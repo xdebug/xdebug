@@ -1,3 +1,7 @@
+Tue May 14 12:41:14 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/Makefile.in:
+- Fix the Makefile
+
 Tue May 14 11:39:28 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Update NEWS
 
