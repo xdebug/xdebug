@@ -7,7 +7,7 @@
     <maintainer>
       <user>derick</user>
       <name>Derick Rethans</name>
-      <email>d.rethans@jdimedia.nl</email>
+      <email>derick@xdebug.org</email>
       <role>lead</role>
     </maintainer>
   </maintainers>
@@ -33,9 +33,33 @@ Xdebug also provides:
   <release>
     <state>beta</state>
     <version>1.3.0rc1</version>
-    <date>2003-05-15</date>
+    <date>2003-09-17</date>
     <notes>
-TBW
+= Fixed bug with wrong file names for functions called from call_user_*().
+  (Derick)
++ Added the option "dump_superglobals" to the remote debugger. If you set this
+  option to 0 the "show-local" and similar commands will not return any data
+  from superglobals anymore. (Derick)
+= Fixed bug #2: "pear package" triggers a segfault. (Derick)
+= Fixed crash bug when a function had sprintf style parameters (ie.
+  strftime()). (Derick)
++ Added "id" attribute to &lt;var /&gt; elements in responses from the remove
+  debugger when the response method is XML. This makes it possible to
+  distinguish between unique elements by use of recursion for example. (Derick)
+= Improved performance greatly by doing lazy folding of variables outside
+  trace mode. (Derick)
+= Fixed a bug with "quit", if it was used it disabled the extension for the
+  current process. (Derick)
++ Added the "full" argument to the remote command "backtrace". When this
+  argument is passed, the local variables will be returned to for each frame in
+  the stack. (Derick)
++ Implemented xdebug_time_index() which returns the time passed since the
+  start of the script. This change also changes the output of the tracing
+  functions as the start time will no longer be the first function call, but
+  the real start time of the script. (Derick)
++ Implemented the "show-local" command (shows all local variables in the
+  current scope including all contents). (Derick)
++ Implemented conditions for breakpoints in the "break" command. (Derick)
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -74,7 +98,34 @@ TBW
       <file role="doc"  name="README"/>
 
       <dir name="debugclient">
+        <file role="src" name="acinclude.m4"/>
+        <file role="src" name="buildconf"/>
+        <file role="src" name="config.guess"/>
+        <file role="src" name="config.h.in"/>
+        <file role="src" name="config.sub"/>
+        <file role="src" name="configure"/>
+        <file role="src" name="cvsclean"/>
+        <file role="src" name="debugclient.dsp"/>
+        <file role="src" name="depcomp"/>
+        <file role="src" name="INSTALL"/>
+        <file role="src" name="install-sh"/>
+        <file role="src" name="LICENSE"/>
+        <file role="src" name="ltmain.sh"/>
         <file role="src" name="main.c"/>
+        <file role="src" name="Makefile.in"/>
+        <file role="src" name="missing"/>
+        <file role="src" name="mkinstalldirs"/>
+        <file role="src" name="usefulstuff.h"/>
+        <file role="src" name="usefulstuff.c"/>
+
+        <dir name="build">
+          <file role="src" name="buildcheck.sh"/>
+          <file role="src" name="buildconf1.mk"/>
+          <file role="src" name="buildconf2.mk"/>
+          <file role="src" name="clean.mk"/>
+          <file role="src" name="config-stubs"/>
+          <file role="src" name="threads.m4"/>
+        </dir>
       </dir>
     </filelist>
   </release>
@@ -82,9 +133,17 @@ TBW
     <release>
       <state>beta</state>
       <version>1.3.0rc1</version>
-      <date>2003-05-15</date>
+      <date>2003-09-17</date>
       <notes>
-+ Added "id" attribute to <var /> elements in responses from the remove
+= Fixed bug with wrong file names for functions called from call_user_*().
+  (Derick)
++ Added the option "dump_superglobals" to the remote debugger. If you set this
+  option to 0 the "show-local" and similar commands will not return any data
+  from superglobals anymore. (Derick)
+= Fixed bug #2: "pear package" triggers a segfault. (Derick)
+= Fixed crash bug when a function had sprintf style parameters (ie.
+  strftime()). (Derick)
++ Added "id" attribute to &lt;var /&gt; elements in responses from the remove
   debugger when the response method is XML. This makes it possible to
   distinguish between unique elements by use of recursion for example. (Derick)
 = Improved performance greatly by doing lazy folding of variables outside

@@ -1,4 +1,4 @@
-???, Jul ??, 2003 - xdebug 1.3.0rc1
+Thu, Sep 18, 2003 - xdebug 1.3.0rc1
 
 = Fixed bug with wrong file names for functions called from call_user_*().
   (Derick)
