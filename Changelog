@@ -1,3 +1,7 @@
+Thu Sep 25 14:58:02 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_profiler.c:
+- MFH: Fixed bug #18
+
 Thu Sep 25 14:53:19 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_profiler.c:
 - Fixed bug #18: Mistyped sizeof()'s for array indexes in profiler output.
