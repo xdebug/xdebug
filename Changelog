@@ -1,3 +1,7 @@
+Tue Sep 17 10:07:06 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/README:
+- update README
+
 Mon Sep 16 16:52:35 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - Fix off-by-one error
