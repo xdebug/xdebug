@@ -1,3 +1,7 @@
+Wed Sep 15 11:34:12 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+:
+- Update NEWS file for 2.0.0beta1
+
 Wed Sep 15 11:33:40 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 package.xml:
 - Merge package.xml releases from the XDEBUG_1_3 branch.
