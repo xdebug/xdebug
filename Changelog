@@ -1,3 +1,7 @@
+Thu Nov 20 15:38:13 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- MFH: Fixed bug #31: & entity replaced after others, wrong HTML output.
+
 Thu Nov 20 15:37:37 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - Fixed bug #31: & entity replaced after others, wrong HTML output.
