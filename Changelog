@@ -1,3 +1,10 @@
+Thu Mar 25 18:48:56 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed handling the DBGP_COOKIE env variable to start an Xdebug session.
+- Fixed bug #53: Feature get misusing the supported attribute.
+- Fixed protocol_version attribute to the init packet.
+
 Thu Mar 25 18:35:33 CET 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/debugclient/main.c:
