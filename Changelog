@@ -1,3 +1,7 @@
+Tue Jan 28 21:30:13 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_profiler.c:
+- Make Windows happy
+
 Mon Jan 27 22:17:09 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_handler_gdb.h
