@@ -1,3 +1,7 @@
+Sun Oct 20 21:07:19 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Handle connection aborts from the server side gracefully.
+
 Sun Oct 20 20:23:18 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Look more like GDB
