@@ -1,3 +1,8 @@
+Sun May 12 12:56:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Implemented handling single-dimensional constant arrays passed to a function.
+   function. (Derick)
+
 Sun May 12 10:28:39 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix bug in levels with includes
