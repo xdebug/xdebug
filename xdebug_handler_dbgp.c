@@ -1250,6 +1250,10 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 		xdebug_dbgp_arg_dtor(args);
 		return command->cont;
 	} else {
+		error = xdebug_xml_node_init("error");
+		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_UNIMPLEMENTED), 0, 1);
+		xdebug_xml_add_child(retval, error);
+
 		xdebug_dbgp_arg_dtor(args);
 		return -1;
 	}
@@ -1261,7 +1265,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.21 $";
+	return "$Revision: 1.22 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
