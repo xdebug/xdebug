@@ -1,3 +1,10 @@
+Mon Oct 21 15:19:27 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handlers.h:
+- Implemented class/method breakpoints
+
 Mon Oct 21 13:57:32 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/Makefile
 /xdebug/debugclient/main.c
