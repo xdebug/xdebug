@@ -1,3 +1,39 @@
+Sat Oct 19 17:21:30 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/auto_trace.phpt
+/xdebug/tests/test10.phpt
+/xdebug/tests/test11.phpt
+/xdebug/tests/test12.phpt
+/xdebug/tests/test13.phpt
+/xdebug/tests/test14.phpt
+/xdebug/tests/test15.phpt
+/xdebug/tests/test16.phpt
+/xdebug/tests/test17.phpt
+/xdebug/tests/test18.phpt
+/xdebug/tests/test19.phpt
+/xdebug/tests/test7.phpt
+/xdebug/tests/test8.phpt
+/xdebug/tests/test9.phpt
+/xdebug/tests/trace.phpt
+/xdebug/tests/test1.phpt
+/xdebug/tests/test4.phpt
+/xdebug/tests/test10.php
+/xdebug/tests/test11.php
+/xdebug/tests/test12.php
+/xdebug/tests/test13.php
+/xdebug/tests/test14.php
+/xdebug/tests/test15.php
+/xdebug/tests/test16.php
+/xdebug/tests/test17.php
+/xdebug/tests/test18.php
+/xdebug/tests/test19.php
+/xdebug/tests/test20.php
+/xdebug/tests/test20a.php
+/xdebug/tests/test7.php
+/xdebug/tests/test8.php
+/xdebug/tests/test9.php
+/xdebug/tests/trace.php:
+- Reworked test-suite
+
 Fri Oct 18 22:57:23 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Consistency
 
