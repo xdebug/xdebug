@@ -1,3 +1,7 @@
+Mon Jan 26 22:28:51 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_var.c:
+- Duplicate variable name in order to prevent PHP freeing it prematurely.
+
 Mon Jan 26 22:06:46 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Be explicit with "supported" attributes in "feature_get".
