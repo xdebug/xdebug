@@ -1,3 +1,8 @@
+Sun Aug 31 15:21:45 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/call_user_func_array.phpt
+/xdebug/TODO:
+- It's definitely a bug, trying to fix it now
+
 Sun Aug 31 12:58:49 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Works just fine
