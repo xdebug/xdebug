@@ -1,3 +1,8 @@
+Sun Apr 6 20:28:42 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml
+/xdebug/php_xdebug.h:
+- Go with 1.2.0rc1
+
 Sat Apr 5 10:48:20 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.mak:
 - Fix the Windows makefile
