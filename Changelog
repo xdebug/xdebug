@@ -1,5 +1,4 @@
-Fri Nov 29 03:43:17 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Fri Nov 29 03:43:17 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/TODO
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
@@ -8,7 +7,6 @@ Fri Nov 29 03:43:17 CET 2002 Ilia Alshanetsky <ilia@prohost.org
 - Fixed crashes when handling things line include().
 - Optimized the detection of xdebug profiler termination function.
 - Minor whitespace fixes in the previously committed code.
--@ Added Stack-Dump profiling.
 
 Thu Nov 28 22:06:16 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
