@@ -1,3 +1,10 @@
+Tue Feb 3 03:07:54 CET 2004 Shane Caraveo <shane@caraveo.com 
+>
+/xdebug/xdebug.c:
+- Implement ability to set remote debugging features via the environment.
+  This allows an IDE to emulate CGI and still pass the configuration through
+  to the debugger.  In CGI mode, PHP does not allow -d arguments.
+
 Fri Jan 30 20:15:47 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/usefulstuff.c:
 - Fixed undefined constant
