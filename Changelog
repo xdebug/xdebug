@@ -1,3 +1,7 @@
+Fri Dec 20 16:43:09 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/auto_trace.phpt:
+- Fix auto_trace test
+
 Fri Dec 20 15:52:50 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/xdebug_handler_gdb.c:
