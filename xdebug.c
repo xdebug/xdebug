@@ -744,12 +744,12 @@ inline static void print_profile_footer (int html, double func_exec_time, double
 		php_printf("</table>\n");
 	} else {
 		fprintf(data_output, "-----------------------------------------------------------------------------------\n");
-		fprintf(data_output, "Opcode Compiling:\t\t\t%10.10f\n", XG(total_compiling_time));
-		fprintf(data_output, "Function Execution:    \t%10.10f\n", func_exec_time);
-		fprintf(data_output, "Ambient Code Execution:\t%10.10f\n", (total_time - func_exec_time));
-		fprintf(data_output, "Total Execution:\t\t\t%10.10f\n", total_time);
+		fprintf(data_output, "Opcode Compiling:                             %10.10f\n", XG(total_compiling_time));
+		fprintf(data_output, "Function Execution:     %10.10f\n", func_exec_time);
+		fprintf(data_output, "Ambient Code Execution: %10.10f\n", (total_time - func_exec_time));
+		fprintf(data_output, "Total Execution:                              %10.10f\n", total_time);
 		fprintf(data_output, "-----------------------------------------------------------------------------------\n");
-		fprintf(data_output, "Total Processing:\t\t\t%10.10f\n", XG(total_compiling_time) + total_time);
+		fprintf(data_output, "Total Processing:                             %10.10f\n", XG(total_compiling_time) + total_time);
 		fprintf(data_output, "-----------------------------------------------------------------------------------\n");
 	}
 }
@@ -1561,6 +1561,9 @@ PHP_FUNCTION(xdebug_start_profiling)
 		}
 
 		XG(do_profile) = 1;
+		if (!XG(total_execution_time)) {
+			XG(total_execution_time) = get_mtimestamp();
+		}	
 
 		if (fname) {
 			XG(profile_file) = fopen(fname, "a");
