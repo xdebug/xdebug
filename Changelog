@@ -1,3 +1,7 @@
+Sat Oct 5 23:29:21 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Some Zend Engine 2 work
+
 Mon Sep 30 07:56:24 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_hash.c
 /xdebug/xdebug_hash.h
