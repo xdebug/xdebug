@@ -1,3 +1,13 @@
+Sun Nov 3 16:43:05 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handlers.h
+/xdebug/tests/test14.phpt:
+- Implemented the list, print, show, step and pwd commands.
+
 Fri Nov 1 23:37:42 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_com.c:
 - Init Winsock2
