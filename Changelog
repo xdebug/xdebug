@@ -1,3 +1,7 @@
+Mon Jul 19 21:51:26 CEST 2004 Marcus Börger <helly@php.net>
+xdebug_compat.c:
+- Make compatible with PHP 5.1.x
+
 Mon Jul 19 20:59:46 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - refix $this for php 5 after yesterday's changes
