@@ -1090,7 +1090,7 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 
 	if (fse->delayed_fname) { /* variable function name */
 #if HAVE_EXECUTE_DATA_PTR
-		fse->function.function = estrdup (executor_globals.execute_data_ptr->function_state.function->common.function_name);
+		fse->function.function = estrdup (EG(execute_data_ptr)->function_state.function->common.function_name);
 #else
 		fse->function.function = estrdup ("{unknown}");
 #endif
@@ -1098,8 +1098,8 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	fse->delayed_fname = 0;
 
 	if (fse->delayed_cname) { /* variable class name */
-		if (((zval*) executor_globals.active_symbol_table->pListHead->pDataPtr)->type == IS_OBJECT) {
-			fse->function.class = estrdup (((zval*) executor_globals.active_symbol_table->pListHead->pDataPtr)->value.obj.ce->name);
+		if (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->type == IS_OBJECT) {
+			fse->function.class = estrdup (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->value.obj.ce->name);
 		}
 	}
 	fse->delayed_cname = 0;
