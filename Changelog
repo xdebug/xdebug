@@ -1,3 +1,7 @@
+Wed Dec 10 10:15:28 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed segfault in showing error messages when there were no stack items yet.
+
 Thu Dec 4 15:44:45 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_superglobals.c
 /xdebug/xdebug.c:
