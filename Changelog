@@ -1,3 +1,7 @@
+Mon Jan 26 20:45:02 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- Fixed getting local variables in all stack frames
+
 Fri Jan 16 09:57:47 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug.c:
 - Fix year
