@@ -1,3 +1,9 @@
+Sat Aug 30 23:54:04 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/get_function_trace.phpt
+/xdebug/xdebug.c:
+- Make xdebug_get_function_trace() and xdebug_get_function_stack() behave 
+  in the same way regarding returning unnamed parameters.
+
 Sat Aug 30 23:35:29 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fixed bug #2: "pear package" triggers a segfault
