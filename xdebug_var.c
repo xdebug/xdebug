@@ -218,7 +218,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			char *type_name;
 
 			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			XDEBUG_STR_ADD(str, xdebug_sprintf("resource(%ld) of type (%s)\n", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
+			XDEBUG_STR_ADD(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
 			break;
 		}
 
