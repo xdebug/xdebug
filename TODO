@@ -18,7 +18,7 @@ For 1.2.0:
   * Add another profiling mode that allows for detailed function analysis.
   * Separate the profiling code into a file of its own.
 - Additions
-  * trace code to trace which files/lines have bene touched (to check
+  * trace code to trace which files/lines have been touched (to check
     code coverage).
 
 For later:

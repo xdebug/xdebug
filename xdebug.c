@@ -1100,7 +1100,7 @@ PHP_FUNCTION(xdebug_start_trace)
 
 		xdebug_start_trace();
 
-		if (fname) {
+		if (fname && strlen(fname)) {
 			XG(trace_file) = fopen (fname, "a");
 			if (XG(trace_file)) {
 				fprintf (XG(trace_file), "\nStart of function trace\n");
