@@ -1,3 +1,9 @@
+Mon Aug 09 08:27:59 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added xdebug_get_stack_depth() to return the current stack depth level.
+- Cleaned up some whitespace.
+
 Fri Aug 06 08:59:03 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #86: xdebug produces output that is not xhtml 1.1 valid
