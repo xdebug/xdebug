@@ -1,3 +1,6 @@
+Mon Sep 2 10:06:05 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
+- Fix ChangeLog
+
 Sun Sep 1 12:26:54 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
