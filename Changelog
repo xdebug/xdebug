@@ -1,3 +1,9 @@
+Tue Oct 29 13:00:55 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h:
+- Implement setting file:line breakpoints
+
 Tue Oct 29 12:58:44 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
