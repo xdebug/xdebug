@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
 	struct sockaddr_in  server_in;
 	int                 fd;
 	struct sockaddr_in  client_in;
+	int                 client_in_len;
 	struct in_addr     *iaddr;
 	char *buffer;
 	char *cmd;
@@ -84,15 +85,19 @@ int main(int argc, char *argv[])
 			exit(-2);
 		}
 		printf ("\nWaiting for debug server to connect.\n");
+#ifdef WIN32
 		fd = accept (ssocket, (struct sockaddr *) &client_in, NULL);
 		if (fd == -1) {
-#ifdef WIN32
 			printf ("accept: %d\n", WSAGetLastError());
-#else
-			perror ("accept");
-#endif
 			exit(-3);
 		}
+#else
+		fd = accept (ssocket, (struct sockaddr *) &client_in, &client_in_len);
+		if (fd == -1) {
+			perror ("accept");
+			exit(-3);
+		}
+#endif
 		close (ssocket);
 
 		iaddr = &client_in.sin_addr;
