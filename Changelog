@@ -1,3 +1,8 @@
+Sat Nov 8 23:32:22 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- MFH: Added file/line to signals in gdb protocol.
+
 Sat Nov 8 23:31:59 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - Fix XML layout
