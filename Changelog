@@ -1,3 +1,8 @@
+Fri Feb 14 23:13:20 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/tests/test6.phpt:
+- Fixed output buffering stuff
+
 Sat Feb 8 12:41:42 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix visibility level of ini settings
