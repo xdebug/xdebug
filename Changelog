@@ -1,3 +1,11 @@
+Tue Feb 3 05:37:32 CET 2004 Shane Caraveo <shane@caraveo.com 
+>
+/xdebug/xdebug_handler_dbgp.h
+/xdebug/xdebug_handler_dbgp.c:
+- dbgp uses -- at the end of command lines to denote extra data.  eval uses this.  
+  this patch fixes command parsing to use -- as the last argument
+- fix error reporting for parse errors
+
 Tue Feb 3 04:23:49 CET 2004 Shane Caraveo <shane@caraveo.com 
 >
 /xdebug/xdebug.c:
