@@ -1,3 +1,7 @@
+Tue Oct 29 12:11:27 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Change debugger port.
+
 Tue Oct 29 12:01:33 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Fixed problem when two servers connected to the debug client. The 2nd one
