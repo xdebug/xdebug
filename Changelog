@@ -1,3 +1,7 @@
+Sat Nov 8 23:31:59 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Fix XML layout
+
 Sat Nov 8 23:28:32 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h:
 - Back to dev
