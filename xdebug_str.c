@@ -23,7 +23,7 @@
 #include "xdebug_mm.h"
 #include "xdebug_str.h"
 
-inline void xdebug_str_add(xdebug_str *xs, char *str, int f)
+void xdebug_str_add(xdebug_str *xs, char *str, int f)
 {
 	int l = strlen(str);
 	if (xs->l + l > xs->a - 1) {
@@ -41,7 +41,7 @@ inline void xdebug_str_add(xdebug_str *xs, char *str, int f)
 	}
 }
 
-inline void xdebug_str_addl(xdebug_str *xs, char *str, int le, int f)
+void xdebug_str_addl(xdebug_str *xs, char *str, int le, int f)
 {
 	if (xs->l + le > xs->a - 1) {
 		xs->d = xdrealloc(xs->d, xs->a + le + XDEBUG_STR_PREALLOC);
