@@ -1,3 +1,11 @@
+Fri Sep 19 17:16:07 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/profiler_miscalc.phpt:
+- Added test which shows that the profiler does strange things if either:
+  * xdebug_print/dump_function_profile() is called outside the global
+    scope
+  * auto_profiling is used, and there is an exit() call inside a function
+	(exit() inside the global scope is fine).
+
 Fri Sep 19 15:15:44 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml:
 - Housekeeping
