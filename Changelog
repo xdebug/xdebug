@@ -1,3 +1,14 @@
+Sun Apr 04 23:24:59 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_compat.c
+xdebug/xdebug_compat.h
+xdebug/xdebug.c
+xdebug/xdebug.dsp
+xdebug/xdebug_handler_dbgp.c:
+- Made Xdebug compile with all PHP 4.3.x versions by embedding the non-exported
+  functions php_var_dump() and php_base64_encode()/php_base64_decode() into the
+  Xdebug source.
+#- BSD style licenses rock :)
+
 Sat Apr 03 23:37:58 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Removed two vars which are no longer needed.
