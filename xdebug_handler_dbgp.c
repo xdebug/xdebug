@@ -1206,6 +1206,7 @@ DBGP_FUNC(property_value)
 {
 	zval            *var_data;
 	zval             ret_zval;
+	zval 		*p_ret_zval = &ret_zval;
 	int              res;
 	char            *name = CMD_OPTION('n');
 	long             context_id = 0, depth = 0;
@@ -1233,16 +1234,17 @@ DBGP_FUNC(property_value)
 
 	if (var_data) {
 		/* XXX cheesy and lame, gets more than we want */
-		xdebug_var_export_xml_node(&var_data, name, *retval, 0 TSRMLS_CC);
+		xdebug_var_export_xml_node(&p_ret_zval, name, *retval, 0 TSRMLS_CC);
+		zval_dtor(p_ret_zval);
 	} else {
 		/* if we cannot get the value directly, then try eval */
-		res = _xdebug_do_eval(CMD_OPTION('n'), &ret_zval TSRMLS_CC);
+		res = _xdebug_do_eval(CMD_OPTION('n'), p_ret_zval TSRMLS_CC);
 		if (res == FAILURE) {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 		} else {
 			/* XXX cheesy and lame, gets more than we want */
-			xdebug_var_export_xml_node(&ret_zval, name, *retval, 0 TSRMLS_CC);
-			zval_dtor(&ret_zval);
+			xdebug_var_export_xml_node(&p_ret_zval, name, *retval, 0 TSRMLS_CC);
+			zval_dtor(p_ret_zval);
 		}
 	}
 }
@@ -1587,7 +1589,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.59 $";
+	return "$Revision: 1.60 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
