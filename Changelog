@@ -1,3 +1,8 @@
+Sun Oct 24 17:53:31 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- xdebug_code_coverage_stop() will now clean up the code coverage array, unless
+  you specify FALSE as parameter.
+
 Thu Oct 21 09:10:10 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - There is indeed no good way as the Zend mastah's didn't want to bumb the
