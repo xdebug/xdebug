@@ -122,12 +122,12 @@ DBGP_FUNC(status);
 DBGP_FUNC(stderr);
 DBGP_FUNC(stdout);
 
-DBGP_FUNC(kill);
+DBGP_FUNC(stop);
 DBGP_FUNC(run);
 DBGP_FUNC(step_into);
 DBGP_FUNC(step_out);
 DBGP_FUNC(step_over);
-DBGP_FUNC(stop);
+DBGP_FUNC(detach);
 
 /*****************************************************************************
 ** Dispatcher tables for supported debug commands
@@ -161,12 +161,12 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_FUNC_ENTRY(stderr)
 	DBGP_FUNC_ENTRY(stdout)
 
-	DBGP_CONT_FUNC_ENTRY(kill)
+	DBGP_CONT_FUNC_ENTRY(stop)
 	DBGP_CONT_FUNC_ENTRY(run)
 	DBGP_CONT_FUNC_ENTRY(step_into)
 	DBGP_CONT_FUNC_ENTRY(step_out)
 	DBGP_CONT_FUNC_ENTRY(step_over)
-	DBGP_CONT_FUNC_ENTRY(stop)
+	DBGP_CONT_FUNC_ENTRY(detach)
 	{ NULL, NULL }
 };
 
@@ -760,7 +760,7 @@ DBGP_FUNC(stdout)
 }
 
 
-DBGP_FUNC(kill)
+DBGP_FUNC(stop)
 {
 	zend_bailout();
 }
@@ -807,7 +807,7 @@ DBGP_FUNC(step_over)
 	}
 }
 
-DBGP_FUNC(stop)
+DBGP_FUNC(detach)
 {
 	XG(remote_enabled) = 0;
 }
@@ -1328,7 +1328,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.38 $";
+	return "$Revision: 1.39 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

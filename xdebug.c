@@ -51,7 +51,9 @@
 #include "zend_execute.h"
 #include "zend_compile.h"
 #include "zend_extensions.h"
+#ifdef ZEND_ENGINE_2
 #include "zend_exceptions.h"
+#endif
 
 #include "php_xdebug.h"
 #include "xdebug_private.h"
@@ -79,7 +81,9 @@ void (*old_error_cb)(int type, const char *error_filename, const uint error_line
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
+#ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
+#endif
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
 static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC);
