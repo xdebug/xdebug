@@ -12,7 +12,7 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
+   | Authors:  Derick Rethans <derick@xdebug.org>                         |
    |           Ilia Alshanetsky <ilia@prohost.org>                        |
    |           Harald Radi <harald.radi@nme.at>                           |
    +----------------------------------------------------------------------+
