@@ -22,43 +22,103 @@
 #include "zend_extensions.h"
 #include "xdebug_var.h"
 
-void xdebug_var_export(zval **struc, int level TSRMLS_DC);
+
+void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int free) { 
+	int l = strlen(str);                
+	if (xs->l + l > xs->a) {            
+		xs->d = erealloc (xs->d, xs->a + l + 128); 
+	   	xs->a = xs->a + l + 128;        
+	}                                   
+	if (!xs->l) {                       
+		xs->d[0] = '\0';                
+	}                                   
+	strcat (xs->d, str);                
+	xs->l = xs->l + l;                  
+	if (free) {                         
+		efree(str);                     
+	}                                   
+}
+
+void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int free) { 
+	if (xs->l + le > xs->a) {                
+		xs->d = erealloc (xs->d, xs->a + le + 128); 
+	   	xs->a = xs->a + le + 128;            
+	}                                        
+	if (!xs->l) {                            
+		xs->d[0] = '\0';                     
+	}                                        
+	strcat (xs->d, str);                     
+	xs->l = xs->l + le;                      
+	if (free) {                              
+		efree(str);                          
+	}                                        
+}
+
+char *xdebug_sprintf (const char* fmt, ...)
+{
+	char   *new_str;
+	int     size = 1;
+	va_list args;
+
+	new_str = (char *) emalloc (size);
+
+	va_start(args, fmt);
+	for (;;) {
+		int n = vsnprintf (new_str, size, fmt, args);
+		if (n > -1 && n < size) {
+			break;
+		}
+		if (n < 0) {
+			size *= 2;
+		} else {
+			size = n + 1;
+		}
+		new_str = (char *) erealloc (new_str, size);
+	}
+	va_end (args);
+
+	return new_str;
+}
 
 
 /* {{{ xdebug_var_export */
 static int xdebug_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
+	xdebug_str *str;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
+	str   = va_arg(args, struct xdebug_str*);
 
 	if (hash_key->nKeyLength==0) { /* numeric key */
-		php_printf("%ld => ", hash_key->h);
+		XDEBUG_STR_ADD(str, xdebug_sprintf("%ld => ", hash_key->h), 1);
 	} else { /* string key */
-		php_printf("'%s' => ", hash_key->arKey);
+		XDEBUG_STR_ADD(str, xdebug_sprintf("'%s' => ", hash_key->arKey), 1);
 	}
-	xdebug_var_export(zv, level + 2 TSRMLS_CC);
-	PUTS (", ");
+	xdebug_var_export(zv, str, level + 2 TSRMLS_CC);
+	XDEBUG_STR_ADDL(str, ", ", 2, 0);
 	return 0;
 }
 
 static int xdebug_object_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
+	xdebug_str *str;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
+	str   = va_arg(args, struct xdebug_str*);
 
 	if (hash_key->nKeyLength != 0) {
-		php_printf("var $%s = ", hash_key->arKey);
+		XDEBUG_STR_ADD(str, xdebug_sprintf("var $%s = ", hash_key->arKey), 1);
 	}
-	xdebug_var_export(zv, level + 2 TSRMLS_CC);
-	PUTS ("; ");
+	xdebug_var_export(zv, str, level + 2 TSRMLS_CC);
+	XDEBUG_STR_ADDL(str, "; ", 2, 0);
 	return 0;
 }
 
-void xdebug_var_export(zval **struc, int level TSRMLS_DC)
+void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
@@ -66,50 +126,46 @@ void xdebug_var_export(zval **struc, int level TSRMLS_DC)
 
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
-			php_printf("%s", Z_LVAL_PP(struc) ? "TRUE" : "FALSE");
+			XDEBUG_STR_ADD(str, xdebug_sprintf("%s", Z_LVAL_PP(struc) ? "TRUE" : "FALSE"), 1);
 			break;
 
 		case IS_NULL:
-			php_printf("NULL");
+			XDEBUG_STR_ADDL(str, "NULL", 4, 0);
 			break;
 
 		case IS_LONG:
-			php_printf("%ld", Z_LVAL_PP(struc));
+			XDEBUG_STR_ADD(str, xdebug_sprintf("%ld", Z_LVAL_PP(struc)), 1);
 			break;
 
 		case IS_DOUBLE:
-			php_printf("%.*G", (int) EG(precision), Z_DVAL_PP(struc));
+			XDEBUG_STR_ADD(str, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_PP(struc)), 1);
 			break;
 
 		case IS_STRING:
 			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
-			PUTS ("'");
-			PHPWRITE(tmp_str, tmp_len);
-			PUTS ("'");
+			XDEBUG_STR_ADD(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			efree (tmp_str);
 			break;
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_PP(struc);
-			myht->bApplyProtection = 0;
-			if (myht->nApplyCount < 3) {
-				PUTS ("array (");
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 1, level);
-				PUTS(")");
+			if (myht->nApplyCount < 2) {
+				XDEBUG_STR_ADDL(str, "array (", 7, 0);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 2, level, str);
+				XDEBUG_STR_ADDL(str, ")", 1, 0);
 			} else {
-				PUTS("...");
+				XDEBUG_STR_ADDL(str, "...", 3, 0);
 			}
-			myht->bApplyProtection = 1;
 			break;
 
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 2) {
-				php_printf ("class %s {", Z_OBJCE_PP(struc)->name);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 1, level);
-				PUTS("}");
+				XDEBUG_STR_ADD(str, xdebug_sprintf ("class %s {", Z_OBJCE_PP(struc)->name), 1);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 2, level, str);
+				XDEBUG_STR_ADDL(str, "}", 1, 0);
 			} else {
-				PUTS("...");
+				XDEBUG_STR_ADDL(str, "...", 3, 0);
 			}
 			break;
 
@@ -117,12 +173,12 @@ void xdebug_var_export(zval **struc, int level TSRMLS_DC)
 			char *type_name;
 
 			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			php_printf("resource(%ld) of type (%s)\n", Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
+			XDEBUG_STR_ADD(str, xdebug_sprintf("resource(%ld) of type (%s)\n", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
 			break;
 		}
 
 		default:
-			PUTS ("NULL");
+			XDEBUG_STR_ADDL(str, "NULL", 4, 0);
 			break;
 	}
 }
@@ -130,19 +186,10 @@ void xdebug_var_export(zval **struc, int level TSRMLS_DC)
 /* }}} */
 char* get_zval_value (zval *val)
 {
-	zval return_val;
+	xdebug_str str = {0, 0, NULL};
 	TSRMLS_FETCH();
 
-	INIT_ZVAL(return_val);
+	xdebug_var_export (&val, (xdebug_str*) &str, 1 TSRMLS_CC);
 
-#if ZEND_EXTENSION_API_NO < 20020429
-	php_start_ob_buffer (NULL, 0 TSRMLS_CC);
-#else
-	php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
-#endif
-	xdebug_var_export (&val, 1 TSRMLS_CC);
-	php_ob_get_buffer (&return_val TSRMLS_CC);
-	php_end_ob_buffer (0, 0 TSRMLS_CC);
-
-	return return_val.value.str.val;
+	return str.d;
 }

@@ -126,33 +126,6 @@ static double get_utime()
 		return 0;
 }
 
-static char *xdebug_sprintf (const char* fmt, ...)
-{
-	char   *new_str;
-	int     size = 1;
-	va_list args;
-
-	new_str = (char *) emalloc (size);
-
-	va_start(args, fmt);
-	for (;;) {
-		int n = vsnprintf (new_str, size, fmt, args);
-		if (n > -1 && n < size) {
-			break;
-		}
-		if (n < 0) {
-			size *= 2;
-		} else {
-			size = n + 1;
-		}
-		new_str = (char *) erealloc (new_str, size);
-	}
-	va_end (args);
-
-	return new_str;
-}
-
-
 static void php_xdebug_init_globals (zend_xdebug_globals *xg)
 {
 	xg->stack    = NULL;
@@ -751,7 +724,9 @@ PHP_FUNCTION(xdebug_start_trace)
 
 		if (fname) {
 			XG(trace_file) = fopen (fname, "a");
-			fprintf (XG(trace_file), "\nStart of function trace\n");
+			if (XG(trace_file)) {
+				fprintf (XG(trace_file), "\nStart of function trace\n");
+			}
 		} else {
 			XG(trace_file) = NULL;
 		}

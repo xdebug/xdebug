@@ -18,5 +18,17 @@
 
 #include "zend.h"
 
-char* get_zval_value (zval *val);
+#ifndef __HAVE_XDEBUG_VAR_H__
+#define __HAVE_XDEBUG_VAR_H__
 
+typedef struct xdebug_str {
+	int   l;
+	int   a;
+	char *d;
+} xdebug_str;
+
+char* get_zval_value (zval *val);
+void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
+char *xdebug_sprintf (const char* fmt, ...);
+
+#endif

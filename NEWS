@@ -1,14 +1,15 @@
 Sun Jun 16, 2002 - xdebug 0.9.0
 
+= Fixed a problem with the output buffering in PHP. (Derick)
 = Fixed a memory leak in delayed included files. (Derick)
-- Added support for PHP 4.1.2. (Derick)
++ Added support for PHP 4.1.2. (Derick)
 = Rewrote xdebug_get_function_stack() and xdebug_get_function_trace() to return
   data in multidimensional arrays. (Derick)
 = Fixed compiling without memory limit enabled (Sander Roobol, Derick)
-- Add support for classnames, variable include files and variable
++ Add support for classnames, variable include files and variable
   function names. (Derick)
-- Implemented links to the PHP Manual in traces. (Derick)
-- Added timestamps and memory usage to function traces. (Derick)
++ Implemented links to the PHP Manual in traces. (Derick)
++ Added timestamps and memory usage to function traces. (Derick)
 = Fixed crash when using an user defined session handler. (Derick)
 + Implemented variable function names ($a = 'foo'; $f();) for use in
   traces. (Derick)
@@ -25,7 +26,7 @@ Sun May 26, 2002 - xdebug 0.8.0 - Yoda
 + Added a parameter to xdebug_start_trace(). When this parameter is used,
   xdebug will dump a function trace to the filename which this parameter
   speficies. (Derick)
-- Fix a problem with nested member functions. (Derick)
++ Fix a problem with nested member functions. (Derick)
 = Make configure scripts work with PHP 4.2.x. (Derick)
 + Implemented handling single-dimensional constant arrays passed to a
   function. (Derick)
