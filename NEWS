@@ -1,4 +1,4 @@
-???, Mar ??, 2004 - xdebug 2.0.0
+???, Jul ??, 2004 - xdebug 2.0.0
 + Added FR #30: Dump current scope information in stack traces on error.
   (Derick)
 + Added FR #5: xdebug_break() function which interupts the script for the debug
