@@ -1471,7 +1471,7 @@ char* xdebug_start_trace(char* fname TSRMLS_DC)
 		filename = xdebug_sprintf("%s.xt", fname);
 	} else {
 		if (strcmp(XG(trace_output_name), "crc32") == 0) {
-			getcwd(&cwd, 127);
+			VCWD_GETCWD(cwd, 127);
 			filename = xdebug_sprintf("%s/trace.%lu.xt", XG(trace_output_dir), xdebug_crc32(cwd, strlen(cwd)));
 		} else {
 			filename = xdebug_sprintf("%s/trace.%ld.xt", XG(trace_output_dir), getpid());

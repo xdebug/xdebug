@@ -1,7 +1,7 @@
 --TEST--
 Test with auto-trace
 --INI--
-xdebug.enable=1
+xdebug.default_enable=1
 xdebug.auto_trace=1
 xdebug.auto_trace_file=/tmp/xdebug_auto_trace.test
 xdebug.collect_params=1

@@ -7,6 +7,7 @@ xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.auto_profile=0
+xdebug.show_mem_delta=0
 --FILE--
 <?php
 $tf = xdebug_start_trace(tempnam('/tmp', 'xdt'));
@@ -25,5 +26,5 @@ unlink($tf);
 test
 
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> DB::query('test') /dat/dev/php/xdebug/tests/test20b.php:9
+    %f      %d     -> DB::query('test') /%s/test20b.php:9
     %f      %d     -> file_get_contents('/tmp/%s') /%s/test20b.php:11

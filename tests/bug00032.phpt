@@ -1,7 +1,7 @@
 --TEST--
 Test for segmentation fault with unusual variables
 --INI--
-xdebug.enable=1
+xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
 --FILE--

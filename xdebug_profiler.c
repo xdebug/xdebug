@@ -133,7 +133,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
 #if MEMORY_LIMIT
-		fprintf(XG(profile_file), "\nsummary: %ld %ld\n\n", (long) (fse->profile.time * 10000000), AG(allocated_memory));
+		fprintf(XG(profile_file), "\nsummary: %ld %u\n\n", (long) (fse->profile.time * 10000000), AG(allocated_memory));
 #else
 		fprintf(XG(profile_file), "\nsummary: %ld\n\n", (long) (fse->profile.time * 10000000));
 #endif

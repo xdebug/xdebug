@@ -1,7 +1,7 @@
 --TEST--
 Test with showing variables in the top most stackframe on errors
 --INI--
-xdebug.enable=1
+xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.auto_profile=0
