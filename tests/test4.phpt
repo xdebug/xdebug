@@ -15,7 +15,7 @@ xdebug.enable=1
 	a();
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function:  c() in /dat/dev/php/xdebug/tests/phpt.%s on line 7
+Fatal error: Call to undefined function:  c() in /%s/phpt.%s on line 7
 
 Call Stack:
     %f      %d   1. {main}() /%s/phpt.%s:0

@@ -1,9 +1,10 @@
+--TEST--
+Test for overloaded member functions / classes
+--INI--
+xdebug.enable=1
+xdebug.auto_trace=0
+--FILE--
 <?php
-/* $Id: test16.php,v 1.1 2002-06-06 11:05:49 derick Exp $
- * Author: d.rethans@jdimedia.nl
- * Description:
- *   Test for overloaded member functions / classes
- */
 	xdebug_start_trace();
 
 	class a {
@@ -32,3 +33,7 @@
 
 	xdebug_dump_function_trace();
 ?>
+--EXPECTF--
+Function trace:
+    %f      %d     -> b->func_a1() /%s/phpt.%x:25
+    %f      %d     -> b->func_b1() /%s/phpt.%x:26

@@ -1,3 +1,9 @@
+--TEST--
+Test for class members
+--INI--
+xdebug.enable=1
+xdebug.auto_trace=0
+--FILE--
 <?php
 	xdebug_start_trace();
 
@@ -30,4 +36,8 @@
 
 	xdebug_dump_function_trace();
 ?>
-
+--EXPECTF--
+Function trace:
+    %f      %d     -> aaa->a1() /%s/phpt.%x:27
+    %f      %d     -> bbb->b1() /%s/phpt.%x:28
+    %f      %d     -> aaa->a2() /%s/phpt.%x:29
