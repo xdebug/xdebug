@@ -119,7 +119,6 @@ Xdebug also provides:
         <file role="src" name="configure.in"/>
         <file role="src" name="cvsclean"/>
         <file role="src" name="debugclient.dsp"/>
-        <file role="src" name="depcomp"/>
         <file role="src" name="INSTALL"/>
         <file role="src" name="install-sh"/>
         <file role="src" name="LICENSE"/>
