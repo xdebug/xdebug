@@ -1251,6 +1251,7 @@ DBGP_FUNC(property_value)
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 {
 	char               *name = (char*) he->ptr;
+	char               *full_name;
 	xdebug_xml_node    *node = (xdebug_xml_node *) xml;
 	xdebug_xml_node    *contents;
 	TSRMLS_FETCH();
@@ -1260,7 +1261,14 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 		xdebug_xml_add_child(node, contents);
 	} else {
 		contents = xdebug_xml_node_init("property");
+		if (name[0] != '$') {
+			full_name = xdebug_sprintf("$%s", name);
+		} else {
+			full_name = xdstrdup(name);
+		}
 		xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(name), 0, 1);
+		xdebug_xml_add_attribute_ex(contents, "fullname", xdstrdup(full_name), 0, 1);
+
 		xdebug_xml_add_attribute(contents, "type", "uninitialized");
 		xdebug_xml_add_child(node, contents);
 	}
@@ -1588,7 +1596,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.61 $";
+	return "$Revision: 1.62 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
