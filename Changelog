@@ -1,3 +1,7 @@
+Sat Aug 31 10:33:27 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.m4:
+- Prevent xdebug from being compiled in into PHP.
+
 Fri Aug 30 16:03:04 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/.cvsignore:
 - Add more targets to .cvsignore file
