@@ -362,20 +362,21 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 		} else {
 			/* Make search key */
 			if (method->args[0][0] != '/') {
-				tmp_name = xdebug_sprintf("/%s\n", method->args[0]);
+				tmp_name = xdebug_sprintf("/%s", method->args[0]);
 			} else {
-				tmp_name = xdebug_sprintf("%s\n", method->args[0]);
+				tmp_name = xdebug_sprintf("%s", method->args[0]);
 			}
 
 			/* Set line number in extra structure */
 			extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
 			extra_brk_info->lineno = atoi(method->args[1]);
+			extra_brk_info->file = tmp_name;
+			extra_brk_info->file_len = strlen(tmp_name);
 
 			/* Add breakpoint to the list */
-			xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints),  (void*) extra_brk_info);
+			xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) extra_brk_info);
 			SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", method->args[0]));
 			xdebug_arg_dtor(method);
-			xdfree(tmp_name);
 		}
 	} else { /* function */
 		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
@@ -527,10 +528,10 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
-/* warning Add dtor! */
+
 	context->function_breakpoints = xdebug_hash_alloc(64, NULL);
 	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
-	context->line_breakpoints = xdebug_llist_alloc(xdebug_brk_dtor);
+	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_brk_dtor);
 	do {
 		SSEND(context->socket, "?init\n");
 		option = fd_read_line(context->socket, context->buffer);

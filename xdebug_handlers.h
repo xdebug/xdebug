@@ -42,6 +42,8 @@ struct _xdebug_con {
 };
 
 struct _xdebug_brk_info {
+	char                 *file;
+	int                   file_len;
 	int                   lineno;
 };
 
@@ -64,6 +66,6 @@ struct _xdebug_remote_handler_info {
 
 xdebug_remote_handler* xdebug_handler_get(char* mode);
 
-void xdebug_brk_dtor(void *dummy, void *brk);
+void xdebug_brk_dtor(void *dummy, xdebug_brk_info *brk);
 
 #endif

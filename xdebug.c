@@ -1162,7 +1162,35 @@ static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
 
 ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 {
+	xdebug_llist_element *le;
+	xdebug_brk_info      *brk;
+	zend_op              *cur_opcode;
+	int                   lineno;
+	char                 *file;
+	int                   file_len = 0;
 
+	if (XG(remote_enabled)) {
+		TSRMLS_FETCH();
+
+		if (XG(context).line_breakpoints) {
+			cur_opcode = *EG(opline_ptr);
+			lineno = cur_opcode->lineno;
+
+			file = op_array->filename;
+			file_len = strlen(file);
+
+			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+				brk = XDEBUG_LLIST_VALP(le);
+
+				if (lineno == brk->lineno && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack))) {
+						XG(remote_enabled) = 0;
+						XG(remote_enable)  = 0;
+					}
+				}
+			}
+		}
+	}
 }
 
 
