@@ -1,3 +1,7 @@
+Fri Apr 25 17:59:28 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat:
+- Also automatically build the 4.3 version
+
 Thu Apr 24 15:58:30 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_handler_gdb.h:
