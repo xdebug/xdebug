@@ -1,3 +1,7 @@
+Thu Feb 26 20:24:23 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/debugclient/main.c:
+- Fixed "invalid argument" bug. (Patch by Brandon Philips and David Sklar)
+
 Thu Feb 19 11:33:55 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug.dsp:
 - Remove profiler.[ch] files from .dsp for PHP 4 snaps builder to work.
