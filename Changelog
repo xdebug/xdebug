@@ -1,3 +1,11 @@
+Fri Dec 20 01:00:36 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/xdebug.c
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_profiler.h:
+- More WS fixes.
+- Corrected time calculations.
+
 Thu Dec 19 23:03:13 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
 >
 /xdebug/xdebug_profiler.c:
