@@ -1,6 +1,5 @@
-- Fixed crash when using an user defined sessiono handler. (Derick)
-
-- Implemented variable function names ($a = 'foo'; $f();) for use in
+= Fixed crash when using an user defined sessiono handler. (Derick)
++ Implemented variable function names ($a = 'foo'; $f();) for use in
   traces. (Derick)
 
 Sun May 26, 2002 - xdebug 0.8.0 - Yoda
