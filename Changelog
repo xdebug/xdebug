@@ -1,3 +1,8 @@
+Wed Sep 15 14:59:49 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/php_xdebug.h:
+- Go with Xdebug 2.0.0beta1.
+
 Wed Sep 15 11:34:12 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 :
 - Update NEWS file for 2.0.0beta1
