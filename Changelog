@@ -1,3 +1,8 @@
+Fri May 10 19:57:47 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.dsp:
+- Make it work on windows (Thanks to Edin Kadribasic for providing this
+  information)
+
 Fri May 10 13:08:11 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Disable multiple displays of the error
