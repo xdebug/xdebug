@@ -106,6 +106,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_start_code_coverage,   NULL)
 	PHP_FE(xdebug_stop_code_coverage,    NULL)
 	PHP_FE(xdebug_get_code_coverage,     NULL)
+	PHP_FE(xdebug_get_function_count,    NULL)
 
 	PHP_FE(xdebug_dump_superglobals,     NULL)
 	{NULL, NULL, NULL}
@@ -450,6 +451,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(trace_file)    = NULL;
 	XG(error_handler) = NULL;
 	XG(prev_memory)   = 0;
+	XG(function_count) = 0;
 
 	/* Only enabled extended info when it is not disabled */
 	CG(extended_info) = XG(extended_info);
@@ -844,6 +846,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(level) == XG(max_nesting_level)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
 	}
+	XG(function_count)++;
 
 	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
 	fse->symbol_table = EG(active_symbol_table);
@@ -875,6 +878,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(level) == XG(max_nesting_level)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
 	}
+	XG(function_count)++;
 
 	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 

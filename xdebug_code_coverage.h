@@ -42,5 +42,6 @@ PHP_FUNCTION(xdebug_start_code_coverage);
 PHP_FUNCTION(xdebug_stop_code_coverage);
 PHP_FUNCTION(xdebug_get_code_coverage);
 
+PHP_FUNCTION(xdebug_get_function_count);
 
 #endif

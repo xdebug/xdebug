@@ -88,8 +88,6 @@ PHP_FUNCTION(xdebug_time_index);
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           status;
 	int           reason;
-	char         *lastcmd;
-	char         *lasttransid;
 
 	int           level;
 	xdebug_llist *stack;
@@ -114,6 +112,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	/* used for code coverage */
 	zend_bool     do_code_coverage;
 	xdebug_hash  *code_coverage;
+	unsigned int  function_count;
 
 	/* superglobals */
 	zend_bool     dump_globals;
@@ -141,6 +140,10 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     breakpoints_allowed;
 	xdebug_con    context;
 	unsigned int  breakpoint_count;
+
+	/* DBGp globals */
+	char         *lastcmd;
+	char         *lasttransid;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS

@@ -137,3 +137,7 @@ PHP_FUNCTION(xdebug_get_code_coverage)
 	xdebug_hash_apply(XG(code_coverage), (void *) return_value, add_file);
 }
 
+PHP_FUNCTION(xdebug_get_function_count)
+{
+	RETURN_LONG(XG(function_count));
+}
