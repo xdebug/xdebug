@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "XDEBUG_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "COMPILE_DL_XDEBUG" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_XDEBUG=1 /D "HAVE_EXECUTE_DATA_PTR" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "COMPILE_DL_XDEBUG" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_XDEBUG=1 /D "HAVE_EXECUTE_DATA_PTR" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
@@ -92,6 +92,10 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\usefulstuff.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug.c
 # End Source File
 # Begin Source File
@@ -112,6 +116,10 @@ SOURCE=.\xdebug_handlers.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\xdebug_hash.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_llist.c
 # End Source File
 # Begin Source File
@@ -128,6 +136,10 @@ SOURCE=.\php_xdebug.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\usefulstuff.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_com.h
 # End Source File
 # Begin Source File
@@ -141,6 +153,10 @@ SOURCE=.\xdebug_handler_php3.h
 # Begin Source File
 
 SOURCE=.\xdebug_handlers.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_hash.h
 # End Source File
 # Begin Source File
 
