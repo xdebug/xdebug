@@ -1,3 +1,10 @@
+Mon Aug 23 08:32:14 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Changed default debugging protocol to dbgp instead of gdb.
+- Fixed a problem with breakpoints on a non-static method call.
+- Fixed a problem where internal function calls were not registered for
+  code coverage.
+
 Mon Aug 23 08:31:06 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed segfault when requesting a property with it's long name.
