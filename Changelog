@@ -1,3 +1,18 @@
+Thu Jun 6 13:05:49 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/tests/test15.php
+/xdebug/tests/test16.php
+/xdebug/tests/test2.php
+/xdebug/tests/test7.php:
+- Add support for classnames, variable include files and variable function
+  names.
+- Implemented links to the PHP Manual in traces.
+- Added timestamps and memory usage to function traces.
+- Splitted function names from class names in the function_stack_entries.
+- Added tests for variable functions and classes
+- Updated tests
+
 Sun Jun 2 21:16:17 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Update NEWS
 
