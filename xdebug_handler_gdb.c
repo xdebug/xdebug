@@ -857,7 +857,17 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 		} else {
 			/* Make search key */
 			if (method->args[0][0] != '/') {
+#if WIN32|WINNT
+				if (strlen(method->args[0]) > 3
+					&& method->args[0][1] != '|')
+				{
+					tmp_name = xdebug_sprintf("/%s", method->args[0]);
+				} else {
+					tmp_name = xdebug_sprintf("%s", method->args[0]);
+				}
+#else
 				tmp_name = xdebug_sprintf("/%s", method->args[0]);
+#endif
 			} else {
 				tmp_name = xdebug_sprintf("%s", method->args[0]);
 			}
@@ -870,9 +880,11 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 					xdebug_llist_remove(context->line_breakpoints, le, NULL);
 					send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
 					xdebug_arg_dtor(method);
+					xdfree(tmp_name);
 					return NULL;
 				}
 			}
+			xdfree(tmp_name);
 			xdebug_arg_dtor(method);
 		}
 	} else { /* function */
