@@ -1,3 +1,10 @@
+Mon Sep 22 11:04:55 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/build/buildconf1.mk
+/xdebug/debugclient/build/buildconf2.mk
+/xdebug/debugclient/Makefile.am
+/xdebug/debugclient/acinclude.m4:
+- Makefile maintenance
+
 Fri Sep 19 17:16:07 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/profiler_miscalc.phpt:
 - Added test which shows that the profiler does strange things if either:
