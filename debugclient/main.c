@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 	fd_buf              cxt = { NULL, 0 };
 	struct in_addr     *iaddr;
 	char               *buffer;              /* Buffer with data from the server */
-	const char         *cmd;                 /* Command to send to the server */
+	char               *cmd;                 /* Command to send to the server */
 	char               *prev_cmd = NULL;     /* Last send command to the server */
 	int                 opt;                 /* Current option during parameter parsing */
 	int                 length;              /* Length of read buffer */
@@ -236,9 +236,11 @@ int main(int argc, char *argv[])
 #ifdef HAVE_LIBEDIT
 				/* Copy the prompt string */
 				sprintf(prompt, "(cmd) ");
-				if ((cmd = el_gets(el, &num)) != NULL && num != 0) {
+				if (((const char*) cmd = el_gets(el, &num)) != NULL && num != 0) {
 					/* Add command to history */
 					history(hist, &ev, H_ENTER, cmd);
+					/* We overwrite the \n with \0 for libedit builds */
+					cmd[strlen(cmd) - 1] = '\0';
 #else
 				printf("(cmd) ");
 				fflush(stdout);
@@ -261,12 +263,11 @@ int main(int argc, char *argv[])
 					if (send(fd, cmd, strlen(cmd), MSG_NOSIGNAL) == -1) {
 						break;
 					}
-#ifndef HAVE_LIBEDIT
-					/* el_gets already put a trailing \n in cmd */
-					if (send(fd, "\n", 1, MSG_NOSIGNAL) == -1) {
+
+					if (send(fd, "\0", 1, MSG_NOSIGNAL) == -1) {
 						break;
 					}
-#endif
+
 					/* If cmd is quit exit from while */
 					if (strncmp(cmd, "quit", 4) == 0) {
 						break;
