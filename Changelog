@@ -1,3 +1,7 @@
+Sun Aug 31 20:14:31 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/call_user_func_array.phpt:
+- Actually, the output of this test works just fine
+
 Sun Aug 31 15:21:45 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/call_user_func_array.phpt
 /xdebug/TODO:
