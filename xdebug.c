@@ -24,7 +24,7 @@
 
 #if HAVE_XDEBUG
 
-#define XDEBUG_VERSION "0.8.0-dev"
+#define XDEBUG_VERSION "0.8.0"
 
 #include "TSRM.h"
 #include "SAPI.h"
