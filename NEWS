@@ -1,5 +1,35 @@
-???, ??? ??, 2004 - xdebug 2.0.0beta2
-- Fixed bug #68: Summary not written when script ended with "exit()".
+Sun, Nov 28, 2004 - xdebug 2.0.0beta2
++ Added new features:
+	- DBGP: Added error messages to returned errors (in most cases)
+  
++ Added new functions:
+	- Added a function "xdebug_debug_zval" to debug zvals by printing its
+	  refcounts and is_ref values.
+  
+= Changed features:
+	- xdebug_code_coverage_stop() will now clean up the code coverage array,
+	  unless you specify FALSE as parameter.
+	- The proper Xdebug type is "hash" for associative arrays.
+	- Extended the code-coverage functionality by returning lines with
+	  executable code on them, but where not executed with a count value of -1.
+
+= Fixed bugs:
+	- DBGP: Make property_get and property_value finally work as they should,
+	  including retrieving information from different depths then the most top
+	  stack frame.
+	- DBGP: Fix eval'ed $varnames in property_get.
+	- DBGP: Support the -d option for property_get.
+	- Fixed the exit handler hook to use the new "5.1" way of handling it;
+	  which fortunately also works with PHP 5.0.
+	- Fixed bug #102: Problems with configure for automake 1.8.
+	- Fixed bug #101: crash with set_exeception_handler() and uncatched exceptions.
+	- Fixed bug #99: unset variables return the name as a string with property_get.
+	- Fixed bug #98: 'longname' attribute not returned for unintialized
+	  property in context_get request.
+	- Fixed bug #94: xdebug_sprintf misbehaves with x86_64/glibc-2.3.3
+	- Fixed bug #93: Crash in lookup_hostname on x86_64
+	- Fixed bug #92: xdebug_disable() doesn't disable the exception handler.
+	- Fixed bug #68: Summary not written when script ended with "exit()".
 
 
 Wed, Sep 15, 2004 - xdebug 2.0.0beta1
@@ -97,7 +127,7 @@ Wed, Sep 15, 2004 - xdebug 2.0.0beta1
 	  remote handler backends; for DBGp it is added to the <init> packet.
 	- Fixed bug #49: Included file's names should not be stored by address.
 	- Fixed bug #44: Script time-outs should be disabled when debugging.
-	= Fixed bug #36: GDB handler using print causes segfault with wrong syntax
+	- Fixed bug #36: GDB handler using print causes segfault with wrong syntax
 	- Fixed bug #33: Implemented the use of the ZEND_POST_DEACTIVATE hook. Now we
 	  can handle destructors safely too.
 	- Fixed bug #32: Unusual dynamic variables cause xdebug to crash.
