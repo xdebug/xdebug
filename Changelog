@@ -1,3 +1,8 @@
+Wed Dec 17 21:43:40 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.w32:
+- Added config.w32 file for the 'new' windows build system (Provided by
+  Sebastian Bergmann).
+
 Fri Dec 12 12:57:42 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_str.c:
 - We don't need those includes
