@@ -1,13 +1,11 @@
-- Added profiling support to xdebug. This introduces 3 new functions,
-
 ? ? ?, 2002 - xdebug 1.2.0
 
-+ xdebug_start_profiling() that begins profiling process, 
++ Added profiling support to xdebug. This introduces 3 new functions,
+  xdebug_start_profiling() that begins profiling process, 
   xdebug_stop_profiling() that ends the profiling process and
   xdebug_dump_function_trace() that dumps the profiling data. (Ilia)
-
 + Implemented the "kill" (kills the running script) and "delete" (removes
-  a breakpoint on a specified element)  command. (Derick)
+  a breakpoint on a specified element) command. (Derick)
 
 Wed Nov 11, 2002 - xdebug 1.1.0
 
