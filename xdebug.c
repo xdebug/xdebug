@@ -1168,10 +1168,9 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	int                   lineno;
 	char                 *file;
 	int                   file_len = 0;
+	TSRMLS_FETCH();
 
 	if (XG(remote_enabled)) {
-		TSRMLS_FETCH();
-
 		if (XG(context).line_breakpoints) {
 			cur_opcode = *EG(opline_ptr);
 			lineno = cur_opcode->lineno;
