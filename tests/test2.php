@@ -1,21 +1,31 @@
 <?php
-	function foo2 ($a, $b, $c)
+	include 'test2a.php';
+
+	function foo4 ($a, $b, $c)
 	{
-		echo xdebug_call_function(). "\n";
-		echo xdebug_call_line(). "\n";
-		echo xdebug_call_file(). "\n";
+		echo "In foo4: ".xdebug_call_function();
+		echo "-".xdebug_call_line();
+		echo "-".xdebug_call_file(). "\n";
+		foo3 ($b, $c, $a);
 	}
 
-	function foo ($a)
+	function foo5 ($a, $b, $c)
 	{
-		foo2 ($b, $a, array ('blaat', 5, FALSE));
+		echo "In foo5: ".xdebug_call_function();
+		echo "-".xdebug_call_line();
+		echo "-".xdebug_call_file(). "\n";
+		foo4 ($b, $c, $a);
 	}
 
-	function foo3 ($a)
+	function foo6 ($a, $b, $c)
 	{
-		foo ($a + 4);
+		echo "In foo6: ".xdebug_call_function();
+		echo "-".xdebug_call_line();
+		echo "-".xdebug_call_file(). "\n";
+		foo5 ($b, $c, $a);
 	}
 
-	echo foo3 (5);
+
+	echo foo6 (1,2,3);
 
 ?>
