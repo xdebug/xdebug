@@ -1472,7 +1472,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_DATA | XDEBUG_RUN | runtime_allowed | XDEBUG_STATUS, "cont", (char**) &error);
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_DATA | XDEBUG_RUN | runtime_allowed | XDEBUG_STATUS, "cont,continue", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);
