@@ -266,7 +266,7 @@ static void show_command_info(xdebug_con *h, xdebug_cmd* cmd)
 /*****************************************************************************
 ** Data printing functions
 */
-static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int offset)
+static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int offset TSRMLS_DC)
 {
 	int    fd;
 	fd_buf fd_buffer = { NULL, 0 };
@@ -492,6 +492,7 @@ char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 	char *tmp_file  = NULL;
 	int   tmp_begin = 0;
 	int   tmp_end   = 0;
+	TSRMLS_FETCH();
 
 	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
@@ -535,7 +536,7 @@ char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 		default:
 			return xdstrdup("Too many arguments."); 
 	}
-	print_sourceline(context, tmp_file, tmp_begin, tmp_end, 0);
+	print_sourceline(context, tmp_file, tmp_begin, tmp_end, 0 TSRMLS_CC);
 
 	xdebug_arg_dtor(parts);	
 	return NULL;
@@ -550,6 +551,7 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 {
 	HashTable                   *st = NULL;
 	zval                       **retval;
+	TSRMLS_FETCH();
 
 	st = &EG(symbol_table);
 	if (zend_hash_find(st, args->args[0], strlen(args->args[0]) + 1, (void **) &retval) == SUCCESS) {
@@ -606,9 +608,12 @@ static void dump_used_var (void *context, xdebug_hash_element* he)
 
 char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 {
-	struct function_stack_entry *i  = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-	xdebug_hash                 *ht = i->used_vars;
+	struct function_stack_entry *i;
+	xdebug_hash                 *ht;
 	TSRMLS_FETCH();
+
+	i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+	ht = i->used_vars;
 
 	xdebug_hash_apply(ht, (void *) context, dump_used_var);
 	
@@ -808,15 +813,18 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 
 int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type)
 {
-	struct function_stack_entry *i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack));
+	struct function_stack_entry *i;
 	int    ret;
 	char  *option;
 	char  *error = NULL;
+	TSRMLS_FETCH();
+
+	i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack));
 
 	if (type == XDEBUG_BREAK) {
 		print_breakpoint(context, i);
 	}
-	print_sourceline(context, file, lineno, lineno, -1);
+	print_sourceline(context, file, lineno, lineno, -1 TSRMLS_CC);
 
 	do {
 		SSEND(context->socket, "?cmd\n");
