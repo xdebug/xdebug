@@ -17,7 +17,7 @@ xdebug.profiler_enable=0
 	foo2 (4, array(array('blaat', 5, FALSE)));
 ?>
 --EXPECTF--
-Warning: Missing argument 3 for foo2() in /%s/test6.php on line 2
+Warning: Missing argument 3 for foo2()%s in /%s/test6.php on line 2
 
 Call Stack:
     %f      %d   1. {main}() /%s/test6.php:0

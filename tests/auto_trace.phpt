@@ -3,6 +3,7 @@ Test with auto-trace
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=1
+xdebug.trace_options=0
 xdebug.trace_output_dir=/tmp
 xdebug.collect_params=1
 xdebug.collect_return=0
@@ -18,7 +19,7 @@ xdebug.trace_format=0
 		echo "bar\n";
 	}
 
-	foo();	
+	foo();
 	echo file_get_contents($trace_file);
 	unlink($trace_file);
 ?>
