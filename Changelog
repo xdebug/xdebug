@@ -1,3 +1,7 @@
+Wed Apr 9 21:35:08 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h:
+- Switch back version no
+
 Tue Apr 8 20:58:48 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fixed handling of auto_profiling (Noticed by Gildas Noël
