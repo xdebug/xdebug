@@ -1,3 +1,8 @@
+Tue Sep 2 23:49:40 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/xdebug.c:
+- Fixed bug with wrong file names for functions called from call_user_*().
+
 Tue Sep 2 17:02:17 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_profiler.c
