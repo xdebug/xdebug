@@ -1,3 +1,11 @@
+Sat Jan 08 15:21:01 CET 2005 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Fixed bug #108: log_only still displays some text for errors in included files.
+- Added the possibility to trigger the profiler by setting
+  "xdebug.profiler_enable_trigger" to 1 and using XDEBUG_PROFILE as a get
+  parameter.
+
 Fri Dec 24 15:41:16 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - Make it compile on Windows again. (Thanks to Marcus Börger)
