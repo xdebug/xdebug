@@ -32,14 +32,10 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>stable</state>
-    <version>1.3.1</version>
-    <date>2004-04-06</date>
+    <version>1.3.2</version>
+    <date>2004-06-30</date>
     <notes>
-= Fixed profiler to aggregate class/method calls correctly. (Robert Beenen)
-= Fixed debugclient to initialize socket structure correctly. (Brandon Philips
-  and David Sklar)
-= GDB: Fixed bug where the source file wasn't closed after a "source" command.
-  (Derick)
+= Fixed bug #58: Xdebug 1.3.x doesn't compile with PHP 5. (Derick)
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -110,6 +106,14 @@ Xdebug also provides:
     </filelist>
   </release>
   <changelog>
+   <release>
+     <state>stable</state>
+     <version>1.3.2</version>
+     <date>2004-06-30</date>
+     <notes>
+= Fixed bug #58: Xdebug 1.3.x doesn't compile with PHP 5. (Derick)
+     </notes>
+    </release>
     <release>
      <state>stable</state>
      <version>1.3.1</version>

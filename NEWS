@@ -1,3 +1,7 @@
+Wed, Jul 30, 2004 - xdebug 1.3.2
+
+= Fixed bug #58: Xdebug 1.3.x doesn't compile with PHP 5. (Derick)
+
 Tue, Apr 06, 2004 - xdebug 1.3.1
 
 = Fixed profiler to aggregate class/method calls correctly. (Robert Beenen)
