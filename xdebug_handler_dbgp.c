@@ -325,8 +325,8 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	xdebug_xml_add_attribute_ex(tmp, "where", xdstrdup(tmp_fname), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "level",    xdebug_sprintf("%ld", nr), 0, 1);
 	if (fse_prev) {
-		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename), 0, 1);
-		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename TSRMLS_CC), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno TSRMLS_CC), 0, 1);
 	} else {
 		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(zend_get_executed_filename(TSRMLS_C)), 0, 1);
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
@@ -390,11 +390,13 @@ static int breakpoint_admin_remove(xdebug_con *context, char *hkey)
 
 static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 {
+	TSRMLS_FETCH();
+
 	if (brk->type) {
 		xdebug_xml_add_attribute_ex(xml, "type", xdstrdup(brk->type), 0, 1);
 	}
 	if (brk->file) {
-		xdebug_xml_add_attribute_ex(xml, "filename", xdebug_path_to_url(brk->file), 0, 1);
+		xdebug_xml_add_attribute_ex(xml, "filename", xdebug_path_to_url(brk->file TSRMLS_CC), 0, 1);
 	}
 	if (brk->lineno) {
 		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", brk->lineno), 0, 1);
@@ -1589,7 +1591,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.56 $";
+	return "$Revision: 1.57 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1656,7 +1658,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	if (strcmp(context->program_name, "-") == 0) {
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdstrdup("dbgp://stdin"), 0, 1);
 	} else {
-		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name), 0, 1);
+		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name TSRMLS_CC), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
 	xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);

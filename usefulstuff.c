@@ -284,7 +284,7 @@ char *xdebug_path_from_url(const char *fileurl)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_to_url(const char *fileurl)
+char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
