@@ -1,3 +1,7 @@
+Mon Jan 26 22:06:46 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- Be explicit with "supported" attributes in "feature_get".
+
 Mon Jan 26 20:46:14 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Also use the now fixed function.
