@@ -1,3 +1,13 @@
+Tue Oct 26 10:41:20 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h:
+- Added a function "xdebug_debug_zval" to debug zvals by printing its refcounts
+  and is_ref values.
+
 Sun Oct 24 17:53:31 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - xdebug_code_coverage_stop() will now clean up the code coverage array, unless
