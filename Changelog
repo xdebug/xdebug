@@ -1,3 +1,23 @@
+Wed Sep 4 20:56:49 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_com.c
+/xdebug/xdebug_com.h
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handler_php3.h
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h
+/xdebug/TODO
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h:
+- Implemented remote debugger handler abstraction
+- Added a php3 compatible debugger handler
+- Abstracted error type to string function
+- Merged memory allocation problems from the 1.0 branch
+- Merged API version check from the 1.0 branch
+- Rename execute_data_ptr to current_execute_data for ZE2 compability
+
 Mon Sep 2 12:53:31 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h:
 - Fix estrdup/free issue
