@@ -701,6 +701,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	zend_op *cur_opcode;
 	zend_op *end_opcode;
 	char buffer[1024];
+	int  func_nest = 0;
 	TSRMLS_FETCH();
 	
 	tmp = emalloc (sizeof (struct function_stack_entry));
@@ -714,13 +715,20 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	while (cur_opcode < end_opcode) {
 		int opcode = cur_opcode->opcode;
 
-		if (opcode == ZEND_DO_FCALL			||
+		if ((opcode == ZEND_DO_FCALL		||
 			opcode == ZEND_DO_FCALL_BY_NAME	||
 			opcode == ZEND_INCLUDE_OR_EVAL	||
-			opcode == ZEND_EXT_FCALL_END)
+			opcode == ZEND_EXT_FCALL_END) && func_nest == 1)
 		{
 			break;
 		}
+		if (opcode == ZEND_EXT_FCALL_BEGIN) {
+			func_nest++;
+		}
+		if (opcode == ZEND_EXT_FCALL_END) {
+			func_nest--;
+		}
+
 		switch (opcode) {
 			case ZEND_SEND_VAL:
 				tmp->vars[tmp->varc] = get_val (cur_opcode);
