@@ -680,7 +680,15 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		cur_opcode = *EG(opline_ptr);
 		tmp->lineno = cur_opcode->lineno;
 
-		if (XG(collect_includes)) {
+		if (tmp->function.type == XFUNC_EVAL) {
+			zval *param;
+			int   is_var;
+
+			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
+			tmp->vars[tmp->varc].name  = NULL;
+			tmp->vars[tmp->varc].addr = param;
+			tmp->varc++;
+		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
 
