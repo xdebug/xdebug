@@ -15,7 +15,7 @@
    | Author: Jim Winstead <jimw@php.net>                                  |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.1 2004-04-04 21:24:58 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.2 2004-04-04 21:35:47 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
@@ -40,11 +40,11 @@ static int php_array_element_dump(zval **zv, int num_args, va_list args, zend_ha
 		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
 		php_printf("\"]=>\n");
 	}
-	xdebug_var_dump(zv, level + 2 TSRMLS_CC);
+	xdebug_php_var_dump(zv, level + 2 TSRMLS_CC);
 	return 0;
 }
 
-void xdebug_var_dump(zval **struc, int level TSRMLS_DC)
+void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht = NULL;
 	zend_object *object = NULL;
