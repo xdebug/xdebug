@@ -40,7 +40,7 @@ static void dump_hash_elem(zval *z, char *name, char *elem, int html, int log TS
 		char *val;
 
 		if (html) {
-			val = get_zval_value_fancy(NULL, z);
+			val = get_zval_value_fancy(NULL, z TSRMLS_CC);
 			php_printf("<td bgcolor='#ffffcc'>%s</td>", val);
 		} else {
 			val = get_zval_value(z);

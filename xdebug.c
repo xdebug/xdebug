@@ -915,6 +915,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 	char      *contents;
 	char      *name = (char*) he->ptr;
 	HashTable *tmp_ht;
+	TSRMLS_FETCH();
 
 	if (!he->ptr) {
 		return;
@@ -929,7 +930,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 		return;
 	}
 	if (html) {
-		contents = get_zval_value_fancy(NULL, zvar);
+		contents = get_zval_value_fancy(NULL, zvar TSRMLS_CC);
 		if (contents) {
 			php_printf("<tr><td colspan='2' align='right' bgcolor='#ccffcc'>$%s = </td><td bgcolor='#ccffcc'>%s</td></tr>\n", name, contents);
 		} else {
