@@ -1,3 +1,7 @@
+Fri May 10 21:11:54 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/.cvsignore:
+- Add config.cache to ignored files
+
 Fri May 10 19:57:47 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.dsp:
 - Make it work on windows (Thanks to Edin Kadribasic for providing this
