@@ -1,3 +1,37 @@
+Tue Mar 16 20:03:38 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_profiler.c
+xdebug/tests/array_map.phpt
+xdebug/tests/assert_test.phpt
+xdebug/tests/auto_trace.phpt
+xdebug/tests/bug00002.phpt
+xdebug/tests/bug00003.phpt
+xdebug/tests/bug00032.phpt
+xdebug/tests/call_user_func_array.phpt
+xdebug/tests/call_user_func_array2.phpt
+xdebug/tests/local_vars_in_error.phpt
+xdebug/tests/test1.phpt
+xdebug/tests/test10b.phpt
+xdebug/tests/test11.phpt
+xdebug/tests/test12.phpt
+xdebug/tests/test13.phpt
+xdebug/tests/test14b.phpt
+xdebug/tests/test15.phpt
+xdebug/tests/test16b.phpt
+xdebug/tests/test17.phpt
+xdebug/tests/test18.phpt
+xdebug/tests/test20b.phpt
+xdebug/tests/test3.phpt
+xdebug/tests/test4.phpt
+xdebug/tests/test5.phpt
+xdebug/tests/test6.phpt
+xdebug/tests/test7b.phpt
+xdebug/tests/test8.phpt
+xdebug/tests/test9b.phpt
+xdebug/tests/trace.phpt:
+- Update test cases after xdebug was turned off by default in our testing
+  suite and also set xdebug.show_mem_delta to 0 where required.
+
 Mon Mar 15 17:42:28 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.dsp:
 - Re-add as binary
