@@ -1,3 +1,29 @@
+Thu Mar 4 12:46:46 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/config.m4
+/xdebug/config.w32
+/xdebug/php_xdebug.h
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_private.h
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_profiler.h
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h:
+- Re-implemented profiling support. Xdebug outputs information the same way that
+  cachegrind does so it is possible to use Kcachegrind as front-end.
+- Added ini settings for the profiler output directory
+  (xdebug.profiler_output_dir) and to enable the profiler
+  (xdebug.profiler_enable). These only work from httpd.conf, php.ini and
+  .htaccess).
+- Moved xdebug_get_utime to usefulstuff.c
+- Removed constants for the old profiler.
+- The show_fname() function now wants an xdebug_func, and no longer a
+  function_stack_entry *.
+
 Tue Mar 2 10:37:48 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/usefulstuff.c
 /xdebug/xdebug_handler_dbgp.c
