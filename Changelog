@@ -1,3 +1,7 @@
+Mon Apr 05 00:03:21 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #44: Script time-outs should be disabled when debugging.
+
 Sun Apr 04 23:35:48 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_compat.c:
 - And change the name of the symbols everywhere so that it works on Winshit
