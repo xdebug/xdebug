@@ -3,7 +3,6 @@ TODO
 
 For 1.3.0:
 - Bug fixing
-  * Double check file/line breakpoints
   * Fix memleaks with the eval command
 
 
