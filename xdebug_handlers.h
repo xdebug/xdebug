@@ -12,24 +12,32 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@vl-srm.net>                         |
+   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
  */
 
-#include "zend.h"
+#ifndef __HAVE_XDEBUG_HANDLERS_H__
+#define __HAVE_XDEBUG_HANDLERS_H__
 
-#ifndef __HAVE_XDEBUG_VAR_H__
-#define __HAVE_XDEBUG_VAR_H__
+#include "xdebug_llist.h"
 
-typedef struct xdebug_str {
-	int   l;
-	int   a;
-	char *d;
-} xdebug_str;
+typedef struct _xdebug_remote_handler       xdebug_remote_handler;
+typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
 
-char* get_zval_value (zval *val);
-void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
-char *xdebug_sprintf (const char* fmt, ...);
-char *error_type (int type);
+struct _xdebug_remote_handler {
+	/* Init / deinit */
+	int (*remote_init)(int socket);
+	int (*remote_deinit)(int socket);
+
+	/* Stack messages */
+	int (*remote_error)(int socket, int type, char *message, char *location, uint line, xdebug_llist *stack);
+};
+
+struct _xdebug_remote_handler_info {
+	char                  *name;
+	xdebug_remote_handler  handler;
+};
+
+xdebug_remote_handler* xdebug_handler_get (char* mode);
 
 #endif

@@ -2,9 +2,6 @@ TODO
 ====
 
 For 1.1.0:
-- Implement PHP 3 compatible debugging capabilities
-
-For 1.2.0:
 - Implement gdb debugging capabilities
   * breakpoints
   * step in / step out / step over

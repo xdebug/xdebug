@@ -21,6 +21,7 @@
 
 #include "php.h"
 
+#include "xdebug_handlers.h"
 #include "xdebug_llist.h"
 
 extern zend_module_entry xdebug_module_entry;
@@ -34,6 +35,22 @@ extern zend_module_entry xdebug_module_entry;
 
 #ifdef ZTS
 #include "TSRM.h"
+#endif
+
+
+/* Memory allocators */
+#if 0
+#define xdmalloc    emalloc
+#define xdcalloc    ecalloc	
+#define xdrealloc   erealloc
+#define xdfree      efree
+#define xdstrdup    estrdup
+#else  
+#define xdmalloc    malloc
+#define xdcalloc    calloc	
+#define xdrealloc   realloc
+#define xdfree      free
+#define xdstrdup    strdup
 #endif
 
 PHP_MINIT_FUNCTION(xdebug);
@@ -77,9 +94,9 @@ typedef struct xdebug_var {
 #define XFUNC_REQUIRE        8
 #define XFUNC_REQUIRE_ONCE   9
 
-#define XFUNC_SET(e,t,c,f)          (e)->function.type = t; (e)->function.class = estrdup (c); (e)->function.function = estrdup (f);
-#define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = estrdup (c); (e)->delayed_fname = 1;
-#define XFUNC_SET_DELAYED_C(e,t,f)  (e)->function.type = t; (e)->function.function = estrdup (f); (e)->delayed_cname = 1;
+#define XFUNC_SET(e,t,c,f)          (e)->function.type = t; (e)->function.class = xdstrdup (c); (e)->function.function = xdstrdup (f);
+#define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = xdstrdup (c); (e)->delayed_fname = 1;
+#define XFUNC_SET_DELAYED_C(e,t,f)  (e)->function.type = t; (e)->function.function = xdstrdup (f); (e)->delayed_cname = 1;
 
 typedef struct xdebug_func {
 	char *class;
@@ -119,6 +136,17 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     do_trace;
 	char         *manual_url;
 	FILE         *trace_file;
+
+	/* remote settings */
+	zend_bool     remote_enable;  /* 0 */
+	int           remote_port;    /* 7869 */
+	char         *remote_host;    /* localhost */
+	char         *remote_mode;    /* php3, gdb */
+
+	/* remote debugging globals */
+	zend_bool                 remote_enabled;
+	int                       socket;
+	xdebug_remote_handler *remote_handler;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 
@@ -127,7 +155,7 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #else
 #define XG(v) (xdebug_globals.v)
 #endif
-
+	
 #endif
 
 

@@ -20,39 +20,40 @@
 #include "ext/standard/php_string.h"
 #include "zend.h"
 #include "zend_extensions.h"
+#include "php_xdebug.h"
 #include "xdebug_var.h"
 
 #define XDEBUG_STR_PREALLOC 4096
 
-void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int free) { 
-	int l = strlen(str);                
-	if (xs->l + l > xs->a) {            
-		xs->d = erealloc (xs->d, xs->a + l + XDEBUG_STR_PREALLOC); 
-		xs->a = xs->a + l + XDEBUG_STR_PREALLOC; 
-	}                                   
-	if (!xs->l) {                       
-		xs->d[0] = '\0';                
-	}                                   
-	strcat (xs->d, str);                
-	xs->l = xs->l + l;                  
-	if (free) {                         
-		efree(str);                     
-	}                                   
+void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f) {
+	int l = strlen(str);
+	if (xs->l + l > xs->a) {
+		xs->d = xdrealloc (xs->d, xs->a + l + XDEBUG_STR_PREALLOC);
+		xs->a = xs->a + l + XDEBUG_STR_PREALLOC;
+	}
+	if (!xs->l) {
+		xs->d[0] = '\0';
+	}
+	strcat (xs->d, str);
+	xs->l = xs->l + l;
+	if (f) {
+		xdfree(str);
+	}
 }
 
-void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int free) { 
-	if (xs->l + le > xs->a) {                
-		xs->d = erealloc (xs->d, xs->a + le + XDEBUG_STR_PREALLOC); 
+void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f) {
+	if (xs->l + le > xs->a) {
+		xs->d = xdrealloc (xs->d, xs->a + le + XDEBUG_STR_PREALLOC);
 		xs->a = xs->a + le + XDEBUG_STR_PREALLOC;
-	}                                        
-	if (!xs->l) {                            
-		xs->d[0] = '\0';                     
-	}                                        
-	strcat (xs->d, str);                     
-	xs->l = xs->l + le;                      
-	if (free) {                              
-		efree(str);                          
-	}                                        
+	}
+	if (!xs->l) {
+		xs->d[0] = '\0';
+	}
+	strcat (xs->d, str);
+	xs->l = xs->l + le;
+	if (f) {
+		xdfree(str);
+	}
 }
 
 void XDEBUG_STR_CHOP(xdebug_str *xs, int c)
@@ -65,13 +66,42 @@ void XDEBUG_STR_CHOP(xdebug_str *xs, int c)
 	}
 }
 
+char *error_type(int type)
+{
+	switch (type) {
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+			return xdstrdup("Fatal error");
+			break;
+		case E_WARNING:
+		case E_CORE_WARNING:
+		case E_COMPILE_WARNING:
+		case E_USER_WARNING:
+			return xdstrdup("Warning");
+			break;
+		case E_PARSE:
+			return xdstrdup("Parse error");
+			break;
+		case E_NOTICE:
+		case E_USER_NOTICE:
+			return xdstrdup("Notice");
+			break;
+		default:
+			return xdstrdup("Unknown error");
+			break;
+	}
+}
+
+
 char *xdebug_sprintf (const char* fmt, ...)
 {
 	char   *new_str;
 	int     size = 1;
 	va_list args;
 
-	new_str = (char *) emalloc (size);
+	new_str = (char *) xdmalloc (size);
 
 	va_start(args, fmt);
 	for (;;) {
@@ -84,7 +114,7 @@ char *xdebug_sprintf (const char* fmt, ...)
 		} else {
 			size = n + 1;
 		}
-		new_str = (char *) erealloc (new_str, size);
+		new_str = (char *) xdrealloc (new_str, size);
 	}
 	va_end (args);
 

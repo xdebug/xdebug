@@ -47,6 +47,7 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 
+#include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_var.h"
 
@@ -58,9 +59,9 @@ zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
-#if ZEND_EXTENSION_API_NO >= 20020731
-void (*old_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
-void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+#if ZEND_EXTENSION_API_NO >= 20020824
+void (*old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
+void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 #endif
 
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -113,6 +114,12 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_SYSTEM, OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_SYSTEM, OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
+
+	/* Remote debugger settings */
+	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_port",       "7869",               PHP_INI_SYSTEM, OnUpdateInt,    remote_port,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_SYSTEM, OnUpdateString, remote_host,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_mode",       "php3",               PHP_INI_SYSTEM, OnUpdateString, remote_mode,       zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 #define MICRO_IN_SEC 1000000.00
@@ -154,7 +161,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_execute = zend_execute;
 	zend_execute = xdebug_execute;
 
-#if ZEND_EXTENSION_API_NO >= 20020731
+#if ZEND_EXTENSION_API_NO >= 20020824
 	old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
 #endif
@@ -170,10 +177,15 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	zend_compile_file = old_compile_file;
 	zend_execute = old_execute;
-#if ZEND_EXTENSION_API_NO >= 20020731
+#if ZEND_EXTENSION_API_NO >= 20020824
 	zend_execute_internal = old_execute_internal;
 #endif
 	zend_error_cb = old_error_cb;
+
+	if (XG(remote_enabled)) {
+		XG(remote_handler)->remote_deinit(XG(socket));
+		xdebug_close_socket(XG(socket)); 
+	}
 
 	return SUCCESS;
 }
@@ -188,23 +200,23 @@ void stack_element_dtor (void *dummy, void *elem)
 
 	if (e->refcount == 0) {
 		if (e->function.function) {
-			efree (e->function.function);
+			xdfree (e->function.function);
 		}
 		if (e->function.class) {
-			efree (e->function.class);
+			xdfree (e->function.class);
 		}
 		if (e->filename) {
-			efree (e->filename);
+			xdfree (e->filename);
 		}
 
 		for (i = 0; i < e->varc; i++) {
 			if ((e->vars[i]).name) {
-				efree ((e->vars[i]).name);
+				xdfree ((e->vars[i]).name);
 			}
-			efree ((e->vars[i]).value);
+			xdfree ((e->vars[i]).value);
 		}
 
-		efree (e);
+		xdfree (e);
 	}
 }
 
@@ -220,6 +232,19 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
+	}
+
+	/* Start socket if requested */
+	XG(remote_enabled) = 0;
+	if (XG(remote_enable)) {
+		XG(socket) = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		if (XG(socket) >= 0) {
+			XG(remote_enabled) = 1;
+
+			/* Get handler from mode */
+			XG(remote_handler) = xdebug_handler_get(XG(remote_mode));
+			XG(remote_handler)->remote_init(XG(socket));
+		}
 	}
 	return SUCCESS;
 }
@@ -243,6 +268,12 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 
 	XG(level)    = 0;
 	XG(do_trace) = 0;
+
+	if (XG(remote_enabled)) {
+		XG(remote_handler)->remote_deinit(XG(socket));
+		xdebug_close_socket(XG(socket)); 
+	}
+
 	return SUCCESS;
 }
 
@@ -264,18 +295,18 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	struct function_stack_entry* tmp;
 
 	if (op_array->function_name == NULL) {
-		tmp = emalloc (sizeof (struct function_stack_entry));
+		tmp = xdmalloc (sizeof (struct function_stack_entry));
 		tmp->varc     = 0;
 		tmp->refcount = 1;
 		tmp->level    = ++XG(level);
 		tmp->delayed_fname = 0;
 		tmp->delayed_cname = 0;
 		tmp->delayed_include   = 0;
-		tmp->function.function = estrdup("{main}");
+		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
 		tmp->function.type     = XFUNC_NORMAL;
 
-		tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
+		tmp->filename  = op_array->filename ? xdstrdup(op_array->filename): NULL;
 		tmp->lineno    = 0;
 #if MEMORY_LIMIT
 		tmp->memory    = AG(allocated_memory);
@@ -287,8 +318,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		/* Handle delayed include for stack */
 		if (XG(stack)->size > 0) {
 			if (((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->delayed_include == 1) {
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].name = estrdup ("");
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].value = op_array->filename ? estrdup(op_array->filename): NULL;
+				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].name = xdstrdup ("");
+				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].value = op_array->filename ? xdstrdup(op_array->filename): NULL;
 				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->varc++;
 			}
 		}
@@ -307,8 +338,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
-#if ZEND_EXTENSION_API_NO >= 20020731
-void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
+#if ZEND_EXTENSION_API_NO >= 20020824
+void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC)
 {
 	zval                **param;
 	void                **p         = EG(argument_stack).top_element-2;
@@ -321,12 +352,12 @@ void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_val
 		if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
 			fse->vars[fse->varc].value = get_zval_value(*param);
 		} else {
-			fse->vars[fse->varc].value = estrdup ("{missing}");
+			fse->vars[fse->varc].value = xdstrdup ("{missing}");
 		}
 		fse->varc++;
 	}
 
-	execute_internal(execute_data_ptr, return_value_used TSRMLS_CC);
+	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 }
 #endif
 
@@ -345,10 +376,10 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 				if (zfunc->type == ZEND_INTERNAL_FUNCTION) {
 					return xdebug_sprintf ("<a href='%s/%s' target='_new'>%s</a>\n", XG(manual_url), f.function, f.function);
 				} else {
-					return estrdup (f.function);
+					return xdstrdup (f.function);
 				}
 			} else {
-				return estrdup (f.function);
+				return xdstrdup (f.function);
 			}
 			break;
 		}
@@ -360,7 +391,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = emalloc (strlen (f.class) + 4 + 1);
+			tmp = xdmalloc (strlen (f.class) + 4 + 1);
 			sprintf (tmp, "new %s", f.class);
 			return tmp;
 			break;
@@ -372,7 +403,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = emalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
+			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
 			sprintf (tmp, "%s::%s", f.class, f.function);
 			return tmp;
 			break;
@@ -384,33 +415,33 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = emalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
+			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
 			sprintf (tmp, "%s->%s", f.class, f.function);
 			return tmp;
 			break;
 
 		case XFUNC_EVAL:
-			return estrdup ("eval");
+			return xdstrdup ("eval");
 			break;
 
 		case XFUNC_INCLUDE:
-			return estrdup ("include");
+			return xdstrdup ("include");
 			break;
 
 		case XFUNC_INCLUDE_ONCE:
-			return estrdup ("include_once");
+			return xdstrdup ("include_once");
 			break;
 
 		case XFUNC_REQUIRE:
-			return estrdup ("require");
+			return xdstrdup ("require");
 			break;
 
 		case XFUNC_REQUIRE_ONCE:
-			return estrdup ("require_once");
+			return xdstrdup ("require_once");
 			break;
 
 		default:
-			return estrdup ("{unknown, please report}");
+			return xdstrdup ("{unknown, please report}");
 	}
 }
 
@@ -459,7 +490,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			if (PG(log_errors) && !is_cli) {
 				snprintf(log_buffer, 1024, "PHP %3d. %s(", i->level, tmp_name);
 			}
-			efree (tmp_name);
+			xdfree (tmp_name);
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
@@ -477,7 +508,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				} else {
 					c = 1;
 				}
-				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : estrdup("");
+				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : xdstrdup("");
 				if (html) {
 					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL));
@@ -491,7 +522,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 						"%s%s", tmp_varname, i->vars[j].value
 					);
 				}
-				efree(tmp_varname);
+				xdfree(tmp_varname);
 			}
 
 			if (html) {
@@ -577,7 +608,7 @@ static inline void print_trace (int html TSRMLS_DC)
 				}
 				printf ("-> %s(", tmp_name);
 			}
-			efree (tmp_name);
+			xdfree (tmp_name);
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
@@ -593,14 +624,14 @@ static inline void print_trace (int html TSRMLS_DC)
 					c = 1;
 				}
 
-				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : estrdup("");
+				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : xdstrdup("");
 				if (html) {
 					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL));
 				} else {
 					printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
-				efree (tmp_varname);
+				xdfree (tmp_varname);
 			}
 
 			if (html) {
@@ -637,30 +668,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		buffer_len = sizeof(buffer) - 1;
 	}
 
-	switch (type) {
-		case E_ERROR:
-		case E_CORE_ERROR:
-		case E_COMPILE_ERROR:
-		case E_USER_ERROR:
-			error_type_str = "Fatal error";
-			break;
-		case E_WARNING:
-		case E_CORE_WARNING:
-		case E_COMPILE_WARNING:
-		case E_USER_WARNING:
-			error_type_str = "Warning";
-			break;
-		case E_PARSE:
-			error_type_str = "Parse error";
-			break;
-		case E_NOTICE:
-		case E_USER_NOTICE:
-			error_type_str = "Notice";
-			break;
-		default:
-			error_type_str = "Unknown error";
-			break;
-	}
+	error_type_str = error_type(type);
 
 	if (EG(error_reporting) & type) {
 		print_stack (!(strcmp ("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
@@ -678,7 +686,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 		php_log_err(log_buffer TSRMLS_CC);
 	}
+	xdfree(error_type_str);
 
+	if (XG(remote_enabled)) {
+		XG(remote_handler)->remote_error(XG(socket), type, buffer, error_filename, error_lineno, XG(stack));
+	}
 	/* Bail out if we can't recover */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -690,6 +702,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			zend_bailout();
 			break;
 	}
+
 }
 
 /* {{{ zend_op_array srm_compile_file (file_handle, type)
@@ -1020,11 +1033,11 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 		switch (cur_opcode->opcode) {
 			case ZEND_NEW:
 #if HAVE_EXECUTE_DATA_PTR
-				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
+				var = get_zval(&(cur_opcode->op1), EG(current_execute_data)->Ts, &is_var);
 				assert(var);
-				cf.class = estrdup(var->value.str.val);
+				cf.class = xdstrdup(var->value.str.val);
 #else
-				cf.class = estrdup("{unknown}");
+				cf.class = xdstrdup("{unknown}");
 #endif
 				break;
 
@@ -1045,11 +1058,11 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 			case ZEND_DO_FCALL:
 				if (func_nest == 1) {
 #if HAVE_EXECUTE_DATA_PTR
-					var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
+					var = get_zval(&(cur_opcode->op1), EG(current_execute_data)->Ts, &is_var);
 					assert(var);
-					cf.function = estrdup(var->value.str.val);
+					cf.function = xdstrdup(var->value.str.val);
 #else
-					cf.function = estrdup("{unknown}");
+					cf.function = xdstrdup("{unknown}");
 #endif
 					cf.type = XFUNC_NORMAL;
 					done = 1;
@@ -1070,7 +1083,7 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 #if HAVE_EXECUTE_DATA_PTR
 				(*varc)++;
 				(*var0).name = NULL;
-				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
+				var = get_zval(&(cur_opcode->op1), EG(current_execute_data)->Ts, &is_var);
 				assert(var);
 				(*var0).value = xdebug_sprintf ("'%s'", var->value.str.val);
 #endif
@@ -1110,35 +1123,35 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 						cf.type = XFUNC_NORMAL; /* may be overwritten later */
 					}
 #if 0
-					if (EG(execute_data_ptr)->fbc) {
+					if (EG(current_execute_data)->fbc) {
 						is_var = 1; /* can we do this smarter - see below? */
-						cf.fname = EG(execute_data_ptr)->fbc->common.function_name;
+						cf.fname = EG(current_execute_data)->fbc->common.function_name;
 					} else 
 #endif
 					{
 #if HAVE_EXECUTE_DATA_PTR
-						var = get_zval(&(tmpOpCode->op2), EG(execute_data_ptr)->Ts, &is_var);
+						var = get_zval(&(tmpOpCode->op2), EG(current_execute_data)->Ts, &is_var);
 						assert(var);
-						cf.function = estrdup(var->value.str.val);
+						cf.function = xdstrdup(var->value.str.val);
 #else
-						cf.function = estrdup("{unknown}");
+						cf.function = xdstrdup("{unknown}");
 #endif
 					}
 
 					if (tmpOpCode->op1.op_type != IS_UNUSED) {
 						if (tmpOpCode->op1.op_type == IS_CONST) {
 							cf.type = XFUNC_STATIC_MEMBER;
-							cf.class = estrdup(tmpOpCode->op1.u.constant.value.str.val);
+							cf.class = xdstrdup(tmpOpCode->op1.u.constant.value.str.val);
 						} else {
 #if HAVE_EXECUTE_DATA_PTR
-							if (EG(execute_data_ptr)->object.ptr) {
+							if (EG(current_execute_data)->object.ptr) {
 								cf.type = XFUNC_MEMBER;
-								cf.class = estrdup(EG(execute_data_ptr)->object.ptr->value.obj.ce->name);
+								cf.class = xdstrdup(EG(current_execute_data)->object.ptr->value.obj.ce->name);
 							} else {
 								assert(cf.class);
 							}
 #else
-							cf.class = estrdup("{unknown}");
+							cf.class = xdstrdup("{unknown}");
 #endif
 						}
 					} 
@@ -1169,7 +1182,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	int  go_back   = 0;
 	TSRMLS_FETCH();
 
-	tmp = emalloc (sizeof (struct function_stack_entry));
+	tmp = xdmalloc (sizeof (struct function_stack_entry));
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
 	tmp->level         = XG(level) + 1;
@@ -1231,8 +1244,8 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 					break;
 			}
 			if (cur_opcode->op1.op_type == IS_CONST) {
-				tmp->vars[tmp->varc].name = estrdup ("");
-				tmp->vars[tmp->varc].value = estrdup (cur_opcode->op1.u.constant.value.str.val);
+				tmp->vars[tmp->varc].name = xdstrdup ("");
+				tmp->vars[tmp->varc].value = xdstrdup (cur_opcode->op1.u.constant.value.str.val);
 				tmp->varc++;
 				tmp->delayed_include = 0;
 			} else {
@@ -1341,7 +1354,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	}
 #endif
 
-	tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
+	tmp->filename  = op_array->filename ? xdstrdup(op_array->filename): NULL;
 	tmp->lineno    = cur_opcode->lineno;
 	
 	xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
@@ -1368,7 +1381,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 			}
 			tmp_name = show_fname(tmp TSRMLS_CC);
 			fprintf (XG(trace_file), "-> %s(", tmp_name);
-			efree (tmp_name);
+			xdfree (tmp_name);
 
 			fprintf (XG(trace_file), ") %s:%d\n", tmp->filename, tmp->lineno);
 			fflush (XG(trace_file));
@@ -1404,16 +1417,16 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 
 	if (fse->delayed_fname) { /* variable function name */
 #if HAVE_EXECUTE_DATA_PTR
-		fse->function.function = estrdup (EG(execute_data_ptr)->function_state.function->common.function_name);
+		fse->function.function = xdstrdup (EG(current_execute_data)->function_state.function->common.function_name);
 #else
-		fse->function.function = estrdup ("{unknown}");
+		fse->function.function = xdstrdup ("{unknown}");
 #endif
 	}
 	fse->delayed_fname = 0;
 
 	if (fse->delayed_cname) { /* variable class name */
 		if (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->type == IS_OBJECT) {
-			fse->function.class = estrdup (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->value.obj.ce->name);
+			fse->function.class = xdstrdup (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->value.obj.ce->name);
 		}
 	}
 	fse->delayed_cname = 0;
@@ -1427,11 +1440,11 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 		for (i = 0; i < op_array->size; i++) {
 			/* Check if optype = RECV_VAR */
 			if (tmp_op->opcode == ZEND_RECV) {
-				fse->vars[fse->varc].name  = estrdup ((tmp_op - 1)->op1.u.constant.value.str.val);
+				fse->vars[fse->varc].name  = xdstrdup ((tmp_op - 1)->op1.u.constant.value.str.val);
 				if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
 					fse->vars[fse->varc].value = get_zval_value(*param);
 				} else {
-					fse->vars[fse->varc].value = estrdup ("{missing}");
+					fse->vars[fse->varc].value = xdstrdup ("{missing}");
 				}
 				fse->varc++;
 			}

@@ -12,24 +12,24 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@vl-srm.net>                         |
+   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
  */
 
-#include "zend.h"
+#ifndef __HAVE_XDEBUG_HANDLER_PHP3_H__
+#define __HAVE_XDEBUG_HANDLER_PHP3_H__
 
-#ifndef __HAVE_XDEBUG_VAR_H__
-#define __HAVE_XDEBUG_VAR_H__
+#include "xdebug_handlers.h"
 
-typedef struct xdebug_str {
-	int   l;
-	int   a;
-	char *d;
-} xdebug_str;
+int xdebug_php3_init(int socket);
+int xdebug_php3_deinit(int socket);
+int xdebug_php3_error(int socket, int type, char *message, char *location, uint line, xdebug_llist *stack);
 
-char* get_zval_value (zval *val);
-void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
-char *xdebug_sprintf (const char* fmt, ...);
-char *error_type (int type);
+#define xdebug_handler_php3 { \
+	xdebug_php3_init,         \
+	xdebug_php3_deinit,       \
+	xdebug_php3_error         \
+}
 
 #endif
+

@@ -16,20 +16,28 @@
    +----------------------------------------------------------------------+
  */
 
-#include "zend.h"
+#ifndef __HAVE_XDEBUG_COM_H__
+#define __HAVE_XDEBUG_COM_H__
 
-#ifndef __HAVE_XDEBUG_VAR_H__
-#define __HAVE_XDEBUG_VAR_H__
+#if WIN32|WINNT
+# define SOCK_ERR INVALID_SOCKET
+# define SOCK_CONN_ERR SOCKET_ERROR
+# define SOCK_RECV_ERR SOCKET_ERROR
+#else
+# define SOCK_ERR -1
+# define SOCK_CONN_ERR -1
+# define SOCK_RECV_ERR -1
+#endif
 
-typedef struct xdebug_str {
-	int   l;
-	int   a;
-	char *d;
-} xdebug_str;
+#if WIN32|WINNT
+#define SCLOSE(a) closesocket(a)
+#define SSEND(a,b,c) send(a,b,c,0)
+#else
+#define SCLOSE(a) close(a)
+#define SSEND(a,b,c) write(a,b,c)
+#endif
 
-char* get_zval_value (zval *val);
-void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
-char *xdebug_sprintf (const char* fmt, ...);
-char *error_type (int type);
+int xdebug_create_socket(const char *hostname, int dport);
+void xdebug_close_socket(int socket);
 
 #endif

@@ -12,24 +12,29 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@vl-srm.net>                         |
+   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
  */
 
-#include "zend.h"
 
-#ifndef __HAVE_XDEBUG_VAR_H__
-#define __HAVE_XDEBUG_VAR_H__
+#include "xdebug_com.h"
+#include "xdebug_handlers.h"
+#include "xdebug_handler_php3.h"
 
-typedef struct xdebug_str {
-	int   l;
-	int   a;
-	char *d;
-} xdebug_str;
+xdebug_remote_handler_info handlers[] = {
+	{ "php3", xdebug_handler_php3 },
+/*	{ "gdb",  xdebug_handler_gdb }, */
+	{ 0, 0 }
+};
 
-char* get_zval_value (zval *val);
-void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
-char *xdebug_sprintf (const char* fmt, ...);
-char *error_type (int type);
+xdebug_remote_handler* xdebug_handler_get(char* mode)
+{
+	xdebug_remote_handler_info *ptr = handlers;
 
-#endif
+	while (ptr->name) {
+		if (strcmp (mode, ptr->name) == 0) {
+			return &ptr->handler;
+		}
+		ptr++;
+	}
+}
