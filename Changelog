@@ -1,3 +1,9 @@
+Fri Aug 06 08:52:31 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_gdb.c:
+- MFH: Fix for bug #83: More than 20 parameters functions make xdebug crash
+
 Thu Aug 05 13:07:26 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #85: Xdebug segfaults when no idekey is set.
