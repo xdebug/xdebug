@@ -1,3 +1,7 @@
+Mon Nov 08 10:40:28 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fix eval'ed $varnames in property_get.
+
 Sun Nov 07 08:25:48 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Support the -d option for property_get.
