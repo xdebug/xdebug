@@ -954,9 +954,13 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 	while (cur_opcode < end_opcode) {
 		switch (cur_opcode->opcode) {
 			case ZEND_NEW:
+#if HAVE_EXECUTE_DATA_PTR
 				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
 				assert(var);
 				cf.class = estrdup(var->value.str.val);
+#else
+				cf.class = estrdup("{unknown}");
+#endif
 				break;
 
 			case ZEND_INIT_FCALL_BY_NAME:
@@ -975,17 +979,19 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 
 			case ZEND_DO_FCALL:
 				if (func_nest == 1) {
+#if HAVE_EXECUTE_DATA_PTR
 					var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
 					assert(var);
-					cf.type = XFUNC_NORMAL;
 					cf.function = estrdup(var->value.str.val);
+#else
+					cf.function = estrdup("{unknown}");
+#endif
+					cf.type = XFUNC_NORMAL;
 					done = 1;
 				}
 				break;
 
 			case ZEND_INCLUDE_OR_EVAL:
-				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
-				assert(var);
 				if (cur_opcode->op2.u.constant.value.lval == ZEND_EVAL) {
 					cf.type = XFUNC_EVAL;
 				} else {
@@ -996,9 +1002,13 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 						case ZEND_REQUIRE:      cf.type = XFUNC_REQUIRE; break;
 					}
 				}
+#if HAVE_EXECUTE_DATA_PTR
 				(*varc)++;
 				(*var0).name = NULL;
+				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
+				assert(var);
 				(*var0).value = xdebug_sprintf ("'%s'", var->value.str.val);
+#endif
 				done = 1;
 				break;
 
@@ -1039,9 +1049,13 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 					} else 
 #endif
 					{
+#if HAVE_EXECUTE_DATA_PTR
 						var = get_zval(&(tmpOpCode->op2), EG(execute_data_ptr)->Ts, &is_var);
 						assert(var);
 						cf.function = estrdup(var->value.str.val);
+#else
+						cf.function = estrdup("{unknown}");
+#endif
 					}
 
 					if (tmpOpCode->op1.op_type != IS_UNUSED) {
@@ -1049,12 +1063,16 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 							cf.type = XFUNC_STATIC_MEMBER;
 							cf.class = estrdup(tmpOpCode->op1.u.constant.value.str.val);
 						} else {
+#if HAVE_EXECUTE_DATA_PTR
 							if (EG(execute_data_ptr)->object.ptr) {
 								cf.type = XFUNC_MEMBER;
 								cf.class = estrdup(EG(execute_data_ptr)->object.ptr->value.obj.ce->name);
 							} else {
 								assert(cf.class);
 							}
+#else
+							cf.class = estrdup("{unknown}");
+#endif
 						}
 					} 
 					done = 1;
