@@ -1,3 +1,9 @@
+Tue Mar 2 10:37:48 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/usefulstuff.c
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_private.c:
+- Fixed -Wall errors
+
 Thu Feb 26 21:05:05 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug.c:
 - Fixed segfault in case autoload was used. (Patch by Marcus Börger)
