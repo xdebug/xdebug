@@ -1,3 +1,8 @@
+Tue Sep 07 16:27:44 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_com.c:
+- Added the setting of the TCP_NODELAY socket option. (Patch by Christof J.
+  Reetz)
+
 Mon Aug 30 16:05:24 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fix this windows mess for good now.
