@@ -1,3 +1,7 @@
+Mon Oct 21 21:21:47 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Remove outdated crap
+
 Mon Oct 21 15:55:55 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_com.c
