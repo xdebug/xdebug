@@ -1,3 +1,7 @@
+Fri Aug 30 15:04:20 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.dsp:
+- Define HAVE_EXECUTE_DATA_PTR in .dsp file
+
 Fri Aug 30 14:45:55 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Windows fixes
