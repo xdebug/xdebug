@@ -1,9 +1,12 @@
 --TEST--
-Test for circular references
+Test for circular references (ZE1)
+--SKIPIF--
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>=')) echo "skip Zend Engine 1 needed\n"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
 report_memleaks=0
+xdebug.collect_params=1
 --FILE--
 <?php
 	xdebug_start_trace();

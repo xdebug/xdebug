@@ -1,7 +1,7 @@
 --TEST--
-Test for overloaded member functions / classes (ZE1)
+Test for overloaded member functions / classes (ZE2)
 --SKIPIF--
-<?php if(version_compare(zend_version(), "2.0.0-dev", '>=')) echo "skip Zend Engine 1 needed\n"; ?>
+<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
@@ -37,5 +37,5 @@ xdebug.auto_trace=0
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> b->func_a1() /%s/test16.php:25
-    %f      %d     -> b->func_b1() /%s/test16.php:26
+    %f      %d     -> a->func_a1() /%s/test16b.php:25
+    %f      %d     -> b->func_b1() /%s/test16b.php:26

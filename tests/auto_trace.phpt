@@ -3,6 +3,7 @@ Test with auto-trace
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=1
+xdebug.collect_params=1
 --FILE--
 <?php
 	function foo() {

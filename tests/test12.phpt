@@ -3,6 +3,7 @@ Test for complex parameters to functions
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
+xdebug.collect_params=1
 --FILE--
 <?php
 	xdebug_start_trace();
