@@ -310,7 +310,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ);
+			if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
+				XG(remote_enabled) = 0;
+			}
 		}
 	}
 
@@ -471,6 +473,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 	xdebug_llist_element *le;
 	int new_len;
 	int is_cli = (strcmp ("cli", sapi_module.name) == 0);
+	double start_time = 0;
 
 	if (html) {
 		php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
@@ -505,6 +508,13 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			if (html) {
 				php_printf ("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
 			} else {
+				if (start_time) {
+					php_printf ("%10.4f ", i->time - start_time);
+				} else {
+					start_time = i->time;
+					php_printf ("%10.4f ", 0.0);
+				}
+				php_printf ("%10lu ", i->memory);
 				printf ("%3d. %s(", i->level, tmp_name);
 			}
 			if (PG(log_errors) && !is_cli) {
@@ -623,6 +633,13 @@ static inline void print_trace (int html TSRMLS_DC)
 				}
 				php_printf ("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name);
 			} else {
+				if (start_time) {
+					php_printf ("%10.4f ", i->time - start_time);
+				} else {
+					start_time = i->time;
+					php_printf ("%10.4f ", 0.0);
+				}
+				php_printf ("%10lu ", i->memory);
 				for (j = 0; j < i->level; j++) {
 					printf ("  ");
 				}
@@ -1390,14 +1407,15 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	tmp->lineno    = cur_opcode->lineno;
 	
 	xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
-	if (XG(do_trace)) {
-		/* Set timestamp and memory footprint */
+	/* Set timestamp and memory footprint */
 #if MEMORY_LIMIT
-		tmp->memory = AG(allocated_memory);
+	tmp->memory = AG(allocated_memory);
 #else
-		tmp->memory = 0;
+	tmp->memory = 0;
 #endif
-		tmp->time   = get_utime();
+	tmp->time   = get_utime();
+
+	if (XG(do_trace)) {
 
 		/* Update refcount and add into hash */
 		tmp->refcount++;

@@ -1,5 +1,6 @@
 ? - xdebug 1.1.0
 
++ Added time-index and memory footprint to CLI dumps. (Derick)
 + Implemented remote debugger handler abstraction. (Derick)
 + Added a php3 compatible debugger handler. (Derick)
 
