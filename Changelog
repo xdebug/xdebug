@@ -1,3 +1,7 @@
+Mon Nov 15 13:45:13 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_private.h:
+- Fixed problem with error codes.
+
 Thu Nov 11 17:30:12 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_compat.c
 xdebug/xdebug_handler_dbgp.c
