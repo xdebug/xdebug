@@ -1,3 +1,8 @@
+Sun Oct 27 17:01:37 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Remove unused code
+
 Fri Oct 25 08:02:18 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/test.sh
 /xdebug/xdebug.c
