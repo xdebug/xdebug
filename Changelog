@@ -1,3 +1,8 @@
+Sat Dec 04 22:45:46 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed bug #103: crash when running the DBGp command 'eval' on a global
+  variable
+
 Sun Nov 28 23:14:49 CET 2004 Derick Rethans <derick@derickrethans.nl>
 package.xml:
 - Remove nolonger existing file.
