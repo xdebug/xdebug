@@ -1,3 +1,14 @@
+Sat May 25 15:42:52 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test11.php
+/xdebug/tests/test12.php
+/xdebug/tests/test7.php
+/xdebug/tests/test8.php
+/xdebug/tests/test9.php:
+- Added more calls to test 7.
+- Updated test 8 and 9 to use xdebug_dump_function_trace().
+- Added new tests for indirect function calls (11) and complex
+  parameters (12).
+
 Sun May 19 16:32:54 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/config.m4
 /xdebug/xdebug.c
