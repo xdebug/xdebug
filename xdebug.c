@@ -930,6 +930,9 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	int                   i;
 	TSRMLS_FETCH();
 
+	if (XG(stack)->size == 0) {
+		return;
+	}
 	fse = XDEBUG_LLIST_TAIL(XG(stack))->ptr;
 
 #if HAVE_EXECUTE_DATA_PTR
