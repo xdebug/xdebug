@@ -1,3 +1,7 @@
+Thu Jan 8 13:55:38 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_var.c:
+- Make it compile with PHP 4 again
+
 Mon Jan 5 09:29:43 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_var.c:
 - Fixed some of the variable printing routines regarding PPP.
