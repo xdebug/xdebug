@@ -1,3 +1,7 @@
+Sat May 25 15:44:11 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test10.php:
+- Add test for functions as parameters to functions (10).
+
 Sat May 25 15:42:52 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test11.php
 /xdebug/tests/test12.php
