@@ -39,3 +39,6 @@ Release_TS
 *.plg
 *.patch
 *.tgz
+*.ncb
+*.opt
+*.dsw
