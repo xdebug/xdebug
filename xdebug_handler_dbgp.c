@@ -1249,7 +1249,12 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 {
 	function_stack_entry *fse;
 	xdebug_hash          *ht;
-	
+#ifdef ZEND_ENGINE_2
+	xdebug_xml_node      *contents;
+	zval                  ret_zval;
+	int                   res;
+#endif
+
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
 		ht = fse->used_vars;
 		XG(active_symbol_table) = fse->symbol_table;
@@ -1258,6 +1263,22 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 		if (ht) {
 			xdebug_hash_apply(ht, (void *) node, func);
 		}
+
+#ifdef ZEND_ENGINE_2
+		/* zend engine 2 does not give us $this, eval so we can get it */
+		contents = get_symbol_contents("this", sizeof("this") TSRMLS_CC);
+		if (!contents) {
+			/* if we cannot get the value directly, then try eval */
+			res = _xdebug_do_eval("$this", &ret_zval TSRMLS_CC);
+			if (res != FAILURE) {
+				contents = get_zval_value_xml_node("this", &ret_zval);
+				zval_dtor(&ret_zval);
+			}
+		}
+		if (contents) {
+			xdebug_xml_add_child(node, contents);
+		}
+#endif
 
 		XG(active_symbol_table) = NULL;
 		return 0;
@@ -1541,7 +1562,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.49 $";
+	return "$Revision: 1.50 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
