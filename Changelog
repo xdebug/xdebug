@@ -1,3 +1,7 @@
+Mon Mar 15 17:30:23 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.dsp:
+- Re-add as binary
+
 Mon Mar 15 17:29:40 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.dsp:
 - Remove non-binary .dsp
