@@ -1,3 +1,7 @@
+Thu Mar 10 09:25:43 CET 2005 Derick Rethans <derick@derickrethans.nl>
+debugclient/debugclient.dsp:
+- Fixed lineendings
+
 Wed Mar 09 22:18:11 CET 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #118: Segfault with exception when remote debugging.
