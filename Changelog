@@ -1,3 +1,14 @@
+Tue Mar 16 23:25:54 CET 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/tests/auto_trace.phpt:
+- Added the xdebug_get_tracefile_name() function to retrieve the name
+  of the tracefile. This is useful in case auto trace is enabled and you 
+  want to clean the trace file.
+- Updated the tests/auto_trace.phpt test to use this new function.
+- Fixed bug #33: Implemented the use of the ZEND_POST_DEACTIVATE hook. Now we
+  can handle destructors safely too.
+
 Tue Mar 16 20:22:36 CET 2004 Derick Rethans <derick@derickrethans.nl>
 tests/bug00032.phpt:
 - Adjust test to changes in PHP 5
