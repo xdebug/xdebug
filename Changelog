@@ -1,3 +1,26 @@
+Tue Apr 20 23:51:56 CEST 2004 Shane Caraveo <shane@caraveo.com>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_var.c:
+- magic_cookie is not necessary for remote debugging
+- implement property_set based on eval
+# todo's are left on this
+- implement property_value based on property_get code
+# needs more work, see comments in code
+- property_get now uses eval as last resort to get a value
+- implement stdout redirection
+# only works in copy mode, not full redirection mode
+# this is one way to do it, but we might also consider
+# using filters so we can deal with stderr and stdin
+- fix stderr command to return success=0
+- factor the eval function so we have some common eval code
+- fix CMD_OPTION to work with -- args
+- fix fullname attribute to be real php syntax
+- fix last response for stop and detach commands (identified by valgrind)
+
+
 Tue Apr 20 03:52:04 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c:
