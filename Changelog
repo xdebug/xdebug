@@ -1,3 +1,9 @@
+Sun Dec 28 23:39:29 CET 2003 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_var.c:
+- Added support for showing private, protected and public in the fancy
+  var_dump() function.
+- Changed showing recursion issues with the fancy var_dump() function.
+
 Sun Dec 28 20:33:54 CET 2003 Derick Rethans <derick@derickrethans.nl>
 /xdebug/LICENSE:
 - Fixed email and web addresses in license
