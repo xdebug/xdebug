@@ -60,8 +60,11 @@ void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
 #if ZEND_EXTENSION_API_NO >= 20020824
+#if ZEND_EXTENSION_API_NO < 90000000
+#define HAVE_EXECUTE_INTERNAL 1
 void (*old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
+#endif
 #endif
 
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -178,7 +181,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_execute = zend_execute;
 	zend_execute = xdebug_execute;
 
-#if ZEND_EXTENSION_API_NO >= 20020824
+#if HAVE_EXECUTE_INTERNAL
 	old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
 #endif
@@ -194,7 +197,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	zend_compile_file = old_compile_file;
 	zend_execute = old_execute;
-#if ZEND_EXTENSION_API_NO >= 20020824
+#if HAVE_EXECUTE_INTERNAL
 	zend_execute_internal = old_execute_internal;
 #endif
 	zend_error_cb = old_error_cb;
@@ -359,29 +362,43 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	} else {
 		/* Check for breakpoints */
 		if (XG(remote_enabled)) {
-			XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack));
+			struct function_stack_entry *i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+		
+			if (i->function.type == XFUNC_NORMAL) {	/* Function breakpoints */
+				char *name = NULL;
+				printf ("HASH SIZE: %d\n", xdebug_globals.context.function_breakpoints->size);
+				printf ("LOOKING F: %s\n", i->function.function);
+				if (xdebug_hash_find(XG(context).function_breakpoints, i->function.function, strlen(i->function.function), (void *) &name)) {
+					/* Yup, breakpoint found, call handler */
+					printf (" FOUND\n");
+					XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack));
+				}
+			}
 		}
 		old_execute (op_array TSRMLS_CC);
 	}
 }
 
-#if ZEND_EXTENSION_API_NO >= 20020824
+#if HAVE_EXECUTE_INTERNAL
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC)
 {
 	zval                **param;
 	void                **p         = EG(argument_stack).top_element-2;
 	int                   arg_count = (ulong) *p;
 	int                   i         = 0;
-	function_stack_entry *fse       = XG(stack)->tail->ptr;
-	
-	for (i = 0; i < arg_count; i++) {
-		fse->vars[fse->varc].name  = NULL;
-		if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-			fse->vars[fse->varc].value = get_zval_value(*param);
-		} else {
-			fse->vars[fse->varc].value = xdstrdup ("{missing}");
+	function_stack_entry *fse;
+
+	if (XG(stack)->tail) {
+		fse = XG(stack)->tail->ptr;
+		for (i = 0; i < arg_count; i++) {
+			fse->vars[fse->varc].name  = NULL;
+			if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
+				fse->vars[fse->varc].value = get_zval_value(*param);
+			} else {
+				fse->vars[fse->varc].value = xdstrdup ("{missing}");
+			}
+			fse->varc++;
 		}
-		fse->varc++;
 	}
 
 	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
@@ -1078,6 +1095,7 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 	zend_op* tmpOpCode;
 	zend_op* initOpCode = 0;
 	int done = 0;
+	int swap_function_class = 0;
 
 	memset(&cf, 0, sizeof(xdebug_func));
 
@@ -1087,9 +1105,14 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 		switch (cur_opcode->opcode) {
 			case ZEND_NEW:
 #if HAVE_EXECUTE_DATA_PTR
+#if HAVE_EXECUTE_INTERNAL
 				var = get_zval(&(cur_opcode->op1), EG(current_execute_data)->Ts, &is_var);
 				assert(var);
 				cf.class = xdstrdup(var->value.str.val);
+#else
+				cf.type = XFUNC_NEW;
+				swap_function_class = 1;
+#endif
 #else
 				cf.class = xdstrdup("{unknown}");
 #endif
@@ -1170,12 +1193,15 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 						printf("found 0x%08x %s\n", tmpOpCode, getOpcodeName(tmpOpCode->opcode));
 					}
 					*/
-
+#if ZEND_EXTENSION_API_NO < 90000000
 					if (tmpOpCode->extended_value & ZEND_CTOR_CALL) {
 						cf.type = XFUNC_NEW;
 					} else {
 						cf.type = XFUNC_NORMAL; /* may be overwritten later */
 					}
+#else
+					cf.type = XFUNC_NORMAL; /* may be overwritten later */
+#endif
 #if 0
 					if (EG(current_execute_data)->fbc) {
 						is_var = 1; /* can we do this smarter - see below? */
@@ -1186,7 +1212,11 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 #if HAVE_EXECUTE_DATA_PTR
 						var = get_zval(&(tmpOpCode->op2), EG(current_execute_data)->Ts, &is_var);
 						assert(var);
+#if ZEND_EXTENSION_API_NO < 90000000
 						cf.function = xdstrdup(var->value.str.val);
+#else
+						cf.function = xdstrdup(var->value.str.val);
+#endif
 #else
 						cf.function = xdstrdup("{unknown}");
 #endif
@@ -1197,15 +1227,23 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 							cf.type = XFUNC_STATIC_MEMBER;
 							cf.class = xdstrdup(tmpOpCode->op1.u.constant.value.str.val);
 						} else {
-#if HAVE_EXECUTE_DATA_PTR
+							cf.type = XFUNC_MEMBER;
+#if HAVE_EXECUTE_DATA_PTR && ZEND_EXTENSION_API_NO < 90000000
 							if (EG(current_execute_data)->object.ptr) {
-								cf.type = XFUNC_MEMBER;
 								cf.class = xdstrdup(EG(current_execute_data)->object.ptr->value.obj.ce->name);
 							} else {
 								assert(cf.class);
 							}
 #else
-							cf.class = xdstrdup("{unknown}");
+							if (EG(current_execute_data)->object) {
+								cf.class = xdstrdup(Z_OBJCE(*EG(current_execute_data)->object)->name);
+								cf.type = XFUNC_MEMBER;
+							} else if (EG(current_execute_data)->function_state.function->common.scope) {
+								cf.class = xdstrdup(EG(current_execute_data)->function_state.function->common.scope->name);
+								cf.type = XFUNC_STATIC_MEMBER;
+							} else {
+								cf.class = xdstrdup("{unknown}");
+							}
 #endif
 						}
 					} 
@@ -1219,6 +1257,13 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 		} else {
 			cur_opcode++;
 		}
+	}
+	/* Zend Engine 2 magic */
+	if (swap_function_class) {
+		char *t = cf.class;
+		cf.class = cf.function;
+		cf.function = cf.class;
+		cf.type = XFUNC_NEW;
 	}
 	return cf;
 }
@@ -1481,7 +1526,11 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 
 	if (fse->delayed_cname) { /* variable class name */
 		if (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->type == IS_OBJECT) {
+#if ZEND_EXTENSION_API_NO < 90000000
 			fse->function.class = xdstrdup (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->value.obj.ce->name);
+#else
+			fse->function.class = xdstrdup ("{unknown}");
+#endif
 		}
 	}
 	fse->delayed_cname = 0;
