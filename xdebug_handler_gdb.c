@@ -377,14 +377,18 @@ static void show_command_info(xdebug_con *h, xdebug_cmd* cmd)
 static char *get_variable(xdebug_con *context, char *name, zval *val)
 {
 	xdebug_gdb_options* options = (xdebug_gdb_options*) context->options;
+	char *str_rep, *ret;
 
 	switch (options->response_format) {
 	   	case XDEBUG_RESPONSE_NORMAL:
+			str_rep = get_zval_value(val);
 			if (name) {
-				return xdebug_sprintf("$%s = %s\n", name, get_zval_value(val));
+				ret = xdebug_sprintf("$%s = %s\n", name, str_rep);
 			} else {
-				return xdebug_sprintf("%s\n", get_zval_value(val));
+				ret = xdebug_sprintf("%s\n", str_rep);
 			}
+			xdfree(str_rep);
+			return ret;
 			break;
 
 		case XDEBUG_RESPONSE_XML:
