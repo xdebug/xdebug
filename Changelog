@@ -1,3 +1,7 @@
+Fri Aug 30 10:23:50 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Prevent the use of assert in older PHP versions.
+
 Fri Aug 30 08:18:48 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/tests/test17.php:
