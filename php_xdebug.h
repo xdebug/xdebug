@@ -91,9 +91,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           status;
 	int           reason;
 
-	int           level;
+	long          level;
 	xdebug_llist *stack;
-	int           max_nesting_level;
+	long          max_nesting_level;
 	zend_bool     default_enable;
 	zend_bool     collect_includes;
 	zend_bool     collect_params;
@@ -138,7 +138,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */
-	int           remote_port;    /* 9000 */
+	long          remote_port;    /* 9000 */
 	char         *remote_host;    /* localhost */
 	int           remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
 	char         *remote_handler; /* php3, gdb, dbgp */
