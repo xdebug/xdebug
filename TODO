@@ -12,6 +12,7 @@ For 1.2.0:
   * add trace code to trace which files/lines have been touched (to check
 	code coverage).
   * finish custom error handler support
+  * namespaces support for Zend Engine 2
 
 For later:
 - Additions

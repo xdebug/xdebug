@@ -371,18 +371,28 @@ xdebug_func xdebug_build_fname(zend_execute_data *edata, zend_op_array *new_op_a
 
 	if (edata) {
 		if (edata->function_state.function->common.function_name) {
+#if ZEND_EXTENSION_API_NO < 90000000
 			if (edata->ce) {
 				tmp.type = XFUNC_STATIC_MEMBER;
 				tmp.class = xdstrdup(edata->ce->name);
-				tmp.function = xdstrdup(edata->function_state.function->common.function_name);
 			} else if (edata->object.ptr) {
 				tmp.type = XFUNC_MEMBER;
 				tmp.class = xdstrdup(edata->object.ptr->value.obj.ce->name);
-				tmp.function = xdstrdup(edata->function_state.function->common.function_name);
 			} else {
 				tmp.type = XFUNC_NORMAL;
-				tmp.function = xdstrdup(edata->function_state.function->common.function_name);
 			}
+#else
+			if (edata->object) {
+				tmp.type = XFUNC_MEMBER;
+				tmp.class = xdstrdup(edata->function_state.function->common.scope->name);
+			} else if (EG(scope)) {
+				tmp.type = XFUNC_STATIC_MEMBER;
+				tmp.class = xdstrdup(edata->calling_scope->name);
+			} else {
+				tmp.type = XFUNC_NORMAL;
+			}
+#endif
+			tmp.function = xdstrdup(edata->function_state.function->common.function_name);
 		} else {
 			switch (edata->opline->op2.u.constant.value.lval) {
 				case ZEND_EVAL:
