@@ -1004,11 +1004,13 @@ static int _xdebug_do_eval(unsigned char *eval_string, zval *ret_zval TSRMLS_DC)
 
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
+	XG(ignore_fatal_error) = 1;
 	res = zend_eval_string(eval_string, ret_zval, "xdebug eval" TSRMLS_CC);
 
 	/* Clean up */
 	EG(error_reporting) = old_error_reporting;
 	XG(breakpoints_allowed) = 1;
+	XG(ignore_fatal_error) = 0;
 
 	return res;
 }
@@ -1888,7 +1890,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.71 $";
+	return "$Revision: 1.72 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

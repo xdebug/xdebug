@@ -591,6 +591,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(remote_enabled) = 0;
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
+	XG(ignore_fatal_error) = 0;
 	if (XG(auto_trace) && XG(trace_output_dir) && strlen(XG(trace_output_dir))) {
 		/* In case we do an auto-trace we are not interested in the return
 		 * value, but we still have to free it. */
@@ -1690,7 +1691,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
-			zend_bailout();
+			if (!XG(ignore_fatal_error)) {
+				zend_bailout();
+			}
 			break;
 	}
 }
@@ -2300,7 +2303,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	XDEBUG_VERSION,
 	XDEBUG_AUTHOR,
 	XDEBUG_URL,
-	"Copyright (c) 2002, 2003, 2004",
+	"Copyright (c) 2002, 2003, 2004, 2005",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
 	NULL,           /* activate_func_t */
