@@ -28,6 +28,11 @@ typedef struct xdebug_str {
 	char *d;
 } xdebug_str;
 
+void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f);
+void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f);
+void XDEBUG_STR_CHOP(xdebug_str *xs, int c);
+void XDEBUG_STR_FREE(xdebug_str *s);
+
 void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 char* error_type (int type);
 char* xdebug_sprintf (const char* fmt, ...);

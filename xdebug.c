@@ -897,8 +897,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	error_type_str = error_type(type);
 
 	if (XG(error_handler)) { /* If an error handler is set, use it */
+/*
 		call_handler(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-
+*/
 	} else if (EG(error_reporting) & type) { /* Otherwise print the default stack trace */
 		print_stack(!(strcmp ("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 	}
