@@ -7,7 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-xdebug_start_trace();
+xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
 class DB {
 	function query($s) {
 		echo $s."\n";
@@ -16,10 +16,12 @@ class DB {
 
 DB::query("test");
 
-xdebug_dump_function_trace();
+echo file_get_contents($tf);
+unlink($tf);
 ?>
 --EXPECTF--
 test
 
-Function trace:
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> db::query('test') /dat/dev/php/xdebug/tests/test20.php:9
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/test20.php:11

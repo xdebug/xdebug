@@ -7,7 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-	xdebug_start_trace();
+	xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
     function fibonacci_cache ($n)
     {
         if (isset ($GLOBALS['fcache'][$n])) {
@@ -28,10 +28,11 @@ xdebug.auto_profile=0
     }
 
 	fibonacci_cache(50);
-	xdebug_dump_function_trace();
+	echo file_get_contents($tf);
+	unlink($tf);
 ?>
 --EXPECTF--
-Function trace:
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> fibonacci_cache(50) /%s/trace.php:22
     %f      %d       -> fibonacci_cache(49) /%s/trace.php:16
     %f      %d         -> fibonacci_cache(48) /%s/trace.php:16
@@ -129,3 +130,4 @@ Function trace:
     %f      %d           -> fibonacci_cache(46) /%s/trace.php:16
     %f      %d         -> fibonacci_cache(47) /%s/trace.php:16
     %f      %d       -> fibonacci_cache(48) /%s/trace.php:16
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/trace.php:23

@@ -10,7 +10,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-	xdebug_start_trace();
+	xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
 
 	class foo {
 
@@ -28,10 +28,12 @@ xdebug.auto_profile=0
 	bar($f);
 	bar($f);
 
-	xdebug_dump_function_trace();
+	echo file_get_contents($tf);
+	unlink($tf);
 ?>
 --EXPECTF--
-Function trace:
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> foo->foo() /%s/test14.php:16
     %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/test14.php:17
     %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/test14.php:18
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/test14.php:20

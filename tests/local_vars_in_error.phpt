@@ -6,6 +6,7 @@ xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.auto_profile=0
 xdebug.dump_globals=0
+xdebug.show_local_vars=1
 --FILE--
 <?php
 	function a($a,$b) {
@@ -25,7 +26,7 @@ Call Stack:
 
 
 Variables in local scope:
-  $d = class stdClass {}
+  $d = class stdClass {  }
   $a = 5
   $c = array (0 => 5, 1 => 36)
   $b = 6

@@ -4,6 +4,7 @@ Test for complex parameters to a function
 xdebug.enable=1
 xdebug.collect_params=1
 xdebug.dump_globals=0
+xdebug.show_local_vars=1
 --FILE--
 <?php
 	function foo2 ($a, $b, $c)

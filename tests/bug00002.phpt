@@ -19,7 +19,7 @@ xdebug.auto_profile=0
 ?>
 --EXPECTF--
 
-Start of function trace
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> do_stuff() /%s/bug00002.php:7
     %f      %d     -> xdebug_stop_trace() /%s/bug00002.php:8
-End of function trace
+TRACE END   [%d-%d-%d %d:%d:%d]

@@ -7,7 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-xdebug_start_trace();
+xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
 
 include 'call_user_func_array2.inc';
 
@@ -17,11 +17,12 @@ call_user_func_array ('debug', array('foo', $foo));
 $foo = 'bar';
 call_user_func_array ('debug', array('bar', $foo));
 
-xdebug_dump_function_trace();
+echo file_get_contents($tf);
+unlink($tf);
 ?>
 --EXPECTF--
-Function trace:
-    %f      %d     -> include(call_user_func_array2.inc) /%s/call_user_func_array2.php:4
+TRACE START [%d-%d-%d %d:%d:%d]
+    %f      %d     -> include('call_user_func_array2.inc') /%s/call_user_func_array2.php:4
     %f      %d     -> call_user_func_array('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) /%s/call_user_func_array2.php:7
     %f      %d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array2.php:7
     %f      %d         -> is_array(array (0 => 1, 1 => 2)) /%s/call_user_func_array2.inc:4
@@ -30,3 +31,4 @@ Function trace:
     %f      %d         -> is_array('bar') /%s/call_user_func_array2.inc:4
     %f      %d         -> is_object('bar') /%s/call_user_func_array2.inc:4
     %f      %d         -> is_resource('bar') /%s/call_user_func_array2.inc:4
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/call_user_func_array2.php:12

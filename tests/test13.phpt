@@ -7,7 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-	xdebug_start_trace();
+	xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
 
 	function foo1 ($a)
 	{
@@ -38,10 +38,11 @@ xdebug.auto_profile=0
 	$i = 'foo3';
 	$i('test\'s');
 
-	xdebug_dump_function_trace();
+	echo file_get_contents($tf);
+	unlink($tf);
 ?>
 --EXPECTF--
-Function trace:
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> foo1('test\'s') /%s/test13.php:25
     %f      %d       -> addslashes('test\'s') /%s/test13.php:6
     %f      %d     -> foo4('test\'s') /%s/test13.php:27
@@ -50,3 +51,4 @@ Function trace:
     %f      %d       -> addslashes('test\'s') /%s/test13.php:11
     %f      %d     -> foo3('test\'s') /%s/test13.php:31
     %f      %d       -> addslashes('test\'s') /%s/test13.php:16
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/test13.php:33

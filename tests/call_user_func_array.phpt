@@ -7,7 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-xdebug_start_trace();
+xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
 
 function debug($var, $val) {
     if (is_array($val) || is_object($val) || is_resource($val)) {
@@ -23,10 +23,11 @@ call_user_func_array ('debug', array('foo', $foo));
 $foo = 'bar';
 call_user_func_array ('debug', array('bar', $foo));
 
-xdebug_dump_function_trace();
+echo file_get_contents($tf);
+unlink($tf);
 ?>
 --EXPECTF--
-Function trace:
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> call_user_func_array('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) /%s/call_user_func_array.php:13
     %f      %d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array.php:13
     %f      %d         -> is_array(array (0 => 1, 1 => 2)) /%s/call_user_func_array.php:5
@@ -35,3 +36,4 @@ Function trace:
     %f      %d         -> is_array('bar') /%s/call_user_func_array.php:5
     %f      %d         -> is_object('bar') /%s/call_user_func_array.php:5
     %f      %d         -> is_resource('bar') /%s/call_user_func_array.php:5
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/call_user_func_array.php:18

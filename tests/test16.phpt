@@ -6,9 +6,10 @@ Test for overloaded member functions / classes (ZE1)
 xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.auto_profile=0
+xdebug.collect_params=1
 --FILE--
 <?php
-	xdebug_start_trace();
+	xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
 
 	class a {
 
@@ -34,9 +35,11 @@ xdebug.auto_profile=0
 	$B->func_a1();
 	$B->func_b1();
 
-	xdebug_dump_function_trace();
+	echo file_get_contents($tf);
+	unlink($tf);
 ?>
 --EXPECTF--
-Function trace:
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> b->func_a1() /%s/test16.php:25
     %f      %d     -> b->func_b1() /%s/test16.php:26
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/test16.php:28

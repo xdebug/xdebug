@@ -7,7 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-	xdebug_start_trace();
+	xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
 
 	class a {
 
@@ -25,9 +25,11 @@ xdebug.auto_profile=0
 	$a = 'func_a2';
 	$A->$a();
 
-	xdebug_dump_function_trace();
+	echo file_get_contents($tf);
+	unlink($tf);
 ?>
 --EXPECTF--
-Function trace:
+TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> a->func_a1() /%s/test15.php:15
     %f      %d     -> a->func_a2() /%s/test15.php:18
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/test15.php:20
