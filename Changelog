@@ -1,3 +1,10 @@
+Sun Aug 31 01:04:39 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handler_gdb.c:
+- Added the option "dump_superglobals" to the remote debugger. If you set this
+  option to 0 the "show-local" and similar commands will not return any data
+  from superglobals anymore.
+
 Sat Aug 30 23:54:04 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/get_function_trace.phpt
 /xdebug/xdebug.c:
