@@ -23,6 +23,7 @@
 #endif
 
 #include "php.h"
+#include "SAPI.h"
 
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
@@ -796,18 +797,6 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 	return 0;
 }
 
-static int _xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
-{
-	zend_unset_timeout(TSRMLS_C);
-	if (XG(stdout_redirected) != 0) {
-		_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
-	}
-
-	/* let PHP also send it out, as it may be needed */
-	zend_set_timeout(EG(timeout_seconds));
-	return XG(stdio).php_body_write(str, str_length TSRMLS_CC);
-}
-
 static int _xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 {
 	zend_unset_timeout(TSRMLS_C);
@@ -818,6 +807,21 @@ static int _xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 	/* let PHP also send it out, as it may be needed */
 	zend_set_timeout(EG(timeout_seconds));
 	return XG(stdio).php_header_write(str, str_length TSRMLS_CC);
+}
+
+static int _xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
+{
+	if (!SG(headers_sent)) {
+		return _xdebug_header_write(str, str_length TSRMLS_CC);
+	}
+	zend_unset_timeout(TSRMLS_C);
+	if (XG(stdout_redirected) != 0) {
+		_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
+	}
+
+	/* let PHP also send it out, as it may be needed */
+	zend_set_timeout(EG(timeout_seconds));
+	return XG(stdio).php_body_write(str, str_length TSRMLS_CC);
 }
 
 DBGP_FUNC(stderr)
@@ -1534,7 +1538,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.47 $";
+	return "$Revision: 1.48 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
