@@ -51,6 +51,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_function_stack, NULL)
+	PHP_FE(xdebug_call_function,      NULL)
+	PHP_FE(xdebug_call_file,          NULL)
+	PHP_FE(xdebug_call_line,          NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -374,17 +377,71 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 PHP_FUNCTION(xdebug_get_function_stack)
 {
 	char buffer[1024];
+	srm_llist_element *le;
+	int                k;
 
 	array_init(return_value);
-#if 0
-	i = XG(top);
-	if (i) {
-		do {
-			snprintf (buffer, 1024, "%s:%d: %s", i->e.filename, i->e.lineno, i->e.function_name);
-			add_next_index_string(return_value, (char*) &buffer, 1);
-		} while (i = i->next);
+	le = SRM_LLIST_HEAD(XG(stack));
+	
+	for (k = 0; k < XG(stack)->size - 1; k++, le = SRM_LLIST_NEXT(le)) {
+		int c = 0; /* Comma flag */
+		int j = 0; /* Counter */
+		struct function_stack_entry *i = SRM_LLIST_VALP(le);
+
+		snprintf (buffer, 1024, "%s:%d: %s", i->filename, i->lineno, i->function_name);
+		add_next_index_string(return_value, (char*) &buffer, 1);
 	}
-#endif
+}
+
+PHP_FUNCTION(xdebug_call_function)
+{
+	srm_llist_element           *le;
+	struct function_stack_entry *i;
+	
+	le = SRM_LLIST_TAIL(XG(stack));
+	if (le->prev) {
+		le = SRM_LLIST_PREV(le);
+		if (le->prev) {
+			le = SRM_LLIST_PREV(le);
+		}
+	}
+	i = SRM_LLIST_VALP(le);
+
+	RETURN_STRING(i->function_name, 1);
+}
+
+PHP_FUNCTION(xdebug_call_line)
+{
+	srm_llist_element           *le;
+	struct function_stack_entry *i;
+	
+	le = SRM_LLIST_TAIL(XG(stack));
+	if (le->prev) {
+		le = SRM_LLIST_PREV(le);
+		if (le->prev) {
+			le = SRM_LLIST_PREV(le);
+		}
+	}
+	i = SRM_LLIST_VALP(le);
+
+	RETURN_LONG(i->lineno);
+}
+
+PHP_FUNCTION(xdebug_call_file)
+{
+	srm_llist_element           *le;
+	struct function_stack_entry *i;
+	
+	le = SRM_LLIST_TAIL(XG(stack));
+	if (le->prev) {
+		le = SRM_LLIST_PREV(le);
+		if (le->prev) {
+			le = SRM_LLIST_PREV(le);
+		}
+	}
+	i = SRM_LLIST_VALP(le);
+
+	RETURN_STRING(i->filename, 1);
 }
 
 
@@ -618,7 +675,7 @@ ZEND_DLEXPORT void function_end (zend_op_array *op_array)
 
 ZEND_DLEXPORT void statement_call (zend_op_array *op_array)
 {
-	printf ("call statement, %s line %d\n", op_array->filename, op_array->opcodes[0].lineno);
+//	printf ("call statement, %s line %d\n", op_array->filename, op_array->opcodes[0].lineno);
 }
 
 

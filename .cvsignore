@@ -17,9 +17,13 @@ dynlib.m4
 install-sh
 ltmain.sh
 include
-Makefile.global
+Makefile.*
 missing
 mkinstalldirs
 modules
 scan_makefile_in.awk
-
+config.guess
+*swp
+config.log
+libtool
+config.status
