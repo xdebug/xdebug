@@ -4,3 +4,4 @@
 *.exp
 *.php
 *.swp
+phpt.*
