@@ -1,3 +1,7 @@
+Wed May 8 09:44:00 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Support static method calls (foo::bar()).
+
 Tue May 7 16:09:13 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Implement display of include/require
