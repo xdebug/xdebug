@@ -50,7 +50,7 @@
 #endif
 
 #define DEBUGCLIENT_VERSION "0.8.0"
-#define DEFAULT_PORT 17869
+#define DEFAULT_PORT        9000
 
 #ifdef HAVE_LIBEDIT
 
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 				printf("\nUsage:\n");
 				printf("\tdebugclient [-h] [-p port] [-v]\n");
 				printf("\t-h\tShow this help\n");
-				printf("\t-p\tSpecify the port to listen on (default = 17869)\n");
+				printf("\t-p\tSpecify the port to listen on (default = 9000)\n");
 				printf("\t-v\tShow version number and exit\n");
 				exit(0);
 				break;

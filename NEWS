@@ -1,12 +1,14 @@
 ???, Mar ??, 2004 - xdebug 2.0.0
-= Client: Added setting for port to listen on and implemented running the
-  previous command when pressing just enter.
-+ DBGp: Added new protocol for communicating with the debug engine.
 + Added FR #30: Dump current scope information in stack traces on error.
-+ Added ini setting "xdebug.dump_global" with which you can turn off dumping
-  of super globals even in you have that configured. This is most useful for
-  tests.
+  (Derick)
++ Added ini setting "xdebug.dump_global" with which you can turn off dumping of
+  super globals even in you have that configured. This is most useful for
+  tests. (Derick)
+= Changed default debugger port from 17869 to 9000. (Derick)
 = Fixed bug #36: GDB handler using print causes segfault with wrong syntax
++ Client: Added setting for port to listen on and implemented running the
+  previous command when pressing just enter. (Derick)
++ DBGp: Added new protocol for communicating with the debug engine. (Derick)
 
 
 Fri, Dec 26, 2003 - xdebug 1.3.0

@@ -10,5 +10,5 @@ The debugclient accepts three command line options:
 -v          shows the version number of the debug client.
 -p portno   sets the TCP port number on which the debug client should listen
 			for connections from the Xdebug server. The default port number is
-            17869.
+            9000.
 
