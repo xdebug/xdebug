@@ -1,3 +1,10 @@
+Mon Oct 28 00:34:11 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/tests/test1.phpt
+/xdebug/tests/test18.phpt
+/xdebug/tests/test2.phpt:
+- Implemented correct handling of include/require and eval.
+
 Sun Oct 27 17:19:22 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/assert_test.phpt:
 - Fix test case
