@@ -1225,7 +1225,11 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 					if (tmpOpCode->op1.op_type != IS_UNUSED) {
 						if (tmpOpCode->op1.op_type == IS_CONST) {
 							cf.type = XFUNC_STATIC_MEMBER;
+#if ZEND_EXTENSION_API_NO < 90000000
 							cf.class = xdstrdup(tmpOpCode->op1.u.constant.value.str.val);
+#else
+							cf.class = xdstrdup(tmpOpCode->op2.u.constant.value.str.val);
+#endif
 						} else {
 							cf.type = XFUNC_MEMBER;
 #if HAVE_EXECUTE_DATA_PTR && ZEND_EXTENSION_API_NO < 90000000
@@ -1262,7 +1266,7 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 	if (swap_function_class) {
 		char *t = cf.class;
 		cf.class = cf.function;
-		cf.function = cf.class;
+		cf.function = t;
 		cf.type = XFUNC_NEW;
 	}
 	return cf;
