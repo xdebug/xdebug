@@ -1,3 +1,29 @@
+Sun Oct 12 16:28:59 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_mm.h
+/xdebug/xdebug_str.c
+/xdebug/xdebug_str.h
+/xdebug/Makefile.in
+/xdebug/config.m4
+/xdebug/package.xml
+/xdebug/php_xdebug.h
+/xdebug/usefulstuff.c
+/xdebug/xdebug.c
+/xdebug/xdebug.dsp
+/xdebug/xdebug.mak
+/xdebug/xdebug_4_3.mak
+/xdebug/xdebug_code_coverage.h
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h:
+- Split xdebug_var.[ch] into xdebug_var.[ch] and xdebug_str.[ch]
+- Move the allocation defines into xdebug_mm.h
+- Lower case the XDEBUG_STR_* functions
+
 Sun Oct 12 16:12:12 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/.cvsignore:
 - Add autoconf 2.5x crap to .cvsignore
