@@ -99,7 +99,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		case XFUNC_INCLUDE_ONCE:
 		case XFUNC_REQUIRE:
 		case XFUNC_REQUIRE_ONCE:
-			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, get_zval_value(fse->vars[0].addr));
+			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, fse->include_filename);
 			xdfree(tmp_name);
 			tmp_name = tmp_fname;
 			default_lineno = 1;
