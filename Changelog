@@ -1,3 +1,7 @@
+Thu Sep 18 20:37:57 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Add configure.in to the package
+
 Thu Sep 18 16:31:59 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/README
 /xdebug/php_xdebug.h
