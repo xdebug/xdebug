@@ -1,3 +1,8 @@
+Fri Nov 7 16:23:07 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- Fix compile warnings
+
 Sun Nov 2 11:32:25 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c
 /xdebug/xdebug_str.h:
