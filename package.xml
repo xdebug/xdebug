@@ -1,5 +1,52 @@
-Sun Jun 16, 2002 - xdebug 0.9.0
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<package>
+  <name>xdebug</name>
+  <summary>Provides functions for function traces and profiling</summary>
+  <status>beta</status>
+  <maintainers>
+    <maintainer>
+      <user>derick</user>
+      <name>Derick Rethans</name>
+      <email>d.rethans@jdimedia.nl</email>
+      <role>lead</role>
+    </maintainer>
+  </maintainers>
+  <description>
+    An extension which gives you detailed errors with backtraces and provides
+    functions for function tracing, memory usage and profiling.
+  </description>
+  <license>PHP</license>
+  <release>
+    <state>beta</state>
+    <version>0.9.0</version>
+    <date>2002-06-16</date>
+    <notes>
+      First pickled version
+    </notes>
+    <filelist>
+      <file role="src"  name="php_xdebug.h"/>
+      <file role="src"  name="xdebug.c"/>
+      <file role="src"  name="xdebug_llist.c"/>
+      <file role="src"  name="xdebug_llist.h"/>
+      <file role="src"  name="xdebug_var.c"/>
+      <file role="src"  name="xdebug_var.h"/>
 
+      <file role="src"  name="Makefile.in"/>
+      <file role="src"  name="config.m4"/>
+      <file role="src"  name="xdebug.dsp"/>
+
+      <file role="doc"  name="CREDITS"/>
+      <file role="doc"  name="Changelog"/>
+      <file role="doc"  name="NEWS"/>
+      <file role="doc"  name="README"/>
+    </filelist>
+  </release>
+  <changelog>
+    <release>
+      <state>beta</state>
+      <version>0.9.0</version>
+      <date>2002-06-16</date>
+      <notes>
 = Fixed a memory leak in delayed included files. (Derick)
 - Added support for PHP 4.1.2. (Derick)
 = Rewrote xdebug_get_function_stack() and xdebug_get_function_trace() to return
@@ -12,10 +59,14 @@ Sun Jun 16, 2002 - xdebug 0.9.0
 = Fixed crash when using an user defined session handler. (Derick)
 + Implemented variable function names ($a = 'foo'; $f();) for use in
   traces. (Derick)
+      </notes>
+    </release>
 
-
-Sun May 26, 2002 - xdebug 0.8.0 - Yoda
-
+    <release>
+      <state>beta</state>
+      <version>0.8.0</version>
+      <date>2002-05-26</date>
+      <notes>
 + Implemented much better parameter tracing for user defined
   functions. (Derick)
 = Renamed xdebug_get_function_trace() to xdebug_dump_function_trace().
@@ -34,10 +85,14 @@ Sun May 26, 2002 - xdebug 0.8.0 - Yoda
   xdebug_start_trace() and xdebug_stop_trace(). You can view the trace by using
   the return array from xdebug_get_function_trace(). (Derick)
 = Fixed segfaults with xdebug_call_*(). (Derick)
+      </notes>
+    </release>
 
-
-Wed May 08, 2002 - xdebug 0.7.0 - Freedom
-
+    <release>
+      <state>beta</state>
+      <version>0.7.0</version>
+      <date>2002-05-08</date>
+      <notes>
 + Implemented handling of static method calls (foo::bar). (Derick)
 + Added correct handling of include(_once)/require(_once) and eval().
   (Derick)
@@ -48,9 +103,7 @@ Wed May 08, 2002 - xdebug 0.7.0 - Freedom
 = Fixed the extension to show all errors. (Derick)
 + Implemented xdebug_memory_usage() which returns the memory in use by PHPs
   engine. (Derick)
-
-
-Legenda:
-+ New additions
-- Removed functions
-= Bug fixes
+      </notes>
+    </release>
+  </changelog>
+</package>
