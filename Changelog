@@ -1,3 +1,7 @@
+Thu Dec 18 12:34:03 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- DBGp: added fileuri attribute to the init tag.
+
 Thu Dec 18 12:11:22 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_private.c
 /xdebug/xdebug_private.h
