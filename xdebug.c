@@ -27,6 +27,7 @@
 #define XDEBUG_VERSION "0.8.0-dev"
 
 #include "TSRM.h"
+#include "SAPI.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_smart_str.h"
@@ -262,8 +263,6 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 
 	if (html) {
 		php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
-	} else {
-		printf ("\nStack trace:\n");
 	}
 
 	error_format = html ?
@@ -274,6 +273,8 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 	if (html) {
 		php_printf ("<tr><th bgcolor='#aaaaaa' colspan='3'>Stacktrace</th></tr>\n");
 		php_printf ("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+	} else {
+		printf ("\nStack trace:\n");
 	}
 
 
@@ -427,6 +428,19 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	if (EG(error_reporting) & type) {
 		print_stack (PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+	}
+
+	/* Log to logger */
+	if (PG(log_errors) && !(strcmp ("cli", sapi_module.name) == 0)) {
+		char log_buffer[1024];
+
+#ifdef PHP_WIN32
+		if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
+			MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
+		}
+#endif
+		snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+		php_log_err(log_buffer TSRMLS_CC);
 	}
 
 	/* Bail out if we can't recover */
