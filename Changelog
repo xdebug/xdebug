@@ -1,3 +1,9 @@
+Sat May 11 11:59:12 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test2a.php
+/xdebug/tests/trace.php
+/xdebug/tests/test2.php:
+- Added new tests
+
 Fri May 10 21:11:54 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/.cvsignore:
 - Add config.cache to ignored files
