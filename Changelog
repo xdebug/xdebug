@@ -1,3 +1,7 @@
+Thu Nov 20 15:37:37 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Fixed bug #31: & entity replaced after others, wrong HTML output.
+
 Sun Nov 9 00:03:36 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/compile.bat:
 - MFB: Name .dlls more consistently
