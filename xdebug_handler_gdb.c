@@ -1000,14 +1000,16 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 
 	XG(active_symbol_table) = EG(active_symbol_table);
 	zvar = xdebug_get_php_symbol(args->args[0], strlen(args->args[0]) + 1);
-	var_data = return_printable_symbol(context, args->args[0], zvar);
-	XG(active_symbol_table) = NULL;
+	if (zvar) {
+		var_data = return_printable_symbol(context, args->args[0], zvar);
+		XG(active_symbol_table) = NULL;
 
-	if (var_data) {
-		SSEND(context->socket, xml ? "<xdebug><print>" : "");
-		SENDMSG(context->socket, var_data);
-		SSEND(context->socket, xml ? "</print></xdebug>\n" : "\n");
-		return NULL;
+		if (var_data) {
+			SSEND(context->socket, xml ? "<xdebug><print>" : "");
+			SENDMSG(context->socket, var_data);
+			SSEND(context->socket, xml ? "</print></xdebug>\n" : "\n");
+			return NULL;
+		}
 	}
 
 	return make_message(context, XDEBUG_E_SYMBOL_NOT_FOUND, "This symbol does not exist or is not yet initialized.");
@@ -1313,7 +1315,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.64 $";
+	return "$Revision: 1.65 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
