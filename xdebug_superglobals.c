@@ -182,3 +182,19 @@ void dump_tok(xdebug_llist *l, char *str)
 		tok = strtok(NULL, sep);
 	}
 }
+
+PHP_FUNCTION(xdebug_dump_superglobals)
+{
+	int is_cli = (strcmp("cli", sapi_module.name) == 0);
+	int html = PG(html_errors);
+
+	if (html) {
+		php_printf("<table border='1' cellspacing='0'>\n");
+	}
+
+	dump_superglobals(html , PG(log_errors) && !is_cli TSRMLS_CC);
+
+	if (html) {
+		php_printf("</table>\n");
+	}
+}
