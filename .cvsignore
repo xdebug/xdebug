@@ -14,6 +14,8 @@ config.nice
 config.sub
 configure
 configure.in
+conftest
+conftest.c
 core
 dynlib.m4
 install-sh
