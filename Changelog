@@ -1,3 +1,8 @@
+Sat Jun 28 16:51:40 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Added the xdebug_time_index() function.
+
 Sat Jun 28 14:53:20 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
