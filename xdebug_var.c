@@ -131,7 +131,10 @@ static int xdebug_array_element_export(zval **zv, int num_args, va_list args, ze
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		xdebug_str_add(str, xdebug_sprintf("%ld => ", hash_key->h), 1);
 	} else { /* string key */
-		xdebug_str_add(str, xdebug_sprintf("'%s' => ", hash_key->arKey), 1);
+		int newlen = 0;
+		char *tmp2 = php_str_to_str(hash_key->arKey, strlen(hash_key->arKey), "'", 1, "\\'", 2, &newlen);
+		xdebug_str_add(str, xdebug_sprintf("'%s' => ", tmp2), 1);
+		efree(tmp2);
 	}
 	xdebug_var_export(zv, str, level + 2, debug_zval TSRMLS_CC);
 	xdebug_str_addl(str, ", ", 2, 0);
@@ -724,6 +727,12 @@ char* xmlize(char *string, int len, int *newlen)
 		efree(tmp);
 
 		tmp = php_str_to_str(tmp2, len, "<", 1, "&lt;", 4, &len);
+		efree(tmp2);
+
+		tmp2 = php_str_to_str(tmp, len, "\"", 1, "&quot;", 6, &len);
+		efree(tmp);
+
+		tmp = php_str_to_str(tmp2, len, "'", 1, "&apos;", 6, &len);
 		efree(tmp2);
 
 		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, newlen);
