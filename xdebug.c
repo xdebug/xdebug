@@ -882,11 +882,11 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 					tmp->function_name = estrndup (cur_opcode->op1.u.constant.value.str.val, cur_opcode->op1.u.constant.value.str.len);
 					break;
 				case IS_VAR:
-					if (CG(class_entry).name) {
-						sprintf (buffer, "%s->%p", CG(class_entry).name, cur_opcode->op2.u.constant.value.str.val);
-					} else {
-						sprintf (buffer, "?->%s", cur_opcode->op1.u.constant.value.str.val);
-					}
+#ifdef HAVE_EXECUTE_DATA_PTR
+					sprintf (buffer, "%s->%p", CG(class_entry).name, cur_opcode->op2.u.constant.value.str.val);
+#else
+					sprintf (buffer, "?->%s", cur_opcode->op1.u.constant.value.str.val);
+#endif
 					tmp->function_name = estrdup (buffer);
 					break;
 				default:
@@ -945,42 +945,43 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 								);
 								break;
 							default:
-								sprintf(buffer, "%s-><???>",
+								sprintf(buffer, "%s->{unknown}",
 									tmpOpCode->op1.u.constant.value.str.val
 								);
 								break;
 						}
 					}
-					else if(CG(class_entry).name) {
+#ifdef HAVE_EXECUTE_DATA_PTR
+					else if (EG(execute_data_ptr)->object.ptr) { /* member of object */
 						switch(tmpOpCode->op2.op_type) {
 							case IS_CONST:
 								sprintf(buffer, "%s->%s",
-									CG(class_entry).name,
+									((EG(execute_data_ptr)->object.ptr)->value.obj.ce)->name,
 									tmpOpCode->op2.u.constant.value.str.val
 								);
 								break;
 							default:
-								sprintf(buffer, "%s-><???>",
-									CG(class_entry).name
+								sprintf(buffer, "%s->{unknown}",
+									((EG(execute_data_ptr)->object.ptr)->value.obj.ce)->name
 								);
 								break;
 						}
 					}
+#endif
 					else {
 						switch(tmpOpCode->op2.op_type) {
 							case IS_CONST:
-								sprintf(buffer, "<???>::%s",
+								sprintf(buffer, "{unknown}::%s",
 									tmpOpCode->op2.u.constant.value.str.val
 								);
 								break;
 							default:
-								sprintf(buffer, "<???>::<???>");
+								sprintf(buffer, "{unknown}::{unknown}");
 								break;
 						}
 					}
 					tmp->function_name = estrdup(buffer);
 				}
-
 			}
 			break;
 	}

@@ -1,5 +1,5 @@
 <?php
-	include ('tests/test_class.php');
+	include ('test_class.php');
 
 	function foo ($a)
 	{

@@ -23,6 +23,11 @@
 	$a = new aaa;
 	$a->a2();
 
-	xdebug_get_function_trace();
+	$b = new bbb;
+	$b->b2();
+	$a = new aaa;
+	$a->a2();
+
+	xdebug_dump_function_trace();
 ?>
 
