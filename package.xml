@@ -58,8 +58,6 @@
 
       <dir name="debugclient">
         <file role="src" name="main.c"/>
-        <file role="src" name="usefulstuff.c"/>
-        <file role="src" name="usefulstuff.h"/>
       </dir>
     </filelist>
   </release>
