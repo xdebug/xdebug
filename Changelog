@@ -1,3 +1,9 @@
+Sun Dec 28 17:35:24 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Added FR #5: xdebug_break() function which interupts the script for the debug
+  engine.
+
 Sun Dec 28 15:37:44 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
