@@ -522,12 +522,12 @@ char* xmlize(char *string)
 	char *tmp2;
 
 	if (strlen(string)) {
-		tmp = php_str_to_str(tmp2, len, "&", 1, "&amp;", 5, &len);
+		tmp = php_str_to_str(string, len, "&", 1, "&amp;", 5, &len);
 
 		tmp2 = php_str_to_str(tmp, len, ">", 1, "&gt;", 4, &len);
 		efree(tmp);
 
-		tmp = php_str_to_str(string, len, "<", 1, "&lt;", 4, &len);
+		tmp = php_str_to_str(tmp2, len, "<", 1, "&lt;", 4, &len);
 		efree(tmp2);
 
 		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
