@@ -1,3 +1,11 @@
+Wed May 29 16:33:18 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_var.c
+/xdebug/tests/test14.php:
+- Implement variable function names.
+- Fix a bug in circular references.
+
 Sun May 26 21:04:10 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.dsp:
 - Update DSP (thanks to Sander)
