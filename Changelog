@@ -1,7 +1,7 @@
 Fri Dec 19 05:12:59 CET 2003 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug.c
 /xdebug/tests/bug00032.phpt:
-- Fixed bug #0000032 (Unusual dynamic variables cause xdebug to crash).
+- Fixed bug #32 (Unusual dynamic variables cause xdebug to crash).
 
 Thu Dec 18 12:40:32 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
