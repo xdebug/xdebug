@@ -57,6 +57,7 @@ PHP_FUNCTION(xdebug_is_enabled);
 PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_function_trace);
+PHP_FUNCTION(xdebug_dump_function_trace);
 
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
@@ -82,6 +83,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           max_nesting_level;
 	zend_bool     default_enable;
 	zend_bool     do_trace;
+	FILE         *trace_file;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 	

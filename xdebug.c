@@ -67,6 +67,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_start_trace,        NULL)
 	PHP_FE(xdebug_stop_trace,         NULL)
 	PHP_FE(xdebug_get_function_trace, NULL)
+	PHP_FE(xdebug_dump_function_trace, NULL)
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,       NULL)
 #endif
@@ -192,6 +193,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(level)    = 0;
 	XG(do_trace) = 0;
 	XG(stack)    = xdebug_llist_alloc (stack_element_dtor);
+	XG(trace_file) = NULL;
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
@@ -209,6 +211,11 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	if (XG(do_trace)) {
 		xdebug_llist_destroy (XG(trace), NULL);
 		XG(trace) = NULL;
+	}
+
+	if (XG(trace_file)) {
+		fprintf (XG(trace_file), "End of function trace\n");
+		fclose (XG(trace_file));
 	}
 
 	XG(level)    = 0;
@@ -568,9 +575,23 @@ PHP_FUNCTION(xdebug_is_enabled)
 
 PHP_FUNCTION(xdebug_start_trace)
 {
+	char *fname = NULL;
+	int   fname_len = 0;
+	
 	if (XG(do_trace) == 0) {
+		if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC, "|s", &fname, &fname_len) == FAILURE) {
+			return;
+		}
+
 		XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
 		XG(do_trace) = 1;
+
+		if (fname) {
+			XG(trace_file) = fopen (fname, "a");
+			fprintf (XG(trace_file), "\nStart of function trace\n");
+		} else {
+			XG(trace_file) = NULL;
+		}	
 	} else {
 		php_error (E_NOTICE, "Function trace already started");
 	}
@@ -582,17 +603,43 @@ PHP_FUNCTION(xdebug_stop_trace)
 		XG(do_trace) = 0;
 		xdebug_llist_destroy (XG(trace), NULL);
 		XG(trace)    = NULL;
+		if (XG(trace_file)) {
+			fprintf (XG(trace_file), "End of function trace\n");
+			fclose (XG(trace_file));
+		}
 	} else {
 		php_error (E_NOTICE, "Function trace was not started");
 	}
 }
 
-PHP_FUNCTION(xdebug_get_function_trace)
+PHP_FUNCTION(xdebug_dump_function_trace)
 {
 	if (XG(do_trace)) {
 		print_trace (PG(html_errors) TSRMLS_CC);
 	} else {
 		php_error (E_NOTICE, "Function tracing was not started, use xdebug_start_trace() before calling this function");
+	}
+}
+
+PHP_FUNCTION(xdebug_get_function_trace)
+{
+	char buffer[1024];
+	xdebug_llist_element *le;
+	unsigned int          k;
+
+	if (!XG(do_trace)) {
+		php_error (E_NOTICE, "Function tracing was not started, use xdebug_start_trace() before calling this function");
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	le = SRM_LLIST_HEAD(XG(trace));
+	
+	for (k = 0; k < XG(trace)->size - 1; k++, le = SRM_LLIST_NEXT(le)) {
+		struct function_stack_entry *i = SRM_LLIST_VALP(le);
+
+		snprintf (buffer, 1024, "%s:%d: %s", i->filename, i->lineno, i->function_name);
+		add_next_index_string(return_value, (char*) &buffer, 1);
 	}
 }
 
@@ -944,6 +991,29 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	if (XG(do_trace)) {
 		tmp->refcount++;
 		xdebug_llist_insert_next (XG(trace), SRM_LLIST_TAIL(XG(trace)), tmp);
+
+		if (XG(trace_file)) {
+			int j = 0;
+			int c = 0;
+
+			for (j = 1; j < tmp->level; j++) {
+				fprintf (XG(trace_file), "  ");
+			}
+			fprintf (XG(trace_file), "-> %s(", tmp->function_name);
+
+#if DO_VARS
+			/* Printing vars */
+			for (j = 0; j < tmp->varc; j++) {
+				if (c) {
+					fprintf (XG(trace_file), ", ");
+				} else {
+					c = 1;
+				}
+				fprintf (XG(trace_file), "%s", tmp->vars[j]);
+			}
+#endif
+			fprintf (XG(trace_file), ") %s:%d\n", tmp->filename, tmp->lineno);
+		}
 	}
 
 	XG(level)++;
