@@ -1,3 +1,9 @@
+Wed Jun 23 15:27:57 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+docs/Makefile
+xdebug/docs/dbgp.txt
+xdebug/docs/gdb.txt:
+- Added Specs to CVS
+
 Thu Jun 17 17:45:04 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed invalid-free bug with XG(ide_key).
