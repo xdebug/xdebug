@@ -1,10 +1,12 @@
-Mon Nov 13, 2002 - xdebug 1.1.0
+Wed Nov 13, 2002 - xdebug 1.1.0
 
 + Implemented the "list" (source listing), "print" (printing variable
   contents), "show" (show all variables in the scope), "step" (step through
   execution), "pwd" (print working directory), "next" (step over) and "finish"
   (step out) commands for the remote debugger. (Derick)
 = Fixed lots of small bugs, under them memory leaks and crash bugs. (Derick)
+= Parameters to functions are no longer recorded by default; use the
+  xdebug.collect_params=1 setting in php.ini to turn it on again.
 
 
 Tue Oct 29, 2002 - xdebug 1.1.0pre2
