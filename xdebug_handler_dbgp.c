@@ -269,7 +269,7 @@ static char* return_source(char *filename, int begin, int end TSRMLS_DC)
 		i = 0;
 	}
 
-	filename = xdebug_path_from_url(filename);
+	filename = xdebug_path_from_url(filename TSRMLS_CC);
 	stream = php_stream_open_wrapper(filename, "rb",
 			USE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
@@ -328,7 +328,7 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename TSRMLS_CC), 0, 1);
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno TSRMLS_CC), 0, 1);
 	} else {
-		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(zend_get_executed_filename(TSRMLS_C)), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(zend_get_executed_filename(TSRMLS_C) TSRMLS_CC), 0, 1);
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
 	}
 
@@ -673,11 +673,11 @@ DBGP_FUNC(breakpoint_set)
 			if (!fse) {
 				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 			} else {
-				brk_info->file = xdebug_path_from_url(fse->filename);
+				brk_info->file = xdebug_path_from_url(fse->filename TSRMLS_CC);
 				brk_info->file_len = strlen(brk_info->file);
 			}
 		} else {
-			brk_info->file = xdebug_path_from_url(CMD_OPTION('f'));
+			brk_info->file = xdebug_path_from_url(CMD_OPTION('f') TSRMLS_CC);
 			brk_info->file_len = strlen(brk_info->file);
 		}
 
@@ -924,8 +924,8 @@ DBGP_FUNC(detach)
 
 DBGP_FUNC(source)
 {
-	char *source, *encoded_source;
-	int   new_len, begin = 0, end = 999999;
+	char *source;
+	int   begin = 0, end = 999999;
 	char *filename;
 	function_stack_entry *fse;
 
@@ -1591,7 +1591,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.57 $";
+	return "$Revision: 1.58 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
