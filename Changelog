@@ -1,3 +1,7 @@
+Fri Nov 29 16:49:21 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fix table termination
+
 Fri Nov 29 16:36:55 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
