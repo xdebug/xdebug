@@ -466,6 +466,10 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, int level TSRMLS_DC)
 {
 	HashTable *myht;
+#ifdef ZEND_ENGINE_2
+	char *class_name;
+	zend_uint class_name_len;
+#endif
 
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
@@ -507,13 +511,21 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			xdebug_xml_add_attribute(node, "type", "object");
-			xdebug_xml_add_attribute(node, "children", myht->nNumOfElements > 0?"1":"0");
+			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
+#ifdef ZEND_ENGINE_2
+			Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
+			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
+			efree(class_name);
+#else
 			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(Z_OBJCE_PP(struc)->name), 0, 1);
-			if (myht->nApplyCount < 1) {
-				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml_node, 3, level, node, name);
-			} else {
-				xdebug_xml_add_attribute(node, "recursive", "1");
+#endif
+			if (myht) {
+				if (myht->nApplyCount < 1) {
+					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
+					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml_node, 3, level, node, name);
+				} else {
+					xdebug_xml_add_attribute(node, "recursive", "1");
+				}
 			}
 			break;
 
