@@ -580,6 +580,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 
 	if (XG(ide_key)) {
 		xdfree(XG(ide_key));
+		XG(ide_key) = NULL;
 	}
 
 	XG(level)            = 0;
@@ -1289,10 +1290,16 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 			}
 
 			if (XG(show_local_vars) && XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
+				int scope_nr = XG(stack)->size;
+				
 				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+				if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
+					i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
+					scope_nr--;
+				}
 				if (i->used_vars && i->used_vars->size) {
 					if (html) {
-						php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope</th></tr>\n");
+						php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope (#%d)</th></tr>\n", scope_nr);
 						php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
 					} else {
 						php_printf("\n\nVariables in local scope:\n");
@@ -1862,6 +1869,7 @@ void xdebug_stop_trace(TSRMLS_D)
 	}
 	if (XG(tracefile_name)) {
 		efree(XG(tracefile_name));
+		XG(tracefile_name) = NULL;
 	}
 }
 
