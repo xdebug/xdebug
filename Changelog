@@ -1,3 +1,7 @@
+Tue Jul 13 13:13:20 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed one more Windows warning.
+
 Tue Jul 13 12:02:39 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #74: Segfault with autoload.
