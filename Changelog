@@ -1,3 +1,9 @@
+Wed Oct 29 10:52:08 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/usefulstuff.h
+/xdebug/debugclient/usefulstuff.c:
+- Added function argument to specify the delimeter and a output argument
+  for the returned length of the buffer to make it binary safe.
+
 Thu Oct 16 12:46:03 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - MFH: We also need to support the long form "continue" here.
