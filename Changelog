@@ -1,3 +1,8 @@
+Thu May 15 12:11:04 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/Makefile.am
+/xdebug/debugclient/main.c:
+- Fix compilation on MacOSX
+
 Wed May 14 22:28:14 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Fix up todo list
