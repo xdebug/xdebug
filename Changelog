@@ -1,3 +1,7 @@
+Thu Sep 25 14:53:19 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_profiler.c:
+- Fixed bug #18: Mistyped sizeof()'s for array indexes in profiler output.
+
 Mon Sep 22 12:02:59 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/README
 /xdebug/LICENSE:
