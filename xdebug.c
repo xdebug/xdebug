@@ -1374,7 +1374,9 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 	} else if (whence == 1) { /* end */
 		xdebug_str_add(&str, "1\t", 0);
 		xdebug_str_add(&str, xdebug_sprintf("%f\t", xdebug_get_utime() - XG(start_time)), 1);
+#if MEMORY_LIMIT
 		xdebug_str_add(&str, xdebug_sprintf("%lu\n", AG(allocated_memory)), 1);
+#endif
 	}
 
 	return str.d;
@@ -1387,7 +1389,7 @@ static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSR
 		case 0:
 			return return_trace_stack_frame_begin_normal(i TSRMLS_CC);
 		case 1:
-			return return_trace_stack_frame_begin_computerized(i, fnr TSRMLS_CC);
+			return return_trace_stack_frame_begin_computerized(i, fnr);
 		default:
 			return xdstrdup("");
 	}
