@@ -275,8 +275,8 @@ static void show_available_commands(xdebug_con *h, int flag)
 	show_available_commands_in_group(h, flag, XDEBUG_BREAKPOINT, commands_breakpoint);
 	show_available_commands_in_group(h, flag, XDEBUG_RUN,        commands_run);
 	show_available_commands_in_group(h, flag, XDEBUG_RUNTIME,    commands_runtime);
-#if 0
 	show_available_commands_in_group(h, flag, XDEBUG_DATA,       commands_data);
+#if 0
 	show_available_commands_in_group(h, flag, XDEBUG_STATUS,     commands_status);
 #endif
 }
@@ -767,10 +767,12 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 	xdebug_hash                 *ht;
 	TSRMLS_FETCH();
 
-	i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-	ht = i->used_vars;
+	if (XDEBUG_LLIST_TAIL(XG(stack))) {
+		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+		ht = i->used_vars;
 
-	xdebug_hash_apply(ht, (void *) context, dump_used_var);
+		xdebug_hash_apply(ht, (void *) context, dump_used_var);
+	}
 	
 	return NULL;
 }
