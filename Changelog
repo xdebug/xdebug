@@ -1,3 +1,7 @@
+Thu Mar 10 22:35:53 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed bug #117: var_dump dows not work with "private".
+
 Thu Mar 10 09:25:43 CET 2005 Derick Rethans <derick@derickrethans.nl>
 debugclient/debugclient.dsp:
 - Fixed lineendings
