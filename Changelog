@@ -1,3 +1,7 @@
+Mon Sep 2 12:53:31 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h:
+- Fix estrdup/free issue
+
 Mon Sep 2 12:20:40 CEST 2002 Jani Taskinen <sniper@iki.fi>
 /xdebug/.cvsignore:
 Some missing entries.. :)
