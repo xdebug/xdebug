@@ -1219,7 +1219,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_brk_dtor);
 	do {
-		SSEND(context->socket, "?init\n");
+		SENDMSG(context->socket, xdebug_sprintf("?init %s\n", context->program_name));
 		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
