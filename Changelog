@@ -1,3 +1,7 @@
+Thu May 2 11:58:04 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Made errors show up always
+
 Thu May 2 10:59:41 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
