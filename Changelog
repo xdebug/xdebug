@@ -1,3 +1,7 @@
+Sun Sep 7 15:10:45 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Plug a memory leak
+
 Sun Sep 7 14:48:44 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/xdebug_handler_gdb.c:
