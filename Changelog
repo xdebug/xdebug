@@ -1,3 +1,9 @@
+Sat Sep 27 22:55:03 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test4.phpt
+/xdebug/tests/test5.phpt
+/xdebug/tests/test6.phpt:
+- Fix tests for PHP 5, where the error format changed.
+
 Sat Sep 27 20:01:13 CEST 2003 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug_profiler.c:
 - Add some missing comments, more to follow.
