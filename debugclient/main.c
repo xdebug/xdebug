@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-//#include "config.h"
-
 #include <stdio.h>
 #include <sys/types.h>
 #ifndef WIN32
