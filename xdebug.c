@@ -220,7 +220,7 @@ PHP_INI_BEGIN()
 #else
 	STD_PHP_INI_ENTRY("xdebug.auto_profile_mode", "0",                  PHP_INI_ALL,    OnUpdateLong,   auto_profile_mode, zend_xdebug_globals, xdebug_globals)
 #endif
-	STD_PHP_INI_ENTRY("xdebug.output_dir",        "/tmp",               PHP_INI_SYSTEM, OnUpdateString, output_dir,        zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.output_dir",        "/tmp",PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, output_dir,        zend_xdebug_globals, xdebug_globals)
 
 	/* Dump superglobals settings */
 	PHP_INI_ENTRY("xdebug.dump.COOKIE",           NULL,                 PHP_INI_ALL,    OnUpdateCookie)
