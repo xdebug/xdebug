@@ -971,19 +971,25 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 	xdebug_gdb_options          *options = (xdebug_gdb_options*) context->options;
 	TSRMLS_FETCH();
 
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SSEND(context->socket, "<xdebug><show>");
-	}
 	
 	if (XDEBUG_LLIST_TAIL(XG(stack))) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 		ht = i->used_vars;
 
-		xdebug_hash_apply(ht, (void *) context, dump_used_var);
-	}
+		/* Only show vars when they are scanned */
+		if (ht) {
+			if (options->response_format == XDEBUG_RESPONSE_XML) {
+				SSEND(context->socket, "<xdebug><show>");
+			}
 
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SSEND(context->socket, "</show></xdebug>\n");
+			xdebug_hash_apply(ht, (void *) context, dump_used_var);
+
+			if (options->response_format == XDEBUG_RESPONSE_XML) {
+				SSEND(context->socket, "</show></xdebug>\n");
+			}
+		} else {
+			return make_message(context, XDEBUG_E_NOT_USER_DEFINED, "You can not show variables in functions not defined in your script.");
+		}
 	}
 	
 	return NULL;

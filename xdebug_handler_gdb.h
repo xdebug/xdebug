@@ -70,6 +70,7 @@ typedef struct xdebug_cmd {
 #define XDEBUG_E_NO_INFO                 XDEBUG_E |    6
 #define XDEBUG_E_UNDEFINED_COMMAND       XDEBUG_E |    7
 #define XDEBUG_E_SYMBOL_NOT_FOUND        XDEBUG_E |    8
+#define XDEBUG_E_NOT_USER_DEFINED        XDEBUG_E |    9
 
 #define XDEBUG_RESPONSE_NORMAL   0
 #define XDEBUG_RESPONSE_XML      1
