@@ -1,3 +1,9 @@
+Fri Aug 30 11:09:46 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/package.xml
+/xdebug/xdebug.c:
+- Administrativia
+
 Fri Aug 30 11:08:16 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Use old code for PHP versions < 4.3.0
