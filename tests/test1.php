@@ -1,6 +1,5 @@
 <?php
-	include ('test_class.php');
-
+	xdebug_start_trace();
 	function foo ($a)
 	{
 		$c = new een();
@@ -9,6 +8,8 @@
 		return $b;
 	}
 
-	echo foo (5);
+	include ('test_class.php');
 
+	echo foo (5);
+	xdebug_dump_function_trace();
 ?>

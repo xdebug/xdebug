@@ -11,5 +11,5 @@ function blaat($a) {
 }
 
 blaat("insert blah '".DBHelper::quote("test's")."' blah");
-xdebug_get_function_trace();
+xdebug_dump_function_trace();
 ?>

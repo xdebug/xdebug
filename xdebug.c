@@ -125,9 +125,10 @@ static double get_utime()
 
 		if (msec >= 1.0) msec -= (long) msec;
 		return msec + sec;
-	} else
+	} else {
 #endif
 		return 0;
+	}
 }
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg)
@@ -184,7 +185,9 @@ void stack_element_dtor (void *dummy, void *elem)
 		}
 
 		for (i = 0; i < e->varc; i++) {
-			efree ((e->vars[i]).name);
+			if ((e->vars[i]).name) {
+				efree ((e->vars[i]).name);
+			}
 			efree ((e->vars[i]).value);
 		}
 
@@ -297,7 +300,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 	xdebug_func f;
 
 	f = entry->function;
-	
+
 	switch (f.type) {
 		case XFUNC_NORMAL: {
 			zend_function *zfunc;
@@ -313,6 +316,18 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			}
 			break;
 		}
+
+		case XFUNC_NEW:
+			if (!f.class) {
+				f.class = "?";
+			}
+			if (!f.function) {
+				f.function = "?";
+			}
+			tmp = emalloc (strlen (f.class) + 4 + 1);
+			sprintf (tmp, "new %s", f.class);
+			return tmp;
+			break;
 
 		case XFUNC_STATIC_MEMBER:
 			if (!f.class) {
@@ -337,6 +352,29 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			sprintf (tmp, "%s->%s", f.class, f.function);
 			return tmp;
 			break;
+
+		case XFUNC_EVAL:
+			return estrdup ("eval");
+			break;
+
+		case XFUNC_INCLUDE:
+			return estrdup ("include");
+			break;
+
+		case XFUNC_INCLUDE_ONCE:
+			return estrdup ("include_once");
+			break;
+
+		case XFUNC_REQUIRE:
+			return estrdup ("require");
+			break;
+
+		case XFUNC_REQUIRE_ONCE:
+			return estrdup ("require_once");
+			break;
+
+		default:
+			assert(0);
 	}
 }
 
@@ -389,6 +427,8 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
+				char *tmp_varname;
+
 				if (c) {
 					if (html) {
 						php_printf (", ");
@@ -401,19 +441,21 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				} else {
 					c = 1;
 				}
+				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : estrdup("");
 				if (html) {
-					php_printf ("$%s = %s", i->vars[j].name,
+					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL));
 				} else {
-					printf ("$%s = %s", i->vars[j].name, i->vars[j].value);
+					printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
 				if (PG(log_errors) && !is_cli) {
 					snprintf(
 						log_buffer + strlen(log_buffer),
 						1024 - strlen(log_buffer),
-						"$%s = %s", i->vars[j].name, i->vars[j].value
+						"%s%s", tmp_varname, i->vars[j].value
 					);
 				}
+				efree(tmp_varname);
 			}
 
 			if (html) {
@@ -467,7 +509,7 @@ static inline void print_trace (int html TSRMLS_DC)
 			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 			char *tmp_name;
 
-			if (strcmp (i->function.function, "xdebug_dump_function_trace") == 0) {
+			if (i->function.function && strcmp (i->function.function, "xdebug_dump_function_trace") == 0) {
 				return;
 			}
 
@@ -503,6 +545,8 @@ static inline void print_trace (int html TSRMLS_DC)
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
+				char *tmp_varname;
+
 				if (c) {
 					if (html) {
 						php_printf (", ");
@@ -512,12 +556,15 @@ static inline void print_trace (int html TSRMLS_DC)
 				} else {
 					c = 1;
 				}
+
+				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : estrdup("");
 				if (html) {
-					php_printf ("$%s = %s", i->vars[j].name,
+					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL));
 				} else {
-					printf ("$%s = %s", i->vars[j].name, i->vars[j].value);
+					printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
+				efree (tmp_varname);
 			}
 
 			if (html) {
@@ -669,9 +716,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 PHP_FUNCTION(xdebug_call_function)
 {
-	xdebug_llist_element           *le;
+	xdebug_llist_element        *le;
 	struct function_stack_entry *i;
-	
+
 	le = XDEBUG_LLIST_TAIL(XG(stack));
 	if (le) {
 		if (le->prev) {
@@ -690,9 +737,9 @@ PHP_FUNCTION(xdebug_call_function)
 
 PHP_FUNCTION(xdebug_call_line)
 {
-	xdebug_llist_element           *le;
+	xdebug_llist_element        *le;
 	struct function_stack_entry *i;
-	
+
 	le = XDEBUG_LLIST_TAIL(XG(stack));
 	if (le) {
 		if (le->prev) {
@@ -708,9 +755,9 @@ PHP_FUNCTION(xdebug_call_line)
 
 PHP_FUNCTION(xdebug_call_file)
 {
-	xdebug_llist_element           *le;
+	xdebug_llist_element        *le;
 	struct function_stack_entry *i;
-	
+
 	le = XDEBUG_LLIST_TAIL(XG(stack));
 	if (le) {
 		if (le->prev) {
@@ -850,6 +897,181 @@ PHP_FUNCTION(xdebug_memory_usage)
 
 /*************************************************************************************************************************************/
 
+static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
+{
+	switch (node->op_type) {
+		case IS_CONST:
+			return &node->u.constant;
+			break;
+
+		case IS_TMP_VAR:
+			*is_var = 1;
+			return &Ts[node->u.var].tmp_var;
+			break;
+
+		case IS_VAR:
+			*is_var = 1;
+			if (Ts[node->u.var].var.ptr) {
+				return Ts[node->u.var].var.ptr;
+			} else {
+				fprintf(stderr, "\nIS_VAR\n");
+			}
+			break;
+
+		case IS_UNUSED:
+			fprintf(stderr, "\nIS_UNUSED\n");
+			break;
+
+		default:
+			fprintf(stderr, "\ndefault %d\n", node->op_type);
+			break;
+	}
+
+	*is_var = 1;
+
+	return NULL;
+}
+
+xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *varc, xdebug_var *var0)
+{
+	zend_op *cur_opcode = my_opcode;
+	zend_op *end_opcode;
+	zval *var;
+	int  func_nest = 0;
+	int  go_back   = 0;
+	char fncname[ 512 ];
+	xdebug_func cf;
+	int is_var = 0;
+	zend_op* tmpOpCode;
+	zend_op* initOpCode = 0;
+	char evalinfo[ 512 ];
+	int done = 0;
+
+	bzero(&cf, sizeof(xdebug_func));
+
+	end_opcode = op_array->opcodes + op_array->last;
+
+	while (cur_opcode < end_opcode) {
+		switch (cur_opcode->opcode) {
+			case ZEND_NEW:
+				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
+				assert(var);
+				cf.class = estrdup(var->value.str.val);
+				break;
+
+			case ZEND_INIT_FCALL_BY_NAME:
+				if (!initOpCode) { 
+					initOpCode = cur_opcode;
+				}
+				break;
+
+			case ZEND_EXT_FCALL_BEGIN:
+				func_nest++;
+				break;
+
+			case ZEND_EXT_FCALL_END:
+				func_nest--;
+				break;
+
+			case ZEND_DO_FCALL:
+				if (func_nest == 1) {
+					var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
+					assert(var);
+					cf.type = XFUNC_NORMAL;
+					cf.function = estrdup(var->value.str.val);
+					done = 1;
+				}
+				break;
+
+			case ZEND_INCLUDE_OR_EVAL:
+				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
+				assert(var);
+				if (cur_opcode->op2.u.constant.value.lval == ZEND_EVAL) {
+					cf.type = XFUNC_EVAL;
+				} else {
+					switch (cur_opcode->op2.u.constant.value.lval) {
+						case ZEND_INCLUDE_ONCE: cf.type = XFUNC_INCLUDE_ONCE; break;
+						case ZEND_REQUIRE_ONCE: cf.type = XFUNC_REQUIRE_ONCE; break;
+						case ZEND_INCLUDE:      cf.type = XFUNC_INCLUDE; break;
+						case ZEND_REQUIRE:      cf.type = XFUNC_REQUIRE; break;
+					}
+				}
+				(*varc)++;
+				(*var0).name = NULL;
+				(*var0).value = xdebug_sprintf ("'%s'", var->value.str.val);
+				done = 1;
+				break;
+
+			case ZEND_DO_FCALL_BY_NAME:
+				if (func_nest == 1) {
+					if (!initOpCode) {
+						tmpOpCode = my_opcode - 1;
+					} else {
+						tmpOpCode = initOpCode;
+					}
+
+					assert(tmpOpCode->opcode == ZEND_INIT_FCALL_BY_NAME);
+
+					/*
+						tmpOpCode = initOpCode;
+						printf("using 0x%08x %s\n", initOpCode, getOpcodeName(initOpCode->opcode));
+					} else {
+						tmpOpCode = cur_opcode;
+						while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME || go_back != 0) {
+							tmpOpCode--;
+							if (tmpOpCode->opcode == ZEND_INIT_FCALL_BY_NAME && go_back > 0) {
+								go_back--;
+							}
+						}
+						printf("found 0x%08x %s\n", tmpOpCode, getOpcodeName(tmpOpCode->opcode));
+					}
+					*/
+
+					if (tmpOpCode->extended_value & ZEND_CTOR_CALL) {
+						cf.type = XFUNC_NEW;
+					} else {
+						cf.type = XFUNC_NORMAL; /* may be overwritten later */
+					}
+#if 0
+					if (EG(execute_data_ptr)->fbc) {
+						is_var = 1; /* can we do this smarter - see below? */
+						cf.fname = EG(execute_data_ptr)->fbc->common.function_name;
+					} else 
+#endif
+					{
+						var = get_zval(&(tmpOpCode->op2), EG(execute_data_ptr)->Ts, &is_var);
+						assert(var);
+						cf.function = estrdup(var->value.str.val);
+					}
+
+					if (tmpOpCode->op1.op_type != IS_UNUSED) {
+						if (tmpOpCode->op1.op_type == IS_CONST) {
+							cf.type = XFUNC_STATIC_MEMBER;
+							cf.class = estrdup(tmpOpCode->op1.u.constant.value.str.val);
+						} else {
+							if (EG(execute_data_ptr)->object.ptr) {
+								cf.type = XFUNC_MEMBER;
+								cf.class = estrdup(EG(execute_data_ptr)->object.ptr->value.obj.ce->name);
+							} else {
+								assert(cf.class);
+							}
+						}
+					} 
+					done = 1;
+				}
+				break;
+		}
+
+		if (done) {
+			break;
+		} else {
+			cur_opcode++;
+		}
+	}
+	return cf;
+}
+
+
 ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 {
 	struct function_stack_entry* tmp;
@@ -873,194 +1095,11 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	tmp->function.type     = XFUNC_UNKNOWN;
 
 	cur_opcode = *EG(opline_ptr);
-	end_opcode = op_array->opcodes + op_array->last + 1;
 
-	while (cur_opcode < end_opcode) {
-		int opcode = cur_opcode->opcode;
-
-		if ((opcode == ZEND_DO_FCALL         ||
-		     opcode == ZEND_DO_FCALL_BY_NAME ||
-		     opcode == ZEND_INCLUDE_OR_EVAL  ||
-		     opcode == ZEND_EXT_FCALL_END) && func_nest == 1)
-		{
-			break;
-		}
-		if (opcode == ZEND_EXT_FCALL_BEGIN) {
-			func_nest++;
-			go_back++;
-		}
-		if (opcode == ZEND_EXT_FCALL_END) {
-			func_nest--;
-		}
-
-		cur_opcode++;
-	}
-
-	switch (cur_opcode->opcode) {
-		case ZEND_INCLUDE_OR_EVAL: {
-			zval *inc_filename;
-			/* Determine type */
-			switch (cur_opcode->op2.u.constant.value.lval) {
-				case ZEND_INCLUDE_ONCE:
-					XFUNC_SET(tmp, XFUNC_NORMAL, "", "include_once");
-					break;
-				case ZEND_REQUIRE_ONCE:
-					XFUNC_SET(tmp, XFUNC_NORMAL, "", "require_once");
-					break;
-				case ZEND_INCLUDE:
-					XFUNC_SET(tmp, XFUNC_NORMAL, "", "include");
-					break;
-				case ZEND_REQUIRE:
-					XFUNC_SET(tmp, XFUNC_NORMAL, "", "require");
-					break;
-				case ZEND_EVAL:
-					XFUNC_SET(tmp, XFUNC_NORMAL, "", "eval");
-					break;
-			}
-			if (cur_opcode->op1.op_type == IS_CONST) {
-				tmp->vars[tmp->varc].name = estrdup ("");
-				tmp->vars[tmp->varc].value = estrdup (cur_opcode->op1.u.constant.value.str.val);
-				tmp->varc++;
-				tmp->delayed_include = 0;
-			} else {
-				tmp->delayed_include = 1;
-			}
-			break;
-		}
-
-		case ZEND_DO_FCALL: {
-			zend_function *zfunc;
-
-			switch (cur_opcode->op1.op_type) {
-				case IS_CONST:
-					XFUNC_SET(tmp, XFUNC_NORMAL, "", cur_opcode->op1.u.constant.value.str.val);
-					break;
-				default:
-					XFUNC_SET_DELAYED_C(tmp, XFUNC_MEMBER, cur_opcode->op1.u.constant.value.str.val);
-					break;
-			}
-#if 0
-			/* Find out if it's an internal function or not */
-			if (zend_hash_find(EG(function_table), tmpc, strlen(tmpc)+1, (void**) &zfunc) == SUCCESS) {
-				if (zfunc->type == ZEND_INTERNAL_FUNCTION) {
-					/* Oooooh, fancy. Attempt to rewrite the op_array now :) */
-					zend_op *end_op, *ptr_op;
-					zend_op *new_op;
-
-					/* Set begin and end op */
-					ptr_op = (*EG(opline_ptr)) + 1;
-					end_op = cur_opcode - 1;
-
-					/* Loop from begin to end, and move opline one back */
-					while (ptr_op <= end_op) {
-						*(ptr_op - 1) = *ptr_op;
-						ptr_op++;
-					}
-
-					/* Insert noop at the end */
-					new_op = emalloc (sizeof (zend_op));
-					new_op->opcode = ZEND_EXT_STMT;
-					new_op->lineno = cur_opcode->lineno;
-					SET_UNUSED(new_op->op1);
-					SET_UNUSED(new_op->op2);
-					*(ptr_op - 1) = *new_op;
-
-					/* Move current opline pointer one back */
-					(*EG(opline_ptr))--;
-					(EG(execute_data_ptr)->opline)--;
-				}
-			}
-#endif
-			break;
-		}
-		case ZEND_DO_FCALL_BY_NAME: {
-			zend_op* tmpOpCode;
-
-			tmpOpCode = cur_opcode;
-			while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME || go_back != 0) {
-				tmpOpCode--;
-				if (tmpOpCode->opcode == ZEND_INIT_FCALL_BY_NAME && go_back > 0) {
-					go_back--;
-				}
-			}
-			switch (tmpOpCode->op1.op_type)  {
-				case IS_UNUSED:
-					switch (tmpOpCode->op2.op_type) {
-						case IS_CONST:
-							sprintf(buffer, "%s",
-								tmpOpCode->op2.u.constant.value.str.val
-							);
-							XFUNC_SET(tmp, XFUNC_NORMAL, "", buffer);
-							break;
-						default:
-#if HAVE_EXECUTE_DATA_PTR
-							XFUNC_SET_DELAYED_F(tmp, XFUNC_NORMAL, "");
-#else
-							XFUNC_SET(tmp, XFUNC_NORMAL, "", "{unknown}");
-#endif
-							break;
-
-					}
-					break;
-				case IS_CONST:
-					switch (tmpOpCode->op2.op_type) {
-						case IS_CONST:
-							XFUNC_SET(
-								tmp, XFUNC_STATIC_MEMBER,
-								tmpOpCode->op1.u.constant.value.str.val,
-								tmpOpCode->op2.u.constant.value.str.val
-							);
-							break;
-						default:  /* FIXME need better IS_VAR handling */
-							XFUNC_SET_DELAYED_F(
-								tmp, XFUNC_STATIC_MEMBER,
-								tmpOpCode->op1.u.constant.value.str.val
-							);
-							break;
-
-					}
-					break;
-				case IS_VAR:
-					if (tmpOpCode->op1.op_type == IS_CONST)   {
-						switch(tmpOpCode->op2.op_type) {
-							case IS_CONST:
-								XFUNC_SET(
-									tmp, XFUNC_MEMBER,
-									tmpOpCode->op1.u.constant.value.str.val,
-									tmpOpCode->op2.u.constant.value.str.val
-								);
-								break;
-							default:
-								XFUNC_SET_DELAYED_F(
-									tmp, XFUNC_MEMBER,
-									tmpOpCode->op1.u.constant.value.str.val
-								);
-								break;
-						}
-					}
-					else {
-						switch (tmpOpCode->op2.op_type) {
-							case IS_CONST:
-								XFUNC_SET_DELAYED_C(
-									tmp, XFUNC_MEMBER,
-									tmpOpCode->op2.u.constant.value.str.val
-								);
-								break;
-							default:
-								XFUNC_SET_DELAYED_F(
-									tmp, XFUNC_MEMBER,
-									"{unknown}"
-								);
-								break;
-						}
-					}
-				}
-			}
-			break;
-	}
+	tmp->function  = find_func_name(op_array, cur_opcode, &(tmp->varc), &(tmp->vars[0]));
 	tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
 	tmp->lineno    = cur_opcode->lineno;
-
+	
 	xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 	if (XG(do_trace)) {
 		/* Set timestamp and memory footprint */
@@ -1180,7 +1219,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	"eXtended Debugger (xdebug)",
 	XDEBUG_VERSION,
 	"Derick Rethans",
-	"http://www.jdimedia.nl/derick/xdebug.php",
+	"http://xdebug.derickrethans.nl/",
 	"Copyright (c) 2002 JDI Media Solutions",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
@@ -1195,6 +1234,5 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	NULL,           /* op_array_dtor_func_t */
 	STANDARD_ZEND_EXTENSION_PROPERTIES
 };
-
 
 #endif

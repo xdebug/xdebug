@@ -2,7 +2,7 @@
 	class een {
 		function hang ()
 		{
-			not_existent();
+//			not_existent();
 		}
 
 		function foo2 ()

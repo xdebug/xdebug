@@ -16,6 +16,6 @@ class DB
 $db = new DB;
 
 $db->query("insert blah '".DBHelper::quote("test's").DBHelper::quote("test's")."' blah");
-//$db->query("insert blah ' blah");
+$db->query("insert blah ' blah");
 xdebug_dump_function_trace();
 ?>

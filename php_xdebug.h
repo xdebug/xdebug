@@ -70,6 +70,12 @@ typedef struct xdebug_var {
 #define XFUNC_NORMAL         1
 #define XFUNC_STATIC_MEMBER  2
 #define XFUNC_MEMBER         3
+#define XFUNC_NEW            4
+#define XFUNC_EVAL           5
+#define XFUNC_INCLUDE        6
+#define XFUNC_INCLUDE_ONCE   7
+#define XFUNC_REQUIRE        8
+#define XFUNC_REQUIRE_ONCE   9
 
 #define XFUNC_SET(e,t,c,f)          (e)->function.type = t; (e)->function.class = estrdup (c); (e)->function.function = estrdup (f);
 #define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = estrdup (c); (e)->delayed_fname = 1;
