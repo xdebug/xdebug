@@ -1,5 +1,37 @@
-???, Sep ??, 2003 - xdebug 1.3.0
+???, Mar ??, 2004 - xdebug 2.0.0
+= Client: Added setting for port to listen on and implemented running the
+  previous command when pressing just enter.
++ DBGp: Added new protocol for communicating with the debug engine.
++ Added FR #30: Dump current scope information in stack traces on error.
++ Added ini setting "xdebug.dump_global" with which you can turn off dumping
+  of super globals even in you have that configured. This is most useful for
+  tests.
+= Fixed bug #36: GDB handler using print causes segfault with wrong syntax
 
+
+Fri, Dec 26, 2003 - xdebug 1.3.0
+
++ GDB: Added file/line to signals. (Derick)
+= Fixed logging to adhere to the error_reporting setting. (Derick)
+= Fixed bug #32: Unusual dynamic variables cause xdebug to crash. (Ilia)
+= Fixed bug #31: & entity replaced after others, wrong HTML output. (Derick)
+= Fixed bug #22: Segmentation fault with xdebug_get_function_stack() and
+  collect_params=1. (Derick)
+
+
+Tue, Nov 08, 2003 - xdebug 1.3.0rc2
+
++ Added version info to handlers which show in phpinfo() output. (Derick)
+= GDB: Fixed bug with continuing after breakpoint where only 'cont' worked.
+  (Derick)
+= GDB: Fixed bug in deleting absolute breakpoints on Windows. (Derick)
+= Fixed bug #27: Repeated connect attempts when no debugger is listening.
+  (Derick)
+= Fixed bug #19: The value of xdebug.output_dir in a .htaccess never takes
+  effect. (Derick)
+= Fixed bug #18: Mistyped sizeof()'s for array indexes in profiler output.
+  (Derick)
+= Fixed handling stack traces for when display_errors was set to Off. (Derick)
 = Fixed segfault where a function name didn't exist in case of a
  "call_user_function". (Derick)
 = Fixed reading a filename in case of an callback to a PHP function from an
