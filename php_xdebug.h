@@ -76,6 +76,9 @@ PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_function_trace);
 PHP_FUNCTION(xdebug_dump_function_trace);
+PHP_FUNCTION(xdebug_start_profiling);
+PHP_FUNCTION(xdebug_stop_profiling);
+PHP_FUNCTION(xdebug_dump_function_profile);
 
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
@@ -99,6 +102,8 @@ typedef struct xdebug_var {
 
 #define XDEBUG_IS_FUNCTION(f) (f == XFUNC_NORMAL || f == XFUNC_STATIC_MEMBER || f == XFUNC_MEMBER)
 
+#define XDEBUG_REGISTER_LONG_CONSTANT(__c) REGISTER_LONG_CONSTANT(#__c, __c, CONST_CS|CONST_PERSISTENT)
+
 #define XDEBUG_NONE      0
 #define XDEBUG_JIT       1
 #define XDEBUG_REQ       2
@@ -108,6 +113,14 @@ typedef struct xdebug_var {
 
 #define XDEBUG_INTERNAL     1
 #define XDEBUG_EXTERNAL     2
+
+#define XDEBUG_PROFILER_LBL    0   /* line by line */
+#define XDEBUG_PROFILER_CPU    1   /* sorted by execution time */
+#define XDEBUG_PROFILER_NC     2   /* number of function calls */
+#define XDEBUG_PROFILER_FS_AV  3   /* sorted by avg. exection time */
+#define XDEBUG_PROFILER_FS_SUM 4   /* sorted by total time taken by each function */
+#define XDEBUG_PROFILER_FS_NC  5   /* sorted by total number of function calls */
+#define XDEBUG_PROFILER_TREE   6   /* hierarchical view of the functions */
 
 typedef struct xdebug_func {
 	char *class;
@@ -132,6 +145,10 @@ typedef struct function_stack_entry {
 
 	xdebug_hash *used_vars;
 
+	/* used for profiling */
+	double       time_taken;	
+	unsigned int f_calls;
+
 	int   level;
 	int   refcount;
 } function_stack_entry;
@@ -147,6 +164,13 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     do_trace;
 	char         *manual_url;
 	FILE         *trace_file;
+
+	/* used for profiling */
+	double 	      total_execution_time;
+	double 	      total_compiling_time;
+	zend_bool     do_profile;
+	zend_bool     profiler_trace;
+	FILE         *profile_file;
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */

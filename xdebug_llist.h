@@ -1,4 +1,4 @@
-/* $Id: xdebug_llist.h,v 1.2 2002-05-25 14:00:42 derick Exp $ */
+/* $Id: xdebug_llist.h,v 1.3 2002-11-27 22:39:22 ilia Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -67,5 +67,6 @@ void xdebug_llist_destroy(xdebug_llist *l, void *user);
 #define XDEBUG_LLIST_VALP(__e) ((__e)->ptr)
 #define XDEBUG_LLIST_IS_TAIL(__e) ((__e)->next ? 0 : 1)
 #define XDEBUG_LLIST_IS_HEAD(__e) ((__e)->prev ? 0 : 1)
+#define XDEBUG_LLIST_COUNT(__l) ((__l)->size)
 
 #endif /* __XDEBUG_LLIST_H__ */
