@@ -1244,7 +1244,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.15 $";
+	return "$Revision: 1.16 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
@@ -1275,13 +1275,11 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	xdebug_xml_add_text(child, xdstrdup(XDEBUG_COPYRIGHT));
 	xdebug_xml_add_child(response, child);
 
-	child = xdebug_xml_node_init("fileuri");
 	if (strcmp(context->program_name, "-") == 0) {
-		xdebug_xml_add_text(child, xdstrdup("dbgp://stdin"));
+		xdebug_xml_add_attribute_ex(response, "fileuri", xdstrdup("dbgp://stdin"), 0, 1);
 	} else {
-		xdebug_xml_add_text(child, xdebug_sprintf("file://%s", context->program_name));
+		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_sprintf("file://%s", context->program_name), 0, 1);
 	}
-	xdebug_xml_add_child(response, child);
 
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
