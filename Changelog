@@ -1,3 +1,7 @@
+Thu Oct 24 23:40:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/Makefile.frag:
+- Copy only on "make install"
+
 Thu Oct 24 23:40:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Remove unused function
