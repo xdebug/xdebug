@@ -1,3 +1,8 @@
+- Implemented function traces, which you can start and stop with
+  xdebug_start_trace() and xdebug_stop_trace(). You can view the trace by using
+  the return array from xdebu_get_function_trace(). (Derick)
+- Fixed segfaults with xdebug_call_*(). (Derick)
+
 Wed May 11, 2002 - xdebug 0.7.0
 
 + Implemented handling of static method calls (foo::bar). (Derick)
