@@ -96,6 +96,6 @@ int main(int argc, char *argv[])
 		printf ("Disconnect\n\n");
 		close(fd);
 		/* Sleep some time to reset the TCP/IP connection */
-		sleep(3);
+		sleep(1);
 	}
 }
