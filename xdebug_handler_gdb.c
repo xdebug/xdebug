@@ -1039,7 +1039,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,step,next,finish", (char**) &error);
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,continue,step,next,finish", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);
