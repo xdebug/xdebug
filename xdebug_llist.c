@@ -1,4 +1,4 @@
-/* $Id: xdebug_llist.c,v 1.1 2002-05-09 12:12:44 derick Exp $ */
+/* $Id: xdebug_llist.c,v 1.2 2002-05-25 14:00:42 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -42,7 +42,7 @@ int xdebug_llist_insert_next(xdebug_llist *l, xdebug_llist_element *e, const voi
 	xdebug_llist_element  *ne;
 
 	if (!e) {
-		e = SRM_LLIST_TAIL(l);
+		e = XDEBUG_LLIST_TAIL(l);
 	}
 
 	ne = (xdebug_llist_element *) malloc(sizeof(xdebug_llist_element));
@@ -73,7 +73,7 @@ int xdebug_llist_insert_prev(xdebug_llist *l, xdebug_llist_element *e, const voi
 	xdebug_llist_element *ne;
 
 	if (!e) {
-		e = SRM_LLIST_HEAD(l);
+		e = XDEBUG_LLIST_HEAD(l);
 	}
 
 	ne = (xdebug_llist_element *) malloc(sizeof(xdebug_llist_element));
@@ -141,15 +141,15 @@ xdebug_llist_element *xdebug_llist_jump(xdebug_llist *l, int where, int pos)
     int i;
 
     if (where == LIST_HEAD) {
-        e = SRM_LLIST_HEAD(l);
+        e = XDEBUG_LLIST_HEAD(l);
         for (i = 0; i < pos; ++i) {
-            e = SRM_LLIST_NEXT(e);
+            e = XDEBUG_LLIST_NEXT(e);
         }
     }
     else if (where == LIST_TAIL) {
-        e = SRM_LLIST_TAIL(l);
+        e = XDEBUG_LLIST_TAIL(l);
         for (i = 0; i < pos; ++i) {
-            e = SRM_LLIST_PREV(e);
+            e = XDEBUG_LLIST_PREV(e);
         }
     }
 
@@ -164,7 +164,7 @@ size_t xdebug_llist_count(xdebug_llist *l)
 void xdebug_llist_destroy(xdebug_llist *l, void *user)
 {
 	while (xdebug_llist_count(l) > 0) {
-		xdebug_llist_remove(l, SRM_LLIST_TAIL(l), user);
+		xdebug_llist_remove(l, XDEBUG_LLIST_TAIL(l), user);
 	}
 
 	free (l);

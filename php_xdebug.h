@@ -36,8 +36,6 @@ extern zend_module_entry xdebug_module_entry;
 #include "TSRM.h"
 #endif
 
-#define DO_VARS 1
-
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
@@ -63,14 +61,20 @@ PHP_FUNCTION(xdebug_dump_function_trace);
 PHP_FUNCTION(xdebug_memory_usage);
 #endif
 
+typedef struct xdebug_var {
+	char *name;
+	char *value;
+} xdebug_var;
+
 typedef struct function_stack_entry {
 	char *function_name;
 	char *filename;
 	int   lineno;
-#if DO_VARS
+
+	int   arg_done;
 	int   varc;
-	char *vars[20];
-#endif
+	xdebug_var vars[20];
+
 	int   level;
 	int   refcount;
 } function_stack_entry;

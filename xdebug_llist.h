@@ -1,4 +1,4 @@
-/* $Id: xdebug_llist.h,v 1.1 2002-05-09 12:12:44 derick Exp $ */
+/* $Id: xdebug_llist.h,v 1.2 2002-05-25 14:00:42 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,8 +20,8 @@
  * Daniel R. Kalowsky <dank@deadmime.org>
  */
 
-#ifndef __SRM_LLIST_H__
-#define __SRM_LLIST_H__
+#ifndef __XDEBUG_LLIST_H__
+#define __XDEBUG_LLIST_H__
 
 #include <stddef.h>
 
@@ -60,12 +60,12 @@ void xdebug_llist_destroy(xdebug_llist *l, void *user);
 #define LIST_TAIL 1
 #endif
 
-#define SRM_LLIST_HEAD(__l) ((__l)->head)
-#define SRM_LLIST_TAIL(__l) ((__l)->tail)
-#define SRM_LLIST_NEXT(__e) ((__e)->next)
-#define SRM_LLIST_PREV(__e) ((__e)->prev)
-#define SRM_LLIST_VALP(__e) ((__e)->ptr)
-#define SRM_LLIST_IS_TAIL(__e) ((__e)->next ? 0 : 1)
-#define SRM_LLIST_IS_HEAD(__e) ((__e)->prev ? 0 : 1)
+#define XDEBUG_LLIST_HEAD(__l) ((__l)->head)
+#define XDEBUG_LLIST_TAIL(__l) ((__l)->tail)
+#define XDEBUG_LLIST_NEXT(__e) ((__e)->next)
+#define XDEBUG_LLIST_PREV(__e) ((__e)->prev)
+#define XDEBUG_LLIST_VALP(__e) ((__e)->ptr)
+#define XDEBUG_LLIST_IS_TAIL(__e) ((__e)->next ? 0 : 1)
+#define XDEBUG_LLIST_IS_HEAD(__e) ((__e)->prev ? 0 : 1)
 
-#endif /* __SRM_LLIST_H__ */
+#endif /* __XDEBUG_LLIST_H__ */
