@@ -1,3 +1,8 @@
+Sat May 11 21:33:42 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Make extended_info always work. (Thanks to Edin Kadribasic and Harald Radi
+  for assisting me tracking this down).
+
 Sat May 11 21:24:55 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Renaming internals to make sure no symbol clashes occur
