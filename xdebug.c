@@ -554,7 +554,7 @@ PHP_FUNCTION(xdebug_stop_trace)
 		xdebug_llist_destroy (XG(trace), NULL);
 		XG(trace)    = NULL;
 	} else {
-		php_error (E_NOTICE, "Function trace was not started started");
+		php_error (E_NOTICE, "Function trace was not started");
 	}
 }
 
