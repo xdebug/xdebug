@@ -1,3 +1,9 @@
+Sat Jun 28 14:53:20 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Fixed time indices in xdebug_get_function_trace
+- Comments and WS
+
 Sat Jun 28 13:16:52 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
