@@ -1,3 +1,7 @@
+Mon Apr 14 15:44:25 CEST 2003 Ilia Alshanetsky <ilia@prohost.org>
+/xdebug/xdebug_profiler.c:
+- Only stop tracing if it was started by the profiler.
+
 Sat Apr 12 19:00:46 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Really remove unused include
