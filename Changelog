@@ -1,3 +1,7 @@
+Tue Nov 12 09:58:59 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Fix bug in linux' debugclient
+
 Mon Nov 11 16:41:19 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/.cvsignore:
 - Update cvsignore file
