@@ -1,3 +1,11 @@
+Mon Jan 27 22:17:09 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h:
+- Add XML responses which can be enabled by executing "option response_format
+  1" before the script is run with "run".
+
 Fri Jan 24 14:58:54 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_handler_gdb.c
