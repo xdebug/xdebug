@@ -1330,7 +1330,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.61 $";
+	return "$Revision: 1.62 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
@@ -1410,7 +1410,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *f
 	) ? XDEBUG_BREAKPOINT | XDEBUG_RUNTIME : 0;
 
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(context->socket, xdebug_sprintf("<xdebug><signal><code>%d</code><type>%s</type><message>%s</message><stack><file>%s</file><line>%lu</line>", type, errortype, message, file, lineno));
+		SENDMSG(context->socket, xdebug_sprintf("<xdebug><signal><code>%d</code><type>%s</type><message>%s</message><file>%s</file><line>%lu</line><stack>", type, errortype, message, file, lineno));
 		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format, XDEBUG_FRAME_NORMAL);
 		SENDMSG(context->socket, xdebug_sprintf("</stack></signal></xdebug>\n"));
 	} else {
