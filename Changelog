@@ -1,3 +1,7 @@
+Fri Dec 26 15:02:20 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- Return correct data in 'stack_get'.
+
 Wed Dec 24 20:13:36 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - Added 'classname' attribute to returning properties of type bject.
