@@ -1,3 +1,7 @@
+Tue Jan 13 13:23:09 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_var.c:
+- Fixed crash bug in getting symbols.
+
 Tue Jan 13 10:36:09 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
