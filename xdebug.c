@@ -1160,6 +1160,7 @@ PHP_FUNCTION(xdebug_get_function_trace)
 	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
+	double                start_time = 0;
 
 	if (!XG(do_trace)) {
 		php_error (E_NOTICE, "Function tracing was not started, use xdebug_start_trace() before calling this function");
@@ -1218,7 +1219,18 @@ PHP_FUNCTION(xdebug_get_function_trace)
 		if (i->filename) {
 			add_assoc_string_ex(frame, "file", sizeof("file"), i->filename, 1);
 		}
-		add_assoc_long_ex  (frame, "line", sizeof("line"), i->lineno);
+		add_assoc_long_ex(frame, "line", sizeof("line"), i->lineno);
+
+		if (start_time) {
+			add_assoc_long_ex(frame, "time_index", sizeof("time_index"), i->time - start_time);
+		} else {
+			start_time = i->time;
+			add_assoc_long_ex(frame, "time_index", sizeof("time_index"), 0);
+		}
+
+#if MEMORY_LIMIT
+		add_assoc_long_ex(frame, "memory_usage", sizeof("memory_usage"), i->memory);
+#endif
 
 		/* Add parameters */
 		MAKE_STD_ZVAL(params);
