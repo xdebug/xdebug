@@ -128,6 +128,17 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #define XG(v) (xdebug_globals.v)
 #endif
 
+/* Memory allocators */
+#if 0
+#define xdmalloc    emalloc
+#define xdcalloc    ecalloc	
+#define xdrealloc   erealloc
+#else  
+#define xdmalloc    malloc
+#define xdcalloc    calloc	
+#define xdrealloc   realloc
+#endif
+	
 #endif
 
 

@@ -20,6 +20,7 @@
 #include "ext/standard/php_string.h"
 #include "zend.h"
 #include "zend_extensions.h"
+#include "php_xdebug.h"
 #include "xdebug_var.h"
 
 #define XDEBUG_STR_PREALLOC 4096
@@ -27,7 +28,7 @@
 void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int free) { 
 	int l = strlen(str);                
 	if (xs->l + l > xs->a) {            
-		xs->d = erealloc (xs->d, xs->a + l + XDEBUG_STR_PREALLOC); 
+		xs->d = xdrealloc (xs->d, xs->a + l + XDEBUG_STR_PREALLOC); 
 		xs->a = xs->a + l + XDEBUG_STR_PREALLOC; 
 	}                                   
 	if (!xs->l) {                       
@@ -42,7 +43,7 @@ void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int free) {
 
 void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int free) { 
 	if (xs->l + le > xs->a) {                
-		xs->d = erealloc (xs->d, xs->a + le + XDEBUG_STR_PREALLOC); 
+		xs->d = xdrealloc (xs->d, xs->a + le + XDEBUG_STR_PREALLOC); 
 		xs->a = xs->a + le + XDEBUG_STR_PREALLOC;
 	}                                        
 	if (!xs->l) {                            
@@ -71,7 +72,7 @@ char *xdebug_sprintf (const char* fmt, ...)
 	int     size = 1;
 	va_list args;
 
-	new_str = (char *) emalloc (size);
+	new_str = (char *) xdmalloc (size);
 
 	va_start(args, fmt);
 	for (;;) {
@@ -84,7 +85,7 @@ char *xdebug_sprintf (const char* fmt, ...)
 		} else {
 			size = n + 1;
 		}
-		new_str = (char *) erealloc (new_str, size);
+		new_str = (char *) xdrealloc (new_str, size);
 	}
 	va_end (args);
 

@@ -264,7 +264,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	struct function_stack_entry* tmp;
 
 	if (op_array->function_name == NULL) {
-		tmp = emalloc (sizeof (struct function_stack_entry));
+		tmp = xdmalloc (sizeof (struct function_stack_entry));
 		tmp->varc     = 0;
 		tmp->refcount = 1;
 		tmp->level    = ++XG(level);
@@ -360,7 +360,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = emalloc (strlen (f.class) + 4 + 1);
+			tmp = xdmalloc (strlen (f.class) + 4 + 1);
 			sprintf (tmp, "new %s", f.class);
 			return tmp;
 			break;
@@ -372,7 +372,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = emalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
+			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
 			sprintf (tmp, "%s::%s", f.class, f.function);
 			return tmp;
 			break;
@@ -384,7 +384,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = emalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
+			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
 			sprintf (tmp, "%s->%s", f.class, f.function);
 			return tmp;
 			break;
@@ -1169,7 +1169,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	int  go_back   = 0;
 	TSRMLS_FETCH();
 
-	tmp = emalloc (sizeof (struct function_stack_entry));
+	tmp = xdmalloc (sizeof (struct function_stack_entry));
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
 	tmp->level         = XG(level) + 1;
