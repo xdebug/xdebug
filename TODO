@@ -10,6 +10,12 @@ For 1.3.0:
   * Finish custom error handler support
   * Add support for the class and method qualifiers such as static, public,
     private etc.
+- Checks
+  * If the manual works with both www.php.net and php.net
+- Make host/port configurable from .htaccess
 
 For 1.4.0:
 - Evaluation ("eval") per stack frame (active_symbol_table per frame).
+- Add callback for after every PHP statement (per EXT_STMT).
+- Integrate VLD
+- Added code-coverage per opcode so that ALL code can be checked for coverage
