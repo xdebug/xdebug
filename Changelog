@@ -1,3 +1,8 @@
+Wed Mar 17 19:21:15 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_gdb.c:
+- Fixed ZTS issues.
+
 Tue Mar 16 23:25:54 CET 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
