@@ -69,11 +69,6 @@ char *xdebug_dbgp_status_strings[6] =
 char *xdebug_dbgp_reason_strings[4] =
 	{"ok", "error", "aborted", "exception"};
 
-
-/* Breakpoint ID to string lookup table */
-char *xdebug_breakpoint_type[7] = 
-	{"", "line", "call", "return", "exception", "conditional", "watch"};
-
 #define XDEBUG_STR_SWITCH_DECL       char *__switch_variable
 #define XDEBUG_STR_SWITCH(s)         __switch_variable = (s);
 #define XDEBUG_STR_CASE(s)           if (strcmp(__switch_variable, s) == 0) {
@@ -550,7 +545,7 @@ static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 
 		breakpoint_brk_info_add(*retval, brk_info);
 		/* Now we add some common attributes */
-		xdebug_xml_add_attribute_ex(*retval, "id", xdstrdup(CMD_OPTION('d')), 0, 1);
+		xdebug_xml_add_attribute(*retval, "id", CMD_OPTION('d'));
 
 		if (action == BREAKPOINT_ACTION_REMOVE) {
 			/* Now we remove the crap */
@@ -621,7 +616,6 @@ DBGP_FUNC(breakpoint_set)
 	}
 	if (CMD_OPTION('s')) {
 		BREAKPOINT_CHANGE_STATE();
-		xdebug_xml_add_attribute_ex(*retval, "state", xdstrdup(CMD_OPTION('s')), 0, 1);
 	}
 	if (CMD_OPTION('o') && CMD_OPTION('h')) {
 		BREAKPOINT_CHANGE_OPERATOR();
@@ -1252,7 +1246,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.18 $";
+	return "$Revision: 1.19 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
