@@ -143,10 +143,6 @@ SOURCE=.\xdebug_superglobals.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\xdebug_profiler.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\xdebug_var.c
 # End Source File
 # End Group
@@ -196,10 +192,6 @@ SOURCE=.\xdebug_llist.h
 # Begin Source File
 
 SOURCE=.\xdebug_mm.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\xdebug_profiler.h
 # End Source File
 # Begin Source File
 
