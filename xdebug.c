@@ -51,6 +51,7 @@
 #include "zend_execute.h"
 #include "zend_compile.h"
 #include "zend_extensions.h"
+#include "zend_exceptions.h"
 
 #include "php_xdebug.h"
 #include "xdebug_private.h"
@@ -77,6 +78,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+
+void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
 static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC);
@@ -456,6 +459,10 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
+
+#ifdef ZEND_ENGINE_2
+		zend_throw_exception_hook = xdebug_throw_exception_hook;
+#endif
 	}
 	XG(remote_enabled) = 0;
 	XG(profiler_enabled) = 0;
@@ -1276,6 +1283,37 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 	return str.d;
 }
 
+#ifdef ZEND_ENGINE_2
+void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
+{
+	/* Start JIT if requested and not yet enabled */
+	if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
+		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		if (XG(context).socket >= 0) {
+			XG(remote_enabled) = 1;
+			XG(context).program_name = NULL;
+
+			/* Get handler from mode */
+			XG(context).handler = xdebug_handler_get(XG(remote_handler));
+			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT, NULL);
+		}
+	}
+	if (XG(remote_enabled)) {
+		zval *message, *file, *line;
+		zend_class_entry *default_ce = zend_exception_get_default();
+		zend_class_entry *exception_ce = zend_get_class_entry(exception TSRMLS_CC);
+
+		message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
+		file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
+		line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
+		
+		if (!XG(context).handler->remote_error(&(XG(context)), 0, exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), XG(stack))) {
+			XG(remote_enabled) = 0;
+		}
+	}
+}
+#endif
+
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	char *buffer, *error_type_str;
@@ -1323,7 +1361,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			}
 		}
 		if (XG(remote_enabled)) {
-			if (!XG(context).handler->remote_error(&(XG(context)), type, buffer, error_filename, error_lineno, XG(stack))) {
+			if (!XG(context).handler->remote_error(&(XG(context)), type, NULL, buffer, error_filename, error_lineno, XG(stack))) {
 				XG(remote_enabled) = 0;
 			}
 		}

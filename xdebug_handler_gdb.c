@@ -1321,7 +1321,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.73 $";
+	return "$Revision: 1.74 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode, char *magic_cookie)
@@ -1382,7 +1382,7 @@ int xdebug_gdb_deinit(xdebug_con *context)
 	return 1;
 }
 
-int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *file, const uint lineno, xdebug_llist *stack)
+int xdebug_gdb_error(xdebug_con *context, int type, char *exception_type, char *message, const char *file, const uint lineno, xdebug_llist *stack)
 {
 	char               *errortype;
 	int                 ret;
@@ -1391,7 +1391,11 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *f
 	int                 runtime_allowed;
 	xdebug_gdb_options *options = (xdebug_gdb_options*) context->options;
 
-	errortype = error_type(type);
+	if (exception_type) {
+		errortype = exception_type;
+	} else {
+		errortype = error_type(type);
+	}
 
 	runtime_allowed = (
 		(type != E_ERROR) && 
@@ -1409,7 +1413,10 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *f
 		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format, XDEBUG_FRAME_NORMAL);
 	}
 
-	xdfree(errortype);
+	if (!exception_type) {
+		xdfree(errortype);
+	}
+
 	do {
 		SSEND(context->socket, "?cmd\n");
 		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);

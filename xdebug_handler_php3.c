@@ -74,7 +74,7 @@ static char *get_current_time(void)
 
 char *xdebug_php3_get_revision(void)
 {
-	return "$Revision: 1.17 $";
+	return "$Revision: 1.18 $";
 }
 
 int xdebug_php3_init(xdebug_con *context, int mode, char *magic_cookie)
@@ -95,7 +95,7 @@ int xdebug_php3_deinit(xdebug_con *context)
 	xdfree(message_buffer);     \
 }
 
-int xdebug_php3_error(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_php3_error(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char *time_buffer;
 	char *hostname;
@@ -110,7 +110,11 @@ int xdebug_php3_error(xdebug_con *h, int type, char *message, const char *locati
 		hostname = estrdup("{unknown}");
 	}
 	prefix     = xdebug_sprintf("%s %s(%lu) ", time_buffer, hostname, getpid());
-	errortype = error_type(type);
+	if (exception_type) {
+		errortype = exception_type;
+	} else {
+		errortype = error_type(type);
+	}
 
 	/* start */
 	SENDMSG(h->socket, xdebug_sprintf("%sstart: %s\n", prefix, errortype));
@@ -138,7 +142,9 @@ int xdebug_php3_error(xdebug_con *h, int type, char *message, const char *locati
 	/* stop */
 	SENDMSG(h->socket, xdebug_sprintf("%sstop: %s\n", prefix, errortype));
 
-	xdfree(errortype);
+	if (!exception_type) {
+		xdfree(errortype);
+	}
 	xdfree(prefix);
 	xdfree(hostname);
 

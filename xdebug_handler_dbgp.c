@@ -1328,7 +1328,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.37 $";
+	return "$Revision: 1.38 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1463,13 +1463,17 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	return 1;
 }
 
-int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char               *errortype;
 	xdebug_xml_node     *response;
 	TSRMLS_FETCH();
 
-	errortype = error_type(type);
+	if (exception_type) {
+		errortype = exception_type;
+	} else {
+		errortype = error_type(type);
+	}
 /*
 	runtime_allowed = (
 		(type != E_ERROR) && 
@@ -1483,7 +1487,9 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 	xdebug_xml_add_text(response, xdstrdup(message));
 	send_message(context, response);
 	xdebug_xml_node_dtor(response);
-	xdfree(errortype);
+	if (!exception_type) {
+		xdfree(errortype);
+	}
 
 	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
