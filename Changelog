@@ -1,3 +1,7 @@
+Wed Oct 30 22:19:19 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Lessen time-out
+
 Wed Oct 30 20:00:14 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Make it compile on Windows again.
