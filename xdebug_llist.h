@@ -1,4 +1,4 @@
-/* $Id: srm_llist.h,v 1.1.1.1 2002-04-24 14:26:19 derick Exp $ */
+/* $Id: xdebug_llist.h,v 1.1 2002-05-09 12:12:44 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -25,32 +25,32 @@
 
 #include <stddef.h>
 
-typedef void (*srm_llist_dtor)(void *, void *);
+typedef void (*xdebug_llist_dtor)(void *, void *);
 
-typedef struct _srm_llist_element {
+typedef struct _xdebug_llist_element {
 	void *ptr;
 
-	struct _srm_llist_element *prev;
-	struct _srm_llist_element *next;
-} srm_llist_element;
+	struct _xdebug_llist_element *prev;
+	struct _xdebug_llist_element *next;
+} xdebug_llist_element;
 
-typedef struct _srm_llist {
-	srm_llist_element *head;
-	srm_llist_element *tail;
+typedef struct _xdebug_llist {
+	xdebug_llist_element *head;
+	xdebug_llist_element *tail;
 
-	srm_llist_dtor dtor;
+	xdebug_llist_dtor dtor;
 
 	size_t size;
-} srm_llist;
+} xdebug_llist;
 
-srm_llist *srm_llist_alloc(srm_llist_dtor dtor);
-int srm_llist_insert_next(srm_llist *l, srm_llist_element *e, const void *p);
-int srm_llist_insert_prev(srm_llist *l, srm_llist_element *e, const void *p);
-int srm_llist_remove(srm_llist *l, srm_llist_element *e, void *user);
-int srm_llist_remove_next(srm_llist *l, srm_llist_element *e, void *user);
-srm_llist_element *srm_llist_jump(srm_llist *l, int where, int pos);
-size_t srm_llist_count(srm_llist *l);
-void srm_llist_destroy(srm_llist *l, void *user);
+xdebug_llist *xdebug_llist_alloc(xdebug_llist_dtor dtor);
+int xdebug_llist_insert_next(xdebug_llist *l, xdebug_llist_element *e, const void *p);
+int xdebug_llist_insert_prev(xdebug_llist *l, xdebug_llist_element *e, const void *p);
+int xdebug_llist_remove(xdebug_llist *l, xdebug_llist_element *e, void *user);
+int xdebug_llist_remove_next(xdebug_llist *l, xdebug_llist_element *e, void *user);
+xdebug_llist_element *xdebug_llist_jump(xdebug_llist *l, int where, int pos);
+size_t xdebug_llist_count(xdebug_llist *l);
+void xdebug_llist_destroy(xdebug_llist *l, void *user);
 
 #if !defined(LIST_HEAD)
 #define LIST_HEAD 0

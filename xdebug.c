@@ -36,7 +36,7 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 
-#include "srm_llist.h"
+#include "xdebug_llist.h"
 
 static int le_xdebug;
 
@@ -59,6 +59,10 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_enable,             NULL)
 	PHP_FE(xdebug_disable,            NULL)
 	PHP_FE(xdebug_is_enabled,         NULL)
+
+	PHP_FE(xdebug_start_trace,        NULL)
+	PHP_FE(xdebug_stop_trace,         NULL)
+	PHP_FE(xdebug_get_function_trace, NULL)
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,       NULL)
 #endif
@@ -120,8 +124,9 @@ char *safe_sprintf (const char* fmt, ...)
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg)
 {
-	xg->stack = NULL;
-	xg->level = 0;
+	xg->stack    = NULL;
+	xg->level    = 0;
+	xg->do_trace = 0;
 }
 
 PHP_MINIT_FUNCTION(xdebug)
@@ -157,24 +162,30 @@ void stack_element_dtor (void *dummy, void *elem)
 	int                   i;
 	function_stack_entry *e = elem;
 
-	if (e->function_name) {
-		efree (e->function_name);
+	e->refcount--;
+
+	if (e->refcount == 0) {
+		if (e->function_name) {
+			efree (e->function_name);
+		}
+		if (e->filename) {
+			efree (e->filename);
+		}
+		for (i = 0; i < e->varc; i++) {
+			efree (e->vars[i]);
+		}
+		efree (e);
 	}
-	if (e->filename) {
-		efree (e->filename);
-	}
-	for (i = 0; i < e->varc; i++) {
-		efree (e->vars[i]);
-	}
-	efree (e);
 }
 
 
 
 PHP_RINIT_FUNCTION(xdebug)
 {
-	XG(level)  = 0;
-	XG(stack)  = srm_llist_alloc (stack_element_dtor);
+	XG(level)    = 0;
+	XG(do_trace) = 0;
+	XG(stack)    = xdebug_llist_alloc (stack_element_dtor);
+	XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
@@ -186,9 +197,12 @@ PHP_RINIT_FUNCTION(xdebug)
 
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
-	srm_llist_destroy (XG(stack), NULL);
-	XG(stack)   = NULL;
-	XG(level) = 0;
+	xdebug_llist_destroy (XG(stack), NULL);
+	xdebug_llist_destroy (XG(trace), NULL);
+	XG(stack)    = NULL;
+	XG(trace)    = NULL;
+	XG(level)    = 0;
+	XG(do_trace) = 0;
 	return SUCCESS;
 }
 
@@ -206,17 +220,145 @@ PHP_MINFO_FUNCTION(xdebug)
 
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
-
 	old_execute (op_array TSRMLS_CC);
+}
+
+static inline print_stack (int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
+{
+	char *error_format;
+	xdebug_llist_element *le;
+
+	if (html) {
+		php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
+	} else {
+		printf ("\nStack trace:\n");
+	}
+
+	error_format = html ?
+		"<tr><td bgcolor='#ffbbbb' colspan=\"3\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b><br />\n"
+		: "\n%s: %s in %s on line %d\n";
+	php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
+
+	if (html) {
+		php_printf ("<tr><th bgcolor='#aaaaaa' colspan='3'>Stacktrace</th></tr>\n");
+		php_printf ("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+	}
+
+
+	for (le = SRM_LLIST_HEAD(XG(stack)); le != NULL; le = SRM_LLIST_NEXT(le))
+	{
+		int c = 0; /* Comma flag */
+		int j = 0; /* Counter */
+		struct function_stack_entry *i = SRM_LLIST_VALP(le);
+
+		if (html) {
+			php_printf ("<tr><td align='center'>%d</td><td>%s(", i->level, i->function_name);
+		} else {
+			printf ("%3d. %s(", i->level, i->function_name);
+		}
+
+		/* Printing vars */
+		for (j = 0; j < i->varc; j++) {
+			if (c) {
+				if (html) {
+					php_printf (", ");
+				} else {
+					printf (", ");
+				}
+			} else {
+				c = 1;
+			}
+			if (html) {
+				php_printf ("%s", i->vars[j]);
+			} else {
+				printf ("%s", i->vars[j]);
+			}
+		}
+
+		if (html) {
+			php_printf (")</td><td>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
+		} else {
+			printf (") %s:%d\n", i->filename, i->lineno);
+		}
+	}
+
+	if (html) {
+		php_printf ("</table>\n");
+	}
+
+}
+
+static inline print_trace (int html TSRMLS_DC)
+{
+	xdebug_llist_element *le;
+
+	if (html) {
+		php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
+	} else {
+		printf ("\nFunction trace:\n");
+	}
+
+	if (html) {
+		php_printf ("<tr><th bgcolor='#aaaaaa' colspan='3'>Function trace</th></tr>\n");
+		php_printf ("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+	}
+
+
+	for (le = SRM_LLIST_HEAD(XG(stack)); le != NULL; le = SRM_LLIST_NEXT(le))
+	{
+		int c = 0; /* Comma flag */
+		int j = 0; /* Counter */
+		struct function_stack_entry *i = SRM_LLIST_VALP(le);
+
+		if (html) {
+			php_printf ("<tr><td align='center'>");
+			for (c = 0; c < i->level; c++) {
+				php_printf ("&nbsp;&nbsp;");
+			}
+			php_printf ("-></td><td>%s(", i->level, i->function_name);
+		} else {
+			for (c = 0; c < i->level; c++) {
+				printf ("--");
+			}
+			printf ("> %s(", i->level, i->function_name);
+		}
+
+		/* Printing vars */
+		for (j = 0; j < i->varc; j++) {
+			if (c) {
+				if (html) {
+					php_printf (", ");
+				} else {
+					printf (", ");
+				}
+			} else {
+				c = 1;
+			}
+			if (html) {
+				php_printf ("%s", i->vars[j]);
+			} else {
+				printf ("%s", i->vars[j]);
+			}
+		}
+
+		if (html) {
+			php_printf (")</td><td>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
+		} else {
+			printf (") %s:%d\n", i->filename, i->lineno);
+		}
+	}
+
+	if (html) {
+		php_printf ("</table>\n");
+	}
+
 }
 
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
-	char buffer[1024];
-	int buffer_len;
-	srm_llist_element *le;
 	char *error_type_str;
-	char *error_format;
+	int buffer_len;
+	char buffer[1024];
 
 	TSRMLS_FETCH();
 
@@ -263,64 +405,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		php_log_err(log_buffer TSRMLS_CC);
 	}
 
-	if (PG(html_errors)) {
-		php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
-	} else {
-		printf ("\nStack trace:\n");
-	}
-
-	error_format = PG(html_errors) ?
-		"<tr><td bgcolor='#ffbbbb' colspan=\"2\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b><br />\n"
-		: "\n%s: %s in %s on line %d\n";
-	php_printf(error_format, error_type_str, buffer,
-			   error_filename, error_lineno);
-
-	if (PG(html_errors)) {
-		php_printf ("<tr><th bgcolor='#aaaaaa' colspan='2'>Stacktrace</th></tr>\n<tr><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
-	}
-
-
-	
-	for (le = SRM_LLIST_HEAD(XG(stack)); le != NULL; le = SRM_LLIST_NEXT(le))
-	{
-		int c = 0; /* Comma flag */
-		int j = 0; /* Counter */
-		struct function_stack_entry *i = SRM_LLIST_VALP(le);
-
-		if (PG(html_errors)) {
-			php_printf ("<tr><td>%s (", i->function_name);
-		} else {
-			printf ("%s (", i->function_name);
-		}
-
-		/* Printing vars */
-		for (j = 0; j < i->varc; j++) {
-			if (c) {
-				if (PG(html_errors)) {
-					php_printf (", ");
-				} else {
-					printf (", ");
-				}
-			} else {
-				c = 1;
-			}
-			if (PG(html_errors)) {
-				php_printf ("%s", i->vars[j]);
-			} else {
-				printf ("%s", i->vars[j]);
-			}
-		}
-
-		if (PG(html_errors)) {
-			php_printf (")</td><td>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
-		} else {
-			printf (") %s:%d\n", i->filename, i->lineno);
-		}
-	}
-
-	if (PG(html_errors)) {
-		php_printf ("</table>\n");
-	}
+	print_stack (PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 
 	/* Bail out if we can't recover */
 	switch (type) {
@@ -350,15 +435,13 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 PHP_FUNCTION(xdebug_get_function_stack)
 {
 	char buffer[1024];
-	srm_llist_element *le;
+	xdebug_llist_element *le;
 	int                k;
 
 	array_init(return_value);
 	le = SRM_LLIST_HEAD(XG(stack));
 	
 	for (k = 0; k < XG(stack)->size - 1; k++, le = SRM_LLIST_NEXT(le)) {
-		int c = 0; /* Comma flag */
-		int j = 0; /* Counter */
 		struct function_stack_entry *i = SRM_LLIST_VALP(le);
 
 		snprintf (buffer, 1024, "%s:%d: %s", i->filename, i->lineno, i->function_name);
@@ -368,7 +451,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 PHP_FUNCTION(xdebug_call_function)
 {
-	srm_llist_element           *le;
+	xdebug_llist_element           *le;
 	struct function_stack_entry *i;
 	
 	le = SRM_LLIST_TAIL(XG(stack));
@@ -385,7 +468,7 @@ PHP_FUNCTION(xdebug_call_function)
 
 PHP_FUNCTION(xdebug_call_line)
 {
-	srm_llist_element           *le;
+	xdebug_llist_element           *le;
 	struct function_stack_entry *i;
 	
 	le = SRM_LLIST_TAIL(XG(stack));
@@ -402,7 +485,7 @@ PHP_FUNCTION(xdebug_call_line)
 
 PHP_FUNCTION(xdebug_call_file)
 {
-	srm_llist_element           *le;
+	xdebug_llist_element           *le;
 	struct function_stack_entry *i;
 	
 	le = SRM_LLIST_TAIL(XG(stack));
@@ -430,6 +513,33 @@ PHP_FUNCTION(xdebug_disable)
 PHP_FUNCTION(xdebug_is_enabled)
 {
 	RETURN_BOOL(zend_error_cb == new_error_cb);
+}
+
+
+PHP_FUNCTION(xdebug_start_trace)
+{
+	if (XG(do_trace) == 0) {
+		/* Alloc array */
+		XG(do_trace) = 1;
+	} else {
+		php_error (E_NOTICE, "Function trace already started");
+	}
+}
+
+PHP_FUNCTION(xdebug_stop_trace)
+{
+	if (XG(do_trace) == 1) {
+		XG(do_trace) = 0;
+		/* Dealloc array */
+	} else {
+		php_error (E_NOTICE, "Function trace was not started started");
+	}
+}
+
+PHP_FUNCTION(xdebug_get_function_trace)
+{
+	/* FIX ME: implement */
+	print_trace (PG(html_errors) TSRMLS_CC);
 }
 
 
@@ -523,7 +633,9 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 	TSRMLS_FETCH();
 	
 	tmp = emalloc (sizeof (struct function_stack_entry));
-	tmp->varc = 0;
+	tmp->varc     = 0;
+	tmp->refcount = 1;
+	tmp->level    = XG(level) + 1;
 
 	cur_opcode = *EG(opline_ptr);
 	end_opcode = op_array->opcodes + op_array->last + 1;
@@ -701,7 +813,7 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 	tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
 	tmp->lineno    = cur_opcode->lineno;
 
-	srm_llist_insert_next (XG(stack), SRM_LLIST_TAIL(XG(stack)), tmp);
+	xdebug_llist_insert_next (XG(stack), SRM_LLIST_TAIL(XG(stack)), tmp);
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
@@ -713,7 +825,7 @@ ZEND_DLEXPORT void function_end (zend_op_array *op_array)
 {
 	TSRMLS_FETCH();
 
-	srm_llist_remove (XG(stack), SRM_LLIST_TAIL(XG(stack)), stack_element_dtor);
+	xdebug_llist_remove (XG(stack), SRM_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
 }
 

@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#include "srm_llist.h"
+#include "xdebug_llist.h"
 
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
@@ -52,6 +52,10 @@ PHP_FUNCTION(xdebug_enable);
 PHP_FUNCTION(xdebug_disable);
 PHP_FUNCTION(xdebug_is_enabled);
 
+PHP_FUNCTION(xdebug_start_trace);
+PHP_FUNCTION(xdebug_stop_trace);
+PHP_FUNCTION(xdebug_get_function_trace);
+
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
 #endif
@@ -62,14 +66,18 @@ typedef struct function_stack_entry {
 	int   lineno;
 	int   varc;
 	char *vars[20];
+	int   level;
+	int   refcount;
 } function_stack_entry;
 
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
-	int        level;
-	srm_llist *stack;
-	int        max_nesting_level;
-	zend_bool  default_enable;
+	int           level;
+	xdebug_llist *stack;
+	xdebug_llist *trace;
+	int           max_nesting_level;
+	zend_bool     default_enable;
+	zend_bool     do_trace;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 	

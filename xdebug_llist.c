@@ -1,4 +1,4 @@
-/* $Id: srm_llist.c,v 1.1.1.1 2002-04-24 14:26:19 derick Exp $ */
+/* $Id: xdebug_llist.c,v 1.1 2002-05-09 12:12:44 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -22,13 +22,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "srm_llist.h"
+#include "xdebug_llist.h"
 
-srm_llist *srm_llist_alloc(srm_llist_dtor dtor)
+xdebug_llist *xdebug_llist_alloc(xdebug_llist_dtor dtor)
 {
-	srm_llist *l;
+	xdebug_llist *l;
 
-	l = malloc(sizeof(srm_llist));
+	l = malloc(sizeof(xdebug_llist));
 	l->size = 0;
 	l->dtor = dtor;
 	l->head = NULL;
@@ -37,15 +37,15 @@ srm_llist *srm_llist_alloc(srm_llist_dtor dtor)
 	return l;
 }
 
-int srm_llist_insert_next(srm_llist *l, srm_llist_element *e, const void *p)
+int xdebug_llist_insert_next(xdebug_llist *l, xdebug_llist_element *e, const void *p)
 {
-	srm_llist_element  *ne;
+	xdebug_llist_element  *ne;
 
 	if (!e) {
 		e = SRM_LLIST_TAIL(l);
 	}
 
-	ne = (srm_llist_element *) malloc(sizeof(srm_llist_element));
+	ne = (xdebug_llist_element *) malloc(sizeof(xdebug_llist_element));
 	ne->ptr = (void *) p;
 	if (l->size == 0) {
 		l->head = ne;
@@ -68,15 +68,15 @@ int srm_llist_insert_next(srm_llist *l, srm_llist_element *e, const void *p)
 	return 1;
 }
 
-int srm_llist_insert_prev(srm_llist *l, srm_llist_element *e, const void *p)
+int xdebug_llist_insert_prev(xdebug_llist *l, xdebug_llist_element *e, const void *p)
 {
-	srm_llist_element *ne;
+	xdebug_llist_element *ne;
 
 	if (!e) {
 		e = SRM_LLIST_HEAD(l);
 	}
 
-	ne = (srm_llist_element *) malloc(sizeof(srm_llist_element));
+	ne = (xdebug_llist_element *) malloc(sizeof(xdebug_llist_element));
 	ne->ptr = (void *) p;
 	if (l->size == 0) {
 		l->head = ne;
@@ -98,7 +98,7 @@ int srm_llist_insert_prev(srm_llist *l, srm_llist_element *e, const void *p)
 	return 0;
 }
 
-int srm_llist_remove(srm_llist *l, srm_llist_element *e, void *user)
+int xdebug_llist_remove(xdebug_llist *l, xdebug_llist_element *e, void *user)
 {
 	if (e == NULL || l->size == 0)
 		return 0;
@@ -125,19 +125,19 @@ int srm_llist_remove(srm_llist *l, srm_llist_element *e, void *user)
 	return 0;
 }
 
-int srm_llist_remove_next(srm_llist *l, srm_llist_element *e, void *user)
+int xdebug_llist_remove_next(xdebug_llist *l, xdebug_llist_element *e, void *user)
 {
-	return srm_llist_remove(l, e->next, user);
+	return xdebug_llist_remove(l, e->next, user);
 }
 
-int srm_llist_remove_prev(srm_llist *l, srm_llist_element *e, void *user)
+int xdebug_llist_remove_prev(xdebug_llist *l, xdebug_llist_element *e, void *user)
 {
-	return srm_llist_remove(l, e->prev, user);
+	return xdebug_llist_remove(l, e->prev, user);
 }
 
-srm_llist_element *srm_llist_jump(srm_llist *l, int where, int pos)
+xdebug_llist_element *xdebug_llist_jump(xdebug_llist *l, int where, int pos)
 {
-    srm_llist_element *e=NULL;
+    xdebug_llist_element *e=NULL;
     int i;
 
     if (where == LIST_HEAD) {
@@ -156,15 +156,15 @@ srm_llist_element *srm_llist_jump(srm_llist *l, int where, int pos)
     return e;
 }
 
-size_t srm_llist_count(srm_llist *l)
+size_t xdebug_llist_count(xdebug_llist *l)
 {
 	return l->size;
 }
 
-void srm_llist_destroy(srm_llist *l, void *user)
+void xdebug_llist_destroy(xdebug_llist *l, void *user)
 {
-	while (srm_llist_count(l) > 0) {
-		srm_llist_remove(l, SRM_LLIST_TAIL(l), user);
+	while (xdebug_llist_count(l) > 0) {
+		xdebug_llist_remove(l, SRM_LLIST_TAIL(l), user);
 	}
 
 	free (l);
