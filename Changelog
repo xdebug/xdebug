@@ -1,3 +1,7 @@
+Mon Jun 24 10:04:14 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fix building on Windows
+
 Sun Jun 23 23:29:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Attempt to make it build on windows again
