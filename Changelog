@@ -1,3 +1,10 @@
+Fri Jan 3 08:13:12 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/xdebug.c:
+- Fixed bug when the parameter to xdebug_function_trace() was the empty
+  string.
+- Fixed typo in TODO
+
 Fri Dec 20 17:49:08 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Fix Changelog
 
