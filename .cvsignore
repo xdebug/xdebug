@@ -14,6 +14,10 @@ config.nice
 config.sub
 configure
 configure.in
+config.status
+config.cache
+conftest
+conftest.c
 core
 dynlib.m4
 install-sh
@@ -30,8 +34,6 @@ config.guess
 *swp
 config.log
 libtool
-config.status
-config.cache
 Debug_TS
 Release_TS
 *.plg
