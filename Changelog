@@ -1,3 +1,7 @@
+Wed Oct 30 20:00:14 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Make it compile on Windows again.
+
 Tue Oct 29 22:28:39 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h:
 - Commence working on the release
