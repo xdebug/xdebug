@@ -77,6 +77,7 @@ typedef struct xdebug_dbgp_options {
 	int max_children;
 	int max_data;
 	int max_depth;
+	int show_hidden;
 } xdebug_dbgp_options;
 
 

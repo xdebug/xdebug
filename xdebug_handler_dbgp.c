@@ -802,28 +802,29 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 
 static int _xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 {
-	zend_unset_timeout(TSRMLS_C);
-	if (XG(stdout_redirected) != 0) {
-		_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
+	/* nesting_level is zero when final output is sent to sapi */
+	if (OG(ob_nesting_level) < 1) {
+		zend_unset_timeout(TSRMLS_C);
+		if (XG(stdout_redirected) != 0) {
+			_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
+		}
+		zend_set_timeout(EG(timeout_seconds));
 	}
-
-	/* let PHP also send it out, as it may be needed */
-	zend_set_timeout(EG(timeout_seconds));
 	return XG(stdio).php_header_write(str, str_length TSRMLS_CC);
 }
 
 static int _xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
 {
-	if (!SG(headers_sent)) {
-		return _xdebug_header_write(str, str_length TSRMLS_CC);
+	/* nesting_level is zero when final output is sent to sapi.  we
+	  also dont want to write if headers are not sent yet, the output
+          layer will handle this correctly later. */
+	if (OG(ob_nesting_level) < 1 && SG(headers_sent)) {
+		zend_unset_timeout(TSRMLS_C);
+		if (XG(stdout_redirected) != 0) {
+			_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
+		}
+		zend_set_timeout(EG(timeout_seconds));
 	}
-	zend_unset_timeout(TSRMLS_C);
-	if (XG(stdout_redirected) != 0) {
-		_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
-	}
-
-	/* let PHP also send it out, as it may be needed */
-	zend_set_timeout(EG(timeout_seconds));
 	return XG(stdio).php_body_write(str, str_length TSRMLS_CC);
 }
 
@@ -1026,6 +1027,11 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("show_hidden")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", options->show_hidden));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE_DEFAULT
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION('n')) ? "1" : "0");
 		XDEBUG_STR_CASE_DEFAULT_END
@@ -1063,6 +1069,10 @@ DBGP_FUNC(feature_set)
 			options->max_depth = strtol(CMD_OPTION('v'), NULL, 10);
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("show_hidden")
+			options->show_hidden = strtol(CMD_OPTION('v'), NULL, 10);
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE("multiple_sessions")
 			/* FIXME: Add new boolean option check / struct field for this */
 		XDEBUG_STR_CASE_END
@@ -1095,33 +1105,40 @@ DBGP_FUNC(typemap_get)
 	}
 }
 
+static int add_variable_node(xdebug_xml_node *node, char *name, int name_length TSRMLS_DC)
+{
+	xdebug_xml_node      *contents;
+	zval                  ret_zval;
+	int                   res;
+
+	XG(active_symbol_table) = EG(active_symbol_table);
+	contents = get_symbol_contents(name, name_length TSRMLS_CC);
+	XG(active_symbol_table) = NULL;
+
+	if (!contents) {
+		/* if we cannot get the value directly, then try eval */
+		res = _xdebug_do_eval(name, &ret_zval TSRMLS_CC);
+		if (res != FAILURE) {
+			contents = get_zval_value_xml_node(name, &ret_zval);
+			zval_dtor(&ret_zval);
+		}
+	}
+	if (contents) {
+		xdebug_xml_add_child(node, contents);
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
+
 DBGP_FUNC(property_get)
 {
-	xdebug_xml_node *var_data;
-	zval             ret_zval;
-	int              res;
-	xdebug_xml_node *ret_xml;
-
 	if (!CMD_OPTION('n')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 
-	XG(active_symbol_table) = EG(active_symbol_table);
-	var_data = get_symbol_contents(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);
-	XG(active_symbol_table) = NULL;
-
-	if (var_data) {
-		xdebug_xml_add_child(*retval, var_data);
-	} else {
-		/* if we cannot get the value directly, then try eval */
-		res = _xdebug_do_eval(CMD_OPTION('n'), &ret_zval TSRMLS_CC);
-		if (res == FAILURE) {
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
-		} else {
-			ret_xml = get_zval_value_xml_node(CMD_OPTION('n'), &ret_zval);
-			xdebug_xml_add_child(*retval, ret_xml);
-			zval_dtor(&ret_zval);
-		}
+	if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC) == FAILURE) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
 }
 
@@ -1181,6 +1198,7 @@ DBGP_FUNC(property_set)
 		zval_dtor(&ret_zval);
 	}
 }
+
 
 DBGP_FUNC(property_value)
 {
@@ -1245,7 +1263,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 	}
 }
 
-static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(void *, xdebug_hash_element*) TSRMLS_DC)
+static int attach_context_vars(xdebug_xml_node *node, xdebug_dbgp_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
 	xdebug_hash          *ht;
@@ -1254,7 +1272,11 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 	zval                  ret_zval;
 	int                   res;
 #endif
-
+	if (context_id > 0) {
+		/* right now, we only have zero or one, one being globals,
+		  which is always the head of the stack */
+		depth = XG(level) - 1;
+	}
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
 		ht = fse->used_vars;
 		XG(active_symbol_table) = fse->symbol_table;
@@ -1266,19 +1288,18 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 
 #ifdef ZEND_ENGINE_2
 		/* zend engine 2 does not give us $this, eval so we can get it */
-		contents = get_symbol_contents("this", sizeof("this") TSRMLS_CC);
-		if (!contents) {
-			/* if we cannot get the value directly, then try eval */
-			res = _xdebug_do_eval("$this", &ret_zval TSRMLS_CC);
-			if (res != FAILURE) {
-				contents = get_zval_value_xml_node("this", &ret_zval);
-				zval_dtor(&ret_zval);
-			}
-		}
-		if (contents) {
-			xdebug_xml_add_child(node, contents);
-		}
+		add_variable_node(node, "this", sizeof("this") TSRMLS_CC);
 #endif
+		if (options->show_hidden && context_id > 0) {
+			/* add supper globals */
+			add_variable_node(node, "_ENV", sizeof("_ENV") TSRMLS_CC);
+			add_variable_node(node, "_GET", sizeof("_GET") TSRMLS_CC);
+			add_variable_node(node, "_POST", sizeof("_POST") TSRMLS_CC);
+			add_variable_node(node, "_COOKIE", sizeof("_COOKIE") TSRMLS_CC);
+			add_variable_node(node, "_REQUEST", sizeof("_REQUEST") TSRMLS_CC);
+			add_variable_node(node, "_FILES", sizeof("_FILES") TSRMLS_CC);
+			add_variable_node(node, "_SERVER", sizeof("_SERVER") TSRMLS_CC);
+		}
 
 		XG(active_symbol_table) = NULL;
 		return 0;
@@ -1328,25 +1349,31 @@ DBGP_FUNC(context_names)
 {
 	xdebug_xml_node *child;
 
-	if (CMD_OPTION('d')) {
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
-	} else {
-		child = xdebug_xml_node_init("context");
-		xdebug_xml_add_attribute(child, "name", "Locals");
-		xdebug_xml_add_attribute(child, "id", "0");
-		xdebug_xml_add_child(*retval, child);
-	}
+	child = xdebug_xml_node_init("context");
+	xdebug_xml_add_attribute(child, "name", "Locals");
+	xdebug_xml_add_attribute(child, "id", "0");
+	xdebug_xml_add_child(*retval, child);
+	child = xdebug_xml_node_init("context");
+	xdebug_xml_add_attribute(child, "name", "Globals");
+	xdebug_xml_add_attribute(child, "id", "1");
+	xdebug_xml_add_child(*retval, child);
 }
 
 DBGP_FUNC(context_get)
 {
 	int res;
-
-	if (CMD_OPTION('d')) {
-		res = attach_local_vars(*retval, atol(CMD_OPTION('d')), attach_used_var_with_contents TSRMLS_CC);
-	} else {
-		res = attach_local_vars(*retval, 0, attach_used_var_with_contents TSRMLS_CC);
+	int context_id = 0;
+	int depth = 0;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
+	
+	if (CMD_OPTION('c')) {
+		context_id = atol(CMD_OPTION('c'));
 	}
+	if (CMD_OPTION('d')) {
+		depth = atol(CMD_OPTION('d'));
+	}
+	
+	res = attach_context_vars(*retval, options, context_id, depth, attach_used_var_with_contents TSRMLS_CC);
 	switch (res) {
 		case 1:
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
@@ -1562,7 +1589,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.51 $";
+	return "$Revision: 1.52 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1656,6 +1683,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	options->max_children = 2048;
 	options->max_data     = 524288;
 	options->max_depth    = 16;
+	options->show_hidden  = 0;
 
 /* {{{ Initialize auto globals in Zend Engine 2 */
 #ifdef ZEND_ENGINE_2
