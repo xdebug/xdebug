@@ -16,7 +16,7 @@
    | Modifications: Derick Rethans <derick@xdebug.org>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.3 2004-04-11 14:22:08 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.4 2004-04-11 14:44:04 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
@@ -278,6 +278,8 @@ unsigned char *xdebug_base64_decode(const unsigned char *str, int length, int *r
    +----------------------------------------------------------------------+
 */
 
+#ifdef ZEND_ENGINE_2
+
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
 zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
@@ -320,3 +322,71 @@ zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 	}
 	return NULL;
 }
+
+#else
+
+static zval get_overloaded_property(temp_variable *T TSRMLS_DC)
+{
+	zval result;
+
+	result = Z_OBJCE_P(T->EA.data.overloaded_element.object)->handle_property_get(&T->EA.data.overloaded_element);
+
+	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
+	efree(T->EA.data.overloaded_element.elements_list);
+	return result;
+}
+
+zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
+{
+	switch(node->op_type) {
+		case IS_CONST:
+			return &node->u.constant;
+			break;
+		case IS_TMP_VAR:
+			return &Ts[node->u.var].tmp_var;
+			break;
+		case IS_VAR:
+			if (Ts[node->u.var].var.ptr) {
+				return Ts[node->u.var].var.ptr;
+			} else {
+
+				switch (Ts[node->u.var].EA.type) {
+					case IS_OVERLOADED_OBJECT:
+						Ts[node->u.var].tmp_var = get_overloaded_property(&Ts[node->u.var] TSRMLS_CC);
+						Ts[node->u.var].tmp_var.refcount=1;
+						Ts[node->u.var].tmp_var.is_ref=1;
+						return &Ts[node->u.var].tmp_var;
+						break;
+					case IS_STRING_OFFSET: {
+							temp_variable *T = &Ts[node->u.var];
+							zval *str = T->EA.data.str_offset.str;
+
+							if (T->EA.data.str_offset.str->type != IS_STRING
+								|| (T->EA.data.str_offset.offset<0)
+								|| (T->EA.data.str_offset.str->value.str.len <= T->EA.data.str_offset.offset)) {
+								zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->EA.data.str_offset.offset);
+								T->tmp_var.value.str.val = empty_string;
+								T->tmp_var.value.str.len = 0;
+							} else {
+								char c = str->value.str.val[T->EA.data.str_offset.offset];
+
+								T->tmp_var.value.str.val = estrndup(&c, 1);
+								T->tmp_var.value.str.len = 1;
+							}
+							T->tmp_var.refcount=1;
+							T->tmp_var.is_ref=1;
+							T->tmp_var.type = IS_STRING;
+							return &T->tmp_var;
+						}
+						break;
+				}
+			}
+			break;
+		case IS_UNUSED:
+			return NULL;
+			break;
+	}
+	return NULL;
+}
+
+#endif
