@@ -38,6 +38,10 @@
 #define close(fd) closesocket(fd)
 #endif
 
+#ifdef __FreeBSD__
+#define MSG_NOSIGNAL 0
+#endif
+
 #define VERSION "0.7.0"
 
 int main(int argc, char *argv[])
