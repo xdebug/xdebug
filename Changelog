@@ -1,3 +1,9 @@
+Tue Apr 20 03:52:04 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- only build zend2 stuff with zend2
+- make the kill/stop stop/detach change that happend long ago
+
 Sun Apr 18 14:31:35 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 test.sh
 xdebug/xdebug.c:
