@@ -1,3 +1,12 @@
+Fri Oct 31 17:37:51 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_dbgp.h
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handlers.h:
+- Implemented temporary breakpoints, and the commands breakpoint_disable and
+  breakpoint_enable
+
 Thu Oct 30 13:55:29 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Fixed breakpoint_remove
