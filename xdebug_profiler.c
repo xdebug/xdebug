@@ -62,6 +62,21 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	return SUCCESS;
 }
 
+int xdebug_profiler_deinit(TSRMLS_D)
+{
+	function_stack_entry *fse;
+	xdebug_llist_element *le;
+
+	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+		fse = XDEBUG_LLIST_VALP(le);
+		if (fse->user_defined == XDEBUG_INTERNAL) {
+			xdebug_profiler_function_internal_end(fse TSRMLS_CC);
+		} else {
+			xdebug_profiler_function_user_end(fse, fse->op_array TSRMLS_CC);
+		}
+	}
+}
+
 static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 {
 	fse->profile.time += xdebug_get_utime();

@@ -162,6 +162,7 @@ typedef struct _function_stack_entry {
 	/* misc properties */
 	int          refcount;
 	struct _function_stack_entry *prev;
+	zend_op_array *op_array;
 } function_stack_entry;
 
 function_stack_entry *xdebug_get_stack_head(TSRMLS_D);

@@ -84,6 +84,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
+int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
@@ -421,6 +422,11 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_error_cb = zend_error_cb;
 	new_error_cb = xdebug_error_cb;
 
+	/* Overload the "exit" opcode */
+#ifdef ZEND_ENGINE_2
+	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
+#endif
+
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
 	}
@@ -727,6 +733,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->filename      = NULL;
 	tmp->include_filename  = NULL;
 	tmp->profile.call_list = xdebug_llist_alloc(profile_call_entry_dtor);
+	tmp->op_array      = op_array;
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		/* Normal function calls */
@@ -1481,6 +1488,12 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 			XG(remote_enabled) = 0;
 		}
 	}
+}
+
+int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	xdebug_profiler_deinit(TSRMLS_C);
+	zend_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 #endif
 

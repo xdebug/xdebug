@@ -1,3 +1,7 @@
+???, ??? ??, 2004 - xdebug 2.0.0beta2
+- Fixed bug #68: Summary not written when script ended with "exit()".
+
+
 Wed, Sep 15, 2004 - xdebug 2.0.0beta1
 + Added new features:
 	- Added support for the new DBGp protocol for communicating with the debug
