@@ -23,7 +23,7 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/base64.h"
+
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "main/php_version.h"
@@ -38,6 +38,8 @@
 #include "xdebug_mm.h"
 #include "xdebug_var.h"
 #include "xdebug_xml.h"
+
+#include "xdebug_compat.h"
 
 #ifdef PHP_WIN32
 #include "win32/time.h"
@@ -718,7 +720,7 @@ DBGP_FUNC(eval)
 	EG(error_reporting) = 0;
 
 	/* base64 decode eval string */
-	eval_string = php_base64_decode(CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
+	eval_string = xdebug_base64_decode(CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
 
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
@@ -822,7 +824,7 @@ DBGP_FUNC(source)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_CANT_OPEN_FILE);
 	} else {
 		xdebug_xml_add_attribute(*retval, "encoding", "base64");
-		encoded_source = php_base64_encode(source, strlen(source), &new_len);
+		encoded_source = xdebug_base64_encode(source, strlen(source), &new_len);
 		xdebug_xml_add_text(*retval, xdstrdup(encoded_source));
 		efree(encoded_source);
 		xdfree(source);
@@ -1306,7 +1308,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.34 $";
+	return "$Revision: 1.35 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

@@ -23,6 +23,8 @@
 #endif
 
 #include "php.h"
+#include "main/php_version.h"
+#include "xdebug_compat.h"
 
 #if HAVE_XDEBUG
 
@@ -1436,7 +1438,7 @@ PHP_FUNCTION(xdebug_var_dump)
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		} else {
-			php_var_dump(args[i], 1 TSRMLS_CC);
+			xdebug_var_dump(args[i], 1 TSRMLS_CC);
 		}
 	}
 	
