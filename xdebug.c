@@ -24,6 +24,8 @@
 
 #if HAVE_XDEBUG
 
+#define XDEBUG_VERSION "0.8.0-dev"
+
 #include "TSRM.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -214,6 +216,7 @@ PHP_MINFO_FUNCTION(xdebug)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "xdebug support", "enabled");
+	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
 	php_info_print_table_row(2, "Stacktraces support", "enabled");
 	php_info_print_table_row(2, "Function nesting protection support", "enabled");
 	php_info_print_table_end();
@@ -768,6 +771,20 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 				tmpOpCode--;
 			}
 			switch (tmpOpCode->op1.op_type)  {
+				case IS_UNUSED:
+					switch (tmpOpCode->op2.op_type) {
+						case IS_CONST:
+							sprintf(buffer, "%s",
+								tmpOpCode->op2.u.constant.value.str.val
+							);
+							tmp->function_name = estrdup(buffer);
+							break;
+						default:  /* FIXME need better IS_VAR handling */
+							tmp->function_name = estrdup("null");
+							break;
+	
+					}
+					break;
 				case IS_CONST:
 					switch (tmpOpCode->op2.op_type) {
 						case IS_CONST:
@@ -880,7 +897,7 @@ ZEND_EXTENSION();
 
 ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	"eXtended Debugger (xdebug)",
-	"0.8.0-dev",
+	XDEBUG_VERSION,
 	"Derick Rethans",
 	"http://www.jdimedia.nl/derick/xdebug.php",
 	"Copyright (c) 2002 JDI Media Solutions",
