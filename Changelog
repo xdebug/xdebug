@@ -1,3 +1,9 @@
+Tue Apr 13 22:33:45 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_gdb.c
+xdebug/xdebug_var.c:
+- Fixed a couple of segfaults with uninitialized variables with the GDB
+  protocol.
+
 Tue Apr 13 16:00:00 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_gdb.c:
 - Fixed breaking on functions with the GDB compatible protocol.
