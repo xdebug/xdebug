@@ -1,3 +1,7 @@
+Sun Apr 6 21:03:09 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Fix the package file
+
 Sun Apr 6 21:02:06 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix a segfault here and there, still quite a lot to do for ZE2.
