@@ -1400,7 +1400,7 @@ static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRML
 {
 	switch (XG(trace_format)) {
 		case 1:
-			return return_trace_stack_frame_end_computerized(i, fnr TSRMLS_CC);
+			return return_trace_stack_frame_end_computerized(i, fnr);
 		default:
 			return xdstrdup("");
 	}
