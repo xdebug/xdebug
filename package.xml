@@ -19,7 +19,7 @@
   <release>
     <state>stable</state>
     <version>1.1.0</version>
-    <date>2002-11-11</date>
+    <date>2002-11-13</date>
     <notes>
      Added breakpoint, stepping and listing functions to the remote debugger
      server and Windows compatibility for server and debug client.
@@ -63,7 +63,7 @@
     <release>
       <state>stable</state>
       <version>1.1.0</version>
-      <date>2002-11-11</date>
+      <date>2002-11-13</date>
       <notes>
 + Implemented the "list" (source listing), "print" (printing variable
   contents), "show" (show all variables in the scope), "step" (step through
