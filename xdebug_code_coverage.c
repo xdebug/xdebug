@@ -114,11 +114,13 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cleanup) == FAILURE) {
 		return;
 	}
-	if (cleanup) {
-		xdebug_hash_destroy(XG(code_coverage));
-		XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+	if (XG(do_code_coverage)) {
+		if (cleanup) {
+			xdebug_hash_destroy(XG(code_coverage));
+			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+		}
+		XG(do_code_coverage) = 0;
 	}
-	XG(do_code_coverage) = 0;
 }
 
 
@@ -145,7 +147,7 @@ static void add_line(void *ret, xdebug_hash_element *e)
 	if (line->executable && (line->count == 0)) {
 		add_index_long(retval, line->lineno, -1);
 	} else {
-		add_index_long(retval, line->lineno, line->count);
+		add_index_long(retval, line->lineno, 1);
 	}
 }
 

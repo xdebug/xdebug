@@ -24,29 +24,35 @@ xdebug.trace_format=0
 --EXPECTF--
 This is a YYYY-MM-DD format.
 This is a YYYYMMDD HHii format.
-array(12) {
+array(15) {
   [2]=>
   int(1)
   [4]=>
-  int(4)
+  int(1)
   [7]=>
-  int(2)
+  int(1)
   [8]=>
+  int(1)
+  [9]=>
   int(1)
   [10]=>
   int(1)
   [11]=>
   int(1)
+  [12]=>
+  int(1)
   [17]=>
-  int(2)
+  int(1)
   [18]=>
-  int(2)
+  int(1)
   [20]=>
   int(1)
   [21]=>
   int(1)
   [22]=>
-  int(4)
+  int(1)
+  [23]=>
+  int(1)
   [25]=>
   int(1)
 }

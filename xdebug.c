@@ -87,8 +87,27 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
+
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 int (*old_exit_handler)(ZEND_OPCODE_HANDLER_ARGS);
+
+static int xdebug_jmp_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_jmp_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_jmpz_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_jmpz_handler)(ZEND_OPCODE_HANDLER_ARGS);
+
+static int xdebug_is_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_not_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_not_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_not_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_not_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_smaller_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_smaller_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_smaller_or_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_smaller_or_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
@@ -437,6 +456,24 @@ PHP_MINIT_FUNCTION(xdebug)
 #ifdef ZEND_ENGINE_2
 	old_exit_handler = zend_opcode_handlers[ZEND_EXIT];
 	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
+
+	old_jmp_handler = zend_opcode_handlers[ZEND_JMP];
+	old_jmpz_handler = zend_opcode_handlers[ZEND_JMPZ];
+	old_is_identical_handler = zend_opcode_handlers[ZEND_IS_IDENTICAL];
+	old_is_not_identical_handler = zend_opcode_handlers[ZEND_IS_NOT_IDENTICAL];
+	old_is_equal_handler = zend_opcode_handlers[ZEND_IS_EQUAL];
+	old_is_not_equal_handler = zend_opcode_handlers[ZEND_IS_NOT_EQUAL];
+	old_is_smaller_handler = zend_opcode_handlers[ZEND_IS_SMALLER];
+	old_is_smaller_or_equal_handler = zend_opcode_handlers[ZEND_IS_SMALLER_OR_EQUAL];
+
+	zend_opcode_handlers[ZEND_JMP] = xdebug_jmp_handler;
+	zend_opcode_handlers[ZEND_JMPZ] = xdebug_jmpz_handler;
+	zend_opcode_handlers[ZEND_IS_IDENTICAL] = xdebug_is_identical_handler;
+	zend_opcode_handlers[ZEND_IS_NOT_IDENTICAL] = xdebug_is_not_identical_handler;
+	zend_opcode_handlers[ZEND_IS_EQUAL] = xdebug_is_equal_handler;
+	zend_opcode_handlers[ZEND_IS_NOT_EQUAL] = xdebug_is_not_equal_handler;
+	zend_opcode_handlers[ZEND_IS_SMALLER] = xdebug_is_smaller_handler;
+	zend_opcode_handlers[ZEND_IS_SMALLER_OR_EQUAL] = xdebug_is_smaller_or_equal_handler;
 #endif
 
 	if (zend_xdebug_initialised == 0) {
@@ -1506,6 +1543,35 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	}
 }
 
+/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
+#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
+{ \
+	if (XG(do_code_coverage)) { \
+		zend_op *cur_opcode; \
+		int      lineno; \
+		char    *file; \
+		int      file_len; \
+\
+		cur_opcode = *EG(opline_ptr); \
+		lineno = cur_opcode->lineno; \
+\
+		file = op_array->filename; \
+		file_len = strlen(file); \
+\
+		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
+	} \
+	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+}
+XDEBUG_OPCODE_OVERRIDE(jmp)
+XDEBUG_OPCODE_OVERRIDE(jmpz)
+XDEBUG_OPCODE_OVERRIDE(is_identical)
+XDEBUG_OPCODE_OVERRIDE(is_not_identical)
+XDEBUG_OPCODE_OVERRIDE(is_equal)
+XDEBUG_OPCODE_OVERRIDE(is_not_equal)
+XDEBUG_OPCODE_OVERRIDE(is_smaller)
+XDEBUG_OPCODE_OVERRIDE(is_smaller_or_equal)
+
+/* Opcode handler for exit, to be able to clean up the profiler */
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (XG(profiler_enabled)) {
