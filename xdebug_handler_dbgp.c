@@ -266,7 +266,7 @@ static char* return_source(char *file, int begin, int end TSRMLS_DC)
 	return source.d;
 }
 
-static xdebug_xml_node* return_breakpoint(function_stack_entry *i)
+static xdebug_xml_node* return_breakpoint(function_stack_entry *i, char *filename, long lineno)
 {
 	char            *tmp_fname;
 	xdebug_xml_node *tmp;
@@ -276,8 +276,8 @@ static xdebug_xml_node* return_breakpoint(function_stack_entry *i)
 
 	tmp = xdebug_xml_node_init("breakpoint");
 	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(i->filename), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", i->lineno), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(filename), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", lineno), 0, 1);
 
 	xdfree(tmp_fname);
 	return tmp;
@@ -1275,7 +1275,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 	return 1;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
 {
 	struct function_stack_entry *i;
 	int    ret;
@@ -1285,7 +1285,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack));
 
 	if (type == XDEBUG_BREAK) {
-		response = return_breakpoint(i);
+		response = return_breakpoint(i, file, lineno);
 		send_message(context, response);
 		xdebug_xml_node_dtor(response);
 	}

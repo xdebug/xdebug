@@ -1426,7 +1426,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 	return 1;
 }
 
-int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type)
+int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
 {
 	struct function_stack_entry *i;
 	int    ret;

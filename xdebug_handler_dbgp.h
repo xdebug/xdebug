@@ -70,7 +70,7 @@ typedef struct xdebug_dbgp_options {
 int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type);
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type);
 
 #define xdebug_handler_dbgp { \
 	xdebug_dbgp_init,         \
