@@ -123,8 +123,10 @@ int main(int argc, char *argv[])
 	char               *buffer;              /* Buffer with data from the server */
 	char               *cmd;                 /* Command to send to the server */
 	char               *prev_cmd = NULL;     /* Last send command to the server */
-	int                 opt;                 /* Current option during parameter parsing */
 	int                 length;              /* Length of read buffer */
+#ifndef WIN32
+	int                 opt;                 /* Current option during parameter parsing */
+#endif
 
 #ifdef HAVE_LIBEDIT
 	int num = 0;
@@ -152,6 +154,7 @@ int main(int argc, char *argv[])
 	printf("- libedit support: enabled\n");
 #endif
 
+#ifndef WIN32
 	/* Option handling */
 	while (1) {
 		opt = getopt(argc, argv, "hp:v");
@@ -178,6 +181,7 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
+#endif
 
 	/* Main loop that listens for connections from the debug client and that
 	 * does all the communications handling. */
