@@ -1,3 +1,8 @@
+Tue Oct 29 12:58:44 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Update portnumber on the server side too
+
 Tue Oct 29 12:11:27 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Change debugger port.
