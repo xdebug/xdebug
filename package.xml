@@ -29,6 +29,8 @@
       <file role="src"  name="usefulstuff.c"/>
       <file role="src"  name="usefulstuff.h"/>
       <file role="src"  name="xdebug.c"/>
+      <file role="src"  name="xdebug_code_coverage.c"/>
+      <file role="src"  name="xdebug_code_coverage.h"/>
       <file role="src"  name="xdebug_com.c"/>
       <file role="src"  name="xdebug_com.h"/>
       <file role="src"  name="xdebug_handlers.c"/>
@@ -43,6 +45,8 @@
       <file role="src"  name="xdebug_llist.h"/>
       <file role="src"  name="xdebug_profiler.c"/>
       <file role="src"  name="xdebug_profiler.h"/>
+      <file role="src"  name="xdebug_superglobals.c"/>
+      <file role="src"  name="xdebug_superglobals.h"/>
       <file role="src"  name="xdebug_var.c"/>
       <file role="src"  name="xdebug_var.h"/>
 

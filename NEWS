@@ -1,11 +1,21 @@
-? ? ?, 2002 - xdebug 1.2.0
+Sun, Apr 6, 2003 - xdebug 1.2.0rc1
 
++ Added code coverage functions to check which lines and how often they were
+  touched during execution. (Derick)
++ Made Xdebug compatible with Zend Engine 2. (Derick)
++ Added dumping of super globals on errors. (Harald Radi)
++ Added XML protocol for the debugger client. (Derick)
+= Fixed handling of "continue" (so that it also continues with the script).
+  (Derick)
++ Additions to the remote debugger: "eval" (evaluate any PHP code from the
+  debugger client). (Derick)
 + Added profiling support to xdebug. This introduces 3 new functions,
   xdebug_start_profiling() that begins profiling process, 
   xdebug_stop_profiling() that ends the profiling process and
   xdebug_dump_function_trace() that dumps the profiling data. (Ilia)
 + Implemented the "kill" (kills the running script) and "delete" (removes
   a breakpoint on a specified element) command. (Derick)
+
 
 Wed Nov 11, 2002 - xdebug 1.1.0
 
