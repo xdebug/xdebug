@@ -175,9 +175,11 @@ void stack_element_dtor (void *dummy, void *elem)
 		if (e->filename) {
 			efree (e->filename);
 		}
+#if DO_VARS
 		for (i = 0; i < e->varc; i++) {
 			efree (e->vars[i]);
 		}
+#endif
 		efree (e);
 	}
 }
@@ -233,7 +235,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	if (op_array->function_name == NULL) {
 		tmp = emalloc (sizeof (struct function_stack_entry));
+#if DO_VARS
 		tmp->varc     = 0;
+#endif
 		tmp->refcount = 1;
 		tmp->level    = ++XG(level);
 		tmp->function_name = estrdup("{main}");
@@ -290,6 +294,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			printf ("%3d. %s(", i->level, i->function_name);
 		}
 
+#if DO_VARS
 		/* Printing vars */
 		for (j = 0; j < i->varc; j++) {
 			if (c) {
@@ -307,6 +312,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				printf ("%s", i->vars[j]);
 			}
 		}
+#endif
 
 		if (html) {
 			php_printf (")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
@@ -356,6 +362,7 @@ static inline void print_trace (int html TSRMLS_DC)
 			printf ("-> %s(",i->function_name);
 		}
 
+#if DO_VARS
 		/* Printing vars */
 		for (j = 0; j < i->varc; j++) {
 			if (c) {
@@ -373,6 +380,7 @@ static inline void print_trace (int html TSRMLS_DC)
 				printf ("%s", i->vars[j]);
 			}
 		}
+#endif
 
 		if (html) {
 			php_printf (")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
@@ -716,10 +724,13 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	zend_op *end_opcode;
 	char buffer[1024];
 	int  func_nest = 0;
+	int  go_back   = 0;
 	TSRMLS_FETCH();
 	
 	tmp = emalloc (sizeof (struct function_stack_entry));
+#if DO_VARS
 	tmp->varc     = 0;
+#endif
 	tmp->refcount = 1;
 	tmp->level    = XG(level) + 1;
 
@@ -738,11 +749,13 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 		}
 		if (opcode == ZEND_EXT_FCALL_BEGIN) {
 			func_nest++;
+			go_back++;
 		}
 		if (opcode == ZEND_EXT_FCALL_END) {
 			func_nest--;
 		}
 
+#if DO_VARS
 		switch (opcode) {
 			case ZEND_SEND_VAL:
 				tmp->vars[tmp->varc] = get_val (cur_opcode);
@@ -763,6 +776,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 				tmp->vars[tmp->varc] = get_array_from_oparray ((zend_op**) &cur_opcode);
 				tmp->varc++;
 		}
+#endif
 		cur_opcode++;
 	}
 
@@ -787,7 +801,8 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 					tmp->function_name = estrdup ("eval");
 					break;
 			}
-			
+
+#if DO_VARS
 			switch (cur_opcode->op1.op_type) {
 				case IS_CONST:
 					sprintf (buffer, "'%s'", cur_opcode->op1.u.constant.value.str.val);
@@ -813,6 +828,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 				tmp->varc++;
 			}
 			break;
+#endif
 		case ZEND_DO_FCALL:
 			switch (cur_opcode->op1.op_type) {
 				case IS_CONST:
@@ -836,8 +852,11 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 			zend_op* tmpOpCode;
 
 			tmpOpCode = cur_opcode;
-			while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME) {
+			while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME || go_back != 0) {
 				tmpOpCode--;
+				if (tmpOpCode->opcode == ZEND_INIT_FCALL_BY_NAME && go_back > 0) {
+					go_back--;
+				}
 			}
 			switch (tmpOpCode->op1.op_type)  {
 				case IS_UNUSED:

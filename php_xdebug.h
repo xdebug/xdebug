@@ -36,6 +36,8 @@ extern zend_module_entry xdebug_module_entry;
 #include "TSRM.h"
 #endif
 
+#define DO_VARS 1
+
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
@@ -64,8 +66,10 @@ typedef struct function_stack_entry {
 	char *function_name;
 	char *filename;
 	int   lineno;
+#if DO_VARS
 	int   varc;
 	char *vars[20];
+#endif
 	int   level;
 	int   refcount;
 } function_stack_entry;
