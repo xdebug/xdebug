@@ -25,6 +25,9 @@
 #include "xdebug_str.h"
 #include "xdebug_var.h"
 #include "usefulstuff.h"
+#ifdef PHP_WIN32
+#include <process.h>
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
