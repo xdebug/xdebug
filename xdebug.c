@@ -1485,6 +1485,8 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 }
 /* }}} */
 
+/* {{{ proto array xdebug_get_function_stack()
+   Returns an array representing the current stack */
 PHP_FUNCTION(xdebug_get_function_stack)
 {
 	xdebug_llist_element *le;
@@ -1541,7 +1543,10 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		add_next_index_zval(return_value, frame);
 	}
 }
+/* }}} */
 
+/* {{{ proto string xdebug_call_class()
+   Returns the name of the calling class */
 PHP_FUNCTION(xdebug_call_class)
 {
 	xdebug_llist_element *le;
@@ -1562,7 +1567,10 @@ PHP_FUNCTION(xdebug_call_class)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto string xdebug_call_function()
+   Returns the function name from which the current function was called from. */
 PHP_FUNCTION(xdebug_call_function)
 {
 	xdebug_llist_element *le;
@@ -1583,7 +1591,10 @@ PHP_FUNCTION(xdebug_call_function)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto string xdebug_call_line()
+   Returns the line number where the current function was called from. */
 PHP_FUNCTION(xdebug_call_line)
 {
 	xdebug_llist_element *le;
@@ -1601,7 +1612,10 @@ PHP_FUNCTION(xdebug_call_line)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto int xdebug_call_file()
+   Returns the filename where the current function was called from. */
 PHP_FUNCTION(xdebug_call_file)
 {
 	xdebug_llist_element *le;
@@ -1619,8 +1633,9 @@ PHP_FUNCTION(xdebug_call_file)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
-/* {{{ proto void xdebug_var_dump(mixed var)
+/* {{{ proto void xdebug_var_dump(mixed var [, ...] )
    Outputs a fancy string representation of a variable */
 PHP_FUNCTION(xdebug_var_dump)
 {
