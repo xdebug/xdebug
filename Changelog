@@ -1,3 +1,9 @@
+Mon Nov 15 18:52:28 CET 2004 Derick Rethans <derick@derickrethans.nl>
+debugclient/configure.in
+xdebug/debugclient/build/threads.m4:
+- Fixed bug #102: Problems with configure for automake 1.8.
+#- We don't use threads here anyway.
+
 Mon Nov 15 13:45:13 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_private.h:
 - Fixed problem with error codes.
