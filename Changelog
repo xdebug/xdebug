@@ -1,3 +1,7 @@
+Sat Apr 12 18:58:39 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_com.c:
+- Fix the Windows stuff
+
 Sat Apr 12 18:54:35 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - ZTS Fix
