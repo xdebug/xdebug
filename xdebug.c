@@ -967,7 +967,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 		php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
 	}
 
-	if (XG(stack)) {
+	if (XG(stack) && XG(stack)->size) {
 		if (!log_only) {
 			if (html) {
 				php_printf("<tr><th bgcolor='#7777dd' colspan='3'>Call Stack</th></tr>\n");
@@ -1058,19 +1058,21 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 		}
 
 		if (!log_only)  {
-			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-
 			if (XG(dump_globals)) {
 				dump_superglobals(html, PG(log_errors) && !is_cli TSRMLS_CC);
 			}
-			if (i->used_vars && i->used_vars->size) {
-				if (html) {
-					php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope</th></tr>\n");
-					php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
-				} else {
-					printf("\n\nVariables in local scope:\n");
+
+			if (XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
+				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+				if (i->used_vars && i->used_vars->size) {
+					if (html) {
+						php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope</th></tr>\n");
+						php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
+					} else {
+						printf("\n\nVariables in local scope:\n");
+					}
+					xdebug_hash_apply(i->used_vars, (void*) &html, dump_used_var_with_contents);
 				}
-				xdebug_hash_apply(i->used_vars, (void*) &html, dump_used_var_with_contents);
 			}
 		}
 
