@@ -3,7 +3,6 @@ TODO
 
 For 1.3.0:
 - Bug fixing
-  * File/line numbers in traces with call_user_func(_array)
   * Double check file/line breakpoints
   * Fix memleaks with the eval command
   * Fix "cont" in remote debugger, test case:

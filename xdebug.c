@@ -572,10 +572,30 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	tmp->arg_done      = 0;
 	tmp->used_vars     = NULL;
 	tmp->user_defined  = type;
+	tmp->filename      = NULL;
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
+		/* Normal function calls */
 		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
-	} else {
+	} else if (EG(current_execute_data) &&
+		EG(current_execute_data)->prev_execute_data &&
+		XDEBUG_LLIST_TAIL(XG(stack))
+	) {
+		/* Ugly hack for call_user_*() type function calls */
+		zend_function *tmpf = EG(current_execute_data)->prev_execute_data->function_state.function;
+		if (tmpf) {
+			if (
+				(strcmp(tmpf->common.function_name, "call_user_func") == 0) ||
+				(strcmp(tmpf->common.function_name, "call_user_func_array") == 0) ||
+				(strcmp(tmpf->common.function_name, "call_user_func_method") == 0) ||
+				(strcmp(tmpf->common.function_name, "call_user_func_method_array") == 0)
+			) {
+				tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
+			}
+		}
+	}
+	if (!tmp->filename) {
+		/* Includes/main script etc */
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
 	}
 #if MEMORY_LIMIT
