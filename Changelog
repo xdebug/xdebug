@@ -1,3 +1,12 @@
+Mon Oct 28 17:09:32 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/tests/memory_usage.phpt
+/xdebug/tests/.cvsignore:
+- Added xdebug.collect_params setting. If this setting is on (the default)
+  then Xdebug collects all parameters passed to functions, otherwise they
+  are not collected at all.
+
 Mon Oct 28 16:33:13 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/usefulstuff.c
 /xdebug/usefulstuff.h
