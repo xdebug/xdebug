@@ -1,3 +1,10 @@
+Wed Sep 15 09:53:46 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/php_xdebug.h:
+- Added request #88: Make the url parameter XDEBUG_SESSION_START optional. So
+  it can be disabled and the user does not need to add it.
+#- This new php.ini setting is xdebug.remote_autostart
+
 Wed Sep 15 09:52:18 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Added Shane's clarifications for our file:// mangling function.
