@@ -639,7 +639,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	) {
 		/* Ugly hack for call_user_*() type function calls */
 		zend_function *tmpf = EG(current_execute_data)->prev_execute_data->function_state.function;
-		if (tmpf && tmpf->common.function_name) {
+		if (tmpf && (tmpf->common.type != 3) && tmpf->common.function_name) {
 			if (
 				(strcmp(tmpf->common.function_name, "call_user_func") == 0) ||
 				(strcmp(tmpf->common.function_name, "call_user_func_array") == 0) ||
