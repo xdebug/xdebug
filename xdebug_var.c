@@ -381,6 +381,136 @@ char* get_zval_value_xml(char *name, zval *val)
 	return str.d;
 }
 
+/*****************************************************************************
+* ** Fancy variable printing routines
+* */
+
+#define BLUE       "#0000ff"
+#define RED        "#ff0000"
+#define GREEN      "#00bb00"
+#define BLUE_GREEN "#00bbbb"
+#define PURPLE     "#bb00bb"
+#define DGREY      "#777777"
+
+static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	xdebug_str *str;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+	str   = va_arg(args, struct xdebug_str*);
+
+	XDEBUG_STR_ADD(str, xdebug_sprintf("%*s", level * 2, ""), 1);
+
+	if (hash_key->nKeyLength==0) { /* numeric key */
+		XDEBUG_STR_ADD(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, DGREY), 1);
+	} else { /* string key */
+		XDEBUG_STR_ADD(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, DGREY), 1);
+	}
+	xdebug_var_export_fancy(zv, str, level + 2 TSRMLS_CC);
+
+	return 0;
+}
+
+static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	xdebug_str *str;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+	str   = va_arg(args, struct xdebug_str*);
+
+	XDEBUG_STR_ADD(str, xdebug_sprintf("%*s", level * 2, ""), 1);
+
+	if (hash_key->nKeyLength != 0) {
+		XDEBUG_STR_ADD(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, DGREY), 1);
+	}
+	xdebug_var_export_fancy(zv, str, level + 2 TSRMLS_CC);
+	return 0;
+}
+
+void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
+{
+	HashTable *myht;
+	char*     tmp_str;
+
+	switch (Z_TYPE_PP(struc)) {
+		case IS_BOOL:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<font color='%s'>%s</font>", BLUE, Z_LVAL_PP(struc) ? "true" : "false"), 1);
+			break;
+
+		case IS_NULL:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<font color='%s'>null</font>", RED), 1);
+			break;
+
+		case IS_LONG:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<font color='%s'>%ld</font>", GREEN, Z_LVAL_PP(struc)), 1);
+			break;
+
+		case IS_DOUBLE:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<font color='%s'>%.*G</font>", BLUE_GREEN, (int) EG(precision), Z_DVAL_PP(struc)), 1);
+			break;
+
+		case IS_STRING:
+			tmp_str = xmlize(Z_STRVAL_PP(struc));
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<font color='%s'>'%s'</font>", PURPLE, tmp_str), 1);
+			efree(tmp_str);
+			break;
+
+		case IS_ARRAY:
+			myht = Z_ARRVAL_PP(struc);
+			XDEBUG_STR_ADD(str, xdebug_sprintf("\n%*s", (level - 1) * 2, ""), 1);
+			XDEBUG_STR_ADDL(str, "<b>array</b>\n", 13, 0);
+			if (myht->nApplyCount < 2) {
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 2, level, str);
+			}
+			break;
+
+		case IS_OBJECT:
+			myht = Z_OBJPROP_PP(struc);
+			XDEBUG_STR_ADD(str, xdebug_sprintf("\n%*s", (level - 1) * 2, ""), 1);
+			if (myht->nApplyCount < 2) {
+				XDEBUG_STR_ADD(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)\n", Z_OBJCE_PP(struc)->name), 1);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_fancy, 2, level, str);
+			} else {
+				XDEBUG_STR_ADDL(str, "<b>object</b> {\n", 16, 0);
+			}
+			break;
+
+		case IS_RESOURCE: {
+			char *type_name;
+
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<b>resource</b>(<i>%ld</i><font color='%s'>,</font> <i>%s</i>)", Z_LVAL_PP(struc), DGREY, type_name ? type_name : "Unknown"), 1);
+			break;
+		}
+
+		default:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<font color='%s'>null</font>", RED), 0);
+			break;
+	}
+	if (Z_TYPE_PP(struc) != IS_ARRAY && Z_TYPE_PP(struc) != IS_OBJECT) {
+		XDEBUG_STR_ADDL(str, "\n", 1, 0);
+	}
+}
+
+char* get_zval_value_fancy(char *name, zval *val TSRMLS_DC)
+{
+	xdebug_str str = {0, 0, NULL};
+
+	XDEBUG_STR_ADDL(&str, "<pre>", 5, 0);
+	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1 TSRMLS_CC);
+	XDEBUG_STR_ADDL(&str, "</pre>", 6, 0);
+
+	return str.d;
+}
+
+/*****************************************************************************
+* ** XML encoding function
+* */
+
 char* xmlize(char *string)
 {
 	int   len = strlen(string);

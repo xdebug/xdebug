@@ -70,6 +70,8 @@ PHP_FUNCTION(xdebug_call_function);
 PHP_FUNCTION(xdebug_call_file);
 PHP_FUNCTION(xdebug_call_line);
 
+PHP_FUNCTION(xdebug_var_dump);
+
 PHP_FUNCTION(xdebug_enable);
 PHP_FUNCTION(xdebug_disable);
 PHP_FUNCTION(xdebug_is_enabled);

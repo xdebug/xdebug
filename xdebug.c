@@ -81,6 +81,8 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_call_file,             NULL)
 	PHP_FE(xdebug_call_line,             NULL)
 
+	PHP_FE(xdebug_var_dump,              NULL)
+
 	PHP_FE(xdebug_enable,                NULL)
 	PHP_FE(xdebug_disable,               NULL)
 	PHP_FE(xdebug_is_enabled,            NULL)
@@ -369,6 +371,8 @@ void stack_element_dtor (void *dummy, void *elem)
 
 PHP_RINIT_FUNCTION(xdebug)
 {
+	zend_function *orig;
+
 	CG(extended_info) = 1;
 	XG(level)         = 0;
 	XG(do_trace)      = 0;
@@ -411,6 +415,9 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	/* Initialize dump superglobals */
 	XG(dumped)        = 0;
+
+	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
+	orig->internal_function.handler = zif_xdebug_var_dump;
 
 	return SUCCESS;
 }
@@ -1221,6 +1228,37 @@ PHP_FUNCTION(xdebug_call_file)
 		RETURN_FALSE;
 	}
 }
+
+/* {{{ proto void xdebug_var_dump(mixed var)
+   Outputs or returns a string representation of a variable */
+PHP_FUNCTION(xdebug_var_dump)
+{
+	zval ***args;
+	int     argc;
+	int     i;
+	char   *val;
+	
+	argc = ZEND_NUM_ARGS();
+	
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	for (i = 0; i < argc; i++) {
+		if (PG(html_errors)) {
+			val = get_zval_value_fancy(NULL, (zval*) *args[i] TSRMLS_CC);
+			PHPWRITE(val, strlen(val));
+			xdfree(val);
+		} else {
+			php_var_dump(args[i], 1 TSRMLS_CC);
+		}
+	}
+	
+	efree(args);
+}
+/* }}} */
 
 PHP_FUNCTION(xdebug_enable)
 {
