@@ -19,7 +19,7 @@
 #ifndef PHP_XDEBUG_H
 #define PHP_XDEBUG_H
 
-#define XDEBUG_VERSION "1.3.2"
+#define XDEBUG_VERSION "1.3.3dev"
 
 #include "php.h"
 
