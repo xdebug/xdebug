@@ -1,3 +1,7 @@
+Wed Mar 02 16:01:32 CET 2005 Derick Rethans <derick@derickrethans.nl>
+package2.xml:
+- Added Package 2 XML
+
 Wed Feb 02 23:50:58 CET 2005 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 oops, forgot to diff first before last commit
