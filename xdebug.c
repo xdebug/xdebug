@@ -742,7 +742,7 @@ ZEND_EXTENSION();
 
 ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	"eXtended Debugger (xdebug)",
-	"0.7.0-dev",
+	"0.7.0",
 	"Derick Rethans",
 	"http://www.jdimedia.nl/derick/xdebug.php",
 	"Copyright (c) 2002 JDI Media Solutions",
