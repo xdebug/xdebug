@@ -1,3 +1,14 @@
+Sun Jun 06 04:03:54 CEST 2004 Shane Caraveo <shane@caraveo.com>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_xml.c:
+- Fix returning text nodes that contain html tags and such
+- Fix dbgp proxy support by adding the idekey attribute
+  Can also use the XDEBUG_SESSION_START var to set the idekey
+  New configuration var, xdebug.idekey
+
+
 Wed May 26 11:08:23 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 :
 - Test for mail
