@@ -1,3 +1,6 @@
+Sat May 11 12:03:25 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
+- Update NEWS
+
 Sat May 11 12:02:58 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Implemented function traces (xdebug_start_trace(), xdebug_stop_trace() and
