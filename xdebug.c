@@ -427,7 +427,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 
 	if (EG(error_reporting) & type) {
-		print_stack (PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+		print_stack (!(strcmp ("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 	}
 
 	/* Log to logger */
