@@ -52,6 +52,8 @@
 
 static int le_xdebug;
 
+static void xdebug_start_trace();
+
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 
@@ -112,6 +114,7 @@ ZEND_GET_MODULE(xdebug)
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_SYSTEM, OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_SYSTEM, OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_SYSTEM, OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
@@ -221,6 +224,10 @@ PHP_RINIT_FUNCTION(xdebug)
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
 	}
+	if (XG(auto_trace)) {
+		xdebug_start_trace();
+	}
+		
 	return SUCCESS;
 }
 
@@ -822,6 +829,12 @@ PHP_FUNCTION(xdebug_is_enabled)
 	RETURN_BOOL(zend_error_cb == new_error_cb);
 }
 
+static void xdebug_start_trace()
+{
+	XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
+	XG(do_trace) = 1;
+}
+
 
 PHP_FUNCTION(xdebug_start_trace)
 {
@@ -833,8 +846,7 @@ PHP_FUNCTION(xdebug_start_trace)
 			return;
 		}
 
-		XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
-		XG(do_trace) = 1;
+		xdebug_start_trace();
 
 		if (fname) {
 			XG(trace_file) = fopen (fname, "a");
