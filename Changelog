@@ -1,3 +1,9 @@
+Sun Sep 1 01:23:52 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_var.c:
+- MFH: Fix for memory consuption bug
+
 Sat Aug 31 22:54:15 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Bump up version no
