@@ -1,3 +1,8 @@
+Thu Apr 24 15:58:30 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- Make breakpoint commands return XML
+
 Mon Apr 21 15:16:41 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml:
 - Update package information
