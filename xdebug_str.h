@@ -19,7 +19,10 @@
 #ifndef __HAVE_XDEBUG_STR_H__
 #define __HAVE_XDEBUG_STR_H__
 
+#include "xdebug_mm.h"
+
 #define XDEBUG_STR_PREALLOC 1024
+#define xdebug_str_dtor(str)  xdfree(str.d)
 
 typedef struct xdebug_str {
 	int   l;
