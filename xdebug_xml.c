@@ -32,7 +32,16 @@ void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output)
 	}
 
 	if (node->text) {
-		xdebug_str_add(output, node->text, 0);
+		if (strstr(node->text, "]]>")) {
+			/* if cdata tags are in the text, then we must base64 encode */
+			int new_len = 0;
+			char *encoded_text = xdebug_base64_encode(node->text, strlen(node->text), &new_len);
+			xdebug_str_add(output, encoded_text, 0);
+		} else {
+			xdebug_str_addl(output, "<![CDATA[", 9, 0);
+			xdebug_str_add(output, node->text, 0);
+			xdebug_str_addl(output, "]]>", 3, 0);
+		}
 	}
 
 	xdebug_str_addl(output, "</", 2, 0);
@@ -95,6 +104,10 @@ void xdebug_xml_add_text(xdebug_xml_node *xml, char *text)
 		xdfree(xml->text);
 	}
 	xml->text = text;
+	if (strstr(xml->text, "]]>")) {
+		/* if cdata tags are in the text, then we must base64 encode */
+		xdebug_xml_add_attribute_ex(xml, "encoding", "base64", 0, 0);
+	}
 }
 
 static void xdebug_xml_attribute_dtor(xdebug_xml_attribute *attr)

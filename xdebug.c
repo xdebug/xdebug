@@ -215,7 +215,27 @@ static PHP_INI_MH(OnUpdateDebugMode)
 	}
 	return SUCCESS;
 }
-	
+
+static PHP_INI_MH(OnUpdateKey)
+{
+	XG(ide_key) = NULL;
+	if (!new_value || !*new_value) {
+		char *ide_key = getenv("DBGP_IDEKEY");
+		if (!ide_key || !*ide_key) {
+			ide_key = getenv("USER");
+			if (!ide_key || !*ide_key) {
+				ide_key = getenv("USERNAME");
+			}
+		}
+		if (ide_key && *ide_key) {
+			XG(ide_key) = xdstrdup(ide_key);
+		}
+	} else {
+		XG(ide_key) = xdstrdup(new_value);
+	}
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
 	/* Debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
@@ -269,6 +289,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 #endif
 	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
+	STD_PHP_INI_ENTRY("xdebug.idekey",            "",          	    PHP_INI_ALL,    OnUpdateKey, ide_key,           zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -350,6 +371,9 @@ void xdebug_env_config()
 		} else
 		if (strcasecmp(envvar, "remote_mode") == 0) {
 			name = "xdebug.remote_mode";
+		} else
+		if (strcasecmp(envvar, "idekey") == 0) {
+			name = "xdebug.idekey";
 		}
 
 		if (name) {
@@ -528,6 +552,10 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 
 	if (XG(error_handler)) {
 		efree(XG(error_handler));
+	}
+
+	if (XG(ide_key)) {
+		xdfree(XG(ide_key));
 	}
 
 	XG(level)            = 0;
@@ -857,6 +885,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		) {
 			convert_to_string_ex(dummy);
 			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
+			XG(ide_key) = xdstrdup(Z_STRVAL_PP(dummy));
 			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_PP(dummy), Z_STRLEN_PP(dummy), time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
 		} else if (
 			PG(http_globals)[TRACK_VARS_COOKIE] &&
@@ -864,9 +893,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		) {
 			convert_to_string_ex(dummy);
 			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
+			XG(ide_key) = xdstrdup(Z_STRVAL_PP(dummy));
 		} else if (getenv("XDEBUG_CONFIG")) {
 			magic_cookie = xdstrdup(getenv("XDEBUG_CONFIG"));
-			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), magic_cookie, strlen(magic_cookie), time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+			if (XG(ide_key) && *XG(ide_key)) {
+				php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), XG(ide_key), strlen(XG(ide_key)), time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+			}
 		}
 			
 

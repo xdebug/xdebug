@@ -1528,7 +1528,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.43 $";
+	return "$Revision: 1.44 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1603,6 +1603,10 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 
 	if (getenv("DBGP_COOKIE")) {
 		xdebug_xml_add_attribute_ex(response, "session", xdstrdup(getenv("DBGP_COOKIE")), 0, 1);
+	}
+
+	if (XG(ide_key) && *XG(ide_key)) {
+		xdebug_xml_add_attribute_ex(response, "idekey", xdstrdup(XG(ide_key)), 0, 1);
 	}
 
 	context->buffer = xdmalloc(sizeof(fd_buf));

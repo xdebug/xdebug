@@ -140,6 +140,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
 	char         *remote_handler; /* php3, gdb, dbgp */
 
+	char         *ide_key;    /* from environment, USER, USERNAME or empty */
+
 	/* remote debugging globals */
 	zend_bool     remote_enabled;
 	zend_bool     breakpoints_allowed;
