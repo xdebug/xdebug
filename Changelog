@@ -1,3 +1,7 @@
+Wed Dec 24 17:47:05 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Fixed bug #36: GDB handler using print causes segfault with wrong syntax
+
 Wed Dec 24 17:46:16 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c
 /xdebug/debugclient/build/buildconf1.mk:
