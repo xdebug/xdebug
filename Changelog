@@ -1,3 +1,9 @@
+Mon Oct 21 13:57:32 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/Makefile
+/xdebug/debugclient/main.c
+/xdebug/debugclient/usefulstuff.c:
+- Being pedantic
+
 Sun Oct 20 21:19:22 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
