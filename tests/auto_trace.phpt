@@ -4,6 +4,7 @@ Test with auto-trace
 xdebug.enable=1
 xdebug.auto_trace=1
 xdebug.collect_params=1
+xdebug.auto_profile=0
 --FILE--
 <?php
 	function foo() {

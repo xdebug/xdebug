@@ -4,6 +4,7 @@ Test for file/line correctness with call_user_func_array()
 xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
+xdebug.auto_profile=0
 --FILE--
 <?php
 xdebug_start_trace();

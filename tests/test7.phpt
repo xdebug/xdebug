@@ -3,6 +3,7 @@ Test for class members
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
+xdebug.auto_profile=0
 --FILE--
 <?php
 	xdebug_start_trace();

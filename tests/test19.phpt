@@ -4,6 +4,7 @@ Test for lots of calls to internal functions
 xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
+xdebug.auto_profile=0
 --FILE--
 <?php
 	for($i=0; $i<256; $i++) {

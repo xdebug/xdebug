@@ -4,6 +4,7 @@ Test for traces to file
 xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
+xdebug.auto_profile=0
 --FILE--
 <?php
 	@unlink('/tmp/bug00002.trace');
