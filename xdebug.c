@@ -47,6 +47,7 @@ void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 function_entry xdebug_functions[] = {
@@ -54,6 +55,10 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_call_function,      NULL)
 	PHP_FE(xdebug_call_file,          NULL)
 	PHP_FE(xdebug_call_line,          NULL)
+
+	PHP_FE(xdebug_enable,             NULL)
+	PHP_FE(xdebug_disable,            NULL)
+	PHP_FE(xdebug_is_enabled,         NULL)
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,       NULL)
 #endif
@@ -82,7 +87,8 @@ ZEND_GET_MODULE(xdebug)
 #endif
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64", PHP_INI_SYSTEM, OnUpdateInt, max_nesting_level, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64", PHP_INI_SYSTEM, OnUpdateInt,  max_nesting_level, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",  PHP_INI_SYSTEM, OnUpdateBool, default_enable,    zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 char *safe_sprintf (const char* fmt, ...)
@@ -130,7 +136,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	zend_execute = xdebug_execute;
 
 	old_error_cb = zend_error_cb;
-	zend_error_cb = xdebug_error_cb;
+	new_error_cb = xdebug_error_cb;
 
 	return SUCCESS;
 }
@@ -169,6 +175,10 @@ PHP_RINIT_FUNCTION(xdebug)
 {
 	XG(level)  = 0;
 	XG(stack)  = srm_llist_alloc (stack_element_dtor);
+
+	if (XG(default_enable)) {
+		zend_error_cb = new_error_cb;
+	}
 	return SUCCESS;
 }
 
@@ -406,6 +416,22 @@ PHP_FUNCTION(xdebug_call_file)
 
 	RETURN_STRING(i->filename, 1);
 }
+
+PHP_FUNCTION(xdebug_enable)
+{
+	zend_error_cb = new_error_cb;
+}
+
+PHP_FUNCTION(xdebug_disable)
+{
+	zend_error_cb = old_error_cb;
+}
+
+PHP_FUNCTION(xdebug_is_enabled)
+{
+	RETURN_BOOL(zend_error_cb == new_error_cb);
+}
+
 
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage)
@@ -669,7 +695,7 @@ ZEND_EXTENSION();
 
 ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	"eXtended Debugger (xdebug)",
-	"0.1",
+	"0.7.0-dev",
 	"Derick Rethans",
 	"http://www.jdimedia.nl/",
 	"Copyright (c) 2002 JDI Media Solutions",

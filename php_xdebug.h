@@ -47,6 +47,11 @@ PHP_FUNCTION(xdebug_get_function_stack);
 PHP_FUNCTION(xdebug_call_function);
 PHP_FUNCTION(xdebug_call_file);
 PHP_FUNCTION(xdebug_call_line);
+
+PHP_FUNCTION(xdebug_enable);
+PHP_FUNCTION(xdebug_disable);
+PHP_FUNCTION(xdebug_is_enabled);
+
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
 #endif
@@ -64,6 +69,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int        level;
 	srm_llist *stack;
 	int        max_nesting_level;
+	zend_bool  default_enable;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 	
