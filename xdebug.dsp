@@ -135,6 +135,14 @@ SOURCE=.\xdebug_llist.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\xdebug_private.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_profiler.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_str.c
 # End Source File
 # Begin Source File
@@ -144,6 +152,10 @@ SOURCE=.\xdebug_superglobals.c
 # Begin Source File
 
 SOURCE=.\xdebug_var.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_xml.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
