@@ -1201,6 +1201,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
+			if (!i->vars[j].value) {
+				i->vars[j].value = get_zval_value(i->vars[j].addr);
+			}
 			if (i->vars[j].name) {
 				add_assoc_string_ex(params, i->vars[j].name, strlen(i->vars[j].name) + 1, i->vars[j].value, 1);
 			} else {
