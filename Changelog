@@ -1,3 +1,13 @@
+Mon Aug 25 13:13:41 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/tests/bug00003.phpt
+/xdebug/tests/bug00004.phpt:
+- Fixed crash bug when a function had sprintf style parameters (ie.
+  strftime()).
+- Fixed a bug in displaying traces.
+- Implemented zend_exec_finished callback (without functionality).
+
 Wed Aug 20 16:23:57 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - One other minor fix
