@@ -112,6 +112,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *trace_output_dir;
 	char         *trace_output_name;
 	long          trace_options;
+	long          trace_format;
 	char         *tracefile_name;
 
 	/* used for code coverage */

@@ -66,7 +66,8 @@ typedef struct xdebug_var {
 
 #define XDEBUG_MAX_FUNCTION_LEN 1024
 
-#define XDEBUG_TRACE_OPTION_APPEND    1
+#define XDEBUG_TRACE_OPTION_APPEND       1
+#define XDEBUG_TRACE_OPTION_COMPUTERIZED 2
 
 #define STATUS_STARTING   0
 #define STATUS_STOPPING   1

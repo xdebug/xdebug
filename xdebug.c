@@ -242,8 +242,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  "/tmp",               PHP_INI_ALL,    OnUpdateString, trace_output_dir,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "crc32",              PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
 #if ZEND_EXTENSION_API_NO < 90000000
+	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateInt,    trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateInt,    trace_options,     zend_xdebug_globals, xdebug_globals)
 #else
+	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_options,     zend_xdebug_globals, xdebug_globals)
 #endif
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   collect_includes,  zend_xdebug_globals, xdebug_globals)
@@ -412,6 +414,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	}
 
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_APPEND", XDEBUG_TRACE_OPTION_APPEND, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_COMPUTERIZED", XDEBUG_TRACE_OPTION_COMPUTERIZED, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
 	return SUCCESS;
@@ -1237,6 +1240,10 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	xdebug_str str = {0, 0, NULL};
 	char      *tmp_value;
 
+	if (XG(trace_format) != 0) {
+		return xdstrdup("");
+	}
+
 	xdebug_str_addl(&str, "                    ", 20, 0);
 	if (XG(show_mem_delta)) {
 		xdebug_str_addl(&str, "        ", 8, 0);
@@ -1253,7 +1260,7 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	return str.d;
 }
 
-static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC)
+static char* return_trace_stack_frame_normal(function_stack_entry* i, int html TSRMLS_DC)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
@@ -1330,6 +1337,41 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 	}
 
 	return str.d;
+}
+
+static char* return_trace_stack_frame_computerized(function_stack_entry* i TSRMLS_DC)
+{
+	int c = 0; /* Comma flag */
+	int j = 0; /* Counter */
+	char *tmp_name;
+	xdebug_str str = {0, 0, NULL};
+
+	tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->level), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%.4f\t", i->time - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%lu\t", i->memory), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%+ld\t", i->memory - i->prev_memory), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
+	xdfree(tmp_name);
+
+	if (i->include_filename) {
+		xdebug_str_add(&str, i->include_filename, 0);
+	}
+
+	xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d\n", i->filename, i->lineno), 1);
+
+	return str.d;
+}
+
+
+static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC)
+{
+	switch (XG(trace_format)) {
+		case 0:
+			return return_trace_stack_frame_normal(i, html TSRMLS_CC);
+		case 1:
+			return return_trace_stack_frame_computerized(i TSRMLS_CC);
+	}
 }
 
 #ifdef ZEND_ENGINE_2
@@ -1693,6 +1735,9 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 		XG(trace_file) = fopen(filename, "a");
 	} else {
 		XG(trace_file) = fopen(filename, "w");
+	}
+	if (options & XDEBUG_TRACE_OPTION_COMPUTERIZED) {
+		XG(trace_format) = 1;
 	}
 	XG(tracefile_name) = estrdup(filename);
 	if (XG(trace_file)) {
