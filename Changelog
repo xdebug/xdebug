@@ -1,3 +1,10 @@
+Wed Feb 18 20:34:08 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug_code_coverage.h
+/xdebug/xdebug.c
+/xdebug/xdebug_code_coverage.c:
+- Implemented function_counter
+
 Tue Feb 10 19:47:41 CET 2004 Shane Caraveo <shane@caraveo.com 
 >
 /xdebug/xdebug_var.c
