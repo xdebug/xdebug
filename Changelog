@@ -1,3 +1,7 @@
+Tue May 14 12:45:29 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/.cvsignore:
+- configure maintenance
+
 Tue May 14 12:41:14 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/Makefile.in:
 - Fix the Makefile
