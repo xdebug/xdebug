@@ -320,11 +320,15 @@ void xdebug_env_config()
 		char *name = NULL;
 		char *envvar = parts->args[i];
 		char *envval = NULL;
-		char *eq = strchr(envvar,'=');
-		if (!eq || !*eq) continue;
+		char *eq = strchr(envvar, '=');
+		if (!eq || !*eq) {
+			continue;
+		}
 		*eq = 0;
 		envval = eq + 1;
-		if (!*envval) continue;
+		if (!*envval) {
+			continue;
+		}
 
 		if (strcasecmp(envvar, "remote_enable") == 0) {
 			name = "xdebug.remote_enable";
@@ -343,7 +347,7 @@ void xdebug_env_config()
 		}
 
 		if (name) {
-			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			zend_alter_ini_entry(name, strlen(name) + 1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 		}
 	}
 
