@@ -1,5 +1,7 @@
-? - xdebug 1.1.0
+Tue Oct 29, 2002 - xdebug 1.1..0pre2
 
++ Implemented class::method, object->method and file.ext:line style
+  breakpoints. (Derick)
 = Changed debugger port from 7869 to 17869. (Derick)
 + Added xdebug.collect_params setting. If this setting is on (the default)
   then Xdebug collects all parameters passed to functions, otherwise they

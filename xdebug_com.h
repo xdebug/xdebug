@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@vl-srm.net>                         |
+   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
  */
 
