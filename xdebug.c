@@ -201,7 +201,8 @@ static PHP_INI_MH(OnUpdateDebugMode)
 PHP_INI_BEGIN()
 	/* Debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.auto_trace_file",   "",                   PHP_INI_ALL,    OnUpdateString, auto_trace_file,   zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  "/tmp",               PHP_INI_ALL,    OnUpdateString, trace_output_dir,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "crc32",              PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
@@ -229,9 +230,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   dump_undefined,    zend_xdebug_globals, xdebug_globals)
 
 	/* Profiler settings */
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",      "0",     PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_output_dir",  "/tmp",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_output_name", "crc32", PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",    "0",     PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_output_dir",  "/tmp",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_output_name", "crc32", PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name, zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
@@ -439,8 +440,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(remote_enabled) = 0;
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
-	if (XG(auto_trace) && XG(auto_trace_file) && strlen(XG(auto_trace_file))) {
-		xdebug_start_trace(XG(auto_trace_file) TSRMLS_CC);
+	if (XG(auto_trace) && XG(trace_output_dir) && strlen(XG(trace_output_dir))) {
+		xdebug_start_trace(NULL TSRMLS_CC);
 	}
 
 	/* Initialize some debugger context properties */
@@ -1464,9 +1465,19 @@ char* xdebug_start_trace(char* fname TSRMLS_DC)
 {
 	char *str_time;
 	char *filename;
+	char  cwd[128];
 
-	filename = xdebug_sprintf("%s.xt", fname);
-	XG(trace_file) = fopen(filename, "a");
+	if (fname) {
+		filename = xdebug_sprintf("%s.xt", fname);
+	} else {
+		if (strcmp(XG(trace_output_name), "crc32") == 0) {
+			getcwd(&cwd, 127);
+			filename = xdebug_sprintf("%s/trace.%lu.xt", XG(trace_output_dir), xdebug_crc32(cwd, strlen(cwd)));
+		} else {
+			filename = xdebug_sprintf("%s/trace.%ld.xt", XG(trace_output_dir), getpid());
+		}
+	}
+	XG(trace_file) = fopen(filename, "w");
 	if (XG(trace_file)) {
 		str_time = xdebug_get_time();
 		fprintf(XG(trace_file), "\nTRACE START [%s]\n", str_time);
