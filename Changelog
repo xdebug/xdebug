@@ -1,3 +1,22 @@
+Thu Mar 25 17:57:32 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_handler_gdb.h
+xdebug/xdebug_handler_php3.c
+xdebug/xdebug_handler_php3.h
+xdebug/xdebug_handlers.h
+xdebug/xdebug_private.h:
+- Added warnings if Xdebug was not loaded as a Zend extension.
+- Fixed bug #49: Included file's names should not be stored by address.
+- Fixed bug #51: Only start a debug session if XDEBUG_SESSION_START is
+  passed as GET or POST parameter, or the DBGP_COOKIE is send to the server.
+  Passing XDEBUG_SESSION_STOP as GET/POST parameter will end the debug
+  session and removes the cookie again. The cookie is also passed to the
+  remote handler backends; for DBGp it is added to the <init> packet.
+- Added the protocol version to the <init> packet.
+
 Mon Mar 22 02:39:57 CET 2004 Derick Rethans <derick@derickrethans.nl>
 debugclient/main.c:
 - Update client to check for \0 at the end of a command packet.
