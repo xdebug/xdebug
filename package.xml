@@ -104,6 +104,7 @@ Xdebug also provides:
         <file role="src" name="config.h.in"/>
         <file role="src" name="config.sub"/>
         <file role="src" name="configure"/>
+        <file role="src" name="configure.in"/>
         <file role="src" name="cvsclean"/>
         <file role="src" name="debugclient.dsp"/>
         <file role="src" name="depcomp"/>
