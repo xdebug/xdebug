@@ -1,3 +1,16 @@
+Mon Apr 12 20:31:01 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handlers.h
+xdebug/xdebug_handler_dbgp.c:
+- Implemented the "return" breakpoint for DBGp.
+- Fixed the "context_get" DBGp command to return errors in case the stack
+  depth requested doesn't exist.
+- Changed the -b and -e options to the DBGp "source" command to default
+  to 0 and "end of script" so that either of those can be emitted. If -b
+  exists and -e misses then the command will return all lines from the -b
+  defined line to the end of the script. If -e exists and -b misses then
+  all source until the line specified with -e is returned.
+
 Sun Apr 11 22:29:49 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 tests/001.phpt
 xdebug/tests/array_map.phpt
