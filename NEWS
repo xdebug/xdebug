@@ -3,6 +3,8 @@
   (Derick)
 + Added FR #5: xdebug_break() function which interupts the script for the debug
   engine. (Derick)
++ Added showing private, protected and public to the fancy var_dump()
+  replacement function. (Derick)
 + Added ini setting "xdebug.dump_global" with which you can turn off dumping of
   super globals even in you have that configured. This is most useful for
   tests. (Derick)

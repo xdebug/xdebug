@@ -507,6 +507,7 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 {
 	int level;
 	xdebug_str *str;
+	char *key;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
@@ -514,8 +515,21 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 
 	xdebug_str_add(str, xdebug_sprintf("%*s", level * 2, ""), 1);
 
+	key = hash_key->arKey;
 	if (hash_key->nKeyLength != 0) {
-		xdebug_str_add(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, DGREY), 1);
+		if ((hash_key->nKeyLength > 2) && (hash_key->arKey[0] == '\0')) {
+			if (hash_key->arKey[1] == '*') {
+				xdebug_str_add(str, "<i>protected</i>", 0);
+				key = &(hash_key->arKey[3]);
+			} else {
+				xdebug_str_add(str, "<i>private</i>", 0);
+				key = &(hash_key->arKey[2]);
+				key = strchr(key, 0) + 1;
+			}
+		} else {
+			xdebug_str_add(str, "<i>public</i>", 0);
+		}
+		xdebug_str_add(str, xdebug_sprintf(" '%s' <font color='%s'>=&gt;</font> ", key, DGREY), 1);
 	}
 	xdebug_var_export_fancy(zv, str, level + 2 TSRMLS_CC);
 	return 0;
@@ -552,20 +566,24 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 		case IS_ARRAY:
 			myht = Z_ARRVAL_PP(struc);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 2, ""), 1);
-			xdebug_str_addl(str, "<b>array</b>\n", 13, 0);
-			if (myht->nApplyCount < 2) {
+			if (myht->nApplyCount < 1) {
+				xdebug_str_addl(str, "<b>array</b>\n", 13, 0);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 2, level, str);
+			} else {
+				xdebug_str_addl(str, "<i>&</i><b>array</b>\n", 21, 0);
 			}
 			break;
 
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 2, ""), 1);
-			if (myht->nApplyCount < 2) {
-				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)\n", Z_OBJCE_PP(struc)->name), 1);
+			if (myht->nApplyCount < 1) {
+				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
+				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_PP(struc)), 1);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_fancy, 2, level, str);
 			} else {
-				xdebug_str_addl(str, "<b>object</b> {\n", 16, 0);
+				xdebug_str_addl(str, "<i>&</i><b>object</b>", 21, 0);
+				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_PP(struc)), 1);
 			}
 			break;
 
