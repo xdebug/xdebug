@@ -17,6 +17,7 @@
  */
 
 #include "php_xdebug.h"
+#include "xdebug_socket.h"
 
 char* xdebug_socket_read_line(int socket, xdebug_socket_buf *context)
 {
@@ -52,7 +53,7 @@ char* xdebug_socket_read_line(int socket, xdebug_socket_buf *context)
 	memcpy(tmp, context->buffer, size);
 	/* Rewrite existing buffer */
 	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
-		char *tmp_buf = xdmalloc(nbufsize + 1);
+		tmp_buf = xdmalloc(nbufsize + 1);
 		memcpy(tmp_buf, ptr + 1, nbufsize);
 		tmp_buf[nbufsize] = 0;
 	}
