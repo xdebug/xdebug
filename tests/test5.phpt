@@ -37,7 +37,7 @@ fucking();
 
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function:  funky_shit() in /%s/test5.php on line 28
+Fatal error: Call to undefined function%sfunky_shit() in /%s/test5.php on line 28
 
 Call Stack:
     %f      %i   1. {main}() /%s/test5.php:0
