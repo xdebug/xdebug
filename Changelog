@@ -1,3 +1,16 @@
+Wed Nov 27 23:39:22 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_llist.h:
+- Added profiling support to xdebug. This introduces 3 new functions,
+  xdebug_start_profiling() that begins profiling process, 
+  xdebug_stop_profiling() that ends the profiling process and
+  xdebug_dump_function_trace() that dumps the profiling data. 
+  xdebug_start_profiling() that begins profiling process, 
+  xdebug_stop_profiling() that ends the profiling process and
+  xdebug_dump_function_trace() that dumps the profiling data. (Ilia)
+
 Fri Nov 15 15:13:13 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/test.sh
 /xdebug/xdebug.c
