@@ -58,7 +58,7 @@ xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag)
 	return xml;
 }
 
-void xdebug_xml_add_attribute_ex(xdebug_xml_node* xml, char *attribute, char *value, int free_name, int free_value);
+void xdebug_xml_add_attribute_ex(xdebug_xml_node* xml, char *attribute, char *value, int free_name, int free_value)
 {
 	xdebug_xml_attribute *attr = xdmalloc(sizeof (xdebug_xml_attribute));
 	xdebug_xml_attribute **ptr;
@@ -102,10 +102,10 @@ static void xdebug_xml_attribute_dtor(xdebug_xml_attribute *attr)
 	if (attr->next) {
 		xdebug_xml_attribute_dtor(attr->next);
 	}
-	if (free_name) {
+	if (attr->free_name) {
 		xdfree(attr->name);
 	}
-	if (free_value) {
+	if (attr->free_value) {
 		xdfree(attr->value);
 	}
 	xdfree(attr);
@@ -122,11 +122,11 @@ void xdebug_xml_node_dtor(xdebug_xml_node* xml)
 	if (xml->attribute) {
 		xdebug_xml_attribute_dtor(xml->attribute);
 	}
-	if (free_tag) {
-		xdfree(attr->tag);
+	if (xml->free_tag) {
+		xdfree(xml->tag);
 	}
 	if (xml->text) {
-		xdfree(text);
+		xdfree(xml->text);
 	}
 	xdfree(xml);
 }

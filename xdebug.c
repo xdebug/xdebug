@@ -236,7 +236,7 @@ PHP_INI_BEGIN()
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_handler",    "dbgp",               PHP_INI_ALL,    OnUpdateString, remote_handler,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_handler",    "gdb",                PHP_INI_ALL,    OnUpdateString, remote_handler,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, remote_host,       zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
 #if ZEND_EXTENSION_API_NO < 90000000
@@ -278,6 +278,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->total_execution_time = 0;
 	xg->total_compiling_time = 0;
 	xg->error_handler        = NULL;
+	xg->breakpoint_count     = 0;
 
 	xdebug_llist_init(&xg->server, dump_dtor);
 	xdebug_llist_init(&xg->get, dump_dtor);
@@ -333,6 +334,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_SD_CPU);
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_SD_NC);
 
+	XG(breakpoint_count) = 0;
 	return SUCCESS;
 }
 
@@ -514,8 +516,6 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "xdebug support", "enabled");
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
-	php_info_print_table_row(2, "Stacktraces support", "enabled");
-	php_info_print_table_row(2, "Function nesting protection support", "enabled");
 	php_info_print_table_end();
 	
 	php_info_print_table_start();
@@ -1792,10 +1792,10 @@ ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 ZEND_EXTENSION();
 
 ZEND_DLEXPORT zend_extension zend_extension_entry = {
-	"Xdebug",
+	XDEBUG_NAME,
 	XDEBUG_VERSION,
-	"Derick Rethans",
-	"http://www.xdebug.org/",
+	XDEBUG_AUTHOR,
+	XDEBUG_URL,
 	"Copyright (c) 2002, 2003",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,

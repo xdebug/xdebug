@@ -25,6 +25,7 @@
 #include "xdebug_hash.h"
 #include "usefulstuff.h"
 
+typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;
 typedef struct _xdebug_con                  xdebug_con;
 typedef struct _xdebug_debug_list           xdebug_debug_list;
@@ -36,12 +37,23 @@ struct _xdebug_debug_list {
 	int   last_line;
 };
 
+#define BREAKPOINT_TYPE_LINE     1
+#define BREAKPOINT_TYPE_FUNCTION 2
+#define BREAKPOINT_TYPE_METHOD   3
+
+struct _xdebug_brk_admin {
+	int   id;
+	int   type;
+	char *key;
+};
+
 struct _xdebug_con {
 	int                    socket;
 	void                  *options;
 	xdebug_remote_handler *handler;
 	fd_buf                *buffer;
 	char                  *program_name;
+	xdebug_hash           *breakpoint_list;
 	xdebug_hash           *function_breakpoints;
 	xdebug_hash           *class_breakpoints;
 	xdebug_llist          *line_breakpoints;

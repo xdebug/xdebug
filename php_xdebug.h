@@ -19,7 +19,11 @@
 #ifndef PHP_XDEBUG_H
 #define PHP_XDEBUG_H
 
-#define XDEBUG_VERSION "2.0.0dev"
+#define XDEBUG_NAME       "Xdebug"
+#define XDEBUG_VERSION    "2.0.0dev"
+#define XDEBUG_AUTHOR     "Derick Rethans"
+#define XDEBUG_COPYRIGHT  "Copyright (c) 2002, 2003 by Derick Rethans"
+#define XDEBUG_URL        "http://xdebug.org"
 
 #include "php.h"
 
@@ -118,6 +122,38 @@ typedef struct xdebug_var {
 
 #define XDEBUG_MAX_FUNCTION_LEN 1024
 
+#define STATUS_STARTING   0
+#define STATUS_STOPPING   1
+#define STATUS_STOPPED    2
+#define STATUS_RUNNING    3
+#define STATUS_BREAK      4
+
+#define REASON_OK         0
+#define REASON_ERROR      1
+#define REASON_ABORTED    2
+#define REASON_EXCEPTION  3
+
+#define XDEBUG_ERROR_OK                              0
+#define XDEBUG_ERROR_PARSE                           1
+#define XDEBUG_ERROR_DUP_ARG                         2
+#define XDEBUG_ERROR_INVALID_ARGS                    3
+
+#define XDEBUG_ERROR_CANT_OPEN_FILE                100
+
+#define XDEBUG_ERROR_BREAKPOINT_NOT_SET            200
+#define XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED 201
+#define XDEBUG_ERROR_BREAKPOINT_INVALID            202
+#define XDEBUG_ERROR_BREAKPOINT_NO_CODE            203
+#define XDEBUG_ERROR_NO_SUCH_BREAKPOINT            204
+#define XDEBUG_ERROR_EVALUATING_CODE               205
+
+#define XDEBUG_ERROR_PROPERTY_NON_EXISTANT         300
+#define XDEBUG_ERROR_STACK_DEPTH_TOO_HIGH          301
+#define XDEBUG_ERROR_STACK_DEPTH_INVALID           302
+
+#define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
+#define XDEBUG_ERROR_UNIMPLEMENTED                 999
+
 typedef struct xdebug_func {
 	char *class;
 	char *function;
@@ -153,6 +189,9 @@ typedef struct function_stack_entry {
 } function_stack_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
+	int           status;
+	int           reason;
+
 	int           level;
 	xdebug_llist *stack;
 	xdebug_llist *trace;
@@ -205,6 +244,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     remote_enabled;
 	zend_bool     breakpoints_allowed;
 	xdebug_con    context;
+	unsigned int  breakpoint_count;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS

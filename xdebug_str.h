@@ -22,6 +22,7 @@
 #include "xdebug_mm.h"
 
 #define XDEBUG_STR_PREALLOC 1024
+#define xdebug_str_ptr_init(str) str = xdmalloc(sizeof(xdebug_str)); str->l = 0; str->a = 0; str->d = NULL;
 #define xdebug_str_dtor(str)  xdfree(str.d)
 
 typedef struct xdebug_str {

@@ -16,17 +16,24 @@
    +----------------------------------------------------------------------+
  */
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "php.h"
+#include "ext/standard/base64.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
+#include "main/php_version.h"
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
 #include "xdebug_com.h"
 #include "xdebug_handler_dbgp.h"
+#include "xdebug_hash.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
 #include "xdebug_var.h"
+#include "xdebug_xml.h"
 
 #ifdef PHP_WIN32
 #include "win32/time.h"
@@ -35,144 +42,119 @@
 #include <fcntl.h>
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+
+/*****************************************************************************
+** Constants and strings for statii and reasons
+*/
+
+/* Status structure */
+#define DBGP_STATUS_STARTING  1
+#define DBGP_STATUS_STOPPING  2
+#define DBGP_STATUS_STOPPED   3
+#define DBGP_STATUS_RUNNING   4
+#define DBGP_STATUS_BREAK     5
+
+char *xdebug_dbgp_status_strings[6] =
+	{"", "starting", "stopping", "stopped", "running", "break"};
+
+#define DBGP_REASON_OK        0
+#define DBGP_REASON_ERROR     1
+#define DBGP_REASON_ABORTED   2
+#define DBGP_REASON_EXCEPTION 3
+
+char *xdebug_dbgp_reason_strings[4] =
+	{"ok", "error", "aborted", "exception"};
+
+
 /*****************************************************************************
 ** Prototypes for debug command handlers
 */
 
-char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_kill(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args);
-char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args);
+/* DBGP_FUNC(break); */
+DBGP_FUNC(breakpoint_disable);
+DBGP_FUNC(breakpoint_enable);
+DBGP_FUNC(breakpoint_get);
+DBGP_FUNC(breakpoint_list);
+DBGP_FUNC(breakpoint_remove);
+DBGP_FUNC(breakpoint_set);
+
+DBGP_FUNC(context_get);
+DBGP_FUNC(context_names);
+
+DBGP_FUNC(eval);
+DBGP_FUNC(feature_get);
+DBGP_FUNC(feature_set);
+
+DBGP_FUNC(property_get);
+DBGP_FUNC(property_set);
+DBGP_FUNC(property_value);
+
+DBGP_FUNC(source);
+DBGP_FUNC(stack_depth);
+DBGP_FUNC(stack_get);
+DBGP_FUNC(status);
+
+DBGP_FUNC(stderr);
+DBGP_FUNC(stdout);
+
+DBGP_FUNC(kill);
+DBGP_FUNC(run);
+DBGP_FUNC(step_into);
+DBGP_FUNC(step_out);
+DBGP_FUNC(step_over);
+DBGP_FUNC(stop);
 
 /*****************************************************************************
 ** Dispatcher tables for supported debug commands
 */
 
-static xdebug_dbgp_cmd commands_init[] = {
-	{ "option", 2, "option [setting] [value]", xdebug_handle_option, 1, "Set a debug session option" },
-	{ "run",    0, "run",                      xdebug_handle_run,    1, "Start the script" },
-	{ NULL, 0, NULL, NULL, 0, NULL }
-};
+static xdebug_dbgp_cmd dbgp_commands[] = {
+	/* DBGP_FUNC_ENTRY(break) */
+	DBGP_FUNC_ENTRY(breakpoint_disable)
+	DBGP_FUNC_ENTRY(breakpoint_enable)
+	DBGP_FUNC_ENTRY(breakpoint_get)
+	DBGP_FUNC_ENTRY(breakpoint_list)
+	DBGP_FUNC_ENTRY(breakpoint_remove)
+	DBGP_FUNC_ENTRY(breakpoint_set)
 
-static xdebug_dbgp_cmd commands_breakpoint[] = {
-	{ "break",      1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 1,
-		"Set breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber, function name or '{main}'\n"
-		"             for the first PHP line."
-	},
-	{ "bre",        1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 0,
-		"Set breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber, function name or '{main}'\n"
-		"             for the first PHP line."
-	},
-	{ "delete",     1, "del(ete) [functionname|filename:linenumber]", xdebug_handle_delete, 1,
-		"Removed breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber, function name or '{main}'\n"
-		"             for the first PHP line."
-	},
-	{ "del",        1, "del(ete) [functionname|filename:linenumber]", xdebug_handle_delete, 0,
-		"Removed breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber, function name or '{main}'\n"
-		"             for the first PHP line."
-	},
-	{ "show-breakpoints", 0, "show-breakpoints",                      xdebug_handle_show_breakpoints, 1,
-		"Shows a list of all breakpoints and optional conditions."
-	},
-	{ NULL, 0, NULL, NULL, 0, NULL }
-};
+	DBGP_FUNC_ENTRY(context_get)
+	DBGP_FUNC_ENTRY(context_names)
 
-static xdebug_dbgp_cmd commands_data[] = {
-	{ "eval",       1, "eval [php code to execute]",                 xdebug_handle_eval,       1,
-		"Evaluation PHP code"
-	},
-	{ "show",       0, "show",                                       xdebug_handle_show,       1,
-		"Show a list of all variables"
-	},
-	{ "show-local", 0, "show-local",                                 xdebug_handle_show_local, 1,
-		"Show a list of all variables including their contents"
-	},
-	{ "print",      1, "print",                                      xdebug_handle_print,      1,
-		"Prints the contents of the variable"
-	},
-	{ NULL, 0, NULL, NULL, 0, NULL }
-};
+	DBGP_FUNC_ENTRY(eval)
+	DBGP_FUNC_ENTRY(feature_get)
+	DBGP_FUNC_ENTRY(feature_set)
 
-static xdebug_dbgp_cmd commands_run[] = {
-	{ "kill",       0, "kill",                                       xdebug_handle_kill,       1, "Kill the script" },
-	{ "quit",       0, "quit",                                       xdebug_handle_quit,       1, "Close the debug session" },
-	{ NULL, 0, NULL, NULL, 0, NULL }
-};
+	DBGP_FUNC_ENTRY(property_get)
+	DBGP_FUNC_ENTRY(property_set)
+	DBGP_FUNC_ENTRY(property_value)
 
-static xdebug_dbgp_cmd commands_runtime[] = {
-	{ "backtrace",  0, "backtrace [full]",                           xdebug_handle_backtrace,  0,
-		"Print backtrace of all stack frames.\n"
-		"             Use of the 'full' qualifier also prints the values of the local\n"
-		"             variables."
-	},
-	{ "bt",         0, "bt [full]",                                  xdebug_handle_backtrace,  1,
-		"Print backtrace of all stack frames.\n"
-		"             Use of the 'full' qualifier also prints the values of the local\n"
-		"             variables."
-	},
+	DBGP_FUNC_ENTRY(source)
+	DBGP_FUNC_ENTRY(stack_depth)
+	DBGP_FUNC_ENTRY(stack_get)
+	DBGP_FUNC_ENTRY(status)
 
-	{ "cont",       0, "cont(inue)",                                 xdebug_handle_cont,       0,
-		"Continue script being debugged, after error or breakpoint."
-	},
-	{ "continue",   0, "cont(inue)",                                 xdebug_handle_cont,       1,
-		"Continue script being debugged, after error or breakpoint."
-	},
+	DBGP_FUNC_ENTRY(stderr)
+	DBGP_FUNC_ENTRY(stdout)
 
-	{ "finish",     0, "finish",                                     xdebug_handle_finish,     1,
-		"Continues executing until the current function returned to the\n"
-		"             calling function."
-	},
-
-	{ "list",       0, "list [[file:]beginline] [endline]",          xdebug_handle_list,       1,
-		"Lists specified line. With no arguments, lists ten more lines\n"
-		"             after or before the previous listing. One argument specifies the\n"
-		"             the line in a file to start, and then lines are listed around that\n"
-		"             line. Two arguments specify starting and ending lines to list."
-	},
-
-	{ "next",       0, "next",                                       xdebug_handle_next,       1,
-		"Continues executing until the next statement in the same stack\n"
-		"             frame. Is basically the same as 'step' but does not go into\n"
-		"             function calls if they occur."
-	},
-
-	{ "pwd",        0, "pwd",                                        xdebug_handle_pwd,        1,
-		"Prints the current working directory."
-	},
-
-	{ "step",       0, "step",                                       xdebug_handle_step,       1,
-		"Continues executing until the next statement."
-	},
-
-	{ NULL, 0, NULL, NULL, 0, NULL }
+	DBGP_CONT_FUNC_ENTRY(kill)
+	DBGP_CONT_FUNC_ENTRY(run)
+	DBGP_CONT_FUNC_ENTRY(step_into)
+	DBGP_CONT_FUNC_ENTRY(step_out)
+	DBGP_CONT_FUNC_ENTRY(step_over)
+	DBGP_CONT_FUNC_ENTRY(stop)
+	{ NULL, NULL }
 };
 
 /*****************************************************************************
 ** Utility functions
 */
 
-static xdebug_dbgp_cmd* scan_cmd(xdebug_dbgp_cmd *ptr, char *line)
+static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 {
+	xdebug_dbgp_cmd *ptr = dbgp_commands;
+
 	while (ptr->name) {
-		if (strcmp(ptr->name, line) == 0) {
+		if (strcmp(ptr->name, cmd) == 0) {
 			return ptr;
 		}
 		ptr++;
@@ -180,170 +162,39 @@ static xdebug_dbgp_cmd* scan_cmd(xdebug_dbgp_cmd *ptr, char *line)
 	return NULL;
 }
 
-static char *make_message(xdebug_con *context, int error_code, char *message)
+static char *make_message(xdebug_con *context, xdebug_xml_node *message, int *len)
 {
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
-	char               *tmp;
-	char               *ret;
-	char               *type;
+	xdebug_str  xml_message = {0, 0, NULL};
+	xdebug_str *ret;
 
-	if ((error_code & XDEBUG_E) == XDEBUG_E) {
-		type = "error";
-	} else {
-		type = "data";
-	}
-	
-	switch (options->response_format) {
-		case XDEBUG_RESPONSE_XML:
-			tmp = xmlize(message);
-			ret = xdebug_sprintf("<xdebug><%s><code>%d</code><message>%s</message></%s></xdebug>", type, error_code, tmp, type);
-			efree(tmp);
-			return ret;
-			break;
+	xdebug_str_ptr_init(ret);
 
-		case XDEBUG_RESPONSE_NORMAL:
-		default:
-			return xdebug_sprintf("%d %s", error_code, message);
-			break;
-	}
+	xdebug_xml_return_node(message, &xml_message);
+
+	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l), 1);
+	xdebug_str_addl(ret, "\0", 1, 0);
+	xdebug_str_add(ret, xml_message.d, 0);
+	xdebug_str_addl(ret, "\0", 1, 0);
+	xdebug_str_dtor(xml_message);
+
+	*len = ret->l;
+	return ret->d;
 }
 
-static void send_message(xdebug_con *context, int error_code, char *message)
+static void send_message(xdebug_con *context, xdebug_xml_node *message)
 {
 	char *tmp;
+	int   len;
 
-	tmp = make_message(context, error_code, message);
-	SENDMSG(context->socket, xdebug_sprintf("%s\n", tmp));
-	xdfree(tmp);
+	tmp = make_message(context, message, &len);
+	SSENDL(context->socket, tmp, len);
 }
 
 
 /*****************************************************************************
-** Helpers for looking up commands
+** Data returning functions
 */
-
-static inline xdebug_dbgp_cmd* lookup_cmd_in_group(char *line, xdebug_dbgp_cmd *group, int flag, int test_flag)
-{
-	xdebug_dbgp_cmd *ptr;
-
-	if (flag & test_flag) {
-		ptr = scan_cmd(group, line);
-		if (ptr) {
-			return (ptr);
-		}
-	}
-	return NULL;
-}
-
-static xdebug_dbgp_cmd* lookup_cmd(char *line, int flag)
-{
-	xdebug_dbgp_cmd *ptr;
-	
-	if ((ptr = lookup_cmd_in_group(line, commands_init,       flag, XDEBUG_INIT)) != NULL)       return ptr;
-	if ((ptr = lookup_cmd_in_group(line, commands_breakpoint, flag, XDEBUG_BREAKPOINT)) != NULL) return ptr;
-	if ((ptr = lookup_cmd_in_group(line, commands_run,        flag, XDEBUG_RUN)) != NULL)        return ptr;
-	if ((ptr = lookup_cmd_in_group(line, commands_runtime,    flag, XDEBUG_RUNTIME)) != NULL)    return ptr;
-	if ((ptr = lookup_cmd_in_group(line, commands_data,       flag, XDEBUG_DATA)) != NULL)       return ptr;
-#if 0
-	if ((ptr = lookup_cmd_in_group(line, commands_status,     flag, XDEBUG_STATUS)) != NULL)     return ptr;
-#endif
-	return NULL;
-}
-
-/*****************************************************************************
-** Helpers for the "help" command
-*/
-
-static inline void show_available_commands_in_group(xdebug_con *h, int fmt, int flag, int test_flag, xdebug_dbgp_cmd *ptr)
-{
-	char *tmp;
-
-	if (flag & test_flag ) {
-    	while (ptr->name) {
-			if (ptr->show && ptr->help) {
-				switch (fmt) {
-					case XDEBUG_RESPONSE_XML:
-						tmp = xmlize(ptr->help);
-						SENDMSG(h->socket, xdebug_sprintf("<command><name>%s</name><desc>%s</desc></command>", ptr->name, tmp));
-						efree(tmp);
-						break;
-					default:
-						SENDMSG(h->socket, xdebug_sprintf("%-12s %s\n", ptr->name, ptr->help));
-						break;
-				}
-			}
-	        ptr++;
-	    }
-	}
-}
-
-static void show_available_commands(xdebug_con *h, int flag)
-{
-	xdebug_dbgp_options* o = (xdebug_dbgp_options*) h->options;
-
-	if (o->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf("<xdebug><help>"));
-	}
-	show_available_commands_in_group(h, o->response_format, flag, XDEBUG_INIT,       commands_init);
-	show_available_commands_in_group(h, o->response_format, flag, XDEBUG_BREAKPOINT, commands_breakpoint);
-	show_available_commands_in_group(h, o->response_format, flag, XDEBUG_RUN,        commands_run);
-	show_available_commands_in_group(h, o->response_format, flag, XDEBUG_RUNTIME,    commands_runtime);
-	show_available_commands_in_group(h, o->response_format, flag, XDEBUG_DATA,       commands_data);
-#if 0
-	show_available_commands_in_group(h, o->response_format, flag, XDEBUG_STATUS,     commands_status);
-#endif
-	if (o->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf("</help></xdebug>\n"));
-	}
-}
-
-static void show_command_info(xdebug_con *h, xdebug_dbgp_cmd* cmd)
-{
-	xdebug_dbgp_options *o = (xdebug_dbgp_options*) h->options;
-	char               *t1, *t2;
-
-	if (cmd) {
-		if (o->response_format == XDEBUG_RESPONSE_XML) {
-			t1 = xmlize(cmd->description);
-			t2 = xmlize(cmd->help);
-			SENDMSG(h->socket, xdebug_sprintf("<xdebug><help><command><syntax>%s</syntax><desc>%s</desc></help</xdebug>\n", t1, t2));
-			efree(t1);
-			efree(t2);
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("Syntax: %s\n%12s %s\n", cmd->description, " ", cmd->help));
-		}
-	} else {
-		send_message(h, XDEBUG_E_NO_INFO, "No information available for this command.");
-	}
-}
-
-/*****************************************************************************
-** Data printing functions
-*/
-static char *get_variable(xdebug_con *context, char *name, zval *val)
-{
-	xdebug_dbgp_options* options = (xdebug_dbgp_options*) context->options;
-	char *str_rep, *ret;
-
-	switch (options->response_format) {
-	   	case XDEBUG_RESPONSE_NORMAL:
-			str_rep = get_zval_value(val);
-			if (name) {
-				ret = xdebug_sprintf("$%s = %s\n", name, str_rep);
-			} else {
-				ret = xdebug_sprintf("%s\n", str_rep);
-			}
-			xdfree(str_rep);
-			return ret;
-			break;
-
-		case XDEBUG_RESPONSE_XML:
-		default:
-			return get_zval_value_xml(name, val);
-	}
-}
-
-static char* get_symbol_contents(xdebug_con *context, char* name, int name_length)
+static xdebug_xml_node* get_symbol_contents(char* name, int name_length)
 {
 	HashTable           *st = NULL;
 	zval               **retval;
@@ -351,95 +202,31 @@ static char* get_symbol_contents(xdebug_con *context, char* name, int name_lengt
 
 	st = XG(active_symbol_table);
 	if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return get_variable(context, name, *retval);
+		return get_zval_value_xml_node(name, *retval);
 	}
 
 	st = EG(active_op_array)->static_variables;
 	if (st) {
 		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-			return get_variable(context, name, *retval);
+			return get_zval_value_xml_node(name, *retval);
 		}
 	}
 	
 	st = &EG(symbol_table);
 	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return get_variable(context, name, *retval);
+		return get_zval_value_xml_node(name, *retval);
 	}
+
 	return NULL;
 }
 
-static void dump_used_var(void *context, xdebug_hash_element* he)
-{
-	char               *name = (char*) he->ptr;
-	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
-
-	if (!options->dump_superglobals) {
-		if ((strcmp(name, "GLOBALS") == 0) ||
-			(strcmp(name, "_GET") == 0) ||
-			(strcmp(name, "_POST") == 0) ||
-			(strcmp(name, "_COOKIE") == 0) ||
-			(strcmp(name, "_REQUEST") == 0) ||
-			(strcmp(name, "_SERVER") == 0) ||
-			(strcmp(name, "_ENV") == 0) ||
-			(strcmp(name, "_SESSION") == 0))
-		{
-			return;
-		}
-	}
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
-	} else {
-		SENDMSG(h->socket, xdebug_sprintf("$%s\n", name));
-	}
-}
-
-
-static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
-{
-	char               *name = (char*) he->ptr;
-	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
-	char               *contents;
-
-	if (!options->dump_superglobals) {
-		if ((strcmp(name, "GLOBALS") == 0) ||
-			(strcmp(name, "_GET") == 0) ||
-			(strcmp(name, "_POST") == 0) ||
-			(strcmp(name, "_COOKIE") == 0) ||
-			(strcmp(name, "_REQUEST") == 0) ||
-			(strcmp(name, "_SERVER") == 0) ||
-			(strcmp(name, "_ENV") == 0) ||
-			(strcmp(name, "_SESSION") == 0))
-		{
-			return;
-		}
-	}
-	contents = get_symbol_contents(context, name, strlen(name) + 1);
-	if (contents) {
-		if (options->response_format == XDEBUG_RESPONSE_XML) {
-			SENDMSG(h->socket, contents);
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("%s", contents));
-			xdfree(contents);
-		}
-	} else {
-		if (options->response_format == XDEBUG_RESPONSE_XML) {
-			SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("$%s = *uninitialized*\n", name));
-		}
-	}
-}
-
-static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int offset, int response_format TSRMLS_DC)
+static char* return_source(char *file, int begin, int end TSRMLS_DC)
 {
 	int    fd;
 	fd_buf fd_buffer = { NULL, 0 };
 	int    i = begin;
 	char  *line = NULL;
-	int    update = 0;
-	char  *tmp;
+	xdebug_str source = { 0, 0, NULL };
 
 	if (i < 0) {
 		begin = 0;
@@ -448,8 +235,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 
 	/* Read until the "begin" line has been read */
 	if ((fd = open(file, 0)) == -1) {
-		SENDMSG(h->socket, xdebug_sprintf("The file '%s' could not be opened.\n", file));
-		return;
+		return NULL;
 	}
 	
 	while (i > 0) {
@@ -463,14 +249,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 	/* Read until the "end" line has been read */
 	do {
 		if (line) {
-			update = 1;
-			if (response_format == XDEBUG_RESPONSE_XML) {
-				tmp = xmlize(line);
-				SENDMSG(h->socket, xdebug_sprintf("<line file='%s' no='%d'>%s</line>", file, begin + i, tmp));
-				efree(tmp);
-			} else {
-				SENDMSG(h->socket, xdebug_sprintf("%d\t%s\n", begin + i, line));
-			}
+			xdebug_str_add(&source, line, 0);
 			free(line);
 			line = NULL;
 		}
@@ -480,403 +259,421 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 
 	/* Print last line */
 	if (line) {
-		update = 1;
 		free(line);
 		line = NULL;
 	}
-
-	/* Update "last" info */
-	if (update) {
-		if (XG(context).list.last_file && XG(context).list.last_file != file) {
-			xdfree(XG(context).list.last_file);
-		}
-		if (XG(context).list.last_file != file) {
-			XG(context).list.last_file = xdstrdup(file);
-		}
-		XG(context).list.last_line = end + 1 + offset;
-	}
+	return source.d;
 }
 
-static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int response_format)
+static xdebug_xml_node* return_breakpoint(function_stack_entry *i)
 {
-	int   c = 0; /* Comma flag */
-	int   j = 0; /* Counter */
-	char *tmp_fname;
-	char *tmp;
-	int   xml = (response_format == XDEBUG_RESPONSE_XML);
+	char            *tmp_fname;
+	xdebug_xml_node *tmp;
 	TSRMLS_FETCH();
-/*
-* Breakpoint 2, xdebug_execute (op_array=0x82caf50)
-*     at /dat/dev/php/xdebug/xdebug.c:361
-*/
+
 	tmp_fname = show_fname(i, 0 TSRMLS_CC);
-	if (xml) {
-		SENDMSG(h->socket, xdebug_sprintf("<breakpoint><function><name>%s</name><params>", tmp_fname));
-	} else {
-		SENDMSG(h->socket, xdebug_sprintf("Breakpoint, %s(", tmp_fname));
-	}
+
+	tmp = xdebug_xml_node_init("breakpoint");
+	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(i->filename), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", i->lineno), 0, 1);
+
 	xdfree(tmp_fname);
-
-	/* Printing vars */
-	for (j = 0; j < i->varc; j++) {
-		if (c) {
-			SSEND(h->socket, ", ");
-		} else {
-			c = 1;
-		}
-
-		if (i->vars[j].name) {
-		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
-		}
-		if (!i->vars[j].value) {
-			i->vars[j].value = get_zval_value(i->vars[j].addr);
-		}
-		tmp = xmlize(i->vars[j].value);
-		SSEND(h->socket, tmp);
-		efree(tmp);
-	}
-
-	if (xml) {
-		SENDMSG(h->socket, xdebug_sprintf("</params></function><file>%s</file><line>%d</line></breakpoint>", i->filename, i->lineno));
-	} else {
-		SENDMSG(h->socket, xdebug_sprintf(")\n\tat %s:%d\n", i->filename, i->lineno));
-	}
+	return tmp;
 }
 
-static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int response_format, int flags)
+static xdebug_xml_node* return_stackframe(int nr)
 {
-	int c = 0; /* Comma flag */
-	int j = 0; /* Counter */
-	char *tmp_fname;
-	char *tmp;
+	xdebug_llist_element *le = XDEBUG_LLIST_TAIL(XG(stack));
+	int                   count_down = nr;
+	function_stack_entry *i; 
+	char                 *tmp_fname;
+	xdebug_xml_node      *tmp;
 	TSRMLS_FETCH();
 	
-/*
-* 0x4001af2e in xdebug_compile_file (file_handle=0xbffff960, type=2)
-*     at /dat/dev/php/xdebug/xdebug.c:901
-*         
-*/
-   	tmp_fname = show_fname(i, 0 TSRMLS_CC);
-	if (response_format == XDEBUG_RESPONSE_XML) {
-		if (nr) {
-			SENDMSG(h->socket, xdebug_sprintf("<stackframe><level>%d</level><function><name>%s</name><params>", nr, tmp_fname));
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("<stackframe><function><name>%s</name><params>", tmp_fname));
-		}
-	} else {
-		if (nr) {
-			SENDMSG(h->socket, xdebug_sprintf("#%-2d %s (", nr, tmp_fname));
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("%s (", tmp_fname));
-		}
+	while (count_down) {
+		count_down--;
+		le = XDEBUG_LLIST_PREV(le);
 	}
+	i = XDEBUG_LLIST_VALP(le);
+
+	tmp_fname = show_fname(i, 0 TSRMLS_CC);
+
+	tmp = xdebug_xml_node_init("breakpoint");
+	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(i->filename), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "level",    xdebug_sprintf("%ld", nr), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", i->lineno), 0, 1);
+
 	xdfree(tmp_fname);
-
-	/* Printing vars */
-	for (j = 0; j < i->varc; j++) {
-		if (c) {
-			SSEND(h->socket, ", ");
-		} else {
-			c = 1;
-		}
-
-		if (i->vars[j].name) {
-		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
-		}
-		if (!i->vars[j].value) {
-			i->vars[j].value = get_zval_value(i->vars[j].addr);
-		}
-		tmp = xmlize(i->vars[j].value);
-		SSEND(h->socket, tmp);
-		efree(tmp);
-	}
-
-	XG(active_symbol_table) = i->symbol_table;
-	if (response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf("</params></function><file>%s</file><line>%d</line>", i->filename, i->lineno));
-		if (flags & XDEBUG_FRAME_FULL && i->used_vars) {
-			SSEND(h->socket, "<locals>");
-			xdebug_hash_apply(i->used_vars, (void *) h, dump_used_var_with_contents);
-			SSEND(h->socket, "</locals>");
-		}
-		SSEND(h->socket, "</stackframe>");
-	} else {
-		SENDMSG(h->socket, xdebug_sprintf(")\n    at %s:%d\n", i->filename, i->lineno));
-		if (flags & XDEBUG_FRAME_FULL && i->used_vars) {
-			xdebug_hash_apply(i->used_vars, (void *) h, dump_used_var_with_contents);
-			SSEND(h->socket, "\n");
-		}
-	}
-	XG(active_symbol_table) = NULL;
+	return tmp;
 }
 
 /*****************************************************************************
-** Client command handlers
+** Client command handlers - Breakpoints
 */
 
-char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args)
+/* Helper functions */
+void xdebug_hash_admin_dtor(xdebug_brk_admin *admin)
+{
+	xdfree(admin->key);
+	xdfree(admin);
+}
+
+static int breakpoint_admin_add(xdebug_con *context, int type, char *key)
+{
+	xdebug_brk_admin *admin = xdmalloc(sizeof(xdebug_brk_admin));
+	char             *hkey;
+
+	XG(breakpoint_count)++;
+	admin->id   = getpid() * 10000 + XG(breakpoint_count);
+	admin->type = type;
+	admin->key  = xdstrdup(key);
+
+	hkey = xdebug_sprintf("%lu", admin->id);
+	xdebug_hash_add(context->breakpoint_list, hkey, strlen(hkey), (void*) admin);
+	xdfree(hkey);
+
+	return admin->id;
+}
+
+static int breakpoint_admin_fetch(xdebug_con *context, char *hkey, int *type, char **key)
+{
+	xdebug_brk_admin *admin;
+
+	if (xdebug_hash_find(context->breakpoint_list, hkey, strlen(hkey), (void *) &admin)) {
+		*type = admin->type;
+		*key  = admin->key;
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+
+}
+
+static int breakpoint_admin_remove(xdebug_con *context, char *hkey)
+{
+	if (xdebug_hash_delete(context->breakpoint_list, hkey, strlen(hkey))) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
+DBGP_FUNC(breakpoint_disable)
+{
+	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+}
+
+DBGP_FUNC(breakpoint_enable)
+{
+	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+}
+
+static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
+{
+	if (brk->file) {
+		xdebug_xml_add_attribute_ex(xml, "filename", xdstrdup(brk->file), 0, 1);
+	}
+	if (brk->lineno) {
+		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", brk->lineno), 0, 1);
+	}
+	if (brk->functionname) {
+		xdebug_xml_add_attribute_ex(xml, "function", xdstrdup(brk->functionname), 0, 1);
+	}
+	if (brk->classname) {
+		xdebug_xml_add_attribute_ex(xml, "class", xdstrdup(brk->classname), 0, 1);
+	}
+}
+
+static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 {
 	xdebug_llist_element *le;
-	int                   counter = 1;
-	int                   full = XDEBUG_FRAME_NORMAL;
-	xdebug_dbgp_options   *options = (xdebug_dbgp_options*) context->options;
-	int                   xml = (options->response_format == XDEBUG_RESPONSE_XML);
-	TSRMLS_FETCH();
+	xdebug_brk_info      *brk = NULL;
+	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
-	if (args->c == 1 && strcmp(args->args[0], "full") == 0) {
-		full = XDEBUG_FRAME_FULL;
-	}
+	switch (type) {
+		case BREAKPOINT_TYPE_LINE:
+			/* First we split the key into filename and linenumber */
+			xdebug_arg_init(parts);
+			xdebug_explode("$", hkey, parts, -1);
 
-	SSEND(context->socket, xml ? "<xdebug><backtrace>" : "");
-	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-		print_stackframe(context, counter++, XDEBUG_LLIST_VALP(le), options->response_format, full);
-	}
-	SSEND(context->socket, xml ? "</backtrace></xdebug>\n" : "\n");
-
-	return NULL;
-}
-
-char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
-{
-	xdebug_arg      *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	char            *tmp_name;
-	xdebug_brk_info *extra_brk_info;
-	xdebug_str       eval = {0, 0, NULL};
-	int              i = 0;
-
-	xdebug_arg_init(method);
-
-	extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
-	extra_brk_info->file = NULL;
-	extra_brk_info->condition = NULL;
-	extra_brk_info->classname = NULL;
-	extra_brk_info->functionname = NULL;
-
-	if (strstr(args->args[0], "::")) { /* class::method */
-		xdebug_explode("::", args->args[0], method, -1);
-		extra_brk_info->classname = xdstrdup(method->args[0]);
-		extra_brk_info->functionname = xdstrdup(method->args[1]);
-
-		if (method->c != 2) {
-			xdebug_arg_dtor(method);
-			xdebug_brk_info_dtor(extra_brk_info);
-			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for class/method combination.");
-		} else {
-			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) extra_brk_info)) {
-				xdebug_arg_dtor(method);
-				xdebug_brk_info_dtor(extra_brk_info);
-				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
-			} else {
-				send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on class/method combination.");
-				xdebug_arg_dtor(method);
-			}
-		}
-	} else if (strstr(args->args[0], "->")) { /* class->method */
-		xdebug_explode("->", args->args[0], method, -1);
-		extra_brk_info->classname = xdstrdup(method->args[0]);
-		extra_brk_info->functionname = xdstrdup(method->args[1]);
-
-		if (method->c != 2) {
-			xdebug_arg_dtor(method);
-			xdebug_brk_info_dtor(extra_brk_info);
-			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for class/method combination.");
-		} else {
-			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) extra_brk_info)) {
-				xdebug_arg_dtor(method);
-				xdebug_brk_info_dtor(extra_brk_info);
-				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
-			} else {
-				send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on class/method combination.");
-				xdebug_arg_dtor(method);
-			}
-		}
-	} else if (strstr(args->args[0], ":")) { /* file:line */
-		xdebug_explode(":", args->args[0], method, -1); /* 0 = filename, 1 = linenumer */
-		if (method->c != 2) {
-			xdebug_arg_dtor(method);
-			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for file:line combination.");
-		} else {
-			/* Make search key */
-			if (method->args[0][0] != '/') {
-#if WIN32|WINNT
-				if (strlen(method->args[0]) > 3
-					&& method->args[0][1] != '|')
-				{
-					tmp_name = xdebug_sprintf("/%s", method->args[0]);
-				} else {
-					tmp_name = xdebug_sprintf("%s", method->args[0]);
-				}
-#else
-				tmp_name = xdebug_sprintf("/%s", method->args[0]);
-#endif
-			} else {
-				tmp_name = xdebug_sprintf("%s", method->args[0]);
-			}
-
-			/* Set line number in extra structure */
-			extra_brk_info->lineno = atoi(method->args[1]);
-			extra_brk_info->file = tmp_name;
-			extra_brk_info->file_len = strlen(tmp_name);
-
-			/* If there are more second parameters to the "break" command, then we
-			 * concat them and use it as a conditional statement */
-			if (args->c > 1) {
-				XDEBUG_STR_ADD(&eval, args->args[1], 0);
-
-				for (i = 2; i < args->c; i++) {
-					XDEBUG_STR_ADD(&eval, " ", 0);
-					XDEBUG_STR_ADD(&eval, args->args[i], 0);
-				}
-				extra_brk_info->condition = xdstrdup(eval.d);
-				XDEBUG_STR_FREE(&eval);
-			}
-
-			/* Add breakpoint to the list */
-			xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) extra_brk_info);
-			send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on file:line combination.");
-			xdebug_arg_dtor(method);
-		}
-	} else { /* function */
-		extra_brk_info->functionname = xdstrdup(args->args[0]);
-
-		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) extra_brk_info)) {
-			xdebug_arg_dtor(method);
-			xdebug_brk_info_dtor(extra_brk_info);
-			return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
-		} else {
-			send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on function.");
-			xdebug_arg_dtor(method);
-		}
-	}
-	return NULL;
-}
-
-char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args)
-{
-	SSEND(context->socket, "Continuing.\n");
-	return NULL;
-}
-
-char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
-{
-	xdebug_arg      *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	char            *tmp_name;
-	xdebug_llist_element *le;
-	xdebug_brk_info      *brk;
-	TSRMLS_FETCH();
-
-	xdebug_arg_init(method);
-
-	if (strstr(args->args[0], "::")) { /* class::method */
-		xdebug_explode("::", args->args[0], method, -1);
-		if (method->c != 2) {
-			xdebug_arg_dtor(method);
-			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for class/method combination.");
-		} else {
-			if (!xdebug_hash_delete(context->class_breakpoints, args->args[0], strlen(args->args[0]))) {
-				xdebug_arg_dtor(method);
-				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_REMOVED, "Breakpoint could not be removed.");
-			} else {
-				send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
-				xdebug_arg_dtor(method);
-			}
-		}
-	} else if (strstr(args->args[0], "->")) { /* class->method */
-		xdebug_explode("->", args->args[0], method, -1);
-		if (method->c != 2) {
-			xdebug_arg_dtor(method);
-			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for class/method combination.");
-		} else {
-			if (!xdebug_hash_delete(context->class_breakpoints, args->args[0], strlen(args->args[0]))) {
-				xdebug_arg_dtor(method);
-				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_REMOVED, "Breakpoint could not be removed.");
-			} else {
-				send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
-				xdebug_arg_dtor(method);
-			}
-		}
-	} else if (strstr(args->args[0], ":")) { /* file:line */
-		xdebug_explode(":", args->args[0], method, -1); /* 0 = filename, 1 = linenumer */
-		if (method->c != 2) {
-			xdebug_arg_dtor(method);
-			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for file:line combination.");
-		} else {
-			/* Make search key */
-			if (method->args[0][0] != '/') {
-				tmp_name = xdebug_sprintf("/%s", method->args[0]);
-			} else {
-				tmp_name = xdebug_sprintf("%s", method->args[0]);
-			}
-
-			/* Add breakpoint to the list */
+			/* Second we loop through the list of file/line breakpoints to
+			 * look for our thingy */
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
-				if (atoi(method->args[1]) == brk->lineno && strcmp(tmp_name, brk->file) == 0) {
-					xdebug_llist_remove(context->line_breakpoints, le, NULL);
-					send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
-					xdebug_arg_dtor(method);
-					return NULL;
+				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[2], brk->file_len) == 0) {
+					xdebug_arg_dtor(parts);
+					return brk;
 				}
 			}
-			xdebug_arg_dtor(method);
-		}
-	} else { /* function */
-		if (!xdebug_hash_delete(context->function_breakpoints, args->args[0], strlen(args->args[0]))) {
-			xdebug_arg_dtor(method);
-			return make_message(context, XDEBUG_E_BREAKPOINT_NOT_REMOVED, "Breakpoint could not be removed.");
-		} else {
-			send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
-			xdebug_arg_dtor(method);
-		}
+
+			/* Cleaning up */
+			xdebug_arg_dtor(parts);
+			break;
+
+		case BREAKPOINT_TYPE_FUNCTION:
+			if (xdebug_hash_find(XG(context).function_breakpoints, hkey, strlen(hkey), (void *) &brk)) {
+				return brk;
+			}
+			break;
+
+		case BREAKPOINT_TYPE_METHOD:
+			if (xdebug_hash_find(XG(context).class_breakpoints, hkey, strlen(hkey), (void *) &brk)) {
+				return brk;
+			}
+			break;
 	}
-	return NULL;
+	return brk;
 }
 
-char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
+static int breakpoint_remove(int type, char *hkey)
 {
-	int        i;
-	xdebug_str buffer = {0, 0, NULL};
-	zval       retval;
-	char      *ret_value;
-	int        old_error_reporting;
-	TSRMLS_FETCH();
+	xdebug_llist_element *le;
+	xdebug_brk_info      *brk = NULL;
+	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+
+	switch (type) {
+		case BREAKPOINT_TYPE_LINE:
+			/* First we split the key into filename and linenumber */
+			xdebug_arg_init(parts);
+			xdebug_explode("$", hkey, parts, -1);
+
+			/* Second we loop through the list of file/line breakpoints to
+			 * look for our thingy */
+			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+				brk = XDEBUG_LLIST_VALP(le);
+
+				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[2], brk->file_len) == 0) {
+					xdebug_llist_remove(XG(context).line_breakpoints, le, NULL);
+					return SUCCESS;
+				}
+			}
+
+			/* Cleaning up */
+			xdebug_arg_dtor(parts);
+			break;
+
+		case BREAKPOINT_TYPE_FUNCTION:
+			if (xdebug_hash_delete(XG(context).function_breakpoints, hkey, strlen(hkey))) {
+				return SUCCESS;
+			}
+			break;
+
+		case BREAKPOINT_TYPE_METHOD:
+			if (xdebug_hash_delete(XG(context).class_breakpoints, hkey, strlen(hkey))) {
+				return SUCCESS;
+			}
+			break;
+	}
+	return FAILURE;
+}
+
+DBGP_FUNC(breakpoint_get)
+{
+	int                   type;
+	char                 *hkey;
+	xdebug_brk_info      *brk;
+
+	if (!CMD_OPTION('d')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
+	/* Lets check if it exists */
+	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey)) {
+		/* so it exists, now we're going to find it in the correct hash/list
+		 * and return the info we have on it */
+		brk = breakpoint_brk_info_fetch(type, hkey);
+		breakpoint_brk_info_add(*retval, brk);
+		/* Now we add some common attributes */
+		xdebug_xml_add_attribute(*retval, "id", CMD_OPTION('d'));
+	} else {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_NO_SUCH_BREAKPOINT)
+	}
+}
+
+static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
+{
+	xdebug_xml_node  *xml_node = (xdebug_xml_node*) xml;
+	xdebug_xml_node  *child;
+	xdebug_brk_admin *admin = (xdebug_brk_admin*) he->ptr;
+	xdebug_brk_info  *brk;
+
+	child = xdebug_xml_node_init("breakpoint");
+	brk = breakpoint_brk_info_fetch(admin->type, admin->key);
+	breakpoint_brk_info_add(child, brk);
+	xdebug_xml_add_attribute_ex(child, "id", xdebug_sprintf("%lu", admin->id), 0, 1);
+	xdebug_xml_add_child(xml_node, child);
+}
+
+DBGP_FUNC(breakpoint_list)
+{
+	xdebug_hash_apply(context->breakpoint_list, (void *) *retval, breakpoint_list_helper);
+}
+
+DBGP_FUNC(breakpoint_remove)
+{
+	int                   type;
+	char                 *hkey;
+	xdebug_brk_info      *brk;
+
+	if (!CMD_OPTION('d')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
+	/* Lets check if it exists */
+	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey)) {
+		/* so it exists, now we're going to find it in the correct hash/list
+		 * and return the info we have on it */
+		brk = breakpoint_brk_info_fetch(type, hkey);
+		breakpoint_brk_info_add(*retval, brk);
+		/* Now we add some common attributes */
+		xdebug_xml_add_attribute(*retval, "id", CMD_OPTION('d'));
+		/* Now we remove the crap */
+		breakpoint_remove(type, hkey);
+		breakpoint_admin_remove(context, CMD_OPTION('d'));
+	} else {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_NO_SUCH_BREAKPOINT)
+	}
+}
+
+DBGP_FUNC(breakpoint_set)
+{
+	xdebug_brk_info *extra_brk_info;
+	char            *tmp_name;
+	int              brk_id = 0;
+
+	extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
+	extra_brk_info->file = NULL;
+	extra_brk_info->classname = NULL;
+	extra_brk_info->functionname = NULL;
+	extra_brk_info->condition = NULL;
+
+	if (!CMD_OPTION('t')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
+	if (strcmp(CMD_OPTION('t'), "line") == 0) {
+		if (!CMD_OPTION('f') || !CMD_OPTION('n')) {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+		}
+		extra_brk_info->file = xdstrdup(CMD_OPTION('f'));
+		extra_brk_info->file_len = strlen(extra_brk_info->file);
+		extra_brk_info->lineno = strtol(CMD_OPTION('n'), NULL, 10);
+
+		tmp_name = xdebug_sprintf("%s$%s", CMD_OPTION('f'), CMD_OPTION('n'));
+		brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_LINE, tmp_name);
+		xdfree(tmp_name);
+		xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) extra_brk_info);
+	} else 
+
+	if (strcmp(CMD_OPTION('t'), "function") == 0) {
+		if (!CMD_OPTION('m')) {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+		}
+		extra_brk_info->functionname = xdstrdup(CMD_OPTION('m'));
+		if (CMD_OPTION('a')) {
+			int   res;
+
+			extra_brk_info->classname = xdstrdup(CMD_OPTION('a'));
+			tmp_name = xdebug_sprintf("%s::%s", CMD_OPTION('a'), CMD_OPTION('m'));
+			res = xdebug_hash_add(context->class_breakpoints, tmp_name, strlen(tmp_name), (void*) extra_brk_info);
+			brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_METHOD, tmp_name);
+			xdfree(tmp_name);
+
+			if (!res) {
+				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+			}
+		} else {
+			if (!xdebug_hash_add(context->function_breakpoints, CMD_OPTION('m'), strlen(CMD_OPTION('m')), (void*) extra_brk_info)) {
+				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_NOT_SET);
+			} else {
+				brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_FUNCTION, CMD_OPTION('m'));
+			}
+		}
+	} else
+
+	if (strcmp(CMD_OPTION('t'), "exception") == 0) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
+	} else
+
+	if (strcmp(CMD_OPTION('t'), "watch") == 0) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
+	}
+
+	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%d", brk_id), 0, 1);
+}
+
+DBGP_FUNC(eval)
+{
+	int              old_error_reporting;
+	char            *eval_string;
+	xdebug_xml_node *ret_xml;
+	zval             ret_zval;
+	int              new_length;
+	int              res;
+
+	if (!CMD_OPTION('v')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
 
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
 	EG(error_reporting) = 0;
 
-	/* Concat all arguments back together */
-	XDEBUG_STR_ADD(&buffer, args->args[0], 0);
+	/* base64 decode eval string */
+	eval_string = php_base64_decode(CMD_OPTION('v'), strlen(CMD_OPTION('v')), &new_length);
 
-	for (i = 1; i < args->c; i++) {
-		XDEBUG_STR_ADD(&buffer, " ", 0);
-		XDEBUG_STR_ADD(&buffer, args->args[i], 0);
-	}
-
+	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
-	if (zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC) == FAILURE) {
-		XDEBUG_STR_FREE(&buffer);
-		EG(error_reporting) = old_error_reporting;
-		XG(breakpoints_allowed) = 1;
-		return make_message(context, XDEBUG_E_EVAL, "Error evaluating code");
+	res = zend_eval_string(eval_string, &ret_zval, "xdebug eval" TSRMLS_CC);
+
+	/* Clean up */
+	EG(error_reporting) = old_error_reporting;
+	XG(breakpoints_allowed) = 1;
+	efree(eval_string);
+
+	/* Handle result */
+	if (res == FAILURE) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_EVALUATING_CODE);
 	} else {
-		XDEBUG_STR_FREE(&buffer);
-		EG(error_reporting) = old_error_reporting;
-		ret_value = get_variable(context, NULL, &retval);
-		SENDMSG(context->socket, xdebug_sprintf("%s\n", ret_value));
-		zval_dtor(&retval);
-		xdfree(ret_value);
-		XG(breakpoints_allowed) = 1;
-		return NULL;
+		ret_xml = get_zval_value_xml_node(NULL, &ret_zval);
+		xdebug_xml_add_child(*retval, ret_xml);
+		zval_dtor(&ret_zval);
 	}
 }
 
-char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args)
+
+DBGP_FUNC(stderr)
+{
+	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+}
+
+DBGP_FUNC(stdout)
+{
+	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+}
+
+
+DBGP_FUNC(kill)
+{
+	zend_bailout();
+}
+
+DBGP_FUNC(run)
+{
+	xdebug_xml_add_attribute_ex(*retval, "filename", context->program_name, 0, 1);
+}
+
+DBGP_FUNC(step_into)
+{
+	XG(context).do_next   = 0;
+	XG(context).do_step   = 1;
+	XG(context).do_finish = 0;
+}
+
+DBGP_FUNC(step_out)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *fse;
-	TSRMLS_FETCH();
 
 	XG(context).do_next   = 0;
 	XG(context).do_step   = 0;
@@ -889,80 +686,12 @@ char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args)
 	} else {
 		XG(context).next_level = -1;
 	}
-
-	return NULL;
 }
 
-char *xdebug_handle_kill(xdebug_con *context, xdebug_arg *args)
-{
-	zend_bailout();
-	return NULL;
-}
-
-char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
-{
-	char               *tmp_file  = NULL;
-	int                 tmp_begin = 0;
-	int                 tmp_end   = 0;
-	xdebug_arg         *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
-	int                 xml = (options->response_format == XDEBUG_RESPONSE_XML);
-	TSRMLS_FETCH();
-
-	xdebug_arg_init(parts);
-
-	switch (args->c) {
-		case 0: 
-			if (XG(context).list.last_file) {
-				tmp_file  = XG(context).list.last_file;
-				tmp_begin = XG(context).list.last_line;
-			} else {
-				tmp_file  = XG(context).program_name;
-				tmp_begin = 1;
-			}
-			tmp_end = tmp_begin + 9;
-			break;
-		case 1: 
-		case 2: 
-			xdebug_explode(":", args->args[0], parts, -1);
-			tmp_begin = parts->c == 1 ? atoi(parts->args[0]) : atoi(parts->args[1]);
-			if (tmp_begin <= 0) {
-				tmp_begin = 1;
-			}
-
-			if (parts->c == 1) { /* Only line is given */
-				if (XG(context).list.last_file) {
-					tmp_file = XG(context).list.last_file;
-				} else {
-					tmp_file = XG(context).program_name;
-				}
-			} else if (parts->c == 2) { /* File:line is given */
-				tmp_file = parts->args[0];
-			}
-
-			if (args->c == 1) {
-				tmp_end = tmp_begin + 9;
-			} else {
-				tmp_end = atoi(args->args[1]);
-			}
-			break;
-		default:
-			return make_message(context, XDEBUG_E_TOO_MANY_ARGUMENTS, "Too many arguments.");
-			break;
-	}
-	SSEND(context->socket, xml ? "<xdebug><list>" : "");
-	print_sourceline(context, tmp_file, tmp_begin, tmp_end, 0, options->response_format TSRMLS_CC);
-	SSEND(context->socket, xml ? "</list></xdebug>\n" : "\n");
-
-	xdebug_arg_dtor(parts);	
-	return NULL;
-}
-
-char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args)
+DBGP_FUNC(step_over)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *fse;
-	TSRMLS_FETCH();
 
 	XG(context).do_next   = 1;
 	XG(context).do_step   = 0;
@@ -975,338 +704,440 @@ char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args)
 	} else {
 		XG(context).next_level = 0;
 	}
-
-	return NULL;
 }
 
-char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
+DBGP_FUNC(stop)
 {
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*)context->options;
-	TSRMLS_FETCH();
+	XG(remote_enabled) = 0;
+}
 
-	if (strcmp(args->args[0], "response_format") == 0) {
-		options->response_format = atoi(args->args[1]);
-	} else if (strcmp(args->args[0], "dump_superglobals") == 0) {
-		options->dump_superglobals = atoi(args->args[1]);
-	} else {
-		return make_message(context, XDEBUG_E_UNKNOWN_OPTION, "Unknown option.");
+
+DBGP_FUNC(source)
+{
+	char *source, *encoded_source;
+	int   new_len;
+
+	if (!CMD_OPTION('f')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 
-	return NULL;
+	if (CMD_OPTION('b') && CMD_OPTION('e')) {
+		source = return_source(CMD_OPTION('f'), strtol(CMD_OPTION('b'), NULL, 10), strtol(CMD_OPTION('e'), NULL, 10) TSRMLS_CC);
+	} else {
+		source = return_source(CMD_OPTION('f'), 0, 999999 TSRMLS_CC);
+	}
+	if (!source) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_CANT_OPEN_FILE);
+	} else {
+		xdebug_xml_add_attribute(*retval, "encoding", "base64");
+		encoded_source = php_base64_encode(source, strlen(source), &new_len);
+		xdebug_xml_add_text(*retval, xdstrdup(encoded_source));
+		efree(encoded_source);
+		xdfree(source);
+	}
 }
 
-char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
+#define XDEBUG_STR_SWITCH_DECL       char *__switch_variable
+#define XDEBUG_STR_SWITCH(s)         __switch_variable = (s);
+#define XDEBUG_STR_CASE(s)           if (strcmp(__switch_variable, s) == 0) {
+#define XDEBUG_STR_CASE_END          } else
+#define XDEBUG_STR_CASE_DEFAULT      {
+#define XDEBUG_STR_CASE_DEFAULT_END  }
+
+DBGP_FUNC(feature_get)
 {
-	xdebug_dbgp_options  *options = (xdebug_dbgp_options*)context->options;
-	int                  xml = (options->response_format == XDEBUG_RESPONSE_XML);
-	char                *var_data;
-	TSRMLS_FETCH();
+	xdebug_dbgp_options *options;
+	XDEBUG_STR_SWITCH_DECL;
+
+	options = (xdebug_dbgp_options*) context->options;
+
+	if (!CMD_OPTION('n')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
+
+	XDEBUG_STR_SWITCH(CMD_OPTION('n')) {
+		XDEBUG_STR_CASE("encoding")
+			xdebug_xml_add_text(*retval, xdstrdup("UTF-8"));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("language_name")
+			xdebug_xml_add_text(*retval, xdstrdup("PHP"));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("language_supports_threads")
+			xdebug_xml_add_attribute(*retval, "supported", "0");
+		XDEBUG_STR_CASE_END
+		
+		XDEBUG_STR_CASE("language_version")
+			xdebug_xml_add_text(*retval, xdstrdup(PHP_VERSION));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("max_children")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_children));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("max_data")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_data));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("max_depth")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_depth));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("protocol_version")
+			xdebug_xml_add_text(*retval, xdstrdup("1"));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("supported_encodings")
+			xdebug_xml_add_text(*retval, xdstrdup("UTF-8"));
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("supports_async")
+			xdebug_xml_add_attribute(*retval, "supported", "0");
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE_DEFAULT
+			/* We need to check if the parameter exists as command */
+		XDEBUG_STR_CASE_DEFAULT_END
+	}
+}
+
+DBGP_FUNC(feature_set)
+{
+	xdebug_dbgp_options *options;
+	XDEBUG_STR_SWITCH_DECL;
+
+	options = (xdebug_dbgp_options*) context->options;
+
+	if (!CMD_OPTION('n') || !CMD_OPTION('v')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
+
+	XDEBUG_STR_SWITCH(CMD_OPTION('n')) {
+
+		XDEBUG_STR_CASE("encoding")
+			if (strcmp(CMD_OPTION('v'), "UTF-8") != 0) {
+				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_ENCODING_NOT_SUPPORTED);
+			}
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("max_children")
+			options->max_children = strtol(CMD_OPTION('v'), NULL, 10);
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("max_data")
+			options->max_data = strtol(CMD_OPTION('v'), NULL, 10);
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("max_depth")
+			options->max_depth = strtol(CMD_OPTION('v'), NULL, 10);
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("multiple_sessions")
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE_DEFAULT
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+		XDEBUG_STR_CASE_DEFAULT_END
+	}
+}
+
+DBGP_FUNC(property_get)
+{
+	xdebug_xml_node *var_data;
+
+	if (!CMD_OPTION('n')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
 
 	XG(active_symbol_table) = EG(active_symbol_table);
-	var_data = get_symbol_contents(context, args->args[0], strlen(args->args[0]) + 1);
+	var_data = get_symbol_contents(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1);
 	XG(active_symbol_table) = NULL;
 
 	if (var_data) {
-		SSEND(context->socket, xml ? "<xdebug><print>" : "");
-		SENDMSG(context->socket, var_data);
-		SSEND(context->socket, xml ? "</print></xdebug>\n" : "\n");
-		return NULL;
-	}
-
-	return make_message(context, XDEBUG_E_SYMBOL_NOT_FOUND, "This symbol does not exist or is not yet initialized.");
-}
-
-char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args)
-{
-	char                buffer[256 + 1];
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
-
-	if (getcwd(buffer, 256)) {
-		if (options->response_format == XDEBUG_RESPONSE_XML) {
-			SENDMSG(context->socket, xdebug_sprintf("<xdebug><pwd><directory>%s</directory></pwd></xdebug>\n", buffer));
-		} else {
-			SENDMSG(context->socket, xdebug_sprintf("Working directory %s.\n", buffer));
-		}
-	}
-	return NULL;
-}
-
-char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args)
-{
-	return NULL;
-}
-
-char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
-{
-	xdebug_dbgp_options          *options = (xdebug_dbgp_options*) context->options;
-
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(context->socket, xdebug_sprintf("<xdebug><run><program>%s</program></run></xdebug>\n", context->program_name));
+		xdebug_xml_add_child(*retval, var_data);
 	} else {
-		SENDMSG(context->socket, xdebug_sprintf("Starting program: %s\n", context->program_name));
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
-	return NULL;
 }
 
-
-static void dump_class_breakpoint(void *context, xdebug_hash_element* he)
+DBGP_FUNC(property_set)
 {
-	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
-	xdebug_brk_info    *brk_info = (xdebug_brk_info*) he->ptr;
+	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+}
 
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(
-			h->socket,
-			xdebug_sprintf("<breakpoint type='class'><class>%s</class><method>%s</method></breakpoint>",
-			brk_info->classname, brk_info->functionname));
+DBGP_FUNC(property_value)
+{
+	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+}
+
+static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
+{
+	char               *name = (char*) he->ptr;
+	xdebug_xml_node    *node = (xdebug_xml_node *) xml;
+	xdebug_xml_node    *contents;
+
+	contents = get_symbol_contents(name, strlen(name) + 1);
+	if (contents) {
+		xdebug_xml_add_child(node, contents);
 	} else {
-		SENDMSG(
-			h->socket,
-			xdebug_sprintf("Method breakpoint: %s::%s\n",
-			brk_info->classname, brk_info->functionname));
+		contents = xdebug_xml_node_init("property");
+		xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(name), 0, 1);
+		xdebug_xml_add_attribute(contents, "type", "uninitialized");
+		xdebug_xml_add_child(node, contents);
 	}
 }
 
-static void dump_function_breakpoint(void *context, xdebug_hash_element* he)
-{
-	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
-	xdebug_brk_info    *brk_info = (xdebug_brk_info*) he->ptr;
-
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf("<breakpoint type='function'><function>%s</function></breakpoint>", brk_info->functionname));
-	} else {
-		SENDMSG(h->socket, xdebug_sprintf("Function breakpoint: %s\n", brk_info->functionname));
-	}
-}
-
-static void dump_line_breakpoint(xdebug_con *h, xdebug_dbgp_options *options, xdebug_brk_info* brk_info)
-{
-	char *condition = NULL;
-
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		if (condition) {
-			condition = xmlize(brk_info->condition);
-			SENDMSG(h->socket,
-				xdebug_sprintf("<breakpoint type='line' condition='%s'><file>%s</file><line>%d</line></breakpoint>",
-				condition,
-				brk_info->file,
-				brk_info->lineno));
-			xdfree(condition);
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("<breakpoint type='line'><file>%s</file><line>%d</line></breakpoint>",
-				brk_info->file,
-				brk_info->lineno));
-		}
-	} else {
-		if (condition) {
-			SENDMSG(h->socket,
-				xdebug_sprintf("Location breakpoint: %s:%d (condition= %s)\n",
-				brk_info->file,
-				brk_info->lineno,
-				brk_info->condition));
-		} else {
-			SENDMSG(h->socket,
-				xdebug_sprintf("Location breakpoint: %s:%d\n",
-				brk_info->file,
-				brk_info->lineno));
-		}
-	}
-}
-
-
-char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args)
-{
-	xdebug_dbgp_options   *options = (xdebug_dbgp_options*) context->options;
-	xdebug_llist_element *le;
-
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SSEND(context->socket, "<breakpoints>");
-	}
-
-	xdebug_hash_apply(context->function_breakpoints, (void *) context, dump_function_breakpoint);
-	xdebug_hash_apply(context->class_breakpoints, (void *) context, dump_class_breakpoint);
-
-	for (le = XDEBUG_LLIST_TAIL(context->line_breakpoints); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-		dump_line_breakpoint(context, options, XDEBUG_LLIST_VALP(le));
-	}
-
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SSEND(context->socket, "</breakpoints>\n");
-	}
-	return NULL;
-}
-
-
-static char* show_local_vars(xdebug_con *context, xdebug_arg *args, void (*func)(void *, xdebug_hash_element*))
+static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(void *, xdebug_hash_element*))
 {
 	struct function_stack_entry *i;
 	xdebug_hash                 *ht;
-	xdebug_dbgp_options          *options = (xdebug_dbgp_options*) context->options;
-	TSRMLS_FETCH();
-
 	
 	if (XDEBUG_LLIST_TAIL(XG(stack))) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 		ht = i->used_vars;
+		XG(active_symbol_table) = i->symbol_table;
 
 		/* Only show vars when they are scanned */
 		if (ht) {
-			if (options->response_format == XDEBUG_RESPONSE_XML) {
-				SSEND(context->socket, "<xdebug><show>");
-			}
-
-			xdebug_hash_apply(ht, (void *) context, func);
-
-			if (options->response_format == XDEBUG_RESPONSE_XML) {
-				SSEND(context->socket, "</show></xdebug>\n");
-			}
-		} else {
-			return make_message(context, XDEBUG_E_NOT_USER_DEFINED, "You can not show variables in functions not defined in your script.");
+			xdebug_hash_apply(ht, (void *) node, func);
 		}
 	}
 	
-	return NULL;
-}
-
-char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
-{
-	return show_local_vars(context, args, dump_used_var);
-}
-
-
-char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args)
-{
-	char *tmp;
-	TSRMLS_FETCH();
-	
-	XG(active_symbol_table) = EG(active_symbol_table);
-	tmp = show_local_vars(context, args, dump_used_var_with_contents);
 	XG(active_symbol_table) = NULL;
-	return tmp;
+	return 0;
 }
 
 
-char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args)
+DBGP_FUNC(stack_depth)
 {
-	TSRMLS_FETCH();
-	XG(context).do_step   = 1;
-	XG(context).do_next   = 0;
-	XG(context).do_finish = 0;
-	
-	return NULL;
+	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%l", XG(level)), 0, 1);
 }
+
+DBGP_FUNC(stack_get)
+{
+	xdebug_xml_node      *stackframe;
+	xdebug_llist_element *le;
+	int                   counter = 0, depth;
+
+	if (CMD_OPTION('d')) {
+		depth = strtol(CMD_OPTION('d'), NULL, 10);
+		if (depth >= 0 && depth < XG(level)) {
+			stackframe = return_stackframe(depth);
+			xdebug_xml_add_child(*retval, stackframe);
+		} else {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+		}
+	} else {
+		counter = 0;
+		for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+			stackframe = return_stackframe(counter);
+			xdebug_xml_add_child(*retval, stackframe);
+			counter++;
+		}
+	}
+}
+
+DBGP_FUNC(status)
+{
+	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[XG(status)]);
+	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
+}
+
+
+DBGP_FUNC(context_names)
+{
+	xdebug_xml_node *child;
+
+	if (CMD_OPTION('d')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+	} else {
+		child = xdebug_xml_node_init("context");
+		xdebug_xml_add_attribute(child, "name", "Locals");
+		xdebug_xml_add_attribute(child, "id", "0");
+		xdebug_xml_add_child(*retval, child);
+	}
+}
+
+DBGP_FUNC(context_get)
+{
+	int res;
+
+	if (CMD_OPTION('d')) {
+		/* res = attach_local_vars(*retval, atol(CMD_OPTION('d')), attach_used_var_with_contents); */
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+	} else {
+		res = attach_local_vars(*retval, 0, attach_used_var_with_contents);
+	}
+	switch (res) {
+		case 1:
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_TOO_HIGH);
+			break;
+	}
+}
+
 
 
 /*****************************************************************************
 ** Parsing functions
 */
 
-int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, char *end_cmd, char **error)
+/* {{{ Constants for state machine */
+#define STATE_NORMAL                   0
+#define STATE_QUOTED                   1
+#define STATE_OPT_FOLLOWS              2
+#define STATE_SEP_FOLLOWS              3
+#define STATE_VALUE_FOLLOWS_FIRST_CHAR 4
+#define STATE_VALUE_FOLLOWS            5
+#define STATE_SKIP_CHAR                6
+/* }}} */
+
+void xdebug_dbgp_arg_dtor(xdebug_dbgp_arg *arg)
 {
-	char *ptr;
-	xdebug_dbgp_cmd *cmd;
-	int retval;
-	char *ret_err = NULL;
 	int i;
-	
-	xdebug_arg *args = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	xdebug_arg *endcmds = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	xdebug_arg_init(args);
-	xdebug_arg_init(endcmds);
 
-	xdebug_explode(",", end_cmd, endcmds, -1); 
-
-	*error = NULL;
-
-	/* Try to find command */
-	ptr = strchr(line, ' ');
-	if (!ptr) { /* No separator found */
-		/* Check for the special case "help" */
-		if (strcmp(line, "help") == 0) {
-			show_available_commands(context, flags);
-			retval = 0;
-			goto cleanup;
-		}
-		if (!(cmd = lookup_cmd(line, flags))) {
-			*error = make_message(context, XDEBUG_E_UNDEFINED_COMMAND, "Undefined command, try \"help\".");
-			retval = -1;
-			goto cleanup;
-		}
-	} else {
-		char *tmp = (char*) xdmalloc(ptr - line + 1);
-		memcpy(tmp, line, ptr - line);
-		tmp[ptr - line] = '\0';
-
-		/* Check for the special case "help [command]" */
-		if (strcmp(tmp, "help") == 0) {
-			xdebug_explode(" ", ptr + 1, args, -1); 
-			if (args->c > 0) {
-				show_command_info(context, lookup_cmd(args->args[0], XDEBUG_ALL));
-				retval = 0;
-			} else {
-				*error = make_message(context, XDEBUG_E_UNDEFINED_COMMAND, "Undefined command, try \"help\".");
-				retval = -1;
-			}
-			xdfree(tmp);
-			goto cleanup;
-		}
-
-		/* Scan for valid commands */
-		if ((cmd = lookup_cmd(tmp, flags))) {
-			xdfree(tmp);
-			xdebug_explode(" ", ptr + 1, args, -1); 
-		} else {
-			*error = make_message(context, XDEBUG_E_UNDEFINED_COMMAND, "Undefined command, try \"help\".");
-			xdfree(tmp);
-			retval = -1;
-			goto cleanup;
+	for (i = 0; i < 26; i++) {
+		if (arg->value[i]) {
+			free(arg->value[i]);
 		}
 	}
-
-	retval = 0;
-
-	/* Default in continue mode */
-	if (args->c >= cmd->args) {
-		ret_err = cmd->handler(context, args);
-		if (ret_err) {
-			*error = xdstrdup(ret_err);
-			xdfree(ret_err);
-			retval = -1;
-			goto cleanup;
-		}
-	} else {
-		*error = xdstrdup(cmd->description);
-		/* Oopsie, error */
-		retval = -1;
-		goto cleanup;
-	}
-	/* If the end command is reached, or the command is quit, set the return
-	 * value to 1 (continue) */
-	for (i = 0; i < endcmds->c; i++) {
-		if (strcmp(cmd->name, endcmds->args[i]) == 0) {
-			retval = 1;
-			goto cleanup;
-		}
-	}
-cleanup:
-	xdebug_arg_dtor(args);
-	xdebug_arg_dtor(endcmds);
-	return retval;
+	free(arg);
 }
 
-static void xdebug_dbgp_option_result(xdebug_con *context, int ret, char *error)
+int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 {
-	if (error || ret == -1) {
-		SSEND(context->socket, "-ERROR");
-		if (error) {
-			SSEND(context->socket, ": ");
-			SSEND(context->socket, error);
+	xdebug_dbgp_arg *args = NULL;
+	char *ptr;
+	int   state;
+	char  opt = ' ', *value_begin = NULL;
+
+	args = malloc(sizeof (xdebug_dbgp_arg));
+	memset(args->value, 0, sizeof(args->value));
+	*cmd = NULL;
+
+	/* Find the end of the command, this is always on the first space */
+	ptr = strchr(line, ' ');
+	if (!ptr) {
+		/* No space found. If the line is not empty, return the line
+		 * and assume it only consists of the command name. If the line
+		 * is 0 chars long, we return a failure. */
+		if (strlen(line)) {
+			*cmd = strdup(line);
+			*ret_args = args;
+			return XDEBUG_ERROR_OK;
+		} else {
+			goto parse_error;
 		}
-		SSEND(context->socket, "\n");
 	} else {
-		SSEND(context->socket, "+OK\n");
+		/* A space was found, so we copy everything before it
+		 * into the cmd parameter. */
+		*cmd = calloc(1, ptr - line + 1);
+		memcpy(*cmd, line, ptr - line);
+	}
+	/* Now we loop until we find the end of the string, which is the \0
+	 * character */
+	state = STATE_NORMAL;
+	do {
+		ptr++;
+		switch (state) {
+			case STATE_NORMAL:
+				if (*ptr != '-') {
+					goto parse_error;
+				} else {
+					state = STATE_OPT_FOLLOWS;
+				}
+				break;
+			case STATE_OPT_FOLLOWS:
+				opt = *ptr;
+				state = STATE_SEP_FOLLOWS;
+				break;
+			case STATE_SEP_FOLLOWS:
+				if (*ptr != ' ') {
+					goto parse_error;
+				} else {
+					state = STATE_VALUE_FOLLOWS_FIRST_CHAR;
+					value_begin = ptr + 1;
+				}
+				break;
+			case STATE_VALUE_FOLLOWS_FIRST_CHAR:
+				if (*ptr == '"') {
+					value_begin = ptr + 1;
+					state = STATE_QUOTED;
+				} else {
+					state = STATE_VALUE_FOLLOWS;
+				}
+				break;
+			case STATE_VALUE_FOLLOWS:
+				if (*ptr == ' ' || *ptr == '\0') {
+
+					if (!args->value[opt - 'a']) {
+						args->value[opt - 'a'] = calloc(1, ptr - value_begin + 1);
+						memcpy(args->value[opt - 'a'], value_begin, ptr - value_begin);
+						state = STATE_NORMAL;
+					} else {
+						goto duplicate_opts;
+					}
+				}
+				break;
+			case STATE_QUOTED:
+				if (*ptr == '"') {
+					if (!args->value[opt - 'a']) {
+						args->value[opt - 'a'] = calloc(1, ptr - value_begin + 1);
+						memcpy(args->value[opt - 'a'], value_begin, ptr - value_begin);
+						state = STATE_SKIP_CHAR;
+					} else {
+						goto duplicate_opts;
+					}
+				}
+				break;
+			case STATE_SKIP_CHAR:
+				state = STATE_NORMAL;
+				break;
+				
+		}
+	} while (*ptr);
+	*ret_args = args;
+	return XDEBUG_ERROR_OK;
+
+parse_error:
+	*ret_args = NULL;
+	xdebug_dbgp_arg_dtor(args);
+	if (*cmd) {	
+		free(*cmd);
+	}
+	return XDEBUG_ERROR_PARSE;
+
+duplicate_opts:
+	*ret_args = NULL;
+	xdebug_dbgp_arg_dtor(args);
+	if (*cmd) {	
+		free(*cmd);
+	}
+	return XDEBUG_ERROR_DUP_ARG;
+}
+
+int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval)
+{
+	char *cmd;
+	int res;
+	xdebug_dbgp_arg *args;
+	xdebug_dbgp_cmd *command;
+	xdebug_xml_node *error;
+
+	res = xdebug_dbgp_parse_cmd(line, (char**) &cmd, (xdebug_dbgp_arg**) &args);
+	if (res != XDEBUG_ERROR_OK) {
+		error = xdebug_xml_node_init("error");
+		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", res), 0, 1);
+		xdebug_xml_add_child(retval, error);
+		return -1;
+	}
+
+	command = lookup_cmd(cmd);
+	if (command) {
+		command->handler((xdebug_xml_node**) &retval, context, args);
+		return command->cont;
+	} else {
+		return -1;
 	}
 }
 
@@ -1318,22 +1149,44 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
 	char *option;
 	int   ret;
-	char *error = NULL;
 	xdebug_dbgp_options *options;
+	xdebug_xml_node *response, *child;
 	TSRMLS_FETCH();
 
-	SENDMSG(context->socket, xdebug_sprintf("This is Xdebug version %s.\n", XDEBUG_VERSION));
-	SSEND(context->socket, "Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
+	response = xdebug_xml_node_init("init");
+
+/* {{{ XML Init Stuff*/
+	child = xdebug_xml_node_init("engine");
+	xdebug_xml_add_attribute(child, "version", XDEBUG_VERSION);
+	xdebug_xml_add_text(child, xdstrdup(XDEBUG_NAME));
+	xdebug_xml_add_child(response, child);
+
+	child = xdebug_xml_node_init("author");
+	xdebug_xml_add_text(child, xdstrdup(XDEBUG_AUTHOR));
+	xdebug_xml_add_child(response, child);
+
+	child = xdebug_xml_node_init("url");
+	xdebug_xml_add_text(child, xdstrdup(XDEBUG_URL));
+	xdebug_xml_add_child(response, child);
+
+	child = xdebug_xml_node_init("copyright");
+	xdebug_xml_add_text(child, xdstrdup(XDEBUG_COPYRIGHT));
+	xdebug_xml_add_child(response, child);
+
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
 
+	send_message(context, response);
+/* }}} */
+
 	context->options = xdmalloc(sizeof(xdebug_dbgp_options));
 	options = (xdebug_dbgp_options*) context->options;
-	options->response_format = XDEBUG_RESPONSE_NORMAL;
-	options->dump_superglobals = 1;
+	options->max_children = 2048;
+	options->max_data     = 524288;
+	options->max_depth    = 16;
 
-	/* Initialize auto globals in Zend Engine 2 */
+/* {{{ Initialize auto globals in Zend Engine 2 */
 #ifdef ZEND_ENGINE_2
 	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);
 	zend_is_auto_global("_GET",     sizeof("_GET")-1     TSRMLS_CC);
@@ -1343,18 +1196,25 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	zend_is_auto_global("_FILES",   sizeof("_FILES")-1   TSRMLS_CC);
 	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
 #endif
+/* }}} */
 
+	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_admin_dtor);
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
 	do {
-		SENDMSG(context->socket, xdebug_sprintf("?init %s\n", context->program_name));
 		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_dbgp_parse_option(context, option, XDEBUG_INIT | XDEBUG_DATA | XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "run", (char**) &error);
-		xdebug_dbgp_option_result(context, ret, error);
+
+		response = xdebug_xml_node_init("response");
+		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+		if (ret != 1) {
+			send_message(context, response);
+		}
+		xdebug_xml_node_dtor(response);
+
 		free(option);
 	} while (1 != ret);
 
@@ -1377,37 +1237,37 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 	char               *errortype;
 	int                 ret;
 	char               *option;
-	char               *error = NULL;
-	int                 runtime_allowed;
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
+	xdebug_xml_node     *response;
 
 	errortype = error_type(type);
-
+/*
 	runtime_allowed = (
 		(type != E_ERROR) && 
 		(type != E_CORE_ERROR) &&
 		(type != E_COMPILE_ERROR) &&
 		(type != E_USER_ERROR)
 	) ? XDEBUG_BREAKPOINT | XDEBUG_RUNTIME : 0;
-
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(context->socket, xdebug_sprintf("<xdebug><signal><code>%d</code><type>%s</type><message>%s</message><stack>", type, errortype, message));
-		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format, XDEBUG_FRAME_NORMAL);
-		SENDMSG(context->socket, xdebug_sprintf("</stack></signal></xdebug>\n"));
-	} else {
-		SENDMSG(context->socket, xdebug_sprintf("\nProgram received signal %s: %s.\n", errortype, message));
-		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format, XDEBUG_FRAME_NORMAL);
-	}
-
+*/
+	response = xdebug_xml_node_init("response");
+	xdebug_xml_add_attribute_ex(response, "exception", xdstrdup(errortype), 0, 1);
+	xdebug_xml_add_text(response, xdstrdup(message));
+	send_message(context, response);
+	xdebug_xml_node_dtor(response);
 	xdfree(errortype);
+
 	do {
-		SSEND(context->socket, "?cmd\n");
 		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_dbgp_parse_option(context, option, XDEBUG_DATA | XDEBUG_RUN | runtime_allowed | XDEBUG_STATUS, "cont", (char**) &error);
-		xdebug_dbgp_option_result(context, ret, error);
+
+		response = xdebug_xml_node_init("response");
+		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+		if (ret != 1) {
+			send_message(context, response);
+		}
+		xdebug_xml_node_dtor(response);
+
 		free(option);
 	} while (1 != ret);
 
@@ -1419,28 +1279,29 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	struct function_stack_entry *i;
 	int    ret;
 	char  *option;
-	char  *error = NULL;
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
-	int                 xml = (options->response_format == XDEBUG_RESPONSE_XML);
-	TSRMLS_FETCH();
+	xdebug_xml_node *response;
 
 	i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack));
 
-	SSEND(context->socket, xml ? "<xdebug><break>" : "");
 	if (type == XDEBUG_BREAK) {
-		print_breakpoint(context, i, options->response_format);
+		response = return_breakpoint(i);
+		send_message(context, response);
+		xdebug_xml_node_dtor(response);
 	}
-	print_sourceline(context, file, lineno, lineno, -1, options->response_format TSRMLS_CC);
-	SSEND(context->socket, xml ? "</break></xdebug>\n" : "\n");
 
 	do {
-		SSEND(context->socket, "?cmd\n");
 		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_dbgp_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,continue,step,next,finish", (char**) &error);
-		xdebug_dbgp_option_result(context, ret, error);
+
+		response = xdebug_xml_node_init("response");
+		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+		if (ret != 1) {
+			send_message(context, response);
+		}
+		xdebug_xml_node_dtor(response);
+
 		free(option);
 	} while (1 != ret);
 

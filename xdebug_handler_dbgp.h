@@ -19,53 +19,52 @@
 #ifndef __HAVE_XDEBUG_HANDLER_DBGP_H__
 #define __HAVE_XDEBUG_HANDLER_DBGP_H__
 
-#include "xdebug_handlers.h"
 #include <string.h>
+#include "xdebug_handlers.h"
+#include "xdebug_xml.h"
 
-#define XDEBUG_INIT         1
-#define XDEBUG_BREAKPOINT   2
-#define XDEBUG_RUN          4
-#define XDEBUG_RUNTIME      8
-#define XDEBUG_DATA        16
-#define XDEBUG_STATUS      32
 
-#define XDEBUG_ALL         63
+typedef struct xdebug_dbgp_result {
+	int status;
+	int reason;
+	int code;
+} xdebug_dbgp_result;
+
+#define RETURN_RESULT(s,r,c) { \
+	xdebug_xml_node *error = xdebug_xml_node_init("error"); \
+	xdebug_xml_node *message = xdebug_xml_node_init("message"); \
+	\
+	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[(s)]); \
+	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[(r)]); \
+	xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%u", (c)), 0, 1); \
+	xdebug_xml_add_text(message, xdstrdup("foo")); \
+	xdebug_xml_add_child(error, message); \
+	xdebug_xml_add_child(*retval, error); \
+	return; \
+}
+
+/* Argument structure */
+typedef struct xdebug_dbgp_arg {
+	char *value[26];
+} xdebug_dbgp_arg;
 
 typedef struct xdebug_dbgp_cmd {
 	char *name;
-	int   args;
-	char *description;
-	char *(*handler)(xdebug_con *context, xdebug_arg *args);
-	int   show;
-	char *help;
+	void (*handler)(xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args);
+	int  cont;
 } xdebug_dbgp_cmd;
 
 
-#define XDEBUG_D                         0
-#define XDEBUG_D_BREAKPOINT_SET          XDEBUG_D |    1
-#define XDEBUG_D_BREAKPOINT_REMOVED      XDEBUG_D |    2
+#define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args)
+#define DBGP_FUNC_ENTRY(name)       { #name, xdebug_dbgp_handle_##name, 0 },
+#define DBGP_CONT_FUNC_ENTRY(name)  { #name, xdebug_dbgp_handle_##name, 1 },
 
-#define XDEBUG_E                         1024
-#define XDEBUG_E_INVALID_FORMAT          XDEBUG_E |    1
-#define XDEBUG_E_BREAKPOINT_NOT_SET      XDEBUG_E |    2
-#define XDEBUG_E_BREAKPOINT_NOT_REMOVED  XDEBUG_E |    3
-#define XDEBUG_E_EVAL                    XDEBUG_E |    4
-#define XDEBUG_E_TOO_MANY_ARGUMENTS      XDEBUG_E |    5
-#define XDEBUG_E_NO_INFO                 XDEBUG_E |    6
-#define XDEBUG_E_UNDEFINED_COMMAND       XDEBUG_E |    7
-#define XDEBUG_E_SYMBOL_NOT_FOUND        XDEBUG_E |    8
-#define XDEBUG_E_NOT_USER_DEFINED        XDEBUG_E |    9
-#define XDEBUG_E_UNKNOWN_OPTION          XDEBUG_E |   10
-
-#define XDEBUG_RESPONSE_NORMAL   0
-#define XDEBUG_RESPONSE_XML      1
-
-#define XDEBUG_FRAME_NORMAL      0
-#define XDEBUG_FRAME_FULL        1
+#define CMD_OPTION(opt)    args->value[(opt) - 'a']
 
 typedef struct xdebug_dbgp_options {
-	int response_format;
-	int dump_superglobals;
+	int max_children;
+	int max_data;
+	int max_depth;
 } xdebug_dbgp_options;
 
 int xdebug_dbgp_init(xdebug_con *context, int mode);
