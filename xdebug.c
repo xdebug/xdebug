@@ -882,7 +882,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	return tmp;
 }
 
-static void add_used_variables (function_stack_entry *fse, zend_op_array *op_array)
+static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
 {
 	int i = 0; 
 	int j = op_array->size;
@@ -1099,7 +1099,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 	}
-	old_execute(op_array TSRMLS_CC);
+	xdebug_old_execute(op_array TSRMLS_CC);
 
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
