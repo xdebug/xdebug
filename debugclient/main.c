@@ -44,7 +44,11 @@
 #define close(fd) closesocket(fd)
 #endif
 
-#define VERSION "0.7.0"
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
+#define VERSION "0.7.1"
 
 #ifdef HAVE_LIBEDIT
 

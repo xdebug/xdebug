@@ -1,4 +1,4 @@
-## $Id: Makefile.am,v 1.1 2002-11-12 11:07:59 derick Exp $
+## $Id: Makefile.am,v 1.2 2003-05-15 10:11:04 derick Exp $
 ##
 
 ## The contents of this file are subject to the Vulcan Logic Public
@@ -20,7 +20,7 @@
 ## Contributor(s): 
 ##/
 
-debugclient_LDFLAGS    = -export-dynamic
+debugclient_LDFLAGS    = 
 
 bin_PROGRAMS        = debugclient
 debugclient_SOURCES = main.c usefulstuff.c
