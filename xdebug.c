@@ -1191,8 +1191,8 @@ static inline void print_trace (int html TSRMLS_DC)
 			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 			char *tmp_name;
 
-			if (i->function.function && strcmp (i->function.function, "xdebug_dump_function_trace") == 0) {
-				return;
+			if (XDEBUG_LLIST_IS_TAIL(le)) {
+				break;
 			}
 
 			tmp_name = show_fname(i TSRMLS_CC);
