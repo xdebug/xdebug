@@ -1,3 +1,6 @@
+Wed Oct 20 19:03:43 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug.c:
+- fix compile for 5.0
 Wed Oct 20 09:35:46 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c:
