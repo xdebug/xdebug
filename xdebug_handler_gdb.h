@@ -20,6 +20,25 @@
 #define __HAVE_XDEBUG_HANDLER_GDB_H__
 
 #include "xdebug_handlers.h"
+#include <string.h>
+
+#define XDEBUG_INIT         1
+#define XDEBUG_BREAKPOINT   2
+#define XDEBUG_RUN          4
+#define XDEBUG_DATA         8
+#define XDEBUG_STATUS      16
+
+typedef struct xdebug_arg {
+	int    c;
+	char **args;
+} xdebug_arg;
+
+typedef struct xdebug_cmd {
+	char *name;
+	int   args;
+	char *description;
+	void (*handler)(void *dummy, xdebug_arg *args);
+} xdebug_cmd;
 
 int xdebug_gdb_init(xdebug_con *context, int mode);
 int xdebug_gdb_deinit(xdebug_con *context);

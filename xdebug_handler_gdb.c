@@ -22,13 +22,22 @@
 #include "php_xdebug.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
-#include "xdebug_handler_php3.h"
+#include "xdebug_handler_gdb.h"
 #include "xdebug_var.h"
 
 #ifdef PHP_WIN32
 #include "win32/time.h"
 #include <process.h>
 #endif
+
+void xdebug_handle_option(void *dummy, xdebug_arg *args);
+void xdebug_handle_run(void *dummy, xdebug_arg *args);
+
+static xdebug_cmd commands_init[] = {
+	{ "option", 2, "option [setting] [value]", xdebug_handle_option },
+	{ "run",    0, "run", xdebug_handle_run },
+	{ NULL,     0, NULL }
+};
 
 
 static char *find_hostname(void)
@@ -189,17 +198,180 @@ static char* xdebug_socket_read_line(xdebug_con *context)
 	return tmp;
 }
 
+static xdebug_cmd* scan_cmd(xdebug_cmd *ptr, char *line)
+{
+	while (ptr->name) {
+		if (strcmp (ptr->name, line) == 0) {
+			return ptr;
+		}
+		*ptr++;
+	}
+	return NULL;
+}
+
+
+static inline char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end)
+{
+	char *p = haystack;
+	char first = *needle;
+
+	/* let end point to the last character where needle may start */
+	end -= needle_len;
+	
+	while (p <= end) {
+		while (*p != first)
+			if (++p > end)
+				return NULL;
+		if (memcmp(p, needle, needle_len) == 0)
+			return p;
+		p++;
+	}
+	return NULL;
+}
+
+void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit) 
+{
+	char *p1, *p2, *endp;
+
+	endp = str + strlen(str);
+
+	p1 = str;
+	p2 = xdebug_memnstr(str, delim, strlen(delim), endp);
+
+	if (p2 == NULL) {
+		args->c++;
+		args->args = (char**) xdrealloc(args->args, sizeof(char*) * args->c);
+		args->args[args->c - 1] = (char*) xdmalloc(strlen(str) + 1);
+		memcpy(args->args[args->c - 1], p1, strlen(str));
+		args->args[args->c - 1][strlen(str)] = '\0';
+	} else {
+		do {
+			args->c++;
+			args->args = (char**) xdrealloc(args->args, sizeof(char*) * args->c);
+			args->args[args->c - 1] = (char*) xdmalloc(p2 - p1 + 1);
+			memcpy(args->args[args->c - 1], p1, p2 - p1);
+			args->args[args->c - 1][p2 - p1] = '\0';
+			p1 = p2 + strlen(delim);
+		} while ((p2 = xdebug_memnstr(p1, delim, strlen(delim), endp)) != NULL && (limit == -1 || --limit > 1));
+
+		if (p1 <= endp) {
+			args->c++;
+			args->args = (char**) xdrealloc(args->args, sizeof(char*) * args->c);
+			args->args[args->c - 1] = (char*) xdmalloc(endp - p1 + 1);
+			memcpy(args->args[args->c - 1], p1, endp - p1);
+			args->args[args->c - 1][endp - p1] = '\0';
+		}
+	}
+}
+
+static xdebug_cmd* lookup_cmd(char *line, int flag)
+{
+	xdebug_cmd *ptr;
+	
+	if (flag & XDEBUG_INIT) {
+		return scan_cmd(commands_init, line);
+	}
+	return NULL;
+}
+
+
+void xdebug_handle_option(void *dummy, xdebug_arg *args)
+{
+	printf ("handle option!\n");
+}
+
+void xdebug_handle_run(void *dummy, xdebug_arg *args)
+{
+	printf ("handle run!\n");
+}
+
+
+int xdebug_gdb_parse_option(void *dummy, char* line, int flags, char *end_cmd, char **error)
+{
+	char *ptr;
+	xdebug_cmd *cmd;
+	int i;
+	int retval;
+	
+	xdebug_arg *args = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	args->c = 0;
+	args->args = NULL;
+
+	*error = NULL;
+
+	/* Try to find command */
+	ptr = strchr(line, ' ');
+	if (!ptr) { /* No separator found */
+		if (!(cmd = lookup_cmd(line, flags))) {
+			return -1;
+		}
+	} else {
+		char *tmp = (char*) xdmalloc(ptr - line + 1);
+		memcpy(tmp, line, ptr - line);
+		tmp[ptr - line] = '\0';
+		if (cmd = lookup_cmd(tmp, flags)) {
+			xdfree(tmp);
+			xdebug_explode(" ", ptr + 1, args, -1); 
+		} else {
+			xdfree(tmp);
+			return -1;
+		}
+	}
+	/* Default in continue mode */
+	retval = 0;
+	if (args->c >= cmd->args) {
+		cmd->handler(dummy, args);
+	} else {
+		*error = xdstrdup(cmd->description);
+		/* Oopsie, error */
+		retval = -1;
+		goto cleanup;
+	}
+	if (strcmp(cmd->name, end_cmd) == 0) {
+		retval = 1;
+	}
+
+cleanup:
+	for (i = 0; i < args->c; i++) {
+		xdfree(args->args[i]);
+	}
+	xdfree(args->args);
+	xdfree(args);
+	return retval;
+}
+
+
 int xdebug_gdb_init(xdebug_con *context, int mode)
 {
 	char *option;
+	int   ret;
+	char *error = NULL;
 
 	SSEND(context->socket, "hello\n");
-	SSEND(context->socket, "?options\n");
 	context->buffer = NULL;
+	SSEND(context->socket, "?init\n");
 	do {
 		option = xdebug_socket_read_line(context);
 		printf ("[%s]\n", option);
-	} while (0);
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_INIT | XDEBUG_BREAKPOINT | XDEBUG_STATUS, "run", (char**) &error);
+		if (error || ret == -1) {
+			SSEND(context->socket, "+ERROR");
+			if (error) {
+				SSEND(context->socket, ": ");
+				SSEND(context->socket, error);
+			} else {
+				SSEND(context->socket, "\n");
+			}
+		} else {
+			SSEND(context->socket, "+OK\n");
+		}
+	} while (-1 != ret);
+
+	if (ret == -1) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
 int xdebug_gdb_deinit(xdebug_con *context)
@@ -221,6 +393,7 @@ int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *locatio
 	char *hostname;
 	char *prefix;
 	char *errortype;
+	char *option;
 	xdebug_llist_element *le;
 	TSRMLS_FETCH();
 
@@ -261,4 +434,10 @@ int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *locatio
 	xdfree(errortype);
 	xdfree(prefix);
 	xdfree(hostname);
+	do {
+		SSEND(h->socket, "?cmd\n");
+		option = xdebug_socket_read_line(h);
+		printf ("[%s]\n", option);
+		SSEND(h->socket, "+OK\n");
+	} while (!option || strcmp(option, "cont") != 0);
 }
