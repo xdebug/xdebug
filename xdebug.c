@@ -868,9 +868,36 @@ PHP_FUNCTION(xdebug_get_function_trace)
 		/* Add data */
 		if (i->function.function) {
 			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function, 1);
+		} else {
+			switch (i->function.type) {
+				case XFUNC_NEW:
+					add_assoc_string_ex(frame, "function", sizeof("function"), "{new}", 1);
+					break;
+
+				case XFUNC_EVAL:
+					add_assoc_string_ex(frame, "function", sizeof("function"), "{eval}", 1);
+					break;
+
+				case XFUNC_INCLUDE:
+					add_assoc_string_ex(frame, "function", sizeof("function"), "{include}", 1);
+					break;
+
+				case XFUNC_INCLUDE_ONCE:
+					add_assoc_string_ex(frame, "function", sizeof("function"), "{include_once}", 1);
+					break;
+
+				case XFUNC_REQUIRE:
+					add_assoc_string_ex(frame, "function", sizeof("function"), "{require}", 1);
+					break;
+
+				case XFUNC_REQUIRE_ONCE:
+					add_assoc_string_ex(frame, "function", sizeof("function"), "{require_once}", 1);
+					break;
+
+			}
 		}
 		if (i->function.class) {
-			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class,    1);
+			add_assoc_string_ex(frame, "class", sizeof("class"), i->function.class, 1);
 		}
 		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename, 1);
 		add_assoc_long_ex  (frame, "line", sizeof("line"), i->lineno);
@@ -879,7 +906,11 @@ PHP_FUNCTION(xdebug_get_function_trace)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			add_assoc_string_ex(params, i->vars[j].name, strlen (i->vars[j].name) + 1, i->vars[j].value, 1);
+			if (i->vars[j].name) {
+				add_assoc_string_ex(params, i->vars[j].name, strlen (i->vars[j].name) + 1, i->vars[j].value, 1);
+			} else {
+				add_assoc_string_ex(params, "1", sizeof("1"), i->vars[j].value, 1);
+			}
 		}
 		add_assoc_zval_ex  (frame, "params", sizeof("params"), params);
 
