@@ -27,7 +27,6 @@
 #endif
 
 #ifdef PHP_WIN32
-# include <winsock.h>
 # include <process.h>
 # include <direct.h>
 # include "win32/time.h"
