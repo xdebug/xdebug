@@ -1,3 +1,7 @@
+Thu Feb 19 11:33:55 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug.dsp:
+- Remove profiler.[ch] files from .dsp for PHP 4 snaps builder to work.
+
 Wed Feb 18 21:53:57 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug.c
 /xdebug/tests/function_counter.phpt:
