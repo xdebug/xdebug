@@ -144,11 +144,11 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 	}
 }
 
-int xdebug_php3_init(xdebug_con context, int mode)
+int xdebug_php3_init(xdebug_con *context, int mode)
 {
 }
 
-int xdebug_php3_deinit(xdebug_con context)
+int xdebug_php3_deinit(xdebug_con *context)
 {
 }
 
@@ -160,7 +160,7 @@ int xdebug_php3_deinit(xdebug_con context)
 	xdfree(message_buffer);     \
 }
 
-int xdebug_php3_error(xdebug_con h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_php3_error(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char *time_buffer;
 	char *hostname;
@@ -178,12 +178,12 @@ int xdebug_php3_error(xdebug_con h, int type, char *message, const char *locatio
 	errortype = error_type(type);
 
 	/* start */
-	SENDMSG(h.socket, xdebug_sprintf("%sstart: %s\n", prefix, errortype));
+	SENDMSG(h->socket, xdebug_sprintf("%sstart: %s\n", prefix, errortype));
 
 	/* header */
-	SENDMSG(h.socket, xdebug_sprintf("%smessage: %s\n", prefix, message));
-	SENDMSG(h.socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, location, line));
-	SENDMSG(h.socket, xdebug_sprintf("%sframes: %d\n", prefix, stack->size));
+	SENDMSG(h->socket, xdebug_sprintf("%smessage: %s\n", prefix, message));
+	SENDMSG(h->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, location, line));
+	SENDMSG(h->socket, xdebug_sprintf("%sframes: %d\n", prefix, stack->size));
 
 	/* stack elements */
 	if (stack) {
@@ -193,15 +193,15 @@ int xdebug_php3_error(xdebug_con h, int type, char *message, const char *locatio
 			char *tmp_name;
 				
 			tmp_name = show_fname (i TSRMLS_CC);
-			SENDMSG(h.socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
+			SENDMSG(h->socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
 			xdfree (tmp_name);
 
-			SENDMSG(h.socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, i->filename, i->lineno));
+			SENDMSG(h->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, i->filename, i->lineno));
 		}
 	}
 
 	/* stop */
-	SENDMSG(h.socket, xdebug_sprintf("%sstop: %s\n", prefix, errortype));
+	SENDMSG(h->socket, xdebug_sprintf("%sstop: %s\n", prefix, errortype));
 
 	xdfree(errortype);
 	xdfree(prefix);

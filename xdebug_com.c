@@ -17,7 +17,7 @@
  */
 
 
-/* define DEBUGGER_FAIL_SILENTLY */
+#define DEBUGGER_FAIL_SILENTLY
 
 #include <sys/types.h>
 #include <errno.h>

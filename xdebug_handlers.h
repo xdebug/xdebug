@@ -31,15 +31,17 @@ struct _xdebug_con {
 	int                    socket;
 	void                  *options;
 	xdebug_remote_handler *handler;
+	char                  *buffer;
+	int                    buffer_size;
 };
 
 struct _xdebug_remote_handler {
 	/* Init / deinit */
-	int (*remote_init)(xdebug_con h, int mode);
-	int (*remote_deinit)(xdebug_con h);
+	int (*remote_init)(xdebug_con *h, int mode);
+	int (*remote_deinit)(xdebug_con *h);
 
 	/* Stack messages */
-	int (*remote_error)(xdebug_con h, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
+	int (*remote_error)(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
 };
 
 struct _xdebug_remote_handler_info {

@@ -23,7 +23,7 @@
 #include "php_xdebug.h"
 #include "xdebug_var.h"
 
-#define XDEBUG_STR_PREALLOC 4096
+#define XDEBUG_STR_PREALLOC 16384
 
 void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f) {
 	int l = strlen(str);

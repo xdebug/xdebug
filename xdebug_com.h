@@ -43,6 +43,8 @@ int inet_aton(const char *cp, struct in_addr *inp);
 #define SSEND(a,b) write(a,b,strlen(b))
 #endif
 
+#define SREAD(a,b,c) read(a,b,c)
+
 int xdebug_create_socket(const char *hostname, int dport);
 void xdebug_close_socket(int socket);
 

@@ -21,9 +21,9 @@
 
 #include "xdebug_handlers.h"
 
-int xdebug_php3_init(xdebug_con context, int mode);
-int xdebug_php3_deinit(xdebug_con context);
-int xdebug_php3_error(xdebug_con context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
+int xdebug_php3_init(xdebug_con *context, int mode);
+int xdebug_php3_deinit(xdebug_con *context);
+int xdebug_php3_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
 
 #define xdebug_handler_php3 { \
 	xdebug_php3_init,         \

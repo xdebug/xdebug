@@ -144,14 +144,67 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 	}
 }
 
-int xdebug_gdb_init(xdebug_con context, int mode)
+static char* xdebug_socket_read_line(xdebug_con *context)
 {
-	SSEND(context.socket, "hello\n");
+	int size = 0, newl = 0, nbufsize = 0;
+	char *tmp;
+	char *tmp_buf = NULL;
+	char *ptr;
+	char buffer[128];
+
+	if (!context->buffer) {
+		context->buffer = xdcalloc(1,1);
+		context->buffer_size = 0;
+	}
+	while ((ptr = memchr(context->buffer, '\n', context->buffer_size)) == NULL) {
+		ptr = context->buffer + context->buffer_size;
+		newl = read(context->socket, buffer, 32);
+		if (newl > 0) {
+			context->buffer = xdrealloc(context->buffer, context->buffer_size + newl);
+			memcpy(ptr, buffer, newl);
+			context->buffer_size += newl;
+		} else {
+/*			xdfree(context->buffer);
+			context->buffer = NULL;
+*/			return NULL;
+		}
+	} ;
+
+	ptr = memchr(context->buffer, '\n', context->buffer_size);
+	size = ptr - context->buffer;
+	/* Copy that line into tmp */
+	tmp = xdmalloc(size + 1);
+	tmp[size] = '\0';
+	memcpy(tmp, context->buffer, size);
+	/* Rewrite existing buffer */
+	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
+		char *tmp_buf = xdmalloc(nbufsize + 1);
+		memcpy(tmp_buf, ptr + 1, nbufsize);
+		tmp_buf[nbufsize] = 0;
+	}
+	xdfree(context->buffer);
+	context->buffer = tmp_buf;
+	context->buffer_size = context->buffer_size - (size + 1);
+	/* Return normal line */
+	return tmp;
 }
 
-int xdebug_gdb_deinit(xdebug_con context)
+int xdebug_gdb_init(xdebug_con *context, int mode)
 {
-	SSEND(context.socket, "bye\n");
+	char *option;
+
+	SSEND(context->socket, "hello\n");
+	SSEND(context->socket, "?options\n");
+	context->buffer = NULL;
+	do {
+		option = xdebug_socket_read_line(context);
+		printf ("[%s]\n", option);
+	} while (0);
+}
+
+int xdebug_gdb_deinit(xdebug_con *context)
+{
+	SSEND(context->socket, "bye\n");
 }
 
 #define SENDMSG(socket, str) {  \
@@ -162,7 +215,7 @@ int xdebug_gdb_deinit(xdebug_con context)
 	xdfree(message_buffer);     \
 }
 
-int xdebug_gdb_error(xdebug_con h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char *time_buffer;
 	char *hostname;
@@ -180,12 +233,12 @@ int xdebug_gdb_error(xdebug_con h, int type, char *message, const char *location
 	errortype = error_type(type);
 
 	/* start */
-	SENDMSG(h.socket, xdebug_sprintf("%sstart: %s\n", prefix, errortype));
+	SENDMSG(h->socket, xdebug_sprintf("%sstart: %s\n", prefix, errortype));
 
 	/* header */
-	SENDMSG(h.socket, xdebug_sprintf("%smessage: %s\n", prefix, message));
-	SENDMSG(h.socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, location, line));
-	SENDMSG(h.socket, xdebug_sprintf("%sframes: %d\n", prefix, stack->size));
+	SENDMSG(h->socket, xdebug_sprintf("%smessage: %s\n", prefix, message));
+	SENDMSG(h->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, location, line));
+	SENDMSG(h->socket, xdebug_sprintf("%sframes: %d\n", prefix, stack->size));
 
 	/* stack elements */
 	if (stack) {
@@ -195,15 +248,15 @@ int xdebug_gdb_error(xdebug_con h, int type, char *message, const char *location
 			char *tmp_name;
 				
 			tmp_name = show_fname (i TSRMLS_CC);
-			SENDMSG(h.socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
+			SENDMSG(h->socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
 			xdfree (tmp_name);
 
-			SENDMSG(h.socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, i->filename, i->lineno));
+			SENDMSG(h->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, i->filename, i->lineno));
 		}
 	}
 
 	/* stop */
-	SENDMSG(h.socket, xdebug_sprintf("%sstop: %s\n", prefix, errortype));
+	SENDMSG(h->socket, xdebug_sprintf("%sstop: %s\n", prefix, errortype));
 
 	xdfree(errortype);
 	xdfree(prefix);

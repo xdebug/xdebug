@@ -271,7 +271,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	XG(do_trace) = 0;
 
 	if (XG(remote_enabled)) {
-		XG(context).handler->remote_deinit(XG(context));
+		XG(context).handler->remote_deinit(&(XG(context)));
 		xdebug_close_socket(XG(context).socket); 
 	}
 
@@ -300,9 +300,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (
 		!XG(remote_enabled) &&
 		XG(remote_enable) &&
-		(XG(remote_mode) == XDEBUG_REQ) &&
+		(XG(remote_mode) == XDEBUG_REQ) /* &&
 		PG(http_globals)[TRACK_VARS_GET] &&
-		zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "__XDEBUG__", sizeof("__XDEBUG__"), (void **) &dummy) == SUCCESS
+		zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "__XDEBUG__", sizeof("__XDEBUG__"), (void **) &dummy) == SUCCESS */
 	) {
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		if (XG(context).socket >= 0) {
@@ -310,7 +310,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			XG(context).handler->remote_init(XG(context), XDEBUG_REQ);
+			XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ);
 		}
 	}
 
@@ -716,11 +716,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			XG(context).handler->remote_init(XG(context), XDEBUG_JIT);
+			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
 		}
 	}
 	if (XG(remote_enabled)) {
-		XG(context).handler->remote_error(XG(context), type, buffer, error_filename, error_lineno, XG(stack));
+		XG(context).handler->remote_error(&(XG(context)), type, buffer, error_filename, error_lineno, XG(stack));
 	}
 
 	/* Bail out if we can't recover */

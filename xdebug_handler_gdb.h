@@ -21,9 +21,9 @@
 
 #include "xdebug_handlers.h"
 
-int xdebug_gdb_init(xdebug_con context, int mode);
-int xdebug_gdb_deinit(xdebug_con context);
-int xdebug_gdb_error(xdebug_con context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
+int xdebug_gdb_init(xdebug_con *context, int mode);
+int xdebug_gdb_deinit(xdebug_con *context);
+int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
 
 #define xdebug_handler_gdb { \
 	xdebug_gdb_init,         \
