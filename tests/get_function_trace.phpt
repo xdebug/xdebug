@@ -72,7 +72,7 @@ bararray(8) {
     int(%d)
     ["params"]=>
     array(1) {
-      [1]=>
+      [0]=>
       string(28) "$foo = foo();
 bar();
 foo();

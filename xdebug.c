@@ -1447,7 +1447,7 @@ PHP_FUNCTION(xdebug_get_function_trace)
 			if (i->vars[j].name) {
 				add_assoc_string_ex(params, i->vars[j].name, strlen(i->vars[j].name) + 1, i->vars[j].value, 1);
 			} else {
-				add_assoc_string_ex(params, "1", sizeof("1"), i->vars[j].value, 1);
+				add_index_string(params, j, i->vars[j].value, 1);
 			}
 		}
 		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
