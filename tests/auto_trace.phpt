@@ -43,6 +43,9 @@ bar
 Function trace:
     %f      %d   -> {main}() /%s/auto_trace.php:0
     %f      %d     -> foo() /%s/auto_trace.php:6
+    %f      %d     -> xdebug_dump_function_trace() /%s/auto_trace.php:7
+    %f      %d     -> xdebug_start_trace() /%s/auto_trace.php:9
+    %f      %d     -> foo() /%s/auto_trace.php:10
 bar
 
 Function trace:
