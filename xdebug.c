@@ -185,7 +185,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(level)    = 0;
 	XG(do_trace) = 0;
 	XG(stack)    = xdebug_llist_alloc (stack_element_dtor);
-	XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
@@ -198,9 +197,13 @@ PHP_RINIT_FUNCTION(xdebug)
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
 	xdebug_llist_destroy (XG(stack), NULL);
-	xdebug_llist_destroy (XG(trace), NULL);
-	XG(stack)    = NULL;
-	XG(trace)    = NULL;
+	XG(stack) = NULL;
+
+	if (XG(do_trace)) {
+		xdebug_llist_destroy (XG(trace), NULL);
+		XG(trace) = NULL;
+	}
+
 	XG(level)    = 0;
 	XG(do_trace) = 0;
 	return SUCCESS;
@@ -220,7 +223,31 @@ PHP_MINFO_FUNCTION(xdebug)
 
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
-	old_execute (op_array TSRMLS_CC);
+	struct function_stack_entry* tmp;
+
+	if (op_array->function_name == NULL) {
+		tmp = emalloc (sizeof (struct function_stack_entry));
+		tmp->varc     = 0;
+		tmp->refcount = 1;
+		tmp->level    = XG(level) + 1;
+		tmp->function_name = estrdup("{main}");
+
+		tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
+		tmp->lineno    = 0;
+
+		xdebug_llist_insert_next (XG(stack), SRM_LLIST_TAIL(XG(stack)), tmp);
+		if (XG(do_trace)) {
+			tmp->refcount++;
+			xdebug_llist_insert_next (XG(trace), SRM_LLIST_TAIL(XG(trace)), tmp);
+		}
+
+		old_execute (op_array TSRMLS_CC);
+
+		xdebug_llist_remove (XG(stack), SRM_LLIST_TAIL(XG(stack)), stack_element_dtor);
+		XG(level)--;
+	} else {
+		old_execute (op_array TSRMLS_CC);
+	}
 }
 
 static inline print_stack (int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
@@ -304,23 +331,23 @@ static inline print_trace (int html TSRMLS_DC)
 	}
 
 
-	for (le = SRM_LLIST_HEAD(XG(stack)); le != NULL; le = SRM_LLIST_NEXT(le))
+	for (le = SRM_LLIST_HEAD(XG(trace)); le != NULL; le = SRM_LLIST_NEXT(le))
 	{
 		int c = 0; /* Comma flag */
 		int j = 0; /* Counter */
 		struct function_stack_entry *i = SRM_LLIST_VALP(le);
 
 		if (html) {
-			php_printf ("<tr><td align='center'>");
-			for (c = 0; c < i->level; c++) {
-				php_printf ("&nbsp;&nbsp;");
+			php_printf ("<tr><td align='left'><pre>");
+			for (j = 0; j < i->level - 1; j++) {
+				php_printf ("  ");
 			}
-			php_printf ("-></td><td>%s(", i->level, i->function_name);
+			php_printf ("-></pre></td><td>%s(", i->function_name);
 		} else {
-			for (c = 0; c < i->level; c++) {
-				printf ("--");
+			for (j = 0; j < i->level; j++) {
+				printf ("  ");
 			}
-			printf ("> %s(", i->level, i->function_name);
+			printf ("-> %s(",i->function_name);
 		}
 
 		/* Printing vars */
@@ -424,7 +451,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 {
 	char buffer[1024];
 	xdebug_llist_element *le;
-	int                k;
+	unsigned int          k;
 
 	array_init(return_value);
 	le = SRM_LLIST_HEAD(XG(stack));
@@ -443,15 +470,19 @@ PHP_FUNCTION(xdebug_call_function)
 	struct function_stack_entry *i;
 	
 	le = SRM_LLIST_TAIL(XG(stack));
-	if (le->prev) {
-		le = SRM_LLIST_PREV(le);
+	if (le) {
 		if (le->prev) {
 			le = SRM_LLIST_PREV(le);
+			if (le->prev) {
+				le = SRM_LLIST_PREV(le);
+			}
 		}
-	}
-	i = SRM_LLIST_VALP(le);
+		i = SRM_LLIST_VALP(le);
 
-	RETURN_STRING(i->function_name, 1);
+		RETURN_STRING(i->function_name ? i->function_name : "{}", 1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 PHP_FUNCTION(xdebug_call_line)
@@ -460,15 +491,16 @@ PHP_FUNCTION(xdebug_call_line)
 	struct function_stack_entry *i;
 	
 	le = SRM_LLIST_TAIL(XG(stack));
-	if (le->prev) {
-		le = SRM_LLIST_PREV(le);
+	if (le) {
 		if (le->prev) {
 			le = SRM_LLIST_PREV(le);
 		}
-	}
-	i = SRM_LLIST_VALP(le);
+		i = SRM_LLIST_VALP(le);
 
-	RETURN_LONG(i->lineno);
+		RETURN_LONG(i->lineno);
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 PHP_FUNCTION(xdebug_call_file)
@@ -477,15 +509,16 @@ PHP_FUNCTION(xdebug_call_file)
 	struct function_stack_entry *i;
 	
 	le = SRM_LLIST_TAIL(XG(stack));
-	if (le->prev) {
-		le = SRM_LLIST_PREV(le);
+	if (le) {
 		if (le->prev) {
 			le = SRM_LLIST_PREV(le);
 		}
-	}
-	i = SRM_LLIST_VALP(le);
+		i = SRM_LLIST_VALP(le);
 
-	RETURN_STRING(i->filename, 1);
+		RETURN_STRING(i->filename, 1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 PHP_FUNCTION(xdebug_enable)
@@ -507,7 +540,7 @@ PHP_FUNCTION(xdebug_is_enabled)
 PHP_FUNCTION(xdebug_start_trace)
 {
 	if (XG(do_trace) == 0) {
-		/* Alloc array */
+		XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
 		XG(do_trace) = 1;
 	} else {
 		php_error (E_NOTICE, "Function trace already started");
@@ -518,7 +551,8 @@ PHP_FUNCTION(xdebug_stop_trace)
 {
 	if (XG(do_trace) == 1) {
 		XG(do_trace) = 0;
-		/* Dealloc array */
+		xdebug_llist_destroy (XG(trace), NULL);
+		XG(trace)    = NULL;
 	} else {
 		php_error (E_NOTICE, "Function trace was not started started");
 	}
@@ -526,8 +560,11 @@ PHP_FUNCTION(xdebug_stop_trace)
 
 PHP_FUNCTION(xdebug_get_function_trace)
 {
-	/* FIX ME: implement */
-	print_trace (PG(html_errors) TSRMLS_CC);
+	if (XG(do_trace)) {
+		print_trace (PG(html_errors) TSRMLS_CC);
+	} else {
+		php_error (E_NOTICE, "Function tracing was not started, use xdebug_start_trace() before calling this function");
+	}
 }
 
 
@@ -543,7 +580,6 @@ PHP_FUNCTION(xdebug_memory_usage)
 static char* get_val (zend_op *op)
 {
 	zend_op *prev;
-	char *var;
 
 	if (op->op1.op_type != IS_CONST) {
 		/* Check for constant */
@@ -589,8 +625,6 @@ static char *get_var (zend_op *op, int opcode)
 {
 	zend_op *prev;
 
-	assert (op->opcode == ZEND_SEND_VAR || op->opcode == ZEND_SEND_REF);
-
 	prev = op - 1;
 
 	while (prev->opcode != ZEND_EXT_FCALL_BEGIN) {
@@ -609,6 +643,8 @@ static char *get_var (zend_op *op, int opcode)
 
 	if (prev->opcode == ZEND_EXT_FCALL_BEGIN) {
 		return estrdup ("?");
+	} else {
+		return estrdup ("??");
 	}
 }
 
@@ -657,7 +693,6 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 		}
 		cur_opcode++;
 	}
-	/* assert(curOpCode != endOpCode); */
 
 	tmp->function_name = NULL;
 	switch (cur_opcode->opcode) {
@@ -727,7 +762,6 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 			break;
 		case ZEND_DO_FCALL_BY_NAME: {
 			zend_op* tmpOpCode;
-			zval* function_name;
 
 			tmpOpCode = cur_opcode;
 			while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME) {
@@ -802,6 +836,10 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 	tmp->lineno    = cur_opcode->lineno;
 
 	xdebug_llist_insert_next (XG(stack), SRM_LLIST_TAIL(XG(stack)), tmp);
+	if (XG(do_trace)) {
+		tmp->refcount++;
+		xdebug_llist_insert_next (XG(trace), SRM_LLIST_TAIL(XG(trace)), tmp);
+	}
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
