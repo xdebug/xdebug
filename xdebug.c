@@ -73,7 +73,7 @@ void (*old_error_cb)(int type, const char *error_filename, const uint error_line
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
-static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
+static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
 static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC);
 
 function_entry xdebug_functions[] = {
@@ -281,6 +281,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_init(&xg->session, dump_dtor);
 }
 
+#ifdef ZTS
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
 	xdebug_llist_empty(&xg->server, NULL);
@@ -292,6 +293,7 @@ static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_empty(&xg->request, NULL);
 	xdebug_llist_empty(&xg->session, NULL);
 }
+#endif
 
 PHP_MINIT_FUNCTION(xdebug)
 {
@@ -1487,7 +1489,7 @@ PHP_FUNCTION(xdebug_set_error_handler)
 /*************************************************************************************************************************************/
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
-static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
+static zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
 {
 	switch (node->op_type) {
 		case IS_CONST:

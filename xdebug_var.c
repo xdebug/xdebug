@@ -28,7 +28,7 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 #define XDEBUG_STR_PREALLOC 1024
 
-void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f)
+inline void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f)
 {
 	int l = strlen(str);
 	if (xs->l + l > xs->a - 1) {
@@ -46,7 +46,7 @@ void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f)
 	}
 }
 
-void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f)
+inline void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f)
 {
 	if (xs->l + le > xs->a - 1) {
 		xs->d = xdrealloc(xs->d, xs->a + le + XDEBUG_STR_PREALLOC);

@@ -29,7 +29,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-inline double get_mtimestamp()
+double get_mtimestamp()
 {
 	struct timeval tv;
 #ifdef HAVE_GETTIMEOFDAY

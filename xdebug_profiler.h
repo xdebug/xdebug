@@ -75,4 +75,5 @@ typedef struct xdebug_fs {
 
 /* need to be export, since these are used by the xdebug.c code */
 void print_profile(int html, int mode TSRMLS_DC);
-inline double get_mtimestamp();
+double get_mtimestamp();
+
