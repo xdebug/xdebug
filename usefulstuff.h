@@ -56,8 +56,8 @@ void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
 char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);
 double xdebug_get_utime(void);
 char* xdebug_get_time(void);
-char *xdebug_path_to_url(const char *fileurl);
-char *xdebug_path_from_url(const char *fileurl TSRMLS_CC);
+char *xdebug_path_to_url(const char *fileurl TSRMLS_DC);
+char *xdebug_path_from_url(const char *fileurl TSRMLS_DC);
 
 #define XDEBUG_CRC32(crc, ch)	 (crc = (crc >> 8) ^ xdebug_crc32tab[(crc ^ (ch)) & 0xff])
 

@@ -245,7 +245,7 @@ char *xdebug_raw_url_encode(char const *s, int len, int *new_length, int skip_sl
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_from_url(const char *fileurl)
+char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 {
 	/* deal with file: url's */
 	char dfp[PATH_MAX * 2];
