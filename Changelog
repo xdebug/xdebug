@@ -1,3 +1,7 @@
+Thu Feb 27 16:02:08 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Improve memory allocation code by a factor of about 500
+
 Thu Feb 27 12:59:24 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/config.m4
 /xdebug/xdebug_superglobals.c
