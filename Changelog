@@ -1,3 +1,7 @@
+Fri May 2 11:43:23 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h:
+- Bump version number
+
 Mon Apr 28 21:28:17 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_4_3.mak:
 - Add PHP 4.3 .mak file
