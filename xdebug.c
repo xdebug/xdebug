@@ -1236,7 +1236,7 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 				if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
 					fse->vars[fse->varc].value = get_zval_value(*param);
 				} else {
-					fse->vars[fse->varc].value = estrdup ("?");
+					fse->vars[fse->varc].value = estrdup ("{missing}");
 				}
 				fse->varc++;
 			}
