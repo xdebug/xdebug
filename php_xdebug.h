@@ -141,6 +141,14 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_con    context;
 	unsigned int  breakpoint_count;
 
+	/* profiler settings */
+	zend_bool     profiler_enable;
+	char         *profiler_output_dir;
+
+	/* profiler globals */
+	zend_bool     profiler_enabled;
+	FILE         *profile_file;
+
 	/* DBGp globals */
 	char         *lastcmd;
 	char         *lasttransid;

@@ -488,7 +488,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 * Breakpoint 2, xdebug_execute (op_array=0x82caf50)
 *     at /dat/dev/php/xdebug/xdebug.c:361
 */
-	tmp_fname = show_fname(i, 0 TSRMLS_CC);
+	tmp_fname = show_fname(i->function, 0, 0 TSRMLS_CC);
 	if (xml) {
 		SENDMSG(h->socket, xdebug_sprintf("<breakpoint><function><name>%s</name><params>", tmp_fname));
 	} else {
@@ -537,7 +537,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 *     at /dat/dev/php/xdebug/xdebug.c:901
 *         
 */
-   	tmp_fname = show_fname(i, 0 TSRMLS_CC);
+   	tmp_fname = show_fname(i->function, 0, 0 TSRMLS_CC);
 	if (response_format == XDEBUG_RESPONSE_XML) {
 		if (nr) {
 			SENDMSG(h->socket, xdebug_sprintf("<stackframe><level>%d</level><function><name>%s</name><params>", nr, tmp_fname));
@@ -1145,9 +1145,9 @@ char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args)
 
 static char* show_local_vars(xdebug_con *context, xdebug_arg *args, void (*func)(void *, xdebug_hash_element*))
 {
-	struct function_stack_entry *i;
-	xdebug_hash                 *ht;
-	xdebug_gdb_options          *options = (xdebug_gdb_options*) context->options;
+	function_stack_entry *i;
+	xdebug_hash          *ht;
+	xdebug_gdb_options   *options = (xdebug_gdb_options*) context->options;
 	TSRMLS_FETCH();
 
 	
@@ -1320,7 +1320,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.67 $";
+	return "$Revision: 1.68 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
@@ -1332,7 +1332,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	TSRMLS_FETCH();
 
 	SENDMSG(context->socket, xdebug_sprintf("This is Xdebug version %s.\n", XDEBUG_VERSION));
-	SSEND(context->socket, "Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
+	SSEND(context->socket, "Copyright 2002, 2003, 2004 by Derick Rethans,\n");
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
@@ -1425,7 +1425,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *f
 
 int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
 {
-	struct function_stack_entry *i;
+	function_stack_entry *i;
 	int    ret;
 	char  *option;
 	char  *error = NULL;

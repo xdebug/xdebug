@@ -296,7 +296,7 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	fse = xdebug_get_stack_frame(nr TSRMLS_CC);
 	fse_prev = xdebug_get_stack_frame(nr - 1 TSRMLS_CC);
 
-	tmp_fname = show_fname(fse, 0 TSRMLS_CC);
+	tmp_fname = show_fname(fse->function, 0, 0 TSRMLS_CC);
 
 	tmp = xdebug_xml_node_init("stack");
 	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
@@ -1009,8 +1009,8 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 
 static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(void *, xdebug_hash_element*) TSRMLS_DC)
 {
-	struct function_stack_entry *fse;
-	xdebug_hash                 *ht;
+	function_stack_entry *fse;
+	xdebug_hash          *ht;
 	
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
 		ht = fse->used_vars;
@@ -1301,7 +1301,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.30 $";
+	return "$Revision: 1.31 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1466,7 +1466,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
 {
-	struct function_stack_entry *i;
+	function_stack_entry *i;
 	xdebug_xml_node *response;
 	TSRMLS_FETCH();
 

@@ -101,15 +101,28 @@ typedef struct xdebug_var {
 
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
-typedef struct xdebug_func {
+typedef struct _xdebug_func {
 	char *class;
 	char *function;
 	int   type;
 	int   internal;
 } xdebug_func;
 
+typedef struct _xdebug_call_entry {
+	int         type; /* 0 = function call, 1 = line */
+	char       *function;
+	int         lineno;
+	double      time_taken;
+} xdebug_call_entry;
+
+typedef struct xdebug_profile {
+	double        time;
+	double        mark;
+	xdebug_llist *call_list;
+} xdebug_profile;
+
 #define MAX_FUNCTION_ARGUMENTS 32
-typedef struct function_stack_entry {
+typedef struct _function_stack_entry {
 	/* function properties */
 	xdebug_func  function;
 	int          user_defined;
@@ -126,15 +139,21 @@ typedef struct function_stack_entry {
 	xdebug_hash *used_vars;
 	HashTable   *symbol_table;
 
-	/* profiling properties */
+	/* tracing properties */
 	unsigned int memory;
 	unsigned int prev_memory;
 	double       time;
+
+	/* profiling properties */
+	xdebug_profile profile;
+#if 0
 	double       time_taken;	
 	unsigned int f_calls;
+#endif
 
 	/* misc properties */
 	int          refcount;
+	struct _function_stack_entry *prev;
 } function_stack_entry;
 
 function_stack_entry *xdebug_get_stack_head(TSRMLS_D);

@@ -37,6 +37,6 @@ char* get_zval_value (zval *val);
 char* get_zval_value_xml (char *name, zval *val);
 char* get_zval_value_fancy(char *name, zval *val TSRMLS_DC);
 xdebug_xml_node* get_zval_value_xml_node (char *name, zval *val);
-char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC);
+char* show_fname (xdebug_func t, int html, int flags TSRMLS_DC);
 
 #endif

@@ -141,6 +141,26 @@ char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
+double xdebug_get_utime(void)
+{
+#ifdef HAVE_GETTIMEOFDAY
+	struct timeval tp;
+	long sec = 0L;
+	double msec = 0.0;
+
+	if (gettimeofday((struct timeval *) &tp, NULL) == 0) {
+		sec = tp.tv_sec;
+		msec = (double) (tp.tv_usec / MICRO_IN_SEC);
+
+		if (msec >= 1.0) {
+			msec -= (long) msec;
+		}
+		return msec + sec;
+	}
+#endif
+	return 0;
+}
+
 char* xdebug_get_time(void)
 {
 	time_t cur_time;
@@ -201,6 +221,9 @@ char *xdebug_path_from_url(const char *fileurl)
 	char dfp[PATH_MAX * 2];
 	const char *fp = dfp, *efp = fileurl;
 	int l = 0;
+#ifdef PHP_WIN32
+	int i;
+#endif
 	char *tmp = NULL, *ret = NULL;;
 
 	memset(dfp, 0, sizeof(dfp));

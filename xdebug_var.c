@@ -696,12 +696,9 @@ char* xmlize(char *string)
 ** Function name printing function
 */
 
-char* show_fname(struct function_stack_entry* entry, int html TSRMLS_DC)
+char* show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 {
 	char *tmp;
-	xdebug_func f;
-
-	f = entry->function;
 
 	switch (f.type) {
 		case XFUNC_NORMAL: {
