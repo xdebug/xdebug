@@ -1,3 +1,9 @@
+Mon Dec 1 16:28:01 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/tests/bug00022.phpt:
+- MFH: Fixed bug #22: Segmentation fault with xdebug_get_function_stack() and
+  collect_params=1.
+
 Mon Dec 1 16:25:00 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/tests/bug00022.phpt:
