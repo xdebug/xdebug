@@ -107,6 +107,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_call_line,             NULL)
 
 	PHP_FE(xdebug_var_dump,              NULL)
+	PHP_FE(xdebug_debug_zval,            NULL)
 
 	PHP_FE(xdebug_enable,                NULL)
 	PHP_FE(xdebug_disable,               NULL)
@@ -805,7 +806,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
 
-			tmp->include_filename = get_zval_value(get_zval(&zdata->opline->op1, zdata->Ts, &is_var));
+			tmp->include_filename = get_zval_value(get_zval(&zdata->opline->op1, zdata->Ts, &is_var), 0);
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
@@ -1176,7 +1177,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 		return;
 	}
 	if (html) {
-		contents = get_zval_value_fancy(NULL, zvar, &len TSRMLS_CC);
+		contents = get_zval_value_fancy(NULL, zvar, &len, 0 TSRMLS_CC);
 		if (contents) {
 			php_printf("<tr><td colspan='2' align='right' bgcolor='#ccffcc'>$%s = </td><td bgcolor='#ccffcc'>", name);
 			PHPWRITE(contents, len);
@@ -1185,7 +1186,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 			php_printf("<tr><td bgcolor='#ccffcc'>$%s</td><td bgcolor='#ccffcc' colspan='2'><i>Undefined</i></td></tr>\n", name);
 		}
 	} else {
-		contents = get_zval_value(zvar);
+		contents = get_zval_value(zvar, 0);
 		if (contents) {
 			php_printf("  $%s = %s\n", name, contents);
 		} else {
@@ -1268,10 +1269,10 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 					c = 1;
 				}
 				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
-				tmp_value = get_zval_value(i->var[j].addr);
+				tmp_value = get_zval_value(i->var[j].addr, 0);
 				if (!log_only) {
 					if (html) {
-						tmp_fancy_value = get_zval_value_fancy(tmp_varname, i->var[j].addr, &len TSRMLS_CC);
+						tmp_fancy_value = get_zval_value_fancy(tmp_varname, i->var[j].addr, &len, 0 TSRMLS_CC);
 						PHPWRITE(tmp_fancy_value, len);
 						xdfree(tmp_fancy_value);
 					} else {
@@ -1357,7 +1358,7 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	}
 	xdebug_str_addl(&str, "   >=> ", 7, 0);
 
-	tmp_value = get_zval_value(retval);
+	tmp_value = get_zval_value(retval, 0);
 	xdebug_str_add(&str, tmp_value, 1);
 	xdebug_str_addl(&str, "\n", 2, 0);
 
@@ -1399,7 +1400,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 		tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
 		xdebug_str_add(&str, tmp_varname, 1);
 
-		tmp_value = get_zval_value(i->var[j].addr);
+		tmp_value = get_zval_value(i->var[j].addr, 0);
 		xdebug_str_add(&str, tmp_value, 1);
 	}
 
@@ -1643,7 +1644,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			argument = get_zval_value(i->var[j].addr);
+			argument = get_zval_value(i->var[j].addr, 0);
 			if (i->var[j].name) {
 				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
 			} else {
@@ -1771,11 +1772,51 @@ PHP_FUNCTION(xdebug_var_dump)
 	
 	for (i = 0; i < argc; i++) {
 		if (PG(html_errors)) {
-			val = get_zval_value_fancy(NULL, (zval*) *args[i], &len TSRMLS_CC);
+			val = get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0 TSRMLS_CC);
 			PHPWRITE(val, len);
 			xdfree(val);
 		} else {
 			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);
+		}
+	}
+	
+	efree(args);
+}
+/* }}} */
+
+/* {{{ proto void xdebug_debug_zval(mixed var [, ...] )
+   Outputs a fancy string representation of a variable */
+PHP_FUNCTION(xdebug_debug_zval)
+{
+	zval ***args;
+	int     argc;
+	int     i, len;
+	char   *val;
+	zval   *debugzval;
+	
+	argc = ZEND_NUM_ARGS();
+	
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	for (i = 0; i < argc; i++) {
+		if (Z_TYPE_PP(args[i]) == IS_STRING) {
+			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
+			if (debugzval) {
+				php_printf("%s: ", Z_STRVAL_PP(args[i]));
+				if (PG(html_errors)) {
+					val = get_zval_value_fancy(NULL, debugzval, &len, 1 TSRMLS_CC);
+					PHPWRITE(val, len);
+				} else {
+					val = get_zval_value(debugzval, 1);
+					PHPWRITE(val, strlen(val));
+				}
+				xdfree(val);
+				PHPWRITE("\n", 1);
+			}
 		}
 	}
 	

@@ -120,48 +120,53 @@ static char* xdebug_get_property_info(char *mangled_property, char **property_na
 
 static int xdebug_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level;
+	int level, debug_zval;
 	xdebug_str *str;
 	TSRMLS_FETCH();
 
-	level = va_arg(args, int);
-	str   = va_arg(args, struct xdebug_str*);
+	level      = va_arg(args, int);
+	str        = va_arg(args, struct xdebug_str*);
+	debug_zval = va_arg(args, int);
 
 	if (hash_key->nKeyLength==0) { /* numeric key */
 		xdebug_str_add(str, xdebug_sprintf("%ld => ", hash_key->h), 1);
 	} else { /* string key */
 		xdebug_str_add(str, xdebug_sprintf("'%s' => ", hash_key->arKey), 1);
 	}
-	xdebug_var_export(zv, str, level + 2 TSRMLS_CC);
+	xdebug_var_export(zv, str, level + 2, debug_zval TSRMLS_CC);
 	xdebug_str_addl(str, ", ", 2, 0);
 	return 0;
 }
 
 static int xdebug_object_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level;
+	int level, debug_zval;
 	xdebug_str *str;
 	char *prop_name, *modifier;
 	TSRMLS_FETCH();
 
-	level = va_arg(args, int);
-	str   = va_arg(args, struct xdebug_str*);
+	level      = va_arg(args, int);
+	str        = va_arg(args, struct xdebug_str*);
+	debug_zval = va_arg(args, int);
 
 	if (hash_key->nKeyLength != 0) {
 		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
 		xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
 	}
-	xdebug_var_export(zv, str, level + 2 TSRMLS_CC);
+	xdebug_var_export(zv, str, level + 2, debug_zval TSRMLS_CC);
 	xdebug_str_addl(str, "; ", 2, 0);
 	return 0;
 }
 
-void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
+void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
 	int       tmp_len;
 
+	if (debug_zval) {
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d),", (*struc)->refcount, (*struc)->is_ref), 1);
+	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("%s", Z_LVAL_PP(struc) ? "TRUE" : "FALSE"), 1);
@@ -203,7 +208,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", Z_OBJCE_PP(struc)->name), 1);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 2, level, str);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 3, level, str, debug_zval);
 				if (myht->nNumOfElements > 0) {
 					xdebug_str_chop(str, 2);
 				}
@@ -227,12 +232,12 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 	}
 }
 
-char* get_zval_value(zval *val)
+char* get_zval_value(zval *val, int debug_zval)
 {
 	xdebug_str str = {0, 0, NULL};
 	TSRMLS_FETCH();
 
-	xdebug_var_export(&val, (xdebug_str*) &str, 1 TSRMLS_CC);
+	xdebug_var_export(&val, (xdebug_str*) &str, 1, debug_zval TSRMLS_CC);
 
 	return str.d;
 }
@@ -557,12 +562,13 @@ xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val)
 
 static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level;
+	int level, debug_zval;
 	xdebug_str *str;
 	TSRMLS_FETCH();
 
-	level = va_arg(args, int);
-	str   = va_arg(args, struct xdebug_str*);
+	level      = va_arg(args, int);
+	str        = va_arg(args, struct xdebug_str*);
+	debug_zval = va_arg(args, int);
 
 	xdebug_str_add(str, xdebug_sprintf("%*s", level * 2, ""), 1);
 
@@ -571,21 +577,22 @@ static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list ar
 	} else { /* string key */
 		xdebug_str_add(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, DGREY), 1);
 	}
-	xdebug_var_export_fancy(zv, str, level + 2 TSRMLS_CC);
+	xdebug_var_export_fancy(zv, str, level + 2, debug_zval TSRMLS_CC);
 
 	return 0;
 }
 
 static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level;
+	int level, debug_zval;
 	xdebug_str *str;
 	char *key;
 	char *prop_name, *modifier;
 	TSRMLS_FETCH();
 
-	level = va_arg(args, int);
-	str   = va_arg(args, struct xdebug_str*);
+	level      = va_arg(args, int);
+	str        = va_arg(args, struct xdebug_str*);
+	debug_zval = va_arg(args, int);
 
 	xdebug_str_add(str, xdebug_sprintf("%*s", level * 2, ""), 1);
 
@@ -594,16 +601,19 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
 		xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, DGREY), 1);
 	}
-	xdebug_var_export_fancy(zv, str, level + 2 TSRMLS_CC);
+	xdebug_var_export_fancy(zv, str, level + 2, debug_zval TSRMLS_CC);
 	return 0;
 }
 
-void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
+void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug_zval TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
 	int       newlen;
 
+	if (debug_zval) {
+		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount, (*struc)->is_ref), 1);
+	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%s</font>", BLUE, Z_LVAL_PP(struc) ? "true" : "false"), 1);
@@ -635,7 +645,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			if (myht->nApplyCount < 1) {
 				xdebug_str_addl(str, "<b>array</b>\n", 13, 0);
 				if (myht->nNumOfElements) {
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 2, level, str);
+					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 3, level, str, debug_zval);
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s", level * 2, ""), 1);
 					xdebug_str_add(str, xdebug_sprintf("<i><font color='%s'>empty</font></i>\n", LGREY), 1);
@@ -655,7 +665,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 #else
 				xdebug_str_addl(str, "\n", 1, 0);
 #endif
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_fancy, 2, level, str);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_fancy, 3, level, str, debug_zval);
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("<i>&</i><b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
 #ifdef ZEND_ENGINE_2
@@ -683,12 +693,12 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 	}
 }
 
-char* get_zval_value_fancy(char *name, zval *val, int *len TSRMLS_DC)
+char* get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 
 	xdebug_str_addl(&str, "<pre>", 5, 0);
-	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1 TSRMLS_CC);
+	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1, debug_zval TSRMLS_CC);
 	xdebug_str_addl(&str, "</pre>", 6, 0);
 
 	*len = str.l;
