@@ -1,3 +1,8 @@
+Sat Dec 20 19:44:12 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- Added missing response attributes "success" and "feature" to "feature_set"
+  responses.
+
 Fri Dec 19 17:29:26 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - The fileuri is an attribute of the init tag, not a sub element
