@@ -1,3 +1,12 @@
+Wed Dec 24 19:59:13 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h:
+- Added 'type' and 'state' attributes to the response of 'breakpoint_get' and
+  'breakpoint_list'.
+- Fixed problem with garbage for the 'id' attribute for returned breakpoints.
+
 Wed Dec 24 17:47:05 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - Fixed bug #36: GDB handler using print causes segfault with wrong syntax
