@@ -1,3 +1,7 @@
+Sat Apr 5 10:42:22 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Allow remote debugging to be enabled in httpd.conf and .htaccess files.
+
 Sat Apr 5 10:40:54 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_code_coverage.c
 /xdebug/xdebug_code_coverage.h
