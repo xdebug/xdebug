@@ -1,3 +1,10 @@
+Tue Sep 2 17:02:17 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_profiler.h
+/xdebug/xdebug_var.c:
+- Fixed a couple of -Wall -Winline problems
+
 Sun Aug 31 23:50:00 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/call_user_func_array2.inc
 /xdebug/tests/call_user_func_array2.phpt:
