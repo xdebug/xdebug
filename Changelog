@@ -1,3 +1,7 @@
+Thu Oct 16 12:46:03 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- MFH: We also need to support the long form "continue" here.
+
 Thu Oct 16 12:45:29 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - We also need to support the long form "continue" here.
