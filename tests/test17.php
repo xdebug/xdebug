@@ -1,12 +1,13 @@
 <?php
-/* $Id: test17.php,v 1.1 2002-06-23 16:35:02 derick Exp $
+/* $Id: test17.php,v 1.2 2002-08-30 06:18:47 derick Exp $
  * Author: d.rethans@jdimedia.nl
  * Description:
- *   Test for memleaks in arrays
+ *   Test for internal parameters
  */
-	function foo ($a)
-	{
-	}
 
-	foo (1);
+	xdebug_start_trace();
+
+	echo str_repeat ("5", 5);
+
+	xdebug_dump_function_trace();
 ?>

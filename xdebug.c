@@ -58,6 +58,9 @@ zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
+void (*old_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -149,6 +152,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_execute = zend_execute;
 	zend_execute = xdebug_execute;
 
+	old_execute_internal = zend_execute_internal;
+	zend_execute_internal = xdebug_execute_internal;
+
 	old_error_cb = zend_error_cb;
 	new_error_cb = xdebug_error_cb;
 
@@ -160,6 +166,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	zend_compile_file = old_compile_file;
 	zend_execute = old_execute;
+	zend_execute_internal = old_execute_internal;
 	zend_error_cb = old_error_cb;
 
 	return SUCCESS;
@@ -292,6 +299,27 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	} else {
 		old_execute (op_array TSRMLS_CC);
 	}
+}
+
+void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
+{
+	zval                **param;
+	void                **p         = EG(argument_stack).top_element-2;
+	int                   arg_count = (ulong) *p;
+	int                   i         = 0;
+	function_stack_entry *fse       = XG(stack)->tail->ptr;
+	
+	for (i = 0; i < arg_count; i++) {
+		fse->vars[fse->varc].name  = NULL;
+		if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
+			fse->vars[fse->varc].value = get_zval_value(*param);
+		} else {
+			fse->vars[fse->varc].value = estrdup ("{missing}");
+		}
+		fse->varc++;
+	}
+
+	execute_internal(execute_data_ptr, return_value_used TSRMLS_DC);
 }
 
 static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
