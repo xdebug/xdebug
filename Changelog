@@ -1,3 +1,7 @@
+Tue Aug 26 12:34:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Put back this include, it's needed to enable libedit on Unices.
+
 Tue Aug 26 12:34:21 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/configure.in:
 - This is Xdebug, not srm
