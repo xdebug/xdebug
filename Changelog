@@ -1,3 +1,7 @@
+Mon Mar 15 17:42:28 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.dsp:
+- Re-add as binary
+
 Mon Mar 15 17:41:50 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.dsp:
 - Remove the .dsp from the branch
