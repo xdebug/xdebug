@@ -1,3 +1,8 @@
+Sun Dec 28 19:11:30 CET 2003 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug.c:
+- If we test for preconditions, let's do the assignment after it ;-) This
+  fixes a segfault for when we have a parse error.
+
 Sun Dec 28 17:35:24 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
