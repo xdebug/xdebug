@@ -810,15 +810,23 @@ DBGP_FUNC(source)
 {
 	char *source, *encoded_source;
 	int   new_len;
+	char *filename;
+	function_stack_entry *fse;
 
 	if (!CMD_OPTION('f')) {
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+		if ((fse = xdebug_get_stack_tail(TSRMLS_C))) {
+			filename = fse->filename;
+		} else {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+		}
+	} else {
+		filename = CMD_OPTION('f');
 	}
 
 	if (CMD_OPTION('b') && CMD_OPTION('e')) {
-		source = return_source(CMD_OPTION('f'), strtol(CMD_OPTION('b'), NULL, 10), strtol(CMD_OPTION('e'), NULL, 10) TSRMLS_CC);
+		source = return_source(filename, strtol(CMD_OPTION('b'), NULL, 10), strtol(CMD_OPTION('e'), NULL, 10) TSRMLS_CC);
 	} else {
-		source = return_source(CMD_OPTION('f'), 0, 999999 TSRMLS_CC);
+		source = return_source(filename, 0, 999999 TSRMLS_CC);
 	}
 	if (!source) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_CANT_OPEN_FILE);
@@ -1308,7 +1316,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.35 $";
+	return "$Revision: 1.36 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
