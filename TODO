@@ -1,9 +1,6 @@
 TODO
 ====
 
-For 1.1.0:
-- Windows compability issues
-
 For 1.2.0:
 - Update gdb debugging capabilities
   * accessing data

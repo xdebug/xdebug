@@ -17,14 +17,12 @@
   </description>
   <license>PHP</license>
   <release>
-    <state>beta</state>
-    <version>1.1.0pre2</version>
-    <date>2002-10-29</date>
+    <state>stable</state>
+    <version>1.1.0</version>
+    <date>2002-11-11</date>
     <notes>
-     Added xdebug.collect_params setting. If this setting is on (the default)
-     then Xdebug collects all parameters passed to functions, otherwise they
-     are not collected at all. Also implemented correct handling of
-     include/require and eval.
+     Added breakpoint, stepping and listing functions to the remote debugger
+     server and Windows compatibility for server and debug client.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -62,6 +60,19 @@
     </filelist>
   </release>
   <changelog>
+    <release>
+      <state>stable</state>
+      <version>1.1.0</version>
+      <date>2002-11-11</date>
+      <notes>
++ Implemented the "list" (source listing), "print" (printing variable
+  contents), "show" (show all variables in the scope), "step" (step through
+  execution), "pwd" (print working directory), "next" (step over) and "finish"
+  (step out) commands for the remote debugger. (Derick)
+= Fixed lots of small bugs, under them memory leaks and crash bugs. (Derick)
+      </notes>
+    </release>
+
     <release>
       <state>beta</state>
       <version>1.1.0pre2</version>

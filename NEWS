@@ -1,6 +1,10 @@
-??? Nov ??, 2002 - xdebug 1.1.0
+Mon Nov 11, 2002 - xdebug 1.1.0
 
-
++ Implemented the "list" (source listing), "print" (printing variable
+  contents), "show" (show all variables in the scope), "step" (step through
+  execution), "pwd" (print working directory), "next" (step over) and "finish"
+  (step out) commands for the remote debugger. (Derick)
+= Fixed lots of small bugs, under them memory leaks and crash bugs. (Derick)
 
 
 Tue Oct 29, 2002 - xdebug 1.1.0pre2
