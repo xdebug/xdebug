@@ -1,3 +1,10 @@
+Sun Apr 27 13:42:20 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h:
+- Add fancy var dumping (this overrides the default var_dump() in PHP)
+
 Fri Apr 25 17:59:28 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/compile.bat:
 - Also automatically build the 4.3 version
