@@ -229,8 +229,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   dump_undefined,    zend_xdebug_globals, xdebug_globals)
 
 	/* Profiler settings */
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",     "0",    PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_output_dir", "/tmp", PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",      "0",     PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_output_dir",  "/tmp",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_output_name", "crc32", PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name, zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
@@ -838,7 +839,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			!XG(profiler_enabled) &&
 			XG(profiler_enable)
 		) {
-			if (xdebug_profiler_init(op_array->filename) == SUCCESS) {
+			if (xdebug_profiler_init(op_array->filename TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
 			}
 		}
@@ -868,7 +869,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 	old_execute(op_array TSRMLS_CC);
 	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_user_end(fse);
+		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}
 	
 	fse->symbol_table = NULL;
@@ -900,7 +901,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	}
 	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_internal_end(fse);
+		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
 	}
 		
 	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);

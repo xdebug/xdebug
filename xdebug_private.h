@@ -110,6 +110,8 @@ typedef struct _xdebug_func {
 
 typedef struct _xdebug_call_entry {
 	int         type; /* 0 = function call, 1 = line */
+	int         user_defined;
+	char       *filename;
 	char       *function;
 	int         lineno;
 	double      time_taken;

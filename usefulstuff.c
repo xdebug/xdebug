@@ -22,10 +22,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #else
 #define PATH_MAX MAX_PATH
 #include <winsock2.h>
 #include <io.h>
+#include "win32/time.h"
+#include <process.h>
 #endif
 #include "php_xdebug.h"
 #include "xdebug_mm.h"
@@ -279,3 +282,15 @@ char *xdebug_path_to_url(const char *fileurl)
 	return tmp;
 }
 
+long xdebug_crc32(const char *string, int str_len)
+{
+	unsigned int crc = ~0;
+	char *p;
+	int len;
+	
+	len = 0 ;
+	for (len += str_len; str_len--; ++p) {
+	    XDEBUG_CRC32(crc, *p);
+	}
+	return ~crc;
+}
