@@ -1,3 +1,24 @@
+Mon Oct 28 16:33:13 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/Makefile.frag
+/xdebug/Makefile.in
+/xdebug/package.xml
+/xdebug/test.sh
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handlers.h
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h
+/xdebug/xdebug_socket.c
+/xdebug/xdebug_socket.h
+/xdebug/debugclient/Makefile
+/xdebug/debugclient/main.c
+/xdebug/debugclient/usefulstuff.c
+/xdebug/debugclient/usefulstuff.h:
+- Cleanup
+
 Mon Oct 28 08:16:06 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Postpone some things to 1.2.0
