@@ -194,7 +194,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval 
 			myht = Z_ARRVAL_PP(struc);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_addl(str, "array (", 7, 0);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 2, level, str);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 3, level, str, debug_zval);
 				if (myht->nNumOfElements > 0) {
 					xdebug_str_chop(str, 2);
 				}
