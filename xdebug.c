@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
+   |           Ilia Alshanetsky <ilia@prohost.org>                        |
    +----------------------------------------------------------------------+
  */
 
