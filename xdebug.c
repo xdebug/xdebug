@@ -97,7 +97,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",  PHP_INI_SYSTEM, OnUpdateBool, default_enable,    zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
-char *safe_sprintf (const char* fmt, ...)
+static char *xdebug_sprintf (const char* fmt, ...)
 {
 	char   *new_str;
 	int     size = 1;
@@ -253,7 +253,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
-static inline print_stack (int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
+static inline void print_stack (int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
 	char *error_format;
 	xdebug_llist_element *le;
@@ -318,7 +318,7 @@ static inline print_stack (int html, const char *error_type_str, char *buffer, c
 
 }
 
-static inline print_trace (int html TSRMLS_DC)
+static inline void print_trace (int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 
@@ -589,7 +589,7 @@ static char* get_val (zend_op *op)
 		prev = op - 1;
 		if (prev->op1.op_type == IS_CONST) {
 			if (prev->op1.u.constant.type == IS_STRING) {
-				return safe_sprintf ("[%s]", prev->op1.u.constant.value.str.val);
+				return xdebug_sprintf ("[%s]", prev->op1.u.constant.value.str.val);
 			}
 		} else if (prev->op1.op_type == IS_TMP_VAR) { /* Check for array */
 			if (prev->opcode == ZEND_ADD_ARRAY_ELEMENT) {
@@ -604,13 +604,13 @@ static char* get_val (zend_op *op)
 			return estrdup("NULL");
 			break;
 		case IS_LONG:
-			return safe_sprintf ("%ld", op->op1.u.constant.value.lval);
+			return xdebug_sprintf ("%ld", op->op1.u.constant.value.lval);
 			break;
 		case IS_DOUBLE:
-			return safe_sprintf ("%g", op->op1.u.constant.value.dval);
+			return xdebug_sprintf ("%g", op->op1.u.constant.value.dval);
 			break;
 		case IS_STRING:
-			return safe_sprintf ("'%s'", op->op1.u.constant.value.str.val);
+			return xdebug_sprintf ("'%s'", op->op1.u.constant.value.str.val);
 			break;
 		case IS_BOOL:
 			return op->op1.u.constant.value.lval ? estrdup ("TRUE") : estrdup ("FALSE");
@@ -636,7 +636,7 @@ static char *get_var (zend_op *op, int opcode)
 		}
 
 		if (prev->op1.op_type == IS_CONST) {
-			return safe_sprintf ("$%s", prev->op1.u.constant.value.str.val);
+			return xdebug_sprintf ("$%s", prev->op1.u.constant.value.str.val);
 		} else {
 			return estrdup ("$");
 		}
@@ -651,7 +651,7 @@ static char *get_var (zend_op *op, int opcode)
 	}
 }
 
-ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
+ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 {
 	struct function_stack_entry* tmp;
 	zend_op *cur_opcode;
@@ -864,7 +864,7 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 	}
 }
 
-ZEND_DLEXPORT void function_end (zend_op_array *op_array)
+ZEND_DLEXPORT void xdebug_function_end (zend_op_array *op_array)
 {
 	TSRMLS_FETCH();
 
@@ -872,7 +872,7 @@ ZEND_DLEXPORT void function_end (zend_op_array *op_array)
 	XG(level)--;
 }
 
-ZEND_DLEXPORT void statement_call (zend_op_array *op_array)
+ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 {
 	/* printf ("call statement, %s line %d\n", op_array->filename, op_array->opcodes[0].lineno); */
 }
@@ -907,9 +907,9 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	NULL,           /* deactivate_func_t */
 	NULL,           /* message_handler_func_t */
 	NULL,           /* op_array_handler_func_t */
-	statement_call, /* statement_handler_func_t */
-	function_begin, /* fcall_begin_handler_func_t */
-	function_end,   /* fcall_end_handler_func_t */
+	xdebug_statement_call, /* statement_handler_func_t */
+	xdebug_function_begin, /* fcall_begin_handler_func_t */
+	xdebug_function_end,   /* fcall_end_handler_func_t */
 	NULL,           /* op_array_ctor_func_t */
 	NULL,           /* op_array_dtor_func_t */
 	STANDARD_ZEND_EXTENSION_PROPERTIES
