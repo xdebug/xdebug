@@ -1,3 +1,7 @@
+Sun Jan 5 17:22:09 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed segfault with custom session handler.
+
 Sun Jan 5 16:27:28 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_handler_gdb.c:
