@@ -1,3 +1,7 @@
+Fri Aug 30 11:08:16 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Use old code for PHP versions < 4.3.0
+
 Fri Aug 30 10:23:50 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Prevent the use of assert in older PHP versions.
