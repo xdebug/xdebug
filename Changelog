@@ -1,3 +1,9 @@
+Wed Feb 02 00:33:16 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed typo in PHP 4 version of code.
+#- Thy shall test before thy commith.
+
 Tue Feb 01 23:53:44 CET 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c
 xdebug/xdebug_var.h
