@@ -277,10 +277,11 @@ void stack_element_dtor (void *dummy, void *elem)
 PHP_RINIT_FUNCTION(xdebug)
 {
 	CG(extended_info) = 1;
-	XG(level)    = 0;
-	XG(do_trace) = 0;
-	XG(stack)    = xdebug_llist_alloc (stack_element_dtor);
-	XG(trace_file) = NULL;
+	XG(level)         = 0;
+	XG(do_trace)      = 0;
+	XG(do_profile)    = 0;
+	XG(stack)         = xdebug_llist_alloc (stack_element_dtor);
+	XG(trace_file)    = NULL;
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
@@ -1608,8 +1609,9 @@ PHP_FUNCTION(xdebug_dump_function_trace)
 
 PHP_FUNCTION(xdebug_dump_function_profile)
 {
+	long profile_flag = XDEBUG_PROFILER_LBL;
+
 	if (XG(do_profile) == 1) {
-		long profile_flag = XDEBUG_PROFILER_LBL;
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &profile_flag) == FAILURE) {
 			return;
 		}
