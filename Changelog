@@ -1,3 +1,11 @@
+Sat Sep 7 00:35:19 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handlers.h
+/xdebug/xdebug_handler_php3.h
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_com.h
+/xdebug/xdebug_com.c:
+- Windows build fixes
+
 Thu Sep 5 13:25:12 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/Makefile.in:
 - Update Makefile.in for old PHP versions (=< 4.2)
