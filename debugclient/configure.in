@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.1 2002-11-12 11:07:59 derick Exp $
+dnl $Id: configure.in,v 1.2 2003-08-26 10:34:20 derick Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -11,7 +11,7 @@ dnl
 AC_INIT([main.c])
 AC_PREFIX_DEFAULT([/usr/local])
 
-AM_INIT_AUTOMAKE(srm, $VERSION)
+AM_INIT_AUTOMAKE(debugclient, $VERSION)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_CANONICAL_HOST
