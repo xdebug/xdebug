@@ -1,3 +1,20 @@
+Wed Dec 3 17:00:16 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/test.sh
+/xdebug/xdebug.c
+/xdebug/tests/local_vars_in_error.phpt
+/xdebug/tests/auto_trace.phpt
+/xdebug/tests/test4.phpt
+/xdebug/tests/test5.phpt
+/xdebug/tests/test6.phpt:
+- Fixed some layout issues.
+- Added ini setting "xdebug.dump_global" with which you can turn off dumping
+  of super globals even in you have that configured. This is most seful for
+  tests.
+- Fixed test cases to use the new xdebug.dump_global setting to suppress
+  dumping of super globals.
+- Added testcase for showing variables in the top most stackframe on error.
+
 Wed Dec 3 12:02:17 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/test.sh
 /xdebug/xdebug.c
