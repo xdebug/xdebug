@@ -1,3 +1,11 @@
+Tue Jan 7 01:28:17 CET 2003 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- xdebug_[stop|start]_trace() cannot be static because they are needed
+  by xdebug_profiler.c. Moved the function declarations to php_xdebug.h
+  as well.
+
 Sun Jan 5 17:22:09 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fixed segfault with custom session handler.
