@@ -41,6 +41,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_smart_str.h"
 #include "php_globals.h"
+#include "ext/standard/php_var.h"
 
 #include "zend.h"
 #include "zend_API.h"
