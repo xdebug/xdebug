@@ -1,3 +1,15 @@
+Tue Aug 03 22:46:06 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+test.sh
+xdebug/xdebug.c
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_private.h
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h:
+- Fixed bug #75: xdebug's var_dump implementation is not binary safe
+- Fixed problem with outputing Local Variables
+- Fixed bug #83: More than 32 parameters functions make xdebug crash
+
 Tue Aug 03 22:36:39 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 tests/bug00032.phpt
 xdebug/tests/test20b.phpt:
