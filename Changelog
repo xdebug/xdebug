@@ -1,3 +1,7 @@
+Thu Jun 17 17:27:37 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Add some protos
+
 Fri Jun 11 15:56:08 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Added a new field to the computerized trace output to show if a function
