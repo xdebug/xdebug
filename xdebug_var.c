@@ -197,7 +197,9 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			if (myht->nApplyCount < 2) {
 				XDEBUG_STR_ADDL(str, "array (", 7, 0);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 2, level, str);
-				XDEBUG_STR_CHOP(str, 2);
+				if (myht->nNumOfElements > 0) {
+					XDEBUG_STR_CHOP(str, 2);
+				}
 				XDEBUG_STR_ADDL(str, ")", 1, 0);
 			} else {
 				XDEBUG_STR_ADDL(str, "...", 3, 0);
@@ -209,7 +211,9 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			if (myht->nApplyCount < 2) {
 				XDEBUG_STR_ADD(str, xdebug_sprintf ("class %s {", Z_OBJCE_PP(struc)->name), 1);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 2, level, str);
-				XDEBUG_STR_CHOP(str, 2);
+				if (myht->nNumOfElements > 0) {
+					XDEBUG_STR_CHOP(str, 2);
+				}
 				XDEBUG_STR_ADDL(str, "}", 1, 0);
 			} else {
 				XDEBUG_STR_ADDL(str, "...", 3, 0);
