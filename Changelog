@@ -1,3 +1,9 @@
+Sat Sep 27 22:57:54 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test4.phpt
+/xdebug/tests/test5.phpt
+/xdebug/tests/test6.phpt:
+- MFH: Change in PHP 5's error messages
+
 Sat Sep 27 22:55:03 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test4.phpt
 /xdebug/tests/test5.phpt
