@@ -251,28 +251,242 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message)
 /*****************************************************************************
 ** Data returning functions
 */
+#define XF_ST_ROOT          0
+#define XF_ST_ARRAY_INDEX   1
+#define XF_ST_OBJ_PROPERTY  2
+
+static char* prepare_search_key(char *name, int *name_length, char *prefix, int prefix_length)
+{
+	char *element;
+	int   extra_length = 0;
+
+	if (prefix_length) {
+		if (prefix[0] == '*') {
+			extra_length = 3;
+		} else {
+			extra_length = 2 + prefix_length;
+		}
+	}
+
+	element = malloc(*name_length + 1 + extra_length);
+	memset(element, 0, *name_length + 1 + extra_length);
+	if (extra_length) {
+		memcpy(element + 1, prefix, extra_length - 2);
+	}
+	memcpy(element + extra_length, name, *name_length);
+	*name_length += extra_length;
+
+	return element;
+}
+
+static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_length, int type, char* ccn, int ccnl TSRMLS_DC)
+{
+	zval **retval_pp = NULL, *retval_p = NULL;
+	char  *element;
+	int    element_length = name_length;
+
+	switch (type) {
+		case XF_ST_ROOT:
+			element = prepare_search_key(name, &name_length, "", 0);
+			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			break;
+		case XF_ST_ARRAY_INDEX:
+			break;
+		case XF_ST_OBJ_PROPERTY:
+			/* First we try a public property */
+			element = prepare_search_key(name, &element_length, "", 0);
+			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			element_length = name_length;
+
+			/* Then we try it again as protected property */
+			element = prepare_search_key(name, &element_length, "*", 1);
+			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			element_length = name_length;
+
+			/* Then we try it again as private property */
+			element = prepare_search_key(name, &element_length, ccn, ccnl);
+			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			break;
+	}
+cleanup:
+	free(element);
+	return retval_p;
+}
+
+inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
+{
+	switch (Z_TYPE_P(z)) {
+		case IS_ARRAY:
+			return Z_ARRVAL_P(z);
+			break;
+		case IS_OBJECT:
+			return Z_OBJPROP_P(z);
+			break;
+	}
+}
+
+inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
+{
+#if PHP_MAJOR_VERSION == 4
+	zend_class_entry *ce;
+	ce = Z_OBJCE_PP(arg);
+	*length = ce->name_length;
+	return estrdup(ce->name);
+#endif
+#if PHP_MAJOR_VERSION == 5
+	char *name;
+	zend_uint name_len;
+
+	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
+		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+		zend_class_entry *ce;
+
+		ce = zend_get_class_entry(z TSRMLS_CC);
+		if (!ce) {
+			return NULL;
+		}
+
+		*length = ce->name_length;
+		return estrdup(ce->name);
+	} 
+
+	*length = name_len;
+	return name;
+#endif
+}
+
 static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 {
 	HashTable           *st = NULL;
-	zval               **retval;
 
-	st = XG(active_symbol_table);
-	if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return *retval;
-	}
+	if (name[0] == '$') {
+		/* This is a fullname property. Relying on eval is bad as it can bail
+		 * out, so we do it ourselves. */
+		int found = -1;
+		int state = 0;
+		char **p = &name;
+		char *keyword = NULL, *keyword_end = NULL;
+		int type = XF_ST_ROOT;
+		zval *retval = NULL;
+		char *current_classname = NULL;
+		int   cc_length;
 
-	st = EG(active_op_array)->static_variables;
-	if (st) {
+		/* Set the target table to the currently active scope */
+		st = XG(active_symbol_table);
+
+		do {
+			if (*p[0] == '\0') {
+				found = 0;
+			} else {
+				switch (state) {
+					case 0:
+						if (*p[0] == '$') {
+							state = 1;
+							keyword = *p + 1;
+							break;
+						}
+						keyword = *p;
+						/* break intentionally missing */
+					case 1:
+						if (*p[0] == '[') {
+							keyword_end = *p;
+							if (keyword) {
+								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length);
+								current_classname = NULL;
+								if (retval) {
+									st = fetch_ht_from_zval(retval TSRMLS_CC);
+								}
+								keyword = NULL;
+							}
+							state = 3;
+							type = XF_ST_ARRAY_INDEX;
+						} else if (*p[0] == '-') {
+							keyword_end = *p;
+							if (keyword) {
+								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length);
+								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+								if (retval) {
+									st = fetch_ht_from_zval(retval TSRMLS_CC);
+								}
+								keyword = NULL;
+							}
+							state = 2;
+							type = XF_ST_OBJ_PROPERTY;
+						}
+						break;
+					case 2:
+						if (*p[0] != '>') {
+							keyword = *p;
+							state = 1;
+						}
+						break;
+					case 3:
+						if (*p[0] == '\'') {
+							state = 4;
+							keyword = *p + 1;
+						}
+						break;
+					case 4:
+						if (*p[0] == '\'') {
+							state = 5;
+							keyword_end = *p;
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length);
+							current_classname = NULL;
+							if (retval) {
+								st = fetch_ht_from_zval(retval TSRMLS_CC);
+							}
+							keyword = NULL;
+						}
+						break;
+					case 5:
+						if (*p[0] == ']') {
+							state = 1;
+						}
+						break;
+				}
+				(*p)++;
+			}
+		} while (found < 0);
+		if (keyword != NULL) {
+			retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length);
+			if (retval) {
+				st = fetch_ht_from_zval(retval TSRMLS_CC);
+			}
+		}
+		return retval;
+	} else {
+		zval **retval;
+
+		st = XG(active_symbol_table);
+		if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+			return *retval;
+		}
+
+		st = EG(active_op_array)->static_variables;
+		if (st) {
+			if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+				return *retval;
+			}
+		}
+#if 0
+		st = &EG(symbol_table);
 		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
 			return *retval;
 		}
-	}
-#if 0
-	st = &EG(symbol_table);
-	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return *retval;
-	}
 #endif
+	}
 	return NULL;
 }
 
@@ -786,6 +1000,7 @@ static int _xdebug_do_eval(unsigned char *eval_string, zval *ret_zval TSRMLS_DC)
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
 	EG(error_reporting) = 0;
+
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
 	res = zend_eval_string(eval_string, ret_zval, "xdebug eval" TSRMLS_CC);
@@ -1672,7 +1887,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.67 $";
+	return "$Revision: 1.68 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

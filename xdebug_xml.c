@@ -20,10 +20,9 @@
 #include <stdio.h>
 #include "xdebug_mm.h"
 #include "xdebug_str.h"
+#include "xdebug_var.h"
 #include "xdebug_xml.h"
 #include "xdebug_compat.h"
-
-extern char* xmlize(char *string, int len, int *newlen);
 
 static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* output)
 {
@@ -33,9 +32,11 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 	xdebug_str_addl(output, " ", 1, 0);
 	xdebug_str_add(output, attr->name, 0);
 	xdebug_str_addl(output, "=\"", 2, 0);
-	tmp = xmlize(attr->value, strlen(attr->value), &newlen);
-	xdebug_str_add(output, tmp, 0);
-	efree(tmp);
+	if (attr->value) {
+		tmp = xmlize(attr->value, strlen(attr->value), &newlen);
+		xdebug_str_add(output, tmp, 0);
+		efree(tmp);
+	}
 	xdebug_str_addl(output, "\"", 1, 0);
 	
 	if (attr->next) {
