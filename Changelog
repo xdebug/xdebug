@@ -1,3 +1,11 @@
+Fri Jan 17 20:34:35 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/xdebug_handler_gdb.c:
+- Disallow 'cont' and the breakpoint commands when a script terminated due
+  to a an error condition (E_*ERROR).
+- Fixed printing of 'eval' return values (both results and errors).
+- Fixed typo in help for "finish".
+
 Fri Jan 17 10:39:56 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Bugfixing items
