@@ -25,6 +25,11 @@
 #include "xdebug_handler_php3.h"
 #include "xdebug_var.h"
 
+#ifdef PHP_WIN32
+#include "win32/time.h"
+#include <process.h>
+#endif
+
 
 static char *find_hostname(void)
 {
@@ -163,8 +168,8 @@ int xdebug_php3_error(int socket, int type, char *message, char *location, uint 
 	char *hostname;
 	char *prefix;
 	char *errortype;
-	char *message_buffer;
 	xdebug_llist_element *le;
+	TSRMLS_FETCH();
 
 	time_buffer = get_current_time();
 	hostname    = find_hostname();

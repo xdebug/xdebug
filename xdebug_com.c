@@ -21,9 +21,11 @@
 
 #include <sys/types.h>
 #include <errno.h>
+#ifndef PHP_WIN32
 #include <unistd.h>
+#endif
 
-#if MSVC5
+#ifdef PHP_WIN32
 # include <winsock.h>
 # include <process.h>
 # include <direct.h>
@@ -37,6 +39,17 @@
 #endif
 
 #include "xdebug_com.h"
+
+#ifdef PHP_WIN32
+int inet_aton(const char *cp, struct in_addr *inp)
+{
+	inp->s_addr = inet_addr(cp);
+	if (inp->s_addr == INADDR_NONE) {
+		return 0;
+	}
+	return 1;
+}
+#endif
 
 /*
  * Converts a host name to an IP address.  */

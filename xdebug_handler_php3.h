@@ -23,7 +23,7 @@
 
 int xdebug_php3_init(int socket);
 int xdebug_php3_deinit(int socket);
-int xdebug_php3_error(int socket, int type, char *message, char *location, uint line, xdebug_llist *stack);
+int xdebug_php3_error(int socket, int type, char *message, char *location, unsigned int line, xdebug_llist *stack);
 
 #define xdebug_handler_php3 { \
 	xdebug_php3_init,         \

@@ -30,7 +30,7 @@ struct _xdebug_remote_handler {
 	int (*remote_deinit)(int socket);
 
 	/* Stack messages */
-	int (*remote_error)(int socket, int type, char *message, char *location, uint line, xdebug_llist *stack);
+	int (*remote_error)(int socket, int type, char *message, char *location, unsigned int line, xdebug_llist *stack);
 };
 
 struct _xdebug_remote_handler_info {

@@ -19,6 +19,10 @@
 #ifndef __HAVE_XDEBUG_COM_H__
 #define __HAVE_XDEBUG_COM_H__
 
+#ifdef PHP_WIN32
+int inet_aton(const char *cp, struct in_addr *inp);
+#endif
+
 #if WIN32|WINNT
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
