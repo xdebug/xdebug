@@ -18,6 +18,8 @@ For 1.2.0:
      If this external call takes > a certain pre-set time show the
      parameter passed to the function so that a person can optimize the
      query or the utility that is being called.
+  * Add another profiling mode that allows for detailed function analysis.
+  * Separate the profiling code into a file of its own.
 - Additions
   * trace code to trace which files/lines have bene touched (to check
     code coverage).
