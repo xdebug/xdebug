@@ -490,6 +490,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 	XG(stack)         = xdebug_llist_alloc(stack_element_dtor);
+	XG(ide_key)       = NULL;
 	XG(trace_file)    = NULL;
 	XG(tracefile_name) = NULL;
 	XG(profile_file)  = NULL;
