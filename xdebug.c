@@ -184,6 +184,7 @@ void stack_element_dtor (void *dummy, void *elem)
 
 PHP_RINIT_FUNCTION(xdebug)
 {
+	CG(extended_info) = 1;
 	XG(level)    = 0;
 	XG(do_trace) = 0;
 	XG(stack)    = xdebug_llist_alloc (stack_element_dtor);
