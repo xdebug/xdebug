@@ -1,0 +1,5 @@
+#!/bin/sh
+
+echo "cleaning"
+${MAKE:-make} -s -f build/clean.mk
+${MAKE:-make} -s -f build/buildconf1.mk
