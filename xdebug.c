@@ -1405,6 +1405,7 @@ PHP_FUNCTION(xdebug_set_error_handler)
 }
 
 /*************************************************************************************************************************************/
+#define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
 static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
 {
@@ -1415,16 +1416,28 @@ static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
 
 		case IS_TMP_VAR:
 			*is_var = 1;
+#ifdef ZEND_ENGINE_2
+			return &T(node->u.var).tmp_var;
+#else
 			return &Ts[node->u.var].tmp_var;
+#endif
 			break;
 
 		case IS_VAR:
 			*is_var = 1;
+#ifdef ZEND_ENGINE_2
+			if (T(node->u.var).var.ptr) {
+				return T(node->u.var).var.ptr;
+			} else {
+				fprintf(stderr, "\nIS_VAR\n");
+			}
+#else
 			if (Ts[node->u.var].var.ptr) {
 				return Ts[node->u.var].var.ptr;
 			} else {
 				fprintf(stderr, "\nIS_VAR\n");
 			}
+#endif
 			break;
 
 		case IS_UNUSED:
