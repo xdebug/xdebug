@@ -1,3 +1,9 @@
+Mon Jun 23 23:37:40 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h:
+- Implemented the 'show-breakpoints' command
+
 Wed Jun 11 13:15:12 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Add TODO item
