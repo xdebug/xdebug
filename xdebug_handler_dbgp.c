@@ -321,7 +321,7 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	tmp_fname = show_fname(fse->function, 0, 0 TSRMLS_CC);
 
 	tmp = xdebug_xml_node_init("stack");
-	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "where", xdstrdup(tmp_fname), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "level",    xdebug_sprintf("%ld", nr), 0, 1);
 	if (fse_prev) {
 		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename), 0, 1);
@@ -1562,7 +1562,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.50 $";
+	return "$Revision: 1.51 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
