@@ -30,6 +30,8 @@
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
 
+#define MICRO_IN_SEC 1000000.00
+
 #ifdef PHP_WIN32
 #define PHP_XDEBUG_API __declspec(dllexport)
 #else
@@ -39,7 +41,6 @@ extern zend_module_entry xdebug_module_entry;
 #ifdef ZTS
 #include "TSRM.h"
 #endif
-
 
 /* Memory allocators */
 #if 0
@@ -76,10 +77,6 @@ PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_function_trace);
 PHP_FUNCTION(xdebug_dump_function_trace);
-PHP_FUNCTION(xdebug_start_profiling);
-PHP_FUNCTION(xdebug_stop_profiling);
-PHP_FUNCTION(xdebug_dump_function_profile);
-PHP_FUNCTION(xdebug_get_function_profile);
 
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
@@ -115,28 +112,6 @@ typedef struct xdebug_var {
 #define XDEBUG_INTERNAL     1
 #define XDEBUG_EXTERNAL     2
 
-#define XDEBUG_PROFILER_LBL    0   /* line by line */
-#define XDEBUG_PROFILER_CPU    1   /* sorted by execution time */
-#define XDEBUG_PROFILER_NC     2   /* number of function calls */
-#define XDEBUG_PROFILER_FS_AV  3   /* sorted by avg. exection time */
-#define XDEBUG_PROFILER_FS_SUM 4   /* sorted by total time taken by each function */
-#define XDEBUG_PROFILER_FS_NC  5   /* sorted by total number of function calls */
-#define XDEBUG_PROFILER_SD_LBL 6   /* hierarchical view of the functions, sorted by line numbers */
-#define XDEBUG_PROFILER_SD_CPU 7   /* hierarchical view of the functions, sorted by cpu usage */
-#define XDEBUG_PROFILER_SD_NC  8   /* hierarchical view of the functions, sorted by function calls */
-
-#define XDEBUG_PROFILER_MODES  9
-
-#define XDEBUG_PROFILER_LBL_D    "Execution Time Profile (sorted by line numbers)"
-#define XDEBUG_PROFILER_CPU_D    "Execution Time Profile (sorted by execution time)"
-#define XDEBUG_PROFILER_NC_D     "Execution Time Profile (sorted by number of calls to each function)"
-#define XDEBUG_PROFILER_FS_AV_D  "Function Summary Profile (sorted by avg. execution time)"
-#define XDEBUG_PROFILER_FS_SUM_D "Function Summary Profile (sorted by total execution time)"
-#define XDEBUG_PROFILER_FS_NC_D  "Function Summary Profile (sorted by number of function calls)"
-#define XDEBUG_PROFILER_SD_LBL_D "Stack-Dump Profile (sorted by line numbers)"
-#define XDEBUG_PROFILER_SD_CPU_D "Stack-Dump Profile (sorted by execution time)"
-#define XDEBUG_PROFILER_SD_NC_D  "Stack-Dump Profile (sorted by number of calls to each function)"
-
 #define XDEBUG_MAX_FUNCTION_LEN 1024
 
 typedef struct xdebug_func {
@@ -169,19 +144,6 @@ typedef struct function_stack_entry {
 	double       time_taken;	
 	unsigned int f_calls;
 } function_stack_entry;
-
-typedef struct xdebug_tree_p {
-	int n_func;
-	function_stack_entry **subf;
-} xdebug_tree_p;
-
-typedef struct xdebug_tree_out {
-	int nelem;
-	int pos;
-	struct xdebug_tree_out *parent; 
-	struct function_stack_entry *fse;
-	struct xdebug_tree_out **children;
-} xdebug_tree_out;
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           level;

@@ -41,6 +41,8 @@
       <file role="src"  name="xdebug_hash.h"/>
       <file role="src"  name="xdebug_llist.c"/>
       <file role="src"  name="xdebug_llist.h"/>
+      <file role="src"  name="xdebug_profiler.c"/>
+      <file role="src"  name="xdebug_profiler.h"/>
       <file role="src"  name="xdebug_var.c"/>
       <file role="src"  name="xdebug_var.h"/>
 
