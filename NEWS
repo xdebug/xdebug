@@ -1,5 +1,12 @@
 ? - xdebug 1.1.0
 
++ Added Added automatic starting of function traces (xdebug.auto_trace,
+  defaulting to "off").
+- Xdebug no longer supports PHP versions below PHP 4.3.0pre1
++ Added gdb compatible debugger handler with support for simple (function only)
+  breakpoints.
+= Implemented a new way to get class names and file names. (Derick, Thies C.
+  Arntzen <thies@thieso.net>)
 + Added time-index and memory footprint to CLI dumps. (Derick)
 + Implemented remote debugger handler abstraction. (Derick)
 + Added a php3 compatible debugger handler. (Derick)
