@@ -1,3 +1,7 @@
+Mon Jan 20 20:53:44 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Add some more verbose error messages
+
 Fri Jan 17 20:34:35 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/xdebug_handler_gdb.c:
