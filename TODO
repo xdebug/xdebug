@@ -16,10 +16,5 @@ For 1.2.0:
      If this external call takes > a certain pre-set time show the
      parameter passed to the function so that a person can optimize the
      query or the utility that is being called.
-  * Auto-profile mode
-     When enabled automatically generate backtraces and write them to
-     the specified directory in [php_script]_[timestamp]_[pid].txt format.
-     This will require 3 ini settings, auto_profile (bool), tmp_dir (string),
-     profile_type (integer).
 - Additions
   * Provide codes for messages (for localization) including parameters

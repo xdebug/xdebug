@@ -201,6 +201,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     do_profile;
 	zend_bool     profiler_trace;
 	FILE         *profile_file;
+	zend_bool     auto_profile;
+	char         *output_dir;
+	int           auto_profile_mode;
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */

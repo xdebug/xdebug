@@ -27,8 +27,10 @@
 
 #ifndef PHP_WIN32
 #include <sys/time.h>
+#include <unistd.h>
 #else
 #include "win32/time.h"
+#include <process.h>
 #endif
 
 #include "TSRM.h"
@@ -54,6 +56,8 @@
 /* static int le_xdebug; */
 
 static void xdebug_start_trace();
+static void xdebug_stop_trace();
+static inline void print_profile(int html, int mode TSRMLS_DC);
 
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
@@ -135,10 +139,13 @@ static PHP_INI_MH(OnUpdateDebugMode)
 	
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_SYSTEM, OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.auto_profile_mode", "0",                  PHP_INI_ALL,    OnUpdateInt,    auto_profile_mode, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_SYSTEM, OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.auto_profile",    "0",                  PHP_INI_SYSTEM, OnUpdateBool,   auto_profile,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_SYSTEM, OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.output_dir",        "/tmp",               PHP_INI_SYSTEM, OnUpdateString, output_dir,        zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
@@ -273,8 +280,6 @@ void stack_element_dtor (void *dummy, void *elem)
 	}
 }
 
-
-
 PHP_RINIT_FUNCTION(xdebug)
 {
 	CG(extended_info) = 1;
@@ -292,6 +297,19 @@ PHP_RINIT_FUNCTION(xdebug)
 		xdebug_start_trace();
 	}
 
+	if (XG(auto_profile)) {
+		if (!XG(auto_trace)) {
+			xdebug_start_trace();
+			XG(profiler_trace) = 1;
+			XG(trace_file) = NULL;
+		} else {
+			XG(profiler_trace) = 0;
+		}
+
+		XG(do_profile) = 1;
+		XG(auto_profile) = 1;
+	}
+
 	/* Initialize some debugger context properties */
 	XG(context).list.last_file = NULL;
 	XG(context).list.last_line = 0;
@@ -303,10 +321,13 @@ PHP_RINIT_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-
-
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
+	if (XG(auto_profile)) {
+		XG(auto_profile) = 2;
+		print_profile(0, XG(auto_profile_mode) TSRMLS_DC);
+	}	
+
 	xdebug_llist_destroy (XG(stack), NULL);
 	XG(stack) = NULL;
 
@@ -577,6 +598,23 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		}
 	}
 
+	if (XG(auto_profile) && !XG(total_execution_time)) {
+		char fname[1024];
+		XG(total_execution_time) = 0;
+		
+		snprintf(fname, sizeof(fname) - 1, "%s/xdebug_%d_%d.txt", XG(output_dir), (int) get_mtimestamp(), getpid());
+
+		XG(profile_file) = fopen(fname, "a");
+		if (!XG(profile_file)) {
+			php_error(E_NOTICE, "Could not open '%s', filesystem said: %s", fname, strerror(errno));
+			XG(profile_file) = NULL;
+			XG(do_profile) = 0;
+			if (!XG(auto_trace)) {
+				xdebug_stop_trace(); 	
+			}
+		}
+	}
+	
 	if (XG(do_profile)) {
 		fse->time_taken = get_mtimestamp();
 		if (!XG(total_execution_time)) {
@@ -831,7 +869,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size TSR
 		pos[i++] = cur;
 
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-			if (XDEBUG_LLIST_IS_TAIL(le)) {
+			if (XDEBUG_LLIST_IS_TAIL(le) && !XG(auto_profile) != 2) {
 				break;
 			}
 
@@ -948,7 +986,7 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size T
 			/* skip the last function because it is our very own profile function.
 			 * since it is the last function, we may as well stop the loop.
 			 */
-			if (XDEBUG_LLIST_IS_TAIL(le)) {
+			if (XDEBUG_LLIST_IS_TAIL(le) && !XG(auto_profile) != 2) {
 				break;
 			}
 		
@@ -1002,7 +1040,7 @@ static inline function_stack_entry **fetch_summary_profile (int mode, int *size 
 			/* skip the last function because it is our very own profile function.
 			 * since it is the last function, we may as well stop the loop.
 			 */
-			if (XDEBUG_LLIST_IS_TAIL(le)) {
+			if (XDEBUG_LLIST_IS_TAIL(le) && !XG(auto_profile) != 2) {
 				break;
 			}
 
@@ -1725,26 +1763,32 @@ PHP_FUNCTION(xdebug_start_trace)
 	}
 }
 
+static void xdebug_stop_trace()
+{
+	TSRMLS_FETCH();
+	XG(do_trace) = 0;
+	xdebug_llist_destroy(XG(trace), NULL);
+	XG(trace) = NULL;
+	if (XG(trace_file)) {
+		fprintf(XG(trace_file), "End of function trace\n");
+		fclose(XG(trace_file));
+	}
+		
+	/* if a profiler is running we need to shut it down */
+	if (XG(do_profile) == 1) {
+		XG(profiler_trace) = 0;
+		XG(do_profile) = 0;
+		if (XG(profile_file)) {
+			fprintf(XG(profile_file), "End of function profiler\n");
+			fclose(XG(profile_file));
+		}
+	}
+}
+
 PHP_FUNCTION(xdebug_stop_trace)
 {
 	if (XG(do_trace) == 1) {
-		XG(do_trace) = 0;
-		xdebug_llist_destroy (XG(trace), NULL);
-		XG(trace)    = NULL;
-		if (XG(trace_file)) {
-			fprintf (XG(trace_file), "End of function trace\n");
-			fclose (XG(trace_file));
-		}
-		
-		/* if a profiler is running we need to shut it down */
-		if (XG(do_profile) == 1) {
-			XG(profiler_trace) = 0;
-			XG(do_profile) = 0;
-			if (XG(profile_file)) {
-				fprintf (XG(profile_file), "End of function profiler\n");
-				fclose (XG(profile_file));
-			}
-		}
+		xdebug_stop_trace();
 	} else {
 		php_error (E_NOTICE, "Function trace was not started");
 	}
@@ -1779,10 +1823,10 @@ PHP_FUNCTION(xdebug_start_profiling)
 				fprintf(XG(profile_file), "\nStart of function profiler\n");
 			} else {
 				php_error(E_NOTICE, "Could not open '%s', filesystem said: %s", fname, strerror(errno));
-				XG(trace_file) = NULL;
+				XG(profile_file) = NULL;
 			}
 		} else {
-			XG(trace_file) = NULL;
+			XG(profile_file) = NULL;
 		}
 	} else {
 		php_error(E_NOTICE, "Function profiler already started");
