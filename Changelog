@@ -1,3 +1,8 @@
+Tue May 14 11:38:36 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/Makefile.in
+/xdebug/config.m4:
+- Change configure scripts to work with PHP 4.2.x
+
 Tue May 14 11:37:58 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Layout NEWS
 
