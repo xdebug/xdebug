@@ -1,3 +1,13 @@
+Tue Aug 03 00:04:34 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c
+xdebug/xdebug_var.c
+xdebug/xdebug_xml.c
+xdebug/xdebug_xml.h:
+- add text node structure to better handle base64 encoding text nodes
+- make string values of variables always encoded.
+
+# fixes http://bugs.activestate.com/show_bug.cgi?id=33152
+
 Mon Aug 02 11:58:26 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 README:
 - Added the 5th step again.
