@@ -18,11 +18,11 @@
   <license>PHP</license>
   <release>
     <state>beta</state>
-    <version>1.2.0rc1</version>
-    <date>2003-04-06</date>
+    <version>1.2.0rc2</version>
+    <date>2003-04-15</date>
     <notes>
-      Added code coverage and profiling. Fixed a number of bugs and
-      initial support for Zend Engine 2.
+      Fixed a bug in handling Windows path files and one for dealing with
+      Zend Engine 2.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -65,6 +65,16 @@
     </filelist>
   </release>
   <changelog>
+    <release>
+      <state>beta</state>
+      <version>1.2.0rc2</version>
+      <date>2003-04-15</date>
+      <notes>
+= Fixed handling Windows paths in the debugger. (Derick)
+= Fixed getting zvals out of Zend Engine 2. (Derick)
+      </notes>
+    </release>
+
     <release>
       <state>beta</state>
       <version>1.2.0rc1</version>
