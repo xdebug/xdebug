@@ -72,6 +72,7 @@ LINK32_FLAGS=php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.
 LINK32_OBJS= \
 	"$(INTDIR)\usefulstuff.obj" \
 	"$(INTDIR)\xdebug.obj" \
+	"$(INTDIR)\xdebug_code_coverage.obj" \
 	"$(INTDIR)\xdebug_com.obj" \
 	"$(INTDIR)\xdebug_handler_gdb.obj" \
 	"$(INTDIR)\xdebug_handler_php3.obj" \
