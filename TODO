@@ -8,6 +8,7 @@ For 1.3.0:
 - Profiling
   * Add another profiling mode that allows for detailed function analysis.
 - Additions
+  * Implement "the full qualifier" to be used with bt (see help text for it).
   * Add xdebug_break() function to insert breakpoints in your script manually.
   * Add a "show all breakpoints" function to the gdb handler.
   * Provide codes for messages (for localization) including parameters
