@@ -700,6 +700,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	XG(level)++;
+	if (XG(level) > XG(max_nesting_level)) {
+		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
+	}
+
 	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
 
 	if (XDEBUG_IS_FUNCTION(fse->function.type)) {
@@ -755,6 +759,10 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	struct function_stack_entry *fse;
 
 	XG(level)++;
+	if (XG(level) > XG(max_nesting_level)) {
+		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
+	}
+
 	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 
 	/* Check for breakpoints */
