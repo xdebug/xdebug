@@ -86,6 +86,27 @@ zval* xdebug_get_php_symbol(char* name, int name_length)
 	return NULL;
 }
 
+static char* xdebug_get_property_info(char *mangled_property, char **property_name)
+{
+#ifdef ZEND_ENGINE_2
+	char *prop_name, *class_name;
+
+	zend_unmangle_property_name(mangled_property, &class_name, &prop_name);
+	*property_name = prop_name;
+	if (class_name) {
+		if (class_name[0] == '*') {
+			return "protected";
+		} else {
+			return "private";
+		}
+	} else {
+		return "public";
+	}
+#else
+	*property_name = mangled_property;
+	return "var";
+#endif
+}
 
 
 /*****************************************************************************
@@ -115,13 +136,15 @@ static int xdebug_object_element_export(zval **zv, int num_args, va_list args, z
 {
 	int level;
 	xdebug_str *str;
+	char *prop_name, *modifier;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
 
 	if (hash_key->nKeyLength != 0) {
-		xdebug_str_add(str, xdebug_sprintf("var $%s = ", hash_key->arKey), 1);
+		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+		xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
 	}
 	xdebug_var_export(zv, str, level + 2 TSRMLS_CC);
 	xdebug_str_addl(str, "; ", 2, 0);
@@ -174,12 +197,12 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 1) {
-				xdebug_str_add(str, xdebug_sprintf("class %s {", Z_OBJCE_PP(struc)->name), 1);
+				xdebug_str_add(str, xdebug_sprintf("class %s { ", Z_OBJCE_PP(struc)->name), 1);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 2, level, str);
 				if (myht->nNumOfElements > 0) {
 					xdebug_str_chop(str, 2);
 				}
-				xdebug_str_addl(str, "}", 1, 0);
+				xdebug_str_addl(str, " }", 2, 0);
 			} else {
 				xdebug_str_addl(str, "...", 3, 0);
 			}
@@ -238,6 +261,7 @@ static int xdebug_object_element_export_xml(zval **zv, int num_args, va_list arg
 {
 	int level;
 	xdebug_str *str;
+	char *prop_name, *modifier;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
@@ -245,7 +269,8 @@ static int xdebug_object_element_export_xml(zval **zv, int num_args, va_list arg
 
 	xdebug_str_addl(str, "<var", 4, 0);
 	if (hash_key->nKeyLength != 0) {
-		xdebug_str_add(str, xdebug_sprintf(" name='%s'", hash_key->arKey), 1);
+		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+		xdebug_str_add(str, xdebug_sprintf(" name='%s' facet='%s'", prop_name, modifier), 1);
 	}
 	xdebug_str_add(str, xdebug_sprintf(" id='%p'>", *zv), 1);
 	xdebug_var_export_xml(zv, str, level + 2 TSRMLS_CC);
@@ -370,6 +395,7 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 	int level;
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
+	char *prop_name, *modifier;
 	TSRMLS_FETCH();
 
 	level  = va_arg(args, int);
@@ -378,7 +404,9 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 	node = xdebug_xml_node_init("property");
 	
 	if (hash_key->nKeyLength != 0) {
-		xdebug_xml_add_attribute(node, "name", hash_key->arKey);
+		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+		xdebug_xml_add_attribute(node, "name", prop_name);
+		xdebug_xml_add_attribute(node, "facet", modifier);
 	}
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
@@ -480,6 +508,7 @@ xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val)
 #define GREEN      "#00bb00"
 #define BLUE_GREEN "#00bbbb"
 #define PURPLE     "#bb00bb"
+#define LGREY      "#999999"
 #define DGREY      "#777777"
 
 static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
@@ -508,6 +537,7 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 	int level;
 	xdebug_str *str;
 	char *key;
+	char *prop_name, *modifier;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
@@ -517,19 +547,8 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 
 	key = hash_key->arKey;
 	if (hash_key->nKeyLength != 0) {
-		if ((hash_key->nKeyLength > 2) && (hash_key->arKey[0] == '\0')) {
-			if (hash_key->arKey[1] == '*') {
-				xdebug_str_add(str, "<i>protected</i>", 0);
-				key = &(hash_key->arKey[3]);
-			} else {
-				xdebug_str_add(str, "<i>private</i>", 0);
-				key = &(hash_key->arKey[2]);
-				key = strchr(key, 0) + 1;
-			}
-		} else {
-			xdebug_str_add(str, "<i>public</i>", 0);
-		}
-		xdebug_str_add(str, xdebug_sprintf(" '%s' <font color='%s'>=&gt;</font> ", key, DGREY), 1);
+		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+		xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, DGREY), 1);
 	}
 	xdebug_var_export_fancy(zv, str, level + 2 TSRMLS_CC);
 	return 0;
@@ -568,7 +587,12 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 2, ""), 1);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_addl(str, "<b>array</b>\n", 13, 0);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 2, level, str);
+				if (myht->nNumOfElements) {
+					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 2, level, str);
+				} else {
+					xdebug_str_add(str, xdebug_sprintf("%*s", level * 2, ""), 1);
+					xdebug_str_add(str, xdebug_sprintf("<i><font color='%s'>empty</font></i>\n", LGREY), 1);
+				}
 			} else {
 				xdebug_str_addl(str, "<i>&</i><b>array</b>\n", 21, 0);
 			}
