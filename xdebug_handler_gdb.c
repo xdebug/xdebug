@@ -915,6 +915,7 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 		EG(error_reporting) = old_error_reporting;
 		ret_value = get_variable(context, NULL, &retval);
 		SENDMSG(context->socket, xdebug_sprintf("%s\n", ret_value));
+		zval_dtor(&retval);
 		xdfree(ret_value);
 		XG(breakpoints_allowed) = 1;
 		return NULL;
