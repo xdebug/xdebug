@@ -1,3 +1,9 @@
+Mon Dec 1 16:25:00 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/tests/bug00022.phpt:
+- Fixed bug #22: Segmentation fault with xdebug_get_function_stack() and
+  collect_params=1.
+
 Tue Nov 25 17:27:52 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/compile.bat:
 - This pause should not be in
