@@ -1,3 +1,7 @@
+Sat Nov 8 19:32:03 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Remove autoconf 2.53 shit
+
 Sat Nov 8 19:26:49 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml
 /xdebug/php_xdebug.h:
