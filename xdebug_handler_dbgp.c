@@ -1092,8 +1092,7 @@ DBGP_FUNC(context_get)
 	int res;
 
 	if (CMD_OPTION('d')) {
-		/* res = attach_local_vars(*retval, atol(CMD_OPTION('d')), attach_used_var_with_contents TSRMLS_CC); */
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+		res = attach_local_vars(*retval, atol(CMD_OPTION('d')), attach_used_var_with_contents TSRMLS_CC);
 	} else {
 		res = attach_local_vars(*retval, 0, attach_used_var_with_contents TSRMLS_CC);
 	}
@@ -1300,7 +1299,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.24 $";
+	return "$Revision: 1.25 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
