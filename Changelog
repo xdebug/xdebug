@@ -1,3 +1,6 @@
+Thu Jul 15 08:04:13 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- fix dbgp source command, uses php streams to handle proper include paths
 Thu Jul 15 04:16:47 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - fix issue where output would be duplicated in some instances.  always check for headers being written first.
