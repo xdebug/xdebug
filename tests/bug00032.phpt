@@ -25,21 +25,21 @@ foo
 Notice: Array to string conversion in %sbug00032.php on line 8
 
 Call Stack:
-    0.0003      42608   1. {main}() %sbug00032.php:0
+    %f      %d   1. {main}() %sbug00032.php:0
 
 Notice: Array to string conversion in %sbug00032.php on line 9
 
 Call Stack:
-    0.0003      42608   1. {main}() %sbug00032.php:0
+    %f      %d   1. {main}() %sbug00032.php:0
 foo
 
 Notice: Object of class stdClass could not be converted to string in %sbug00032.php on line 11
 
 Call Stack:
-    0.0003      42608   1. {main}() %sbug00032.php:0
+    %f      %d   1. {main}() %sbug00032.php:0
 
 Notice: Object of class stdClass could not be converted to string in %sbug00032.php on line 12
 
 Call Stack:
-    0.0003      42608   1. {main}() %sbug00032.php:0
+    %f      %d   1. {main}() %sbug00032.php:0
 foo
