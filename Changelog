@@ -1,3 +1,13 @@
+Tue Jan 13 10:36:09 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_private.h:
+- Added a new setting xdebug.show_mem_delta to show differences between
+  current and previous memory usage on a function call level.
+- Added a new setting xdebug.collect_includes which separates collecting
+  names of include files from the xdebug.collect_params setting. This is
+  mostly useful for tracing.
+
 Mon Jan 12 13:03:48 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/tests/peak_memory_usage.phpt
 /xdebug/tests/array_map.phpt
