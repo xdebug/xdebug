@@ -29,7 +29,7 @@ Xdebug also provides:
     * script execution analysis
 	* capabilities to debug your scripts interactively with a debug client
   </description>
-  <license>PHP</license>
+  <license>BSD style</license>
   <release>
     <state>beta</state>
     <version>1.3.0rc1</version>
@@ -69,6 +69,7 @@ TBW
 
       <file role="doc"  name="CREDITS"/>
       <file role="doc"  name="Changelog"/>
+      <file role="doc"  name="LICENSE"/>
       <file role="doc"  name="NEWS"/>
       <file role="doc"  name="README"/>
 
