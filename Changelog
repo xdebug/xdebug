@@ -1,3 +1,8 @@
+Thu Oct 21 09:10:10 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- There is indeed no good way as the Zend mastah's didn't want to bumb the
+  API number.
+
 Wed Oct 20 20:03:07 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - fix bad pointer in property_value
