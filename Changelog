@@ -1,3 +1,7 @@
+Mon Nov 11 00:51:57 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Make the debug client compatible with Windows
+
 Sun Nov 10 21:14:44 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/usefulstuff.c
 /xdebug/debugclient/main.c:
