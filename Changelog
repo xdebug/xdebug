@@ -1,3 +1,9 @@
+Sun Dec 28 20:33:54 CET 2003 Derick Rethans <derick@derickrethans.nl>
+/xdebug/LICENSE:
+- Fixed email and web addresses in license
+- Added "2004" to the copyright statement
+- Bumbed the version number to 1.01
+
 Sun Dec 28 19:11:30 CET 2003 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug.c:
 - If we test for preconditions, let's do the assignment after it ;-) This
