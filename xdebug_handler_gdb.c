@@ -363,7 +363,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i)
 * Breakpoint 2, xdebug_execute (op_array=0x82caf50)
 *     at /dat/dev/php/xdebug/xdebug.c:361
 */
-	tmp_fname = show_fname(i TSRMLS_CC);
+	tmp_fname = show_fname(i, 0 TSRMLS_CC);
 	SENDMSG(h->socket, xdebug_sprintf("Breakpoint, %s(", tmp_fname));
 	xdfree(tmp_fname);
 
@@ -396,7 +396,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i)
 *     at /dat/dev/php/xdebug/xdebug.c:901
 *         
 */
-   	tmp_fname = show_fname(i TSRMLS_CC);
+   	tmp_fname = show_fname(i, 0 TSRMLS_CC);
 	if (nr) {
 		SENDMSG(h->socket, xdebug_sprintf("#%-2d %s (", nr, tmp_fname));
 	} else {

@@ -703,7 +703,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			char *tmp_name;
 			char log_buffer[4096];
 			
-			tmp_name = show_fname (i TSRMLS_CC);
+			tmp_name = show_fname(i, html TSRMLS_CC);
 			if (html) {
 				php_printf ("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
 			} else {
@@ -809,7 +809,7 @@ static inline void print_trace (int html TSRMLS_DC)
 				break;
 			}
 
-			tmp_name = show_fname(i TSRMLS_CC);
+			tmp_name = show_fname(i, html TSRMLS_CC);
 
 			if (html) {
 				/* Start row */

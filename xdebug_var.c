@@ -252,7 +252,7 @@ char* get_zval_value (zval *val)
 	return str.d;
 }
 
-char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
+char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC)
 {
 	char *tmp;
 	xdebug_func f;
@@ -264,7 +264,7 @@ char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			zend_function *zfunc;
 
 			if (PG(html_errors) && zend_hash_find(EG(function_table), f.function, strlen(f.function) + 1, (void**) &zfunc) == SUCCESS) {
-				if (zfunc->type == ZEND_INTERNAL_FUNCTION) {
+				if (html && zfunc->type == ZEND_INTERNAL_FUNCTION) {
 					return xdebug_sprintf ("<a href='%s/%s' target='_new'>%s</a>\n", XG(manual_url), f.function, f.function);
 				} else {
 					return xdstrdup (f.function);

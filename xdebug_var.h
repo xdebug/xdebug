@@ -37,6 +37,6 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 char* error_type (int type);
 char* xdebug_sprintf (const char* fmt, ...);
 char* get_zval_value (zval *val);
-char* show_fname (struct function_stack_entry* entry TSRMLS_DC);
+char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC);
 
 #endif

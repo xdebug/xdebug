@@ -121,7 +121,7 @@ int xdebug_php3_error(xdebug_con *h, int type, char *message, const char *locati
 			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 			char *tmp_name;
 				
-			tmp_name = show_fname (i TSRMLS_CC);
+			tmp_name = show_fname(i, 0 TSRMLS_CC);
 			SENDMSG(h->socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
 			xdfree (tmp_name);
 
