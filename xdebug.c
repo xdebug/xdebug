@@ -1061,7 +1061,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
-		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
+		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
 	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
@@ -1138,7 +1138,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
-		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
+		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
 	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
@@ -1455,8 +1455,6 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 
 static char* return_trace_stack_frame_computerized(function_stack_entry* i, int fnr, int whence TSRMLS_DC)
 {
-	int c = 0; /* Comma flag */
-	int j = 0; /* Counter */
 	char *tmp_name;
 	xdebug_str str = {0, 0, NULL};
 

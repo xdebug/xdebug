@@ -1154,7 +1154,6 @@ DBGP_FUNC(property_set)
 	int              new_length;
 	int              res;
 	int              address = 0;
-	char            *key = CMD_OPTION('k'); /* property key */
 	char            *name = CMD_OPTION('n');
 	char            *data = CMD_OPTION('-');
 
@@ -1589,7 +1588,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.60 $";
+	return "$Revision: 1.61 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
