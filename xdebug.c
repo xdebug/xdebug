@@ -586,9 +586,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		}
 	}
 
-	if (XG(auto_profile) && XG(output_dir) && !XG(total_execution_time)) {
-		char fname[1024];
+	if (XG(level) == 1) {
 		XG(total_execution_time) = 0;
+	}	
+
+	if (XG(auto_profile) && XG(output_dir)) {
+		char fname[1024];
 		
 		snprintf(fname, sizeof(fname) - 1, "%s/xdebug_%d_%d.txt", XG(output_dir), (int) get_mtimestamp(), getpid());
 
