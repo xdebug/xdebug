@@ -103,6 +103,10 @@ SOURCE=.\xdebug.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\xdebug_code_coverage.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_com.c
 # End Source File
 # Begin Source File
@@ -148,6 +152,10 @@ SOURCE=.\php_xdebug.h
 # Begin Source File
 
 SOURCE=.\usefulstuff.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_code_coverage.h
 # End Source File
 # Begin Source File
 

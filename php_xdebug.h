@@ -164,6 +164,10 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *trace_file;
 	char         *error_handler;
 
+	/* used for code coverage */
+	zend_bool     do_code_coverage;
+	xdebug_hash  *code_coverage;
+
 	/* used for profiling */
 	double 	      total_execution_time;
 	double 	      total_compiling_time;

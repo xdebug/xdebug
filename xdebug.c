@@ -48,6 +48,7 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 
+#include "xdebug_code_coverage.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_var.h"
@@ -87,6 +88,11 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_stop_trace,            NULL)
 	PHP_FE(xdebug_get_function_trace,    NULL)
 	PHP_FE(xdebug_dump_function_trace,   NULL)
+
+	PHP_FE(xdebug_start_code_coverage,   NULL)
+	PHP_FE(xdebug_stop_code_coverage,    NULL)
+	PHP_FE(xdebug_get_code_coverage,     NULL)
+
 	PHP_FE(xdebug_start_profiling,       NULL)
 	PHP_FE(xdebug_stop_profiling,        NULL)
 	PHP_FE(xdebug_dump_function_profile, NULL)
@@ -240,6 +246,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->level                = 0;
 	xg->do_trace             = 0;
 	xg->do_profile           = 0;
+	xg->do_code_coverage     = 0;
 	xg->profiler_trace       = 0;
 	xg->total_execution_time = 0;
 	xg->total_compiling_time = 0;
@@ -356,6 +363,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(level)         = 0;
 	XG(do_trace)      = 0;
 	XG(do_profile)    = 0;
+	XG(do_code_coverage) = 0;
+	XG(code_coverage) = xdebug_hash_alloc (32, xdebug_coverage_file_dtor);
 	XG(stack)         = xdebug_llist_alloc (stack_element_dtor);
 	XG(trace_file)    = NULL;
 	XG(output_dir)    = NULL;
@@ -420,8 +429,11 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 		efree(XG(error_handler));
 	}
 
-	XG(level)    = 0;
-	XG(do_trace) = 0;
+	XG(level)            = 0;
+	XG(do_trace)         = 0;
+	XG(do_code_coverage) = 0;
+
+	xdebug_hash_destroy(XG(code_coverage));
 
 	if (XG(remote_enabled)) {
 		XG(context).handler->remote_deinit(&(XG(context)));
@@ -1184,6 +1196,7 @@ PHP_FUNCTION(xdebug_is_enabled)
 	RETURN_BOOL(zend_error_cb == new_error_cb);
 }
 
+
 void xdebug_start_trace()
 {
 	TSRMLS_FETCH();
@@ -1439,13 +1452,17 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	int                   level = 0;
 	TSRMLS_FETCH();
 
-	if (XG(remote_enabled)) {
-		TSRMLS_FETCH();
-		cur_opcode = *EG(opline_ptr);
-		lineno = cur_opcode->lineno;
+	cur_opcode = *EG(opline_ptr);
+	lineno = cur_opcode->lineno;
 
-		file = op_array->filename;
-		file_len = strlen(file);
+	file = op_array->filename;
+	file_len = strlen(file);
+
+	if (XG(do_code_coverage)) {
+		xdebug_count_line(file, lineno TSRMLS_CC);
+	}
+
+	if (XG(remote_enabled)) {
 
 		if (XG(context).do_break) {
 			XG(context).do_break = 0;

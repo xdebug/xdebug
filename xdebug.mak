@@ -44,6 +44,7 @@ CLEAN :
 	-@erase "$(INTDIR)\usefulstuff.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(INTDIR)\xdebug.obj"
+	-@erase "$(INTDIR)\xdebug_code_coverage.obj"
 	-@erase "$(INTDIR)\xdebug_com.obj"
 	-@erase "$(INTDIR)\xdebug_handler_gdb.obj"
 	-@erase "$(INTDIR)\xdebug_handler_php3.obj"
@@ -103,6 +104,7 @@ CLEAN :
 	-@erase "$(INTDIR)\vc60.pdb"
 	-@erase "$(INTDIR)\xdebug.obj"
 	-@erase "$(INTDIR)\xdebug_com.obj"
+	-@erase "$(INTDIR)\xdebug_code_coverage.obj"
 	-@erase "$(INTDIR)\xdebug_handler_gdb.obj"
 	-@erase "$(INTDIR)\xdebug_handler_php3.obj"
 	-@erase "$(INTDIR)\xdebug_handlers.obj"
@@ -131,6 +133,7 @@ LINK32_FLAGS=php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib com
 LINK32_OBJS= \
 	"$(INTDIR)\usefulstuff.obj" \
 	"$(INTDIR)\xdebug.obj" \
+	"$(INTDIR)\xdebug_code_coverage.obj" \
 	"$(INTDIR)\xdebug_com.obj" \
 	"$(INTDIR)\xdebug_handler_gdb.obj" \
 	"$(INTDIR)\xdebug_handler_php3.obj" \
@@ -197,6 +200,11 @@ SOURCE=.\usefulstuff.c
 SOURCE=.\xdebug.c
 
 "$(INTDIR)\xdebug.obj" : $(SOURCE) "$(INTDIR)"
+
+
+SOURCE=.\xdebug_code_coverage.c
+
+"$(INTDIR)\xdebug_code_coverage.obj" : $(SOURCE) "$(INTDIR)"
 
 
 SOURCE=.\xdebug_com.c
