@@ -1438,7 +1438,7 @@ PHP_FUNCTION(xdebug_var_dump)
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		} else {
-			xdebug_var_dump(args[i], 1 TSRMLS_CC);
+			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);
 		}
 	}
 	

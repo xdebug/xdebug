@@ -22,12 +22,12 @@
 
 #if (PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)
 
-void xdebug_var_dump(zval **struc, int level TSRMLS_DC);
+void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC);
 
 #else
 
 #	include "ext/standard/php_var.h"
-#	define xdebug_var_dump php_var_dump
+#	define xdebug_php_var_dump php_var_dump
 
 #endif
 
