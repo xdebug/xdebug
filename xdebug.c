@@ -761,7 +761,7 @@ static void add_used_variables (function_stack_entry *fse, zend_op_array *op_arr
 	}
 }
 
-static int handle_breakpoints(function_stack_entry *fse)
+static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
 	char            *tmp_name = NULL;
@@ -772,14 +772,14 @@ static int handle_breakpoints(function_stack_entry *fse)
 		if (xdebug_hash_find(XG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &extra_brk_info)) {
 			/* Yup, breakpoint found, we call the handler when it's not
 			 * disabled*/
-			if (!extra_brk_info->disabled) {
-				if (fse->user_defined == XDEBUG_EXTERNAL) {
-					XG(context).do_break = 1;
-				} else {
+			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
+				if (fse->user_defined == XDEBUG_INTERNAL || (breakpoint_type == XDEBUG_BRK_FUNC_RETURN)) {
 					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
 						XG(remote_enabled) = 0;
 						return 0;
 					}
+				} else {
+					XG(context).do_break = 1;
 				}
 			}
 		}
@@ -906,9 +906,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		add_used_variables(fse, op_array);
 	}
 
-	/* Check for breakpoints */
+	/* Check for entry breakpoints */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse)) {
+		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_CALL)) {
 			XG(remote_enabled) = 0;
 		}
 	}
@@ -918,6 +918,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 	old_execute(op_array TSRMLS_CC);
 
+	if (XG(profiler_enabled)) {
+		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
+	}
+
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 			char* t = return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
@@ -926,11 +930,14 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			xdfree(t);
 		}
 	}
-	
-	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
+
+	/* Check for return breakpoints */
+	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
+			XG(remote_enabled) = 0;
+		}
 	}
-	
+
 	fse->symbol_table = NULL;
 	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
@@ -950,9 +957,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 
 	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 
-	/* Check for breakpoints */
+	/* Check for entry breakpoints */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse)) {
+		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_CALL)) {
 			XG(remote_enabled) = 0;
 		}
 	}
@@ -961,6 +968,10 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
 	}
 	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
+
+	if (XG(profiler_enabled)) {
+		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
+	}
 
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		cur_opcode = *EG(opline_ptr);
@@ -973,10 +984,13 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 		}
 	}
 
-	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
+	/* Check for return breakpoints */
+	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
+			XG(remote_enabled) = 0;
+		}
 	}
-		
+
 	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
 }

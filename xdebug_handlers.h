@@ -71,10 +71,14 @@ struct _xdebug_con {
 #define XDEBUG_HIT_EQUAL          2
 #define XDEBUG_HIT_MOD            3
 
+#define XDEBUG_BRK_FUNC_CALL      1
+#define XDEBUG_BRK_FUNC_RETURN    2
+
 struct _xdebug_brk_info {
 	char                 *type;
 	char                 *classname;
 	char                 *functionname;
+	int                   function_break_type; /* XDEBUG_BRK_FUNC_* */
 	char                 *file;
 	int                   file_len;
 	int                   lineno;

@@ -618,6 +618,7 @@ DBGP_FUNC(breakpoint_set)
 	brk_info->file_len = 0;
 	brk_info->classname = NULL;
 	brk_info->functionname = NULL;
+	brk_info->function_break_type = 0;
 	brk_info->condition = NULL;
 	brk_info->disabled = 0;
 	brk_info->temporary = 0;
@@ -665,7 +666,13 @@ DBGP_FUNC(breakpoint_set)
 		xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) brk_info);
 	} else 
 
-	if (strcmp(CMD_OPTION('t'), "call") == 0) {
+	if ((strcmp(CMD_OPTION('t'), "call") == 0) || (strcmp(CMD_OPTION('t'), "return") == 0)) {
+		if (strcmp(CMD_OPTION('t'), "call") == 0) {
+			brk_info->function_break_type = XDEBUG_BRK_FUNC_CALL;
+		} else {
+			brk_info->function_break_type = XDEBUG_BRK_FUNC_RETURN;
+		}
+
 		if (!CMD_OPTION('m')) {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		}
@@ -809,7 +816,7 @@ DBGP_FUNC(stop)
 DBGP_FUNC(source)
 {
 	char *source, *encoded_source;
-	int   new_len;
+	int   new_len, begin = 0, end = 999999;
 	char *filename;
 	function_stack_entry *fse;
 
@@ -823,11 +830,14 @@ DBGP_FUNC(source)
 		filename = CMD_OPTION('f');
 	}
 
-	if (CMD_OPTION('b') && CMD_OPTION('e')) {
-		source = return_source(filename, strtol(CMD_OPTION('b'), NULL, 10), strtol(CMD_OPTION('e'), NULL, 10) TSRMLS_CC);
-	} else {
-		source = return_source(filename, 0, 999999 TSRMLS_CC);
+	if (CMD_OPTION('b')) {
+		begin = strtol(CMD_OPTION('b'), NULL, 10);
 	}
+	if (CMD_OPTION('e')) {
+		begin = strtol(CMD_OPTION('e'), NULL, 10);
+	}
+	source = return_source(filename, begin, end TSRMLS_CC);
+
 	if (!source) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_CANT_OPEN_FILE);
 	} else {
@@ -1035,10 +1045,12 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 		if (ht) {
 			xdebug_hash_apply(ht, (void *) node, func);
 		}
+
+		XG(active_symbol_table) = NULL;
+		return 0;
 	}
 	
-	XG(active_symbol_table) = NULL;
-	return 0;
+	return 1;
 }
 
 
@@ -1316,7 +1328,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.36 $";
+	return "$Revision: 1.37 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
