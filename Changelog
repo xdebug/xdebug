@@ -1,3 +1,13 @@
+Thu Feb 20 15:30:55 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_superglobals.c
+/xdebug/xdebug_superglobals.h
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug.dsp
+/xdebug/xdebug_llist.c
+/xdebug/xdebug_llist.h:
+- Added dumping of superglobals (patch by Harald Radi <phanto@php.net>).
+
 Fri Feb 14 23:13:20 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/tests/test6.phpt:
