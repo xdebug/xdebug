@@ -1,3 +1,9 @@
+Wed Mar 10 19:38:17 UTC 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_private.h
+xdebug/xdebug_profiler.c:
+[0.25]
+- Added limited report for memory profiling
+
 Fri Mar 5 15:29:42 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/php_xdebug.h
 /xdebug/usefulstuff.c
