@@ -88,9 +88,13 @@ char *xdebug_sprintf(const char* fmt, ...)
 
 	new_str = (char *) xdmalloc(size);
 
-	va_start(args, fmt);
 	for (;;) {
-		int n = vsnprintf(new_str, size, fmt, args);
+		int n;
+
+		va_start(args, fmt);
+		n = vsnprintf(new_str, size, fmt, args);
+		va_end(args);
+
 		if (n > -1 && n < size) {
 			break;
 		}
@@ -101,7 +105,6 @@ char *xdebug_sprintf(const char* fmt, ...)
 		}
 		new_str = (char *) xdrealloc(new_str, size);
 	}
-	va_end(args);
 
 	return new_str;
 }
