@@ -1,3 +1,8 @@
+Sun Feb 2 17:15:09 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- Prevent the use of the "show" command for internal functions
+
 Fri Jan 31 16:06:39 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/config.m4:
 - Add our useful stuff too :)
