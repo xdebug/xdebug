@@ -1,3 +1,7 @@
+Wed Oct 06 16:58:38 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- Fixed bug #93: Crash in lookup_hostname on x86_64
+
 Wed Oct 06 09:09:35 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c
 xdebug/xdebug_profiler.h:
