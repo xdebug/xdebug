@@ -26,7 +26,7 @@
 xdebug_remote_handler_info handlers[] = {
 	{ "php3", xdebug_handler_php3 },
 	{ "gdb",  xdebug_handler_gdb },
-	{ 0, 0 }
+	{ 0, { NULL } }
 };
 
 xdebug_remote_handler* xdebug_handler_get(char* mode)

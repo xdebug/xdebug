@@ -172,7 +172,7 @@ static xdebug_cmd* scan_cmd(xdebug_cmd *ptr, char *line)
 		if (strcmp (ptr->name, line) == 0) {
 			return ptr;
 		}
-		*ptr++;
+		ptr++;
 	}
 	return NULL;
 }
@@ -275,7 +275,7 @@ static inline void show_available_commands_in_group(xdebug_con *h, int flag, int
 			if (ptr->show && ptr->help) {
 				SENDMSG(h->socket, xdebug_sprintf("%-12s %s\n", ptr->name, ptr->help));
 			}
-	        *ptr++;
+	        ptr++;
 	    }
 	}
 }
@@ -305,7 +305,7 @@ static void show_command_info(xdebug_con *h, xdebug_cmd* cmd)
 ** Data printing functions
 */
 
-static print_breakpoint(xdebug_con *h, function_stack_entry *i)
+static void print_breakpoint(xdebug_con *h, function_stack_entry *i)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
@@ -336,7 +336,7 @@ static print_breakpoint(xdebug_con *h, function_stack_entry *i)
 	SENDMSG(h->socket, xdebug_sprintf(")\n\tat %s:%d\n", i->filename, i->lineno));
 }
 
-static print_stackframe(xdebug_con *h, int nr, function_stack_entry *i)
+static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
@@ -471,7 +471,6 @@ int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *en
 {
 	char *ptr;
 	xdebug_cmd *cmd;
-	int i;
 	int retval;
 	char *ret_err = NULL;
 	
@@ -514,7 +513,7 @@ int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *en
 		}
 
 		/* Scan for valid commands */
-		if (cmd = lookup_cmd(tmp, flags)) {
+		if ((cmd = lookup_cmd(tmp, flags))) {
 			xdfree(tmp);
 			xdebug_explode(" ", ptr + 1, args, -1); 
 		} else {
@@ -601,6 +600,8 @@ int xdebug_gdb_deinit(xdebug_con *context)
 {
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
+
+	return 1;
 }
 
 int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
@@ -609,7 +610,6 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 	int   ret;
 	char *option;
 	char *error = NULL;
-	xdebug_llist_element *le;
 
 	errortype = error_type(type);
 

@@ -28,7 +28,8 @@ int xdebug_php3_error(xdebug_con *context, int type, char *message, const char *
 #define xdebug_handler_php3 { \
 	xdebug_php3_init,         \
 	xdebug_php3_deinit,       \
-	xdebug_php3_error         \
+	xdebug_php3_error,        \
+	NULL                      \
 }
 
 #endif

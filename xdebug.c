@@ -49,7 +49,7 @@
 #include "xdebug_var.h"
 #include "php_xdebug.h"
 
-static int le_xdebug;
+/* static int le_xdebug; */
 
 xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *varc, xdebug_var *var0 TSRMLS_DC);
 static void xdebug_start_trace();
@@ -123,6 +123,7 @@ static PHP_INI_MH(OnUpdateDebugMode)
 	} else {
 		XG(remote_mode) = XDEBUG_NONE;
 	}
+	return SUCCESS;
 }
 	
 PHP_INI_BEGIN()
@@ -472,7 +473,7 @@ static int handle_breakpoints (struct function_stack_entry *fse)
 
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
-	zval                        **dummy;
+/*	zval                        **dummy; */
 	zend_execute_data           *edata = EG(current_execute_data);
 	struct function_stack_entry *fse;
 		
@@ -516,7 +517,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC)
 {
-	zval                        **dummy;
+/*	zval                        **dummy; */
 	zend_execute_data           *edata = EG(current_execute_data);
 	struct function_stack_entry *fse;
 
@@ -1234,7 +1235,7 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 	zend_op *end_opcode;
 	zval *var;
 	int  func_nest = 0;
-	int  go_back   = 0;
+/*	int  go_back   = 0; */
 	xdebug_func cf;
 	int is_var = 0;
 	zend_op* tmpOpCode;

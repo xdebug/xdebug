@@ -64,7 +64,7 @@ static char *get_current_time(void)
 
 #if HAVE_GETTIMEOFDAY
 	gettimeofday(&tv, &tz);
-	snprintf(microbuf, sizeof(microbuf) - 1, ":%06d", tv.tv_usec);
+	snprintf(microbuf, sizeof(microbuf) - 1, ":%06lu", (long) tv.tv_usec);
 	strcat(debug_timebuf, microbuf);
 #endif
 	return debug_timebuf;
@@ -146,10 +146,12 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 
 int xdebug_php3_init(xdebug_con *context, int mode)
 {
+	return 1;
 }
 
 int xdebug_php3_deinit(xdebug_con *context)
 {
+	return 1;
 }
 
 #define SENDMSG(socket, str) {  \
@@ -206,4 +208,6 @@ int xdebug_php3_error(xdebug_con *h, int type, char *message, const char *locati
 	xdfree(errortype);
 	xdfree(prefix);
 	xdfree(hostname);
+
+	return 1;
 }

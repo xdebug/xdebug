@@ -19,6 +19,7 @@
 
 #define DEBUGGER_FAIL_SILENTLY
 
+#include <string.h>
 #include <sys/types.h>
 #include <errno.h>
 #ifndef PHP_WIN32
