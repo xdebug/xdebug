@@ -815,9 +815,9 @@ static int _xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 
 static int _xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
 {
-	/* nesting_level is zero when final output is sent to sapi.  we
-	  also dont want to write if headers are not sent yet, the output
-          layer will handle this correctly later. */
+	/* nesting_level is zero when final output is sent to sapi. We also dont
+	 * want to write if headers are not sent yet, the output layer will handle
+	 * this correctly later. */
 	if (OG(ob_nesting_level) < 1 && SG(headers_sent)) {
 		zend_unset_timeout(TSRMLS_C);
 		if (XG(stdout_redirected) != 0) {
@@ -1121,7 +1121,7 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 			varname = xdebug_sprintf("$%s", name);
 		}
 		/* if we cannot get the value directly, then try eval */
-		res = _xdebug_do_eval(varname?varname:name, &ret_zval TSRMLS_CC);
+		res = _xdebug_do_eval(varname ? varname : name, &ret_zval TSRMLS_CC);
 		if (res != FAILURE && (!non_null || Z_TYPE_P(&ret_zval) != IS_NULL)) {
 			contents = get_zval_value_xml_node(name, &ret_zval);
 			zval_dtor(&ret_zval);
@@ -1280,8 +1280,8 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_dbgp_options *optio
 	int                   res;
 #endif
 	if (context_id > 0) {
-		/* right now, we only have zero or one, one being globals,
-		  which is always the head of the stack */
+		/* right now, we only have zero or one, one being globals, which is
+		 * always the head of the stack */
 		depth = XG(level) - 1;
 	}
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
@@ -1596,7 +1596,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.53 $";
+	return "$Revision: 1.54 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
