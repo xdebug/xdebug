@@ -47,8 +47,10 @@ struct _xdebug_con {
 	xdebug_llist          *line_breakpoints;
 	xdebug_debug_list      list;
 	int                    do_break;
+
 	int                    do_step;
 	int                    do_next;
+	int                    do_finish;
 	int                    next_level;
 };
 

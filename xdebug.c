@@ -267,6 +267,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(context).do_break       = 0;
 	XG(context).do_step        = 0;
 	XG(context).do_next        = 0;
+	XG(context).do_finish      = 0;
 
 	return SUCCESS;
 }
@@ -1222,8 +1223,15 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 			level = 0;
 		}
 		
-		/* Check for "next" */
-		if (XG(context).do_next && XG(context).next_level >= level) {
+		if (XG(context).do_finish && XG(context).next_level == level) { /* Check for "finish" */
+			XG(context).do_finish = 0;
+
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
+				XG(remote_enabled) = 0;
+				XG(remote_enable)  = 0;
+				return;
+			}
+		} else if (XG(context).do_next && XG(context).next_level >= level) { /* Check for "next" */
 			XG(context).do_next = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {

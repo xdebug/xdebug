@@ -39,6 +39,7 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
@@ -62,12 +63,12 @@ static xdebug_cmd commands_init[] = {
 static xdebug_cmd commands_breakpoint[] = {
 	{ "break",      1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 1,
 		"Set breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber, function name or '{main}'"
+		"             Argument may be filename and linenumber, function name or '{main}'\n"
 		"             for the first PHP line."
 	},
 	{ "bre",        1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 0,
 		"Set breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber, function name or '{main}'"
+		"             Argument may be filename and linenumber, function name or '{main}'\n"
 		"             for the first PHP line."
 	},
 	{ NULL, 0, NULL, NULL, 0, NULL }
@@ -107,25 +108,31 @@ static xdebug_cmd commands_runtime[] = {
 		"Continue script being debugged, after error or breakpoint."
 	},
 
+	{ "finish",     0, "finish",                                     xdebug_handle_finish,     1,
+		"Continues executing until the current function returned to the\n"
+		"             calling function.ly the same as 'step' but does not go into\n"
+		"             function calls if they occur."
+	},
+
 	{ "list",       0, "list [[file:]beginline] [endline]",          xdebug_handle_list,       1,
 		"Lists specified line. With no arguments, lists ten more lines\n"
 		"             after or before the previous listing. One argument specifies the\n"
 		"             the line in a file to start, and then lines are listed around that\n"
-		"             line. Two arguments specify starting and ending lines to list.\n"
+		"             line. Two arguments specify starting and ending lines to list."
 	},
 
 	{ "next",       0, "next",                                       xdebug_handle_next,       1,
 		"Continues executing until the next statement in the same stack\n"
 		"             frame. Is basically the same as 'step' but does not go into\n"
-		"             function calls if they occur.\n"
+		"             function calls if they occur."
 	},
 
 	{ "pwd",        0, "pwd",                                        xdebug_handle_pwd,        1,
-		"Prints the current working directory.\n"
+		"Prints the current working directory."
 	},
 
 	{ "step",       0, "step",                                       xdebug_handle_step,       1,
-		"Continues executing until the next statement.\n"
+		"Continues executing until the next statement."
 	},
 
 	{ NULL, 0, NULL, NULL, 0, NULL }
@@ -494,6 +501,26 @@ char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args)
 	return NULL;
 }
 
+char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args)
+{
+	xdebug_llist_element *le;
+	function_stack_entry *fse;
+	TSRMLS_FETCH();
+
+	XG(context).do_next   = 0;
+	XG(context).do_step   = 0;
+	XG(context).do_finish = 1;
+
+	if (XG(stack)) {
+		le = XDEBUG_LLIST_TAIL(XG(stack));
+		fse = XDEBUG_LLIST_VALP(le);
+		XG(context).next_level = fse->level - 1;
+	} else {
+		XG(context).next_level = -1;
+	}
+
+	return NULL;
+}
 char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 {
 	char *tmp_file  = NULL;
@@ -554,13 +581,16 @@ char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args)
 	function_stack_entry *fse;
 	TSRMLS_FETCH();
 
-	XG(context).do_next = 1;
-	XG(context).do_step = 0;
+	XG(context).do_next   = 1;
+	XG(context).do_step   = 0;
+	XG(context).do_finish = 0;
 
 	if (XG(stack)) {
 		le = XDEBUG_LLIST_TAIL(XG(stack));
 		fse = XDEBUG_LLIST_VALP(le);
 		XG(context).next_level = fse->level;
+	} else {
+		XG(context).next_level = 0;
 	}
 
 	return NULL;
@@ -648,8 +678,9 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args)
 {
 	TSRMLS_FETCH();
-	XG(context).do_step = 1;
-	XG(context).do_next = 0;
+	XG(context).do_step   = 1;
+	XG(context).do_next   = 0;
+	XG(context).do_finish = 0;
 	
 	return NULL;
 }
@@ -858,7 +889,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,step,next", (char**) &error);
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,step,next,finish", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);
