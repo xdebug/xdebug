@@ -1,3 +1,9 @@
+Thu Dec 19 23:03:13 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/xdebug_profiler.c:
+- Lots & lots of WS fixes.
+- Fixed the HTML output of the Function Execution Profile mode.
+
 Thu Dec 19 22:43:08 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
 >
 /xdebug/xdebug_profiler.c
