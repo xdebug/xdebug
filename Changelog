@@ -1,3 +1,7 @@
+Tue Mar 16 20:22:36 CET 2004 Derick Rethans <derick@derickrethans.nl>
+tests/bug00032.phpt:
+- Adjust test to changes in PHP 5
+
 Tue Mar 16 20:03:38 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_profiler.c
