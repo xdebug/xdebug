@@ -1,3 +1,9 @@
+? - xdebug 1.1.0
+
++ Implemented remote debugger handler abstraction. (Derick)
++ Added a php3 compatible debugger handler. (Derick)
+
+
 Sun Sep 1, 2002 - xdebug 1.0.0rc1
 
 + Implemented gathering of parameters to internal functions (only available
