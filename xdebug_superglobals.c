@@ -32,6 +32,7 @@ void dump_dtor(void *user, void *ptr)
 static void dump_hash_elem(zval *z, char *name, char *elem, int html, int log TSRMLS_DC)
 {
 	char buffer[1024];
+	int  len;
 
 	if (html) {
 		php_printf("<tr><td colspan='2' align='right' bgcolor='#ffffcc'>$%s['%s'] =</td>", name, elem);
@@ -41,8 +42,10 @@ static void dump_hash_elem(zval *z, char *name, char *elem, int html, int log TS
 		char *val;
 
 		if (html) {
-			val = get_zval_value_fancy(NULL, z TSRMLS_CC);
-			php_printf("<td bgcolor='#ffffcc'>%s</td>", val);
+			val = get_zval_value_fancy(NULL, z, &len TSRMLS_CC);
+			php_printf("<td bgcolor='#ffffcc'>");
+			PHPWRITE(val, len);
+			php_printf("</td>");
 		} else {
 			val = get_zval_value(z);
 			printf("\n   $%s['%s'] = %s", name, elem, val);

@@ -456,9 +456,11 @@ void stack_element_dtor (void *dummy, void *elem)
 			xdfree(e->filename);
 		}
 
-		for (i = 0; i < e->varc; i++) {
-			if (e->vars[i].name) {
-				xdfree(e->vars[i].name);
+		if (e->var) {
+			for (i = 0; i < e->varc; i++) {
+				if (e->var[i].name) {
+					xdfree(e->var[i].name);
+				}
 			}
 		}
 
@@ -697,6 +699,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	int                   i         = 0;
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
+	tmp->var           = NULL;
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
 	tmp->level         = XG(level);
@@ -763,8 +766,9 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			int   is_var;
 
 			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
-			tmp->vars[tmp->varc].name  = NULL;
-			tmp->vars[tmp->varc].addr = param;
+			tmp->var = xdmalloc(sizeof (xdebug_var));
+			tmp->var[tmp->varc].name  = NULL;
+			tmp->var[tmp->varc].addr = param;
 			tmp->varc++;
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
@@ -776,12 +780,13 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			tmp->lineno = cur_opcode->lineno;
 		}
 		if (XG(collect_params)) {
+			tmp->var = xdmalloc(arg_count * sizeof (xdebug_var));
 			for (i = 0; i < arg_count; i++) {
-				tmp->vars[tmp->varc].name  = NULL;
+				tmp->var[tmp->varc].name  = NULL;
 				if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-					tmp->vars[tmp->varc].addr = *param;
+					tmp->var[tmp->varc].addr = *param;
 				} else {
-					tmp->vars[tmp->varc].addr = NULL;
+					tmp->var[tmp->varc].addr = NULL;
 				}
 				tmp->varc++;
 			}
@@ -1104,6 +1109,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 {
 	int        html = *(int *)htmlq;
+	int        len;
 	zval      *zvar;
 	char      *contents;
 	char      *name = (char*) he->ptr;
@@ -1128,18 +1134,20 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 		return;
 	}
 	if (html) {
-		contents = get_zval_value_fancy(NULL, zvar TSRMLS_CC);
+		contents = get_zval_value_fancy(NULL, zvar, &len TSRMLS_CC);
 		if (contents) {
-			php_printf("<tr><td colspan='2' align='right' bgcolor='#ccffcc'>$%s = </td><td bgcolor='#ccffcc'>%s</td></tr>\n", name, contents);
+			php_printf("<tr><td colspan='2' align='right' bgcolor='#ccffcc'>$%s = </td><td bgcolor='#ccffcc'>", name);
+			PHPWRITE(contents, len);
+			php_printf("</td></tr>\n");
 		} else {
 			php_printf("<tr><td bgcolor='#ccffcc'>$%s</td><td bgcolor='#ccffcc' colspan='2'><i>Undefined</i></td></tr>\n", name);
 		}
 	} else {
 		contents = get_zval_value(zvar);
 		if (contents) {
-			printf("  $%s = %s\n", name, contents);
+			php_printf("  $%s = %s\n", name, contents);
 		} else {
-			printf("  $%s = *uninitialized*\n", name);
+			php_printf("  $%s = *uninitialized*\n", name);
 		}
 	}
 	xdfree(contents);
@@ -1152,6 +1160,7 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 	xdebug_llist_element *le;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
 	function_stack_entry *i;
+	int len;
 
 	if (html && !log_only) {
 		php_printf("<br />\n<font size='1'><table border='1' cellspacing='0'>\n");
@@ -1216,12 +1225,12 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				} else {
 					c = 1;
 				}
-				tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
-				tmp_value = get_zval_value(i->vars[j].addr);
+				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
+				tmp_value = get_zval_value(i->var[j].addr);
 				if (!log_only) {
 					if (html) {
-						tmp_fancy_value = get_zval_value_fancy(tmp_varname, i->vars[j].addr TSRMLS_CC);
-						php_printf("%s", tmp_fancy_value);
+						tmp_fancy_value = get_zval_value_fancy(tmp_varname, i->var[j].addr, &len TSRMLS_CC);
+						PHPWRITE(tmp_fancy_value, len);
 						xdfree(tmp_fancy_value);
 					} else {
 						php_printf("%s%s", tmp_varname, tmp_value);
@@ -1268,7 +1277,7 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 						php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope</th></tr>\n");
 						php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
 					} else {
-						printf("\n\nVariables in local scope:\n");
+						php_printf("\n\nVariables in local scope:\n");
 					}
 					xdebug_hash_apply(i->used_vars, (void*) &html, dump_used_var_with_contents);
 				}
@@ -1339,10 +1348,10 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 			c = 1;
 		}
 
-		tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
+		tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
 		xdebug_str_add(&str, tmp_varname, 1);
 
-		tmp_value = get_zval_value(i->vars[j].addr);
+		tmp_value = get_zval_value(i->var[j].addr);
 		xdebug_str_add(&str, tmp_value, 1);
 	}
 
@@ -1569,9 +1578,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			argument = get_zval_value(i->vars[j].addr);
-			if (i->vars[j].name) {
-				add_assoc_string_ex(params, i->vars[j].name, strlen(i->vars[j].name) + 1, argument, 1);
+			argument = get_zval_value(i->var[j].addr);
+			if (i->var[j].name) {
+				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
 			} else {
 				add_index_string(params, j, argument, 1);
 			}
@@ -1684,7 +1693,7 @@ PHP_FUNCTION(xdebug_var_dump)
 {
 	zval ***args;
 	int     argc;
-	int     i;
+	int     i, len;
 	char   *val;
 	
 	argc = ZEND_NUM_ARGS();
@@ -1697,8 +1706,8 @@ PHP_FUNCTION(xdebug_var_dump)
 	
 	for (i = 0; i < argc; i++) {
 		if (PG(html_errors)) {
-			val = get_zval_value_fancy(NULL, (zval*) *args[i] TSRMLS_CC);
-			PHPWRITE(val, strlen(val));
+			val = get_zval_value_fancy(NULL, (zval*) *args[i], &len TSRMLS_CC);
+			PHPWRITE(val, len);
 			xdfree(val);
 		} else {
 			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);

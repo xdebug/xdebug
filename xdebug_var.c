@@ -287,6 +287,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
+	int       newlen;
 
 	if (!*struc) {
 		xdebug_str_addl(str, "<uninitialized/>", 16, 0);
@@ -311,9 +312,11 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			break;
 
 		case IS_STRING:
-			tmp_str = xmlize(Z_STRVAL_PP(struc));
-			xdebug_str_add(str, xdebug_sprintf("<string>%s</string>", tmp_str), 1);
+			xdebug_str_addl(str, "<string>", 8, 0);
+			tmp_str = xmlize(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &newlen);
+			xdebug_str_addl(str, tmp_str, newlen, 0);
 			efree(tmp_str);
+			xdebug_str_addl(str, "</string>", 9, 0);
 			break;
 
 		case IS_ARRAY:
@@ -599,6 +602,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
+	int       newlen;
 
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
@@ -618,9 +622,11 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			break;
 
 		case IS_STRING:
-			tmp_str = xmlize(Z_STRVAL_PP(struc));
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>'%s'</font>", PURPLE, tmp_str), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>'", PURPLE), 1);
+			tmp_str = xmlize(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &newlen);
+			xdebug_str_addl(str, tmp_str, newlen, 0);
 			efree(tmp_str);
+			xdebug_str_addl(str, "'</font>", 8, 0);
 			break;
 
 		case IS_ARRAY:
@@ -677,7 +683,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 	}
 }
 
-char* get_zval_value_fancy(char *name, zval *val TSRMLS_DC)
+char* get_zval_value_fancy(char *name, zval *val, int *len TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 
@@ -685,6 +691,7 @@ char* get_zval_value_fancy(char *name, zval *val TSRMLS_DC)
 	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1 TSRMLS_CC);
 	xdebug_str_addl(&str, "</pre>", 6, 0);
 
+	*len = str.l;
 	return str.d;
 }
 
@@ -692,13 +699,12 @@ char* get_zval_value_fancy(char *name, zval *val TSRMLS_DC)
 ** XML encoding function
 */
 
-char* xmlize(char *string)
+char* xmlize(char *string, int len, int *newlen)
 {
-	int   len = strlen(string);
 	char *tmp;
 	char *tmp2;
 
-	if (strlen(string)) {
+	if (len) {
 		tmp = php_str_to_str(string, len, "&", 1, "&amp;", 5, &len);
 
 		tmp2 = php_str_to_str(tmp, len, ">", 1, "&gt;", 4, &len);
@@ -707,7 +713,7 @@ char* xmlize(char *string)
 		tmp = php_str_to_str(tmp2, len, "<", 1, "&lt;", 4, &len);
 		efree(tmp2);
 
-		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
+		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, newlen);
 		efree(tmp);
 		return tmp2;
 	} else {

@@ -128,7 +128,6 @@ typedef struct xdebug_profile {
 	xdebug_llist *call_list;
 } xdebug_profile;
 
-#define MAX_FUNCTION_ARGUMENTS 32
 typedef struct _function_stack_entry {
 	/* function properties */
 	xdebug_func  function;
@@ -143,7 +142,7 @@ typedef struct _function_stack_entry {
 	/* argument properties */
 	int          arg_done;
 	int          varc;
-	xdebug_var   vars[MAX_FUNCTION_ARGUMENTS];
+	xdebug_var   *var;
 	zval        *return_value;
 	xdebug_hash *used_vars;
 	HashTable   *symbol_table;
