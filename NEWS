@@ -1,6 +1,6 @@
-Sun Jun 16, 2002 - xdebug 0.9.0
+Sun Jun 23, 2002 - xdebug 0.9.0
 
-= Fixed a problem with the output buffering in PHP. (Derick)
+= Fixed a problem with output buffering in PHP. (Derick)
 = Fixed a memory leak in delayed included files. (Derick)
 + Added support for PHP 4.1.2. (Derick)
 = Rewrote xdebug_get_function_stack() and xdebug_get_function_trace() to return

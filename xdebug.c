@@ -24,7 +24,7 @@
 
 #if HAVE_XDEBUG
 
-#define XDEBUG_VERSION "0.9.0-dev"
+#define XDEBUG_VERSION "0.9.0"
 
 #include <sys/time.h>
 
