@@ -1,3 +1,8 @@
+Mon Sep 23 16:25:55 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- Added command line parsing
+
 Fri Sep 20 22:09:56 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.dsp:
 - Fix line-endings
