@@ -1,3 +1,7 @@
+Mon Jul 19 20:59:46 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- refix $this for php 5 after yesterday's changes
+# change add_variable_node to enable me to force special vars to only eval as variables, while allowing property_get to eval arbitrary code
 Sun Jul 18 21:52:08 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c
 xdebug/xdebug_handler_dbgp.h:
