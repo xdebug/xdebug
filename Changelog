@@ -1,3 +1,9 @@
+Sat Jun 28 13:16:52 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Let the time index start from the beginning of the *script* and not at the
+  first function call.
+
 Mon Jun 23 23:56:37 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update todo list
