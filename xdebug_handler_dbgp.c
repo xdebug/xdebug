@@ -341,7 +341,7 @@ inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
 {
 #if PHP_MAJOR_VERSION == 4
 	zend_class_entry *ce;
-	ce = Z_OBJCE_PP(arg);
+	ce = Z_OBJCE_P(z);
 	*length = ce->name_length;
 	return estrdup(ce->name);
 #endif
@@ -1887,7 +1887,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.68 $";
+	return "$Revision: 1.69 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

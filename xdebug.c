@@ -895,6 +895,19 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	}
 
 	while (i < j) {
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
+		char *cv = NULL;
+		int cv_len;
+
+		if (op_array->opcodes[i].op1.op_type == IS_CV) {
+			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.u.var, &cv_len);
+			xdebug_hash_update(fse->used_vars, cv, cv_len, xdstrdup(cv));
+		}
+		if (op_array->opcodes[i].op2.op_type == IS_CV) {
+			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.u.var, &cv_len);
+			xdebug_hash_update(fse->used_vars, cv, cv_len, xdstrdup(cv));
+		}
+#else
 		if (op_array->opcodes[i].opcode == ZEND_FETCH_R || op_array->opcodes[i].opcode == ZEND_FETCH_W) {
 			if (op_array->opcodes[i].op1.op_type == IS_CONST) {
 				if (Z_TYPE(op_array->opcodes[i].op1.u.constant) == IS_STRING) {
@@ -916,6 +929,7 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 				}
 			}
 		}
+#endif
 		i++;
 	}
 }
