@@ -44,3 +44,4 @@ Release_TS
 *.ncb
 *.opt
 *.dsw
+autom4te.cache
