@@ -1,3 +1,7 @@
+Sat Nov 8 23:34:26 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat:
+- Update compile script with -dP
+
 Sat Nov 8 23:32:22 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_handler_gdb.h:
