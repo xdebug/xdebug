@@ -1,3 +1,11 @@
+Sun Jun 23 18:35:03 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h
+/xdebug/tests/test17.php:
+- Don't rely on the output buffering in PHP, which is still a little bit
+  shaky.
+
 Sun Jun 16 22:05:59 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Added fflush() to flush the trace to file after every line
