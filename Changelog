@@ -1,3 +1,7 @@
+Sun Nov 28 22:53:28 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_str.c:
+- Fixed bug #94: xdebug_sprintf misbehaves with x86_64/glibc-2.3.3
+
 Sun Nov 28 20:34:19 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #101: crash with set_exeception_handler() and uncatched exceptions.
