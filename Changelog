@@ -1,3 +1,7 @@
+Wed Aug 28 19:53:34 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Remove ", " at the end of arrays and object var arrays.
+
 Wed Aug 28 19:47:53 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Change "?" to "{missing}" for missing parameters to functions.
