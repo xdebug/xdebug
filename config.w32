@@ -1,10 +1,10 @@
-// $Id: config.w32,v 1.1 2003-12-17 20:43:39 derick Exp $
+// $Id: config.w32,v 1.2 2004-01-13 16:11:41 derick Exp $
 // vim:ft=javascript
 
 ARG_WITH("xdebug", "Xdebug support", "yes");
 
 if (PHP_XDEBUG == "yes") {
-	EXTENSION("xdebug", "xdebug.c xdebug_code_coverage.c xdebug_com.c xdebug_handler_dbgp.c xdebug_handler_gdb.c xdebug_handler_php3.c xdebug_handlers.c xdebug_llist.c xdebug_hash.c xdebug_private.c xdebug_profiler.c xdebug_str.c xdebug_superglobals.c xdebug_var.c xdebug_xml.c usefulstuff.c");
+	EXTENSION("xdebug", "xdebug.c xdebug_code_coverage.c xdebug_com.c xdebug_handler_dbgp.c xdebug_handler_gdb.c xdebug_handler_php3.c xdebug_handlers.c xdebug_llist.c xdebug_hash.c xdebug_private.c xdebug_str.c xdebug_superglobals.c xdebug_var.c xdebug_xml.c usefulstuff.c");
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
 	AC_DEFINE("HAVE_EXECUTE_DATA_PTR", 1);
 }
