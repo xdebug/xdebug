@@ -1,3 +1,7 @@
+Tue Aug 27 22:40:58 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test18.php:
+- Added test for eval (nr 18)
+
 Tue Aug 27 22:26:38 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
