@@ -46,7 +46,9 @@ typedef struct xdebug_arg {
 	for (i = 0; i < arg->c; i++) { \
 		xdfree(arg->args[i]);      \
 	}                              \
-	xdfree(arg->args);             \
+	if (arg->args) {               \
+		xdfree(arg->args);         \
+	}                              \
 	xdfree(arg);                   \
 }
 

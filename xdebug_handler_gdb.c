@@ -61,11 +61,13 @@ static xdebug_cmd commands_init[] = {
 static xdebug_cmd commands_breakpoint[] = {
 	{ "break",      1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 1,
 		"Set breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber or function name."
+		"             Argument may be filename and linenumber, function name or '{main}'"
+		"             for the first PHP line."
 	},
 	{ "bre",        1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 0,
 		"Set breakpoint at specified line or function.\n"
-		"             Argument may be filename and linenumber or function name."
+		"             Argument may be filename and linenumber, function name or '{main}'"
+		"             for the first PHP line."
 	},
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
@@ -264,7 +266,7 @@ static void show_command_info(xdebug_con *h, xdebug_cmd* cmd)
 /*****************************************************************************
 ** Data printing functions
 */
-static void print_sourceline(xdebug_con *h, char *file, int begin, int end)
+static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int offset)
 {
 	int    fd;
 	fd_buf fd_buffer = { NULL, 0 };
@@ -284,7 +286,8 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end)
 	
 	while (i > 0) {
 		if (line) {
-			xdfree(line);
+			free(line);
+			line = NULL;
 		}
 		line = fd_read_line(fd, &fd_buffer);
 		i--;
@@ -294,7 +297,8 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end)
 		if (line) {
 			update = 1;
 			SENDMSG(h->socket, xdebug_sprintf("%d\t%s\n", begin + i, line));
-			xdfree(line);
+			free(line);
+			line = NULL;
 		}
 		line = fd_read_line(fd, &fd_buffer);
 		i++;
@@ -303,7 +307,8 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end)
 	/* Print last line */
 	if (line) {
 		update = 1;
-		xdfree(line);
+		free(line);
+		line = NULL;
 	}
 
 	/* Update "last" info */
@@ -314,7 +319,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end)
 		if (XG(context).list.last_file != file) {
 			XG(context).list.last_file = xdstrdup(file);
 		}
-		XG(context).list.last_line = end + 1;
+		XG(context).list.last_line = end + 1 + offset;
 	}
 }
 
@@ -466,9 +471,11 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 		}
 	} else { /* function */
 		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
+			xdebug_arg_dtor(method);
 			return xdstrdup("Breakpoint could not be set.");
 		} else {
 			SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", args->args[0]));
+			xdebug_arg_dtor(method);
 		}
 	}
 	return NULL;
@@ -489,7 +496,7 @@ char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
 	xdebug_arg_init(parts);
-		
+
 	switch (args->c) {
 		case 0: 
 			if (XG(context).list.last_file) {
@@ -528,8 +535,9 @@ char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 		default:
 			return xdstrdup("Too many arguments."); 
 	}
-	print_sourceline(context, tmp_file, tmp_begin, tmp_end);
-		
+	print_sourceline(context, tmp_file, tmp_begin, tmp_end, 0);
+
+	xdebug_arg_dtor(parts);	
 	return NULL;
 }
 
@@ -563,7 +571,7 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 		}
 	}
 	
-	return NULL;
+	return xdebug_sprintf("The symbol '%s' does not exist or is not yet initialized.", args->args[0]);
 }
 
 char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args)
@@ -588,10 +596,10 @@ char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
 }
 
 
-static void dump_used_var(void *data, xdebug_hash_element *e)
+static void dump_used_var (void *context, xdebug_hash_element* he)
 {
-	char *name = (char *) e->ptr;
-	xdebug_con *h = data;
+	char *name = (char*) he->ptr;
+	xdebug_con *h = (xdebug_con*) context;
 
 	SENDMSG(h->socket, xdebug_sprintf ("$%s\n", name));
 }
@@ -754,6 +762,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 		}
 		ret = xdebug_gdb_parse_option(context, option, XDEBUG_INIT | XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "run", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
+		free(option);
 	} while (1 != ret);
 
 	return 1;
@@ -764,6 +773,7 @@ int xdebug_gdb_deinit(xdebug_con *context)
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
 	xdebug_llist_destroy(context->line_breakpoints, NULL);
+	xdfree(context->buffer);
 
 	return 1;
 }
@@ -790,6 +800,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 		}
 		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
+		free(option);
 	} while (1 != ret);
 
 	return 1;
@@ -805,7 +816,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 	if (type == XDEBUG_BREAK) {
 		print_breakpoint(context, i);
 	}
-	print_sourceline(context, file, lineno, lineno);
+	print_sourceline(context, file, lineno, lineno, -1);
 
 	do {
 		SSEND(context->socket, "?cmd\n");
@@ -815,6 +826,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 		}
 		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,step", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
+		free(option);
 	} while (1 != ret);
 
 	return 1;

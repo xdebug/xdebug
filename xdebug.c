@@ -482,7 +482,7 @@ static void add_used_variables (struct function_stack_entry *fse, zend_op_array 
 	fse->used_vars = xdebug_hash_alloc(64, used_var_dtor); 
 	while (i < j) {
 		if (op_array->opcodes[i].opcode == ZEND_FETCH_R || op_array->opcodes[i].opcode == ZEND_FETCH_W) {
-			if (op_array->opcodes[i].op1.op_type == IS_CONSTANT) {
+			if (op_array->opcodes[i].op1.op_type == IS_CONST) {
 				xdebug_hash_update(
 					fse->used_vars, 
 					op_array->opcodes[i].op1.u.constant.value.str.val,
