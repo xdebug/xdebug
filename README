@@ -34,14 +34,16 @@ Xdebug is compiled separately, all by itself, as stated above.
    --with-php-config=/path/to/php-config if php-config is not in your
    path)
 
-5. cp modules/xdebug.so /to/wherever/you/want/it
+5. Compile the module with "make"
 
-6. add the following line to php.ini:
+6. cp modules/xdebug.so /to/wherever/you/want/it
+
+7. add the following line to php.ini:
    zend_extension="/wherever/you/put/it/xdebug.so"
 
-7. Restart your webserver.
+8. Restart your webserver.
 
-8. Write a PHP page that calls "phpinfo();" Load it in a browser and
+9. Write a PHP page that calls "phpinfo();" Load it in a browser and
    look for the info on the xdebug module.  If you see it, you have been
    successful!
 
