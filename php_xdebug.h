@@ -137,6 +137,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_llist *trace;
 	int           max_nesting_level;
 	zend_bool     default_enable;
+	zend_bool     collect_params;
 	zend_bool     auto_trace;
 	zend_bool     do_trace;
 	char         *manual_url;

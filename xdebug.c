@@ -131,6 +131,7 @@ static PHP_INI_MH(OnUpdateDebugMode)
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_SYSTEM, OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_SYSTEM, OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_SYSTEM, OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
 
@@ -427,16 +428,17 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	} else {
 		cur_opcode = *EG(opline_ptr);
 		tmp->lineno = cur_opcode->lineno;
-		for (i = 0; i < arg_count; i++) {
-			tmp->vars[tmp->varc].name  = NULL;
-			if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-				tmp->vars[tmp->varc].value = get_zval_value(*param);
-			} else {
-				tmp->vars[tmp->varc].value = xdstrdup ("{missing}");
+		if (XG(collect_params)) {
+			for (i = 0; i < arg_count; i++) {
+				tmp->vars[tmp->varc].name  = NULL;
+				if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
+					tmp->vars[tmp->varc].value = get_zval_value(*param);
+				} else {
+					tmp->vars[tmp->varc].value = xdstrdup ("{missing}");
+				}
+				tmp->varc++;
 			}
-			tmp->varc++;
 		}
-
 	}
 	xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 
