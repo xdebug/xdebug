@@ -1,3 +1,7 @@
+Thu Nov 04 23:43:56 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Make things work in PHP 4.3 and PHP 5.0 again.
+
 Thu Nov 04 23:10:37 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed bug #98: 'longname' attribute not returned for unintialized property
