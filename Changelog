@@ -1,3 +1,26 @@
+Mon Jan 20 21:27:30 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/test.sh
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/xdebug.c
+/xdebug/xdebug_com.c
+/xdebug/xdebug_com.h
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handler_php3.h
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_profiler.h
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h
+/xdebug/debugclient/main.c
+/xdebug/debugclient/usefulstuff.c
+/xdebug/debugclient/usefulstuff.h:
+- Happy New Year!
+
 Mon Jan 20 20:53:44 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - Add some more verbose error messages
