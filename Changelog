@@ -1,3 +1,7 @@
+Mon May 6 14:59:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Remove functions from the stack after they are finished
+
 Sat May 4 19:27:20 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/EXPERIMENTAL:
 - My code is never experimental :)
