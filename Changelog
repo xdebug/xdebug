@@ -1,3 +1,11 @@
+Fri Sep 19 10:08:55 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/tests/array_map.phpt:
+- Fixed segfault where a function name didn't exist in case of a
+ "call_user_function".
+- Fixed reading a filename in case of an callback to a PHP function from an
+  internal function (like "array_map()").
+
 Fri Sep 19 09:54:29 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/bug00001.phpt:
 - Add ZE2 contraint
