@@ -1,3 +1,6 @@
+Thu Jul 15 04:15:49 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_var.c:
+- fix issue where full name would have $$varname rather than $varname
 Thu Jul 15 01:58:49 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - fixed #73: komodo beta 4.3.7 crash
