@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@vl-srm.net>                         |
+   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
  */
 
@@ -345,6 +345,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 	char *error_format;
 	xdebug_llist_element *le;
 	int new_len;
+	int is_cli = (strcmp ("cli", sapi_module.name) == 0);
 
 	if (html) {
 		php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
@@ -357,10 +358,14 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 
 	if (XG(stack)) {
 		if (html) {
-			php_printf ("<tr><th bgcolor='#aaaaaa' colspan='3'>Stacktrace</th></tr>\n");
+			php_printf ("<tr><th bgcolor='#aaaaaa' colspan='3'>Call Stack</th></tr>\n");
 			php_printf ("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
 		} else {
-			printf ("\nStack trace:\n");
+			printf ("\nCall Stack:\n");
+		}
+
+		if (PG(log_errors) && !is_cli) {
+			php_log_err("PHP Stack trace:" TSRMLS_CC);
 		}
 
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -369,12 +374,16 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			int j = 0; /* Counter */
 			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 			char *tmp_name;
+			char log_buffer[4096];
 			
 			tmp_name = show_fname (i TSRMLS_CC);
 			if (html) {
 				php_printf ("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
 			} else {
 				printf ("%3d. %s(", i->level, tmp_name);
+			}
+			if (PG(log_errors) && !is_cli) {
+				snprintf(log_buffer, 1024, "PHP %3d. %s(", i->level, tmp_name);
 			}
 			efree (tmp_name);
 
@@ -386,6 +395,9 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 					} else {
 						printf (", ");
 					}
+					if (PG(log_errors) && !is_cli) {
+						strcat(log_buffer, ", ");
+					}
 				} else {
 					c = 1;
 				}
@@ -395,12 +407,27 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				} else {
 					printf ("$%s = %s", i->vars[j].name, i->vars[j].value);
 				}
+				if (PG(log_errors) && !is_cli) {
+					snprintf(
+						log_buffer + strlen(log_buffer),
+						1024 - strlen(log_buffer),
+						"$%s = %s", i->vars[j].name, i->vars[j].value
+					);
+				}
 			}
 
 			if (html) {
 				php_printf (")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
 			} else {
 				printf (") %s:%d\n", i->filename, i->lineno);
+			}
+			if (PG(log_errors) && !is_cli) {
+				snprintf(
+					log_buffer + strlen(log_buffer),
+					1024 - strlen(log_buffer),
+					") %s:%d", i->filename, i->lineno
+				);
+				php_log_err(log_buffer TSRMLS_CC);
 			}
 		}
 
