@@ -1,3 +1,31 @@
+Mon Jun 23 23:55:51 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/LICENSE
+/xdebug/package.xml
+/xdebug/php_xdebug.h
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/xdebug.c
+/xdebug/xdebug_code_coverage.c
+/xdebug/xdebug_code_coverage.h
+/xdebug/xdebug_com.c
+/xdebug/xdebug_com.h
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handler_php3.h
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_profiler.h
+/xdebug/xdebug_superglobals.c
+/xdebug/xdebug_superglobals.h
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h
+/xdebug/debugclient/LICENSE
+/xdebug/debugclient/main.c
+/xdebug/debugclient/usefulstuff.c
+/xdebug/debugclient/usefulstuff.h
+/xdebug/debugclient/COPYING:
+- Licence update. This change only renames "PHP Licence" to "Xdebug Licence",
+  "The PHP Group" to "Derick Rethans" and "PHP" to "Xdebug".
+
 Mon Jun 23 23:37:40 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_handlers.c
