@@ -804,7 +804,10 @@ static void add_used_variables (function_stack_entry *fse, zend_op_array *op_arr
 	int i = 0; 
 	int j = op_array->size;
 
-	fse->used_vars = xdebug_hash_alloc(64, used_var_dtor); 
+	if (!fse->used_vars) {
+		fse->used_vars = xdebug_hash_alloc(64, used_var_dtor);
+	}
+
 	while (i < j) {
 		if (op_array->opcodes[i].opcode == ZEND_FETCH_R || op_array->opcodes[i].opcode == ZEND_FETCH_W) {
 			if (op_array->opcodes[i].op1.op_type == IS_CONST) {
@@ -884,10 +887,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
 	zval                **dummy;
 	zend_execute_data    *edata = EG(current_execute_data);
-	function_stack_entry *fse;
+	function_stack_entry *fse, *xfse;
 	char                 *magic_cookie = NULL;
 	int                   do_return = (XG(do_trace) && XG(trace_file));
 	int                   function_nr = 0;
+	xdebug_llist_element *le;
 
 	if (XG(level) == 0) {
 		/* Set session cookie if requested */
@@ -988,8 +992,16 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	fse->symbol_table = EG(active_symbol_table);
 
-	if (XDEBUG_IS_FUNCTION(fse->function.type)) {
-		add_used_variables(fse, op_array);
+	/* Because include/require is treated as a stack level, we have to
+	  add used variables in include/required files to all the stack levels
+          above, until we hit a function or the to level stack.  This is so
+          that the variables show up correctly where they should be.  We
+          always call add_used_varialbes on the current stack level, otherwise
+          vars in include files do not show up in the locals list.  */
+	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+		xfse = XDEBUG_LLIST_VALP(le);
+		add_used_variables(xfse, op_array);
+		if (XDEBUG_IS_FUNCTION(xfse->function.type)) break;
 	}
 
 	/* Check for entry breakpoints */
