@@ -192,7 +192,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.auto_profile_mode", "0",                  PHP_INI_ALL,    OnUpdateLong,   auto_profile_mode, zend_xdebug_globals, xdebug_globals)
 #endif
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "1",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.auto_profile",    "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_profile,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_ALL,    OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
