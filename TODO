@@ -19,4 +19,9 @@ For 1.2.0:
      parameter passed to the function so that a person can optimize the
      query or the utility that is being called.
 - Additions
-  * Provide codes for messages (for localization) including parameters
+  * trace code to trace which files/lines have bene touched (to check
+    code coverage).
+
+For later:
+- Additions
+   * Provide codes for messages (for localization) including parameters
