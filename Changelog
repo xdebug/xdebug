@@ -1,3 +1,7 @@
+Wed May 8 19:19:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Change comments to make Jani happy
+
 Wed May 8 10:17:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Fix NEWS
 
