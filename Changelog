@@ -1,3 +1,21 @@
+Fri Mar 5 15:29:42 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/php_xdebug.h
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/xdebug.c
+/xdebug/xdebug_private.h
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_profiler.h:
+- Added internal xdebug_crc32() function. (Copy from PHP sources).
+- Changed the naming of profile files. With the setting
+  xdebug.profiler_output_name you can configure if the pid must be appended, or
+  an crc32 check of the path/file of the starting script. The latter setting
+  "crc32" is the default. (This makes it easier to reload a profiling file for
+  the same script.)
+- Fixed issues for compiling on Windows.
+- Implement correct recording of line information into profile files.
+- Added the php:: prefix to all internal PHP files in the profile output files.
+
 Fri Mar 5 15:25:50 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_handler_gdb.c:
 - MFH: Fixed problem with not closing files from which sourcelines where read.
