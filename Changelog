@@ -1,3 +1,8 @@
+Sun Aug 31 23:50:00 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/call_user_func_array2.inc
+/xdebug/tests/call_user_func_array2.phpt:
+- Okay, with this test case I can reproduce the problem finally.
+
 Sun Aug 31 20:14:31 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/call_user_func_array.phpt:
 - Actually, the output of this test works just fine
