@@ -34,6 +34,8 @@ config.guess
 *swp
 config.log
 libtool
+Debug
+Release
 Debug_TS
 Release_TS
 *.plg
