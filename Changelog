@@ -1,3 +1,7 @@
+Mon Nov 01 13:06:17 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Added PHP 5.1 compability for the opcode overrides.
+
 Fri Oct 29 12:01:18 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 test.sh
 xdebug/xdebug.c
