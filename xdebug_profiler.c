@@ -1076,7 +1076,7 @@ PHP_FUNCTION(xdebug_start_profiling)
 PHP_FUNCTION(xdebug_stop_profiling)
 {
 	if (XG(do_profile) == 1) {
-		if (XG(do_trace) == 1) {
+		if (XG(profiler_trace) == 1) {
 			XG(do_trace) = 0;
 			xdebug_llist_destroy(XG(trace), NULL);
 			XG(trace) = NULL;
