@@ -1,3 +1,6 @@
+Sun May 26 13:42:02 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
+- Fix NEWS
+
 Sun May 26 13:01:05 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Unify unknown data
