@@ -1,3 +1,7 @@
+Sat Apr 5 10:48:20 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.mak:
+- Fix the Windows makefile
+
 Sat Apr 5 10:42:22 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Allow remote debugging to be enabled in httpd.conf and .htaccess files.
