@@ -1,3 +1,7 @@
+Wed Dec 24 20:13:36 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Added 'classname' attribute to returning properties of type bject.
+
 Wed Dec 24 19:59:13 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c
 /xdebug/xdebug_handler_gdb.c
