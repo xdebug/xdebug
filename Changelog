@@ -1,3 +1,7 @@
+Fri Dec 19 17:29:26 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- The fileuri is an attribute of the init tag, not a sub element
+
 Fri Dec 19 10:43:06 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - MFH: Fixed bug #32 (Unusual dynamic variables cause xdebug to crash).
