@@ -200,6 +200,19 @@ static PHP_INI_MH(OnUpdateAllowedClients)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateIDEKey)
+{
+	if (XG(ide_key)) {
+		xdfree(XG(ide_key));
+	}
+	if (!new_value) {
+		XG(ide_key) = NULL;
+	} else {
+		XG(ide_key) = xdstrdup(new_value);
+	}
+	return SUCCESS;
+}
+
 static PHP_INI_MH(OnUpdateDebugMode)
 {
 	if (!new_value) {
@@ -272,7 +285,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 #endif
 	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
-	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, ide_key,           zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
 PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -490,7 +503,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 	XG(stack)         = xdebug_llist_alloc(stack_element_dtor);
-	XG(ide_key)       = NULL;
 	XG(trace_file)    = NULL;
 	XG(tracefile_name) = NULL;
 	XG(profile_file)  = NULL;
@@ -499,6 +511,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(function_count) = 0;
 	
 	if (idekey && *idekey) {
+		if (XG(ide_key)) {
+			xdfree(XG(ide_key));
+		}
 		XG(ide_key) = xdstrdup(idekey);
 	}
 
