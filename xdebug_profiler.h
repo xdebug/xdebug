@@ -25,6 +25,7 @@
 #include "xdebug_private.h"
 
 int xdebug_profiler_init(char *script_name TSRMLS_DC);
+void xdebug_profiler_deinit(TSRMLS_D);
 
 void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC);
 void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);

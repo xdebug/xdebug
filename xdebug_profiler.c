@@ -62,7 +62,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	return SUCCESS;
 }
 
-int xdebug_profiler_deinit(TSRMLS_D)
+void xdebug_profiler_deinit(TSRMLS_D)
 {
 	function_stack_entry *fse;
 	xdebug_llist_element *le;
