@@ -849,6 +849,11 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 		return;
 	}
 
+	/* Bail out on $this and $GLOBALS */
+	if (strcmp(name, "this") == 0 || strcmp(name, "GLOBALS") == 0) {
+		return;
+	}
+
 	tmp_ht = XG(active_symbol_table);
 	XG(active_symbol_table) = EG(active_symbol_table);
 	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
