@@ -1,3 +1,7 @@
+Tue Oct 14 17:59:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- MFH: Fix URL
+
 Tue Oct 14 17:57:04 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix URL
