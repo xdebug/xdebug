@@ -1,3 +1,8 @@
+Mon Apr 14 22:25:56 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug.c:
+- Fix handling of paths under Windows
+
 Mon Apr 14 15:49:34 CEST 2003 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug_profiler.c:
 - Added overall stats to HTML profiles.
