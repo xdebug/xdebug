@@ -68,7 +68,7 @@ zval* xdebug_get_php_symbol(char* name, int name_length)
 	TSRMLS_FETCH();
 
 	st = XG(active_symbol_table);
-	if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+	if (st && st->nNumOfElements && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
 		return *retval;
 	}
 
