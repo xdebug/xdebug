@@ -26,7 +26,7 @@ function_stack_entry *xdebug_get_stack_head(TSRMLS_D)
 	xdebug_llist_element *le;
 
 	if (XG(stack)) {
-		if (le = XDEBUG_LLIST_HEAD(XG(stack))) {
+		if ((le = XDEBUG_LLIST_HEAD(XG(stack)))) {
 			return XDEBUG_LLIST_VALP(le);
 		} else {
 			return NULL;
@@ -63,7 +63,7 @@ function_stack_entry *xdebug_get_stack_tail(TSRMLS_D)
 	xdebug_llist_element *le;
 
 	if (XG(stack)) {
-		if (le = XDEBUG_LLIST_TAIL(XG(stack))) {
+		if ((le = XDEBUG_LLIST_TAIL(XG(stack)))) {
 			return XDEBUG_LLIST_VALP(le);
 		} else {
 			return NULL;

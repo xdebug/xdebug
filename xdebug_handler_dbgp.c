@@ -287,26 +287,8 @@ static char* return_source(char *file, int begin, int end TSRMLS_DC)
 	return source.d;
 }
 
-static xdebug_xml_node* return_breakpoint(function_stack_entry *i, char *filename, long lineno)
-{
-	char            *tmp_fname;
-	xdebug_xml_node *tmp;
-	TSRMLS_FETCH();
-
-	tmp_fname = show_fname(i, 0 TSRMLS_CC);
-
-	tmp = xdebug_xml_node_init("breakpoint");
-	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(filename), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", lineno), 0, 1);
-
-	xdfree(tmp_fname);
-	return tmp;
-}
-
 static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 {
-	int                   count_down = nr;
 	function_stack_entry *fse, *fse_prev;
 	char                 *tmp_fname;
 	xdebug_xml_node      *tmp;
@@ -790,7 +772,7 @@ DBGP_FUNC(step_out)
 	XG(context).do_step   = 0;
 	XG(context).do_finish = 1;
 
-	if (fse = xdebug_get_stack_tail(TSRMLS_C)) {
+	if ((fse = xdebug_get_stack_tail(TSRMLS_C))) {
 		XG(context).next_level = fse->level - 1;
 	} else {
 		XG(context).next_level = -1;
@@ -805,7 +787,7 @@ DBGP_FUNC(step_over)
 	XG(context).do_step   = 0;
 	XG(context).do_finish = 0;
 
-	if (fse = xdebug_get_stack_tail(TSRMLS_C)) {
+	if ((fse = xdebug_get_stack_tail(TSRMLS_C))) {
 		XG(context).next_level = fse->level;
 	} else {
 		XG(context).next_level = 0;
@@ -1030,7 +1012,7 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 	struct function_stack_entry *fse;
 	xdebug_hash                 *ht;
 	
-	if (fse = xdebug_get_stack_frame(depth TSRMLS_CC)) {
+	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
 		ht = fse->used_vars;
 		XG(active_symbol_table) = fse->symbol_table;
 
@@ -1319,7 +1301,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.29 $";
+	return "$Revision: 1.30 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

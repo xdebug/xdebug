@@ -200,7 +200,7 @@ char *xdebug_path_from_url(const char *fileurl)
 	/* deal with file: url's */
 	char dfp[PATH_MAX * 2];
 	const char *fp = dfp, *efp = fileurl;
-	int i, l = 0;
+	int l = 0;
 	char *tmp = NULL, *ret = NULL;;
 
 	memset(dfp, 0, sizeof(dfp));
