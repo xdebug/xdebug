@@ -1,3 +1,8 @@
+- Add support for classnames, variable include files and variable
+  function names. (Derick)
+- Implemented links to the PHP Manual in traces. (Derick)
+- Added timestamps and memory usage to function traces. (Derick)
+
 = Fixed crash when using an user defined sessiono handler. (Derick)
 + Implemented variable function names ($a = 'foo'; $f();) for use in
   traces. (Derick)
