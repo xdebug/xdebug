@@ -1,3 +1,8 @@
+Sat Apr 5 00:54:51 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_superglobals.c
+/xdebug/xdebug_superglobals.h:
+- Header maintenance
+
 Fri Mar 28 19:50:47 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - Removed unused var
