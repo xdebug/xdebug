@@ -1128,6 +1128,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	int   ret;
 	char *error = NULL;
 	xdebug_gdb_options *options;
+	TSRMLS_FETCH();
 
 	SENDMSG(context->socket, xdebug_sprintf("This is Xdebug version %s.\n", XDEBUG_VERSION));
 	SSEND(context->socket, "Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
