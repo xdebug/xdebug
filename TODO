@@ -9,6 +9,8 @@ For 1.2.0:
   * watches / conditional breakpoints
 - Bug fixing
   * Disconnect bug
+  * Fix xdebug_get_function_trace() to return all available data
+    (timestamp, memory footprint)
 - Profiling
   * External data sources monitor
      create a hash-list of SQL & execution functions that can be 
