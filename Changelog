@@ -1,3 +1,7 @@
+Thu Mar 11 23:27:45 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_profiler.c:
+- Fixed typo
+
 Thu Mar 11 23:26:53 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_profiler.c
