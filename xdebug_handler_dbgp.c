@@ -236,12 +236,12 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 			return *retval;
 		}
 	}
-
+#if 0
 	st = &EG(symbol_table);
 	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
 		return *retval;
 	}
-
+#endif
 	return NULL;
 }
 
@@ -1100,17 +1100,15 @@ DBGP_FUNC(typemap_get)
 	}
 }
 
-static int add_variable_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null TSRMLS_DC)
+static int add_variable_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null, int no_eval TSRMLS_DC)
 {
 	xdebug_xml_node      *contents;
 	zval                  ret_zval;
 	int                   res;
 
-	XG(active_symbol_table) = EG(active_symbol_table);
 	contents = get_symbol_contents(name, name_length TSRMLS_CC);
-	XG(active_symbol_table) = NULL;
 
-	if (!contents) {
+	if (!contents && !no_eval) {
 		char *varname = NULL;
 		if (var_only && name[0] != '$') {
 			varname = xdebug_sprintf("$%s", name);
@@ -1135,11 +1133,28 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 
 DBGP_FUNC(property_get)
 {
+	int                   depth = -1;
+	function_stack_entry *fse;
+
 	if (!CMD_OPTION('n')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 
-	if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0 TSRMLS_CC) == FAILURE) {
+	if (CMD_OPTION('d')) {
+		depth = strtol(CMD_OPTION('d'), NULL, 10);
+	}
+	/* Set the symbol table corresponding with the requested stack depth */
+	if (depth == -1) {
+		XG(active_symbol_table) = EG(active_symbol_table);
+	} else {
+		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+			XG(active_symbol_table) = fse->symbol_table;
+		} else {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+		}
+	}
+
+	if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 1 TSRMLS_CC) == FAILURE) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
 }
@@ -1205,7 +1220,7 @@ DBGP_FUNC(property_value)
 {
 	zval            *var_data;
 	zval             ret_zval;
-	zval 		*p_ret_zval = &ret_zval;
+	zval            *p_ret_zval = &ret_zval;
 	int              res;
 	char            *name = CMD_OPTION('n');
 	long             context_id = 0, depth = 0;
@@ -1295,17 +1310,17 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_dbgp_options *optio
 
 #ifdef ZEND_ENGINE_2
 		/* zend engine 2 does not give us $this, eval so we can get it */
-		add_variable_node(node, "this", sizeof("this"), 1, 1 TSRMLS_CC);
+		add_variable_node(node, "this", sizeof("this"), 1, 1, 0 TSRMLS_CC);
 #endif
 		if (options->show_hidden && context_id > 0) {
 			/* add supper globals */
-			add_variable_node(node, "_ENV", sizeof("_ENV"), 1, 1 TSRMLS_CC);
-			add_variable_node(node, "_GET", sizeof("_GET"), 1, 1 TSRMLS_CC);
-			add_variable_node(node, "_POST", sizeof("_POST"), 1, 1 TSRMLS_CC);
-			add_variable_node(node, "_COOKIE", sizeof("_COOKIE"), 1, 1 TSRMLS_CC);
-			add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1 TSRMLS_CC);
-			add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1 TSRMLS_CC);
-			add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1 TSRMLS_CC);
+			add_variable_node(node, "_ENV", sizeof("_ENV"), 1, 1, 0 TSRMLS_CC);
+			add_variable_node(node, "_GET", sizeof("_GET"), 1, 1, 0 TSRMLS_CC);
+			add_variable_node(node, "_POST", sizeof("_POST"), 1, 1, 0 TSRMLS_CC);
+			add_variable_node(node, "_COOKIE", sizeof("_COOKIE"), 1, 1, 0 TSRMLS_CC);
+			add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1, 0 TSRMLS_CC);
+			add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1, 0 TSRMLS_CC);
+			add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1, 0 TSRMLS_CC);
 		}
 
 		XG(active_symbol_table) = NULL;
@@ -1596,7 +1611,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.63 $";
+	return "$Revision: 1.64 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
