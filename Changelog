@@ -1,3 +1,7 @@
+Tue Nov 25 17:27:52 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat:
+- This pause should not be in
+
 Sat Nov 22 16:45:42 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - MFH: Copy and paste error
