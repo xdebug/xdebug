@@ -717,6 +717,7 @@ char* xmlize(char *string, int len, int *newlen)
 		efree(tmp);
 		return tmp2;
 	} else {
+		*newlen = len;
 		return estrdup(string);
 	}
 }
