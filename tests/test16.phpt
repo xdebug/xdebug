@@ -6,10 +6,11 @@ Test for overloaded member functions / classes (ZE1)
 xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.auto_profile=0
+xdebug.profiler_enable=0
 xdebug.collect_params=1
 --FILE--
 <?php
-	$tf = xdebug_start_trace(tempnam('/tmp', 'xdt'));
+	$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
 
 	class a {
 

@@ -6,6 +6,7 @@ xdebug.auto_trace=1
 xdebug.trace_output_dir=/tmp
 xdebug.collect_params=1
 xdebug.auto_profile=0
+xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 --FILE--

@@ -6,6 +6,7 @@ Test for segmentation fault with unusual variables (ZE2)
 xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
+xdebug.profiler_enable=0
 --FILE--
 <?php
 	${1} = "foo";

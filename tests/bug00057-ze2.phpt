@@ -7,6 +7,7 @@ xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.show_mem_delta=0
+xdebug.profiler_enable=0
 --FILE--
 <?php
 class OO {

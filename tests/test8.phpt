@@ -6,10 +6,11 @@ xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.collect_return=1
 xdebug.auto_profile=0
+xdebug.profiler_enable=0
 xdebug.show_mem_delta=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(tempnam('/tmp', 'xdt'));
+$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
 
 function a () {
 	var_dump (xdebug_get_function_stack());

@@ -2,8 +2,8 @@
 Check for xdebug presence
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
---POST--
---GET--
+--INI--
+xdebug.profiler_enable=0
 --FILE--
 <?php 
 echo "xdebug extension is available";

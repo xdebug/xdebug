@@ -4,6 +4,7 @@ Test for segmentation fault with xdebug_get_function_stack() and collect_params=
 xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
+xdebug.profiler_enable=0
 --FILE--
 <?php
 function foo($s) {

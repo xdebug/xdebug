@@ -4,6 +4,7 @@ Test for xdebug_peak_memory_usage
 xdebug.enable=1
 xdebug.collect_params=1
 xdebug.auto_profile=0
+xdebug.profiler_enable=0
 --FILE--
 <?php
 	$a = xdebug_memory_usage();

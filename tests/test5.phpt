@@ -4,6 +4,7 @@ Test for somewhat more complex backtrace
 xdebug.default_enable=1
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
+xdebug.profiler_enable=0
 --FILE--
 <?php
 
