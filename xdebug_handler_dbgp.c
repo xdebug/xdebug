@@ -858,14 +858,17 @@ DBGP_FUNC(feature_get)
 	XDEBUG_STR_SWITCH(CMD_OPTION('n')) {
 		XDEBUG_STR_CASE("data_encoding")
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
+			xdebug_xml_add_attribute(*retval, "supported", "0");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("encoding")
 			xdebug_xml_add_text(*retval, xdstrdup("UTF-8"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("language_name")
 			xdebug_xml_add_text(*retval, xdstrdup("PHP"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("language_supports_threads")
@@ -874,26 +877,32 @@ DBGP_FUNC(feature_get)
 		
 		XDEBUG_STR_CASE("language_version")
 			xdebug_xml_add_text(*retval, xdstrdup(PHP_VERSION));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("max_children")
 			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_children));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("max_data")
 			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_data));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("max_depth")
 			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_depth));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("protocol_version")
 			xdebug_xml_add_text(*retval, xdstrdup("1"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("supported_encodings")
 			xdebug_xml_add_text(*retval, xdstrdup("UTF-8"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("supports_async")
@@ -1299,7 +1308,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.25 $";
+	return "$Revision: 1.26 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
