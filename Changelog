@@ -1,3 +1,9 @@
+Mon Nov 11 16:07:48 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/package.xml
+/xdebug/php_xdebug.h:
+- Go with 1.1.0
+
 Mon Nov 11 09:58:09 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/.cvsignore:
 - Add Debug and Release to .cvsignore
