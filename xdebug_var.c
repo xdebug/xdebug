@@ -392,10 +392,10 @@ static int xdebug_array_element_export_xml_node(zval **zv, int num_args, va_list
 	
 	if (hash_key->nKeyLength != 0) {
 		name = xdstrdup(hash_key->arKey);
-		full_name = xdebug_sprintf("%s['%s']", parent_name, name);
+		full_name = xdebug_sprintf("$%s['%s']", parent_name, name);
 	} else {
 		name = xdebug_sprintf("%ld", hash_key->h);
-		full_name = xdebug_sprintf("%s[%s]", parent_name, name);
+		full_name = xdebug_sprintf("$%s[%s]", parent_name, name);
 	}
 
 	xdebug_xml_add_attribute_ex(node, "name", name, 0, 1);
@@ -426,7 +426,7 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
 		xdebug_xml_add_attribute(node, "name", prop_name);
 		/* XXX static vars? */
-		full_name = xdebug_sprintf("%s->%s", parent_name, prop_name);
+		full_name = xdebug_sprintf("$%s->%s", parent_name, prop_name);
 		xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 		xdebug_xml_add_attribute(node, "facet", modifier);
 	}
@@ -509,12 +509,18 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val)
 {
 	xdebug_xml_node *node;
+	char *full_name = NULL;
 	TSRMLS_FETCH();
 
 	node = xdebug_xml_node_init("property");
 	if (name) {
+		if (name[0] != '$') {
+			full_name = xdebug_sprintf("$%s", name);
+		} else {
+			full_name = xdstrdup(name);
+		}
 		xdebug_xml_add_attribute_ex(node, "name", xdstrdup(name), 0, 1);
-		xdebug_xml_add_attribute_ex(node, "fullname", xdstrdup(name), 0, 1);
+		xdebug_xml_add_attribute_ex(node, "fullname", xdstrdup(full_name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) val), 0, 1);
 	xdebug_var_export_xml_node(&val, name, node, 1 TSRMLS_CC);

@@ -872,7 +872,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 		/* Start remote context if requested */
 		if (
-			magic_cookie &&
 			!XG(remote_enabled) &&
 			XG(remote_enable) &&
 			(XG(remote_mode) == XDEBUG_REQ)

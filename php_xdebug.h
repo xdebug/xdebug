@@ -157,6 +157,13 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	/* DBGp globals */
 	char         *lastcmd;
 	char         *lasttransid;
+
+	/* output redirection */
+	php_output_globals stdio;
+	int stdout_redirected;
+	int stderr_redirected;
+	int stdin_redirected;
+
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS
