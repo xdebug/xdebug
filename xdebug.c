@@ -453,6 +453,7 @@ static int handle_breakpoints (struct function_stack_entry *fse)
 {
 	char *name     = NULL;
 	char *tmp_name = NULL;
+	TSRMLS_FETCH();
 
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
@@ -623,7 +624,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : xdstrdup("");
 				if (html) {
 					php_printf ("%s%s", tmp_varname,
-						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL) TSRMLS_CC);
+						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
 				} else {
 					printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
@@ -746,7 +747,7 @@ static inline void print_trace (int html TSRMLS_DC)
 				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : xdstrdup("");
 				if (html) {
 					php_printf ("%s%s", tmp_varname,
-						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL) TSRMLS_CC);
+						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
 				} else {
 					printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
@@ -975,6 +976,7 @@ PHP_FUNCTION(xdebug_is_enabled)
 
 static void xdebug_start_trace()
 {
+	TSRMLS_FETCH();
 	XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
 	XG(do_trace) = 1;
 }

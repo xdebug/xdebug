@@ -324,7 +324,7 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 
 	xdebug_arg_init(method);
 
-#warning optimize rebuilding methodname	
+/* warning optimize rebuilding methodname */
 	if (strstr(args->args[0], "::")) { /* class::method */
 		xdebug_explode("::", args->args[0], method, -1);
 		if (method->c != 2) {
@@ -507,7 +507,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
-#warning Add dtor!
+/* warning Add dtor! */
 	context->function_breakpoints = xdebug_hash_alloc(64, NULL);
 	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
 	do {

@@ -1,4 +1,4 @@
-/* $Id: xdebug_hash.c,v 1.1 2002-09-30 05:56:23 derick Exp $ */
+/* $Id: xdebug_hash.c,v 1.2 2002-10-28 23:23:15 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -86,7 +86,7 @@ static void hash_element_dtor(void *u, void *ele)
 xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor)
 {
 	xdebug_hash *h;
-	size_t    i; 
+	int          i; 
 
 	h = malloc(sizeof(xdebug_hash));
 	h->dtor  = dtor;
@@ -221,7 +221,7 @@ int xdebug_hash_extended_find(xdebug_hash *h, char *str_key, unsigned int str_ke
 void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *))
 {
 	 xdebug_llist_element  *le;
-	 size_t              i;
+	 int                    i;
 
 	 for (i = 0; i < h->slots; ++i) {
 		  for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
@@ -232,7 +232,7 @@ void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_has
 
 void xdebug_hash_destroy(xdebug_hash *h)
 {
-	size_t i;
+	int i;
 
     for (i = 0; i < h->slots; ++i) {
 		xdebug_llist_destroy(h->table[i], (void *) h);
