@@ -204,6 +204,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.auto_trace_file",   "",                   PHP_INI_ALL,    OnUpdateString, auto_trace_file,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_ALL,    OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
@@ -213,6 +214,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_ALL,    OnUpdateLong,   max_nesting_level, zend_xdebug_globals, xdebug_globals)
 #endif
 	STD_PHP_INI_BOOLEAN("xdebug.show_local_vars", "0",                  PHP_INI_ALL,    OnUpdateBool,   show_local_vars,   zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.show_mem_delta",  "0",                  PHP_INI_ALL,    OnUpdateBool,   show_mem_delta,    zend_xdebug_globals, xdebug_globals)
 
 	/* Dump superglobals settings */
 	PHP_INI_ENTRY("xdebug.dump.COOKIE",           NULL,                 PHP_INI_ALL,    OnUpdateCookie)
@@ -392,6 +394,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(stack)         = xdebug_llist_alloc(stack_element_dtor);
 	XG(trace_file)    = NULL;
 	XG(error_handler) = NULL;
+	XG(prev_memory)   = 0;
 
 	/* Only enabled extended info when it is not disabled */
 	CG(extended_info) = XG(extended_info);
@@ -588,9 +591,12 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 	}
 #if MEMORY_LIMIT
+	tmp->prev_memory = XG(prev_memory);
 	tmp->memory = AG(allocated_memory);
+	XG(prev_memory) = tmp->memory;
 #else
 	tmp->memory = 0;
+	tmp->prev_memory = 0;
 #endif
 	tmp->time   = get_utime();
 	tmp->lineno = 0;
@@ -608,7 +614,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		cur_opcode = *EG(opline_ptr);
 		tmp->lineno = cur_opcode->lineno;
 
-		if (XG(collect_params)) {
+		if (XG(collect_includes)) {
 			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
 			tmp->vars[tmp->varc].name  = NULL;
 			tmp->vars[tmp->varc].addr = param;
@@ -1026,6 +1032,9 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 	} else {
 		xdebug_str_add(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
 		xdebug_str_add(&str, xdebug_sprintf("%10lu ", i->memory), 1);
+		if (XG(show_mem_delta)) {
+			xdebug_str_add(&str, xdebug_sprintf("%+8ld ", i->memory - i->prev_memory), 1);
+		}
 		for (j = 0; j < i->level; j++) {
 			xdebug_str_addl(&str, "  ", 2, 0);
 		}

@@ -128,6 +128,7 @@ typedef struct function_stack_entry {
 
 	/* profiling properties */
 	unsigned int memory;
+	unsigned int prev_memory;
 	double       time;
 	double       time_taken;	
 	unsigned int f_calls;

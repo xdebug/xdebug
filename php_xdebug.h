@@ -93,13 +93,16 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_llist *stack;
 	int           max_nesting_level;
 	zend_bool     default_enable;
+	zend_bool     collect_includes;
 	zend_bool     collect_params;
 	zend_bool     extended_info;
 	zend_bool     show_local_vars;
+	zend_bool     show_mem_delta;
 	char         *manual_url;
 	char         *error_handler;
 	double        start_time;
 	HashTable    *active_symbol_table;
+	unsigned int  prev_memory;
 
 	FILE         *trace_file;
 	zend_bool     do_trace;
