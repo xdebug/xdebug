@@ -1,3 +1,9 @@
+Sun Jun 16 20:39:48 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml
+/xdebug/xdebug.c:
+- Add PECL package file
+- Maintain version info
+
 Sun Jun 16 20:15:47 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
