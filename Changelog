@@ -1,3 +1,7 @@
+Mon Aug 25 13:18:02 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/.cvsignore:
+- Add phpt.*
+
 Mon Aug 25 13:13:41 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
