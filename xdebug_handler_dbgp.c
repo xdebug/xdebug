@@ -293,19 +293,25 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	int                   count_down = nr;
-	function_stack_entry *fse;
+	function_stack_entry *fse, *fse_prev;
 	char                 *tmp_fname;
 	xdebug_xml_node      *tmp;
 
 	fse = xdebug_get_stack_frame(nr TSRMLS_CC);
+	fse_prev = xdebug_get_stack_frame(nr - 1 TSRMLS_CC);
 
 	tmp_fname = show_fname(fse, 0 TSRMLS_CC);
 
 	tmp = xdebug_xml_node_init("stack");
 	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(fse->filename), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "level",    xdebug_sprintf("%ld", nr), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", fse->lineno), 0, 1);
+	if (fse_prev) {
+		xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(fse_prev->filename), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", fse_prev->lineno), 0, 1);
+	} else {
+		xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(zend_get_executed_filename(TSRMLS_C)), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
+	}
 
 	xdfree(tmp_fname);
 	return tmp;
@@ -606,6 +612,7 @@ DBGP_FUNC(breakpoint_set)
 	brk_info = xdmalloc(sizeof(xdebug_brk_info));
 	brk_info->type = NULL;
 	brk_info->file = NULL;
+	brk_info->file_len = 0;
 	brk_info->classname = NULL;
 	brk_info->functionname = NULL;
 	brk_info->condition = NULL;
@@ -1254,7 +1261,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.20 $";
+	return "$Revision: 1.21 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
