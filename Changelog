@@ -1,3 +1,8 @@
+Mon Aug 30 16:00:20 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/usefulstuff.h:
+- Fix it for real now.
+
 Mon Aug 30 15:48:41 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.h:
 - Add the TSRMLS_CC to the declaration too.
