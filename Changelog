@@ -1,3 +1,7 @@
+Fri Apr 16 19:37:06 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_profiler.c:
+just get rid of a warning (sorry forgot what the cvs msg format is)
+
 Fri Apr 16 09:56:22 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_private.h:
 - Added return_value member to the function_stack struct.
