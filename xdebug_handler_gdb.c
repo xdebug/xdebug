@@ -983,7 +983,6 @@ char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args)
 char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 {
 	xdebug_gdb_options *options = (xdebug_gdb_options*)context->options;
-	TSRMLS_FETCH();
 
 	if (strcmp(args->args[0], "response_format") == 0) {
 		options->response_format = atoi(args->args[1]);
@@ -1321,7 +1320,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.69 $";
+	return "$Revision: 1.70 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
