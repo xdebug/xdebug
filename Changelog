@@ -1,3 +1,7 @@
+Sat Aug 31 22:49:56 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO:
+- New TODO for 1.1 and 1.2
+
 Sat Aug 31 10:33:27 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/config.m4:
 - Prevent xdebug from being compiled in into PHP.
