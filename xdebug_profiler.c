@@ -12,7 +12,8 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
-   | Author:   Ilia Alshanetsky <ilia@prohost.org>                        |
+   | Authors:  Ilia Alshanetsky <ilia@prohost.org>                        |
+   |           Robert Beenen <robert.beenen@philips.com>                  |
    +----------------------------------------------------------------------+
  */
 
@@ -145,16 +146,68 @@ inline static int n_line_no_cmp(xdebug_tree_out **p1, xdebug_tree_out **p2)
 	}
 }
 
+static inline void fetch_full_function_name(function_stack_entry *ent, char *buf)
+{
+	char *p;
+
+	p = buf;
+
+	if (ent->user_defined == XDEBUG_EXTERNAL) {
+		sprintf(buf, "*");
+		p++;
+	}
+	if (ent->function.class) {
+		if (ent->function.type == XFUNC_MEMBER) {
+			snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s->%s", ent->function.class, ent->function.function);
+		} else {
+			snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s::%s", ent->function.class, ent->function.function);
+		}
+		return;
+	}
+	if (ent->function.function) {
+		snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s", ent->function.function);
+	}
+
+	switch (ent->function.type) {
+		case XFUNC_NEW:
+			sprintf(buf, "%s", "{new}");
+			break;
+		case XFUNC_EVAL:
+			sprintf(buf, "%s", "{eval}");
+			break;
+		case XFUNC_INCLUDE:
+			sprintf(buf, "%s", "{include}");
+			break;
+		case XFUNC_INCLUDE_ONCE:
+			sprintf(buf, "%s", "{include_once}");
+			break;
+		case XFUNC_REQUIRE:
+			sprintf(buf, "%s", "{require}");
+			break;
+		case XFUNC_REQUIRE_ONCE:
+			sprintf(buf, "%s", "{require_once}");
+			break;
+		default:
+			buf = NULL;
+			break;
+	}
+}
+
 inline static void add_function_entry(xdebug_hash *hasht, function_stack_entry *ent)
 {
-	xdebug_hash_add(hasht, ent->function.function, strlen(ent->function.function), ent);
+	char hashkey[XDEBUG_MAX_FUNCTION_LEN];
+
+	fetch_full_function_name(ent, hashkey);
+	xdebug_hash_add(hasht, hashkey, strlen(hashkey), ent);
 }
 
 inline static int find_and_inc_function_entry(xdebug_hash *hasht, function_stack_entry *ent, int all)
 {
 	function_stack_entry *found_ent;
+	char hashkey[XDEBUG_MAX_FUNCTION_LEN];
 
-	if (ent->function.function && xdebug_hash_find(hasht, ent->function.function, strlen(ent->function.function), (void *) &found_ent)) {
+	fetch_full_function_name(ent, hashkey);
+	if (ent->function.function && xdebug_hash_find(hasht, hashkey, strlen(hashkey), (void *) &found_ent)) {
 		if (!all && (found_ent->lineno != ent->lineno || strcasecmp(found_ent->filename, ent->filename))) {
 			return 0;
 		}
@@ -163,8 +216,8 @@ inline static int find_and_inc_function_entry(xdebug_hash *hasht, function_stack
 			return 0;
 		}
 
-		if (found_ent->function.type == ent->function.type && found_ent->function.internal == ent->function.internal && found_ent->function.class == ent->function.class) {
-			if (found_ent->function.class && strcasecmp(found_ent->function.class, ent->function.class)) {
+		if (found_ent->function.type == ent->function.type && found_ent->function.internal == ent->function.internal) {
+			if (found_ent->function.class && (!ent->function.class || strcasecmp(found_ent->function.class, ent->function.class))) {
 				return 0;
 			}
 			found_ent->time_taken += ent->time_taken;
@@ -318,20 +371,20 @@ static inline function_stack_entry **fetch_tree_profile(int mode, int *size, dou
 inline static int find_same_function(xdebug_hash *hasht, xdebug_fs *cur, function_stack_entry *parent)
 {
 	xdebug_fs *found_ent = NULL;
+	char hashkey[XDEBUG_MAX_FUNCTION_LEN];
 
-	if (parent && cur->fse->function.function && xdebug_hash_find(hasht, cur->fse->function.function, strlen(cur->fse->function.function), (void *) &found_ent)) {
-		if (found_ent->fse->function.class == cur->fse->function.class) {
-			if (cur->fse->function.class && strcasecmp(found_ent->fse->function.class, cur->fse->function.class)) {
-				goto add_new_ent;
-			}
-			found_ent->fse->f_calls++;
-			found_ent->fse->time_taken += cur->fse->time_taken;
-			found_ent->nelem_p++;
-			found_ent->parents = xdrealloc(found_ent->parents, found_ent->nelem_p * sizeof(function_stack_entry *));
-			found_ent->parents[found_ent->nelem_p-1] = parent;
-
-			return 1;
+	fetch_full_function_name(cur->fse, hashkey);
+	if (parent && cur->fse->function.function && xdebug_hash_find(hasht, hashkey, strlen(hashkey), (void *) &found_ent)) {
+		if (cur->fse->function.class && (!found_ent->fse->function.class || strcasecmp(found_ent->fse->function.class, cur->fse->function.class))) {
+			goto add_new_ent;
 		}
+		found_ent->fse->f_calls++;
+		found_ent->fse->time_taken += cur->fse->time_taken;
+		found_ent->nelem_p++;
+		found_ent->parents = xdrealloc(found_ent->parents, found_ent->nelem_p * sizeof(function_stack_entry *));
+		found_ent->parents[found_ent->nelem_p-1] = parent;
+
+		return 1;
 	}
 
 add_new_ent:
@@ -346,17 +399,22 @@ add_new_ent:
 
 	cur->time = cur->fse->time_taken;
 	if (cur->fse->function.function) {
-		xdebug_hash_add(hasht, cur->fse->function.function, strlen(cur->fse->function.function), cur);
+		char hashkey[XDEBUG_MAX_FUNCTION_LEN];
+
+		fetch_full_function_name(cur->fse, hashkey);
+		xdebug_hash_add(hasht, hashkey, strlen(hashkey), cur);
 	}
 
 	return 0;
 }
 
-inline static xdebug_fs *find_parent(xdebug_hash *hasht, char *func_name)
+inline static xdebug_fs *find_parent(xdebug_hash *hasht, function_stack_entry *ent)
 {
 	xdebug_fs *found_ent = NULL;
+	char hashkey[XDEBUG_MAX_FUNCTION_LEN];
 
-	xdebug_hash_find(hasht, func_name, strlen(func_name), (void *) &found_ent);
+	fetch_full_function_name(ent, hashkey);
+	xdebug_hash_find(hasht, hashkey, strlen(hashkey), (void *) &found_ent);
 
 	return found_ent;
 }
@@ -395,7 +453,7 @@ static inline xdebug_fs **fetch_fcall_summary(int mode, int *size, double total_
 			pos[i] = cur;
 			pos[i]->fse = ent;
 
-			if (llist[ent->level - 1] && (parent = find_parent(function_hash, llist[ent->level - 1]->function.function))) {
+			if (llist[ent->level - 1] && (parent = find_parent(function_hash, llist[ent->level - 1]))) {
 				parent->nelem_c++;
 				parent->children = xdrealloc(parent->children, parent->nelem_c * sizeof(function_stack_entry *));
 				parent->children[parent->nelem_c-1] = ent;
@@ -558,53 +616,6 @@ static inline function_stack_entry **fetch_simple_profile(int mode, int *size, d
 	}
 
 	return (function_stack_entry **) NULL;
-}
-
-static inline void fetch_full_function_name(function_stack_entry *ent, char *buf)
-{
-	char *p;
-
-	p = buf;
-
-	if (ent->user_defined == XDEBUG_EXTERNAL) {
-		sprintf(buf, "*");
-		p++;
-	}
-	if (ent->function.class) {
-		if (ent->function.type == XFUNC_MEMBER) {
-			snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s->%s", ent->function.class, ent->function.function);
-		} else {
-			snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s::%s", ent->function.class, ent->function.function);
-		}
-		return;
-	}
-	if (ent->function.function) {
-		snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s", ent->function.function);
-	}
-
-	switch (ent->function.type) {
-		case XFUNC_NEW:
-			sprintf(buf, "%s", "{new}");
-			break;
-		case XFUNC_EVAL:
-			sprintf(buf, "%s", "{eval}");
-			break;
-		case XFUNC_INCLUDE:
-			sprintf(buf, "%s", "{include}");
-			break;
-		case XFUNC_INCLUDE_ONCE:
-			sprintf(buf, "%s", "{include_once}");
-			break;
-		case XFUNC_REQUIRE:
-			sprintf(buf, "%s", "{require}");
-			break;
-		case XFUNC_REQUIRE_ONCE:
-			sprintf(buf, "%s", "{require_once}");
-			break;
-		default:
-			buf = NULL;
-			break;
-	}
 }
 
 void print_profile(int html, int mode TSRMLS_DC)
