@@ -1,3 +1,7 @@
+Mon Jan 26 22:32:17 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_private.c:
+- Fix some warnings
+
 Mon Jan 26 22:28:51 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_var.c:
 - Duplicate variable name in order to prevent PHP freeing it prematurely.
