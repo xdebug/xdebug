@@ -12,7 +12,7 @@ xdebug.trace_format=0
 <?php
 	$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
 
-	echo str_repeat ("5", 5);
+	echo str_repeat ("5", 5), "\n";
 
 	echo file_get_contents($tf);
 	unlink($tf);

@@ -36,6 +36,6 @@ xdebug.trace_format=0
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> foo->foo() /%s/test14.php:16
-    %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/test14.php:17
-    %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/test14.php:18
+    %f      %d     -> bar(class foo { var $a = class foo { var $a = ...; var $b = ... }; var $b = class foo { var $a = ...; var $b = ... } }) /%s/test14.php:17
+    %f      %d     -> bar(class foo { var $a = class foo { var $a = ...; var $b = ... }; var $b = class foo { var $a = ...; var $b = ... } }) /%s/test14.php:18
     %f      %d     -> file_get_contents('/tmp/%s') /%s/test14.php:20

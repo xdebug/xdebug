@@ -19,7 +19,7 @@ xdebug.trace_format=0
 
 	$a = array (1, 2,3,4,5);
 	$b = array ("h" => 9.12, $a, $a, $a, "p" => 9 - 0.12);
-	echo a (5, 9.12, FALSE, $b);
+	echo a (5, 9.12, FALSE, $b), "\n";
 
 	echo file_get_contents($tf);
 	unlink($tf);

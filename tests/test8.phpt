@@ -26,7 +26,7 @@ function c ($a, $b) {
 	return $b.$a;
 }
 
-echo c(c(a(),b(2)), c(a(), a()));
+echo c(c(a(),b(2)), c(a(), a())), "\n";
 
 echo file_get_contents($tf);
 unlink($tf);

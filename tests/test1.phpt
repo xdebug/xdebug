@@ -20,7 +20,7 @@ xdebug.trace_format=0
 
 	include ('test_class.php');
 
-	echo foo (5);
+	echo foo(5), "\n";
 	echo file_get_contents($tf);
 	unlink($tf);
 ?>

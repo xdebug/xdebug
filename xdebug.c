@@ -1388,6 +1388,8 @@ static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSR
 			return return_trace_stack_frame_begin_normal(i TSRMLS_CC);
 		case 1:
 			return return_trace_stack_frame_begin_computerized(i, fnr TSRMLS_CC);
+		default:
+			return xdstrdup("");
 	}
 }
 
@@ -1397,6 +1399,8 @@ static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRML
 	switch (XG(trace_format)) {
 		case 1:
 			return return_trace_stack_frame_end_computerized(i, fnr TSRMLS_CC);
+		default:
+			return xdstrdup("");
 	}
 }
 

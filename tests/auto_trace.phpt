@@ -23,7 +23,6 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 bar
-
 TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d   -> {main}() /%s/auto_trace.php:0
     %f      %d     -> xdebug_get_tracefile_name() /%s/auto_trace.php:2

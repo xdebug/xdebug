@@ -30,6 +30,7 @@ assert_options (ASSERT_CALLBACK, 'my_assert_handler');
 
 // Make an assertion that should fail
 assert (1==2);
+echo "\n";
 echo file_get_contents($tf);
 unlink($tf);
 ?>
@@ -45,4 +46,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> assert_options(2, 'my_assert_handler') /%s/assert_test.php:18
     %f      %d     -> assert(FALSE) /%s/assert_test.php:21
     %f      %d       -> my_assert_handler('/%s/assert_test.php', 21, '') /%s/assert_test.php:21
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/assert_test.php:22
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/assert_test.php:23

@@ -25,7 +25,7 @@ function foo()
 foo();
 
 eval("\$foo = foo();\nbar();\nfoo();\n");
-echo $foo;
+echo $foo, "\n";
 echo file_get_contents($tf);
 unlink($tf);
 ?>
