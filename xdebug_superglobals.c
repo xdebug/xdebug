@@ -148,14 +148,14 @@ void dump_superglobals(int html, int log TSRMLS_DC)
 
 	XG(dumped) = 1;
 
-	dump_hash(&XG(server),  "_SERVER",  8, html, log TSRMLS_DC);
-	dump_hash(&XG(get),     "_GET",     5, html, log TSRMLS_DC);
-	dump_hash(&XG(post),    "_POST",    6, html, log TSRMLS_DC);
-	dump_hash(&XG(cookie),  "_COOKIE",  8, html, log TSRMLS_DC);
-	dump_hash(&XG(files),   "_FILES",   7, html, log TSRMLS_DC);
-	dump_hash(&XG(env),     "_ENV",     5, html, log TSRMLS_DC);
-	dump_hash(&XG(session), "_SESSION", 9, html, log TSRMLS_DC);
-	dump_hash(&XG(request), "_REQUEST", 9, html, log TSRMLS_DC);
+	dump_hash(&XG(server),  "_SERVER",  8, html, log TSRMLS_CC);
+	dump_hash(&XG(get),     "_GET",     5, html, log TSRMLS_CC);
+	dump_hash(&XG(post),    "_POST",    6, html, log TSRMLS_CC);
+	dump_hash(&XG(cookie),  "_COOKIE",  8, html, log TSRMLS_CC);
+	dump_hash(&XG(files),   "_FILES",   7, html, log TSRMLS_CC);
+	dump_hash(&XG(env),     "_ENV",     5, html, log TSRMLS_CC);
+	dump_hash(&XG(session), "_SESSION", 9, html, log TSRMLS_CC);
+	dump_hash(&XG(request), "_REQUEST", 9, html, log TSRMLS_CC);
 }
 
 void dump_tok(xdebug_llist *l, char *str)

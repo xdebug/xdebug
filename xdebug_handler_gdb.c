@@ -1018,6 +1018,7 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 	xdebug_gdb_options  *options = (xdebug_gdb_options*)context->options;
 	int                  xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	char                *var_data;
+	TSRMLS_FETCH();
 
 	XG(active_symbol_table) = EG(active_symbol_table);
 	var_data = get_symbol_contents(context, args->args[0], strlen(args->args[0]) + 1);
