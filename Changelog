@@ -1,3 +1,10 @@
+Sun Aug 31 12:54:07 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_code_coverage.c
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_superglobals.c:
+- Plug some warnings
+
 Sun Aug 31 01:08:26 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO list
