@@ -771,7 +771,6 @@ inline static void init_profile_modes (char ***mode_titles)
 {
 	*mode_titles = xdmalloc(XDEBUG_PROFILER_MODES * sizeof(char *));
 	
-	
 	(*mode_titles)[0] = XDEBUG_PROFILER_LBL_D;
 	(*mode_titles)[1] = XDEBUG_PROFILER_CPU_D;
 	(*mode_titles)[2] = XDEBUG_PROFILER_NC_D;
@@ -780,6 +779,7 @@ inline static void init_profile_modes (char ***mode_titles)
 	(*mode_titles)[5] = XDEBUG_PROFILER_FS_NC_D;
 	(*mode_titles)[6] = XDEBUG_PROFILER_SD_LBL_D;
 	(*mode_titles)[7] = XDEBUG_PROFILER_SD_CPU_D;
+	(*mode_titles)[8] = XDEBUG_PROFILER_SD_NC_D;
 }
 
 inline static void free_profile_modes (char ***mode_titles)
@@ -803,6 +803,17 @@ inline static int n_calls_cmp (function_stack_entry **p1, function_stack_entry *
 	if ((*p1)->f_calls < (*p2)->f_calls) {
 		return 1;
 	} else if ((*p1)->f_calls > (*p2)->f_calls) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+inline static int line_numbers (function_stack_entry **p1, function_stack_entry **p2)
+{
+	if ((*p1)->lineno > (*p2)->lineno) {
+		return 1;
+	} else if ((*p1)->lineno < (*p2)->lineno) {
 		return -1;
 	} else {
 		return 0;
@@ -840,13 +851,55 @@ inline static int time_taken_tree_cmp (xdebug_tree_out **p1, xdebug_tree_out **p
 
 inline static int n_calls_tree_cmp (xdebug_tree_out **p1, xdebug_tree_out **p2)
 {
-	if (((*p1)->fse)->time_taken < ((*p2)->fse)->time_taken) {
+	if (((*p1)->fse)->f_calls < ((*p2)->fse)->f_calls) {
 		return 1;
-	} else if (((*p1)->fse)->time_taken > ((*p2)->fse)->time_taken) {
+	} else if (((*p1)->fse)->f_calls > ((*p2)->fse)->f_calls) {
 		return -1;
 	} else {
 		return 0;
 	}
+}
+
+inline static int n_line_no_cmp (xdebug_tree_out **p1, xdebug_tree_out **p2)
+{
+	if (((*p1)->fse)->lineno > ((*p2)->fse)->lineno) {
+		return 1;
+	} else if (((*p1)->fse)->lineno < ((*p2)->fse)->lineno) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
+inline static void add_function_entry(xdebug_hash *hasht, function_stack_entry *ent)
+{
+	xdebug_hash_add(hasht, ent->function.function, strlen(ent->function.function), ent);
+}
+
+inline static int find_and_inc_function_entry (xdebug_hash *hasht, function_stack_entry *ent, int all)
+{
+	function_stack_entry *found_ent;
+	
+	if (ent->function.function && xdebug_hash_find(hasht, ent->function.function, strlen(ent->function.function), (void *) &found_ent)) {
+		if (!all && (found_ent->lineno != ent->lineno || strcasecmp(found_ent->filename, ent->filename))) {
+			return 0;
+		}
+		
+		if (all == 2 && found_ent->level != ent->level) {
+			return 0;
+		}
+		
+		if (found_ent->function.type == ent->function.type && found_ent->function.internal == ent->function.internal && found_ent->function.class == ent->function.class) {
+			if (found_ent->function.class && strcasecmp(found_ent->function.class, ent->function.class)) {
+				return 0;
+			}
+			found_ent->time_taken += ent->time_taken;
+			found_ent->f_calls++;
+			return 1;
+		}
+	}
+	
+	return 0;
 }
 
 static inline function_stack_entry **fetch_tree_profile (int mode, int *size TSRMLS_DC)
@@ -858,9 +911,10 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size TSR
 		unsigned int           n_elem = XDEBUG_LLIST_COUNT(XG(trace));
 		int                    j, level_cnt, i = 0;
 		xdebug_tree_out	      *cur = NULL, *parent = NULL, **list, **pos;
+		xdebug_hash                  *function_hash;
 
 		list = (xdebug_tree_out **) xdmalloc(n_elem * sizeof(xdebug_tree_out *));
-
+		function_hash = xdebug_hash_alloc(n_elem, NULL);
 		pos = &list[0];
 
 		level_cnt = 1;
@@ -875,12 +929,13 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size TSR
 
 			ent = XDEBUG_LLIST_VALP(le);
 			ent->f_calls = 1;
-
-			/* merge calls to the same function on the same line into a single entry */
-			if (cur->fse && (cur->fse)->lineno == ent->lineno && !strcmp((cur->fse)->function.function, ent->function.function)) {
-				(cur->fse)->f_calls++;
-				(cur->fse)->time_taken += ent->time_taken;
-				continue;
+			
+			if (ent->function.function) {
+				if (!find_and_inc_function_entry(function_hash, ent, 2)) {
+					add_function_entry(function_hash, ent);
+				} else {
+					continue;
+				}
 			}
 
 			if (level_cnt < ent->level) { /* level down */
@@ -914,6 +969,8 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size TSR
 				cur->parent = parent;
 			}
 		}
+
+		xdebug_hash_destroy(function_hash);
 		
 		/* build a list of children & sort them based on the specified sorting scheme */
 		for (j = 0; j < i; j++) {
@@ -934,6 +991,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size TSR
 							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)()) &n_calls_tree_cmp);
 							break;	
 						default:
+							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)()) &n_line_no_cmp);
 							break;
 					}
 				}	
@@ -978,9 +1036,18 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size T
 		function_stack_entry       **list, **start_p, *ent;
 		unsigned int                 n_elem = XDEBUG_LLIST_COUNT(XG(trace));
 		int                          i = 0;
+		xdebug_hash                  *function_hash;
+		int                          mode_op;
 		
 		list = (function_stack_entry **) xdmalloc(n_elem * sizeof(function_stack_entry *));
+		function_hash = xdebug_hash_alloc(n_elem, NULL);
 		start_p = &list[0];
+		
+		if (mode >= XDEBUG_PROFILER_FS_AV) {
+			mode_op = 1;
+		} else {
+			mode_op = 0;
+		}
 		
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			/* skip the last function because it is our very own profile function.
@@ -992,10 +1059,13 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size T
 		
 			ent = XDEBUG_LLIST_VALP(le);
 			
-			/* merge calls to the same function on the same line into a single entry */
-			if (i && start_p[i-1]->lineno == ent->lineno && !strcmp(start_p[i-1]->function.function, ent->function.function)) {
-				start_p[i-1]->f_calls++;
-				start_p[i-1]->time_taken += ent->time_taken;
+			if (ent->function.function) {
+				if (!find_and_inc_function_entry(function_hash, ent, mode_op)) {
+					start_p[i] = XDEBUG_LLIST_VALP(le);
+					start_p[i]->f_calls = 1;
+					add_function_entry(function_hash, start_p[i]);
+					i++;
+				}
 			} else {
 				start_p[i] = XDEBUG_LLIST_VALP(le);
 				start_p[i]->f_calls = 1;
@@ -1004,79 +1074,28 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size T
 		}
 		
 		*size = n_elem = i;
+		xdebug_hash_destroy(function_hash);
 		
 		switch (mode) {
 			case XDEBUG_PROFILER_CPU:
-				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &time_taken_cmp);
-				break;
-			case XDEBUG_PROFILER_NC:
-				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &n_calls_cmp);
-				break;
-			default:
-				break;
-		}
-		
-		return list;
-	}
-
-	return (function_stack_entry **) NULL;
-}
-
-static inline function_stack_entry **fetch_summary_profile (int mode, int *size TSRMLS_DC)
-{
-	xdebug_llist_element *le;
-
-	if (XG(trace) && XDEBUG_LLIST_COUNT(XG(trace))) {
-		function_stack_entry        **list, **start_p, *ent, *found_ent;
-		unsigned int                  n_elem = XDEBUG_LLIST_COUNT(XG(trace));
-		int                           i = 0;
-		xdebug_hash                  *function_hash;
-		
-		list = (function_stack_entry **) xdmalloc(n_elem * sizeof(function_stack_entry *));
-		function_hash = xdebug_hash_alloc(n_elem, NULL);
-		start_p = &list[0];
-		
-		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-			/* skip the last function because it is our very own profile function.
-			 * since it is the last function, we may as well stop the loop.
-			 */
-			if (XDEBUG_LLIST_IS_TAIL(le) && !XG(auto_profile) != 2) {
-				break;
-			}
-
-			ent = XDEBUG_LLIST_VALP(le);
-
-			if (ent->function.function && xdebug_hash_find(function_hash, ent->function.function, strlen(ent->function.function), (void *) &found_ent)) {
-				found_ent->time_taken += ent->time_taken;
-				found_ent->f_calls++;
-			} else {
-				start_p[i] = XDEBUG_LLIST_VALP(le);
-				start_p[i]->f_calls = 1;
-				
-				if (ent->function.function) { 
-					xdebug_hash_add(function_hash, ent->function.function, strlen(ent->function.function), start_p[i]);
-				}
-				i++;
-			}
-		}
-
-		*size = n_elem = i;
-		xdebug_hash_destroy(function_hash);
-
-		switch (mode) {
 			case XDEBUG_PROFILER_FS_SUM:
 				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &time_taken_cmp);
 				break;
+			case XDEBUG_PROFILER_NC:
 			case XDEBUG_PROFILER_FS_NC:
 				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &n_calls_cmp);
 				break;
-			default:
+			case XDEBUG_PROFILER_FS_AV:
 				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &avg_time_cmp);
+				break;	
+			default:
+				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &line_numbers);
 				break;
 		}
-
+		
 		return list;
 	}
+
 	return (function_stack_entry **) NULL;
 }
 
@@ -1137,6 +1156,11 @@ static inline void print_profile(int html, int mode TSRMLS_DC)
 	char                   buffer[XDEBUG_MAX_FUNCTION_LEN];
 	int                    i, size = 0;
 
+	if (mode < XDEBUG_PROFILER_LBL || mode > XDEBUG_PROFILER_SD_NC) {
+		php_error(E_WARNING, "'%d' is not a valid profiling flag\n", mode);
+		return;
+	}
+
 	init_profile_modes(&mode_titles);
 	
 	if (!html) {
@@ -1190,7 +1214,7 @@ static inline void print_profile(int html, int mode TSRMLS_DC)
 		case XDEBUG_PROFILER_FS_AV:
 		case XDEBUG_PROFILER_FS_SUM:
 		case XDEBUG_PROFILER_FS_NC: {
-			if (!(list = fetch_summary_profile(mode, &size TSRMLS_CC))) {
+			if (!(list = fetch_simple_profile(mode, &size TSRMLS_CC))) {
 				goto err;
 			}
 
@@ -1219,7 +1243,7 @@ static inline void print_profile(int html, int mode TSRMLS_DC)
 				}
 			}
 
-			/* free memory allocated by fetch_summary_profile() */
+			/* free memory allocated by fetch_simple_profile() */
 			xdfree(list);
 			break;
 		}
@@ -1267,10 +1291,6 @@ static inline void print_profile(int html, int mode TSRMLS_DC)
 			xdfree(list);
 			break;
 		}	
-		default:
-			php_error(E_WARNING, "Invalid profiling flag\n");
-			goto err;
-			break;
 	}
 
 	if (html) {
@@ -1510,14 +1530,10 @@ PHP_FUNCTION(xdebug_get_function_profile)
 			case XDEBUG_PROFILER_LBL:
 			case XDEBUG_PROFILER_CPU:
 			case XDEBUG_PROFILER_NC:
-				if (!(list = fetch_simple_profile(profile_flag, &size TSRMLS_CC))) {
-					goto err;
-				}
-				break;
 			case XDEBUG_PROFILER_FS_AV:
 			case XDEBUG_PROFILER_FS_SUM:
 			case XDEBUG_PROFILER_FS_NC:
-				if (!(list = fetch_summary_profile(profile_flag, &size TSRMLS_CC))) {
+				if (!(list = fetch_simple_profile(profile_flag, &size TSRMLS_CC))) {
 					goto err;
 				}
 				break;
@@ -1870,7 +1886,7 @@ PHP_FUNCTION(xdebug_dump_function_profile)
 			RETURN_FALSE;
 		}
 		if (profile_flag < XDEBUG_PROFILER_LBL || profile_flag > XDEBUG_PROFILER_SD_NC) {
-			php_error(E_WARNING, "'%s' is not a valid profiling flag\n", profile_flag);
+			php_error(E_WARNING, "'%d' is not a valid profiling flag\n", profile_flag);
 			RETURN_FALSE;
 		}
 		print_profile(PG(html_errors), profile_flag TSRMLS_CC);
