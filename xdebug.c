@@ -56,9 +56,6 @@
 
 /* static int le_xdebug; */
 
-static void xdebug_start_trace();
-static void xdebug_stop_trace();
-
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 
@@ -1085,7 +1082,7 @@ PHP_FUNCTION(xdebug_is_enabled)
 	RETURN_BOOL(zend_error_cb == new_error_cb);
 }
 
-static void xdebug_start_trace()
+void xdebug_start_trace()
 {
 	TSRMLS_FETCH();
 	XG(trace)    = xdebug_llist_alloc (stack_element_dtor);
@@ -1117,7 +1114,7 @@ PHP_FUNCTION(xdebug_start_trace)
 	}
 }
 
-static void xdebug_stop_trace()
+void xdebug_stop_trace()
 {
 	TSRMLS_FETCH();
 	XG(do_trace) = 0;

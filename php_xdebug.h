@@ -82,6 +82,9 @@ PHP_FUNCTION(xdebug_dump_function_trace);
 PHP_FUNCTION(xdebug_memory_usage);
 #endif
 
+void xdebug_start_trace();
+void xdebug_stop_trace();
+
 typedef struct xdebug_var {
 	char *name;
 	char *value;
