@@ -1,3 +1,27 @@
+Wed Oct 29 11:27:49 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_dbgp.h
+/xdebug/xdebug_handlers.h
+/xdebug/xdebug_str.h
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h
+/xdebug/xdebug_xml.c:
+- Added the XML writer to config.m4
+- Added constants for version, author etc.
+- Added constants for statuses, reasons and error codes
+- We go back to "gdb" as default for now, so that other people can test other
+  Xdebug 2 features too.
+- Replaced old GDB-style function handlers with the new DBGp one.
+- Added breakpoint list managing functions.
+- Added new command parsing function.
+- Rewrote the remote debugging callbacks for DBGp.
+- Added zval to xdebug_xml_node convertor.
+- Made xdebug_xml.c compile and work again.
+- 
+
 Wed Oct 29 11:07:45 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Now use the new protocol
