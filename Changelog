@@ -1,3 +1,39 @@
+Wed Nov 13 13:27:47 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>:
+- Add note about parameter collection
+
+Wed Nov 13 13:26:35 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Change some defaults
+
+Wed Nov 13 13:21:15 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Update date in package file
+
+Wed Nov 13 13:17:48 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>:
+- Change date
+
+Tue Nov 12 09:58:59 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Fix bug in linux' debugclient
+
+Mon Nov 11 16:41:19 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/.cvsignore:
+- Update cvsignore file
+
+Mon Nov 11 16:07:48 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/package.xml
+/xdebug/php_xdebug.h:
+- Go with 1.1.0
+
+Mon Nov 11 09:58:09 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/.cvsignore:
+- Add Debug and Release to .cvsignore
+
+Mon Nov 11 07:34:18 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/debugclient.dsp:
+- Update .dsp file
+
 Mon Nov 11 00:51:57 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Make the debug client compatible with Windows
