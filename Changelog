@@ -1,3 +1,10 @@
+Tue Oct 29 00:23:15 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/usefulstuff.c
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_hash.c:
+- Windows updates
+
 Mon Oct 28 17:09:32 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
