@@ -508,7 +508,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 /*	zval                        **dummy; */
 	zend_execute_data           *edata = EG(current_execute_data);
 	struct function_stack_entry *fse;
-		
+
 	/* Start context if requested */
 	if (
 		!XG(remote_enabled) &&
@@ -553,7 +553,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC)
 {
-/*	zval                        **dummy; */
 	zend_execute_data           *edata = EG(current_execute_data);
 	struct function_stack_entry *fse;
 
