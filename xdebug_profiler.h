@@ -26,9 +26,9 @@
 
 int xdebug_profiler_init(char *script_name TSRMLS_DC);
 
-void xdebug_profiler_function_user_begin(function_stack_entry *fse);
+void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC);
 void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
-void xdebug_profiler_function_internal_begin(function_stack_entry *fse);
+void xdebug_profiler_function_internal_begin(function_stack_entry *fse TSRMLS_DC);
 void xdebug_profiler_function_internal_end(function_stack_entry *fse TSRMLS_DC);
 
 void profile_call_entry_dtor(void *dummy, void *elem);

@@ -866,7 +866,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_user_begin(fse);
+		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 	}
 	old_execute(op_array TSRMLS_CC);
 	if (XG(profiler_enabled)) {
@@ -898,7 +898,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	}
 	
 	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_internal_begin(fse);
+		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
 	}
 	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 	if (XG(profiler_enabled)) {

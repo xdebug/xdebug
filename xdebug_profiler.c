@@ -76,7 +76,7 @@ void xdebug_profiler_function_pause(function_stack_entry *fse)
 	xdebug_profiler_function_push(fse);
 }
 
-void xdebug_profiler_function_user_begin(function_stack_entry *fse)
+void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC)
 {
 	fse->profile.time = 0;
 	fse->profile.mark = xdebug_get_utime();
@@ -177,9 +177,9 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 }
 
 
-void xdebug_profiler_function_internal_begin(function_stack_entry *fse)
+void xdebug_profiler_function_internal_begin(function_stack_entry *fse TSRMLC_DC)
 {
-	xdebug_profiler_function_user_begin(fse);
+	xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 }
 
 
