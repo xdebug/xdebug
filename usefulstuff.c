@@ -217,6 +217,33 @@ int xdebug_raw_url_decode(char *str, int len)
 	return dest - str;
 }
 
+static unsigned char hexchars[] = "0123456789ABCDEF";
+
+char *xdebug_raw_url_encode(char const *s, int len, int *new_length, int skip_slash)
+{
+	register int x, y;
+	unsigned char *str;
+
+	str = (unsigned char *) xdmalloc(3 * len + 1);
+	for (x = 0, y = 0; len--; x++, y++) {
+		str[y] = (unsigned char) s[x];
+		if ((str[y] < '0' && str[y] != '-' && str[y] != '.' && (str[y] != '/' || !skip_slash)) ||
+			(str[y] < 'A' && str[y] > '9') ||
+			(str[y] > 'Z' && str[y] < 'a' && str[y] != '_') ||
+			(str[y] > 'z'))
+		{
+			str[y++] = '%';
+			str[y++] = hexchars[(unsigned char) s[x] >> 4];
+			str[y] = hexchars[(unsigned char) s[x] & 15];
+		}
+	}
+	str[y] = '\0';
+	if (new_length) {
+		*new_length = y;
+	}
+	return ((char *) str);
+}
+
 /* fake URI's per IETF RFC 1738 and 2396 format */
 char *xdebug_path_from_url(const char *fileurl)
 {
@@ -259,18 +286,22 @@ char *xdebug_path_from_url(const char *fileurl)
 /* fake URI's per IETF RFC 1738 and 2396 format */
 char *xdebug_path_to_url(const char *fileurl)
 {
-	int l, i;
+	int l, i, new_len;
 	char *tmp = NULL;
+	char *encoded_fileurl;
+
+	/* encode the url */
+	encoded_fileurl = xdebug_raw_url_encode(fileurl, strlen(fileurl), &new_len, 1);
 
 	if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		/* we assume the first char is a slash as well, what else could it be? */
-		tmp = xdebug_sprintf("file:/%s", fileurl);
+		tmp = xdebug_sprintf("file:/%s", encoded_fileurl);
 	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
-		tmp = xdebug_sprintf("file://%s", fileurl);
+		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
 	} else if (fileurl[1] == ':') {
-		tmp = xdebug_sprintf("file:///%s", fileurl);
+		tmp = xdebug_sprintf("file:///%s", encoded_fileurl);
 	} else {
-		tmp = xdstrdup(fileurl);
+		tmp = xdstrdup(encoded_fileurl);
 	}
 	l = strlen(tmp);
 	/* convert '\' to '/' */
@@ -279,6 +310,7 @@ char *xdebug_path_to_url(const char *fileurl)
 			tmp[i]='/';
 		}
 	}
+	xdfree(encoded_fileurl);
 	return tmp;
 }
 
