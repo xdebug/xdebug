@@ -24,8 +24,6 @@
 
 #if HAVE_XDEBUG
 
-#define XDEBUG_VERSION "1.1.0dev"
-
 #ifndef PHP_WIN32
 #include <sys/time.h>
 #else
@@ -474,6 +472,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
+			XG(context).program_name = estrdup(op_array->filename);
 			if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
 				XG(remote_enabled) = 0;
 				XG(remote_enable)  = 0;

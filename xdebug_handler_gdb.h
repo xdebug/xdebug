@@ -25,10 +25,11 @@
 #define XDEBUG_INIT         1
 #define XDEBUG_BREAKPOINT   2
 #define XDEBUG_RUN          4
-#define XDEBUG_DATA         8
-#define XDEBUG_STATUS      16
+#define XDEBUG_RUNTIME      8
+#define XDEBUG_DATA        16
+#define XDEBUG_STATUS      32
 
-#define XDEBUG_ALL         31
+#define XDEBUG_ALL         63
 
 typedef struct xdebug_arg {
 	int    c;

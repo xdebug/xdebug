@@ -19,6 +19,8 @@
 #ifndef PHP_XDEBUG_H
 #define PHP_XDEBUG_H
 
+#define XDEBUG_VERSION "1.1.0dev"
+
 #include "php.h"
 
 #include "xdebug_handlers.h"
@@ -152,7 +154,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool                 remote_enabled;
 	xdebug_con                context;
 ZEND_END_MODULE_GLOBALS(xdebug)
-
 
 #ifdef ZTS
 #define XG(v) TSRMG(xdebug_globals_id, zend_xdebug_globals *, v)
