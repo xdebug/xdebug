@@ -22,6 +22,7 @@
 #define __HAVE_XDEBUG_XML_H__
 
 typedef struct _xdebug_xml_attribute xdebug_xml_attribute;
+typedef struct _xdebug_xml_text_node xdebug_xml_text_node;
 typedef struct _xdebug_xml_node xdebug_xml_node;
 
 struct _xdebug_xml_attribute
@@ -33,10 +34,18 @@ struct _xdebug_xml_attribute
 	int   free_value;
 };
 
+/* todo: support multiple text nodes inside an element */
+struct _xdebug_xml_text_node
+{
+	char *text;
+	int   free_value;
+	int   encode;
+};
+
 struct _xdebug_xml_node
 {
 	char *tag;
-	char *text;
+	struct _xdebug_xml_text_node *text;
 	struct _xdebug_xml_attribute *attribute;
 	struct _xdebug_xml_node      *child;
 	struct _xdebug_xml_node      *next;
@@ -50,7 +59,10 @@ struct _xdebug_xml_node
 xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag);
 void xdebug_xml_add_attribute_ex(xdebug_xml_node* xml, char *attribute, char *value, int free_name, int free_value);
 void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child);
-void xdebug_xml_add_text(xdebug_xml_node *xml, char *text);
+
+void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int free_text, int encode);
+#define xdebug_xml_add_text(x,t) 	 xdebug_xml_add_text_ex((x), (t), 1, 0)
+#define xdebug_xml_add_text_encode(x,t)  xdebug_xml_add_text_ex((x), (t), 1, 1)
 
 void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output);
 void xdebug_xml_node_dtor(xdebug_xml_node* xml);

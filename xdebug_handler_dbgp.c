@@ -13,6 +13,7 @@
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   |           Shane Caraveo <shanec@ActiveState.com>                     |
    +----------------------------------------------------------------------+
  */
 
@@ -785,18 +786,13 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 {
 	/* create an xml document to send as the stream */
 	xdebug_xml_node *message;
-	int   new_len;
-	char *encoded_source;
 
 	message = xdebug_xml_node_init("stream");
 	xdebug_xml_add_attribute_ex(message, "type", (char *)name, 0, 0);
-	xdebug_xml_add_attribute_ex(message, "encoding", "base64", 0, 0);
-	encoded_source = xdebug_base64_encode(str, str_length, &new_len);
-	xdebug_xml_add_text(message, xdstrdup(encoded_source));
+	xdebug_xml_add_text_encode(message, xdstrdup(str));
 	send_message(&XG(context), message);
 	xdebug_xml_node_dtor(message);
 
-	efree(encoded_source);
 	return 0;
 }
 
@@ -947,16 +943,13 @@ DBGP_FUNC(source)
 	if (CMD_OPTION('e')) {
 		begin = strtol(CMD_OPTION('e'), NULL, 10);
 	}
+	/* return_source allocates memory for source */
 	source = return_source(filename, begin, end TSRMLS_CC);
 
 	if (!source) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_CANT_OPEN_FILE);
 	} else {
-		xdebug_xml_add_attribute(*retval, "encoding", "base64");
-		encoded_source = xdebug_base64_encode(source, strlen(source), &new_len);
-		xdebug_xml_add_text(*retval, xdstrdup(encoded_source));
-		efree(encoded_source);
-		xdfree(source);
+		xdebug_xml_add_text_encode(*retval, source);
 	}
 }
 
@@ -1596,7 +1589,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.54 $";
+	return "$Revision: 1.55 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

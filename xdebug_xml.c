@@ -36,11 +36,29 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 	}
 }
 
+static void xdebug_xml_return_text_node(xdebug_xml_text_node* node, xdebug_str* output)
+{
+	xdebug_str_addl(output, "<![CDATA[", 9, 0);
+	if (node->encode) {
+		/* if cdata tags are in the text, then we must base64 encode */
+		int new_len = 0;
+		char *encoded_text = xdebug_base64_encode(node->text, strlen(node->text), &new_len);
+		xdebug_str_add(output, encoded_text, 0);
+		efree(encoded_text);
+	} else {
+		xdebug_str_add(output, node->text, 0);
+	}
+	xdebug_str_addl(output, "]]>", 3, 0);
+}
+
 void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output)
 {
 	xdebug_str_addl(output, "<", 1, 0);
 	xdebug_str_add(output, node->tag, 0);
 
+	if (node->text && node->text->encode) {
+		xdebug_xml_add_attribute_ex(node, "encoding", "base64", 0, 0);
+	}
 	if (node->attribute) {
 		xdebug_xml_return_attribute(node->attribute, output);
 	}
@@ -51,16 +69,7 @@ void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output)
 	}
 
 	if (node->text) {
-		if (strstr(node->text, "]]>")) {
-			/* if cdata tags are in the text, then we must base64 encode */
-			int new_len = 0;
-			char *encoded_text = xdebug_base64_encode(node->text, strlen(node->text), &new_len);
-			xdebug_str_add(output, encoded_text, 0);
-		} else {
-			xdebug_str_addl(output, "<![CDATA[", 9, 0);
-			xdebug_str_add(output, node->text, 0);
-			xdebug_str_addl(output, "]]>", 3, 0);
-		}
+		xdebug_xml_return_text_node(node->text, output);
 	}
 
 	xdebug_str_addl(output, "</", 2, 0);
@@ -117,15 +126,27 @@ void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child)
 	*ptr = child;
 }
 
-void xdebug_xml_add_text(xdebug_xml_node *xml, char *text)
+static void xdebug_xml_text_node_dtor(xdebug_xml_text_node* node)
 {
-	if (xml->text) {
-		xdfree(xml->text);
+	if (node->free_value && node->text) {
+		xdfree(node->text);
 	}
-	xml->text = text;
-	if (strstr(xml->text, "]]>")) {
-		/* if cdata tags are in the text, then we must base64 encode */
-		xdebug_xml_add_attribute_ex(xml, "encoding", "base64", 0, 0);
+	xdfree(node);
+}
+
+void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int free_text, int encode)
+{
+	xdebug_xml_text_node *node = xdmalloc(sizeof (xdebug_xml_text_node));
+	node->free_value = free_text;
+	node->encode = encode;
+	
+	if (xml->text) {
+		xdebug_xml_text_node_dtor(xml->text);
+	}
+	node->text = text;
+	xml->text = node;
+	if (!encode && strstr(node->text, "]]>")) {
+		node->encode = 1;
 	}
 }
 
@@ -158,7 +179,7 @@ void xdebug_xml_node_dtor(xdebug_xml_node* xml)
 		xdfree(xml->tag);
 	}
 	if (xml->text) {
-		xdfree(xml->text);
+		xdebug_xml_text_node_dtor(xml->text);
 	}
 	xdfree(xml);
 }
