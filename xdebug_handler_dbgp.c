@@ -1006,7 +1006,7 @@ DBGP_FUNC(context_get)
 	}
 	switch (res) {
 		case 1:
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_TOO_HIGH);
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 			break;
 	}
 }
@@ -1185,7 +1185,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.10 $";
+	return "$Revision: 1.11 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)

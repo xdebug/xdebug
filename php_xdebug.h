@@ -137,8 +137,11 @@ typedef struct xdebug_var {
 #define XDEBUG_ERROR_PARSE                           1
 #define XDEBUG_ERROR_DUP_ARG                         2
 #define XDEBUG_ERROR_INVALID_ARGS                    3
+#define XDEBUG_ERROR_UNIMPLEMENTED                   4
+#define XDEBUG_ERROR_COMMAND_UNAVAILABLE             5 /* unused */
 
 #define XDEBUG_ERROR_CANT_OPEN_FILE                100
+#define XDEBUG_ERROR_STREAM_REDIRECT_FAILED        101 /* unused */
 
 #define XDEBUG_ERROR_BREAKPOINT_NOT_SET            200
 #define XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED 201
@@ -146,13 +149,13 @@ typedef struct xdebug_var {
 #define XDEBUG_ERROR_BREAKPOINT_NO_CODE            203
 #define XDEBUG_ERROR_NO_SUCH_BREAKPOINT            204
 #define XDEBUG_ERROR_EVALUATING_CODE               205
+#define XDEBUG_ERROR_INVALID_EXPRESSION            206 /* unused */
 
 #define XDEBUG_ERROR_PROPERTY_NON_EXISTANT         300
-#define XDEBUG_ERROR_STACK_DEPTH_TOO_HIGH          301
-#define XDEBUG_ERROR_STACK_DEPTH_INVALID           302
+#define XDEBUG_ERROR_STACK_DEPTH_INVALID           301
+#define XDEBUG_ERROR_CONTEXT_INVALID               302 /* unused */
 
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
-#define XDEBUG_ERROR_UNIMPLEMENTED                 999
 
 typedef struct xdebug_func {
 	char *class;
