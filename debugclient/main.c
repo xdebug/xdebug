@@ -32,7 +32,7 @@
 
 int main(int argc, char *argv[])
 {
-	int port = 7869;
+	int port = 17869;
 	int ssocket = 0;
 	struct sockaddr_in server_in;
 	int				client_in_len;
