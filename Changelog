@@ -1,3 +1,7 @@
+Fri Jan 31 16:06:39 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.m4:
+- Add our useful stuff too :)
+
 Wed Jan 29 21:57:03 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/config.m4:
 - Changed Makefile to use PHP_NEW_EXTENSION and removed a useles check.
