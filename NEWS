@@ -1,5 +1,9 @@
 ???, ??? ??, 2003 - xdebug 1.3.0
 
++ Implemented xdebug_time_index() which returns the time passed since the
+  start of the script. This change also changes the output of the tracing
+  functions as the start time will no longer be the first function call, but
+  the real start time of the script. (Derick)
 + Implemented the "show-local" command (shows all local variables in the
   current scope including all contents). (Derick)
 + Implemented conditions for breakpoints in the "break" command. (Derick)

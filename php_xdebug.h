@@ -81,14 +81,15 @@ PHP_FUNCTION(xdebug_is_enabled);
 PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_function_trace);
+PHP_FUNCTION(xdebug_dump_function_trace);
 
 /* misc functions */
-PHP_FUNCTION(xdebug_dump_function_trace);
 PHP_FUNCTION(xdebug_dump_superglobals);
 PHP_FUNCTION(xdebug_set_error_handler);
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
 #endif
+PHP_FUNCTION(xdebug_time_index);
 
 
 void xdebug_start_trace();

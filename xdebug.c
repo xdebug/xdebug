@@ -95,6 +95,7 @@ function_entry xdebug_functions[] = {
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,          NULL)
 #endif
+	PHP_FE(xdebug_time_index,            NULL)
 
 	PHP_FE(xdebug_start_code_coverage,   NULL)
 	PHP_FE(xdebug_stop_code_coverage,    NULL)
@@ -1434,6 +1435,11 @@ PHP_FUNCTION(xdebug_memory_usage)
 	RETURN_LONG(AG(allocated_memory));
 }
 #endif
+
+PHP_FUNCTION(xdebug_time_index)
+{
+	RETURN_DOUBLE(get_utime() - XG(start_time));
+}
 
 PHP_FUNCTION(xdebug_set_error_handler)
 {
