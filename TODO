@@ -7,6 +7,8 @@ For 1.2.0:
     o modifying variables
     o reading super globals
   * watches / conditional breakpoints
+- Bug fixing
+  * Disconnect bug
 - Profiling
   * External data sources monitor
      create a hash-list of SQL & execution functions that can be 
@@ -19,3 +21,5 @@ For 1.2.0:
      the specified directory in [php_script]_[timestamp]_[pid].txt format.
      This will require 3 ini settings, auto_profile (bool), tmp_dir (string),
      profile_type (integer).
+- Additions
+  * Provide codes for messages (for localization) including parameters
