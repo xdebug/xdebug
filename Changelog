@@ -1,3 +1,7 @@
+Sun Nov 9 00:02:47 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat:
+- Name .dlls more consistently
+
 Sat Nov 8 23:34:26 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/compile.bat:
 - Update compile script with -dP
