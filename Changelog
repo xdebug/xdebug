@@ -1,3 +1,7 @@
+Sat Oct 19 18:13:14 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/.cvsignore:
+- Add .cvsignore file
+
 Sat Oct 19 18:12:58 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/Makefile
 /xdebug/debugclient/main.c
