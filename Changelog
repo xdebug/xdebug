@@ -1,3 +1,7 @@
+Thu Oct 30 13:55:29 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- Fixed breakpoint_remove
+
 Thu Oct 30 09:28:00 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Fix continue commands
