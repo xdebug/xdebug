@@ -1,3 +1,14 @@
+Tue Jan 7 22:07:19 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_var.c:
+- Implemented the 'eval' command with which you can set and get variables and 
+  evaluate any piece of PHP code from the debugger interface.
+- Started with adding hooks for a custom error handler.
+- Added a utility function to free xdebug_str's.
+
 Tue Jan 7 01:28:17 CET 2003 Ilia Alshanetsky <ilia@prohost.org 
 >
 /xdebug/php_xdebug.h
