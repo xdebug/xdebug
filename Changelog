@@ -1,3 +1,7 @@
+Tue Aug 26 12:34:21 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/configure.in:
+- This is Xdebug, not srm
+
 Mon Aug 25 13:32:34 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO
