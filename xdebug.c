@@ -727,17 +727,12 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 					tmp->function_name = estrndup (cur_opcode->op1.u.constant.value.str.val, cur_opcode->op1.u.constant.value.str.len);
 					break;
 				case IS_VAR:
-#ifdef HAVE_EXECUTE_DATA_PTR
-					sprintf (buffer, "%s->%p", CG(class_entry).name, cur_opcode->op2.u.constant.value.str.val);
-					tmpc = cur_opcode->op2.u.constant.value.str.val;
-#else
-					sprintf (buffer, "?->%s", cur_opcode->op1.u.constant.value.str.val);
+					sprintf (buffer, "{unknown}->%s", cur_opcode->op1.u.constant.value.str.val);
 					tmpc = cur_opcode->op1.u.constant.value.str.val;
-#endif
 					tmp->function_name = estrdup (buffer);
 					break;
 				default:
-					sprintf (buffer, "?->%s", cur_opcode->op1.u.constant.value.str.val);
+					sprintf (buffer, "{unknown}->%s", cur_opcode->op1.u.constant.value.str.val);
 					tmpc = cur_opcode->op1.u.constant.value.str.val;
 					tmp->function_name = estrdup (buffer);
 					break;
