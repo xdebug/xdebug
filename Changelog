@@ -1,3 +1,11 @@
+Mon Sep 22 11:07:15 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/README
+/xdebug/debugclient/INSTALL
+/xdebug/debugclient/LICENSE
+/xdebug/debugclient/main.c:
+- Added setting for port to listen on
+- Implemented running the previous command when pressing just enter.
+
 Mon Sep 22 11:04:55 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/build/buildconf1.mk
 /xdebug/debugclient/build/buildconf2.mk
