@@ -1,3 +1,7 @@
+Thu Oct 9 09:06:49 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed bug #20: Build failure due to wrong check for API_NO.
+
 Tue Oct 7 12:56:43 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c
 /xdebug/xdebug_handler_dbgp.h
