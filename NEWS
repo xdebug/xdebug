@@ -1,6 +1,5 @@
-- Implemented much better parameter tracing for user defined
++ Implemented much better parameter tracing for user defined
   functions. (Derick)
-
 = Renamed xdebug_get_function_trace() to xdebug_dump_function_trace().
   (Derick)
 = Implemented new xdebug_get_function_trace() to return the function trace in
