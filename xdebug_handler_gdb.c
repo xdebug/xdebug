@@ -417,6 +417,20 @@ cleanup:
 	return retval;
 }
 
+static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
+{
+	if (error || ret == -1) {
+		SSEND(context->socket, "-ERROR");
+		if (error) {
+			SSEND(context->socket, ": ");
+			SSEND(context->socket, error);
+		}
+		SSEND(context->socket, "\n");
+	} else {
+		SSEND(context->socket, "+OK\n");
+	}
+}
+
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
 {
@@ -436,16 +450,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 			return 0;
 		}
 		ret = xdebug_gdb_parse_option(context, option, XDEBUG_INIT | XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "run", (char**) &error);
-		if (error || ret == -1) {
-			SSEND(context->socket, "-ERROR");
-			if (error) {
-				SSEND(context->socket, ": ");
-				SSEND(context->socket, error);
-			}
-			SSEND(context->socket, "\n");
-		} else {
-			SSEND(context->socket, "+OK\n");
-		}
+		xdebug_gdb_option_result(context, ret, error);
 	} while (1 != ret);
 
 	return 1;
@@ -457,13 +462,15 @@ int xdebug_gdb_deinit(xdebug_con *context)
 	xdebug_hash_destroy(context->function_breakpoints);
 }
 
-int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char *time_buffer;
 	char *hostname;
 	char *prefix;
 	char *errortype;
+	int   ret;
 	char *option;
+	char *error = NULL;
 	xdebug_llist_element *le;
 	TSRMLS_FETCH();
 
@@ -476,12 +483,12 @@ int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *locatio
 	errortype = error_type(type);
 
 	/* start */
-	SENDMSG(h->socket, xdebug_sprintf("%sstart: %s\n", prefix, errortype));
+	SENDMSG(context->socket, xdebug_sprintf("%sstart: %s\n", prefix, errortype));
 
 	/* header */
-	SENDMSG(h->socket, xdebug_sprintf("%smessage: %s\n", prefix, message));
-	SENDMSG(h->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, location, line));
-	SENDMSG(h->socket, xdebug_sprintf("%sframes: %d\n", prefix, stack->size));
+	SENDMSG(context->socket, xdebug_sprintf("%smessage: %s\n", prefix, message));
+	SENDMSG(context->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, location, line));
+	SENDMSG(context->socket, xdebug_sprintf("%sframes: %d\n", prefix, stack->size));
 
 	/* stack elements */
 	if (stack) {
@@ -491,32 +498,33 @@ int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *locatio
 			char *tmp_name;
 				
 			tmp_name = show_fname (i TSRMLS_CC);
-			SENDMSG(h->socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
+			SENDMSG(context->socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
 			xdfree (tmp_name);
 
-			SENDMSG(h->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, i->filename, i->lineno));
+			SENDMSG(context->socket, xdebug_sprintf("%slocation: %s:%d\n", prefix, i->filename, i->lineno));
 		}
 	}
 
 	/* stop */
-	SENDMSG(h->socket, xdebug_sprintf("%sstop: %s\n", prefix, errortype));
+	SENDMSG(context->socket, xdebug_sprintf("%sstop: %s\n", prefix, errortype));
 
 	xdfree(errortype);
 	xdfree(prefix);
 	xdfree(hostname);
 	do {
-		SSEND(h->socket, "?cmd\n");
-		option = xdebug_socket_read_line(h->socket, h->buffer);
-		printf ("[%s]\n", option);
+		SSEND(context->socket, "?cmd\n");
+		option = xdebug_socket_read_line(context->socket, context->buffer);
 		if (!option) {
 			return 0;
 		}
-		SSEND(h->socket, "+OK\n");
-	} while (strcmp(option, "cont") != 0);
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "cont", (char**) &error);
+		xdebug_gdb_option_result(context, ret, error);
+	} while (1 != ret);
+
 	return 1;
 }
 
-static print_stack_frame(xdebug_con *h, function_stack_entry *i)
+static print_breakpoint(xdebug_con *h, function_stack_entry *i)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
@@ -552,7 +560,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack)
 	char  *option;
 	char  *error = NULL;
 
-	print_stack_frame(context, i);
+	print_breakpoint(context, i);
 
 	do {
 		SSEND(context->socket, "?cmd\n");
@@ -561,16 +569,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack)
 			return 0;
 		}
 		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "cont", (char**) &error);
-		if (error || ret == -1) {
-			SSEND(context->socket, "-ERROR");
-			if (error) {
-				SSEND(context->socket, ": ");
-				SSEND(context->socket, error);
-			}
-			SSEND(context->socket, "\n");
-		} else {
-			SSEND(context->socket, "+OK\n");
-		}
+		xdebug_gdb_option_result(context, ret, error);
 	} while (1 != ret);
 
 	return 1;
