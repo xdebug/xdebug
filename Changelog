@@ -1,3 +1,13 @@
+Thu Jul 3 22:18:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- Implemented "bt full" which shows a full stack trace including local
+  variables.
+- Added an error when an unknown option was passed to "option".
+
 Sat Jun 28 16:53:23 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO
