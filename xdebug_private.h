@@ -115,11 +115,13 @@ typedef struct _xdebug_call_entry {
 	char       *function;
 	int         lineno;
 	double      time_taken;
+	long        mem_used;
 } xdebug_call_entry;
 
 typedef struct xdebug_profile {
 	double        time;
 	double        mark;
+	long          memory;
 	xdebug_llist *call_list;
 } xdebug_profile;
 

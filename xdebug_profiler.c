@@ -55,7 +55,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	if (!XG(profile_file)) {
 		return FAILURE;
 	} 
-	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time\n\n", script_name);
+	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time Memory\n\n", script_name);
 	return SUCCESS;
 }
 
@@ -80,6 +80,9 @@ void xdebug_profiler_function_user_begin(function_stack_entry *fse)
 {
 	fse->profile.time = 0;
 	fse->profile.mark = xdebug_get_utime();
+#if MEMORY_LIMIT
+	fse->profile.memory = AG(allocated_memory);
+#endif
 }
 
 
@@ -109,6 +112,9 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
 		ce->user_defined = fse->user_defined;
+#if MEMORY_LIMIT
+		ce->mem_used = fse->profile.memory - AG(allocated_memory);
+#endif
 
 		xdebug_llist_insert_next(fse->prev->profile.call_list, NULL, ce);
 	}
@@ -126,7 +132,11 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	xdfree(tmp_name);
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
+#if MEMORY_LIMIT
+		fprintf(XG(profile_file), "\nsummary: %ld %ld\n\n", (long) (fse->profile.time * 10000000), AG(allocated_memory));
+#else
 		fprintf(XG(profile_file), "\nsummary: %ld\n\n", (long) (fse->profile.time * 10000000));
+#endif
 	}
 
 	/* Subtract time in calledfunction from time here */
@@ -134,8 +144,15 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	{
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 		fse->profile.time -= call_entry->time_taken;
+#if MEMORY_LIMIT
+		fse->memory -= call_entry->mem_used;
+#endif
 	}
+#if MEMORY_LIMIT
+	fprintf(XG(profile_file), "%d %ld %ld\n", default_lineno, (long) (fse->profile.time * 10000000), (AG(allocated_memory) - fse->profile.memory) < 0 ? 0 : (AG(allocated_memory) - fse->profile.memory));
+#else
 	fprintf(XG(profile_file), "%d %ld\n", default_lineno, (long) (fse->profile.time * 10000000));
+#endif
 
 	/* dump call list */
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -148,8 +165,12 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 			fprintf(XG(profile_file), "cfn=php::%s\n", call_entry->function);
 		}
 		
-		fprintf(XG(profile_file), "calls=1 0\n");
+		fprintf(XG(profile_file), "calls=1 0 0\n");
+#if MEMORY_LIMIT
+		fprintf(XG(profile_file), "%d %ld %ld\n", call_entry->lineno, (long) (call_entry->time_taken * 10000000), call_entry->mem_used < 0 ? 0 : call_entry->mem_used);
+#else
 		fprintf(XG(profile_file), "%d %ld\n", call_entry->lineno, (long) (call_entry->time_taken * 10000000));
+#endif
 	}
 	fprintf(XG(profile_file), "\n");
 
