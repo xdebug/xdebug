@@ -1,19 +1,5 @@
 XDEBUG
 ------
-
-This extension is not totally finished yet, but it works fine for me. If
-you have questions, feel free to send me an e-mail at derick@php.net. If
-you like this piece of software, feel free to checkout my wishlist @
-http://www.derickrethans.nl/link.php?url=giftlist . Sending me items
-from my wishlist improves my motivation to keep working on xdebug, and
-helps me keeping xdebug free.
-
-INSTALLATION
-------------
-
-You compile xdebug separately from the rest of PHP.  Note, however, that
-you need access to the scripts "phpize" and "php-config".  If your
-system does not have "phpize" and "php-config", you will need to compile
 and install PHP from a source tarball first, as these script are
 by-products of the PHP compilation and installation processes. It is
 important that the source version matches the installed version as there
@@ -34,7 +20,7 @@ Xdebug is compiled separately, all by itself, as stated above.
    --with-php-config=/path/to/php-config if php-config is not in your
    path)
 
-5. Compile the module with "make"
+
 
 6. cp modules/xdebug.so /to/wherever/you/want/it
 

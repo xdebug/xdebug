@@ -87,7 +87,8 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 #endif
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
-static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC);
+static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSRMLS_DC);
+static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRMLS_DC);
 static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC);
 
 int zend_xdebug_initialised = 0;
@@ -666,6 +667,25 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 	}
 }
 
+static void trace_function_begin(function_stack_entry *fse, int function_nr TSRMLS_DC)
+{
+	if (XG(do_trace) && XG(trace_file)) {
+		char *t = return_trace_stack_frame_begin(fse, function_nr TSRMLS_CC);
+		fprintf(XG(trace_file), "%s", t);
+		fflush(XG(trace_file));
+		xdfree(t);
+	}
+}
+
+static void trace_function_end(function_stack_entry *fse, int function_nr TSRMLS_DC)
+{
+	if (XG(do_trace) && XG(trace_file)) {
+		char *t = return_trace_stack_frame_end(fse, function_nr TSRMLS_CC);
+		fprintf(XG(trace_file), "%s", t);
+		fflush(XG(trace_file));
+		xdfree(t);
+	}
+}
 
 static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
@@ -776,12 +796,6 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 	xdebug_llist_insert_next(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 
-	if (XG(do_trace) && XG(trace_file)) {
-		char *t = return_trace_stack_frame(tmp, 0 TSRMLS_CC);
-		fprintf(XG(trace_file), "%s", t);
-		fflush(XG(trace_file));
-		xdfree(t);
-	}
 	return tmp;
 }
 
@@ -873,6 +887,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	function_stack_entry *fse;
 	char                 *magic_cookie = NULL;
 	int                   do_return = (XG(do_trace) && XG(trace_file));
+	int                   function_nr = 0;
 
 	if (XG(level) == 0) {
 		/* Set session cookie if requested */
@@ -963,6 +978,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
+
+	function_nr = XG(function_count);
+	trace_function_begin(fse, function_nr TSRMLS_CC);
+
 	fse->symbol_table = EG(active_symbol_table);
 
 	if (XDEBUG_IS_FUNCTION(fse->function.type)) {
@@ -984,6 +1003,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}
+
+	trace_function_end(fse, function_nr TSRMLS_CC);
 
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
@@ -1012,6 +1033,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	function_stack_entry *fse;
 	zend_op              *cur_opcode;
 	int                   do_return = (XG(do_trace) && XG(trace_file));
+	int                   function_nr = 0;
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
@@ -1019,6 +1041,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	}
 
 	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
+
+	function_nr = XG(function_count);
+	trace_function_begin(fse, function_nr TSRMLS_CC);
 
 	/* Check for entry breakpoints */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
@@ -1035,6 +1060,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
 	}
+
+	trace_function_end(fse, function_nr TSRMLS_CC);
 
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		cur_opcode = *EG(opline_ptr);
@@ -1264,41 +1291,25 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	return str.d;
 }
 
-static char* return_trace_stack_frame_normal(function_stack_entry* i, int html TSRMLS_DC)
+static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRMLS_DC)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
 	char *tmp_name;
 	xdebug_str str = {0, 0, NULL};
 
-	tmp_name = show_fname(i->function, html, 0 TSRMLS_CC);
+	tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
 
-	if (html) {
-		/* Start row */
-		xdebug_str_addl(&str, "<tr>", 4, 0);
-
-		/* Do timestamp */
-		xdebug_str_add(&str, "<td bgcolor='#ffffff' align='center'>", 0);
-		xdebug_str_add(&str, xdebug_sprintf("%.6f", i->time - XG(start_time)), 1);
-		xdebug_str_addl(&str, "</td>", 5, 0);
-
-		/* Do rest of line */
-		xdebug_str_add(&str, "<td bgcolor='#ffffff' align='left'><pre>", 0);
-		for (j = 0; j < i->level - 1; j++) {
-			xdebug_str_addl(&str, "  ", 2, 0);
-		}
-		xdebug_str_add(&str, xdebug_sprintf("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name), 1);
-	} else {
-		xdebug_str_add(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
-		xdebug_str_add(&str, xdebug_sprintf("%10lu ", i->memory), 1);
-		if (XG(show_mem_delta)) {
-			xdebug_str_add(&str, xdebug_sprintf("%+8ld ", i->memory - i->prev_memory), 1);
-		}
-		for (j = 0; j < i->level; j++) {
-			xdebug_str_addl(&str, "  ", 2, 0);
-		}
-		xdebug_str_add(&str, xdebug_sprintf("-> %s(", tmp_name), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%10lu ", i->memory), 1);
+	if (XG(show_mem_delta)) {
+		xdebug_str_add(&str, xdebug_sprintf("%+8ld ", i->memory - i->prev_memory), 1);
 	}
+	for (j = 0; j < i->level; j++) {
+		xdebug_str_addl(&str, "  ", 2, 0);
+	}
+	xdebug_str_add(&str, xdebug_sprintf("-> %s(", tmp_name), 1);
+
 	xdfree(tmp_name);
 
 	/* Printing vars */
@@ -1315,11 +1326,7 @@ static char* return_trace_stack_frame_normal(function_stack_entry* i, int html T
 		tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
 		xdebug_str_add(&str, tmp_varname, 1);
 
-		if (html) {
-			tmp_value = get_zval_value_fancy(NULL, i->vars[j].addr TSRMLS_CC);
-		} else {
-			tmp_value = get_zval_value(i->vars[j].addr);
-		}
+		tmp_value = get_zval_value(i->vars[j].addr);
 		xdebug_str_add(&str, tmp_value, 1);
 	}
 
@@ -1327,55 +1334,65 @@ static char* return_trace_stack_frame_normal(function_stack_entry* i, int html T
 		xdebug_str_add(&str, i->include_filename, 0);
 	}
 
-	if (html) {
-		/* Do filename and line no */
-		xdebug_str_add(&str, xdebug_sprintf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td>", i->filename, i->lineno), 1);
-#if MEMORY_LIMIT
-		/* Do memory */
-		xdebug_str_add(&str, xdebug_sprintf("<td bgcolor='#ffffff' align='right'>%lu</td>", i->memory), 1);
-#endif
-		/* Close row */
-		xdebug_str_add(&str, xdebug_sprintf("</tr>\n"), 0);
-	} else {
-		xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", i->filename, i->lineno), 1);
-	}
+	xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", i->filename, i->lineno), 1);
 
 	return str.d;
 }
 
-static char* return_trace_stack_frame_computerized(function_stack_entry* i TSRMLS_DC)
+#define return_trace_stack_frame_begin_computerized(i,f)  return_trace_stack_frame_computerized((i), (f), 0 TSRMLS_CC)
+#define return_trace_stack_frame_end_computerized(i,f)    return_trace_stack_frame_computerized((i), (f), 1 TSRMLS_CC)
+
+static char* return_trace_stack_frame_computerized(function_stack_entry* i, int fnr, int whence TSRMLS_DC)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
 	char *tmp_name;
 	xdebug_str str = {0, 0, NULL};
 
-	tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->level), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%f\t", i->time - XG(start_time)), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%lu\t", i->memory), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%+ld\t", i->memory - i->prev_memory), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
-	xdfree(tmp_name);
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", fnr), 1);
+	if (whence == 0) { /* start */
+		tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
 
-	if (i->include_filename) {
-		xdebug_str_add(&str, i->include_filename, 0);
+		xdebug_str_add(&str, "0\t", 0);
+		xdebug_str_add(&str, xdebug_sprintf("%f\t", i->time - XG(start_time)), 1);
+		xdebug_str_add(&str, xdebug_sprintf("%lu\t", i->memory), 1);
+		xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
+		xdebug_str_add(&str, xdebug_sprintf("%d\t", i->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
+		xdfree(tmp_name);
+
+		if (i->include_filename) {
+			xdebug_str_add(&str, i->include_filename, 0);
+		}
+
+		xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d\n", i->filename, i->lineno), 1);
+
+	} else if (whence == 1) { /* end */
+		xdebug_str_add(&str, "1\t", 0);
+		xdebug_str_add(&str, xdebug_sprintf("%f\t", xdebug_get_utime() - XG(start_time)), 1);
+		xdebug_str_add(&str, xdebug_sprintf("%lu\n", AG(allocated_memory)), 1);
 	}
-
-	xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d\n", i->filename, i->lineno), 1);
 
 	return str.d;
 }
 
 
-static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC)
+static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSRMLS_DC)
 {
 	switch (XG(trace_format)) {
 		case 0:
-			return return_trace_stack_frame_normal(i, html TSRMLS_CC);
+			return return_trace_stack_frame_begin_normal(i TSRMLS_CC);
 		case 1:
-			return return_trace_stack_frame_computerized(i TSRMLS_CC);
+			return return_trace_stack_frame_begin_computerized(i, fnr TSRMLS_CC);
+	}
+}
+
+
+static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRMLS_DC)
+{
+	switch (XG(trace_format)) {
+		case 1:
+			return return_trace_stack_frame_end_computerized(i, fnr TSRMLS_CC);
 	}
 }
 
@@ -1711,7 +1728,7 @@ PHP_FUNCTION(xdebug_start_trace)
 	long  options = 0;
 
 	if (XG(do_trace) == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &fname, &fname_len, &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &fname, &fname_len, &options) == FAILURE) {
 			return;
 		}
 
