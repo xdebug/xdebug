@@ -1185,7 +1185,164 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 
 	cur_opcode = *EG(opline_ptr);
 
+#if ZEND_EXTENSION_API_NO >= 20020731
 	tmp->function  = find_func_name(op_array, cur_opcode, &(tmp->varc), &(tmp->vars[0]));
+#else
+	end_opcode = op_array->opcodes + op_array->last + 1;
+
+	while (cur_opcode < end_opcode) {
+		int opcode = cur_opcode->opcode;
+
+		if ((opcode == ZEND_DO_FCALL         ||
+		     opcode == ZEND_DO_FCALL_BY_NAME ||
+		     opcode == ZEND_INCLUDE_OR_EVAL  ||
+		     opcode == ZEND_EXT_FCALL_END) && func_nest == 1)
+		{
+			break;
+		}
+		if (opcode == ZEND_EXT_FCALL_BEGIN) {
+			func_nest++;
+			go_back++;
+		}
+		if (opcode == ZEND_EXT_FCALL_END) {
+			func_nest--;
+		}
+
+		cur_opcode++;
+	}
+
+	switch (cur_opcode->opcode) {
+		case ZEND_INCLUDE_OR_EVAL: {
+			zval *inc_filename;
+			/* Determine type */
+			switch (cur_opcode->op2.u.constant.value.lval) {
+				case ZEND_INCLUDE_ONCE:
+					XFUNC_SET(tmp, XFUNC_NORMAL, "", "include_once");
+					break;
+				case ZEND_REQUIRE_ONCE:
+					XFUNC_SET(tmp, XFUNC_NORMAL, "", "require_once");
+					break;
+				case ZEND_INCLUDE:
+					XFUNC_SET(tmp, XFUNC_NORMAL, "", "include");
+					break;
+				case ZEND_REQUIRE:
+					XFUNC_SET(tmp, XFUNC_NORMAL, "", "require");
+					break;
+				case ZEND_EVAL:
+					XFUNC_SET(tmp, XFUNC_NORMAL, "", "eval");
+					break;
+			}
+			if (cur_opcode->op1.op_type == IS_CONST) {
+				tmp->vars[tmp->varc].name = estrdup ("");
+				tmp->vars[tmp->varc].value = estrdup (cur_opcode->op1.u.constant.value.str.val);
+				tmp->varc++;
+				tmp->delayed_include = 0;
+			} else {
+				tmp->delayed_include = 1;
+			}
+			break;
+		}
+
+		case ZEND_DO_FCALL: {
+			zend_function *zfunc;
+
+			switch (cur_opcode->op1.op_type) {
+				case IS_CONST:
+					XFUNC_SET(tmp, XFUNC_NORMAL, "", cur_opcode->op1.u.constant.value.str.val);
+					break;
+				default:
+					XFUNC_SET_DELAYED_C(tmp, XFUNC_MEMBER, cur_opcode->op1.u.constant.value.str.val);
+					break;
+			}
+			break;
+		}
+		case ZEND_DO_FCALL_BY_NAME: {
+			zend_op* tmpOpCode;
+
+			tmpOpCode = cur_opcode;
+			while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME || go_back != 0) {
+				tmpOpCode--;
+				if (tmpOpCode->opcode == ZEND_INIT_FCALL_BY_NAME && go_back > 0) {
+					go_back--;
+				}
+			}
+			switch (tmpOpCode->op1.op_type)  {
+				case IS_UNUSED:
+					switch (tmpOpCode->op2.op_type) {
+						case IS_CONST:
+							sprintf(buffer, "%s",
+								tmpOpCode->op2.u.constant.value.str.val
+							);
+							XFUNC_SET(tmp, XFUNC_NORMAL, "", buffer);
+							break;
+						default:
+#if HAVE_EXECUTE_DATA_PTR
+							XFUNC_SET_DELAYED_F(tmp, XFUNC_NORMAL, "");
+#else
+							XFUNC_SET(tmp, XFUNC_NORMAL, "", "{unknown}");
+#endif
+							break;
+
+					}
+					break;
+				case IS_CONST:
+					switch (tmpOpCode->op2.op_type) {
+						case IS_CONST:
+							XFUNC_SET(
+								tmp, XFUNC_STATIC_MEMBER,
+								tmpOpCode->op1.u.constant.value.str.val,
+								tmpOpCode->op2.u.constant.value.str.val
+							);
+							break;
+						default:  /* FIXME need better IS_VAR handling */
+							XFUNC_SET_DELAYED_F(
+								tmp, XFUNC_STATIC_MEMBER,
+								tmpOpCode->op1.u.constant.value.str.val
+							);
+							break;
+
+					}
+					break;
+				case IS_VAR:
+					if (tmpOpCode->op1.op_type == IS_CONST)   {
+						switch(tmpOpCode->op2.op_type) {
+							case IS_CONST:
+								XFUNC_SET(
+									tmp, XFUNC_MEMBER,
+									tmpOpCode->op1.u.constant.value.str.val,
+									tmpOpCode->op2.u.constant.value.str.val
+								);
+								break;
+							default:
+								XFUNC_SET_DELAYED_F(
+									tmp, XFUNC_MEMBER,
+									tmpOpCode->op1.u.constant.value.str.val
+								);
+								break;
+						}
+					}
+					else {
+						switch (tmpOpCode->op2.op_type) {
+							case IS_CONST:
+								XFUNC_SET_DELAYED_C(
+									tmp, XFUNC_MEMBER,
+									tmpOpCode->op2.u.constant.value.str.val
+								);
+								break;
+							default:
+								XFUNC_SET_DELAYED_F(
+									tmp, XFUNC_MEMBER,
+									"{unknown}"
+								);
+								break;
+						}
+					}
+				}
+			}
+			break;
+	}
+#endif
+
 	tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
 	tmp->lineno    = cur_opcode->lineno;
 	
