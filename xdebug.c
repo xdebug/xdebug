@@ -845,7 +845,9 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 				php_printf("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
 			} else {
 				php_printf("%10.4f ", i->time - XG(start_time));
+#if MEMORY_LIMIT
 				php_printf("%10lu ", i->memory);
+#endif
 				php_printf("%3d. %s(", i->level, tmp_name);
 			}
 			if (PG(log_errors) && !is_cli) {
