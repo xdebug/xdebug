@@ -446,7 +446,7 @@ static int breakpoint_remove(int type, char *hkey)
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
-				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[2], brk->file_len) == 0) {
+				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[0], brk->file_len) == 0) {
 					xdebug_llist_remove(XG(context).line_breakpoints, le, NULL);
 					return SUCCESS;
 				}
@@ -522,7 +522,7 @@ DBGP_FUNC(breakpoint_remove)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 	/* Lets check if it exists */
-	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey)) {
+	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey) == SUCCESS) {
 		/* so it exists, now we're going to find it in the correct hash/list
 		 * and return the info we have on it */
 		brk = breakpoint_brk_info_fetch(type, hkey);
