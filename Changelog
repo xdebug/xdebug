@@ -1,3 +1,7 @@
+Thu Apr 22 21:00:49 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- The whitespace Nazi strikes again!
+
 Thu Apr 22 20:37:44 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c
