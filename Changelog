@@ -1,3 +1,7 @@
+Sat Apr 10 01:25:09 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #57: Crash with overloading functions
+
 Fri Apr 09 22:02:48 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed earlier introduced bug where parameters to eval() were recorded
