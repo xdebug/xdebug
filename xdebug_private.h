@@ -141,6 +141,7 @@ typedef struct _function_stack_entry {
 	int          arg_done;
 	int          varc;
 	xdebug_var   vars[MAX_FUNCTION_ARGUMENTS];
+	zval        *return_value;
 	xdebug_hash *used_vars;
 	HashTable   *symbol_table;
 
