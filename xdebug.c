@@ -281,7 +281,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 		tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
 		tmp->lineno    = 0;
+#if MEMORY_LIMIT
 		tmp->memory    = AG(allocated_memory);
+#else
+		tmp->memory    = 0;
+#endif
 		tmp->time      = get_utime();
 
 		/* Handle delayed include for stack */
@@ -313,8 +317,6 @@ static inline char* show_fname (struct function_stack_entry* entry)
 	xdebug_func f;
 
 	f = entry->function;
-
-
 	
 	switch (f.type) {
 		case XFUNC_NORMAL: {
@@ -442,8 +444,13 @@ static inline void print_trace (int html TSRMLS_DC)
 		}
 
 		if (html) {
+#if MEMORY_LIMIT
 			php_printf ("<tr><th bgcolor='#aaaaaa' colspan='5'>Function trace</th></tr>\n");
 			php_printf ("<tr><th bgcolor='#cccccc'>Time</th><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th><th bgcolor='#cccccc'>Memory</th></tr>\n");
+#else
+			php_printf ("<tr><th bgcolor='#aaaaaa' colspan='4'>Function trace</th></tr>\n");
+			php_printf ("<tr><th bgcolor='#cccccc'>Time</th><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+#endif
 		}
 
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -504,10 +511,10 @@ static inline void print_trace (int html TSRMLS_DC)
 			if (html) {
 				/* Do filename and line no */
 				php_printf (")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td>", i->filename, i->lineno);
-
+#if MEMORY_LIMIT
 				/* Do memory */
 				php_printf ("<td bgcolor='#ffffff' align='right'>%lu</td>", i->memory);
-
+#endif
 				/* Close row */
 				php_printf ("</tr>\n");
 			} else {
@@ -606,16 +613,39 @@ PHP_FUNCTION(xdebug_get_function_stack)
 {
 	char buffer[1024];
 	xdebug_llist_element *le;
-	unsigned int          k;
+	unsigned int          j, k;
+	zval                 *frame;
+	zval                 *params;
 
 	array_init(return_value);
 	le = XDEBUG_LLIST_HEAD(XG(stack));
 	
 	for (k = 0; k < XG(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
 		struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
-#warning rewrite!
-//		snprintf (buffer, 1024, "%s:%d: %s", i->filename, i->lineno, i->function_name);
-//		add_next_index_string(return_value, (char*) &buffer, 1);
+
+		/* Initialize frame array */
+		MAKE_STD_ZVAL(frame);
+		array_init(frame);
+
+		/* Add data */
+		if (i->function.function) {
+			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function, 1);
+		}
+		if (i->function.class) {
+			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class,    1);
+		}
+		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename, 1);
+		add_assoc_long_ex  (frame, "line", sizeof("line"), i->lineno);
+
+		/* Add parameters */
+		MAKE_STD_ZVAL(params);
+		array_init(params);
+		for (j = 0; j < i->varc; j++) {
+			add_assoc_string_ex(params, i->vars[j].name, strlen (i->vars[j].name) + 1, i->vars[j].value, 1);
+		}
+		add_assoc_zval_ex  (frame, "params", sizeof("params"), params);
+
+		add_next_index_zval(return_value, frame);
 	}
 }
 
@@ -744,7 +774,9 @@ PHP_FUNCTION(xdebug_get_function_trace)
 {
 	char buffer[1024];
 	xdebug_llist_element *le;
-	unsigned int          k;
+	unsigned int          j, k;
+	zval                 *frame;
+	zval                 *params;
 
 	if (!XG(do_trace)) {
 		php_error (E_NOTICE, "Function tracing was not started, use xdebug_start_trace() before calling this function");
@@ -756,9 +788,30 @@ PHP_FUNCTION(xdebug_get_function_trace)
 	
 	for (k = 0; k < XG(trace)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
 		struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
-#warning rewrite!
-//		snprintf (buffer, 1024, "%s:%d: %s", i->filename, i->lineno, i->function_name);
-//		add_next_index_string(return_value, (char*) &buffer, 1);
+
+		/* Initialize frame array */
+		MAKE_STD_ZVAL(frame);
+		array_init(frame);
+
+		/* Add data */
+		if (i->function.function) {
+			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function, 1);
+		}
+		if (i->function.class) {
+			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class,    1);
+		}
+		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename, 1);
+		add_assoc_long_ex  (frame, "line", sizeof("line"), i->lineno);
+
+		/* Add parameters */
+		MAKE_STD_ZVAL(params);
+		array_init(params);
+		for (j = 0; j < i->varc; j++) {
+			add_assoc_string_ex(params, i->vars[j].name, strlen (i->vars[j].name) + 1, i->vars[j].value, 1);
+		}
+		add_assoc_zval_ex  (frame, "params", sizeof("params"), params);
+
+		add_next_index_zval(return_value, frame);
 	}
 }
 
@@ -986,7 +1039,11 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 	if (XG(do_trace)) {
 		/* Set timestamp and memory footprint */
+#if MEMORY_LIMIT
 		tmp->memory = AG(allocated_memory);
+#else
+		tmp->memory = 0;
+#endif
 		tmp->time   = get_utime();
 
 		/* Update refcount and add into hash */

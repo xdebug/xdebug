@@ -1,5 +1,5 @@
 <?php
-/* $Id: test10.php,v 1.1 2002-05-25 13:44:11 derick Exp $
+/* $Id: test10.php,v 1.2 2002-06-09 07:45:51 derick Exp $
  * Author: d.rethans@jdimedia.nl
  * Description:
  *   Test for functions in parameters to functions
@@ -23,5 +23,5 @@
 	}
 
 	blaat("insert blah '".D::a(D::b(D::a(D::c('blah')))));
-	xdebug_dump_function_trace();
+	var_dump (xdebug_get_function_trace());
 ?>
