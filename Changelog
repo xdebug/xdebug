@@ -1,3 +1,17 @@
+Thu Dec 19 22:43:08 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_profiler.h
+/xdebug/Makefile.in
+/xdebug/config.m4
+/xdebug/package.xml
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Added another profiling mode, which can be accessed via
+  XDEBUG_PROFILER_FC_SUM. 
+- Moved the profiling code into it's own file.
+- Fixed some bugs inside the profiling code (more fixes are pending).
+
 Thu Dec 19 07:37:15 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
 >
 /xdebug/TODO:
