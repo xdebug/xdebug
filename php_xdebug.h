@@ -46,7 +46,9 @@ PHP_FUNCTION(xdebug_get_function_stack);
 PHP_FUNCTION(xdebug_call_function);
 PHP_FUNCTION(xdebug_call_file);
 PHP_FUNCTION(xdebug_call_line);
+#if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
+#endif
 
 typedef struct function_stack_entry {
 	char *function_name;
