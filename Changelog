@@ -1,3 +1,15 @@
+Mon Sep 30 07:56:24 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_hash.c
+/xdebug/xdebug_hash.h
+/xdebug/Makefile.in
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handlers.h:
+- Updated error handling from debug commands
+- Implemented the setting of function breakpoints
+- Added hash functions from SRM
+
 Sat Sep 28 21:29:13 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_socket.c
 /xdebug/xdebug_socket.h
