@@ -293,8 +293,27 @@ char *xdebug_path_to_url(const char *fileurl)
 	/* encode the url */
 	encoded_fileurl = xdebug_raw_url_encode(fileurl, strlen(fileurl), &new_len, 1);
 
-	if (fileurl[1] == '/' || fileurl[1] == '\\') {
-		/* we assume the first char is a slash as well, what else could it be? */
+	if (fileurl[0] != '/' && fileurl[0] != '\\') {
+		cwd_state new_state;
+		char cwd[MAXPATHLEN];
+		char *result;
+
+		result = VCWD_GETCWD(cwd, MAXPATHLEN);
+		if (!result) {
+			cwd[0] = '\0';
+		}
+
+		new_state.cwd = strdup(cwd);
+		new_state.cwd_length = strlen(cwd);
+
+		if(!virtual_file_ex(&new_state, fileurl, NULL, 1)) {
+			char *s = estrndup(new_state.cwd, new_state.cwd_length);
+			tmp = xdebug_sprintf("file://%s",s);
+			efree(s);
+		}
+		free(new_state.cwd);
+
+	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		tmp = xdebug_sprintf("file:/%s", encoded_fileurl);
 	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
 		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
