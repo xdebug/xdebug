@@ -1,3 +1,7 @@
+Mon Aug 30 08:52:13 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_superglobals.c:
+- Fixed dumping of superglobals for numeric keys.
+
 Fri Aug 27 08:58:18 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/xdebug_handler_dbgp.c:
