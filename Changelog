@@ -1,3 +1,8 @@
+Tue Dec 14 11:45:22 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Fixed bug #107: Code Coverage only detects executable code in used functions
+  and classes.
+
 Sat Dec 04 22:45:46 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed bug #103: crash when running the DBGp command 'eval' on a global
