@@ -20,7 +20,7 @@
 #include "xdebug_var.h"
 #include "xdebug_code_coverage.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(xdebug);
+extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
 void xdebug_coverage_line_dtor(void *data)
 {

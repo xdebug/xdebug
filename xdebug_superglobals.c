@@ -20,7 +20,7 @@
 #include "xdebug_var.h"
 #include "xdebug_superglobals.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(xdebug);
+extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
 void dump_dtor(void *user, void *ptr)
 {
