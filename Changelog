@@ -1,3 +1,8 @@
+Fri Aug 27 08:58:18 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/xdebug_handler_dbgp.c:
+- Make this work with ZTS again.
+
 Thu Aug 26 11:18:55 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Apply Rasmus' patch to redo the path resolving in case his SKIP_PATH_CHECK
