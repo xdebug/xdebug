@@ -1139,6 +1139,17 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	options = (xdebug_gdb_options*) context->options;
 	options->response_format = XDEBUG_RESPONSE_NORMAL;
 
+	/* Initialize auto globals in Zend Engine 2 */
+#ifdef ZEND_ENGINE_2
+	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);
+	zend_is_auto_global("_GET",     sizeof("_GET")-1     TSRMLS_CC);
+	zend_is_auto_global("_POST",    sizeof("_POST")-1    TSRMLS_CC);
+	zend_is_auto_global("_COOKIE",  sizeof("_COOKIE")-1  TSRMLS_CC);
+	zend_is_auto_global("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
+	zend_is_auto_global("_FILES",   sizeof("_FILES")-1   TSRMLS_CC);
+	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
+#endif
+
 	context->function_breakpoints = xdebug_hash_alloc(64, NULL);
 	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_brk_dtor);
