@@ -18,10 +18,10 @@
   <license>PHP</license>
   <release>
     <state>beta</state>
-    <version>0.9.0</version>
-    <date>2002-06-23</date>
+    <version>1.0.0rc1</version>
+    <date>2002-09-01</date>
     <notes>
-      First pickled version
+      Added better logic and support for parameters to internal functions
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -42,6 +42,21 @@
     </filelist>
   </release>
   <changelog>
+    <release>
+      <state>beta</state>
+      <version>1.0.0rc1</version>
+      <date>2002-09-01</date>
+      <notes>
++ Implemented gathering of parameters to internal functions (only available
+  in combination with PHP 4.3.0-dev). (Derick)
+= Implemented a new way to get class names and file names. (Derick, Thies C.
+  Arntzen &gt;thies@thieso.net&lt;)
++ Added support for error messages with stack trace in syslog. (Sergio
+  Ballestrero &gt;s.ballestrero@planetweb.it&lt;)
+= Windows compilation fixes. (Derick)
+      </notes>
+    </release>
+
     <release>
       <state>beta</state>
       <version>0.9.0</version>

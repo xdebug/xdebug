@@ -1,0 +1,5 @@
+TODO
+====
+
+For 1.0.0:
+- Check xdebug_start_trace(<filename>);

@@ -1,7 +1,12 @@
-? - xdebug 1.0.0
+Sun Sep 1, 2002 - xdebug 1.0.0rc1
 
-+ Added support for error messages with stack trace in syslog (Sergio
++ Implemented gathering of parameters to internal functions (only available
+  in combination with PHP 4.3.0-dev). (Derick)
+= Implemented a new way to get class names and file names. (Derick, Thies C.
+  Arntzen <thies@thieso.net>)
++ Added support for error messages with stack trace in syslog. (Sergio
   Ballestrero <s.ballestrero@planetweb.it>)
+= Windows compilation fixes. (Derick)
 
 
 Sun Jun 23, 2002 - xdebug 0.9.0
