@@ -72,7 +72,7 @@ typedef struct xdebug_gdb_options {
 
 int xdebug_gdb_init(xdebug_con *context, int mode);
 int xdebug_gdb_deinit(xdebug_con *context);
-int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *file, const long lineno, xdebug_llist *stack);
+int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *file, const uint lineno, xdebug_llist *stack);
 int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type);
 char *xdebug_gdb_get_revision(void);
 
