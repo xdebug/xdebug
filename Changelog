@@ -1,3 +1,17 @@
+Wed Apr 21 20:19:31 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_handler_gdb.h
+xdebug/xdebug_handler_php3.c
+xdebug/xdebug_handler_php3.h
+xdebug/xdebug_handlers.h:
+- distinguish between xdebug and IDE session variables better
+- DBGP_COOKIE is specific to the dbgp protocol
+- XDEBUG_SESSION is now used for the xdebug activation cookie
+- magic_cookie no longer needs to be provided to the protocol handlers
+
 Tue Apr 20 23:51:56 CEST 2004 Shane Caraveo <shane@caraveo.com>
 php_xdebug.h
 xdebug/xdebug.c
