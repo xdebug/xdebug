@@ -52,7 +52,7 @@ PHP_RINIT_FUNCTION(xdebug);
 PHP_RSHUTDOWN_FUNCTION(xdebug);
 PHP_MINFO_FUNCTION(xdebug);
 #ifdef ZEND_ENGINE_2
-ZEND_MODULE_EXEC_FINISHED_D(xdebug);
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 #endif
 
 /* call stack functions */
@@ -75,6 +75,7 @@ PHP_FUNCTION(xdebug_break);
 /* tracing functions */
 PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
+PHP_FUNCTION(xdebug_get_tracefile_name);
 
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
@@ -109,6 +110,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     auto_trace;
 	char         *trace_output_dir;
 	char         *trace_output_name;
+	char         *tracefile_name;
 
 	/* used for code coverage */
 	zend_bool     do_code_coverage;

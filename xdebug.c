@@ -95,6 +95,7 @@ function_entry xdebug_functions[] = {
 
 	PHP_FE(xdebug_start_trace,           NULL)
 	PHP_FE(xdebug_stop_trace,            NULL)
+	PHP_FE(xdebug_get_tracefile_name,    NULL)
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,          NULL)
 	PHP_FE(xdebug_peak_memory_usage,     NULL)
@@ -117,11 +118,15 @@ zend_module_entry xdebug_module_entry = {
 	PHP_MINIT(xdebug),
 	PHP_MSHUTDOWN(xdebug),
 	PHP_RINIT(xdebug),
+#ifndef ZEND_ENGINE_2
 	PHP_RSHUTDOWN(xdebug),
+#else
+	NULL,
+#endif
 	PHP_MINFO(xdebug),
 	XDEBUG_VERSION,
 #ifdef ZEND_ENGINE_2
-	ZEND_MODULE_EXEC_FINISHED_N(xdebug),
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(xdebug),
 #else
 	NULL,
 	NULL,
@@ -426,6 +431,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 	XG(stack)         = xdebug_llist_alloc(stack_element_dtor);
 	XG(trace_file)    = NULL;
+	XG(tracefile_name) = NULL;
 	XG(profile_file)  = NULL;
 	XG(error_handler) = NULL;
 	XG(prev_memory)   = 0;
@@ -465,13 +471,10 @@ PHP_RINIT_FUNCTION(xdebug)
 }
 
 #ifdef ZEND_ENGINE_2
-ZEND_MODULE_EXEC_FINISHED_D(xdebug)
-{
-	return SUCCESS;
-}
-#endif
-
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
+#else
 PHP_RSHUTDOWN_FUNCTION(xdebug)
+#endif
 {
 	xdebug_llist_destroy(XG(stack), NULL);
 	XG(stack) = NULL;
@@ -1478,6 +1481,7 @@ char* xdebug_start_trace(char* fname TSRMLS_DC)
 		}
 	}
 	XG(trace_file) = fopen(filename, "w");
+	XG(tracefile_name) = estrdup(filename);
 	if (XG(trace_file)) {
 		str_time = xdebug_get_time();
 		fprintf(XG(trace_file), "\nTRACE START [%s]\n", str_time);
@@ -1500,6 +1504,9 @@ void xdebug_stop_trace(TSRMLS_D)
 		XG(trace_file) = NULL;
 		xdfree(str_time);
 	}
+	if (XG(tracefile_name)) {
+		efree(XG(tracefile_name));
+	}
 }
 
 PHP_FUNCTION(xdebug_stop_trace)
@@ -1508,6 +1515,15 @@ PHP_FUNCTION(xdebug_stop_trace)
 		xdebug_stop_trace(TSRMLS_C);
 	} else {
 		php_error(E_NOTICE, "Function trace was not started");
+	}
+}
+
+PHP_FUNCTION(xdebug_get_tracefile_name)
+{
+	if (XG(tracefile_name)) {
+		RETURN_STRING(XG(tracefile_name), 1);
+	} else {
+		RETURN_FALSE;
 	}
 }
 
