@@ -1396,10 +1396,7 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 
 DBGP_FUNC(property_get)
 {
-	xdebug_dbgp_options *options = (xdebug_dbgp_options*) XG(context).options;
 	int                   depth = -1;
-	int                   page = -1;
-	int                   max_data = options->max_data;
 	function_stack_entry *fse;
 
 	if (!CMD_OPTION('n')) {
@@ -1408,9 +1405,6 @@ DBGP_FUNC(property_get)
 
 	if (CMD_OPTION('d')) {
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
-	}
-	if (CMD_OPTION('p')) {
-		page = strtol(CMD_OPTION('p'), NULL, 10);
 	}
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (depth == -1) {
@@ -1894,7 +1888,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.70 $";
+	return "$Revision: 1.71 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
