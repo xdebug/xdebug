@@ -32,5 +32,5 @@ xdebug.collect_params=1
 --EXPECTF--
 Function trace:
     %f      %d     -> foo->foo() /%s/test14b.php:16
-    %f      %d     -> bar(class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}) /%s/test14b.php:17
-    %f      %d     -> bar(class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}) /%s/test14b.php:18
+    %f      %d     -> bar(class foo {var $a = ...; var $b = ...}) /%s/test14b.php:17
+    %f      %d     -> bar(class foo {var $a = ...; var $b = ...}) /%s/test14b.php:18
