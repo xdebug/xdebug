@@ -54,7 +54,7 @@
 #include "zend_extensions.h"
 #ifdef ZEND_ENGINE_2
 # include "zend_exceptions.h"
-# if PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 1
+# if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
 #  include "zend_vm.h"
 # endif
 #endif
@@ -1544,6 +1544,7 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 }
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
 #define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 { \
 	if (XG(do_code_coverage)) { \
@@ -1551,6 +1552,7 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		int      lineno; \
 		char    *file; \
 		int      file_len; \
+		zend_op_array *op_array = execute_data->op_array; \
 \
 		cur_opcode = *EG(opline_ptr); \
 		lineno = cur_opcode->lineno; \
@@ -1562,6 +1564,26 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	} \
 	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 }
+#else
+#define xdebug_opcode_override(f)  static int xdebug_##f##_handler(zend_opcode_handler_args) \
+{ \
+	if (xg(do_code_coverage)) { \
+		zend_op *cur_opcode; \
+		int      lineno; \
+		char    *file; \
+		int      file_len; \
+\
+		cur_opcode = *eg(opline_ptr); \
+		lineno = cur_opcode->lineno; \
+\
+		file = op_array->filename; \
+		file_len = strlen(file); \
+\
+		xdebug_count_line(file, lineno, 0 tsrmls_cc); \
+	} \
+	return old_##f##_handler(zend_opcode_handler_args_passthru); \
+}
+#endif
 XDEBUG_OPCODE_OVERRIDE(jmp)
 XDEBUG_OPCODE_OVERRIDE(jmpz)
 XDEBUG_OPCODE_OVERRIDE(is_identical)
