@@ -1,3 +1,7 @@
+Mon Apr 21 15:16:41 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Update package information
+
 Mon Apr 21 14:40:22 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/php_xdebug.h:
