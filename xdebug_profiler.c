@@ -177,7 +177,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 }
 
 
-void xdebug_profiler_function_internal_begin(function_stack_entry *fse TSRMLC_DC)
+void xdebug_profiler_function_internal_begin(function_stack_entry *fse TSRMLS_DC)
 {
 	xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 }
