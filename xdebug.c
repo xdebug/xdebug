@@ -460,9 +460,13 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		tmp->vars[tmp->varc].value = xdstrdup(param->value.str.val);
 		tmp->varc++;
 
-	} else {
-		cur_opcode = *EG(opline_ptr);
-		tmp->lineno = cur_opcode->lineno;
+	} else  {
+		if (EG(opline_ptr)) {
+			cur_opcode = *EG(opline_ptr);
+			tmp->lineno = cur_opcode->lineno;
+		} else {
+			tmp->lineno = 0;
+		}
 		if (XG(collect_params)) {
 			for (i = 0; i < arg_count; i++) {
 				tmp->vars[tmp->varc].name  = NULL;
