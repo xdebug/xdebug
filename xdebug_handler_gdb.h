@@ -61,6 +61,11 @@ typedef struct xdebug_cmd {
 	char *help;
 } xdebug_cmd;
 
+
+#define XDEBUG_D                         0
+#define XDEBUG_D_BREAKPOINT_SET          XDEBUG_D |    1
+#define XDEBUG_D_BREAKPOINT_REMOVED      XDEBUG_D |    2
+
 #define XDEBUG_E                         1024
 #define XDEBUG_E_INVALID_FORMAT          XDEBUG_E |    1
 #define XDEBUG_E_BREAKPOINT_NOT_SET      XDEBUG_E |    2

@@ -584,7 +584,7 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 				xdebug_arg_dtor(method);
 				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
 			} else {
-				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", args->args[0]));
+				send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on class/method combination.");
 				xdebug_arg_dtor(method);
 			}
 		}
@@ -598,7 +598,7 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 				xdebug_arg_dtor(method);
 				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
 			} else {
-				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", args->args[0]));
+				send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on class/method combination.");
 				xdebug_arg_dtor(method);
 			}
 		}
@@ -633,7 +633,7 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 
 			/* Add breakpoint to the list */
 			xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) extra_brk_info);
-			SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s:%d.\n", method->args[0], atoi(method->args[1])));
+			send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on file:line combination.");
 			xdebug_arg_dtor(method);
 		}
 	} else { /* function */
@@ -641,7 +641,7 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 			xdebug_arg_dtor(method);
 			return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
 		} else {
-			SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", args->args[0]));
+			send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on function.");
 			xdebug_arg_dtor(method);
 		}
 	}
@@ -675,7 +675,7 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 				xdebug_arg_dtor(method);
 				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_REMOVED, "Breakpoint could not be removed.");
 			} else {
-				SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", args->args[0]));
+				send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
 				xdebug_arg_dtor(method);
 			}
 		}
@@ -689,7 +689,7 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 				xdebug_arg_dtor(method);
 				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_REMOVED, "Breakpoint could not be removed.");
 			} else {
-				SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", args->args[0]));
+				send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
 				xdebug_arg_dtor(method);
 			}
 		}
@@ -718,7 +718,7 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 
 				if (atoi(method->args[1]) == brk->lineno && strcmp(tmp_name, brk->file) == 0) {
 					xdebug_llist_remove(context->line_breakpoints, le, NULL);
-					SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", method->args[0]));
+					send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
 					xdebug_arg_dtor(method);
 					return NULL;
 				}
@@ -730,7 +730,7 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 			xdebug_arg_dtor(method);
 			return make_message(context, XDEBUG_E_BREAKPOINT_NOT_REMOVED, "Breakpoint could not be removed.");
 		} else {
-			SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", args->args[0]));
+			send_message(context, XDEBUG_D_BREAKPOINT_REMOVED, "Breakpoint removed.");
 			xdebug_arg_dtor(method);
 		}
 	}
