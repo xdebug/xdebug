@@ -844,6 +844,14 @@ void print_profile(int html, int mode TSRMLS_DC)
 
 	if (html) {
 		php_printf("</table>\n");
+
+		php_printf("<table cellspacing=1 cellpadding=1 border=1>\n");
+		php_printf("<tr><td>Opcode Compiling</td><td>%10.10f</td></tr>\n", XG(total_compiling_time));
+		php_printf("<tr><td>Function Execution</td><td>%10.10f</td></tr>\n", total_function_exec);
+		php_printf("<tr><td>Ambient Code Execution</td><td>%10.10f</td></tr>\n", (total_time - total_function_exec));
+		php_printf("<tr><td>Total Execution</td><td>%10.10f</td></tr>\n", total_time);
+		php_printf("<tr><td>Total Processing</td><td>%10.10f</td></tr>\n", XG(total_compiling_time) + total_time);
+		php_printf("</table>\n");
 	} else {
 		fprintf(data_output, "-----------------------------------------------------------------------------------\n");
 		fprintf(data_output, "Opcode Compiling:                             %10.10f\n", XG(total_compiling_time));
