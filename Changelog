@@ -1,3 +1,7 @@
+Sun Nov 28 23:14:49 CET 2004 Derick Rethans <derick@derickrethans.nl>
+package.xml:
+- Remove nolonger existing file.
+
 Sun Nov 28 23:12:05 CET 2004 Derick Rethans <derick@derickrethans.nl>
 package.xml:
 - Update NEWS and package.xml
