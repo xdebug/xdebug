@@ -118,11 +118,15 @@ zend_module_entry xdebug_module_entry = {
 	PHP_MINIT(xdebug),
 	PHP_MSHUTDOWN(xdebug),
 	PHP_RINIT(xdebug),
+#ifndef ZEND_ENGINE_2
 	PHP_RSHUTDOWN(xdebug),
+#else
+	NULL,
+#endif
 	PHP_MINFO(xdebug),
 	XDEBUG_VERSION,
 #ifdef ZEND_ENGINE_2
-	ZEND_MODULE_EXEC_FINISHED_N(xdebug),
+	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(xdebug),
 #else
 	NULL,
 	NULL,
@@ -439,13 +443,19 @@ PHP_RINIT_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-ZEND_MODULE_EXEC_FINISHED_D(xdebug)
+ZEND_MODULE_EXEC_POST_DEACTIVATE_D(xdebug)
 {
 	return SUCCESS;
 }
 
+#ifdef ZEND_ENGINE_2
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
+{
+	TSRMLS_FETCH();
+#else
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
+#endif
 	if (XG(auto_profile) && XG(profile_file)) {
 		XG(auto_profile) = 2;
 		print_profile(0, XG(auto_profile_mode) TSRMLS_CC);

@@ -19,7 +19,7 @@
 #ifndef PHP_XDEBUG_H
 #define PHP_XDEBUG_H
 
-#define XDEBUG_VERSION "1.3.1"
+#define XDEBUG_VERSION "1.3.2dev"
 
 #include "php.h"
 
@@ -63,7 +63,7 @@ PHP_RINIT_FUNCTION(xdebug);
 PHP_RSHUTDOWN_FUNCTION(xdebug);
 PHP_MINFO_FUNCTION(xdebug);
 #ifdef ZEND_ENGINE_2
-ZEND_MODULE_EXEC_FINISHED_D(xdebug);
+ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 #endif
 
 /* call stack functions */
