@@ -48,6 +48,14 @@ Xdebug is compiled separately, all by itself, as stated above.
    successful!
 
 
+SUPPORT
+-------
+
+If you think that you encountered a bug, please file a detailed bugreport
+at http://bugs.xdebug.org . You are required to create an account, this is
+so that you can be contacted for additional information and to keep out
+bogus bugreports.
+
 
 Derick Rethans
 derick@xdebug.org

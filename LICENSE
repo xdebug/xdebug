@@ -17,26 +17,26 @@ are met:
      distribution.
  
   3. The name "Xdebug" must not be used to endorse or promote products
-	 derived from this software without prior written permission. For
-	 written permission, please contact xdebug@derickrethans.nl.
+     derived from this software without prior written permission. For
+     written permission, please contact xdebug@derickrethans.nl.
   
   4. Products derived from this software may not be called "Xdebug", nor
      may "Xdebug" appear in their name, without prior written permission
-	 from xdebug@derickrethans.nl.
+     from xdebug@derickrethans.nl.
  
   5. Derick Rethans may publish revised and/or new versions of the
-	 license from time to time. Each version will be given a
-	 distinguishing version number.  Once covered code has been
-	 published under a particular version of the license, you may
-	 always continue to use it under the terms of that version. You
-	 may also choose to use such covered code under the terms of any
-	 subsequent version of the license published by Derick Rethans. No
-	 one other than Derick Rethans has the right to modify the terms
-	 applicable to covered code created under this License.
+     license from time to time. Each version will be given a
+     distinguishing version number.  Once covered code has been
+     published under a particular version of the license, you may
+     always continue to use it under the terms of that version. You
+     may also choose to use such covered code under the terms of any
+     subsequent version of the license published by Derick Rethans. No
+     one other than Derick Rethans has the right to modify the terms
+     applicable to covered code created under this License.
 
   6. Redistributions of any form whatsoever must retain the following
-	 acknowledgment: "This product includes Xdebug, freely available
-	 from <http://xdebug.derickrethans.nl/>".
+     acknowledgment: "This product includes Xdebug, freely available
+     from <http://xdebug.derickrethans.nl/>".
 
 THIS SOFTWARE IS PROVIDED BY DERICK RETHANS ``AS IS'' AND ANY
 EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
