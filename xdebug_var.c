@@ -32,7 +32,7 @@ void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f)
 {
 	int l = strlen(str);
 	if (xs->l + l > xs->a - 1) {
-		xs->d = xdrealloc (xs->d, xs->a + l + XDEBUG_STR_PREALLOC);
+		xs->d = xdrealloc(xs->d, xs->a + l + XDEBUG_STR_PREALLOC);
 		xs->a = xs->a + l + XDEBUG_STR_PREALLOC;
 	}
 	if (!xs->l) {
@@ -49,7 +49,7 @@ void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f)
 void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f)
 {
 	if (xs->l + le > xs->a - 1) {
-		xs->d = xdrealloc (xs->d, xs->a + le + XDEBUG_STR_PREALLOC);
+		xs->d = xdrealloc(xs->d, xs->a + le + XDEBUG_STR_PREALLOC);
 		xs->a = xs->a + le + XDEBUG_STR_PREALLOC;
 	}
 	if (!xs->l) {
@@ -110,17 +110,17 @@ char *error_type(int type)
 }
 
 
-char *xdebug_sprintf (const char* fmt, ...)
+char *xdebug_sprintf(const char* fmt, ...)
 {
 	char   *new_str;
 	int     size = 1;
 	va_list args;
 
-	new_str = (char *) xdmalloc (size);
+	new_str = (char *) xdmalloc(size);
 
 	va_start(args, fmt);
 	for (;;) {
-		int n = vsnprintf (new_str, size, fmt, args);
+		int n = vsnprintf(new_str, size, fmt, args);
 		if (n > -1 && n < size) {
 			break;
 		}
@@ -129,9 +129,9 @@ char *xdebug_sprintf (const char* fmt, ...)
 		} else {
 			size = n + 1;
 		}
-		new_str = (char *) xdrealloc (new_str, size);
+		new_str = (char *) xdrealloc(new_str, size);
 	}
-	va_end (args);
+	va_end(args);
 
 	return new_str;
 }
@@ -202,7 +202,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 		case IS_STRING:
 			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
 			XDEBUG_STR_ADD(str, xdebug_sprintf("'%s'", tmp_str), 1);
-			efree (tmp_str);
+			efree(tmp_str);
 			break;
 
 		case IS_ARRAY:
@@ -222,7 +222,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 2) {
-				XDEBUG_STR_ADD(str, xdebug_sprintf ("class %s {", Z_OBJCE_PP(struc)->name), 1);
+				XDEBUG_STR_ADD(str, xdebug_sprintf("class %s {", Z_OBJCE_PP(struc)->name), 1);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 2, level, str);
 				if (myht->nNumOfElements > 0) {
 					XDEBUG_STR_CHOP(str, 2);
@@ -247,12 +247,12 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 	}
 }
 
-char* get_zval_value (zval *val)
+char* get_zval_value(zval *val)
 {
 	xdebug_str str = {0, 0, NULL};
 	TSRMLS_FETCH();
 
-	xdebug_var_export (&val, (xdebug_str*) &str, 1 TSRMLS_CC);
+	xdebug_var_export(&val, (xdebug_str*) &str, 1 TSRMLS_CC);
 
 	return str.d;
 }
@@ -322,7 +322,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 		case IS_STRING:
 			tmp_str = xmlize(Z_STRVAL_PP(struc));
 			XDEBUG_STR_ADD(str, xdebug_sprintf("<string>%s</string>", tmp_str), 1);
-			efree (tmp_str);
+			efree(tmp_str);
 			break;
 
 		case IS_ARRAY:
@@ -339,7 +339,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 2) {
-				XDEBUG_STR_ADD(str, xdebug_sprintf ("<object class='%s'>", Z_OBJCE_PP(struc)->name), 1);
+				XDEBUG_STR_ADD(str, xdebug_sprintf("<object class='%s'>", Z_OBJCE_PP(struc)->name), 1);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml, 2, level, str);
 				XDEBUG_STR_ADDL(str, "</object>", 9, 0);
 			} else {
@@ -408,7 +408,7 @@ char* xmlize(char *string)
 * ** Function name printing function
 * */
 
-char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC)
+char* show_fname(struct function_stack_entry* entry, int html TSRMLS_DC)
 {
 	char *tmp;
 	xdebug_func f;
@@ -421,12 +421,12 @@ char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC)
 
 			if (PG(html_errors) && zend_hash_find(EG(function_table), f.function, strlen(f.function) + 1, (void**) &zfunc) == SUCCESS) {
 				if (html && zfunc->type == ZEND_INTERNAL_FUNCTION) {
-					return xdebug_sprintf ("<a href='%s/%s' target='_new'>%s</a>\n", XG(manual_url), f.function, f.function);
+					return xdebug_sprintf("<a href='%s/%s' target='_new'>%s</a>\n", XG(manual_url), f.function, f.function);
 				} else {
-					return xdstrdup (f.function);
+					return xdstrdup(f.function);
 				}
 			} else {
-				return xdstrdup (f.function);
+				return xdstrdup(f.function);
 			}
 			break;
 		}
@@ -438,8 +438,8 @@ char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = xdmalloc (strlen (f.class) + 4 + 1);
-			sprintf (tmp, "new %s", f.class);
+			tmp = xdmalloc(strlen(f.class) + 4 + 1);
+			sprintf(tmp, "new %s", f.class);
 			return tmp;
 			break;
 
@@ -450,8 +450,8 @@ char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
-			sprintf (tmp, "%s::%s", f.class, f.function);
+			tmp = xdmalloc(strlen(f.function) + strlen(f.class) + 2 + 1);
+			sprintf(tmp, "%s::%s", f.class, f.function);
 			return tmp;
 			break;
 
@@ -462,32 +462,32 @@ char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC)
 			if (!f.function) {
 				f.function = "?";
 			}
-			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
-			sprintf (tmp, "%s->%s", f.class, f.function);
+			tmp = xdmalloc(strlen(f.function) + strlen(f.class) + 2 + 1);
+			sprintf(tmp, "%s->%s", f.class, f.function);
 			return tmp;
 			break;
 
 		case XFUNC_EVAL:
-			return xdstrdup ("eval");
+			return xdstrdup("eval");
 			break;
 
 		case XFUNC_INCLUDE:
-			return xdstrdup ("include");
+			return xdstrdup("include");
 			break;
 
 		case XFUNC_INCLUDE_ONCE:
-			return xdstrdup ("include_once");
+			return xdstrdup("include_once");
 			break;
 
 		case XFUNC_REQUIRE:
-			return xdstrdup ("require");
+			return xdstrdup("require");
 			break;
 
 		case XFUNC_REQUIRE_ONCE:
-			return xdstrdup ("require_once");
+			return xdstrdup("require_once");
 			break;
 
 		default:
-			return xdstrdup ("{unknown}");
+			return xdstrdup("{unknown}");
 	}
 }

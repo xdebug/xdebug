@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-
 #include "xdebug_com.h"
 #include "php_xdebug.h"
 #include "xdebug_handlers.h"
@@ -34,7 +33,7 @@ xdebug_remote_handler* xdebug_handler_get(char* mode)
 	xdebug_remote_handler_info *ptr = handlers;
 
 	while (ptr->name) {
-		if (strcmp (mode, ptr->name) == 0) {
+		if (strcmp(mode, ptr->name) == 0) {
 			return &ptr->handler;
 		}
 		ptr++;

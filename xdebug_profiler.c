@@ -40,7 +40,7 @@ inline double get_mtimestamp()
 	return 0;
 }
 
-inline static void init_profile_modes (char ***mode_titles)
+inline static void init_profile_modes(char ***mode_titles)
 {
 	*mode_titles = xdmalloc(XDEBUG_PROFILER_MODES * sizeof(char *));
 
@@ -56,12 +56,12 @@ inline static void init_profile_modes (char ***mode_titles)
 	(*mode_titles)[9] = XDEBUG_PROFILER_FC_SUM_D;
 }
 
-inline static void free_profile_modes (char ***mode_titles)
+inline static void free_profile_modes(char ***mode_titles)
 {
 	xdfree(*mode_titles);
 }
 
-inline static int time_taken_cmp (function_stack_entry **p1, function_stack_entry **p2)
+inline static int time_taken_cmp(function_stack_entry **p1, function_stack_entry **p2)
 {
 	if ((*p1)->time_taken < (*p2)->time_taken) {
 		return 1;
@@ -72,7 +72,7 @@ inline static int time_taken_cmp (function_stack_entry **p1, function_stack_entr
 	}
 }
 
-inline static int n_calls_cmp (function_stack_entry **p1, function_stack_entry **p2)
+inline static int n_calls_cmp(function_stack_entry **p1, function_stack_entry **p2)
 {
 	if ((*p1)->f_calls < (*p2)->f_calls) {
 		return 1;
@@ -83,7 +83,7 @@ inline static int n_calls_cmp (function_stack_entry **p1, function_stack_entry *
 	}
 }
 
-inline static int line_numbers (function_stack_entry **p1, function_stack_entry **p2)
+inline static int line_numbers(function_stack_entry **p1, function_stack_entry **p2)
 {
 	if ((*p1)->lineno > (*p2)->lineno) {
 		return 1;
@@ -94,7 +94,7 @@ inline static int line_numbers (function_stack_entry **p1, function_stack_entry 
 	}
 }
 
-inline static int avg_time_cmp (function_stack_entry **p1, function_stack_entry **p2)
+inline static int avg_time_cmp(function_stack_entry **p1, function_stack_entry **p2)
 {
 	double avg1, avg2;
 
@@ -110,7 +110,7 @@ inline static int avg_time_cmp (function_stack_entry **p1, function_stack_entry 
 	}
 }
 
-inline static int time_taken_tree_cmp (xdebug_tree_out **p1, xdebug_tree_out **p2)
+inline static int time_taken_tree_cmp(xdebug_tree_out **p1, xdebug_tree_out **p2)
 {
 	double i = ((*p1)->fse)->time_taken - ((*p2)->fse)->time_taken;
 
@@ -123,7 +123,7 @@ inline static int time_taken_tree_cmp (xdebug_tree_out **p1, xdebug_tree_out **p
 	}
 }
 
-inline static int n_calls_tree_cmp (xdebug_tree_out **p1, xdebug_tree_out **p2)
+inline static int n_calls_tree_cmp(xdebug_tree_out **p1, xdebug_tree_out **p2)
 {
 	if (((*p1)->fse)->f_calls < ((*p2)->fse)->f_calls) {
 		return 1;
@@ -134,7 +134,7 @@ inline static int n_calls_tree_cmp (xdebug_tree_out **p1, xdebug_tree_out **p2)
 	}
 }
 
-inline static int n_line_no_cmp (xdebug_tree_out **p1, xdebug_tree_out **p2)
+inline static int n_line_no_cmp(xdebug_tree_out **p1, xdebug_tree_out **p2)
 {
 	if (((*p1)->fse)->lineno > ((*p2)->fse)->lineno) {
 		return 1;
@@ -150,7 +150,7 @@ inline static void add_function_entry(xdebug_hash *hasht, function_stack_entry *
 	xdebug_hash_add(hasht, ent->function.function, strlen(ent->function.function), ent);
 }
 
-inline static int find_and_inc_function_entry (xdebug_hash *hasht, function_stack_entry *ent, int all)
+inline static int find_and_inc_function_entry(xdebug_hash *hasht, function_stack_entry *ent, int all)
 {
 	function_stack_entry *found_ent;
 
@@ -176,7 +176,7 @@ inline static int find_and_inc_function_entry (xdebug_hash *hasht, function_stac
 	return 0;
 }
 
-static inline function_stack_entry **fetch_tree_profile (int mode, int *size, double total_time TSRMLS_DC)
+static inline function_stack_entry **fetch_tree_profile(int mode, int *size, double total_time TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 
@@ -315,7 +315,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 	return (function_stack_entry **) NULL;
 }
 
-inline static int find_same_function (xdebug_hash *hasht, xdebug_fs *cur, function_stack_entry *parent)
+inline static int find_same_function(xdebug_hash *hasht, xdebug_fs *cur, function_stack_entry *parent)
 {
 	xdebug_fs *found_ent = NULL;
 
@@ -361,7 +361,7 @@ inline static xdebug_fs *find_parent(xdebug_hash *hasht, char *func_name)
 	return found_ent;
 }
 
-static inline xdebug_fs **fetch_fcall_summary (int mode, int *size, double total_time TSRMLS_DC)
+static inline xdebug_fs **fetch_fcall_summary(int mode, int *size, double total_time TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 
@@ -485,7 +485,7 @@ static inline xdebug_fs **fetch_fcall_summary (int mode, int *size, double total
 }
 
 
-static inline function_stack_entry **fetch_simple_profile (int mode, int *size, double total_time TSRMLS_DC)
+static inline function_stack_entry **fetch_simple_profile(int mode, int *size, double total_time TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 
@@ -560,7 +560,7 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size, 
 	return (function_stack_entry **) NULL;
 }
 
-static inline void fetch_full_function_name (function_stack_entry *ent, char *buf)
+static inline void fetch_full_function_name(function_stack_entry *ent, char *buf)
 {
 	char *p;
 
@@ -867,7 +867,7 @@ err:
 	return;
 }
 
-inline static void append_frame (zval **dest, function_stack_entry *ent)
+inline static void append_frame(zval **dest, function_stack_entry *ent)
 {
 	zval *frame = *dest;
 

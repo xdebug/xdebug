@@ -53,7 +53,7 @@ int inet_aton(const char *cp, struct in_addr *inp)
 
 /*
  * Converts a host name to an IP address.  */
-static int lookup_hostname (const char *addr, struct in_addr *in)
+static int lookup_hostname(const char *addr, struct in_addr *in)
 {
 	struct hostent *host_info;
 

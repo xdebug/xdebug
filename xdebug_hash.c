@@ -1,4 +1,4 @@
-/* $Id: xdebug_hash.c,v 1.2 2002-10-28 23:23:15 derick Exp $ */
+/* $Id: xdebug_hash.c,v 1.3 2003-04-15 05:55:56 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -35,7 +35,7 @@ char *xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len)
 	char *tmp;
 
 	tmp = calloc (key->value.str.len + 1, 1);
-	memcpy (tmp, key->value.str.val, key->value.str.len);
+	memcpy(tmp, key->value.str.val, key->value.str.len);
 	*new_len = key->value.str.len;
 
 	return tmp;

@@ -163,7 +163,7 @@ static xdebug_cmd commands_runtime[] = {
 static xdebug_cmd* scan_cmd(xdebug_cmd *ptr, char *line)
 {
 	while (ptr->name) {
-		if (strcmp (ptr->name, line) == 0) {
+		if (strcmp(ptr->name, line) == 0) {
 			return ptr;
 		}
 		ptr++;
@@ -373,9 +373,9 @@ static char *get_variable(xdebug_con *context, char *name, zval *val)
 	switch (options->response_format) {
 	   	case XDEBUG_RESPONSE_NORMAL:
 			if (name) {
-				return xdebug_sprintf ("$%s = %s\n", name, get_zval_value(val));
+				return xdebug_sprintf("$%s = %s\n", name, get_zval_value(val));
 			} else {
-				return xdebug_sprintf ("%s\n", get_zval_value(val));
+				return xdebug_sprintf("%s\n", get_zval_value(val));
 			}
 			break;
 
@@ -479,7 +479,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 		}
 
 		if (i->vars[j].name) {
-		   SENDMSG(h->socket, xdebug_sprintf ("$%s = ", i->vars[j].name));
+		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
 		}
 		tmp = xmlize(i->vars[j].value);
 		SSEND(h->socket, tmp);
@@ -531,7 +531,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 		}
 
 		if (i->vars[j].name) {
-		   SENDMSG(h->socket, xdebug_sprintf ("$%s = ", i->vars[j].name));
+		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
 		}
 		tmp = xmlize(i->vars[j].value);
 		SSEND(h->socket, tmp);
@@ -961,16 +961,16 @@ char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
 }
 
 
-static void dump_used_var (void *context, xdebug_hash_element* he)
+static void dump_used_var(void *context, xdebug_hash_element* he)
 {
 	char               *name = (char*) he->ptr;
 	xdebug_con         *h = (xdebug_con*) context;
 	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
 
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf ("<var name='%s'/>", name));
+		SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
 	} else {
-		SENDMSG(h->socket, xdebug_sprintf ("$%s\n", name));
+		SENDMSG(h->socket, xdebug_sprintf("$%s\n", name));
 	}
 }
 
