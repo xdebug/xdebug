@@ -1,3 +1,9 @@
+Thu Apr 22 20:37:44 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h:
+- Whitespace and removing some unused variables.
+
 Wed Apr 21 20:30:29 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug.c:
 - fix cookie name length
