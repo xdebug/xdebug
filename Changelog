@@ -1,3 +1,7 @@
+Fri Nov 8 15:30:39 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/README:
+- Update README
+
 Thu Nov 7 18:56:53 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - Windows updates
