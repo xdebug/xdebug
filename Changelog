@@ -1,3 +1,7 @@
+Wed Mar 10 19:46:16 UTC 2004 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- Fixed CRC routines
+
 Wed Mar 10 19:40:46 UTC 2004 Derick Rethans <derick@derickrethans.nl>
 :
 - Fixed Changelog
