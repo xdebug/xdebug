@@ -851,7 +851,9 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	} else  {
 		if (EG(opline_ptr)) {
 			cur_opcode = *EG(opline_ptr);
-			tmp->lineno = cur_opcode->lineno;
+			if (cur_opcode) {
+				tmp->lineno = cur_opcode->lineno;
+			}
 		}
 		if (XG(collect_params)) {
 			tmp->var = xdmalloc(arg_count * sizeof (xdebug_var));
