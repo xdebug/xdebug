@@ -288,7 +288,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (XG(stack)->size > 0) {
 			if (((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->delayed_include == 1) {
 				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].name = estrdup ("");
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].value = tmp->filename;
+				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].value = op_array->filename ? estrdup(op_array->filename): NULL;
 				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->varc++;
 			}
 		}
