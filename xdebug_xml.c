@@ -1,8 +1,27 @@
+/*
+   +----------------------------------------------------------------------+
+   | Xdebug                                                               |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2002, 2003, 2004 Derick Rethans                        |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://xdebug.derickrethans.nl/license.php                           |
+   | If you did not receive a copy of the Xdebug license and are unable   |
+   | to obtain it through the world-wide-web, please send a note to       |
+   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   +----------------------------------------------------------------------+
+   | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   +----------------------------------------------------------------------+
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "xdebug_mm.h"
 #include "xdebug_str.h"
 #include "xdebug_xml.h"
+#include "xdebug_compat.h"
 
 static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* output)
 {

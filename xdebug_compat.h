@@ -19,6 +19,7 @@
 #ifndef __HAVE_XDEBUG_COMPAT_H__
 #define __HAVE_XDEBUG_COMPAT_H__
 
+#include "php.h"
 
 #if (PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)
 
