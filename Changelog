@@ -1,3 +1,8 @@
+Sun Apr 04 23:35:48 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_compat.c:
+- And change the name of the symbols everywhere so that it works on Winshit
+  again.
+
 Sun Apr 04 23:32:49 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_compat.h:
