@@ -1534,7 +1534,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.45 $";
+	return "$Revision: 1.46 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1659,8 +1659,12 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	XG(status) = DBGP_STATUS_STOPPED;
 	XG(reason) = DBGP_REASON_OK;
 	response = xdebug_xml_node_init("response");
-	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
-	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
+	/* lastcmd and lasttransid are not always set (for example when the
+	 * connection is severed before the first command is send) */
+	if (XG(lastcmd) && XG(lasttransid)) {
+		xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
+		xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
+	}
 	xdebug_xml_add_attribute_ex(response, "status", xdebug_dbgp_status_strings[XG(status)], 0, 0);
 	xdebug_xml_add_attribute_ex(response, "reason", xdebug_dbgp_reason_strings[XG(reason)], 0, 0);
 
