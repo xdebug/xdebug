@@ -1,3 +1,7 @@
+Thu Apr 08 23:47:43 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #54: source command did not except missing -f parameter.
+
 Tue Apr 06 21:26:06 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 package.xml
 xdebug/php_xdebug.h:
