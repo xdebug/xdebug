@@ -1,6 +1,8 @@
 .deps
 Makefile
 *.lo
+*.slo
+*.mk
 *.la
 .libs
 libs.mk
