@@ -1795,7 +1795,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	"Xdebug",
 	XDEBUG_VERSION,
 	"Derick Rethans",
-	"http://xdebug.derickrethans.nl/",
+	"http://www.xdebug.org/",
 	"Copyright (c) 2002, 2003",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
