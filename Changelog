@@ -1,3 +1,8 @@
+Wed Aug 28 19:56:01 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Increased pre-allocated memory for dumping variables to have some
+  increase in performance.
+
 Wed Aug 28 19:53:34 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - Remove ", " at the end of arrays and object var arrays.
