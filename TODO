@@ -4,17 +4,55 @@ TODO
 For 1.3.0:
 - Bug fixing
   * Double check file/line breakpoints
-  * Remove GLOBALS from 'show-local' (and possibly other superglobals as well)
-    as an 'option'
+  * Fix memleaks with the eval command
+  * Fix "cont" in remote debugger, test case:
+
+  [script]
+  
+	<?php
+		$a = 'foo';
+
+		function foo() {
+			$b = 2;
+			echo $GLOBALS['a'];
+		}
+
+		foo();
+	?>
+
+  [debug commands]
+
+	(init /home/derick/test2.php) bre foo
+	1 Breakpoint set on function.
+	(init /home/derick/test2.php) run
+	Starting program: /home/derick/test2.php
+	Breakpoint, foo()
+		at /home/derick/test2.php:9
+	5			$b = 2;
+
+	(cmd) eval $_GET;
+	array ()
+
+	(cmd) cont
+	Continuing.
+	Breakpoint, foo()                            <<< Should not break here
+		at /home/derick/test2.php:9
+	6			echo $GLOBALS['a'];
+
+	(cmd) cont
+	Continuing.
+	Disconnect
+
+
+- Checks
+  * If the manual works with both www.php.net and php.net
+  * File/line numbers in traces with call_user_func(_array)
+
+For 1.4.0:
 - Additions
   * Add xdebug_break() function to insert breakpoints in your script manually.
   * Provide codes for messages (for localization) including parameters
   * Make host/port configurable from .htaccess
-- Checks
-  * If the manual works with both www.php.net and php.net
-
-For 1.4.0:
-- Additions
   * Finish custom error handler support
   * Add support for the class and method qualifiers such as static, public,
     private etc.
