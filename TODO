@@ -1,5 +1,14 @@
 TODO
 ====
 
-For 1.0.0:
-- Check xdebug_start_trace(<filename>);
+For 1.1.0:
+- Implement PHP 3 compatible debugging capabilities
+
+For 1.2.0:
+- Implement gdb debugging capabilities
+  * breakpoints
+  * step in / step out / step over
+  * accessing data
+    o reading variables / globals
+    o modifying variables / globals
+  * watches
