@@ -314,6 +314,7 @@ void xdebug_env_config()
 	xdebug_explode(" ", config, parts, -1);
 
 	for (i = 0; i < parts->c; ++i) {
+		char *name = NULL;
 		char *envvar = parts->args[i];
 		char *envval = NULL;
 		char *eq = strchr(envvar,'=');
@@ -323,23 +324,22 @@ void xdebug_env_config()
 		if (!*envval) continue;
 
 		if (strcasecmp(envvar, "remote_enable") == 0) {
-			char *name = "xdebug.remote_enable";
-			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			name = "xdebug.remote_enable";
 		} else
 		if (strcasecmp(envvar, "remote_port") == 0) {
-			char *name = "xdebug.remote_port";
-			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			name = "xdebug.remote_port";
 		} else
 		if (strcasecmp(envvar, "remote_host") == 0) {
-			char *name = "xdebug.remote_host";
-			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			name = "xdebug.remote_host";
 		} else
 		if (strcasecmp(envvar, "remote_handler") == 0) {
-			char *name = "xdebug.remote_handler";
-			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			name = "xdebug.remote_handler";
 		} else
 		if (strcasecmp(envvar, "remote_mode") == 0) {
-			char *name = "xdebug.remote_mode";
+			name = "xdebug.remote_mode";
+		}
+
+		if (name) {
 			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 		}
 	}
