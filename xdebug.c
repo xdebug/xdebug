@@ -288,9 +288,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		struct function_stack_entry *i = SRM_LLIST_VALP(le);
 
 		if (PG(html_errors)) {
-			php_printf ("<tr><td>%s(", i->function_name);
+			php_printf ("<tr><td>%s (", i->function_name);
 		} else {
-			printf ("%s(", i->function_name);
+			printf ("%s (", i->function_name);
 		}
 
 		/* Printing vars */
@@ -561,6 +561,51 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 
 	tmp->function_name = NULL;
 	switch (cur_opcode->opcode) {
+		case ZEND_INCLUDE_OR_EVAL:
+			/* Determine type */
+			switch (cur_opcode->op2.u.constant.value.lval) {
+				case ZEND_INCLUDE_ONCE:
+					tmp->function_name = estrdup ("include_once");
+					break;
+				case ZEND_REQUIRE_ONCE:
+					tmp->function_name = estrdup ("require_once");
+					break;
+				case ZEND_INCLUDE:
+					tmp->function_name = estrdup ("include");
+					break;
+				case ZEND_REQUIRE:
+					tmp->function_name = estrdup ("require");
+					break;
+				case ZEND_EVAL:
+					tmp->function_name = estrdup ("eval");
+					break;
+			}
+			
+			switch (cur_opcode->op1.op_type) {
+				case IS_CONST:
+					sprintf (buffer, "'%s'", cur_opcode->op1.u.constant.value.str.val);
+					tmp->vars[tmp->varc] = estrdup (buffer);
+					tmp->varc++;
+					break;
+				default:
+					break;
+			}
+
+			/* If it's not a constant name, back track to see what the variable name of the parameter was */
+			if (tmp->varc == 0 && (cur_opcode - 2)->opcode == ZEND_FETCH_R) {
+				if ((cur_opcode - 2)->op1.op_type == IS_CONST) {
+					sprintf (buffer, "$%s", (cur_opcode - 2)->op1.u.constant.value.str.val);
+					tmp->vars[tmp->varc] = estrdup (buffer);
+					tmp->varc++;
+				}
+			}
+
+			/* Otherwise fall back to ? */
+			if (tmp->varc == 0) {
+				tmp->vars[tmp->varc] = estrdup ("?");
+				tmp->varc++;
+			}
+			break;
 		case ZEND_DO_FCALL:
 			switch (cur_opcode->op1.op_type) {
 				case IS_CONST:
@@ -580,76 +625,75 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 					break;
 			}
 			break;
-		case ZEND_DO_FCALL_BY_NAME: 
-			{
-				zend_op* tmpOpCode;
-				zval* function_name;
+		case ZEND_DO_FCALL_BY_NAME: {
+			zend_op* tmpOpCode;
+			zval* function_name;
 
-				tmpOpCode = cur_opcode;
-				while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME) {
-					tmpOpCode--;
-				}
-				switch (cur_opcode->op1.op_type)  {
-					case IS_CONST:
-						switch (tmpOpCode->op2.op_type) {
+			tmpOpCode = cur_opcode;
+			while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME) {
+				tmpOpCode--;
+			}
+			switch (cur_opcode->op1.op_type)  {
+				case IS_CONST:
+					switch (tmpOpCode->op2.op_type) {
+						case IS_CONST:
+							tmp->function_name = estrndup(
+								tmpOpCode->op2.u.constant.value.str.val,
+								tmpOpCode->op2.u.constant.value.str.len
+							);
+							break;
+						default:  /* FIXME need better IS_VAR handling */
+							tmp->function_name = estrdup("null");
+							break;
+	
+					}
+					break;
+				case IS_VAR:
+					if (tmpOpCode->op1.op_type == IS_CONST)   {
+						switch(tmpOpCode->op2.op_type) {
 							case IS_CONST:
-								tmp->function_name = estrndup(
-									tmpOpCode->op2.u.constant.value.str.val,
-		 							tmpOpCode->op2.u.constant.value.str.len
+								sprintf(buffer, "%s::%s",
+									tmpOpCode->op1.u.constant.value.str.val,
+									tmpOpCode->op2.u.constant.value.str.val
 								);
 								break;
-							default:  /* FIXME need better IS_VAR handling */
-								tmp->function_name = estrdup("null");
+							default:
+								sprintf(buffer, "%s::<???>",
+									tmpOpCode->op1.u.constant.value.str.val
+								);
 								break;
-		
 						}
-						break;
-					case IS_VAR:
-						if (tmpOpCode->op1.op_type == IS_CONST)   {
-							switch(tmpOpCode->op2.op_type) {
-								case IS_CONST:
-									sprintf(buffer, "%s::%s",
-										tmpOpCode->op1.u.constant.value.str.val,
-										tmpOpCode->op2.u.constant.value.str.val
-									);
-									break;
-								default:
-									sprintf(buffer, "%s::<???>",
-										tmpOpCode->op1.u.constant.value.str.val
-									);
-									break;
-							}
+					}
+					else if(CG(class_entry).name) {
+						switch(tmpOpCode->op2.op_type) {
+							case IS_CONST:
+								sprintf(buffer, "%s::%s",
+									CG(class_entry).name,
+									tmpOpCode->op2.u.constant.value.str.val
+								);
+								break;
+							default:
+								sprintf(buffer, "%s::<???>",
+									CG(class_entry).name
+								);
+								break;
 						}
-						else if(CG(class_entry).name) {
-							switch(tmpOpCode->op2.op_type) {
-								case IS_CONST:
-									sprintf(buffer, "%s::%s",
-										CG(class_entry).name,
-										tmpOpCode->op2.u.constant.value.str.val
-									);
-									break;
-								default:
-									sprintf(buffer, "%s::<???>",
-										CG(class_entry).name
-									);
-									break;
-							}
+					}
+					else {
+						switch(tmpOpCode->op2.op_type) {
+							case IS_CONST:
+								sprintf(buffer, "<???>::%s",
+									tmpOpCode->op2.u.constant.value.str.val
+								);
+								break;
+							default:
+								sprintf(buffer, "<???>::<???>");
+								break;
 						}
-						else {
-							switch(tmpOpCode->op2.op_type) {
-								case IS_CONST:
-									sprintf(buffer, "<???>::%s",
-										tmpOpCode->op2.u.constant.value.str.val
-									);
-									break;
-								default:
-									sprintf(buffer, "<???>::<???>");
-									break;
-							}
-						}
-						tmp->function_name = estrdup(buffer);
+					}
+					tmp->function_name = estrdup(buffer);
 				}
-								
+
 			}
 			break;
 	}
