@@ -1022,7 +1022,7 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 	struct function_stack_entry *fse;
 	xdebug_hash                 *ht;
 	
-	if (fse = xdebug_get_stack_tail(TSRMLS_C)) {
+	if (fse = xdebug_get_stack_frame(depth TSRMLS_CC)) {
 		ht = fse->used_vars;
 		XG(active_symbol_table) = fse->symbol_table;
 
@@ -1300,7 +1300,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.23 $";
+	return "$Revision: 1.24 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
