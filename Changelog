@@ -1,3 +1,7 @@
+Sat Nov 8 13:03:28 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed bug #19: The value of xdebug.output_dir in a .htaccess never takes effect.
+
 Fri Nov 7 16:27:03 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - MFH: Fixed bug #27: Repeated connect attempts when no debugger is listening
