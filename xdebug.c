@@ -54,6 +54,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_call_function,      NULL)
 	PHP_FE(xdebug_call_file,          NULL)
 	PHP_FE(xdebug_call_line,          NULL)
+	PHP_FE(xdebug_memory_usage,       NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -442,6 +443,11 @@ PHP_FUNCTION(xdebug_call_file)
 	i = SRM_LLIST_VALP(le);
 
 	RETURN_STRING(i->filename, 1);
+}
+
+PHP_FUNCTION(xdebug_memory_usage)
+{
+	RETURN_LONG(AG(allocated_memory));
 }
 
 
