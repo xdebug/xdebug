@@ -1,3 +1,8 @@
+Thu Jul 15 01:58:49 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- fixed #73: komodo beta 4.3.7 crash
+- fixed dbgp error handler to work correctly and provide a response that is correct for the protocol
+#- bug entry does not identify what the real bug was, see also bugs.activestate.com for bug # 32630
 Tue Jul 13 13:13:20 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed one more Windows warning.
