@@ -1,3 +1,26 @@
+Mon Aug 16 09:59:56 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+tests/array_map.phpt
+xdebug/tests/assert_test.phpt
+xdebug/tests/auto_trace.phpt
+xdebug/tests/bug00002.phpt
+xdebug/tests/bug00003.phpt
+xdebug/tests/call_user_func_array.phpt
+xdebug/tests/call_user_func_array2.phpt
+xdebug/tests/test1.phpt
+xdebug/tests/test10b.phpt
+xdebug/tests/test12.phpt
+xdebug/tests/test13.phpt
+xdebug/tests/test14b.phpt
+xdebug/tests/test15.phpt
+xdebug/tests/test16b.phpt
+xdebug/tests/test17.phpt
+xdebug/tests/test18.phpt
+xdebug/tests/test20b.phpt
+xdebug/tests/test7b.phpt
+xdebug/tests/test9b.phpt
+xdebug/tests/trace.phpt:
+- Make testcases work independently of the xdebug.collect_return setting.
+
 Mon Aug 16 09:59:27 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_var.c:
