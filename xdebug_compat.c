@@ -16,11 +16,12 @@
    | Modifications: Derick Rethans <derick@xdebug.org>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.4 2004-04-11 14:44:04 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.5 2004-07-19 19:51:26 helly Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
 #include "xdebug_compat.h"
+#include "zend_extensions.h"
 
 #if (PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)
 
@@ -302,7 +303,11 @@ zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 					|| ((int)T->str_offset.offset<0)
 					|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
 					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
+#if ZEND_EXTENSION_API_NO >= 220040718
+					T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
+#else
 					T->tmp_var.value.str.val = empty_string;
+#endif
 					T->tmp_var.value.str.len = 0;
 				} else {
 					char c = str->value.str.val[T->str_offset.offset];
@@ -365,7 +370,11 @@ zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 								|| (T->EA.data.str_offset.offset<0)
 								|| (T->EA.data.str_offset.str->value.str.len <= T->EA.data.str_offset.offset)) {
 								zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->EA.data.str_offset.offset);
+#if ZEND_EXTENSION_API_NO >= 220040718
+								T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
+#else
 								T->tmp_var.value.str.val = empty_string;
+#endif
 								T->tmp_var.value.str.len = 0;
 							} else {
 								char c = str->value.str.val[T->EA.data.str_offset.offset];
