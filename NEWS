@@ -1,3 +1,8 @@
+- Added ini setting to change the default setting for enabling showing
+  enhanced error messages. (Defaults to "On"). (Derick)
+- Added the functions xdebug_enable() and xdebug_disable() to change the
+  showing of stack traces from within your code. (Derick)
+
 - Fixed the extension to show all errors. (Derick)
 
 - Implemented xdebug_memory_usage() which returns the memory in use by PHPs
