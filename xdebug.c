@@ -177,10 +177,6 @@ static PHP_INI_MH(OnUpdateSession)
 	DUMP_TOK(session);
 }
 
-static PHP_INI_MH(OnUpdateAllowedClients)
-{
-}
-
 static PHP_INI_MH(OnUpdateDebugMode)
 {
 	if (!new_value) {
@@ -241,7 +237,6 @@ PHP_INI_BEGIN()
 #else
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "17869",              PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 #endif
-	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
 PHP_INI_END()
 
 static double get_utime()
@@ -741,44 +736,17 @@ static int handle_breakpoints(struct function_stack_entry *fse)
 
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
-	zval                        *dummy;
+/*	zval                        **dummy; */
 	zend_execute_data           *edata = EG(current_execute_data);
 	struct function_stack_entry *fse;
-
-	/* Set session cookie if requested */
-	if (
-		((
-		 	PG(http_globals)[TRACK_VARS_GET] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
-		) || (
-		 	PG(http_globals)[TRACK_VARS_POST] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
-		)) && !(
-			PG(http_globals)[TRACK_VARS_COOKIE] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "xdebug_session", sizeof("xdebug_session"), (void **) &dummy) == SUCCESS
-		)
-	) {
-		php_setcookie("xdebug_session", 13, "yes", 3, time(NULL) + 3600, "/", 1, NULL, 0, 0, 1 TSRMLS_CC);
-	}
-
-	/* Remove session cookie if requested */
-	if (
-		(
-		 	PG(http_globals)[TRACK_VARS_GET] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
-		) || (
-		 	PG(http_globals)[TRACK_VARS_POST] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
-		)
-	) {
-		php_setcookie("xdebug_session", 13, "", 0, time(NULL) + 3600, "/", 1, 1, NULL, 0, 0, 1 TSRMLS_CC);
-	}
 
 	/* Start context if requested */
 	if (
 		!XG(remote_enabled) &&
 		XG(remote_enable) &&
-		(XG(remote_mode) == XDEBUG_REQ)
+		(XG(remote_mode) == XDEBUG_REQ) /* &&
+		PG(http_globals)[TRACK_VARS_GET] &&
+		zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "__XDEBUG__", sizeof("__XDEBUG__"), (void **) &dummy) == SUCCESS */
 	) {
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		if (XG(context).socket >= 0) {
