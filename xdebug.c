@@ -831,22 +831,24 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 	xdfree(error_type_str);
 
-	/* Start JIT if requested and not yet enabled */
-	if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
-		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
-		if (XG(context).socket >= 0) {
-			XG(remote_enabled) = 1;
-			XG(context).program_name = NULL;
+	if (EG(error_reporting) & type) {
+		/* Start JIT if requested and not yet enabled */
+		if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
+			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+			if (XG(context).socket >= 0) {
+				XG(remote_enabled) = 1;
+				XG(context).program_name = NULL;
 
-			/* Get handler from mode */
-			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
+				/* Get handler from mode */
+				XG(context).handler = xdebug_handler_get(XG(remote_handler));
+				XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
+			}
 		}
-	}
-	if (XG(remote_enabled)) {
-		if (!XG(context).handler->remote_error(&(XG(context)), type, buffer, error_filename, error_lineno, XG(stack))) {
-			XG(remote_enabled) = 0;
-			XG(remote_enable)  = 0;
+		if (XG(remote_enabled)) {
+			if (!XG(context).handler->remote_error(&(XG(context)), type, buffer, error_filename, error_lineno, XG(stack))) {
+				XG(remote_enabled) = 0;
+				XG(remote_enable)  = 0;
+			}
 		}
 	}
 
