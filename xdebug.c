@@ -1300,7 +1300,7 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT, NULL);
+			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
 		}
 	}
 	if (XG(remote_enabled)) {

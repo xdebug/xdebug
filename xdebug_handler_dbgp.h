@@ -71,7 +71,7 @@ typedef struct xdebug_dbgp_cmd {
 	int  cont;
 } xdebug_dbgp_cmd;
 
-#define CMD_OPTION(opt)    (opt == '-'?args->value[26]:args->value[(opt) - 'a'])
+#define CMD_OPTION(opt)    (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])
 
 typedef struct xdebug_dbgp_options {
 	int max_children;

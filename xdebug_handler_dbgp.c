@@ -234,7 +234,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 			return *retval;
 		}
 	}
-	
+
 	st = &EG(symbol_table);
 	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
 		return *retval;
@@ -555,7 +555,7 @@ static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 		if (action == BREAKPOINT_ACTION_UPDATE) {
 			if (CMD_OPTION('s')) {
 				BREAKPOINT_CHANGE_STATE();
-			}		
+			}
 			if (CMD_OPTION('n')) {
 				brk_info->lineno = strtol(CMD_OPTION('n'), NULL, 10);
 			}
@@ -777,7 +777,7 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 	xdebug_xml_node *message;
 	int   new_len;
 	char *encoded_source;
-	
+
 	message = xdebug_xml_node_init("stream");
 	xdebug_xml_add_attribute_ex(message, "type", (char *)name, 0, 0);
 	xdebug_xml_add_attribute_ex(message, "encoding", "base64", 0, 0);
@@ -785,7 +785,7 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 	xdebug_xml_add_text(message, xdstrdup(encoded_source));
 	send_message(&XG(context), message);
 	xdebug_xml_node_dtor(message);
-	
+
 	efree(encoded_source);
 	return 0;
 }
@@ -1114,12 +1114,10 @@ DBGP_FUNC(property_get)
 
 DBGP_FUNC(property_set)
 {
-	xdebug_xml_node *var_data;
 	int              depth = 0;
 	int              context_id = 0;
 	char            *new_value;
 	char            *eval_string;
-	xdebug_xml_node *ret_xml;
 	zval             ret_zval;
 	int              new_length;
 	int              res;
@@ -1129,14 +1127,14 @@ DBGP_FUNC(property_set)
 	char            *data = CMD_OPTION('-');
 
 	/* XXX TODO
-	  if the key or the address are returned, they can be used to more efficiently
-           retrieve the value from the variables list.  Otherwise we use EVAL to set
-           the property which works great, but is slower.
-         
-           handle the depth value and set the property at a specific stack depth
-           
-           handle the context_id value and set the property in the correct context
-         */
+	 * if the key or the address are returned, they can be used to more
+	 * efficiently retrieve the value from the variables list.  Otherwise we
+	 * use EVAL to set the property which works great, but is slower.
+	 *
+	 * handle the depth value and set the property at a specific stack depth
+	 *
+	 * handle the context_id value and set the property in the correct context
+	 */
 	
 	if (!name) { /* name */
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
@@ -1153,12 +1151,11 @@ DBGP_FUNC(property_set)
 	if (CMD_OPTION('a')) { /* address */
 		address = strtol(CMD_OPTION('a'), NULL, 10);
 	}
-	
+
 	/* base64 decode eval string */
 	new_value = xdebug_base64_decode(data, strlen(data), &new_length);
 	eval_string = xdebug_sprintf("%s = %s", name, new_value);
 	res = _xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
-
 
 	efree(new_value);
 	xdfree(eval_string);
@@ -1168,11 +1165,6 @@ DBGP_FUNC(property_set)
 		xdebug_xml_add_attribute(*retval, "success", "0");
 	} else {
 		xdebug_xml_add_attribute(*retval, "success", "1");
-		/*
-		  It is not spec to return the property element
-		ret_xml = get_zval_value_xml_node(name, &ret_zval);
-		xdebug_xml_add_child(*retval, ret_xml);
-		*/
 		zval_dtor(&ret_zval);
 	}
 }
@@ -1182,13 +1174,14 @@ DBGP_FUNC(property_value)
 	zval            *var_data;
 	zval             ret_zval;
 	int              res;
-	xdebug_xml_node *ret_xml;
 	char            *name = CMD_OPTION('n');
+	long             context_id = 0, depth = 0;
 
 	/* XXX TODO
-           handle the depth value and set the property at a specific stack depth
-           
-           handle the context_id value and set the property in the correct context
+	 * handle the depth value and set the property at a specific stack depth
+	 * 
+	 * handle the context_id value and set the property in the correct context
+	 */
 
 	if (CMD_OPTION('d')) { 
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
@@ -1196,7 +1189,6 @@ DBGP_FUNC(property_value)
 	if (CMD_OPTION('c')) { 
 		context_id = strtol(CMD_OPTION('c'), NULL, 10);
 	}
-        */
 
 	if (!name) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
@@ -1536,7 +1528,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.41 $";
+	return "$Revision: 1.42 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1611,7 +1603,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 
 	if (getenv("DBGP_COOKIE")) {
 		xdebug_xml_add_attribute_ex(response, "session", xdstrdup(getenv("DBGP_COOKIE")), 0, 1);
-	}	
+	}
 
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
@@ -1672,7 +1664,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		XG(stdio).php_body_write = NULL;
 		XG(stdio).php_header_write = NULL;
 	}
-	
+
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
