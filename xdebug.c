@@ -74,10 +74,10 @@
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 
-void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
+void (*xdebug_old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
-void (*old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
+void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 
 /* error callback repalcement functions */
@@ -442,10 +442,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_compile_file = zend_compile_file;
 	zend_compile_file = xdebug_compile_file;
 
-	old_execute = zend_execute;
+	xdebug_old_execute = zend_execute;
 	zend_execute = xdebug_execute;
 
-	old_execute_internal = zend_execute_internal;
+	xdebug_old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
 
 	/* Replace error handler callback with our own */
@@ -494,8 +494,8 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	/* Reset compile, execute and error callbacks */
 	zend_compile_file = old_compile_file;
-	zend_execute = old_execute;
-	zend_execute_internal = old_execute_internal;
+	zend_execute = xdebug_old_execute;
+	zend_execute_internal = xdebug_old_execute_internal;
 	zend_error_cb = old_error_cb;
 
 	return SUCCESS;
