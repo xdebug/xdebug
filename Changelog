@@ -1,3 +1,25 @@
+Thu Oct 24 23:27:26 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/auto_trace.phpt
+/xdebug/tests/test1.phpt
+/xdebug/tests/test10.phpt
+/xdebug/tests/test11.phpt
+/xdebug/tests/test12.phpt
+/xdebug/tests/test13.phpt
+/xdebug/tests/test14.phpt
+/xdebug/tests/test15.phpt
+/xdebug/tests/test16.phpt
+/xdebug/tests/test17.phpt
+/xdebug/tests/test18.phpt
+/xdebug/tests/test2.phpt
+/xdebug/tests/test4.phpt
+/xdebug/tests/test5.phpt
+/xdebug/tests/test6.phpt
+/xdebug/tests/test7.phpt
+/xdebug/tests/test8.phpt
+/xdebug/tests/test9.phpt
+/xdebug/tests/trace.phpt:
+- Fix testsuite to work with new run-tests.php script
+
 Tue Oct 22 15:15:05 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/Makefile:
 - Re-add makefile
