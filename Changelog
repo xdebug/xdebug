@@ -1,3 +1,8 @@
+Thu Jul 3 22:47:30 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/xdebug.c:
+- Don't show memory footprint when it's not enabled.
+
 Thu Jul 3 22:18:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/php_xdebug.h
