@@ -58,8 +58,7 @@
 #include "usefulstuff.h"
 #include "php_xdebug.h"
 
-/* static int le_xdebug; */
-
+/* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 
@@ -69,6 +68,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 void (*old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 
+/* error callback repalcement functions */
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -292,6 +292,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
+	/* Redirect compile and execute functions to our own */
 	old_compile_file = zend_compile_file;
 	zend_compile_file = xdebug_compile_file;
 
@@ -301,9 +302,11 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
 
+	/* Replace error handler callback with our own */
 	old_error_cb = zend_error_cb;
 	new_error_cb = xdebug_error_cb;
 
+	/* Register constants for profiling */
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_LBL);
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_CPU);
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_NC);
@@ -320,6 +323,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
+	/* Reset compile, execute and error callbacks */
 	zend_compile_file = old_compile_file;
 	zend_execute = old_execute;
 	zend_execute_internal = old_execute_internal;
@@ -551,9 +555,9 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	int                   i         = 0;
 
 	tmp = xdmalloc (sizeof (struct function_stack_entry));
-	tmp->varc     = 0;
-	tmp->refcount = 1;
-	tmp->level    = XG(level);
+	tmp->varc          = 0;
+	tmp->refcount      = 1;
+	tmp->level         = XG(level);
 	tmp->arg_done      = 0;
 	tmp->used_vars     = NULL;
 	tmp->user_defined  = type;
@@ -564,11 +568,11 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
 	}
 #if MEMORY_LIMIT
-	tmp->memory    = AG(allocated_memory);
+	tmp->memory = AG(allocated_memory);
 #else
-	tmp->memory    = 0;
+	tmp->memory = 0;
 #endif
-	tmp->time      = get_utime();
+	tmp->time   = get_utime();
 
 	tmp->function = xdebug_build_fname(zdata, op_array TSRMLS_CC);
 	if (!tmp->function.type) {
@@ -803,7 +807,6 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 	xdebug_llist_element *le;
 	int new_len;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
-	double start_time = XG(start_time);
 
 	if (html) {
 		php_printf("<br />\n<table border='1' cellspacing='0'>\n");
@@ -838,7 +841,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 			if (html) {
 				php_printf("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
 			} else {
-				php_printf("%10.4f ", i->time - start_time);
+				php_printf("%10.4f ", i->time - XG(start_time));
 				php_printf("%10lu ", i->memory);
 				php_printf("%3d. %s(", i->level, tmp_name);
 			}
@@ -903,7 +906,6 @@ static inline void print_trace(int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	int new_len;
-	double start_time = XG(start_time);
 
 	if (XG(trace)) {
 		if (html) {
@@ -941,7 +943,7 @@ static inline void print_trace(int html TSRMLS_DC)
 
 				/* Do timestamp */
 				php_printf("<td bgcolor='#ffffff' align='center'>");
-				php_printf("%.6f", i->time - start_time);
+				php_printf("%.6f", i->time - XG(start_time));
 				php_printf("</td>");
 
 				/* Do rest of line */
@@ -951,7 +953,7 @@ static inline void print_trace(int html TSRMLS_DC)
 				}
 				php_printf("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name);
 			} else {
-				php_printf("%10.4f ", i->time - start_time);
+				php_printf("%10.4f ", i->time - XG(start_time));
 				php_printf("%10lu ", i->memory);
 				for (j = 0; j < i->level; j++) {
 					php_printf("  ");
@@ -1219,7 +1221,7 @@ PHP_FUNCTION(xdebug_call_file)
 }
 
 /* {{{ proto void xdebug_var_dump(mixed var)
-   Outputs or returns a string representation of a variable */
+   Outputs a fancy string representation of a variable */
 PHP_FUNCTION(xdebug_var_dump)
 {
 	zval ***args;
@@ -1344,7 +1346,6 @@ PHP_FUNCTION(xdebug_get_function_trace)
 	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
-	double                start_time = 0;
 
 	if (!XG(do_trace)) {
 		php_error(E_NOTICE, "Function tracing was not started, use xdebug_start_trace() before calling this function");
@@ -1405,12 +1406,7 @@ PHP_FUNCTION(xdebug_get_function_trace)
 		}
 		add_assoc_long_ex(frame, "line", sizeof("line"), i->lineno);
 
-		if (start_time) {
-			add_assoc_double_ex(frame, "time_index", sizeof("time_index"), i->time - start_time);
-		} else {
-			start_time = i->time;
-			add_assoc_double_ex(frame, "time_index", sizeof("time_index"), 0);
-		}
+		add_assoc_double_ex(frame, "time_index", sizeof("time_index"), i->time - XG(start_time));
 
 #if MEMORY_LIMIT
 		add_assoc_long_ex(frame, "memory_usage", sizeof("memory_usage"), i->memory);

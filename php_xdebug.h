@@ -63,7 +63,7 @@ PHP_RINIT_FUNCTION(xdebug);
 PHP_RSHUTDOWN_FUNCTION(xdebug);
 PHP_MINFO_FUNCTION(xdebug);
 
-
+/* call stack functions */
 PHP_FUNCTION(xdebug_get_function_stack);
 PHP_FUNCTION(xdebug_call_class);
 PHP_FUNCTION(xdebug_call_function);
@@ -72,21 +72,24 @@ PHP_FUNCTION(xdebug_call_line);
 
 PHP_FUNCTION(xdebug_var_dump);
 
+/* activation functions */
 PHP_FUNCTION(xdebug_enable);
 PHP_FUNCTION(xdebug_disable);
 PHP_FUNCTION(xdebug_is_enabled);
 
+/* tracing functions */
 PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_function_trace);
+
+/* misc functions */
 PHP_FUNCTION(xdebug_dump_function_trace);
 PHP_FUNCTION(xdebug_dump_superglobals);
-
 PHP_FUNCTION(xdebug_set_error_handler);
-
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
 #endif
+
 
 void xdebug_start_trace();
 void xdebug_stop_trace();
@@ -111,15 +114,15 @@ typedef struct xdebug_var {
 
 #define XDEBUG_REGISTER_LONG_CONSTANT(__c) REGISTER_LONG_CONSTANT(#__c, __c, CONST_CS|CONST_PERSISTENT)
 
-#define XDEBUG_NONE      0
-#define XDEBUG_JIT       1
-#define XDEBUG_REQ       2
+#define XDEBUG_NONE          0
+#define XDEBUG_JIT           1
+#define XDEBUG_REQ           2
 
-#define XDEBUG_BREAK        1
-#define XDEBUG_STEP         2
+#define XDEBUG_BREAK         1
+#define XDEBUG_STEP          2
 
-#define XDEBUG_INTERNAL     1
-#define XDEBUG_EXTERNAL     2
+#define XDEBUG_INTERNAL      1
+#define XDEBUG_EXTERNAL      2
 
 #define XDEBUG_MAX_FUNCTION_LEN 1024
 
@@ -131,27 +134,29 @@ typedef struct xdebug_func {
 } xdebug_func;
 
 typedef struct function_stack_entry {
+	/* function properties */
 	xdebug_func  function;
 	int          user_defined;
 
-	char *filename;
-	int   lineno;
+	/* location properties */
+	int          level;
+	char        *filename;
+	int          lineno;
 
-	int   arg_done;
-	int   varc;
-	xdebug_var vars[20];
-
-	unsigned int memory;
-	double       time;
-
+	/* argument properties */
+	int          arg_done;
+	int          varc;
+	xdebug_var   vars[20];
 	xdebug_hash *used_vars;
 
-	int   level;
-	int   refcount;
-
-	/* used for profiling */
+	/* profiling properties */
+	unsigned int memory;
+	double       time;
 	double       time_taken;	
 	unsigned int f_calls;
+
+	/* misc properties */
+	int          refcount;
 } function_stack_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
@@ -203,8 +208,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *remote_handler; /* php3, gdb */
 
 	/* remote debugging globals */
-	zend_bool                 remote_enabled;
-	xdebug_con                context;
+	zend_bool     remote_enabled;
+	xdebug_con    context;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS
