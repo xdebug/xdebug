@@ -76,6 +76,19 @@ char *xdebug_dbgp_reason_strings[4] =
 #define XDEBUG_STR_CASE_DEFAULT      {
 #define XDEBUG_STR_CASE_DEFAULT_END  }
 
+#define XDEBUG_TYPES_COUNT 8
+char *xdebug_dbgp_typemap[XDEBUG_TYPES_COUNT][3] = {
+	/* common, lang, schema */
+	{"bool",     "bool",     "xsd:boolean"},
+	{"int",      "int",      "xsd:decimal"},
+	{"float",    "float",    "xsd:double"},
+	{"string",   "string",   "xsd:string"},
+	{"null",     "null",     NULL},
+	{"hash",     "array",    NULL},
+	{"object",   "object",   NULL},
+	{"resource", "resource", NULL}
+};
+
 /*****************************************************************************
 ** Prototypes for debug command handlers
 */
@@ -94,6 +107,7 @@ DBGP_FUNC(eval);
 DBGP_FUNC(feature_get);
 DBGP_FUNC(feature_set);
 
+DBGP_FUNC(typemap_get);
 DBGP_FUNC(property_get);
 DBGP_FUNC(property_set);
 DBGP_FUNC(property_value);
@@ -132,6 +146,7 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_FUNC_ENTRY(feature_get)
 	DBGP_FUNC_ENTRY(feature_set)
 
+	DBGP_FUNC_ENTRY(typemap_get)
 	DBGP_FUNC_ENTRY(property_get)
 	DBGP_FUNC_ENTRY(property_set)
 	DBGP_FUNC_ENTRY(property_value)
@@ -935,6 +950,26 @@ DBGP_FUNC(feature_set)
 	xdebug_xml_add_attribute_ex(*retval, "success", "1", 0, 0);
 }
 
+DBGP_FUNC(typemap_get)
+{
+	int              i;
+	xdebug_xml_node *type;
+
+	xdebug_xml_add_attribute(*retval, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+	xdebug_xml_add_attribute(*retval, "xmlns:xsd", "http://www.w3.org/2001/XMLSchema");
+
+	/* Add our basic types */
+	for (i = 0; i < XDEBUG_TYPES_COUNT; i++) {
+		type = xdebug_xml_node_init("map");
+		xdebug_xml_add_attribute(type, "name", xdebug_dbgp_typemap[i][1]);
+		xdebug_xml_add_attribute(type, "type", xdebug_dbgp_typemap[i][0]);
+		if (xdebug_dbgp_typemap[i][2]) {
+			xdebug_xml_add_attribute(type, "xsi:type", xdebug_dbgp_typemap[i][2]);
+		}
+		xdebug_xml_add_child(*retval, type);
+	}
+}
+
 DBGP_FUNC(property_get)
 {
 	xdebug_xml_node *var_data;
@@ -1265,7 +1300,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.22 $";
+	return "$Revision: 1.23 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
