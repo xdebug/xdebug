@@ -29,6 +29,29 @@ struct _fd_buf {
 	int   buffer_size;
 };
 
+typedef struct xdebug_arg {
+	int    c;
+	char **args;
+} xdebug_arg;
+
+#define xdebug_arg_init(arg) {    \
+	arg->args = NULL;             \
+	arg->c    = 0;                \
+}
+
+#define xdebug_arg_dtor(arg) {     \
+	int i;                         \
+	for (i = 0; i < arg->c; i++) { \
+		xdfree(arg->args[i]);      \
+	}                              \
+	if (arg->args) {               \
+		xdfree(arg->args);         \
+	}                              \
+	xdfree(arg);                   \
+}
+
 char* fd_read_line(int socket, fd_buf *context, int type);
+void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
+char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);
 
 #endif

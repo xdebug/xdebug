@@ -111,6 +111,10 @@ SOURCE=.\xdebug_com.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\xdebug_handler_dbgp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_handler_gdb.c
 # End Source File
 # Begin Source File
@@ -160,6 +164,10 @@ SOURCE=.\xdebug_code_coverage.h
 # Begin Source File
 
 SOURCE=.\xdebug_com.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_handler_dbgp.h
 # End Source File
 # Begin Source File
 

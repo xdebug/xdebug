@@ -76,6 +76,8 @@ Xdebug also provides:
       <file role="src"  name="xdebug_com.h"/>
       <file role="src"  name="xdebug_handlers.c"/>
       <file role="src"  name="xdebug_handlers.h"/>
+      <file role="src"  name="xdebug_handler_dbgp.c"/>
+      <file role="src"  name="xdebug_handler_dbgp.h"/>
       <file role="src"  name="xdebug_handler_gdb.c"/>
       <file role="src"  name="xdebug_handler_gdb.h"/>
       <file role="src"  name="xdebug_handler_php3.c"/>

@@ -1,7 +1,7 @@
-# $Id: Makefile.in,v 1.9 2002-12-19 21:43:08 ilia Exp $
+# $Id: Makefile.in,v 1.10 2003-10-07 10:56:42 derick Exp $
 
 LTLIBRARY_NAME          = libxdebug.la
-LTLIBRARY_SOURCES       = xdebug.c xdebug_com.c xdebug_llist.c xdebug_hash.c xdebug_var.c xdebug_handlers.c xdebug_handler_php3.c xdebug_handler_gdb.c usefulstuff.c xdebug_profiler.c
+LTLIBRARY_SOURCES       = xdebug.c xdebug_com.c xdebug_llist.c xdebug_hash.c xdebug_var.c xdebug_handlers.c xdebug_handler_dbgp.c xdebug_handler_php3.c xdebug_handler_gdb.c usefulstuff.c xdebug_profiler.c
 LTLIBRARY_SHARED_NAME   = xdebug.la
 LTLIBRARY_SHARED_LIBADD = $(XDEBUG_SHARED_LIBADD)
 

@@ -77,10 +77,12 @@ struct _xdebug_remote_handler {
 
 struct _xdebug_remote_handler_info {
 	char                  *name;
+	char                  *description;
 	xdebug_remote_handler  handler;
 };
 
 xdebug_remote_handler* xdebug_handler_get(char* mode);
+xdebug_remote_handler_info* xdebug_handlers_get(void);
 
 void xdebug_brk_info_dtor(xdebug_brk_info *brk);
 void xdebug_llist_brk_dtor(void *dummy, xdebug_brk_info *brk);

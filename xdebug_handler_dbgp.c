@@ -24,7 +24,7 @@
 #include "php_xdebug.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
-#include "xdebug_handler_gdb.h"
+#include "xdebug_handler_dbgp.h"
 #include "xdebug_var.h"
 
 #ifdef PHP_WIN32
@@ -38,36 +38,36 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 ** Prototypes for debug command handlers
 */
 
-static char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_kill(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args);
-static char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_kill(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args);
 
 /*****************************************************************************
 ** Dispatcher tables for supported debug commands
 */
 
-static xdebug_gdb_cmd commands_init[] = {
+static xdebug_dbgp_cmd commands_init[] = {
 	{ "option", 2, "option [setting] [value]", xdebug_handle_option, 1, "Set a debug session option" },
 	{ "run",    0, "run",                      xdebug_handle_run,    1, "Start the script" },
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
-static xdebug_gdb_cmd commands_breakpoint[] = {
+static xdebug_dbgp_cmd commands_breakpoint[] = {
 	{ "break",      1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 1,
 		"Set breakpoint at specified line or function.\n"
 		"             Argument may be filename and linenumber, function name or '{main}'\n"
@@ -94,7 +94,7 @@ static xdebug_gdb_cmd commands_breakpoint[] = {
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
-static xdebug_gdb_cmd commands_data[] = {
+static xdebug_dbgp_cmd commands_data[] = {
 	{ "eval",       1, "eval [php code to execute]",                 xdebug_handle_eval,       1,
 		"Evaluation PHP code"
 	},
@@ -110,13 +110,13 @@ static xdebug_gdb_cmd commands_data[] = {
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
-static xdebug_gdb_cmd commands_run[] = {
+static xdebug_dbgp_cmd commands_run[] = {
 	{ "kill",       0, "kill",                                       xdebug_handle_kill,       1, "Kill the script" },
 	{ "quit",       0, "quit",                                       xdebug_handle_quit,       1, "Close the debug session" },
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
-static xdebug_gdb_cmd commands_runtime[] = {
+static xdebug_dbgp_cmd commands_runtime[] = {
 	{ "backtrace",  0, "backtrace [full]",                           xdebug_handle_backtrace,  0,
 		"Print backtrace of all stack frames.\n"
 		"             Use of the 'full' qualifier also prints the values of the local\n"
@@ -168,7 +168,7 @@ static xdebug_gdb_cmd commands_runtime[] = {
 ** Utility functions
 */
 
-static xdebug_gdb_cmd* scan_cmd(xdebug_gdb_cmd *ptr, char *line)
+static xdebug_dbgp_cmd* scan_cmd(xdebug_dbgp_cmd *ptr, char *line)
 {
 	while (ptr->name) {
 		if (strcmp(ptr->name, line) == 0) {
@@ -179,10 +179,9 @@ static xdebug_gdb_cmd* scan_cmd(xdebug_gdb_cmd *ptr, char *line)
 	return NULL;
 }
 
-
 static char *make_message(xdebug_con *context, int error_code, char *message)
 {
-	xdebug_gdb_options *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
 	char               *tmp;
 	char               *ret;
 	char               *type;
@@ -222,9 +221,9 @@ static void send_message(xdebug_con *context, int error_code, char *message)
 ** Helpers for looking up commands
 */
 
-static inline xdebug_gdb_cmd* lookup_cmd_in_group(char *line, xdebug_gdb_cmd *group, int flag, int test_flag)
+static inline xdebug_dbgp_cmd* lookup_cmd_in_group(char *line, xdebug_dbgp_cmd *group, int flag, int test_flag)
 {
-	xdebug_gdb_cmd *ptr;
+	xdebug_dbgp_cmd *ptr;
 
 	if (flag & test_flag) {
 		ptr = scan_cmd(group, line);
@@ -235,9 +234,9 @@ static inline xdebug_gdb_cmd* lookup_cmd_in_group(char *line, xdebug_gdb_cmd *gr
 	return NULL;
 }
 
-static xdebug_gdb_cmd* lookup_cmd(char *line, int flag)
+static xdebug_dbgp_cmd* lookup_cmd(char *line, int flag)
 {
-	xdebug_gdb_cmd *ptr;
+	xdebug_dbgp_cmd *ptr;
 	
 	if ((ptr = lookup_cmd_in_group(line, commands_init,       flag, XDEBUG_INIT)) != NULL)       return ptr;
 	if ((ptr = lookup_cmd_in_group(line, commands_breakpoint, flag, XDEBUG_BREAKPOINT)) != NULL) return ptr;
@@ -254,7 +253,7 @@ static xdebug_gdb_cmd* lookup_cmd(char *line, int flag)
 ** Helpers for the "help" command
 */
 
-static inline void show_available_commands_in_group(xdebug_con *h, int fmt, int flag, int test_flag, xdebug_gdb_cmd *ptr)
+static inline void show_available_commands_in_group(xdebug_con *h, int fmt, int flag, int test_flag, xdebug_dbgp_cmd *ptr)
 {
 	char *tmp;
 
@@ -279,7 +278,7 @@ static inline void show_available_commands_in_group(xdebug_con *h, int fmt, int 
 
 static void show_available_commands(xdebug_con *h, int flag)
 {
-	xdebug_gdb_options* o = (xdebug_gdb_options*) h->options;
+	xdebug_dbgp_options* o = (xdebug_dbgp_options*) h->options;
 
 	if (o->response_format == XDEBUG_RESPONSE_XML) {
 		SENDMSG(h->socket, xdebug_sprintf("<xdebug><help>"));
@@ -297,9 +296,9 @@ static void show_available_commands(xdebug_con *h, int flag)
 	}
 }
 
-static void show_command_info(xdebug_con *h, xdebug_gdb_cmd* cmd)
+static void show_command_info(xdebug_con *h, xdebug_dbgp_cmd* cmd)
 {
-	xdebug_gdb_options *o = (xdebug_gdb_options*) h->options;
+	xdebug_dbgp_options *o = (xdebug_dbgp_options*) h->options;
 	char               *t1, *t2;
 
 	if (cmd) {
@@ -322,7 +321,7 @@ static void show_command_info(xdebug_con *h, xdebug_gdb_cmd* cmd)
 */
 static char *get_variable(xdebug_con *context, char *name, zval *val)
 {
-	xdebug_gdb_options* options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options* options = (xdebug_dbgp_options*) context->options;
 	char *str_rep, *ret;
 
 	switch (options->response_format) {
@@ -372,7 +371,7 @@ static void dump_used_var(void *context, xdebug_hash_element* he)
 {
 	char               *name = (char*) he->ptr;
 	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
 
 	if (!options->dump_superglobals) {
 		if ((strcmp(name, "GLOBALS") == 0) ||
@@ -399,7 +398,7 @@ static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
 {
 	char               *name = (char*) he->ptr;
 	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
 	char               *contents;
 
 	if (!options->dump_superglobals) {
@@ -619,7 +618,7 @@ char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args)
 	xdebug_llist_element *le;
 	int                   counter = 1;
 	int                   full = XDEBUG_FRAME_NORMAL;
-	xdebug_gdb_options   *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options   *options = (xdebug_dbgp_options*) context->options;
 	int                   xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	TSRMLS_FETCH();
 
@@ -905,7 +904,7 @@ char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 	int                 tmp_begin = 0;
 	int                 tmp_end   = 0;
 	xdebug_arg         *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	xdebug_gdb_options *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
 	int                 xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	TSRMLS_FETCH();
 
@@ -981,7 +980,7 @@ char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args)
 
 char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 {
-	xdebug_gdb_options *options = (xdebug_gdb_options*)context->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*)context->options;
 	TSRMLS_FETCH();
 
 	if (strcmp(args->args[0], "response_format") == 0) {
@@ -997,7 +996,7 @@ char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 
 char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 {
-	xdebug_gdb_options  *options = (xdebug_gdb_options*)context->options;
+	xdebug_dbgp_options  *options = (xdebug_dbgp_options*)context->options;
 	int                  xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	char                *var_data;
 	TSRMLS_FETCH();
@@ -1019,7 +1018,7 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args)
 {
 	char                buffer[256 + 1];
-	xdebug_gdb_options *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
 
 	if (getcwd(buffer, 256)) {
 		if (options->response_format == XDEBUG_RESPONSE_XML) {
@@ -1038,7 +1037,7 @@ char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args)
 
 char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
 {
-	xdebug_gdb_options          *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options          *options = (xdebug_dbgp_options*) context->options;
 
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
 		SENDMSG(context->socket, xdebug_sprintf("<xdebug><run><program>%s</program></run></xdebug>\n", context->program_name));
@@ -1052,7 +1051,7 @@ char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
 static void dump_class_breakpoint(void *context, xdebug_hash_element* he)
 {
 	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
 	xdebug_brk_info    *brk_info = (xdebug_brk_info*) he->ptr;
 
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
@@ -1071,7 +1070,7 @@ static void dump_class_breakpoint(void *context, xdebug_hash_element* he)
 static void dump_function_breakpoint(void *context, xdebug_hash_element* he)
 {
 	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) h->options;
 	xdebug_brk_info    *brk_info = (xdebug_brk_info*) he->ptr;
 
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
@@ -1081,7 +1080,7 @@ static void dump_function_breakpoint(void *context, xdebug_hash_element* he)
 	}
 }
 
-static void dump_line_breakpoint(xdebug_con *h, xdebug_gdb_options *options, xdebug_brk_info* brk_info)
+static void dump_line_breakpoint(xdebug_con *h, xdebug_dbgp_options *options, xdebug_brk_info* brk_info)
 {
 	char *condition = NULL;
 
@@ -1118,7 +1117,7 @@ static void dump_line_breakpoint(xdebug_con *h, xdebug_gdb_options *options, xde
 
 char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args)
 {
-	xdebug_gdb_options   *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options   *options = (xdebug_dbgp_options*) context->options;
 	xdebug_llist_element *le;
 
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
@@ -1143,7 +1142,7 @@ static char* show_local_vars(xdebug_con *context, xdebug_arg *args, void (*func)
 {
 	struct function_stack_entry *i;
 	xdebug_hash                 *ht;
-	xdebug_gdb_options          *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options          *options = (xdebug_dbgp_options*) context->options;
 	TSRMLS_FETCH();
 
 	
@@ -1203,10 +1202,10 @@ char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args)
 ** Parsing functions
 */
 
-int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *end_cmd, char **error)
+int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, char *end_cmd, char **error)
 {
 	char *ptr;
-	xdebug_gdb_cmd *cmd;
+	xdebug_dbgp_cmd *cmd;
 	int retval;
 	char *ret_err = NULL;
 	int i;
@@ -1296,7 +1295,7 @@ cleanup:
 	return retval;
 }
 
-static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
+static void xdebug_dbgp_option_result(xdebug_con *context, int ret, char *error)
 {
 	if (error || ret == -1) {
 		SSEND(context->socket, "-ERROR");
@@ -1314,12 +1313,12 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 ** Handlers for debug functions
 */
 
-int xdebug_gdb_init(xdebug_con *context, int mode)
+int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
 	char *option;
 	int   ret;
 	char *error = NULL;
-	xdebug_gdb_options *options;
+	xdebug_dbgp_options *options;
 	TSRMLS_FETCH();
 
 	SENDMSG(context->socket, xdebug_sprintf("This is Xdebug version %s.\n", XDEBUG_VERSION));
@@ -1328,8 +1327,8 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
 
-	context->options = xdmalloc(sizeof(xdebug_gdb_options));
-	options = (xdebug_gdb_options*) context->options;
+	context->options = xdmalloc(sizeof(xdebug_dbgp_options));
+	options = (xdebug_dbgp_options*) context->options;
 	options->response_format = XDEBUG_RESPONSE_NORMAL;
 	options->dump_superglobals = 1;
 
@@ -1353,15 +1352,15 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_INIT | XDEBUG_DATA | XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "run", (char**) &error);
-		xdebug_gdb_option_result(context, ret, error);
+		ret = xdebug_dbgp_parse_option(context, option, XDEBUG_INIT | XDEBUG_DATA | XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "run", (char**) &error);
+		xdebug_dbgp_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);
 
 	return 1;
 }
 
-int xdebug_gdb_deinit(xdebug_con *context)
+int xdebug_dbgp_deinit(xdebug_con *context)
 {
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
@@ -1372,14 +1371,14 @@ int xdebug_gdb_deinit(xdebug_con *context)
 	return 1;
 }
 
-int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char               *errortype;
 	int                 ret;
 	char               *option;
 	char               *error = NULL;
 	int                 runtime_allowed;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
 
 	errortype = error_type(type);
 
@@ -1406,21 +1405,21 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_DATA | XDEBUG_RUN | runtime_allowed | XDEBUG_STATUS, "cont", (char**) &error);
-		xdebug_gdb_option_result(context, ret, error);
+		ret = xdebug_dbgp_parse_option(context, option, XDEBUG_DATA | XDEBUG_RUN | runtime_allowed | XDEBUG_STATUS, "cont", (char**) &error);
+		xdebug_dbgp_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);
 
 	return 1;
 }
 
-int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type)
 {
 	struct function_stack_entry *i;
 	int    ret;
 	char  *option;
 	char  *error = NULL;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) context->options;
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) context->options;
 	int                 xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	TSRMLS_FETCH();
 
@@ -1439,8 +1438,8 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,continue,step,next,finish", (char**) &error);
-		xdebug_gdb_option_result(context, ret, error);
+		ret = xdebug_dbgp_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,continue,step,next,finish", (char**) &error);
+		xdebug_dbgp_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);
 

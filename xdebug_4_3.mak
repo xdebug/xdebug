@@ -46,6 +46,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xdebug.obj"
 	-@erase "$(INTDIR)\xdebug_code_coverage.obj"
 	-@erase "$(INTDIR)\xdebug_com.obj"
+	-@erase "$(INTDIR)\xdebug_handler_dbgp.obj"
 	-@erase "$(INTDIR)\xdebug_handler_gdb.obj"
 	-@erase "$(INTDIR)\xdebug_handler_php3.obj"
 	-@erase "$(INTDIR)\xdebug_handlers.obj"
@@ -74,6 +75,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\xdebug.obj" \
 	"$(INTDIR)\xdebug_code_coverage.obj" \
 	"$(INTDIR)\xdebug_com.obj" \
+	"$(INTDIR)\xdebug_handler_dbgp.obj" \
 	"$(INTDIR)\xdebug_handler_gdb.obj" \
 	"$(INTDIR)\xdebug_handler_php3.obj" \
 	"$(INTDIR)\xdebug_handlers.obj" \
@@ -106,6 +108,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xdebug.obj"
 	-@erase "$(INTDIR)\xdebug_com.obj"
 	-@erase "$(INTDIR)\xdebug_code_coverage.obj"
+	-@erase "$(INTDIR)\xdebug_handler_dbgp.obj"
 	-@erase "$(INTDIR)\xdebug_handler_gdb.obj"
 	-@erase "$(INTDIR)\xdebug_handler_php3.obj"
 	-@erase "$(INTDIR)\xdebug_handlers.obj"
@@ -136,6 +139,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\xdebug.obj" \
 	"$(INTDIR)\xdebug_code_coverage.obj" \
 	"$(INTDIR)\xdebug_com.obj" \
+	"$(INTDIR)\xdebug_handler_dbgp.obj" \
 	"$(INTDIR)\xdebug_handler_gdb.obj" \
 	"$(INTDIR)\xdebug_handler_php3.obj" \
 	"$(INTDIR)\xdebug_handlers.obj" \
@@ -211,6 +215,11 @@ SOURCE=.\xdebug_code_coverage.c
 SOURCE=.\xdebug_com.c
 
 "$(INTDIR)\xdebug_com.obj" : $(SOURCE) "$(INTDIR)"
+
+
+SOURCE=.\xdebug_handler_dbgp.c
+
+"$(INTDIR)\xdebug_handler_dbgp.obj" : $(SOURCE) "$(INTDIR)"
 
 
 SOURCE=.\xdebug_handler_gdb.c

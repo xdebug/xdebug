@@ -26,6 +26,7 @@
 #include <winsock2.h>
 #include <io.h>
 #endif
+#include "php_xdebug.h"
 #include "usefulstuff.h"
 
 #define READ_BUFFER_SIZE 128
@@ -77,5 +78,59 @@ char* fd_read_line(int socket, fd_buf *context, int type)
 	context->buffer_size = context->buffer_size - (size + 1);
 	/* Return normal line */
 	return tmp;
+}
+
+void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit) 
+{
+	char *p1, *p2, *endp;
+
+	endp = str + strlen(str);
+
+	p1 = str;
+	p2 = xdebug_memnstr(str, delim, strlen(delim), endp);
+
+	if (p2 == NULL) {
+		args->c++;
+		args->args = (char**) xdrealloc(args->args, sizeof(char*) * args->c);
+		args->args[args->c - 1] = (char*) xdmalloc(strlen(str) + 1);
+		memcpy(args->args[args->c - 1], p1, strlen(str));
+		args->args[args->c - 1][strlen(str)] = '\0';
+	} else {
+		do {
+			args->c++;
+			args->args = (char**) xdrealloc(args->args, sizeof(char*) * args->c);
+			args->args[args->c - 1] = (char*) xdmalloc(p2 - p1 + 1);
+			memcpy(args->args[args->c - 1], p1, p2 - p1);
+			args->args[args->c - 1][p2 - p1] = '\0';
+			p1 = p2 + strlen(delim);
+		} while ((p2 = xdebug_memnstr(p1, delim, strlen(delim), endp)) != NULL && (limit == -1 || --limit > 1));
+
+		if (p1 <= endp) {
+			args->c++;
+			args->args = (char**) xdrealloc(args->args, sizeof(char*) * args->c);
+			args->args[args->c - 1] = (char*) xdmalloc(endp - p1 + 1);
+			memcpy(args->args[args->c - 1], p1, endp - p1);
+			args->args[args->c - 1][endp - p1] = '\0';
+		}
+	}
+}
+
+char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end)
+{
+	char *p = haystack;
+	char first = *needle;
+
+	/* let end point to the last character where needle may start */
+	end -= needle_len;
+	
+	while (p <= end) {
+		while (*p != first)
+			if (++p > end)
+				return NULL;
+		if (memcmp(p, needle, needle_len) == 0)
+			return p;
+		p++;
+	}
+	return NULL;
 }
 

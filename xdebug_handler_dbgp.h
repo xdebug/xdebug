@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_XDEBUG_HANDLER_GDB_H__
-#define __HAVE_XDEBUG_HANDLER_GDB_H__
+#ifndef __HAVE_XDEBUG_HANDLER_DBGP_H__
+#define __HAVE_XDEBUG_HANDLER_DBGP_H__
 
 #include "xdebug_handlers.h"
 #include <string.h>
@@ -31,14 +31,14 @@
 
 #define XDEBUG_ALL         63
 
-typedef struct xdebug_gdb_cmd {
+typedef struct xdebug_dbgp_cmd {
 	char *name;
 	int   args;
 	char *description;
 	char *(*handler)(xdebug_con *context, xdebug_arg *args);
 	int   show;
 	char *help;
-} xdebug_gdb_cmd;
+} xdebug_dbgp_cmd;
 
 
 #define XDEBUG_D                         0
@@ -63,21 +63,21 @@ typedef struct xdebug_gdb_cmd {
 #define XDEBUG_FRAME_NORMAL      0
 #define XDEBUG_FRAME_FULL        1
 
-typedef struct xdebug_gdb_options {
+typedef struct xdebug_dbgp_options {
 	int response_format;
 	int dump_superglobals;
-} xdebug_gdb_options;
+} xdebug_dbgp_options;
 
-int xdebug_gdb_init(xdebug_con *context, int mode);
-int xdebug_gdb_deinit(xdebug_con *context);
-int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
-int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type);
+int xdebug_dbgp_init(xdebug_con *context, int mode);
+int xdebug_dbgp_deinit(xdebug_con *context);
+int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type);
 
-#define xdebug_handler_gdb { \
-	xdebug_gdb_init,         \
-	xdebug_gdb_deinit,       \
-	xdebug_gdb_error,        \
-	xdebug_gdb_breakpoint    \
+#define xdebug_handler_dbgp { \
+	xdebug_dbgp_init,         \
+	xdebug_dbgp_deinit,       \
+	xdebug_dbgp_error,        \
+	xdebug_dbgp_breakpoint    \
 }
 
 #endif
