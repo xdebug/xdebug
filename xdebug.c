@@ -59,21 +59,21 @@ void (*new_error_cb)(int type, const char *error_filename, const uint error_line
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 function_entry xdebug_functions[] = {
-	PHP_FE(xdebug_get_function_stack, NULL)
-	PHP_FE(xdebug_call_function,      NULL)
-	PHP_FE(xdebug_call_file,          NULL)
-	PHP_FE(xdebug_call_line,          NULL)
+	PHP_FE(xdebug_get_function_stack,  NULL)
+	PHP_FE(xdebug_call_function,       NULL)
+	PHP_FE(xdebug_call_file,           NULL)
+	PHP_FE(xdebug_call_line,           NULL)
 
-	PHP_FE(xdebug_enable,             NULL)
-	PHP_FE(xdebug_disable,            NULL)
-	PHP_FE(xdebug_is_enabled,         NULL)
+	PHP_FE(xdebug_enable,              NULL)
+	PHP_FE(xdebug_disable,             NULL)
+	PHP_FE(xdebug_is_enabled,          NULL)
 
-	PHP_FE(xdebug_start_trace,        NULL)
-	PHP_FE(xdebug_stop_trace,         NULL)
-	PHP_FE(xdebug_get_function_trace, NULL)
+	PHP_FE(xdebug_start_trace,         NULL)
+	PHP_FE(xdebug_stop_trace,          NULL)
+	PHP_FE(xdebug_get_function_trace,  NULL)
 	PHP_FE(xdebug_dump_function_trace, NULL)
 #if MEMORY_LIMIT
-	PHP_FE(xdebug_memory_usage,       NULL)
+	PHP_FE(xdebug_memory_usage,        NULL)
 #endif
 	{NULL, NULL, NULL}
 };
@@ -125,7 +125,7 @@ static double get_utime()
 #endif
 		return 0;
 }
-	
+
 static char *xdebug_sprintf (const char* fmt, ...)
 {
 	char   *new_str;
@@ -627,7 +627,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 	array_init(return_value);
 	le = XDEBUG_LLIST_HEAD(XG(stack));
-	
+
 	for (k = 0; k < XG(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
 		struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 
@@ -740,7 +740,7 @@ PHP_FUNCTION(xdebug_start_trace)
 {
 	char *fname = NULL;
 	int   fname_len = 0;
-	
+
 	if (XG(do_trace) == 0) {
 		if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC, "|s", &fname, &fname_len) == FAILURE) {
 			return;
@@ -754,7 +754,7 @@ PHP_FUNCTION(xdebug_start_trace)
 			fprintf (XG(trace_file), "\nStart of function trace\n");
 		} else {
 			XG(trace_file) = NULL;
-		}	
+		}
 	} else {
 		php_error (E_NOTICE, "Function trace already started");
 	}
@@ -853,7 +853,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	int  func_nest = 0;
 	int  go_back   = 0;
 	TSRMLS_FETCH();
-	
+
 	tmp = emalloc (sizeof (struct function_stack_entry));
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
@@ -872,10 +872,10 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	while (cur_opcode < end_opcode) {
 		int opcode = cur_opcode->opcode;
 
-		if ((opcode == ZEND_DO_FCALL		||
-			opcode == ZEND_DO_FCALL_BY_NAME	||
-			opcode == ZEND_INCLUDE_OR_EVAL	||
-			opcode == ZEND_EXT_FCALL_END) && func_nest == 1)
+		if ((opcode == ZEND_DO_FCALL         ||
+		     opcode == ZEND_DO_FCALL_BY_NAME ||
+		     opcode == ZEND_INCLUDE_OR_EVAL  ||
+		     opcode == ZEND_EXT_FCALL_END) && func_nest == 1)
 		{
 			break;
 		}
@@ -924,7 +924,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 
 		case ZEND_DO_FCALL: {
 			zend_function *zfunc;
-						
+
 			switch (cur_opcode->op1.op_type) {
 				case IS_CONST:
 					XFUNC_SET(tmp, XFUNC_NORMAL, "", cur_opcode->op1.u.constant.value.str.val);
@@ -993,7 +993,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 							XFUNC_SET(tmp, XFUNC_NORMAL, "", "{unknown}");
 #endif
 							break;
-	
+
 					}
 					break;
 				case IS_CONST:
@@ -1011,7 +1011,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 								tmpOpCode->op1.u.constant.value.str.val
 							);
 							break;
-	
+
 					}
 					break;
 				case IS_VAR:
@@ -1112,7 +1112,6 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	}
 	fse = XDEBUG_LLIST_TAIL(XG(stack))->ptr;
 
-
 	if (fse->delayed_fname) { /* variable function name */
 #if HAVE_EXECUTE_DATA_PTR
 		fse->function.function = estrdup (executor_globals.execute_data_ptr->function_state.function->common.function_name);
@@ -1164,7 +1163,7 @@ ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 }
 
 #ifndef ZEND_EXT_API
-#define ZEND_EXT_API	ZEND_DLEXPORT
+#define ZEND_EXT_API    ZEND_DLEXPORT
 #endif
 ZEND_EXTENSION();
 

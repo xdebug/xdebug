@@ -115,7 +115,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *trace_file;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
-	
+
 #ifdef ZTS
 #define XG(v) TSRMG(xdebug_globals_id, zend_xdebug_globals *, v)
 #else
