@@ -1121,7 +1121,7 @@ static inline void print_fsum_profile (int html, int mode TSRMLS_DC)
 
 		if (html) {
 			php_printf("<br />\n<table border='1' cellspacing='0'>\n");
-			php_printf("<tr><th bgcolor='#aaaaaa' colspan='4'>%s</th></tr>\n");
+			php_printf("<tr><th bgcolor='#aaaaaa' colspan='4'>%s</th></tr>\n", buffer);
 			php_printf("<tr><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'># of calls</th><th bgcolor='#cccccc'>avg. execution time</th><th bgcolor='#cccccc'>total execution time</th></tr>\n");
 		} else {
 			fld1 = sizeof("Function") - 1;
