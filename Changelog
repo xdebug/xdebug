@@ -1,3 +1,9 @@
+Fri Jan 3 15:28:32 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Fixed segfault with 'show' when there were no used variables in the current
+  scope.
+- Fixed 'help' command to show the data commands if they are available.
+
 Fri Jan 3 08:13:12 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/xdebug.c:
