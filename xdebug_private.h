@@ -135,6 +135,7 @@ typedef struct _function_stack_entry {
 	int          level;
 	char        *filename;
 	int          lineno;
+	char        *include_filename;
 
 	/* argument properties */
 	int          arg_done;

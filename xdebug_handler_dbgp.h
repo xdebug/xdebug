@@ -23,6 +23,7 @@
 #include "xdebug_handlers.h"
 #include "xdebug_xml.h"
 
+#define DBGP_VERSION "1.0"
 
 typedef struct xdebug_dbgp_result {
 	int status;
@@ -79,7 +80,7 @@ typedef struct xdebug_dbgp_options {
 } xdebug_dbgp_options;
 
 
-int xdebug_dbgp_init(xdebug_con *context, int mode);
+int xdebug_dbgp_init(xdebug_con *context, int mode, char *magic_cookie);
 int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type);

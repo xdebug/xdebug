@@ -79,6 +79,8 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
 static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC);
 
+int zend_xdebug_initialised = 0;
+
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_function_stack,    NULL)
 	PHP_FE(xdebug_call_class,            NULL)
@@ -360,6 +362,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_error_cb = zend_error_cb;
 	new_error_cb = xdebug_error_cb;
 
+	if (zend_xdebug_initialised == 0) {
+		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
+	}
+
 	XG(breakpoint_count) = 0;
 	return SUCCESS;
 }
@@ -407,6 +413,10 @@ void stack_element_dtor (void *dummy, void *elem)
 			if (e->vars[i].name) {
 				xdfree(e->vars[i].name);
 			}
+		}
+
+		if (e->include_filename) {
+			xdfree(e->include_filename);
 		}
 
 		if (e->used_vars) {
@@ -524,6 +534,12 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
 	php_info_print_table_end();
 	
+	if (zend_xdebug_initialised == 0) {
+		php_info_print_table_start();
+		php_info_print_table_header(1, "XDEBUG NOT LOADED AS ZEND EXTENSION");
+		php_info_print_table_end();
+	}
+
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Supported protocols", "Revision");
 	while (ptr->name) {
@@ -608,6 +624,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->used_vars     = NULL;
 	tmp->user_defined  = type;
 	tmp->filename      = NULL;
+	tmp->include_filename  = NULL;
 	tmp->profile.call_list = xdebug_llist_alloc(profile_call_entry_dtor);
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
@@ -665,10 +682,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = cur_opcode->lineno;
 
 		if (XG(collect_includes)) {
-			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
-			tmp->vars[tmp->varc].name  = NULL;
-			tmp->vars[tmp->varc].addr = param;
-			tmp->varc++;
+			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
 
 	} else  {
@@ -789,42 +803,52 @@ static int handle_breakpoints(function_stack_entry *fse)
 
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
-	zval                 *dummy;
+	zval                **dummy;
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
-
-	/* Set session cookie if requested */
-	if (
-		((
-		 	PG(http_globals)[TRACK_VARS_GET] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
-		) || (
-		 	PG(http_globals)[TRACK_VARS_POST] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
-		)) && !(
-			PG(http_globals)[TRACK_VARS_COOKIE] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "xdebug_session", sizeof("xdebug_session"), (void **) &dummy) == SUCCESS
-		)
-	) {
-		php_setcookie("xdebug_session", 13, "yes", 3, time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
-	}
-
-	/* Remove session cookie if requested */
-	if (
-		(
-		 	PG(http_globals)[TRACK_VARS_GET] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
-		) || (
-		 	PG(http_globals)[TRACK_VARS_POST] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
-		)
-	) {
-		php_setcookie("xdebug_session", 13, "", 0, time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
-	}
+	char                 *magic_cookie = NULL;
 
 	if (XG(level) == 0) {
+		/* Set session cookie if requested */
+		if (
+			((
+				PG(http_globals)[TRACK_VARS_GET] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
+			) || (
+				PG(http_globals)[TRACK_VARS_POST] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
+			)) && !(
+				PG(http_globals)[TRACK_VARS_COOKIE] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "DBGP_COOKIE", sizeof("DBGP_COOKIE"), (void **) &dummy) == SUCCESS
+			)
+		) {
+			convert_to_string_ex(dummy);
+			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
+			php_setcookie("DBGP_COOKIE", 10, Z_STRVAL_PP(dummy), Z_STRLEN_PP(dummy), time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+		} else if (
+			PG(http_globals)[TRACK_VARS_COOKIE] &&
+			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "DBGP_COOKIE", sizeof("DBGP_COOKIE"), (void **) &dummy) == SUCCESS
+		) {
+			convert_to_string_ex(dummy);
+			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
+		}
+
+		/* Remove session cookie if requested */
+		if (
+			(
+				PG(http_globals)[TRACK_VARS_GET] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
+			) || (
+				PG(http_globals)[TRACK_VARS_POST] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
+			)
+		) {
+			php_setcookie("DBGP_COOKIE", 10, "", 0, time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+		}
+
 		/* Start remote context if requested */
 		if (
+			magic_cookie &&
 			!XG(remote_enabled) &&
 			XG(remote_enable) &&
 			(XG(remote_mode) == XDEBUG_REQ)
@@ -836,7 +860,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				/* Get handler from mode */
 				XG(context).handler = xdebug_handler_get(XG(remote_handler));
 				XG(context).program_name = xdstrdup(op_array->filename);
-				if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
+				if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ, magic_cookie)) {
 					XG(remote_enabled) = 0;
 				}
 			}
@@ -849,6 +873,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				XG(profiler_enabled) = 1;
 			}
 		}
+		xdfree(magic_cookie);
+		magic_cookie = NULL;
 	}
 
 	XG(level)++;
@@ -1048,6 +1074,14 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				xdfree(tmp_value);
 			}
 
+			if (i->include_filename) {
+				if (html) {
+					php_printf("<font color='#00bb00'>'%s'</font>", i->include_filename);
+				} else {
+					php_printf("'%s'", i->include_filename);
+				}
+			}
+
 			if (!log_only) {
 				if (html) {
 					php_printf(")</td><td bgcolor='#ddddff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
@@ -1145,6 +1179,10 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 		xdebug_str_add(&str, tmp_value, 1);
 	}
 
+	if (i->include_filename) {
+		xdebug_str_add(&str, i->include_filename, 0);
+	}
+
 	if (html) {
 		/* Do filename and line no */
 		xdebug_str_add(&str, xdebug_sprintf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td>", i->filename, i->lineno), 1);
@@ -1204,7 +1242,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 				/* Get handler from mode */
 				XG(context).handler = xdebug_handler_get(XG(remote_handler));
-				XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
+				XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT, NULL);
 			}
 		}
 		if (XG(remote_enabled)) {
@@ -1288,6 +1326,10 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			xdfree(argument);
 		}
 		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
+
+		if (i->include_filename) {
+			add_assoc_string_ex(frame, "include_filename", sizeof("include_filename"), i->include_filename, 1);
+		}
 
 		add_next_index_zval(return_value, frame);
 	}
@@ -1725,8 +1767,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
-	TSRMLS_FETCH();
-	CG(extended_info) = 1;
+	zend_xdebug_initialised = 1;
 	return zend_startup_module(&xdebug_module_entry);
 }
 

@@ -1320,10 +1320,10 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.70 $";
+	return "$Revision: 1.71 $";
 }
 
-int xdebug_gdb_init(xdebug_con *context, int mode)
+int xdebug_gdb_init(xdebug_con *context, int mode, char *magic_cookie)
 {
 	char *option;
 	int   ret;
