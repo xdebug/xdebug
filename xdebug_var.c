@@ -52,6 +52,11 @@ char *error_type(int type)
 		case E_USER_NOTICE:
 			return xdstrdup("Notice");
 			break;
+#ifdef ZEND_ENGINE_2
+		case E_STRICT:
+			return xdstrdup("Strict standards");
+			break;
+#endif
 		default:
 			return xdstrdup("Unknown error");
 			break;
