@@ -1,3 +1,7 @@
+Mon Nov 11 16:41:19 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/.cvsignore:
+- Update cvsignore file
+
 Mon Nov 11 16:07:48 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/package.xml
