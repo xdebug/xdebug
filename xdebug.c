@@ -296,9 +296,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   dump_undefined,    zend_xdebug_globals, xdebug_globals)
 
 	/* Profiler settings */
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",    "0",     PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.profiler_output_dir",  "/tmp",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.profiler_output_name", "crc32", PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,         zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_output_dir",       "/tmp",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "crc32",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable_trigger, zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
@@ -1049,9 +1050,19 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			}
 		}
+
+		/* Check for special GET/POST parameter to start profiling */
 		if (
 			!XG(profiler_enabled) &&
-			XG(profiler_enable)
+			(
+				XG(profiler_enable)
+				|| 
+				(
+					XG(profiler_enable_trigger) && 
+					PG(http_globals)[TRACK_VARS_GET] &&
+					zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+				)
+			)
 		) {
 			if (xdebug_profiler_init(op_array->filename TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
@@ -1326,15 +1337,15 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				xdfree(tmp_value);
 			}
 
-			if (i->include_filename) {
-				if (html) {
-					php_printf("<font color='#00bb00'>'%s'</font>", i->include_filename);
-				} else {
-					php_printf("'%s'", i->include_filename);
-				}
-			}
-
 			if (!log_only) {
+				if (i->include_filename) {
+					if (html) {
+						php_printf("<font color='#00bb00'>'%s'</font>", i->include_filename);
+					} else {
+						php_printf("'%s'", i->include_filename);
+					}
+				}
+
 				if (html) {
 					php_printf(")</td><td bgcolor='#ddddff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
 				} else {
