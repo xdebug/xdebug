@@ -1,3 +1,11 @@
+Fri Oct 25 08:02:18 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/test.sh
+/xdebug/xdebug.c
+/xdebug/tests/assert_test.phpt:
+- Fixed a bug when calling functions with the internal call_user_func()
+  function.
+- Added test shell script for easier testing.
+
 Thu Oct 24 23:40:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/Makefile.frag:
 - Copy only on "make install"
