@@ -1,3 +1,10 @@
+Thu May 2 10:59:41 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/tests/test_memory.php:
+- Implemented xdebug_memory_usage() which returns the memory in use by PHPs
+  engine.
+
 Thu May 2 10:58:51 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/.test1.php.swp:
 - Remove swap file
