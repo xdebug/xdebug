@@ -1,3 +1,7 @@
+Wed Jan 22 17:35:39 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Make 'continue' work too (in addition to 'cont').
+
 Mon Jan 20 21:27:30 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/test.sh
