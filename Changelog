@@ -1,3 +1,10 @@
+Mon Aug 16 09:59:27 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_var.c:
+- Fixed showing local variables in case the top most frame was a PHP function.
+- Fixed showing referenced objects, they missed the classname.
+- Nullify some globals after freeing them.
+
 Mon Aug 09 08:27:59 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
