@@ -92,7 +92,7 @@ struct _xdebug_brk_info {
 
 struct _xdebug_remote_handler {
 	/* Init / deinit */
-	int (*remote_init)(xdebug_con *h, int mode, char *magic_cookie);
+	int (*remote_init)(xdebug_con *h, int mode);
 	int (*remote_deinit)(xdebug_con *h);
 
 	/* Stack messages */

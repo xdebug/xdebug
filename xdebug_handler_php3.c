@@ -74,10 +74,10 @@ static char *get_current_time(void)
 
 char *xdebug_php3_get_revision(void)
 {
-	return "$Revision: 1.18 $";
+	return "$Revision: 1.19 $";
 }
 
-int xdebug_php3_init(xdebug_con *context, int mode, char *magic_cookie)
+int xdebug_php3_init(xdebug_con *context, int mode)
 {
 	return 1;
 }

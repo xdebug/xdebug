@@ -1536,7 +1536,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.40 $";
+	return "$Revision: 1.41 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1564,7 +1564,7 @@ int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
 
 }
 
-int xdebug_dbgp_init(xdebug_con *context, int mode, char *magic_cookie)
+int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
 	xdebug_dbgp_options *options;
 	xdebug_xml_node *response, *child;
@@ -1608,9 +1608,10 @@ int xdebug_dbgp_init(xdebug_con *context, int mode, char *magic_cookie)
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
 	xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);
 	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf("%d", getpid()), 0, 1);
-	if (magic_cookie) {
-		xdebug_xml_add_attribute_ex(response, "session", magic_cookie, 0, 0);
-	}
+
+	if (getenv("DBGP_COOKIE")) {
+		xdebug_xml_add_attribute_ex(response, "session", xdstrdup(getenv("DBGP_COOKIE")), 0, 1);
+	}	
 
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
