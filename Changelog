@@ -1,3 +1,7 @@
+Fri Dec 19 10:43:06 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- MFH: Fixed bug #32 (Unusual dynamic variables cause xdebug to crash).
+
 Fri Dec 19 10:41:58 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>:
 - We don't prepend thoseugly zeroes (need to find a way to tell mantis not to
   do it either :)
