@@ -1,3 +1,8 @@
+Tue Aug 03 22:36:39 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+tests/bug00032.phpt
+xdebug/tests/test20b.phpt:
+- Fixed test cases.
+
 Tue Aug 03 00:04:34 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c
 xdebug/xdebug_var.c
