@@ -1,3 +1,7 @@
+Wed Jun 09 09:21:26 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Minor whitespace things
+
 Wed Jun 09 09:07:19 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_compat.h
 xdebug/xdebug_xml.c:
