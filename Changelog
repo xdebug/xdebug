@@ -1,3 +1,8 @@
+Sat Jul 17 01:20:06 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_var.c:
+- if we are an empty object or array, dont pretent to have children
+- php documents the array data type, not a hash data type, give it the appropriate name so as to not confuse people.
+
 Fri Jul 16 23:42:05 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug.c:
 - fix the availability of used vars from included files.
