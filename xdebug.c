@@ -110,6 +110,22 @@ ZEND_DECLARE_MODULE_GLOBALS(xdebug)
 ZEND_GET_MODULE(xdebug)
 #endif
 
+static PHP_INI_MH(OnUpdateDebugMode)
+{
+	if (!new_value) {
+		XG(remote_mode) = XDEBUG_NONE;
+
+	} else if (strcmp(new_value, "jit") == 0) {
+		XG(remote_mode) = XDEBUG_JIT;
+
+	} else if (strcmp(new_value, "req") == 0) {
+		XG(remote_mode) = XDEBUG_REQ;
+
+	} else {
+		XG(remote_mode) = XDEBUG_NONE;
+	}
+}
+	
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_SYSTEM, OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
@@ -117,9 +133,10 @@ PHP_INI_BEGIN()
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_port",       "7869",               PHP_INI_SYSTEM, OnUpdateInt,    remote_port,       zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_SYSTEM, OnUpdateString, remote_host,       zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_mode",       "php3",               PHP_INI_SYSTEM, OnUpdateString, remote_mode,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_port",       "7869",               PHP_INI_ALL,    OnUpdateInt,    remote_port,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, remote_host,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_handler",    "gdb",                PHP_INI_ALL,    OnUpdateString, remote_handler,    zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
 PHP_INI_END()
 
 #define MICRO_IN_SEC 1000000.00
@@ -228,19 +245,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
 	}
-
-	/* Start context if requested */
 	XG(remote_enabled) = 0;
-	if (XG(remote_enable)) {
-		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
-		if (XG(context).socket >= 0) {
-			XG(remote_enabled) = 1;
-#error change logic, it's the wrong way around
-			/* Get handler from mode */
-			XG(remote_handler) = xdebug_handler_get(XG(remote_mode));
-			XG(remote_handler)->remote_init(XG(context));
-		}
-	}
+
 	return SUCCESS;
 }
 
@@ -265,7 +271,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	XG(do_trace) = 0;
 
 	if (XG(remote_enabled)) {
-		XG(remote_handler)->remote_deinit(XG(context));
+		XG(context).handler->remote_deinit(XG(context));
 		xdebug_close_socket(XG(context).socket); 
 	}
 
@@ -287,7 +293,26 @@ PHP_MINFO_FUNCTION(xdebug)
 
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
-	struct function_stack_entry* tmp;
+	struct function_stack_entry  *tmp;
+	zval                        **dummy;
+	
+	/* Start context if requested */
+	if (
+		!XG(remote_enabled) &&
+		XG(remote_enable) &&
+		(XG(remote_mode) == XDEBUG_REQ) &&
+		PG(http_globals)[TRACK_VARS_GET] &&
+		zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "__XDEBUG__", sizeof("__XDEBUG__"), (void **) &dummy) == SUCCESS
+	) {
+		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		if (XG(context).socket >= 0) {
+			XG(remote_enabled) = 1;
+
+			/* Get handler from mode */
+			XG(context).handler = xdebug_handler_get(XG(remote_handler));
+			XG(context).handler->remote_init(XG(context), XDEBUG_REQ);
+		}
+	}
 
 	if (op_array->function_name == NULL) {
 		tmp = xdmalloc (sizeof (struct function_stack_entry));
@@ -683,9 +708,21 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 	xdfree(error_type_str);
 
-	if (XG(remote_enabled)) {
-		XG(remote_handler)->remote_error(XG(context), type, buffer, error_filename, error_lineno, XG(stack));
+	/* Start JIT if requested and not yet enabled */
+	if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
+		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		if (XG(context).socket >= 0) {
+			XG(remote_enabled) = 1;
+
+			/* Get handler from mode */
+			XG(context).handler = xdebug_handler_get(XG(remote_handler));
+			XG(context).handler->remote_init(XG(context), XDEBUG_JIT);
+		}
 	}
+	if (XG(remote_enabled)) {
+		XG(context).handler->remote_error(XG(context), type, buffer, error_filename, error_lineno, XG(stack));
+	}
+
 	/* Bail out if we can't recover */
 	switch (type) {
 		case E_CORE_ERROR:

@@ -144,7 +144,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 	}
 }
 
-int xdebug_gdb_init(xdebug_con context)
+int xdebug_gdb_init(xdebug_con context, int mode)
 {
 	SSEND(context.socket, "hello\n");
 }

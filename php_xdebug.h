@@ -98,6 +98,10 @@ typedef struct xdebug_var {
 #define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = xdstrdup (c); (e)->delayed_fname = 1;
 #define XFUNC_SET_DELAYED_C(e,t,f)  (e)->function.type = t; (e)->function.function = xdstrdup (f); (e)->delayed_cname = 1;
 
+#define XDEBUG_NONE      0
+#define XDEBUG_JIT       1
+#define XDEBUG_REQ       2
+
 typedef struct xdebug_func {
 	char *class;
 	char *function;
@@ -140,11 +144,11 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     remote_enable;  /* 0 */
 	int           remote_port;    /* 7869 */
 	char         *remote_host;    /* localhost */
-	char         *remote_mode;    /* php3, gdb */
+	int           remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
+	char         *remote_handler; /* php3, gdb */
 
 	/* remote debugging globals */
 	zend_bool                 remote_enabled;
-	xdebug_remote_handler    *remote_handler;
 	xdebug_con                context;
 ZEND_END_MODULE_GLOBALS(xdebug)
 

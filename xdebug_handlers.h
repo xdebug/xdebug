@@ -28,13 +28,14 @@ typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
 typedef struct _xdebug_con xdebug_con;
 
 struct _xdebug_con {
-	int   socket;
-	void *options;
+	int                    socket;
+	void                  *options;
+	xdebug_remote_handler *handler;
 };
 
 struct _xdebug_remote_handler {
 	/* Init / deinit */
-	int (*remote_init)(xdebug_con h);
+	int (*remote_init)(xdebug_con h, int mode);
 	int (*remote_deinit)(xdebug_con h);
 
 	/* Stack messages */
