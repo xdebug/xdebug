@@ -38,6 +38,6 @@ xdebug.auto_trace=0
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> aaa->a1() /%s/phpt.%x:27
-    %f      %d     -> bbb->b1() /%s/phpt.%x:28
-    %f      %d     -> aaa->a2() /%s/phpt.%x:29
+    %f      %d     -> aaa->a1() /%s/test7.php:27
+    %f      %d     -> bbb->b1() /%s/test7.php:28
+    %f      %d     -> aaa->a2() /%s/test7.php:29

@@ -40,11 +40,11 @@ xdebug.auto_trace=0
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> foo1('test\'s') /%s/phpt.%x:25
-    %f      %d       -> addslashes('test\'s') /%s/phpt.%x:6
-    %f      %d     -> foo4('test\'s') /%s/phpt.%x:27
-    %f      %d       -> addslashes('test\'s') /%s/phpt.%x:21
-    %f      %d     -> foo2('test\'s') /%s/phpt.%x:29
-    %f      %d       -> addslashes('test\'s') /%s/phpt.%x:11
-    %f      %d     -> foo3('test\'s') /%s/phpt.%x:31
-    %f      %d       -> addslashes('test\'s') /%s/phpt.%x:16
+    %f      %d     -> foo1('test\'s') /%s/test13.php:25
+    %f      %d       -> addslashes('test\'s') /%s/test13.php:6
+    %f      %d     -> foo4('test\'s') /%s/test13.php:27
+    %f      %d       -> addslashes('test\'s') /%s/test13.php:21
+    %f      %d     -> foo2('test\'s') /%s/test13.php:29
+    %f      %d       -> addslashes('test\'s') /%s/test13.php:11
+    %f      %d     -> foo3('test\'s') /%s/test13.php:31
+    %f      %d       -> addslashes('test\'s') /%s/test13.php:16

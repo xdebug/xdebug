@@ -14,4 +14,4 @@ xdebug.auto_trace=0
 --EXPECTF--
 55555
 Function trace:
-    %f      %d     -> str_repeat('5', 5) /%s/phpt.%x:4
+    %f      %d     -> str_repeat('5', 5) /%s/test17.php:4

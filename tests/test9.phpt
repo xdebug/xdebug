@@ -27,9 +27,9 @@ xdebug_dump_function_trace();
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> dbhelper::quote('test\'s') /%s/phpt.%x:18
-    %f      %d       -> addslashes('test\'s') /%s/phpt.%x:6
-    %f      %d     -> dbhelper::quote('test\'s') /%s/phpt.%x:18
-    %f      %d       -> addslashes('test\'s') /%s/phpt.%x:6
-    %f      %d     -> db->query('insert blah \'test\\\'stest\\\'s\' blah') /%s/phpt.%x:18
-    %f      %d     -> db->query('insert blah \' blah') /%s/phpt.%x:19
+    %f      %d     -> dbhelper::quote('test\'s') /%s/test9.php:18
+    %f      %d       -> addslashes('test\'s') /%s/test9.php:6
+    %f      %d     -> dbhelper::quote('test\'s') /%s/test9.php:18
+    %f      %d       -> addslashes('test\'s') /%s/test9.php:6
+    %f      %d     -> db->query('insert blah \'test\\\'stest\\\'s\' blah') /%s/test9.php:18
+    %f      %d     -> db->query('insert blah \' blah') /%s/test9.php:19

@@ -27,8 +27,8 @@ xdebug.auto_trace=0
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> d::c('blah') /%s/phpt.%x:19
-    %f      %d     -> d::a('c') /%s/phpt.%x:19
-    %f      %d     -> d::b('a') /%s/phpt.%x:19
-    %f      %d     -> d::a('b') /%s/phpt.%x:19
-    %f      %d     -> blaat('insert blah \'a') /%s/phpt.%x:19
+    %f      %d     -> d::c('blah') /%s/test10.php:19
+    %f      %d     -> d::a('c') /%s/test10.php:19
+    %f      %d     -> d::b('a') /%s/test10.php:19
+    %f      %d     -> d::a('b') /%s/test10.php:19
+    %f      %d     -> blaat('insert blah \'a') /%s/test10.php:19

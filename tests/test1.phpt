@@ -21,8 +21,8 @@ xdebug.auto_trace=0
 --EXPECTF--
 15
 Function trace:
-    %f      %i     -> {main}() /%s/test_class.php:0
-    %f      %i     -> foo(5) /%s/%s:13
-    %f      %i       -> een->foo2(15, array (0 => 'blaat', 1 => 5, 2 => FALSE)) /%s/test_class.php:7
+    %f      %i     -> {main}() /%s/test1.php:0
+    %f      %i     -> foo(5) /%s/test1.php:13
+    %f      %i       -> een->foo2(15, array (0 => 'blaat', 1 => 5, 2 => FALSE)) /%s/test1.php:7
     %f      %i         -> een->hang() /%s/test_class.php:10
 

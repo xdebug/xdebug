@@ -30,33 +30,33 @@ xdebug.auto_trace=1
 bar
 
 Function trace:
-    %f      %d   -> {main}() /%s/phpt.%x:0
-    %f      %d     -> foo() /%s/phpt.%x:6
+    %f      %d   -> {main}() /%s/auto_trace.php:0
+    %f      %d     -> foo() /%s/auto_trace.php:6
 
-Notice: Function trace already started in /%s/phpt.%x on line 9
+Notice: Function trace already started in /%s/auto_trace.php on line 9
 
 Call Stack:
-    %f      %d   1. {main}() /%s/phpt.%x:0
-    %f      %d   2. xdebug_start_trace() /%s/phpt.%x:9
+    %f      %d   1. {main}() /%s/auto_trace.php:0
+    %f      %d   2. xdebug_start_trace() /%s/auto_trace.php:9
 bar
 
 Function trace:
-    %f      %d   -> {main}() /%s/phpt.%x:0
-    %f      %d     -> foo() /%s/phpt.%x:6
+    %f      %d   -> {main}() /%s/auto_trace.php:0
+    %f      %d     -> foo() /%s/auto_trace.php:6
 bar
 
 Function trace:
-    %f      %d     -> foo() /%s/phpt.%x:15
+    %f      %d     -> foo() /%s/auto_trace.php:15
 bar
 
-Notice: Function tracing was not started, use xdebug_start_trace() before calling this function in /%s/phpt.%x on line 20
+Notice: Function tracing was not started, use xdebug_start_trace() before calling this function in /%s/auto_trace.php on line 20
 
 Call Stack:
-    %f      %d   1. {main}() /%s/phpt.%x:0
-    %f      %d   2. xdebug_dump_function_trace() /%s/phpt.%x:20
+    %f      %d   1. {main}() /%s/auto_trace.php:0
+    %f      %d   2. xdebug_dump_function_trace() /%s/auto_trace.php:20
 
-Notice: Function trace was not started in /%s/phpt.%x on line 21
+Notice: Function trace was not started in /%s/auto_trace.php on line 21
 
 Call Stack:
-    %f      %d   1. {main}() /%s/phpt.%x:0
-    %f      %d   2. xdebug_stop_trace() /%s/phpt.%x:21
+    %f      %d   1. {main}() /%s/auto_trace.php:0
+    %f      %d   2. xdebug_stop_trace() /%s/auto_trace.php:21

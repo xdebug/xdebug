@@ -35,5 +35,5 @@ xdebug.auto_trace=0
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> b->func_a1() /%s/phpt.%x:25
-    %f      %d     -> b->func_b1() /%s/phpt.%x:26
+    %f      %d     -> b->func_a1() /%s/test16.php:25
+    %f      %d     -> b->func_b1() /%s/test16.php:26

@@ -27,6 +27,6 @@ xdebug.auto_trace=0
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> foo->foo() /%s/phpt.%x:16
-    %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/phpt.%x:17
-    %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/phpt.%x:18
+    %f      %d     -> foo->foo() /%s/test14.php:16
+    %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/test14.php:17
+    %f      %d     -> bar(class foo {var $a = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}; var $b = class foo {var $a = class foo {var $a = ...; var $b = ...}; var $b = class foo {var $a = ...; var $b = ...}}}) /%s/test14.php:18

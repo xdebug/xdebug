@@ -26,11 +26,11 @@ xdebug_dump_function_trace();
 --EXPECTF--
 bar
 Function trace:
-    %f      %d     -> foo() /%s/phpt.%x:14
-    %f      %d       -> bar() /%s/phpt.%x:11
-    %f      %d     -> {main}() /%s/phpt.%x(16) : eval()'d code:0
-?   %f      %d       -> foo() /%s/phpt.%x:1
-    %f      %d         -> bar() /%s/phpt.%x:11
-?   %f      %d       -> bar() /%s/phpt.%x:2
-?   %f      %d       -> foo() /%s/phpt.%x:3
-    %f      %d         -> bar() /%s/phpt.%x:11
+    %f      %d     -> foo() /%s/test18.php:14
+    %f      %d       -> bar() /%s/test18.php:11
+    %f      %d     -> {main}() /%s/test18.php:0
+    %f      %d       -> foo() /%s/test18.php(16) : eval()'d code:1
+    %f      %d         -> bar() /%s/test18.php:11
+    %f      %d       -> bar() /%s/test18.php(16) : eval()'d code:2
+    %f      %d       -> foo() /%s/test18.php(16) : eval()'d code:3
+    %f      %d         -> bar() /%s/test18.php:11

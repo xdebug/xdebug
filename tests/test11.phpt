@@ -18,4 +18,4 @@ xdebug.auto_trace=0
 ?>
 --EXPECTF--
 Function trace:
-    %f      %d     -> blaat() /%s/phpt.%x:9
+    %f      %d     -> blaat() /%s/test11.php:9
