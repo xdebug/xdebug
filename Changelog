@@ -1,3 +1,9 @@
+Tue Jan 28 21:48:24 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat
+/xdebug/xdebug.mak
+/xdebug/xdebug.dsp:
+- Add script to automate builds on Windows
+
 Tue Jan 28 21:30:13 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_profiler.c:
 - Make Windows happy
