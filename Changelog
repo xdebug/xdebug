@@ -1,3 +1,10 @@
+Fri Nov 15 15:13:13 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/test.sh
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c:
+- Implemented the "kill" (kills the running script) and "delete" (removes
+  a breakpoint on a specified element) command.
+
 Fri Nov 15 15:12:05 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_llist.c:
 - Only call the destructor if it's available
