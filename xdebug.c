@@ -622,6 +622,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
+		XG(function_count)++;
 	} else if (EG(current_execute_data) &&
 		EG(current_execute_data)->prev_execute_data &&
 		XDEBUG_LLIST_TAIL(XG(stack))
@@ -638,6 +639,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 				tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 			}
 		}
+		XG(function_count)++;
 	}
 	if (!tmp->filename) {
 		/* Includes/main script etc */
@@ -846,7 +848,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(level) == XG(max_nesting_level)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
 	}
-	XG(function_count)++;
 
 	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
 	fse->symbol_table = EG(active_symbol_table);
@@ -878,7 +879,6 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(level) == XG(max_nesting_level)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%d' reached, aborting!", XG(max_nesting_level));
 	}
-	XG(function_count)++;
 
 	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 
