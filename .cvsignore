@@ -27,3 +27,4 @@ config.guess
 config.log
 libtool
 config.status
+confi.cache
