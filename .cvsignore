@@ -32,3 +32,8 @@ config.log
 libtool
 config.status
 config.cache
+Debug_TS
+Release_TS
+*.plg
+*.patch
+*.tgz
