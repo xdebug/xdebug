@@ -1,3 +1,13 @@
+Fri May 17 20:42:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/tests/test7.php
+/xdebug/tests/test8.php
+/xdebug/tests/test9.php
+/xdebug/tests/test9a.php:
+- Fix problem for backtracking by ZEND_DO_FCALL_BY_NAME
+- Added defines around variable handling
+
 Thu May 16 23:16:10 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix bug, no more HTML output in CLI
