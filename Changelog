@@ -1,3 +1,7 @@
+Fri Nov 7 16:24:27 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed bug #27: Repeated connect attempts when no debugger is listening
+
 Fri Nov 7 16:23:07 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_handler_gdb.h:
