@@ -26,9 +26,12 @@
 
 #define XDEBUG_VERSION "0.9.0-dev"
 
+#include <sys/time.h>
+
 #include "TSRM.h"
 #include "SAPI.h"
 #include "php_ini.h"
+#include "ext/standard/html.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_smart_str.h"
 #include "php_globals.h"
