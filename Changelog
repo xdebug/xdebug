@@ -1,3 +1,12 @@
+Thu Mar 11 16:29:29 UTC 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Changed trace file naming: xdebug.trace_output_dir is now used to configure a
+  directory to dump automatic traces; the trace file name now also includes the
+  pid (xdebug.trace_output_name=pid) or a crc32 checksum of the current working
+  dir (xdebug.trace_output_name=crc32) and traces are not being appended to an
+  existing file anymore, but simply overwritten.
+
 Wed Mar 10 19:46:16 UTC 2004 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Fixed CRC routines
