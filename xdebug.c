@@ -39,7 +39,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_smart_str.h"
 #include "php_globals.h"
-#include "php_xdebug.h"
 
 #include "zend.h"
 #include "zend_API.h"
@@ -50,6 +49,7 @@
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_var.h"
+#include "php_xdebug.h"
 
 static int le_xdebug;
 
@@ -182,11 +182,6 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 #endif
 	zend_error_cb = old_error_cb;
 
-	if (XG(remote_enabled)) {
-		XG(remote_handler)->remote_deinit(XG(socket));
-		xdebug_close_socket(XG(socket)); 
-	}
-
 	return SUCCESS;
 }
 
@@ -234,16 +229,16 @@ PHP_RINIT_FUNCTION(xdebug)
 		zend_error_cb = new_error_cb;
 	}
 
-	/* Start socket if requested */
+	/* Start context if requested */
 	XG(remote_enabled) = 0;
 	if (XG(remote_enable)) {
-		XG(socket) = xdebug_create_socket(XG(remote_host), XG(remote_port));
-		if (XG(socket) >= 0) {
+		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		if (XG(context).socket >= 0) {
 			XG(remote_enabled) = 1;
 
 			/* Get handler from mode */
 			XG(remote_handler) = xdebug_handler_get(XG(remote_mode));
-			XG(remote_handler)->remote_init(XG(socket));
+			XG(remote_handler)->remote_init(XG(context));
 		}
 	}
 	return SUCCESS;
@@ -270,8 +265,8 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	XG(do_trace) = 0;
 
 	if (XG(remote_enabled)) {
-		XG(remote_handler)->remote_deinit(XG(socket));
-		xdebug_close_socket(XG(socket)); 
+		XG(remote_handler)->remote_deinit(XG(context));
+		xdebug_close_socket(XG(context).socket); 
 	}
 
 	return SUCCESS;
@@ -689,7 +684,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	xdfree(error_type_str);
 
 	if (XG(remote_enabled)) {
-		XG(remote_handler)->remote_error(XG(socket), type, buffer, error_filename, error_lineno, XG(stack));
+		XG(remote_handler)->remote_error(XG(context), type, buffer, error_filename, error_lineno, XG(stack));
 	}
 	/* Bail out if we can't recover */
 	switch (type) {

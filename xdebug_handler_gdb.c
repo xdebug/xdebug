@@ -25,12 +25,6 @@
 #include "xdebug_handler_php3.h"
 #include "xdebug_var.h"
 
-#ifdef PHP_WIN32
-#include "win32/time.h"
-#include <process.h>
-#endif
-
-
 static char *find_hostname(void)
 {
 	char tmpname[33];
@@ -144,12 +138,14 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 	}
 }
 
-int xdebug_php3_init(xdebug_con context)
+int xdebug_gdb_init(xdebug_con context)
 {
+	SSEND(context.socket, "hello\n");
 }
 
-int xdebug_php3_deinit(xdebug_con context)
+int xdebug_gdb_deinit(xdebug_con context)
 {
+	SSEND(context.socket, "bye\n");
 }
 
 #define SENDMSG(socket, str) {  \
@@ -160,14 +156,14 @@ int xdebug_php3_deinit(xdebug_con context)
 	xdfree(message_buffer);     \
 }
 
-int xdebug_php3_error(xdebug_con h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_gdb_error(xdebug_con h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char *time_buffer;
 	char *hostname;
 	char *prefix;
 	char *errortype;
+	char *message_buffer;
 	xdebug_llist_element *le;
-	TSRMLS_FETCH();
 
 	time_buffer = get_current_time();
 	hostname    = find_hostname();

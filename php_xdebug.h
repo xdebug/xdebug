@@ -126,7 +126,6 @@ typedef struct function_stack_entry {
 	int   refcount;
 } function_stack_entry;
 
-
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           level;
 	xdebug_llist *stack;
@@ -145,8 +144,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* remote debugging globals */
 	zend_bool                 remote_enabled;
-	int                       socket;
-	xdebug_remote_handler *remote_handler;
+	xdebug_remote_handler    *remote_handler;
+	xdebug_con                context;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 

@@ -19,18 +19,26 @@
 #ifndef __HAVE_XDEBUG_HANDLERS_H__
 #define __HAVE_XDEBUG_HANDLERS_H__
 
+#include "php_xdebug.h"
+#include "xdebug_com.h"
 #include "xdebug_llist.h"
 
 typedef struct _xdebug_remote_handler       xdebug_remote_handler;
 typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
+typedef struct _xdebug_con xdebug_con;
+
+struct _xdebug_con {
+	int   socket;
+	void *options;
+};
 
 struct _xdebug_remote_handler {
 	/* Init / deinit */
-	int (*remote_init)(int socket);
-	int (*remote_deinit)(int socket);
+	int (*remote_init)(xdebug_con h);
+	int (*remote_deinit)(xdebug_con h);
 
 	/* Stack messages */
-	int (*remote_error)(int socket, int type, char *message, char *location, unsigned int line, xdebug_llist *stack);
+	int (*remote_error)(xdebug_con h, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
 };
 
 struct _xdebug_remote_handler_info {

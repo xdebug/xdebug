@@ -12,38 +12,24 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@vl-srm.net>                         |
+   | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_XDEBUG_COM_H__
-#define __HAVE_XDEBUG_COM_H__
+#ifndef __HAVE_XDEBUG_HANDLER_GDB_H__
+#define __HAVE_XDEBUG_HANDLER_GDB_H__
 
-#ifdef PHP_WIN32
-int inet_aton(const char *cp, struct in_addr *inp);
-#endif
+#include "xdebug_handlers.h"
 
-#if WIN32|WINNT
-# define SOCK_ERR INVALID_SOCKET
-# define SOCK_CONN_ERR SOCKET_ERROR
-# define SOCK_RECV_ERR SOCKET_ERROR
-#else
-# define SOCK_ERR -1
-# define SOCK_CONN_ERR -1
-# define SOCK_RECV_ERR -1
-#endif
+int xdebug_gdb_init(xdebug_con context);
+int xdebug_gdb_deinit(xdebug_con context);
+int xdebug_gdb_error(xdebug_con context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
 
-#if WIN32|WINNT
-#define SCLOSE(a) closesocket(a)
-#define SSENDL(a,b,c) send(a,b,c,0)
-#define SSEND(a,b) send(a,b,strlen(b),0)
-#else
-#define SCLOSE(a) close(a)
-#define SSENDL(a,b,c) write(a,b,c)
-#define SSEND(a,b) write(a,b,strlen(b))
-#endif
-
-int xdebug_create_socket(const char *hostname, int dport);
-void xdebug_close_socket(int socket);
+#define xdebug_handler_gdb { \
+	xdebug_gdb_init,         \
+	xdebug_gdb_deinit,       \
+	xdebug_gdb_error         \
+}
 
 #endif
+

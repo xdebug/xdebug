@@ -1,4 +1,4 @@
-dnl $Id: config.m4,v 1.7 2002-09-04 18:56:49 derick Exp $
+dnl $Id: config.m4,v 1.8 2002-09-06 22:39:20 derick Exp $
 dnl config.m4 for extension xdebug
 
 PHP_ARG_ENABLE(xdebug, whether to enable eXtended debugging support,
@@ -15,7 +15,7 @@ if test "$PHP_XDEBUG" != "no"; then
 dnl PHP < 4.3 config
   PHP_EXTENSION(xdebug, $ext_shared)
 dnl PHP >= 4.3 config
-dnl  PHP_NEW_EXTENSION(xdebug, xdebug.c xdebug_com.c xdebug_handler_php3.c xdebug_handlers.c xdebug_llist.c xdebug_var.c, $ext_shared)
+dnl  PHP_NEW_EXTENSION(xdebug, xdebug.c xdebug_com.c xdebug_handler_gdb.c xdebug_handler_php3.c xdebug_handlers.c xdebug_llist.c xdebug_var.c, $ext_shared)
   AC_DEFINE(HAVE_XDEBUG,1,[ ])
 
 dnl Check for new current_execute_data field in zend_executor_globals

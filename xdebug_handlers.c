@@ -18,12 +18,14 @@
 
 
 #include "xdebug_com.h"
+#include "php_xdebug.h"
 #include "xdebug_handlers.h"
 #include "xdebug_handler_php3.h"
+#include "xdebug_handler_gdb.h"
 
 xdebug_remote_handler_info handlers[] = {
 	{ "php3", xdebug_handler_php3 },
-/*	{ "gdb",  xdebug_handler_gdb }, */
+	{ "gdb",  xdebug_handler_gdb },
 	{ 0, 0 }
 };
 
