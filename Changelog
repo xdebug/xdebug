@@ -1,3 +1,7 @@
+Sat Sep 28 21:28:01 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Initialize member variable
+
 Thu Sep 26 18:09:26 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Added time index and memory footprint to CLI dumps. The information shown
