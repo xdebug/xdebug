@@ -1,3 +1,18 @@
+Sun Oct 03 15:10:56 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_code_coverage.h
+xdebug/xdebug_private.h
+xdebug/tests/coverage.inc
+xdebug/tests/coverage.phpt
+xdebug/tests/coverage2.phpt:
+- Fixed the exit handler hook to use the new "5.1" way of handling it; which
+  fortunately also works with PHP 5.0.
+- Extended the code-coverage functionality by returning lines with executable
+  code on them, but where not executed with a count value of -1.
+- Added test-cases for the code-coverage functionality.
+
 Tue Sep 28 08:42:13 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 tests/test6.phpt:
 - Fixed this test.
