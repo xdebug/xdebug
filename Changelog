@@ -1,3 +1,7 @@
+Thu Jul 15 09:29:27 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- provide $this in locals context if we are inside a class.  
+# zend engine 2 does not have this in the symbol table for some reason, or I am missing something obvious, either way it needs to be dealt with
 Thu Jul 15 08:04:13 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - fix dbgp source command, uses php streams to handle proper include paths
