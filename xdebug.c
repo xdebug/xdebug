@@ -386,7 +386,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	tmp->arg_done      = 0;
 	tmp->delayed_include   = 0;
 
-	if (EG(current_execute_data)) {
+	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
 	} else {
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
