@@ -1,3 +1,7 @@
+Sat Apr 12 19:00:46 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Really remove unused include
+
 Sat Apr 12 18:59:59 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Remove unused include
