@@ -464,6 +464,12 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 		XG(trace_file) = NULL;
 	}
 
+	if (XG(profile_file)) {
+		fprintf(XG(profile_file), "End of function profiler\n");
+		fclose(XG(profile_file));
+		XG(profile_file) = NULL;
+	}
+
 	if (XG(error_handler)) {
 		efree(XG(error_handler));
 	}
