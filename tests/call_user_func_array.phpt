@@ -27,10 +27,10 @@ xdebug_dump_function_trace();
 --EXPECTF--
 Function trace:
     %f      %d     -> call_user_func_array('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) /%s/call_user_func_array.php:13
-    %f      %d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array.php:4
+    %f      %d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array.php:13
     %f      %d         -> is_array(array (0 => 1, 1 => 2)) /%s/call_user_func_array.php:5
     %f      %d     -> call_user_func_array('debug', array (0 => 'bar', 1 => 'bar')) /%s/call_user_func_array.php:16
-    %f      %d       -> debug('bar', 'bar') /%s/call_user_func_array.php:4
+    %f      %d       -> debug('bar', 'bar') /%s/call_user_func_array.php:16
     %f      %d         -> is_array('bar') /%s/call_user_func_array.php:5
     %f      %d         -> is_object('bar') /%s/call_user_func_array.php:5
     %f      %d         -> is_resource('bar') /%s/call_user_func_array.php:5
