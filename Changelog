@@ -1,3 +1,22 @@
+Fri Oct 18 22:49:49 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_com.h
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- Added automatic starting of function traces (xdebug.auto_trace, defaulting to
+  "off").
+- Rewrote gathering of function names and parameters.
+- Xdebug now only works with PHP 4.3.0pre1 and later.
+- Some code clean ups.
+- Added support for breakpoints (only on function name for now).
+- Fixed building with a ZTS enabled PHP.
+- Better handling of error conditions from remote debugging client.
+- Dropped making use of extended opcodes.
+- (GDB Handler) Reimplemented parsing debugging commands
+- (GDB Handler) Added "help", "quit" and "break" handlers.
+
 Fri Oct 18 22:40:31 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test19.php
 /xdebug/tests/test20.php
