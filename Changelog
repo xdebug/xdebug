@@ -1,3 +1,7 @@
+Wed Oct 20 20:03:07 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- fix bad pointer in property_value
+
 Wed Oct 20 19:03:43 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug.c:
 - fix compile for 5.0
