@@ -1,3 +1,11 @@
+Sat Nov 9 21:00:16 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handlers.h:
+- Implemented "next" (step over)
+- Fixed a compile error due to windows 'fixes'
+- Removed outcommented code
+
 Sat Nov 9 13:52:41 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test6.phpt:
 - Fix test
