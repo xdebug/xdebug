@@ -1,3 +1,7 @@
+Mon Apr 28 21:28:17 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_4_3.mak:
+- Add PHP 4.3 .mak file
+
 Mon Apr 28 21:25:28 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix the Windows stuff
