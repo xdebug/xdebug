@@ -1,3 +1,8 @@
+Fri Nov 15 15:10:55 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test2.phpt
+/xdebug/tests/test8.phpt:
+- Fix tests
+
 Wed Nov 13 16:03:31 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - FreeBSD 4.6 fixes
