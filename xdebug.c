@@ -557,7 +557,7 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 		}
 		cur_opcode++;
 	}
-//	assert(curOpCode != endOpCode);
+	/* assert(curOpCode != endOpCode); */
 
 	tmp->function_name = NULL;
 	switch (cur_opcode->opcode) {
@@ -719,7 +719,7 @@ ZEND_DLEXPORT void function_end (zend_op_array *op_array)
 
 ZEND_DLEXPORT void statement_call (zend_op_array *op_array)
 {
-//	printf ("call statement, %s line %d\n", op_array->filename, op_array->opcodes[0].lineno);
+	/* printf ("call statement, %s line %d\n", op_array->filename, op_array->opcodes[0].lineno); */
 }
 
 
@@ -732,7 +732,7 @@ ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 {
-	// Do nothing.
+	/* Do nothing. */
 }
 
 #ifndef ZEND_EXT_API
@@ -742,21 +742,21 @@ ZEND_EXTENSION();
 
 ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	"eXtended Debugger (xdebug)",
-	"0.7.0",
+	"0.8.0-dev",
 	"Derick Rethans",
 	"http://www.jdimedia.nl/derick/xdebug.php",
 	"Copyright (c) 2002 JDI Media Solutions",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
-	NULL,		// activate_func_t
-	NULL,		// deactivate_func_t
-	NULL,		// message_handler_func_t
-	NULL,		// op_array_handler_func_t
-	statement_call,		// statement_handler_func_t
-	function_begin, // fcall_begin_handler_func_t
-	function_end,	// fcall_end_handler_func_t
-	NULL,		// op_array_ctor_func_t
-	NULL,		// op_array_dtor_func_t
+	NULL,           /* activate_func_t */
+	NULL,           /* deactivate_func_t */
+	NULL,           /* message_handler_func_t */
+	NULL,           /* op_array_handler_func_t */
+	statement_call, /* statement_handler_func_t */
+	function_begin, /* fcall_begin_handler_func_t */
+	function_end,   /* fcall_end_handler_func_t */
+	NULL,           /* op_array_ctor_func_t */
+	NULL,           /* op_array_dtor_func_t */
 	STANDARD_ZEND_EXTENSION_PROPERTIES
 };
 
