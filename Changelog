@@ -1,3 +1,9 @@
+Thu Mar 11 23:26:53 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_profiler.c
+xdebug/xdebug_profiler.h:
+- Fixed Windows compile issues.
+
 Thu Mar 11 16:29:29 UTC 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
