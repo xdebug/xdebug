@@ -1,3 +1,17 @@
+Fri Jul 02 17:11:39 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/array_map.phpt
+xdebug/tests/assert_test.phpt
+xdebug/tests/auto_trace.phpt
+xdebug/tests/test1.phpt
+xdebug/tests/test12.phpt
+xdebug/tests/test14.phpt
+xdebug/tests/test17.phpt
+xdebug/tests/test18.phpt
+xdebug/tests/test20.phpt
+xdebug/tests/test8.phpt:
+- More fixes for the tests due to changed output formats.
+
 Fri Jul 02 16:06:51 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 tests/array_map.phpt
 xdebug/tests/assert_test.phpt
