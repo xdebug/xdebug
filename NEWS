@@ -1,12 +1,17 @@
-- Added correct handling of include(_once)/require(_once) and eval()
+Wed May 11, 2002 - xdebug 0.7.0
 
-- Added ini setting to change the default setting for enabling showing
++ Implemented handling of static method calls (foo::bar). (Derick)
++ Added correct handling of include(_once)/require(_once) and eval().
+  (Derick)
++ Added ini setting to change the default setting for enabling showing
   enhanced error messages. (Defaults to "On"). (Derick)
-- Added the functions xdebug_enable() and xdebug_disable() to change the
++ Added the functions xdebug_enable() and xdebug_disable() to change the
   showing of stack traces from within your code. (Derick)
-
-- Fixed the extension to show all errors. (Derick)
-
-- Implemented xdebug_memory_usage() which returns the memory in use by PHPs
+= Fixed the extension to show all errors. (Derick)
++ Implemented xdebug_memory_usage() which returns the memory in use by PHPs
   engine. (Derick)
 
+
++ New additions
+- Removed functions
+= Bug fixes
