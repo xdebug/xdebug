@@ -29,7 +29,7 @@
 #include "TSRM.h"
 #endif
 
-char* xdebug_start_trace(char* fname TSRMLS_DC);
+char* xdebug_start_trace(char* fname, long options TSRMLS_DC);
 void xdebug_stop_trace(TSRMLS_D);
 
 typedef struct xdebug_var {
@@ -65,6 +65,8 @@ typedef struct xdebug_var {
 #define XDEBUG_EXTERNAL      2
 
 #define XDEBUG_MAX_FUNCTION_LEN 1024
+
+#define XDEBUG_TRACE_OPTION_APPEND    1
 
 #define STATUS_STARTING   0
 #define STATUS_STOPPING   1

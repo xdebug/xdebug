@@ -111,6 +111,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     auto_trace;
 	char         *trace_output_dir;
 	char         *trace_output_name;
+	long          trace_options;
 	char         *tracefile_name;
 
 	/* used for code coverage */

@@ -50,6 +50,7 @@
 #include "zend_API.h"
 #include "zend_execute.h"
 #include "zend_compile.h"
+#include "zend_constants.h"
 #include "zend_extensions.h"
 #ifdef ZEND_ENGINE_2
 #include "zend_exceptions.h"
@@ -220,6 +221,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  "/tmp",               PHP_INI_ALL,    OnUpdateString, trace_output_dir,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "crc32",              PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
+#if ZEND_EXTENSION_API_NO < 90000000
+	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateInt,    trace_options,     zend_xdebug_globals, xdebug_globals)
+#else
+	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_options,     zend_xdebug_globals, xdebug_globals)
+#endif
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_return,    zend_xdebug_globals, xdebug_globals)
@@ -381,6 +387,8 @@ PHP_MINIT_FUNCTION(xdebug)
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
 	}
 
+	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_APPEND", XDEBUG_TRACE_OPTION_APPEND, CONST_CS | CONST_PERSISTENT);
+
 	XG(breakpoint_count) = 0;
 	return SUCCESS;
 }
@@ -476,7 +484,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
 	if (XG(auto_trace) && XG(trace_output_dir) && strlen(XG(trace_output_dir))) {
-		xdebug_start_trace(NULL TSRMLS_CC);
+		xdebug_start_trace(NULL, XG(trace_options) TSRMLS_CC);
 	}
 
 	/* Initialize some debugger context properties */
@@ -1606,14 +1614,15 @@ PHP_FUNCTION(xdebug_start_trace)
 	char *fname = NULL;
 	int   fname_len = 0;
 	char *trace_fname;
+	long  options = 0;
 
 	if (XG(do_trace) == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &fname, &fname_len, &options) == FAILURE) {
 			return;
 		}
 
 		if (fname && strlen(fname)) {
-			if ((trace_fname = xdebug_start_trace(fname TSRMLS_CC)) != NULL) {
+			if ((trace_fname = xdebug_start_trace(fname, options TSRMLS_CC)) != NULL) {
 				XG(do_trace) = 1;
 				RETVAL_STRING(trace_fname, 1);
 				xdfree(trace_fname);
@@ -1632,7 +1641,7 @@ PHP_FUNCTION(xdebug_start_trace)
 	}
 }
 
-char* xdebug_start_trace(char* fname TSRMLS_DC)
+char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 {
 	char *str_time;
 	char *filename;
@@ -1648,7 +1657,11 @@ char* xdebug_start_trace(char* fname TSRMLS_DC)
 			filename = xdebug_sprintf("%s/trace.%ld.xt", XG(trace_output_dir), getpid());
 		}
 	}
-	XG(trace_file) = fopen(filename, "w");
+	if (options & XDEBUG_TRACE_OPTION_APPEND) {
+		XG(trace_file) = fopen(filename, "a");
+	} else {
+		XG(trace_file) = fopen(filename, "w");
+	}
 	XG(tracefile_name) = estrdup(filename);
 	if (XG(trace_file)) {
 		str_time = xdebug_get_time();
