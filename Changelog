@@ -1,3 +1,8 @@
+Mon Jan 12 09:49:31 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h:
+- Added internal function to return time in the 2004-01-12 09:49:25 format.
+
 Thu Jan 8 13:55:38 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_var.c:
 - Make it compile with PHP 4 again
