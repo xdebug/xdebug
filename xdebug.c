@@ -91,6 +91,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_enable,                NULL)
 	PHP_FE(xdebug_disable,               NULL)
 	PHP_FE(xdebug_is_enabled,            NULL)
+	PHP_FE(xdebug_break,                 NULL)
 
 	PHP_FE(xdebug_start_trace,           NULL)
 	PHP_FE(xdebug_stop_trace,            NULL)
@@ -1470,6 +1471,23 @@ PHP_FUNCTION(xdebug_is_enabled)
 	RETURN_BOOL(zend_error_cb == new_error_cb);
 }
 
+PHP_FUNCTION(xdebug_break)
+{
+	char *file;
+	int   lineno;
+
+	if (XG(remote_enabled)) {
+		file = zend_get_executed_filename(TSRMLS_C);
+		lineno = zend_get_executed_lineno(TSRMLS_C);
+
+		if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
+			XG(remote_enabled) = 0;
+		}
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
 
 void xdebug_start_trace()
 {

@@ -1,6 +1,8 @@
 ???, Mar ??, 2004 - xdebug 2.0.0
 + Added FR #30: Dump current scope information in stack traces on error.
   (Derick)
++ Added FR #5: xdebug_break() function which interupts the script for the debug
+  engine. (Derick)
 + Added ini setting "xdebug.dump_global" with which you can turn off dumping of
   super globals even in you have that configured. This is most useful for
   tests. (Derick)

@@ -69,6 +69,9 @@ PHP_FUNCTION(xdebug_enable);
 PHP_FUNCTION(xdebug_disable);
 PHP_FUNCTION(xdebug_is_enabled);
 
+/* breaking functions */
+PHP_FUNCTION(xdebug_break);
+
 /* tracing functions */
 PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
