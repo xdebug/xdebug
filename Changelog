@@ -1,3 +1,7 @@
+Sat Nov 9 13:52:41 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test6.phpt:
+- Fix test
+
 Sat Nov 9 13:50:33 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix defines, this would never have compiled if GETTIME was not available.
