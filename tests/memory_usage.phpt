@@ -25,3 +25,6 @@ xdebug.collect_params=0
 	}
 	echo "Alive!\n";
 ?>
+--EXPECT--
+Alive!
+Alive!
