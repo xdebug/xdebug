@@ -71,7 +71,7 @@ static void dump_hash_elem(zval *z, char *name, char *elem, int html, int log TS
 static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int html, log;
-	char *name, *val = get_zval_value((zval *) pDest);
+	char *name;
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif

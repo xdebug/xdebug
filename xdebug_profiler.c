@@ -609,7 +609,7 @@ static inline void fetch_full_function_name(function_stack_entry *ent, char *buf
 
 void print_profile(int html, int mode TSRMLS_DC)
 {
-	FILE                  *data_output;
+	FILE                  *data_output = stdout;
 	char                 **mode_titles;
 	double                 total_time = get_mtimestamp() - XG(total_execution_time);
 	double                 total_function_exec = 0.0;
@@ -1005,7 +1005,7 @@ PHP_FUNCTION(xdebug_get_function_profile)
 				break;
 			}
 			default:
-				php_error(E_WARNING, "'%l' is not a valid profiling flag\n", profile_flag);
+				php_error(E_WARNING, "'%ld' is not a valid profiling flag\n", profile_flag);
 err:
 				RETURN_FALSE;
 				break;
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(xdebug_dump_function_profile)
 			RETURN_FALSE;
 		}
 		if (profile_flag < 0 || profile_flag >= XDEBUG_PROFILER_MODES) {
-			php_error(E_WARNING, "'%d' is not a valid profiling flag\n", profile_flag);
+			php_error(E_WARNING, "'%ld' is not a valid profiling flag\n", profile_flag);
 			RETURN_FALSE;
 		}
 		print_profile(PG(html_errors), profile_flag TSRMLS_CC);

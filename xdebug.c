@@ -438,6 +438,7 @@ PHP_RINIT_FUNCTION(xdebug)
 
 ZEND_MODULE_EXEC_FINISHED_D(xdebug)
 {
+	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(xdebug)
@@ -855,7 +856,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 			} else {
 				php_printf("%10.4f ", i->time - XG(start_time));
 #if MEMORY_LIMIT
-				php_printf("%10lu ", i->memory);
+				php_printf("%10u ", i->memory);
 #endif
 				php_printf("%3d. %s(", i->level, tmp_name);
 			}

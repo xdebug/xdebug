@@ -111,7 +111,6 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	zval                 *retval = (zval*) ret;
 	zval                 *lines;
 	HashTable            *target_hash;
-	long                  sort_type = 0; /* SORT_REGULAR; */
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(lines);
