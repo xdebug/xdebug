@@ -1,3 +1,6 @@
+Fri Jul 16 06:02:51 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+change stack function attribute to where attribute per spec
 Thu Jul 15 09:29:27 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - provide $this in locals context if we are inside a class.  
