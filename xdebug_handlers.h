@@ -22,6 +22,7 @@
 #include "php_xdebug.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
+#include "xdebug_hash.h"
 #include "xdebug_socket.h"
 
 typedef struct _xdebug_remote_handler       xdebug_remote_handler;
@@ -33,6 +34,7 @@ struct _xdebug_con {
 	void                  *options;
 	xdebug_remote_handler *handler;
 	xdebug_socket_buf     *buffer;
+	xdebug_hash           *function_breakpoints;
 };
 
 struct _xdebug_remote_handler {
@@ -42,6 +44,9 @@ struct _xdebug_remote_handler {
 
 	/* Stack messages */
 	int (*remote_error)(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
+
+	/* Breakpoints */
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack);
 };
 
 struct _xdebug_remote_handler_info {

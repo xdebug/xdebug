@@ -30,12 +30,19 @@
 #include <process.h>
 #endif
 
-void xdebug_handle_option(void *dummy, xdebug_arg *args);
-void xdebug_handle_run(void *dummy, xdebug_arg *args);
+char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args);
 
 static xdebug_cmd commands_init[] = {
 	{ "option", 2, "option [setting] [value]", xdebug_handle_option },
 	{ "run",    0, "run", xdebug_handle_run },
+	{ NULL,     0, NULL }
+};
+
+static xdebug_cmd commands_breakpoint[] = {
+	{ "break",  1, "bre [functionname|filename:linenumber]", xdebug_handle_breakpoint },
+	{ "bre",    1, "bre [functionname|filename:linenumber]", xdebug_handle_breakpoint },
 	{ NULL,     0, NULL }
 };
 
@@ -224,29 +231,58 @@ static xdebug_cmd* lookup_cmd(char *line, int flag)
 	xdebug_cmd *ptr;
 	
 	if (flag & XDEBUG_INIT) {
-		return scan_cmd(commands_init, line);
+		ptr = scan_cmd(commands_init, line);
+		if (ptr) {
+			return (ptr);
+		}
+	}
+	if (flag & XDEBUG_BREAKPOINT) {
+		ptr = scan_cmd(commands_breakpoint, line);
+		if (ptr) {
+			return (ptr);
+		}
 	}
 	return NULL;
 }
 
 
-void xdebug_handle_option(void *dummy, xdebug_arg *args)
+char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
+{
+	printf ("handle breakpoint!\n");
+
+	if (strstr(args->args[0], "::")) { /* class::method */
+		return xdstrdup("Class::method breakpoints are not yet supported.");
+	} else if (strstr(args->args[0], ":")) { /* file:line */
+		return xdstrdup("File:line breakpoints are not yet supported.");
+	} else { /* function */
+		printf ("function breakpoint on '%s'\n", args->args[0]);
+		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) args->args[0])) {
+			return xdstrdup("Breakpoint already set");
+		}
+	}
+	return NULL;
+}
+
+char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 {
 	printf ("handle option!\n");
+	return NULL;
 }
 
-void xdebug_handle_run(void *dummy, xdebug_arg *args)
+char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
 {
 	printf ("handle run!\n");
+	return NULL;
 }
 
 
-int xdebug_gdb_parse_option(void *dummy, char* line, int flags, char *end_cmd, char **error)
+int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *end_cmd, char **error)
 {
 	char *ptr;
 	xdebug_cmd *cmd;
 	int i;
 	int retval;
+	char *ret_err = NULL;
 	
 	xdebug_arg *args = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	args->c = 0;
@@ -275,7 +311,13 @@ int xdebug_gdb_parse_option(void *dummy, char* line, int flags, char *end_cmd, c
 	/* Default in continue mode */
 	retval = 0;
 	if (args->c >= cmd->args) {
-		cmd->handler(dummy, args);
+		ret_err = cmd->handler(context, args);
+		if (ret_err) {
+			*error = xdstrdup(ret_err);
+			xdfree(ret_err);
+			retval = -1;
+			goto cleanup;
+		}
 	} else {
 		*error = xdstrdup(cmd->description);
 		/* Oopsie, error */
@@ -306,6 +348,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->buffer = xdmalloc(sizeof(xdebug_socket_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
+	context->function_breakpoints = xdebug_hash_alloc(64, NULL);
 	do {
 		SSEND(context->socket, "?init\n");
 		option = xdebug_socket_read_line(context->socket, context->buffer);
@@ -333,6 +376,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 int xdebug_gdb_deinit(xdebug_con *context)
 {
 	SSEND(context->socket, "bye\n");
+	xdebug_hash_destroy(context->function_breakpoints);
 }
 
 #define SENDMSG(socket, str) {  \
@@ -396,4 +440,14 @@ int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *locatio
 		printf ("[%s]\n", option);
 		SSEND(h->socket, "+OK\n");
 	} while (!option || strcmp(option, "cont") != 0);
+}
+
+int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack)
+{
+#warning print last stack element
+#warning loop for commands until "cont"
+#warning 	commands include:
+#warning	- printing stack frames
+#warning	- chancing parameters
+#warning	- and more...
 }

@@ -357,6 +357,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		xdebug_llist_remove (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
 		XG(level)--;
 	} else {
+		/* Check for breakpoints */
+		if (XG(remote_enabled)) {
+			XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack));
+		}
 		old_execute (op_array TSRMLS_CC);
 	}
 }
