@@ -1,26 +1,17 @@
-## $Id: Makefile.am,v 1.2 2003-05-15 10:11:04 derick Exp $
+## $Id: Makefile.am,v 1.3 2003-09-22 09:04:55 derick Exp $
 ##
 
-## The contents of this file are subject to the Vulcan Logic Public
-## License Version 1.1 (the "License"); you may not use this file
-## except in compliance with the License. You may obtain a copy of
-## the License at http://www.vl-srm.net/vlpl/
+## This source file is subject to version 1.0 of the Xdebug license,
+## that is bundled with this package in the file LICENSE, and is
+## available at through the world-wide-web at
+## http://xdebug.derickrethans.nl/license.php
+## If you did not receive a copy of the Xdebug license and are unable
+## to obtain it through the world-wide-web, please send a note to
+## xdebug@derickrethans.nl so we can mail you a copy immediately.
 ##
-## Software distributed under the License is distributed on an "AS
-## IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-## implied. See the License for the specific language governing
-## rights and limitations under the License.
-##
-## The Original Code is vl-srm.net code.
-##
-## The Initial Developer of the Original Code is the Vulcan Logic 
-## Group.  Portions created by Vulcan Logic Group are Copyright (C) 
-## 2000, 2001, 2002 Vulcan Logic Group. All Rights Reserved.
-##
-## Contributor(s): 
-##/
+## Authors:  Derick Rethans <derick@xdebug.org>
 
-debugclient_LDFLAGS    = 
+debugclient_LDFLAGS = 
 
 bin_PROGRAMS        = debugclient
 debugclient_SOURCES = main.c usefulstuff.c

@@ -1,25 +1,16 @@
 dnl
-dnl $Id: acinclude.m4,v 1.1 2002-11-12 11:07:59 derick Exp $
+dnl $Id: acinclude.m4,v 1.2 2003-09-22 09:04:55 derick Exp $
 dnl
 dnl This file contains local autoconf functions.
-dnl The contents of this file are subject to the Vulcan Logic Public
-dnl License Version 1.1 (the "License"); you may not use this file
-dnl except in compliance with the License. You may obtain a copy of
-dnl the License at http://www.vl-srm.net/vlpl/
+dnl This source file is subject to version 1.0 of the Xdebug license,
+dnl that is bundled with this package in the file LICENSE, and is
+dnl available at through the world-wide-web at
+dnl http://xdebug.derickrethans.nl/license.php
+dnl If you did not receive a copy of the Xdebug license and are unable
+dnl to obtain it through the world-wide-web, please send a note to
+dnl xdebug@derickrethans.nl so we can mail you a copy immediately.
 dnl
-dnl Software distributed under the License is distributed on an "AS
-dnl IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
-dnl implied. See the License for the specific language governing
-dnl rights and limitations under the License.
-dnl
-dnl The Original Code is vl-srm.net code.
-dnl
-dnl The Initial Developer of the Original Code is the Vulcan Logic 
-dnl Group.  Portions created by Vulcan Logic Group are Copyright (C) 
-dnl 2000, 2001, 2002 Vulcan Logic Group. All Rights Reserved.
-dnl
-dnl Contributor(s): 
-dnl
+dnl Authors:  Derick Rethans <derick@xdebug.org>
 
 dnl
 dnl XDEBUG_MODULE_ADD(modulename [, static])

@@ -8,7 +8,7 @@ all: $(TOUCH_FILES) config_h.in aclocal.m4 targets configure
 targets:
 	@echo rebuilding Makefile templates
 	@for i in `find . -name Makefile.am`; do \
-		(automake -a `dirname $$i`/Makefile 2>/dev/null || true); \
+		(automake --foreign  -a `dirname $$i`/Makefile 2>/dev/null || true); \
 		echo "   `dirname $$i`/Makefile.in"; \
 	done
 
