@@ -117,13 +117,13 @@ static xdebug_cmd commands_run[] = {
 };
 
 static xdebug_cmd commands_runtime[] = {
-	{ "backtrace",  0, "backtrace [count]",                          xdebug_handle_backtrace,  0,
-		"Print backtrace of all stack frames, or innermost COUNT frames.\n"
+	{ "backtrace",  0, "backtrace [full]",                           xdebug_handle_backtrace,  0,
+		"Print backtrace of all stack frames.\n"
 		"             Use of the 'full' qualifier also prints the values of the local\n"
 		"             variables."
 	},
-	{ "bt",         0, "bt [count]",                                 xdebug_handle_backtrace,  1,
-		"Print backtrace of all stack frames, or innermost COUNT frames.\n"
+	{ "bt",         0, "bt [full]",                                  xdebug_handle_backtrace,  1,
+		"Print backtrace of all stack frames.\n"
 		"             Use of the 'full' qualifier also prints the values of the local\n"
 		"             variables."
 	},
@@ -393,6 +393,69 @@ static char *get_variable(xdebug_con *context, char *name, zval *val)
 	}
 }
 
+static char* get_symbol_contents(xdebug_con *context, char* name, int name_length)
+{
+	HashTable           *st = NULL;
+	zval               **retval;
+	TSRMLS_FETCH();
+
+	st = XG(active_symbol_table);
+	if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+		return get_variable(context, name, *retval);
+	}
+
+	st = EG(active_op_array)->static_variables;
+	if (st) {
+		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+			return get_variable(context, name, *retval);
+		}
+	}
+	
+	st = &EG(symbol_table);
+	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+		return get_variable(context, name, *retval);
+	}
+	return NULL;
+}
+
+static void dump_used_var(void *context, xdebug_hash_element* he)
+{
+	char               *name = (char*) he->ptr;
+	xdebug_con         *h = (xdebug_con*) context;
+	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+
+	if (options->response_format == XDEBUG_RESPONSE_XML) {
+		SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
+	} else {
+		SENDMSG(h->socket, xdebug_sprintf("$%s\n", name));
+	}
+}
+
+
+static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
+{
+	char               *name = (char*) he->ptr;
+	xdebug_con         *h = (xdebug_con*) context;
+	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	char               *contents;
+
+	contents = get_symbol_contents(context, name, strlen(name) + 1);
+	if (contents) {
+		if (options->response_format == XDEBUG_RESPONSE_XML) {
+			SENDMSG(h->socket, contents);
+		} else {
+			SENDMSG(h->socket, xdebug_sprintf("%s", contents));
+			xdfree(contents);
+		}
+	} else {
+		if (options->response_format == XDEBUG_RESPONSE_XML) {
+			SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
+		} else {
+			SENDMSG(h->socket, xdebug_sprintf("$%s = *uninitialized*\n", name));
+		}
+	}
+}
+
 static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int offset, int response_format TSRMLS_DC)
 {
 	int    fd;
@@ -501,7 +564,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 	}
 }
 
-static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int response_format)
+static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int response_format, int flags)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
@@ -546,11 +609,23 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 		efree(tmp);
 	}
 
+	XG(active_symbol_table) = i->symbol_table;
 	if (response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf("</params></function><file>%s</file><line>%d</line></stackframe>", i->filename, i->lineno));
+		SENDMSG(h->socket, xdebug_sprintf("</params></function><file>%s</file><line>%d</line>", i->filename, i->lineno));
+		if (flags & XDEBUG_FRAME_FULL && i->used_vars) {
+			SSEND(h->socket, "<locals>");
+			xdebug_hash_apply(i->used_vars, (void *) h, dump_used_var_with_contents);
+			SSEND(h->socket, "</locals>");
+		}
+		SSEND(h->socket, "</stackframe>");
 	} else {
 		SENDMSG(h->socket, xdebug_sprintf(")\n    at %s:%d\n", i->filename, i->lineno));
+		if (flags & XDEBUG_FRAME_FULL && i->used_vars) {
+			xdebug_hash_apply(i->used_vars, (void *) h, dump_used_var_with_contents);
+			SSEND(h->socket, "\n");
+		}
 	}
+	XG(active_symbol_table) = NULL;
 }
 
 /*****************************************************************************
@@ -561,13 +636,18 @@ char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args)
 {
 	xdebug_llist_element *le;
 	int                   counter = 1;
+	int                   full = XDEBUG_FRAME_NORMAL;
 	xdebug_gdb_options   *options = (xdebug_gdb_options*) context->options;
 	int                   xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	TSRMLS_FETCH();
 
+	if (args->c == 1 && strcmp(args->args[0], "full") == 0) {
+		full = XDEBUG_FRAME_FULL;
+	}
+
 	SSEND(context->socket, xml ? "<xdebug><backtrace>" : "");
 	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-		print_stackframe(context, counter++, XDEBUG_LLIST_VALP(le), options->response_format);
+		print_stackframe(context, counter++, XDEBUG_LLIST_VALP(le), options->response_format, full);
 	}
 	SSEND(context->socket, xml ? "</backtrace></xdebug>\n" : "\n");
 
@@ -920,33 +1000,10 @@ char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 
 	if (strcmp(args->args[0], "response_format") == 0) {
 		options->response_format = atoi(args->args[1]);
-	}	
-
-	return NULL;
-}
-
-static char* get_symbol_contents(xdebug_con *context, char* name, int name_length)
-{
-	HashTable           *st = NULL;
-	zval               **retval;
-	TSRMLS_FETCH();
-
-	st = EG(active_symbol_table);
-	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return get_variable(context, name, *retval);
+	} else {
+		return make_message(context, XDEBUG_E_UNKNOWN_OPTION, "Unknown option.");
 	}
 
-	st = EG(active_op_array)->static_variables;
-	if (st) {
-		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-			return get_variable(context, name, *retval);
-		}
-	}
-	
-	st = &EG(symbol_table);
-	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return get_variable(context, name, *retval);
-	}
 	return NULL;
 }
 
@@ -956,7 +1013,9 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 	int                  xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	char                *var_data;
 
+	XG(active_symbol_table) = EG(active_symbol_table);
 	var_data = get_symbol_contents(context, args->args[0], strlen(args->args[0]) + 1);
+	XG(active_symbol_table) = NULL;
 
 	if (var_data) {
 		SSEND(context->socket, xml ? "<xdebug><print>" : "");
@@ -1091,43 +1150,6 @@ char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args)
 }
 
 
-static void dump_used_var(void *context, xdebug_hash_element* he)
-{
-	char               *name = (char*) he->ptr;
-	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
-
-	if (options->response_format == XDEBUG_RESPONSE_XML) {
-		SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
-	} else {
-		SENDMSG(h->socket, xdebug_sprintf("$%s\n", name));
-	}
-}
-
-static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
-{
-	char               *name = (char*) he->ptr;
-	xdebug_con         *h = (xdebug_con*) context;
-	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
-	char               *contents;
-
-	contents = get_symbol_contents(context, name, strlen(name) + 1);
-	if (contents) {
-		if (options->response_format == XDEBUG_RESPONSE_XML) {
-			SENDMSG(h->socket, contents);
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("%s", contents));
-			xdfree(contents);
-		}
-	} else {
-		if (options->response_format == XDEBUG_RESPONSE_XML) {
-			SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
-		} else {
-			SENDMSG(h->socket, xdebug_sprintf("$%s = *uninitialized*\n", name));
-		}
-	}
-}
-
 static char* show_local_vars(xdebug_con *context, xdebug_arg *args, void (*func)(void *, xdebug_hash_element*))
 {
 	struct function_stack_entry *i;
@@ -1167,7 +1189,12 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 
 char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args)
 {
-	return show_local_vars(context, args, dump_used_var_with_contents);
+	char *tmp;
+	
+	XG(active_symbol_table) = EG(active_symbol_table);
+	tmp = show_local_vars(context, args, dump_used_var_with_contents);
+	XG(active_symbol_table) = NULL;
+	return tmp;
 }
 
 
@@ -1374,11 +1401,11 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
 		SENDMSG(context->socket, xdebug_sprintf("<xdebug><signal><code>%d</code><type>%s</type><message>%s</message><stack>", type, errortype, message));
-		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format);
+		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format, XDEBUG_FRAME_NORMAL);
 		SENDMSG(context->socket, xdebug_sprintf("</stack></signal></xdebug>\n"));
 	} else {
 		SENDMSG(context->socket, xdebug_sprintf("\nProgram received signal %s: %s.\n", errortype, message));
-		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format);
+		print_stackframe(context, 0, XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack)), options->response_format, XDEBUG_FRAME_NORMAL);
 	}
 
 	xdfree(errortype);

@@ -1,5 +1,8 @@
-???, ??? ??, 2003 - xdebug 1.3.0
+???, Jul ??, 2003 - xdebug 1.3.0rc1
 
++ Added the "full" argument to the remote command "backtrace". When this
+  argument is passed, the local variables will be returned to for each frame in
+  the stack. (Derick)
 + Implemented xdebug_time_index() which returns the time passed since the
   start of the script. This change also changes the output of the tracing
   functions as the start time will no longer be the first function call, but

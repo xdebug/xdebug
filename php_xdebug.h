@@ -149,6 +149,7 @@ typedef struct function_stack_entry {
 	int          varc;
 	xdebug_var   vars[20];
 	xdebug_hash *used_vars;
+	HashTable   *symbol_table;
 
 	/* profiling properties */
 	unsigned int memory;
@@ -173,6 +174,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *trace_file;
 	char         *error_handler;
 	double        start_time;
+	HashTable    *active_symbol_table;
 
 	/* used for code coverage */
 	zend_bool     do_code_coverage;

@@ -7,9 +7,14 @@ For 1.3.0:
   * Re-evaluate "quit" and "kill" commands
   * Double check file/line breakpoints
 - Additions
-  * Implement "the full qualifier" to be used with bt (see help text for it).
   * Add xdebug_break() function to insert breakpoints in your script manually.
   * Provide codes for messages (for localization) including parameters
   * Finish custom error handler support
   * Add support for the class and method qualifiers such as static, public,
     private etc.
+- Updates:
+  * Only record variables when in trace mode, a stack trace can use the
+    active_symbol_tables.
+
+For 1.4.0:
+- Evaluation ("eval") per stack frame (active_symbol_table per frame).

@@ -722,6 +722,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
+	fse->symbol_table = EG(active_symbol_table);
 
 	if (XDEBUG_IS_FUNCTION(fse->function.type)) {
 		add_used_variables(fse, op_array);
@@ -766,6 +767,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		old_execute(op_array TSRMLS_CC);
 	}
 	
+	fse->symbol_table = NULL;
 	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
 }
