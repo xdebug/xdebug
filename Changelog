@@ -1,21 +1,3 @@
-Sun May 26 14:35:54 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
-/xdebug/xdebug.c:
-- Fix version
-
-Sun May 26 13:42:02 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
-- Fix NEWS
-
-Sun May 26 13:01:05 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
-/xdebug/xdebug.c:
-- Unify unknown data
-
-Sun May 26 13:00:17 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
-/xdebug/tests/test13.php:
-- Added test for variable function calls  (13)
-
-Sat May 25 16:01:23 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
-- Fix NEWS
-
 Sat May 25 16:00:42 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c
 /xdebug/xdebug_var.h
