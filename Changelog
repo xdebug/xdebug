@@ -1,3 +1,10 @@
+Tue Apr 06 21:26:06 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/php_xdebug.h:
+- Updated Changelog and NEWS from HEAD.
+- Updated package.xml file.
+- Go with 1.3.1!
+
 Tue Apr 06 21:10:04 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Fixed profiler to aggregate class/method calls correctly. (Patch by Robert
