@@ -87,6 +87,8 @@ Xdebug also provides:
       <file role="src"  name="xdebug_llist.c"/>
       <file role="src"  name="xdebug_llist.h"/>
       <file role="src"  name="xdebug_mm.h"/>
+      <file role="src"  name="xdebug_private.c"/>
+      <file role="src"  name="xdebug_private.h"/>
       <file role="src"  name="xdebug_profiler.c"/>
       <file role="src"  name="xdebug_profiler.h"/>
       <file role="src"  name="xdebug_str.c"/>

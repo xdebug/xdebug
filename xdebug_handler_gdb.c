@@ -22,6 +22,7 @@
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
+#include "xdebug_private.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_handler_gdb.h"
@@ -630,6 +631,9 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 	extra_brk_info->functionname = NULL;
 	extra_brk_info->disabled = 0;
 	extra_brk_info->temporary = 0;
+	extra_brk_info->hit_count = 0;
+	extra_brk_info->hit_value = 0;
+	extra_brk_info->hit_condition = XDEBUG_HIT_DISABLED;
 
 	if (strstr(args->args[0], "::")) { /* class::method */
 		xdebug_explode("::", args->args[0], method, -1);
@@ -1309,7 +1313,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.63 $";
+	return "$Revision: 1.64 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)

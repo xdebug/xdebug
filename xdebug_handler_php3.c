@@ -20,6 +20,7 @@
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
+#include "xdebug_private.h"
 #include "xdebug_com.h"
 #include "xdebug_handler_php3.h"
 #include "xdebug_llist.h"
@@ -73,7 +74,7 @@ static char *get_current_time(void)
 
 char *xdebug_php3_get_revision(void)
 {
-	return "$Revision: 1.14 $";
+	return "$Revision: 1.15 $";
 }
 
 int xdebug_php3_init(xdebug_con *context, int mode)

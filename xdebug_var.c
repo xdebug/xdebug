@@ -23,6 +23,7 @@
 #include "zend_extensions.h"
 
 #include "php_xdebug.h"
+#include "xdebug_private.h"
 #include "xdebug_mm.h"
 #include "xdebug_var.h"
 #include "xdebug_xml.h"

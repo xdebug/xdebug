@@ -52,6 +52,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xdebug_handlers.obj"
 	-@erase "$(INTDIR)\xdebug_hash.obj"
 	-@erase "$(INTDIR)\xdebug_llist.obj"
+	-@erase "$(INTDIR)\xdebug_private.obj"
 	-@erase "$(INTDIR)\xdebug_profiler.obj"
 	-@erase "$(INTDIR)\xdebug_str.obj"
 	-@erase "$(INTDIR)\xdebug_superglobals.obj"
@@ -83,6 +84,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\xdebug_handlers.obj" \
 	"$(INTDIR)\xdebug_hash.obj" \
 	"$(INTDIR)\xdebug_llist.obj" \
+	"$(INTDIR)\xdebug_private.obj" \
 	"$(INTDIR)\xdebug_profiler.obj" \
 	"$(INTDIR)\xdebug_str.obj" \
 	"$(INTDIR)\xdebug_superglobals.obj" \
@@ -118,6 +120,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xdebug_handlers.obj"
 	-@erase "$(INTDIR)\xdebug_hash.obj"
 	-@erase "$(INTDIR)\xdebug_llist.obj"
+	-@erase "$(INTDIR)\xdebug_private.obj"
 	-@erase "$(INTDIR)\xdebug_profiler.obj"
 	-@erase "$(INTDIR)\xdebug_str.obj"
 	-@erase "$(INTDIR)\xdebug_superglobals.obj"
@@ -151,6 +154,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\xdebug_handlers.obj" \
 	"$(INTDIR)\xdebug_hash.obj" \
 	"$(INTDIR)\xdebug_llist.obj" \
+	"$(INTDIR)\xdebug_private.obj" \
 	"$(INTDIR)\xdebug_profiler.obj" \
 	"$(INTDIR)\xdebug_str.obj" \
 	"$(INTDIR)\xdebug_superglobals.obj" \
@@ -253,6 +257,11 @@ SOURCE=.\xdebug_hash.c
 SOURCE=.\xdebug_llist.c
 
 "$(INTDIR)\xdebug_llist.obj" : $(SOURCE) "$(INTDIR)"
+
+
+SOURCE=.\xdebug_private.c
+
+"$(INTDIR)\xdebug_private.obj" : $(SOURCE) "$(INTDIR)"
 
 
 SOURCE=.\xdebug_profiler.c

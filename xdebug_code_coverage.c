@@ -17,6 +17,7 @@
  */
 
 #include "php_xdebug.h"
+#include "xdebug_private.h"
 #include "xdebug_var.h"
 #include "xdebug_code_coverage.h"
 

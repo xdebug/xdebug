@@ -66,6 +66,11 @@ struct _xdebug_con {
 	int                    next_level;
 };
 
+#define XDEBUG_HIT_DISABLED       0
+#define XDEBUG_HIT_GREATER_EQUAL  1
+#define XDEBUG_HIT_EQUAL          2
+#define XDEBUG_HIT_MOD            3
+
 struct _xdebug_brk_info {
 	char                 *classname;
 	char                 *functionname;
@@ -75,6 +80,9 @@ struct _xdebug_brk_info {
 	char                 *condition;
 	int                   disabled;
 	int                   temporary;
+	int                   hit_count;
+	int                   hit_value;
+	int                   hit_condition;
 };
 
 struct _xdebug_remote_handler {

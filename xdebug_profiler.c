@@ -20,6 +20,7 @@
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
+#include "xdebug_private.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
 #include "xdebug_profiler.h"

@@ -50,6 +50,8 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 
+#include "php_xdebug.h"
+#include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
@@ -58,7 +60,6 @@
 #include "xdebug_profiler.h"
 #include "xdebug_superglobals.h"
 #include "usefulstuff.h"
-#include "php_xdebug.h"
 
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
