@@ -1,3 +1,9 @@
+Mon Jun 10 15:01:23 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_var.c:
+- Fixed a memory leak in delayed included files. (Derick)
+- Added support for PHP 4.1.2. (Derick)
+
 Sun Jun 9 09:45:51 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/tests/test10.php:
