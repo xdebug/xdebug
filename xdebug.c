@@ -235,7 +235,7 @@ PHP_RINIT_FUNCTION(xdebug)
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		if (XG(context).socket >= 0) {
 			XG(remote_enabled) = 1;
-
+#error change logic, it's the wrong way around
 			/* Get handler from mode */
 			XG(remote_handler) = xdebug_handler_get(XG(remote_mode));
 			XG(remote_handler)->remote_init(XG(context));

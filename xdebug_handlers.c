@@ -39,4 +39,5 @@ xdebug_remote_handler* xdebug_handler_get(char* mode)
 		}
 		ptr++;
 	}
+	return NULL;
 }
