@@ -1,3 +1,7 @@
+Fri Apr 18 17:00:05 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Turn off xdebug.collect_params by default
+
 Fri Apr 18 16:59:10 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - One one more todo item
