@@ -1,3 +1,8 @@
+Thu Dec 4 15:44:45 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_superglobals.c
+/xdebug/xdebug.c:
+- Make things build on Windows again.
+
 Wed Dec 3 17:00:16 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/test.sh
