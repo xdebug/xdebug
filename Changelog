@@ -1,3 +1,7 @@
+Fri Apr 16 09:56:22 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_private.h:
+- Added return_value member to the function_stack struct.
+
 Wed Apr 14 19:42:31 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 config.w32:
 - Make things work with the snaps builder too.
