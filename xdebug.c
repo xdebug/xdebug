@@ -742,6 +742,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	/* Start context if requested */
 	if (
+		(XG(level) == 0) &&
 		!XG(remote_enabled) &&
 		XG(remote_enable) &&
 		(XG(remote_mode) == XDEBUG_REQ) /* &&
