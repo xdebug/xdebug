@@ -58,6 +58,7 @@ struct _xdebug_brk_info {
 	char                 *file;
 	int                   file_len;
 	int                   lineno;
+	char                 *condition;
 };
 
 struct _xdebug_remote_handler {

@@ -46,5 +46,8 @@ void xdebug_brk_dtor(void *dummy, xdebug_brk_info *brk)
 	if (brk->file) {
 		xdfree(brk->file);
 	}
+	if (brk->condition) {
+		xdfree(brk->condition);
+	}
 	xdfree(brk);
 }

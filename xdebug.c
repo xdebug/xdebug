@@ -1617,18 +1617,46 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		}
 
 		if (XG(context).line_breakpoints) {
-
 			char *filename = xdebug_mangle_filename(file);
+			int   break_ok;
+			int   old_error_reporting;
+			zval  retval;
+
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
 				if (lineno == brk->lineno && memcmp(brk->file, filename + file_len - brk->file_len, brk->file_len) == 0) {
-					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
-						XG(remote_enabled) = 0;
-						XG(remote_enable)  = 0;
+					break_ok = 1; /* Breaking is allowed by default */
+
+					/* Check if we have a condition set for it */
+					if (brk->condition) {
+						/* If there is a condition, we disable breaking by
+						 * default and only enabled it when the code evaluates
+						 * to TRUE */
+						break_ok = 0;
+
+						/* Remember error reporting level */
+						old_error_reporting = EG(error_reporting);
+						EG(error_reporting) = 0;
+
+						/* Check the condition */
+						if (zend_eval_string(brk->condition, &retval, "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
+							convert_to_boolean(&retval);
+							break_ok = retval.value.lval;
+							zval_dtor(&retval);
+						}
+
+						/* Restore error reporting level */
+						EG(error_reporting) = old_error_reporting;
+					}
+					if (break_ok) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
+							XG(remote_enabled) = 0;
+							XG(remote_enable)  = 0;
+							break;
+						}
 						break;
 					}
-					break;
 				}
 			}
 			xdebug_free_filename(filename);

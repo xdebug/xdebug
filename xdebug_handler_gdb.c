@@ -53,6 +53,7 @@ char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args);
 
 /*****************************************************************************
@@ -94,6 +95,9 @@ static xdebug_cmd commands_data[] = {
 		"Evaluation PHP code"
 	},
 	{ "show",       0, "show",                                       xdebug_handle_show,       1,
+		"Show a list of all variables"
+	},
+	{ "show-local", 0, "show-local",                                 xdebug_handle_show_local, 1,
 		"Show a list of all variables"
 	},
 	{ "print",      1, "print",                                      xdebug_handle_print,      1,
@@ -571,6 +575,8 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 	xdebug_arg      *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	char            *tmp_name;
 	xdebug_brk_info *extra_brk_info;
+	xdebug_str       eval = {0, 0, NULL};
+	int              i = 0;
 
 	xdebug_arg_init(method);
 
@@ -630,6 +636,20 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 			extra_brk_info->lineno = atoi(method->args[1]);
 			extra_brk_info->file = tmp_name;
 			extra_brk_info->file_len = strlen(tmp_name);
+			extra_brk_info->condition = NULL;
+
+			/* If there are more second parameters to the "break" command, then we
+			 * concat them and use it as a conditional statement */
+			if (args->c > 1) {
+				XDEBUG_STR_ADD(&eval, args->args[1], 0);
+
+				for (i = 2; i < args->c; i++) {
+					XDEBUG_STR_ADD(&eval, " ", 0);
+					XDEBUG_STR_ADD(&eval, args->args[i], 0);
+				}
+				extra_brk_info->condition = xdstrdup(eval.d);
+				XDEBUG_STR_FREE(&eval);
+			}
 
 			/* Add breakpoint to the list */
 			xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) extra_brk_info);
@@ -658,7 +678,6 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 {
 	xdebug_arg      *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	char            *tmp_name;
-	xdebug_brk_info *extra_brk_info;
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk;
 	TSRMLS_FETCH();
@@ -705,12 +724,6 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 			} else {
 				tmp_name = xdebug_sprintf("%s", method->args[0]);
 			}
-
-			/* Set line number in extra structure */
-			extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
-			extra_brk_info->lineno = atoi(method->args[1]);
-			extra_brk_info->file = tmp_name;
-			extra_brk_info->file_len = strlen(tmp_name);
 
 			/* Add breakpoint to the list */
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
@@ -891,36 +904,42 @@ char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 	return NULL;
 }
 
-char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
+static char* get_symbol_contents(xdebug_con *context, char* name, int name_length)
 {
 	HashTable           *st = NULL;
 	zval               **retval;
-	xdebug_gdb_options  *options = (xdebug_gdb_options*)context->options;
-	int                  xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	TSRMLS_FETCH();
 
 	st = EG(active_symbol_table);
-	if (zend_hash_find(st, args->args[0], strlen(args->args[0]) + 1, (void **) &retval) == SUCCESS) {
-		SSEND(context->socket, xml ? "<xdebug><print>" : "");
-		SENDMSG(context->socket, get_variable(context, args->args[0], *retval));
-		SSEND(context->socket, xml ? "</print></xdebug>\n" : "\n");
-		return NULL;
+	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+		return get_variable(context, name, *retval);
 	}
 
 	st = EG(active_op_array)->static_variables;
 	if (st) {
-		if (zend_hash_find(st, args->args[0], strlen(args->args[0]) + 1, (void **) &retval) == SUCCESS) {
-			SSEND(context->socket, xml ? "<xdebug><print>" : "");
-			SENDMSG(context->socket, get_variable(context, args->args[0], *retval));
-			SSEND(context->socket, xml ? "</print></xdebug>\n" : "\n");
-			return NULL;
+		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+			return get_variable(context, name, *retval);
 		}
 	}
 	
 	st = &EG(symbol_table);
-	if (zend_hash_find(st, args->args[0], strlen(args->args[0]) + 1, (void **) &retval) == SUCCESS) {
+	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+		return get_variable(context, name, *retval);
+	}
+	return NULL;
+}
+
+char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
+{
+	xdebug_gdb_options  *options = (xdebug_gdb_options*)context->options;
+	int                  xml = (options->response_format == XDEBUG_RESPONSE_XML);
+	char                *var_data;
+
+	var_data = get_symbol_contents(context, args->args[0], strlen(args->args[0]) + 1);
+
+	if (var_data) {
 		SSEND(context->socket, xml ? "<xdebug><print>" : "");
-		SENDMSG(context->socket, get_variable(context, args->args[0], *retval));
+		SENDMSG(context->socket, var_data);
 		SSEND(context->socket, xml ? "</print></xdebug>\n" : "\n");
 		return NULL;
 	}
@@ -974,7 +993,31 @@ static void dump_used_var(void *context, xdebug_hash_element* he)
 	}
 }
 
-char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
+static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
+{
+	char               *name = (char*) he->ptr;
+	xdebug_con         *h = (xdebug_con*) context;
+	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	char               *contents;
+
+	contents = get_symbol_contents(context, name, strlen(name) + 1);
+	if (contents) {
+		if (options->response_format == XDEBUG_RESPONSE_XML) {
+			SENDMSG(h->socket, contents);
+		} else {
+			SENDMSG(h->socket, xdebug_sprintf("%s", contents));
+			xdfree(contents);
+		}
+	} else {
+		if (options->response_format == XDEBUG_RESPONSE_XML) {
+			SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
+		} else {
+			SENDMSG(h->socket, xdebug_sprintf("$%s = *uninitialized*\n", name));
+		}
+	}
+}
+
+static char* show_local_vars(xdebug_con *context, xdebug_arg *args, void (*func)(void *, xdebug_hash_element*))
 {
 	struct function_stack_entry *i;
 	xdebug_hash                 *ht;
@@ -992,7 +1035,7 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 				SSEND(context->socket, "<xdebug><show>");
 			}
 
-			xdebug_hash_apply(ht, (void *) context, dump_used_var);
+			xdebug_hash_apply(ht, (void *) context, func);
 
 			if (options->response_format == XDEBUG_RESPONSE_XML) {
 				SSEND(context->socket, "</show></xdebug>\n");
@@ -1003,6 +1046,17 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 	}
 	
 	return NULL;
+}
+
+char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
+{
+	return show_local_vars(context, args, dump_used_var);
+}
+
+
+char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args)
+{
+	return show_local_vars(context, args, dump_used_var_with_contents);
 }
 
 
