@@ -166,6 +166,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *manual_url;
 	FILE         *trace_file;
 	char         *error_handler;
+	double        start_time;
 
 	/* used for code coverage */
 	zend_bool     do_code_coverage;

@@ -118,7 +118,7 @@ zend_module_entry xdebug_module_entry = {
 	PHP_RINIT(xdebug),
 	PHP_RSHUTDOWN(xdebug),
 	PHP_MINFO(xdebug),
-	"0.1",
+	XDEBUG_VERSION,
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
@@ -415,7 +415,10 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(context).do_finish      = 0;
 
 	/* Initialize dump superglobals */
-	XG(dumped)        = 0;
+	XG(dumped) = 0;
+
+	/* Initialize start time */
+	XG(start_time) = get_utime();
 
 	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
 	orig->internal_function.handler = zif_xdebug_var_dump;
@@ -800,7 +803,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 	xdebug_llist_element *le;
 	int new_len;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
-	double start_time = 0;
+	double start_time = XG(start_time);
 
 	if (html) {
 		php_printf("<br />\n<table border='1' cellspacing='0'>\n");
@@ -835,12 +838,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 			if (html) {
 				php_printf("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
 			} else {
-				if (start_time) {
-					php_printf("%10.4f ", i->time - start_time);
-				} else {
-					start_time = i->time;
-					php_printf("%10.4f ", 0.0);
-				}
+				php_printf("%10.4f ", i->time - start_time);
 				php_printf("%10lu ", i->memory);
 				php_printf("%3d. %s(", i->level, tmp_name);
 			}
@@ -905,7 +903,7 @@ static inline void print_trace(int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	int new_len;
-	double start_time = 0;
+	double start_time = XG(start_time);
 
 	if (XG(trace)) {
 		if (html) {
@@ -943,12 +941,7 @@ static inline void print_trace(int html TSRMLS_DC)
 
 				/* Do timestamp */
 				php_printf("<td bgcolor='#ffffff' align='center'>");
-				if (start_time) {
-					php_printf("%.6f", i->time - start_time);
-				} else {
-					start_time = i->time;
-					php_printf("0");
-				}
+				php_printf("%.6f", i->time - start_time);
 				php_printf("</td>");
 
 				/* Do rest of line */
@@ -958,12 +951,7 @@ static inline void print_trace(int html TSRMLS_DC)
 				}
 				php_printf("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name);
 			} else {
-				if (start_time) {
-					php_printf("%10.4f ", i->time - start_time);
-				} else {
-					start_time = i->time;
-					php_printf("%10.4f ", 0.0);
-				}
+				php_printf("%10.4f ", i->time - start_time);
 				php_printf("%10lu ", i->memory);
 				for (j = 0; j < i->level; j++) {
 					php_printf("  ");
