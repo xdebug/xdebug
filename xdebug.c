@@ -483,6 +483,7 @@ void stack_element_dtor (void *dummy, void *elem)
 					xdfree(e->var[i].name);
 				}
 			}
+			xdfree(e->var);
 		}
 
 		if (e->include_filename) {
@@ -539,7 +540,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
 	if (XG(auto_trace) && XG(trace_output_dir) && strlen(XG(trace_output_dir))) {
-		xdebug_start_trace(NULL, XG(trace_options) TSRMLS_CC);
+		/* In case we do an auto-trace we are not interested in the return
+		 * value, but we still have to free it. */
+		xdfree(xdebug_start_trace(NULL, XG(trace_options) TSRMLS_CC));
 	}
 
 	/* Initialize some debugger context properties */
@@ -790,11 +793,12 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			zval *param;
 			int   is_var;
 
-			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
-			tmp->var = xdmalloc(sizeof (xdebug_var));
+/*			tmp->var = xdmalloc(sizeof (xdebug_var));
 			tmp->var[tmp->varc].name  = NULL;
 			tmp->var[tmp->varc].addr = param;
 			tmp->varc++;
+*/
+			tmp->include_filename = get_zval_value(get_zval(&zdata->opline->op1, zdata->Ts, &is_var));
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
@@ -1301,7 +1305,7 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				int scope_nr = XG(stack)->size;
 				
 				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-				if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
+				if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
 					i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
 					scope_nr--;
 				}
