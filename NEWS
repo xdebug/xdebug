@@ -1,3 +1,5 @@
+- Implemented handling single-dimensional constant arrays passed to a
+
 - Fix function traces in windows. (Derick)
 
 + Implemented function traces, which you can start and stop with
