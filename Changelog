@@ -1,3 +1,9 @@
+Thu Oct 30 09:16:15 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/configure.in
+/xdebug/debugclient/main.c:
+- Bail out if libedit support was requested but not found
+- Add libedit availability to start up banner
+
 Wed Oct 29 17:42:00 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c
 /xdebug/xdebug_handler_dbgp.h
