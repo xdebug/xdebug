@@ -1,3 +1,14 @@
+Sat Apr 10 01:27:51 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+tests/bug00032-ze1.phpt
+xdebug/tests/local_vars_in_error-ze1.phpt
+xdebug/tests/shutdown.phpt
+xdebug/tests/bug00032.phpt
+xdebug/tests/call_user_func_array2.phpt
+xdebug/tests/local_vars_in_error.phpt
+xdebug/tests/test1.phpt:
+- Update tests with new style of showing include files.
+- Split local vars and bug 32 tests to ZE1 and ZE2 test.
+
 Sat Apr 10 01:25:09 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #57: Crash with overloading functions
