@@ -1,3 +1,8 @@
+Sun Nov 10 21:14:44 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/usefulstuff.c
+/xdebug/debugclient/main.c:
+- Fix debug client after Windows fixes.
+
 Sun Nov 10 20:31:26 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_com.h
