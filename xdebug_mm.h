@@ -12,35 +12,26 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
+   | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_XDEBUG_CODE_COVERAGE_H__
-#define __HAVE_XDEBUG_CODE_COVERAGE_H__
+#ifndef __HAVE_XDEBUG_MM_H__
+#define __HAVE_XDEBUG_MM_H__
 
-#include "php.h"
-#include "xdebug_hash.h"
-#include "xdebug_mm.h"
-
-typedef struct xdebug_coverage_line {
-	int lineno;
-	int count;
-} xdebug_coverage_line;
-
-typedef struct xdebug_coverage_file {
-	char        *name;
-	xdebug_hash *lines;
-} xdebug_coverage_file;
-
-void xdebug_coverage_line_dtor(void *data);
-void xdebug_coverage_file_dtor(void *data);
-
-void xdebug_count_line(char *file, int lineno TSRMLS_DC);
-
-PHP_FUNCTION(xdebug_start_code_coverage);
-PHP_FUNCTION(xdebug_stop_code_coverage);
-PHP_FUNCTION(xdebug_get_code_coverage);
-
+/* Memory allocators */
+#if 0
+#define xdmalloc    emalloc
+#define xdcalloc    ecalloc	
+#define xdrealloc   erealloc
+#define xdfree      efree
+#define xdstrdup    estrdup
+#else  
+#define xdmalloc    malloc
+#define xdcalloc    calloc	
+#define xdrealloc   realloc
+#define xdfree      free
+#define xdstrdup    strdup
+#endif
 
 #endif

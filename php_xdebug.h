@@ -42,21 +42,6 @@ extern zend_module_entry xdebug_module_entry;
 #include "TSRM.h"
 #endif
 
-/* Memory allocators */
-#if 0
-#define xdmalloc    emalloc
-#define xdcalloc    ecalloc	
-#define xdrealloc   erealloc
-#define xdfree      efree
-#define xdstrdup    estrdup
-#else  
-#define xdmalloc    malloc
-#define xdcalloc    calloc	
-#define xdrealloc   realloc
-#define xdfree      free
-#define xdstrdup    strdup
-#endif
-
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);

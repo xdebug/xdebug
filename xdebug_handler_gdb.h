@@ -19,8 +19,9 @@
 #ifndef __HAVE_XDEBUG_HANDLER_GDB_H__
 #define __HAVE_XDEBUG_HANDLER_GDB_H__
 
-#include "xdebug_handlers.h"
 #include <string.h>
+#include "xdebug_handlers.h"
+#include "xdebug_mm.h"
 
 #define XDEBUG_INIT         1
 #define XDEBUG_BREAKPOINT   2

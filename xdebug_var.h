@@ -18,20 +18,10 @@
 
 #include "zend.h"
 #include "php_xdebug.h"
+#include "xdebug_str.h"
 
 #ifndef __HAVE_XDEBUG_VAR_H__
 #define __HAVE_XDEBUG_VAR_H__
-
-typedef struct xdebug_str {
-	int   l;
-	int   a;
-	char *d;
-} xdebug_str;
-
-void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f);
-void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f);
-void XDEBUG_STR_CHOP(xdebug_str *xs, int c);
-void XDEBUG_STR_FREE(xdebug_str *s);
 
 void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC);
@@ -39,7 +29,6 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 
 char* xmlize(char *string);
 char* error_type (int type);
-char* xdebug_sprintf (const char* fmt, ...);
 char* get_zval_value (zval *val);
 char* get_zval_value_xml (char *name, zval *val);
 char* get_zval_value_fancy(char *name, zval *val TSRMLS_DC);

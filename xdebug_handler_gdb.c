@@ -721,14 +721,14 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 			/* If there are more second parameters to the "break" command, then we
 			 * concat them and use it as a conditional statement */
 			if (args->c > 1) {
-				XDEBUG_STR_ADD(&eval, args->args[1], 0);
+				xdebug_str_add(&eval, args->args[1], 0);
 
 				for (i = 2; i < args->c; i++) {
-					XDEBUG_STR_ADD(&eval, " ", 0);
-					XDEBUG_STR_ADD(&eval, args->args[i], 0);
+					xdebug_str_add(&eval, " ", 0);
+					xdebug_str_add(&eval, args->args[i], 0);
 				}
 				extra_brk_info->condition = xdstrdup(eval.d);
-				XDEBUG_STR_FREE(&eval);
+				xdebug_str_free(&eval);
 			}
 
 			/* Add breakpoint to the list */
@@ -847,21 +847,21 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 	EG(error_reporting) = 0;
 
 	/* Concat all arguments back together */
-	XDEBUG_STR_ADD(&buffer, args->args[0], 0);
+	xdebug_str_add(&buffer, args->args[0], 0);
 
 	for (i = 1; i < args->c; i++) {
-		XDEBUG_STR_ADD(&buffer, " ", 0);
-		XDEBUG_STR_ADD(&buffer, args->args[i], 0);
+		xdebug_str_add(&buffer, " ", 0);
+		xdebug_str_add(&buffer, args->args[i], 0);
 	}
 
 	XG(breakpoints_allowed) = 0;
 	if (zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC) == FAILURE) {
-		XDEBUG_STR_FREE(&buffer);
+		xdebug_str_free(&buffer);
 		EG(error_reporting) = old_error_reporting;
 		XG(breakpoints_allowed) = 1;
 		return make_message(context, XDEBUG_E_EVAL, "Error evaluating code");
 	} else {
-		XDEBUG_STR_FREE(&buffer);
+		xdebug_str_free(&buffer);
 		EG(error_reporting) = old_error_reporting;
 		ret_value = get_variable(context, NULL, &retval);
 		SENDMSG(context->socket, xdebug_sprintf("%s\n", ret_value));

@@ -12,35 +12,26 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
+   | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_XDEBUG_CODE_COVERAGE_H__
-#define __HAVE_XDEBUG_CODE_COVERAGE_H__
+#ifndef __HAVE_XDEBUG_STR_H__
+#define __HAVE_XDEBUG_STR_H__
 
-#include "php.h"
-#include "xdebug_hash.h"
-#include "xdebug_mm.h"
+#define XDEBUG_STR_PREALLOC 1024
 
-typedef struct xdebug_coverage_line {
-	int lineno;
-	int count;
-} xdebug_coverage_line;
+typedef struct xdebug_str {
+	int   l;
+	int   a;
+	char *d;
+} xdebug_str;
 
-typedef struct xdebug_coverage_file {
-	char        *name;
-	xdebug_hash *lines;
-} xdebug_coverage_file;
+void xdebug_str_add(xdebug_str *xs, char *str, int f);
+void xdebug_str_addl(xdebug_str *xs, char *str, int le, int f);
+void xdebug_str_chop(xdebug_str *xs, int c);
+void xdebug_str_free(xdebug_str *s);
 
-void xdebug_coverage_line_dtor(void *data);
-void xdebug_coverage_file_dtor(void *data);
-
-void xdebug_count_line(char *file, int lineno TSRMLS_DC);
-
-PHP_FUNCTION(xdebug_start_code_coverage);
-PHP_FUNCTION(xdebug_stop_code_coverage);
-PHP_FUNCTION(xdebug_get_code_coverage);
-
+char* xdebug_sprintf (const char* fmt, ...);
 
 #endif

@@ -16,12 +16,13 @@
    +----------------------------------------------------------------------+
  */
 
-#include "xdebug_com.h"
 #include "php_xdebug.h"
+#include "xdebug_com.h"
 #include "xdebug_handlers.h"
 #include "xdebug_handler_dbgp.h"
 #include "xdebug_handler_gdb.h"
 #include "xdebug_handler_php3.h"
+#include "xdebug_mm.h"
 
 xdebug_remote_handler_info handlers[] = {
 	{ "dbgp", "DBGp - Common DeBuGger Protocol", xdebug_handler_dbgp },

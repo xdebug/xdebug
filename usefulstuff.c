@@ -27,6 +27,7 @@
 #include <io.h>
 #endif
 #include "php_xdebug.h"
+#include "xdebug_mm.h"
 #include "usefulstuff.h"
 
 #define READ_BUFFER_SIZE 128

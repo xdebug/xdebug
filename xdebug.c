@@ -53,6 +53,7 @@
 #include "xdebug_code_coverage.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
+#include "xdebug_mm.h"
 #include "xdebug_var.h"
 #include "xdebug_profiler.h"
 #include "xdebug_superglobals.h"
@@ -1027,26 +1028,26 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 
 	if (html) {
 		/* Start row */
-		XDEBUG_STR_ADDL(&str, "<tr>", 4, 0);
+		xdebug_str_addl(&str, "<tr>", 4, 0);
 
 		/* Do timestamp */
-		XDEBUG_STR_ADD(&str, "<td bgcolor='#ffffff' align='center'>", 0);
-		XDEBUG_STR_ADD(&str, xdebug_sprintf("%.6f", i->time - XG(start_time)), 1);
-		XDEBUG_STR_ADDL(&str, "</td>", 5, 0);
+		xdebug_str_add(&str, "<td bgcolor='#ffffff' align='center'>", 0);
+		xdebug_str_add(&str, xdebug_sprintf("%.6f", i->time - XG(start_time)), 1);
+		xdebug_str_addl(&str, "</td>", 5, 0);
 
 		/* Do rest of line */
-		XDEBUG_STR_ADD(&str, "<td bgcolor='#ffffff' align='left'><pre>", 0);
+		xdebug_str_add(&str, "<td bgcolor='#ffffff' align='left'><pre>", 0);
 		for (j = 0; j < i->level - 1; j++) {
-			XDEBUG_STR_ADDL(&str, "  ", 2, 0);
+			xdebug_str_addl(&str, "  ", 2, 0);
 		}
-		XDEBUG_STR_ADD(&str, xdebug_sprintf("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name), 1);
+		xdebug_str_add(&str, xdebug_sprintf("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name), 1);
 	} else {
-		XDEBUG_STR_ADD(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
-		XDEBUG_STR_ADD(&str, xdebug_sprintf("%10lu ", i->memory), 1);
+		xdebug_str_add(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
+		xdebug_str_add(&str, xdebug_sprintf("%10lu ", i->memory), 1);
 		for (j = 0; j < i->level; j++) {
-			XDEBUG_STR_ADDL(&str, "  ", 2, 0);
+			xdebug_str_addl(&str, "  ", 2, 0);
 		}
-		XDEBUG_STR_ADD(&str, xdebug_sprintf("-> %s(", tmp_name), 1);
+		xdebug_str_add(&str, xdebug_sprintf("-> %s(", tmp_name), 1);
 	}
 	xdfree(tmp_name);
 
@@ -1055,32 +1056,32 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 		char *tmp_varname;
 
 		if (c) {
-			XDEBUG_STR_ADDL(&str, ", ", 2, 0);
+			xdebug_str_addl(&str, ", ", 2, 0);
 		} else {
 			c = 1;
 		}
 
 		tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
-		XDEBUG_STR_ADD(&str, tmp_varname, 1);
+		xdebug_str_add(&str, tmp_varname, 1);
 
 		if (html) {
-			XDEBUG_STR_ADD(&str, php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC), 0);
+			xdebug_str_add(&str, php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC), 0);
 		} else {
-			XDEBUG_STR_ADD(&str, i->vars[j].value, 0);
+			xdebug_str_add(&str, i->vars[j].value, 0);
 		}
 	}
 
 	if (html) {
 		/* Do filename and line no */
-		XDEBUG_STR_ADD(&str, xdebug_sprintf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td>", i->filename, i->lineno), 1);
+		xdebug_str_add(&str, xdebug_sprintf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td>", i->filename, i->lineno), 1);
 #if MEMORY_LIMIT
 		/* Do memory */
-		XDEBUG_STR_ADD(&str, xdebug_sprintf("<td bgcolor='#ffffff' align='right'>%lu</td>", i->memory), 1);
+		xdebug_str_add(&str, xdebug_sprintf("<td bgcolor='#ffffff' align='right'>%lu</td>", i->memory), 1);
 #endif
 		/* Close row */
-		XDEBUG_STR_ADD(&str, xdebug_sprintf("</tr>\n"), 0);
+		xdebug_str_add(&str, xdebug_sprintf("</tr>\n"), 0);
 	} else {
-		XDEBUG_STR_ADD(&str, xdebug_sprintf(") %s:%d\n", i->filename, i->lineno), 1);
+		xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", i->filename, i->lineno), 1);
 	}
 
 	return str.d;

@@ -21,6 +21,7 @@
 #include "php_globals.h"
 #include "php_xdebug.h"
 #include "xdebug_llist.h"
+#include "xdebug_mm.h"
 #include "xdebug_profiler.h"
 
 #ifdef PHP_WIN32
