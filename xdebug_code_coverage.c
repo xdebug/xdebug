@@ -86,6 +86,7 @@ static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list 
 {
 	char *new_filename;
 	unsigned int i;
+	TSRMLS_FETCH();
 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
