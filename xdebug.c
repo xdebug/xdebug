@@ -917,10 +917,13 @@ ZEND_DLEXPORT void xdebug_function_end (zend_op_array *op_array)
 
 ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 {
-	function_stack_entry *fse = XDEBUG_LLIST_TAIL(XG(stack))->ptr;
+	function_stack_entry *fse;
 	zend_op              *tmp_op;
 	zval                **param;
 	int                   i;
+	TSRMLS_FETCH();
+
+	fse = XDEBUG_LLIST_TAIL(XG(stack))->ptr;
 
 	if (!fse->arg_done) { /* start scanning for REC_VARS */
 

@@ -120,6 +120,7 @@ void xdebug_var_export(zval **struc, int level TSRMLS_DC)
 char* get_zval_value (zval *val)
 {
 	zval return_val;
+	TSRMLS_FETCH();
 
 	INIT_ZVAL(return_val);
 	
