@@ -1197,6 +1197,7 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args)
 {
 	char *tmp;
+	TSRMLS_FETCH();
 	
 	XG(active_symbol_table) = EG(active_symbol_table);
 	tmp = show_local_vars(context, args, dump_used_var_with_contents);
