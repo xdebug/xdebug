@@ -1,3 +1,7 @@
+Sat Apr 03 23:37:58 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Removed two vars which are no longer needed.
+
 Tue Mar 30 22:07:49 CEST 2004 Harald Radi <harald.radi@nme.at>
 xdebug_handler_dbgp.c:
 - Fixed uri to local file path conversion in source command
