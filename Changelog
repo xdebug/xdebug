@@ -1,3 +1,14 @@
+Thu May 9 14:12:44 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_llist.c
+/xdebug/xdebug_llist.h
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/srm_llist.c
+/xdebug/srm_llist.h:
+- srm_llist > xdebug_llist
+- prework for function call traces
+
 Wed May 8 19:19:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Change comments to make Jani happy
