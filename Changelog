@@ -1,3 +1,17 @@
+Sun Apr 11 16:22:09 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+config.m4
+xdebug/php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_compat.c
+xdebug/xdebug_compat.h
+xdebug/xt.vim
+xdebug/tests/test11.phpt
+xdebug/tests/test8.phpt:
+- Implemented showing returng values in traces. The xdebug.collect_return
+  php.ini settings needs to be activated for this.
+- Modified two test cases to test for the new feature
+- Added xdebug_compat.c to the extension files.
+
 Sat Apr 10 12:33:49 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 test-4.3.sh
 xdebug/test.sh
