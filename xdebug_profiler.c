@@ -136,9 +136,9 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
 #if MEMORY_LIMIT
-		fprintf(XG(profile_file), "\nsummary: %ld %u\n\n", (long) (fse->profile.time * 10000000), AG(allocated_memory));
+		fprintf(XG(profile_file), "\nsummary: %lu %u\n\n", (unsigned long) (fse->profile.time * 10000000), AG(allocated_memory));
 #else
-		fprintf(XG(profile_file), "\nsummary: %ld\n\n", (long) (fse->profile.time * 10000000));
+		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 10000000));
 #endif
 	}
 
@@ -152,9 +152,9 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 #endif
 	}
 #if MEMORY_LIMIT
-	fprintf(XG(profile_file), "%d %ld %ld\n", default_lineno, (long) (fse->profile.time * 10000000), (AG(allocated_memory) - fse->profile.memory) < 0 ? 0 : (AG(allocated_memory) - fse->profile.memory));
+	fprintf(XG(profile_file), "%d %lu %ld\n", default_lineno, (unsigned long) (fse->profile.time * 10000000), (AG(allocated_memory) - fse->profile.memory) < 0 ? 0 : (AG(allocated_memory) - fse->profile.memory));
 #else
-	fprintf(XG(profile_file), "%d %ld\n", default_lineno, (long) (fse->profile.time * 10000000));
+	fprintf(XG(profile_file), "%d %lu\n", default_lineno, (unsigned long) (fse->profile.time * 10000000));
 #endif
 
 	/* dump call list */
@@ -170,9 +170,9 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		
 		fprintf(XG(profile_file), "calls=1 0 0\n");
 #if MEMORY_LIMIT
-		fprintf(XG(profile_file), "%d %ld %ld\n", call_entry->lineno, (long) (call_entry->time_taken * 10000000), call_entry->mem_used < 0 ? 0 : call_entry->mem_used);
+		fprintf(XG(profile_file), "%d %lu %ld\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 10000000), call_entry->mem_used < 0 ? 0 : call_entry->mem_used);
 #else
-		fprintf(XG(profile_file), "%d %ld\n", call_entry->lineno, (long) (call_entry->time_taken * 10000000));
+		fprintf(XG(profile_file), "%d %lu\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 10000000));
 #endif
 	}
 	fprintf(XG(profile_file), "\n");
