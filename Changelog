@@ -1,3 +1,8 @@
+Sun Sep 7 14:48:44 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/xdebug_handler_gdb.c:
+- Fixed memleak with 'eval' command
+
 Sun Sep 7 14:38:21 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - This appeared to be the same 'eval' problem that I fixed yesterday.
