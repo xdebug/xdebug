@@ -1,6 +1,6 @@
-- Implemented handling single-dimensional constant arrays passed to a
++ Implemented handling single-dimensional constant arrays passed to a
 
-- Fix function traces in windows. (Derick)
+= Fix function traces in windows. (Derick)
 
 + Implemented function traces, which you can start and stop with
   xdebug_start_trace() and xdebug_stop_trace(). You can view the trace by using
