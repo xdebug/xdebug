@@ -1,3 +1,8 @@
+Fri Sep 20 22:09:56 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.dsp:
+- Fix line-endings
+- update project file
+
 Tue Sep 17 10:07:43 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/README:
 - Update README
