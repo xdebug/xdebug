@@ -1,3 +1,13 @@
+Fri Jan 30 19:59:15 CET 2004 Shane Caraveo <shane@caraveo.com 
+>
+/xdebug/xdebug.c
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/xdebug_handler_dbgp.c:
+- put redundant command loop code into a function (dbgp)
+- add functions to switch between paths and uri's
+- make breakpoints work (breaks gdb breakpoints)
+
 Tue Jan 27 00:24:48 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/php_xdebug.h
 /xdebug/usefulstuff.c
