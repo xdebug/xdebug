@@ -855,6 +855,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			XG(remote_enable) &&
 			(XG(remote_mode) == XDEBUG_REQ)
 		) {
+			/* Initialize debugging session */
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 			if (XG(context).socket >= 0) {
 				XG(remote_enabled) = 1;
@@ -865,6 +866,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ, magic_cookie)) {
 					XG(remote_enabled) = 0;
 				}
+
+				/* Turn off script time outs */
+				zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			}
 		}
 		if (
