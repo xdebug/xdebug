@@ -1,3 +1,9 @@
+Fri Jan 16 09:44:07 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xt.vim
+/xdebug/xdebug.c:
+- Added VIM syntax highlighting file
+- Added the .xt extension to generated traces
+
 Wed Jan 14 15:53:13 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug.c:
 - Remove $this and $GLOBALS from showing variables in the local scope
