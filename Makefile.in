@@ -1,8 +1,8 @@
-# $Id: Makefile.in,v 1.1 2002-05-14 09:38:36 derick Exp $
+# $Id: Makefile.in,v 1.2 2002-05-14 10:41:14 derick Exp $
 
 LTLIBRARY_NAME          = libxdebug.la
 LTLIBRARY_SOURCES       = xdebug.c xdebug_llist.c
-LILIBRARY_SHARED_NAME   = xdebug.la
-LILIBRARY_SHARED_LIBADD = $(XDEBUG_SHARED_LIBADD)
+LTLIBRARY_SHARED_NAME   = xdebug.la
+LTLIBRARY_SHARED_LIBADD = $(XDEBUG_SHARED_LIBADD)
 
 include $(top_srcdir)/build/dynlib.mk
