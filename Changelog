@@ -1,3 +1,7 @@
+Tue Oct 29 00:44:18 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/usefulstuff.c:
+- Fix warning on Windows
+
 Tue Oct 29 00:28:37 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.dsp:
 - Update .dsp file
