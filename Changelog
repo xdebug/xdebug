@@ -1,3 +1,9 @@
+Fri Nov 29 17:43:44 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/xdebug.c:
+- Fixed a bug with the calculation of total execution time.
+- Replaced tabs with spaces in the cli 'footer'.
+
 Fri Nov 29 17:07:42 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix crash due to not passing the string.
