@@ -1,3 +1,5 @@
+- Added profiling support to xdebug. This introduces 3 new functions,
+
 ? ? ?, 2002 - xdebug 1.2.0
 
 + Implemented the "kill" (kills the running script) and "delete" (removes
