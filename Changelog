@@ -1,3 +1,15 @@
+Sun Oct 20 21:19:22 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handlers.h:
+- Added "bt" command to get backtraces
+- Redid showing of E_* errors to the client
+- Made it more look like GDB
+- Added better help texts
+- Reordened functions in file
+
 Sun Oct 20 21:07:19 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Handle connection aborts from the server side gracefully.
