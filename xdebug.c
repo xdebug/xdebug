@@ -1791,6 +1791,7 @@ PHP_FUNCTION(xdebug_enable)
 	zend_error_cb = new_error_cb;
 #ifdef ZEND_ENGINE_2
 	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
+	zend_throw_exception_hook = xdebug_throw_exception_hook;
 #endif
 }
 
@@ -1799,6 +1800,7 @@ PHP_FUNCTION(xdebug_disable)
 	zend_error_cb = old_error_cb;
 #ifdef ZEND_ENGINE_2
 	zend_opcode_handlers[ZEND_EXIT] = old_exit_handler;
+	zend_throw_exception_hook = NULL;
 #endif
 }
 
