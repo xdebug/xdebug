@@ -96,7 +96,7 @@ SOURCE=.\xdebug.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\srm_llist.c
+SOURCE=.\xdebug_llist.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
