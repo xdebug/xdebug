@@ -75,6 +75,8 @@ typedef struct function_stack_entry {
 	int   varc;
 	xdebug_var vars[20];
 
+	int   delayed_fn;
+
 	int   level;
 	int   refcount;
 } function_stack_entry;

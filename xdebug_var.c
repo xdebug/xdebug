@@ -90,16 +90,26 @@ void xdebug_var_export(zval **struc, int level TSRMLS_DC)
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_PP(struc);
-			PUTS ("array (");
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 1, level);
-			PUTS(")");
+			myht->bApplyProtection = 0;
+			if (myht->nApplyCount < 3) {
+				PUTS ("array (");
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 1, level);
+				PUTS(")");
+			} else {
+				PUTS("...");
+			}
+			myht->bApplyProtection = 1;
 			break;
 
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
-			php_printf ("class %s {", Z_OBJCE_PP(struc)->name);
-			zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 1, level);
-			PUTS("}");
+			if (myht->nApplyCount < 2) {
+				php_printf ("class %s {", Z_OBJCE_PP(struc)->name);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 1, level);
+				PUTS("}");
+			} else {
+				PUTS("...");
+			}
 			break;
 
 		case IS_RESOURCE: {

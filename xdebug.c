@@ -248,6 +248,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		tmp->varc     = 0;
 		tmp->refcount = 1;
 		tmp->level    = ++XG(level);
+		tmp->delayed_fn    = 0;
 		tmp->function_name = estrdup("{main}");
 
 		tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
@@ -665,10 +666,12 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	TSRMLS_FETCH();
 	
 	tmp = emalloc (sizeof (struct function_stack_entry));
-	tmp->varc     = 0;
-	tmp->refcount = 1;
-	tmp->level    = XG(level) + 1;
-	tmp->arg_done = 0;
+	tmp->varc          = 0;
+	tmp->refcount      = 1;
+	tmp->level         = XG(level) + 1;
+	tmp->arg_done      = 0;
+	tmp->delayed_fn    = 0;
+	tmp->function_name = NULL;
 
 	cur_opcode = *EG(opline_ptr);
 	end_opcode = op_array->opcodes + op_array->last + 1;
@@ -790,8 +793,12 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 							);
 							tmp->function_name = estrdup(buffer);
 							break;
-						default:  /* FIXME need better IS_VAR handling */
+						default:
+#if HAVE_EXECUTE_DATA_PTR
+							tmp->delayed_fn = 1;
+#else
 							tmp->function_name = estrdup("{unknown}");
+#endif
 							break;
 	
 					}
@@ -925,6 +932,12 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 
 	fse = XDEBUG_LLIST_TAIL(XG(stack))->ptr;
 
+#if HAVE_EXECUTE_DATA_PTR
+	if (fse->delayed_fn) { /* variable function name */
+		fse->function_name = estrdup (executor_globals.execute_data_ptr->function_state.function->common.function_name);
+	}
+#endif
+	
 	if (!fse->arg_done) { /* start scanning for REC_VARS */
 
 		fse->varc = 0;
