@@ -1,3 +1,13 @@
+Thu Nov 11 17:30:12 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_compat.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/debugclient/main.c:
+- Added error messages to returned errors (in most cases)
+- Make property_get and property_value finally work as they should, including
+  retrieving information from different depths then the most top stack frame.
+- Fixed warnings because of updated API numbers
+
 Mon Nov 08 10:40:28 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fix eval'ed $varnames in property_get.
