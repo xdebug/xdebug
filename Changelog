@@ -1,3 +1,7 @@
+Mon Mar 22 02:39:57 CET 2004 Derick Rethans <derick@derickrethans.nl>
+debugclient/main.c:
+- Update client to check for \0 at the end of a command packet.
+
 Wed Mar 17 19:21:15 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_gdb.c:
