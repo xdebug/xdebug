@@ -36,6 +36,20 @@ typedef struct xdebug_arg {
 	char **args;
 } xdebug_arg;
 
+#define xdebug_arg_init(arg) {    \
+	arg->args = NULL;             \
+	arg->c    = 0;                \
+}
+
+#define xdebug_arg_dtor(arg) {     \
+	int i;                         \
+	for (i = 0; i < arg->c; i++) { \
+		xdfree(arg->args[i]);      \
+	}                              \
+	xdfree(arg->args);             \
+	xdfree(arg);                   \
+}
+
 typedef struct xdebug_cmd {
 	char *name;
 	int   args;

@@ -36,6 +36,7 @@ struct _xdebug_con {
 	xdebug_socket_buf     *buffer;
 	char                  *program_name;
 	xdebug_hash           *function_breakpoints;
+	xdebug_hash           *class_breakpoints;
 };
 
 struct _xdebug_remote_handler {

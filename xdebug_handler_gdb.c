@@ -309,11 +309,15 @@ static print_breakpoint(xdebug_con *h, function_stack_entry *i)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
+	char *tmp_fname;
+	TSRMLS_FETCH();
 /*
 * Breakpoint 2, xdebug_execute (op_array=0x82caf50)
 *     at /dat/dev/php/xdebug/xdebug.c:361
 */
-	SENDMSG(h->socket, xdebug_sprintf("Breakpoint, %s (", i->function.function));
+	tmp_fname = show_fname(i TSRMLS_CC);
+	SENDMSG(h->socket, xdebug_sprintf("Breakpoint, %s(", tmp_fname));
+	xdfree(tmp_fname);
 
 	/* Printing vars */
 	for (j = 0; j < i->varc; j++) {
@@ -336,16 +340,21 @@ static print_stackframe(xdebug_con *h, int nr, function_stack_entry *i)
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
+	char *tmp_fname;
+	TSRMLS_FETCH();
+	
 /*
 * 0x4001af2e in xdebug_compile_file (file_handle=0xbffff960, type=2)
 *     at /dat/dev/php/xdebug/xdebug.c:901
 *         
 */
+   	tmp_fname = show_fname(i TSRMLS_CC);
 	if (nr) {
-		SENDMSG(h->socket, xdebug_sprintf("#%-2d %s (", nr, i->function.function));
+		SENDMSG(h->socket, xdebug_sprintf("#%-2d %s (", nr, tmp_fname));
 	} else {
-		SENDMSG(h->socket, xdebug_sprintf("%s (", i->function.function));
+		SENDMSG(h->socket, xdebug_sprintf("%s (", tmp_fname));
 	}
+	xdfree(tmp_fname);
 
 	/* Printing vars */
 	for (j = 0; j < i->varc; j++) {
@@ -383,12 +392,46 @@ char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args)
 
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 {
+	xdebug_arg *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	char       *tmp_name;
+
+	xdebug_arg_init(method);
+
+#warning optimize rebuilding methodname	
 	if (strstr(args->args[0], "::")) { /* class::method */
-		return xdstrdup("Class::method breakpoints are not yet supported.");
+		xdebug_explode("::", args->args[0], method, -1);
+		if (method->c != 2) {
+			xdebug_arg_dtor(method);
+			return xdstrdup("Invalid format for class/method combination.");
+		} else {
+			tmp_name = xdebug_sprintf("%s::%s", method->args[0], method->args[1]);
+			if (!xdebug_hash_add(context->class_breakpoints, tmp_name, strlen(tmp_name), (void*) tmp_name)) {
+				xdebug_arg_dtor(method);
+				return xdstrdup("Breakpoint could not be set.");
+			} else {
+				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s::%s.\n", method->args[0], method->args[1]));
+				xdebug_arg_dtor(method);
+			}
+		}
+	} else if (strstr(args->args[0], "->")) { /* class->method */
+		xdebug_explode("->", args->args[0], method, -1);
+		if (method->c != 2) {
+			xdebug_arg_dtor(method);
+			return xdstrdup("Invalid format for class/method combination.");
+		} else {
+			tmp_name = xdebug_sprintf("%s->%s", method->args[0], method->args[1]);
+			if (!xdebug_hash_add(context->class_breakpoints, tmp_name, strlen(tmp_name), (void*) tmp_name)) {
+				xdebug_arg_dtor(method);
+				return xdstrdup("Breakpoint could not be set.");
+			} else {
+				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s->%s.\n", method->args[0], method->args[1]));
+				xdebug_arg_dtor(method);
+			}
+		}
 	} else if (strstr(args->args[0], ":")) { /* file:line */
 		return xdstrdup("File:line breakpoints are not yet supported.");
 	} else { /* function */
-		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) args->args[0])) {
+		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) xdstrdup(args->args[0]))) {
 			return xdstrdup("Breakpoint could not be set.");
 		} else {
 			SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", args->args[0]));
@@ -433,8 +476,7 @@ int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *en
 	char *ret_err = NULL;
 	
 	xdebug_arg *args = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	args->c = 0;
-	args->args = NULL;
+	xdebug_arg_init(args);
 
 	*error = NULL;
 
@@ -506,11 +548,7 @@ int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *en
 		retval = 1;
 	}
 cleanup:
-	for (i = 0; i < args->c; i++) {
-		xdfree(args->args[i]);
-	}
-	xdfree(args->args);
-	xdfree(args);
+	xdebug_arg_dtor(args);
 	return retval;
 }
 
@@ -545,6 +583,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->buffer->buffer_size = 0;
 #warning Add dtor!
 	context->function_breakpoints = xdebug_hash_alloc(64, NULL);
+	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
 	do {
 		SSEND(context->socket, "?init\n");
 		option = xdebug_socket_read_line(context->socket, context->buffer);
@@ -561,6 +600,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 int xdebug_gdb_deinit(xdebug_con *context)
 {
 	xdebug_hash_destroy(context->function_breakpoints);
+	xdebug_hash_destroy(context->class_breakpoints);
 }
 
 int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack)

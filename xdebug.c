@@ -438,7 +438,8 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 
 static int handle_breakpoints (struct function_stack_entry *fse)
 {
-	char *name = NULL;
+	char *name     = NULL;
+	char *tmp_name = NULL;
 
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
@@ -448,6 +449,23 @@ static int handle_breakpoints (struct function_stack_entry *fse)
 				return 0;
 			}
 		}
+	}
+	/* class->function breakpoints */
+	if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
+		if (fse->function.type == XFUNC_MEMBER) {
+			tmp_name = xdebug_sprintf ("%s->%s", fse->function.class, fse->function.function);
+		} else if (fse->function.type == XFUNC_STATIC_MEMBER) {
+			tmp_name = xdebug_sprintf ("%s::%s", fse->function.class, fse->function.function);
+		}
+
+		if (xdebug_hash_find(XG(context).class_breakpoints, tmp_name, strlen(tmp_name), (void *) &name)) {
+			/* Yup, breakpoint found, call handler */
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack))) {
+				xdfree(tmp_name);
+				return 0;
+			}
+		}
+		xdfree(tmp_name);
 	}
 	return 1;
 }
@@ -518,7 +536,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	XG(level)--;
 }
 
-static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
+char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 {
 	char *tmp;
 	xdebug_func f;
