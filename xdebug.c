@@ -74,6 +74,7 @@ void (*new_error_cb)(int type, const char *error_filename, const uint error_line
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
+static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC);
 
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_function_stack,    NULL)
@@ -449,6 +450,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	if (XG(trace_file)) {
 		fprintf(XG(trace_file), "End of function trace\n");
 		fclose(XG(trace_file));
+		XG(trace_file) = NULL;
 	}
 
 	if (XG(error_handler)) {
@@ -627,6 +629,11 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	if (XG(do_trace)) {
 		tmp->refcount++;
 		xdebug_llist_insert_next(XG(trace), XDEBUG_LLIST_TAIL(XG(trace)), tmp);
+		if (XG(trace_file)) {
+			char *t = return_trace_stack_frame(tmp, 0 TSRMLS_CC);
+			fprintf(XG(trace_file), t);
+			xdfree(t);
+		}
 	}
 	return tmp;
 }
@@ -908,10 +915,81 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 	}
 }
 
+static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC)
+{
+	int c = 0; /* Comma flag */
+	int j = 0; /* Counter */
+	int new_len;
+	char *tmp_name;
+	xdebug_str str = {0, 0, NULL};
+
+	tmp_name = show_fname(i, html TSRMLS_CC);
+
+	if (html) {
+		/* Start row */
+		XDEBUG_STR_ADDL(&str, "<tr>", 4, 0);
+
+		/* Do timestamp */
+		XDEBUG_STR_ADD(&str, "<td bgcolor='#ffffff' align='center'>", 0);
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("%.6f", i->time - XG(start_time)), 1);
+		XDEBUG_STR_ADDL(&str, "</td>", 5, 0);
+
+		/* Do rest of line */
+		php_printf("<td bgcolor='#ffffff' align='left'><pre>");
+		for (j = 0; j < i->level - 1; j++) {
+			XDEBUG_STR_ADDL(&str, "  ", 2, 0);
+		}
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name), 1);
+	} else {
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("%10lu ", i->memory), 1);
+		for (j = 0; j < i->level; j++) {
+			XDEBUG_STR_ADDL(&str, "  ", 2, 0);
+		}
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("-> %s(", tmp_name), 1);
+	}
+	xdfree(tmp_name);
+
+	/* Printing vars */
+	for (j = 0; j < i->varc; j++) {
+		char *tmp_varname;
+
+		if (c) {
+			XDEBUG_STR_ADDL(&str, ", ", 2, 0);
+		} else {
+			c = 1;
+		}
+
+		tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
+		XDEBUG_STR_ADD(&str, tmp_varname, 1);
+
+		if (html) {
+			XDEBUG_STR_ADD(&str, php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC), 0);
+		} else {
+			XDEBUG_STR_ADD(&str, i->vars[j].value, 0);
+		}
+	}
+
+	if (html) {
+		/* Do filename and line no */
+		XDEBUG_STR_ADD(&str, xdebug_sprintf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td>", i->filename, i->lineno), 1);
+#if MEMORY_LIMIT
+		/* Do memory */
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("<td bgcolor='#ffffff' align='right'>%lu</td>", i->memory), 1);
+#endif
+		/* Close row */
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("</tr>\n"), 0);
+	} else {
+		XDEBUG_STR_ADD(&str, xdebug_sprintf(") %s:%d\n", i->filename, i->lineno), 1);
+	}
+
+	return str.d;
+}
+
+
 static inline void print_trace(int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
-	int new_len;
 
 	if (XG(trace)) {
 		if (html) {
@@ -932,74 +1010,13 @@ static inline void print_trace(int html TSRMLS_DC)
 
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
-			int c = 0; /* Comma flag */
-			int j = 0; /* Counter */
 			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
-			char *tmp_name;
 
 			if (XDEBUG_LLIST_IS_TAIL(le)) {
 				break;
 			}
 
-			tmp_name = show_fname(i, html TSRMLS_CC);
-
-			if (html) {
-				/* Start row */
-				php_printf("<tr>");
-
-				/* Do timestamp */
-				php_printf("<td bgcolor='#ffffff' align='center'>");
-				php_printf("%.6f", i->time - XG(start_time));
-				php_printf("</td>");
-
-				/* Do rest of line */
-				php_printf("<td bgcolor='#ffffff' align='left'><pre>");
-				for (j = 0; j < i->level - 1; j++) {
-					php_printf("  ");
-				}
-				php_printf("-></pre></td><td bgcolor='#ffffff'>%s(", tmp_name);
-			} else {
-				php_printf("%10.4f ", i->time - XG(start_time));
-				php_printf("%10lu ", i->memory);
-				for (j = 0; j < i->level; j++) {
-					php_printf("  ");
-				}
-				php_printf("-> %s(", tmp_name);
-			}
-			xdfree(tmp_name);
-
-			/* Printing vars */
-			for (j = 0; j < i->varc; j++) {
-				char *tmp_varname;
-
-				if (c) {
-					php_printf(", ");
-				} else {
-					c = 1;
-				}
-
-				tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
-				if (html) {
-					php_printf("%s%s", tmp_varname,
-						php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
-				} else {
-					php_printf("%s%s", tmp_varname, i->vars[j].value);
-				}
-				xdfree(tmp_varname);
-			}
-
-			if (html) {
-				/* Do filename and line no */
-				php_printf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td>", i->filename, i->lineno);
-#if MEMORY_LIMIT
-				/* Do memory */
-				php_printf("<td bgcolor='#ffffff' align='right'>%lu</td>", i->memory);
-#endif
-				/* Close row */
-				php_printf("</tr>\n");
-			} else {
-				php_printf(") %s:%d\n", i->filename, i->lineno);
-			}
+			php_printf(return_trace_stack_frame(i, html TSRMLS_CC));
 		}
 
 		if (html) {
@@ -1313,6 +1330,7 @@ void xdebug_stop_trace()
 	if (XG(trace_file)) {
 		fprintf(XG(trace_file), "End of function trace\n");
 		fclose(XG(trace_file));
+		XG(trace_file) = NULL;
 	}
 		
 	/* if a profiler is running we need to shut it down */
@@ -1322,6 +1340,7 @@ void xdebug_stop_trace()
 		if (XG(profile_file)) {
 			fprintf(XG(profile_file), "End of function profiler\n");
 			fclose(XG(profile_file));
+			XG(profile_file) = NULL;
 		}
 	}
 }
