@@ -1105,7 +1105,7 @@ DBGP_FUNC(typemap_get)
 	}
 }
 
-static int add_variable_node(xdebug_xml_node *node, char *name, int name_length TSRMLS_DC)
+static int add_variable_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null TSRMLS_DC)
 {
 	xdebug_xml_node      *contents;
 	zval                  ret_zval;
@@ -1116,11 +1116,18 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length 
 	XG(active_symbol_table) = NULL;
 
 	if (!contents) {
+		char *varname = NULL;
+		if (var_only && name[0] != '$') {
+			varname = xdebug_sprintf("$%s", name);
+		}
 		/* if we cannot get the value directly, then try eval */
-		res = _xdebug_do_eval(name, &ret_zval TSRMLS_CC);
-		if (res != FAILURE) {
+		res = _xdebug_do_eval(varname?varname:name, &ret_zval TSRMLS_CC);
+		if (res != FAILURE && (!non_null || Z_TYPE_P(&ret_zval) != IS_NULL)) {
 			contents = get_zval_value_xml_node(name, &ret_zval);
 			zval_dtor(&ret_zval);
+		}
+		if (varname) {
+			xdfree(varname);
 		}
 	}
 	if (contents) {
@@ -1137,7 +1144,7 @@ DBGP_FUNC(property_get)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 
-	if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC) == FAILURE) {
+	if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 0, 0 TSRMLS_CC) == FAILURE) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
 }
@@ -1288,17 +1295,17 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_dbgp_options *optio
 
 #ifdef ZEND_ENGINE_2
 		/* zend engine 2 does not give us $this, eval so we can get it */
-		add_variable_node(node, "this", sizeof("this") TSRMLS_CC);
+		add_variable_node(node, "this", sizeof("this"), 1, 1 TSRMLS_CC);
 #endif
 		if (options->show_hidden && context_id > 0) {
 			/* add supper globals */
-			add_variable_node(node, "_ENV", sizeof("_ENV") TSRMLS_CC);
-			add_variable_node(node, "_GET", sizeof("_GET") TSRMLS_CC);
-			add_variable_node(node, "_POST", sizeof("_POST") TSRMLS_CC);
-			add_variable_node(node, "_COOKIE", sizeof("_COOKIE") TSRMLS_CC);
-			add_variable_node(node, "_REQUEST", sizeof("_REQUEST") TSRMLS_CC);
-			add_variable_node(node, "_FILES", sizeof("_FILES") TSRMLS_CC);
-			add_variable_node(node, "_SERVER", sizeof("_SERVER") TSRMLS_CC);
+			add_variable_node(node, "_ENV", sizeof("_ENV"), 1, 1 TSRMLS_CC);
+			add_variable_node(node, "_GET", sizeof("_GET"), 1, 1 TSRMLS_CC);
+			add_variable_node(node, "_POST", sizeof("_POST"), 1, 1 TSRMLS_CC);
+			add_variable_node(node, "_COOKIE", sizeof("_COOKIE"), 1, 1 TSRMLS_CC);
+			add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1 TSRMLS_CC);
+			add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1 TSRMLS_CC);
+			add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1 TSRMLS_CC);
 		}
 
 		XG(active_symbol_table) = NULL;
@@ -1589,7 +1596,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.52 $";
+	return "$Revision: 1.53 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
