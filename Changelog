@@ -1,3 +1,8 @@
+Sun Apr 18 14:31:35 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+test.sh
+xdebug/xdebug.c:
+- Remove useles remainder.
+
 Sun Apr 18 01:35:33 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
