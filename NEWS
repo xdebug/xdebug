@@ -1,3 +1,5 @@
+- Added correct handling of include(_once)/require(_once) and eval()
+
 - Added ini setting to change the default setting for enabling showing
   enhanced error messages. (Defaults to "On"). (Derick)
 - Added the functions xdebug_enable() and xdebug_disable() to change the
