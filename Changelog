@@ -1,3 +1,7 @@
+Sun May 26 13:00:17 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test13.php:
+- Added test for variable function calls  (13)
+
 Sat May 25 16:01:23 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Fix NEWS
 
