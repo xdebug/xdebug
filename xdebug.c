@@ -425,7 +425,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			break;
 	}
 
-	print_stack (PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+	if (EG(error_reporting) & type) {
+		print_stack (PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+	}
 
 	/* Bail out if we can't recover */
 	switch (type) {
