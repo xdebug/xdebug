@@ -1,3 +1,7 @@
+Mon Oct 6 20:37:15 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- This should not have gone in, as it was not ready yet.
+
 Mon Oct 6 20:19:47 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - MFH: Fixed handling stack traces for hen display_errors was set to Off.
