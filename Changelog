@@ -1,3 +1,7 @@
+Sun Oct 20 20:23:18 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Look more like GDB
+
 Sat Oct 19 21:14:23 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - Abstracted error reporting in response to commands from the client.
