@@ -1,3 +1,15 @@
+Wed May 14 22:16:58 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/package.xml
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h:
+- Implemented the "show-local" command (shows all local variables in the
+  current scope including all contents).
+- Implemented conditions for breakpoints in the "break" command.
+- Fixed a memleak.
+
 Fri May 2 11:43:23 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h:
 - Bump version number
