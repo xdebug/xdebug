@@ -1,3 +1,7 @@
+Tue Oct 29 18:54:46 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Fixed superfluous files in package.xml
+
 Tue Oct 29 16:57:06 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml
 /xdebug/php_xdebug.h
