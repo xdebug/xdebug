@@ -1,3 +1,7 @@
+Wed Oct 15 16:16:21 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Fixed bug in deleting absolute breakpoints on Windows
+
 Tue Oct 14 18:46:47 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_xml.c
 /xdebug/xdebug_xml.h:
