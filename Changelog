@@ -1,3 +1,8 @@
+Sat Nov 22 15:16:40 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug_handler_dbgp.c:
+- Update constant names
+
 Thu Nov 20 15:38:13 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - MFH: Fixed bug #31: & entity replaced after others, wrong HTML output.
