@@ -1,4 +1,4 @@
-Mon Nov 11, 2002 - xdebug 1.1.0
+Mon Nov 13, 2002 - xdebug 1.1.0
 
 + Implemented the "list" (source listing), "print" (printing variable
   contents), "show" (show all variables in the scope), "step" (step through
