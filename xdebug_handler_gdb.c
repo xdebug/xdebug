@@ -481,6 +481,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 	int   j = 0; /* Counter */
 	char *tmp_fname;
 	char *tmp;
+	char *tmp_value;
 	int   xml = (response_format == XDEBUG_RESPONSE_XML);
 	TSRMLS_FETCH();
 /*
@@ -506,11 +507,12 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 		if (i->vars[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
 		}
-		if (!i->vars[j].value) {
-			i->vars[j].value = get_zval_value(i->vars[j].addr);
+		if (!i->vars[j].addr) {
+			tmp_value = get_zval_value(i->vars[j].addr);
 		}
-		tmp = xmlize(i->vars[j].value);
+		tmp = xmlize(tmp_value);
 		SSEND(h->socket, tmp);
+		xdfree(tmp_value);
 		efree(tmp);
 	}
 
@@ -527,6 +529,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 	int j = 0; /* Counter */
 	char *tmp_fname;
 	char *tmp;
+	char *tmp_value;
 	TSRMLS_FETCH();
 	
 /*
@@ -561,11 +564,12 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 		if (i->vars[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
 		}
-		if (!i->vars[j].value) {
-			i->vars[j].value = get_zval_value(i->vars[j].addr);
+		if (!i->vars[j].addr) {
+			tmp_value = get_zval_value(i->vars[j].addr);
 		}
-		tmp = xmlize(i->vars[j].value);
+		tmp = xmlize(tmp_value);
 		SSEND(h->socket, tmp);
+		xdfree(tmp_value);
 		efree(tmp);
 	}
 
@@ -1316,7 +1320,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.66 $";
+	return "$Revision: 1.67 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)

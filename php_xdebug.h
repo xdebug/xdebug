@@ -75,14 +75,13 @@ PHP_FUNCTION(xdebug_break);
 /* tracing functions */
 PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
-PHP_FUNCTION(xdebug_get_function_trace);
-PHP_FUNCTION(xdebug_dump_function_trace);
 
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
 PHP_FUNCTION(xdebug_set_error_handler);
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
+PHP_FUNCTION(xdebug_peak_memory_usage);
 #endif
 PHP_FUNCTION(xdebug_time_index);
 
@@ -92,31 +91,24 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	int           level;
 	xdebug_llist *stack;
-	xdebug_llist *trace;
 	int           max_nesting_level;
 	zend_bool     default_enable;
 	zend_bool     collect_params;
-	zend_bool     auto_trace;
-	zend_bool     do_trace;
+	zend_bool     extended_info;
+	zend_bool     show_local_vars;
 	char         *manual_url;
-	FILE         *trace_file;
 	char         *error_handler;
 	double        start_time;
 	HashTable    *active_symbol_table;
 
+	FILE         *trace_file;
+	zend_bool     do_trace;
+	zend_bool     auto_trace;
+	char         *auto_trace_file;
+
 	/* used for code coverage */
 	zend_bool     do_code_coverage;
 	xdebug_hash  *code_coverage;
-
-	/* used for profiling */
-	double 	      total_execution_time;
-	double 	      total_compiling_time;
-	zend_bool     do_profile;
-	zend_bool     profiler_trace;
-	FILE         *profile_file;
-	zend_bool     auto_profile;
-	char         *output_dir;
-	int           auto_profile_mode;
 
 	/* superglobals */
 	zend_bool     dump_globals;

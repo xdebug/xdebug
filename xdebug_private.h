@@ -29,12 +29,11 @@
 #include "TSRM.h"
 #endif
 
-void xdebug_start_trace();
-void xdebug_stop_trace();
+int xdebug_start_trace(char* fname TSRMLS_DC);
+void xdebug_stop_trace(TSRMLS_D);
 
 typedef struct xdebug_var {
 	char *name;
-	char *value;
 	void *addr;
 } xdebug_var;
 
@@ -109,6 +108,7 @@ typedef struct xdebug_func {
 	int   internal;
 } xdebug_func;
 
+#define MAX_FUNCTION_ARGUMENTS 32
 typedef struct function_stack_entry {
 	/* function properties */
 	xdebug_func  function;
@@ -122,7 +122,7 @@ typedef struct function_stack_entry {
 	/* argument properties */
 	int          arg_done;
 	int          varc;
-	xdebug_var   vars[20];
+	xdebug_var   vars[MAX_FUNCTION_ARGUMENTS];
 	xdebug_hash *used_vars;
 	HashTable   *symbol_table;
 

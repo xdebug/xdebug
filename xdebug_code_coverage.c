@@ -74,7 +74,11 @@ void xdebug_count_line(char *filename, int lineno TSRMLS_DC)
 
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
-	XG(do_code_coverage) = 1;
+	if (XG(extended_info)) {
+		XG(do_code_coverage) = 1;
+	} else {
+		php_error(E_WARNING, "You can only use code coverage when you leave the setting of 'xdebug.extended_info' to the default '1'.");
+	}
 }
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
