@@ -590,7 +590,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	) {
 		/* Ugly hack for call_user_*() type function calls */
 		zend_function *tmpf = EG(current_execute_data)->prev_execute_data->function_state.function;
-		if (tmpf) {
+		if (tmpf && tmpf->common.function_name) {
 			if (
 				(strcmp(tmpf->common.function_name, "call_user_func") == 0) ||
 				(strcmp(tmpf->common.function_name, "call_user_func_array") == 0) ||
@@ -604,6 +604,10 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	if (!tmp->filename) {
 		/* Includes/main script etc */
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
+	}
+	/* Call user function locations */
+	if (!tmp->filename && XDEBUG_LLIST_TAIL(XG(stack)) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) ) {
+		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 	}
 #if MEMORY_LIMIT
 	tmp->memory = AG(allocated_memory);
