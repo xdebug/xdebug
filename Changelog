@@ -1,3 +1,8 @@
+Tue Oct 22 12:57:22 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/package.xml:
+- update package.xml and todo
+
 Mon Oct 21 21:21:47 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Remove outdated crap
