@@ -1,3 +1,9 @@
+Wed Feb 18 21:53:57 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug.c
+/xdebug/tests/function_counter.phpt:
+- Fixed counting functions for xdebug_get_function_count().
+- Added a testcase for xdebug_get_function_count().
+
 Wed Feb 18 21:45:32 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/test.sh
 /xdebug/xdebug.c
