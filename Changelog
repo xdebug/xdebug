@@ -1,3 +1,7 @@
+Thu Sep 5 13:25:12 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/Makefile.in:
+- Update Makefile.in for old PHP versions (=< 4.2)
+
 Wed Sep 4 21:00:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Updated NEWS file
 
