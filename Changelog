@@ -1,3 +1,8 @@
+Tue Jul 13 12:02:39 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #74: Segfault with autoload.
+#- Already fixed in revision 1.191 for HEAD
+
 Mon Jul 12 09:12:26 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed Windows build issues.
