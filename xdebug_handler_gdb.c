@@ -1,16 +1,16 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003 The PHP Group                               |
+   | Copyright (c) 2002, 2003 Derick Rethans                              |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.02 of the PHP license,      |
+   | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://www.php.net/license/2_02.txt.                                 |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | http://xdebug.derickrethans.nl/license.php                           |
+   | If you did not receive a copy of the Xdebug license and are unable   |
+   | to obtain it through the world-wide-web, please send a note to       |
+   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    +----------------------------------------------------------------------+
@@ -53,6 +53,7 @@ char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args);
 
@@ -87,6 +88,9 @@ static xdebug_cmd commands_breakpoint[] = {
 		"             Argument may be filename and linenumber, function name or '{main}'\n"
 		"             for the first PHP line."
 	},
+	{ "show-breakpoints", 0, "show-breakpoints",                      xdebug_handle_show_breakpoints, 1,
+		"Shows a list of all breakpoints and optional conditions."
+	},
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
@@ -98,7 +102,7 @@ static xdebug_cmd commands_data[] = {
 		"Show a list of all variables"
 	},
 	{ "show-local", 0, "show-local",                                 xdebug_handle_show_local, 1,
-		"Show a list of all variables"
+		"Show a list of all variables including their contents"
 	},
 	{ "print",      1, "print",                                      xdebug_handle_print,      1,
 		"Prints the contents of the variable"
@@ -580,14 +584,25 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 
 	xdebug_arg_init(method);
 
+	extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
+	extra_brk_info->file = NULL;
+	extra_brk_info->condition = NULL;
+	extra_brk_info->classname = NULL;
+	extra_brk_info->functionname = NULL;
+
 	if (strstr(args->args[0], "::")) { /* class::method */
 		xdebug_explode("::", args->args[0], method, -1);
+		extra_brk_info->classname = xdstrdup(method->args[0]);
+		extra_brk_info->functionname = xdstrdup(method->args[1]);
+
 		if (method->c != 2) {
 			xdebug_arg_dtor(method);
+			xdebug_brk_info_dtor(extra_brk_info);
 			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for class/method combination.");
 		} else {
-			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
+			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) extra_brk_info)) {
 				xdebug_arg_dtor(method);
+				xdebug_brk_info_dtor(extra_brk_info);
 				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
 			} else {
 				send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on class/method combination.");
@@ -596,12 +611,17 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 		}
 	} else if (strstr(args->args[0], "->")) { /* class->method */
 		xdebug_explode("->", args->args[0], method, -1);
+		extra_brk_info->classname = xdstrdup(method->args[0]);
+		extra_brk_info->functionname = xdstrdup(method->args[1]);
+
 		if (method->c != 2) {
 			xdebug_arg_dtor(method);
+			xdebug_brk_info_dtor(extra_brk_info);
 			return make_message(context, XDEBUG_E_INVALID_FORMAT, "Invalid format for class/method combination.");
 		} else {
-			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
+			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) extra_brk_info)) {
 				xdebug_arg_dtor(method);
+				xdebug_brk_info_dtor(extra_brk_info);
 				return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
 			} else {
 				send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on class/method combination.");
@@ -632,11 +652,9 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 			}
 
 			/* Set line number in extra structure */
-			extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
 			extra_brk_info->lineno = atoi(method->args[1]);
 			extra_brk_info->file = tmp_name;
 			extra_brk_info->file_len = strlen(tmp_name);
-			extra_brk_info->condition = NULL;
 
 			/* If there are more second parameters to the "break" command, then we
 			 * concat them and use it as a conditional statement */
@@ -657,8 +675,11 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 			xdebug_arg_dtor(method);
 		}
 	} else { /* function */
-		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
+		extra_brk_info->functionname = xdstrdup(args->args[0]);
+
+		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) extra_brk_info)) {
 			xdebug_arg_dtor(method);
+			xdebug_brk_info_dtor(extra_brk_info);
 			return make_message(context, XDEBUG_E_BREAKPOINT_NOT_SET, "Breakpoint could not be set.");
 		} else {
 			send_message(context, XDEBUG_D_BREAKPOINT_SET, "Breakpoint set on function.");
@@ -980,6 +1001,96 @@ char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
 }
 
 
+static void dump_class_breakpoint(void *context, xdebug_hash_element* he)
+{
+	xdebug_con         *h = (xdebug_con*) context;
+	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	xdebug_brk_info    *brk_info = (xdebug_brk_info*) he->ptr;
+
+	if (options->response_format == XDEBUG_RESPONSE_XML) {
+		SENDMSG(
+			h->socket,
+			xdebug_sprintf("<breakpoint type='class'><class>%s</class><method>%s</method></breakpoint>",
+			brk_info->classname, brk_info->functionname));
+	} else {
+		SENDMSG(
+			h->socket,
+			xdebug_sprintf("Method breakpoint: %s::%s\n",
+			brk_info->classname, brk_info->functionname));
+	}
+}
+
+static void dump_function_breakpoint(void *context, xdebug_hash_element* he)
+{
+	xdebug_con         *h = (xdebug_con*) context;
+	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
+	xdebug_brk_info    *brk_info = (xdebug_brk_info*) he->ptr;
+
+	if (options->response_format == XDEBUG_RESPONSE_XML) {
+		SENDMSG(h->socket, xdebug_sprintf("<breakpoint type='function'><function>%s</function></breakpoint>", brk_info->functionname));
+	} else {
+		SENDMSG(h->socket, xdebug_sprintf("Function breakpoint: %s\n", brk_info->functionname));
+	}
+}
+
+static void dump_line_breakpoint(xdebug_con *h, xdebug_gdb_options *options, xdebug_brk_info* brk_info)
+{
+	char *condition = NULL;
+
+	if (options->response_format == XDEBUG_RESPONSE_XML) {
+		if (condition) {
+			condition = xmlize(brk_info->condition);
+			SENDMSG(h->socket,
+				xdebug_sprintf("<breakpoint type='line' condition='%s'><file>%s</file><line>%d</line></breakpoint>",
+				condition,
+				brk_info->file,
+				brk_info->lineno));
+			xdfree(condition);
+		} else {
+			SENDMSG(h->socket, xdebug_sprintf("<breakpoint type='line'><file>%s</file><line>%d</line></breakpoint>",
+				brk_info->file,
+				brk_info->lineno));
+		}
+	} else {
+		if (condition) {
+			SENDMSG(h->socket,
+				xdebug_sprintf("Location breakpoint: %s:%d (condition= %s)\n",
+				brk_info->file,
+				brk_info->lineno,
+				brk_info->condition));
+		} else {
+			SENDMSG(h->socket,
+				xdebug_sprintf("Location breakpoint: %s:%d\n",
+				brk_info->file,
+				brk_info->lineno));
+		}
+	}
+}
+
+
+char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args)
+{
+	xdebug_gdb_options   *options = (xdebug_gdb_options*) context->options;
+	xdebug_llist_element *le;
+
+	if (options->response_format == XDEBUG_RESPONSE_XML) {
+		SSEND(context->socket, "<breakpoints>");
+	}
+
+	xdebug_hash_apply(context->function_breakpoints, (void *) context, dump_function_breakpoint);
+	xdebug_hash_apply(context->class_breakpoints, (void *) context, dump_class_breakpoint);
+
+	for (le = XDEBUG_LLIST_TAIL(context->line_breakpoints); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+		dump_line_breakpoint(context, options, XDEBUG_LLIST_VALP(le));
+	}
+
+	if (options->response_format == XDEBUG_RESPONSE_XML) {
+		SSEND(context->socket, "</breakpoints>\n");
+	}
+	return NULL;
+}
+
+
 static void dump_used_var(void *context, xdebug_hash_element* he)
 {
 	char               *name = (char*) he->ptr;
@@ -1215,9 +1326,9 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
 #endif
 
-	context->function_breakpoints = xdebug_hash_alloc(64, NULL);
-	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
-	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_brk_dtor);
+	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
+	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
+	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
 	do {
 		SENDMSG(context->socket, xdebug_sprintf("?init %s\n", context->program_name));
 		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
