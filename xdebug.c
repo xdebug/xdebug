@@ -885,7 +885,6 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 {
 	char *error_format;
 	xdebug_llist_element *le;
-	int new_len;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
 	struct function_stack_entry *i;
 
@@ -1013,7 +1012,6 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 {
 	int c = 0; /* Comma flag */
 	int j = 0; /* Counter */
-	int new_len;
 	char *tmp_name;
 	xdebug_str str = {0, 0, NULL};
 
@@ -1607,7 +1605,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		}
 
 		if (XG(context).line_breakpoints) {
-			char *filename = xdebug_mangle_filename(file);
 			int   break_ok;
 			int   old_error_reporting;
 			zval  retval;
@@ -1615,7 +1612,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
-				if (!brk->disabled && lineno == brk->lineno && memcmp(brk->file, filename + file_len - brk->file_len, brk->file_len) == 0) {
+				if (!brk->disabled && lineno == brk->lineno && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
 					break_ok = 1; /* Breaking is allowed by default */
 
 					/* Check if we have a condition set for it */
@@ -1648,7 +1645,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 					}
 				}
 			}
-			xdebug_free_filename(filename);
 		}
 	}
 }

@@ -297,7 +297,7 @@ static xdebug_xml_node* return_breakpoint(function_stack_entry *i, char *filenam
 
 	tmp = xdebug_xml_node_init("breakpoint");
 	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(filename), 0, 1);
+	xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(filename), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", lineno), 0, 1);
 
 	xdfree(tmp_fname);
@@ -306,7 +306,6 @@ static xdebug_xml_node* return_breakpoint(function_stack_entry *i, char *filenam
 
 static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 {
-	xdebug_llist_element *le;
 	int                   count_down = nr;
 	function_stack_entry *fse, *fse_prev;
 	char                 *tmp_fname;
@@ -321,10 +320,10 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "level",    xdebug_sprintf("%ld", nr), 0, 1);
 	if (fse_prev) {
-		xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(fse_prev->filename), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename), 0, 1);
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", fse_prev->lineno), 0, 1);
 	} else {
-		xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(zend_get_executed_filename(TSRMLS_C)), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(zend_get_executed_filename(TSRMLS_C)), 0, 1);
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
 	}
 
@@ -390,7 +389,7 @@ static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 		xdebug_xml_add_attribute_ex(xml, "type", xdstrdup(brk->type), 0, 1);
 	}
 	if (brk->file) {
-		xdebug_xml_add_attribute_ex(xml, "filename", xdstrdup(brk->file), 0, 1);
+		xdebug_xml_add_attribute_ex(xml, "filename", xdebug_path_to_url(brk->file), 0, 1);
 	}
 	if (brk->lineno) {
 		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", brk->lineno), 0, 1);
@@ -415,6 +414,7 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk = NULL;
 	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+
 	TSRMLS_FETCH();
 
 	switch (type) {
@@ -663,15 +663,15 @@ DBGP_FUNC(breakpoint_set)
 			if (!fse) {
 				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 			} else {
-				brk_info->file = xdstrdup(fse->filename);
+				brk_info->file = xdebug_path_from_url(fse->filename);
 				brk_info->file_len = strlen(brk_info->file);
 			}
 		} else {
-			brk_info->file = xdstrdup(CMD_OPTION('f'));
+			brk_info->file = xdebug_path_from_url(CMD_OPTION('f'));
 			brk_info->file_len = strlen(brk_info->file);
 		}
 
-		tmp_name = xdebug_sprintf("%s$%s", CMD_OPTION('f'), CMD_OPTION('n'));
+		tmp_name = xdebug_sprintf("%s$%l", brk_info->file, brk_info->lineno);
 		brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_LINE, tmp_name);
 		xdfree(tmp_name);
 		xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) brk_info);
@@ -846,7 +846,6 @@ DBGP_FUNC(source)
 DBGP_FUNC(feature_get)
 {
 	xdebug_dbgp_options *options;
-	xdebug_dbgp_cmd     *cmd;
 	XDEBUG_STR_SWITCH_DECL;
 
 	options = (xdebug_dbgp_options*) context->options;
@@ -1314,13 +1313,36 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.27 $";
+	return "$Revision: 1.28 $";
+}
+
+int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
+{
+	char *option;
+	int   ret;
+	xdebug_xml_node *response;
+	
+	do {
+		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
+		if (!option) {
+			return 0;
+		}
+
+		response = xdebug_xml_node_init("response");
+		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
+		if (ret != 1) {
+			send_message(context, response);
+		}
+		xdebug_xml_node_dtor(response);
+
+		free(option);
+	} while (1 != ret);
+	return ret;
+
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
-	char *option;
-	int   ret;
 	xdebug_dbgp_options *options;
 	xdebug_xml_node *response, *child;
 	char *cookie = NULL;
@@ -1355,7 +1377,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	if (strcmp(context->program_name, "-") == 0) {
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdstrdup("dbgp://stdin"), 0, 1);
 	} else {
-		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_sprintf("file://%s", context->program_name), 0, 1);
+		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
 	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf("%d", getpid()), 0, 1);
@@ -1394,21 +1416,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
-	do {
-		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
-		if (!option) {
-			return 0;
-		}
 
-		response = xdebug_xml_node_init("response");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
-		if (ret != 1) {
-			send_message(context, response);
-		}
-		xdebug_xml_node_dtor(response);
-
-		free(option);
-	} while (1 != ret);
+	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
 	return 1;
 }
@@ -1443,8 +1452,6 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char               *errortype;
-	int                 ret;
-	char               *option;
 	xdebug_xml_node     *response;
 	TSRMLS_FETCH();
 
@@ -1464,21 +1471,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 	xdebug_xml_node_dtor(response);
 	xdfree(errortype);
 
-	do {
-		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
-		if (!option) {
-			return 0;
-		}
-
-		response = xdebug_xml_node_init("response");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
-		if (ret != 1) {
-			send_message(context, response);
-		}
-		xdebug_xml_node_dtor(response);
-
-		free(option);
-	} while (1 != ret);
+	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
 	return 1;
 }
@@ -1486,8 +1479,6 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
 {
 	struct function_stack_entry *i;
-	int    ret;
-	char  *option;
 	xdebug_xml_node *response;
 	TSRMLS_FETCH();
 
@@ -1508,21 +1499,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	XG(lastcmd) = NULL;
 	XG(lasttransid) = NULL;
 
-	do {
-		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
-		if (!option) {
-			return 0;
-		}
-
-		response = xdebug_xml_node_init("response");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
-		if (ret != 1) {
-			send_message(context, response);
-		}
-		xdebug_xml_node_dtor(response);
-
-		free(option);
-	} while (1 != ret);
+	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
 	return 1;
 }

@@ -28,6 +28,7 @@
 #endif
 #include "php_xdebug.h"
 #include "xdebug_mm.h"
+#include "xdebug_str.h"
 #include "usefulstuff.h"
 
 #define READ_BUFFER_SIZE 128
@@ -148,4 +149,100 @@ char* xdebug_get_time(void)
 	cur_time = time(NULL);
 	strftime(str_time, 24, "%Y-%m-%d %H:%M:%S", gmtime (&cur_time));
 	return str_time;
+}
+
+/* not all versions of php export this */
+static int xdebug_htoi(char *s)
+{
+	int value;
+	int c;
+
+	c = s[0];
+	if (isupper(c))
+		c = tolower(c);
+	value = (c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10) * 16;
+
+	c = s[1];
+	if (isupper(c))
+		c = tolower(c);
+	value += c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10;
+
+	return (value);
+}
+
+/* not all versions of php export this */
+int xdebug_raw_url_decode(char *str, int len)
+{
+	char *dest = str;
+	char *data = str;
+
+	while (len--) {
+		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) {
+			*dest = (char) xdebug_htoi(data + 1);
+			data += 2;
+			len -= 2;
+		} else
+			*dest = *data;
+		data++;
+		dest++;
+	}
+	*dest = '\0';
+	return dest - str;
+}
+
+/* fake URI's per IETF RFC 1738 and 2396 format */
+char *xdebug_path_from_url(const char *fileurl)
+{
+	/* deal with file: url's */
+	char dfp[MAX_PATH*2];
+	const char *fp=dfp,*efp = fileurl;
+	int i,l=0;
+	char *tmp = NULL, *ret = NULL;;
+
+	memset(dfp,0,sizeof(dfp));
+	strncpy(dfp, efp, sizeof(dfp)-1);
+	xdebug_raw_url_decode(dfp, strlen(dfp));
+	tmp = strstr(fp,"file://");
+
+	if (tmp) {
+		fp = tmp + 7;
+		if (fp[0] == '/' && fp[2] == ':') fp++;
+		ret = xdstrdup(fp);
+		l = strlen(ret);
+#ifdef PHP_WIN32
+		/* convert '/' to '\' */
+		for (i=0; i < l; i++) {
+			if (ret[i] == '/') ret[i] = '\\';
+		}
+#endif
+	} else {
+		ret = xdstrdup(fileurl);
+	}
+
+	// fprintf(stderr,"path from url is [%s]\n",ret);
+	return ret;
+}
+
+/* fake URI's per IETF RFC 1738 and 2396 format */
+char *xdebug_path_to_url(const char *fileurl)
+{
+	int l,i;
+	char *tmp = NULL;
+
+	if (fileurl[1] == '/' || fileurl[1] == '\\') {
+		/* we assume the first char is a slash as well, what else could it be? */
+		tmp = xdebug_sprintf("file:/%s", fileurl);
+	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
+		tmp = xdebug_sprintf("file://%s", fileurl);
+	} else if (fileurl[1] == ':') {
+		tmp = xdebug_sprintf("file:///%s", fileurl);
+	} else {
+		tmp = xdstrdup(fileurl);
+	}
+	l = strlen(tmp);
+	/* convert '\' to '/' */
+	for (i=0; i < l; i++) {
+		if (tmp[i] == '\\') tmp[i]='/';
+	}
+	return tmp;
 }
