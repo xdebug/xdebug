@@ -277,7 +277,7 @@ PHP_INI_BEGIN()
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_handler",    "gdb",                PHP_INI_ALL,    OnUpdateString, remote_handler,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_handler",    "dbgp",               PHP_INI_ALL,    OnUpdateString, remote_handler,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, remote_host,       zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
 #if ZEND_EXTENSION_API_NO < 90000000
@@ -810,6 +810,10 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
+	if (XG(do_code_coverage)) {
+		xdebug_count_line(tmp->filename, tmp->lineno TSRMLS_CC);
+	}
+
 	if (XDEBUG_LLIST_TAIL(XG(stack))) {
 		function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 		tmp->prev = prev;
@@ -881,11 +885,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	}
 	/* class->function breakpoints */
 	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
-		if (fse->function.type == XFUNC_MEMBER) {
-			tmp_name = xdebug_sprintf("%s->%s", fse->function.class, fse->function.function);
-		} else if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			tmp_name = xdebug_sprintf("%s::%s", fse->function.class, fse->function.function);
-		}
+		tmp_name = xdebug_sprintf("%s::%s", fse->function.class, fse->function.function);
 
 		if (xdebug_hash_find(XG(context).class_breakpoints, tmp_name, strlen(tmp_name), (void *) &extra_brk_info)) {
 			/* Yup, breakpoint found, call handler if the breakpoint is not
