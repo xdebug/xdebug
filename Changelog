@@ -1,3 +1,7 @@
+Sun Aug 10 15:35:10 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test14b.phpt:
+- Fixed test
+
 Wed Jul 16 14:56:09 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml
 /xdebug/xdebug_var.c:
