@@ -1,3 +1,9 @@
+Tue Feb 10 19:47:41 CET 2004 Shane Caraveo <shane@caraveo.com 
+>
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h:
+- add fullname attribute to properties.  Still a couple issues that need to be worked out, such as static class vars, adding variable sybmols ($)
+
 Tue Feb 3 05:37:32 CET 2004 Shane Caraveo <shane@caraveo.com 
 >
 /xdebug/xdebug_handler_dbgp.h
