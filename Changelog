@@ -1,3 +1,8 @@
+Thu Mar 25 18:35:33 CET 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/debugclient/main.c:
+- Fixing copyright strings
+
 Thu Mar 25 17:57:32 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c
