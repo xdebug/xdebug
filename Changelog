@@ -1,3 +1,7 @@
+Sat Feb 8 12:41:42 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fix visibility level of ini settings
+
 Sun Feb 2 19:52:14 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/compile.bat:
 - Fix some typoes
