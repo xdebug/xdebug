@@ -1222,10 +1222,10 @@ PHP_FUNCTION(xdebug_get_function_trace)
 		add_assoc_long_ex(frame, "line", sizeof("line"), i->lineno);
 
 		if (start_time) {
-			add_assoc_long_ex(frame, "time_index", sizeof("time_index"), i->time - start_time);
+			add_assoc_double_ex(frame, "time_index", sizeof("time_index"), i->time - start_time);
 		} else {
 			start_time = i->time;
-			add_assoc_long_ex(frame, "time_index", sizeof("time_index"), 0);
+			add_assoc_double_ex(frame, "time_index", sizeof("time_index"), 0);
 		}
 
 #if MEMORY_LIMIT

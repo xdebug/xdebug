@@ -1,5 +1,5 @@
 --TEST--
-Test with eval()
+Test for xdebug_get_function_trace()
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
@@ -34,7 +34,7 @@ bararray(8) {
     ["line"]=>
     int(14)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
@@ -50,7 +50,7 @@ bararray(8) {
     ["line"]=>
     int(11)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
@@ -66,7 +66,7 @@ bararray(8) {
     ["line"]=>
     int(16)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
@@ -87,7 +87,7 @@ foo();
     ["line"]=>
     int(1)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
@@ -103,7 +103,7 @@ foo();
     ["line"]=>
     int(11)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
@@ -119,7 +119,7 @@ foo();
     ["line"]=>
     int(2)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
@@ -135,7 +135,7 @@ foo();
     ["line"]=>
     int(3)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
@@ -151,7 +151,7 @@ foo();
     ["line"]=>
     int(11)
     ["time_index"]=>
-    int(0)
+    float(%f)
     ["memory_usage"]=>
     int(%d)
     ["params"]=>
