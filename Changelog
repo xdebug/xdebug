@@ -1,3 +1,7 @@
+Sun May 12 12:58:08 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/.cvsignore:
+- Fix typo
+
 Sun May 12 12:57:46 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test5.php
 /xdebug/tests/test6.php:
