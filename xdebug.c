@@ -367,8 +367,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(code_coverage) = xdebug_hash_alloc (32, xdebug_coverage_file_dtor);
 	XG(stack)         = xdebug_llist_alloc (stack_element_dtor);
 	XG(trace_file)    = NULL;
-	XG(output_dir)    = NULL;
 	XG(error_handler) = NULL;
+	XG(profile_file)  = NULL;
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
@@ -709,7 +709,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		XG(total_execution_time) = 0;
 	}	
 
-	if (XG(auto_profile) && XG(output_dir)) {
+	if (XG(auto_profile) && XG(output_dir) && !XG(profile_file)) {
 		char fname[1024];
 		
 		snprintf(fname, sizeof(fname) - 1, "%s/xdebug_%d_%d.txt", XG(output_dir), (int) get_mtimestamp(), getpid());
