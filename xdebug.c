@@ -967,7 +967,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 	xdebug_llist_element *le;
 	int new_len;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
-	struct function_stack_entry *i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
+	struct function_stack_entry *i;
 
 	if (html && !log_only) {
 		php_printf("<br />\n<font size='1'><table border='1' cellspacing='0'>\n");
@@ -981,6 +981,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 	}
 
 	if (XG(stack) && XG(stack)->size) {
+		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
 		if (!log_only) {
 			if (html) {
 				php_printf("<tr><th bgcolor='#7777dd' colspan='3'>Call Stack</th></tr>\n");
