@@ -1,3 +1,7 @@
+Mon Aug 16 10:00:20 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+tests/xdebug_var_dump.phpt:
+- Added a test for showing local variables on errors.
+
 Mon Aug 16 09:59:56 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 tests/array_map.phpt
 xdebug/tests/assert_test.phpt
