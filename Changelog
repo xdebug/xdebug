@@ -1,3 +1,7 @@
+Mon Apr 14 15:49:34 CEST 2003 Ilia Alshanetsky <ilia@prohost.org>
+/xdebug/xdebug_profiler.c:
+- Added overall stats to HTML profiles.
+
 Mon Apr 14 15:44:25 CEST 2003 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug_profiler.c:
 - Only stop tracing if it was started by the profiler.
