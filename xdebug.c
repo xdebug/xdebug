@@ -323,6 +323,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		tmp->level    = ++XG(level);
 		tmp->delayed_fname = 0;
 		tmp->delayed_cname = 0;
+		tmp->arg_done      = 0;
 		tmp->delayed_include   = 0;
 		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
