@@ -1,3 +1,8 @@
+Fri Jan 30 20:15:47 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/usefulstuff.c:
+- Fixed undefined constant
+- Whitespace fixes
+
 Fri Jan 30 19:59:15 CET 2004 Shane Caraveo <shane@caraveo.com 
 >
 /xdebug/xdebug.c
