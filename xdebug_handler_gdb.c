@@ -88,7 +88,7 @@ static xdebug_cmd commands_breakpoint[] = {
 };
 
 static xdebug_cmd commands_data[] = {
-	{ "eval",       0, "eval",                                       xdebug_handle_eval,       1,
+	{ "eval",       1, "eval [php code to execute]",                 xdebug_handle_eval,       1,
 		"Evaluation PHP code"
 	},
 	{ "show",       0, "show",                                       xdebug_handle_show,       1,
@@ -611,7 +611,7 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
 	EG(error_reporting) = 0;
-	
+
 	/* Concat all arguments back together */
 	XDEBUG_STR_ADD(&buffer, args->args[0], 0);
 	
@@ -624,7 +624,7 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 	if (zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC) == FAILURE) {
 		XDEBUG_STR_FREE(&buffer);
 		EG(error_reporting) = old_error_reporting;
-		return xdstrdup("eval");
+		return xdstrdup("eval: Error evaluating code");
 	} else {
 		XDEBUG_STR_FREE(&buffer);
 		EG(error_reporting) = old_error_reporting;
