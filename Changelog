@@ -1,3 +1,7 @@
+Tue Apr 13 16:00:00 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_gdb.c:
+- Fixed breaking on functions with the GDB compatible protocol.
+
 Mon Apr 12 20:31:01 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handlers.h
