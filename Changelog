@@ -1,3 +1,7 @@
+Wed Oct 20 00:38:28 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_com.c:
+- fix windows compile
+
 Wed Oct 13 10:01:22 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 README:
 - Test commit.
