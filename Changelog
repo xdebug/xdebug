@@ -1,3 +1,7 @@
+Fri Mar 28 19:50:47 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Removed unused var
+
 Fri Mar 28 19:50:10 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.mak:
 - Fix make file for nmake
