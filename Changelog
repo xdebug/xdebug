@@ -1,3 +1,16 @@
+Mon Dec 2 00:44:12 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/TODO
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Separated to profiling sorting/analysis code from the output code, which
+  allows the profiling data to be easily presented in a variety of formats.
+- Added xdebug_get_function_profile() function that returns the profiling
+  data as an associated array already sorted according to the profiling
+  mode used.
+- In the stack-dump profiling mode made the sorting algorithm work across
+  all levels rather then just the 1st one. 
+
 Fri Nov 29 17:43:44 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
 >
 /xdebug/xdebug.c:
