@@ -1,3 +1,7 @@
+Thu Jul 3 22:49:04 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test6.phpt:
+- Fix test
+
 Thu Jul 3 22:47:30 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/xdebug.c:
