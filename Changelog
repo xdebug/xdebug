@@ -1,3 +1,8 @@
+Mon Oct 13 10:18:39 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_xml.c
+/xdebug/xdebug_xml.h:
+- Added Xdebug XML write functions
+
 Mon Oct 13 10:17:11 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_str.h:
 - Add xdebug_str_dtor macro
