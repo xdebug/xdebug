@@ -77,17 +77,17 @@ void xdebug_count_line(char *filename, int lineno, int executable TSRMLS_DC)
 	xdfree(sline);
 }
 
-static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode)
+static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode TSRMLS_DC)
 {
-	xdebug_count_line(fn, opcode.lineno, 1);
+	xdebug_count_line(fn, opcode.lineno, 1 TSRMLS_CC);
 }
 
-void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array)
+void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
 {
 	unsigned int i;
 
 	for (i = 0; i < op_array->size; i++) {
-		prefil_from_opcode(fse, op_array->filename, op_array->opcodes[i]);
+		prefil_from_opcode(fse, op_array->filename, op_array->opcodes[i] TSRMLS_CC);
 	}
 }
 

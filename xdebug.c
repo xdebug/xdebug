@@ -1051,7 +1051,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_prefil_code_coverage(fse, op_array);
+		xdebug_prefil_code_coverage(fse, op_array TSRMLS_CC);
 	}
 
 	/* Check for entry breakpoints */
