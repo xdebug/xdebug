@@ -1,3 +1,17 @@
+Sat Apr 17 01:27:33 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_handler_gdb.h
+xdebug/xdebug_handler_php3.c
+xdebug/xdebug_handler_php3.h
+xdebug/xdebug_handlers.h
+xdebug/tests/exception.phpt:
+- Added hook into exception throwing mechinism of PHP so that they can be
+  dealth with in the remote debugger frontends too.
+#- Only works with >= PHP 5 RC2
+
 Sat Apr 17 01:26:04 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 rebuild.sh:
 - Add a script to rebuild the extension.
