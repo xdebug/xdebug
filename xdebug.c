@@ -1454,6 +1454,36 @@ static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
 	return NULL;
 }
 
+static char* xdebug_mangle_filename(char *name)
+{
+#if WIN32|WINNT
+	char         *dup;
+	unsigned int  i;
+
+	dup = xdstrdup(name);
+	for (i = 0; i < strlen(dup); i++) {
+		switch (dup[i]) {
+			case ':':
+				dup[i] = '|';
+				break;
+			case '\\':
+				dup[i] = '/';
+				break;
+		}
+	}
+	return dup;
+#else
+	return name;
+#endif
+}
+
+static void xdebug_free_filename(char *name)
+{
+#if WIN32|WINNT
+	xdfree(name);
+#endif
+}
+
 
 ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 {
@@ -1525,18 +1555,21 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 		}
 
 		if (XG(context).line_breakpoints) {
+
+			char *filename = xdebug_mangle_filename(file);
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
-				if (lineno == brk->lineno && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+				if (lineno == brk->lineno && memcmp(brk->file, filename + file_len - brk->file_len, brk->file_len) == 0) {
 					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
 						XG(remote_enabled) = 0;
 						XG(remote_enable)  = 0;
-						return;
+						break;
 					}
 					break;
 				}
 			}
+			xdebug_free_filename(filename);
 		}
 	}
 }

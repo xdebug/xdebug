@@ -610,7 +610,17 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 		} else {
 			/* Make search key */
 			if (method->args[0][0] != '/') {
+#if WIN32|WINNT
+				if (strlen(method->args[0]) > 3
+					&& method->args[0][1] != '|')
+				{
+					tmp_name = xdebug_sprintf("/%s", method->args[0]);
+				} else {
+					tmp_name = xdebug_sprintf("%s", method->args[0]);
+				}
+#else
 				tmp_name = xdebug_sprintf("/%s", method->args[0]);
+#endif
 			} else {
 				tmp_name = xdebug_sprintf("%s", method->args[0]);
 			}
