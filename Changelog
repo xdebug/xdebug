@@ -1,3 +1,7 @@
+Fri Aug 30 14:45:55 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Windows fixes
+
 Fri Aug 30 11:09:46 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO
 /xdebug/package.xml
