@@ -1492,7 +1492,9 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	xdebug_profiler_deinit(TSRMLS_C);
+	if (XG(profiler_enabled)) {
+		xdebug_profiler_deinit(TSRMLS_C);
+	}
 	zend_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 #endif
