@@ -1,3 +1,7 @@
+Fri Sep 19 09:53:41 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/INSTALL:
+- Fix install instructions
+
 Thu Sep 18 20:37:57 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml:
 - Add configure.in to the package
