@@ -1,3 +1,7 @@
+Fri Dec 26 22:59:43 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat:
+- Update for Windows / Xdebug 1.3.0
+
 Fri Dec 26 22:47:50 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml:
 - Fixing some typoes
