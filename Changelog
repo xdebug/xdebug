@@ -1,3 +1,7 @@
+Fri Dec 20 16:51:03 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/test.sh:
+- Also use the installed PHP
+
 Fri Dec 20 16:47:17 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/test.sh:
 - Make this better working
