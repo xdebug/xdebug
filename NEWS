@@ -1,8 +1,9 @@
 ? - xdebug 1.0.0
 
-+ Fixed segfaults in string routines
++ Fixed segfaults in string routines. (Derick)
 + Added automatic starting of function traces (xdebug.auto_trace, defaulting to
-  "off").
+  "off"). (Derick)
++ Fixed compile problems in ZTS mode. (Derick)
 
 
 Sun Sep 1, 2002 - xdebug 1.0.0rc1
