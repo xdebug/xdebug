@@ -53,11 +53,10 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #ifdef ZEND_ENGINE_2
-#include "zend_exceptions.h"
-// XXX No good way to know when the vm is introduced???
-#if PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 1
-#include "zend_vm.h"
-#endif
+# include "zend_exceptions.h"
+# if PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 1
+#  include "zend_vm.h"
+# endif
 #endif
 
 #include "php_xdebug.h"
