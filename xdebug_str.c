@@ -21,6 +21,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "php.h"
+#include "ext/standard/php_string.h"
+
 #include "xdebug_mm.h"
 #include "xdebug_str.h"
 
