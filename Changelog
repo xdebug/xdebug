@@ -1,3 +1,6 @@
+Wed Nov 13 13:27:47 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>:
+- Add note about parameter collection
+
 Wed Nov 13 13:26:35 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Change some defaults
