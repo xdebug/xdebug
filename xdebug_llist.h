@@ -1,4 +1,4 @@
-/* $Id: xdebug_llist.h,v 1.3 2002-11-27 22:39:22 ilia Exp $ */
+/* $Id: xdebug_llist.h,v 1.4 2003-02-20 14:30:54 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -44,12 +44,14 @@ typedef struct _xdebug_llist {
 } xdebug_llist;
 
 xdebug_llist *xdebug_llist_alloc(xdebug_llist_dtor dtor);
+void xdebug_llist_init(xdebug_llist *l, xdebug_llist_dtor dtor);
 int xdebug_llist_insert_next(xdebug_llist *l, xdebug_llist_element *e, const void *p);
 int xdebug_llist_insert_prev(xdebug_llist *l, xdebug_llist_element *e, const void *p);
 int xdebug_llist_remove(xdebug_llist *l, xdebug_llist_element *e, void *user);
 int xdebug_llist_remove_next(xdebug_llist *l, xdebug_llist_element *e, void *user);
 xdebug_llist_element *xdebug_llist_jump(xdebug_llist *l, int where, int pos);
 size_t xdebug_llist_count(xdebug_llist *l);
+void xdebug_llist_empty(xdebug_llist *l, void *user);
 void xdebug_llist_destroy(xdebug_llist *l, void *user);
 
 #if !defined(LIST_HEAD)

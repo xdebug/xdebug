@@ -77,6 +77,7 @@ PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_function_trace);
 PHP_FUNCTION(xdebug_dump_function_trace);
+PHP_FUNCTION(xdebug_dump_superglobals);
 
 PHP_FUNCTION(xdebug_set_error_handler);
 
@@ -172,6 +173,19 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     auto_profile;
 	char         *output_dir;
 	int           auto_profile_mode;
+
+	/* superglobals */
+	zend_bool     dump_once;
+	zend_bool     dump_undefined;
+	zend_bool     dumped;
+	xdebug_llist  server;
+	xdebug_llist  get;
+	xdebug_llist  post;
+	xdebug_llist  cookie;
+	xdebug_llist  files;
+	xdebug_llist  env;
+	xdebug_llist  request;
+	xdebug_llist  session;
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */

@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "XDEBUG_EXPORTS" /YX /FD /c
+# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "XDEBUG_EXPORTS" /D "MEMORY_LIMIT" /YX /FD /c
 # ADD CPP /nologo /MT /W3 /GX /O2 /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D "WIN32" /D "COMPILE_DL_XDEBUG" /D ZTS=1 /D HAVE_XDEBUG=1 /D ZEND_DEBUG=0 /D "NDEBUG" /D "_WINDOWS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "HAVE_EXECUTE_DATA_PTR" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "XDEBUG_EXPORTS" /YX /FD /GZ /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "XDEBUG_EXPORTS" /D "MEMORY_LIMIT" /YX /FD /GZ /c
 # ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\main" /D ZEND_DEBUG=1 /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "COMPILE_DL_XDEBUG" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_XDEBUG=1 /D "HAVE_EXECUTE_DATA_PTR" /YX /FD /GZ /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -127,6 +127,10 @@ SOURCE=.\xdebug_llist.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\xdebug_superglobals.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_profiler.c
 # End Source File
 # Begin Source File
@@ -168,6 +172,14 @@ SOURCE=.\xdebug_hash.h
 # Begin Source File
 
 SOURCE=.\xdebug_llist.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_profiler.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_superglobals.h
 # End Source File
 # Begin Source File
 

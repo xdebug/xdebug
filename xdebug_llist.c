@@ -1,4 +1,4 @@
-/* $Id: xdebug_llist.c,v 1.3 2002-11-15 14:12:05 derick Exp $ */
+/* $Id: xdebug_llist.c,v 1.4 2003-02-20 14:30:54 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -29,12 +29,17 @@ xdebug_llist *xdebug_llist_alloc(xdebug_llist_dtor dtor)
 	xdebug_llist *l;
 
 	l = malloc(sizeof(xdebug_llist));
+	xdebug_llist_init(l, dtor);
+
+	return l;
+}
+
+void xdebug_llist_init(xdebug_llist *l, xdebug_llist_dtor dtor)
+{
 	l->size = 0;
 	l->dtor = dtor;
 	l->head = NULL;
 	l->tail = NULL;
-
-	return l;
 }
 
 int xdebug_llist_insert_next(xdebug_llist *l, xdebug_llist_element *e, const void *p)
@@ -163,11 +168,16 @@ size_t xdebug_llist_count(xdebug_llist *l)
 	return l->size;
 }
 
-void xdebug_llist_destroy(xdebug_llist *l, void *user)
+void xdebug_llist_empty(xdebug_llist *l, void *user)
 {
 	while (xdebug_llist_count(l) > 0) {
 		xdebug_llist_remove(l, XDEBUG_LLIST_TAIL(l), user);
 	}
+}
+
+void xdebug_llist_destroy(xdebug_llist *l, void *user)
+{
+	xdebug_llist_empty(l, user);
 
 	free (l);
 	l = NULL;

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <d.rethans@jdimedia.nl>                     |
    |           Ilia Alshanetsky <ilia@prohost.org>                        |
+   |           Harald Radi <harald.radi@nme.at>                           |
    +----------------------------------------------------------------------+
  */
 
@@ -51,6 +52,7 @@
 #include "xdebug_llist.h"
 #include "xdebug_var.h"
 #include "xdebug_profiler.h"
+#include "xdebug_superglobals.h"
 #include "usefulstuff.h"
 #include "php_xdebug.h"
 
@@ -89,6 +91,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_stop_profiling,        NULL)
 	PHP_FE(xdebug_dump_function_profile, NULL)
 	PHP_FE(xdebug_get_function_profile,  NULL)
+	PHP_FE(xdebug_dump_superglobals,     NULL)
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,          NULL)
 #endif
@@ -117,6 +120,46 @@ ZEND_DECLARE_MODULE_GLOBALS(xdebug)
 ZEND_GET_MODULE(xdebug)
 #endif
 
+static PHP_INI_MH(OnUpdateServer)
+{
+	DUMP_TOK(server);
+}
+
+static PHP_INI_MH(OnUpdateGet)
+{
+	DUMP_TOK(get);
+}
+
+static PHP_INI_MH(OnUpdatePost)
+{
+	DUMP_TOK(post);
+}
+
+static PHP_INI_MH(OnUpdateCookie)
+{
+	DUMP_TOK(cookie);
+}
+
+static PHP_INI_MH(OnUpdateFiles)
+{
+	DUMP_TOK(files);
+}
+
+static PHP_INI_MH(OnUpdateEnv)
+{
+	DUMP_TOK(env);
+}
+
+static PHP_INI_MH(OnUpdateRequest)
+{
+	DUMP_TOK(request);
+}
+
+static PHP_INI_MH(OnUpdateSession)
+{
+	DUMP_TOK(session);
+}
+
 static PHP_INI_MH(OnUpdateDebugMode)
 {
 	if (!new_value) {
@@ -144,6 +187,18 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_ALL,    OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.output_dir",        "/tmp",               PHP_INI_SYSTEM, OnUpdateString, output_dir,        zend_xdebug_globals, xdebug_globals)
 
+	/* Dump superglobals settings */
+	STD_PHP_INI_BOOLEAN("xdebug.dump_once",       "1",                  PHP_INI_ALL,    OnUpdateBool,   dump_once,         zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   dump_undefined,    zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY("xdebug.dump.SERVER",           NULL,                 PHP_INI_ALL,    OnUpdateServer)
+	PHP_INI_ENTRY("xdebug.dump.GET",              NULL,                 PHP_INI_ALL,    OnUpdateGet)
+	PHP_INI_ENTRY("xdebug.dump.POST",             NULL,                 PHP_INI_ALL,    OnUpdatePost)
+	PHP_INI_ENTRY("xdebug.dump.COOKIE",           NULL,                 PHP_INI_ALL,    OnUpdateCookie)
+	PHP_INI_ENTRY("xdebug.dump.FILES",            NULL,                 PHP_INI_ALL,    OnUpdateFiles)
+	PHP_INI_ENTRY("xdebug.dump.ENV",              NULL,                 PHP_INI_ALL,    OnUpdateEnv)
+	PHP_INI_ENTRY("xdebug.dump.REQUEST",          NULL,                 PHP_INI_ALL,    OnUpdateRequest)
+	PHP_INI_ENTRY("xdebug.dump.SESSION",          NULL,                 PHP_INI_ALL,    OnUpdateSession)
+
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",                  PHP_INI_SYSTEM, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "17869",              PHP_INI_ALL,    OnUpdateInt,    remote_port,       zend_xdebug_globals, xdebug_globals)
@@ -170,7 +225,7 @@ static double get_utime()
 	return 0;
 }
 
-static void php_xdebug_init_globals (zend_xdebug_globals *xg)
+static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
 	xg->stack                = NULL;
 	xg->level                = 0;
@@ -180,11 +235,32 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg)
 	xg->total_execution_time = 0;
 	xg->total_compiling_time = 0;
 	xg->error_handler        = NULL;
+
+	xdebug_llist_init(&xg->server, dump_dtor);
+	xdebug_llist_init(&xg->get, dump_dtor);
+	xdebug_llist_init(&xg->post, dump_dtor);
+	xdebug_llist_init(&xg->cookie, dump_dtor);
+	xdebug_llist_init(&xg->files, dump_dtor);
+	xdebug_llist_init(&xg->env, dump_dtor);
+	xdebug_llist_init(&xg->request, dump_dtor);
+	xdebug_llist_init(&xg->session, dump_dtor);
+}
+
+static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
+{
+	xdebug_llist_empty(&xg->server, NULL);
+	xdebug_llist_empty(&xg->get, NULL);
+	xdebug_llist_empty(&xg->post, NULL);
+	xdebug_llist_empty(&xg->cookie, NULL);
+	xdebug_llist_empty(&xg->files, NULL);
+	xdebug_llist_empty(&xg->env, NULL);
+	xdebug_llist_empty(&xg->request, NULL);
+	xdebug_llist_empty(&xg->session, NULL);
 }
 
 PHP_MINIT_FUNCTION(xdebug)
 {
-	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, NULL);
+	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
 	old_compile_file = zend_compile_file;
@@ -304,6 +380,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(context).do_step        = 0;
 	XG(context).do_next        = 0;
 	XG(context).do_finish      = 0;
+
+	/* Initialize dump superglobals */
+	XG(dumped)        = 0;
 
 	return SUCCESS;
 }
@@ -764,6 +843,8 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				php_log_err(log_buffer TSRMLS_CC);
 			}
 		}
+
+		dump_superglobals(html, PG(log_errors) && !is_cli TSRMLS_CC);
 
 		if (html) {
 			php_printf ("</table>\n");
@@ -1261,6 +1342,21 @@ PHP_FUNCTION(xdebug_get_function_trace)
 	}
 }
 
+PHP_FUNCTION(xdebug_dump_superglobals)
+{
+	int is_cli = (strcmp ("cli", sapi_module.name) == 0);
+	int html = PG(html_errors);
+
+	if (html) {
+		php_printf("<table border='1' cellspacing='0'>\n");
+	}
+
+	dump_superglobals(html , PG(log_errors) && !is_cli TSRMLS_CC);
+
+	if (html) {
+		php_printf("</table>\n");
+	}
+}
 
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage)
