@@ -1,3 +1,8 @@
+Sat Apr 17 01:26:04 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+rebuild.sh:
+- Add a script to rebuild the extension.
+#- /me lazy
+
 Fri Apr 16 19:37:06 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_profiler.c:
 just get rid of a warning (sorry forgot what the cvs msg format is)
