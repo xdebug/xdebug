@@ -98,6 +98,10 @@ SOURCE=.\xdebug.c
 
 SOURCE=.\xdebug_llist.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_var.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
