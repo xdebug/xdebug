@@ -188,23 +188,23 @@ void stack_element_dtor (void *dummy, void *elem)
 
 	if (e->refcount == 0) {
 		if (e->function.function) {
-			efree (e->function.function);
+			xdfree (e->function.function);
 		}
 		if (e->function.class) {
-			efree (e->function.class);
+			xdfree (e->function.class);
 		}
 		if (e->filename) {
-			efree (e->filename);
+			xdfree (e->filename);
 		}
 
 		for (i = 0; i < e->varc; i++) {
 			if ((e->vars[i]).name) {
-				efree ((e->vars[i]).name);
+				xdfree ((e->vars[i]).name);
 			}
-			efree ((e->vars[i]).value);
+			xdfree ((e->vars[i]).value);
 		}
 
-		efree (e);
+		xdfree (e);
 	}
 }
 
@@ -271,11 +271,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		tmp->delayed_fname = 0;
 		tmp->delayed_cname = 0;
 		tmp->delayed_include   = 0;
-		tmp->function.function = estrdup("{main}");
+		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
 		tmp->function.type     = XFUNC_NORMAL;
 
-		tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
+		tmp->filename  = op_array->filename ? xdstrdup(op_array->filename): NULL;
 		tmp->lineno    = 0;
 #if MEMORY_LIMIT
 		tmp->memory    = AG(allocated_memory);
@@ -287,8 +287,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		/* Handle delayed include for stack */
 		if (XG(stack)->size > 0) {
 			if (((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->delayed_include == 1) {
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].name = estrdup ("");
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].value = op_array->filename ? estrdup(op_array->filename): NULL;
+				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].name = xdstrdup ("");
+				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].value = op_array->filename ? xdstrdup(op_array->filename): NULL;
 				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->varc++;
 			}
 		}
@@ -321,7 +321,7 @@ void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_val
 		if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
 			fse->vars[fse->varc].value = get_zval_value(*param);
 		} else {
-			fse->vars[fse->varc].value = estrdup ("{missing}");
+			fse->vars[fse->varc].value = xdstrdup ("{missing}");
 		}
 		fse->varc++;
 	}
@@ -345,10 +345,10 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 				if (zfunc->type == ZEND_INTERNAL_FUNCTION) {
 					return xdebug_sprintf ("<a href='%s/%s' target='_new'>%s</a>\n", XG(manual_url), f.function, f.function);
 				} else {
-					return estrdup (f.function);
+					return xdstrdup (f.function);
 				}
 			} else {
-				return estrdup (f.function);
+				return xdstrdup (f.function);
 			}
 			break;
 		}
@@ -390,27 +390,27 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			break;
 
 		case XFUNC_EVAL:
-			return estrdup ("eval");
+			return xdstrdup ("eval");
 			break;
 
 		case XFUNC_INCLUDE:
-			return estrdup ("include");
+			return xdstrdup ("include");
 			break;
 
 		case XFUNC_INCLUDE_ONCE:
-			return estrdup ("include_once");
+			return xdstrdup ("include_once");
 			break;
 
 		case XFUNC_REQUIRE:
-			return estrdup ("require");
+			return xdstrdup ("require");
 			break;
 
 		case XFUNC_REQUIRE_ONCE:
-			return estrdup ("require_once");
+			return xdstrdup ("require_once");
 			break;
 
 		default:
-			return estrdup ("{unknown, please report}");
+			return xdstrdup ("{unknown, please report}");
 	}
 }
 
@@ -459,7 +459,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			if (PG(log_errors) && !is_cli) {
 				snprintf(log_buffer, 1024, "PHP %3d. %s(", i->level, tmp_name);
 			}
-			efree (tmp_name);
+			xdfree (tmp_name);
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
@@ -477,7 +477,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				} else {
 					c = 1;
 				}
-				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : estrdup("");
+				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : xdstrdup("");
 				if (html) {
 					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL));
@@ -491,7 +491,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 						"%s%s", tmp_varname, i->vars[j].value
 					);
 				}
-				efree(tmp_varname);
+				xdfree(tmp_varname);
 			}
 
 			if (html) {
@@ -577,7 +577,7 @@ static inline void print_trace (int html TSRMLS_DC)
 				}
 				printf ("-> %s(", tmp_name);
 			}
-			efree (tmp_name);
+			xdfree (tmp_name);
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
@@ -593,14 +593,14 @@ static inline void print_trace (int html TSRMLS_DC)
 					c = 1;
 				}
 
-				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : estrdup("");
+				tmp_varname = i->vars[j].name ? xdebug_sprintf ("$%s = ", i->vars[j].name) : xdstrdup("");
 				if (html) {
 					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL));
 				} else {
 					printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
-				efree (tmp_varname);
+				xdfree (tmp_varname);
 			}
 
 			if (html) {
@@ -1022,9 +1022,9 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 #if HAVE_EXECUTE_DATA_PTR
 				var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
 				assert(var);
-				cf.class = estrdup(var->value.str.val);
+				cf.class = xdstrdup(var->value.str.val);
 #else
-				cf.class = estrdup("{unknown}");
+				cf.class = xdstrdup("{unknown}");
 #endif
 				break;
 
@@ -1047,9 +1047,9 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 #if HAVE_EXECUTE_DATA_PTR
 					var = get_zval(&(cur_opcode->op1), EG(execute_data_ptr)->Ts, &is_var);
 					assert(var);
-					cf.function = estrdup(var->value.str.val);
+					cf.function = xdstrdup(var->value.str.val);
 #else
-					cf.function = estrdup("{unknown}");
+					cf.function = xdstrdup("{unknown}");
 #endif
 					cf.type = XFUNC_NORMAL;
 					done = 1;
@@ -1119,26 +1119,26 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 #if HAVE_EXECUTE_DATA_PTR
 						var = get_zval(&(tmpOpCode->op2), EG(execute_data_ptr)->Ts, &is_var);
 						assert(var);
-						cf.function = estrdup(var->value.str.val);
+						cf.function = xdstrdup(var->value.str.val);
 #else
-						cf.function = estrdup("{unknown}");
+						cf.function = xdstrdup("{unknown}");
 #endif
 					}
 
 					if (tmpOpCode->op1.op_type != IS_UNUSED) {
 						if (tmpOpCode->op1.op_type == IS_CONST) {
 							cf.type = XFUNC_STATIC_MEMBER;
-							cf.class = estrdup(tmpOpCode->op1.u.constant.value.str.val);
+							cf.class = xdstrdup(tmpOpCode->op1.u.constant.value.str.val);
 						} else {
 #if HAVE_EXECUTE_DATA_PTR
 							if (EG(execute_data_ptr)->object.ptr) {
 								cf.type = XFUNC_MEMBER;
-								cf.class = estrdup(EG(execute_data_ptr)->object.ptr->value.obj.ce->name);
+								cf.class = xdstrdup(EG(execute_data_ptr)->object.ptr->value.obj.ce->name);
 							} else {
 								assert(cf.class);
 							}
 #else
-							cf.class = estrdup("{unknown}");
+							cf.class = xdstrdup("{unknown}");
 #endif
 						}
 					} 
@@ -1231,8 +1231,8 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 					break;
 			}
 			if (cur_opcode->op1.op_type == IS_CONST) {
-				tmp->vars[tmp->varc].name = estrdup ("");
-				tmp->vars[tmp->varc].value = estrdup (cur_opcode->op1.u.constant.value.str.val);
+				tmp->vars[tmp->varc].name = xdstrdup ("");
+				tmp->vars[tmp->varc].value = xdstrdup (cur_opcode->op1.u.constant.value.str.val);
 				tmp->varc++;
 				tmp->delayed_include = 0;
 			} else {
@@ -1341,7 +1341,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	}
 #endif
 
-	tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
+	tmp->filename  = op_array->filename ? xdstrdup(op_array->filename): NULL;
 	tmp->lineno    = cur_opcode->lineno;
 	
 	xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
@@ -1368,7 +1368,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 			}
 			tmp_name = show_fname(tmp TSRMLS_CC);
 			fprintf (XG(trace_file), "-> %s(", tmp_name);
-			efree (tmp_name);
+			xdfree (tmp_name);
 
 			fprintf (XG(trace_file), ") %s:%d\n", tmp->filename, tmp->lineno);
 			fflush (XG(trace_file));
@@ -1404,16 +1404,16 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 
 	if (fse->delayed_fname) { /* variable function name */
 #if HAVE_EXECUTE_DATA_PTR
-		fse->function.function = estrdup (EG(execute_data_ptr)->function_state.function->common.function_name);
+		fse->function.function = xdstrdup (EG(execute_data_ptr)->function_state.function->common.function_name);
 #else
-		fse->function.function = estrdup ("{unknown}");
+		fse->function.function = xdstrdup ("{unknown}");
 #endif
 	}
 	fse->delayed_fname = 0;
 
 	if (fse->delayed_cname) { /* variable class name */
 		if (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->type == IS_OBJECT) {
-			fse->function.class = estrdup (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->value.obj.ce->name);
+			fse->function.class = xdstrdup (((zval*) EG(active_symbol_table)->pListHead->pDataPtr)->value.obj.ce->name);
 		}
 	}
 	fse->delayed_cname = 0;
@@ -1427,11 +1427,11 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 		for (i = 0; i < op_array->size; i++) {
 			/* Check if optype = RECV_VAR */
 			if (tmp_op->opcode == ZEND_RECV) {
-				fse->vars[fse->varc].name  = estrdup ((tmp_op - 1)->op1.u.constant.value.str.val);
+				fse->vars[fse->varc].name  = xdstrdup ((tmp_op - 1)->op1.u.constant.value.str.val);
 				if (zend_ptr_stack_get_arg(fse->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
 					fse->vars[fse->varc].value = get_zval_value(*param);
 				} else {
-					fse->vars[fse->varc].value = estrdup ("{missing}");
+					fse->vars[fse->varc].value = xdstrdup ("{missing}");
 				}
 				fse->varc++;
 			}

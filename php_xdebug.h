@@ -133,10 +133,14 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #define xdmalloc    emalloc
 #define xdcalloc    ecalloc	
 #define xdrealloc   erealloc
+#define xdfree      efree
+#define xdstrdup    estrdup
 #else  
 #define xdmalloc    malloc
 #define xdcalloc    calloc	
 #define xdrealloc   realloc
+#define xdfree      free
+#define xdstrdup    strdup
 #endif
 	
 #endif
