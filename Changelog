@@ -1,3 +1,8 @@
+Sat Nov 9 23:39:23 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/xdebug.c:
+- Fixed error_reporting awareness for remote debugger
+
 Sat Nov 9 23:15:02 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO
