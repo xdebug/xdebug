@@ -1,3 +1,7 @@
+Tue May 7 16:09:13 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Implement display of include/require
+
 Mon May 6 14:59:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Remove functions from the stack after they are finished
