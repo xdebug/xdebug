@@ -1,3 +1,11 @@
+Fri Oct 18 22:40:31 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test19.php
+/xdebug/tests/test20.php
+/xdebug/tests/test20a.php
+/xdebug/tests/.cvsignore:
+- Added two more tests
+- Added .swp to ignores files
+
 Fri Oct 18 22:38:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/.cvsignore
 /xdebug/tests/test1.phpt
