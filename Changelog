@@ -1,3 +1,7 @@
+Sun Nov 28 20:34:19 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #101: crash with set_exeception_handler() and uncatched exceptions.
+
 Tue Nov 16 14:42:39 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - The proper Xdebug type is "hash" for associative arrays.
