@@ -17,7 +17,9 @@ dynlib.m4
 install-sh
 ltmain.sh
 include
-Makefile.*
+Makefile.fragments
+Makefile.global
+Makefile.objects
 missing
 mkinstalldirs
 modules
