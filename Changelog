@@ -1,3 +1,37 @@
+Mon Jan 12 13:03:48 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/tests/peak_memory_usage.phpt
+/xdebug/tests/array_map.phpt
+/xdebug/tests/assert_test.phpt
+/xdebug/tests/auto_trace.phpt
+/xdebug/tests/bug00002.phpt
+/xdebug/tests/bug00003.phpt
+/xdebug/tests/call_user_func_array.phpt
+/xdebug/tests/call_user_func_array2.phpt
+/xdebug/tests/local_vars_in_error.phpt
+/xdebug/tests/memory_usage.phpt
+/xdebug/tests/test1.phpt
+/xdebug/tests/test10.phpt
+/xdebug/tests/test11.phpt
+/xdebug/tests/test12.phpt
+/xdebug/tests/test13.phpt
+/xdebug/tests/test14.phpt
+/xdebug/tests/test14b.phpt
+/xdebug/tests/test15.phpt
+/xdebug/tests/test16.phpt
+/xdebug/tests/test16b.phpt
+/xdebug/tests/test17.phpt
+/xdebug/tests/test18.phpt
+/xdebug/tests/test20.phpt
+/xdebug/tests/test6.phpt
+/xdebug/tests/test7.phpt
+/xdebug/tests/test8.phpt
+/xdebug/tests/test9.phpt
+/xdebug/tests/trace.phpt
+/xdebug/tests/bug00004.phpt
+/xdebug/tests/get_function_trace.phpt
+/xdebug/tests/profiler_miscalc.phpt:
+- Fixed tests for new tracing method
+
 Mon Jan 12 13:01:29 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/config.m4
 /xdebug/php_xdebug.h
