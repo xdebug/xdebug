@@ -1,3 +1,34 @@
+Mon Jan 12 13:01:29 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_code_coverage.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_private.h
+/xdebug/package.xml:
+- Removed profiler code, and lay foundation for new code.
+- Rewrote the tracing code, you can now only trace to file; this greatly
+  enhances performance as no string representation of variables need to
+  be kept in memory any more.
+- Removed xdebug_get/dump_function_trace() because of the new idea of tracing.
+- Added the xdebug.auto_trace_file setting to configure a trace file to write
+  to as addition to the xdebug.auto_trace setting which just turns on tracing.
+- Removed the four profiling functions, something new will be written for them.
+- Added a xdebug.extended_info configuration setting to turn off the generation
+  of extended opcodes that are needed for stepping and breakpoints for the
+  remote debugger. This is useful incase you want to profile memory usage as
+  the generation of this extended info increases memory usage of oparrrays by
+  about 33%. 
+- Changed test for max_nesting_level; it now tests if the current level is
+  equal to the maximum level. This prevents infinite calls to the error handler
+  in case a user defined error handler or user defined session handler is used.
+- Fixed a crash bug that was caused by a buffer overrun in a statically sized
+  buffer for logging to the error file.
+- Added the xdebug.show_local_vars setting with which you can turn off the
+  showing of local variables in the top most stack frame on errors.
+- Added the xdebug_peak_memory_usage() function which returns the peak memory
+  used in a script. (Only work when --enable-memory-limit was enabled)
+
 Mon Jan 12 09:49:31 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/usefulstuff.c
 /xdebug/usefulstuff.h:
