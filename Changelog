@@ -1,3 +1,41 @@
+Wed Feb 18 21:45:32 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/test.sh
+/xdebug/xdebug.c
+/xdebug/xdebug_private.h
+/xdebug/tests/test10b.phpt
+/xdebug/tests/test20b.phpt
+/xdebug/tests/test7b.phpt
+/xdebug/tests/test9b.phpt
+/xdebug/tests/array_map.phpt
+/xdebug/tests/assert_test.phpt
+/xdebug/tests/auto_trace.phpt
+/xdebug/tests/bug00002.phpt
+/xdebug/tests/bug00003.phpt
+/xdebug/tests/bug00032.phpt
+/xdebug/tests/call_user_func_array.phpt
+/xdebug/tests/call_user_func_array2.phpt
+/xdebug/tests/test1.phpt
+/xdebug/tests/test10.phpt
+/xdebug/tests/test11.phpt
+/xdebug/tests/test12.phpt
+/xdebug/tests/test13.phpt
+/xdebug/tests/test14.phpt
+/xdebug/tests/test14b.phpt
+/xdebug/tests/test15.phpt
+/xdebug/tests/test16.phpt
+/xdebug/tests/test16b.phpt
+/xdebug/tests/test17.phpt
+/xdebug/tests/test18.phpt
+/xdebug/tests/test20.phpt
+/xdebug/tests/test7.phpt
+/xdebug/tests/test8.phpt
+/xdebug/tests/test9.phpt
+/xdebug/tests/trace.phpt:
+- Changed xdebug_start_trace() to return the filename of the tracefile (.xt is
+  added to the requested name).
+- Updated test cases for the change to xdebug_start_trace().
+- Corrected and added test cases for PHP 5.
+
 Wed Feb 18 20:43:15 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/tests/local_vars_in_error.phpt:
 - Fixed textcase by parameterized time
