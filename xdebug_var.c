@@ -491,7 +491,7 @@ xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val)
 
 	node = xdebug_xml_node_init("property");
 	if (name) {
-		xdebug_xml_add_attribute(node, "name", name);
+		xdebug_xml_add_attribute_ex(node, "name", xdstrdup(name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) val), 0, 1);
 	xdebug_var_export_xml_node(&val, node, 1 TSRMLS_CC);
