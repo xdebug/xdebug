@@ -1542,6 +1542,10 @@ static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRML
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 {
+	if (!exception) {
+		return;
+	}
+
 	/* Start JIT if requested and not yet enabled */
 	if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
