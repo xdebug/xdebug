@@ -45,4 +45,6 @@ unsigned char *xdebug_base64_decode(const unsigned char *str, int length, int *r
 
 #endif
 
+zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC);
+
 #endif

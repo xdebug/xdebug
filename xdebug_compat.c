@@ -13,9 +13,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Jim Winstead <jimw@php.net>                                  |
+   | Modifications: Derick Rethans <derick@xdebug.org>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.2 2004-04-04 21:35:47 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.3 2004-04-11 14:22:08 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
@@ -256,3 +257,66 @@ unsigned char *xdebug_base64_decode(const unsigned char *str, int length, int *r
 /* }}} */
 
 #endif
+
+/*
+   +----------------------------------------------------------------------+
+   | Zend Engine                                                          |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2004 Zend Technologies Ltd. (http://www.zend.com) |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 2.00 of the Zend license,     |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.zend.com/license/2_00.txt.                                |
+   | If you did not receive a copy of the Zend license and are unable to  |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@zend.com so we can mail you a copy immediately.              |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   | Modifications: Derick Rethans <derick@xdebug.org>                    |
+   +----------------------------------------------------------------------+
+*/
+
+#define T(offset) (*(temp_variable *)((char *) Ts + offset))
+
+zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
+{
+	switch (node->op_type) {
+		case IS_CONST:
+			return &node->u.constant;
+			break;
+		case IS_TMP_VAR:
+			return &T(node->u.var).tmp_var;
+			break;
+		case IS_VAR:
+			if (T(node->u.var).var.ptr) {
+				return T(node->u.var).var.ptr;
+			} else {
+				temp_variable *T = &T(node->u.var);
+				zval *str = T->str_offset.str;
+
+				if (T->str_offset.str->type != IS_STRING
+					|| ((int)T->str_offset.offset<0)
+					|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
+					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
+					T->tmp_var.value.str.val = empty_string;
+					T->tmp_var.value.str.len = 0;
+				} else {
+					char c = str->value.str.val[T->str_offset.offset];
+
+					T->tmp_var.value.str.val = estrndup(&c, 1);
+					T->tmp_var.value.str.len = 1;
+				}
+				T->tmp_var.refcount=1;
+				T->tmp_var.is_ref=1;
+				T->tmp_var.type = IS_STRING;
+				return &T->tmp_var;
+			}
+			break;
+		case IS_UNUSED:
+			return NULL;
+			break;
+	}
+	return NULL;
+}

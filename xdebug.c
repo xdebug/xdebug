@@ -80,6 +80,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
 static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC);
+static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC);
 
 int zend_xdebug_initialised = 0;
 
@@ -212,8 +213,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  "/tmp",               PHP_INI_ALL,    OnUpdateString, trace_output_dir,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "crc32",              PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   collect_includes,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_return,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_SYSTEM, OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_ALL,    OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
@@ -814,6 +816,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
 	char                 *magic_cookie = NULL;
+	int                   do_return = (XG(do_trace) && XG(trace_file));
 
 	if (XG(level) == 0) {
 		/* Set session cookie if requested */
@@ -914,6 +917,16 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 	}
 	old_execute(op_array TSRMLS_CC);
+
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
+		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
+			char* t = return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			fprintf(XG(trace_file), "%s", t);
+			fflush(XG(trace_file));
+			xdfree(t);
+		}
+	}
+	
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}
@@ -927,6 +940,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
+	zend_op              *cur_opcode;
+	int                   do_return = (XG(do_trace) && XG(trace_file));
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
@@ -946,6 +961,18 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
 	}
 	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
+
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
+		cur_opcode = *EG(opline_ptr);
+		if (cur_opcode) {
+			zval *ret = xdebug_zval_ptr(&(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
+			char* t = return_trace_stack_retval(fse, ret TSRMLS_CC);
+			fprintf(XG(trace_file), "%s", t);
+			fflush(XG(trace_file));
+			xdfree(t);
+		}
+	}
+
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
 	}
@@ -1132,6 +1159,28 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 			php_printf("</table></font>\n");
 		}
 	}
+}
+
+static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC)
+{
+	int        j = 0; /* Counter */
+	xdebug_str str = {0, 0, NULL};
+	char      *tmp_value;
+
+	xdebug_str_addl(&str, "                    ", 20, 0);
+	if (XG(show_mem_delta)) {
+		xdebug_str_addl(&str, "        ", 8, 0);
+	}
+	for (j = 0; j < i->level; j++) {
+		xdebug_str_addl(&str, "  ", 2, 0);
+	}
+	xdebug_str_addl(&str, "   >=> ", 7, 0);
+
+	tmp_value = get_zval_value(retval);
+	xdebug_str_add(&str, tmp_value, 1);
+	xdebug_str_addl(&str, "\n", 2, 0);
+
+	return str.d;
 }
 
 static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_DC)

@@ -22,6 +22,7 @@ syn match nll_memory    "+0"
 syn match level         "->"
 syn match lineno        ":\d\+$"
 
+syn match result          ">=>.\+"
 
 syn match methodcall      "\k\+->"
 syn match staticcall      "\k\+::"
@@ -47,6 +48,7 @@ if version >= 508 || !exists("did_diff_syntax_inits")
   HiLink date   Label
 
   HiLink level  SpecialChar
+  HiLink result Constant
 
   HiLink min_memory Constant
   HiLink pls_memory Structure
