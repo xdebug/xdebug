@@ -2,20 +2,15 @@ TODO
 ====
 
 For 1.2.0:
-- Update gdb debugging capabilities
-  * watches / conditional breakpoints
 - Bug fixing
   * Crash with includes on ZE2
-  * Disconnect bug
+  * Don't show memory footprint at all if it's not enabled 
 - Profiling
   * Add another profiling mode that allows for detailed function analysis.
-- Other
-  * add trace code to trace which files/lines have been touched (to check
-	code coverage).
-  * finish custom error handler support
-  * namespaces support for Zend Engine 2
 
 For later:
+- Update gdb debugging capabilities
+  * watches / conditional breakpoints
 - Additions
    * Provide codes for messages (for localization) including parameters
 - Profiling
@@ -25,3 +20,8 @@ For later:
      If this external call takes > a certain pre-set time show the
      parameter passed to the function so that a person can optimize the
      query or the utility that is being called.
+- Other
+  * finish custom error handler support
+  * namespaces support for Zend Engine 2
+  * add trace code to trace which files/lines have been touched (to check
+    code coverage).
