@@ -256,10 +256,9 @@ static xdebug_xml_node* get_symbol_contents(char* name, int name_length TSRMLS_D
 	return NULL;
 }
 
-static char* return_source(char *file, int begin, int end TSRMLS_DC)
+static char* return_source(char *filename, int begin, int end TSRMLS_DC)
 {
-	int    fd;
-	fd_buf fd_buffer = { NULL, 0 };
+	php_stream *stream;
 	int    i = begin;
 	char  *line = NULL;
 	xdebug_str source = { 0, 0, NULL };
@@ -269,40 +268,44 @@ static char* return_source(char *file, int begin, int end TSRMLS_DC)
 		i = 0;
 	}
 
-	file = xdebug_path_from_url(file);
-	fd = open(file, 0);
-	xdfree(file);
+	filename = xdebug_path_from_url(filename);
+	stream = php_stream_open_wrapper(filename, "rb",
+			USE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			NULL);
+	xdfree(filename);
 
 	/* Read until the "begin" line has been read */
-	if (fd == -1) {
+	if (!stream) {
 		return NULL;
 	}
 
-	while (i > 0) {
+	/* skip to the first requested line */
+	while (i > 0 && !php_stream_eof(stream)) {
 		if (line) {
-			free(line);
+			efree(line);
 			line = NULL;
 		}
-		line = fd_read_line(fd, &fd_buffer, FD_RL_FILE);
+		line = php_stream_gets(stream, NULL, 1024);
 		i--;
 	}
 	/* Read until the "end" line has been read */
 	do {
 		if (line) {
 			xdebug_str_add(&source, line, 0);
-			xdebug_str_addl(&source, "\n", 1, 0);
-			free(line);
+			efree(line);
 			line = NULL;
+			if (php_stream_eof(stream)) break;
 		}
-		line = fd_read_line(fd, &fd_buffer, FD_RL_FILE);
+		line = php_stream_gets(stream, NULL, 1024);
 		i++;
 	} while (i < end + 1 - begin);
 
 	/* Print last line */
 	if (line) {
-		free(line);
+		efree(line);
 		line = NULL;
 	}
+	php_stream_close(stream);
 	return source.d;
 }
 
@@ -1538,7 +1541,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.48 $";
+	return "$Revision: 1.49 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
