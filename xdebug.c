@@ -29,6 +29,7 @@
 #include "TSRM.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_smart_str.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
 
@@ -581,6 +582,67 @@ PHP_FUNCTION(xdebug_memory_usage)
 
 /*************************************************************************************************************************************/
 
+static inline char* get_node_value (znode *node)
+{
+	switch (node->u.constant.type) {
+		case IS_NULL:
+			return estrdup("NULL");
+			break;
+		case IS_LONG:
+			return xdebug_sprintf ("%ld", node->u.constant.value.lval);
+			break;
+		case IS_DOUBLE:
+			return xdebug_sprintf ("%g", node->u.constant.value.dval);
+			break;
+		case IS_STRING:
+			return xdebug_sprintf ("'%s'", node->u.constant.value.str.val);
+			break;
+		case IS_BOOL:
+			return node->u.constant.value.lval ? estrdup ("TRUE") : estrdup ("FALSE");
+			break;
+		case IS_CONSTANT:
+			return estrdup (node->u.constant.value.str.val);
+			break;
+		default:
+			return estrdup ("??");
+	}
+}
+
+static char* get_array_from_oparray (zend_op **op)
+{
+	smart_str ret = {0};
+	zend_op *top = *op;
+
+	smart_str_appends (&ret, "array (");
+	smart_str_appends (&ret, get_node_value (&top->op1));
+
+	(*op)++;
+	while (top->opcode != ZEND_SEND_VAL) {
+		top = *op;
+		if (top->opcode == ZEND_ADD_ARRAY_ELEMENT) {
+			switch (top->op1.op_type) {
+				case 1:
+					smart_str_appends (&ret, ", ");
+					smart_str_appends (&ret, get_node_value (&top->op1));
+					break;
+				case 2:
+					smart_str_appends (&ret, ", ");
+					smart_str_appends (&ret, get_node_value (&(top - 1)->op1));
+					break;
+				default:
+					smart_str_appends (&ret, ", ?");
+					break;
+			}
+		}
+		(*op)++;
+	}
+	smart_str_appendc (&ret, ')');
+	smart_str_0 (&ret);
+	(*op)--;
+
+	return estrdup (ret.c);
+}
+
 static char* get_val (zend_op *op)
 {
 	zend_op *prev;
@@ -600,28 +662,7 @@ static char* get_val (zend_op *op)
 		return estrdup("?");
 	}
 
-	switch (op->op1.u.constant.type) {
-		case IS_NULL:
-			return estrdup("NULL");
-			break;
-		case IS_LONG:
-			return xdebug_sprintf ("%ld", op->op1.u.constant.value.lval);
-			break;
-		case IS_DOUBLE:
-			return xdebug_sprintf ("%g", op->op1.u.constant.value.dval);
-			break;
-		case IS_STRING:
-			return xdebug_sprintf ("'%s'", op->op1.u.constant.value.str.val);
-			break;
-		case IS_BOOL:
-			return op->op1.u.constant.value.lval ? estrdup ("TRUE") : estrdup ("FALSE");
-			break;
-		case IS_CONSTANT:
-			return estrdup (op->op1.u.constant.value.str.val);
-			break;
-		default:
-			return estrdup ("??");
-	}
+	return get_node_value (&op->op1);
 }
 
 
@@ -679,21 +720,24 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 			break;
 		}
 		switch (opcode) {
-		  case ZEND_SEND_VAL:
-			tmp->vars[tmp->varc] = get_val (cur_opcode);
-			tmp->varc++;
-			break;
+			case ZEND_SEND_VAL:
+				tmp->vars[tmp->varc] = get_val (cur_opcode);
+				tmp->varc++;
+				break;
 
-		  case ZEND_SEND_VAR:
-			tmp->vars[tmp->varc] = get_var (cur_opcode, opcode);
-			tmp->varc++;
-			break;
+			case ZEND_SEND_VAR:
+				tmp->vars[tmp->varc] = get_var (cur_opcode, opcode);
+				tmp->varc++;
+				break;
 
-		  case ZEND_SEND_REF:
-			tmp->vars[tmp->varc] = get_var (cur_opcode, opcode);
-			tmp->varc++;
-			break;
-
+			case ZEND_SEND_REF:
+				tmp->vars[tmp->varc] = get_var (cur_opcode, opcode);
+				tmp->varc++;
+				break;
+		
+			case ZEND_INIT_ARRAY:
+				tmp->vars[tmp->varc] = get_array_from_oparray ((zend_op**) &cur_opcode);
+				tmp->varc++;
 		}
 		cur_opcode++;
 	}
