@@ -1,3 +1,10 @@
+Sun May 19 16:32:54 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.m4
+/xdebug/xdebug.c
+/xdebug/tests/test1.php
+/xdebug/tests/test7.php:
+- First attempt at class stuff
+
 Sat May 18 22:41:20 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>:
 - Update NEWS
 
