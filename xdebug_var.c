@@ -431,6 +431,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_xml_node *node, int level T
 		case IS_OBJECT:
 			xdebug_xml_add_attribute(node, "type", "object");
 			xdebug_xml_add_attribute(node, "children", "1");
+			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(Z_OBJCE_PP(struc)->name), 0, 1);
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
