@@ -473,6 +473,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 		}
 		XG(context).list.last_line = end + 1 + offset;
 	}
+	close(fd);
 }
 
 static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int response_format)
@@ -1320,7 +1321,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.68 $";
+	return "$Revision: 1.69 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
