@@ -1,3 +1,14 @@
+Sat May 01 23:25:28 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_private.h:
+- Added a new php.ini setting "xdebug.trace_options" to configure extra
+  options for trace dumping.
+- Added the XDEBUG_TRACE_APPEND option (1) as trace option. This can be set
+  with the ini setting above (only the number "1"), or passed as 2nd parameter
+  to xdebug_start_trace() (both the number "1" or the constant
+  XDEBUG_TRACE_APPEND).
+
 Sat May 01 13:49:36 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed returned error when the stack depth was out of limits.
