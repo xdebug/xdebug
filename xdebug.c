@@ -203,139 +203,111 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	char buffer[1024];
 	int buffer_len;
 	srm_llist_element *le;
+	char *error_type_str;
+	char *error_format;
 
 	TSRMLS_FETCH();
 
-	EG(error_reporting) = 1;
 	buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
 	buffer[sizeof(buffer)-1]=0;
-	if(buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
+	if (buffer_len > sizeof(buffer) - 1 || buffer_len < 0) {
 		buffer_len = sizeof(buffer) - 1;
 	}
 
-	/* display/log the error if necessary */
-	if ((EG(error_reporting) & type || (type & E_CORE))
-		&& (PG(log_errors) || PG(display_errors))) {
-		char *error_type_str;
+	switch (type) {
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+			error_type_str = "Fatal error";
+			break;
+		case E_WARNING:
+		case E_CORE_WARNING:
+		case E_COMPILE_WARNING:
+		case E_USER_WARNING:
+			error_type_str = "Warning";
+			break;
+		case E_PARSE:
+			error_type_str = "Parse error";
+			break;
+		case E_NOTICE:
+		case E_USER_NOTICE:
+			error_type_str = "Notice";
+			break;
+		default:
+			error_type_str = "Unknown error";
+			break;
+	}
 
-		switch (type) {
-			case E_ERROR:
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-				error_type_str = "Fatal error";
-				break;
-			case E_WARNING:
-			case E_CORE_WARNING:
-			case E_COMPILE_WARNING:
-			case E_USER_WARNING:
-				error_type_str = "Warning";
-				break;
-			case E_PARSE:
-				error_type_str = "Parse error";
-				break;
-			case E_NOTICE:
-			case E_USER_NOTICE:
-				error_type_str = "Notice";
-				break;
-			default:
-				error_type_str = "Unknown error";
-				break;
-		}
-
-		if (PG(log_errors)) {
-			char log_buffer[1024];
+	if (PG(log_errors)) {
+		char log_buffer[1024];
 
 #ifdef PHP_WIN32
-			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
-				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
-			}
-#endif
-			snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-			php_log_err(log_buffer TSRMLS_CC);
+		if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
+			MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
 		}
-		if (PG(display_errors)
-			&& (!PG(during_request_startup) || PG(display_startup_errors))) {
-			char *error_format;
+#endif
+		snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+		php_log_err(log_buffer TSRMLS_CC);
+	}
 
-			if (PG(html_errors)) {
-				php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
+	if (PG(html_errors)) {
+		php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
+	} else {
+		printf ("\nStack trace:\n");
+	}
+
+	error_format = PG(html_errors) ?
+		"<tr><td bgcolor='#ffbbbb' colspan=\"2\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b><br />\n"
+		: "\n%s: %s in %s on line %d\n";
+	php_printf(error_format, error_type_str, buffer,
+			   error_filename, error_lineno);
+
+	if (PG(html_errors)) {
+		php_printf ("<tr><th bgcolor='#aaaaaa' colspan='2'>Stacktrace</th></tr>\n<tr><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+	}
+
+
+	
+	for (le = SRM_LLIST_HEAD(XG(stack)); le != NULL; le = SRM_LLIST_NEXT(le))
+	{
+		int c = 0; /* Comma flag */
+		int j = 0; /* Counter */
+		struct function_stack_entry *i = SRM_LLIST_VALP(le);
+
+		if (PG(html_errors)) {
+			php_printf ("<tr><td>%s(", i->function_name);
+		} else {
+			printf ("%s(", i->function_name);
+		}
+
+		/* Printing vars */
+		for (j = 0; j < i->varc; j++) {
+			if (c) {
+				if (PG(html_errors)) {
+					php_printf (", ");
+				} else {
+					printf (", ");
+				}
 			} else {
-				printf ("\nStack trace:\n");
+				c = 1;
 			}
-
-			error_format = PG(html_errors) ?
-				"<tr><td bgcolor='#ffbbbb' colspan=\"2\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b><br />\n"
-				: "\n%s: %s in %s on line %d\n";
-			php_printf(error_format, error_type_str, buffer,
-					   error_filename, error_lineno);
-
 			if (PG(html_errors)) {
-				php_printf ("<tr><th bgcolor='#aaaaaa' colspan='2'>Stacktrace</th></tr>\n<tr><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+				php_printf ("%s", i->vars[j]);
+			} else {
+				printf ("%s", i->vars[j]);
 			}
-
-
-			
-			for (le = SRM_LLIST_HEAD(XG(stack)); le != NULL; le = SRM_LLIST_NEXT(le))
-			{
-				int c = 0; /* Comma flag */
-				int j = 0; /* Counter */
-				struct function_stack_entry *i = SRM_LLIST_VALP(le);
-
-				if (PG(html_errors)) {
-					php_printf ("<tr><td>%s(", i->function_name);
-				} else {
-					printf ("%s(", i->function_name);
-				}
-
-				/* Printing vars */
-				for (j = 0; j < i->varc; j++) {
-					if (c) {
-						if (PG(html_errors)) {
-							php_printf (", ");
-						} else {
-							printf (", ");
-						}
-					} else {
-						c = 1;
-					}
-					if (PG(html_errors)) {
-						php_printf ("%s", i->vars[j]);
-					} else {
-						printf ("%s", i->vars[j]);
-					}
-				}
-
-				if (PG(html_errors)) {
-					php_printf (")</td><td>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
-				} else {
-					printf (") %s:%d\n", i->filename, i->lineno);
-				}
-			}
-
-			if (PG(html_errors)) {
-				php_printf ("</table>\n");
-			}
-
 		}
-#if ZEND_DEBUG
-		{
-			zend_bool trigger_break;
 
-			switch (type) {
-				case E_ERROR:
-				case E_CORE_ERROR:
-				case E_COMPILE_ERROR:
-				case E_USER_ERROR:
-					trigger_break=1;
-					break;
-				default:
-					trigger_break=0;
-					break;
-			}
-			zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+		if (PG(html_errors)) {
+			php_printf (")</td><td>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
+		} else {
+			printf (") %s:%d\n", i->filename, i->lineno);
 		}
-#endif
+	}
+
+	if (PG(html_errors)) {
+		php_printf ("</table>\n");
 	}
 
 	/* Bail out if we can't recover */
@@ -348,18 +320,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		case E_USER_ERROR:
 			zend_bailout();
 			break;
-	}
-
-	/* Log if necessary */
-	if (PG(track_errors) && EG(active_symbol_table)) {
-		pval *tmp;
-
-		ALLOC_ZVAL(tmp);
-		INIT_PZVAL(tmp);
-		Z_STRVAL_P(tmp) = (char *) estrndup(buffer, buffer_len);
-		Z_STRLEN_P(tmp) = buffer_len;
-		Z_TYPE_P(tmp) = IS_STRING;
-		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
 	}
 }
 
