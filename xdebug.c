@@ -24,9 +24,9 @@
 
 #if HAVE_XDEBUG
 
-#define XDEBUG_VERSION "0.9.0"
+#define XDEBUG_VERSION "1.0.0dev"
 
-#ifdef PHP_WIN32
+#ifndef PHP_WIN32
 #include <sys/time.h>
 #else
 #include "win32/time.h"
