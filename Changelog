@@ -1,3 +1,30 @@
+Tue Nov 12 12:08:02 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/Makefile.frag
+/xdebug/debugclient/COPYING
+/xdebug/debugclient/INSTALL
+/xdebug/debugclient/Makefile.am
+/xdebug/debugclient/acinclude.m4
+/xdebug/debugclient/buildconf
+/xdebug/debugclient/config.guess
+/xdebug/debugclient/config.sub
+/xdebug/debugclient/configure.in
+/xdebug/debugclient/cvsclean
+/xdebug/debugclient/install-sh
+/xdebug/debugclient/ltmain.sh
+/xdebug/debugclient/mkinstalldirs
+/xdebug/debugclient/usefulstuff.c
+/xdebug/debugclient/usefulstuff.h
+/xdebug/debugclient/main.c
+/xdebug/debugclient/Makefile
+/xdebug/debugclient/build/buildcheck.sh
+/xdebug/debugclient/build/buildconf1.mk
+/xdebug/debugclient/build/buildconf2.mk
+/xdebug/debugclient/build/clean.mk
+/xdebug/debugclient/build/config-stubs
+/xdebug/debugclient/build/threads.m4:
+- Make the debug client use autoconf/automake. (Derick)
+- Added libedit support to the debugclient. (Marco)
+
 Tue Nov 12 09:58:59 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Fix bug in linux' debugclient
