@@ -1,3 +1,9 @@
+Sun Jun 9 09:45:51 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/tests/test10.php:
+- Rewrote xdebug_get_function_stack() and xdebug_get_function_trace() to return
+  data in multidimensional arrays.
+
 Thu Jun 6 13:51:43 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fixed double freeing
