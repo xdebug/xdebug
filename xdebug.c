@@ -685,12 +685,23 @@ static void add_used_variables (struct function_stack_entry *fse, zend_op_array 
 	while (i < j) {
 		if (op_array->opcodes[i].opcode == ZEND_FETCH_R || op_array->opcodes[i].opcode == ZEND_FETCH_W) {
 			if (op_array->opcodes[i].op1.op_type == IS_CONST) {
-				xdebug_hash_update(
-					fse->used_vars, 
-					op_array->opcodes[i].op1.u.constant.value.str.val,
-					op_array->opcodes[i].op1.u.constant.value.str.len,
-					xdstrdup(op_array->opcodes[i].op1.u.constant.value.str.val)
-				);
+				if (Z_TYPE(op_array->opcodes[i].op1.u.constant) == IS_STRING) {
+					xdebug_hash_update(
+						fse->used_vars, 
+						op_array->opcodes[i].op1.u.constant.value.str.val,
+						op_array->opcodes[i].op1.u.constant.value.str.len,
+						xdstrdup(op_array->opcodes[i].op1.u.constant.value.str.val)
+					);
+				} else { /* unusual but not impossible situation */
+					int use_copy;
+					zval tmp_zval;
+
+					zend_make_printable_zval(&(op_array->opcodes[i].op1.u.constant), &tmp_zval, &use_copy);
+
+					xdebug_hash_update(fse->used_vars, tmp_zval.value.str.val, tmp_zval.value.str.len, xdstrdup(tmp_zval.value.str.val));
+
+					zval_dtor(&tmp_zval);
+				}
 			}
 		}
 		i++;
