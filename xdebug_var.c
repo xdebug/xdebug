@@ -371,22 +371,29 @@ static int xdebug_array_element_export_xml_node(zval **zv, int num_args, va_list
 	int level;
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
+	char *name = NULL, *parent_name = NULL, *full_name = NULL;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 	parent = va_arg(args, xdebug_xml_node*);
+	parent_name = va_arg(args, char *);
 
 	node = xdebug_xml_node_init("property");
 	
 	if (hash_key->nKeyLength != 0) {
-		xdebug_xml_add_attribute(node, "name", hash_key->arKey);
+		name = xdstrdup(hash_key->arKey);
+		full_name = xdebug_sprintf("%s['%s']", parent_name, name);
 	} else {
-		xdebug_xml_add_attribute_ex(node, "name", xdebug_sprintf("%ld", hash_key->h), 0, 1);
+		name = xdebug_sprintf("%ld", hash_key->h);
+		full_name = xdebug_sprintf("%s[%s]", parent_name, name);
 	}
+
+	xdebug_xml_add_attribute_ex(node, "name", name, 0, 1);
+	xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
 	xdebug_xml_add_child(parent, node);
-	xdebug_var_export_xml_node(zv, node, level + 2 TSRMLS_CC);
+	xdebug_var_export_xml_node(zv, full_name, node, level + 2 TSRMLS_CC);
 	return 0;
 }
 
@@ -396,26 +403,31 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
 	char *prop_name, *modifier;
+	char *parent_name = NULL, *full_name = NULL;
 	TSRMLS_FETCH();
 
 	level  = va_arg(args, int);
 	parent = va_arg(args, xdebug_xml_node*);
+	full_name = parent_name = va_arg(args, char *);
 
 	node = xdebug_xml_node_init("property");
 	
 	if (hash_key->nKeyLength != 0) {
 		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
 		xdebug_xml_add_attribute(node, "name", prop_name);
+		/* XXX static vars? */
+		full_name = xdebug_sprintf("%s->%s", parent_name, prop_name);
+		xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 		xdebug_xml_add_attribute(node, "facet", modifier);
 	}
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
 	xdebug_xml_add_child(parent, node);
-	xdebug_var_export_xml_node(zv, node, level + 2 TSRMLS_CC);
+	xdebug_var_export_xml_node(zv, full_name, node, level + 2 TSRMLS_CC);
 	return 0;
 }
 
-void xdebug_var_export_xml_node(zval **struc, xdebug_xml_node *node, int level TSRMLS_DC)
+void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, int level TSRMLS_DC)
 {
 	HashTable *myht;
 
@@ -450,7 +462,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_xml_node *node, int level T
 			myht = Z_ARRVAL_PP(struc);
 			if (myht->nApplyCount < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml_node, 2, level, node);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml_node, 3, level, node, name);
 			} else {
 				xdebug_xml_add_attribute(node, "recursive", "1");
 			}
@@ -463,7 +475,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_xml_node *node, int level T
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml_node, 2, level, node);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml_node, 3, level, node, name);
 			} else {
 				xdebug_xml_add_attribute(node, "recursive", "1");
 			}
@@ -492,9 +504,10 @@ xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val)
 	node = xdebug_xml_node_init("property");
 	if (name) {
 		xdebug_xml_add_attribute_ex(node, "name", xdstrdup(name), 0, 1);
+		xdebug_xml_add_attribute_ex(node, "fullname", xdstrdup(name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) val), 0, 1);
-	xdebug_var_export_xml_node(&val, node, 1 TSRMLS_CC);
+	xdebug_var_export_xml_node(&val, name, node, 1 TSRMLS_CC);
 
 	return node;
 }
