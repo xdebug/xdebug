@@ -1,3 +1,10 @@
+Sat Apr 10 12:33:49 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+test-4.3.sh
+xdebug/test.sh
+xdebug/tests/bug00057-ze1.phpt
+xdebug/tests/bug00057-ze2.phpt:
+- Added test cases for bug #57
+
 Sat Apr 10 01:27:51 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 tests/bug00032-ze1.phpt
 xdebug/tests/local_vars_in_error-ze1.phpt
