@@ -1,3 +1,7 @@
+Fri Dec 26 22:43:11 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Update for 1.3.0 release
+
 Fri Dec 26 15:35:02 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Implemented 'typemap_get'.
