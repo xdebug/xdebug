@@ -28,12 +28,12 @@
 
 #include "../usefulstuff.h"
 
-#define VERSION "0.5.0"
+#define VERSION "0.6.0"
 
 int main(int argc, char *argv[])
 {
 	int port = 7869;
-	int ssocket = socket (AF_INET, SOCK_STREAM, 0);
+	int ssocket = 0;
 	struct sockaddr_in server_in;
 	int				client_in_len;
 	int				fd;
@@ -44,28 +44,31 @@ int main(int argc, char *argv[])
 	fd_buf cxt = { NULL, 0 };
 	fd_buf std_in = { NULL, 0 };
 
-	if (ssocket < 0) {
-		printf ("setup_socket: couldn't create socket\n");
-	}
-
-	memset (&server_in, 0, sizeof(struct sockaddr));
-	server_in.sin_family	  = AF_INET;
-	server_in.sin_addr.s_addr = htonl(INADDR_ANY);
-	server_in.sin_port		= htons((int) port);
-
-	while (bind (ssocket, (struct sockaddr *) &server_in, sizeof(struct sockaddr_in)) < 0) {
-		printf ("setup_socket: couldn't bind AF_INET socket?\n");
-		sleep(5);
-	}
 	printf ("Xdebug GDB emulation client (%s)\n", VERSION);
 	printf ("Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
 
 	while (1) {
-		if (listen (ssocket, 5) == -1) {
+		ssocket = socket (AF_INET, SOCK_STREAM, 0);
+		if (ssocket < 0) {
+			printf ("setup_socket: couldn't create socket\n");
+		}
+	
+		memset (&server_in, 0, sizeof(struct sockaddr));
+		server_in.sin_family	  = AF_INET;
+		server_in.sin_addr.s_addr = htonl(INADDR_ANY);
+		server_in.sin_port		= htons((int) port);
+	
+		while (bind (ssocket, (struct sockaddr *) &server_in, sizeof(struct sockaddr_in)) < 0) {
+			printf ("setup_socket: couldn't bind AF_INET socket?\n");
+			sleep(5);
+		}
+		if (listen (ssocket, 0) == -1) {
 			printf ("setup_socket: listen call failed\n");
+			exit(-1);
 		}
 		printf ("\nWaiting for debug server to connect.\n");
 		fd = accept (ssocket, (struct sockaddr *) &client_in, &client_in_len);
+		close (ssocket);
 		iaddr = &client_in.sin_addr;
 		printf ("Connect\n");
 		while ((buffer = fd_read_line (fd, &cxt)) > 0) {
@@ -92,5 +95,7 @@ int main(int argc, char *argv[])
 		}
 		printf ("Disconnect\n\n");
 		close(fd);
+		/* Sleep some time to reset the TCP/IP connection */
+		sleep(3);
 	}
 }
