@@ -1,3 +1,7 @@
+Mon Nov 11 00:54:54 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/debugclient.dsp:
+- Add .dsp file for debugclient
+
 Mon Nov 11 00:53:50 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Whitespace
