@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #else
+#define PATH_MAX MAX_PATH
 #include <winsock2.h>
 #include <io.h>
 #endif
@@ -158,16 +159,18 @@ static int xdebug_htoi(char *s)
 	int c;
 
 	c = s[0];
-	if (isupper(c))
+	if (isupper(c)) {
 		c = tolower(c);
+	}
 	value = (c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10) * 16;
 
 	c = s[1];
-	if (isupper(c))
+	if (isupper(c)) {
 		c = tolower(c);
+	}
 	value += c >= '0' && c <= '9' ? c - '0' : c - 'a' + 10;
 
-	return (value);
+	return value;
 }
 
 /* not all versions of php export this */
@@ -181,8 +184,9 @@ int xdebug_raw_url_decode(char *str, int len)
 			*dest = (char) xdebug_htoi(data + 1);
 			data += 2;
 			len -= 2;
-		} else
+		} else {
 			*dest = *data;
+		}
 		data++;
 		dest++;
 	}
@@ -194,39 +198,42 @@ int xdebug_raw_url_decode(char *str, int len)
 char *xdebug_path_from_url(const char *fileurl)
 {
 	/* deal with file: url's */
-	char dfp[MAX_PATH*2];
-	const char *fp=dfp,*efp = fileurl;
-	int i,l=0;
+	char dfp[PATH_MAX * 2];
+	const char *fp = dfp, *efp = fileurl;
+	int i, l = 0;
 	char *tmp = NULL, *ret = NULL;;
 
-	memset(dfp,0,sizeof(dfp));
-	strncpy(dfp, efp, sizeof(dfp)-1);
+	memset(dfp, 0, sizeof(dfp));
+	strncpy(dfp, efp, sizeof(dfp) - 1);
 	xdebug_raw_url_decode(dfp, strlen(dfp));
-	tmp = strstr(fp,"file://");
+	tmp = strstr(fp, "file://");
 
 	if (tmp) {
 		fp = tmp + 7;
-		if (fp[0] == '/' && fp[2] == ':') fp++;
+		if (fp[0] == '/' && fp[2] == ':') {
+			fp++;
+		}
 		ret = xdstrdup(fp);
 		l = strlen(ret);
 #ifdef PHP_WIN32
 		/* convert '/' to '\' */
-		for (i=0; i < l; i++) {
-			if (ret[i] == '/') ret[i] = '\\';
+		for (i = 0; i < l; i++) {
+			if (ret[i] == '/') {
+				ret[i] = '\\';
+			}
 		}
 #endif
 	} else {
 		ret = xdstrdup(fileurl);
 	}
 
-	// fprintf(stderr,"path from url is [%s]\n",ret);
 	return ret;
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
 char *xdebug_path_to_url(const char *fileurl)
 {
-	int l,i;
+	int l, i;
 	char *tmp = NULL;
 
 	if (fileurl[1] == '/' || fileurl[1] == '\\') {
@@ -241,8 +248,11 @@ char *xdebug_path_to_url(const char *fileurl)
 	}
 	l = strlen(tmp);
 	/* convert '\' to '/' */
-	for (i=0; i < l; i++) {
-		if (tmp[i] == '\\') tmp[i]='/';
+	for (i = 0; i < l; i++) {
+		if (tmp[i] == '\\') {
+			tmp[i]='/';
+		}
 	}
 	return tmp;
 }
+
