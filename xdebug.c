@@ -753,7 +753,7 @@ static int handle_breakpoints(struct function_stack_entry *fse)
 	return 1;
 }
 
-#if PHP_API_VERSION > 20030820
+#if PHP_API_VERSION >= 20030820
 #define COOKIE_ENCODE , 1
 #else
 #define COOKIE_ENCODE
