@@ -371,11 +371,13 @@ void stack_element_dtor (void *dummy, void *elem)
 			xdfree(e->filename);
 		}
 
-		for (i = 0; i < e->varc; i++) {
-			if ((e->vars[i]).name) {
-				xdfree((e->vars[i]).name);
+		if (e->var) {
+			for (i = 0; i < e->varc; i++) {
+				if ((e->var[i]).name) {
+					xdfree((e->var[i]).name);
+				}
+				xdfree((e->var[i]).value);
 			}
-			xdfree((e->vars[i]).value);
 		}
 
 		if (e->used_vars) {
@@ -580,6 +582,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	int                   i         = 0;
 
 	tmp = xdmalloc (sizeof (struct function_stack_entry));
+	tmp->var           = NULL;
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
 	tmp->level         = XG(level);
@@ -639,9 +642,10 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 
 		if (XG(collect_params)) {
 			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
-			tmp->vars[tmp->varc].name  = NULL;
-			tmp->vars[tmp->varc].value = xdstrdup(param->value.str.val);
-			tmp->vars[tmp->varc].addr = NULL;
+			tmp->var = xdmalloc(sizeof (xdebug_var));
+			tmp->var[tmp->varc].name  = NULL;
+			tmp->var[tmp->varc].value = xdstrdup(param->value.str.val);
+			tmp->var[tmp->varc].addr = NULL;
 			tmp->varc++;
 		}
 
@@ -651,18 +655,19 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 			tmp->lineno = cur_opcode->lineno;
 		}
 		if (XG(collect_params)) {
+			tmp->var = xdmalloc(arg_count * sizeof (xdebug_var));
 			for (i = 0; i < arg_count; i++) {
-				tmp->vars[tmp->varc].name  = NULL;
+				tmp->var[tmp->varc].name  = NULL;
 				if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
 					if (XG(do_trace)) {
-						tmp->vars[tmp->varc].value = get_zval_value(*param);
+						tmp->var[tmp->varc].value = get_zval_value(*param);
 					} else {
-						tmp->vars[tmp->varc].value = NULL;
+						tmp->var[tmp->varc].value = NULL;
 					}
-					tmp->vars[tmp->varc].addr = *param;
+					tmp->var[tmp->varc].addr = *param;
 				} else {
-					tmp->vars[tmp->varc].value = xdstrdup("{missing}");
-					tmp->vars[tmp->varc].addr = NULL;
+					tmp->var[tmp->varc].value = xdstrdup("{missing}");
+					tmp->var[tmp->varc].addr = NULL;
 				}
 				tmp->varc++;
 			}
@@ -935,23 +940,23 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 				} else {
 					c = 1;
 				}
-				tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
-				if (!i->vars[j].value) {
-					i->vars[j].value = get_zval_value(i->vars[j].addr);
+				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
+				if (!i->var[j].value) {
+					i->var[j].value = get_zval_value(i->var[j].addr);
 				}
 				if (!log_only) {
 					if (html) {
 						php_printf("%s%s", tmp_varname,
-							php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
+							php_escape_html_entities(i->var[j].value, strlen(i->var[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
 					} else {
-						php_printf("%s%s", tmp_varname, i->vars[j].value);
+						php_printf("%s%s", tmp_varname, i->var[j].value);
 					}
 				}
 				if (PG(log_errors) && !is_cli) {
 					snprintf(
 						log_buffer + strlen(log_buffer),
 						1024 - strlen(log_buffer),
-						"%s%s", tmp_varname, i->vars[j].value
+						"%s%s", tmp_varname, i->var[j].value
 					);
 				}
 				xdfree(tmp_varname);
@@ -1027,13 +1032,13 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 			c = 1;
 		}
 
-		tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
+		tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
 		XDEBUG_STR_ADD(&str, tmp_varname, 1);
 
 		if (html) {
-			XDEBUG_STR_ADD(&str, php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC), 0);
+			XDEBUG_STR_ADD(&str, php_escape_html_entities(i->var[j].value, strlen(i->var[j].value), &new_len, 1, 1, NULL TSRMLS_CC), 0);
 		} else {
-			XDEBUG_STR_ADD(&str, i->vars[j].value, 0);
+			XDEBUG_STR_ADD(&str, i->var[j].value, 0);
 		}
 	}
 
@@ -1219,13 +1224,13 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			if (!i->vars[j].value) {
-				i->vars[j].value = get_zval_value(i->vars[j].addr);
+			if (!i->var[j].value) {
+				i->var[j].value = get_zval_value(i->var[j].addr);
 			}
-			if (i->vars[j].name) {
-				add_assoc_string_ex(params, i->vars[j].name, strlen(i->vars[j].name) + 1, i->vars[j].value, 1);
+			if (i->var[j].name) {
+				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, i->var[j].value, 1);
 			} else {
-				add_index_string(params, j, i->vars[j].value, 1);
+				add_index_string(params, j, i->var[j].value, 1);
 			}
 		}
 		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
@@ -1510,10 +1515,10 @@ PHP_FUNCTION(xdebug_get_function_trace)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			if (i->vars[j].name) {
-				add_assoc_string_ex(params, i->vars[j].name, strlen(i->vars[j].name) + 1, i->vars[j].value, 1);
+			if (i->var[j].name) {
+				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, i->var[j].value, 1);
 			} else {
-				add_index_string(params, j, i->vars[j].value, 1);
+				add_index_string(params, j, i->var[j].value, 1);
 			}
 		}
 		add_assoc_zval_ex(frame, "params", sizeof("params"), params);

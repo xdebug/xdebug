@@ -153,7 +153,7 @@ typedef struct function_stack_entry {
 	/* argument properties */
 	int          arg_done;
 	int          varc;
-	xdebug_var   vars[20];
+	xdebug_var  *var;
 	xdebug_hash *used_vars;
 	HashTable   *symbol_table;
 

@@ -580,13 +580,13 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 			c = 1;
 		}
 
-		if (i->vars[j].name) {
-		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
+		if (i->var[j].name) {
+		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->var[j].name));
 		}
-		if (!i->vars[j].value) {
-			i->vars[j].value = get_zval_value(i->vars[j].addr);
+		if (!i->var[j].value) {
+			i->var[j].value = get_zval_value(i->var[j].addr);
 		}
-		tmp = xmlize(i->vars[j].value);
+		tmp = xmlize(i->var[j].value);
 		SSEND(h->socket, tmp);
 		efree(tmp);
 	}
@@ -635,13 +635,13 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 			c = 1;
 		}
 
-		if (i->vars[j].name) {
-		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
+		if (i->var[j].name) {
+		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->var[j].name));
 		}
-		if (!i->vars[j].value) {
-			i->vars[j].value = get_zval_value(i->vars[j].addr);
+		if (!i->var[j].value) {
+			i->var[j].value = get_zval_value(i->var[j].addr);
 		}
-		tmp = xmlize(i->vars[j].value);
+		tmp = xmlize(i->var[j].value);
 		SSEND(h->socket, tmp);
 		efree(tmp);
 	}
