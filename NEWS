@@ -1,3 +1,11 @@
+- Renamed xdebug_get_function_trace() to xdebug_dump_function_trace().
+  (Derick)
+- Implemented new xdebug_get_function_trace() to return the function trace in
+  an array. (Derick)
+- Added a parameter to xdebug_start_trace(). When this parameter is used,
+  xdebug will dump a function trace to the filename which this parameter
+  speficies. (Derick)
+
 - Fix a problem with nested member functions. (Derick)
 
 = Make configure scripts work with PHP 4.2.x. (Derick)
