@@ -1,3 +1,13 @@
+Sat Nov 22 16:40:47 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat
+/xdebug/xdebug.mak
+/xdebug/xdebug_4_3.mak
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_dbgp.h
+/xdebug/xdebug_str.c
+/xdebug/xdebug_var.c:
+- Fix compilation on windows
+
 Sat Nov 22 15:16:40 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug_handler_dbgp.c:
