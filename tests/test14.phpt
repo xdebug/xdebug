@@ -3,6 +3,7 @@ Test for circular references
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
+report_memleaks=0
 --FILE--
 <?php
 	xdebug_start_trace();

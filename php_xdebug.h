@@ -24,6 +24,7 @@
 #include "php.h"
 
 #include "xdebug_handlers.h"
+#include "xdebug_hash.h"
 #include "xdebug_llist.h"
 
 extern zend_module_entry xdebug_module_entry;
@@ -96,13 +97,14 @@ typedef struct xdebug_var {
 #define XFUNC_REQUIRE        8
 #define XFUNC_REQUIRE_ONCE   9
 
-#define XFUNC_SET(e,t,c,f)          (e)->function.type = t; (e)->function.class = xdstrdup (c); (e)->function.function = xdstrdup (f);
-#define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = xdstrdup (c); (e)->delayed_fname = 1;
-#define XFUNC_SET_DELAYED_C(e,t,f)  (e)->function.type = t; (e)->function.function = xdstrdup (f); (e)->delayed_cname = 1;
+#define XDEBUG_IS_FUNCTION(f) (f == XFUNC_NORMAL || f == XFUNC_STATIC_MEMBER || f == XFUNC_MEMBER)
 
 #define XDEBUG_NONE      0
 #define XDEBUG_JIT       1
 #define XDEBUG_REQ       2
+
+#define XDEBUG_BREAK        1
+#define XDEBUG_STEP         2
 
 typedef struct xdebug_func {
 	char *class;
@@ -126,6 +128,8 @@ typedef struct function_stack_entry {
 
 	unsigned int memory;
 	double       time;
+
+	xdebug_hash *used_vars;
 
 	int   level;
 	int   refcount;

@@ -62,7 +62,7 @@ typedef struct xdebug_cmd {
 int xdebug_gdb_init(xdebug_con *context, int mode);
 int xdebug_gdb_deinit(xdebug_con *context);
 int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
-int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack);
+int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, int lineno, int type);
 
 #define xdebug_handler_gdb { \
 	xdebug_gdb_init,         \

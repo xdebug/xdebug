@@ -27,8 +27,14 @@
 
 typedef struct _xdebug_brk_info             xdebug_brk_info;
 typedef struct _xdebug_con                  xdebug_con;
+typedef struct _xdebug_debug_list           xdebug_debug_list;
 typedef struct _xdebug_remote_handler       xdebug_remote_handler;
 typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
+
+struct _xdebug_debug_list {
+	char *last_file;
+	int   last_line;
+};
 
 struct _xdebug_con {
 	int                    socket;
@@ -39,6 +45,9 @@ struct _xdebug_con {
 	xdebug_hash           *function_breakpoints;
 	xdebug_hash           *class_breakpoints;
 	xdebug_llist          *line_breakpoints;
+	xdebug_debug_list      list;
+	int                    do_break;
+	int                    do_step;
 };
 
 struct _xdebug_brk_info {
@@ -56,7 +65,7 @@ struct _xdebug_remote_handler {
 	int (*remote_error)(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
 
 	/* Breakpoints */
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack);
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, int lineno, int type);
 };
 
 struct _xdebug_remote_handler_info {

@@ -1,16 +1,18 @@
-dnl $Id: config.m4,v 1.8 2002-09-06 22:39:20 derick Exp $
+dnl $Id: config.m4,v 1.9 2002-11-03 15:43:02 derick Exp $
 dnl config.m4 for extension xdebug
 
 PHP_ARG_ENABLE(xdebug, whether to enable eXtended debugging support,
 [  --enable-xdebug         Enable xdebug support])
 
 if test "$PHP_XDEBUG" != "no"; then
-  if test "$PHP_SAPI" != ""; then
-	echo ""
-    echo "You can not compile xdebug into PHP. Please read the instructions"
-    echo "on the website (http://xdebug.derickrethans.nl/#source)."
-	echo ""
-    AC_MSG_ERROR(Can not compile in xdebug.)
+  if test "$PHP_XDEBUG" != "shared"; then
+    if test "$PHP_SAPI" != ""; then
+      echo ""
+      echo "You can not compile xdebug into PHP. Please read the instructions"
+      echo "on the website (http://xdebug.derickrethans.nl/#source)."
+      echo ""
+      AC_MSG_ERROR(Can not compile in xdebug.)
+    fi
   fi
 dnl PHP < 4.3 config
   PHP_EXTENSION(xdebug, $ext_shared)

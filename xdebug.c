@@ -202,6 +202,14 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
+void used_var_dtor (void *elem)
+{
+	char *s = elem;
+
+	if (s) {
+		xdfree(s);
+	}
+}
 
 void stack_element_dtor (void *dummy, void *elem)
 {
@@ -228,6 +236,10 @@ void stack_element_dtor (void *dummy, void *elem)
 			xdfree ((e->vars[i]).value);
 		}
 
+		if (e->used_vars) {
+			xdebug_hash_destroy(e->used_vars);
+		}
+
 		xdfree (e);
 	}
 }
@@ -249,6 +261,12 @@ PHP_RINIT_FUNCTION(xdebug)
 	if (XG(auto_trace)) {
 		xdebug_start_trace();
 	}
+
+	/* Initialize some debugger context properties */
+	XG(context).list.last_file = NULL;
+	XG(context).list.last_line = 0;
+	XG(context).do_break       = 0;
+	XG(context).do_step        = 0;
 
 	return SUCCESS;
 }
@@ -276,6 +294,13 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	if (XG(remote_enabled)) {
 		XG(context).handler->remote_deinit(&(XG(context)));
 		xdebug_close_socket(XG(context).socket); 
+		if (XG(context).program_name) {
+			xdfree(XG(context).program_name);
+		}
+	}
+
+	if (XG(context.list.last_file)) {
+		xdfree(XG(context).list.last_file);
 	}
 
 	return SUCCESS;
@@ -388,6 +413,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	tmp->delayed_fname = 0;
 	tmp->delayed_cname = 0;
 	tmp->arg_done      = 0;
+	tmp->used_vars     = NULL;
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
@@ -449,6 +475,25 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	return tmp;
 }
 
+static void add_used_variables (struct function_stack_entry *fse, zend_op_array *op_array)
+{
+	int i = 0; 
+	int j = op_array->size;
+
+	fse->used_vars = xdebug_hash_alloc(64, used_var_dtor); 
+	while (i < j) {
+		if (op_array->opcodes[i].opcode == ZEND_FETCH_R || op_array->opcodes[i].opcode == ZEND_FETCH_W) {
+			xdebug_hash_update(
+				fse->used_vars, 
+				op_array->opcodes[i].op1.u.constant.value.str.val,
+				op_array->opcodes[i].op1.u.constant.value.str.len,
+				xdstrdup(op_array->opcodes[i].op1.u.constant.value.str.val)
+			);
+		}
+		i++;
+	}
+}
+
 static int handle_breakpoints (struct function_stack_entry *fse)
 {
 	char *name     = NULL;
@@ -459,9 +504,7 @@ static int handle_breakpoints (struct function_stack_entry *fse)
 	if (fse->function.type == XFUNC_NORMAL) {
 		if (xdebug_hash_find(XG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &name)) {
 			/* Yup, breakpoint found, call handler */
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack))) {
-				return 0;
-			}
+			XG(context).do_break = 1;
 		}
 	}
 	/* class->function breakpoints */
@@ -474,10 +517,7 @@ static int handle_breakpoints (struct function_stack_entry *fse)
 
 		if (xdebug_hash_find(XG(context).class_breakpoints, tmp_name, strlen(tmp_name), (void *) &name)) {
 			/* Yup, breakpoint found, call handler */
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack))) {
-				xdfree(tmp_name);
-				return 0;
-			}
+			XG(context).do_break = 1;
 		}
 		xdfree(tmp_name);
 	}
@@ -504,7 +544,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			XG(context).program_name = estrdup(op_array->filename);
+			XG(context).program_name = xdstrdup(op_array->filename);
 			if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
 				XG(remote_enabled) = 0;
 				XG(remote_enable)  = 0;
@@ -514,6 +554,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	XG(level)++;
 	fse = add_stack_frame(edata, op_array TSRMLS_CC);
+
+	if (XDEBUG_IS_FUNCTION(fse->function.type)) {
+		add_used_variables(fse, op_array);
+	}
 
 	/* Check for breakpoints */
 	if (XG(remote_enabled)) {
@@ -813,6 +857,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		if (XG(context).socket >= 0) {
 			XG(remote_enabled) = 1;
+			XG(context).program_name = NULL;
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
@@ -1171,20 +1216,42 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	TSRMLS_FETCH();
 
 	if (XG(remote_enabled)) {
+		TSRMLS_FETCH();
+		cur_opcode = *EG(opline_ptr);
+		lineno = cur_opcode->lineno;
+
+		file = op_array->filename;
+		file_len = strlen(file);
+
+		if (XG(context).do_break) {
+			XG(context).do_break = 0;
+
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
+				XG(remote_enabled) = 0;
+				XG(remote_enable)  = 0;
+				return;
+			}
+		}
+
+		if (XG(context).do_step) {
+			XG(context).do_step = 0;
+
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
+				XG(remote_enabled) = 0;
+				XG(remote_enable)  = 0;
+				return;
+			}
+		}
+
 		if (XG(context).line_breakpoints) {
-			cur_opcode = *EG(opline_ptr);
-			lineno = cur_opcode->lineno;
-
-			file = op_array->filename;
-			file_len = strlen(file);
-
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
 				if (lineno == brk->lineno && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
-					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack))) {
+					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
 						XG(remote_enabled) = 0;
 						XG(remote_enable)  = 0;
+						return;
 					}
 				}
 			}
