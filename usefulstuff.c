@@ -135,3 +135,13 @@ char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
+char* xdebug_get_time(void)
+{
+	time_t cur_time;
+	char  *str_time;
+
+	str_time = xdmalloc(24);
+	cur_time = time(NULL);
+	strftime(str_time, 24, "%Y-%m-%d %H:%M:%S", gmtime (&cur_time));
+	return str_time;
+}

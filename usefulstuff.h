@@ -53,5 +53,6 @@ typedef struct xdebug_arg {
 char* fd_read_line(int socket, fd_buf *context, int type);
 void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
 char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);
+char* xdebug_get_time(void);
 
 #endif
