@@ -121,8 +121,12 @@ zend_module_entry xdebug_module_entry = {
 	PHP_RSHUTDOWN(xdebug),
 	PHP_MINFO(xdebug),
 	XDEBUG_VERSION,
+#ifdef ZEND_ENGINE_2
+	ZEND_MODULE_EXEC_FINISHED_N(xdebug),
+#else
 	NULL,
 	NULL,
+#endif
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
@@ -432,6 +436,10 @@ PHP_RINIT_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
+ZEND_MODULE_EXEC_FINISHED_D(xdebug)
+{
+}
+
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
 	if (XG(auto_profile) && XG(profile_file)) {
@@ -631,7 +639,8 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		xdebug_llist_insert_next(XG(trace), XDEBUG_LLIST_TAIL(XG(trace)), tmp);
 		if (XG(trace_file)) {
 			char *t = return_trace_stack_frame(tmp, 0 TSRMLS_CC);
-			fprintf(XG(trace_file), t);
+			fprintf(XG(trace_file), "%s", t);
+			fflush(XG(trace_file));
 			xdfree(t);
 		}
 	}
@@ -935,7 +944,7 @@ static char* return_trace_stack_frame(function_stack_entry* i, int html TSRMLS_D
 		XDEBUG_STR_ADDL(&str, "</td>", 5, 0);
 
 		/* Do rest of line */
-		php_printf("<td bgcolor='#ffffff' align='left'><pre>");
+		XDEBUG_STR_ADD(&str, "<td bgcolor='#ffffff' align='left'><pre>", 0);
 		for (j = 0; j < i->level - 1; j++) {
 			XDEBUG_STR_ADDL(&str, "  ", 2, 0);
 		}
@@ -1016,7 +1025,7 @@ static inline void print_trace(int html TSRMLS_DC)
 				break;
 			}
 
-			php_printf(return_trace_stack_frame(i, html TSRMLS_CC));
+			php_printf("%s", return_trace_stack_frame(i, html TSRMLS_CC));
 		}
 
 		if (html) {

@@ -62,6 +62,9 @@ PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
 PHP_RSHUTDOWN_FUNCTION(xdebug);
 PHP_MINFO_FUNCTION(xdebug);
+#ifdef ZEND_ENGINE_2
+ZEND_MODULE_EXEC_FINISHED_D(xdebug);
+#endif
 
 /* call stack functions */
 PHP_FUNCTION(xdebug_get_function_stack);
