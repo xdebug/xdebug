@@ -1,3 +1,13 @@
+Wed Oct 29 17:42:00 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_dbgp.h
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handlers.h:
+- Show the current file/line in a breakpoint package, not the file/line of
+  where the current function was called from.
+- Use "long" as type for line numbers
+
 Wed Oct 29 15:28:22 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Fixed a couple of silly typoes
