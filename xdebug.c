@@ -24,7 +24,7 @@
 
 #if HAVE_XDEBUG
 
-#define XDEBUG_VERSION "0.9.0"
+#define XDEBUG_VERSION "0.9.0-dev"
 
 #include <sys/time.h>
 
@@ -1082,6 +1082,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 			efree (tmp_name);
 
 			fprintf (XG(trace_file), ") %s:%d\n", tmp->filename, tmp->lineno);
+			fflush (XG(trace_file));
 		}
 	}
 
@@ -1122,7 +1123,9 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	fse->delayed_fname = 0;
 
 	if (fse->delayed_cname) { /* variable class name */
-		fse->function.class = estrdup (((zval*) executor_globals.active_symbol_table->pListHead->pDataPtr)->value.obj.ce->name);
+		if (((zval*) executor_globals.active_symbol_table->pListHead->pDataPtr)->type == IS_OBJECT) {
+			fse->function.class = estrdup (((zval*) executor_globals.active_symbol_table->pListHead->pDataPtr)->value.obj.ce->name);
+		}
 	}
 	fse->delayed_cname = 0;
 
