@@ -1,3 +1,28 @@
+Tue Jan 14 22:45:14 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test14b.phpt
+/xdebug/tests/test16b.phpt
+/xdebug/tests/test20.phpt
+/xdebug/tests/assert_test.phpt
+/xdebug/tests/auto_trace.phpt
+/xdebug/tests/get_function_trace.phpt
+/xdebug/tests/test1.phpt
+/xdebug/tests/test10.phpt
+/xdebug/tests/test11.phpt
+/xdebug/tests/test12.phpt
+/xdebug/tests/test13.phpt
+/xdebug/tests/test14.phpt
+/xdebug/tests/test15.phpt
+/xdebug/tests/test16.phpt
+/xdebug/tests/test17.phpt
+/xdebug/tests/test18.phpt
+/xdebug/tests/test19.phpt
+/xdebug/tests/test6.phpt
+/xdebug/tests/test8.phpt
+/xdebug/tests/test9.phpt
+/xdebug/tests/trace.phpt:
+- Added Zend Engine 2 specific tests
+- Updated existing tests with the "xdebug.collect_params=1" setting
+
 Wed Jan 8 20:34:40 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_profiler.c
