@@ -1,3 +1,9 @@
+Wed Oct 20 09:35:46 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed some Windows related warnings
+- Hopefully fixed bug #95
+
 Wed Oct 20 00:38:28 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_com.c:
 - fix windows compile
