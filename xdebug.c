@@ -289,7 +289,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 #endif
 	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
-	STD_PHP_INI_ENTRY("xdebug.idekey",            "",          	    PHP_INI_ALL,    OnUpdateKey, ide_key,           zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateKey,    ide_key,           zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
