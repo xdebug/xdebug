@@ -675,9 +675,6 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->function.type     = XFUNC_NORMAL;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
-		zval *param;
-		int   is_var;
-
 		cur_opcode = *EG(opline_ptr);
 		tmp->lineno = cur_opcode->lineno;
 
