@@ -1,4 +1,4 @@
-/* $Id: xdebug_llist.c,v 1.2 2002-05-25 14:00:42 derick Exp $ */
+/* $Id: xdebug_llist.c,v 1.3 2002-11-15 14:12:05 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -118,7 +118,9 @@ int xdebug_llist_remove(xdebug_llist *l, xdebug_llist_element *e, void *user)
 			e->next->prev = e->prev;
 	}
 
-	l->dtor(user, e->ptr);
+	if (l->dtor) {
+		l->dtor(user, e->ptr);
+	}
 	free(e);
 	--l->size;
 
