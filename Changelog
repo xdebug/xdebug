@@ -1,3 +1,9 @@
+Wed Jul 16 14:56:09 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml
+/xdebug/xdebug_var.c:
+- Implemented the ID attribute for the <var /> element which can be used to
+  identify a specific variable even in recursion.
+
 Wed Jul 16 11:12:35 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml:
 - Update news
