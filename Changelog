@@ -1,3 +1,8 @@
+Fri Aug 06 08:59:03 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #86: xdebug produces output that is not xhtml 1.1 valid
+#- This is already fixed in Xdebug 2.0-dev
+
 Fri Aug 06 08:52:31 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
