@@ -1,3 +1,10 @@
+Sun Mar 06 22:55:31 CET 2005 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed bug #109:  DBGP's eval will abort the script when the eval statement is
+  invalid.
+
 Wed Mar 02 16:01:32 CET 2005 Derick Rethans <derick@derickrethans.nl>
 package2.xml:
 - Added Package 2 XML
