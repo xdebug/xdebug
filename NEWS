@@ -1,3 +1,10 @@
+? - xdebug 1.0.0
+
++ Fixed segfaults in string routines
++ Added automatic starting of function traces (xdebug.auto_trace, defaulting to
+  "off").
+
+
 Sun Sep 1, 2002 - xdebug 1.0.0rc1
 
 + Implemented gathering of parameters to internal functions (only available
