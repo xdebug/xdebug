@@ -21,11 +21,9 @@
 
 
 	$a = new aaa;
-	$a->a2();
-
 	$b = new bbb;
-	$b->b2();
-	$a = new aaa;
+	$a->a1();
+	$b->b1();
 	$a->a2();
 
 	xdebug_dump_function_trace();

@@ -16,6 +16,6 @@ function c ($a, $b) {
 
 echo c(c(a(),b(2)), c(a(), a()));
 
-xdebug_get_function_trace();
+xdebug_dump_function_trace();
 
 ?>

@@ -3,6 +3,7 @@ xdebug_start_trace();
 class DBHelper
 {
   function quote($s) {
+    return addslashes ($s);
   }
 }
 
@@ -16,5 +17,5 @@ $db = new DB;
 
 $db->query("insert blah '".DBHelper::quote("test's").DBHelper::quote("test's")."' blah");
 //$db->query("insert blah ' blah");
-xdebug_get_function_trace();
+xdebug_dump_function_trace();
 ?>
