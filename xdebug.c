@@ -883,7 +883,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 	}
 
 	error_format = html ?
-		"<tr><td bgcolor='#ffbbbb' colspan=\"3\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b><br />\n"
+		"<tr><td bgcolor='#ffbbbb' colspan=\"3\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b></td></tr>\n"
 		: "\n%s: %s in %s on line %d\n";
 	if (!log_only) {
 		php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
