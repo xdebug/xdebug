@@ -1,3 +1,17 @@
+Sat Apr 5 10:40:54 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_code_coverage.c
+/xdebug/xdebug_code_coverage.h
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug.dsp
+/xdebug/xdebug.mak:
+- Added code coverage, enable with xdebug_start_code_coverage(), disable with
+  xdebug_stop_code_coverage() and get the information with
+  xdebug_get_code_coverage(). The latter returns an array with each element
+  being an array containing the lines and the number of times a statement was
+  run on that line, per executed file. 
+
 Sat Apr 5 00:54:51 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_superglobals.c
 /xdebug/xdebug_superglobals.h:
