@@ -1,3 +1,7 @@
+Fri Nov 29 17:07:42 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fix crash due to not passing the string.
+
 Fri Nov 29 16:49:21 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix table termination
