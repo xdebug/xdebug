@@ -1,3 +1,7 @@
+Fri May 10 13:08:11 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Disable multiple displays of the error
+
 Fri May 10 12:59:21 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.dsp:
 - Update .dsp
