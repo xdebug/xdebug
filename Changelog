@@ -1,3 +1,11 @@
+Sat May 11 12:02:58 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Implemented function traces (xdebug_start_trace(), xdebug_stop_trace() and
+  xdebug_get_function_trace()).
+- Fixed segfaults in xdebug_call_*
+- Added includes to the function trace/stacks
+- Fixed warnings for window build
+
 Sat May 11 11:59:12 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test2a.php
 /xdebug/tests/trace.php
