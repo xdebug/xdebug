@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Display copyright notice and version number */
-	printf("Xdebug GDB emulation client (%s)\n", DEBUGCLIENT_VERSION);
+	printf("Xdebug Simple DBGp client (%s)\n", DEBUGCLIENT_VERSION);
 	printf("Copyright 2002-2004 by Derick Rethans.\n");
 #ifdef HAVE_LIBEDIT
 	printf("- libedit support: enabled\n");
