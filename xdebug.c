@@ -397,7 +397,7 @@ xdebug_func xdebug_build_fname(zend_execute_data *edata, zend_op_array *new_op_a
 }
 
 
-static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array TSRMLS_DC)
+static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
 	struct function_stack_entry  *tmp;
 	zend_op *cur_opcode;
@@ -410,10 +410,9 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	tmp->varc     = 0;
 	tmp->refcount = 1;
 	tmp->level    = XG(level);
-	tmp->delayed_fname = 0;
-	tmp->delayed_cname = 0;
 	tmp->arg_done      = 0;
 	tmp->used_vars     = NULL;
+	tmp->user_defined  = type;
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
@@ -506,11 +505,19 @@ static int handle_breakpoints (struct function_stack_entry *fse)
 	if (fse->function.type == XFUNC_NORMAL) {
 		if (xdebug_hash_find(XG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &name)) {
 			/* Yup, breakpoint found, call handler */
-			XG(context).do_break = 1;
+			if (fse->user_defined == XDEBUG_EXTERNAL) {
+				XG(context).do_break = 1;
+			} else {
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
+					XG(remote_enabled) = 0;
+					XG(remote_enable)  = 0;
+					return 0;
+				}
+			}
 		}
 	}
 	/* class->function breakpoints */
-	if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
+	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
 		if (fse->function.type == XFUNC_MEMBER) {
 			tmp_name = xdebug_sprintf ("%s->%s", fse->function.class, fse->function.function);
 		} else if (fse->function.type == XFUNC_STATIC_MEMBER) {
@@ -555,7 +562,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	XG(level)++;
-	fse = add_stack_frame(edata, op_array TSRMLS_CC);
+	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
 
 	if (XDEBUG_IS_FUNCTION(fse->function.type)) {
 		add_used_variables(fse, op_array);
@@ -581,7 +588,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	struct function_stack_entry *fse;
 
 	XG(level)++;
-	fse = add_stack_frame(edata, edata->op_array TSRMLS_CC);
+	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 
 	/* Check for breakpoints */
 	if (XG(remote_enabled)) {

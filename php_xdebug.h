@@ -106,6 +106,9 @@ typedef struct xdebug_var {
 #define XDEBUG_BREAK        1
 #define XDEBUG_STEP         2
 
+#define XDEBUG_INTERNAL     1
+#define XDEBUG_EXTERNAL     2
+
 typedef struct xdebug_func {
 	char *class;
 	char *function;
@@ -115,6 +118,7 @@ typedef struct xdebug_func {
 
 typedef struct function_stack_entry {
 	xdebug_func  function;
+	int          user_defined;
 
 	char *filename;
 	int   lineno;
@@ -122,9 +126,6 @@ typedef struct function_stack_entry {
 	int   arg_done;
 	int   varc;
 	xdebug_var vars[20];
-
-	int   delayed_fname;
-	int   delayed_cname;
 
 	unsigned int memory;
 	double       time;
