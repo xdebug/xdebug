@@ -1,3 +1,9 @@
+Sun May 12 12:57:46 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/test5.php
+/xdebug/tests/test6.php:
+- Added test 5 for testing nested function calls
+- Added test 6 for multi-dimensional constant arrays passed to functions.
+
 Sun May 12 12:56:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Implemented handling single-dimensional constant arrays passed to a function.
