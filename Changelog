@@ -1,3 +1,7 @@
+Sun May 12 10:28:39 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fix bug in levels with includes
+
 Sat May 11 21:33:42 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Make extended_info always work. (Thanks to Edin Kadribasic and Harald Radi
