@@ -75,13 +75,15 @@ int xdebug_create_socket(const char *hostname, int dport)
 	struct sockaddr_in address;
 	int                err = -1;
 	int                sockfd;
-	long               optval = 1;
 #if WIN32|WINNT
 	WORD               wVersionRequested;
 	WSADATA            wsaData;
+	char               optval = 1;
 
 	wVersionRequested = MAKEWORD(2, 2);
 	WSAStartup(wVersionRequested, &wsaData);
+#else
+	long               optval = 1;
 #endif
 	memset(&address, 0, sizeof(address));
 	lookup_hostname(hostname, &address.sin_addr);
