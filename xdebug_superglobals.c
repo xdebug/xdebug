@@ -89,8 +89,7 @@ static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_
 	return SUCCESS;
 }
 
-#define dump_hash(__l, __name, __html, __log) _dump_hash(__l, __name, sizeof(__name), __html, __log TSRMLS_CC)
-static void _dump_hash(xdebug_llist *l, char *name, int name_len, int html, int log TSRMLS_DC)
+static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, int log TSRMLS_DC)
 {
 	zval **z;
 	HashTable *ht;
@@ -149,14 +148,14 @@ void dump_superglobals(int html, int log TSRMLS_DC)
 
 	XG(dumped) = 1;
 
-	dump_hash(&XG(server), "_SERVER", html, log);
-	dump_hash(&XG(get), "_GET", html, log);
-	dump_hash(&XG(post), "_POST", html, log);
-	dump_hash(&XG(cookie), "_COOKIE", html, log);
-	dump_hash(&XG(files), "_FILES", html, log);
-	dump_hash(&XG(env), "_ENV", html, log);
-	dump_hash(&XG(session), "_SESSION", html, log);
-	dump_hash(&XG(request), "_REQUEST", html, log);
+	dump_hash(&XG(server),  "_SERVER",  8, html, log TSRMLS_DC);
+	dump_hash(&XG(get),     "_GET",     5, html, log TSRMLS_DC);
+	dump_hash(&XG(post),    "_POST",    6, html, log TSRMLS_DC);
+	dump_hash(&XG(cookie),  "_COOKIE",  8, html, log TSRMLS_DC);
+	dump_hash(&XG(files),   "_FILES",   7, html, log TSRMLS_DC);
+	dump_hash(&XG(env),     "_ENV",     5, html, log TSRMLS_DC);
+	dump_hash(&XG(session), "_SESSION", 9, html, log TSRMLS_DC);
+	dump_hash(&XG(request), "_REQUEST", 9, html, log TSRMLS_DC);
 }
 
 void dump_tok(xdebug_llist *l, char *str)

@@ -98,18 +98,21 @@ void xdebug_stop_trace();
 typedef struct xdebug_var {
 	char *name;
 	char *value;
+	void *addr;
 } xdebug_var;
 
-#define XFUNC_UNKNOWN        0
-#define XFUNC_NORMAL         1
-#define XFUNC_STATIC_MEMBER  2
-#define XFUNC_MEMBER         3
-#define XFUNC_NEW            4
-#define XFUNC_EVAL           5
-#define XFUNC_INCLUDE        6
-#define XFUNC_INCLUDE_ONCE   7
-#define XFUNC_REQUIRE        8
-#define XFUNC_REQUIRE_ONCE   9
+#define XFUNC_UNKNOWN        0x00
+#define XFUNC_NORMAL         0x01
+#define XFUNC_STATIC_MEMBER  0x02
+#define XFUNC_MEMBER         0x03
+#define XFUNC_NEW            0x04
+
+#define XFUNC_INCLUDES       0x10
+#define XFUNC_EVAL           0x10
+#define XFUNC_INCLUDE        0x11
+#define XFUNC_INCLUDE_ONCE   0x12
+#define XFUNC_REQUIRE        0x13
+#define XFUNC_REQUIRE_ONCE   0x14
 
 #define XDEBUG_IS_FUNCTION(f) (f == XFUNC_NORMAL || f == XFUNC_STATIC_MEMBER || f == XFUNC_MEMBER)
 

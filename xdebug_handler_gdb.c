@@ -552,6 +552,9 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 		if (i->vars[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
 		}
+		if (!i->vars[j].value) {
+			i->vars[j].value = get_zval_value(i->vars[j].addr);
+		}
 		tmp = xmlize(i->vars[j].value);
 		SSEND(h->socket, tmp);
 		efree(tmp);
@@ -603,6 +606,9 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 
 		if (i->vars[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
+		}
+		if (!i->vars[j].value) {
+			i->vars[j].value = get_zval_value(i->vars[j].addr);
 		}
 		tmp = xmlize(i->vars[j].value);
 		SSEND(h->socket, tmp);

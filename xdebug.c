@@ -582,12 +582,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		tmp->function.type     = XFUNC_NORMAL;
 		tmp->lineno = 0;
 
-	} else if (tmp->function.type == XFUNC_INCLUDE ||
-		tmp->function.type == XFUNC_REQUIRE ||
-		tmp->function.type == XFUNC_INCLUDE_ONCE ||
-		tmp->function.type == XFUNC_REQUIRE_ONCE ||
-		tmp->function.type == XFUNC_EVAL
-	) {
+	} else if (tmp->function.type & XFUNC_INCLUDES) {
 		zval *param;
 		int   is_var;
 
@@ -598,6 +593,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
 			tmp->vars[tmp->varc].name  = NULL;
 			tmp->vars[tmp->varc].value = xdstrdup(param->value.str.val);
+			tmp->vars[tmp->varc].addr = NULL;
 			tmp->varc++;
 		}
 
@@ -612,9 +608,15 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 			for (i = 0; i < arg_count; i++) {
 				tmp->vars[tmp->varc].name  = NULL;
 				if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-					tmp->vars[tmp->varc].value = get_zval_value(*param);
+					if (XG(do_trace)) {
+						tmp->vars[tmp->varc].value = get_zval_value(*param);
+					} else {
+						tmp->vars[tmp->varc].value = NULL;
+					}
+					tmp->vars[tmp->varc].addr = *param;
 				} else {
 					tmp->vars[tmp->varc].value = xdstrdup("{missing}");
+					tmp->vars[tmp->varc].addr = NULL;
 				}
 				tmp->varc++;
 			}
@@ -665,7 +667,6 @@ static int handle_breakpoints(struct function_stack_entry *fse)
 			} else {
 				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
 					XG(remote_enabled) = 0;
-					XG(remote_enable)  = 0;
 					return 0;
 				}
 			}
@@ -711,7 +712,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			XG(context).program_name = xdstrdup(op_array->filename);
 			if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
 				XG(remote_enabled) = 0;
-				XG(remote_enable)  = 0;
 			}
 		}
 	}
@@ -732,7 +732,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(remote_enabled)) {
 		if (!handle_breakpoints(fse)) {
 			XG(remote_enabled) = 0;
-			XG(remote_enable)  = 0;
 		}
 	}
 
@@ -788,7 +787,6 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(remote_enabled)) {
 		if (!handle_breakpoints(fse)) {
 			XG(remote_enabled) = 0;
-			XG(remote_enable)  = 0;
 		}
 	}
 	
@@ -868,6 +866,9 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 					c = 1;
 				}
 				tmp_varname = i->vars[j].name ? xdebug_sprintf("$%s = ", i->vars[j].name) : xdstrdup("");
+				if (!i->vars[j].value) {
+					i->vars[j].value = get_zval_value(i->vars[j].addr);
+				}
 				if (html) {
 					php_printf("%s%s", tmp_varname,
 						php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
@@ -1061,7 +1062,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		if (XG(remote_enabled)) {
 			if (!XG(context).handler->remote_error(&(XG(context)), type, buffer, error_filename, error_lineno, XG(stack))) {
 				XG(remote_enabled) = 0;
-				XG(remote_enable)  = 0;
 			}
 		}
 	}
@@ -1570,7 +1570,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
 				XG(remote_enabled) = 0;
-				XG(remote_enable)  = 0;
 				return;
 			}
 		}
@@ -1589,7 +1588,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
 				XG(remote_enabled) = 0;
-				XG(remote_enable)  = 0;
 				return;
 			}
 		} else if (XG(context).do_next && XG(context).next_level >= level) { /* Check for "next" */
@@ -1597,7 +1595,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
 				XG(remote_enabled) = 0;
-				XG(remote_enable)  = 0;
 				return;
 			}
 		} else if (XG(context).do_step) { /* Check for "step" */
@@ -1605,7 +1602,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
 				XG(remote_enabled) = 0;
-				XG(remote_enable)  = 0;
 				return;
 			}
 		}
@@ -1646,7 +1642,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 					if (break_ok) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
 							XG(remote_enabled) = 0;
-							XG(remote_enable)  = 0;
 							break;
 						}
 						break;

@@ -207,7 +207,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_PP(struc);
-			if (myht->nApplyCount < 2) {
+			if (myht->nApplyCount < 1) {
 				XDEBUG_STR_ADDL(str, "array (", 7, 0);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 2, level, str);
 				if (myht->nNumOfElements > 0) {
@@ -221,7 +221,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
-			if (myht->nApplyCount < 2) {
+			if (myht->nApplyCount < 1) {
 				XDEBUG_STR_ADD(str, xdebug_sprintf("class %s {", Z_OBJCE_PP(struc)->name), 1);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 2, level, str);
 				if (myht->nNumOfElements > 0) {
@@ -327,23 +327,23 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_PP(struc);
-			if (myht->nApplyCount < 2) {
+			if (myht->nApplyCount < 1) {
 				XDEBUG_STR_ADDL(str, "<array>", 7, 0);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml, 2, level, str);
 				XDEBUG_STR_ADDL(str, "</array>", 8, 0);
 			} else {
-				XDEBUG_STR_ADDL(str, "<array/>", 8, 0);
+				XDEBUG_STR_ADDL(str, "<array hidden='true' recursive='true'/>", 39, 0);
 			}
 			break;
 
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
-			if (myht->nApplyCount < 2) {
+			if (myht->nApplyCount < 1) {
 				XDEBUG_STR_ADD(str, xdebug_sprintf("<object class='%s'>", Z_OBJCE_PP(struc)->name), 1);
 				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml, 2, level, str);
 				XDEBUG_STR_ADDL(str, "</object>", 9, 0);
 			} else {
-				XDEBUG_STR_ADDL(str, "<object/>", 9, 0);
+				XDEBUG_STR_ADDL(str, "<object hidden='true' recursive='true'/>", 40, 0);
 			}
 			break;
 
