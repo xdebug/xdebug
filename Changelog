@@ -1,3 +1,7 @@
+Fri Sep 19 15:15:44 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml:
+- Housekeeping
+
 Fri Sep 19 10:08:55 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/tests/array_map.phpt:
