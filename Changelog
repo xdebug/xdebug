@@ -1,3 +1,9 @@
+Thu Feb 27 12:59:24 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.m4
+/xdebug/xdebug_superglobals.c
+/xdebug/xdebug_superglobals.h:
+- Make it compile on Linux again
+
 Sun Feb 23 22:47:28 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - update TODO
