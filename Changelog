@@ -1,3 +1,8 @@
+Sun Jun 23 18:37:53 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/package.xml
+/xdebug/xdebug.c:
+- Go with 0.9.0
+
 Sun Jun 23 18:35:03 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_var.c
