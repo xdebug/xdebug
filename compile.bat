@@ -9,5 +9,3 @@ copy Release_TS\php_xdebug.dll h:\xdebug-4.3-2.0dev.dll
 
 nmake /f xdebug.mak "CFG=xdebug - Win32 Release_TS" clean all
 copy Release_TS\php_xdebug.dll h:\xdebug-5.0-2.0dev.dll
-
-pause
