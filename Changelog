@@ -1,3 +1,9 @@
+Thu Apr 25 08:27:48 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/tests/test2.php:
+- Implement userland functions
+
 Thu Apr 25 08:27:03 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/.cvsignore:
 - Update cvsignore
