@@ -1,3 +1,11 @@
+Mon Jan 31 00:24:34 CET 2005 Shane Caraveo <shane@caraveo.com>
+xdebug_xml.c
+xdebug/xdebug_var.c:
+- fix xml attributes that contain xml entities
+- escape single quotes in values 
+
+The breakage was found when trying to debug a soap app, and looking at _xmlEntities in SOAP/Base.php
+
 Sat Jan 08 15:21:01 CET 2005 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
