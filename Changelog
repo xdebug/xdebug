@@ -1,3 +1,18 @@
+Sat Sep 7 00:39:20 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/Makefile.in
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_com.h
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handler_php3.h
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h:
+- Change socket to contexts
+- Added basic GDB emulation files
+
 Sat Sep 7 00:35:19 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handlers.h
 /xdebug/xdebug_handler_php3.h
