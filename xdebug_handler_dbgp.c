@@ -541,6 +541,7 @@ static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 	int                   type;
 	char                 *hkey;
 	xdebug_brk_info      *brk_info;
+	xdebug_xml_node      *breakpoint_node;
 	XDEBUG_STR_SWITCH_DECL;
 
 	if (!CMD_OPTION('d')) {
@@ -567,9 +568,10 @@ static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 			}
 		}
 
-		breakpoint_brk_info_add(*retval, brk_info);
-		/* Now we add some common attributes */
-		xdebug_xml_add_attribute_ex(*retval, "id", xdstrdup(CMD_OPTION('d')), 0, 1);
+		breakpoint_node = xdebug_xml_node_init("breakpoint");
+		breakpoint_brk_info_add(breakpoint_node, brk_info);
+		xdebug_xml_add_attribute_ex(breakpoint_node, "id", xdstrdup(CMD_OPTION('d')), 0, 1);
+		xdebug_xml_add_child(*retval, breakpoint_node);
 
 		if (action == BREAKPOINT_ACTION_REMOVE) {
 			/* Now we remove the crap */
@@ -708,6 +710,10 @@ DBGP_FUNC(breakpoint_set)
 				brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_FUNCTION, CMD_OPTION('m'));
 			}
 		}
+	} else
+
+	if (strcmp(CMD_OPTION('t'), "conditional") == 0) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
 	} else
 
 	if (strcmp(CMD_OPTION('t'), "exception") == 0) {
@@ -1528,7 +1534,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.44 $";
+	return "$Revision: 1.45 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
