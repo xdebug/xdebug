@@ -36,6 +36,22 @@ extern zend_module_entry xdebug_module_entry;
 #include "TSRM.h"
 #endif
 
+
+/* Memory allocators */
+#if 0
+#define xdmalloc    emalloc
+#define xdcalloc    ecalloc	
+#define xdrealloc   erealloc
+#define xdfree      efree
+#define xdstrdup    estrdup
+#else  
+#define xdmalloc    malloc
+#define xdcalloc    calloc	
+#define xdrealloc   realloc
+#define xdfree      free
+#define xdstrdup    strdup
+#endif
+
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
@@ -77,9 +93,9 @@ typedef struct xdebug_var {
 #define XFUNC_REQUIRE        8
 #define XFUNC_REQUIRE_ONCE   9
 
-#define XFUNC_SET(e,t,c,f)          (e)->function.type = t; (e)->function.class = estrdup (c); (e)->function.function = estrdup (f);
-#define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = estrdup (c); (e)->delayed_fname = 1;
-#define XFUNC_SET_DELAYED_C(e,t,f)  (e)->function.type = t; (e)->function.function = estrdup (f); (e)->delayed_cname = 1;
+#define XFUNC_SET(e,t,c,f)          (e)->function.type = t; (e)->function.class = xdstrdup (c); (e)->function.function = xdstrdup (f);
+#define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = xdstrdup (c); (e)->delayed_fname = 1;
+#define XFUNC_SET_DELAYED_C(e,t,f)  (e)->function.type = t; (e)->function.function = xdstrdup (f); (e)->delayed_cname = 1;
 
 typedef struct xdebug_func {
 	char *class;
@@ -126,21 +142,6 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #define XG(v) TSRMG(xdebug_globals_id, zend_xdebug_globals *, v)
 #else
 #define XG(v) (xdebug_globals.v)
-#endif
-
-/* Memory allocators */
-#if 0
-#define xdmalloc    emalloc
-#define xdcalloc    ecalloc	
-#define xdrealloc   erealloc
-#define xdfree      efree
-#define xdstrdup    estrdup
-#else  
-#define xdmalloc    malloc
-#define xdcalloc    calloc	
-#define xdrealloc   realloc
-#define xdfree      free
-#define xdstrdup    strdup
 #endif
 	
 #endif
