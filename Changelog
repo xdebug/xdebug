@@ -1,3 +1,7 @@
+Fri Nov 15 15:12:05 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_llist.c:
+- Only call the destructor if it's available
+
 Fri Nov 15 15:10:55 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test2.phpt
 /xdebug/tests/test8.phpt:
