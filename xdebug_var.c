@@ -23,11 +23,12 @@
 #include "php_xdebug.h"
 #include "xdebug_var.h"
 
-#define XDEBUG_STR_PREALLOC 16384
+#define XDEBUG_STR_PREALLOC 1024
 
-void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f) {
+void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f)
+{
 	int l = strlen(str);
-	if (xs->l + l > xs->a) {
+	if (xs->l + l > xs->a - 1) {
 		xs->d = xdrealloc (xs->d, xs->a + l + XDEBUG_STR_PREALLOC);
 		xs->a = xs->a + l + XDEBUG_STR_PREALLOC;
 	}
@@ -41,8 +42,9 @@ void XDEBUG_STR_ADD(xdebug_str *xs, char *str, int f) {
 	}
 }
 
-void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f) {
-	if (xs->l + le > xs->a) {
+void XDEBUG_STR_ADDL(xdebug_str *xs, char *str, int le, int f)
+{
+	if (xs->l + le > xs->a - 1) {
 		xs->d = xdrealloc (xs->d, xs->a + le + XDEBUG_STR_PREALLOC);
 		xs->a = xs->a + le + XDEBUG_STR_PREALLOC;
 	}
