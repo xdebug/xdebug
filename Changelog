@@ -1,3 +1,9 @@
+Tue Sep 21 01:39:52 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_private.h
+xdebug/xdebug_profiler.c:
+- Fixed bug #68: Summary not written when script ended with "exit()".
+
 Wed Sep 15 14:59:49 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 package.xml
 xdebug/php_xdebug.h:
