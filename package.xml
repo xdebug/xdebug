@@ -142,7 +142,6 @@ Xdebug also provides:
           <file role="src" name="buildconf2.mk"/>
           <file role="src" name="clean.mk"/>
           <file role="src" name="config-stubs"/>
-          <file role="src" name="threads.m4"/>
         </dir>
       </dir>
     </filelist>
