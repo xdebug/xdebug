@@ -1,3 +1,7 @@
+Fri Mar 5 15:25:19 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_handler_gdb.c:
+- Fixed problem with not closing files from which sourcelines where read.
+
 Thu Mar 4 12:46:46 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/config.m4
 /xdebug/config.w32
