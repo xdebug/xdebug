@@ -1,3 +1,14 @@
+Tue Jan 27 00:24:48 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/php_xdebug.h
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/xdebug_handler_dbgp.c:
+- Fixed responses by setting status and reasons correctly. (Shane)
+- Fixed handling reading from sockets. (Shane, Derick)
+- Added some missing attributes to the init response. (Shane)
+- Fixed deinit by sending a response. (Shane, Derick)
+- Fixed responses when a breakpoint occurred. (Shane)
+
 Mon Jan 26 22:32:17 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_private.c:
 - Fix some warnings
