@@ -1154,7 +1154,7 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 	contents = get_symbol(name, name_length TSRMLS_CC);
 	if (!contents && !no_eval) {
 		char *varname = NULL;
-		if (var_only && name[0] != '$') {
+		if (var_only && name[0] != '$' && !strstr(name, "::$")) {
 			varname = xdebug_sprintf("$%s", name);
 		}
 		/* if we cannot get the value directly, then try eval */
@@ -1272,7 +1272,7 @@ static int add_variable_contents_node(xdebug_xml_node *node, char *name, int nam
 	contents_found = get_symbol_contents(name, name_length, node TSRMLS_CC);
 	if (!contents_found && !no_eval) {
 		char *varname = NULL;
-		if (var_only && name[0] != '$') {
+		if (var_only && name[0] != '$' && !strstr(name, "::$")) {
 			varname = xdebug_sprintf("$%s", name);
 		}
 		/* if we cannot get the value directly, then try eval */
@@ -1672,7 +1672,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.66 $";
+	return "$Revision: 1.67 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
