@@ -28,6 +28,8 @@
 #define XDEBUG_DATA         8
 #define XDEBUG_STATUS      16
 
+#define XDEBUG_ALL         31
+
 typedef struct xdebug_arg {
 	int    c;
 	char **args;
@@ -38,6 +40,8 @@ typedef struct xdebug_cmd {
 	int   args;
 	char *description;
 	char *(*handler)(xdebug_con *context, xdebug_arg *args);
+	int   show;
+	char *help;
 } xdebug_cmd;
 
 int xdebug_gdb_init(xdebug_con *context, int mode);

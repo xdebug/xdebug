@@ -31,19 +31,28 @@
 #endif
 
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args);
 
 static xdebug_cmd commands_init[] = {
-	{ "option", 2, "option [setting] [value]", xdebug_handle_option },
-	{ "run",    0, "run", xdebug_handle_run },
-	{ NULL,     0, NULL }
+	{ "option", 2, "option [setting] [value]", xdebug_handle_option, 1, "Set a debug session option" },
+	{ "run",    0, "run",                      xdebug_handle_run,    1, "Start the script" },
+	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
 static xdebug_cmd commands_breakpoint[] = {
-	{ "break",  1, "bre [functionname|filename:linenumber]", xdebug_handle_breakpoint },
-	{ "bre",    1, "bre [functionname|filename:linenumber]", xdebug_handle_breakpoint },
-	{ NULL,     0, NULL }
+	{ "break",      1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 1, "Put a break point on an element" },
+	{ "bre",        1, "bre(ak) [functionname|filename:linenumber]", xdebug_handle_breakpoint, 0, "Put a break point on an element" },
+	{ "continue",   0, "cont(inue)",                                 xdebug_handle_cont,       1, "Continue execution" },
+	{ "cont",       0, "cont(inue)",                                 xdebug_handle_cont,       0, "Continue execution" },
+	{ NULL, 0, NULL, NULL, 0, NULL }
+};
+
+static xdebug_cmd commands_run[] = {
+	{ "quit", 0, "quit", xdebug_handle_quit, 1, "Close the debug session" },
+	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
 
@@ -226,18 +235,12 @@ void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit)
 	}
 }
 
-static xdebug_cmd* lookup_cmd(char *line, int flag)
+static inline xdebug_cmd* lookup_cmd_in_group(char *line, xdebug_cmd *group, int flag, int test_flag)
 {
 	xdebug_cmd *ptr;
-	
-	if (flag & XDEBUG_INIT) {
-		ptr = scan_cmd(commands_init, line);
-		if (ptr) {
-			return (ptr);
-		}
-	}
-	if (flag & XDEBUG_BREAKPOINT) {
-		ptr = scan_cmd(commands_breakpoint, line);
+
+	if (flag & test_flag) {
+		ptr = scan_cmd(group, line);
 		if (ptr) {
 			return (ptr);
 		}
@@ -245,11 +248,51 @@ static xdebug_cmd* lookup_cmd(char *line, int flag)
 	return NULL;
 }
 
+static xdebug_cmd* lookup_cmd(char *line, int flag)
+{
+	xdebug_cmd *ptr;
+	
+	if ((ptr = lookup_cmd_in_group(line, commands_init,       flag, XDEBUG_INIT)) != NULL)       return ptr;
+	if ((ptr = lookup_cmd_in_group(line, commands_breakpoint, flag, XDEBUG_BREAKPOINT)) != NULL) return ptr;
+	if ((ptr = lookup_cmd_in_group(line, commands_run,        flag, XDEBUG_RUN)) != NULL)        return ptr;
+#if 0
+	if ((ptr = lookup_cmd_in_group(line, commands_data,       flag, XDEBUG_DATA)) != NULL)       return ptr;
+	if ((ptr = lookup_cmd_in_group(line, commands_status,     flag, XDEBUG_STATUS)) != NULL)     return ptr;
+#endif
+	return NULL;
+}
+
+static inline void show_available_commands_in_group(xdebug_con *h, int flag, int test_flag, xdebug_cmd *ptr)
+{
+	if (flag & test_flag ) {
+    	while (ptr->name) {
+			if (ptr->show && ptr->help) {
+				SENDMSG(h->socket, xdebug_sprintf("%-20s %s\n", ptr->name, ptr->help));
+			}
+	        *ptr++;
+	    }
+	}
+}
+
+static void show_available_commands(xdebug_con *h, int flag)
+{
+	show_available_commands_in_group(h, flag, XDEBUG_INIT,       commands_init);
+	show_available_commands_in_group(h, flag, XDEBUG_BREAKPOINT, commands_breakpoint);
+	show_available_commands_in_group(h, flag, XDEBUG_RUN,        commands_run);
+#if 0
+	show_available_commands_in_group(h, flag, XDEBUG_DATA,       commands_data);
+	show_available_commands_in_group(h, flag, XDEBUG_STATUS,     commands_status);
+#endif
+}
+
+static void show_command_info(xdebug_con *h, xdebug_cmd* cmd)
+{
+	SENDMSG(h->socket, xdebug_sprintf("Syntax:%s\n%s\n", cmd->description, cmd->help));
+}
+
 
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 {
-	printf ("handle breakpoint!\n");
-
 	if (strstr(args->args[0], "::")) { /* class::method */
 		return xdstrdup("Class::method breakpoints are not yet supported.");
 	} else if (strstr(args->args[0], ":")) { /* file:line */
@@ -263,15 +306,23 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 	return NULL;
 }
 
+char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args)
+{
+	return NULL;
+}
+
 char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 {
-	printf ("handle option!\n");
+	return NULL;
+}
+
+char *xdebug_handle_quit(xdebug_con *context, xdebug_arg *args)
+{
 	return NULL;
 }
 
 char *xdebug_handle_run(xdebug_con *context, xdebug_arg *args)
 {
-	printf ("handle run!\n");
 	return NULL;
 }
 
@@ -293,23 +344,51 @@ int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *en
 	/* Try to find command */
 	ptr = strchr(line, ' ');
 	if (!ptr) { /* No separator found */
+		/* Check for the special case "help" */
+		if (strcmp(line, "help") == 0) {
+			show_available_commands(context, flags);
+			retval = 0;
+			goto cleanup;
+		}
 		if (!(cmd = lookup_cmd(line, flags))) {
-			return -1;
+			*error = xdebug_sprintf("Undefined command: \"%s\".  Try \"help\".", line);
+			retval = -1;
+			goto cleanup;
 		}
 	} else {
 		char *tmp = (char*) xdmalloc(ptr - line + 1);
 		memcpy(tmp, line, ptr - line);
 		tmp[ptr - line] = '\0';
+
+		/* Check for the special case "help [command]" */
+		if (strcmp(tmp, "help") == 0) {
+			xdebug_explode(" ", ptr + 1, args, -1); 
+			if (args->c > 0) {
+				show_command_info(context, lookup_cmd(args->args[0], XDEBUG_ALL));
+				retval = 0;
+			} else {
+				*error = xdebug_sprintf("Undefined command: \"%s\".  Try \"help\".", tmp);
+				retval = -1;
+			}
+			xdfree(tmp);
+			goto cleanup;
+		}
+
+		/* Scan for valid commands */
 		if (cmd = lookup_cmd(tmp, flags)) {
 			xdfree(tmp);
 			xdebug_explode(" ", ptr + 1, args, -1); 
 		} else {
+			*error = xdebug_sprintf("Undefined command: \"%s\".  Try \"help\".", tmp);
 			xdfree(tmp);
-			return -1;
+			retval = -1;
+			goto cleanup;
 		}
 	}
-	/* Default in continue mode */
+
 	retval = 0;
+
+	/* Default in continue mode */
 	if (args->c >= cmd->args) {
 		ret_err = cmd->handler(context, args);
 		if (ret_err) {
@@ -324,10 +403,11 @@ int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *en
 		retval = -1;
 		goto cleanup;
 	}
+	/* If the end command is reached, or the command is quit, set the return
+	 * value to 1 (continue) */
 	if (strcmp(cmd->name, end_cmd) == 0) {
 		retval = 1;
 	}
-
 cleanup:
 	for (i = 0; i < args->c; i++) {
 		xdfree(args->args[i]);
@@ -355,16 +435,14 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 		if (!option) {
 			return 0;
 		}
-		printf ("[%s]\n", option);
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_INIT | XDEBUG_BREAKPOINT | XDEBUG_STATUS, "run", (char**) &error);
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_INIT | XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "run", (char**) &error);
 		if (error || ret == -1) {
-			SSEND(context->socket, "+ERROR");
+			SSEND(context->socket, "-ERROR");
 			if (error) {
 				SSEND(context->socket, ": ");
 				SSEND(context->socket, error);
-			} else {
-				SSEND(context->socket, "\n");
 			}
+			SSEND(context->socket, "\n");
 		} else {
 			SSEND(context->socket, "+OK\n");
 		}
@@ -377,14 +455,6 @@ int xdebug_gdb_deinit(xdebug_con *context)
 {
 	SSEND(context->socket, "bye\n");
 	xdebug_hash_destroy(context->function_breakpoints);
-}
-
-#define SENDMSG(socket, str) {  \
-	char *message_buffer;       \
-                                \
-	message_buffer = str;       \
-	SSEND(socket, message_buffer); \
-	xdfree(message_buffer);     \
 }
 
 int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack)
@@ -438,16 +508,70 @@ int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *locatio
 		SSEND(h->socket, "?cmd\n");
 		option = xdebug_socket_read_line(h->socket, h->buffer);
 		printf ("[%s]\n", option);
+		if (!option) {
+			return 0;
+		}
 		SSEND(h->socket, "+OK\n");
-	} while (!option || strcmp(option, "cont") != 0);
+	} while (strcmp(option, "cont") != 0);
+	return 1;
+}
+
+static print_stack_frame(xdebug_con *h, function_stack_entry *i)
+{
+	int c = 0; /* Comma flag */
+	int j = 0; /* Counter */
+/*
+* Breakpoint 2, xdebug_execute (op_array=0x82caf50)
+*     at /dat/dev/php/xdebug/xdebug.c:361
+* 361			if (XG(remote_enabled)) {
+*     
+*/
+	SENDMSG(h->socket, xdebug_sprintf("Breakpoint, %s (", i->function.function));
+
+	/* Printing vars */
+	for (j = 0; j < i->varc; j++) {
+		if (c) {
+			SSEND(h->socket, ", ");
+		} else {
+			c = 1;
+		}
+
+		if (i->vars[j].name) {
+		   SENDMSG(h->socket, xdebug_sprintf ("$%s = ", i->vars[j].name));
+		}
+		SSEND(h->socket, i->vars[j].value);
+	}
+
+	SENDMSG(h->socket, xdebug_sprintf(")\n\tat %s:%d\n", i->filename, i->lineno));
 }
 
 int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack)
 {
-#warning print last stack element
-#warning loop for commands until "cont"
-#warning 	commands include:
-#warning	- printing stack frames
-#warning	- chancing parameters
-#warning	- and more...
+	struct function_stack_entry *i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack));
+	int    ret;
+	char  *option;
+	char  *error = NULL;
+
+	print_stack_frame(context, i);
+
+	do {
+		SSEND(context->socket, "?cmd\n");
+		option = xdebug_socket_read_line(context->socket, context->buffer);
+		if (!option) {
+			return 0;
+		}
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_RUN | XDEBUG_STATUS, "cont", (char**) &error);
+		if (error || ret == -1) {
+			SSEND(context->socket, "-ERROR");
+			if (error) {
+				SSEND(context->socket, ": ");
+				SSEND(context->socket, error);
+			}
+			SSEND(context->socket, "\n");
+		} else {
+			SSEND(context->socket, "+OK\n");
+		}
+	} while (1 != ret);
+
+	return 1;
 }

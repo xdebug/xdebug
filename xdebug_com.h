@@ -45,6 +45,15 @@ int inet_aton(const char *cp, struct in_addr *inp);
 
 #define SREAD(a,b,c) read(a,b,c)
 
+#define SENDMSG(socket, str) {  \
+	char *message_buffer;       \
+                                \
+	message_buffer = str;       \
+	SSEND(socket, message_buffer); \
+	xdfree(message_buffer);     \
+}
+
+
 int xdebug_create_socket(const char *hostname, int dport);
 void xdebug_close_socket(int socket);
 

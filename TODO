@@ -2,6 +2,7 @@ TODO
 ====
 
 For 1.1.0:
+- Respect error reporting value
 - Implement gdb debugging capabilities
   * breakpoints
   * step in / step out / step over
