@@ -1,3 +1,8 @@
+Wed Jun 23 23:51:29 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug.c:
+- fix retrieval of config information to work correctly for startup 
+environment and per request
+
 Wed Jun 23 15:27:57 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 docs/Makefile
 xdebug/docs/dbgp.txt
