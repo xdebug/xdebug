@@ -1,3 +1,8 @@
+Wed Oct 06 09:09:35 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_profiler.c
+xdebug/xdebug_profiler.h:
+- Add another function to the .h file.
+
 Wed Oct 06 08:58:02 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 debugclient/debugclient.dsp
 xdebug/debugclient/main.c:
