@@ -1,3 +1,10 @@
+Sat Oct 19 18:12:58 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/Makefile
+/xdebug/debugclient/main.c
+/xdebug/debugclient/usefulstuff.c
+/xdebug/debugclient/usefulstuff.h:
+- Added debug client
+
 Sat Oct 19 17:21:30 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/auto_trace.phpt
 /xdebug/tests/test10.phpt
