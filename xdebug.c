@@ -905,7 +905,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		) {
 			convert_to_string_ex(dummy);
 			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
-			if (XG(ide_key)) xdfree(XG(ide_key));
+			if (XG(ide_key)) {
+				xdfree(XG(ide_key));
+			}
 			XG(ide_key) = xdstrdup(Z_STRVAL_PP(dummy));
 			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_PP(dummy), Z_STRLEN_PP(dummy), time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
 		} else if (
@@ -914,7 +916,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		) {
 			convert_to_string_ex(dummy);
 			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
-			if (XG(ide_key)) xdfree(XG(ide_key));
+			if (XG(ide_key)) {
+				xdfree(XG(ide_key));
+			}
 			XG(ide_key) = xdstrdup(Z_STRVAL_PP(dummy));
 		} else if (getenv("XDEBUG_CONFIG")) {
 			magic_cookie = xdstrdup(getenv("XDEBUG_CONFIG"));
