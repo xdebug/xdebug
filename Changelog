@@ -1,3 +1,7 @@
+Sun Sep 1 01:25:10 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/.cvsignore:
+- Update .cvsignore file
+
 Sun Sep 1 01:23:52 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
