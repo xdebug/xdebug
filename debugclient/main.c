@@ -49,7 +49,7 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define VERSION      "0.8.0"
+#define DEBUGCLIENT_VERSION "0.8.0"
 #define DEFAULT_PORT 17869
 
 #ifdef HAVE_LIBEDIT
@@ -123,6 +123,7 @@ int main(int argc, char *argv[])
 	const char         *cmd;                 /* Command to send to the server */
 	char               *prev_cmd = NULL;     /* Last send command to the server */
 	int                 opt;                 /* Current option during parameter parsing */
+	int                 length;              /* Length of read buffer */
 
 #ifdef HAVE_LIBEDIT
 	int num = 0;
@@ -144,7 +145,7 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Display copyright notice and version number */
-	printf("Xdebug GDB emulation client (%s)\n", VERSION);
+	printf("Xdebug GDB emulation client (%s)\n", DEBUGCLIENT_VERSION);
 	printf("Copyright 2002-2003 by Derick Rethans.\n");
 
 	/* Option handling */
@@ -220,18 +221,20 @@ int main(int argc, char *argv[])
 		printf("Connect\n");
 
 		/* Get the message from the server*/
-		while ((buffer = fd_read_line(fd, &cxt, FD_RL_SOCKET)) > 0) {
-			if (buffer[0] == '?') {
+		while ((buffer = fd_read_line_delim(fd, &cxt, FD_RL_SOCKET, '\0', &length)) > 0) {
+			buffer = fd_read_line_delim(fd, &cxt, FD_RL_SOCKET, '\0', &length);
+			printf ("%s\n", buffer);
+			{
 				/* The server requires a new command */
 
 #ifdef HAVE_LIBEDIT
 				/* Copy the prompt string */
-				sprintf(prompt, "(%s) ", &buffer[1]);
+				sprintf(prompt, "(cmd) ");
 				if ((cmd = el_gets(el, &num)) != NULL && num != 0) {
 					/* Add command to history */
 					history(hist, &ev, H_ENTER, cmd);
 #else
-				printf("(%s) ", &buffer[1]);
+				printf("(cmd) ");
 				fflush(stdout);
 				if ((cmd = fd_read_line(0, &std_in, FD_RL_FILE))) {
 #endif
@@ -263,14 +266,6 @@ int main(int argc, char *argv[])
 						break;
 					}
 				}
-			} else if (buffer[0] == '-') {
-				/* An error on the server happened, the error msg begins
-				 * after 8 chars. */
-				printf("%s\n", &buffer[8]);
-			} else if (buffer[0] != '+') {
-				/* The server has performed a command and the resulting output
-				 * is in buffer. Let show it to the user. */
-				printf ("%s\n", buffer);
 			}
 		}
 		printf("Disconnect\n\n");
