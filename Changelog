@@ -1,3 +1,9 @@
+Wed Jan 8 20:34:40 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_var.h:
+- Make it compile on Windows again.
+
 Tue Jan 7 22:07:48 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>:
 - Fix changelog
 
