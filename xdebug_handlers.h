@@ -25,9 +25,10 @@
 #include "xdebug_hash.h"
 #include "usefulstuff.h"
 
+typedef struct _xdebug_brk_info             xdebug_brk_info;
+typedef struct _xdebug_con                  xdebug_con;
 typedef struct _xdebug_remote_handler       xdebug_remote_handler;
 typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
-typedef struct _xdebug_con xdebug_con;
 
 struct _xdebug_con {
 	int                    socket;
@@ -37,6 +38,11 @@ struct _xdebug_con {
 	char                  *program_name;
 	xdebug_hash           *function_breakpoints;
 	xdebug_hash           *class_breakpoints;
+	xdebug_llist          *line_breakpoints;
+};
+
+struct _xdebug_brk_info {
+	int                   lineno;
 };
 
 struct _xdebug_remote_handler {
@@ -57,5 +63,7 @@ struct _xdebug_remote_handler_info {
 };
 
 xdebug_remote_handler* xdebug_handler_get(char* mode);
+
+void xdebug_brk_dtor(void *dummy, void *brk);
 
 #endif

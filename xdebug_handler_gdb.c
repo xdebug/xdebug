@@ -319,8 +319,9 @@ char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args)
 
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 {
-	xdebug_arg *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	char       *tmp_name;
+	xdebug_arg      *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	char            *tmp_name;
+	xdebug_brk_info *extra_brk_info;
 
 	xdebug_arg_init(method);
 
@@ -331,12 +332,11 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 			xdebug_arg_dtor(method);
 			return xdstrdup("Invalid format for class/method combination.");
 		} else {
-			tmp_name = xdebug_sprintf("%s::%s", method->args[0], method->args[1]);
-			if (!xdebug_hash_add(context->class_breakpoints, tmp_name, strlen(tmp_name), (void*) tmp_name)) {
+			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
 				xdebug_arg_dtor(method);
 				return xdstrdup("Breakpoint could not be set.");
 			} else {
-				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s::%s.\n", method->args[0], method->args[1]));
+				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", method->args[0]));
 				xdebug_arg_dtor(method);
 			}
 		}
@@ -346,19 +346,39 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 			xdebug_arg_dtor(method);
 			return xdstrdup("Invalid format for class/method combination.");
 		} else {
-			tmp_name = xdebug_sprintf("%s->%s", method->args[0], method->args[1]);
-			if (!xdebug_hash_add(context->class_breakpoints, tmp_name, strlen(tmp_name), (void*) tmp_name)) {
+			if (!xdebug_hash_add(context->class_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
 				xdebug_arg_dtor(method);
 				return xdstrdup("Breakpoint could not be set.");
 			} else {
-				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s->%s.\n", method->args[0], method->args[1]));
+				SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", method->args[0]));
 				xdebug_arg_dtor(method);
 			}
 		}
 	} else if (strstr(args->args[0], ":")) { /* file:line */
-		return xdstrdup("File:line breakpoints are not yet supported.");
+		xdebug_explode(":", args->args[0], method, -1); /* 0 = filename, 1 = linenumer */
+		if (method->c != 2) {
+			xdebug_arg_dtor(method);
+			return xdstrdup("Invalid format for file:line combination.");
+		} else {
+			/* Make search key */
+			if (method->args[0][0] != '/') {
+				tmp_name = xdebug_sprintf("/%s\n", method->args[0]);
+			} else {
+				tmp_name = xdebug_sprintf("%s\n", method->args[0]);
+			}
+
+			/* Set line number in extra structure */
+			extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
+			extra_brk_info->lineno = atoi(method->args[1]);
+
+			/* Add breakpoint to the list */
+			xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints),  (void*) extra_brk_info);
+			SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", method->args[0]));
+			xdebug_arg_dtor(method);
+			xdfree(tmp_name);
+		}
 	} else { /* function */
-		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) xdstrdup(args->args[0]))) {
+		if (!xdebug_hash_add(context->function_breakpoints, args->args[0], strlen(args->args[0]), (void*) 0)) {
 			return xdstrdup("Breakpoint could not be set.");
 		} else {
 			SENDMSG(context->socket, xdebug_sprintf("Breakpoint on %s.\n", args->args[0]));
@@ -510,6 +530,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 /* warning Add dtor! */
 	context->function_breakpoints = xdebug_hash_alloc(64, NULL);
 	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
+	context->line_breakpoints = xdebug_llist_alloc(xdebug_brk_dtor);
 	do {
 		SSEND(context->socket, "?init\n");
 		option = fd_read_line(context->socket, context->buffer);
@@ -527,6 +548,7 @@ int xdebug_gdb_deinit(xdebug_con *context)
 {
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
+	xdebug_llist_destroy(context->line_breakpoints, NULL);
 
 	return 1;
 }

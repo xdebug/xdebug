@@ -41,3 +41,8 @@ xdebug_remote_handler* xdebug_handler_get(char* mode)
 	}
 	return NULL;
 }
+
+void xdebug_brk_dtor(void *dummy, void *brk)
+{
+	xdfree(brk);
+}
