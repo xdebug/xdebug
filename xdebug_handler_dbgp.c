@@ -1534,7 +1534,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.46 $";
+	return "$Revision: 1.47 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1692,13 +1692,33 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack)
 {
 	char               *errortype;
-	xdebug_xml_node     *response;
+	xdebug_xml_node     *response, *error;
 	TSRMLS_FETCH();
 
 	if (exception_type) {
 		errortype = exception_type;
 	} else {
 		errortype = error_type(type);
+	}
+
+	if (exception_type) {
+		XG(status) = DBGP_STATUS_BREAK;
+		XG(reason) = DBGP_REASON_EXCEPTION;
+	} else {
+		switch (type) {
+			case E_CORE_ERROR:
+			/* no break - intentionally */
+			case E_ERROR:
+			/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
+				XG(status) = DBGP_STATUS_STOPPING;
+				XG(reason) = DBGP_REASON_ABORTED;
+				break;
+			default:
+				XG(status) = DBGP_STATUS_BREAK;
+				XG(reason) = DBGP_REASON_ERROR;
+		}
 	}
 /*
 	runtime_allowed = (
@@ -1708,9 +1728,19 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 		(type != E_USER_ERROR)
 	) ? XDEBUG_BREAKPOINT | XDEBUG_RUNTIME : 0;
 */
+
 	response = xdebug_xml_node_init("response");
-	xdebug_xml_add_attribute_ex(response, "exception", xdstrdup(errortype), 0, 1);
-	xdebug_xml_add_text(response, xdstrdup(message));
+	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
+	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 1);
+	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
+	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
+
+	error = xdebug_xml_node_init("error");
+	xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", type), 0, 1);
+	xdebug_xml_add_attribute_ex(error, "exception", xdstrdup(errortype), 0, 1);
+	xdebug_xml_add_text(error, xdstrdup(message));
+	xdebug_xml_add_child(response, error);
+
 	send_message(context, response);
 	xdebug_xml_node_dtor(response);
 	if (!exception_type) {
