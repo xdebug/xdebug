@@ -1,3 +1,7 @@
+Mon Nov 11 00:53:50 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Whitespace
+
 Mon Nov 11 00:51:57 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c:
 - Make the debug client compatible with Windows
