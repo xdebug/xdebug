@@ -1,3 +1,7 @@
+Fri Sep 19 09:54:29 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/bug00001.phpt:
+- Add ZE2 contraint
+
 Fri Sep 19 09:53:41 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/INSTALL:
 - Fix install instructions
