@@ -71,12 +71,12 @@ int main(int argc, char *argv[])
 		close (ssocket);
 		iaddr = &client_in.sin_addr;
 		printf ("Connect\n");
-		while ((buffer = fd_read_line (fd, &cxt)) > 0) {
+		while ((buffer = fd_read_line (fd, &cxt, FD_RL_SOCKET)) > 0) {
 
 			if (buffer[0] == '?') {
 				printf ("(%s) ", &buffer[1]);
 				fflush(stdout);
-				if ((cmd = fd_read_line (0, &std_in))) {
+				if ((cmd = fd_read_line (0, &std_in, FD_RL_SOCKET))) {
 					if (send (fd, cmd, strlen(cmd), MSG_NOSIGNAL) == -1) {
 						break;
 					}
