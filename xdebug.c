@@ -94,6 +94,7 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 int zend_xdebug_initialised = 0;
 
 function_entry xdebug_functions[] = {
+	PHP_FE(xdebug_get_stack_depth,       NULL)
 	PHP_FE(xdebug_get_function_stack,    NULL)
 	PHP_FE(xdebug_call_class,            NULL)
 	PHP_FE(xdebug_call_function,         NULL)
@@ -249,9 +250,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_ALL,    OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
 #if ZEND_EXTENSION_API_NO < 90000000
-	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_ALL,    OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "100",                PHP_INI_ALL,    OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
 #else
-	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "64",                 PHP_INI_ALL,    OnUpdateLong,   max_nesting_level, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "100",                PHP_INI_ALL,    OnUpdateLong,   max_nesting_level, zend_xdebug_globals, xdebug_globals)
 #endif
 	STD_PHP_INI_BOOLEAN("xdebug.show_local_vars", "0",                  PHP_INI_ALL,    OnUpdateBool,   show_local_vars,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_mem_delta",  "0",                  PHP_INI_ALL,    OnUpdateBool,   show_mem_delta,    zend_xdebug_globals, xdebug_globals)
@@ -1012,16 +1013,18 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	fse->symbol_table = EG(active_symbol_table);
 
-	/* Because include/require is treated as a stack level, we have to
-	  add used variables in include/required files to all the stack levels
-          above, until we hit a function or the to level stack.  This is so
-          that the variables show up correctly where they should be.  We
-          always call add_used_varialbes on the current stack level, otherwise
-          vars in include files do not show up in the locals list.  */
+	/* Because include/require is treated as a stack level, we have to add used
+	 * variables in include/required files to all the stack levels above, until
+	 * we hit a function or the to level stack.  This is so that the variables
+	 * show up correctly where they should be.  We always call
+	 * add_used_variables on the current stack level, otherwise vars in include
+	 * files do not show up in the locals list.  */
 	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
 		xfse = XDEBUG_LLIST_VALP(le);
 		add_used_variables(xfse, op_array);
-		if (XDEBUG_IS_FUNCTION(xfse->function.type)) break;
+		if (XDEBUG_IS_FUNCTION(xfse->function.type)) {
+			break;
+		}
 	}
 
 	/* Check for entry breakpoints */
@@ -1551,6 +1554,15 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	return op_array;
 }
 /* }}} */
+
+/* {{{ proto integet xdebug_get_stack_depth()
+   Returns the stack depth */
+PHP_FUNCTION(xdebug_get_stack_depth)
+{
+	/* We substract one so that the function call to xdebug_get_stack_depth()
+	 * is not part of the returned depth. */
+	RETURN_LONG(XG(stack)->size - 1);
+}
 
 /* {{{ proto array xdebug_get_function_stack()
    Returns an array representing the current stack */
