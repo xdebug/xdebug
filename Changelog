@@ -1,3 +1,7 @@
+Sun Aug 10 15:44:09 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/bug00001.phpt:
+- Add test for problems in destructors with traces
+
 Sun Aug 10 15:35:10 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test14b.phpt:
 - Fixed test
