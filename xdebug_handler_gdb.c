@@ -520,6 +520,7 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 	xdebug_brk_info *extra_brk_info;
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk;
+	TSRMLS_FETCH();
 
 	xdebug_arg_init(method);
 

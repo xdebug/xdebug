@@ -313,7 +313,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
 	if (XG(auto_profile) && XG(profile_file)) {
 		XG(auto_profile) = 2;
-		print_profile(0, XG(auto_profile_mode) TSRMLS_DC);
+		print_profile(0, XG(auto_profile_mode) TSRMLS_CC);
 	}	
 
 	xdebug_llist_destroy (XG(stack), NULL);
