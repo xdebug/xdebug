@@ -30,14 +30,24 @@ typedef struct xdebug_dbgp_result {
 	int code;
 } xdebug_dbgp_result;
 
-#define RETURN_RESULT(s,r,c) { \
+#define RETURN_RESULT(s, r, c) { \
+	xdebug_xml_node *error = xdebug_xml_node_init("error"); \
+	\
+	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[(s)]); \
+	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[(r)]); \
+	xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%u", (c)), 0, 1); \
+	xdebug_xml_add_child(*retval, error); \
+	return; \
+}
+
+#define RETURN_RESULT_MESSAGE(s, r, c, msg) { \
 	xdebug_xml_node *error = xdebug_xml_node_init("error"); \
 	xdebug_xml_node *message = xdebug_xml_node_init("message"); \
 	\
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[(s)]); \
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[(r)]); \
 	xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%u", (c)), 0, 1); \
-	xdebug_xml_add_text(message, xdstrdup("foo")); \
+	xdebug_xml_add_text(message, xdstrdup(msg), 0, 1); \
 	xdebug_xml_add_child(error, message); \
 	xdebug_xml_add_child(*retval, error); \
 	return; \
@@ -45,7 +55,7 @@ typedef struct xdebug_dbgp_result {
 
 /* Argument structure */
 typedef struct xdebug_dbgp_arg {
-	char *value[26];
+	char *value[27]; /* one extra for - */
 } xdebug_dbgp_arg;
 
 #define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args TSRMLS_DC

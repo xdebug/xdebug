@@ -723,7 +723,7 @@ DBGP_FUNC(eval)
 	int              new_length;
 	int              res;
 
-	if (!CMD_OPTION('v')) {
+	if (!CMD_OPTION('-')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 
@@ -732,7 +732,7 @@ DBGP_FUNC(eval)
 	EG(error_reporting) = 0;
 
 	/* base64 decode eval string */
-	eval_string = php_base64_decode(CMD_OPTION('v'), strlen(CMD_OPTION('v')), &new_length);
+	eval_string = php_base64_decode(CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
 
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
@@ -1195,7 +1195,7 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 				}
 				break;
 			case STATE_VALUE_FOLLOWS_FIRST_CHAR:
-				if (*ptr == '"') {
+				if (*ptr == '"' && opt != '-') {
 					value_begin = ptr + 1;
 					state = STATE_QUOTED;
 				} else {
@@ -1203,11 +1203,16 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 				}
 				break;
 			case STATE_VALUE_FOLLOWS:
-				if (*ptr == ' ' || *ptr == '\0') {
+				if ((*ptr == ' ' && opt != '-') || *ptr == '\0') {
+					int index = opt - 'a';
 
-					if (!args->value[opt - 'a']) {
-						args->value[opt - 'a'] = xdcalloc(1, ptr - value_begin + 1);
-						memcpy(args->value[opt - 'a'], value_begin, ptr - value_begin);
+					if (opt == '-') {
+						index = 26;
+					}
+
+					if (!args->value[index]) {
+						args->value[index] = xdcalloc(1, ptr - value_begin + 1);
+						memcpy(args->value[index], value_begin, ptr - value_begin);
 						state = STATE_NORMAL;
 					} else {
 						goto duplicate_opts;
@@ -1216,9 +1221,15 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 				break;
 			case STATE_QUOTED:
 				if (*ptr == '"') {
-					if (!args->value[opt - 'a']) {
-						args->value[opt - 'a'] = xdcalloc(1, ptr - value_begin + 1);
-						memcpy(args->value[opt - 'a'], value_begin, ptr - value_begin);
+					int index = opt - 'a';
+
+					if (opt == '-') {
+						index = 26;
+					}
+
+					if (!args->value[index]) {
+						args->value[index] = xdcalloc(1, ptr - value_begin + 1);
+						memcpy(args->value[index], value_begin, ptr - value_begin);
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;
@@ -1235,76 +1246,71 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 	return XDEBUG_ERROR_OK;
 
 parse_error:
-	*ret_args = NULL;
-	xdebug_dbgp_arg_dtor(args);
-	if (*cmd) {	
-		free(*cmd);
-	}
+	*ret_args = args;
 	return XDEBUG_ERROR_PARSE;
 
 duplicate_opts:
-	*ret_args = NULL;
-	xdebug_dbgp_arg_dtor(args);
-	if (*cmd) {	
-		free(*cmd);
-	}
+	*ret_args = args;
 	return XDEBUG_ERROR_DUP_ARG;
 }
 
 int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval TSRMLS_DC)
 {
-	char *cmd;
-	int res;
+	char *cmd = NULL;
+	int res, ret = 0;
 	xdebug_dbgp_arg *args;
 	xdebug_dbgp_cmd *command;
 	xdebug_xml_node *error;
 
 	res = xdebug_dbgp_parse_cmd(line, (char**) &cmd, (xdebug_dbgp_arg**) &args);
 
+	/* Add command name to return packet */
+	if (cmd) {
+		/* if no cmd res will be XDEBUG_ERROR_PARSE */
+		xdebug_xml_add_attribute_ex(retval, "command", xdstrdup(cmd), 0, 1);
+	}
+
+	/* Handle missing transaction ID, and if it exist add it to the result */
+	if (!CMD_OPTION('i')) {
+		/* we need the transaction_id even for errors in parse_cmd, but if
+		   we error out here, just force the error to happen below */
+		res = XDEBUG_ERROR_INVALID_ARGS;
+	} else {
+		xdebug_xml_add_attribute_ex(retval, "transaction_id", xdstrdup(CMD_OPTION('i')), 0, 1);
+	}
+
 	/* Handle parse errors */
 	if (res != XDEBUG_ERROR_OK) {
 		error = xdebug_xml_node_init("error");
 		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", res), 0, 1);
 		xdebug_xml_add_child(retval, error);
-		return -1;
-	}
-
-	/* Add command name to return packet */
-	xdebug_xml_add_attribute_ex(retval, "command", xdstrdup(cmd), 0, 1);
-
-	/* Handle missing transaction ID, and if it exist add it to the result */
-	if (!CMD_OPTION('i')) {
-		xdfree(cmd);
-
-		error = xdebug_xml_node_init("error");
-		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_INVALID_ARGS), 0, 1);
-		xdebug_xml_add_child(retval, error);
-		return -1;
 	} else {
-		xdebug_xml_add_attribute_ex(retval, "transaction_id", xdstrdup(CMD_OPTION('i')), 0, 1);
-	}
 
-	/* Execute commands and stuff */
-	command = lookup_cmd(cmd);
-	xdfree(cmd);
-	if (command) {
-		command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
-		if (command->cont) {
-			XG(status) = DBGP_STATUS_RUNNING;
-			XG(reason) = DBGP_REASON_OK;
-			XG(lastcmd) = command->name;
-			XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
+		/* Execute commands and stuff */
+		command = lookup_cmd(cmd);
+
+		if (command) {
+			command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
+			if (command->cont) {
+				XG(status) = DBGP_STATUS_RUNNING;
+				XG(reason) = DBGP_REASON_OK;
+				XG(lastcmd) = command->name;
+				XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
+			}
+
+			ret = command->cont;
+		} else {
+			error = xdebug_xml_node_init("error");
+			xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_UNIMPLEMENTED), 0, 1);
+			xdebug_xml_add_child(retval, error);
+
+			ret = -1;
 		}
-		xdebug_dbgp_arg_dtor(args);
-		return command->cont;
-	} else {
-		error = xdebug_xml_node_init("error");
-		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_UNIMPLEMENTED), 0, 1);
-		xdebug_xml_add_child(retval, error);
-
-		xdebug_dbgp_arg_dtor(args);
-		return -1;
 	}
+
+	xdfree(cmd);
+	xdebug_dbgp_arg_dtor(args);
+	return ret;
 }
 
 /*****************************************************************************
@@ -1313,7 +1319,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.28 $";
+	return "$Revision: 1.29 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
