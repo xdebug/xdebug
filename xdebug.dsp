@@ -126,6 +126,10 @@ SOURCE=.\xdebug_llist.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\xdebug_profiler.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_var.c
 # End Source File
 # End Group
