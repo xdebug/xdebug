@@ -1,3 +1,5 @@
+- Fixed crash when using an user defined sessiono handler. (Derick)
+
 - Implemented variable function names ($a = 'foo'; $f();) for use in
   traces. (Derick)
 
