@@ -58,7 +58,7 @@ zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
-#if ZEND_EXTENSION_API_NO >= 20020731
+#if ZEND_EXTENSION_API_NO >= 20020824
 void (*old_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 #endif
@@ -154,7 +154,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_execute = zend_execute;
 	zend_execute = xdebug_execute;
 
-#if ZEND_EXTENSION_API_NO >= 20020731
+#if ZEND_EXTENSION_API_NO >= 20020824
 	old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
 #endif
@@ -170,7 +170,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	zend_compile_file = old_compile_file;
 	zend_execute = old_execute;
-#if ZEND_EXTENSION_API_NO >= 20020731
+#if ZEND_EXTENSION_API_NO >= 20020824
 	zend_execute_internal = old_execute_internal;
 #endif
 	zend_error_cb = old_error_cb;
@@ -307,7 +307,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
-#if ZEND_EXTENSION_API_NO >= 20020731
+#if ZEND_EXTENSION_API_NO >= 20020824
 void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
 {
 	zval                **param;
