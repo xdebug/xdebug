@@ -44,11 +44,10 @@ int main(int argc, char *argv[])
 {
 	int port = 17869;
 	int ssocket = 0;
-	struct sockaddr_in server_in;
-	int				client_in_len;
-	int				fd;
-	struct sockaddr_in client_in;
-	struct in_addr	*iaddr;
+	struct sockaddr_in  server_in;
+	int                 fd;
+	struct sockaddr_in  client_in;
+	struct in_addr     *iaddr;
 	char *buffer;
 	char *cmd;
 	fd_buf cxt = { NULL, 0 };
@@ -72,9 +71,9 @@ int main(int argc, char *argv[])
 		}
 	
 		memset (&server_in, 0, sizeof(struct sockaddr));
-		server_in.sin_family	  = AF_INET;
+		server_in.sin_family      = AF_INET;
 		server_in.sin_addr.s_addr = htonl(INADDR_ANY);
-		server_in.sin_port	      = htons((unsigned short int) port);
+		server_in.sin_port        = htons((unsigned short int) port);
 	
 		while (bind (ssocket, (struct sockaddr *) &server_in, sizeof(struct sockaddr_in)) < 0) {
 			printf ("bind: couldn't bind AF_INET socket?\n");
