@@ -5,6 +5,8 @@ For 1.2.0:
 - Update gdb debugging capabilities
   * watches / conditional breakpoints
 - Bug fixing
+  * Crash with includes on ZE2
+  * Disallow 'continue' on parse errors
   * Disconnect bug
 - Profiling
   * Add another profiling mode that allows for detailed function analysis.
