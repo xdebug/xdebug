@@ -150,6 +150,9 @@ inline static void add_function_entry(xdebug_hash *hasht, function_stack_entry *
 	xdebug_hash_add(hasht, ent->function.function, strlen(ent->function.function), ent);
 }
 
+/* Determine if this function was called and if so, increment the # of calls to the function
+ * and the total time taken to execute the function.
+ */
 inline static int find_and_inc_function_entry(xdebug_hash *hasht, function_stack_entry *ent, int all)
 {
 	function_stack_entry *found_ent;
@@ -176,6 +179,7 @@ inline static int find_and_inc_function_entry(xdebug_hash *hasht, function_stack
 	return 0;
 }
 
+/* Generate a profile that follows the execution tree */
 static inline function_stack_entry **fetch_tree_profile(int mode, int *size, double total_time TSRMLS_DC)
 {
 	xdebug_llist_element *le;
@@ -319,6 +323,10 @@ inline static int find_same_function(xdebug_hash *hasht, xdebug_fs *cur, functio
 {
 	xdebug_fs *found_ent = NULL;
 
+	/* Find if this function was previously called, this is determined by looking at:
+	 * name, filename and line number. If we are dealing with a method, also examine the class name
+	 * and see if the function was called statically (::) or dynamically (->).
+	 */ 
 	if (parent && cur->fse->function.function && xdebug_hash_find(hasht, cur->fse->function.function, strlen(cur->fse->function.function), (void *) &found_ent)) {
 		if (found_ent->fse->function.class == cur->fse->function.class) {
 			if (cur->fse->function.class && strcasecmp(found_ent->fse->function.class, cur->fse->function.class)) {
@@ -377,6 +385,9 @@ static inline xdebug_fs **fetch_fcall_summary(int mode, int *size, double total_
 
 		function_hash = xdebug_hash_alloc(XDEBUG_LLIST_COUNT(XG(trace)), NULL);
 
+		/* go through the function list, generating the appropriate child/parent relations
+		 * between functions.
+		 */
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			if (XDEBUG_LLIST_IS_TAIL(le) && !XG(auto_profile) != 2) {
 				break;
@@ -415,11 +426,13 @@ static inline xdebug_fs **fetch_fcall_summary(int mode, int *size, double total_
 
 		list_out = (xdebug_fs **) xdmalloc(i * sizeof(xdebug_fs *));
 
+		/* generate output linked list */
 		for (j = 0; j < i; j++) {
 			list_out[j] = xdcalloc(1, sizeof(struct xdebug_fs));
 			list_out[j]->fse = list[j]->fse;
 			list_out[j]->time = list_out[j]->fse->time_taken;
 
+			/* for each 'parent' add a linked list of 'children' */
 			if (list[j]->nelem_c) {
 				function_hash = xdebug_hash_alloc(list[j]->nelem_c, NULL);
 				list_out[j]->nelem_c = 0;
@@ -448,6 +461,7 @@ static inline xdebug_fs **fetch_fcall_summary(int mode, int *size, double total_
 				xdebug_hash_destroy(function_hash);
 			}
 
+			/* for each 'child' create a linked list of 'parents' */
 			if (list[j]->nelem_p) {
 				function_hash = xdebug_hash_alloc(list[j]->nelem_p, NULL);
 				list_out[j]->nelem_p = 0;
@@ -506,6 +520,7 @@ static inline function_stack_entry **fetch_simple_profile(int mode, int *size, d
 			mode_op = 0;
 		}
 
+		/* generate a simple linked list (that can be easily sorted & outputed) of function calls */
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			/* skip the last function because it is our very own profile function.
 			 * since it is the last function, we may as well stop the loop.
@@ -537,6 +552,7 @@ static inline function_stack_entry **fetch_simple_profile(int mode, int *size, d
 		*size = n_elem = i;
 		xdebug_hash_destroy(function_hash);
 
+		/* sort the data based on the sorting mode specified by the user */
 		switch (mode) {
 			case XDEBUG_PROFILER_CPU:
 			case XDEBUG_PROFILER_FS_SUM:
@@ -560,16 +576,20 @@ static inline function_stack_entry **fetch_simple_profile(int mode, int *size, d
 	return (function_stack_entry **) NULL;
 }
 
+/* Determine the function/method name */
 static inline void fetch_full_function_name(function_stack_entry *ent, char *buf)
 {
 	char *p;
 
 	p = buf;
 
+	/* add a '*' beside all functions that are created by the user */
 	if (ent->user_defined == XDEBUG_EXTERNAL) {
 		sprintf(buf, "*");
 		p++;
 	}
+
+	/* when class method is encountered, prefix the method with class name & method of execution */
 	if (ent->function.class) {
 		if (ent->function.type == XFUNC_MEMBER) {
 			snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s->%s", ent->function.class, ent->function.function);
@@ -582,6 +602,7 @@ static inline void fetch_full_function_name(function_stack_entry *ent, char *buf
 		snprintf(p, XDEBUG_MAX_FUNCTION_LEN - (p-buf), "%s", ent->function.function);
 	}
 
+	/* special handling for language constructs */
 	switch (ent->function.type) {
 		case XFUNC_NEW:
 			sprintf(buf, "%s", "{new}");
@@ -921,6 +942,8 @@ inline static void append_frame(zval **dest, function_stack_entry *ent)
 	add_assoc_long_ex(frame, "level", sizeof("level"), ent->level - 2);
 }
 
+/* {{{ proto array xdebug_dump_function_profile([int mode])
+   Return profiling information in the form of an associated array. */
 PHP_FUNCTION(xdebug_get_function_profile)
 {
 	if (XG(do_profile) == 1) {
@@ -1041,7 +1064,10 @@ finish:
 		RETURN_FALSE;
 	}
 }
+/* }}} */
 
+/* {{{ proto void xdebug_start_profiling(string filename)
+   Begin profiling, the user may specify a file where the profiling data is to be written to */
 PHP_FUNCTION(xdebug_start_profiling)
 {
 	if (XG(do_profile) == 0) {
@@ -1080,7 +1106,10 @@ PHP_FUNCTION(xdebug_start_profiling)
 		php_error(E_NOTICE, "Function profiler already started");
 	}
 }
+/* }}} */
 
+/* {{{ proto void xdebug_stop_profiling(void)
+   Disable collection of profiling information */
 PHP_FUNCTION(xdebug_stop_profiling)
 {
 	if (XG(do_profile) == 1) {
@@ -1099,7 +1128,10 @@ PHP_FUNCTION(xdebug_stop_profiling)
 		php_error(E_NOTICE, "Function profiling was not started");
 	}
 }
+/* }}} */
 
+/* {{{ proto bool xdebug_dump_function_profile([int mode])
+   Output profiling information to screen */
 PHP_FUNCTION(xdebug_dump_function_profile)
 {
 	if (XG(do_profile) == 1) {
@@ -1118,3 +1150,4 @@ PHP_FUNCTION(xdebug_dump_function_profile)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
