@@ -26,7 +26,11 @@
 
 #define XDEBUG_VERSION "0.9.0"
 
+#ifdef PHP_WIN32
 #include <sys/time.h>
+#else
+#include "win32/time.h"
+#endif
 
 #include "TSRM.h"
 #include "SAPI.h"
