@@ -1,3 +1,12 @@
+Mon Oct 21 15:55:55 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_com.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handler_php3.h
+/xdebug/xdebug_handlers.c:
+- Make -Wall happy
+
 Mon Oct 21 15:19:27 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_handler_gdb.c
