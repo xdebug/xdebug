@@ -1,3 +1,7 @@
+Wed Sep 15 09:52:18 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- Added Shane's clarifications for our file:// mangling function.
+
 Wed Sep 08 07:58:58 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 debugclient/main.c:
 - Added patch to fix warnings and implicit declarations. (Based on a patch by
