@@ -293,7 +293,8 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 	/* encode the url */
 	encoded_fileurl = xdebug_raw_url_encode(fileurl, strlen(fileurl), &new_len, 1);
 
-	if (fileurl[0] != '/' && fileurl[0] != '\\') {
+	if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
+		/* convert relative paths */
 		cwd_state new_state;
 		char cwd[MAXPATHLEN];
 		char *result;
@@ -314,12 +315,16 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 		free(new_state.cwd);
 
 	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
+		/* convert UNC paths (eg. \\server\sharepath) */
 		tmp = xdebug_sprintf("file:/%s", encoded_fileurl);
 	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
+		/* convert *nix paths (eg. /path) */
 		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
 	} else if (fileurl[1] == ':') {
+		/* convert windows drive paths (eg. c:\path) */
 		tmp = xdebug_sprintf("file:///%s", encoded_fileurl);
 	} else {
+		/* no clue about it, use it raw */
 		tmp = xdstrdup(encoded_fileurl);
 	}
 	l = strlen(tmp);
