@@ -1,3 +1,8 @@
+Tue Nov 5 18:14:24 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Fixed problem with breakpoints on internal functions.
+
 Mon Nov 4 15:14:09 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix crashbug
