@@ -1,3 +1,7 @@
+Thu Aug 05 13:07:26 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #85: Xdebug segfaults when no idekey is set.
+
 Tue Aug 03 22:46:06 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 test.sh
 xdebug/xdebug.c
