@@ -285,12 +285,11 @@ char *xdebug_path_to_url(const char *fileurl)
 long xdebug_crc32(const char *string, int str_len)
 {
 	unsigned int crc = ~0;
-	char *p;
 	int len;
 	
 	len = 0 ;
-	for (len += str_len; str_len--; ++p) {
-	    XDEBUG_CRC32(crc, *p);
+	for (len += str_len; str_len--; ++string) {
+	    XDEBUG_CRC32(crc, *string);
 	}
 	return ~crc;
 }
