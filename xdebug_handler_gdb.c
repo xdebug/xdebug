@@ -93,79 +93,6 @@ static xdebug_cmd commands_runtime[] = {
 ** Utility functions
 */
 
-static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
-{
-	char *tmp;
-	xdebug_func f;
-
-	f = entry->function;
-
-	switch (f.type) {
-		case XFUNC_NORMAL:
-			return xdstrdup (f.function);
-			break;
-
-		case XFUNC_NEW:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc (strlen (f.class) + 4 + 1);
-			sprintf (tmp, "new %s", f.class);
-			return tmp;
-			break;
-
-		case XFUNC_STATIC_MEMBER:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
-			sprintf (tmp, "%s::%s", f.class, f.function);
-			return tmp;
-			break;
-
-		case XFUNC_MEMBER:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
-			sprintf (tmp, "%s->%s", f.class, f.function);
-			return tmp;
-			break;
-
-		case XFUNC_EVAL:
-			return xdstrdup ("eval");
-			break;
-
-		case XFUNC_INCLUDE:
-			return xdstrdup ("include");
-			break;
-
-		case XFUNC_INCLUDE_ONCE:
-			return xdstrdup ("include_once");
-			break;
-
-		case XFUNC_REQUIRE:
-			return xdstrdup ("require");
-			break;
-
-		case XFUNC_REQUIRE_ONCE:
-			return xdstrdup ("require_once");
-			break;
-
-		default:
-			return xdstrdup ("{unknown, please report}");
-	}
-}
-
 static xdebug_cmd* scan_cmd(xdebug_cmd *ptr, char *line)
 {
 	while (ptr->name) {
@@ -577,7 +504,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 
 	SENDMSG(context->socket, xdebug_sprintf("This is Xdebug version %s.\n", XDEBUG_VERSION));
 	SSEND(context->socket, "Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
-	context->buffer = xdmalloc(sizeof(xdebug_socket_buf));
+	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
 #warning Add dtor!
@@ -585,7 +512,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->class_breakpoints = xdebug_hash_alloc(64, NULL);
 	do {
 		SSEND(context->socket, "?init\n");
-		option = xdebug_socket_read_line(context->socket, context->buffer);
+		option = fd_read_line(context->socket, context->buffer);
 		if (!option) {
 			return 0;
 		}
@@ -620,7 +547,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 	xdfree(errortype);
 	do {
 		SSEND(context->socket, "?cmd\n");
-		option = xdebug_socket_read_line(context->socket, context->buffer);
+		option = fd_read_line(context->socket, context->buffer);
 		if (!option) {
 			return 0;
 		}
@@ -642,7 +569,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack)
 
 	do {
 		SSEND(context->socket, "?cmd\n");
-		option = xdebug_socket_read_line(context->socket, context->buffer);
+		option = fd_read_line(context->socket, context->buffer);
 		if (!option) {
 			return 0;
 		}

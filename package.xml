@@ -26,6 +26,8 @@
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
+      <file role="src"  name="usefulstuff.c"/>
+      <file role="src"  name="usefulstuff.h"/>
       <file role="src"  name="xdebug.c"/>
       <file role="src"  name="xdebug_com.c"/>
       <file role="src"  name="xdebug_com.h"/>
@@ -39,8 +41,6 @@
       <file role="src"  name="xdebug_hash.h"/>
       <file role="src"  name="xdebug_llist.c"/>
       <file role="src"  name="xdebug_llist.h"/>
-      <file role="src"  name="xdebug_socket.c"/>
-      <file role="src"  name="xdebug_socket.h"/>
       <file role="src"  name="xdebug_var.c"/>
       <file role="src"  name="xdebug_var.h"/>
 

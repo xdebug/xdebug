@@ -23,7 +23,7 @@
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_hash.h"
-#include "xdebug_socket.h"
+#include "usefulstuff.h"
 
 typedef struct _xdebug_remote_handler       xdebug_remote_handler;
 typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
@@ -33,7 +33,7 @@ struct _xdebug_con {
 	int                    socket;
 	void                  *options;
 	xdebug_remote_handler *handler;
-	xdebug_socket_buf     *buffer;
+	fd_buf                *buffer;
 	char                  *program_name;
 	xdebug_hash           *function_breakpoints;
 	xdebug_hash           *class_breakpoints;
@@ -56,6 +56,6 @@ struct _xdebug_remote_handler_info {
 	xdebug_remote_handler  handler;
 };
 
-xdebug_remote_handler* xdebug_handler_get (char* mode);
+xdebug_remote_handler* xdebug_handler_get(char* mode);
 
 #endif

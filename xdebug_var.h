@@ -17,6 +17,7 @@
  */
 
 #include "zend.h"
+#include "php_xdebug.h"
 
 #ifndef __HAVE_XDEBUG_VAR_H__
 #define __HAVE_XDEBUG_VAR_H__
@@ -27,9 +28,10 @@ typedef struct xdebug_str {
 	char *d;
 } xdebug_str;
 
-char* get_zval_value (zval *val);
 void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
-char *xdebug_sprintf (const char* fmt, ...);
-char *error_type (int type);
+char* error_type (int type);
+char* xdebug_sprintf (const char* fmt, ...);
+char* get_zval_value (zval *val);
+char* show_fname (struct function_stack_entry* entry TSRMLS_DC);
 
 #endif

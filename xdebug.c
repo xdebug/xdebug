@@ -47,6 +47,7 @@
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_var.h"
+#include "usefulstuff.h"
 #include "php_xdebug.h"
 
 /* static int le_xdebug; */
@@ -544,90 +545,6 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 	xdebug_llist_remove (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
-}
-
-char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
-{
-	char *tmp;
-	xdebug_func f;
-
-	f = entry->function;
-
-	switch (f.type) {
-		case XFUNC_NORMAL: {
-			zend_function *zfunc;
-
-			if (!(strcmp ("cli", sapi_module.name) == 0) && zend_hash_find(EG(function_table), f.function, strlen(f.function) + 1, (void**) &zfunc) == SUCCESS) {
-				if (zfunc->type == ZEND_INTERNAL_FUNCTION) {
-					return xdebug_sprintf ("<a href='%s/%s' target='_new'>%s</a>\n", XG(manual_url), f.function, f.function);
-				} else {
-					return xdstrdup (f.function);
-				}
-			} else {
-				return xdstrdup (f.function);
-			}
-			break;
-		}
-
-		case XFUNC_NEW:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc (strlen (f.class) + 4 + 1);
-			sprintf (tmp, "new %s", f.class);
-			return tmp;
-			break;
-
-		case XFUNC_STATIC_MEMBER:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
-			sprintf (tmp, "%s::%s", f.class, f.function);
-			return tmp;
-			break;
-
-		case XFUNC_MEMBER:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc (strlen (f.function) + strlen (f.class) + 2 + 1);
-			sprintf (tmp, "%s->%s", f.class, f.function);
-			return tmp;
-			break;
-
-		case XFUNC_EVAL:
-			return xdstrdup ("eval");
-			break;
-
-		case XFUNC_INCLUDE:
-			return xdstrdup ("include");
-			break;
-
-		case XFUNC_INCLUDE_ONCE:
-			return xdstrdup ("include_once");
-			break;
-
-		case XFUNC_REQUIRE:
-			return xdstrdup ("require");
-			break;
-
-		case XFUNC_REQUIRE_ONCE:
-			return xdstrdup ("require_once");
-			break;
-
-		default:
-			return xdstrdup ("{unknown, please report}");
-	}
 }
 
 static inline void print_stack (int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)

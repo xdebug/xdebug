@@ -26,7 +26,7 @@
 #include <sys/un.h>
 #include <sys/stat.h>
 
-#include "usefulstuff.h"
+#include "../usefulstuff.h"
 
 #define VERSION "0.5.0"
 
