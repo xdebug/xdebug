@@ -49,7 +49,7 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define VERSION "0.7.2"
+#define DEBUGCLIENT_VERSION "0.7.3"
 
 #ifdef HAVE_LIBEDIT
 
@@ -139,8 +139,11 @@ int main(int argc, char *argv[])
 	WSAStartup(wVersionRequested, &wsaData);
 #endif
 
-	printf("Xdebug GDB emulation client (%s)\n", VERSION);
-	printf("Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
+	printf("Xdebug GDB emulation client (%s)\n", DEBUGCLIENT_VERSION);
+	printf("Copyright 2002-2003 by Derick Rethans.\n");
+#ifdef HAVE_LIBEDIT
+	printf("- libedit support: enabled\n");
+#endif
 
 	while (1) {
 		ssocket = socket(AF_INET, SOCK_STREAM, 0);

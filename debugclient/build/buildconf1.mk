@@ -6,4 +6,4 @@ buildmk.stamp: build/buildcheck.sh
 	@build/buildcheck.sh $@
         
 generated_list:
-	@echo config_m4_files = modules/*/config*.m4 >> $@
+	@echo config_m4_files = >> $@
