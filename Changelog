@@ -1,3 +1,6 @@
+Tue Feb 01 03:28:02 CET 2005 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- fix retrieving static vars in classes
 Tue Feb 01 02:28:40 CET 2005 Shane Caraveo <shane@caraveo.com>
 xdebug_var.c:
 - fix crashes on win32 if introspecting com objects.  unfortunately, no easy way to deal with this, so we punt just like print_r and family
