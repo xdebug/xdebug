@@ -288,6 +288,11 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 	HashTable *myht;
 	char*     tmp_str;
 
+	if (!*struc) {
+		xdebug_str_addl(str, "<uninitialized/>", 16, 0);
+		return;
+	}
+	
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("<bool>%s</bool>", Z_LVAL_PP(struc) ? "1" : "0"), 1);

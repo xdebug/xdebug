@@ -328,7 +328,11 @@ static char *return_printable_symbol(xdebug_con *context, char *name, zval *val)
 
 	switch (options->response_format) {
 	   	case XDEBUG_RESPONSE_NORMAL:
-			str_rep = get_zval_value(val);
+			if (val) {
+				str_rep = get_zval_value(val);
+			} else {
+				str_rep = xdstrdup("*uninitialized*");
+			}
 			if (name) {
 				ret = xdebug_sprintf("$%s = %s\n", name, str_rep);
 			} else {
@@ -508,9 +512,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 		if (i->vars[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
 		}
-		if (!i->vars[j].addr) {
-			tmp_value = get_zval_value(i->vars[j].addr);
-		}
+		tmp_value = get_zval_value(i->vars[j].addr);
 		tmp = xmlize(tmp_value);
 		SSEND(h->socket, tmp);
 		xdfree(tmp_value);
@@ -565,9 +567,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 		if (i->vars[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->vars[j].name));
 		}
-		if (!i->vars[j].addr) {
-			tmp_value = get_zval_value(i->vars[j].addr);
-		}
+		tmp_value = get_zval_value(i->vars[j].addr);
 		tmp = xmlize(tmp_value);
 		SSEND(h->socket, tmp);
 		xdfree(tmp_value);
@@ -1321,7 +1321,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.72 $";
+	return "$Revision: 1.73 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode, char *magic_cookie)
