@@ -1,3 +1,8 @@
+Sat Aug 30 23:35:29 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed bug #2: "pear package" triggers a segfault
+- Rewrote build_fname to accept the function struct as a parameter
+
 Tue Aug 26 13:56:59 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Make this switchable with an option
