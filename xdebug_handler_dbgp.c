@@ -168,7 +168,7 @@ static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 	return NULL;
 }
 
-static char *make_message(xdebug_con *context, xdebug_xml_node *message, int *len)
+static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 {
 	xdebug_str  xml_message = {0, 0, NULL};
 	xdebug_str *ret;
@@ -183,17 +183,16 @@ static char *make_message(xdebug_con *context, xdebug_xml_node *message, int *le
 	xdebug_str_addl(ret, "\0", 1, 0);
 	xdebug_str_dtor(xml_message);
 
-	*len = ret->l;
-	return ret->d;
+	return ret;
 }
 
 static void send_message(xdebug_con *context, xdebug_xml_node *message)
 {
-	char *tmp;
-	int   len;
+	xdebug_str *tmp;
 
-	tmp = make_message(context, message, &len);
-	SSENDL(context->socket, tmp, len);
+	tmp = make_message(context, message);
+	SSENDL(context->socket, tmp->d, tmp->l);
+	xdebug_str_ptr_dtor(tmp);
 }
 
 
@@ -1034,10 +1033,10 @@ void xdebug_dbgp_arg_dtor(xdebug_dbgp_arg *arg)
 
 	for (i = 0; i < 26; i++) {
 		if (arg->value[i]) {
-			free(arg->value[i]);
+			xdfree(arg->value[i]);
 		}
 	}
-	free(arg);
+	xdfree(arg);
 }
 
 int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
@@ -1047,7 +1046,7 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 	int   state;
 	char  opt = ' ', *value_begin = NULL;
 
-	args = malloc(sizeof (xdebug_dbgp_arg));
+	args = xdmalloc(sizeof (xdebug_dbgp_arg));
 	memset(args->value, 0, sizeof(args->value));
 	*cmd = NULL;
 
@@ -1067,7 +1066,7 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 	} else {
 		/* A space was found, so we copy everything before it
 		 * into the cmd parameter. */
-		*cmd = calloc(1, ptr - line + 1);
+		*cmd = xdcalloc(1, ptr - line + 1);
 		memcpy(*cmd, line, ptr - line);
 	}
 	/* Now we loop until we find the end of the string, which is the \0
@@ -1107,7 +1106,7 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 				if (*ptr == ' ' || *ptr == '\0') {
 
 					if (!args->value[opt - 'a']) {
-						args->value[opt - 'a'] = calloc(1, ptr - value_begin + 1);
+						args->value[opt - 'a'] = xdcalloc(1, ptr - value_begin + 1);
 						memcpy(args->value[opt - 'a'], value_begin, ptr - value_begin);
 						state = STATE_NORMAL;
 					} else {
@@ -1118,7 +1117,7 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 			case STATE_QUOTED:
 				if (*ptr == '"') {
 					if (!args->value[opt - 'a']) {
-						args->value[opt - 'a'] = calloc(1, ptr - value_begin + 1);
+						args->value[opt - 'a'] = xdcalloc(1, ptr - value_begin + 1);
 						memcpy(args->value[opt - 'a'], value_begin, ptr - value_begin);
 						state = STATE_SKIP_CHAR;
 					} else {
@@ -1169,10 +1168,13 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 	}
 
 	command = lookup_cmd(cmd);
+	xdfree(cmd);
 	if (command) {
 		command->handler((xdebug_xml_node**) &retval, context, args);
+		xdebug_dbgp_arg_dtor(args);
 		return command->cont;
 	} else {
+		xdebug_dbgp_arg_dtor(args);
 		return -1;
 	}
 }
@@ -1183,7 +1185,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.9 $";
+	return "$Revision: 1.10 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
@@ -1219,6 +1221,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->buffer->buffer_size = 0;
 
 	send_message(context, response);
+	xdebug_xml_node_dtor(response);
 /* }}} */
 
 	context->options = xdmalloc(sizeof(xdebug_dbgp_options));
@@ -1268,6 +1271,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
 	xdebug_llist_destroy(context->line_breakpoints, NULL);
+	xdebug_hash_destroy(context->breakpoint_list);
 	xdfree(context->buffer);
 
 	return 1;
