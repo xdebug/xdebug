@@ -1284,11 +1284,12 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 
 	i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack));
 
-	if (type == XDEBUG_BREAK) {
-		response = return_breakpoint(i, file, lineno);
-		send_message(context, response);
-		xdebug_xml_node_dtor(response);
+	response = return_breakpoint(i, file, lineno);
+	if (type == XDEBUG_STEP) {
+		xdebug_xml_add_attribute(response, "break", "step");
 	}
+	send_message(context, response);
+	xdebug_xml_node_dtor(response);
 
 	do {
 		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
