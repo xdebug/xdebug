@@ -48,17 +48,17 @@ typedef struct xdebug_dbgp_arg {
 	char *value[26];
 } xdebug_dbgp_arg;
 
-typedef struct xdebug_dbgp_cmd {
-	char *name;
-	void (*handler)(xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args);
-	int  cont;
-} xdebug_dbgp_cmd;
-
-#define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args
-#define DBGP_FUNC_PASS_PARAMETERS   retval, context, args
+#define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args TSRMLS_DC
+#define DBGP_FUNC_PASS_PARAMETERS   retval, context, args TSRMLS_CC
 #define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(DBGP_FUNC_PARAMETERS)
 #define DBGP_FUNC_ENTRY(name)       { #name, xdebug_dbgp_handle_##name, 0 },
 #define DBGP_CONT_FUNC_ENTRY(name)  { #name, xdebug_dbgp_handle_##name, 1 },
+
+typedef struct xdebug_dbgp_cmd {
+	char *name;
+	void (*handler)(DBGP_FUNC_PARAMETERS);
+	int  cont;
+} xdebug_dbgp_cmd;
 
 #define CMD_OPTION(opt)    args->value[(opt) - 'a']
 

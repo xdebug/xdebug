@@ -56,6 +56,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xdebug_str.obj"
 	-@erase "$(INTDIR)\xdebug_superglobals.obj"
 	-@erase "$(INTDIR)\xdebug_var.obj"
+	-@erase "$(INTDIR)\xdebug_xml.obj"
 	-@erase "$(OUTDIR)\php_xdebug.dll"
 	-@erase "$(OUTDIR)\php_xdebug.exp"
 	-@erase "$(OUTDIR)\php_xdebug.lib"
@@ -85,7 +86,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\xdebug_profiler.obj" \
 	"$(INTDIR)\xdebug_str.obj" \
 	"$(INTDIR)\xdebug_superglobals.obj" \
-	"$(INTDIR)\xdebug_var.obj"
+	"$(INTDIR)\xdebug_var.obj" \
+	"$(INTDIR)\xdebug_xml.obj"
 
 "$(OUTDIR)\php_xdebug.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -120,6 +122,7 @@ CLEAN :
 	-@erase "$(INTDIR)\xdebug_str.obj"
 	-@erase "$(INTDIR)\xdebug_superglobals.obj"
 	-@erase "$(INTDIR)\xdebug_var.obj"
+	-@erase "$(INTDIR)\xdebug_xml.obj"
 	-@erase "$(OUTDIR)\php_xdebug.dll"
 	-@erase "$(OUTDIR)\php_xdebug.exp"
 	-@erase "$(OUTDIR)\php_xdebug.ilk"
@@ -151,7 +154,8 @@ LINK32_OBJS= \
 	"$(INTDIR)\xdebug_profiler.obj" \
 	"$(INTDIR)\xdebug_str.obj" \
 	"$(INTDIR)\xdebug_superglobals.obj" \
-	"$(INTDIR)\xdebug_var.obj"
+	"$(INTDIR)\xdebug_var.obj" \
+	"$(INTDIR)\xdebug_xml.obj"
 
 "$(OUTDIR)\php_xdebug.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -269,6 +273,11 @@ SOURCE=.\xdebug_superglobals.c
 SOURCE=.\xdebug_var.c
 
 "$(INTDIR)\xdebug_var.obj" : $(SOURCE) "$(INTDIR)"
+
+
+SOURCE=.\xdebug_xml.c
+
+"$(INTDIR)\xdebug_xml.obj" : $(SOURCE) "$(INTDIR)"
 
 
 

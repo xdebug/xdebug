@@ -17,7 +17,10 @@
  */
 
 #include <sys/types.h>
+
+#ifndef PHP_WIN32
 #include <unistd.h>
+#endif
 
 #include "php.h"
 #include "ext/standard/base64.h"
@@ -199,11 +202,10 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message)
 /*****************************************************************************
 ** Data returning functions
 */
-static xdebug_xml_node* get_symbol_contents(char* name, int name_length)
+static xdebug_xml_node* get_symbol_contents(char* name, int name_length TSRMLS_DC)
 {
 	HashTable           *st = NULL;
 	zval               **retval;
-	TSRMLS_FETCH();
 
 	st = XG(active_symbol_table);
 	if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
@@ -290,12 +292,14 @@ static xdebug_xml_node* return_breakpoint(function_stack_entry *i, char *filenam
 
 static xdebug_xml_node* return_stackframe(int nr)
 {
-	xdebug_llist_element *le = XDEBUG_LLIST_TAIL(XG(stack));
+	xdebug_llist_element *le;
 	int                   count_down = nr;
 	function_stack_entry *i; 
 	char                 *tmp_fname;
 	xdebug_xml_node      *tmp;
 	TSRMLS_FETCH();
+
+	le = XDEBUG_LLIST_TAIL(XG(stack));
 	
 	while (count_down) {
 		count_down--;
@@ -330,6 +334,7 @@ static int breakpoint_admin_add(xdebug_con *context, int type, char *key)
 {
 	xdebug_brk_admin *admin = xdmalloc(sizeof(xdebug_brk_admin));
 	char             *hkey;
+	TSRMLS_FETCH();
 
 	XG(breakpoint_count)++;
 	admin->id   = getpid() * 10000 + XG(breakpoint_count);
@@ -394,6 +399,7 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk = NULL;
 	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	TSRMLS_FETCH();
 
 	switch (type) {
 		case BREAKPOINT_TYPE_LINE:
@@ -436,6 +442,7 @@ static int breakpoint_remove(int type, char *hkey)
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk = NULL;
 	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	TSRMLS_FETCH();
 
 	switch (type) {
 		case BREAKPOINT_TYPE_LINE:
@@ -886,7 +893,7 @@ DBGP_FUNC(property_get)
 	}
 
 	XG(active_symbol_table) = EG(active_symbol_table);
-	var_data = get_symbol_contents(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1);
+	var_data = get_symbol_contents(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);
 	XG(active_symbol_table) = NULL;
 
 	if (var_data) {
@@ -911,8 +918,9 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 	char               *name = (char*) he->ptr;
 	xdebug_xml_node    *node = (xdebug_xml_node *) xml;
 	xdebug_xml_node    *contents;
+	TSRMLS_FETCH();
 
-	contents = get_symbol_contents(name, strlen(name) + 1);
+	contents = get_symbol_contents(name, strlen(name) + 1 TSRMLS_CC);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
@@ -923,7 +931,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 	}
 }
 
-static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(void *, xdebug_hash_element*))
+static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(void *, xdebug_hash_element*) TSRMLS_DC)
 {
 	struct function_stack_entry *i;
 	xdebug_hash                 *ht;
@@ -999,10 +1007,10 @@ DBGP_FUNC(context_get)
 	int res;
 
 	if (CMD_OPTION('d')) {
-		/* res = attach_local_vars(*retval, atol(CMD_OPTION('d')), attach_used_var_with_contents); */
+		/* res = attach_local_vars(*retval, atol(CMD_OPTION('d')), attach_used_var_with_contents TSRMLS_CC); */
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
 	} else {
-		res = attach_local_vars(*retval, 0, attach_used_var_with_contents);
+		res = attach_local_vars(*retval, 0, attach_used_var_with_contents TSRMLS_CC);
 	}
 	switch (res) {
 		case 1:
@@ -1151,7 +1159,7 @@ duplicate_opts:
 	return XDEBUG_ERROR_DUP_ARG;
 }
 
-int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval)
+int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval TSRMLS_DC)
 {
 	char *cmd;
 	int res;
@@ -1170,7 +1178,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 	command = lookup_cmd(cmd);
 	xdfree(cmd);
 	if (command) {
-		command->handler((xdebug_xml_node**) &retval, context, args);
+		command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
 		xdebug_dbgp_arg_dtor(args);
 		return command->cont;
 	} else {
@@ -1185,7 +1193,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.11 $";
+	return "$Revision: 1.12 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
@@ -1253,7 +1261,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		}
 
 		response = xdebug_xml_node_init("response");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
 		if (ret != 1) {
 			send_message(context, response);
 		}
@@ -1283,6 +1291,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 	int                 ret;
 	char               *option;
 	xdebug_xml_node     *response;
+	TSRMLS_FETCH();
 
 	errortype = error_type(type);
 /*
@@ -1307,7 +1316,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 		}
 
 		response = xdebug_xml_node_init("response");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
 		if (ret != 1) {
 			send_message(context, response);
 		}
@@ -1325,6 +1334,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	int    ret;
 	char  *option;
 	xdebug_xml_node *response;
+	TSRMLS_FETCH();
 
 	i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(stack));
 
@@ -1342,7 +1352,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 		}
 
 		response = xdebug_xml_node_init("response");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
 		if (ret != 1) {
 			send_message(context, response);
 		}
