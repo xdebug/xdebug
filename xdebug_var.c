@@ -318,7 +318,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			break;
 
 		case IS_STRING:
-			tmp_str = php_url_encode(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len);
+			tmp_str = xmlize(Z_STRVAL_PP(struc));
 			XDEBUG_STR_ADD(str, xdebug_sprintf("<string>%s</string>", tmp_str), 1);
 			efree (tmp_str);
 			break;
