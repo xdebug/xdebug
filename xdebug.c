@@ -688,7 +688,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			php_printf ("<tr><th bgcolor='#aaaaaa' colspan='3'>Call Stack</th></tr>\n");
 			php_printf ("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
 		} else {
-			printf ("\nCall Stack:\n");
+			php_printf ("\nCall Stack:\n");
 		}
 
 		if (PG(log_errors) && !is_cli) {
@@ -714,7 +714,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 					php_printf ("%10.4f ", 0.0);
 				}
 				php_printf ("%10lu ", i->memory);
-				printf ("%3d. %s(", i->level, tmp_name);
+				php_printf ("%3d. %s(", i->level, tmp_name);
 			}
 			if (PG(log_errors) && !is_cli) {
 				snprintf(log_buffer, 1024, "PHP %3d. %s(", i->level, tmp_name);
@@ -726,11 +726,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 				char *tmp_varname;
 
 				if (c) {
-					if (html) {
-						php_printf (", ");
-					} else {
-						printf (", ");
-					}
+					php_printf (", ");
 					if (PG(log_errors) && !is_cli) {
 						strcat(log_buffer, ", ");
 					}
@@ -742,7 +738,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
 				} else {
-					printf ("%s%s", tmp_varname, i->vars[j].value);
+					php_printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
 				if (PG(log_errors) && !is_cli) {
 					snprintf(
@@ -757,7 +753,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			if (html) {
 				php_printf (")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
 			} else {
-				printf (") %s:%d\n", i->filename, i->lineno);
+				php_printf (") %s:%d\n", i->filename, i->lineno);
 			}
 			if (PG(log_errors) && !is_cli) {
 				snprintf(
@@ -785,7 +781,7 @@ static inline void print_trace (int html TSRMLS_DC)
 		if (html) {
 			php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
 		} else {
-			printf ("\nFunction trace:\n");
+			php_printf ("\nFunction trace:\n");
 		}
 
 		if (html) {
@@ -840,9 +836,9 @@ static inline void print_trace (int html TSRMLS_DC)
 				}
 				php_printf ("%10lu ", i->memory);
 				for (j = 0; j < i->level; j++) {
-					printf ("  ");
+					php_printf ("  ");
 				}
-				printf ("-> %s(", tmp_name);
+				php_printf ("-> %s(", tmp_name);
 			}
 			xdfree (tmp_name);
 
@@ -851,11 +847,7 @@ static inline void print_trace (int html TSRMLS_DC)
 				char *tmp_varname;
 
 				if (c) {
-					if (html) {
-						php_printf (", ");
-					} else {
-						printf (", ");
-					}
+					php_printf (", ");
 				} else {
 					c = 1;
 				}
@@ -865,7 +857,7 @@ static inline void print_trace (int html TSRMLS_DC)
 					php_printf ("%s%s", tmp_varname,
 						php_escape_html_entities (i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
 				} else {
-					printf ("%s%s", tmp_varname, i->vars[j].value);
+					php_printf ("%s%s", tmp_varname, i->vars[j].value);
 				}
 				xdfree (tmp_varname);
 			}
@@ -880,7 +872,7 @@ static inline void print_trace (int html TSRMLS_DC)
 				/* Close row */
 				php_printf ("</tr>\n");
 			} else {
-				printf (") %s:%d\n", i->filename, i->lineno);
+				php_printf (") %s:%d\n", i->filename, i->lineno);
 			}
 		}
 
