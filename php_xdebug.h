@@ -120,7 +120,9 @@ typedef struct xdebug_var {
 #define XDEBUG_PROFILER_FS_AV  3   /* sorted by avg. exection time */
 #define XDEBUG_PROFILER_FS_SUM 4   /* sorted by total time taken by each function */
 #define XDEBUG_PROFILER_FS_NC  5   /* sorted by total number of function calls */
-#define XDEBUG_PROFILER_TREE   6   /* hierarchical view of the functions */
+#define XDEBUG_PROFILER_SD_LBL 6   /* hierarchical view of the functions, sorted by line numbers */
+#define XDEBUG_PROFILER_SD_CPU 7   /* hierarchical view of the functions, sorted by cpu usage */
+#define XDEBUG_PROFILER_SD_NC  8   /* hierarchical view of the functions, sorted by function calls */
 
 typedef struct xdebug_func {
 	char *class;
@@ -148,10 +150,16 @@ typedef struct function_stack_entry {
 	/* used for profiling */
 	double       time_taken;	
 	unsigned int f_calls;
+	void         *sub_func;
 
 	int   level;
 	int   refcount;
 } function_stack_entry;
+
+typedef struct xdebug_tree_p {
+	int n_func;
+	function_stack_entry **subf;
+} xdebug_tree_p;
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           level;

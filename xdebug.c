@@ -180,11 +180,13 @@ inline static double get_mtimestamp()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg)
 {
-	xg->stack          = NULL;
-	xg->level          = 0;
-	xg->do_trace       = 0;
-	xg->do_profile     = 0;
-	xg->profiler_trace = 0;
+	xg->stack                = NULL;
+	xg->level                = 0;
+	xg->do_trace             = 0;
+	xg->do_profile           = 0;
+	xg->profiler_trace       = 0;
+	xg->total_execution_time = 0;
+	xg->total_compiling_time = 0;
 }
 
 PHP_MINIT_FUNCTION(xdebug)
@@ -210,7 +212,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_FS_AV);
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_FS_SUM);
 	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_FS_NC);
-	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_TREE);
+	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_SD_LBL);
+	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_SD_CPU);
+	XDEBUG_REGISTER_LONG_CONSTANT(XDEBUG_PROFILER_SD_NC);
 
 	return SUCCESS;
 }
@@ -571,8 +575,16 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		}
 	}
 
-	XG(total_execution_time) = get_mtimestamp();
- 	old_execute (op_array TSRMLS_CC);
+	if (XG(do_profile)) {
+		fse->time_taken = get_mtimestamp();
+		if (!XG(total_execution_time)) {
+			XG(total_execution_time) += fse->time_taken;
+		}
+		old_execute (op_array TSRMLS_CC);
+		fse->time_taken = get_mtimestamp() - fse->time_taken;
+	} else {
+		old_execute (op_array TSRMLS_CC);
+	}
 	
 	xdebug_llist_remove (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
@@ -595,14 +607,13 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	}
 	
 	if (XG(do_profile)) {
-		double s_time, e_time;
-		s_time = get_mtimestamp();
+		fse->time_taken = get_mtimestamp();
 		execute_internal(current_execute_data, return_value_used TSRMLS_CC);
-		e_time = get_mtimestamp();
-		fse->time_taken = e_time - s_time;
+		fse->time_taken = get_mtimestamp() - fse->time_taken;
 	} else {
 		execute_internal(current_execute_data, return_value_used TSRMLS_CC);
-	}	
+	}
+		
 	xdebug_llist_remove (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
 }
@@ -780,6 +791,148 @@ inline static int avg_time_cmp (function_stack_entry **p1, function_stack_entry 
 	}
 }
 
+static inline void print_tree_profile (int html, int mode TSRMLS_DC)
+{
+	xdebug_llist_element *le;
+	
+	if (XG(trace) && XDEBUG_LLIST_COUNT(XG(trace))) {
+		function_stack_entry **list, **start_p, *ent, *pent = NULL;
+		unsigned int n_elem = XDEBUG_LLIST_COUNT(XG(trace));
+		int j, i;
+		xdebug_tree_p **mlist;
+		FILE *data_output;
+		int max_level = XG(max_nesting_level);
+		int level = 0, lowest_level = 0, current_level;
+		double total_time = get_mtimestamp() - XG(total_execution_time);
+		double total_function_exec = 0.0;
+		char buffer[1024], buffer2[1024];
+		int cur_fun_len, max_func_len = 0;
+		
+		list = (function_stack_entry **) xdmalloc(n_elem * sizeof(function_stack_entry *));
+		mlist = (xdebug_tree_p **) xdcalloc(max_level, sizeof(xdebug_tree_p *));
+		
+		start_p = &list[0];
+		
+		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+			/* skip the last function because it is our very own profile function.
+			 * since it is the last function, we may as well stop the loop.
+			 */
+			if (XDEBUG_LLIST_IS_TAIL(le)) {
+				break;
+			}
+			
+			ent = XDEBUG_LLIST_VALP(le);
+			
+			/* merge commonalities */
+			if (pent && pent->lineno == ent->lineno && !strcmp(pent->function.function, ent->function.function)) {
+				pent->f_calls++;
+				pent->time_taken += ent->time_taken;
+				continue;
+			} else {
+				if (ent->function.function && (max_func_len < (cur_fun_len = strlen(ent->function.function)))) {
+					max_func_len = cur_fun_len;
+				}
+			}
+			
+			current_level = ent->level - 2;
+			
+			if (current_level > level) {
+				pent->sub_func = ent;
+				if (lowest_level < current_level) {
+					lowest_level = current_level;
+				}
+			}
+		
+			if (!mlist[current_level]) { /* mmm... memory, tasty */
+				mlist[current_level] = (xdebug_tree_p *) xdmalloc(sizeof(xdebug_tree_p *));
+				mlist[current_level]->subf = (function_stack_entry **) xdmalloc(n_elem * sizeof(function_stack_entry *));
+				mlist[current_level]->n_func = 0;
+			}
+		
+			pent = mlist[current_level]->subf[mlist[current_level]->n_func] = XDEBUG_LLIST_VALP(le);
+			pent->f_calls = 1;
+			pent->sub_func = NULL;
+			mlist[current_level]->n_func++;
+		}
+		
+		lowest_level++;
+		
+		switch (mode) 
+		{
+			case XDEBUG_PROFILER_SD_CPU:
+				for (j = 0; j < lowest_level; j++) {
+					qsort(mlist[j]->subf, mlist[j]->n_func, sizeof(function_stack_entry *), (int (*)()) &time_taken_cmp);
+				}
+				snprintf(buffer, sizeof(buffer) - 1, "Stack-Dump Profile (sorted by execution time):");
+				break;
+			case XDEBUG_PROFILER_SD_NC:
+				for (j = 0; j < lowest_level; j++) {
+					qsort(mlist[j]->subf, mlist[j]->n_func, sizeof(function_stack_entry *), (int (*)()) &n_calls_cmp);
+				}	
+				snprintf(buffer, sizeof(buffer) - 1, "Stack-Dump Profile (sorted by number of calls to each function):");
+				break;
+			default:
+				snprintf(buffer, sizeof(buffer) - 1, "Stack-Dump Profile (sorted by line numbers):");
+				break;	
+		}
+		
+		if (!html) {
+			if (XG(profile_file)) {
+				data_output = XG(profile_file);
+			} else {
+				data_output = stdout;
+			}
+			max_func_len += (lowest_level - 1) * 2;
+			snprintf(buffer2, sizeof(buffer2) - 1, "-> %%-%ds  %%-5u  %%10.10f  %%s:%%d\n", max_func_len);
+			
+			fprintf(data_output, "\n%s\n", buffer);
+			fprintf(data_output, "-----------------------------------------------------------------------------------\n");
+			snprintf(buffer, sizeof(buffer) - 1, "%%-%ds  %%-%ds  %%-%ds  %%s\n", max_func_len + 3, 5, 20);
+			fprintf(data_output, buffer, "Function", "#", "Time Taken", "Location");
+			fprintf(data_output, "-----------------------------------------------------------------------------------\n");
+		} else {
+			php_printf("<br />\n<table border='1' cellspacing='0'>\n");
+			php_printf("<tr><th bgcolor='#aaaaaa' colspan='4'>%s</th></tr>\n", buffer);
+			php_printf("<tr><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Number of Calls</th><th bgcolor='#cccccc'>Time Taken</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+		}
+		
+		for (i = 0; i < mlist[0]->n_func; i++) {
+			ent = mlist[0]->subf[i];
+			if (!html) {
+				fprintf(data_output, buffer2, ent->function.function, ent->f_calls, ent->time_taken, ent->filename, ent->lineno);
+			} else {
+				php_printf("<tr><td>-&gt; %s</td><td>%u</td><td>%10.10f</td><td>%s:%d</td></tr>",
+					ent->function.function, ent->f_calls, ent->time_taken, ent->filename, ent->lineno);
+			}	
+			total_function_exec += ent->time_taken;
+			while (ent->sub_func) {
+				ent = ent->sub_func;
+				
+				if (!html) {
+					j = (ent->level - 2) * 2;
+					snprintf(buffer, sizeof(buffer) - 1, "%%%ds-> %%-%ds  %%-5u  %%10.10f  %%s:%%d\n", j, max_func_len - j);
+					fprintf(data_output, buffer, "", ent->function.function, ent->f_calls, ent->time_taken, ent->filename, ent->lineno);
+				} else {
+					php_printf("<tr><td>");
+					for (j = 0; j <(ent->level - 2); j++) {
+						 php_printf("&nbsp;&nbsp;");
+					}
+					php_printf("-&gt; %s</td><td>%u</td><td>%10.10f</td><td>%s:%d</td></tr>",
+						ent->function.function, ent->f_calls, ent->time_taken, ent->filename, ent->lineno);
+				}	
+			}
+		}
+		
+		print_profile_footer(html, total_function_exec, total_time TSRMLS_DC);
+		
+		for (j = 0; j < lowest_level; j++) {
+			xdfree(mlist[j]->subf);
+			xdfree(mlist[j]);
+		}
+		xdfree(list);
+	}
+}
+
 static inline void print_simple_profile (int html, int mode TSRMLS_DC)
 {
 	xdebug_llist_element *le;
@@ -791,7 +944,7 @@ static inline void print_simple_profile (int html, int mode TSRMLS_DC)
 		int i = 0;
 		char user_func_ident;
 		double total_function_exec = 0.0;
-		int cur_fun_len, max_func_len=0;
+		int cur_fun_len, max_func_len = 0;
 		FILE *data_output;
 		char buffer[255];
 		int fld1;
@@ -803,11 +956,14 @@ static inline void print_simple_profile (int html, int mode TSRMLS_DC)
 		start_p = &list[0];
 		
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-			ent = XDEBUG_LLIST_VALP(le);
-			/* skip xdebug functions, we are too cool to be timed */
-			if (ent->function.function && (strcmp(ent->function.function, "xdebug_dump_function_profile") == 0)) {
-				continue;
+			/* skip the last function because it is our very own profile function.
+			 * since it is the last function, we may as well stop the loop.
+			 */
+			if (XDEBUG_LLIST_IS_TAIL(le)) {
+				break;
 			}
+		
+			ent = XDEBUG_LLIST_VALP(le);
 			
 			/* merge calls to the same function on the same line into a single entry */
 			if (i && start_p[i-1]->lineno == ent->lineno && !strcmp(start_p[i-1]->function.function, ent->function.function)) {
@@ -817,7 +973,7 @@ static inline void print_simple_profile (int html, int mode TSRMLS_DC)
 				start_p[i] = XDEBUG_LLIST_VALP(le);
 				start_p[i]->f_calls = 1;
 				
-				if (max_func_len < (cur_fun_len = strlen(start_p[i]->function.function))) {
+				if (start_p[i]->function.function && (max_func_len < (cur_fun_len = strlen(start_p[i]->function.function)))) {
 					max_func_len = cur_fun_len;
 				}
 				
@@ -825,7 +981,7 @@ static inline void print_simple_profile (int html, int mode TSRMLS_DC)
 			}
 		}
 		
-		n_elem = i - 1;
+		n_elem = i;
 		
 		if (!html) {
 			if (XG(profile_file)) {
@@ -851,9 +1007,9 @@ static inline void print_simple_profile (int html, int mode TSRMLS_DC)
 		}
 
 		if (html) {
-			php_printf ("<br />\n<table border='1' cellspacing='0'>\n");
-			php_printf ("<tr><th bgcolor='#aaaaaa' colspan='4'>%s</th></tr>\n", buffer);
-			php_printf ("<tr><th bgcolor='#cccccc'>Number of Calls</th><th bgcolor='#cccccc'>Time Taken</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+			php_printf("<br />\n<table border='1' cellspacing='0'>\n");
+			php_printf("<tr><th bgcolor='#aaaaaa' colspan='4'>%s</th></tr>\n", buffer);
+			php_printf("<tr><th bgcolor='#cccccc'>Number of Calls</th><th bgcolor='#cccccc'>Time Taken</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
 		} else {
 			fld1 = sizeof("Function") - 1;
 		
@@ -874,7 +1030,9 @@ static inline void print_simple_profile (int html, int mode TSRMLS_DC)
 			ent = list[i];
 			
 			user_func_ident = ent->user_defined != XDEBUG_EXTERNAL ? ' ' : '*';
-			total_function_exec += ent->time_taken;
+			if (ent->level == 2) {
+				total_function_exec += ent->time_taken;
+			}	
 			
 			if (html) {
 				php_printf("<tr><td bgcolor='#ffffff'>%-5u</td><td bgcolor='#ffffff'>%10.10f</td><td bgcolor='#ffffff'>%c%s</td><td bgcolor='#ffffff'>%s:%d</td></tr>", 
@@ -915,21 +1073,28 @@ static inline void print_fsum_profile (int html, int mode TSRMLS_DC)
 		start_p = &list[0];
 		
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-			ent = XDEBUG_LLIST_VALP(le);
-			if (ent->function.function && (strcmp(ent->function.function, "xdebug_dump_function_profile") == 0)) {
-				continue;
+			/* skip the last function because it is our very own profile function.
+			 * since it is the last function, we may as well stop the loop.
+			 */
+			if (XDEBUG_LLIST_IS_TAIL(le)) {
+				break;
 			}
+		
+			ent = XDEBUG_LLIST_VALP(le);
 			
-			if (xdebug_hash_find(function_hash, ent->function.function, strlen(ent->function.function), (void *) &found_ent)) {
+			if (ent->function.function && xdebug_hash_find(function_hash, ent->function.function, strlen(ent->function.function), (void *) &found_ent)) {
 				found_ent->time_taken += ent->time_taken;
 				found_ent->f_calls++;
 			} else {
 				start_p[i] = XDEBUG_LLIST_VALP(le);
 				start_p[i]->f_calls = 1;
-				xdebug_hash_add(function_hash, ent->function.function, strlen(ent->function.function), start_p[i]);
-				if (max_func_len < (cur_fun_len = strlen(start_p[i]->function.function))) {
-					max_func_len = cur_fun_len;
-				}
+				
+				if (ent->function.function) { 
+					xdebug_hash_add(function_hash, ent->function.function, strlen(ent->function.function), start_p[i]);
+					if (max_func_len < (cur_fun_len = strlen(start_p[i]->function.function))) {
+						max_func_len = cur_fun_len;
+					}
+				}	
 				i++;
 			}
 		}
@@ -983,7 +1148,9 @@ static inline void print_fsum_profile (int html, int mode TSRMLS_DC)
 			ent = list[i];
 			
 			user_func_ident = ent->user_defined != XDEBUG_EXTERNAL ? ' ' : '*';
-			total_function_exec += ent->time_taken;
+			if (ent->level == 2) {
+				total_function_exec += ent->time_taken;
+			}
 			
 			if (html) {
 				php_printf("<tr><td bgcolor='#ffffff'>%c%s</td><td bgcolor='#ffffff'>%u</td><td bgcolor='#ffffff'>%10.10f</td><td bgcolor='#ffffff'>%10.10f</td></tr>",
@@ -1195,7 +1362,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	op_array = old_compile_file (file_handle, type TSRMLS_CC);
 	time_e = get_mtimestamp();
 		
-	XG(total_compiling_time) = time_e - time_s;
+	XG(total_compiling_time) += time_e - time_s;
 
 	return op_array;
 }
@@ -1466,8 +1633,10 @@ PHP_FUNCTION(xdebug_dump_function_profile)
 			case XDEBUG_PROFILER_FS_NC:
 				print_fsum_profile(PG(html_errors), profile_flag TSRMLS_DC);
 				break;
-			case XDEBUG_PROFILER_TREE:
-				php_error(E_NOTICE, "Not yet implemented\n");
+			case XDEBUG_PROFILER_SD_LBL:
+			case XDEBUG_PROFILER_SD_CPU:
+			case XDEBUG_PROFILER_SD_NC:
+				print_tree_profile(PG(html_errors), profile_flag TSRMLS_DC);
 				break;
 			default:
 				php_error(E_NOTICE, "Invalid profiling flag\n");

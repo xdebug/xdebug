@@ -8,7 +8,6 @@ For 1.2.0:
     o reading super globals
   * watches / conditional breakpoints
 - Profiling
-  * Stack-dump profiling
   * External data sources monitor
      create a hash-list of SQL & execution functions that can be 
      compared against the functions used in the code.
