@@ -38,10 +38,8 @@ int main(int argc, char *argv[])
 	int				client_in_len;
 	int				fd;
 	struct sockaddr_in client_in;
-	struct timeval	 timeout;
 	struct in_addr	*iaddr;
 	char *buffer;
-	ssize_t l;
 	char *cmd;
 	fd_buf cxt = { NULL, 0 };
 	fd_buf std_in = { NULL, 0 };
@@ -75,7 +73,7 @@ int main(int argc, char *argv[])
 			if (buffer[0] == '?') {
 				printf ("(%s) ", &buffer[1]);
 				fflush(stdout);
-				if (cmd = fd_read_line (0, &std_in)) {
+				if ((cmd = fd_read_line (0, &std_in))) {
 					if (send (fd, cmd, strlen(cmd), MSG_NOSIGNAL) == -1) {
 						break;
 					}

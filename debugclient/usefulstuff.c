@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "usefulstuff.h"
 
 #define READ_BUFFER_SIZE 128

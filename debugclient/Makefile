@@ -1,2 +1,3 @@
 all:
-	gcc -o debugclient main.c usefulstuff.c
+	gcc -Wall -g -o debugclient main.c usefulstuff.c
+
