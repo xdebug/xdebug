@@ -301,7 +301,6 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
-	int       tmp_len;
 
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
