@@ -3,8 +3,8 @@ Sun, Nov 28, 2004 - xdebug 2.0.0beta2
 	- DBGP: Added error messages to returned errors (in most cases)
   
 + Added new functions:
-	- Added a function "xdebug_debug_zval" to debug zvals by printing its
-	  refcounts and is_ref values.
+	- xdebug_debug_zval() to debug zvals by printing its refcounts and is_ref
+	  values.
   
 = Changed features:
 	- xdebug_code_coverage_stop() will now clean up the code coverage array,
