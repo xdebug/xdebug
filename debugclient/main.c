@@ -49,7 +49,8 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define VERSION "0.7.2"
+#define VERSION      "0.8.0"
+#define DEFAULT_PORT 17869
 
 #ifdef HAVE_LIBEDIT
 
@@ -110,16 +111,18 @@ void handle_sigterm(int i)
 
 int main(int argc, char *argv[])
 {
-	int port = 17869;
-	int ssocket = 0;
+	int                 port = DEFAULT_PORT; /* Port number to listen for connections */
+	int                 ssocket = 0;         /* Socket file descriptor */
 	struct sockaddr_in  server_in;
-	int                 fd;
 	struct sockaddr_in  client_in;
 	int                 client_in_len;
+	int                 fd;                  /* Filedescriptor for userinput */
+	fd_buf              cxt = { NULL, 0 };
 	struct in_addr     *iaddr;
-	char *buffer;
-	const char *cmd;
-	fd_buf cxt = { NULL, 0 };
+	char               *buffer;              /* Buffer with data from the server */
+	const char         *cmd;                 /* Command to send to the server */
+	char               *prev_cmd = NULL;     /* Last send command to the server */
+	int                 opt;                 /* Current option during parameter parsing */
 
 #ifdef HAVE_LIBEDIT
 	int num = 0;
@@ -132,6 +135,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef WIN32
+	/* Initialise Windows' WinSock library */
 	WORD               wVersionRequested;
 	WSADATA            wsaData;
 
@@ -139,25 +143,57 @@ int main(int argc, char *argv[])
 	WSAStartup(wVersionRequested, &wsaData);
 #endif
 
+	/* Display copyright notice and version number */
 	printf("Xdebug GDB emulation client (%s)\n", VERSION);
-	printf("Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
+	printf("Copyright 2002-2003 by Derick Rethans.\n");
 
+	/* Option handling */
+	while (1) {
+		opt = getopt(argc, argv, "hp:v");
+
+		if (opt == -1) {
+			break;
+		}
+
+		switch (opt) {
+			case 'h':
+				printf("\nUsage:\n");
+				printf("\tdebugclient [-h] [-p port] [-v]\n");
+				printf("\t-h\tShow this help\n");
+				printf("\t-p\tSpecify the port to listen on (default = 17869)\n");
+				printf("\t-v\tShow version number and exit\n");
+				exit(0);
+				break;
+			case 'v':
+				exit(0);
+				break;
+			case 'p':
+				port = atoi(optarg);
+				printf("Listening on TCP port %d.\n", port);
+				break;
+		}
+	}
+
+	/* Main loop that listens for connections from the debug client and that
+	 * does all the communications handling. */
 	while (1) {
 		ssocket = socket(AF_INET, SOCK_STREAM, 0);
 		if (ssocket < 0) {
 			fprintf(stderr, "socket: couldn't create socket\n");
 			exit(-1);
 		}
-	
+
 		memset(&server_in, 0, sizeof(struct sockaddr));
 		server_in.sin_family      = AF_INET;
 		server_in.sin_addr.s_addr = htonl(INADDR_ANY);
 		server_in.sin_port        = htons((unsigned short int) port);
-	
+
+		/* Loop until we can bind to the listening socket. */
 		while (bind(ssocket, (struct sockaddr *) &server_in, sizeof(struct sockaddr_in)) < 0) {
-			fprintf (stderr, "bind: couldn't bind AF_INET socket?\n");
-			sleep (5);
+			fprintf(stderr, "bind: couldn't bind AF_INET socket?\n");
+			sleep(5);
 		}
+
 		if (listen(ssocket, 0) == -1) {
 			fprintf(stderr, "listen: listen call failed\n");
 			exit(-2);
@@ -200,6 +236,19 @@ int main(int argc, char *argv[])
 				if ((cmd = fd_read_line(0, &std_in, FD_RL_FILE))) {
 #endif
 
+					/* If there is a 'previous' command, and when the command
+					 * just consists of an "enter", then we set the command to
+					 * the previous command. */
+					if (prev_cmd && strlen(cmd) == 0 || (strlen(cmd) == 1 && cmd[0] == '\n')) {
+						cmd = prev_cmd;
+					} else {
+						if (prev_cmd) {
+							free(prev_cmd);
+						}
+						prev_cmd = strdup(cmd);
+					}
+
+					/* Send the command to the debug server */
 					if (send(fd, cmd, strlen(cmd), MSG_NOSIGNAL) == -1) {
 						break;
 					}
@@ -226,6 +275,10 @@ int main(int argc, char *argv[])
 		}
 		printf("Disconnect\n\n");
 		close(fd);
+		if (prev_cmd) {
+			free(prev_cmd);
+			prev_cmd = NULL;
+		}
 
 		/* Sleep some time to reset the TCP/IP connection */
 		sleep(1);
