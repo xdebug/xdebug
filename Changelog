@@ -1,3 +1,8 @@
+Wed Sep 10 18:10:18 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO:
+- Update of NEWS
+- Moved TODO list to http://bugs.xdebug.org
+
 Sun Sep 7 15:28:01 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/assert_test.phpt
 /xdebug/tests/auto_trace.phpt
