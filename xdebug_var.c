@@ -70,6 +70,13 @@ void XDEBUG_STR_CHOP(xdebug_str *xs, int c)
 	}
 }
 
+void XDEBUG_STR_FREE(xdebug_str *s)
+{
+	if (s->d) {
+		xdfree(s->d);
+	}
+}
+
 char *error_type(int type)
 {
 	switch (type) {
@@ -325,6 +332,6 @@ char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			break;
 
 		default:
-			return xdstrdup ("{unknown, please report}");
+			return xdstrdup ("{unknown}");
 	}
 }

@@ -3,11 +3,19 @@ TODO
 
 For 1.2.0:
 - Update gdb debugging capabilities
-  * accessing data
-    o modifying variables
   * watches / conditional breakpoints
 - Bug fixing
   * Disconnect bug
+- Profiling
+  * Add another profiling mode that allows for detailed function analysis.
+- Other
+  * add trace code to trace which files/lines have been touched (to check
+	code coverage).
+  * finish custom error handler support
+
+For later:
+- Additions
+   * Provide codes for messages (for localization) including parameters
 - Profiling
   * External data sources monitor
      create a hash-list of SQL & execution functions that can be 
@@ -15,12 +23,3 @@ For 1.2.0:
      If this external call takes > a certain pre-set time show the
      parameter passed to the function so that a person can optimize the
      query or the utility that is being called.
-  * Add another profiling mode that allows for detailed function analysis.
-  * Separate the profiling code into a file of its own.
-- Additions
-  * trace code to trace which files/lines have been touched (to check
-    code coverage).
-
-For later:
-- Additions
-   * Provide codes for messages (for localization) including parameters

@@ -78,6 +78,8 @@ PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_function_trace);
 PHP_FUNCTION(xdebug_dump_function_trace);
 
+PHP_FUNCTION(xdebug_set_error_handler);
+
 #if MEMORY_LIMIT
 PHP_FUNCTION(xdebug_memory_usage);
 #endif
@@ -159,6 +161,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     do_trace;
 	char         *manual_url;
 	FILE         *trace_file;
+	char         *error_handler;
 
 	/* used for profiling */
 	double 	      total_execution_time;

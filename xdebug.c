@@ -179,6 +179,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg)
 	xg->profiler_trace       = 0;
 	xg->total_execution_time = 0;
 	xg->total_compiling_time = 0;
+	xg->error_handler        = NULL;
 }
 
 PHP_MINIT_FUNCTION(xdebug)
@@ -273,6 +274,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(stack)         = xdebug_llist_alloc (stack_element_dtor);
 	XG(trace_file)    = NULL;
 	XG(output_dir)    = NULL;
+	XG(error_handler) = NULL;
 
 	if (XG(default_enable)) {
 		zend_error_cb = new_error_cb;
@@ -324,6 +326,10 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	if (XG(trace_file)) {
 		fprintf (XG(trace_file), "End of function trace\n");
 		fclose (XG(trace_file));
+	}
+
+	if (XG(error_handler)) {
+		efree(XG(error_handler));
 	}
 
 	XG(level)    = 0;
@@ -395,7 +401,7 @@ xdebug_func xdebug_build_fname(zend_execute_data *edata, zend_op_array *new_op_a
 					tmp.type = XFUNC_REQUIRE_ONCE;
 					break;
 				default:
-					assert(0);
+					tmp.type = XFUNC_UNKNOWN;
 					break;
 			}
 		}
@@ -890,8 +896,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	error_type_str = error_type(type);
 
-	if (EG(error_reporting) & type) {
-		print_stack (!(strcmp ("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+	if (XG(error_handler)) { /* If an error handler is set, use it */
+		call_handler(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+
+	} else if (EG(error_reporting) & type) { /* Otherwise print the default stack trace */
+		print_stack(!(strcmp ("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 	}
 
 	/* Log to logger */
@@ -1256,6 +1265,21 @@ PHP_FUNCTION(xdebug_memory_usage)
 	RETURN_LONG(AG(allocated_memory));
 }
 #endif
+
+PHP_FUNCTION(xdebug_set_error_handler)
+{
+	char *handler;
+	int   handler_len;
+
+	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC, "s", &handler, &handler_len) == FAILURE) {
+		return;
+	}
+
+	if (XG(error_handler)) {
+		efree(XG(error_handler));
+	}
+	XG(error_handler) = estrndup(handler, handler_len);
+}
 
 /*************************************************************************************************************************************/
 

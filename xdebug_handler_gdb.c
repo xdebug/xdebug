@@ -39,6 +39,7 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_kill(xdebug_con *context, xdebug_arg *args);
@@ -87,6 +88,9 @@ static xdebug_cmd commands_breakpoint[] = {
 };
 
 static xdebug_cmd commands_data[] = {
+	{ "eval",       0, "eval",                                       xdebug_handle_eval,       1,
+		"Evaluation PHP code"
+	},
 	{ "show",       0, "show",                                       xdebug_handle_show,       1,
 		"Show a list of all variables"
 	},
@@ -594,6 +598,42 @@ char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
 		}
 	}
 	return NULL;
+}
+
+char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
+{
+	int        i;
+	xdebug_str buffer = {0, 0, NULL};
+	zval       retval;
+	char      *ret_value;
+	int        old_error_reporting;
+	TSRMLS_FETCH();
+
+	/* Remember error reporting level */
+	old_error_reporting = EG(error_reporting);
+	EG(error_reporting) = 0;
+	
+	/* Concat all arguments back together */
+	XDEBUG_STR_ADD(&buffer, args->args[0], 0);
+	
+	for (i = 1; i < args->c; i++) {
+		XDEBUG_STR_ADD(&buffer, " ", 0);
+		XDEBUG_STR_ADD(&buffer, args->args[i], 0);
+	}
+	
+	SENDMSG(context->socket, xdebug_sprintf("Evaluating '%s' ", buffer.d));
+	if (zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC) == FAILURE) {
+		XDEBUG_STR_FREE(&buffer);
+		EG(error_reporting) = old_error_reporting;
+		return xdstrdup("eval");
+	} else {
+		XDEBUG_STR_FREE(&buffer);
+		EG(error_reporting) = old_error_reporting;
+		ret_value = get_zval_value(&retval);
+		SENDMSG(context->socket, xdebug_sprintf("returned: %s\n", ret_value));
+		xdfree(ret_value);
+		return NULL;
+	}
 }
 
 char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args)
