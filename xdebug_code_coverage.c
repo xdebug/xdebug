@@ -109,6 +109,15 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
 {
+	long cleanup = 1;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cleanup) == FAILURE) {
+		return;
+	}
+	if (cleanup) {
+		xdebug_hash_destroy(XG(code_coverage));
+		XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+	}
 	XG(do_code_coverage) = 0;
 }
 
