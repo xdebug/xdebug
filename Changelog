@@ -1,3 +1,7 @@
+Wed Aug 20 16:23:57 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c:
+- One other minor fix
+
 Wed Aug 20 16:21:58 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_superglobals.c:
