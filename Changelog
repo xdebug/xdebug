@@ -1,3 +1,8 @@
+Tue Mar 30 22:07:49 CEST 2004 Harald Radi <harald.radi@nme.at>
+xdebug_handler_dbgp.c:
+- Fixed uri to local file path conversion in source command
+- Fixed format strings that caused xdebug to segfault
+
 Fri Mar 26 17:58:32 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Fixed profiler crash with includes.
