@@ -16,39 +16,16 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_XDEBUG_HANDLERS_H__
-#define __HAVE_XDEBUG_HANDLERS_H__
+#ifndef __HAVE_XDEBUG_SOCKET_H__
+#define __HAVE_XDEBUG_SOCKET_H__
 
-#include "php_xdebug.h"
-#include "xdebug_com.h"
-#include "xdebug_llist.h"
-#include "xdebug_socket.h"
+typedef struct _xdebug_socket_buf xdebug_socket_buf;
 
-typedef struct _xdebug_remote_handler       xdebug_remote_handler;
-typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
-typedef struct _xdebug_con xdebug_con;
-
-struct _xdebug_con {
-	int                    socket;
-	void                  *options;
-	xdebug_remote_handler *handler;
-	xdebug_socket_buf     *buffer;
+struct _xdebug_socket_buf {
+	char                  *buffer;
+	int                    buffer_size;
 };
 
-struct _xdebug_remote_handler {
-	/* Init / deinit */
-	int (*remote_init)(xdebug_con *h, int mode);
-	int (*remote_deinit)(xdebug_con *h);
-
-	/* Stack messages */
-	int (*remote_error)(xdebug_con *h, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
-};
-
-struct _xdebug_remote_handler_info {
-	char                  *name;
-	xdebug_remote_handler  handler;
-};
-
-xdebug_remote_handler* xdebug_handler_get (char* mode);
+char* xdebug_socket_read_line(int socket, xdebug_socket_buf *context);
 
 #endif

@@ -153,51 +153,6 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 	}
 }
 
-static char* xdebug_socket_read_line(xdebug_con *context)
-{
-	int size = 0, newl = 0, nbufsize = 0;
-	char *tmp;
-	char *tmp_buf = NULL;
-	char *ptr;
-	char buffer[128];
-
-	if (!context->buffer) {
-		context->buffer = xdcalloc(1,1);
-		context->buffer_size = 0;
-	}
-	while ((ptr = memchr(context->buffer, '\n', context->buffer_size)) == NULL) {
-		ptr = context->buffer + context->buffer_size;
-		newl = read(context->socket, buffer, 32);
-		if (newl > 0) {
-			context->buffer = xdrealloc(context->buffer, context->buffer_size + newl);
-			memcpy(ptr, buffer, newl);
-			context->buffer_size += newl;
-		} else {
-/*			xdfree(context->buffer);
-			context->buffer = NULL;
-*/			return NULL;
-		}
-	} ;
-
-	ptr = memchr(context->buffer, '\n', context->buffer_size);
-	size = ptr - context->buffer;
-	/* Copy that line into tmp */
-	tmp = xdmalloc(size + 1);
-	tmp[size] = '\0';
-	memcpy(tmp, context->buffer, size);
-	/* Rewrite existing buffer */
-	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
-		char *tmp_buf = xdmalloc(nbufsize + 1);
-		memcpy(tmp_buf, ptr + 1, nbufsize);
-		tmp_buf[nbufsize] = 0;
-	}
-	xdfree(context->buffer);
-	context->buffer = tmp_buf;
-	context->buffer_size = context->buffer_size - (size + 1);
-	/* Return normal line */
-	return tmp;
-}
-
 static xdebug_cmd* scan_cmd(xdebug_cmd *ptr, char *line)
 {
 	while (ptr->name) {
@@ -348,10 +303,15 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	char *error = NULL;
 
 	SSEND(context->socket, "hello\n");
-	context->buffer = NULL;
-	SSEND(context->socket, "?init\n");
+	context->buffer = xdmalloc(sizeof(xdebug_socket_buf));
+	context->buffer->buffer = NULL;
+	context->buffer->buffer_size = 0;
 	do {
-		option = xdebug_socket_read_line(context);
+		SSEND(context->socket, "?init\n");
+		option = xdebug_socket_read_line(context->socket, context->buffer);
+		if (!option) {
+			return 0;
+		}
 		printf ("[%s]\n", option);
 		ret = xdebug_gdb_parse_option(context, option, XDEBUG_INIT | XDEBUG_BREAKPOINT | XDEBUG_STATUS, "run", (char**) &error);
 		if (error || ret == -1) {
@@ -365,13 +325,9 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 		} else {
 			SSEND(context->socket, "+OK\n");
 		}
-	} while (-1 != ret);
+	} while (1 != ret);
 
-	if (ret == -1) {
-		return 0;
-	} else {
-		return 1;
-	}
+	return 1;
 }
 
 int xdebug_gdb_deinit(xdebug_con *context)
@@ -436,7 +392,7 @@ int xdebug_gdb_error(xdebug_con *h, int type, char *message, const char *locatio
 	xdfree(hostname);
 	do {
 		SSEND(h->socket, "?cmd\n");
-		option = xdebug_socket_read_line(h);
+		option = xdebug_socket_read_line(h->socket, h->buffer);
 		printf ("[%s]\n", option);
 		SSEND(h->socket, "+OK\n");
 	} while (!option || strcmp(option, "cont") != 0);
