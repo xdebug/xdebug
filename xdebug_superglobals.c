@@ -29,13 +29,17 @@ void dump_dtor(void *user, void *ptr)
 	free(ptr);
 }
 
-static void dump_hash_elem(zval *z, char *name, char *elem, int html, int log TSRMLS_DC)
+static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html, int log TSRMLS_DC)
 {
 	char buffer[1024];
 	int  len;
 
 	if (html) {
-		php_printf("<tr><td colspan='2' align='right' bgcolor='#ffffcc'>$%s['%s'] =</td>", name, elem);
+		if (elem) {
+			php_printf("<tr><td colspan='2' align='right' bgcolor='#ffffcc'>$%s['%s'] =</td>", name, elem);
+		} else {
+			php_printf("<tr><td colspan='2' align='right' bgcolor='#ffffcc'>$%s[%ld] =</td>", name, index);
+		}
 	}
 
 	if (z != NULL) {
@@ -90,7 +94,11 @@ static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_
 	tsrm_ls = va_arg(args, void ***);
 #endif
 
-	dump_hash_elem(*((zval **) pDest), name, hash_key->arKey, html, log TSRMLS_CC);
+	if (hash_key->nKeyLength == 0) {
+		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, log TSRMLS_CC);
+	} else {
+		dump_hash_elem(*((zval **) pDest), name, 0, hash_key->arKey, html, log TSRMLS_CC);
+	}
 
 	return SUCCESS;
 }
@@ -137,9 +145,9 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, int l
 
 			zend_hash_apply_with_arguments(ht, dump_hash_elem_va, X_DUMP_ARGS, name, html, log TSRMLS_CC);
 		} else if (ht && zend_hash_find(ht, elem->ptr, strlen(elem->ptr) + 1, (void **) &z) == SUCCESS) {
-			dump_hash_elem(*z, name, elem->ptr, html, log TSRMLS_CC);
+			dump_hash_elem(*z, name, 0, elem->ptr, html, log TSRMLS_CC);
 		} else if(XG(dump_undefined)) {
-			dump_hash_elem(NULL, name, elem->ptr, html, log TSRMLS_CC);
+			dump_hash_elem(NULL, name, 0, elem->ptr, html, log TSRMLS_CC);
 		}
 
 		elem = XDEBUG_LLIST_NEXT(elem);
