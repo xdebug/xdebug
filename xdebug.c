@@ -831,7 +831,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		) {
 			convert_to_string_ex(dummy);
 			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
+		} else if (getenv("DBGP_COOKIE")) {
+			magic_cookie = xdstrdup(getenv("DBGP_COOKIE"));
 		}
+			
 
 		/* Remove session cookie if requested */
 		if (

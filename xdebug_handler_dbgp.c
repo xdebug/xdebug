@@ -835,10 +835,10 @@ DBGP_FUNC(feature_get)
 	if (!CMD_OPTION('n')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
+	xdebug_xml_add_attribute_ex(*retval, "feature_name", xdstrdup(CMD_OPTION('n')), 0, 1);
 
 	XDEBUG_STR_SWITCH(CMD_OPTION('n')) {
 		XDEBUG_STR_CASE("data_encoding")
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
 			xdebug_xml_add_attribute(*retval, "supported", "0");
 		XDEBUG_STR_CASE_END
 
@@ -853,7 +853,8 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("language_supports_threads")
-			xdebug_xml_add_attribute(*retval, "supported", "0");
+			xdebug_xml_add_text(*retval, xdstrdup("0"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 		
 		XDEBUG_STR_CASE("language_version")
@@ -877,7 +878,7 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("protocol_version")
-			xdebug_xml_add_text(*retval, xdstrdup("1"));
+			xdebug_xml_add_text(*retval, xdstrdup(DBGP_VERSION));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
@@ -887,14 +888,14 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("supports_async")
-			xdebug_xml_add_attribute(*retval, "supported", "0");
+			xdebug_xml_add_text(*retval, xdstrdup("0"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE_DEFAULT
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION('n')) ? "1" : "0");
 		XDEBUG_STR_CASE_DEFAULT_END
 	}
-	xdebug_xml_add_attribute_ex(*retval, "feature_name", xdstrdup(CMD_OPTION('n')), 0, 1);
 }
 
 DBGP_FUNC(feature_set)
@@ -1301,7 +1302,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.32 $";
+	return "$Revision: 1.33 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1333,7 +1334,6 @@ int xdebug_dbgp_init(xdebug_con *context, int mode, char *magic_cookie)
 {
 	xdebug_dbgp_options *options;
 	xdebug_xml_node *response, *child;
-	char *cookie = NULL;
 	TSRMLS_FETCH();
 
 	/* initialize our status information */
@@ -1368,16 +1368,10 @@ int xdebug_dbgp_init(xdebug_con *context, int mode, char *magic_cookie)
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
-	xdebug_xml_add_attribute_ex(response, "protocol_version", XDEBUG_VERSION, 0, 0);
+	xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);
 	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf("%d", getpid()), 0, 1);
-	cookie = getenv("DBGP_COOKIE");
-	if (!cookie) {
-		if (magic_cookie) {
-			cookie = magic_cookie;
-		}
-	}
-	if (cookie) {
-		xdebug_xml_add_attribute_ex(response, "session", cookie, 0, 0);
+	if (magic_cookie) {
+		xdebug_xml_add_attribute_ex(response, "session", magic_cookie, 0, 0);
 	}
 
 	context->buffer = xdmalloc(sizeof(fd_buf));
