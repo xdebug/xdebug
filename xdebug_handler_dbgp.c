@@ -250,6 +250,7 @@ static char* return_source(char *file, int begin, int end TSRMLS_DC)
 	do {
 		if (line) {
 			xdebug_str_add(&source, line, 0);
+			xdebug_str_addl(&source, "\n", 1, 0);
 			free(line);
 			line = NULL;
 		}
@@ -299,7 +300,7 @@ static xdebug_xml_node* return_stackframe(int nr)
 
 	tmp_fname = show_fname(i, 0 TSRMLS_CC);
 
-	tmp = xdebug_xml_node_init("breakpoint");
+	tmp = xdebug_xml_node_init("stack");
 	xdebug_xml_add_attribute_ex(tmp, "function", xdstrdup(tmp_fname), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "filename", xdstrdup(i->filename), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "level",    xdebug_sprintf("%ld", nr), 0, 1);
@@ -403,7 +404,7 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
-				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[2], brk->file_len) == 0) {
+				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[0], brk->file_len) == 0) {
 					xdebug_arg_dtor(parts);
 					return brk;
 				}
@@ -480,7 +481,7 @@ DBGP_FUNC(breakpoint_get)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 	/* Lets check if it exists */
-	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey)) {
+	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey) == SUCCESS) {
 		/* so it exists, now we're going to find it in the correct hash/list
 		 * and return the info we have on it */
 		brk = breakpoint_brk_info_fetch(type, hkey);
@@ -660,7 +661,7 @@ DBGP_FUNC(kill)
 
 DBGP_FUNC(run)
 {
-	xdebug_xml_add_attribute_ex(*retval, "filename", context->program_name, 0, 1);
+	xdebug_xml_add_attribute_ex(*retval, "filename", xdstrdup(context->program_name), 0, 1);
 }
 
 DBGP_FUNC(step_into)
@@ -911,7 +912,7 @@ static int attach_local_vars(xdebug_xml_node *node, long depth, void (*func)(voi
 
 DBGP_FUNC(stack_depth)
 {
-	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%l", XG(level)), 0, 1);
+	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%lu", XG(level)), 0, 1);
 }
 
 DBGP_FUNC(stack_get)
