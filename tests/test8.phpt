@@ -108,14 +108,14 @@ aa2ba
 Function trace:
     %f      %d     -> a() /%s/test8.php:17
     %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
-    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array)), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array)))) /%s/test8.php:5
+    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
     %f      %d     -> b(2) /%s/test8.php:17
     %f      %d     -> c('a', '2b') /%s/test8.php:17
     %f      %d     -> a() /%s/test8.php:17
     %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
-    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array)), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array)))) /%s/test8.php:5
+    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
     %f      %d     -> a() /%s/test8.php:17
     %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
-    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array)), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array)))) /%s/test8.php:5
+    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
     %f      %d     -> c('a', 'a') /%s/test8.php:17
     %f      %d     -> c('2ba', 'aa') /%s/test8.php:17
