@@ -20,6 +20,7 @@
 #define PHP_XDEBUG_H
 
 #include "php.h"
+
 #include "srm_llist.h"
 
 extern zend_module_entry xdebug_module_entry;

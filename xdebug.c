@@ -494,6 +494,7 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 	zend_op *cur_opcode;
 	zend_op *end_opcode;
 	char buffer[1024];
+	TSRMLS_FETCH();
 	
 	tmp = emalloc (sizeof (struct function_stack_entry));
 	tmp->varc = 0;
@@ -639,6 +640,7 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 
 ZEND_DLEXPORT void function_end (zend_op_array *op_array)
 {
+	TSRMLS_FETCH();
 	XG(level)--;
 }
 
@@ -648,8 +650,9 @@ ZEND_DLEXPORT void statement_call (zend_op_array *op_array)
 }
 
 
-int xdebug_zend_startup(zend_extension *extension)
+ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
+	TSRMLS_FETCH();
 	CG(extended_info) = 1;
 	return zend_startup_module(&xdebug_module_entry);
 }
