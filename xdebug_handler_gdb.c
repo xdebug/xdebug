@@ -549,6 +549,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 		}
 		XG(context).list.last_line = end + 1 + offset;
 	}
+	close(fd);
 }
 
 static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int response_format)
