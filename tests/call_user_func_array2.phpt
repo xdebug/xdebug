@@ -23,7 +23,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> include('call_user_func_array2.inc') /%s/call_user_func_array2.php:4
+    %f      %d     -> include(/%s/call_user_func_array2.inc) /%s/call_user_func_array2.php:4
     %f      %d     -> call_user_func_array('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) /%s/call_user_func_array2.php:7
     %f      %d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array2.php:7
     %f      %d         -> is_array(array (0 => 1, 1 => 2)) /%s/call_user_func_array2.inc:4

@@ -25,7 +25,7 @@ xdebug.show_mem_delta=0
 --EXPECTF--
 15
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %i     -> include('test_class.php') /%s/test1.php:11
+    %f      %i     -> include(/%s/test_class.php) /%s/test1.php:11
     %f      %i     -> foo(5) /%s/test1.php:13
     %f      %i       -> een->foo2(15, array (0 => 'blaat', 1 => 5, 2 => FALSE)) /%s/test1.php:7
     %f      %i         -> een->hang() /%s/test_class.php:10
