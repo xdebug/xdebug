@@ -847,28 +847,32 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	XG(level)--;
 }
 
-static inline void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
+static inline void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
 {
 	char *error_format;
 	xdebug_llist_element *le;
 	int new_len;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
 
-	if (html) {
+	if (html && !log_only) {
 		php_printf("<br />\n<table border='1' cellspacing='0'>\n");
 	}
 
 	error_format = html ?
 		"<tr><td bgcolor='#ffbbbb' colspan=\"3\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b><br />\n"
 		: "\n%s: %s in %s on line %d\n";
-	php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
+	if (!log_only) {
+		php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
+	}
 
 	if (XG(stack)) {
-		if (html) {
-			php_printf("<tr><th bgcolor='#aaaaaa' colspan='3'>Call Stack</th></tr>\n");
-			php_printf("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
-		} else {
-			php_printf("\nCall Stack:\n");
+		if (!log_only) {
+			if (html) {
+				php_printf("<tr><th bgcolor='#aaaaaa' colspan='3'>Call Stack</th></tr>\n");
+				php_printf("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+			} else {
+				php_printf("\nCall Stack:\n");
+			}
 		}
 
 		if (PG(log_errors) && !is_cli) {
@@ -884,14 +888,16 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 			char log_buffer[4096];
 			
 			tmp_name = show_fname(i, html TSRMLS_CC);
-			if (html) {
-				php_printf("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
-			} else {
-				php_printf("%10.4f ", i->time - XG(start_time));
+			if (!log_only) {
+				if (html) {
+					php_printf("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
+				} else {
+					php_printf("%10.4f ", i->time - XG(start_time));
 #if MEMORY_LIMIT
-				php_printf("%10u ", i->memory);
+					php_printf("%10u ", i->memory);
 #endif
-				php_printf("%3d. %s(", i->level, tmp_name);
+					php_printf("%3d. %s(", i->level, tmp_name);
+				}
 			}
 			if (PG(log_errors) && !is_cli) {
 				snprintf(log_buffer, 1024, "PHP %3d. %s(", i->level, tmp_name);
@@ -914,11 +920,13 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 				if (!i->vars[j].value) {
 					i->vars[j].value = get_zval_value(i->vars[j].addr);
 				}
-				if (html) {
-					php_printf("%s%s", tmp_varname,
-						php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
-				} else {
-					php_printf("%s%s", tmp_varname, i->vars[j].value);
+				if (!log_only) {
+					if (html) {
+						php_printf("%s%s", tmp_varname,
+							php_escape_html_entities(i->vars[j].value, strlen(i->vars[j].value), &new_len, 1, 1, NULL TSRMLS_CC));
+					} else {
+						php_printf("%s%s", tmp_varname, i->vars[j].value);
+					}
 				}
 				if (PG(log_errors) && !is_cli) {
 					snprintf(
@@ -930,10 +938,12 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 				xdfree(tmp_varname);
 			}
 
-			if (html) {
-				php_printf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
-			} else {
-				php_printf(") %s:%d\n", i->filename, i->lineno);
+			if (!log_only) {
+				if (html) {
+					php_printf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
+				} else {
+					php_printf(") %s:%d\n", i->filename, i->lineno);
+				}
 			}
 			if (PG(log_errors) && !is_cli) {
 				snprintf(
@@ -947,7 +957,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 
 		dump_superglobals(html, PG(log_errors) && !is_cli TSRMLS_CC);
 
-		if (html) {
+		if (html && !log_only) {
 			php_printf("</table>\n");
 		}
 	}
@@ -1083,8 +1093,8 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 /*
 		call_handler(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 */
-	} else if (EG(error_reporting) & type) { /* Otherwise print the default stack trace */
-		print_stack(!(strcmp("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+	} else if ((EG(error_reporting) & type)) { /* Otherwise print the default stack trace */
+		print_stack(!(strcmp("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno, !PG(display_errors) TSRMLS_CC);
 	}
 
 	/* Log to logger */
