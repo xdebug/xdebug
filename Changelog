@@ -1,3 +1,7 @@
+Wed Jan 29 21:57:03 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/config.m4:
+- Changed Makefile to use PHP_NEW_EXTENSION and removed a useles check.
+
 Wed Jan 29 16:56:46 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Made remote_enable default to Off
