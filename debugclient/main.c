@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #ifndef WIN32
+#include "config.h"
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -48,7 +49,7 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define VERSION "0.7.1"
+#define VERSION "0.7.2"
 
 #ifdef HAVE_LIBEDIT
 
