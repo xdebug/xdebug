@@ -31,6 +31,7 @@
 #endif
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <string.h>
 
 #ifdef HAVE_LIBEDIT
 #include <signal.h>
@@ -250,7 +251,7 @@ int main(int argc, char *argv[])
 					/* If there is a 'previous' command, and when the command
 					 * just consists of an "enter", then we set the command to
 					 * the previous command. */
-					if (prev_cmd && strlen(cmd) == 0 || (strlen(cmd) == 1 && cmd[0] == '\n')) {
+					if (prev_cmd && ((strlen(cmd) == 0) || (strlen(cmd) == 1 && cmd[0] == '\n'))) {
 						cmd = prev_cmd;
 					} else {
 						if (prev_cmd) {
