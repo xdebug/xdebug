@@ -387,7 +387,11 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	tmp->arg_done      = 0;
 	tmp->delayed_include   = 0;
 
-	tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
+	if (EG(current_execute_data)) {
+		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
+	} else {
+		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
+	}
 #if MEMORY_LIMIT
 	tmp->memory    = AG(allocated_memory);
 #else
