@@ -1,3 +1,10 @@
+Sun Jul 18 21:52:08 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h:
+- in dbgp handle redirected io correctly when output buffering is on
+- add globals context, and use show_hidden feature name for deciding
+  whether to show super globals in the global context
+
 Sat Jul 17 01:20:06 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_var.c:
 - if we are an empty object or array, dont pretent to have children
