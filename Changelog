@@ -1,3 +1,7 @@
+Mon Mar 15 17:29:40 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.dsp:
+- Remove non-binary .dsp
+
 Thu Mar 11 23:27:45 CET 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Fixed typo
