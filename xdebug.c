@@ -285,7 +285,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 		struct function_stack_entry *i = SRM_LLIST_VALP(le);
 
 		if (html) {
-			php_printf ("<tr><td align='center'>%d</td><td>%s(", i->level, i->function_name);
+			php_printf ("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, i->function_name);
 		} else {
 			printf ("%3d. %s(", i->level, i->function_name);
 		}
@@ -309,7 +309,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 		}
 
 		if (html) {
-			php_printf (")</td><td>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
+			php_printf (")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
 		} else {
 			printf (") %s:%d\n", i->filename, i->lineno);
 		}
@@ -344,11 +344,11 @@ static inline void print_trace (int html TSRMLS_DC)
 		struct function_stack_entry *i = SRM_LLIST_VALP(le);
 
 		if (html) {
-			php_printf ("<tr><td align='left'><pre>");
+			php_printf ("<tr><td bgcolor='#ffffff' align='left'><pre>");
 			for (j = 0; j < i->level - 1; j++) {
 				php_printf ("  ");
 			}
-			php_printf ("-></pre></td><td>%s(", i->function_name);
+			php_printf ("-></pre></td><td bgcolor='#ffffff'>%s(", i->function_name);
 		} else {
 			for (j = 0; j < i->level; j++) {
 				printf ("  ");
@@ -375,7 +375,7 @@ static inline void print_trace (int html TSRMLS_DC)
 		}
 
 		if (html) {
-			php_printf (")</td><td>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
+			php_printf (")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
 		} else {
 			printf (") %s:%d\n", i->filename, i->lineno);
 		}
