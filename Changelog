@@ -1,3 +1,7 @@
+Wed Mar 09 22:18:11 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #118: Segfault with exception when remote debugging.
+
 Sun Mar 06 22:55:31 CET 2005 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
