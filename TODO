@@ -5,7 +5,6 @@ For 1.2.0:
 - Update gdb debugging capabilities
   * accessing data
     o modifying variables
-    o reading super globals
   * watches / conditional breakpoints
 - Bug fixing
   * Disconnect bug
