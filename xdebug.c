@@ -613,14 +613,14 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 					break;
 				case IS_VAR:
 					if (CG(class_entry).name) {
-						sprintf (buffer, "%s::%p", CG(class_entry).name, cur_opcode->op2.u.constant.value.str.val);
+						sprintf (buffer, "%s->%p", CG(class_entry).name, cur_opcode->op2.u.constant.value.str.val);
 					} else {
-						sprintf (buffer, "?::%s", cur_opcode->op1.u.constant.value.str.val);
+						sprintf (buffer, "?->%s", cur_opcode->op1.u.constant.value.str.val);
 					}
 					tmp->function_name = estrdup (buffer);
 					break;
 				default:
-					sprintf (buffer, "?::%s", cur_opcode->op1.u.constant.value.str.val);
+					sprintf (buffer, "?->%s", cur_opcode->op1.u.constant.value.str.val);
 					tmp->function_name = estrdup (buffer);
 					break;
 			}
@@ -633,14 +633,15 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 			while (tmpOpCode->opcode != ZEND_INIT_FCALL_BY_NAME) {
 				tmpOpCode--;
 			}
-			switch (cur_opcode->op1.op_type)  {
+			switch (tmpOpCode->op1.op_type)  {
 				case IS_CONST:
 					switch (tmpOpCode->op2.op_type) {
 						case IS_CONST:
-							tmp->function_name = estrndup(
-								tmpOpCode->op2.u.constant.value.str.val,
-								tmpOpCode->op2.u.constant.value.str.len
+							sprintf(buffer, "%s::%s",
+								tmpOpCode->op1.u.constant.value.str.val,
+								tmpOpCode->op2.u.constant.value.str.val
 							);
+							tmp->function_name = estrdup(buffer);
 							break;
 						default:  /* FIXME need better IS_VAR handling */
 							tmp->function_name = estrdup("null");
@@ -652,13 +653,13 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 					if (tmpOpCode->op1.op_type == IS_CONST)   {
 						switch(tmpOpCode->op2.op_type) {
 							case IS_CONST:
-								sprintf(buffer, "%s::%s",
+								sprintf(buffer, "%s->%s",
 									tmpOpCode->op1.u.constant.value.str.val,
 									tmpOpCode->op2.u.constant.value.str.val
 								);
 								break;
 							default:
-								sprintf(buffer, "%s::<???>",
+								sprintf(buffer, "%s-><???>",
 									tmpOpCode->op1.u.constant.value.str.val
 								);
 								break;
@@ -667,13 +668,13 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 					else if(CG(class_entry).name) {
 						switch(tmpOpCode->op2.op_type) {
 							case IS_CONST:
-								sprintf(buffer, "%s::%s",
+								sprintf(buffer, "%s->%s",
 									CG(class_entry).name,
 									tmpOpCode->op2.u.constant.value.str.val
 								);
 								break;
 							default:
-								sprintf(buffer, "%s::<???>",
+								sprintf(buffer, "%s-><???>",
 									CG(class_entry).name
 								);
 								break;
