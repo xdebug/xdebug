@@ -1,13 +1,11 @@
-- Renamed xdebug_get_function_trace() to xdebug_dump_function_trace().
+= Renamed xdebug_get_function_trace() to xdebug_dump_function_trace().
   (Derick)
-- Implemented new xdebug_get_function_trace() to return the function trace in
+= Implemented new xdebug_get_function_trace() to return the function trace in
   an array. (Derick)
-- Added a parameter to xdebug_start_trace(). When this parameter is used,
++ Added a parameter to xdebug_start_trace(). When this parameter is used,
   xdebug will dump a function trace to the filename which this parameter
   speficies. (Derick)
-
 - Fix a problem with nested member functions. (Derick)
-
 = Make configure scripts work with PHP 4.2.x. (Derick)
 + Implemented handling single-dimensional constant arrays passed to a
   function. (Derick)
@@ -17,7 +15,7 @@
   the return array from xdebu_get_function_trace(). (Derick)
 = Fixed segfaults with xdebug_call_*(). (Derick)
 
-Wed May 11, 2002 - xdebug 0.7.0
+Wed May 08, 2002 - xdebug 0.7.0
 
 + Implemented handling of static method calls (foo::bar). (Derick)
 + Added correct handling of include(_once)/require(_once) and eval().
