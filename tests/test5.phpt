@@ -2,6 +2,7 @@
 Test for somewhat more complex backtrace
 --INI--
 xdebug.enable=1
+xdebug.dump_globals=0
 --FILE--
 <?php
 

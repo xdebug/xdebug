@@ -224,6 +224,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           auto_profile_mode;
 
 	/* superglobals */
+	zend_bool     dump_globals;
 	zend_bool     dump_once;
 	zend_bool     dump_undefined;
 	zend_bool     dumped;

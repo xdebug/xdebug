@@ -231,6 +231,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("xdebug.dump.REQUEST",          NULL,                 PHP_INI_ALL,    OnUpdateRequest)
 	PHP_INI_ENTRY("xdebug.dump.SERVER",           NULL,                 PHP_INI_ALL,    OnUpdateServer)
 	PHP_INI_ENTRY("xdebug.dump.SESSION",          NULL,                 PHP_INI_ALL,    OnUpdateSession)
+	STD_PHP_INI_BOOLEAN("xdebug.dump_globals",    "1",                  PHP_INI_ALL,    OnUpdateBool,   dump_globals,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.dump_once",       "1",                  PHP_INI_ALL,    OnUpdateBool,   dump_once,         zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   dump_undefined,    zend_xdebug_globals, xdebug_globals)
 
@@ -927,14 +928,15 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 	if (!zvar) {
 		return;
 	}
-	contents = get_zval_value_fancy(NULL, zvar);
 	if (html) {
+		contents = get_zval_value_fancy(NULL, zvar);
 		if (contents) {
 			php_printf("<tr><td colspan='2' align='right' bgcolor='#ccffcc'>$%s = </td><td bgcolor='#ccffcc'>%s</td></tr>\n", name, contents);
 		} else {
 			php_printf("<tr><td bgcolor='#ccffcc'>$%s</td><td bgcolor='#ccffcc' colspan='2'><i>Undefined</i></td></tr>\n", name);
 		}
 	} else {
+		contents = get_zval_value(zvar);
 		if (contents) {
 			printf("  $%s = %s\n", name, contents);
 		} else {
@@ -1057,14 +1059,16 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 		if (!log_only)  {
 			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 
-			dump_superglobals(html, PG(log_errors) && !is_cli TSRMLS_CC);
-			if (html) {
-				php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope</th></tr>\n");
-				php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
-			} else {
-				printf("\nVariables in local scope:\n");
+			if (XG(dump_globals)) {
+				dump_superglobals(html, PG(log_errors) && !is_cli TSRMLS_CC);
 			}
-			if (i->used_vars) {
+			if (i->used_vars && i->used_vars->size) {
+				if (html) {
+					php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope</th></tr>\n");
+					php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
+				} else {
+					printf("\n\nVariables in local scope:\n");
+				}
 				xdebug_hash_apply(i->used_vars, (void*) &html, dump_used_var_with_contents);
 			}
 		}
