@@ -18,6 +18,7 @@
 
 #include "php.h"
 #include "ext/standard/php_string.h"
+#include "ext/standard/url.h"
 #include "zend.h"
 #include "zend_extensions.h"
 #include "php_xdebug.h"
@@ -132,8 +133,10 @@ char *xdebug_sprintf (const char* fmt, ...)
 	return new_str;
 }
 
+/*****************************************************************************
+* ** Normal variable printing routines
+* */
 
-/* {{{ xdebug_var_export */
 static int xdebug_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
@@ -241,7 +244,6 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 	}
 }
 
-/* }}} */
 char* get_zval_value (zval *val)
 {
 	xdebug_str str = {0, 0, NULL};
@@ -251,6 +253,158 @@ char* get_zval_value (zval *val)
 
 	return str.d;
 }
+
+/*****************************************************************************
+* ** XML variable printing routines
+* */
+
+static int xdebug_array_element_export_xml(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	xdebug_str *str;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+	str   = va_arg(args, struct xdebug_str*);
+
+	if (hash_key->nKeyLength==0) { /* numeric key */
+		XDEBUG_STR_ADD(str, xdebug_sprintf("<var name='%ld'>", hash_key->h), 1);
+	} else { /* string key */
+		XDEBUG_STR_ADD(str, xdebug_sprintf("<var name='%s'>", hash_key->arKey), 1);
+	}
+	xdebug_var_export_xml(zv, str, level + 2 TSRMLS_CC);
+	XDEBUG_STR_ADDL(str, "</var>", 6, 0);
+	return 0;
+}
+
+static int xdebug_object_element_export_xml(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level;
+	xdebug_str *str;
+	TSRMLS_FETCH();
+
+	level = va_arg(args, int);
+	str   = va_arg(args, struct xdebug_str*);
+
+	if (hash_key->nKeyLength != 0) {
+		XDEBUG_STR_ADD(str, xdebug_sprintf("<var name='%s'>", hash_key->arKey), 1);
+	}
+	xdebug_var_export_xml(zv, str, level + 2 TSRMLS_CC);
+	XDEBUG_STR_ADDL(str, "</var>", 6, 0);
+	return 0;
+}
+
+void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
+{
+	HashTable *myht;
+	char*     tmp_str;
+	int       tmp_len;
+
+	switch (Z_TYPE_PP(struc)) {
+		case IS_BOOL:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<bool>%s</bool>", Z_LVAL_PP(struc) ? "1" : "0"), 1);
+			break;
+
+		case IS_NULL:
+			XDEBUG_STR_ADDL(str, "<null/>", 7, 0);
+			break;
+
+		case IS_LONG:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<int>%ld</int>", Z_LVAL_PP(struc)), 1);
+			break;
+
+		case IS_DOUBLE:
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<float>%.*G</float>", (int) EG(precision), Z_DVAL_PP(struc)), 1);
+			break;
+
+		case IS_STRING:
+			tmp_str = php_url_encode(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len);
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<string>%s</string>", tmp_str), 1);
+			efree (tmp_str);
+			break;
+
+		case IS_ARRAY:
+			myht = Z_ARRVAL_PP(struc);
+			if (myht->nApplyCount < 2) {
+				XDEBUG_STR_ADDL(str, "<array>", 7, 0);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml, 2, level, str);
+				XDEBUG_STR_ADDL(str, "</array>", 8, 0);
+			} else {
+				XDEBUG_STR_ADDL(str, "<array/>", 8, 0);
+			}
+			break;
+
+		case IS_OBJECT:
+			myht = Z_OBJPROP_PP(struc);
+			if (myht->nApplyCount < 2) {
+				XDEBUG_STR_ADD(str, xdebug_sprintf ("<object class='%s'>", Z_OBJCE_PP(struc)->name), 1);
+				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml, 2, level, str);
+				XDEBUG_STR_ADDL(str, "</object>", 9, 0);
+			} else {
+				XDEBUG_STR_ADDL(str, "<object/>", 9, 0);
+			}
+			break;
+
+		case IS_RESOURCE: {
+			char *type_name;
+
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			XDEBUG_STR_ADD(str, xdebug_sprintf("<resource id='%ld' type='%s'/>", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
+			break;
+		}
+
+		default:
+			XDEBUG_STR_ADDL(str, "<null/>", 7, 0);
+			break;
+	}
+}
+
+char* get_zval_value_xml(char *name, zval *val)
+{
+	xdebug_str str = {0, 0, NULL};
+	TSRMLS_FETCH();
+
+	if (name) {
+		XDEBUG_STR_ADDL(&str, "<var name='", 11, 0);
+		XDEBUG_STR_ADD(&str, name, 0);
+		XDEBUG_STR_ADDL(&str, "'>", 2, 0);
+	} else {
+		XDEBUG_STR_ADDL(&str, "<var>", 5, 0);
+	}
+	
+	xdebug_var_export_xml(&val, (xdebug_str*) &str, 1 TSRMLS_CC);
+
+	XDEBUG_STR_ADDL(&str, "</var>", 7, 0);
+
+	return str.d;
+}
+
+char* xmlize(char *string)
+{
+	int   len = strlen(string);
+	char *tmp;
+	char *tmp2;
+
+	if (strlen(string)) {
+		tmp = php_str_to_str(string, len, "<", 1, "&lt;", 4, &len);
+
+		tmp2 = php_str_to_str(tmp, len, ">", 1, "&gt;", 4, &len);
+		efree(tmp);
+
+		tmp = php_str_to_str(tmp2, len, "&", 1, "&amp;", 5, &len);
+		efree(tmp2);
+
+		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
+		efree(tmp);
+		return tmp2;
+	} else {
+		return estrdup(string);
+	}
+}
+
+/*****************************************************************************
+* ** Function name printing function
+* */
 
 char* show_fname (struct function_stack_entry* entry, int html TSRMLS_DC)
 {

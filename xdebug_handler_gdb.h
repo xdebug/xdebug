@@ -61,6 +61,23 @@ typedef struct xdebug_cmd {
 	char *help;
 } xdebug_cmd;
 
+#define XDEBUG_E                         1024
+#define XDEBUG_E_INVALID_FORMAT          XDEBUG_E |    1
+#define XDEBUG_E_BREAKPOINT_NOT_SET      XDEBUG_E |    2
+#define XDEBUG_E_BREAKPOINT_NOT_REMOVED  XDEBUG_E |    3
+#define XDEBUG_E_EVAL                    XDEBUG_E |    4
+#define XDEBUG_E_TOO_MANY_ARGUMENTS      XDEBUG_E |    5
+#define XDEBUG_E_NO_INFO                 XDEBUG_E |    6
+#define XDEBUG_E_UNDEFINED_COMMAND       XDEBUG_E |    7
+#define XDEBUG_E_SYMBOL_NOT_FOUND        XDEBUG_E |    8
+
+#define XDEBUG_RESPONSE_NORMAL   0
+#define XDEBUG_RESPONSE_XML      1
+
+typedef struct xdebug_gdb_options {
+	int response_format;
+} xdebug_gdb_options;
+
 int xdebug_gdb_init(xdebug_con *context, int mode);
 int xdebug_gdb_deinit(xdebug_con *context);
 int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *location, const uint line, xdebug_llist *stack);
