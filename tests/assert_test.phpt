@@ -31,10 +31,10 @@ Assertion Failed:
         Line '19'
         Code ''
 Function trace:
-    0.0000      35352   -> {main}() /%s/assert_test.php:0
-    0.0001      35400     -> assert_options(1, 1) /%s/assert_test.php:3
-    0.0006      35400     -> assert_options(4, 0) /%s/assert_test.php:4
-    0.0006      35400     -> assert_options(5, 1) /%s/assert_test.php:5
-    0.0006      35400     -> assert_options(2, 'my_assert_handler') /%s/assert_test.php:16
-    0.0006      35352     -> assert(FALSE) /%s/assert_test.php:19
-    0.0009      35504       -> my_assert_handler('/%s/assert_test.php', 19, '') /%s/assert_test.php:19
+    %f      %d   -> {main}() /%s/assert_test.php:0
+    %f      %d     -> assert_options(1, 1) /%s/assert_test.php:3
+    %f      %d     -> assert_options(4, 0) /%s/assert_test.php:4
+    %f      %d     -> assert_options(5, 1) /%s/assert_test.php:5
+    %f      %d     -> assert_options(2, 'my_assert_handler') /%s/assert_test.php:16
+    %f      %d     -> assert(FALSE) /%s/assert_test.php:19
+    %f      %d       -> my_assert_handler('/%s/assert_test.php', 19, '') /%s/assert_test.php:19
