@@ -192,6 +192,9 @@ int main(int argc, char *argv[])
 		server_in.sin_addr.s_addr = htonl(INADDR_ANY);
 		server_in.sin_port        = htons((unsigned short int) port);
 
+		memset(&client_in, 0, sizeof(client_in));
+		client_in_len = sizeof(client_in);
+
 		/* Loop until we can bind to the listening socket. */
 		while (bind(ssocket, (struct sockaddr *) &server_in, sizeof(struct sockaddr_in)) < 0) {
 			fprintf(stderr, "bind: couldn't bind AF_INET socket?\n");
