@@ -1,3 +1,7 @@
+Wed Oct 29 15:28:22 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- Fixed a couple of silly typoes
+
 Wed Oct 29 11:27:49 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/config.m4
 /xdebug/php_xdebug.h
