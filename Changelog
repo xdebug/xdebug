@@ -1,3 +1,7 @@
+Sun May 26 21:04:10 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.dsp:
+- Update DSP (thanks to Sander)
+
 Sun May 26 15:56:51 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_var.c:
