@@ -1,3 +1,10 @@
+Fri Jul 02 15:50:29 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+README
+xdebug/test.sh
+xdebug/xdebug.c:
+- Redid the new second format of trace files to be able to do much better
+  analysis.
+
 Wed Jun 30 13:45:10 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Back to dev
