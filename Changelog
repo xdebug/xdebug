@@ -1,3 +1,9 @@
+Fri May 3 20:33:34 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/tests/test3.php:
+- Add ini_setting and functions to enable and disable showing stacktraces.
+
 Thu May 2 19:10:18 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
