@@ -1,3 +1,7 @@
+Sun Apr 11 16:44:04 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_compat.c:
+- Implement collecting return values for PHP 4.3.x correctly.
+
 Sun Apr 11 16:22:09 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 config.m4
 xdebug/php_xdebug.h
