@@ -266,6 +266,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(context).list.last_line = 0;
 	XG(context).do_break       = 0;
 	XG(context).do_step        = 0;
+	XG(context).do_next        = 0;
 
 	return SUCCESS;
 }
@@ -339,37 +340,6 @@ xdebug_func xdebug_build_fname(zend_execute_data *edata, zend_op_array *new_op_a
 				tmp.function = xdstrdup(edata->function_state.function->common.function_name);
 			}
 		} else {
-#if 0
-			char *tmpname = "?!?";
-			int is_include = 1;
-			switch (edata->opline->op2.u.constant.value.lval) {
-				case ZEND_EVAL:
-					is_include = 0;
-					tmpname = "eval";
-					break;
-				case ZEND_INCLUDE:
-					tmpname = "include";
-					break;
-				case ZEND_REQUIRE:
-					tmpname = "require";
-					break;
-				case ZEND_INCLUDE_ONCE:
-					tmpname = "include_once";
-					break;
-				case ZEND_REQUIRE_ONCE:
-					tmpname = "require_once";
-					break;
-				default:
-					assert(0);
-					break;
-			}
-
-			if (is_include && new_op_array) {
-				sprintf(fname, "%s %s", tmpname, new_op_array->filename);
-			} else {
-				sprintf(fname, "%s", tmpname);
-			}
-#endif
 			switch (edata->opline->op2.u.constant.value.lval) {
 				case ZEND_EVAL:
 					tmp.type = XFUNC_EVAL;
@@ -1217,10 +1187,12 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk;
+	function_stack_entry *fse;
 	zend_op              *cur_opcode;
 	int                   lineno;
 	char                 *file;
 	int                   file_len = 0;
+	int                   level = 0;
 	TSRMLS_FETCH();
 
 	if (XG(remote_enabled)) {
@@ -1241,7 +1213,25 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 			}
 		}
 
-		if (XG(context).do_step) {
+		/* Get latest stack level */
+		if (XG(stack)) {
+			le = XDEBUG_LLIST_TAIL(XG(stack));
+			fse = XDEBUG_LLIST_VALP(le);
+			level = fse->level;
+		} else {
+			level = 0;
+		}
+		
+		/* Check for "next" */
+		if (XG(context).do_next && XG(context).next_level >= level) {
+			XG(context).do_next = 0;
+
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
+				XG(remote_enabled) = 0;
+				XG(remote_enable)  = 0;
+				return;
+			}
+		} else if (XG(context).do_step) { /* Check for "step" */
 			XG(context).do_step = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {

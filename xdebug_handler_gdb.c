@@ -40,6 +40,7 @@ char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_pwd(xdebug_con *context, xdebug_arg *args);
@@ -111,6 +112,12 @@ static xdebug_cmd commands_runtime[] = {
 		"             after or before the previous listing. One argument specifies the\n"
 		"             the line in a file to start, and then lines are listed around that\n"
 		"             line. Two arguments specify starting and ending lines to list.\n"
+	},
+
+	{ "next",       0, "next",                                       xdebug_handle_next,       1,
+		"Continues executing until the next statement in the same stack\n"
+		"             frame. Is basically the same as 'step' but does not go into\n"
+		"             function calls if they occur.\n"
 	},
 
 	{ "pwd",        0, "pwd",                                        xdebug_handle_pwd,        1,
@@ -492,9 +499,8 @@ char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 	char *tmp_file  = NULL;
 	int   tmp_begin = 0;
 	int   tmp_end   = 0;
-	TSRMLS_FETCH();
-
 	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	TSRMLS_FETCH();
 
 	xdebug_arg_init(parts);
 
@@ -539,6 +545,24 @@ char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 	print_sourceline(context, tmp_file, tmp_begin, tmp_end, 0 TSRMLS_CC);
 
 	xdebug_arg_dtor(parts);	
+	return NULL;
+}
+
+char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args)
+{
+	xdebug_llist_element *le;
+	function_stack_entry *fse;
+	TSRMLS_FETCH();
+
+	XG(context).do_next = 1;
+	XG(context).do_step = 0;
+
+	if (XG(stack)) {
+		le = XDEBUG_LLIST_TAIL(XG(stack));
+		fse = XDEBUG_LLIST_VALP(le);
+		XG(context).next_level = fse->level;
+	}
+
 	return NULL;
 }
 
@@ -620,10 +644,12 @@ char *xdebug_handle_show(xdebug_con *context, xdebug_arg *args)
 	return NULL;
 }
 
+
 char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args)
 {
 	TSRMLS_FETCH();
 	XG(context).do_step = 1;
+	XG(context).do_next = 0;
 	
 	return NULL;
 }
@@ -832,7 +858,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,step", (char**) &error);
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont,step,next", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);

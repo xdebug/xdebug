@@ -48,6 +48,8 @@ struct _xdebug_con {
 	xdebug_debug_list      list;
 	int                    do_break;
 	int                    do_step;
+	int                    do_next;
+	int                    next_level;
 };
 
 struct _xdebug_brk_info {
