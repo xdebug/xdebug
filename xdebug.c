@@ -326,7 +326,7 @@ void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_val
 		fse->varc++;
 	}
 
-	execute_internal(execute_data_ptr, return_value_used TSRMLS_DC);
+	execute_internal(execute_data_ptr, return_value_used TSRMLS_CC);
 }
 #endif
 
@@ -410,9 +410,7 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			break;
 
 		default:
-#if ZEND_EXTENSION_API_NO >= 20020731
-			assert(0);
-#endif
+			return estrdup ("{unknown, please report}");
 	}
 }
 
@@ -708,9 +706,9 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 
 PHP_FUNCTION(xdebug_get_function_stack)
 {
-	char buffer[1024];
 	xdebug_llist_element *le;
-	unsigned int          j, k;
+	int                   j;
+	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
 
@@ -877,9 +875,9 @@ PHP_FUNCTION(xdebug_dump_function_trace)
 
 PHP_FUNCTION(xdebug_get_function_trace)
 {
-	char buffer[1024];
 	xdebug_llist_element *le;
-	unsigned int          j, k;
+	int                   j;
+	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
 
@@ -1001,22 +999,20 @@ static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
 	return NULL;
 }
 
-xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *varc, xdebug_var *var0)
+xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *varc, xdebug_var *var0 TSRMLS_DC)
 {
 	zend_op *cur_opcode = my_opcode;
 	zend_op *end_opcode;
 	zval *var;
 	int  func_nest = 0;
 	int  go_back   = 0;
-	char fncname[ 512 ];
 	xdebug_func cf;
 	int is_var = 0;
 	zend_op* tmpOpCode;
 	zend_op* initOpCode = 0;
-	char evalinfo[ 512 ];
 	int done = 0;
 
-	bzero(&cf, sizeof(xdebug_func));
+	memset(&cf, 0, sizeof(xdebug_func));
 
 	end_opcode = op_array->opcodes + op_array->last;
 
@@ -1165,8 +1161,10 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 {
 	struct function_stack_entry* tmp;
 	zend_op *cur_opcode;
+#if ZEND_EXTENSION_API_NO < 20020731
 	zend_op *end_opcode;
 	char buffer[1024];
+#endif
 	int  func_nest = 0;
 	int  go_back   = 0;
 	TSRMLS_FETCH();
@@ -1186,7 +1184,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 	cur_opcode = *EG(opline_ptr);
 
 #if ZEND_EXTENSION_API_NO >= 20020731
-	tmp->function  = find_func_name(op_array, cur_opcode, &(tmp->varc), &(tmp->vars[0]));
+	tmp->function  = find_func_name(op_array, cur_opcode, &(tmp->varc), &(tmp->vars[0]) TSRMLS_CC);
 #else
 	end_opcode = op_array->opcodes + op_array->last + 1;
 
@@ -1396,7 +1394,7 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	function_stack_entry *fse;
 	zend_op              *tmp_op;
 	zval                **param;
-	int                   i;
+	unsigned int          i;
 	TSRMLS_FETCH();
 
 	if (XG(stack)->size == 0) {
