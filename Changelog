@@ -1,3 +1,8 @@
+Sun Mar 20 16:11:51 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #95: Segfault when deinitializing Xdebug module.
+  (Patch by Maxim Poltarak <demiurg@gmail.com>)
+
 Thu Mar 10 22:35:53 CET 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed bug #117: var_dump dows not work with "private".
