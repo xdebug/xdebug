@@ -7,5 +7,10 @@ For 1.1.0:
   * step in / step out / step over
   * accessing data
     o reading variables / globals
+
+For 1.2.0:
+- Update gdb debugging capabilities
+  * accessing data
     o modifying variables / globals
-  * watches
+  * watches / conditional breakpoints
+- Profiling
