@@ -335,6 +335,7 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 			return Z_OBJPROP_P(z);
 			break;
 	}
+	return NULL;
 }
 
 inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
@@ -381,7 +382,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 		int type = XF_ST_ROOT;
 		zval *retval = NULL;
 		char *current_classname = NULL;
-		int   cc_length;
+		int   cc_length = 0;
 
 		/* Set the target table to the currently active scope */
 		st = XG(active_symbol_table);
@@ -403,7 +404,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						if (*p[0] == '[') {
 							keyword_end = *p;
 							if (keyword) {
-								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length);
+								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
 								current_classname = NULL;
 								if (retval) {
 									st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -415,7 +416,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						} else if (*p[0] == '-') {
 							keyword_end = *p;
 							if (keyword) {
-								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length);
+								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
 								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
 								if (retval) {
 									st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -442,7 +443,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						if (*p[0] == '\'') {
 							state = 5;
 							keyword_end = *p;
-							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length);
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
 							current_classname = NULL;
 							if (retval) {
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -460,7 +461,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 			}
 		} while (found < 0);
 		if (keyword != NULL) {
-			retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length);
+			retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length TSRMLS_CC);
 			if (retval) {
 				st = fetch_ht_from_zval(retval TSRMLS_CC);
 			}
@@ -1395,7 +1396,10 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 
 DBGP_FUNC(property_get)
 {
+	xdebug_dbgp_options *options = (xdebug_dbgp_options*) XG(context).options;
 	int                   depth = -1;
+	int                   page = -1;
+	int                   max_data = options->max_data;
 	function_stack_entry *fse;
 
 	if (!CMD_OPTION('n')) {
@@ -1404,6 +1408,9 @@ DBGP_FUNC(property_get)
 
 	if (CMD_OPTION('d')) {
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
+	}
+	if (CMD_OPTION('p')) {
+		page = strtol(CMD_OPTION('p'), NULL, 10);
 	}
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (depth == -1) {
@@ -1887,7 +1894,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.69 $";
+	return "$Revision: 1.70 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
