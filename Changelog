@@ -1,3 +1,11 @@
+Fri Dec 20 16:52:10 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/TODO
+/xdebug/xdebug.c
+/xdebug/tests/get_function_trace.phpt
+/xdebug/tests/test2.phpt:
+- Fix get_function_trace() by including timing and memory usage information.
+- Adjusted test scripts
+
 Fri Dec 20 16:51:03 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/test.sh:
 - Also use the installed PHP
