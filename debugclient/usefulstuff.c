@@ -20,13 +20,15 @@
 #include <string.h>
 #include "usefulstuff.h"
 
+#define READ_BUFFER_SIZE 128
+
 char* fd_read_line(int socket, fd_buf *context)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;
 	char *tmp_buf = NULL;
 	char *ptr;
-	char buffer[128];
+	char buffer[READ_BUFFER_SIZE + 1];
 
 	if (!context->buffer) {
 		context->buffer = calloc(1,1);
@@ -35,7 +37,7 @@ char* fd_read_line(int socket, fd_buf *context)
 
 	while ((ptr = memchr(context->buffer, '\n', context->buffer_size)) == NULL) {
 		ptr = context->buffer + context->buffer_size;
-		newl = read(socket, buffer, 16);
+		newl = read(socket, buffer, READ_BUFFER_SIZE);
 		if (newl > 0) {
 			context->buffer = realloc(context->buffer, context->buffer_size + newl + 1);
 			memcpy(context->buffer + context->buffer_size, buffer, newl);

@@ -19,13 +19,15 @@
 #include "php_xdebug.h"
 #include "xdebug_socket.h"
 
+#define READ_BUFFER_SIZE 128
+
 char* xdebug_socket_read_line(int socket, xdebug_socket_buf *context)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;
 	char *tmp_buf = NULL;
 	char *ptr;
-	char buffer[128];
+	char buffer[READ_BUFFER_SIZE + 1];
 
 	if (!context->buffer) {
 		context->buffer = xdcalloc(1,1);
@@ -34,7 +36,7 @@ char* xdebug_socket_read_line(int socket, xdebug_socket_buf *context)
 
 	while ((ptr = memchr(context->buffer, '\n', context->buffer_size)) == NULL) {
 		ptr = context->buffer + context->buffer_size;
-		newl = read(socket, buffer, 8);
+		newl = read(socket, buffer, READ_BUFFER_SIZE);
 		if (newl > 0) {
 			context->buffer = xdrealloc(context->buffer, context->buffer_size + newl + 1);
 			memcpy(context->buffer + context->buffer_size, buffer, newl);
