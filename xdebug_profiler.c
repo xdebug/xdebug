@@ -21,7 +21,7 @@ inline double get_mtimestamp()
 inline static void init_profile_modes (char ***mode_titles)
 {
 	*mode_titles = xdmalloc(XDEBUG_PROFILER_MODES * sizeof(char *));
-	
+
 	(*mode_titles)[0] = XDEBUG_PROFILER_LBL_D;
 	(*mode_titles)[1] = XDEBUG_PROFILER_CPU_D;
 	(*mode_titles)[2] = XDEBUG_PROFILER_NC_D;
@@ -131,16 +131,16 @@ inline static void add_function_entry(xdebug_hash *hasht, function_stack_entry *
 inline static int find_and_inc_function_entry (xdebug_hash *hasht, function_stack_entry *ent, int all)
 {
 	function_stack_entry *found_ent;
-	
+
 	if (ent->function.function && xdebug_hash_find(hasht, ent->function.function, strlen(ent->function.function), (void *) &found_ent)) {
 		if (!all && (found_ent->lineno != ent->lineno || strcasecmp(found_ent->filename, ent->filename))) {
 			return 0;
 		}
-		
+
 		if (all == 2 && found_ent->level != ent->level) {
 			return 0;
 		}
-		
+
 		if (found_ent->function.type == ent->function.type && found_ent->function.internal == ent->function.internal && found_ent->function.class == ent->function.class) {
 			if (found_ent->function.class && strcasecmp(found_ent->function.class, ent->function.class)) {
 				return 0;
@@ -152,7 +152,7 @@ inline static int find_and_inc_function_entry (xdebug_hash *hasht, function_stac
 			return 1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -183,7 +183,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 
 			ent = XDEBUG_LLIST_VALP(le);
 			ent->f_calls = 1;
-			
+
 			if (ent->function.function) {
 				if (!find_and_inc_function_entry(function_hash, ent, 2)) {
 					add_function_entry(function_hash, ent);
@@ -191,7 +191,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 					continue;
 				}
 			}
-			
+
 			if (ent->level == 1 && ent->time_taken > 1000000.00) {
 				ent->time_taken = total_time;
 			}
@@ -231,7 +231,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 		}
 
 		xdebug_hash_destroy(function_hash);
-		
+
 		/* build a list of children & sort them based on the specified sorting scheme */
 		for (j = 0; j < i; j++) {
 			if (list[j]->nelem) {
@@ -258,12 +258,12 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 				(list[j]->parent)->pos = 0;
 			}
 		}
-		
+
 		/* Creation of output linked list and freeing of previously allocated memory */
 		list_out = (function_stack_entry **) xdmalloc(i * sizeof(function_stack_entry *));
 		*size = 0;
 		cur = pos[0];
-		
+
 		while (cur->pos < cur->nelem) {
 			if (cur->fse) {
 				list_out[(*size)++] = cur->fse;
@@ -280,7 +280,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 				}
 			}
 		}	
-			
+
 		/* deallocate memory */
 		for (j = 0; j < i; j++) {
 			if (list[j]->nelem) {
@@ -289,7 +289,7 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 			xdfree(list[j]);
 		}
 		xdfree(list);
-		
+
 		return list_out;
 	}
 	return (function_stack_entry **) NULL;
@@ -298,28 +298,28 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 inline static int find_same_function (xdebug_hash *hasht, xdebug_fs *cur, function_stack_entry *parent)
 {
 	xdebug_fs *found_ent = NULL;
-	
+
 	if (parent && cur->fse->function.function && xdebug_hash_find(hasht, cur->fse->function.function, strlen(cur->fse->function.function), (void *) &found_ent)) {
 		if (found_ent->fse->function.class == cur->fse->function.class) {
 			if (cur->fse->function.class && strcasecmp(found_ent->fse->function.class, cur->fse->function.class)) {
 				goto add_new_ent;
 			}
-			
+
 			found_ent->fse->f_calls++;
 			found_ent->fse->time_taken += cur->fse->time_taken;
-			
+
 			found_ent->nelem_p++;
 			found_ent->parents = xdrealloc(found_ent->parents, found_ent->nelem_p * sizeof(function_stack_entry *));
 			found_ent->parents[found_ent->nelem_p-1] = parent;
-					
+
 			return 1;
 		}
 	}	
 
 add_new_ent:
-	
+
 	cur->nelem_c = 0;
-	
+
 	if (parent) {
 		cur->nelem_p = 1;
 		cur->parents = xdmalloc(cur->nelem_p * sizeof(function_stack_entry *));
@@ -330,7 +330,7 @@ add_new_ent:
 	if (cur->fse->function.function) {
 		xdebug_hash_add(hasht, cur->fse->function.function, strlen(cur->fse->function.function), cur);
 	}	
-	
+
 	return 0;
 }
 
@@ -339,7 +339,7 @@ inline static xdebug_fs *find_parent(xdebug_hash *hasht, char *func_name)
 	xdebug_fs *found_ent = NULL;
 
 	xdebug_hash_find(hasht, func_name, strlen(func_name), (void *) &found_ent);
-	
+
 	return found_ent;
 }
 
@@ -356,24 +356,24 @@ static inline xdebug_fs **fetch_fcall_summary (int mode, int *size, double total
 		llist = xdcalloc(XG(max_nesting_level), sizeof(function_stack_entry *));
 		list = (xdebug_fs **) xdmalloc(XDEBUG_LLIST_COUNT(XG(trace)) * sizeof(xdebug_fs *));
 		pos = &list[0];
-		
+
 		function_hash = xdebug_hash_alloc(XDEBUG_LLIST_COUNT(XG(trace)), NULL);
 
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			if (XDEBUG_LLIST_IS_TAIL(le) && !XG(auto_profile) != 2) {
 				break;
 			}
-			
+
 			ent = XDEBUG_LLIST_VALP(le);
 			ent->f_calls = 1;
-			
+
 			if (ent->level == 1 && ent->time_taken > 1000000.00) {
 				ent->time_taken = total_time;
 			}
 
 			llist[ent->level] = ent;
 			cur = xdcalloc(1, sizeof(struct xdebug_fs));
-			
+
 			pos[i] = cur;
 			pos[i]->fse = ent;
 
@@ -384,33 +384,33 @@ static inline xdebug_fs **fetch_fcall_summary (int mode, int *size, double total
 			} else {
 				parent = NULL;
 			}
-			
+
 			if (!find_same_function(function_hash, pos[i], llist[ent->level - 1])) {
 				i++;
 			} else {
 				xdfree(cur);
 			}	
 		}
-		
+
 		xdebug_hash_destroy(function_hash);
 		xdfree(llist);
-		
+
 		list_out = (xdebug_fs **) xdmalloc(i * sizeof(xdebug_fs *));
-		
+
 		for (j = 0; j < i; j++) {
 			list_out[j] = xdcalloc(1, sizeof(struct xdebug_fs));
 			list_out[j]->fse = list[j]->fse;
 			list_out[j]->time = list_out[j]->fse->time_taken;
-		
+
 			if (list[j]->nelem_c) {
 				function_hash = xdebug_hash_alloc(list[j]->nelem_c, NULL);
 				list_out[j]->nelem_c = 0;
-				
+
 				for (k = 0; k < list[j]->nelem_c; k++) {
 					ent = list[j]->children[k];
 					if (ent->function.function) {
 						list_out[j]->time -= ent->time_taken;
-					
+
 						if (!find_and_inc_function_entry(function_hash, ent, 1)) {
 							list_out[j]->nelem_c++;
 							list_out[j]->children = xdrealloc(list_out[j]->children, list_out[j]->nelem_c * sizeof(function_stack_entry *));
@@ -419,12 +419,13 @@ static inline xdebug_fs **fetch_fcall_summary (int mode, int *size, double total
 							list_out[j]->children[list_out[j]->nelem_c - 1]->f_calls = 1;
 							list_out[j]->children[list_out[j]->nelem_c - 1]->time_taken = ent->time_taken;
 							list_out[j]->children[list_out[j]->nelem_c - 1]->filename = ent->filename;
-							list_out[j]->children[list_out[j]->nelem_c - 1]->lineno =ent->lineno;
+							list_out[j]->children[list_out[j]->nelem_c - 1]->lineno = ent->lineno;
+							list_out[j]->children[list_out[j]->nelem_c - 1]->level = ent->level;
 							add_function_entry(function_hash, list_out[j]->children[list_out[j]->nelem_c - 1]);
  						}
  					}		
 				}	
-				
+
 				xdfree(list[j]->children);
 				xdebug_hash_destroy(function_hash);
 			}
@@ -432,7 +433,7 @@ static inline xdebug_fs **fetch_fcall_summary (int mode, int *size, double total
 			if (list[j]->nelem_p) {
 				function_hash = xdebug_hash_alloc(list[j]->nelem_p, NULL);
 				list_out[j]->nelem_p = 0;
-				
+
 				for (k = 0; k < list[j]->nelem_p; k++) {
 					ent = list[j]->parents[k];
 					if (!find_and_inc_function_entry(function_hash, ent, 1)) {
@@ -443,24 +444,25 @@ static inline xdebug_fs **fetch_fcall_summary (int mode, int *size, double total
 						list_out[j]->parents[list_out[j]->nelem_p - 1]->f_calls = 1;
 						list_out[j]->parents[list_out[j]->nelem_p - 1]->time_taken = ent->time_taken;
 						list_out[j]->parents[list_out[j]->nelem_p - 1]->filename = ent->filename;
-						list_out[j]->parents[list_out[j]->nelem_p - 1]->lineno =ent->lineno;
+						list_out[j]->parents[list_out[j]->nelem_p - 1]->lineno = ent->lineno;
+						list_out[j]->parents[list_out[j]->nelem_p - 1]->level = ent->level;
 						add_function_entry(function_hash, list_out[j]->parents[list_out[j]->nelem_p - 1]);
 					}
 				}
-				
+
 				xdfree(list[j]->parents);
 				xdebug_hash_destroy(function_hash);
 			}
-			
+
 			xdfree(list[j]);
 		}
-		
+
 		xdfree(list);
-		
+
 		*size = i;
 		return list_out;
 	}
-			
+
 	return (xdebug_fs **) NULL;
 }
 
@@ -475,17 +477,17 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size, 
 		int                          i = 0;
 		xdebug_hash                  *function_hash;
 		int                          mode_op;
-		
+
 		list = (function_stack_entry **) xdmalloc(n_elem * sizeof(function_stack_entry *));
 		function_hash = xdebug_hash_alloc(n_elem, NULL);
 		start_p = &list[0];
-		
+
 		if (mode >= XDEBUG_PROFILER_FS_AV) {
 			mode_op = 1;
 		} else {
 			mode_op = 0;
 		}
-		
+
 		for (le = XDEBUG_LLIST_HEAD(XG(trace)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			/* skip the last function because it is our very own profile function.
 			 * since it is the last function, we may as well stop the loop.
@@ -493,13 +495,13 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size, 
 			if (XDEBUG_LLIST_IS_TAIL(le) && !XG(auto_profile) != 2) {
 				break;
 			}
-		
+
 			ent = XDEBUG_LLIST_VALP(le);
-			
+
 			if (ent->level == 1 && ent->time_taken > 1000000.00) {
 				ent->time_taken = total_time;
 			}
-			
+
 			if (ent->function.function) {
 				if (!find_and_inc_function_entry(function_hash, ent, mode_op)) {
 					start_p[i] = XDEBUG_LLIST_VALP(le);
@@ -513,10 +515,10 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size, 
 				i++;
 			}
 		}
-		
+
 		*size = n_elem = i;
 		xdebug_hash_destroy(function_hash);
-		
+
 		switch (mode) {
 			case XDEBUG_PROFILER_CPU:
 			case XDEBUG_PROFILER_FS_SUM:
@@ -533,7 +535,7 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size, 
 				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &line_numbers);
 				break;
 		}
-		
+
 		return list;
 	}
 
@@ -543,9 +545,9 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size, 
 static inline void fetch_full_function_name (function_stack_entry *ent, char *buf)
 {
 	char *p;
-	
+
 	p = buf;
-	
+
 	if (ent->user_defined == XDEBUG_EXTERNAL) {
 		sprintf(buf, "*");
 		p++;
@@ -603,7 +605,7 @@ void print_profile(int html, int mode TSRMLS_DC)
 	}
 
 	init_profile_modes(&mode_titles);
-	
+
 	if (!html) {
 		if (XG(profile_file)) {
 			data_output = XG(profile_file);
@@ -647,7 +649,7 @@ void print_profile(int html, int mode TSRMLS_DC)
 					fprintf(data_output, "%10.10f    %u    %s()    %s:%d\n", ent->time_taken, ent->f_calls, buffer, ent->filename, ent->lineno);
 				}
 			}
-			
+
 			/* free memory allocated by fetch_simple_profile() */
 			xdfree(list);
 			break;
@@ -692,11 +694,11 @@ void print_profile(int html, int mode TSRMLS_DC)
 		case XDEBUG_PROFILER_SD_CPU:
 		case XDEBUG_PROFILER_SD_NC: {
 			int j;
-		
+
 			if (!(list = fetch_tree_profile(mode, &size, total_time TSRMLS_CC))) {
 				goto err;
 			}
-			
+
 			if (!html) {
 				fprintf(data_output, "-----------------------------------------------------------------------------------\n");
 				fprintf(data_output, "Time Taken    Number of Calls    Function Name    Location\n");
@@ -704,7 +706,7 @@ void print_profile(int html, int mode TSRMLS_DC)
 			} else {
 				php_printf("<tr><th bgcolor='#cccccc'>Time Taken</th><th bgcolor='#cccccc'>Number of Calls</th><th bgcolor='#cccccc'>Function Name</th><th bgcolor='#cccccc'>Location</th></tr>\n");
 			}
-			
+
 			for (i = 0; i < size; i++) {
 				ent = list[i];
 
@@ -736,52 +738,50 @@ void print_profile(int html, int mode TSRMLS_DC)
 		case XDEBUG_PROFILER_FC_SUM: {
 			xdebug_fs **llist;
 			int j;
-		
+
 			if (!(llist = fetch_fcall_summary(mode, &size, total_time TSRMLS_CC))) {
 				goto err;
 			}
-			
+
 			if (!html) {
 				fprintf(data_output, "-----------------------------------------------------------------------------------\n");
 				fprintf(data_output, "Function    Called function    Number of calls    Time Taken    Location\n");
 				fprintf(data_output, "-----------------------------------------------------------------------------------\n");
 			} else {
-				php_printf("<tr><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Called function</th><th bgcolor='#cccccc'>Number of calls</th><th bgcolor='#cccccc'>Time Taken</th><th bgcolor='#cccccc'>Time Taken</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+				php_printf("</table><br />\n<table border='1' cellspacing='0'>\n");
+				php_printf("<tr><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Called function</th><th bgcolor='#cccccc'>Number of calls</th><th bgcolor='#cccccc'>Time Taken</th><th bgcolor='#cccccc'>Location</th></tr>\n");
 			}
-			
+
 			for (i = 0; i < size; i++) {
 				fetch_full_function_name(llist[i]->fse, buffer);
 				if (llist[i]->fse->level == 2) {
 					total_function_exec += llist[i]->fse->time_taken;
 				}
-				
+
 				if (html) {
-					php_printf("<tr><td bgcolor='#cccccc' colspan='2'>%s</td><td bgcolor='#cccccc'>%u</td><td bgcolor='#cccccc'>%10.10f (%2.0f%%)</td><td bgcolor='#cccccc'>%s:%d</td></tr>\n",
+					php_printf("<tr><td bgcolor='#cccccc' colspan='2'>%s()</td><td bgcolor='#cccccc'>%u</td><td bgcolor='#cccccc'>%10.10f (%2.0f%%)</td><td bgcolor='#cccccc'>%s:%d</td></tr>\n",
 						buffer, llist[i]->fse->f_calls, llist[i]->fse->time_taken, (llist[i]->time / llist[i]->fse->time_taken * 100), llist[i]->fse->filename, llist[i]->fse->lineno);
-									
 					if (llist[i]->nelem_c) {
-						php_printf("<tr><td bgcolor='#cccccc' colspan='5'>Children:</td></tr>");
-					
-						fprintf(data_output, "    Children:\n");
+						php_printf("<tr><td bgcolor='#cccccc'> </td><td bgcolor='#cccccc' colspan='4'>Children:</td></tr>");
 						for (j = 0; j < llist[i]->nelem_c; j++) {
 							ent = llist[i]->children[j];
 							fetch_full_function_name(ent, buffer);
-							
-							php_printf("<tr><td bgcolor='#cccccc'> </td><td bgcolor='#cccccc'>%s</td><td bgcolor='#cccccc'>%u</td><td bgcolor='#cccccc'>%10.10f (%2.0f%%)</td><td bgcolor='#cccccc'>%s:%d</td></tr>\n",
-								buffer, llist[i]->fse->f_calls, llist[i]->fse->time_taken, (llist[i]->time / llist[i]->fse->time_taken * 100), llist[i]->fse->filename, llist[i]->fse->lineno);
-							
+
+							php_printf("<tr><td bgcolor='#cccccc'> </td><td bgcolor='#cccccc'>&nbsp;&nbsp;%s()</td><td bgcolor='#cccccc'>%u</td><td bgcolor='#cccccc'>%10.10f (%2.0f%%)</td><td bgcolor='#cccccc'>%s:%d</td></tr>\n",
+								buffer, ent->f_calls, ent->time_taken, (llist[i]->time / llist[i]->fse->time_taken * 100), ent->filename, ent->lineno);
+
 							xdfree(llist[i]->children[j]);
 						}
 						xdfree(llist[i]->children);
 					}
-					
+
 					if (llist[i]->nelem_p) {
-						php_printf("<tr><td bgcolor='#cccccc' colspan='5'>Parents:</td></tr>");
+						php_printf("<tr><td bgcolor='#cccccc'> </td><td bgcolor='#cccccc' colspan='4'>Parents:</td></tr>");
 						for (j = 0; j < llist[i]->nelem_p; j++) {
 							ent = llist[i]->parents[j];
 							fetch_full_function_name(ent, buffer);
-							
-							php_printf("<tr><td bgcolor='#cccccc'> </td><td bgcolor='#cccccc'>%s</td><td bgcolor='#cccccc'>%u</td><td bgcolor='#cccccc'>%2.0f%%</td><td bgcolor='#cccccc'>%s:%d</td></tr>\n",
+
+							php_printf("<tr><td bgcolor='#cccccc'> </td><td bgcolor='#cccccc'>&nbsp;&nbsp;%s()</td><td bgcolor='#cccccc'>%u</td><td bgcolor='#cccccc'>%2.0f%%</td><td bgcolor='#cccccc'>%s:%d</td></tr>\n",
 								buffer, ent->f_calls, (llist[i]->fse->time_taken  /  ent->time_taken * 100), ent->filename, ent->lineno);
 
 							xdfree(llist[i]->parents[j]);
@@ -801,7 +801,7 @@ void print_profile(int html, int mode TSRMLS_DC)
 						}
 						xdfree(llist[i]->children);
 					}
-					
+
 					if (llist[i]->nelem_p) {
 						fprintf(data_output, "    Parents:\n");
 						for (j = 0; j < llist[i]->nelem_p; j++) {
@@ -812,10 +812,10 @@ void print_profile(int html, int mode TSRMLS_DC)
 						}
 						xdfree(llist[i]->parents);
 					}
-					
+
 					fprintf(data_output, "----------------------------------\n");
 				}
-				
+
 				xdfree(llist[i]);
 			}
 
@@ -844,7 +844,7 @@ err:
 inline static void append_frame (zval **dest, function_stack_entry *ent)
 {
 	zval *frame = *dest;
-	
+
 	if (ent->function.function) {
 		add_assoc_string_ex(frame, "function", sizeof("function"), ent->function.function, 1);
 	} else {
@@ -869,7 +869,7 @@ inline static void append_frame (zval **dest, function_stack_entry *ent)
 				break;
 		}
 	}
-	
+
 	if (ent->function.class) {
 		add_assoc_string_ex(frame, "class", sizeof("class"), ent->function.class, 1);
 		if (ent->function.type == XFUNC_MEMBER) {
@@ -878,20 +878,20 @@ inline static void append_frame (zval **dest, function_stack_entry *ent)
 			add_assoc_string_ex(frame, "method_type", sizeof("static"), "static", 1);
 		}
 	}
-	
+
 	add_assoc_long_ex(frame, "n_calls", sizeof("n_calls"), ent->f_calls);
 	add_assoc_double_ex(frame, "ttl_time", sizeof("ttl_time"), ent->time_taken);
-	
+
 	if (ent->f_calls > 1) {
 		add_assoc_double_ex(frame, "avg_time", sizeof("avg_time"), (ent->time_taken / ent->f_calls));
 	}	
-	
+
 	if (ent->user_defined != XDEBUG_EXTERNAL) {
 		add_assoc_string_ex(frame, "origin", sizeof("origin"), "php", 1);
 	} else {
 		add_assoc_string_ex(frame, "origin", sizeof("origin"), "user", 1);
 	}
-	
+
 	add_assoc_long_ex(frame, "level", sizeof("level"), ent->level - 2);
 }
 
@@ -931,16 +931,16 @@ PHP_FUNCTION(xdebug_get_function_profile)
 				xdebug_fs **llist;
 				zval       *children, *parents, *child, *parent;
 				int         j;
-			
+
 				if (!(llist = fetch_fcall_summary(profile_flag, &size, total_time TSRMLS_CC))) {
 					goto err;
 				}
-				
+
 				array_init(return_value);
-				
+
 				for (i = 0; i < size; i++) {
 					ent = llist[i]->fse;
-					
+
 					if (ent->level == 2) {
 						total_function_exec += ent->time_taken;
 					}
@@ -948,11 +948,11 @@ PHP_FUNCTION(xdebug_get_function_profile)
 					MAKE_STD_ZVAL(frame);
 					array_init(frame);
 					append_frame(&frame, ent);
-					
+
 					if (llist[i]->nelem_c) {
 						MAKE_STD_ZVAL(children);
 						array_init(children);
-						
+
 						for (j = 0; j < llist[i]->nelem_c; j++) {
 							MAKE_STD_ZVAL(child);
 							array_init(child);
@@ -964,7 +964,7 @@ PHP_FUNCTION(xdebug_get_function_profile)
 					if (llist[i]->nelem_p) {
 						MAKE_STD_ZVAL(parents);
 						array_init(parents);
-						
+
 						for (j = 0; j < llist[i]->nelem_p; j++) {
 							MAKE_STD_ZVAL(parent);
 							array_init(parent);
@@ -997,7 +997,7 @@ err:
 			/* Initialize frame array */
 			MAKE_STD_ZVAL(frame);
 			array_init(frame);
-		
+
 			append_frame(&frame, ent);
 			add_next_index_zval(return_value, frame);
 		}
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(xdebug_start_profiling)
 	if (XG(do_profile) == 0) {
 		char *fname = NULL;
 		int fname_len;
-	
+
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &fname, &fname_len) == FAILURE) {
 			return;
 		}
