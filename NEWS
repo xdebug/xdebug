@@ -1,5 +1,10 @@
 ? - xdebug 1.1.0
 
++ Implemented correct handling of include/require and eval. (Derick)
+
+
+Mon Oct 22, 2002 - xdebug 1.1.0pre1
+
 + Added automatic starting of function traces (xdebug.auto_trace, defaulting to
   "off"). (Derick)
 - Xdebug no longer supports PHP versions below PHP 4.3.0pre1. (Derick)

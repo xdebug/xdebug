@@ -168,13 +168,15 @@ array(27) {
   [0]=>
   array(4) {
     ["function"]=>
-    string(6) "{main}"
+    string(9) "{include}"
     ["file"]=>
     string(%d) "/%s/test2.php"
     ["line"]=>
-    int(0)
+    int(3)
     ["params"]=>
-    array(0) {
+    array(1) {
+      [1]=>
+      string(10) "test2a.php"
     }
   }
   [1]=>
@@ -500,7 +502,7 @@ array(27) {
     ["params"]=>
     array(1) {
       [1]=>
-      string(%d) "array (0 => array ('function' => '{main}', 'file' => '/%s/test2.php', 'line' => 0, 'params' => array)), 1 => array ('function' => 'foo6', 'file' => '/%s/test2.php', 'line' => 30, 'params' => array (0 => '1', 1 => '2', 2 => '3')), 2 => array ('function' => 'foo5', 'file' => '/%s/test2.php', 'line' => 26, 'params' => array (0 => '2', 1 => '3', 2 => '1')), 3 => array ('function' => 'foo4', 'file' => '/%s/test2.php', 'line' => 18, 'params' => array (0 => '3', 1 => '1', 2 => '2')), 4 => array ('function' => 'foo3', 'file' => '/%s/test2.php', 'line' => 10, 'params' => array (0 => '1', 1 => '2', 2 => '3')), 5 => array ('function' => 'foo2', 'file' => '/%s/test2a.php', 'line' => 23, 'params' => array (0 => '2', 1 => '3', 2 => '1')), 6 => array ('function' => 'foo1', 'file' => '/%s/test2a.php', 'line' => 15, 'params' => array (0 => '3', 1 => '1', 2 => '2')))"
+      string(%d) "array (0 => array ('function' => '{main}', 'file' => '/%s/test2.php', 'line' => 0, 'params' => array)), 1 => array ('function' => 'foo6', 'file' => '/dat/dev/php/xdebug/tests/test2.php', 'line' => 30, 'params' => array (0 => '1', 1 => '2', 2 => '3')), 2 => array ('function' => 'foo5', 'file' => '/dat/dev/php/xdebug/tests/test2.php', 'line' => 26, 'params' => array (0 => '2', 1 => '3', 2 => '1')), 3 => array ('function' => 'foo4', 'file' => '/dat/dev/php/xdebug/tests/test2.php', 'line' => 18, 'params' => array (0 => '3', 1 => '1', 2 => '2')), 4 => array ('function' => 'foo3', 'file' => '/dat/dev/php/xdebug/tests/test2.php', 'line' => 10, 'params' => array (0 => '1', 1 => '2', 2 => '3')), 5 => array ('function' => 'foo2', 'file' => '/dat/dev/php/xdebug/tests/test2a.php', 'line' => 23, 'params' => array (0 => '2', 1 => '3', 2 => '1')), 6 => array ('function' => 'foo1', 'file' => '/dat/dev/php/xdebug/tests/test2a.php', 'line' => 15, 'params' => array (0 => '3', 1 => '1', 2 => '2')))"
     }
   }
 }

@@ -66,6 +66,8 @@ void (*old_error_cb)(int type, const char *error_filename, const uint error_line
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
+static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
+
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_function_stack,  NULL)
 	PHP_FE(xdebug_call_function,       NULL)
@@ -397,21 +399,33 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 #endif
 	tmp->time      = get_utime();
 
-	if ((op_array && op_array->function_name == NULL) && !(EG(current_execute_data) && EG(current_execute_data)->function_state.function->common.function_name)) { /* handling main() */
-
+	tmp->function = xdebug_build_fname(zdata, op_array TSRMLS_CC);
+	if (!tmp->function.type) {
 		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
 		tmp->function.type     = XFUNC_NORMAL;
 		tmp->lineno = 0;
 
-		xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
-	} else {
+	} else if (tmp->function.type == XFUNC_INCLUDE ||
+		tmp->function.type == XFUNC_REQUIRE ||
+		tmp->function.type == XFUNC_INCLUDE_ONCE ||
+		tmp->function.type == XFUNC_REQUIRE_ONCE ||
+		tmp->function.type == XFUNC_EVAL
+	) {
+		zval *param;
+		int   is_var;
+
 		cur_opcode = *EG(opline_ptr);
 		tmp->lineno = cur_opcode->lineno;
 
-		tmp->function = xdebug_build_fname(zdata, op_array TSRMLS_CC);
-		xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
+		param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
+		tmp->vars[tmp->varc].name  = NULL;
+		tmp->vars[tmp->varc].value = xdstrdup(param->value.str.val);
+		tmp->varc++;
 
+	} else {
+		cur_opcode = *EG(opline_ptr);
+		tmp->lineno = cur_opcode->lineno;
 		for (i = 0; i < arg_count; i++) {
 			tmp->vars[tmp->varc].name  = NULL;
 			if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
@@ -423,6 +437,7 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		}
 
 	}
+	xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 
 	if (XG(do_trace)) {
 		tmp->refcount++;
