@@ -12,8 +12,22 @@
     </maintainer>
   </maintainers>
   <description>
-    A extension which gives you detailed errors with backtraces and provides
-    functions for function tracing, memory usage and profiling.
+The Xdebug extension helps you debugging your script by providing a lot of
+valuable debug information. The debug information that Xdebug can provide
+includes the following:
+
+    * stack and function traces in error messages with:
+          o full parameter display for user defined functions
+          o function name, file name and line indications
+          o support for member functions
+    * memory allocation
+    * protection for infinite recursions
+
+Xdebug also provides:
+
+    * profiling information for PHP scripts
+    * script execution analysis
+	* capabilities to debug your scripts interactively with a debug client
   </description>
   <license>PHP</license>
   <release>
