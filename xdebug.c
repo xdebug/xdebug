@@ -285,6 +285,7 @@ PHP_INI_BEGIN()
 #else
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 #endif
+	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
 	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
 PHP_INI_END()
@@ -969,7 +970,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 		/* Start remote context if requested */
 		if (
-			magic_cookie &&
+			(magic_cookie || XG(remote_autostart)) &&
 			!XG(remote_enabled) &&
 			XG(remote_enable) &&
 			(XG(remote_mode) == XDEBUG_REQ)
