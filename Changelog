@@ -1,3 +1,7 @@
+Mon Jul 1 18:08:16 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fix include stuff (thanks to sweede <sweede@gallatinriver.net>)
+
 Mon Jun 24 10:04:14 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Fix building on Windows
