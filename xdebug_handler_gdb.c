@@ -607,12 +607,6 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 	zval                       **retval;
 	TSRMLS_FETCH();
 
-	st = &EG(symbol_table);
-	if (zend_hash_find(st, args->args[0], strlen(args->args[0]) + 1, (void **) &retval) == SUCCESS) {
-		SENDMSG(context->socket, xdebug_sprintf ("$%s = %s\n", args->args[0], get_zval_value(*retval)));
-		return NULL;
-	}
-
 	st = EG(active_symbol_table);
 	if (zend_hash_find(st, args->args[0], strlen(args->args[0]) + 1, (void **) &retval) == SUCCESS) {
 		SENDMSG(context->socket, xdebug_sprintf ("$%s = %s\n", args->args[0], get_zval_value(*retval)));
@@ -627,6 +621,12 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 		}
 	}
 	
+	st = &EG(symbol_table);
+	if (zend_hash_find(st, args->args[0], strlen(args->args[0]) + 1, (void **) &retval) == SUCCESS) {
+		SENDMSG(context->socket, xdebug_sprintf ("$%s = %s\n", args->args[0], get_zval_value(*retval)));
+		return NULL;
+	}
+
 	return xdebug_sprintf("The symbol '%s' does not exist or is not yet initialized.", args->args[0]);
 }
 
