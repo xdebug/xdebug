@@ -1,3 +1,20 @@
+Fri Oct 18 22:38:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/tests/.cvsignore
+/xdebug/tests/test1.phpt
+/xdebug/tests/test2.phpt
+/xdebug/tests/test3.phpt
+/xdebug/tests/test4.phpt
+/xdebug/tests/test5.phpt
+/xdebug/tests/test6.phpt
+/xdebug/tests/001.phpt
+/xdebug/tests/test1.php
+/xdebug/tests/test2.php
+/xdebug/tests/test3.php
+/xdebug/tests/test4.php
+/xdebug/tests/test5.php
+/xdebug/tests/test6.php:
+- Converted tests
+
 Thu Oct 17 13:15:49 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
