@@ -158,10 +158,9 @@ static double get_utime()
 
 		if (msec >= 1.0) msec -= (long) msec;
 		return msec + sec;
-	} else {
-#endif
-		return 0;
 	}
+#endif
+	return 0;
 }
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg)
