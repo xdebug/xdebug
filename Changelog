@@ -1,3 +1,7 @@
+Sun Nov 9 00:03:36 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat:
+- MFB: Name .dlls more consistently
+
 Sun Nov 9 00:02:47 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/compile.bat:
 - Name .dlls more consistently
