@@ -1,3 +1,12 @@
+Fri Jul 16 23:42:05 CEST 2004 Shane Caraveo <shane@caraveo.com>
+xdebug.c:
+- fix the availability of used vars from included files.
+# since included files are treated as a stack frame, we have to update 
+# the used vars in all the parent stack frames, up to the 'real' previous 
+# stack, which is either the top stack or the first fuction stack we find.  
+# Without this patch, when you step into an included file, you would not 
+# see the variables defined at the global level of that file.
+
 Fri Jul 16 06:02:51 CEST 2004 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 change stack function attribute to where attribute per spec
