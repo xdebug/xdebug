@@ -899,9 +899,9 @@ inline static void append_frame(zval **dest, function_stack_entry *ent)
 	if (ent->function.class) {
 		add_assoc_string_ex(frame, "class", sizeof("class"), ent->function.class, 1);
 		if (ent->function.type == XFUNC_MEMBER) {
-			add_assoc_string_ex(frame, "method_type", sizeof("public"), "public", 1);
+			add_assoc_string_ex(frame, "method_type", sizeof("method_type"), "public", 1);
 		} else {
-			add_assoc_string_ex(frame, "method_type", sizeof("static"), "static", 1);
+			add_assoc_string_ex(frame, "method_type", sizeof("method_type"), "static", 1);
 		}
 	}
 
