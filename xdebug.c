@@ -401,6 +401,7 @@ PHP_RINIT_FUNCTION(xdebug)
 		zend_error_cb = new_error_cb;
 	}
 	XG(remote_enabled) = 0;
+	XG(breakpoints_allowed) = 1;
 	if (XG(auto_trace)) {
 		xdebug_start_trace();
 	}
@@ -769,7 +770,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	/* Check for breakpoints */
-	if (XG(remote_enabled)) {
+	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
 		if (!handle_breakpoints(fse)) {
 			XG(remote_enabled) = 0;
 		}
@@ -824,7 +825,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 
 	/* Check for breakpoints */
-	if (XG(remote_enabled)) {
+	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
 		if (!handle_breakpoints(fse)) {
 			XG(remote_enabled) = 0;
 		}

@@ -898,15 +898,17 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 
 	/* Concat all arguments back together */
 	XDEBUG_STR_ADD(&buffer, args->args[0], 0);
-	
+
 	for (i = 1; i < args->c; i++) {
 		XDEBUG_STR_ADD(&buffer, " ", 0);
 		XDEBUG_STR_ADD(&buffer, args->args[i], 0);
 	}
-	
+
+	XG(breakpoints_allowed) = 0;
 	if (zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC) == FAILURE) {
 		XDEBUG_STR_FREE(&buffer);
 		EG(error_reporting) = old_error_reporting;
+		XG(breakpoints_allowed) = 1;
 		return make_message(context, XDEBUG_E_EVAL, "Error evaluating code");
 	} else {
 		XDEBUG_STR_FREE(&buffer);
@@ -914,6 +916,7 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 		ret_value = get_variable(context, NULL, &retval);
 		SENDMSG(context->socket, xdebug_sprintf("%s\n", ret_value));
 		xdfree(ret_value);
+		XG(breakpoints_allowed) = 1;
 		return NULL;
 	}
 }
