@@ -254,11 +254,15 @@ static char* return_source(char *file, int begin, int end TSRMLS_DC)
 		i = 0;
 	}
 
+	file = xdebug_path_from_url(file);
+	fd = open(file, 0);
+	xdfree(file);
+
 	/* Read until the "begin" line has been read */
-	if ((fd = open(file, 0)) == -1) {
+	if (fd == -1) {
 		return NULL;
 	}
-	
+
 	while (i > 0) {
 		if (line) {
 			free(line);
@@ -303,10 +307,10 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	xdebug_xml_add_attribute_ex(tmp, "level",    xdebug_sprintf("%ld", nr), 0, 1);
 	if (fse_prev) {
 		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename), 0, 1);
-		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", fse_prev->lineno), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno), 0, 1);
 	} else {
 		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(zend_get_executed_filename(TSRMLS_C)), 0, 1);
-		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%ld", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
+		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
 	}
 
 	xdfree(tmp_fname);
@@ -653,7 +657,7 @@ DBGP_FUNC(breakpoint_set)
 			brk_info->file_len = strlen(brk_info->file);
 		}
 
-		tmp_name = xdebug_sprintf("%s$%l", brk_info->file, brk_info->lineno);
+		tmp_name = xdebug_sprintf("%s$%lu", brk_info->file, brk_info->lineno);
 		brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_LINE, tmp_name);
 		xdfree(tmp_name);
 		xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) brk_info);
@@ -863,17 +867,17 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("max_children")
-			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_children));
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", options->max_children));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("max_data")
-			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_data));
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", options->max_data));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("max_depth")
-			xdebug_xml_add_text(*retval, xdebug_sprintf("%l", options->max_depth));
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", options->max_depth));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
@@ -1302,7 +1306,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.33 $";
+	return "$Revision: 1.34 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
