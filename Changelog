@@ -1,3 +1,8 @@
+Sat Oct 19 18:16:32 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_socket.c
+/xdebug/debugclient/usefulstuff.c:
+- Use constant to define buffer size
+
 Sat Oct 19 18:13:14 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/.cvsignore:
 - Add .cvsignore file
