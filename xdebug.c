@@ -1804,6 +1804,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 	
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
+			XG(active_symbol_table) = EG(active_symbol_table);
 			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
 			if (debugzval) {
 				php_printf("%s: ", Z_STRVAL_PP(args[i]));
