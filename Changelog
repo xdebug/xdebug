@@ -1,3 +1,13 @@
+Sat May 18 22:39:57 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Renamed xdebug_get_function_trace() to xdebug_dump_function_trace().
+- Implemented new xdebug_get_function_trace() to return the function trace in
+  an array.
+- Added a parameter to xdebug_start_trace(). When this parameter is used,
+  xdebug will dump a function trace to the filename which this parameter
+  speficies.
+
 Fri May 17 20:42:37 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c
