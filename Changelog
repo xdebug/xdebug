@@ -1,3 +1,8 @@
+Sun Nov 2 11:30:06 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h:
+- Add file/line number for signals
+
 Fri Oct 31 18:45:15 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_handler_dbgp.c
