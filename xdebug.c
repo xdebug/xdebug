@@ -533,7 +533,9 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 #else
 			if (edata->object) {
 				tmp->type = XFUNC_MEMBER;
-				tmp->class = xdstrdup(edata->function_state.function->common.scope->name);
+				if (edata->function_state.function->common.scope) { /* __autoload has no scope */
+					tmp->class = xdstrdup(edata->function_state.function->common.scope->name);
+				}
 			} else if (EG(scope) && edata->function_state.function->common.scope && edata->function_state.function->common.scope->name) {
 				tmp->type = XFUNC_STATIC_MEMBER;
 				tmp->class = xdstrdup(edata->function_state.function->common.scope->name);
