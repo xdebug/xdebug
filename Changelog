@@ -1,3 +1,7 @@
+Fri Dec 20 16:47:17 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/test.sh:
+- Make this better working
+
 Fri Dec 20 16:43:09 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/auto_trace.phpt:
 - Fix auto_trace test
