@@ -17,12 +17,13 @@
   </description>
   <license>PHP</license>
   <release>
-    <state>beta</state>
-    <version>1.2.0rc2</version>
-    <date>2003-04-15</date>
+    <state>stable</state>
+    <version>1.2.0</version>
+    <date>2003-04-21</date>
     <notes>
-      Fixed a bug in handling Windows path files and one for dealing with
-      Zend Engine 2.
+      Fixed a bug in handling Windows path files and one for dealing with Zend
+      Engine 2. Also added support for MacOSX and added the xdebug_call_class()
+      function.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -65,6 +66,15 @@
     </filelist>
   </release>
   <changelog>
+    <release>
+      <state>stable</state>
+      <version>1.2.0</version>
+      <date>2003-04-21</date>
+      <notes>
+= Fixed compilation on MacOSX. (Derick)
+      </notes>
+    </release>
+
     <release>
       <state>beta</state>
       <version>1.2.0rc2</version>

@@ -1,7 +1,13 @@
+Mon, Apr 21, 2003 - xdebug 1.2.0
+
+= Fixed compilation on MacOSX. (Derick)
+
+
 Tue, Apr 15, 2003 - xdebug 1.2.0rc2
 
 = Fixed handling Windows paths in the debugger. (Derick)
 = Fixed getting zvals out of Zend Engine 2. (Derick)
+
 
 Sun, Apr 6, 2003 - xdebug 1.2.0rc1
 
