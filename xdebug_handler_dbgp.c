@@ -65,6 +65,12 @@ char *xdebug_dbgp_status_strings[6] =
 char *xdebug_dbgp_reason_strings[4] =
 	{"ok", "error", "aborted", "exception"};
 
+#define XDEBUG_STR_SWITCH_DECL       char *__switch_variable
+#define XDEBUG_STR_SWITCH(s)         __switch_variable = (s);
+#define XDEBUG_STR_CASE(s)           if (strcmp(__switch_variable, s) == 0) {
+#define XDEBUG_STR_CASE_END          } else
+#define XDEBUG_STR_CASE_DEFAULT      {
+#define XDEBUG_STR_CASE_DEFAULT_END  }
 
 /*****************************************************************************
 ** Prototypes for debug command handlers
@@ -361,16 +367,6 @@ static int breakpoint_admin_remove(xdebug_con *context, char *hkey)
 	}
 }
 
-DBGP_FUNC(breakpoint_disable)
-{
-	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
-}
-
-DBGP_FUNC(breakpoint_enable)
-{
-	RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_UNIMPLEMENTED);
-}
-
 static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 {
 	if (brk->file) {
@@ -384,6 +380,13 @@ static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 	}
 	if (brk->classname) {
 		xdebug_xml_add_attribute_ex(xml, "class", xdstrdup(brk->classname), 0, 1);
+	}
+	if (brk->temporary) {
+		xdebug_xml_add_attribute(xml, "state", "temporary");
+	} else if (brk->disabled) {
+		xdebug_xml_add_attribute(xml, "state", "disabled");
+	} else {
+		xdebug_xml_add_attribute(xml, "state", "enabled");
 	}
 }
 
@@ -471,7 +474,12 @@ static int breakpoint_remove(int type, char *hkey)
 	return FAILURE;
 }
 
-DBGP_FUNC(breakpoint_get)
+#define BREAKPOINT_ACTION_DISABLE   1
+#define BREAKPOINT_ACTION_ENABLE    2
+#define BREAKPOINT_ACTION_GET       3
+#define BREAKPOINT_ACTION_REMOVE    4
+
+static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 {
 	int                   type;
 	char                 *hkey;
@@ -485,13 +493,48 @@ DBGP_FUNC(breakpoint_get)
 		/* so it exists, now we're going to find it in the correct hash/list
 		 * and return the info we have on it */
 		brk = breakpoint_brk_info_fetch(type, hkey);
+		switch (action) {
+			case BREAKPOINT_ACTION_DISABLE:
+				brk->disabled = 1;
+				break;
+			case BREAKPOINT_ACTION_ENABLE:
+				brk->disabled = 0;
+				break;
+		}
 		breakpoint_brk_info_add(*retval, brk);
 		/* Now we add some common attributes */
 		xdebug_xml_add_attribute(*retval, "id", CMD_OPTION('d'));
+
+		if (action == BREAKPOINT_ACTION_REMOVE) {
+			/* Now we remove the crap */
+			breakpoint_remove(type, hkey);
+			breakpoint_admin_remove(context, CMD_OPTION('d'));
+		}
 	} else {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_NO_SUCH_BREAKPOINT)
 	}
 }
+
+DBGP_FUNC(breakpoint_disable)
+{
+	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_DISABLE);
+}
+
+DBGP_FUNC(breakpoint_enable)
+{
+	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_ENABLE);
+}
+
+DBGP_FUNC(breakpoint_get)
+{
+	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_GET);
+}
+
+DBGP_FUNC(breakpoint_remove)
+{
+	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_REMOVE);
+}
+
 
 static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
 {
@@ -512,46 +555,45 @@ DBGP_FUNC(breakpoint_list)
 	xdebug_hash_apply(context->breakpoint_list, (void *) *retval, breakpoint_list_helper);
 }
 
-DBGP_FUNC(breakpoint_remove)
-{
-	int                   type;
-	char                 *hkey;
-	xdebug_brk_info      *brk;
-
-	if (!CMD_OPTION('d')) {
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
-	}
-	/* Lets check if it exists */
-	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey) == SUCCESS) {
-		/* so it exists, now we're going to find it in the correct hash/list
-		 * and return the info we have on it */
-		brk = breakpoint_brk_info_fetch(type, hkey);
-		breakpoint_brk_info_add(*retval, brk);
-		/* Now we add some common attributes */
-		xdebug_xml_add_attribute(*retval, "id", CMD_OPTION('d'));
-		/* Now we remove the crap */
-		breakpoint_remove(type, hkey);
-		breakpoint_admin_remove(context, CMD_OPTION('d'));
-	} else {
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_NO_SUCH_BREAKPOINT)
-	}
-}
-
 DBGP_FUNC(breakpoint_set)
 {
 	xdebug_brk_info *extra_brk_info;
 	char            *tmp_name;
 	int              brk_id = 0;
+	XDEBUG_STR_SWITCH_DECL;
 
 	extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
 	extra_brk_info->file = NULL;
 	extra_brk_info->classname = NULL;
 	extra_brk_info->functionname = NULL;
 	extra_brk_info->condition = NULL;
+	extra_brk_info->disabled = 0;
+	extra_brk_info->temporary = 0;
 
 	if (!CMD_OPTION('t')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
+
+	if (CMD_OPTION('s')) {
+		XDEBUG_STR_SWITCH(CMD_OPTION('s')) {
+			XDEBUG_STR_CASE("temporary")
+				extra_brk_info->temporary = 1;
+			XDEBUG_STR_CASE_END
+
+			XDEBUG_STR_CASE("enabled")
+				extra_brk_info->disabled = 0;
+			XDEBUG_STR_CASE_END
+
+			XDEBUG_STR_CASE("disabled")
+				extra_brk_info->disabled = 1;
+			XDEBUG_STR_CASE_END
+
+			XDEBUG_STR_CASE_DEFAULT
+				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+			XDEBUG_STR_CASE_DEFAULT_END
+		}
+	}
+
 	if (strcmp(CMD_OPTION('t'), "line") == 0) {
 		if (!CMD_OPTION('f') || !CMD_OPTION('n')) {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
@@ -737,13 +779,6 @@ DBGP_FUNC(source)
 		xdfree(source);
 	}
 }
-
-#define XDEBUG_STR_SWITCH_DECL       char *__switch_variable
-#define XDEBUG_STR_SWITCH(s)         __switch_variable = (s);
-#define XDEBUG_STR_CASE(s)           if (strcmp(__switch_variable, s) == 0) {
-#define XDEBUG_STR_CASE_END          } else
-#define XDEBUG_STR_CASE_DEFAULT      {
-#define XDEBUG_STR_CASE_DEFAULT_END  }
 
 DBGP_FUNC(feature_get)
 {

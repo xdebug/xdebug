@@ -651,6 +651,8 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 	extra_brk_info->condition = NULL;
 	extra_brk_info->classname = NULL;
 	extra_brk_info->functionname = NULL;
+	extra_brk_info->disabled = 0;
+	extra_brk_info->temporary = 0;
 
 	if (strstr(args->args[0], "::")) { /* class::method */
 		xdebug_explode("::", args->args[0], method, -1);

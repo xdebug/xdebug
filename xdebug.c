@@ -719,20 +719,23 @@ static void add_used_variables (struct function_stack_entry *fse, zend_op_array 
 
 static int handle_breakpoints(struct function_stack_entry *fse)
 {
-	char *name     = NULL;
-	char *tmp_name = NULL;
+	xdebug_brk_info *extra_brk_info = NULL;
+	char            *tmp_name = NULL;
 	TSRMLS_FETCH();
 
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
-		if (xdebug_hash_find(XG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &name)) {
-			/* Yup, breakpoint found, call handler */
-			if (fse->user_defined == XDEBUG_EXTERNAL) {
-				XG(context).do_break = 1;
-			} else {
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
-					XG(remote_enabled) = 0;
-					return 0;
+		if (xdebug_hash_find(XG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &extra_brk_info)) {
+			/* Yup, breakpoint found, we call the handler when it's not
+			 * disabled*/
+			if (!extra_brk_info->disabled) {
+				if (fse->user_defined == XDEBUG_EXTERNAL) {
+					XG(context).do_break = 1;
+				} else {
+					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
+						XG(remote_enabled) = 0;
+						return 0;
+					}
 				}
 			}
 		}
@@ -745,9 +748,12 @@ static int handle_breakpoints(struct function_stack_entry *fse)
 			tmp_name = xdebug_sprintf("%s::%s", fse->function.class, fse->function.function);
 		}
 
-		if (xdebug_hash_find(XG(context).class_breakpoints, tmp_name, strlen(tmp_name), (void *) &name)) {
-			/* Yup, breakpoint found, call handler */
-			XG(context).do_break = 1;
+		if (xdebug_hash_find(XG(context).class_breakpoints, tmp_name, strlen(tmp_name), (void *) &extra_brk_info)) {
+			/* Yup, breakpoint found, call handler if the breakpoint is not
+			 * disabled */
+			if (!extra_brk_info->disabled) {
+				XG(context).do_break = 1;
+			}
 		}
 		xdfree(tmp_name);
 	}
@@ -1735,7 +1741,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
-				if (lineno == brk->lineno && memcmp(brk->file, filename + file_len - brk->file_len, brk->file_len) == 0) {
+				if (!brk->disabled && lineno == brk->lineno && memcmp(brk->file, filename + file_len - brk->file_len, brk->file_len) == 0) {
 					break_ok = 1; /* Breaking is allowed by default */
 
 					/* Check if we have a condition set for it */

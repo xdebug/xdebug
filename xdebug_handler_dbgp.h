@@ -54,8 +54,9 @@ typedef struct xdebug_dbgp_cmd {
 	int  cont;
 } xdebug_dbgp_cmd;
 
-
-#define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args)
+#define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args
+#define DBGP_FUNC_PASS_PARAMETERS   retval, context, args
+#define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(DBGP_FUNC_PARAMETERS)
 #define DBGP_FUNC_ENTRY(name)       { #name, xdebug_dbgp_handle_##name, 0 },
 #define DBGP_CONT_FUNC_ENTRY(name)  { #name, xdebug_dbgp_handle_##name, 1 },
 
