@@ -1,3 +1,7 @@
+Wed Mar 10 19:40:46 UTC 2004 Derick Rethans <derick@derickrethans.nl>
+:
+- Fixed Changelog
+
 Wed Mar 10 19:38:17 UTC 2004 Derick Rethans <derick@derickrethans.nl>
 xdebug_private.h
 xdebug/xdebug_profiler.c:
