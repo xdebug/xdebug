@@ -28,6 +28,8 @@
 
 #include "usefulstuff.h"
 
+#define VERSION "0.5.0"
+
 int main(int argc, char *argv[])
 {
 	int port = 7869;
@@ -57,19 +59,21 @@ int main(int argc, char *argv[])
 		printf ("setup_socket: couldn't bind AF_INET socket?\n");
 		sleep(5);
 	}
-	printf ("init\n");
+	printf ("Xdebug GDB emulation client (%s)\n", VERSION);
+	printf ("Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
 
 	while (1) {
 		if (listen (ssocket, 5) == -1) {
 			printf ("setup_socket: listen call failed\n");
 		}
+		printf ("\nWaiting for debug server to connect.\n");
 		fd = accept (ssocket, (struct sockaddr *) &client_in, &client_in_len);
 		iaddr = &client_in.sin_addr;
 		printf ("Connect\n");
 		while ((buffer = fd_read_line (fd, &cxt)) > 0) {
 
 			if (buffer[0] == '?') {
-				printf ("(%s): ", buffer);
+				printf ("(%s) ", &buffer[1]);
 				fflush(stdout);
 				if (cmd = fd_read_line (0, &std_in)) {
 					if (send (fd, cmd, strlen(cmd), 0) == -1) {
@@ -83,7 +87,7 @@ int main(int argc, char *argv[])
 					}
 				}
 			} else if (buffer[0] == '-') {
-				printf ("%s\n", buffer);
+				printf ("%s\n", &buffer[8]);
 			} else if (buffer[0] != '+') {
 				printf ("%s\n", buffer);
 			}
