@@ -667,6 +667,8 @@ ZEND_DLEXPORT void function_begin (zend_op_array *op_array)
 ZEND_DLEXPORT void function_end (zend_op_array *op_array)
 {
 	TSRMLS_FETCH();
+
+	srm_llist_remove (XG(stack), SRM_LLIST_TAIL(XG(stack)), stack_element_dtor);
 	XG(level)--;
 }
 
@@ -697,7 +699,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	"eXtended Debugger (xdebug)",
 	"0.7.0-dev",
 	"Derick Rethans",
-	"http://www.jdimedia.nl/",
+	"http://www.jdimedia.nl/derick/xdebug.php",
 	"Copyright (c) 2002 JDI Media Solutions",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
