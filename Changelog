@@ -1,3 +1,8 @@
+Wed Oct 29 11:07:45 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c:
+- Now use the new protocol
+- Renamed VERSION to DEBUGCLIENT_VERSION for some weird autoconf conflict
+
 Wed Oct 29 10:52:08 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/usefulstuff.h
 /xdebug/debugclient/usefulstuff.c:
