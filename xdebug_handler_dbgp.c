@@ -1239,7 +1239,7 @@ DBGP_FUNC(property_value)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 		} else {
 			/* XXX cheesy and lame, gets more than we want */
-			xdebug_var_export_xml_node(&var_data, name, *retval, 0 TSRMLS_CC);
+			xdebug_var_export_xml_node(&ret_zval, name, *retval, 0 TSRMLS_CC);
 			zval_dtor(&ret_zval);
 		}
 	}
@@ -1589,7 +1589,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.55 $";
+	return "$Revision: 1.56 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
