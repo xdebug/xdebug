@@ -1,3 +1,6 @@
+Fri Dec 20 17:49:08 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>:
+- Fix Changelog
+
 Fri Dec 20 17:17:56 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/tests/get_function_trace.phpt:
