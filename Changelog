@@ -1,3 +1,7 @@
+Sat Oct 12 16:46:09 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Beautify output (patch by Sander Roobol <sander@php.net>)
+
 Thu Oct 10 13:54:31 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_socket.c:
 - Fix bug in algorithm
