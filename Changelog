@@ -1,3 +1,7 @@
+Sun Nov 28 23:12:05 CET 2004 Derick Rethans <derick@derickrethans.nl>
+package.xml:
+- Update NEWS and package.xml
+
 Sun Nov 28 23:07:32 CET 2004 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Go with 2.0.0beta2
