@@ -39,7 +39,9 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 char *xdebug_handle_backtrace(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args);
+char *xdebug_handle_kill(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_next(xdebug_con *context, xdebug_arg *args);
 char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args);
@@ -71,6 +73,16 @@ static xdebug_cmd commands_breakpoint[] = {
 		"             Argument may be filename and linenumber, function name or '{main}'\n"
 		"             for the first PHP line."
 	},
+	{ "delete",     1, "del(ete) [functionname|filename:linenumber]", xdebug_handle_delete, 1,
+		"Removed breakpoint at specified line or function.\n"
+		"             Argument may be filename and linenumber, function name or '{main}'\n"
+		"             for the first PHP line."
+	},
+	{ "del",        1, "del(ete) [functionname|filename:linenumber]", xdebug_handle_delete, 0,
+		"Removed breakpoint at specified line or function.\n"
+		"             Argument may be filename and linenumber, function name or '{main}'\n"
+		"             for the first PHP line."
+	},
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
 
@@ -85,6 +97,7 @@ static xdebug_cmd commands_data[] = {
 };
 
 static xdebug_cmd commands_run[] = {
+	{ "kill",       0, "kill",                                       xdebug_handle_kill,       1, "Kill the script" },
 	{ "quit",       0, "quit",                                       xdebug_handle_quit,       1, "Close the debug session" },
 	{ NULL, 0, NULL, NULL, 0, NULL }
 };
@@ -430,7 +443,6 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 
 	xdebug_arg_init(method);
 
-/* warning optimize rebuilding methodname */
 	if (strstr(args->args[0], "::")) { /* class::method */
 		xdebug_explode("::", args->args[0], method, -1);
 		if (method->c != 2) {
@@ -501,6 +513,88 @@ char *xdebug_handle_cont(xdebug_con *context, xdebug_arg *args)
 	return NULL;
 }
 
+char *xdebug_handle_delete(xdebug_con *context, xdebug_arg *args)
+{
+	xdebug_arg      *method = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	char            *tmp_name;
+	xdebug_brk_info *extra_brk_info;
+	xdebug_llist_element *le;
+	xdebug_brk_info      *brk;
+
+	xdebug_arg_init(method);
+
+	if (strstr(args->args[0], "::")) { /* class::method */
+		xdebug_explode("::", args->args[0], method, -1);
+		if (method->c != 2) {
+			xdebug_arg_dtor(method);
+			return xdstrdup("Invalid format for class/method combination.");
+		} else {
+			if (!xdebug_hash_delete(context->class_breakpoints, args->args[0], strlen(args->args[0]))) {
+				xdebug_arg_dtor(method);
+				return xdstrdup("Breakpoint could not be removed.");
+			} else {
+				SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", args->args[0]));
+				xdebug_arg_dtor(method);
+			}
+		}
+	} else if (strstr(args->args[0], "->")) { /* class->method */
+		xdebug_explode("->", args->args[0], method, -1);
+		if (method->c != 2) {
+			xdebug_arg_dtor(method);
+			return xdstrdup("Invalid format for class/method combination.");
+		} else {
+			if (!xdebug_hash_delete(context->class_breakpoints, args->args[0], strlen(args->args[0]))) {
+				xdebug_arg_dtor(method);
+				return xdstrdup("Breakpoint could not be removed.");
+			} else {
+				SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", args->args[0]));
+				xdebug_arg_dtor(method);
+			}
+		}
+	} else if (strstr(args->args[0], ":")) { /* file:line */
+		xdebug_explode(":", args->args[0], method, -1); /* 0 = filename, 1 = linenumer */
+		if (method->c != 2) {
+			xdebug_arg_dtor(method);
+			return xdstrdup("Invalid format for file:line combination.");
+		} else {
+			/* Make search key */
+			if (method->args[0][0] != '/') {
+				tmp_name = xdebug_sprintf("/%s", method->args[0]);
+			} else {
+				tmp_name = xdebug_sprintf("%s", method->args[0]);
+			}
+
+			/* Set line number in extra structure */
+			extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
+			extra_brk_info->lineno = atoi(method->args[1]);
+			extra_brk_info->file = tmp_name;
+			extra_brk_info->file_len = strlen(tmp_name);
+
+			/* Add breakpoint to the list */
+			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+				brk = XDEBUG_LLIST_VALP(le);
+
+				if (atoi(method->args[1]) == brk->lineno && strcmp(tmp_name, brk->file) == 0) {
+					xdebug_llist_remove(context->line_breakpoints, le, NULL);
+					SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", method->args[0]));
+					xdebug_arg_dtor(method);
+					return NULL;
+				}
+			}
+			xdebug_arg_dtor(method);
+		}
+	} else { /* function */
+		if (!xdebug_hash_delete(context->function_breakpoints, args->args[0], strlen(args->args[0]))) {
+			xdebug_arg_dtor(method);
+			return xdstrdup("Breakpoint could not be removed.");
+		} else {
+			SENDMSG(context->socket, xdebug_sprintf("Breakpoint removed from %s.\n", args->args[0]));
+			xdebug_arg_dtor(method);
+		}
+	}
+	return NULL;
+}
+
 char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args)
 {
 	xdebug_llist_element *le;
@@ -521,6 +615,13 @@ char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args)
 
 	return NULL;
 }
+
+char *xdebug_handle_kill(xdebug_con *context, xdebug_arg *args)
+{
+	zend_bailout();
+	return NULL;
+}
+
 char *xdebug_handle_list(xdebug_con *context, xdebug_arg *args)
 {
 	char *tmp_file  = NULL;

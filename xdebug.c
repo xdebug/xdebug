@@ -1260,6 +1260,7 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 						XG(remote_enable)  = 0;
 						return;
 					}
+					break;
 				}
 			}
 		}
