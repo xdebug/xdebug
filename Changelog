@@ -1,3 +1,18 @@
+Sat May 25 16:00:42 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c
+/xdebug/xdebug_var.h
+/xdebug/Makefile.in
+/xdebug/config.m4
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug_llist.c
+/xdebug/xdebug_llist.h:
+- Implemented MUCH better parameter tracing for user defined functions
+  (and render parameter tracing to internal functions unusable).
+- s/SRM_LLIST/XDEBUG_LLIST
+- Moved variable dumping code to xdebug_var.c
+- Unified unknown entries for class/function names
+
 Sat May 25 15:44:11 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/tests/test10.php:
 - Add test for functions as parameters to functions (10).
