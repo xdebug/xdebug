@@ -28,22 +28,19 @@ Fri Dec 20 15:52:50 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - Allow printing of data in 'init' state.
 
-Fri Dec 20 01:00:36 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Fri Dec 20 01:00:36 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug.c
 /xdebug/xdebug_profiler.c
 /xdebug/xdebug_profiler.h:
 - More WS fixes.
 - Corrected time calculations.
 
-Thu Dec 19 23:03:13 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Thu Dec 19 23:03:13 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug_profiler.c:
 - Lots & lots of WS fixes.
 - Fixed the HTML output of the Function Execution Profile mode.
 
-Thu Dec 19 22:43:08 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Thu Dec 19 22:43:08 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug_profiler.c
 /xdebug/xdebug_profiler.h
 /xdebug/Makefile.in
@@ -56,8 +53,7 @@ Thu Dec 19 22:43:08 CET 2002 Ilia Alshanetsky <ilia@prohost.org
 - Moved the profiling code into it's own file.
 - Fixed some bugs inside the profiling code (more fixes are pending).
 
-Thu Dec 19 07:37:15 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Thu Dec 19 07:37:15 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/TODO:
 - Adding some notes for myself.
 
@@ -69,8 +65,7 @@ Sun Dec 15 23:54:35 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO
 
-Thu Dec 12 04:32:34 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Thu Dec 12 04:32:34 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug.c:
 - Implemented a much better and not to mention properly working function
   merging algorithm. This change also lead to removal of few large chunks
@@ -78,8 +73,7 @@ Thu Dec 12 04:32:34 CET 2002 Ilia Alshanetsky <ilia@prohost.org
 - Added a number of sanity checks that prevent invalid input from causing
   segvs.
 
-Sun Dec 8 21:56:49 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Sun Dec 8 21:56:49 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/TODO
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
@@ -89,8 +83,7 @@ Mon Dec 2 12:02:35 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO
 
-Mon Dec 2 00:44:12 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Mon Dec 2 00:44:12 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/TODO
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
@@ -102,8 +95,7 @@ Mon Dec 2 00:44:12 CET 2002 Ilia Alshanetsky <ilia@prohost.org
 - In the stack-dump profiling mode made the sorting algorithm work across
   all levels rather then just the 1st one. 
 
-Fri Nov 29 17:43:44 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
->
+Fri Nov 29 17:43:44 CET 2002 Ilia Alshanetsky <ilia@prohost.org>
 /xdebug/xdebug.c:
 - Fixed a bug with the calculation of total execution time.
 - Replaced tabs with spaces in the cli 'footer'.
