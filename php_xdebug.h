@@ -66,8 +66,25 @@ typedef struct xdebug_var {
 	char *value;
 } xdebug_var;
 
+#define XFUNC_UNKNOWN        0
+#define XFUNC_NORMAL         1
+#define XFUNC_STATIC_MEMBER  2
+#define XFUNC_MEMBER         3
+
+#define XFUNC_SET(e,t,c,f)          (e)->function.type = t; (e)->function.class = estrdup (c); (e)->function.function = estrdup (f);
+#define XFUNC_SET_DELAYED_F(e,t,c)  (e)->function.type = t; (e)->function.class = estrdup (c); (e)->delayed_fname = 1;
+#define XFUNC_SET_DELAYED_C(e,t,f)  (e)->function.type = t; (e)->function.function = estrdup (f); (e)->delayed_cname = 1;
+
+typedef struct xdebug_func {
+	char *class;
+	char *function;
+	int   type;
+	int   internal;
+} xdebug_func;
+
 typedef struct function_stack_entry {
-	char *function_name;
+	xdebug_func  function;
+
 	char *filename;
 	int   lineno;
 
@@ -75,7 +92,12 @@ typedef struct function_stack_entry {
 	int   varc;
 	xdebug_var vars[20];
 
-	int   delayed_fn;
+	int   delayed_fname;
+	int   delayed_cname;
+	int   delayed_include;
+
+	unsigned int memory;
+	double       time;
 
 	int   level;
 	int   refcount;
@@ -89,6 +111,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           max_nesting_level;
 	zend_bool     default_enable;
 	zend_bool     do_trace;
+	char         *manual_url;
 	FILE         *trace_file;
 ZEND_END_MODULE_GLOBALS(xdebug)
 

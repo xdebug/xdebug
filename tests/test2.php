@@ -1,4 +1,5 @@
 <?php
+	xdebug_start_trace();
 	include 'test2a.php';
 
 	function foo4 ($a, $b, $c)
@@ -27,5 +28,5 @@
 
 
 	echo foo6 (1,2,3);
-
+	xdebug_dump_function_trace();
 ?>

@@ -2,6 +2,8 @@
 	xdebug_start_trace();
 
 	class aaa {
+		var $c1;
+		var $c2;
 		function a1 () {
 			return 'a1';
 		}
