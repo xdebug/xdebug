@@ -127,8 +127,7 @@ static xdebug_cmd commands_runtime[] = {
 
 	{ "finish",     0, "finish",                                     xdebug_handle_finish,     1,
 		"Continues executing until the current function returned to the\n"
-		"             calling function.ly the same as 'step' but does not go into\n"
-		"             function calls if they occur."
+		"             calling function."
 	},
 
 	{ "list",       0, "list [[file:]beginline] [endline]",          xdebug_handle_list,       1,
@@ -621,7 +620,7 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 		XDEBUG_STR_ADD(&buffer, args->args[i], 0);
 	}
 	
-	SENDMSG(context->socket, xdebug_sprintf("Evaluating '%s' ", buffer.d));
+	SENDMSG(context->socket, xdebug_sprintf("Evaluating '%s'\n", buffer.d));
 	if (zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC) == FAILURE) {
 		XDEBUG_STR_FREE(&buffer);
 		EG(error_reporting) = old_error_reporting;
@@ -990,6 +989,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 	int   ret;
 	char *option;
 	char *error = NULL;
+	int   runtime_allowed;
 
 	errortype = error_type(type);
 
@@ -1004,7 +1004,13 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 		if (!option) {
 			return 0;
 		}
-		ret = xdebug_gdb_parse_option(context, option, XDEBUG_BREAKPOINT | XDEBUG_DATA | XDEBUG_RUN | XDEBUG_RUNTIME | XDEBUG_STATUS, "cont", (char**) &error);
+		runtime_allowed = (
+			(type != E_ERROR) && 
+			(type != E_CORE_ERROR) &&
+			(type != E_COMPILE_ERROR) &&
+			(type != E_USER_ERROR)
+		) ? XDEBUG_BREAKPOINT | XDEBUG_RUNTIME : 0;
+		ret = xdebug_gdb_parse_option(context, option, XDEBUG_DATA | XDEBUG_RUN | runtime_allowed | XDEBUG_STATUS, "cont", (char**) &error);
 		xdebug_gdb_option_result(context, ret, error);
 		free(option);
 	} while (1 != ret);
