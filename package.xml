@@ -17,12 +17,12 @@
   </description>
   <license>PHP</license>
   <release>
-    <state>stable</state>
-    <version>1.1.0</version>
-    <date>2002-11-11</date>
+    <state>beta</state>
+    <version>1.2.0rc1</version>
+    <date>2003-04-06</date>
     <notes>
-     Added breakpoint, stepping and listing functions to the remote debugger
-     server and Windows compatibility for server and debug client.
+      Added code coverage and profiling. Fixed a number of bugs and
+      initial support for Zend Engine 2.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -51,7 +51,6 @@
       <file role="src"  name="xdebug_var.h"/>
 
       <file role="src"  name="Makefile.in"/>
-      <file role="src"  name="Makefile.frag"/>
       <file role="src"  name="config.m4"/>
       <file role="src"  name="xdebug.dsp"/>
 
@@ -66,6 +65,29 @@
     </filelist>
   </release>
   <changelog>
+    <release>
+      <state>beta</state>
+      <version>1.2.0rc1</version>
+      <date>2003-04-06</date>
+      <notes>
++ Added code coverage functions to check which lines and how often they were
+  touched during execution. (Derick)
++ Made Xdebug compatible with Zend Engine 2. (Derick)
++ Added dumping of super globals on errors. (Harald Radi)
++ Added XML protocol for the debugger client. (Derick)
+= Fixed handling of "continue" (so that it also continues with the script).
+  (Derick)
++ Additions to the remote debugger: "eval" (evaluate any PHP code from the
+  debugger client). (Derick)
++ Added profiling support to xdebug. This introduces 3 new functions,
+  xdebug_start_profiling() that begins profiling process, 
+  xdebug_stop_profiling() that ends the profiling process and
+  xdebug_dump_function_trace() that dumps the profiling data. (Ilia)
++ Implemented the "kill" (kills the running script) and "delete" (removes
+  a breakpoint on a specified element) command. (Derick)
+      </notes>
+    </release>
+
     <release>
       <state>stable</state>
       <version>1.1.0</version>
