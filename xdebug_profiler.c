@@ -265,13 +265,13 @@ static inline function_stack_entry **fetch_tree_profile (int mode, int *size, do
 				if ((list[j]->parent)->nelem > 1) {
 					switch (mode) {
 						case XDEBUG_PROFILER_SD_CPU:
-							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)()) &time_taken_tree_cmp);
+							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)(const void *, const void *)) &time_taken_tree_cmp);
 							break;
 						case XDEBUG_PROFILER_SD_NC:
-							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)()) &n_calls_tree_cmp);
+							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)(const void *, const void *)) &n_calls_tree_cmp);
 							break;
 						default:
-							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)()) &n_line_no_cmp);
+							qsort((list[j]->parent)->children, (list[j]->parent)->nelem, sizeof(xdebug_tree_out *), (int (*)(const void *, const void *)) &n_line_no_cmp);
 							break;
 					}
 				}
@@ -540,17 +540,17 @@ static inline function_stack_entry **fetch_simple_profile (int mode, int *size, 
 		switch (mode) {
 			case XDEBUG_PROFILER_CPU:
 			case XDEBUG_PROFILER_FS_SUM:
-				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &time_taken_cmp);
+				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)(const void *, const void *)) &time_taken_cmp);
 				break;
 			case XDEBUG_PROFILER_NC:
 			case XDEBUG_PROFILER_FS_NC:
-				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &n_calls_cmp);
+				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)(const void *, const void *)) &n_calls_cmp);
 				break;
 			case XDEBUG_PROFILER_FS_AV:
-				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &avg_time_cmp);
+				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)(const void *, const void *)) &avg_time_cmp);
 				break;
 			default:
-				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)()) &line_numbers);
+				qsort(list, n_elem, sizeof(function_stack_entry *), (int (*)(const void *, const void *)) &line_numbers);
 				break;
 		}
 
