@@ -1,7 +1,7 @@
+= Make configure scripts work with PHP 4.2.x. (Derick)
 + Implemented handling single-dimensional constant arrays passed to a
-
+  function. (Derick)
 = Fix function traces in windows. (Derick)
-
 + Implemented function traces, which you can start and stop with
   xdebug_start_trace() and xdebug_stop_trace(). You can view the trace by using
   the return array from xdebu_get_function_trace(). (Derick)
