@@ -37,13 +37,14 @@ int inet_aton(const char *cp, struct in_addr *inp);
 #define SCLOSE(a) closesocket(a)
 #define SSENDL(a,b,c) send(a,b,c,0)
 #define SSEND(a,b) send(a,b,strlen(b),0)
+#define SREAD(a,b,c) recv(a,b,c,0)
 #else
 #define SCLOSE(a) close(a)
 #define SSENDL(a,b,c) write(a,b,c)
 #define SSEND(a,b) write(a,b,strlen(b))
+#define SREAD(a,b,c) read(a,b,c)
 #endif
 
-#define SREAD(a,b,c) read(a,b,c)
 
 #define SENDMSG(socket, str) {  \
 	char *message_buffer;       \

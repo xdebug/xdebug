@@ -21,13 +21,14 @@
 #ifndef WIN32
 #include <unistd.h>
 #else
+#include <winsock2.h>
 #include <io.h>
 #endif
 #include "usefulstuff.h"
 
 #define READ_BUFFER_SIZE 128
 
-char* fd_read_line(int socket, fd_buf *context)
+char* fd_read_line(int socket, fd_buf *context, int type)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;
@@ -42,7 +43,11 @@ char* fd_read_line(int socket, fd_buf *context)
 
 	while ((ptr = memchr(context->buffer, '\n', context->buffer_size)) == NULL) {
 		ptr = context->buffer + context->buffer_size;
-		newl = read(socket, buffer, READ_BUFFER_SIZE);
+		if (type == FD_RL_FILE) {
+			newl = read(socket, buffer, READ_BUFFER_SIZE);
+		} else {
+			newl = recv(socket, buffer, READ_BUFFER_SIZE, 0);
+		}
 		if (newl > 0) {
 			context->buffer = realloc(context->buffer, context->buffer_size + newl + 1);
 			memcpy(context->buffer + context->buffer_size, buffer, newl);

@@ -19,6 +19,9 @@
 #ifndef __HAVE_USEFULSTUFF_H__
 #define __HAVE_USEFULSTUFF_H__
 
+#define FD_RL_FILE    0
+#define FD_RL_SOCKET  1
+
 typedef struct _fd_buf fd_buf;
 
 struct _fd_buf {
@@ -26,6 +29,6 @@ struct _fd_buf {
 	int   buffer_size;
 };
 
-char* fd_read_line(int socket, fd_buf *context);
+char* fd_read_line(int socket, fd_buf *context, int type);
 
 #endif

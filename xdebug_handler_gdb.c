@@ -303,7 +303,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 			free(line);
 			line = NULL;
 		}
-		line = fd_read_line(fd, &fd_buffer);
+		line = fd_read_line(fd, &fd_buffer, FD_RL_FILE);
 		i--;
 	}
 	/* Read until the "end" line has been read */
@@ -314,7 +314,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 			free(line);
 			line = NULL;
 		}
-		line = fd_read_line(fd, &fd_buffer);
+		line = fd_read_line(fd, &fd_buffer, FD_RL_FILE);
 		i++;
 	} while (i < end + 1 - begin);
 
@@ -818,7 +818,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_brk_dtor);
 	do {
 		SSEND(context->socket, "?init\n");
-		option = fd_read_line(context->socket, context->buffer);
+		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
@@ -856,7 +856,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *message, const char *l
 	xdfree(errortype);
 	do {
 		SSEND(context->socket, "?cmd\n");
-		option = fd_read_line(context->socket, context->buffer);
+		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
@@ -885,7 +885,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 
 	do {
 		SSEND(context->socket, "?cmd\n");
-		option = fd_read_line(context->socket, context->buffer);
+		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
