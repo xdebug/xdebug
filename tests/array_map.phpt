@@ -7,7 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
+$tf = xdebug_start_trace(tempnam('/tmp', 'xdt'));
 
 $ar = array('a', 'bb', 'ccc');
 $r = array_map('strlen', $ar);

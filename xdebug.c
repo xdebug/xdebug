@@ -1420,6 +1420,7 @@ PHP_FUNCTION(xdebug_start_trace)
 {
 	char *fname = NULL;
 	int   fname_len = 0;
+	char *trace_fname;
 
 	if (XG(do_trace) == 0) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &fname, &fname_len) == FAILURE) {
@@ -1427,9 +1428,11 @@ PHP_FUNCTION(xdebug_start_trace)
 		}
 
 		if (fname && strlen(fname)) {
-			if (xdebug_start_trace(fname TSRMLS_CC)) {
+			if ((trace_fname = xdebug_start_trace(fname TSRMLS_CC)) != NULL) {
 				XG(do_trace) = 1;
-				RETURN_TRUE;
+				RETVAL_STRING(trace_fname, 1);
+				xdfree(trace_fname);
+				return;
 			} else {
 				php_error(E_NOTICE, "Trace could not be started");
 			}
@@ -1444,22 +1447,21 @@ PHP_FUNCTION(xdebug_start_trace)
 	}
 }
 
-int xdebug_start_trace(char* fname TSRMLS_DC)
+char* xdebug_start_trace(char* fname TSRMLS_DC)
 {
 	char *str_time;
 	char *filename;
 
 	filename = xdebug_sprintf("%s.xt", fname);
 	XG(trace_file) = fopen(filename, "a");
-	xdfree(filename);
 	if (XG(trace_file)) {
 		str_time = xdebug_get_time();
 		fprintf(XG(trace_file), "\nTRACE START [%s]\n", str_time);
 		XG(do_trace) = 1;
 		xdfree(str_time);
-		return 1;
+		return filename;
 	}
-	return 0;
+	return NULL;
 }
 
 void xdebug_stop_trace(TSRMLS_D)

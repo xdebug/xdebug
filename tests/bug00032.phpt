@@ -22,12 +22,24 @@ xdebug.collect_params=1
 foo
 foo
 
-Notice: Array to string conversion in %sbug00032.php on line %d
+Notice: Array to string conversion in %sbug00032.php on line 8
 
-Notice: Array to string conversion in %sbug00032.php on line %d
+Call Stack:
+    0.0003      42608   1. {main}() %sbug00032.php:0
+
+Notice: Array to string conversion in %sbug00032.php on line 9
+
+Call Stack:
+    0.0003      42608   1. {main}() %sbug00032.php:0
 foo
 
-Notice: Object to string conversion in %sbug00032.php on line %d
+Notice: Object of class stdClass could not be converted to string in %sbug00032.php on line 11
 
-Notice: Object to string conversion in %sbug00032.php on line %d
+Call Stack:
+    0.0003      42608   1. {main}() %sbug00032.php:0
+
+Notice: Object of class stdClass could not be converted to string in %sbug00032.php on line 12
+
+Call Stack:
+    0.0003      42608   1. {main}() %sbug00032.php:0
 foo

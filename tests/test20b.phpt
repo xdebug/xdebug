@@ -1,7 +1,7 @@
 --TEST--
 Test for static method calls
 --SKIPIF--
-<?php if(version_compare(zend_version(), "2.0.0-dev", '>=')) echo "skip Zend Engine 1 needed\n"; ?>
+<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
@@ -11,7 +11,7 @@ xdebug.auto_profile=0
 <?php
 $tf = xdebug_start_trace(tempnam('/tmp', 'xdt'));
 class DB {
-	function query($s) {
+	static function query($s) {
 		echo $s."\n";
 	}
 }
@@ -25,5 +25,5 @@ unlink($tf);
 test
 
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> db::query('test') /dat/dev/php/xdebug/tests/test20.php:9
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/test20.php:11
+    %f      %d     -> DB::query('test') /dat/dev/php/xdebug/tests/test20b.php:9
+    %f      %d     -> file_get_contents('/tmp/%s') /%s/test20b.php:11

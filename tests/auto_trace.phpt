@@ -7,6 +7,7 @@ xdebug.auto_trace_file=/tmp/xdebug_auto_trace.test
 xdebug.collect_params=1
 xdebug.auto_profile=0
 xdebug.dump_globals=0
+xdebug.show_mem_delta=0
 --FILE--
 <?php
 	function foo() {
@@ -14,8 +15,8 @@ xdebug.dump_globals=0
 	}
 
 	foo();	
-	echo file_get_contents('/tmp/xdebug_auto_trace.test');
-	unlink('/tmp/xdebug_auto_trace.test');
+	echo file_get_contents('/tmp/xdebug_auto_trace.test.xt');
+	unlink('/tmp/xdebug_auto_trace.test.xt');
 ?>
 --EXPECTF--
 bar

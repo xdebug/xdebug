@@ -9,7 +9,7 @@ xdebug.auto_profile=0
 xdebug.collect_params=1
 --FILE--
 <?php
-	xdebug_start_trace($tf = tempnam('/tmp', 'xdt'));
+	$tf = xdebug_start_trace(tempnam('/tmp', 'xdt'));
 
 	class a {
 

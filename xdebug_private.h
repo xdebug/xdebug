@@ -29,7 +29,7 @@
 #include "TSRM.h"
 #endif
 
-int xdebug_start_trace(char* fname TSRMLS_DC);
+char* xdebug_start_trace(char* fname TSRMLS_DC);
 void xdebug_stop_trace(TSRMLS_D);
 
 typedef struct xdebug_var {

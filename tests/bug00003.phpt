@@ -7,16 +7,15 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 --FILE--
 <?php
-	@unlink('/tmp/bug00003.trace');
-	xdebug_start_trace('/tmp/bug00003.trace');
+	$tf = xdebug_start_trace('/tmp/bug00003.trace');
 	strftime('%b %l %Y %H:%M:%S', 1061728888);
 	xdebug_stop_trace();
-	readfile('/tmp/bug00003.trace');
-	unlink('/tmp/bug00003.trace');
+	readfile($tf);
+	unlink($tf);
 ?>
 --EXPECTF--
 
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> strftime('%b %l %Y %H:%M:%S', 1061728888) /%s/bug00003.php:4
-    %f      %d     -> xdebug_stop_trace() /%s/bug00003.php:5
+    %f      %d     -> strftime('%b %l %Y %H:%M:%S', 1061728888) /%s/bug00003.php:3
+    %f      %d     -> xdebug_stop_trace() /%s/bug00003.php:4
 TRACE END   [%d-%d-%d %d:%d:%d]
