@@ -1,3 +1,7 @@
+Sun Feb 2 19:45:46 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Stop using url_encode, and use xmlize instead.
+
 Sun Feb 2 17:15:09 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c
 /xdebug/xdebug_handler_gdb.h:
