@@ -1,3 +1,10 @@
+Sun Dec 8 21:56:49 CET 2002 Ilia Alshanetsky <ilia@prohost.org 
+>
+/xdebug/TODO
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Added automatic profiling.
+
 Mon Dec 2 12:02:35 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO
