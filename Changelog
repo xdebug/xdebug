@@ -1,3 +1,29 @@
+Tue Oct 7 12:56:43 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_dbgp.h
+/xdebug/Makefile.in
+/xdebug/config.m4
+/xdebug/package.xml
+/xdebug/php_xdebug.h
+/xdebug/test.sh
+/xdebug/usefulstuff.c
+/xdebug/usefulstuff.h
+/xdebug/xdebug.c
+/xdebug/xdebug.dsp
+/xdebug/xdebug.mak
+/xdebug/xdebug_4_3.mak
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_gdb.h
+/xdebug/xdebug_handlers.c
+/xdebug/xdebug_handlers.h:
+- Add dbgp handler files, which do currently nothing yet
+- Implemented debug session cookies
+- Added allowed_clients ini setting (unimplemented yet)
+- Added a description field to debug handlers struct, and show those in
+  phpinfo()
+- Move some common functions to usefulstuff.[ch]
+- Fixed PHP 4.3 problems for php_setcookie and MODULE_EXEC_FINISHED
+
 Mon Oct 6 20:41:59 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h:
 - Update version number
