@@ -1,3 +1,26 @@
+Thu Dec 18 12:11:22 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_private.c
+/xdebug/xdebug_private.h
+/xdebug/config.m4
+/xdebug/package.xml
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c
+/xdebug/xdebug.mak
+/xdebug/xdebug_4_3.mak
+/xdebug/xdebug_code_coverage.c
+/xdebug/xdebug_handler_dbgp.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handler_php3.c
+/xdebug/xdebug_handlers.h
+/xdebug/xdebug_profiler.c
+/xdebug/xdebug_superglobals.c
+/xdebug/xdebug_var.c:
+- Seperate some definitions and functions out to xdebug_private.[ch]
+- DBGp: remove breakpoint_disable/breakpoint_enable and add breakpoint_update
+  instead.
+- DBGp: added various attributes to various responses to bring it more uptodate
+  to the updated protocol specifications.
+
 Wed Dec 17 21:50:27 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_str.c:
 - And we readd those headers because Windows needs them for vsnprint().
