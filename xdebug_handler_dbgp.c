@@ -1290,6 +1290,12 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 	xdfree(cmd);
 	if (command) {
 		command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
+		if (command->cont) {
+			XG(status) = DBGP_STATUS_RUNNING;
+			XG(reason) = DBGP_REASON_OK;
+			XG(lastcmd) = command->name;
+			XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
+		}
 		xdebug_dbgp_arg_dtor(args);
 		return command->cont;
 	} else {
@@ -1308,7 +1314,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.26 $";
+	return "$Revision: 1.27 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
@@ -1317,7 +1323,14 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	int   ret;
 	xdebug_dbgp_options *options;
 	xdebug_xml_node *response, *child;
+	char *cookie = NULL;
 	TSRMLS_FETCH();
+
+	/* initialize our status information */
+	XG(status) = DBGP_STATUS_STARTING;
+	XG(reason) = DBGP_REASON_OK;
+	XG(lastcmd) = NULL;
+	XG(lasttransid) = NULL;
 
 	response = xdebug_xml_node_init("init");
 
@@ -1343,6 +1356,12 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdstrdup("dbgp://stdin"), 0, 1);
 	} else {
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_sprintf("file://%s", context->program_name), 0, 1);
+	}
+	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
+	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf("%d", getpid()), 0, 1);
+	cookie = getenv("DBGP_COOKIE");
+	if (cookie) {
+		xdebug_xml_add_attribute_ex(response, "session", cookie, 0, 0);
 	}
 
 	context->buffer = xdmalloc(sizeof(fd_buf));
@@ -1376,7 +1395,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
 	do {
-		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
+		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
 		if (!option) {
 			return 0;
 		}
@@ -1396,6 +1415,21 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 
 int xdebug_dbgp_deinit(xdebug_con *context)
 {
+	xdebug_xml_node     *response;
+	TSRMLS_FETCH();
+
+	XG(status) = DBGP_STATUS_STOPPED;
+	XG(reason) = DBGP_REASON_OK;
+
+	response = xdebug_xml_node_init("response");
+	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
+	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 1);
+	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
+	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
+
+	send_message(context, response);
+	xdebug_xml_node_dtor(response);
+	
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
@@ -1431,7 +1465,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *message, const char *
 	xdfree(errortype);
 
 	do {
-		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
+		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
 		if (!option) {
 			return 0;
 		}
@@ -1459,15 +1493,23 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 
 	i = xdebug_get_stack_tail(TSRMLS_C);
 
-	response = return_breakpoint(i, file, lineno);
-	if (type == XDEBUG_STEP) {
-		xdebug_xml_add_attribute(response, "break", "step");
-	}
+	XG(status) = DBGP_STATUS_BREAK;
+	XG(reason) = DBGP_REASON_OK;
+
+	response = xdebug_xml_node_init("response");
+	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
+	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 1);
+	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
+	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
+
 	send_message(context, response);
 	xdebug_xml_node_dtor(response);
 
+	XG(lastcmd) = NULL;
+	XG(lasttransid) = NULL;
+
 	do {
-		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
+		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
 		if (!option) {
 			return 0;
 		}

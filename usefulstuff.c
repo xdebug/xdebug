@@ -32,7 +32,7 @@
 
 #define READ_BUFFER_SIZE 128
 
-char* fd_read_line(int socket, fd_buf *context, int type)
+char* fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;
@@ -45,7 +45,7 @@ char* fd_read_line(int socket, fd_buf *context, int type)
 		context->buffer_size = 0;
 	}
 
-	while ((ptr = memchr(context->buffer, '\n', context->buffer_size)) == NULL) {
+	while (context->buffer_size < 1 || context->buffer[context->buffer_size - 1] != delim) {
 		ptr = context->buffer + context->buffer_size;
 		if (type == FD_RL_FILE) {
 			newl = read(socket, buffer, READ_BUFFER_SIZE);
@@ -62,7 +62,7 @@ char* fd_read_line(int socket, fd_buf *context, int type)
 		}
 	}
 
-	ptr = memchr(context->buffer, '\n', context->buffer_size);
+	ptr = memchr(context->buffer, delim, context->buffer_size);
 	size = ptr - context->buffer;
 	/* Copy that line into tmp */
 	tmp = malloc(size + 1);
@@ -77,7 +77,11 @@ char* fd_read_line(int socket, fd_buf *context, int type)
 	free(context->buffer);
 	context->buffer = tmp_buf;
 	context->buffer_size = context->buffer_size - (size + 1);
+
 	/* Return normal line */
+	if (length) {
+		*length = size;
+	}
 	return tmp;
 }
 

@@ -88,6 +88,8 @@ PHP_FUNCTION(xdebug_time_index);
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           status;
 	int           reason;
+	char         *lastcmd;
+	char         *lasttransid;
 
 	int           level;
 	xdebug_llist *stack;
