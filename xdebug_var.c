@@ -19,6 +19,7 @@
 #include "php.h"
 #include "ext/standard/php_string.h"
 #include "zend.h"
+#include "zend_extensions.h"
 #include "xdebug_var.h"
 
 void xdebug_var_export(zval **struc, int level TSRMLS_DC);
@@ -133,8 +134,12 @@ char* get_zval_value (zval *val)
 	TSRMLS_FETCH();
 
 	INIT_ZVAL(return_val);
-	
+
+#if ZEND_EXTENSION_API_NO < 20020429
+	php_start_ob_buffer (NULL, 0 TSRMLS_CC);
+#else
 	php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
+#endif
 	xdebug_var_export (&val, 1 TSRMLS_CC);
 	php_ob_get_buffer (&return_val TSRMLS_CC);
 	php_end_ob_buffer (0, 0 TSRMLS_CC);

@@ -892,8 +892,8 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 					XFUNC_SET(tmp, XFUNC_NORMAL, "", "eval");
 					break;
 			}
-			tmp->vars[tmp->varc].name = estrdup ("");
 			if (cur_opcode->op1.op_type == IS_CONST) {
+				tmp->vars[tmp->varc].name = estrdup ("");
 				tmp->vars[tmp->varc].value = estrdup (cur_opcode->op1.u.constant.value.str.val);
 				tmp->varc++;
 				tmp->delayed_include = 0;
@@ -1104,11 +1104,7 @@ ZEND_DLEXPORT void xdebug_statement_call (zend_op_array *op_array)
 	fse->delayed_fname = 0;
 
 	if (fse->delayed_cname) { /* variable class name */
-#if HAVE_EXECUTE_DATA_PTR
 		fse->function.class = estrdup (((zval*) executor_globals.active_symbol_table->pListHead->pDataPtr)->value.obj.ce->name);
-#else
-		fse->function.class = estrdup ("{unknown}");
-#endif
 	}
 	fse->delayed_cname = 0;
 
