@@ -1,3 +1,7 @@
+Sun Nov 10 13:42:48 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- Fixed bug in printing 0-sized arrays.
+
 Sun Nov 10 13:36:09 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_gdb.c:
 - Fixed bug in symbol scoping, the local symbol table is now scanned first.
