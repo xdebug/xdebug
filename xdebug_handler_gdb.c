@@ -640,6 +640,7 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 	extra_brk_info->hit_count = 0;
 	extra_brk_info->hit_value = 0;
 	extra_brk_info->hit_condition = XDEBUG_HIT_DISABLED;
+	extra_brk_info->function_break_type = XDEBUG_BRK_FUNC_CALL;
 
 	if (strstr(args->args[0], "::")) { /* class::method */
 		xdebug_explode("::", args->args[0], method, -1);
@@ -1320,7 +1321,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.71 $";
+	return "$Revision: 1.72 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode, char *magic_cookie)
