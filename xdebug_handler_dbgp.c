@@ -916,6 +916,8 @@ DBGP_FUNC(feature_set)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		XDEBUG_STR_CASE_DEFAULT_END
 	}
+	xdebug_xml_add_attribute_ex(*retval, "feature", xdstrdup(CMD_OPTION('n')), 0, 1);
+	xdebug_xml_add_attribute_ex(*retval, "success", "1", 0, 0);
 }
 
 DBGP_FUNC(property_get)
@@ -1244,7 +1246,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.16 $";
+	return "$Revision: 1.17 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
