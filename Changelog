@@ -1,3 +1,8 @@
+Wed Aug 20 16:21:58 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_superglobals.c:
+- Windows build fixes
+
 Tue Aug 19 22:38:48 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/TODO:
 - Update TODO a bit
