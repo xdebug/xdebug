@@ -311,7 +311,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
-static inline char* show_fname (struct function_stack_entry* entry)
+static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 {
 	char *tmp;
 	xdebug_func f;
@@ -390,7 +390,7 @@ static inline void print_stack (int html, const char *error_type_str, char *buff
 			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 			char *tmp_name;
 			
-			tmp_name = show_fname (i);
+			tmp_name = show_fname (i TSRMLS_CC);
 			if (html) {
 				php_printf ("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
 			} else {
@@ -458,8 +458,13 @@ static inline void print_trace (int html TSRMLS_DC)
 			int c = 0; /* Comma flag */
 			int j = 0; /* Counter */
 			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
-			char *tmp_name = show_fname (i);
+			char *tmp_name;
 
+			if (strcmp (i->function.function, "xdebug_dump_function_trace") == 0) {
+				return;
+			}
+
+			tmp_name = show_fname(i TSRMLS_CC);
 
 			if (html) {
 				/* Start row */
@@ -622,6 +627,12 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	
 	for (k = 0; k < XG(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
 		struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
+
+		if (i->function.function) {
+			if (strcmp (i->function.function, "xdebug_get_function_stack") == 0) {
+				return;
+			}
+		}
 
 		/* Initialize frame array */
 		MAKE_STD_ZVAL(frame);
@@ -789,6 +800,11 @@ PHP_FUNCTION(xdebug_get_function_trace)
 	for (k = 0; k < XG(trace)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
 		struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 
+		if (i->function.function) {
+			if (strcmp (i->function.function, "xdebug_get_function_trace") == 0) {
+				return;
+			}
+		}
 		/* Initialize frame array */
 		MAKE_STD_ZVAL(frame);
 		array_init(frame);
@@ -1058,7 +1074,7 @@ ZEND_DLEXPORT void xdebug_function_begin (zend_op_array *op_array)
 			for (j = 1; j < tmp->level; j++) {
 				fprintf (XG(trace_file), "  ");
 			}
-			tmp_name = show_fname(tmp);
+			tmp_name = show_fname(tmp TSRMLS_CC);
 			fprintf (XG(trace_file), "-> %s(", tmp_name);
 			efree (tmp_name);
 

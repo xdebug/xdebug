@@ -28,5 +28,5 @@
 
 
 	echo foo6 (1,2,3);
-	xdebug_dump_function_trace();
+	var_dump (xdebug_get_function_trace());
 ?>
