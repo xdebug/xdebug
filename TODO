@@ -5,6 +5,7 @@ For 1.3.0:
 - Bug fixing
   * Double check file/line breakpoints
   * Remove GLOBALS from 'show-local' (and possibly other superglobals as well)
+    as an 'option'
 - Additions
   * Add xdebug_break() function to insert breakpoints in your script manually.
   * Provide codes for messages (for localization) including parameters
