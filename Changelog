@@ -1,3 +1,10 @@
+Sat Nov 9 23:13:35 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c
+/xdebug/xdebug_handler_gdb.c
+/xdebug/xdebug_handlers.h:
+- Implemented "finish" (step out)
+- Cleaned some \n's in help lines
+
 Sat Nov 9 21:00:16 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c
 /xdebug/xdebug_handler_gdb.c
