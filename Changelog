@@ -1,3 +1,8 @@
+Tue Apr 8 20:58:48 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed handling of auto_profiling (Noticed by Gildas Noël
+  <g.noel@symphonieonline.com>)
+
 Sun Apr 6 21:03:09 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/package.xml:
 - Fix the package file
