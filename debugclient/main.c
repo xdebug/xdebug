@@ -18,17 +18,27 @@
 
 #include <stdio.h>
 #include <sys/types.h>
+#ifndef WIN32
 #include <unistd.h>
-#include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/un.h>
+#else
+#include <winsock2.h>
+#endif
+#include <stdlib.h>
 #include <sys/stat.h>
 
 #include "../usefulstuff.h"
 
-#define VERSION "0.6.0"
+#ifdef WIN32
+#define MSG_NOSIGNAL 0
+#define sleep(t)  Sleep((t)*1000)
+#define close(fd) closesocket(fd)
+#endif
+
+#define VERSION "0.7.0"
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +53,13 @@ int main(int argc, char *argv[])
 	char *cmd;
 	fd_buf cxt = { NULL, 0 };
 	fd_buf std_in = { NULL, 0 };
+#ifdef WIN32
+	WORD               wVersionRequested;
+	WSADATA            wsaData;
+
+	wVersionRequested = MAKEWORD(2, 2);
+	WSAStartup(wVersionRequested, &wsaData);
+#endif
 
 	printf ("Xdebug GDB emulation client (%s)\n", VERSION);
 	printf ("Copyright 2002 by Derick Rethans, JDI Media Solutions.\n");
@@ -50,25 +67,35 @@ int main(int argc, char *argv[])
 	while (1) {
 		ssocket = socket (AF_INET, SOCK_STREAM, 0);
 		if (ssocket < 0) {
-			printf ("setup_socket: couldn't create socket\n");
+			printf ("socket: couldn't create socket\n");
+			exit(-1);
 		}
 	
 		memset (&server_in, 0, sizeof(struct sockaddr));
 		server_in.sin_family	  = AF_INET;
 		server_in.sin_addr.s_addr = htonl(INADDR_ANY);
-		server_in.sin_port		= htons((int) port);
+		server_in.sin_port	      = htons((unsigned short int) port);
 	
 		while (bind (ssocket, (struct sockaddr *) &server_in, sizeof(struct sockaddr_in)) < 0) {
-			printf ("setup_socket: couldn't bind AF_INET socket?\n");
+			printf ("bind: couldn't bind AF_INET socket?\n");
 			sleep(5);
 		}
 		if (listen (ssocket, 0) == -1) {
-			printf ("setup_socket: listen call failed\n");
-			exit(-1);
+			printf ("listen: listen call failed\n");
+			exit(-2);
 		}
 		printf ("\nWaiting for debug server to connect.\n");
-		fd = accept (ssocket, (struct sockaddr *) &client_in, &client_in_len);
+		fd = accept (ssocket, (struct sockaddr *) &client_in, NULL);
+		if (fd == -1) {
+#ifdef WIN32
+			printf ("accept: %d\n", WSAGetLastError());
+#else
+			perror ("accept");
+#endif
+			exit(-3);
+		}
 		close (ssocket);
+
 		iaddr = &client_in.sin_addr;
 		printf ("Connect\n");
 		while ((buffer = fd_read_line (fd, &cxt, FD_RL_SOCKET)) > 0) {
@@ -76,7 +103,7 @@ int main(int argc, char *argv[])
 			if (buffer[0] == '?') {
 				printf ("(%s) ", &buffer[1]);
 				fflush(stdout);
-				if ((cmd = fd_read_line (0, &std_in, FD_RL_SOCKET))) {
+				if ((cmd = fd_read_line (0, &std_in, FD_RL_FILE))) {
 					if (send (fd, cmd, strlen(cmd), MSG_NOSIGNAL) == -1) {
 						break;
 					}
@@ -95,6 +122,7 @@ int main(int argc, char *argv[])
 		}
 		printf ("Disconnect\n\n");
 		close(fd);
+
 		/* Sleep some time to reset the TCP/IP connection */
 		sleep(1);
 	}
