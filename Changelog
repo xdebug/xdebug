@@ -1,3 +1,8 @@
+Tue Aug 17 08:54:03 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c
+xdebug/tests/bug00089.phpt:
+- Fix for bug #89: var_dump shows empty strings garbled
+
 Mon Aug 16 10:00:20 CEST 2004 Derick Rethans <derick@derickrethans.nl>
 tests/xdebug_var_dump.phpt:
 - Added a test for showing local variables on errors.
