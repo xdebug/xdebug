@@ -76,11 +76,11 @@ int main(int argc, char *argv[])
 				printf ("(%s) ", &buffer[1]);
 				fflush(stdout);
 				if (cmd = fd_read_line (0, &std_in)) {
-					if (send (fd, cmd, strlen(cmd), 0) == -1) {
-						perror("-");
+					if (send (fd, cmd, strlen(cmd), MSG_NOSIGNAL) == -1) {
+						break;
 					}
-					if (send (fd, "\n", 1, 0) == -1) {
-						perror("-");
+					if (send (fd, "\n", 1, MSG_NOSIGNAL) == -1) {
+						break;
 					}
 					if (strcmp (cmd, "quit") == 0) {
 						break;
