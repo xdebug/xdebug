@@ -76,6 +76,7 @@ static inline zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
 
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_function_stack,    NULL)
+	PHP_FE(xdebug_call_class,            NULL)
 	PHP_FE(xdebug_call_function,         NULL)
 	PHP_FE(xdebug_call_file,             NULL)
 	PHP_FE(xdebug_call_line,             NULL)
@@ -1140,6 +1141,27 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
 
 		add_next_index_zval(return_value, frame);
+	}
+}
+
+PHP_FUNCTION(xdebug_call_class)
+{
+	xdebug_llist_element        *le;
+	struct function_stack_entry *i;
+
+	le = XDEBUG_LLIST_TAIL(XG(stack));
+	if (le) {
+		if (le->prev) {
+			le = XDEBUG_LLIST_PREV(le);
+			if (le->prev) {
+				le = XDEBUG_LLIST_PREV(le);
+			}
+		}
+		i = XDEBUG_LLIST_VALP(le);
+
+		RETURN_STRING(i->function.class ? i->function.class : "", 1);
+	} else {
+		RETURN_FALSE;
 	}
 }
 

@@ -19,7 +19,7 @@
 #ifndef PHP_XDEBUG_H
 #define PHP_XDEBUG_H
 
-#define XDEBUG_VERSION "1.2.0rc2"
+#define XDEBUG_VERSION "1.2.0"
 
 #include "php.h"
 
@@ -65,6 +65,7 @@ PHP_MINFO_FUNCTION(xdebug);
 
 
 PHP_FUNCTION(xdebug_get_function_stack);
+PHP_FUNCTION(xdebug_call_class);
 PHP_FUNCTION(xdebug_call_function);
 PHP_FUNCTION(xdebug_call_file);
 PHP_FUNCTION(xdebug_call_line);
