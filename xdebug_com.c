@@ -34,6 +34,7 @@
 #else
 # include <sys/socket.h>
 # include <netinet/in.h>
+# include <netinet/tcp.h>
 # include <arpa/inet.h>
 # include <netdb.h>
 #endif
@@ -74,6 +75,7 @@ int xdebug_create_socket(const char *hostname, int dport)
 	struct sockaddr_in address;
 	int                err = -1;
 	int                sockfd;
+	long               optval = 1;
 #if WIN32|WINNT
 	WORD               wVersionRequested;
 	WSADATA            wsaData;
@@ -115,6 +117,7 @@ int xdebug_create_socket(const char *hostname, int dport)
 		SCLOSE(sockfd);
 		return -1;
 	}
+	setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	return sockfd;
 }
 
