@@ -1,3 +1,7 @@
+Thu Feb 26 21:05:05 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug.c:
+- Fixed segfault in case autoload was used. (Patch by Marcus Börger)
+
 Thu Feb 26 21:03:58 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_var.c:
 - Added the new PHP 5 error level E_STRICT. (Idea by Marcus Börger).
