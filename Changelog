@@ -1,3 +1,10 @@
+Wed Dec 24 17:46:16 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/main.c
+/xdebug/debugclient/build/buildconf1.mk:
+- Partial MFH:
+  - Renamed VERSION to DEBUGCLIENT_VERSION for some weird autoconf conflict
+  - Add libedit availability to start up banner
+
 Tue Dec 23 22:07:08 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Backout this unwanted commit
