@@ -42,7 +42,8 @@ Xdebug also provides:
 = GDB: Fixed bug in deleting absolute breakpoints on Windows. (Derick)
 = Fixed logging to adhere to the error_reporting setting. (Derick)
 = Fixed bug #32: Unusual dynamic variables cause xdebug to crash. (Ilia)
-= Fixed bug #31: & entity replaced after others, wrong HTML output. (Derick)
+= Fixed bug #31: &amp; entity replaced after others, wrong HTML output.
+  (Derick)
 = Fixed bug #27: Repeated connect attempts when no debugger is listening.
   (Derick)
 = Fixed bug #22: Segmentation fault with xdebug_get_function_stack() and
@@ -159,7 +160,7 @@ Xdebug also provides:
 + GDB: Added file/line to signals. (Derick)
 = Fixed logging to adhere to the error_reporting setting. (Derick)
 = Fixed bug #32: Unusual dynamic variables cause xdebug to crash. (Ilia)
-= Fixed bug #31: & entity replaced after others, wrong HTML output. (Derick)
+= Fixed bug #31: &amp; entity replaced after others, wrong HTML output. (Derick)
 = Fixed bug #22: Segmentation fault with xdebug_get_function_stack() and
   collect_params=1. (Derick)
       </notes>
