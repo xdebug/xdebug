@@ -1348,10 +1348,11 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i TSRML
 
 	tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->level), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%.4f\t", i->time - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%f\t", i->time - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%lu\t", i->memory), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%+ld\t", i->memory - i->prev_memory), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
 	xdfree(tmp_name);
 
 	if (i->include_filename) {
@@ -1741,8 +1742,11 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	}
 	XG(tracefile_name) = estrdup(filename);
 	if (XG(trace_file)) {
+		if (XG(trace_format) == 1) {
+			fprintf(XG(trace_file), "Version: %s\n", XDEBUG_VERSION);
+		}
 		str_time = xdebug_get_time();
-		fprintf(XG(trace_file), "\nTRACE START [%s]\n", str_time);
+		fprintf(XG(trace_file), "TRACE START [%s]\n", str_time);
 		XG(do_trace) = 1;
 		xdfree(str_time);
 		return filename;
@@ -1757,7 +1761,7 @@ void xdebug_stop_trace(TSRMLS_D)
 	XG(do_trace) = 0;
 	if (XG(trace_file)) {
 		str_time = xdebug_get_time();
-		fprintf(XG(trace_file), "TRACE END   [%s]\n", str_time);
+		fprintf(XG(trace_file), "TRACE END   [%s]\n\n", str_time);
 		fclose(XG(trace_file));
 		XG(trace_file) = NULL;
 		xdfree(str_time);
