@@ -365,6 +365,9 @@ static int breakpoint_admin_remove(xdebug_con *context, char *hkey)
 
 static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 {
+	if (brk->type) {
+		xdebug_xml_add_attribute_ex(xml, "type", xdstrdup(brk->type), 0, 1);
+	}
 	if (brk->file) {
 		xdebug_xml_add_attribute_ex(xml, "filename", xdstrdup(brk->file), 0, 1);
 	}
@@ -545,7 +548,7 @@ static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 
 		breakpoint_brk_info_add(*retval, brk_info);
 		/* Now we add some common attributes */
-		xdebug_xml_add_attribute(*retval, "id", CMD_OPTION('d'));
+		xdebug_xml_add_attribute_ex(*retval, "id", xdstrdup(CMD_OPTION('d')), 0, 1);
 
 		if (action == BREAKPOINT_ACTION_REMOVE) {
 			/* Now we remove the crap */
@@ -601,6 +604,7 @@ DBGP_FUNC(breakpoint_set)
 	XDEBUG_STR_SWITCH_DECL;
 
 	brk_info = xdmalloc(sizeof(xdebug_brk_info));
+	brk_info->type = NULL;
 	brk_info->file = NULL;
 	brk_info->classname = NULL;
 	brk_info->functionname = NULL;
@@ -613,9 +617,13 @@ DBGP_FUNC(breakpoint_set)
 
 	if (!CMD_OPTION('t')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	} else {
+		brk_info->type = xdstrdup(CMD_OPTION('t'));
 	}
+
 	if (CMD_OPTION('s')) {
 		BREAKPOINT_CHANGE_STATE();
+		xdebug_xml_add_attribute_ex(*retval, "state", xdstrdup(CMD_OPTION('s')), 0, 1);
 	}
 	if (CMD_OPTION('o') && CMD_OPTION('h')) {
 		BREAKPOINT_CHANGE_OPERATOR();
@@ -1246,7 +1254,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.19 $";
+	return "$Revision: 1.20 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)

@@ -625,6 +625,7 @@ char *xdebug_handle_breakpoint(xdebug_con *context, xdebug_arg *args)
 	xdebug_arg_init(method);
 
 	extra_brk_info = xdmalloc(sizeof(xdebug_brk_info));
+	extra_brk_info->type = NULL;
 	extra_brk_info->file = NULL;
 	extra_brk_info->condition = NULL;
 	extra_brk_info->classname = NULL;
@@ -1315,7 +1316,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.65 $";
+	return "$Revision: 1.66 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)

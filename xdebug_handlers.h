@@ -72,6 +72,7 @@ struct _xdebug_con {
 #define XDEBUG_HIT_MOD            3
 
 struct _xdebug_brk_info {
+	char                 *type;
 	char                 *classname;
 	char                 *functionname;
 	char                 *file;

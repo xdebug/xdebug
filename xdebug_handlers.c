@@ -51,6 +51,9 @@ xdebug_remote_handler_info* xdebug_handlers_get(void)
 
 void xdebug_brk_info_dtor(xdebug_brk_info *brk)
 {
+	if (brk->type) {
+		xdfree(brk->type);
+	}
 	if (brk->classname) {
 		xdfree(brk->classname);
 	}
