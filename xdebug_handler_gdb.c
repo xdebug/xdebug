@@ -320,7 +320,7 @@ static void show_command_info(xdebug_con *h, xdebug_gdb_cmd* cmd)
 /*****************************************************************************
 ** Data printing functions
 */
-static char *get_variable(xdebug_con *context, char *name, zval *val)
+static char *return_printable_symbol(xdebug_con *context, char *name, zval *val)
 {
 	xdebug_gdb_options* options = (xdebug_gdb_options*) context->options;
 	char *str_rep, *ret;
@@ -341,31 +341,6 @@ static char *get_variable(xdebug_con *context, char *name, zval *val)
 		default:
 			return get_zval_value_xml(name, val);
 	}
-}
-
-static char* get_symbol_contents(xdebug_con *context, char* name, int name_length)
-{
-	HashTable           *st = NULL;
-	zval               **retval;
-	TSRMLS_FETCH();
-
-	st = XG(active_symbol_table);
-	if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return get_variable(context, name, *retval);
-	}
-
-	st = EG(active_op_array)->static_variables;
-	if (st) {
-		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-			return get_variable(context, name, *retval);
-		}
-	}
-	
-	st = &EG(symbol_table);
-	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return get_variable(context, name, *retval);
-	}
-	return NULL;
 }
 
 static void dump_used_var(void *context, xdebug_hash_element* he)
@@ -401,6 +376,7 @@ static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
 	xdebug_con         *h = (xdebug_con*) context;
 	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
 	char               *contents;
+	zval               *zval_var;
 
 	if (!options->dump_superglobals) {
 		if ((strcmp(name, "GLOBALS") == 0) ||
@@ -415,7 +391,8 @@ static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
 			return;
 		}
 	}
-	contents = get_symbol_contents(context, name, strlen(name) + 1);
+	zval_var = xdebug_get_php_symbol(name, strlen(name) + 1);
+	contents = return_printable_symbol(context, name, zval_var);
 	if (contents) {
 		if (options->response_format == XDEBUG_RESPONSE_XML) {
 			SENDMSG(h->socket, contents);
@@ -877,7 +854,7 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 	} else {
 		xdebug_str_free(&buffer);
 		EG(error_reporting) = old_error_reporting;
-		ret_value = get_variable(context, NULL, &retval);
+		ret_value = return_printable_symbol(context, NULL, &retval);
 		SENDMSG(context->socket, xdebug_sprintf("%s\n", ret_value));
 		zval_dtor(&retval);
 		xdfree(ret_value);
@@ -1014,10 +991,12 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 	xdebug_gdb_options  *options = (xdebug_gdb_options*)context->options;
 	int                  xml = (options->response_format == XDEBUG_RESPONSE_XML);
 	char                *var_data;
+	zval                *zvar;
 	TSRMLS_FETCH();
 
 	XG(active_symbol_table) = EG(active_symbol_table);
-	var_data = get_symbol_contents(context, args->args[0], strlen(args->args[0]) + 1);
+	zvar = xdebug_get_php_symbol(args->args[0], strlen(args->args[0]) + 1);
+	var_data = return_printable_symbol(context, args->args[0], zvar);
 	XG(active_symbol_table) = NULL;
 
 	if (var_data) {
@@ -1330,7 +1309,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.62 $";
+	return "$Revision: 1.63 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)

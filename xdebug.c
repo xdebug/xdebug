@@ -907,19 +907,58 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	XG(level)--;
 }
 
+static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
+{
+	int        html = *(int *)htmlq;
+	zval      *zvar;
+	char      *contents;
+	char      *name = (char*) he->ptr;
+	HashTable *tmp_ht;
+
+	if (!he->ptr) {
+		return;
+	}
+
+	tmp_ht = XG(active_symbol_table);
+	XG(active_symbol_table) = EG(active_symbol_table);
+	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
+	XG(active_symbol_table) = tmp_ht;
+
+	if (!zvar) {
+		return;
+	}
+	contents = get_zval_value_fancy(NULL, zvar);
+	if (html) {
+		if (contents) {
+			php_printf("<tr><td colspan='2' align='right' bgcolor='#ccffcc'>$%s = </td><td bgcolor='#ccffcc'>%s</td></tr>\n", name, contents);
+		} else {
+			php_printf("<tr><td bgcolor='#ccffcc'>$%s</td><td bgcolor='#ccffcc' colspan='2'><i>Undefined</i></td></tr>\n", name);
+		}
+	} else {
+		if (contents) {
+			printf("  $%s = %s\n", name, contents);
+		} else {
+			printf("  $%s = *uninitialized*\n", name);
+		}
+	}
+	xdfree(contents);
+}
+
+
 static inline void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
 {
 	char *error_format;
 	xdebug_llist_element *le;
 	int new_len;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
+	struct function_stack_entry *i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
 
 	if (html && !log_only) {
-		php_printf("<br />\n<table border='1' cellspacing='0'>\n");
+		php_printf("<br />\n<font size='1'><table border='1' cellspacing='0'>\n");
 	}
 
 	error_format = html ?
-		"<tr><td bgcolor='#ffbbbb' colspan=\"3\"><b>%s</b>: %s in <b>%s</b> on line <b>%d</b><br />\n"
+		"<tr><th bgcolor='#ee5555' colspan=\"3\">%s: <i>%s</i> in <i>%s</i> on line <i>%d</i></th></tr>\n"
 		: "\n%s: %s in %s on line %d\n";
 	if (!log_only) {
 		php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
@@ -928,8 +967,8 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 	if (XG(stack)) {
 		if (!log_only) {
 			if (html) {
-				php_printf("<tr><th bgcolor='#aaaaaa' colspan='3'>Call Stack</th></tr>\n");
-				php_printf("<tr><th bgcolor='#cccccc'>#</th><th bgcolor='#cccccc'>Function</th><th bgcolor='#cccccc'>Location</th></tr>\n");
+				php_printf("<tr><th bgcolor='#7777dd' colspan='3'>Call Stack</th></tr>\n");
+				php_printf("<tr><th bgcolor='#9999ee'>#</th><th bgcolor='#9999ee'>Function</th><th bgcolor='#9999ee'>Location</th></tr>\n");
 			} else {
 				php_printf("\nCall Stack:\n");
 			}
@@ -943,14 +982,14 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 		{
 			int c = 0; /* Comma flag */
 			int j = 0; /* Counter */
-			struct function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 			char *tmp_name;
 			char log_buffer[4096];
 			
+			i = XDEBUG_LLIST_VALP(le);
 			tmp_name = show_fname(i, html TSRMLS_CC);
 			if (!log_only) {
 				if (html) {
-					php_printf("<tr><td bgcolor='#ffffff' align='center'>%d</td><td bgcolor='#ffffff'>%s(", i->level, tmp_name);
+					php_printf("<tr><td bgcolor='#ddddff' align='center'>%d</td><td bgcolor='#ddddff'>%s(", i->level, tmp_name);
 				} else {
 					php_printf("%10.4f ", i->time - XG(start_time));
 #if MEMORY_LIMIT
@@ -1000,7 +1039,7 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 
 			if (!log_only) {
 				if (html) {
-					php_printf(")</td><td bgcolor='#ffffff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
+					php_printf(")</td><td bgcolor='#ddddff'>%s<b>:</b>%d</td></tr>\n", i->filename, i->lineno);
 				} else {
 					php_printf(") %s:%d\n", i->filename, i->lineno);
 				}
@@ -1015,10 +1054,23 @@ static inline void print_stack(int html, const char *error_type_str, char *buffe
 			}
 		}
 
-		dump_superglobals(html, PG(log_errors) && !is_cli TSRMLS_CC);
+		if (!log_only)  {
+			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+
+			dump_superglobals(html, PG(log_errors) && !is_cli TSRMLS_CC);
+			if (html) {
+				php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope</th></tr>\n");
+				php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
+			} else {
+				printf("\nVariables in local scope:\n");
+			}
+			if (i->used_vars) {
+				xdebug_hash_apply(i->used_vars, (void*) &html, dump_used_var_with_contents);
+			}
+		}
 
 		if (html && !log_only) {
-			php_printf("</table>\n");
+			php_printf("</table></font>\n");
 		}
 	}
 }

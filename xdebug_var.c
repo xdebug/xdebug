@@ -58,6 +58,36 @@ char *error_type(int type)
 }
 
 /*****************************************************************************
+** PHP Variable related utility functions
+*/
+zval* xdebug_get_php_symbol(char* name, int name_length)
+{
+	HashTable           *st = NULL;
+	zval               **retval;
+	TSRMLS_FETCH();
+
+	st = XG(active_symbol_table);
+	if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+		return *retval;
+	}
+
+	st = EG(active_op_array)->static_variables;
+	if (st) {
+		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+			return *retval;
+		}
+	}
+	
+	st = &EG(symbol_table);
+	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
+		return *retval;
+	}
+	return NULL;
+}
+
+
+
+/*****************************************************************************
 ** Normal variable printing routines
 */
 

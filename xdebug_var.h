@@ -24,6 +24,8 @@
 #ifndef __HAVE_XDEBUG_VAR_H__
 #define __HAVE_XDEBUG_VAR_H__
 
+zval* xdebug_get_php_symbol(char* name, int name_length);
+
 void xdebug_var_export(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level TSRMLS_DC);

@@ -33,15 +33,17 @@ static void dump_hash_elem(zval *z, char *name, char *elem, int html, int log TS
 	char buffer[1024];
 
 	if (html) {
-		php_printf("<tr><td colspan='2' bgcolor='#ffffff'>$%s['%s']</td>", name, elem);
+		php_printf("<tr><td colspan='2' align='right' bgcolor='#ffffcc'>$%s['%s'] =</td>", name, elem);
 	}
 
 	if (z != NULL) {
-		char *val = get_zval_value(z);
+		char *val;
 
 		if (html) {
-			php_printf("<td bgcolor='#ffffff'>%s</td>", val);
+			val = get_zval_value_fancy(NULL, z);
+			php_printf("<td bgcolor='#ffffcc'>%s</td>", val);
 		} else {
+			val = get_zval_value(z);
 			printf("\n   $%s['%s'] = %s", name, elem, val);
 		}
 
@@ -52,7 +54,7 @@ static void dump_hash_elem(zval *z, char *name, char *elem, int html, int log TS
 	} else {
 		/* not found */
 		if (html) {
-			php_printf("<td bgcolor='#ffffff'><i>undefined</i></td>");
+			php_printf("<td bgcolor='#ffff77'><i>undefined</i></td>");
 		} else {
 			printf("\n   $%s['%s'] is undefined", name, elem);
 		}
@@ -106,7 +108,7 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, int l
 	}
 
 	if (html) {
-		php_printf("<tr><th colspan='3' bgcolor='#aaaaaa'>Dump $%s</th></tr>\n", name);
+		php_printf("<tr><th colspan='3' bgcolor='#dddd22'>Dump <i>$%s</i></th></tr>\n", name);
 	} else {
 		printf("\nDump $%s", name);
 	}
