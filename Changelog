@@ -1,3 +1,8 @@
+Mon Nov 01 13:12:47 CET 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed some -Wall warnings.
+
 Mon Nov 01 13:09:49 CET 2004 Derick Rethans <derick@derickrethans.nl>
 test.sh
 xdebug/xdebug.c:
