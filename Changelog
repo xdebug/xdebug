@@ -1,3 +1,7 @@
+Thu Feb 26 21:03:58 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_var.c:
+- Added the new PHP 5 error level E_STRICT. (Idea by Marcus Börger).
+
 Thu Feb 26 20:26:04 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/debugclient/main.c:
 - MFH: Fixed "invalid argument" bug. (Patch by Brandon Philips and David Sklar)
