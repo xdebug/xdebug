@@ -55,6 +55,7 @@
       <file role="doc"  name="README"/>
 
       <dir name="debugclient">
+        <file role="src" name="Makefile"/>
         <file role="src" name="main.c"/>
       </dir>
     </filelist>
