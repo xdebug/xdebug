@@ -297,7 +297,7 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	char                 *tmp_fname;
 	xdebug_xml_node      *tmp;
 
-	fse = xdebug_get_stack_frame(nr);
+	fse = xdebug_get_stack_frame(nr TSRMLS_CC);
 
 	tmp_fname = show_fname(fse, 0 TSRMLS_CC);
 
@@ -1244,7 +1244,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.14 $";
+	return "$Revision: 1.15 $";
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
