@@ -9,6 +9,7 @@ For 1.3.0:
 - Update gdb debugging capabilities
   * watches / conditional breakpoints
 - Additions
+  * Add xdebug_break() function to insert breakpoints in your script manually.
   * Provide codes for messages (for localization) including parameters
 - Profiling
   * External data sources monitor
