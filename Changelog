@@ -1,3 +1,7 @@
+Thu Apr 10 10:29:07 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fixed getting zvals from the op structure for Zend Engine 2.
+
 Wed Apr 9 21:35:08 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h:
 - Switch back version no
