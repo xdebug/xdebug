@@ -485,7 +485,7 @@ xdebug_func xdebug_build_fname(zend_execute_data *edata, zend_op_array *new_op_a
 			if (edata->object) {
 				tmp.type = XFUNC_MEMBER;
 				tmp.class = xdstrdup(edata->function_state.function->common.scope->name);
-			} else if (EG(scope)) {
+			} else if (EG(scope) && edata->calling_scope && edata->calling_scope->name) {
 				tmp.type = XFUNC_STATIC_MEMBER;
 				tmp.class = xdstrdup(edata->calling_scope->name);
 			} else {
@@ -568,10 +568,12 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		cur_opcode = *EG(opline_ptr);
 		tmp->lineno = cur_opcode->lineno;
 
-		param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
-		tmp->vars[tmp->varc].name  = NULL;
-		tmp->vars[tmp->varc].value = xdstrdup(param->value.str.val);
-		tmp->varc++;
+		if (XG(collect_params)) {
+			param = get_zval(&zdata->opline->op1, zdata->Ts, &is_var);
+			tmp->vars[tmp->varc].name  = NULL;
+			tmp->vars[tmp->varc].value = xdstrdup(param->value.str.val);
+			tmp->varc++;
+		}
 
 	} else  {
 		if (EG(opline_ptr)) {
