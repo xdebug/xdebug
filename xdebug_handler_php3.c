@@ -71,6 +71,10 @@ static char *get_current_time(void)
 	return debug_timebuf;
 }
 
+char *xdebug_php3_get_revision(void)
+{
+	return "$Revision: 1.14 $";
+}
 
 int xdebug_php3_init(xdebug_con *context, int mode)
 {

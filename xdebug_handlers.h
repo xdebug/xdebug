@@ -87,6 +87,9 @@ struct _xdebug_remote_handler {
 
 	/* Breakpoints */
 	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type);
+
+	/* Information */
+	char *(*get_revision)(void);
 };
 
 struct _xdebug_remote_handler_info {

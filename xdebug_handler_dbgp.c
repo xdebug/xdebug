@@ -1181,6 +1181,11 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 ** Handlers for debug functions
 */
 
+char *xdebug_dbgp_get_revision(void)
+{
+	return "$Revision: 1.9 $";
+}
+
 int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
 	char *option;

@@ -519,9 +519,9 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_end();
 	
 	php_info_print_table_start();
-	php_info_print_table_header(1, "Supported protocols");
+	php_info_print_table_header(2, "Supported protocols", "Revision");
 	while (ptr->name) {
-		php_info_print_table_row(1, ptr->description);
+		php_info_print_table_row(2, ptr->description, ptr->handler.get_revision());
 		ptr++;
 	}
 	php_info_print_table_end();
