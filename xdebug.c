@@ -58,8 +58,10 @@ zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
+#if ZEND_EXTENSION_API_NO >= 20020731
 void (*old_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+#endif
 
 void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -152,8 +154,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_execute = zend_execute;
 	zend_execute = xdebug_execute;
 
+#if ZEND_EXTENSION_API_NO >= 20020731
 	old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
+#endif
 
 	old_error_cb = zend_error_cb;
 	new_error_cb = xdebug_error_cb;
@@ -166,7 +170,9 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	zend_compile_file = old_compile_file;
 	zend_execute = old_execute;
+#if ZEND_EXTENSION_API_NO >= 20020731
 	zend_execute_internal = old_execute_internal;
+#endif
 	zend_error_cb = old_error_cb;
 
 	return SUCCESS;
@@ -301,6 +307,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
+#if ZEND_EXTENSION_API_NO >= 20020731
 void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
 {
 	zval                **param;
@@ -321,6 +328,7 @@ void xdebug_execute_internal(zend_execute_data *execute_data_ptr, int return_val
 
 	execute_internal(execute_data_ptr, return_value_used TSRMLS_DC);
 }
+#endif
 
 static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 {
@@ -402,7 +410,9 @@ static inline char* show_fname (struct function_stack_entry* entry TSRMLS_DC)
 			break;
 
 		default:
+#if ZEND_EXTENSION_API_NO >= 20020731
 			assert(0);
+#endif
 	}
 }
 
@@ -1079,7 +1089,9 @@ xdebug_func find_func_name(zend_op_array *op_array, zend_op *my_opcode, int *var
 						tmpOpCode = initOpCode;
 					}
 
+#if ZEND_EXTENSION_API_NO >= 20020731
 					assert(tmpOpCode->opcode == ZEND_INIT_FCALL_BY_NAME);
+#endif
 
 					/*
 						tmpOpCode = initOpCode;
