@@ -1,3 +1,8 @@
+Wed Aug 28 19:45:11 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Update xdebug_get_function_trace() with new logic
+- Fix crash bug in xdebug_get_function_trace() due to new logic
+
 Wed Aug 28 10:31:14 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - Make it compile with PHP versions <= 4.2.0
