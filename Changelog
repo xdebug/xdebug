@@ -1,3 +1,7 @@
+Fri Jan 16 09:57:47 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug.c:
+- Fix year
+
 Fri Jan 16 09:44:07 CET 2004 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xt.vim
 /xdebug/xdebug.c:
