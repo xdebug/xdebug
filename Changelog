@@ -1,3 +1,7 @@
+Sun Feb 2 19:52:14 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/compile.bat:
+- Fix some typoes
+
 Sun Feb 2 19:45:46 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_var.c:
 - Stop using url_encode, and use xmlize instead.
