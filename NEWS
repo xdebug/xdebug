@@ -1,3 +1,12 @@
+Tue, Apr 06, 2004 - xdebug 1.3.1
+
+= Fixed profiler to aggregate class/method calls correctly. (Robert Beenen)
+= Fixed debugclient to initialize socket structure correctly. (Brandon Philips
+  and David Sklar)
+= GDB: Fixed bug where the source file wasn't closed after a "source" command.
+  (Derick)
+
+
 Fri, Dec 26, 2003 - xdebug 1.3.0
 
 + GDB: Added file/line to signals. (Derick)

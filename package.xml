@@ -32,56 +32,14 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>stable</state>
-    <version>1.3.0</version>
-    <date>2003-12-26</date>
+    <version>1.3.1</version>
+    <date>2004-04-06</date>
     <notes>
-+ Added version info to handlers which show in phpinfo() output. (Derick)
-+ GDB: Added file/line to signals. (Derick)
-= GDB: Fixed bug with continuing after breakpoint where only 'cont' worked.
+= Fixed profiler to aggregate class/method calls correctly. (Robert Beenen)
+= Fixed debugclient to initialize socket structure correctly. (Brandon Philips
+  and David Sklar)
+= GDB: Fixed bug where the source file wasn't closed after a "source" command.
   (Derick)
-= GDB: Fixed bug in deleting absolute breakpoints on Windows. (Derick)
-= Fixed logging to adhere to the error_reporting setting. (Derick)
-= Fixed bug #32: Unusual dynamic variables cause xdebug to crash. (Ilia)
-= Fixed bug #31: &amp; entity replaced after others, wrong HTML output.
-  (Derick)
-= Fixed bug #27: Repeated connect attempts when no debugger is listening.
-  (Derick)
-= Fixed bug #22: Segmentation fault with xdebug_get_function_stack() and
-  collect_params=1. (Derick)
-= Fixed bug #19: The value of xdebug.output_dir in a .htaccess never takes
-  effect. (Derick)
-= Fixed bug #18: Mistyped sizeof()'s for array indexes in profiler output.
-  (Derick)
-= Fixed handling stack traces for when display_errors was set to Off. (Derick)
-= Fixed segfault where a function name didn't exist in case of a
- "call_user_function". (Derick)
-= Fixed reading a filename in case of an callback to a PHP function from an
-  internal function (like "array_map()"). (Derick)
-= Fixed bug with wrong file names for functions called from call_user_*().
-  (Derick)
-+ Added the option "dump_superglobals" to the remote debugger. If you set this
-  option to 0 the "show-local" and similar commands will not return any data
-  from superglobals anymore. (Derick)
-= Fixed bug #2: "pear package" triggers a segfault. (Derick)
-= Fixed crash bug when a function had sprintf style parameters (ie.
-  strftime()). (Derick)
-+ Added "id" attribute to &lt;var /&gt; elements in responses from the remove
-  debugger when the response method is XML. This makes it possible to
-  distinguish between unique elements by use of recursion for example. (Derick)
-= Improved performance greatly by doing lazy folding of variables outside
-  trace mode. (Derick)
-= Fixed a bug with "quit", if it was used it disabled the extension for the
-  current process. (Derick)
-+ Added the "full" argument to the remote command "backtrace". When this
-  argument is passed, the local variables will be returned to for each frame in
-  the stack. (Derick)
-+ Implemented xdebug_time_index() which returns the time passed since the
-  start of the script. This change also changes the output of the tracing
-  functions as the start time will no longer be the first function call, but
-  the real start time of the script. (Derick)
-+ Implemented the "show-local" command (shows all local variables in the
-  current scope including all contents). (Derick)
-+ Implemented conditions for breakpoints in the "break" command. (Derick)
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -152,6 +110,19 @@ Xdebug also provides:
     </filelist>
   </release>
   <changelog>
+    <release>
+     <state>stable</state>
+     <version>1.3.1</version>
+     <date>2004-04-06</date>
+     <notes>
+= Fixed profiler to aggregate class/method calls correctly. (Robert Beenen)
+= Fixed debugclient to initialize socket structure correctly. (Brandon Philips
+  and David Sklar)
+= GDB: Fixed bug where the source file wasn't closed after a "source" command.
+  (Derick)
+     </notes>
+    </release>
+
     <release>
       <state>stable</state>
       <version>1.3.0</version>

@@ -1,3 +1,16 @@
+Tue Apr 06 21:10:04 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_profiler.c:
+- Fixed profiler to aggregate class/method calls correctly. (Patch by Robert
+  Beenen)
+
+Fri Mar 5 15:25:50 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_handler_gdb.c:
+- MFH: Fixed problem with not closing files from which sourcelines where read.
+
+Thu Feb 26 20:26:04 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/debugclient/main.c:
+- MFH: Fixed "invalid argument" bug. (Patch by Brandon Philips and David Sklar)
+
 Wed Dec 24 17:46:16 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/debugclient/main.c
 /xdebug/debugclient/build/buildconf1.mk:
