@@ -233,7 +233,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		tmp = emalloc (sizeof (struct function_stack_entry));
 		tmp->varc     = 0;
 		tmp->refcount = 1;
-		tmp->level    = XG(level) + 1;
+		tmp->level    = ++XG(level);
 		tmp->function_name = estrdup("{main}");
 
 		tmp->filename  = op_array->filename ? estrdup(op_array->filename): NULL;
