@@ -1,3 +1,8 @@
+Thu May 2 19:10:18 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/php_xdebug.h
+/xdebug/xdebug.c:
+- Make it compile under ZTS mode
+
 Thu May 2 12:22:15 CEST 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/php_xdebug.h
 /xdebug/xdebug.c:
