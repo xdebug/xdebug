@@ -1,3 +1,7 @@
+Sat Nov 22 16:45:42 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_var.c:
+- MFH: Copy and paste error
+
 Sat Nov 22 16:40:47 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/compile.bat
 /xdebug/xdebug.mak
