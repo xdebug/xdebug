@@ -1390,8 +1390,11 @@ PHP_FUNCTION(xdebug_start_trace)
 int xdebug_start_trace(char* fname TSRMLS_DC)
 {
 	char *str_time;
+	char *filename;
 
-	XG(trace_file) = fopen(fname, "a");
+	filename = xdebug_sprintf("%s.xt", fname);
+	XG(trace_file) = fopen(filename, "a");
+	xdfree(filename);
 	if (XG(trace_file)) {
 		str_time = xdebug_get_time();
 		fprintf(XG(trace_file), "\nTRACE START [%s]\n", str_time);
