@@ -1,0 +1,3 @@
+- Implemented xdebug_memory_usage() which returns the memory in use by PHPs
+  engine. (Derick)
+
