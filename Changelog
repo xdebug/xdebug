@@ -1,3 +1,8 @@
+Tue Oct 14 18:46:47 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_xml.c
+/xdebug/xdebug_xml.h:
+- Change interface a bit to accomodate memory issues
+
 Tue Oct 14 17:59:50 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug.c:
 - MFH: Fix URL
