@@ -1,3 +1,7 @@
+Mon Nov 11 07:34:18 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/debugclient/debugclient.dsp:
+- Update .dsp file
+
 Mon Nov 11 00:56:10 CET 2002 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/.cvsignore:
 - Add Debug and Release to .cvsignore
