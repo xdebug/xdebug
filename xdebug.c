@@ -1563,23 +1563,23 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 }
 #else
-#define xdebug_opcode_override(f)  static int xdebug_##f##_handler(zend_opcode_handler_args) \
+#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 { \
-	if (xg(do_code_coverage)) { \
+	if (XG(do_code_coverage)) { \
 		zend_op *cur_opcode; \
 		int      lineno; \
 		char    *file; \
 		int      file_len; \
 \
-		cur_opcode = *eg(opline_ptr); \
+		cur_opcode = *EG(opline_ptr); \
 		lineno = cur_opcode->lineno; \
 \
 		file = op_array->filename; \
 		file_len = strlen(file); \
 \
-		xdebug_count_line(file, lineno, 0 tsrmls_cc); \
+		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
 	} \
-	return old_##f##_handler(zend_opcode_handler_args_passthru); \
+	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 }
 #endif
 XDEBUG_OPCODE_OVERRIDE(jmp)
