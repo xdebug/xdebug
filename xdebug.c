@@ -499,60 +499,57 @@ PHP_MINFO_FUNCTION(xdebug)
 	DISPLAY_INI_ENTRIES();
 }
 
-xdebug_func xdebug_build_fname(zend_execute_data *edata, zend_op_array *new_op_array TSRMLS_DC)
+void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 {
-	xdebug_func tmp;
-
-	memset(&tmp, 0, sizeof(xdebug_func));
+	memset(tmp, 0, sizeof(xdebug_func));
 
 	if (edata) {
 		if (edata->function_state.function->common.function_name) {
 #if ZEND_EXTENSION_API_NO < 90000000
 			if (edata->ce) {
-				tmp.type = XFUNC_STATIC_MEMBER;
-				tmp.class = xdstrdup(edata->ce->name);
+				tmp->type = XFUNC_STATIC_MEMBER;
+				tmp->class = xdstrdup(edata->ce->name);
 			} else if (edata->object.ptr) {
-				tmp.type = XFUNC_MEMBER;
-				tmp.class = xdstrdup(edata->object.ptr->value.obj.ce->name);
+				tmp->type = XFUNC_MEMBER;
+				tmp->class = xdstrdup(edata->object.ptr->value.obj.ce->name);
 			} else {
-				tmp.type = XFUNC_NORMAL;
+				tmp->type = XFUNC_NORMAL;
 			}
 #else
 			if (edata->object) {
-				tmp.type = XFUNC_MEMBER;
-				tmp.class = xdstrdup(edata->function_state.function->common.scope->name);
-			} else if (EG(scope) && edata->calling_scope && edata->calling_scope->name) {
-				tmp.type = XFUNC_STATIC_MEMBER;
-				tmp.class = xdstrdup(edata->calling_scope->name);
+				tmp->type = XFUNC_MEMBER;
+				tmp->class = xdstrdup(edata->function_state.function->common.scope->name);
+			} else if (EG(scope) && edata->function_state.function->common.scope && edata->function_state.function->common.scope->name) {
+				tmp->type = XFUNC_STATIC_MEMBER;
+				tmp->class = xdstrdup(edata->function_state.function->common.scope->name);
 			} else {
-				tmp.type = XFUNC_NORMAL;
+				tmp->type = XFUNC_NORMAL;
 			}
 #endif
-			tmp.function = xdstrdup(edata->function_state.function->common.function_name);
+			tmp->function = xdstrdup(edata->function_state.function->common.function_name);
 		} else {
 			switch (edata->opline->op2.u.constant.value.lval) {
 				case ZEND_EVAL:
-					tmp.type = XFUNC_EVAL;
+					tmp->type = XFUNC_EVAL;
 					break;
 				case ZEND_INCLUDE:
-					tmp.type = XFUNC_INCLUDE;
+					tmp->type = XFUNC_INCLUDE;
 					break;
 				case ZEND_REQUIRE:
-					tmp.type = XFUNC_REQUIRE;
+					tmp->type = XFUNC_REQUIRE;
 					break;
 				case ZEND_INCLUDE_ONCE:
-					tmp.type = XFUNC_INCLUDE_ONCE;
+					tmp->type = XFUNC_INCLUDE_ONCE;
 					break;
 				case ZEND_REQUIRE_ONCE:
-					tmp.type = XFUNC_REQUIRE_ONCE;
+					tmp->type = XFUNC_REQUIRE_ONCE;
 					break;
 				default:
-					tmp.type = XFUNC_UNKNOWN;
+					tmp->type = XFUNC_UNKNOWN;
 					break;
 			}
 		}
 	}
-	return tmp; 
 }
 
 
@@ -584,13 +581,13 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	tmp->memory = 0;
 #endif
 	tmp->time   = get_utime();
+	tmp->lineno = 0;
 
-	tmp->function = xdebug_build_fname(zdata, op_array TSRMLS_CC);
+	xdebug_build_fname(&(tmp->function), zdata TSRMLS_CC);
 	if (!tmp->function.type) {
 		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
 		tmp->function.type     = XFUNC_NORMAL;
-		tmp->lineno = 0;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
 		zval *param;
@@ -611,8 +608,6 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		if (EG(opline_ptr)) {
 			cur_opcode = *EG(opline_ptr);
 			tmp->lineno = cur_opcode->lineno;
-		} else {
-			tmp->lineno = 0;
 		}
 		if (XG(collect_params)) {
 			for (i = 0; i < arg_count; i++) {
