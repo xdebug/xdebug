@@ -384,7 +384,6 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 	tmp->delayed_fname = 0;
 	tmp->delayed_cname = 0;
 	tmp->arg_done      = 0;
-	tmp->delayed_include   = 0;
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
@@ -405,14 +404,6 @@ static struct function_stack_entry *add_stack_frame(zend_execute_data *zdata, ze
 		tmp->function.type     = XFUNC_NORMAL;
 		tmp->lineno = 0;
 
-		/* Handle delayed include for stack */
-		if (XG(stack)->size > 0) {
-			if (((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->delayed_include == 1) {
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].name = xdstrdup ("");
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->vars[0].value = op_array->filename ? xdstrdup(op_array->filename): NULL;
-				((function_stack_entry*) XDEBUG_LLIST_TAIL(XG(stack))->ptr)->varc++;
-			}
-		}
 		xdebug_llist_insert_next (XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 	} else {
 		cur_opcode = *EG(opline_ptr);

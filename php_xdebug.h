@@ -123,7 +123,6 @@ typedef struct function_stack_entry {
 
 	int   delayed_fname;
 	int   delayed_cname;
-	int   delayed_include;
 
 	unsigned int memory;
 	double       time;
