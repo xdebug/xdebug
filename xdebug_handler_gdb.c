@@ -424,6 +424,19 @@ static void dump_used_var(void *context, xdebug_hash_element* he)
 	xdebug_con         *h = (xdebug_con*) context;
 	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
 
+	if (!options->dump_superglobals) {
+		if ((strcmp(name, "GLOBALS") == 0) ||
+			(strcmp(name, "_GET") == 0) ||
+			(strcmp(name, "_POST") == 0) ||
+			(strcmp(name, "_COOKIE") == 0) ||
+			(strcmp(name, "_REQUEST") == 0) ||
+			(strcmp(name, "_SERVER") == 0) ||
+			(strcmp(name, "_ENV") == 0) ||
+			(strcmp(name, "_SESSION") == 0))
+		{
+			return;
+		}
+	}
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
 		SENDMSG(h->socket, xdebug_sprintf("<var name='%s'/>", name));
 	} else {
@@ -439,6 +452,19 @@ static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
 	xdebug_gdb_options *options = (xdebug_gdb_options*) h->options;
 	char               *contents;
 
+	if (!options->dump_superglobals) {
+		if ((strcmp(name, "GLOBALS") == 0) ||
+			(strcmp(name, "_GET") == 0) ||
+			(strcmp(name, "_POST") == 0) ||
+			(strcmp(name, "_COOKIE") == 0) ||
+			(strcmp(name, "_REQUEST") == 0) ||
+			(strcmp(name, "_SERVER") == 0) ||
+			(strcmp(name, "_ENV") == 0) ||
+			(strcmp(name, "_SESSION") == 0))
+		{
+			return;
+		}
+	}
 	contents = get_symbol_contents(context, name, strlen(name) + 1);
 	if (contents) {
 		if (options->response_format == XDEBUG_RESPONSE_XML) {
@@ -1006,6 +1032,8 @@ char *xdebug_handle_option(xdebug_con *context, xdebug_arg *args)
 
 	if (strcmp(args->args[0], "response_format") == 0) {
 		options->response_format = atoi(args->args[1]);
+	} else if (strcmp(args->args[0], "dump_superglobals") == 0) {
+		options->dump_superglobals = atoi(args->args[1]);
 	} else {
 		return make_message(context, XDEBUG_E_UNKNOWN_OPTION, "Unknown option.");
 	}
@@ -1349,6 +1377,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->options = xdmalloc(sizeof(xdebug_gdb_options));
 	options = (xdebug_gdb_options*) context->options;
 	options->response_format = XDEBUG_RESPONSE_NORMAL;
+	options->dump_superglobals = 1;
 
 	/* Initialize auto globals in Zend Engine 2 */
 #ifdef ZEND_ENGINE_2

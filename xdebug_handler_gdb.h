@@ -86,6 +86,7 @@ typedef struct xdebug_cmd {
 
 typedef struct xdebug_gdb_options {
 	int response_format;
+	int dump_superglobals;
 } xdebug_gdb_options;
 
 int xdebug_gdb_init(xdebug_con *context, int mode);
