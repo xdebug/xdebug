@@ -1269,11 +1269,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_dbgp_options *optio
 {
 	function_stack_entry *fse;
 	xdebug_hash          *ht;
-#ifdef ZEND_ENGINE_2
-	xdebug_xml_node      *contents;
-	zval                  ret_zval;
-	int                   res;
-#endif
+
 	if (context_id > 0) {
 		/* right now, we only have zero or one, one being globals, which is
 		 * always the head of the stack */
@@ -1591,7 +1587,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.58 $";
+	return "$Revision: 1.59 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

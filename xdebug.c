@@ -54,6 +54,7 @@
 #include "zend_extensions.h"
 #ifdef ZEND_ENGINE_2
 #include "zend_exceptions.h"
+#include "zend_vm.h"
 #endif
 
 #include "php_xdebug.h"
@@ -800,14 +801,8 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = cur_opcode->lineno;
 
 		if (tmp->function.type == XFUNC_EVAL) {
-			zval *param;
 			int   is_var;
 
-/*			tmp->var = xdmalloc(sizeof (xdebug_var));
-			tmp->var[tmp->varc].name  = NULL;
-			tmp->var[tmp->varc].addr = param;
-			tmp->varc++;
-*/
 			tmp->include_filename = get_zval_value(get_zval(&zdata->opline->op1, zdata->Ts, &is_var));
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
@@ -1513,7 +1508,7 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_deinit(TSRMLS_C);
 	}
-	old_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return old_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 #endif
 
