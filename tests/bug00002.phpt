@@ -7,6 +7,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.show_mem_delta=0
+xdebug.trace_format=0
 --FILE--
 <?php
 	require 'bug00002.inc';
