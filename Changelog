@@ -1,3 +1,7 @@
+Mon Jan 5 09:29:43 CET 2004 Derick Rethans <derick@derickrethans.nl>
+/xdebug/xdebug_var.c:
+- Fixed some of the variable printing routines regarding PPP.
+
 Sun Dec 28 23:39:29 CET 2003 Derick Rethans <derick@derickrethans.nl>
 /xdebug/xdebug_var.c:
 - Added support for showing private, protected and public in the fancy
