@@ -1,3 +1,7 @@
+Tue Oct 14 17:57:04 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug.c:
+- Fix URL
+
 Mon Oct 13 10:18:39 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_xml.c
 /xdebug/xdebug_xml.h:
