@@ -69,6 +69,8 @@ typedef struct xdebug_var {
 #define XDEBUG_TRACE_OPTION_APPEND       1
 #define XDEBUG_TRACE_OPTION_COMPUTERIZED 2
 
+#define XDEBUG_CC_OPTION_UNUSED          1
+
 #define STATUS_STARTING   0
 #define STATUS_STOPPING   1
 #define STATUS_STOPPED    2

@@ -39,7 +39,7 @@ void xdebug_coverage_file_dtor(void *data)
 	xdfree(file);
 }
 
-void xdebug_count_line(char *filename, int lineno TSRMLS_DC)
+void xdebug_count_line(char *filename, int lineno, int executable TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
@@ -62,18 +62,44 @@ void xdebug_count_line(char *filename, int lineno TSRMLS_DC)
 	if (!xdebug_hash_find(file->lines, sline, strlen(sline), (void *) &line)) {
 		line = xdmalloc(sizeof(xdebug_coverage_line));
 		line->lineno = lineno;
-		line->count  = 0;
+		line->count = 0;
+		line->executable = 0;
 
 		xdebug_hash_add(file->lines, sline, strlen(sline), line);
 	}
 
-	line->count++;
+	if (executable) {
+		line->executable = 1;
+	} else {
+		line->count++;
+	}
 
 	xdfree(sline);
 }
 
+static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode)
+{
+	xdebug_count_line(fn, opcode.lineno, 1);
+}
+
+void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array)
+{
+	unsigned int i;
+
+	for (i = 0; i < op_array->size; i++) {
+		prefil_from_opcode(fse, op_array->filename, op_array->opcodes[i]);
+	}
+}
+
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
+	long options = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
+		return;
+	}
+	XG(code_coverage_unused) = (options == XDEBUG_CC_OPTION_UNUSED);
+
 	if (XG(extended_info)) {
 		XG(do_code_coverage) = 1;
 	} else {
@@ -107,7 +133,11 @@ static void add_line(void *ret, xdebug_hash_element *e)
 	xdebug_coverage_line *line = (xdebug_coverage_line*) e->ptr;
 	zval                 *retval = (zval*) ret;
 
-	add_index_long(retval, line->lineno, line->count);
+	if (line->executable && (line->count == 0)) {
+		add_index_long(retval, line->lineno, -1);
+	} else {
+		add_index_long(retval, line->lineno, line->count);
+	}
 }
 
 static void add_file(void *ret, xdebug_hash_element *e)

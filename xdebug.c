@@ -85,6 +85,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
+int (*old_exit_handler)(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
@@ -405,6 +406,12 @@ PHP_MINIT_FUNCTION(xdebug)
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
+#ifdef ZEND_ENGINE_2
+# if PHP_MINOR_VERSION >= 1
+	zend_vm_use_old_executor();
+# endif
+#endif
+
 	/* get xdebug ini entries from the environment also */
 	xdebug_env_config();
 
@@ -424,6 +431,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	/* Overload the "exit" opcode */
 #ifdef ZEND_ENGINE_2
+	old_exit_handler = zend_opcode_handlers[ZEND_EXIT];
 	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
 #endif
 
@@ -433,6 +441,8 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_APPEND", XDEBUG_TRACE_OPTION_APPEND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_COMPUTERIZED", XDEBUG_TRACE_OPTION_COMPUTERIZED, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
 	return SUCCESS;
@@ -823,7 +833,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 
 	if (XG(do_code_coverage)) {
-		xdebug_count_line(tmp->filename, tmp->lineno TSRMLS_CC);
+		xdebug_count_line(tmp->filename, tmp->lineno, 0 TSRMLS_CC);
 	}
 
 	if (XDEBUG_LLIST_TAIL(XG(stack))) {
@@ -1038,6 +1048,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (XDEBUG_IS_FUNCTION(xfse->function.type)) {
 			break;
 		}
+	}
+
+	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
+		xdebug_prefil_code_coverage(fse, op_array);
 	}
 
 	/* Check for entry breakpoints */
@@ -1499,7 +1513,7 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_deinit(TSRMLS_C);
 	}
-	zend_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	old_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 #endif
 
@@ -1775,11 +1789,17 @@ PHP_FUNCTION(xdebug_var_dump)
 PHP_FUNCTION(xdebug_enable)
 {
 	zend_error_cb = new_error_cb;
+#ifdef ZEND_ENGINE_2
+	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
+#endif
 }
 
 PHP_FUNCTION(xdebug_disable)
 {
 	zend_error_cb = old_error_cb;
+#ifdef ZEND_ENGINE_2
+	zend_opcode_handlers[ZEND_EXIT] = old_exit_handler;
+#endif
 }
 
 PHP_FUNCTION(xdebug_is_enabled)
@@ -2013,7 +2033,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	file_len = strlen(file);
 
 	if (XG(do_code_coverage)) {
-		xdebug_count_line(file, lineno TSRMLS_CC);
+		xdebug_count_line(file, lineno, 0 TSRMLS_CC);
 	}
 
 	if (XG(remote_enabled)) {

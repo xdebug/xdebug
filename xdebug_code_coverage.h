@@ -26,6 +26,7 @@
 typedef struct xdebug_coverage_line {
 	int lineno;
 	int count;
+	int executable;
 } xdebug_coverage_line;
 
 typedef struct xdebug_coverage_file {
@@ -36,7 +37,7 @@ typedef struct xdebug_coverage_file {
 void xdebug_coverage_line_dtor(void *data);
 void xdebug_coverage_file_dtor(void *data);
 
-void xdebug_count_line(char *file, int lineno TSRMLS_DC);
+void xdebug_count_line(char *file, int lineno, int executable TSRMLS_DC);
 
 PHP_FUNCTION(xdebug_start_code_coverage);
 PHP_FUNCTION(xdebug_stop_code_coverage);
