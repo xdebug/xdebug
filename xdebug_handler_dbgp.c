@@ -73,6 +73,37 @@ char *xdebug_dbgp_status_strings[6] =
 char *xdebug_dbgp_reason_strings[4] =
 	{"ok", "error", "aborted", "exception"};
 
+typedef struct {
+	int   code;
+	char *message;
+} xdebug_error_entry;
+
+xdebug_error_entry xdebug_error_codes[23] = {
+	{   0, "no error" },
+	{   1, "parse error in command" },
+	{   2, "duplicate arguments in command" },
+	{   3, "invalid or missing options" },
+	{   4, "unimplemented command" },
+	{   5, "command is not available" },
+	{ 100, "can not open file" },
+	{ 101, "stream redirect failed" },
+	{ 200, "breakpoint could not be set" },
+	{ 201, "breakpoint type is not supported" },
+	{ 202, "invalid breakpoint line" },
+	{ 203, "no code on breakpoint line" },
+	{ 204, "invalid breakpoint state" },
+	{ 205, "no such breakpoint" },
+	{ 206, "error evaluating code" },
+	{ 207, "invalid expression" },
+	{ 300, "can not get property" },
+	{ 301, "stack depth invalid" },
+	{ 302, "context invalid" },
+	{ 900, "encoding not supported" },
+	{ 998, "an internal exception in the debugger" },
+	{ 999, "unknown error" },
+	{  -1, NULL }
+};
+
 #define XDEBUG_STR_SWITCH_DECL       char *__switch_variable
 #define XDEBUG_STR_SWITCH(s)         __switch_variable = (s);
 #define XDEBUG_STR_CASE(s)           if (strcmp(__switch_variable, s) == 0) {
@@ -245,7 +276,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 	return NULL;
 }
 
-static xdebug_xml_node* get_symbol_contents(char* name, int name_length TSRMLS_DC)
+static xdebug_xml_node* get_symbol(char* name, int name_length TSRMLS_DC)
 {
 	zval                *retval;
 
@@ -255,6 +286,19 @@ static xdebug_xml_node* get_symbol_contents(char* name, int name_length TSRMLS_D
 	}
 
 	return NULL;
+}
+
+int get_symbol_contents(char* name, int name_length, xdebug_xml_node *node TSRMLS_DC)
+{
+	zval                *retval;
+
+	retval = get_symbol_contents_zval(name, name_length TSRMLS_CC);
+	if (retval) {
+		xdebug_var_export_xml_node(&retval, name, node, 1 TSRMLS_CC);
+		return 1;
+	}
+
+	return 0;
 }
 
 static char* return_source(char *filename, int begin, int end TSRMLS_DC)
@@ -1105,16 +1149,19 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 	xdebug_xml_node      *contents;
 	zval                  ret_zval;
 	int                   res;
+	HashTable            *tmp_symbol_table;
 
-	contents = get_symbol_contents(name, name_length TSRMLS_CC);
-
+	contents = get_symbol(name, name_length TSRMLS_CC);
 	if (!contents && !no_eval) {
 		char *varname = NULL;
 		if (var_only && name[0] != '$') {
 			varname = xdebug_sprintf("$%s", name);
 		}
 		/* if we cannot get the value directly, then try eval */
+		tmp_symbol_table = EG(active_symbol_table);
+		EG(active_symbol_table) = XG(active_symbol_table);
 		res = _xdebug_do_eval(varname ? varname : name, &ret_zval TSRMLS_CC);
+		EG(active_symbol_table) = tmp_symbol_table;
 		if (res != FAILURE && (!non_null || Z_TYPE_P(&ret_zval) != IS_NULL)) {
 			contents = get_zval_value_xml_node(name, &ret_zval);
 			zval_dtor(&ret_zval);
@@ -1215,54 +1262,67 @@ DBGP_FUNC(property_set)
 	}
 }
 
+static int add_variable_contents_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null, int no_eval TSRMLS_DC)
+{
+	int                   contents_found;
+	zval                  ret_zval;
+	int                   res;
+	HashTable            *tmp_symbol_table;
 
+	contents_found = get_symbol_contents(name, name_length, node TSRMLS_CC);
+	if (!contents_found && !no_eval) {
+		char *varname = NULL;
+		if (var_only && name[0] != '$') {
+			varname = xdebug_sprintf("$%s", name);
+		}
+		/* if we cannot get the value directly, then try eval */
+		tmp_symbol_table = EG(active_symbol_table);
+		EG(active_symbol_table) = XG(active_symbol_table);
+		res = _xdebug_do_eval(varname ? varname : name, &ret_zval TSRMLS_CC);
+		EG(active_symbol_table) = tmp_symbol_table;
+		if (res != FAILURE && (!non_null || Z_TYPE_P(&ret_zval) != IS_NULL)) {
+			zval *tmp_zval = &ret_zval;
+			
+			xdebug_var_export_xml_node(&tmp_zval, name, node, 1 TSRMLS_CC);
+			contents_found = 1;
+			zval_dtor(&ret_zval);
+		}
+		if (varname) {
+			xdfree(varname);
+		}
+	}
+	if (contents_found) {
+		return SUCCESS;
+	}
+	return FAILURE;
+}
 DBGP_FUNC(property_value)
 {
-	zval            *var_data;
-	zval             ret_zval;
-	zval            *p_ret_zval = &ret_zval;
-	int              res;
-	char            *name = CMD_OPTION('n');
-	long             context_id = 0, depth = 0;
+	int                   depth = -1;
+	function_stack_entry *fse;
 
-	/* XXX TODO
-	 * handle the depth value and set the property at a specific stack depth
-	 * 
-	 * handle the context_id value and set the property in the correct context
-	 */
-
-	if (CMD_OPTION('d')) { 
-		depth = strtol(CMD_OPTION('d'), NULL, 10);
-	}
-	if (CMD_OPTION('c')) { 
-		context_id = strtol(CMD_OPTION('c'), NULL, 10);
-	}
-
-	if (!name) {
+	if (!CMD_OPTION('n')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 
-	XG(active_symbol_table) = EG(active_symbol_table);
-	var_data = get_symbol_contents_zval(name, strlen(name) + 1 TSRMLS_CC);
-	XG(active_symbol_table) = NULL;
-
-	if (var_data) {
-		/* XXX cheesy and lame, gets more than we want */
-		xdebug_var_export_xml_node(&p_ret_zval, name, *retval, 0 TSRMLS_CC);
-		zval_dtor(p_ret_zval);
+	if (CMD_OPTION('d')) {
+		depth = strtol(CMD_OPTION('d'), NULL, 10);
+	}
+	/* Set the symbol table corresponding with the requested stack depth */
+	if (depth == -1) {
+		XG(active_symbol_table) = EG(active_symbol_table);
 	} else {
-		/* if we cannot get the value directly, then try eval */
-		res = _xdebug_do_eval(CMD_OPTION('n'), p_ret_zval TSRMLS_CC);
-		if (res == FAILURE) {
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+			XG(active_symbol_table) = fse->symbol_table;
 		} else {
-			/* XXX cheesy and lame, gets more than we want */
-			xdebug_var_export_xml_node(&p_ret_zval, name, *retval, 0 TSRMLS_CC);
-			zval_dtor(p_ret_zval);
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
 	}
-}
 
+	if (add_variable_contents_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0 TSRMLS_CC) == FAILURE) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+	}
+}
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 {
 	char               *name = (char*) he->ptr;
@@ -1271,7 +1331,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he)
 	xdebug_xml_node    *contents;
 	TSRMLS_FETCH();
 
-	contents = get_symbol_contents(name, strlen(name) + 1 TSRMLS_CC);
+	contents = get_symbol(name, strlen(name) + 1 TSRMLS_CC);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
@@ -1572,6 +1632,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 	}
 
 	/* Handle parse errors */
+	/* FIXME: use RETURN_RESULT here too */
 	if (res != XDEBUG_ERROR_OK) {
 		error = xdebug_xml_node_init("error");
 		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", res), 0, 1);
@@ -1611,7 +1672,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.65 $";
+	return "$Revision: 1.66 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

@@ -50,7 +50,7 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define DEBUGCLIENT_VERSION "0.8.0"
+#define DEBUGCLIENT_VERSION "0.9.0"
 #define DEFAULT_PORT        9000
 
 #ifdef HAVE_LIBEDIT
@@ -114,6 +114,7 @@ int main(int argc, char *argv[])
 {
 	int                 port = DEFAULT_PORT; /* Port number to listen for connections */
 	int                 ssocket = 0;         /* Socket file descriptor */
+	int                 debug_once = 1;      /* Whether to allow more than one debug session (1 = no) */
 	struct sockaddr_in  server_in;
 	struct sockaddr_in  client_in;
 	int                 client_in_len;
@@ -157,7 +158,7 @@ int main(int argc, char *argv[])
 #ifndef WIN32
 	/* Option handling */
 	while (1) {
-		opt = getopt(argc, argv, "hp:v");
+		opt = getopt(argc, argv, "hp:v1");
 
 		if (opt == -1) {
 			break;
@@ -170,6 +171,7 @@ int main(int argc, char *argv[])
 				printf("\t-h\tShow this help\n");
 				printf("\t-p\tSpecify the port to listen on (default = 9000)\n");
 				printf("\t-v\tShow version number and exit\n");
+				printf("\t-1\tDebug once and then exit\n");
 				exit(0);
 				break;
 			case 'v':
@@ -179,13 +181,16 @@ int main(int argc, char *argv[])
 				port = atoi(optarg);
 				printf("Listening on TCP port %d.\n", port);
 				break;
+			case '1':
+				debug_once = 0;
+				break;
 		}
 	}
 #endif
 
 	/* Main loop that listens for connections from the debug client and that
 	 * does all the communications handling. */
-	while (1) {
+	do {
 		ssocket = socket(AF_INET, SOCK_STREAM, 0);
 		if (ssocket < 0) {
 			fprintf(stderr, "socket: couldn't create socket\n");
@@ -289,5 +294,5 @@ int main(int argc, char *argv[])
 
 		/* Sleep some time to reset the TCP/IP connection */
 		sleep(1);
-	}
+	} while (debug_once);
 }
