@@ -296,10 +296,65 @@ static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
 }
 #endif
 
+void xdebug_env_config()
+{
+	char       *config = getenv("XDEBUG_CONFIG");
+	xdebug_arg *parts;
+	int			i;
+	/*
+		XDEBUG_CONFIG format:
+		XDEBUG_CONFIG=var=val var=val
+	*/
+	if (!config) {
+		return;
+	}
+
+	parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	xdebug_arg_init(parts);
+	xdebug_explode(" ", config, parts, -1);
+
+	for (i = 0; i < parts->c; ++i) {
+		char *envvar = parts->args[i];
+		char *envval = NULL;
+		char *eq = strchr(envvar,'=');
+		if (!eq || !*eq) continue;
+		*eq = 0;
+		envval = eq + 1;
+		if (!*envval) continue;
+
+		if (strcasecmp(envvar, "remote_enable") == 0) {
+			char *name = "xdebug.remote_enable";
+			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		} else
+		if (strcasecmp(envvar, "remote_port") == 0) {
+			char *name = "xdebug.remote_port";
+			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		} else
+		if (strcasecmp(envvar, "remote_host") == 0) {
+			char *name = "xdebug.remote_host";
+			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		} else
+		if (strcasecmp(envvar, "remote_handler") == 0) {
+			char *name = "xdebug.remote_handler";
+			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		} else
+		if (strcasecmp(envvar, "remote_mode") == 0) {
+			char *name = "xdebug.remote_mode";
+			zend_alter_ini_entry(name, strlen(name)+1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		}
+	}
+
+	xdebug_arg_dtor(parts);
+}
+
+
 PHP_MINIT_FUNCTION(xdebug)
 {
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
+
+	/* get xdebug ini entries from the environment also */
+	xdebug_env_config();
 
 	/* Redirect compile and execute functions to our own */
 	old_compile_file = zend_compile_file;
