@@ -1,3 +1,7 @@
+Fri Dec 26 15:35:02 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_handler_dbgp.c:
+- Implemented 'typemap_get'.
+
 Fri Dec 26 15:08:28 CET 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_handler_dbgp.c:
 - Return an error when an unknown command has been issued.
