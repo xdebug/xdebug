@@ -82,6 +82,46 @@ static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opco
 	xdebug_count_line(fn, opcode.lineno, 1 TSRMLS_CC);
 }
 
+static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	char *new_filename;
+	unsigned int i;
+
+	new_filename = va_arg(args, char*);
+	if (opa->type == ZEND_USER_FUNCTION) {
+		if (opa->filename && strcmp(opa->filename, new_filename) == 0) {
+			for (i = 0; i < opa->size; i++) {
+				prefil_from_opcode(NULL, new_filename, opa->opcodes[i] TSRMLS_CC);
+			}
+		}
+	}
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+#ifdef ZEND_ENGINE_2
+static int prefil_from_class_table(zend_class_entry **class_entry, int num_args, va_list args, zend_hash_key *hash_key)
+#else
+static int prefil_from_class_table(zend_class_entry *class_entry, int num_args, va_list args, zend_hash_key *hash_key)
+#endif
+{
+	char *new_filename;
+	zend_class_entry *ce;
+
+#ifdef ZEND_ENGINE_2
+	ce = *class_entry;
+#else
+	ce = class_entry;
+#endif
+
+	new_filename = va_arg(args, char*);
+	if (ce->type == ZEND_USER_CLASS) {
+		zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefil_from_function_table, 1, new_filename);
+	}
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+
 void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
 {
 	unsigned int i;
@@ -89,6 +129,9 @@ void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_ar
 	for (i = 0; i < op_array->size; i++) {
 		prefil_from_opcode(fse, op_array->filename, op_array->opcodes[i] TSRMLS_CC);
 	}
+
+	zend_hash_apply_with_arguments(CG(function_table), (apply_func_args_t) prefil_from_function_table, 1, op_array->filename);
+	zend_hash_apply_with_arguments(CG(class_table), (apply_func_args_t) prefil_from_class_table, 1, op_array->filename);
 }
 
 PHP_FUNCTION(xdebug_start_code_coverage)
