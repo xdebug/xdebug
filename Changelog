@@ -1,3 +1,7 @@
+Tue Jul 20 18:34:31 CEST 2004 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Some whitespace fixes.
+
 Mon Jul 19 21:51:26 CEST 2004 Marcus Börger <helly@php.net>
 xdebug_compat.c:
 - Make compatible with PHP 5.1.x
