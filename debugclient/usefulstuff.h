@@ -29,6 +29,7 @@ struct _fd_buf {
 	int   buffer_size;
 };
 
-char* fd_read_line(int socket, fd_buf *context, int type);
+#define fd_read_line(s,c,t) fd_read_line_delim(s, c, t, '\n', NULL)
+char* fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length);
 
 #endif
