@@ -1,3 +1,7 @@
+Mon Oct 13 10:17:11 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
+/xdebug/xdebug_str.h:
+- Add xdebug_str_dtor macro
+
 Sun Oct 12 16:28:59 CEST 2003 Derick Rethans <d.rethans@jdimedia.nl>
 /xdebug/xdebug_mm.h
 /xdebug/xdebug_str.c
