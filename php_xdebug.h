@@ -145,7 +145,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */
-	int           remote_port;    /* 7869 */
+	int           remote_port;    /* 17869 */
 	char         *remote_host;    /* localhost */
 	int           remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
 	char         *remote_handler; /* php3, gdb */
