@@ -270,11 +270,13 @@ static int xdebug_array_element_export_xml(zval **zv, int num_args, va_list args
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
 
-	if (hash_key->nKeyLength==0) { /* numeric key */
-		XDEBUG_STR_ADD(str, xdebug_sprintf("<var name='%ld'>", hash_key->h), 1);
+	XDEBUG_STR_ADDL(str, "<var", 4, 0);
+	if (hash_key->nKeyLength == 0) { /* numeric key */
+		XDEBUG_STR_ADD(str, xdebug_sprintf(" name='%ld'", hash_key->h), 1);
 	} else { /* string key */
-		XDEBUG_STR_ADD(str, xdebug_sprintf("<var name='%s'>", hash_key->arKey), 1);
+		XDEBUG_STR_ADD(str, xdebug_sprintf(" name='%s'", hash_key->arKey), 1);
 	}
+	XDEBUG_STR_ADD(str, xdebug_sprintf(" id='%p'>", *zv), 1);
 	xdebug_var_export_xml(zv, str, level + 2 TSRMLS_CC);
 	XDEBUG_STR_ADDL(str, "</var>", 6, 0);
 	return 0;
@@ -289,9 +291,11 @@ static int xdebug_object_element_export_xml(zval **zv, int num_args, va_list arg
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
 
+	XDEBUG_STR_ADDL(str, "<var", 4, 0);
 	if (hash_key->nKeyLength != 0) {
-		XDEBUG_STR_ADD(str, xdebug_sprintf("<var name='%s'>", hash_key->arKey), 1);
+		XDEBUG_STR_ADD(str, xdebug_sprintf(" name='%s'", hash_key->arKey), 1);
 	}
+	XDEBUG_STR_ADD(str, xdebug_sprintf(" id='%p'>", *zv), 1);
 	xdebug_var_export_xml(zv, str, level + 2 TSRMLS_CC);
 	XDEBUG_STR_ADDL(str, "</var>", 6, 0);
 	return 0;
@@ -369,9 +373,9 @@ char* get_zval_value_xml(char *name, zval *val)
 	if (name) {
 		XDEBUG_STR_ADDL(&str, "<var name='", 11, 0);
 		XDEBUG_STR_ADD(&str, name, 0);
-		XDEBUG_STR_ADDL(&str, "'>", 2, 0);
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("' id='%p'>", val), 1);
 	} else {
-		XDEBUG_STR_ADDL(&str, "<var>", 5, 0);
+		XDEBUG_STR_ADD(&str, xdebug_sprintf("<var id='%p'>", val), 1);
 	}
 	
 	xdebug_var_export_xml(&val, (xdebug_str*) &str, 1 TSRMLS_CC);
