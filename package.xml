@@ -18,16 +18,29 @@
   <license>PHP</license>
   <release>
     <state>beta</state>
-    <version>1.0.0rc1</version>
-    <date>2002-09-01</date>
+    <version>1.1.0pre1</version>
+    <date>2002-10-22</date>
     <notes>
-      Added better logic and support for parameters to internal functions
+      Added gdb compatible debugger handler with support for simple (function
+      only) breakpoints.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
       <file role="src"  name="xdebug.c"/>
+      <file role="src"  name="xdebug_com.c"/>
+      <file role="src"  name="xdebug_com.h"/>
+      <file role="src"  name="xdebug_handlers.c"/>
+      <file role="src"  name="xdebug_handlers.h"/>
+      <file role="src"  name="xdebug_handler_gdb.c"/>
+      <file role="src"  name="xdebug_handler_gdb.h"/>
+      <file role="src"  name="xdebug_handler_php3.c"/>
+      <file role="src"  name="xdebug_handler_php3.h"/>
+      <file role="src"  name="xdebug_hash.c"/>
+      <file role="src"  name="xdebug_hash.h"/>
       <file role="src"  name="xdebug_llist.c"/>
       <file role="src"  name="xdebug_llist.h"/>
+      <file role="src"  name="xdebug_socket.c"/>
+      <file role="src"  name="xdebug_socket.h"/>
       <file role="src"  name="xdebug_var.c"/>
       <file role="src"  name="xdebug_var.h"/>
 
@@ -42,6 +55,24 @@
     </filelist>
   </release>
   <changelog>
+    <release>
+      <state>beta</state>
+      <version>1.1.0pre1</version>
+      <date>2002-10-22</date>
+      <notes>
++ Added automatic starting of function traces (xdebug.auto_trace, defaulting to
+  "off"). (Derick)
+- Xdebug no longer supports PHP versions below PHP 4.3.0pre1. (Derick)
++ Added gdb compatible debugger handler with support for simple (function only)
+  breakpoints. (Derick)
+= Implemented a new way to get class names and file names. (Derick, Thies C.
+  Arntzen &lt;thies@thieso.net&gt;)
++ Added time-index and memory footprint to CLI dumps. (Derick)
++ Implemented remote debugger handler abstraction. (Derick)
++ Added a php3 compatible debugger handler. (Derick)
+      </notes>
+    </release>
+
     <release>
       <state>beta</state>
       <version>1.0.0rc1</version>
