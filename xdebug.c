@@ -415,6 +415,18 @@ void xdebug_env_config()
 		} else
 		if (strcasecmp(envvar, "idekey") == 0) {
 			name = "xdebug.idekey";
+		} else
+		if (strcasecmp(envvar, "profiler_enable") == 0) {
+			name = "xdebug.profile_enable";
+		} else
+		if (strcasecmp(envvar, "profiler_output_dir") == 0) {
+			name = "xdebug.profiler_output_dir";
+		} else
+		if (strcasecmp(envvar, "profiler_output_name") == 0) {
+			name = "xdebug.profiler_output_name";
+		} else
+		if (strcasecmp(envvar, "profiler_enable_trigger") == 0) {
+			name = "xdebug.profiler_enable_trigger";
 		}
 
 		if (name) {
