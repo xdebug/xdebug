@@ -1,3 +1,7 @@
+Wed Apr 27 11:08:32 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+README:
+- Commit updated README
+
 Sun Mar 20 16:11:51 CET 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #95: Segfault when deinitializing Xdebug module.
