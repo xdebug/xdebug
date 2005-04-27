@@ -1,5 +1,6 @@
 XDEBUG
 ------
+
 and install PHP from a source tarball first, as these script are
 by-products of the PHP compilation and installation processes. It is
 important that the source version matches the installed version as there
