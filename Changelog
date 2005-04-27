@@ -1,3 +1,7 @@
+Wed Apr 27 11:10:15 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Allow profiler to be enabled and configured through the environment.
+
 Wed Apr 27 11:08:32 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 README:
 - Commit updated README
