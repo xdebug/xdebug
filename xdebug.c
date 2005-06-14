@@ -88,26 +88,28 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 
-int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
+# if PHP_MINOR_VERSION == 0
 int (*old_exit_handler)(ZEND_OPCODE_HANDLER_ARGS);
 
-static int xdebug_jmp_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_jmp_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_jmpz_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_jmpz_handler)(ZEND_OPCODE_HANDLER_ARGS);
 
-static int xdebug_is_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_is_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_not_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_is_not_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_is_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_not_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_is_not_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_smaller_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_is_smaller_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_smaller_or_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
 static int (*old_is_smaller_or_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
+# endif
+int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_jmp_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_jmpz_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_not_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_not_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_smaller_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_smaller_or_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
@@ -443,13 +445,13 @@ PHP_MINIT_FUNCTION(xdebug)
 {
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
-
+#if 0
 #ifdef ZEND_ENGINE_2
 # if PHP_MINOR_VERSION >= 1
 	zend_vm_use_old_executor();
 # endif
 #endif
-
+#endif
 	/* get xdebug ini entries from the environment also */
 	xdebug_env_config();
 
@@ -469,6 +471,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	/* Overload the "exit" opcode */
 #ifdef ZEND_ENGINE_2
+# if PHP_MINOR_VERSION == 0
 	old_exit_handler = zend_opcode_handlers[ZEND_EXIT];
 	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
 
@@ -489,6 +492,17 @@ PHP_MINIT_FUNCTION(xdebug)
 	zend_opcode_handlers[ZEND_IS_NOT_EQUAL] = xdebug_is_not_equal_handler;
 	zend_opcode_handlers[ZEND_IS_SMALLER] = xdebug_is_smaller_handler;
 	zend_opcode_handlers[ZEND_IS_SMALLER_OR_EQUAL] = xdebug_is_smaller_or_equal_handler;
+# else
+	zend_set_user_opcode_handler(ZEND_EXIT, xdebug_exit_handler);
+	zend_set_user_opcode_handler(ZEND_JMP,  xdebug_jmp_handler);
+	zend_set_user_opcode_handler(ZEND_JMPZ, xdebug_jmpz_handler);
+	zend_set_user_opcode_handler(ZEND_IS_IDENTICAL, xdebug_is_identical_handler);
+	zend_set_user_opcode_handler(ZEND_IS_NOT_IDENTICAL, xdebug_is_not_identical_handler);
+	zend_set_user_opcode_handler(ZEND_IS_EQUAL, xdebug_is_equal_handler);
+	zend_set_user_opcode_handler(ZEND_IS_NOT_EQUAL, xdebug_is_not_equal_handler);
+	zend_set_user_opcode_handler(ZEND_IS_SMALLER, xdebug_is_smaller_handler);
+	zend_set_user_opcode_handler(ZEND_IS_SMALLER_OR_EQUAL, xdebug_is_smaller_or_equal_handler);
+# endif
 #endif
 
 	if (zend_xdebug_initialised == 0) {
@@ -1606,7 +1620,7 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 \
 		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
 	} \
-	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+	return ZEND_USER_OPCODE_DISPATCH; \
 }
 #else
 #define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
@@ -1643,7 +1657,12 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_deinit(TSRMLS_C);
 	}
+	
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
+	return ZEND_USER_OPCODE_DISPATCH;
+#else
 	return old_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+#endif
 }
 #endif
 
@@ -1999,7 +2018,9 @@ PHP_FUNCTION(xdebug_enable)
 {
 	zend_error_cb = new_error_cb;
 #ifdef ZEND_ENGINE_2
+# if PHP_MINOR_VERSION == 0
 	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
+# endif
 	zend_throw_exception_hook = xdebug_throw_exception_hook;
 #endif
 }
@@ -2008,7 +2029,9 @@ PHP_FUNCTION(xdebug_disable)
 {
 	zend_error_cb = old_error_cb;
 #ifdef ZEND_ENGINE_2
+# if PHP_MINOR_VERSION == 0
 	zend_opcode_handlers[ZEND_EXIT] = old_exit_handler;
+# endif
 	zend_throw_exception_hook = NULL;
 #endif
 }
