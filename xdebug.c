@@ -127,6 +127,7 @@ function_entry xdebug_functions[] = {
 
 	PHP_FE(xdebug_var_dump,              NULL)
 	PHP_FE(xdebug_debug_zval,            NULL)
+	PHP_FE(xdebug_debug_zval_stdout,     NULL)
 
 	PHP_FE(xdebug_enable,                NULL)
 	PHP_FE(xdebug_disable,               NULL)
@@ -1698,7 +1699,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			}
 		}
 	}
-	efree(buffer);
+//	efree(buffer);
 
 	/* Bail out if we can't recover */
 	switch (type) {
@@ -1950,6 +1951,42 @@ PHP_FUNCTION(xdebug_debug_zval)
 				}
 				xdfree(val);
 				PHPWRITE("\n", 1);
+			}
+		}
+	}
+	
+	efree(args);
+}
+/* }}} */
+
+/* {{{ proto void xdebug_debug_zval_stdout(mixed var [, ...] )
+   Outputs a fancy string representation of a variable */
+PHP_FUNCTION(xdebug_debug_zval_stdout)
+{
+	zval ***args;
+	int     argc;
+	int     i, len;
+	char   *val;
+	zval   *debugzval;
+	
+	argc = ZEND_NUM_ARGS();
+	
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	for (i = 0; i < argc; i++) {
+		if (Z_TYPE_PP(args[i]) == IS_STRING) {
+			XG(active_symbol_table) = EG(active_symbol_table);
+			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
+			if (debugzval) {
+				printf("%s: ", Z_STRVAL_PP(args[i]));
+				val = get_zval_value(debugzval, 1);
+				printf("%s(%d)", val, strlen(val));
+				xdfree(val);
+				printf("\n");
 			}
 		}
 	}
