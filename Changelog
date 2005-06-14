@@ -1,3 +1,8 @@
+Tue Jun 14 09:41:17 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added xdebug_debug_zval_stdout().
+
 Tue Jun 14 09:37:32 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Prevent accessing 0x0 vars.
