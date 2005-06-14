@@ -167,6 +167,9 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval 
 	char*     tmp_str;
 	int       tmp_len;
 
+	if (!struc) {
+		return;
+	}
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d),", (*struc)->refcount, (*struc)->is_ref), 1);
 	}
