@@ -1,3 +1,7 @@
+Tue Jun 14 09:37:32 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Prevent accessing 0x0 vars.
+
 Tue May 03 16:34:28 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Added debugging tool for Thomas.
