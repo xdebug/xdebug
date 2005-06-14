@@ -1,3 +1,7 @@
+Tue Jun 14 15:54:08 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Make it work with ZendEngine 2.1 again.
+
 Tue Jun 14 09:41:17 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
