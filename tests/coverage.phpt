@@ -12,6 +12,7 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
+xdebug.extended_info=1
 --FILE--
 <?php
 	xdebug_start_code_coverage();
