@@ -1,3 +1,7 @@
+Sun Jun 19 14:51:17 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+package.xml:
+- Update package and NEWS for beta 3 (which is already released).
+
 Sun Jun 19 14:50:38 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Little cosmetics.
