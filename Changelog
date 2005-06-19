@@ -1,3 +1,7 @@
+Sun Jun 19 14:50:38 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Little cosmetics.
+
 Tue Jun 14 15:54:30 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 tests/coverage.phpt
 xdebug/tests/coverage2.phpt:
