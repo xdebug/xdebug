@@ -171,7 +171,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval 
 		return;
 	}
 	if (debug_zval) {
-		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d),", (*struc)->refcount, (*struc)->is_ref), 1);
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount, (*struc)->is_ref), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
