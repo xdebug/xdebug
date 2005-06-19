@@ -1,3 +1,8 @@
+Sun Jun 19 14:51:50 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Allow "xdebug.default_enable" to be set everywhere.
+- Make it compile with HEAD again.
+
 Sun Jun 19 14:51:17 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 package.xml:
 - Update package and NEWS for beta 3 (which is already released).
