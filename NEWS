@@ -1,3 +1,26 @@
+Thu, May 12, 2005 - xdebug 2.0.0beta3
++ Added new features:
+	- Added the possibility to trigger the profiler by setting
+	  "xdebug.profiler_enable_trigger" to 1 and using XDEBUG_PROFILE as a get
+	  parameter.
+
+= Fixed bugs:
+	- Fixed a segfault for when an attribute value is NULL on XML string
+	  generation.
+	- Fixed bug #118: Segfault with exception when remote debugging.
+	- Fixed bug #117: var_dump dows not work with "private".
+	- Fixed bug #109: DBGP's eval will abort the script when the eval statement
+	  is invalid.
+	- Fixed bug #108: log_only still displays some text for errors in included
+	  files.
+	- Fixed bug #107: Code Coverage only detects executable code in used
+	  functions and classes.
+	- Fixed bug #103: crash when running the DBGp command 'eval' on a global
+	  variable
+	- Fixed bug #95: Segfault when deinitializing Xdebug module.
+	  (Patch by Maxim Poltarak <demiurg@gmail.com>)
+
+
 Sun, Nov 28, 2004 - xdebug 2.0.0beta2
 + Added new features:
 	- DBGP: Added error messages to returned errors (in most cases)

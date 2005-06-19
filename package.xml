@@ -32,40 +32,29 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>beta</state>
-    <version>2.0.0beta2</version>
-    <date>2004-11-28</date>
+    <version>2.0.0beta3</version>
+    <date>2005-05-12</date>
     <notes>
 + Added new features:
-	- DBGP: Added error messages to returned errors (in most cases)
-  
-+ Added new functions:
-	- Added a function "xdebug_debug_zval" to debug zvals by printing its
-	  refcounts and is_ref values.
-  
-= Changed features:
-	- xdebug_code_coverage_stop() will now clean up the code coverage array,
-	  unless you specify FALSE as parameter.
-	- The proper Xdebug type is "hash" for associative arrays.
-	- Extended the code-coverage functionality by returning lines with
-	  executable code on them, but where not executed with a count value of -1.
+    - Added the possibility to trigger the profiler by setting
+      "xdebug.profiler_enable_trigger" to 1 and using XDEBUG_PROFILE as a get
+      parameter.
 
 = Fixed bugs:
-	- DBGP: Make property_get and property_value finally work as they should,
-	  including retrieving information from different depths then the most top
-	  stack frame.
-	- DBGP: Fix eval'ed $varnames in property_get.
-	- DBGP: Support the -d option for property_get.
-	- Fixed the exit handler hook to use the new "5.1" way of handling it;
-	  which fortunately also works with PHP 5.0.
-	- Fixed bug #102: Problems with configure for automake 1.8.
-	- Fixed bug #101: crash with set_exeception_handler() and uncatched exceptions.
-	- Fixed bug #99: unset variables return the name as a string with property_get.
-	- Fixed bug #98: 'longname' attribute not returned for unintialized
-	  property in context_get request.
-	- Fixed bug #94: xdebug_sprintf misbehaves with x86_64/glibc-2.3.3
-	- Fixed bug #93: Crash in lookup_hostname on x86_64
-	- Fixed bug #92: xdebug_disable() doesn't disable the exception handler.
-	- Fixed bug #68: Summary not written when script ended with "exit()".
+    - Fixed a segfault for when an attribute value is NULL on XML string
+      generation.
+    - Fixed bug #118: Segfault with exception when remote debugging.
+    - Fixed bug #117: var_dump dows not work with "private".
+    - Fixed bug #109: DBGP's eval will abort the script when the eval statement
+      is invalid.
+    - Fixed bug #108: log_only still displays some text for errors in included
+      files.
+    - Fixed bug #107: Code Coverage only detects executable code in used
+      functions and classes.
+    - Fixed bug #103: crash when running the DBGp command 'eval' on a global
+      variable
+    - Fixed bug #95: Segfault when deinitializing Xdebug module.
+      (Patch by Maxim Poltarak &lt;demiurg@gmail.com&gt;)
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -147,11 +136,38 @@ Xdebug also provides:
     </filelist>
   </release>
   <changelog>
-   <release>
-     <state>beta</state>
-     <version>2.0.0beta2</version>
-     <date>2004-11-28</date>
-     <notes>
+    <release>
+      <state>beta</state>
+      <version>2.0.0beta3</version>
+      <date>2005-05-12</date>
+      <notes>
++ Added new features:
+    - Added the possibility to trigger the profiler by setting
+      "xdebug.profiler_enable_trigger" to 1 and using XDEBUG_PROFILE as a get
+      parameter.
+
+= Fixed bugs:
+    - Fixed a segfault for when an attribute value is NULL on XML string
+      generation.
+    - Fixed bug #118: Segfault with exception when remote debugging.
+    - Fixed bug #117: var_dump dows not work with "private".
+    - Fixed bug #109: DBGP's eval will abort the script when the eval statement
+      is invalid.
+    - Fixed bug #108: log_only still displays some text for errors in included
+      files.
+    - Fixed bug #107: Code Coverage only detects executable code in used
+      functions and classes.
+    - Fixed bug #103: crash when running the DBGp command 'eval' on a global
+      variable
+    - Fixed bug #95: Segfault when deinitializing Xdebug module.
+      (Patch by Maxim Poltarak &lt;demiurg@gmail.com&gt;)
+      </notes>
+    </release>
+    <release>
+      <state>beta</state>
+      <version>2.0.0beta2</version>
+      <date>2004-11-28</date>
+      <notes>
 + Added new features:
 	- DBGP: Added error messages to returned errors (in most cases)
   
