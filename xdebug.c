@@ -2365,15 +2365,8 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
-	TSRMLS_FETCH();
-#endif
 	zend_xdebug_initialised = 1;
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
-	return zend_startup_module(&xdebug_module_entry TSRMLS_CC);
-#else
 	return zend_startup_module(&xdebug_module_entry);
-#endif
 }
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
