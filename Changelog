@@ -1,3 +1,8 @@
+Thu Jul 21 18:33:58 CEST 2005 Jani Taskinen <sniper@php.net>
+xdebug_profiler.c:
+- Added some fflush()'s to get the profile output file written 
+  and to be able to display it during script run.
+
 Thu Jul 21 17:41:06 CEST 2005 Jani Taskinen <sniper@php.net>
 :
 Update NEWS
