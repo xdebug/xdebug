@@ -1,3 +1,7 @@
+Thu Jul 21 17:40:36 CEST 2005 Jani Taskinen <sniper@php.net>
+xdebug.c
+xdebug/php_xdebug.h:
+profile -> profiler (consistent)
 Thu Jul 21 17:33:17 CEST 2005 Jani Taskinen <sniper@php.net>
 php_xdebug.h
 xdebug/xdebug.c
