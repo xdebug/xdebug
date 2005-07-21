@@ -60,6 +60,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	} 
 	XG(profile_filename) = estrdup(filename);
 	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time Memory\n\n", script_name);
+	fflush(XG(profile_file));
 	return SUCCESS;
 }
 
@@ -108,7 +109,7 @@ void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC)
 void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array* op_array TSRMLS_DC)
 {
 	xdebug_llist_element *le;
-    char                 *tmp_fname, *tmp_name;
+	char                 *tmp_fname, *tmp_name;
 	int                   default_lineno = 0;
 
 	xdebug_profiler_function_push(fse);
@@ -157,6 +158,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 10000000));
 #endif
 	}
+	fflush(XG(profile_file));
 
 	/* Subtract time in calledfunction from time here */
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -192,7 +194,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 #endif
 	}
 	fprintf(XG(profile_file), "\n");
-
+	fflush(XG(profile_file));
 }
 
 
