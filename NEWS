@@ -4,6 +4,10 @@ Thu, May 12, 2005 - xdebug 2.0.0beta3
 	  "xdebug.profiler_enable_trigger" to 1 and using XDEBUG_PROFILE as a get
 	  parameter.
 
++ Added new functions:
+	- xdebug_get_profiler_filename() to retrieve the name of the dump file
+	  used by profiler.
+
 = Fixed bugs:
 	- Fixed a segfault for when an attribute value is NULL on XML string
 	  generation.
