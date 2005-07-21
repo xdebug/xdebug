@@ -1,3 +1,8 @@
+Thu Jul 21 17:33:17 CEST 2005 Jani Taskinen <sniper@php.net>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_profiler.c:
+- Added xdebug_get_profile_filename() function which returns the current profiler dump file
 Sun Jul 03 01:10:41 CEST 2005 Marcus Börger <helly@php.net>
 xdebug.c:
 - Remove 5.1 specific zts part (startup signatures are back to pre 
