@@ -81,7 +81,7 @@ PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_tracefile_name);
 
 /* profiling functions */
-PHP_FUNCTION(xdebug_get_profile_filename);
+PHP_FUNCTION(xdebug_get_profiler_filename);
 
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);

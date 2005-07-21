@@ -140,7 +140,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_stop_trace,            NULL)
 	PHP_FE(xdebug_get_tracefile_name,    NULL)
 
-	PHP_FE(xdebug_get_profile_filename,  NULL)
+	PHP_FE(xdebug_get_profiler_filename,  NULL)
 
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,          NULL)
@@ -2173,7 +2173,7 @@ PHP_FUNCTION(xdebug_get_tracefile_name)
 	}
 }
 
-PHP_FUNCTION(xdebug_get_profile_filename)
+PHP_FUNCTION(xdebug_get_profiler_filename)
 {
 	if (XG(profile_filename)) {
 		RETURN_STRING(XG(profile_filename), 1);
