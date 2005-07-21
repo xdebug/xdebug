@@ -139,6 +139,9 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_start_trace,           NULL)
 	PHP_FE(xdebug_stop_trace,            NULL)
 	PHP_FE(xdebug_get_tracefile_name,    NULL)
+
+	PHP_FE(xdebug_get_profile_filename,  NULL)
+
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,          NULL)
 	PHP_FE(xdebug_peak_memory_usage,     NULL)
@@ -595,6 +598,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(trace_file)    = NULL;
 	XG(tracefile_name) = NULL;
 	XG(profile_file)  = NULL;
+	XG(profile_filename) = NULL;
 	XG(error_handler) = NULL;
 	XG(prev_memory)   = 0;
 	XG(function_count) = 0;
@@ -663,6 +667,10 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 
 	if (XG(profile_file)) {
 		fclose(XG(profile_file));
+	}
+
+	if (XG(profile_filename)) {
+		efree(XG(profile_filename));
 	}
 
 	if (XG(error_handler)) {
@@ -2160,6 +2168,15 @@ PHP_FUNCTION(xdebug_get_tracefile_name)
 {
 	if (XG(tracefile_name)) {
 		RETURN_STRING(XG(tracefile_name), 1);
+	} else {
+		RETURN_FALSE;
+	}
+}
+
+PHP_FUNCTION(xdebug_get_profile_filename)
+{
+	if (XG(profile_filename)) {
+		RETURN_STRING(XG(profile_filename), 1);
 	} else {
 		RETURN_FALSE;
 	}

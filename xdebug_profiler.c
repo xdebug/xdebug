@@ -58,6 +58,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	if (!XG(profile_file)) {
 		return FAILURE;
 	} 
+	XG(profile_filename) = estrdup(filename);
 	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time Memory\n\n", script_name);
 	return SUCCESS;
 }

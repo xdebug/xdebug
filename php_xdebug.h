@@ -80,6 +80,9 @@ PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_tracefile_name);
 
+/* profiling functions */
+PHP_FUNCTION(xdebug_get_profile_filename);
+
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
 PHP_FUNCTION(xdebug_set_error_handler);
@@ -164,6 +167,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	/* profiler globals */
 	zend_bool     profiler_enabled;
 	FILE         *profile_file;
+	char         *profile_filename;
 
 	/* DBGp globals */
 	char         *lastcmd;
