@@ -501,7 +501,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_PP(struc);
-			xdebug_xml_add_attribute(node, "type", "hash");
+			xdebug_xml_add_attribute(node, "type", "array");
 			xdebug_xml_add_attribute(node, "children", myht->nNumOfElements > 0?"1":"0");
 			if (myht->nApplyCount < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
