@@ -1,3 +1,8 @@
+Thu Aug 04 18:30:15 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Xdebug should return "array" with property get, which is defined in the
+  typemap to the common type "hash".
+
 Thu Aug 04 16:04:30 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed bug #136: The "type" attribute is missing from stack_get returns.
