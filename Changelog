@@ -1,3 +1,7 @@
+Thu Aug 04 16:04:30 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #136: The "type" attribute is missing from stack_get returns.
+
 Thu Jul 21 18:33:58 CEST 2005 Jani Taskinen <sniper@php.net>
 xdebug_profiler.c:
 - Added some fflush()'s to get the profile output file written 
