@@ -54,7 +54,7 @@
 #include "zend_extensions.h"
 #ifdef ZEND_ENGINE_2
 # include "zend_exceptions.h"
-# if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 #  include "zend_vm.h"
 # endif
 #endif
@@ -87,29 +87,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
+#endif
 
+#ifdef ZEND_ENGINE_2
 # if PHP_MINOR_VERSION == 0
 int (*old_exit_handler)(ZEND_OPCODE_HANDLER_ARGS);
-
-static int (*old_jmp_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_jmpz_handler)(ZEND_OPCODE_HANDLER_ARGS);
-
-static int (*old_is_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_not_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_not_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_smaller_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_smaller_or_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
 # endif
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_jmp_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_jmpz_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_not_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_not_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_smaller_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_smaller_or_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
 static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
@@ -443,6 +427,58 @@ void xdebug_env_config()
 	xdebug_arg_dtor(parts);
 }
 
+#ifdef ZEND_ENGINE_2
+/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
+#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
+{ \
+	if (XG(do_code_coverage)) { \
+		zend_op *cur_opcode; \
+		int      lineno; \
+		char    *file; \
+		int      file_len; \
+		zend_op_array *op_array = execute_data->op_array; \
+\
+		cur_opcode = *EG(opline_ptr); \
+		lineno = cur_opcode->lineno; \
+\
+		file = op_array->filename; \
+		file_len = strlen(file); \
+\
+		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
+	} \
+	return ZEND_USER_OPCODE_DISPATCH; \
+}
+#else
+#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
+{ \
+	if (XG(do_code_coverage)) { \
+		zend_op *cur_opcode; \
+		int      lineno; \
+		char    *file; \
+		int      file_len; \
+\
+		cur_opcode = *EG(opline_ptr); \
+		lineno = cur_opcode->lineno; \
+\
+		file = op_array->filename; \
+		file_len = strlen(file); \
+\
+		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
+	} \
+	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+}
+#endif
+XDEBUG_OPCODE_OVERRIDE(jmp)
+XDEBUG_OPCODE_OVERRIDE(jmpz)
+XDEBUG_OPCODE_OVERRIDE(is_identical)
+XDEBUG_OPCODE_OVERRIDE(is_not_identical)
+XDEBUG_OPCODE_OVERRIDE(is_equal)
+XDEBUG_OPCODE_OVERRIDE(is_not_equal)
+XDEBUG_OPCODE_OVERRIDE(is_smaller)
+XDEBUG_OPCODE_OVERRIDE(is_smaller_or_equal)
+#endif
+
 
 PHP_MINIT_FUNCTION(xdebug)
 {
@@ -473,8 +509,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	new_error_cb = xdebug_error_cb;
 
 	/* Overload the "exit" opcode */
-#ifdef ZEND_ENGINE_2
-# if PHP_MINOR_VERSION == 0
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
 	old_exit_handler = zend_opcode_handlers[ZEND_EXIT];
 	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
 
@@ -495,7 +530,8 @@ PHP_MINIT_FUNCTION(xdebug)
 	zend_opcode_handlers[ZEND_IS_NOT_EQUAL] = xdebug_is_not_equal_handler;
 	zend_opcode_handlers[ZEND_IS_SMALLER] = xdebug_is_smaller_handler;
 	zend_opcode_handlers[ZEND_IS_SMALLER_OR_EQUAL] = xdebug_is_smaller_or_equal_handler;
-# else
+#endif
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 	zend_set_user_opcode_handler(ZEND_EXIT, xdebug_exit_handler);
 	zend_set_user_opcode_handler(ZEND_JMP,  xdebug_jmp_handler);
 	zend_set_user_opcode_handler(ZEND_JMPZ, xdebug_jmpz_handler);
@@ -505,7 +541,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	zend_set_user_opcode_handler(ZEND_IS_NOT_EQUAL, xdebug_is_not_equal_handler);
 	zend_set_user_opcode_handler(ZEND_IS_SMALLER, xdebug_is_smaller_handler);
 	zend_set_user_opcode_handler(ZEND_IS_SMALLER_OR_EQUAL, xdebug_is_smaller_or_equal_handler);
-# endif
 #endif
 
 	if (zend_xdebug_initialised == 0) {
@@ -932,7 +967,7 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	}
 
 	while (i < j) {
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 		char *cv = NULL;
 		int cv_len;
 
@@ -1609,56 +1644,6 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	}
 }
 
-/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
-#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
-{ \
-	if (XG(do_code_coverage)) { \
-		zend_op *cur_opcode; \
-		int      lineno; \
-		char    *file; \
-		int      file_len; \
-		zend_op_array *op_array = execute_data->op_array; \
-\
-		cur_opcode = *EG(opline_ptr); \
-		lineno = cur_opcode->lineno; \
-\
-		file = op_array->filename; \
-		file_len = strlen(file); \
-\
-		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
-	} \
-	return ZEND_USER_OPCODE_DISPATCH; \
-}
-#else
-#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
-{ \
-	if (XG(do_code_coverage)) { \
-		zend_op *cur_opcode; \
-		int      lineno; \
-		char    *file; \
-		int      file_len; \
-\
-		cur_opcode = *EG(opline_ptr); \
-		lineno = cur_opcode->lineno; \
-\
-		file = op_array->filename; \
-		file_len = strlen(file); \
-\
-		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
-	} \
-	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
-}
-#endif
-XDEBUG_OPCODE_OVERRIDE(jmp)
-XDEBUG_OPCODE_OVERRIDE(jmpz)
-XDEBUG_OPCODE_OVERRIDE(is_identical)
-XDEBUG_OPCODE_OVERRIDE(is_not_identical)
-XDEBUG_OPCODE_OVERRIDE(is_equal)
-XDEBUG_OPCODE_OVERRIDE(is_not_equal)
-XDEBUG_OPCODE_OVERRIDE(is_smaller)
-XDEBUG_OPCODE_OVERRIDE(is_smaller_or_equal)
-
 /* Opcode handler for exit, to be able to clean up the profiler */
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -1666,7 +1651,7 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 		xdebug_profiler_deinit(TSRMLS_C);
 	}
 	
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 	return ZEND_USER_OPCODE_DISPATCH;
 #else
 	return old_exit_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -1736,6 +1721,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
+			EG(exit_status) = 255;
 			if (!XG(ignore_fatal_error)) {
 				zend_bailout();
 			}
@@ -2025,11 +2011,11 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 PHP_FUNCTION(xdebug_enable)
 {
 	zend_error_cb = new_error_cb;
-#ifdef ZEND_ENGINE_2
-# if PHP_MINOR_VERSION == 0
-	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
-# endif
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 	zend_throw_exception_hook = xdebug_throw_exception_hook;
+#endif
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
+	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
 #endif
 }
 
@@ -2037,7 +2023,7 @@ PHP_FUNCTION(xdebug_disable)
 {
 	zend_error_cb = old_error_cb;
 #ifdef ZEND_ENGINE_2
-# if PHP_MINOR_VERSION == 0
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
 	zend_opcode_handlers[ZEND_EXIT] = old_exit_handler;
 # endif
 	zend_throw_exception_hook = NULL;
@@ -2382,7 +2368,13 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION == 6
+	TSRMLS_FETCH();
+#endif
 	zend_xdebug_initialised = 1;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION == 6
+	return zend_startup_module(&xdebug_module_entry TSRMLS_CC);
+#else
 	return zend_startup_module(&xdebug_module_entry);
 }
 

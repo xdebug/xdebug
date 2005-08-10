@@ -16,7 +16,7 @@
    | Modifications: Derick Rethans <derick@xdebug.org>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.6 2004-11-11 16:30:12 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.7 2005-08-10 17:18:33 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
@@ -303,7 +303,7 @@ zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 					|| ((int)T->str_offset.offset<0)
 					|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
 					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION == 6
 					T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
 #else
 					T->tmp_var.value.str.val = empty_string;
