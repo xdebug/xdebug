@@ -1,3 +1,9 @@
+Wed Aug 10 19:18:33 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_compat.c:
+- Fixed bug #133: PHP scripts exits with 0 on PHP error.
+- Make it compile with PHP 6.0dev
+
 Thu Aug 04 18:30:15 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Xdebug should return "array" with property get, which is defined in the
