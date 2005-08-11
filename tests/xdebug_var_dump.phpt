@@ -7,6 +7,7 @@ xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.profiler_enable=0
 html_errors=1
+date.timezone=Europe/Oslo
 --FILE--
 <?php
 	class TimeStuff {
