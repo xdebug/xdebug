@@ -45,3 +45,5 @@ Release_TS
 *.opt
 *.dsw
 autom4te.cache
+run-tests-config.php
+run-tests.php
