@@ -916,7 +916,9 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0) || PHP_MAJOR_VERSION == 4
 			tmp->include_filename = get_zval_value(get_zval(&zdata->opline->op1, zdata->Ts, &is_var), 0);
+#endif
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
@@ -2376,6 +2378,7 @@ ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 	return zend_startup_module(&xdebug_module_entry TSRMLS_CC);
 #else
 	return zend_startup_module(&xdebug_module_entry);
+#endif
 }
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
