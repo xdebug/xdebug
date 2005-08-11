@@ -1,3 +1,9 @@
+Thu Aug 11 14:42:15 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00003.phpt:
+- Fixed test "bug00003.phpt" and added a note about why test6 fails in PHP 5.1
+  and 6.0.
+
 Thu Aug 11 13:43:08 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 tests/xdebug_var_dump.phpt:
 - Fixed testcase.
