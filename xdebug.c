@@ -981,6 +981,7 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.u.var, &cv_len);
 			xdebug_hash_update(fse->used_vars, cv, cv_len, xdstrdup(cv));
 		}
+		/* FIXME: Add support for function arguments too */
 #else
 		if (op_array->opcodes[i].opcode == ZEND_FETCH_R || op_array->opcodes[i].opcode == ZEND_FETCH_W) {
 			if (op_array->opcodes[i].op1.op_type == IS_CONST) {
