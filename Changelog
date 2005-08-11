@@ -1,3 +1,7 @@
+Thu Aug 11 21:58:52 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Make this compile in ZTS mode for PHP 6.0 again.
+
 Thu Aug 11 17:02:29 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 test-6.0.sh
 xdebug/.cvsignore:
