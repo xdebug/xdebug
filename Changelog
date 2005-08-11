@@ -1,3 +1,7 @@
+Thu Aug 11 13:43:08 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+tests/xdebug_var_dump.phpt:
+- Fixed testcase.
+
 Thu Aug 11 13:39:58 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #132: use of eval causes a segmentation fault.
