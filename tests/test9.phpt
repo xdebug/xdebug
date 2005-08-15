@@ -6,6 +6,7 @@ Test for nested static method calls (ZE1)
 xdebug.enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=1
+xdebug.collect_return=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.trace_format=0

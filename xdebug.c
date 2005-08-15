@@ -89,10 +89,29 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 #endif
 
-#ifdef ZEND_ENGINE_2
-# if PHP_MINOR_VERSION == 0
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
 int (*old_exit_handler)(ZEND_OPCODE_HANDLER_ARGS);
-# endif
+
+static int (*old_jmp_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_jmpz_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_not_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_not_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_smaller_handler)(ZEND_OPCODE_HANDLER_ARGS);
+static int (*old_is_smaller_or_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
+
+static int xdebug_jmp_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_jmpz_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_not_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_not_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_smaller_handler(ZEND_OPCODE_HANDLER_ARGS);
+static int xdebug_is_smaller_or_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
+#endif
+
+#ifdef ZEND_ENGINE_2
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
