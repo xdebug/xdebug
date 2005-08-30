@@ -38,7 +38,7 @@
 
 #include "TSRM.h"
 #include "SAPI.h"
-#include "php_ini.h"
+#include "main/php_ini.h"
 #include "ext/standard/head.h"
 #include "ext/standard/html.h"
 #include "ext/standard/info.h"
