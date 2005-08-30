@@ -1,3 +1,8 @@
+Tue Aug 30 13:57:25 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+test.sh
+xdebug/xdebug.c:
+- MFH: Broken include.
+
 Tue Aug 30 10:55:25 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed headers.
