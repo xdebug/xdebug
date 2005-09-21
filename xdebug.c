@@ -932,16 +932,18 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		cur_opcode = *EG(opline_ptr);
 		tmp->lineno = cur_opcode->lineno;
 
+#if (PHP_MAJOR_VERSION == 6) || \
+	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1) || \
+	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0 && PHP_MINI_VERSION > 5) || \
+	(PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 4 && PHP_MINI_VERSION > 0)
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0) || PHP_MAJOR_VERSION == 4
 			tmp->include_filename = get_zval_value(get_zval(&zdata->opline->op1, zdata->Ts, &is_var), 0);
-#endif
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
-
+#endif
 	} else  {
 		if (EG(opline_ptr)) {
 			cur_opcode = *EG(opline_ptr);
