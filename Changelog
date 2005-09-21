@@ -1,3 +1,8 @@
+Wed Sep 21 10:28:38 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Update defines so that it works with the latest CVS versions only, which
+  should be safe.
+
 Tue Aug 30 13:57:25 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 test.sh
 xdebug/xdebug.c:
