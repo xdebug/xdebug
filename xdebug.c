@@ -115,7 +115,7 @@ static int xdebug_is_smaller_or_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
-static zval *get_zval(znode *node, temp_variable *Ts, int *is_var);
+static zval *get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, int *is_var);
 static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSRMLS_DC);
 static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRMLS_DC);
 static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC);
@@ -939,7 +939,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
 
-			tmp->include_filename = get_zval_value(get_zval(&zdata->opline->op1, zdata->Ts, &is_var), 0);
+			tmp->include_filename = get_zval_value(get_zval(zdata, &zdata->opline->op1, zdata->Ts, &is_var), 0);
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
@@ -2227,7 +2227,7 @@ PHP_FUNCTION(xdebug_set_error_handler)
 /*************************************************************************************************************************************/
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
-static zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
+static zval *get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, int *is_var)
 {
 	switch (node->op_type) {
 		case IS_CONST:
@@ -2259,6 +2259,12 @@ static zval *get_zval(znode *node, temp_variable *Ts, int *is_var)
 			}
 #endif
 			break;
+
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1) || (PHP_MAJOR_VERSION >= 6)
+		case IS_CV:
+			return *zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
+			break;
+#endif
 
 		case IS_UNUSED:
 			fprintf(stderr, "\nIS_UNUSED\n");
