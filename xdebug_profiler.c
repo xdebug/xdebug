@@ -54,10 +54,17 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), getpid());
 	}
 
-	XG(profile_file) = fopen(filename, "w");
+	if (XG(profiler_append)) {
+		XG(profile_file) = fopen(filename, "a");
+	} else {
+		XG(profile_file) = fopen(filename, "w");
+	}
 	if (!XG(profile_file)) {
 		return FAILURE;
-	} 
+	}
+	if (XG(profiler_append)) {
+		fprintf(XG(profile_file), "\n==== NEW PROFILING FILE ==============================================\n");
+	}
 	XG(profile_filename) = estrdup(filename);
 	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time Memory\n\n", script_name);
 	fflush(XG(profile_file));
