@@ -1,3 +1,7 @@
+Thu Sep 22 20:47:00 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+tests/bug00146.phpt:
+- Added a test case for bug #146.
+
 Thu Sep 22 20:36:51 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
