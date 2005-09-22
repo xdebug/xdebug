@@ -1,3 +1,9 @@
+Thu Sep 22 20:36:51 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_profiler.c:
+- Added FR #148: Option to append to cachegrind files, instead of overwriting.
+
 Wed Sep 21 11:01:50 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Added support for PHP 5.1 and higher's IS_CV, so that $x = "bar();";
