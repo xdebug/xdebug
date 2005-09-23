@@ -946,8 +946,8 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 #endif
 	} else  {
-		if (EG(opline_ptr)) {
-			cur_opcode = *EG(opline_ptr);
+		if (EG(current_execute_data)->opline) {
+			cur_opcode = EG(current_execute_data)->opline;
 			if (cur_opcode) {
 				tmp->lineno = cur_opcode->lineno;
 			}
