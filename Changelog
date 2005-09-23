@@ -1,3 +1,15 @@
+Fri Sep 23 10:35:36 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+timelib.h
+timelib/unixtime2tm.c
+xdebug/tests/test_class.inc
+xdebug/tests/test2a.php
+xdebug/tests/test9a.php
+xdebug/tests/test_class.php
+xdebug/tests/test_memory.php
+xdebug/tests/.cvsignore
+xdebug/tests/test1.phpt:
+- Implemented FR #114: Rename tests/*.php to tests/*.inc
+
 Fri Sep 23 10:22:57 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/assert_test.phpt
