@@ -2,6 +2,5 @@
 *.log
 *.out
 *.exp
-*.php
 *.swp
 phpt.*
