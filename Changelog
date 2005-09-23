@@ -1,3 +1,10 @@
+Fri Sep 23 10:22:57 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/assert_test.phpt
+xdebug/tests/call_user_func_array.phpt
+xdebug/tests/call_user_func_array2.phpt:
+- Fixed bug #142: xdebug crashes with implicit destructor calls.
+
 Thu Sep 22 20:47:00 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 tests/bug00146.phpt:
 - Added a test case for bug #146.
