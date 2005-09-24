@@ -1,3 +1,8 @@
+Sat Sep 24 23:56:38 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml:
+- Added package XML version 2 file.
+
 Sat Sep 24 22:03:03 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 srm_oparray.c
 xdebug/package.xml
