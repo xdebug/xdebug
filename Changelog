@@ -1,3 +1,9 @@
+Sat Sep 24 22:03:03 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+srm_oparray.c
+xdebug/package.xml
+xdebug/php_xdebug.h:
+- Go with beta4.
+
 Sat Sep 24 22:00:12 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 debugclient/configure.in
 xdebug/debugclient/main.c:
