@@ -50,7 +50,7 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define DEBUGCLIENT_VERSION "0.9.0"
+#define DEBUGCLIENT_VERSION "0.9.1"
 #define DEFAULT_PORT        9000
 
 #ifdef HAVE_LIBEDIT
@@ -58,7 +58,9 @@
 static char prompt[8];
 static EditLine *el = NULL;
 static History *hist = NULL;
+#ifndef XSC_OLD_LIBEDIT
 static HistEvent ev;
+#endif
 
 void initialize_libedit(const char *prog);
 void deinitialize_libedit();
@@ -73,10 +75,18 @@ void initialize_libedit(const char *prog)
 	hist = history_init();
 
 	/* Remember 100 events */
-	history(hist, &ev, H_SETSIZE, 100);
+#ifdef XDC_OLD_LIBEDIT
+	history(hist, XDC_H_SETSIZE, 100);
+#else
+	history(hist, &ev, XDC_H_SETSIZE, 100);
+#endif
 
 	/* Initialize editline */
+#ifdef XDC_OLD_LIBEDIT
+	el = el_init(prog, stdin, stdout);
+#else
 	el = el_init(prog, stdin, stdout, stderr);
+#endif
 
 	el_set(el, EL_EDITOR, "emacs");    /* Default editor is emacs   */
 	el_set(el, EL_SIGNAL, 1);          /* Handle signals gracefully */
@@ -150,7 +160,7 @@ int main(int argc, char *argv[])
 
 	/* Display copyright notice and version number */
 	printf("Xdebug Simple DBGp client (%s)\n", DEBUGCLIENT_VERSION);
-	printf("Copyright 2002-2004 by Derick Rethans.\n");
+	printf("Copyright 2002-2005 by Derick Rethans.\n");
 #ifdef HAVE_LIBEDIT
 	printf("- libedit support: enabled\n");
 #endif
@@ -248,7 +258,11 @@ int main(int argc, char *argv[])
 				sprintf(prompt, "(cmd) ");
 				if (((const char*) cmd = el_gets(el, &num)) != NULL && num != 0) {
 					/* Add command to history */
+#ifdef XDC_OLD_LIBEDIT
+					history(hist, H_ENTER, cmd);
+#else
 					history(hist, &ev, H_ENTER, cmd);
+#endif
 					/* We overwrite the \n with \0 for libedit builds */
 					cmd[strlen(cmd) - 1] = '\0';
 #else

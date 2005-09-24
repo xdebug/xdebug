@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.4 2004-11-15 17:52:28 derick Exp $
+dnl $Id: configure.in,v 1.5 2005-09-24 20:00:12 derick Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -123,6 +123,51 @@ AC_ARG_WITH(libedit,
     [
       AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
       LIBS="-ledit $LIBS"
+      AC_MSG_CHECKING([for H_SETSIZE])
+
+      AC_EGREP_CPP(yes, [
+#include <histedit.h>
+#ifdef H_SETSIZE
+yes
+#endif
+], [
+  AC_DEFINE([XDC_H_SETSIZE], H_SETSIZE, [H_SETSIZE or H_EVENT])
+  AC_MSG_RESULT([H_SETSIZE])
+], [
+  AC_DEFINE([XDC_H_SETSIZE], H_EVENT, [H_SETSIZE or H_EVENT])
+  AC_MSG_RESULT([H_EVENT])
+])
+
+      AC_MSG_CHECKING([for number of arguments to el_init])
+      AC_TRY_COMPILE([
+#include <stdio.h>
+#include <histedit.h>
+], [
+static EditLine *el = NULL;
+
+int main()
+{
+	el = el_init("foo", stdin, stdout, stderr);
+}
+                        ],
+                        XDC_ELINIT_ARGS=4,
+                        [AC_TRY_COMPILE([
+#include <stdio.h>
+#include <histedit.h>
+], [
+static EditLine *el = NULL;
+
+int main()
+{
+	el = el_init("foo", stdin, stdout);
+}
+                                           ],
+                                           XDC_ELINIT_ARGS=3,
+                                           [AC_ERROR("you have strange libedit")]
+                                          )]
+                       )
+      AC_DEFINE_UNQUOTED([XDC_ELINIT_ARGS], $XDC_ELINIT_ARGS, [Number of arguments to el_init])
+      AC_MSG_RESULT($XDC_ELINIT_ARGS)
     ],
     [
       AC_ERROR("libedit was not found on your system.")
