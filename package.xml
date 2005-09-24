@@ -30,31 +30,32 @@ Xdebug also provides:
     * capabilities to debug your scripts interactively with a debug client
   </description>
   <license>BSD style</license>
-  <release>
+    <release>
     <state>beta</state>
-    <version>2.0.0beta3</version>
-    <date>2005-05-12</date>
+    <version>2.0.0beta4</version>
+    <date>2005-09-24</date>
     <notes>
 + Added new features:
-    - Added the possibility to trigger the profiler by setting
-      "xdebug.profiler_enable_trigger" to 1 and using XDEBUG_PROFILE as a get
-      parameter.
+    - Added xdebug_debug_zval_stdout().
+	- Added xdebug_get_profile_filename() function which returns the current
+	  profiler dump file.
+	- Updated for latest 5.1 and 6.0 CVS versions of PHP.
+	- Added FR #148: Option to append to cachegrind files, instead of
+	  overwriting.
+	- Implemented FR #114: Rename tests/*.php to tests/*.inc
+
+- Changed features:
+	- Allow "xdebug.default_enable" to be set everywhere.
 
 = Fixed bugs:
-    - Fixed a segfault for when an attribute value is NULL on XML string
-      generation.
-    - Fixed bug #118: Segfault with exception when remote debugging.
-    - Fixed bug #117: var_dump dows not work with "private".
-    - Fixed bug #109: DBGP's eval will abort the script when the eval statement
-      is invalid.
-    - Fixed bug #108: log_only still displays some text for errors in included
-      files.
-    - Fixed bug #107: Code Coverage only detects executable code in used
-      functions and classes.
-    - Fixed bug #103: crash when running the DBGp command 'eval' on a global
-      variable
-    - Fixed bug #95: Segfault when deinitializing Xdebug module.
-      (Patch by Maxim Poltarak &lt;demiurg@gmail.com&gt;)
+	- DBGP: Xdebug should return "array" with property get, which is defined
+	  in the typemap to the common type "hash".
+	- Debugclient: Will now build with an older libedit as found in FreeBSD
+	  4.9.
+	- Fixed bug #142: xdebug crashes with implicit destructor calls.
+	- Fixed bug #136: The "type" attribute is missing from stack_get returns.
+	- Fixed bug #133: PHP scripts exits with 0 on PHP error.
+	- Fixed bug #132: use of eval causes a segmentation fault.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -136,6 +137,32 @@ Xdebug also provides:
     </filelist>
   </release>
   <changelog>
+    <release>
+      <state>beta</state>
+      <version>2.0.0beta4</version>
+      <date>2005-09-24</date>
+      <notes>
++ Added new features:
+    - Added xdebug_debug_zval_stdout().
+	- Added xdebug_get_profile_filename() function which returns the current
+	  profiler dump file.
+	- Updated for latest 5.1 and 6.0 CVS versions of PHP.
+	- Added FR #148: Option to append to cachegrind files, instead of
+	  overwriting.
+	- Implemented FR #114: Rename tests/*.php to tests/*.inc
+
+- Changed features:
+	- Allow "xdebug.default_enable" to be set everywhere.
+
+= Fixed bugs:
+	- DBGP: Xdebug should return "array" with property get, which is defined
+	  in the typemap to the common type "hash".
+	- Fixed bug #142: xdebug crashes with implicit destructor calls.
+	- Fixed bug #136: The "type" attribute is missing from stack_get returns.
+	- Fixed bug #133: PHP scripts exits with 0 on PHP error.
+	- Fixed bug #132: use of eval causes a segmentation fault.
+      </notes>
+    </release>
     <release>
       <state>beta</state>
       <version>2.0.0beta3</version>

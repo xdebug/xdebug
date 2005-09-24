@@ -1,3 +1,27 @@
+Thu, Sep 24, 2005 - xdebug 2.0.0beta4
++ Added new features:
+    - Added xdebug_debug_zval_stdout().
+	- Added xdebug_get_profile_filename() function which returns the current
+	  profiler dump file.
+	- Updated for latest 5.1 and 6.0 CVS versions of PHP.
+	- Added FR #148: Option to append to cachegrind files, instead of
+	  overwriting.
+	- Implemented FR #114: Rename tests/*.php to tests/*.inc
+
+- Changed features:
+	- Allow "xdebug.default_enable" to be set everywhere.
+
+= Fixed bugs:
+	- DBGP: Xdebug should return "array" with property get, which is defined
+	  in the typemap to the common type "hash".
+	- Debugclient: Will now build with an older libedit as found in FreeBSD
+	  4.9.
+	- Fixed bug #142: xdebug crashes with implicit destructor calls.
+	- Fixed bug #136: The "type" attribute is missing from stack_get returns.
+	- Fixed bug #133: PHP scripts exits with 0 on PHP error.
+	- Fixed bug #132: use of eval causes a segmentation fault.
+
+	
 Thu, May 12, 2005 - xdebug 2.0.0beta3
 + Added new features:
 	- Added the possibility to trigger the profiler by setting
