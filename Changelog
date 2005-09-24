@@ -1,3 +1,7 @@
+Sat Sep 24 11:23:50 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- We're at beta4-dev already.
+
 Fri Sep 23 10:35:36 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 timelib.h
 timelib/unixtime2tm.c
