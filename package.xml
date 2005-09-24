@@ -135,6 +135,9 @@ Xdebug also provides:
         </dir>
       </dir>
     </filelist>
+    <deps>
+      <dep type="php" rel="ge" version="4.3.0" />
+    </deps>
   </release>
   <changelog>
     <release>
