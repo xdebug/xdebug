@@ -865,9 +865,14 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
 	zval                **param;
-	void                **p         = EG(argument_stack).top_element-2;
-	int                   arg_count = (ulong) *p;
-	int                   i         = 0;
+	void                **p;
+	int                   arg_count = 0;
+	int                   i = 0;
+
+	if (EG(argument_stack).top >= 2) {
+		p = EG(argument_stack).top_element - 2;
+		arg_count = (ulong) *p;
+	}
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
 	tmp->var           = NULL;
