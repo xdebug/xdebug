@@ -1,3 +1,8 @@
+Tue Sep 27 15:30:04 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed memory read error when the argument stack didn't have atleast two
+  elements.
+
 Sat Sep 24 23:56:38 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 package.xml
 xdebug/package2.xml:
