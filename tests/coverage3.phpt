@@ -37,7 +37,7 @@ xdebug.extended_info=1
 ?>
 --EXPECTF--
 array(1) {
-  ["/dat/dev/php/xdebug/tests/coverage3.php"]=>
+  ["%scoverage3.php"]=>
   array(12) {
     [2]=>
     int(-1)

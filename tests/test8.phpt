@@ -114,7 +114,7 @@ aa2ba
 TRACE START [%d-%d-%d %d:%d:%d]
     %f      %d     -> a() /%s/test8.php:17
     %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
-                             >=> array (0 => array ('function' => '{main}', 'file' => '/dat/dev/php/xdebug/tests/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/dat/dev/php/xdebug/tests/test8.php', 'line' => 17, 'params' => array ()))
+                             >=> array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))
     %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
                              >=> NULL
                            >=> 'a'
@@ -124,13 +124,13 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            >=> '2ba'
     %f      %d     -> a() /%s/test8.php:17
     %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
-                             >=> array (0 => array ('function' => '{main}', 'file' => '/dat/dev/php/xdebug/tests/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/dat/dev/php/xdebug/tests/test8.php', 'line' => 17, 'params' => array ()))
+                             >=> array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))
     %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
                              >=> NULL
                            >=> 'a'
     %f      %d     -> a() /%s/test8.php:17
     %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
-                             >=> array (0 => array ('function' => '{main}', 'file' => '/dat/dev/php/xdebug/tests/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/dat/dev/php/xdebug/tests/test8.php', 'line' => 17, 'params' => array ()))
+                             >=> array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))
     %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
                              >=> NULL
                            >=> 'a'
