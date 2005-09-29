@@ -1,3 +1,7 @@
+Thu Sep 29 22:50:32 CEST 2005 Marcus Börger <helly@php.net>
+tests/test8.phpt:
+- Fix expectations
+
 Thu Sep 29 22:48:01 CEST 2005 Marcus Börger <helly@php.net>
 tests/coverage3.phpt:
 - Fix expectations
