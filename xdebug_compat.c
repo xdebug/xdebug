@@ -16,14 +16,21 @@
    | Modifications: Derick Rethans <derick@xdebug.org>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.7 2005-08-10 17:18:33 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.8 2005-09-29 20:42:27 helly Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
 
-#if (PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)
+#if PHP_MAJOR_VERSION >= 6
+
+void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC)
+{
+	php_var_dump(struc, 1, 1 TSRMLS_CC);
+}
+
+#elif (PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)
 
 #define COMMON ((*struc)->is_ref ? "&" : "")
 /* {{{ xdebug_var_dump */

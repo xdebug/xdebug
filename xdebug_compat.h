@@ -21,7 +21,7 @@
 
 #include "php.h"
 
-#if (PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)
+#if ((PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)) || PHP_MAJOR_VERSION >= 6
 
 void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC);
 
