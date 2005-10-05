@@ -1,3 +1,8 @@
+Wed Oct 05 22:35:37 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- Next version.
+#- And mail server test.
+
 Thu Sep 29 22:50:32 CEST 2005 Marcus Börger <helly@php.net>
 tests/test8.phpt:
 - Fix expectations
