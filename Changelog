@@ -1,3 +1,7 @@
+Thu Oct 06 22:22:38 CEST 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed names of the defines.
+
 Wed Oct 05 22:57:46 CEST 2005 Derick Rethans <derick@derickrethans.nl>
 LICENSE:
 - mail server test
