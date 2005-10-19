@@ -961,8 +961,13 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			tmp->var = xdmalloc(arg_count * sizeof (xdebug_var));
 			for (i = 0; i < arg_count; i++) {
 				tmp->var[tmp->varc].name  = NULL;
+				param = NULL;
 				if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-					tmp->var[tmp->varc].addr = *param;
+					if (param) {
+						tmp->var[tmp->varc].addr = *param;
+					} else {
+						tmp->var[tmp->varc].addr = NULL;
+					}
 				} else {
 					tmp->var[tmp->varc].addr = NULL;
 				}
@@ -1567,7 +1572,11 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 		xdebug_str_add(&str, tmp_varname, 1);
 
 		tmp_value = get_zval_value(i->var[j].addr, 0);
-		xdebug_str_add(&str, tmp_value, 1);
+		if (tmp_value) {
+			xdebug_str_add(&str, tmp_value, 1);
+		} else {
+			xdebug_str_add(&str, "???", 0);
+		}
 	}
 
 	if (i->include_filename) {

@@ -167,7 +167,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval 
 	char*     tmp_str;
 	int       tmp_len;
 
-	if (!struc) {
+	if (!struc || !(*struc)) {
 		return;
 	}
 	if (debug_zval) {
