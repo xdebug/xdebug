@@ -1766,7 +1766,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
 			if (!XG(ignore_fatal_error)) {
+#if MEMORY_LIMIT
+			/* restore memory limit */
+				AG(memory_limit) = PG(memory_limit);
+#endif
+				efree(buffer);
 				zend_bailout();
+				return;
 			}
 			break;
 	}
