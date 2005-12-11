@@ -3,4 +3,5 @@
 *.out
 *.exp
 *.swp
+*.php
 phpt.*
