@@ -1,3 +1,7 @@
+Sun Dec 11 12:06:23 CET 2005 Marcus Börger <helly@php.net>
+tests/.cvsignore:
+- .php files are temp files here
+
 Mon Dec 05 16:47:03 CET 2005 Jani Taskinen <sniper@php.net>
 xdebug.c:
 - Fixed bad memory leak when a E_ERROR of exceeding memory_limit was thrown
