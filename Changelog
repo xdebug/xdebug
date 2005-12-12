@@ -1,3 +1,8 @@
+Mon Dec 12 12:53:10 CET 2005 Jani Taskinen <sniper@php.net>
+xdebug.c:
+- Plugged couple of dozen memleaks
+
+
 Sun Dec 11 12:06:23 CET 2005 Marcus Börger <helly@php.net>
 tests/.cvsignore:
 - .php files are temp files here
