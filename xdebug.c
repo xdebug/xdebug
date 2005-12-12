@@ -1754,7 +1754,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			}
 		}
 	}
-//	efree(buffer);
+	efree(buffer);
 
 	/* Bail out if we can't recover */
 	switch (type) {
@@ -1770,7 +1770,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			/* restore memory limit */
 				AG(memory_limit) = PG(memory_limit);
 #endif
-				efree(buffer);
 				zend_bailout();
 				return;
 			}
