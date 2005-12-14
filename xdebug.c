@@ -585,6 +585,12 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	zend_execute_internal = xdebug_old_execute_internal;
 	zend_error_cb = old_error_cb;
 
+#ifdef ZTS
+	ts_free_id(xdebug_globals_id);
+#else
+	php_xdebug_shutdown_globals(&xdebug_globals TSRMLS_CC);
+#endif
+
 	return SUCCESS;
 }
 
