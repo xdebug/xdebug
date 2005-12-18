@@ -347,7 +347,6 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_init(&xg->session, dump_dtor);
 }
 
-#ifdef ZTS
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
 	xdebug_llist_empty(&xg->server, NULL);
@@ -359,8 +358,6 @@ static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_empty(&xg->request, NULL);
 	xdebug_llist_empty(&xg->session, NULL);
 }
-#endif
-
 
 void xdebug_env_key()
 {
