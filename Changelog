@@ -1,3 +1,7 @@
+Sun Dec 18 02:04:19 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fix non-zts mode
+
 Wed Dec 14 12:48:04 CET 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed shutdown crash with ZTS on Win32 (Patch by Antony Dovgal)
