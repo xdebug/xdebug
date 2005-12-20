@@ -1,3 +1,7 @@
+Tue Dec 20 11:26:58 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Implemented FR #161: var_dump doesn't show lengths for strings.
+
 Sun Dec 18 02:04:19 CET 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fix non-zts mode
