@@ -658,6 +658,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			xdebug_str_addl(str, tmp_str, newlen, 0);
 			efree(tmp_str);
 			xdebug_str_addl(str, "'</font>", 8, 0);
+			xdebug_str_add(str, xdebug_sprintf(" <i>(length=%d)</i>", Z_STRLEN_PP(struc)), 1);
 			break;
 
 		case IS_ARRAY:
