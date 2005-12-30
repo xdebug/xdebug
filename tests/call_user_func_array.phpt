@@ -1,5 +1,7 @@
 --TEST--
 Test for file/line correctness with call_user_func_array()
+--SKIPIF--
+<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0

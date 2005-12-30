@@ -1,6 +1,7 @@
 --TEST--
 Test for correct display with xdebug_var_dump() (ZE2)
 --SKIPIF--
+<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 <?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
 --INI--
 xdebug.default_enable=1

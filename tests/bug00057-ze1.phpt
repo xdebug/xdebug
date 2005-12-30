@@ -1,6 +1,7 @@
 --TEST--
 Test for bug #57: Crash with overloading functions (ZE1)
 --SKIPIF--
+<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 <?php if(version_compare(zend_version(), "2.0.0-dev", '>')) echo "skip Zend Engine 1 needed\n"; ?>
 --INI--
 xdebug.default_enable=1

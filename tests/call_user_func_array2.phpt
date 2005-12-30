@@ -1,5 +1,7 @@
 --TEST--
 Test call_user_func_array() with multiple files
+--SKIPIF--
+<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0

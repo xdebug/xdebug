@@ -1,5 +1,7 @@
 --TEST--
 Test for xdebug_peak_memory_usage
+--SKIPIF--
+<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.enable=1
 xdebug.collect_params=1

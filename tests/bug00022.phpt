@@ -1,5 +1,7 @@
 --TEST--
 Test for segmentation fault with xdebug_get_function_stack() and collect_params=1.
+--SKIPIF--
+<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
