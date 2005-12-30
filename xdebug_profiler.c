@@ -66,7 +66,11 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		fprintf(XG(profile_file), "\n==== NEW PROFILING FILE ==============================================\n");
 	}
 	XG(profile_filename) = estrdup(filename);
+#if MEMORY_LIMIT
 	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time Memory\n\n", script_name);
+#else
+	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time\n\n", script_name);
+#endif
 	fflush(XG(profile_file));
 	return SUCCESS;
 }
@@ -130,6 +134,11 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 			xdfree(tmp_name);
 			tmp_name = tmp_fname;
 			default_lineno = 1;
+			break;
+
+		default:
+			default_lineno = fse->lineno;
+			break;
 	}
 
 	if (fse->prev) {
