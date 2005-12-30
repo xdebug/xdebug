@@ -1875,12 +1875,13 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 {
 	xdebug_llist_element *le;
 	int                   j;
+	function_stack_entry *i;
 
 	array_init(return_value);
 	le = XDEBUG_LLIST_TAIL(XG(stack));
 	le = XDEBUG_LLIST_PREV(le);
-
-	function_stack_entry *i = XDEBUG_LLIST_VALP(le);
+	i = XDEBUG_LLIST_VALP(le);
+	
 	/* Add declared vars */
 	if (i->used_vars) {
 		xdebug_hash_apply(i->used_vars, (void *) return_value, attach_used_var_names);
@@ -2211,10 +2212,19 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 
 void xdebug_stop_trace(TSRMLS_D)
 {
-	char *str_time;
+	char   *str_time;
+	double  u_time;
 
 	XG(do_trace) = 0;
 	if (XG(trace_file)) {
+		u_time = xdebug_get_utime();
+		fprintf(XG(trace_file), "%10.4f ", u_time - XG(start_time));
+#if MEMORY_LIMIT
+		fprintf(XG(trace_file), "%10u", AG(allocated_memory));
+#else
+		fprintf(XG(trace_file), "%10u", 0);
+#endif
+		fprintf(XG(trace_file), "\n");
 		str_time = xdebug_get_time();
 		fprintf(XG(trace_file), "TRACE END   [%s]\n\n", str_time);
 		fclose(XG(trace_file));
