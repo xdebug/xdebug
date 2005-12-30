@@ -1,3 +1,8 @@
+Fri Dec 30 16:59:02 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug_profiler.c:
+- Implemented FR #158: Function calls from the {main} scope always have the
+  line number 0. (Patch by Jan Jehnardt)
+
 Fri Dec 30 16:58:17 CET 2005 Derick Rethans <derick@derickrethans.nl>
 tests/bug00002.phpt:
 - Updated test case to reflect changes in trace files.
