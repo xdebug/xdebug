@@ -125,6 +125,7 @@ int zend_xdebug_initialised = 0;
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
 	PHP_FE(xdebug_get_function_stack,    NULL)
+	PHP_FE(xdebug_get_declared_vars,     NULL)
 	PHP_FE(xdebug_call_class,            NULL)
 	PHP_FE(xdebug_call_function,         NULL)
 	PHP_FE(xdebug_call_file,             NULL)
@@ -1857,6 +1858,40 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		add_next_index_zval(return_value, frame);
+	}
+}
+/* }}} */
+
+static void attach_used_var_names(void *return_value, xdebug_hash_element *he)
+{
+	char *name = (char*) he->ptr;
+	
+	add_next_index_string(return_value, name, 1);
+}
+
+/* {{{ proto array xdebug_get_declared_vars()
+   Returns an array representing the current stack */
+PHP_FUNCTION(xdebug_get_declared_vars)
+{
+	xdebug_llist_element *le;
+	int                   j;
+
+	array_init(return_value);
+	le = XDEBUG_LLIST_TAIL(XG(stack));
+	le = XDEBUG_LLIST_PREV(le);
+
+	function_stack_entry *i = XDEBUG_LLIST_VALP(le);
+	/* Add declared vars */
+	if (i->used_vars) {
+		xdebug_hash_apply(i->used_vars, (void *) return_value, attach_used_var_names);
+	}
+	/* Add params */
+	if (i->var) {
+		for (j = 0; j < i->varc; j++) {
+			if (i->var[j].name) {
+				add_next_index_string(return_value, i->var[j].name, 1);
+			}
+		}
 	}
 }
 /* }}} */
