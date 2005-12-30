@@ -22,6 +22,6 @@ xdebug.trace_format=0
 Fatal error: Call to undefined function%sc() in /%s/test4.php on line 7
 
 Call Stack:
-    %f      %d   1. {main}() /%s/test4.php:0
-    %f      %d   2. a() /%s/test4.php:10
-    %f      %d   3. b() /%s/test4.php:3
+    %f          %d   1. {main}() /%s/test4.php:0
+    %f          %d   2. a() /%s/test4.php:10
+    %f          %d   3. b() /%s/test4.php:3

@@ -48,8 +48,8 @@ date.timezone=Europe/Oslo
       'mon' <font color='#777777'>=&gt;</font> <font color='#00bb00'>8</font>
       'year' <font color='#777777'>=&gt;</font> <font color='#00bb00'>2004</font>
       'yday' <font color='#777777'>=&gt;</font> <font color='#00bb00'>226</font>
-      'weekday' <font color='#777777'>=&gt;</font> <font color='#bb00bb'>'Saturday'</font>
-      'month' <font color='#777777'>=&gt;</font> <font color='#bb00bb'>'August'</font>
+      'weekday' <font color='#777777'>=&gt;</font> <font color='#bb00bb'>'Saturday'</font> <i>(length=8)</i>
+      'month' <font color='#777777'>=&gt;</font> <font color='#bb00bb'>'August'</font> <i>(length=6)</i>
       0 <font color='#777777'>=&gt;</font> <font color='#00bb00'>1092515106</font>
-  <i>public</i> 'date' <font color='#777777'>=&gt;</font> <font color='#bb00bb'>'2004-08-14 22:25:06 CEST'</font>
+  <i>public</i> 'date' <font color='#777777'>=&gt;</font> <font color='#bb00bb'>'2004-08-14 22:25:06 CEST'</font> <i>(length=24)</i>
 </pre>

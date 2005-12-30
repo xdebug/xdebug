@@ -41,10 +41,10 @@ Assertion Failed:
         Line '21'
         Code ''
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> assert_options(1, 1) /%s/assert_test.php:5
-    %f      %d     -> assert_options(4, 0) /%s/assert_test.php:6
-    %f      %d     -> assert_options(5, 1) /%s/assert_test.php:7
-    %f      %d     -> assert_options(2, 'my_assert_handler') /%s/assert_test.php:18
-    %f      %d     -> assert(FALSE) /%s/assert_test.php:21
-    %f      %d       -> my_assert_handler('/%s/assert_test.php', 21, '') /%s/assert_test.php:0
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/assert_test.php:23
+    %f          %d     -> assert_options(1, 1) /%s/assert_test.php:5
+    %f          %d     -> assert_options(4, 0) /%s/assert_test.php:6
+    %f          %d     -> assert_options(5, 1) /%s/assert_test.php:7
+    %f          %d     -> assert_options(2, 'my_assert_handler') /%s/assert_test.php:18
+    %f          %d     -> assert(FALSE) /%s/assert_test.php:21
+    %f          %d       -> my_assert_handler('/%s/assert_test.php', 21, '') /%s/assert_test.php:0
+    %f          %d     -> file_get_contents('/tmp/%s') /%s/assert_test.php:23

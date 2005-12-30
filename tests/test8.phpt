@@ -112,30 +112,30 @@ array(2) {
 }
 aa2ba
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> a() /%s/test8.php:17
-    %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
+    %f          %d     -> a() /%s/test8.php:17
+    %f          %d       -> xdebug_get_function_stack() /%s/test8.php:5
                              >=> array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))
-    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
+    %f          %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
                              >=> NULL
                            >=> 'a'
-    %f      %d     -> b(2) /%s/test8.php:17
+    %f          %d     -> b(2) /%s/test8.php:17
                            >=> '2b'
-    %f      %d     -> c('a', '2b') /%s/test8.php:17
+    %f          %d     -> c('a', '2b') /%s/test8.php:17
                            >=> '2ba'
-    %f      %d     -> a() /%s/test8.php:17
-    %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
+    %f          %d     -> a() /%s/test8.php:17
+    %f          %d       -> xdebug_get_function_stack() /%s/test8.php:5
                              >=> array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))
-    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
+    %f          %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
                              >=> NULL
                            >=> 'a'
-    %f      %d     -> a() /%s/test8.php:17
-    %f      %d       -> xdebug_get_function_stack() /%s/test8.php:5
+    %f          %d     -> a() /%s/test8.php:17
+    %f          %d       -> xdebug_get_function_stack() /%s/test8.php:5
                              >=> array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))
-    %f      %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
+    %f          %d       -> var_dump(array (0 => array ('function' => '{main}', 'file' => '/%s/test8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '/%s/test8.php', 'line' => 17, 'params' => array ()))) /%s/test8.php:5
                              >=> NULL
                            >=> 'a'
-    %f      %d     -> c('a', 'a') /%s/test8.php:17
+    %f          %d     -> c('a', 'a') /%s/test8.php:17
                            >=> 'aa'
-    %f      %d     -> c('2ba', 'aa') /%s/test8.php:17
+    %f          %d     -> c('2ba', 'aa') /%s/test8.php:17
                            >=> 'aa2ba'
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/test8.php:19
+    %f          %d     -> file_get_contents('/tmp/%s') /%s/test8.php:19

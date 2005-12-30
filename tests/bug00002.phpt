@@ -23,6 +23,6 @@ xdebug.trace_format=0
 --EXPECTF--
 
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> do_stuff() /%s/bug00002.php:6
-    %f      %d     -> xdebug_stop_trace() /%s/bug00002.php:7
+    %f          %d     -> do_stuff() /%s/bug00002.php:6
+    %f          %d     -> xdebug_stop_trace() /%s/bug00002.php:7
 TRACE END   [%d-%d-%d %d:%d:%d]

@@ -35,15 +35,15 @@ echo $o->foo('80');
 Notice: Undefined offset:  0 in /%s/bug00057-ze1.php on line 9
 
 Call Stack:
-    %f      %d   1. {main}() /%s/bug00057-ze1.php:0
-    %f      %d   2. oo->__call('oo', array (), NULL) /%s/bug00057-ze1.php:16
+    %f          %d   1. {main}() /%s/bug00057-ze1.php:0
+    %f          %d   2. oo->__call('oo', array (), NULL) /%s/bug00057-ze1.php:16
 0
 Warning: Call to undefined method oo::oo() in /%s/bug00057-ze1.php on line 16
 
 Call Stack:
-    %f      %d   1. {main}() /%s/bug00057-ze1.php:0
+    %f          %d   1. {main}() /%s/bug00057-ze1.php:0
 2
 Warning: Call to undefined method oo::foo() in /%s/bug00057-ze1.php on line 18
 
 Call Stack:
-    %f      %d   1. {main}() /%s/bug00057-ze1.php:0
+    %f          %d   1. {main}() /%s/bug00057-ze1.php:0

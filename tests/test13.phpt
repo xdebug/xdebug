@@ -47,12 +47,12 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> foo1('test\'s') /%s/test13.php:25
-    %f      %d       -> addslashes('test\'s') /%s/test13.php:6
-    %f      %d     -> foo4('test\'s') /%s/test13.php:27
-    %f      %d       -> addslashes('test\'s') /%s/test13.php:21
-    %f      %d     -> foo2('test\'s') /%s/test13.php:29
-    %f      %d       -> addslashes('test\'s') /%s/test13.php:11
-    %f      %d     -> foo3('test\'s') /%s/test13.php:31
-    %f      %d       -> addslashes('test\'s') /%s/test13.php:16
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/test13.php:33
+    %f          %d     -> foo1('test\'s') /%s/test13.php:25
+    %f          %d       -> addslashes('test\'s') /%s/test13.php:6
+    %f          %d     -> foo4('test\'s') /%s/test13.php:27
+    %f          %d       -> addslashes('test\'s') /%s/test13.php:21
+    %f          %d     -> foo2('test\'s') /%s/test13.php:29
+    %f          %d       -> addslashes('test\'s') /%s/test13.php:11
+    %f          %d     -> foo3('test\'s') /%s/test13.php:31
+    %f          %d       -> addslashes('test\'s') /%s/test13.php:16
+    %f          %d     -> file_get_contents('/tmp/%s') /%s/test13.php:33

@@ -36,14 +36,14 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> D::c('blah') /%s/test10b.php:19
+    %f          %d     -> D::c('blah') /%s/test10b.php:19
                            >=> 'c'
-    %f      %d     -> D::a('c') /%s/test10b.php:19
+    %f          %d     -> D::a('c') /%s/test10b.php:19
                            >=> 'a'
-    %f      %d     -> D::b('a') /%s/test10b.php:19
+    %f          %d     -> D::b('a') /%s/test10b.php:19
                            >=> 'b'
-    %f      %d     -> D::a('b') /%s/test10b.php:19
+    %f          %d     -> D::a('b') /%s/test10b.php:19
                            >=> 'a'
-    %f      %d     -> blaat('insert blah \'a') /%s/test10b.php:19
+    %f          %d     -> blaat('insert blah \'a') /%s/test10b.php:19
                            >=> NULL
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/test10b.php:20
+    %f          %d     -> file_get_contents('/tmp/%s') /%s/test10b.php:20

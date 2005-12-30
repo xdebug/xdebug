@@ -43,11 +43,11 @@ fucking();
 Fatal error: Call to undefined function%sfunky_shit() in /%s/test5.php on line 28
 
 Call Stack:
-    %f      %i   1. {main}() /%s/test5.php:0
-    %f      %i   2. fucking() /%s/test5.php:31
-    %f      %i   3. deep() /%s/test5.php:4
-    %f      %i   4. nested() /%s/test5.php:8
-    %f      %i   5. error() /%s/test5.php:12
-    %f      %i   6. in() /%s/test5.php:16
-    %f      %i   7. func() /%s/test5.php:20
-    %f      %i   8. blah() /%s/test5.php:24
+    %f          %d   1. {main}() /%s/test5.php:0
+    %f          %d   2. fucking() /%s/test5.php:31
+    %f          %d   3. deep() /%s/test5.php:4
+    %f          %d   4. nested() /%s/test5.php:8
+    %f          %d   5. error() /%s/test5.php:12
+    %f          %d   6. in() /%s/test5.php:16
+    %f          %d   7. func() /%s/test5.php:20
+    %f          %d   8. blah() /%s/test5.php:24

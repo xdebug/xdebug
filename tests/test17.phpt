@@ -21,5 +21,5 @@ xdebug.trace_format=0
 --EXPECTF--
 55555
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> str_repeat('5', 5) /%s/test17.php:4
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/test17.php:6
+    %f          %d     -> str_repeat('5', 5) /%s/test17.php:4
+    %f          %d     -> file_get_contents('/tmp/%s') /%s/test17.php:6

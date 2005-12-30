@@ -26,13 +26,13 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> include(/%s/call_user_func_array2.inc) /%s/call_user_func_array2.php:4
-    %f      %d     -> call_user_func_array('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) /%s/call_user_func_array2.php:7
-    %f      %d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array2.php:0
-    %f      %d         -> is_array(array (0 => 1, 1 => 2)) /%s/call_user_func_array2.inc:4
-    %f      %d     -> call_user_func_array('debug', array (0 => 'bar', 1 => 'bar')) /%s/call_user_func_array2.php:10
-    %f      %d       -> debug('bar', 'bar') /%s/call_user_func_array2.php:0
-    %f      %d         -> is_array('bar') /%s/call_user_func_array2.inc:4
-    %f      %d         -> is_object('bar') /%s/call_user_func_array2.inc:4
-    %f      %d         -> is_resource('bar') /%s/call_user_func_array2.inc:4
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/call_user_func_array2.php:12
+    %f          %d     -> include(/%s/call_user_func_array2.inc) /%s/call_user_func_array2.php:4
+    %f          %d     -> call_user_func_array('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) /%s/call_user_func_array2.php:7
+    %f          %d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array2.php:0
+    %f          %d         -> is_array(array (0 => 1, 1 => 2)) /%s/call_user_func_array2.inc:4
+    %f          %d     -> call_user_func_array('debug', array (0 => 'bar', 1 => 'bar')) /%s/call_user_func_array2.php:10
+    %f          %d       -> debug('bar', 'bar') /%s/call_user_func_array2.php:0
+    %f          %d         -> is_array('bar') /%s/call_user_func_array2.inc:4
+    %f          %d         -> is_object('bar') /%s/call_user_func_array2.inc:4
+    %f          %d         -> is_resource('bar') /%s/call_user_func_array2.inc:4
+    %f          %d     -> file_get_contents('/tmp/%s') /%s/call_user_func_array2.php:12

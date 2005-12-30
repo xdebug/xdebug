@@ -24,8 +24,8 @@ xdebug.show_local_vars=1
 Fatal error: Call to undefined function do_f() in /%s/local_vars_in_error.php on line 5
 
 Call Stack:
-    %f      %d   1. {main}() /%s/local_vars_in_error.php:0
-    %f      %d   2. a(5, 6) /%s/local_vars_in_error.php:8
+    %f          %d   1. {main}() /%s/local_vars_in_error.php:0
+    %f          %d   2. a(5, 6) /%s/local_vars_in_error.php:8
 
 
 Variables in local scope:

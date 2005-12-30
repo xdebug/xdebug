@@ -44,6 +44,6 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> a->func_a1() /%s/test16b.php:25
-    %f      %d     -> b->func_b1() /%s/test16b.php:26
-    %f      %d     -> file_get_contents('/tmp/%s') /%s/test16b.php:28
+    %f          %d     -> a->func_a1() /%s/test16b.php:25
+    %f          %d     -> b->func_b1() /%s/test16b.php:26
+    %f          %d     -> file_get_contents('/tmp/%s') /%s/test16b.php:28

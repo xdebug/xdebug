@@ -21,6 +21,6 @@ date.timezone=Europe/Oslo
 --EXPECTF--
 
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f      %d     -> strftime('%b %l %Y %H:%M:%S', 1061728888) /%s/bug00003.php:3
-    %f      %d     -> xdebug_stop_trace() /%s/bug00003.php:4
+    %f          %d     -> strftime('%b %l %Y %H:%M:%S', 1061728888) /%s/bug00003.php:3
+    %f          %d     -> xdebug_stop_trace() /%s/bug00003.php:4
 TRACE END   [%d-%d-%d %d:%d:%d]
