@@ -1,3 +1,10 @@
+Fri Dec 30 16:54:24 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00003.phpt:
+- Implemented FR #156: it's impossible to know the time taken by the last func
+  call in xdebug trace mode 0.
+- Fixed MSVC compile error for xdebug_get_declared_vars().
+
 Fri Dec 30 16:33:31 CET 2005 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
