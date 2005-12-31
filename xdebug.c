@@ -661,6 +661,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(error_handler) = NULL;
 	XG(prev_memory)   = 0;
 	XG(function_count) = 0;
+	XG(active_symbol_table) = NULL;
 	
 	if (idekey && *idekey) {
 		if (XG(ide_key)) {
@@ -890,6 +891,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->include_filename  = NULL;
 	tmp->profile.call_list = xdebug_llist_alloc(profile_call_entry_dtor);
 	tmp->op_array      = op_array;
+	tmp->symbol_table  = NULL;
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		/* Normal function calls */
