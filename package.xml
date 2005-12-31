@@ -30,32 +30,25 @@ Xdebug also provides:
     * capabilities to debug your scripts interactively with a debug client
   </description>
   <license>BSD style</license>
-    <release>
+  <release>
     <state>beta</state>
-    <version>2.0.0beta4</version>
-    <date>2005-09-24</date>
+    <version>2.0.0beta5</version>
+    <date>2005-12-31</date>
     <notes>
 + Added new features:
-    - Added xdebug_debug_zval_stdout().
-	- Added xdebug_get_profile_filename() function which returns the current
-	  profiler dump file.
-	- Updated for latest 5.1 and 6.0 CVS versions of PHP.
-	- Added FR #148: Option to append to cachegrind files, instead of
-	  overwriting.
-	- Implemented FR #114: Rename tests/*.php to tests/*.inc
-
-- Changed features:
-	- Allow "xdebug.default_enable" to be set everywhere.
-
+	- Implemented FR #161: var_dump doesn't show lengths for strings.
+	- Implemented FR #158: Function calls from the {main} scope always have the
+	  line number 0. 
+	- Implemented FR #156: it's impossible to know the time taken by the last
+	  func call in xdebug trace mode 0.
+	- Implemented FR #153: xdebug_get_declared_vars().
+	
 = Fixed bugs:
-	- DBGP: Xdebug should return "array" with property get, which is defined
-	  in the typemap to the common type "hash".
-	- Debugclient: Will now build with an older libedit as found in FreeBSD
-	  4.9.
-	- Fixed bug #142: xdebug crashes with implicit destructor calls.
-	- Fixed bug #136: The "type" attribute is missing from stack_get returns.
-	- Fixed bug #133: PHP scripts exits with 0 on PHP error.
-	- Fixed bug #132: use of eval causes a segmentation fault.
+	- Fixed shutdown crash with ZTS on Win32
+	- Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
+	  thrown.
+	- Fixed bug #154: GCC 4.0.2 optimizes too much out with -O2.
+	- Fixed bug #141: Remote context_get causes segfault.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -140,6 +133,27 @@ Xdebug also provides:
     </deps>
   </release>
   <changelog>
+    <release>
+      <state>beta</state>
+      <version>2.0.0beta5</version>
+      <date>2005-12-31</date>
+      <notes>
++ Added new features:
+	- Implemented FR #161: var_dump doesn't show lengths for strings.
+	- Implemented FR #158: Function calls from the {main} scope always have the
+	  line number 0. 
+	- Implemented FR #156: it's impossible to know the time taken by the last
+	  func call in xdebug trace mode 0.
+	- Implemented FR #153: xdebug_get_declared_vars().
+	
+= Fixed bugs:
+	- Fixed shutdown crash with ZTS on Win32
+	- Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
+	  thrown.
+	- Fixed bug #154: GCC 4.0.2 optimizes too much out with -O2.
+	- Fixed bug #141: Remote context_get causes segfault.
+      </notes>
+	</release>
     <release>
       <state>beta</state>
       <version>2.0.0beta4</version>

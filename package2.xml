@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.5" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -30,38 +30,31 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2005-09-24</date>
- <time>22:05:28</time>
+ <date>2005-12-31</date>
+ <time>11:52:11</time>
  <version>
-  <release>2.0.0beta4</release>
-  <api>2.0.0beta4</api>
+  <release>2.0.0beta5</release>
+  <api>2.0.0beta5</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
- <license>BSD style</license>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>+ Added new features:
-    - Added xdebug_debug_zval_stdout().
-	- Added xdebug_get_profile_filename() function which returns the current
-	  profiler dump file.
-	- Updated for latest 5.1 and 6.0 CVS versions of PHP.
-	- Added FR #148: Option to append to cachegrind files, instead of
-	  overwriting.
-	- Implemented FR #114: Rename tests/*.php to tests/*.inc
-
-- Changed features:
-	- Allow &quot;xdebug.default_enable&quot; to be set everywhere.
-
+	- Implemented FR #161: var_dump doesn&apos;t show lengths for strings.
+	- Implemented FR #158: Function calls from the {main} scope always have the
+	  line number 0. 
+	- Implemented FR #156: it&apos;s impossible to know the time taken by the last
+	  func call in xdebug trace mode 0.
+	- Implemented FR #153: xdebug_get_declared_vars().
+	
 = Fixed bugs:
-	- DBGP: Xdebug should return &quot;array&quot; with property get, which is defined
-	  in the typemap to the common type &quot;hash&quot;.
-	- Debugclient: Will now build with an older libedit as found in FreeBSD
-	  4.9.
-	- Fixed bug #142: xdebug crashes with implicit destructor calls.
-	- Fixed bug #136: The &quot;type&quot; attribute is missing from stack_get returns.
-	- Fixed bug #133: PHP scripts exits with 0 on PHP error.
-	- Fixed bug #132: use of eval causes a segmentation fault.
+	- Fixed shutdown crash with ZTS on Win32
+	- Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
+	  thrown.
+	- Fixed bug #154: GCC 4.0.2 optimizes too much out with -O2.
+	- Fixed bug #141: Remote context_get causes segfault.
     
  </notes>
  <contents>
@@ -155,6 +148,34 @@ Xdebug also provides:
  <changelog>
   <release>
    <version>
+    <release>2.0.0beta5</release>
+    <api>2.0.0beta5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2005-12-31</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>+ Added new features:
+	- Implemented FR #161: var_dump doesn&apos;t show lengths for strings.
+	- Implemented FR #158: Function calls from the {main} scope always have the
+	  line number 0. 
+	- Implemented FR #156: it&apos;s impossible to know the time taken by the last
+	  func call in xdebug trace mode 0.
+	- Implemented FR #153: xdebug_get_declared_vars().
+	
+= Fixed bugs:
+	- Fixed shutdown crash with ZTS on Win32
+	- Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
+	  thrown.
+	- Fixed bug #154: GCC 4.0.2 optimizes too much out with -O2.
+	- Fixed bug #141: Remote context_get causes segfault.
+      
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>2.0.0beta4</release>
     <api>2.0.0beta4</api>
    </version>
@@ -163,7 +184,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2005-09-24</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
     - Added xdebug_debug_zval_stdout().
 	- Added xdebug_get_profile_filename() function which returns the current
@@ -196,7 +217,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2005-05-12</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
     - Added the possibility to trigger the profiler by setting
       &quot;xdebug.profiler_enable_trigger&quot; to 1 and using XDEBUG_PROFILE as a get
@@ -230,7 +251,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2004-11-28</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
 	- DBGP: Added error messages to returned errors (in most cases)
   
@@ -275,7 +296,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2004-09-15</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
 	- Added support for the new DBGp protocol for communicating with the debug
 	  engine.
@@ -387,7 +408,7 @@ Xdebug also provides:
     <api>stable</api>
    </stability>
    <date>2004-04-06</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>= Fixed profiler to aggregate class/method calls correctly. (Robert Beenen)
 = Fixed debugclient to initialize socket structure correctly. (Brandon Philips
   and David Sklar)
@@ -406,7 +427,7 @@ Xdebug also provides:
     <api>stable</api>
    </stability>
    <date>2003-09-17</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>= Fixed segfault where a function name didn&apos;t exist in case of a
  &quot;call_user_function&quot;. (Derick)
 = Fixed reading a filename in case of an callback to a PHP function from an
@@ -424,7 +445,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2003-09-17</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>= Fixed bug with wrong file names for functions called from call_user_*().
   (Derick)
 + Added the option &quot;dump_superglobals&quot; to the remote debugger. If you set this
@@ -463,7 +484,7 @@ Xdebug also provides:
     <api>stable</api>
    </stability>
    <date>2003-04-21</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>= Fixed compilation on MacOSX. (Derick)
       
    </notes>
@@ -478,7 +499,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2003-04-15</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>= Fixed handling Windows paths in the debugger. (Derick)
 = Fixed getting zvals out of Zend Engine 2. (Derick)
       
@@ -494,7 +515,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2003-04-06</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added code coverage functions to check which lines and how often they were
   touched during execution. (Derick)
 + Made Xdebug compatible with Zend Engine 2. (Derick)
@@ -523,7 +544,7 @@ Xdebug also provides:
     <api>stable</api>
    </stability>
    <date>2002-11-11</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Implemented the &quot;list&quot; (source listing), &quot;print&quot; (printing variable
   contents), &quot;show&quot; (show all variables in the scope), &quot;step&quot; (step through
   execution), &quot;pwd&quot; (print working directory), &quot;next&quot; (step over) and &quot;finish&quot;
@@ -542,7 +563,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2002-10-29</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Implemented class::method, object-&gt;method and file.ext:line style
   breakpoints. (Derick)
 + Added xdebug.collect_params setting. If this setting is on (the default)
@@ -562,7 +583,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2002-10-22</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added automatic starting of function traces (xdebug.auto_trace, defaulting to
   &quot;off&quot;). (Derick)
 - Xdebug no longer supports PHP versions below PHP 4.3.0pre1. (Derick)
@@ -586,7 +607,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2002-09-01</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Implemented gathering of parameters to internal functions (only available
   in combination with PHP 4.3.0-dev). (Derick)
 = Implemented a new way to get class names and file names. (Derick, Thies C.
@@ -607,7 +628,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2002-06-16</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>= Fixed a memory leak in delayed included files. (Derick)
 - Added support for PHP 4.1.2. (Derick)
 = Rewrote xdebug_get_function_stack() and xdebug_get_function_trace() to return
@@ -633,7 +654,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2002-05-26</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Implemented much better parameter tracing for user defined
   functions. (Derick)
 = Renamed xdebug_get_function_trace() to xdebug_dump_function_trace().
@@ -665,7 +686,7 @@ Xdebug also provides:
     <api>beta</api>
    </stability>
    <date>2002-05-08</date>
-   <license>BSD style</license>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Implemented handling of static method calls (foo::bar). (Derick)
 + Added correct handling of include(_once)/require(_once) and eval().
   (Derick)
