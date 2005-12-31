@@ -1,3 +1,8 @@
+Sat Dec 31 11:34:53 CET 2005 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed bug #141: Remote context_get causes segfault.
+
 Fri Dec 30 16:59:02 CET 2005 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Implemented FR #158: Function calls from the {main} scope always have the
