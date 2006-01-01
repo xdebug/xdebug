@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003 Derick Rethans                              |
+   | Copyright (c) 2002, 2003, 2004, 2005, 2006  Derick Rethans           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
 	/* Display copyright notice and version number */
 	printf("Xdebug Simple DBGp client (%s)\n", DEBUGCLIENT_VERSION);
-	printf("Copyright 2002-2005 by Derick Rethans.\n");
+	printf("Copyright 2002-2006 by Derick Rethans.\n");
 #ifdef HAVE_LIBEDIT
 	printf("- libedit support: enabled\n");
 #endif

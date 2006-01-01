@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003 Derick Rethans                              |
+   | Copyright (c) 2002, 2003, 2004, 2005, 2006 Derick Rethans            |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1334,7 +1334,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.77 $";
+	return "$Revision: 1.78 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
