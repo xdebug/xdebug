@@ -37,10 +37,10 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f          %d     -> DBHelper::quote('test\'s') /%s/test9b.php:18
-    %f          %d       -> addslashes('test\'s') /%s/test9b.php:6
-    %f          %d     -> DBHelper::quote('test\'s') /%s/test9b.php:18
-    %f          %d       -> addslashes('test\'s') /%s/test9b.php:6
-    %f          %d     -> DB->query('insert blah \'test\\\'stest\\\'s\' blah') /%s/test9b.php:18
-    %f          %d     -> DB->query('insert blah \' blah') /%s/test9b.php:19
-    %f          %d     -> file_get_contents('/tmp/%s') /%s/test9b.php:20
+%w%f %w%d     -> DBHelper::quote('test\'s') /%s/test9b.php:18
+%w%f %w%d       -> addslashes('test\'s') /%s/test9b.php:6
+%w%f %w%d     -> DBHelper::quote('test\'s') /%s/test9b.php:18
+%w%f %w%d       -> addslashes('test\'s') /%s/test9b.php:6
+%w%f %w%d     -> DB->query('insert blah \'test\\\'stest\\\'s\' blah') /%s/test9b.php:18
+%w%f %w%d     -> DB->query('insert blah \' blah') /%s/test9b.php:19
+%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/test9b.php:20

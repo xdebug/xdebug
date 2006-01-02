@@ -30,21 +30,21 @@ foo
 Notice: Array to string conversion in %sbug00032.php on line 8
 
 Call Stack:
-    %f          %d   1. {main}() %sbug00032.php:0
+%w%f %w%d   1. {main}() %sbug00032.php:0
 
 Notice: Array to string conversion in %sbug00032.php on line 9
 
 Call Stack:
-    %f          %d   1. {main}() %sbug00032.php:0
+%w%f %w%d   1. {main}() %sbug00032.php:0
 foo
 
 Notice: Object of class stdClass to string conversion in %sbug00032.php on line 11
 
 Call Stack:
-    %f          %d   1. {main}() %sbug00032.php:0
+%w%f %w%d   1. {main}() %sbug00032.php:0
 
 Notice: Object of class stdClass to string conversion in %sbug00032.php on line 12
 
 Call Stack:
-    %f          %d   1. {main}() %sbug00032.php:0
+%w%f %w%d   1. {main}() %sbug00032.php:0
 foo

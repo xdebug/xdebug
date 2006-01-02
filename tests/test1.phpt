@@ -30,8 +30,8 @@ xdebug.trace_format=0
 --EXPECTF--
 15
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f          %d     -> include(/%s/test_class.inc) /%s/test1.php:11
-    %f          %d     -> foo(5) /%s/test1.php:13
-    %f          %d       -> een->foo2(15, array (0 => 'blaat', 1 => 5, 2 => FALSE)) /%s/test1.php:7
-    %f          %d         -> een->hang() /%s/test_class.inc:10
-    %f          %d     -> file_get_contents('/tmp/%s') /%s/test1.php:14
+%w%f %w%d     -> include(/%s/test_class.inc) /%s/test1.php:11
+%w%f %w%d     -> foo(5) /%s/test1.php:13
+%w%f %w%d       -> een->foo2(15, array (0 => 'blaat', 1 => 5, 2 => FALSE)) /%s/test1.php:7
+%w%f %w%d         -> een->hang() /%s/test_class.inc:10
+%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/test1.php:14

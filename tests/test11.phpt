@@ -27,6 +27,6 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %f          %d     -> blaat() /%s/test11.php:9
+%w%f %w%d     -> blaat() /%s/test11.php:9
                            >=> NULL
-    %f          %d     -> file_get_contents('/tmp/%s') /%s/test11.php:11
+%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/test11.php:11
