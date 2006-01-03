@@ -2428,7 +2428,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
 
-#if WIN32|WINNT
+#if 0
 				printf("b->d: %d; ln: %d; b->l: %d; b->f: %s; f: %s, f_l: %d; b->f_l: %d\n",
 						brk->disabled, lineno, brk->lineno, brk->file, file, file_len, brk->file_len);
 #endif
