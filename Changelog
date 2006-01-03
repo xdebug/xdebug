@@ -1,3 +1,7 @@
+Tue Jan 03 22:15:31 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Removed debug information.
+
 Mon Jan 02 17:12:32 CET 2006 Marcus Börger <helly@php.net>
 tests/array_map.phpt
 xdebug/tests/assert_test.phpt
