@@ -433,9 +433,15 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						}
 						break;
 					case 3:
+						/* Associative arrays */
 						if (*p[0] == '\'') {
 							state = 4;
 							keyword = *p + 1;
+						}
+						/* Numerical index */
+						if (*p[0] >= '0' && *p[0] <= '9') {
+							state = 6;
+							keyword = *p;
 						}
 						break;
 					case 4:
@@ -453,6 +459,18 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 					case 5:
 						if (*p[0] == ']') {
 							state = 1;
+						}
+						break;
+					case 6:
+						if (*p[0] == ']') {
+							state = 1;
+							keyword_end = *p;
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							current_classname = NULL;
+							if (retval) {
+								st = fetch_ht_from_zval(retval TSRMLS_CC);
+							}
+							keyword = NULL;
 						}
 						break;
 				}
@@ -1890,7 +1908,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.76 $";
+	return "$Revision: 1.77 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
