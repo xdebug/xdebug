@@ -287,13 +287,12 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 
 	switch (type) {
 		case XF_ST_ROOT:
+		case XF_ST_ARRAY_INDEX:
 			element = prepare_search_key(name, &name_length, "", 0);
 			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
 				goto cleanup;
 			}
-			break;
-		case XF_ST_ARRAY_INDEX:
 			break;
 		case XF_ST_OBJ_PROPERTY:
 			/* First we try a public property */
@@ -1891,7 +1890,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.75 $";
+	return "$Revision: 1.76 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
