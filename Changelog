@@ -1,3 +1,7 @@
+Tue Jan 17 23:19:48 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #121: property_get -n $r[2] returns the whole hash.
+
 Tue Jan 17 22:35:42 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Make property_get -n $r['keyName'] actually work without segfaulting.
