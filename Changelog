@@ -1,3 +1,9 @@
+Tue Jan 17 21:58:36 CET 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Fixed bug #111: xdebug does not ignore set_time_limit() function during debug
+  session.
+
 Tue Jan 03 22:15:31 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Removed debug information.
