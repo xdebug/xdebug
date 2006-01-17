@@ -64,6 +64,8 @@ PHP_FUNCTION(xdebug_call_function);
 PHP_FUNCTION(xdebug_call_file);
 PHP_FUNCTION(xdebug_call_line);
 
+PHP_FUNCTION(xdebug_set_time_limit);
+
 PHP_FUNCTION(xdebug_var_dump);
 PHP_FUNCTION(xdebug_debug_zval);
 PHP_FUNCTION(xdebug_debug_zval_stdout);

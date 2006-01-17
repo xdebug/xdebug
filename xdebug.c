@@ -704,8 +704,13 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Initialize start time */
 	XG(start_time) = xdebug_get_utime();
 
+	/* Override var_dump with our own function */
 	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
 	orig->internal_function.handler = zif_xdebug_var_dump;
+
+	/* Override set_time_limit with our own function to prevent timing out while debugging */
+	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
+	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
 	return SUCCESS;
 }
@@ -1986,6 +1991,13 @@ PHP_FUNCTION(xdebug_call_file)
 	} else {
 		RETURN_FALSE;
 	}
+}
+/* }}} */
+
+/* {{{ proto void xdebug_set_time_limit(void)
+   Dummy function to prevent time limit from being set within the script */
+PHP_FUNCTION(xdebug_set_time_limit)
+{
 }
 /* }}} */
 
