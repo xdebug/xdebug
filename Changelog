@@ -1,3 +1,13 @@
+Mon Jan 23 00:30:59 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_hash.c
+xdebug/xdebug_hash.h
+xdebug/xdebug_mm.h
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h:
+- Implemented FR #131: XDebug needs to implement paged child object requests.
+
 Tue Jan 17 23:19:48 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed bug #121: property_get -n $r[2] returns the whole hash.
