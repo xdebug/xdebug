@@ -1,4 +1,4 @@
-/* $Id: xdebug_hash.h,v 1.1 2002-09-30 05:56:23 derick Exp $ */
+/* $Id: xdebug_hash.h,v 1.2 2006-01-22 23:30:59 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -67,6 +67,7 @@ int  xdebug_hash_add_or_update(xdebug_hash *h, char *str_key, unsigned int str_k
 int  xdebug_hash_extended_delete(xdebug_hash *h, char *str_key, unsigned int str_key_len, unsigned long num_key);
 int  xdebug_hash_extended_find(xdebug_hash *h, char *str_key, unsigned int str_key_len, unsigned long num_key, void **p);
 void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *));
+void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *, void *), void *argument);
 void xdebug_hash_destroy(xdebug_hash *h);
 
 #define xdebug_hash_find(h, key, key_len, p) xdebug_hash_extended_find(h, key, key_len, 0, p)

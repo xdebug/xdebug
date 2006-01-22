@@ -70,14 +70,6 @@ typedef struct xdebug_dbgp_cmd {
 
 #define CMD_OPTION(opt)    (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])
 
-typedef struct xdebug_dbgp_options {
-	int max_children;
-	int max_data;
-	int max_depth;
-	int show_hidden;
-} xdebug_dbgp_options;
-
-
 int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);

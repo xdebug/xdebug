@@ -1,4 +1,4 @@
-/* $Id: xdebug_hash.c,v 1.3 2003-04-15 05:55:56 derick Exp $ */
+/* $Id: xdebug_hash.c,v 1.4 2006-01-22 23:30:59 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -226,6 +226,18 @@ void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_has
 	 for (i = 0; i < h->slots; ++i) {
 		  for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			   cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le));
+		  }
+	 }
+}
+
+void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *, void *), void *argument)
+{
+	 xdebug_llist_element  *le;
+	 int                    i;
+
+	 for (i = 0; i < h->slots; ++i) {
+		  for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+			   cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
 		  }
 	 }
 }

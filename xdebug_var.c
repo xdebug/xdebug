@@ -268,7 +268,7 @@ static int xdebug_array_element_export_xml(zval **zv, int num_args, va_list args
 		xdebug_str_add(str, xdebug_sprintf(" name='%s'", hash_key->arKey), 1);
 	}
 	xdebug_str_add(str, xdebug_sprintf(" id='%p'>", *zv), 1);
-	xdebug_var_export_xml(zv, str, level + 2 TSRMLS_CC);
+	xdebug_var_export_xml(zv, str, level + 1 TSRMLS_CC);
 	xdebug_str_addl(str, "</var>", 6, 0);
 	return 0;
 }
@@ -289,7 +289,7 @@ static int xdebug_object_element_export_xml(zval **zv, int num_args, va_list arg
 		xdebug_str_add(str, xdebug_sprintf(" name='%s' facet='%s'", prop_name, modifier), 1);
 	}
 	xdebug_str_add(str, xdebug_sprintf(" id='%p'>", *zv), 1);
-	xdebug_var_export_xml(zv, str, level + 2 TSRMLS_CC);
+	xdebug_var_export_xml(zv, str, level + 1 TSRMLS_CC);
 	xdebug_str_addl(str, "</var>", 6, 0);
 	return 0;
 }
@@ -395,37 +395,44 @@ static int xdebug_array_element_export_xml_node(zval **zv, int num_args, va_list
 	int level;
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
+	xdebug_var_export_options *options;
 	char *name = NULL, *parent_name = NULL, *full_name = NULL;
 	TSRMLS_FETCH();
 
 	level = va_arg(args, int);
 	parent = va_arg(args, xdebug_xml_node*);
 	parent_name = va_arg(args, char *);
+	options = va_arg(args, xdebug_var_export_options*);
 
-	node = xdebug_xml_node_init("property");
-	
-	if (hash_key->nKeyLength != 0) {
-		name = xdstrdup(hash_key->arKey);
-		if (parent_name[0] != '$') {
-			full_name = xdebug_sprintf("$%s['%s']", parent_name, name);
+	if (options->runtime.current_element_nr >= options->runtime.start_element_nr &&
+		options->runtime.current_element_nr < options->runtime.end_element_nr)
+	{
+		node = xdebug_xml_node_init("property");
+		
+		if (hash_key->nKeyLength != 0) {
+			name = xdstrdup(hash_key->arKey);
+			if (parent_name[0] != '$') {
+				full_name = xdebug_sprintf("$%s['%s']", parent_name, name);
+			} else {
+				full_name = xdebug_sprintf("%s['%s']", parent_name, name);
+			}
 		} else {
-			full_name = xdebug_sprintf("%s['%s']", parent_name, name);
+			name = xdebug_sprintf("%ld", hash_key->h);
+			if (parent_name[0] != '$') {
+				full_name = xdebug_sprintf("$%s[%s]", parent_name, name);
+			} else {
+				full_name = xdebug_sprintf("%s[%s]", parent_name, name);
+			}
 		}
-	} else {
-		name = xdebug_sprintf("%ld", hash_key->h);
-		if (parent_name[0] != '$') {
-			full_name = xdebug_sprintf("$%s[%s]", parent_name, name);
-		} else {
-			full_name = xdebug_sprintf("%s[%s]", parent_name, name);
-		}
+
+		xdebug_xml_add_attribute_ex(node, "name", name, 0, 1);
+		xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
+
+		xdebug_xml_add_child(parent, node);
+		xdebug_var_export_xml_node(zv, full_name, node, options, level + 1 TSRMLS_CC);
 	}
-
-	xdebug_xml_add_attribute_ex(node, "name", name, 0, 1);
-	xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
-	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
-
-	xdebug_xml_add_child(parent, node);
-	xdebug_var_export_xml_node(zv, full_name, node, level + 2 TSRMLS_CC);
+	options->runtime.current_element_nr++;
 	return 0;
 }
 
@@ -434,6 +441,7 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 	int level;
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
+	xdebug_var_export_options *options;
 	char *prop_name, *modifier;
 	char *parent_name = NULL, *full_name = NULL;
 	TSRMLS_FETCH();
@@ -441,32 +449,38 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 	level  = va_arg(args, int);
 	parent = va_arg(args, xdebug_xml_node*);
 	full_name = parent_name = va_arg(args, char *);
+	options = va_arg(args, xdebug_var_export_options*);
 
-	node = xdebug_xml_node_init("property");
-	
-	if (hash_key->nKeyLength != 0) {
-		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
-		xdebug_xml_add_attribute(node, "name", prop_name);
-		/* XXX static vars? */
+	if (options->runtime.current_element_nr >= options->runtime.start_element_nr &&
+		options->runtime.current_element_nr < options->runtime.end_element_nr)
+	{
+		node = xdebug_xml_node_init("property");
+		
+		if (hash_key->nKeyLength != 0) {
+			modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+			xdebug_xml_add_attribute(node, "name", prop_name);
+			/* XXX static vars? */
 
-		if (parent_name) {
-			if (parent_name[0] != '$') {
-				full_name = xdebug_sprintf("$%s->%s", parent_name, prop_name);
-			} else {
-				full_name = xdebug_sprintf("%s->%s", parent_name, prop_name);
+			if (parent_name) {
+				if (parent_name[0] != '$') {
+					full_name = xdebug_sprintf("$%s->%s", parent_name, prop_name);
+				} else {
+					full_name = xdebug_sprintf("%s->%s", parent_name, prop_name);
+				}
+				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 			}
-			xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+			xdebug_xml_add_attribute(node, "facet", modifier);
 		}
-		xdebug_xml_add_attribute(node, "facet", modifier);
-	}
-	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
+		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
-	xdebug_xml_add_child(parent, node);
-	xdebug_var_export_xml_node(zv, full_name, node, level + 2 TSRMLS_CC);
+		xdebug_xml_add_child(parent, node);
+		xdebug_var_export_xml_node(zv, full_name, node, options, level + 1 TSRMLS_CC);
+	}
+	options->runtime.current_element_nr++;
 	return 0;
 }
 
-void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, int level TSRMLS_DC)
+void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level TSRMLS_DC)
 {
 	HashTable *myht;
 #ifdef ZEND_ENGINE_2
@@ -496,7 +510,12 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
-			xdebug_xml_add_text_encode(node, xdstrdup(Z_STRVAL_PP(struc)));
+			if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+				xdebug_xml_add_text_encode(node, xdstrdup(Z_STRVAL_PP(struc)));
+			} else {
+				xdebug_xml_add_text_encode(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data));
+			}
+			xdebug_xml_add_attribute(node, "size", xdebug_sprintf("%d", Z_STRLEN_PP(struc)));
 			break;
 
 		case IS_ARRAY:
@@ -505,7 +524,19 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			xdebug_xml_add_attribute(node, "children", myht->nNumOfElements > 0?"1":"0");
 			if (myht->nApplyCount < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml_node, 3, level, node, name);
+				if (level <= options->max_depth) {
+					options->runtime.current_element_nr = 0;
+					if (myht->nNumOfElements > options->max_children) {
+						xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime.page), 0, 1);
+						xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);
+						options->runtime.start_element_nr = options->max_children * options->runtime.page;
+						options->runtime.end_element_nr = options->max_children * (options->runtime.page + 1);
+					} else {
+						options->runtime.start_element_nr = 0;
+						options->runtime.end_element_nr = myht->nNumOfElements;
+					}
+					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml_node, 4, level, node, name, options);
+				}
 			} else {
 				xdebug_xml_add_attribute(node, "recursive", "1");
 			}
@@ -525,7 +556,10 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			if (myht) {
 				if (myht->nApplyCount < 1) {
 					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml_node, 3, level, node, name);
+					if (level <= options->max_depth) {
+						options->runtime.current_element_nr = 0;
+						zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml_node, 4, level, node, name, options);
+					}
 				} else {
 					xdebug_xml_add_attribute(node, "recursive", "1");
 				}
@@ -547,7 +581,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	}
 }
 
-xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val)
+xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val, xdebug_var_export_options *options)
 {
 	xdebug_xml_node *node;
 	char *full_name = NULL;
@@ -564,7 +598,7 @@ xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val)
 		xdebug_xml_add_attribute_ex(node, "fullname", xdstrdup(full_name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) val), 0, 1);
-	xdebug_var_export_xml_node(&val, name, node, 1 TSRMLS_CC);
+	xdebug_var_export_xml_node(&val, name, node, options, 1 TSRMLS_CC);
 
 	return node;
 }
