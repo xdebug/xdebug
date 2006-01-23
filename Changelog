@@ -1,3 +1,7 @@
+Mon Jan 23 08:14:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_mm.h:
+- Fixed issue with strndup's GNU extensions.
+
 Mon Jan 23 00:30:59 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c
 xdebug/xdebug_handler_dbgp.h
