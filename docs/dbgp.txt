@@ -2,7 +2,7 @@ DBGP - A common debugger protocol for languages and debugger UI communication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :Version: 1.0
-:Status: draft 14
+:Status: draft 15
 :Authors: - Shane Caraveo, ActiveState <shanec@ActiveState.com>
           - Derick Rethans <derick@derickrethans.nl>
 
@@ -124,34 +124,34 @@ init packet: ::
 
 Attributes in the init element can include:
     
-    =============== ========================================================
-    Attribute       Description
-    =============== ========================================================
-    appid           defined by the debugger engine
-    idekey          defined by the user.  The DBGP_IDEKEY environment
-                    variable SHOULD be used if it is available,
-                    otherwise setting this value is debugger engine
-                    implementation specific.  This value may be empty.
-    session         If the environment variable DBGP_COOKIE exists,
-                    then the init packet MUST contain a session
-                    attribute with the value of the variable.  This
-                    allows an IDE to execute a debugger engine, and
-                    maintain some state information between the
-                    execution and the protocol connection.  This value
-                    should not be expected to be set in 'remote'
-                    debugging situations where the IDE is not in
-                    control of the process.  
-    thread_id       the systems thread id
-    parent_appid    the appid of the application that spawned the
-                    process.  When an application is executed, it
-                    should set it's APPID into the environment.
-                    If an APPID already exists, it should first
-                    read that value and use it as the PARENT_APPID.
-    language_name   debugger engine specific, must not contain
-                    additional information, such as version, etc.
-    protocol        The highest version of this protocol supported
-    fileuri         URI of the script file being debugged
-    =============== ========================================================
+    ================ ========================================================
+    Attribute        Description
+    ================ ========================================================
+    appid            defined by the debugger engine
+    idekey           defined by the user.  The DBGP_IDEKEY environment
+                     variable SHOULD be used if it is available,
+                     otherwise setting this value is debugger engine
+                     implementation specific.  This value may be empty.
+    session          If the environment variable DBGP_COOKIE exists,
+                     then the init packet MUST contain a session
+                     attribute with the value of the variable.  This
+                     allows an IDE to execute a debugger engine, and
+                     maintain some state information between the
+                     execution and the protocol connection.  This value
+                     should not be expected to be set in 'remote'
+                     debugging situations where the IDE is not in
+                     control of the process.  
+    thread           the systems thread id
+    parent           the appid of the application that spawned the
+                     process.  When an application is executed, it
+                     should set it's APPID into the environment.
+                     If an APPID already exists, it should first
+                     read that value and use it as the PARENT_APPID.
+    language         debugger engine specific, must not contain
+                     additional information, such as version, etc.
+    protocol_version The highest version of this protocol supported
+    fileuri          URI of the script file being debugged
+    ================ ========================================================
 
 The IDE responds by dropping socket connection, or starting with
 debugger commands.
@@ -223,7 +223,9 @@ IDE to an error, or the success of the initialization (see section
 6.5 for more details on the error element). ::
 
     <proxyinit success="[0|1]"
-               idekey="{ID}">
+               idekey="{ID}"
+               address="{IP_ADDRESS}"
+               port="{NUM}>
         <error id="app_specific_error_code">
             <message>UI Usable Message</message>
         </error>
@@ -233,6 +235,11 @@ Once the IDE has sent this command, and received a confirmation, it
 disconnects from the proxy.  The IDE will only connect to the proxy
 when it initially wants to start accepting connections from the proxy,
 or when it wants to stop accepting connections from the proxy.
+
+The address and port attributes of the returned proxyinit element are the
+address and port that the proxy is configured to listen for DBGP connections on.
+This information is returned to the IDE so that it may pass this information on
+to build systems or the user via some UI.
 
 5.3.1 Init Packet Handling
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -345,7 +352,7 @@ with a stringified integer representing the length of the XML data
 packet.  The length and XML data are separated by a NULL byte.  The
 XML data is ended with a NULL byte.  Neither the IDE or debugger engine
 packets may contain NULL bytes within the packet since it is used as
-a separator.  Binary data must be encoded using base64. ::
+a separator.  Data must be encoded using base64. ::
 
     IDE:       command [SPACE] [args] -- data [NULL]
     DEBUGGER:  [NUMBER] [NULL] XML(data) [NULL]
@@ -1271,9 +1278,11 @@ max_depth argument.  The IDE may then use the fullname attribute of
 a property to dig further into the tree.  Data types are defined
 further in section 7.12 below.
 
-The number of children sent is defined by the debugger engine
-unless otherwise defined by sending the feature_set command with
-the max_children argument. ::
+The number of children sent is defined by the debugger engine unless
+otherwise defined by sending the feature_set command with the
+max_children argument. If max_depth > 1, irregardless of the page
+argument, the childrens pages are always the first page. Children are
+only returned if max_depth > 0 and max_children > 0. ::
 
     <property
         name="short_name"
@@ -1314,7 +1323,7 @@ Attributes in the property element can include:
                     returned, then the page attribute, in combination
                     with the pagesize attribute will define where in
                     the array or object these children should be
-                    located.
+                    located. The page number is 0-based.
     pagesize        the size of each page of data, defaulted by the
                     debugger engine, or negotiated with feature_set
                     and max_children
@@ -1421,6 +1430,11 @@ resource:
     of the type mapping, and should be considered
     experimental, and not generally available in
     implementations of this protocol.
+undefined:
+	This is used when a variable exists in the
+	local scope but does not have any value yet.
+	This is optional, it is also correct to not
+	return the property at all instead.
 
 For the most part, this protocol treats array's and hashes in the
 same way, placing the key or index into the name attribute of the
@@ -1556,6 +1570,8 @@ debugger engine ::
         ...data...
     </response>
 
+When the encoding attribute is not present then the default value of "none"
+is assumed.
 
 7.14 source
 -----------
@@ -2052,6 +2068,25 @@ where,
 
 A. ChangeLog
 ============
+2006-01-23
+
+- 7.11 Clarified the behavior of paging regarding depths, and that
+  paging of arrays/objects/hashes is 0 based.
+- draft 15
+
+2004-11-03
+
+- 7.12.1 Added the 'undefined' type.
+
+2004-10-28
+
+- 6 Clarify encoding for data passed in commands with the -- option.
+- 7.13 Clarify the default encoding for property values.
+
+2004-05-16
+
+- 5.3 add address and port attributes to the proxyinit element returned to the
+  ide by the proxy.
 
 2004-05-12
 
