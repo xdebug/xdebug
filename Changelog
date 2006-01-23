@@ -1,3 +1,7 @@
+Mon Jan 23 21:12:46 CET 2006 Derick Rethans <derick@derickrethans.nl>
+docs/dbgp.txt:
+- Merged from dbgp specs.
+
 Mon Jan 23 08:14:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_mm.h:
 - Fixed issue with strndup's GNU extensions.
