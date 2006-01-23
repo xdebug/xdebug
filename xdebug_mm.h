@@ -28,13 +28,12 @@
 #define xdstrdup    estrdup
 #define xdstrndup   estrndup
 #else  
-#include <string.h>
 #define xdmalloc    malloc
 #define xdcalloc    calloc	
 #define xdrealloc   realloc
 #define xdfree      free
 #define xdstrdup    strdup
-#define xdstrndup   strndup
+#define xdstrndup   zend_strndup
 #endif
 
 #endif
