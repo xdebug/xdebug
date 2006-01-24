@@ -694,6 +694,10 @@ The following features strings MUST be available:
                                       XML, HTML and XHTML. An IDE may need this
                                       information to to know what types of
                                       breakpoints an engine will accept.
+    breakpoint_types          get     returns a space separated list with all
+                                      the breakpoint types that are supported.
+                                      See `7.6 breakpoints`_ for a list of the
+                                      6 defined breakpoint types.
     multiple_sessions         get|set {0|1}
     encoding                  get|set {ISO8859-15, UTF-8, etc.}
     max_children              get|set max number of array or object
@@ -703,7 +707,6 @@ The following features strings MUST be available:
     max_depth                 get|set maximum depth that the debugger
                                       engine may return when sending arrays,
                                       hashs or object structures to the IDE.
-    data_encoding             get|set see feature_get
     ========================= ======= ==========================================
 
 The following features strings MAY be available, if they are not, the IDE should
@@ -2068,6 +2071,10 @@ where,
 
 A. ChangeLog
 ============
+2006-01-24
+
+- 7.2.1 Added a description of the breakpoint_types feature.
+
 2006-01-23
 
 - 7.11 Clarified the behavior of paging regarding depths, and that

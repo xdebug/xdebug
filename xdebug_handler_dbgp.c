@@ -1251,6 +1251,11 @@ DBGP_FUNC(feature_get)
 	xdebug_xml_add_attribute_ex(*retval, "feature_name", xdstrdup(CMD_OPTION('n')), 0, 1);
 
 	XDEBUG_STR_SWITCH(CMD_OPTION('n')) {
+		XDEBUG_STR_CASE("breakpoint_types")
+			xdebug_xml_add_text(*retval, xdstrdup("line call return"));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE("data_encoding")
 			xdebug_xml_add_attribute(*retval, "supported", "0");
 		XDEBUG_STR_CASE_END
@@ -1957,7 +1962,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.80 $";
+	return "$Revision: 1.81 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
