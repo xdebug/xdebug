@@ -1691,10 +1691,12 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
 		file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
 		line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
-		
+
 		if (!XG(context).handler->remote_error(&(XG(context)), 0, exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), XG(stack))) {
 			XG(remote_enabled) = 0;
 		}
+
+		print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
 	}
 }
 
