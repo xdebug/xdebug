@@ -1,3 +1,8 @@
+Tue Jan 24 23:13:04 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed implementation for FR #124: It was only done when remote debugging was
+  enabled.
+
 Tue Jan 24 23:05:54 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c
 xdebug/docs/dbgp.txt:
