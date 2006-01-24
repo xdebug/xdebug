@@ -1663,10 +1663,24 @@ static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRML
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 {
+	zval *message, *file, *line;
+#if PHP_MAJOR_VERSION >= 6
+	zend_class_entry *default_ce = zend_exception_get_default(TSRMLS_C);
+#else
+	zend_class_entry *default_ce = zend_exception_get_default();
+#endif
+	zend_class_entry *exception_ce = zend_get_class_entry(exception TSRMLS_CC);
+
 	if (!exception) {
 		return;
 	}
 
+	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
+	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
+	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
+
+	print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
+	
 	/* Start JIT if requested and not yet enabled */
 	if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
@@ -1680,23 +1694,11 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		}
 	}
 	if (XG(remote_enabled)) {
-		zval *message, *file, *line;
-#if PHP_MAJOR_VERSION >= 6
-		zend_class_entry *default_ce = zend_exception_get_default(TSRMLS_C);
-#else
-		zend_class_entry *default_ce = zend_exception_get_default();
-#endif
-		zend_class_entry *exception_ce = zend_get_class_entry(exception TSRMLS_CC);
-
-		message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
-		file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
-		line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
 		if (!XG(context).handler->remote_error(&(XG(context)), 0, exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), XG(stack))) {
 			XG(remote_enabled) = 0;
 		}
 
-		print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
 	}
 }
 
