@@ -1,3 +1,9 @@
+Tue Jan 24 22:12:06 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h:
+- Implemented correct paging behavior in case max_depth is greater than 1.
+
 Mon Jan 23 21:13:50 CET 2006 Derick Rethans <derick@derickrethans.nl>
 docs/Makefile:
 - Fixed Makefile.
