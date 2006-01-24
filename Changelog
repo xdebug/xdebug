@@ -1,3 +1,7 @@
+Tue Jan 24 22:26:41 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Implement FR #124: Add backtrace dumping information when exception thrown.
+
 Tue Jan 24 22:12:06 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c
 xdebug/xdebug_var.c
