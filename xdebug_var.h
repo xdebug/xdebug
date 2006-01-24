@@ -25,18 +25,20 @@
 #ifndef __HAVE_XDEBUG_VAR_H__
 #define __HAVE_XDEBUG_VAR_H__
 
+typedef struct
+{
+	int page; /* The number of the page to retrieve */
+	int current_element_nr;
+	int start_element_nr;
+	int end_element_nr;
+} xdebug_var_runtime_page;
+
 typedef struct xdebug_var_export_options {
 	int max_children;
 	int max_data;
 	int max_depth;
 	int show_hidden;
-	struct
-	{
-		int page; /* The number of the page to retrieve */
-		int current_element_nr;
-		int start_element_nr;
-		int end_element_nr;
-	} runtime;
+	xdebug_var_runtime_page *runtime;
 } xdebug_var_export_options;
 
 zval* xdebug_get_php_symbol(char* name, int name_length);

@@ -1349,7 +1349,16 @@ DBGP_FUNC(feature_set)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("max_depth")
+			int i;
 			options->max_depth = strtol(CMD_OPTION('v'), NULL, 10);
+
+			/* Reallocating page structure */
+			xdfree(options->runtime);
+			options->runtime = (xdebug_var_runtime_page*) xdmalloc(options->max_depth * sizeof(xdebug_var_runtime_page));
+			for (i = 0; i < options->max_depth; i++) {
+				options->runtime[i].page = 0;
+				options->runtime[i].current_element_nr = 0;
+			}
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("show_hidden")
@@ -1448,9 +1457,9 @@ DBGP_FUNC(property_get)
 	}
 
 	if (CMD_OPTION('p')) {
-		options->runtime.page = strtol(CMD_OPTION('p'), NULL, 10);
+		options->runtime[0].page = strtol(CMD_OPTION('p'), NULL, 10);
 	} else {
-		options->runtime.page = 0;
+		options->runtime[0].page = 0;
 	}
 
 	/* Override max data size if necessary */
@@ -1581,9 +1590,9 @@ DBGP_FUNC(property_value)
 	}
 
 	if (CMD_OPTION('p')) {
-		options->runtime.page = strtol(CMD_OPTION('p'), NULL, 10);
+		options->runtime[0].page = strtol(CMD_OPTION('p'), NULL, 10);
 	} else {
-		options->runtime.page = 0;
+		options->runtime[0].page = 0;
 	}
 
 	/* Override max data size if necessary */
@@ -1728,7 +1737,7 @@ DBGP_FUNC(context_get)
 		depth = atol(CMD_OPTION('d'));
 	}
 	/* Always reset to page = 0, as it might have been modified by property_get or property_value */
-	options->runtime.page = 0;
+	options->runtime[0].page = 0;
 	
 	res = attach_context_vars(*retval, options, context_id, depth, attach_used_var_with_contents TSRMLS_CC);
 	switch (res) {
@@ -1947,7 +1956,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.78 $";
+	return "$Revision: 1.79 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -1979,6 +1988,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
 	xdebug_var_export_options *options;
 	xdebug_xml_node *response, *child;
+	int i;
 	TSRMLS_FETCH();
 
 	/* initialize our status information */
@@ -2042,8 +2052,11 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	options->max_data     = 1024;
 	options->max_depth    = 1;
 	options->show_hidden  = 0;
-	options->runtime.page = 0;
-	options->runtime.current_element_nr = 0;
+	options->runtime = (xdebug_var_runtime_page*) xdmalloc(options->max_depth * sizeof(xdebug_var_runtime_page));
+	for (i = 0; i < options->max_depth; i++) {
+		options->runtime[i].page = 0;
+		options->runtime[i].current_element_nr = 0;
+	}
 
 /* {{{ Initialize auto globals in Zend Engine 2 */
 #ifdef ZEND_ENGINE_2
@@ -2069,7 +2082,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 
 int xdebug_dbgp_deinit(xdebug_con *context)
 {
-	xdebug_xml_node     *response;
+	xdebug_xml_node           *response;
+	xdebug_var_export_options *options;
 	TSRMLS_FETCH();
 
 	XG(status) = DBGP_STATUS_STOPPED;
@@ -2095,6 +2109,8 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		XG(stdio).php_header_write = NULL;
 	}
 
+	options = (xdebug_var_export_options*) context->options;
+	xdfree(options->runtime);
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
