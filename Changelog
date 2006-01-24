@@ -1,3 +1,8 @@
+Tue Jan 24 23:05:54 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c
+xdebug/docs/dbgp.txt:
+- Implemented FR #70: Add feature_get breakpoint_types.
+
 Tue Jan 24 22:32:50 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Implemented FR #137: feature_get for general commands doesn't have a text field.
