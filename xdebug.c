@@ -1664,16 +1664,18 @@ static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRML
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 {
 	zval *message, *file, *line;
-#if PHP_MAJOR_VERSION >= 6
-	zend_class_entry *default_ce = zend_exception_get_default(TSRMLS_C);
-#else
-	zend_class_entry *default_ce = zend_exception_get_default();
-#endif
-	zend_class_entry *exception_ce = zend_get_class_entry(exception TSRMLS_CC);
+	zend_class_entry *default_ce, *exception_ce;
 
 	if (!exception) {
 		return;
 	}
+
+#if PHP_MAJOR_VERSION >= 6
+	default_ce = zend_exception_get_default(TSRMLS_C);
+#else
+	default_ce = zend_exception_get_default();
+#endif
+	exception_ce = zend_get_class_entry(exception TSRMLS_CC);
 
 	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
 	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
