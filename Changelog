@@ -1,3 +1,8 @@
+Fri Jan 27 10:22:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_private.h:
+- Fixed bug #125: show_mem_delta does not calculate correct negative values on
+  64bit machines.
+
 Wed Jan 25 09:49:16 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed printing of stack trace on an exception.
