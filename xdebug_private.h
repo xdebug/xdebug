@@ -151,8 +151,8 @@ typedef struct _function_stack_entry {
 	HashTable   *symbol_table;
 
 	/* tracing properties */
-	unsigned int memory;
-	unsigned int prev_memory;
+	signed long  memory;
+	signed long  prev_memory;
 	double       time;
 
 	/* profiling properties */
