@@ -1037,7 +1037,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			xae.time_own = 0;
 			xae.time_inclusive = 0;
 #if MEMORY_LIMIT
-			xae.frame.mem_used = 0;
+			xae.mem_used = 0;
 #endif
 			xae.call_list = NULL;
 
