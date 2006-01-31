@@ -1,3 +1,7 @@
+Tue Jan 31 22:07:37 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed typo.
+
 Tue Jan 31 22:07:19 CET 2006 Derick Rethans <derick@derickrethans.nl>
 tests/get_declared_vars.phpt:
 - Fixed test.
