@@ -1,3 +1,7 @@
+Tue Jan 31 22:07:19 CET 2006 Derick Rethans <derick@derickrethans.nl>
+tests/get_declared_vars.phpt:
+- Fixed test.
+
 Tue Jan 31 22:04:05 CET 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
