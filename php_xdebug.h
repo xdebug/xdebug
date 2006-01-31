@@ -85,6 +85,8 @@ PHP_FUNCTION(xdebug_get_tracefile_name);
 
 /* profiling functions */
 PHP_FUNCTION(xdebug_get_profiler_filename);
+PHP_FUNCTION(xdebug_dump_aggr_profiling_data);
+PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
 
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
@@ -182,6 +184,10 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int stdout_redirected;
 	int stderr_redirected;
 	int stdin_redirected;
+
+	/* aggregate profiling */
+	HashTable  aggr_calls;
+	zend_bool  profiler_aggregate;
 
 ZEND_END_MODULE_GLOBALS(xdebug)
 

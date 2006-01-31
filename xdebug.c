@@ -144,7 +144,9 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_stop_trace,            NULL)
 	PHP_FE(xdebug_get_tracefile_name,    NULL)
 
-	PHP_FE(xdebug_get_profiler_filename,  NULL)
+	PHP_FE(xdebug_get_profiler_filename, NULL)
+	PHP_FE(xdebug_dump_aggr_profiling_data, NULL)
+	PHP_FE(xdebug_clear_aggr_profiling_data, NULL)
 
 #if MEMORY_LIMIT
 	PHP_FE(xdebug_memory_usage,          NULL)
@@ -311,6 +313,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "crc32",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable_trigger, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_append,         zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_aggregate",      "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_aggregate,      zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   remote_enable,     zend_xdebug_globals, xdebug_globals)
@@ -512,6 +515,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	/* get xdebug ini entries from the environment also */
 	xdebug_env_config();
 
+	/* initialize aggregate call information hash */
+	zend_hash_init_ex(&XG(aggr_calls), 50, NULL, (dtor_func_t) profile_aggr_call_entry_dtor, 1, 0);
+
 	/* Redirect compile and execute functions to our own */
 	old_compile_file = zend_compile_file;
 	zend_compile_file = xdebug_compile_file;
@@ -575,13 +581,30 @@ PHP_MINIT_FUNCTION(xdebug)
 }
 
 
+static xdebug_output_aggr_data(TSRMLS_D)
+{
+	xdebug_aggregate_entry *xae;
+
+	zend_hash_internal_pointer_reset(&XG(aggr_calls));
+	while (zend_hash_get_current_data(&XG(aggr_calls), (void**)&xae) == SUCCESS) {
+		fprintf(stderr, "filename=%s\nfunction=%s\nlineno=%d\ntime_own=%lu\ntime_inclusive=%lu\n\n", xae->filename, xae->function, xae->lineno, (unsigned long) (xae->time_own * 10000000), (unsigned long) (xae->time_inclusive * 10000000));
+		zend_hash_move_forward(&XG(aggr_calls));
+	}
+}
+
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
+	if (XG(profiler_aggregate)) {
+		xdebug_profiler_output_aggr_data(NULL TSRMLS_C);
+	}
+
 	/* Reset compile, execute and error callbacks */
 	zend_compile_file = old_compile_file;
 	zend_execute = xdebug_old_execute;
 	zend_execute_internal = xdebug_old_execute_internal;
 	zend_error_cb = old_error_cb;
+
+	zend_hash_destroy(&XG(aggr_calls));
 
 #ifdef ZTS
 	ts_free_id(xdebug_globals_id);
@@ -878,6 +901,8 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	void                **p;
 	int                   arg_count = 0;
 	int                   i = 0;
+	char                 *aggr_key;
+	int                   aggr_key_len;
 
 	if (EG(argument_stack).top >= 2) {
 		p = EG(argument_stack).top_element - 2;
@@ -991,13 +1016,57 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		xdebug_count_line(tmp->filename, tmp->lineno, 0 TSRMLS_CC);
 	}
 
+	if (XG(profiler_aggregate)) {
+		char *func_name = show_fname(tmp->function, 0, 0 TSRMLS_CC);
+
+		aggr_key = xdebug_sprintf("%s.%s.%d", tmp->filename, func_name, tmp->lineno);
+		aggr_key_len = strlen(aggr_key);
+
+		if (zend_hash_find(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void**)&tmp->aggr_entry) == FAILURE) {
+			xdebug_aggregate_entry xae;
+
+			if (tmp->user_defined == XDEBUG_EXTERNAL) {
+				xae.filename = xdstrdup(tmp->op_array->filename);
+			} else {
+				xae.filename = xdstrdup("php:internal");
+			}
+			xae.function = func_name;
+			xae.lineno = tmp->lineno;
+			xae.user_defined = tmp->user_defined;
+			xae.call_count = 0;
+			xae.time_own = 0;
+			xae.time_inclusive = 0;
+#if MEMORY_LIMIT
+			xae.frame.mem_used = 0;
+#endif
+			xae.call_list = NULL;
+
+			zend_hash_add(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void*)&xae, sizeof(xdebug_aggregate_entry), (void**)&tmp->aggr_entry);
+		}
+	}
+
 	if (XDEBUG_LLIST_TAIL(XG(stack))) {
 		function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 		tmp->prev = prev;
+		if (XG(profiler_aggregate)) {
+			if (prev->aggr_entry->call_list) {
+				if (!zend_hash_exists(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1)) {
+					zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
+				}
+			} else {
+				prev->aggr_entry->call_list = xdmalloc(sizeof(HashTable));
+				zend_hash_init_ex(prev->aggr_entry->call_list, 1, NULL, NULL, 1, 0);
+				zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
+			}
+		}
 	} else {
 		tmp->prev = 0;
 	}
 	xdebug_llist_insert_next(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
+
+	if (XG(profiler_aggregate)) {
+		xdfree(aggr_key);
+	}
 
 	return tmp;
 }
@@ -2282,6 +2351,37 @@ PHP_FUNCTION(xdebug_get_profiler_filename)
 	} else {
 		RETURN_FALSE;
 	}
+}
+
+PHP_FUNCTION(xdebug_dump_aggr_profiling_data)
+{
+	char *prefix = NULL;
+	int prefix_len;
+
+	if (!XG(profiler_aggregate)) {
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &prefix, &prefix_len) == FAILURE) {
+		return;
+	}
+
+	if (xdebug_profiler_output_aggr_data(prefix TSRMLS_CC) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+
+PHP_FUNCTION(xdebug_clear_aggr_profiling_data)
+{
+	if (!XG(profiler_aggregate)) {
+		RETURN_FALSE;
+	}
+
+	zend_hash_clean(&XG(aggr_calls));
+
+	RETURN_TRUE;
 }
 
 #if MEMORY_LIMIT
