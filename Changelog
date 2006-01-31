@@ -1,3 +1,11 @@
+Tue Jan 31 22:04:05 CET 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_private.h
+xdebug/xdebug_profiler.c
+xdebug/xdebug_profiler.h:
+- Added profiling aggregation functions (patch by Andrei Zmievski)
+
 Fri Jan 27 10:22:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_private.h:
 - Fixed bug #125: show_mem_delta does not calculate correct negative values on
