@@ -581,21 +581,10 @@ PHP_MINIT_FUNCTION(xdebug)
 }
 
 
-static xdebug_output_aggr_data(TSRMLS_D)
-{
-	xdebug_aggregate_entry *xae;
-
-	zend_hash_internal_pointer_reset(&XG(aggr_calls));
-	while (zend_hash_get_current_data(&XG(aggr_calls), (void**)&xae) == SUCCESS) {
-		fprintf(stderr, "filename=%s\nfunction=%s\nlineno=%d\ntime_own=%lu\ntime_inclusive=%lu\n\n", xae->filename, xae->function, xae->lineno, (unsigned long) (xae->time_own * 10000000), (unsigned long) (xae->time_inclusive * 10000000));
-		zend_hash_move_forward(&XG(aggr_calls));
-	}
-}
-
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	if (XG(profiler_aggregate)) {
-		xdebug_profiler_output_aggr_data(NULL TSRMLS_C);
+		xdebug_profiler_output_aggr_data(NULL TSRMLS_CC);
 	}
 
 	/* Reset compile, execute and error callbacks */
