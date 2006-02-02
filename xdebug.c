@@ -1486,7 +1486,7 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				} else {
 					php_printf("%10.4f ", i->time - XG(start_time));
 #if MEMORY_LIMIT
-					php_printf("%10u ", i->memory);
+					php_printf("%10ld ", i->memory);
 #endif
 					php_printf("%3d. %s(", i->level, tmp_name);
 				}
@@ -2143,7 +2143,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 {
 	zval ***args;
 	int     argc;
-	int     i, len;
+	int     i;
 	char   *val;
 	zval   *debugzval;
 	
