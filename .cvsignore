@@ -1,6 +1,7 @@
 .deps
 Makefile
 *.lo
+*.loT
 *.slo
 *.mk
 *.la
