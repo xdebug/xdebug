@@ -1,3 +1,7 @@
+Fri Feb 10 15:44:55 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Align the headers (include error message) to the left.
+
 Thu Feb 02 23:21:49 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed TSRMLS issue
