@@ -1450,7 +1450,7 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 	}
 
 	error_format = html ?
-		"<tr><th bgcolor='#ee5555' colspan=\"3\">%s: <i>%s</i> in <i>%s</i> on line <i>%d</i></th></tr>\n"
+		"<tr><th align='left' bgcolor='#ee5555' colspan=\"3\">%s: <i>%s</i> in <i>%s</i> on line <i>%d</i></th></tr>\n"
 		: "\n%s: %s in %s on line %d\n";
 	if (!log_only) {
 		php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
@@ -1460,8 +1460,8 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
 		if (!log_only) {
 			if (html) {
-				php_printf("<tr><th bgcolor='#7777dd' colspan='3'>Call Stack</th></tr>\n");
-				php_printf("<tr><th bgcolor='#9999ee'>#</th><th bgcolor='#9999ee'>Function</th><th bgcolor='#9999ee'>Location</th></tr>\n");
+				php_printf("<tr><th align='left' bgcolor='#7777dd' colspan='3'>Call Stack</th></tr>\n");
+				php_printf("<tr><th align='left' bgcolor='#9999ee'>#</th><th align='left' bgcolor='#9999ee'>Function</th><th align='left' bgcolor='#9999ee'>Location</th></tr>\n");
 			} else {
 				php_printf("\nCall Stack:\n");
 			}
@@ -1563,8 +1563,8 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				}
 				if (i->used_vars && i->used_vars->size) {
 					if (html) {
-						php_printf("<tr><th colspan='3' bgcolor='#33aa33'>Variables in local scope (#%d)</th></tr>\n", scope_nr);
-						php_printf("<tr><th colspan='2' bgcolor='#55cc55'>Variable</th><th bgcolor='#55cc55'>Value</th></tr>\n");
+						php_printf("<tr><th align='left' colspan='3' bgcolor='#33aa33'>Variables in local scope (#%d)</th></tr>\n", scope_nr);
+						php_printf("<tr><th align='left' colspan='2' bgcolor='#55cc55'>Variable</th><th align='left' bgcolor='#55cc55'>Value</th></tr>\n");
 					} else {
 						php_printf("\n\nVariables in local scope:\n");
 					}
