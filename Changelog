@@ -1,3 +1,7 @@
+Mon Feb 13 21:54:47 CET 2006 Derick Rethans <derick@derickrethans.nl>
+tests/bug00001.phpt:
+- Fixed skip-if clause.
+
 Fri Feb 10 15:44:55 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Align the headers (include error message) to the left.
