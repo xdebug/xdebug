@@ -1,3 +1,8 @@
+Mon Feb 20 15:57:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Temporary solution for this, until I can figure out how to deal with it
+  correctly.
+
 Mon Feb 13 21:54:47 CET 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00001.phpt:
 - Fixed skip-if clause.
