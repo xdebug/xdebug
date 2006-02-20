@@ -134,7 +134,7 @@ static int xdebug_array_element_export(zval **zv, int num_args, va_list args, ze
 		int newlen = 0;
 		char *tmp2 = php_str_to_str(hash_key->arKey, strlen(hash_key->arKey), "'", 1, "\\'", 2, &newlen);
 		xdebug_str_add(str, xdebug_sprintf("'%s' => ", tmp2), 1);
-		efree(tmp2);
+//		efree(tmp2);
 	}
 	xdebug_var_export(zv, str, level + 2, debug_zval TSRMLS_CC);
 	xdebug_str_addl(str, ", ", 2, 0);
