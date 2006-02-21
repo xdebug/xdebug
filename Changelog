@@ -1,3 +1,8 @@
+Tue Feb 21 22:26:58 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed bug #168: Xdebug's DBGp crashes on an eval command where the
+  result is an array.
+
 Tue Feb 21 22:25:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed memory overrun problem as we allocated too little pages for
