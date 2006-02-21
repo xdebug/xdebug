@@ -408,17 +408,21 @@ static int xdebug_array_element_export_xml_node(zval **zv, int num_args, va_list
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		node = xdebug_xml_node_init("property");
-		
+	
 		if (hash_key->nKeyLength != 0) {
 			name = xdstrdup(hash_key->arKey);
-			if (parent_name[0] != '$') {
+			if (!parent_name) {
+				full_name = NULL;
+			} else if (parent_name[0] != '$') {
 				full_name = xdebug_sprintf("$%s['%s']", parent_name, name);
 			} else {
 				full_name = xdebug_sprintf("%s['%s']", parent_name, name);
 			}
 		} else {
 			name = xdebug_sprintf("%ld", hash_key->h);
-			if (parent_name[0] != '$') {
+			if (!parent_name) {
+				full_name = NULL;
+			} else if (parent_name[0] != '$') {
 				full_name = xdebug_sprintf("$%s[%s]", parent_name, name);
 			} else {
 				full_name = xdebug_sprintf("%s[%s]", parent_name, name);
@@ -426,7 +430,9 @@ static int xdebug_array_element_export_xml_node(zval **zv, int num_args, va_list
 		}
 
 		xdebug_xml_add_attribute_ex(node, "name", name, 0, 1);
-		xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+		if (full_name) {
+			xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+		}
 		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
 		xdebug_xml_add_child(parent, node);
