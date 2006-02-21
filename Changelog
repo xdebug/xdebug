@@ -1,3 +1,15 @@
+Tue Feb 21 21:43:17 CET 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/usefulstuff.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_handler_gdb.h
+xdebug/xdebug_handler_php3.h
+xdebug/xdebug_handlers.c
+xdebug/xdebug_handlers.h:
+- Implemented virtual files for eval'ed statements. This fixes bug #136 too.
+
 Mon Feb 20 15:57:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Temporary solution for this, until I can figure out how to deal with it
