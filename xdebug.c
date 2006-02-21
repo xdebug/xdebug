@@ -1164,6 +1164,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	int                   do_return = (XG(do_trace) && XG(trace_file));
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
+	int                   eval_id = 0;
 
 	if (XG(level) == 0) {
 		/* Set session cookie if requested */
@@ -1292,6 +1293,13 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		xdebug_prefil_code_coverage(fse, op_array TSRMLS_CC);
 	}
 
+	/* If we're in an eval, we need to create an ID for it. This ID however
+	 * depends on the debugger mechanism in use so we need to call a function
+	 * in the handler for it */
+	if (XG(remote_enabled) && XG(context).handler->register_eval_id && fse->function.type == XFUNC_EVAL) {
+		eval_id = XG(context).handler->register_eval_id(&(XG(context)), fse);
+	}
+
 	/* Check for entry breakpoints */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
 		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_CALL)) {
@@ -1324,6 +1332,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
 			XG(remote_enabled) = 0;
 		}
+	}
+
+	/* If we're in an eval, we need to destroy the created ID again. */
+	if (XG(remote_enabled) && XG(context).handler->unregister_eval_id && fse->function.type == XFUNC_EVAL) {
+		XG(context).handler->unregister_eval_id(&(XG(context)), fse, eval_id);
 	}
 
 	fse->symbol_table = NULL;

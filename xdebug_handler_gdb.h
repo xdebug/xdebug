@@ -81,6 +81,8 @@ char *xdebug_gdb_get_revision(void);
 	xdebug_gdb_deinit,       \
 	xdebug_gdb_error,        \
 	xdebug_gdb_breakpoint,   \
+	NULL,                    \
+	NULL,                    \
 	xdebug_gdb_get_revision  \
 }
 

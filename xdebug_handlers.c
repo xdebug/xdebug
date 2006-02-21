@@ -79,3 +79,14 @@ void xdebug_llist_brk_dtor(void *dummy, xdebug_brk_info *brk)
 	xdebug_brk_info_dtor(brk);
 }
 
+void xdebug_hash_eval_info_dtor(xdebug_eval_info *ei)
+{
+	ei->refcount--;
+
+	if (ei->refcount == 0) {
+		xdfree(ei->contents);
+		xdfree(ei);
+	} else {
+		/* refcount wasn't 0 yet, so we won't free it yet */
+	}
+}

@@ -23,10 +23,12 @@
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_hash.h"
+#include "xdebug_private.h"
 #include "usefulstuff.h"
 
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;
+typedef struct _xdebug_eval_info            xdebug_eval_info;
 typedef struct _xdebug_con                  xdebug_con;
 typedef struct _xdebug_debug_list           xdebug_debug_list;
 typedef struct _xdebug_remote_handler       xdebug_remote_handler;
@@ -56,6 +58,8 @@ struct _xdebug_con {
 	xdebug_hash           *breakpoint_list;
 	xdebug_hash           *function_breakpoints;
 	xdebug_hash           *class_breakpoints;
+	xdebug_hash           *eval_id_lookup;
+	int                    eval_id_sequence;
 	xdebug_llist          *line_breakpoints;
 	xdebug_debug_list      list;
 	int                    do_break;
@@ -90,6 +94,12 @@ struct _xdebug_brk_info {
 	int                   hit_condition;
 };
 
+struct _xdebug_eval_info {
+	int   id;
+	int   refcount;
+	char *contents;
+};
+
 struct _xdebug_remote_handler {
 	/* Init / deinit */
 	int (*remote_init)(xdebug_con *h, int mode);
@@ -100,6 +110,10 @@ struct _xdebug_remote_handler {
 
 	/* Breakpoints */
 	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type);
+
+	/* Eval ID registration and removal */
+	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
+	int (*unregister_eval_id)(xdebug_con *h, function_stack_entry *fse, int eval_id);
 
 	/* Information */
 	char *(*get_revision)(void);
@@ -117,5 +131,6 @@ xdebug_remote_handler_info* xdebug_handlers_get(void);
 void xdebug_brk_info_dtor(xdebug_brk_info *brk);
 void xdebug_llist_brk_dtor(void *dummy, xdebug_brk_info *brk);
 void xdebug_hash_brk_dtor(xdebug_brk_info *brk);
+void xdebug_hash_eval_info_dtor(xdebug_eval_info *ei);
 
 #endif

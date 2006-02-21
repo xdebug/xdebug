@@ -32,6 +32,8 @@ char *xdebug_php3_get_revision(void);
 	xdebug_php3_deinit,       \
 	xdebug_php3_error,        \
 	NULL,                     \
+	NULL,                     \
+	NULL,                     \
 	xdebug_php3_get_revision  \
 }
 

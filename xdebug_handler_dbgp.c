@@ -50,6 +50,7 @@
 #include <fcntl.h>
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+static char *create_eval_key_id(int id);
 
 /*****************************************************************************
 ** Constants and strings for statii and reasons
@@ -533,7 +534,7 @@ int get_symbol_contents(char* name, int name_length, xdebug_xml_node *node, xdeb
 	return 0;
 }
 
-static char* return_source(char *filename, int begin, int end TSRMLS_DC)
+static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 {
 	php_stream *stream;
 	int    i = begin;
@@ -586,10 +587,57 @@ static char* return_source(char *filename, int begin, int end TSRMLS_DC)
 	return source.d;
 }
 
+static char* return_eval_source(char *id, int begin, int end TSRMLS_DC)
+{
+	char             *key, *joined;
+	xdebug_eval_info *ei;
+	xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+
+	if (begin < 0) {
+		begin = 0;
+	}
+	key = create_eval_key_id(atoi(id));
+	if (xdebug_hash_find(XG(context).eval_id_lookup, key, strlen(key), (void *) &ei)) {
+		xdebug_arg_init(parts);
+		xdebug_explode("\n", ei->contents, parts, end + 2);
+		joined = xdebug_join("\n", parts, begin, end);
+		xdebug_arg_dtor(parts);
+		return joined;
+	}
+	return NULL;
+}
+
+static char* return_source(char *filename, int begin, int end TSRMLS_DC)
+{
+	if (strncmp(filename, "dbgp://", 7) == 0) {
+		return return_eval_source(filename + 7, begin, end TSRMLS_CC);
+	} else {
+		return return_file_source(filename, begin, end TSRMLS_CC);
+	}
+}
+
+
+static int check_evaled_code(function_stack_entry *fse, char **filename, int *lineno TSRMLS_DC)
+{
+	char *end_marker;
+	xdebug_eval_info *ei;
+
+	end_marker = fse->filename + strlen(fse->filename) - strlen("eval()'d code");
+	if (strcmp("eval()'d code", end_marker) == 0) {
+		if (xdebug_hash_find(XG(context).eval_id_lookup, fse->filename, strlen(fse->filename), (void *) &ei)) {
+			*filename = xdebug_sprintf("dbgp://%lu", ei->id);
+		}
+		return 1;
+	}
+	return 0;
+}
+
 static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 {
 	function_stack_entry *fse, *fse_prev;
 	char                 *tmp_fname;
+	char                 *tmp_filename;
+	int                   tmp_lineno;
 	xdebug_xml_node      *tmp;
 
 	fse = xdebug_get_stack_frame(nr TSRMLS_CC);
@@ -600,11 +648,17 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	tmp = xdebug_xml_node_init("stack");
 	xdebug_xml_add_attribute_ex(tmp, "where", xdstrdup(tmp_fname), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "level", xdebug_sprintf("%ld", nr), 0, 1);
-	xdebug_xml_add_attribute_ex(tmp, "type",  xdstrdup("file"), 0, 1);
 	if (fse_prev) {
-		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename TSRMLS_CC), 0, 1);
+		if (check_evaled_code(fse_prev, &tmp_filename, &tmp_lineno TSRMLS_CC)) {
+			xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("eval"), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", tmp_filename, 0, 0);
+		} else {
+			xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("file"), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename TSRMLS_CC), 0, 1);
+		}
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno TSRMLS_CC), 0, 1);
 	} else {
+		xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("file"), 0, 1);
 		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(zend_get_executed_filename(TSRMLS_C) TSRMLS_CC), 0, 1);
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
 	}
@@ -1226,7 +1280,7 @@ DBGP_FUNC(source)
 		begin = strtol(CMD_OPTION('b'), NULL, 10);
 	}
 	if (CMD_OPTION('e')) {
-		begin = strtol(CMD_OPTION('e'), NULL, 10);
+		end = strtol(CMD_OPTION('e'), NULL, 10);
 	}
 	/* return_source allocates memory for source */
 	source = return_source(filename, begin, end TSRMLS_CC);
@@ -1962,7 +2016,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.81 $";
+	return "$Revision: 1.82 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2080,6 +2134,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
+	context->eval_id_lookup = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_eval_info_dtor);
+	context->eval_id_sequence = 0;
 
 	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
@@ -2120,6 +2176,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
+	xdebug_hash_destroy(context->eval_id_lookup);
 	xdebug_llist_destroy(context->line_breakpoints, NULL);
 	xdebug_hash_destroy(context->breakpoint_list);
 	xdfree(context->buffer);
@@ -2215,5 +2272,48 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 
 	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
+	return 1;
+}
+
+static char *create_eval_key_file(char *filename, int lineno)
+{
+	return xdebug_sprintf("%s(%d) : eval()'d code", filename, lineno);
+}
+
+static char *create_eval_key_id(int id)
+{
+	return xdebug_sprintf("%04x", id);
+}
+
+int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse)
+{
+	char             *key;
+	xdebug_eval_info *ei;
+
+	context->eval_id_sequence++;
+
+	ei = xdcalloc(sizeof(xdebug_eval_info), 1);
+	ei->id = context->eval_id_sequence;
+	ei->contents = xdstrndup(fse->include_filename + 1, strlen(fse->include_filename) - 2);
+	ei->refcount = 2;
+
+	key = create_eval_key_file(fse->filename, fse->lineno);
+	xdebug_hash_add(context->eval_id_lookup, key, strlen(key), (void*) ei);
+
+	key = create_eval_key_id(ei->id);
+	xdebug_hash_add(context->eval_id_lookup, key, strlen(key), (void*) ei);
+
+	return ei->id;
+}
+
+int xdebug_dbgp_unregister_eval_id(xdebug_con *context, function_stack_entry *fse, int eval_id)
+{
+	char *key;
+
+	key = create_eval_key_file(fse->filename, fse->lineno);
+	xdebug_hash_delete(context->eval_id_lookup, key, strlen(key));
+
+	key = create_eval_key_id(eval_id);
+	xdebug_hash_delete(context->eval_id_lookup, key, strlen(key));
 	return 1;
 }

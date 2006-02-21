@@ -90,6 +90,26 @@ char* fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char de
 	return tmp;
 }
 
+char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end)
+{
+	int         i;
+	xdebug_str *ret;
+
+	xdebug_str_ptr_init(ret);
+	if (begin < 0) {
+		begin = 0;
+	}
+	if (end > args->c - 1) {
+		end = args->c - 1;
+	}
+	for (i = begin; i < end; i++) {
+		xdebug_str_add(ret, args->args[i], 0);
+		xdebug_str_add(ret, delim, 0);
+	}
+	xdebug_str_add(ret, args->args[end], 0);
+	return ret->d;
+}
+
 void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit) 
 {
 	char *p1, *p2, *endp;
