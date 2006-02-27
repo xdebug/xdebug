@@ -2075,6 +2075,9 @@ PHP_FUNCTION(xdebug_call_file)
    Dummy function to prevent time limit from being set within the script */
 PHP_FUNCTION(xdebug_set_time_limit)
 {
+	if (!XG(remote_enabled)) {
+		zif_set_time_limit(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
 }
 /* }}} */
 
