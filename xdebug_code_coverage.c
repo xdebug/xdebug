@@ -79,7 +79,9 @@ void xdebug_count_line(char *filename, int lineno, int executable TSRMLS_DC)
 
 static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode TSRMLS_DC)
 {
-	xdebug_count_line(fn, opcode.lineno, 1 TSRMLS_CC);
+	if (opcode.opcode != ZEND_NOP && opcode.opcode != ZEND_EXT_NOP) {
+		xdebug_count_line(fn, opcode.lineno, 1 TSRMLS_CC);
+	}
 }
 
 static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list args, zend_hash_key *hash_key)
