@@ -1,3 +1,8 @@
+Mon Feb 27 22:00:55 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Suppress NOP/EXT_NOP from being marked as executable code with Code
+  Coverage.
+
 Mon Feb 27 21:59:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed PECL bug #6940 (XDebug ignores set_time_limit)
