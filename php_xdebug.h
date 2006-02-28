@@ -117,6 +117,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	HashTable    *active_symbol_table;
 	unsigned int  prev_memory;
 
+	void        (*orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAMETERS);
+
 	FILE         *trace_file;
 	zend_bool     do_trace;
 	zend_bool     auto_trace;

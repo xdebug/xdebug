@@ -722,6 +722,7 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
 	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
+	XG(orig_set_time_limit_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
 	return SUCCESS;
@@ -2076,7 +2077,7 @@ PHP_FUNCTION(xdebug_call_file)
 PHP_FUNCTION(xdebug_set_time_limit)
 {
 	if (!XG(remote_enabled)) {
-		zif_set_time_limit(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		XG(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 }
 /* }}} */
