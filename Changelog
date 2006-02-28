@@ -1,3 +1,9 @@
+Tue Feb 28 09:54:47 CET 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- The zif_ trick doesn't work on Windows, so work around it by storing
+  the original handler in a request global.
+
 Mon Feb 27 22:00:55 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - Suppress NOP/EXT_NOP from being marked as executable code with Code
