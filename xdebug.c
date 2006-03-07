@@ -291,6 +291,7 @@ PHP_INI_BEGIN()
 #else
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "100",                PHP_INI_ALL,    OnUpdateLong,   max_nesting_level, zend_xdebug_globals, xdebug_globals)
 #endif
+	STD_PHP_INI_BOOLEAN("xdebug.show_exception_trace",  "0",            PHP_INI_ALL,    OnUpdateBool,   show_ex_trace,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_local_vars", "0",                  PHP_INI_ALL,    OnUpdateBool,   show_local_vars,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_mem_delta",  "0",                  PHP_INI_ALL,    OnUpdateBool,   show_mem_delta,    zend_xdebug_globals, xdebug_globals)
 
@@ -1753,7 +1754,9 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
 	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
-	print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
+	if (XG(show_ex_trace)) {
+		print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
+	}
 	
 	/* Start JIT if requested and not yet enabled */
 	if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
