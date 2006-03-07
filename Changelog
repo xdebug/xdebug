@@ -1,3 +1,9 @@
+Tue Mar 07 22:30:54 CET 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Turn the display of a stack trace whenever an exception occurs into a setting
+  as it's highly annoying.
+
 Tue Mar 07 22:30:13 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Added missing return statement.
