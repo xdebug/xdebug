@@ -286,6 +286,8 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 	}
 	fprintf(fp, "\n");
 	fflush(fp);
+
+	return ZEND_HASH_APPLY_KEEP;
 }
 
 int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC)
