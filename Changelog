@@ -1,3 +1,7 @@
+Thu Mar 09 14:06:20 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #87: Warning about headers when "register_shutdown_function" used.
+
 Tue Mar 07 22:30:54 CET 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
