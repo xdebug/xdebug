@@ -1112,6 +1112,39 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	}
 }
 
+static int handle_hit_value(xdebug_brk_info *brk_info)
+{
+	/* Increase hit counter */
+	brk_info->hit_count++;
+
+	/* If the hit_value is 0, the condition check is disabled */
+	if (!brk_info->hit_value) {
+		return 1;
+	}
+
+	switch (brk_info->hit_condition) {
+		case XDEBUG_HIT_GREATER_EQUAL:
+			if (brk_info->hit_count >= brk_info->hit_value) {
+				return 1;
+			}
+			break;
+		case XDEBUG_HIT_EQUAL:
+			if (brk_info->hit_count == brk_info->hit_value) {
+				return 1;
+			}
+			break;
+		case XDEBUG_HIT_MOD:
+			if (brk_info->hit_count % brk_info->hit_value == 0) {
+				return 1;
+			}
+			break;
+		case XDEBUG_HIT_DISABLED:
+			return 1;
+			break;
+	}
+	return 0;
+}
+
 static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
@@ -1122,15 +1155,16 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	if (fse->function.type == XFUNC_NORMAL) {
 		if (xdebug_hash_find(XG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &extra_brk_info)) {
 			/* Yup, breakpoint found, we call the handler when it's not
-			 * disabled*/
+			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (fse->user_defined == XDEBUG_INTERNAL || (breakpoint_type == XDEBUG_BRK_FUNC_RETURN)) {
-					if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
-						XG(remote_enabled) = 0;
-						return 0;
+				if (handle_hit_value(extra_brk_info)) {
+					if (fse->user_defined == XDEBUG_INTERNAL || (breakpoint_type == XDEBUG_BRK_FUNC_RETURN)) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
+							return 0;
+						}
+					} else {
+						XG(context).do_break = 1;
 					}
-				} else {
-					XG(context).do_break = 1;
 				}
 			}
 		}
@@ -1141,9 +1175,11 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 
 		if (xdebug_hash_find(XG(context).class_breakpoints, tmp_name, strlen(tmp_name), (void *) &extra_brk_info)) {
 			/* Yup, breakpoint found, call handler if the breakpoint is not
-			 * disabled */
+			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled) {
-				XG(context).do_break = 1;
+				if (handle_hit_value(extra_brk_info)) {
+					XG(context).do_break = 1;
+				}
 			}
 		}
 		xdfree(tmp_name);

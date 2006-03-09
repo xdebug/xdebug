@@ -745,6 +745,19 @@ static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 	} else {
 		xdebug_xml_add_attribute(xml, "state", "enabled");
 	}
+	xdebug_xml_add_attribute_ex(xml, "hit_count", xdebug_sprintf("%lu", brk->hit_count), 0, 1);
+	switch (brk->hit_condition) {
+		case XDEBUG_HIT_GREATER_EQUAL:
+			xdebug_xml_add_attribute(xml, "hit_condition", ">=");
+			break;
+		case XDEBUG_HIT_EQUAL:
+			xdebug_xml_add_attribute(xml, "hit_condition", "==");
+			break;
+		case XDEBUG_HIT_MOD:
+			xdebug_xml_add_attribute(xml, "hit_condition", "%");
+			break;
+	}
+	xdebug_xml_add_attribute_ex(xml, "hit_value", xdebug_sprintf("%lu", brk->hit_value), 0, 1);
 }
 
 static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
@@ -2016,7 +2029,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.83 $";
+	return "$Revision: 1.84 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2249,11 +2262,8 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
 {
-	function_stack_entry *i;
 	xdebug_xml_node *response;
 	TSRMLS_FETCH();
-
-	i = xdebug_get_stack_tail(TSRMLS_C);
 
 	XG(status) = DBGP_STATUS_BREAK;
 	XG(reason) = DBGP_REASON_OK;
