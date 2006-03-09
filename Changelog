@@ -1,3 +1,8 @@
+Thu Mar 09 22:32:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- DBGp: Implemented support for hit conditions for breakpoints.
+
 Thu Mar 09 14:06:20 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #87: Warning about headers when "register_shutdown_function" used.
