@@ -1,3 +1,8 @@
+Fri Mar 10 13:10:26 CET 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Fixed bug #171: set_time_limit stack overflow on 2nd request.
+
 Thu Mar 09 22:32:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c:
