@@ -719,6 +719,7 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	/* Override var_dump with our own function */
 	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
+	XG(orig_var_dump_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_var_dump;
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
@@ -737,6 +738,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
 #endif
+	zend_function *orig;
+
 	xdebug_llist_destroy(XG(stack), NULL);
 	XG(stack) = NULL;
 
@@ -778,6 +781,12 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
 	}
+
+	/* Reset var_dump and set_time_limit to the original function */
+	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
+	orig->internal_function.handler = XG(orig_var_dump_func);
+	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
+	orig->internal_function.handler = XG(orig_set_time_limit_func);
 
 	return SUCCESS;
 }
