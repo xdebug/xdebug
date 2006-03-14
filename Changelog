@@ -1,3 +1,12 @@
+Tue Mar 14 22:20:48 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handlers.h:
+- Added support for conditions for file/line breakpoints.
+- Added support for hit value checking to file/line breakpoints.
+- Added support for "exception" breakpoints.
+- Removed general breaks for normal PHP warnings, errors and exceptions.
+
 Fri Mar 10 13:10:26 CET 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
