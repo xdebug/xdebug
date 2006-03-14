@@ -39,9 +39,10 @@ struct _xdebug_debug_list {
 	int   last_line;
 };
 
-#define BREAKPOINT_TYPE_LINE     1
-#define BREAKPOINT_TYPE_FUNCTION 2
-#define BREAKPOINT_TYPE_METHOD   3
+#define BREAKPOINT_TYPE_LINE      1
+#define BREAKPOINT_TYPE_FUNCTION  2
+#define BREAKPOINT_TYPE_METHOD    3
+#define BREAKPOINT_TYPE_EXCEPTION 4
 
 struct _xdebug_brk_admin {
 	int   id;
@@ -61,6 +62,7 @@ struct _xdebug_con {
 	xdebug_hash           *eval_id_lookup;
 	int                    eval_id_sequence;
 	xdebug_llist          *line_breakpoints;
+	xdebug_llist          *exception_breakpoints;
 	xdebug_debug_list      list;
 	int                    do_break;
 
@@ -82,6 +84,7 @@ struct _xdebug_brk_info {
 	char                 *type;
 	char                 *classname;
 	char                 *functionname;
+	char                 *exceptionname;
 	int                   function_break_type; /* XDEBUG_BRK_FUNC_* */
 	char                 *file;
 	int                   file_len;

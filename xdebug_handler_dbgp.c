@@ -800,6 +800,12 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 				return brk;
 			}
 			break;
+
+		case BREAKPOINT_TYPE_EXCEPTION:
+			if (xdebug_hash_find(XG(context).exception_breakpoints, hkey, strlen(hkey), (void *) &brk)) {
+				return brk;
+			}
+			break;
 	}
 	return brk;
 }
@@ -840,6 +846,12 @@ static int breakpoint_remove(int type, char *hkey)
 
 		case BREAKPOINT_TYPE_METHOD:
 			if (xdebug_hash_delete(XG(context).class_breakpoints, hkey, strlen(hkey))) {
+				return SUCCESS;
+			}
+			break;
+
+		case BREAKPOINT_TYPE_EXCEPTION:
+			if (xdebug_hash_delete(XG(context).exception_breakpoints, hkey, strlen(hkey))) {
 				return SUCCESS;
 			}
 			break;
@@ -974,6 +986,7 @@ DBGP_FUNC(breakpoint_set)
 	xdebug_brk_info      *brk_info;
 	char                 *tmp_name;
 	int                   brk_id = 0;
+	int                   new_length = 0;
 	function_stack_entry *fse;
 	XDEBUG_STR_SWITCH_DECL;
 
@@ -984,6 +997,7 @@ DBGP_FUNC(breakpoint_set)
 	brk_info->classname = NULL;
 	brk_info->functionname = NULL;
 	brk_info->function_break_type = 0;
+	brk_info->exceptionname = NULL;
 	brk_info->condition = NULL;
 	brk_info->disabled = 0;
 	brk_info->temporary = 0;
@@ -1012,6 +1026,7 @@ DBGP_FUNC(breakpoint_set)
 		}
 		brk_info->lineno = strtol(CMD_OPTION('n'), NULL, 10);
 
+		/* If no filename is given, we use the current one */
 		if (!CMD_OPTION('f')) {
 			fse = xdebug_get_stack_tail(TSRMLS_C);
 			if (!fse) {
@@ -1023,6 +1038,11 @@ DBGP_FUNC(breakpoint_set)
 		} else {
 			brk_info->file = xdebug_path_from_url(CMD_OPTION('f') TSRMLS_CC);
 			brk_info->file_len = strlen(brk_info->file);
+		}
+
+		/* Perhaps we have a break condition */
+		if (CMD_OPTION('-')) {
+			brk_info->condition = xdebug_base64_decode(CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length); 
 		}
 
 		tmp_name = xdebug_sprintf("%s$%lu", brk_info->file, brk_info->lineno);
@@ -1068,7 +1088,19 @@ DBGP_FUNC(breakpoint_set)
 	} else
 
 	if (strcmp(CMD_OPTION('t'), "exception") == 0) {
+#if PHP_MAJOR_VERSION >= 5
+		if (!CMD_OPTION('x')) {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+		}
+		brk_info->exceptionname = xdstrdup(CMD_OPTION('x'));
+		if (!xdebug_hash_add(context->exception_breakpoints, CMD_OPTION('x'), strlen(CMD_OPTION('x')), (void*) brk_info)) {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_NOT_SET);
+		} else {
+			brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_EXCEPTION, CMD_OPTION('x'));
+		}
+#else
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
+#endif
 	} else
 
 	if (strcmp(CMD_OPTION('t'), "watch") == 0) {
@@ -2029,7 +2061,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.84 $";
+	return "$Revision: 1.85 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2145,6 +2177,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 
 	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_admin_dtor);
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
+	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
 	context->eval_id_lookup = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_eval_info_dtor);
@@ -2188,6 +2221,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdfree(options->runtime);
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
+	xdebug_hash_destroy(context->exception_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
 	xdebug_hash_destroy(context->eval_id_lookup);
 	xdebug_llist_destroy(context->line_breakpoints, NULL);

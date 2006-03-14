@@ -1785,6 +1785,8 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 {
 	zval *message, *file, *line;
 	zend_class_entry *default_ce, *exception_ce;
+	xdebug_brk_info *extra_brk_info;
+	int do_exception = 0;
 
 	if (!exception) {
 		return;
@@ -1804,9 +1806,17 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	if (XG(show_ex_trace)) {
 		print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
 	}
+
+	/* Check if we have a breakpoint on this exception */
 	
+	if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
+		if (handle_hit_value(extra_brk_info)) {
+			do_exception = 1;
+		}
+	}
+		
 	/* Start JIT if requested and not yet enabled */
-	if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
+	if (do_exception && !XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		if (XG(context).socket >= 0) {
 			XG(remote_enabled) = 1;
@@ -1817,12 +1827,10 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
 		}
 	}
-	if (XG(remote_enabled)) {
-
+	if (do_exception && XG(remote_enabled)) {
 		if (!XG(context).handler->remote_error(&(XG(context)), 0, exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), XG(stack))) {
 			XG(remote_enabled) = 0;
 		}
-
 	}
 }
 
@@ -1874,25 +1882,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 	xdfree(error_type_str);
 
-	if (EG(error_reporting) & type) {
-		/* Start JIT if requested and not yet enabled */
-		if (XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT) && !XG(remote_enabled)) {
-			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
-			if (XG(context).socket >= 0) {
-				XG(remote_enabled) = 1;
-				XG(context).program_name = NULL;
-
-				/* Get handler from mode */
-				XG(context).handler = xdebug_handler_get(XG(remote_handler));
-				XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
-			}
-		}
-		if (XG(remote_enabled)) {
-			if (!XG(context).handler->remote_error(&(XG(context)), type, NULL, buffer, error_filename, error_lineno, XG(stack))) {
-				XG(remote_enabled) = 0;
-			}
-		}
-	}
 	efree(buffer);
 
 	/* Bail out if we can't recover */
@@ -2630,7 +2619,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						/* Restore error reporting level */
 						EG(error_reporting) = old_error_reporting;
 					}
-					if (break_ok) {
+					if (break_ok && handle_hit_value(brk)) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
 							XG(remote_enabled) = 0;
 							break;
