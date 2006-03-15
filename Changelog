@@ -1,3 +1,7 @@
+Wed Mar 15 10:22:20 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed exception breakpoints.
+
 Tue Mar 14 22:20:48 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c
