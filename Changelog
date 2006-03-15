@@ -1,3 +1,11 @@
+Wed Mar 15 23:51:31 CET 2006 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- fix escaped characters in dbgp command
+- fix using double quoted strings in array indicies
+
+# example: property_get -n "$_SERVER[\"QUERY_STRING\"]"
+# example: property_get -n "$_SERVER[\'QUERY_STRING\']"
+
 Wed Mar 15 10:22:20 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed exception breakpoints.
