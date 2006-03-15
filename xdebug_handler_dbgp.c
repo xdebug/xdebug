@@ -383,6 +383,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 		zval *retval = NULL;
 		char *current_classname = NULL;
 		int   cc_length = 0;
+		char  quotechar = 0;
 
 		/* Set the target table to the currently active scope */
 		st = XG(active_symbol_table);
@@ -435,9 +436,10 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						break;
 					case 3:
 						/* Associative arrays */
-						if (*p[0] == '\'') {
+						if (*p[0] == '\'' || *p[0] == '"') {
 							state = 4;
 							keyword = *p + 1;
+							quotechar = *p[0];
 						}
 						/* Numerical index */
 						if (*p[0] >= '0' && *p[0] <= '9') {
@@ -446,7 +448,8 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						}
 						break;
 					case 4:
-						if (*p[0] == '\'') {
+						if (*p[0] == quotechar) {
+							quotechar = 0;
 							state = 5;
 							keyword_end = *p;
 							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
@@ -1885,6 +1888,7 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 	xdebug_dbgp_arg *args = NULL;
 	char *ptr;
 	int   state;
+	int   charescaped = 0;
 	char  opt = ' ', *value_begin = NULL;
 
 	args = xdmalloc(sizeof (xdebug_dbgp_arg));
@@ -1961,16 +1965,29 @@ int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 				}
 				break;
 			case STATE_QUOTED:
+				/* if the quote is escaped, remain in STATE_QUOTED.  This
+				   will also handle other escaped chars, or an instance of
+				   an escaped slash followed by a quote: \\"
+				*/
+				if (*ptr == '\\') {
+					charescaped = !charescaped;
+				} else
 				if (*ptr == '"') {
 					int index = opt - 'a';
 
+					if (charescaped) {
+						charescaped = 0;
+						break;
+					}
 					if (opt == '-') {
 						index = 26;
 					}
 
 					if (!args->value[index]) {
-						args->value[index] = xdcalloc(1, ptr - value_begin + 1);
-						memcpy(args->value[index], value_begin, ptr - value_begin);
+						int len = ptr - value_begin;
+						args->value[index] = xdcalloc(1, len + 1);
+						memcpy(args->value[index], value_begin, len);
+						php_stripcslashes(args->value[index], &len);
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;
@@ -2061,7 +2078,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.85 $";
+	return "$Revision: 1.86 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
