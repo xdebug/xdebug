@@ -1807,16 +1807,8 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
 	}
 
-	/* Check if we have a breakpoint on this exception */
-	
-	if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
-		if (handle_hit_value(extra_brk_info)) {
-			do_exception = 1;
-		}
-	}
-		
 	/* Start JIT if requested and not yet enabled */
-	if (do_exception && !XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
+	if (!XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		if (XG(context).socket >= 0) {
 			XG(remote_enabled) = 1;
@@ -1827,9 +1819,14 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
 		}
 	}
-	if (do_exception && XG(remote_enabled)) {
-		if (!XG(context).handler->remote_error(&(XG(context)), 0, exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), XG(stack))) {
-			XG(remote_enabled) = 0;
+	if (XG(remote_enabled)) {
+		/* Check if we have a breakpoint on this exception */
+		if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
+			if (handle_hit_value(extra_brk_info)) {
+				if (!XG(context).handler->remote_error(&(XG(context)), 0, exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), XG(stack))) {
+					XG(remote_enabled) = 0;
+				}
+			}
 		}
 	}
 }
