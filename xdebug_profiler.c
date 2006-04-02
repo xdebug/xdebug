@@ -61,6 +61,9 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 
 	if (strcmp(XG(profiler_output_name), "crc32") == 0) {
 		filename = xdebug_sprintf("%s/cachegrind.out.%lu", XG(profiler_output_dir), xdebug_crc32(script_name, strlen(script_name)));
+	} else if (strcmp(XG(profiler_output_name), "timestamp") == 0) {
+		time_t the_time = time(NULL);
+		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), the_time);
 	} else {
 		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), getpid());
 	}

@@ -2315,6 +2315,9 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 		if (strcmp(XG(trace_output_name), "crc32") == 0) {
 			VCWD_GETCWD(cwd, 127);
 			filename = xdebug_sprintf("%s/trace.%lu.xt", XG(trace_output_dir), xdebug_crc32(cwd, strlen(cwd)));
+		} else if (strcmp(XG(trace_output_name), "timestamp") == 0) {
+			time_t the_time = time(NULL);
+			filename = xdebug_sprintf("%s/trace.%ld.xt", XG(trace_output_dir), the_time);
 		} else {
 			filename = xdebug_sprintf("%s/trace.%ld.xt", XG(trace_output_dir), getpid());
 		}
