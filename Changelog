@@ -1,3 +1,9 @@
+Sun Apr 02 09:31:03 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_profiler.c:
+- Implemented the "timestamp" option for the xdebug.trace_output_name and
+  xdebug.profiler_output_name settings.
+
 Wed Mar 15 23:51:31 CET 2006 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - fix escaped characters in dbgp command
