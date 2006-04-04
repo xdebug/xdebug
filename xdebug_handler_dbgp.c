@@ -229,6 +229,9 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 	xdebug_str_ptr_init(ret);
 
 	xdebug_xml_return_node(message, &xml_message);
+	if (XG(remote_log_file)) {
+		fprintf(XG(remote_log_file), "-> %s\n\n", xml_message.d);
+	}
 
 	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l), 1);
 	xdebug_str_addl(ret, "\0", 1, 0);
@@ -2020,6 +2023,9 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 	xdebug_dbgp_cmd *command;
 	xdebug_xml_node *error;
 
+	if (XG(remote_log_file)) {
+		fprintf(XG(remote_log_file), "<- %s\n", line);
+	}
 	res = xdebug_dbgp_parse_cmd(line, (char**) &cmd, (xdebug_dbgp_arg**) &args);
 
 	/* Add command name to return packet */
@@ -2078,7 +2084,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.86 $";
+	return "$Revision: 1.87 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2200,6 +2206,16 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->eval_id_lookup = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_eval_info_dtor);
 	context->eval_id_sequence = 0;
 
+	XG(remote_log_file) = NULL;
+	if (XG(remote_log) && strlen(XG(remote_log))) {
+		XG(remote_log_file) = fopen(XG(remote_log), "a");
+	}
+	if (XG(remote_log_file)) {
+		char *timestr = xdebug_get_time();
+		fprintf(XG(remote_log_file), "Log opened at %s\n", timestr);
+		xdfree(timestr);
+	}
+
 	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
 	return 1;
@@ -2245,6 +2261,13 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdebug_hash_destroy(context->breakpoint_list);
 	xdfree(context->buffer);
 
+	if (XG(remote_log_file)) {
+		char *timestr = xdebug_get_time();
+		fprintf(XG(remote_log_file), "Log closed at %s\n\n", timestr);
+		xdfree(timestr);
+		fclose(XG(remote_log_file));
+		XG(remote_log_file) = NULL;
+	}
 	return 1;
 }
 

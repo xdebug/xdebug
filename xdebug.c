@@ -327,6 +327,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 #endif
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
 	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
 PHP_INI_END()
@@ -439,6 +440,9 @@ void xdebug_env_config()
 		} else
 		if (strcasecmp(envvar, "profiler_enable_trigger") == 0) {
 			name = "xdebug.profiler_enable_trigger";
+		} else
+		if (strcasecmp(envvar, "remote_log") == 0) {
+			name = "xdebug.remote_log";
 		}
 
 		if (name) {
