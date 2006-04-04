@@ -1,3 +1,11 @@
+Tue Apr 04 19:01:10 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Added the xdebug.remote_log setting that allows you to log debugger
+  communication to a log file for debugging. This can also be set through the
+  "remote_log" element in the XDEBUG_CONFIG environment variable.
+
 Sun Apr 02 09:31:03 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_profiler.c:
