@@ -1,3 +1,7 @@
+Thu Apr 06 19:40:22 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+debugclient/main.c:
+- Fixed gcc4 build issues.
+
 Thu Apr 06 08:38:54 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Flush the log so that it is also useful if things crash.
