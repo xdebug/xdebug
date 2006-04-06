@@ -231,6 +231,7 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 	xdebug_xml_return_node(message, &xml_message);
 	if (XG(remote_log_file)) {
 		fprintf(XG(remote_log_file), "-> %s\n\n", xml_message.d);
+		fflush(XG(remote_log_file));
 	}
 
 	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l), 1);
@@ -2025,6 +2026,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 	if (XG(remote_log_file)) {
 		fprintf(XG(remote_log_file), "<- %s\n", line);
+		fflush(XG(remote_log_file));
 	}
 	res = xdebug_dbgp_parse_cmd(line, (char**) &cmd, (xdebug_dbgp_arg**) &args);
 
@@ -2084,7 +2086,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.87 $";
+	return "$Revision: 1.88 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2213,6 +2215,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	if (XG(remote_log_file)) {
 		char *timestr = xdebug_get_time();
 		fprintf(XG(remote_log_file), "Log opened at %s\n", timestr);
+		fflush(XG(remote_log_file));
 		xdfree(timestr);
 	}
 
@@ -2264,6 +2267,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	if (XG(remote_log_file)) {
 		char *timestr = xdebug_get_time();
 		fprintf(XG(remote_log_file), "Log closed at %s\n\n", timestr);
+		fflush(XG(remote_log_file));
 		xdfree(timestr);
 		fclose(XG(remote_log_file));
 		XG(remote_log_file) = NULL;
