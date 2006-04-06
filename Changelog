@@ -1,3 +1,7 @@
+Thu Apr 06 20:47:28 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Try to fix encoding issues with Komodo, but this seems to make Komodo hang.
+
 Thu Apr 06 19:40:22 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 debugclient/main.c:
 - Fixed gcc4 build issues.
