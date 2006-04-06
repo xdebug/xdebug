@@ -234,8 +234,9 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 		fflush(XG(remote_log_file));
 	}
 
-	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l), 1);
+	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l + sizeof("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n")), 1);
 	xdebug_str_addl(ret, "\0", 1, 0);
+	xdebug_str_add(ret, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n", 0);
 	xdebug_str_add(ret, xml_message.d, 0);
 	xdebug_str_addl(ret, "\0", 1, 0);
 	xdebug_str_dtor(xml_message);
@@ -1367,7 +1368,7 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("encoding")
-			xdebug_xml_add_text(*retval, xdstrdup("UTF-8"));
+			xdebug_xml_add_text(*retval, xdstrdup("iso-8859-1"));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
@@ -1407,7 +1408,7 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("supported_encodings")
-			xdebug_xml_add_text(*retval, xdstrdup("UTF-8"));
+			xdebug_xml_add_text(*retval, xdstrdup("iso-8859-1"));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
@@ -1447,7 +1448,7 @@ DBGP_FUNC(feature_set)
 	XDEBUG_STR_SWITCH(CMD_OPTION('n')) {
 
 		XDEBUG_STR_CASE("encoding")
-			if (strcmp(CMD_OPTION('v'), "UTF-8") != 0) {
+			if (strcmp(CMD_OPTION('v'), "iso-8859-1") != 0) {
 				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_ENCODING_NOT_SUPPORTED);
 			}
 		XDEBUG_STR_CASE_END
@@ -2086,7 +2087,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.88 $";
+	return "$Revision: 1.89 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
