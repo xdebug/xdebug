@@ -234,7 +234,7 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 		fflush(XG(remote_log_file));
 	}
 
-	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l + sizeof("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n")), 1);
+	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l + sizeof("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n") - 1), 1);
 	xdebug_str_addl(ret, "\0", 1, 0);
 	xdebug_str_add(ret, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n", 0);
 	xdebug_str_add(ret, xml_message.d, 0);
@@ -2087,7 +2087,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.89 $";
+	return "$Revision: 1.90 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
