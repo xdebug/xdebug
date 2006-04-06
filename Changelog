@@ -1,3 +1,7 @@
+Thu Apr 06 20:57:13 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed off by one error.
+
 Thu Apr 06 20:47:28 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Try to fix encoding issues with Komodo, but this seems to make Komodo hang.
