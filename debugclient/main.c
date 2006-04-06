@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 	int                 debug_once = 1;      /* Whether to allow more than one debug session (1 = no) */
 	struct sockaddr_in  server_in;
 	struct sockaddr_in  client_in;
-	int                 client_in_len;
+	socklen_t           client_in_len;
 	int                 fd;                  /* Filedescriptor for userinput */
 	fd_buf              cxt = { NULL, 0 };
 	struct in_addr     *iaddr;
@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
 #ifdef HAVE_LIBEDIT
 				/* Copy the prompt string */
 				sprintf(prompt, "(cmd) ");
-				if (((const char*) cmd = el_gets(el, &num)) != NULL && num != 0) {
+				if ((cmd = (char *) el_gets(el, &num)) != NULL && num != 0) {
 					/* Add command to history */
 #ifdef XDC_OLD_LIBEDIT
 					history(hist, H_ENTER, cmd);
