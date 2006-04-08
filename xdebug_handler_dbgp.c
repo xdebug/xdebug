@@ -221,7 +221,7 @@ static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 	return NULL;
 }
 
-static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
+static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC)
 {
 	xdebug_str  xml_message = {0, 0, NULL};
 	xdebug_str *ret;
@@ -244,11 +244,11 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 	return ret;
 }
 
-static void send_message(xdebug_con *context, xdebug_xml_node *message)
+static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC)
 {
 	xdebug_str *tmp;
 
-	tmp = make_message(context, message);
+	tmp = make_message(context, message TSRMLS_CC);
 	SSENDL(context->socket, tmp->d, tmp->l);
 	xdebug_str_ptr_dtor(tmp);
 }
@@ -1182,7 +1182,7 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 	message = xdebug_xml_node_init("stream");
 	xdebug_xml_add_attribute_ex(message, "type", (char *)name, 0, 0);
 	xdebug_xml_add_text_encode(message, xdstrdup(str));
-	send_message(&XG(context), message);
+	send_message(&XG(context), message TSRMLS_CC);
 	xdebug_xml_node_dtor(message);
 
 	return 0;
@@ -2087,7 +2087,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.90 $";
+	return "$Revision: 1.91 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2105,7 +2105,7 @@ int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
 		response = xdebug_xml_node_init("response");
 		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
 		if (ret != 1) {
-			send_message(context, response);
+			send_message(context, response TSRMLS_CC);
 		}
 		xdebug_xml_node_dtor(response);
 
@@ -2173,7 +2173,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
 
-	send_message(context, response);
+	send_message(context, response TSRMLS_CC);
 	xdebug_xml_node_dtor(response);
 /* }}} */
 
@@ -2243,7 +2243,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdebug_xml_add_attribute_ex(response, "status", xdebug_dbgp_status_strings[XG(status)], 0, 0);
 	xdebug_xml_add_attribute_ex(response, "reason", xdebug_dbgp_reason_strings[XG(reason)], 0, 0);
 
-	send_message(context, response);
+	send_message(context, response TSRMLS_CC);
 	xdebug_xml_node_dtor(response);
 
 	if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
@@ -2328,7 +2328,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	xdebug_xml_add_text(error, xdstrdup(message));
 	xdebug_xml_add_child(response, error);
 
-	send_message(context, response);
+	send_message(context, response TSRMLS_CC);
 	xdebug_xml_node_dtor(response);
 	if (!exception_type) {
 		xdfree(errortype);
@@ -2353,7 +2353,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
 	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 
-	send_message(context, response);
+	send_message(context, response TSRMLS_CC);
 	xdebug_xml_node_dtor(response);
 
 	XG(lastcmd) = NULL;
