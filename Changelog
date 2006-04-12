@@ -1,3 +1,7 @@
+Thu Apr 13 00:26:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed Komodo bug 45484: no member data for objects in PHP debugger.
+
 Sat Apr 08 19:30:44 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 html/archive.php
 www.derickrethans.nl/html/index.php
