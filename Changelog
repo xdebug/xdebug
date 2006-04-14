@@ -1,3 +1,8 @@
+Fri Apr 14 12:07:08 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00173.phpt:
+- Fixed bug #173: Xdebug segfaults using SPL ArrayIterator.
+
 Thu Apr 13 00:26:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed Komodo bug 45484: no member data for objects in PHP debugger.
