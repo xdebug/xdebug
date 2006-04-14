@@ -1665,7 +1665,9 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	xdebug_str_addl(&str, "   >=> ", 7, 0);
 
 	tmp_value = get_zval_value(retval, 0);
-	xdebug_str_add(&str, tmp_value, 1);
+	if (tmp_value) {
+		xdebug_str_add(&str, tmp_value, 1);
+	}
 	xdebug_str_addl(&str, "\n", 2, 0);
 
 	return str.d;
