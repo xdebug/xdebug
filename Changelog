@@ -1,3 +1,8 @@
+Mon May 01 12:09:16 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+debugclient/build/buildcheck.sh:
+- Fixed bug #177: debugclient fails to compile due to Bison.
+#- As we don't need bison at all I just removed the check.
+
 Fri Apr 14 12:07:08 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/bug00173.phpt:
