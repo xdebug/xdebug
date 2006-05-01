@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.1 2002-11-12 11:08:02 derick Exp $ 
+# $Id: buildcheck.sh,v 1.2 2006-05-01 10:09:16 derick Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -100,14 +100,6 @@ if test "$am_prefix" != "$lt_prefix"; then
     echo "WARNING: automake and libtool are installed in different"
     echo "         directories.  This may cause aclocal to fail."
     echo "         continuing anyway"
-fi
-
-set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'`
-if test "${1}" = "1" -a "${2}" -lt "28"; then
-echo "buildconf: You need GNU Bison 1.28 or newer installed."
-exit 1
-else
-echo "buildconf: bison version ${1}.${2} (ok)"
 fi
 
 test -n "$stamp" && touch $stamp
