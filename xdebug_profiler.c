@@ -58,12 +58,26 @@ void profile_call_entry_dtor(void *dummy, void *elem)
 int xdebug_profiler_init(char *script_name TSRMLS_DC)
 {
 	char *filename;
+	char *script_name_tmp, *char_ptr;
 
 	if (strcmp(XG(profiler_output_name), "crc32") == 0) {
 		filename = xdebug_sprintf("%s/cachegrind.out.%lu", XG(profiler_output_dir), xdebug_crc32(script_name, strlen(script_name)));
 	} else if (strcmp(XG(profiler_output_name), "timestamp") == 0) {
 		time_t the_time = time(NULL);
 		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), the_time);
+	} else if (strcmp(XG(profiler_output_name), "script") == 0) {
+		script_name_tmp = estrdup(script_name + 1);
+		/* replace slashes with underscores */
+		while ((char_ptr = strpbrk(script_name_tmp, "/\\")) != NULL) {
+			char_ptr[0] = '_';
+		}
+		/* replace .php with _php */
+		char_ptr = strrchr(script_name_tmp, '.');  
+		if (char_ptr) {
+			char_ptr[0] = '_';
+		}
+		filename = xdebug_sprintf("%s/%s_cachegrind.out", XG(profiler_output_dir), script_name_tmp);
+		efree(script_name_tmp);
 	} else {
 		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), getpid());
 	}
