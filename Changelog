@@ -1,3 +1,11 @@
+Thu May 04 11:55:31 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_profiler.c:
+- Added a "script" value to the profiler_output_name option.  This will write
+  the profiler output to a filename that consists of the script's full path
+  (using underscores). ie: /var/www/index.php becomes
+  var_www_index_php_cachegrind.out. (Patch by Brian Shire
+  <shire@facebook.com>).
+
 Mon May 01 12:09:16 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 debugclient/build/buildcheck.sh:
 - Fixed bug #177: debugclient fails to compile due to Bison.
