@@ -1863,6 +1863,35 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	error_type_str = error_type(type);
 
+#if PHP_MAJOR_VERSION >= 5
+	/* according to error handling mode, suppress error, throw exception or show it */
+	if (PG(error_handling) != EH_NORMAL) {
+		switch (type) {
+			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_PARSE:
+				/* fatal errors are real errors and cannot be made exceptions */
+				break;
+			case E_STRICT:
+				/* for the sake of BC to old damaged code */
+				break;
+			case E_NOTICE:
+			case E_USER_NOTICE:
+				/* notices are no errors and are not treated as such like E_WARNINGS */
+				break;
+			default:
+				/* throw an exception if we are in EH_THROW mode
+				 * but DO NOT overwrite a pending exception
+				 */
+				if (PG(error_handling) == EH_THROW && !EG(exception)) {
+					zend_throw_error_exception(PG(exception_class), buffer, 0, type TSRMLS_CC);
+				}
+				efree(buffer);
+				return;
+		}
+	}
+#endif
+
 	if (XG(error_handler)) { /* If an error handler is set, use it */
 /*
 		call_handler(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
