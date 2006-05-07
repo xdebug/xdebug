@@ -1567,7 +1567,9 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				char *tmp_varname, *tmp_value, *tmp_fancy_value;
 
 				if (c) {
-					php_printf(", ");
+					if (!log_only) {
+						php_printf(", ");
+					}
 					if (PG(log_errors) && !is_cli) {
 						xdebug_str_addl(&log_buffer, ", ", 2, 0);
 					}
@@ -1914,8 +1916,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 	xdfree(error_type_str);
 
-	efree(buffer);
-
 	/* Bail out if we can't recover */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -1935,6 +1935,19 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			}
 			break;
 	}
+
+	if (PG(track_errors) && EG(active_symbol_table)) {
+		zval *tmp;
+
+		ALLOC_ZVAL(tmp);
+		INIT_PZVAL(tmp);
+		Z_STRVAL_P(tmp) = (char *) estrndup(buffer, buffer_len);
+		Z_STRLEN_P(tmp) = buffer_len;
+		Z_TYPE_P(tmp) = IS_STRING;
+		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
+	}
+
+	efree(buffer);
 }
 
 /* {{{ zend_op_array srm_compile_file (file_handle, type)
