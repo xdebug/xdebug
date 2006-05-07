@@ -1,3 +1,8 @@
+Sun May 07 23:36:38 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00176.phpt:
+- Fixed bug #176: Segfault using SplTempFileObject.
+
 Sun May 07 18:19:50 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #180: collected includes not shown in trace files. (Patch by
