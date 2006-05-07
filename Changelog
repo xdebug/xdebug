@@ -1,3 +1,7 @@
+Sun May 07 18:18:10 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+tests/bug00057-ze2.phpt:
+- Fix test
+
 Thu May 04 11:55:31 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Added a "script" value to the profiler_output_name option.  This will write
