@@ -9,6 +9,7 @@ xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.show_mem_delta=0
 xdebug.profiler_enable=0
+error_reporting=2047
 --FILE--
 <?php
 class OO {
@@ -28,7 +29,4 @@ echo $o->foo('80');
 
 ?> 
 --EXPECTF--
-Strict standards: var: Deprecated. Please use the public/private/protected modifiers in /%s/bug00057-ze2.php on line 3
-
-Strict standards: var: Deprecated. Please use the public/private/protected modifiers in /%s/bug00057-ze2.php on line 4
 2
