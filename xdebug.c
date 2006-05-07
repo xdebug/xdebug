@@ -979,7 +979,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = cur_opcode->lineno;
 
 #if (PHP_MAJOR_VERSION == 6) || \
-	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1) || \
+	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || \
 	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0 && PHP_RELEASE_VERSION > 5) || \
 	(PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 4 && PHP_RELEASE_VERSION > 0)
 		if (tmp->function.type == XFUNC_EVAL) {
@@ -2503,7 +2503,7 @@ static zval *get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, 
 #endif
 			break;
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1) || (PHP_MAJOR_VERSION >= 6)
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || (PHP_MAJOR_VERSION >= 6)
 		case IS_CV:
 			return *zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
 			break;
