@@ -1,3 +1,8 @@
+Sun May 07 18:19:50 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #180: collected includes not shown in trace files. (Patch by
+  Cristian Rodriguez <soporte@onfocus.cl>)
+
 Sun May 07 18:18:10 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00057-ze2.phpt:
 - Fix test
