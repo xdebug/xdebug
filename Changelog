@@ -1,3 +1,8 @@
+Sun May 07 23:55:49 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00178.phpt:
+- Fixed bug #178: $php_errormsg and Track errors unavailable.
+
 Sun May 07 23:36:38 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/bug00176.phpt:
