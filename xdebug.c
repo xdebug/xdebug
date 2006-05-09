@@ -1800,7 +1800,7 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		return;
 	}
 
-#if PHP_MAJOR_VERSION >= 6
+#if (PHP_MAJOR_VERSION >= 6) || ((PHP_MAJOR_VERSION == 5) && (PHP_MINOR_VERSION >= 2))
 	default_ce = zend_exception_get_default(TSRMLS_C);
 #else
 	default_ce = zend_exception_get_default();
