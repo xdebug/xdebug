@@ -1,3 +1,7 @@
+Tue May 09 23:25:47 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed support for getting $this as property with DBGp.
+
 Sun May 07 23:55:49 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/bug00178.phpt:
