@@ -295,6 +295,11 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 		case XF_ST_ROOT:
 		case XF_ST_ARRAY_INDEX:
 			element = prepare_search_key(name, &name_length, "", 0);
+			/* Handle "this" in a different way */
+			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
+				retval_p = EG(This);
+				goto cleanup;
+			}
 			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
 				goto cleanup;
@@ -310,6 +315,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			element_length = name_length;
 
 			/* Then we try it again as protected property */
+			free(element);
 			element = prepare_search_key(name, &element_length, "*", 1);
 			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
@@ -318,6 +324,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			element_length = name_length;
 
 			/* Then we try it again as private property */
+			free(element);
 			element = prepare_search_key(name, &element_length, ccn, ccnl);
 			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
@@ -351,7 +358,7 @@ inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
 	*length = ce->name_length;
 	return estrdup(ce->name);
 #endif
-#if PHP_MAJOR_VERSION == 5
+#if PHP_MAJOR_VERSION >= 5
 	char *name;
 	zend_uint name_len;
 
@@ -411,6 +418,9 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							keyword_end = *p;
 							if (keyword) {
 								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+								if (current_classname) {
+									efree(current_classname);
+								}
 								current_classname = NULL;
 								if (retval) {
 									st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -423,8 +433,11 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							keyword_end = *p;
 							if (keyword) {
 								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
-								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
 								if (retval) {
+									if (current_classname) {
+										efree(current_classname);
+									}
+									current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
 									st = fetch_ht_from_zval(retval TSRMLS_CC);
 								}
 								keyword = NULL;
@@ -458,6 +471,9 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							state = 5;
 							keyword_end = *p;
 							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
 							current_classname = NULL;
 							if (retval) {
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -475,6 +491,9 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							state = 1;
 							keyword_end = *p;
 							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
 							current_classname = NULL;
 							if (retval) {
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -2087,7 +2106,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.91 $";
+	return "$Revision: 1.92 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
