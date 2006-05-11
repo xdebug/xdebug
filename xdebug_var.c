@@ -39,6 +39,11 @@ char *error_type(int type)
 		case E_USER_ERROR:
 			return xdstrdup("Fatal error");
 			break;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
+		case E_RECOVERABLE_ERROR:
+			return xdstrdup("Catchable fatal error");
+			break;
+#endif
 		case E_WARNING:
 		case E_CORE_WARNING:
 		case E_COMPILE_WARNING:
