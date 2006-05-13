@@ -1,3 +1,9 @@
+Sat May 13 19:44:46 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Changed trace file logging so that it closes the file when it can no longer
+  write to disk. (f.e. because the disk is full).
+- Fixed bug #182: Errors are not html escaped when being displayed. 
+
 Tue May 09 23:25:47 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed support for getting $this as property with DBGp.
