@@ -881,8 +881,12 @@ static void trace_function_begin(function_stack_entry *fse, int function_nr TSRM
 {
 	if (XG(do_trace) && XG(trace_file)) {
 		char *t = return_trace_stack_frame_begin(fse, function_nr TSRMLS_CC);
-		fprintf(XG(trace_file), "%s", t);
-		fflush(XG(trace_file));
+		if (fprintf(XG(trace_file), "%s", t) < 0) {
+			fclose(XG(trace_file));
+			XG(trace_file) = NULL;
+		} else {
+			fflush(XG(trace_file));
+		}
 		xdfree(t);
 	}
 }
@@ -891,8 +895,12 @@ static void trace_function_end(function_stack_entry *fse, int function_nr TSRMLS
 {
 	if (XG(do_trace) && XG(trace_file)) {
 		char *t = return_trace_stack_frame_end(fse, function_nr TSRMLS_CC);
-		fprintf(XG(trace_file), "%s", t);
-		fflush(XG(trace_file));
+		if (fprintf(XG(trace_file), "%s", t) < 0) {
+			fclose(XG(trace_file));
+			XG(trace_file) = NULL;
+		} else {
+			fflush(XG(trace_file));
+		}
 		xdfree(t);
 	}
 }
@@ -1505,11 +1513,11 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 
 static void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
 {
-	char *error_format;
+	char *error_format, *error_string;
 	xdebug_llist_element *le;
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
 	function_stack_entry *i;
-	int len;
+	int len, dummy;
 
 	if (html && !log_only) {
 		php_printf("<br />\n<font size='1'><table border='1' cellspacing='0'>\n");
@@ -1519,7 +1527,9 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 		"<tr><th align='left' bgcolor='#ee5555' colspan=\"3\">%s: <i>%s</i> in <i>%s</i> on line <i>%d</i></th></tr>\n"
 		: "\n%s: %s in %s on line %d\n";
 	if (!log_only) {
-		php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
+		error_string = xmlize(buffer, strlen(buffer), &dummy);
+		php_printf(error_format, error_type_str, error_string, error_filename, error_lineno);
+		efree(error_string);
 	}
 
 	if (XG(stack) && XG(stack)->size) {
