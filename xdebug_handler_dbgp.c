@@ -1148,13 +1148,11 @@ static int _xdebug_do_eval(unsigned char *eval_string, zval *ret_zval TSRMLS_DC)
 
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
-	XG(ignore_fatal_error) = 1;
 	res = zend_eval_string(eval_string, ret_zval, "xdebug eval" TSRMLS_CC);
 
 	/* Clean up */
 	EG(error_reporting) = old_error_reporting;
 	XG(breakpoints_allowed) = 1;
-	XG(ignore_fatal_error) = 0;
 
 	return res;
 }
@@ -1537,24 +1535,6 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 	HashTable            *tmp_symbol_table;
 
 	contents = get_symbol(name, name_length, options TSRMLS_CC);
-	if (!contents && !no_eval && XG(active_symbol_table)) {
-		char *varname = NULL;
-		if (var_only && name[0] != '$' && !strstr(name, "::$")) {
-			varname = xdebug_sprintf("$%s", name);
-		}
-		/* if we cannot get the value directly, then try eval */
-		tmp_symbol_table = EG(active_symbol_table);
-		EG(active_symbol_table) = XG(active_symbol_table);
-		res = _xdebug_do_eval(varname ? varname : name, &ret_zval TSRMLS_CC);
-		EG(active_symbol_table) = tmp_symbol_table;
-		if (res != FAILURE && (!non_null || Z_TYPE_P(&ret_zval) != IS_NULL)) {
-			contents = get_zval_value_xml_node(name, &ret_zval, options);
-			zval_dtor(&ret_zval);
-		}
-		if (varname) {
-			xdfree(varname);
-		}
-	}
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 		return SUCCESS;
@@ -1669,27 +1649,6 @@ static int add_variable_contents_node(xdebug_xml_node *node, char *name, int nam
 	HashTable            *tmp_symbol_table;
 
 	contents_found = get_symbol_contents(name, name_length, node, options TSRMLS_CC);
-	if (!contents_found && !no_eval) {
-		char *varname = NULL;
-		if (var_only && name[0] != '$' && !strstr(name, "::$")) {
-			varname = xdebug_sprintf("$%s", name);
-		}
-		/* if we cannot get the value directly, then try eval */
-		tmp_symbol_table = EG(active_symbol_table);
-		EG(active_symbol_table) = XG(active_symbol_table);
-		res = _xdebug_do_eval(varname ? varname : name, &ret_zval TSRMLS_CC);
-		EG(active_symbol_table) = tmp_symbol_table;
-		if (res != FAILURE && (!non_null || Z_TYPE_P(&ret_zval) != IS_NULL)) {
-			zval *tmp_zval = &ret_zval;
-			
-			xdebug_var_export_xml_node(&tmp_zval, name, node, options, 1 TSRMLS_CC);
-			contents_found = 1;
-			zval_dtor(&ret_zval);
-		}
-		if (varname) {
-			xdfree(varname);
-		}
-	}
 	if (contents_found) {
 		return SUCCESS;
 	}
@@ -2106,7 +2065,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.93 $";
+	return "$Revision: 1.94 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

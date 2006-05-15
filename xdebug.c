@@ -701,7 +701,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(remote_enabled) = 0;
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
-	XG(ignore_fatal_error) = 0;
 	if (XG(auto_trace) && XG(trace_output_dir) && strlen(XG(trace_output_dir))) {
 		/* In case we do an auto-trace we are not interested in the return
 		 * value, but we still have to free it. */
@@ -1937,15 +1936,12 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
-			if (!XG(ignore_fatal_error)) {
 #if MEMORY_LIMIT
 			/* restore memory limit */
-				AG(memory_limit) = PG(memory_limit);
+			AG(memory_limit) = PG(memory_limit);
 #endif
-				zend_bailout();
-				return;
-			}
-			break;
+			zend_bailout();
+			return;
 	}
 
 	if (PG(track_errors) && EG(active_symbol_table)) {
