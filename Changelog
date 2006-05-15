@@ -1,3 +1,11 @@
+Mon May 15 23:41:05 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed bug #183: property_get -n $this->somethingnonexistent crashes the
+  debugger.
+#- And thanks to Marcus for helping me figuring out the problem.
+
 Mon May 15 23:34:05 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
