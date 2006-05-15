@@ -670,6 +670,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_trace)      = 0;
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+	XG(code_coverage_op_array_cache) = xdebug_hash_alloc(1024, NULL);
 	XG(stack)         = xdebug_llist_alloc(stack_element_dtor);
 	XG(trace_file)    = NULL;
 	XG(tracefile_name) = NULL;
@@ -773,6 +774,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	XG(do_code_coverage) = 0;
 
 	xdebug_hash_destroy(XG(code_coverage));
+	xdebug_hash_destroy(XG(code_coverage_op_array_cache));
 
 	if (XG(remote_enabled)) {
 		XG(context).handler->remote_deinit(&(XG(context)));

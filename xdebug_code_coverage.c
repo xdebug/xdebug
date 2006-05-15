@@ -128,7 +128,16 @@ static int prefil_from_class_table(zend_class_entry *class_entry, int num_args, 
 void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
 {
 	unsigned int i;
+	char cache_key[64];
+	int  cache_key_len;
+	void *dummy;
 
+	cache_key_len = snprintf(&cache_key, 63, "%X", op_array);
+	if (xdebug_hash_find(XG(code_coverage_op_array_cache), cache_key, cache_key_len, (void*) &dummy)) {
+		return;
+	}
+	xdebug_hash_add(XG(code_coverage_op_array_cache), cache_key, cache_key_len, NULL);
+	
 	for (i = 0; i < op_array->size; i++) {
 		prefil_from_opcode(fse, op_array->filename, op_array->opcodes[i] TSRMLS_CC);
 	}
