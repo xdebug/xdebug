@@ -1,3 +1,11 @@
+Mon May 15 23:34:05 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c:
+- Added a cache that prevents the code coverage functionality from running a
+  "which code is executable check" on every function call, even if they were
+  executed multiple times. This should speed up code coverage a lot.
+
 Sat May 13 19:44:46 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Changed trace file logging so that it closes the file when it can no longer
