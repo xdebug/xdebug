@@ -1312,8 +1312,13 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				|| 
 				(
 					XG(profiler_enable_trigger) && 
-					PG(http_globals)[TRACK_VARS_GET] &&
-					zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+					(
+						PG(http_globals)[TRACK_VARS_GET] && 
+						zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+					) || (
+						PG(http_globals)[TRACK_VARS_POST] && 
+						zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+					)
 				)
 			)
 		) {
