@@ -1,3 +1,7 @@
+Fri May 26 09:28:43 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Only escape the error in case we're in HTML error mode.
+
 Fri May 26 09:28:07 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed compilation with PHP 4.4.
