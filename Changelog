@@ -1,3 +1,7 @@
+Fri May 26 09:28:07 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed compilation with PHP 4.4.
+
 Mon May 15 23:41:05 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
