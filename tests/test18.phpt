@@ -37,10 +37,7 @@ bar
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> foo() /%s/test18.php:14
 %w%f %w%d       -> bar() /%s/test18.php:11
-%w%f %w%d     -> eval('$foo = foo();
-bar();
-foo();
-') /%s/test18.php:16
+%w%f %w%d     -> eval('$foo = foo();\nbar();\nfoo();\n') /%s/test18.php:16
 %w%f %w%d       -> foo() /%s/test18.php(16) : eval()'d code:1
 %w%f %w%d         -> bar() /%s/test18.php:11
 %w%f %w%d       -> bar() /%s/test18.php(16) : eval()'d code:2

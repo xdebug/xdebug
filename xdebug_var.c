@@ -206,7 +206,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval 
 			break;
 
 		case IS_STRING:
-			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
+			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			efree(tmp_str);
 			break;
