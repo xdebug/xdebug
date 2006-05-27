@@ -1,3 +1,12 @@
+Sat May 27 22:06:57 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+test.sh
+xdebug/xdebug_var.c
+xdebug/tests/bug00032-ze22.phpt
+xdebug/tests/bug00184.phpt
+xdebug/tests/bug00032.phpt
+xdebug/tests/test18.phpt:
+- Fixed bug #184: problem with control chars in code traces
+
 Fri May 26 09:28:43 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Only escape the error in case we're in HTML error mode.
