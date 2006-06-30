@@ -1342,17 +1342,19 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	fse->symbol_table = EG(active_symbol_table);
 
-	/* Because include/require is treated as a stack level, we have to add used
-	 * variables in include/required files to all the stack levels above, until
-	 * we hit a function or the to level stack.  This is so that the variables
-	 * show up correctly where they should be.  We always call
-	 * add_used_variables on the current stack level, otherwise vars in include
-	 * files do not show up in the locals list.  */
-	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-		xfse = XDEBUG_LLIST_VALP(le);
-		add_used_variables(xfse, op_array);
-		if (XDEBUG_IS_FUNCTION(xfse->function.type)) {
-			break;
+	if (XG(remote_enabled) || XG(show_local_vars)) {
+		/* Because include/require is treated as a stack level, we have to add used
+		 * variables in include/required files to all the stack levels above, until
+		 * we hit a function or the to level stack.  This is so that the variables
+		 * show up correctly where they should be.  We always call
+		 * add_used_variables on the current stack level, otherwise vars in include
+		 * files do not show up in the locals list.  */
+		for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+			xfse = XDEBUG_LLIST_VALP(le);
+			add_used_variables(xfse, op_array);
+			if (XDEBUG_IS_FUNCTION(xfse->function.type)) {
+				break;
+			}
 		}
 	}
 
