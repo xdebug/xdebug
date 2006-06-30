@@ -1,3 +1,8 @@
+Fri Jun 30 10:57:27 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/php_xdebug.h:
+- Go with 2.0.0beta6.
+
 Fri Jun 30 09:44:05 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/get_declared_vars.phpt:
