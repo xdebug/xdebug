@@ -1,3 +1,9 @@
+Fri Jun 30 09:44:05 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/get_declared_vars.phpt:
+- Speedup Xdebug but only gathering information about variables in scopes when
+  either remote debugging is used, or show_local_vars is enabled.
+
 Sat May 27 22:06:57 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 test.sh
 xdebug/xdebug_var.c
