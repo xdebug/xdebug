@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.5" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.4.9" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -30,11 +30,11 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2005-12-31</date>
- <time>11:52:11</time>
+ <date>2006-06-30</date>
+ <time>11:25:15</time>
  <version>
-  <release>2.0.0beta5</release>
-  <api>2.0.0beta5</api>
+  <release>2.0.0beta6</release>
+  <api>2.0.0beta6</api>
  </version>
  <stability>
   <release>beta</release>
@@ -42,19 +42,56 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>+ Added new features:
-	- Implemented FR #161: var_dump doesn&apos;t show lengths for strings.
-	- Implemented FR #158: Function calls from the {main} scope always have the
-	  line number 0. 
-	- Implemented FR #156: it&apos;s impossible to know the time taken by the last
-	  func call in xdebug trace mode 0.
-	- Implemented FR #153: xdebug_get_declared_vars().
-	
+    - Implemented FR #137: feature_get for general commands doesn&apos;t have a text field.
+    - Implemented FR #131: XDebug needs to implement paged child object requests.
+    - Implemented FR #124: Add backtrace dumping information when exception thrown.
+    - Implemented FR #70: Add feature_get breakpoint_types.
+    - Added profiling aggregation functions (patch by Andrei Zmievski)
+    - Implemented the &quot;timestamp&quot; option for the xdebug.trace_output_name and
+      xdebug.profiler_output_name settings.
+    - Added the xdebug.remote_log setting that allows you to log debugger
+      communication to a log file for debugging. This can also be set through
+      the &quot;remote_log&quot; element in the XDEBUG_CONFIG environment variable.
+    - Added a &quot;script&quot; value to the profiler_output_name option.  This will write
+      the profiler output to a filename that consists of the script&apos;s full path
+      (using underscores). ie: /var/www/index.php becomes
+      var_www_index_php_cachegrind.out. (Patch by Brian Shire).
+    - DBGp: Implemented support for hit conditions for breakpoints.
+    - DBGp: Added support for conditions for file/line breakpoints.
+    - DBGp: Added support for hit value checking to file/line breakpoints.
+    - DBGp: Added support for &quot;exception&quot; breakpoints.
+
++ Performance improvements:
+    - Added a cache that prevents the code coverage functionality from running a
+      &quot;which code is executable check&quot; on every function call, even if they
+      were executed multiple times. This should speed up code coverage a lot.
+    - Speedup Xdebug but only gathering information about variables in scopes when
+      either remote debugging is used, or show_local_vars is enabled.
+
 = Fixed bugs:
-	- Fixed shutdown crash with ZTS on Win32
-	- Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
-	  thrown.
-	- Fixed bug #154: GCC 4.0.2 optimizes too much out with -O2.
-	- Fixed bug #141: Remote context_get causes segfault.
+    - Fixed bug #184: problem with control chars in code traces
+    - Fixed bug #183: property_get -n $this-&gt;somethingnonexistent crashes the
+      debugger.
+    - Fixed bug #182: Errors are not html escaped when being displayed.
+    - Fixed bug #180: collected includes not shown in trace files. (Patch by
+      Cristian Rodriguez)
+    - Fixed bug #178: $php_errormsg and Track errors unavailable.
+    - Fixed bug #177: debugclient fails to compile due to Bison.
+    - Fixed bug #176: Segfault using SplTempFileObject.
+    - Fixed bug #173: Xdebug segfaults using SPL ArrayIterator.
+    - Fixed bug #171: set_time_limit stack overflow on 2nd request.
+    - Fixed bug #168: Xdebug&apos;s DBGp crashes on an eval command where the
+      result is an array.
+    - Fixed bug #125: show_mem_delta does not calculate correct negative values on
+      64bit machines.
+    - Fixed bug #121: property_get -n $r[2] returns the whole hash.
+    - Fixed bug #111: xdebug does not ignore set_time_limit() function during debug
+      session.
+    - Fixed bug #87: Warning about headers when &quot;register_shutdown_function&quot; used.
+    - Fixed PECL bug #6940 (XDebug ignores set_time_limit)
+    - Fixed Komodo bug 45484: no member data for objects in PHP debugger.
+    - Suppress NOP/EXT_NOP from being marked as executable code with Code
+      Coverage.
     
  </notes>
  <contents>
@@ -148,6 +185,69 @@ Xdebug also provides:
  <changelog>
   <release>
    <version>
+    <release>2.0.0beta6</release>
+    <api>2.0.0beta6</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2006-06-30</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>+ Added new features:
+    - Implemented FR #137: feature_get for general commands doesn&apos;t have a text field.
+    - Implemented FR #131: XDebug needs to implement paged child object requests.
+    - Implemented FR #124: Add backtrace dumping information when exception thrown.
+    - Implemented FR #70: Add feature_get breakpoint_types.
+    - Added profiling aggregation functions (patch by Andrei Zmievski)
+    - Implemented the &quot;timestamp&quot; option for the xdebug.trace_output_name and
+      xdebug.profiler_output_name settings.
+    - Added the xdebug.remote_log setting that allows you to log debugger
+      communication to a log file for debugging. This can also be set through
+      the &quot;remote_log&quot; element in the XDEBUG_CONFIG environment variable.
+    - Added a &quot;script&quot; value to the profiler_output_name option.  This will write
+      the profiler output to a filename that consists of the script&apos;s full path
+      (using underscores). ie: /var/www/index.php becomes
+      var_www_index_php_cachegrind.out. (Patch by Brian Shire).
+    - DBGp: Implemented support for hit conditions for breakpoints.
+    - DBGp: Added support for conditions for file/line breakpoints.
+    - DBGp: Added support for hit value checking to file/line breakpoints.
+    - DBGp: Added support for &quot;exception&quot; breakpoints.
++ Performance improvements:
+    - Added a cache that prevents the code coverage functionality from running a
+      &quot;which code is executable check&quot; on every function call, even if they
+      were executed multiple times. This should speed up code coverage a lot.
+    - Speedup Xdebug but only gathering information about variables in scopes when
+      either remote debugging is used, or show_local_vars is enabled.
+= Fixed bugs:
+    - Fixed bug #184: problem with control chars in code traces
+    - Fixed bug #183: property_get -n $this-&gt;somethingnonexistent crashes the
+      debugger.
+    - Fixed bug #182: Errors are not html escaped when being displayed.
+    - Fixed bug #180: collected includes not shown in trace files. (Patch by
+      Cristian Rodriguez)
+    - Fixed bug #178: $php_errormsg and Track errors unavailable.
+    - Fixed bug #177: debugclient fails to compile due to Bison.
+    - Fixed bug #176: Segfault using SplTempFileObject.
+    - Fixed bug #173: Xdebug segfaults using SPL ArrayIterator.
+    - Fixed bug #171: set_time_limit stack overflow on 2nd request.
+    - Fixed bug #168: Xdebug&apos;s DBGp crashes on an eval command where the
+      result is an array.
+    - Fixed bug #125: show_mem_delta does not calculate correct negative values on
+      64bit machines.
+    - Fixed bug #121: property_get -n $r[2] returns the whole hash.
+    - Fixed bug #111: xdebug does not ignore set_time_limit() function during debug
+      session.
+    - Fixed bug #87: Warning about headers when &quot;register_shutdown_function&quot; used.
+    - Fixed PECL bug #6940 (XDebug ignores set_time_limit)
+    - Fixed Komodo bug 45484: no member data for objects in PHP debugger.
+    - Suppress NOP/EXT_NOP from being marked as executable code with Code
+      Coverage.
+    
+   </notes>
+  </release>
+  <release>
+   <version>
     <release>2.0.0beta5</release>
     <api>2.0.0beta5</api>
    </version>
@@ -158,19 +258,19 @@ Xdebug also provides:
    <date>2005-12-31</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
-	- Implemented FR #161: var_dump doesn&apos;t show lengths for strings.
-	- Implemented FR #158: Function calls from the {main} scope always have the
-	  line number 0. 
-	- Implemented FR #156: it&apos;s impossible to know the time taken by the last
-	  func call in xdebug trace mode 0.
-	- Implemented FR #153: xdebug_get_declared_vars().
-	
+    - Implemented FR #161: var_dump doesn&apos;t show lengths for strings.
+    - Implemented FR #158: Function calls from the {main} scope always have the
+      line number 0. 
+    - Implemented FR #156: it&apos;s impossible to know the time taken by the last
+      func call in xdebug trace mode 0.
+    - Implemented FR #153: xdebug_get_declared_vars().
+    
 = Fixed bugs:
-	- Fixed shutdown crash with ZTS on Win32
-	- Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
-	  thrown.
-	- Fixed bug #154: GCC 4.0.2 optimizes too much out with -O2.
-	- Fixed bug #141: Remote context_get causes segfault.
+    - Fixed shutdown crash with ZTS on Win32
+    - Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
+      thrown.
+    - Fixed bug #154: GCC 4.0.2 optimizes too much out with -O2.
+    - Fixed bug #141: Remote context_get causes segfault.
       
    </notes>
   </release>
@@ -187,23 +287,23 @@ Xdebug also provides:
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
     - Added xdebug_debug_zval_stdout().
-	- Added xdebug_get_profile_filename() function which returns the current
-	  profiler dump file.
-	- Updated for latest 5.1 and 6.0 CVS versions of PHP.
-	- Added FR #148: Option to append to cachegrind files, instead of
-	  overwriting.
-	- Implemented FR #114: Rename tests/*.php to tests/*.inc
+    - Added xdebug_get_profile_filename() function which returns the current
+      profiler dump file.
+    - Updated for latest 5.1 and 6.0 CVS versions of PHP.
+    - Added FR #148: Option to append to cachegrind files, instead of
+      overwriting.
+    - Implemented FR #114: Rename tests/*.php to tests/*.inc
 
 - Changed features:
-	- Allow &quot;xdebug.default_enable&quot; to be set everywhere.
+    - Allow &quot;xdebug.default_enable&quot; to be set everywhere.
 
 = Fixed bugs:
-	- DBGP: Xdebug should return &quot;array&quot; with property get, which is defined
-	  in the typemap to the common type &quot;hash&quot;.
-	- Fixed bug #142: xdebug crashes with implicit destructor calls.
-	- Fixed bug #136: The &quot;type&quot; attribute is missing from stack_get returns.
-	- Fixed bug #133: PHP scripts exits with 0 on PHP error.
-	- Fixed bug #132: use of eval causes a segmentation fault.
+    - DBGP: Xdebug should return &quot;array&quot; with property get, which is defined
+      in the typemap to the common type &quot;hash&quot;.
+    - Fixed bug #142: xdebug crashes with implicit destructor calls.
+    - Fixed bug #136: The &quot;type&quot; attribute is missing from stack_get returns.
+    - Fixed bug #133: PHP scripts exits with 0 on PHP error.
+    - Fixed bug #132: use of eval causes a segmentation fault.
       
    </notes>
   </release>
@@ -253,36 +353,36 @@ Xdebug also provides:
    <date>2004-11-28</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
-	- DBGP: Added error messages to returned errors (in most cases)
+    - DBGP: Added error messages to returned errors (in most cases)
   
 + Added new functions:
-	- xdebug_debug_zval() to debug zvals by printing its refcounts and is_ref
-	  values.
+    - xdebug_debug_zval() to debug zvals by printing its refcounts and is_ref
+      values.
   
 = Changed features:
-	- xdebug_code_coverage_stop() will now clean up the code coverage array,
-	  unless you specify FALSE as parameter.
-	- The proper Xdebug type is &quot;hash&quot; for associative arrays.
-	- Extended the code-coverage functionality by returning lines with
-	  executable code on them, but where not executed with a count value of -1.
+    - xdebug_code_coverage_stop() will now clean up the code coverage array,
+      unless you specify FALSE as parameter.
+    - The proper Xdebug type is &quot;hash&quot; for associative arrays.
+    - Extended the code-coverage functionality by returning lines with
+      executable code on them, but where not executed with a count value of -1.
 
 = Fixed bugs:
-	- DBGP: Make property_get and property_value finally work as they should,
-	  including retrieving information from different depths then the most top
-	  stack frame.
-	- DBGP: Fix eval&apos;ed $varnames in property_get.
-	- DBGP: Support the -d option for property_get.
-	- Fixed the exit handler hook to use the new &quot;5.1&quot; way of handling it;
-	  which fortunately also works with PHP 5.0.
-	- Fixed bug #102: Problems with configure for automake 1.8.
-	- Fixed bug #101: crash with set_exeception_handler() and uncatched exceptions.
-	- Fixed bug #99: unset variables return the name as a string with property_get.
-	- Fixed bug #98: &apos;longname&apos; attribute not returned for unintialized
-	  property in context_get request.
-	- Fixed bug #94: xdebug_sprintf misbehaves with x86_64/glibc-2.3.3
-	- Fixed bug #93: Crash in lookup_hostname on x86_64
-	- Fixed bug #92: xdebug_disable() doesn&apos;t disable the exception handler.
-	- Fixed bug #68: Summary not written when script ended with &quot;exit()&quot;.
+    - DBGP: Make property_get and property_value finally work as they should,
+      including retrieving information from different depths then the most top
+      stack frame.
+    - DBGP: Fix eval&apos;ed $varnames in property_get.
+    - DBGP: Support the -d option for property_get.
+    - Fixed the exit handler hook to use the new &quot;5.1&quot; way of handling it;
+      which fortunately also works with PHP 5.0.
+    - Fixed bug #102: Problems with configure for automake 1.8.
+    - Fixed bug #101: crash with set_exeception_handler() and uncatched exceptions.
+    - Fixed bug #99: unset variables return the name as a string with property_get.
+    - Fixed bug #98: &apos;longname&apos; attribute not returned for unintialized
+      property in context_get request.
+    - Fixed bug #94: xdebug_sprintf misbehaves with x86_64/glibc-2.3.3
+    - Fixed bug #93: Crash in lookup_hostname on x86_64
+    - Fixed bug #92: xdebug_disable() doesn&apos;t disable the exception handler.
+    - Fixed bug #68: Summary not written when script ended with &quot;exit()&quot;.
      
    </notes>
   </release>
@@ -298,103 +398,103 @@ Xdebug also provides:
    <date>2004-09-15</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>+ Added new features:
-	- Added support for the new DBGp protocol for communicating with the debug
-	  engine.
-	- A computerized trace format for easier parsing by external programs.
-	- The ability to set remote debugging features via the environment.  This
-	  allows an IDE to emulate CGI and still pass the configuration through to
-	  the debugger.  In CGI mode, PHP does not allow -d arguments.
-	- Reimplementation of the tracing code, you can now only trace to file; this greatly
-	  enhances performance as no string representation of variables need to be
-	  kept in memory any more.
-	- Re-implemented profiling support. Xdebug outputs information the same way
-	  that cachegrind does so it is possible to use Kcachegrind as front-end.
-	- Xdebug emits warnings when it was not loaded as a Zend extension.
-	- Added showing private, protected and public to the fancy var_dump()
-	  replacement function.
-	- Added the setting of the TCP_NODELAY socket option to stop delays in
-	  transferring data to the remote debugger client. (Patch by Christof J.  Reetz)
-	+ DebugClient: Added setting for port to listen on and implemented running
-	  the previous command when pressing just enter.
+    - Added support for the new DBGp protocol for communicating with the debug
+      engine.
+    - A computerized trace format for easier parsing by external programs.
+    - The ability to set remote debugging features via the environment.  This
+      allows an IDE to emulate CGI and still pass the configuration through to
+      the debugger.  In CGI mode, PHP does not allow -d arguments.
+    - Reimplementation of the tracing code, you can now only trace to file; this greatly
+      enhances performance as no string representation of variables need to be
+      kept in memory any more.
+    - Re-implemented profiling support. Xdebug outputs information the same way
+      that cachegrind does so it is possible to use Kcachegrind as front-end.
+    - Xdebug emits warnings when it was not loaded as a Zend extension.
+    - Added showing private, protected and public to the fancy var_dump()
+      replacement function.
+    - Added the setting of the TCP_NODELAY socket option to stop delays in
+      transferring data to the remote debugger client. (Patch by Christof J.  Reetz)
+    + DebugClient: Added setting for port to listen on and implemented running
+      the previous command when pressing just enter.
 
 + Added new functions:
-	- xdebug_get_stack_depth() to return the current stack depth level.
-	- xdebug_get_tracefile_name() to retrieve the name of the tracefile. This
-	  is useful in case auto trace is enabled and you want to clean the trace
-	  file.
-	- xdebug_peak_memory_usage() which returns the peak memory
-	  used in a script. (Only works when --enable-memory-limit was enabled)
+    - xdebug_get_stack_depth() to return the current stack depth level.
+    - xdebug_get_tracefile_name() to retrieve the name of the tracefile. This
+      is useful in case auto trace is enabled and you want to clean the trace
+      file.
+    - xdebug_peak_memory_usage() which returns the peak memory
+      used in a script. (Only works when --enable-memory-limit was enabled)
 
 + Added feature requests:
-	- FR #5: xdebug_break() function which interupts the script for the debug
-	  engine.
-	- FR #30: Dump current scope information in stack traces on error.
-	- FR #88: Make the url parameter XDEBUG_SESSION_START optional. So it can
-	  be disabled and the user does not need to add it.
+    - FR #5: xdebug_break() function which interupts the script for the debug
+      engine.
+    - FR #30: Dump current scope information in stack traces on error.
+    - FR #88: Make the url parameter XDEBUG_SESSION_START optional. So it can
+      be disabled and the user does not need to add it.
 
 + Added new php.ini settings:
-	- xdebug.auto_trace_file: to configure a trace file to write to as addition
-	  to the xdebug.auto_trace setting which just turns on tracing.
-	- xdebug.collect_includes: separates collecting
-	  names of include files from the xdebug.collect_params setting.
-	- xdebug.collect_return: showing return values in traces.
-	- xdebug.dump_global: with which you can turn off dumping of super globals
-	  even in you have that configured.
-	- xdebug.extended_info: turns off the generation of extended opcodes that
-	  are needed for stepping and breakpoints for the remote debugger. This is
-	  useful incase you want to profile memory usage as the generation of this
-	  extended info increases memory usage of oparrrays by about 33%. 
-	- xdebug.profiler_output_dir: profiler output directory.
-	- xdebug.profiler_enable: enable the profiler.
-	- xdebug.show_local_vars: turn off the showing of local variables in the
-	  top most stack frame on errors.
-	- xdebug.show_mem_delta: show differences between current and previous
-	  memory usage on a function call level.
-	- xdebug.trace_options: to configure extra
-	  options for trace dumping:
-		o XDEBUG_TRACE_APPEND option (1)
+    - xdebug.auto_trace_file: to configure a trace file to write to as addition
+      to the xdebug.auto_trace setting which just turns on tracing.
+    - xdebug.collect_includes: separates collecting
+      names of include files from the xdebug.collect_params setting.
+    - xdebug.collect_return: showing return values in traces.
+    - xdebug.dump_global: with which you can turn off dumping of super globals
+      even in you have that configured.
+    - xdebug.extended_info: turns off the generation of extended opcodes that
+      are needed for stepping and breakpoints for the remote debugger. This is
+      useful incase you want to profile memory usage as the generation of this
+      extended info increases memory usage of oparrrays by about 33%. 
+    - xdebug.profiler_output_dir: profiler output directory.
+    - xdebug.profiler_enable: enable the profiler.
+    - xdebug.show_local_vars: turn off the showing of local variables in the
+      top most stack frame on errors.
+    - xdebug.show_mem_delta: show differences between current and previous
+      memory usage on a function call level.
+    - xdebug.trace_options: to configure extra
+      options for trace dumping:
+        o XDEBUG_TRACE_APPEND option (1)
 
 = Changed features:
-	- xdebug_start_trace() now returns the filename of the tracefile (.xt is
-	  added to the requested name).
-	- Changed default debugging protocol to dbgp instead of gdb.
-	- Changed default debugger port from 17869 to 9000.
-	- Changed trace file naming: xdebug.trace_output_dir is now used to
-	  configure a directory to dump automatic traces; the trace file name now
-	  also includes the pid (xdebug.trace_output_name=pid) or a crc32 checksum
-	  of the current working dir (xdebug.trace_output_name=crc32) and traces
-	  are not being appended to an existing file anymore, but simply
-	  overwritten.
-	- Removed $this and $GLOBALS from showing variables in the local scope.
+    - xdebug_start_trace() now returns the filename of the tracefile (.xt is
+      added to the requested name).
+    - Changed default debugging protocol to dbgp instead of gdb.
+    - Changed default debugger port from 17869 to 9000.
+    - Changed trace file naming: xdebug.trace_output_dir is now used to
+      configure a directory to dump automatic traces; the trace file name now
+      also includes the pid (xdebug.trace_output_name=pid) or a crc32 checksum
+      of the current working dir (xdebug.trace_output_name=crc32) and traces
+      are not being appended to an existing file anymore, but simply
+      overwritten.
+    - Removed $this and $GLOBALS from showing variables in the local scope.
 
 - Removed functions:
-	- xdebug_get_function_trace/xdebug_dump_function_trace() because of the new
-	  idea of tracing.
+    - xdebug_get_function_trace/xdebug_dump_function_trace() because of the new
+      idea of tracing.
 
 = Fixed bugs:
-	- Fixed bug #89: var_dump shows empty strings garbled.
-	- Fixed bug #85: Xdebug segfaults when no idekey is set.
-	- Fixed bug #83: More than 32 parameters functions make xdebug crash.
-	- Fixed bug #75: xdebug&apos;s var_dump implementation is not binary safe.
-	- Fixed bug #73: komodo beta 4.3.7 crash.
-	- Fixed bug #72: breakpoint_get returns wrong structure.
-	- Fixed bug #69: Integer overflow in cachegrind summary.
-	- Fixed bug #67: Filenames in Xdebug break URI RFC with spaces.
-	- Fixed bug #64: Missing include of xdebug_compat.h.
-	- Fixed bug #57: Crash with overloading functions.
-	- Fixed bug #54: source command did not except missing -f parameter.
-	- Fixed bug #53: Feature get misusing the supported attribute.
-	- Fixed bug #51: Only start a debug session if XDEBUG_SESSION_START is
-	  passed as GET or POST parameter, or the DBGP_COOKIE is send to the server.
-	  Passing XDEBUG_SESSION_STOP as GET/POST parameter will end the debug
-	  session and removes the cookie again. The cookie is also passed to the
-	  remote handler backends; for DBGp it is added to the &lt;init&gt; packet.
-	- Fixed bug #49: Included file&apos;s names should not be stored by address.
-	- Fixed bug #44: Script time-outs should be disabled when debugging.
-	= Fixed bug #36: GDB handler using print causes segfault with wrong syntax
-	- Fixed bug #33: Implemented the use of the ZEND_POST_DEACTIVATE hook. Now we
-	  can handle destructors safely too.
-	- Fixed bug #32: Unusual dynamic variables cause xdebug to crash.
+    - Fixed bug #89: var_dump shows empty strings garbled.
+    - Fixed bug #85: Xdebug segfaults when no idekey is set.
+    - Fixed bug #83: More than 32 parameters functions make xdebug crash.
+    - Fixed bug #75: xdebug&apos;s var_dump implementation is not binary safe.
+    - Fixed bug #73: komodo beta 4.3.7 crash.
+    - Fixed bug #72: breakpoint_get returns wrong structure.
+    - Fixed bug #69: Integer overflow in cachegrind summary.
+    - Fixed bug #67: Filenames in Xdebug break URI RFC with spaces.
+    - Fixed bug #64: Missing include of xdebug_compat.h.
+    - Fixed bug #57: Crash with overloading functions.
+    - Fixed bug #54: source command did not except missing -f parameter.
+    - Fixed bug #53: Feature get misusing the supported attribute.
+    - Fixed bug #51: Only start a debug session if XDEBUG_SESSION_START is
+      passed as GET or POST parameter, or the DBGP_COOKIE is send to the server.
+      Passing XDEBUG_SESSION_STOP as GET/POST parameter will end the debug
+      session and removes the cookie again. The cookie is also passed to the
+      remote handler backends; for DBGp it is added to the &lt;init&gt; packet.
+    - Fixed bug #49: Included file&apos;s names should not be stored by address.
+    - Fixed bug #44: Script time-outs should be disabled when debugging.
+    = Fixed bug #36: GDB handler using print causes segfault with wrong syntax
+    - Fixed bug #33: Implemented the use of the ZEND_POST_DEACTIVATE hook. Now we
+      can handle destructors safely too.
+    - Fixed bug #32: Unusual dynamic variables cause xdebug to crash.
      
    </notes>
   </release>
