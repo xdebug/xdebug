@@ -1,3 +1,57 @@
+Fri, Jun 30, 2006 - xdebug 2.0.0beta6
++ Added new features:
+    - Implemented FR #137: feature_get for general commands doesn't have a text field.
+    - Implemented FR #131: XDebug needs to implement paged child object requests.
+    - Implemented FR #124: Add backtrace dumping information when exception thrown.
+    - Implemented FR #70: Add feature_get breakpoint_types.
+    - Added profiling aggregation functions (patch by Andrei Zmievski)
+    - Implemented the "timestamp" option for the xdebug.trace_output_name and
+      xdebug.profiler_output_name settings.
+    - Added the xdebug.remote_log setting that allows you to log debugger
+      communication to a log file for debugging. This can also be set through
+      the "remote_log" element in the XDEBUG_CONFIG environment variable.
+    - Added a "script" value to the profiler_output_name option.  This will write
+      the profiler output to a filename that consists of the script's full path
+      (using underscores). ie: /var/www/index.php becomes
+      var_www_index_php_cachegrind.out. (Patch by Brian Shire).
+    - DBGp: Implemented support for hit conditions for breakpoints.
+    - DBGp: Added support for conditions for file/line breakpoints.
+    - DBGp: Added support for hit value checking to file/line breakpoints.
+    - DBGp: Added support for "exception" breakpoints.
+
++ Performance improvements:
+    - Added a cache that prevents the code coverage functionality from running a
+      "which code is executable check" on every function call, even if they
+      were executed multiple times. This should speed up code coverage a lot.
+    - Speedup Xdebug but only gathering information about variables in scopes when
+      either remote debugging is used, or show_local_vars is enabled.
+
+= Fixed bugs:
+    - Fixed bug #184: problem with control chars in code traces
+    - Fixed bug #183: property_get -n $this->somethingnonexistent crashes the
+      debugger.
+    - Fixed bug #182: Errors are not html escaped when being displayed.
+    - Fixed bug #180: collected includes not shown in trace files. (Patch by
+      Cristian Rodriguez)
+    - Fixed bug #178: $php_errormsg and Track errors unavailable.
+    - Fixed bug #177: debugclient fails to compile due to Bison.
+    - Fixed bug #176: Segfault using SplTempFileObject.
+    - Fixed bug #173: Xdebug segfaults using SPL ArrayIterator.
+    - Fixed bug #171: set_time_limit stack overflow on 2nd request.
+    - Fixed bug #168: Xdebug's DBGp crashes on an eval command where the
+      result is an array.
+    - Fixed bug #125: show_mem_delta does not calculate correct negative values on
+      64bit machines.
+    - Fixed bug #121: property_get -n $r[2] returns the whole hash.
+    - Fixed bug #111: xdebug does not ignore set_time_limit() function during debug
+      session.
+    - Fixed bug #87: Warning about headers when "register_shutdown_function" used.
+    - Fixed PECL bug #6940 (XDebug ignores set_time_limit)
+    - Fixed Komodo bug 45484: no member data for objects in PHP debugger.
+    - Suppress NOP/EXT_NOP from being marked as executable code with Code
+      Coverage.
+
+
 Sat, Dec 31, 2005 - xdebug 2.0.0beta5
 + Added new features:
 	- Implemented FR #161: var_dump doesn't show lengths for strings.

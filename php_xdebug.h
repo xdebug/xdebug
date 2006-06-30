@@ -20,7 +20,7 @@
 #define PHP_XDEBUG_H
 
 #define XDEBUG_NAME       "Xdebug"
-#define XDEBUG_VERSION    "2.0.0rc1-dev"
+#define XDEBUG_VERSION    "2.0.0beta6"
 #define XDEBUG_AUTHOR     "Derick Rethans"
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2006 by Derick Rethans"
 #define XDEBUG_URL        "http://xdebug.org"
