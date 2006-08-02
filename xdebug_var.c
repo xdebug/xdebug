@@ -39,7 +39,7 @@ char *error_type(int type)
 		case E_USER_ERROR:
 			return xdstrdup("Fatal error");
 			break;
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
+#if PHP_VERSION_ID >= 50200
 		case E_RECOVERABLE_ERROR:
 			return xdstrdup("Catchable fatal error");
 			break;
@@ -96,12 +96,16 @@ zval* xdebug_get_php_symbol(char* name, int name_length)
 	return NULL;
 }
 
-static char* xdebug_get_property_info(char *mangled_property, char **property_name)
+static char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name)
 {
 #ifdef ZEND_ENGINE_2
 	char *prop_name, *class_name;
 
+#if PHP_VERSION_ID >= 50200
+	zend_unmangle_property_name(mangled_property, mangled_len - 1, &class_name, &prop_name);
+#else
 	zend_unmangle_property_name(mangled_property, &class_name, &prop_name);
+#endif
 	*property_name = prop_name;
 	if (class_name) {
 		if (class_name[0] == '*') {
@@ -168,7 +172,7 @@ static int xdebug_object_element_export(zval **zv, int num_args, va_list args, z
 	debug_zval = va_arg(args, int);
 
 	if (hash_key->nKeyLength != 0) {
-		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
 		xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
 	}
 	xdebug_var_export(zv, str, level + 2, debug_zval TSRMLS_CC);
@@ -300,7 +304,7 @@ static int xdebug_object_element_export_xml(zval **zv, int num_args, va_list arg
 
 	xdebug_str_addl(str, "<var", 4, 0);
 	if (hash_key->nKeyLength != 0) {
-		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
 		xdebug_str_add(str, xdebug_sprintf(" name='%s' facet='%s'", prop_name, modifier), 1);
 	}
 	xdebug_str_add(str, xdebug_sprintf(" id='%p'>", *zv), 1);
@@ -478,7 +482,7 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 		node = xdebug_xml_node_init("property");
 		
 		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
 			xdebug_xml_add_attribute(node, "name", prop_name);
 			/* XXX static vars? */
 
@@ -683,7 +687,7 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 
 	key = hash_key->arKey;
 	if (hash_key->nKeyLength != 0) {
-		modifier = xdebug_get_property_info(hash_key->arKey, &prop_name);
+		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
 		xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, DGREY), 1);
 	}
 	xdebug_var_export_fancy(zv, str, level + 2, debug_zval TSRMLS_CC);

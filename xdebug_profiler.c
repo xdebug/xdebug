@@ -94,7 +94,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		fprintf(XG(profile_file), "\n==== NEW PROFILING FILE ==============================================\n");
 	}
 	XG(profile_filename) = estrdup(filename);
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time Memory\n\n", script_name);
 #else
 	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time\n\n", script_name);
@@ -139,8 +139,8 @@ void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC)
 {
 	fse->profile.time = 0;
 	fse->profile.mark = xdebug_get_utime();
-#if MEMORY_LIMIT
-	fse->profile.memory = AG(allocated_memory);
+#if HAVE_PHP_MEMORY_USAGE
+	fse->profile.memory = XG_MEMORY_USAGE();
 #endif
 }
 
@@ -176,8 +176,8 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
 		ce->user_defined = fse->user_defined;
-#if MEMORY_LIMIT
-		ce->mem_used = fse->profile.memory - AG(allocated_memory);
+#if HAVE_PHP_MEMORY_USAGE
+		ce->mem_used = fse->profile.memory - XG_MEMORY_USAGE();
 #endif
 
 		xdebug_llist_insert_next(fse->prev->profile.call_list, NULL, ce);
@@ -196,8 +196,8 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	xdfree(tmp_name);
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
-#if MEMORY_LIMIT
-		fprintf(XG(profile_file), "\nsummary: %lu %u\n\n", (unsigned long) (fse->profile.time * 10000000), AG(allocated_memory));
+#if HAVE_PHP_MEMORY_USAGE
+		fprintf(XG(profile_file), "\nsummary: %lu %u\n\n", (unsigned long) (fse->profile.time * 10000000), XG_MEMORY_USAGE());
 #else
 		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 10000000));
 #endif
@@ -215,12 +215,12 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	{
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 		fse->profile.time -= call_entry->time_taken;
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 		fse->memory -= call_entry->mem_used;
 #endif
 	}
-#if MEMORY_LIMIT
-	fprintf(XG(profile_file), "%d %lu %ld\n", default_lineno, (unsigned long) (fse->profile.time * 10000000), (AG(allocated_memory) - fse->profile.memory) < 0 ? 0 : (AG(allocated_memory) - fse->profile.memory));
+#if HAVE_PHP_MEMORY_USAGE
+	fprintf(XG(profile_file), "%d %lu %ld\n", default_lineno, (unsigned long) (fse->profile.time * 10000000), (XG_MEMORY_USAGE() - fse->profile.memory) < 0 ? 0 : (XG_MEMORY_USAGE() - fse->profile.memory));
 #else
 	fprintf(XG(profile_file), "%d %lu\n", default_lineno, (unsigned long) (fse->profile.time * 10000000));
 #endif
@@ -228,7 +228,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	/* update aggregate data */
 	if (XG(profiler_aggregate)) {
 		fse->aggr_entry->time_own += fse->profile.time;
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 		fse->aggr_entry->mem_used += fse->memory;
 #endif
 	}
@@ -245,7 +245,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		}
 		
 		fprintf(XG(profile_file), "calls=1 0 0\n");
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 		fprintf(XG(profile_file), "%d %lu %ld\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 10000000), call_entry->mem_used < 0 ? 0 : call_entry->mem_used);
 #else
 		fprintf(XG(profile_file), "%d %lu\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 10000000));
@@ -274,13 +274,13 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 
 	fprintf(fp, "fl=%s\n", xae->filename);
 	fprintf(fp, "fn=%s\n", xae->function);
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 	fprintf(fp, "%d %lu %ld\n", 0, (unsigned long) (xae->time_own * 10000000), (xae->mem_used < 0) ? 0 : xae->mem_used);
 #else
 	fprintf(fp, "%d %lu\n", 0, (unsigned long) (xae->time_own * 10000000));
 #endif
 	if (strcmp(xae->function, "{main}") == 0) {
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 		fprintf(fp, "\nsummary: %lu %u\n\n", (unsigned long) (xae->time_inclusive * 10000000), (xae->mem_used));
 #else
 		fprintf(fp, "\nsummary: %lu\n\n", (unsigned long) (xae->time_inclusive * 10000000), (xae->mem_used));
@@ -293,7 +293,7 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 		while (zend_hash_get_current_data(xae->call_list, (void**)&xae_call) == SUCCESS) {
 			fprintf(fp, "cfn=%s\n", (*xae_call)->function);
 			fprintf(fp, "calls=%d 0 0\n", (*xae_call)->call_count);
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 			fprintf(fp, "%d %lu %ld\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 10000000), (*xae_call)->mem_used < 0 ? 0 : (*xae_call)->mem_used);
 #else
 			fprintf(fp, "%d %lu\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 10000000));

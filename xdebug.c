@@ -148,7 +148,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_dump_aggr_profiling_data, NULL)
 	PHP_FE(xdebug_clear_aggr_profiling_data, NULL)
 
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 	PHP_FE(xdebug_memory_usage,          NULL)
 	PHP_FE(xdebug_peak_memory_usage,     NULL)
 #endif
@@ -966,9 +966,9 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->filename && XDEBUG_LLIST_TAIL(XG(stack)) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) ) {
 		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 	}
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 	tmp->prev_memory = XG(prev_memory);
-	tmp->memory = AG(allocated_memory);
+	tmp->memory = XG_MEMORY_USAGE();
 	XG(prev_memory) = tmp->memory;
 #else
 	tmp->memory = 0;
@@ -1049,7 +1049,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			xae.call_count = 0;
 			xae.time_own = 0;
 			xae.time_inclusive = 0;
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 			xae.mem_used = 0;
 #endif
 			xae.call_list = NULL;
@@ -1573,7 +1573,7 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 					php_printf("<tr><td bgcolor='#ddddff' align='center'>%d</td><td bgcolor='#ddddff'>%s(", i->level, tmp_name);
 				} else {
 					php_printf("%10.4f ", i->time - XG(start_time));
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 					php_printf("%10ld ", i->memory);
 #endif
 					php_printf("%3d. %s(", i->level, tmp_name);
@@ -1778,8 +1778,8 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 	} else if (whence == 1) { /* end */
 		xdebug_str_add(&str, "1\t", 0);
 		xdebug_str_add(&str, xdebug_sprintf("%f\t", xdebug_get_utime() - XG(start_time)), 1);
-#if MEMORY_LIMIT
-		xdebug_str_add(&str, xdebug_sprintf("%lu\n", AG(allocated_memory)), 1);
+#if HAVE_PHP_MEMORY_USAGE
+		xdebug_str_add(&str, xdebug_sprintf("%lu\n", XG_MEMORY_USAGE()), 1);
 #endif
 	}
 
@@ -1947,9 +1947,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 			/* restore memory limit */
+# if PHP_VERSION_ID >= 50200 
+			zend_set_memory_limit(PG(memory_limit));
+# else
 			AG(memory_limit) = PG(memory_limit);
+# endif
 #endif
 			zend_bailout();
 			return;
@@ -2420,8 +2424,8 @@ void xdebug_stop_trace(TSRMLS_D)
 	if (XG(trace_file)) {
 		u_time = xdebug_get_utime();
 		fprintf(XG(trace_file), "%10.4f ", u_time - XG(start_time));
-#if MEMORY_LIMIT
-		fprintf(XG(trace_file), "%10u", AG(allocated_memory));
+#if HAVE_PHP_MEMORY_USAGE
+		fprintf(XG(trace_file), "%10u", XG_MEMORY_USAGE());
 #else
 		fprintf(XG(trace_file), "%10u", 0);
 #endif
@@ -2496,15 +2500,15 @@ PHP_FUNCTION(xdebug_clear_aggr_profiling_data)
 	RETURN_TRUE;
 }
 
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 PHP_FUNCTION(xdebug_memory_usage)
 {
-	RETURN_LONG(AG(allocated_memory));
+	RETURN_LONG(XG_MEMORY_USAGE());
 }
 
 PHP_FUNCTION(xdebug_peak_memory_usage)
 {
-	RETURN_LONG(AG(allocated_memory_peak));
+	RETURN_LONG(XG_MEMORY_PEAK_USAGE());
 }
 #endif
 

@@ -46,6 +46,20 @@ extern zend_module_entry xdebug_module_entry;
 #include "TSRM.h"
 #endif
 
+#if PHP_VERSION_ID >= 50200
+# define HAVE_PHP_MEMORY_USAGE 1
+# define XG_MEMORY_USAGE()		zend_memory_usage(1) 
+# define XG_MEMORY_PEAK_USAGE()	zend_memory_peak_usage(1) 
+#else
+# if MEMORY_LIMIT
+#  define HAVE_PHP_MEMORY_USAGE 1
+# else
+#  define HAVE_PHP_MEMORY_USAGE 0
+# endif
+# define XG_MEMORY_USAGE()		AG(allocated_memory)
+# define XG_MEMORY_PEAK_USAGE()	AG(allocated_memory_peak)
+#endif
+
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
@@ -91,7 +105,7 @@ PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
 PHP_FUNCTION(xdebug_set_error_handler);
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 PHP_FUNCTION(xdebug_memory_usage);
 PHP_FUNCTION(xdebug_peak_memory_usage);
 #endif
