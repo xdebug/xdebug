@@ -1,3 +1,6 @@
+Wed Aug 02 20:15:23 CEST 2006 Jani Taskinen <sniper@php.net>
+php_xdebug.h:
+- Fix build with ZTS enabled
 Wed Aug 02 14:06:55 CEST 2006 Jani Taskinen <sniper@php.net>
 php_xdebug.h
 xdebug/xdebug.c
