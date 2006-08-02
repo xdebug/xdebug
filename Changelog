@@ -1,3 +1,9 @@
+Wed Aug 02 14:06:55 CEST 2006 Jani Taskinen <sniper@php.net>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_profiler.c
+xdebug/xdebug_var.c:
+- Fixed compile failures with PHP 5.2
 Fri Jun 30 11:27:25 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 package2.xml:
 - Added v2 of the package file as well after hacking around bugs in PEAR.
