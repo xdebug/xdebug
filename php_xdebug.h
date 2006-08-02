@@ -48,8 +48,8 @@ extern zend_module_entry xdebug_module_entry;
 
 #if PHP_VERSION_ID >= 50200
 # define HAVE_PHP_MEMORY_USAGE 1
-# define XG_MEMORY_USAGE()		zend_memory_usage(1) 
-# define XG_MEMORY_PEAK_USAGE()	zend_memory_peak_usage(1) 
+# define XG_MEMORY_USAGE()		zend_memory_usage(1 TSRMLS_CC) 
+# define XG_MEMORY_PEAK_USAGE()	zend_memory_peak_usage(1 TSRMLS_CC) 
 #else
 # if MEMORY_LIMIT
 #  define HAVE_PHP_MEMORY_USAGE 1
