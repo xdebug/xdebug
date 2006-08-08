@@ -1,3 +1,10 @@
+Tue Aug 08 15:28:30 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/usefulstuff.h
+xdebug/xdebug_profiler.c:
+- Try to make the profiler more accurate by using getrusage() instead of
+  gettimeofday() for time measurements.
+
 Tue Aug 08 15:23:19 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Addresses issues with 5.2 memory manager.
