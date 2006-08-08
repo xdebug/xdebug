@@ -1,3 +1,7 @@
+Tue Aug 08 15:23:19 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Addresses issues with 5.2 memory manager.
+
 Tue Aug 08 14:38:34 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00032-ze22.phpt:
 - Fixed test case.
