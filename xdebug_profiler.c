@@ -120,14 +120,14 @@ void xdebug_profiler_deinit(TSRMLS_D)
 
 static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 {
-	fse->profile.time += xdebug_get_utime();
+	fse->profile.time += xdebug_get_rtime();
 	fse->profile.time -= fse->profile.mark;
 	fse->profile.mark = 0;
 }
 
 void xdebug_profiler_function_continue(function_stack_entry *fse)
 {
-	fse->profile.mark = xdebug_get_utime();
+	fse->profile.mark = xdebug_get_rtime();
 }
 
 void xdebug_profiler_function_pause(function_stack_entry *fse)
@@ -138,7 +138,7 @@ void xdebug_profiler_function_pause(function_stack_entry *fse)
 void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC)
 {
 	fse->profile.time = 0;
-	fse->profile.mark = xdebug_get_utime();
+	fse->profile.mark = xdebug_get_rtime();
 #if HAVE_PHP_MEMORY_USAGE
 	fse->profile.memory = XG_MEMORY_USAGE();
 #endif

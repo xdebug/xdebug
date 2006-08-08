@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/resource.h>
 #else
 #define PATH_MAX MAX_PATH
 #include <winsock2.h>
@@ -174,6 +175,26 @@ double xdebug_get_utime(void)
 	if (gettimeofday((struct timeval *) &tp, NULL) == 0) {
 		sec = tp.tv_sec;
 		msec = (double) (tp.tv_usec / MICRO_IN_SEC);
+
+		if (msec >= 1.0) {
+			msec -= (long) msec;
+		}
+		return msec + sec;
+	}
+#endif
+	return 0;
+}
+
+double xdebug_get_rtime(void)
+{
+#ifdef HAVE_GETRUSAGE
+	struct rusage ru;
+	long sec = 0L;
+	double msec = 0.0;
+
+	if (getrusage(RUSAGE_SELF, (struct rusage *) &ru) == 0) {
+		sec = ru.ru_utime.tv_sec;
+		msec = (double) (ru.ru_utime.tv_usec / MICRO_IN_SEC);
 
 		if (msec >= 1.0) {
 			msec -= (long) msec;
