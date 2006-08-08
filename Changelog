@@ -1,3 +1,7 @@
+Tue Aug 08 14:38:34 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+tests/bug00032-ze22.phpt:
+- Fixed test case.
+
 Wed Aug 02 20:15:23 CEST 2006 Jani Taskinen <sniper@php.net>
 php_xdebug.h:
 - Fix build with ZTS enabled
