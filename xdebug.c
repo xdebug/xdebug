@@ -177,10 +177,12 @@ zend_module_entry xdebug_module_entry = {
 #endif
 	PHP_MINFO(xdebug),
 	XDEBUG_VERSION,
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
+	NO_MODULE_GLOBALS,
+#endif
 #ifdef ZEND_ENGINE_2
 	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(xdebug),
 #else
-	NULL,
 	NULL,
 #endif
 	STANDARD_MODULE_PROPERTIES_EX
@@ -517,9 +519,6 @@ PHP_MINIT_FUNCTION(xdebug)
 # endif
 #endif
 #endif
-	/* get xdebug ini entries from the environment also */
-	xdebug_env_config();
-
 	/* initialize aggregate call information hash */
 	zend_hash_init_ex(&XG(aggr_calls), 50, NULL, (dtor_func_t) profile_aggr_call_entry_dtor, 1, 0);
 
@@ -664,8 +663,12 @@ void stack_element_dtor (void *dummy, void *elem)
 PHP_RINIT_FUNCTION(xdebug)
 {
 	zend_function *orig;
-	char *idekey = zend_ini_string("xdebug.idekey", sizeof("xdebug.idekey"), 0);
+	char *idekey;
 	
+	/* get xdebug ini entries from the environment also */
+	xdebug_env_config();
+	idekey = zend_ini_string("xdebug.idekey", sizeof("xdebug.idekey"), 0);
+
 	XG(level)         = 0;
 	XG(do_trace)      = 0;
 	XG(do_code_coverage) = 0;
