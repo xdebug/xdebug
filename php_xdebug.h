@@ -46,16 +46,16 @@ extern zend_module_entry xdebug_module_entry;
 #include "TSRM.h"
 #endif
 
-#if PHP_VERSION_ID >= 50200
+#if MEMORY_LIMIT
 # define HAVE_PHP_MEMORY_USAGE 1
+#else
+# define HAVE_PHP_MEMORY_USAGE 0
+#endif
+
+#if PHP_VERSION_ID >= 50200
 # define XG_MEMORY_USAGE()		zend_memory_usage(1 TSRMLS_CC) 
 # define XG_MEMORY_PEAK_USAGE()	zend_memory_peak_usage(1 TSRMLS_CC) 
 #else
-# if MEMORY_LIMIT
-#  define HAVE_PHP_MEMORY_USAGE 1
-# else
-#  define HAVE_PHP_MEMORY_USAGE 0
-# endif
 # define XG_MEMORY_USAGE()		AG(allocated_memory)
 # define XG_MEMORY_PEAK_USAGE()	AG(allocated_memory_peak)
 #endif
