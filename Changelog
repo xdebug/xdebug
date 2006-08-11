@@ -1,3 +1,8 @@
+Fri Aug 11 09:15:45 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_profiler.c:
+- Let's see if this makes it compile on Windows again.
+
 Tue Aug 08 15:28:30 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/usefulstuff.h
