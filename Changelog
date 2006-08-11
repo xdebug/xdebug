@@ -1,3 +1,7 @@
+Fri Aug 11 11:08:52 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- Let's see if this makes it compile then.
+
 Fri Aug 11 09:15:45 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_profiler.c:
