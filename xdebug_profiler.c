@@ -20,6 +20,7 @@
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
+#include "Zend/zend_alloc.h"
 #include "xdebug_mm.h"
 #include "xdebug_profiler.h"
 #include "xdebug_str.h"

@@ -48,6 +48,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_alloc.h"
 #include "zend_execute.h"
 #include "zend_compile.h"
 #include "zend_constants.h"
