@@ -1,3 +1,7 @@
+Fri Aug 11 13:46:13 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- Fixed version number.
+
 Fri Aug 11 11:08:52 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Let's see if this makes it compile then.
