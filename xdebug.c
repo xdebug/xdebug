@@ -1213,7 +1213,9 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	return 1;
 }
 
-#if PHP_API_VERSION >= 20030820
+#if PHP_VERSION_ID >= 50200
+#define COOKIE_ENCODE , 1, 0
+#elif PHP_API_VERSION >= 20030820
 #define COOKIE_ENCODE , 1
 #else
 #define COOKIE_ENCODE
@@ -1225,7 +1227,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse, *xfse;
 	char                 *magic_cookie = NULL;
-	int                   do_return = (XG(do_trace) && XG(trace_file));
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
 	int                   eval_id = 0;
@@ -1391,7 +1392,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	trace_function_end(fse, function_nr TSRMLS_CC);
 
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
+	/* Store return value in the trace file */
+	if (XG(collect_return) && XG(do_trace) && XG(trace_file)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 			char* t = return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
 			fprintf(XG(trace_file), "%s", t);
@@ -1422,7 +1424,6 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
 	zend_op              *cur_opcode;
-	int                   do_return = (XG(do_trace) && XG(trace_file));
 	int                   function_nr = 0;
 
 	XG(level)++;
@@ -1453,7 +1454,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 
 	trace_function_end(fse, function_nr TSRMLS_CC);
 
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
+	/* Store return value in the trace file */
+	if (XG(collect_return) && XG(do_trace) && XG(trace_file)) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(&(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
@@ -2670,7 +2672,11 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 				printf("b->d: %d; ln: %d; b->l: %d; b->f: %s; f: %s, f_l: %d; b->f_l: %d\n",
 						brk->disabled, lineno, brk->lineno, brk->file, file, file_len, brk->file_len);
 #endif
+#if PHP_WIN32
+				if (!brk->disabled && lineno == brk->lineno && strncasecmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+#else
 				if (!brk->disabled && lineno == brk->lineno && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+#endif
 					break_ok = 1; /* Breaking is allowed by default */
 
 					/* Check if we have a condition set for it */
