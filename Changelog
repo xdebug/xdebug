@@ -1,3 +1,8 @@
+Mon Aug 14 11:31:54 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Revert this part as it would show return values for stack frames which were
+  not shown at all in the traces.
+
 Mon Aug 14 09:14:21 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #191: File/line breakpoints are case-sensitive on Windows.
