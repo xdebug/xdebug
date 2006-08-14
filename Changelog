@@ -1,3 +1,8 @@
+Mon Aug 14 09:14:21 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #191: File/line breakpoints are case-sensitive on Windows.
+- Fixed bug #193: Compile problems with PHP 5.2.
+
 Fri Aug 11 13:46:13 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Fixed version number.
