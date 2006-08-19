@@ -2067,7 +2067,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.95 $";
+	return "$Revision: 1.96 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2111,6 +2111,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	XG(stdout_redirected) = 0;
 	XG(stderr_redirected) = 0;
 	XG(stdin_redirected) = 0;
+	XG(stdio).php_body_write = NULL;
+	XG(stdio).php_header_write = NULL;
 
 	/* initialize remote log file */
 	XG(remote_log_file) = NULL;
