@@ -2119,7 +2119,7 @@ PHP_FUNCTION(xdebug_call_class)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(2 + depth);
+	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
 	if (i) {
 		RETURN_STRING(i->function.class ? i->function.class : "", 1);
 	} else {
@@ -2138,7 +2138,7 @@ PHP_FUNCTION(xdebug_call_function)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(2 + depth);
+	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
 	if (i) {
 		RETURN_STRING(i->function.function ? i->function.function : "{}", 1);
 	} else {
@@ -2157,7 +2157,7 @@ PHP_FUNCTION(xdebug_call_line)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(1 + depth);
+	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
 	if (i) {
 		RETURN_LONG(i->lineno);
 	} else {
@@ -2176,7 +2176,7 @@ PHP_FUNCTION(xdebug_call_file)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(1 + depth);
+	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
 	if (i) {
 		RETURN_STRING(i->filename, 1);
 	} else {
