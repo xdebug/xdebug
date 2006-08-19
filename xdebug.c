@@ -2113,19 +2113,14 @@ PHP_FUNCTION(xdebug_get_declared_vars)
    Returns the name of the calling class */
 PHP_FUNCTION(xdebug_call_class)
 {
-	xdebug_llist_element *le;
 	function_stack_entry *i;
+	long depth = 0;
 
-	le = XDEBUG_LLIST_TAIL(XG(stack));
-	if (le) {
-		if (le->prev) {
-			le = XDEBUG_LLIST_PREV(le);
-			if (le->prev) {
-				le = XDEBUG_LLIST_PREV(le);
-			}
-		}
-		i = XDEBUG_LLIST_VALP(le);
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+		return;
+	}
+	i = xdebug_get_stack_frame(2 + depth);
+	if (i) {
 		RETURN_STRING(i->function.class ? i->function.class : "", 1);
 	} else {
 		RETURN_FALSE;
@@ -2137,19 +2132,14 @@ PHP_FUNCTION(xdebug_call_class)
    Returns the function name from which the current function was called from. */
 PHP_FUNCTION(xdebug_call_function)
 {
-	xdebug_llist_element *le;
 	function_stack_entry *i;
+	long depth = 0;
 
-	le = XDEBUG_LLIST_TAIL(XG(stack));
-	if (le) {
-		if (le->prev) {
-			le = XDEBUG_LLIST_PREV(le);
-			if (le->prev) {
-				le = XDEBUG_LLIST_PREV(le);
-			}
-		}
-		i = XDEBUG_LLIST_VALP(le);
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+		return;
+	}
+	i = xdebug_get_stack_frame(2 + depth);
+	if (i) {
 		RETURN_STRING(i->function.function ? i->function.function : "{}", 1);
 	} else {
 		RETURN_FALSE;
@@ -2161,16 +2151,14 @@ PHP_FUNCTION(xdebug_call_function)
    Returns the line number where the current function was called from. */
 PHP_FUNCTION(xdebug_call_line)
 {
-	xdebug_llist_element *le;
 	function_stack_entry *i;
+	long depth = 0;
 
-	le = XDEBUG_LLIST_TAIL(XG(stack));
-	if (le) {
-		if (le->prev) {
-			le = XDEBUG_LLIST_PREV(le);
-		}
-		i = XDEBUG_LLIST_VALP(le);
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+		return;
+	}
+	i = xdebug_get_stack_frame(1 + depth);
+	if (i) {
 		RETURN_LONG(i->lineno);
 	} else {
 		RETURN_FALSE;
@@ -2182,16 +2170,14 @@ PHP_FUNCTION(xdebug_call_line)
    Returns the filename where the current function was called from. */
 PHP_FUNCTION(xdebug_call_file)
 {
-	xdebug_llist_element *le;
 	function_stack_entry *i;
+	long depth = 0;
 
-	le = XDEBUG_LLIST_TAIL(XG(stack));
-	if (le) {
-		if (le->prev) {
-			le = XDEBUG_LLIST_PREV(le);
-		}
-		i = XDEBUG_LLIST_VALP(le);
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+		return;
+	}
+	i = xdebug_get_stack_frame(1 + depth);
+	if (i) {
 		RETURN_STRING(i->filename, 1);
 	} else {
 		RETURN_FALSE;
