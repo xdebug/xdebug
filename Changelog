@@ -1,3 +1,7 @@
+Sat Aug 19 17:43:28 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- ZTS issues.
+
 Sat Aug 19 16:07:48 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Kill a bunch of unused variables.
