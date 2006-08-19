@@ -1,3 +1,10 @@
+Sat Aug 19 15:34:03 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/xdebug_call.phpt
+xdebug/tests/xdebug_call_depth.phpt
+xdebug/tests/xdebug_call_depth2.phpt:
+- Implemented FR #70: Provide optional depth on xdebug_call_* functions .
+
 Sat Aug 19 14:29:08 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00184.phpt:
 - Updated test case for bug #184.
