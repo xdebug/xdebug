@@ -1888,6 +1888,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 {
 	char *buffer, *error_type_str;
 	int buffer_len;
+	xdebug_brk_info *extra_brk_info = NULL;
 
 	TSRMLS_FETCH();
 
@@ -1930,6 +1931,17 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 */
 	} else if ((EG(error_reporting) & type)) { /* Otherwise print the default stack trace */
 		print_stack(!(strcmp("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno, !PG(display_errors) TSRMLS_CC);
+	}
+
+	/* Check for the pseudo exceptions to allow breakpoints on PHP error statusses */
+	if (XG(remote_enabled)) {
+		if (xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info)) {
+			if (handle_hit_value(extra_brk_info)) {
+				if (!XG(context).handler->remote_error(&(XG(context)), 0, error_type_str, buffer, error_filename, error_lineno, XG(stack))) {
+					XG(remote_enabled) = 0;
+				}
+			}
+		}
 	}
 
 	/* Log to logger */
