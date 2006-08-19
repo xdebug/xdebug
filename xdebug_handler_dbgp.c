@@ -1531,10 +1531,7 @@ DBGP_FUNC(typemap_get)
 
 static int add_variable_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_xml_node      *contents;
-	zval                  ret_zval;
-	int                   res;
-	HashTable            *tmp_symbol_table;
+	xdebug_xml_node *contents;
 
 	contents = get_symbol(name, name_length, options TSRMLS_CC);
 	if (contents) {
@@ -1645,10 +1642,7 @@ DBGP_FUNC(property_set)
 
 static int add_variable_contents_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	int                   contents_found;
-	zval                  ret_zval;
-	int                   res;
-	HashTable            *tmp_symbol_table;
+	int contents_found;
 
 	contents_found = get_symbol_contents(name, name_length, node, options TSRMLS_CC);
 	if (contents_found) {
@@ -2067,7 +2061,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.96 $";
+	return "$Revision: 1.97 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
