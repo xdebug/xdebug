@@ -1,3 +1,7 @@
+Sat Aug 19 16:00:30 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Possible fix for bug #195: CLI Error after debgging session.
+
 Sat Aug 19 15:34:03 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/xdebug_call.phpt
