@@ -1,3 +1,9 @@
+Sat Aug 19 14:18:31 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Implemented break points for different types of PHP errors. You can now set
+  an 'exception' breakpoint on "Fatal error", "Warning", "Notice" etc. This is
+  related to bug #187.
+
 Mon Aug 14 11:31:54 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Revert this part as it would show return values for stack frames which were
