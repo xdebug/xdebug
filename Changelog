@@ -1,3 +1,7 @@
+Sat Aug 19 14:29:08 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+tests/bug00184.phpt:
+- Updated test case for bug #184.
+
 Sat Aug 19 14:18:31 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Implemented break points for different types of PHP errors. You can now set
