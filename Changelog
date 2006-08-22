@@ -1,3 +1,7 @@
+Tue Aug 22 20:43:08 CEST 2006 Shane Caraveo <shane@caraveo.com>
+xdebug.c:
+fix xdebug builds against 5.0.x
+
 Sat Aug 19 17:43:28 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - ZTS issues.
