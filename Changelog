@@ -1,3 +1,6 @@
+Thu Aug 24 00:58:15 CEST 2006 Shane Caraveo <shane@caraveo.com>
+xdebug.c:
+fix again for php 6
 Tue Aug 22 20:43:08 CEST 2006 Shane Caraveo <shane@caraveo.com>
 xdebug.c:
 fix xdebug builds against 5.0.x
