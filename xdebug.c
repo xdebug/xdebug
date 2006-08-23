@@ -1917,7 +1917,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				 * but DO NOT overwrite a pending exception
 				 */
 				if (PG(error_handling) == EH_THROW && !EG(exception)) {
-#if PHP_MINOR_VERSION >= 1
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 					zend_throw_error_exception(PG(exception_class), buffer, 0, type TSRMLS_CC);
 #else
 					zend_throw_exception(PG(exception_class), buffer, 0 TSRMLS_CC);
