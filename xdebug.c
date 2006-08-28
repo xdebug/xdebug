@@ -92,24 +92,6 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
 int (*old_exit_handler)(ZEND_OPCODE_HANDLER_ARGS);
-
-static int (*old_jmp_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_jmpz_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_not_identical_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_not_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_smaller_handler)(ZEND_OPCODE_HANDLER_ARGS);
-static int (*old_is_smaller_or_equal_handler)(ZEND_OPCODE_HANDLER_ARGS);
-
-static int xdebug_jmp_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_jmpz_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_not_identical_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_not_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_smaller_handler(ZEND_OPCODE_HANDLER_ARGS);
-static int xdebug_is_smaller_or_equal_handler(ZEND_OPCODE_HANDLER_ARGS);
 #endif
 
 #ifdef ZEND_ENGINE_2
@@ -459,6 +441,10 @@ void xdebug_env_config()
 #ifdef ZEND_ENGINE_2
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
 # if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
+
+#define XDEBUG_SET_OPCODE_OVERRIDE(f,oc) \
+	zend_set_user_opcode_handler(oc, xdebug_##f##_handler);
+
 #define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 { \
 	if (XG(do_code_coverage)) { \
@@ -479,7 +465,13 @@ void xdebug_env_config()
 	return ZEND_USER_OPCODE_DISPATCH; \
 }
 #else
-#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
+#define XDEBUG_SET_OPCODE_OVERRIDE(f,oc) \
+	old_##f##_handler = zend_opcode_handlers[oc]; \
+	zend_opcode_handlers[oc] = xdebug_##f##_handler; \
+
+#define XDEBUG_OPCODE_OVERRIDE(f) \
+static int (*old_##f##_handler)(ZEND_OPCODE_HANDLER_ARGS); \
+static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 { \
 	if (XG(do_code_coverage)) { \
 		zend_op *cur_opcode; \
@@ -498,6 +490,7 @@ void xdebug_env_config()
 	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 }
 #endif
+
 XDEBUG_OPCODE_OVERRIDE(jmp)
 XDEBUG_OPCODE_OVERRIDE(jmpz)
 XDEBUG_OPCODE_OVERRIDE(is_identical)
@@ -506,6 +499,9 @@ XDEBUG_OPCODE_OVERRIDE(is_equal)
 XDEBUG_OPCODE_OVERRIDE(is_not_equal)
 XDEBUG_OPCODE_OVERRIDE(is_smaller)
 XDEBUG_OPCODE_OVERRIDE(is_smaller_or_equal)
+XDEBUG_OPCODE_OVERRIDE(assign)
+XDEBUG_OPCODE_OVERRIDE(add_array_element)
+XDEBUG_OPCODE_OVERRIDE(return)
 #endif
 
 
@@ -538,39 +534,18 @@ PHP_MINIT_FUNCTION(xdebug)
 	new_error_cb = xdebug_error_cb;
 
 	/* Overload the "exit" opcode */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
-	old_exit_handler = zend_opcode_handlers[ZEND_EXIT];
-	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
-
-	old_jmp_handler = zend_opcode_handlers[ZEND_JMP];
-	old_jmpz_handler = zend_opcode_handlers[ZEND_JMPZ];
-	old_is_identical_handler = zend_opcode_handlers[ZEND_IS_IDENTICAL];
-	old_is_not_identical_handler = zend_opcode_handlers[ZEND_IS_NOT_IDENTICAL];
-	old_is_equal_handler = zend_opcode_handlers[ZEND_IS_EQUAL];
-	old_is_not_equal_handler = zend_opcode_handlers[ZEND_IS_NOT_EQUAL];
-	old_is_smaller_handler = zend_opcode_handlers[ZEND_IS_SMALLER];
-	old_is_smaller_or_equal_handler = zend_opcode_handlers[ZEND_IS_SMALLER_OR_EQUAL];
-
-	zend_opcode_handlers[ZEND_JMP] = xdebug_jmp_handler;
-	zend_opcode_handlers[ZEND_JMPZ] = xdebug_jmpz_handler;
-	zend_opcode_handlers[ZEND_IS_IDENTICAL] = xdebug_is_identical_handler;
-	zend_opcode_handlers[ZEND_IS_NOT_IDENTICAL] = xdebug_is_not_identical_handler;
-	zend_opcode_handlers[ZEND_IS_EQUAL] = xdebug_is_equal_handler;
-	zend_opcode_handlers[ZEND_IS_NOT_EQUAL] = xdebug_is_not_equal_handler;
-	zend_opcode_handlers[ZEND_IS_SMALLER] = xdebug_is_smaller_handler;
-	zend_opcode_handlers[ZEND_IS_SMALLER_OR_EQUAL] = xdebug_is_smaller_or_equal_handler;
-#endif
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
-	zend_set_user_opcode_handler(ZEND_EXIT, xdebug_exit_handler);
-	zend_set_user_opcode_handler(ZEND_JMP,  xdebug_jmp_handler);
-	zend_set_user_opcode_handler(ZEND_JMPZ, xdebug_jmpz_handler);
-	zend_set_user_opcode_handler(ZEND_IS_IDENTICAL, xdebug_is_identical_handler);
-	zend_set_user_opcode_handler(ZEND_IS_NOT_IDENTICAL, xdebug_is_not_identical_handler);
-	zend_set_user_opcode_handler(ZEND_IS_EQUAL, xdebug_is_equal_handler);
-	zend_set_user_opcode_handler(ZEND_IS_NOT_EQUAL, xdebug_is_not_equal_handler);
-	zend_set_user_opcode_handler(ZEND_IS_SMALLER, xdebug_is_smaller_handler);
-	zend_set_user_opcode_handler(ZEND_IS_SMALLER_OR_EQUAL, xdebug_is_smaller_or_equal_handler);
-#endif
+	XDEBUG_SET_OPCODE_OVERRIDE(exit, ZEND_EXIT);
+	XDEBUG_SET_OPCODE_OVERRIDE(jmp, ZEND_JMP);
+	XDEBUG_SET_OPCODE_OVERRIDE(jmpz, ZEND_JMPZ);
+	XDEBUG_SET_OPCODE_OVERRIDE(is_identical, ZEND_IS_IDENTICAL);
+	XDEBUG_SET_OPCODE_OVERRIDE(is_not_identical, ZEND_IS_NOT_IDENTICAL);
+	XDEBUG_SET_OPCODE_OVERRIDE(is_equal, ZEND_IS_EQUAL);
+	XDEBUG_SET_OPCODE_OVERRIDE(is_not_equal, ZEND_IS_NOT_EQUAL);
+	XDEBUG_SET_OPCODE_OVERRIDE(is_smaller, ZEND_IS_SMALLER);
+	XDEBUG_SET_OPCODE_OVERRIDE(is_smaller_or_equal, ZEND_IS_SMALLER_OR_EQUAL);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign, ZEND_ASSIGN);
+	XDEBUG_SET_OPCODE_OVERRIDE(add_array_element, ZEND_ADD_ARRAY_ELEMENT);
+	XDEBUG_SET_OPCODE_OVERRIDE(return, ZEND_RETURN);
 
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
