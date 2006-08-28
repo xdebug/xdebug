@@ -1,3 +1,7 @@
+Mon Aug 28 21:53:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Made the code coverage a bit more accurate.
+
 Thu Aug 24 00:58:15 CEST 2006 Shane Caraveo <shane@caraveo.com>
 xdebug.c:
 fix again for php 6
