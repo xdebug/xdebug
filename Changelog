@@ -1,3 +1,8 @@
+Tue Aug 29 11:18:55 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_profiler.c:
+- Make this compile with PHP 4.3/4.4 again.
+
 Mon Aug 28 21:53:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Made the code coverage a bit more accurate.
