@@ -65,7 +65,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		filename = xdebug_sprintf("%s/cachegrind.out.%lu", XG(profiler_output_dir), xdebug_crc32(script_name, strlen(script_name)));
 	} else if (strcmp(XG(profiler_output_name), "timestamp") == 0) {
 		time_t the_time = time(NULL);
-		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), the_time);
+		filename = xdebug_sprintf("%s/cachegrind.out.%ld%d", XG(profiler_output_dir), the_time, php_combined_lcg(TSRMLS_C));
 	} else if (strcmp(XG(profiler_output_name), "script") == 0) {
 		script_name_tmp = estrdup(script_name + 1);
 		/* replace slashes with underscores */

@@ -533,6 +533,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_error_cb = zend_error_cb;
 	new_error_cb = xdebug_error_cb;
 
+#ifdef ZEND_ENGINE_2
 	/* Overload the "exit" opcode */
 	XDEBUG_SET_OPCODE_OVERRIDE(exit, ZEND_EXIT);
 	XDEBUG_SET_OPCODE_OVERRIDE(jmp, ZEND_JMP);
@@ -546,6 +547,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE(assign, ZEND_ASSIGN);
 	XDEBUG_SET_OPCODE_OVERRIDE(add_array_element, ZEND_ADD_ARRAY_ELEMENT);
 	XDEBUG_SET_OPCODE_OVERRIDE(return, ZEND_RETURN);
+#endif
 
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
