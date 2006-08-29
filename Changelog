@@ -1,3 +1,8 @@
+Tue Aug 29 18:43:20 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_profiler.c:
+- Added some random number to the generated file names so that there is less
+  problems of concurrent requests writing to the same file.
+
 Tue Aug 29 11:18:55 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_profiler.c:
