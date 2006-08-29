@@ -62,10 +62,10 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	char *script_name_tmp, *char_ptr;
 
 	if (strcmp(XG(profiler_output_name), "crc32") == 0) {
-		filename = xdebug_sprintf("%s/cachegrind.out.%lu", XG(profiler_output_dir), xdebug_crc32(script_name, strlen(script_name)));
+		filename = xdebug_sprintf("%s/cachegrind.out.%lu.%d", XG(profiler_output_dir), xdebug_crc32(script_name, strlen(script_name)), php_combined_lcg(TSRMLS_C));
 	} else if (strcmp(XG(profiler_output_name), "timestamp") == 0) {
 		time_t the_time = time(NULL);
-		filename = xdebug_sprintf("%s/cachegrind.out.%ld%d", XG(profiler_output_dir), the_time, php_combined_lcg(TSRMLS_C));
+		filename = xdebug_sprintf("%s/cachegrind.out.%ld.%d", XG(profiler_output_dir), the_time, php_combined_lcg(TSRMLS_C));
 	} else if (strcmp(XG(profiler_output_name), "script") == 0) {
 		script_name_tmp = estrdup(script_name + 1);
 		/* replace slashes with underscores */
@@ -80,7 +80,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		filename = xdebug_sprintf("%s/%s_cachegrind.out", XG(profiler_output_dir), script_name_tmp);
 		efree(script_name_tmp);
 	} else {
-		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), getpid());
+		filename = xdebug_sprintf("%s/cachegrind.out.%ld.%d", XG(profiler_output_dir), getpid(), php_combined_lcg(TSRMLS_C));
 	}
 
 	if (XG(profiler_append)) {
