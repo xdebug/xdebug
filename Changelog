@@ -1,3 +1,8 @@
+Tue Aug 29 18:44:06 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_code_coverage.c:
+- More tweaks for code coverage.
+
 Tue Aug 29 18:43:20 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Added some random number to the generated file names so that there is less
