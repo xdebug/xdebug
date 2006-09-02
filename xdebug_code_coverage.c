@@ -83,8 +83,10 @@ static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opco
 		opcode.opcode != ZEND_NOP &&
 		opcode.opcode != ZEND_EXT_NOP &&
 		opcode.opcode != ZEND_RECV &&
-		opcode.opcode != ZEND_RECV_INIT &&
-		opcode.opcode != ZEND_VERIFY_ABSTRACT_CLASS
+		opcode.opcode != ZEND_RECV_INIT
+#ifdef ZEND_ENGINE_2
+		&& opcode.opcode != ZEND_VERIFY_ABSTRACT_CLASS
+#endif
 	) {
 		xdebug_count_line(fn, opcode.lineno, 1 TSRMLS_CC);
 	}
