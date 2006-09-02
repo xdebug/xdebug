@@ -1,3 +1,7 @@
+Sat Sep 02 14:01:30 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- PHP 4.x doesn't have VERIFY_ABSTRACT_CLASS.
+
 Sat Sep 02 13:58:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Fixed bug #196: Profile timing on Windows does not work.
