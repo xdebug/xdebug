@@ -201,6 +201,8 @@ double xdebug_get_rtime(void)
 		}
 		return msec + sec;
 	}
+#else
+	return xdebug_get_utime();
 #endif
 	return 0;
 }
