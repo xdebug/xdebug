@@ -1,3 +1,7 @@
+Sat Sep 02 13:58:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- Fixed bug #196: Profile timing on Windows does not work.
+
 Tue Aug 29 18:44:06 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_code_coverage.c:
