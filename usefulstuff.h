@@ -56,7 +56,6 @@ char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end);
 void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
 char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);
 double xdebug_get_utime(void);
-double xdebug_get_rtime(void);
 char* xdebug_get_time(void);
 char *xdebug_path_to_url(const char *fileurl TSRMLS_DC);
 char *xdebug_path_from_url(const char *fileurl TSRMLS_DC);

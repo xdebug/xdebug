@@ -185,28 +185,6 @@ double xdebug_get_utime(void)
 	return 0;
 }
 
-double xdebug_get_rtime(void)
-{
-#ifdef HAVE_GETRUSAGE
-	struct rusage ru;
-	long sec = 0L;
-	double msec = 0.0;
-
-	if (getrusage(RUSAGE_SELF, (struct rusage *) &ru) == 0) {
-		sec = ru.ru_utime.tv_sec;
-		msec = (double) (ru.ru_utime.tv_usec / MICRO_IN_SEC);
-
-		if (msec >= 1.0) {
-			msec -= (long) msec;
-		}
-		return msec + sec;
-	}
-#else
-	return xdebug_get_utime();
-#endif
-	return 0;
-}
-
 char* xdebug_get_time(void)
 {
 	time_t cur_time;
