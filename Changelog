@@ -1,3 +1,11 @@
+Sun Sep 03 14:04:13 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/usefulstuff.h
+xdebug/xdebug_profiler.c:
+- Removed getrusage() usage again as it wouldn't provide better profiling
+  results and it added some confusion as well to people who didn't know
+  that "sleep()" actually doesn't use processor time.
+
 Sat Sep 02 14:01:30 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - PHP 4.x doesn't have VERIFY_ABSTRACT_CLASS.
