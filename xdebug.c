@@ -741,7 +741,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	}
 
 	if (XG(profile_filename)) {
-		efree(XG(profile_filename));
+		xdfree(XG(profile_filename));
 	}
 
 	if (XG(error_handler)) {
@@ -2370,29 +2370,30 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	char *str_time;
 	char *filename;
 	char  cwd[128];
+	char *tmp_fname;
 
 	if (fname) {
-		filename = xdebug_sprintf("%s.xt", fname);
+		filename = xdstrdup(fname);
 	} else {
 		if (strcmp(XG(trace_output_name), "crc32") == 0) {
 			VCWD_GETCWD(cwd, 127);
-			filename = xdebug_sprintf("%s/trace.%lu.xt", XG(trace_output_dir), xdebug_crc32(cwd, strlen(cwd)));
+			filename = xdebug_sprintf("%s/trace.%lu", XG(trace_output_dir), xdebug_crc32(cwd, strlen(cwd)));
 		} else if (strcmp(XG(trace_output_name), "timestamp") == 0) {
 			time_t the_time = time(NULL);
-			filename = xdebug_sprintf("%s/trace.%ld.xt", XG(trace_output_dir), the_time);
+			filename = xdebug_sprintf("%s/trace.%ld", XG(trace_output_dir), the_time);
 		} else {
-			filename = xdebug_sprintf("%s/trace.%ld.xt", XG(trace_output_dir), getpid());
+			filename = xdebug_sprintf("%s/trace.%ld", XG(trace_output_dir), getpid());
 		}
 	}
 	if (options & XDEBUG_TRACE_OPTION_APPEND) {
-		XG(trace_file) = fopen(filename, "a");
+		XG(trace_file) = xdebug_fopen(filename, "a", "xt", (char**) &tmp_fname);
 	} else {
-		XG(trace_file) = fopen(filename, "w");
+		XG(trace_file) = xdebug_fopen(filename, "w", "xt", (char**) &tmp_fname);
 	}
+	xdfree(filename);
 	if (options & XDEBUG_TRACE_OPTION_COMPUTERIZED) {
 		XG(trace_format) = 1;
 	}
-	XG(tracefile_name) = estrdup(filename);
 	if (XG(trace_file)) {
 		if (XG(trace_format) == 1) {
 			fprintf(XG(trace_file), "Version: %s\n", XDEBUG_VERSION);
@@ -2401,7 +2402,8 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 		fprintf(XG(trace_file), "TRACE START [%s]\n", str_time);
 		XG(do_trace) = 1;
 		xdfree(str_time);
-		return filename;
+		XG(tracefile_name) = tmp_fname;
+		return xdstrdup(XG(tracefile_name));
 	}
 	return NULL;
 }
@@ -2428,7 +2430,7 @@ void xdebug_stop_trace(TSRMLS_D)
 		xdfree(str_time);
 	}
 	if (XG(tracefile_name)) {
-		efree(XG(tracefile_name));
+		xdfree(XG(tracefile_name));
 		XG(tracefile_name) = NULL;
 	}
 }

@@ -2061,7 +2061,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.97 $";
+	return "$Revision: 1.98 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2111,7 +2111,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	/* initialize remote log file */
 	XG(remote_log_file) = NULL;
 	if (XG(remote_log) && strlen(XG(remote_log))) {
-		XG(remote_log_file) = fopen(XG(remote_log), "a");
+		XG(remote_log_file) = xdebug_fopen(XG(remote_log), "a", NULL, NULL);
 	}
 	if (XG(remote_log_file)) {
 		char *timestr = xdebug_get_time();

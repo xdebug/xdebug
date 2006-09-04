@@ -24,6 +24,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/file.h>
 #else
 #define PATH_MAX MAX_PATH
 #include <winsock2.h>
@@ -369,4 +370,83 @@ long xdebug_crc32(const char *string, int str_len)
 	    XDEBUG_CRC32(crc, *string);
 	}
 	return ~crc;
+}
+
+static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **new_fname)
+{
+	FILE *fh;
+	char *tmp_fname;
+
+	if (extension) {
+		tmp_fname = xdebug_sprintf("%s.%s", fname, extension);
+	} else {
+		tmp_fname = xdstrdup(fname);
+	}
+	fh = fopen(tmp_fname, mode);
+	if (new_fname) {
+		*new_fname = tmp_fname;
+	} else {
+		xdfree(tmp_fname);
+	}
+	return fh;
+}
+
+FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
+{
+	int   fd, r;
+	FILE *fh;
+	struct stat buf;
+	char *tmp_fname;
+	TSRMLS_FETCH();
+
+	/* We're not doing any tricks for append mode... as that has atomic writes
+	 * anyway. */
+	if (mode[0] == 'a') {
+		return xdebug_open_file(fname, mode, extension, new_fname);
+	}
+
+	/* In write mode however we do have to do some stuff. */
+	/* 1. Check if the file exists */
+	if (extension) {
+		tmp_fname = xdebug_sprintf("%s.%s", fname, extension);
+	} else {
+		tmp_fname = xdebug_sprintf("%s", fname);
+	}
+	r = stat(tmp_fname, &buf);
+	xdfree(tmp_fname);
+
+	if (r == -1) {
+		/* 2. Cool, the file doesn't exist so we can open it without probs now. */
+		return xdebug_open_file(fname, "w", extension, new_fname);
+	}
+	/* 3. It exists, check if we can exclusively lock it. */
+	fh = xdebug_open_file(fname, "r+", extension, (char**) &tmp_fname);
+	r = flock(fileno(fh), LOCK_EX | LOCK_NB);
+	if (r == -1) {
+		if (errno == EWOULDBLOCK) {
+			fclose(fh);
+			xdfree(tmp_fname);
+			/* 4. The file is in use, so we open one with a new name. */
+			if (extension) {
+				tmp_fname = xdebug_sprintf("%s.%08x.%s", fname, php_combined_lcg(TSRMLS_C), extension);
+			} else {
+				tmp_fname = xdebug_sprintf("%s.%08x", fname, php_combined_lcg(TSRMLS_C));
+			}
+			fh = fopen(tmp_fname, "w");
+			flock(fileno(fh), LOCK_UN);
+			if (new_fname) {
+				*new_fname = tmp_fname;
+			} else {
+				xdfree(tmp_fname);
+			}
+			return fh;
+		}
+	}
+	/* 5. We established a lock, now we make a fh out of it. */
+	if (new_fname) {
+		*new_fname = tmp_fname;
+	} else {
+		xdfree(tmp_fname);
+	}
+	return fh;
 }

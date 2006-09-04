@@ -62,10 +62,10 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	char *script_name_tmp, *char_ptr;
 
 	if (strcmp(XG(profiler_output_name), "crc32") == 0) {
-		filename = xdebug_sprintf("%s/cachegrind.out.%lu.%d", XG(profiler_output_dir), xdebug_crc32(script_name, strlen(script_name)), php_combined_lcg(TSRMLS_C));
+		filename = xdebug_sprintf("%s/cachegrind.out.%lu", XG(profiler_output_dir), xdebug_crc32(script_name, strlen(script_name)));
 	} else if (strcmp(XG(profiler_output_name), "timestamp") == 0) {
 		time_t the_time = time(NULL);
-		filename = xdebug_sprintf("%s/cachegrind.out.%ld.%d", XG(profiler_output_dir), the_time, php_combined_lcg(TSRMLS_C));
+		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), the_time);
 	} else if (strcmp(XG(profiler_output_name), "script") == 0) {
 		script_name_tmp = estrdup(script_name + 1);
 		/* replace slashes with underscores */
@@ -80,21 +80,22 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		filename = xdebug_sprintf("%s/%s_cachegrind.out", XG(profiler_output_dir), script_name_tmp);
 		efree(script_name_tmp);
 	} else {
-		filename = xdebug_sprintf("%s/cachegrind.out.%ld.%d", XG(profiler_output_dir), getpid(), php_combined_lcg(TSRMLS_C));
+		filename = xdebug_sprintf("%s/cachegrind.out.%ld", XG(profiler_output_dir), getpid());
 	}
 
 	if (XG(profiler_append)) {
-		XG(profile_file) = fopen(filename, "a");
+		XG(profile_file) = xdebug_fopen(filename, "a", NULL, &XG(profile_filename));
 	} else {
-		XG(profile_file) = fopen(filename, "w");
+		XG(profile_file) = xdebug_fopen(filename, "w", NULL, &XG(profile_filename));
 	}
+	xdfree(filename);
+
 	if (!XG(profile_file)) {
 		return FAILURE;
 	}
 	if (XG(profiler_append)) {
 		fprintf(XG(profile_file), "\n==== NEW PROFILING FILE ==============================================\n");
 	}
-	XG(profile_filename) = estrdup(filename);
 #if HAVE_PHP_MEMORY_USAGE
 	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time Memory\n\n", script_name);
 #else
@@ -324,7 +325,7 @@ int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC)
 	}
 
 	fprintf(stderr, "opening %s\n", filename);
-	aggr_file = fopen(filename, "w");
+	aggr_file = xdebug_fopen(filename, "w", NULL, NULL);
 	if (!aggr_file) {
 		return FAILURE;
 	}
