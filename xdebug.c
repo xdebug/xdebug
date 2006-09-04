@@ -108,6 +108,7 @@ int zend_xdebug_initialised = 0;
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
 	PHP_FE(xdebug_get_function_stack,    NULL)
+	PHP_FE(xdebug_print_function_stack,  NULL)
 	PHP_FE(xdebug_get_declared_vars,     NULL)
 	PHP_FE(xdebug_call_class,            NULL)
 	PHP_FE(xdebug_call_function,         NULL)
@@ -2065,6 +2066,17 @@ static void attach_used_var_names(void *return_value, xdebug_hash_element *he)
 	
 	add_next_index_string(return_value, name, 1);
 }
+
+/* {{{ proto array xdebug_print_declared_vars()
+   Displays a stack trace */
+PHP_FUNCTION(xdebug_print_function_stack)
+{
+	function_stack_entry *i;
+
+	i = xdebug_get_stack_frame(0 TSRMLS_CC);
+	print_stack(!(strcmp("cli", sapi_module.name) == 0), "Xdebug", "user triggered", i->filename, i->lineno, !PG(display_errors) TSRMLS_CC);
+}
+/* }}} */
 
 /* {{{ proto array xdebug_get_declared_vars()
    Returns an array representing the current stack */
