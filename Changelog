@@ -1,3 +1,11 @@
+Mon Sep 04 22:44:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/usefulstuff.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_profiler.c:
+- Fixed bug #197: Race condition fixes created too many files.
+
 Sun Sep 03 14:04:13 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/usefulstuff.h
