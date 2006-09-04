@@ -1,3 +1,9 @@
+Mon Sep 04 23:20:18 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added the xdebug_print_function_trace() function to display a stack trace on
+  demand.
+
 Mon Sep 04 22:44:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/usefulstuff.h
