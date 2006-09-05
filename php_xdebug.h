@@ -123,6 +123,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     collect_includes;
 	zend_bool     collect_params;
 	zend_bool     collect_return;
+	zend_bool     collect_vars;
 	zend_bool     extended_info;
 	zend_bool     show_ex_trace;
 	zend_bool     show_local_vars;
