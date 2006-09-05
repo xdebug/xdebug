@@ -372,6 +372,7 @@ long xdebug_crc32(const char *string, int str_len)
 	return ~crc;
 }
 
+#ifdef PHP_WIN32
 static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **new_fname)
 {
 	FILE *fh;
@@ -451,3 +452,17 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 	}
 	return fh;
 }
+#else
+FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
+{
+	char *tmp_fname;
+
+	if (extension) {
+		tmp_fname = xdebug_sprintf("%s.%s", fname, extension);
+	} else {
+		tmp_fname = xdebug_sprintf("%s", fname);
+	}
+	*new_fname = tmp_fname;
+	return fopen(tmp_fname, mode);
+}
+#endif
