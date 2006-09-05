@@ -560,6 +560,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_APPEND", XDEBUG_TRACE_OPTION_APPEND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_COMPUTERIZED", XDEBUG_TRACE_OPTION_COMPUTERIZED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_HTML", XDEBUG_TRACE_OPTION_HTML, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 
@@ -1776,6 +1777,38 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 	return str.d;
 }
 
+static char* return_trace_stack_frame_begin_html(function_stack_entry* i, int fnr TSRMLS_DC)
+{
+	char *tmp_name;
+	int   j;
+	xdebug_str str = {0, 0, NULL};
+
+	xdebug_str_add(&str, "\t<tr>", 0);
+	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", fnr), 1);
+	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6f</td>", i->time - XG(start_time)), 1);
+#if MEMORY_LIMIT
+	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", i->memory), 1);
+#endif
+	xdebug_str_add(&str, "<td align='left'>", 0);
+	for (j = 0; j < i->level - 1; j++) {
+		xdebug_str_add(&str, "&nbsp; &nbsp;", 0);
+	}
+	xdebug_str_add(&str, "-&gt;</td>", 0);
+
+	tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
+	xdebug_str_add(&str, xdebug_sprintf("<td>%s(", tmp_name), 1);
+	xdfree(tmp_name);
+
+	if (i->include_filename) {
+		xdebug_str_add(&str, i->include_filename, 0);
+	}
+
+	xdebug_str_add(&str, xdebug_sprintf(")</td><td>%s:%d</td>", i->filename, i->lineno), 1);
+	xdebug_str_add(&str, "</tr>\n", 0);
+
+	return str.d;
+}
+
 
 static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSRMLS_DC)
 {
@@ -1784,6 +1817,8 @@ static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSR
 			return return_trace_stack_frame_begin_normal(i TSRMLS_CC);
 		case 1:
 			return return_trace_stack_frame_begin_computerized(i, fnr);
+		case 2:
+			return return_trace_stack_frame_begin_html(i, fnr TSRMLS_CC);
 		default:
 			return xdstrdup("");
 	}
@@ -2406,14 +2441,27 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	if (options & XDEBUG_TRACE_OPTION_COMPUTERIZED) {
 		XG(trace_format) = 1;
 	}
+	if (options & XDEBUG_TRACE_OPTION_HTML) {
+		XG(trace_format) = 2;
+	}
 	if (XG(trace_file)) {
 		if (XG(trace_format) == 1) {
 			fprintf(XG(trace_file), "Version: %s\n", XDEBUG_VERSION);
 		}
-		str_time = xdebug_get_time();
-		fprintf(XG(trace_file), "TRACE START [%s]\n", str_time);
+		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
+			str_time = xdebug_get_time();
+			fprintf(XG(trace_file), "TRACE START [%s]\n", str_time);
+			xdfree(str_time);
+		}
+		if (XG(trace_format) == 2) {
+			fprintf(XG(trace_file), "<table class='xdebug-trace' border='1' cellspacing='0'>\n");
+			fprintf(XG(trace_file), "\t<tr><th>#</th><th>Time</th>");
+#if MEMORY_LIMIT
+			fprintf(XG(trace_file), "<th>Mem</th>");
+#endif
+			fprintf(XG(trace_file), "<th colspan='2'>Function</th><th>Location</th></tr>\n");
+		}
 		XG(do_trace) = 1;
-		xdfree(str_time);
 		XG(tracefile_name) = tmp_fname;
 		return xdstrdup(XG(tracefile_name));
 	}
@@ -2427,19 +2475,25 @@ void xdebug_stop_trace(TSRMLS_D)
 
 	XG(do_trace) = 0;
 	if (XG(trace_file)) {
-		u_time = xdebug_get_utime();
-		fprintf(XG(trace_file), "%10.4f ", u_time - XG(start_time));
+		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
+			u_time = xdebug_get_utime();
+			fprintf(XG(trace_file), "%10.4f ", u_time - XG(start_time));
 #if HAVE_PHP_MEMORY_USAGE
-		fprintf(XG(trace_file), "%10u", XG_MEMORY_USAGE());
+			fprintf(XG(trace_file), "%10u", XG_MEMORY_USAGE());
 #else
-		fprintf(XG(trace_file), "%10u", 0);
+			fprintf(XG(trace_file), "%10u", 0);
 #endif
-		fprintf(XG(trace_file), "\n");
-		str_time = xdebug_get_time();
-		fprintf(XG(trace_file), "TRACE END   [%s]\n\n", str_time);
+			fprintf(XG(trace_file), "\n");
+			str_time = xdebug_get_time();
+			fprintf(XG(trace_file), "TRACE END   [%s]\n\n", str_time);
+			xdfree(str_time);
+		}
+		if (XG(trace_format) == 2) {
+			fprintf(XG(trace_file), "</table>\n");
+		}
+
 		fclose(XG(trace_file));
 		XG(trace_file) = NULL;
-		xdfree(str_time);
 	}
 	if (XG(tracefile_name)) {
 		xdfree(XG(tracefile_name));
@@ -2450,8 +2504,10 @@ void xdebug_stop_trace(TSRMLS_D)
 PHP_FUNCTION(xdebug_stop_trace)
 {
 	if (XG(do_trace) == 1) {
+		RETVAL_STRING(XG(tracefile_name), 1);
 		xdebug_stop_trace(TSRMLS_C);
 	} else {
+		RETVAL_FALSE;
 		php_error(E_NOTICE, "Function trace was not started");
 	}
 }
