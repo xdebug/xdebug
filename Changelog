@@ -1,3 +1,7 @@
+Tue Sep 05 14:10:04 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- Fixed an issue where the file was not truncated when rewriting it.
+
 Mon Sep 04 23:20:18 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
