@@ -442,7 +442,8 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 			return fh;
 		}
 	}
-	/* 5. We established a lock, now we make a fh out of it. */
+	/* 5. We established a lock, now we truncate and return the handle */
+	fh = freopen(tmp_fname, "w", fh);
 	if (new_fname) {
 		*new_fname = tmp_fname;
 	} else {
