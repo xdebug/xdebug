@@ -1,3 +1,12 @@
+Tue Sep 05 16:46:20 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/tests/get_declared_vars.phpt:
+- Added the xdebug.collect_vars setting to tell Xdebug to collect
+  information about which variables are used in a scope. Now you don't need
+  to show variables with xdebug.show_local_vars anymore for
+  xdebug_get_declared_vars() to work.
+
 Tue Sep 05 15:05:09 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_private.h:
