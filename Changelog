@@ -1,3 +1,12 @@
+Tue Sep 05 15:05:09 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_private.h:
+- Reintroduce HTML tracing by adding a new tracing option "XDEBUG_TRACE_HTML"
+  (4).
+- Made xdebug_stop_trace() return the trace file name, so that the following
+  works:
+  <?php echo file_get_contents( xdebug_stop_trace() ); ?>
+
 Tue Sep 05 14:10:04 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Fixed an issue where the file was not truncated when rewriting it.
