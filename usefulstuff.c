@@ -372,7 +372,7 @@ long xdebug_crc32(const char *string, int str_len)
 	return ~crc;
 }
 
-#ifdef PHP_WIN32
+#ifndef PHP_WIN32
 static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **new_fname)
 {
 	FILE *fh;
