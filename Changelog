@@ -1,3 +1,7 @@
+Wed Sep 06 08:27:28 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- It helps if you put the #ifdef correctly.
+
 Tue Sep 05 16:56:41 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Let's see if this makes it work on windows again where there is no
