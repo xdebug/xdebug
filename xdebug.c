@@ -1280,17 +1280,20 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			/* Initialize debugging session */
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 			if (XG(context).socket >= 0) {
-				XG(remote_enabled) = 1;
+				XG(remote_enabled) = 0;
+				XG(context).program_name = xdstrdup(op_array->filename);
 
 				/* Get handler from mode */
 				XG(context).handler = xdebug_handler_get(XG(remote_handler));
-				XG(context).program_name = xdstrdup(op_array->filename);
-				if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
-					XG(remote_enabled) = 0;
+				if (!XG(context).handler) {
+					zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
+				} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
+					/* The request could not be started, ignore it then */
+				} else {
+					/* All is well, turn off script time outs */
+					zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+					XG(remote_enabled) = 1;
 				}
-
-				/* Turn off script time outs */
-				zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			}
 		}
 
@@ -1867,12 +1870,20 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	if (!XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		if (XG(context).socket >= 0) {
-			XG(remote_enabled) = 1;
+			XG(remote_enabled) = 0;
 			XG(context).program_name = NULL;
 
 			/* Get handler from mode */
 			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT);
+			if (!XG(context).handler) {
+				zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
+			} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
+				/* The request could not be started, ignore it then */
+			} else {
+				/* All is well, turn off script time outs */
+				zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+				XG(remote_enabled) = 1;
+			}
 		}
 	}
 	if (XG(remote_enabled)) {
