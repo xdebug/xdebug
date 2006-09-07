@@ -1,3 +1,7 @@
+Thu Sep 07 22:56:16 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #198: Segfault when trying to use a non-existing debug handler.
+
 Wed Sep 06 08:27:28 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - It helps if you put the #ifdef correctly.
