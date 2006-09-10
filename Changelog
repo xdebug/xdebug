@@ -1,3 +1,9 @@
+Sun Sep 10 20:43:41 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Improve code coverage by eliminating unreachable code for:
+  * abstract methods
+  * implicit returns when a normal return is present
+
 Thu Sep 07 22:56:16 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #198: Segfault when trying to use a non-existing debug handler.
