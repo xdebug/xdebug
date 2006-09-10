@@ -92,6 +92,69 @@ static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opco
 	}
 }
 
+static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_array *opa TSRMLS_DC)
+{
+	unsigned int i, check_jumps = 0, jmp, marker, end, jump_over = 0;
+	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
+
+#ifdef ZEND_ENGINE_2
+	/* Check for abstract methods and simply return from this function in those
+	 * cases. */
+	if (opa->opcodes[opa->size - 4].opcode == ZEND_RAISE_ABSTRACT_ERROR)
+	{
+		return;
+	}	
+#endif
+
+	/* We need to figure out the last jump point to see if we can fix the
+	 * return at the end of the function. We only have to do that if the
+	 * last 5 opcodes are EXT_STMT, RETURN, EXT_STMT, RETURN and
+	 * ZEND_HANDLE_EXCEPTION though (for PHP 5). */
+	if (opa->size >= 4) {
+		if (
+			opa->opcodes[opa->size - 4].opcode == ZEND_RETURN &&
+			opa->opcodes[opa->size - 3].opcode == ZEND_EXT_STMT &&
+			opa->opcodes[opa->size - 2].opcode == ZEND_RETURN &&
+			opa->opcodes[opa->size - 1].opcode == ZEND_HANDLE_EXCEPTION
+		) {
+			marker = opa->size - 5;
+			check_jumps = 1;
+		}
+	}
+	for (i = 0; i < opa->size; i++) {
+		zend_op opcode = opa->opcodes[i];
+		if (check_jumps) {
+			jmp = 0;
+			if (opcode.opcode == ZEND_JMP) {
+				jmp = (opcode.op1.u.opline_num - base_address) / sizeof(zend_op);
+			} else if (
+				opcode.opcode == ZEND_JMPZ || 
+				opcode.opcode == ZEND_JMPNZ || 
+				opcode.opcode == ZEND_JMPZ_EX || 
+				opcode.opcode == ZEND_JMPNZ_EX
+			) {
+				jmp = (opcode.op2.u.opline_num - base_address) / sizeof(zend_op);
+			} else if (opcode.opcode == ZEND_JMPZNZ) {
+				jmp = opcode.op2.u.opline_num;
+			}
+			if (jmp > marker) {
+				jump_over = 1;
+			}
+		}
+	}
+	if (jump_over && check_jumps) {
+		end = opa->size;
+	} else {
+		end = opa->size - 3;
+	}
+
+	/* The normal loop then finally */
+	for (i = 0; i < end; i++) {
+		zend_op opcode = opa->opcodes[i];
+		prefil_from_opcode(NULL, fn, opcode TSRMLS_CC);
+	}
+}
+
 static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	char *new_filename;
@@ -101,9 +164,7 @@ static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
 		if (opa->filename && strcmp(opa->filename, new_filename) == 0) {
-			for (i = 0; i < opa->size; i++) {
-				prefil_from_opcode(NULL, new_filename, opa->opcodes[i] TSRMLS_CC);
-			}
+			prefil_from_oparray(NULL, new_filename, opa TSRMLS_CC);
 		}
 	}
 
@@ -145,10 +206,8 @@ void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_ar
 		return;
 	}
 	xdebug_hash_add(XG(code_coverage_op_array_cache), cache_key, cache_key_len, NULL);
-	
-	for (i = 0; i < op_array->size; i++) {
-		prefil_from_opcode(fse, op_array->filename, op_array->opcodes[i] TSRMLS_CC);
-	}
+
+	prefil_from_oparray(fse, op_array->filename, op_array TSRMLS_CC);
 
 	zend_hash_apply_with_arguments(CG(function_table), (apply_func_args_t) prefil_from_function_table, 1, op_array->filename);
 	zend_hash_apply_with_arguments(CG(class_table), (apply_func_args_t) prefil_from_class_table, 1, op_array->filename);
