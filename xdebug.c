@@ -417,7 +417,7 @@ void xdebug_env_config()
 			name = "xdebug.idekey";
 		} else
 		if (strcasecmp(envvar, "profiler_enable") == 0) {
-			name = "xdebug.profile_enable";
+			name = "xdebug.profiler_enable";
 		} else
 		if (strcasecmp(envvar, "profiler_output_dir") == 0) {
 			name = "xdebug.profiler_output_dir";
