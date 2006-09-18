@@ -40,9 +40,7 @@ xdebug.extended_info=1
 --EXPECTF--
 array(1) {
   ["%scoverage3.php"]=>
-  array(12) {
-    [2]=>
-    int(-1)
+  array(11) {
     [4]=>
     int(1)
     [5]=>
