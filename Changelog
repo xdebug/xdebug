@@ -1,3 +1,7 @@
+Mon Sep 18 11:06:48 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+debugclient/LICENSE:
+- Fixed e-mail address.
+
 Mon Sep 18 10:58:35 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00168.phpt
 xdebug/tests/coverage3.phpt:
