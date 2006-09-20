@@ -1,3 +1,7 @@
+Wed Sep 20 15:11:31 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Even more tweakage for code coverage.
+
 Wed Sep 20 14:30:58 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Tweak code coverage some more (added send_var to the overload list).
