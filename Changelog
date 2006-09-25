@@ -1,3 +1,15 @@
+Mon Sep 25 22:20:01 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_set.c
+xdebug/xdebug_set.h
+xdebug/config.m4
+xdebug/php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_code_coverage.h
+xdebug/xdebug_private.h:
+- Implemented dead code analysis that should give much better code coverage
+  results.
+
 Thu Sep 21 11:36:51 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - One more to overload.
