@@ -1,3 +1,7 @@
+Mon Sep 25 23:08:25 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- The foreach loop contruct contains some jump information as well.
+
 Mon Sep 25 22:20:01 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_set.c
 xdebug/xdebug_set.h
