@@ -140,6 +140,10 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, unsigned 
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 			return 1;
 		}
+	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
+		*jmp1 = position + 1;
+		*jmp2 = opcode.op2.u.opline_num;
+		return 1;
 	}
 	return 0;
 }
