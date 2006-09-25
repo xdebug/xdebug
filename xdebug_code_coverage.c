@@ -18,6 +18,7 @@
 
 #include "php_xdebug.h"
 #include "xdebug_private.h"
+#include "xdebug_set.h"
 #include "xdebug_var.h"
 #include "xdebug_code_coverage.h"
 
@@ -39,7 +40,7 @@ void xdebug_coverage_file_dtor(void *data)
 	xdfree(file);
 }
 
-void xdebug_count_line(char *filename, int lineno, int executable TSRMLS_DC)
+void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
@@ -69,7 +70,11 @@ void xdebug_count_line(char *filename, int lineno, int executable TSRMLS_DC)
 	}
 
 	if (executable) {
-		line->executable = 1;
+		if (line->executable != 1 && deadcode) {
+			line->executable = 2;
+		} else {
+			line->executable = 1;
+		}
 	} else {
 		line->count++;
 	}
@@ -77,7 +82,7 @@ void xdebug_count_line(char *filename, int lineno, int executable TSRMLS_DC)
 	xdfree(sline);
 }
 
-static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode TSRMLS_DC)
+static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode, int deadcode TSRMLS_DC)
 {
 	if (
 		opcode.opcode != ZEND_NOP &&
@@ -88,14 +93,113 @@ static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opco
 		&& opcode.opcode != ZEND_VERIFY_ABSTRACT_CLASS
 #endif
 	) {
-		xdebug_count_line(fn, opcode.lineno, 1 TSRMLS_CC);
+		xdebug_count_line(fn, opcode.lineno, 1, deadcode TSRMLS_CC);
 	}
 }
 
+static zend_brk_cont_element* xdebug_find_brk_cont(zval *nest_levels_zval, int array_offset, zend_op_array *op_array)
+{
+	int nest_levels;
+	zend_brk_cont_element *jmp_to;
+
+	nest_levels = nest_levels_zval->value.lval;
+
+	do {
+		jmp_to = &op_array->brk_cont_array[array_offset];
+		array_offset = jmp_to->parent;
+	} while (--nest_levels > 0);
+	return jmp_to;
+}
+
+static int xdebug_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1, unsigned int *jmp2)
+{
+	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
+
+	zend_op opcode = opa->opcodes[position];
+	if (opcode.opcode == ZEND_JMP) {
+		*jmp1 = (opcode.op1.u.opline_num - base_address) / sizeof(zend_op);
+		return 1;
+	} else if (
+		opcode.opcode == ZEND_JMPZ ||
+		opcode.opcode == ZEND_JMPNZ ||
+		opcode.opcode == ZEND_JMPZ_EX ||
+		opcode.opcode == ZEND_JMPNZ_EX
+	) {
+		*jmp1 = position + 1;
+		*jmp2 = (opcode.op2.u.opline_num - base_address) / sizeof(zend_op);
+		return 1;
+	} else if (opcode.opcode == ZEND_JMPZNZ) {
+		*jmp1 = opcode.op2.u.opline_num;
+		*jmp2 = opcode.extended_value;
+		return 1;
+	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
+		zend_brk_cont_element *el;
+
+		if (opcode.op2.op_type == IS_CONST) {
+			el = xdebug_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
+			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xdebug_set *set)
+{
+	unsigned int jump_found = 0;
+	int jump_pos1 = -1;
+	int jump_pos2 = -1;
+
+	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
+	/* First we see if the branch has been visited, if so we bail out. */
+	if (xdebug_set_in(set, position)) {
+		return;
+	}
+	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
+	xdebug_set_add(set, position);
+	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
+	while (position < opa->size) {
+
+		/* See if we have a jump instruction */
+		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
+			/*(fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);)*/
+			if (jump_pos2 != -1) {
+				/*(fprintf(stderr, ", Position 2 = %d\n", jump_pos2);)*/
+			} else {
+				/*(fprintf(stderr, "\n");)*/
+			}
+			xdebug_analyse_branch(opa, jump_pos1, set);
+			if (jump_pos2 != -1) {
+				xdebug_analyse_branch(opa, jump_pos2, set);
+			}
+			break;
+		}
+		/* See if we have an exit instruction */
+		if (opa->opcodes[position].opcode == ZEND_EXIT) {
+			/* fprintf(stderr, "X* Return found\n"); */
+			break;
+		}
+		/* See if we have a return instruction */
+		if (opa->opcodes[position].opcode == ZEND_RETURN) {
+			/*(fprintf(stderr, "XDEBUG Return found\n");)*/
+			break;
+		}
+		/* See if we have a throw instruction */
+		if (opa->opcodes[position].opcode == ZEND_THROW) {
+			/* fprintf(stderr, "X/* Throw found\n"); */
+			break;
+		}
+
+		position++;
+		/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
+		xdebug_set_add(set, position);
+	}
+}
 static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_array *opa TSRMLS_DC)
 {
-	unsigned int i, check_jumps = 0, jmp, marker, end, jump_over = 0;
+	unsigned int i;
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
+	xdebug_set *set = NULL;
 
 #ifdef ZEND_ENGINE_2
 	/* Check for abstract methods and simply return from this function in those
@@ -106,52 +210,20 @@ static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_arr
 	}	
 #endif
 
-	/* We need to figure out the last jump point to see if we can fix the
-	 * return at the end of the function. We only have to do that if the
-	 * last 5 opcodes are EXT_STMT, RETURN, EXT_STMT, RETURN and
-	 * ZEND_HANDLE_EXCEPTION though (for PHP 5). */
-	if (opa->size >= 4) {
-		if (
-			opa->opcodes[opa->size - 4].opcode == ZEND_RETURN &&
-			opa->opcodes[opa->size - 3].opcode == ZEND_EXT_STMT &&
-			opa->opcodes[opa->size - 2].opcode == ZEND_RETURN &&
-			opa->opcodes[opa->size - 1].opcode == ZEND_HANDLE_EXCEPTION
-		) {
-			marker = opa->size - 5;
-			check_jumps = 1;
-		}
-	}
-	for (i = 0; i < opa->size; i++) {
-		zend_op opcode = opa->opcodes[i];
-		if (check_jumps) {
-			jmp = 0;
-			if (opcode.opcode == ZEND_JMP) {
-				jmp = (opcode.op1.u.opline_num - base_address) / sizeof(zend_op);
-			} else if (
-				opcode.opcode == ZEND_JMPZ || 
-				opcode.opcode == ZEND_JMPNZ || 
-				opcode.opcode == ZEND_JMPZ_EX || 
-				opcode.opcode == ZEND_JMPNZ_EX
-			) {
-				jmp = (opcode.op2.u.opline_num - base_address) / sizeof(zend_op);
-			} else if (opcode.opcode == ZEND_JMPZNZ) {
-				jmp = opcode.op2.u.opline_num;
-			}
-			if (jmp > marker) {
-				jump_over = 1;
-			}
-		}
-	}
-	if (jump_over && check_jumps) {
-		end = opa->size;
-	} else {
-		end = opa->size - 3;
+	/* Run dead code analysis if requested */
+	if (XG(code_coverage_dead_code_analysis)) {
+		set = xdebug_set_create(opa->size);
+		xdebug_analyse_branch(opa, 0, set);
 	}
 
 	/* The normal loop then finally */
-	for (i = 0; i < end; i++) {
+	for (i = 0; i < opa->size; i++) {
 		zend_op opcode = opa->opcodes[i];
-		prefil_from_opcode(NULL, fn, opcode TSRMLS_CC);
+		prefil_from_opcode(NULL, fn, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
+	}
+
+	if (set) {
+		xdebug_set_free(set);
 	}
 }
 
@@ -220,7 +292,8 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
 		return;
 	}
-	XG(code_coverage_unused) = (options == XDEBUG_CC_OPTION_UNUSED);
+	XG(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
+	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
 
 	if (XG(extended_info)) {
 		XG(do_code_coverage) = 1;
@@ -267,7 +340,7 @@ static void add_line(void *ret, xdebug_hash_element *e)
 	zval                 *retval = (zval*) ret;
 
 	if (line->executable && (line->count == 0)) {
-		add_index_long(retval, line->lineno, -1);
+		add_index_long(retval, line->lineno, -line->executable);
 	} else {
 		add_index_long(retval, line->lineno, 1);
 	}

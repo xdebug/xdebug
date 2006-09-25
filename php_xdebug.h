@@ -150,6 +150,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     do_code_coverage;
 	xdebug_hash  *code_coverage;
 	zend_bool     code_coverage_unused;
+	zend_bool     code_coverage_dead_code_analysis;
 	xdebug_hash  *code_coverage_op_array_cache;
 	unsigned int  function_count;
 

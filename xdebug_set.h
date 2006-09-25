@@ -12,38 +12,24 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
+   | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
+/* $Id: xdebug_set.h,v 1.1 2006-09-25 20:20:01 derick Exp $ */
 
-#ifndef __HAVE_XDEBUG_CODE_COVERAGE_H__
-#define __HAVE_XDEBUG_CODE_COVERAGE_H__
+#ifndef __XDEBUG_SET_H__
+#define __XDEBUG_SET_H__
 
-#include "php.h"
-#include "xdebug_hash.h"
-#include "xdebug_mm.h"
+typedef struct _xdebug_set {
+	unsigned int size;
+	unsigned char *setinfo;
+} xdebug_set;
 
-typedef struct xdebug_coverage_line {
-	int lineno;
-	int count;
-	int executable;
-} xdebug_coverage_line;
-
-typedef struct xdebug_coverage_file {
-	char        *name;
-	xdebug_hash *lines;
-} xdebug_coverage_file;
-
-void xdebug_coverage_line_dtor(void *data);
-void xdebug_coverage_file_dtor(void *data);
-
-void xdebug_count_line(char *file, int lineno, int executable, int deadcode TSRMLS_DC);
-void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
-
-PHP_FUNCTION(xdebug_start_code_coverage);
-PHP_FUNCTION(xdebug_stop_code_coverage);
-PHP_FUNCTION(xdebug_get_code_coverage);
-
-PHP_FUNCTION(xdebug_get_function_count);
+xdebug_set *xdebug_set_create(unsigned int size);
+void xdebug_set_add(xdebug_set *set, unsigned int position);
+void xdebug_set_remove(xdebug_set *set, unsigned int position);
+#define xdebug_set_in(x,y) xdebug_set_in_ex(x,y,1)
+int xdebug_set_in_ex(xdebug_set *set, unsigned int position, int noisy);
+void xdebug_set_dump(xdebug_set *set);
 
 #endif

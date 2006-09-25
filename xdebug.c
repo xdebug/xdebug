@@ -462,7 +462,7 @@ void xdebug_env_config()
 		file = op_array->filename; \
 		file_len = strlen(file); \
 \
-		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
+		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC); \
 	} \
 	return ZEND_USER_OPCODE_DISPATCH; \
 }
@@ -487,7 +487,7 @@ static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 		file = op_array->filename; \
 		file_len = strlen(file); \
 \
-		xdebug_count_line(file, lineno, 0 TSRMLS_CC); \
+		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC); \
 	} \
 	return old_##f##_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
 }
@@ -576,6 +576,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_HTML", XDEBUG_TRACE_OPTION_HTML, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
 	return SUCCESS;
@@ -1026,7 +1027,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 
 	if (XG(do_code_coverage)) {
-		xdebug_count_line(tmp->filename, tmp->lineno, 0 TSRMLS_CC);
+		xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
 	}
 
 	if (XG(profiler_aggregate)) {
@@ -2693,7 +2694,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	file_len = strlen(file);
 
 	if (XG(do_code_coverage)) {
-		xdebug_count_line(file, lineno, 0 TSRMLS_CC);
+		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 	}
 
 	if (XG(remote_enabled)) {
