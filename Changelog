@@ -1,3 +1,9 @@
+Tue Sep 26 13:48:47 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_code_coverage.c:
+- Overload some more opcodes
+- Ignore the ZEND_OP_DATA pseudo opcode
+
 Mon Sep 25 23:08:25 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - The foreach loop contruct contains some jump information as well.
