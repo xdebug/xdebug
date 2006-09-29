@@ -1,3 +1,20 @@
+Fri Sep 29 12:07:17 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h
+xdebug/tests/call_user_func_array.phpt
+xdebug/tests/call_user_func_array2.phpt
+xdebug/tests/test12.phpt
+xdebug/tests/test6.phpt
+xdebug/tests/test8.phpt:
+- Partially implemented FR #50: Resource limiting for variable display. By
+  default only two levels of nested variables and max string lengths of 512 are
+  shown. These can be changed by setting the ini settings
+  xdebug.var_display_max_depth and xdebug.var_display_max_data.
+
 Tue Sep 26 19:46:22 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 html/rss.xml
 xdebug/xdebug.c:
