@@ -146,6 +146,11 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          trace_format;
 	char         *tracefile_name;
 
+	/* variable dumping limitation settings */
+	long          display_max_children;
+	long          display_max_data;
+	long          display_max_depth;
+
 	/* used for code coverage */
 	zend_bool     do_code_coverage;
 	xdebug_hash  *code_coverage;

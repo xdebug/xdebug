@@ -317,6 +317,17 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
 	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
+
+	/* Variable display settings */
+#if ZEND_EXTENSION_API_NO < 90000000
+/*	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateInt,    display_max_children, zend_xdebug_globals, xdebug_globals) */
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateInt,    display_max_data,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "2",           PHP_INI_ALL,    OnUpdateInt,    display_max_depth,    zend_xdebug_globals, xdebug_globals)
+#else
+/*	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateLong,   display_max_children, zend_xdebug_globals, xdebug_globals) */
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateLong,   display_max_data,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "2",           PHP_INI_ALL,    OnUpdateLong,   display_max_depth,    zend_xdebug_globals, xdebug_globals)
+#endif
 PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -1007,7 +1018,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
 
-			tmp->include_filename = get_zval_value(get_zval(zdata, &zdata->opline->op1, zdata->Ts, &is_var), 0);
+			tmp->include_filename = get_zval_value(get_zval(zdata, &zdata->opline->op1, zdata->Ts, &is_var), 0, NULL);
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
@@ -1519,7 +1530,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 		return;
 	}
 	if (html) {
-		contents = get_zval_value_fancy(NULL, zvar, &len, 0 TSRMLS_CC);
+		contents = get_zval_value_fancy(NULL, zvar, &len, 0, NULL TSRMLS_CC);
 		if (contents) {
 			php_printf("<tr><td colspan='2' align='right' bgcolor='#ccffcc'>$%s = </td><td bgcolor='#ccffcc'>", name);
 			PHPWRITE(contents, len);
@@ -1528,7 +1539,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 			php_printf("<tr><td bgcolor='#ccffcc'>$%s</td><td bgcolor='#ccffcc' colspan='2'><i>Undefined</i></td></tr>\n", name);
 		}
 	} else {
-		contents = get_zval_value(zvar, 0);
+		contents = get_zval_value(zvar, 0, NULL);
 		if (contents) {
 			php_printf("  $%s = %s\n", name, contents);
 		} else {
@@ -1619,10 +1630,10 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 					c = 1;
 				}
 				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
-				tmp_value = get_zval_value(i->var[j].addr, 0);
+				tmp_value = get_zval_value(i->var[j].addr, 0, NULL);
 				if (!log_only) {
 					if (html) {
-						tmp_fancy_value = get_zval_value_fancy(tmp_varname, i->var[j].addr, &len, 0 TSRMLS_CC);
+						tmp_fancy_value = get_zval_value_fancy(tmp_varname, i->var[j].addr, &len, 0, NULL TSRMLS_CC);
 						PHPWRITE(tmp_fancy_value, len);
 						xdfree(tmp_fancy_value);
 					} else {
@@ -1708,7 +1719,7 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	}
 	xdebug_str_addl(&str, "   >=> ", 7, 0);
 
-	tmp_value = get_zval_value(retval, 0);
+	tmp_value = get_zval_value(retval, 0, NULL);
 	if (tmp_value) {
 		xdebug_str_add(&str, tmp_value, 1);
 	}
@@ -1752,7 +1763,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 		tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
 		xdebug_str_add(&str, tmp_varname, 1);
 
-		tmp_value = get_zval_value(i->var[j].addr, 0);
+		tmp_value = get_zval_value(i->var[j].addr, 0, NULL);
 		if (tmp_value) {
 			xdebug_str_add(&str, tmp_value, 1);
 		} else {
@@ -2113,7 +2124,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			argument = get_zval_value(i->var[j].addr, 0);
+			argument = get_zval_value(i->var[j].addr, 0, NULL);
 			if (i->var[j].name) {
 				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
 			} else {
@@ -2283,7 +2294,7 @@ PHP_FUNCTION(xdebug_var_dump)
 	
 	for (i = 0; i < argc; i++) {
 		if (PG(html_errors)) {
-			val = get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0 TSRMLS_CC);
+			val = get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0, NULL TSRMLS_CC);
 			PHPWRITE(val, len);
 			xdfree(val);
 		} else {
@@ -2320,10 +2331,10 @@ PHP_FUNCTION(xdebug_debug_zval)
 			if (debugzval) {
 				php_printf("%s: ", Z_STRVAL_PP(args[i]));
 				if (PG(html_errors)) {
-					val = get_zval_value_fancy(NULL, debugzval, &len, 1 TSRMLS_CC);
+					val = get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
 				} else {
-					val = get_zval_value(debugzval, 1);
+					val = get_zval_value(debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}
 				xdfree(val);
@@ -2360,7 +2371,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
 			if (debugzval) {
 				printf("%s: ", Z_STRVAL_PP(args[i]));
-				val = get_zval_value(debugzval, 1);
+				val = get_zval_value(debugzval, 1, NULL);
 				printf("%s(%d)", val, strlen(val));
 				xdfree(val);
 				printf("\n");

@@ -46,12 +46,12 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 		char *val;
 
 		if (html) {
-			val = get_zval_value_fancy(NULL, z, &len, 0 TSRMLS_CC);
+			val = get_zval_value_fancy(NULL, z, &len, 0, NULL TSRMLS_CC);
 			php_printf("<td bgcolor='#ffffcc'>");
 			PHPWRITE(val, len);
 			php_printf("</td>");
 		} else {
-			val = get_zval_value(z, 0);
+			val = get_zval_value(z, 0, NULL);
 			printf("\n   $%s['%s'] = %s", name, elem, val);
 		}
 
