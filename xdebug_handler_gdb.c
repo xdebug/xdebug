@@ -335,7 +335,7 @@ static char *return_printable_symbol(xdebug_con *context, char *name, zval *val)
 	switch (options->response_format) {
 	   	case XDEBUG_RESPONSE_NORMAL:
 			if (val) {
-				str_rep = get_zval_value(val, 0, xdebug_var_get_nolimit_options());
+				str_rep = get_zval_value(val, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
 			} else {
 				str_rep = xdstrdup("*uninitialized*");
 			}
@@ -520,7 +520,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 		if (i->var[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->var[j].name));
 		}
-		tmp_value = get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options());
+		tmp_value = get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
 		/* we ignore binary safety here */
 		tmp = xmlize(tmp_value, strlen(tmp_value), &len);
 		SSENDL(h->socket, tmp, len);
@@ -577,7 +577,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 		if (i->var[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->var[j].name));
 		}
-		tmp_value = get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options());
+		tmp_value = get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
 		/* we ignore binary safety here */
 		tmp = xmlize(tmp_value, strlen(tmp_value), &len);
 		SSENDL(h->socket, tmp, len);
@@ -1334,7 +1334,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.79 $";
+	return "$Revision: 1.80 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
