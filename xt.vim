@@ -68,4 +68,8 @@ endif
 
 let b:current_syntax = "xt"
 
+:set foldmethod=expr
+:set foldexpr=strlen(substitute(substitute(substitute(substitute(getline(v:lnum),'^TR.*$','',''),'\\s>=>','->',\"g\"),'^\\s.\\{20\\}\\(\\s\\+\\)\\?->.*$','\\1',''),'\\s\\s','\ ',\"g\"))-2
+:set foldlevel=9999
+
 " vim: ts=8 sw=2
