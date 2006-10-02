@@ -1,3 +1,7 @@
+Mon Oct 02 12:35:00 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_gdb.c:
+- One more TSRMLS issue.
+
 Fri Sep 29 16:27:22 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_gdb.c:
 - Fixed ZTS issue.
