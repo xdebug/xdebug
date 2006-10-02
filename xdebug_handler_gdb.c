@@ -331,6 +331,7 @@ static char *return_printable_symbol(xdebug_con *context, char *name, zval *val)
 {
 	xdebug_gdb_options* options = (xdebug_gdb_options*) context->options;
 	char *str_rep, *ret;
+	TSRMLS_FETCH();
 
 	switch (options->response_format) {
 	   	case XDEBUG_RESPONSE_NORMAL:
@@ -1334,7 +1335,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.80 $";
+	return "$Revision: 1.81 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
