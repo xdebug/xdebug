@@ -1,3 +1,8 @@
+Mon Oct 02 20:22:12 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xt.vim:
+- Added folding for VIM .xt file format. (Patch by Ethan Winn
+  <public@destratify.com>)
+
 Mon Oct 02 12:35:00 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_gdb.c:
 - One more TSRMLS issue.
