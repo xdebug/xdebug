@@ -1566,13 +1566,7 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 		"<tr><th align='left' bgcolor='#ee5555' colspan=\"3\">%s: <i>%s</i> in <i>%s</i> on line <i>%d</i></th></tr>\n"
 		: "\n%s: %s in %s on line %d\n";
 	if (!log_only) {
-		if (html) {
-			error_string = xmlize(buffer, strlen(buffer), &dummy);
-			php_printf(error_format, error_type_str, error_string, error_filename, error_lineno);
-			efree(error_string);
-		} else {
-			php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
-		}
+		php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
 	}
 
 	if (XG(stack) && XG(stack)->size) {
