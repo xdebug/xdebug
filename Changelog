@@ -1,3 +1,8 @@
+Tue Oct 03 21:13:14 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #173: Coverage produce wrong coverage, by overloading yet another
+  opcode.
+
 Tue Oct 03 21:07:06 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #203: PHP errors with html content processed incorrectly. This
