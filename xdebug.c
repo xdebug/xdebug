@@ -2436,22 +2436,19 @@ PHP_FUNCTION(xdebug_start_trace)
 	long  options = 0;
 
 	if (XG(do_trace) == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &fname, &fname_len, &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
 			return;
 		}
 
-		if (fname && strlen(fname)) {
-			if ((trace_fname = xdebug_start_trace(fname, options TSRMLS_CC)) != NULL) {
-				XG(do_trace) = 1;
-				RETVAL_STRING(trace_fname, 1);
-				xdfree(trace_fname);
-				return;
-			} else {
-				php_error(E_NOTICE, "Trace could not be started");
-			}
+		if ((trace_fname = xdebug_start_trace(fname, options TSRMLS_CC)) != NULL) {
+			XG(do_trace) = 1;
+			RETVAL_STRING(trace_fname, 1);
+			xdfree(trace_fname);
+			return;
 		} else {
-			php_error(E_NOTICE, "Filename can not be empty");
+			php_error(E_NOTICE, "Trace could not be started");
 		}
+
 		XG(do_trace) = 0;
 		RETURN_FALSE;
 	} else {
@@ -2467,7 +2464,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	char  cwd[128];
 	char *tmp_fname;
 
-	if (fname) {
+	if (fname && strlen(fname)) {
 		filename = xdstrdup(fname);
 	} else {
 		if (strcmp(XG(trace_output_name), "crc32") == 0) {
