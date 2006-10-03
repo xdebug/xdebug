@@ -1,3 +1,10 @@
+Tue Oct 03 21:05:33 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/start_trace.phpt:
+- Make the filename parameter to the xdebug_start_trace() function optional. If
+  left empty it will use the same algorithm to pick a filename as when you are
+  using the xdebug.auto_trace setting.
+
 Mon Oct 02 20:22:12 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xt.vim:
 - Added folding for VIM .xt file format. (Patch by Ethan Winn
