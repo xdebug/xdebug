@@ -1,3 +1,18 @@
+Fri Oct 06 16:23:04 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_superglobals.h
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h
+xdebug/tests/bug00032-ze22.phpt
+xdebug/tests/bug00089.phpt
+xdebug/tests/bug00178.phpt
+xdebug/tests/local_vars_in_error.phpt
+xdebug/tests/xdebug_var_dump.phpt:
+- Pimped the stack trace output.
+- Removed unused hooks for xdebug_set_error_handler().
+
 Tue Oct 03 21:13:14 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #173: Coverage produce wrong coverage, by overloading yet another
