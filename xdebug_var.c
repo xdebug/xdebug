@@ -324,6 +324,78 @@ char* get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *optio
 	return str.d;
 }
 
+static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	HashTable *myht;
+	char*     tmp_str;
+	int       tmp_len;
+
+	if (!struc || !(*struc)) {
+		return;
+	}
+	if (debug_zval) {
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount, (*struc)->is_ref), 1);
+	}
+	switch (Z_TYPE_PP(struc)) {
+		case IS_BOOL:
+			xdebug_str_addl(str, "bool", 4, 0);
+			break;
+
+		case IS_NULL:
+			xdebug_str_addl(str, "null", 4, 0);
+			break;
+
+		case IS_LONG:
+			xdebug_str_addl(str, "long", 4, 0);
+			break;
+
+		case IS_DOUBLE:
+			xdebug_str_addl(str, "double", 6, 0);
+			break;
+
+		case IS_STRING:
+			xdebug_str_add(str, xdebug_sprintf("string(%d)", Z_STRLEN_PP(struc)), 1);
+			break;
+
+		case IS_ARRAY:
+			myht = Z_ARRVAL_PP(struc);
+			xdebug_str_add(str, xdebug_sprintf("array(%d)", myht->nNumOfElements), 1);
+			break;
+
+		case IS_OBJECT:
+			xdebug_str_add(str, xdebug_sprintf("class %s ", Z_OBJCE_PP(struc)->name), 1);
+			break;
+
+		case IS_RESOURCE: {
+			char *type_name;
+
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
+			break;
+		}
+	}
+}
+
+char* get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options)
+{
+	xdebug_str str = {0, 0, NULL};
+	int default_options = 0;
+	TSRMLS_FETCH();
+
+	if (!options) {
+		options = get_options_from_ini(TSRMLS_C);
+		default_options = 1;
+	}
+
+	xdebug_var_export(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+
+	if (default_options) {
+		xdfree(options);
+	}
+
+	return str.d;
+}
+
 /*****************************************************************************
 ** XML variable printing routines
 */
@@ -698,13 +770,16 @@ xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val, xdebug_var_expor
 ** Fancy variable printing routines
 */
 
-#define BLUE       "#0000ff"
-#define RED        "#ff0000"
-#define GREEN      "#00bb00"
-#define BLUE_GREEN "#00bbbb"
-#define PURPLE     "#bb00bb"
-#define LGREY      "#999999"
-#define DGREY      "#777777"
+#define COLOR_POINTER   "#888a85"
+#define COLOR_BOOL      "#75507b"
+#define COLOR_LONG      "#4e9a06"
+#define COLOR_NULL      "#3465a4"
+#define COLOR_DOUBLE    "#f57900"
+#define COLOR_STRING    "#cc0000"
+#define COLOR_EMPTY     "#888a85"
+#define COLOR_ARRAY     "#ce5c00"
+#define COLOR_OBJECT    "#8f5902"
+#define COLOR_RESOURCE  "#2e3436"
 
 static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
@@ -721,9 +796,9 @@ static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list ar
 	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 	if (hash_key->nKeyLength==0) { /* numeric key */
-		xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, DGREY), 1);
+		xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, COLOR_POINTER), 1);
 	} else { /* string key */
-		xdebug_str_add(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, DGREY), 1);
+		xdebug_str_add(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, COLOR_POINTER), 1);
 	}
 	xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 
@@ -749,7 +824,7 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 	key = hash_key->arKey;
 	if (hash_key->nKeyLength != 0) {
 		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
-		xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, DGREY), 1);
+		xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
 	}
 	xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	return 0;
@@ -766,23 +841,23 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%s</font>", BLUE, Z_LVAL_PP(struc) ? "true" : "false"), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%s</font>", COLOR_BOOL, Z_LVAL_PP(struc) ? "true" : "false"), 1);
 			break;
 
 		case IS_NULL:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", RED), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", COLOR_NULL), 1);
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%ld</font>", GREEN, Z_LVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%ld</font>", COLOR_LONG, Z_LVAL_PP(struc)), 1);
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%.*G</font>", BLUE_GREEN, (int) EG(precision), Z_DVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%.*G</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_PP(struc)), 1);
 			break;
 
 		case IS_STRING:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>'", PURPLE), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>'", COLOR_STRING), 1);
 			if (Z_STRLEN_PP(struc) > options->max_data) {
 				tmp_str = xmlize(Z_STRVAL_PP(struc), options->max_data, &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
@@ -807,7 +882,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 						zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 4, level, str, debug_zval, options);
 					} else {
 						xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
-						xdebug_str_add(str, xdebug_sprintf("<i><font color='%s'>empty</font></i>\n", LGREY), 1);
+						xdebug_str_add(str, xdebug_sprintf("<i><font color='%s'>empty</font></i>\n", COLOR_EMPTY), 1);
 					}
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
@@ -848,12 +923,12 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			char *type_name;
 
 			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("<b>resource</b>(<i>%ld</i><font color='%s'>,</font> <i>%s</i>)", Z_LVAL_PP(struc), DGREY, type_name ? type_name : "Unknown"), 1);
+			xdebug_str_add(str, xdebug_sprintf("<b>resource</b>(<i>%ld</i><font color='%s'>,</font> <i>%s</i>)", Z_LVAL_PP(struc), COLOR_RESOURCE, type_name ? type_name : "Unknown"), 1);
 			break;
 		}
 
 		default:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", RED), 0);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", COLOR_NULL), 0);
 			break;
 	}
 	if (Z_TYPE_PP(struc) != IS_ARRAY && Z_TYPE_PP(struc) != IS_OBJECT) {
@@ -874,6 +949,79 @@ char* get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdeb
 	xdebug_str_addl(&str, "<pre>", 5, 0);
 	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 	xdebug_str_addl(&str, "</pre>", 6, 0);
+
+	if (default_options) {
+		xdfree(options);
+	}
+
+	*len = str.l;
+	return str.d;
+}
+
+static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	HashTable *myht;
+	char*     tmp_str;
+	int       newlen;
+
+	if (debug_zval) {
+		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount, (*struc)->is_ref), 1);
+	}
+	switch (Z_TYPE_PP(struc)) {
+		case IS_BOOL:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>bool</font>", COLOR_BOOL), 1);
+			break;
+
+		case IS_NULL:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", COLOR_NULL), 1);
+			break;
+
+		case IS_LONG:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>long</font>", COLOR_LONG), 1);
+			break;
+
+		case IS_DOUBLE:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>double</font>", COLOR_DOUBLE), 1);
+			break;
+
+		case IS_STRING:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>string(%d)</font>", COLOR_STRING, Z_STRLEN_PP(struc)), 1);
+			break;
+
+		case IS_ARRAY:
+			myht = Z_ARRVAL_PP(struc);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>array(%d)</font>", COLOR_ARRAY, myht->nNumOfElements), 1);
+			break;
+
+		case IS_OBJECT:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>object(%s)", COLOR_OBJECT, Z_OBJCE_PP(struc)->name), 1);
+#ifdef ZEND_ENGINE_2
+			xdebug_str_add(str, xdebug_sprintf("[%d]", Z_OBJ_HANDLE_PP(struc)), 1);
+#endif
+			xdebug_str_addl(str, "</font>", 7, 0);
+			break;
+
+		case IS_RESOURCE: {
+			char *type_name;
+
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>resource(%ld, %s)</font>", COLOR_RESOURCE, Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
+			break;
+		}
+	}
+}
+
+char* get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	xdebug_str str = {0, 0, NULL};
+	int default_options = 0;
+
+	if (!options) {
+		options = get_options_from_ini(TSRMLS_C);
+		default_options = 1;
+	}
+
+	xdebug_var_synopsis_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
 		xdfree(options);

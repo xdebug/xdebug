@@ -29,16 +29,16 @@ void dump_dtor(void *user, void *ptr)
 	free(ptr);
 }
 
-static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html, int log TSRMLS_DC)
+static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html TSRMLS_DC)
 {
 	char buffer[1024];
 	int  len;
 
 	if (html) {
 		if (elem) {
-			php_printf("<tr><td colspan='2' align='right' bgcolor='#ffffcc'>$%s['%s'] =</td>", name, elem);
+			php_printf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s['%s']&nbsp;=</pre></td>", name, elem);
 		} else {
-			php_printf("<tr><td colspan='2' align='right' bgcolor='#ffffcc'>$%s[%ld] =</td>", name, index);
+			php_printf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s[%ld]&nbsp;=</pre></td>", name, index);
 		}
 	}
 
@@ -47,29 +47,27 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 
 		if (html) {
 			val = get_zval_value_fancy(NULL, z, &len, 0, NULL TSRMLS_CC);
-			php_printf("<td bgcolor='#ffffcc'>");
+#if HAVE_PHP_MEMORY_USAGE
+			php_printf("<td colspan='3' bgcolor='#eeeeec'>");
+#else
+			php_printf("<td colspan='2' bgcolor='#eeeeec'>");
+#endif
 			PHPWRITE(val, len);
 			php_printf("</td>");
 		} else {
 			val = get_zval_value(z, 0, NULL);
 			printf("\n   $%s['%s'] = %s", name, elem, val);
 		}
-
-		if (log) {
-			snprintf(buffer, 1024, "PHP   $%s['%s'] = %s", name, elem, val);
-			php_log_err(buffer TSRMLS_CC);
-		}
 	} else {
 		/* not found */
 		if (html) {
-			php_printf("<td bgcolor='#ffff77'><i>undefined</i></td>");
+#if HAVE_PHP_MEMORY_USAGE
+			php_printf("<td colspan='3' bgcolor='#eeeeec'><i>undefined</i></td>");
+#else
+			php_printf("<td colspan='2' bgcolor='#eeeeec'><i>undefined</i></td>");
+#endif
 		} else {
 			printf("\n   $%s['%s'] is undefined", name, elem);
-		}
-
-		if (log) {
-			snprintf(buffer, 1024, "PHP   $%s['%s'] is undefined", name, elem);
-			php_log_err(buffer TSRMLS_CC);
 		}
 	}
 
@@ -80,7 +78,7 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 
 static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int html, log;
+	int html;
 	char *name;
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -88,22 +86,21 @@ static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_
 
 	name = va_arg(args, char *);
 	html = va_arg(args, int);
-	log = va_arg(args, int);
 
 #ifdef ZTS
 	tsrm_ls = va_arg(args, void ***);
 #endif
 
 	if (hash_key->nKeyLength == 0) {
-		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, log TSRMLS_CC);
+		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html TSRMLS_CC);
 	} else {
-		dump_hash_elem(*((zval **) pDest), name, 0, hash_key->arKey, html, log TSRMLS_CC);
+		dump_hash_elem(*((zval **) pDest), name, 0, hash_key->arKey, html TSRMLS_CC);
 	}
 
 	return SUCCESS;
 }
 
-static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, int log TSRMLS_DC)
+static void dump_hash(xdebug_llist *l, char *name, int name_len, int html TSRMLS_DC)
 {
 	zval **z;
 	HashTable *ht;
@@ -120,16 +117,13 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, int l
 	}
 
 	if (html) {
-		php_printf("<tr><th colspan='3' bgcolor='#dddd22'>Dump <i>$%s</i></th></tr>\n", name);
+#if HAVE_PHP_MEMORY_USAGE
+		php_printf("<tr><th colspan='5' align='left' bgcolor='#e9b96e'>Dump <i>$%s</i></th></tr>\n", name);
+#else
+		php_printf("<tr><th colspan='4' align='left' bgcolor='#e9b96e'>Dump <i>$%s</i></th></tr>\n", name);
+#endif
 	} else {
 		printf("\nDump $%s", name);
-	}
-
-	if (log) {
-		char buffer[64];
-
-		snprintf(buffer, 64, "PHP Dump $%s:", name);
-		php_log_err(buffer TSRMLS_CC);
 	}
 
 	elem = XDEBUG_LLIST_HEAD(l);
@@ -138,23 +132,23 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, int l
 		if (ht && (*((char *) (elem->ptr)) == '*')) {
 
 #ifdef ZTS
-#define X_DUMP_ARGS 4
-#else
 #define X_DUMP_ARGS 3
+#else
+#define X_DUMP_ARGS 2
 #endif
 
-			zend_hash_apply_with_arguments(ht, dump_hash_elem_va, X_DUMP_ARGS, name, html, log TSRMLS_CC);
+			zend_hash_apply_with_arguments(ht, dump_hash_elem_va, X_DUMP_ARGS, name, html TSRMLS_CC);
 		} else if (ht && zend_hash_find(ht, elem->ptr, strlen(elem->ptr) + 1, (void **) &z) == SUCCESS) {
-			dump_hash_elem(*z, name, 0, elem->ptr, html, log TSRMLS_CC);
+			dump_hash_elem(*z, name, 0, elem->ptr, html TSRMLS_CC);
 		} else if(XG(dump_undefined)) {
-			dump_hash_elem(NULL, name, 0, elem->ptr, html, log TSRMLS_CC);
+			dump_hash_elem(NULL, name, 0, elem->ptr, html TSRMLS_CC);
 		}
 
 		elem = XDEBUG_LLIST_NEXT(elem);
 	}
 }
 
-void dump_superglobals(int html, int log TSRMLS_DC)
+void dump_superglobals(int html TSRMLS_DC)
 {
 	if (XG(dump_once) && XG(dumped)) {
 		return;
@@ -162,14 +156,14 @@ void dump_superglobals(int html, int log TSRMLS_DC)
 
 	XG(dumped) = 1;
 
-	dump_hash(&XG(server),  "_SERVER",  8, html, log TSRMLS_CC);
-	dump_hash(&XG(get),     "_GET",     5, html, log TSRMLS_CC);
-	dump_hash(&XG(post),    "_POST",    6, html, log TSRMLS_CC);
-	dump_hash(&XG(cookie),  "_COOKIE",  8, html, log TSRMLS_CC);
-	dump_hash(&XG(files),   "_FILES",   7, html, log TSRMLS_CC);
-	dump_hash(&XG(env),     "_ENV",     5, html, log TSRMLS_CC);
-	dump_hash(&XG(session), "_SESSION", 9, html, log TSRMLS_CC);
-	dump_hash(&XG(request), "_REQUEST", 9, html, log TSRMLS_CC);
+	dump_hash(&XG(server),  "_SERVER",  8, html TSRMLS_CC);
+	dump_hash(&XG(get),     "_GET",     5, html TSRMLS_CC);
+	dump_hash(&XG(post),    "_POST",    6, html TSRMLS_CC);
+	dump_hash(&XG(cookie),  "_COOKIE",  8, html TSRMLS_CC);
+	dump_hash(&XG(files),   "_FILES",   7, html TSRMLS_CC);
+	dump_hash(&XG(env),     "_ENV",     5, html TSRMLS_CC);
+	dump_hash(&XG(session), "_SESSION", 9, html TSRMLS_CC);
+	dump_hash(&XG(request), "_REQUEST", 9, html TSRMLS_CC);
 }
 
 void dump_tok(xdebug_llist *l, char *str)
@@ -206,7 +200,7 @@ PHP_FUNCTION(xdebug_dump_superglobals)
 		php_printf("<table border='1' cellspacing='0'>\n");
 	}
 
-	dump_superglobals(html , PG(log_errors) && !is_cli TSRMLS_CC);
+	dump_superglobals(html TSRMLS_CC);
 
 	if (html) {
 		php_printf("</table>\n");

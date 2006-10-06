@@ -29,7 +29,7 @@ Call Stack:
 %w%f %w%d   2. a(5, 6) /%s/local_vars_in_error.php:8
 
 
-Variables in local scope:
+Variables in local scope (#2):
   $d = class stdClass {  }
   $a = 5
   $c = array (0 => 5, 1 => 36)

@@ -24,5 +24,5 @@ echo "> ", $php_errormsg, "\n";
 DONE
 --EXPECT--
 > fsockopen() expects at least 1 parameter, 0 given
-> unable to connect to localhost:5000 (Connection refused)
+> fsockopen(): unable to connect to localhost:5000 (Connection refused)
 DONE

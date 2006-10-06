@@ -56,6 +56,10 @@ char* get_zval_value (zval *val, int debug_zval, xdebug_var_export_options *opti
 char* get_zval_value_xml (char *name, zval *val);
 char* get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 xdebug_xml_node* get_zval_value_xml_node (char *name, zval *val, xdebug_var_export_options *options);
+
+char* get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options);
+char* get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
+
 char* show_fname(xdebug_func t, int html, int flags TSRMLS_DC);
 
 #endif

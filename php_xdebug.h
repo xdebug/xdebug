@@ -105,7 +105,6 @@ PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
 
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
-PHP_FUNCTION(xdebug_set_error_handler);
 #if HAVE_PHP_MEMORY_USAGE
 PHP_FUNCTION(xdebug_memory_usage);
 PHP_FUNCTION(xdebug_peak_memory_usage);
@@ -129,7 +128,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     show_local_vars;
 	zend_bool     show_mem_delta;
 	char         *manual_url;
-	char         *error_handler;
 	double        start_time;
 	HashTable    *active_symbol_table;
 	unsigned int  prev_memory;
