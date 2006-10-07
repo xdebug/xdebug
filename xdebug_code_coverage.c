@@ -189,11 +189,13 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			/*(fprintf(stderr, "XDEBUG Return found\n");)*/
 			break;
 		}
+#ifdef ZEND_ENGINE_2
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
-			/* fprintf(stderr, "X/* Throw found\n"); */
+			/* fprintf(stderr, "X* Throw found\n"); */
 			break;
 		}
+#endif
 
 		position++;
 		/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
