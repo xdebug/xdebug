@@ -62,7 +62,7 @@ struct _xdebug_con {
 	xdebug_hash           *eval_id_lookup;
 	int                    eval_id_sequence;
 	xdebug_llist          *line_breakpoints;
-	xdebug_llist          *exception_breakpoints;
+	xdebug_hash           *exception_breakpoints;
 	xdebug_debug_list      list;
 	int                    do_break;
 
