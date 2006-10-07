@@ -1,3 +1,20 @@
+Sun Oct 08 01:10:33 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_profiler.c
+xdebug/xdebug_set.c
+xdebug/xdebug_set.h
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_var.c
+xdebug/xdebug_xml.c
+xdebug/tests/local_vars_in_error.phpt
+xdebug/tests/test6.phpt:
+- Use PG(html_errors) instead of checking for CLI.
+- Cleaned up compilation warnings.
+- Fixed a bug in get_zval_synopsis() which was still using xdebug_var_export().
+
 Sun Oct 08 00:10:58 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - ZEND_THROW only exists in Zend Engine 2.
