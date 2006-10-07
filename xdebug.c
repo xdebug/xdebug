@@ -340,14 +340,14 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->breakpoint_count     = 0;
 	xg->ide_key              = NULL;
 
-	xdebug_llist_init(&xg->server, dump_dtor);
-	xdebug_llist_init(&xg->get, dump_dtor);
-	xdebug_llist_init(&xg->post, dump_dtor);
-	xdebug_llist_init(&xg->cookie, dump_dtor);
-	xdebug_llist_init(&xg->files, dump_dtor);
-	xdebug_llist_init(&xg->env, dump_dtor);
-	xdebug_llist_init(&xg->request, dump_dtor);
-	xdebug_llist_init(&xg->session, dump_dtor);
+	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xg->post, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xg->cookie, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xg->files, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xg->env, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xg->request, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 }
 
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -1538,7 +1538,7 @@ static char* html_formats[10] = {
 	"<tr><td bgcolor='#eeeeec'>$%s</td><td colspan='4' bgcolor='#eeeeec' colspan='2'><i>Undefined</i></td></tr>\n"
 };
 
-static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
+static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
 {
 	int        html = *(int *)htmlq;
 	int        len;
@@ -1547,6 +1547,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 	char      *name = (char*) he->ptr;
 	HashTable *tmp_ht;
 	char     **formats;
+	xdebug_str *str = (xdebug_str *) argument;
 	TSRMLS_FETCH();
 
 	if (!he->ptr) {
@@ -1576,9 +1577,9 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he)
 	}
 
 	if (contents) {
-		php_printf(formats[8], name, contents);
+		xdebug_str_add(str, xdebug_sprintf(formats[8], name, contents), 1);
 	} else {
-		php_printf(formats[9], name);
+		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);;
 	}
 
 	xdfree(contents);
@@ -1624,17 +1625,19 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 
 			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
 			php_log_err(log_buffer.d TSRMLS_CC);
+			xdebug_str_free(&log_buffer);
 		}
 	}
 }
 
-static void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
+static char* get_printable_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
 {
 	char *error_format, *error_string;
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	int len, dummy;
 	char **formats;
+	xdebug_str str = {0, 0, NULL};
 
 	log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 
@@ -1648,14 +1651,14 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 		formats = text_formats;
 	}
 
-	php_printf(formats[0]);
+	xdebug_str_add(&str, formats[0], 0);
 
-	php_printf(formats[1], error_type_str, buffer, error_filename, error_lineno);
+	xdebug_str_add(&str, xdebug_sprintf(formats[1], error_type_str, buffer, error_filename, error_lineno), 1);
 
 	if (XG(stack) && XG(stack)->size) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
 		
-		php_printf(formats[2]);
+		xdebug_str_add(&str, formats[2], 0);
 
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
@@ -1667,15 +1670,15 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 			tmp_name = show_fname(i->function, html, 0 TSRMLS_CC);
 			if (html) {
 #if HAVE_PHP_MEMORY_USAGE
-				php_printf(formats[3], i->level, i->time - XG(start_time), i->memory, tmp_name);
+				xdebug_str_add(&str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), i->memory, tmp_name), 1);
 #else
-				php_printf(formats[3], i->level, i->time - XG(start_time), tmp_name);
+				xdebug_str_add(&str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), tmp_name), 1);
 #endif
 			} else {
 #if HAVE_PHP_MEMORY_USAGE
-				php_printf(formats[3], i->time - XG(start_time), i->memory, i->level, tmp_name);
+				xdebug_str_add(&str, xdebug_sprintf(formats[3], i->time - XG(start_time), i->memory, i->level, tmp_name), 1);
 #else
-				php_printf(formats[3], i->time - XG(start_time), i->level, tmp_name);
+				xdebug_str_add(&str, xdebug_sprintf(formats[3], i->time - XG(start_time), i->level, tmp_name), 1);
 #endif
 			}
 			xdfree(tmp_name);
@@ -1685,32 +1688,32 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				char *tmp_varname, *tmp_value, *tmp_fancy_value;
 
 				if (c) {
-					php_printf(", ");
+					xdebug_str_addl(&str, ", ", 2, 0);
 				} else {
 					c = 1;
 				}
 				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
 				if (html) {
 					tmp_fancy_value = get_zval_synopsis_fancy(tmp_varname, i->var[j].addr, &len, 0, NULL TSRMLS_CC);
-					php_printf("%s", tmp_fancy_value);
+					xdebug_str_add(&str, xdebug_sprintf("%s", tmp_fancy_value), 1);
 					xdfree(tmp_fancy_value);
 				} else {
 					tmp_value = get_zval_synopsis(i->var[j].addr, 0, NULL);
-					php_printf("%s%s", tmp_varname, tmp_value);
+					xdebug_str_add(&str, xdebug_sprintf("%s%s", tmp_varname, tmp_value), 1);
 					xdfree(tmp_value);
 				}
 				xdfree(tmp_varname);
 			}
 
 			if (i->include_filename) {
-				php_printf(formats[4], i->include_filename);
+				xdebug_str_add(&str, xdebug_sprintf(formats[4], i->include_filename), 1);
 			}
 
-			php_printf(formats[5], i->filename, i->lineno);
+			xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
 		}
 
 		if (XG(dump_globals)) {
-			dump_superglobals(html TSRMLS_CC);
+			xdebug_str_add(&str, xdebug_get_printable_superglobals(html TSRMLS_CC), 1);
 		}
 
 		if (XG(show_local_vars) && XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
@@ -1722,13 +1725,23 @@ static void print_stack(int html, const char *error_type_str, char *buffer, cons
 				scope_nr--;
 			}
 			if (i->used_vars && i->used_vars->size) {
-				php_printf(formats[6], scope_nr);
-				xdebug_hash_apply(i->used_vars, (void*) &html, dump_used_var_with_contents);
+				xdebug_str_add(&str, xdebug_sprintf(formats[6], scope_nr), 1);
+				xdebug_hash_apply_with_argument(i->used_vars, (void*) &html, dump_used_var_with_contents, (void *) &str);
 			}
 		}
 
-		php_printf(formats[7]);
+		xdebug_str_add(&str, formats[7], 0);
 	}
+	return str.d;
+}
+
+static void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
+{
+	char *printable_stack;
+
+	printable_stack = get_printable_stack(html, error_type_str, buffer, error_filename, error_lineno, log_only TSRMLS_CC);
+	php_printf("%s", printable_stack);
+	xdfree(printable_stack);
 }
 
 static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC)
