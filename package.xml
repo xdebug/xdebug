@@ -115,6 +115,8 @@ Xdebug also provides:
       <file role="src"  name="xdebug_private.h"/>
       <file role="src"  name="xdebug_profiler.c"/>
       <file role="src"  name="xdebug_profiler.h"/>
+      <file role="src"  name="xdebug_set.c"/>
+      <file role="src"  name="xdebug_set.h"/>
       <file role="src"  name="xdebug_str.c"/>
       <file role="src"  name="xdebug_str.h"/>
       <file role="src"  name="xdebug_superglobals.c"/>
