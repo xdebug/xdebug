@@ -1,3 +1,7 @@
+Sun Oct 08 00:06:32 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handlers.h:
+- Fixed wrong type for context variable.
+
 Sun Oct 08 00:02:47 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_superglobals.c
