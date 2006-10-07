@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_set.h,v 1.1 2006-09-25 20:20:01 derick Exp $ */
+/* $Id: xdebug_set.h,v 1.2 2006-10-07 23:10:32 derick Exp $ */
 
 #ifndef __XDEBUG_SET_H__
 #define __XDEBUG_SET_H__
@@ -31,5 +31,6 @@ void xdebug_set_remove(xdebug_set *set, unsigned int position);
 #define xdebug_set_in(x,y) xdebug_set_in_ex(x,y,1)
 int xdebug_set_in_ex(xdebug_set *set, unsigned int position, int noisy);
 void xdebug_set_dump(xdebug_set *set);
+void xdebug_set_free(xdebug_set *set);
 
 #endif

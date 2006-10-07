@@ -36,6 +36,7 @@
 #include "xdebug_mm.h"
 #include "xdebug_str.h"
 #include "usefulstuff.h"
+#include "ext/standard/php_lcg.h"
 
 #define READ_BUFFER_SIZE 128
 
@@ -394,7 +395,7 @@ static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **n
 
 FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 {
-	int   fd, r;
+	int   r;
 	FILE *fh;
 	struct stat buf;
 	char *tmp_fname;

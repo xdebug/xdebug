@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_set.c,v 1.1 2006-09-25 20:20:01 derick Exp $ */
+/* $Id: xdebug_set.c,v 1.2 2006-10-07 23:10:32 derick Exp $ */
 
 #include <stdlib.h>
 #include <math.h>
@@ -41,9 +41,9 @@ void xdebug_set_free(xdebug_set *set)
 
 void xdebug_set_add(xdebug_set *set, unsigned int position)
 {
-	char         *byte;
-	unsigned int  bit;
-
+	unsigned char *byte;
+	unsigned int   bit;
+ 
 	byte = &(set->setinfo[position / 8]);
 	bit  = position % 8;
 
@@ -52,8 +52,8 @@ void xdebug_set_add(xdebug_set *set, unsigned int position)
 
 void xdebug_set_remove(xdebug_set *set, unsigned int position)
 {
-	char         *byte;
-	unsigned int  bit;
+	unsigned char *byte;
+	unsigned int   bit;
 
 	byte = &(set->setinfo[position / 8]);
 	bit  = position % 8;
@@ -63,8 +63,8 @@ void xdebug_set_remove(xdebug_set *set, unsigned int position)
 
 int xdebug_set_in_ex(xdebug_set *set, unsigned int position, int noisy)
 {
-	char         *byte;
-	unsigned int  bit;
+	unsigned char *byte;
+	unsigned int   bit;
 
 	byte = &(set->setinfo[position / 8]);
 	bit  = position % 8;

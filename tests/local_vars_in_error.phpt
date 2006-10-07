@@ -26,7 +26,7 @@ Fatal error: Call to undefined function do_f() in /%s/local_vars_in_error.php on
 
 Call Stack:
 %w%f %w%d   1. {main}() /%s/local_vars_in_error.php:0
-%w%f %w%d   2. a(5, 6) /%s/local_vars_in_error.php:8
+%w%f %w%d   2. a(long, long) /%s/local_vars_in_error.php:8
 
 
 Variables in local scope (#2):

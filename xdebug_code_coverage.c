@@ -112,7 +112,7 @@ static zend_brk_cont_element* xdebug_find_brk_cont(zval *nest_levels_zval, int a
 	return jmp_to;
 }
 
-static int xdebug_find_jump(zend_op_array *opa, unsigned int position, unsigned int *jmp1, unsigned int *jmp2)
+static int xdebug_find_jump(zend_op_array *opa, unsigned int position, int *jmp1, int *jmp2)
 {
 	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 
@@ -151,7 +151,6 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, unsigned 
 
 static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xdebug_set *set)
 {
-	unsigned int jump_found = 0;
 	int jump_pos1 = -1;
 	int jump_pos2 = -1;
 
@@ -205,7 +204,6 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_array *opa TSRMLS_DC)
 {
 	unsigned int i;
-	zend_uint base_address = (zend_uint) &(opa->opcodes[0]);
 	xdebug_set *set = NULL;
 
 #ifdef ZEND_ENGINE_2
@@ -237,7 +235,6 @@ static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_arr
 static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	char *new_filename;
-	unsigned int i;
 	TSRMLS_FETCH();
 
 	new_filename = va_arg(args, char*);
@@ -275,12 +272,11 @@ static int prefil_from_class_table(zend_class_entry *class_entry, int num_args, 
 
 void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
 {
-	unsigned int i;
 	char cache_key[64];
 	int  cache_key_len;
 	void *dummy;
 
-	cache_key_len = snprintf(&cache_key, 63, "%X", op_array);
+	cache_key_len = snprintf(cache_key, sizeof(cache_key) - 1, "%p", op_array);
 	if (xdebug_hash_find(XG(code_coverage_op_array_cache), cache_key, cache_key_len, (void*) &dummy)) {
 		return;
 	}

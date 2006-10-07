@@ -31,7 +31,6 @@ void xdebug_superglobals_dump_dtor(void *user, void *ptr)
 
 static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html, xdebug_str *str TSRMLS_DC)
 {
-	char buffer[1024];
 	int  len;
 
 	if (html) {
@@ -155,12 +154,6 @@ char* xdebug_get_printable_superglobals(int html TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 
-	if (XG(dump_once) && XG(dumped)) {
-		return;
-	}
-
-	XG(dumped) = 1;
-
 	dump_hash(&XG(server),  "_SERVER",  8, html, &str TSRMLS_CC);
 	dump_hash(&XG(get),     "_GET",     5, html, &str TSRMLS_CC);
 	dump_hash(&XG(post),    "_POST",    6, html, &str TSRMLS_CC);
@@ -200,7 +193,6 @@ void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str)
 
 PHP_FUNCTION(xdebug_dump_superglobals)
 {
-	int is_cli = (strcmp("cli", sapi_module.name) == 0);
 	int html = PG(html_errors);
 
 	if (html) {

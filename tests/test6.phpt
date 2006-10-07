@@ -23,8 +23,8 @@ xdebug.var_display_max_depth=3
 Warning: Missing argument 3 for foo2()%sin /%s/test6.php on line 2
 
 Call Stack:
-    %f          %d   1. {main}() /%s/test6.php:0
-    %f          %d   2. foo2(4, array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))) /%s/test6.php:7
+%w%f %w%d   1. {main}() /%s/test6.php:0
+%w%f %w%d   2. foo2(long, array (1)) /%s/test6.php:7
 
 
 Variables in local scope:
@@ -35,8 +35,8 @@ Variables in local scope:
 Fatal error: Call to undefined function%sfoo() in /%s/test6.php on line 4
 
 Call Stack:
-    %f          %d   1. {main}() /%s/test6.php:0
-    %f          %d   2. foo2(4, array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))) /%s/test6.php:7
+%w%f %w%d   1. {main}() /%s/test6.php:0
+%w%f %w%d   2. foo2(long, array(1)) /%s/test6.php:7
 
 
 Variables in local scope:

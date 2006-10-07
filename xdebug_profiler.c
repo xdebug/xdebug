@@ -283,7 +283,7 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 #endif
 	if (strcmp(xae->function, "{main}") == 0) {
 #if HAVE_PHP_MEMORY_USAGE
-		fprintf(fp, "\nsummary: %lu %u\n\n", (unsigned long) (xae->time_inclusive * 10000000), (xae->mem_used));
+		fprintf(fp, "\nsummary: %lu %lu\n\n", (unsigned long) (xae->time_inclusive * 10000000), (xae->mem_used));
 #else
 		fprintf(fp, "\nsummary: %lu\n\n", (unsigned long) (xae->time_inclusive * 10000000), (xae->mem_used));
 #endif

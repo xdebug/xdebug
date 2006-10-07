@@ -1292,11 +1292,13 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		/* Remove session cookie if requested */
 		if (
 			(
-				PG(http_globals)[TRACK_VARS_GET] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
-			) || (
-				PG(http_globals)[TRACK_VARS_POST] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
+				(
+					PG(http_globals)[TRACK_VARS_GET] &&
+					zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
+				) || (
+					PG(http_globals)[TRACK_VARS_POST] &&
+					zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
+				)
 			)
 			&& !SG(headers_sent)
 		) {
@@ -1337,13 +1339,15 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				XG(profiler_enable)
 				|| 
 				(
-					XG(profiler_enable_trigger) && 
+					XG(profiler_enable_trigger) &&
 					(
-						PG(http_globals)[TRACK_VARS_GET] && 
-						zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
-					) || (
-						PG(http_globals)[TRACK_VARS_POST] && 
-						zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+						(
+							PG(http_globals)[TRACK_VARS_GET] && 
+							zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+						) || (
+							PG(http_globals)[TRACK_VARS_POST] && 
+							zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+						)
 					)
 				)
 			)
@@ -1608,7 +1612,7 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
-				char *tmp_varname, *tmp_value, *tmp_fancy_value;
+				char *tmp_varname, *tmp_value;
 
 				if (c) {
 					xdebug_str_addl(&log_buffer, ", ", 2, 0);
@@ -1630,20 +1634,15 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 	}
 }
 
-static char* get_printable_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
+static char* get_printable_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
-	char *error_format, *error_string;
 	xdebug_llist_element *le;
 	function_stack_entry *i;
-	int len, dummy;
+	int len;
 	char **formats;
 	xdebug_str str = {0, 0, NULL};
 
 	log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-
-	if (log_only) {
-		return;
-	}
 
 	if (html) {
 		formats = html_formats;
@@ -1712,8 +1711,13 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 			xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
 		}
 
-		if (XG(dump_globals)) {
-			xdebug_str_add(&str, xdebug_get_printable_superglobals(html TSRMLS_CC), 1);
+		if (XG(dump_globals) && !(XG(dump_once) && XG(dumped))) {
+			char *tmp = xdebug_get_printable_superglobals(html TSRMLS_CC);
+
+			if (tmp) {
+				xdebug_str_add(&str, tmp, 1);
+			}
+			XG(dumped) = 1;
 		}
 
 		if (XG(show_local_vars) && XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
@@ -1735,11 +1739,11 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 	return str.d;
 }
 
-static void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno, int log_only TSRMLS_DC)
+static void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
 	char *printable_stack;
 
-	printable_stack = get_printable_stack(html, error_type_str, buffer, error_filename, error_lineno, log_only TSRMLS_CC);
+	printable_stack = get_printable_stack(html, error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 	php_printf("%s", printable_stack);
 	xdfree(printable_stack);
 }
@@ -1925,7 +1929,6 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	zval *message, *file, *line;
 	zend_class_entry *default_ce, *exception_ce;
 	xdebug_brk_info *extra_brk_info;
-	int do_exception = 0;
 
 	if (!exception) {
 		return;
@@ -1943,7 +1946,10 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
 	if (XG(show_ex_trace)) {
-		print_stack(!(strcmp("cli", sapi_module.name) == 0), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), !PG(display_errors) TSRMLS_CC);
+		log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+		if (PG(display_errors)) {
+			print_stack(PG(html_errors), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+		}
 	}
 
 	/* Start JIT if requested and not yet enabled */
@@ -2052,7 +2058,10 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 
 	if ((EG(error_reporting) & type)) { /* Otherwise print the default stack trace */
-		print_stack(!(strcmp("cli", sapi_module.name) == 0), error_type_str, buffer, error_filename, error_lineno, !PG(display_errors) TSRMLS_CC);
+		log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+		if (PG(display_errors)) {
+			print_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+		}
 	}
 
 	/* Check for the pseudo exceptions to allow breakpoints on PHP error statusses */
@@ -2197,7 +2206,7 @@ PHP_FUNCTION(xdebug_print_function_stack)
 	function_stack_entry *i;
 
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
-	print_stack(!(strcmp("cli", sapi_module.name) == 0), "Xdebug", "user triggered", i->filename, i->lineno, 0 TSRMLS_CC);
+	print_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
 }
 /* }}} */
 

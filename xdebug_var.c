@@ -327,8 +327,6 @@ char* get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *optio
 static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	HashTable *myht;
-	char*     tmp_str;
-	int       tmp_len;
 
 	if (!struc || !(*struc)) {
 		return;
@@ -387,7 +385,7 @@ char* get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *op
 		default_options = 1;
 	}
 
-	xdebug_var_export(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_synopsis(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
 		xdfree(options);
@@ -961,8 +959,6 @@ char* get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdeb
 static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	HashTable *myht;
-	char*     tmp_str;
-	int       newlen;
 
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount, (*struc)->is_ref), 1);

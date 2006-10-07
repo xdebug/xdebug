@@ -1071,7 +1071,7 @@ DBGP_FUNC(breakpoint_set)
 
 		/* Perhaps we have a break condition */
 		if (CMD_OPTION('-')) {
-			brk_info->condition = xdebug_base64_decode(CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length); 
+			brk_info->condition = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length); 
 		}
 
 		tmp_name = xdebug_sprintf("%s$%lu", brk_info->file, brk_info->lineno);
@@ -1139,7 +1139,7 @@ DBGP_FUNC(breakpoint_set)
 	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%d", brk_id), 0, 1);
 }
 
-static int _xdebug_do_eval(unsigned char *eval_string, zval *ret_zval TSRMLS_DC)
+static int _xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 {
 	int              old_error_reporting;
 	int              res;
@@ -1161,7 +1161,7 @@ static int _xdebug_do_eval(unsigned char *eval_string, zval *ret_zval TSRMLS_DC)
 
 DBGP_FUNC(eval)
 {
-	unsigned char   *eval_string;
+	char            *eval_string;
 	xdebug_xml_node *ret_xml;
 	zval             ret_zval;
 	int              new_length;
@@ -1175,7 +1175,7 @@ DBGP_FUNC(eval)
 	options = (xdebug_var_export_options*) context->options;
 	
 	/* base64 decode eval string */
-	eval_string = xdebug_base64_decode(CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
+	eval_string = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
 
 	res = _xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
 
@@ -1624,7 +1624,7 @@ DBGP_FUNC(property_set)
 	}
 
 	/* base64 decode eval string */
-	new_value = xdebug_base64_decode(data, strlen(data), &new_length);
+	new_value = (char*) xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
 	eval_string = xdebug_sprintf("%s = %s", name, new_value);
 	res = _xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
 
@@ -2061,7 +2061,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.98 $";
+	return "$Revision: 1.99 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
