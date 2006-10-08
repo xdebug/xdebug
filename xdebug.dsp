@@ -147,6 +147,10 @@ SOURCE=.\xdebug_profiler.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\xdebug_set.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\xdebug_str.c
 # End Source File
 # Begin Source File
@@ -212,6 +216,10 @@ SOURCE=.\xdebug_llist.h
 # Begin Source File
 
 SOURCE=.\xdebug_mm.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\xdebug_set.h
 # End Source File
 # Begin Source File
 
