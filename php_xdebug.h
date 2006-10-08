@@ -143,6 +143,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          trace_options;
 	long          trace_format;
 	char         *tracefile_name;
+	char         *last_exception_trace;
 
 	/* variable dumping limitation settings */
 	long          display_max_children;

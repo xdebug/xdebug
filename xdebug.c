@@ -704,6 +704,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(prev_memory)   = 0;
 	XG(function_count) = 0;
 	XG(active_symbol_table) = NULL;
+	XG(last_exception_trace) = NULL;
 	
 	if (idekey && *idekey) {
 		if (XG(ide_key)) {
@@ -806,6 +807,10 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
+	}
+
+	if (XG(last_exception_trace)) {
+		xdfree(XG(last_exception_trace));
 	}
 
 	/* Reset var_dump and set_time_limit to the original function */
@@ -1929,6 +1934,7 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	zval *message, *file, *line;
 	zend_class_entry *default_ce, *exception_ce;
 	xdebug_brk_info *extra_brk_info;
+	char *exception_trace;
 
 	if (!exception) {
 		return;
@@ -1945,10 +1951,16 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
 	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
+	exception_trace = get_printable_stack(PG(html_errors), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+	if (XG(last_exception_trace)) {
+		xdfree(XG(last_exception_trace));
+	}
+	XG(last_exception_trace) = exception_trace;
+
 	if (XG(show_ex_trace)) {
 		log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
 		if (PG(display_errors)) {
-			print_stack(PG(html_errors), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+			php_printf("%s", exception_trace);
 		}
 	}
 
@@ -2060,7 +2072,16 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	if ((EG(error_reporting) & type)) { /* Otherwise print the default stack trace */
 		log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 		if (PG(display_errors)) {
-			print_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+			char *printable_stack;
+
+			/* We need to see if we have an uncaught exception fatal error now */
+			if (type == E_ERROR && strncmp(buffer, "Uncaught exception", 18) == 0) {
+				php_printf("%s", XG(last_exception_trace));
+			} else {
+				printable_stack = get_printable_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+				php_printf("%s", printable_stack);
+				xdfree(printable_stack);
+			}
 		}
 	}
 
