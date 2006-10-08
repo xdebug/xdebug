@@ -1,3 +1,9 @@
+Sun Oct 08 22:54:34 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/php_xdebug.h:
+- PEAR wants "RC" and not "rc"...
+
 Sun Oct 08 22:51:48 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 package2.xml:
 - Update package2.xml file as well.
