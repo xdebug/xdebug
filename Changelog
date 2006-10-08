@@ -1,3 +1,8 @@
+Sun Oct 08 21:31:00 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Fixed bug #181: Xdebug doesn't handle uncaught exception output correctly.
+
 Sun Oct 08 10:59:08 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.dsp:
 - Added the xdebug_set files to the PHP 4.x build thingy too.
