@@ -1,3 +1,7 @@
+Sun Oct 08 10:59:08 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.dsp:
+- Added the xdebug_set files to the PHP 4.x build thingy too.
+
 Sun Oct 08 01:10:33 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/xdebug.c
