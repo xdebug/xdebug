@@ -1,3 +1,10 @@
+Wed Oct 11 10:54:30 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c:
+- Fixed oparray prefill caching for code coverage.
+- Overload yet another opcode to improve code coverage.
+
 Sun Oct 08 22:54:34 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 package.xml
 xdebug/package2.xml
