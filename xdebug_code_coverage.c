@@ -203,8 +203,17 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 }
 static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_array *opa TSRMLS_DC)
 {
+	char cache_key[256];
+	int  cache_key_len;
+	void *dummy;
 	unsigned int i;
 	xdebug_set *set = NULL;
+
+	cache_key_len = snprintf(cache_key, sizeof(cache_key) - 1, "%p%s", opa, opa->function_name ? "" : opa->filename);
+	if (xdebug_hash_find(XG(code_coverage_op_array_cache), cache_key, cache_key_len, (void*) &dummy)) {
+		return;
+	}
+	xdebug_hash_add(XG(code_coverage_op_array_cache), cache_key, cache_key_len, NULL);
 
 #ifdef ZEND_ENGINE_2
 	/* Check for abstract methods and simply return from this function in those
@@ -272,16 +281,6 @@ static int prefil_from_class_table(zend_class_entry *class_entry, int num_args, 
 
 void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
 {
-	char cache_key[64];
-	int  cache_key_len;
-	void *dummy;
-
-	cache_key_len = snprintf(cache_key, sizeof(cache_key) - 1, "%p", op_array);
-	if (xdebug_hash_find(XG(code_coverage_op_array_cache), cache_key, cache_key_len, (void*) &dummy)) {
-		return;
-	}
-	xdebug_hash_add(XG(code_coverage_op_array_cache), cache_key, cache_key_len, NULL);
-
 	prefil_from_oparray(fse, op_array->filename, op_array TSRMLS_CC);
 
 	zend_hash_apply_with_arguments(CG(function_table), (apply_func_args_t) prefil_from_function_table, 1, op_array->filename);
