@@ -1,3 +1,9 @@
+Mon Oct 16 22:11:23 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_code_coverage.h:
+- s/prefil/prefill (Patch by Sebastian Bergmann)
+
 Mon Oct 16 22:08:58 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed two valgrind errors. One was an uninitialized value, the other
