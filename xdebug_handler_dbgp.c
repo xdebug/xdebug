@@ -1023,6 +1023,7 @@ DBGP_FUNC(breakpoint_set)
 	brk_info->type = NULL;
 	brk_info->file = NULL;
 	brk_info->file_len = 0;
+	brk_info->lineno = 0;
 	brk_info->classname = NULL;
 	brk_info->functionname = NULL;
 	brk_info->function_break_type = 0;
@@ -2061,7 +2062,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.99 $";
+	return "$Revision: 1.100 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2295,7 +2296,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 
 	response = xdebug_xml_node_init("response");
 	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
-	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 1);
+	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
 	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
 	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 
