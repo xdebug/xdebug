@@ -1396,7 +1396,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_prefil_code_coverage(fse, op_array TSRMLS_CC);
+		xdebug_prefill_code_coverage(fse, op_array TSRMLS_CC);
 	}
 
 	/* If we're in an eval, we need to create an ID for it. This ID however

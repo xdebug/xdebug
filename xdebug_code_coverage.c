@@ -82,7 +82,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	xdfree(sline);
 }
 
-static void prefil_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode, int deadcode TSRMLS_DC)
+static void prefill_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode, int deadcode TSRMLS_DC)
 {
 	if (
 		opcode.opcode != ZEND_NOP &&
@@ -201,7 +201,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		xdebug_set_add(set, position);
 	}
 }
-static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_array *opa TSRMLS_DC)
+static void prefill_from_oparray(function_stack_entry *fse, char *fn, zend_op_array *opa TSRMLS_DC)
 {
 	char cache_key[256];
 	int  cache_key_len;
@@ -233,7 +233,7 @@ static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_arr
 	/* The normal loop then finally */
 	for (i = 0; i < opa->size; i++) {
 		zend_op opcode = opa->opcodes[i];
-		prefil_from_opcode(NULL, fn, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
+		prefill_from_opcode(NULL, fn, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
 	}
 
 	if (set) {
@@ -241,7 +241,7 @@ static void prefil_from_oparray(function_stack_entry *fse, char *fn, zend_op_arr
 	}
 }
 
-static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list args, zend_hash_key *hash_key)
+static int prefill_from_function_table(zend_op_array *opa, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	char *new_filename;
 	TSRMLS_FETCH();
@@ -249,7 +249,7 @@ static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
 		if (opa->filename && strcmp(opa->filename, new_filename) == 0) {
-			prefil_from_oparray(NULL, new_filename, opa TSRMLS_CC);
+			prefill_from_oparray(NULL, new_filename, opa TSRMLS_CC);
 		}
 	}
 
@@ -257,9 +257,9 @@ static int prefil_from_function_table(zend_op_array *opa, int num_args, va_list 
 }
 
 #ifdef ZEND_ENGINE_2
-static int prefil_from_class_table(zend_class_entry **class_entry, int num_args, va_list args, zend_hash_key *hash_key)
+static int prefill_from_class_table(zend_class_entry **class_entry, int num_args, va_list args, zend_hash_key *hash_key)
 #else
-static int prefil_from_class_table(zend_class_entry *class_entry, int num_args, va_list args, zend_hash_key *hash_key)
+static int prefill_from_class_table(zend_class_entry *class_entry, int num_args, va_list args, zend_hash_key *hash_key)
 #endif
 {
 	char *new_filename;
@@ -273,18 +273,18 @@ static int prefil_from_class_table(zend_class_entry *class_entry, int num_args, 
 
 	new_filename = va_arg(args, char*);
 	if (ce->type == ZEND_USER_CLASS) {
-		zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefil_from_function_table, 1, new_filename);
+		zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
+void xdebug_prefill_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
 {
-	prefil_from_oparray(fse, op_array->filename, op_array TSRMLS_CC);
+	prefill_from_oparray(fse, op_array->filename, op_array TSRMLS_CC);
 
-	zend_hash_apply_with_arguments(CG(function_table), (apply_func_args_t) prefil_from_function_table, 1, op_array->filename);
-	zend_hash_apply_with_arguments(CG(class_table), (apply_func_args_t) prefil_from_class_table, 1, op_array->filename);
+	zend_hash_apply_with_arguments(CG(function_table), (apply_func_args_t) prefill_from_function_table, 1, op_array->filename);
+	zend_hash_apply_with_arguments(CG(class_table), (apply_func_args_t) prefill_from_class_table, 1, op_array->filename);
 }
 
 PHP_FUNCTION(xdebug_start_code_coverage)

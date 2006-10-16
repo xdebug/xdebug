@@ -38,7 +38,7 @@ void xdebug_coverage_line_dtor(void *data);
 void xdebug_coverage_file_dtor(void *data);
 
 void xdebug_count_line(char *file, int lineno, int executable, int deadcode TSRMLS_DC);
-void xdebug_prefil_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
+void xdebug_prefill_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
 
 PHP_FUNCTION(xdebug_start_code_coverage);
 PHP_FUNCTION(xdebug_stop_code_coverage);
