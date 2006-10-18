@@ -684,15 +684,25 @@ void stack_element_dtor (void *dummy, void *elem)
 	}
 }
 
+#if PHP_VERSION_ID >= 50200
+#define COOKIE_ENCODE , 1, 0
+#elif PHP_API_VERSION >= 20030820
+#define COOKIE_ENCODE , 1
+#else
+#define COOKIE_ENCODE
+#endif
+
 PHP_RINIT_FUNCTION(xdebug)
 {
 	zend_function *orig;
 	char *idekey;
+	zval **dummy;
 	
 	/* get xdebug ini entries from the environment also */
 	xdebug_env_config();
 	idekey = zend_ini_string("xdebug.idekey", sizeof("xdebug.idekey"), 0);
 
+	XG(no_exec)       = 0;
 	XG(level)         = 0;
 	XG(do_trace)      = 0;
 	XG(do_code_coverage) = 0;
@@ -713,6 +723,24 @@ PHP_RINIT_FUNCTION(xdebug)
 			xdfree(XG(ide_key));
 		}
 		XG(ide_key) = xdstrdup(idekey);
+	}
+
+	/* Check if we have this special get variable that stops a debugging
+	 * request without executing any code */
+	if (
+		(
+			(
+				PG(http_globals)[TRACK_VARS_GET] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP_NO_EXEC", sizeof("XDEBUG_SESSION_STOP_NO_EXEC"), (void **) &dummy) == SUCCESS
+			) || (
+				PG(http_globals)[TRACK_VARS_POST] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP_NO_EXEC", sizeof("XDEBUG_SESSION_STOP_NO_EXEC"), (void **) &dummy) == SUCCESS
+			)
+		)
+		&& !SG(headers_sent)
+	) {
+		php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+		XG(no_exec) = 1;
 	}
 
 	/* Only enabled extended info when it is not disabled */
@@ -1237,14 +1265,6 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	return 1;
 }
 
-#if PHP_VERSION_ID >= 50200
-#define COOKIE_ENCODE , 1, 0
-#elif PHP_API_VERSION >= 20030820
-#define COOKIE_ENCODE , 1
-#else
-#define COOKIE_ENCODE
-#endif
-
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
 	zval                **dummy;
@@ -1255,6 +1275,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
 	int                   eval_id = 0;
+
+
+	if (XG(no_exec) == 1) {
+		php_printf("DEBUG SESSION ENDED");
+		return;
+	}
 
 	if (XG(level) == 0) {
 		/* Set session cookie if requested */

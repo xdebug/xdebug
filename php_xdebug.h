@@ -189,6 +189,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     breakpoints_allowed;
 	xdebug_con    context;
 	unsigned int  breakpoint_count;
+	unsigned int  no_exec;
 
 	/* profiler settings */
 	zend_bool     profiler_enable;
