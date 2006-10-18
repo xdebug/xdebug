@@ -1,3 +1,11 @@
+Wed Oct 18 14:04:07 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Implemented FR #210: Add a way to stop the debug session without having to
+  execute a script. The GET/POST parameter "XDEBUG_SESSION_STOP_NO_EXEC"
+  works in the same way as XDEBUG_SESSION_STOP, except that the script will
+  not be executed.
+
 Wed Oct 18 12:00:34 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #208: Socket connection attempted when XDEBUG_SESSION_STOP.
