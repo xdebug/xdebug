@@ -1,3 +1,12 @@
+Wed Oct 18 16:47:23 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+tests/bug00212a.inc
+xdebug/tests/bug00212a.phpt
+xdebug/tests/bug00212b.inc
+xdebug/tests/bug00212b.phpt
+xdebug/tests/bug00212c.inc
+xdebug/tests/bug00212c.phpt:
+- Added some test cases for the non-bug #212.
+
 Wed Oct 18 14:04:07 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
