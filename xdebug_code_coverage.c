@@ -192,7 +192,15 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
 			/* fprintf(stderr, "X* Throw found\n"); */
-			break;
+			/* Now we need to go forward to the first
+			 * zend_fetch_class/zend_catch combo */
+			while (position < opa->size) {
+				position++;
+				if (opa->opcodes[position].opcode == ZEND_CATCH) {
+					position -= 2;
+					break;
+				}
+			}
 		}
 #endif
 
