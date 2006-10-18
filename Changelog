@@ -1,3 +1,9 @@
+Wed Oct 18 12:00:34 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #208: Socket connection attempted when XDEBUG_SESSION_STOP.
+- Fixed bug #211: When starting a new session with a different idekey, the
+  cookie is not updated.
+
 Mon Oct 16 22:11:23 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_code_coverage.c
