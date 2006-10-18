@@ -1,3 +1,10 @@
+Wed Oct 18 20:46:45 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/bug00213.inc
+xdebug/tests/bug00213.phpt:
+- Fixed bug #213: Dead code analysis doesn't take catches for throws into
+  account.
+
 Wed Oct 18 16:47:23 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00212a.inc
 xdebug/tests/bug00212a.phpt
