@@ -1265,10 +1265,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			) || (
 				PG(http_globals)[TRACK_VARS_POST] &&
 				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
-			)) && !(
-				PG(http_globals)[TRACK_VARS_COOKIE] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (void **) &dummy) == SUCCESS
-			)
+			))
 			&& !SG(headers_sent)
 		) {
 			convert_to_string_ex(dummy);
@@ -1309,6 +1306,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			)
 			&& !SG(headers_sent)
 		) {
+			if (magic_cookie) {
+				xdfree(magic_cookie);
+				magic_cookie = NULL;
+			}
 			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
 		}
 
@@ -1338,6 +1339,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				}
 			}
 		}
+		if (magic_cookie) {
+			xdfree(magic_cookie);
+			magic_cookie = NULL;
+		}
 
 		/* Check for special GET/POST parameter to start profiling */
 		if (
@@ -1363,8 +1368,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				XG(profiler_enabled) = 1;
 			}
 		}
-		xdfree(magic_cookie);
-		magic_cookie = NULL;
 	}
 
 	XG(level)++;
