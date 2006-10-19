@@ -162,7 +162,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	xdebug_set_add(set, position);
 	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
-	while (position < opa->size) {
+	while (position < opa->size - 1) {
 
 		/* See if we have a jump instruction */
 		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
@@ -178,6 +178,24 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			}
 			break;
 		}
+#ifdef ZEND_ENGINE_2
+		/* See if we have a throw instruction */
+		if (opa->opcodes[position].opcode == ZEND_THROW) {
+			/* fprintf(stderr, "Throw found at %d\n", position); */
+			/* Now we need to go forward to the first
+			 * zend_fetch_class/zend_catch combo */
+			while (position < opa->size - 1) {
+				if (opa->opcodes[position].opcode == ZEND_CATCH) {
+					/* fprintf(stderr, "Found catch at %d\n", position); */
+					position--;
+					break;
+				}
+				position++;
+				/* fprintf(stderr, "Skipping %d\n", position); */
+			}
+			position--;
+		}
+#endif
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			/* fprintf(stderr, "X* Return found\n"); */
@@ -188,21 +206,6 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			/*(fprintf(stderr, "XDEBUG Return found\n");)*/
 			break;
 		}
-#ifdef ZEND_ENGINE_2
-		/* See if we have a throw instruction */
-		if (opa->opcodes[position].opcode == ZEND_THROW) {
-			/* fprintf(stderr, "X* Throw found\n"); */
-			/* Now we need to go forward to the first
-			 * zend_fetch_class/zend_catch combo */
-			while (position < opa->size) {
-				position++;
-				if (opa->opcodes[position].opcode == ZEND_CATCH) {
-					position -= 2;
-					break;
-				}
-			}
-		}
-#endif
 
 		position++;
 		/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
