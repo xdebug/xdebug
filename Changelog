@@ -1,3 +1,8 @@
+Thu Oct 19 21:08:11 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Make the remote_log feature work.
+#- It helps if you don't reset it to NULL on request start...
+
 Thu Oct 19 10:19:36 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c
 xdebug/tests/bug00209.inc
