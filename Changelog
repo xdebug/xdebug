@@ -1,3 +1,7 @@
+Thu Oct 19 22:46:17 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Overload some more opcodes.
+
 Thu Oct 19 22:45:48 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - Fixed dead code analysis for THROW.
