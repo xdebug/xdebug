@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_set.c,v 1.2 2006-10-07 23:10:32 derick Exp $ */
+/* $Id: xdebug_set.c,v 1.3 2006-10-19 20:45:19 derick Exp $ */
 
 #include <stdlib.h>
 #include <math.h>
@@ -27,7 +27,7 @@ xdebug_set *xdebug_set_create(unsigned int size)
 
 	tmp = calloc(1, sizeof(xdebug_set));
 	tmp->size = size;
-	size = ceil((size + 7) / 8);
+	size = ceil((size + 7) / 8) + 1;
 	tmp->setinfo = calloc(1, size);
 
 	return tmp;
