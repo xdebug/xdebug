@@ -1329,6 +1329,7 @@ DBGP_FUNC(detach)
 {
 	XG(status) = DBGP_STATUS_STOPPING;
 	XG(remote_enabled) = 0;
+	XG(remote_enable) = 0;
 }
 
 
@@ -2062,7 +2063,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.100 $";
+	return "$Revision: 1.101 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
