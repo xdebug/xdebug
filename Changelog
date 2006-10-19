@@ -1,3 +1,10 @@
+Thu Oct 19 10:19:36 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c
+xdebug/tests/bug00209.inc
+xdebug/tests/bug00209.phpt:
+- Fixed bug #209: Additional remote debugging session started when triggering
+  shutdown function.
+
 Wed Oct 18 20:46:45 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00213.inc
