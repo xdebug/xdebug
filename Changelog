@@ -1,3 +1,7 @@
+Thu Oct 19 22:45:48 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Fixed dead code analysis for THROW.
+
 Thu Oct 19 22:45:19 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_set.c:
 - Allocate one byte more because of safety.
