@@ -1,3 +1,7 @@
+Thu Oct 19 22:45:19 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_set.c:
+- Allocate one byte more because of safety.
+
 Thu Oct 19 21:08:11 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Make the remote_log feature work.
