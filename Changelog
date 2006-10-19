@@ -1,3 +1,7 @@
+Thu Oct 19 22:51:19 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+tests/bug00173.phpt:
+- Fixed test case... this is now handling much better than before.
+
 Thu Oct 19 22:46:17 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Overload some more opcodes.
