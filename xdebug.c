@@ -754,7 +754,6 @@ PHP_RINIT_FUNCTION(xdebug)
 #endif
 	}
 	XG(remote_enabled) = 0;
-	XG(remote_log) = NULL;
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
 	if (XG(auto_trace) && XG(trace_output_dir) && strlen(XG(trace_output_dir))) {
