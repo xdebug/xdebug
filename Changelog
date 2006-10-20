@@ -1,3 +1,8 @@
+Fri Oct 20 08:51:31 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Change context 1 from globals (superglobals + vars in bottom most stack
+  frame) to just superglobals.
+
 Thu Oct 19 22:51:19 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00173.phpt:
 - Fixed test case... this is now handling much better than before.
