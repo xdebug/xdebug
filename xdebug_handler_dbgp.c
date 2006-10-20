@@ -1547,6 +1547,7 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 DBGP_FUNC(property_get)
 {
 	int                        depth = -1;
+	int                        context_nr = 0;
 	function_stack_entry      *fse;
 	int                        old_max_data;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
@@ -1558,15 +1559,24 @@ DBGP_FUNC(property_get)
 	if (CMD_OPTION('d')) {
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
 	}
+
+	if (CMD_OPTION('c')) {
+		context_nr = strtol(CMD_OPTION('c'), NULL, 10);
+	}
+
 	/* Set the symbol table corresponding with the requested stack depth */
-	if (depth == -1) {
-		XG(active_symbol_table) = EG(active_symbol_table);
-	} else {
-		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-			XG(active_symbol_table) = fse->symbol_table;
+	if (context_nr == 0) { /* locals */
+		if (depth == -1) {
+			XG(active_symbol_table) = EG(active_symbol_table);
 		} else {
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+			if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+				XG(active_symbol_table) = fse->symbol_table;
+			} else {
+				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+			}
 		}
+	} else { /* superglobals */
+		XG(active_symbol_table) = &EG(symbol_table);
 	}
 
 	if (CMD_OPTION('p')) {
@@ -1725,11 +1735,23 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	function_stack_entry *fse;
 	xdebug_hash          *ht;
 
-	if (context_id > 0) {
-		/* right now, we only have zero or one, one being globals, which is
-		 * always the head of the stack */
-		depth = XG(level) - 1;
+	/* right now, we only have zero or one, one being globals, which is
+	 * always the head of the stack */
+	if (context_id == 1) {
+		/* add super globals */
+		XG(active_symbol_table) = &EG(symbol_table);
+		add_variable_node(node, "_ENV", sizeof("_ENV"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_GET", sizeof("_GET"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_POST", sizeof("_POST"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_COOKIE", sizeof("_COOKIE"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1, 0, options TSRMLS_CC);
+		XG(active_symbol_table) = NULL;
+		return 0;
 	}
+
+	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
 		ht = fse->used_vars;
 		XG(active_symbol_table) = fse->symbol_table;
@@ -1743,16 +1765,6 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		/* zend engine 2 does not give us $this, eval so we can get it */
 		add_variable_node(node, "this", sizeof("this"), 1, 1, 0, options TSRMLS_CC);
 #endif
-		if (options->show_hidden && context_id > 0) {
-			/* add supper globals */
-			add_variable_node(node, "_ENV", sizeof("_ENV"), 1, 1, 0, options TSRMLS_CC);
-			add_variable_node(node, "_GET", sizeof("_GET"), 1, 1, 0, options TSRMLS_CC);
-			add_variable_node(node, "_POST", sizeof("_POST"), 1, 1, 0, options TSRMLS_CC);
-			add_variable_node(node, "_COOKIE", sizeof("_COOKIE"), 1, 1, 0, options TSRMLS_CC);
-			add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1, 0, options TSRMLS_CC);
-			add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1, 0, options TSRMLS_CC);
-			add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1, 0, options TSRMLS_CC);
-		}
 
 		XG(active_symbol_table) = NULL;
 		return 0;
@@ -1807,7 +1819,7 @@ DBGP_FUNC(context_names)
 	xdebug_xml_add_attribute(child, "id", "0");
 	xdebug_xml_add_child(*retval, child);
 	child = xdebug_xml_node_init("context");
-	xdebug_xml_add_attribute(child, "name", "Globals");
+	xdebug_xml_add_attribute(child, "name", "Superglobals");
 	xdebug_xml_add_attribute(child, "id", "1");
 	xdebug_xml_add_child(*retval, child);
 }
@@ -2063,7 +2075,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.101 $";
+	return "$Revision: 1.102 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
