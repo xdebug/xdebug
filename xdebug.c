@@ -796,12 +796,13 @@ PHP_RINIT_FUNCTION(xdebug)
 #ifdef ZEND_ENGINE_2
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
+	zend_function *orig;
 	TSRMLS_FETCH();
 #else
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
-#endif
 	zend_function *orig;
+#endif
 
 	xdebug_llist_destroy(XG(stack), NULL);
 	XG(stack) = NULL;
