@@ -257,9 +257,10 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 /*****************************************************************************
 ** Data returning functions
 */
-#define XF_ST_ROOT          0
-#define XF_ST_ARRAY_INDEX   1
-#define XF_ST_OBJ_PROPERTY  2
+#define XF_ST_ROOT               0
+#define XF_ST_ARRAY_INDEX_NUM    1
+#define XF_ST_ARRAY_INDEX_ASSOC  2
+#define XF_ST_OBJ_PROPERTY       3
 
 static char* prepare_search_key(char *name, int *name_length, char *prefix, int prefix_length)
 {
@@ -293,7 +294,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 
 	switch (type) {
 		case XF_ST_ROOT:
-		case XF_ST_ARRAY_INDEX:
+		case XF_ST_ARRAY_INDEX_ASSOC:
 			element = prepare_search_key(name, &name_length, "", 0);
 #ifdef ZEND_ENGINE_2
 			/* Handle "this" in a different way */
@@ -305,6 +306,12 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
 				goto cleanup;
+			}
+			break;
+		case XF_ST_ARRAY_INDEX_NUM:
+			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup_num;
 			}
 			break;
 		case XF_ST_OBJ_PROPERTY:
@@ -336,6 +343,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 	}
 cleanup:
 	free(element);
+cleanup_num:
 	return retval_p;
 }
 
@@ -430,7 +438,6 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 								keyword = NULL;
 							}
 							state = 3;
-							type = XF_ST_ARRAY_INDEX;
 						} else if (*p[0] == '-') {
 							keyword_end = *p;
 							if (keyword) {
@@ -460,11 +467,13 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							state = 4;
 							keyword = *p + 1;
 							quotechar = *p[0];
+							type = XF_ST_ARRAY_INDEX_ASSOC;
 						}
 						/* Numerical index */
 						if (*p[0] >= '0' && *p[0] <= '9') {
 							state = 6;
 							keyword = *p;
+							type = XF_ST_ARRAY_INDEX_NUM;
 						}
 						break;
 					case 4:
@@ -2075,7 +2084,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.102 $";
+	return "$Revision: 1.103 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
