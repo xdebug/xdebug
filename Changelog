@@ -1,3 +1,8 @@
+Mon Oct 23 22:33:21 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed bug #214: The depth level of arrays was incorrectly checked so it
+  would show the first page of a level too deep as well.
+
 Mon Oct 23 22:30:59 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 tests/bug00173.phpt:
 - Fixed testcase.
