@@ -1,3 +1,8 @@
+Mon Oct 23 22:35:53 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #215: Cannot retrieve nested arrays when the array key is a
+  numeric index.
+
 Mon Oct 23 22:33:21 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed bug #214: The depth level of arrays was incorrectly checked so it
