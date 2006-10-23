@@ -676,7 +676,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			xdebug_xml_add_attribute(node, "children", myht->nNumOfElements > 0?"1":"0");
 			if (myht->nApplyCount < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
-				if (level <= options->max_depth) {
+				if (level < options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					if (level == 0 && myht->nNumOfElements > options->max_children) {
 						xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
@@ -708,7 +708,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			if (myht) {
 				if (myht->nApplyCount < 1) {
 					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
-					if (level <= options->max_depth) {
+					if (level < options->max_depth) {
 						options->runtime[level].current_element_nr = 0;
 						if (level == 0 && myht->nNumOfElements > options->max_children) {
 							xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
