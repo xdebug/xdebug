@@ -1,3 +1,7 @@
+Mon Oct 23 22:30:59 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+tests/bug00173.phpt:
+- Fixed testcase.
+
 Fri Oct 20 14:37:42 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed PECL bug #8989: Compile error with PHP 5 and GCC 2.95.
