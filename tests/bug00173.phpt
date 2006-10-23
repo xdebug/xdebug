@@ -24,8 +24,8 @@ xdebug.trace_format=0
 InvalidArgumentException: Passed variable is not an array or object, using empty array instead in %sbug00173.php on line 3
 
 Call Stack:
-    0.0005     262144   1. {main}() %sbug00173.php:0
-    0.0010     262144   2. ArrayIterator->__construct(null) %sbug00173.php:3
+%w%f%w%d   1. {main}() %sbug00173.php:0
+%w%f%w%d   2. ArrayIterator->__construct(null) %sbug00173.php:3
 
 
 Variables in local scope (#1):
