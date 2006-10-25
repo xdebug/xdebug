@@ -1,4 +1,4 @@
-dnl $Id: config.m4,v 1.23 2006-09-25 20:20:01 derick Exp $
+dnl $Id: config.m4,v 1.24 2006-10-25 12:50:50 derick Exp $
 dnl config.m4 for extension xdebug
 
 PHP_ARG_ENABLE(xdebug, whether to enable eXtended debugging support,
@@ -25,4 +25,6 @@ dnl Check for new current_execute_data field in zend_executor_globals
   AC_CHECK_FUNCS(gettimeofday)
 
   CPPFLAGS=$old_CPPFLAGS
+
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi

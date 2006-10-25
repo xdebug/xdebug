@@ -122,6 +122,7 @@ Xdebug also provides:
       <file role="src"  name="xdebug_xml.h"/>
 
       <file role="src"  name="Makefile.in"/>
+      <file role="src"  name="Makefile.frag"/>
       <file role="src"  name="config.m4"/>
       <file role="src"  name="xdebug.dsp"/>
 

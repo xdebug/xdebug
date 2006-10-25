@@ -124,6 +124,7 @@ Xdebug also provides:
    <file name="CREDITS" role="doc" />
    <file name="LICENSE" role="doc" />
    <file name="Makefile.in" role="src" />
+   <file name="Makefile.frag" role="src" />
    <file name="NEWS" role="doc" />
    <file name="php_xdebug.h" role="src" />
    <file name="README" role="doc" />
