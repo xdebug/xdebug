@@ -1,3 +1,10 @@
+Wed Oct 25 14:50:50 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+Makefile.frag
+xdebug/config.m4
+xdebug/package.xml
+xdebug/package2.xml:
+- Unconfuse people that install Xdebug with the PECL installer.
+
 Mon Oct 23 22:35:53 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed bug #215: Cannot retrieve nested arrays when the array key is a
