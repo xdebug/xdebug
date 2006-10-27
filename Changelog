@@ -1,3 +1,7 @@
+Fri Oct 27 23:05:50 CEST 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed a bug where $this did not appear in the local scoped context.
+
 Wed Oct 25 14:50:50 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 Makefile.frag
 xdebug/config.m4
