@@ -79,7 +79,7 @@ typedef struct {
 	char *message;
 } xdebug_error_entry;
 
-xdebug_error_entry xdebug_error_codes[23] = {
+xdebug_error_entry xdebug_error_codes[24] = {
 	{   0, "no error" },
 	{   1, "parse error in command" },
 	{   2, "duplicate arguments in command" },
@@ -99,6 +99,7 @@ xdebug_error_entry xdebug_error_codes[23] = {
 	{ 300, "can not get property" },
 	{ 301, "stack depth invalid" },
 	{ 302, "context invalid" },
+	{ 800, "profiler not started" },
 	{ 900, "encoding not supported" },
 	{ 998, "an internal exception in the debugger" },
 	{ 999, "unknown error" },
@@ -163,44 +164,50 @@ DBGP_FUNC(step_out);
 DBGP_FUNC(step_over);
 DBGP_FUNC(detach);
 
+/* Non standard comments */
+DBGP_FUNC(xcmd_profiler_name_get);
+
 /*****************************************************************************
 ** Dispatcher tables for supported debug commands
 */
 
 static xdebug_dbgp_cmd dbgp_commands[] = {
 	/* DBGP_FUNC_ENTRY(break) */
-	DBGP_FUNC_ENTRY(breakpoint_get)
-	DBGP_FUNC_ENTRY(breakpoint_list)
-	DBGP_FUNC_ENTRY(breakpoint_remove)
-	DBGP_FUNC_ENTRY(breakpoint_set)
-	DBGP_FUNC_ENTRY(breakpoint_update)
+	DBGP_FUNC_ENTRY(breakpoint_get,    XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(breakpoint_list,   XDEBUG_DBGP_POST_MORTEM)
+	DBGP_FUNC_ENTRY(breakpoint_remove, XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(breakpoint_set,    XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(breakpoint_update, XDEBUG_DBGP_NONE)
 
-	DBGP_FUNC_ENTRY(context_get)
-	DBGP_FUNC_ENTRY(context_names)
+	DBGP_FUNC_ENTRY(context_get,       XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(context_names,     XDEBUG_DBGP_POST_MORTEM)
 
-	DBGP_FUNC_ENTRY(eval)
-	DBGP_FUNC_ENTRY(feature_get)
-	DBGP_FUNC_ENTRY(feature_set)
+	DBGP_FUNC_ENTRY(eval,              XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(feature_get,       XDEBUG_DBGP_POST_MORTEM)
+	DBGP_FUNC_ENTRY(feature_set,       XDEBUG_DBGP_NONE)
 
-	DBGP_FUNC_ENTRY(typemap_get)
-	DBGP_FUNC_ENTRY(property_get)
-	DBGP_FUNC_ENTRY(property_set)
-	DBGP_FUNC_ENTRY(property_value)
+	DBGP_FUNC_ENTRY(typemap_get,       XDEBUG_DBGP_POST_MORTEM)
+	DBGP_FUNC_ENTRY(property_get,      XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(property_set,      XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(property_value,    XDEBUG_DBGP_NONE)
 
-	DBGP_FUNC_ENTRY(source)
-	DBGP_FUNC_ENTRY(stack_depth)
-	DBGP_FUNC_ENTRY(stack_get)
-	DBGP_FUNC_ENTRY(status)
+	DBGP_FUNC_ENTRY(source,            XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(stack_depth,       XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(stack_get,         XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(status,            XDEBUG_DBGP_POST_MORTEM)
 
-	DBGP_FUNC_ENTRY(stderr)
-	DBGP_FUNC_ENTRY(stdout)
+	DBGP_FUNC_ENTRY(stderr,            XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(stdout,            XDEBUG_DBGP_NONE)
 
-	DBGP_CONT_FUNC_ENTRY(stop)
-	DBGP_CONT_FUNC_ENTRY(run)
-	DBGP_CONT_FUNC_ENTRY(step_into)
-	DBGP_CONT_FUNC_ENTRY(step_out)
-	DBGP_CONT_FUNC_ENTRY(step_over)
-	DBGP_CONT_FUNC_ENTRY(detach)
+	DBGP_CONT_FUNC_ENTRY(stop,         XDEBUG_DBGP_NONE)
+	DBGP_CONT_FUNC_ENTRY(run,          XDEBUG_DBGP_NONE)
+	DBGP_CONT_FUNC_ENTRY(step_into,    XDEBUG_DBGP_NONE)
+	DBGP_CONT_FUNC_ENTRY(step_out,     XDEBUG_DBGP_NONE)
+	DBGP_CONT_FUNC_ENTRY(step_over,    XDEBUG_DBGP_NONE)
+	DBGP_CONT_FUNC_ENTRY(detach,       XDEBUG_DBGP_NONE)
+
+	/* Non standard functions */
+	DBGP_FUNC_ENTRY(xcmd_profiler_name_get, XDEBUG_DBGP_POST_MORTEM)
 	{ NULL, NULL }
 };
 
@@ -1448,7 +1455,7 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("supports_postmortem")
-			xdebug_xml_add_text(*retval, xdstrdup("0"));
+			xdebug_xml_add_text(*retval, xdstrdup("1"));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
@@ -1857,6 +1864,14 @@ DBGP_FUNC(context_get)
 	}
 }
 
+DBGP_FUNC(xcmd_profiler_name_get)
+{
+	if (XG(profiler_enabled) && XG(profile_filename)) {
+		xdebug_xml_add_text(*retval, xdstrdup(XG(profile_filename)));
+	} else {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROFILING_NOT_STARTED);
+	}
+}
 
 
 /*****************************************************************************
@@ -2049,6 +2064,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 		error = xdebug_xml_node_init("error");
 		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", res), 0, 1);
 		xdebug_xml_add_child(retval, error);
+		ADD_REASON_MESSAGE(res);
 	} else {
 
 		/* Execute commands and stuff */
@@ -2061,12 +2077,21 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 				XG(lastcmd) = command->name;
 				XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
 			}
-			command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
+			if (XG(status) != DBGP_STATUS_STOPPED || (XG(status) == DBGP_STATUS_STOPPED && command->flags & XDEBUG_DBGP_POST_MORTEM)) {
+				command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
+				ret = command->cont;
+			} else {
+				error = xdebug_xml_node_init("error");
+				xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_COMMAND_UNAVAILABLE), 0, 1);
+				ADD_REASON_MESSAGE(XDEBUG_ERROR_COMMAND_UNAVAILABLE);
+				xdebug_xml_add_child(retval, error);
 
-			ret = command->cont;
+				ret = -1;
+			}
 		} else {
 			error = xdebug_xml_node_init("error");
 			xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_UNIMPLEMENTED), 0, 1);
+			ADD_REASON_MESSAGE(XDEBUG_ERROR_UNIMPLEMENTED);
 			xdebug_xml_add_child(retval, error);
 
 			ret = -1;
@@ -2084,7 +2109,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.104 $";
+	return "$Revision: 1.105 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2245,6 +2270,8 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 
 	send_message(context, response TSRMLS_CC);
 	xdebug_xml_node_dtor(response);
+
+	xdebug_dbgp_cmdloop(context TSRMLS_CC);
 
 	if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
 		OG(php_body_write) = XG(stdio).php_body_write;

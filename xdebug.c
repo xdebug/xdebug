@@ -804,6 +804,14 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	zend_function *orig;
 #endif
 
+	if (XG(remote_enabled)) {
+		XG(context).handler->remote_deinit(&(XG(context)));
+		xdebug_close_socket(XG(context).socket); 
+		if (XG(context).program_name) {
+			xdfree(XG(context).program_name);
+		}
+	}
+
 	xdebug_llist_destroy(XG(stack), NULL);
 	XG(stack) = NULL;
 
@@ -830,14 +838,6 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 
 	xdebug_hash_destroy(XG(code_coverage));
 	xdebug_hash_destroy(XG(code_coverage_op_array_cache));
-
-	if (XG(remote_enabled)) {
-		XG(context).handler->remote_deinit(&(XG(context)));
-		xdebug_close_socket(XG(context).socket); 
-		if (XG(context).program_name) {
-			xdfree(XG(context).program_name);
-		}
-	}
 
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);

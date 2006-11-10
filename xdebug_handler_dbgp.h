@@ -31,6 +31,19 @@ typedef struct xdebug_dbgp_result {
 	int code;
 } xdebug_dbgp_result;
 
+#define ADD_REASON_MESSAGE(c) { \
+	xdebug_xml_node *message = xdebug_xml_node_init("message"); \
+	xdebug_error_entry *error_entry = &xdebug_error_codes[0]; \
+	\
+	while (error_entry->message) { \
+		if ((c) == error_entry->code) { \
+			xdebug_xml_add_text(message, xdstrdup(error_entry->message)); \
+			xdebug_xml_add_child(error, message); \
+		} \
+		error_entry++; \
+	} \
+}
+
 #define RETURN_RESULT(s, r, c) { \
 	xdebug_xml_node *error = xdebug_xml_node_init("error"); \
 	xdebug_xml_node *message = xdebug_xml_node_init("message"); \
@@ -59,13 +72,17 @@ typedef struct xdebug_dbgp_arg {
 #define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args TSRMLS_DC
 #define DBGP_FUNC_PASS_PARAMETERS   retval, context, args TSRMLS_CC
 #define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(DBGP_FUNC_PARAMETERS)
-#define DBGP_FUNC_ENTRY(name)       { #name, xdebug_dbgp_handle_##name, 0 },
-#define DBGP_CONT_FUNC_ENTRY(name)  { #name, xdebug_dbgp_handle_##name, 1 },
+#define DBGP_FUNC_ENTRY(name,flags)       { #name, xdebug_dbgp_handle_##name, 0, flags },
+#define DBGP_CONT_FUNC_ENTRY(name,flags)  { #name, xdebug_dbgp_handle_##name, 1, flags },
+
+#define XDEBUG_DBGP_NONE          0x00
+#define XDEBUG_DBGP_POST_MORTEM   0x01
 
 typedef struct xdebug_dbgp_cmd {
 	char *name;
 	void (*handler)(DBGP_FUNC_PARAMETERS);
 	int  cont;
+	int  flags;
 } xdebug_dbgp_cmd;
 
 #define CMD_OPTION(opt)    (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])

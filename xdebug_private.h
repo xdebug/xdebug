@@ -89,7 +89,7 @@ typedef struct xdebug_var {
 #define XDEBUG_ERROR_DUP_ARG                         2
 #define XDEBUG_ERROR_INVALID_ARGS                    3
 #define XDEBUG_ERROR_UNIMPLEMENTED                   4
-#define XDEBUG_ERROR_COMMAND_UNAVAILABLE             5 /* unused */
+#define XDEBUG_ERROR_COMMAND_UNAVAILABLE             5
 
 #define XDEBUG_ERROR_CANT_OPEN_FILE                100
 #define XDEBUG_ERROR_STREAM_REDIRECT_FAILED        101 /* unused */
@@ -106,6 +106,8 @@ typedef struct xdebug_var {
 #define XDEBUG_ERROR_PROPERTY_NON_EXISTANT         300
 #define XDEBUG_ERROR_STACK_DEPTH_INVALID           301
 #define XDEBUG_ERROR_CONTEXT_INVALID               302 /* unused */
+
+#define XDEBUG_ERROR_PROFILING_NOT_STARTED         400
 
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
