@@ -1,3 +1,12 @@
+Fri Nov 10 12:33:29 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_private.h:
+- Allow postmortem analysis.
+- Added the non-standard function xcmd_profiler_name_get.
+- Fixed a bug where error messages where not added upon errors in the protocol.
+
 Sat Oct 28 00:00:11 CEST 2006 Derick Rethans <derick@derickrethans.nl>
 README:
 - One more.
