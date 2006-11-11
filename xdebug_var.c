@@ -836,6 +836,10 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount, (*struc)->is_ref), 1);
+	} else {
+		if ((*struc)->is_ref) {
+			xdebug_str_add(str, "&amp;", 0);
+		}
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
