@@ -1,3 +1,7 @@
+Tue Nov 21 19:53:39 CET 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- Fixed bug #219: Memory usage delta in traces don't work on PHP 5.2.0.
+
 Sat Nov 11 22:57:23 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Make sure we add the "reference" mark also for non-debug-zval var_dump calls.
