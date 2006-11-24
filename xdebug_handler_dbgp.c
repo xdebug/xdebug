@@ -316,6 +316,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			}
 			break;
 		case XF_ST_ARRAY_INDEX_NUM:
+			element = prepare_search_key(name, &name_length, "", 0);
 			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
 				goto cleanup_num;
@@ -2109,7 +2110,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.105 $";
+	return "$Revision: 1.106 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
