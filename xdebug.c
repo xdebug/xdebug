@@ -1565,13 +1565,13 @@ static char* html_formats[10] = {
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 #if HAVE_PHP_MEMORY_USAGE
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
-	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s(",
+	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s( ",
 #else
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='4'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
-	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec'>%s(",
+	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec'>%s( ",
 #endif
 	"<font color='#00bb00'>'%s'</font>",
-	")</td><td bgcolor='#eeeeec'>%s<b>:</b>%d</td></tr>\n",
+	" )</td><td title='%s' bgcolor='#eeeeec'>..%s<b>:</b>%d</td></tr>\n",
 #if HAVE_PHP_MEMORY_USAGE
 	"<tr><th align='left' colspan='5' bgcolor='#e9b96e'>Variables in local scope (#%d)</th></tr>\n",
 #else
@@ -1724,7 +1724,8 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
-				char *tmp_varname, *tmp_value, *tmp_fancy_value;
+				char *tmp_varname, *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value;
+				int newlen;
 
 				if (c) {
 					xdebug_str_addl(&str, ", ", 2, 0);
@@ -1733,9 +1734,13 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 				}
 				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
 				if (html) {
-					tmp_fancy_value = get_zval_synopsis_fancy(tmp_varname, i->var[j].addr, &len, 0, NULL TSRMLS_CC);
-					xdebug_str_add(&str, xdebug_sprintf("%s", tmp_fancy_value), 1);
-					xdfree(tmp_fancy_value);
+					tmp_value = get_zval_value(i->var[j].addr, 0, NULL);
+					tmp_fancy_value = xmlize(tmp_value, strlen(tmp_value), &newlen);
+					tmp_fancy_synop_value = get_zval_synopsis_fancy(tmp_varname, i->var[j].addr, &len, 0, NULL TSRMLS_CC);
+					xdebug_str_add(&str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
+					xdfree(tmp_value);
+					efree(tmp_fancy_value);
+					xdfree(tmp_fancy_synop_value);
 				} else {
 					tmp_value = get_zval_synopsis(i->var[j].addr, 0, NULL);
 					xdebug_str_add(&str, xdebug_sprintf("%s%s", tmp_varname, tmp_value), 1);
@@ -1748,7 +1753,12 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 				xdebug_str_add(&str, xdebug_sprintf(formats[4], i->include_filename), 1);
 			}
 
-			xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
+			if (html) {
+				char *just_filename = strrchr(i->filename, '/');
+				xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, just_filename, i->lineno), 1);
+			} else {
+				xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
+			}
 		}
 
 		if (XG(dump_globals) && !(XG(dump_once) && XG(dumped))) {

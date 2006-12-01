@@ -370,32 +370,40 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 
 inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
 {
+	if (Z_TYPE_P(z) != IS_OBJECT) {
+		return NULL;
+	}
 #if PHP_MAJOR_VERSION == 4
-	zend_class_entry *ce;
-	ce = Z_OBJCE_P(z);
-	*length = ce->name_length;
-	return estrdup(ce->name);
-#endif
-#if PHP_MAJOR_VERSION >= 5
-	char *name;
-	zend_uint name_len;
-
-	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
-		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+	{
 		zend_class_entry *ce;
-
-		ce = zend_get_class_entry(z TSRMLS_CC);
-		if (!ce) {
-			return NULL;
-		}
-
+		ce = Z_OBJCE_P(z);
 		*length = ce->name_length;
 		return estrdup(ce->name);
-	} 
-
-	*length = name_len;
-	return name;
+	}
 #endif
+#if PHP_MAJOR_VERSION >= 5
+	{
+		char *name;
+		zend_uint name_len;
+
+		if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
+			Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+			zend_class_entry *ce;
+
+			ce = zend_get_class_entry(z TSRMLS_CC);
+			if (!ce) {
+				return NULL;
+			}
+
+			*length = ce->name_length;
+			return estrdup(ce->name);
+		} 
+
+		*length = name_len;
+		return name;
+	}
+#endif
+	return NULL;
 }
 
 static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
@@ -513,7 +521,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							if (current_classname) {
 								efree(current_classname);
 							}
-							current_classname = NULL;
+							current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
 							if (retval) {
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
 							}
@@ -2110,7 +2118,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.106 $";
+	return "$Revision: 1.107 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
