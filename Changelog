@@ -1,3 +1,11 @@
+Fri Dec 01 20:38:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed fetching private properies from objects when the object was an
+  array element.
+- Improved use of width in stack traces by using tooltips for directories
+  and values of parameters.
+
 Fri Nov 24 11:52:49 CET 2006 Derick Rethans <derick@derickrethans.nl>
 debugclient/main.c:
 - Picky picky.
