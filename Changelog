@@ -1,3 +1,8 @@
+Thu Dec 07 01:21:27 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed some issues with finding out the classname, which is important for
+  fetching private properties.
+
 Fri Dec 01 20:38:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c:
