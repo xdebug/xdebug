@@ -1,3 +1,8 @@
+Mon Dec 11 22:36:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #277: The SESSION super global does not show up in the Globals
+  scope.
+
 Thu Dec 07 01:21:27 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed some issues with finding out the classname, which is important for
