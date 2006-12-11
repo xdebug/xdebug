@@ -1,3 +1,7 @@
+Mon Dec 11 22:38:24 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Sort super globals in Globals overview.
+
 Mon Dec 11 22:36:21 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed bug #277: The SESSION super global does not show up in the Globals
