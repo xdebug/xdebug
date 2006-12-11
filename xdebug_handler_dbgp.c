@@ -1775,6 +1775,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1, 0, options TSRMLS_CC);
 		add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1, 0, options TSRMLS_CC);
 		add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_SESSION", sizeof("_SESSION"), 1, 1, 0, options TSRMLS_CC);
 		XG(active_symbol_table) = NULL;
 		return 0;
 	}
@@ -2121,7 +2122,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.108 $";
+	return "$Revision: 1.109 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2246,6 +2247,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	zend_is_auto_global("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
 	zend_is_auto_global("_FILES",   sizeof("_FILES")-1   TSRMLS_CC);
 	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
+	zend_is_auto_global("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
 #endif
 /* }}} */
 
