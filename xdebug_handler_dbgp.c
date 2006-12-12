@@ -1229,7 +1229,7 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 
 	message = xdebug_xml_node_init("stream");
 	xdebug_xml_add_attribute_ex(message, "type", (char *)name, 0, 0);
-	xdebug_xml_add_text_encode(message, xdstrdup(str));
+	xdebug_xml_add_text_encodel(message, xdstrndup(str, str_length), str_length);
 	send_message(&XG(context), message TSRMLS_CC);
 	xdebug_xml_node_dtor(message);
 
@@ -2122,7 +2122,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.110 $";
+	return "$Revision: 1.111 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

@@ -663,9 +663,9 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
 			if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
-				xdebug_xml_add_text_encode(node, xdstrdup(Z_STRVAL_PP(struc)));
+				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc)), Z_STRLEN_PP(struc));
 			} else {
-				xdebug_xml_add_text_encode(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data));
+				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data), options->max_data);
 			}
 			xdebug_xml_add_attribute(node, "size", xdebug_sprintf("%d", Z_STRLEN_PP(struc)));
 			break;

@@ -40,6 +40,7 @@ struct _xdebug_xml_text_node
 	char *text;
 	int   free_value;
 	int   encode;
+	int   text_len;
 };
 
 struct _xdebug_xml_node
@@ -60,9 +61,11 @@ xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag);
 void xdebug_xml_add_attribute_ex(xdebug_xml_node* xml, char *attribute, char *value, int free_name, int free_value);
 void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child);
 
-void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int free_text, int encode);
-#define xdebug_xml_add_text(x,t) 	 xdebug_xml_add_text_ex((x), (t), 1, 0)
-#define xdebug_xml_add_text_encode(x,t)  xdebug_xml_add_text_ex((x), (t), 1, 1)
+void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int free_text, int encode);
+#define xdebug_xml_add_text(x,t) 	 xdebug_xml_add_text_ex((x), (t), strlen(t), 1, 0)
+#define xdebug_xml_add_text_encode(x,t)  xdebug_xml_add_text_ex((x), (t), strlen(t), 1, 1)
+#define xdebug_xml_add_textl(x,t,l) 	 xdebug_xml_add_text_ex((x), (t), (l), 1, 0)
+#define xdebug_xml_add_text_encodel(x,t,l)  xdebug_xml_add_text_ex((x), (t), (l), 1, 1)
 
 void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output);
 void xdebug_xml_node_dtor(xdebug_xml_node* xml);

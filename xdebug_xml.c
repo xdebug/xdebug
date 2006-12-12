@@ -52,7 +52,7 @@ static void xdebug_xml_return_text_node(xdebug_xml_text_node* node, xdebug_str* 
 		int new_len = 0;
 		char *encoded_text;
 		
-		encoded_text = (char*) xdebug_base64_encode((unsigned char*) node->text, strlen(node->text), &new_len);
+		encoded_text = (char*) xdebug_base64_encode((unsigned char*) node->text, node->text_len, &new_len);
 		xdebug_str_add(output, encoded_text, 0);
 		efree(encoded_text);
 	} else {
@@ -144,7 +144,7 @@ static void xdebug_xml_text_node_dtor(xdebug_xml_text_node* node)
 	xdfree(node);
 }
 
-void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int free_text, int encode)
+void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int free_text, int encode)
 {
 	xdebug_xml_text_node *node = xdmalloc(sizeof (xdebug_xml_text_node));
 	node->free_value = free_text;
@@ -154,6 +154,7 @@ void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int free_text, int
 		xdebug_xml_text_node_dtor(xml->text);
 	}
 	node->text = text;
+	node->text_len = length;
 	xml->text = node;
 	if (!encode && strstr(node->text, "]]>")) {
 		node->encode = 1;
