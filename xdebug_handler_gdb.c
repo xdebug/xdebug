@@ -1335,7 +1335,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.81 $";
+	return "$Revision: 1.82 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
@@ -1369,6 +1369,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 #endif
 
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
+	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
 	do {
@@ -1389,6 +1390,7 @@ int xdebug_gdb_deinit(xdebug_con *context)
 {
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
+	xdebug_hash_destroy(context->exception_breakpoints);
 	xdebug_hash_destroy(context->class_breakpoints);
 	xdebug_llist_destroy(context->line_breakpoints, NULL);
 	xdfree(context->buffer);
