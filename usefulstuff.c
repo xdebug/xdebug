@@ -37,6 +37,7 @@
 #include "xdebug_str.h"
 #include "usefulstuff.h"
 #include "ext/standard/php_lcg.h"
+#include "ext/standard/flock_compat.h"
 
 #define READ_BUFFER_SIZE 128
 
