@@ -1,3 +1,10 @@
+Tue Dec 12 22:23:32 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c
+xdebug/xdebug_var.c
+xdebug/xdebug_xml.c
+xdebug/xdebug_xml.h:
+- Fixed bug #228: Binary safety for stream output and property fetches.
+
 Tue Dec 12 13:46:40 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_gdb.c:
 - Fixed bug #225: xdebug dumps core when protocol is GDB.
