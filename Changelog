@@ -1,3 +1,7 @@
+Tue Dec 12 13:03:00 CET 2006 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- Fixed bug #224: Compile failure on Solaris.
+
 Mon Dec 11 22:38:24 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Sort super globals in Globals overview.
