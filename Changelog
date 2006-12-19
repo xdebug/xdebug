@@ -1,3 +1,7 @@
+Tue Dec 19 11:48:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Added types to fancy var dumping function.
+
 Tue Dec 12 22:23:32 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c
 xdebug/xdebug_var.c
