@@ -134,11 +134,15 @@ static xdebug_var_export_options* get_options_from_ini(TSRMLS_D)
 	options->show_hidden = 0;
 	options->runtime = NULL;
 
-	if (options->max_data < 1) {
+	if (options->max_data == -1) {
+		options->max_data = 1073741824;
+	} else if (options->max_data < 1) {
 		options->max_data = 1;
 	}
 
-	if (options->max_depth < 0) {
+	if (options->max_depth == -1) {
+		options->max_depth = 65536;
+	} else if (options->max_depth < 0) {
 		options->max_depth = 0;
 	}
 
