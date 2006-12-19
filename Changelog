@@ -1,3 +1,8 @@
+Tue Dec 19 18:54:19 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Allow xdebug.var_display_max_data and xdebug.var_display_max_depth settings
+  of -1 which will unlimit those settings.
+
 Tue Dec 19 17:16:12 CET 2006 Derick Rethans <derick@derickrethans.nl>
 config.m4:
 - Link in libm for the systems that need it (AIX).
