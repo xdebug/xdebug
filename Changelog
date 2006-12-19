@@ -1,3 +1,9 @@
+Tue Dec 19 18:55:28 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- DBGP: Reimplemented property_set to use the same symbol fetching function
+  as property_get. We now only use eval in case no type (-t) argument was
+  given.
+
 Tue Dec 19 18:54:19 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Allow xdebug.var_display_max_data and xdebug.var_display_max_depth settings
