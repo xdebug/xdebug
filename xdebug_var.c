@@ -843,7 +843,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%s</font>", COLOR_BOOL, Z_LVAL_PP(struc) ? "true" : "false"), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>boolean</small> <font color='%s'>%s</font>", COLOR_BOOL, Z_LVAL_PP(struc) ? "true" : "false"), 1);
 			break;
 
 		case IS_NULL:
@@ -851,15 +851,15 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%ld</font>", COLOR_LONG, Z_LVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>int</small> <font color='%s'>%ld</font>", COLOR_LONG, Z_LVAL_PP(struc)), 1);
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%.*G</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>float</small> <font color='%s'>%.*G</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_PP(struc)), 1);
 			break;
 
 		case IS_STRING:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>'", COLOR_STRING), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>string</small> <font color='%s'>'", COLOR_STRING), 1);
 			if (Z_STRLEN_PP(struc) > options->max_data) {
 				tmp_str = xmlize(Z_STRVAL_PP(struc), options->max_data, &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
