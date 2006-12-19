@@ -1626,57 +1626,112 @@ DBGP_FUNC(property_get)
 
 DBGP_FUNC(property_set)
 {
-	int              depth = 0;
-	int              context_id = 0;
-	char            *new_value;
-	char            *eval_string;
-	zval             ret_zval;
-	int              new_length;
-	int              res;
-	int              address = 0;
-	char            *name = CMD_OPTION('n');
-	char            *data = CMD_OPTION('-');
+	char                      *data = CMD_OPTION('-');
+	char                      *new_value;
+	int                        new_length;
+	int                        depth = -1;
+	int                        context_nr = 0;
+	int                        res;
+	char                      *eval_string;
+	zval                       ret_zval;
+	function_stack_entry      *fse;
+	int                        old_max_data;
+	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
+	zval                      *symbol;
+	XDEBUG_STR_SWITCH_DECL;
 
-	/* XXX TODO
-	 * if the key or the address are returned, they can be used to more
-	 * efficiently retrieve the value from the variables list.  Otherwise we
-	 * use EVAL to set the property which works great, but is slower.
-	 *
-	 * handle the depth value and set the property at a specific stack depth
-	 *
-	 * handle the context_id value and set the property in the correct context
-	 */
-	
-	if (!name) { /* name */
+	if (!CMD_OPTION('n')) { /* name */
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
+
 	if (!data) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
+
 	if (CMD_OPTION('d')) { /* depth */
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
 	}
+
 	if (CMD_OPTION('c')) { /* context_id */
-		context_id = strtol(CMD_OPTION('c'), NULL, 10);
-	}
-	if (CMD_OPTION('a')) { /* address */
-		address = strtol(CMD_OPTION('a'), NULL, 10);
+		context_nr = strtol(CMD_OPTION('c'), NULL, 10);
 	}
 
-	/* base64 decode eval string */
-	new_value = (char*) xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
-	eval_string = xdebug_sprintf("%s = %s", name, new_value);
-	res = _xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+	/* Set the symbol table corresponding with the requested stack depth */
+	if (context_nr == 0) { /* locals */
+		if (depth == -1) {
+			XG(active_symbol_table) = EG(active_symbol_table);
+		} else {
+			if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+				XG(active_symbol_table) = fse->symbol_table;
+			} else {
+				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+			}
+		}
+	} else { /* superglobals */
+		XG(active_symbol_table) = &EG(symbol_table);
+	}
 
-	efree(new_value);
-	xdfree(eval_string);
-	/* Handle result */
-	if (res == FAILURE) {
-		/* don't send an error, send success = zero */
-		xdebug_xml_add_attribute(*retval, "success", "0");
+	if (CMD_OPTION('p')) {
+		options->runtime[0].page = strtol(CMD_OPTION('p'), NULL, 10);
 	} else {
-		xdebug_xml_add_attribute(*retval, "success", "1");
-		zval_dtor(&ret_zval);
+		options->runtime[0].page = 0;
+	}
+
+	new_value = (char*) xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
+
+	if (CMD_OPTION('t')) {
+		symbol = get_symbol_contents_zval(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);
+
+		/* Handle result */
+		if (!symbol) {
+			efree(new_value);
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+		} else {
+			zval_dtor(symbol);
+			Z_TYPE_P(symbol) = IS_STRING;
+			Z_STRVAL_P(symbol) = new_value;
+			Z_STRLEN_P(symbol) = new_length;
+			xdebug_xml_add_attribute(*retval, "success", "1");
+
+			XDEBUG_STR_SWITCH(CMD_OPTION('t')) {
+				XDEBUG_STR_CASE("bool")
+					convert_to_boolean(symbol);
+				XDEBUG_STR_CASE_END
+
+				XDEBUG_STR_CASE("int")
+					convert_to_long(symbol);
+				XDEBUG_STR_CASE_END
+
+				XDEBUG_STR_CASE("float")
+					convert_to_double(symbol);
+				XDEBUG_STR_CASE_END
+
+				XDEBUG_STR_CASE("string")
+					/* do nothing */
+				XDEBUG_STR_CASE_END
+
+				XDEBUG_STR_CASE_DEFAULT
+					xdebug_xml_add_attribute(*retval, "success", "0");
+				XDEBUG_STR_CASE_DEFAULT_END
+			}
+		}
+	} else {
+		/* Do the eval */
+		eval_string = xdebug_sprintf("%s = %s", CMD_OPTION('n'), new_value);
+		res = _xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+
+		/* Free data */
+		xdfree(eval_string);
+		efree(new_value);
+
+		/* Handle result */
+		if (res == FAILURE) {
+			/* don't send an error, send success = zero */
+			xdebug_xml_add_attribute(*retval, "success", "0");
+		} else {
+			zval_dtor(&ret_zval);
+			xdebug_xml_add_attribute(*retval, "success", "1");
+		}
 	}
 }
 
@@ -2122,7 +2177,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.111 $";
+	return "$Revision: 1.112 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
