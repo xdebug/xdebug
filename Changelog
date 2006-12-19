@@ -1,3 +1,7 @@
+Tue Dec 19 17:16:12 CET 2006 Derick Rethans <derick@derickrethans.nl>
+config.m4:
+- Link in libm for the systems that need it (AIX).
+
 Tue Dec 19 11:48:44 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Added types to fancy var dumping function.
