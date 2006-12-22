@@ -1,3 +1,25 @@
+Fri Dec 22 14:51:04 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_var.c
+xdebug/tests/array_map.phpt
+xdebug/tests/bug00022.phpt
+xdebug/tests/bug00032-ze22.phpt
+xdebug/tests/bug00089.phpt
+xdebug/tests/bug00173.phpt
+xdebug/tests/bug00184.phpt
+xdebug/tests/get_declared_vars.phpt
+xdebug/tests/test1.phpt
+xdebug/tests/test12.phpt
+xdebug/tests/test6.phpt
+xdebug/tests/test8.phpt
+xdebug/tests/xdebug_var_dump.phpt:
+- Implemented the "xdebug.var_display_max_children" setting. The default is set to 128 children.
+- Fixed the issue where get_declared_parameters() did not now about variables
+  there are in the declared function header, but were not used in the code. Due
+  to this change expected arguments that were not send to a function will now
+  show up as ??? in stack and function traces. Only tested with PHP 5.2.
+- Removed variable name printing from the fancy synopsis formatter.
+
 Tue Dec 19 18:55:28 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - DBGP: Reimplemented property_set to use the same symbol fetching function
