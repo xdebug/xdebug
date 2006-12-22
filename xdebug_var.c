@@ -128,11 +128,16 @@ static xdebug_var_export_options* get_options_from_ini(TSRMLS_D)
 	xdebug_var_export_options *options;
 	options = xdmalloc(sizeof(xdebug_var_export_options));
 
-	options->max_children = 1024; /* XG(display_max_children); */
+	options->max_children = XG(display_max_children);
 	options->max_data = XG(display_max_data);
 	options->max_depth = XG(display_max_depth);
 	options->show_hidden = 0;
-	options->runtime = NULL;
+
+	if (options->max_children == -1) {
+		options->max_children = 1048576;
+	} else if (options->max_children < 1) {
+		options->max_children = 1;
+	}
 
 	if (options->max_data == -1) {
 		options->max_data = 1073741824;
@@ -141,10 +146,12 @@ static xdebug_var_export_options* get_options_from_ini(TSRMLS_D)
 	}
 
 	if (options->max_depth == -1) {
-		options->max_depth = 65536;
+		options->max_depth = 4096;
 	} else if (options->max_depth < 0) {
 		options->max_depth = 0;
 	}
+
+	options->runtime = (xdebug_var_runtime_page*) xdmalloc((options->max_depth + 1) * sizeof(xdebug_var_runtime_page));
 
 	return options;
 }
@@ -172,26 +179,34 @@ static int xdebug_array_element_export(zval **zv, int num_args, va_list args, ze
 	debug_zval = va_arg(args, int);
 	options    = va_arg(args, xdebug_var_export_options*);
 
-	if (hash_key->nKeyLength==0) { /* numeric key */
-		xdebug_str_add(str, xdebug_sprintf("%ld => ", hash_key->h), 1);
-	} else { /* string key */
-		int newlen = 0;
-		char *tmp, *tmp2;
-		
-		tmp = php_str_to_str(hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
-		tmp2 = php_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
-		if (tmp) {
-			efree(tmp);
+	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
+		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
+	{
+		if (hash_key->nKeyLength==0) { /* numeric key */
+			xdebug_str_add(str, xdebug_sprintf("%ld => ", hash_key->h), 1);
+		} else { /* string key */
+			int newlen = 0;
+			char *tmp, *tmp2;
+			
+			tmp = php_str_to_str(hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
+			tmp2 = php_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
+			if (tmp) {
+				efree(tmp);
+			}
+			xdebug_str_addl(str, "'", 1, 0);
+			if (tmp2) {
+				xdebug_str_addl(str, tmp2, newlen, 0);
+				efree(tmp2);
+			}
+			xdebug_str_add(str, "' => ", 0);
 		}
-		xdebug_str_addl(str, "'", 1, 0);
-		if (tmp2) {
-			xdebug_str_addl(str, tmp2, newlen, 0);
-			efree(tmp2);
-		}
-		xdebug_str_add(str, "' => ", 0);
+		xdebug_var_export(zv, str, level + 2, debug_zval, options TSRMLS_CC);
+		xdebug_str_addl(str, ", ", 2, 0);
 	}
-	xdebug_var_export(zv, str, level + 2, debug_zval, options TSRMLS_CC);
-	xdebug_str_addl(str, ", ", 2, 0);
+	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
+		xdebug_str_addl(str, "..., ", 5, 0);
+	}
+	options->runtime[level].current_element_nr++;
 	return 0;
 }
 
@@ -208,12 +223,20 @@ static int xdebug_object_element_export(zval **zv, int num_args, va_list args, z
 	debug_zval = va_arg(args, int);
 	options    = va_arg(args, xdebug_var_export_options*);
 
-	if (hash_key->nKeyLength != 0) {
-		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
-		xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
+	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
+		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
+	{
+		if (hash_key->nKeyLength != 0) {
+			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
+			xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
+		}
+		xdebug_var_export(zv, str, level + 2, debug_zval, options TSRMLS_CC);
+		xdebug_str_addl(str, "; ", 2, 0);
 	}
-	xdebug_var_export(zv, str, level + 2, debug_zval, options TSRMLS_CC);
-	xdebug_str_addl(str, "; ", 2, 0);
+	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
+		xdebug_str_addl(str, "...; ", 5, 0);
+	}
+	options->runtime[level].current_element_nr++;
 	return 0;
 }
 
@@ -263,7 +286,12 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			if (myht->nApplyCount < 1) {
 				xdebug_str_addl(str, "array (", 7, 0);
 				if (level <= options->max_depth) {
+					options->runtime[level].current_element_nr = 0;
+					options->runtime[level].start_element_nr = 0;
+					options->runtime[level].end_element_nr = options->max_children;
+
 					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 4, level, str, debug_zval, options);
+					/* Remove the ", " at the end of the string */
 					if (myht->nNumOfElements > 0) {
 						xdebug_str_chop(str, 2);
 					}
@@ -281,7 +309,12 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			if (myht->nApplyCount < 1) {
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", Z_OBJCE_PP(struc)->name), 1);
 				if (level <= options->max_depth) {
+					options->runtime[level].current_element_nr = 0;
+					options->runtime[level].start_element_nr = 0;
+					options->runtime[level].end_element_nr = options->max_children;
+
 					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 4, level, str, debug_zval, options);
+					/* Remove the ", " at the end of the string */
 					if (myht->nNumOfElements > 0) {
 						xdebug_str_chop(str, 2);
 					}
@@ -795,15 +828,23 @@ static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list ar
 	debug_zval = va_arg(args, int);
 	options    = va_arg(args, xdebug_var_export_options*);
 
-	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
+	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
+		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
+	{
+		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
-	if (hash_key->nKeyLength==0) { /* numeric key */
-		xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, COLOR_POINTER), 1);
-	} else { /* string key */
-		xdebug_str_add(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, COLOR_POINTER), 1);
+		if (hash_key->nKeyLength==0) { /* numeric key */
+			xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, COLOR_POINTER), 1);
+		} else { /* string key */
+			xdebug_str_add(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, COLOR_POINTER), 1);
+		}
+		xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}
-	xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
-
+	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
+		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
+		xdebug_str_addl(str, "<i>more elements...</i>\n", 24, 0);
+	}
+	options->runtime[level].current_element_nr++;
 	return 0;
 }
 
@@ -821,14 +862,23 @@ static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list a
 	debug_zval = va_arg(args, int);
 	options    = va_arg(args, xdebug_var_export_options*);
 
-	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
+	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
+		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
+	{
+		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
-	key = hash_key->arKey;
-	if (hash_key->nKeyLength != 0) {
-		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
-		xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
+		key = hash_key->arKey;
+		if (hash_key->nKeyLength != 0) {
+			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
+			xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
+		}
+		xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}
-	xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
+	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
+		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
+		xdebug_str_addl(str, "<i>more elements...</i>\n", 24, 0);
+	}
+	options->runtime[level].current_element_nr++;
 	return 0;
 }
 
@@ -885,6 +935,10 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 				xdebug_str_addl(str, "<b>array</b>\n", 13, 0);
 				if (level <= options->max_depth) {
 					if (myht->nNumOfElements) {
+						options->runtime[level].current_element_nr = 0;
+						options->runtime[level].start_element_nr = 0;
+						options->runtime[level].end_element_nr = options->max_children;
+
 						zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 4, level, str, debug_zval, options);
 					} else {
 						xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
@@ -910,6 +964,10 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 				xdebug_str_addl(str, "\n", 1, 0);
 #endif
 				if (level <= options->max_depth) {
+					options->runtime[level].current_element_nr = 0;
+					options->runtime[level].start_element_nr = 0;
+					options->runtime[level].end_element_nr = options->max_children;
+
 					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_fancy, 4, level, str, debug_zval, options);
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);

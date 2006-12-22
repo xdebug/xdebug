@@ -40,7 +40,7 @@ bararray(2) {
     int(7)
     ["params"]=>
     array(1) {
-      [0]=>
+      ["s"]=>
       string(5) "'bar'"
     }
   }

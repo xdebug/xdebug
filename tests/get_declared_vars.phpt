@@ -52,7 +52,11 @@ xdebug.show_local_vars=0
 	register_shutdown_function('s');
 ?>
 --EXPECTF--
-array(0) {
+array(2) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
 }
 5252
 array(2) {
@@ -69,13 +73,15 @@ array(2) {
   string(1) "b"
 }
 1
-array(3) {
+array(4) {
   [0]=>
   string(1) "d"
   [1]=>
   string(1) "a"
   [2]=>
   string(1) "c"
+  [3]=>
+  string(1) "b"
 }
 4254
 array(2) {

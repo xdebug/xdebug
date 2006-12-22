@@ -9,6 +9,7 @@ xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.profiler_enable=0
 xdebug.show_local_vars=0
+xdebug.dump_globals=0
 --FILE--
 <?php
 	${1} = "foo";

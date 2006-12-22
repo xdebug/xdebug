@@ -12,6 +12,7 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
+xdebug.show_local_vars=1
 --FILE--
 <?php
 	$trace_file = xdebug_get_tracefile_name();
