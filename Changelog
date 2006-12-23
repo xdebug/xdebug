@@ -1,3 +1,9 @@
+Sat Dec 23 21:25:04 CET 2006 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/php_xdebug.h:
+- Go with RC2.
+
 Sat Dec 23 21:04:23 CET 2006 Derick Rethans <derick@derickrethans.nl>
 test-5.1.sh
 xdebug/test-5.2.sh
