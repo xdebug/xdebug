@@ -11,6 +11,7 @@ xdebug.collect_return=0
 xdebug.show_mem_delta=0
 xdebug.profiler_enable=0
 xdebug.show_local_vars=0
+xdebug.dump_globals=0
 --FILE--
 <?php
 class OO {
@@ -37,12 +38,14 @@ Notice: Undefined offset:  0 in /%s/bug00057-ze1.php on line 9
 
 Call Stack:
     %f          %d   1. {main}() /%s/bug00057-ze1.php:0
-    %f          %d   2. oo->__call('oo', array (), NULL) /%s/bug00057-ze1.php:16
+    %f          %d   2. oo->__call(string(2), array(0), null) /%s/bug00057-ze1.php:0
+
 0
 Warning: Call to undefined method oo::oo() in /%s/bug00057-ze1.php on line 16
 
 Call Stack:
     %f          %d   1. {main}() /%s/bug00057-ze1.php:0
+
 2
 Warning: Call to undefined method oo::foo() in /%s/bug00057-ze1.php on line 18
 

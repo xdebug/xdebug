@@ -1073,9 +1073,11 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 				arguments_wanted = arguments_sent;
 			}
 
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 			if (tmp->user_defined == XDEBUG_EXTERNAL) {
 				arguments_wanted = op_array->num_args;
 			}
+# endif
 
 			if (arguments_wanted > arguments_sent) {
 				arguments_storage = arguments_wanted;
@@ -1105,6 +1107,8 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 				tmp->varc++;
 			}
+
+# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 			/* Sometimes not enough arguments are send to a user defined
 			 * function, so we have to gather only the name for those extra. */
 			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
@@ -1113,6 +1117,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 					tmp->varc++;
 				}
 			}
+# endif
 		}
 	}
 

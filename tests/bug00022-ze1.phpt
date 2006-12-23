@@ -1,8 +1,8 @@
 --TEST--
-Test for segmentation fault with xdebug_get_function_stack() and collect_params=1. (ZE20)
+Test for segmentation fault with xdebug_get_function_stack() and collect_params=1. (ZE1)
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2.0 needed\n"; ?>
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>')) echo "skip Zend Engine 1 needed\n"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
@@ -24,7 +24,7 @@ bararray(2) {
     ["function"]=>
     string(6) "{main}"
     ["file"]=>
-    string(%d) "/%s/bug00022.php"
+    string(%d) "/%s/bug00022-ze1.php"
     ["line"]=>
     int(0)
     ["params"]=>
@@ -36,12 +36,12 @@ bararray(2) {
     ["function"]=>
     string(3) "foo"
     ["file"]=>
-    string(%d) "/%s/bug00022.php"
+    string(%d) "/%s/bug00022-ze1.php"
     ["line"]=>
     int(7)
     ["params"]=>
     array(1) {
-      ["s"]=>
+      [0]=>
       string(5) "'bar'"
     }
   }

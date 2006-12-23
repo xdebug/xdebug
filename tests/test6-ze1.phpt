@@ -1,8 +1,8 @@
 --TEST--
-Test for complex parameters to a function (ZE2)
+Test for complex parameters to a function (ZE1)
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>')) echo "skip Zend Engine 1 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.collect_params=1
@@ -22,27 +22,27 @@ xdebug.var_display_max_children=3
 	foo2 (4, array(array('blaat', 5, FALSE)));
 ?>
 --EXPECTF--
-Warning: Missing argument 3 for foo2()%sin /%s/test6.php on line 2
+Warning: Missing argument 3 for foo2()%sin /%s/test6-ze1.php on line 2
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/test6.php:0
-%w%f %w%d   2. foo2(long, array(1), ???) /%s/test6.php:7
+%w%f %w%d   1. {main}() /%s/test6-ze1.php:0
+%w%f %w%d   2. foo2(long, array(1)) /%s/test6-ze1.php:7
 
 
 Variables in local scope (#2):
   $a = 4
-  $c = *uninitialized*
+  $c = NULL
   $b = array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))
 
 
-Fatal error: Call to undefined function%sfoo() in /%s/test6.php on line 4
+Fatal error: Call to undefined function%sfoo() in /%s/test6-ze1.php on line 4
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/test6.php:0
-%w%f %w%d   2. foo2(long, array(1), ???) /%s/test6.php:7
+%w%f %w%d   1. {main}() /%s/test6-ze1.php:0
+%w%f %w%d   2. foo2(long, array(1)) /%s/test6-ze1.php:7
 
 
 Variables in local scope (#2):
   $a = 4
-  $c = *uninitialized*
+  $c = NULL
   $b = array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))

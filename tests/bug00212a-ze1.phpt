@@ -1,8 +1,8 @@
 --TEST--
-Test for bug #212: coverage coverage inaccurate.
+Test for bug #212: coverage coverage inaccurate (ZE1).
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>')) echo "skip Zend Engine 1 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -19,18 +19,22 @@ xdebug.extended_info=1
 --FILE--
 <?php
 	xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );
-	$file = realpath('./tests/bug00212b.inc');
+	$file = realpath('./tests/bug00212a.inc');
 	include $file;
 	$cc = xdebug_get_code_coverage();
 	xdebug_stop_code_coverage();
 	var_dump($cc[$file]);
 ?>
 --EXPECT--
-array(3) {
+array(5) {
+  [5]=>
+  int(1)
   [7]=>
   int(1)
   [9]=>
   int(1)
-  [11]=>
+  [10]=>
+  int(-1)
+  [12]=>
   int(1)
 }

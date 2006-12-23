@@ -9,6 +9,7 @@ xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.profiler_enable=0
 xdebug.show_local_vars=0
+xdebug.dump_globals=0
 --FILE--
 <?php
 	${1} = "foo";
@@ -32,10 +33,12 @@ Notice: Array to string conversion in %sbug00032-ze1.php on line 8
 Call Stack:
     %f          %d   1. {main}() %sbug00032-ze1.php:0
 
+
 Notice: Array to string conversion in %sbug00032-ze1.php on line 9
 
 Call Stack:
     %f          %d   1. {main}() %sbug00032-ze1.php:0
+
 foo
 
 Notice: Object to string conversion in %sbug00032-ze1.php on line 11
@@ -43,8 +46,10 @@ Notice: Object to string conversion in %sbug00032-ze1.php on line 11
 Call Stack:
     %f          %d   1. {main}() %sbug00032-ze1.php:0
 
+
 Notice: Object to string conversion in %sbug00032-ze1.php on line 12
 
 Call Stack:
     %f          %d   1. {main}() %sbug00032-ze1.php:0
+
 foo

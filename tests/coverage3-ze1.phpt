@@ -1,8 +1,8 @@
 --TEST--
-Test with Code Coverage with unused lines (ZE2)
+Test with Code Coverage with unused lines (ZE1)
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>')) echo "skip Zend Engine 1 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -40,20 +40,22 @@ xdebug.extended_info=1
 ?>
 --EXPECTF--
 array(1) {
-  ["%scoverage3.php"]=>
-  array(11) {
+  ["%scoverage3-ze1.php"]=>
+  array(12) {
+    [2]=>
+    int(-1)
     [4]=>
     int(1)
     [5]=>
-    int(1)
+    int(-1)
     [6]=>
     int(-1)
     [7]=>
     int(-1)
     [9]=>
-    int(1)
+    int(-1)
     [10]=>
-    int(1)
+    int(-1)
     [11]=>
     int(1)
     [12]=>

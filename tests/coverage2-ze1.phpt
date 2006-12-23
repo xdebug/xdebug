@@ -1,8 +1,8 @@
 --TEST--
-Test with Code Coverage (ZE2)
+Test with Code Coverage with unused lines (ZE1)
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
+<?php if(version_compare(zend_version(), "2.0.0-dev", '>')) echo "skip Zend Engine 1 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -18,7 +18,7 @@ xdebug.trace_format=0
 xdebug.extended_info=1
 --FILE--
 <?php
-	xdebug_start_code_coverage();
+	xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
 	$file = realpath('./tests/coverage.inc');
 	include $file;
 	$cc = xdebug_get_code_coverage();
@@ -28,23 +28,29 @@ xdebug.extended_info=1
 --EXPECTF--
 This is a YYYY-MM-DD format.
 This is a YYYYMMDD HHii format.
-array(15) {
+array(%d) {
   [2]=>
   int(1)
   [4]=>
   int(1)
+  [5]=>
+  int(-1)
+  [6]=>
+  int(-1)
   [7]=>
   int(1)
   [8]=>
   int(1)
   [9]=>
-  int(1)
+  int(-1)
   [10]=>
   int(1)
   [11]=>
   int(1)
   [12]=>
-  int(1)
+  int(-1)
+  [14]=>
+  int(-1)
   [17]=>
   int(1)
   [18]=>
@@ -56,7 +62,7 @@ array(15) {
   [22]=>
   int(1)
   [23]=>
-  int(1)
+  int(-1)
   [25]=>
   int(1)
 }

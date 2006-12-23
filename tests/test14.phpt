@@ -11,6 +11,7 @@ xdebug.collect_params=1
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.trace_format=0
+xdebug.var_display_max_depth=3
 --FILE--
 <?php
 	$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));

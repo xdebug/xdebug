@@ -26,10 +26,10 @@ Fatal error: Call to undefined function:  do_f() in /%s/local_vars_in_error-ze1.
 
 Call Stack:
     %f          %d   1. {main}() /%s/local_vars_in_error-ze1.php:0
-    %f          %d   2. a(5, 6) /%s/local_vars_in_error-ze1.php:8
+    %f          %d   2. a(long, long) /%s/local_vars_in_error-ze1.php:8
 
 
-Variables in local scope:
+Variables in local scope (#2):
   $d = class stdClass {  }
   $a = 5
   $c = array (0 => 5, 1 => 36)
