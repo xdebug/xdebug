@@ -1,3 +1,40 @@
+Sat Dec 23 21:04:23 CET 2006 Derick Rethans <derick@derickrethans.nl>
+test-5.1.sh
+xdebug/test-5.2.sh
+xdebug/test-4.3.sh
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/tests/bug00022-ze1.phpt
+xdebug/tests/bug00212a-ze1.phpt
+xdebug/tests/coverage-ze1.phpt
+xdebug/tests/coverage2-ze1.phpt
+xdebug/tests/coverage3-ze1.phpt
+xdebug/tests/test6-ze1.phpt
+xdebug/tests/array_map.phpt
+xdebug/tests/bug00022.phpt
+xdebug/tests/bug00032-ze1.phpt
+xdebug/tests/bug00057-ze1.phpt
+xdebug/tests/bug00173.phpt
+xdebug/tests/bug00176.phpt
+xdebug/tests/bug00178.phpt
+xdebug/tests/bug00212a.phpt
+xdebug/tests/bug00212b.phpt
+xdebug/tests/bug00212c.phpt
+xdebug/tests/bug00213.phpt
+xdebug/tests/coverage.phpt
+xdebug/tests/coverage2.phpt
+xdebug/tests/coverage3.phpt
+xdebug/tests/local_vars_in_error-ze1.phpt
+xdebug/tests/test14.phpt
+xdebug/tests/test20.phpt
+xdebug/tests/test6.phpt
+xdebug/tests/test9b.phpt
+xdebug/tests/xdebug_call.phpt
+xdebug/tests/xdebug_call_depth.phpt
+xdebug/tests/xdebug_call_depth2.phpt:
+- PHP 4.4 compatibility.
+- Fixed/added test cases for PHP 4.4.
+
 Fri Dec 22 14:51:04 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_var.c
