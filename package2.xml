@@ -30,63 +30,74 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2006-10-08</date>
- <time>22:50:35</time>
+ <date>2006-12-23</date>
+ <time>21:19:07</time>
  <version>
-  <release>2.0.0RC1</release>
-  <api>2.0.0RC1</api>
+  <release>2.0.0RC2</release>
+  <api>2.0.0RC2</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
- <notes>+ Added new features:
-    - Implemented FR #70: Provide optional depth on xdebug_call_* functions.
-    - Partially implemented FR #50: Resource limiting for variable display. By
-      default only two levels of nested variables and max string lengths of 512
-      are shown. This can be changed by setting the ini settings
-      xdebug.var_display_max_depth and xdebug.var_display_max_data.
-    - Implemented breakpoints for different types of PHP errors. You can now
-      set an &apos;exception&apos; breakpoint on &quot;Fatal error&quot;, &quot;Warning&quot;, &quot;Notice&quot; etc.
-      This is related to bug #187.
-    - Added the xdebug_print_function_trace() function to display a stack trace on
-      demand.
-    - Reintroduce HTML tracing by adding a new tracing option &quot;XDEBUG_TRACE_HTML&quot;
-      (4).
-    - Made xdebug_stop_trace() return the trace file name, so that the
-      following works: 
-    - Added the xdebug.collect_vars setting to tell Xdebug to collect
-      information about which variables are used in a scope. Now you don&apos;t need
-      to show variables with xdebug.show_local_vars anymore for
-      xdebug_get_declared_vars() to work.
-    - Make the filename parameter to the xdebug_start_trace() function
-      optional. If left empty it will use the same algorithm to pick a filename
-      as when you are using the xdebug.auto_trace setting.
+ <notes>Sun, Dec 24, 2006 - xdebug 2.0.0rc2
++ Added new features:
+	- Implemented the &quot;xdebug.var_display_max_children&quot; setting. The default is
+	  set to 128 children.
+	- Added types to fancy var dumping function.
+	- Implemented FR #210: Add a way to stop the debug session without having
+	  to execute a script. The GET/POST parameter &quot;XDEBUG_SESSION_STOP_NO_EXEC&quot;
+	  works in the same way as XDEBUG_SESSION_STOP, except that the script will
+	  not be executed.
+	- DBGP: Allow postmortem analysis.
+	- DBGP: Added the non-standard function xcmd_profiler_name_get.
 
 + Changes:
-    - Implemented dead code analysis during code coverage for:
-      * abstract methods.
-      * dead code after return, throw and exit.
-      * implicit returns when a normal return is present.
-    - Improved readability of stack traces.
-    - Use PG(html_errors) instead of checking whether we run with CLI when
-      deciding when to use HTML messages or plain text messages.
+	- Fixed the issue where xdebug_get_declared_vars() did not know about
+	  variables there are in the declared function header, but were not used in
+	  the code. Due to this change expected arguments that were not send to a
+	  function will now show up as ??? in stack and function traces in PHP 5.1
+	  and PHP 5.2.
+	- Allow xdebug.var_display_max_data and xdebug.var_display_max_depth
+	  settings of -1 which will unlimit those settings.
+	- DBGP: Sort super globals in Globals overview.
+	- DBGP: Fixed a bug where error messages where not added upon errors in the
+	  protocol.
+	- DBGP: Change context 1 from globals (superglobals + vars in bottom most
+	  stack frame) to just superglobals.
 
 = Fixed bugs:
-    - Fixed bug #203: PHP errors with HTML content processed incorrectly. This
-      patch backs out the change that was made to fix bug #182.
-    - Fixed bug #198: Segfault when trying to use a non-existing debug handler.
-    - Fixed bug #197: Race condition fixes created too many files.
-    - Fixed bug #196: Profile timing on Windows does not work.
-    - Fixed bug #195: CLI Error after debugging session.
-    - Fixed bug #193: Compile problems with PHP 5.2.
-    - Fixed bug #191: File/line breakpoints are case-sensitive on Windows.
-    - Fixed bug #181: Xdebug doesn&apos;t handle uncaught exception output
-      correctly.
-    - Fixed bug #173: Coverage produces wrong coverage.
-    - Fixed a typo that prevented the XDEBUG_CONFIG option &quot;profiler_enable&quot;
-      from working.
+	- Fixed linking error on AIX by adding libm.
+	- Fixed dead code analysis for THROW.
+	- Fixed oparray prefill caching for code coverage.
+	- Fixed the xdebug.remote_log feature work.
+	- DBGP: Fixed a bug where $this did not appear in the local scoped context.
+	- DBGP: Reimplemented property_set to use the same symbol fetching function
+	  as property_get. We now only use eval in case no type (-t) argument was
+	  given.
+	- DBGP: Fixed some issues with finding out the classname, which is
+	  important for fetching private properties.
+	- DBGP: Fixed usage of uninitialized memory that prevented looking up
+	  numerical array keys while fetching array elements not work properly.
+	- Fixed bug #228: Binary safety for stream output and property fetches.
+	- Fixed bug #227: The SESSION super global does not show up in the Globals
+	  scope.
+	- Fixed bug #225: xdebug dumps core when protocol is GDB.
+	- Fixed bug #224: Compile failure on Solaris.
+	- Fixed bug #219: Memory usage delta in traces don&apos;t work on PHP 5.2.0.
+	- Fixed bug #215: Cannot retrieve nested arrays when the array key is a
+	  numeric index.
+	- Fixed bug #214: The depth level of arrays was incorrectly checked so it
+	  would show the first page of a level too deep as well.
+	- Fixed bug #213: Dead code analysis doesn&apos;t take catches for throws into
+	  account.
+	- Fixed bug #211: When starting a new session with a different idekey, the
+	  cookie is not updated.
+	- Fixed bug #209: Additional remote debugging session started when
+	  triggering shutdown function.
+	- Fixed bug #208: Socket connection attempted when XDEBUG_SESSION_STOP.
+	- Fixed PECL bug #8989: Compile error with PHP 5 and GCC 2.95.
     
  </notes>
  <contents>
@@ -123,8 +134,8 @@ Xdebug also provides:
    <file name="config.m4" role="src" />
    <file name="CREDITS" role="doc" />
    <file name="LICENSE" role="doc" />
-   <file name="Makefile.in" role="src" />
    <file name="Makefile.frag" role="src" />
+   <file name="Makefile.in" role="src" />
    <file name="NEWS" role="doc" />
    <file name="php_xdebug.h" role="src" />
    <file name="README" role="doc" />
@@ -181,6 +192,77 @@ Xdebug also provides:
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.0.0RC2</release>
+    <api>2.0.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2006-12-24</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>Sun, Dec 24, 2006 - xdebug 2.0.0rc2
++ Added new features:
+	- Implemented the &quot;xdebug.var_display_max_children&quot; setting. The default is
+	  set to 128 children.
+	- Added types to fancy var dumping function.
+	- Implemented FR #210: Add a way to stop the debug session without having
+	  to execute a script. The GET/POST parameter &quot;XDEBUG_SESSION_STOP_NO_EXEC&quot;
+	  works in the same way as XDEBUG_SESSION_STOP, except that the script will
+	  not be executed.
+	- DBGP: Allow postmortem analysis.
+	- DBGP: Added the non-standard function xcmd_profiler_name_get.
+
++ Changes:
+	- Fixed the issue where xdebug_get_declared_vars() did not know about
+	  variables there are in the declared function header, but were not used in
+	  the code. Due to this change expected arguments that were not send to a
+	  function will now show up as ??? in stack and function traces in PHP 5.1
+	  and PHP 5.2.
+	- Allow xdebug.var_display_max_data and xdebug.var_display_max_depth
+	  settings of -1 which will unlimit those settings.
+	- DBGP: Sort super globals in Globals overview.
+	- DBGP: Fixed a bug where error messages where not added upon errors in the
+	  protocol.
+	- DBGP: Change context 1 from globals (superglobals + vars in bottom most
+	  stack frame) to just superglobals.
+
+= Fixed bugs:
+	- Fixed linking error on AIX by adding libm.
+	- Fixed dead code analysis for THROW.
+	- Fixed oparray prefill caching for code coverage.
+	- Fixed the xdebug.remote_log feature work.
+	- DBGP: Fixed a bug where $this did not appear in the local scoped context.
+	- DBGP: Reimplemented property_set to use the same symbol fetching function
+	  as property_get. We now only use eval in case no type (-t) argument was
+	  given.
+	- DBGP: Fixed some issues with finding out the classname, which is
+	  important for fetching private properties.
+	- DBGP: Fixed usage of uninitialized memory that prevented looking up
+	  numerical array keys while fetching array elements not work properly.
+	- Fixed bug #228: Binary safety for stream output and property fetches.
+	- Fixed bug #227: The SESSION super global does not show up in the Globals
+	  scope.
+	- Fixed bug #225: xdebug dumps core when protocol is GDB.
+	- Fixed bug #224: Compile failure on Solaris.
+	- Fixed bug #219: Memory usage delta in traces don&apos;t work on PHP 5.2.0.
+	- Fixed bug #215: Cannot retrieve nested arrays when the array key is a
+	  numeric index.
+	- Fixed bug #214: The depth level of arrays was incorrectly checked so it
+	  would show the first page of a level too deep as well.
+	- Fixed bug #213: Dead code analysis doesn&apos;t take catches for throws into
+	  account.
+	- Fixed bug #211: When starting a new session with a different idekey, the
+	  cookie is not updated.
+	- Fixed bug #209: Additional remote debugging session started when
+	  triggering shutdown function.
+	- Fixed bug #208: Socket connection attempted when XDEBUG_SESSION_STOP.
+	- Fixed PECL bug #8989: Compile error with PHP 5 and GCC 2.95.
+      
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.0.0rc1</release>
