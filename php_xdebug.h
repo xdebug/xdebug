@@ -48,6 +48,8 @@ extern zend_module_entry xdebug_module_entry;
 
 #if MEMORY_LIMIT
 # define HAVE_PHP_MEMORY_USAGE 1
+#elif PHP_VERSION_ID >= 50201
+# define HAVE_PHP_MEMORY_USAGE 1
 #else
 # define HAVE_PHP_MEMORY_USAGE 0
 #endif
