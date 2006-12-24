@@ -1,3 +1,7 @@
+Sun Dec 24 21:04:29 CET 2006 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- Fixed memory tracking as memory_limit is always enabled in PHP 5.2.1 and later.
+
 Sat Dec 23 21:26:15 CET 2006 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Back to -dev.
