@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003, 2004, 2005, 2006 Derick Rethans            |
+   | Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Derick Rethans      |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1335,7 +1335,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.82 $";
+	return "$Revision: 1.83 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
@@ -1347,7 +1347,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	TSRMLS_FETCH();
 
 	SENDMSG(context->socket, xdebug_sprintf("This is Xdebug version %s.\n", XDEBUG_VERSION));
-	SSEND(context->socket, "Copyright 2002, 2003, 2004 by Derick Rethans,\n");
+	SSEND(context->socket, "Copyright 2002, 2003, 2004, 2005, 2006, 2007 by Derick Rethans,\n");
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;

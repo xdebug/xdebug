@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003, 2004, 2005, 2006 Derick Rethans            |
+   | Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Derick Rethans      |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +15,7 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_set.c,v 1.3 2006-10-19 20:45:19 derick Exp $ */
+/* $Id: xdebug_set.c,v 1.4 2006-12-28 22:58:37 derick Exp $ */
 
 #include <stdlib.h>
 #include <math.h>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003, 2004, 2005, 2006 Derick Rethans            |
+   | Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Derick Rethans      |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2991,7 +2991,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	XDEBUG_VERSION,
 	XDEBUG_AUTHOR,
 	XDEBUG_URL,
-	"Copyright (c) 2002, 2003, 2004, 2005, 2006",
+	"Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
 	NULL,           /* activate_func_t */
