@@ -1902,7 +1902,6 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 
 	/* Printing vars */
 	for (j = 0; j < i->varc; j++) {
-		char *tmp_varname;
 		char *tmp_value;
 
 		if (c) {
@@ -1910,10 +1909,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 		} else {
 			c = 1;
 		}
-/*
-		tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
-		xdebug_str_add(&str, tmp_varname, 1);
-*/
+
 		tmp_value = get_zval_value(i->var[j].addr, 0, NULL);
 		if (tmp_value) {
 			xdebug_str_add(&str, tmp_value, 1);
@@ -2334,7 +2330,6 @@ PHP_FUNCTION(xdebug_print_function_stack)
 PHP_FUNCTION(xdebug_get_declared_vars)
 {
 	xdebug_llist_element *le;
-	int                   j;
 	function_stack_entry *i;
 
 	array_init(return_value);
@@ -2346,16 +2341,6 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 	if (i->used_vars) {
 		xdebug_hash_apply(i->used_vars, (void *) return_value, attach_used_var_names);
 	}
-	/* Add params */
-#if 0
-	if (i->var) {
-		for (j = 0; j < i->varc; j++) {
-			if (i->var[j].name) {
-				add_next_index_string(return_value, i->var[j].name, 1);
-			}
-		}
-	}
-#endif
 }
 /* }}} */
 

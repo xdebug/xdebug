@@ -1635,7 +1635,6 @@ DBGP_FUNC(property_set)
 	char                      *eval_string;
 	zval                       ret_zval;
 	function_stack_entry      *fse;
-	int                        old_max_data;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
 	zval                      *symbol;
 	XDEBUG_STR_SWITCH_DECL;
@@ -2177,7 +2176,7 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.113 $";
+	return "$Revision: 1.114 $";
 }
 
 int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
