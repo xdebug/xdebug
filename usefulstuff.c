@@ -386,7 +386,29 @@ static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **n
 		tmp_fname = xdstrdup(fname);
 	}
 	fh = fopen(tmp_fname, mode);
-	if (new_fname) {
+	if (fh) {
+		if (new_fname) {
+			*new_fname = tmp_fname;
+		} else {
+			xdfree(tmp_fname);
+		}
+	}
+	return fh;
+}
+
+static FILE *xdebug_open_file_with_random_ext(char *fname, char *mode, char *extension, char **new_fname)
+{
+	FILE *fh;
+	char *tmp_fname;
+	TSRMLS_FETCH();
+
+	if (extension) {
+		tmp_fname = xdebug_sprintf("%s.%08x.%s", fname, php_combined_lcg(TSRMLS_C), extension);
+	} else {
+		tmp_fname = xdebug_sprintf("%s.%08x", fname, php_combined_lcg(TSRMLS_C));
+	}
+	fh = fopen(tmp_fname, mode);
+	if (fh && new_fname) {
 		*new_fname = tmp_fname;
 	} else {
 		xdfree(tmp_fname);
@@ -400,11 +422,10 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 	FILE *fh;
 	struct stat buf;
 	char *tmp_fname;
-	TSRMLS_FETCH();
 
 	/* We're not doing any tricks for append mode... as that has atomic writes
-	 * anyway. */
-	if (mode[0] == 'a') {
+	 * anyway. And we ignore read mode as well. */
+	if (mode[0] == 'a' || mode[0] == 'r') {
 		return xdebug_open_file(fname, mode, extension, new_fname);
 	}
 
@@ -416,42 +437,49 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 		tmp_fname = xdebug_sprintf("%s", fname);
 	}
 	r = stat(tmp_fname, &buf);
-	xdfree(tmp_fname);
+	/* We're not freeing "tmp_fname" as that is used in the freopen as well. */
 
 	if (r == -1) {
+		xdfree(tmp_fname);
 		/* 2. Cool, the file doesn't exist so we can open it without probs now. */
-		return xdebug_open_file(fname, "w", extension, new_fname);
+		fh = xdebug_open_file(fname, "w", extension, (char**) &new_fname);
+		goto lock;
 	}
-	/* 3. It exists, check if we can exclusively lock it. */
+
+	/* 3. It exists, check if we can open it. */
 	fh = xdebug_open_file(fname, "r+", extension, (char**) &tmp_fname);
+	if (!fh) {
+		xdfree(tmp_fname);
+		/* 4. If fh == null we couldn't even open the file, so open a new one with a new name */
+		fh = xdebug_open_file_with_random_ext(fname, "w", extension, (char**) &new_fname);
+		goto lock;
+	}
+	/* 5. It exists and we can open it, check if we can exclusively lock it. */
 	r = flock(fileno(fh), LOCK_EX | LOCK_NB);
 	if (r == -1) {
 		if (errno == EWOULDBLOCK) {
 			fclose(fh);
 			xdfree(tmp_fname);
-			/* 4. The file is in use, so we open one with a new name. */
-			if (extension) {
-				tmp_fname = xdebug_sprintf("%s.%08x.%s", fname, php_combined_lcg(TSRMLS_C), extension);
-			} else {
-				tmp_fname = xdebug_sprintf("%s.%08x", fname, php_combined_lcg(TSRMLS_C));
-			}
-			fh = fopen(tmp_fname, "w");
-			flock(fileno(fh), LOCK_UN);
-			if (new_fname) {
-				*new_fname = tmp_fname;
-			} else {
-				xdfree(tmp_fname);
-			}
+			/* 6. The file is in use, so we open one with a new name. */
+			fh = xdebug_open_file_with_random_ext(fname, "w", extension, (char**) &new_fname);
+			goto lock;
+		}
+	}
+	/* 7. We established a lock, now we truncate and return the handle */
+	fh = freopen(tmp_fname, "w", fh);
+
+lock: /* Yes yes, an evil goto label here!!! */
+	if (fh) {
+		/* 8. We have to lock again after the reopen as that basically closes
+		 * the file and opens it again. There is a small race condition here...
+		 */
+		flock(fileno(fh), LOCK_EX | LOCK_NB);
+		if (new_fname) {
+			*new_fname = tmp_fname;
 			return fh;
 		}
 	}
-	/* 5. We established a lock, now we truncate and return the handle */
-	fh = freopen(tmp_fname, "w", fh);
-	if (new_fname) {
-		*new_fname = tmp_fname;
-	} else {
-		xdfree(tmp_fname);
-	}
+	xdfree(tmp_fname);
 	return fh;
 }
 #else
