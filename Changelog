@@ -1,3 +1,8 @@
+Thu Dec 28 23:59:07 CET 2006 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Removing some unused vars.
+
 Thu Dec 28 23:58:40 CET 2006 Derick Rethans <derick@derickrethans.nl>
 LICENSE
 xdebug/php_xdebug.h
