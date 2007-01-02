@@ -33,7 +33,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array 
 void xdebug_profiler_function_internal_begin(function_stack_entry *fse TSRMLS_DC);
 void xdebug_profiler_function_internal_end(function_stack_entry *fse TSRMLS_DC);
 
-void profile_call_entry_dtor(void *dummy, void *elem);
-void profile_aggr_call_entry_dtor(void *elem);
+void xdebug_profile_call_entry_dtor(void *dummy, void *elem);
+void xdebug_profile_aggr_call_entry_dtor(void *elem);
 
 #endif

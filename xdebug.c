@@ -547,7 +547,7 @@ PHP_MINIT_FUNCTION(xdebug)
 #endif
 #endif
 	/* initialize aggregate call information hash */
-	zend_hash_init_ex(&XG(aggr_calls), 50, NULL, (dtor_func_t) profile_aggr_call_entry_dtor, 1, 0);
+	zend_hash_init_ex(&XG(aggr_calls), 50, NULL, (dtor_func_t) xdebug_profile_aggr_call_entry_dtor, 1, 0);
 
 	/* Redirect compile and execute functions to our own */
 	old_compile_file = zend_compile_file;
@@ -636,7 +636,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-void used_var_dtor (void *elem)
+static void xdebug_used_var_dtor(void *elem)
 {
 	char *s = elem;
 
@@ -645,7 +645,7 @@ void used_var_dtor (void *elem)
 	}
 }
 
-void stack_element_dtor (void *dummy, void *elem)
+static void xdebug_stack_element_dtor(void *dummy, void *elem)
 {
 	int                   i;
 	function_stack_entry *e = elem;
@@ -712,7 +712,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 	XG(code_coverage_op_array_cache) = xdebug_hash_alloc(1024, NULL);
-	XG(stack)         = xdebug_llist_alloc(stack_element_dtor);
+	XG(stack)         = xdebug_llist_alloc(xdebug_stack_element_dtor);
 	XG(trace_file)    = NULL;
 	XG(tracefile_name) = NULL;
 	XG(profile_file)  = NULL;
@@ -985,7 +985,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->user_defined  = type;
 	tmp->filename      = NULL;
 	tmp->include_filename  = NULL;
-	tmp->profile.call_list = xdebug_llist_alloc(profile_call_entry_dtor);
+	tmp->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
 	tmp->op_array      = op_array;
 	tmp->symbol_table  = NULL;
 
@@ -1047,7 +1047,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
 
-			tmp->include_filename = get_zval_value(get_zval(zdata, &zdata->opline->op1, zdata->Ts, &is_var), 0, NULL);
+			tmp->include_filename = xdebug_get_zval_value(get_zval(zdata, &zdata->opline->op1, zdata->Ts, &is_var), 0, NULL);
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
@@ -1126,7 +1126,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 
 	if (XG(profiler_aggregate)) {
-		char *func_name = show_fname(tmp->function, 0, 0 TSRMLS_CC);
+		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
 
 		aggr_key = xdebug_sprintf("%s.%s.%d", tmp->filename, func_name, tmp->lineno);
 		aggr_key_len = strlen(aggr_key);
@@ -1186,7 +1186,7 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	int j = op_array->size;
 
 	if (!fse->used_vars) {
-		fse->used_vars = xdebug_hash_alloc(64, used_var_dtor);
+		fse->used_vars = xdebug_hash_alloc(64, xdebug_used_var_dtor);
 	}
 
 	/* Check parameters */
@@ -1525,7 +1525,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	fse->symbol_table = NULL;
-	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
+	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
 	XG(level)--;
 }
 
@@ -1584,7 +1584,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 		}
 	}
 
-	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), stack_element_dtor);
+	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
 	XG(level)--;
 }
 
@@ -1665,9 +1665,9 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	}
 
 	if (html) {
-		contents = get_zval_value_fancy(NULL, zvar, &len, 0, NULL TSRMLS_CC);
+		contents = xdebug_get_zval_value_fancy(NULL, zvar, &len, 0, NULL TSRMLS_CC);
 	} else {
-		contents = get_zval_value(zvar, 0, NULL);
+		contents = xdebug_get_zval_value(zvar, 0, NULL);
 	}
 
 	if (contents) {
@@ -1696,7 +1696,7 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 			xdebug_str log_buffer = {0, 0, NULL};
 
 			i = XDEBUG_LLIST_VALP(le);
-			tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
+			tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
 			xdebug_str_add(&log_buffer, xdebug_sprintf("PHP %3d. %s(", i->level, tmp_name), 1);
 			xdfree(tmp_name);
 
@@ -1710,7 +1710,7 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 					c = 1;
 				}
 				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
-				tmp_value = get_zval_value(i->var[j].addr, 0, NULL);
+				tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 				xdebug_str_add(&log_buffer, tmp_varname, 0);
 				xdebug_str_add(&log_buffer, tmp_value, 0);
 				xdfree(tmp_varname);
@@ -1756,7 +1756,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 			char *tmp_name;
 			
 			i = XDEBUG_LLIST_VALP(le);
-			tmp_name = show_fname(i->function, html, 0 TSRMLS_CC);
+			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
 			if (html) {
 #if HAVE_PHP_MEMORY_USAGE
 				xdebug_str_add(&str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), i->memory, tmp_name), 1);
@@ -1784,15 +1784,15 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 				}
 
 				if (html) {
-					tmp_value = get_zval_value(i->var[j].addr, 0, NULL);
-					tmp_fancy_value = xmlize(tmp_value, strlen(tmp_value), &newlen);
-					tmp_fancy_synop_value = get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
+					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+					tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
+					tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
 					xdebug_str_add(&str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
 					xdfree(tmp_value);
 					efree(tmp_fancy_value);
 					xdfree(tmp_fancy_synop_value);
 				} else {
-					tmp_value = get_zval_synopsis(i->var[j].addr, 0, NULL);
+					tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
 					if (tmp_value) {
 						xdebug_str_add(&str, xdebug_sprintf("%s", tmp_value), 1);
 						xdfree(tmp_value);
@@ -1870,7 +1870,7 @@ static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	}
 	xdebug_str_addl(&str, "   >=> ", 7, 0);
 
-	tmp_value = get_zval_value(retval, 0, NULL);
+	tmp_value = xdebug_get_zval_value(retval, 0, NULL);
 	if (tmp_value) {
 		xdebug_str_add(&str, tmp_value, 1);
 	}
@@ -1886,7 +1886,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 	char *tmp_name;
 	xdebug_str str = {0, 0, NULL};
 
-	tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
+	tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
 
 	xdebug_str_add(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%10lu ", i->memory), 1);
@@ -1910,7 +1910,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 			c = 1;
 		}
 
-		tmp_value = get_zval_value(i->var[j].addr, 0, NULL);
+		tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 		if (tmp_value) {
 			xdebug_str_add(&str, tmp_value, 1);
 		} else {
@@ -1938,7 +1938,7 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->level), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fnr), 1);
 	if (whence == 0) { /* start */
-		tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
+		tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
 
 		xdebug_str_add(&str, "0\t", 0);
 		xdebug_str_add(&str, xdebug_sprintf("%f\t", i->time - XG(start_time)), 1);
@@ -1982,7 +1982,7 @@ static char* return_trace_stack_frame_begin_html(function_stack_entry* i, int fn
 	}
 	xdebug_str_add(&str, "-&gt;</td>", 0);
 
-	tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
+	tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%s(", tmp_name), 1);
 	xdfree(tmp_name);
 
@@ -2115,7 +2115,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
-	error_type_str = error_type(type);
+	error_type_str = xdebug_error_type(type);
 
 #if PHP_MAJOR_VERSION >= 5
 	/* according to error handling mode, suppress error, throw exception or show it */
@@ -2288,7 +2288,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			argument = get_zval_value(i->var[j].addr, 0, NULL);
+			argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 			if (i->var[j].name) {
 				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
 			} else {
@@ -2449,7 +2449,7 @@ PHP_FUNCTION(xdebug_var_dump)
 	
 	for (i = 0; i < argc; i++) {
 		if (PG(html_errors)) {
-			val = get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0, NULL TSRMLS_CC);
+			val = xdebug_get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0, NULL TSRMLS_CC);
 			PHPWRITE(val, len);
 			xdfree(val);
 		} else {
@@ -2486,10 +2486,10 @@ PHP_FUNCTION(xdebug_debug_zval)
 			if (debugzval) {
 				php_printf("%s: ", Z_STRVAL_PP(args[i]));
 				if (PG(html_errors)) {
-					val = get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
+					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
 				} else {
-					val = get_zval_value(debugzval, 1, NULL);
+					val = xdebug_get_zval_value(debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}
 				xdfree(val);
@@ -2526,7 +2526,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
 			if (debugzval) {
 				printf("%s: ", Z_STRVAL_PP(args[i]));
-				val = get_zval_value(debugzval, 1, NULL);
+				val = xdebug_get_zval_value(debugzval, 1, NULL);
 				printf("%s(%d)", val, strlen(val));
 				xdfree(val);
 				printf("\n");

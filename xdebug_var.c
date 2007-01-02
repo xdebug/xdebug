@@ -30,7 +30,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-char *error_type(int type)
+char* xdebug_error_type(int type)
 {
 	switch (type) {
 		case E_ERROR:
@@ -341,7 +341,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 	}
 }
 
-char* get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options)
+char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options)
 {
 	xdebug_str str = {0, 0, NULL};
 	int default_options = 0;
@@ -411,7 +411,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 	}
 }
 
-char* get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options)
+char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options)
 {
 	xdebug_str str = {0, 0, NULL};
 	int default_options = 0;
@@ -507,7 +507,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 
 		case IS_STRING:
 			xdebug_str_addl(str, "<string>", 8, 0);
-			tmp_str = xmlize(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &newlen);
+			tmp_str = xdebug_xmlize(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &newlen);
 			xdebug_str_addl(str, tmp_str, newlen, 0);
 			efree(tmp_str);
 			xdebug_str_addl(str, "</string>", 9, 0);
@@ -549,7 +549,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 	}
 }
 
-char* get_zval_value_xml(char *name, zval *val)
+char* xdebug_get_zval_value_xml(char *name, zval *val)
 {
 	xdebug_str str = {0, 0, NULL};
 	TSRMLS_FETCH();
@@ -779,7 +779,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	}
 }
 
-xdebug_xml_node* get_zval_value_xml_node(char *name, zval *val, xdebug_var_export_options *options)
+xdebug_xml_node* xdebug_get_zval_value_xml_node(char *name, zval *val, xdebug_var_export_options *options)
 {
 	xdebug_xml_node *node;
 	char *full_name = NULL;
@@ -915,12 +915,12 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		case IS_STRING:
 			xdebug_str_add(str, xdebug_sprintf("<small>string</small> <font color='%s'>'", COLOR_STRING), 1);
 			if (Z_STRLEN_PP(struc) > options->max_data) {
-				tmp_str = xmlize(Z_STRVAL_PP(struc), options->max_data, &newlen);
+				tmp_str = xdebug_xmlize(Z_STRVAL_PP(struc), options->max_data, &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
 				efree(tmp_str);
 				xdebug_str_addl(str, "'...</font>", 11, 0);
 			} else {
-				tmp_str = xmlize(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &newlen);
+				tmp_str = xdebug_xmlize(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
 				efree(tmp_str);
 				xdebug_str_addl(str, "'</font>", 8, 0);
@@ -1000,7 +1000,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	}
 }
 
-char* get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 	int default_options = 0;
@@ -1073,7 +1073,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 	}
 }
 
-char* get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 	int default_options = 0;
@@ -1097,7 +1097,7 @@ char* get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, x
 ** XML encoding function
 */
 
-char* xmlize(char *string, int len, int *newlen)
+char* xdebug_xmlize(char *string, int len, int *newlen)
 {
 	char *tmp;
 	char *tmp2;
@@ -1130,7 +1130,7 @@ char* xmlize(char *string, int len, int *newlen)
 ** Function name printing function
 */
 
-char* show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
+char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 {
 	char *tmp;
 

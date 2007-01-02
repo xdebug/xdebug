@@ -32,7 +32,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-void profile_aggr_call_entry_dtor(void *elem)
+void xdebug_profile_aggr_call_entry_dtor(void *elem)
 {
 	xdebug_aggregate_entry *xae = (xdebug_aggregate_entry *) elem;
 	if (xae->filename) {
@@ -43,7 +43,7 @@ void profile_aggr_call_entry_dtor(void *elem)
 	}
 }
 
-void profile_call_entry_dtor(void *dummy, void *elem)
+void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 {
 	xdebug_call_entry *ce = elem;
 
@@ -154,7 +154,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	int                   default_lineno = 0;
 
 	xdebug_profiler_function_push(fse);
-	tmp_name = show_fname(fse->function, 0, 0 TSRMLS_CC);
+	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 	switch (fse->function.type) {
 		case XFUNC_INCLUDE:
 		case XFUNC_INCLUDE_ONCE:

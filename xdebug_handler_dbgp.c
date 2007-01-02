@@ -572,13 +572,13 @@ static xdebug_xml_node* get_symbol(char* name, int name_length, xdebug_var_expor
 
 	retval = get_symbol_contents_zval(name, name_length TSRMLS_CC);
 	if (retval) {
-		return get_zval_value_xml_node(name, retval, options);
+		return xdebug_get_zval_value_xml_node(name, retval, options);
 	}
 
 	return NULL;
 }
 
-int get_symbol_contents(char* name, int name_length, xdebug_xml_node *node, xdebug_var_export_options *options TSRMLS_DC)
+static int get_symbol_contents(char* name, int name_length, xdebug_xml_node *node, xdebug_var_export_options *options TSRMLS_DC)
 {
 	zval                *retval;
 
@@ -700,7 +700,7 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	fse = xdebug_get_stack_frame(nr TSRMLS_CC);
 	fse_prev = xdebug_get_stack_frame(nr - 1 TSRMLS_CC);
 
-	tmp_fname = show_fname(fse->function, 0, 0 TSRMLS_CC);
+	tmp_fname = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 
 	tmp = xdebug_xml_node_init("stack");
 	xdebug_xml_add_attribute_ex(tmp, "where", xdstrdup(tmp_fname), 0, 1);
@@ -1168,7 +1168,7 @@ DBGP_FUNC(breakpoint_set)
 	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%d", brk_id), 0, 1);
 }
 
-static int _xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
+static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 {
 	int              old_error_reporting;
 	int              res;
@@ -1206,7 +1206,7 @@ DBGP_FUNC(eval)
 	/* base64 decode eval string */
 	eval_string = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
 
-	res = _xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+	res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
 
 	efree(eval_string);
 
@@ -1214,7 +1214,7 @@ DBGP_FUNC(eval)
 	if (res == FAILURE) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_EVALUATING_CODE);
 	} else {
-		ret_xml = get_zval_value_xml_node(NULL, &ret_zval, options);
+		ret_xml = xdebug_get_zval_value_xml_node(NULL, &ret_zval, options);
 		xdebug_xml_add_child(*retval, ret_xml);
 		zval_dtor(&ret_zval);
 	}
@@ -1222,7 +1222,7 @@ DBGP_FUNC(eval)
 
 /* these functions interupt PHP's output functions, so we can
    redirect to our remote debugger! */
-static int _xdebug_send_stream(const char *name, const char *str, uint str_length TSRMLS_DC)
+static int xdebug_send_stream(const char *name, const char *str, uint str_length TSRMLS_DC)
 {
 	/* create an xml document to send as the stream */
 	xdebug_xml_node *message;
@@ -1236,20 +1236,20 @@ static int _xdebug_send_stream(const char *name, const char *str, uint str_lengt
 	return 0;
 }
 
-static int _xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
+static int xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 {
 	/* nesting_level is zero when final output is sent to sapi */
 	if (OG(ob_nesting_level) < 1) {
 		zend_unset_timeout(TSRMLS_C);
 		if (XG(stdout_redirected) != 0) {
-			_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
+			xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
 		}
 		zend_set_timeout(EG(timeout_seconds));
 	}
 	return XG(stdio).php_header_write(str, str_length TSRMLS_CC);
 }
 
-static int _xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
+static int xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
 {
 	/* nesting_level is zero when final output is sent to sapi. We also dont
 	 * want to write if headers are not sent yet, the output layer will handle
@@ -1257,7 +1257,7 @@ static int _xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
 	if (OG(ob_nesting_level) < 1 && SG(headers_sent)) {
 		zend_unset_timeout(TSRMLS_C);
 		if (XG(stdout_redirected) != 0) {
-			_xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
+			xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
 		}
 		zend_set_timeout(EG(timeout_seconds));
 	}
@@ -1292,9 +1292,9 @@ DBGP_FUNC(stdout)
 	} else if (mode != 0 && XG(stdout_redirected) == 0) {
 		if (XG(stdio).php_body_write == NULL && OG(php_body_write)) {
 			XG(stdio).php_body_write = OG(php_body_write);
-			OG(php_body_write) = _xdebug_body_write;
+			OG(php_body_write) = xdebug_body_write;
 			XG(stdio).php_header_write = OG(php_header_write);
-			OG(php_header_write) = _xdebug_header_write;
+			OG(php_header_write) = xdebug_header_write;
 			success = "1";
 		}
 	}
@@ -1717,7 +1717,7 @@ DBGP_FUNC(property_set)
 	} else {
 		/* Do the eval */
 		eval_string = xdebug_sprintf("%s = %s", CMD_OPTION('n'), new_value);
-		res = _xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+		res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
 
 		/* Free data */
 		xdfree(eval_string);
@@ -1786,6 +1786,7 @@ DBGP_FUNC(property_value)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
 }
+
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
 {
 	char               *name = (char*) he->ptr;
@@ -1955,7 +1956,7 @@ DBGP_FUNC(xcmd_profiler_name_get)
 #define STATE_SKIP_CHAR                6
 /* }}} */
 
-void xdebug_dbgp_arg_dtor(xdebug_dbgp_arg *arg)
+static void xdebug_dbgp_arg_dtor(xdebug_dbgp_arg *arg)
 {
 	int i;
 
@@ -1967,7 +1968,7 @@ void xdebug_dbgp_arg_dtor(xdebug_dbgp_arg *arg)
 	xdfree(arg);
 }
 
-int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
+static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_args)
 {
 	xdebug_dbgp_arg *args = NULL;
 	char *ptr;
@@ -2096,7 +2097,7 @@ duplicate_opts:
 	return XDEBUG_ERROR_DUP_ARG;
 }
 
-int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval TSRMLS_DC)
+static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval TSRMLS_DC)
 {
 	char *cmd = NULL;
 	int res, ret = 0;
@@ -2176,17 +2177,17 @@ int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.114 $";
+	return "$Revision: 1.115 $";
 }
 
-int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
+static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
 {
 	char *option;
 	int   ret;
 	xdebug_xml_node *response;
 	
 	do {
-		option = fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
+		option = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
 		if (!option) {
 			return 0;
 		}
@@ -2380,7 +2381,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	if (exception_type) {
 		errortype = exception_type;
 	} else {
-		errortype = error_type(type);
+		errortype = xdebug_error_type(type);
 	}
 
 	if (exception_type) {

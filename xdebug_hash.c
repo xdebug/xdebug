@@ -1,4 +1,4 @@
-/* $Id: xdebug_hash.c,v 1.4 2006-01-22 23:30:59 derick Exp $ */
+/* $Id: xdebug_hash.c,v 1.5 2007-01-02 16:02:37 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file

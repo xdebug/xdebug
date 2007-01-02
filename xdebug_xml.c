@@ -33,7 +33,7 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 	xdebug_str_add(output, attr->name, 0);
 	xdebug_str_addl(output, "=\"", 2, 0);
 	if (attr->value) {
-		tmp = xmlize(attr->value, strlen(attr->value), &newlen);
+		tmp = xdebug_xmlize(attr->value, strlen(attr->value), &newlen);
 		xdebug_str_add(output, tmp, 0);
 		efree(tmp);
 	}

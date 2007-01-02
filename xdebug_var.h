@@ -50,16 +50,16 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level TSRMLS_DC);
 
-char* xmlize(char *string, int len, int *newlen);
-char* error_type (int type);
-char* get_zval_value (zval *val, int debug_zval, xdebug_var_export_options *options);
-char* get_zval_value_xml (char *name, zval *val);
-char* get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
-xdebug_xml_node* get_zval_value_xml_node (char *name, zval *val, xdebug_var_export_options *options);
+char* xdebug_xmlize(char *string, int len, int *newlen);
+char* xdebug_error_type(int type);
+char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options);
+char* xdebug_get_zval_value_xml(char *name, zval *val);
+char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
+xdebug_xml_node* xdebug_get_zval_value_xml_node(char *name, zval *val, xdebug_var_export_options *options);
 
-char* get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options);
-char* get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
+char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options);
+char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 
-char* show_fname(xdebug_func t, int html, int flags TSRMLS_DC);
+char* xdebug_show_fname(xdebug_func t, int html, int flags TSRMLS_DC);
 
 #endif

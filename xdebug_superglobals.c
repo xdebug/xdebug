@@ -45,7 +45,7 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 		char *val;
 
 		if (html) {
-			val = get_zval_value_fancy(NULL, z, &len, 0, NULL TSRMLS_CC);
+			val = xdebug_get_zval_value_fancy(NULL, z, &len, 0, NULL TSRMLS_CC);
 #if HAVE_PHP_MEMORY_USAGE
 			xdebug_str_add(str, xdebug_sprintf("<td colspan='3' bgcolor='#eeeeec'>"), 1);
 #else
@@ -54,7 +54,7 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 			xdebug_str_addl(str, val, len, 0);
 			xdebug_str_add(str, "</td>", 0);
 		} else {
-			val = get_zval_value(z, 0, NULL);
+			val = xdebug_get_zval_value(z, 0, NULL);
 			xdebug_str_add(str, xdebug_sprintf("\n   $%s['%s'] = %s", name, elem, val), 1);
 		}
 		xdfree(val);

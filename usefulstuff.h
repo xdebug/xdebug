@@ -50,8 +50,8 @@ typedef struct xdebug_arg {
 	xdfree(arg);                   \
 }
 
-#define fd_read_line(s,c,t) fd_read_line_delim(s, c, t, '\n', NULL)
-char* fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length);
+#define xdebug_fd_read_line(s,c,t) xdebug_fd_read_line_delim(s, c, t, '\n', NULL)
+char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length);
 char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end);
 void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
 char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);

@@ -74,7 +74,7 @@ static char *get_current_time(void)
 
 char *xdebug_php3_get_revision(void)
 {
-	return "$Revision: 1.21 $";
+	return "$Revision: 1.22 $";
 }
 
 int xdebug_php3_init(xdebug_con *context, int mode)
@@ -113,7 +113,7 @@ int xdebug_php3_error(xdebug_con *h, int type, char *exception_type, char *messa
 	if (exception_type) {
 		errortype = exception_type;
 	} else {
-		errortype = error_type(type);
+		errortype = xdebug_error_type(type);
 	}
 
 	/* start */
@@ -131,7 +131,7 @@ int xdebug_php3_error(xdebug_con *h, int type, char *exception_type, char *messa
 			function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 			char *tmp_name;
 				
-			tmp_name = show_fname(i->function, 0, 0 TSRMLS_CC);
+			tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
 			SENDMSG(h->socket, xdebug_sprintf("%sfunction: %s\n", prefix, tmp_name));
 			xdfree(tmp_name);
 

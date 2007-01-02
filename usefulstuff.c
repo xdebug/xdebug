@@ -41,7 +41,7 @@
 
 #define READ_BUFFER_SIZE 128
 
-char* fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length)
+char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;

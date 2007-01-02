@@ -198,7 +198,7 @@ static char *make_message(xdebug_con *context, int error_code, char *message)
 	switch (options->response_format) {
 		case XDEBUG_RESPONSE_XML:
 			/* we ignore binary safety here */
-			tmp = xmlize(message, strlen(message), &len);
+			tmp = xdebug_xmlize(message, strlen(message), &len);
 			ret = xdebug_sprintf("<xdebug><%s><code>%d</code><message>%s</message></%s></xdebug>", type, error_code, tmp, type);
 			efree(tmp);
 			return ret;
@@ -268,7 +268,7 @@ static inline void show_available_commands_in_group(xdebug_con *h, int fmt, int 
 				switch (fmt) {
 					case XDEBUG_RESPONSE_XML:
 						/* we ignore binary safety here */
-						tmp = xmlize(ptr->help, strlen(ptr->help), &len);
+						tmp = xdebug_xmlize(ptr->help, strlen(ptr->help), &len);
 						SENDMSG(h->socket, xdebug_sprintf("<command><name>%s</name><desc>%s</desc></command>", ptr->name, tmp));
 						efree(tmp);
 						break;
@@ -311,8 +311,8 @@ static void show_command_info(xdebug_con *h, xdebug_gdb_cmd* cmd)
 	if (cmd) {
 		if (o->response_format == XDEBUG_RESPONSE_XML) {
 			/* we ignore binary safety here */
-			t1 = xmlize(cmd->description, strlen(cmd->description), &len);
-			t2 = xmlize(cmd->help, strlen(cmd->help), &len);
+			t1 = xdebug_xmlize(cmd->description, strlen(cmd->description), &len);
+			t2 = xdebug_xmlize(cmd->help, strlen(cmd->help), &len);
 			SENDMSG(h->socket, xdebug_sprintf("<xdebug><help><command><syntax>%s</syntax><desc>%s</desc></help</xdebug>\n", t1, t2));
 			efree(t1);
 			efree(t2);
@@ -336,7 +336,7 @@ static char *return_printable_symbol(xdebug_con *context, char *name, zval *val)
 	switch (options->response_format) {
 	   	case XDEBUG_RESPONSE_NORMAL:
 			if (val) {
-				str_rep = get_zval_value(val, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
+				str_rep = xdebug_get_zval_value(val, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
 			} else {
 				str_rep = xdstrdup("*uninitialized*");
 			}
@@ -351,7 +351,7 @@ static char *return_printable_symbol(xdebug_con *context, char *name, zval *val)
 
 		case XDEBUG_RESPONSE_XML:
 		default:
-			return get_zval_value_xml(name, val);
+			return xdebug_get_zval_value_xml(name, val);
 	}
 }
 
@@ -446,7 +446,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 			free(line);
 			line = NULL;
 		}
-		line = fd_read_line(fd, &fd_buffer, FD_RL_FILE);
+		line = xdebug_fd_read_line(fd, &fd_buffer, FD_RL_FILE);
 		i--;
 	}
 	/* Read until the "end" line has been read */
@@ -455,7 +455,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 			update = 1;
 			if (response_format == XDEBUG_RESPONSE_XML) {
 				/* we ignore binary safety here */
-				tmp = xmlize(line, strlen(line), &len);
+				tmp = xdebug_xmlize(line, strlen(line), &len);
 				SENDMSG(h->socket, xdebug_sprintf("<line file='%s' no='%d'>%s</line>", file, begin + i, tmp));
 				efree(tmp);
 			} else {
@@ -464,7 +464,7 @@ static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int 
 			free(line);
 			line = NULL;
 		}
-		line = fd_read_line(fd, &fd_buffer, FD_RL_FILE);
+		line = xdebug_fd_read_line(fd, &fd_buffer, FD_RL_FILE);
 		i++;
 	} while (i < end + 1 - begin);
 
@@ -502,7 +502,7 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 * Breakpoint 2, xdebug_execute (op_array=0x82caf50)
 *     at /dat/dev/php/xdebug/xdebug.c:361
 */
-	tmp_fname = show_fname(i->function, 0, 0 TSRMLS_CC);
+	tmp_fname = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
 	if (xml) {
 		SENDMSG(h->socket, xdebug_sprintf("<breakpoint><function><name>%s</name><params>", tmp_fname));
 	} else {
@@ -521,9 +521,9 @@ static void print_breakpoint(xdebug_con *h, function_stack_entry *i, int respons
 		if (i->var[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->var[j].name));
 		}
-		tmp_value = get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
+		tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
 		/* we ignore binary safety here */
-		tmp = xmlize(tmp_value, strlen(tmp_value), &len);
+		tmp = xdebug_xmlize(tmp_value, strlen(tmp_value), &len);
 		SSENDL(h->socket, tmp, len);
 		xdfree(tmp_value);
 		efree(tmp);
@@ -551,7 +551,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 *     at /dat/dev/php/xdebug/xdebug.c:901
 *         
 */
-   	tmp_fname = show_fname(i->function, 0, 0 TSRMLS_CC);
+   	tmp_fname = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
 	if (response_format == XDEBUG_RESPONSE_XML) {
 		if (nr) {
 			SENDMSG(h->socket, xdebug_sprintf("<stackframe><level>%d</level><function><name>%s</name><params>", nr, tmp_fname));
@@ -578,9 +578,9 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 		if (i->var[j].name) {
 		   SENDMSG(h->socket, xdebug_sprintf("$%s = ", i->var[j].name));
 		}
-		tmp_value = get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
+		tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, xdebug_var_get_nolimit_options(TSRMLS_C));
 		/* we ignore binary safety here */
-		tmp = xmlize(tmp_value, strlen(tmp_value), &len);
+		tmp = xdebug_xmlize(tmp_value, strlen(tmp_value), &len);
 		SSENDL(h->socket, tmp, len);
 		xdfree(tmp_value);
 		efree(tmp);
@@ -1106,7 +1106,7 @@ static void dump_line_breakpoint(xdebug_con *h, xdebug_gdb_options *options, xde
 	if (options->response_format == XDEBUG_RESPONSE_XML) {
 		if (condition) {
 			/* we ignore binary safety here */
-			condition = xmlize(brk_info->condition, strlen(brk_info->condition), &len);
+			condition = xdebug_xmlize(brk_info->condition, strlen(brk_info->condition), &len);
 			SENDMSG(h->socket,
 				xdebug_sprintf("<breakpoint type='line' condition='%s'><file>%s</file><line>%d</line></breakpoint>",
 				condition,
@@ -1222,7 +1222,7 @@ char *xdebug_handle_step(xdebug_con *context, xdebug_arg *args)
 ** Parsing functions
 */
 
-int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *end_cmd, char **error)
+static int xdebug_gdb_parse_option(xdebug_con *context, char* line, int flags, char *end_cmd, char **error)
 {
 	char *ptr;
 	xdebug_gdb_cmd *cmd;
@@ -1335,7 +1335,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.83 $";
+	return "$Revision: 1.84 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
@@ -1374,7 +1374,7 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
 	do {
 		SENDMSG(context->socket, xdebug_sprintf("?init %s\n", context->program_name));
-		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
+		option = xdebug_fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
@@ -1410,7 +1410,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *exception_type, char *
 	if (exception_type) {
 		errortype = exception_type;
 	} else {
-		errortype = error_type(type);
+		errortype = xdebug_error_type(type);
 	}
 
 	runtime_allowed = (
@@ -1435,7 +1435,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *exception_type, char *
 
 	do {
 		SSEND(context->socket, "?cmd\n");
-		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
+		option = xdebug_fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
@@ -1468,7 +1468,7 @@ int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, 
 
 	do {
 		SSEND(context->socket, "?cmd\n");
-		option = fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
+		option = xdebug_fd_read_line(context->socket, context->buffer, FD_RL_SOCKET);
 		if (!option) {
 			return 0;
 		}
