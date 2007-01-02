@@ -1,3 +1,20 @@
+Tue Jan 02 17:02:37 CET 2007 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/usefulstuff.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_handler_php3.c
+xdebug/xdebug_hash.c
+xdebug/xdebug_llist.c
+xdebug/xdebug_profiler.c
+xdebug/xdebug_profiler.h
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h
+xdebug/xdebug_xml.c:
+- Namespace protect everything correctly.
+
 Thu Dec 28 23:59:07 CET 2006 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c:
