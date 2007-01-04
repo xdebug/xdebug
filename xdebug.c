@@ -1114,6 +1114,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
 				for (i = arguments_sent; i < arguments_wanted; i++) {
 					tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
+					tmp->var[tmp->varc].addr = NULL;
 					tmp->varc++;
 				}
 			}
@@ -1783,22 +1784,26 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 					c = 1;
 				}
 
-				if (html) {
-					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-					tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
-					tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
-					xdebug_str_add(&str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
-					xdfree(tmp_value);
-					efree(tmp_fancy_value);
-					xdfree(tmp_fancy_synop_value);
-				} else {
-					tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
-					if (tmp_value) {
-						xdebug_str_add(&str, xdebug_sprintf("%s", tmp_value), 1);
+				if (i->var[j].addr) {
+					if (html) {
+						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+						tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
+						tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
+						xdebug_str_add(&str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
 						xdfree(tmp_value);
+						efree(tmp_fancy_value);
+						xdfree(tmp_fancy_synop_value);
 					} else {
-						xdebug_str_addl(&str, "???", 3, 0);
+						tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
+						if (tmp_value) {
+							xdebug_str_add(&str, xdebug_sprintf("%s", tmp_value), 1);
+							xdfree(tmp_value);
+						} else {
+							xdebug_str_addl(&str, "???", 3, 0);
+						}
 					}
+				} else {
+					xdebug_str_addl(&str, "???", 3, 0);
 				}
 			}
 
