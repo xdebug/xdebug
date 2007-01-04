@@ -1,3 +1,9 @@
+Thu Jan 04 17:15:11 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed an undefined variable error.
+- Fixed a segfault that occurred when creating printable stack traces and
+  collect_params was turned off.
+
 Tue Jan 02 17:02:37 CET 2007 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/usefulstuff.h
