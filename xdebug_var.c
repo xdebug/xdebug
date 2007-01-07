@@ -398,7 +398,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 			break;
 
 		case IS_OBJECT:
-			xdebug_str_add(str, xdebug_sprintf("class %s ", Z_OBJCE_PP(struc)->name), 1);
+			xdebug_str_add(str, xdebug_sprintf("class %s", Z_OBJCE_PP(struc)->name), 1);
 			break;
 
 		case IS_RESOURCE: {
