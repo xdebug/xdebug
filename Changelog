@@ -1,3 +1,7 @@
+Sun Jan 07 15:44:21 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed formatting "problem"
+
 Thu Jan 04 17:15:11 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed an undefined variable error.
