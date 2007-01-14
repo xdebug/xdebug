@@ -1,3 +1,18 @@
+Sun Jan 14 18:00:59 CET 2007 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_private.c
+xdebug/xdebug_private.h:
+- Fixed problems with opening files - the filename could cause double free
+  issues.
+- Removed the bogus "xdebug.allowed_clients" setting - it was not implemented.
+- Optimized used variable collection by switching to a linked list instead
+  of a hash. This is about 30% faster, but it needed a quick conversion to
+  hash in the case the information had to be shown to remove duplicate
+  variable names.
+
 Sun Jan 07 15:44:21 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed formatting "problem"
