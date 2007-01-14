@@ -2149,7 +2149,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 #endif
 
 	/* Log to logger */
-	if (PG(log_errors) && !(strcmp("cli", sapi_module.name) == 0) && (EG(error_reporting) & type)) {
+	if (PG(log_errors) && (EG(error_reporting) & type)) {
 		char log_buffer[1024];
 
 #ifdef PHP_WIN32
