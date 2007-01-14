@@ -544,6 +544,7 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 	char *tmp;
 	char *tmp_value;
 	int   len;
+	xdebug_hash *tmp_hash;
 	TSRMLS_FETCH();
 	
 /*
@@ -591,14 +592,18 @@ static void print_stackframe(xdebug_con *h, int nr, function_stack_entry *i, int
 		SENDMSG(h->socket, xdebug_sprintf("</params></function><file>%s</file><line>%d</line>", i->filename, i->lineno));
 		if (flags & XDEBUG_FRAME_FULL && i->used_vars) {
 			SSEND(h->socket, "<locals>");
-			xdebug_hash_apply(i->used_vars, (void *) h, dump_used_var_with_contents);
+			tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
+			xdebug_hash_apply(tmp_hash, (void *) h, dump_used_var_with_contents);
+			xdebug_hash_destroy(tmp_hash);
 			SSEND(h->socket, "</locals>");
 		}
 		SSEND(h->socket, "</stackframe>");
 	} else {
 		SENDMSG(h->socket, xdebug_sprintf(")\n    at %s:%d\n", i->filename, i->lineno));
 		if (flags & XDEBUG_FRAME_FULL && i->used_vars) {
-			xdebug_hash_apply(i->used_vars, (void *) h, dump_used_var_with_contents);
+			tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
+			xdebug_hash_apply(tmp_hash, (void *) h, dump_used_var_with_contents);
+			xdebug_hash_destroy(tmp_hash);
 			SSEND(h->socket, "\n");
 		}
 	}
@@ -1161,22 +1166,23 @@ char *xdebug_handle_show_breakpoints(xdebug_con *context, xdebug_arg *args)
 static char* show_local_vars(xdebug_con *context, xdebug_arg *args, void (*func)(void *, xdebug_hash_element*))
 {
 	function_stack_entry *i;
-	xdebug_hash          *ht;
+	xdebug_hash          *tmp_hash;
 	xdebug_gdb_options   *options = (xdebug_gdb_options*) context->options;
 	TSRMLS_FETCH();
 
 	
 	if (XDEBUG_LLIST_TAIL(XG(stack))) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		ht = i->used_vars;
 
 		/* Only show vars when they are scanned */
-		if (ht) {
+		if (i->used_vars) {
 			if (options->response_format == XDEBUG_RESPONSE_XML) {
 				SSEND(context->socket, "<xdebug><show>");
 			}
 
-			xdebug_hash_apply(ht, (void *) context, func);
+			tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
+			xdebug_hash_apply(tmp_hash, (void *) context, func);
+			xdebug_hash_destroy(tmp_hash);
 
 			if (options->response_format == XDEBUG_RESPONSE_XML) {
 				SSEND(context->socket, "</show></xdebug>\n");
@@ -1335,7 +1341,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.84 $";
+	return "$Revision: 1.85 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)

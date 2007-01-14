@@ -163,7 +163,7 @@ typedef struct _function_stack_entry {
 	int          varc;
 	xdebug_var   *var;
 	zval        *return_value;
-	xdebug_hash *used_vars;
+	xdebug_llist *used_vars;
 	HashTable   *symbol_table;
 
 	/* tracing properties */
@@ -188,6 +188,8 @@ typedef struct _function_stack_entry {
 function_stack_entry *xdebug_get_stack_head(TSRMLS_D);
 function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC);
 function_stack_entry *xdebug_get_stack_tail(TSRMLS_D);
+
+xdebug_hash* xdebug_used_var_hash_from_llist(xdebug_llist *list);
 
 #endif
 

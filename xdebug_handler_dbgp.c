@@ -1816,7 +1816,6 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
-	xdebug_hash          *ht;
 
 	/* right now, we only have zero or one, one being globals, which is
 	 * always the head of the stack */
@@ -1837,12 +1836,14 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-		ht = fse->used_vars;
 		XG(active_symbol_table) = fse->symbol_table;
 
 		/* Only show vars when they are scanned */
-		if (ht) {
-			xdebug_hash_apply_with_argument(ht, (void *) node, func, (void *) options);
+		if (fse->used_vars) {
+			xdebug_hash *tmp_hash;
+			tmp_hash = xdebug_used_var_hash_from_llist(fse->used_vars);
+			xdebug_hash_apply_with_argument(tmp_hash, (void *) node, func, (void *) options);
+			xdebug_hash_destroy(tmp_hash);
 		}
 
 #ifdef ZEND_ENGINE_2
@@ -2177,7 +2178,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.115 $";
+	return "$Revision: 1.116 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

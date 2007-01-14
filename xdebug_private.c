@@ -72,3 +72,23 @@ function_stack_entry *xdebug_get_stack_tail(TSRMLS_D)
 		return NULL;
 	}
 }
+
+static void xdebug_used_var_hash_from_llist_dtor(void *data)
+{
+	/* We are not freeing anything as the list creating didn't copy the data */
+}
+
+xdebug_hash* xdebug_used_var_hash_from_llist(xdebug_llist *list)
+{
+	xdebug_hash *tmp;
+	xdebug_llist_element *le;
+	char *var_name;
+
+	tmp = xdebug_hash_alloc(32, xdebug_used_var_hash_from_llist_dtor);
+	for (le = XDEBUG_LLIST_HEAD(list); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+		var_name = (char*) XDEBUG_LLIST_VALP(le);
+		xdebug_hash_add(tmp, var_name, strlen(var_name), var_name);
+	}
+
+	return tmp;
+}

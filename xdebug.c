@@ -219,11 +219,6 @@ static PHP_INI_MH(OnUpdateSession)
 	DUMP_TOK(session);
 }
 
-static PHP_INI_MH(OnUpdateAllowedClients)
-{
-	return SUCCESS;
-}
-
 static PHP_INI_MH(OnUpdateIDEKey)
 {
 	if (XG(ide_key)) {
@@ -315,7 +310,6 @@ PHP_INI_BEGIN()
 #endif
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
-	PHP_INI_ENTRY("xdebug.allowed_clients",       "",                   PHP_INI_SYSTEM, OnUpdateAllowedClients)
 	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
 
 	/* Variable display settings */
@@ -636,7 +630,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-static void xdebug_used_var_dtor(void *elem)
+static void xdebug_used_var_dtor(void *dummy, void *elem)
 {
 	char *s = elem;
 
@@ -677,7 +671,7 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 		}
 
 		if (e->used_vars) {
-			xdebug_hash_destroy(e->used_vars);
+			xdebug_llist_destroy(e->used_vars, NULL);
 		}
 
 		if (e->profile.call_list) {
@@ -1187,14 +1181,14 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	int j = op_array->size;
 
 	if (!fse->used_vars) {
-		fse->used_vars = xdebug_hash_alloc(64, xdebug_used_var_dtor);
+		fse->used_vars = xdebug_llist_alloc(xdebug_used_var_dtor);
 	}
 
 	/* Check parameters */
 # if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 	for (i = 0; i < fse->varc; i++) {
 		if (fse->var[i].name) {
-			xdebug_hash_update(fse->used_vars, fse->var[i].name, strlen(fse->var[i].name), xdstrdup(fse->var[i].name));
+			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(fse->var[i].name));
 		}
 	}
 # endif
@@ -1207,29 +1201,24 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 		if (op_array->opcodes[i].op1.op_type == IS_CV) {
 			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.u.var, &cv_len);
-			xdebug_hash_update(fse->used_vars, cv, cv_len, xdstrdup(cv));
+			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
 		if (op_array->opcodes[i].op2.op_type == IS_CV) {
 			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.u.var, &cv_len);
-			xdebug_hash_update(fse->used_vars, cv, cv_len, xdstrdup(cv));
+			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
 #else
 		if (op_array->opcodes[i].opcode == ZEND_FETCH_R || op_array->opcodes[i].opcode == ZEND_FETCH_W) {
 			if (op_array->opcodes[i].op1.op_type == IS_CONST) {
 				if (Z_TYPE(op_array->opcodes[i].op1.u.constant) == IS_STRING) {
-					xdebug_hash_update(
-						fse->used_vars, 
-						op_array->opcodes[i].op1.u.constant.value.str.val,
-						op_array->opcodes[i].op1.u.constant.value.str.len,
-						xdstrdup(op_array->opcodes[i].op1.u.constant.value.str.val)
-					);
+					xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(op_array->opcodes[i].op1.u.constant.value.str.val));
 				} else { /* unusual but not impossible situation */
 					int use_copy;
 					zval tmp_zval;
 
 					zend_make_printable_zval(&(op_array->opcodes[i].op1.u.constant), &tmp_zval, &use_copy);
 
-					xdebug_hash_update(fse->used_vars, tmp_zval.value.str.val, tmp_zval.value.str.len, xdstrdup(tmp_zval.value.str.val));
+					xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(tmp_zval.value.str.val));
 
 					zval_dtor(&tmp_zval);
 				}
@@ -1837,8 +1826,12 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 				scope_nr--;
 			}
 			if (i->used_vars && i->used_vars->size) {
+				xdebug_hash *tmp_hash;
+
 				xdebug_str_add(&str, xdebug_sprintf(formats[6], scope_nr), 1);
-				xdebug_hash_apply_with_argument(i->used_vars, (void*) &html, dump_used_var_with_contents, (void *) &str);
+				tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
+				xdebug_hash_apply_with_argument(tmp_hash, (void*) &html, dump_used_var_with_contents, (void *) &str);
+				xdebug_hash_destroy(tmp_hash);
 			}
 		}
 
@@ -2336,6 +2329,7 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *i;
+	xdebug_hash *tmp_hash;
 
 	array_init(return_value);
 	le = XDEBUG_LLIST_TAIL(XG(stack));
@@ -2344,7 +2338,9 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 	
 	/* Add declared vars */
 	if (i->used_vars) {
-		xdebug_hash_apply(i->used_vars, (void *) return_value, attach_used_var_names);
+		tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
+		xdebug_hash_apply(tmp_hash, (void *) return_value, attach_used_var_names);
+		xdebug_hash_destroy(tmp_hash);
 	}
 }
 /* }}} */
@@ -2622,7 +2618,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	char *str_time;
 	char *filename;
 	char  cwd[128];
-	char *tmp_fname;
+	char *tmp_fname = NULL;
 
 	if (fname && strlen(fname)) {
 		filename = xdstrdup(fname);
