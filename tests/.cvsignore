@@ -1,4 +1,5 @@
 *.diff
+*.mem
 *.log
 *.out
 *.exp
