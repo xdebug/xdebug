@@ -1,3 +1,23 @@
+Wed, Jan 31, 2007 - xdebug 2.0.0rc3
++ Changes:
+	- Removed the bogus "xdebug.allowed_clients" setting - it was not
+	  implemented.
+	- Optimized used variable collection by switching to a linked list instead
+	  of a hash. This is about 30% faster, but it needed a quick conversion to
+	  hash in the case the information had to be shown to remove duplicate
+	  variable names.
+
+= Fixed bugs:
+	- Fixed bug #232: PHP log_errors functionality lost after enabling xdebug
+	  error handler when CLI is used.
+	- Fixed problems with opening files - the filename could cause double free
+	  issues.
+	- Fixed memory tracking as memory_limit is always enabled in PHP 5.2.1 and
+	  later.
+	- Fixed a segfault that occurred when creating printable stack traces and
+	  collect_params was turned off.
+
+
 Sun, Dec 24, 2006 - xdebug 2.0.0rc2
 + Added new features:
 	- Implemented the "xdebug.var_display_max_children" setting. The default is
