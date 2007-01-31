@@ -1,3 +1,7 @@
+Wed Jan 31 19:57:24 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Added uncommitted code-coverage fix.
+
 Sun Jan 14 18:55:43 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #232: PHP log_errors functionality lost after enabling xdebug error
