@@ -228,7 +228,7 @@ static void prefill_from_oparray(function_stack_entry *fse, char *fn, zend_op_ar
 	unsigned int i;
 	xdebug_set *set = NULL;
 
-	cache_key_len = snprintf(cache_key, sizeof(cache_key) - 1, "%p%s", opa, opa->function_name ? "" : opa->filename);
+	cache_key_len = snprintf(cache_key, sizeof(cache_key) - 1, "%p", opa->opcodes);
 	if (xdebug_hash_find(XG(code_coverage_op_array_cache), cache_key, cache_key_len, (void*) &dummy)) {
 		return;
 	}
