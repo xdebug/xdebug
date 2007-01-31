@@ -1,3 +1,9 @@
+Wed Jan 31 20:07:37 CET 2007 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/php_xdebug.h:
+- Go with RC3.
+
 Wed Jan 31 19:57:24 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - Added uncommitted code-coverage fix.
