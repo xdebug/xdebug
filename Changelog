@@ -1,3 +1,8 @@
+Sat Feb 17 23:23:38 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00241.phpt:
+- Fixed bug #241: Crash in xdebug_get_function_stack().
+
 Sat Feb 17 22:00:31 CET 2007 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Fixed bug #240: Crash with xdebug.remote_log on Windows.
