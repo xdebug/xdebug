@@ -495,7 +495,9 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 	} else {
 		tmp_fname = xdebug_sprintf("%s", fname);
 	}
-	*new_fname = tmp_fname;
+	if (new_fname) {
+		*new_fname = tmp_fname;
+	}
 	return fopen(tmp_fname, mode);
 }
 #endif
