@@ -316,11 +316,11 @@ PHP_INI_BEGIN()
 #if ZEND_EXTENSION_API_NO < 90000000
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateInt,    display_max_children, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateInt,    display_max_data,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "2",           PHP_INI_ALL,    OnUpdateInt,    display_max_depth,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",           PHP_INI_ALL,    OnUpdateInt,    display_max_depth,    zend_xdebug_globals, xdebug_globals)
 #else
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateLong,   display_max_children, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateLong,   display_max_data,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "2",           PHP_INI_ALL,    OnUpdateLong,   display_max_depth,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",           PHP_INI_ALL,    OnUpdateLong,   display_max_depth,    zend_xdebug_globals, xdebug_globals)
 #endif
 PHP_INI_END()
 
@@ -2286,7 +2286,15 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		MAKE_STD_ZVAL(params);
 		array_init(params);
 		for (j = 0; j < i->varc; j++) {
-			argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+			if (i->var[j].addr) {
+				argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+			} else {
+				zval *tmp_zval;
+				MAKE_STD_ZVAL(tmp_zval);
+				argument = xdebug_get_zval_value(tmp_zval, 0, NULL);
+				zval_dtor(tmp_zval);
+				FREE_ZVAL(tmp_zval);
+			}
 			if (i->var[j].name) {
 				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
 			} else {
