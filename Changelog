@@ -1,3 +1,7 @@
+Sat Feb 17 22:00:31 CET 2007 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- Fixed bug #240: Crash with xdebug.remote_log on Windows.
+
 Wed Jan 31 20:51:23 CET 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Back to dev
