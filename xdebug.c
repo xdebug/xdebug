@@ -1140,9 +1140,6 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			xae.call_count = 0;
 			xae.time_own = 0;
 			xae.time_inclusive = 0;
-#if HAVE_PHP_MEMORY_USAGE
-			xae.mem_used = 0;
-#endif
 			xae.call_list = NULL;
 
 			zend_hash_add(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void*)&xae, sizeof(xdebug_aggregate_entry), (void**)&tmp->aggr_entry);

@@ -125,7 +125,6 @@ typedef struct _xdebug_call_entry {
 	char       *function;
 	int         lineno;
 	double      time_taken;
-	long        mem_used;
 } xdebug_call_entry;
 
 typedef struct xdebug_aggregate_entry {
@@ -136,7 +135,6 @@ typedef struct xdebug_aggregate_entry {
 	int         call_count;
 	double      time_own;
 	double      time_inclusive;
-	long        mem_used;
 	HashTable  *call_list;
 } xdebug_aggregate_entry;
 
