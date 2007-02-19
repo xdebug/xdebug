@@ -1,3 +1,9 @@
+Mon Feb 19 23:16:09 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_private.h
+xdebug/xdebug_profiler.c:
+- Removed support for Memory profiling as that didn't work properly.
+
 Sat Feb 17 23:23:38 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/bug00241.phpt:
