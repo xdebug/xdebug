@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.5 2005-09-24 20:00:12 derick Exp $
+dnl $Id: configure.in,v 1.6 2007-02-26 14:38:42 derick Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -200,9 +200,7 @@ AC_SUBST(INCLUDES)
 dnl
 dnl Output 
 dnl
-MAKES="Makefile"
-
-AC_OUTPUT([$MAKES], [], [
+AC_OUTPUT([Makefile], [], [
   if test "\$CONFIG_FILES" = "$MAKES" || test -z "\$CONFIG_FILES"; then
     REDO_ALL=yes
   fi
