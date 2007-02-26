@@ -1,3 +1,8 @@
+Mon Feb 26 15:38:42 CET 2007 Derick Rethans <derick@derickrethans.nl>
+debugclient/acinclude.m4
+xdebug/debugclient/configure.in:
+- Make this work with newer autoconf and automake.
+
 Mon Feb 19 23:16:09 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_private.h
