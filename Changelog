@@ -1,3 +1,16 @@
+Mon Feb 26 15:43:30 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_handler_gdb.h
+xdebug/xdebug_handlers.h:
+- Correctly add namespace definitions to XML.
+- Added the xdebug namespace that adds extra information to breakpoints
+  if available.
+- Stopped the use of <error> elements for exception breakpoints, as that
+  violates the protocol.
+
 Mon Feb 26 15:38:42 CET 2007 Derick Rethans <derick@derickrethans.nl>
 debugclient/acinclude.m4
 xdebug/debugclient/configure.in:
