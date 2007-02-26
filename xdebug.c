@@ -1273,7 +1273,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (handle_hit_value(extra_brk_info)) {
 					if (fse->user_defined == XDEBUG_INTERNAL || (breakpoint_type == XDEBUG_BRK_FUNC_RETURN)) {
-						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK)) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, NULL)) {
 							return 0;
 						}
 					} else {
@@ -2077,7 +2077,7 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		/* Check if we have a breakpoint on this exception */
 		if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
 			if (handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_error(&(XG(context)), 0, exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), XG(stack))) {
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, exception_ce->name, Z_STRVAL_P(message))) {
 					XG(remote_enabled) = 0;
 				}
 			}
@@ -2178,7 +2178,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	if (XG(remote_enabled)) {
 		if (xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info)) {
 			if (handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_error(&(XG(context)), 0, error_type_str, buffer, error_filename, error_lineno, XG(stack))) {
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, buffer)) {
 					XG(remote_enabled) = 0;
 				}
 			}
@@ -2580,7 +2580,7 @@ PHP_FUNCTION(xdebug_break)
 		file = zend_get_executed_filename(TSRMLS_C);
 		lineno = zend_get_executed_lineno(TSRMLS_C);
 
-		if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
+		if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
 			XG(remote_enabled) = 0;
 		}
 		RETURN_TRUE;
@@ -2868,7 +2868,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		if (XG(context).do_break) {
 			XG(context).do_break = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
@@ -2886,21 +2886,21 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		if (XG(context).do_finish && XG(context).next_level == level) { /* Check for "finish" */
 			XG(context).do_finish = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
 		} else if (XG(context).do_next && XG(context).next_level >= level) { /* Check for "next" */
 			XG(context).do_next = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
 		} else if (XG(context).do_step) { /* Check for "step" */
 			XG(context).do_step = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
@@ -2947,7 +2947,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						EG(error_reporting) = old_error_reporting;
 					}
 					if (break_ok && handle_hit_value(brk)) {
-						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK)) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
 							XG(remote_enabled) = 0;
 							break;
 						}

@@ -1228,6 +1228,8 @@ static int xdebug_send_stream(const char *name, const char *str, uint str_length
 	xdebug_xml_node *message;
 
 	message = xdebug_xml_node_init("stream");
+	xdebug_xml_add_attribute(message, "xmlns", "urn:debugger_protocol_v1");
+	xdebug_xml_add_attribute(message, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
 	xdebug_xml_add_attribute_ex(message, "type", (char *)name, 0, 0);
 	xdebug_xml_add_text_encodel(message, xdstrndup(str, str_length), str_length);
 	send_message(&XG(context), message TSRMLS_CC);
@@ -2178,7 +2180,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.116 $";
+	return "$Revision: 1.117 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2194,6 +2196,8 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
 		}
 
 		response = xdebug_xml_node_init("response");
+		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+		xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
 		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
 		if (ret != 1) {
 			send_message(context, response TSRMLS_CC);
@@ -2238,6 +2242,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	}
 
 	response = xdebug_xml_node_init("init");
+	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
 
 /* {{{ XML Init Stuff*/
 	child = xdebug_xml_node_init("engine");
@@ -2329,6 +2335,8 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	XG(status) = DBGP_STATUS_STOPPED;
 	XG(reason) = DBGP_REASON_OK;
 	response = xdebug_xml_node_init("response");
+	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
 	/* lastcmd and lasttransid are not always set (for example when the
 	 * connection is severed before the first command is send) */
 	if (XG(lastcmd) && XG(lasttransid)) {
@@ -2414,6 +2422,8 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 */
 
 	response = xdebug_xml_node_init("response");
+	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
 	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
 	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
 	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
@@ -2436,19 +2446,36 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	return 1;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, const char *file, long lineno, int type, char *exception, char *message)
 {
-	xdebug_xml_node *response;
+	xdebug_xml_node *response, *error_container;
 	TSRMLS_FETCH();
 
 	XG(status) = DBGP_STATUS_BREAK;
 	XG(reason) = DBGP_REASON_OK;
 
 	response = xdebug_xml_node_init("response");
+	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
 	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
 	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 1);
 	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
 	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
+
+	error_container = xdebug_xml_node_init("xdebug:message");
+	if (file) {
+		xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(file), 0, 1);
+	}
+	if (lineno) {
+		xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
+	}
+	if (exception) {
+		xdebug_xml_add_attribute_ex(error_container, "exception", xdstrdup(exception), 0, 1);
+	}
+	if (message) {
+		xdebug_xml_add_text(error_container, xdstrdup(message));
+	}
+	xdebug_xml_add_child(response, error_container);
 
 	send_message(context, response TSRMLS_CC);
 	xdebug_xml_node_dtor(response);

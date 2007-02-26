@@ -421,7 +421,7 @@ static void dump_used_var_with_contents(void *context, xdebug_hash_element* he)
 	}
 }
 
-static void print_sourceline(xdebug_con *h, char *file, int begin, int end, int offset, int response_format TSRMLS_DC)
+static void print_sourceline(xdebug_con *h, const char *file, int begin, int end, int offset, int response_format TSRMLS_DC)
 {
 	int    fd;
 	fd_buf fd_buffer = { NULL, 0 };
@@ -1341,7 +1341,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.85 $";
+	return "$Revision: 1.86 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
@@ -1453,7 +1453,7 @@ int xdebug_gdb_error(xdebug_con *context, int type, char *exception_type, char *
 	return 1;
 }
 
-int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type)
+int xdebug_gdb_breakpoint(xdebug_con *context, xdebug_llist *stack, const char *file, long lineno, int type, char *exception_type, char *message)
 {
 	function_stack_entry *i;
 	int    ret;
