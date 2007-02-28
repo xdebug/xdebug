@@ -1,3 +1,8 @@
+Wed Feb 28 20:44:32 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #243: show_exception_trace="0" ignored.
+- Fixed a segfault in rendering stack traces to error logs.
+
 Mon Feb 26 15:43:30 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c
