@@ -1671,8 +1671,17 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 	int is_cli = (strcmp("cli", sapi_module.name) == 0);
 	xdebug_llist_element *le;
 	function_stack_entry *i;
+	char                 *tmp_log_message;
 
-	if (PG(log_errors) && !is_cli && XG(stack) && XG(stack)->size) {
+	if (is_cli) {
+		return;
+	}
+
+	tmp_log_message = xdebug_sprintf( "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
+	php_log_err(tmp_log_message TSRMLS_CC);
+	xdfree(tmp_log_message);
+
+	if (XG(stack) && XG(stack)->size) {
 		php_log_err("PHP Stack trace:" TSRMLS_CC);
 
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -1697,11 +1706,16 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 					c = 1;
 				}
 				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
-				tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 				xdebug_str_add(&log_buffer, tmp_varname, 0);
-				xdebug_str_add(&log_buffer, tmp_value, 0);
 				xdfree(tmp_varname);
-				xdfree(tmp_value);
+
+				if (i->var[j].addr) {
+					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+					xdebug_str_add(&log_buffer, tmp_value, 0);
+					xdfree(tmp_value);
+				} else {
+					xdebug_str_addl(&log_buffer, "*uninitialized*", 15, 0);
+				}
 			}
 
 			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
@@ -1718,8 +1732,6 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 	int len;
 	char **formats;
 	xdebug_str str = {0, 0, NULL};
-
-	log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 
 	if (html) {
 		formats = html_formats;
@@ -2047,7 +2059,9 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	XG(last_exception_trace) = exception_trace;
 
 	if (XG(show_ex_trace)) {
-		log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+		if (PG(log_errors)) {
+			log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+		}
 		if (PG(display_errors)) {
 			php_printf("%s", exception_trace);
 		}
@@ -2145,21 +2159,20 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 #endif
 
-	/* Log to logger */
-	if (PG(log_errors) && (EG(error_reporting) & type)) {
-		char log_buffer[1024];
+	if (EG(error_reporting) & type) {
+		/* Log to logger */
+		if (PG(log_errors)) {
+			char log_buffer[1024];
 
 #ifdef PHP_WIN32
-		if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
-			MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
-		}
+			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
+				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
+			}
 #endif
-		snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-		php_log_err(log_buffer TSRMLS_CC);
-	}
+			log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+		}
 
-	if ((EG(error_reporting) & type)) { /* Otherwise print the default stack trace */
-		log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+		/* Display errors */
 		if (PG(display_errors)) {
 			char *printable_stack;
 
