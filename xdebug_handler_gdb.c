@@ -859,11 +859,16 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 	zval       retval;
 	char      *ret_value;
 	int        old_error_reporting;
+	int        eval_status;
+
 	TSRMLS_FETCH();
 
-	/* Remember error reporting level */
-	old_error_reporting = EG(error_reporting);
-	EG(error_reporting) = 0;
+	/* Remember error reporting level and debug session state */
+	old_error_reporting     = EG(error_reporting);
+	EG(error_reporting)     = 0;
+	XG(breakpoints_allowed) = 0;
+	XG(remote_enabled)      = 0;
+	XG(remote_enable)       = 0;
 
 	/* Concat all arguments back together */
 	xdebug_str_add(&buffer, args->args[0], 0);
@@ -873,22 +878,27 @@ char *xdebug_handle_eval(xdebug_con *context, xdebug_arg *args)
 		xdebug_str_add(&buffer, args->args[i], 0);
 	}
 
-	XG(breakpoints_allowed) = 0;
-	if (zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC) == FAILURE) {
-		xdebug_str_free(&buffer);
-		EG(error_reporting) = old_error_reporting;
-		XG(breakpoints_allowed) = 1;
+	/* Run eval statement */
+	eval_status = zend_eval_string(buffer.d, &retval, "xdebug eval" TSRMLS_CC);
+	xdebug_str_free(&buffer);
+
+	/* Restore error reporting level and debug session state */
+	EG(error_reporting)     = old_error_reporting;
+	XG(breakpoints_allowed) = 1;
+	XG(remote_enabled)      = 1;
+	XG(remote_enable)       = 1;
+
+	/* Return error message */
+	if (eval_status == FAILURE) {
 		return make_message(context, XDEBUG_E_EVAL, "Error evaluating code");
-	} else {
-		xdebug_str_free(&buffer);
-		EG(error_reporting) = old_error_reporting;
-		ret_value = return_printable_symbol(context, NULL, &retval);
-		SENDMSG(context->socket, xdebug_sprintf("%s\n", ret_value));
-		zval_dtor(&retval);
-		xdfree(ret_value);
-		XG(breakpoints_allowed) = 1;
-		return NULL;
-	}
+	} 
+
+	/* Return data */
+	ret_value = return_printable_symbol(context, NULL, &retval);
+	SENDMSG(context->socket, xdebug_sprintf("%s\n", ret_value));
+	zval_dtor(&retval);
+	xdfree(ret_value);
+	return NULL;
 }
 
 char *xdebug_handle_finish(xdebug_con *context, xdebug_arg *args)
@@ -1341,7 +1351,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.86 $";
+	return "$Revision: 1.87 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
