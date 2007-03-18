@@ -2180,7 +2180,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.117 $";
+	return "$Revision: 1.118 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2218,8 +2218,13 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	TSRMLS_FETCH();
 
 	/* initialize our status information */
-	XG(status) = DBGP_STATUS_STARTING;
-	XG(reason) = DBGP_REASON_OK;
+	if (mode == XDEBUG_REQ) {
+		XG(status) = DBGP_STATUS_STARTING;
+		XG(reason) = DBGP_REASON_OK;
+	} else if (mode == XDEBUG_JIT) {
+		XG(status) = DBGP_STATUS_BREAK;
+		XG(reason) = DBGP_REASON_ERROR;
+	}
 	XG(lastcmd) = NULL;
 	XG(lasttransid) = NULL;
 

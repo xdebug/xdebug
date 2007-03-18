@@ -16,7 +16,7 @@
    | Modifications: Derick Rethans <derick@xdebug.org>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.8 2005-09-29 20:42:27 helly Exp $ */
+/* $Id: xdebug_compat.c,v 1.9 2007-03-18 09:04:18 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"

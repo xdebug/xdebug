@@ -1088,7 +1088,9 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 				 * actually wanted  we can only access the name in case there
 				 * is an associated variable to receive the variable here. */
 				if (tmp->user_defined == XDEBUG_EXTERNAL && i < arguments_wanted) {
-					tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
+					if (op_array->arg_info[i].name) {
+						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
+					}
 				}
 # endif
 				if (XG(collect_params)) {
@@ -1107,7 +1109,9 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			 * function, so we have to gather only the name for those extra. */
 			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
 				for (i = arguments_sent; i < arguments_wanted; i++) {
-					tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
+					if (op_array->arg_info[i].name) {
+						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
+					}
 					tmp->var[tmp->varc].addr = NULL;
 					tmp->varc++;
 				}
@@ -1318,6 +1322,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		return;
 	}
 
+	XG(context).program_name = xdstrdup(op_array->filename);
+
 	if (XG(level) == 0) {
 		/* Set session cookie if requested */
 		if (
@@ -1386,7 +1392,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 			if (XG(context).socket >= 0) {
 				XG(remote_enabled) = 0;
-				XG(context).program_name = xdstrdup(op_array->filename);
 
 				/* Get handler from mode */
 				XG(context).handler = xdebug_handler_get(XG(remote_handler));
@@ -2029,6 +2034,28 @@ static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRML
 	}
 }
 
+static void xdebug_do_jit(TSRMLS_D)
+{
+	if (!XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
+		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		if (XG(context).socket >= 0) {
+			XG(remote_enabled) = 0;
+
+			/* Get handler from mode */
+			XG(context).handler = xdebug_handler_get(XG(remote_handler));
+			if (!XG(context).handler) {
+				zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
+			} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT)) {
+				/* The request could not be started, ignore it then */
+			} else {
+				/* All is well, turn off script time outs */
+				zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+				XG(remote_enabled) = 1;
+			}
+		}
+	}
+}
+
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 {
@@ -2068,25 +2095,8 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	}
 
 	/* Start JIT if requested and not yet enabled */
-	if (!XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
-		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
-		if (XG(context).socket >= 0) {
-			XG(remote_enabled) = 0;
-			XG(context).program_name = NULL;
+	xdebug_do_jit(TSRMLS_C);
 
-			/* Get handler from mode */
-			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			if (!XG(context).handler) {
-				zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
-			} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
-				/* The request could not be started, ignore it then */
-			} else {
-				/* All is well, turn off script time outs */
-				zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-				XG(remote_enabled) = 1;
-			}
-		}
-	}
 	if (XG(remote_enabled)) {
 		/* Check if we have a breakpoint on this exception */
 		if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
@@ -2187,7 +2197,10 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		}
 	}
 
-	/* Check for the pseudo exceptions to allow breakpoints on PHP error statusses */
+	/* Start JIT if requested and not yet enabled */
+	xdebug_do_jit(TSRMLS_C);
+
+	/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
 	if (XG(remote_enabled)) {
 		if (xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info)) {
 			if (handle_hit_value(extra_brk_info)) {
