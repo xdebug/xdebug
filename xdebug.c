@@ -1053,7 +1053,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 				tmp->lineno = cur_opcode->lineno;
 			}
 		}
-		if (XG(collect_params) || XG(collect_vars)) {
+		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
 			void **p;
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
