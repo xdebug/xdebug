@@ -1138,7 +1138,7 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 		case XFUNC_NORMAL: {
 			zend_function *zfunc;
 
-			if (PG(html_errors) && zend_hash_find(EG(function_table), f.function, strlen(f.function) + 1, (void**) &zfunc) == SUCCESS) {
+			if (PG(html_errors) && EG(function_table) && zend_hash_find(EG(function_table), f.function, strlen(f.function) + 1, (void**) &zfunc) == SUCCESS) {
 				if (html && zfunc->type == ZEND_INTERNAL_FUNCTION) {
 					return xdebug_sprintf("<a href='%s/%s' target='_new'>%s</a>\n", XG(manual_url), f.function, f.function);
 				} else {
