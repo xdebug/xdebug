@@ -1,3 +1,7 @@
+Fri Mar 23 19:37:23 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed a possible crash for when EG(function_table) = NULL.
+
 Sun Mar 18 10:21:14 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed a bug that prevented variable names from being recorded for remote
