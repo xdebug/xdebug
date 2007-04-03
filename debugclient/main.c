@@ -50,7 +50,7 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define DEBUGCLIENT_VERSION "0.9.1"
+#define DEBUGCLIENT_VERSION "0.10.0"
 #define DEFAULT_PORT        9000
 
 #ifdef HAVE_LIBEDIT
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 
 	/* Display copyright notice and version number */
 	printf("Xdebug Simple DBGp client (%s)\n", DEBUGCLIENT_VERSION);
-	printf("Copyright 2002-2006 by Derick Rethans.\n");
+	printf("Copyright 2002-2007 by Derick Rethans.\n");
 #ifdef HAVE_LIBEDIT
 	printf("- libedit support: enabled\n");
 #endif
@@ -250,6 +250,7 @@ int main(int argc, char *argv[])
 		while ((buffer = fd_read_line_delim(fd, &cxt, FD_RL_SOCKET, '\0', &length)) > 0) {
 			buffer = fd_read_line_delim(fd, &cxt, FD_RL_SOCKET, '\0', &length);
 			printf ("%s\n", buffer);
+			if (strstr(buffer, "<stream") == NULL)
 			{
 				/* The server requires a new command */
 
