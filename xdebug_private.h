@@ -107,7 +107,7 @@ typedef struct xdebug_var {
 #define XDEBUG_ERROR_STACK_DEPTH_INVALID           301
 #define XDEBUG_ERROR_CONTEXT_INVALID               302 /* unused */
 
-#define XDEBUG_ERROR_PROFILING_NOT_STARTED         400
+#define XDEBUG_ERROR_PROFILING_NOT_STARTED         800
 
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
