@@ -1386,8 +1386,11 @@ DBGP_FUNC(source)
 	if (CMD_OPTION('e')) {
 		end = strtol(CMD_OPTION('e'), NULL, 10);
 	}
+
 	/* return_source allocates memory for source */
+	XG(breakpoints_allowed) = 0;
 	source = return_source(filename, begin, end TSRMLS_CC);
+	XG(breakpoints_allowed) = 1;
 
 	if (!source) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_CANT_OPEN_FILE);
@@ -2180,7 +2183,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.118 $";
+	return "$Revision: 1.119 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

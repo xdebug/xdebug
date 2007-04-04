@@ -2201,7 +2201,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	xdebug_do_jit(TSRMLS_C);
 
 	/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
-	if (XG(remote_enabled)) {
+	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
 		if (xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info)) {
 			if (handle_hit_value(extra_brk_info)) {
 				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, buffer)) {
