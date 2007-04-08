@@ -28,6 +28,7 @@
 #include <sys/un.h>
 #else
 #include <winsock2.h>
+#define socklen_t int
 #endif
 #include <stdlib.h>
 #include <sys/stat.h>
