@@ -1,3 +1,7 @@
+Sun Apr 08 17:40:49 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+debugclient/main.c:
+- Make this compile on Windows again.
+
 Wed Apr 04 13:11:04 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c:
