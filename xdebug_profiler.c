@@ -188,7 +188,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	xdfree(tmp_name);
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
-		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 10000000));
+		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 1000000));
 	}
 	fflush(XG(profile_file));
 
@@ -204,7 +204,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 		fse->profile.time -= call_entry->time_taken;
 	}
-	fprintf(XG(profile_file), "%d %lu\n", default_lineno, (unsigned long) (fse->profile.time * 10000000));
+	fprintf(XG(profile_file), "%d %lu\n", default_lineno, (unsigned long) (fse->profile.time * 1000000));
 
 	/* update aggregate data */
 	if (XG(profiler_aggregate)) {
@@ -223,7 +223,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		}
 		
 		fprintf(XG(profile_file), "calls=1 0 0\n");
-		fprintf(XG(profile_file), "%d %lu\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 10000000));
+		fprintf(XG(profile_file), "%d %lu\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 1000000));
 	}
 	fprintf(XG(profile_file), "\n");
 	fflush(XG(profile_file));
@@ -248,9 +248,9 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 
 	fprintf(fp, "fl=%s\n", xae->filename);
 	fprintf(fp, "fn=%s\n", xae->function);
-	fprintf(fp, "%d %lu\n", 0, (unsigned long) (xae->time_own * 10000000));
+	fprintf(fp, "%d %lu\n", 0, (unsigned long) (xae->time_own * 1000000));
 	if (strcmp(xae->function, "{main}") == 0) {
-		fprintf(fp, "\nsummary: %lu\n\n", (unsigned long) (xae->time_inclusive * 10000000));
+		fprintf(fp, "\nsummary: %lu\n\n", (unsigned long) (xae->time_inclusive * 1000000));
 	}
 	if (xae->call_list) {
 		xdebug_aggregate_entry **xae_call;
@@ -259,7 +259,7 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 		while (zend_hash_get_current_data(xae->call_list, (void**)&xae_call) == SUCCESS) {
 			fprintf(fp, "cfn=%s\n", (*xae_call)->function);
 			fprintf(fp, "calls=%d 0 0\n", (*xae_call)->call_count);
-			fprintf(fp, "%d %lu\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 10000000));
+			fprintf(fp, "%d %lu\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 1000000));
 			zend_hash_move_forward(xae->call_list);
 		}
 	}
