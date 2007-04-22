@@ -1,3 +1,19 @@
+Sun Apr 22 14:32:10 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/stacktrace_html_0.phpt
+xdebug/tests/stacktrace_html_1.phpt
+xdebug/tests/stacktrace_html_2.phpt
+xdebug/tests/stacktrace_html_3.phpt
+xdebug/tests/stacktrace_html_4.phpt
+xdebug/tests/stacktrace_html_4_novar.phpt
+xdebug/tests/stacktrace_text_0.phpt
+xdebug/tests/stacktrace_text_1.phpt
+xdebug/tests/stacktrace_text_2.phpt
+xdebug/tests/stacktrace_text_3.phpt
+xdebug/tests/stacktrace_text_4.phpt
+xdebug/tests/stacktrace_text_4_novar.phpt:
+- Implemented different levels of showing variables.
+
 Sun Apr 22 14:28:43 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 tests/bug00241.phpt:
 - Fixed test case.
