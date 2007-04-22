@@ -1,3 +1,7 @@
+Sun Apr 22 14:28:43 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+tests/bug00241.phpt:
+- Fixed test case.
+
 Fri Apr 13 14:49:35 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_profiler.c:
 - Use µ seconds instead of a tenth of them to avoid confusion.
