@@ -10,6 +10,8 @@ xdebug.collect_params=1
 xdebug.collect_vars=1
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
+xdebug.var_display_max_depth=3
+xdebug.var_display_max_children=2
 --FILE--
 <?php
 function error_handler($errno, $string, $file, $line, $context)
@@ -78,7 +80,7 @@ array(5) {
       ["line"]=>
       string(2) "32"
       ["context"]=>
-      string(98) "array ('GLOBALS' => ..., '_ENV' => array ('SSH_AGENT_PID' => '3466', 'TERM' => 'xterm', ...), ...)"
+      string(%d) "array ('GLOBALS' => ..., '_ENV' => array ('%s' => '%s', '%s' => '%s', ...), ...)"
     }
   }
   [2]=>
