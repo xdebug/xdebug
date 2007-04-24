@@ -1843,7 +1843,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 			}
 
 			if (html) {
-				char *just_filename = strrchr(i->filename, '/');
+				char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
 				xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, just_filename, i->lineno), 1);
 			} else {
 				xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
