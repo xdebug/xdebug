@@ -1,3 +1,7 @@
+Tue Apr 24 16:17:40 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #255: Call Stack Table doesn't show Location on Windows.
+
 Sun Apr 22 14:32:10 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/stacktrace_html_0.phpt
