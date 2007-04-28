@@ -28,5 +28,5 @@ unlink($tf);
 --EXPECTF--
 test
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> db::query('test') /dat/dev/php/xdebug/tests/test20.php:9
+%w%f %w%d     -> db::query('test') /%s/test20.php:9
 %w%f %w%d     -> file_get_contents('/tmp/%s') /%s/test20.php:11
