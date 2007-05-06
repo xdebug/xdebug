@@ -4,7 +4,7 @@ Test for xdebug_peak_memory_usage
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.enable=1
-xdebug.collect_params=1
+xdebug.collect_params=3
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 --FILE--
@@ -26,13 +26,12 @@ xdebug.profiler_enable=0
 
 	unset($param);
 
-	$d = xdebug_memory_usage();
 	$e = xdebug_peak_memory_usage();
+	$d = xdebug_memory_usage();
 
 	var_dump($a, $b, $c, $d, $e);
 	echo ($b > $c) ? "Current is HIGHER than peak\n" : "Current is lower than peak\n";
 	echo ($d > $e) ? "Current is HIGHER than peak\n" : "Current is lower than peak\n";
-	echo ($c == $e) ? "Peak is equal\n" : "peak is NOT equal\n";
 ?>
 --EXPECTF--
 int(%d)
@@ -42,4 +41,3 @@ int(%d)
 int(%d)
 Current is lower than peak
 Current is lower than peak
-Peak is equal

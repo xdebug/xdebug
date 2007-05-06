@@ -4,7 +4,7 @@ Test with include file
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.auto_trace=0
-xdebug.collect_params=1
+xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0

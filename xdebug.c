@@ -1452,7 +1452,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars)) {
 		/* Because include/require is treated as a stack level, we have to add used
 		 * variables in include/required files to all the stack levels above, until
-		 * we hit a function or the to level stack.  This is so that the variables
+		 * we hit a function or the top level stack.  This is so that the variables
 		 * show up correctly where they should be.  We always call
 		 * add_used_variables on the current stack level, otherwise vars in include
 		 * files do not show up in the locals list.  */
@@ -1941,20 +1941,35 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 	xdfree(tmp_name);
 
 	/* Printing vars */
-	for (j = 0; j < i->varc; j++) {
-		char *tmp_value;
+	if (XG(collect_params) > 0) {
+		for (j = 0; j < i->varc; j++) {
+			char *tmp_value;
 
-		if (c) {
-			xdebug_str_addl(&str, ", ", 2, 0);
-		} else {
-			c = 1;
-		}
+			if (c) {
+				xdebug_str_addl(&str, ", ", 2, 0);
+			} else {
+				c = 1;
+			}
 
-		tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-		if (tmp_value) {
-			xdebug_str_add(&str, tmp_value, 1);
-		} else {
-			xdebug_str_add(&str, "???", 0);
+			if (i->var[j].name && XG(collect_params) >= 4) {
+				xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
+			}
+
+			switch (XG(collect_params)) {
+				case 1: // synopsis
+				case 2:
+					tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
+					break;
+				case 3:
+				default:
+					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+					break;
+			}
+			if (tmp_value) {
+				xdebug_str_add(&str, tmp_value, 1);
+			} else {
+				xdebug_str_add(&str, "???", 0);
+			}
 		}
 	}
 
@@ -2200,7 +2215,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	if (EG(error_reporting) & type) {
 		/* Log to logger */
 		if (PG(log_errors)) {
-			char log_buffer[1024];
 
 #ifdef PHP_WIN32
 			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
