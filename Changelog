@@ -1,3 +1,7 @@
+Wed May 09 11:04:22 CEST 2007 Jani Taskinen <sniper@php.net>
+xdebug.c:
+- Allow to trigger profiling by cookie.
+
 Sun May 06 16:36:17 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 test.sh
 xdebug/xdebug.c
