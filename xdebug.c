@@ -1426,6 +1426,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 						) || (
 							PG(http_globals)[TRACK_VARS_POST] && 
 							zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
+						) || (
+							PG(http_globals)[TRACK_VARS_COOKIE] && 
+							zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
 						)
 					)
 				)
