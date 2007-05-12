@@ -289,7 +289,7 @@ int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC)
 	if (!aggr_file) {
 		return FAILURE;
 	}
-	fprintf(aggr_file, "version: 0.9.6\npart: 1\n\nevents: Time Memory\n\n");
+	fprintf(aggr_file, "version: 0.9.6\ncmd: Aggregate\npart: 1\n\nevents: Time\n\n");
 	fflush(aggr_file);
 	zend_hash_apply_with_argument(&XG(aggr_calls), xdebug_print_aggr_entry, aggr_file TSRMLS_CC);
 	fclose(aggr_file);
