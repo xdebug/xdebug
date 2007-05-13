@@ -119,9 +119,6 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_debug_zval,            NULL)
 	PHP_FE(xdebug_debug_zval_stdout,     NULL)
 
-	PHP_FE(xdebug_enable,                NULL)
-	PHP_FE(xdebug_disable,               NULL)
-	PHP_FE(xdebug_is_enabled,            NULL)
 	PHP_FE(xdebug_break,                 NULL)
 
 	PHP_FE(xdebug_start_trace,           NULL)
@@ -265,7 +262,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.collect_params",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_return,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_vars,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_ALL,    OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_ALL,    OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
 #if ZEND_EXTENSION_API_NO < 90000000
@@ -744,13 +740,11 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Only enabled extended info when it is not disabled */
 	CG(extended_info) = XG(extended_info);
 
-	if (XG(default_enable)) {
-		zend_error_cb = new_error_cb;
-
+	zend_error_cb = new_error_cb;
 #ifdef ZEND_ENGINE_2
-		zend_throw_exception_hook = xdebug_throw_exception_hook;
+	zend_throw_exception_hook = xdebug_throw_exception_hook;
 #endif
-	}
+
 	XG(remote_enabled) = 0;
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
@@ -2614,33 +2608,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	efree(args);
 }
 /* }}} */
-
-PHP_FUNCTION(xdebug_enable)
-{
-	zend_error_cb = new_error_cb;
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
-	zend_throw_exception_hook = xdebug_throw_exception_hook;
-#endif
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
-	zend_opcode_handlers[ZEND_EXIT] = xdebug_exit_handler;
-#endif
-}
-
-PHP_FUNCTION(xdebug_disable)
-{
-	zend_error_cb = old_error_cb;
-#ifdef ZEND_ENGINE_2
-# if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0)
-	zend_opcode_handlers[ZEND_EXIT] = old_exit_handler;
-# endif
-	zend_throw_exception_hook = NULL;
-#endif
-}
-
-PHP_FUNCTION(xdebug_is_enabled)
-{
-	RETURN_BOOL(zend_error_cb == new_error_cb);
-}
 
 PHP_FUNCTION(xdebug_break)
 {
