@@ -1,3 +1,9 @@
+Sun May 13 17:10:00 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/tests/test3.phpt:
+- Get rid of xdebug.default_enable setting and associated functions.
+
 Sat May 12 03:41:19 CEST 2007 Jani Taskinen <sniper@php.net>
 xdebug_profiler.c:
 - Fixed the header format (callgrind_annotate failed..)
