@@ -38,6 +38,7 @@
 #include "usefulstuff.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/flock_compat.h"
+#include "main/php_ini.h"
 
 #define READ_BUFFER_SIZE 128
 
@@ -387,11 +388,9 @@ static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **n
 	}
 	fh = fopen(tmp_fname, mode);
 	if (fh && new_fname) {
-		if (new_fname) {
-			*new_fname = tmp_fname;
-		} else {
-			xdfree(tmp_fname);
-		}
+		*new_fname = tmp_fname;
+	} else {
+		xdfree(tmp_fname);
 	}
 	return fh;
 }
@@ -403,9 +402,9 @@ static FILE *xdebug_open_file_with_random_ext(char *fname, char *mode, char *ext
 	TSRMLS_FETCH();
 
 	if (extension) {
-		tmp_fname = xdebug_sprintf("%s.%08x.%s", fname, php_combined_lcg(TSRMLS_C), extension);
+		tmp_fname = xdebug_sprintf("%s.%06x.%s", fname, (long) (1000000 * php_combined_lcg(TSRMLS_C)), extension);
 	} else {
-		tmp_fname = xdebug_sprintf("%s.%08x", fname, php_combined_lcg(TSRMLS_C));
+		tmp_fname = xdebug_sprintf("%s.%06x", fname, (long) (1000000 * php_combined_lcg(TSRMLS_C)), extension);
 	}
 	fh = fopen(tmp_fname, mode);
 	if (fh && new_fname) {
@@ -434,40 +433,36 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 	if (extension) {
 		tmp_fname = xdebug_sprintf("%s.%s", fname, extension);
 	} else {
-		tmp_fname = xdebug_sprintf("%s", fname);
+		tmp_fname = xdstrdup(fname);
 	}
 	r = stat(tmp_fname, &buf);
 	/* We're not freeing "tmp_fname" as that is used in the freopen as well. */
 
 	if (r == -1) {
-		xdfree(tmp_fname);
-		tmp_fname = NULL;
 		/* 2. Cool, the file doesn't exist so we can open it without probs now. */
 		fh = xdebug_open_file(fname, "w", extension, new_fname);
 		goto lock;
 	}
 
 	/* 3. It exists, check if we can open it. */
-	fh = xdebug_open_file(fname, "r+", extension, (char**) &tmp_fname);
+	fh = xdebug_open_file(fname, "r+", extension, new_fname);
 	if (!fh) {
-		xdfree(tmp_fname);
-		tmp_fname = NULL;
 		/* 4. If fh == null we couldn't even open the file, so open a new one with a new name */
 		fh = xdebug_open_file_with_random_ext(fname, "w", extension, new_fname);
 		goto lock;
 	}
+
 	/* 5. It exists and we can open it, check if we can exclusively lock it. */
 	r = flock(fileno(fh), LOCK_EX | LOCK_NB);
 	if (r == -1) {
 		if (errno == EWOULDBLOCK) {
 			fclose(fh);
-			xdfree(tmp_fname);
-			tmp_fname = NULL;
 			/* 6. The file is in use, so we open one with a new name. */
 			fh = xdebug_open_file_with_random_ext(fname, "w", extension, new_fname);
 			goto lock;
 		}
 	}
+
 	/* 7. We established a lock, now we truncate and return the handle */
 	fh = freopen(tmp_fname, "w", fh);
 
@@ -477,10 +472,6 @@ lock: /* Yes yes, an evil goto label here!!! */
 		 * the file and opens it again. There is a small race condition here...
 		 */
 		flock(fileno(fh), LOCK_EX | LOCK_NB);
-		if (new_fname && tmp_fname) {
-			*new_fname = tmp_fname;
-			return fh;
-		}
 	}
 	xdfree(tmp_fname);
 	return fh;
@@ -493,11 +484,128 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 	if (extension) {
 		tmp_fname = xdebug_sprintf("%s.%s", fname, extension);
 	} else {
-		tmp_fname = xdebug_sprintf("%s", fname);
+		tmp_fname = xdstrdup(fname);
 	}
 	if (new_fname) {
 		*new_fname = tmp_fname;
+	} else {
+		xdfree(tmp_fname);
 	}
 	return fopen(tmp_fname, mode);
 }
 #endif
+
+int xdebug_format_output_filename(char **filename, char *format, char *script_name)
+{
+	xdebug_str fname = {0, 0, NULL};
+	TSRMLS_FETCH();
+	
+	while (*format)
+	{
+		if (*format != '%') {
+			xdebug_str_addl(&fname, (char *) format, 1, 0);
+		} else {
+			format++;
+			switch (*format)
+			{
+				case 'p': /* pid */
+					xdebug_str_add(&fname, xdebug_sprintf("%ld", getpid()), 1);
+					break;
+				
+				case 'r': /* random number */
+					xdebug_str_add(&fname, xdebug_sprintf("%06x", (long) (1000000 * php_combined_lcg(TSRMLS_C))), 1);
+					break;
+
+				case 's': { /* script fname */
+					char *char_ptr, *script_name_tmp = xdstrdup(script_name);
+
+					/* replace slashes and whitespace with underscores */
+					while ((char_ptr = strpbrk(script_name_tmp, "/\\ ")) != NULL) {
+						char_ptr[0] = '_';
+					}
+					/* replace .php with _php */
+					char_ptr = strrchr(script_name_tmp, '.');
+					if (char_ptr) {
+						char_ptr[0] = '_';
+					}
+					xdebug_str_add(&fname, script_name_tmp, 0);
+					xdfree(script_name_tmp);
+				}	break;
+
+				case 't': { /* timestamp (in seconds) */
+					time_t the_time = time(NULL);
+					xdebug_str_add(&fname, xdebug_sprintf("%ld", the_time), 1);
+				}	break;
+
+				case 'u': { /* timestamp (in microseconds) */
+					char *char_ptr, *utime = xdebug_sprintf("%f", xdebug_get_utime());
+					
+					/* Replace . with _ (or should it be nuked?) */
+					char_ptr = strrchr(utime, '.');  
+					if (char_ptr) {
+						char_ptr[0] = '_';
+					}
+					xdebug_str_add(&fname, utime, 1);
+				}	break;
+
+				case 'H':   /* $_SERVER['HTTP_HOST'] */
+				case 'R': { /* $_SERVER['REQUEST_URI'] */
+					zval **data;
+					char *char_ptr, *strval;
+					int retval;
+
+					if (PG(http_globals)[TRACK_VARS_SERVER]) {
+						switch (*format) {
+						case 'H':
+							retval = zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_HOST", sizeof("HTTP_HOST"), (void **) &data);
+							break;
+						case 'R':
+							retval = zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &data);
+							break;
+						}
+
+						if (retval == SUCCESS) {
+							strval = estrdup(Z_STRVAL_PP(data));
+							
+							/* replace slashes, dots, question marks, plus signs,
+							 * ambersands and spaces with underscores */
+							while ((char_ptr = strpbrk(strval, "/\\.?&+ ")) != NULL) {
+								char_ptr[0] = '_';
+							}
+							xdebug_str_add(&fname, strval, 0);
+							efree(strval);
+						}
+					}
+				}	break;
+
+				case 'S': { /* session id */
+					zval **data;
+					char *char_ptr, *strval;
+					char *sess_name;
+					
+					sess_name = zend_ini_string("session.name", sizeof("session.name"), 0);
+					
+					if (sess_name && PG(http_globals)[TRACK_VARS_COOKIE] &&
+						zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name) + 1, (void **) &data) == SUCCESS &&
+						Z_STRLEN_PP(data) < 100 /* Prevent any unrealistically long data being set as filename */
+					) {
+						strval = estrdup(Z_STRVAL_PP(data));
+						
+						/* replace slashes, dots, question marks, plus signs,
+						 * ambersands and spaces with underscores */
+						while ((char_ptr = strpbrk(strval, "/\\.?&+ ")) != NULL) {
+							char_ptr[0] = '_';
+						}
+						xdebug_str_add(&fname, strval, 0);
+						efree(strval);
+					}
+				}	break;
+			}
+		}
+		format++;
+	}
+	
+	*filename = fname.d;
+
+	return fname.l;
+}
