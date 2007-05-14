@@ -755,6 +755,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	}
 
 	/* Initialize some debugger context properties */
+	XG(context).program_name   = NULL;
 	XG(context).list.last_file = NULL;
 	XG(context).list.last_line = 0;
 	XG(context).do_break       = 0;
@@ -795,9 +796,9 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	if (XG(remote_enabled)) {
 		XG(context).handler->remote_deinit(&(XG(context)));
 		xdebug_close_socket(XG(context).socket); 
-		if (XG(context).program_name) {
-			xdfree(XG(context).program_name);
-		}
+	}
+	if (XG(context).program_name) {
+		xdfree(XG(context).program_name);
 	}
 
 	xdebug_llist_destroy(XG(stack), NULL);
