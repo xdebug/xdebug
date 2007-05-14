@@ -1,3 +1,21 @@
+Mon May 14 16:20:40 CEST 2007 Jani Taskinen <sniper@php.net>
+usefulstuff.c
+xdebug/usefulstuff.h
+xdebug/xdebug.c
+xdebug/xdebug_profiler.c
+xdebug/contrib/online_profiling_prepend.php:
+- Changed xdebug.profiler_output_name to use modifier tags:
+  %p = pid
+  %r = random number
+  %s = script name
+  %t = timestamp (seconds)
+  %u = timestamp (microseconds)
+  %H = $_SERVER['HTTP_HOST']
+  %R = $_SERVER['REQUEST_URI']
+  %S = session_id (from $_COOKIE if set)
+- Fixed some memleaks
+
+
 Mon May 14 10:25:17 CEST 2007 Jani Taskinen <sniper@php.net>
 xdebug.c:
 - Fix memleak.
