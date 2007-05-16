@@ -250,7 +250,7 @@ PHP_INI_BEGIN()
 	/* Debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  "/tmp",               PHP_INI_ALL,    OnUpdateString, trace_output_dir,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "crc32",              PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
 #if ZEND_EXTENSION_API_NO < 90000000
 	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateInt,    trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateInt,    trace_options,     zend_xdebug_globals, xdebug_globals)
@@ -2667,15 +2667,13 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	if (fname && strlen(fname)) {
 		filename = xdstrdup(fname);
 	} else {
-		if (strcmp(XG(trace_output_name), "crc32") == 0) {
-			VCWD_GETCWD(cwd, 127);
-			filename = xdebug_sprintf("%s/trace.%lu", XG(trace_output_dir), xdebug_crc32(cwd, strlen(cwd)));
-		} else if (strcmp(XG(trace_output_name), "timestamp") == 0) {
-			time_t the_time = time(NULL);
-			filename = xdebug_sprintf("%s/trace.%ld", XG(trace_output_dir), the_time);
-		} else {
-			filename = xdebug_sprintf("%s/trace.%ld", XG(trace_output_dir), getpid());
+		if (!strlen(XG(trace_output_name)) ||
+			xdebug_format_output_filename(&fname, XG(trace_output_name), NULL) <= 0
+		) {
+			/* Invalid or empty xdebug.trace_output_name */
+			return NULL;
 		}
+		filename = xdebug_sprintf("%s/%s", XG(trace_output_dir), fname);
 	}
 	if (options & XDEBUG_TRACE_OPTION_APPEND) {
 		XG(trace_file) = xdebug_fopen(filename, "a", "xt", (char**) &tmp_fname);
