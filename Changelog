@@ -1,3 +1,8 @@
+Wed May 16 17:53:31 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- Added the c (crc32 of the cwd) and the % modifiers (literal %).
+- Fixed the s modifier in case the script name is not available.
+
 Wed May 16 17:43:27 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_superglobals.c:
 - Fixed xdebug_dump_superglobals() in case no super globals were configured.
