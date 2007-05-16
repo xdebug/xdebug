@@ -194,12 +194,18 @@ void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str)
 PHP_FUNCTION(xdebug_dump_superglobals)
 {
 	int html = PG(html_errors);
+	char *superglobal_info = NULL;
 
 	if (html) {
 		php_printf("<table border='1' cellspacing='0'>\n");
 	}
 
-	php_printf("%s", xdebug_get_printable_superglobals(html TSRMLS_CC));
+	superglobal_info = xdebug_get_printable_superglobals(html TSRMLS_CC);
+	if (superglobal_info) {
+		php_printf("%s", xdebug_get_printable_superglobals(html TSRMLS_CC));
+	} else {
+		php_printf("<tr><td><i>No information about superglobals is available or configured.</i></td></tr>\n");
+	}
 
 	if (html) {
 		php_printf("</table>\n");
