@@ -1,3 +1,7 @@
+Wed May 16 17:43:27 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_superglobals.c:
+- Fixed xdebug_dump_superglobals() in case no super globals were configured.
+
 Mon May 14 16:20:40 CEST 2007 Jani Taskinen <sniper@php.net>
 usefulstuff.c
 xdebug/usefulstuff.h
