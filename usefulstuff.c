@@ -498,6 +498,7 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 int xdebug_format_output_filename(char **filename, char *format, char *script_name)
 {
 	xdebug_str fname = {0, 0, NULL};
+	char       cwd[128];
 	TSRMLS_FETCH();
 	
 	while (*format)
@@ -508,6 +509,11 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 			format++;
 			switch (*format)
 			{
+				case 'c': /* crc32 of the current working directory */
+					VCWD_GETCWD(cwd, 127);
+					xdebug_str_add(&fname, xdebug_sprintf("%lu", xdebug_crc32(cwd, strlen(cwd))), 1);
+					break;
+
 				case 'p': /* pid */
 					xdebug_str_add(&fname, xdebug_sprintf("%ld", getpid()), 1);
 					break;
@@ -517,7 +523,17 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 					break;
 
 				case 's': { /* script fname */
-					char *char_ptr, *script_name_tmp = xdstrdup(script_name);
+					char *char_ptr, *script_name_tmp;
+				
+					/* we do not always have script_name available, so if we
+					 * don't have it and this format specifier is used then we
+					 * make this function fail by returning 0. */
+					if (!script_name) {
+						return 0;
+					}
+
+					/* create a copy to work on */
+					script_name_tmp = xdstrdup(script_name);
 
 					/* replace slashes and whitespace with underscores */
 					while ((char_ptr = strpbrk(script_name_tmp, "/\\ ")) != NULL) {
@@ -592,7 +608,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 						strval = estrdup(Z_STRVAL_PP(data));
 						
 						/* replace slashes, dots, question marks, plus signs,
-						 * ambersands and spaces with underscores */
+						 * ampersands and spaces with underscores */
 						while ((char_ptr = strpbrk(strval, "/\\.?&+ ")) != NULL) {
 							char_ptr[0] = '_';
 						}
@@ -600,6 +616,10 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 						efree(strval);
 					}
 				}	break;
+
+				case '%': /* literal % */
+					xdebug_str_addl(&fname, "%", 1, 0);
+					break;
 			}
 		}
 		format++;
