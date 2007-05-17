@@ -1,3 +1,9 @@
+Thu May 17 21:50:04 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+tests/bug00173.phpt
+xdebug/tests/bug00184.phpt
+xdebug/tests/start_trace.phpt:
+- Fixed some test cases.
+
 Thu May 17 21:47:57 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Back to -dev.
