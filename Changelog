@@ -1,3 +1,9 @@
+Thu May 17 17:26:18 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/php_xdebug.h:
+- GO with RC4.
+
 Wed May 16 18:11:24 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Reimplemented file naming for trace files to use the new output formatting
