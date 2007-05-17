@@ -8,6 +8,7 @@ xdebug.default_enable=1
 xdebug.auto_trace=1
 xdebug.trace_options=0
 xdebug.trace_output_dir=/tmp
+xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
 xdebug.collect_params=1
 xdebug.auto_profile=0

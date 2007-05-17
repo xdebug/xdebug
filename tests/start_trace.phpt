@@ -12,7 +12,7 @@ xdebug.profiler_enable=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
 xdebug.trace_output_dir=/tmp
-xdebug.trace_output_name=crc32
+xdebug.trace_output_name=trace.%c
 --FILE--
 <?php
 	$tf = xdebug_start_trace();
