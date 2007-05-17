@@ -32,27 +32,55 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>beta</state>
-    <version>2.0.0RC3</version>
-    <date>2007-01-31</date>
+    <version>2.0.0RC4</version>
+    <date>2007-05-17</date>
     <notes>
-Wed, Jan 31, 2007 - xdebug 2.0.0rc3
+Wed, May 17, 2007 - xdebug 2.0.0rc4
 + Changes:
-	- Removed the bogus "xdebug.allowed_clients" setting - it was not
-	  implemented.
-	- Optimized used variable collection by switching to a linked list instead
-	  of a hash. This is about 30% faster, but it needed a quick conversion to
-	  hash in the case the information had to be shown to remove duplicate
-	  variable names.
+	- Use µ seconds instead of a tenths of µ seconds to avoid confusion in
+	  profile information.
+	- Changed xdebug.profiler_output_name and xdebug.trace_output_name to use
+	  modifier tags:
+	  %c = crc32 of the current working directory
+	  %p = pid
+	  %r = random number
+	  %s = script name
+	  %t = timestamp (seconds)
+	  %u = timestamp (microseconds)
+	  %H = $_SERVER['HTTP_HOST']
+	  %R = $_SERVER['REQUEST_URI']
+	  %S = session_id (from $_COOKIE if set)
+	  %% = literal %
 
 = Fixed bugs:
-	- Fixed bug #232: PHP log_errors functionality lost after enabling xdebug
-	  error handler when CLI is used.
-	- Fixed problems with opening files - the filename could cause double free
-	  issues.
-	- Fixed memory tracking as memory_limit is always enabled in PHP 5.2.1 and
-	  later.
-	- Fixed a segfault that occurred when creating printable stack traces and
-	  collect_params was turned off.
+	- Fixed bug #255: Call Stack Table doesn't show Location on Windows.
+	- Fixed bug #251: Using the source command with an invalid filename returns
+	  unexpected result.
+	- Fixed bug #243: show_exception_trace="0" ignored.
+	- Fixed bug #241: Crash in xdebug_get_function_stack().
+	- Fixed bug #240: Crash with xdebug.remote_log on Windows.
+	- Fixed a segfault in rendering stack traces to error logs.
+	- Fixed a bug that prevented variable names from being recorded for remote
+	  debug session while xdebug.collect_vars was turned off.
+	- Fixed xdebug_dump_superglobals() in case no super globals were
+	  configured.
+
+- Removed functions:
+	- Removed support for Memory profiling as that didn't work properly.
+	- Get rid of xdebug.default_enable setting and associated functions:
+	  xdebug_disable() and xdebug_enable().
+
++ Added features:
+	- Implemented support for four different xdebug.collect_params settings for
+	  stack traces and function traces.
+	- Allow to trigger profiling by the XDEBUG_PROFILE cookie.
+
++ DBGP:
+	- Correctly add namespace definitions to XML.
+	- Added the xdebug namespace that adds extra information to breakpoints if
+	  available.
+	- Stopped the use of &gt;error> elements for exception breakpoints, as that
+	  violates the protocol.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -140,6 +168,59 @@ Wed, Jan 31, 2007 - xdebug 2.0.0rc3
     </deps>
   </release>
   <changelog>
+    <release>
+      <state>beta</state>
+      <version>2.0.0RC4</version>
+      <date>2007-05-17</date>
+      <notes>
+Wed, May 17, 2007 - xdebug 2.0.0rc4
++ Changes:
+	- Use µ seconds instead of a tenths of µ seconds to avoid confusion in
+	  profile information.
+	- Changed xdebug.profiler_output_name and xdebug.trace_output_name to use
+	  modifier tags:
+	  %c = crc32 of the current working directory
+	  %p = pid
+	  %r = random number
+	  %s = script name
+	  %t = timestamp (seconds)
+	  %u = timestamp (microseconds)
+	  %H = $_SERVER['HTTP_HOST']
+	  %R = $_SERVER['REQUEST_URI']
+	  %S = session_id (from $_COOKIE if set)
+	  %% = literal %
+
+= Fixed bugs:
+	- Fixed bug #255: Call Stack Table doesn't show Location on Windows.
+	- Fixed bug #251: Using the source command with an invalid filename returns
+	  unexpected result.
+	- Fixed bug #243: show_exception_trace="0" ignored.
+	- Fixed bug #241: Crash in xdebug_get_function_stack().
+	- Fixed bug #240: Crash with xdebug.remote_log on Windows.
+	- Fixed a segfault in rendering stack traces to error logs.
+	- Fixed a bug that prevented variable names from being recorded for remote
+	  debug session while xdebug.collect_vars was turned off.
+	- Fixed xdebug_dump_superglobals() in case no super globals were
+	  configured.
+
+- Removed functions:
+	- Removed support for Memory profiling as that didn't work properly.
+	- Get rid of xdebug.default_enable setting and associated functions:
+	  xdebug_disable() and xdebug_enable().
+
++ Added features:
+	- Implemented support for four different xdebug.collect_params settings for
+	  stack traces and function traces.
+	- Allow to trigger profiling by the XDEBUG_PROFILE cookie.
+
++ DBGP:
+	- Correctly add namespace definitions to XML.
+	- Added the xdebug namespace that adds extra information to breakpoints if
+	  available.
+	- Stopped the use of &gt;error> elements for exception breakpoints, as that
+	  violates the protocol.
+      </notes>
+    </release>
     <release>
       <state>beta</state>
       <version>2.0.0RC3</version>

@@ -1,3 +1,51 @@
+Wed, May 17, 2007 - xdebug 2.0.0rc4
++ Changes:
+	- Use µ seconds instead of a tenths of µ seconds to avoid confusion in
+	  profile information.
+	- Changed xdebug.profiler_output_name and xdebug.trace_output_name to use
+	  modifier tags:
+	  %c = crc32 of the current working directory
+	  %p = pid
+	  %r = random number
+	  %s = script name
+	  %t = timestamp (seconds)
+	  %u = timestamp (microseconds)
+	  %H = $_SERVER['HTTP_HOST']
+	  %R = $_SERVER['REQUEST_URI']
+	  %S = session_id (from $_COOKIE if set)
+	  %% = literal %
+
+= Fixed bugs:
+	- Fixed bug #255: Call Stack Table doesn't show Location on Windows.
+	- Fixed bug #251: Using the source command with an invalid filename returns
+	  unexpected result.
+	- Fixed bug #243: show_exception_trace="0" ignored.
+	- Fixed bug #241: Crash in xdebug_get_function_stack().
+	- Fixed bug #240: Crash with xdebug.remote_log on Windows.
+	- Fixed a segfault in rendering stack traces to error logs.
+	- Fixed a bug that prevented variable names from being recorded for remote
+	  debug session while xdebug.collect_vars was turned off.
+	- Fixed xdebug_dump_superglobals() in case no super globals were
+	  configured.
+
+- Removed functions:
+	- Removed support for Memory profiling as that didn't work properly.
+	- Get rid of xdebug.default_enable setting and associated functions:
+	  xdebug_disable() and xdebug_enable().
+
++ Added features:
+	- Implemented support for four different xdebug.collect_params settings for
+	  stack traces and function traces.
+	- Allow to trigger profiling by the XDEBUG_PROFILE cookie.
+
++ DBGP:
+	- Correctly add namespace definitions to XML.
+	- Added the xdebug namespace that adds extra information to breakpoints if
+	  available.
+	- Stopped the use of <error> elements for exception breakpoints, as that
+	  violates the protocol.
+
+
 Wed, Jan 31, 2007 - xdebug 2.0.0rc3
 + Changes:
 	- Removed the bogus "xdebug.allowed_clients" setting - it was not
