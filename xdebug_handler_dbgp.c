@@ -674,14 +674,17 @@ static char* return_source(char *filename, int begin, int end TSRMLS_DC)
 }
 
 
-static int check_evaled_code(function_stack_entry *fse, char **filename, int *lineno TSRMLS_DC)
+static int check_evaled_code(function_stack_entry *fse, char **filename, int *lineno, int use_fse TSRMLS_DC)
 {
 	char *end_marker;
 	xdebug_eval_info *ei;
+	char *filename_to_use;
 
-	end_marker = fse->filename + strlen(fse->filename) - strlen("eval()'d code");
+	filename_to_use = use_fse ? fse->filename : *filename;
+
+	end_marker = filename_to_use + strlen(filename_to_use) - strlen("eval()'d code");
 	if (strcmp("eval()'d code", end_marker) == 0) {
-		if (xdebug_hash_find(XG(context).eval_id_lookup, fse->filename, strlen(fse->filename), (void *) &ei)) {
+		if (xdebug_hash_find(XG(context).eval_id_lookup, filename_to_use, strlen(filename_to_use), (void *) &ei)) {
 			*filename = xdebug_sprintf("dbgp://%lu", ei->id);
 		}
 		return 1;
@@ -706,7 +709,7 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 	xdebug_xml_add_attribute_ex(tmp, "where", xdstrdup(tmp_fname), 0, 1);
 	xdebug_xml_add_attribute_ex(tmp, "level", xdebug_sprintf("%ld", nr), 0, 1);
 	if (fse_prev) {
-		if (check_evaled_code(fse_prev, &tmp_filename, &tmp_lineno TSRMLS_CC)) {
+		if (check_evaled_code(fse_prev, &tmp_filename, &tmp_lineno, 1 TSRMLS_CC)) {
 			xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("eval"), 0, 1);
 			xdebug_xml_add_attribute_ex(tmp, "filename", tmp_filename, 0, 0);
 		} else {
@@ -715,9 +718,16 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 		}
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno TSRMLS_CC), 0, 1);
 	} else {
-		xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("file"), 0, 1);
-		xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(zend_get_executed_filename(TSRMLS_C) TSRMLS_CC), 0, 1);
-		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", zend_get_executed_lineno(TSRMLS_C)), 0, 1);
+		tmp_filename = zend_get_executed_filename(TSRMLS_C);
+		tmp_lineno = zend_get_executed_lineno(TSRMLS_C);
+		if (check_evaled_code(fse, &tmp_filename, &tmp_lineno, 0 TSRMLS_CC)) {
+			xdebug_xml_add_attribute_ex(tmp, "type", xdstrdup("eval"), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", tmp_filename, 0, 0);
+		} else {
+			xdebug_xml_add_attribute_ex(tmp, "type", xdstrdup("file"), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(tmp_filename), 0, 1);
+		}
+		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", tmp_lineno), 0, 1);
 	}
 
 	xdfree(tmp_fname);
@@ -2183,7 +2193,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.119 $";
+	return "$Revision: 1.120 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2472,7 +2482,13 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, const char 
 
 	error_container = xdebug_xml_node_init("xdebug:message");
 	if (file) {
-		xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(file), 0, 1);
+		char *tmp_filename = file;
+		int tmp_lineno = lineno;
+		if (check_evaled_code(NULL, &tmp_filename, &tmp_lineno, 0 TSRMLS_CC)) {
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(tmp_filename), 0, 1);
+		} else {
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(file), 0, 1);
+		}
 	}
 	if (lineno) {
 		xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
