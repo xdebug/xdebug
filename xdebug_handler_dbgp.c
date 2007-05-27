@@ -1946,6 +1946,8 @@ DBGP_FUNC(context_get)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 			break;
 	}
+
+	xdebug_xml_add_attribute_ex(*retval, "context", xdebug_sprintf("%d", context_id), 0, 1);
 }
 
 DBGP_FUNC(xcmd_profiler_name_get)
@@ -2193,7 +2195,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.120 $";
+	return "$Revision: 1.121 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
