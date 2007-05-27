@@ -87,6 +87,11 @@ PHP_FUNCTION(xdebug_var_dump);
 PHP_FUNCTION(xdebug_debug_zval);
 PHP_FUNCTION(xdebug_debug_zval_stdout);
 
+/* activation functions */
+PHP_FUNCTION(xdebug_enable);
+PHP_FUNCTION(xdebug_disable);
+PHP_FUNCTION(xdebug_is_enabled);
+
 /* breaking functions */
 PHP_FUNCTION(xdebug_break);
 
@@ -115,6 +120,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          level;
 	xdebug_llist *stack;
 	long          max_nesting_level;
+	zend_bool     default_enable;
 	zend_bool     collect_includes;
 	zend_bool     collect_params;
 	zend_bool     collect_return;
