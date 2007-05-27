@@ -1,3 +1,12 @@
+Sun May 27 23:25:52 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+html/rss.xml
+www.derickrethans.nl/html/files/php-secrets-phptek7.pdf
+xdebug/php_xdebug.h
+xdebug/xdebug.c
+xdebug/tests/test3.phpt:
+- Put back the disabling of stack traces - apperently people were relying on
+  this.
+
 Sat May 26 21:55:43 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed issues with recognizing eval'ed statements in the top scope of the
