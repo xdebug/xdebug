@@ -1,3 +1,7 @@
+Sun May 27 23:57:17 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #273: Remote debugging: context_get does not return context id.
+
 Sun May 27 23:25:52 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 html/rss.xml
 www.derickrethans.nl/html/files/php-secrets-phptek7.pdf
