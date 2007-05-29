@@ -2712,7 +2712,6 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 {
 	char *str_time;
 	char *filename;
-	char  cwd[128];
 	char *tmp_fname = NULL;
 
 	if (fname && strlen(fname)) {
