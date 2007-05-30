@@ -1,3 +1,7 @@
+Wed May 30 19:34:09 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Made this compile on PHP 5.0 and 5.1 again.
+
 Tue May 29 16:17:46 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Removed unused variable.
