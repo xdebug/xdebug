@@ -2196,7 +2196,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	if (PG(last_error_file)) {
 		free(PG(last_error_file));
 	}
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
 	PG(last_error_type) = type;
+#endif
 	PG(last_error_message) = strdup(buffer);
 	PG(last_error_file) = strdup(error_filename);
 	PG(last_error_lineno) = error_lineno;
