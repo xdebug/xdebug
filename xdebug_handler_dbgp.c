@@ -2195,7 +2195,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.122 $";
+	return "$Revision: 1.123 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
@@ -2489,7 +2489,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, const char 
 		if (check_evaled_code(NULL, &tmp_filename, &tmp_lineno, 0 TSRMLS_CC)) {
 			xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(tmp_filename), 0, 1);
 		} else {
-			xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(file), 0, 1);
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_path_to_url(file TSRMLS_CC), 0, 1);
 		}
 	}
 	if (lineno) {
