@@ -253,8 +253,8 @@ char *xdebug_raw_url_encode(char const *s, int len, int *new_length, int skip_sl
 	for (x = 0, y = 0; len--; x++, y++) {
 		str[y] = (unsigned char) s[x];
 		if ((str[y] < '0' && str[y] != '-' && str[y] != '.' && (str[y] != '/' || !skip_slash)) ||
-			(str[y] < 'A' && str[y] > '9') ||
-			(str[y] > 'Z' && str[y] < 'a' && str[y] != '_') ||
+			(str[y] < 'A' && str[y] > '9' && str[y] != ':') ||
+			(str[y] > 'Z' && str[y] < 'a' && str[y] != '_' && (str[y] != '\\' || !skip_slash)) ||
 			(str[y] > 'z'))
 		{
 			str[y++] = '%';
