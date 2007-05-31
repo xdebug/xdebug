@@ -2189,6 +2189,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	error_type_str = xdebug_error_type(type);
 
+#if PHP_MAJOR_VERSION >= 5
 	/* Store last error message for error_get_last() */
 	if (PG(last_error_message)) {
 		free(PG(last_error_message));
@@ -2202,6 +2203,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	PG(last_error_message) = strdup(buffer);
 	PG(last_error_file) = strdup(error_filename);
 	PG(last_error_lineno) = error_lineno;
+#endif
 
 #if PHP_MAJOR_VERSION >= 5
 	/* according to error handling mode, suppress error, throw exception or show it */
