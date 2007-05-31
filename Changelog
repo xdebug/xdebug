@@ -1,3 +1,7 @@
+Thu May 31 20:41:27 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- ZTS fix.
+
 Wed May 30 19:34:09 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Made this compile on PHP 5.0 and 5.1 again.
