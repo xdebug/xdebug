@@ -1,3 +1,7 @@
+Thu May 31 20:42:48 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- "Last error" bits are only available in PHP 5 and later.
+
 Thu May 31 20:41:27 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - ZTS fix.
