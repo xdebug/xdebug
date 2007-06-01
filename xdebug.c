@@ -1043,7 +1043,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 #if (PHP_MAJOR_VERSION == 6) || \
 	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || \
-	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0 && PHP_RELEASE_VERSION > 5) || \
+	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 0 && PHP_RELEASE_VERSION > 3) || \
 	(PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 4 && PHP_RELEASE_VERSION > 0)
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
