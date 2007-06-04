@@ -818,7 +818,8 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node(char *name, zval *val, xdebug_va
 
 static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level, debug_zval;
+	int level, debug_zval, newlen;
+	char *tmp_str;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
 	TSRMLS_FETCH();
@@ -836,7 +837,11 @@ static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list ar
 		if (hash_key->nKeyLength==0) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, COLOR_POINTER), 1);
 		} else { /* string key */
-			xdebug_str_add(str, xdebug_sprintf("'%s' <font color='%s'>=&gt;</font> ", hash_key->arKey, COLOR_POINTER), 1);
+			xdebug_str_addl(str, "'", 1, 0);
+			tmp_str = xdebug_xmlize(hash_key->arKey, hash_key->nKeyLength - 1, &newlen);
+			xdebug_str_addl(str, tmp_str, newlen, 0);
+			efree(tmp_str);
+			xdebug_str_add(str, xdebug_sprintf("' <font color='%s'>=&gt;</font> ", COLOR_POINTER), 1);
 		}
 		xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}
@@ -1119,7 +1124,10 @@ char* xdebug_xmlize(char *string, int len, int *newlen)
 
 		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, newlen);
 		efree(tmp);
-		return tmp2;
+
+		tmp = php_str_to_str(tmp2, len, "\0", 1, "&#0;", 4, newlen);
+		efree(tmp2);
+		return tmp;
 	} else {
 		*newlen = len;
 		return estrdup(string);
