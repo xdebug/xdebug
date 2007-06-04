@@ -1,3 +1,9 @@
+Mon Jun 04 18:05:20 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+test-4.3.sh
+xdebug/xdebug_var.c
+xdebug/tests/bug00280.phpt:
+- Fixed bug #280: var_dump don't display key of array as expected.
+
 Fri Jun 01 14:23:36 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #270: Debugger aborts when PHP's eval() is encountered. 
