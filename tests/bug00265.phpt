@@ -4,6 +4,11 @@ Test for bug #265: Xdebug's error handler breaks error_get_last().
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 <?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
 --INI--
+xdebug.default_enable=1
+xdebug.dump_globals=0
+xdebug.show_mem_delta=0
+xdebug.profiler_enable=0
+xdebug.trace_format=0
 --FILE--
 <?php
 register_shutdown_function( 'f' );
@@ -28,7 +33,7 @@ array(4) {
   ["message"]=>
   string(21) "Undefined variable: b"
   ["file"]=>
-  string(46) "%sbug00265.php"
+  string(%d) "%sbug00265.php"
   ["line"]=>
   int(6)
 }
@@ -44,7 +49,7 @@ array(4) {
   ["message"]=>
   string(21) "Undefined variable: b"
   ["file"]=>
-  string(46) "%sbug00265.php"
+  string(%d) "%sbug00265.php"
   ["line"]=>
   int(8)
 }
@@ -60,7 +65,7 @@ array(4) {
   ["message"]=>
   string(34) "Call to undefined function gabba()"
   ["file"]=>
-  string(46) "%sbug00265.php"
+  string(%d) "%sbug00265.php"
   ["line"]=>
   int(10)
 }
