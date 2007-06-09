@@ -1,3 +1,7 @@
+Sun Jun 10 00:00:37 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #278: Code Coverage Issue.
+
 Sat Jun 09 16:43:31 CEST 2007 Jani Taskinen <sniper@php.net>
 tests/bug00265.phpt:
 - fix test
