@@ -535,8 +535,8 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 					/* create a copy to work on */
 					script_name_tmp = xdstrdup(script_name);
 
-					/* replace slashes and whitespace with underscores */
-					while ((char_ptr = strpbrk(script_name_tmp, "/\\ ")) != NULL) {
+					/* replace slashes, whitespace and colons with underscores */
+					while ((char_ptr = strpbrk(script_name_tmp, "/\\: ")) != NULL) {
 						char_ptr[0] = '_';
 					}
 					/* replace .php with _php */
