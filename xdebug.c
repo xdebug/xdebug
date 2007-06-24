@@ -991,6 +991,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
 	tmp->op_array      = op_array;
 	tmp->symbol_table  = NULL;
+	tmp->execute_data  = NULL;
 
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		/* Normal function calls */
@@ -1460,6 +1461,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	trace_function_begin(fse, function_nr TSRMLS_CC);
 
 	fse->symbol_table = EG(active_symbol_table);
+	fse->execute_data = EG(current_execute_data);
 
 	if (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars)) {
 		/* Because include/require is treated as a stack level, we have to add used
@@ -1529,6 +1531,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	fse->symbol_table = NULL;
+	fse->execute_data = NULL;
 	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
 	XG(level)--;
 }

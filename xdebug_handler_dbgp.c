@@ -306,7 +306,11 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 #ifdef ZEND_ENGINE_2
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
-				retval_p = EG(This);
+				if (XG(active_execute_data)) {
+					retval_p = XG(active_execute_data)->object;
+				} else {
+					retval_p = NULL;
+				}
 				goto cleanup;
 			}
 #endif
@@ -1589,7 +1593,7 @@ static int add_variable_node(xdebug_xml_node *node, char *name, int name_length,
 
 DBGP_FUNC(property_get)
 {
-	int                        depth = -1;
+	int                        depth = 0;
 	int                        context_nr = 0;
 	function_stack_entry      *fse;
 	int                        old_max_data;
@@ -1609,14 +1613,11 @@ DBGP_FUNC(property_get)
 
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
-		if (depth == -1) {
-			XG(active_symbol_table) = EG(active_symbol_table);
+		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+			XG(active_symbol_table) = fse->symbol_table;
+			XG(active_execute_data) = fse->execute_data;
 		} else {
-			if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-				XG(active_symbol_table) = fse->symbol_table;
-			} else {
-				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
-			}
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
 	} else { /* superglobals */
 		XG(active_symbol_table) = &EG(symbol_table);
@@ -1644,7 +1645,7 @@ DBGP_FUNC(property_set)
 	char                      *data = CMD_OPTION('-');
 	char                      *new_value;
 	int                        new_length;
-	int                        depth = -1;
+	int                        depth = 0;
 	int                        context_nr = 0;
 	int                        res;
 	char                      *eval_string;
@@ -1672,14 +1673,11 @@ DBGP_FUNC(property_set)
 
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
-		if (depth == -1) {
-			XG(active_symbol_table) = EG(active_symbol_table);
+		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+			XG(active_symbol_table) = fse->symbol_table;
+			XG(active_execute_data) = fse->execute_data;
 		} else {
-			if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-				XG(active_symbol_table) = fse->symbol_table;
-			} else {
-				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
-			}
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
 	} else { /* superglobals */
 		XG(active_symbol_table) = &EG(symbol_table);
@@ -1762,7 +1760,7 @@ static int add_variable_contents_node(xdebug_xml_node *node, char *name, int nam
 
 DBGP_FUNC(property_value)
 {
-	int                        depth = -1;
+	int                        depth = 0;
 	function_stack_entry      *fse;
 	int                        old_max_data;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
@@ -1774,15 +1772,13 @@ DBGP_FUNC(property_value)
 	if (CMD_OPTION('d')) {
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
 	}
+
 	/* Set the symbol table corresponding with the requested stack depth */
-	if (depth == -1) {
-		XG(active_symbol_table) = EG(active_symbol_table);
+	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+		XG(active_symbol_table) = fse->symbol_table;
+		XG(active_execute_data) = fse->execute_data;
 	} else {
-		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-			XG(active_symbol_table) = fse->symbol_table;
-		} else {
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
-		}
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 	}
 
 	if (CMD_OPTION('p')) {
@@ -1852,6 +1848,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
 		XG(active_symbol_table) = fse->symbol_table;
+		XG(active_execute_data) = fse->execute_data;
 
 		/* Only show vars when they are scanned */
 		if (fse->used_vars) {
@@ -1867,6 +1864,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 #endif
 
 		XG(active_symbol_table) = NULL;
+		XG(active_execute_data) = NULL;
 		return 0;
 	}
 	
@@ -2195,7 +2193,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.123 $";
+	return "$Revision: 1.124 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)

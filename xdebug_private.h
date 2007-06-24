@@ -163,6 +163,7 @@ typedef struct _function_stack_entry {
 	zval        *return_value;
 	xdebug_llist *used_vars;
 	HashTable   *symbol_table;
+	zend_execute_data *execute_data;
 
 	/* tracing properties */
 	signed long  memory;

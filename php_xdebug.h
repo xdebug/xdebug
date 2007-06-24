@@ -132,6 +132,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *manual_url;
 	double        start_time;
 	HashTable    *active_symbol_table;
+	zend_execute_data *active_execute_data;
 	unsigned int  prev_memory;
 
 	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
