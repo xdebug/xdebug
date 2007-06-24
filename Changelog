@@ -1,3 +1,11 @@
+Sun Jun 24 22:20:17 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_private.h:
+- Fixed bug #283: Xdebug always return $this with the value of last stack frame
+  in all stack frames.
+
 Sun Jun 10 23:21:09 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Fixed bug #282: %s is not usable for xdebug.profiler_output_name on Windows.
