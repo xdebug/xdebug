@@ -2986,20 +2986,27 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 				XG(remote_enabled) = 0;
 				return;
 			}
-		} else if (XG(context).do_next && XG(context).next_level >= level) { /* Check for "next" */
+			return;
+		}
+
+		if (XG(context).do_next && XG(context).next_level >= level) { /* Check for "next" */
 			XG(context).do_next = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
-		} else if (XG(context).do_step) { /* Check for "step" */
+			return;
+		}
+
+		if (XG(context).do_step) { /* Check for "step" */
 			XG(context).do_step = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
+			return;
 		}
 
 		if (XG(context).line_breakpoints) {
@@ -3047,7 +3054,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 							XG(remote_enabled) = 0;
 							break;
 						}
-						break;
+						return;
 					}
 				}
 			}
