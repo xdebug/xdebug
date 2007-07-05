@@ -1,3 +1,7 @@
+Thu Jul 05 21:08:37 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #284: Step_over on breakpointed line made Xdebug break twice.
+
 Sun Jun 24 22:20:17 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
