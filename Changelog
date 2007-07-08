@@ -1,3 +1,7 @@
+Sun Jul 08 15:06:31 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Added support for "breakpoint_languages".
+
 Sun Jul 08 14:56:23 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #290: Function call leaks memory.
