@@ -66,7 +66,6 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		/* Invalid or empty xdebug.profiler_output_name */
 		return FAILURE;
 	}
-	php_printf("%p %p\n", XG(profiler_output_dir), fname);
 	filename = xdebug_sprintf("%s/%s", XG(profiler_output_dir), fname);
 	xdfree(fname);
 		
