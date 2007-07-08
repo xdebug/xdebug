@@ -1,3 +1,7 @@
+Sun Jul 08 20:35:00 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_profiler.c:
+- Backing out debug statement.
+
 Sun Jul 08 20:33:44 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_profiler.c:
