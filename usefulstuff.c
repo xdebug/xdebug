@@ -480,18 +480,20 @@ lock: /* Yes yes, an evil goto label here!!! */
 FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 {
 	char *tmp_fname;
+	FILE *ret;
 
 	if (extension) {
 		tmp_fname = xdebug_sprintf("%s.%s", fname, extension);
 	} else {
 		tmp_fname = xdstrdup(fname);
 	}
+	ret = fopen(tmp_fname, mode);
 	if (new_fname) {
 		*new_fname = tmp_fname;
 	} else {
 		xdfree(tmp_fname);
 	}
-	return fopen(tmp_fname, mode);
+	return ret;
 }
 #endif
 
