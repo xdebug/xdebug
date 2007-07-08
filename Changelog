@@ -1,3 +1,9 @@
+Sun Jul 08 20:33:44 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_profiler.c:
+- Fixed bug #289: Xdebug terminates connection when eval() is run in the init
+  stage.
+
 Sun Jul 08 15:06:31 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Added support for "breakpoint_languages".
