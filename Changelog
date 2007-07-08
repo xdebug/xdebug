@@ -1,3 +1,7 @@
+Sun Jul 08 14:56:23 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug #290: Function call leaks memory.
+
 Sun Jul 08 14:55:39 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 tests/bug00173.phpt
 xdebug/tests/bug00176.phpt:
