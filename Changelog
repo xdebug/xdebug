@@ -1,3 +1,8 @@
+Sun Jul 08 14:55:39 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+tests/bug00173.phpt
+xdebug/tests/bug00176.phpt:
+- Fixed bug #291: Test that use SPL do not skip when SPL is not available.
+
 Thu Jul 05 21:08:37 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #284: Step_over on breakpointed line made Xdebug break twice.
