@@ -1332,7 +1332,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		return;
 	}
 
-	XG(context).program_name = xdstrdup(op_array->filename);
+	if (!XG(context).program_name) {
+		XG(context).program_name = xdstrdup(op_array->filename);
+	}
 
 	if (XG(level) == 0) {
 		/* Set session cookie if requested */
