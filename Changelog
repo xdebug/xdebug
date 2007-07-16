@@ -1,3 +1,7 @@
+Mon Jul 16 12:09:07 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Removed unreferenced var.
+
 Sun Jul 15 20:39:01 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #279: PHP segfault on use of virtual() function.
