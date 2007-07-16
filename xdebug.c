@@ -2945,7 +2945,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk;
 	function_stack_entry *fse;
-	zend_op              *cur_opcode;
 	int                   lineno;
 	char                 *file;
 	int                   file_len = 0;
