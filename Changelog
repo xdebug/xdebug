@@ -1,3 +1,9 @@
+Wed Jul 18 19:34:56 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/php_xdebug.h:
+- Go with 2.0.0.
+
 Wed Jul 18 19:25:31 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 test-4.3.sh:
 - Fixed test script.
