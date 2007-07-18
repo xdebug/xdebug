@@ -1,3 +1,7 @@
+Wed Jul 18 19:40:13 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- HEAD is now 2.1.0-dev.
+
 Wed Jul 18 19:39:55 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Back to -dev in branch.
