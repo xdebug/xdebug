@@ -1,3 +1,7 @@
+Wed Jul 18 19:39:55 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- Back to -dev in branch.
+
 Wed Jul 18 19:34:56 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 package.xml
 xdebug/package2.xml
