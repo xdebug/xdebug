@@ -20,7 +20,7 @@ includes the following:
 Xdebug also provides:
 
     * profiling information for PHP scripts
-    * script execution analysis
+    * code coverage analysis
     * capabilities to debug your scripts interactively with a debug client
   
  </description>
@@ -30,63 +30,48 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2007-05-17</date>
- <time>10:22:14</time>
+ <date>2007-07-18</date>
+ <time>19:25:03</time>
  <version>
-  <release>2.0.0RC4</release>
-  <api>2.0.0RC4</api>
+  <release>2.0.0</release>
+  <api>2.0.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
- <notes>Wed, May 17, 2007 - xdebug 2.0.0rc4
+ <notes>Wed, Jul 18, 2007 - xdebug 2.0.0
+
 + Changes:
-	- Use Âµ seconds instead of a tenths of Âµ seconds to avoid confusion in
-	  profile information.
-	- Changed xdebug.profiler_output_name and xdebug.trace_output_name to use
-	  modifier tags:
-	  %c = crc32 of the current working directory
-	  %p = pid
-	  %r = random number
-	  %s = script name
-	  %t = timestamp (seconds)
-	  %u = timestamp (microseconds)
-	  %H = $_SERVER[&apos;HTTP_HOST&apos;]
-	  %R = $_SERVER[&apos;REQUEST_URI&apos;]
-	  %S = session_id (from $_COOKIE if set)
-	  %% = literal %
+	- Put back the disabling of stack traces - apperently people were relying
+	  on this. This brings back xdebug_enable(), xdebug_disable() and
+	  xdebug_is_enabled().
+	- xdebug.collect_params is no longer a boolean setting. Although it worked
+	  fine, phpinfo() showed only just On or Off here.
+	- Fixed the Xdebug version of raw_url_encode to not encode : and \. This is
+	  not necessary according to the RFCs and it makes debug breakpoints work
+	  on Windows.
 
 = Fixed bugs:
-	- Fixed bug #255: Call Stack Table doesn&apos;t show Location on Windows.
-	- Fixed bug #251: Using the source command with an invalid filename returns
-	  unexpected result.
-	- Fixed bug #243: show_exception_trace=&quot;0&quot; ignored.
-	- Fixed bug #241: Crash in xdebug_get_function_stack().
-	- Fixed bug #240: Crash with xdebug.remote_log on Windows.
-	- Fixed a segfault in rendering stack traces to error logs.
-	- Fixed a bug that prevented variable names from being recorded for remote
-	  debug session while xdebug.collect_vars was turned off.
-	- Fixed xdebug_dump_superglobals() in case no super globals were
-	  configured.
-
-- Removed functions:
-	- Removed support for Memory profiling as that didn&apos;t work properly.
-	- Get rid of xdebug.default_enable setting and associated functions:
-	  xdebug_disable() and xdebug_enable().
-
-+ Added features:
-	- Implemented support for four different xdebug.collect_params settings for
-	  stack traces and function traces.
-	- Allow to trigger profiling by the XDEBUG_PROFILE cookie.
+	- Fixed bug #291: Tests that use SPL do not skip when SPL is not available.
+	- Fixed bug #290: Function calls leak memory.
+	- Fixed bug #289: Xdebug terminates connection when eval() is run in the
+	  init stage.
+	- Fixed bug #284: Step_over on breakpointed line made Xdebug break twice.
+	- Fixed bug #283: Xdebug always returns $this with the value of last stack
+	  frame.
+	- Fixed bug #282: %s is not usable for xdebug.profiler_output_name on
+	  Windows in all stack frames.
+	- Fixed bug #280: var_dump() doesn&apos;t display key of array as expected.
+	- Fixed bug #278: Code Coverage Issue.
+	- Fixed bug #273: Remote debugging: context_get does not return context id.
+	- Fixed bug #270: Debugger aborts when PHP&apos;s eval() is encountered. 
+	- Fixed bug #265: XDebug breaks error_get_last() .
+	- Fixed bug #261: Code coverage issues by overloading zend_assign_dim.
 
 + DBGP:
-	- Correctly add namespace definitions to XML.
-	- Added the xdebug namespace that adds extra information to breakpoints if
-	  available.
-	- Stopped the use of &gt;error&gt; elements for exception breakpoints, as that
-	  violates the protocol.
+	- Added support for &quot;breakpoint_languages&quot;.
     
  </notes>
  <contents>
@@ -181,6 +166,51 @@ Xdebug also provides:
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.0.0</release>
+    <api>2.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-07-18</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>Wed, Jul 18, 2007 - xdebug 2.0.0
+
++ Changes:
+	- Put back the disabling of stack traces - apperently people were relying
+	  on this. This brings back xdebug_enable(), xdebug_disable() and
+	  xdebug_is_enabled().
+	- xdebug.collect_params is no longer a boolean setting. Although it worked
+	  fine, phpinfo() showed only just On or Off here.
+	- Fixed the Xdebug version of raw_url_encode to not encode : and \. This is
+	  not necessary according to the RFCs and it makes debug breakpoints work
+	  on Windows.
+
+= Fixed bugs:
+	- Fixed bug #291: Tests that use SPL do not skip when SPL is not available.
+	- Fixed bug #290: Function calls leak memory.
+	- Fixed bug #289: Xdebug terminates connection when eval() is run in the
+	  init stage.
+	- Fixed bug #284: Step_over on breakpointed line made Xdebug break twice.
+	- Fixed bug #283: Xdebug always returns $this with the value of last stack
+	  frame.
+	- Fixed bug #282: %s is not usable for xdebug.profiler_output_name on
+	  Windows in all stack frames.
+	- Fixed bug #280: var_dump() doesn&apos;t display key of array as expected.
+	- Fixed bug #278: Code Coverage Issue.
+	- Fixed bug #273: Remote debugging: context_get does not return context id.
+	- Fixed bug #270: Debugger aborts when PHP&apos;s eval() is encountered. 
+	- Fixed bug #265: XDebug breaks error_get_last() .
+	- Fixed bug #261: Code coverage issues by overloading zend_assign_dim.
+
++ DBGP:
+	- Added support for &quot;breakpoint_languages&quot;.
+      
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.0.0RC4</release>

@@ -1,3 +1,36 @@
+Wed, Jul 18, 2007 - xdebug 2.0.0
+
++ Changes:
+	- Put back the disabling of stack traces - apperently people were relying
+	  on this. This brings back xdebug_enable(), xdebug_disable() and
+	  xdebug_is_enabled().
+	- xdebug.collect_params is no longer a boolean setting. Although it worked
+	  fine, phpinfo() showed only just On or Off here.
+	- Fixed the Xdebug version of raw_url_encode to not encode : and \. This is
+	  not necessary according to the RFCs and it makes debug breakpoints work
+	  on Windows.
+
+= Fixed bugs:
+	- Fixed bug #291: Tests that use SPL do not skip when SPL is not available.
+	- Fixed bug #290: Function calls leak memory.
+	- Fixed bug #289: Xdebug terminates connection when eval() is run in the
+	  init stage.
+	- Fixed bug #284: Step_over on breakpointed line made Xdebug break twice.
+	- Fixed bug #283: Xdebug always returns $this with the value of last stack
+	  frame.
+	- Fixed bug #282: %s is not usable for xdebug.profiler_output_name on
+	  Windows in all stack frames.
+	- Fixed bug #280: var_dump() doesn't display key of array as expected.
+	- Fixed bug #278: Code Coverage Issue.
+	- Fixed bug #273: Remote debugging: context_get does not return context id.
+	- Fixed bug #270: Debugger aborts when PHP's eval() is encountered. 
+	- Fixed bug #265: XDebug breaks error_get_last() .
+	- Fixed bug #261: Code coverage issues by overloading zend_assign_dim.
+
++ DBGP:
+	- Added support for "breakpoint_languages".
+
+
 Wed, May 17, 2007 - xdebug 2.0.0rc4
 + Changes:
 	- Use µ seconds instead of a tenths of µ seconds to avoid confusion in
