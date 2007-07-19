@@ -64,7 +64,7 @@ void xdebug_brk_info_dtor(xdebug_brk_info *brk)
 		xdfree(brk->file);
 	}
 	if (brk->condition) {
-		xdfree(brk->condition);
+		efree(brk->condition);
 	}
 	xdfree(brk);
 }
