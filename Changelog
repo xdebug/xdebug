@@ -1,3 +1,8 @@
+Fri Jul 20 00:19:44 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handlers.c:
+- MFH: Fixed a memory free error related to remote debugging conditions.
+  (Related to bug #297).
+
 Fri Jul 20 00:19:15 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_handlers.c:
 - Fixed a memory free error related to remote debugging conditions. (Related to
