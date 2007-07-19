@@ -1,3 +1,8 @@
+Fri Jul 20 00:19:15 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handlers.c:
+- Fixed a memory free error related to remote debugging conditions. (Related to
+  bug #297).
+
 Wed Jul 18 19:40:13 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - HEAD is now 2.1.0-dev.
