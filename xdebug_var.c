@@ -1122,7 +1122,7 @@ char* xdebug_xmlize(char *string, int len, int *newlen)
 		tmp = php_str_to_str(tmp2, len, "'", 1, "&apos;", 6, &len);
 		efree(tmp2);
 
-		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, newlen);
+		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
 		efree(tmp);
 
 		tmp = php_str_to_str(tmp2, len, "\0", 1, "&#0;", 4, newlen);
