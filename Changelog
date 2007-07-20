@@ -1,3 +1,10 @@
+Fri Jul 20 15:52:40 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+test.sh
+xdebug/xdebug_var.c
+xdebug/tests/bug00298.phpt:
+- MFH: Fixed bug #298: xdebug_var_dump() doesn't handle entity replacements
+  correctly concerning string length.
+
 Fri Jul 20 15:52:26 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c
 xdebug/tests/bug00298.phpt:
