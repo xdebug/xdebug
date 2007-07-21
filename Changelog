@@ -1,3 +1,7 @@
+Sat Jul 21 13:34:10 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+template.rc:
+- MFH: New template.rc file.
+
 Sat Jul 21 13:31:06 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 template.rc:
 - Added template.rc file to override default PHP version template.
