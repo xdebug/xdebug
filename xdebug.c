@@ -271,6 +271,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_vars,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_ALL,    OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.file_link_format",  "",                   PHP_INI_ALL,    OnUpdateString, file_link_format,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.manual_url",        "http://www.php.net", PHP_INI_ALL,    OnUpdateString, manual_url,        zend_xdebug_globals, xdebug_globals)
 #if ZEND_EXTENSION_API_NO < 90000000
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "100",                PHP_INI_ALL,    OnUpdateInt,    max_nesting_level, zend_xdebug_globals, xdebug_globals)
@@ -1615,7 +1616,7 @@ static char* text_formats[10] = {
 	"  $%s = *uninitialized*\n"
 };
 
-static char* html_formats[10] = {
+static char* html_formats[12] = {
 	"<br />\n<font size='1'><table border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 #if HAVE_PHP_MEMORY_USAGE
@@ -1634,7 +1635,9 @@ static char* html_formats[10] = {
 #endif
 	"</table></font>\n",
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='4' bgcolor='#eeeeec'>%s</td></tr>\n",
-	"<tr><td bgcolor='#eeeeec'>$%s</td><td colspan='4' bgcolor='#eeeeec' colspan='2'><i>Undefined</i></td></tr>\n"
+	"<tr><td bgcolor='#eeeeec'>$%s</td><td colspan='4' bgcolor='#eeeeec' colspan='2'><i>Undefined</i></td></tr>\n",
+	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>..%s<b>:</b>%d</a></td></tr>\n",
+	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n"
 };
 
 static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
@@ -1748,6 +1751,41 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 	}
 }
 
+static int create_file_link(char **filename, const char *error_filename, int error_lineno)
+{
+	xdebug_str fname = {0, 0, NULL};
+	char       cwd[128];
+	char      *format = XG(file_link_format);
+	
+	while (*format)
+	{
+		if (*format != '%') {
+			xdebug_str_addl(&fname, (char *) format, 1, 0);
+		} else {
+			format++;
+			switch (*format)
+			{
+				case 'f': /* filename */
+					xdebug_str_add(&fname, xdebug_sprintf("%s", error_filename), 1);
+					break;
+
+				case 'l': /* line number */
+					xdebug_str_add(&fname, xdebug_sprintf("%d", error_lineno), 1);
+					break;
+
+				case '%': /* literal % */
+					xdebug_str_addl(&fname, "%", 1, 0);
+					break;
+			}
+		}
+		format++;
+	}
+	
+	*filename = fname.d;
+
+	return fname.l;
+}
+
 static char* get_printable_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
 	xdebug_llist_element *le;
@@ -1764,11 +1802,19 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 
 	xdebug_str_add(&str, formats[0], 0);
 
-	xdebug_str_add(&str, xdebug_sprintf(formats[1], error_type_str, buffer, error_filename, error_lineno), 1);
+	if (strlen(XG(file_link_format)) > 0) {
+		char *file_link;
+
+		create_file_link(&file_link, error_filename, error_lineno);
+		xdebug_str_add(&str, xdebug_sprintf(formats[11], error_type_str, buffer, file_link, error_filename, error_lineno), 1);
+		xdfree(file_link);
+	} else {
+		xdebug_str_add(&str, xdebug_sprintf(formats[1], error_type_str, buffer, error_filename, error_lineno), 1);
+	}
 
 	if (XG(stack) && XG(stack)->size) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
-		
+
 		xdebug_str_add(&str, formats[2], 0);
 
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -1861,8 +1907,18 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 			}
 
 			if (html) {
-				char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
-				xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, just_filename, i->lineno), 1);
+				if (strlen(XG(file_link_format)) > 0) {
+					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
+					char *file_link;
+
+					create_file_link(&file_link, i->filename, i->lineno);
+					xdebug_str_add(&str, xdebug_sprintf(formats[10], i->filename, file_link, just_filename, i->lineno), 1);
+					xdfree(file_link);
+				} else {
+					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
+
+					xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, just_filename, i->lineno), 1);
+				}
 			} else {
 				xdebug_str_add(&str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
 			}
