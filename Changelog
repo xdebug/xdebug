@@ -1,3 +1,10 @@
+Sun Jul 22 23:03:08 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Implemented FR #244: Be able to click on filename in the error report
+  location items.  Documented at
+  http://xdebug.org/docs/stack_trace#file_link_format
+
 Sat Jul 21 13:34:10 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 template.rc:
 - MFH: New template.rc file.
