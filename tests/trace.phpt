@@ -1,5 +1,5 @@
 --TEST--
-Test with fibonacci numbers
+Trace test with fibonacci numbers (format=0)
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
@@ -34,6 +34,7 @@ xdebug.trace_format=0
     }
 
 	fibonacci_cache(50);
+	xdebug_stop_trace();
 	echo file_get_contents($tf);
 	unlink($tf);
 ?>
@@ -136,4 +137,6 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d           -> fibonacci_cache(46) /%s/trace.php:16
 %w%f %w%d         -> fibonacci_cache(47) /%s/trace.php:16
 %w%f %w%d       -> fibonacci_cache(48) /%s/trace.php:16
-%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/trace.php:23
+%w%f %w%d     -> xdebug_stop_trace() /%s/trace.php:23
+%w%f %w%d
+TRACE END   [%d-%d-%d %d:%d:%d]
