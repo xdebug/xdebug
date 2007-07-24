@@ -1,3 +1,7 @@
+Tue Jul 24 12:34:15 CEST 2007 Jani Taskinen <sniper@php.net>
+contrib/online_profiling_prepend.php:
+- Added error checks and messages for missing profile output file / dir.
+
 Sun Jul 22 23:03:08 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
