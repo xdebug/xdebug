@@ -2015,7 +2015,11 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 
 		xdebug_str_add(&str, "0\t", 0);
 		xdebug_str_add(&str, xdebug_sprintf("%f\t", i->time - XG(start_time)), 1);
+#if HAVE_PHP_MEMORY_USAGE
 		xdebug_str_add(&str, xdebug_sprintf("%lu\t", i->memory), 1);
+#else
+		xdebug_str_add(&str, "\t", 0);
+#endif
 		xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
 		xdebug_str_add(&str, xdebug_sprintf("%d\t", i->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
 		xdfree(tmp_name);
@@ -2031,6 +2035,8 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 		xdebug_str_add(&str, xdebug_sprintf("%f\t", xdebug_get_utime() - XG(start_time)), 1);
 #if HAVE_PHP_MEMORY_USAGE
 		xdebug_str_add(&str, xdebug_sprintf("%lu\n", XG_MEMORY_USAGE()), 1);
+#else
+		xdebug_str_add(&str, "\n", 0);
 #endif
 	}
 
@@ -2782,11 +2788,11 @@ void xdebug_stop_trace(TSRMLS_D)
 	if (XG(trace_file)) {
 		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
 			u_time = xdebug_get_utime();
-			fprintf(XG(trace_file), "%10.4f ", u_time - XG(start_time));
+			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10.4f " : "\t\t\t%f\t", u_time - XG(start_time));
 #if HAVE_PHP_MEMORY_USAGE
-			fprintf(XG(trace_file), "%10u", XG_MEMORY_USAGE());
+			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10u" : "%lu", XG_MEMORY_USAGE());
 #else
-			fprintf(XG(trace_file), "%10u", 0);
+			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10u" : "", 0);
 #endif
 			fprintf(XG(trace_file), "\n");
 			str_time = xdebug_get_time();
