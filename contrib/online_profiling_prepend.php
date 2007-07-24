@@ -3,7 +3,7 @@
 /* 
  * Online profiling dump - Written by Jani Taskinen <sniper@iki.fi> A.D. 2007
  *
- * $Id: online_profiling_prepend.php,v 1.2 2007-05-14 14:20:40 sniper Exp $
+ * $Id: online_profiling_prepend.php,v 1.3 2007-07-24 10:34:15 sniper Exp $
  *
  * Usage:
  *
@@ -55,35 +55,54 @@ function xdebug_profiler_shutdown_cb()
 
   if (isset($_REQUEST['XDEBUG_PROFILE']))
   {
-    $dump = '';
     $used_memory = xdebug_memory_usage();
     $sizename = array(" Bytes", " KB", " MB", " GB");
-    $used_memory = round($used_memory/pow(1024, ($i = floor(log($used_memory, 1024)))), 2) . $sizename[$i];
+    $used_memory = round($used_memory / pow(1024, ($i = floor(log($used_memory, 1024)))), 2) . $sizename[$i];
     $elapsed_time = round(xdebug_time_index() * 1000, 3);
     $profile = xdebug_get_profiler_filename();
     $profile_id = md5($profile);
 
-    if (file_exists($profile) && !$is_xmlhttprequest) // Fixme: How to provide profiler links for these without breaking possible json?
+    /* Show result box */
+    if (!$is_xmlhttprequest) // FIXME: How to provide profiler links without breaking possible json?
     {
-      if ($_REQUEST['XDEBUG_PROFILE'] == 'long')
+      if ($profile === false)
       {
-        $dump = shell_exec("/usr/bin/callgrind_annotate --inclusive=yes --tree=both $profile");
+        $path = ini_get('xdebug.profiler_output_dir');
+
+        if ($path != '')
+        {
+          $reason = is_dir($path) ? 'Directory is not writeable' : (file_exists($path) ? "'{$path}' is not directory" : "'$path' does not exist");
+          $output = sprintf('Error: Could not create profile dump in %s<br />(Reason: %s)', $path, $reason);
+        }
+        else
+        {
+          $output = 'Error: xdebug.profiler_output_dir is not set';
+        }
+      }
+      else
+      {
+        $output = "
+<b>Page generated in</b> {$elapsed_time} ms <b>Used memory:</b> {$used_memory}
+<b>Profiler dump:</b> <a href='/download.php?file={$profile}'>{$profile}</a>
+";
+
+        if ($_REQUEST['XDEBUG_PROFILE'] == 'long')
+        {
+          $output.= shell_exec("/usr/bin/callgrind_annotate --inclusive=yes --tree=both $profile");
+        }
       }
 
-    echo <<< DATA
+      echo <<< DATA
 <div style="position: absolute; top: 0; z-index: 5000; border: dashed black 1px; background-color: #fff;" id="xdebug_profile_{$profile_id}">
  <a href="#" style="font-size: 11px;" onclick="javascript: document.getElementById('xdebug_profile_{$profile_id}').style.display = 'none'; return false;">[close]</a>
- <pre style="padding: 5px;">
-  <b>Page generated in</b> {$elapsed_time} ms <b>Used memory:</b> {$used_memory}
-  <b>Profiler dump:</b> <a href="/download.php?file={$profile}">$profile</a>
- {$dump}</pre>
+ <pre style="padding: 5px;">{$output}</pre>
  <a href="#" style="font-size: 11px;" onclick="javascript: document.getElementById('xdebug_profile_{$profile_id}').style.display = 'none'; return false;">[close]</a>
 </div>
 DATA;
     }
   }
 
-  /* Output button to enable/disable profiler */
+  /* Output box with toggles to enable/disable profiler and annotation */
   if (!$is_xmlhttprequest)
   {
     $profiler = isset($_REQUEST['XDEBUG_PROFILE']) ? 
@@ -99,6 +118,8 @@ DATA;
       'checked' => '',
       'display' => 'none',
     );
+
+    $profiler['checked_annotate'] = isset($_REQUEST['XDEBUG_PROFILE']) && $_REQUEST['XDEBUG_PROFILE'] == 'long' ? 'checked="checked"' : '';
 
     echo <<< DATA
 <!-- XDEBUG Dynamic Profiler -->
@@ -129,12 +150,12 @@ function xdebug_toggleProfiler(output)
 }
 // -->
 </script>
-<div style="padding: 5px; border: dashed black 1px; background-color: #fff; position: absolute; top: 0; z-index: 1000;" id="xdebug_profile_enable_cookie">
+<div style="padding: 5px; border: dashed black 1px; background-color: #fff; z-index: 1000; position: absolute; top: 0px; right: 5px; " id="xdebug_profile_enable_cookie">
  <label for="xdebug_toggler" style="vertical-align: top">Toggle Profiler</label>
  <input id="xdebug_toggler" type="checkbox" onclick="this.checked = xdebug_toggleProfiler(this.value);" value="short" {$profiler['checked']} />
  <div id="xdebug_profiler_annotate" style="display: {$profiler['display']}">
   <label for="xdebug_annotate" style="vertical-align: top">Annotate</label>
-  <input id="xdebug_annotate" type="checkbox" onclick="xdebug_setCookie((this.checked)?this.value:'short');" value="long" />
+  <input id="xdebug_annotate" type="checkbox" onclick="xdebug_setCookie((this.checked)?this.value:'short');" value="long" {$profiler['checked_annotate']} />
  </div>
 </div>
 DATA;
