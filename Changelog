@@ -1,3 +1,11 @@
+Tue Jul 24 22:06:41 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/trace1.phpt
+xdebug/tests/trace2.phpt
+xdebug/tests/trace.phpt:
+- Fixed bug #299: Computerized traces don't have a newline for return entries if
+  memory limit is not enabled.
+
 Tue Jul 24 12:34:15 CEST 2007 Jani Taskinen <sniper@php.net>
 contrib/online_profiling_prepend.php:
 - Added error checks and messages for missing profile output file / dir.
