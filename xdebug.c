@@ -1751,7 +1751,7 @@ static void log_stack(const char *error_type_str, char *buffer, const char *erro
 	}
 }
 
-static int create_file_link(char **filename, const char *error_filename, int error_lineno)
+static int create_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC)
 {
 	xdebug_str fname = {0, 0, NULL};
 	char       cwd[128];
@@ -1805,7 +1805,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 	if (strlen(XG(file_link_format)) > 0) {
 		char *file_link;
 
-		create_file_link(&file_link, error_filename, error_lineno);
+		create_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
 		xdebug_str_add(&str, xdebug_sprintf(formats[11], error_type_str, buffer, file_link, error_filename, error_lineno), 1);
 		xdfree(file_link);
 	} else {
@@ -1911,7 +1911,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
 					char *file_link;
 
-					create_file_link(&file_link, i->filename, i->lineno);
+					create_file_link(&file_link, i->filename, i->lineno TSRMLS_CC);
 					xdebug_str_add(&str, xdebug_sprintf(formats[10], i->filename, file_link, just_filename, i->lineno), 1);
 					xdfree(file_link);
 				} else {
