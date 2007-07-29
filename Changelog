@@ -1,3 +1,8 @@
+Sun Jul 29 17:05:20 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h:
+- MFH: Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch
+  by Sean Chalmers)
+
 Sun Jul 29 17:04:48 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch by
