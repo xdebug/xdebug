@@ -122,7 +122,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          max_nesting_level;
 	zend_bool     default_enable;
 	zend_bool     collect_includes;
-	zend_bool     collect_params;
+	long          collect_params;
 	zend_bool     collect_return;
 	zend_bool     collect_vars;
 	zend_bool     extended_info;
