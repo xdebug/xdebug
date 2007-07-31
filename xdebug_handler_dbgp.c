@@ -33,6 +33,7 @@
 #include "php_globals.h"
 #include "php_xdebug.h"
 #include "xdebug_private.h"
+#include "xdebug_code_coverage.h"
 #include "xdebug_com.h"
 #include "xdebug_handler_dbgp.h"
 #include "xdebug_hash.h"
@@ -166,6 +167,7 @@ DBGP_FUNC(detach);
 
 /* Non standard comments */
 DBGP_FUNC(xcmd_profiler_name_get);
+DBGP_FUNC(xcmd_get_executable_lines);
 
 /*****************************************************************************
 ** Dispatcher tables for supported debug commands
@@ -207,7 +209,8 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_CONT_FUNC_ENTRY(detach,       XDEBUG_DBGP_NONE)
 
 	/* Non standard functions */
-	DBGP_FUNC_ENTRY(xcmd_profiler_name_get, XDEBUG_DBGP_POST_MORTEM)
+	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_POST_MORTEM)
+	DBGP_FUNC_ENTRY(xcmd_get_executable_lines, XDEBUG_DBGP_NONE)
 	{ NULL, NULL }
 };
 
@@ -1961,6 +1964,34 @@ DBGP_FUNC(xcmd_profiler_name_get)
 	}
 }
 
+DBGP_FUNC(xcmd_get_executable_lines)
+{
+	function_stack_entry *fse;
+	int                   i, depth;
+	xdebug_xml_node      *lines, *line;
+
+	if (!CMD_OPTION('d')) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
+
+	depth = strtol(CMD_OPTION('d'), NULL, 10);
+	if (depth >= 0 && depth < XG(level)) {
+		fse = xdebug_get_stack_frame(depth TSRMLS_CC);
+	} else {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+	}
+
+	lines = xdebug_xml_node_init("xdebug:lines");
+	for (i = 0; i < fse->op_array->size; i++ ) {
+		if (fse->op_array->opcodes[i].opcode == ZEND_EXT_STMT ) {
+			line = xdebug_xml_node_init("xdebug:line");
+			xdebug_xml_add_attribute_ex(line, "lineno", xdebug_sprintf("%lu", fse->op_array->opcodes[i].lineno), 0, 1);
+			xdebug_xml_add_child(lines, line);
+		}
+	}
+	xdebug_xml_add_child(*retval, lines);
+}
+
 
 /*****************************************************************************
 ** Parsing functions
@@ -2197,7 +2228,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.125 $";
+	return "$Revision: 1.126 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
