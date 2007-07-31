@@ -1,3 +1,11 @@
+Tue Jul 31 23:44:56 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Implemented request #200: Add the retrieval of a file's execution lines in
+  DBGp. I added a new un-official method called xcmd_get_executable_lines
+  which requires the stack depth as argument (-d). You can only fetch
+  this information for stack frames as it needs an available op-array which
+  is only available when a function is executed.
+
 Sun Jul 29 17:05:20 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - MFH: Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch
