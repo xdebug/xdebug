@@ -197,7 +197,7 @@ PHP_FUNCTION(xdebug_dump_superglobals)
 	char *superglobal_info = NULL;
 
 	if (html) {
-		php_printf("<table border='1' cellspacing='0'>\n");
+		php_printf("<table dir='ltr' border='1' cellspacing='0'>\n");
 	}
 
 	superglobal_info = xdebug_get_printable_superglobals(html TSRMLS_CC);
