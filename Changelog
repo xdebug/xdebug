@@ -1,3 +1,8 @@
+Mon Aug 06 21:35:41 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_superglobals.c:
+- Fixed bug #300: Xdebug does not force LTR rendering for its tables.
+
 Tue Jul 31 23:44:56 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Implemented request #200: Add the retrieval of a file's execution lines in
