@@ -1616,7 +1616,7 @@ static char* text_formats[10] = {
 };
 
 static char* html_formats[10] = {
-	"<br />\n<font size='1'><table border='1' cellspacing='0' cellpadding='1'>\n",
+	"<br />\n<font size='1'><table dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 #if HAVE_PHP_MEMORY_USAGE
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
@@ -2765,7 +2765,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 			xdfree(str_time);
 		}
 		if (XG(trace_format) == 2) {
-			fprintf(XG(trace_file), "<table class='xdebug-trace' border='1' cellspacing='0'>\n");
+			fprintf(XG(trace_file), "<table dir='ltr' class='xdebug-trace' border='1' cellspacing='0'>\n");
 			fprintf(XG(trace_file), "\t<tr><th>#</th><th>Time</th>");
 #if MEMORY_LIMIT
 			fprintf(XG(trace_file), "<th>Mem</th>");
