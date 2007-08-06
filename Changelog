@@ -1,3 +1,8 @@
+Mon Aug 06 21:36:27 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_superglobals.c:
+- MFH: Fixed bug #300: Xdebug does not force LTR rendering for its tables.
+
 Mon Aug 06 21:35:41 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_superglobals.c:
