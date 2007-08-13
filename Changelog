@@ -1,3 +1,13 @@
+Mon Aug 13 08:51:20 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+tests/stacktrace_html_0.phpt
+xdebug/tests/stacktrace_html_1.phpt
+xdebug/tests/stacktrace_html_2.phpt
+xdebug/tests/stacktrace_html_3.phpt
+xdebug/tests/stacktrace_html_4.phpt
+xdebug/tests/stacktrace_html_4_novar.phpt
+xdebug/tests/trace2.phpt:
+- Fixed test cases.
+
 Mon Aug 06 21:36:27 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_superglobals.c:
