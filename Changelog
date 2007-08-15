@@ -1,3 +1,15 @@
+Wed Aug 15 20:24:00 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_superglobals.c
+xdebug/tests/stacktrace_html_0.phpt
+xdebug/tests/stacktrace_html_1.phpt
+xdebug/tests/stacktrace_html_2.phpt
+xdebug/tests/stacktrace_html_3.phpt
+xdebug/tests/stacktrace_html_4.phpt
+xdebug/tests/stacktrace_html_4_novar.phpt
+xdebug/tests/trace2.phpt:
+- Use a class for all generated tables.
+
 Wed Aug 15 16:49:50 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 README:
 - Fixed the English that has been broken for only 5 years :)
