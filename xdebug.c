@@ -138,6 +138,10 @@ function_entry xdebug_functions[] = {
 #endif
 	PHP_FE(xdebug_time_index,            NULL)
 
+	PHP_FE(xdebug_start_error_collection, NULL)
+	PHP_FE(xdebug_stop_error_collection, NULL)
+	PHP_FE(xdebug_get_collected_errors,  NULL)
+
 	PHP_FE(xdebug_start_code_coverage,   NULL)
 	PHP_FE(xdebug_stop_code_coverage,    NULL)
 	PHP_FE(xdebug_get_code_coverage,     NULL)
@@ -639,6 +643,15 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
+static void xdebug_collected_error_dtor(void *dummy, void *elem)
+{
+	char *s = elem;
+
+	if (s) {
+		xdfree(s);
+	}
+}
+
 static void xdebug_used_var_dtor(void *dummy, void *elem)
 {
 	char *s = elem;
@@ -724,6 +737,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(function_count) = 0;
 	XG(active_symbol_table) = NULL;
 	XG(last_exception_trace) = NULL;
+	XG(do_collect_errors) = 0;
+	XG(collected_errors)  = xdebug_llist_alloc(xdebug_collected_error_dtor);
 	
 	if (idekey && *idekey) {
 		if (XG(ide_key)) {
@@ -850,6 +865,8 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	if (XG(last_exception_trace)) {
 		xdfree(XG(last_exception_trace));
 	}
+
+	xdebug_llist_destroy(XG(collected_errors), NULL);
 
 	/* Reset var_dump and set_time_limit to the original function */
 	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
@@ -2333,6 +2350,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				xdfree(printable_stack);
 			}
 		}
+		if (XG(do_collect_errors)) {
+			char *printable_stack;
+			printable_stack = get_printable_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+			xdebug_llist_insert_next(XG(collected_errors), XDEBUG_LLIST_TAIL(XG(collected_errors)), printable_stack);
+		}
 	}
 
 	/* Start JIT if requested and not yet enabled */
@@ -2750,6 +2772,44 @@ PHP_FUNCTION(xdebug_break)
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
+	}
+}
+
+PHP_FUNCTION(xdebug_start_error_collection)
+{
+	if (XG(do_collect_errors) == 1) {
+		php_error(E_NOTICE, "Error collection was already started");
+	}
+	XG(do_collect_errors) = 1;
+}
+
+PHP_FUNCTION(xdebug_stop_error_collection)
+{
+	if (XG(do_collect_errors) == 0) {
+		php_error(E_NOTICE, "Error collection was not started");
+	}
+	XG(do_collect_errors) = 0;
+}
+
+PHP_FUNCTION(xdebug_get_collected_errors)
+{
+	xdebug_llist_element *le;
+	char                 *string;
+	zend_bool             clear = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &clear) == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+	for (le = XDEBUG_LLIST_HEAD(XG(collected_errors)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
+		string = XDEBUG_LLIST_VALP(le);
+		add_next_index_string(return_value, string, 1);
+	}
+
+	if (clear) {
+		xdebug_llist_destroy(XG(collected_errors), NULL);
+		XG(collected_errors)  = xdebug_llist_alloc(xdebug_collected_error_dtor);
 	}
 }
 

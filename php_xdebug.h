@@ -100,6 +100,11 @@ PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
 PHP_FUNCTION(xdebug_get_tracefile_name);
 
+/* error collecting functions */
+PHP_FUNCTION(xdebug_start_error_collection);
+PHP_FUNCTION(xdebug_stop_error_collection);
+PHP_FUNCTION(xdebug_get_collected_errors);
+
 /* profiling functions */
 PHP_FUNCTION(xdebug_get_profiler_filename);
 PHP_FUNCTION(xdebug_dump_aggr_profiling_data);
@@ -161,6 +166,10 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     code_coverage_dead_code_analysis;
 	xdebug_hash  *code_coverage_op_array_cache;
 	unsigned int  function_count;
+
+	/* used for collection errors */
+	zend_bool     do_collect_errors;
+	xdebug_llist *collected_errors;
 
 	/* superglobals */
 	zend_bool     dump_globals;
