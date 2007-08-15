@@ -39,7 +39,7 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-<table dir='ltr' class='xdebug-trace' border='1' cellspacing='0'>
+<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>
 	<tr><th>#</th><th>Time</th><th colspan='2'>Function</th><th>Location</th></tr>
 	<tr><td>3</td><td>%f</td><td align='left'>&nbsp; &nbsp;-&gt;</td><td>fibonacci_cache()</td><td>%strace2.php:22</td></tr>
 	<tr><td>4</td><td>%f</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>fibonacci_cache()</td><td>%strace2.php:16</td></tr>
