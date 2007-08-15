@@ -1,3 +1,9 @@
+Wed Aug 15 16:03:58 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added the xdebug_start_error_collection(), xdebug_stop_error_collection() and
+  xdebug_get_collected_errors() functions.
+
 Mon Aug 13 08:51:20 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 tests/stacktrace_html_0.phpt
 xdebug/tests/stacktrace_html_1.phpt
