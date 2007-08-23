@@ -141,6 +141,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	unsigned int  prev_memory;
 	char         *file_link_format;
 
+	zend_bool     overload_var_dump;
+	zend_bool     var_dump_overloaded;
 	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAMETERS);
 

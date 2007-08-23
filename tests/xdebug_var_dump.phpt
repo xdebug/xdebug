@@ -10,6 +10,7 @@ xdebug.profiler_enable=0
 html_errors=1
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11
+xdebug.overload_var_dump=1
 --FILE--
 <?php
 	class TimeStuff {
