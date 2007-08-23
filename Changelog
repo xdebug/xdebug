@@ -1,3 +1,13 @@
+Thu Aug 23 21:44:31 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/tests/xdebug_var_dump_non_overload.phpt
+xdebug/tests/bug00089.phpt
+xdebug/tests/bug00280.phpt
+xdebug/tests/xdebug_var_dump.phpt:
+- Added the xdebug.overload_var_dump setting which allows you to turn off
+  Xdebug's version of var_dump().
+
 Wed Aug 15 20:24:00 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_superglobals.c
