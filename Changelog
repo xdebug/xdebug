@@ -1,3 +1,11 @@
+Fri Aug 24 03:37:54 CEST 2007 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h:
+- ignore post mortem if detached
+- detach does respond
+- fixup post mortem command handler checking
+- dont bail if detaching
+
 Fri Aug 24 03:07:57 CEST 2007 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c:
 - conform to spec on stopping/stopped status, this fixes post mortem support since a status of stopped means no more communication is allowed
