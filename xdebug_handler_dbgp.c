@@ -63,6 +63,7 @@ static char *create_eval_key_id(int id);
 #define DBGP_STATUS_STOPPED   3
 #define DBGP_STATUS_RUNNING   4
 #define DBGP_STATUS_BREAK     5
+#define DBGP_STATUS_DETACHED  6
 
 char *xdebug_dbgp_status_strings[6] =
 	{"", "starting", "stopping", "stopped", "running", "break"};
@@ -201,12 +202,13 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_FUNC_ENTRY(stderr,            XDEBUG_DBGP_NONE)
 	DBGP_FUNC_ENTRY(stdout,            XDEBUG_DBGP_NONE)
 
-	DBGP_FUNC_ENTRY(stop,              XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(run,          XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(step_into,    XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(step_out,     XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(step_over,    XDEBUG_DBGP_NONE)
-	DBGP_CONT_FUNC_ENTRY(detach,       XDEBUG_DBGP_NONE)
+
+	DBGP_STOP_FUNC_ENTRY(stop,         XDEBUG_DBGP_POST_MORTEM)
+	DBGP_STOP_FUNC_ENTRY(detach,       XDEBUG_DBGP_NONE)
 
 	/* Non standard functions */
 	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_POST_MORTEM)
@@ -1375,7 +1377,9 @@ DBGP_FUNC(step_over)
 
 DBGP_FUNC(detach)
 {
-	XG(status) = DBGP_STATUS_STOPPED;
+	XG(status) = DBGP_STATUS_DETACHED;
+	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[DBGP_STATUS_STOPPED]);
+	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 	XG(remote_enabled) = 0;
 	XG(remote_enable) = 0;
 }
@@ -2197,7 +2201,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 				XG(lastcmd) = command->name;
 				XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
 			}
-			if (XG(status) != DBGP_STATUS_STOPPED || (XG(status) == DBGP_STATUS_STOPPED && command->flags & XDEBUG_DBGP_POST_MORTEM)) {
+			if (XG(status) != DBGP_STATUS_STOPPING || (XG(status) == DBGP_STATUS_STOPPING && command->flags & XDEBUG_DBGP_POST_MORTEM)) {
 				command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
 				ret = command->cont;
 			} else {
@@ -2229,7 +2233,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.127 $";
+	return "$Revision: 1.128 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
@@ -2254,7 +2258,7 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
 		xdebug_xml_node_dtor(response);
 
 		free(option);
-	} while (1 != ret && XG(status) != DBGP_STATUS_STOPPED);
+	} while (0 == ret);
 	
 	if (bail && XG(status) == DBGP_STATUS_STOPPED) {
 		zend_bailout();
@@ -2390,25 +2394,26 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdebug_var_export_options *options;
 	TSRMLS_FETCH();
 
-	XG(status) = DBGP_STATUS_STOPPING;
-	XG(reason) = DBGP_REASON_OK;
-	response = xdebug_xml_node_init("response");
-	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
-	/* lastcmd and lasttransid are not always set (for example when the
-	 * connection is severed before the first command is send) */
-	if (XG(lastcmd) && XG(lasttransid)) {
-		xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
-		xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
+	if (XG(remote_enabled)) {
+		XG(status) = DBGP_STATUS_STOPPING;
+		XG(reason) = DBGP_REASON_OK;
+		response = xdebug_xml_node_init("response");
+		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+		xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+		/* lastcmd and lasttransid are not always set (for example when the
+		 * connection is severed before the first command is send) */
+		if (XG(lastcmd) && XG(lasttransid)) {
+			xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
+			xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
+		}
+		xdebug_xml_add_attribute_ex(response, "status", xdebug_dbgp_status_strings[XG(status)], 0, 0);
+		xdebug_xml_add_attribute_ex(response, "reason", xdebug_dbgp_reason_strings[XG(reason)], 0, 0);
+	
+		send_message(context, response TSRMLS_CC);
+		xdebug_xml_node_dtor(response);
+	
+		xdebug_dbgp_cmdloop(context, 0 TSRMLS_CC);
 	}
-	xdebug_xml_add_attribute_ex(response, "status", xdebug_dbgp_status_strings[XG(status)], 0, 0);
-	xdebug_xml_add_attribute_ex(response, "reason", xdebug_dbgp_reason_strings[XG(reason)], 0, 0);
-
-	send_message(context, response TSRMLS_CC);
-	xdebug_xml_node_dtor(response);
-
-	xdebug_dbgp_cmdloop(context, 0 TSRMLS_CC);
-
 	if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
 		OG(php_body_write) = XG(stdio).php_body_write;
 		OG(php_header_write) = XG(stdio).php_header_write;
