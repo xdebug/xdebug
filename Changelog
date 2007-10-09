@@ -1,3 +1,9 @@
+Tue Oct 09 23:58:11 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_compat.c
+xdebug/xdebug_compat.h
+xdebug/xdebug_var.c:
+- PHP 5.3 compatibility.
+
 Fri Aug 24 03:37:54 CEST 2007 Shane Caraveo <shane@caraveo.com>
 xdebug_handler_dbgp.c
 xdebug/xdebug_handler_dbgp.h:
