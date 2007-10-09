@@ -16,7 +16,7 @@
    | Modifications: Derick Rethans <derick@xdebug.org>                    |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.9 2007-03-18 09:04:18 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.9.2.1 2007-10-09 21:58:10 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
@@ -322,8 +322,8 @@ zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 					T->tmp_var.value.str.val = estrndup(&c, 1);
 					T->tmp_var.value.str.len = 1;
 				}
-				T->tmp_var.refcount=1;
-				T->tmp_var.is_ref=1;
+				T->tmp_var.XDEBUG_REFCOUNT=1;
+				T->tmp_var.XDEBUG_IS_REF=1;
 				T->tmp_var.type = IS_STRING;
 				return &T->tmp_var;
 			}
