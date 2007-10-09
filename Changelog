@@ -1,3 +1,9 @@
+Wed Oct 10 00:28:34 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_compat.c
+xdebug/xdebug_compat.h
+xdebug/xdebug_var.c:
+- MF2.0: PHP 5.3 compatibility.
+
 Tue Oct 09 23:58:11 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_compat.c
 xdebug/xdebug_compat.h
