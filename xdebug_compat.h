@@ -48,4 +48,12 @@ unsigned char *xdebug_base64_decode(const unsigned char *str, int length, int *r
 
 zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC);
 
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || (PHP_MAJOR_VERSION >= 6)
+#	define XDEBUG_REFCOUNT refcount__gc
+#	define XDEBUG_IS_REF is_ref__gc
+#else
+#	define XDEBUG_REFCOUNT refcount
+#	define XDEBUG_IS_REF is_ref
+#endif
+
 #endif
