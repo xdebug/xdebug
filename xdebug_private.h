@@ -111,6 +111,8 @@ typedef struct xdebug_var {
 
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
+#define ZEND_XDEBUG_VISITED 0x1000000
+
 typedef struct _xdebug_func {
 	char *class;
 	char *function;

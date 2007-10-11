@@ -82,7 +82,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	xdfree(sline);
 }
 
-static void prefill_from_opcode(function_stack_entry *fse, char *fn, zend_op opcode, int deadcode TSRMLS_DC)
+static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC)
 {
 	if (
 		opcode.opcode != ZEND_NOP &&
@@ -220,7 +220,8 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		xdebug_set_add(set, position);
 	}
 }
-static void prefill_from_oparray(function_stack_entry *fse, char *fn, zend_op_array *opa TSRMLS_DC)
+
+static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 {
 	char cache_key[256];
 	int  cache_key_len;
@@ -228,11 +229,7 @@ static void prefill_from_oparray(function_stack_entry *fse, char *fn, zend_op_ar
 	unsigned int i;
 	xdebug_set *set = NULL;
 
-	cache_key_len = snprintf(cache_key, sizeof(cache_key) - 1, "%p", opa->opcodes);
-	if (xdebug_hash_find(XG(code_coverage_op_array_cache), cache_key, cache_key_len, (void*) &dummy)) {
-		return;
-	}
-	xdebug_hash_add(XG(code_coverage_op_array_cache), cache_key, cache_key_len, NULL);
+	opa->reserved[XG(reserved_offset)] = 1;
 
 #ifdef ZEND_ENGINE_2
 	/* Check for abstract methods and simply return from this function in those
@@ -252,7 +249,7 @@ static void prefill_from_oparray(function_stack_entry *fse, char *fn, zend_op_ar
 	/* The normal loop then finally */
 	for (i = 0; i < opa->size; i++) {
 		zend_op opcode = opa->opcodes[i];
-		prefill_from_opcode(NULL, fn, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
+		prefill_from_opcode(fn, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
 	}
 
 	if (set) {
@@ -267,8 +264,8 @@ static int prefill_from_function_table(zend_op_array *opa, int num_args, va_list
 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
-		if (opa->filename && strcmp(opa->filename, new_filename) == 0) {
-			prefill_from_oparray(NULL, new_filename, opa TSRMLS_CC);
+		if (opa->reserved[XG(reserved_offset)] != 1/* && opa->filename && strcmp(opa->filename, new_filename) == 0)*/) {
+			prefill_from_oparray(opa->filename, opa TSRMLS_CC);
 		}
 	}
 
@@ -292,15 +289,20 @@ static int prefill_from_class_table(zend_class_entry *class_entry, int num_args,
 
 	new_filename = va_arg(args, char*);
 	if (ce->type == ZEND_USER_CLASS) {
-		zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
+		if (!(ce->ce_flags & ZEND_XDEBUG_VISITED)) {
+			ce->ce_flags |= ZEND_XDEBUG_VISITED;
+			zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
+		}
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-void xdebug_prefill_code_coverage(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
+void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
-	prefill_from_oparray(fse, op_array->filename, op_array TSRMLS_CC);
+	if (op_array->reserved[XG(reserved_offset)] == 0) {
+		prefill_from_oparray(op_array->filename, op_array TSRMLS_CC);
+	}
 
 	zend_hash_apply_with_arguments(CG(function_table), (apply_func_args_t) prefill_from_function_table, 1, op_array->filename);
 	zend_hash_apply_with_arguments(CG(class_table), (apply_func_args_t) prefill_from_class_table, 1, op_array->filename);
