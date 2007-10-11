@@ -1,3 +1,11 @@
+Thu Oct 11 02:54:10 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_code_coverage.h
+xdebug/xdebug_private.h:
+- MF20: Improve code coverage gathering performace by 1000%.
+
 Thu Oct 11 02:49:12 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
