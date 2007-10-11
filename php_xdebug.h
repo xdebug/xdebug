@@ -166,8 +166,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_hash  *code_coverage;
 	zend_bool     code_coverage_unused;
 	zend_bool     code_coverage_dead_code_analysis;
-	xdebug_hash  *code_coverage_op_array_cache;
 	unsigned int  function_count;
+	int           reserved_offset;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;

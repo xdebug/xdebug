@@ -543,6 +543,8 @@ XDEBUG_OPCODE_OVERRIDE(concat)
 
 PHP_MINIT_FUNCTION(xdebug)
 {
+	zend_extension dummy_ext;
+
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 #if 0
@@ -570,6 +572,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	new_error_cb = xdebug_error_cb;
 
 #ifdef ZEND_ENGINE_2
+	/* Get reserved offset */
+	XG(reserved_offset) = zend_get_resource_handle(&dummy_ext);
+
 	/* Overload the "exit" opcode */
 	XDEBUG_SET_OPCODE_OVERRIDE(exit, ZEND_EXIT);
 	XDEBUG_SET_OPCODE_OVERRIDE(jmp, ZEND_JMP);
@@ -728,7 +733,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_trace)      = 0;
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
-	XG(code_coverage_op_array_cache) = xdebug_hash_alloc(1024, NULL);
 	XG(stack)         = xdebug_llist_alloc(xdebug_stack_element_dtor);
 	XG(trace_file)    = NULL;
 	XG(tracefile_name) = NULL;
@@ -861,7 +865,6 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	XG(do_code_coverage) = 0;
 
 	xdebug_hash_destroy(XG(code_coverage));
-	xdebug_hash_destroy(XG(code_coverage_op_array_cache));
 
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
@@ -1508,7 +1511,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_prefill_code_coverage(fse, op_array TSRMLS_CC);
+		xdebug_prefill_code_coverage(op_array TSRMLS_CC);
 	}
 
 	/* If we're in an eval, we need to create an ID for it. This ID however
@@ -2421,7 +2424,11 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	zend_op_array *op_array;
 	
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
-		
+	op_array->reserved[XG(reserved_offset)] = 0;
+
+	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
+		xdebug_prefill_code_coverage(op_array TSRMLS_CC);
+	}
 	return op_array;
 }
 /* }}} */
