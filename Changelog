@@ -1,3 +1,9 @@
+Sat Oct 20 19:07:47 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/php_xdebug.h:
+- Go with 2.0.1.
+
 Sat Oct 20 18:48:31 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MF20: Make this scale a bit better.
