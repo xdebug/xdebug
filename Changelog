@@ -1,3 +1,7 @@
+Sat Oct 20 18:37:49 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Make this scale a bit better.
+
 Thu Oct 11 02:54:10 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
