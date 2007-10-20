@@ -1,3 +1,7 @@
+Sat Oct 20 18:48:31 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- MF20: Make this scale a bit better.
+
 Sat Oct 20 18:37:49 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Make this scale a bit better.
