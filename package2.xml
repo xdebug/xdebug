@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.5.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.6.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -30,48 +30,33 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2007-07-18</date>
- <time>19:25:03</time>
+ <date>2007-10-20</date>
+ <time>19:07:10</time>
  <version>
-  <release>2.0.0</release>
-  <api>2.0.0</api>
+  <release>2.0.1</release>
+  <api>2.0.1</api>
  </version>
  <stability>
   <release>stable</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
- <notes>Wed, Jul 18, 2007 - xdebug 2.0.0
+ <notes>Sat, Oct 20, 2007 - xdebug 2.0.1
 
 + Changes:
-	- Put back the disabling of stack traces - apperently people were relying
-	  on this. This brings back xdebug_enable(), xdebug_disable() and
-	  xdebug_is_enabled().
-	- xdebug.collect_params is no longer a boolean setting. Although it worked
-	  fine, phpinfo() showed only just On or Off here.
-	- Fixed the Xdebug version of raw_url_encode to not encode : and \. This is
-	  not necessary according to the RFCs and it makes debug breakpoints work
-	  on Windows.
-
+	- Improved code coverage performance dramatically.
+	- PHP 5.3 compatibility (no namespaces yet though).
+	
 = Fixed bugs:
-	- Fixed bug #291: Tests that use SPL do not skip when SPL is not available.
-	- Fixed bug #290: Function calls leak memory.
-	- Fixed bug #289: Xdebug terminates connection when eval() is run in the
-	  init stage.
-	- Fixed bug #284: Step_over on breakpointed line made Xdebug break twice.
-	- Fixed bug #283: Xdebug always returns $this with the value of last stack
-	  frame.
-	- Fixed bug #282: %s is not usable for xdebug.profiler_output_name on
-	  Windows in all stack frames.
-	- Fixed bug #280: var_dump() doesn&apos;t display key of array as expected.
-	- Fixed bug #278: Code Coverage Issue.
-	- Fixed bug #273: Remote debugging: context_get does not return context id.
-	- Fixed bug #270: Debugger aborts when PHP&apos;s eval() is encountered. 
-	- Fixed bug #265: XDebug breaks error_get_last() .
-	- Fixed bug #261: Code coverage issues by overloading zend_assign_dim.
-
-+ DBGP:
-	- Added support for &quot;breakpoint_languages&quot;.
+	- Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch by
+	  Sean Chalmers)
+	- Fixed bug #300: Xdebug does not force LTR rendering for its tables.
+	- Fixed bug #299: Computerized traces don&apos;t have a newline for return
+	  entries if memory limit is not enabled.
+	- Fixed bug #298: xdebug_var_dump() doesn&apos;t handle entity replacements
+	  correctly concerning string length.
+	- Fixed a memory free error related to remote debugging conditions.
+	  (Related to bug #297).
     
  </notes>
  <contents>
@@ -166,6 +151,36 @@ Xdebug also provides:
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.0.1</release>
+    <api>2.0.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2007-10-29</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>Sat, Oct 20, 2007 - xdebug 2.0.1
+
++ Changes:
+	- Improved code coverage performance dramatically.
+	- PHP 5.3 compatibility (no namespaces yet though).
+	
+= Fixed bugs:
+	- Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch by
+	  Sean Chalmers)
+	- Fixed bug #300: Xdebug does not force LTR rendering for its tables.
+	- Fixed bug #299: Computerized traces don&apos;t have a newline for return
+	  entries if memory limit is not enabled.
+	- Fixed bug #298: xdebug_var_dump() doesn&apos;t handle entity replacements
+	  correctly concerning string length.
+	- Fixed a memory free error related to remote debugging conditions.
+	  (Related to bug #297).
+      
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.0.0</release>
