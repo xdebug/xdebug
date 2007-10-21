@@ -1,3 +1,7 @@
+Sun Oct 21 12:45:38 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- MFH: PHP 4.3 and PHP 4.4 compatibility.
+
 Sun Oct 21 12:45:25 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - PHP 4.3 and 4.4 compatibility.
