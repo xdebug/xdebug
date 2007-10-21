@@ -1,3 +1,7 @@
+Sun Oct 21 12:21:45 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+template.rc:
+- Also update version in Windows template file.
+
 Sat Oct 20 19:07:47 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 package.xml
 xdebug/package2.xml
