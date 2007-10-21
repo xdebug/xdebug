@@ -289,10 +289,14 @@ static int prefill_from_class_table(zend_class_entry *class_entry, int num_args,
 
 	new_filename = va_arg(args, char*);
 	if (ce->type == ZEND_USER_CLASS) {
+#if PHP_MAJOR_VERSION >= 5
 		if (!(ce->ce_flags & ZEND_XDEBUG_VISITED)) {
 			ce->ce_flags |= ZEND_XDEBUG_VISITED;
 			zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
 		}
+#else
+		zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
+#endif
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
