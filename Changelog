@@ -1,3 +1,8 @@
+Sun Oct 21 12:24:54 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/template.rc:
+- Back to dev.
+
 Sun Oct 21 12:21:45 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 template.rc:
 - Also update version in Windows template file.
