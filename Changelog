@@ -1,3 +1,9 @@
+Thu Oct 25 22:44:16 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+test-5.2.sh
+xdebug/xdebug.c
+xdebug/tests/bug00315.phpt:
+- MFH: Fixed bug #315: Xdebug crashes when including a file that doesn't exist.
+
 Thu Oct 25 22:42:30 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/bug00315.phpt:
