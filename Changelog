@@ -1,3 +1,7 @@
+Thu Oct 25 22:41:19 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+test-5.2.sh:
+- Update location of test script.
+
 Sun Oct 21 12:45:38 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - MFH: PHP 4.3 and PHP 4.4 compatibility.
