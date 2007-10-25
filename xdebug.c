@@ -2339,10 +2339,13 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	zend_op_array *op_array;
 	
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
-	op_array->reserved[XG(reserved_offset)] = 0;
 
-	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_prefill_code_coverage(op_array TSRMLS_CC);
+	if (op_array) {
+		op_array->reserved[XG(reserved_offset)] = 0;
+
+		if (XG(do_code_coverage) && XG(code_coverage_unused)) {
+			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
+		}
 	}
 	return op_array;
 }
