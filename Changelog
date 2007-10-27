@@ -1,3 +1,8 @@
+Sat Oct 27 18:40:10 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #325: "detach" stops further sessions being established from
+  Apache.
+
 Sat Oct 27 17:48:00 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00318.inc
