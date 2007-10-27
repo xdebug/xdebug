@@ -1721,14 +1721,9 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 
 static void log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
-	int is_cli = (strcmp("cli", sapi_module.name) == 0);
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	char                 *tmp_log_message;
-
-	if (is_cli) {
-		return;
-	}
 
 	tmp_log_message = xdebug_sprintf( "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 	php_log_err(tmp_log_message TSRMLS_CC);
