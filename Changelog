@@ -1,3 +1,9 @@
+Sat Oct 27 17:47:42 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/bug00318.inc
+xdebug/tests/bug00318.phpt:
+- Fixed bug #318: Segmentation Fault in code coverage analysis.
+
 Thu Oct 25 22:44:16 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 test-5.2.sh
 xdebug/xdebug.c
