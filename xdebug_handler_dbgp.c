@@ -1381,7 +1381,7 @@ DBGP_FUNC(detach)
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[DBGP_STATUS_STOPPED]);
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 	XG(remote_enabled) = 0;
-	XG(remote_enable) = 0;
+	xdebug_close_socket(context->socket);
 }
 
 
@@ -2233,7 +2233,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.128 $";
+	return "$Revision: 1.129 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
