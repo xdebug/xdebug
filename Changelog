@@ -1,3 +1,8 @@
+Sat Oct 27 20:25:28 CEST 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00314.phpt:
+- Fixed bug #314: PHP CLI Error Logging thwarted when XDebug Loaded.
+
 Sat Oct 27 18:40:37 CEST 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - MFH: Fixed bug #325: "detach" stops further sessions being established from
