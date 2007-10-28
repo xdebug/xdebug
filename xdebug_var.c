@@ -1016,7 +1016,7 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 		default_options = 1;
 	}
 
-	xdebug_str_addl(&str, "<pre>", 5, 0);
+	xdebug_str_addl(&str, "<pre dir=\"ltr\">", 15, 0);
 	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 	xdebug_str_addl(&str, "</pre>", 6, 0);
 
