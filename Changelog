@@ -1,3 +1,7 @@
+Sun Oct 28 18:07:07 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- MFH: Fixed bug #300: Direction of var_dump().
+
 Sun Oct 28 18:06:35 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed bug #300: Direction of var_dump().
