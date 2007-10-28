@@ -1,3 +1,7 @@
+Sun Oct 28 17:31:52 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- MFH: Always set the transaction_id and command. (Related to bug #313).
+
 Sun Oct 28 17:27:44 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Always set the transaction_id and command. (Related to bug #313).
