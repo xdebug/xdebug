@@ -2162,9 +2162,9 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 			if (command->cont) {
 				XG(status) = DBGP_STATUS_RUNNING;
 				XG(reason) = DBGP_REASON_OK;
-				XG(lastcmd) = command->name;
-				XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
 			}
+			XG(lastcmd) = command->name;
+			XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
 			if (XG(status) != DBGP_STATUS_STOPPED || (XG(status) == DBGP_STATUS_STOPPED && command->flags & XDEBUG_DBGP_POST_MORTEM)) {
 				command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
 				ret = command->cont;
@@ -2197,7 +2197,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.125.2.1 $";
+	return "$Revision: 1.125.2.2 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context TSRMLS_DC)
