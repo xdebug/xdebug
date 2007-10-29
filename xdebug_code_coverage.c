@@ -234,7 +234,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 #ifdef ZEND_ENGINE_2
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
-	if (opa->opcodes[opa->size - 4].opcode == ZEND_RAISE_ABSTRACT_ERROR)
+	if (opa->size >= 4 && opa->opcodes[opa->size - 4].opcode == ZEND_RAISE_ABSTRACT_ERROR)
 	{
 		return;
 	}	
