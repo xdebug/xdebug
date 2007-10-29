@@ -1,3 +1,9 @@
+Mon Oct 29 19:59:55 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/bug00313.inc
+xdebug/tests/bug00313.phpt:
+- MFH: Fixed bug #313: Code coverage crashes on empty PHP files.
+
 Mon Oct 29 19:59:27 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00313.inc
