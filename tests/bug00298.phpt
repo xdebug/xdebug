@@ -11,5 +11,5 @@ $sql = "select * \n table from \nwhere condition";
 xdebug_var_dump($sql);
 ?>
 --EXPECT--
-<pre><small>string</small> <font color='#cc0000'>'select * &#10; table from &#10;where condition'</font> <i>(length=38)</i>
+<pre dir="ltr"><small>string</small> <font color='#cc0000'>'select * &#10; table from &#10;where condition'</font> <i>(length=38)</i>
 </pre>

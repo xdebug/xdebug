@@ -34,7 +34,7 @@ xdebug.var_display_max_children=11
 	var_dump($ts1);
 ?>
 --EXPECT--
-<pre>
+<pre dir="ltr">
 <b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
   <i>private</i> 'user_defined' <font color='#888a85'>=&gt;</font> <small>boolean</small> <font color='#75507b'>true</font>
