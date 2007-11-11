@@ -1,3 +1,8 @@
+Sun Nov 11 17:29:08 CET 2007 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/template.rc:
+- Back to -dev.
+
 Sun Nov 11 15:35:04 CET 2007 Derick Rethans <derick@derickrethans.nl>
 package2.xml:
 - Update package2.xml file as well...
