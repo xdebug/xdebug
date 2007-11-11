@@ -1,3 +1,7 @@
+Sun Nov 11 15:33:24 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- MFH: Change the if() in case the value is uninitialized.
+
 Sun Nov 11 15:32:56 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - Change the if() in case the value is uninitialized.
