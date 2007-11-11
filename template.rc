@@ -1,5 +1,5 @@
 /* This is a template RC file.
- * $Id: template.rc,v 1.1.2.5 2007-11-11 14:34:05 derick Exp $
+ * $Id: template.rc,v 1.1.2.6 2007-11-11 16:29:08 derick Exp $
  * Do not edit with MSVC */
 #ifdef APSTUDIO_INVOKED
 # error dont edit with MSVC
@@ -15,8 +15,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 # define THANKS_GUYS ""
 #endif
 
-#define VERSIONDESC 2,0,2,0
-#define VERSIONSTR  "2.0.2"
+#define VERSIONDESC 2,0,3,0
+#define VERSIONSTR  "2.0.3dev"
 
 //Version
 VS_VERSION_INFO VERSIONINFO
