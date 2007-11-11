@@ -32,25 +32,20 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>stable</state>
-    <version>2.0.1</version>
-    <date>2007-10-29</date>
+    <version>2.0.2</version>
+    <date>2007-11-11</date>
     <notes>
-Sat, Oct 20, 2007 - xdebug 2.0.1
+Sun, Nov 11, 2007 - xdebug 2.0.2
 
-+ Changes:
-	- Improved code coverage performance dramatically.
-	- PHP 5.3 compatibility (no namespaces yet though).
-	
 = Fixed bugs:
-	- Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch by
-	  Sean Chalmers)
-	- Fixed bug #300: Xdebug does not force LTR rendering for its tables.
-	- Fixed bug #299: Computerized traces don't have a newline for return
-	  entries if memory limit is not enabled.
-	- Fixed bug #298: xdebug_var_dump() doesn't handle entity replacements
-	  correctly concerning string length.
-	- Fixed a memory free error related to remote debugging conditions.
-	  (Related to bug #297).
+	- Fixed bug #325: DBGP: "detach" stops further sessions being established
+	  from Apache.
+	- Fixed bug #321: Code coverage crashes on empty PHP files.
+	- Fixed bug #318: Segmentation Fault in code coverage analysis.
+	- Fixed bug #315: Xdebug crashes when including a file that doesn't exist.
+	- Fixed bug #314: PHP CLI Error Logging thwarted when XDebug Loaded.
+	- Fixed bug #300: Direction of var_dump().
+	- Always set the transaction_id and command. (Related to bug #313).
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -138,6 +133,24 @@ Sat, Oct 20, 2007 - xdebug 2.0.1
     </deps>
   </release>
   <changelog>
+    <release>
+      <state>stable</state>
+      <version>2.0.2</version>
+      <date>2007-11-11</date>
+      <notes>
+Sun, Nov 11, 2007 - xdebug 2.0.2
+
+= Fixed bugs:
+	- Fixed bug #325: DBGP: "detach" stops further sessions being established
+	  from Apache.
+	- Fixed bug #321: Code coverage crashes on empty PHP files.
+	- Fixed bug #318: Segmentation Fault in code coverage analysis.
+	- Fixed bug #315: Xdebug crashes when including a file that doesn't exist.
+	- Fixed bug #314: PHP CLI Error Logging thwarted when XDebug Loaded.
+	- Fixed bug #300: Direction of var_dump().
+	- Always set the transaction_id and command. (Related to bug #313).
+      </notes>
+    </release>
     <release>
       <state>stable</state>
       <version>2.0.1</version>

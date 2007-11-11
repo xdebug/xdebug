@@ -1,3 +1,16 @@
+Sun, Nov 11, 2007 - xdebug 2.0.2
+
+= Fixed bugs:
+	- Fixed bug #325: DBGP: "detach" stops further sessions being established
+	  from Apache.
+	- Fixed bug #321: Code coverage crashes on empty PHP files.
+	- Fixed bug #318: Segmentation Fault in code coverage analysis.
+	- Fixed bug #315: Xdebug crashes when including a file that doesn't exist.
+	- Fixed bug #314: PHP CLI Error Logging thwarted when XDebug Loaded.
+	- Fixed bug #300: Direction of var_dump().
+	- Always set the transaction_id and command. (Related to bug #313).
+
+
 Sat, Oct 20, 2007 - xdebug 2.0.1
 
 + Changes:
