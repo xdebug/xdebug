@@ -304,7 +304,7 @@ static int prefill_from_class_table(zend_class_entry *class_entry, int num_args,
 
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
-	if (op_array->reserved[XG(reserved_offset)] == 0) {
+	if (op_array->reserved[XG(reserved_offset)] != 1) {
 		prefill_from_oparray(op_array->filename, op_array TSRMLS_CC);
 	}
 
