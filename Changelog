@@ -1,3 +1,7 @@
+Sun Nov 11 15:32:56 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Change the if() in case the value is uninitialized.
+
 Mon Oct 29 19:59:55 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00313.inc
