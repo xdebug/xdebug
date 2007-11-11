@@ -1,3 +1,9 @@
+Sun Nov 11 15:34:06 CET 2007 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/php_xdebug.h
+xdebug/template.rc:
+- Go with 2.0.2.
+
 Sun Nov 11 15:33:24 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - MFH: Change the if() in case the value is uninitialized.
