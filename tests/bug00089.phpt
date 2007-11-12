@@ -15,7 +15,7 @@ xdebug.var_display_max_children=3
 var_dump(array(4, array('', 2, 'node'), false));
 ?>
 --EXPECT--
-<pre dir="ltr">
+<pre class='xdebug-var-dump' dir='ltr'>
 <b>array</b>
   0 <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>4</font>
   1 <font color='#888a85'>=&gt;</font> 

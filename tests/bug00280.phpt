@@ -12,7 +12,7 @@ ini_set('html_errors', '1');
 var_dump($arr);
 ?>
 --EXPECT--
-<pre dir="ltr">
+<pre class='xdebug-var-dump' dir='ltr'>
 <b>array</b>
   'te&#0;st' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'te&#0;st'</font> <i>(length=5)</i>
 </pre>
