@@ -1,3 +1,7 @@
+Mon Nov 12 17:58:32 CET 2007 Derick Rethans <derick@derickrethans.nl>
+:
+- Fixed ChangeLog.
+
 Sun Nov 11 17:29:08 CET 2007 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/template.rc:
