@@ -1,3 +1,7 @@
+Mon Nov 12 17:59:34 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- MFH: Added a CSS-class for xdebug's var_dump().
+
 Mon Nov 12 17:59:01 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Added a CSS-class for xdebug's var_dump().
