@@ -1,3 +1,9 @@
+Mon Nov 12 23:27:50 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/bug00334.inc
+xdebug/tests/bug00334.phpt:
+- MFH: Fixed bug #334: Code Coverage Regressions.
+
 Mon Nov 12 23:26:57 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00334.inc
