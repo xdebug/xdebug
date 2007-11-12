@@ -1,3 +1,10 @@
+Mon Nov 12 23:25:57 CET 2007 Derick Rethans <derick@derickrethans.nl>
+tests/bug00089.phpt
+xdebug/tests/bug00280.phpt
+xdebug/tests/bug00298.phpt
+xdebug/tests/xdebug_var_dump.phpt:
+- MFH: Fixed test cases after last feature addition.
+
 Mon Nov 12 23:25:23 CET 2007 Derick Rethans <derick@derickrethans.nl>
 tests/bug00089.phpt
 xdebug/tests/bug00280.phpt
