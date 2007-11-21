@@ -1411,8 +1411,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				/* Get handler from mode */
 				XG(context).handler = xdebug_handler_get(XG(remote_handler));
 				if (!XG(context).handler) {
-					zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
 					XG(remote_enabled) = 0;
+					zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
 				} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
 					/* The request could not be started, ignore it then */
 					XG(remote_enabled) = 0;
