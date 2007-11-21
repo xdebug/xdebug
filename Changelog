@@ -1,3 +1,13 @@
+Wed Nov 21 14:44:38 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/functrace_comp_0.phpt
+xdebug/tests/functrace_comp_1.phpt
+xdebug/tests/functrace_comp_2.phpt
+xdebug/tests/functrace_comp_3.phpt
+xdebug/tests/functrace_comp_4.phpt
+xdebug/tests/trace1.phpt:
+- Implemented feature #245: Function parameters in computerized function traces.
+
 Wed Nov 21 14:42:42 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: Use the op_array ctor handler.
