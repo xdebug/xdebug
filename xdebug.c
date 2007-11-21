@@ -2106,7 +2106,46 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 			xdebug_str_add(&str, i->include_filename, 0);
 		}
 
-		xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d\n", i->filename, i->lineno), 1);
+		/* Filename and Lineno (9, 10) */
+		xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d", i->filename, i->lineno), 1);
+
+
+		if (XG(collect_params) > 0) {
+			int j = 0; /* Counter */
+
+			/* Nr of arguments (11) */
+			xdebug_str_add(&str, xdebug_sprintf("\t%d", i->varc), 1);
+
+			/* Arguments (12-...) */
+			for (j = 0; j < i->varc; j++) {
+				char *tmp_value;
+
+				xdebug_str_addl(&str, "\t", 1, 0);
+
+				if (i->var[j].name && XG(collect_params) >= 4) {
+					xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
+				}
+
+				switch (XG(collect_params)) {
+					case 1: // synopsis
+					case 2:
+						tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
+						break;
+					case 3:
+					default:
+						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+						break;
+				}
+				if (tmp_value) {
+					xdebug_str_add(&str, tmp_value, 1);
+				} else {
+					xdebug_str_add(&str, "???", 0);
+				}
+			}
+		}
+
+		/* Trailing \n */
+		xdebug_str_add(&str, "\n", 0);
 
 	} else if (whence == 1) { /* end */
 		xdebug_str_add(&str, "1\t", 0);
@@ -2884,6 +2923,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	if (XG(trace_file)) {
 		if (XG(trace_format) == 1) {
 			fprintf(XG(trace_file), "Version: %s\n", XDEBUG_VERSION);
+			fprintf(XG(trace_file), "File format: 2\n");
 		}
 		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
 			str_time = xdebug_get_time();

@@ -5,7 +5,7 @@ Trace test with fibonacci numbers (format=1)
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
-xdebug.collect_params=3
+xdebug.collect_params=0
 xdebug.collect_return=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
@@ -40,6 +40,7 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 Version: 2.%d.%d%s
+File format: 2
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%f	%d
 2	3	0	%f	%d	fibonacci_cache	1		%strace1.php	22
