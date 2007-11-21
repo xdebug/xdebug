@@ -1,3 +1,7 @@
+Wed Nov 21 14:42:15 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Use the op_array ctor handler.
+
 Mon Nov 12 23:27:50 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00334.inc
