@@ -1,3 +1,7 @@
+Wed Nov 21 15:04:25 CET 2007 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- MFH: Fixed bug #338: Crash with: xdebug.remote_handler=req.
+
 Wed Nov 21 15:03:52 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #338: Crash with: xdebug.remote_handler=req.
