@@ -1,3 +1,8 @@
+Fri Nov 30 23:19:51 CET 2007 Shane Caraveo <shane@caraveo.com>
+xdebug_code_coverage.c:
+- fix xdebug builds against 4.4.  
+
+Derick, can you verify what *should* be done for 4.x?
 Fri Nov 30 22:25:35 CET 2007 Shane Caraveo <shane@caraveo.com>
 xdebug.c:
 - fix windows TSRM build after change 1.412
