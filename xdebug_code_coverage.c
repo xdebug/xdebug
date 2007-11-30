@@ -144,7 +144,13 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, int *jmp1
 	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
 		zend_brk_cont_element *el;
 
-		if (opcode.op2.op_type == IS_CONST && opcode.op1.u.jmp_addr != (zend_op*) 0xFFFFFFFF) {
+		if (opcode.op2.op_type == IS_CONST
+#ifdef ZEND_ENGINE_2
+		    && opcode.op1.u.jmp_addr != (zend_op*) 0xFFFFFFFF
+#else
+		    && opcode.op1.u.opline_num > -1
+#endif
+		) {
 			el = xdebug_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 			return 1;
