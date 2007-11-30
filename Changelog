@@ -1,3 +1,6 @@
+Fri Nov 30 22:25:35 CET 2007 Shane Caraveo <shane@caraveo.com>
+xdebug.c:
+- fix windows TSRM build after change 1.412
 Wed Nov 21 15:04:25 CET 2007 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: Fixed bug #338: Crash with: xdebug.remote_handler=req.
