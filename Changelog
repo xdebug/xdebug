@@ -1,3 +1,7 @@
+Sun Feb 03 14:04:48 CET 2008 Marcus Börger <helly@php.net>
+xdebug.c:
+- Initial 5.3 fixup
+
 Fri Nov 30 23:19:51 CET 2007 Shane Caraveo <shane@caraveo.com>
 xdebug_code_coverage.c:
 - fix xdebug builds against 4.4.  
