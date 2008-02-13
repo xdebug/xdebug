@@ -1,3 +1,9 @@
+Wed Feb 13 14:38:21 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/coverage4.inc
+xdebug/tests/coverage4.phpt:
+- MFH: Fixed abstract method detection.
+
 Wed Feb 13 14:37:47 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/coverage4.inc
