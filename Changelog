@@ -1,3 +1,17 @@
+Wed Feb 13 13:12:21 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/tests/bug00314.phpt
+xdebug/tests/stacktrace_html_0.phpt
+xdebug/tests/stacktrace_html_1.phpt
+xdebug/tests/stacktrace_html_2.phpt
+xdebug/tests/stacktrace_html_3.phpt
+xdebug/tests/stacktrace_html_4.phpt
+xdebug/tests/stacktrace_html_4_novar.phpt
+xdebug/tests/trace2.phpt:
+- Merge PHP 5.3 and DBGp fixes from HEAD.
+
 Sun Feb 03 14:04:48 CET 2008 Marcus Börger <helly@php.net>
 xdebug.c:
 - Initial 5.3 fixup
