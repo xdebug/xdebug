@@ -1,3 +1,8 @@
+Wed Feb 13 14:59:48 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/bug00334.phpt:
+- MFH: Fixed code coverage dead-code detection.
+
 Wed Feb 13 14:59:28 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00334.phpt:
