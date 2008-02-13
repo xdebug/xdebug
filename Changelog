@@ -1,3 +1,8 @@
+Wed Feb 13 15:57:00 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_code_coverage.c:
+- Two more code coverage fixes: elseif and return.
+
 Wed Feb 13 14:59:48 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c
 xdebug/tests/bug00334.phpt:
