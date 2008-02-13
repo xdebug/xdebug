@@ -1,3 +1,7 @@
+Wed Feb 13 17:27:07 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- MFH: One more overloaded opcode for code coverage.
+
 Wed Feb 13 17:26:42 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - One more overloaded opcode for code coverage.
