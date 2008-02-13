@@ -112,14 +112,14 @@ static zend_brk_cont_element* xdebug_find_brk_cont(zval *nest_levels_zval, int a
 	return jmp_to;
 }
 
-static int xdebug_find_jump(zend_op_array *opa, unsigned int position, int *jmp1, int *jmp2)
+static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
 	zend_op *base_address = &(opa->opcodes[0]);
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
 #ifdef ZEND_ENGINE_2
-		*jmp1 = (opcode.op1.u.jmp_addr - base_address) / sizeof(zend_op);
+		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
 #else
 		*jmp1 = opcode.op1.u.opline_num;
 #endif
@@ -132,7 +132,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, int *jmp1
 	) {
 		*jmp1 = position + 1;
 #ifdef ZEND_ENGINE_2
-		*jmp2 = (opcode.op2.u.jmp_addr - base_address) / sizeof(zend_op);
+		*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
 #else
 		*jmp2 = opcode.op1.u.opline_num;
 #endif
@@ -159,8 +159,8 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, int *jmp1
 
 static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xdebug_set *set)
 {
-	int jump_pos1 = -1;
-	int jump_pos2 = -1;
+	long jump_pos1 = -1;
+	long jump_pos2 = -1;
 
 	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
 	/* First we see if the branch has been visited, if so we bail out. */
