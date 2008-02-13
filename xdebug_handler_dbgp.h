@@ -74,6 +74,7 @@ typedef struct xdebug_dbgp_arg {
 #define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(DBGP_FUNC_PARAMETERS)
 #define DBGP_FUNC_ENTRY(name,flags)       { #name, xdebug_dbgp_handle_##name, 0, flags },
 #define DBGP_CONT_FUNC_ENTRY(name,flags)  { #name, xdebug_dbgp_handle_##name, 1, flags },
+#define DBGP_STOP_FUNC_ENTRY(name,flags)  { #name, xdebug_dbgp_handle_##name, 2, flags },
 
 #define XDEBUG_DBGP_NONE          0x00
 #define XDEBUG_DBGP_POST_MORTEM   0x01

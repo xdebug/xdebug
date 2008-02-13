@@ -974,6 +974,7 @@ static void trace_function_end(function_stack_entry *fse, int function_nr TSRMLS
 
 static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
+	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
 	zval                **param;
@@ -996,16 +997,16 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->symbol_table  = NULL;
 	tmp->execute_data  = NULL;
 
-	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
+	if (edata && edata->op_array) {
 		/* Normal function calls */
-		tmp->filename  = xdstrdup(EG(current_execute_data)->op_array->filename);
+		tmp->filename  = xdstrdup(edata->op_array->filename);
 		XG(function_count)++;
-	} else if (EG(current_execute_data) &&
-		EG(current_execute_data)->prev_execute_data &&
+	} else if (edata &&
+		edata->prev_execute_data &&
 		XDEBUG_LLIST_TAIL(XG(stack))
 	) {
 		/* Ugly hack for call_user_*() type function calls */
-		zend_function *tmpf = EG(current_execute_data)->prev_execute_data->function_state.function;
+		zend_function *tmpf = edata->prev_execute_data->function_state.function;
 		if (tmpf && (tmpf->common.type != 3) && tmpf->common.function_name) {
 			if (
 				(strcmp(tmpf->common.function_name, "call_user_func") == 0) ||
@@ -1060,12 +1061,13 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 #endif
 	} else  {
-		if (EG(current_execute_data)->opline) {
-			cur_opcode = EG(current_execute_data)->opline;
+		if (edata->opline) {
+			cur_opcode = edata->opline;
 			if (cur_opcode) {
 				tmp->lineno = cur_opcode->lineno;
 			}
 		}
+
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
 			void **p;
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
@@ -1074,11 +1076,26 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 			 * works for both internal and user defined functions.
 			 * op_array->num_args works only for user defined functions so
 			 * we're not using that here. */
+#if PHP_VERSION_ID >= 50300
+			void **curpos = NULL;
+			if ((!edata->opline) || ((edata->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (edata->opline->opcode == ZEND_DO_FCALL))) {
+				curpos = edata->function_state.arguments;
+				arguments_sent = (int)(zend_uintptr_t) *curpos;
+				arguments_wanted = arguments_sent;
+				p = curpos - arguments_sent;
+			} else {
+				p = zend_vm_stack_top(TSRMLS_C) - 1;
+				arguments_sent = (ulong) *p;
+				arguments_wanted = arguments_sent;
+				p = curpos = NULL;
+			}
+#else
 			if (EG(argument_stack).top >= 2) {
 				p = EG(argument_stack).top_element - 2;
 				arguments_sent = (ulong) *p;
 				arguments_wanted = arguments_sent;
 			}
+#endif
 
 # if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
 			if (tmp->user_defined == XDEBUG_EXTERNAL) {
@@ -1107,12 +1124,19 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 # endif
 				if (XG(collect_params)) {
+#if PHP_VERSION_ID >= 50300
+					if (p) {
+						param = (zval **) p++;				
+						tmp->var[tmp->varc].addr = *param;
+					}
+#else
 					param = NULL;
 					if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
 						if (param) {
 							tmp->var[tmp->varc].addr = *param;
 						}
 					}
+#endif
 				}
 				tmp->varc++;
 			}
@@ -3087,6 +3111,7 @@ ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 {
+	TSRMLS_FETCH();
 	op_array->reserved[XG(reserved_offset)] = 0;
 }
 
