@@ -1,3 +1,7 @@
+Wed Feb 13 14:54:12 CET 2008 Derick Rethans <derick@derickrethans.nl>
+test-5.3.sh:
+- MFH: Added 5.3 test script.
+
 Wed Feb 13 14:53:57 CET 2008 Derick Rethans <derick@derickrethans.nl>
 test-5.3.sh:
 - Added 5.3 test script.
