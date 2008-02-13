@@ -538,6 +538,7 @@ XDEBUG_OPCODE_OVERRIDE(fetch_dim_func_arg)
 XDEBUG_OPCODE_OVERRIDE(fetch_class)
 XDEBUG_OPCODE_OVERRIDE(fetch_constant)
 XDEBUG_OPCODE_OVERRIDE(concat)
+XDEBUG_OPCODE_OVERRIDE(isset_isempty_dim_obj)
 #endif
 
 
@@ -608,6 +609,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE(fetch_class, ZEND_FETCH_CLASS);
 	XDEBUG_SET_OPCODE_OVERRIDE(fetch_constant, ZEND_FETCH_CONSTANT);
 	XDEBUG_SET_OPCODE_OVERRIDE(concat, ZEND_CONCAT);
+	XDEBUG_SET_OPCODE_OVERRIDE(isset_isempty_dim_obj, ZEND_ISSET_ISEMPTY_DIM_OBJ);
 #endif
 
 	if (zend_xdebug_initialised == 0) {
