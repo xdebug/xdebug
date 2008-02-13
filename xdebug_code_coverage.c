@@ -234,7 +234,11 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 #ifdef ZEND_ENGINE_2
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
+#if PHP_VERSION_ID >= 50300
+	if (opa->size >= 3 && opa->opcodes[opa->size - 3].opcode == ZEND_RAISE_ABSTRACT_ERROR)
+#else
 	if (opa->size >= 4 && opa->opcodes[opa->size - 4].opcode == ZEND_RAISE_ABSTRACT_ERROR)
+#endif
 	{
 		return;
 	}	
