@@ -170,7 +170,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	xdebug_set_add(set, position);
 	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
-	while (position < opa->size - 1) {
+	while (position < opa->size) {
 
 		/* See if we have a jump instruction */
 		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
@@ -192,7 +192,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			/* fprintf(stderr, "Throw found at %d\n", position); */
 			/* Now we need to go forward to the first
 			 * zend_fetch_class/zend_catch combo */
-			while (position < opa->size - 1) {
+			while (position < opa->size) {
 				if (opa->opcodes[position].opcode == ZEND_CATCH) {
 					/* fprintf(stderr, "Found catch at %d\n", position); */
 					position--;
