@@ -1,3 +1,7 @@
+Tue Feb 19 17:57:32 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed strange empty zval to string conversion.
+
 Sun Feb 17 21:52:08 CET 2008 Marcus Börger <helly@php.net>
 config.m4:
 - Enable to be tested as built-in using 'make test'
