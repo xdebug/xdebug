@@ -2548,11 +2548,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			if (i->var[j].addr) {
 				argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 			} else {
-				zval *tmp_zval;
-				MAKE_STD_ZVAL(tmp_zval);
-				argument = xdebug_get_zval_value(tmp_zval, 0, NULL);
-				zval_dtor(tmp_zval);
-				FREE_ZVAL(tmp_zval);
+				argument = xdstrdup("");
 			}
 			if (i->var[j].name) {
 				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
