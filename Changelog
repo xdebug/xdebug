@@ -1,3 +1,7 @@
+Tue Mar 04 14:13:05 CET 2008 Derick Rethans <derick@derickrethans.nl>
+config.m4:
+- Revert Marcus' patch
+
 Tue Mar 04 12:24:07 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - MFH: Added support for the new E_DEPRECATED.
