@@ -1,3 +1,7 @@
+Tue Mar 04 12:23:52 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Added support for the new E_DEPRECATED.
+
 Tue Feb 19 17:57:32 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed strange empty zval to string conversion.
