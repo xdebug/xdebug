@@ -63,6 +63,11 @@ char* xdebug_error_type(int type)
 			return xdstrdup("Strict standards");
 			break;
 #endif
+#if PHP_VERSION_ID >= 50300
+		case E_DEPRECATED:
+			return xdstrdup("Deprecated");
+			break;
+#endif
 		default:
 			return xdstrdup("Unknown error");
 			break;
