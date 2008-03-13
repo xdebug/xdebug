@@ -1,3 +1,7 @@
+Thu Mar 13 15:06:57 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Make this compile with PHP 5.3 and HEAD again. (Patch by Etienne Kneus)
+
 Thu Mar 13 15:06:10 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Make this compile with PHP 5.3 and HEAD again. (Patch by Etienne Kneus)
