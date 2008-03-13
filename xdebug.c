@@ -2222,6 +2222,10 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	char *buffer, *error_type_str;
 	int buffer_len;
 	xdebug_brk_info *extra_brk_info = NULL;
+#if PHP_MAJOR_VERSION >= 5
+	error_handling_t  error_handling;
+	zend_class_entry *exception_class;
+#endif
 
 	TSRMLS_FETCH();
 
@@ -2246,8 +2250,15 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 #endif
 
 #if PHP_MAJOR_VERSION >= 5
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+	error_handling  = EG(error_handling);
+	exception_class = EG(exception_class);
+#else
+	error_handling  = PG(error_handling);
+	exception_class = PG(exception_class);
+#endif
 	/* according to error handling mode, suppress error, throw exception or show it */
-	if (PG(error_handling) != EH_NORMAL) {
+	if (error_handling != EH_NORMAL) {
 		switch (type) {
 			case E_CORE_ERROR:
 			case E_COMPILE_ERROR:
@@ -2265,11 +2276,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				/* throw an exception if we are in EH_THROW mode
 				 * but DO NOT overwrite a pending exception
 				 */
-				if (PG(error_handling) == EH_THROW && !EG(exception)) {
+				if (error_handling == EH_THROW && !EG(exception)) {
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || PHP_MAJOR_VERSION >= 6
-					zend_throw_error_exception(PG(exception_class), buffer, 0, type TSRMLS_CC);
+					zend_throw_error_exception(exception_class, buffer, 0, type TSRMLS_CC);
 #else
-					zend_throw_exception(PG(exception_class), buffer, 0 TSRMLS_CC);
+					zend_throw_exception(exception_class, buffer, 0 TSRMLS_CC);
 #endif
 				}
 				efree(buffer);
