@@ -1,3 +1,8 @@
+Wed Mar 19 17:01:07 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- MFH: Make it compile with PHP 5.3 again.
+
 Wed Mar 19 17:00:29 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_handler_dbgp.c:
