@@ -1265,7 +1265,11 @@ static int xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 		if (XG(stdout_redirected) != 0) {
 			xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
 		}
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+		zend_set_timeout(EG(timeout_seconds), 0);
+#else
 		zend_set_timeout(EG(timeout_seconds));
+#endif
 	}
 	return XG(stdio).php_header_write(str, str_length TSRMLS_CC);
 }
@@ -1280,7 +1284,11 @@ static int xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
 		if (XG(stdout_redirected) != 0) {
 			xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
 		}
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+		zend_set_timeout(EG(timeout_seconds), 0);
+#else
 		zend_set_timeout(EG(timeout_seconds));
+#endif
 	}
 	return XG(stdio).php_body_write(str, str_length TSRMLS_CC);
 }
@@ -2233,7 +2241,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.130 $";
+	return "$Revision: 1.131 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
