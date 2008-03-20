@@ -92,6 +92,7 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 #ifdef ZEND_ENGINE_2
 		&& opcode.opcode != ZEND_VERIFY_ABSTRACT_CLASS
 		&& opcode.opcode != ZEND_OP_DATA
+		&& opcode.opcode != ZEND_ADD_INTERFACE
 #endif
 	) {
 		xdebug_count_line(fn, opcode.lineno, 1, deadcode TSRMLS_CC);
