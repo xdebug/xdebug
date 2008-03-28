@@ -1,3 +1,7 @@
+Fri Mar 28 01:09:10 CET 2008 Shane Caraveo <shane@caraveo.com>
+xdebug_handler_dbgp.c:
+- fix conditional breakpoint support, now only watch needs to be implemented
+
 Thu Mar 20 17:51:20 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - MFH: Ignore ZEND_ADD_INTERFACE, which is on a different line in PHP >= 5.3
