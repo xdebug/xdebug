@@ -1097,7 +1097,7 @@ DBGP_FUNC(breakpoint_set)
 		brk_info->hit_value = strtol(CMD_OPTION('h'), NULL, 10);
 	}
 
-	if (strcmp(CMD_OPTION('t'), "line") == 0) {
+	if ((strcmp(CMD_OPTION('t'), "line") == 0) || (strcmp(CMD_OPTION('t'), "conditional") == 0)) {
 		if (!CMD_OPTION('n')) {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		}
@@ -1158,10 +1158,6 @@ DBGP_FUNC(breakpoint_set)
 				brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_FUNCTION, CMD_OPTION('m'));
 			}
 		}
-	} else
-
-	if (strcmp(CMD_OPTION('t'), "conditional") == 0) {
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
 	} else
 
 	if (strcmp(CMD_OPTION('t'), "exception") == 0) {
@@ -2241,7 +2237,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.131 $";
+	return "$Revision: 1.132 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
