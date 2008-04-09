@@ -1,3 +1,7 @@
+Wed Apr 09 14:42:03 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_compat.c:
+- MFH: Re-license file.
+
 Wed Apr 09 14:41:37 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_compat.c:
 - Re-license file.
