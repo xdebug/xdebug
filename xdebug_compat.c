@@ -1,22 +1,44 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2004 The PHP Group                                |
+   | Copyright (c) 2002-2008 Derick Rethans <derick@xdebug.org>           |
+   |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
+   |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
+   |                         Zeev Suraski <zeev@zend.com>                 |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.0 of the PHP license,       |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_0.txt.                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
-   +----------------------------------------------------------------------+
-   | Author: Jim Winstead <jimw@php.net>                                  |
-   | Modifications: Derick Rethans <derick@xdebug.org>                    |
+   | This source file is subject to the following Modified BSD license:   |
+   |                                                                      |
+   | Redistribution and use in source and binary forms, with or without   |
+   | modification, are permitted provided that the following conditions   |
+   | are met:                                                             |
+   |                                                                      |
+   |   1. Redistributions of source code must retain the above copyright  |
+   |      notice, this list of conditions and the following disclaimer.   |
+   |                                                                      |
+   |   2. Redistributions in binary form must reproduce the above         |
+   |      copyright notice, this list of conditions and the following     |
+   |      disclaimer in the documentation and/or other materials provided |
+   |      with the distribution.                                          |
+   |                                                                      |
+   |   3. The name of the author may not be used to endorse or promote    |
+   |      products derived from this software without specific prior      |
+   |      written permission.                                             |
+   |                                                                      |
+   | THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR |
+   | IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED       |
+   | WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   |
+   | ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY       |
+   | DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL   |
+   | DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE    |
+   | GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS        |
+   | INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER |
+   | IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR      |
+   | OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN  |
+   | IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.9.2.1 2007-10-09 21:58:10 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.9.2.2 2008-04-09 12:42:03 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"
@@ -265,26 +287,6 @@ unsigned char *xdebug_base64_decode(const unsigned char *str, int length, int *r
 /* }}} */
 
 #endif
-
-/*
-   +----------------------------------------------------------------------+
-   | Zend Engine                                                          |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2004 Zend Technologies Ltd. (http://www.zend.com) |
-   +----------------------------------------------------------------------+
-   | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
-   | If you did not receive a copy of the Zend license and are unable to  |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@zend.com so we can mail you a copy immediately.              |
-   +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   | Modifications: Derick Rethans <derick@xdebug.org>                    |
-   +----------------------------------------------------------------------+
-*/
 
 #ifdef ZEND_ENGINE_2
 
