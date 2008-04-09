@@ -1,5 +1,5 @@
 /* This is a template RC file.
- * $Id: template.rc,v 1.1.2.6 2007-11-11 16:29:08 derick Exp $
+ * $Id: template.rc,v 1.1.2.7 2008-04-09 14:47:54 derick Exp $
  * Do not edit with MSVC */
 #ifdef APSTUDIO_INVOKED
 # error dont edit with MSVC
@@ -16,7 +16,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #endif
 
 #define VERSIONDESC 2,0,3,0
-#define VERSIONSTR  "2.0.3dev"
+#define VERSIONSTR  "2.0.3"
 
 //Version
 VS_VERSION_INFO VERSIONINFO
@@ -41,7 +41,7 @@ BEGIN
             VALUE "FileDescription", FILE_DESCRIPTION "\0"
             VALUE "FileVersion", VERSIONSTR
             VALUE "InternalName", FILE_NAME "\0"
-            VALUE "LegalCopyright", "Copyright © 2002-2007 Derick Rethans\0"
+            VALUE "LegalCopyright", "Copyright © 2002-2008 Derick Rethans\0"
             VALUE "OriginalFilename", FILE_NAME "\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Xdebug\0"
