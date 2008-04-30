@@ -1,3 +1,8 @@
+Wed Apr 30 16:31:34 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_superglobals.c
+xdebug/xdebug.c:
+- Merge back trivial changes from HEAD.
+
 Wed Apr 30 16:24:52 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 package.xml:
 - Added depcomp to the package to make debugclient work properly.
