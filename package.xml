@@ -127,6 +127,7 @@ Wed, Jul 18, 2007 - xdebug 2.0.0
         <file role="src" name="configure"/>
         <file role="src" name="configure.in"/>
         <file role="src" name="cvsclean"/>
+        <file role="src" name="depcomp"/>
         <file role="src" name="debugclient.dsp"/>
         <file role="src" name="INSTALL"/>
         <file role="src" name="install-sh"/>
