@@ -1798,7 +1798,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 
 	if (XG(stack) && XG(stack)->size) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
-		
+
 		xdebug_str_add(&str, formats[2], 0);
 
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -2440,11 +2440,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			if (i->var[j].addr) {
 				argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 			} else {
-				zval *tmp_zval;
-				MAKE_STD_ZVAL(tmp_zval);
-				argument = xdebug_get_zval_value(tmp_zval, 0, NULL);
-				zval_dtor(tmp_zval);
-				FREE_ZVAL(tmp_zval);
+				argument = xdstrdup("");
 			}
 			if (i->var[j].name) {
 				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
@@ -2811,7 +2807,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 			xdfree(str_time);
 		}
 		if (XG(trace_format) == 2) {
-			fprintf(XG(trace_file), "<table dir='ltr' class='xdebug-trace' border='1' cellspacing='0'>\n");
+			fprintf(XG(trace_file), "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
 			fprintf(XG(trace_file), "\t<tr><th>#</th><th>Time</th>");
 #if MEMORY_LIMIT
 			fprintf(XG(trace_file), "<th>Mem</th>");
@@ -3144,7 +3140,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	XDEBUG_VERSION,
 	XDEBUG_AUTHOR,
 	XDEBUG_URL,
-	"Copyright (c) 2002-2007",
+	"Copyright (c) 2002-2008",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
 	NULL,           /* activate_func_t */
