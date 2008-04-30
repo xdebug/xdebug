@@ -1,3 +1,7 @@
+Wed Apr 30 16:24:52 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+package.xml:
+- Added depcomp to the package to make debugclient work properly.
+
 Wed Apr 30 16:24:30 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed CS.
