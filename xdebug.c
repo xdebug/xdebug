@@ -3288,7 +3288,7 @@ ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 {
-        TSRMLS_FETCH();
+	TSRMLS_FETCH();
 	op_array->reserved[XG(reserved_offset)] = 0;
 }
 
