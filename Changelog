@@ -1,3 +1,10 @@
+Wed Apr 30 16:46:45 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_superglobals.h
+xdebug/xdebug.c:
+- Two more overloaded opcodes to make code coverage better.
+
 Wed Apr 30 16:36:13 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - MFH: Fix for strange jump positions in path analysis.
