@@ -1,3 +1,8 @@
+Wed May 21 16:32:02 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- MFH: Fixed issues with Xdebug stalling/crashing when detaching from remote
+  debugging.
+
 Wed May 21 16:31:44 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed issues with Xdebug stalling/crashing when detaching from remote
