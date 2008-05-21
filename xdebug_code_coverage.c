@@ -177,7 +177,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	xdebug_set_add(set, position);
 	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
-	while (position < opa->size) {
+	while (position < opa->last) {
 
 		/* See if we have a jump instruction */
 		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
@@ -188,7 +188,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 				/*(fprintf(stderr, "\n");)*/
 			}
 			xdebug_analyse_branch(opa, jump_pos1, set);
-			if (jump_pos2 != -1) {
+			if (jump_pos2 != -1 && jump_pos2 <= opa->last) {
 				xdebug_analyse_branch(opa, jump_pos2, set);
 			}
 			break;
@@ -199,7 +199,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			/* fprintf(stderr, "Throw found at %d\n", position); */
 			/* Now we need to go forward to the first
 			 * zend_fetch_class/zend_catch combo */
-			while (position < opa->size) {
+			while (position < opa->last) {
 				if (opa->opcodes[position].opcode == ZEND_CATCH) {
 					/* fprintf(stderr, "Found catch at %d\n", position); */
 					position--;
@@ -242,9 +242,9 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
 #if PHP_VERSION_ID >= 50300
-	if (opa->size >= 3 && opa->opcodes[opa->size - 3].opcode == ZEND_RAISE_ABSTRACT_ERROR)
+	if (opa->last >= 3 && opa->opcodes[opa->last - 3].opcode == ZEND_RAISE_ABSTRACT_ERROR)
 #else
-	if (opa->size >= 4 && opa->opcodes[opa->size - 4].opcode == ZEND_RAISE_ABSTRACT_ERROR)
+	if (opa->last >= 4 && opa->opcodes[opa->last - 4].opcode == ZEND_RAISE_ABSTRACT_ERROR)
 #endif
 	{
 		return;
@@ -253,12 +253,12 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 
 	/* Run dead code analysis if requested */
 	if (XG(code_coverage_dead_code_analysis)) {
-		set = xdebug_set_create(opa->size);
+		set = xdebug_set_create(opa->last);
 		xdebug_analyse_branch(opa, 0, set);
 	}
 
 	/* The normal loop then finally */
-	for (i = 0; i < opa->size; i++) {
+	for (i = 0; i < opa->last; i++) {
 		zend_op opcode = opa->opcodes[i];
 		prefill_from_opcode(fn, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
 	}
