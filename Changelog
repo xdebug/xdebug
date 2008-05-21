@@ -1,3 +1,7 @@
+Wed May 21 16:30:34 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Fixed issues with code coverage crashing on parse errors.
+
 Wed Apr 30 16:47:04 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: Two more overloaded opcodes to make code coverage better.
