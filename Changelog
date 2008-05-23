@@ -1,3 +1,10 @@
+Fri May 23 21:09:51 CEST 2008 Shane Caraveo <shane@caraveo.com>
+xdebug_mm.h:
+- fix windows memory alloc/free crash in xdebug.  This shows up primarily on vista.
+
+http://bugs.activestate.com/show_bug.cgi?id=77272
+
+
 Wed May 21 16:32:02 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - MFH: Fixed issues with Xdebug stalling/crashing when detaching from remote
