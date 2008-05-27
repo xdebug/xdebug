@@ -318,7 +318,10 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 	/* encode the url */
 	encoded_fileurl = xdebug_raw_url_encode(fileurl, strlen(fileurl), &new_len, 1);
 
-	if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
+	if (strncmp(fileurl, "phar://", 7) == 0) {
+		/* ignore, phar is cool */
+		tmp = xdebug_sprintf("dbgp://%s", fileurl);
+	} else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
 		/* convert relative paths */
 		cwd_state new_state;
 		char cwd[MAXPATHLEN];
