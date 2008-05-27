@@ -676,6 +676,9 @@ static char* return_eval_source(char *id, int begin, int end TSRMLS_DC)
 static char* return_source(char *filename, int begin, int end TSRMLS_DC)
 {
 	if (strncmp(filename, "dbgp://", 7) == 0) {
+		if (strncmp(filename, "dbgp://phar://", 14) == 0) {
+			return return_file_source(filename + 7, begin, end TSRMLS_CC);
+		}
 		return return_eval_source(filename + 7, begin, end TSRMLS_CC);
 	} else {
 		return return_file_source(filename, begin, end TSRMLS_CC);
@@ -2240,7 +2243,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.133 $";
+	return "$Revision: 1.134 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
