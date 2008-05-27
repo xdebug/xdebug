@@ -1,3 +1,8 @@
+Tue May 27 14:40:21 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c
+xdebug/xdebug_handler_dbgp.c:
+- MFH: Support debugging into phars.
+
 Tue May 27 14:40:06 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/xdebug_handler_dbgp.c:
