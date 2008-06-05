@@ -33,7 +33,7 @@
 #define xdrealloc   realloc
 #define xdfree      free
 #define xdstrdup    strdup
-#define xdstrndup   zend_strndup
+#define xdstrndup   xdebug_strndup
 #endif
 
 #endif

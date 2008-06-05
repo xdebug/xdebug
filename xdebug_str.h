@@ -38,5 +38,6 @@ void xdebug_str_chop(xdebug_str *xs, int c);
 void xdebug_str_free(xdebug_str *s);
 
 char* xdebug_sprintf (const char* fmt, ...);
+char* xdebug_strndup(const char *s, int length);
 
 #endif
