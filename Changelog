@@ -1,3 +1,11 @@
+Thu Jun 05 18:34:38 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_str.c
+xdebug/xdebug_str.h
+xdebug/xdebug_mm.h:
+- Fixed crash on Vista where memory was freed with routines from a different
+  standard-C library than it was allocated with. (Patch by Eric Promislow
+  <ericp@activestate.com>).
+
 Tue May 27 14:40:21 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c
 xdebug/xdebug_handler_dbgp.c:
