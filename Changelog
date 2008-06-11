@@ -1,3 +1,8 @@
+Wed Jun 11 13:48:50 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.ini:
+- Added a default xdebug.ini - patch by Martin Schuhfuß
+  <martins@spot-media.de>.
+
 Thu Jun 05 18:35:39 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_str.c
 xdebug/xdebug_str.h
