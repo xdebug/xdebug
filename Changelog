@@ -1,3 +1,7 @@
+Fri Jul 04 10:33:27 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed a crash bug in case a link format was given but PHP is used as CLI.
+
 Fri Jul 04 10:32:45 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
