@@ -1529,6 +1529,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	function_nr = XG(function_count);
 	trace_function_begin(fse, function_nr TSRMLS_CC);
 
+	XG_INIT_SYMBOL_TABLE
 	fse->symbol_table = EG(active_symbol_table);
 	fse->execute_data = EG(current_execute_data);
 
@@ -1727,6 +1728,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	}
 
 	tmp_ht = XG(active_symbol_table);
+	XG_INIT_SYMBOL_TABLE
 	XG(active_symbol_table) = EG(active_symbol_table);
 	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
 	XG(active_symbol_table) = tmp_ht;
@@ -2485,6 +2487,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			return;
 	}
 
+	XG_INIT_SYMBOL_TABLE
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		zval *tmp;
 
@@ -2766,6 +2769,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 	
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
+			XG_INIT_SYMBOL_TABLE
 			XG(active_symbol_table) = EG(active_symbol_table);
 			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
 			if (debugzval) {
@@ -2807,6 +2811,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
+			XG_INIT_SYMBOL_TABLE
 			XG(active_symbol_table) = EG(active_symbol_table);
 			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
 			if (debugzval) {
