@@ -1,3 +1,10 @@
+Fri Jul 04 10:32:45 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_gdb.c:
+- Added some workarounds that dmitry mentioned, but don't work - so we
+  leave them de-activated.
+
 Wed Jun 11 13:48:50 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.ini:
 - Added a default xdebug.ini - patch by Martin Schuhfuß
