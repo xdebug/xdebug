@@ -1863,7 +1863,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 
 	xdebug_str_add(&str, formats[0], 0);
 
-	if (strlen(XG(file_link_format)) > 0) {
+	if (strlen(XG(file_link_format)) > 0 && html) {
 		char *file_link;
 
 		create_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
