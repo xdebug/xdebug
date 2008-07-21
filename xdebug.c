@@ -843,6 +843,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(orig_header_handler) = sapi_module.header_handler;
 	sapi_module.header_handler = xdebug_header_handler;
 	XG(headers) = xdebug_llist_alloc(NULL);
+	if (strcmp(sapi_module.name, "cli") == 0) {
+		SG(request_info).no_headers = 1;
+	}
 
 	return SUCCESS;
 }
