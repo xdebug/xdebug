@@ -1,3 +1,7 @@
+Mon Jul 21 11:17:02 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Overload yet another opcode.
+
 Mon Jul 21 11:16:40 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
