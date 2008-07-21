@@ -86,6 +86,8 @@ void (*old_error_cb)(int type, const char *error_filename, const uint error_line
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
+static int xdebug_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC);
+
 #ifdef ZEND_ENGINE_2
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 #endif
@@ -148,6 +150,7 @@ function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_function_count,    NULL)
 
 	PHP_FE(xdebug_dump_superglobals,     NULL)
+	PHP_FE(xdebug_get_headers,           NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -834,6 +837,11 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(orig_set_time_limit_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
+	/* Override header generation in SAPI */
+	XG(orig_header_handler) = sapi_module.header_handler;
+	sapi_module.header_handler = xdebug_header_handler;
+	XG(headers) = xdebug_llist_alloc(NULL);
+
 	return SUCCESS;
 }
 
@@ -899,6 +907,9 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	}
 	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
 	orig->internal_function.handler = XG(orig_set_time_limit_func);
+
+	/* Clean up collected headers */
+	xdebug_llist_destroy(XG(headers), NULL);
 
 	return SUCCESS;
 }
@@ -2521,6 +2532,12 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 }
 /* }}} */
 
+static int xdebug_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC)
+{
+	xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
+	return XG(orig_header_handler)(h, s TSRMLS_CC);
+}
+
 /* {{{ proto integet xdebug_get_stack_depth()
    Returns the stack depth */
 PHP_FUNCTION(xdebug_get_stack_depth)
@@ -2910,6 +2927,18 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 	if (clear) {
 		xdebug_llist_destroy(XG(collected_errors), NULL);
 		XG(collected_errors)  = xdebug_llist_alloc(xdebug_collected_error_dtor);
+	}
+}
+
+PHP_FUNCTION(xdebug_get_headers)
+{
+	xdebug_llist_element *le;
+	char                 *string;
+
+	array_init(return_value);
+	for (le = XDEBUG_LLIST_HEAD(XG(headers)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+		string = XDEBUG_LLIST_VALP(le);
+		add_next_index_string(return_value, string, 1);
 	}
 }
 

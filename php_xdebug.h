@@ -46,6 +46,8 @@ extern zend_module_entry xdebug_module_entry;
 #include "TSRM.h"
 #endif
 
+#include "main/SAPI.h"
+
 #if MEMORY_LIMIT
 # define HAVE_PHP_MEMORY_USAGE 1
 #elif PHP_VERSION_ID >= 50201
@@ -119,6 +121,7 @@ PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
 
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
+PHP_FUNCTION(xdebug_get_headers);
 #if HAVE_PHP_MEMORY_USAGE
 PHP_FUNCTION(xdebug_memory_usage);
 PHP_FUNCTION(xdebug_peak_memory_usage);
@@ -193,6 +196,10 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_llist  env;
 	xdebug_llist  request;
 	xdebug_llist  session;
+
+	/* headers */
+	xdebug_llist *headers;
+	int        (*orig_header_handler)(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC);
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */
