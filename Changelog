@@ -1,3 +1,13 @@
+Mon Jul 21 11:26:49 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+tests/bug00241.phpt
+xdebug/tests/stacktrace_html_0.phpt
+xdebug/tests/stacktrace_html_1.phpt
+xdebug/tests/stacktrace_html_2.phpt
+xdebug/tests/stacktrace_html_3.phpt
+xdebug/tests/stacktrace_html_4.phpt
+xdebug/tests/stacktrace_html_4_novar.phpt:
+- Fixed a few tests.
+
 Mon Jul 21 11:18:13 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: Opcode overrides.
