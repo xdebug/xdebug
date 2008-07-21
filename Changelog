@@ -1,3 +1,8 @@
+Mon Jul 21 11:16:40 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added header collection functionality and the xdebug_get_headers() function.
+
 Wed Jul 16 17:52:51 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.ini:
 - Commented incorrect zend_extension_line out.
