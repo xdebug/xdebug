@@ -16,6 +16,7 @@ xdebug.collect_vars=1
 xdebug.collect_params=4
 xdebug.collect_returns=0
 html_errors=1
+xdebug.file_link_format=
 --FILE--
 <?php
 function foo( $a ) {
