@@ -1,3 +1,7 @@
+Wed Jul 30 13:17:00 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed recursive issue with headers.
+
 Mon Jul 21 13:47:55 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Suppress "headers already sent" messages for CLI.
