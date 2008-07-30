@@ -916,6 +916,8 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
 
+	sapi_module.header_handler = XG(orig_header_handler);
+
 	return SUCCESS;
 }
 
@@ -2945,6 +2947,7 @@ PHP_FUNCTION(xdebug_get_headers)
 		string = XDEBUG_LLIST_VALP(le);
 		add_next_index_string(return_value, string, 1);
 	}
+	xdebug_llist_empty(XG(headers), NULL);
 }
 
 PHP_FUNCTION(xdebug_start_trace)
