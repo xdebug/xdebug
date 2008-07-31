@@ -1,4 +1,4 @@
-dnl $Id: config.m4,v 1.27 2008-03-04 13:13:05 derick Exp $
+dnl $Id: config.m4,v 1.28 2008-07-31 00:43:35 sniper Exp $
 dnl config.m4 for extension xdebug
 
 PHP_ARG_ENABLE(xdebug, whether to enable eXtended debugging support,
@@ -27,7 +27,7 @@ dnl Check for new current_execute_data field in zend_executor_globals
 
   CPPFLAGS=$old_CPPFLAGS
 
-  PHP_ADD_MAKEFILE_FRAGMENT
+  PHP_NEW_EXTENSION(xdebug, xdebug.c xdebug_code_coverage.c xdebug_com.c xdebug_compat.c xdebug_handler_dbgp.c xdebug_handler_gdb.c xdebug_handler_php3.c xdebug_handlers.c xdebug_llist.c xdebug_hash.c xdebug_private.c xdebug_profiler.c xdebug_set.c xdebug_str.c xdebug_superglobals.c xdebug_var.c xdebug_xml.c usefulstuff.c, $ext_shared,,,,yes)
   PHP_SUBST(XDEBUG_SHARED_LIBADD)
-  PHP_NEW_EXTENSION(xdebug, xdebug.c xdebug_code_coverage.c xdebug_com.c xdebug_compat.c xdebug_handler_dbgp.c xdebug_handler_gdb.c xdebug_handler_php3.c xdebug_handlers.c xdebug_llist.c xdebug_hash.c xdebug_private.c xdebug_profiler.c xdebug_set.c xdebug_str.c xdebug_superglobals.c xdebug_var.c xdebug_xml.c usefulstuff.c, $ext_shared)
+  PHP_ADD_MAKEFILE_FRAGMENT
 fi
