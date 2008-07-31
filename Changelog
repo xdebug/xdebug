@@ -1,3 +1,9 @@
+Thu Jul 31 02:43:35 CEST 2008 Jani Taskinen <sniper@php.net>
+config.m4:
+- Fixed Makefile.frag addition
+- Use (future) zend_ext flag in PHP_NEW_EXTENSION()
+  which allows 'make test' for Zend extensions too.
+
 Wed Jul 30 13:17:00 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed recursive issue with headers.
