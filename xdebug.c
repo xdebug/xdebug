@@ -2542,7 +2542,10 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 static int xdebug_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC)
 {
 	xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
-	return XG(orig_header_handler)(h, s TSRMLS_CC);
+	if (XG(orig_header_handler)) {
+		return XG(orig_header_handler)(h, s TSRMLS_CC);
+	}
+	return SAPI_HEADER_ADD;
 }
 
 /* {{{ proto integet xdebug_get_stack_depth()
