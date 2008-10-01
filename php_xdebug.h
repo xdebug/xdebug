@@ -211,6 +211,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     remote_autostart; /* Disables the requirement for XDEBUG_SESSION_START */
 	char         *remote_log;       /* Filename to log protocol communication to */
 	FILE         *remote_log_file;  /* File handler for protocol log */
+	long          remote_cookie_expire_time; /* Expire time for the remote-session cookie */
 
 	char         *ide_key;    /* from environment, USER, USERNAME or empty */
 

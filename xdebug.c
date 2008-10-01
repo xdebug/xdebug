@@ -325,6 +325,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
+#if ZEND_EXTENSION_API_NO < 90000000
+	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateInt,    remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
+#else
+	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
+#endif
 
 	/* Variable display settings */
 #if ZEND_EXTENSION_API_NO < 90000000
@@ -448,6 +453,9 @@ void xdebug_env_config()
 		} else
 		if (strcasecmp(envvar, "remote_log") == 0) {
 			name = "xdebug.remote_log";
+		} else
+		if (strcasecmp(envvar, "remote_cookie_expire_time") == 0) {
+			name = "xdebug.remote_cookie_expire_time";
 		}
 
 		if (name) {
@@ -784,7 +792,7 @@ PHP_RINIT_FUNCTION(xdebug)
 		)
 		&& !SG(headers_sent)
 	) {
-		php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+		php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
 		XG(no_exec) = 1;
 	}
 
@@ -1441,7 +1449,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				xdfree(XG(ide_key));
 			}
 			XG(ide_key) = xdstrdup(Z_STRVAL_PP(dummy));
-			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_PP(dummy), Z_STRLEN_PP(dummy), time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_PP(dummy), Z_STRLEN_PP(dummy), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
 		} else if (
 			PG(http_globals)[TRACK_VARS_COOKIE] &&
 			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (void **) &dummy) == SUCCESS
@@ -1455,7 +1463,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		} else if (getenv("XDEBUG_CONFIG")) {
 			magic_cookie = xdstrdup(getenv("XDEBUG_CONFIG"));
 			if (XG(ide_key) && *XG(ide_key) && !SG(headers_sent)) {
-				php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), XG(ide_key), strlen(XG(ide_key)), time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+				php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), XG(ide_key), strlen(XG(ide_key)), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
 			}
 		}
 			
@@ -1477,7 +1485,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				xdfree(magic_cookie);
 				magic_cookie = NULL;
 			}
-			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + 3600, "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
+			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0 COOKIE_ENCODE TSRMLS_CC);
 		}
 
 		/* Start remote context if requested */
