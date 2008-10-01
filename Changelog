@@ -1,3 +1,9 @@
+Wed Oct 01 23:34:58 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added the xdebug.remote_cookie_expire_time that controls the length of a
+  remote debugging session. Patch by Rick Pannen <pannen@gmail.com>.
+
 Wed Oct 01 19:04:47 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
