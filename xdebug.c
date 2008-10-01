@@ -110,6 +110,7 @@ int zend_xdebug_initialised = 0;
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
 	PHP_FE(xdebug_get_function_stack,    NULL)
+	PHP_FE(xdebug_get_formatted_function_stack,    NULL)
 	PHP_FE(xdebug_print_function_stack,  NULL)
 	PHP_FE(xdebug_get_declared_vars,     NULL)
 	PHP_FE(xdebug_call_class,            NULL)
@@ -2037,15 +2038,6 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 	return str.d;
 }
 
-static void print_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
-{
-	char *printable_stack;
-
-	printable_stack = get_printable_stack(html, error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-	php_printf("%s", printable_stack);
-	xdfree(printable_stack);
-}
-
 static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC)
 {
 	int        j = 0; /* Counter */
@@ -2633,9 +2625,26 @@ static void attach_used_var_names(void *return_value, xdebug_hash_element *he)
 PHP_FUNCTION(xdebug_print_function_stack)
 {
 	function_stack_entry *i;
+	char *tmp;
 
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
-	print_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
+	tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
+	php_printf("%s", tmp);
+	xdfree(tmp);
+}
+/* }}} */
+
+/* {{{ proto array xdebug_get_formatted_function_stack()
+   Displays a stack trace */
+PHP_FUNCTION(xdebug_get_formatted_function_stack)
+{
+	function_stack_entry *i;
+	char *tmp;
+
+	i = xdebug_get_stack_frame(0 TSRMLS_CC);
+	tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
+	RETVAL_STRING(tmp, 1);
+	xdfree(tmp);
 }
 /* }}} */
 

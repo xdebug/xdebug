@@ -83,6 +83,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 /* call stack functions */
 PHP_FUNCTION(xdebug_get_stack_depth);
 PHP_FUNCTION(xdebug_get_function_stack);
+PHP_FUNCTION(xdebug_get_formatted_function_stack);
 PHP_FUNCTION(xdebug_print_function_stack);
 PHP_FUNCTION(xdebug_get_declared_vars);
 PHP_FUNCTION(xdebug_call_class);
