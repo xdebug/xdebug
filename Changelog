@@ -1,3 +1,8 @@
+Wed Oct 01 19:04:47 CEST 2008 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added xdebug_get_formatted_function_stack().
+
 Tue Aug 26 14:38:37 CEST 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed segmentation fault for when the original header op was not set.
