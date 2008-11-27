@@ -1,3 +1,8 @@
+Thu Nov 27 20:00:05 CET 2008 Derick Rethans <derick@derickrethans.nl>
+usefulstuff.c:
+- MFH: Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
+  Promislow <ericp@activestate.com>).
+
 Thu Nov 27 19:59:41 CET 2008 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
