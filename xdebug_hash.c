@@ -1,4 +1,4 @@
-/* $Id: xdebug_hash.c,v 1.5 2007-01-02 16:02:37 derick Exp $ */
+/* $Id: xdebug_hash.c,v 1.5.2.1 2008-11-27 18:56:41 derick Exp $ */
 
 /* The contents of this file are subject to the Vulcan Logic Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -230,16 +230,44 @@ void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_has
 	 }
 }
 
+static int xdebug_compare_le_name(const void *le1, const void *le2)
+{
+	return strcmp((char *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le1),
+		(char *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le2));
+}
+
 void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *, void *), void *argument)
 {
-	 xdebug_llist_element  *le;
-	 int                    i;
+	xdebug_llist_element  *le;
+	int                    i;
+	int                    num_items = 0;
+	xdebug_hash_element  **pp_he_list;
 
-	 for (i = 0; i < h->slots; ++i) {
-		  for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-			   cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
-		  }
-	 }
+	for (i = 0; i < h->slots; ++i) {
+		for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+			num_items += 1;
+		}
+	}
+	pp_he_list = (xdebug_hash_element **) malloc((size_t) (num_items * sizeof(xdebug_hash_element **)));
+	if (pp_he_list) {
+		int j = 0;
+		for (i = 0; i < h->slots; ++i) {
+			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+				pp_he_list[j++] = XDEBUG_LLIST_VALP(le);
+			}
+		}
+		qsort(pp_he_list, num_items, sizeof(xdebug_llist_element *), xdebug_compare_le_name);
+		for (i = 0; i < num_items; ++i) {
+			cb(user, pp_he_list[i], argument);
+		}
+		free((void *) pp_he_list);
+	} else {
+		for (i = 0; i < h->slots; ++i) {
+			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+				cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
+			}
+		}
+	}
 }
 
 void xdebug_hash_destroy(xdebug_hash *h)
