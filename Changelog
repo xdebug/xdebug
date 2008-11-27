@@ -1,3 +1,8 @@
+Thu Nov 27 19:56:26 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_hash.c:
+- Sort the symbol elements according to name. (Patch by Eric Promislow
+  <ericp@activestate.com>).
+
 Thu Nov 27 19:44:37 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.dsp:
 - MFH: Link against the correct CRT library. (Patch by Eric Promislow
