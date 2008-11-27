@@ -344,7 +344,8 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 
 	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
-		tmp = xdebug_sprintf("file:/%s", encoded_fileurl);
+		/* See http://blogs.msdn.com/ie/archive/2006/12/06/file-uris-in-windows.aspx */
+		tmp = xdebug_sprintf("file:%s", encoded_fileurl);
 	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
 		/* convert *nix paths (eg. /path) */
 		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
