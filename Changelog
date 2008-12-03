@@ -1,3 +1,7 @@
+Wed Dec 03 23:09:02 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- MFH: Fixed a segfault in interactive mode while including a file.
+
 Wed Dec 03 23:08:13 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed a segfault in interactive mode while including a file.
