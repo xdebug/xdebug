@@ -1063,8 +1063,12 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->function.type     = XFUNC_NORMAL;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
-		cur_opcode = *EG(opline_ptr);
-		tmp->lineno = cur_opcode->lineno;
+		if (EG(opline_ptr)) {
+			cur_opcode = *EG(opline_ptr);
+			tmp->lineno = cur_opcode->lineno;
+		} else {
+			tmp->lineno = 0;
+		}
 
 #if (PHP_MAJOR_VERSION == 6) || \
 	(PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || \
