@@ -1,3 +1,7 @@
+Wed Dec 03 23:08:13 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed a segfault in interactive mode while including a file.
+
 Thu Nov 27 20:00:05 CET 2008 Derick Rethans <derick@derickrethans.nl>
 usefulstuff.c:
 - MFH: Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
