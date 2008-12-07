@@ -1,3 +1,8 @@
+Sun Dec 07 20:28:07 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_superglobals.c:
+- Fixed a crash in super global dumping in case somebody was strange enough
+  to reassign them to a value type other than an Array.
+
 Wed Dec 03 23:09:02 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: Fixed a segfault in interactive mode while including a file.
