@@ -105,17 +105,17 @@ static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_
 static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebug_str *str TSRMLS_DC)
 {
 	zval **z;
-	HashTable *ht;
+	HashTable *ht = NULL;
 	xdebug_llist_element *elem;
 
 	if (!XDEBUG_LLIST_COUNT(l)) {
 		return;
 	}
 
-	if (zend_hash_find(&EG(symbol_table), name, name_len, (void **) &z) != SUCCESS) {
-		ht = NULL;
-	} else {
-		ht = Z_ARRVAL_PP(z);
+	if (zend_hash_find(&EG(symbol_table), name, name_len, (void **) &z) == SUCCESS) {
+		if (Z_TYPE_PP(z) == IS_ARRAY) {
+			ht = Z_ARRVAL_PP(z);
+		}
 	}
 
 	if (html) {
