@@ -1,3 +1,7 @@
+Mon Dec 08 10:16:52 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.dsp:
+- Fixed .dsps.
+
 Sun Dec 07 20:28:37 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_superglobals.c:
 - MFH: Fixed a crash in super global dumping in case somebody was strange
