@@ -1,3 +1,8 @@
+Tue Dec 09 21:27:55 CET 2008 Derick Rethans <derick@derickrethans.nl>
+debugclient/build/buildcheck.sh:
+- MFH: Simplify version checking for libtool. (Patch by PGNet
+  <pgnet.trash@gmail.com>).
+
 Tue Dec 09 21:27:24 CET 2008 Derick Rethans <derick@derickrethans.nl>
 debugclient/build/buildcheck.sh:
 - Simplify version checking for libtool. (Patch by PGNet
