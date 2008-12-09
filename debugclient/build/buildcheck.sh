@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.2 2006-05-01 10:09:16 derick Exp $ 
+# $Id: buildcheck.sh,v 1.3 2008-12-09 20:27:24 derick Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -74,7 +74,7 @@ fi
 # Prefer glibtool over libtool for Mac OS X compatibility
 libtool=`which glibtool 2> /dev/null`
 if test ! -f "$libtool"; then libtool=`which libtool`; fi
-lt_pversion=`$libtool --version 2>/dev/null|sed -n -e 's/^[^0-9]*//' -e 1's/[- ].*//p'`
+lt_pversion=`$libtool --version 2>/dev/null | head -n 1 | awk '{print $4}'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.4 or newer installed"
