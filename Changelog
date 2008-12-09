@@ -1,3 +1,7 @@
+Tue Dec 09 15:59:34 CET 2008 Derick Rethans <derick@derickrethans.nl>
+LICENSE:
+- Update year.
+
 Mon Dec 08 10:17:15 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.dsp:
 - MFH: Fixed .dsp for building with php 4.
