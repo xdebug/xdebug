@@ -334,9 +334,11 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
 
 	if (XG(extended_info)) {
+		RETVAL_BOOL(!XG(do_code_coverage));
 		XG(do_code_coverage) = 1;
 	} else {
 		php_error(E_WARNING, "You can only use code coverage when you leave the setting of 'xdebug.extended_info' to the default '1'.");
+		RETVAL_BOOL(0);
 	}
 }
 
@@ -353,7 +355,9 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 		}
 		XG(do_code_coverage) = 0;
+		RETURN_TRUE;
 	}
+	RETURN_FALSE;
 }
 
 
