@@ -1,3 +1,12 @@
+Thu Dec 11 13:29:43 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Added return values for xdebug_start_code_coverage() and
+  xdebug_stop_code_coverage() to indicate whether the action was succesfull.
+  xdebug_start_code_coverage() will return TRUE if the call enabled code
+  coverage, and FALSE if it was already enabled. xdebug_stop_code_coverage()
+  will return FALSE when code coverage wasn't started yet and TRUE if it was
+  turned on.
+
 Tue Dec 09 21:27:55 CET 2008 Derick Rethans <derick@derickrethans.nl>
 debugclient/build/buildcheck.sh:
 - MFH: Simplify version checking for libtool. (Patch by PGNet
