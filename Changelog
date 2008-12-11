@@ -1,3 +1,8 @@
+Thu Dec 11 16:11:32 CET 2008 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml:
+- MFH: Added the config.w32 to the package as well.
+
 Thu Dec 11 16:10:46 CET 2008 Derick Rethans <derick@derickrethans.nl>
 package2.xml
 xdebug/package.xml:
