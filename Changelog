@@ -1,3 +1,8 @@
+Thu Dec 11 16:10:46 CET 2008 Derick Rethans <derick@derickrethans.nl>
+package2.xml
+xdebug/package.xml:
+- Include config.w32 in the packages as well.
+
 Thu Dec 11 13:29:43 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - Added return values for xdebug_start_code_coverage() and
