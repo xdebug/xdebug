@@ -505,13 +505,11 @@ static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 		zend_op *cur_opcode; \
 		int      lineno; \
 		char    *file; \
-		int      file_len; \
 \
 		cur_opcode = *EG(opline_ptr); \
 		lineno = cur_opcode->lineno; \
 \
 		file = op_array->filename; \
-		file_len = strlen(file); \
 \
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC); \
 	} \
