@@ -1,3 +1,8 @@
+Fri Dec 26 13:02:12 CET 2008 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed display of unused returned variables from functions in PHP 5.3.
+#- This is the "famous" return_value_ptr_ptr fix.
+
 Thu Dec 25 23:58:48 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Removed unused vars.
