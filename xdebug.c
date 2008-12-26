@@ -1374,6 +1374,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
 	int                   eval_id = 0;
+	zval                 *return_val = NULL;
 
 
 	if (XG(no_exec) == 1) {
@@ -1552,6 +1553,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 	}
+
+	if (EG(return_value_ptr_ptr) == NULL) {
+		EG(return_value_ptr_ptr) = &return_val;
+	}
+	
 	xdebug_old_execute(op_array TSRMLS_CC);
 
 	if (XG(profiler_enabled)) {
@@ -1568,6 +1574,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			fflush(XG(trace_file));
 			xdfree(t);
 		}
+	}
+
+	if (return_val) {
+		zval_ptr_dtor(&return_val);
+		EG(return_value_ptr_ptr) = NULL;
 	}
 
 	/* Check for return breakpoints */
