@@ -30,30 +30,46 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2008-12-11</date>
- <time>16:11:10</time>
+ <date>2008-12-30</date>
+ <time>16:02:35</time>
  <version>
-  <release>2.0.3</release>
-  <api>2.0.3</api>
+  <release>2.0.4</release>
+  <api>2.0.4</api>
  </version>
  <stability>
   <release>stable</release>
   <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
- <notes>Wed, Apr 09, 2008 - xdebug 2.0.3
+ <notes>Tue, Dec 30, 2008 - xdebug 2.0.4
 
 = Fixed bugs:
-	- Fixed bug #338: Crash with: xdebug.remote_handler=req.
-	- Fixed bug #334: Code Coverage Regressions.
-	- Fixed abstract method detection for PHP 5.3.
-	- Fixed code coverage dead-code detection.
-	- Ignore ZEND_ADD_INTERFACE, which is on a different line in PHP &gt;= 5.3 for
-	  some weird reason.
+	- Fixed for strange jump positions in path analysis.
+	- Fixed issues with code coverage crashing on parse errors.
+	- Fixed code code coverage by overriding more opcodes.
+	- Fixed issues with Xdebug stalling/crashing when detaching from remote
+	  debugging.
+	- Fixed crash on Vista where memory was freed with routines from a different
+	  standard-C library than it was allocated with. (Patch by Eric Promislow
+	  &lt;ericp@activestate.com&gt;).
+	- Link against the correct CRT library. (Patch by Eric Promislow
+	  &lt;ericp@activestate.com&gt;).
+	- Sort the symbol elements according to name. (Patch by Eric Promislow
+	  &lt;ericp@activestate.com&gt;).
+	- Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
+	  Promislow &lt;ericp@activestate.com&gt;).
+	- Fixed a segfault in interactive mode while including a file.
+	- Fixed a crash in super global dumping in case somebody was strange enough
+	  to reassign them to a value type other than an Array.
+	- Simplify version checking for libtool. (Patch by PGNet
+	  &lt;pgnet.trash@gmail.com&gt;).
+	- Fixed display of unused returned variables from functions in PHP 5.3.
+	- Include config.w32 in the packages as well.
+	- Fixed .dsp for building with PHP 4.
 
-+ Changes:
-	- Added a CSS-class for xdebug&apos;s var_dump().
-	- Added support for the new E_DEPRECATED.
++ Added features:
+	- Support debugging into phars.
+	- Basic PHP 5.3 support.
     
  </notes>
  <contents>
@@ -150,6 +166,49 @@ Xdebug also provides:
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.0.4</release>
+    <api>2.0.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2008-12-30</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>Tue, Dec 30, 2008 - xdebug 2.0.4
+
+= Fixed bugs:
+	- Fixed for strange jump positions in path analysis.
+	- Fixed issues with code coverage crashing on parse errors.
+	- Fixed code code coverage by overriding more opcodes.
+	- Fixed issues with Xdebug stalling/crashing when detaching from remote
+	  debugging.
+	- Fixed crash on Vista where memory was freed with routines from a different
+	  standard-C library than it was allocated with. (Patch by Eric Promislow
+	  &lt;ericp@activestate.com&gt;).
+	- Link against the correct CRT library. (Patch by Eric Promislow
+	  &lt;ericp@activestate.com&gt;).
+	- Sort the symbol elements according to name. (Patch by Eric Promislow
+	  &lt;ericp@activestate.com&gt;).
+	- Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
+	  Promislow &lt;ericp@activestate.com&gt;).
+	- Fixed a segfault in interactive mode while including a file.
+	- Fixed a crash in super global dumping in case somebody was strange enough
+	  to reassign them to a value type other than an Array.
+	- Simplify version checking for libtool. (Patch by PGNet
+	  &lt;pgnet.trash@gmail.com&gt;).
+	- Fixed display of unused returned variables from functions in PHP 5.3.
+	- Include config.w32 in the packages as well.
+	- Fixed .dsp for building with PHP 4.
+
++ Added features:
+	- Support debugging into phars.
+	- Basic PHP 5.3 support.
+      
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.0.3</release>

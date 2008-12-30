@@ -1,3 +1,34 @@
+Tue, Dec 30, 2008 - xdebug 2.0.4
+
+= Fixed bugs:
+	- Fixed for strange jump positions in path analysis.
+	- Fixed issues with code coverage crashing on parse errors.
+	- Fixed code code coverage by overriding more opcodes.
+	- Fixed issues with Xdebug stalling/crashing when detaching from remote
+	  debugging.
+	- Fixed crash on Vista where memory was freed with routines from a different
+	  standard-C library than it was allocated with. (Patch by Eric Promislow
+	  <ericp@activestate.com>).
+	- Link against the correct CRT library. (Patch by Eric Promislow
+	  <ericp@activestate.com>).
+	- Sort the symbol elements according to name. (Patch by Eric Promislow
+	  <ericp@activestate.com>).
+	- Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
+	  Promislow <ericp@activestate.com>).
+	- Fixed a segfault in interactive mode while including a file.
+	- Fixed a crash in super global dumping in case somebody was strange enough
+	  to reassign them to a value type other than an Array.
+	- Simplify version checking for libtool. (Patch by PGNet
+	  <pgnet.trash@gmail.com>).
+	- Fixed display of unused returned variables from functions in PHP 5.3.
+	- Include config.w32 in the packages as well.
+	- Fixed .dsp for building with PHP 4.
+
++ Added features:
+	- Support debugging into phars.
+	- Basic PHP 5.3 support.
+
+
 Wed, Apr 09, 2008 - xdebug 2.0.3
 
 = Fixed bugs:
