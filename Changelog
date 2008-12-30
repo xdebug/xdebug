@@ -1,3 +1,10 @@
+Tue Dec 30 16:04:29 CET 2008 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/php_xdebug.h
+xdebug/template.rc:
+- Go with 2.0.4.
+
 Fri Dec 26 13:02:29 CET 2008 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: Fixed display of unused returned variables from functions in PHP 5.3.
