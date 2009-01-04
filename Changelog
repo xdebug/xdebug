@@ -1,3 +1,7 @@
+Sun Jan 04 22:24:44 CET 2009 Derick Rethans <derick@derickrethans.nl>
+tests/bug00265.phpt:
+- get_last_error() is only in PHP 5.2 and later.
+
 Tue Dec 30 16:50:38 CET 2008 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h:
 - Back to -dev.
