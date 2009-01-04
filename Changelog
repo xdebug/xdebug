@@ -1,3 +1,72 @@
+Sun Jan 04 22:34:10 CET 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/test-5.1.sh
+xdebug/xdebug.c
+xdebug/xt.vim
+xdebug/tests/assignment-trace1.phpt
+xdebug/tests/assignment-trace2.phpt
+xdebug/tests/assignment-trace3.phpt
+xdebug/tests/assignment-trace4.phpt
+xdebug/tests/array_map.phpt
+xdebug/tests/assert_test.phpt
+xdebug/tests/auto_trace.phpt
+xdebug/tests/bug00002.phpt
+xdebug/tests/bug00003.phpt
+xdebug/tests/bug00022-ze1.phpt
+xdebug/tests/bug00022.phpt
+xdebug/tests/bug00032-ze1.phpt
+xdebug/tests/bug00032-ze22.phpt
+xdebug/tests/bug00032.phpt
+xdebug/tests/bug00057-ze1.phpt
+xdebug/tests/bug00057-ze2.phpt
+xdebug/tests/bug00146.phpt
+xdebug/tests/bug00173.phpt
+xdebug/tests/bug00176.phpt
+xdebug/tests/bug00178.phpt
+xdebug/tests/bug00184.phpt
+xdebug/tests/call_user_func_array.phpt
+xdebug/tests/call_user_func_array2.phpt
+xdebug/tests/coverage-ze1.phpt
+xdebug/tests/coverage.phpt
+xdebug/tests/coverage2-ze1.phpt
+xdebug/tests/coverage2.phpt
+xdebug/tests/coverage3-ze1.phpt
+xdebug/tests/coverage3.phpt
+xdebug/tests/coverage4.phpt
+xdebug/tests/functrace_comp_0.phpt
+xdebug/tests/functrace_comp_1.phpt
+xdebug/tests/functrace_comp_2.phpt
+xdebug/tests/functrace_comp_3.phpt
+xdebug/tests/functrace_comp_4.phpt
+xdebug/tests/start_trace.phpt
+xdebug/tests/test1.phpt
+xdebug/tests/test10.phpt
+xdebug/tests/test10b.phpt
+xdebug/tests/test11.phpt
+xdebug/tests/test12.phpt
+xdebug/tests/test13.phpt
+xdebug/tests/test14.phpt
+xdebug/tests/test14b.phpt
+xdebug/tests/test15.phpt
+xdebug/tests/test16.phpt
+xdebug/tests/test16b.phpt
+xdebug/tests/test17.phpt
+xdebug/tests/test18.phpt
+xdebug/tests/test20.phpt
+xdebug/tests/test20b.phpt
+xdebug/tests/test7.phpt
+xdebug/tests/test7b.phpt
+xdebug/tests/test8.phpt
+xdebug/tests/test9.phpt
+xdebug/tests/test9b.phpt
+xdebug/tests/trace.phpt
+xdebug/tests/trace1.phpt
+xdebug/tests/trace2.phpt:
+- Added the new setting "xdebug.collect_assignments" which enables the emitting
+  of variable assignments in function traces.
+#- This only works in PHP 5.1 and up, but that's okay as PHP 4 and PHP 5.0
+#  support will be dropped from Xdebug 2.1 anyway.
+
 Sun Jan 04 22:24:44 CET 2009 Derick Rethans <derick@derickrethans.nl>
 tests/bug00265.phpt:
 - get_last_error() is only in PHP 5.2 and later.
