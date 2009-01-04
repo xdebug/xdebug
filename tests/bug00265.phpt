@@ -2,7 +2,7 @@
 Test for bug #265: Xdebug's error handler breaks error_get_last().
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
+<?php if(version_compare(php_version(), "5.2.0", '<')) echo "skip PHP 5.2 or later needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0
