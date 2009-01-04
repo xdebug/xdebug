@@ -9,6 +9,7 @@ xdebug.auto_trace=0
 report_memleaks=0
 xdebug.collect_params=3
 xdebug.collect_return=0
+xdebug.collect_assignments=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.show_mem_delta=0

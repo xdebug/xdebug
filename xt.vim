@@ -23,6 +23,8 @@ syn match level         "->"
 syn match lineno        ":\d\+$"
 
 syn match result          ">=>.\+"
+syn match assignment      "=> \$[a-z]\+\(->[a-z]\+\)*\ .*="
+syn match assignment      "=> \$[a-z]\+\['\([a-z]\+\)*'\]\ .*="
 
 syn match methodcall      "\k\+->"
 syn match staticcall      "\k\+::"
@@ -46,6 +48,7 @@ if version >= 508 || !exists("did_diff_syntax_inits")
   HiLink begin	Label
   HiLink end	Label
   HiLink date   Label
+  HiLink assignment Label
 
   HiLink level  SpecialChar
   HiLink result Constant

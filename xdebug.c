@@ -104,6 +104,7 @@ static zval *get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, 
 static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSRMLS_DC);
 static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRMLS_DC);
 static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC);
+static char* return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno TSRMLS_DC);
 
 int zend_xdebug_initialised = 0;
 
@@ -277,6 +278,7 @@ PHP_INI_BEGIN()
 #endif
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_return,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_vars,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   collect_assignments, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_ALL,    OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",  "",                   PHP_INI_ALL,    OnUpdateString, file_link_format,  zend_xdebug_globals, xdebug_globals)
@@ -486,7 +488,6 @@ void xdebug_env_config()
 		lineno = cur_opcode->lineno; \
 \
 		file = op_array->filename; \
-		file_len = strlen(file); \
 \
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC); \
 	} \
@@ -517,6 +518,74 @@ static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 }
 #endif
 
+static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *cur_opcode, *next_opcode, *prev_opcode = NULL;
+	int      lineno;
+	char    *file, *varname, *full_varname;
+	int      is_var, cv_len;
+	zval    *val, *dimval, *mainval;
+	zend_op_array *op_array = execute_data->op_array;
+
+	cur_opcode = *EG(opline_ptr);
+	next_opcode = cur_opcode + 1;
+	prev_opcode = cur_opcode - 1;
+	lineno = cur_opcode->lineno;
+
+	file = op_array->filename;
+
+	if (do_cc && XG(do_code_coverage)) {
+		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
+	}
+	if (XG(do_trace) && XG(trace_file) && XG(collect_assignments)) {
+		char* t;
+		xdebug_llist_element *le;
+		function_stack_entry *fse;
+
+		le = XDEBUG_LLIST_TAIL(XG(stack));
+		fse = XDEBUG_LLIST_VALP(le);
+
+		if (cur_opcode->op1.op_type == IS_VAR &&
+				(next_opcode->op1.op_type == IS_VAR || cur_opcode->op2.op_type == IS_VAR) &&
+				prev_opcode->opcode == ZEND_FETCH_RW &&
+				prev_opcode->op1.op_type == IS_CONST &&
+				prev_opcode->op1.u.constant.type == IS_STRING
+		) {
+			varname = prev_opcode->op1.u.constant.value.str.val;
+		} else if (cur_opcode->op1.op_type == IS_UNUSED) {
+			varname = "this";
+		} else if (cur_opcode->op1.op_type == IS_CV) {
+			varname = zend_get_compiled_variable_name(op_array, cur_opcode->op1.u.var, &cv_len);
+		}
+		if (next_opcode->opcode == ZEND_OP_DATA) {
+			dimval = get_zval(execute_data, &cur_opcode->op2, execute_data->Ts, &is_var);
+			if (next_opcode->op2.op_type != IS_UNUSED || cur_opcode->op1.op_type == IS_UNUSED) {
+				full_varname = xdebug_sprintf("%s->%s", varname, Z_STRVAL_P(dimval));
+			} else {
+				full_varname = xdebug_sprintf("%s['%s']", varname, Z_STRVAL_P(dimval));
+			}
+			val = get_zval(execute_data, &next_opcode->op1, execute_data->Ts, &is_var);
+		} else {
+			full_varname = xdstrdup(varname);
+			val = get_zval(execute_data, &cur_opcode->op2, execute_data->Ts, &is_var);
+		}
+
+		t = return_trace_assignment(fse, full_varname, val, op, file, lineno TSRMLS_CC);
+		xdfree(full_varname);
+		fprintf(XG(trace_file), "%s", t);
+		fflush(XG(trace_file));
+		xdfree(t);
+	}
+	return ZEND_USER_OPCODE_DISPATCH;
+}
+
+#define XDEBUG_OPCODE_OVERRIDE_ASSIGN(f,o,cc) \
+	static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
+	{ \
+		return xdebug_common_assign_dim_handler((o), (cc), ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+	}
+
+
 XDEBUG_OPCODE_OVERRIDE(jmp)
 XDEBUG_OPCODE_OVERRIDE(jmpz)
 XDEBUG_OPCODE_OVERRIDE(jmpnz)
@@ -526,9 +595,20 @@ XDEBUG_OPCODE_OVERRIDE(is_equal)
 XDEBUG_OPCODE_OVERRIDE(is_not_equal)
 XDEBUG_OPCODE_OVERRIDE(is_smaller)
 XDEBUG_OPCODE_OVERRIDE(is_smaller_or_equal)
-XDEBUG_OPCODE_OVERRIDE(assign)
-XDEBUG_OPCODE_OVERRIDE(assign_dim)
-XDEBUG_OPCODE_OVERRIDE(assign_obj)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_add,"+=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sub,"-=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mul,"*=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_div,"/=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mod,"%=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sl,"<<=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sr,">>=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_concat,".=",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_or,"|=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_and,"&=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
 XDEBUG_OPCODE_OVERRIDE(add_array_element)
 XDEBUG_OPCODE_OVERRIDE(return)
 XDEBUG_OPCODE_OVERRIDE(ext_stmt)
@@ -554,7 +634,6 @@ XDEBUG_OPCODE_OVERRIDE(fetch_constant)
 XDEBUG_OPCODE_OVERRIDE(concat)
 XDEBUG_OPCODE_OVERRIDE(isset_isempty_dim_obj)
 XDEBUG_OPCODE_OVERRIDE(pre_inc_obj)
-XDEBUG_OPCODE_OVERRIDE(assign_concat)
 XDEBUG_OPCODE_OVERRIDE(switch_free)
 XDEBUG_OPCODE_OVERRIDE(qm_assign)
 #endif
@@ -605,9 +684,22 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE(is_not_equal, ZEND_IS_NOT_EQUAL);
 	XDEBUG_SET_OPCODE_OVERRIDE(is_smaller, ZEND_IS_SMALLER);
 	XDEBUG_SET_OPCODE_OVERRIDE(is_smaller_or_equal, ZEND_IS_SMALLER_OR_EQUAL);
+	
 	XDEBUG_SET_OPCODE_OVERRIDE(assign, ZEND_ASSIGN);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_add, ZEND_ASSIGN_ADD);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_sub, ZEND_ASSIGN_SUB);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_mul, ZEND_ASSIGN_MUL);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_div, ZEND_ASSIGN_DIV);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_mod, ZEND_ASSIGN_MOD);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_sl, ZEND_ASSIGN_SL);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_sr, ZEND_ASSIGN_SR);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_concat, ZEND_ASSIGN_CONCAT);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_bw_or, ZEND_ASSIGN_BW_OR);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_bw_and, ZEND_ASSIGN_BW_AND);
+	XDEBUG_SET_OPCODE_OVERRIDE(assign_bw_xor, ZEND_ASSIGN_BW_XOR);
 	XDEBUG_SET_OPCODE_OVERRIDE(assign_dim, ZEND_ASSIGN_DIM);
 	XDEBUG_SET_OPCODE_OVERRIDE(assign_obj, ZEND_ASSIGN_OBJ);
+
 	XDEBUG_SET_OPCODE_OVERRIDE(add_array_element, ZEND_ADD_ARRAY_ELEMENT);
 	XDEBUG_SET_OPCODE_OVERRIDE(return, ZEND_RETURN);
 	XDEBUG_SET_OPCODE_OVERRIDE(ext_stmt, ZEND_EXT_STMT);
@@ -633,7 +725,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE(concat, ZEND_CONCAT);
 	XDEBUG_SET_OPCODE_OVERRIDE(isset_isempty_dim_obj, ZEND_ISSET_ISEMPTY_DIM_OBJ);
 	XDEBUG_SET_OPCODE_OVERRIDE(pre_inc_obj, ZEND_PRE_INC_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_concat, ZEND_ASSIGN_CONCAT);
 	XDEBUG_SET_OPCODE_OVERRIDE(switch_free, ZEND_SWITCH_FREE);
 	XDEBUG_SET_OPCODE_OVERRIDE(qm_assign, ZEND_QM_ASSIGN);
 #endif
@@ -1426,7 +1517,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
 	int                   eval_id = 0;
-	zval                 *return_val = NULL;
 
 
 	if (XG(no_exec) == 1) {
@@ -1606,11 +1696,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 	}
-
-	if (EG(return_value_ptr_ptr) == NULL) {
-		EG(return_value_ptr_ptr) = &return_val;
-	}
-	
 	xdebug_old_execute(op_array TSRMLS_CC);
 
 	if (XG(profiler_enabled)) {
@@ -1627,11 +1712,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			fflush(XG(trace_file));
 			xdfree(t);
 		}
-	}
-
-	if (return_val) {
-		zval_ptr_dtor(&return_val);
-		EG(return_value_ptr_ptr) = NULL;
 	}
 
 	/* Check for return breakpoints */
@@ -2060,6 +2140,38 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 
 		xdebug_str_add(&str, formats[7], 0);
 	}
+	return str.d;
+}
+
+static char* return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *filename, int lineno TSRMLS_DC)
+{
+	int        j = 0; /* Counter */
+	xdebug_str str = {0, 0, NULL};
+	char      *tmp_value;
+
+	if (XG(trace_format) != 0) {
+		return xdstrdup("");
+	}
+
+	xdebug_str_addl(&str, "                    ", 20, 0);
+	if (XG(show_mem_delta)) {
+		xdebug_str_addl(&str, "        ", 8, 0);
+	}
+	for (j = 0; j < i->level; j++) {
+		xdebug_str_addl(&str, "  ", 2, 0);
+	}
+	xdebug_str_addl(&str, "   => $", 7, 0);
+
+	xdebug_str_add(&str, varname, 0);
+	xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
+	tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+	if (tmp_value) {
+		xdebug_str_add(&str, tmp_value, 1);
+	} else {
+		xdebug_str_addl(&str, "NULL", 4, 0);
+	}
+	xdebug_str_add(&str, xdebug_sprintf(" %s:%d\n", filename, lineno), 1);
+
 	return str.d;
 }
 
@@ -3217,9 +3329,14 @@ static zval *get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, 
 			break;
 
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1) || (PHP_MAJOR_VERSION >= 6)
-		case IS_CV:
-			return *zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
+		case IS_CV: {
+			zval **tmp;
+			tmp = zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
+			if (tmp) {
+				return *tmp;
+			}
 			break;
+		}
 #endif
 
 		case IS_UNUSED:

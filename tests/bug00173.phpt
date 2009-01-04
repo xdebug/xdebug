@@ -12,6 +12,7 @@ xdebug.trace_output_dir=/tmp
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
 xdebug.collect_params=1
+xdebug.collect_assignments=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.dump_globals=0
