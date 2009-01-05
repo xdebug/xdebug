@@ -58,11 +58,9 @@ char* xdebug_error_type(int type)
 		case E_USER_NOTICE:
 			return xdstrdup("Notice");
 			break;
-#ifdef ZEND_ENGINE_2
 		case E_STRICT:
 			return xdstrdup("Strict standards");
 			break;
-#endif
 #if PHP_VERSION_ID >= 50300
 		case E_DEPRECATED:
 			return xdstrdup("Deprecated");
@@ -104,7 +102,6 @@ zval* xdebug_get_php_symbol(char* name, int name_length)
 
 static char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name)
 {
-#ifdef ZEND_ENGINE_2
 	char *prop_name, *class_name;
 
 #if PHP_VERSION_ID >= 50200
@@ -122,10 +119,6 @@ static char* xdebug_get_property_info(char *mangled_property, int mangled_len, c
 	} else {
 		return "public";
 	}
-#else
-	*property_name = mangled_property;
-	return "var";
-#endif
 }
 
 
@@ -678,10 +671,8 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level TSRMLS_DC)
 {
 	HashTable *myht;
-#ifdef ZEND_ENGINE_2
 	char *class_name;
 	zend_uint class_name_len;
-#endif
 
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
@@ -741,13 +732,9 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			myht = Z_OBJPROP_PP(struc);
 			xdebug_xml_add_attribute(node, "type", "object");
 			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
-#ifdef ZEND_ENGINE_2
 			Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
 			efree(class_name);
-#else
-			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(Z_OBJCE_PP(struc)->name), 0, 1);
-#endif
 			if (myht) {
 				if (myht->nApplyCount < 1) {
 					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
@@ -956,8 +943,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 						xdebug_str_add(str, xdebug_sprintf("<i><font color='%s'>empty</font></i>\n", COLOR_EMPTY), 1);
 					}
 				} else {
-					xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
-					xdebug_str_add(str, xdebug_sprintf("...\n"), 1);
+					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
 			} else {
 				xdebug_str_addl(str, "<i>&</i><b>array</b>\n", 21, 0);
@@ -969,11 +955,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
-#ifdef ZEND_ENGINE_2
 				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_PP(struc)), 1);
-#else
-				xdebug_str_addl(str, "\n", 1, 0);
-#endif
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
@@ -981,16 +963,11 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 
 					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_fancy, 4, level, str, debug_zval, options);
 				} else {
-					xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
-					xdebug_str_add(str, xdebug_sprintf("...\n"), 1);
+					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("<i>&</i><b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
-#ifdef ZEND_ENGINE_2
 				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_PP(struc)), 1);
-#else
-				xdebug_str_addl(str, "\n", 1, 0);
-#endif
 			}
 			break;
 
@@ -1068,9 +1045,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 
 		case IS_OBJECT:
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>object(%s)", COLOR_OBJECT, Z_OBJCE_PP(struc)->name), 1);
-#ifdef ZEND_ENGINE_2
 			xdebug_str_add(str, xdebug_sprintf("[%d]", Z_OBJ_HANDLE_PP(struc)), 1);
-#endif
 			xdebug_str_addl(str, "</font>", 7, 0);
 			break;
 

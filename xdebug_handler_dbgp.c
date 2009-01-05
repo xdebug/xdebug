@@ -308,7 +308,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 		case XF_ST_ROOT:
 		case XF_ST_ARRAY_INDEX_ASSOC:
 			element = prepare_search_key(name, &name_length, "", 0);
-#ifdef ZEND_ENGINE_2
+
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
 				if (XG(active_execute_data)) {
@@ -318,7 +318,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 				}
 				goto cleanup;
 			}
-#endif
+
 			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
 				goto cleanup;
@@ -379,40 +379,28 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 
 inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
 {
+	char *name;
+	zend_uint name_len;
+
 	if (Z_TYPE_P(z) != IS_OBJECT) {
 		return NULL;
 	}
-#if PHP_MAJOR_VERSION == 4
-	{
+
+	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
+		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
 		zend_class_entry *ce;
-		ce = Z_OBJCE_P(z);
+
+		ce = zend_get_class_entry(z TSRMLS_CC);
+		if (!ce) {
+			return NULL;
+		}
+
 		*length = ce->name_length;
 		return estrdup(ce->name);
-	}
-#endif
-#if PHP_MAJOR_VERSION >= 5
-	{
-		char *name;
-		zend_uint name_len;
+	} 
 
-		if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
-			Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
-			zend_class_entry *ce;
-
-			ce = zend_get_class_entry(z TSRMLS_CC);
-			if (!ce) {
-				return NULL;
-			}
-
-			*length = ce->name_length;
-			return estrdup(ce->name);
-		} 
-
-		*length = name_len;
-		return name;
-	}
-#endif
-	return NULL;
+	*length = name_len;
+	return name;
 }
 
 static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
@@ -1164,7 +1152,6 @@ DBGP_FUNC(breakpoint_set)
 	} else
 
 	if (strcmp(CMD_OPTION('t'), "exception") == 0) {
-#if PHP_MAJOR_VERSION >= 5
 		if (!CMD_OPTION('x')) {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		}
@@ -1174,9 +1161,6 @@ DBGP_FUNC(breakpoint_set)
 		} else {
 			brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_EXCEPTION, CMD_OPTION('x'));
 		}
-#else
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
-#endif
 	} else
 
 	if (strcmp(CMD_OPTION('t'), "watch") == 0) {
@@ -1880,10 +1864,8 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			xdebug_hash_destroy(tmp_hash);
 		}
 
-#ifdef ZEND_ENGINE_2
 		/* zend engine 2 does not give us $this, eval so we can get it */
 		add_variable_node(node, "$this", sizeof("$this"), 1, 1, 0, options TSRMLS_CC);
-#endif
 
 		XG(active_symbol_table) = NULL;
 		XG(active_execute_data) = NULL;
@@ -2243,7 +2225,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.134 $";
+	return "$Revision: 1.135 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
@@ -2373,7 +2355,6 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	}
 
 /* {{{ Initialize auto globals in Zend Engine 2 */
-#ifdef ZEND_ENGINE_2
 	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);
 	zend_is_auto_global("_GET",     sizeof("_GET")-1     TSRMLS_CC);
 	zend_is_auto_global("_POST",    sizeof("_POST")-1    TSRMLS_CC);
@@ -2382,7 +2363,6 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	zend_is_auto_global("_FILES",   sizeof("_FILES")-1   TSRMLS_CC);
 	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
 	zend_is_auto_global("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
-#endif
 /* }}} */
 
 	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_admin_dtor);

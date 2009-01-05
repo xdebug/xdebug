@@ -1353,7 +1353,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.88 $";
+	return "$Revision: 1.89 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
@@ -1376,7 +1376,6 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	options->dump_superglobals = 1;
 
 	/* Initialize auto globals in Zend Engine 2 */
-#ifdef ZEND_ENGINE_2
 	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);
 	zend_is_auto_global("_GET",     sizeof("_GET")-1     TSRMLS_CC);
 	zend_is_auto_global("_POST",    sizeof("_POST")-1    TSRMLS_CC);
@@ -1384,7 +1383,6 @@ int xdebug_gdb_init(xdebug_con *context, int mode)
 	zend_is_auto_global("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
 	zend_is_auto_global("_FILES",   sizeof("_FILES")-1   TSRMLS_CC);
 	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
-#endif
 
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);

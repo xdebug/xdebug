@@ -89,11 +89,9 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 		opcode.opcode != ZEND_EXT_NOP &&
 		opcode.opcode != ZEND_RECV &&
 		opcode.opcode != ZEND_RECV_INIT
-#ifdef ZEND_ENGINE_2
 		&& opcode.opcode != ZEND_VERIFY_ABSTRACT_CLASS
 		&& opcode.opcode != ZEND_OP_DATA
 		&& opcode.opcode != ZEND_ADD_INTERFACE
-#endif
 	) {
 		xdebug_count_line(fn, opcode.lineno, 1, deadcode TSRMLS_CC);
 	}
@@ -119,11 +117,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
-#ifdef ZEND_ENGINE_2
 		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
-#else
-		*jmp1 = opcode.op1.u.opline_num;
-#endif
 		return 1;
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
@@ -132,11 +126,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
 		*jmp1 = position + 1;
-#ifdef ZEND_ENGINE_2
 		*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
-#else
-		*jmp2 = opcode.op1.u.opline_num;
-#endif
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 		*jmp1 = opcode.op2.u.opline_num;
@@ -146,11 +136,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		zend_brk_cont_element *el;
 
 		if (opcode.op2.op_type == IS_CONST
-#ifdef ZEND_ENGINE_2
 		    && opcode.op1.u.jmp_addr != (zend_op*) 0xFFFFFFFF
-#else
-		    && opcode.op1.u.opline_num > -1
-#endif
 		) {
 			el = xdebug_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
 			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
@@ -193,7 +179,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			}
 			break;
 		}
-#ifdef ZEND_ENGINE_2
+
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
 			/* fprintf(stderr, "Throw found at %d\n", position); */
@@ -210,7 +196,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			}
 			position--;
 		}
-#endif
+
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			/* fprintf(stderr, "X* Return found\n"); */
@@ -238,7 +224,6 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 
 	opa->reserved[XG(reserved_offset)] = 1;
 
-#ifdef ZEND_ENGINE_2
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
 #if PHP_VERSION_ID >= 50300
@@ -249,7 +234,6 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 	{
 		return;
 	}	
-#endif
 
 	/* Run dead code analysis if requested */
 	if (XG(code_coverage_dead_code_analysis)) {
@@ -283,31 +267,19 @@ static int prefill_from_function_table(zend_op_array *opa, int num_args, va_list
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-#ifdef ZEND_ENGINE_2
 static int prefill_from_class_table(zend_class_entry **class_entry, int num_args, va_list args, zend_hash_key *hash_key)
-#else
-static int prefill_from_class_table(zend_class_entry *class_entry, int num_args, va_list args, zend_hash_key *hash_key)
-#endif
 {
 	char *new_filename;
 	zend_class_entry *ce;
 
-#ifdef ZEND_ENGINE_2
 	ce = *class_entry;
-#else
-	ce = class_entry;
-#endif
 
 	new_filename = va_arg(args, char*);
 	if (ce->type == ZEND_USER_CLASS) {
-#if PHP_MAJOR_VERSION >= 5
 		if (!(ce->ce_flags & ZEND_XDEBUG_VISITED)) {
 			ce->ce_flags |= ZEND_XDEBUG_VISITED;
 			zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
 		}
-#else
-		zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
-#endif
 	}
 
 	return ZEND_HASH_APPLY_KEEP;

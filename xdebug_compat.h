@@ -21,30 +21,21 @@
 
 #include "php.h"
 
-#if ((PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 1)) || PHP_MAJOR_VERSION >= 6
+#if PHP_MAJOR_VERSION >= 6
 
 void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC);
 
 #else
 
-#	include "ext/standard/php_var.h"
-#	define xdebug_php_var_dump php_var_dump
+# include "ext/standard/php_var.h"
+# define xdebug_php_var_dump php_var_dump
 
 #endif
 
 
-#if (PHP_MAJOR_VERSION == 4) && (PHP_MINOR_VERSION == 3) && (PHP_RELEASE_VERSION <= 4)
-
-unsigned char *xdebug_base64_encode(const unsigned char *, int, int *);
-unsigned char *xdebug_base64_decode(const unsigned char *str, int length, int *ret_length);
-
-#else
-
-#	include "ext/standard/base64.h"
-#	define xdebug_base64_encode php_base64_encode
-#	define xdebug_base64_decode php_base64_decode
-
-#endif
+#include "ext/standard/base64.h"
+#define xdebug_base64_encode php_base64_encode
+#define xdebug_base64_decode php_base64_decode
 
 zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC);
 
