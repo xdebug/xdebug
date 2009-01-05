@@ -1,3 +1,7 @@
+Mon Jan 05 18:21:27 CET 2009 Derick Rethans <derick@derickrethans.nl>
+tests/bug00265.phpt:
+- Fixed SKIPIF clause.
+
 Sun Jan 04 22:34:10 CET 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/test-5.1.sh
