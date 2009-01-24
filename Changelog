@@ -1,3 +1,10 @@
+Sat Jan 24 21:00:12 CET 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/bug00422.inc
+xdebug/tests/bug00422.phpt:
+- Fixed bug #422: Segfaults when using code coverage with a parse error in the
+  script.
+
 Mon Jan 05 18:24:34 CET 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
