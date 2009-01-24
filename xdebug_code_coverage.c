@@ -252,7 +252,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 #endif
 
 	/* Run dead code analysis if requested */
-	if (XG(code_coverage_dead_code_analysis)) {
+	if (XG(code_coverage_dead_code_analysis) && opa->done_pass_two) {
 		set = xdebug_set_create(opa->last);
 		xdebug_analyse_branch(opa, 0, set);
 	}
