@@ -1,3 +1,9 @@
+Thu Mar 05 15:38:52 CET 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/tests/scream.phpt:
+- Added scream support (xdebug.scream) that makes the @ operator to be ignored.
+
 Tue Feb 03 09:46:04 CET 2009 Derick Rethans <derick@derickrethans.nl>
 LICENSE:
 - Update year.
