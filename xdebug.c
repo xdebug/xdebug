@@ -295,6 +295,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateLong,   display_max_children, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateLong,   display_max_data,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",           PHP_INI_ALL,    OnUpdateLong,   display_max_depth,    zend_xdebug_globals, xdebug_globals)
+
+	/* Scream support */
+	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   do_scream,            zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -418,6 +421,15 @@ void xdebug_env_config()
 	}
 
 	xdebug_arg_dtor(parts);
+}
+
+static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+    if (XG(do_scream)) {
+        execute_data->opline++;
+        return ZEND_USER_OPCODE_CONTINUE;
+    }
+    return ZEND_USER_OPCODE_DISPATCH;
 }
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
@@ -650,6 +662,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE(pre_inc_obj, ZEND_PRE_INC_OBJ);
 	XDEBUG_SET_OPCODE_OVERRIDE(switch_free, ZEND_SWITCH_FREE);
 	XDEBUG_SET_OPCODE_OVERRIDE(qm_assign, ZEND_QM_ASSIGN);
+
+	XDEBUG_SET_OPCODE_OVERRIDE(silence, ZEND_BEGIN_SILENCE);
+	XDEBUG_SET_OPCODE_OVERRIDE(silence, ZEND_END_SILENCE);
 
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");

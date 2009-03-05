@@ -247,6 +247,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	HashTable  aggr_calls;
 	zend_bool  profiler_aggregate;
 
+	/* scream */
+	zend_bool  do_scream;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS
