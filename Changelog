@@ -1,3 +1,8 @@
+Thu Mar 26 13:40:14 CET 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Added Mikko's patch to allow a specific message to be passed with
+  xdebug_print_function_stack().
+
 Thu Mar 05 15:38:52 CET 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
