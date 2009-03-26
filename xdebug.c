@@ -2623,15 +2623,25 @@ static void attach_used_var_names(void *return_value, xdebug_hash_element *he)
 	add_next_index_string(return_value, name, 1);
 }
 
-/* {{{ proto array xdebug_print_declared_vars()
+/* {{{ proto array xdebug_print_function_stack([string message])
    Displays a stack trace */
 PHP_FUNCTION(xdebug_print_function_stack)
 {
+	char *message = NULL;
+	int message_len;
 	function_stack_entry *i;
 	char *tmp;
-
+  
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &message, &message_len) == FAILURE) {
+		return;
+	}
+ 
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
-	tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
+	if (message) {
+		tmp = get_printable_stack(PG(html_errors), "Xdebug", message, i->filename, i->lineno TSRMLS_CC);
+	} else {
+		tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
+	}
 	php_printf("%s", tmp);
 	xdfree(tmp);
 }
