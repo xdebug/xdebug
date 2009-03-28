@@ -1,3 +1,8 @@
+Sat Mar 28 20:22:43 CET 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- MFH: Fixed bug #403: 'call' and 'return' breakpoints triggers both on call
+  and return for class method breakpoints. 
+
 Sat Mar 28 20:22:19 CET 2009 Derick Rethans <derick@derickrethans.nl>
 README
 xdebug/xdebug.c:
