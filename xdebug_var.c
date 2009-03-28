@@ -166,12 +166,14 @@ xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 ** Normal variable printing routines
 */
 
-static int xdebug_array_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_array_element_export(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level      = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
@@ -209,13 +211,15 @@ static int xdebug_array_element_export(zval **zv, int num_args, va_list args, ze
 	return 0;
 }
 
-static int xdebug_object_element_export(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
 	char *prop_name, *modifier;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level      = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
@@ -289,7 +293,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export, 4, level, str, debug_zval, options);
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export, 4, level, str, debug_zval, options);
 					/* Remove the ", " at the end of the string */
 					if (myht->nNumOfElements > 0) {
 						xdebug_str_chop(str, 2);
@@ -312,7 +316,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export, 4, level, str, debug_zval, options);
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export, 4, level, str, debug_zval, options);
 					/* Remove the ", " at the end of the string */
 					if (myht->nNumOfElements > 0) {
 						xdebug_str_chop(str, 2);
@@ -434,11 +438,13 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 ** XML variable printing routines
 */
 
-static int xdebug_array_element_export_xml(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_array_element_export_xml(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
 	xdebug_str *str;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
@@ -455,12 +461,14 @@ static int xdebug_array_element_export_xml(zval **zv, int num_args, va_list args
 	return 0;
 }
 
-static int xdebug_object_element_export_xml(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export_xml(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
 	xdebug_str *str;
 	char *prop_name, *modifier;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
@@ -516,7 +524,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			myht = Z_ARRVAL_PP(struc);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_addl(str, "<array>", 7, 0);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml, 2, level, str);
+				zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_xml, 2, level, str);
 				xdebug_str_addl(str, "</array>", 8, 0);
 			} else {
 				xdebug_str_addl(str, "<array hidden='true' recursive='true'/>", 39, 0);
@@ -527,7 +535,7 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_add(str, xdebug_sprintf("<object class='%s'>", Z_OBJCE_PP(struc)->name), 1);
-				zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml, 2, level, str);
+				zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_xml, 2, level, str);
 				xdebug_str_addl(str, "</object>", 9, 0);
 			} else {
 				xdebug_str_addl(str, "<object hidden='true' recursive='true'/>", 40, 0);
@@ -572,14 +580,16 @@ char* xdebug_get_zval_value_xml(char *name, zval *val)
 ** XML node printing routines
 */
 
-static int xdebug_array_element_export_xml_node(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_array_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
 	xdebug_var_export_options *options;
 	char *name = NULL, *parent_name = NULL, *full_name = NULL;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level = va_arg(args, int);
 	parent = va_arg(args, xdebug_xml_node*);
@@ -624,7 +634,7 @@ static int xdebug_array_element_export_xml_node(zval **zv, int num_args, va_list
 	return 0;
 }
 
-static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
 	xdebug_xml_node *parent;
@@ -632,7 +642,9 @@ static int xdebug_object_element_export_xml_node(zval **zv, int num_args, va_lis
 	xdebug_var_export_options *options;
 	char *prop_name, *modifier;
 	char *parent_name = NULL, *full_name = NULL;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level  = va_arg(args, int);
 	parent = va_arg(args, xdebug_xml_node*);
@@ -721,7 +733,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 						options->runtime[level].start_element_nr = 0;
 						options->runtime[level].end_element_nr = options->max_children;
 					}
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_xml_node, 4, level, node, name, options);
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_xml_node, 4, level, node, name, options);
 				}
 			} else {
 				xdebug_xml_add_attribute(node, "recursive", "1");
@@ -749,7 +761,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 							options->runtime[level].start_element_nr = 0;
 							options->runtime[level].end_element_nr = options->max_children;
 						}
-						zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_xml_node, 4, level, node, name, options);
+						zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_xml_node, 4, level, node, name, options);
 					}
 				} else {
 					xdebug_xml_add_attribute(node, "recursive", "1");
@@ -809,13 +821,15 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node(char *name, zval *val, xdebug_va
 #define COLOR_OBJECT    "#8f5902"
 #define COLOR_RESOURCE  "#2e3436"
 
-static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_array_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level, debug_zval, newlen;
 	char *tmp_str;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level      = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
@@ -846,14 +860,16 @@ static int xdebug_array_element_export_fancy(zval **zv, int num_args, va_list ar
 	return 0;
 }
 
-static int xdebug_object_element_export_fancy(zval **zv, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
 	char *key;
 	char *prop_name, *modifier;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
+#endif
 
 	level      = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
@@ -937,7 +953,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 						options->runtime[level].start_element_nr = 0;
 						options->runtime[level].end_element_nr = options->max_children;
 
-						zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_array_element_export_fancy, 4, level, str, debug_zval, options);
+						zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_fancy, 4, level, str, debug_zval, options);
 					} else {
 						xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 						xdebug_str_add(str, xdebug_sprintf("<i><font color='%s'>empty</font></i>\n", COLOR_EMPTY), 1);
@@ -961,7 +977,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) xdebug_object_element_export_fancy, 4, level, str, debug_zval, options);
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_fancy, 4, level, str, debug_zval, options);
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
