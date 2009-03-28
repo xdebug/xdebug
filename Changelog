@@ -1,3 +1,9 @@
+Sat Mar 28 20:22:19 CET 2009 Derick Rethans <derick@derickrethans.nl>
+README
+xdebug/xdebug.c:
+- Fixed bug #403: 'call' and 'return' breakpoints triggers both on call and
+  return for class method breakpoints.
+
 Sat Mar 28 19:45:45 CET 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - MFH: Fixed bug #425: memory leak (around 40MB for each request) when using
