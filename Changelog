@@ -1,3 +1,7 @@
+Sat Mar 28 20:37:16 CET 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Fixed bug #418: compilation breaks with CodeWarrior for NetWare.
+
 Sat Mar 28 20:22:43 CET 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: Fixed bug #403: 'call' and 'return' breakpoints triggers both on call
