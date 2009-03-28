@@ -365,6 +365,7 @@ char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options
 	xdebug_var_export(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
+		xdfree(options->runtime);
 		xdfree(options);
 	}
 
