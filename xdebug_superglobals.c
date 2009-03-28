@@ -19,6 +19,7 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 #include "xdebug_var.h"
+#include "xdebug_compat.h"
 #include "xdebug_superglobals.h"
 #include "SAPI.h"
 
@@ -76,12 +77,12 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 	}
 }
 
-static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_key *hash_key)
+static int dump_hash_elem_va(void *pDest XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int html;
 	char *name;
 	xdebug_str *str;
-#ifdef ZTS
+#if defined(ZTS) && (!defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300)
 	void ***tsrm_ls;
 #endif
 
@@ -89,7 +90,7 @@ static int dump_hash_elem_va(void *pDest, int num_args, va_list args, zend_hash_
 	html = va_arg(args, int);
 	str =  va_arg(args, xdebug_str *);
 
-#ifdef ZTS
+#if defined(ZTS) && (!defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300)
 	tsrm_ls = va_arg(args, void ***);
 #endif
 
@@ -133,13 +134,11 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 	while (elem != NULL) {
 		if (ht && (*((char *) (elem->ptr)) == '*')) {
 
-#ifdef ZTS
-#define X_DUMP_ARGS 4
+#if defined(ZTS) && (!defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300)
+			zend_hash_apply_with_arguments(ht, dump_hash_elem_va, 4, name, html, str TSRMLS_CC);
 #else
-#define X_DUMP_ARGS 3
+			zend_hash_apply_with_arguments(ht TSRMLS_CC, dump_hash_elem_va, 3, name, html, str);
 #endif
-
-			zend_hash_apply_with_arguments(ht, dump_hash_elem_va, X_DUMP_ARGS, name, html, str TSRMLS_CC);
 		} else if (ht && zend_hash_find(ht, elem->ptr, strlen(elem->ptr) + 1, (void **) &z) == SUCCESS) {
 			dump_hash_elem(*z, name, 0, elem->ptr, html, str TSRMLS_CC);
 		} else if(XG(dump_undefined)) {

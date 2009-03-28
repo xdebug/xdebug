@@ -56,4 +56,12 @@ zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC);
 #	define XDEBUG_IS_REF is_ref
 #endif
 
+#if defined(PHP_VERSION_ID) && PHP_VERSION_ID >= 50300 && ZTS
+#	define XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC TSRMLS_DC
+#	define XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC TSRMLS_CC
+#else
+#	define XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC
+#	define XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC
+#endif
+
 #endif
