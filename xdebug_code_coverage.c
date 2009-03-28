@@ -223,7 +223,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 	unsigned int i;
 	xdebug_set *set = NULL;
 
-	opa->reserved[XG(reserved_offset)] = 1;
+	opa->reserved[XG(reserved_offset)] = (void*) 1;
 
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
@@ -262,7 +262,7 @@ static int prefill_from_function_table(zend_op_array *opa XDEBUG_ZEND_HASH_APPLY
 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
-		if (opa->reserved[XG(reserved_offset)] != 1/* && opa->filename && strcmp(opa->filename, new_filename) == 0)*/) {
+		if (opa->reserved[XG(reserved_offset)] != (void*) 1 /* && opa->filename && strcmp(opa->filename, new_filename) == 0)*/) {
 			prefill_from_oparray(opa->filename, opa TSRMLS_CC);
 		}
 	}
@@ -290,7 +290,7 @@ static int prefill_from_class_table(zend_class_entry **class_entry XDEBUG_ZEND_H
 
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
-	if (op_array->reserved[XG(reserved_offset)] != 1) {
+	if (op_array->reserved[XG(reserved_offset)] != (void*) 1) {
 		prefill_from_oparray(op_array->filename, op_array TSRMLS_CC);
 	}
 
