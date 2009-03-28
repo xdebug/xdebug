@@ -1353,7 +1353,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 		if (xdebug_hash_find(XG(context).class_breakpoints, tmp_name, strlen(tmp_name), (void *) &extra_brk_info)) {
 			/* Yup, breakpoint found, call handler if the breakpoint is not
 			 * disabled AND handle_hit_value is happy */
-			if (!extra_brk_info->disabled) {
+			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (handle_hit_value(extra_brk_info)) {
 					XG(context).do_break = 1;
 				}
