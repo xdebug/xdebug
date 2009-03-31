@@ -1,3 +1,7 @@
+Tue Mar 31 20:48:12 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Fixed TSRMLS issue.
+
 Sat Mar 28 20:37:26 CET 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - MFH: Fixed bug #418: compilation breaks with CodeWarrior for NetWare.
