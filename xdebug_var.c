@@ -467,9 +467,6 @@ static int xdebug_object_element_export_xml(zval **zv TSRMLS_DC, int num_args, v
 	int level;
 	xdebug_str *str;
 	char *prop_name, *modifier;
-#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
-	TSRMLS_FETCH();
-#endif
 
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
