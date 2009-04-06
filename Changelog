@@ -1,3 +1,7 @@
+Mon Apr 06 22:41:21 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+config.w32:
+- Make Liz happy.
+
 Tue Mar 31 20:48:12 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed TSRMLS issue.
