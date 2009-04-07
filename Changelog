@@ -1,3 +1,9 @@
+Tue Apr 07 23:21:07 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Fixed a crash bug when using eval() and xdebug.collect_includes enabled.
+#- Will not merge this to Xdebug 2.x as it's just too bloody much work.
+
 Mon Apr 06 22:41:21 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 config.w32:
 - Make Liz happy.
