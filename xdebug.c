@@ -432,6 +432,38 @@ static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
     return ZEND_USER_OPCODE_DISPATCH;
 }
 
+static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	zend_op *opline = execute_data->opline;
+
+	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
+		zval *inc_filename;
+		zval tmp_inc_filename;
+		int  is_var;
+		int  tmp_len;
+
+		inc_filename = get_zval(execute_data, &opline->op1, execute_data->Ts, &is_var);
+
+		if (inc_filename->type != IS_STRING) {
+			tmp_inc_filename = *inc_filename;
+			zval_copy_ctor(&tmp_inc_filename);
+			convert_to_string(&tmp_inc_filename);
+			inc_filename = &tmp_inc_filename;
+		}
+
+		/* Now let's store this info */
+		if (XG(last_eval_statement)) {
+			efree(XG(last_eval_statement));
+		}
+		XG(last_eval_statement) = php_addcslashes(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
+
+		if (inc_filename == &tmp_inc_filename) {
+			zval_dtor(&tmp_inc_filename);
+		}
+	}
+	return ZEND_USER_OPCODE_DISPATCH;
+}
+
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
 #define XDEBUG_SET_OPCODE_OVERRIDE(f,oc) \
 	zend_set_user_opcode_handler(oc, xdebug_##f##_handler);
@@ -662,6 +694,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE(pre_inc_obj, ZEND_PRE_INC_OBJ);
 	XDEBUG_SET_OPCODE_OVERRIDE(switch_free, ZEND_SWITCH_FREE);
 	XDEBUG_SET_OPCODE_OVERRIDE(qm_assign, ZEND_QM_ASSIGN);
+	XDEBUG_SET_OPCODE_OVERRIDE(include_or_eval, ZEND_INCLUDE_OR_EVAL);
 
 	XDEBUG_SET_OPCODE_OVERRIDE(silence, ZEND_BEGIN_SILENCE);
 	XDEBUG_SET_OPCODE_OVERRIDE(silence, ZEND_END_SILENCE);
@@ -798,6 +831,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(function_count) = 0;
 	XG(active_symbol_table) = NULL;
 	XG(last_exception_trace) = NULL;
+	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_collected_error_dtor);
 	
@@ -931,6 +965,10 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	if (XG(last_exception_trace)) {
 		xdfree(XG(last_exception_trace));
+	}
+
+	if (XG(last_eval_statement)) {
+		efree(XG(last_eval_statement));
 	}
 
 	xdebug_llist_destroy(XG(collected_errors), NULL);
@@ -1132,7 +1170,7 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if (tmp->function.type == XFUNC_EVAL) {
 			int   is_var;
 
-			tmp->include_filename = xdebug_get_zval_value(get_zval(zdata, &zdata->opline->op1, zdata->Ts, &is_var), 0, NULL);
+			tmp->include_filename = xdebug_sprintf("'%s'", XG(last_eval_statement));
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
