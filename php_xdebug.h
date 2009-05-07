@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Derick Rethans      |
+   | Copyright (c) 2002-2009 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #define XDEBUG_NAME       "Xdebug"
 #define XDEBUG_VERSION    "2.1.0-dev"
 #define XDEBUG_AUTHOR     "Derick Rethans"
-#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2007 by Derick Rethans"
+#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2009 by Derick Rethans"
 #define XDEBUG_URL        "http://xdebug.org"
 
 #include "php.h"

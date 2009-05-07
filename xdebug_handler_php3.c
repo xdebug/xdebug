@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Derick Rethans      |
+   | Copyright (c) 2002-2009 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -74,7 +74,7 @@ static char *get_current_time(void)
 
 char *xdebug_php3_get_revision(void)
 {
-	return "$Revision: 1.22 $";
+	return "$Revision: 1.23 $";
 }
 
 int xdebug_php3_init(xdebug_con *context, int mode)

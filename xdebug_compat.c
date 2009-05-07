@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2008 Derick Rethans <derick@xdebug.org>           |
+   | Copyright (c) 2002-2009 Derick Rethans <derick@xdebug.org>           |
    |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
    |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
    |                         Zeev Suraski <zeev@zend.com>                 |
@@ -38,7 +38,7 @@
    | IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.12 2009-01-05 17:24:34 derick Exp $ */
+/* $Id: xdebug_compat.c,v 1.13 2009-05-07 20:39:13 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"

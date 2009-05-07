@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Derick Rethans      |
+   | Copyright (c) 2002-2009 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2269,7 +2269,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.136 $";
+	return "$Revision: 1.137 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
