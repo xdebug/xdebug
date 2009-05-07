@@ -1,3 +1,15 @@
+Thu May 07 21:11:46 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_var.c:
+- Added support for PHP 5.3 and local variables for debugging.
+- Added code-coverage improvements related to not-fully parsed files.
+- Fixed cases where private properties where shown for objects, but not
+  accesible.
+
 Tue Apr 07 23:21:07 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
