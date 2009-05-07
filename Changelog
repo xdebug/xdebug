@@ -1,3 +1,43 @@
+Thu May 07 22:39:14 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/template.rc
+xdebug/usefulstuff.c
+xdebug/usefulstuff.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_code_coverage.h
+xdebug/xdebug_com.c
+xdebug/xdebug_com.h
+xdebug/xdebug_compat.c
+xdebug/xdebug_compat.h
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_handler_gdb.h
+xdebug/xdebug_handler_php3.c
+xdebug/xdebug_handler_php3.h
+xdebug/xdebug_handlers.c
+xdebug/xdebug_handlers.h
+xdebug/xdebug_mm.h
+xdebug/xdebug_private.c
+xdebug/xdebug_private.h
+xdebug/xdebug_profiler.c
+xdebug/xdebug_profiler.h
+xdebug/xdebug_set.c
+xdebug/xdebug_set.h
+xdebug/xdebug_str.c
+xdebug/xdebug_str.h
+xdebug/xdebug_superglobals.c
+xdebug/xdebug_superglobals.h
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h
+xdebug/xdebug_xml.c
+xdebug/xdebug_xml.h
+xdebug/debugclient/main.c
+xdebug/debugclient/usefulstuff.c
+xdebug/debugclient/usefulstuff.h:
+- Fixing the copyright statements.
+
 Thu May 07 21:11:46 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
