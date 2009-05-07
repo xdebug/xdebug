@@ -64,13 +64,6 @@ extern zend_module_entry xdebug_module_entry;
 # define XG_MEMORY_PEAK_USAGE()	AG(allocated_memory_peak)
 #endif
 
-#if PHP_VERSION_ID >= 50300
-# define XG_INIT_SYMBOL_TABLE   // if (!EG(active_symbol_table)) { zend_rebuild_symbol_table(TSRMLS_C); }
-# define XG_INIT_SYMBOL_TABLE
-#else
-# define XG_INIT_SYMBOL_TABLE
-#endif
-
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
@@ -148,6 +141,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	double        start_time;
 	HashTable    *active_symbol_table;
 	zend_execute_data *active_execute_data;
+	zend_op_array     *active_op_array;
 	unsigned int  prev_memory;
 	char         *file_link_format;
 

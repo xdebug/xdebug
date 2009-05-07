@@ -100,18 +100,19 @@ zval* xdebug_get_php_symbol(char* name, int name_length)
 	return NULL;
 }
 
-static char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name)
+static char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name)
 {
-	char *prop_name, *class_name;
+	char *prop_name, *cls_name;
 
 #if PHP_VERSION_ID >= 50200
-	zend_unmangle_property_name(mangled_property, mangled_len - 1, &class_name, &prop_name);
+	zend_unmangle_property_name(mangled_property, mangled_len - 1, &cls_name, &prop_name);
 #else
-	zend_unmangle_property_name(mangled_property, &class_name, &prop_name);
+	zend_unmangle_property_name(mangled_property, &cls_name, &prop_name);
 #endif
 	*property_name = prop_name;
-	if (class_name) {
-		if (class_name[0] == '*') {
+	*class_name = cls_name;
+	if (cls_name) {
+		if (cls_name[0] == '*') {
 			return "protected";
 		} else {
 			return "private";
@@ -216,7 +217,7 @@ static int xdebug_object_element_export(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_
 	int level, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
-	char *prop_name, *modifier;
+	char *prop_name, *class_name, *modifier;
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
 #endif
@@ -230,7 +231,7 @@ static int xdebug_object_element_export(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
+			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &class_name);
 			xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
 		}
 		xdebug_var_export(zv, str, level + 2, debug_zval, options TSRMLS_CC);
@@ -466,14 +467,14 @@ static int xdebug_object_element_export_xml(zval **zv TSRMLS_DC, int num_args, v
 {
 	int level;
 	xdebug_str *str;
-	char *prop_name, *modifier;
+	char *prop_name, *class_name, *modifier;
 
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
 
 	xdebug_str_addl(str, "<var", 4, 0);
 	if (hash_key->nKeyLength != 0) {
-		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
+		modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &class_name);
 		xdebug_str_add(str, xdebug_sprintf(" name='%s' facet='%s'", prop_name, modifier), 1);
 	}
 	xdebug_str_add(str, xdebug_sprintf(" id='%p'>", *zv), 1);
@@ -638,7 +639,7 @@ static int xdebug_object_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPL
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
 	xdebug_var_export_options *options;
-	char *prop_name, *modifier;
+	char *prop_name, *modifier, *class_name, *prop_class_name;
 	char *parent_name = NULL, *full_name = NULL;
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
@@ -648,31 +649,37 @@ static int xdebug_object_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPL
 	parent = va_arg(args, xdebug_xml_node*);
 	full_name = parent_name = va_arg(args, char *);
 	options = va_arg(args, xdebug_var_export_options*);
+	class_name = va_arg(args, char *);
 
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		node = xdebug_xml_node_init("property");
-		
-		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
-			xdebug_xml_add_attribute(node, "name", prop_name);
-			/* XXX static vars? */
 
-			if (parent_name) {
-				if (parent_name[0] != '$') {
-					full_name = xdebug_sprintf("$%s->%s", parent_name, prop_name);
-				} else {
-					full_name = xdebug_sprintf("%s->%s", parent_name, prop_name);
+		if (hash_key->nKeyLength != 0) {
+			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
+			xdebug_xml_add_attribute(node, "name", prop_name);
+
+			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
+				if (parent_name) {
+					if (parent_name[0] != '$') {
+						full_name = xdebug_sprintf("$%s->%s", parent_name, prop_name);
+					} else {
+						full_name = xdebug_sprintf("%s->%s", parent_name, prop_name);
+					}
+					xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 				}
-				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 			}
 			xdebug_xml_add_attribute(node, "facet", modifier);
-		}
-		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
-		xdebug_xml_add_child(parent, node);
-		xdebug_var_export_xml_node(zv, full_name, node, options, level + 1 TSRMLS_CC);
+			xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
+
+			xdebug_xml_add_child(parent, node);
+
+			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
+				xdebug_var_export_xml_node(zv, full_name, node, options, level + 1 TSRMLS_CC);
+			}
+		}
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
@@ -744,7 +751,6 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
 			Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
-			efree(class_name);
 			if (myht) {
 				if (myht->nApplyCount < 1) {
 					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
@@ -759,12 +765,13 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 							options->runtime[level].start_element_nr = 0;
 							options->runtime[level].end_element_nr = options->max_children;
 						}
-						zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_xml_node, 4, level, node, name, options);
+						zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_xml_node, 5, level, node, name, options, class_name);
 					}
 				} else {
 					xdebug_xml_add_attribute(node, "recursive", "1");
 				}
 			}
+			efree(class_name);
 			break;
 
 		case IS_RESOURCE: {
@@ -864,7 +871,7 @@ static int xdebug_object_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_T
 	xdebug_str *str;
 	xdebug_var_export_options *options;
 	char *key;
-	char *prop_name, *modifier;
+	char *prop_name, *class_name, *modifier;
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
 #endif
@@ -881,7 +888,7 @@ static int xdebug_object_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_T
 
 		key = hash_key->arKey;
 		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name);
+			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &class_name);
 			xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
 		}
 		xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);

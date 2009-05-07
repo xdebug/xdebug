@@ -118,7 +118,11 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
+#ifdef ZEND_ENGINE_2
 		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
+#else
+		*jmp1 = opcode.op1.u.opline_num;
+#endif
 		return 1;
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
@@ -127,7 +131,11 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
 		*jmp1 = position + 1;
+#ifdef ZEND_ENGINE_2
 		*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
+#else
+		*jmp2 = opcode.op1.u.opline_num;
+#endif
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 		*jmp1 = opcode.op2.u.opline_num;
@@ -153,8 +161,8 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 
 static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xdebug_set *set)
 {
-	long jump_pos1 = -1;
-	long jump_pos2 = -1;
+	long jump_pos1;
+	long jump_pos2;
 
 	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
 	/* First we see if the branch has been visited, if so we bail out. */
@@ -165,14 +173,16 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 	xdebug_set_add(set, position);
 	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
 	while (position < opa->last) {
+		jump_pos1 = -1;
+		jump_pos2 = -1;
 
 		/* See if we have a jump instruction */
 		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			/*(fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);)*/
+			fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);
 			if (jump_pos2 != -1) {
-				/*(fprintf(stderr, ", Position 2 = %d\n", jump_pos2);)*/
+				fprintf(stderr, ", Position 2 = %d\n", jump_pos2);
 			} else {
-				/*(fprintf(stderr, "\n");)*/
+				fprintf(stderr, "\n");
 			}
 			xdebug_analyse_branch(opa, jump_pos1, set);
 			if (jump_pos2 != -1 && jump_pos2 <= opa->last) {

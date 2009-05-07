@@ -274,6 +274,45 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 #define XF_ST_ARRAY_INDEX_ASSOC  2
 #define XF_ST_OBJ_PROPERTY       3
 
+inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
+{
+	switch (Z_TYPE_P(z)) {
+		case IS_ARRAY:
+			return Z_ARRVAL_P(z);
+			break;
+		case IS_OBJECT:
+			return Z_OBJPROP_P(z);
+			break;
+	}
+	return NULL;
+}
+
+inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
+{
+	char *name;
+	zend_uint name_len;
+
+	if (Z_TYPE_P(z) != IS_OBJECT) {
+		return NULL;
+	}
+
+	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
+		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+		zend_class_entry *ce;
+
+		ce = zend_get_class_entry(z TSRMLS_CC);
+		if (!ce) {
+			return NULL;
+		}
+
+		*length = ce->name_length;
+		return estrdup(ce->name);
+	} 
+
+	*length = name_len;
+	return name;
+}
+
 static char* prepare_search_key(char *name, int *name_length, char *prefix, int prefix_length)
 {
 	char *element;
@@ -306,6 +345,33 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 
 	switch (type) {
 		case XF_ST_ROOT:
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+			/* Check for compiled vars */
+			element = prepare_search_key(name, &element_length, "", 0);
+			if (XG(active_execute_data) && XG(active_op_array)) {
+				int i = 0;
+				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
+				zend_op_array *opa = XG(active_op_array);
+				zval ***CVs = XG(active_execute_data)->CVs;
+
+				while (i < opa->last_var) {
+					if (opa->vars[i].hash_value == hash_value &&
+						opa->vars[i].name_len == element_length &&
+						strcmp(opa->vars[i].name, element) == 0)
+					{
+						if (CVs[i]) {
+							retval_p = *CVs[i];
+							goto cleanup;
+						}
+					}
+					i++;
+				}
+			}
+			free(element);
+#else
+			ht = XG(active_symbol_table);
+			/* break intentionally missing */
+#endif
 		case XF_ST_ARRAY_INDEX_ASSOC:
 			element = prepare_search_key(name, &name_length, "", 0);
 
@@ -364,203 +430,135 @@ cleanup_num:
 	return retval_p;
 }
 
-inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
-{
-	switch (Z_TYPE_P(z)) {
-		case IS_ARRAY:
-			return Z_ARRVAL_P(z);
-			break;
-		case IS_OBJECT:
-			return Z_OBJPROP_P(z);
-			break;
-	}
-	return NULL;
-}
-
-inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
-{
-	char *name;
-	zend_uint name_len;
-
-	if (Z_TYPE_P(z) != IS_OBJECT) {
-		return NULL;
-	}
-
-	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
-		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
-		zend_class_entry *ce;
-
-		ce = zend_get_class_entry(z TSRMLS_CC);
-		if (!ce) {
-			return NULL;
-		}
-
-		*length = ce->name_length;
-		return estrdup(ce->name);
-	} 
-
-	*length = name_len;
-	return name;
-}
-
 static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 {
-	HashTable           *st = NULL;
+	HashTable *st = NULL;
+	int        found = -1;
+	int        state = 0;
+	char     **p = &name;
+	char      *keyword = NULL, *keyword_end = NULL;
+	int        type = XF_ST_ROOT;
+	zval      *retval = NULL;
+	char      *current_classname = NULL;
+	int        cc_length = 0;
+	char       quotechar = 0;
 
-	if (name[0] == '$') {
-		/* This is a fullname property. Relying on eval is bad as it can bail
-		 * out, so we do it ourselves. */
-		int found = -1;
-		int state = 0;
-		char **p = &name;
-		char *keyword = NULL, *keyword_end = NULL;
-		int type = XF_ST_ROOT;
-		zval *retval = NULL;
-		char *current_classname = NULL;
-		int   cc_length = 0;
-		char  quotechar = 0;
-
-		/* Set the target table to the currently active scope */
-		st = XG(active_symbol_table);
-
-		do {
-			if (*p[0] == '\0') {
-				found = 0;
-			} else {
-				switch (state) {
-					case 0:
-						if (*p[0] == '$') {
-							state = 1;
-							keyword = *p + 1;
-							break;
+	do {
+		if (*p[0] == '\0') {
+			found = 0;
+		} else {
+			switch (state) {
+				case 0:
+					if (*p[0] == '$') {
+						keyword = *p + 1;
+						break;
+					}
+					keyword = *p;
+					state = 1;
+					/* break intentionally missing */
+				case 1:
+					if (*p[0] == '[') {
+						keyword_end = *p;
+						if (keyword) {
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
+							current_classname = NULL;
+							if (retval) {
+								st = fetch_ht_from_zval(retval TSRMLS_CC);
+							}
+							keyword = NULL;
 						}
+						state = 3;
+					} else if (*p[0] == '-') {
+						keyword_end = *p;
+						if (keyword) {
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
+							current_classname = NULL;
+							if (retval) {
+								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+								st = fetch_ht_from_zval(retval TSRMLS_CC);
+							}
+							keyword = NULL;
+						}
+						state = 2;
+						type = XF_ST_OBJ_PROPERTY;
+					}
+					break;
+				case 2:
+					if (*p[0] != '>') {
 						keyword = *p;
-						/* break intentionally missing */
-					case 1:
-						if (*p[0] == '[') {
-							keyword_end = *p;
-							if (keyword) {
-								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
-								if (current_classname) {
-									efree(current_classname);
-								}
-								current_classname = NULL;
-								if (retval) {
-									st = fetch_ht_from_zval(retval TSRMLS_CC);
-								}
-								keyword = NULL;
-							}
-							state = 3;
-						} else if (*p[0] == '-') {
-							keyword_end = *p;
-							if (keyword) {
-								retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
-								if (current_classname) {
-									efree(current_classname);
-								}
-								current_classname = NULL;
-								if (retval) {
-									current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
-									st = fetch_ht_from_zval(retval TSRMLS_CC);
-								}
-								keyword = NULL;
-							}
-							state = 2;
-							type = XF_ST_OBJ_PROPERTY;
+						state = 1;
+					}
+					break;
+				case 3:
+					/* Associative arrays */
+					if (*p[0] == '\'' || *p[0] == '"') {
+						state = 4;
+						keyword = *p + 1;
+						quotechar = *p[0];
+						type = XF_ST_ARRAY_INDEX_ASSOC;
+					}
+					/* Numerical index */
+					if (*p[0] >= '0' && *p[0] <= '9') {
+						state = 6;
+						keyword = *p;
+						type = XF_ST_ARRAY_INDEX_NUM;
+					}
+					break;
+				case 4:
+					if (*p[0] == quotechar) {
+						quotechar = 0;
+						state = 5;
+						keyword_end = *p;
+						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+						if (current_classname) {
+							efree(current_classname);
 						}
-						break;
-					case 2:
-						if (*p[0] != '>') {
-							keyword = *p;
-							state = 1;
+						current_classname = NULL;
+						if (retval) {
+							current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+							st = fetch_ht_from_zval(retval TSRMLS_CC);
 						}
-						break;
-					case 3:
-						/* Associative arrays */
-						if (*p[0] == '\'' || *p[0] == '"') {
-							state = 4;
-							keyword = *p + 1;
-							quotechar = *p[0];
-							type = XF_ST_ARRAY_INDEX_ASSOC;
+						keyword = NULL;
+					}
+					break;
+				case 5:
+					if (*p[0] == ']') {
+						state = 1;
+					}
+					break;
+				case 6:
+					if (*p[0] == ']') {
+						state = 1;
+						keyword_end = *p;
+						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+						if (current_classname) {
+							efree(current_classname);
 						}
-						/* Numerical index */
-						if (*p[0] >= '0' && *p[0] <= '9') {
-							state = 6;
-							keyword = *p;
-							type = XF_ST_ARRAY_INDEX_NUM;
+						current_classname = NULL;
+						if (retval) {
+							current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+							st = fetch_ht_from_zval(retval TSRMLS_CC);
 						}
-						break;
-					case 4:
-						if (*p[0] == quotechar) {
-							quotechar = 0;
-							state = 5;
-							keyword_end = *p;
-							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
-							if (current_classname) {
-								efree(current_classname);
-							}
-							current_classname = NULL;
-							if (retval) {
-								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
-								st = fetch_ht_from_zval(retval TSRMLS_CC);
-							}
-							keyword = NULL;
-						}
-						break;
-					case 5:
-						if (*p[0] == ']') {
-							state = 1;
-						}
-						break;
-					case 6:
-						if (*p[0] == ']') {
-							state = 1;
-							keyword_end = *p;
-							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
-							if (current_classname) {
-								efree(current_classname);
-							}
-							current_classname = NULL;
-							if (retval) {
-								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
-								st = fetch_ht_from_zval(retval TSRMLS_CC);
-							}
-							keyword = NULL;
-						}
-						break;
-				}
-				(*p)++;
+						keyword = NULL;
+					}
+					break;
 			}
-		} while (found < 0);
-		if (keyword != NULL) {
-			retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length TSRMLS_CC);
-			if (retval) {
-				st = fetch_ht_from_zval(retval TSRMLS_CC);
-			}
+			(*p)++;
 		}
-		return retval;
-	} else {
-		zval **retval;
-
-		st = XG(active_symbol_table);
-		if (st && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-			return *retval;
+	} while (found < 0);
+	if (keyword != NULL) {
+		retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length TSRMLS_CC);
+		if (retval) {
+			st = fetch_ht_from_zval(retval TSRMLS_CC);
 		}
-
-		st = EG(active_op_array)->static_variables;
-		if (st) {
-			if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-				return *retval;
-			}
-		}
-#if 0
-		st = &EG(symbol_table);
-		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-			return *retval;
-		}
-#endif
 	}
-	return NULL;
+	return retval;
 }
 
 static xdebug_xml_node* get_symbol(char* name, int name_length, xdebug_var_export_options *options TSRMLS_DC)
@@ -1620,8 +1618,19 @@ DBGP_FUNC(property_get)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-			XG(active_symbol_table) = fse->symbol_table;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
+
+			if (depth > 0) {
+				XG(active_execute_data) = old_fse->execute_data;
+			} else {
+				XG(active_execute_data) = EG(current_execute_data);
+			}
+#else
 			XG(active_execute_data) = fse->execute_data;
+#endif
+			XG(active_symbol_table) = fse->symbol_table;
+			XG(active_op_array)     = fse->op_array;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1644,6 +1653,7 @@ DBGP_FUNC(property_get)
 		options->max_data = old_max_data;
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
+	XG(active_op_array) = NULL;
 }
 
 DBGP_FUNC(property_set)
@@ -1680,8 +1690,19 @@ DBGP_FUNC(property_set)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-			XG(active_symbol_table) = fse->symbol_table;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
+
+			if (depth > 0) {
+				XG(active_execute_data) = old_fse->execute_data;
+			} else {
+				XG(active_execute_data) = EG(current_execute_data);
+			}
+#else
 			XG(active_execute_data) = fse->execute_data;
+#endif
+			XG(active_symbol_table) = fse->symbol_table;
+			XG(active_op_array)     = fse->op_array;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1781,8 +1802,19 @@ DBGP_FUNC(property_value)
 
 	/* Set the symbol table corresponding with the requested stack depth */
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-		XG(active_symbol_table) = fse->symbol_table;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
+
+		if (depth > 0) {
+			XG(active_execute_data) = old_fse->execute_data;
+		} else {
+			XG(active_execute_data) = EG(current_execute_data);
+		}
+#else
 		XG(active_execute_data) = fse->execute_data;
+#endif
+		XG(active_symbol_table) = fse->symbol_table;
+		XG(active_op_array)     = fse->op_array;
 	} else {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 	}
@@ -1812,7 +1844,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	xdebug_xml_node    *contents;
 	TSRMLS_FETCH();
 
-	contents = get_symbol(name, strlen(name) + 1, options TSRMLS_CC);
+	contents = get_symbol(name, strlen(name), options TSRMLS_CC);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
@@ -1853,8 +1885,19 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-		XG(active_symbol_table) = fse->symbol_table;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
+
+		if (depth > 0) {
+			XG(active_execute_data) = old_fse->execute_data;
+		} else {
+			XG(active_execute_data) = EG(current_execute_data);
+		}
+#else
 		XG(active_execute_data) = fse->execute_data;
+#endif
+		XG(active_symbol_table) = fse->symbol_table;
+		XG(active_op_array)     = fse->op_array;
 
 		/* Only show vars when they are scanned */
 		if (fse->used_vars) {
@@ -1869,6 +1912,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 		XG(active_symbol_table) = NULL;
 		XG(active_execute_data) = NULL;
+		XG(active_op_array)     = NULL;
 		return 0;
 	}
 	
@@ -2225,7 +2269,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.135 $";
+	return "$Revision: 1.136 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)

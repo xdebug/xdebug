@@ -1326,7 +1326,6 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
 {
 	int i = 0; 
-	int j = op_array->size;
 
 	if (!fse->used_vars) {
 		fse->used_vars = xdebug_llist_alloc(xdebug_used_var_dtor);
@@ -1339,8 +1338,14 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 		}
 	}
 
+	/* gather used variables from compiled vars information */
+	while (i < op_array->last_var) {
+		xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(op_array->vars[i].name));
+		i++;
+	}
+
 	/* opcode scanning time */
-	while (i < j) {
+	while (i < op_array->size) {
 		char *cv = NULL;
 		int cv_len;
 
@@ -1579,7 +1584,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	function_nr = XG(function_count);
 	trace_function_begin(fse, function_nr TSRMLS_CC);
 
-	XG_INIT_SYMBOL_TABLE
 	fse->symbol_table = EG(active_symbol_table);
 	fse->execute_data = EG(current_execute_data);
 
@@ -1778,7 +1782,6 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	}
 
 	tmp_ht = XG(active_symbol_table);
-	XG_INIT_SYMBOL_TABLE
 	XG(active_symbol_table) = EG(active_symbol_table);
 	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
 	XG(active_symbol_table) = tmp_ht;
@@ -2446,7 +2449,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	exception_class = PG(exception_class);
 #endif
 	/* according to error handling mode, suppress error, throw exception or show it */
-	if (error_handling != EH_NORMAL) {
+	if (error_handling != EH_NORMAL && EG(in_execution)) {
 		switch (type) {
 			case E_CORE_ERROR:
 			case E_COMPILE_ERROR:
@@ -2540,7 +2543,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			return;
 	}
 
-	XG_INIT_SYMBOL_TABLE
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		zval *tmp;
 
@@ -2564,7 +2566,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		if (XG(do_code_coverage) && XG(code_coverage_unused)) {
+		if (XG(do_code_coverage) && XG(code_coverage_unused && op_array->done_pass_two)) {
 			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
 		}
 	}
@@ -2858,7 +2860,6 @@ PHP_FUNCTION(xdebug_debug_zval)
 	
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
-			XG_INIT_SYMBOL_TABLE
 			XG(active_symbol_table) = EG(active_symbol_table);
 			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
 			if (debugzval) {
@@ -2900,7 +2901,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
-			XG_INIT_SYMBOL_TABLE
 			XG(active_symbol_table) = EG(active_symbol_table);
 			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
 			if (debugzval) {

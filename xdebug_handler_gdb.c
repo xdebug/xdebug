@@ -1031,7 +1031,6 @@ char *xdebug_handle_print(xdebug_con *context, xdebug_arg *args)
 	zval                *zvar;
 	TSRMLS_FETCH();
 
-	XG_INIT_SYMBOL_TABLE
 	XG(active_symbol_table) = EG(active_symbol_table);
 	zvar = xdebug_get_php_symbol(args->args[0], strlen(args->args[0]) + 1);
 	if (zvar) {
@@ -1217,7 +1216,6 @@ char *xdebug_handle_show_local(xdebug_con *context, xdebug_arg *args)
 	char *tmp;
 	TSRMLS_FETCH();
 	
-	XG_INIT_SYMBOL_TABLE
 	XG(active_symbol_table) = EG(active_symbol_table);
 	tmp = show_local_vars(context, args, dump_used_var_with_contents);
 	XG(active_symbol_table) = NULL;
@@ -1353,7 +1351,7 @@ static void xdebug_gdb_option_result(xdebug_con *context, int ret, char *error)
 
 char *xdebug_gdb_get_revision(void)
 {
-	return "$Revision: 1.89 $";
+	return "$Revision: 1.90 $";
 }
 
 int xdebug_gdb_init(xdebug_con *context, int mode)
