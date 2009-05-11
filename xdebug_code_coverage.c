@@ -178,11 +178,11 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 
 		/* See if we have a jump instruction */
 		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);
+			/*(fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);)*/
 			if (jump_pos2 != -1) {
-				fprintf(stderr, ", Position 2 = %d\n", jump_pos2);
+				/*(fprintf(stderr, ", Position 2 = %d\n", jump_pos2))*/;
 			} else {
-				fprintf(stderr, "\n");
+				/*(fprintf(stderr, "\n"))*/;
 			}
 			xdebug_analyse_branch(opa, jump_pos1, set);
 			if (jump_pos2 != -1 && jump_pos2 <= opa->last) {
