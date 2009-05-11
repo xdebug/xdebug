@@ -1,3 +1,7 @@
+Mon May 11 10:34:07 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c:
+- Remove debug information that accidently slipped in.
+
 Thu May 07 22:39:14 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/template.rc
