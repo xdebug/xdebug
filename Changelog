@@ -1,3 +1,8 @@
+Wed Jun 03 09:31:26 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed odd crash bugs
+#- GCC 4 is a whole more lot sensitive!
+
 Mon May 11 10:34:07 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - Remove debug information that accidently slipped in.
