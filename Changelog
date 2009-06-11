@@ -1,3 +1,10 @@
+Thu Jun 11 10:10:35 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Added a patch by Lucas Nealan (lucas@php.net) and Brian Shire (shire@php.net)
+  of Facebook to allow connections to the initiating request's IP address for
+  remote debugging.
+
 Wed Jun 03 09:31:26 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed odd crash bugs
