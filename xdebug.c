@@ -288,6 +288,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_SYSTEM, OnUpdateBool,   remote_connect_back,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
 	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
@@ -842,6 +843,11 @@ PHP_RINIT_FUNCTION(xdebug)
 		}
 		XG(ide_key) = xdstrdup(idekey);
 	}
+
+	/* This is to kick the global variable JIT-mechanism in PHP */
+#ifdef ZEND_ENGINE_2
+	zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
+#endif
 
 	/* Check if we have this special get variable that stops a debugging
 	 * request without executing any code */
@@ -1523,7 +1529,13 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			(XG(remote_mode) == XDEBUG_REQ)
 		) {
 			/* Initialize debugging session */
-			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+			if (XG(remote_connect_back)) {
+				zval **remote_addr = NULL;
+				zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
+				XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
+			} else {
+				XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+			}
 			if (XG(context).socket >= 0) {
 				XG(remote_enabled) = 1;
 
@@ -2337,7 +2349,13 @@ static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRML
 static void xdebug_do_jit(TSRMLS_D)
 {
 	if (!XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
-		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		if (XG(remote_connect_back)) {
+			zval **remote_addr = NULL;
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
+			XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
+		} else {
+			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		}
 		if (XG(context).socket >= 0) {
 			XG(remote_enabled) = 0;
 

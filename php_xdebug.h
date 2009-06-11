@@ -203,6 +203,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
 	char         *remote_handler; /* php3, gdb, dbgp */
 	zend_bool     remote_autostart; /* Disables the requirement for XDEBUG_SESSION_START */
+	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
 	char         *remote_log;       /* Filename to log protocol communication to */
 	FILE         *remote_log_file;  /* File handler for protocol log */
 	long          remote_cookie_expire_time; /* Expire time for the remote-session cookie */
