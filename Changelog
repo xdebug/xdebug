@@ -1,3 +1,8 @@
+Fri Jun 26 18:04:50 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/template.rc:
+- Mark as 2.0.5, that means a release is imminent!
+
 Thu Jun 11 10:10:35 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c:
