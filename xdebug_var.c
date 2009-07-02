@@ -469,7 +469,7 @@ static int xdebug_array_element_export_xml(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRM
 	return 0;
 }
 
-static int xdebug_object_element_export_xml(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export_xml(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
 	xdebug_str *str;
