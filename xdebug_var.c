@@ -463,7 +463,7 @@ static int xdebug_array_element_export_xml(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRM
 	return 0;
 }
 
-static int xdebug_object_element_export_xml(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export_xml(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
 	xdebug_str *str;
@@ -747,10 +747,23 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
+
 			xdebug_xml_add_attribute(node, "type", "object");
 			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
 			Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
 			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
+
+			/** Temporary additional property **/
+			{
+				xdebug_xml_node *pnode;
+
+				pnode = xdebug_xml_node_init("property");
+				xdebug_xml_add_attribute(pnode, "name", "CLASSNAME");
+				xdebug_xml_add_attribute(pnode, "type", "string");
+				xdebug_xml_add_text(pnode, xdstrdup(class_name));
+				xdebug_xml_add_child(node, pnode);
+			}
+
 			if (myht) {
 				if (myht->nApplyCount < 1) {
 					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
