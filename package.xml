@@ -2,7 +2,7 @@
 <package>
   <name>xdebug</name>
   <summary>Provides functions for function traces and profiling</summary>
-  <status>beta</status>
+  <status>stable</status>
   <maintainers>
     <maintainer>
       <user>derick</user>
@@ -32,38 +32,22 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>stable</state>
-    <version>2.0.4</version>
-    <date>2008-12-30</date>
+    <version>2.0.5</version>
+    <date>2009-07-03</date>
     <notes>
-Tue, Dec 30, 2008 - xdebug 2.0.4
+Fri, Jul 03, 2009 - xdebug 2.0.5
 
 = Fixed bugs:
-	- Fixed for strange jump positions in path analysis.
-	- Fixed issues with code coverage crashing on parse errors.
-	- Fixed code code coverage by overriding more opcodes.
-	- Fixed issues with Xdebug stalling/crashing when detaching from remote
-	  debugging.
-	- Fixed crash on Vista where memory was freed with routines from a different
-	  standard-C library than it was allocated with. (Patch by Eric Promislow
-	  &lt;ericp@activestate.com&gt;).
-	- Link against the correct CRT library. (Patch by Eric Promislow
-	  &lt;ericp@activestate.com&gt;).
-	- Sort the symbol elements according to name. (Patch by Eric Promislow
-	  &lt;ericp@activestate.com&gt;).
-	- Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
-	  Promislow &lt;ericp@activestate.com&gt;).
-	- Fixed a segfault in interactive mode while including a file.
-	- Fixed a crash in super global dumping in case somebody was strange enough
-	  to reassign them to a value type other than an Array.
-	- Simplify version checking for libtool. (Patch by PGNet
-	  &lt;pgnet.trash@gmail.com&gt;).
-	- Fixed display of unused returned variables from functions in PHP 5.3.
-	- Include config.w32 in the packages as well.
-	- Fixed .dsp for building with PHP 4.
-
-+ Added features:
-	- Support debugging into phars.
-	- Basic PHP 5.3 support.
+	- Fixed bug #425: memory leak (around 40MB for each request) when using
+	  xdebug_start_trace.
+	- Fixed bug #422: Segfaults when using code coverage with a parse error in
+	  the script.
+	- Fixed bug #418: compilation breaks with CodeWarrior for NetWare.
+	- Fixed bug #403: 'call' and 'return' breakpoints triggers both on call and
+	  return for class method breakpoints.
+	- Fixed TSRM issues for PHP 5.2 and PHP 5.3. (Original patch by Elizabeth
+	  M. Smith).
+	- Fixed odd crash bugs, due to GCC 4 sensitivity.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -153,6 +137,26 @@ Tue, Dec 30, 2008 - xdebug 2.0.4
     </deps>
   </release>
   <changelog>
+    <release>
+      <state>stable</state>
+      <version>2.0.5</version>
+      <date>2009-07-03</date>
+      <notes>
+Fri, Jul 03, 2009 - xdebug 2.0.5
+
+= Fixed bugs:
+	- Fixed bug #425: memory leak (around 40MB for each request) when using
+	  xdebug_start_trace.
+	- Fixed bug #422: Segfaults when using code coverage with a parse error in
+	  the script.
+	- Fixed bug #418: compilation breaks with CodeWarrior for NetWare.
+	- Fixed bug #403: 'call' and 'return' breakpoints triggers both on call and
+	  return for class method breakpoints.
+	- Fixed TSRM issues for PHP 5.2 and PHP 5.3. (Original patch by Elizabeth
+	  M. Smith).
+	- Fixed odd crash bugs, due to GCC 4 sensitivity.
+      </notes>
+    </release>
     <release>
       <state>stable</state>
       <version>2.0.4</version>

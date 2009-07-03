@@ -1,3 +1,18 @@
+Fri, Jul 03, 2009 - xdebug 2.0.5
+
+= Fixed bugs:
+	- Fixed bug #425: memory leak (around 40MB for each request) when using
+	  xdebug_start_trace.
+	- Fixed bug #422: Segfaults when using code coverage with a parse error in
+	  the script.
+	- Fixed bug #418: compilation breaks with CodeWarrior for NetWare.
+	- Fixed bug #403: 'call' and 'return' breakpoints triggers both on call and
+	  return for class method breakpoints.
+	- Fixed TSRM issues for PHP 5.2 and PHP 5.3. (Original patch by Elizabeth
+	  M. Smith).
+	- Fixed odd crash bugs, due to GCC 4 sensitivity.
+
+
 Tue, Dec 30, 2008 - xdebug 2.0.4
 
 = Fixed bugs:
