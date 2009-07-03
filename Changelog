@@ -1,3 +1,10 @@
+Fri Jul 03 18:36:36 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+package.xml
+xdebug/package2.xml
+xdebug/test-4.3.sh
+xdebug/test-5.1.sh:
+- Go with 2.0.5.
+
 Fri Jul 03 17:56:09 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - MFH: ixed odd crash bugs
