@@ -1,3 +1,8 @@
+Fri Jul 03 17:56:09 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- MFH: ixed odd crash bugs
+#- GCC 4 is a whole more lot sensitive!
+
 Thu Jul 02 11:03:41 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed TS compile in PHP < 5.3.
