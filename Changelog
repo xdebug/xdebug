@@ -1,3 +1,16 @@
+Sat Jul 04 16:31:44 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_handler_dbgp.h
+xdebug/xdebug_handler_gdb.c
+xdebug/xdebug_handler_gdb.h
+xdebug/xdebug_handlers.h:
+- Fixed bug #439: Xdebug crash in xdebug_header_handler.
+#- There were API changes in PHp 5.3 that I missed.
+- Fixed random GCC warnings.
+
 Sat Jul 04 15:54:44 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/template.rc:
