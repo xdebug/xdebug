@@ -83,7 +83,7 @@ void (*old_error_cb)(int type, const char *error_filename, const uint error_line
 void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
-static int xdebug_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC);
+static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 
 void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
@@ -476,7 +476,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_op *cur_opcode; \
 		int      lineno; \
 		char    *file; \
-		int      file_len; \
+\
 		zend_op_array *op_array = execute_data->op_array; \
 \
 		cur_opcode = *EG(opline_ptr); \
@@ -495,7 +495,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 	int      lineno;
 	char    *file, *varname, *full_varname;
 	int      is_var, cv_len;
-	zval    *val, *dimval, *mainval;
+	zval    *val, *dimval;
 	zend_op_array *op_array = execute_data->op_array;
 
 	cur_opcode = *EG(opline_ptr);
@@ -1175,8 +1175,6 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 
 		if (tmp->function.type == XFUNC_EVAL) {
-			int   is_var;
-
 			tmp->include_filename = xdebug_sprintf("'%s'", XG(last_eval_statement));
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
@@ -2085,7 +2083,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 
 static char* return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *filename, int lineno TSRMLS_DC)
 {
-	int        j = 0; /* Counter */
+	int        j = 0;
 	xdebug_str str = {0, 0, NULL};
 	char      *tmp_value;
 
@@ -2593,11 +2591,11 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 }
 /* }}} */
 
-static int xdebug_header_handler(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC)
+static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC)
 {
 	xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
 	if (XG(orig_header_handler)) {
-		return XG(orig_header_handler)(h, s TSRMLS_CC);
+		return XG(orig_header_handler)(h XG_SAPI_HEADER_OP_CC, s TSRMLS_CC);
 	}
 	return SAPI_HEADER_ADD;
 }
@@ -2925,7 +2923,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			if (debugzval) {
 				printf("%s: ", Z_STRVAL_PP(args[i]));
 				val = xdebug_get_zval_value(debugzval, 1, NULL);
-				printf("%s(%d)", val, strlen(val));
+				printf("%s(%zd)", val, strlen(val));
 				xdfree(val);
 				printf("\n");
 			}
@@ -3116,7 +3114,7 @@ void xdebug_stop_trace(TSRMLS_D)
 			u_time = xdebug_get_utime();
 			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10.4f " : "\t\t\t%f\t", u_time - XG(start_time));
 #if HAVE_PHP_MEMORY_USAGE
-			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10u" : "%lu", XG_MEMORY_USAGE());
+			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10zu" : "%lu", XG_MEMORY_USAGE());
 #else
 			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10u" : "", 0);
 #endif

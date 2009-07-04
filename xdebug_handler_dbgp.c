@@ -2269,7 +2269,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.137 $";
+	return "$Revision: 1.138 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
@@ -2543,7 +2543,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	return 1;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, const char *file, long lineno, int type, char *exception, char *message)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *message)
 {
 	xdebug_xml_node *response, *error_container;
 	TSRMLS_FETCH();

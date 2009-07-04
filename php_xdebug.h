@@ -64,6 +64,14 @@ extern zend_module_entry xdebug_module_entry;
 # define XG_MEMORY_PEAK_USAGE()	AG(allocated_memory_peak)
 #endif
 
+#if PHP_VERSION_ID >= 50300
+# define XG_SAPI_HEADER_OP_DC   , sapi_header_op_enum op
+# define XG_SAPI_HEADER_OP_CC   , op
+#else
+# define XG_SAPI_HEADER_OP_DC
+# define XG_SAPI_HEADER_OP_CC
+#endif
+
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
@@ -194,7 +202,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* headers */
 	xdebug_llist *headers;
-	int        (*orig_header_handler)(sapi_header_struct *h, sapi_headers_struct *s TSRMLS_DC);
+	int        (*orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */
