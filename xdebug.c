@@ -2709,7 +2709,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			if (debugzval) {
 				printf("%s: ", Z_STRVAL_PP(args[i]));
 				val = xdebug_get_zval_value(debugzval, 1, NULL);
-				printf("%s(%d)", val, strlen(val));
+				printf("%s(%zd)", val, strlen(val));
 				xdfree(val);
 				printf("\n");
 			}
@@ -2858,7 +2858,7 @@ void xdebug_stop_trace(TSRMLS_D)
 			u_time = xdebug_get_utime();
 			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10.4f " : "\t\t\t%f\t", u_time - XG(start_time));
 #if HAVE_PHP_MEMORY_USAGE
-			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10u" : "%lu", XG_MEMORY_USAGE());
+			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10zu" : "%lu", XG_MEMORY_USAGE());
 #else
 			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10u" : "", 0);
 #endif

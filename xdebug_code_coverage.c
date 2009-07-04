@@ -231,9 +231,6 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 
 static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 {
-	char cache_key[256];
-	int  cache_key_len;
-	void *dummy;
 	unsigned int i;
 	xdebug_set *set = NULL;
 
