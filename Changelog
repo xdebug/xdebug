@@ -1,3 +1,8 @@
+Sat Jul 04 15:54:44 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/template.rc:
+- Back to dev.
+
 Fri Jul 03 18:36:36 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 package.xml
 xdebug/package2.xml
