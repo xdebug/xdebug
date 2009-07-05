@@ -1,3 +1,8 @@
+Sun Jul 05 23:20:12 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Implemented feature #445 (error_prepend_string and error_append_string are
+  ignored by xdebug_error_cb). (Patch by Kent Davidson <kent@marketruler.com>).
+
 Sun Jul 05 21:58:12 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 debugclient/configure.in:
 - MFH: Fixed bug #442: configure: error: "you have strange libedit".
