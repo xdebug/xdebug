@@ -1918,6 +1918,8 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 	int len;
 	char **formats;
 	xdebug_str str = {0, 0, NULL};
+	char *prepend_string;
+	char *append_string;
 
 	if (html) {
 		formats = html_formats;
@@ -1925,6 +1927,10 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 		formats = text_formats;
 	}
 
+	prepend_string = INI_STR("error_prepend_string");
+	append_string = INI_STR("error_append_string");
+ 
+	xdebug_str_add(&str, prepend_string ? prepend_string : "", 0);
 	xdebug_str_add(&str, formats[0], 0);
 
 	if (strlen(XG(file_link_format)) > 0 && html) {
@@ -2077,6 +2083,7 @@ static char* get_printable_stack(int html, const char *error_type_str, char *buf
 		}
 
 		xdebug_str_add(&str, formats[7], 0);
+		xdebug_str_add(&str, append_string ? append_string : "", 0);
 	}
 	return str.d;
 }
