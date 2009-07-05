@@ -1,3 +1,7 @@
+Sun Jul 05 21:57:59 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+debugclient/configure.in:
+- Fixed bug #442: configure: error: "you have strange libedit".
+
 Sat Jul 04 16:32:00 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/xdebug_code_coverage.c
