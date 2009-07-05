@@ -1,4 +1,4 @@
-dnl $Id: configure.in,v 1.6 2007-02-26 14:38:42 derick Exp $
+dnl $Id: configure.in,v 1.6.2.1 2009-07-05 19:58:12 derick Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -145,10 +145,7 @@ yes
 ], [
 static EditLine *el = NULL;
 
-int main()
-{
-	el = el_init("foo", stdin, stdout, stderr);
-}
+el = el_init("foo", stdin, stdout, stderr);
                         ],
                         XDC_ELINIT_ARGS=4,
                         [AC_TRY_COMPILE([
@@ -157,10 +154,7 @@ int main()
 ], [
 static EditLine *el = NULL;
 
-int main()
-{
-	el = el_init("foo", stdin, stdout);
-}
+el = el_init("foo", stdin, stdout);
                                            ],
                                            XDC_ELINIT_ARGS=3,
                                            [AC_ERROR("you have strange libedit")]
