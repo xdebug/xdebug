@@ -1,3 +1,8 @@
+Mon Jul 06 11:05:59 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c:
+- Fixed copyright year.
+
 Sun Jul 05 23:20:12 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Implemented feature #445 (error_prepend_string and error_append_string are
