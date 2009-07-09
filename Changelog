@@ -1,3 +1,8 @@
+Thu Jul 09 18:52:14 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00340.phpt:
+- MFH: Fixed bug #340: Segfault while throwing an Exception.
+
 Thu Jul 09 18:51:44 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/bug00340.phpt:
