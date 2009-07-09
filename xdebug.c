@@ -3170,7 +3170,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	XDEBUG_VERSION,
 	XDEBUG_AUTHOR,
 	XDEBUG_URL,
-	"Copyright (c) 2002-2008",
+	"Copyright (c) 2002-2009",
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
 	NULL,           /* activate_func_t */
