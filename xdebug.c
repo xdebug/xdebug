@@ -2397,6 +2397,10 @@ void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
 	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
+	if (Z_TYPE_P(message) != IS_STRING || Z_TYPE_P(file) != IS_STRING || Z_TYPE_P(line) != IS_LONG) {
+		php_error(E_ERROR, "Your exception class uses incorrect types for common properties: 'message' and 'file' need to be a string and 'line' needs to be an integer.");
+	}
+
 	exception_trace = get_printable_stack(PG(html_errors), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
 	if (XG(last_exception_trace)) {
 		xdfree(XG(last_exception_trace));
