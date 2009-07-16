@@ -468,6 +468,9 @@ static int xdebug_object_element_export_xml(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 	int level;
 	xdebug_str *str;
 	char *prop_name, *class_name, *modifier;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
+	TSRMLS_FETCH();
+#endif
 
 	level = va_arg(args, int);
 	str   = va_arg(args, struct xdebug_str*);
