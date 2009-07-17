@@ -1,3 +1,6 @@
+Fri Jul 17 09:21:14 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+config.m4:
+- Added srm_oparray.c to build.
 Fri Jul 17 09:06:03 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 Makefile.in:
 Added srm_oparray.c to build
