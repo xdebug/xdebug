@@ -1,3 +1,6 @@
+Fri Jul 17 08:12:07 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug.c:
+First commit to branch. Added handlers for all opcodes and changed count_line to count_instruction and always prefill from oparray.
 Fri Jul 17 01:01:00 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed ZTS compile again for PHP < 5.3.
