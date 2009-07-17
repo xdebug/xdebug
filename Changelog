@@ -1,3 +1,6 @@
+Fri Jul 17 08:20:58 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug_code_coverage.h:
+First commit to branch. Added declarations for structures to count instructions.
 Fri Jul 17 08:20:21 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_code_coverage.c:
 First commit to branch. Added functions and structures to count instructions.
