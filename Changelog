@@ -1,3 +1,16 @@
+Fri Jul 17 08:58:18 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+code_coverage_test_scripts/assign1_cc.php
+xdebug/code_coverage_test_scripts/assign2_cc.php
+xdebug/code_coverage_test_scripts/do1_cc.php
+xdebug/code_coverage_test_scripts/do2_cc.php
+xdebug/code_coverage_test_scripts/for1_cc.php
+xdebug/code_coverage_test_scripts/for2_cc.php
+xdebug/code_coverage_test_scripts/func0_cc.php
+xdebug/code_coverage_test_scripts/func2_cc.php
+xdebug/code_coverage_test_scripts/func3_cc.php
+xdebug/code_coverage_test_scripts/if1_cc.php
+xdebug/code_coverage_test_scripts/while1_cc.php:
+- Added some code coverage php test scripts.
 Fri Jul 17 08:45:36 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 html/talks.php
 xdebug/srm_oparray.h:
