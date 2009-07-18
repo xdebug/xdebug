@@ -1,3 +1,9 @@
+Sat Jul 18 21:26:33 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug_code_coverage.c
+xdebug/xdebug_code_coverage.h:
+- Added additional lines hash to file hash - prefill and count;
+- Added accurate setting of line->count and line->executed.
+-
 Sat Jul 18 20:35:12 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/class1_cc.php:
 - Added dead line.
