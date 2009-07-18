@@ -1,3 +1,7 @@
+Sat Jul 18 20:35:12 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+code_coverage_test_scripts/class1_cc.php:
+- Added dead line.
+-
 Sat Jul 18 19:25:59 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_var.c:
 - Fixed ZTS compile again for PHP < 5.3.
