@@ -1,3 +1,7 @@
+Sat Jul 18 21:35:24 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug_private.h:
+- Added XDEBUG_CC_OPTION_BRANCH_COVERAGE and XDEBUG_CC_OPTION_INSTRUCTIONS constants.
+-
 Sat Jul 18 21:31:10 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/if3_cc.php:
 Added one-line loop and decision test.-
