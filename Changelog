@@ -1,3 +1,8 @@
+Sat Jul 18 09:26:26 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug_code_coverage.c:
+Removed test for previous instruction in test for branch - assume all JMPZ, JMPNZ et.al are decisions. 
+Prefill and count class methods.
+-
 Sat Jul 18 09:02:14 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/class1_cc.php:
 Script to test coverage of class execution.
