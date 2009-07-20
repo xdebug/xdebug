@@ -1,3 +1,8 @@
+Mon Jul 20 12:25:18 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+bytekit.c
+xdebug/bytekit.h:
+- Added source files to build - contains code to create basic blocks.
+-
 Mon Jul 20 12:22:01 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 php_xdebug.h:
  - Added XDEBUG_CC_LINE_ COVERAGE_EX XDEBUG_CC_LBRANCH_ COVERAGE and        XDEBUG_CC_DUMP_INSTRUCTIONS extension constants
