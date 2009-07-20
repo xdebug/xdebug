@@ -1,3 +1,10 @@
+Mon Jul 20 12:34:39 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug_code_coverage.c
+xdebug/xdebug_code_coverage.h:
+- Added a check which will eliminate some edge cases when only a single semicolon is used in a decision like for(%$....) if (foor) then bar.
+- Fixed bug in counting lines.
+- Build basic blocks info and store it in a global.
+-
 Mon Jul 20 12:25:18 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 bytekit.c
 xdebug/bytekit.h:
