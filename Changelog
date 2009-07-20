@@ -1,3 +1,9 @@
+Mon Jul 20 12:17:40 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug.c:
+ - Added XDEBUG_CC_LINE_ COVERAGE_EX XDEBUG_CC_LBRANCH_ COVERAGE and        XDEBUG_CC_DUMP_INSTRUCTIONS extension constants
+- Added code_coverage_basic_blocks array to Xdebug globals
+- Re-added opcode handlers for ZRND_BRK and ZEND_CONT
+-
 Mon Jul 20 12:10:15 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 config.m4
 xdebug/config.w32:
