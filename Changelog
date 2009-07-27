@@ -1,3 +1,7 @@
+Mon Jul 27 03:19:22 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+code_coverage_test_scripts/func5_cc.php:
+Added script - contains function calls within a loop and if-else.
+-
 Mon Jul 20 12:38:07 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/assign1_cc.php
 xdebug/code_coverage_test_scripts/func3_cc.php
