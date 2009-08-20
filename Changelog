@@ -1,3 +1,9 @@
+Thu Aug 20 09:06:29 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_code_coverage.h:
+Formatted according to PHP coding standard.
+-
 Mon Jul 27 03:19:22 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/func5_cc.php:
 Added script - contains function calls within a loop and if-else.
