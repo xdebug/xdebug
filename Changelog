@@ -1,3 +1,10 @@
+Fri Aug 21 19:42:39 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+php_xdebug.h
+xdebug/xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_private.h:
+- Fixed support for showing $this in remote debugging sessions.
+
 Thu Aug 20 09:06:29 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 php_xdebug.h
 xdebug/xdebug.c
