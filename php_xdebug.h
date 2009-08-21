@@ -151,6 +151,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	HashTable    *active_symbol_table;
 	zend_execute_data *active_execute_data;
 	zend_op_array     *active_op_array;
+	zval              *This;
 	unsigned int  prev_memory;
 	char         *file_link_format;
 

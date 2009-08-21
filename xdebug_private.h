@@ -166,6 +166,7 @@ typedef struct _function_stack_entry {
 	xdebug_llist *used_vars;
 	HashTable   *symbol_table;
 	zend_execute_data *execute_data;
+	zval        *This;
 
 	/* tracing properties */
 	signed long  memory;

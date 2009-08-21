@@ -832,6 +832,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(prev_memory)   = 0;
 	XG(function_count) = 0;
 	XG(active_symbol_table) = NULL;
+	XG(This) = NULL;
 	XG(last_exception_trace) = NULL;
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
@@ -1597,6 +1598,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	fse->symbol_table = EG(active_symbol_table);
 	fse->execute_data = EG(current_execute_data);
+	fse->This = EG(This);
 
 	if (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars)) {
 		/* Because include/require is treated as a stack level, we have to add used

@@ -377,8 +377,8 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
-				if (XG(active_execute_data)) {
-					retval_p = XG(active_execute_data)->object;
+				if (XG(This)) {
+					retval_p = XG(This);
 				} else {
 					retval_p = NULL;
 				}
@@ -1631,6 +1631,7 @@ DBGP_FUNC(property_get)
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(active_op_array)     = fse->op_array;
+			XG(This)                = fse->This;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1703,6 +1704,7 @@ DBGP_FUNC(property_set)
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(active_op_array)     = fse->op_array;
+			XG(This)                = fse->This;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1815,6 +1817,7 @@ DBGP_FUNC(property_value)
 #endif
 		XG(active_symbol_table) = fse->symbol_table;
 		XG(active_op_array)     = fse->op_array;
+		XG(This)                = fse->This;
 	} else {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 	}
@@ -1865,6 +1868,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
+	char                 *var_name;
 
 	/* right now, we only have zero or one, one being globals, which is
 	 * always the head of the stack */
@@ -1898,21 +1902,26 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 #endif
 		XG(active_symbol_table) = fse->symbol_table;
 		XG(active_op_array)     = fse->op_array;
+		XG(This)                = fse->This;
 
 		/* Only show vars when they are scanned */
 		if (fse->used_vars) {
 			xdebug_hash *tmp_hash;
 			tmp_hash = xdebug_used_var_hash_from_llist(fse->used_vars);
 			xdebug_hash_apply_with_argument(tmp_hash, (void *) node, func, (void *) options);
+
+			/* zend engine 2 does not give us $this, eval so we can get it */
+			if (!xdebug_hash_find(tmp_hash, "this", 4, (void *) &var_name)) {
+				add_variable_node(node, "this", sizeof("this"), 1, 1, 0, options TSRMLS_CC);
+			}
+
 			xdebug_hash_destroy(tmp_hash);
 		}
-
-		/* zend engine 2 does not give us $this, eval so we can get it */
-		add_variable_node(node, "$this", sizeof("$this"), 1, 1, 0, options TSRMLS_CC);
 
 		XG(active_symbol_table) = NULL;
 		XG(active_execute_data) = NULL;
 		XG(active_op_array)     = NULL;
+		XG(This)                = NULL;
 		return 0;
 	}
 	
@@ -2269,7 +2278,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.138 $";
+	return "$Revision: 1.139 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
