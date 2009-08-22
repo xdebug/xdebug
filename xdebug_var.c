@@ -311,7 +311,12 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 1) {
-				xdebug_str_add(str, xdebug_sprintf("class %s { ", Z_OBJCE_PP(struc)->name), 1);
+				char *class_name;
+				zend_uint class_name_len;
+
+				zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
+
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
@@ -402,9 +407,14 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 			xdebug_str_add(str, xdebug_sprintf("array(%d)", myht->nNumOfElements), 1);
 			break;
 
-		case IS_OBJECT:
-			xdebug_str_add(str, xdebug_sprintf("class %s", Z_OBJCE_PP(struc)->name), 1);
+		case IS_OBJECT: {
+			char *class_name;
+			zend_uint class_name_len;
+
+			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("class %s", class_name), 1);
 			break;
+		}
 
 		case IS_RESOURCE: {
 			char *type_name;
@@ -536,7 +546,11 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC)
 		case IS_OBJECT:
 			myht = Z_OBJPROP_PP(struc);
 			if (myht->nApplyCount < 1) {
-				xdebug_str_add(str, xdebug_sprintf("<object class='%s'>", Z_OBJCE_PP(struc)->name), 1);
+				char *class_name;
+				zend_uint class_name_len;
+
+				zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+				xdebug_str_add(str, xdebug_sprintf("<object class='%s'>", class_name), 1);
 				zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_xml, 2, level, str);
 				xdebug_str_addl(str, "</object>", 9, 0);
 			} else {
@@ -753,7 +767,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 			xdebug_xml_add_attribute(node, "type", "object");
 			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
-			Z_OBJ_HANDLER(**struc, get_class_name)(*struc, &class_name, &class_name_len, 0 TSRMLS_CC);
+			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
 			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
 
 			/** Temporary additional property **/
