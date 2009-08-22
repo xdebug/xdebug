@@ -1,3 +1,8 @@
+Sat Aug 22 14:18:06 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_var.c:
+- Use the API call for fetching a class name.
+#- Solves issues with PHP 5.2 and classes extended from internal classes.
+
 Fri Aug 21 19:42:39 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 php_xdebug.h
 xdebug/xdebug.c
