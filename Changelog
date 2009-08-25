@@ -14,64 +14,69 @@ Thu Aug 20 09:06:29 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 php_xdebug.h
 xdebug/xdebug.c
 xdebug/xdebug_code_coverage.h:
-Formatted according to PHP coding standard.
--
+- Formatted according to PHP coding standard.
+
 Mon Jul 27 03:19:22 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/func5_cc.php:
-Added script - contains function calls within a loop and if-else.
--
+- Added script - contains function calls within a loop and if-else.
+
 Mon Jul 20 12:38:07 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/assign1_cc.php
 xdebug/code_coverage_test_scripts/func3_cc.php
 xdebug/code_coverage_test_scripts/if1_cc.php
 xdebug/code_coverage_test_scripts/while1_cc.php:
-Use new extension constants
--
+- Use new extension constants
+
 Mon Jul 20 12:37:15 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/func4_cc.php:
-- Simpler version of func3-
+- Simpler version of func3
+
 Mon Jul 20 12:36:14 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 html/text/blurps.xml
 xdebug/code_coverage_test_scripts/if2_cc.php:
-one liner with two decisions.
--
+- one liner with two decisions.
+
 Mon Jul 20 12:34:39 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_code_coverage.c
 xdebug/xdebug_code_coverage.h:
-- Added a check which will eliminate some edge cases when only a single semicolon is used in a decision like for(%$....) if (foor) then bar.
+- Added a check which will eliminate some edge cases when only a single
+  semicolon is used in a decision like for(%$....) if (foor) then bar.
 - Fixed bug in counting lines.
 - Build basic blocks info and store it in a global.
--
+
 Mon Jul 20 12:25:18 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 bytekit.c
 xdebug/bytekit.h:
 - Added source files to build - contains code to create basic blocks.
--
+
 Mon Jul 20 12:22:01 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 php_xdebug.h:
- - Added XDEBUG_CC_LINE_ COVERAGE_EX XDEBUG_CC_LBRANCH_ COVERAGE and        XDEBUG_CC_DUMP_INSTRUCTIONS extension constants
+- Added XDEBUG_CC_LINE_ COVERAGE_EX XDEBUG_CC_LBRANCH_ COVERAGE and
+  XDEBUG_CC_DUMP_INSTRUCTIONS extension constants
 - Added code_coverage_basic_blocks array to Xdebug globals
 - Re-added opcode handlers for ZRND_BRK and ZEND_CONT
--
+
 Mon Jul 20 12:17:40 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug.c:
- - Added XDEBUG_CC_LINE_ COVERAGE_EX XDEBUG_CC_LBRANCH_ COVERAGE and        XDEBUG_CC_DUMP_INSTRUCTIONS extension constants
+- Added XDEBUG_CC_LINE_ COVERAGE_EX XDEBUG_CC_LBRANCH_ COVERAGE and
+  XDEBUG_CC_DUMP_INSTRUCTIONS extension constants
 - Added code_coverage_basic_blocks array to Xdebug globals
 - Re-added opcode handlers for ZRND_BRK and ZEND_CONT
--
+
 Mon Jul 20 12:10:15 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 config.m4
 xdebug/config.w32:
 - Added bytekit.c source file to build.
--
+
 Mon Jul 20 12:07:28 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_private.h:
-- added XDEBUG_CC_LINE_COVERAGE_EX |, XDEBUG_CC_BRANCH_COVERAGE and XDEBUG_CC_DUMP_INSTRUCTIONS constants.
--
+- added XDEBUG_CC_LINE_COVERAGE_EX |, XDEBUG_CC_BRANCH_COVERAGE and
+  XDEBUG_CC_DUMP_INSTRUCTIONS constants.
+
 Sat Jul 18 21:35:24 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_private.h:
 - Added XDEBUG_CC_OPTION_BRANCH_COVERAGE and XDEBUG_CC_OPTION_INSTRUCTIONS constants.
--
+
 Sat Jul 18 21:31:10 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/if3_cc.php:
 Added one-line loop and decision test.-
@@ -80,34 +85,37 @@ xdebug_code_coverage.c
 xdebug/xdebug_code_coverage.h:
 - Added additional lines hash to file hash - prefill and count;
 - Added accurate setting of line->count and line->executed.
--
+
 Sat Jul 18 20:35:12 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/class1_cc.php:
 - Added dead line.
--
+
 Sat Jul 18 19:25:59 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_var.c:
 - Fixed ZTS compile again for PHP < 5.3.
 
--
 Sat Jul 18 09:26:26 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_code_coverage.c:
-Removed test for previous instruction in test for branch - assume all JMPZ, JMPNZ et.al are decisions. 
-Prefill and count class methods.
--
+- Removed test for previous instruction in test for branch - assume all JMPZ,
+  JMPNZ et.al are decisions. 
+- Prefill and count class methods.
+
 Sat Jul 18 09:02:14 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/class1_cc.php:
-Script to test coverage of class execution.
--
+- Script to test coverage of class execution.
+
 Fri Jul 17 09:53:34 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 srm_oparray.c:
--Added srm_oparray.c file.
+- Added srm_oparray.c file.
+
 Fri Jul 17 09:21:14 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 config.m4:
 - Added srm_oparray.c to build.
+
 Fri Jul 17 09:06:03 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 Makefile.in:
-Added srm_oparray.c to build
+- Added srm_oparray.c to build
+
 Fri Jul 17 08:58:18 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 code_coverage_test_scripts/assign1_cc.php
 xdebug/code_coverage_test_scripts/assign2_cc.php
@@ -121,19 +129,25 @@ xdebug/code_coverage_test_scripts/func3_cc.php
 xdebug/code_coverage_test_scripts/if1_cc.php
 xdebug/code_coverage_test_scripts/while1_cc.php:
 - Added some code coverage php test scripts.
+
 Fri Jul 17 08:45:36 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 html/talks.php
 xdebug/srm_oparray.h:
-First commit - added file to branch.
+- First commit - added file to branch.
+
 Fri Jul 17 08:20:58 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_code_coverage.h:
-First commit to branch. Added declarations for structures to count instructions.
+- First commit to branch. Added declarations for structures to count instructions.
+
 Fri Jul 17 08:20:21 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_code_coverage.c:
-First commit to branch. Added functions and structures to count instructions.
+- First commit to branch. Added functions and structures to count instructions.
+
 Fri Jul 17 08:12:07 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug.c:
-First commit to branch. Added handlers for all opcodes and changed count_line to count_instruction and always prefill from oparray.
+- First commit to branch. Added handlers for all opcodes and changed count_line
+  to count_instruction and always prefill from oparray.
+
 Fri Jul 17 01:01:00 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_var.c:
 - Fixed ZTS compile again for PHP < 5.3.
