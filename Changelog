@@ -1,3 +1,7 @@
+Wed Sep 02 05:29:15 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
+xdebug_code_coverage.c:
+Formatted according to PHP coding standard.
+-
 Tue Aug 25 14:25:58 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 :
 - Fixed Changelog
