@@ -440,6 +440,7 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 	xdebug_var_synopsis(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
+		xdfree(options->runtime);
 		xdfree(options);
 	}
 
@@ -735,7 +736,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			} else {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data), options->max_data);
 			}
-			xdebug_xml_add_attribute(node, "size", xdebug_sprintf("%d", Z_STRLEN_PP(struc)));
+			xdebug_xml_add_attribute_ex(node, "size", xdebug_sprintf("%d", Z_STRLEN_PP(struc)), 0, 1);
 			break;
 
 		case IS_ARRAY:
@@ -833,7 +834,7 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node(char *name, zval *val, xdebug_va
 			full_name = xdstrdup(name);
 		}
 		xdebug_xml_add_attribute_ex(node, "name", xdstrdup(name), 0, 1);
-		xdebug_xml_add_attribute_ex(node, "fullname", xdstrdup(full_name), 0, 1);
+		xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) val), 0, 1);
 	xdebug_var_export_xml_node(&val, name, node, options, 0 TSRMLS_CC);

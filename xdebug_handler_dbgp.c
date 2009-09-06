@@ -394,7 +394,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			element = prepare_search_key(name, &name_length, "", 0);
 			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
-				goto cleanup_num;
+				goto cleanup;
 			}
 			break;
 		case XF_ST_OBJ_PROPERTY:
@@ -426,7 +426,6 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 	}
 cleanup:
 	free(element);
-cleanup_num:
 	return retval_p;
 }
 
@@ -1369,11 +1368,11 @@ DBGP_FUNC(detach)
 	XG(status) = DBGP_STATUS_DETACHED;
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[DBGP_STATUS_STOPPED]);
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
+	XG(context).handler->remote_deinit(&(XG(context)));
 	XG(remote_enabled) = 0;
 	XG(stdout_redirected) = 0;
 	XG(stderr_redirected) = 0;
 	XG(stdin_redirected) = 0;
-	xdebug_close_socket(context->socket);
 }
 
 
@@ -1858,7 +1857,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 			full_name = xdstrdup(name);
 		}
 		xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(name), 0, 1);
-		xdebug_xml_add_attribute_ex(contents, "fullname", xdstrdup(full_name), 0, 1);
+		xdebug_xml_add_attribute_ex(contents, "fullname", full_name, 0, 1);
 
 		xdebug_xml_add_attribute(contents, "type", "uninitialized");
 		xdebug_xml_add_child(node, contents);
@@ -2061,7 +2060,7 @@ static void xdebug_dbgp_arg_dtor(xdebug_dbgp_arg *arg)
 {
 	int i;
 
-	for (i = 0; i < 26; i++) {
+	for (i = 0; i < 27; i++) {
 		if (arg->value[i]) {
 			xdfree(arg->value[i]);
 		}
@@ -2245,6 +2244,9 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 				XG(reason) = DBGP_REASON_OK;
 			}
 			XG(lastcmd) = command->name;
+			if (XG(lasttransid)) {
+				xdfree(XG(lasttransid));
+			}
 			XG(lasttransid) = xdstrdup(CMD_OPTION('i'));
 			if (XG(status) != DBGP_STATUS_STOPPING || (XG(status) == DBGP_STATUS_STOPPING && command->flags & XDEBUG_DBGP_POST_MORTEM)) {
 				command->handler((xdebug_xml_node**) &retval, context, args TSRMLS_CC);
@@ -2278,7 +2280,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.139 $";
+	return "$Revision: 1.140 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
@@ -2530,8 +2532,12 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	response = xdebug_xml_node_init("response");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
 	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
-	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
-	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
+	/* lastcmd and lasttransid are not always set (for example when the
+	 * connection is severed before the first command is send) */
+	if (XG(lastcmd) && XG(lasttransid)) {
+		xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
+		xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
+	}
 	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
 	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 
@@ -2563,8 +2569,12 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	response = xdebug_xml_node_init("response");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
 	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
-	xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
-	xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 1);
+	/* lastcmd and lasttransid are not always set (for example when the
+	 * connection is severed before the first command is send) */
+	if (XG(lastcmd) && XG(lasttransid)) {
+		xdebug_xml_add_attribute_ex(response, "command", XG(lastcmd), 0, 0);
+		xdebug_xml_add_attribute_ex(response, "transaction_id", XG(lasttransid), 0, 0);
+	}
 	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG(status)]);
 	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 
@@ -2593,7 +2603,10 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	xdebug_xml_node_dtor(response);
 
 	XG(lastcmd) = NULL;
-	XG(lasttransid) = NULL;
+	if (XG(lasttransid)) {
+		xdfree(XG(lasttransid));
+		XG(lasttransid) = NULL;
+	}
 
 	xdebug_dbgp_cmdloop(context, 1 TSRMLS_CC);
 

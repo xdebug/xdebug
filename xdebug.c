@@ -740,7 +740,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-static void xdebug_collected_error_dtor(void *dummy, void *elem)
+static void xdebug_llist_string_dtor(void *dummy, void *elem)
 {
 	char *s = elem;
 
@@ -836,7 +836,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(last_exception_trace) = NULL;
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
-	XG(collected_errors)  = xdebug_llist_alloc(xdebug_collected_error_dtor);
+	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	
 	if (idekey && *idekey) {
 		if (XG(ide_key)) {
@@ -920,7 +920,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Override header generation in SAPI */
 	XG(orig_header_handler) = sapi_module.header_handler;
 	sapi_module.header_handler = xdebug_header_handler;
-	XG(headers) = xdebug_llist_alloc(NULL);
+	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	if (strcmp(sapi_module.name, "cli") == 0) {
 		SG(request_info).no_headers = 1;
 	}
@@ -3016,7 +3016,7 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 
 	if (clear) {
 		xdebug_llist_destroy(XG(collected_errors), NULL);
-		XG(collected_errors)  = xdebug_llist_alloc(xdebug_collected_error_dtor);
+		XG(collected_errors) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	}
 }
 
