@@ -1,3 +1,12 @@
+Mon Sep 07 00:03:27 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c
+xdebug/xdebug_var.c
+xdebug/xdebug_xml.c
+xdebug/xdebug_xml.h:
+- Fixed bug #453: Memory leaks.
+#- Also fixed other memory leaks not mentioned in the report.
+
 Wed Sep 02 05:29:15 CEST 2009 Allister Beharry <allister.beharry@gmail.com>
 xdebug_code_coverage.c:
 Formatted according to PHP coding standard.
