@@ -74,7 +74,7 @@ array(5) {
       ["errno"]=>
       string(1) "8"
       ["string"]=>
-      string(23) "'Undefined index: FOO'"
+      string(22) "'Undefined index: FOO'"
       ["file"]=>
       string(%d) "'%sbug00241.php'"
       ["line"]=>

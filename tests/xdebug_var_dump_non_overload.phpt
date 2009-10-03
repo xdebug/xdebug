@@ -38,19 +38,19 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECT--
 object(TimeStuff)#1 (5) {
-  ["timestamp:private"]=>
+  ["timestamp":"TimeStuff":private]=>
   int(1092515106)
-  ["user_defined:private"]=>
+  ["user_defined":"TimeStuff":private]=>
   bool(true)
-  ["self:private"]=>
+  ["self":"TimeStuff":private]=>
   object(TimeStuff)#1 (5) {
-    ["timestamp:private"]=>
+    ["timestamp":"TimeStuff":private]=>
     int(1092515106)
-    ["user_defined:private"]=>
+    ["user_defined":"TimeStuff":private]=>
     bool(true)
-    ["self:private"]=>
+    ["self":"TimeStuff":private]=>
     *RECURSION*
-    ["tm:protected"]=>
+    ["tm":protected]=>
     array(11) {
       ["seconds"]=>
       int(6)
@@ -78,7 +78,7 @@ object(TimeStuff)#1 (5) {
     ["date"]=>
     string(24) "2004-08-14 22:25:06 CEST"
   }
-  ["tm:protected"]=>
+  ["tm":protected]=>
   array(11) {
     ["seconds"]=>
     int(6)
@@ -107,19 +107,19 @@ object(TimeStuff)#1 (5) {
   string(24) "2004-08-14 22:25:06 CEST"
 }
 object(TimeStuff)#1 (5) {
-  ["timestamp:private"]=>
+  ["timestamp":"TimeStuff":private]=>
   int(1092515106)
-  ["user_defined:private"]=>
+  ["user_defined":"TimeStuff":private]=>
   bool(true)
-  ["self:private"]=>
+  ["self":"TimeStuff":private]=>
   object(TimeStuff)#1 (5) {
-    ["timestamp:private"]=>
+    ["timestamp":"TimeStuff":private]=>
     int(1092515106)
-    ["user_defined:private"]=>
+    ["user_defined":"TimeStuff":private]=>
     bool(true)
-    ["self:private"]=>
+    ["self":"TimeStuff":private]=>
     *RECURSION*
-    ["tm:protected"]=>
+    ["tm":protected]=>
     array(11) {
       ["seconds"]=>
       int(6)
@@ -147,7 +147,7 @@ object(TimeStuff)#1 (5) {
     ["date"]=>
     string(24) "2004-08-14 22:25:06 CEST"
   }
-  ["tm:protected"]=>
+  ["tm":protected]=>
   array(11) {
     ["seconds"]=>
     int(6)
