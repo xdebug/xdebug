@@ -1,3 +1,18 @@
+Sat Oct 03 19:33:14 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+test-5.3.sh
+xdebug/xdebug.c
+xdebug/xdebug_var.c
+xdebug/xdebug_var.h
+xdebug/tests/assignment-trace5.phpt
+xdebug/tests/assignment-trace6.phpt
+xdebug/tests/assignment-trace7.phpt
+xdebug/tests/assignment-trace8.phpt
+xdebug/tests/assignment-trace9.phpt
+xdebug/tests/assignment-trace2.phpt
+xdebug/tests/assignment-trace3.phpt:
+- Reimplemented variable assignment tracing.
+#- Now with test cases.
+
 Sat Oct 03 19:31:20 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 tests/bug00241.phpt
 xdebug/tests/scream.phpt
