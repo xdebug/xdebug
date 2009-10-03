@@ -123,7 +123,7 @@ static char* xdebug_get_property_info(char *mangled_property, int mangled_len, c
 }
 
 
-static xdebug_var_export_options* get_options_from_ini(TSRMLS_D)
+xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 {
 	xdebug_var_export_options *options;
 	options = xdmalloc(sizeof(xdebug_var_export_options));
@@ -152,11 +152,12 @@ static xdebug_var_export_options* get_options_from_ini(TSRMLS_D)
 	}
 
 	options->runtime = (xdebug_var_runtime_page*) xdmalloc((options->max_depth + 1) * sizeof(xdebug_var_runtime_page));
+	options->no_decoration = 0;
 
 	return options;
 }
 
-xdebug_var_export_options xdebug_var_nolimit_options = { 1048576, 1048576, 64, 1, NULL };
+xdebug_var_export_options xdebug_var_nolimit_options = { 1048576, 1048576, 64, 1, NULL, 0 };
 
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 {
@@ -275,7 +276,9 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 		case IS_STRING:
 			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
-			if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+			if (options->no_decoration) {
+				xdebug_str_add(str, tmp_str, 0);
+			} else if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			} else {
 				xdebug_str_addl(str, "'", 1, 0);
@@ -316,6 +319,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 				zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
+				efree(class_name);
 
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
@@ -357,7 +361,7 @@ char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options
 	TSRMLS_FETCH();
 
 	if (!options) {
-		options = get_options_from_ini(TSRMLS_C);
+		options = xdebug_var_export_options_from_ini(TSRMLS_C);
 		default_options = 1;
 	}
 
@@ -433,7 +437,7 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 	TSRMLS_FETCH();
 
 	if (!options) {
-		options = get_options_from_ini(TSRMLS_C);
+		options = xdebug_var_export_options_from_ini(TSRMLS_C);
 		default_options = 1;
 	}
 
@@ -1046,7 +1050,7 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 	int default_options = 0;
 
 	if (!options) {
-		options = get_options_from_ini(TSRMLS_C);
+		options = xdebug_var_export_options_from_ini(TSRMLS_C);
 		default_options = 1;
 	}
 
@@ -1117,7 +1121,7 @@ char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_
 	int default_options = 0;
 
 	if (!options) {
-		options = get_options_from_ini(TSRMLS_C);
+		options = xdebug_var_export_options_from_ini(TSRMLS_C);
 		default_options = 1;
 	}
 

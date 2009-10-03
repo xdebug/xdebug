@@ -46,19 +46,19 @@ Call Stack:
 TRACE START [%d-%d-%d %d:%d:%d]
                          => $tf = '/tmp/%s.xt' %sassignment-trace2.php:2
                          => $t = array () %sassignment-trace2.php:13
-                         => $t->a = 98 %sassignment-trace2.php:14
-                         => $t->b = 4 %sassignment-trace2.php:15
-                         => $t->b -= 8 %sassignment-trace2.php:16
-                         => $t->b *= -0.5 %sassignment-trace2.php:17
-                         => $t->b <<= 1 %sassignment-trace2.php:18
-                         => $t->c = 0.125 %sassignment-trace2.php:19
+                         => $t['a'] = 98 %sassignment-trace2.php:14
+                         => $t['b'] = 4 %sassignment-trace2.php:15
+                         => $t['b'] -= 8 %sassignment-trace2.php:16
+                         => $t['b'] *= -0.5 %sassignment-trace2.php:17
+                         => $t['b'] <<= 1 %sassignment-trace2.php:18
+                         => $t['c'] = 0.125 %sassignment-trace2.php:19
 %w%f %w%d     -> test(1, 2, 3) %sassignment-trace2.php:21
                            => $t = array ('a' => 4, 'b' => 9, 'c' => 13) %sassignment-trace2.php:6
-                           => $t->d = 89 %sassignment-trace2.php:7
-                           => $t->a += NULL %sassignment-trace2.php:8
-                           => $t->a += NULL %sassignment-trace2.php:9
-                           => $t->c /= 7 %sassignment-trace2.php:10
-                           => $t->b *= 9 %sassignment-trace2.php:11
+                           => $t['d'] = 89 %sassignment-trace2.php:7
+                           => $t['a'] += NULL %sassignment-trace2.php:8
+                           => $t['a'] += NULL %sassignment-trace2.php:9
+                           => $t['c'] /= 7 %sassignment-trace2.php:10
+                           => $t['b'] *= 9 %sassignment-trace2.php:11
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace2.php:23
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

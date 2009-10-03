@@ -30,8 +30,8 @@ Call Stack:
 TRACE START [%d-%d-%d %d:%d:%d]
                          => $tf = '%s' %sassignment-trace3.php:2
                          => $t = array ('a' => 4, 'b' => 9, 'c' => 13) %sassignment-trace3.php:4
-                         => $t->a += NULL %sassignment-trace3.php:5
-                         => $t->a += NULL %sassignment-trace3.php:6
+                         => $t['a'] += NULL %sassignment-trace3.php:5
+                         => $t['a'] += NULL %sassignment-trace3.php:6
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace3.php:8
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

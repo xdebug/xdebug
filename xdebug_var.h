@@ -39,10 +39,12 @@ typedef struct xdebug_var_export_options {
 	int max_depth;
 	int show_hidden;
 	xdebug_var_runtime_page *runtime;
+	int no_decoration;
 } xdebug_var_export_options;
 
 zval* xdebug_get_php_symbol(char* name, int name_length);
 
+xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D);
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D);
 
 void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
