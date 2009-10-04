@@ -368,6 +368,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 				}
 			}
 			free(element);
+			ht = XG(active_symbol_table);
 #else
 			ht = XG(active_symbol_table);
 			/* break intentionally missing */
@@ -2280,7 +2281,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.140 $";
+	return "$Revision: 1.141 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
