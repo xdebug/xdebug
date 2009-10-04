@@ -1,3 +1,8 @@
+Mon Oct 05 01:49:34 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed issue #469: context_get for function variables always appear as
+  "uninitialized".
+
 Sat Oct 03 19:33:14 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 test-5.3.sh
 xdebug/xdebug.c
