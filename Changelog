@@ -1,3 +1,7 @@
+Thu Oct 08 17:31:17 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c:
+- Fixed bug in formatting the display of "Variables in the local scope".
+
 Mon Oct 05 01:49:34 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed issue #469: context_get for function variables always appear as
