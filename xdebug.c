@@ -1864,8 +1864,8 @@ static char* html_formats[12] = {
 	"<tr><th align='left' colspan='4' bgcolor='#e9b96e'>Variables in local scope (#%d)</th></tr>\n",
 #endif
 	"</table></font>\n",
-	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='4' bgcolor='#eeeeec'>%s</td></tr>\n",
-	"<tr><td bgcolor='#eeeeec'>$%s</td><td colspan='4' bgcolor='#eeeeec' colspan='2'><i>Undefined</i></td></tr>\n",
+	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec'>%s</td></tr>\n",
+	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
 	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>..%s<b>:</b>%d</a></td></tr>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n"
 };
