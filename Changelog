@@ -1,3 +1,8 @@
+Mon Oct 12 10:21:31 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #468: property_get on $GLOBALS works only at top-level, by adding
+  GLOBALS to the super globals context.
+
 Thu Oct 08 17:31:17 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug in formatting the display of "Variables in the local scope".
