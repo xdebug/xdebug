@@ -1883,6 +1883,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1, 0, options TSRMLS_CC);
 		add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1, 0, options TSRMLS_CC);
 		add_variable_node(node, "_SESSION", sizeof("_SESSION"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "GLOBALS", sizeof("GLOBALS"), 1, 1, 0, options TSRMLS_CC);
 		XG(active_symbol_table) = NULL;
 		return 0;
 	}
@@ -2281,7 +2282,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.141 $";
+	return "$Revision: 1.142 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
