@@ -1,3 +1,12 @@
+Thu Oct 15 18:25:02 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_code_coverage.c
+xdebug/tests/bug00470.inc
+xdebug/tests/bug00470.phpt
+xdebug/tests/bug00472.inc
+xdebug/tests/bug00472.phpt:
+- Fixed bug #470: catch blocks marked as dead code unless executed.
+- Fixed bug #472: Dead Code Analysis for code coverage messed up after goto.
+
 Mon Oct 12 10:21:31 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed bug #468: property_get on $GLOBALS works only at top-level, by adding
