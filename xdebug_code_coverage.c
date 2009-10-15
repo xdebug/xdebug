@@ -155,6 +155,11 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		*jmp1 = position + 1;
 		*jmp2 = opcode.op2.u.opline_num;
 		return 1;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
+	} else if (opcode.opcode == ZEND_GOTO) {
+		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
+		return 1;
+#endif
 	}
 	return 0;
 }
@@ -194,18 +199,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
 			/* fprintf(stderr, "Throw found at %d\n", position); */
-			/* Now we need to go forward to the first
-			 * zend_fetch_class/zend_catch combo */
-			while (position < opa->last) {
-				if (opa->opcodes[position].opcode == ZEND_CATCH) {
-					/* fprintf(stderr, "Found catch at %d\n", position); */
-					position--;
-					break;
-				}
-				position++;
-				/* fprintf(stderr, "Skipping %d\n", position); */
-			}
-			position--;
+			break;
 		}
 
 		/* See if we have an exit instruction */
@@ -222,6 +216,20 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		position++;
 		/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
 		xdebug_set_add(set, position);
+	}
+}
+
+static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set TSRMLS_DC)
+{
+	unsigned int position = 0;
+
+	while (position < opa->last) {
+		if (position == 0) {
+			xdebug_analyse_branch(opa, position, set TSRMLS_CC);
+		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
+			xdebug_analyse_branch(opa, position, set TSRMLS_CC);
+		}
+		position++;
 	}
 }
 
@@ -246,7 +254,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 	/* Run dead code analysis if requested */
 	if (XG(code_coverage_dead_code_analysis) && opa->done_pass_two) {
 		set = xdebug_set_create(opa->last);
-		xdebug_analyse_branch(opa, 0, set);
+		xdebug_analyse_oparray(opa, set);
 	}
 
 	/* The normal loop then finally */
