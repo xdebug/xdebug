@@ -1206,7 +1206,9 @@ DBGP_FUNC(eval)
 	/* base64 decode eval string */
 	eval_string = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
 
-	res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+	zend_try {
+		res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+	} zend_end_try();
 
 	efree(eval_string);
 
@@ -2282,7 +2284,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.142 $";
+	return "$Revision: 1.143 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
