@@ -1,3 +1,8 @@
+Sat Oct 17 18:40:44 CEST 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug_handler_dbgp.c:
+- Fixed bug #368: Xdebug's debugger bails out on a parse error with the eval
+  command.
+
 Sat Oct 17 17:52:08 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #249: Xdebug's error handler messes up with the SOAP extension's
