@@ -972,7 +972,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	CG(extended_info) = XG(extended_info);
 #endif
 
-	if (XG(default_enable)) {
+	/* Hack: We check for a soap header here, if that's existing, we don't use
+	 * Xdebug's error handler to keep soap fault from fucking up. */
+	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", 16, (void**)&dummy) == FAILURE) {
 		zend_error_cb = new_error_cb;
 		zend_throw_exception_hook = xdebug_throw_exception_hook;
 	}
