@@ -1,3 +1,9 @@
+Sat Oct 31 10:08:56 CET 2009 Derick Rethans <derick@derickrethans.nl>
+tests/array_map.phpt
+xdebug/tests/assignment-trace8.phpt
+xdebug/tests/assignment-trace9.phpt:
+- Fixed tests.
+
 Sat Oct 17 18:40:44 CEST 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_handler_dbgp.c:
 - Fixed bug #368: Xdebug's debugger bails out on a parse error with the eval
