@@ -3,7 +3,7 @@ Test with internal callbacks
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
-xdebug.enable=1
+xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.collect_params=3
 xdebug.collect_return=0
