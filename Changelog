@@ -1,3 +1,13 @@
+Tue Nov 03 11:12:34 CET 2009 Derick Rethans <derick@derickrethans.nl>
+html/files/php_xdebug-2.0.3-5.1.7.dll
+www.xdebug.org/html/files/php_xdebug-2.0.3-5.2.5.dll
+www.xdebug.org/html/files/php_xdebug-2.0.3-5.3.0.dll
+www.xdebug.org/html/files/xdebug-2.0.3.tgz
+www.xdebug.org/html/include/links.php
+www.xdebug.org/html/include/side.php
+xdebug/xdebug_xml.c:
+- Fixed compilation on Windows.
+
 Sat Oct 31 10:08:56 CET 2009 Derick Rethans <derick@derickrethans.nl>
 tests/array_map.phpt
 xdebug/tests/assignment-trace8.phpt
