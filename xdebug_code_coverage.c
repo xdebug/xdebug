@@ -189,9 +189,9 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			} else {
 				/*(fprintf(stderr, "\n"))*/;
 			}
-			xdebug_analyse_branch(opa, jump_pos1, set);
+			xdebug_analyse_branch(opa, jump_pos1, set TSRMLS_CC);
 			if (jump_pos2 != -1 && jump_pos2 <= opa->last) {
-				xdebug_analyse_branch(opa, jump_pos2, set);
+				xdebug_analyse_branch(opa, jump_pos2, set TSRMLS_CC);
 			}
 			break;
 		}
@@ -254,7 +254,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *opa TSRMLS_DC)
 	/* Run dead code analysis if requested */
 	if (XG(code_coverage_dead_code_analysis) && opa->done_pass_two) {
 		set = xdebug_set_create(opa->last);
-		xdebug_analyse_oparray(opa, set TSRMLC_CC);
+		xdebug_analyse_oparray(opa, set TSRMLS_CC);
 	}
 
 	/* The normal loop then finally */
