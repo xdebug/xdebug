@@ -144,14 +144,14 @@ static void xdebug_xml_text_node_dtor(xdebug_xml_text_node* node)
 	xdfree(node);
 }
 
-inline void xdebug_xml_add_text(xdebug_xml_node *xml, char *text)
+void xdebug_xml_add_text(xdebug_xml_node *xml, char *text)
 {
-	return xdebug_xml_add_text_ex(xml, text, strlen(text), 1, 0);
+	xdebug_xml_add_text_ex(xml, text, strlen(text), 1, 0);
 }
 
-inline void xdebug_xml_add_text_encode(xdebug_xml_node *xml, char *text)
+void xdebug_xml_add_text_encode(xdebug_xml_node *xml, char *text)
 {
-	return xdebug_xml_add_text_ex(xml, text, strlen(text), 1, 1);
+	xdebug_xml_add_text_ex(xml, text, strlen(text), 1, 1);
 }
 
 void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int free_text, int encode)
