@@ -1,3 +1,8 @@
+Fri Nov 13 12:06:39 CET 2009 Derick Rethans <derick@derickrethans.nl>
+contrib/tracefile-analyser.php
+xdebug/contrib/api/parser.php:
+- Added a tracefile analysing script.
+
 Tue Nov 03 11:18:12 CET 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug_code_coverage.c:
 - More TSRMLS issues.
