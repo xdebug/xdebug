@@ -1,3 +1,7 @@
+Sun Nov 22 19:49:18 CET 2009 Derick Rethans <derick@derickrethans.nl>
+tests/bug00355.phpt:
+- Added a test case for bug #355.
+
 Sun Nov 22 19:43:28 CET 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c:
 - Fixed bug #355: Function numbers in trace files weren't unique.
