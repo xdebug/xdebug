@@ -1,3 +1,9 @@
+Sun Nov 22 17:56:05 CET 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/xdebug_handler_dbgp.c:
+- Fixed bug #356: temporary breakpoints persist.
+#- Temporary breakpoints where never even implemented.
+
 Sun Nov 22 14:43:23 CET 2009 Derick Rethans <derick@derickrethans.nl>
 xdebug.c
 xdebug/tests/bug00476-2.phpt
