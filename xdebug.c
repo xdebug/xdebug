@@ -1468,6 +1468,11 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 static int handle_hit_value(xdebug_brk_info *brk_info)
 {
+	/* If this is a temporary breakpoint, disable the breakpoint */
+	if (brk_info->temporary) {
+		brk_info->disabled = 1;
+	}
+
 	/* Increase hit counter */
 	brk_info->hit_count++;
 

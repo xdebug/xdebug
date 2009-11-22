@@ -1085,6 +1085,9 @@ DBGP_FUNC(breakpoint_set)
 		BREAKPOINT_CHANGE_OPERATOR();
 		brk_info->hit_value = strtol(CMD_OPTION('h'), NULL, 10);
 	}
+	if (CMD_OPTION('r')) {
+		brk_info->temporary = strtol(CMD_OPTION('r'), NULL, 10);
+	}
 
 	if ((strcmp(CMD_OPTION('t'), "line") == 0) || (strcmp(CMD_OPTION('t'), "conditional") == 0)) {
 		if (!CMD_OPTION('n')) {
@@ -2284,7 +2287,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.143 $";
+	return "$Revision: 1.144 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
