@@ -927,7 +927,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(profile_file)  = NULL;
 	XG(profile_filename) = NULL;
 	XG(prev_memory)   = 0;
-	XG(function_count) = 0;
+	XG(function_count) = -1;
 	XG(active_symbol_table) = NULL;
 	XG(This) = NULL;
 	XG(last_exception_trace) = NULL;
@@ -1219,10 +1219,10 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->symbol_table  = NULL;
 	tmp->execute_data  = NULL;
 
+	XG(function_count)++;
 	if (edata && edata->op_array) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(edata->op_array->filename);
-		XG(function_count)++;
 	} else if (edata &&
 		edata->prev_execute_data &&
 		XDEBUG_LLIST_TAIL(XG(stack))
@@ -1239,7 +1239,6 @@ static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_a
 				tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 			}
 		}
-		XG(function_count)++;
 	}
 	if (!tmp->filename) {
 		/* Includes/main script etc */
