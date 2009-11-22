@@ -28,6 +28,8 @@ xdebug.show_local_vars=1
 	echo "DONE\n";
 ?>
 --EXPECTF--
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Passed variable is not an array or object, using empty array instead' in %sbug00173.php on line 3
+
 InvalidArgumentException: Passed variable is not an array or object, using empty array instead in %sbug00173.php on line 3
 
 Call Stack:
