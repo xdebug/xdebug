@@ -1,3 +1,10 @@
+Sun Nov 22 14:43:23 CET 2009 Derick Rethans <derick@derickrethans.nl>
+xdebug.c
+xdebug/tests/bug00476-2.phpt
+xdebug/tests/bug00476.phpt
+xdebug/tests/bug00173.phpt:
+- Fixed bug #476: Xdebug doesn't support PHP 5.3's exception chaining.
+
 Fri Nov 13 12:06:39 CET 2009 Derick Rethans <derick@derickrethans.nl>
 contrib/tracefile-analyser.php
 xdebug/contrib/api/parser.php:
