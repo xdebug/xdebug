@@ -1436,7 +1436,7 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("breakpoint_types")
-			xdebug_xml_add_text(*retval, xdstrdup("line call return"));
+			xdebug_xml_add_text(*retval, xdstrdup("line conditional call return exception"));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
@@ -2287,7 +2287,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 
 char *xdebug_dbgp_get_revision(void)
 {
-	return "$Revision: 1.144 $";
+	return "$Revision: 1.145 $";
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
