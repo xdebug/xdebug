@@ -1,5 +1,7 @@
 --TEST--
-Test for tracing multi-dimensional property assignments in user-readable function traces
+Test for tracing multi-dimensional property assignments in user-readable function traces (>= PHP 5.3)
+--SKIPIF--
+<?php if(version_compare(phpversion(), "5.3.0", '<')) echo "skip PHP 5.3 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

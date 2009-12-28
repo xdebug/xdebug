@@ -16,4 +16,4 @@ ini_set('xdebug.scream', 0);
 echo @strstr(), "\n";
 ?>
 --EXPECTF--
-Warning: strstr() expects at least 2 parameters, 0 given in %sscream.php on line 4
+Warning:%sstrstr()%sin %sscream.php on line 4
