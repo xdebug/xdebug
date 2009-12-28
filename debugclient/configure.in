@@ -3,12 +3,13 @@ dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
-divert(1)
+dnl divert(1)
 
 dnl
 dnl Start
 dnl
 AC_INIT([main.c])
+AC_PREREQ(2.60)
 AC_PREFIX_DEFAULT([/usr/local])
 
 AM_INIT_AUTOMAKE(debugclient, $VERSION)
@@ -19,7 +20,7 @@ AC_CANONICAL_HOST
 # This is needed if SUBDIRS is set
 AC_PROG_MAKE_SET
 
-divert(2)
+dnl divert(2)
 dnl
 dnl Checks for working compiler and other programs needed.
 dnl
