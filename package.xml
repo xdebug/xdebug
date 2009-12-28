@@ -82,10 +82,6 @@ Wed, Jul 18, 2007 - xdebug 2.0.0
       <file role="src"  name="xdebug_handlers.h"/>
       <file role="src"  name="xdebug_handler_dbgp.c"/>
       <file role="src"  name="xdebug_handler_dbgp.h"/>
-      <file role="src"  name="xdebug_handler_gdb.c"/>
-      <file role="src"  name="xdebug_handler_gdb.h"/>
-      <file role="src"  name="xdebug_handler_php3.c"/>
-      <file role="src"  name="xdebug_handler_php3.h"/>
       <file role="src"  name="xdebug_hash.c"/>
       <file role="src"  name="xdebug_hash.h"/>
       <file role="src"  name="xdebug_llist.c"/>

@@ -20,14 +20,10 @@
 #include "xdebug_com.h"
 #include "xdebug_handlers.h"
 #include "xdebug_handler_dbgp.h"
-#include "xdebug_handler_gdb.h"
-#include "xdebug_handler_php3.h"
 #include "xdebug_mm.h"
 
 xdebug_remote_handler_info handlers[] = {
 	{ "dbgp", "DBGp - Common DeBuGger Protocol", xdebug_handler_dbgp },
-	{ "gdb",  "GDB - GNU Debugger protocol",     xdebug_handler_gdb  },
-	{ "php3", "PHP3 - PHP 3 Debugger protocol",  xdebug_handler_php3 },
 	{ 0, NULL, { NULL } }
 };
 
