@@ -533,9 +533,9 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				
 					/* we do not always have script_name available, so if we
 					 * don't have it and this format specifier is used then we
-					 * make this function fail by returning 0. */
+					 * simple do nothing for this specifier */
 					if (!script_name) {
-						return 0;
+						break;
 					}
 
 					/* create a copy to work on */
