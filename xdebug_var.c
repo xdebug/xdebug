@@ -926,6 +926,7 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 	xdebug_str_addl(&str, "</pre>", 6, 0);
 
 	if (default_options) {
+		xdfree(options->runtime);
 		xdfree(options);
 	}
 
@@ -995,6 +996,7 @@ char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_
 	xdebug_var_synopsis_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
+		xdfree(options->runtime);
 		xdfree(options);
 	}
 
