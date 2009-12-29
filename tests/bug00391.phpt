@@ -1,0 +1,32 @@
+--TEST--
+Test for bug #391: When PHP runs with Xdebug it doesn't stop executing script when type hinting leads to fatal error.
+--INI--
+log_errors=0
+xdebug.default_enable=1
+--FILE--
+<?php
+
+class A
+{
+	public $x = 1;
+}
+
+class B
+{
+	public function myMethod(A $y)
+	{
+		echo $y, "\n";
+	}
+}
+
+$z = new B();
+$z->myMethod(123);
+echo "And going and going...\n";
+?>
+DONE
+--EXPECTF--
+%satal error: Argument 1 passed to B::myMethod() must be an %s, called in %sbug00391.php on line 17 and defined in %sbug00391.php on line 10
+
+Call Stack:
+%w%f%w%d   1. {main}() %sbug00391.php:0
+%w%f%w%d   2. B->myMethod() %sbug00391.php:17

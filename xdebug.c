@@ -2723,6 +2723,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		case E_CORE_ERROR:
 		/* no break - intentionally */
 		case E_ERROR:
+#if PHP_VERSION_ID >= 50200 
+		case E_RECOVERABLE_ERROR:
+#endif
 		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
