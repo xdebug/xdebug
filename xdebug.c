@@ -942,10 +942,16 @@ PHP_RINIT_FUNCTION(xdebug)
 		XG(ide_key) = xdstrdup(idekey);
 	}
 
-	/* This is to kick the global variable JIT-mechanism in PHP */
-#ifdef ZEND_ENGINE_2
-	zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
-#endif
+/* {{{ Initialize auto globals in Zend Engine 2 */
+	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);
+	zend_is_auto_global("_GET",     sizeof("_GET")-1     TSRMLS_CC);
+	zend_is_auto_global("_POST",    sizeof("_POST")-1    TSRMLS_CC);
+	zend_is_auto_global("_COOKIE",  sizeof("_COOKIE")-1  TSRMLS_CC);
+	zend_is_auto_global("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
+	zend_is_auto_global("_FILES",   sizeof("_FILES")-1   TSRMLS_CC);
+	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
+	zend_is_auto_global("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
+/* }}} */
 
 	/* Check if we have this special get variable that stops a debugging
 	 * request without executing any code */
