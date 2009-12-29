@@ -860,12 +860,6 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 			}
 			break;
 
-		case BREAKPOINT_TYPE_METHOD:
-			if (xdebug_hash_find(XG(context).class_breakpoints, hkey, strlen(hkey), (void *) &brk)) {
-				return brk;
-			}
-			break;
-
 		case BREAKPOINT_TYPE_EXCEPTION:
 			if (xdebug_hash_find(XG(context).exception_breakpoints, hkey, strlen(hkey), (void *) &brk)) {
 				return brk;
@@ -905,12 +899,6 @@ static int breakpoint_remove(int type, char *hkey)
 
 		case BREAKPOINT_TYPE_FUNCTION:
 			if (xdebug_hash_delete(XG(context).function_breakpoints, hkey, strlen(hkey))) {
-				return SUCCESS;
-			}
-			break;
-
-		case BREAKPOINT_TYPE_METHOD:
-			if (xdebug_hash_delete(XG(context).class_breakpoints, hkey, strlen(hkey))) {
 				return SUCCESS;
 			}
 			break;
@@ -1136,8 +1124,8 @@ DBGP_FUNC(breakpoint_set)
 
 			brk_info->classname = xdstrdup(CMD_OPTION('a'));
 			tmp_name = xdebug_sprintf("%s::%s", CMD_OPTION('a'), CMD_OPTION('m'));
-			res = xdebug_hash_add(context->class_breakpoints, tmp_name, strlen(tmp_name), (void*) brk_info);
-			brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_METHOD, tmp_name);
+			res = xdebug_hash_add(context->function_breakpoints, tmp_name, strlen(tmp_name), (void*) brk_info);
+			brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_FUNCTION, tmp_name);
 			xdfree(tmp_name);
 
 			if (!res) {
@@ -2419,7 +2407,6 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_admin_dtor);
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
-	context->class_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
 	context->eval_id_lookup = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_eval_info_dtor);
 	context->eval_id_sequence = 0;
@@ -2468,7 +2455,6 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdfree(context->options);
 	xdebug_hash_destroy(context->function_breakpoints);
 	xdebug_hash_destroy(context->exception_breakpoints);
-	xdebug_hash_destroy(context->class_breakpoints);
 	xdebug_hash_destroy(context->eval_id_lookup);
 	xdebug_llist_destroy(context->line_breakpoints, NULL);
 	xdebug_hash_destroy(context->breakpoint_list);

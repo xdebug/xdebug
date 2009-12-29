@@ -41,7 +41,6 @@ struct _xdebug_debug_list {
 
 #define BREAKPOINT_TYPE_LINE      1
 #define BREAKPOINT_TYPE_FUNCTION  2
-#define BREAKPOINT_TYPE_METHOD    3
 #define BREAKPOINT_TYPE_EXCEPTION 4
 
 struct _xdebug_brk_admin {
@@ -58,7 +57,6 @@ struct _xdebug_con {
 	char                  *program_name;
 	xdebug_hash           *breakpoint_list;
 	xdebug_hash           *function_breakpoints;
-	xdebug_hash           *class_breakpoints;
 	xdebug_hash           *eval_id_lookup;
 	int                    eval_id_sequence;
 	xdebug_llist          *line_breakpoints;
