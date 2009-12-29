@@ -2735,6 +2735,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			AG(memory_limit) = PG(memory_limit);
 # endif
 #endif
+			zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
 			zend_bailout();
 			return;
 	}
