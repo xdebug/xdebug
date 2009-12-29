@@ -612,10 +612,10 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			if (myht->nApplyCount < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
 				if (level < options->max_depth) {
+					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
+					xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);
 					options->runtime[level].current_element_nr = 0;
 					if (level == 0 && myht->nNumOfElements > options->max_children) {
-						xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
-						xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);
 						options->runtime[level].start_element_nr = options->max_children * options->runtime[level].page;
 						options->runtime[level].end_element_nr = options->max_children * (options->runtime[level].page + 1);
 					} else {
@@ -633,9 +633,9 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			myht = Z_OBJPROP_PP(struc);
 
 			xdebug_xml_add_attribute(node, "type", "object");
-			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
 			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
 			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
+			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
 
 			/** Temporary additional property **/
 			{
@@ -652,10 +652,10 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 				if (myht->nApplyCount < 1) {
 					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
 					if (level < options->max_depth) {
+						xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
+						xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);
 						options->runtime[level].current_element_nr = 0;
 						if (level == 0 && myht->nNumOfElements > options->max_children) {
-							xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
-							xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);
 							options->runtime[level].start_element_nr = options->max_children * options->runtime[level].page;
 							options->runtime[level].end_element_nr = options->max_children * (options->runtime[level].page + 1);
 						} else {
