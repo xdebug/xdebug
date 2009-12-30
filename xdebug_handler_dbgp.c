@@ -1194,6 +1194,12 @@ DBGP_FUNC(eval)
 
 	options = (xdebug_var_export_options*) context->options;
 	
+	if (CMD_OPTION('p')) {
+		options->runtime[0].page = strtol(CMD_OPTION('p'), NULL, 10);
+	} else {
+		options->runtime[0].page = 0;
+	}
+
 	/* base64 decode eval string */
 	eval_string = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
 
