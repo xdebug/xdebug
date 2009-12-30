@@ -1820,7 +1820,11 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
 	}
-	execute_internal(current_execute_data, return_value_used TSRMLS_CC);
+	if (xdebug_old_execute_internal) {
+		xdebug_old_execute_internal(current_execute_data, return_value_used TSRMLS_CC);
+	} else {
+		execute_internal(current_execute_data, return_value_used TSRMLS_CC);
+	}
 
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
