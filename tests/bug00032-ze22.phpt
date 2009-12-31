@@ -46,23 +46,3 @@ Catchable fatal error: Object of class stdClass could not be converted to string
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00032-ze22.php:0
-
-
-Notice: Object of class stdClass to string conversion in %sbug00032-ze22.php on line 11
-
-Call Stack:
-%w%f %w%d   1. {main}() %sbug00032-ze22.php:0
-
-
-Catchable fatal error: Object of class stdClass could not be converted to string in %sbug00032-ze22.php on line 12
-
-Call Stack:
-%w%f %w%d   1. {main}() %sbug00032-ze22.php:0
-
-
-Notice: Object of class stdClass to string conversion in %sbug00032-ze22.php on line 12
-
-Call Stack:
-%w%f %w%d   1. {main}() %sbug00032-ze22.php:0
-
-foo
