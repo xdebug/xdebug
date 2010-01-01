@@ -1,3 +1,95 @@
+Fri, Jul 03, 2009 - xdebug 2.0.5
+
+= Fixed bugs:
+	- Fixed bug #425: memory leak (around 40MB for each request) when using
+	  xdebug_start_trace.
+	- Fixed bug #422: Segfaults when using code coverage with a parse error in
+	  the script.
+	- Fixed bug #418: compilation breaks with CodeWarrior for NetWare.
+	- Fixed bug #403: 'call' and 'return' breakpoints triggers both on call and
+	  return for class method breakpoints.
+	- Fixed TSRM issues for PHP 5.2 and PHP 5.3. (Original patch by Elizabeth
+	  M. Smith).
+	- Fixed odd crash bugs, due to GCC 4 sensitivity.
+
+
+Tue, Dec 30, 2008 - xdebug 2.0.4
+
+= Fixed bugs:
+	- Fixed for strange jump positions in path analysis.
+	- Fixed issues with code coverage crashing on parse errors.
+	- Fixed code code coverage by overriding more opcodes.
+	- Fixed issues with Xdebug stalling/crashing when detaching from remote
+	  debugging.
+	- Fixed crash on Vista where memory was freed with routines from a different
+	  standard-C library than it was allocated with. (Patch by Eric Promislow
+	  <ericp@activestate.com>).
+	- Link against the correct CRT library. (Patch by Eric Promislow
+	  <ericp@activestate.com>).
+	- Sort the symbol elements according to name. (Patch by Eric Promislow
+	  <ericp@activestate.com>).
+	- Fixed support for mapped-drive UNC paths for Windows. (Patch by Eric
+	  Promislow <ericp@activestate.com>).
+	- Fixed a segfault in interactive mode while including a file.
+	- Fixed a crash in super global dumping in case somebody was strange enough
+	  to reassign them to a value type other than an Array.
+	- Simplify version checking for libtool. (Patch by PGNet
+	  <pgnet.trash@gmail.com>).
+	- Fixed display of unused returned variables from functions in PHP 5.3.
+	- Include config.w32 in the packages as well.
+	- Fixed .dsp for building with PHP 4.
+
++ Added features:
+	- Support debugging into phars.
+	- Basic PHP 5.3 support.
+
+
+Wed, Apr 09, 2008 - xdebug 2.0.3
+
+= Fixed bugs:
+	- Fixed bug #338: Crash with: xdebug.remote_handler=req.
+	- Fixed bug #334: Code Coverage Regressions.
+	- Fixed abstract method detection for PHP 5.3.
+	- Fixed code coverage dead-code detection.
+	- Ignore ZEND_ADD_INTERFACE, which is on a different line in PHP >= 5.3 for
+	  some weird reason.
+
++ Changes:
+	- Added a CSS-class for xdebug's var_dump().
+	- Added support for the new E_DEPRECATED.
+
+
+Sun, Nov 11, 2007 - xdebug 2.0.2
+
+= Fixed bugs:
+	- Fixed bug #325: DBGP: "detach" stops further sessions being established
+	  from Apache.
+	- Fixed bug #321: Code coverage crashes on empty PHP files.
+	- Fixed bug #318: Segmentation Fault in code coverage analysis.
+	- Fixed bug #315: Xdebug crashes when including a file that doesn't exist.
+	- Fixed bug #314: PHP CLI Error Logging thwarted when XDebug Loaded.
+	- Fixed bug #300: Direction of var_dump().
+	- Always set the transaction_id and command. (Related to bug #313).
+
+
+Sat, Oct 20, 2007 - xdebug 2.0.1
+
++ Changes:
+	- Improved code coverage performance dramatically.
+	- PHP 5.3 compatibility (no namespaces yet though).
+
+= Fixed bugs:
+	- Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch by
+	  Sean Chalmers)
+	- Fixed bug #300: Xdebug does not force LTR rendering for its tables.
+	- Fixed bug #299: Computerized traces don't have a newline for return
+	  entries if memory limit is not enabled.
+	- Fixed bug #298: xdebug_var_dump() doesn't handle entity replacements
+	  correctly concerning string length.
+	- Fixed a memory free error related to remote debugging conditions.
+	  (Related to bug #297).
+
+
 Wed, Jul 18, 2007 - xdebug 2.0.0
 
 + Changes:
