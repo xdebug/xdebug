@@ -816,9 +816,13 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
+
+	/* Override header generation in SAPI */
+	XG(orig_header_handler) = sapi_module.header_handler;
+	sapi_module.header_handler = xdebug_header_handler;
+	XG(headers) = NULL;
 	return SUCCESS;
 }
-
 
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
@@ -1028,9 +1032,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(orig_set_time_limit_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
-	/* Override header generation in SAPI */
-	XG(orig_header_handler) = sapi_module.header_handler;
-	sapi_module.header_handler = xdebug_header_handler;
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	if (strcmp(sapi_module.name, "cli") == 0) {
 		SG(request_info).no_headers = 1;
@@ -1102,8 +1103,6 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
-
-	sapi_module.header_handler = XG(orig_header_handler);
 
 	return SUCCESS;
 }
@@ -2790,9 +2789,11 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 
 static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC)
 {
-	xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
-	if (XG(orig_header_handler)) {
-		return XG(orig_header_handler)(h XG_SAPI_HEADER_OP_CC, s TSRMLS_CC);
+	if (XG(headers)) {
+		xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
+		if (XG(orig_header_handler)) {
+			return XG(orig_header_handler)(h XG_SAPI_HEADER_OP_CC, s TSRMLS_CC);
+		}
 	}
 	return SAPI_HEADER_ADD;
 }
