@@ -1,5 +1,5 @@
 /* This is a template RC file.
- * $Id: template.rc,v 1.2 2009-05-07 20:39:13 derick Exp $
+ * $Id: template.rc,v 1.2 2010-05-07 20:39:13 derick Exp $
  * Do not edit with MSVC */
 #ifdef APSTUDIO_INVOKED
 # error dont edit with MSVC
@@ -41,7 +41,7 @@ BEGIN
             VALUE "FileDescription", FILE_DESCRIPTION "\0"
             VALUE "FileVersion", VERSIONSTR
             VALUE "InternalName", FILE_NAME "\0"
-            VALUE "LegalCopyright", "Copyright © 2002-2009 Derick Rethans\0"
+            VALUE "LegalCopyright", "Copyright © 2002-2010 Derick Rethans\0"
             VALUE "OriginalFilename", FILE_NAME "\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Xdebug\0"
