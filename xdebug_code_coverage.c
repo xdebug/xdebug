@@ -118,11 +118,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
-#ifdef ZEND_ENGINE_2
 		*jmp1 = ((long) opcode.op1.u.jmp_addr - (long) base_address) / sizeof(zend_op);
-#else
-		*jmp1 = opcode.op1.u.opline_num;
-#endif
 		return 1;
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
@@ -131,11 +127,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
 		*jmp1 = position + 1;
-#ifdef ZEND_ENGINE_2
 		*jmp2 = ((long) opcode.op2.u.jmp_addr - (long) base_address) / sizeof(zend_op);
-#else
-		*jmp2 = opcode.op1.u.opline_num;
-#endif
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 		*jmp1 = opcode.op2.u.opline_num;

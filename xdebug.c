@@ -718,13 +718,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
-#if 0
-#ifdef ZEND_ENGINE_2
-# if PHP_MINOR_VERSION >= 1
-	zend_vm_use_old_executor();
-# endif
-#endif
-#endif
+
 	/* initialize aggregate call information hash */
 	zend_hash_init_ex(&XG(aggr_calls), 50, NULL, (dtor_func_t) xdebug_profile_aggr_call_entry_dtor, 1, 0);
 
