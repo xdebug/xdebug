@@ -34,7 +34,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-Version: 2.1.0-dev
+Version: %s
 File format: 2
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%f	%d
