@@ -874,6 +874,7 @@ static int breakpoint_remove(int type, char *hkey)
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk = NULL;
 	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	int                   retval = FAILURE;
 	TSRMLS_FETCH();
 
 	switch (type) {
@@ -889,7 +890,8 @@ static int breakpoint_remove(int type, char *hkey)
 
 				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[0], brk->file_len) == 0) {
 					xdebug_llist_remove(XG(context).line_breakpoints, le, NULL);
-					return SUCCESS;
+					retval = SUCCESS;
+					break;
 				}
 			}
 
@@ -899,17 +901,17 @@ static int breakpoint_remove(int type, char *hkey)
 
 		case BREAKPOINT_TYPE_FUNCTION:
 			if (xdebug_hash_delete(XG(context).function_breakpoints, hkey, strlen(hkey))) {
-				return SUCCESS;
+				retval = SUCCESS;
 			}
 			break;
 
 		case BREAKPOINT_TYPE_EXCEPTION:
 			if (xdebug_hash_delete(XG(context).exception_breakpoints, hkey, strlen(hkey))) {
-				return SUCCESS;
+				retval = SUCCESS;
 			}
 			break;
 	}
-	return FAILURE;
+	return retval;
 }
 
 #define BREAKPOINT_ACTION_GET       1
