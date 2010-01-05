@@ -822,6 +822,11 @@ static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 			xdebug_xml_add_attribute(xml, "hit_condition", "%");
 			break;
 	}
+	if (brk->condition) {
+		xdebug_xml_node *condition = xdebug_xml_node_init("expression");
+		xdebug_xml_add_text_ex(condition, brk->condition, strlen(brk->condition), 0, 1);
+		xdebug_xml_add_child(xml, condition);
+	}
 	xdebug_xml_add_attribute_ex(xml, "hit_value", xdebug_sprintf("%lu", brk->hit_value), 0, 1);
 }
 
