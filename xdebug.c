@@ -637,7 +637,20 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 	if (XG(do_trace) && XG(trace_file) && XG(collect_assignments)) {
 		full_varname = xdebug_find_var_name(execute_data TSRMLS_CC);
 
-		if (next_opcode->opcode == ZEND_OP_DATA) {
+		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
+			char *tmp_varname;
+
+			switch (cur_opcode->opcode) {
+				case ZEND_PRE_INC:  tmp_varname = xdebug_sprintf("++%s", full_varname); break;
+				case ZEND_POST_INC: tmp_varname = xdebug_sprintf("%s++", full_varname); break;
+				case ZEND_PRE_DEC:  tmp_varname = xdebug_sprintf("--%s", full_varname); break;
+				case ZEND_POST_DEC: tmp_varname = xdebug_sprintf("%s--", full_varname); break;
+			}
+			xdfree(full_varname);
+			full_varname = tmp_varname;
+
+			val = get_zval(execute_data, &cur_opcode->op1, execute_data->Ts, &is_var);
+		} else if (next_opcode->opcode == ZEND_OP_DATA) {
 			val = get_zval(execute_data, &next_opcode->op1, execute_data->Ts, &is_var);
 		} else {
 			val = get_zval(execute_data, &cur_opcode->op2, execute_data->Ts, &is_var);
@@ -677,6 +690,10 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_div,"/=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mod,"%=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sl,"<<=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sr,">>=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc,"",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc,"",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec,"",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec,"",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_concat,".=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_or,"|=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_and,"&=",0)
@@ -765,6 +782,11 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE(assign_bw_xor, ZEND_ASSIGN_BW_XOR);
 	XDEBUG_SET_OPCODE_OVERRIDE(assign_dim, ZEND_ASSIGN_DIM);
 	XDEBUG_SET_OPCODE_OVERRIDE(assign_obj, ZEND_ASSIGN_OBJ);
+
+	XDEBUG_SET_OPCODE_OVERRIDE(pre_inc, ZEND_PRE_INC);
+	XDEBUG_SET_OPCODE_OVERRIDE(post_inc, ZEND_POST_INC);
+	XDEBUG_SET_OPCODE_OVERRIDE(pre_dec, ZEND_PRE_DEC);
+	XDEBUG_SET_OPCODE_OVERRIDE(post_dec, ZEND_POST_DEC);
 
 	XDEBUG_SET_OPCODE_OVERRIDE(add_array_element, ZEND_ADD_ARRAY_ELEMENT);
 	XDEBUG_SET_OPCODE_OVERRIDE(return, ZEND_RETURN);
@@ -2245,14 +2267,17 @@ static char* return_trace_assignment(function_stack_entry *i, char *varname, zva
 	xdebug_str_addl(&str, "   => ", 6, 0);
 
 	xdebug_str_add(&str, varname, 0);
-	xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
 
-	tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+	if (op[0] != '\0' ) { // pre/post inc/dec ops are special
+		xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
 
-	if (tmp_value) {
-		xdebug_str_add(&str, tmp_value, 1);
-	} else {
-		xdebug_str_addl(&str, "NULL", 4, 0);
+		tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+
+		if (tmp_value) {
+			xdebug_str_add(&str, tmp_value, 1);
+		} else {
+			xdebug_str_addl(&str, "NULL", 4, 0);
+		}
 	}
 	xdebug_str_add(&str, xdebug_sprintf(" %s:%d\n", filename, lineno), 1);
 
