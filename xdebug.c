@@ -1119,6 +1119,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
+	XG(headers) = NULL;
 
 	return SUCCESS;
 }
