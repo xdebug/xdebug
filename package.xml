@@ -179,10 +179,14 @@ Sun, Jan 03, 2010 - xdebug 2.1.0beta1
       <file role="src"  name="xdebug_profiler.h"/>
       <file role="src"  name="xdebug_set.c"/>
       <file role="src"  name="xdebug_set.h"/>
+      <file role="src"  name="xdebug_stack.c"/>
+      <file role="src"  name="xdebug_stack.h"/>
       <file role="src"  name="xdebug_str.c"/>
       <file role="src"  name="xdebug_str.h"/>
       <file role="src"  name="xdebug_superglobals.c"/>
       <file role="src"  name="xdebug_superglobals.h"/>
+      <file role="src"  name="xdebug_tracing.c"/>
+      <file role="src"  name="xdebug_tracing.h"/>
       <file role="src"  name="xdebug_var.c"/>
       <file role="src"  name="xdebug_var.h"/>
       <file role="src"  name="xdebug_xml.c"/>

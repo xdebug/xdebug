@@ -47,15 +47,6 @@
 #include "php_globals.h"
 #include "ext/standard/php_var.h"
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_alloc.h"
-#include "zend_execute.h"
-#include "zend_compile.h"
-#include "zend_constants.h"
-#include "zend_extensions.h"
-#include "zend_exceptions.h"
-#include "zend_vm.h"
 
 #include "php_xdebug.h"
 #include "xdebug_private.h"
@@ -65,7 +56,9 @@
 #include "xdebug_mm.h"
 #include "xdebug_var.h"
 #include "xdebug_profiler.h"
+#include "xdebug_stack.h"
 #include "xdebug_superglobals.h"
+#include "xdebug_tracing.h"
 #include "usefulstuff.h"
 
 /* execution redirection functions */
@@ -85,14 +78,8 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 
-void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
+static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
-
-static zval *get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, int *is_var);
-static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSRMLS_DC);
-static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRMLS_DC);
-static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC);
-static char* return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno TSRMLS_DC);
 
 int zend_xdebug_initialised = 0;
 
@@ -450,7 +437,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		int  is_var;
 		int  tmp_len;
 
-		inc_filename = get_zval(execute_data, &opline->op1, execute_data->Ts, &is_var);
+		inc_filename = xdebug_get_zval(execute_data, &opline->op1, execute_data->Ts, &is_var);
 
 		if (inc_filename->type != IS_STRING) {
 			tmp_inc_filename = *inc_filename;
@@ -471,262 +458,6 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	return ZEND_USER_OPCODE_DISPATCH;
 }
-
-/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
-#define XDEBUG_SET_OPCODE_OVERRIDE(f,oc) \
-	zend_set_user_opcode_handler(oc, xdebug_##f##_handler);
-
-#define XDEBUG_OPCODE_OVERRIDE(f)  static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
-{ \
-	if (XG(do_code_coverage)) { \
-		zend_op *cur_opcode; \
-		int      lineno; \
-		char    *file; \
-\
-		zend_op_array *op_array = execute_data->op_array; \
-\
-		cur_opcode = *EG(opline_ptr); \
-		lineno = cur_opcode->lineno; \
-\
-		file = op_array->filename; \
-\
-		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC); \
-	} \
-	return ZEND_USER_OPCODE_DISPATCH; \
-}
-
-static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
-{
-	zend_op       *cur_opcode, *next_opcode, *prev_opcode = NULL, *opcode_ptr;
-	zval          *dimval;
-	int            is_var, cv_len;
-	zend_op_array *op_array = execute_data->op_array;
-	xdebug_str     name = {0, 0, NULL};
-	int            gohungfound = 0, is_static = 0;
-	char          *zval_value = NULL;
-	xdebug_var_export_options *options;
-
-	cur_opcode = *EG(opline_ptr);
-	next_opcode = cur_opcode + 1;
-	prev_opcode = cur_opcode - 1;
-
-	if (cur_opcode->op1.op_type == IS_VAR &&
-			(next_opcode->op1.op_type == IS_VAR || cur_opcode->op2.op_type == IS_VAR) &&
-			prev_opcode->opcode == ZEND_FETCH_RW &&
-			prev_opcode->op1.op_type == IS_CONST &&
-			prev_opcode->op1.u.constant.type == IS_STRING
-	) {
-		xdebug_str_add(&name, xdebug_sprintf("$%s", prev_opcode->op1.u.constant.value.str.val), 1);
-	}
-
-	is_static = (prev_opcode->op1.op_type == IS_CONST && prev_opcode->op2.u.EA.type == ZEND_FETCH_STATIC_MEMBER);
-	options = xdebug_var_export_options_from_ini(TSRMLS_C);
-	options->no_decoration = 1;
-
-	if (cur_opcode->op1.op_type == IS_CV) {
-		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op1.u.var, &cv_len)), 1);
-	} else if (cur_opcode->op1.op_type == IS_VAR && cur_opcode->opcode == ZEND_ASSIGN && prev_opcode->opcode == ZEND_FETCH_W) {
-		if (is_static) {
-			xdebug_str_add(&name, xdebug_sprintf("self::"), 1);
-		} else {
-			zval_value = xdebug_get_zval_value(get_zval(execute_data, &prev_opcode->op1, execute_data->Ts, &is_var), 0, options);
-			xdebug_str_add(&name, xdebug_sprintf("$%s", zval_value), 1);
-		}
-	} else if (is_static) { // todo : see if you can change this and the previous cases around
-		xdebug_str_add(&name, xdebug_sprintf("self::"), 1 );
-	}
-	if (cur_opcode->opcode >= ZEND_ASSIGN_ADD && cur_opcode->opcode <= ZEND_ASSIGN_BW_XOR ) {
-		if (cur_opcode->extended_value == ZEND_ASSIGN_OBJ) {
-			zval_value = xdebug_get_zval_value(get_zval(execute_data, &cur_opcode->op2, execute_data->Ts, &is_var), 0, options);
-			if (cur_opcode->op1.op_type == IS_UNUSED) {
-				xdebug_str_add(&name, xdebug_sprintf("$this->%s", zval_value), 1);
-			} else {
-				xdebug_str_add(&name, xdebug_sprintf("->%s", zval_value), 1);
-			}
-		} else if (cur_opcode->extended_value == ZEND_ASSIGN_DIM) {
-			zval_value = xdebug_get_zval_value(get_zval(execute_data, &cur_opcode->op2, execute_data->Ts, &is_var), 0, NULL);
-			xdebug_str_add(&name,xdebug_sprintf("[%s]", zval_value), 1);
-		}
-	}
-	if (zval_value) {
-		xdfree(zval_value);
-		zval_value = NULL;
-	}
-
-	/* Scroll back to start of FETCHES */
-	gohungfound = 0;
-	opcode_ptr = prev_opcode;
-	while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W) {
-		opcode_ptr = opcode_ptr - 1;
-		gohungfound = 1;
-	}
-	opcode_ptr = opcode_ptr + 1;
-
-	if (gohungfound) {
-		do
-		{
-			if (opcode_ptr->op1.op_type == IS_UNUSED && opcode_ptr->opcode == ZEND_FETCH_OBJ_W) {
-				xdebug_str_add(&name, "$this", 0);
-			}
-			if (opcode_ptr->op1.op_type == IS_CV) {
-				xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, opcode_ptr->op1.u.var, &cv_len)), 1);
-			}
-			if (opcode_ptr->opcode == ZEND_FETCH_W) {
-				zval_value = xdebug_get_zval_value(get_zval(execute_data, &opcode_ptr->op1, execute_data->Ts, &is_var), 0, options);
-				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
-			}
-			if (opcode_ptr->opcode == ZEND_FETCH_DIM_W) {
-				zval_value = xdebug_get_zval_value(get_zval(execute_data, &opcode_ptr->op2, execute_data->Ts, &is_var), 0, NULL);
-				xdebug_str_add(&name, xdebug_sprintf("[%s]", zval_value), 1);
-			} else if (opcode_ptr->opcode == ZEND_FETCH_OBJ_W) {
-				zval_value = xdebug_get_zval_value(get_zval(execute_data, &opcode_ptr->op2, execute_data->Ts, &is_var), 0, options);
-				xdebug_str_add(&name, xdebug_sprintf("->%s", zval_value), 1);
-			}
-			opcode_ptr = opcode_ptr + 1;
-			if (zval_value) {
-				xdfree(zval_value);
-				zval_value = NULL;
-			}
-		} while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W);
-	}
-
-	if (cur_opcode->opcode == ZEND_ASSIGN_OBJ) {
-		if (cur_opcode->op1.op_type == IS_UNUSED) {
-			xdebug_str_add(&name, "$this", 0);
-		}
-		dimval = get_zval(execute_data, &cur_opcode->op2, execute_data->Ts, &is_var);
-		xdebug_str_add(&name, xdebug_sprintf("->%s", Z_STRVAL_P(dimval)), 1);
-	}
-
-	if (cur_opcode->opcode == ZEND_ASSIGN_DIM) {
-		if (next_opcode->opcode == ZEND_OP_DATA && cur_opcode->op2.op_type == IS_UNUSED) {
-			xdebug_str_add(&name, "[]", 0);
-		} else {
-			zval_value = xdebug_get_zval_value(get_zval(execute_data, &opcode_ptr->op2, execute_data->Ts, &is_var), 0, NULL);
-			xdebug_str_add(&name, xdebug_sprintf("[%s]", zval_value), 1);
-			xdfree(zval_value);
-		}
-	}
-
-	xdfree(options->runtime);
-	xdfree(options);
-
-	return name.d;
-}
-
-static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HANDLER_ARGS)
-{
-	char    *file;
-	zend_op_array *op_array = execute_data->op_array;
-	int            lineno;
-	zend_op       *cur_opcode, *next_opcode;
-	char          *full_varname;
-	zval          *val = NULL;
-	char          *t;
-	int            is_var;
-	function_stack_entry *fse;
-
-	cur_opcode = *EG(opline_ptr);
-	next_opcode = cur_opcode + 1;
-	file = op_array->filename;
-	lineno = cur_opcode->lineno;
-
-	if (do_cc && XG(do_code_coverage)) {
-		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
-	}
-	if (XG(do_trace) && XG(trace_file) && XG(collect_assignments)) {
-		full_varname = xdebug_find_var_name(execute_data TSRMLS_CC);
-
-		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
-			char *tmp_varname;
-
-			switch (cur_opcode->opcode) {
-				case ZEND_PRE_INC:  tmp_varname = xdebug_sprintf("++%s", full_varname); break;
-				case ZEND_POST_INC: tmp_varname = xdebug_sprintf("%s++", full_varname); break;
-				case ZEND_PRE_DEC:  tmp_varname = xdebug_sprintf("--%s", full_varname); break;
-				case ZEND_POST_DEC: tmp_varname = xdebug_sprintf("%s--", full_varname); break;
-			}
-			xdfree(full_varname);
-			full_varname = tmp_varname;
-
-			val = get_zval(execute_data, &cur_opcode->op1, execute_data->Ts, &is_var);
-		} else if (next_opcode->opcode == ZEND_OP_DATA) {
-			val = get_zval(execute_data, &next_opcode->op1, execute_data->Ts, &is_var);
-		} else {
-			val = get_zval(execute_data, &cur_opcode->op2, execute_data->Ts, &is_var);
-		}
-
-		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		t = return_trace_assignment(fse, full_varname, val, op, file, lineno TSRMLS_CC);
-		xdfree(full_varname);
-		fprintf(XG(trace_file), "%s", t);
-		fflush(XG(trace_file));
-		xdfree(t);
-	}
-	return ZEND_USER_OPCODE_DISPATCH;
-}
-
-#define XDEBUG_OPCODE_OVERRIDE_ASSIGN(f,o,cc) \
-	static int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
-	{ \
-		return xdebug_common_assign_dim_handler((o), (cc), ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
-	}
-
-
-XDEBUG_OPCODE_OVERRIDE(jmp)
-XDEBUG_OPCODE_OVERRIDE(jmpz)
-XDEBUG_OPCODE_OVERRIDE(jmpnz)
-XDEBUG_OPCODE_OVERRIDE(is_identical)
-XDEBUG_OPCODE_OVERRIDE(is_not_identical)
-XDEBUG_OPCODE_OVERRIDE(is_equal)
-XDEBUG_OPCODE_OVERRIDE(is_not_equal)
-XDEBUG_OPCODE_OVERRIDE(is_smaller)
-XDEBUG_OPCODE_OVERRIDE(is_smaller_or_equal)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_add,"+=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sub,"-=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mul,"*=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_div,"/=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mod,"%=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sl,"<<=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sr,">>=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_concat,".=",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_or,"|=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_and,"&=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
-XDEBUG_OPCODE_OVERRIDE(add_array_element)
-XDEBUG_OPCODE_OVERRIDE(return)
-XDEBUG_OPCODE_OVERRIDE(ext_stmt)
-XDEBUG_OPCODE_OVERRIDE(raise_abstract_error)
-XDEBUG_OPCODE_OVERRIDE(send_var)
-XDEBUG_OPCODE_OVERRIDE(send_var_no_ref)
-XDEBUG_OPCODE_OVERRIDE(send_val)
-XDEBUG_OPCODE_OVERRIDE(new)
-XDEBUG_OPCODE_OVERRIDE(ext_fcall_begin)
-XDEBUG_OPCODE_OVERRIDE(catch)
-XDEBUG_OPCODE_OVERRIDE(bool)
-XDEBUG_OPCODE_OVERRIDE(add_string)
-XDEBUG_OPCODE_OVERRIDE(init_array)
-XDEBUG_OPCODE_OVERRIDE(fetch_dim_r)
-XDEBUG_OPCODE_OVERRIDE(fetch_obj_r)
-XDEBUG_OPCODE_OVERRIDE(fetch_obj_w)
-XDEBUG_OPCODE_OVERRIDE(fetch_obj_func_arg)
-XDEBUG_OPCODE_OVERRIDE(fetch_dim_func_arg)
-XDEBUG_OPCODE_OVERRIDE(fetch_dim_unset)
-XDEBUG_OPCODE_OVERRIDE(fetch_obj_unset)
-XDEBUG_OPCODE_OVERRIDE(fetch_class)
-XDEBUG_OPCODE_OVERRIDE(fetch_constant)
-XDEBUG_OPCODE_OVERRIDE(concat)
-XDEBUG_OPCODE_OVERRIDE(isset_isempty_dim_obj)
-XDEBUG_OPCODE_OVERRIDE(pre_inc_obj)
-XDEBUG_OPCODE_OVERRIDE(switch_free)
-XDEBUG_OPCODE_OVERRIDE(qm_assign)
 
 
 PHP_MINIT_FUNCTION(xdebug)
@@ -757,68 +488,67 @@ PHP_MINIT_FUNCTION(xdebug)
 	XG(reserved_offset) = zend_get_resource_handle(&dummy_ext);
 
 	/* Overload the "exit" opcode */
-	XDEBUG_SET_OPCODE_OVERRIDE(exit, ZEND_EXIT);
-	XDEBUG_SET_OPCODE_OVERRIDE(jmp, ZEND_JMP);
-	XDEBUG_SET_OPCODE_OVERRIDE(jmpz, ZEND_JMPZ);
-	XDEBUG_SET_OPCODE_OVERRIDE(jmpnz, ZEND_JMPNZ);
-	XDEBUG_SET_OPCODE_OVERRIDE(is_identical, ZEND_IS_IDENTICAL);
-	XDEBUG_SET_OPCODE_OVERRIDE(is_not_identical, ZEND_IS_NOT_IDENTICAL);
-	XDEBUG_SET_OPCODE_OVERRIDE(is_equal, ZEND_IS_EQUAL);
-	XDEBUG_SET_OPCODE_OVERRIDE(is_not_equal, ZEND_IS_NOT_EQUAL);
-	XDEBUG_SET_OPCODE_OVERRIDE(is_smaller, ZEND_IS_SMALLER);
-	XDEBUG_SET_OPCODE_OVERRIDE(is_smaller_or_equal, ZEND_IS_SMALLER_OR_EQUAL);
-	
-	XDEBUG_SET_OPCODE_OVERRIDE(assign, ZEND_ASSIGN);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_add, ZEND_ASSIGN_ADD);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_sub, ZEND_ASSIGN_SUB);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_mul, ZEND_ASSIGN_MUL);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_div, ZEND_ASSIGN_DIV);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_mod, ZEND_ASSIGN_MOD);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_sl, ZEND_ASSIGN_SL);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_sr, ZEND_ASSIGN_SR);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_concat, ZEND_ASSIGN_CONCAT);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_bw_or, ZEND_ASSIGN_BW_OR);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_bw_and, ZEND_ASSIGN_BW_AND);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_bw_xor, ZEND_ASSIGN_BW_XOR);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_dim, ZEND_ASSIGN_DIM);
-	XDEBUG_SET_OPCODE_OVERRIDE(assign_obj, ZEND_ASSIGN_OBJ);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXIT);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMP);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMPZ);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMPNZ);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_IDENTICAL);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_NOT_IDENTICAL);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_EQUAL);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_NOT_EQUAL);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_SMALLER);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_SMALLER_OR_EQUAL);
 
-	XDEBUG_SET_OPCODE_OVERRIDE(pre_inc, ZEND_PRE_INC);
-	XDEBUG_SET_OPCODE_OVERRIDE(post_inc, ZEND_POST_INC);
-	XDEBUG_SET_OPCODE_OVERRIDE(pre_dec, ZEND_PRE_DEC);
-	XDEBUG_SET_OPCODE_OVERRIDE(post_dec, ZEND_POST_DEC);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_ARRAY_ELEMENT);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_RETURN);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXT_STMT);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_RAISE_ABSTRACT_ERROR);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR_NO_REF);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAL);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_NEW);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXT_FCALL_BEGIN);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CATCH);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BOOL);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_STRING);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_ARRAY);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_R);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_R);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_W);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_FUNC_ARG);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_FUNC_ARG);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_UNSET);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_UNSET);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CLASS);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CONSTANT);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CONCAT);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_DIM_OBJ);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_PRE_INC_OBJ);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SWITCH_FREE);
+	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_QM_ASSIGN);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
 
-	XDEBUG_SET_OPCODE_OVERRIDE(add_array_element, ZEND_ADD_ARRAY_ELEMENT);
-	XDEBUG_SET_OPCODE_OVERRIDE(return, ZEND_RETURN);
-	XDEBUG_SET_OPCODE_OVERRIDE(ext_stmt, ZEND_EXT_STMT);
-	XDEBUG_SET_OPCODE_OVERRIDE(raise_abstract_error, ZEND_RAISE_ABSTRACT_ERROR);
-	XDEBUG_SET_OPCODE_OVERRIDE(send_var, ZEND_SEND_VAR);
-	XDEBUG_SET_OPCODE_OVERRIDE(send_var_no_ref, ZEND_SEND_VAR_NO_REF);
-	XDEBUG_SET_OPCODE_OVERRIDE(send_val, ZEND_SEND_VAL);
-	XDEBUG_SET_OPCODE_OVERRIDE(new, ZEND_NEW);
-	XDEBUG_SET_OPCODE_OVERRIDE(ext_fcall_begin, ZEND_EXT_FCALL_BEGIN);
-	XDEBUG_SET_OPCODE_OVERRIDE(catch, ZEND_CATCH);
-	XDEBUG_SET_OPCODE_OVERRIDE(bool, ZEND_BOOL);
-	XDEBUG_SET_OPCODE_OVERRIDE(add_string, ZEND_ADD_STRING);
-	XDEBUG_SET_OPCODE_OVERRIDE(init_array, ZEND_INIT_ARRAY);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_dim_r, ZEND_FETCH_DIM_R);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_obj_r, ZEND_FETCH_OBJ_R);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_obj_w, ZEND_FETCH_OBJ_W);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_obj_func_arg, ZEND_FETCH_OBJ_FUNC_ARG);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_dim_func_arg, ZEND_FETCH_DIM_FUNC_ARG);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_dim_unset, ZEND_FETCH_DIM_UNSET);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_obj_unset, ZEND_FETCH_OBJ_UNSET);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_class, ZEND_FETCH_CLASS);
-	XDEBUG_SET_OPCODE_OVERRIDE(fetch_constant, ZEND_FETCH_CONSTANT);
-	XDEBUG_SET_OPCODE_OVERRIDE(concat, ZEND_CONCAT);
-	XDEBUG_SET_OPCODE_OVERRIDE(isset_isempty_dim_obj, ZEND_ISSET_ISEMPTY_DIM_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE(pre_inc_obj, ZEND_PRE_INC_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE(switch_free, ZEND_SWITCH_FREE);
-	XDEBUG_SET_OPCODE_OVERRIDE(qm_assign, ZEND_QM_ASSIGN);
-	XDEBUG_SET_OPCODE_OVERRIDE(include_or_eval, ZEND_INCLUDE_OR_EVAL);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign, ZEND_ASSIGN);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_add, ZEND_ASSIGN_ADD);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_sub, ZEND_ASSIGN_SUB);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_mul, ZEND_ASSIGN_MUL);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_div, ZEND_ASSIGN_DIV);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_mod, ZEND_ASSIGN_MOD);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_sl, ZEND_ASSIGN_SL);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_sr, ZEND_ASSIGN_SR);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_concat, ZEND_ASSIGN_CONCAT);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_or, ZEND_ASSIGN_BW_OR);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_and, ZEND_ASSIGN_BW_AND);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor, ZEND_ASSIGN_BW_XOR);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_dim, ZEND_ASSIGN_DIM);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_obj, ZEND_ASSIGN_OBJ);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_inc, ZEND_PRE_INC);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc, ZEND_POST_INC);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_dec, ZEND_PRE_DEC);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec, ZEND_POST_DEC);
 
-	XDEBUG_SET_OPCODE_OVERRIDE(silence, ZEND_BEGIN_SILENCE);
-	XDEBUG_SET_OPCODE_OVERRIDE(silence, ZEND_END_SILENCE);
+	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
+	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
 
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
@@ -1151,310 +881,6 @@ PHP_MINFO_FUNCTION(xdebug)
 	DISPLAY_INI_ENTRIES();
 }
 
-void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
-{
-	memset(tmp, 0, sizeof(xdebug_func));
-
-	if (edata) {
-		if (edata->function_state.function->common.function_name) {
-			if (edata->object) {
-				tmp->type = XFUNC_MEMBER;
-				if (edata->function_state.function->common.scope) { /* __autoload has no scope */
-					tmp->class = xdstrdup(edata->function_state.function->common.scope->name);
-				}
-			} else if (EG(scope) && edata->function_state.function->common.scope && edata->function_state.function->common.scope->name) {
-				tmp->type = XFUNC_STATIC_MEMBER;
-				tmp->class = xdstrdup(edata->function_state.function->common.scope->name);
-			} else {
-				tmp->type = XFUNC_NORMAL;
-			}
-			tmp->function = xdstrdup(edata->function_state.function->common.function_name);
-		} else {
-			switch (edata->opline->op2.u.constant.value.lval) {
-				case ZEND_EVAL:
-					tmp->type = XFUNC_EVAL;
-					break;
-				case ZEND_INCLUDE:
-					tmp->type = XFUNC_INCLUDE;
-					break;
-				case ZEND_REQUIRE:
-					tmp->type = XFUNC_REQUIRE;
-					break;
-				case ZEND_INCLUDE_ONCE:
-					tmp->type = XFUNC_INCLUDE_ONCE;
-					break;
-				case ZEND_REQUIRE_ONCE:
-					tmp->type = XFUNC_REQUIRE_ONCE;
-					break;
-				default:
-					tmp->type = XFUNC_UNKNOWN;
-					break;
-			}
-		}
-	}
-}
-
-static void trace_function_begin(function_stack_entry *fse, int function_nr TSRMLS_DC)
-{
-	if (XG(do_trace) && XG(trace_file)) {
-		char *t = return_trace_stack_frame_begin(fse, function_nr TSRMLS_CC);
-		if (fprintf(XG(trace_file), "%s", t) < 0) {
-			fclose(XG(trace_file));
-			XG(trace_file) = NULL;
-		} else {
-			fflush(XG(trace_file));
-		}
-		xdfree(t);
-	}
-}
-
-static void trace_function_end(function_stack_entry *fse, int function_nr TSRMLS_DC)
-{
-	if (XG(do_trace) && XG(trace_file)) {
-		char *t = return_trace_stack_frame_end(fse, function_nr TSRMLS_CC);
-		if (fprintf(XG(trace_file), "%s", t) < 0) {
-			fclose(XG(trace_file));
-			XG(trace_file) = NULL;
-		} else {
-			fflush(XG(trace_file));
-		}
-		xdfree(t);
-	}
-}
-
-static function_stack_entry *add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
-{
-	zend_execute_data    *edata = EG(current_execute_data);
-	function_stack_entry *tmp;
-	zend_op              *cur_opcode;
-	zval                **param;
-	int                   i = 0;
-	char                 *aggr_key;
-	int                   aggr_key_len;
-
-	tmp = xdmalloc (sizeof (function_stack_entry));
-	tmp->var           = NULL;
-	tmp->varc          = 0;
-	tmp->refcount      = 1;
-	tmp->level         = XG(level);
-	tmp->arg_done      = 0;
-	tmp->used_vars     = NULL;
-	tmp->user_defined  = type;
-	tmp->filename      = NULL;
-	tmp->include_filename  = NULL;
-	tmp->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
-	tmp->op_array      = op_array;
-	tmp->symbol_table  = NULL;
-	tmp->execute_data  = NULL;
-
-	XG(function_count)++;
-	if (edata && edata->op_array) {
-		/* Normal function calls */
-		tmp->filename  = xdstrdup(edata->op_array->filename);
-	} else if (edata &&
-		edata->prev_execute_data &&
-		XDEBUG_LLIST_TAIL(XG(stack))
-	) {
-		/* Ugly hack for call_user_*() type function calls */
-		zend_function *tmpf = edata->prev_execute_data->function_state.function;
-		if (tmpf && (tmpf->common.type != 3) && tmpf->common.function_name) {
-			if (
-				(strcmp(tmpf->common.function_name, "call_user_func") == 0) ||
-				(strcmp(tmpf->common.function_name, "call_user_func_array") == 0) ||
-				(strcmp(tmpf->common.function_name, "call_user_func_method") == 0) ||
-				(strcmp(tmpf->common.function_name, "call_user_func_method_array") == 0)
-			) {
-				tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
-			}
-		}
-	}
-	if (!tmp->filename) {
-		/* Includes/main script etc */
-		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
-	}
-	/* Call user function locations */
-	if (!tmp->filename && XDEBUG_LLIST_TAIL(XG(stack)) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) ) {
-		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
-	}
-#if HAVE_PHP_MEMORY_USAGE
-	tmp->prev_memory = XG(prev_memory);
-	tmp->memory = XG_MEMORY_USAGE();
-	XG(prev_memory) = tmp->memory;
-#else
-	tmp->memory = 0;
-	tmp->prev_memory = 0;
-#endif
-	tmp->time   = xdebug_get_utime();
-	tmp->lineno = 0;
-
-	xdebug_build_fname(&(tmp->function), zdata TSRMLS_CC);
-	if (!tmp->function.type) {
-		tmp->function.function = xdstrdup("{main}");
-		tmp->function.class    = NULL;
-		tmp->function.type     = XFUNC_NORMAL;
-
-	} else if (tmp->function.type & XFUNC_INCLUDES) {
-		if (EG(opline_ptr)) {
-			cur_opcode = *EG(opline_ptr);
-			tmp->lineno = cur_opcode->lineno;
-		} else {
-			tmp->lineno = 0;
-		}
-
-		if (tmp->function.type == XFUNC_EVAL) {
-			tmp->include_filename = xdebug_sprintf("'%s'", XG(last_eval_statement));
-		} else if (XG(collect_includes)) {
-			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
-		}
-	} else  {
-		if (edata->opline) {
-			cur_opcode = edata->opline;
-			if (cur_opcode) {
-				tmp->lineno = cur_opcode->lineno;
-			}
-		}
-
-		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
-			void **p;
-			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
-
-			/* This calculates how many arguments where sent to a function. It
-			 * works for both internal and user defined functions.
-			 * op_array->num_args works only for user defined functions so
-			 * we're not using that here. */
-#if PHP_VERSION_ID >= 50300
-			void **curpos = NULL;
-			if ((!edata->opline) || ((edata->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (edata->opline->opcode == ZEND_DO_FCALL))) {
-				curpos = edata->function_state.arguments;
-				arguments_sent = (int)(zend_uintptr_t) *curpos;
-				arguments_wanted = arguments_sent;
-				p = curpos - arguments_sent;
-			} else {
-				p = zend_vm_stack_top(TSRMLS_C) - 1;
-				arguments_sent = (ulong) *p;
-				arguments_wanted = arguments_sent;
-				p = curpos = NULL;
-			}
-#else
-			if (EG(argument_stack).top >= 2) {
-				p = EG(argument_stack).top_element - 2;
-				arguments_sent = (ulong) *p;
-				arguments_wanted = arguments_sent;
-			}
-#endif
-
-			if (tmp->user_defined == XDEBUG_EXTERNAL) {
-				arguments_wanted = op_array->num_args;
-			}
-
-			if (arguments_wanted > arguments_sent) {
-				arguments_storage = arguments_wanted;
-			} else {
-				arguments_storage = arguments_sent;
-			}
-			tmp->var = xdmalloc(arguments_storage * sizeof (xdebug_var));
-
-			for (i = 0; i < arguments_sent; i++) {
-				tmp->var[tmp->varc].name = NULL;
-				tmp->var[tmp->varc].addr = NULL;
-
-				/* Because it is possible that more parameters are sent, then
-				 * actually wanted  we can only access the name in case there
-				 * is an associated variable to receive the variable here. */
-				if (tmp->user_defined == XDEBUG_EXTERNAL && i < arguments_wanted) {
-					if (op_array->arg_info[i].name) {
-						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
-					}
-				}
-
-				if (XG(collect_params)) {
-#if PHP_VERSION_ID >= 50300
-					if (p) {
-						param = (zval **) p++;				
-						tmp->var[tmp->varc].addr = *param;
-					}
-#else
-					param = NULL;
-					if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-						if (param) {
-							tmp->var[tmp->varc].addr = *param;
-						}
-					}
-#endif
-				}
-				tmp->varc++;
-			}
-
-			/* Sometimes not enough arguments are send to a user defined
-			 * function, so we have to gather only the name for those extra. */
-			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
-				for (i = arguments_sent; i < arguments_wanted; i++) {
-					if (op_array->arg_info[i].name) {
-						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
-					}
-					tmp->var[tmp->varc].addr = NULL;
-					tmp->varc++;
-				}
-			}
-		}
-	}
-
-	if (XG(do_code_coverage)) {
-		xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
-	}
-
-	if (XG(profiler_aggregate)) {
-		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
-
-		aggr_key = xdebug_sprintf("%s.%s.%d", tmp->filename, func_name, tmp->lineno);
-		aggr_key_len = strlen(aggr_key);
-
-		if (zend_hash_find(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void**)&tmp->aggr_entry) == FAILURE) {
-			xdebug_aggregate_entry xae;
-
-			if (tmp->user_defined == XDEBUG_EXTERNAL) {
-				xae.filename = xdstrdup(tmp->op_array->filename);
-			} else {
-				xae.filename = xdstrdup("php:internal");
-			}
-			xae.function = func_name;
-			xae.lineno = tmp->lineno;
-			xae.user_defined = tmp->user_defined;
-			xae.call_count = 0;
-			xae.time_own = 0;
-			xae.time_inclusive = 0;
-			xae.call_list = NULL;
-
-			zend_hash_add(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void*)&xae, sizeof(xdebug_aggregate_entry), (void**)&tmp->aggr_entry);
-		}
-	}
-
-	if (XDEBUG_LLIST_TAIL(XG(stack))) {
-		function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		tmp->prev = prev;
-		if (XG(profiler_aggregate)) {
-			if (prev->aggr_entry->call_list) {
-				if (!zend_hash_exists(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1)) {
-					zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
-				}
-			} else {
-				prev->aggr_entry->call_list = xdmalloc(sizeof(HashTable));
-				zend_hash_init_ex(prev->aggr_entry->call_list, 1, NULL, NULL, 1, 0);
-				zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
-			}
-		}
-	} else {
-		tmp->prev = 0;
-	}
-	xdebug_llist_insert_next(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
-
-	if (XG(profiler_aggregate)) {
-		xdfree(aggr_key);
-	}
-
-	return tmp;
-}
-
 static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
 {
 	int i = 0; 
@@ -1493,42 +919,73 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	}
 }
 
-static int handle_hit_value(xdebug_brk_info *brk_info)
+static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 {
-	/* If this is a temporary breakpoint, disable the breakpoint */
-	if (brk_info->temporary) {
-		brk_info->disabled = 1;
+	zval *message, *file, *line, *xdebug_message_trace, *previous_exception;
+	zend_class_entry *default_ce, *exception_ce;
+	xdebug_brk_info *extra_brk_info;
+	char *exception_trace;
+	xdebug_str tmp_str = { 0, 0, NULL };
+
+	if (!exception) {
+		return;
 	}
 
-	/* Increase hit counter */
-	brk_info->hit_count++;
+	default_ce = zend_exception_get_default(TSRMLS_C);
+	exception_ce = zend_get_class_entry(exception TSRMLS_CC);
 
-	/* If the hit_value is 0, the condition check is disabled */
-	if (!brk_info->hit_value) {
-		return 1;
+	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
+	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
+	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
+
+	if (Z_TYPE_P(message) != IS_STRING || Z_TYPE_P(file) != IS_STRING || Z_TYPE_P(line) != IS_LONG) {
+		php_error(E_ERROR, "Your exception class uses incorrect types for common properties: 'message' and 'file' need to be a string and 'line' needs to be an integer.");
 	}
 
-	switch (brk_info->hit_condition) {
-		case XDEBUG_HIT_GREATER_EQUAL:
-			if (brk_info->hit_count >= brk_info->hit_value) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_EQUAL:
-			if (brk_info->hit_count == brk_info->hit_value) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_MOD:
-			if (brk_info->hit_count % brk_info->hit_value == 0) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_DISABLED:
-			return 1;
-			break;
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
+	previous_exception = zend_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+	if (previous_exception && Z_TYPE_P(previous_exception) != IS_NULL) {
+		xdebug_message_trace = zend_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1 TSRMLS_CC);
+		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
+			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
+		}
 	}
-	return 0;
+#endif
+	if (!PG(html_errors)) {
+		xdebug_str_addl(&tmp_str, "\n", 1, 0);
+	}
+	xdebug_append_error_description(&tmp_str, PG(html_errors), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+	xdebug_append_printable_stack(&tmp_str, PG(html_errors) TSRMLS_CC);
+	exception_trace = tmp_str.d;
+	zend_update_property_string(default_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace TSRMLS_CC);
+
+	if (XG(last_exception_trace)) {
+		xdfree(XG(last_exception_trace));
+	}
+	XG(last_exception_trace) = exception_trace;
+
+	if (XG(show_ex_trace)) {
+		if (PG(log_errors)) {
+			xdebug_log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+		}
+		if (PG(display_errors)) {
+			php_printf("%s", exception_trace);
+		}
+	}
+
+	/* Start JIT if requested and not yet enabled */
+	xdebug_do_jit(TSRMLS_C);
+
+	if (XG(remote_enabled)) {
+		/* Check if we have a breakpoint on this exception */
+		if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
+			if (xdebug_handle_hit_value(extra_brk_info)) {
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, exception_ce->name, Z_STRVAL_P(message))) {
+					XG(remote_enabled) = 0;
+				}
+			}
+		}
+	}
 }
 
 static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
@@ -1543,7 +1000,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 			/* Yup, breakpoint found, we call the handler when it's not
 			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (handle_hit_value(extra_brk_info)) {
+				if (xdebug_handle_hit_value(extra_brk_info)) {
 					if (fse->user_defined == XDEBUG_INTERNAL || (breakpoint_type == XDEBUG_BRK_FUNC_RETURN)) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, NULL)) {
 							return 0;
@@ -1567,7 +1024,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 			/* Yup, breakpoint found, call handler if the breakpoint is not
 			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (handle_hit_value(extra_brk_info)) {
+				if (xdebug_handle_hit_value(extra_brk_info)) {
 					XG(context).do_break = 1;
 				}
 			}
@@ -1726,10 +1183,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
-	fse = add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
+	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
 
 	function_nr = XG(function_count);
-	trace_function_begin(fse, function_nr TSRMLS_CC);
+	xdebug_trace_function_begin(fse, function_nr TSRMLS_CC);
 
 	fse->symbol_table = EG(active_symbol_table);
 	fse->execute_data = EG(current_execute_data);
@@ -1778,12 +1235,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}
 
-	trace_function_end(fse, function_nr TSRMLS_CC);
+	xdebug_trace_function_end(fse, function_nr TSRMLS_CC);
 
 	/* Store return value in the trace file */
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-			char* t = return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			char* t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
 			fprintf(XG(trace_file), "%s", t);
 			fflush(XG(trace_file));
 			xdfree(t);
@@ -1821,10 +1278,10 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
-	fse = add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
+	fse = xdebug_add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 
 	function_nr = XG(function_count);
-	trace_function_begin(fse, function_nr TSRMLS_CC);
+	xdebug_trace_function_begin(fse, function_nr TSRMLS_CC);
 
 	/* Check for entry breakpoints */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
@@ -1846,14 +1303,14 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
 	}
 
-	trace_function_end(fse, function_nr TSRMLS_CC);
+	xdebug_trace_function_end(fse, function_nr TSRMLS_CC);
 
 	/* Store return value in the trace file */
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(&(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
-			char* t = return_trace_stack_retval(fse, ret TSRMLS_CC);
+			char* t = xdebug_return_trace_stack_retval(fse, ret TSRMLS_CC);
 			fprintf(XG(trace_file), "%s", t);
 			fflush(XG(trace_file));
 			xdfree(t);
@@ -1871,748 +1328,6 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	XG(level)--;
 }
 
-static char* text_formats[10] = {
-	"\n",
-	"%s: %s in %s on line %d\n",
-	"\nCall Stack:\n",
-#if HAVE_PHP_MEMORY_USAGE
-	"%10.4f %10ld %3d. %s(",
-#else
-	"%10.4f %3d. %s(",
-#endif
-	"'%s'",
-	") %s:%d\n",
-	"\n\nVariables in local scope (#%d):\n",
-	"\n",
-	"  $%s = %s\n",
-	"  $%s = *uninitialized*\n"
-};
-
-static char* html_formats[12] = {
-	"<br />\n<font size='1'><table class='xdebug-error' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
-	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
-#if HAVE_PHP_MEMORY_USAGE
-	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
-	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s( ",
-#else
-	"<tr><th align='left' bgcolor='#e9b96e' colspan='4'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
-	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec'>%s( ",
-#endif
-	"<font color='#00bb00'>'%s'</font>",
-	" )</td><td title='%s' bgcolor='#eeeeec'>..%s<b>:</b>%d</td></tr>\n",
-#if HAVE_PHP_MEMORY_USAGE
-	"<tr><th align='left' colspan='5' bgcolor='#e9b96e'>Variables in local scope (#%d)</th></tr>\n",
-#else
-	"<tr><th align='left' colspan='4' bgcolor='#e9b96e'>Variables in local scope (#%d)</th></tr>\n",
-#endif
-	"</table></font>\n",
-	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec'>%s</td></tr>\n",
-	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
-	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>..%s<b>:</b>%d</a></td></tr>\n",
-	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n"
-};
-
-static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
-{
-	int        html = *(int *)htmlq;
-	int        len;
-	zval      *zvar;
-	char      *contents;
-	char      *name = (char*) he->ptr;
-	HashTable *tmp_ht;
-	char     **formats;
-	xdebug_str *str = (xdebug_str *) argument;
-	TSRMLS_FETCH();
-
-	if (!he->ptr) {
-		return;
-	}
-
-	/* Bail out on $this and $GLOBALS */
-	if (strcmp(name, "this") == 0 || strcmp(name, "GLOBALS") == 0) {
-		return;
-	}
-
-	tmp_ht = XG(active_symbol_table);
-	XG(active_symbol_table) = EG(active_symbol_table);
-	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
-	XG(active_symbol_table) = tmp_ht;
-
-	if (html) {
-		formats = html_formats;
-	} else {
-		formats = text_formats;
-	}
-
-	if (!zvar) {
-		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
-		return;
-	}
-
-	if (html) {
-		contents = xdebug_get_zval_value_fancy(NULL, zvar, &len, 0, NULL TSRMLS_CC);
-	} else {
-		contents = xdebug_get_zval_value(zvar, 0, NULL);
-	}
-
-	if (contents) {
-		xdebug_str_add(str, xdebug_sprintf(formats[8], name, contents), 1);
-	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
-	}
-
-	xdfree(contents);
-}
-
-static void log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
-{
-	xdebug_llist_element *le;
-	function_stack_entry *i;
-	char                 *tmp_log_message;
-
-	tmp_log_message = xdebug_sprintf( "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-	php_log_err(tmp_log_message TSRMLS_CC);
-	xdfree(tmp_log_message);
-
-	if (XG(stack) && XG(stack)->size) {
-		php_log_err("PHP Stack trace:" TSRMLS_CC);
-
-		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
-		{
-			int c = 0; /* Comma flag */
-			int j = 0; /* Counter */
-			char *tmp_name;
-			xdebug_str log_buffer = {0, 0, NULL};
-
-			i = XDEBUG_LLIST_VALP(le);
-			tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
-			xdebug_str_add(&log_buffer, xdebug_sprintf("PHP %3d. %s(", i->level, tmp_name), 1);
-			xdfree(tmp_name);
-
-			/* Printing vars */
-			for (j = 0; j < i->varc; j++) {
-				char *tmp_varname, *tmp_value;
-
-				if (c) {
-					xdebug_str_addl(&log_buffer, ", ", 2, 0);
-				} else {
-					c = 1;
-				}
-				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
-				xdebug_str_add(&log_buffer, tmp_varname, 0);
-				xdfree(tmp_varname);
-
-				if (i->var[j].addr) {
-					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-					xdebug_str_add(&log_buffer, tmp_value, 0);
-					xdfree(tmp_value);
-				} else {
-					xdebug_str_addl(&log_buffer, "*uninitialized*", 15, 0);
-				}
-			}
-
-			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
-			php_log_err(log_buffer.d TSRMLS_CC);
-			xdebug_str_free(&log_buffer);
-		}
-	}
-}
-
-static int create_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC)
-{
-	xdebug_str fname = {0, 0, NULL};
-	char      *format = XG(file_link_format);
-	
-	while (*format)
-	{
-		if (*format != '%') {
-			xdebug_str_addl(&fname, (char *) format, 1, 0);
-		} else {
-			format++;
-			switch (*format)
-			{
-				case 'f': /* filename */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", error_filename), 1);
-					break;
-
-				case 'l': /* line number */
-					xdebug_str_add(&fname, xdebug_sprintf("%d", error_lineno), 1);
-					break;
-
-				case '%': /* literal % */
-					xdebug_str_addl(&fname, "%", 1, 0);
-					break;
-			}
-		}
-		format++;
-	}
-	
-	*filename = fname.d;
-
-	return fname.l;
-}
-
-static void xdebug_append_error_head(xdebug_str *str, int html TSRMLS_DC)
-{
-	char **formats = html ? html_formats : text_formats;
- 
-	xdebug_str_add(str, formats[0], 0);
-}
-
-static void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
-{
-	char **formats = html ? html_formats : text_formats;
-
-	if (strlen(XG(file_link_format)) > 0 && html) {
-		char *file_link;
-
-		create_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
-		xdebug_str_add(str, xdebug_sprintf(formats[11], error_type_str, buffer, file_link, error_filename, error_lineno), 1);
-		xdfree(file_link);
-	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[1], error_type_str, buffer, error_filename, error_lineno), 1);
-	}
-}
-
-static void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
-{
-	xdebug_llist_element *le;
-	function_stack_entry *i;
-	int    len;
-	char **formats = html ? html_formats : text_formats;
-
-	if (XG(stack) && XG(stack)->size) {
-		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
-
-		xdebug_str_add(str, formats[2], 0);
-
-		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
-		{
-			int c = 0; /* Comma flag */
-			int j = 0; /* Counter */
-			char *tmp_name;
-			
-			i = XDEBUG_LLIST_VALP(le);
-			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
-			if (html) {
-#if HAVE_PHP_MEMORY_USAGE
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), i->memory, tmp_name), 1);
-#else
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), tmp_name), 1);
-#endif
-			} else {
-#if HAVE_PHP_MEMORY_USAGE
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->time - XG(start_time), i->memory, i->level, tmp_name), 1);
-#else
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->time - XG(start_time), i->level, tmp_name), 1);
-#endif
-			}
-			xdfree(tmp_name);
-
-			/* Printing vars */
-			for (j = 0; j < i->varc; j++) {
-				char *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value;
-				int newlen;
-
-				if (c) {
-					xdebug_str_addl(str, ", ", 2, 0);
-				} else {
-					c = 1;
-				}
-
-				if (i->var[j].name && XG(collect_params) >= 4) {
-					if (html) {
-						xdebug_str_add(str, xdebug_sprintf("<span>$%s = </span>", i->var[j].name), 1);
-					} else {
-						xdebug_str_add(str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
-					}
-				}
-
-				if (i->var[j].addr) {
-					if (html) {
-						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-						tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
-						tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
-						switch (XG(collect_params)) {
-							case 1: // synopsis
-								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_synop_value), 1);
-								break;
-							case 2: // synopsis + full in tooltip
-								xdebug_str_add(str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
-								break;
-							case 3: // full
-							default:
-								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_value), 1);
-								break;
-						}
-						xdfree(tmp_value);
-						efree(tmp_fancy_value);
-						xdfree(tmp_fancy_synop_value);
-					} else {
-						switch (XG(collect_params)) {
-							case 1: // synopsis
-							case 2:
-								tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
-								break;
-							case 3:
-							default:
-								tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-								break;
-						}
-						if (tmp_value) {
-							xdebug_str_add(str, xdebug_sprintf("%s", tmp_value), 1);
-							xdfree(tmp_value);
-						} else {
-							xdebug_str_addl(str, "???", 3, 0);
-						}
-					}
-				} else {
-					xdebug_str_addl(str, "???", 3, 0);
-				}
-			}
-
-			if (i->include_filename) {
-				xdebug_str_add(str, xdebug_sprintf(formats[4], i->include_filename), 1);
-			}
-
-			if (html) {
-				if (strlen(XG(file_link_format)) > 0) {
-					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
-					char *file_link;
-
-					create_file_link(&file_link, i->filename, i->lineno TSRMLS_CC);
-					xdebug_str_add(str, xdebug_sprintf(formats[10], i->filename, file_link, just_filename, i->lineno), 1);
-					xdfree(file_link);
-				} else {
-					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
-
-					xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, just_filename, i->lineno), 1);
-				}
-			} else {
-				xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
-			}
-		}
-
-		if (XG(dump_globals) && !(XG(dump_once) && XG(dumped))) {
-			char *tmp = xdebug_get_printable_superglobals(html TSRMLS_CC);
-
-			if (tmp) {
-				xdebug_str_add(str, tmp, 1);
-			}
-			XG(dumped) = 1;
-		}
-
-		if (XG(show_local_vars) && XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
-			int scope_nr = XG(stack)->size;
-			
-			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-			if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
-				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
-				scope_nr--;
-			}
-			if (i->used_vars && i->used_vars->size) {
-				xdebug_hash *tmp_hash;
-
-				xdebug_str_add(str, xdebug_sprintf(formats[6], scope_nr), 1);
-				tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
-				xdebug_hash_apply_with_argument(tmp_hash, (void*) &html, dump_used_var_with_contents, (void *) str);
-				xdebug_hash_destroy(tmp_hash);
-			}
-		}
-	}
-}
-
-static void xdebug_append_error_footer(xdebug_str *str, int html)
-{
-	char **formats = html ? html_formats : text_formats;
-
-	xdebug_str_add(str, formats[7], 0);
-}
-
-static char *get_printable_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
-{
-	char *prepend_string;
-	char *append_string;
-	xdebug_str str = {0, 0, NULL};
-
-	prepend_string = INI_STR("error_prepend_string");
-	append_string = INI_STR("error_append_string");
-
-	xdebug_str_add(&str, prepend_string ? prepend_string : "", 0);
-	xdebug_append_error_head(&str, html TSRMLS_CC);
-	xdebug_append_error_description(&str, html, error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-	xdebug_append_printable_stack(&str, html TSRMLS_CC);
-	xdebug_append_error_footer(&str, html);
-	xdebug_str_add(&str, append_string ? append_string : "", 0);
-
-	return str.d;
-}
-
-static char* return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *filename, int lineno TSRMLS_DC)
-{
-	int        j = 0;
-	xdebug_str str = {0, 0, NULL};
-	char      *tmp_value;
-
-	if (XG(trace_format) != 0) {
-		return xdstrdup("");
-	}
-
-	xdebug_str_addl(&str, "                    ", 20, 0);
-	if (XG(show_mem_delta)) {
-		xdebug_str_addl(&str, "        ", 8, 0);
-	}
-	for (j = 0; j < i->level; j++) {
-		xdebug_str_addl(&str, "  ", 2, 0);
-	}
-	xdebug_str_addl(&str, "   => ", 6, 0);
-
-	xdebug_str_add(&str, varname, 0);
-
-	if (op[0] != '\0' ) { // pre/post inc/dec ops are special
-		xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
-
-		tmp_value = xdebug_get_zval_value(retval, 0, NULL);
-
-		if (tmp_value) {
-			xdebug_str_add(&str, tmp_value, 1);
-		} else {
-			xdebug_str_addl(&str, "NULL", 4, 0);
-		}
-	}
-	xdebug_str_add(&str, xdebug_sprintf(" %s:%d\n", filename, lineno), 1);
-
-	return str.d;
-}
-
-static char* return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC)
-{
-	int        j = 0; /* Counter */
-	xdebug_str str = {0, 0, NULL};
-	char      *tmp_value;
-
-	if (XG(trace_format) != 0) {
-		return xdstrdup("");
-	}
-
-	xdebug_str_addl(&str, "                    ", 20, 0);
-	if (XG(show_mem_delta)) {
-		xdebug_str_addl(&str, "        ", 8, 0);
-	}
-	for (j = 0; j < i->level; j++) {
-		xdebug_str_addl(&str, "  ", 2, 0);
-	}
-	xdebug_str_addl(&str, "   >=> ", 7, 0);
-
-	tmp_value = xdebug_get_zval_value(retval, 0, NULL);
-	if (tmp_value) {
-		xdebug_str_add(&str, tmp_value, 1);
-	}
-	xdebug_str_addl(&str, "\n", 2, 0);
-
-	return str.d;
-}
-
-static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRMLS_DC)
-{
-	int c = 0; /* Comma flag */
-	int j = 0; /* Counter */
-	char *tmp_name;
-	xdebug_str str = {0, 0, NULL};
-
-	tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
-
-	xdebug_str_add(&str, xdebug_sprintf("%10.4f ", i->time - XG(start_time)), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%10lu ", i->memory), 1);
-	if (XG(show_mem_delta)) {
-		xdebug_str_add(&str, xdebug_sprintf("%+8ld ", i->memory - i->prev_memory), 1);
-	}
-	for (j = 0; j < i->level; j++) {
-		xdebug_str_addl(&str, "  ", 2, 0);
-	}
-	xdebug_str_add(&str, xdebug_sprintf("-> %s(", tmp_name), 1);
-
-	xdfree(tmp_name);
-
-	/* Printing vars */
-	if (XG(collect_params) > 0) {
-		for (j = 0; j < i->varc; j++) {
-			char *tmp_value;
-
-			if (c) {
-				xdebug_str_addl(&str, ", ", 2, 0);
-			} else {
-				c = 1;
-			}
-
-			if (i->var[j].name && XG(collect_params) >= 4) {
-				xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
-			}
-
-			switch (XG(collect_params)) {
-				case 1: // synopsis
-				case 2:
-					tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
-					break;
-				case 3:
-				default:
-					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-					break;
-			}
-			if (tmp_value) {
-				xdebug_str_add(&str, tmp_value, 1);
-			} else {
-				xdebug_str_add(&str, "???", 0);
-			}
-		}
-	}
-
-	if (i->include_filename) {
-		xdebug_str_add(&str, i->include_filename, 0);
-	}
-
-	xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", i->filename, i->lineno), 1);
-
-	return str.d;
-}
-
-#define return_trace_stack_frame_begin_computerized(i,f)  return_trace_stack_frame_computerized((i), (f), 0 TSRMLS_CC)
-#define return_trace_stack_frame_end_computerized(i,f)    return_trace_stack_frame_computerized((i), (f), 1 TSRMLS_CC)
-
-static char* return_trace_stack_frame_computerized(function_stack_entry* i, int fnr, int whence TSRMLS_DC)
-{
-	char *tmp_name;
-	xdebug_str str = {0, 0, NULL};
-
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->level), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", fnr), 1);
-	if (whence == 0) { /* start */
-		tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
-
-		xdebug_str_add(&str, "0\t", 0);
-		xdebug_str_add(&str, xdebug_sprintf("%f\t", i->time - XG(start_time)), 1);
-#if HAVE_PHP_MEMORY_USAGE
-		xdebug_str_add(&str, xdebug_sprintf("%lu\t", i->memory), 1);
-#else
-		xdebug_str_add(&str, "\t", 0);
-#endif
-		xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
-		xdebug_str_add(&str, xdebug_sprintf("%d\t", i->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
-		xdfree(tmp_name);
-
-		if (i->include_filename) {
-			xdebug_str_add(&str, i->include_filename, 0);
-		}
-
-		/* Filename and Lineno (9, 10) */
-		xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d", i->filename, i->lineno), 1);
-
-
-		if (XG(collect_params) > 0) {
-			int j = 0; /* Counter */
-
-			/* Nr of arguments (11) */
-			xdebug_str_add(&str, xdebug_sprintf("\t%d", i->varc), 1);
-
-			/* Arguments (12-...) */
-			for (j = 0; j < i->varc; j++) {
-				char *tmp_value;
-
-				xdebug_str_addl(&str, "\t", 1, 0);
-
-				if (i->var[j].name && XG(collect_params) >= 4) {
-					xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
-				}
-
-				switch (XG(collect_params)) {
-					case 1: // synopsis
-					case 2:
-						tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
-						break;
-					case 3:
-					default:
-						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-						break;
-				}
-				if (tmp_value) {
-					xdebug_str_add(&str, tmp_value, 1);
-				} else {
-					xdebug_str_add(&str, "???", 0);
-				}
-			}
-		}
-
-		/* Trailing \n */
-		xdebug_str_add(&str, "\n", 0);
-
-	} else if (whence == 1) { /* end */
-		xdebug_str_add(&str, "1\t", 0);
-		xdebug_str_add(&str, xdebug_sprintf("%f\t", xdebug_get_utime() - XG(start_time)), 1);
-#if HAVE_PHP_MEMORY_USAGE
-		xdebug_str_add(&str, xdebug_sprintf("%lu\n", XG_MEMORY_USAGE()), 1);
-#else
-		xdebug_str_add(&str, "\n", 0);
-#endif
-	}
-
-	return str.d;
-}
-
-static char* return_trace_stack_frame_begin_html(function_stack_entry* i, int fnr TSRMLS_DC)
-{
-	char *tmp_name;
-	int   j;
-	xdebug_str str = {0, 0, NULL};
-
-	xdebug_str_add(&str, "\t<tr>", 0);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", fnr), 1);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6f</td>", i->time - XG(start_time)), 1);
-#if MEMORY_LIMIT
-	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", i->memory), 1);
-#endif
-	xdebug_str_add(&str, "<td align='left'>", 0);
-	for (j = 0; j < i->level - 1; j++) {
-		xdebug_str_add(&str, "&nbsp; &nbsp;", 0);
-	}
-	xdebug_str_add(&str, "-&gt;</td>", 0);
-
-	tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%s(", tmp_name), 1);
-	xdfree(tmp_name);
-
-	if (i->include_filename) {
-		xdebug_str_add(&str, i->include_filename, 0);
-	}
-
-	xdebug_str_add(&str, xdebug_sprintf(")</td><td>%s:%d</td>", i->filename, i->lineno), 1);
-	xdebug_str_add(&str, "</tr>\n", 0);
-
-	return str.d;
-}
-
-
-static char* return_trace_stack_frame_begin(function_stack_entry* i, int fnr TSRMLS_DC)
-{
-	switch (XG(trace_format)) {
-		case 0:
-			return return_trace_stack_frame_begin_normal(i TSRMLS_CC);
-		case 1:
-			return return_trace_stack_frame_begin_computerized(i, fnr);
-		case 2:
-			return return_trace_stack_frame_begin_html(i, fnr TSRMLS_CC);
-		default:
-			return xdstrdup("");
-	}
-}
-
-
-static char* return_trace_stack_frame_end(function_stack_entry* i, int fnr TSRMLS_DC)
-{
-	switch (XG(trace_format)) {
-		case 1:
-			return return_trace_stack_frame_end_computerized(i, fnr);
-		default:
-			return xdstrdup("");
-	}
-}
-
-static void xdebug_do_jit(TSRMLS_D)
-{
-	if (!XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
-		if (XG(remote_connect_back)) {
-			zval **remote_addr = NULL;
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
-			XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
-		} else {
-			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
-		}
-		if (XG(context).socket >= 0) {
-			XG(remote_enabled) = 0;
-
-			/* Get handler from mode */
-			XG(context).handler = xdebug_handler_get(XG(remote_handler));
-			if (!XG(context).handler) {
-				zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
-			} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_JIT)) {
-				/* The request could not be started, ignore it then */
-			} else {
-				/* All is well, turn off script time outs */
-				zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-				XG(remote_enabled) = 1;
-			}
-		}
-	}
-}
-
-void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
-{
-	zval *message, *file, *line, *xdebug_message_trace, *previous_exception;
-	zend_class_entry *default_ce, *exception_ce;
-	xdebug_brk_info *extra_brk_info;
-	char *exception_trace;
-	xdebug_str tmp_str = { 0, 0, NULL };
-
-	if (!exception) {
-		return;
-	}
-
-	default_ce = zend_exception_get_default(TSRMLS_C);
-	exception_ce = zend_get_class_entry(exception TSRMLS_CC);
-
-	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
-	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
-	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
-
-	if (Z_TYPE_P(message) != IS_STRING || Z_TYPE_P(file) != IS_STRING || Z_TYPE_P(line) != IS_LONG) {
-		php_error(E_ERROR, "Your exception class uses incorrect types for common properties: 'message' and 'file' need to be a string and 'line' needs to be an integer.");
-	}
-
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
-	previous_exception = zend_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
-	if (previous_exception && Z_TYPE_P(previous_exception) != IS_NULL) {
-		xdebug_message_trace = zend_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1 TSRMLS_CC);
-		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
-			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
-		}
-	}
-#endif
-	if (!PG(html_errors)) {
-		xdebug_str_addl(&tmp_str, "\n", 1, 0);
-	}
-	xdebug_append_error_description(&tmp_str, PG(html_errors), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
-	xdebug_append_printable_stack(&tmp_str, PG(html_errors) TSRMLS_CC);
-	exception_trace = tmp_str.d;
-	zend_update_property_string(default_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace TSRMLS_CC);
-
-	if (XG(last_exception_trace)) {
-		xdfree(XG(last_exception_trace));
-	}
-	XG(last_exception_trace) = exception_trace;
-
-	if (XG(show_ex_trace)) {
-		if (PG(log_errors)) {
-			log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
-		}
-		if (PG(display_errors)) {
-			php_printf("%s", exception_trace);
-		}
-	}
-
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
-
-	if (XG(remote_enabled)) {
-		/* Check if we have a breakpoint on this exception */
-		if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
-			if (handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, exception_ce->name, Z_STRVAL_P(message))) {
-					XG(remote_enabled) = 0;
-				}
-			}
-		}
-	}
-}
-
 /* Opcode handler for exit, to be able to clean up the profiler */
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -2623,174 +1338,6 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-/* Error callback for formatting stack traces */
-void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
-{
-	char *buffer, *error_type_str;
-	int buffer_len;
-	xdebug_brk_info *extra_brk_info = NULL;
-	error_handling_t  error_handling;
-	zend_class_entry *exception_class;
-
-	TSRMLS_FETCH();
-
-	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
-
-	error_type_str = xdebug_error_type(type);
-
-	/* Store last error message for error_get_last() */
-	if (PG(last_error_message)) {
-		free(PG(last_error_message));
-	}
-	if (PG(last_error_file)) {
-		free(PG(last_error_file));
-	}
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
-	PG(last_error_type) = type;
-#endif
-	PG(last_error_message) = strdup(buffer);
-	PG(last_error_file) = strdup(error_filename);
-	PG(last_error_lineno) = error_lineno;
-
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
-	error_handling  = EG(error_handling);
-	exception_class = EG(exception_class);
-#else
-	error_handling  = PG(error_handling);
-	exception_class = PG(exception_class);
-#endif
-	/* according to error handling mode, suppress error, throw exception or show it */
-	if (error_handling != EH_NORMAL && EG(in_execution)) {
-		switch (type) {
-			case E_CORE_ERROR:
-			case E_COMPILE_ERROR:
-			case E_PARSE:
-				/* fatal errors are real errors and cannot be made exceptions */
-				break;
-			case E_STRICT:
-				/* for the sake of BC to old damaged code */
-				break;
-			case E_NOTICE:
-			case E_USER_NOTICE:
-				/* notices are no errors and are not treated as such like E_WARNINGS */
-				break;
-			default:
-				/* throw an exception if we are in EH_THROW mode
-				 * but DO NOT overwrite a pending exception
-				 */
-				if (error_handling == EH_THROW && !EG(exception)) {
-					zend_throw_error_exception(exception_class, buffer, 0, type TSRMLS_CC);
-				}
-				efree(buffer);
-				return;
-		}
-	}
-
-	if (EG(error_reporting) & type) {
-		/* Log to logger */
-		if (PG(log_errors)) {
-
-#ifdef PHP_WIN32
-			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
-				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
-			}
-#endif
-			log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-		}
-
-		/* Display errors */
-		if (PG(display_errors)) {
-			char *printable_stack;
-
-			/* We need to see if we have an uncaught exception fatal error now */
-			if (type == E_ERROR && strncmp(buffer, "Uncaught exception", 18) == 0) {
-				xdebug_str str = {0, 0, NULL};
-				char *tmp_buf, *p;
-				
-				/* find first new line */
-				p = strchr(buffer, '\n');
-				/* find last quote */
-				p = ((char *) zend_memrchr(buffer, '\'', p - buffer)) + 1;
-				/* Create new buffer */
-				tmp_buf = calloc(p - buffer + 1, 1);
-				strncpy(tmp_buf, buffer, p - buffer );
-
-				/* Append error */
-				xdebug_append_error_head(&str, PG(html_errors) TSRMLS_CC);
-				xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
-				xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
-				xdebug_str_add(&str, XG(last_exception_trace), 0);
-				xdebug_append_error_footer(&str, PG(html_errors));
-				php_printf("%s", str.d);
-
-				xdfree(str.d);
-				free(tmp_buf);
-			} else {
-				printable_stack = get_printable_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-				php_printf("%s", printable_stack);
-				xdfree(printable_stack);
-			}
-		}
-		if (XG(do_collect_errors)) {
-			char *printable_stack;
-			printable_stack = get_printable_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-			xdebug_llist_insert_next(XG(collected_errors), XDEBUG_LLIST_TAIL(XG(collected_errors)), printable_stack);
-		}
-	}
-
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
-
-	/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
-	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
-		if (xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info)) {
-			if (handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, buffer)) {
-					XG(remote_enabled) = 0;
-				}
-			}
-		}
-	}
-	xdfree(error_type_str);
-
-	/* Bail out if we can't recover */
-	switch (type) {
-		case E_CORE_ERROR:
-		/* no break - intentionally */
-		case E_ERROR:
-#if PHP_VERSION_ID >= 50200 
-		case E_RECOVERABLE_ERROR:
-#endif
-		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
-		case E_COMPILE_ERROR:
-		case E_USER_ERROR:
-			EG(exit_status) = 255;
-#if HAVE_PHP_MEMORY_USAGE
-			/* restore memory limit */
-# if PHP_VERSION_ID >= 50200 
-			zend_set_memory_limit(PG(memory_limit));
-# else
-			AG(memory_limit) = PG(memory_limit);
-# endif
-#endif
-			zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
-			zend_bailout();
-			return;
-	}
-
-	if (PG(track_errors) && EG(active_symbol_table)) {
-		zval *tmp;
-
-		ALLOC_ZVAL(tmp);
-		INIT_PZVAL(tmp);
-		Z_STRVAL_P(tmp) = (char *) estrndup(buffer, buffer_len);
-		Z_STRLEN_P(tmp) = buffer_len;
-		Z_TYPE_P(tmp) = IS_STRING;
-		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
-	}
-
-	efree(buffer);
-}
 
 /* {{{ zend_op_array srm_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
@@ -2820,221 +1367,6 @@ static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sap
 	return SAPI_HEADER_ADD;
 }
 
-/* {{{ proto integet xdebug_get_stack_depth()
-   Returns the stack depth */
-PHP_FUNCTION(xdebug_get_stack_depth)
-{
-	/* We substract one so that the function call to xdebug_get_stack_depth()
-	 * is not part of the returned depth. */
-	RETURN_LONG(XG(stack)->size - 1);
-}
-
-/* {{{ proto array xdebug_get_function_stack()
-   Returns an array representing the current stack */
-PHP_FUNCTION(xdebug_get_function_stack)
-{
-	xdebug_llist_element *le;
-	int                   j;
-	unsigned int          k;
-	zval                 *frame;
-	zval                 *params;
-	char                 *argument;
-
-	array_init(return_value);
-	le = XDEBUG_LLIST_HEAD(XG(stack));
-
-	for (k = 0; k < XG(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
-		function_stack_entry *i = XDEBUG_LLIST_VALP(le);
-
-		if (i->function.function) {
-			if (strcmp(i->function.function, "xdebug_get_function_stack") == 0) {
-				return;
-			}
-		}
-
-		/* Initialize frame array */
-		MAKE_STD_ZVAL(frame);
-		array_init(frame);
-
-		/* Add data */
-		if (i->function.function) {
-			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function, 1);
-		}
-		if (i->function.class) {
-			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class,    1);
-		}
-		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename, 1);
-		add_assoc_long_ex(frame, "line", sizeof("line"), i->lineno);
-
-		/* Add parameters */
-		MAKE_STD_ZVAL(params);
-		array_init(params);
-		for (j = 0; j < i->varc; j++) {
-			if (i->var[j].addr) {
-				argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-			} else {
-				argument = xdstrdup("");
-			}
-			if (i->var[j].name) {
-				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
-			} else {
-				add_index_string(params, j, argument, 1);
-			}
-			xdfree(argument);
-		}
-		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
-
-		if (i->include_filename) {
-			add_assoc_string_ex(frame, "include_filename", sizeof("include_filename"), i->include_filename, 1);
-		}
-
-		add_next_index_zval(return_value, frame);
-	}
-}
-/* }}} */
-
-static void attach_used_var_names(void *return_value, xdebug_hash_element *he)
-{
-	char *name = (char*) he->ptr;
-	
-	add_next_index_string(return_value, name, 1);
-}
-
-/* {{{ proto array xdebug_print_function_stack([string message])
-   Displays a stack trace */
-PHP_FUNCTION(xdebug_print_function_stack)
-{
-	char *message = NULL;
-	int message_len;
-	function_stack_entry *i;
-	char *tmp;
-  
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &message, &message_len) == FAILURE) {
-		return;
-	}
- 
-	i = xdebug_get_stack_frame(0 TSRMLS_CC);
-	if (message) {
-		tmp = get_printable_stack(PG(html_errors), "Xdebug", message, i->filename, i->lineno TSRMLS_CC);
-	} else {
-		tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
-	}
-	php_printf("%s", tmp);
-	xdfree(tmp);
-}
-/* }}} */
-
-/* {{{ proto array xdebug_get_formatted_function_stack()
-   Displays a stack trace */
-PHP_FUNCTION(xdebug_get_formatted_function_stack)
-{
-	function_stack_entry *i;
-	char *tmp;
-
-	i = xdebug_get_stack_frame(0 TSRMLS_CC);
-	tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
-	RETVAL_STRING(tmp, 1);
-	xdfree(tmp);
-}
-/* }}} */
-
-/* {{{ proto array xdebug_get_declared_vars()
-   Returns an array representing the current stack */
-PHP_FUNCTION(xdebug_get_declared_vars)
-{
-	xdebug_llist_element *le;
-	function_stack_entry *i;
-	xdebug_hash *tmp_hash;
-
-	array_init(return_value);
-	le = XDEBUG_LLIST_TAIL(XG(stack));
-	le = XDEBUG_LLIST_PREV(le);
-	i = XDEBUG_LLIST_VALP(le);
-	
-	/* Add declared vars */
-	if (i->used_vars) {
-		tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
-		xdebug_hash_apply(tmp_hash, (void *) return_value, attach_used_var_names);
-		xdebug_hash_destroy(tmp_hash);
-	}
-}
-/* }}} */
-
-/* {{{ proto string xdebug_call_class()
-   Returns the name of the calling class */
-PHP_FUNCTION(xdebug_call_class)
-{
-	function_stack_entry *i;
-	long depth = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
-		return;
-	}
-	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
-	if (i) {
-		RETURN_STRING(i->function.class ? i->function.class : "", 1);
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto string xdebug_call_function()
-   Returns the function name from which the current function was called from. */
-PHP_FUNCTION(xdebug_call_function)
-{
-	function_stack_entry *i;
-	long depth = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
-		return;
-	}
-	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
-	if (i) {
-		RETURN_STRING(i->function.function ? i->function.function : "{}", 1);
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto string xdebug_call_line()
-   Returns the line number where the current function was called from. */
-PHP_FUNCTION(xdebug_call_line)
-{
-	function_stack_entry *i;
-	long depth = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
-		return;
-	}
-	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
-	if (i) {
-		RETURN_LONG(i->lineno);
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
-
-/* {{{ proto int xdebug_call_file()
-   Returns the filename where the current function was called from. */
-PHP_FUNCTION(xdebug_call_file)
-{
-	function_stack_entry *i;
-	long depth = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
-		return;
-	}
-	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
-	if (i) {
-		RETURN_STRING(i->filename, 1);
-	} else {
-		RETURN_FALSE;
-	}
-}
-/* }}} */
 
 /* {{{ proto void xdebug_set_time_limit(void)
    Dummy function to prevent time limit from being set within the script */
@@ -3240,141 +1572,6 @@ PHP_FUNCTION(xdebug_get_headers)
 	xdebug_llist_empty(XG(headers), NULL);
 }
 
-PHP_FUNCTION(xdebug_start_trace)
-{
-	char *fname = NULL;
-	int   fname_len = 0;
-	char *trace_fname;
-	long  options = 0;
-
-	if (XG(do_trace) == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
-			return;
-		}
-
-		if ((trace_fname = xdebug_start_trace(fname, options TSRMLS_CC)) != NULL) {
-			XG(do_trace) = 1;
-			RETVAL_STRING(trace_fname, 1);
-			xdfree(trace_fname);
-			return;
-		} else {
-			php_error(E_NOTICE, "Trace could not be started");
-		}
-
-		XG(do_trace) = 0;
-		RETURN_FALSE;
-	} else {
-		php_error(E_NOTICE, "Function trace already started");
-		RETURN_FALSE;
-	}
-}
-
-char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
-{
-	char *str_time;
-	char *filename;
-	char *tmp_fname = NULL;
-
-	if (fname && strlen(fname)) {
-		filename = xdstrdup(fname);
-	} else {
-		if (!strlen(XG(trace_output_name)) ||
-			xdebug_format_output_filename(&fname, XG(trace_output_name), NULL) <= 0
-		) {
-			/* Invalid or empty xdebug.trace_output_name */
-			return NULL;
-		}
-		filename = xdebug_sprintf("%s/%s", XG(trace_output_dir), fname);
-	}
-	if (options & XDEBUG_TRACE_OPTION_APPEND) {
-		XG(trace_file) = xdebug_fopen(filename, "a", "xt", (char**) &tmp_fname);
-	} else {
-		XG(trace_file) = xdebug_fopen(filename, "w", "xt", (char**) &tmp_fname);
-	}
-	xdfree(filename);
-	if (options & XDEBUG_TRACE_OPTION_COMPUTERIZED) {
-		XG(trace_format) = 1;
-	}
-	if (options & XDEBUG_TRACE_OPTION_HTML) {
-		XG(trace_format) = 2;
-	}
-	if (XG(trace_file)) {
-		if (XG(trace_format) == 1) {
-			fprintf(XG(trace_file), "Version: %s\n", XDEBUG_VERSION);
-			fprintf(XG(trace_file), "File format: 2\n");
-		}
-		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
-			str_time = xdebug_get_time();
-			fprintf(XG(trace_file), "TRACE START [%s]\n", str_time);
-			xdfree(str_time);
-		}
-		if (XG(trace_format) == 2) {
-			fprintf(XG(trace_file), "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
-			fprintf(XG(trace_file), "\t<tr><th>#</th><th>Time</th>");
-#if MEMORY_LIMIT
-			fprintf(XG(trace_file), "<th>Mem</th>");
-#endif
-			fprintf(XG(trace_file), "<th colspan='2'>Function</th><th>Location</th></tr>\n");
-		}
-		XG(do_trace) = 1;
-		XG(tracefile_name) = tmp_fname;
-		return xdstrdup(XG(tracefile_name));
-	}
-	return NULL;
-}
-
-void xdebug_stop_trace(TSRMLS_D)
-{
-	char   *str_time;
-	double  u_time;
-
-	XG(do_trace) = 0;
-	if (XG(trace_file)) {
-		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
-			u_time = xdebug_get_utime();
-			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10.4f " : "\t\t\t%f\t", u_time - XG(start_time));
-#if HAVE_PHP_MEMORY_USAGE
-			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10zu" : "%lu", XG_MEMORY_USAGE());
-#else
-			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10u" : "", 0);
-#endif
-			fprintf(XG(trace_file), "\n");
-			str_time = xdebug_get_time();
-			fprintf(XG(trace_file), "TRACE END   [%s]\n\n", str_time);
-			xdfree(str_time);
-		}
-		if (XG(trace_format) == 2) {
-			fprintf(XG(trace_file), "</table>\n");
-		}
-
-		fclose(XG(trace_file));
-		XG(trace_file) = NULL;
-	}
-	if (XG(tracefile_name)) {
-		xdfree(XG(tracefile_name));
-		XG(tracefile_name) = NULL;
-	}
-}
-
-PHP_FUNCTION(xdebug_stop_trace)
-{
-	if (XG(do_trace) == 1) {
-		RETVAL_STRING(XG(tracefile_name), 1);
-		xdebug_stop_trace(TSRMLS_C);
-	} else {
-		RETVAL_FALSE;
-		php_error(E_NOTICE, "Function trace was not started");
-	}
-}
-
-PHP_FUNCTION(xdebug_get_tracefile_name)
-{
-	if (XG(tracefile_name)) {
-		RETURN_STRING(XG(tracefile_name), 1);
-	} else {
-		RETURN_FALSE;
-	}
-}
 
 PHP_FUNCTION(xdebug_get_profiler_filename)
 {
@@ -3432,54 +1629,6 @@ PHP_FUNCTION(xdebug_time_index)
 {
 	RETURN_DOUBLE(xdebug_get_utime() - XG(start_time));
 }
-
-/*************************************************************************************************************************************/
-#define T(offset) (*(temp_variable *)((char *) Ts + offset))
-
-static zval *get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, int *is_var)
-{
-	switch (node->op_type) {
-		case IS_CONST:
-			return &node->u.constant;
-			break;
-
-		case IS_TMP_VAR:
-			*is_var = 1;
-			return &T(node->u.var).tmp_var;
-			break;
-
-		case IS_VAR:
-			*is_var = 1;
-			if (T(node->u.var).var.ptr) {
-				return T(node->u.var).var.ptr;
-			} else {
-				fprintf(stderr, "\nIS_VAR\n");
-			}
-			break;
-
-		case IS_CV: {
-			zval **tmp;
-			tmp = zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
-			if (tmp) {
-				return *tmp;
-			}
-			break;
-		}
-
-		case IS_UNUSED:
-			fprintf(stderr, "\nIS_UNUSED\n");
-			break;
-
-		default:
-			fprintf(stderr, "\ndefault %d\n", node->op_type);
-			break;
-	}
-
-	*is_var = 1;
-
-	return NULL;
-}
-
 
 ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 {
@@ -3591,7 +1740,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						/* Restore error reporting level */
 						EG(error_reporting) = old_error_reporting;
 					}
-					if (break_ok && handle_hit_value(brk)) {
+					if (break_ok && xdebug_handle_hit_value(brk)) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
 							XG(remote_enabled) = 0;
 							break;

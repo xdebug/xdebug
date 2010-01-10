@@ -72,6 +72,53 @@ char* xdebug_error_type(int type)
 	}
 }
 
+/*************************************************************************************************************************************/
+#define T(offset) (*(temp_variable *)((char *) Ts + offset))
+
+zval *xdebug_get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, int *is_var)
+{
+	switch (node->op_type) {
+		case IS_CONST:
+			return &node->u.constant;
+			break;
+
+		case IS_TMP_VAR:
+			*is_var = 1;
+			return &T(node->u.var).tmp_var;
+			break;
+
+		case IS_VAR:
+			*is_var = 1;
+			if (T(node->u.var).var.ptr) {
+				return T(node->u.var).var.ptr;
+			} else {
+				fprintf(stderr, "\nIS_VAR\n");
+			}
+			break;
+
+		case IS_CV: {
+			zval **tmp;
+			tmp = zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
+			if (tmp) {
+				return *tmp;
+			}
+			break;
+		}
+
+		case IS_UNUSED:
+			fprintf(stderr, "\nIS_UNUSED\n");
+			break;
+
+		default:
+			fprintf(stderr, "\ndefault %d\n", node->op_type);
+			break;
+	}
+
+	*is_var = 1;
+
+	return NULL;
+}
+
 /*****************************************************************************
 ** PHP Variable related utility functions
 */

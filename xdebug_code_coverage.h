@@ -34,8 +34,39 @@ typedef struct xdebug_coverage_file {
 	xdebug_hash *lines;
 } xdebug_coverage_file;
 
+/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
+#define XDEBUG_SET_OPCODE_OVERRIDE_COMMON(oc) \
+	zend_set_user_opcode_handler(oc, xdebug_common_override_handler);
+#define XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(f,oc) \
+	zend_set_user_opcode_handler(oc, xdebug_##f##_handler);
+
+
 void xdebug_coverage_line_dtor(void *data);
 void xdebug_coverage_file_dtor(void *data);
+
+int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS);
+
+#define XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(f) \
+	int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS)
+
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_add);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_sub);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_mul);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_div);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_mod);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_sl);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_sr);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(pre_inc);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(post_inc);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(pre_dec);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(post_dec);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_concat);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_bw_or);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_bw_and);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_bw_xor);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_dim);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_obj);
 
 void xdebug_count_line(char *file, int lineno, int executable, int deadcode TSRMLS_DC);
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC);
