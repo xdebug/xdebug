@@ -24,6 +24,8 @@
 #include "xdebug_superglobals.h"
 #include "xdebug_var.h"
 
+#include "main/php_ini.h"
+
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 static char* text_formats[10] = {
@@ -491,6 +493,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 					zend_throw_error_exception(exception_class, buffer, 0, type TSRMLS_CC);
 				}
 				efree(buffer);
+				xdfree(error_type_str);
 				return;
 		}
 	}
