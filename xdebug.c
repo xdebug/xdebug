@@ -42,7 +42,6 @@
 #include "ext/standard/head.h"
 #include "ext/standard/html.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
 #include "ext/standard/php_string.h"
 #include "php_globals.h"
 #include "ext/standard/php_var.h"
@@ -1123,7 +1122,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			if (XG(remote_connect_back)) {
 				zval **remote_addr = NULL;
 				zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
-				XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
+				if (remote_addr) {
+					XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
+				} else {
+					XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+				}
 			} else {
 				XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 			}
