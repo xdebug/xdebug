@@ -1,3 +1,17 @@
+Wed, Feb 03, 2010 - xdebug 2.1.0beta2
+
+= Fixed bugs:
+	- Fixed memory leak in breakpoint handling.
+	- Fixed bug #528: Core dump generated with remote_connect_back option set
+	  and CLI usage.
+	- Fixed bug #515: declare(ticks) statement confuses code coverage.
+	- Fixed bug #512: DBGP: breakpoint_get doesn't return conditions in its
+	  response.
+	- Possible fix for bug #507/#517: Crashes because of uninitalised header
+	  globals.
+	- Fixed bug #501: Xdebug's variable tracing misses POST_INC and variants.
+
+
 Sun, Jan 03, 2010 - xdebug 2.1.0beta1
 
 + Added features:
