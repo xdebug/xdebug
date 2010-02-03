@@ -16,7 +16,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #endif
 
 #define VERSIONDESC 2,1,0,0
-#define VERSIONSTR  "2.1.0beta2"
+#define VERSIONSTR  "2.1.0beta3-dev"
 
 //Version
 VS_VERSION_INFO VERSIONINFO
@@ -46,7 +46,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Xdebug\0"
             VALUE "ProductVersion", VERSIONSTR
-			VALUE "URL", "http://xdebug.org"
+            VALUE "URL", "http://xdebug.org"
         END
     END
     BLOCK "VarFileInfo"
