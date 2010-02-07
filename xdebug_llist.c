@@ -180,7 +180,6 @@ void xdebug_llist_destroy(xdebug_llist *l, void *user)
 	xdebug_llist_empty(l, user);
 
 	free (l);
-	l = NULL;
 }
 
 /*

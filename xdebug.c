@@ -643,10 +643,12 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 
 		if (e->used_vars) {
 			xdebug_llist_destroy(e->used_vars, NULL);
+			e->used_vars = NULL;
 		}
 
 		if (e->profile.call_list) {
 			xdebug_llist_destroy(e->profile.call_list, NULL);
+			e->profile.call_list = NULL;
 		}
 
 		xdfree(e);
@@ -823,6 +825,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	XG(do_code_coverage) = 0;
 
 	xdebug_hash_destroy(XG(code_coverage));
+	XG(code_coverage) = NULL;
 
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
@@ -837,6 +840,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 
 	xdebug_llist_destroy(XG(collected_errors), NULL);
+	XG(collected_errors) = NULL;
 
 	/* Reset var_dump and set_time_limit to the original function */
 	if (XG(var_dump_overloaded)) {
