@@ -81,6 +81,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 
 int zend_xdebug_initialised = 0;
+int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 
 function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
@@ -296,6 +297,8 @@ PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
+	zend_extension dummy_ext;
+
 	xg->stack                = NULL;
 	xg->level                = 0;
 	xg->do_trace             = 0;
@@ -312,6 +315,16 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_init(&xg->env, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->request, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
+
+	/* Get reserved offset */
+	xg->reserved_offset = zend_get_resource_handle(&dummy_ext);
+
+	/* Override header generation in SAPI */
+	if (sapi_module.header_handler != xdebug_header_handler) {
+		xdebug_orig_header_handler = sapi_module.header_handler;
+		sapi_module.header_handler = xdebug_header_handler;
+	}
+	xg->headers = NULL;
 }
 
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -561,11 +574,13 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
+#ifndef ZTS
+	if (sapi_module.header_handler != xdebug_header_handler) {
+		xdebug_orig_header_handler = sapi_module.header_handler;
+		sapi_module.header_handler = xdebug_header_handler;
+	}
+#endif
 
-	/* Override header generation in SAPI */
-	XG(orig_header_handler) = sapi_module.header_handler;
-	sapi_module.header_handler = xdebug_header_handler;
-	XG(headers) = NULL;
 	return SUCCESS;
 }
 
@@ -1367,9 +1382,9 @@ static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sap
 {
 	if (XG(headers)) {
 		xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
-		if (XG(orig_header_handler)) {
-			return XG(orig_header_handler)(h XG_SAPI_HEADER_OP_CC, s TSRMLS_CC);
-		}
+	}
+	if (xdebug_orig_header_handler) {
+		return xdebug_orig_header_handler(h XG_SAPI_HEADER_OP_CC, s TSRMLS_CC);
 	}
 	return SAPI_HEADER_ADD;
 }

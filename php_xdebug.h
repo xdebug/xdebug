@@ -204,7 +204,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* headers */
 	xdebug_llist *headers;
-	int        (*orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */
