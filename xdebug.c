@@ -685,6 +685,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	zval **dummy;
 	
 	/* get xdebug ini entries from the environment also */
+	XG(ide_key) = NULL;
 	xdebug_env_config();
 	idekey = zend_ini_string("xdebug.idekey", sizeof("xdebug.idekey"), 0);
 
@@ -706,7 +707,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	
+
 	if (idekey && *idekey) {
 		if (XG(ide_key)) {
 			xdfree(XG(ide_key));
