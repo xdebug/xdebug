@@ -662,7 +662,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
 					xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);
 					options->runtime[level].current_element_nr = 0;
-					if (level == 0 && myht->nNumOfElements > options->max_children) {
+					if (level == 0) {
 						options->runtime[level].start_element_nr = options->max_children * options->runtime[level].page;
 						options->runtime[level].end_element_nr = options->max_children * (options->runtime[level].page + 1);
 					} else {
@@ -702,7 +702,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 						xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
 						xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);
 						options->runtime[level].current_element_nr = 0;
-						if (level == 0 && myht->nNumOfElements > options->max_children) {
+						if (level == 0) {
 							options->runtime[level].start_element_nr = options->max_children * options->runtime[level].page;
 							options->runtime[level].end_element_nr = options->max_children * (options->runtime[level].page + 1);
 						} else {
