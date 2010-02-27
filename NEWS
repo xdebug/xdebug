@@ -1,3 +1,13 @@
+Sat, Feb 27, 2010 - xdebug 2.1.0beta3
+
+= Fixed bugs:
+	- Fixed memory corruption issues.
+	- Fixed a threading related issue for code-coverage.
+	- Fixed bug #532: XDebug breaks header() function.
+	- DBGP: Prevent Xdebug from returning properties when a too high page number
+	  has been requested.
+
+
 Wed, Feb 03, 2010 - xdebug 2.1.0beta2
 
 = Fixed bugs:

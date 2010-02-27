@@ -32,21 +32,17 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>beta</state>
-    <version>2.1.0beta2</version>
-    <date>2010-02-03</date>
+    <version>2.1.0beta3</version>
+    <date>2010-02-27</date>
     <notes>
-Wed, Feb 03, 2010 - xdebug 2.1.0beta2
+Sat, Feb 27, 2010 - xdebug 2.1.0beta3
 
 = Fixed bugs:
-	- Fixed memory leak in breakpoint handling.
-	- Fixed bug #528: Core dump generated with remote_connect_back option set
-	  and CLI usage.
-	- Fixed bug #515: declare(ticks) statement confuses code coverage.
-	- Fixed bug #512: DBGP: breakpoint_get doesn't return conditions in its
-	  response.
-	- Possible fix for bug #507/#517: Crashes because of uninitalised header
-	  globals.
-	- Fixed bug #501: Xdebug's variable tracing misses POST_INC and variants.
+	- Fixed memory corruption issues.
+	- Fixed a threading related issue for code-coverage.
+	- Fixed bug #532: XDebug breaks header() function.
+	- DBGP: Prevent Xdebug from returning properties when a too high page number
+	  has been requested.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -135,6 +131,21 @@ Wed, Feb 03, 2010 - xdebug 2.1.0beta2
     </deps>
   </release>
   <changelog>
+   <release>
+    <state>beta</state>
+    <version>2.1.0beta3</version>
+    <date>2010-02-27</date>
+    <notes>
+Sat, Feb 27, 2010 - xdebug 2.1.0beta3
+
+= Fixed bugs:
+	- Fixed memory corruption issues.
+	- Fixed a threading related issue for code-coverage.
+	- Fixed bug #532: XDebug breaks header() function.
+	- DBGP: Prevent Xdebug from returning properties when a too high page number
+	  has been requested.
+    </notes>
+   </release>
    <release>
      <state>beta</state>
      <version>2.1.0beta2</version>
