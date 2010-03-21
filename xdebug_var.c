@@ -582,15 +582,13 @@ static int xdebug_object_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPL
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
-		node = xdebug_xml_node_init("property");
-
 		if (hash_key->nKeyLength != 0) {
 			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
+				node = xdebug_xml_node_init("property");
 				xdebug_xml_add_attribute(node, "name", prop_name);
 			} else {
-				char *tmpname = xdebug_sprintf("{%s}:%s", prop_class_name, prop_name);
-				xdebug_xml_add_attribute(node, "name", tmpname);
+				return 0;
 			}
 
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
