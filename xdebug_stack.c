@@ -511,7 +511,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		}
 
 		/* Display errors */
-		if (PG(display_errors)) {
+		if (PG(display_errors) && !PG(during_request_startup)) {
 			char *printable_stack;
 
 			/* We need to see if we have an uncaught exception fatal error now */
