@@ -81,9 +81,11 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 
 int zend_xdebug_initialised = 0;
+int zend_xdebug_global_offset = -1;
+
 int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 
-function_entry xdebug_functions[] = {
+zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
 	PHP_FE(xdebug_get_function_stack,    NULL)
 	PHP_FE(xdebug_get_formatted_function_stack,    NULL)
@@ -317,7 +319,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 
 	/* Get reserved offset */
-	xg->reserved_offset = zend_get_resource_handle(&dummy_ext);
+	xg->reserved_offset = zend_xdebug_global_offset;
 
 	/* Override header generation in SAPI */
 	if (sapi_module.header_handler != xdebug_header_handler) {
@@ -497,7 +499,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	new_error_cb = xdebug_error_cb;
 
 	/* Get reserved offset */
-	XG(reserved_offset) = zend_get_resource_handle(&dummy_ext);
+	zend_xdebug_global_offset = zend_get_resource_handle(&dummy_ext);
 
 	/* Overload the "exit" opcode */
 	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXIT);
@@ -707,6 +709,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	XG(reserved_offset) = zend_xdebug_global_offset;
 
 	if (idekey && *idekey) {
 		if (XG(ide_key)) {
