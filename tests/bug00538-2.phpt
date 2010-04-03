@@ -29,7 +29,7 @@ array(2) {
     ["function"]=>
     string(6) "{main}"
     ["file"]=>
-    string(48) "%sbug00538-2.php"
+    string(%d) "%sbug00538-2.php"
     ["line"]=>
     int(0)
     ["params"]=>
@@ -41,13 +41,13 @@ array(2) {
     ["function"]=>
     string(4) "call"
     ["file"]=>
-    string(48) "%sbug00538-2.php"
+    string(%d) "%sbug00538-2.php"
     ["line"]=>
     int(14)
     ["params"]=>
     array(3) {
       ["param1"]=>
-      string(29) "'/home/derick/dev/php/xdebug'"
+      string(%d) "'%sxdebug'"
       ["param2"]=>
       string(16) "'candena\\a\\nb'"
       ["param3"]=>

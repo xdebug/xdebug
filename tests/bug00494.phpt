@@ -51,7 +51,7 @@ dbgpRun( $data, $commands );
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="17"></xdebug:message></response>
 
 -> property_get -i 4 -n o
-498: <?xml version="1.0" encoding="iso-8859-1"?>
+%d: <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="o" fullname="$o" address="" type="object" classname="def" children="1" numchildren="2" page="0" pagesize="32"><property name="CLASSNAME" type="string"><![CDATA[def]]></property><property name="arr" fullname="$o-&gt;arr" facet="private" address="" type="null"></property></property></response>
 
 -> detach -i 5

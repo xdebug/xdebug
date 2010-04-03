@@ -11,6 +11,7 @@ xdebug.trace_format=0
 log_errors=1
 error_log=/tmp/bug315.log
 xdebug.collect_params=3
+date.timezone=UTC
 --FILE--
 <?php
 @unlink("/tmp/bug315.log");

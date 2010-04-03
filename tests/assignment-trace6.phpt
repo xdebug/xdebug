@@ -41,7 +41,7 @@ unlink($tf);
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
                          => $tf = '%s' %sassignment-trace6.php:2
-%w%f %w%d     -> foo::test() /home/derick/dev/php/xdebug/tests/assignment-trace6.php:23
+%w%f %w%d     -> foo::test() %sassignment-trace6.php:23
                            => self::foo = array () %sassignment-trace6.php:11
                            => self::foo[] = 42 %sassignment-trace6.php:12
                            => self::var = 'var' %sassignment-trace6.php:13

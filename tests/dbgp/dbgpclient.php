@@ -15,7 +15,7 @@ class DebugClient
 		   2 => array( 'file', '/tmp/error-output.txt', 'a' )
 		);
 
-		$cmd = "/usr/local/php/5.3dev/bin/php -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 /tmp/xdebug-dbgp-test.php";
+		$cmd = "php -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 /tmp/xdebug-dbgp-test.php";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
