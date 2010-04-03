@@ -3,6 +3,7 @@ Test for bug #340 (Segfault while throwing an Exception)
 --INI--
 xdebug.default_enable=1
 html_errors=1
+xdebug.file_link_format=
 --FILE--
 <?php
 class MyException extends Exception
