@@ -29,7 +29,7 @@ class DebugClient
 		// sanitize
 		$read = preg_replace( '@\s(id|address)="\d+?"@', ' \\1=""', $read );
 		$parts = explode( "\0", $read, 2 );
-		echo $parts[0], ': ', $parts[1], "\n\n";
+		echo $parts[1], "\n\n";
 	}
 
 	function runTest( $data, array $commands )
