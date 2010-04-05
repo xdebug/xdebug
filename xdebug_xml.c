@@ -30,10 +30,16 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 	int newlen;
 
 	xdebug_str_addl(output, " ", 1, 0);
-	xdebug_str_add(output, attr->name, 0);
+
+	/* attribute name */
+	tmp = xdebug_xmlize(attr->name, attr->name_len, &newlen);
+	xdebug_str_addl(output, tmp, newlen, 0);
+	efree(tmp);
+
+	/* attribute value */
 	xdebug_str_addl(output, "=\"", 2, 0);
 	if (attr->value) {
-		tmp = xdebug_xmlize(attr->value, strlen(attr->value), &newlen);
+		tmp = xdebug_xmlize(attr->value, attr->value_len, &newlen);
 		xdebug_str_add(output, tmp, 0);
 		efree(tmp);
 	}
@@ -105,7 +111,7 @@ xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag)
 	return xml;
 }
 
-void xdebug_xml_add_attribute_ex(xdebug_xml_node* xml, char *attribute, char *value, int free_name, int free_value)
+void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute, int attribute_len, char *value, int value_len, int free_name, int free_value)
 {
 	xdebug_xml_attribute *attr = xdmalloc(sizeof (xdebug_xml_attribute));
 	xdebug_xml_attribute **ptr;
@@ -113,6 +119,8 @@ void xdebug_xml_add_attribute_ex(xdebug_xml_node* xml, char *attribute, char *va
 	/* Init structure */
 	attr->name = attribute;
 	attr->value = value;
+	attr->name_len = attribute_len;
+	attr->value_len = value_len;
 	attr->next = NULL;
 	attr->free_name = free_name;
 	attr->free_value = free_value;

@@ -513,7 +513,9 @@ static int xdebug_array_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY
 	xdebug_xml_node *parent;
 	xdebug_xml_node *node;
 	xdebug_var_export_options *options;
-	char *name = NULL, *parent_name = NULL, *full_name = NULL;
+	char *name = NULL, *parent_name = NULL;
+	int   name_len = 0;
+	xdebug_str full_name = { 0, 0, NULL };
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
 #endif
@@ -529,33 +531,37 @@ static int xdebug_array_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY
 		node = xdebug_xml_node_init("property");
 	
 		if (hash_key->nKeyLength != 0) {
-			name = xdstrdup(hash_key->arKey);
-			if (!parent_name) {
-				full_name = NULL;
-			} else if (parent_name[0] != '$') {
-				full_name = xdebug_sprintf("$%s['%s']", parent_name, name);
-			} else {
-				full_name = xdebug_sprintf("%s['%s']", parent_name, name);
+			name = xdstrndup(hash_key->arKey, hash_key->nKeyLength);
+			name_len = hash_key->nKeyLength - 1;
+			if (parent_name) {
+				if (parent_name[0] != '$') {
+					xdebug_str_addl(&full_name, "$", 1, 0);
+				}
+				xdebug_str_add(&full_name, parent_name, 0);
+				xdebug_str_addl(&full_name, "['", 2, 0);
+				xdebug_str_addl(&full_name, name, name_len, 0);
+				xdebug_str_addl(&full_name, "']", 2, 0);
 			}
 		} else {
 			name = xdebug_sprintf("%ld", hash_key->h);
-			if (!parent_name) {
-				full_name = NULL;
-			} else if (parent_name[0] != '$') {
-				full_name = xdebug_sprintf("$%s[%s]", parent_name, name);
-			} else {
-				full_name = xdebug_sprintf("%s[%s]", parent_name, name);
+			name_len = strlen(name);
+			if (parent_name) {
+				if (parent_name[0] != '$') {
+					xdebug_str_add(&full_name, xdebug_sprintf("$%s[%s]", parent_name, name), 1);
+				} else {
+					xdebug_str_add(&full_name, xdebug_sprintf("%s[%s]", parent_name, name), 1);
+				}
 			}
 		}
 
-		xdebug_xml_add_attribute_ex(node, "name", name, 0, 1);
-		if (full_name) {
-			xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+		xdebug_xml_add_attribute_exl(node, "name", 4, name, name_len, 0, 1);
+		if (full_name.l) {
+			xdebug_xml_add_attribute_exl(node, "fullname", 8, full_name.d, full_name.l, 0, 1);
 		}
 		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
 		xdebug_xml_add_child(parent, node);
-		xdebug_var_export_xml_node(zv, full_name, node, options, level + 1 TSRMLS_CC);
+		xdebug_var_export_xml_node(zv, full_name.d, node, options, level + 1 TSRMLS_CC);
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
