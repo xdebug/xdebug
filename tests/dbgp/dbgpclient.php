@@ -27,7 +27,9 @@ class DebugClient
 		$read = trim( fread( $conn, 10240 ) );
 
 		// sanitize
-		$read = preg_replace( '@\s(id|address)="\d+?"@', ' \\1=""', $read );
+		$read = preg_replace( '@\s(appid|id|address)="\d+?"@', ' \\1=""', $read );
+		$read = preg_replace( '@\s(idekey)="[^"]+?"@', ' \\1=""', $read );
+		$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
 		$parts = explode( "\0", $read, 2 );
 		echo $parts[1], "\n\n";
 	}
