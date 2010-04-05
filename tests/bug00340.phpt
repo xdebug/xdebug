@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #340 (Segfault while throwing an Exception)
+Test for bug #340: Segfault while throwing an Exception
 --INI--
 xdebug.default_enable=1
 html_errors=1
