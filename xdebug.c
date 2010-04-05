@@ -452,6 +452,11 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		int  tmp_len;
 
 		inc_filename = xdebug_get_zval(execute_data, &opline->op1, execute_data->Ts, &is_var);
+		
+		/* If there is no inc_filename, we're just bailing out instead */
+		if (!inc_filename) {
+			return ZEND_USER_OPCODE_DISPATCH;
+		}
 
 		if (inc_filename->type != IS_STRING) {
 			tmp_inc_filename = *inc_filename;
