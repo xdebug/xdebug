@@ -31,10 +31,10 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
  <date>2010-04-06</date>
- <time>10:46:30</time>
+ <time>10:47:36</time>
  <version>
-  <release>2.1.0rc1</release>
-  <api>2.1.0rc1</api>
+  <release>2.1.0RC1</release>
+  <api>2.1.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -42,7 +42,7 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Apr 06, 2010 - xdebug 2.1.0rc1
+Thu, Apr 06, 2010 - xdebug 2.1.0RC1
 
 = Fixed bugs:
 	- Fixed bug #494: Private attributes of parent class unavailable when
@@ -151,8 +151,8 @@ Thu, Apr 06, 2010 - xdebug 2.1.0rc1
  <changelog>
   <release>
    <version>
-    <release>2.1.0beta3</release>
-    <api>2.1.0beta3</api>
+    <release>2.1.0RC1</release>
+    <api>2.1.0RC1</api>
    </version>
    <stability>
     <release>beta</release>
