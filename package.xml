@@ -31,18 +31,23 @@ Xdebug also provides:
   </description>
   <license>BSD style</license>
   <release>
-    <state>beta</state>
-    <version>2.1.0beta3</version>
-    <date>2010-02-27</date>
-    <notes>
-Sat, Feb 27, 2010 - xdebug 2.1.0beta3
+   <state>beta</state>
+   <version>2.1.0rc1</version>
+   <date>2010-04-06</date>
+   <notes>
+Thu, Apr 06, 2010 - xdebug 2.1.0rc1
 
 = Fixed bugs:
-	- Fixed memory corruption issues.
-	- Fixed a threading related issue for code-coverage.
-	- Fixed bug #532: XDebug breaks header() function.
-	- DBGP: Prevent Xdebug from returning properties when a too high page number
-	  has been requested.
+	- Fixed bug #494: Private attributes of parent class unavailable when
+	  inheriting.
+	- Fixed bug #400: Xdebug shows errors, even when PHP is request startup
+	  mode.
+	- Fixed bug #421: xdebug sends back invalid characters in xml sometimes.
+	- Fixed bug #475: Property names with null chars are not sent fully to the
+	  client.
+	- Fixed bug #480: Issues with the reserved resource in multi threaded
+	  environments (Patch by Francis.Grolemund@netapp.com).
+	- Fixed bug #558: PHP segfaults when running a nested eval.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -131,6 +136,26 @@ Sat, Feb 27, 2010 - xdebug 2.1.0beta3
     </deps>
   </release>
   <changelog>
+   <release>
+    <state>beta</state>
+    <version>2.1.0beta3</version>
+    <date>2010-02-27</date>
+    <notes>
+Thu, Apr 06, 2010 - xdebug 2.1.0rc1
+
+= Fixed bugs:
+	- Fixed bug #494: Private attributes of parent class unavailable when
+	  inheriting.
+	- Fixed bug #400: Xdebug shows errors, even when PHP is request startup
+	  mode.
+	- Fixed bug #421: xdebug sends back invalid characters in xml sometimes.
+	- Fixed bug #475: Property names with null chars are not sent fully to the
+	  client.
+	- Fixed bug #480: Issues with the reserved resource in multi threaded
+	  environments (Patch by Francis.Grolemund@netapp.com).
+	- Fixed bug #558: PHP segfaults when running a nested eval.
+    </notes>
+   </release>
    <release>
     <state>beta</state>
     <version>2.1.0beta3</version>

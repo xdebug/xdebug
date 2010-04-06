@@ -1,3 +1,18 @@
+Thu, Apr 06, 2010 - xdebug 2.1.0rc1
+
+= Fixed bugs:
+	- Fixed bug #494: Private attributes of parent class unavailable when
+	  inheriting.
+	- Fixed bug #400: Xdebug shows errors, even when PHP is request startup
+	  mode.
+	- Fixed bug #421: xdebug sends back invalid characters in xml sometimes.
+	- Fixed bug #475: Property names with null chars are not sent fully to the
+	  client.
+	- Fixed bug #480: Issues with the reserved resource in multi threaded
+	  environments (Patch by Francis.Grolemund@netapp.com).
+	- Fixed bug #558: PHP segfaults when running a nested eval.
+
+
 Sat, Feb 27, 2010 - xdebug 2.1.0beta3
 
 = Fixed bugs:

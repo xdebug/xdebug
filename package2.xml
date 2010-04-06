@@ -30,11 +30,11 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2010-02-27</date>
- <time>16:02:06</time>
+ <date>2010-04-06</date>
+ <time>10:46:30</time>
  <version>
-  <release>2.1.0beta3</release>
-  <api>2.1.0beta3</api>
+  <release>2.1.0rc1</release>
+  <api>2.1.0rc1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -42,14 +42,19 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sat, Feb 27, 2010 - xdebug 2.1.0beta3
+Thu, Apr 06, 2010 - xdebug 2.1.0rc1
 
 = Fixed bugs:
-	- Fixed memory corruption issues.
-	- Fixed a threading related issue for code-coverage.
-	- Fixed bug #532: XDebug breaks header() function.
-	- DBGP: Prevent Xdebug from returning properties when a too high page number
-	  has been requested.
+	- Fixed bug #494: Private attributes of parent class unavailable when
+	  inheriting.
+	- Fixed bug #400: Xdebug shows errors, even when PHP is request startup
+	  mode.
+	- Fixed bug #421: xdebug sends back invalid characters in xml sometimes.
+	- Fixed bug #475: Property names with null chars are not sent fully to the
+	  client.
+	- Fixed bug #480: Issues with the reserved resource in multi threaded
+	  environments (Patch by Francis.Grolemund@netapp.com).
+	- Fixed bug #558: PHP segfaults when running a nested eval.
  </notes>
  <contents>
   <dir name="/">
@@ -144,6 +149,33 @@ Sat, Feb 27, 2010 - xdebug 2.1.0beta3
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.1.0beta3</release>
+    <api>2.1.0beta3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2010-02-27</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Apr 06, 2010 - xdebug 2.1.0rc1
+
+= Fixed bugs:
+	- Fixed bug #494: Private attributes of parent class unavailable when
+	  inheriting.
+	- Fixed bug #400: Xdebug shows errors, even when PHP is request startup
+	  mode.
+	- Fixed bug #421: xdebug sends back invalid characters in xml sometimes.
+	- Fixed bug #475: Property names with null chars are not sent fully to the
+	  client.
+	- Fixed bug #480: Issues with the reserved resource in multi threaded
+	  environments (Patch by Francis.Grolemund@netapp.com).
+	- Fixed bug #558: PHP segfaults when running a nested eval.
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.1.0beta3</release>
