@@ -5,7 +5,7 @@ Test for bug #558: PHP segfaults when running a nested eval.
 $any = 'printf("foo\n");';
 eval('eval($any);');
 ?>
---DONE--
+DONE
 --EXPECT--
 foo
---DONE--
+DONE
