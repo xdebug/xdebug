@@ -90,6 +90,12 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		return;
 	}
 
+#if PHP_VERSION_ID >= 50300
+	if (!EG(active_symbol_table)) {
+		zend_rebuild_symbol_table(TSRMLS_C);
+	}
+#endif
+
 	tmp_ht = XG(active_symbol_table);
 	XG(active_symbol_table) = EG(active_symbol_table);
 	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
