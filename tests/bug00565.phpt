@@ -19,8 +19,8 @@ Fatal error: Uncaught exception 'Exception' in %sbug00565.php on line 4
 Exception:  in %sbug00565.php on line 4
 
 Call Stack:
-    0.0010     666392   1. {main}() %sbug00565.php:0
-    0.0010     666392   2. func() %sbug00565.php:7
+%w%f %w%d   1. {main}() %sbug00565.php:0
+%w%f %w%d   2. func() %sbug00565.php:7
 
 
 Variables in local scope (#2):
