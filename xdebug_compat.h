@@ -22,14 +22,15 @@
 #include "php.h"
 
 #if PHP_MAJOR_VERSION >= 6
-
 void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC);
-
 #else
-
 # include "ext/standard/php_var.h"
 # define xdebug_php_var_dump php_var_dump
+#endif
 
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
+# define zend_memrchr php_zend_memrchr
+void *php_zend_memrchr(const void *s, int c, size_t n);
 #endif
 
 

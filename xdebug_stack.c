@@ -18,6 +18,7 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
+#include "xdebug_compat.h"
 #include "xdebug_profiler.h"
 #include "xdebug_stack.h"
 #include "xdebug_str.h"

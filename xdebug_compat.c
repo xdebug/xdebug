@@ -52,6 +52,24 @@ void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC)
 }
 #endif
 
+#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
+void *php_zend_memrchr(const void *s, int c, size_t n)
+{
+	register unsigned char *e;
+
+	if (n <= 0) {
+		return NULL;
+	}
+
+	for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
+		if (*e == (unsigned char)c) {
+			return (void *)e;
+		}
+	}
+
+	return NULL;
+}
+#endif
 
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
