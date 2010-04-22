@@ -1833,7 +1833,7 @@ ZEND_DLEXPORT zend_extension zend_extension_entry = {
 	XDEBUG_NAME,
 	XDEBUG_VERSION,
 	XDEBUG_AUTHOR,
-	XDEBUG_URL,
+	XDEBUG_URL_FAQ,
 	XDEBUG_COPYRIGHT_SHORT,
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,

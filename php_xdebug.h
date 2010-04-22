@@ -25,6 +25,7 @@
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2010 by Derick Rethans"
 #define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2010"
 #define XDEBUG_URL        "http://xdebug.org"
+#define XDEBUG_URL_FAQ    "http://xdebug.org/docs/faq#api"
 
 #include "php.h"
 
