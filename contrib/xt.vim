@@ -1,7 +1,7 @@
 " Vim syntax file
-" Language:	Diff (context or unified)
-" Maintainer:	Bram Moolenaar <Bram@vim.org>
-" Last Change:	2003 Apr 02
+" Language:	Xdebug trace files (context or unified)
+" Maintainer:	Derick Rethans <derick@xdebug.org>
+" Last Change:	2010 Jun 06
 
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
