@@ -30,31 +30,28 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2010-04-06</date>
- <time>10:47:36</time>
+ <date>2010-06-24</date>
+ <time>22:07:24</time>
  <version>
-  <release>2.1.0RC1</release>
-  <api>2.1.0RC1</api>
+  <release>2.1.0</release>
+  <api>2.1.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Apr 06, 2010 - xdebug 2.1.0RC1
+Tue, Jun 29, 2010 - xdebug 2.1.0
 
 = Fixed bugs:
-	- Fixed bug #494: Private attributes of parent class unavailable when
-	  inheriting.
-	- Fixed bug #400: Xdebug shows errors, even when PHP is request startup
-	  mode.
-	- Fixed bug #421: xdebug sends back invalid characters in xml sometimes.
-	- Fixed bug #475: Property names with null chars are not sent fully to the
-	  client.
-	- Fixed bug #480: Issues with the reserved resource in multi threaded
-	  environments (Patch by Francis.Grolemund@netapp.com).
-	- Fixed bug #558: PHP segfaults when running a nested eval.
+
+	- Fixed bug #562: Incorrect coverage information for closure function
+	  headers.
+	- Fixed bug #566: Xdebug crashes when using conditional breakpoints.
+	- Fixed bug #567: xdebug_debug_zval and xdebug_debug_zval_stdout don&apos;t work
+	  with PHP 5.3. (Patch by Endo Hiroaki).
+	- Fixed bug #570: undefined symbol: zend_memrchr.
  </notes>
  <contents>
   <dir name="/">
@@ -149,6 +146,29 @@ Thu, Apr 06, 2010 - xdebug 2.1.0RC1
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.1.0</release>
+    <api>2.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2010-06-29</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Jun 29, 2010 - xdebug 2.1.0
+
+= Fixed bugs:
+	- Fixed bug #562: Incorrect coverage information for closure function
+	  headers.
+	- Fixed bug #566: Xdebug crashes when using conditional breakpoints.
+	- Fixed bug #567: xdebug_debug_zval and xdebug_debug_zval_stdout don&apos;t work
+	  with PHP 5.3. (Patch by Endo Hiroaki).
+	- Fixed bug #570: undefined symbol: zend_memrchr.
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.1.0RC1</release>
