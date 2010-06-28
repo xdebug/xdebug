@@ -31,7 +31,7 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
  <date>2010-06-24</date>
- <time>22:07:24</time>
+ <time>22:09:55</time>
  <version>
   <release>2.1.0</release>
   <api>2.1.0</api>
@@ -55,6 +55,10 @@ Tue, Jun 29, 2010 - xdebug 2.1.0
  </notes>
  <contents>
   <dir name="/">
+   <dir name="contrib">
+    <file name="tracefile-analyser.php" role="doc" />
+    <file name="xt.vim" role="doc" />
+   </dir> <!-- /contrib -->
    <dir name="debugclient">
     <dir name="build">
      <file name="buildcheck.sh" role="src" />
@@ -62,7 +66,7 @@ Tue, Jun 29, 2010 - xdebug 2.1.0
      <file name="buildconf2.mk" role="src" />
      <file name="clean.mk" role="src" />
      <file name="config-stubs" role="src" />
-    </dir> <!-- //debugclient/build -->
+    </dir> <!-- /debugclient/build -->
     <file name="acinclude.m4" role="src" />
     <file name="buildconf" role="src" />
     <file name="config.guess" role="src" />
@@ -83,7 +87,7 @@ Tue, Jun 29, 2010 - xdebug 2.1.0
     <file name="mkinstalldirs" role="src" />
     <file name="usefulstuff.c" role="src" />
     <file name="usefulstuff.h" role="src" />
-   </dir> <!-- //debugclient -->
+   </dir> <!-- /debugclient -->
    <file name="Changelog" role="doc" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
@@ -130,7 +134,6 @@ Tue, Jun 29, 2010 - xdebug 2.1.0
    <file name="xdebug_var.h" role="src" />
    <file name="xdebug_xml.c" role="src" />
    <file name="xdebug_xml.h" role="src" />
-   <file name="xt.vim" role="doc" />
   </dir> <!-- / -->
  </contents>
  <dependencies>

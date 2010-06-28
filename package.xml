@@ -95,7 +95,11 @@ Tue, Jun 29, 2010 - xdebug 2.1.0
       <file role="doc"  name="LICENSE"/>
       <file role="doc"  name="NEWS"/>
       <file role="doc"  name="README"/>
-      <file role="doc"  name="xt.vim"/>
+
+      <dir name="contrib">
+        <file role="doc"  name="xt.vim"/>
+        <file role="doc"  name="tracefile-analyser.php"/>
+      </dir>
 
       <dir name="debugclient">
         <file role="src" name="acinclude.m4"/>
