@@ -1,3 +1,14 @@
+Fri, Jun 25, 2010 - xdebug 2.1.0
+
+= Fixed bugs:
+
+	- Fixed bug #562: Incorrect coverage information for closure function headers.
+	- Fixed bug #566: Xdebug crashes when using conditional breakpoints.
+	- Fixed bug #567: xdebug_debug_zval and xdebug_debug_zval_stdout don't work
+	  with PHP 5.3. (Patch by Endo Hiroaki).
+	- Fixed bug #570: undefined symbol: zend_memrchr.
+
+
 Thu, Apr 06, 2010 - xdebug 2.1.0rc1
 
 = Fixed bugs:
