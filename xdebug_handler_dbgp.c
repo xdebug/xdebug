@@ -2463,15 +2463,17 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		XG(stdio).php_header_write = NULL;
 	}
 
-	options = (xdebug_var_export_options*) context->options;
-	xdfree(options->runtime);
-	xdfree(context->options);
-	xdebug_hash_destroy(context->function_breakpoints);
-	xdebug_hash_destroy(context->exception_breakpoints);
-	xdebug_hash_destroy(context->eval_id_lookup);
-	xdebug_llist_destroy(context->line_breakpoints, NULL);
-	xdebug_hash_destroy(context->breakpoint_list);
-	xdfree(context->buffer);
+	if (XG(remote_enabled)) {
+		options = (xdebug_var_export_options*) context->options;
+		xdfree(options->runtime);
+		xdfree(context->options);
+		xdebug_hash_destroy(context->function_breakpoints);
+		xdebug_hash_destroy(context->exception_breakpoints);
+		xdebug_hash_destroy(context->eval_id_lookup);
+		xdebug_llist_destroy(context->line_breakpoints, NULL);
+		xdebug_hash_destroy(context->breakpoint_list);
+		xdfree(context->buffer);
+	}
 
 	if (XG(remote_log_file)) {
 		char *timestr = xdebug_get_time();
@@ -2481,6 +2483,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		fclose(XG(remote_log_file));
 		XG(remote_log_file) = NULL;
 	}
+	XG(remote_enabled) = 0;
 	return 1;
 }
 
