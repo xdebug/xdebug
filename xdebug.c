@@ -1560,6 +1560,9 @@ PHP_FUNCTION(xdebug_break)
 	char *file;
 	int   lineno;
 
+	/* Start JIT if requested and not yet enabled */
+	xdebug_do_jit(TSRMLS_C);
+
 	if (XG(remote_enabled)) {
 		file = zend_get_executed_filename(TSRMLS_C);
 		lineno = zend_get_executed_lineno(TSRMLS_C);
