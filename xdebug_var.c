@@ -503,6 +503,311 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 	return str.d;
 }
 
+#ifndef PHP_WIN32
+/*****************************************************************************
+** ANSI colored variable printing routines
+*/
+
+#define ANSI_COLOR_POINTER       "\e[30m"
+#define ANSI_COLOR_BOOL          "\e[35m"
+#define ANSI_COLOR_LONG          "\e[32m"
+#define ANSI_COLOR_NULL          "\e[34m"
+#define ANSI_COLOR_DOUBLE        "\e[33m"
+#define ANSI_COLOR_STRING        "\e[31m"
+#define ANSI_COLOR_EMPTY         "\e[30m"
+#define ANSI_COLOR_ARRAY         "\e[33m"
+#define ANSI_COLOR_OBJECT        "\e[31m"
+#define ANSI_COLOR_RESOURCE      "\e[36m"
+#define ANSI_COLOR_MODIFIER      "\e[32m"
+#define ANSI_COLOR_RESET         "\e[0m"
+#define ANSI_COLOR_BOLD          "\e[1m"
+#define ANSI_COLOR_BOLD_OFF      "\e[22m"
+
+static int xdebug_array_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level, debug_zval;
+	xdebug_str *str;
+	xdebug_var_export_options *options;
+
+	level      = va_arg(args, int);
+	str        = va_arg(args, struct xdebug_str*);
+	debug_zval = va_arg(args, int);
+	options    = va_arg(args, xdebug_var_export_options*);
+
+	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
+		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
+	{
+		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
+
+		if (hash_key->nKeyLength==0) { /* numeric key */
+			xdebug_str_add(str, xdebug_sprintf("[%ld] %s=>%s\n", hash_key->h, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+		} else { /* string key */
+			int newlen = 0;
+			char *tmp, *tmp2;
+			
+			tmp = php_str_to_str(hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
+			tmp2 = php_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
+			if (tmp) {
+				efree(tmp);
+			}
+			xdebug_str_addl(str, "'", 1, 0);
+			if (tmp2) {
+				xdebug_str_addl(str, tmp2, newlen, 0);
+				efree(tmp2);
+			}
+			xdebug_str_add(str, "' =>\n", 0);
+		}
+		xdebug_var_export_ansi(zv, str, level + 1, debug_zval, options TSRMLS_CC);
+	}
+	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
+		xdebug_str_addl(str, "...,\n ", 6, 0);
+	}
+	options->runtime[level].current_element_nr++;
+	return 0;
+}
+
+static int xdebug_object_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	int level, debug_zval;
+	xdebug_str *str;
+	xdebug_var_export_options *options;
+	char *prop_name, *class_name, *modifier;
+
+	level      = va_arg(args, int);
+	str        = va_arg(args, struct xdebug_str*);
+	debug_zval = va_arg(args, int);
+	options    = va_arg(args, xdebug_var_export_options*);
+
+	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
+		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
+	{
+		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
+
+		if (hash_key->nKeyLength != 0) {
+			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &class_name);
+			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s", 
+			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
+			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+		}
+		xdebug_var_export_ansi(zv, str, level + 1, debug_zval, options TSRMLS_CC);
+	}
+	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
+		xdebug_str_addl(str, "...; ", 5, 0);
+	}
+	options->runtime[level].current_element_nr++;
+	return 0;
+}
+
+void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	HashTable *myht;
+	char*     tmp_str;
+	int       tmp_len;
+
+	if (!struc || !(*struc)) {
+		return;
+	}
+	if (debug_zval) {
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+	}
+	
+	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
+
+	switch (Z_TYPE_PP(struc)) {
+		case IS_BOOL:
+			xdebug_str_add(str, xdebug_sprintf("%sbool%s(%s%s%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOOL, Z_LVAL_PP(struc) ? "true" : "false", ANSI_COLOR_RESET), 1);
+			break;
+
+		case IS_NULL:
+			xdebug_str_add(str, xdebug_sprintf("%s%sNULL%s%s", ANSI_COLOR_BOLD, ANSI_COLOR_NULL, ANSI_COLOR_RESET, ANSI_COLOR_BOLD_OFF), 1);
+			break;
+
+		case IS_LONG:
+			xdebug_str_add(str, xdebug_sprintf("%sint%s(%s%ld%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_LVAL_PP(struc), ANSI_COLOR_RESET), 1);
+			break;
+
+		case IS_DOUBLE:
+			xdebug_str_add(str, xdebug_sprintf("%sdouble%s(%s%.*G%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_DOUBLE, (int) EG(precision), Z_DVAL_PP(struc), ANSI_COLOR_RESET), 1);
+			break;
+
+		case IS_STRING:
+			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
+			if (options->no_decoration) {
+				xdebug_str_add(str, tmp_str, 0);
+			} else if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) '%s%s%s'", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
+				               ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET,
+				               ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), 1);
+			} else {
+				xdebug_str_addl(str, "'", 1, 0);
+				xdebug_str_addl(str, xdebug_sprintf("%sstring%s(%s%ld%s) %s%s%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
+				                ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET,
+				                ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), options->max_data, 1);
+				xdebug_str_addl(str, "...'", 4, 0);
+			}
+			efree(tmp_str);
+			break;
+
+		case IS_ARRAY:
+			myht = Z_ARRVAL_PP(struc);
+			if (myht->nApplyCount < 1) {
+				xdebug_str_add(str, xdebug_sprintf("%sarray%s(%s%d%s) {\n", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
+				if (level <= options->max_depth) {
+					options->runtime[level].current_element_nr = 0;
+					options->runtime[level].start_element_nr = 0;
+					options->runtime[level].end_element_nr = options->max_children;
+
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_ansi, 4, level, str, debug_zval, options);
+				} else {
+					xdebug_str_addl(str, "...", 3, 0);
+				}
+				xdebug_str_add(str, xdebug_sprintf("%*s}", (level * 2) - 2 , ""), 1);
+			} else {
+				xdebug_str_add(str, xdebug_sprintf("&%sarray%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
+			}
+			break;
+
+		case IS_OBJECT:
+			myht = Z_OBJPROP_PP(struc);
+			if (myht->nApplyCount < 1) {
+				char *class_name;
+				zend_uint class_name_len;
+
+				zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_OBJECT, class_name, ANSI_COLOR_RESET,
+							Z_OBJ_HANDLE_PP(struc),
+							ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
+				efree(class_name);
+
+				if (level <= options->max_depth) {
+					options->runtime[level].current_element_nr = 0;
+					options->runtime[level].start_element_nr = 0;
+					options->runtime[level].end_element_nr = options->max_children;
+
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_ansi, 4, level, str, debug_zval, options);
+				} else {
+					xdebug_str_addl(str, "...", 3, 0);
+				}
+				xdebug_str_add(str, xdebug_sprintf("%*s}", (level * 2) - 2, ""), 1);
+			} else {
+				xdebug_str_addl(str, "...", 3, 0);
+			}
+			break;
+
+		case IS_RESOURCE: {
+			char *type_name;
+
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("%sresource%s(%s%ld%s) of type (%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
+			               ANSI_COLOR_RESOURCE, Z_LVAL_PP(struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+			break;
+		}
+
+		default:
+			xdebug_str_add(str, xdebug_sprintf("%sNULL%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET), 0);
+			break;
+	}
+
+	xdebug_str_addl(str, "\n", 1, 0);
+}
+
+char* xdebug_get_zval_value_ansi(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	xdebug_str str = {0, 0, NULL};
+	int default_options = 0;
+
+	if (!options) {
+		options = xdebug_var_export_options_from_ini(TSRMLS_C);
+		default_options = 1;
+	}
+
+	xdebug_var_export_ansi(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+
+	if (default_options) {
+		xdfree(options->runtime);
+		xdfree(options);
+	}
+
+	return str.d;
+}
+
+static void xdebug_var_synopsis_ansi(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	HashTable *myht;
+
+	if (!struc || !(*struc)) {
+		return;
+	}
+	if (debug_zval) {
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+	}
+	switch (Z_TYPE_PP(struc)) {
+		case IS_BOOL:
+			xdebug_str_add(str, xdebug_sprintf("%sbool%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
+			break;
+
+		case IS_NULL:
+			xdebug_str_add(str, xdebug_sprintf("%snull%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
+			break;
+
+		case IS_LONG:
+			xdebug_str_add(str, xdebug_sprintf("%sint%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
+			break;
+
+		case IS_DOUBLE:
+			xdebug_str_add(str, xdebug_sprintf("%sdouble%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
+			break;
+
+		case IS_STRING:
+			xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%d%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET), 1);
+			break;
+
+		case IS_ARRAY:
+			myht = Z_ARRVAL_PP(struc);
+			xdebug_str_add(str, xdebug_sprintf("array(%s%d%s)", ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
+			break;
+
+		case IS_OBJECT: {
+			char *class_name;
+			zend_uint class_name_len;
+
+			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("class %s", class_name), 1);
+			break;
+		}
+
+		case IS_RESOURCE: {
+			char *type_name;
+
+			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_LVAL_PP(struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+			break;
+		}
+	}
+}
+
+char* xdebug_get_zval_synopsis_ansi(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	xdebug_str str = {0, 0, NULL};
+	int default_options = 0;
+
+	if (!options) {
+		options = xdebug_var_export_options_from_ini(TSRMLS_C);
+		default_options = 1;
+	}
+
+	xdebug_var_synopsis_ansi(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+
+	if (default_options) {
+		xdfree(options->runtime);
+		xdfree(options);
+	}
+
+	return str.d;
+}
+#endif
+
+
 /*****************************************************************************
 ** XML node printing routines
 */
@@ -1175,3 +1480,4 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 			return xdstrdup("{unknown}");
 	}
 }
+

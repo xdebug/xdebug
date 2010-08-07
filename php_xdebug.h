@@ -38,6 +38,12 @@ extern zend_module_entry xdebug_module_entry;
 
 #define MICRO_IN_SEC 1000000.00
 
+#ifndef PHP_WIN32
+#define OUTPUT_NOT_CHECKED -1
+#define OUTPUT_IS_TTY       1
+#define OUTPUT_NOT_TTY      0
+#endif
+
 #ifdef PHP_WIN32
 #define PHP_XDEBUG_API __declspec(dllexport)
 #else
@@ -80,6 +86,10 @@ PHP_RINIT_FUNCTION(xdebug);
 PHP_RSHUTDOWN_FUNCTION(xdebug);
 PHP_MINFO_FUNCTION(xdebug);
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
+
+#ifndef PHP_WIN32
+int xdebug_is_output_tty();
+#endif
 
 /* call stack functions */
 PHP_FUNCTION(xdebug_get_stack_depth);
@@ -176,6 +186,11 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          display_max_children;
 	long          display_max_data;
 	long          display_max_depth;
+
+#ifndef PHP_WIN32
+	zend_bool     cli_color;
+	int           output_is_tty;
+#endif
 
 	/* used for code coverage */
 	zend_bool     do_code_coverage;

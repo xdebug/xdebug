@@ -292,6 +292,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateLong,   display_max_children, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateLong,   display_max_data,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",           PHP_INI_ALL,    OnUpdateLong,   display_max_depth,    zend_xdebug_globals, xdebug_globals)
+#ifndef PHP_WIN32
+	STD_PHP_INI_ENTRY("xdebug.cli_color",                "0",           PHP_INI_ALL,    OnUpdateBool,   cli_color,            zend_xdebug_globals, xdebug_globals)
+#endif
 
 	/* Scream support */
 	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   do_scream,            zend_xdebug_globals, xdebug_globals)
@@ -308,6 +311,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->do_code_coverage     = 0;
 	xg->breakpoint_count     = 0;
 	xg->ide_key              = NULL;
+	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -423,6 +427,11 @@ void xdebug_env_config()
 		if (strcasecmp(envvar, "remote_cookie_expire_time") == 0) {
 			name = "xdebug.remote_cookie_expire_time";
 		}
+#ifndef PHP_WIN32
+		else if (strcasecmp(envvar, "cli_color") == 0) {
+			name = "xdebug.cli_color";
+		}
+#endif
 
 		if (name) {
 			zend_alter_ini_entry(name, strlen(name) + 1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
@@ -477,6 +486,26 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	return ZEND_USER_OPCODE_DISPATCH;
 }
+
+#ifndef PHP_WIN32
+int xdebug_is_output_tty()
+{
+	if (XG(output_is_tty) == OUTPUT_NOT_CHECKED) {
+		php_stream *output = php_stream_open_wrapper("php://stdout", "w", REPORT_ERRORS, NULL);
+		int fd;
+
+		if (php_stream_cast(output, PHP_STREAM_AS_FD, (void *)&fd, REPORT_ERRORS) == FAILURE) {
+			XG(output_is_tty) = OUTPUT_NOT_TTY;
+		} else if (!isatty(fd)) {
+			XG(output_is_tty) = OUTPUT_NOT_TTY;
+		} else {
+			XG(output_is_tty) = OUTPUT_IS_TTY;
+		}
+		php_stream_close(output);
+	}
+	return (XG(output_is_tty));
+}
+#endif
 
 
 PHP_MINIT_FUNCTION(xdebug)
@@ -584,6 +613,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
+#ifndef PHP_WIN32
+	XG(output_is_tty) = OUTPUT_NOT_CHECKED;
+#endif
+
 #ifndef ZTS
 	if (sapi_module.header_handler != xdebug_header_handler) {
 		xdebug_orig_header_handler = sapi_module.header_handler;
@@ -1436,7 +1469,15 @@ PHP_FUNCTION(xdebug_var_dump)
 			val = xdebug_get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0, NULL TSRMLS_CC);
 			PHPWRITE(val, len);
 			xdfree(val);
-		} else {
+		}
+#ifndef PHP_WIN32
+		else if (XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) {
+			val = xdebug_get_zval_value_ansi((zval*) *args[i], 0, NULL TSRMLS_CC);
+			PHPWRITE(val, strlen(val));
+			xdfree(val);
+		} 
+#endif
+		else {
 			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);
 		}
 	}
@@ -1478,7 +1519,14 @@ PHP_FUNCTION(xdebug_debug_zval)
 				if (PG(html_errors)) {
 					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
-				} else {
+				}
+#ifndef PHP_WIN32
+				else if (XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) {
+					val = xdebug_get_zval_value_ansi(debugzval, 1, NULL TSRMLS_CC);
+					PHPWRITE(val, strlen(val));
+				}
+#endif
+				else {
 					val = xdebug_get_zval_value(debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}

@@ -24,6 +24,7 @@
 #include "xdebug_str.h"
 #include "xdebug_superglobals.h"
 #include "xdebug_var.h"
+#include "php_ini.h"
 
 #include "main/php_ini.h"
 
@@ -45,6 +46,25 @@ static char* text_formats[10] = {
 	"  $%s = %s\n",
 	"  $%s = *uninitialized*\n"
 };
+
+#ifndef PHP_WIN32
+static char* ansi_formats[10] = {
+	"\n",
+	"\e[1m\e[31m%s\e[0m: %s\e[22m in \e[31m%s\e[0m on line \e[32m%d\e[0m\e[22m\n",
+	"\n\e[1mCall Stack:\e[22m\n",
+#if HAVE_PHP_MEMORY_USAGE
+	"%10.4f %10ld %3d. %s(",
+#else
+	"%10.4f %3d. %s(",
+#endif
+	"'%s'",
+	") %s:%d\n",
+	"\n\nVariables in local scope (#%d):\n",
+	"\n",
+	"  $%s = %s\n",
+	"  $%s = *uninitialized*\n"
+};
+#endif
 
 static char* html_formats[12] = {
 	"<br />\n<font size='1'><table class='xdebug-error' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
@@ -69,6 +89,20 @@ static char* html_formats[12] = {
 	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>..%s<b>:</b>%d</a></td></tr>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n"
 };
+
+static char** select_formats(int html TSRMLS_DC) {
+	if (html) {
+		return html_formats;
+	} 
+#ifndef PHP_WIN32
+	else if (XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) {
+		return ansi_formats;
+	}
+#endif
+	else {
+		return text_formats;
+	}
+}
 
 static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
 {
@@ -102,11 +136,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
 	XG(active_symbol_table) = tmp_ht;
 
-	if (html) {
-		formats = html_formats;
-	} else {
-		formats = text_formats;
-	}
+	formats = select_formats(PG(html_errors));
 
 	if (!zvar) {
 		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
@@ -218,14 +248,14 @@ static int create_file_link(char **filename, const char *error_filename, int err
 
 static void xdebug_append_error_head(xdebug_str *str, int html TSRMLS_DC)
 {
-	char **formats = html ? html_formats : text_formats;
+	char **formats = select_formats(html TSRMLS_CC);
  
 	xdebug_str_add(str, formats[0], 0);
 }
 
 void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
-	char **formats = html ? html_formats : text_formats;
+	char **formats = select_formats(html TSRMLS_CC);
 
 	if (strlen(XG(file_link_format)) > 0 && html) {
 		char *file_link;
@@ -243,7 +273,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	int    len;
-	char **formats = html ? html_formats : text_formats;
+	char **formats = select_formats(html TSRMLS_CC);
 
 	if (XG(stack) && XG(stack)->size) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
@@ -388,7 +418,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 static void xdebug_append_error_footer(xdebug_str *str, int html)
 {
-	char **formats = html ? html_formats : text_formats;
+	char **formats = select_formats(html TSRMLS_CC);
 
 	xdebug_str_add(str, formats[7], 0);
 }
