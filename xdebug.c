@@ -488,7 +488,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 #ifndef PHP_WIN32
-int xdebug_is_output_tty()
+int xdebug_is_output_tty(TSRMLS_D)
 {
 	if (XG(output_is_tty) == OUTPUT_NOT_CHECKED) {
 		php_stream *output = php_stream_open_wrapper("php://stdout", "w", REPORT_ERRORS, NULL);
@@ -501,7 +501,6 @@ int xdebug_is_output_tty()
 		} else {
 			XG(output_is_tty) = OUTPUT_IS_TTY;
 		}
-		php_stream_close(output);
 	}
 	return (XG(output_is_tty));
 }

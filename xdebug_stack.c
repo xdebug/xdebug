@@ -136,7 +136,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
 	XG(active_symbol_table) = tmp_ht;
 
-	formats = select_formats(PG(html_errors));
+	formats = select_formats(PG(html_errors) TSRMLS_CC);
 
 	if (!zvar) {
 		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
@@ -416,7 +416,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 	}
 }
 
-static void xdebug_append_error_footer(xdebug_str *str, int html)
+static void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC)
 {
 	char **formats = select_formats(html TSRMLS_CC);
 
@@ -436,7 +436,7 @@ static char *get_printable_stack(int html, const char *error_type_str, char *buf
 	xdebug_append_error_head(&str, html TSRMLS_CC);
 	xdebug_append_error_description(&str, html, error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 	xdebug_append_printable_stack(&str, html TSRMLS_CC);
-	xdebug_append_error_footer(&str, html);
+	xdebug_append_error_footer(&str, html TSRMLS_CC);
 	xdebug_str_add(&str, append_string ? append_string : "", 0);
 
 	return str.d;
@@ -569,7 +569,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
 				xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
 				xdebug_str_add(&str, XG(last_exception_trace), 0);
-				xdebug_append_error_footer(&str, PG(html_errors));
+				xdebug_append_error_footer(&str, PG(html_errors) TSRMLS_CC);
 				php_printf("%s", str.d);
 
 				xdfree(str.d);
