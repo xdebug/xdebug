@@ -493,16 +493,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 int xdebug_is_output_tty(TSRMLS_D)
 {
 	if (XG(output_is_tty) == OUTPUT_NOT_CHECKED) {
-		php_stream *output = php_stream_open_wrapper("php://stdout", "w", REPORT_ERRORS, NULL);
-		int fd;
-
-		if (php_stream_cast(output, PHP_STREAM_AS_FD, (void *)&fd, REPORT_ERRORS) == FAILURE) {
-			XG(output_is_tty) = OUTPUT_NOT_TTY;
-		} else if (!isatty(fd)) {
-			XG(output_is_tty) = OUTPUT_NOT_TTY;
-		} else {
-			XG(output_is_tty) = OUTPUT_IS_TTY;
-		}
+		XG(output_is_tty) = isatty(STDOUT_FILENO);
 	}
 	return (XG(output_is_tty));
 }
