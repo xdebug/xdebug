@@ -528,6 +528,9 @@ static int xdebug_array_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 	int level, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
+	TSRMLS_FETCH();
+#endif
 
 	level      = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
@@ -572,6 +575,9 @@ static int xdebug_object_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TS
 	xdebug_str *str;
 	xdebug_var_export_options *options;
 	char *prop_name, *class_name, *modifier;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
+	TSRMLS_FETCH();
+#endif
 
 	level      = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
