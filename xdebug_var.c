@@ -75,22 +75,26 @@ char* xdebug_error_type(int type)
 /*************************************************************************************************************************************/
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
-zval *xdebug_get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, int *is_var)
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *node, temp_variable *Ts, int *is_var)
 {
-	switch (node->op_type) {
+	switch (node_type) {
 		case IS_CONST:
+#if PHP_VERSION_ID >= 50399
+			return node->zv;
+#else
 			return &node->u.constant;
+#endif
 			break;
 
 		case IS_TMP_VAR:
 			*is_var = 1;
-			return &T(node->u.var).tmp_var;
+			return &T(node->var).tmp_var;
 			break;
 
 		case IS_VAR:
 			*is_var = 1;
-			if (T(node->u.var).var.ptr) {
-				return T(node->u.var).var.ptr;
+			if (T(node->var).var.ptr) {
+				return T(node->var).var.ptr;
 			} else {
 				fprintf(stderr, "\nIS_VAR\n");
 			}
@@ -98,7 +102,7 @@ zval *xdebug_get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, 
 
 		case IS_CV: {
 			zval **tmp;
-			tmp = zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
+			tmp = zend_get_compiled_variable_value(zdata, node->constant);
 			if (tmp) {
 				return *tmp;
 			}
@@ -110,7 +114,7 @@ zval *xdebug_get_zval(zend_execute_data *zdata, znode *node, temp_variable *Ts, 
 			break;
 
 		default:
-			fprintf(stderr, "\ndefault %d\n", node->op_type);
+			fprintf(stderr, "\ndefault %d\n", node_type);
 			break;
 	}
 

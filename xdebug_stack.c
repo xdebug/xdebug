@@ -774,7 +774,11 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 			}
 			tmp->function = xdstrdup(edata->function_state.function->common.function_name);
 		} else {
+#if PHP_VERSION_ID >= 50399
+			switch (edata->opline->extended_value) {
+#else
 			switch (edata->opline->op2.u.constant.value.lval) {
+#endif
 				case ZEND_EVAL:
 					tmp->type = XFUNC_EVAL;
 					break;

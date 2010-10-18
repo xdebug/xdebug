@@ -73,20 +73,30 @@ void *php_zend_memrchr(const void *s, int c, size_t n)
 
 #define T(offset) (*(temp_variable *)((char *) Ts + offset))
 
-zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
+#if PHP_VERSION_ID >= 50399
+zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC)
 {
-	switch (node->op_type) {
+#else
+zval *xdebug_zval_ptr(XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC)
+{
+	int op_type = node->op_type;
+#endif
+	switch (op_type) {
 		case IS_CONST:
+#if PHP_VERSION_ID >= 50399
+			return node->zv;
+#else
 			return &node->u.constant;
+#endif
 			break;
 		case IS_TMP_VAR:
-			return &T(node->u.var).tmp_var;
+			return &T(XDEBUG_ZNODEP_ELEM(node, var)).tmp_var;
 			break;
 		case IS_VAR:
-			if (T(node->u.var).var.ptr) {
-				return T(node->u.var).var.ptr;
+			if (T(XDEBUG_ZNODEP_ELEM(node, var)).var.ptr) {
+				return T(XDEBUG_ZNODEP_ELEM(node, var)).var.ptr;
 			} else {
-				temp_variable *T = &T(node->u.var);
+				temp_variable *T = &T(XDEBUG_ZNODEP_ELEM(node, var));
 				zval *str = T->str_offset.str;
 
 				if (T->str_offset.str->type != IS_STRING

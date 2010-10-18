@@ -33,12 +33,29 @@ void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC);
 void *php_zend_memrchr(const void *s, int c, size_t n);
 #endif
 
+#if PHP_VERSION_ID >= 50399
+# define XDEBUG_ZNODE znode_op
+# define XDEBUG_ZNODE_ELEM(node,var) node.var
+# define XDEBUG_ZNODEP_ELEM(node,var) node->var
+# define XDEBUG_TYPE(t) t##_type
+# define XDEBUG_EXTENDED_VALUE(o) extended_value
+# define XDEBUG_PASS_TWO_DONE (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)
+zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC);
+#else
+# define XDEBUG_ZNODE znode
+# define XDEBUG_ZNODE_ELEM(node,var) node.u.var
+# define XDEBUG_ZNODEP_ELEM(node,var) node->u.var
+# define XDEBUG_TYPE(t) t.op_type
+# define XDEBUG_EXTENDED_VALUE(o) o.u.EA.type
+# define XDEBUG_PASS_TWO_DONE op_array->done_pass_two
+zval *xdebug_zval_ptr(XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC);
+#endif
+
 
 #include "ext/standard/base64.h"
 #define xdebug_base64_encode php_base64_encode
 #define xdebug_base64_decode php_base64_decode
 
-zval *xdebug_zval_ptr(znode *node, temp_variable *Ts TSRMLS_DC);
 
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || (PHP_MAJOR_VERSION >= 6)
 #	define XDEBUG_REFCOUNT refcount__gc

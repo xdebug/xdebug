@@ -155,10 +155,10 @@ DBGP_FUNC(source);
 DBGP_FUNC(stack_depth);
 DBGP_FUNC(stack_get);
 DBGP_FUNC(status);
-
+#if OUTPUTBUFFERING
 DBGP_FUNC(stderr);
 DBGP_FUNC(stdout);
-
+#endif
 DBGP_FUNC(stop);
 DBGP_FUNC(run);
 DBGP_FUNC(step_into);
@@ -198,10 +198,10 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_FUNC_ENTRY(stack_depth,       XDEBUG_DBGP_NONE)
 	DBGP_FUNC_ENTRY(stack_get,         XDEBUG_DBGP_NONE)
 	DBGP_FUNC_ENTRY(status,            XDEBUG_DBGP_POST_MORTEM)
-
+#if OUTPUTBUFFERING
 	DBGP_FUNC_ENTRY(stderr,            XDEBUG_DBGP_NONE)
 	DBGP_FUNC_ENTRY(stdout,            XDEBUG_DBGP_NONE)
-
+#endif
 	DBGP_CONT_FUNC_ENTRY(run,          XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(step_into,    XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(step_out,     XDEBUG_DBGP_NONE)
@@ -1244,6 +1244,7 @@ static int xdebug_send_stream(const char *name, const char *str, uint str_length
 	return 0;
 }
 
+#ifdef OUTPUTBUFFERING
 static int xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 {
 	/* nesting_level is zero when final output is sent to sapi */
@@ -1319,7 +1320,7 @@ DBGP_FUNC(stdout)
 
 	xdebug_xml_add_attribute_ex(*retval, "success", xdstrdup(success), 0, 1);
 }
-
+#endif
 
 DBGP_FUNC(stop)
 {
@@ -2039,7 +2040,7 @@ DBGP_FUNC(xcmd_get_executable_lines)
 	}
 
 	lines = xdebug_xml_node_init("xdebug:lines");
-	for (i = 0; i < fse->op_array->size; i++ ) {
+	for (i = 0; i < fse->op_array->last; i++ ) {
 		if (fse->op_array->opcodes[i].opcode == ZEND_EXT_STMT ) {
 			line = xdebug_xml_node_init("xdebug:line");
 			xdebug_xml_add_attribute_ex(line, "lineno", xdebug_sprintf("%lu", fse->op_array->opcodes[i].lineno), 0, 1);
@@ -2340,11 +2341,13 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	XG(lastcmd) = NULL;
 	XG(lasttransid) = NULL;
 
+#if OUTPUT_BUFFERING
 	XG(stdout_redirected) = 0;
 	XG(stderr_redirected) = 0;
 	XG(stdin_redirected) = 0;
 	XG(stdio).php_body_write = NULL;
 	XG(stdio).php_header_write = NULL;
+#endif
 
 	/* initialize remote log file */
 	XG(remote_log_file) = NULL;
@@ -2455,6 +2458,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	
 		xdebug_dbgp_cmdloop(context, 0 TSRMLS_CC);
 	}
+#if OUTPUT_BUFFERING
 	if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
 		OG(php_body_write) = XG(stdio).php_body_write;
 		OG(php_header_write) = XG(stdio).php_header_write;
@@ -2462,7 +2466,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		XG(stdio).php_body_write = NULL;
 		XG(stdio).php_header_write = NULL;
 	}
-
+#endif
 	if (XG(remote_enabled)) {
 		options = (xdebug_var_export_options*) context->options;
 		xdfree(options->runtime);

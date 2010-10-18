@@ -456,13 +456,17 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = execute_data->opline;
 
+#if PHP_VERSION_ID >= 50399
+	if (opline->extended_value == ZEND_EVAL) {
+#else
 	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
+#endif
 		zval *inc_filename;
 		zval tmp_inc_filename;
 		int  is_var;
 		int  tmp_len;
 
-		inc_filename = xdebug_get_zval(execute_data, &opline->op1, execute_data->Ts, &is_var);
+		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, execute_data->Ts, &is_var);
 		
 		/* If there is no inc_filename, we're just bailing out instead */
 		if (!inc_filename) {
@@ -718,7 +722,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	zend_function *orig;
 	char *idekey;
 	zval **dummy;
-	
+
 	/* get xdebug ini entries from the environment also */
 	XG(ide_key) = NULL;
 	xdebug_env_config();
@@ -958,16 +962,16 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	}
 
 	/* opcode scanning time */
-	while (i < op_array->size) {
+	while (i < op_array->last) {
 		char *cv = NULL;
 		int cv_len;
 
-		if (op_array->opcodes[i].op1.op_type == IS_CV) {
-			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.u.var, &cv_len);
+		if (op_array->opcodes[i].XDEBUG_TYPE(op1) == IS_CV) {
+			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op1,var), &cv_len);
 			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
-		if (op_array->opcodes[i].op2.op_type == IS_CV) {
-			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.u.var, &cv_len);
+		if (op_array->opcodes[i].XDEBUG_TYPE(op2) == IS_CV) {
+			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op2,var), &cv_len);
 			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
 		i++;
@@ -1370,11 +1374,13 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
-			zval *ret = xdebug_zval_ptr(&(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
-			char* t = xdebug_return_trace_stack_retval(fse, ret TSRMLS_CC);
-			fprintf(XG(trace_file), "%s", t);
-			fflush(XG(trace_file));
-			xdfree(t);
+			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
+			if (ret) {
+				char* t = xdebug_return_trace_stack_retval(fse, ret TSRMLS_CC);
+				fprintf(XG(trace_file), "%s", t);
+				fflush(XG(trace_file));
+				xdfree(t);
+			}
 		}
 	}
 
@@ -1399,7 +1405,6 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-
 /* {{{ zend_op_array srm_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
 zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
@@ -1409,7 +1414,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		if (XG(do_code_coverage) && XG(code_coverage_unused && op_array->done_pass_two)) {
+		if (XG(do_code_coverage) && XG(code_coverage_unused && XDEBUG_PASS_TWO_DONE)) {
 			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
 		}
 	}

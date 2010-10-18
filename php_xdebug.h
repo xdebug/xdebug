@@ -259,7 +259,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *lasttransid;
 
 	/* output redirection */
+#ifdef OUTPUTBUFFERING
 	php_output_globals stdio;
+#endif
 	int stdout_redirected;
 	int stderr_redirected;
 	int stdin_redirected;
