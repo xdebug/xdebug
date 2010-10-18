@@ -22,7 +22,7 @@ xdebug.trace_format=0
 	}
 
 	$array = array("te\"st's" => 42);
-	foo($array);
+	$a = foo($array);
 
 	echo file_get_contents($tf);
 	unlink($tf);
