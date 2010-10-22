@@ -88,13 +88,22 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *nod
 
 		case IS_TMP_VAR:
 			*is_var = 1;
+#if PHP_VERSION_ID >= 50399
 			return &T(node->var).tmp_var;
+#else
+			return &T(node->u.var).tmp_var;
+#endif
 			break;
 
 		case IS_VAR:
 			*is_var = 1;
+#if PHP_VERSION_ID >= 50399
 			if (T(node->var).var.ptr) {
 				return T(node->var).var.ptr;
+#else
+			if (T(node->u.var).var.ptr) {
+				return T(node->u.var).var.ptr;
+#endif
 			} else {
 				fprintf(stderr, "\nIS_VAR\n");
 			}
@@ -102,7 +111,11 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *nod
 
 		case IS_CV: {
 			zval **tmp;
+#if PHP_VERSION_ID >= 50399
 			tmp = zend_get_compiled_variable_value(zdata, node->constant);
+#else
+			tmp = zend_get_compiled_variable_value(zdata, node->u.constant.value.lval);
+#endif
 			if (tmp) {
 				return *tmp;
 			}

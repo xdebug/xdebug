@@ -466,7 +466,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		int  is_var;
 		int  tmp_len;
 
-		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, execute_data->Ts, &is_var);
+		inc_filename = xdebug_get_zval(execute_data, opline->XDEBUG_TYPE(op1), &opline->op1, execute_data->Ts, &is_var);
 		
 		/* If there is no inc_filename, we're just bailing out instead */
 		if (!inc_filename) {
@@ -1374,7 +1374,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
-			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
+			zval *ret = xdebug_zval_ptr(cur_opcode->XDEBUG_TYPE(result), &(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
 			if (ret) {
 				char* t = xdebug_return_trace_stack_retval(fse, ret TSRMLS_CC);
 				fprintf(XG(trace_file), "%s", t);

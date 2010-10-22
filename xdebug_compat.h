@@ -40,7 +40,6 @@ void *php_zend_memrchr(const void *s, int c, size_t n);
 # define XDEBUG_TYPE(t) t##_type
 # define XDEBUG_EXTENDED_VALUE(o) extended_value
 # define XDEBUG_PASS_TWO_DONE (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)
-zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC);
 #else
 # define XDEBUG_ZNODE znode
 # define XDEBUG_ZNODE_ELEM(node,var) node.u.var
@@ -48,9 +47,9 @@ zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_
 # define XDEBUG_TYPE(t) t.op_type
 # define XDEBUG_EXTENDED_VALUE(o) o.u.EA.type
 # define XDEBUG_PASS_TWO_DONE op_array->done_pass_two
-zval *xdebug_zval_ptr(XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC);
 #endif
 
+zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC);
 
 #include "ext/standard/base64.h"
 #define xdebug_base64_encode php_base64_encode
