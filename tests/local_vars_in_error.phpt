@@ -30,7 +30,7 @@ Call Stack:
 
 
 Variables in local scope (#2):
-  $d = class stdClass {  }
   $a = 5
-  $c = array (0 => 5, 1 => 36)
   $b = 6
+  $c = array (0 => 5, 1 => 36)
+  $d = class stdClass {  }

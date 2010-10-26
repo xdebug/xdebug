@@ -31,8 +31,8 @@ Call Stack:
 
 Variables in local scope (#2):
   $a = 4
-  $c = *uninitialized*
   $b = array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))
+  $c = *uninitialized*
 
 
 Fatal error: Call to undefined function%sfoo() in /%s/test6.php on line 4
@@ -44,5 +44,5 @@ Call Stack:
 
 Variables in local scope (#2):
   $a = 4
-  $c = *uninitialized*
   $b = array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))
+  $c = *uninitialized*
