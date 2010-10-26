@@ -80,7 +80,7 @@ array(5) {
       ["line"]=>
       string(2) "32"
       ["context"]=>
-      string(%d) "array ('GLOBALS' => ..., '_ENV' => array ('%s' => '%s', '%s' => '%s', ...), ...)"
+      string(%d) "array (%s)"
     }
   }
   [2]=>
