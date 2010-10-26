@@ -3,26 +3,7 @@ Test for bug #494: Private attributes of parent class unavailable when inheritin
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-$data = <<<'NOWDOC'
-<?php
-class abc {
-        private $arr;
-        public function abc(){
-                $this->arr = array(
-                        0 => array("some", "values"),
-                        1 => array("some", "more", "values")
-                );
-        }
-}
-
-class def extends abc {
-        private $arr;
-}
-
-$o = new def;
-echo "o: ";
-var_dump($o);
-NOWDOC;
+$data = file_get_contents(dirname(__FILE__) . '/bug00494.inc');
 
 $commands = array(
 	'step_into',

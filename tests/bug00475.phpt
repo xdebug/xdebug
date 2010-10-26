@@ -3,10 +3,10 @@ Test for bug #475: Property names with null chars are not sent fully to the clie
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-$data = <<<'NOWDOC'
+$data = <<<NOWDOC
 <?php
-$a = array( "example\0key" => "Value", "example" => "value\0key" );
-var_dump( $a );
+\$a = array( "example\0key" => "Value", "example" => "value\0key" );
+var_dump( \$a );
 NOWDOC;
 
 $commands = array(
