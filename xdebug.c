@@ -1743,7 +1743,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	function_stack_entry *fse;
 	int                   lineno;
 	char                 *file;
-	int                   file_len = 0;
 	int                   level = 0;
 	TSRMLS_FETCH();
 
@@ -1754,7 +1753,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	lineno = EG(current_execute_data)->opline->lineno;
 
 	file = op_array->filename;
-	file_len = strlen(file);
 
 	if (XG(do_code_coverage)) {
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
@@ -1814,6 +1812,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			int   break_ok;
 			int   old_error_reporting;
 			zval  retval;
+			int   file_len = strlen(file);
 
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
