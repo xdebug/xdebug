@@ -193,6 +193,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 #endif
 
 	/* used for code coverage */
+	zend_bool     coverage_enable;
 	zend_bool     do_code_coverage;
 	xdebug_hash  *code_coverage;
 	zend_bool     code_coverage_unused;

@@ -551,12 +551,15 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	XG(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
 	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
 
-	if (XG(extended_info)) {
-		RETVAL_BOOL(!XG(do_code_coverage));
-		XG(do_code_coverage) = 1;
-	} else {
+	if (!XG(extended_info)) {
 		php_error(E_WARNING, "You can only use code coverage when you leave the setting of 'xdebug.extended_info' to the default '1'.");
-		RETVAL_BOOL(0);
+		RETURN_FALSE;
+	} else if (!XG(code_coverage)) {
+		php_error(E_WARNING, "Code coverage needs to be enabled in php.ini by setting 'xdebug.coverage_enable' to '1'.");
+		RETURN_FALSE;
+	} else {
+		XG(do_code_coverage) = 1;
+		RETURN_TRUE;
 	}
 }
 

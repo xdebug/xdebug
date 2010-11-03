@@ -3,6 +3,8 @@ Test for bug #562: Incorrect coverage information for closure function headers
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 <?php if(version_compare(phpversion(), "5.3.0", '<')) echo "skip PHP 5.3 needed\n"; ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 
