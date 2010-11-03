@@ -17,14 +17,15 @@ xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
 xdebug.extended_info=1
+xdebug.coverage_enable=1
 --FILE--
 <?php
     xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
 
 	include 'bug00472.inc';
     $cc = xdebug_get_code_coverage();
-	array_shift($cc);
-	var_dump($cc);
+	ksort($cc);
+	var_dump(array_slice($cc, 0, 1));
 
     xdebug_stop_code_coverage(false);
 ?>

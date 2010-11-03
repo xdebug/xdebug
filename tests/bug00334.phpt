@@ -14,18 +14,13 @@ xdebug.trace_format=0
 xdebug_start_code_coverage(XDEBUG_CC_DEAD_CODE | XDEBUG_CC_UNUSED);
 // MUST be both code coverage options to cause problems
 include(dirname(__FILE__).'/bug00334.inc'); // File with problem in it.
-var_dump(xdebug_get_code_coverage());
+$c = xdebug_get_code_coverage();
+ksort($c);
+var_dump($c);
 xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 array(2) {
-  ["%sbug00334.php"]=>
-  array(2) {
-    [5]=>
-    int(1)
-    [6]=>
-    int(1)
-  }
   ["%sbug00334.inc"]=>
   array(3) {
     [5]=>
@@ -33,6 +28,13 @@ array(2) {
     [7]=>
     int(-1)
     [9]=>
+    int(1)
+  }
+  ["%sbug00334.php"]=>
+  array(2) {
+    [5]=>
+    int(1)
+    [6]=>
     int(1)
   }
 }
