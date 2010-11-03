@@ -132,6 +132,9 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	char                 *tmp_fname, *tmp_name;
 	int                   default_lineno = 0;
 
+	if (!fse->profile.call_list) {
+		fse->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
+	}
 	xdebug_profiler_function_push(fse);
 	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 	switch (fse->function.type) {

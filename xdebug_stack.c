@@ -822,7 +822,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->user_defined  = type;
 	tmp->filename      = NULL;
 	tmp->include_filename  = NULL;
-	tmp->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
+	tmp->profile.call_list = NULL;
 	tmp->op_array      = op_array;
 	tmp->symbol_table  = NULL;
 	tmp->execute_data  = NULL;
