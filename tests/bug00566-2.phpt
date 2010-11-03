@@ -7,27 +7,7 @@ xdebug.collect_assignments=0
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-$data = <<<'NOWDOC'
-<?php
-
-function loadMod( $module )
-{
-	strlen( $module );
-	$module .= 's';
-	strlen( $module );
-}
-
-function loadFoo( $test )
-{
-	strlen( $test );
-	$test .= 's';
-	strlen( $test );
-}
-
-loadFoo( 'view' );
-loadMod( 'test' );
-loadMod( 'view' );
-NOWDOC;
+$data = file_get_contents(dirname(__FILE__) . '/bug00566-2.inc');
 
 $commands = array(
 	'step_into',

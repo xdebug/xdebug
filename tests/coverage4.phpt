@@ -24,7 +24,9 @@ xdebug.extended_info=1
 	include 'coverage4.inc';
 
     xdebug_stop_code_coverage(false);
-    var_dump(xdebug_get_code_coverage());
+    $c = xdebug_get_code_coverage();
+	ksort($c);
+	var_dump($c);
 ?>
 --EXPECTF--
 array(2) {

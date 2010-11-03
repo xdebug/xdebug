@@ -22,8 +22,8 @@ xdebug.extended_info=1
 
 	include 'bug00515.inc';
 	$cc = xdebug_get_code_coverage();
-	array_shift($cc);
-	var_dump($cc);
+	ksort($cc);
+	var_dump(array_slice($cc, 0, 1));
 
 	xdebug_stop_code_coverage(false);
 ?>

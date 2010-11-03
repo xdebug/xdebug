@@ -15,163 +15,25 @@ xdebug.overload_var_dump=0
 <?php
 	class TimeStuff {
 		private $timestamp;
-		private $user_defined;
-		private $self;
-		protected $tm;
-		public $date;
 
 		function TimeStuff($ts = null)
 		{
-			$this->self = &$this;
 			$this->timestamp = $ts === null ? time() : $ts;
-			$this->user_defined = ($ts !== null);
-			$this->date = date("Y-m-d H:i:s T", $this->timestamp);
-			$this->tm = getdate($this->timestamp);
 		}
 	}
 
 	$ts1 = new TimeStuff(1092515106);
 
 	var_dump($ts1);
-	ini_set('xdebug.overload_var_dump', 1);
+	ini_set('xdebug.overload_var_dump', 1); // has no effect, because it's INI_SYSTEM/INI_PERDIR
 	var_dump($ts1);
 ?>
---EXPECT--
-object(TimeStuff)#1 (5) {
-  ["timestamp":"TimeStuff":private]=>
+--EXPECTF--
+object(TimeStuff)#1 (1) {
+  ["timestamp%sprivat%s]=>
   int(1092515106)
-  ["user_defined":"TimeStuff":private]=>
-  bool(true)
-  ["self":"TimeStuff":private]=>
-  object(TimeStuff)#1 (5) {
-    ["timestamp":"TimeStuff":private]=>
-    int(1092515106)
-    ["user_defined":"TimeStuff":private]=>
-    bool(true)
-    ["self":"TimeStuff":private]=>
-    *RECURSION*
-    ["tm":protected]=>
-    array(11) {
-      ["seconds"]=>
-      int(6)
-      ["minutes"]=>
-      int(25)
-      ["hours"]=>
-      int(22)
-      ["mday"]=>
-      int(14)
-      ["wday"]=>
-      int(6)
-      ["mon"]=>
-      int(8)
-      ["year"]=>
-      int(2004)
-      ["yday"]=>
-      int(226)
-      ["weekday"]=>
-      string(8) "Saturday"
-      ["month"]=>
-      string(6) "August"
-      [0]=>
-      int(1092515106)
-    }
-    ["date"]=>
-    string(24) "2004-08-14 22:25:06 CEST"
-  }
-  ["tm":protected]=>
-  array(11) {
-    ["seconds"]=>
-    int(6)
-    ["minutes"]=>
-    int(25)
-    ["hours"]=>
-    int(22)
-    ["mday"]=>
-    int(14)
-    ["wday"]=>
-    int(6)
-    ["mon"]=>
-    int(8)
-    ["year"]=>
-    int(2004)
-    ["yday"]=>
-    int(226)
-    ["weekday"]=>
-    string(8) "Saturday"
-    ["month"]=>
-    string(6) "August"
-    [0]=>
-    int(1092515106)
-  }
-  ["date"]=>
-  string(24) "2004-08-14 22:25:06 CEST"
 }
-object(TimeStuff)#1 (5) {
-  ["timestamp":"TimeStuff":private]=>
+object(TimeStuff)#1 (1) {
+  ["timestamp%sprivat%s]=>
   int(1092515106)
-  ["user_defined":"TimeStuff":private]=>
-  bool(true)
-  ["self":"TimeStuff":private]=>
-  object(TimeStuff)#1 (5) {
-    ["timestamp":"TimeStuff":private]=>
-    int(1092515106)
-    ["user_defined":"TimeStuff":private]=>
-    bool(true)
-    ["self":"TimeStuff":private]=>
-    *RECURSION*
-    ["tm":protected]=>
-    array(11) {
-      ["seconds"]=>
-      int(6)
-      ["minutes"]=>
-      int(25)
-      ["hours"]=>
-      int(22)
-      ["mday"]=>
-      int(14)
-      ["wday"]=>
-      int(6)
-      ["mon"]=>
-      int(8)
-      ["year"]=>
-      int(2004)
-      ["yday"]=>
-      int(226)
-      ["weekday"]=>
-      string(8) "Saturday"
-      ["month"]=>
-      string(6) "August"
-      [0]=>
-      int(1092515106)
-    }
-    ["date"]=>
-    string(24) "2004-08-14 22:25:06 CEST"
-  }
-  ["tm":protected]=>
-  array(11) {
-    ["seconds"]=>
-    int(6)
-    ["minutes"]=>
-    int(25)
-    ["hours"]=>
-    int(22)
-    ["mday"]=>
-    int(14)
-    ["wday"]=>
-    int(6)
-    ["mon"]=>
-    int(8)
-    ["year"]=>
-    int(2004)
-    ["yday"]=>
-    int(226)
-    ["weekday"]=>
-    string(8) "Saturday"
-    ["month"]=>
-    string(6) "August"
-    [0]=>
-    int(1092515106)
-  }
-  ["date"]=>
-  string(24) "2004-08-14 22:25:06 CEST"
 }

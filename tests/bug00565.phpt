@@ -4,6 +4,7 @@ Test for bug #565: xdebug.show_local_vars setting does not work with php 5.3.
 xdebug.default_enable=1
 xdebug.collect_params=1
 xdebug.show_local_vars=1
+xdebug.dump.GET=
 --FILE--
 <?php
 function func(){

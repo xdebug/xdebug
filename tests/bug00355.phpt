@@ -39,7 +39,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 Hi2
-Version: 2.1%s
+Version: 2.%d%s
 File format: 2
 TRACE START [%s]
 2	2	1	%f	%d

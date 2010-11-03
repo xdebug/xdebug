@@ -74,13 +74,13 @@ array(5) {
       ["errno"]=>
       string(1) "8"
       ["string"]=>
-      string(22) "'Undefined index: FOO'"
+      string(2%d) "'Undefined index:%sFOO'"
       ["file"]=>
       string(%d) "'%sbug00241.php'"
       ["line"]=>
       string(2) "32"
       ["context"]=>
-      string(%d) "array ('GLOBALS' => ..., '_ENV' => array ('%s' => '%s', '%s' => '%s', ...), ...)"
+      string(%d) "array (%s)"
     }
   }
   [2]=>
@@ -96,7 +96,7 @@ array(5) {
     ["params"]=>
     array(1) {
       ["errno"]=>
-      string(4) "NULL"
+      string(%d) "%s
     }
   }
   [3]=>
