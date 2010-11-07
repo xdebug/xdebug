@@ -534,7 +534,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	zend_xdebug_global_offset = zend_get_resource_handle(&dummy_ext);
 
 	/* Overload the "exit" opcode */
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXIT);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(exit, ZEND_EXIT);
 
 	/* Overload opcodes for code coverage */
 	if (XG(coverage_enable)) {
