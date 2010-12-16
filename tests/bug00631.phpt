@@ -14,7 +14,7 @@ exit();
 ?>
 --EXPECTF--
 version: 0.9.6
-cmd: /home/derick/dev/php/xdebug/trunk/tests/bug00XXX.php
+cmd: %sbug00631.php
 part: 1
 
 events: Time
@@ -27,7 +27,7 @@ fl=php:internal
 fn=php::strlen
 %d %d
 
-fl=/home/derick/dev/php/xdebug/trunk/tests/bug00XXX.php
+fl=%sbug00631.php
 fn={main}
 
 summary: %d
