@@ -772,7 +772,16 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 			} else {
 				tmp->type = XFUNC_NORMAL;
 			}
-			tmp->function = xdstrdup(edata->function_state.function->common.function_name);
+			if (strcmp(edata->function_state.function->common.function_name, "{closure}") == 0) {
+				tmp->function = xdebug_sprintf(
+					"{closure:%s:%d-%d}",
+					edata->function_state.function->op_array.filename,
+					edata->function_state.function->op_array.line_start,
+					edata->function_state.function->op_array.line_end
+				);
+			} else {
+				tmp->function = xdstrdup(edata->function_state.function->common.function_name);
+			}
 		} else {
 #if PHP_VERSION_ID >= 50399
 			switch (edata->opline->extended_value) {
