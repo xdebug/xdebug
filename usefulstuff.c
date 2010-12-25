@@ -571,6 +571,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 'H':   /* $_SERVER['HTTP_HOST'] */
+				case 'U':   /* $_SERVER['UNIQUE_ID'] */
 				case 'R': { /* $_SERVER['REQUEST_URI'] */
 					zval **data;
 					char *char_ptr, *strval;
@@ -583,6 +584,9 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 							break;
 						case 'R':
 							retval = zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &data);
+							break;
+						case 'U':
+							retval = zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "UNIQUE_ID", sizeof("UNIQUE_ID"), (void **) &data);
 							break;
 						}
 
