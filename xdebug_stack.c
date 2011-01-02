@@ -246,7 +246,7 @@ static int create_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
-static void xdebug_append_error_head(xdebug_str *str, int html TSRMLS_DC)
+void xdebug_append_error_head(xdebug_str *str, int html TSRMLS_DC)
 {
 	char **formats = select_formats(html TSRMLS_CC);
  
@@ -416,7 +416,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 	}
 }
 
-static void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC)
+void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC)
 {
 	char **formats = select_formats(html TSRMLS_CC);
 

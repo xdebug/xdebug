@@ -22,8 +22,10 @@
 #include "xdebug_str.h"
 
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC);
+void xdebug_append_error_head(xdebug_str *str, int html TSRMLS_DC);
 void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC);
 void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC);
+void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC);
 void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC);
 void xdebug_do_jit(TSRMLS_D);
 int xdebug_handle_hit_value(xdebug_brk_info *brk_info);
