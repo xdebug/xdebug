@@ -68,7 +68,7 @@ array(5) {
     ["file"]=>
     string(%d) "%sbug00241.php"
     ["line"]=>
-    int(0)
+    int(32)
     ["params"]=>
     array(5) {
       ["errno"]=>

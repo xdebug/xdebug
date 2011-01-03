@@ -858,6 +858,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			if (cur_opcode) {
 				tmp->lineno = cur_opcode->lineno;
 			}
+		} else if (edata->prev_execute_data && edata->prev_execute_data->opline) {
+			cur_opcode = edata->prev_execute_data->opline;
+			if (cur_opcode) {
+				tmp->lineno = cur_opcode->lineno;
+			} 
 		}
 
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {

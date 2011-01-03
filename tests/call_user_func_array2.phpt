@@ -32,10 +32,10 @@ unlink($tf);
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> include(/%s/call_user_func_array2.inc) /%s/call_user_func_array2.php:4
 %w%f %w%d     -> call_user_func_array('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) /%s/call_user_func_array2.php:7
-%w%f %w%d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array2.php:0
+%w%f %w%d       -> debug('foo', array (0 => 1, 1 => 2)) /%s/call_user_func_array2.php:7
 %w%f %w%d         -> is_array(array (0 => 1, 1 => 2)) /%s/call_user_func_array2.inc:4
 %w%f %w%d     -> call_user_func_array('debug', array (0 => 'bar', 1 => 'bar')) /%s/call_user_func_array2.php:10
-%w%f %w%d       -> debug('bar', 'bar') /%s/call_user_func_array2.php:0
+%w%f %w%d       -> debug('bar', 'bar') /%s/call_user_func_array2.php:10
 %w%f %w%d         -> is_array('bar') /%s/call_user_func_array2.inc:4
 %w%f %w%d         -> is_object('bar') /%s/call_user_func_array2.inc:4
 %w%f %w%d         -> is_resource('bar') /%s/call_user_func_array2.inc:4

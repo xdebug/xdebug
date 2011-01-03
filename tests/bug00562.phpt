@@ -20,9 +20,7 @@ var_dump( xdebug_get_code_coverage() );
 --EXPECTF--
 array(1) {
   ["%sbug00562.php"]=>
-  array(8) {
-    [0]=>
-    int(1)
+  array(7) {
     [4]=>
     int(1)
     [6]=>

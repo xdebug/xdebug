@@ -49,5 +49,5 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> assert_options(5, 1) /%s/assert_test.php:7
 %w%f %w%d     -> assert_options(2, 'my_assert_handler') /%s/assert_test.php:18
 %w%f %w%d     -> assert(FALSE) /%s/assert_test.php:21
-%w%f %w%d       -> my_assert_handler('/%s/assert_test.php', 21, '') /%s/assert_test.php:0
+%w%f %w%d       -> my_assert_handler('/%s/assert_test.php', 21, '') /%s/assert_test.php:21
 %w%f %w%d     -> file_get_contents('/tmp/%s') /%s/assert_test.php:23
