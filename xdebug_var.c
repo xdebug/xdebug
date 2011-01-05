@@ -525,7 +525,7 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 ** ANSI colored variable printing routines
 */
 
-#define ANSI_COLOR_POINTER       "\e[30m"
+#define ANSI_COLOR_POINTER       "\e[0m"
 #define ANSI_COLOR_BOOL          "\e[35m"
 #define ANSI_COLOR_LONG          "\e[32m"
 #define ANSI_COLOR_NULL          "\e[34m"
