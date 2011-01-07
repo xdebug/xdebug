@@ -42,7 +42,7 @@ xdebug.overload_var_dump=1
   <i>private</i> 'self' <font color='#888a85'>=&gt;</font> 
     <i>&</i><b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>protected</i> 'tm' <font color='#888a85'>=&gt;</font> 
-    <b>array</b>
+    <b>array</b> <i>(size=11)</i>
       'seconds' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>6</font>
       'minutes' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>25</font>
       'hours' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>22</font>
