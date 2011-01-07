@@ -31,7 +31,7 @@ class Test {
 	public function __call($func, $args) {
 		return $this->$func($args);
 	}
-	public function test($args) {
+	public function testFunc($args) {
 		count($args);
 	}
 }
@@ -41,7 +41,7 @@ $test->test = 'test';
 $foo = $test->test;
 isset($test->test);
 unset($test->test);
-$test->test('test1', 'test2');
+$test->testFunc('test1', 'test2');
 
 xdebug_stop_trace();
 echo file_get_contents($tf);
@@ -54,7 +54,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> Test->__get(string(4)) %strace_with_magic_methods.php:29
 %w%f %w%d     -> Test->__isset(string(4)) %strace_with_magic_methods.php:30
 %w%f %w%d     -> Test->__unset(string(4)) %strace_with_magic_methods.php:31
-%w%f %w%d     -> Test->test(string(5), string(5)) %strace_with_magic_methods.php:32
+%w%f %w%d     -> Test->testFunc(string(5), string(5)) %strace_with_magic_methods.php:32
 %w%f %w%d       -> count(string(5)) %strace_with_magic_methods.php:23
 %w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_methods.php:34
 %w%f %w%d
