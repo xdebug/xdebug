@@ -1232,7 +1232,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			myht = Z_ARRVAL_PP(struc);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
 			if (myht->nApplyCount < 1) {
-				xdebug_str_addl(str, "<b>array</b>\n", 13, 0);
+				xdebug_str_add(str, xdebug_sprintf("<b>array</b> <i>(size=%d)</li>\n", myht->nNumOfElements), 1);
 				if (level <= options->max_depth) {
 					if (myht->nNumOfElements) {
 						options->runtime[level].current_element_nr = 0;
