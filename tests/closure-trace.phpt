@@ -1,5 +1,7 @@
 --TEST--
 Test for closure file and location in stack traces
+--SKIPIF--
+<?php if(version_compare(phpversion(), "5.3.0", '<')) echo "skip PHP 5.3 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
