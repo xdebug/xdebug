@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #651: Incorrect code coverage after ! empty() in conditional
+Test for bug #651: Incorrect code coverage after isset() in conditional
 --FILE--
 <?php
 
@@ -7,7 +7,7 @@ xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
 
 function repeat($x)
 {
-    if ( ! empty($x)
+    if ( isset($x)
         AND $x !== 1
         AND $x !== 2
         AND $x !== 3)
@@ -26,7 +26,7 @@ var_dump(xdebug_get_code_coverage());
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00651.php"]=>
+  ["%sbug00651c.php"]=>
   array(15) {
     [5]=>
     int(1)
