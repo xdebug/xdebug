@@ -593,9 +593,10 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 						if (retval == SUCCESS) {
 							strval = estrdup(Z_STRVAL_PP(data));
 							
-							/* replace slashes, dots, question marks, plus signs,
-							 * ambersands and spaces with underscores */
-							while ((char_ptr = strpbrk(strval, "/\\.?&+ ")) != NULL) {
+							/* replace slashes, dots, question marks, plus
+							 * signs, ampersands, spaces and other evil chars
+							 * with underscores */
+							while ((char_ptr = strpbrk(strval, "/\\.?&+:*\"<>| ")) != NULL) {
 								char_ptr[0] = '_';
 							}
 							xdebug_str_add(&fname, strval, 0);
