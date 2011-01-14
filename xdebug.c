@@ -810,9 +810,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	if (strcmp(sapi_module.name, "cli") == 0) {
-		SG(request_info).no_headers = 1;
-	}
 
 	return SUCCESS;
 }
