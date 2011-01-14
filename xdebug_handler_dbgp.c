@@ -1244,7 +1244,7 @@ static int xdebug_send_stream(const char *name, const char *str, uint str_length
 	return 0;
 }
 
-#ifdef OUTPUTBUFFERING
+#if OUTPUTBUFFERING
 static int xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 {
 	/* nesting_level is zero when final output is sent to sapi */
