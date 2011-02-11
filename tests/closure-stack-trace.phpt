@@ -11,6 +11,7 @@ xdebug.collect_vars=1
 xdebug.collect_params=4
 xdebug.collect_return=1
 xdebug.collect_assignments=1
+xdebug.dump.SERVER=
 --FILE--
 <?php
 function test1()
@@ -31,5 +32,5 @@ Notice: foo in %sclosure-stack-trace.php on line 6
 Call Stack:
 %w%f %w%d   1. {main}() %sclosure-stack-trace.php:0
 %w%f %w%d   2. test1() %sclosure-stack-trace.php:12
-%w%f %w%d   3. {closure:%sclosure-stack-trace.php:4-7}($a = 5, $b = 25) /home/derick/dev/php/xdebug.git/trunk/tests/closure-stack-trace.php:9
+%w%f %w%d   3. {closure:%sclosure-stack-trace.php:4-7}($a = 5, $b = 25) %sclosure-stack-trace.php:9
 %w%f %w%d   4. trigger_error('foo') %sclosure-stack-trace.php:6
