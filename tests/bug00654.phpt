@@ -3,6 +3,7 @@ Test for bug #654: Xdebug hides error message in CLI
 --INI--
 error_reporting=-1
 xdebug.default_enable=1
+xdebug.dump.SERVER=
 --FILE--
 <?php
 echo "FOO\n";
