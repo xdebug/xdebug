@@ -70,9 +70,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 
-/* error callback repalcement functions */
-void (*old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
-void (*new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+/* error callback replacement functions */
+void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
@@ -500,8 +500,8 @@ PHP_MINIT_FUNCTION(xdebug)
 	zend_execute_internal = xdebug_execute_internal;
 
 	/* Replace error handler callback with our own */
-	old_error_cb = zend_error_cb;
-	new_error_cb = xdebug_error_cb;
+	xdebug_old_error_cb = zend_error_cb;
+	xdebug_new_error_cb = xdebug_error_cb;
 
 	/* Get reserved offset */
 	zend_xdebug_global_offset = zend_get_resource_handle(&dummy_ext);
@@ -607,7 +607,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	zend_compile_file = old_compile_file;
 	zend_execute = xdebug_old_execute;
 	zend_execute_internal = xdebug_old_execute_internal;
-	zend_error_cb = old_error_cb;
+	zend_error_cb = xdebug_old_error_cb;
 
 	zend_hash_destroy(&XG(aggr_calls));
 
@@ -768,7 +768,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", 16, (void**)&dummy) == FAILURE) {
-		zend_error_cb = new_error_cb;
+		zend_error_cb = xdebug_new_error_cb;
 		zend_throw_exception_hook = xdebug_throw_exception_hook;
 	}
 	XG(remote_enabled) = 0;
@@ -1536,19 +1536,19 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 
 PHP_FUNCTION(xdebug_enable)
 {
-	zend_error_cb = new_error_cb;
+	zend_error_cb = xdebug_new_error_cb;
 	zend_throw_exception_hook = xdebug_throw_exception_hook;
 }
 
 PHP_FUNCTION(xdebug_disable)
 {
-	zend_error_cb = old_error_cb;
+	zend_error_cb = xdebug_old_error_cb;
 	zend_throw_exception_hook = NULL;
 }
 
 PHP_FUNCTION(xdebug_is_enabled)
 {
-	RETURN_BOOL(zend_error_cb == new_error_cb);
+	RETURN_BOOL(zend_error_cb == xdebug_new_error_cb);
 }
 
 PHP_FUNCTION(xdebug_break)
