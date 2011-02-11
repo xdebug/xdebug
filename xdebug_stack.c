@@ -468,7 +468,7 @@ void xdebug_init_debugger(TSRMLS_D)
 			/* The request could not be started, ignore it then */
 		} else {
 			/* All is well, turn off script time outs */
-			XG(remote_endbled) = 1;
+			XG(remote_enabled) = 1;
 		}
 	}
 }
