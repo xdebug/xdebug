@@ -5,6 +5,7 @@ xdebug.default_enable=1
 html_errors=1
 xdebug.file_link_format=
 xdebug.dump.GET=
+xdebug.dump.SERVER=
 --FILE--
 <?php
 class MyException extends Exception

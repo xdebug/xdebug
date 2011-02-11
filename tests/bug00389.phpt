@@ -4,6 +4,7 @@ Test for bug #389: Destructors called on fatal error
 log_errors=0
 xdebug.default_enable=1
 xdebug.dump.GET=
+xdebug.dump.SERVER=
 --FILE--
 <?php
 class Food {

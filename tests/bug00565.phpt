@@ -5,6 +5,7 @@ xdebug.default_enable=1
 xdebug.collect_params=1
 xdebug.show_local_vars=1
 xdebug.dump.GET=
+xdebug.dump.SERVER=
 --FILE--
 <?php
 function func(){

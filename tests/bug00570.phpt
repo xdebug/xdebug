@@ -3,6 +3,7 @@ Test for bug #570: undefined symbol: zend_memrchr
 --INI--
 xdebug.default_enable=1
 xdebug.dump.GET=
+xdebug.dump.SERVER=
 --FILE--
 <?php
 function foo() {

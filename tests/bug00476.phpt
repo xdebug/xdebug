@@ -5,6 +5,7 @@ Test for bug #476: Exception chanining doesn't work
 --INI--
 xdebug.default_enable=1
 xdebug.dump.GET=
+xdebug.dump.SERVER=
 --FILE--
 <?php
 try {

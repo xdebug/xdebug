@@ -4,6 +4,7 @@ Test for bug #391: When PHP runs with Xdebug it doesn't stop executing script wh
 log_errors=0
 xdebug.default_enable=1
 xdebug.dump.GET=
+xdebug.dump.SERVER=
 xdebug.collect_params=0
 --FILE--
 <?php
