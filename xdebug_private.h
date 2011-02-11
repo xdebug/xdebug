@@ -201,6 +201,7 @@ function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC);
 function_stack_entry *xdebug_get_stack_tail(TSRMLS_D);
 
 xdebug_hash* xdebug_used_var_hash_from_llist(xdebug_llist *list);
+void xdebug_init_debugger(TSRMLS_D);
 
 #endif
 

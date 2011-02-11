@@ -1194,34 +1194,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			XG(remote_enable) &&
 			(XG(remote_mode) == XDEBUG_REQ)
 		) {
-			/* Initialize debugging session */
-			if (XG(remote_connect_back)) {
-				zval **remote_addr = NULL;
-				zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
-				if (remote_addr) {
-					XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
-				} else {
-					XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
-				}
-			} else {
-				XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
-			}
-			if (XG(context).socket >= 0) {
-				XG(remote_enabled) = 1;
-
-				/* Get handler from mode */
-				XG(context).handler = xdebug_handler_get(XG(remote_handler));
-				if (!XG(context).handler) {
-					XG(remote_enabled) = 0;
-					zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
-				} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
-					/* The request could not be started, ignore it then */
-					XG(remote_enabled) = 0;
-				} else {
-					/* All is well, turn off script time outs */
-					zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-				}
-			}
+			xdebug_init_debugger(TSRMLS_C);
 		}
 		if (magic_cookie) {
 			xdfree(magic_cookie);
