@@ -688,17 +688,6 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
 			xdebug_xml_add_attribute(node, "children", (myht && zend_hash_num_elements(myht))?"1":"0");
 
-			/** Temporary additional property **/
-			{
-				xdebug_xml_node *pnode;
-
-				pnode = xdebug_xml_node_init("property");
-				xdebug_xml_add_attribute(pnode, "name", "CLASSNAME");
-				xdebug_xml_add_attribute(pnode, "type", "string");
-				xdebug_xml_add_text(pnode, xdstrdup(class_name));
-				xdebug_xml_add_child(node, pnode);
-			}
-
 			if (myht) {
 				if (myht->nApplyCount < 1) {
 					xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(myht)), 0, 1);
