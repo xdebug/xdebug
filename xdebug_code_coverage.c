@@ -330,6 +330,10 @@ static zend_brk_cont_element* xdebug_find_brk_cont(zval *nest_levels_zval, int a
 	nest_levels = nest_levels_zval->value.lval;
 
 	do {
+		if (array_offset == -1) {
+			// broken break/continue in code
+			return NULL;
+		}
 		jmp_to = &op_array->brk_cont_array[array_offset];
 		array_offset = jmp_to->parent;
 	} while (--nest_levels > 0);
@@ -364,8 +368,13 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		    && opcode.op1.u.jmp_addr != (zend_op*) 0xFFFFFFFF
 		) {
 			el = xdebug_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
-			*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
-			return 1;
+			if (el) {
+				*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
+				return 1;
+			} else {
+				// broken break/continue in code
+				return 0;
+			}
 		}
 	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
 		*jmp1 = position + 1;
