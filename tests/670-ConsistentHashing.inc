@@ -9,7 +9,7 @@
  * @link http://rediska.geometria-lab.net
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-class Rediska_KeyDistributor_ConsistentHashing implements Rediska_KeyDistributor_Interface
+class Rediska_KeyDistributor_ConsistentHashing
 {
     protected $_backends = array();
     protected $_backendsCount = 0;
