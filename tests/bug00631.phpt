@@ -35,9 +35,11 @@ fn={main}
 summary: %d
 
 %d %d
+cfl=php:internal
 cfn=php::register_shutdown_function
 calls=1 0 0
 %d %d
+cfl=php:internal
 cfn=php::strlen
 calls=1 0 0
 %d %d

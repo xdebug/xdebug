@@ -160,7 +160,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 
 	if (fse->prev) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
-		ce->filename = xdstrdup(fse->filename);
+		ce->filename = op_array ? xdstrdup(op_array->filename) : xdstrdup(fse->filename);
 		ce->function = xdstrdup(tmp_name);
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
@@ -211,8 +211,10 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 
 		if (call_entry->user_defined == XDEBUG_EXTERNAL) {
+			fprintf(XG(profile_file), "cfl=%s\n", call_entry->filename);
 			fprintf(XG(profile_file), "cfn=%s\n", call_entry->function);
 		} else {
+			fprintf(XG(profile_file), "cfl=php:internal\n");
 			fprintf(XG(profile_file), "cfn=php::%s\n", call_entry->function);
 		}
 		
