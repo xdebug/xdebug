@@ -82,7 +82,9 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	if (XG(profiler_append)) {
 		fprintf(XG(profile_file), "\n==== NEW PROFILING FILE ==============================================\n");
 	}
-	fprintf(XG(profile_file), "version: 0.9.6\ncmd: %s\npart: 1\n\nevents: Time\n\n", script_name);
+	fprintf(XG(profile_file), "version: 1\ncreator: xdebug %s\n", XDEBUG_VERSION);
+	fprintf(XG(profile_file), "cmd: %s\npart: 1\npositions: line\n\n", script_name);
+	fprintf(XG(profile_file), "events: Time\n\n");
 	fflush(XG(profile_file));
 	return SUCCESS;
 }
@@ -146,13 +148,20 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 			break;
 
 		default:
-			default_lineno = fse->lineno;
+			if (op_array) {
+				default_lineno = op_array->line_start;
+			} else {
+				default_lineno = fse->lineno;
+			}
 			break;
+	}
+	if (default_lineno == 0) {
+		default_lineno = 1;
 	}
 
 	if (fse->prev) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
-		ce->filename = xdstrdup(fse->filename);
+		ce->filename = op_array ? xdstrdup(op_array->filename) : xdstrdup(fse->filename);
 		ce->function = xdstrdup(tmp_name);
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
@@ -203,8 +212,10 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 
 		if (call_entry->user_defined == XDEBUG_EXTERNAL) {
+			fprintf(XG(profile_file), "cfl=%s\n", call_entry->filename);
 			fprintf(XG(profile_file), "cfn=%s\n", call_entry->function);
 		} else {
+			fprintf(XG(profile_file), "cfl=php:internal\n");
 			fprintf(XG(profile_file), "cfn=php::%s\n", call_entry->function);
 		}
 		

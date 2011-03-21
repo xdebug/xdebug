@@ -13,9 +13,11 @@ strlen("5");
 exit();
 ?>
 --EXPECTF--
-version: 0.9.6
+version: 1
+creator: xdebug 2.%s
 cmd: %sbug00631.php
 part: 1
+positions: line
 
 events: Time
 
@@ -33,9 +35,11 @@ fn={main}
 summary: %d
 
 %d %d
+cfl=php:internal
 cfn=php::register_shutdown_function
 calls=1 0 0
 %d %d
+cfl=php:internal
 cfn=php::strlen
 calls=1 0 0
 %d %d
