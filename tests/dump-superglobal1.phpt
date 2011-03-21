@@ -6,6 +6,7 @@ xdebug.dump_globals=1
 xdebug.dump_once=0
 xdebug.dump.SERVER=argc
 xdebug.dump.GET=
+xdebug.collect_params=4
 --FILE--
 <?php
 trigger_error('foo');
