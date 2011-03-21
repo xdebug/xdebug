@@ -13,7 +13,8 @@ strlen("5");
 exit();
 ?>
 --EXPECTF--
-version: 0.9.6
+version: 1
+creator: xdebug 2.%s
 cmd: %sbug00631.php
 part: 1
 
