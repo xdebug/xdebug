@@ -19,6 +19,7 @@ cmd: %sbug00631.php
 part: 1
 
 events: Time
+positions: line
 
 fl=php:internal
 fn=php::register_shutdown_function

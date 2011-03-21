@@ -84,6 +84,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	}
 	fprintf(XG(profile_file), "version: 1\ncreator: xdebug %s\n", XDEBUG_VERSION);
 	fprintf(XG(profile_file), "cmd: %s\npart: 1\n\nevents: Time\n\n", script_name);
+	fprintf(XG(profile_file), "positions: line\n");
 	fflush(XG(profile_file));
 	return SUCCESS;
 }
