@@ -39,7 +39,7 @@ fn=php::strlen
 
 fl=%sbug00639-2.inc
 fn=func2
-6 %d
+2 %d
 cfl=php:internal
 cfn=php::strlen
 calls=1 0 0
@@ -51,7 +51,7 @@ fn=php::strlen
 
 fl=%sbug00639-2.inc
 fn=func2
-7 %d
+2 %d
 cfl=php:internal
 cfn=php::strlen
 calls=1 0 0
@@ -59,7 +59,7 @@ calls=1 0 0
 
 fl=%sbug00639.php
 fn=func1
-10 %d
+4 %d
 cfl=%sbug00639-2.inc
 cfn=func2
 calls=1 0 0
@@ -75,7 +75,7 @@ fn=php::strlen
 
 fl=%sbug00639-2.inc
 fn=func2
-11 %d
+2 %d
 cfl=php:internal
 cfn=php::strlen
 calls=1 0 0
@@ -87,7 +87,7 @@ fn=php::strlen
 
 fl=%sbug00639-2.inc
 fn=func2
-12 %d
+2 %d
 cfl=php:internal
 cfn=php::strlen
 calls=1 0 0
@@ -99,7 +99,7 @@ fn=php::strlen
 
 fl=%sbug00639-2.inc
 fn=func2
-13 %d
+2 %d
 cfl=php:internal
 cfn=php::strlen
 calls=1 0 0
