@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.9.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.9.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -30,28 +30,45 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2010-06-24</date>
- <time>22:09:55</time>
+ <date>2011-03-21</date>
+ <time>21:08:13</time>
  <version>
-  <release>2.1.0</release>
-  <api>2.1.0</api>
+  <release>2.1.1RC1</release>
+  <api>2.1.1RC1</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Tue, Jun 29, 2010 - xdebug 2.1.0
+Tue, Mar 22, 2011 - xdebug 2.1.1rc1
 
 = Fixed bugs:
 
-	- Fixed bug #562: Incorrect coverage information for closure function
-	  headers.
-	- Fixed bug #566: Xdebug crashes when using conditional breakpoints.
-	- Fixed bug #567: xdebug_debug_zval and xdebug_debug_zval_stdout don&apos;t work
-	  with PHP 5.3. (Patch by Endo Hiroaki).
-	- Fixed bug #570: undefined symbol: zend_memrchr.
+  = Debugger
+	- Fixed bug #518: Removed CLASSNAME pseudo-property optional.
+	- Fixed bug #592: Xdebug crashes with run after detach.
+	- Fixed bug #596: Call breakpoint never works with instance methods, only
+	  static methods.
+	- Fixed JIT mode in the debugger so that it works for xdebug_break() too.
+
+  = Profiler
+	- Fixed bug #631: Summary not written when script ended with &quot;exit()&quot;.
+	- Fixed bug #639: Xdebug profiling: output not correct - missing &apos;cfl=&apos;.
+	- Fixed bug #642: Fixed line numbers for offsetGet, offsetSet,
+	  __get/__set/__isset/__unset and __call in profile files and stack
+	  traces/function traces.
+	- Fixed bug #643: Profiler gets line numbers wrong.
+	- Fixed bug #653: XDebug profiler crashes with %H in file name and non
+	  standard port.
+
+  = Others
+	- Fixed bug #651: Incorrect code coverage after empty() in conditional.
+	- Fixed bug #654: Xdebug hides error message in CLI.
+	- Fixed bug #665: Xdebug does not respect display_errors=stderr.
+	  Patch by Ben Spencer &lt;dangerous.ben@gmail.com&gt;
+	- Fixed bug #670: Xdebug crashes with broken &quot;break x&quot; code.
  </notes>
  <contents>
   <dir name="/">
@@ -149,6 +166,47 @@ Tue, Jun 29, 2010 - xdebug 2.1.0
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.1.1RC1</release>
+    <api>2.1.1RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2011-03-22</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Mar 22, 2011 - xdebug 2.1.1rc1
+
+= Fixed bugs:
+
+  = Debugger
+	- Fixed bug #518: Removed CLASSNAME pseudo-property optional.
+	- Fixed bug #592: Xdebug crashes with run after detach.
+	- Fixed bug #596: Call breakpoint never works with instance methods, only
+	  static methods.
+	- Fixed JIT mode in the debugger so that it works for xdebug_break() too.
+
+  = Profiler
+	- Fixed bug #631: Summary not written when script ended with &quot;exit()&quot;.
+	- Fixed bug #639: Xdebug profiling: output not correct - missing &apos;cfl=&apos;.
+	- Fixed bug #642: Fixed line numbers for offsetGet, offsetSet,
+	  __get/__set/__isset/__unset and __call in profile files and stack
+	  traces/function traces.
+	- Fixed bug #643: Profiler gets line numbers wrong.
+	- Fixed bug #653: XDebug profiler crashes with %H in file name and non
+	  standard port.
+
+  = Others
+	- Fixed bug #651: Incorrect code coverage after empty() in conditional.
+	- Fixed bug #654: Xdebug hides error message in CLI.
+	- Fixed bug #665: Xdebug does not respect display_errors=stderr.
+	  Patch by Ben Spencer &lt;dangerous.ben@gmail.com&gt;
+	- Fixed bug #670: Xdebug crashes with broken &quot;break x&quot; code.
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.1.0</release>

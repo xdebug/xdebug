@@ -1,3 +1,32 @@
+Tue, Mar 22, 2011 - xdebug 2.1.1rc1
+
+= Fixed bugs:
+
+  = Debugger
+	- Fixed bug #518: Removed CLASSNAME pseudo-property optional.
+	- Fixed bug #592: Xdebug crashes with run after detach.
+	- Fixed bug #596: Call breakpoint never works with instance methods, only
+	  static methods.
+	- Fixed JIT mode in the debugger so that it works for xdebug_break() too.
+
+  = Profiler
+	- Fixed bug #631: Summary not written when script ended with "exit()".
+	- Fixed bug #639: Xdebug profiling: output not correct - missing 'cfl='.
+	- Fixed bug #642: Fixed line numbers for offsetGet, offsetSet,
+	  __get/__set/__isset/__unset and __call in profile files and stack
+	  traces/function traces.
+	- Fixed bug #643: Profiler gets line numbers wrong.
+	- Fixed bug #653: XDebug profiler crashes with %H in file name and non
+	  standard port.
+
+  = Others
+	- Fixed bug #651: Incorrect code coverage after empty() in conditional.
+	- Fixed bug #654: Xdebug hides error message in CLI.
+	- Fixed bug #665: Xdebug does not respect display_errors=stderr.
+	  Patch by Ben Spencer <dangerous.ben@gmail.com>
+	- Fixed bug #670: Xdebug crashes with broken "break x" code.
+
+
 Tue, Jun 29, 2010 - xdebug 2.1.0
 
 = Fixed bugs:
