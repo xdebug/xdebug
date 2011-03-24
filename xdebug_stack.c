@@ -480,7 +480,7 @@ void xdebug_do_jit(TSRMLS_D)
 	}
 }
 
-static void php_output_error(const char *error)
+static void php_output_error(const char *error TSRMLS_DC)
 {
 #ifdef PHP_DISPLAY_ERRORS_STDERR
 	if (PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR) {
@@ -591,13 +591,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
 				xdebug_str_add(&str, XG(last_exception_trace), 0);
 				xdebug_append_error_footer(&str, PG(html_errors) TSRMLS_CC);
-				php_output_error(str.d);
+				php_output_error(str.d TSRMLS_CC);
 
 				xdfree(str.d);
 				free(tmp_buf);
 			} else {
 				printable_stack = get_printable_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-				php_output_error(printable_stack);
+				php_output_error(printable_stack TSRMLS_CC);
 				xdfree(printable_stack);
 			}
 		}
