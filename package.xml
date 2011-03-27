@@ -31,11 +31,11 @@ Xdebug also provides:
   </description>
   <license>BSD style</license>
   <release>
-    <state>beta</state>
-    <version>2.1.1RC1</version>
-    <date>2011-03-22</date>
+    <state>stable</state>
+    <version>2.1.1</version>
+    <date>2011-03-28</date>
     <notes>
-Tue, Mar 22, 2011 - xdebug 2.1.1rc1
+Mon, Mar 28, 2011 - xdebug 2.1.1
 
 = Fixed bugs:
 
@@ -154,6 +154,18 @@ Tue, Mar 22, 2011 - xdebug 2.1.1rc1
     </deps>
   </release>
   <changelog>
+   <release>
+    <state>stable</state>
+    <version>2.1.1</version>
+    <date>2011-03-28</date>
+    <notes>
+Mon, Mar 28, 2011 - xdebug 2.1.1
+
+= Fixed bugs:
+
+  - Fixed ZTS compilation.
+    </notes>
+   </release>
    <release>
     <state>beta</state>
     <version>2.1.1RC1</version>
