@@ -180,6 +180,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *trace_file;
 	zend_bool     do_trace;
 	zend_bool     auto_trace;
+	zend_bool     trace_enable_trigger;
 	char         *trace_output_dir;
 	char         *trace_output_name;
 	long          trace_options;
