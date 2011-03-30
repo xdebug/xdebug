@@ -1236,25 +1236,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		/* Check for special GET/POST parameter to start profiling */
 		if (
 			!XG(profiler_enabled) &&
-			(
-				XG(profiler_enable)
-				|| 
-				(
-					XG(profiler_enable_trigger) &&
-					(
-						(
-							PG(http_globals)[TRACK_VARS_GET] && 
-							zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
-						) || (
-							PG(http_globals)[TRACK_VARS_POST] && 
-							zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
-						) || (
-							PG(http_globals)[TRACK_VARS_COOKIE] && 
-							zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "XDEBUG_PROFILE", sizeof("XDEBUG_PROFILE"), (void **) &dummy) == SUCCESS
-						)
-					)
-				)
-			)
+			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE"))
 		) {
 			if (xdebug_profiler_init(op_array->filename TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
