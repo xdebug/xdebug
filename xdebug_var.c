@@ -1065,7 +1065,7 @@ char* xdebug_xmlize(char *string, int len, int *newlen)
 		tmp2 = php_str_to_str(tmp, len, "\"", 1, "&quot;", 6, &len);
 		efree(tmp);
 
-		tmp = php_str_to_str(tmp2, len, "'", 1, "&apos;", 6, &len);
+		tmp = php_str_to_str(tmp2, len, "'", 1, "&#39;", 5, &len);
 		efree(tmp2);
 
 		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);

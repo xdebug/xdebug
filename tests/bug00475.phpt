@@ -37,7 +37,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n a
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="a" fullname="$a" address="" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="example&#0;key" fullname="$a[&apos;example&#0;key&apos;]" address="" type="string" size="5" encoding="base64"><![CDATA[VmFsdWU=]]></property><property name="example" fullname="$a[&apos;example&apos;]" address="" type="string" size="9" encoding="base64"><![CDATA[dmFsdWUAa2V5]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="a" fullname="$a" address="" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="example&#0;key" fullname="$a[&#39;example&#0;key&#39;]" address="" type="string" size="5" encoding="base64"><![CDATA[VmFsdWU=]]></property><property name="example" fullname="$a[&#39;example&#39;]" address="" type="string" size="9" encoding="base64"><![CDATA[dmFsdWUAa2V5]]></property></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
