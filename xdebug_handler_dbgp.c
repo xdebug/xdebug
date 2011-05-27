@@ -2349,18 +2349,6 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	XG(stdio).php_header_write = NULL;
 #endif
 
-	/* initialize remote log file */
-	XG(remote_log_file) = NULL;
-	if (XG(remote_log) && strlen(XG(remote_log))) {
-		XG(remote_log_file) = xdebug_fopen(XG(remote_log), "a", NULL, NULL);
-	}
-	if (XG(remote_log_file)) {
-		char *timestr = xdebug_get_time();
-		fprintf(XG(remote_log_file), "Log opened at %s\n", timestr);
-		fflush(XG(remote_log_file));
-		xdfree(timestr);
-	}
-
 	response = xdebug_xml_node_init("init");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
 	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
@@ -2479,14 +2467,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		xdfree(context->buffer);
 	}
 
-	if (XG(remote_log_file)) {
-		char *timestr = xdebug_get_time();
-		fprintf(XG(remote_log_file), "Log closed at %s\n\n", timestr);
-		fflush(XG(remote_log_file));
-		xdfree(timestr);
-		fclose(XG(remote_log_file));
-		XG(remote_log_file) = NULL;
-	}
+	xdebug_close_log(TSRMLS_C);
 	XG(remote_enabled) = 0;
 	return 1;
 }

@@ -40,6 +40,8 @@
 #include "ext/standard/flock_compat.h"
 #include "main/php_ini.h"
 
+ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+
 #define READ_BUFFER_SIZE 128
 
 char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length)
@@ -639,4 +641,31 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 	*filename = fname.d;
 
 	return fname.l;
+}
+
+void xdebug_open_log(TSRMLS_D)
+{
+	/* initialize remote log file */
+	XG(remote_log_file) = NULL;
+	if (XG(remote_log) && strlen(XG(remote_log))) {
+		XG(remote_log_file) = xdebug_fopen(XG(remote_log), "a", NULL, NULL);
+	}
+	if (XG(remote_log_file)) {
+		char *timestr = xdebug_get_time();
+		fprintf(XG(remote_log_file), "Log opened at %s\n", timestr);
+		fflush(XG(remote_log_file));
+		xdfree(timestr);
+	}
+}
+
+void xdebug_close_log(TSRMLS_D)
+{
+	if (XG(remote_log_file)) {
+		char *timestr = xdebug_get_time();
+		fprintf(XG(remote_log_file), "Log closed at %s\n\n", timestr);
+		fflush(XG(remote_log_file));
+		xdfree(timestr);
+		fclose(XG(remote_log_file));
+		XG(remote_log_file) = NULL;
+	}
 }

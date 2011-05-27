@@ -444,32 +444,45 @@ static char *get_printable_stack(int html, const char *error_type_str, char *buf
 
 void xdebug_init_debugger(TSRMLS_D)
 {
+	xdebug_open_log(TSRMLS_C);
 	if (XG(remote_connect_back)) {
 		zval **remote_addr = NULL;
+		fprintf(XG(remote_log_file), "I: Checking remote connect back address.\n");
 		if (zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "X_HTTP_FORWARDED_FOR", 21, (void**)&remote_addr) == FAILURE) {
 			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
 		}
 		if (remote_addr) {
+			fprintf(XG(remote_log_file), "I: Remote address found, connecting to %s:%d.\n", Z_STRVAL_PP(remote_addr), XG(remote_port));
 			XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
 		} else {
+			fprintf(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%d. :-|\n", XG(remote_host), XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		}
 	} else {
+		fprintf(XG(remote_log_file), "I: Connecting to configured address/port: %s:%d.\n", XG(remote_host), XG(remote_port));
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 	}
 	if (XG(context).socket >= 0) {
+		fprintf(XG(remote_log_file), "I: Connected to client. :-)\n");
 		XG(remote_enabled) = 0;
 
 		/* Get handler from mode */
 		XG(context).handler = xdebug_handler_get(XG(remote_handler));
 		if (!XG(context).handler) {
 			zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
+			fprintf(XG(remote_log_file), "E: The remote debug handler '%s' is not supported. :-(\n", XG(remote_handler));
 		} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
 			/* The request could not be started, ignore it then */
+			fprintf(XG(remote_log_file), "E: The debug session could not be started. :-(\n");
 		} else {
 			/* All is well, turn off script time outs */
 			XG(remote_enabled) = 1;
 		}
+	} else {
+		fprintf(XG(remote_log_file), "E: Could not connect to client. :-(\n");
+	}
+	if (!XG(remote_enabled)) {
+		xdebug_close_log(TSRMLS_C);
 	}
 }
 
