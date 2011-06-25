@@ -638,6 +638,8 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 	xdfree(error_type_str);
 
+#if PHP_VERSION_ID < 50400
+
 	/* Bail out if we can't recover */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -662,6 +664,46 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			zend_bailout();
 			return;
 	}
+
+#else
+
+	/* Bail out if we can't recover */
+	switch (type) {
+		case E_CORE_ERROR:
+			if (!php_get_module_initialized()) {
+				/* bad error in module startup - no way we can live with this */
+				exit(-2);
+			}
+		case E_ERROR:
+		case E_RECOVERABLE_ERROR:
+		case E_PARSE:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+			EG(exit_status) = 255;
+			if (php_get_module_initialized()) {
+				if (!PG(display_errors) &&
+				    !SG(headers_sent) &&
+					SG(sapi_headers).http_response_code == 200
+				) {
+					sapi_header_line ctr = {0};
+
+					ctr.line = "HTTP/1.0 500 Internal Server Error";
+					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
+					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+				}
+				/* the parser would return 1 (failure), we can bail out nicely */
+				if (type != E_PARSE) {
+					/* restore memory limit */
+					zend_set_memory_limit(PG(memory_limit));
+					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
+					zend_bailout();
+					return;
+				}
+			}
+			break;
+	}
+
+#endif
 
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		zval *tmp;
