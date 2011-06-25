@@ -32,6 +32,7 @@
 /modules
 /scan_makefile_in.awk
 /config.guess
+/*swo
 /*swp
 /config.log
 /libtool
@@ -50,3 +51,4 @@
 /run-tests.php
 /tmp-php.ini
 .svn
+/*~
