@@ -276,9 +276,6 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
-	char *sline;
-
-	sline = xdebug_sprintf("%d", lineno);
 
 	/* Check if the file already exists in the hash */
 	if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
@@ -292,13 +289,13 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	}
 
 	/* Check if the line already exists in the hash */
-	if (!xdebug_hash_find(file->lines, sline, strlen(sline), (void *) &line)) {
+	if (!xdebug_hash_index_find(file->lines, lineno, (void *) &line)) {
 		line = xdmalloc(sizeof(xdebug_coverage_line));
 		line->lineno = lineno;
 		line->count = 0;
 		line->executable = 0;
 
-		xdebug_hash_add(file->lines, sline, strlen(sline), line);
+		xdebug_hash_index_add(file->lines, lineno, line);
 	}
 
 	if (executable) {
@@ -310,8 +307,6 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	} else {
 		line->count++;
 	}
-
-	xdfree(sline);
 }
 
 static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC)
