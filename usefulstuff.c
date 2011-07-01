@@ -427,11 +427,20 @@ FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
 	FILE *fh;
 	struct stat buf;
 	char *tmp_fname = NULL;
+	int   filename_len = 0;
 
 	/* We're not doing any tricks for append mode... as that has atomic writes
 	 * anyway. And we ignore read mode as well. */
 	if (mode[0] == 'a' || mode[0] == 'r') {
 		return xdebug_open_file(fname, mode, extension, new_fname);
+	}
+
+	/* Make sure we don't open a file with a path that's too long */
+	filename_len += (fname ? strlen(fname) : 0); /* filename */
+	filename_len += (extension ? strlen(extension) : 0) + 1; /* extension (+ ".") */
+	filename_len += 8; /* possible random extension (+ ".") */
+	if (filename_len > NAME_MAX) {
+		fname[NAME_MAX - (extension ? strlen(extension) : 0 )] = '\0';
 	}
 
 	/* In write mode however we do have to do some stuff. */
