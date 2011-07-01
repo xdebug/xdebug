@@ -49,11 +49,10 @@ unlink("/tmp/remote_log.txt");
 
 Log opened at %d-%d-%d %d:%d:%d
 I: Connecting to configured address/port: localhost:9991.
-I: Connected to client.
+I: Connected to client. :-)
 -> %s
 
 <- step_into -i 1
-I: The debug session is succesfully initiated! :-)
 -> %s
 
 <- breakpoint_set -i 2 -t line -n 8
