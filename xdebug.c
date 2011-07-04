@@ -313,6 +313,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->do_trace             = 0;
 	xg->trace_file           = NULL;
 	xg->coverage_enable      = 0;
+	xg->previous_filename    = "";
+	xg->previous_file        = NULL;
 	xg->do_code_coverage     = 0;
 	xg->breakpoint_count     = 0;
 	xg->ide_key              = NULL;
