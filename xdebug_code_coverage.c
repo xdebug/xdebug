@@ -297,7 +297,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 		
 			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
 		}
-		previous_filename = filename;
+		previous_filename = file->name;
 		previous_file = file;
 	}
 
