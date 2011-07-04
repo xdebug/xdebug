@@ -918,23 +918,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (edata && edata->op_array) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(edata->op_array->filename);
-	} else if (edata &&
-		edata->prev_execute_data &&
-		XDEBUG_LLIST_TAIL(XG(stack))
+	} else if (edata && edata->prev_execute_data && XDEBUG_LLIST_TAIL(XG(stack))
 	) {
-		/* Ugly hack for call_user_*() type function calls */
-		zend_function *tmpf = edata->prev_execute_data->function_state.function;
-		if (tmpf && (tmpf->common.type != 3) && tmpf->common.function_name) {
-			if (
-				(strcmp(tmpf->common.function_name, "call_user_func") == 0) ||
-				(strcmp(tmpf->common.function_name, "call_user_func_array") == 0) ||
-				(strcmp(tmpf->common.function_name, "call_user_func_method") == 0) ||
-				(strcmp(tmpf->common.function_name, "call_user_func_method_array") == 0)
-			) {
-				tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
-			}
-		}
+		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 	}
+
 	if (!tmp->filename) {
 		/* Includes/main script etc */
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
