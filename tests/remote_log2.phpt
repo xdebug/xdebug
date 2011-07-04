@@ -1,6 +1,7 @@
 --TEST--
 Test for Xdebug's remote log (can not connect, with not-found remote callback)
 --INI--
+xdebug.remote_enable=1
 xdebug.remote_log=/tmp/remote-log2.txt
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
