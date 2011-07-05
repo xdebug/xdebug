@@ -273,8 +273,8 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
 
 /* File hash entry cache; faster than doing a hash lookup most of the time */
-static char* previous_filename = "";
-static void* previous_file = NULL;
+static char *previous_filename = "";
+static xdebug_coverage_file *previous_file = NULL;
 
 void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
 {
