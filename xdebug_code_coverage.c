@@ -272,20 +272,30 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
 
+/* File hash entry cache; faster than doing a hash lookup most of the time */
+static char *previous_filename = "";
+static xdebug_coverage_file *previous_file = NULL;
+
 void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
 
-	/* Check if the file already exists in the hash */
-	if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
-		/* The file does not exist, so we add it to the hash, and
-		 *  add a line element to the file */
-		file = xdmalloc(sizeof(xdebug_coverage_file));
-		file->name = xdstrdup(filename);
-		file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
+	if (strcmp(previous_filename, filename) == 0) {
+		file = previous_file;
+	} else {
+		/* Check if the file already exists in the hash */
+		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
+			/* The file does not exist, so we add it to the hash, and
+			 *  add a line element to the file */
+			file = xdmalloc(sizeof(xdebug_coverage_file));
+			file->name = xdstrdup(filename);
+			file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
 		
-		xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
+			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
+		}
+		previous_filename = file->name;
+		previous_file = file;
 	}
 
 	/* Check if the line already exists in the hash */
@@ -576,6 +586,8 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	}
 	if (XG(do_code_coverage)) {
 		if (cleanup) {
+			previous_filename = "";
+			previous_file = NULL;
 			xdebug_hash_destroy(XG(code_coverage));
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 		}
