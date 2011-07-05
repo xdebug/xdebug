@@ -5,10 +5,6 @@ PHP_ARG_ENABLE(xdebug, whether to enable eXtended debugging support,
 [  --enable-xdebug         Enable Xdebug support])
 
 if test "$PHP_XDEBUG" != "no"; then
-dnl We need to set optimization to 0 because my GCC otherwise optimizes too
-dnl much out.
-  CFLAGS=`echo $CFLAGS | sed 's/O2/O0/'`
-  
   AC_DEFINE(HAVE_XDEBUG,1,[ ])
 
 dnl Check for new current_execute_data field in zend_executor_globals
