@@ -280,15 +280,21 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 
 	sline = xdebug_sprintf("%d", lineno);
 
-	/* Check if the file already exists in the hash */
-	if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
-		/* The file does not exist, so we add it to the hash, and
-		 *  add a line element to the file */
-		file = xdmalloc(sizeof(xdebug_coverage_file));
-		file->name = xdstrdup(filename);
-		file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
+	if (strcmp(XG(previous_filename), filename) == 0) {
+		file = XG(previous_file);
+	} else {
+		/* Check if the file already exists in the hash */
+		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
+			/* The file does not exist, so we add it to the hash, and
+			 *  add a line element to the file */
+			file = xdmalloc(sizeof(xdebug_coverage_file));
+			file->name = xdstrdup(filename);
+			file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
 		
-		xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
+			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
+		}
+		XG(previous_filename) = file->name;
+		XG(previous_file) = file;
 	}
 
 	/* Check if the line already exists in the hash */
@@ -581,6 +587,8 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	}
 	if (XG(do_code_coverage)) {
 		if (cleanup) {
+			XG(previous_filename) = "";
+			XG(previous_file) = NULL;
 			xdebug_hash_destroy(XG(code_coverage));
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 		}
