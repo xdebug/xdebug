@@ -24,14 +24,15 @@
 #include "xdebug_mm.h"
 
 typedef struct xdebug_coverage_line {
-	int lineno;
-	int count;
-	int executable;
+	unsigned int hit:1;
+	unsigned int count:1;
+	unsigned int executable:2;
 } xdebug_coverage_line;
 
 typedef struct xdebug_coverage_file {
 	char        *name;
-	xdebug_hash *lines;
+	int          lines_slots;
+	xdebug_coverage_line *lines;
 } xdebug_coverage_file;
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
@@ -41,7 +42,6 @@ typedef struct xdebug_coverage_file {
 	zend_set_user_opcode_handler(oc, xdebug_##f##_handler);
 
 
-void xdebug_coverage_line_dtor(void *data);
 void xdebug_coverage_file_dtor(void *data);
 
 int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS);
