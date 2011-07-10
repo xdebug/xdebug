@@ -32,6 +32,7 @@
 #include "xdebug_handlers.h"
 #include "xdebug_hash.h"
 #include "xdebug_llist.h"
+#include "xdebug_code_coverage.h"
 
 #if PHP_VERSION_ID >= 50399
 # define OUTPUTBUFFERING 0
@@ -207,6 +208,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     code_coverage_dead_code_analysis;
 	unsigned int  function_count;
 	int           reserved_offset;
+	char                 *previous_filename;
+	xdebug_coverage_file *previous_file;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
