@@ -85,7 +85,7 @@ int zend_xdebug_global_offset = -1;
 
 int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 
-static int xdebug_trigger_enabled(int setting, char *var_name);
+static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC);
 
 zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
@@ -820,7 +820,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
 	if (
-		(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE"))
+		(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE" TSRMLS_CC))
 		&& XG(trace_output_dir) && strlen(XG(trace_output_dir))
 	) {
 		/* In case we do an auto-trace we are not interested in the return
@@ -960,7 +960,7 @@ PHP_MINFO_FUNCTION(xdebug)
 	DISPLAY_INI_ENTRIES();
 }
 
-static int xdebug_trigger_enabled(int setting, char *var_name)
+static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC)
 {
 	zval **dummy;
 
@@ -1243,7 +1243,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		/* Check for special GET/POST parameter to start profiling */
 		if (
 			!XG(profiler_enabled) &&
-			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE"))
+			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE" TSRMLS_CC))
 		) {
 			if (xdebug_profiler_init(op_array->filename TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
