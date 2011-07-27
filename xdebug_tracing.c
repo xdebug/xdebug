@@ -175,7 +175,16 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 	}
 
 	if (i->include_filename) {
-		xdebug_str_add(&str, i->include_filename, 0);
+		if (i->function.type == XFUNC_EVAL) {
+			int tmp_len;
+
+			char *escaped;
+			escaped = php_addcslashes(i->include_filename, strlen(i->include_filename), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
+			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped), 1);
+			efree(escaped);
+		} else {
+			xdebug_str_add(&str, i->include_filename, 0);
+		}
 	}
 
 	xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", i->filename, i->lineno), 1);
@@ -208,7 +217,16 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 		xdfree(tmp_name);
 
 		if (i->include_filename) {
-			xdebug_str_add(&str, i->include_filename, 0);
+			if (i->function.type == XFUNC_EVAL) {
+				int tmp_len;
+
+				char *escaped;
+				escaped = php_addcslashes(i->include_filename, strlen(i->include_filename), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
+				xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped), 1);
+				efree(escaped);
+			} else {
+				xdebug_str_add(&str, i->include_filename, 0);
+			}
 		}
 
 		/* Filename and Lineno (9, 10) */
@@ -288,7 +306,21 @@ static char* return_trace_stack_frame_begin_html(function_stack_entry* i, int fn
 	xdfree(tmp_name);
 
 	if (i->include_filename) {
-		xdebug_str_add(&str, i->include_filename, 0);
+		if (i->function.type == XFUNC_EVAL) {
+			char             *key, *joined;
+			xdebug_eval_info *ei;
+			xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+
+			xdebug_arg_init(parts);
+			xdebug_explode("\n", i->include_filename, parts, 99999);
+			joined = xdebug_join("<br />", parts, 0, 99999);
+			xdebug_arg_dtor(parts);
+
+			xdebug_str_add(&str, xdebug_sprintf("'%s'", joined), 1);
+			xdfree(joined);
+		} else {
+			xdebug_str_add(&str, i->include_filename, 0);
+		}
 	}
 
 	xdebug_str_add(&str, xdebug_sprintf(")</td><td>%s:%d</td>", i->filename, i->lineno), 1);

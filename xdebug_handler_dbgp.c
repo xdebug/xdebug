@@ -2630,7 +2630,7 @@ int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse)
 
 	ei = xdcalloc(sizeof(xdebug_eval_info), 1);
 	ei->id = context->eval_id_sequence;
-	ei->contents = xdstrndup(fse->include_filename + 1, strlen(fse->include_filename) - 2);
+	ei->contents = xdstrndup(fse->include_filename, strlen(fse->include_filename));
 	ei->refcount = 2;
 
 	key = create_eval_key_file(fse->filename, fse->lineno);
@@ -2640,16 +2640,4 @@ int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse)
 	xdebug_hash_add(context->eval_id_lookup, key, strlen(key), (void*) ei);
 
 	return ei->id;
-}
-
-int xdebug_dbgp_unregister_eval_id(xdebug_con *context, function_stack_entry *fse, int eval_id)
-{
-	char *key;
-
-	key = create_eval_key_file(fse->filename, fse->lineno);
-	xdebug_hash_delete(context->eval_id_lookup, key, strlen(key));
-
-	key = create_eval_key_id(eval_id);
-	xdebug_hash_delete(context->eval_id_lookup, key, strlen(key));
-	return 1;
 }

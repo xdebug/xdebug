@@ -889,7 +889,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 
 		if (tmp->function.type == XFUNC_EVAL) {
-			tmp->include_filename = xdebug_sprintf("'%s'", XG(last_eval_statement));
+			tmp->include_filename = xdebug_sprintf("%s", XG(last_eval_statement));
 		} else if (XG(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
