@@ -491,7 +491,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		if (XG(last_eval_statement)) {
 			efree(XG(last_eval_statement));
 		}
-		XG(last_eval_statement) = php_addcslashes(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
+		XG(last_eval_statement) = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
 
 		if (inc_filename == &tmp_inc_filename) {
 			zval_dtor(&tmp_inc_filename);
@@ -1335,11 +1335,6 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
 			XG(remote_enabled) = 0;
 		}
-	}
-
-	/* If we're in an eval, we need to destroy the created ID again. */
-	if (XG(remote_enabled) && XG(context).handler->unregister_eval_id && fse->function.type == XFUNC_EVAL) {
-		XG(context).handler->unregister_eval_id(&(XG(context)), fse, eval_id);
 	}
 
 	fse->symbol_table = NULL;

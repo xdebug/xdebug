@@ -114,7 +114,6 @@ struct _xdebug_remote_handler {
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
-	int (*unregister_eval_id)(xdebug_con *h, function_stack_entry *fse, int eval_id);
 
 	/* Information */
 	char *(*get_revision)(void);
