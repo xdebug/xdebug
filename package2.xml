@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.9.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+<package packagerversion="1.9.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
 http://pear.php.net/dtd/tasks-1.0.xsd
 http://pear.php.net/dtd/package-2.0
 http://pear.php.net/dtd/package-2.0.xsd">
@@ -30,11 +30,11 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2011-03-27</date>
- <time>11:10:58</time>
+ <date>2011-07-28</date>
+ <time>11:08:54</time>
  <version>
-  <release>2.1.1</release>
-  <api>2.1.1</api>
+  <release>2.1.2</release>
+  <api>2.1.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -42,33 +42,17 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Mar 28, 2011 - xdebug 2.1.1
-
 = Fixed bugs:
 
-  = Debugger
-	- Fixed bug #518: Removed CLASSNAME pseudo-property optional.
-	- Fixed bug #592: Xdebug crashes with run after detach.
-	- Fixed bug #596: Call breakpoint never works with instance methods, only
-	  static methods.
-	- Fixed JIT mode in the debugger so that it works for xdebug_break() too.
-
-  = Profiler
-	- Fixed bug #631: Summary not written when script ended with &quot;exit()&quot;.
-	- Fixed bug #639: Xdebug profiling: output not correct - missing &apos;cfl=&apos;.
-	- Fixed bug #642: Fixed line numbers for offsetGet, offsetSet,
-	  __get/__set/__isset/__unset and __call in profile files and stack
-	  traces/function traces.
-	- Fixed bug #643: Profiler gets line numbers wrong.
-	- Fixed bug #653: XDebug profiler crashes with %H in file name and non
-	  standard port.
-
-  = Others
-	- Fixed bug #651: Incorrect code coverage after empty() in conditional.
-	- Fixed bug #654: Xdebug hides error message in CLI.
-	- Fixed bug #665: Xdebug does not respect display_errors=stderr.
-	  Patch by Ben Spencer &lt;dangerous.ben@gmail.com&gt;
-	- Fixed bug #670: Xdebug crashes with broken &quot;break x&quot; code.
+	- Fixed bug #622: Working with eval() code is inconvenient and difficult.
+	- Fixed bug #684: xdebug_var_dump - IE does not support &amp;.
+	- Fixed bug #693: Cachegrind files not written when filename is very long.
+	- Fixed bug #697: Incorrect code coverage of function arguments when using
+	  XDEBUG_CC_UNUSED.
+	- Fixed bug #699: Xdebug gets the filename wrong for the countable
+	  interface.
+	- Fixed bug #703 by adding another opcode to the list that needs to be
+	  overridden.
  </notes>
  <contents>
   <dir name="/">
@@ -166,6 +150,31 @@ Mon, Mar 28, 2011 - xdebug 2.1.1
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.1.2</release>
+    <api>2.1.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2011-07-28</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+= Fixed bugs:
+
+	- Fixed bug #622: Working with eval() code is inconvenient and difficult.
+	- Fixed bug #684: xdebug_var_dump - IE does not support &amp;.
+	- Fixed bug #693: Cachegrind files not written when filename is very long.
+	- Fixed bug #697: Incorrect code coverage of function arguments when using
+	  XDEBUG_CC_UNUSED.
+	- Fixed bug #699: Xdebug gets the filename wrong for the countable
+	  interface.
+	- Fixed bug #703 by adding another opcode to the list that needs to be
+	  overridden.
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.1.1</release>

@@ -1,3 +1,17 @@
+Thu, Jul 28, 2011 - xdebug 2.1.2
+
+= Fixed bugs:
+
+	- Fixed bug #622: Working with eval() code is inconvenient and difficult.
+	- Fixed bug #684: xdebug_var_dump - IE does not support &amp;.
+	- Fixed bug #693: Cachegrind files not written when filename is very long.
+	- Fixed bug #697: Incorrect code coverage of function arguments when using
+	  XDEBUG_CC_UNUSED.
+	- Fixed bug #699: Xdebug gets the filename wrong for the countable
+	  interface.
+	- Fixed bug #703 by adding another opcode to the list that needs to be
+	  overridden.
+
 Mon, Mar 28, 2011 - xdebug 2.1.1
 
 = Fixed bugs:
