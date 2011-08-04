@@ -94,6 +94,13 @@ class drXdebugTraceFileParser
 		$this->stack[ 0] = array( '', 0, 0, 0, 0 );
 
 		$this->stackFunctions = array();
+		$header1 = fgets( $this->handle );
+		$header2 = fgets( $this->handle );
+		if ( !preg_match( '@Version: 2.*@', $header1 ) || !preg_match( '@File format: 2@', $header2 ) )
+		{
+			echo "\nThis file is not an Xdebug trace file made with format option '1'.\n";
+			showUsage();
+		}
 	}
 
 	public function parse()
