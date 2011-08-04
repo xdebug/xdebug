@@ -1077,6 +1077,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	xdebug_llist_element *le;
 	int                   eval_id = 0;
 
+	/* If we're evaluating for the debugger's eval capability, just bail out */
+	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", op_array->filename) == 0) {
+		xdebug_old_execute(op_array TSRMLS_CC);
+		return;
+	}
+
 	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
 	   that it's just being called to check for breakpoints with conditions */
 	if (edata && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
