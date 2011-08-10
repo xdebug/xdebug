@@ -40,6 +40,10 @@
 #include "ext/standard/flock_compat.h"
 #include "main/php_ini.h"
 
+#ifndef NAME_MAX
+# define NAME_MAX (MAXNAMELEN-1)
+#endif
+
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 #define READ_BUFFER_SIZE 128
