@@ -40,6 +40,10 @@
 #include "ext/standard/flock_compat.h"
 #include "main/php_ini.h"
 
+#ifndef NAME_MAX
+# define NAME_MAX (MAXNAMELEN-1)
+#endif
+
 #define READ_BUFFER_SIZE 128
 
 char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length)
