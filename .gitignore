@@ -33,6 +33,7 @@
 /scan_makefile_in.awk
 /config.guess
 /*swp
+/*swo
 /config.log
 /libtool
 /Debug
@@ -48,3 +49,4 @@
 /autom4te.cache
 /run-tests-config.php
 /run-tests.php
+/debugclient/*.o
