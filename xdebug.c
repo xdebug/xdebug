@@ -1560,23 +1560,8 @@ PHP_FUNCTION(xdebug_is_enabled)
 
 PHP_FUNCTION(xdebug_break)
 {
-	char *file;
-	int   lineno;
-
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
-
-	if (XG(remote_enabled)) {
-		file = zend_get_executed_filename(TSRMLS_C);
-		lineno = zend_get_executed_lineno(TSRMLS_C);
-
-		if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
-			XG(remote_enabled) = 0;
-		}
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	XG(context).do_break = 1;
+	RETURN_TRUE;
 }
 
 PHP_FUNCTION(xdebug_start_error_collection)
