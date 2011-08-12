@@ -1154,6 +1154,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	int                   eval_id = 0, clear = 0;
 	zval                 *return_val = NULL;
 
+	/* If we're evaluating for the debugger's eval capability, just bail out */
+	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", op_array->filename) == 0) {
+		xdebug_old_execute(op_array TSRMLS_CC);
+		return;
+	}
+
 	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
 	   that it's just being called to check for breakpoints with conditions */
 	if (edata && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
@@ -1611,23 +1617,8 @@ PHP_FUNCTION(xdebug_is_enabled)
 
 PHP_FUNCTION(xdebug_break)
 {
-	char *file;
-	int   lineno;
-
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
-
-	if (XG(remote_enabled)) {
-		file = zend_get_executed_filename(TSRMLS_C);
-		lineno = zend_get_executed_lineno(TSRMLS_C);
-
-		if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
-			XG(remote_enabled) = 0;
-		}
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	XG(context).do_break = 1;
+	RETURN_TRUE;
 }
 
 PHP_FUNCTION(xdebug_start_error_collection)
