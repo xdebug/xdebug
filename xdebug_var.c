@@ -63,6 +63,7 @@ char* xdebug_error_type(int type)
 			break;
 #if PHP_VERSION_ID >= 50300
 		case E_DEPRECATED:
+		case E_USER_DEPRECATED:
 			return xdstrdup("Deprecated");
 			break;
 #endif
