@@ -1194,6 +1194,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function, 1);
 		}
 		if (i->function.class) {
+			add_assoc_string_ex(frame, "type",     sizeof("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic", 1);
 			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class,    1);
 		}
 		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename, 1);
