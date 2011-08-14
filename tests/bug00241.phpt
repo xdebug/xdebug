@@ -84,9 +84,11 @@ array(5) {
     }
   }
   [2]=>
-  array(5) {
+  array(6) {
     ["function"]=>
     string(8) "newError"
+    ["type"]=>
+    string(6) "static"
     ["class"]=>
     string(11) "Error_Class"
     ["file"]=>
@@ -100,9 +102,11 @@ array(5) {
     }
   }
   [3]=>
-  array(5) {
+  array(6) {
     ["function"]=>
     string(11) "__construct"
+    ["type"]=>
+    string(7) "dynamic"
     ["class"]=>
     string(11) "Error_Entry"
     ["file"]=>
@@ -118,9 +122,11 @@ array(5) {
     }
   }
   [4]=>
-  array(5) {
+  array(6) {
     ["function"]=>
     string(5) "getBT"
+    ["type"]=>
+    string(6) "static"
     ["class"]=>
     string(11) "Error_Class"
     ["file"]=>

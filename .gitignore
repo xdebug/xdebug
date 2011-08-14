@@ -34,6 +34,7 @@
 /config.guess
 /*swo
 /*swp
+/*swo
 /config.log
 /libtool
 /Debug
@@ -52,3 +53,4 @@
 /tmp-php.ini
 .svn
 /*~
+/debugclient/*.o
