@@ -423,6 +423,24 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 				retval_p = *retval_pp;
 				goto cleanup;
 			}
+			element_length = name_length;
+
+			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
+			if (name[0] == '*') {
+				char *secondStar;
+				
+				secondStar = strstr(name + 1, "*");
+				if (secondStar) {
+					free(element);
+					element_length = name_length - (secondStar + 1 - name);
+					element = prepare_search_key(secondStar + 1, &element_length, name + 1, secondStar - name - 1);
+					if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+						retval_p = *retval_pp;
+						goto cleanup;
+					}
+				}
+			}
+
 			break;
 	}
 cleanup:
