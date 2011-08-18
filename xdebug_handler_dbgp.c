@@ -469,6 +469,12 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 				case 0:
 					if (*p[0] == '$') {
 						keyword = *p + 1;
+						php_printf("SHOULD NEVER EVER HAPPEN AGAIN!\n");
+						break;
+					}
+					if (*p[0] == '*') { /* special tricks */
+						keyword = *p + 1;
+						state = 7;
 						break;
 					}
 					keyword = *p;
@@ -564,6 +570,25 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							st = fetch_ht_from_zval(retval TSRMLS_CC);
 						}
 						keyword = NULL;
+					}
+					break;
+				case 7: /* special cases, started with a "*" */
+					if (*p[0] == '*') {
+						state = 1;
+						keyword_end = *p;
+
+						if (strncmp(keyword, "static", 6) == 0) { /* static class properties */
+							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF);
+							st = ce->static_members;
+
+							current_classname = estrdup(ce->name);
+							cc_length = strlen(ce->name);
+							keyword = *p + 1;
+
+							type = XF_ST_OBJ_PROPERTY;
+						} else {
+							return NULL;
+						}
 					}
 					break;
 			}
@@ -1668,6 +1693,7 @@ DBGP_FUNC(property_get)
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
+			XG(active_fse)          = fse;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1741,6 +1767,7 @@ DBGP_FUNC(property_set)
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
+			XG(active_fse)          = fse;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1854,6 +1881,7 @@ DBGP_FUNC(property_value)
 		XG(active_symbol_table) = fse->symbol_table;
 		XG(active_op_array)     = fse->op_array;
 		XG(This)                = fse->This;
+		XG(active_fse)          = fse;
 	} else {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 	}
@@ -1900,7 +1928,24 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 		xdebug_xml_add_child(node, contents);
 	}
 }
+/*
+static int attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce)
+{
+	HashTable        *static_members = ce->static_members;
+	xdebug_xml_node  *static_container;
 
+	static_container = xdebug_xml_node_init("property");
+	xdebug_xml_add_attribute(static_container, "name", "*static*");
+	xdebug_xml_add_attribute(static_container, "fullname", "*static*");
+	xdebug_xml_add_attribute(static_container, "type", "object");
+	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(ce->name), 0, 1);
+	xdebug_xml_add_attribute(static_container, "children", static_members->nNumOfElements > 0 ? "1" : "0");
+	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(static_members)), 0, 1);
+
+	zend_hash_apply_with_arguments(static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) attach_static_var_with_contents, 2, static_container, options); 
+	xdebug_xml_add_child(node, static_container);
+}
+*/
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
@@ -1953,6 +1998,15 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			}
 
 			xdebug_hash_destroy(tmp_hash);
+		}
+
+		/* Check for static variables and constants, but only if it's a static
+		 * method call as we attach constants and static properties to "this"
+		 * too normally. */
+		if (fse->function.type == XFUNC_STATIC_MEMBER) {
+			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF);
+
+			xdebug_attach_static_vars(node, options, ce);
 		}
 
 		XG(active_symbol_table) = NULL;
