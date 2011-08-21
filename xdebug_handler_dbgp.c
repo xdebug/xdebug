@@ -469,11 +469,10 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 				case 0:
 					if (*p[0] == '$') {
 						keyword = *p + 1;
-						php_printf("SHOULD NEVER EVER HAPPEN AGAIN!\n");
 						break;
 					}
-					if (*p[0] == '*') { /* special tricks */
-						keyword = *p + 1;
+					if (*p[0] == ':') { /* special tricks */
+						keyword = *p;
 						state = 7;
 						break;
 					}
@@ -511,10 +510,32 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						}
 						state = 2;
 						type = XF_ST_OBJ_PROPERTY;
+					} else if (*p[0] == ':') {
+						keyword_end = *p;
+						if (keyword) {
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
+							current_classname = NULL;
+							if (retval) {
+								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+								st = Z_OBJCE_P(retval)->static_members;
+							}
+							keyword = NULL;
+						}
+						state = 8;
+						type = XF_ST_OBJ_PROPERTY;
 					}
 					break;
 				case 2:
 					if (*p[0] != '>') {
+						keyword = *p;
+						state = 1;
+					}
+					break;
+				case 8:
+					if (*p[0] != ':') {
 						keyword = *p;
 						state = 1;
 					}
@@ -572,12 +593,12 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						keyword = NULL;
 					}
 					break;
-				case 7: /* special cases, started with a "*" */
-					if (*p[0] == '*') {
+				case 7: /* special cases, started with a ":" */
+					if (*p[0] == ':') {
 						state = 1;
 						keyword_end = *p;
 
-						if (strncmp(keyword, "static", 6) == 0) { /* static class properties */
+						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
 							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF);
 							st = ce->static_members;
 

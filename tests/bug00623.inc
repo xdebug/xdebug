@@ -1,14 +1,19 @@
 <?php
 
-class testclass {
+class testclassDaddy {
+    static private $daddyPriv = 42;
+}
+
+class testclass extend testclassDaddy {
     static private $namePriv;
     static protected $nameProt;
     static public $namePub;
+    static public $fourtyTwo = 42;
     
     static public function show_name() {
         //do something with $name
         self::$namePriv = array( "Sir John\n", self::$namePriv );
-        self::$nameProt = self::$namePriv;
+        self::$nameProt = new testclass;
         self::$namePub  = self::$namePriv;
         return self::$namePriv;
     }
@@ -18,6 +23,7 @@ class testclass {
         self::$namePriv = array( "Sir John\n", self::$namePriv );
         self::$nameProt = self::$namePriv;
         self::$namePub  = self::$namePriv;
+
         return self::$namePriv;
     }
 }

@@ -605,7 +605,7 @@ static int xdebug_array_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY
 	return 0;
 }
 
-static int xdebug_object_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export_xml_node(xdebug_object_item **item XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
 	xdebug_xml_node *parent;
@@ -626,8 +626,8 @@ static int xdebug_object_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPL
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
-		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
+		if ((*item)->name_len != 0) {
+			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len, &prop_name, &prop_class_name);
 			node = xdebug_xml_node_init("property");
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_xml_add_attribute_ex(node, "name", xdstrdup(prop_name), 0, 1);
@@ -637,27 +637,19 @@ static int xdebug_object_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPL
 
 			if (parent_name) {
 				if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-	//				if (parent_name[0] != '$') {
-	//					full_name = xdebug_sprintf("$%s->%s", parent_name, prop_name);
-	//				} else {
-						full_name = xdebug_sprintf("%s->%s", parent_name, prop_name);
-	//				}
+					full_name = xdebug_sprintf("%s%s%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_name);
 				} else {
-	//				if (parent_name[0] != '$') {
-	//					full_name = xdebug_sprintf("$%s->*%s*%s", parent_name, prop_class_name, prop_name);
-	//				} else {
-						full_name = xdebug_sprintf("%s->*%s*%s", parent_name, prop_class_name, prop_name);
-	//				}
+					full_name = xdebug_sprintf("%s*%s*%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_class_name, prop_name);
 				}
 				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 			}
-			xdebug_xml_add_attribute(node, "facet", modifier);
+			xdebug_xml_add_attribute_ex(node, "facet", xdebug_sprintf("%s%s", (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "", modifier), 0, 1);
 
-			xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
+			xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) (*item)->zv), 0, 1);
 
 			xdebug_xml_add_child(parent, node);
 
-			xdebug_var_export_xml_node(zv, full_name, node, options, level + 1 TSRMLS_CC);
+			xdebug_var_export_xml_node(&((*item)->zv), full_name, node, options, level + 1 TSRMLS_CC);
 		}
 	}
 	options->runtime[level].current_element_nr++;
@@ -705,8 +697,8 @@ int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *
 	xdebug_xml_node  *static_container;
 
 	static_container = xdebug_xml_node_init("property");
-	xdebug_xml_add_attribute(static_container, "name", "*static*");
-	xdebug_xml_add_attribute(static_container, "fullname", "*static*");
+	xdebug_xml_add_attribute(static_container, "name", "::");
+	xdebug_xml_add_attribute(static_container, "fullname", "::");
 	xdebug_xml_add_attribute(static_container, "type", "object");
 	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(ce->name), 0, 1);
 	xdebug_xml_add_attribute(static_container, "children", static_members->nNumOfElements > 0 ? "1" : "0");
@@ -784,7 +776,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
 			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
-			ce = zend_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_SELF);
+			ce = zend_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT);
 
 			/* Adding static properties */
 			zend_hash_apply_with_arguments(ce->static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY);
@@ -849,15 +841,11 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 		switch (var_type) {
 			case XDEBUG_VAR_TYPE_NORMAL:
 				short_name = xdstrdup(name);
-//				if (name[0] != '$') {
-//					full_name = xdebug_sprintf("$%s", name);
-//				} else {
-					full_name = xdstrdup(name);
-//				}
+				full_name = xdstrdup(name);
 				break;
 			case XDEBUG_VAR_TYPE_STATIC:
-				short_name = xdebug_sprintf("*static*%s", name);
-				full_name =  xdebug_sprintf("*static*%s", name);
+				short_name = xdebug_sprintf("::%s", name);
+				full_name =  xdebug_sprintf("::%s", name);
 				break;
 		}
 
