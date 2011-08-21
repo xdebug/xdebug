@@ -639,7 +639,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item XDEBU
 				if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 					full_name = xdebug_sprintf("%s%s%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_name);
 				} else {
-					full_name = xdebug_sprintf("%s*%s*%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_class_name, prop_name);
+					full_name = xdebug_sprintf("%s%s*%s*%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_class_name, prop_name);
 				}
 				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 			}
@@ -660,21 +660,29 @@ void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 {
 	xdebug_xml_node    *node;
 	char               *name = hash_key->arKey;
-	char               *visibility;
+	char               *modifier;
 	xdebug_xml_node    *contents = NULL;
 	char               *full_name;
+	char               *class_name;
 	char               *prop_name, *prop_class_name;
 	xdebug_var_export_options *options;
 
 	node = va_arg(args, xdebug_xml_node *);
 	options = va_arg(args, xdebug_var_export_options *);
+	class_name = va_arg(args, char *);
 
-	visibility = xdebug_get_property_info(name, hash_key->nKeyLength, &prop_name, &prop_class_name);
+	modifier = xdebug_get_property_info(name, hash_key->nKeyLength, &prop_name, &prop_class_name);
 
-	contents = xdebug_get_zval_value_xml_node_ex(prop_name, *zv, XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
+		contents = xdebug_get_zval_value_xml_node_ex(prop_name, *zv, XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+	} else{
+		char *priv_name = xdebug_sprintf("*%s*%s", prop_class_name, prop_name);
+		contents = xdebug_get_zval_value_xml_node_ex(priv_name, *zv, XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+		xdfree(priv_name);
+	}
 
 	if (contents) {
-		xdebug_xml_add_attribute_ex(contents, "facet", xdebug_sprintf("static %s", visibility), 0, 1);
+		xdebug_xml_add_attribute_ex(contents, "facet", xdebug_sprintf("static %s", modifier), 0, 1);
 		xdebug_xml_add_child(node, contents);
 	} else {
 		contents = xdebug_xml_node_init("property");
@@ -704,7 +712,7 @@ int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *
 	xdebug_xml_add_attribute(static_container, "children", static_members->nNumOfElements > 0 ? "1" : "0");
 	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(static_members)), 0, 1);
 
-	zend_hash_apply_with_arguments(static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_attach_static_var_with_contents, 2, static_container, options); 
+	zend_hash_apply_with_arguments(static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_attach_static_var_with_contents, 3, static_container, options, ce->name); 
 	xdebug_xml_add_child(node, static_container);
 }
 
