@@ -841,8 +841,8 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 	if (name) {
 		switch (var_type) {
 			case XDEBUG_VAR_TYPE_NORMAL:
-				short_name = xdstrdup(name);
-				full_name = xdstrdup(name);
+				short_name = xdebug_sprintf("%s%s", (name[0] == '$' || name[0] == ':') ? "" : "$", name);
+				full_name = xdebug_sprintf("%s%s", (name[0] == '$' || name[0] == ':') ? "" : "$", name);
 				break;
 			case XDEBUG_VAR_TYPE_STATIC:
 				short_name = xdebug_sprintf("::%s", name);
