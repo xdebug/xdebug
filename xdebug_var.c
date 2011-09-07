@@ -572,9 +572,6 @@ static int xdebug_array_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY
 			name = xdstrndup(hash_key->arKey, hash_key->nKeyLength);
 			name_len = hash_key->nKeyLength - 1;
 			if (parent_name) {
-		//		if (parent_name[0] != '$') {
-		//			xdebug_str_addl(&full_name, "$", 1, 0);
-		//		}
 				xdebug_str_add(&full_name, parent_name, 0);
 				xdebug_str_addl(&full_name, "['", 2, 0);
 				xdebug_str_addl(&full_name, name, name_len, 0);
@@ -584,11 +581,7 @@ static int xdebug_array_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY
 			name = xdebug_sprintf("%ld", hash_key->h);
 			name_len = strlen(name);
 			if (parent_name) {
-		//		if (parent_name[0] != '$') {
-		//			xdebug_str_add(&full_name, xdebug_sprintf("$%s[%s]", parent_name, name), 1);
-		//		} else {
-					xdebug_str_add(&full_name, xdebug_sprintf("%s[%s]", parent_name, name), 1);
-		//		}
+				xdebug_str_add(&full_name, xdebug_sprintf("%s[%s]", parent_name, name), 1);
 			}
 		}
 
