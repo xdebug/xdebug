@@ -18,6 +18,7 @@
 
 #include "zend.h"
 #include "php_xdebug.h"
+#include "xdebug_compat.h"
 #include "xdebug_str.h"
 #include "xdebug_xml.h"
 #include "xdebug_compat.h"
@@ -43,7 +44,11 @@ typedef struct xdebug_var_export_options {
 	int no_decoration;
 } xdebug_var_export_options;
 
+#define XDEBUG_VAR_TYPE_NORMAL   0x00
+#define XDEBUG_VAR_TYPE_STATIC   0x01
+
 zval* xdebug_get_php_symbol(char* name, int name_length);
+char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name);
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D);
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D);
@@ -65,7 +70,12 @@ char* xdebug_get_zval_value_ansi(zval *val, int debug_zval, xdebug_var_export_op
 #endif
 char* xdebug_get_zval_value_xml(char *name, zval *val);
 char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
+
+int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce);
+void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
 xdebug_xml_node* xdebug_get_zval_value_xml_node(char *name, zval *val, xdebug_var_export_options *options);
+#define xdebug_get_zval_value_xml_node(name, val, options) xdebug_get_zval_value_xml_node_ex(name, val, XDEBUG_VAR_TYPE_NORMAL, options)
+xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int var_type, xdebug_var_export_options *options);
 
 char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options);
 #ifndef PHP_WIN32

@@ -1,7 +1,17 @@
 <?php
 function iterateXML()
 {
-    $siteXMLString = file_get_contents( FILE, true);
+    $siteXMLString = <<<ENDXML
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+    <page name="projects">
+        <page name="Project 1" />
+        <page name="Project 2" />
+    </page>
+</site>
+
+ENDXML;
+
     $iterator = new SimpleXMLIterator($siteXMLString);
     $projectsIterator = $iterator->xpath("//page");
 
