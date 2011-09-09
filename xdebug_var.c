@@ -649,7 +649,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item XDEBU
 	return 0;
 }
 
-static char *xdebug_prepare_variable_name(char *name)
+static char *prepare_variable_name(char *name)
 {
 	char *tmp_name;
 
@@ -667,7 +667,7 @@ void xdebug_attach_uninitialized_var(xdebug_xml_node *node, char *name)
 
 	contents = xdebug_xml_node_init("property");
 
-	tmp_name = xdebug_prepare_variable_name(name);
+	tmp_name = prepare_variable_name(name);
 	xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(tmp_name), 0, 1);
 	xdebug_xml_add_attribute_ex(contents, "fullname", xdstrdup(tmp_name), 0, 1);
 	xdfree(tmp_name);
@@ -860,7 +860,7 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 			case XDEBUG_VAR_TYPE_NORMAL: {
 				char *tmp_name;
 
-				tmp_name = xdebug_prepare_variable_name(name);
+				tmp_name = prepare_variable_name(name);
 				short_name = xdstrdup(tmp_name);
 				full_name = xdstrdup(tmp_name);
 				xdfree(tmp_name);

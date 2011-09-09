@@ -1939,24 +1939,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 		xdebug_attach_uninitialized_var(node, name);
 	}
 }
-/*
-static int attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce)
-{
-	HashTable        *static_members = ce->static_members;
-	xdebug_xml_node  *static_container;
 
-	static_container = xdebug_xml_node_init("property");
-	xdebug_xml_add_attribute(static_container, "name", "*static*");
-	xdebug_xml_add_attribute(static_container, "fullname", "*static*");
-	xdebug_xml_add_attribute(static_container, "type", "object");
-	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(ce->name), 0, 1);
-	xdebug_xml_add_attribute(static_container, "children", static_members->nNumOfElements > 0 ? "1" : "0");
-	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(static_members)), 0, 1);
-
-	zend_hash_apply_with_arguments(static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) attach_static_var_with_contents, 2, static_container, options); 
-	xdebug_xml_add_child(node, static_container);
-}
-*/
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
