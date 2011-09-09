@@ -471,6 +471,11 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						keyword = *p + 1;
 						break;
 					}
+					if (*p[0] == ':') { /* special tricks */
+						keyword = *p;
+						state = 7;
+						break;
+					}
 					keyword = *p;
 					state = 1;
 					/* break intentionally missing */
@@ -505,10 +510,32 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						}
 						state = 2;
 						type = XF_ST_OBJ_PROPERTY;
+					} else if (*p[0] == ':') {
+						keyword_end = *p;
+						if (keyword) {
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
+							current_classname = NULL;
+							if (retval) {
+								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+								st = Z_OBJCE_P(retval)->static_members;
+							}
+							keyword = NULL;
+						}
+						state = 8;
+						type = XF_ST_OBJ_PROPERTY;
 					}
 					break;
 				case 2:
 					if (*p[0] != '>') {
+						keyword = *p;
+						state = 1;
+					}
+					break;
+				case 8:
+					if (*p[0] != ':') {
 						keyword = *p;
 						state = 1;
 					}
@@ -564,6 +591,25 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							st = fetch_ht_from_zval(retval TSRMLS_CC);
 						}
 						keyword = NULL;
+					}
+					break;
+				case 7: /* special cases, started with a ":" */
+					if (*p[0] == ':') {
+						state = 1;
+						keyword_end = *p;
+
+						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
+							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF);
+							st = ce->static_members;
+
+							current_classname = estrdup(ce->name);
+							cc_length = strlen(ce->name);
+							keyword = *p + 1;
+
+							type = XF_ST_OBJ_PROPERTY;
+						} else {
+							return NULL;
+						}
 					}
 					break;
 			}
@@ -1668,6 +1714,7 @@ DBGP_FUNC(property_get)
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
+			XG(active_fse)          = fse;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1741,6 +1788,7 @@ DBGP_FUNC(property_set)
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
+			XG(active_fse)          = fse;
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
@@ -1854,6 +1902,7 @@ DBGP_FUNC(property_value)
 		XG(active_symbol_table) = fse->symbol_table;
 		XG(active_op_array)     = fse->op_array;
 		XG(This)                = fse->This;
+		XG(active_fse)          = fse;
 	} else {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 	}
@@ -1887,17 +1936,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
-		contents = xdebug_xml_node_init("property");
-		if (name[0] != '$') {
-			full_name = xdebug_sprintf("$%s", name);
-		} else {
-			full_name = xdstrdup(name);
-		}
-		xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(name), 0, 1);
-		xdebug_xml_add_attribute_ex(contents, "fullname", full_name, 0, 1);
-
-		xdebug_xml_add_attribute(contents, "type", "uninitialized");
-		xdebug_xml_add_child(node, contents);
+		xdebug_attach_uninitialized_var(node, name);
 	}
 }
 
@@ -1953,6 +1992,15 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			}
 
 			xdebug_hash_destroy(tmp_hash);
+		}
+
+		/* Check for static variables and constants, but only if it's a static
+		 * method call as we attach constants and static properties to "this"
+		 * too normally. */
+		if (fse->function.type == XFUNC_STATIC_MEMBER) {
+			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF);
+
+			xdebug_attach_static_vars(node, options, ce);
 		}
 
 		XG(active_symbol_table) = NULL;
