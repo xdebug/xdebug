@@ -1936,17 +1936,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
-		contents = xdebug_xml_node_init("property");
-		if (name[0] != '$') {
-			full_name = xdebug_sprintf("$%s", name);
-		} else {
-			full_name = xdstrdup(name);
-		}
-		xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(name), 0, 1);
-		xdebug_xml_add_attribute_ex(contents, "fullname", full_name, 0, 1);
-
-		xdebug_xml_add_attribute(contents, "type", "uninitialized");
-		xdebug_xml_add_child(node, contents);
+		xdebug_attach_uninitialized_var(node, name);
 	}
 }
 /*

@@ -649,6 +649,33 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item XDEBU
 	return 0;
 }
 
+static char *xdebug_prepare_variable_name(char *name)
+{
+	char *tmp_name;
+
+	tmp_name = xdebug_sprintf("%s%s", (name[0] == '$' || name[0] == ':') ? "" : "$", name);
+	if (tmp_name[strlen(tmp_name) - 2] == ':' && tmp_name[strlen(tmp_name) - 1] == ':') {
+		tmp_name[strlen(tmp_name) - 2] = '\0';
+	}
+	return tmp_name;
+}
+
+void xdebug_attach_uninitialized_var(xdebug_xml_node *node, char *name)
+{
+	xdebug_xml_node *contents = NULL;
+	char            *tmp_name;
+
+	contents = xdebug_xml_node_init("property");
+
+	tmp_name = xdebug_prepare_variable_name(name);
+	xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(tmp_name), 0, 1);
+	xdebug_xml_add_attribute_ex(contents, "fullname", xdstrdup(tmp_name), 0, 1);
+	xdfree(tmp_name);
+
+	xdebug_xml_add_attribute(contents, "type", "uninitialized");
+	xdebug_xml_add_child(node, contents);
+}
+
 void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_xml_node    *node;
@@ -678,17 +705,7 @@ void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 		xdebug_xml_add_attribute_ex(contents, "facet", xdebug_sprintf("static %s", modifier), 0, 1);
 		xdebug_xml_add_child(node, contents);
 	} else {
-		contents = xdebug_xml_node_init("property");
-		if (name[0] != '$') {
-			full_name = xdebug_sprintf("$%s", name);
-		} else {
-			full_name = xdstrdup(name);
-		}
-		xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(name), 0, 1);
-		xdebug_xml_add_attribute_ex(contents, "fullname", full_name, 0, 1);
-
-		xdebug_xml_add_attribute(contents, "type", "uninitialized");
-		xdebug_xml_add_child(node, contents);
+		xdebug_attach_uninitialized_var(node, name);
 	}
 }
 
@@ -840,10 +857,14 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 	node = xdebug_xml_node_init("property");
 	if (name) {
 		switch (var_type) {
-			case XDEBUG_VAR_TYPE_NORMAL:
-				short_name = xdebug_sprintf("%s%s", (name[0] == '$' || name[0] == ':') ? "" : "$", name);
-				full_name = xdebug_sprintf("%s%s", (name[0] == '$' || name[0] == ':') ? "" : "$", name);
-				break;
+			case XDEBUG_VAR_TYPE_NORMAL: {
+				char *tmp_name;
+
+				tmp_name = xdebug_prepare_variable_name(name);
+				short_name = xdstrdup(tmp_name);
+				full_name = xdstrdup(tmp_name);
+				xdfree(tmp_name);
+			} break;
 			case XDEBUG_VAR_TYPE_STATIC:
 				short_name = xdebug_sprintf("::%s", name);
 				full_name =  xdebug_sprintf("::%s", name);
