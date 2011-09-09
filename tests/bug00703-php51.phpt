@@ -1,8 +1,8 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (PHP >= 5.2)
+Test for bug #703: Line in heredoc marked as not executed (PHP = 5.1).
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if (version_compare(phpversion(), "5.2.0", '<')) echo "skip Test for PHP 5.2 and greater"; ?>
+<?php if (version_compare(phpversion(), "5.2.0", '>=')) echo "skip Test for PHP 5.1"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -25,25 +25,21 @@ xdebug.coverage_enable=1
 	include 'bug00703.inc';
 	$cc = xdebug_get_code_coverage();
 	ksort($cc);
-	var_dump(array_slice($cc, 0, 1));
+	var_dump(array_slice($cc, 1, 1));
 
 	xdebug_stop_code_coverage(false);
 ?>
 --EXPECTF--
 array(1) {
   ["%sbug00703.inc"]=>
-  array(8) {
+  array(6) {
     [3]=>
     int(1)
     [6]=>
     int(1)
-    [7]=>
-    int(1)
     [8]=>
     int(1)
     [11]=>
-    int(1)
-    [12]=>
     int(1)
     [13]=>
     int(1)
