@@ -16,7 +16,7 @@ $commands = array(
 	'detach'
 );
 
-dbgpRun( str_replace( 'FILE', "\"$file\"", $data ), $commands );
+dbgpRun( $data, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
