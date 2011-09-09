@@ -2,6 +2,7 @@
 Test for bug #709: Xdebug doesn't understand E_USER_DEPRECATED.
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
+<?php if (version_compare(phpversion(), "5.3.0", '<')) echo "skip Feature only supported in PHP 5.3 and greater"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.trace_format=0
