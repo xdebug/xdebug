@@ -5,6 +5,15 @@ PHP_ARG_ENABLE(xdebug, whether to enable eXtended debugging support,
 [  --enable-xdebug         Enable Xdebug support])
 
 if test "$PHP_XDEBUG" != "no"; then
+  AC_MSG_CHECKING([Check for supported PHP versions])
+  PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
+  PHP_XDEBUG_FOUND_VERNUM=`echo "${PHP_XDEBUG_FOUND_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 100 + [$]2) * 100 + [$]3;}'`
+dnl  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "50400"; then
+    AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
+dnl  else
+dnl    AC_MSG_ERROR([not supported. Need a PHP version < 5.4.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+dnl  fi
+  
   AC_DEFINE(HAVE_XDEBUG,1,[ ])
 
 dnl Check for new current_execute_data field in zend_executor_globals
