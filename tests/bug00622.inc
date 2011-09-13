@@ -1,8 +1,8 @@
 <?php
-$text = <<<'EOD'
-function foo($a1, $b1) {
-  echo("In foo\nline two of echo\n");
-  return $a1 = $b1;
+$text = <<<EOD
+function foo(\$a1, \$b1) {
+  echo("In foo\\nline two of echo\\n");
+  return \$a1 = \$b1;
 }
 EOD;
  eval($text);

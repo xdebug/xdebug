@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #622: Working with eval() code is inconvenient and difficult.
 --SKIPIF--
-<?php if (version_compare(phpversion(), "5.3.0", '>=')) echo "skip < PHP 5.3 needed\n"; ?>
+<?php if (version_compare(phpversion(), "5.3.0", '<')) echo "skip >= PHP 5.3 needed\n"; ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
@@ -28,7 +28,7 @@ dbgpRun( $data, $commands );
 
 -> step_into -i 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="7"></xdebug:message></response>
 
 -> step_into -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>

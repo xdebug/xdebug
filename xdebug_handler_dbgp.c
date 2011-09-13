@@ -608,7 +608,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 
 							type = XF_ST_OBJ_PROPERTY;
 						} else {
-							return NULL;
+							keyword = NULL;
 						}
 					}
 					break;
@@ -621,6 +621,9 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 		if (retval) {
 			st = fetch_ht_from_zval(retval TSRMLS_CC);
 		}
+	}
+	if (current_classname) {
+		efree(current_classname);
 	}
 	return retval;
 }

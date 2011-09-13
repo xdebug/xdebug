@@ -487,6 +487,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 
 			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("class %s", class_name), 1);
+			efree(class_name);
 			break;
 		}
 
