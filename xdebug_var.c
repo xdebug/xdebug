@@ -712,7 +712,7 @@ void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 
 int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce)
 {
-	HashTable        *static_members = ce->static_members;
+	HashTable        *static_members = CE_STATIC_MEMBERS(ce);
 	xdebug_xml_node  *static_container;
 
 	static_container = xdebug_xml_node_init("property");
