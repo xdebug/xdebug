@@ -520,7 +520,11 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							current_classname = NULL;
 							if (retval) {
 								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+#if PHP_VERSION_ID >= 50400
+								st = &Z_OBJCE_P(retval)->properties_info;
+#else
 								st = CE_STATIC_MEMBERS(Z_OBJCE_P(retval));
+#endif
 							}
 							keyword = NULL;
 						}
@@ -600,7 +604,11 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 
 						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
 							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF);
+#if PHP_VERSION_ID >= 50400
+							st = &ce->properties_info;
+#else
 							st = CE_STATIC_MEMBERS(ce);
+#endif
 
 							current_classname = estrdup(ce->name);
 							cc_length = strlen(ce->name);
