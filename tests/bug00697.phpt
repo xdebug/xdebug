@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED.
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
+Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

@@ -1,7 +1,5 @@
 --TEST--
 Test with include file
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.auto_trace=0
 xdebug.collect_params=3

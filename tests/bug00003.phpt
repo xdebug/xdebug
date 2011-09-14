@@ -1,7 +1,5 @@
 --TEST--
 Text for crash bug in tracing to file
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0

@@ -1,7 +1,5 @@
 --TEST--
-Test for scream support.
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
+Test for scream support
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0

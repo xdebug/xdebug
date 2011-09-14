@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #535: Code coverage and return before function|class ending.
+Test for bug #535: Code coverage and return before function|class ending
 --FILE--
 <?php
 xdebug_start_code_coverage();

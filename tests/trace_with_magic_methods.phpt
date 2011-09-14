@@ -1,5 +1,5 @@
 --TEST--
-Test for line numbers for __get, __set, __isset, __unset and __call.
+Test for line numbers for __get, __set, __isset, __unset and __call
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

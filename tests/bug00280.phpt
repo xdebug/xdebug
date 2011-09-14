@@ -1,8 +1,5 @@
 --TEST--
 Test for bug #280: var_dump don't display key of array as expected
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
 --INI--
 xdebug.overload_var_dump=1
 --FILE--

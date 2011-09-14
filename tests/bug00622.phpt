@@ -1,7 +1,7 @@
 --TEST--
-Test for bug #622: Working with eval() code is inconvenient and difficult.
+Test for bug #622: Working with eval() code is inconvenient and difficult (< PHP 5.3)
 --SKIPIF--
-<?php if (version_compare(phpversion(), "5.3.0", '>=')) echo "skip < PHP 5.3 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "5.3", '<')) echo "skip < PHP 5.3 needed\n"; ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

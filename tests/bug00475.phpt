@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #475: Property names with null chars are not sent fully to the client.
+Test for bug #475: Property names with null chars are not sent fully to the client
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

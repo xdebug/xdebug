@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #328: (Private properties are incorrectly enumerated in case of extended classes)
+Test for bug #328: Private properties are incorrectly enumerated in case of extended classes
 --INI--
 html_errors=1
 --FILE--

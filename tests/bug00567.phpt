@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work with php 5.3.
+Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work with php 5.3
 --INI--
 xdebug.default_enable=1
 --FILE--

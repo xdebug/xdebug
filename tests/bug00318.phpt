@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #318: Segmentation Fault in code coverage analysis
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

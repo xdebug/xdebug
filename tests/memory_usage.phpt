@@ -1,7 +1,5 @@
 --TEST--
 Test for xdebug.collect_params setting
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.enable=1
 xdebug.collect_params=1

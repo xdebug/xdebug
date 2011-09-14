@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #494: Private attributes of parent class unavailable when inheriting.
+Test for bug #494: Private attributes of parent class unavailable when inheriting
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

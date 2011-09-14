@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #623: Static properties of a class can be evaluated only with difficulty.
+Test for bug #623: Static properties of a class can be evaluated only with difficulty
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

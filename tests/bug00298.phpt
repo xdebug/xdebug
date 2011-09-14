@@ -1,9 +1,5 @@
 --TEST--
-Test for bug #298: xdebug_var_dump & multiline strings,
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if(version_compare(zend_version(), "2.0.0-dev", '<')) echo "skip Zend Engine 2 needed\n"; ?>
---INI--
+Test for bug #298: xdebug_var_dump & multiline strings
 --FILE--
 <?php
 ini_set('html_errors', '1');

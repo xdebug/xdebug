@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #538: Error in watches and call stack parameter with string containing '\\'.
+Test for bug #538: Error in watches and call stack parameter with string containing '\\'
 --INI--
 xdebug.collect_params=3
 --FILE--
