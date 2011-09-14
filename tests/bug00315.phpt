@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #315: Xdebug crashes when including a file that doesn't exist.
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
+Test for bug #315: Xdebug crashes when including a file that doesn't exist
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

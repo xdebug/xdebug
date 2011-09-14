@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #168: Memory error with DBGp eval when the result is an array.
+Test for bug #168: Memory error with DBGp eval when the result is an array
 --SKIPIF--
 <?php print "skip Can only be tested through DBGp"; ?>
 --FILE--

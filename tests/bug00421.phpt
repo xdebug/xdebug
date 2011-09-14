@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #421: xdebug sends back invalid characters in xml sometimes.
+Test for bug #421: xdebug sends back invalid characters in xml sometimes
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

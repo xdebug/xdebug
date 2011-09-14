@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #631: Summary not written when script ended with "exit()".
+Test for bug #631: Summary not written when script ended with "exit()"
 --INI--
 xdebug.profiler_enable=1
 --FILE--

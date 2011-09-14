@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #313: Segmentation Fault in code coverage analysis on empty PHP files.
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
+Test for bug #313: Segmentation Fault in code coverage analysis on empty PHP files
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

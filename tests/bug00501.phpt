@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #501: Xdebug's variable tracing misses POST_INC and variants.
+Test for bug #501: Xdebug's variable tracing misses POST_INC and variants
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #566: Xdebug crashes when using conditional breakpoints [2]
+Test for bug #566: Xdebug crashes when using conditional breakpoints (2)
 --INI--
 xdebug.collect_params=4
 xdebug.collect_return=1

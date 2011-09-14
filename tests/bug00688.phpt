@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #688: Call to not yet defined function aborts the session.
+Test for bug #688: Call to not yet defined function aborts the session
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

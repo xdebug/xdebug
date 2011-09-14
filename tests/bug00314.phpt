@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #314: PHP CLI Error Logging thwarted when XDebug Loaded.
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
+Test for bug #314: PHP CLI Error logging thwarted when Xdebug loaded
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #678: XDebug segfault when IDE send "eval NonExistsClass".
+Test for bug #678: Xdebug segfault when IDE send "eval NonExistsClass"
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

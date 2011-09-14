@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #355: Non-unique functions numbers in function traces.
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
+Test for bug #355: Non-unique functions numbers in function traces
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

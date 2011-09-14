@@ -1,8 +1,7 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (PHP = 5.1).
+Test for bug #703: Line in heredoc marked as not executed (< PHP 5.2)
 --SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if (version_compare(phpversion(), "5.2.0", '>=')) echo "skip Test for PHP 5.1"; ?>
+<?php if (!version_compare(phpversion(), "5.2", '<')) echo "skip < PHP 5.2 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

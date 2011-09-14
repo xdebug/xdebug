@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #606: evaluate a $this->... expression when $this is not accesible crash xdebug.
+Test for bug #606: evaluate a $this->... expression when $this is not accesible crash xdebug
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

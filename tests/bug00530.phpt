@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #530: Xdebug returns properties out of page if there are less than max_children properties.
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
+Test for bug #530: Xdebug returns properties out of page if there are less than max_children properties
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

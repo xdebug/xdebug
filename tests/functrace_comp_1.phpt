@@ -1,7 +1,5 @@
 --TEST--
 Test computerized function traces (level1, comp)
---SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

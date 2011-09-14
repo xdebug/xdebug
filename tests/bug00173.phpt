@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #173: Xdebug segfaults using SPL ArrayIterator.
+Test for bug #173: Xdebug segfaults using SPL ArrayIterator (>= PHP 5.2)
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 <?php if (!extension_loaded("SPL")) print "skip No SPL available"; ?>
-<?php if(version_compare(zend_version(), "2.2.0-dev", '<')) echo "skip Zend Engine 2.2 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "5.2", '>=')) echo "skip >= PHP 5.2 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=1

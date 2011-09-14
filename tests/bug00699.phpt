@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #699: Xdebug gets the filename wrong for the countable interface.
+Test for bug #699: Xdebug gets the filename wrong for the countable interface
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
