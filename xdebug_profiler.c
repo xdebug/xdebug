@@ -154,7 +154,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 			break;
 
 		default:
-			if (op_array) {
+			if (op_array && op_array->function_name) {
 				default_lineno = op_array->line_start;
 			} else {
 				default_lineno = fse->lineno;
