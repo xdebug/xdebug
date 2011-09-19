@@ -360,7 +360,7 @@ PHP_FUNCTION(xdebug_start_trace)
 	char *fname = NULL;
 	int   fname_len = 0;
 	char *trace_fname;
-	long  options = 0;
+	long  options = XG(trace_options);
 
 	if (XG(do_trace) == 0) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
