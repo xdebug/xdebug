@@ -5,6 +5,8 @@ xdebug.auto_trace=0
 xdebug.trace_output_name=trace.bug690
 xdebug.trace_options=1
 xdebug.collect_assignments=1
+xdebug.collect_return=1
+xdebug.collect_params=4
 --FILE--
 <?php
 xdebug_start_trace();
