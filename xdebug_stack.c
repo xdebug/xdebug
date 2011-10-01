@@ -24,7 +24,7 @@
 #include "xdebug_str.h"
 #include "xdebug_superglobals.h"
 #include "xdebug_var.h"
-#include "php_ini.h"
+#include "ext/standard/html.h"
 
 #include "main/php_ini.h"
 
@@ -256,16 +256,26 @@ void xdebug_append_error_head(xdebug_str *str, int html TSRMLS_DC)
 void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
 	char **formats = select_formats(html TSRMLS_CC);
+	char *escaped;
+	size_t newlen;
+
+	if (html) {
+		escaped = php_escape_html_entities_ex(buffer, strlen(buffer), &newlen, 0, 0, NULL, 1 TSRMLS_CC);
+	} else {
+		escaped = estrdup(buffer);
+	}
 
 	if (strlen(XG(file_link_format)) > 0 && html) {
 		char *file_link;
 
 		create_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
-		xdebug_str_add(str, xdebug_sprintf(formats[11], error_type_str, buffer, file_link, error_filename, error_lineno), 1);
+		xdebug_str_add(str, xdebug_sprintf(formats[11], error_type_str, escaped, file_link, error_filename, error_lineno), 1);
 		xdfree(file_link);
 	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[1], error_type_str, buffer, error_filename, error_lineno), 1);
+		xdebug_str_add(str, xdebug_sprintf(formats[1], error_type_str, escaped, error_filename, error_lineno), 1);
 	}
+
+	efree(escaped);
 }
 
 void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
