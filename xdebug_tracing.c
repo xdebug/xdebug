@@ -20,6 +20,7 @@
 #include "xdebug_str.h"
 #include "xdebug_tracing.h"
 #include "xdebug_var.h"
+#include "ext/standard/php_string.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

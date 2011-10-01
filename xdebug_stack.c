@@ -228,7 +228,11 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 {
 	char **formats = html ? html_formats : text_formats;
 	char *escaped;
+#if PHP_VERSION_ID >= 50400
 	size_t newlen;
+#else
+	int    newlen;
+#endif
 
 	if (html) {
 		escaped = php_escape_html_entities_ex(buffer, strlen(buffer), &newlen, 0, 0, NULL, 1 TSRMLS_CC);
