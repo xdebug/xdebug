@@ -257,7 +257,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 {
 	char **formats = select_formats(html TSRMLS_CC);
 	char *escaped;
-#if PHP_VERSION_ID > 50400
+#if PHP_VERSION_ID >= 50400
 	size_t newlen;
 #else
 	int    newlen;
