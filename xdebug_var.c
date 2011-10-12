@@ -1038,7 +1038,7 @@ void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 	}
 }
 
-int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce)
+int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce TSRMLS_DC)
 {
 #if PHP_VERSION_ID >= 50400
 	HashTable        *static_members = &ce->properties_info;
@@ -1130,7 +1130,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
 			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
-			ce = zend_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT);
+			ce = zend_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 #if PHP_VERSION_ID >= 50400
 			zend_hash_apply_with_arguments(Z_OBJDEBUG_PP(struc, is_temp) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, ce);
@@ -1187,12 +1187,11 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	}
 }
 
-xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int var_type, xdebug_var_export_options *options)
+xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int var_type, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_xml_node *node;
 	char *short_name = NULL;
 	char *full_name = NULL;
-	TSRMLS_FETCH();
 
 	node = xdebug_xml_node_init("property");
 	if (name) {

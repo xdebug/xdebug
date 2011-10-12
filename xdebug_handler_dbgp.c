@@ -603,7 +603,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						keyword_end = *p;
 
 						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
-							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF);
+							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 #if PHP_VERSION_ID >= 50400
 							st = &ce->properties_info;
 #else
@@ -642,7 +642,7 @@ static xdebug_xml_node* get_symbol(char* name, int name_length, xdebug_var_expor
 
 	retval = get_symbol_contents_zval(name, name_length TSRMLS_CC);
 	if (retval) {
-		return xdebug_get_zval_value_xml_node(name, retval, options);
+		return xdebug_get_zval_value_xml_node(name, retval, options TSRMLS_CC);
 	}
 
 	return NULL;
@@ -1307,7 +1307,7 @@ DBGP_FUNC(eval)
 	if (res == FAILURE) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_EVALUATING_CODE);
 	} else {
-		ret_xml = xdebug_get_zval_value_xml_node(NULL, &ret_zval, options);
+		ret_xml = xdebug_get_zval_value_xml_node(NULL, &ret_zval, options TSRMLS_CC);
 		xdebug_xml_add_child(*retval, ret_xml);
 		zval_dtor(&ret_zval);
 	}
@@ -2010,9 +2010,9 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF);
+			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
-			xdebug_attach_static_vars(node, options, ce);
+			xdebug_attach_static_vars(node, options, ce TSRMLS_CC);
 		}
 
 		XG(active_symbol_table) = NULL;
