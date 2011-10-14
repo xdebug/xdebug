@@ -24,12 +24,6 @@ dnl Check for new current_execute_data field in zend_executor_globals
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS="$INCLUDES $CPPFLAGS"
 
-  AC_TRY_COMPILE([
-#include <zend_compile.h>
-#include <zend_globals.h>
-  ], [static struct _zend_executor_globals zeg; zend_execute_data *zed = zeg.current_execute_data],
-    [AC_DEFINE(HAVE_EXECUTE_DATA_PTR, 1, [ ])]
-  )
   AC_CHECK_FUNCS(gettimeofday)
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])
