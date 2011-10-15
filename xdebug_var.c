@@ -664,11 +664,10 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 				               ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET,
 				               ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), 1);
 			} else {
-				xdebug_str_addl(str, "'", 1, 0);
-				xdebug_str_addl(str, xdebug_sprintf("%sstring%s(%s%ld%s) %s%s%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
+				xdebug_str_addl(str, xdebug_sprintf("%sstring%s(%s%ld%s) '%s%s%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
 				                ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET,
 				                ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), options->max_data, 1);
-				xdebug_str_addl(str, "...'", 4, 0);
+				xdebug_str_add(str, xdebug_sprintf("...%s'", ANSI_COLOR_RESET), 1);
 			}
 			efree(tmp_str);
 			break;
