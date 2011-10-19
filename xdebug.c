@@ -1329,6 +1329,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			fprintf(XG(trace_file), "%s", t);
 			fflush(XG(trace_file));
 			xdfree(t);
+		} else if (XG(trace_format == 1) {
+			fprintf(XG(trace_file), "%s", "\n");
+			fflush(XG(trace_file));
 		}
 	}
 	if (clear && *EG(return_value_ptr_ptr)) {
