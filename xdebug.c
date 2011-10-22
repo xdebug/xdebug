@@ -1684,6 +1684,10 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	int                   level = 0;
 	TSRMLS_FETCH();
 
+	if (!EG(current_execute_data)) {
+		return;
+	}
+
 	lineno = EG(current_execute_data)->opline->lineno;
 
 	file = op_array->filename;
