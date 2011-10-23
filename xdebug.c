@@ -1349,6 +1349,22 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	XG(level)--;
 }
 
+static int check_soap_call(function_stack_entry *fse)
+{
+	zend_module_entry tmp_mod_entry;
+
+	if (fse->function.class && 
+		(
+			(strstr(fse->function.class, "SoapClient") != NULL) ||
+			(strstr(fse->function.class, "SoapClient") != NULL)
+		) &&
+		(zend_hash_find(&module_registry, "soap", 5, (void**) &tmp_mod_entry) == SUCCESS)
+	) {
+		return 1;
+	}
+	return 0;
+}
+
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC)
 {
 	zend_execute_data    *edata = EG(current_execute_data);
@@ -1356,6 +1372,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	zend_op              *cur_opcode;
 	int                   do_return = (XG(do_trace) && XG(trace_file));
 	int                   function_nr = 0;
+
+	int                   restore_error_handler_situation = 0;
+	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
@@ -1373,7 +1392,14 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 			XG(remote_enabled) = 0;
 		}
 	}
-	
+
+	/* Check for SOAP */
+	if (check_soap_call(fse)) {
+		restore_error_handler_situation = 1;
+		tmp_error_cb = zend_error_cb;
+		zend_error_cb = xdebug_old_error_cb;
+	}
+
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
 	}
@@ -1385,6 +1411,11 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
+	}
+
+	/* Restore SOAP situation if needed */
+	if (restore_error_handler_situation) {
+		zend_error_cb = tmp_error_cb;
 	}
 
 	xdebug_trace_function_end(fse, function_nr TSRMLS_CC);
