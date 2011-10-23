@@ -495,7 +495,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	PG(last_error_message) = strdup(buffer);
 	PG(last_error_file) = strdup(error_filename);
 	PG(last_error_lineno) = error_lineno;
-
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 	error_handling  = EG(error_handling);
 	exception_class = EG(exception_class);
