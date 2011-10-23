@@ -95,7 +95,7 @@ static char** select_formats(int html TSRMLS_DC) {
 		return html_formats;
 	} 
 #ifndef PHP_WIN32
-	else if (XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) {
+	else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
 		return ansi_formats;
 	}
 #endif
