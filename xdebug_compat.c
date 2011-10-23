@@ -45,13 +45,6 @@
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
 
-#if PHP_MAJOR_VERSION >= 6
-void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC)
-{
-	php_var_dump(struc, 1, 1 TSRMLS_CC);
-}
-#endif
-
 #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
 void *php_zend_memrchr(const void *s, int c, size_t n)
 {
