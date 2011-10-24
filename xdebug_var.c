@@ -582,7 +582,7 @@ static int xdebug_array_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 		xdebug_var_export_ansi(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}
 	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
-		xdebug_str_addl(str, "...,\n ", 6, 0);
+		xdebug_str_add(str, xdebug_sprintf("\n%*s(more elements)...\n", (level * 2), ""), 1);
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
@@ -617,7 +617,7 @@ static int xdebug_object_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TS
 		xdebug_var_export_ansi(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}
 	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
-		xdebug_str_addl(str, "...; ", 5, 0);
+		xdebug_str_add(str, xdebug_sprintf("\n%*s(more elements)...\n", (level * 2), ""), 1);
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
@@ -667,7 +667,7 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) '%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
 							ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET, ANSI_COLOR_STRING), 1);
 				xdebug_str_addl(str, tmp_str, options->max_data, 0);
-				xdebug_str_add(str, xdebug_sprintf("...%s'", ANSI_COLOR_RESET), 1);
+				xdebug_str_add(str, xdebug_sprintf("'...%s", ANSI_COLOR_RESET), 1);
 			}
 			efree(tmp_str);
 			break;
@@ -683,7 +683,7 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 
 					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_ansi, 4, level, str, debug_zval, options);
 				} else {
-					xdebug_str_addl(str, "...", 3, 0);
+					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 				}
 				xdebug_str_add(str, xdebug_sprintf("%*s}", (level * 2) - 2 , ""), 1);
 			} else {
@@ -710,11 +710,11 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 
 					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_ansi, 4, level, str, debug_zval, options);
 				} else {
-					xdebug_str_addl(str, "...", 3, 0);
+					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 				}
 				xdebug_str_add(str, xdebug_sprintf("%*s}", (level * 2) - 2, ""), 1);
 			} else {
-				xdebug_str_addl(str, "...", 3, 0);
+				xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 			}
 			break;
 
