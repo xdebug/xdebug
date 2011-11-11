@@ -6,6 +6,7 @@ xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.collect_assignments=0
 xdebug.profiler_enable=0
+xdebug.overload_var_dump=0
 --FILE--
 <?php
 function foo($s) {

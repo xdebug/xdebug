@@ -6,6 +6,7 @@ xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.profiler_enable=0
 xdebug.trace_format=0
+xdebug.overload_var_dump=0
 --FILE--
 <?php
 register_shutdown_function( 'f' );

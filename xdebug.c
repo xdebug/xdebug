@@ -1519,13 +1519,15 @@ PHP_FUNCTION(xdebug_var_dump)
 		}
 #ifndef PHP_WIN32
 		else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-			val = xdebug_get_zval_value_ansi((zval*) *args[i], 0, NULL TSRMLS_CC);
+			val = xdebug_get_zval_value_ansi((zval*) *args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		} 
 #endif
 		else {
-			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);
+			val = xdebug_get_zval_value_text((zval*) *args[i], 0, NULL);
+			PHPWRITE(val, strlen(val));
+			xdfree(val);
 		}
 	}
 	
@@ -1569,7 +1571,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 				}
 #ifndef PHP_WIN32
 				else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-					val = xdebug_get_zval_value_ansi(debugzval, 1, NULL TSRMLS_CC);
+					val = xdebug_get_zval_value_ansi(debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}
 #endif

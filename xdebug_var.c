@@ -527,24 +527,24 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 ** ANSI colored variable printing routines
 */
 
-#define ANSI_COLOR_POINTER       "\e[0m"
-#define ANSI_COLOR_BOOL          "\e[35m"
-#define ANSI_COLOR_LONG          "\e[32m"
-#define ANSI_COLOR_NULL          "\e[34m"
-#define ANSI_COLOR_DOUBLE        "\e[33m"
-#define ANSI_COLOR_STRING        "\e[31m"
-#define ANSI_COLOR_EMPTY         "\e[30m"
-#define ANSI_COLOR_ARRAY         "\e[33m"
-#define ANSI_COLOR_OBJECT        "\e[31m"
-#define ANSI_COLOR_RESOURCE      "\e[36m"
-#define ANSI_COLOR_MODIFIER      "\e[32m"
-#define ANSI_COLOR_RESET         "\e[0m"
-#define ANSI_COLOR_BOLD          "\e[1m"
-#define ANSI_COLOR_BOLD_OFF      "\e[22m"
+#define ANSI_COLOR_POINTER       (mode == 1 ? "\e[0m" : "")
+#define ANSI_COLOR_BOOL          (mode == 1 ? "\e[35m" : "")
+#define ANSI_COLOR_LONG          (mode == 1 ? "\e[32m" : "")
+#define ANSI_COLOR_NULL          (mode == 1 ? "\e[34m" : "")
+#define ANSI_COLOR_DOUBLE        (mode == 1 ? "\e[33m" : "")
+#define ANSI_COLOR_STRING        (mode == 1 ? "\e[31m" : "")
+#define ANSI_COLOR_EMPTY         (mode == 1 ? "\e[30m" : "")
+#define ANSI_COLOR_ARRAY         (mode == 1 ? "\e[33m" : "")
+#define ANSI_COLOR_OBJECT        (mode == 1 ? "\e[31m" : "")
+#define ANSI_COLOR_RESOURCE      (mode == 1 ? "\e[36m" : "")
+#define ANSI_COLOR_MODIFIER      (mode == 1 ? "\e[32m" : "")
+#define ANSI_COLOR_RESET         (mode == 1 ? "\e[0m" : "")
+#define ANSI_COLOR_BOLD          (mode == 1 ? "\e[1m" : "")
+#define ANSI_COLOR_BOLD_OFF      (mode == 1 ? "\e[22m" : "")
 
-static int xdebug_array_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_array_element_export_text_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level, debug_zval;
+	int level, mode, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
@@ -552,6 +552,7 @@ static int xdebug_array_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 #endif
 
 	level      = va_arg(args, int);
+	mode       = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
 	debug_zval = va_arg(args, int);
 	options    = va_arg(args, xdebug_var_export_options*);
@@ -579,7 +580,7 @@ static int xdebug_array_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 			}
 			xdebug_str_add(str, "' =>\n", 0);
 		}
-		xdebug_var_export_ansi(zv, str, level + 1, debug_zval, options TSRMLS_CC);
+		xdebug_var_export_text_ansi(zv, str, mode, level + 1, debug_zval, options TSRMLS_CC);
 	}
 	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
 		xdebug_str_add(str, xdebug_sprintf("\n%*s(more elements)...\n", (level * 2), ""), 1);
@@ -588,9 +589,9 @@ static int xdebug_array_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 	return 0;
 }
 
-static int xdebug_object_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_object_element_export_text_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level, debug_zval;
+	int level, mode, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
 	char *prop_name, *class_name, *modifier;
@@ -599,6 +600,7 @@ static int xdebug_object_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TS
 #endif
 
 	level      = va_arg(args, int);
+	mode       = va_arg(args, int);
 	str        = va_arg(args, struct xdebug_str*);
 	debug_zval = va_arg(args, int);
 	options    = va_arg(args, xdebug_var_export_options*);
@@ -614,7 +616,7 @@ static int xdebug_object_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TS
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
 			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		}
-		xdebug_var_export_ansi(zv, str, level + 1, debug_zval, options TSRMLS_CC);
+		xdebug_var_export_text_ansi(zv, str, mode, level + 1, debug_zval, options TSRMLS_CC);
 	}
 	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
 		xdebug_str_add(str, xdebug_sprintf("\n%*s(more elements)...\n", (level * 2), ""), 1);
@@ -623,7 +625,7 @@ static int xdebug_object_element_export_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TS
 	return 0;
 }
 
-void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	HashTable *myht;
 	char*     tmp_str;
@@ -667,7 +669,7 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) '%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
 							ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET, ANSI_COLOR_STRING), 1);
 				xdebug_str_addl(str, tmp_str, options->max_data, 0);
-				xdebug_str_add(str, xdebug_sprintf("'...%s", ANSI_COLOR_RESET), 1);
+				xdebug_str_add(str, xdebug_sprintf("%s'...", ANSI_COLOR_RESET), 1);
 			}
 			efree(tmp_str);
 			break;
@@ -681,7 +683,7 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_ansi, 4, level, str, debug_zval, options);
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_text_ansi, 5, level, mode, str, debug_zval, options);
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 				}
@@ -708,7 +710,7 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_ansi, 4, level, str, debug_zval, options);
+					zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_text_ansi, 5, level, mode, str, debug_zval, options);
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 				}
@@ -735,7 +737,7 @@ void xdebug_var_export_ansi(zval **struc, xdebug_str *str, int level, int debug_
 	xdebug_str_addl(str, "\n", 1, 0);
 }
 
-char* xdebug_get_zval_value_ansi(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 	int default_options = 0;
@@ -745,7 +747,7 @@ char* xdebug_get_zval_value_ansi(zval *val, int debug_zval, xdebug_var_export_op
 		default_options = 1;
 	}
 
-	xdebug_var_export_ansi(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_export_text_ansi(&val, (xdebug_str*) &str, mode, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
 		xdfree(options->runtime);
@@ -755,7 +757,7 @@ char* xdebug_get_zval_value_ansi(zval *val, int debug_zval, xdebug_var_export_op
 	return str.d;
 }
 
-static void xdebug_var_synopsis_ansi(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	HashTable *myht;
 
@@ -810,7 +812,7 @@ static void xdebug_var_synopsis_ansi(zval **struc, xdebug_str *str, int level, i
 	}
 }
 
-char* xdebug_get_zval_synopsis_ansi(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 	int default_options = 0;
@@ -820,7 +822,7 @@ char* xdebug_get_zval_synopsis_ansi(zval *val, int debug_zval, xdebug_var_export
 		default_options = 1;
 	}
 
-	xdebug_var_synopsis_ansi(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_synopsis_text_ansi(&val, (xdebug_str*) &str, mode, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
 		xdfree(options->runtime);

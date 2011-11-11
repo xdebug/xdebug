@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #535: Code coverage and return before function|class ending
+--INI--
+xdebug.overload_var_dump=0
 --FILE--
 <?php
 xdebug_start_code_coverage();

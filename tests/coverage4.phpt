@@ -14,6 +14,7 @@ xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
 xdebug.extended_info=1
+xdebug.overload_var_dump=0
 --FILE--
 <?php
     xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);

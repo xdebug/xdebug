@@ -9,6 +9,7 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.collect_vars=1
 xdebug.show_local_vars=0
+xdebug.overload_var_dump=0
 --FILE--
 <?php
 	function a($a,$b) {
