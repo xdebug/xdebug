@@ -111,7 +111,7 @@ xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag)
 	return xml;
 }
 
-void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute, int attribute_len, char *value, int value_len, int free_name, int free_value)
+void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute, size_t attribute_len, char *value, size_t value_len, int free_name, int free_value)
 {
 	xdebug_xml_attribute *attr = xdmalloc(sizeof (xdebug_xml_attribute));
 	xdebug_xml_attribute **ptr;
