@@ -522,9 +522,8 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 	return str.d;
 }
 
-#ifndef PHP_WIN32
 /*****************************************************************************
-** ANSI colored variable printing routines
+** Plain text/ANSI coloured variable printing routines
 */
 
 #define ANSI_COLOR_POINTER       (mode == 1 ? "\e[0m" : "")
@@ -831,7 +830,6 @@ char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xd
 
 	return str.d;
 }
-#endif
 
 
 /*****************************************************************************
