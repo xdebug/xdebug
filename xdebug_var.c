@@ -526,20 +526,37 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 ** Plain text/ANSI coloured variable printing routines
 */
 
-#define ANSI_COLOR_POINTER       (mode == 1 ? "\e[0m" : "")
-#define ANSI_COLOR_BOOL          (mode == 1 ? "\e[35m" : "")
-#define ANSI_COLOR_LONG          (mode == 1 ? "\e[32m" : "")
-#define ANSI_COLOR_NULL          (mode == 1 ? "\e[34m" : "")
-#define ANSI_COLOR_DOUBLE        (mode == 1 ? "\e[33m" : "")
-#define ANSI_COLOR_STRING        (mode == 1 ? "\e[31m" : "")
-#define ANSI_COLOR_EMPTY         (mode == 1 ? "\e[30m" : "")
-#define ANSI_COLOR_ARRAY         (mode == 1 ? "\e[33m" : "")
-#define ANSI_COLOR_OBJECT        (mode == 1 ? "\e[31m" : "")
-#define ANSI_COLOR_RESOURCE      (mode == 1 ? "\e[36m" : "")
-#define ANSI_COLOR_MODIFIER      (mode == 1 ? "\e[32m" : "")
-#define ANSI_COLOR_RESET         (mode == 1 ? "\e[0m" : "")
-#define ANSI_COLOR_BOLD          (mode == 1 ? "\e[1m" : "")
-#define ANSI_COLOR_BOLD_OFF      (mode == 1 ? "\e[22m" : "")
+#ifndef WIN32
+# define ANSI_COLOR_POINTER       (mode == 1 ? "\e[0m" : "")
+# define ANSI_COLOR_BOOL          (mode == 1 ? "\e[35m" : "")
+# define ANSI_COLOR_LONG          (mode == 1 ? "\e[32m" : "")
+# define ANSI_COLOR_NULL          (mode == 1 ? "\e[34m" : "")
+# define ANSI_COLOR_DOUBLE        (mode == 1 ? "\e[33m" : "")
+# define ANSI_COLOR_STRING        (mode == 1 ? "\e[31m" : "")
+# define ANSI_COLOR_EMPTY         (mode == 1 ? "\e[30m" : "")
+# define ANSI_COLOR_ARRAY         (mode == 1 ? "\e[33m" : "")
+# define ANSI_COLOR_OBJECT        (mode == 1 ? "\e[31m" : "")
+# define ANSI_COLOR_RESOURCE      (mode == 1 ? "\e[36m" : "")
+# define ANSI_COLOR_MODIFIER      (mode == 1 ? "\e[32m" : "")
+# define ANSI_COLOR_RESET         (mode == 1 ? "\e[0m" : "")
+# define ANSI_COLOR_BOLD          (mode == 1 ? "\e[1m" : "")
+# define ANSI_COLOR_BOLD_OFF      (mode == 1 ? "\e[22m" : "")
+#else
+# define ANSI_COLOR_POINTER      "" 
+# define ANSI_COLOR_BOOL         ""
+# define ANSI_COLOR_LONG         ""
+# define ANSI_COLOR_NULL         ""
+# define ANSI_COLOR_DOUBLE       ""
+# define ANSI_COLOR_STRING       ""
+# define ANSI_COLOR_EMPTY        ""
+# define ANSI_COLOR_ARRAY        ""
+# define ANSI_COLOR_OBJECT       ""
+# define ANSI_COLOR_RESOURCE     ""
+# define ANSI_COLOR_MODIFIER     ""
+# define ANSI_COLOR_RESET        ""
+# define ANSI_COLOR_BOLD         ""
+# define ANSI_COLOR_BOLD_OFF     ""
+#endif
 
 static int xdebug_array_element_export_text_ansi(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
