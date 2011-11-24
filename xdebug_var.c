@@ -662,14 +662,14 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
 			} else if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
-				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) '%s%s%s'", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
+				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s%s%s\"", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
 							ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET,
 							ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), 1);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) '%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
+				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
 							ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET, ANSI_COLOR_STRING), 1);
 				xdebug_str_addl(str, tmp_str, options->max_data, 0);
-				xdebug_str_add(str, xdebug_sprintf("%s'...", ANSI_COLOR_RESET), 1);
+				xdebug_str_add(str, xdebug_sprintf("%s\"...", ANSI_COLOR_RESET), 1);
 			}
 			efree(tmp_str);
 			break;

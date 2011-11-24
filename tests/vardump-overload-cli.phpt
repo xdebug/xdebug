@@ -27,7 +27,7 @@ var_dump($array);
 --EXPECT--
 array(3) {
   [0] =>
-  string(61) 'Hello, this is a very long strin'...
+  string(61) "Hello, this is a very long strin"...
   [1] =>
   array(1) {
     'depth2' =>
@@ -59,7 +59,7 @@ array(3) {
 }
 [1marray[22m([32m3[0m) {
   [0] [0m=>[0m
-  [1mstring[22m([32m61[0m) '[31mHello, this is a very long strin[0m'...
+  [1mstring[22m([32m61[0m) "[31mHello, this is a very long strin[0m"...
   [1] [0m=>[0m
   [1marray[22m([32m1[0m) {
     'depth2' =>

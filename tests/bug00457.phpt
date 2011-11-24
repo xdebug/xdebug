@@ -38,35 +38,35 @@ var_dump($object);
 --EXPECTF--
 array(5) {
   [0] =>
-  string(58) 'A very long string that should b'...
+  string(58) "A very long string that should b"...
   [1] =>
   array(2) {
     [0] =>
-    string(28) 'a test for the depth setting'
+    string(28) "a test for the depth setting"
     [1] =>
     array(1) {
       ...
     }
   }
   [2] =>
-  string(13) 'third element'
+  string(13) "third element"
   [3] =>
-  string(28) 'fourth element (still shows)'
+  string(28) "fourth element (still shows)"
 
   (more elements)...
 }
 class stdClass#1 (5) {
-  public $prop1 =>  string(58) 'A very long string that should b'...
+  public $prop1 =>  string(58) "A very long string that should b"...
   public $array =>  array(2) {
     [0] =>
-    string(28) 'a test for the depth setting'
+    string(28) "a test for the depth setting"
     [1] =>
     array(1) {
       ...
     }
   }
-  public $prop3 =>  string(13) 'third element'
-  public $prop4 =>  string(28) 'fourth element (still shows)'
+  public $prop3 =>  string(13) "third element"
+  public $prop4 =>  string(28) "fourth element (still shows)"
 
   (more elements)...
 }
