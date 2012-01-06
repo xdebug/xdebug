@@ -612,7 +612,7 @@ static int xdebug_object_element_export_text_ansi(zval **zv XDEBUG_ZEND_HASH_APP
 
 		if (hash_key->nKeyLength != 0) {
 			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &class_name);
-			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s", 
+			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
 			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		}

@@ -56,8 +56,10 @@ var_dump($object);
   (more elements)...
 }
 [1mclass[22m [31mstdClass[0m#1 ([32m5[0m) {
-  [32m[1mpublic[22m[0m $prop1 [0m=>[0m  [1mstring[22m([32m58[0m) "[31mA very long string that should b[0m"...
-  [32m[1mpublic[22m[0m $array [0m=>[0m  [1marray[22m([32m2[0m) {
+  [32m[1mpublic[22m[0m $prop1 [0m=>[0m
+  [1mstring[22m([32m58[0m) "[31mA very long string that should b[0m"...
+  [32m[1mpublic[22m[0m $array [0m=>[0m
+  [1marray[22m([32m2[0m) {
     [0] [0m=>[0m
     [1mstring[22m([32m28[0m) "[31ma test for the depth setting[0m"
     [1] [0m=>[0m
@@ -65,8 +67,10 @@ var_dump($object);
       ...
     }
   }
-  [32m[1mpublic[22m[0m $prop3 [0m=>[0m  [1mstring[22m([32m13[0m) "[31mthird element[0m"
-  [32m[1mpublic[22m[0m $prop4 [0m=>[0m  [1mstring[22m([32m28[0m) "[31mfourth element (still shows)[0m"
+  [32m[1mpublic[22m[0m $prop3 [0m=>[0m
+  [1mstring[22m([32m13[0m) "[31mthird element[0m"
+  [32m[1mpublic[22m[0m $prop4 [0m=>[0m
+  [1mstring[22m([32m28[0m) "[31mfourth element (still shows)[0m"
 
   (more elements)...
 }

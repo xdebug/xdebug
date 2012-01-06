@@ -56,8 +56,10 @@ array(5) {
   (more elements)...
 }
 class stdClass#1 (5) {
-  public $prop1 =>  string(58) "A very long string that should b"...
-  public $array =>  array(2) {
+  public $prop1 =>
+  string(58) "A very long string that should b"...
+  public $array =>
+  array(2) {
     [0] =>
     string(28) "a test for the depth setting"
     [1] =>
@@ -65,8 +67,10 @@ class stdClass#1 (5) {
       ...
     }
   }
-  public $prop3 =>  string(13) "third element"
-  public $prop4 =>  string(28) "fourth element (still shows)"
+  public $prop3 =>
+  string(13) "third element"
+  public $prop4 =>
+  string(28) "fourth element (still shows)"
 
   (more elements)...
 }
