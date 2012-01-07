@@ -235,7 +235,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 #endif
 
 	if (html) {
-		escaped = php_escape_html_entities_ex(buffer, strlen(buffer), &newlen, 0, 0, NULL, 1 TSRMLS_CC);
+		escaped = php_escape_html_entities(buffer, strlen(buffer), &newlen, 0, 0, NULL TSRMLS_CC);
 	} else {
 		escaped = estrdup(buffer);
 	}
