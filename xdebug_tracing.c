@@ -293,7 +293,7 @@ static char* return_trace_stack_frame_begin_html(function_stack_entry* i, int fn
 	xdebug_str_add(&str, "\t<tr>", 0);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", fnr), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6f</td>", i->time - XG(start_time)), 1);
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", i->memory), 1);
 #endif
 	xdebug_str_add(&str, "<td align='left'>", 0);
@@ -427,7 +427,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 		if (XG(trace_format) == 2) {
 			fprintf(XG(trace_file), "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
 			fprintf(XG(trace_file), "\t<tr><th>#</th><th>Time</th>");
-#if MEMORY_LIMIT
+#if HAVE_PHP_MEMORY_USAGE
 			fprintf(XG(trace_file), "<th>Mem</th>");
 #endif
 			fprintf(XG(trace_file), "<th colspan='2'>Function</th><th>Location</th></tr>\n");
