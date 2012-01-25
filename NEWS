@@ -1,3 +1,33 @@
+Wed, Jan 25, 2012 - xdebug 2.1.3
+
+= Fixed bugs:
+    
+	- Fixed bug #725: EG(current_execute_data) is not checked in xdebug.c,
+	  xdebug_statement_call.
+	- Fixed bug #723: xdebug is stricter than PHP regarding Exception property
+	  types.
+	- Fixed bug #714: Cachegrind files have huge (wrong) numbers in some lines.
+	- Fixed bug #709: Xdebug doesn't understand E_USER_DEPRECATED.
+	- Fixed bug #698: Allow xdebug.remote_connect_back to be set in .htaccess.
+	- Fixed bug #690: Function traces are not appended to file with
+	  xdebug_start_trace() and xdebug.trace_options=1.
+	- Fixed bug #623: Static properties of a class can be evaluated only with
+	  difficulty.
+	- Fixed bug #614/#619: Viewing private variables in base classes through
+	  the debugger.
+	- Fixed bug #609: Xdebug and SOAP extension's error handlers conflict.
+	- Fixed bug #606/#678/#688/#689/#704: crash after using eval on an
+	  unparsable, or un-executable statement.
+	- Fixed bug #305: xdebug exception handler doesn't properly handle special
+	  chars.
+
++ Changes:
+
+	- Changed xdebug_break() to hint to the statement execution trap instead of
+	  breaking forcefully adding an extra stackframe.
+	- Prevent Xdebug 2.1.x to build with PHP 5.4.
+
+
 Thu, Jul 28, 2011 - xdebug 2.1.2
 
 = Fixed bugs:
