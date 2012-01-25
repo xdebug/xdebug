@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2011 Derick Rethans <derick@xdebug.org>           |
+   | Copyright (c) 2002-2012 Derick Rethans <derick@xdebug.org>           |
    |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
    |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
    |                         Zeev Suraski <zeev@zend.com>                 |
