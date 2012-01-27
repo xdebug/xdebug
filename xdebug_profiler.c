@@ -66,7 +66,15 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		/* Invalid or empty xdebug.profiler_output_name */
 		return FAILURE;
 	}
-	filename = xdebug_sprintf("%s/%s", XG(profiler_output_dir), fname);
+	
+	if ( !strlen(XG(profiler_output_dir)) ||
+		xdebug_format_output_filename( &profileDir, XG(profiler_output_dir), script_name ) <= 0
+	) {
+		/* Invalid or empty xdebug.profiler_output_dir */
+		return FAILURE;
+	}
+	
+	filename = xdebug_sprintf("%s/%s", profileDir , fname);
 	xdfree(fname);
 		
 	if (XG(profiler_append)) {
