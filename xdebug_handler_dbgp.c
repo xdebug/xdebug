@@ -1242,6 +1242,10 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_op_array     *original_active_op_array = EG(active_op_array);
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
+#if PHP_VERSION_ID >= 50300
+	void             **original_argument_stack_top = EG(argument_stack)->top;
+	void             **original_argument_stack_end = EG(argument_stack)->end;
+#endif
 
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
@@ -1263,6 +1267,10 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(active_op_array) = original_active_op_array;
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
+#if PHP_VERSION_ID >= 50300
+	EG(argument_stack)->top = original_argument_stack_top;
+	EG(argument_stack)->end = original_argument_stack_end;
+#endif
 
 	return res;
 }
