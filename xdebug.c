@@ -1315,7 +1315,7 @@ static int check_soap_call(function_stack_entry *fse)
 	if (fse->function.class && 
 		(
 			(strstr(fse->function.class, "SoapClient") != NULL) ||
-			(strstr(fse->function.class, "SoapClient") != NULL)
+			(strstr(fse->function.class, "SoapServer") != NULL)
 		) &&
 		(zend_hash_find(&module_registry, "soap", 5, (void**) &tmp_mod_entry) == SUCCESS)
 	) {
