@@ -273,6 +273,8 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 #define XF_ST_ARRAY_INDEX_NUM    1
 #define XF_ST_ARRAY_INDEX_ASSOC  2
 #define XF_ST_OBJ_PROPERTY       3
+#define XF_ST_STATIC_ROOT        4
+#define XF_ST_STATIC_PROPERTY    5
 
 inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 {
@@ -287,7 +289,7 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 	return NULL;
 }
 
-inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
+inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
 {
 	char *name;
 	zend_uint name_len;
@@ -298,15 +300,16 @@ inline static char *fetch_classname_from_zval(zval *z, int *length TSRMLS_DC)
 
 	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
 		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
-		zend_class_entry *ce;
+		zend_class_entry *tmp_ce;
 
-		ce = zend_get_class_entry(z TSRMLS_CC);
-		if (!ce) {
+		tmp_ce = zend_get_class_entry(z TSRMLS_CC);
+		if (!tmp_ce) {
 			return NULL;
 		}
 
-		*length = ce->name_length;
-		return estrdup(ce->name);
+		*length = tmp_ce->name_length;
+		*ce = tmp_ce;
+		return estrdup(tmp_ce->name);
 	} 
 
 	*length = name_len;
@@ -337,13 +340,21 @@ static char* prepare_search_key(char *name, int *name_length, char *prefix, int 
 	return element;
 }
 
-static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_length, int type, char* ccn, int ccnl TSRMLS_DC)
+static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	zval **retval_pp = NULL, *retval_p = NULL;
 	char  *element;
 	int    element_length = name_length;
 
 	switch (type) {
+		case XF_ST_STATIC_ROOT:
+#if PHP_VERSION_ID < 50400
+			ht = CE_STATIC_MEMBERS(cce);
+			goto continue_from_static_root;
+#else
+			return NULL;
+#endif
+
 		case XF_ST_ROOT:
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			/* Check for compiled vars */
@@ -399,6 +410,10 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			}
 			break;
 		case XF_ST_OBJ_PROPERTY:
+#if PHP_VERSION_ID <= 50400
+continue_from_static_root:
+#endif
+
 			/* First we try a public property */
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
@@ -458,6 +473,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 	int        type = XF_ST_ROOT;
 	zval      *retval = NULL;
 	char      *current_classname = NULL;
+	zend_class_entry *current_ce = NULL;
 	int        cc_length = 0;
 	char       quotechar = 0;
 
@@ -483,11 +499,12 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 					if (*p[0] == '[') {
 						keyword_end = *p;
 						if (keyword) {
-							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							current_ce = NULL;
 							if (retval) {
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
 							}
@@ -497,13 +514,14 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 					} else if (*p[0] == '-') {
 						keyword_end = *p;
 						if (keyword) {
-							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							current_ce = NULL;
 							if (retval) {
-								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
 							}
 							keyword = NULL;
@@ -513,23 +531,19 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 					} else if (*p[0] == ':') {
 						keyword_end = *p;
 						if (keyword) {
-							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
 								efree(current_classname);
 							}
 							current_classname = NULL;
 							if (retval) {
-								current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
-#if PHP_VERSION_ID >= 50400
-								st = &Z_OBJCE_P(retval)->properties_info;
-#else
-								st = CE_STATIC_MEMBERS(Z_OBJCE_P(retval));
-#endif
+								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
+								st = NULL;
 							}
 							keyword = NULL;
 						}
 						state = 8;
-						type = XF_ST_OBJ_PROPERTY;
+						type = XF_ST_STATIC_PROPERTY;
 					}
 					break;
 				case 2:
@@ -564,13 +578,13 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						quotechar = 0;
 						state = 5;
 						keyword_end = *p;
-						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 						if (current_classname) {
 							efree(current_classname);
 						}
 						current_classname = NULL;
 						if (retval) {
-							current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							st = fetch_ht_from_zval(retval TSRMLS_CC);
 						}
 						keyword = NULL;
@@ -585,13 +599,13 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 					if (*p[0] == ']') {
 						state = 1;
 						keyword_end = *p;
-						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length TSRMLS_CC);
+						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 						if (current_classname) {
 							efree(current_classname);
 						}
 						current_classname = NULL;
 						if (retval) {
-							current_classname = fetch_classname_from_zval(retval, &cc_length TSRMLS_CC);
+							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							st = fetch_ht_from_zval(retval TSRMLS_CC);
 						}
 						keyword = NULL;
@@ -604,17 +618,15 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 
 						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
 							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
-#if PHP_VERSION_ID >= 50400
-							st = &ce->properties_info;
-#else
-							st = CE_STATIC_MEMBERS(ce);
-#endif
+
+							st = NULL;
 
 							current_classname = estrdup(ce->name);
 							cc_length = strlen(ce->name);
+							current_ce = ce;
 							keyword = *p + 1;
 
-							type = XF_ST_OBJ_PROPERTY;
+							type = XF_ST_STATIC_ROOT;
 						} else {
 							keyword = NULL;
 						}
@@ -625,7 +637,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 		}
 	} while (found < 0);
 	if (keyword != NULL) {
-		retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length TSRMLS_CC);
+		retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 		if (retval) {
 			st = fetch_ht_from_zval(retval TSRMLS_CC);
 		}
