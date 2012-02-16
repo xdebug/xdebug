@@ -29,8 +29,7 @@ extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 inline void xdebug_coverage_lines_alloc(xdebug_coverage_file *file)
 {
 	file->lines_slots = 64;
-	file->lines = (xdebug_coverage_line *) xdmalloc(
-		file->lines_slots * sizeof(xdebug_coverage_line));
+	file->lines = (xdebug_coverage_line *) xdmalloc(file->lines_slots * sizeof(xdebug_coverage_line));
 	memset(
 		file->lines,
 		0,
@@ -625,7 +624,7 @@ static void add_lines(void *ret, xdebug_coverage_file *file)
 	long                  lineno;
 	xdebug_coverage_line *line;
 
-	for (lineno = 0; lineno < file->lines_slots; lineno++) {
+	for (lineno = 1; lineno < file->lines_slots; lineno++) {
 		line = &file->lines[lineno];
 		if (line->hit) {
 			if (line->executable && (line->count == 0)) {
