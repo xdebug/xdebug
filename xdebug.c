@@ -87,6 +87,8 @@ int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sa
 
 static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC);
 
+static int xdebug_autostart_ignorepath(char *ignore_path TSRMLS_DC);
+
 zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
 	PHP_FE(xdebug_get_function_stack,    NULL)
@@ -287,6 +289,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   remote_port,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
+        STD_PHP_INI_BOOLEAN("xdebug.remote_autostart_ignore","",            PHP_INI_ALL,    OnUpdateString,   remote_autostart_ignore,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   remote_connect_back,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
@@ -990,6 +993,33 @@ static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC)
 	return 0;
 }
 
+static int xdebug_autostart_ignorepath(char *ignore_path TSRMLS_DC)
+{
+  char *tok;
+  char *last;
+  size_t l;
+
+  if (! SG(request_info).request_uri)
+    return 0;
+
+  tok = strtok_r(ignore_path, ",", &last);
+  while (tok)
+  {
+    while (tok && strchr(" \t", tok[0])) tok++;
+
+    l= strlen(tok);
+    while (l && strchr(" \t", tok[l-1]))
+      l--;
+
+    if (strncmp(SG(request_info).request_uri, tok, l) == 0)
+      return 1;
+
+    tok = strtok_r(NULL, ",", &last);
+  }
+
+  return 0;
+}
+
 static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
 {
 	int i = 0; 
@@ -1238,7 +1268,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 		/* Start remote context if requested */
 		if (
-			(magic_cookie || XG(remote_autostart)) &&
+			(magic_cookie || (XG(remote_autostart) && ! xdebug_autostart_ignorepath(XG(remote_autostart_ignore) TSRMLS_CC))) &&
 			!XG(remote_enabled) &&
 			XG(remote_enable) &&
 			(XG(remote_mode) == XDEBUG_REQ)
