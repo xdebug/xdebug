@@ -999,6 +999,10 @@ static int xdebug_autostart_ignorepath(char *ignore_path TSRMLS_DC)
 	char *last;
 	size_t l;
 
+	if (! ignore_path) {
+		return 0;
+	}
+
 	if (! SG(request_info).request_uri) {
 		return 0;
 	}
