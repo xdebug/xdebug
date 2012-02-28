@@ -1558,9 +1558,12 @@ char* xdebug_xmlize(char *string, int len, int *newlen)
 		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
 		efree(tmp);
 
-		tmp = php_str_to_str(tmp2, len, "\0", 1, "&#0;", 4, newlen);
+		tmp = php_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
 		efree(tmp2);
-		return tmp;
+
+		tmp2 = php_str_to_str(tmp, len, "\0", 1, "&#0;", 4, newlen);
+		efree(tmp);
+		return tmp2;
 	} else {
 		*newlen = len;
 		return estrdup(string);
