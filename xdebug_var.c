@@ -105,8 +105,6 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *nod
 			if (T(node->u.var).var.ptr) {
 				return T(node->u.var).var.ptr;
 #endif
-			} else {
-				fprintf(stderr, "\nIS_VAR\n");
 			}
 			break;
 

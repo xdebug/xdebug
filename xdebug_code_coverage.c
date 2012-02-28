@@ -129,6 +129,10 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 			xdebug_str_add(&name,xdebug_sprintf("[%s]", zval_value), 1);
 		}
 	}
+	if (cur_opcode->opcode >= ZEND_PRE_INC_OBJ && cur_opcode->opcode <= ZEND_POST_DEC_OBJ) {
+		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->XDEBUG_TYPE(op2), &cur_opcode->op2, execute_data->Ts, &is_var), 0, options);
+		xdebug_str_add(&name, xdebug_sprintf("$this->%s", zval_value), 1);
+	}
 	if (zval_value) {
 		xdfree(zval_value);
 		zval_value = NULL;
@@ -137,7 +141,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	/* Scroll back to start of FETCHES */
 	gohungfound = 0;
 	opcode_ptr = prev_opcode;
-	while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W) {
+	while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW) {
 		opcode_ptr = opcode_ptr - 1;
 		gohungfound = 1;
 	}
@@ -156,6 +160,10 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->XDEBUG_TYPE(op1), &opcode_ptr->op1, execute_data->Ts, &is_var), 0, options);
 				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
 			}
+			if (is_static && opcode_ptr->opcode == ZEND_FETCH_RW) {
+				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->XDEBUG_TYPE(op1), &opcode_ptr->op1, execute_data->Ts, &is_var), 0, options);
+				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
+			}
 			if (opcode_ptr->opcode == ZEND_FETCH_DIM_W) {
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->XDEBUG_TYPE(op2), &opcode_ptr->op2, execute_data->Ts, &is_var), 0, NULL);
 				xdebug_str_add(&name, xdebug_sprintf("[%s]", zval_value), 1);
@@ -168,7 +176,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 				xdfree(zval_value);
 				zval_value = NULL;
 			}
-		} while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W);
+		} while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW);
 	}
 
 	if (cur_opcode->opcode == ZEND_ASSIGN_OBJ) {
@@ -231,6 +239,19 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 			full_varname = tmp_varname;
 
 			val = xdebug_get_zval(execute_data, cur_opcode->XDEBUG_TYPE(op1), &cur_opcode->op1, execute_data->Ts, &is_var);
+		} else if (cur_opcode->opcode >= ZEND_PRE_INC_OBJ && cur_opcode->opcode <= ZEND_POST_DEC_OBJ) {
+			char *tmp_varname;
+
+			switch (cur_opcode->opcode) {
+				case ZEND_PRE_INC_OBJ:  tmp_varname = xdebug_sprintf("++%s", full_varname); break;
+				case ZEND_POST_INC_OBJ: tmp_varname = xdebug_sprintf("%s++", full_varname); break;
+				case ZEND_PRE_DEC_OBJ:  tmp_varname = xdebug_sprintf("--%s", full_varname); break;
+				case ZEND_POST_DEC_OBJ: tmp_varname = xdebug_sprintf("%s--", full_varname); break;
+			}
+			xdfree(full_varname);
+			full_varname = tmp_varname;
+
+			val = xdebug_get_zval(execute_data, cur_opcode->XDEBUG_TYPE(op2), &cur_opcode->op2, execute_data->Ts, &is_var);
 		} else if (next_opcode->opcode == ZEND_OP_DATA) {
 			val = xdebug_get_zval(execute_data, next_opcode->XDEBUG_TYPE(op1), &next_opcode->op1, execute_data->Ts, &is_var);
 		} else {
@@ -265,6 +286,10 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc,"",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc,"",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec,"",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec,"",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc_obj,"",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_obj,"",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec_obj,"",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_obj,"",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_concat,".=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_or,"|=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_and,"&=",0)
