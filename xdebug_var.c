@@ -685,6 +685,9 @@ void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 	char               *class_name;
 	char               *prop_name, *prop_class_name;
 	xdebug_var_export_options *options;
+#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
+	TSRMLS_FETCH();
+#endif
 
 	node = va_arg(args, xdebug_xml_node *);
 	options = va_arg(args, xdebug_var_export_options *);
