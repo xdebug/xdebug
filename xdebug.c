@@ -1083,7 +1083,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		}
 		if (PG(display_errors)) {
 			xdebug_str tmp_str = { 0, 0, NULL };
-			xdebug_append_error_head(&tmp_str, PG(html_errors) TSRMLS_CC);
+			xdebug_append_error_head(&tmp_str, PG(html_errors), "exception" TSRMLS_CC);
 			xdebug_str_add(&tmp_str, exception_trace, 0);
 			xdebug_append_error_footer(&tmp_str, PG(html_errors) TSRMLS_CC);
 
