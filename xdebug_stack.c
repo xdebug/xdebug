@@ -67,7 +67,7 @@ static char* ansi_formats[10] = {
 #endif
 
 static char* html_formats[12] = {
-	"<br />\n<font size='1'><table class='xdebug-error' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
+	"<br />\n<font size='1'><table class='xdebug-error xe-%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 #if HAVE_PHP_MEMORY_USAGE
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
@@ -246,11 +246,15 @@ static int create_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
-void xdebug_append_error_head(xdebug_str *str, int html TSRMLS_DC)
+void xdebug_append_error_head(xdebug_str *str, int html, char *error_type_str TSRMLS_DC)
 {
 	char **formats = select_formats(html TSRMLS_CC);
- 
-	xdebug_str_add(str, formats[0], 0);
+
+	if (html) {
+		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str), 1);
+	} else {
+		xdebug_str_add(str, formats[0], 0);
+	}
 }
 
 void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
@@ -437,21 +441,26 @@ void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC)
 	xdebug_str_add(str, formats[7], 0);
 }
 
-static char *get_printable_stack(int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
+static char *get_printable_stack(int html, int error_type, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
 	char *prepend_string;
 	char *append_string;
+	char *error_type_str = xdebug_error_type(error_type);
+	char *error_type_str_simple = xdebug_error_type_simple(error_type);
 	xdebug_str str = {0, 0, NULL};
 
 	prepend_string = INI_STR("error_prepend_string");
 	append_string = INI_STR("error_append_string");
 
 	xdebug_str_add(&str, prepend_string ? prepend_string : "", 0);
-	xdebug_append_error_head(&str, html TSRMLS_CC);
+	xdebug_append_error_head(&str, html, error_type_str_simple TSRMLS_CC);
 	xdebug_append_error_description(&str, html, error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
 	xdebug_append_printable_stack(&str, html TSRMLS_CC);
 	xdebug_append_error_footer(&str, html TSRMLS_CC);
 	xdebug_str_add(&str, append_string ? append_string : "", 0);
+
+	xdfree(error_type_str);
+	xdfree(error_type_str_simple);
 
 	return str.d;
 }
@@ -614,7 +623,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				strncpy(tmp_buf, buffer, p - buffer );
 
 				/* Append error */
-				xdebug_append_error_head(&str, PG(html_errors) TSRMLS_CC);
+				xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception" TSRMLS_CC);
 				xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
 				xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
 				xdebug_str_add(&str, XG(last_exception_trace), 0);
@@ -624,14 +633,14 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				xdfree(str.d);
 				free(tmp_buf);
 			} else {
-				printable_stack = get_printable_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+				printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno TSRMLS_CC);
 				php_output_error(printable_stack TSRMLS_CC);
 				xdfree(printable_stack);
 			}
 		}
 		if (XG(do_collect_errors)) {
 			char *printable_stack;
-			printable_stack = get_printable_stack(PG(html_errors), error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+			printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno TSRMLS_CC);
 			xdebug_llist_insert_next(XG(collected_errors), XDEBUG_LLIST_TAIL(XG(collected_errors)), printable_stack);
 		}
 	}
@@ -747,9 +756,9 @@ PHP_FUNCTION(xdebug_print_function_stack)
  
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
 	if (message) {
-		tmp = get_printable_stack(PG(html_errors), "Xdebug", message, i->filename, i->lineno TSRMLS_CC);
+		tmp = get_printable_stack(PG(html_errors), 0, message, i->filename, i->lineno TSRMLS_CC);
 	} else {
-		tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
+		tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno TSRMLS_CC);
 	}
 	php_printf("%s", tmp);
 	xdfree(tmp);
@@ -764,7 +773,7 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 	char *tmp;
 
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
-	tmp = get_printable_stack(PG(html_errors), "Xdebug", "user triggered", i->filename, i->lineno TSRMLS_CC);
+	tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno TSRMLS_CC);
 	RETVAL_STRING(tmp, 1);
 	xdfree(tmp);
 }

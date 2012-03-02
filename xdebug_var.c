@@ -31,6 +31,51 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+char* xdebug_error_type_simple(int type)
+{
+	switch (type) {
+		case E_ERROR:
+		case E_CORE_ERROR:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+			return xdstrdup("fatal-error");
+			break;
+#if PHP_VERSION_ID >= 50200
+		case E_RECOVERABLE_ERROR:
+			return xdstrdup("catchable-fatal-error");
+			break;
+#endif
+		case E_WARNING:
+		case E_CORE_WARNING:
+		case E_COMPILE_WARNING:
+		case E_USER_WARNING:
+			return xdstrdup("warning");
+			break;
+		case E_PARSE:
+			return xdstrdup("parse-error");
+			break;
+		case E_NOTICE:
+		case E_USER_NOTICE:
+			return xdstrdup("notice");
+			break;
+		case E_STRICT:
+			return xdstrdup("strict-standards");
+			break;
+#if PHP_VERSION_ID >= 50300
+		case E_DEPRECATED:
+		case E_USER_DEPRECATED:
+			return xdstrdup("deprecated");
+			break;
+#endif
+		case 0:
+			return xdstrdup("xdebug");
+			break;
+		default:
+			return xdstrdup("unknown-error");
+			break;
+	}
+}
+
 char* xdebug_error_type(int type)
 {
 	switch (type) {
@@ -67,6 +112,9 @@ char* xdebug_error_type(int type)
 			return xdstrdup("Deprecated");
 			break;
 #endif
+		case 0:
+			return xdstrdup("Xdebug");
+			break;
 		default:
 			return xdstrdup("Unknown error");
 			break;
