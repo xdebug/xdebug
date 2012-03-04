@@ -30,7 +30,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-static char* text_formats[10] = {
+static char* text_formats[11] = {
 	"\n",
 	"%s: %s in %s on line %d\n",
 	"\nCall Stack:\n",
@@ -44,11 +44,12 @@ static char* text_formats[10] = {
 	"\n\nVariables in local scope (#%d):\n",
 	"\n",
 	"  $%s = %s\n",
-	"  $%s = *uninitialized*\n"
+	"  $%s = *uninitialized*\n",
+	"SCREAM:  Error suppression ignored for\n"
 };
 
 #ifndef PHP_WIN32
-static char* ansi_formats[10] = {
+static char* ansi_formats[11] = {
 	"\n",
 	"\e[1m\e[31m%s\e[0m: %s\e[22m in \e[31m%s\e[0m on line \e[32m%d\e[0m\e[22m\n",
 	"\n\e[1mCall Stack:\e[22m\n",
@@ -62,12 +63,13 @@ static char* ansi_formats[10] = {
 	"\n\nVariables in local scope (#%d):\n",
 	"\n",
 	"  $%s = %s\n",
-	"  $%s = *uninitialized*\n"
+	"  $%s = *uninitialized*\n",
+	"\e[1m\e[31mSCREAM\e[0m:  Error suppression ignored for\n"
 };
 #endif
 
-static char* html_formats[12] = {
-	"<br />\n<font size='1'><table class='xdebug-error xe-%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
+static char* html_formats[13] = {
+	"<br />\n<font size='1'><table class='xdebug-error xe-%s%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 #if HAVE_PHP_MEMORY_USAGE
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
@@ -87,7 +89,8 @@ static char* html_formats[12] = {
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec'>%s</td></tr>\n",
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
 	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>..%s<b>:</b>%d</a></td></tr>\n",
-	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n"
+	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n",
+	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> SCREAM: Error suppression ignored for</th></tr>\n"
 };
 
 static char** select_formats(int html TSRMLS_DC) {
@@ -251,9 +254,15 @@ void xdebug_append_error_head(xdebug_str *str, int html, char *error_type_str TS
 	char **formats = select_formats(html TSRMLS_CC);
 
 	if (html) {
-		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str), 1);
+		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str, XG(in_at) ? " xe-scream" : ""), 1);
+		if (XG(in_at)) {
+			xdebug_str_add(str, formats[12], 0);
+		}
 	} else {
 		xdebug_str_add(str, formats[0], 0);
+		if (XG(in_at)) {
+			xdebug_str_add(str, formats[10], 0);
+		}
 	}
 }
 

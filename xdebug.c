@@ -452,11 +452,18 @@ void xdebug_env_config()
 
 static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-    if (XG(do_scream)) {
-        execute_data->opline++;
-        return ZEND_USER_OPCODE_CONTINUE;
-    }
-    return ZEND_USER_OPCODE_DISPATCH;
+	zend_op *cur_opcode = *EG(opline_ptr);
+
+	if (XG(do_scream)) {
+		execute_data->opline++;
+		if (cur_opcode->opcode == ZEND_BEGIN_SILENCE) {
+			XG(in_at) = 1;
+		} else {
+			XG(in_at) = 0;
+		}
+		return ZEND_USER_OPCODE_CONTINUE;
+	}
+	return ZEND_USER_OPCODE_DISPATCH;
 }
 
 static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
