@@ -634,11 +634,14 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				free(tmp_buf);
 			} else {
 				printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno TSRMLS_CC);
-				php_output_error(printable_stack TSRMLS_CC);
-				xdfree(printable_stack);
+				if (XG(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
+					xdebug_llist_insert_next(XG(collected_errors), XDEBUG_LLIST_TAIL(XG(collected_errors)), printable_stack);
+				} else {
+					php_output_error(printable_stack TSRMLS_CC);
+					xdfree(printable_stack);
+				}
 			}
-		}
-		if (XG(do_collect_errors)) {
+		} else if (XG(do_collect_errors)) {
 			char *printable_stack;
 			printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno TSRMLS_CC);
 			xdebug_llist_insert_next(XG(collected_errors), XDEBUG_LLIST_TAIL(XG(collected_errors)), printable_stack);
