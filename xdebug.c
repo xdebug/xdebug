@@ -1489,7 +1489,18 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC)
 {
 	if (XG(headers)) {
+#if PHP_VERSION_ID >= 50300
+		switch (op) {
+			case SAPI_HEADER_ADD:
+			case SAPI_HEADER_REPLACE:
+				xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
+			break;
+			case SAPI_HEADER_DELETE_ALL:
+				xdebug_llist_empty(XG(headers), NULL);
+		}
+#else
 		xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
+#endif
 	}
 	if (xdebug_orig_header_handler) {
 		return xdebug_orig_header_handler(h XG_SAPI_HEADER_OP_CC, s TSRMLS_CC);
