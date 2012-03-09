@@ -520,7 +520,6 @@ typedef struct
 
 static void xdebug_hash_object_item_dtor(void *data)
 {
-	xdebug_object_item *item = (xdebug_object_item *) data;
 	xdfree(data);
 }
 
@@ -681,7 +680,6 @@ void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 	char               *name = hash_key->arKey;
 	char               *modifier;
 	xdebug_xml_node    *contents = NULL;
-	char               *full_name;
 	char               *class_name;
 	char               *prop_name, *prop_class_name;
 	xdebug_var_export_options *options;
