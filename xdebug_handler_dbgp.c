@@ -1947,7 +1947,6 @@ DBGP_FUNC(property_value)
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
 {
 	char               *name = (char*) he->ptr;
-	char               *full_name;
 	xdebug_xml_node    *node = (xdebug_xml_node *) xml;
 	xdebug_xml_node    *contents;
 	TSRMLS_FETCH();
