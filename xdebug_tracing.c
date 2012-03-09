@@ -308,8 +308,7 @@ static char* return_trace_stack_frame_begin_html(function_stack_entry* i, int fn
 
 	if (i->include_filename) {
 		if (i->function.type == XFUNC_EVAL) {
-			char             *key, *joined;
-			xdebug_eval_info *ei;
+			char             *joined;
 			xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
 			xdebug_arg_init(parts);
