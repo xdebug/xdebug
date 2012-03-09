@@ -50,10 +50,13 @@ TRACE START [%d-%d-%d %d:%d:%d]
                          => $trace_file = '/tmp/xdt%s.%s.xt' %sbug00756.php:19
 %w%f %w%d     -> foo::bar() %sbug00756.php:21
                            => self::bar++ %sbug00756.php:9
+                           >=> NULL
 %w%f %w%d     -> foo->foo() %sbug00756.php:22
                            => $this->foo++ %sbug00756.php:14
+                           >=> NULL
                          => $f = class foo { public $foo = 1 } %sbug00756.php:22
 %w%f %w%d     -> foo->foo() %sbug00756.php:23
                            => $this->foo++ %sbug00756.php:14
+                           >=> NULL
 %w%f %w%d     -> file_get_contents('/tmp/xdt%s.%s.xt') %sbug00756.php:25
 DONE
