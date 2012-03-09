@@ -486,14 +486,14 @@ void xdebug_init_debugger(TSRMLS_D)
 			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
 		}
 		if (remote_addr) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%d.\n", Z_STRVAL_PP(remote_addr), XG(remote_port));
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", Z_STRVAL_PP(remote_addr), XG(remote_port));
 			XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
 		} else {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%d. :-|\n", XG(remote_host), XG(remote_port));
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		}
 	} else {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connecting to configured address/port: %s:%d.\n", XG(remote_host), XG(remote_port));
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connecting to configured address/port: %s:%ld.\n", XG(remote_host), XG(remote_port));
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 	}
 	if (XG(context).socket >= 0) {
