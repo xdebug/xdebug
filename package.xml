@@ -32,35 +32,22 @@ Xdebug also provides:
   <license>BSD style</license>
   <release>
     <state>stable</state>
-    <version>2.1.3</version>
-    <date>2012-01-25</date>
+    <version>2.1.4</version>
+    <date>2012-03-12</date>
     <notes>
 = Fixed bugs:
-    
-	- Fixed bug #725: EG(current_execute_data) is not checked in xdebug.c,
-	  xdebug_statement_call.
-	- Fixed bug #723: xdebug is stricter than PHP regarding Exception property
-	  types.
-	- Fixed bug #714: Cachegrind files have huge (wrong) numbers in some lines.
-	- Fixed bug #709: Xdebug doesn't understand E_USER_DEPRECATED.
-	- Fixed bug #698: Allow xdebug.remote_connect_back to be set in .htaccess.
-	- Fixed bug #690: Function traces are not appended to file with
-	  xdebug_start_trace() and xdebug.trace_options=1.
-	- Fixed bug #623: Static properties of a class can be evaluated only with
-	  difficulty.
-	- Fixed bug #614/#619: Viewing private variables in base classes through
-	  the debugger.
-	- Fixed bug #609: Xdebug and SOAP extension's error handlers conflict.
-	- Fixed bug #606/#678/#688/#689/#704: crash after using eval on an
-	  unparsable, or un-executable statement.
-	- Fixed bug #305: xdebug exception handler doesn't properly handle special
-	  chars.
 
-+ Changes:
-
-	- Changed xdebug_break() to hint to the statement execution trap instead of
-	  breaking forcefully adding an extra stackframe.
-	- Prevent Xdebug 2.1.x to build with PHP 5.4.
+	- Fixed bug #788: Collect errors eats fatal errors.
+	- Fixed bug #787: Segmentation Fault with PHP header_remove().
+	- Fixed bug #778: Xdebug session in Eclipse crash whenever it run into
+	  simplexml_load_string call.
+	- Fixed bug #756: Added support for ZEND_*_*_OBJ and self::*.
+	- Fixed bug #747: Still problem with error message and soap client / soap
+	  server.
+	- Fixed bug #744: new lines in a PHP file from Windows are displayed with
+	  an extra white line with var_dump().
+	- Fixed an issue with debugging and the eval command.
+	- Fixed compilation with ZTS on PHP < 5.3
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -153,6 +140,26 @@ Xdebug also provides:
     </deps>
   </release>
   <changelog>
+    <release>
+      <state>stable</state>
+      <version>2.1.4</version>
+      <date>2012-03-12</date>
+      <notes>
+= Fixed bugs:
+
+	- Fixed bug #788: Collect errors eats fatal errors.
+	- Fixed bug #787: Segmentation Fault with PHP header_remove().
+	- Fixed bug #778: Xdebug session in Eclipse crash whenever it run into
+	  simplexml_load_string call.
+	- Fixed bug #756: Added support for ZEND_*_*_OBJ and self::*.
+	- Fixed bug #747: Still problem with error message and soap client / soap
+	  server.
+	- Fixed bug #744: new lines in a PHP file from Windows are displayed with
+	  an extra white line with var_dump().
+	- Fixed an issue with debugging and the eval command.
+	- Fixed compilation with ZTS on PHP < 5.3
+      </notes>
+    </release>
     <release>
       <state>stable</state>
       <version>2.1.3</version>
