@@ -47,7 +47,7 @@ Xdebug also provides:
 	- Fixed bug #744: new lines in a PHP file from Windows are displayed with
 	  an extra white line with var_dump().
 	- Fixed an issue with debugging and the eval command.
-	- Fixed compilation with ZTS on PHP < 5.3
+	- Fixed compilation with ZTS on PHP &lt; 5.3.
     </notes>
     <filelist>
       <file role="src"  name="php_xdebug.h"/>
@@ -157,7 +157,7 @@ Xdebug also provides:
 	- Fixed bug #744: new lines in a PHP file from Windows are displayed with
 	  an extra white line with var_dump().
 	- Fixed an issue with debugging and the eval command.
-	- Fixed compilation with ZTS on PHP < 5.3
+	- Fixed compilation with ZTS on PHP &lt; 5.3
       </notes>
     </release>
     <release>
