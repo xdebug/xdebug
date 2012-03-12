@@ -787,14 +787,12 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 
 int xdebug_ub_write(const char *string, unsigned int length TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (XG(remote_enabled)) {
 		if (-1 == XG(context).handler->remote_stream_output(string, length TSRMLS_CC)) {
 			return 0;
 		}
 	}
-	return xdebug_orig_ub_write(string, length);
+	return xdebug_orig_ub_write(string, length TSRMLS_CC);
 }
 
 PHP_RINIT_FUNCTION(xdebug)
