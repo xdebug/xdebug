@@ -2700,23 +2700,16 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 }
 
 #if PHP_VERSION_ID >= 50400
-void xdebug_dbgp_stream_output(php_output_context *c TSRMLS_DC)
+int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC)
 {
-	if (XG(stdout_mode) == 0 || XG(stdout_mode) == 1) {
-		c->out.data = c->in.data;
-		c->out.size = c->in.used;
-		c->out.used = c->in.used;
-		c->out.free = 0;
-	} else {
-		c->out.data = estrdup("");
-		c->out.size = 0;
-		c->out.used = 0;
-		c->out.free = 1;
+	if ((XG(stdout_mode) == 1 || XG(stdout_mode) == 2) && length) {
+		xdebug_send_stream("stdout", string, length TSRMLS_CC);
 	}
 
-	if ((XG(stdout_mode) == 1 || XG(stdout_mode) == 2) && c->in.used) {
-		xdebug_send_stream("stdout", c->in.data, c->in.used TSRMLS_CC);
+	if (XG(stdout_mode) == 0 || XG(stdout_mode) == 1) {
+		return 0;
 	}
+	return -1;
 }
 #endif
 

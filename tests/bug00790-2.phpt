@@ -24,17 +24,11 @@ dbgpRun( $data, $commands );
 
 -> run -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="14"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="15"></xdebug:message></response>
 
 -> run -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
 <stream xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" type="stdout" encoding="base64"><![CDATA[%s]]></stream>
-
-<?xml version="1.0" encoding="iso-8859-1"?>
-<stream xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" type="stdout" encoding="base64"><![CDATA[dGVzdAo=]]></stream>
-
-<?xml version="1.0" encoding="iso-8859-1"?>
-<stream xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" type="stdout" encoding="base64"><![CDATA[YWdhaW4K]]></stream>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="stopping" reason="ok"></response>

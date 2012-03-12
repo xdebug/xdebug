@@ -114,7 +114,7 @@ struct _xdebug_remote_handler {
 
 #if PHP_VERSION_ID >= 50400
 	/* Output redirection */
-	void (*remote_stream_output)(php_output_context *c TSRMLS_DC);
+	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
 #endif
 
 	/* Eval ID registration and removal */

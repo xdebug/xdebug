@@ -77,6 +77,9 @@ void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint err
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
+#if PHP_VERSION_ID >= 50400
+static int xdebug_ub_write(const char *string, unsigned int lenght TSRMLS_DC);
+#endif
 
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
@@ -85,6 +88,9 @@ int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
 
 int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
+#if PHP_VERSION_ID >= 50400
+int (*xdebug_orig_ub_write)(const char *string, unsigned int len TSRMLS_DC);
+#endif
 
 static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC);
 
@@ -339,6 +345,14 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 		sapi_module.header_handler = xdebug_header_handler;
 	}
 	xg->headers = NULL;
+
+#if PHP_VERSION_ID >= 50400
+	/* Capturing output */
+	if (sapi_module.ub_write != xdebug_ub_write) {
+		xdebug_orig_ub_write = sapi_module.ub_write;
+		sapi_module.ub_write = xdebug_ub_write;
+	}
+#endif
 }
 
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -673,6 +687,12 @@ PHP_MINIT_FUNCTION(xdebug)
 		xdebug_orig_header_handler = sapi_module.header_handler;
 		sapi_module.header_handler = xdebug_header_handler;
 	}
+# if PHP_VERSION_ID >= 50400
+	if (sapi_module.ub_write != xdebug_ub_write) {
+		xdebug_orig_ub_write = sapi_module.ub_write;
+		sapi_module.ub_write = xdebug_ub_write;
+	}
+# endif
 #endif
 
 	return SUCCESS;
@@ -773,20 +793,16 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 #endif
 
 #if PHP_VERSION_ID >= 50400
-int xdebug_output_handler(void **handler_context, php_output_context *c)
+int xdebug_ub_write(const char *string, unsigned int length TSRMLS_DC)
 {
 	TSRMLS_FETCH();
 
 	if (XG(remote_enabled)) {
-		XG(context).handler->remote_stream_output(c TSRMLS_CC);
-		return SUCCESS;
-	} else {
-		c->out.data = c->in.data;
-		c->out.size = c->in.used;
-		c->out.used = c->in.used;
-		c->out.free = 0;
-		return SUCCESS;
+		if (-1 == XG(context).handler->remote_stream_output(string, length TSRMLS_CC)) {
+			return 0;
+		}
 	}
+	return xdebug_orig_ub_write(string, length);
 }
 #endif
 
@@ -795,9 +811,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	zend_function *orig;
 	char *idekey;
 	zval **dummy;
-#if PHP_VERSION_ID >= 50400
-	php_output_handler *h;
-#endif
 
 	/* get xdebug ini entries from the environment also */
 	XG(ide_key) = NULL;
@@ -916,13 +929,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
-
-#if PHP_VERSION_ID >= 50400
-	h = php_output_handler_create_internal("xdebug", sizeof("xdebug"), xdebug_output_handler, 1, 0 TSRMLS_CC);
-	php_output_handler_start(h TSRMLS_CC);
-
-	XG(stdout_mode) = 0;
-#endif
 
 	return SUCCESS;
 }
