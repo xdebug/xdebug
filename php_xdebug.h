@@ -34,12 +34,6 @@
 #include "xdebug_llist.h"
 #include "xdebug_code_coverage.h"
 
-#if PHP_VERSION_ID >= 50399
-# define OUTPUTBUFFERING 0
-#else
-# define OUTPUTBUFFERING 1
-#endif
-
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
 
@@ -271,12 +265,14 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *lasttransid;
 
 	/* output redirection */
-#if OUTPUTBUFFERING
+#if PHP_VERSION_ID < 50400
 	php_output_globals stdio;
+	int           stdout_redirected;
+	int           stderr_redirected;
+	int           stdin_redirected;
+#else
+	int           stdout_mode;
 #endif
-	int stdout_redirected;
-	int stderr_redirected;
-	int stdin_redirected;
 
 	/* aggregate profiling */
 	HashTable  aggr_calls;

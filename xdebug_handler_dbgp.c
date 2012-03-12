@@ -155,10 +155,10 @@ DBGP_FUNC(source);
 DBGP_FUNC(stack_depth);
 DBGP_FUNC(stack_get);
 DBGP_FUNC(status);
-#if OUTPUTBUFFERING
+
 DBGP_FUNC(stderr);
 DBGP_FUNC(stdout);
-#endif
+
 DBGP_FUNC(stop);
 DBGP_FUNC(run);
 DBGP_FUNC(step_into);
@@ -198,10 +198,10 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_FUNC_ENTRY(stack_depth,       XDEBUG_DBGP_NONE)
 	DBGP_FUNC_ENTRY(stack_get,         XDEBUG_DBGP_NONE)
 	DBGP_FUNC_ENTRY(status,            XDEBUG_DBGP_POST_MORTEM)
-#if OUTPUTBUFFERING
+
 	DBGP_FUNC_ENTRY(stderr,            XDEBUG_DBGP_NONE)
 	DBGP_FUNC_ENTRY(stdout,            XDEBUG_DBGP_NONE)
-#endif
+
 	DBGP_CONT_FUNC_ENTRY(run,          XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(step_into,    XDEBUG_DBGP_NONE)
 	DBGP_CONT_FUNC_ENTRY(step_out,     XDEBUG_DBGP_NONE)
@@ -1339,7 +1339,7 @@ static int xdebug_send_stream(const char *name, const char *str, uint str_length
 	return 0;
 }
 
-#if OUTPUTBUFFERING
+#if PHP_VERSION_ID < 50400
 static int xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
 {
 	/* nesting_level is zero when final output is sent to sapi */
@@ -1375,6 +1375,7 @@ static int xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
 	}
 	return XG(stdio).php_body_write(str, str_length TSRMLS_CC);
 }
+#endif
 
 DBGP_FUNC(stderr)
 {
@@ -1391,7 +1392,7 @@ DBGP_FUNC(stdout)
 	}
 
 	mode = strtol(CMD_OPTION('c'), NULL, 10);
-
+#if PHP_VERSION_ID < 50400
 	if (mode == 0 && XG(stdout_redirected) != 0) {
 		if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
 			OG(php_body_write) = XG(stdio).php_body_write;
@@ -1412,10 +1413,12 @@ DBGP_FUNC(stdout)
 	}
 
 	XG(stdout_redirected) = mode;
-
+#else
+	XG(stdout_mode) = mode;
+	success = "1";
+#endif
 	xdebug_xml_add_attribute_ex(*retval, "success", xdstrdup(success), 0, 1);
 }
-#endif
 
 DBGP_FUNC(stop)
 {
@@ -1473,9 +1476,13 @@ DBGP_FUNC(detach)
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 	XG(context).handler->remote_deinit(&(XG(context)));
 	XG(remote_enabled) = 0;
+#if PHP_VERSION_ID < 50400
 	XG(stdout_redirected) = 0;
 	XG(stderr_redirected) = 0;
 	XG(stdin_redirected) = 0;
+#else
+	XG(stdout_mode) = 0;
+#endif
 }
 
 
@@ -2437,7 +2444,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	XG(lastcmd) = NULL;
 	XG(lasttransid) = NULL;
 
-#if OUTPUT_BUFFERING
+#if PHP_VERSION_ID < 50400
 	XG(stdout_redirected) = 0;
 	XG(stderr_redirected) = 0;
 	XG(stdin_redirected) = 0;
@@ -2542,7 +2549,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	
 		xdebug_dbgp_cmdloop(context, 0 TSRMLS_CC);
 	}
-#if OUTPUT_BUFFERING
+#if PHP_VERSION_ID < 50400
 	if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
 		OG(php_body_write) = XG(stdio).php_body_write;
 		OG(php_header_write) = XG(stdio).php_header_write;
@@ -2691,6 +2698,27 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 
 	return 1;
 }
+
+#if PHP_VERSION_ID >= 50400
+void xdebug_dbgp_stream_output(php_output_context *c TSRMLS_DC)
+{
+	if (XG(stdout_mode) == 0 || XG(stdout_mode) == 1) {
+		c->out.data = c->in.data;
+		c->out.size = c->in.used;
+		c->out.used = c->in.used;
+		c->out.free = 0;
+	} else {
+		c->out.data = estrdup("");
+		c->out.size = 0;
+		c->out.used = 0;
+		c->out.free = 1;
+	}
+
+	if ((XG(stdout_mode) == 1 || XG(stdout_mode) == 2) && c->in.used) {
+		xdebug_send_stream("stdout", c->in.data, c->in.used TSRMLS_CC);
+	}
+}
+#endif
 
 static char *create_eval_key_file(char *filename, int lineno)
 {

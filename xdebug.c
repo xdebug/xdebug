@@ -44,6 +44,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "php_globals.h"
+#include "main/php_output.h"
 #include "ext/standard/php_var.h"
 
 
@@ -514,6 +515,30 @@ int xdebug_is_output_tty(TSRMLS_D)
 }
 #endif
 
+#if 0
+int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int size)
+{
+	int i;
+
+    if (stack->top >= stack->max) {    /* we need to allocate more memory */
+        stack->elements = (void **) erealloc(stack->elements,
+                   (sizeof(void **) * (stack->max += 64)));
+        if (!stack->elements) {
+            return FAILURE;
+        }
+    }
+
+	/* move all existing ones up */
+	for (i = stack->top; i >= 0; i--) {
+		stack->elements[i + 1] = stack->elements[i];
+	}
+
+	/* replace top handler */
+    stack->elements[0] = (void *) emalloc(size);
+    memcpy(stack->elements[0], element, size);
+    return stack->top++;
+}
+#endif
 
 PHP_MINIT_FUNCTION(xdebug)
 {
@@ -747,11 +772,32 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 #define COOKIE_ENCODE
 #endif
 
+#if PHP_VERSION_ID >= 50400
+int xdebug_output_handler(void **handler_context, php_output_context *c)
+{
+	TSRMLS_FETCH();
+
+	if (XG(remote_enabled)) {
+		XG(context).handler->remote_stream_output(c TSRMLS_CC);
+		return SUCCESS;
+	} else {
+		c->out.data = c->in.data;
+		c->out.size = c->in.used;
+		c->out.used = c->in.used;
+		c->out.free = 0;
+		return SUCCESS;
+	}
+}
+#endif
+
 PHP_RINIT_FUNCTION(xdebug)
 {
 	zend_function *orig;
 	char *idekey;
 	zval **dummy;
+#if PHP_VERSION_ID >= 50400
+	php_output_handler *h;
+#endif
 
 	/* get xdebug ini entries from the environment also */
 	XG(ide_key) = NULL;
@@ -870,6 +916,13 @@ PHP_RINIT_FUNCTION(xdebug)
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
+
+#if PHP_VERSION_ID >= 50400
+	h = php_output_handler_create_internal("xdebug", sizeof("xdebug"), xdebug_output_handler, 1, 0 TSRMLS_CC);
+	php_output_handler_start(h TSRMLS_CC);
+
+	XG(stdout_mode) = 0;
+#endif
 
 	return SUCCESS;
 }

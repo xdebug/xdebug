@@ -92,9 +92,13 @@ int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *message);
+#if PHP_VERSION_ID >= 50400
+void xdebug_dbgp_stream_output(php_output_context *c TSRMLS_DC);
+#endif
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 char *xdebug_dbgp_get_revision(void);
 
+#if PHP_VERSION_ID < 50400
 #define xdebug_handler_dbgp {       \
 	xdebug_dbgp_init,               \
 	xdebug_dbgp_deinit,             \
@@ -103,6 +107,19 @@ char *xdebug_dbgp_get_revision(void);
 	xdebug_dbgp_register_eval_id,   \
 	xdebug_dbgp_get_revision        \
 }
+#endif
+
+#if PHP_VERSION_ID >= 50400
+#define xdebug_handler_dbgp {       \
+	xdebug_dbgp_init,               \
+	xdebug_dbgp_deinit,             \
+	xdebug_dbgp_error,              \
+	xdebug_dbgp_breakpoint,         \
+	xdebug_dbgp_stream_output,      \
+	xdebug_dbgp_register_eval_id,   \
+	xdebug_dbgp_get_revision        \
+}
+#endif
 
 #endif
 
