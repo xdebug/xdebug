@@ -265,14 +265,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *lasttransid;
 
 	/* output redirection */
-#if PHP_VERSION_ID < 50400
-	php_output_globals stdio;
-	int           stdout_redirected;
-	int           stderr_redirected;
-	int           stdin_redirected;
-#else
 	int           stdout_mode;
-#endif
 
 	/* aggregate profiling */
 	HashTable  aggr_calls;

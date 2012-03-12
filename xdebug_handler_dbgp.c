@@ -1339,43 +1339,6 @@ static int xdebug_send_stream(const char *name, const char *str, uint str_length
 	return 0;
 }
 
-#if PHP_VERSION_ID < 50400
-static int xdebug_header_write(const char *str, uint str_length TSRMLS_DC)
-{
-	/* nesting_level is zero when final output is sent to sapi */
-	if (OG(ob_nesting_level) < 1) {
-		zend_unset_timeout(TSRMLS_C);
-		if (XG(stdout_redirected) != 0) {
-			xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
-		}
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
-		zend_set_timeout(EG(timeout_seconds), 0);
-#else
-		zend_set_timeout(EG(timeout_seconds));
-#endif
-	}
-	return XG(stdio).php_header_write(str, str_length TSRMLS_CC);
-}
-
-static int xdebug_body_write(const char *str, uint str_length TSRMLS_DC)
-{
-	/* nesting_level is zero when final output is sent to sapi. We also dont
-	 * want to write if headers are not sent yet, the output layer will handle
-	 * this correctly later. */
-	if (OG(ob_nesting_level) < 1 && SG(headers_sent)) {
-		zend_unset_timeout(TSRMLS_C);
-		if (XG(stdout_redirected) != 0) {
-			xdebug_send_stream("stdout", str, str_length TSRMLS_CC);
-		}
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
-		zend_set_timeout(EG(timeout_seconds), 0);
-#else
-		zend_set_timeout(EG(timeout_seconds));
-#endif
-	}
-	return XG(stdio).php_body_write(str, str_length TSRMLS_CC);
-}
-#endif
 
 DBGP_FUNC(stderr)
 {
@@ -1392,31 +1355,9 @@ DBGP_FUNC(stdout)
 	}
 
 	mode = strtol(CMD_OPTION('c'), NULL, 10);
-#if PHP_VERSION_ID < 50400
-	if (mode == 0 && XG(stdout_redirected) != 0) {
-		if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
-			OG(php_body_write) = XG(stdio).php_body_write;
-			OG(php_header_write) = XG(stdio).php_header_write;
-			
-			XG(stdio).php_body_write = NULL;
-			XG(stdio).php_header_write = NULL;
-			success = "1";
-		}
-	} else if (mode != 0 && XG(stdout_redirected) == 0) {
-		if (XG(stdio).php_body_write == NULL && OG(php_body_write)) {
-			XG(stdio).php_body_write = OG(php_body_write);
-			OG(php_body_write) = xdebug_body_write;
-			XG(stdio).php_header_write = OG(php_header_write);
-			OG(php_header_write) = xdebug_header_write;
-			success = "1";
-		}
-	}
-
-	XG(stdout_redirected) = mode;
-#else
 	XG(stdout_mode) = mode;
 	success = "1";
-#endif
+
 	xdebug_xml_add_attribute_ex(*retval, "success", xdstrdup(success), 0, 1);
 }
 
@@ -1476,13 +1417,7 @@ DBGP_FUNC(detach)
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG(reason)]);
 	XG(context).handler->remote_deinit(&(XG(context)));
 	XG(remote_enabled) = 0;
-#if PHP_VERSION_ID < 50400
-	XG(stdout_redirected) = 0;
-	XG(stderr_redirected) = 0;
-	XG(stdin_redirected) = 0;
-#else
 	XG(stdout_mode) = 0;
-#endif
 }
 
 
@@ -2444,14 +2379,6 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	XG(lastcmd) = NULL;
 	XG(lasttransid) = NULL;
 
-#if PHP_VERSION_ID < 50400
-	XG(stdout_redirected) = 0;
-	XG(stderr_redirected) = 0;
-	XG(stdin_redirected) = 0;
-	XG(stdio).php_body_write = NULL;
-	XG(stdio).php_header_write = NULL;
-#endif
-
 	response = xdebug_xml_node_init("init");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
 	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
@@ -2549,15 +2476,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	
 		xdebug_dbgp_cmdloop(context, 0 TSRMLS_CC);
 	}
-#if PHP_VERSION_ID < 50400
-	if (XG(stdio).php_body_write != NULL && OG(php_body_write)) {
-		OG(php_body_write) = XG(stdio).php_body_write;
-		OG(php_header_write) = XG(stdio).php_header_write;
-		
-		XG(stdio).php_body_write = NULL;
-		XG(stdio).php_header_write = NULL;
-	}
-#endif
+
 	if (XG(remote_enabled)) {
 		options = (xdebug_var_export_options*) context->options;
 		xdfree(options->runtime);
@@ -2699,7 +2618,6 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	return 1;
 }
 
-#if PHP_VERSION_ID >= 50400
 int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC)
 {
 	if ((XG(stdout_mode) == 1 || XG(stdout_mode) == 2) && length) {
@@ -2711,7 +2629,6 @@ int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC)
 	}
 	return -1;
 }
-#endif
 
 static char *create_eval_key_file(char *filename, int lineno)
 {

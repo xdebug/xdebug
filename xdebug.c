@@ -77,9 +77,7 @@ void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint err
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
-#if PHP_VERSION_ID >= 50400
 static int xdebug_ub_write(const char *string, unsigned int lenght TSRMLS_DC);
-#endif
 
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
@@ -88,9 +86,7 @@ int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
 
 int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
-#if PHP_VERSION_ID >= 50400
 int (*xdebug_orig_ub_write)(const char *string, unsigned int len TSRMLS_DC);
-#endif
 
 static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC);
 
@@ -346,13 +342,11 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	}
 	xg->headers = NULL;
 
-#if PHP_VERSION_ID >= 50400
 	/* Capturing output */
 	if (sapi_module.ub_write != xdebug_ub_write) {
 		xdebug_orig_ub_write = sapi_module.ub_write;
 		sapi_module.ub_write = xdebug_ub_write;
 	}
-#endif
 }
 
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -687,12 +681,11 @@ PHP_MINIT_FUNCTION(xdebug)
 		xdebug_orig_header_handler = sapi_module.header_handler;
 		sapi_module.header_handler = xdebug_header_handler;
 	}
-# if PHP_VERSION_ID >= 50400
+
 	if (sapi_module.ub_write != xdebug_ub_write) {
 		xdebug_orig_ub_write = sapi_module.ub_write;
 		sapi_module.ub_write = xdebug_ub_write;
 	}
-# endif
 #endif
 
 	return SUCCESS;
@@ -792,7 +785,6 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 #define COOKIE_ENCODE
 #endif
 
-#if PHP_VERSION_ID >= 50400
 int xdebug_ub_write(const char *string, unsigned int length TSRMLS_DC)
 {
 	TSRMLS_FETCH();
@@ -804,7 +796,6 @@ int xdebug_ub_write(const char *string, unsigned int length TSRMLS_DC)
 	}
 	return xdebug_orig_ub_write(string, length);
 }
-#endif
 
 PHP_RINIT_FUNCTION(xdebug)
 {

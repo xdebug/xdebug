@@ -112,10 +112,8 @@ struct _xdebug_remote_handler {
 	/* Breakpoints */
 	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *message);
 
-#if PHP_VERSION_ID >= 50400
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
-#endif
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
