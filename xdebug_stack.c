@@ -97,11 +97,13 @@ static char** select_formats(int html TSRMLS_DC) {
 	if (html) {
 		return html_formats;
 	} 
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+	else if ((XG(cli_color) == 1 && getenv("ANSICON")) || (XG(cli_color) == 2)) {
+#else
 	else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
+#endif
 		return ansi_formats;
 	}
-#endif
 	else {
 		return text_formats;
 	}

@@ -299,9 +299,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateLong,   display_max_children, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateLong,   display_max_data,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",           PHP_INI_ALL,    OnUpdateLong,   display_max_depth,    zend_xdebug_globals, xdebug_globals)
-#ifndef PHP_WIN32
 	STD_PHP_INI_ENTRY("xdebug.cli_color",                "0",           PHP_INI_ALL,    OnUpdateBool,   cli_color,            zend_xdebug_globals, xdebug_globals)
-#endif
 
 	/* Scream support */
 	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   do_scream,            zend_xdebug_globals, xdebug_globals)
@@ -443,11 +441,9 @@ void xdebug_env_config()
 		if (strcasecmp(envvar, "remote_cookie_expire_time") == 0) {
 			name = "xdebug.remote_cookie_expire_time";
 		}
-#ifndef PHP_WIN32
 		else if (strcasecmp(envvar, "cli_color") == 0) {
 			name = "xdebug.cli_color";
 		}
-#endif
 
 		if (name) {
 			zend_alter_ini_entry(name, strlen(name) + 1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
@@ -1587,13 +1583,15 @@ PHP_FUNCTION(xdebug_var_dump)
 			PHPWRITE(val, len);
 			xdfree(val);
 		}
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+		else if ((XG(cli_color) == 1 && getenv("ANSICON")) || (XG(cli_color) == 2)) {
+#else
 		else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
+#endif
 			val = xdebug_get_zval_value_ansi((zval*) *args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		} 
-#endif
 		else {
 			val = xdebug_get_zval_value_text((zval*) *args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
@@ -1639,12 +1637,14 @@ PHP_FUNCTION(xdebug_debug_zval)
 					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
 				}
-#ifndef PHP_WIN32
+#ifdef PHP_WIN32
+				else if ((XG(cli_color) == 1 && getenv("ANSICON")) || (XG(cli_color) == 2)) {
+#else
 				else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
+#endif
 					val = xdebug_get_zval_value_ansi(debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}
-#endif
 				else {
 					val = xdebug_get_zval_value(debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
