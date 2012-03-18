@@ -56,9 +56,7 @@ xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D);
 void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 #define debug_var_export_text(struc, str, level, debug_zval, options) xdebug_var_export_text_ansi(struc, str, 0, level, debug_zval, options TSRMLS_CC);
-#ifndef PHP_WIN32
-# define debug_var_export_ansi(struc, str, level, debug_zval, options) xdebug_var_export_text_ansi(struc, str, 1, level, debug_zval, options TSRMLS_CC);
-#endif
+#define debug_var_export_ansi(struc, str, level, debug_zval, options) xdebug_var_export_text_ansi(struc, str, 1, level, debug_zval, options TSRMLS_CC);
 void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level TSRMLS_DC);
@@ -70,9 +68,7 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *nod
 char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options);
 char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 #define xdebug_get_zval_value_text(v,d,o) xdebug_get_zval_value_text_ansi(v,0,d,o TSRMLS_CC);
-#ifndef PHP_WIN32
-# define xdebug_get_zval_value_ansi(v,d,o) xdebug_get_zval_value_text_ansi(v,1,d,o TSRMLS_CC);
-#endif
+#define xdebug_get_zval_value_ansi(v,d,o) xdebug_get_zval_value_text_ansi(v,1,d,o TSRMLS_CC);
 char* xdebug_get_zval_value_xml(char *name, zval *val);
 char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 

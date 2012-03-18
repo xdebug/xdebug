@@ -48,11 +48,10 @@ static char* text_formats[11] = {
 	"SCREAM:  Error suppression ignored for\n"
 };
 
-#ifndef PHP_WIN32
 static char* ansi_formats[11] = {
 	"\n",
-	"\e[1m\e[31m%s\e[0m: %s\e[22m in \e[31m%s\e[0m on line \e[32m%d\e[0m\e[22m\n",
-	"\n\e[1mCall Stack:\e[22m\n",
+	"[1m[31m%s[0m: %s[22m in [31m%s[0m on line [32m%d[0m[22m\n",
+	"\n[1mCall Stack:[22m\n",
 #if HAVE_PHP_MEMORY_USAGE
 	"%10.4f %10ld %3d. %s(",
 #else
@@ -64,9 +63,8 @@ static char* ansi_formats[11] = {
 	"\n",
 	"  $%s = %s\n",
 	"  $%s = *uninitialized*\n",
-	"\e[1m\e[31mSCREAM\e[0m:  Error suppression ignored for\n"
+	"[1m[31mSCREAM[0m:  Error suppression ignored for\n"
 };
-#endif
 
 static char* html_formats[13] = {
 	"<br />\n<font size='1'><table class='xdebug-error xe-%s%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
@@ -97,11 +95,7 @@ static char** select_formats(int html TSRMLS_DC) {
 	if (html) {
 		return html_formats;
 	} 
-#ifdef PHP_WIN32
-	else if ((XG(cli_color) == 1 && getenv("ANSICON")) || (XG(cli_color) == 2)) {
-#else
 	else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-#endif
 		return ansi_formats;
 	}
 	else {

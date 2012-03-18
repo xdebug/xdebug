@@ -317,9 +317,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->do_code_coverage     = 0;
 	xg->breakpoint_count     = 0;
 	xg->ide_key              = NULL;
-#ifndef WIN32
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
-#endif
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -509,15 +507,17 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-#ifndef PHP_WIN32
 int xdebug_is_output_tty(TSRMLS_D)
 {
 	if (XG(output_is_tty) == OUTPUT_NOT_CHECKED) {
+#ifndef PHP_WIN32
 		XG(output_is_tty) = isatty(STDOUT_FILENO);
+#else
+		XG(output_is_tty) = getenv("ANSICON");
+#endif
 	}
 	return (XG(output_is_tty));
 }
-#endif
 
 #if 0
 int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int size)
@@ -668,9 +668,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
-#ifndef PHP_WIN32
 	XG(output_is_tty) = OUTPUT_NOT_CHECKED;
-#endif
 
 #ifndef ZTS
 	if (sapi_module.header_handler != xdebug_header_handler) {
@@ -1583,11 +1581,7 @@ PHP_FUNCTION(xdebug_var_dump)
 			PHPWRITE(val, len);
 			xdfree(val);
 		}
-#ifdef PHP_WIN32
-		else if ((XG(cli_color) == 1 && getenv("ANSICON")) || (XG(cli_color) == 2)) {
-#else
 		else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-#endif
 			val = xdebug_get_zval_value_ansi((zval*) *args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
@@ -1637,11 +1631,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
 				}
-#ifdef PHP_WIN32
-				else if ((XG(cli_color) == 1 && getenv("ANSICON")) || (XG(cli_color) == 2)) {
-#else
 				else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-#endif
 					val = xdebug_get_zval_value_ansi(debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}
