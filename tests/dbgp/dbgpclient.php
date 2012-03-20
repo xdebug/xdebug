@@ -27,7 +27,9 @@ class DebugClient
 		stream_set_timeout( $conn, 0, 1000 );
 		do {
 			$end = true;
-			$header = stream_get_line( $conn, 10240, "\0" );
+			do {
+				$header = stream_get_line( $conn, 10240, "\0" );
+			} while ( $header === false );
 			$read   = stream_get_line( $conn, 10240, "\0" );
 
 			// sanitize
