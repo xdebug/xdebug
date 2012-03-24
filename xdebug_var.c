@@ -183,13 +183,13 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	if (options->max_children == -1 || options->max_children > XDEBUG_MAX_INT) {
 		options->max_children = XDEBUG_MAX_INT;
 	} else if (options->max_children < 1) {
-		options->max_children = 1;
+		options->max_children = 0;
 	}
 
 	if (options->max_data == -1 || options->max_data > XDEBUG_MAX_INT) {
 		options->max_data = XDEBUG_MAX_INT;
 	} else if (options->max_data < 1) {
-		options->max_data = 1;
+		options->max_data = 0;
 	}
 
 	if (options->max_depth == -1 || options->max_depth > 1023) {
@@ -330,7 +330,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
-			} else if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+			} else if (Z_STRLEN_PP(struc) <= options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			} else {
 				xdebug_str_addl(str, "'", 1, 0);
@@ -755,7 +755,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
-			if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+			if (Z_STRLEN_PP(struc) <= options->max_data) {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc)), Z_STRLEN_PP(struc));
 			} else {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data), options->max_data);
