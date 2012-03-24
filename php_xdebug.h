@@ -256,6 +256,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* scream */
 	zend_bool  do_scream;
+
+	/* in-execution checking */
+	zend_bool  in_execution;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS

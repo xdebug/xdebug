@@ -140,7 +140,7 @@ zend_module_entry xdebug_module_entry = {
 	PHP_MINIT(xdebug),
 	PHP_MSHUTDOWN(xdebug),
 	PHP_RINIT(xdebug),
-	NULL,
+	PHP_RSHUTDOWN(xdebug),
 	PHP_MINFO(xdebug),
 	XDEBUG_VERSION,
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
@@ -818,6 +818,9 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
+	/* Signal that we're in a request now */
+	XG(in_execution) = 1;
+
 	return SUCCESS;
 }
 
@@ -887,6 +890,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
 	XG(headers) = NULL;
+
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(xdebug)
+{
+	/* Signal that we're no longer in a request */
+	XG(in_execution) = 0;
 
 	return SUCCESS;
 }
@@ -1100,7 +1111,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		XG(context).program_name = xdstrdup(op_array->filename);
 	}
 
-	if (XG(level) == 0) {
+	if (XG(level) == 0 && XG(in_execution)) {
 		/* Set session cookie if requested */
 		if (
 			((
