@@ -192,9 +192,9 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 		options->max_data = 1;
 	}
 
-	if (options->max_depth == -1) {
-		options->max_depth = 4096;
-	} else if (options->max_depth < 0) {
+	if (options->max_depth == -1 || options->max_depth > 1023) {
+		options->max_depth = 1023;
+	} else if (options->max_depth < 1) {
 		options->max_depth = 0;
 	}
 
@@ -204,7 +204,7 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	return options;
 }
 
-xdebug_var_export_options xdebug_var_nolimit_options = { 1048576, 1048576, 64, 1, NULL, 0 };
+xdebug_var_export_options xdebug_var_nolimit_options = { XDEBUG_MAX_INT, XDEBUG_MAX_INT, 1023, 1, NULL, 0 };
 
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 {
