@@ -233,6 +233,7 @@ char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **p
 	}
 }
 
+#define XDEBUG_MAX_INT 2147483647
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 {
@@ -244,21 +245,21 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	options->max_depth = XG(display_max_depth);
 	options->show_hidden = 0;
 
-	if (options->max_children == -1) {
-		options->max_children = 1048576;
+	if (options->max_children == -1 || options->max_children > XDEBUG_MAX_INT) {
+		options->max_children = XDEBUG_MAX_INT;
 	} else if (options->max_children < 1) {
-		options->max_children = 1;
+		options->max_children = 0;
 	}
 
-	if (options->max_data == -1) {
-		options->max_data = 1073741824;
+	if (options->max_data == -1 || options->max_data > XDEBUG_MAX_INT) {
+		options->max_data = XDEBUG_MAX_INT;
 	} else if (options->max_data < 1) {
-		options->max_data = 1;
+		options->max_data = 0;
 	}
 
-	if (options->max_depth == -1) {
-		options->max_depth = 4096;
-	} else if (options->max_depth < 0) {
+	if (options->max_depth == -1 || options->max_depth > 1023) {
+		options->max_depth = 1023;
+	} else if (options->max_depth < 1) {
 		options->max_depth = 0;
 	}
 
@@ -268,7 +269,7 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	return options;
 }
 
-xdebug_var_export_options xdebug_var_nolimit_options = { 1048576, 1048576, 64, 1, NULL, 0 };
+xdebug_var_export_options xdebug_var_nolimit_options = { XDEBUG_MAX_INT, XDEBUG_MAX_INT, 1023, 1, NULL, 0 };
 
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 {
@@ -394,7 +395,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
-			} else if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+			} else if (Z_STRLEN_PP(struc) <= options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			} else {
 				xdebug_str_addl(str, "'", 1, 0);
@@ -706,7 +707,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
-			} else if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+			} else if (Z_STRLEN_PP(struc) <= options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s%s%s\"", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
 							ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET,
 							ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), 1);
@@ -1133,7 +1134,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
-			if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
+			if (Z_STRLEN_PP(struc) <= options->max_data) {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc)), Z_STRLEN_PP(struc));
 			} else {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data), options->max_data);
