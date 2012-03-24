@@ -168,6 +168,7 @@ char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **p
 	}
 }
 
+#define XDEBUG_MAX_INT 2147483647
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 {
@@ -179,14 +180,14 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	options->max_depth = XG(display_max_depth);
 	options->show_hidden = 0;
 
-	if (options->max_children == -1) {
-		options->max_children = 1048576;
+	if (options->max_children == -1 || options->max_children > XDEBUG_MAX_INT) {
+		options->max_children = XDEBUG_MAX_INT;
 	} else if (options->max_children < 1) {
 		options->max_children = 1;
 	}
 
-	if (options->max_data == -1) {
-		options->max_data = 1073741824;
+	if (options->max_data == -1 || options->max_data > XDEBUG_MAX_INT) {
+		options->max_data = XDEBUG_MAX_INT;
 	} else if (options->max_data < 1) {
 		options->max_data = 1;
 	}
