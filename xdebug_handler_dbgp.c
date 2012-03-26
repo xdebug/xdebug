@@ -1242,9 +1242,19 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_op_array     *original_active_op_array = EG(active_op_array);
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
+#if PHP_VERSION_ID < 50200
+	zend_bool          original_bailout_set = EG(bailout_set);
+	jmp_buf            original_bailout;
+#else
+	jmp_buf           *original_bailout = EG(bailout);
+#endif
 #if PHP_VERSION_ID >= 50300
 	void             **original_argument_stack_top = EG(argument_stack)->top;
 	void             **original_argument_stack_end = EG(argument_stack)->end;
+#endif
+
+#if PHP_VERSION_ID < 50200
+	memcpy(&original_bailout, &EG(bailout), sizeof(jmp_buf));
 #endif
 
 	/* Remember error reporting level */
@@ -1267,6 +1277,12 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(active_op_array) = original_active_op_array;
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
+#if PHP_VERSION_ID < 50200
+	EG(bailout_set) = original_bailout_set;
+	memcpy(&EG(bailout), &original_bailout, sizeof(jmp_buf));
+#else
+	EG(bailout) = original_bailout;
+#endif
 #if PHP_VERSION_ID >= 50300
 	EG(argument_stack)->top = original_argument_stack_top;
 	EG(argument_stack)->end = original_argument_stack_end;
