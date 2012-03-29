@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #689: Access method of not yet defined variable aborts debug session
+Test for bug #763: Access method of not yet defined variable aborts debug session
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
