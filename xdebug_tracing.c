@@ -77,7 +77,7 @@ char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zva
 
 	xdebug_str_add(&str, varname, 0);
 
-	if (op[0] != '\0' ) { // pre/post inc/dec ops are special
+	if (op[0] != '\0' ) { /* pre/post inc/dec ops are special */
 		xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
 
 		tmp_value = xdebug_get_zval_value(retval, 0, NULL);
@@ -158,7 +158,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 			}
 
 			switch (XG(collect_params)) {
-				case 1: // synopsis
+				case 1: /* synopsis */
 				case 2:
 					tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
 					break;
@@ -251,7 +251,7 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 				}
 
 				switch (XG(collect_params)) {
-					case 1: // synopsis
+					case 1: /* synopsis */
 					case 2:
 						tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
 						break;
