@@ -105,7 +105,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, &prev_opcode->op1, execute_data->Ts, &is_var), 0, options);
 			xdebug_str_add(&name, xdebug_sprintf("$%s", zval_value), 1);
 		}
-	} else if (is_static) { // todo : see if you can change this and the previous cases around
+	} else if (is_static) { /* todo : see if you can change this and the previous cases around */
 		xdebug_str_add(&name, xdebug_sprintf("self::"), 1 );
 	}
 	if (cur_opcode->opcode >= ZEND_ASSIGN_ADD && cur_opcode->opcode <= ZEND_ASSIGN_BW_XOR ) {
@@ -356,7 +356,7 @@ static zend_brk_cont_element* xdebug_find_brk_cont(zval *nest_levels_zval, int a
 
 	do {
 		if (array_offset == -1) {
-			// broken break/continue in code
+			/* broken break/continue in code */
 			return NULL;
 		}
 		jmp_to = &op_array->brk_cont_array[array_offset];
@@ -397,7 +397,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 				*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 				return 1;
 			} else {
-				// broken break/continue in code
+				/* broken break/continue in code */
 				return 0;
 			}
 		}

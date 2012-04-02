@@ -313,13 +313,13 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 						tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
 						tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
 						switch (XG(collect_params)) {
-							case 1: // synopsis
+							case 1: /* synopsis */
 								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_synop_value), 1);
 								break;
-							case 2: // synopsis + full in tooltip
+							case 2: /* synopsis + full in tooltip */
 								xdebug_str_add(str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
 								break;
-							case 3: // full
+							case 3: /* full */
 							default:
 								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_value), 1);
 								break;
@@ -329,7 +329,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 						xdfree(tmp_fancy_synop_value);
 					} else {
 						switch (XG(collect_params)) {
-							case 1: // synopsis
+							case 1: /* synopsis */
 							case 2:
 								tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
 								break;
