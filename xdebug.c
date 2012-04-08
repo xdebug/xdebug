@@ -202,19 +202,6 @@ static PHP_INI_MH(OnUpdateSession)
 	DUMP_TOK(session);
 }
 
-static PHP_INI_MH(OnUpdateIDEKey)
-{
-	if (XG(ide_key)) {
-		xdfree(XG(ide_key));
-	}
-	if (!new_value) {
-		XG(ide_key) = NULL;
-	} else {
-		XG(ide_key) = xdstrdup(new_value);
-	}
-	return SUCCESS;
-}
-
 static PHP_INI_MH(OnUpdateDebugMode)
 {
 	if (!new_value) {
@@ -292,7 +279,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   remote_connect_back,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
-	PHP_INI_ENTRY("xdebug.idekey",                "",                   PHP_INI_ALL,    OnUpdateIDEKey)
+	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, ide_key_setting,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
 
 	/* Variable display settings */
@@ -357,17 +344,28 @@ static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_empty(&xg->session, NULL);
 }
 
-void xdebug_env_key()
+char *xdebug_env_key(TSRMLS_D)
 {
-	char *ide_key = getenv("DBGP_IDEKEY");
-	if (!ide_key || !*ide_key) {
-		ide_key = getenv("USER");
-		if (!ide_key || !*ide_key) {
-			ide_key = getenv("USERNAME");
-		}
-	}
+	char *ide_key;
+
+	ide_key = XG(ide_key_setting);
 	if (ide_key && *ide_key) {
-		zend_alter_ini_entry("xdebug.idekey", sizeof("xdebug.idekey"), ide_key, strlen(ide_key), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		return ide_key;
+	}
+
+	ide_key = getenv("DBGP_IDEKEY");
+	if (ide_key && *ide_key) {
+		return ide_key;
+	}
+
+	ide_key = getenv("USER");
+	if (ide_key && *ide_key) {
+		return ide_key;
+	}
+
+	ide_key = getenv("USERNAME");
+	if (ide_key && *ide_key) {
+		return ide_key;
 	}
 }
 
@@ -380,7 +378,6 @@ void xdebug_env_config()
 		XDEBUG_CONFIG format:
 		XDEBUG_CONFIG=var=val var=val
 	*/
-	xdebug_env_key();
 	if (!config) {
 		return;
 	}
@@ -419,7 +416,10 @@ void xdebug_env_config()
 			name = "xdebug.remote_mode";
 		} else
 		if (strcasecmp(envvar, "idekey") == 0) {
-			name = "xdebug.idekey";
+			if (XG(ide_key)) {
+				xdfree(XG(ide_key));
+			}
+			XG(ide_key) = xdstrdup(envval);
 		} else
 		if (strcasecmp(envvar, "profiler_enable") == 0) {
 			name = "xdebug.profiler_enable";
@@ -795,10 +795,19 @@ PHP_RINIT_FUNCTION(xdebug)
 	char *idekey;
 	zval **dummy;
 
-	/* get xdebug ini entries from the environment also */
+	/* Get the ide key for this session */
 	XG(ide_key) = NULL;
+	idekey = xdebug_env_key(TSRMLS_C);
+	if (idekey && *idekey) {
+		if (XG(ide_key)) {
+			xdfree(XG(ide_key));
+		}
+		XG(ide_key) = xdstrdup(idekey);
+	}
+
+	/* Get xdebug ini entries from the environment also,
+	   this can override the idekey if one is set */
 	xdebug_env_config();
-	idekey = zend_ini_string("xdebug.idekey", sizeof("xdebug.idekey"), 0);
 
 	XG(no_exec)       = 0;
 	XG(level)         = 0;
@@ -820,13 +829,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG(reserved_offset) = zend_xdebug_global_offset;
-
-	if (idekey && *idekey) {
-		if (XG(ide_key)) {
-			xdfree(XG(ide_key));
-		}
-		XG(ide_key) = xdstrdup(idekey);
-	}
 
 /* {{{ Initialize auto globals in Zend Engine 2 */
 	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);
@@ -1006,6 +1008,7 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "xdebug support", "enabled");
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
+	php_info_print_table_row(2, "IDE Key", XG(ide_key));
 	php_info_print_table_end();
 	
 	if (zend_xdebug_initialised == 0) {
