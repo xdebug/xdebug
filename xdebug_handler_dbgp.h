@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2011 Derick Rethans                               |
+   | Copyright (c) 2002-2012 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,6 +92,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *message);
+int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 char *xdebug_dbgp_get_revision(void);
 
@@ -100,6 +101,7 @@ char *xdebug_dbgp_get_revision(void);
 	xdebug_dbgp_deinit,             \
 	xdebug_dbgp_error,              \
 	xdebug_dbgp_breakpoint,         \
+	xdebug_dbgp_stream_output,      \
 	xdebug_dbgp_register_eval_id,   \
 	xdebug_dbgp_get_revision        \
 }

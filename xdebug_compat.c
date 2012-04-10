@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2011 Derick Rethans <derick@xdebug.org>           |
+   | Copyright (c) 2002-2012 Derick Rethans <derick@xdebug.org>           |
    |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
    |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
    |                         Zeev Suraski <zeev@zend.com>                 |
@@ -44,13 +44,6 @@
 #include "main/php_version.h"
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
-
-#if PHP_MAJOR_VERSION >= 6
-void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC)
-{
-	php_var_dump(struc, 1, 1 TSRMLS_CC);
-}
-#endif
 
 #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
 void *php_zend_memrchr(const void *s, int c, size_t n)

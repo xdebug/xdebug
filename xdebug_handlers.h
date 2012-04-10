@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2011 Derick Rethans                               |
+   | Copyright (c) 2002-2012 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,6 +111,9 @@ struct _xdebug_remote_handler {
 
 	/* Breakpoints */
 	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *message);
+
+	/* Output redirection */
+	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);

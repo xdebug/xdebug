@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2011 Derick Rethans                               |
+   | Copyright (c) 2002-2012 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,10 +20,10 @@
 #define PHP_XDEBUG_H
 
 #define XDEBUG_NAME       "Xdebug"
-#define XDEBUG_VERSION    "2.2.0-dev"
+#define XDEBUG_VERSION    "2.2.0rc2-dev"
 #define XDEBUG_AUTHOR     "Derick Rethans"
-#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2011 by Derick Rethans"
-#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2011"
+#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2012 by Derick Rethans"
+#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2012"
 #define XDEBUG_URL        "http://xdebug.org"
 #define XDEBUG_URL_FAQ    "http://xdebug.org/docs/faq#api"
 
@@ -34,22 +34,14 @@
 #include "xdebug_llist.h"
 #include "xdebug_code_coverage.h"
 
-#if PHP_VERSION_ID >= 50399
-# define OUTPUTBUFFERING 0
-#else
-# define OUTPUTBUFFERING 1
-#endif
-
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
 
 #define MICRO_IN_SEC 1000000.00
 
-#ifndef PHP_WIN32
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY       1
 #define OUTPUT_NOT_TTY      0
-#endif
 
 #ifdef PHP_WIN32
 #define PHP_XDEBUG_API __declspec(dllexport)
@@ -196,10 +188,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          display_max_data;
 	long          display_max_depth;
 
-#ifndef PHP_WIN32
 	zend_bool     cli_color;
 	int           output_is_tty;
-#endif
 
 	/* used for code coverage */
 	zend_bool     coverage_enable;
@@ -245,7 +235,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *remote_log_file;  /* File handler for protocol log */
 	long          remote_cookie_expire_time; /* Expire time for the remote-session cookie */
 
-	char         *ide_key;    /* from environment, USER, USERNAME or empty */
+	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
+	char         *ide_key_setting; /* Set through php.ini and friends */
 
 	/* remote debugging globals */
 	zend_bool     remote_enabled;
@@ -271,12 +262,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *lasttransid;
 
 	/* output redirection */
-#if OUTPUTBUFFERING
-	php_output_globals stdio;
-#endif
-	int stdout_redirected;
-	int stderr_redirected;
-	int stdin_redirected;
+	int           stdout_mode;
 
 	/* aggregate profiling */
 	HashTable  aggr_calls;
@@ -284,6 +270,10 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* scream */
 	zend_bool  do_scream;
+	zend_bool  in_at;
+
+	/* in-execution checking */
+	zend_bool  in_execution;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS

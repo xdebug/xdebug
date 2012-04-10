@@ -12,6 +12,7 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 xdebug.var_display_max_depth=5
 xdebug.var_display_max_children=4
+xdebug.overload_var_dump=0
 --FILE--
 <?php
 $tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));

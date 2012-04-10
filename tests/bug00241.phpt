@@ -9,6 +9,7 @@ xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.var_display_max_depth=3
 xdebug.var_display_max_children=2
+xdebug.overload_var_dump=0
 --FILE--
 <?php
 function error_handler($errno, $string, $file, $line, $context)

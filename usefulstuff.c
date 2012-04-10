@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2011 Derick Rethans                               |
+   | Copyright (c) 2002-2012 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,7 +41,12 @@
 #include "main/php_ini.h"
 
 #ifndef NAME_MAX
-# define NAME_MAX (MAXNAMELEN-1)
+# ifdef _AIX
+#  include <unistd.h>
+#  define NAME_MAX pathconf("/dev/null",_PC_NAME_MAX)
+# else
+#  define NAME_MAX (MAXNAMELEN-1)
+# endif
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)

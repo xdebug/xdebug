@@ -4,6 +4,7 @@ Test for bug #562: Incorrect coverage information for closure function headers
 <?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
 --INI--
 xdebug.coverage_enable=1
+xdebug.overload_var_dump=0
 --FILE--
 <?php
 

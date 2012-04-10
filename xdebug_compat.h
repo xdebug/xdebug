@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2011 Derick Rethans                               |
+   | Copyright (c) 2002-2012 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,12 +21,8 @@
 
 #include "php.h"
 
-#if PHP_MAJOR_VERSION >= 6
-void xdebug_php_var_dump(zval **struc, int level TSRMLS_DC);
-#else
-# include "ext/standard/php_var.h"
-# define xdebug_php_var_dump php_var_dump
-#endif
+#include "ext/standard/php_var.h"
+#define xdebug_php_var_dump php_var_dump
 
 #if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
 # define zend_memrchr php_zend_memrchr

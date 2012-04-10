@@ -1,7 +1,7 @@
 --TEST--
 Test for scream support
 --INI--
-xdebug.enable=1
+xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.scream=0
 error_reporting(E_ALL);
@@ -14,4 +14,9 @@ ini_set('xdebug.scream', 0);
 echo @strstr(), "\n";
 ?>
 --EXPECTF--
-Warning:%sstrstr()%sin %sscream.php on line 4
+SCREAM:  Error suppression ignored for
+Warning: %s in %sscream.php on line 4
+
+Call Stack:
+%w%f %w%d   1. {main}() %sscream.php:0
+%w%f %w%d   2. strstr() %sscream.php:4
