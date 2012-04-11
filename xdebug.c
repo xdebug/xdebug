@@ -351,7 +351,7 @@ char *xdebug_env_key(TSRMLS_D)
 	}
 }
 
-void xdebug_env_config()
+void xdebug_env_config(TSRMLS_D)
 {
 	char       *config = getenv("XDEBUG_CONFIG");
 	xdebug_arg *parts;
@@ -716,7 +716,7 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	/* Get xdebug ini entries from the environment also,
 	   this can override the idekey if one is set */
-	xdebug_env_config();
+	xdebug_env_config(TSRMLS_C);
 
 	XG(no_exec)       = 0;
 	XG(level)         = 0;
