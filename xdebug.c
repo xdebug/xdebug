@@ -357,13 +357,15 @@ void xdebug_env_key()
 
 void xdebug_env_config()
 {
-	char       *config = getenv("XDEBUG_CONFIG");
+	char       *config = NULL;
 	xdebug_arg *parts;
 	int			i;
+	TSRMLS_FETCH();
 	/*
 		XDEBUG_CONFIG format:
 		XDEBUG_CONFIG=var=val var=val
 	*/
+	config = getenv("XDEBUG_CONFIG");
 	xdebug_env_key();
 	if (!config) {
 		return;
