@@ -15,7 +15,7 @@ class DebugClient
 		   2 => array( 'file', '/tmp/error-output.txt', 'a' )
 		);
 
-		$cmd = "php -dxdebug.remote_enable=1 -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 /tmp/xdebug-dbgp-test.php";
+		$cmd = "php -dxdebug.remote_enable=1 -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 -dxdebug.remote_log=/tmp/remote_log.txt /tmp/xdebug-dbgp-test.php";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -24,14 +24,24 @@ class DebugClient
 
 	function doRead( $conn )
 	{
-		$read = trim( fread( $conn, 10240 ) );
+		stream_set_timeout( $conn, 0, 1000 );
+		do {
+			$end = true;
+			do {
+				$header = stream_get_line( $conn, 10240, "\0" );
+			} while ( $header === false );
+			$read   = stream_get_line( $conn, 102400, "\0" );
+			// sanitize
+			$read = preg_replace( '@\s(appid|id|address)="\d+?"@', ' \\1=""', $read );
+			$read = preg_replace( '@\s(idekey)="[^"]+?"@', ' \\1=""', $read );
+			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
+			echo $read, "\n\n";
 
-		// sanitize
-		$read = preg_replace( '@\s(appid|id|address)="\d+?"@', ' \\1=""', $read );
-		$read = preg_replace( '@\s(idekey)="[^"]+?"@', ' \\1=""', $read );
-		$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
-		$parts = explode( "\0", $read, 2 );
-		echo $parts[1], "\n\n";
+			if ( preg_match( '@<stream xmlns="urn.debugger_protocol_v1" xmlns:xdebug@', $read ) )
+			{
+				$end = false;
+			}
+		} while( !$end );
 	}
 
 	function runTest( $data, array $commands )
