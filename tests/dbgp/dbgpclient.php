@@ -30,7 +30,7 @@ class DebugClient
 			do {
 				$header = stream_get_line( $conn, 10240, "\0" );
 			} while ( $header === false );
-			$read   = stream_get_line( $conn, 10240, "\0" );
+			$read   = stream_get_line( $conn, 102400, "\0" );
 
 			// sanitize
 			$read = preg_replace( '@\s(appid|id|address)="\d+?"@', ' \\1=""', $read );
