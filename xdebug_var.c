@@ -1067,6 +1067,10 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info XDEBUG_Z
 	class_entry = va_arg(args, zend_class_entry *);
 	class_name = va_arg(args, char *);
 
+	if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
+		return;
+	}
+
 	modifier = xdebug_get_property_info(prop_info->name, prop_info->name_length, &prop_name, &prop_class_name);
 
 	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {

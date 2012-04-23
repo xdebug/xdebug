@@ -1,17 +1,19 @@
 <?php
-class Base {
-	static public $property = true;
-	
-	static public function basetest( ) {
-		echo 'blah blah blah';
-	}
+$a = new A;
+
+class A {
+//    private $a;
+
+    function __construct() {
+        $this->a = B::foo();
+    }
 }
 
-class Test extends Base {
-	public function test( ) {
-		static::basetest( );
-	}
-}
+class B {
+    private $b;
 
-$test = new Test;
-$test->test( );
+    static public function foo() {
+        return "I'm alive!";
+    }
+}
+?>
