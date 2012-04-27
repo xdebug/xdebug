@@ -2,7 +2,7 @@
 $a = new A;
 
 class A {
-//    private $a;
+
 
     function __construct() {
         $this->a = B::foo();
@@ -10,7 +10,7 @@ class A {
 }
 
 class B {
-    private $b;
+    private $b = 1;
 
     static public function foo() {
         return "I'm alive!";

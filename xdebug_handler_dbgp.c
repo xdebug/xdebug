@@ -293,16 +293,16 @@ inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_e
 {
 	char *name;
 	zend_uint name_len;
+	zend_class_entry *tmp_ce;
 
 	if (Z_TYPE_P(z) != IS_OBJECT) {
 		return NULL;
 	}
 
+	tmp_ce = zend_get_class_entry(z TSRMLS_CC);
 	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
 		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
-		zend_class_entry *tmp_ce;
 
-		tmp_ce = zend_get_class_entry(z TSRMLS_CC);
 		if (!tmp_ce) {
 			return NULL;
 		}
@@ -310,7 +310,9 @@ inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_e
 		*length = tmp_ce->name_length;
 		*ce = tmp_ce;
 		return estrdup(tmp_ce->name);
-	} 
+	} else {
+		*ce = tmp_ce;
+	}
 
 	*length = name_len;
 	return name;
@@ -343,16 +345,44 @@ static char* prepare_search_key(char *name, int *name_length, char *prefix, int 
 static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	zval **retval_pp = NULL, *retval_p = NULL;
-	char  *element;
+	char  *element = NULL;
 	int    element_length = name_length;
+#if PHP_VERSION_ID >= 50400
+	zend_property_info *zpp;
+#endif
 
 	switch (type) {
 		case XF_ST_STATIC_ROOT:
+		case XF_ST_STATIC_PROPERTY:
 #if PHP_VERSION_ID < 50400
 			ht = CE_STATIC_MEMBERS(cce);
 			goto continue_from_static_root;
 #else
-			return NULL;
+			/* First we try a public,private,protected property */
+			element = prepare_search_key(name, &element_length, "", 0);
+			if (cce && &cce->properties_info && zend_hash_find(&cce->properties_info, element, element_length + 1, (void **) &zpp) == SUCCESS) {
+				retval_p = cce->static_members_table[zpp->offset];
+				goto cleanup;
+			}
+			element_length = name_length;
+
+			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
+			if (name[0] == '*') {
+				char *secondStar;
+				
+				secondStar = strstr(name + 1, "*");
+				if (secondStar) {
+					free(element);
+					element_length = name_length - (secondStar + 1 - name);
+					element = prepare_search_key(secondStar + 1, &element_length, "", 0);
+					if (cce && &cce->properties_info && zend_hash_find(&cce->properties_info, element, element_length + 1, (void **) &zpp) == SUCCESS) {
+						retval_p = cce->static_members_table[zpp->offset];
+						goto cleanup;
+					}
+				}
+			}
+
+			break;
 #endif
 
 		case XF_ST_ROOT:
@@ -459,7 +489,9 @@ continue_from_static_root:
 			break;
 	}
 cleanup:
-	free(element);
+	if (element) {
+		free(element);
+	}
 	return retval_p;
 }
 
@@ -637,10 +669,13 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 		}
 	} while (found < 0);
 	if (keyword != NULL) {
-		retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
-		if (retval) {
-			st = fetch_ht_from_zval(retval TSRMLS_CC);
+		if (type == XF_ST_STATIC_ROOT) {
+			/* special case for static properties */
 		}
+		retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+/*		if (retval) {
+			st = fetch_ht_from_zval(retval TSRMLS_CC);
+		}*/
 	}
 	if (current_classname) {
 		efree(current_classname);

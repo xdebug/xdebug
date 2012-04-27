@@ -919,6 +919,30 @@ static int object_item_add_to_merged_hash(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRML
 	return 0;
 }
 
+#if PHP_VERSION_ID >= 50400
+static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	HashTable          *merged;
+	int                 object_type;
+	xdebug_object_item *item;
+	zend_class_entry   *ce;
+
+	merged = va_arg(args, HashTable*);
+	object_type = va_arg(args, int);
+	ce = va_arg(args, zend_class_entry*);
+
+	item = xdmalloc(sizeof(xdebug_object_item));
+	item->type = object_type;
+	item->zv   = ce->static_members_table[zpp->offset];
+	item->name = zpp->name;
+	item->name_len = zpp->name_length;
+
+	zend_hash_next_index_insert(merged, &item, sizeof(xdebug_object_item*), NULL);
+
+	return 0;
+}
+#endif
+
 static int xdebug_array_element_export_xml_node(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	int level;
@@ -1061,16 +1085,19 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info XDEBUG_Z
 	zend_class_entry   *class_entry;
 	char               *prop_name, *prop_class_name;
 	xdebug_var_export_options *options;
+	int                *children_count;
 
 	node = va_arg(args, xdebug_xml_node *);
 	options = va_arg(args, xdebug_var_export_options *);
 	class_entry = va_arg(args, zend_class_entry *);
 	class_name = va_arg(args, char *);
+	children_count = va_arg(args, int *);
 
 	if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
 		return;
 	}
 
+	(*children_count)++;
 	modifier = xdebug_get_property_info(prop_info->name, prop_info->name_length, &prop_name, &prop_class_name);
 
 	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
@@ -1129,6 +1156,7 @@ int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *
 {
 #if PHP_VERSION_ID >= 50400
 	HashTable        *static_members = &ce->properties_info;
+	int               children = 0;
 #else
 	HashTable        *static_members = CE_STATIC_MEMBERS(ce);
 #endif
@@ -1139,13 +1167,15 @@ int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *
 	xdebug_xml_add_attribute(static_container, "fullname", "::");
 	xdebug_xml_add_attribute(static_container, "type", "object");
 	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(ce->name), 0, 1);
-	xdebug_xml_add_attribute(static_container, "children", static_members->nNumOfElements > 0 ? "1" : "0");
-	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(static_members)), 0, 1);
 
 #if PHP_VERSION_ID >= 50400
-	zend_hash_apply_with_arguments(static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_attach_property_with_contents, 4, static_container, options, ce, ce->name); 
+	zend_hash_apply_with_arguments(static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_attach_property_with_contents, 5, static_container, options, ce, ce->name, &children); 
+	xdebug_xml_add_attribute(static_container, "children", children > 0 ? "1" : "0");
+	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", children), 0, 1);
 #else
 	zend_hash_apply_with_arguments(static_members XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_attach_static_var_with_contents, 3, static_container, options, ce->name); 
+	xdebug_xml_add_attribute(static_container, "children", static_members->nNumOfElements > 0 ? "1" : "0");
+	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(static_members)), 0, 1);
 #endif
 	xdebug_xml_add_child(node, static_container);
 }
@@ -1224,7 +1254,13 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			ce = zend_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 #if PHP_VERSION_ID >= 50400
-			zend_hash_apply_with_arguments(Z_OBJDEBUG_PP(struc, is_temp) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, ce);
+			/* Adding static properties */
+			if (ce->static_members_table) {
+				zend_hash_apply_with_arguments(&ce->properties_info XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_zend_prop_to_merged_hash, 3, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
+			}
+
+			/* Adding normal properties */
+			zend_hash_apply_with_arguments(Z_OBJDEBUG_PP(struc, is_temp) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
 #else
 			/* Adding static properties */
 			if (CE_STATIC_MEMBERS(ce)) {
