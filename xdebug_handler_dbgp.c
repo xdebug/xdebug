@@ -669,13 +669,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 		}
 	} while (found < 0);
 	if (keyword != NULL) {
-		if (type == XF_ST_STATIC_ROOT) {
-			/* special case for static properties */
-		}
 		retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
-/*		if (retval) {
-			st = fetch_ht_from_zval(retval TSRMLS_CC);
-		}*/
 	}
 	if (current_classname) {
 		efree(current_classname);
