@@ -506,6 +506,7 @@ void xdebug_init_debugger(TSRMLS_D)
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "E: The debug session could not be started. :-(\n");
 		} else {
 			/* All is well, turn off script time outs */
+			zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			XG(remote_enabled) = 1;
 		}
 	} else {
