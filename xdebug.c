@@ -1331,6 +1331,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
+	/* A hack to make __call work with profiles. The function *is* user defined after all. */
+	if (fse && fse->prev && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
+		fse->prev->user_defined = XDEBUG_EXTERNAL;
+	}
 
 	function_nr = XG(function_count);
 	xdebug_trace_function_begin(fse, function_nr TSRMLS_CC);

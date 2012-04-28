@@ -176,14 +176,15 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		xdebug_llist_insert_next(fse->prev->profile.call_list, NULL, ce);
 	}
 
-	if (op_array) {
-		fprintf(XG(profile_file), "fl=%s\n", op_array->filename);
-	} else {
-		fprintf(XG(profile_file), "fl=php:internal\n");
-	}
 	if (fse->user_defined == XDEBUG_EXTERNAL) {
+		if (op_array) {
+			fprintf(XG(profile_file), "fl=%s\n", op_array->filename);
+		} else {
+			fprintf(XG(profile_file), "fl=%s\n", fse->filename);
+		}
 		fprintf(XG(profile_file), "fn=%s\n", tmp_name);
 	} else {
+		fprintf(XG(profile_file), "fl=php:internal\n");
 		fprintf(XG(profile_file), "fn=php::%s\n", tmp_name);
 	}
 	xdfree(tmp_name);
