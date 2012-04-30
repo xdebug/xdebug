@@ -90,6 +90,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 int xdebug_is_output_tty();
 #endif
 
+extern ZEND_API void (*xdebug_external_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+
 /* call stack functions */
 PHP_FUNCTION(xdebug_get_stack_depth);
 PHP_FUNCTION(xdebug_get_function_stack);

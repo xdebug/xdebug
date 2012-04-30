@@ -74,6 +74,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 /* error callback replacement functions */
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+ZEND_API void (*xdebug_external_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
@@ -567,6 +568,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	/* Replace error handler callback with our own */
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
+	xdebug_external_error_cb = NULL;
 
 	/* Get reserved offset */
 	zend_xdebug_global_offset = zend_get_resource_handle(&dummy_ext);
@@ -869,6 +871,10 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", 16, (void**)&dummy) == FAILURE) {
+		/* If zend_error_cb has been changed by another ext, register it as external cb */
+		if (zend_error_cb != xdebug_old_error_cb) {
+			xdebug_external_error_cb = zend_error_cb;
+		}
 		zend_error_cb = xdebug_new_error_cb;
 		zend_throw_exception_hook = xdebug_throw_exception_hook;
 	}
