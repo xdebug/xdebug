@@ -302,7 +302,7 @@ inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_e
 
 	tmp_ce = zend_get_class_entry(z TSRMLS_CC);
 	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
-		Z_OBJ_HT_P(z)->get_class_name(z, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+		Z_OBJ_HT_P(z)->get_class_name(z, (const char **) &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
 
 		if (!tmp_ce) {
 			return NULL;
@@ -833,7 +833,7 @@ static xdebug_xml_node* return_stackframe(int nr TSRMLS_DC)
 		}
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno TSRMLS_CC), 0, 1);
 	} else {
-		tmp_filename = zend_get_executed_filename(TSRMLS_C);
+		tmp_filename = (char *) zend_get_executed_filename(TSRMLS_C);
 		tmp_lineno = zend_get_executed_lineno(TSRMLS_C);
 		if (check_evaled_code(fse, &tmp_filename, &tmp_lineno, 0 TSRMLS_CC)) {
 			xdebug_xml_add_attribute_ex(tmp, "type", xdstrdup("eval"), 0, 1);

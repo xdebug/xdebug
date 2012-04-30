@@ -213,15 +213,15 @@ zval* xdebug_get_php_symbol(char* name, int name_length)
 
 char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name)
 {
-	char *prop_name, *cls_name;
+	const char *prop_name, *cls_name;
 
 #if PHP_VERSION_ID >= 50200
 	zend_unmangle_property_name(mangled_property, mangled_len - 1, &cls_name, &prop_name);
 #else
 	zend_unmangle_property_name(mangled_property, &cls_name, &prop_name);
 #endif
-	*property_name = prop_name;
-	*class_name = cls_name;
+	*property_name = (char *) prop_name;
+	*class_name = (char *) cls_name;
 	if (cls_name) {
 		if (cls_name[0] == '*') {
 			return "protected";
@@ -303,7 +303,7 @@ static int xdebug_array_element_export(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_D
 			int newlen = 0;
 			char *tmp, *tmp2;
 			
-			tmp = php_str_to_str(hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
+			tmp = php_str_to_str((char *) hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
 			tmp2 = php_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
 				efree(tmp);
@@ -345,7 +345,7 @@ static int xdebug_object_element_export(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
+			modifier = xdebug_get_property_info((char *) hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
 			} else {
@@ -434,7 +434,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 				char *class_name;
 				zend_uint class_name_len;
 
-				zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+				zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
 				if (level <= options->max_depth) {
@@ -460,7 +460,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
 			break;
 		}
@@ -532,7 +532,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 			char *class_name;
 			zend_uint class_name_len;
 
-			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+			zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("class %s", class_name), 1);
 			efree(class_name);
 			break;
@@ -541,7 +541,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
 			break;
 		}
@@ -614,7 +614,7 @@ static int xdebug_array_element_export_text_ansi(zval **zv XDEBUG_ZEND_HASH_APPL
 			int newlen = 0;
 			char *tmp, *tmp2;
 			
-			tmp = php_str_to_str(hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
+			tmp = php_str_to_str((char *) hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
 			tmp2 = php_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
 				efree(tmp);
@@ -657,7 +657,7 @@ static int xdebug_object_element_export_text_ansi(zval **zv XDEBUG_ZEND_HASH_APP
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
 
 		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &class_name);
+			modifier = xdebug_get_property_info((char *) hash_key->arKey, hash_key->nKeyLength, &prop_name, &class_name);
 			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
 			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
@@ -745,7 +745,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 				char *class_name;
 				zend_uint class_name_len;
 
-				zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+				zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
 				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_OBJECT, class_name, ANSI_COLOR_RESET,
 							Z_OBJ_HANDLE_PP(struc),
 							ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
@@ -769,7 +769,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("%sresource%s(%s%ld%s) of type (%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
 			               ANSI_COLOR_RESOURCE, Z_LVAL_PP(struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
 			break;
@@ -843,7 +843,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 			char *class_name;
 			zend_uint class_name_len;
 
-			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+			zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("class %s", class_name), 1);
 			break;
 		}
@@ -851,7 +851,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_LVAL_PP(struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
 			break;
 		}
@@ -894,11 +894,6 @@ typedef struct
 	zval *zv;
 } xdebug_object_item;
 
-static void xdebug_hash_object_item_dtor(void *data)
-{
-	xdfree(data);
-}
-
 static int object_item_add_to_merged_hash(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	HashTable          *merged;
@@ -911,7 +906,7 @@ static int object_item_add_to_merged_hash(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRML
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
 	item->zv   = *zv;
-	item->name = hash_key->arKey;
+	item->name = (char *) hash_key->arKey;
 	item->name_len = hash_key->nKeyLength;
 
 	zend_hash_next_index_insert(merged, &item, sizeof(xdebug_object_item*), NULL);
@@ -934,7 +929,7 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp XDEB
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
 	item->zv   = ce->static_members_table[zpp->offset];
-	item->name = zpp->name;
+	item->name = (char *) zpp->name;
 	item->name_len = zpp->name_length;
 
 	zend_hash_next_index_insert(merged, &item, sizeof(xdebug_object_item*), NULL);
@@ -1097,7 +1092,7 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info XDEBUG_Z
 	}
 
 	(*children_count)++;
-	modifier = xdebug_get_property_info(prop_info->name, prop_info->name_length, &prop_name, &prop_class_name);
+	modifier = xdebug_get_property_info((char *) prop_info->name, prop_info->name_length, &prop_name, &prop_class_name);
 
 	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 		contents = xdebug_get_zval_value_xml_node_ex(prop_name, class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
@@ -1111,14 +1106,14 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info XDEBUG_Z
 		xdebug_xml_add_attribute_ex(contents, "facet", xdebug_sprintf("static %s", modifier), 0, 1);
 		xdebug_xml_add_child(node, contents);
 	} else {
-		xdebug_attach_uninitialized_var(node, prop_info->name);
+		xdebug_attach_uninitialized_var(node, (char *) prop_info->name);
 	}
 }
 #else
 void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_xml_node    *node;
-	char               *name = hash_key->arKey;
+	char               *name = (char *) hash_key->arKey;
 	char               *modifier;
 	xdebug_xml_node    *contents = NULL;
 	char               *class_name;
@@ -1151,7 +1146,7 @@ void xdebug_attach_static_var_with_contents(zval **zv XDEBUG_ZEND_HASH_APPLY_TSR
 }
 #endif
 
-int xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce TSRMLS_DC)
+void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce TSRMLS_DC)
 {
 #if PHP_VERSION_ID >= 50400
 	HashTable        *static_members = &ce->properties_info;
@@ -1249,7 +1244,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			ALLOC_HASHTABLE(merged_hash);
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
-			zend_get_object_classname(*struc, &class_name, &class_name_len TSRMLS_CC);
+			zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
 			ce = zend_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 #if PHP_VERSION_ID >= 50400
@@ -1301,7 +1296,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			char *type_name;
 
 			xdebug_xml_add_attribute(node, "type", "resource");
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			xdebug_xml_add_text(node, xdebug_sprintf("resource id='%ld' type='%s'", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"));
 			break;
 		}
@@ -1383,7 +1378,7 @@ static int xdebug_array_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_TS
 			xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, COLOR_POINTER), 1);
 		} else { /* string key */
 			xdebug_str_addl(str, "'", 1, 0);
-			tmp_str = xdebug_xmlize(hash_key->arKey, hash_key->nKeyLength - 1, &newlen);
+			tmp_str = xdebug_xmlize((char *) hash_key->arKey, hash_key->nKeyLength - 1, &newlen);
 			xdebug_str_addl(str, tmp_str, newlen, 0);
 			efree(tmp_str);
 			xdebug_str_add(str, xdebug_sprintf("' <font color='%s'>=&gt;</font> ", COLOR_POINTER), 1);
@@ -1420,7 +1415,7 @@ static int xdebug_object_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_T
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 		if (hash_key->nKeyLength != 0) {
-			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
+			modifier = xdebug_get_property_info((char *) hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
 			} else {
@@ -1531,7 +1526,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("<b>resource</b>(<i>%ld</i><font color='%s'>,</font> <i>%s</i>)", Z_LVAL_PP(struc), COLOR_RESOURCE, type_name ? type_name : "Unknown"), 1);
 			break;
 		}
@@ -1610,7 +1605,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>resource(%ld, %s)</font>", COLOR_RESOURCE, Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
 			break;
 		}

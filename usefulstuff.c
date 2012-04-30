@@ -542,8 +542,9 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 			switch (*format)
 			{
 				case 'c': /* crc32 of the current working directory */
-					VCWD_GETCWD(cwd, 127);
-					xdebug_str_add(&fname, xdebug_sprintf("%lu", xdebug_crc32(cwd, strlen(cwd))), 1);
+					if (VCWD_GETCWD(cwd, 127)) {
+						xdebug_str_add(&fname, xdebug_sprintf("%lu", xdebug_crc32(cwd, strlen(cwd))), 1);
+					}
 					break;
 
 				case 'p': /* pid */
@@ -601,7 +602,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case 'R': { /* $_SERVER['REQUEST_URI'] */
 					zval **data;
 					char *char_ptr, *strval;
-					int retval;
+					int retval = FAILURE;
 
 					if (PG(http_globals)[TRACK_VARS_SERVER]) {
 						switch (*format) {

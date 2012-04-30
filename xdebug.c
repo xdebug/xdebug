@@ -367,6 +367,8 @@ char *xdebug_env_key(TSRMLS_D)
 	if (ide_key && *ide_key) {
 		return ide_key;
 	}
+
+	return NULL;
 }
 
 void xdebug_env_config(TSRMLS_D)
@@ -1081,11 +1083,11 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 		int cv_len;
 
 		if (op_array->opcodes[i].XDEBUG_TYPE(op1) == IS_CV) {
-			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op1,var), &cv_len);
+			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op1,var), &cv_len);
 			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
 		if (op_array->opcodes[i].XDEBUG_TYPE(op2) == IS_CV) {
-			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op2,var), &cv_len);
+			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op2,var), &cv_len);
 			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
 		i++;
@@ -1157,9 +1159,9 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 
 	if (XG(remote_enabled)) {
 		/* Check if we have a breakpoint on this exception */
-		if (xdebug_hash_find(XG(context).exception_breakpoints, exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
+		if (xdebug_hash_find(XG(context).exception_breakpoints, (char *) exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info)) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, exception_ce->name, Z_STRVAL_P(message))) {
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, Z_STRVAL_P(message))) {
 					XG(remote_enabled) = 0;
 				}
 			}
@@ -1319,7 +1321,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			!XG(profiler_enabled) &&
 			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE" TSRMLS_CC))
 		) {
-			if (xdebug_profiler_init(op_array->filename TSRMLS_CC) == SUCCESS) {
+			if (xdebug_profiler_init((char *) op_array->filename TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
 			}
 		}
@@ -1445,7 +1447,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	int                   function_nr = 0;
 
 	int                   restore_error_handler_situation = 0;
-	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) = NULL;
 
 	XG(level)++;
 	if (XG(level) == XG(max_nesting_level)) {
@@ -1554,6 +1556,9 @@ static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sap
 			break;
 			case SAPI_HEADER_DELETE_ALL:
 				xdebug_llist_empty(XG(headers), NULL);
+			case SAPI_HEADER_DELETE:
+			case SAPI_HEADER_SET_STATUS:
+			break;
 		}
 #else
 		xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
@@ -1857,7 +1862,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 	lineno = EG(current_execute_data)->opline->lineno;
 
-	file = op_array->filename;
+	file = (char *) op_array->filename;
 
 	if (XG(do_code_coverage)) {
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
