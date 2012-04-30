@@ -1080,7 +1080,6 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info XDEBUG_Z
 	xdebug_xml_node    *node;
 	char               *modifier;
 	xdebug_xml_node    *contents = NULL;
-	char               *full_name;
 	char               *class_name;
 	zend_class_entry   *class_entry;
 	char               *prop_name, *prop_class_name;
@@ -1404,7 +1403,6 @@ static int xdebug_object_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_T
 	int level, debug_zval;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
-	char *key;
 	char *prop_name, *class_name, *modifier, *prop_class_name;
 #if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
 	TSRMLS_FETCH();
@@ -1421,7 +1419,6 @@ static int xdebug_object_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_T
 	{
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
-		key = hash_key->arKey;
 		if (hash_key->nKeyLength != 0) {
 			modifier = xdebug_get_property_info(hash_key->arKey, hash_key->nKeyLength, &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
