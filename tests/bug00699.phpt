@@ -29,7 +29,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> dirname(string(46)) %sbug00699.php:4
+%w%f %w%d     -> dirname(string(%d)) %sbug00699.php:4
 %w%f %w%d     -> require(%sbug00699.inc) %sbug00699.php:4
 %w%f %w%d     -> SomeClass->addData(string(6)) %sbug00699.php:6
 %w%f %w%d     -> count(class SomeClass) %sbug00699.php:10
