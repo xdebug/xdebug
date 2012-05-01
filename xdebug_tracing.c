@@ -99,26 +99,33 @@ char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	xdebug_str str = {0, 0, NULL};
 	char      *tmp_value;
 
-	if (XG(trace_format) != 0) {
+	if (XG(trace_format) == 0) {
+		xdebug_str_addl(&str, "                    ", 20, 0);
+		if (XG(show_mem_delta)) {
+			xdebug_str_addl(&str, "        ", 8, 0);
+		}
+		for (j = 0; j < i->level; j++) {
+			xdebug_str_addl(&str, "  ", 2, 0);
+		}
+		xdebug_str_addl(&str, "   >=> ", 7, 0);
+
+		tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+		if (tmp_value) {
+			xdebug_str_add(&str, tmp_value, 1);
+		}
+		xdebug_str_addl(&str, "\n", 2, 0);
+		return str.d;
+	} else if (XG(trace_format) == 1) {
+		xdebug_str_addl(&str, "\t", 1, 0);
+		tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+		if (!tmp_value) {
+			tmp_value = "";
+		}
+		xdebug_str_add(&str, xdebug_sprintf("%s\n", tmp_value), 1);
+		return str.d;
+	} else {
 		return xdstrdup("");
 	}
-
-	xdebug_str_addl(&str, "                    ", 20, 0);
-	if (XG(show_mem_delta)) {
-		xdebug_str_addl(&str, "        ", 8, 0);
-	}
-	for (j = 0; j < i->level; j++) {
-		xdebug_str_addl(&str, "  ", 2, 0);
-	}
-	xdebug_str_addl(&str, "   >=> ", 7, 0);
-
-	tmp_value = xdebug_get_zval_value(retval, 0, NULL);
-	if (tmp_value) {
-		xdebug_str_add(&str, tmp_value, 1);
-	}
-	xdebug_str_addl(&str, "\n", 2, 0);
-
-	return str.d;
 }
 
 static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRMLS_DC)
