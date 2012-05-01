@@ -1216,7 +1216,18 @@ DBGP_FUNC(breakpoint_set)
 				brk_info->file_len = strlen(brk_info->file);
 			}
 		} else {
+			char *realpath_file;
+
 			brk_info->file = xdebug_path_from_url(CMD_OPTION('f') TSRMLS_CC);
+
+			/* Now we do some real path checks to resolve symlinks. */
+			realpath_file = VCWD_REALPATH(brk_info->file, NULL);
+			if (realpath_file) {
+				xdfree(brk_info->file);
+				brk_info->file = xdstrdup(realpath_file);
+				free(realpath_file);
+			}
+
 			brk_info->file_len = strlen(brk_info->file);
 		}
 
