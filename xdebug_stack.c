@@ -273,7 +273,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 #endif
 
 	if (html) {
-		escaped = php_escape_html_entities(buffer, strlen(buffer), &newlen, 0, 0, NULL TSRMLS_CC);
+		escaped = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), &newlen, 0, 0, NULL TSRMLS_CC);
 	} else {
 		escaped = estrdup(buffer);
 	}
@@ -661,7 +661,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
 		if (xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info)) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, buffer)) {
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, buffer)) {
 					XG(remote_enabled) = 0;
 				}
 			}
@@ -927,8 +927,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op              *cur_opcode;
 	zval                **param;
 	int                   i = 0;
-	char                 *aggr_key;
-	int                   aggr_key_len;
+	char                 *aggr_key = NULL;
+	int                   aggr_key_len = 0;
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
 	tmp->var           = NULL;
