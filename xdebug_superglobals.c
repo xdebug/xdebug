@@ -97,7 +97,7 @@ static int dump_hash_elem_va(void *pDest XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int n
 	if (hash_key->nKeyLength == 0) {
 		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, str TSRMLS_CC);
 	} else {
-		dump_hash_elem(*((zval **) pDest), name, 0, hash_key->arKey, html, str TSRMLS_CC);
+		dump_hash_elem(*((zval **) pDest), name, 0, (char *) hash_key->arKey, html, str TSRMLS_CC);
 	}
 
 	return SUCCESS;

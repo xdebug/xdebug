@@ -61,7 +61,7 @@ int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 		cur_opcode = *EG(opline_ptr);
 		lineno = cur_opcode->lineno;
 
-		file = op_array->filename;
+		file = (char *)op_array->filename;
 
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 	}
@@ -221,7 +221,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 
 	cur_opcode = *EG(opline_ptr);
 	next_opcode = cur_opcode + 1;
-	file = op_array->filename;
+	file = (char *) op_array->filename;
 	lineno = cur_opcode->lineno;
 
 	if (do_cc && XG(do_code_coverage)) {
@@ -550,7 +550,7 @@ static int prefill_from_function_table(zend_op_array *opa XDEBUG_ZEND_HASH_APPLY
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
 		if (opa->reserved[XG(reserved_offset)] != (void*) 1 /* && opa->filename && strcmp(opa->filename, new_filename) == 0)*/) {
-			prefill_from_oparray(opa->filename, opa TSRMLS_CC);
+			prefill_from_oparray((char *) opa->filename, opa TSRMLS_CC);
 		}
 	}
 
@@ -578,7 +578,7 @@ static int prefill_from_class_table(zend_class_entry **class_entry XDEBUG_ZEND_H
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
 	if (op_array->reserved[XG(reserved_offset)] != (void*) 1) {
-		prefill_from_oparray(op_array->filename, op_array TSRMLS_CC);
+		prefill_from_oparray((char *) op_array->filename, op_array TSRMLS_CC);
 	}
 
 	zend_hash_apply_with_arguments(CG(function_table)  XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, op_array->filename);
