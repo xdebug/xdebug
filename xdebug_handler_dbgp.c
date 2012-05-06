@@ -2002,6 +2002,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	if (context_id == 1) {
 		/* add super globals */
 		XG(active_symbol_table) = &EG(symbol_table);
+		XG(active_execute_data) = NULL;
 		add_variable_node(node, "_COOKIE", sizeof("_COOKIE"), 1, 1, 0, options TSRMLS_CC);
 		add_variable_node(node, "_ENV", sizeof("_ENV"), 1, 1, 0, options TSRMLS_CC);
 		add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1, 0, options TSRMLS_CC);
