@@ -35,6 +35,7 @@
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
 #include "xdebug_com.h"
+#include "xdebug_compat.h"
 #include "xdebug_handler_dbgp.h"
 #include "xdebug_hash.h"
 #include "xdebug_llist.h"
@@ -1969,6 +1970,30 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	}
 }
 
+static int xdebug_add_filtered_symboltable_var(zval *symbol XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+	xdebug_hash *tmp_hash;
+
+	tmp_hash = va_arg(args, xdebug_hash *);
+
+	if (strcmp("argc", hash_key->arKey) == 0) { return 0; }
+	if (strcmp("argv", hash_key->arKey) == 0) { return 0; }
+	if (hash_key->arKey[0] == '_') {
+		if (strcmp("_COOKIE", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("_ENV", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("_FILES", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("_GET", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("_POST", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("_REQUEST", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("_SERVER", hash_key->arKey) == 0) { return 0; }
+	}
+	if (strcmp("GLOBALS", hash_key->arKey) == 0) { return 0; }
+
+	xdebug_hash_add(tmp_hash, hash_key->arKey, strlen(hash_key->arKey), hash_key->arKey);	
+
+	return 0;
+}
+
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
@@ -2012,10 +2037,20 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		/* Only show vars when they are scanned */
 		if (fse->used_vars) {
 			xdebug_hash *tmp_hash;
+
+			/* Get a hash from all the used vars (which can have duplicates) */
 			tmp_hash = xdebug_used_var_hash_from_llist(fse->used_vars);
+
+			/* Check for dynamically defined variables, but make sure we don't already
+			 * have them. Also blacklist superglobals and argv/argc */
+			if (XG(active_symbol_table)) {
+				zend_hash_apply_with_arguments(XG(active_symbol_table) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
+			}
+
+			/* Add all the found variables to the node */
 			xdebug_hash_apply_with_argument(tmp_hash, (void *) node, func, (void *) options);
 
-			/* zend engine 2 does not give us $this, eval so we can get it */
+			/* Zend engine 2 does not give us $this, eval so we can get it */
 			if (!xdebug_hash_find(tmp_hash, "this", 4, (void *) &var_name)) {
 				add_variable_node(node, "this", sizeof("this"), 1, 1, 0, options TSRMLS_CC);
 			}
