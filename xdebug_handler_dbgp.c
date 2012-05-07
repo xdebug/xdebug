@@ -1984,6 +1984,17 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol XDEBUG_ZEND_HASH_APP
 		if (strcmp("_POST", hash_key->arKey) == 0) { return 0; }
 		if (strcmp("_REQUEST", hash_key->arKey) == 0) { return 0; }
 		if (strcmp("_SERVER", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("_SESSION", hash_key->arKey) == 0) { return 0; }
+	}
+	if (hash_key->arKey[0] == 'H') {
+		if (strcmp("HTTP_COOKIE_VARS", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("HTTP_ENV_VARS", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("HTTP_GET_VARS", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("HTTP_POST_VARS", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("HTTP_POST_FILES", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("HTTP_RAW_POST_DATA", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("HTTP_SERVER_VARS", hash_key->arKey) == 0) { return 0; }
+		if (strcmp("HTTP_SESSION_VARS", hash_key->arKey) == 0) { return 0; }
 	}
 	if (strcmp("GLOBALS", hash_key->arKey) == 0) { return 0; }
 
