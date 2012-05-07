@@ -4,6 +4,7 @@ Test for overloaded var_dump() on the CLI
 xdebug.overload_var_dump=1
 html_errors=0
 xdebug.cli_color=0
+xdebug.default_enable=1
 xdebug.var_display_max_data=32
 xdebug.var_display_max_depth=2
 xdebug.var_display_max_children=8

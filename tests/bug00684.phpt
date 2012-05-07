@@ -2,6 +2,7 @@
 Test for bug #684: xdebug_var_dump - IE does not support &amp;
 --INI--
 html_errors=1
+xdebug.default_enable=1
 --FILE--
 <?php
 xdebug_var_dump('Testing isn\'t fun');

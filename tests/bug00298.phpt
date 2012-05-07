@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #298: xdebug_var_dump & multiline strings
+--INI--
+xdebug.default_enable=1
 --FILE--
 <?php
 ini_set('html_errors', '1');

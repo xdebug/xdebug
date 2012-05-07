@@ -1599,7 +1599,10 @@ PHP_FUNCTION(xdebug_var_dump)
 	}
 	
 	for (i = 0; i < argc; i++) {
-		if (PG(html_errors)) {
+		if (XG(default_enable) == 0) {
+			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);
+		}
+		else if (PG(html_errors)) {
 			val = xdebug_get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0, NULL TSRMLS_CC);
 			PHPWRITE(val, len);
 			xdfree(val);

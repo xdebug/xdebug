@@ -2,6 +2,7 @@
 Test for bug #328: Private properties are incorrectly enumerated in case of extended classes
 --INI--
 html_errors=1
+xdebug.default_enable=1
 --FILE--
 <?php
 class Daddy
