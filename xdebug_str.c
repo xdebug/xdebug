@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 
 #include "php.h"
 #include "ext/standard/php_string.h"
@@ -85,7 +86,10 @@ char *xdebug_sprintf(const char* fmt, ...)
 	char   *new_str;
 	int     size = 1;
 	va_list args;
+	char   *orig_locale;
 
+	orig_locale = xdstrdup(setlocale(LC_ALL, NULL));
+	setlocale(LC_ALL, "C");
 	new_str = (char *) xdmalloc(size);
 
 	for (;;) {
@@ -105,6 +109,8 @@ char *xdebug_sprintf(const char* fmt, ...)
 		}
 		new_str = (char *) xdrealloc(new_str, size);
 	}
+	setlocale(LC_ALL, orig_locale);
+	xdfree(orig_locale);
 
 	return new_str;
 }
