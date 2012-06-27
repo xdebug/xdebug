@@ -22,9 +22,9 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-                         => $tf = '%s' %sassignment-trace5.php:2
-                         => $t = array () %sassignment-trace5.php:4
-                         => $t[] = 42 %sassignment-trace5.php:5
+                           => $tf = '%s' %sassignment-trace5.php:2
+                           => $t = array () %sassignment-trace5.php:4
+                           => $t[] = 42 %sassignment-trace5.php:5
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace5.php:7
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

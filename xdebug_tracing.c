@@ -70,7 +70,7 @@ char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zva
 	if (XG(show_mem_delta)) {
 		xdebug_str_addl(&str, "        ", 8, 0);
 	}
-	for (j = 0; j < i->level; j++) {
+	for (j = 0; j <= i->level; j++) {
 		xdebug_str_addl(&str, "  ", 2, 0);
 	}
 	xdebug_str_addl(&str, "   => ", 6, 0);
