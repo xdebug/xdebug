@@ -156,7 +156,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     show_ex_trace;
 	zend_bool     show_local_vars;
 	zend_bool     show_mem_delta;
-	char         *manual_url;
 	double        start_time;
 	HashTable    *active_symbol_table;
 	zend_execute_data *active_execute_data;
