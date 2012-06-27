@@ -798,7 +798,7 @@ static int check_evaled_code(function_stack_entry *fse, char **filename, int *li
 	filename_to_use = use_fse ? fse->filename : *filename;
 
 	end_marker = filename_to_use + strlen(filename_to_use) - strlen("eval()'d code");
-	if (strcmp("eval()'d code", end_marker) == 0) {
+	if (end_marker >= filename_to_use && strcmp("eval()'d code", end_marker) == 0) {
 		if (xdebug_hash_find(XG(context).eval_id_lookup, filename_to_use, strlen(filename_to_use), (void *) &ei)) {
 			*filename = xdebug_sprintf("dbgp://%lu", ei->id);
 		}
