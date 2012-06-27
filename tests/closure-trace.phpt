@@ -31,9 +31,9 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-                         => $tf = '/tmp/%s.xt' %sclosure-trace.php:2
+                           => $tf = '/tmp/%s.xt' %sclosure-trace.php:2
 %w%f %w%d     -> test1() %sclosure-trace.php:13
-                           => $f = class Closure {  } %sclosure-trace.php:8
+                             => $f = class Closure {  } %sclosure-trace.php:8
 %w%f %w%d       -> {closure:%sclosure-trace.php:6-8}($a = 5, $b = 25) %sclosure-trace.php:10
 %w%f %w%d         -> strlen(125) %sclosure-trace.php:7
                                >=> 3

@@ -40,17 +40,17 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-                         => $tf = '%s' %sassignment-trace6.php:2
+                           => $tf = '%s' %sassignment-trace6.php:2
 %w%f %w%d     -> foo::test() %sassignment-trace6.php:23
-                           => self::foo = array () %sassignment-trace6.php:11
-                           => self::foo[] = 42 %sassignment-trace6.php:12
-                           => self::var = 'var' %sassignment-trace6.php:13
-                           => self::var2 = 'var' %sassignment-trace6.php:14
-                           => $id = 42 %sassignment-trace6.php:15
-                           => self::foo[42] = 44 %sassignment-trace6.php:16
-                           => self::bar['test'] = array () %sassignment-trace6.php:18
-                           => $id = 'test' %sassignment-trace6.php:19
-                           => bar['test'][] = 55 %sassignment-trace6.php:20
+                             => self::foo = array () %sassignment-trace6.php:11
+                             => self::foo[] = 42 %sassignment-trace6.php:12
+                             => self::var = 'var' %sassignment-trace6.php:13
+                             => self::var2 = 'var' %sassignment-trace6.php:14
+                             => $id = 42 %sassignment-trace6.php:15
+                             => self::foo[42] = 44 %sassignment-trace6.php:16
+                             => self::bar['test'] = array () %sassignment-trace6.php:18
+                             => $id = 'test' %sassignment-trace6.php:19
+                             => bar['test'][] = 55 %sassignment-trace6.php:20
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace6.php:25
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]
