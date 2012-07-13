@@ -923,7 +923,7 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp XDEB
 	zend_class_entry   *ce;
 
 	if ((zpp->flags & ZEND_ACC_STATIC) == 0) {
-		return;
+		return 0;
 	}
 	merged = va_arg(args, HashTable*);
 	object_type = va_arg(args, int);
