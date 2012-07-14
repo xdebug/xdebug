@@ -32,11 +32,11 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2012-05-08</date>
+ <date>2012-07-15</date>
  <time>12:00:00</time>
  <version>
-  <release>2.2.0</release>
-  <api>2.2.0</api>
+  <release>2.2.1</release>
+  <api>2.2.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -44,62 +44,15 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Tue, May 08, 2012 - xdebug 2.2.0
-
-+ Added features:
-
-	- Support for PHP 5.4.
-
-	- Added ANSI colour output for the shell. (Including patches by Michael
-	  Maclean)
-	- Added var_dump() overloading on the command line (issue #457).
-
-	- Added better support for closures in stack and function traces.
-	- Added the size of arrays to the overloaded variable output, so that you
-	  know how many elements there are.
-	- Added support for X-HTTP-FORWARDED-FOR before falling back to REMOTE_ADDR
-	  (issue #660). (Patch by Hannes Magnusson)
-	- Added the method call type to xdebug_get_function_stack() (issue #695).
-	- Added extra information to error printouts to tell that the error
-	  suppression operator has been ignored due to xdebug.scream.
-	- Added a error-specific CSS class to stack traces.
-
-+ New settings:
-
-	- xdebug.cli_color for colouring output on the command line (Unix only).
-	- Added xdebug.trace_enable_trigger to triger function traces through a
-	  GET/POST/COOKIE parameter (issue #517). (Patch by Patrick Allaert)
-	- Added support for the 'U' format specifier for function trace and
-	  profiler filenames.
-
-+ Changes:
-
-	- Improved performance by lazy-initializing data structures.
-	- Improved code coverage performance. (Including some patches by Taavi
-	  Burns)
-	- Improved compatibility with KCacheGrind.
-	- Improved logging of remote debugging connections, by added connection
-	  success/failure logging to the xdebug.remote_log functionality.
-
 = Fixed bugs:
 
-	- Fixed bug #827: Enabling Xdebug causes phpt tests to fail because of
-	  var_dump() formatting issues.
-	- Fixed bug #823: Single quotes are escaped in var_dumped string output.
-	- Fixed issue #819: Xdebug 2.2.0RC2 can't stand on a breakpoint more than 30 seconds.
-	- Fixed bug #801: Segfault with streamwrapper and unclosed $fp on
-	  destruction.
-	- Fixed issue #797: Xdebug crashes when fetching static properties.
-	- Fixed bug #794: Allow coloured output on Windows.
-	- Fixed bug #784: Unlimited feature for var_display_max_data and
-	  var_display_max_depth is undocumented.
-	- Fixed bug #774: Apache crashes on header() calls.
-	- Fixed bug #764: Tailored Installation instructions do not work.
-	- Fixed bug #758: php_value xdebug.idekey is ignored in .htaccess files
-	- Fixed bug #728: Profiler reports __call() invocations confusingly/wrongly.
-	- Fixed bug #687: Xdebug does not show dynamically defined variable.
-	- Fixed bug #662: idekey is set to running user.
-	- Fixed bug #627: Added the realpath check.
+	- Fixed bug #843: Text output depends on php locale.
+	- Fixed bug #838/#839/#840: Debugging static properties crashes Xdebug.
+	- Fixed bug #821: Variable assignments (beginning with =>) should be
+	  indented one more scope.
+	- Fixed bug #811: PHP Documentation Link.
+	- Fixed bug #800: var_dump(get_class(new foo\bar')) add an extra "\" in
+	  class name.
  </notes>
  <contents>
   <dir name="/">
@@ -196,6 +149,29 @@ Tue, May 08, 2012 - xdebug 2.2.0
  <providesextension>xdebug</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.2.1</release>
+    <api>2.2.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <date>2012-07-14</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+= Fixed bugs:
+
+	- Fixed bug #843: Text output depends on php locale.
+	- Fixed bug #838/#839/#840: Debugging static properties crashes Xdebug.
+	- Fixed bug #821: Variable assignments (beginning with =>) should be
+	  indented one more scope.
+	- Fixed bug #811: PHP Documentation Link.
+	- Fixed bug #800: var_dump(get_class(new foo\bar')) add an extra "\" in
+	  class name.
+   </notes>
+  </release>
   <release>
    <version>
     <release>2.2.0</release>
