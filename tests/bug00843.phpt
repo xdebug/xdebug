@@ -27,7 +27,7 @@ Version: 2.%s
 File format: 2
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%d.%d	%d
-2	3	0	%d.%d	%d	setlocale	0		%sbug00843.php	4	2	6	'ro_RO.UTF-8'
+2	3	0	%d.%d	%d	setlocale	0		%sbug00843.php	4	%d	6	'%s'
 2	3	1	%d.%d	%d
 2	4	0	%d.%d	%d	xdebug_stop_trace	0		%sbug00843.php	6	0
 			%d.%d	%d
