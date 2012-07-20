@@ -449,7 +449,7 @@ void xdebug_stop_trace(TSRMLS_D)
 		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
 			u_time = xdebug_get_utime();
 			tmp = xdebug_sprintf(XG(trace_format) == 0 ? "%10.4f " : "\t\t\t%f\t", u_time - XG(start_time));
-			fprintf(XG(trace_file), tmp);
+			fprintf(XG(trace_file), "%s", tmp);
 			xdfree(tmp);
 #if HAVE_PHP_MEMORY_USAGE
 			fprintf(XG(trace_file), XG(trace_format) == 0 ? "%10zu" : "%lu", XG_MEMORY_USAGE());
