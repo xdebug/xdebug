@@ -478,7 +478,7 @@ void xdebug_init_debugger(TSRMLS_D)
 	if (XG(remote_connect_back)) {
 		zval **remote_addr = NULL;
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking remote connect back address.\n");
-		if (zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "X_HTTP_FORWARDED_FOR", 21, (void**)&remote_addr) == FAILURE) {
+		if (zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", 21, (void**)&remote_addr) == FAILURE) {
 			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
 		}
 		if (remote_addr) {
