@@ -527,7 +527,9 @@ void xdebug_do_jit(TSRMLS_D)
 static void php_output_error(const char *error TSRMLS_DC)
 {
 #ifdef PHP_DISPLAY_ERRORS_STDERR
-	if (PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR) {
+	if ((!strcmp(sapi_module.name, "cli") || !strcmp(sapi_module.name, "cgi")) &&
+		PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
+	) {
 		fputs(error, stderr);
 		fflush(stderr);
 		return;
