@@ -622,8 +622,12 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				
 				/* find first new line */
 				p = strchr(buffer, '\n');
-				/* find last quote */
-				p = ((char *) zend_memrchr(buffer, '\'', p - buffer)) + 1;
+				if (!p) {
+					p = buffer + strlen(buffer);
+				} else {
+					/* find last quote */
+					p = ((char *) zend_memrchr(buffer, '\'', p - buffer)) + 1;
+				}
 				/* Create new buffer */
 				tmp_buf = calloc(p - buffer + 1, 1);
 				strncpy(tmp_buf, buffer, p - buffer );
