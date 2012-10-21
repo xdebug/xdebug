@@ -1,16 +1,3 @@
-Sun, Jul 15, 2012 - xdebug 2.2.1
-
-= Fixed bugs:
-
-	- Fixed bug #843: Text output depends on php locale.
-	- Fixed bug #838/#839/#840: Debugging static properties crashes Xdebug.
-	- Fixed bug #821: Variable assignments (beginning with =>) should be
-	  indented one more scope.
-	- Fixed bug #811: PHP Documentation Link.
-	- Fixed bug #800: var_dump(get_class(new foo\bar')) add an extra "\" in
-	  class name.
-
-
 Tue, May 08, 2012 - xdebug 2.2.0
 
 + Added features:
