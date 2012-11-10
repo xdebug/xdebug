@@ -676,6 +676,9 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	HashTable *myht;
 	char*     tmp_str;
 	int       tmp_len;
+#if PHP_VERSION_ID >= 50300
+	int       is_temp;
+#endif
 
 	if (!struc || !(*struc)) {
 		return;
@@ -740,8 +743,12 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			break;
 
 		case IS_OBJECT:
+#if PHP_VERSION_ID >= 50300
+			myht = Z_OBJDEBUG_PP(struc, is_temp);
+#else
 			myht = Z_OBJPROP_PP(struc);
-			if (myht->nApplyCount < 1) {
+#endif
+			if (myht && myht->nApplyCount < 1) {
 				char *class_name;
 				zend_uint class_name_len;
 
@@ -764,6 +771,12 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 			}
+#if PHP_VERSION_ID >= 50300
+			if (is_temp) {
+				zend_hash_destroy(myht);
+				efree(myht);
+			}
+#endif
 			break;
 
 		case IS_RESOURCE: {
