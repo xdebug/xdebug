@@ -926,13 +926,23 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
-	zend_execute_data    *edata = EG(current_execute_data);
+	zend_execute_data    *edata;
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
 	zval                **param;
 	int                   i = 0;
 	char                 *aggr_key = NULL;
 	int                   aggr_key_len = 0;
+
+#if PHP_VERSION_ID < 50500
+	edata = EG(current_execute_data);
+#else
+	if (type == XDEBUG_EXTERNAL) {
+		edata = EG(current_execute_data)->prev_execute_data;
+	} else {
+		edata = EG(current_execute_data);
+	}
+#endif
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
 	tmp->var           = NULL;
