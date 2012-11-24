@@ -27,6 +27,10 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_exceptions.h"
+#if PHP_VERSION_ID >= 50500
+#include "zend_generators.h"
+#endif
+#include "zend_exceptions.h"
 #include "zend_vm.h"
 #include "zend_hash.h"
 #include "xdebug_hash.h"

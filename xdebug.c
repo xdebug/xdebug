@@ -1444,7 +1444,16 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	/* Store return value in the trace file */
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-			char* t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			char *t;
+#if PHP_VERSION_ID >= 50500
+			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+				t = xdebug_return_trace_stack_generator_retval(fse, (zend_generator *) EG(return_value_ptr_ptr) TSRMLS_CC);
+			} else {
+				t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			}
+#else
+			t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+#endif
 			fprintf(XG(trace_file), "%s", t);
 			fflush(XG(trace_file));
 			xdfree(t);

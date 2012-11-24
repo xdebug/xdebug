@@ -93,9 +93,22 @@ char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zva
 	return str.d;
 }
 
-char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC)
+static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_entry *i TSRMLS_DC)
 {
 	int        j = 0; /* Counter */
+
+	xdebug_str_addl(str, "                    ", 20, 0);
+	if (XG(show_mem_delta)) {
+		xdebug_str_addl(str, "        ", 8, 0);
+	}
+	for (j = 0; j < i->level; j++) {
+		xdebug_str_addl(str, "  ", 2, 0);
+	}
+	xdebug_str_addl(str, "   >=> ", 7, 0);
+}
+
+char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC)
+{
 	xdebug_str str = {0, 0, NULL};
 	char      *tmp_value;
 
@@ -103,14 +116,7 @@ char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 		return xdstrdup("");
 	}
 
-	xdebug_str_addl(&str, "                    ", 20, 0);
-	if (XG(show_mem_delta)) {
-		xdebug_str_addl(&str, "        ", 8, 0);
-	}
-	for (j = 0; j < i->level; j++) {
-		xdebug_str_addl(&str, "  ", 2, 0);
-	}
-	xdebug_str_addl(&str, "   >=> ", 7, 0);
+	xdebug_return_trace_stack_common(&str, i TSRMLS_CC);
 
 	tmp_value = xdebug_get_zval_value(retval, 0, NULL);
 	if (tmp_value) {
@@ -120,6 +126,38 @@ char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 
 	return str.d;
 }
+
+#if PHP_VERSION_ID >= 50500
+char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_generator* generator TSRMLS_DC)
+{
+	xdebug_str str = {0, 0, NULL};
+	char      *tmp_value = NULL;
+
+	if (XG(trace_format) != 0) {
+		return xdstrdup("");
+	}
+
+	/* Generator key */
+	tmp_value = xdebug_get_zval_value(generator->key, 0, NULL);
+	if (tmp_value) {
+		xdebug_return_trace_stack_common(&str, i TSRMLS_CC);
+
+		xdebug_str_addl(&str, "(", 1, 0);
+		xdebug_str_add(&str, tmp_value, 1);
+		xdebug_str_addl(&str, " => ", 4, 0);
+
+		tmp_value = xdebug_get_zval_value(generator->value, 0, NULL);
+		if (tmp_value) {
+			xdebug_str_add(&str, tmp_value, 1);
+		}
+		xdebug_str_addl(&str, ")", 1, 0);
+		xdebug_str_addl(&str, "\n", 2, 0);
+		return str.d;
+	} else {
+		return xdstrdup("");
+	}
+}
+#endif
 
 static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRMLS_DC)
 {
