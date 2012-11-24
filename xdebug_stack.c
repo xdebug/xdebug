@@ -927,6 +927,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
 	zend_execute_data    *edata;
+	zend_op             **opline_ptr = NULL;
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
 	zval                **param;
@@ -936,11 +937,16 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 #if PHP_VERSION_ID < 50500
 	edata = EG(current_execute_data);
+	opline_ptr = EG(opline_ptr);
 #else
 	if (type == XDEBUG_EXTERNAL) {
 		edata = EG(current_execute_data)->prev_execute_data;
+		if (edata) {
+			opline_ptr = &edata->opline;
+		}
 	} else {
 		edata = EG(current_execute_data);
+		opline_ptr = EG(opline_ptr);
 	}
 #endif
 
@@ -1007,8 +1013,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->function.type     = XFUNC_NORMAL;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
-		if (EG(opline_ptr)) {
-			cur_opcode = *EG(opline_ptr);
+		if (opline_ptr) {
+			cur_opcode = *opline_ptr;
 			tmp->lineno = cur_opcode->lineno;
 		} else {
 			tmp->lineno = 0;
