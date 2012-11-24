@@ -926,13 +926,29 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
-	zend_execute_data    *edata = EG(current_execute_data);
+	zend_execute_data    *edata;
+	zend_op             **opline_ptr = NULL;
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
 	zval                **param;
 	int                   i = 0;
 	char                 *aggr_key = NULL;
 	int                   aggr_key_len = 0;
+
+#if PHP_VERSION_ID < 50500
+	edata = EG(current_execute_data);
+	opline_ptr = EG(opline_ptr);
+#else
+	if (type == XDEBUG_EXTERNAL) {
+		edata = EG(current_execute_data)->prev_execute_data;
+		if (edata) {
+			opline_ptr = &edata->opline;
+		}
+	} else {
+		edata = EG(current_execute_data);
+		opline_ptr = EG(opline_ptr);
+	}
+#endif
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
 	tmp->var           = NULL;
@@ -953,7 +969,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (edata && edata->op_array) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(edata->op_array->filename);
-	} else if (edata && edata->prev_execute_data && XDEBUG_LLIST_TAIL(XG(stack))
+	} else if (
+		edata &&
+		edata->prev_execute_data &&
+		XDEBUG_LLIST_TAIL(XG(stack)) &&
+		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
 	) {
 		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 	}
@@ -963,8 +983,17 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
 	}
 	/* Call user function locations */
-	if (!tmp->filename && XDEBUG_LLIST_TAIL(XG(stack)) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) ) {
+	if (
+		!tmp->filename &&
+		XDEBUG_LLIST_TAIL(XG(stack)) &&
+		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) &&
+		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
+	) {
 		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
+	}
+
+	if (!tmp->filename) {
+		tmp->filename = xdstrdup("UNKNOWN?");
 	}
 #if HAVE_PHP_MEMORY_USAGE
 	tmp->prev_memory = XG(prev_memory);
@@ -984,8 +1013,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->function.type     = XFUNC_NORMAL;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
-		if (EG(opline_ptr)) {
-			cur_opcode = *EG(opline_ptr);
+		if (opline_ptr) {
+			cur_opcode = *opline_ptr;
 			tmp->lineno = cur_opcode->lineno;
 		} else {
 			tmp->lineno = 0;
