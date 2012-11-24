@@ -1,7 +1,7 @@
 --TEST--
 Test with internal callbacks
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "5.5", '<')) echo "skip < PHP 5.5 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "5.5", '>=')) echo "skip >= PHP 5.5 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -29,6 +29,9 @@ unlink($tf);
 --EXPECTF--
 array
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> array_map('strlen', array (0 => 'a', 1 => 'bb', 2 => 'ccc')) /%s/array_map.php:5
-%w%f %w%d     -> gettype(array (0 => 1, 1 => 2, 2 => 3)) /%s/array_map.php:7
-%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/array_map.php:9
+%w%f %w%d     -> array_map('strlen', array (0 => 'a', 1 => 'bb', 2 => 'ccc')) /%s/array_map-php55.php:5
+%w%f %w%d       -> strlen('a') /%s/array_map-php55.php:5
+%w%f %w%d       -> strlen('bb') /%s/array_map-php55.php:5
+%w%f %w%d       -> strlen('ccc') /%s/array_map-php55.php:5
+%w%f %w%d     -> gettype(array (0 => 1, 1 => 2, 2 => 3)) /%s/array_map-php55.php:7
+%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/array_map-php55.php:9

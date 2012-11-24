@@ -20,6 +20,9 @@
 #define XDEBUG_TRACING_H
 
 char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC);
+#if PHP_VERSION_ID >= 50500
+char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_generator* generator TSRMLS_DC);
+#endif
 char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno TSRMLS_DC);
 
 void xdebug_trace_function_begin(function_stack_entry *fse, int function_nr TSRMLS_DC);

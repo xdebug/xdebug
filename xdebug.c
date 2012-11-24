@@ -65,11 +65,19 @@
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 
+#if PHP_VERSION_ID < 50500
 void (*xdebug_old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
 
 void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
+#else
+void (*xdebug_old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
+void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
+
+void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+#endif
 
 /* error callback replacement functions */
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -561,8 +569,13 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_compile_file = zend_compile_file;
 	zend_compile_file = xdebug_compile_file;
 
+#if PHP_VERSION_ID < 50500
 	xdebug_old_execute = zend_execute;
 	zend_execute = xdebug_execute;
+#else
+	xdebug_old_execute_ex = zend_execute_ex;
+	zend_execute_ex = xdebug_execute_ex;
+#endif
 
 	xdebug_old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
@@ -700,7 +713,11 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 
 	/* Reset compile, execute and error callbacks */
 	zend_compile_file = old_compile_file;
+#if PHP_VERSION_ID < 50500
 	zend_execute = xdebug_old_execute;
+#else
+	zend_execute_ex = xdebug_old_execute_ex;
+#endif
 	zend_execute_internal = xdebug_old_execute_internal;
 	zend_error_cb = xdebug_old_error_cb;
 
@@ -1216,10 +1233,17 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	return 1;
 }
 
+#if PHP_VERSION_ID < 50500
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
-	zval                **dummy;
 	zend_execute_data    *edata = EG(current_execute_data);
+#else
+void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+{
+	zend_op_array        *op_array = execute_data->op_array;
+	zend_execute_data    *edata = execute_data->prev_execute_data;
+#endif
+	zval                **dummy;
 	function_stack_entry *fse, *xfse;
 	char                 *magic_cookie = NULL;
 	int                   do_return = (XG(do_trace) && XG(trace_file));
@@ -1230,14 +1254,22 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	/* If we're evaluating for the debugger's eval capability, just bail out */
 	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", op_array->filename) == 0) {
+#if PHP_VERSION_ID < 50500
 		xdebug_old_execute(op_array TSRMLS_CC);
+#else
+		xdebug_old_execute_ex(execute_data TSRMLS_CC);
+#endif
 		return;
 	}
 
 	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
 	   that it's just being called to check for breakpoints with conditions */
 	if (edata && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
+#if PHP_VERSION_ID < 50500
 		xdebug_old_execute(op_array TSRMLS_CC);
+#else
+		xdebug_old_execute_ex(execute_data TSRMLS_CC);
+#endif
 		return;
 	}
 
@@ -1347,7 +1379,11 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	xdebug_trace_function_begin(fse, function_nr TSRMLS_CC);
 
 	fse->symbol_table = EG(active_symbol_table);
+#if PHP_VERSION_ID < 50500
 	fse->execute_data = EG(current_execute_data);
+#else
+	fse->execute_data = EG(current_execute_data)->prev_execute_data;
+#endif
 	fse->This = EG(This);
 
 	if (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars)) {
@@ -1392,7 +1428,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		EG(return_value_ptr_ptr) = &return_val;
 		clear = 1;
 	}
+
+#if PHP_VERSION_ID < 50500
 	xdebug_old_execute(op_array TSRMLS_CC);
+#else
+	xdebug_old_execute_ex(execute_data TSRMLS_CC);
+#endif
 
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
@@ -1403,7 +1444,16 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	/* Store return value in the trace file */
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-			char* t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			char *t;
+#if PHP_VERSION_ID >= 50500
+			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+				t = xdebug_return_trace_stack_generator_retval(fse, (zend_generator *) EG(return_value_ptr_ptr) TSRMLS_CC);
+			} else {
+				t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			}
+#else
+			t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+#endif
 			fprintf(XG(trace_file), "%s", t);
 			fflush(XG(trace_file));
 			xdfree(t);
@@ -1443,7 +1493,11 @@ static int check_soap_call(function_stack_entry *fse)
 	return 0;
 }
 
+#if PHP_VERSION_ID < 50500
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC)
+#else
+void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC)
+#endif
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
@@ -1481,11 +1535,19 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
 	}
+#if PHP_VERSION_ID < 50500
 	if (xdebug_old_execute_internal) {
 		xdebug_old_execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 	} else {
 		execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 	}
+#else
+	if (xdebug_old_execute_internal) {
+		xdebug_old_execute_internal(current_execute_data, fci, return_value_used TSRMLS_CC);
+	} else {
+		execute_internal(current_execute_data, fci, return_value_used TSRMLS_CC);
+	}
+#endif
 
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
@@ -1499,7 +1561,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	xdebug_trace_function_end(fse, function_nr TSRMLS_CC);
 
 	/* Store return value in the trace file */
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file) && EG(opline_ptr)) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->XDEBUG_TYPE(result), &(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);
