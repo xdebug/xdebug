@@ -1552,7 +1552,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 	xdebug_trace_function_end(fse, function_nr TSRMLS_CC);
 
 	/* Store return value in the trace file */
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file) && EG(opline_ptr)) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->XDEBUG_TYPE(result), &(cur_opcode->result), current_execute_data->Ts TSRMLS_CC);

@@ -963,7 +963,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (edata && edata->op_array) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(edata->op_array->filename);
-	} else if (edata && edata->prev_execute_data && XDEBUG_LLIST_TAIL(XG(stack))
+	} else if (
+		edata &&
+		edata->prev_execute_data &&
+		XDEBUG_LLIST_TAIL(XG(stack)) &&
+		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
 	) {
 		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 	}
@@ -973,8 +977,17 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
 	}
 	/* Call user function locations */
-	if (!tmp->filename && XDEBUG_LLIST_TAIL(XG(stack)) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) ) {
+	if (
+		!tmp->filename &&
+		XDEBUG_LLIST_TAIL(XG(stack)) &&
+		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) &&
+		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
+	) {
 		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
+	}
+
+	if (!tmp->filename) {
+		tmp->filename = xdstrdup("UNKNOWN?");
 	}
 #if HAVE_PHP_MEMORY_USAGE
 	tmp->prev_memory = XG(prev_memory);
