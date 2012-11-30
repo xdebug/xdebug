@@ -65,16 +65,17 @@
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
 
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 void (*xdebug_old_execute)(zend_op_array *op_array TSRMLS_DC);
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC);
-
-void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
-void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
 #else
 void (*xdebug_old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
 void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
-
+#endif
+#if PHP_VERSION_ID < 50500
+void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
+void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC);
+#else
 void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 #endif
@@ -569,7 +570,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	old_compile_file = zend_compile_file;
 	zend_compile_file = xdebug_compile_file;
 
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 	xdebug_old_execute = zend_execute;
 	zend_execute = xdebug_execute;
 #else
@@ -713,7 +714,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 
 	/* Reset compile, execute and error callbacks */
 	zend_compile_file = old_compile_file;
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 	zend_execute = xdebug_old_execute;
 #else
 	zend_execute_ex = xdebug_old_execute_ex;
@@ -1233,7 +1234,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	return 1;
 }
 
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_execute_data    *edata = EG(current_execute_data);
@@ -1254,7 +1255,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	/* If we're evaluating for the debugger's eval capability, just bail out */
 	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", op_array->filename) == 0) {
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 		xdebug_old_execute(op_array TSRMLS_CC);
 #else
 		xdebug_old_execute_ex(execute_data TSRMLS_CC);
@@ -1265,7 +1266,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
 	   that it's just being called to check for breakpoints with conditions */
 	if (edata && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 		xdebug_old_execute(op_array TSRMLS_CC);
 #else
 		xdebug_old_execute_ex(execute_data TSRMLS_CC);
@@ -1379,7 +1380,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	xdebug_trace_function_begin(fse, function_nr TSRMLS_CC);
 
 	fse->symbol_table = EG(active_symbol_table);
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 	fse->execute_data = EG(current_execute_data);
 #else
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
@@ -1429,7 +1430,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		clear = 1;
 	}
 
-#if PHP_VERSION_ID < 50500
+#if PHP_VERSION_ID < 50600
 	xdebug_old_execute(op_array TSRMLS_CC);
 #else
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
@@ -1445,7 +1446,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 			char *t;
-#if PHP_VERSION_ID >= 50500
+#if PHP_VERSION_ID >= 50600
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 				t = xdebug_return_trace_stack_generator_retval(fse, (zend_generator *) EG(return_value_ptr_ptr) TSRMLS_CC);
 			} else {
