@@ -1005,6 +1005,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 #endif
 	tmp->time   = xdebug_get_utime();
 	tmp->lineno = 0;
+	tmp->prev   = 0;
 
 	xdebug_build_fname(&(tmp->function), zdata TSRMLS_CC);
 	if (!tmp->function.type) {
@@ -1153,24 +1154,24 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
-	if (XDEBUG_LLIST_TAIL(XG(stack))) {
-		function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		tmp->prev = prev;
-		if (XG(profiler_aggregate)) {
-			if (prev->aggr_entry->call_list) {
-				if (!zend_hash_exists(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1)) {
+	if (XG(stack)) {
+		if (XDEBUG_LLIST_TAIL(XG(stack))) {
+			function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+			tmp->prev = prev;
+			if (XG(profiler_aggregate)) {
+				if (prev->aggr_entry->call_list) {
+					if (!zend_hash_exists(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1)) {
+						zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
+					}
+				} else {
+					prev->aggr_entry->call_list = xdmalloc(sizeof(HashTable));
+					zend_hash_init_ex(prev->aggr_entry->call_list, 1, NULL, NULL, 1, 0);
 					zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
 				}
-			} else {
-				prev->aggr_entry->call_list = xdmalloc(sizeof(HashTable));
-				zend_hash_init_ex(prev->aggr_entry->call_list, 1, NULL, NULL, 1, 0);
-				zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
 			}
 		}
-	} else {
-		tmp->prev = 0;
+		xdebug_llist_insert_next(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 	}
-	xdebug_llist_insert_next(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
 
 	if (XG(profiler_aggregate)) {
 		xdfree(aggr_key);
