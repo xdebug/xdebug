@@ -1473,7 +1473,9 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	fse->symbol_table = NULL;
 	fse->execute_data = NULL;
-	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
+	if (XG(stack)) {
+		xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
+	}
 	XG(level)--;
 }
 
