@@ -54,7 +54,6 @@ typedef struct xdebug_var {
 #define XFUNC_NORMAL         0x01
 #define XFUNC_STATIC_MEMBER  0x02
 #define XFUNC_MEMBER         0x03
-#define XFUNC_NEW            0x04
 
 #define XFUNC_INCLUDES       0x10
 #define XFUNC_EVAL           0x10
