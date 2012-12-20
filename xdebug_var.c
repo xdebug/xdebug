@@ -1691,6 +1691,39 @@ char* xdebug_xmlize(char *string, int len, int *newlen)
 /*****************************************************************************
 ** Function name printing function
 */
+static char* xdebug_create_doc_link(xdebug_func f TSRMLS_DC)
+{
+	char *tmp_target, *p, *retval;
+
+	switch (f.type) {
+		case XFUNC_NORMAL: {
+			tmp_target = xdebug_sprintf("function.%s", f.function);
+			break;
+		}
+
+		case XFUNC_STATIC_MEMBER:
+		case XFUNC_MEMBER: {
+			if (strcmp(f.function, "__construct") == 0) {
+				tmp_target = xdebug_sprintf("%s.construct", f.class);
+			} else {
+				tmp_target = xdebug_sprintf("%s.%s", f.class, f.function);
+			}
+			break;
+		}
+	}
+
+	while ((p = strchr(tmp_target, '_')) != NULL) {
+		*p = '-';
+	}
+
+	retval = xdebug_sprintf("<a href='%s%s%s' target='_new'>%s</a>\n",
+		(PG(docref_root) && PG(docref_root)[0]) ? PG(docref_root) : "http://www.php.net/",
+		tmp_target, PG(docref_ext), f.function);
+
+	xdfree(tmp_target);
+
+	return retval;
+}
 
 char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 {
@@ -1698,57 +1731,27 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 
 	switch (f.type) {
 		case XFUNC_NORMAL: {
-			zend_function *zfunc;
-
-			if (PG(html_errors) && EG(function_table) && zend_hash_find(EG(function_table), f.function, strlen(f.function) + 1, (void**) &zfunc) == SUCCESS) {
-				if (html && zfunc->type == ZEND_INTERNAL_FUNCTION) {
-					return xdebug_sprintf("<a href='%s/%s%s' target='_new'>%s</a>\n",
-						(PG(docref_root) && PG(docref_root)[0]) ? PG(docref_root) : "http://www.php.net",
-						f.function, PG(docref_ext), f.function);
-				} else {
-					return xdstrdup(f.function);
-				}
+			if (PG(html_errors) && html && f.internal) {
+				return xdebug_create_doc_link(f TSRMLS_CC);
 			} else {
 				return xdstrdup(f.function);
 			}
 			break;
 		}
 
-		case XFUNC_NEW:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc(strlen(f.class) + 4 + 1);
-			sprintf(tmp, "new %s", f.class);
-			return tmp;
-			break;
-
 		case XFUNC_STATIC_MEMBER:
-			if (!f.class) {
-				f.class = "?";
+		case XFUNC_MEMBER: {
+			if (PG(html_errors) && html && f.internal) {
+				return xdebug_create_doc_link(f TSRMLS_CC);
+			} else {
+				return xdebug_sprintf("%s%s%s",
+					f.class ? f.class : "?",
+					f.type == XFUNC_STATIC_MEMBER ? "::" : "->",
+					f.function ? f.function : "?"
+				);
 			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc(strlen(f.function) + strlen(f.class) + 2 + 1);
-			sprintf(tmp, "%s::%s", f.class, f.function);
-			return tmp;
 			break;
-
-		case XFUNC_MEMBER:
-			if (!f.class) {
-				f.class = "?";
-			}
-			if (!f.function) {
-				f.function = "?";
-			}
-			tmp = xdmalloc(strlen(f.function) + strlen(f.class) + 2 + 1);
-			sprintf(tmp, "%s->%s", f.class, f.function);
-			return tmp;
-			break;
+		}	
 
 		case XFUNC_EVAL:
 			return xdstrdup("eval");
