@@ -337,7 +337,7 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 
 	if (strncmp(fileurl, "phar://", 7) == 0) {
 		/* ignore, phar is cool */
-		tmp = xdebug_sprintf("dbgp://%s", fileurl);
+		tmp = xdstrdup(fileurl);
 	} else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
 		/* convert relative paths */
 		cwd_state new_state;
