@@ -30,7 +30,7 @@ dbgpRun( $data, $commands );
 
 -> run -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///home/derick/dev/php/xdebug/tests/bug00627-symlink-target.inc" lineno="4"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file://%sbug00627-symlink-target.inc" lineno="4"></xdebug:message></response>
 
 -> context_get -i 4 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
