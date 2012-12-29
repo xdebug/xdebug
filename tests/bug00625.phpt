@@ -4,12 +4,16 @@ Test for bug #625: xdebug_get_headers() resets header list
 xdebug.default_enable=1
 --FILE--
 <?php
-header( 'Location: bar');
-header( 'HTTP/1.0 404 Not Found' );
+header('Content-type: text/plain');
+var_dump( xdebug_get_headers( ) );
 var_dump( xdebug_get_headers( ) );
 ?>
 --EXPECTF--
 array(1) {
   [0] =>
-  string(13) "Location: bar"
+  string(24) "Content-type: text/plain"
+}
+array(1) {
+  [0] =>
+  string(24) "Content-type: text/plain"
 }
