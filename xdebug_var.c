@@ -122,9 +122,13 @@ char* xdebug_error_type(int type)
 }
 
 /*************************************************************************************************************************************/
-#define T(offset) (*(temp_variable *)((char *) Ts + offset))
+#if defined(PHP_VERSION_ID) && PHP_VERSION_ID >= 50500
+#define T(offset) (*EX_TMP_VAR(zdata, offset))
+#else
+#define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
+#endif
 
-zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *node, temp_variable *Ts, int *is_var)
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *node, int *is_var)
 {
 	switch (node_type) {
 		case IS_CONST:

@@ -64,7 +64,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 char* xdebug_xmlize(char *string, int len, int *newlen);
 char* xdebug_error_type_simple(int type);
 char* xdebug_error_type(int type);
-zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *node, temp_variable *Ts, int *is_var);
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *node, int *is_var);
 char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options);
 char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 #define xdebug_get_zval_value_text(v,d,o) xdebug_get_zval_value_text_ansi(v,0,d,o TSRMLS_CC);
