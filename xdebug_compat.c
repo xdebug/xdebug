@@ -64,9 +64,13 @@ void *php_zend_memrchr(const void *s, int c, size_t n)
 }
 #endif
 
-#define T(offset) (*(temp_variable *)((char *) Ts + offset))
+#if PHP_VERSION_ID >= 50500
+# define T(offset) (*EX_TMP_VAR(zdata, offset))
+#else
+# define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
+#endif
 
-zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC)
+zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata TSRMLS_DC)
 {
 	switch (op_type & 0x0F) {
 		case IS_CONST:
