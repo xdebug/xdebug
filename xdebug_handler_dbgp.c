@@ -394,15 +394,20 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 				int i = 0;
 				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
 				zend_op_array *opa = XG(active_op_array);
-				zval ***CVs = XG(active_execute_data)->CVs;
+				zval **CV;
 
 				while (i < opa->last_var) {
 					if (opa->vars[i].hash_value == hash_value &&
 						opa->vars[i].name_len == element_length &&
 						strcmp(opa->vars[i].name, element) == 0)
 					{
-						if (CVs[i]) {
-							retval_p = *CVs[i];
+#if PHP_VERSION_ID >= 50500
+						CV = (*EX_CV_NUM(XG(active_execute_data), i));
+#else
+						CV = XG(active_execute_data)->CVs[i];
+#endif
+						if (CV) {
+							retval_p = *CV;
 							goto cleanup;
 						}
 					}
