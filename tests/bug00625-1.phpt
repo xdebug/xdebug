@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #625: xdebug_get_headers() resets header list
+Test for bug #625: xdebug_get_headers() resets header list (1)
 --INI--
 xdebug.default_enable=1
 --FILE--
