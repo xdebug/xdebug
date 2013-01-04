@@ -401,7 +401,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 						opa->vars[i].name_len == element_length &&
 						strcmp(opa->vars[i].name, element) == 0)
 					{
-#if defined(PHP_VERSION_ID) && PHP_VERSION_ID >= 50500
+#if PHP_VERSION_ID >= 50500
 						CV = (*EX_CV_NUM(XG(active_execute_data), i));
 #else
 						CV = XG(active_execute_data)->CVs[i];

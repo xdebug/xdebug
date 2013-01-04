@@ -122,10 +122,10 @@ char* xdebug_error_type(int type)
 }
 
 /*************************************************************************************************************************************/
-#if defined(PHP_VERSION_ID) && PHP_VERSION_ID >= 50500
-#define T(offset) (*EX_TMP_VAR(zdata, offset))
+#if PHP_VERSION_ID >= 50500
+# define T(offset) (*EX_TMP_VAR(zdata, offset))
 #else
-#define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
+# define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
 #endif
 
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *node, int *is_var)
