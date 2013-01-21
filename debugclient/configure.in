@@ -9,7 +9,7 @@ dnl
 dnl Start
 dnl
 AC_INIT([main.c])
-AC_PREREQ(2.60)
+AC_PREREQ(2.59)
 AC_PREFIX_DEFAULT([/usr/local])
 
 AM_INIT_AUTOMAKE(debugclient, $VERSION)
