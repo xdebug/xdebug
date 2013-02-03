@@ -511,6 +511,11 @@ void xdebug_init_debugger(TSRMLS_D)
 		}
 	} else {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");
+		if (errno == EACCES) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "   SELinux may be blocking connections.\n");
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "   Allow Apache to listen on your debug port.\n");
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "   $ semanage port -a -t http_port_t -p tcp %ld\n", XG(remote_port));
+		}
 	}
 	if (!XG(remote_enabled)) {
 		xdebug_close_log(TSRMLS_C);
