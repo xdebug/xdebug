@@ -194,7 +194,7 @@ Tue, May 08, 2012 - xdebug 2.2.0
   </required>
  </dependencies>
  <providesextension>xdebug</providesextension>
- <extsrcrelease />
+ <zendextsrcrelease />
  <changelog>
   <release>
    <version>
