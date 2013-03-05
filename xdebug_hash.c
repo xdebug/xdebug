@@ -274,7 +274,7 @@ void xdebug_hash_destroy(xdebug_hash *h)
 {
 	int i;
 
-    for (i = 0; i < h->slots; ++i) {
+	for (i = 0; i < h->slots; ++i) {
 		xdebug_llist_destroy(h->table[i], (void *) h);
 	}
 

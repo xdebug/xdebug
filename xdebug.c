@@ -301,19 +301,22 @@ PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
-	xg->stack                = NULL;
-	xg->level                = 0;
-	xg->do_trace             = 0;
-	xg->trace_file           = NULL;
-	xg->coverage_enable      = 0;
-	xg->previous_filename    = "";
-	xg->previous_file        = NULL;
-	xg->do_code_coverage     = 0;
-	xg->breakpoint_count     = 0;
-	xg->ide_key              = NULL;
-	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
-	xg->stdout_mode          = 0;
-	xg->in_at                = 0;
+	xg->stack                   = NULL;
+	xg->level                   = 0;
+	xg->do_trace                = 0;
+	xg->trace_file              = NULL;
+	xg->coverage_enable         = 0;
+	xg->previous_filename       = "";
+	xg->previous_file           = NULL;
+	xg->previous_funcname       = "";
+	xg->previous_func           = NULL;
+	xg->previous_file_func_only = NULL;
+	xg->do_code_coverage        = 0;
+	xg->breakpoint_count        = 0;
+	xg->ide_key                 = NULL;
+	xg->output_is_tty           = OUTPUT_NOT_CHECKED;
+	xg->stdout_mode             = 0;
+	xg->in_at                   = 0;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -686,6 +689,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_CC_FUNC_ONLY", XDEBUG_CC_OPTION_FUNC_ONLY, CONST_CS | CONST_PERSISTENT);
 
 	XG(breakpoint_count) = 0;
 	XG(output_is_tty) = OUTPUT_NOT_CHECKED;
@@ -839,6 +843,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(coverage_enable) = 0;
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+	XG(cc_func_only)  = xdebug_hash_alloc(32, xdebug_cc_func_only_file_dtor);
 	XG(stack)         = xdebug_llist_alloc(xdebug_stack_element_dtor);
 	XG(trace_file)    = NULL;
 	XG(tracefile_name) = NULL;

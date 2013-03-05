@@ -144,23 +144,23 @@ int xdebug_llist_remove_prev(xdebug_llist *l, xdebug_llist_element *e, void *use
 
 xdebug_llist_element *xdebug_llist_jump(xdebug_llist *l, int where, int pos)
 {
-    xdebug_llist_element *e=NULL;
-    int i;
+	xdebug_llist_element *e=NULL;
+	int i;
 
-    if (where == LIST_HEAD) {
-        e = XDEBUG_LLIST_HEAD(l);
-        for (i = 0; i < pos; ++i) {
-            e = XDEBUG_LLIST_NEXT(e);
-        }
-    }
-    else if (where == LIST_TAIL) {
-        e = XDEBUG_LLIST_TAIL(l);
-        for (i = 0; i < pos; ++i) {
-            e = XDEBUG_LLIST_PREV(e);
-        }
-    }
+	if (where == LIST_HEAD) {
+		e = XDEBUG_LLIST_HEAD(l);
+		for (i = 0; i < pos; ++i) {
+			e = XDEBUG_LLIST_NEXT(e);
+		}
+	}
+	else if (where == LIST_TAIL) {
+		e = XDEBUG_LLIST_TAIL(l);
+		for (i = 0; i < pos; ++i) {
+			e = XDEBUG_LLIST_PREV(e);
+		}
+	}
 
-    return e;
+	return e;
 }
 
 size_t xdebug_llist_count(xdebug_llist *l)

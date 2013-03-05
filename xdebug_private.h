@@ -84,6 +84,7 @@ typedef struct xdebug_var {
 
 #define XDEBUG_CC_OPTION_UNUSED          1
 #define XDEBUG_CC_OPTION_DEAD_CODE       2
+#define XDEBUG_CC_OPTION_FUNC_ONLY       4
 
 #define STATUS_STARTING   0
 #define STATUS_STOPPING   1

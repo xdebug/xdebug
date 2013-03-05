@@ -42,6 +42,22 @@ void xdebug_coverage_file_dtor(void *data)
 	xdfree(file);
 }
 
+void xdebug_cc_func_only_func_dtor(void *data)
+{
+	xdebug_cc_func_only_func *func = (xdebug_cc_func_only_func *) data;
+
+	xdfree(func);
+}
+
+void xdebug_cc_func_only_file_dtor(void *data)
+{
+	xdebug_cc_func_only_file *file = (xdebug_cc_func_only_file *) data;
+
+	xdebug_hash_destroy(file->funcnames);
+	xdfree(file->name);
+	xdfree(file);
+}
+
 #define XDEBUG_OPCODE_OVERRIDE(f) \
 	int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 	{ \
@@ -316,7 +332,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 			file = xdmalloc(sizeof(xdebug_coverage_file));
 			file->name = xdstrdup(filename);
 			file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
-		
+
 			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
 		}
 		XG(previous_filename) = file->name;
@@ -342,6 +358,46 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	} else {
 		line->count++;
 	}
+}
+
+void xdebug_log_function_call(char *filename, char* funcname)
+{
+	if (filename == NULL || funcname == NULL) {
+		return;
+	}
+
+	xdebug_cc_func_only_file *file;
+	xdebug_cc_func_only_func *func;
+
+	if (strcmp(XG(previous_filename), filename) == 0) {
+		file = XG(previous_file_func_only);
+	} else {
+		if (!xdebug_hash_find(XG(cc_func_only), filename, strlen(filename), (void*) &file)) {
+			file = xdmalloc(sizeof(xdebug_cc_func_only_file));
+			file->name = xdstrdup(filename);
+			file->funcnames = xdebug_hash_alloc(32, xdebug_cc_func_only_func_dtor);
+
+			xdebug_hash_add(XG(cc_func_only), filename, strlen(filename), file);
+		}
+		XG(previous_filename) = file->name;
+		XG(previous_file_func_only) = file;
+	}
+
+	if (strcmp(XG(previous_funcname), funcname) == 0) {
+		func = XG(previous_func);
+	} else {
+		if (!xdebug_hash_find(file->funcnames, funcname, strlen(funcname), (void*) &func)) {
+			func = xdmalloc(sizeof(xdebug_cc_func_only_func));
+			func->name = funcname;
+			func->count = 0;
+
+			xdebug_hash_add(file->funcnames, funcname, strlen(funcname), func);
+		}
+		XG(previous_funcname) = funcname;
+		XG(previous_func) = func;
+	}
+
+	func->count++;
 }
 
 static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC)
@@ -594,6 +650,7 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	}
 	XG(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
 	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
+	XG(code_coverage_func_only) = (options & XDEBUG_CC_OPTION_FUNC_ONLY);
 
 	if (!XG(extended_info)) {
 		php_error(E_WARNING, "You can only use code coverage when you leave the setting of 'xdebug.extended_info' to the default '1'.");
@@ -601,10 +658,11 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	} else if (!XG(code_coverage)) {
 		php_error(E_WARNING, "Code coverage needs to be enabled in php.ini by setting 'xdebug.coverage_enable' to '1'.");
 		RETURN_FALSE;
-	} else {
+	} else if (!XG(code_coverage_func_only)) {
 		XG(do_code_coverage) = 1;
 		RETURN_TRUE;
 	}
+	RETURN_TRUE;
 }
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
@@ -676,10 +734,38 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, lines);
 }
 
+static void add_func(void *ret, xdebug_hash_element *e)
+{
+	xdebug_cc_func_only_func *func   = (xdebug_cc_func_only_func*) e->ptr;
+	zval                     *retval = (zval*) ret;
+
+	add_assoc_long(ret, func->name, func->count);
+}
+
+static void add_file_func_only(void *ret, xdebug_hash_element *e)
+{
+	xdebug_cc_func_only_file *file = (xdebug_cc_func_only_file*) e->ptr;
+	zval                     *retval = (zval*) ret;
+	zval                     *funcs;
+	TSRMLS_FETCH();
+
+	MAKE_STD_ZVAL(funcs);
+	array_init(funcs);
+
+	xdebug_hash_apply(file->funcnames, (void*) funcs, add_func);
+
+	add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, funcs);
+}
+
 PHP_FUNCTION(xdebug_get_code_coverage)
 {
 	array_init(return_value);
-	xdebug_hash_apply(XG(code_coverage), (void *) return_value, add_file);
+
+	if (XG(code_coverage_func_only)) {
+		xdebug_hash_apply(XG(cc_func_only), (void*) return_value, add_file_func_only);
+	} else {
+		xdebug_hash_apply(XG(code_coverage), (void *) return_value, add_file);
+	}
 }
 
 PHP_FUNCTION(xdebug_get_function_count)

@@ -1126,6 +1126,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	if (XG(do_code_coverage)) {
 		xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
+	} else if (XG(code_coverage_func_only)) {
+		xdebug_log_function_call(op_array->filename ? op_array->filename : NULL, op_array->function_name ? op_array->function_name : NULL);
 	}
 
 	if (XG(profiler_aggregate)) {
