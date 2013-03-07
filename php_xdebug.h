@@ -20,7 +20,7 @@
 #define PHP_XDEBUG_H
 
 #define XDEBUG_NAME       "Xdebug"
-#define XDEBUG_VERSION    "2.3.0dev"
+#define XDEBUG_VERSION    "2.2.1"
 #define XDEBUG_AUTHOR     "Derick Rethans"
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2012 by Derick Rethans"
 #define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2012"
@@ -233,6 +233,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *remote_log;       /* Filename to log protocol communication to */
 	FILE         *remote_log_file;  /* File handler for protocol log */
 	long          remote_cookie_expire_time; /* Expire time for the remote-session cookie */
+	zend_bool     nosymlink_enable;
 
 	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
 	char         *ide_key_setting; /* Set through php.ini and friends */
