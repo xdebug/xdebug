@@ -45,7 +45,7 @@ void *php_zend_memrchr(const void *s, int c, size_t n);
 # define XDEBUG_PASS_TWO_DONE op_array->done_pass_two
 #endif
 
-zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, temp_variable *Ts TSRMLS_DC);
+zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *execute_data TSRMLS_DC);
 
 #include "ext/standard/base64.h"
 #define xdebug_base64_encode php_base64_encode
