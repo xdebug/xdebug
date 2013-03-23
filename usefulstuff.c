@@ -694,3 +694,31 @@ void xdebug_close_log(TSRMLS_D)
 		XG(remote_log_file) = NULL;
 	}
 }
+
+
+int xdebug_recursive_mkdir( const char *path )
+{
+	if ( ( access( path , F_OK ) == 0 ) )
+		return 0;
+
+	char *copy, *p;
+	p = copy = strdup(path);
+	mode_t mode = S_IRWXU|S_IRWXG|S_IROTH|S_IXOTH;
+
+	do {
+		p = strchr (p + 1, '/');
+		if (p)
+			*p = '\0';
+		if (access (copy, F_OK) == -1) {
+			if ( mkdir ( copy, mode ) == -1) {
+					return -1;
+			}
+		}
+
+		if (p)
+			*p = '/';
+	} while (p);
+
+	return 0;
+}
+
