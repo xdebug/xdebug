@@ -38,7 +38,7 @@ object(DOMDocument)#1 (34) {
   ["strictErrorChecking"]=>
   bool(true)
   ["documentURI"]=>
-  string(36) "%s"
+  string(%d) "%s"
   ["config"]=>
   NULL
   ["formatOutput"]=>
