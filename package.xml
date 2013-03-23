@@ -147,7 +147,7 @@ Xdebug also provides:
   </required>
  </dependencies>
  <providesextension>xdebug</providesextension>
- <extsrcrelease />
+ <zendextsrcrelease />
  <changelog>
   <release>
    <version>
