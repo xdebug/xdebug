@@ -2039,9 +2039,9 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						brk->disabled, lineno, brk->lineno, brk->file, file, file_len, brk->file_len);
 #endif
 #if PHP_WIN32
-				if (!brk->disabled && lineno == brk->lineno && strncasecmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && strncasecmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
 #else
-				if (!brk->disabled && lineno == brk->lineno && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
 #endif
 					break_ok = 1; /* Breaking is allowed by default */
 

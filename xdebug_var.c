@@ -948,7 +948,15 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp XDEB
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
+#if ZTS
+	if (ce->type == 1) {
+		item->zv   = CG(static_members_table)[(zend_intptr_t) ce->static_members_table][zpp->offset];
+	} else {
+		item->zv   = ce->static_members_table[zpp->offset];
+	}
+#else
 	item->zv   = ce->static_members_table[zpp->offset];
+#endif
 	item->name = (char *) zpp->name;
 	item->name_len = zpp->name_length;
 
@@ -1269,7 +1277,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 #if PHP_VERSION_ID >= 50400
 			/* Adding static properties */
-			if (ce->static_members_table) {
+			if (&ce->properties_info) {
 				zend_hash_apply_with_arguments(&ce->properties_info XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_zend_prop_to_merged_hash, 3, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
 			}
 
