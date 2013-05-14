@@ -948,7 +948,15 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp XDEB
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
+#if ZTS
+	if (ce->type == 1) {
+		item->zv   = CG(static_members_table)[(zend_intptr_t) ce->static_members_table][zpp->offset];
+	} else {
+		item->zv   = ce->static_members_table[zpp->offset];
+	}
+#else
 	item->zv   = ce->static_members_table[zpp->offset];
+#endif
 	item->name = (char *) zpp->name;
 	item->name_len = zpp->name_length;
 
