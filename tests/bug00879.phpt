@@ -28,7 +28,9 @@ include $file;
 
 new WithTrait;
 
-var_dump(xdebug_get_code_coverage());
+$cc = xdebug_get_code_coverage();
+ksort($cc);
+var_dump($cc);
 ?>
 --EXPECTF--
 array(2) {
