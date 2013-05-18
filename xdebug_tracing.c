@@ -437,7 +437,12 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 			/* Invalid or empty xdebug.trace_output_name */
 			return NULL;
 		}
-		filename = xdebug_sprintf("%s/%s", XG(trace_output_dir), fname);
+		if (IS_SLASH(XG(trace_output_dir)[strlen(XG(trace_output_dir)) - 1])) {
+			filename = xdebug_sprintf("%s%s", XG(trace_output_dir), fname);
+		} else {
+			filename = xdebug_sprintf("%s%c%s", XG(trace_output_dir), DEFAULT_SLASH, fname);
+		}
+		xdfree(fname);
 	}
 	if (options & XDEBUG_TRACE_OPTION_APPEND) {
 		XG(trace_file) = xdebug_fopen(filename, "a", "xt", (char**) &tmp_fname);
