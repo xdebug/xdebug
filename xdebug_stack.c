@@ -636,7 +636,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception" TSRMLS_CC);
 				xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
 				xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
-				xdebug_str_add(&str, XG(last_exception_trace), 0);
+				if (XG(last_exception_trace)) {
+					xdebug_str_add(&str, XG(last_exception_trace), 0);
+				}
 				xdebug_append_error_footer(&str, PG(html_errors) TSRMLS_CC);
 				php_output_error(str.d TSRMLS_CC);
 
