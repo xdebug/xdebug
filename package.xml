@@ -32,11 +32,12 @@ Xdebug also provides:
   <email>derick@xdebug.org</email>
   <active>yes</active>
  </lead>
- <date>2013-03-23</date>
- <time>12:00:00</time>
+
+ <date>2013-05-22</date>
+ <time>08:54:00</time>
  <version>
-  <release>2.2.2</release>
-  <api>2.2.2</api>
+  <release>2.2.3</release>
+  <api>2.2.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -44,22 +45,21 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sat, Mar 23, 2013 - xdebug 2.2.2
+Tue, May 21, 2013 - xdebug 2.2.3
 
 + Added features:
 
-	- Support for PHP 5.5.
+ - Support for PHP 5.5.
 
 = Fixed bugs:
 
-	- Fixed bug #598: Use HTTP_X_FORWARDED_FOR to determine remote debugger.
-	- Fixed bug #625: xdebug_get_headers() -> Headers are reset unexpectedly.
-	- Fixed bug #811: PHP Documentation Link.
-	- Fixed bug #818: Require a php script in the PHP_RINIT causes Xdebug to crash.
-	- Fixed bug #903: xdebug_get_headers() returns replaced headers.
-	- Fixed bug #905: Support PHP 5.5 and generators.
-	- Fixed bug #920: AM_CONFIG_HEADER is depreciated. 
+ - Fixed bug #923: Xdebug + Netbeans + ext/MongoDB crash on MongoCursor instance
+ - Fixed bug #929: Directory name management in xdebug.profiler_output_dir
+ - Fixed bug #931: xdebug_str_add does not check for NULL str before calling strlen on it
+ - Fixed bug #935: Document the return value from xdebug_get_code_coverage()
+ - Fixed bug #947: Newlines converted when html_errors = 0
  </notes>
+
  <contents>
   <dir name="/">
    <dir name="contrib">
@@ -155,6 +155,38 @@ Sat, Mar 23, 2013 - xdebug 2.2.2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2013-03-23</date>
+   <time>12:00:00</time>
+   <version>
+    <release>2.2.2</release>
+    <api>2.2.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Mar 23, 2013 - xdebug 2.2.2
+
++ Added features:
+
+	- Support for PHP 5.5.
+
+= Fixed bugs:
+
+	- Fixed bug #598: Use HTTP_X_FORWARDED_FOR to determine remote debugger.
+	- Fixed bug #625: xdebug_get_headers() -> Headers are reset unexpectedly.
+	- Fixed bug #811: PHP Documentation Link.
+	- Fixed bug #818: Require a php script in the PHP_RINIT causes Xdebug to crash.
+	- Fixed bug #903: xdebug_get_headers() returns replaced headers.
+	- Fixed bug #905: Support PHP 5.5 and generators.
+	- Fixed bug #920: AM_CONFIG_HEADER is depreciated. 
+   </notes>
+  </release>
+
   <release>
    <version>
     <release>2.2.1</release>
@@ -1776,3 +1808,6 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
   </release>
  </changelog>
 </package>
+<!-- 
+vim:et:ts=1:sw=1 
+--> 
