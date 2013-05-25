@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #923: Debugging PHP with MongoDB using Cursor, causes debug session termination
---EXTENSIONS--
-mongo
 --SKIPIF--
 <?php if (!extension_loaded('mongo')) echo "skip The MongoDB extension needs to be installed\n"; ?>
 --FILE--
