@@ -894,6 +894,31 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 					edata->function_state.function->op_array.line_start,
 					edata->function_state.function->op_array.line_end
 				);
+			} else if (strncmp(edata->function_state.function->common.function_name, "call_user_func", 14) == 0) {
+				char *fname = NULL;
+
+				if (edata->prev_execute_data) {
+					fname = edata->prev_execute_data->function_state.function->op_array.filename;
+				}
+
+				if (
+					!fname &&
+					XDEBUG_LLIST_TAIL(XG(stack)) &&
+					XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) &&
+					((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
+				) {
+					fname = ((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename;
+				}
+
+				if (!fname) {
+					fname = "whoops";
+				}
+				tmp->function = xdebug_sprintf(
+					"%s:{%s:%d}",
+					edata->function_state.function->common.function_name,
+					fname,
+					edata->opline->lineno
+				);
 			} else {
 				tmp->function = xdstrdup(edata->function_state.function->common.function_name);
 			}
