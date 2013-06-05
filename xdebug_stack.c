@@ -470,7 +470,19 @@ static char *get_printable_stack(int html, int error_type, char *buffer, const c
 	return str.d;
 }
 
+#ifdef __VA_ARGS__
 #define XDEBUG_LOG_PRINT(fs, string, ...) if (fs) { fprintf(fs, string, ## __VA_ARGS__); }
+#else
+static void XDEBUG_LOG_PRINT(FILE * stream, const char * format, ...)
+{
+	if(stream) {
+		va_list  arguments;
+		va_start(arguments, format);
+		vfprintf(stream, format, arguments);
+		va_end(arguments);
+	}
+}
+#endif
 
 void xdebug_init_debugger(TSRMLS_D)
 {
