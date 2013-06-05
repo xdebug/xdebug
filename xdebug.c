@@ -96,8 +96,8 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
 
-int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
-int (*xdebug_orig_ub_write)(const char *string, unsigned int len TSRMLS_DC);
+static int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
+static int (*xdebug_orig_ub_write)(const char *string, unsigned int len TSRMLS_DC);
 
 static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC);
 
@@ -309,6 +309,7 @@ PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
+	xg->headers              = NULL;
 	xg->stack                = NULL;
 	xg->level                = 0;
 	xg->do_trace             = 0;
@@ -334,19 +335,6 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 
 	/* Get reserved offset */
 	xg->reserved_offset = zend_xdebug_global_offset;
-
-	/* Override header generation in SAPI */
-	if (sapi_module.header_handler != xdebug_header_handler) {
-		xdebug_orig_header_handler = sapi_module.header_handler;
-		sapi_module.header_handler = xdebug_header_handler;
-	}
-	xg->headers = NULL;
-
-	/* Capturing output */
-	if (sapi_module.ub_write != xdebug_ub_write) {
-		xdebug_orig_ub_write = sapi_module.ub_write;
-		sapi_module.ub_write = xdebug_ub_write;
-	}
 }
 
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -715,18 +703,6 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	XG(breakpoint_count) = 0;
 	XG(output_is_tty) = OUTPUT_NOT_CHECKED;
-
-#ifndef ZTS
-	if (sapi_module.header_handler != xdebug_header_handler) {
-		xdebug_orig_header_handler = sapi_module.header_handler;
-		sapi_module.header_handler = xdebug_header_handler;
-	}
-
-	if (sapi_module.ub_write != xdebug_ub_write) {
-		xdebug_orig_ub_write = sapi_module.ub_write;
-		sapi_module.ub_write = xdebug_ub_write;
-	}
-#endif
 
 	return SUCCESS;
 }
@@ -2118,9 +2094,37 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	}
 }
 
+static void xdebug_hook_output_handlers()
+{
+	/* Override header handler in SAPI */
+	if (xdebug_orig_header_handler == NULL) {
+		xdebug_orig_header_handler = sapi_module.header_handler;
+		sapi_module.header_handler = xdebug_header_handler;
+	}
+
+	/* Override output handler for capturing output */
+	if (xdebug_orig_ub_write == NULL) {
+		xdebug_orig_ub_write = sapi_module.ub_write;
+		sapi_module.ub_write = xdebug_ub_write;
+	}
+}
+
+static void xdebug_unhook_output_handlers()
+{
+	/* Restore original header handler in SAPI */
+	sapi_module.header_handler = xdebug_orig_header_handler;
+	xdebug_orig_header_handler = NULL;
+
+	/* Restore original output handler */
+	sapi_module.ub_write = xdebug_orig_ub_write;
+	xdebug_orig_ub_write = NULL;
+}
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
+	/* Hook output handlers (header and output writer) */
+	xdebug_hook_output_handlers();
+
 	zend_xdebug_initialised = 1;
 
 	return zend_startup_module(&xdebug_module_entry);
@@ -2128,7 +2132,8 @@ ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 {
-	/* Do nothing. */
+	/* Remove our hooks to output handlers (header and output writer) */
+	xdebug_unhook_output_handlers();
 }
 
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
