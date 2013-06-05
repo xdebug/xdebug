@@ -2242,7 +2242,7 @@ static int xdebug_zend_startup_wrapper(zend_extension *ext)
 						+ strlen(ex->author);
 
 	new_info = (char *) malloc(new_info_length+1);
-	sprintf(new_info, "%s\n	with %s v%s, %s, by %s", ext->author, ex->name, ex->version, ex->copyright, ex->author);
+	sprintf(new_info, "%s\n    with %s v%s, %s, by %s", ext->author, ex->name, ex->version, ex->copyright, ex->author);
 	ext->author = new_info;
 
 	/* Stealth Mode */
