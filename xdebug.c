@@ -61,6 +61,31 @@
 #include "xdebug_tracing.h"
 #include "usefulstuff.h"
 
+/** Position of last loaded zend extension */
+static zend_llist_position lp = NULL;
+
+/** Last zend_extension pointer - Set in PHP_MINIT_FUNCTION(xdebug) */
+static zend_extension *ze = NULL;
+
+/** Xdebug zend startup declaration and pointer to original startup */
+static int xdebug_zend_startup(zend_extension *extension);
+static int (*orig_zend_startup)(zend_extension *extension) = NULL;
+
+/** Xdebug zend shutdown declaration and pointer to original shutdown */
+static void xdebug_zend_shutdown(zend_extension *extension);
+static void (*orig_zend_shutdown)(zend_extension *extension) = NULL;
+
+/** Xdebug zend statement handler declaration and pointer to original statement handler */
+static void xdebug_statement_call(zend_op_array *op_array);
+static void (*orig_statement_call)(zend_op_array *op_array) = NULL;
+
+/** Xdebug zend op array ctor declaration and pointer to original op array ctor */
+static void xdebug_init_oparray(zend_op_array *op_array);
+static void (*orig_init_oparray)(zend_op_array *op_array) = NULL;
+
+/** Xdebug zend startup wrapper */
+static int xdebug_zend_startup_wrapper(zend_extension *ext);
+
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
@@ -90,7 +115,6 @@ static int xdebug_ub_write(const char *string, unsigned int lenght TSRMLS_DC);
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 
-int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
 
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
@@ -146,6 +170,7 @@ zend_function_entry xdebug_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+/** Xdebug extension (PHP module) entry */
 zend_module_entry xdebug_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"xdebug",
@@ -163,6 +188,26 @@ zend_module_entry xdebug_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
+/** Xdebug zend extension entry */
+static zend_extension xdebug_zend_extension_entry = {
+	XDEBUG_NAME,
+	XDEBUG_VERSION,
+	XDEBUG_AUTHOR,
+	XDEBUG_URL_FAQ,
+	XDEBUG_COPYRIGHT_SHORT,
+	xdebug_zend_startup,
+	xdebug_zend_shutdown,
+	NULL,           /* activate_func_t */
+	NULL,           /* deactivate_func_t */
+	NULL,           /* message_handler_func_t */
+	NULL,           /* op_array_handler_func_t */
+	xdebug_statement_call, /* statement_handler_func_t */
+	NULL,           /* fcall_begin_handler_func_t */
+	NULL,           /* fcall_end_handler_func_t */
+	xdebug_init_oparray,   /* op_array_ctor_func_t */
+	NULL,           /* op_array_dtor_func_t */
+	STANDARD_ZEND_EXTENSION_PROPERTIES
+};
 
 ZEND_DECLARE_MODULE_GLOBALS(xdebug)
 
@@ -327,12 +372,6 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 
 	/* Get reserved offset */
 	xg->reserved_offset = zend_xdebug_global_offset;
-
-	/* Capturing output */
-	if (sapi_module.ub_write != xdebug_ub_write) {
-		xdebug_orig_ub_write = sapi_module.ub_write;
-		sapi_module.ub_write = xdebug_ub_write;
-	}
 }
 
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -556,6 +595,22 @@ PHP_MINIT_FUNCTION(xdebug)
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
+	/* Load invisible to other zend extensions */
+	if (zend_llist_count(&zend_extensions)==0)
+	{
+		zend_extension extension;
+		extension = xdebug_zend_extension_entry;
+		extension.handle = NULL;
+		zend_llist_add_element(&zend_extensions, &extension);
+		ze = NULL;
+	}
+	else
+	{
+		ze = (zend_extension *)zend_llist_get_last_ex(&zend_extensions, &lp);
+		orig_zend_startup = ze->startup;
+		ze->startup = xdebug_zend_startup_wrapper;
+	}
+
 	/* initialize aggregate call information hash */
 	zend_hash_init_ex(&XG(aggr_calls), 50, NULL, (dtor_func_t) xdebug_profile_aggr_call_entry_dtor, 1, 0);
 
@@ -669,10 +724,6 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
 	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
-
-	if (zend_xdebug_initialised == 0) {
-		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
-	}
 
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_APPEND", XDEBUG_TRACE_OPTION_APPEND, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_COMPUTERIZED", XDEBUG_TRACE_OPTION_COMPUTERIZED, CONST_CS | CONST_PERSISTENT);
@@ -1017,12 +1068,6 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_row(2, "IDE Key", XG(ide_key));
 	php_info_print_table_end();
 	
-	if (zend_xdebug_initialised == 0) {
-		php_info_print_table_start();
-		php_info_print_table_header(1, "XDEBUG NOT LOADED AS ZEND EXTENSION");
-		php_info_print_table_end();
-	}
-
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Supported protocols", "Revision");
 	while (ptr->name) {
@@ -1935,7 +1980,7 @@ PHP_FUNCTION(xdebug_time_index)
 	RETURN_DOUBLE(xdebug_get_utime() - XG(start_time));
 }
 
-ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
+static void xdebug_statement_call(zend_op_array *op_array)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk;
@@ -2087,51 +2132,136 @@ static void xdebug_unhook_output_handlers()
 	xdebug_orig_ub_write = NULL;
 }
 
-ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
+/** Xdebug zend extension startup */
+static int xdebug_zend_startup(zend_extension *extension)
 {
+	zend_module_entry *module_entry_ptr;
+	int resid;
+
+	if (zend_hash_find(&module_registry, "xdebug", sizeof("xdebug"), (void **)&module_entry_ptr)==SUCCESS)
+	{
+		if (extension)
+		{
+			extension->handle = module_entry_ptr->handle;
+		}
+		else
+		{
+			extension = &xdebug_zend_extension_entry;
+		}
+		module_entry_ptr->handle = NULL;
+	}
+	else
+	{
+		return FAILURE;
+	}
+
+	resid = zend_get_resource_handle(extension);
+	xdebug_zend_extension_entry.resource_number = resid;
+
 	/* Hook output handlers (header and output writer) */
 	xdebug_hook_output_handlers();
 
-	zend_xdebug_initialised = 1;
-
-	return zend_startup_module(&xdebug_module_entry);
+	return SUCCESS;
 }
 
-ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
+/** Xdebug zend extension shutdown */
+static void xdebug_zend_shutdown(zend_extension *extension)
 {
 	/* Remove our hooks to output handlers (header and output writer) */
 	xdebug_unhook_output_handlers();
+
+	if (ze != NULL)
+	{
+		ze->startup = orig_zend_startup;
+		ze->shutdown = orig_zend_shutdown;
+		ze->statement_handler = orig_statement_call;
+		ze->op_array_ctor = orig_init_oparray;
+	}
 }
 
-ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
+/** Xdebug zend extension op array ctor */
+static void xdebug_init_oparray(zend_op_array *op_array)
 {
 	TSRMLS_FETCH();
 	op_array->reserved[XG(reserved_offset)] = 0;
 }
 
-#ifndef ZEND_EXT_API
-#define ZEND_EXT_API    ZEND_DLEXPORT
-#endif
-ZEND_EXTENSION();
+/** Stealth extension statement handler */
+static void stealth_statement_call(zend_op_array *op_array)
+{
+	if (orig_statement_call != NULL)
+	{
+		orig_statement_call(op_array);
+	}
+	xdebug_statement_call(op_array);
+}
 
-ZEND_DLEXPORT zend_extension zend_extension_entry = {
-	XDEBUG_NAME,
-	XDEBUG_VERSION,
-	XDEBUG_AUTHOR,
-	XDEBUG_URL_FAQ,
-	XDEBUG_COPYRIGHT_SHORT,
-	xdebug_zend_startup,
-	xdebug_zend_shutdown,
-	NULL,           /* activate_func_t */
-	NULL,           /* deactivate_func_t */
-	NULL,           /* message_handler_func_t */
-	NULL,           /* op_array_handler_func_t */
-	xdebug_statement_call, /* statement_handler_func_t */
-	NULL,           /* fcall_begin_handler_func_t */
-	NULL,           /* fcall_end_handler_func_t */
-	xdebug_init_oparray,   /* op_array_ctor_func_t */
-	NULL,           /* op_array_dtor_func_t */
-	STANDARD_ZEND_EXTENSION_PROPERTIES
-};
+/** Stealth extension startup */
+static int stealth_zend_startup(zend_extension *extension)
+{
+	int r = (orig_zend_startup == NULL) ? SUCCESS : orig_zend_startup(extension);
+	xdebug_zend_startup(extension);
+	return r;
+}
+
+/** Stealth extension shutdown */
+static void stealth_zend_shutdown(zend_extension *extension)
+{
+	if (orig_zend_shutdown != NULL)
+	{
+		orig_zend_shutdown(extension);
+	}
+	xdebug_zend_shutdown(extension);
+}
+
+/** Stealth extension op array ctor */
+static void stealth_init_oparray(zend_op_array *op_array)
+{
+	if (orig_init_oparray != NULL)
+	{
+		orig_init_oparray(op_array);
+	}
+	xdebug_init_oparray(op_array);
+}
+
+/** Zend extension startup wrapper */
+static int xdebug_zend_startup_wrapper(zend_extension *ext)
+{
+	int res;
+	zend_extension *ex = &xdebug_zend_extension_entry;
+	char *new_info;
+	int new_info_length;
+	TSRMLS_FETCH();
+
+	/* Ugly but working hack */
+	new_info_length = sizeof("%s\n    with %s v%s, %s, by %s\n")
+						+ strlen(ext->author)
+						+ strlen(ex->name)
+						+ strlen(ex->version)
+						+ strlen(ex->copyright)
+						+ strlen(ex->author);
+
+	new_info = (char *) malloc(new_info_length+1);
+	sprintf(new_info, "%s\n	with %s v%s, %s, by %s", ext->author, ex->name, ex->version, ex->copyright, ex->author);
+	ext->author = new_info;
+
+	/* Stealth Mode */
+#if 0
+	orig_zend_startup = ze->startup; /* Already done, see PHP_MINIT_FUNCTION(xdebug) */
+#endif
+	orig_zend_shutdown = ze->shutdown;
+	orig_statement_call = ze->statement_handler;
+	orig_init_oparray = ze->op_array_ctor;
+
+	ze->startup = stealth_zend_startup;
+	ze->shutdown = stealth_zend_shutdown;
+	ze->statement_handler = stealth_statement_call;
+	ze->op_array_ctor = stealth_init_oparray;
+
+	res = orig_zend_startup(ext);
+	xdebug_zend_startup(NULL);
+
+	return res;
+}
 
 #endif
