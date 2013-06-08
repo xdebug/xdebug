@@ -1609,7 +1609,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		if (XG(do_code_coverage) && XG(code_coverage_unused && XDEBUG_PASS_TWO_DONE)) {
+		if (XG(do_code_coverage) && XG(code_coverage_unused) && XDEBUG_PASS_TWO_DONE) {
 			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
 		}
 	}
