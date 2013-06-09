@@ -251,7 +251,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",  "",                   PHP_INI_ALL,    OnUpdateString, file_link_format,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "100",                PHP_INI_ALL,    OnUpdateLong,   max_nesting_level, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.overload_var_dump", "1", PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   overload_var_dump, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.overload_var_dump", "1",                PHP_INI_ALL,    OnUpdateBool,   overload_var_dump, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_exception_trace",  "0",            PHP_INI_ALL,    OnUpdateBool,   show_ex_trace,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_local_vars", "0",                  PHP_INI_ALL,    OnUpdateBool,   show_local_vars,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_mem_delta",  "0",                  PHP_INI_ALL,    OnUpdateBool,   show_mem_delta,    zend_xdebug_globals, xdebug_globals)
@@ -924,13 +924,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(start_time) = xdebug_get_utime();
 
 	/* Override var_dump with our own function */
-	XG(var_dump_overloaded) = 0;
-	if (XG(overload_var_dump)) {
-		zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
-		XG(orig_var_dump_func) = orig->internal_function.handler;
-		orig->internal_function.handler = zif_xdebug_var_dump;
-		XG(var_dump_overloaded) = 1;
-	}
+	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
+	XG(orig_var_dump_func) = orig->internal_function.handler;
+	orig->internal_function.handler = zif_xdebug_var_dump;
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
 	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
@@ -1002,10 +998,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	XG(collected_errors) = NULL;
 
 	/* Reset var_dump and set_time_limit to the original function */
-	if (XG(var_dump_overloaded)) {
-		zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
-		orig->internal_function.handler = XG(orig_var_dump_func);
-	}
+	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
+	orig->internal_function.handler = XG(orig_var_dump_func);
 	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
 	orig->internal_function.handler = XG(orig_set_time_limit_func);
 
@@ -1695,6 +1689,11 @@ PHP_FUNCTION(xdebug_var_dump)
 	int     i, len;
 	char   *val;
 	
+	if (!XG(overload_var_dump)) {
+		XG(orig_var_dump_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		return;
+	}
+
 	argc = ZEND_NUM_ARGS();
 	
 	args = (zval ***)emalloc(argc * sizeof(zval **));
