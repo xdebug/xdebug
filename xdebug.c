@@ -596,16 +596,13 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_INI_ENTRIES();
 
 	/* Load invisible to other zend extensions */
-	if (zend_llist_count(&zend_extensions)==0)
-	{
+	if (zend_llist_count(&zend_extensions)==0) {
 		zend_extension extension;
 		extension = xdebug_zend_extension_entry;
 		extension.handle = NULL;
 		zend_llist_add_element(&zend_extensions, &extension);
 		ze = NULL;
-	}
-	else
-	{
+	} else {
 		ze = (zend_extension *)zend_llist_get_last_ex(&zend_extensions, &lp);
 		orig_zend_startup = ze->startup;
 		ze->startup = xdebug_zend_startup_wrapper;
@@ -2138,20 +2135,14 @@ static int xdebug_zend_startup(zend_extension *extension)
 	zend_module_entry *module_entry_ptr;
 	int resid;
 
-	if (zend_hash_find(&module_registry, "xdebug", sizeof("xdebug"), (void **)&module_entry_ptr)==SUCCESS)
-	{
-		if (extension)
-		{
+	if (zend_hash_find(&module_registry, "xdebug", sizeof("xdebug"), (void **)&module_entry_ptr)==SUCCESS) {
+		if (extension) {
 			extension->handle = module_entry_ptr->handle;
-		}
-		else
-		{
+		} else {
 			extension = &xdebug_zend_extension_entry;
 		}
 		module_entry_ptr->handle = NULL;
-	}
-	else
-	{
+	} else {
 		return FAILURE;
 	}
 
@@ -2170,8 +2161,7 @@ static void xdebug_zend_shutdown(zend_extension *extension)
 	/* Remove our hooks to output handlers (header and output writer) */
 	xdebug_unhook_output_handlers();
 
-	if (ze != NULL)
-	{
+	if (ze != NULL) {
 		ze->startup = orig_zend_startup;
 		ze->shutdown = orig_zend_shutdown;
 		ze->statement_handler = orig_statement_call;
@@ -2189,8 +2179,7 @@ static void xdebug_init_oparray(zend_op_array *op_array)
 /** Stealth extension statement handler */
 static void stealth_statement_call(zend_op_array *op_array)
 {
-	if (orig_statement_call != NULL)
-	{
+	if (orig_statement_call != NULL) {
 		orig_statement_call(op_array);
 	}
 	xdebug_statement_call(op_array);
@@ -2207,8 +2196,7 @@ static int stealth_zend_startup(zend_extension *extension)
 /** Stealth extension shutdown */
 static void stealth_zend_shutdown(zend_extension *extension)
 {
-	if (orig_zend_shutdown != NULL)
-	{
+	if (orig_zend_shutdown != NULL) {
 		orig_zend_shutdown(extension);
 	}
 	xdebug_zend_shutdown(extension);
@@ -2217,8 +2205,7 @@ static void stealth_zend_shutdown(zend_extension *extension)
 /** Stealth extension op array ctor */
 static void stealth_init_oparray(zend_op_array *op_array)
 {
-	if (orig_init_oparray != NULL)
-	{
+	if (orig_init_oparray != NULL) {
 		orig_init_oparray(op_array);
 	}
 	xdebug_init_oparray(op_array);
