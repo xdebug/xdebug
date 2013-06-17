@@ -362,12 +362,12 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 
 void xdebug_log_function_call(char *filename, char* funcname)
 {
+	xdebug_cc_func_only_file *file;
+	xdebug_cc_func_only_func *func;
+
 	if (filename == NULL || funcname == NULL) {
 		return;
 	}
-
-	xdebug_cc_func_only_file *file;
-	xdebug_cc_func_only_func *func;
 
 	if (strcmp(XG(previous_filename), filename) == 0) {
 		file = XG(previous_file_func_only);
