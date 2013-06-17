@@ -983,13 +983,16 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG(ide_key) = NULL;
 	}
 
-	XG(level)            = 0;
-	XG(do_trace)         = 0;
-	XG(coverage_enable)  = 0;
-	XG(do_code_coverage) = 0;
+	XG(level)                   = 0;
+	XG(do_trace)                = 0;
+	XG(coverage_enable)         = 0;
+	XG(do_code_coverage)        = 0;
+	XG(code_coverage_func_only) = 0;
 
 	xdebug_hash_destroy(XG(code_coverage));
 	XG(code_coverage) = NULL;
+	xdebug_hash_destroy(XG(cc_func_only));
+	XG(cc_func_only) = NULL;
 
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
