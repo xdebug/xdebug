@@ -383,7 +383,7 @@ void xdebug_log_function_call(char *filename, char* funcname)
 		XG(previous_file_func_only) = file;
 	}
 
-	if (strcmp(XG(previous_funcname), funcname) == 0) {
+	if (strcmp(XG(previous_funcname), funcname) == 0 && strcmp(XG(previous_filename), filename) == 0) {
 		func = XG(previous_func);
 	} else {
 		if (!xdebug_hash_find(file->funcnames, funcname, strlen(funcname), (void*) &func)) {
