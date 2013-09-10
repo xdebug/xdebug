@@ -33,7 +33,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 Version: %s
-File format: 2
+File format: 3
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%f	%d
 2	3	0	%f	%d	foo	1		%sfunctrace_comp_1.php	9	2	long	???
