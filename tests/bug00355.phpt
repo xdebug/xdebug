@@ -38,7 +38,7 @@ unlink($tf);
 --EXPECTF--
 Hi2
 Version: 2.%d%s
-File format: 2
+File format: 3
 TRACE START [%s]
 2	2	1	%f	%d
 2	3	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'
