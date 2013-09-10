@@ -1445,10 +1445,10 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 				t = xdebug_return_trace_stack_generator_retval(fse, (zend_generator *) EG(return_value_ptr_ptr) TSRMLS_CC);
 			} else {
-				t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+				t = xdebug_return_trace_stack_retval(fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
 			}
 #else
-			t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			t = xdebug_return_trace_stack_retval(fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
 #endif
 			fprintf(XG(trace_file), "%s", t);
 			fflush(XG(trace_file));
@@ -1565,7 +1565,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->XDEBUG_TYPE(result), &(cur_opcode->result), current_execute_data TSRMLS_CC);
 			if (ret) {
-				char* t = xdebug_return_trace_stack_retval(fse, ret TSRMLS_CC);
+				char* t = xdebug_return_trace_stack_retval(fse, function_nr, ret TSRMLS_CC);
 				fprintf(XG(trace_file), "%s", t);
 				fflush(XG(trace_file));
 				xdfree(t);

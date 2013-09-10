@@ -337,7 +337,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 					c = 1;
 				}
 
-				if (i->var[j].name && XG(collect_params) >= 4) {
+				if (i->var[j].name && XG(collect_params) == 4) {
 					if (html) {
 						xdebug_str_add(str, xdebug_sprintf("<span>$%s = </span>", i->var[j].name), 1);
 					} else {
@@ -358,6 +358,8 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 								xdebug_str_add(str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
 								break;
 							case 3: /* full */
+							case 4: /* full (with var_name) */
+							case 5: /* serialized */
 							default:
 								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_value), 1);
 								break;
@@ -374,6 +376,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 							case 3:
 							default:
 								tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+								break;
+							case 5:
+								tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL);
 								break;
 						}
 						if (tmp_value) {
