@@ -46,6 +46,7 @@
 #include "php_globals.h"
 #include "main/php_output.h"
 #include "ext/standard/php_var.h"
+#include "Zend/zend_closures.h"
 
 
 #include "php_xdebug.h"
@@ -556,6 +557,17 @@ int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int s
 }
 #endif
 
+static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
+{
+	zend_class_entry *ce = Z_OBJCE_P(object);
+
+	if (!XG(in_var_serialisation)) {
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name);
+	}
+	return FAILURE;
+}
+
+
 PHP_MINIT_FUNCTION(xdebug)
 {
 	zend_extension dummy_ext;
@@ -940,6 +952,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
+
+	XG(in_var_serialisation) = 0;
+	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;
 
 	/* Signal that we're in a request now */
 	XG(in_execution) = 1;
