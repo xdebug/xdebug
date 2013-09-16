@@ -1596,19 +1596,16 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 	return str.d;
 }
 
-char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options)
+char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
+	XG(in_var_serialisation) = 1;
 	php_var_serialize(&buf, &val, &var_hash TSRMLS_CC);
+	XG(in_var_serialisation) = 0;
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-
-	if (EG(exception)) {
-		smart_str_free(&buf);
-		return NULL;
-	}
 
 	if (buf.c) {
 		int new_len;

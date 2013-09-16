@@ -71,7 +71,7 @@ char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebu
 #define xdebug_get_zval_value_ansi(v,d,o) xdebug_get_zval_value_text_ansi(v,1,d,o TSRMLS_CC);
 char* xdebug_get_zval_value_xml(char *name, zval *val);
 char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
-char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options);
+char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 
 void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce TSRMLS_DC);
 void xdebug_attach_uninitialized_var(xdebug_xml_node *node, char *name);
