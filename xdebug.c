@@ -46,7 +46,9 @@
 #include "php_globals.h"
 #include "main/php_output.h"
 #include "ext/standard/php_var.h"
-#include "Zend/zend_closures.h"
+#if PHP_VERSION_ID >= 50300
+# include "Zend/zend_closures.h"
+#endif
 
 
 #include "php_xdebug.h"
@@ -556,6 +558,7 @@ int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int s
 }
 #endif
 
+#if PHP_VERSION_ID >= 50300
 static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
@@ -565,7 +568,7 @@ static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **b
 	}
 	return FAILURE;
 }
-
+#endif
 
 PHP_MINIT_FUNCTION(xdebug)
 {
@@ -948,7 +951,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	XG(in_var_serialisation) = 0;
+#if PHP_VERSION_ID >= 50300
 	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;
+#endif
 
 	/* Signal that we're in a request now */
 	XG(in_execution) = 1;
