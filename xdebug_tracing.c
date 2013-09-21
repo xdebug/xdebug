@@ -136,7 +136,7 @@ static char* return_trace_stack_retval_computerized(function_stack_entry* i, int
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fnr), 1);
 	xdebug_str_add(&str, "R\t\t\t", 0);
 
-	tmp_value = xdebug_get_zval_value_serialized(retval, 0, NULL);
+	tmp_value = xdebug_get_zval_value_serialized(retval, 0, NULL TSRMLS_CC);
 	if (tmp_value) {
 		xdebug_str_add(&str, tmp_value, 1);
 	}
@@ -236,7 +236,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 					break;
 				case 5: /* serialized */
-					tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL);
+					tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
 					break;
 			}
 			if (tmp_value) {
@@ -333,7 +333,7 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 						break;
 					case 5: /* serialized */
-						tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL);
+						tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
 						break;
 				}
 				if (tmp_value) {
