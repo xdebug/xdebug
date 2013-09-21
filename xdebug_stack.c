@@ -378,7 +378,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 								tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 								break;
 							case 5:
-								tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL);
+								tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
 								break;
 						}
 						if (tmp_value) {
