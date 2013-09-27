@@ -1601,6 +1601,10 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
+	if (!val) {
+		return NULL;
+	}
+
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	XG(in_var_serialisation) = 1;
 	php_var_serialize(&buf, &val, &var_hash TSRMLS_CC);
