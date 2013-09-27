@@ -9,7 +9,7 @@ xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.collect_vars=0
 xdebug.collect_params=2
-xdebug.collect_returns=0
+xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
 <?php
@@ -33,7 +33,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 Version: %s
-File format: 2
+File format: 3
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%f	%d
 2	3	0	%f	%d	foo	1		%sfunctrace_comp_2.php	9	2	long	???

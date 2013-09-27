@@ -46,6 +46,9 @@
 #include "php_globals.h"
 #include "main/php_output.h"
 #include "ext/standard/php_var.h"
+#if PHP_VERSION_ID >= 50300
+# include "Zend/zend_closures.h"
+#endif
 
 
 #include "php_xdebug.h"
@@ -556,6 +559,18 @@ int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int s
 }
 #endif
 
+#if PHP_VERSION_ID >= 50300
+static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
+{
+	zend_class_entry *ce = Z_OBJCE_P(object);
+
+	if (!XG(in_var_serialisation)) {
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name);
+	}
+	return FAILURE;
+}
+#endif
+
 PHP_MINIT_FUNCTION(xdebug)
 {
 	zend_extension dummy_ext;
@@ -940,6 +955,11 @@ PHP_RINIT_FUNCTION(xdebug)
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
+
+	XG(in_var_serialisation) = 0;
+#if PHP_VERSION_ID >= 50300
+	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;
+#endif
 
 	/* Signal that we're in a request now */
 	XG(in_execution) = 1;
@@ -1451,10 +1471,10 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 				t = xdebug_return_trace_stack_generator_retval(fse, (zend_generator *) EG(return_value_ptr_ptr) TSRMLS_CC);
 			} else {
-				t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+				t = xdebug_return_trace_stack_retval(fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
 			}
 #else
-			t = xdebug_return_trace_stack_retval(fse, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			t = xdebug_return_trace_stack_retval(fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
 #endif
 			fprintf(XG(trace_file), "%s", t);
 			fflush(XG(trace_file));
@@ -1571,7 +1591,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->XDEBUG_TYPE(result), &(cur_opcode->result), current_execute_data TSRMLS_CC);
 			if (ret) {
-				char* t = xdebug_return_trace_stack_retval(fse, ret TSRMLS_CC);
+				char* t = xdebug_return_trace_stack_retval(fse, function_nr, ret TSRMLS_CC);
 				fprintf(XG(trace_file), "%s", t);
 				fflush(XG(trace_file));
 				xdfree(t);

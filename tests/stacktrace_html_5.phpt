@@ -1,5 +1,5 @@
 --TEST--
-Test stack traces (level4, html)
+Test stack traces (level5, html)
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -11,7 +11,7 @@ xdebug.var_display_max_children=50
 xdebug.var_display_max_depth=5
 xdebug.var_display_max_length=64
 xdebug.collect_vars=1
-xdebug.collect_params=4
+xdebug.collect_params=5
 xdebug.collect_return=0
 html_errors=1
 xdebug.file_link_format=
@@ -34,9 +34,9 @@ foo( $a );
 --EXPECTF--
 <br />
 <font size='1'><table class='xdebug-error xe-fatal-error' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
-<tr><th align='left' bgcolor='#f57900' colspan="5"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> Fatal error: Call to undefined function poo() in /%s/stacktrace_html_4.php on line <i>4</i></th></tr>
+<tr><th align='left' bgcolor='#f57900' colspan="5"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> Fatal error: Call to undefined function poo() in /%s/stacktrace_html_5.php on line <i>4</i></th></tr>
 <tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
-<tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='/%s/stacktrace_html_4.php' bgcolor='#eeeeec'>../stacktrace_html_4.php<b>:</b>0</td></tr>
-<tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>foo( <span>$a = </span><span>array (42 =&gt; FALSE, &#39;foo&#39; =&gt; 912124, 43 =&gt; class stdClass { public $bar = 100 }, 44 =&gt; class stdClass {  }, 45 =&gt; resource(5) of type (stream))</span> )</td><td title='/%s/stacktrace_html_4.php' bgcolor='#eeeeec'>../stacktrace_html_4.php<b>:</b>14</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='/%s/stacktrace_html_5.php' bgcolor='#eeeeec'>../stacktrace_html_5.php<b>:</b>0</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>foo( <span>YTo1OntpOjQyO2I6MDtzOjM6ImZvbyI7aTo5MTIxMjQ7aTo0MztPOjg6InN0ZENsYXNzIjoxOntzOjM6ImJhciI7aToxMDA7fWk6NDQ7Tzo4OiJzdGRDbGFzcyI6MDp7fWk6NDU7aTowO30=</span> )</td><td title='/%s/stacktrace_html_5.php' bgcolor='#eeeeec'>../stacktrace_html_5.php<b>:</b>14</td></tr>
 </table></font>

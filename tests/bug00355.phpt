@@ -9,7 +9,7 @@ xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.collect_vars=0
 xdebug.collect_params=4
-xdebug.collect_returns=0
+xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
 <?php
@@ -38,7 +38,7 @@ unlink($tf);
 --EXPECTF--
 Hi2
 Version: 2.%d%s
-File format: 2
+File format: 3
 TRACE START [%s]
 2	2	1	%f	%d
 2	3	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'

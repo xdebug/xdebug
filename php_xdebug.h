@@ -274,6 +274,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* in-execution checking */
 	zend_bool  in_execution;
+	zend_bool  in_var_serialisation;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS
