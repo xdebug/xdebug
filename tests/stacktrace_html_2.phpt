@@ -12,7 +12,7 @@ xdebug.var_display_max_depth=5
 xdebug.var_display_max_length=64
 xdebug.collect_vars=0
 xdebug.collect_params=2
-xdebug.collect_returns=0
+xdebug.collect_return=0
 html_errors=1
 xdebug.file_link_format=
 --FILE--
