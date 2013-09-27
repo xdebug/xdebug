@@ -34,7 +34,7 @@ events: Time
 
 fl=php:internal
 fn=php::sleep
-2 1000%d
+2 10%d
 
 fl=%sbug00714.php
 fn=sleep1
@@ -42,7 +42,7 @@ fn=sleep1
 cfl=php:internal
 cfn=php::sleep
 calls=1 0 0
-2 1000%d
+2 10%d
 
 fl=php:internal
 fn=php::sleep
