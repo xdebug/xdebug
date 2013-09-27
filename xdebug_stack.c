@@ -328,7 +328,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
-				char *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value;
+				char *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value, *tmp_serialized;
 				int newlen;
 
 				if (c) {
@@ -350,6 +350,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 						tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
 						tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
+						tmp_serialized = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
 						switch (XG(collect_params)) {
 							case 1: /* synopsis */
 								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_synop_value), 1);
@@ -359,25 +360,29 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 								break;
 							case 3: /* full */
 							case 4: /* full (with var_name) */
-							case 5: /* serialized */
 							default:
 								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_value), 1);
+								break;
+							case 5: /* serialized */
+								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_serialized), 1);
 								break;
 						}
 						xdfree(tmp_value);
 						efree(tmp_fancy_value);
 						xdfree(tmp_fancy_synop_value);
+						xdfree(tmp_serialized);
 					} else {
 						switch (XG(collect_params)) {
 							case 1: /* synopsis */
 							case 2:
 								tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
 								break;
-							case 3:
+							case 3: /* full */
+							case 4: /* full (with var_name) */
 							default:
 								tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 								break;
-							case 5:
+							case 5: /* serialized */
 								tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
 								break;
 						}
