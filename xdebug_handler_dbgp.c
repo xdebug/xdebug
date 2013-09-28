@@ -1949,10 +1949,15 @@ DBGP_FUNC(property_value)
 	if (CMD_OPTION('m')) {
 		options->max_data = strtol(CMD_OPTION('m'), NULL, 10);
 	}
+	if (options->max_data < 0) {
+		options->max_data = old_max_data;
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+	}
 	if (add_variable_contents_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0, options TSRMLS_CC) == FAILURE) {
 		options->max_data = old_max_data;
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
+	options->max_data = old_max_data;
 }
 
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, void *options)

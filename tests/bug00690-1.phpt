@@ -3,6 +3,7 @@ Test for bug #690: Function traces are not appended to file when xdebug_start_tr
 --INI--
 xdebug.trace_output_name=trace.bug690
 xdebug.trace_options=1
+xdebug.auto_trace=0
 --FILE--
 <?php
 xdebug_start_trace();
