@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #886: Use the same file system protocol for file located inside PHAR in both directions
+--INI--
+xdebug.auto_trace=0
 --FILE--
 <?php
 xdebug_start_trace( "/tmp/trace.log" );
