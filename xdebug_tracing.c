@@ -107,14 +107,10 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 	xdebug_str_addl(str, "   >=> ", 7, 0);
 }
 
-char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSRMLS_DC)
+static char* return_trace_stack_retval_normal(function_stack_entry* i, zval* retval TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 	char      *tmp_value;
-
-	if (XG(trace_format) != 0) {
-		return xdstrdup("");
-	}
 
 	xdebug_return_trace_stack_common(&str, i TSRMLS_CC);
 
@@ -125,6 +121,40 @@ char* xdebug_return_trace_stack_retval(function_stack_entry* i, zval* retval TSR
 	xdebug_str_addl(&str, "\n", 2, 0);
 
 	return str.d;
+}
+
+static char* return_trace_stack_retval_computerized(function_stack_entry* i, int fnr, zval* retval TSRMLS_DC)
+{
+	xdebug_str str = {0, 0, NULL};
+	char      *tmp_value;
+
+	if (XG(collect_params) != 5) {
+		return xdstrdup("");
+	}
+
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->level), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", fnr), 1);
+	xdebug_str_add(&str, "R\t\t\t", 0);
+
+	tmp_value = xdebug_get_zval_value_serialized(retval, 0, NULL TSRMLS_CC);
+	if (tmp_value) {
+		xdebug_str_add(&str, tmp_value, 1);
+	}
+	xdebug_str_addl(&str, "\n", 2, 0);
+
+	return str.d;
+}
+
+char* xdebug_return_trace_stack_retval(function_stack_entry* i, int fnr, zval* retval TSRMLS_DC)
+{
+	switch (XG(trace_format)) {
+		case 0:
+			return return_trace_stack_retval_normal(i, retval TSRMLS_CC);
+		case 1:
+			return return_trace_stack_retval_computerized(i, fnr, retval TSRMLS_CC);
+		default:
+			return xdstrdup("");
+	}
 }
 
 #if PHP_VERSION_ID >= 50500
@@ -191,7 +221,7 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 				c = 1;
 			}
 
-			if (i->var[j].name && XG(collect_params) >= 4) {
+			if (i->var[j].name && XG(collect_params) == 4) {
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
 			}
 
@@ -200,9 +230,13 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 				case 2:
 					tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
 					break;
-				case 3:
+				case 3: /* full */
+				case 4: /* full (with var) */
 				default:
 					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+					break;
+				case 5: /* serialized */
+					tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
 					break;
 			}
 			if (tmp_value) {
@@ -284,7 +318,7 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 
 				xdebug_str_addl(&str, "\t", 1, 0);
 
-				if (i->var[j].name && XG(collect_params) >= 4) {
+				if (i->var[j].name && XG(collect_params) == 4) {
 					xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
 				}
 
@@ -293,9 +327,13 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 					case 2:
 						tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
 						break;
-					case 3:
+					case 3: /* full */
+					case 4: /* full (with var) */
 					default:
 						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+						break;
+					case 5: /* serialized */
+						tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
 						break;
 				}
 				if (tmp_value) {
@@ -459,7 +497,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	if (XG(trace_file)) {
 		if (XG(trace_format) == 1) {
 			fprintf(XG(trace_file), "Version: %s\n", XDEBUG_VERSION);
-			fprintf(XG(trace_file), "File format: 2\n");
+			fprintf(XG(trace_file), "File format: 3\n");
 		}
 		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
 			str_time = xdebug_get_time();

@@ -1,5 +1,5 @@
 --TEST--
-Test stack traces (level1, text)
+Test stack traces (level4, text)
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -7,8 +7,11 @@ xdebug.auto_trace=0
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
-xdebug.collect_vars=0
-xdebug.collect_params=1
+xdebug.var_display_max_children=50
+xdebug.var_display_max_depth=5
+xdebug.var_display_max_length=64
+xdebug.collect_vars=1
+xdebug.collect_params=5
 xdebug.collect_return=0
 --FILE--
 <?php
@@ -31,4 +34,4 @@ Fatal error: Call to undefined function poo() in /%s/stacktrace%s.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() /%s/stacktrace%s.php:0
-%w%f %w%d   2. foo(array(5)) /%s/stacktrace%s.php:14
+%w%f %w%d   2. foo(YTo1OntpOjQyO2I6MDtzOjM6ImZvbyI7aTo5MTIxMjQ7aTo0MztPOjg6InN0ZENsYXNzIjoxOntzOjM6ImJhciI7aToxMDA7fWk6NDQ7Tzo4OiJzdGRDbGFzcyI6MDp7fWk6NDU7aTowO30=) /%s/stacktrace%s.php:14

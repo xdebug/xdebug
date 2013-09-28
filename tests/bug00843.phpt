@@ -24,7 +24,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 Version: 2.%s
-File format: 2
+File format: 3
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%d.%d	%d
 2	3	0	%d.%d	%d	setlocale	0		%sbug00843.php	4	%d	6	'%s'

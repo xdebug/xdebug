@@ -4,6 +4,7 @@ Test for bug #898: Wrong works with empty string key in ArrayObject. (>= PHP 5.3
 <?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
+xdebug.auto_trace=0
 --FILE--
 <?php
 $example = new ArrayObject;

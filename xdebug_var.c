@@ -19,6 +19,7 @@
 #include "php.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
+#include "ext/standard/php_smart_str.h"
 #include "zend.h"
 #include "zend_extensions.h"
 
@@ -1234,7 +1235,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
-			if (Z_STRLEN_PP(struc) <= options->max_data) {
+			if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc)), Z_STRLEN_PP(struc));
 			} else {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data), options->max_data);
@@ -1593,6 +1594,40 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 
 	*len = str.l;
 	return str.d;
+}
+
+char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+{
+	php_serialize_data_t var_hash;
+	smart_str buf = {0};
+
+	if (!val) {
+		return NULL;
+	}
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+	XG(in_var_serialisation) = 1;
+	php_var_serialize(&buf, &val, &var_hash TSRMLS_CC);
+	XG(in_var_serialisation) = 0;
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+
+	if (buf.c) {
+		int new_len;
+		char *tmp_base64, *tmp_ret;
+
+		/* now we need to base64 it */
+		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) buf.c, buf.len, &new_len);
+
+		/* we need a malloc'ed and not an emalloc'ed string */
+		tmp_ret = xdstrdup(tmp_base64);
+
+		efree(tmp_base64);
+		smart_str_free(&buf);
+
+		return tmp_ret;
+	} else {
+		return NULL;
+	}
 }
 
 static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)

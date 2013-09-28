@@ -39,7 +39,7 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 Version: 2.%d.%s
-File format: 2
+File format: 3
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%f	%d
 2	3	0	%f	%d	fibonacci_cache	1		%strace1.php	22
