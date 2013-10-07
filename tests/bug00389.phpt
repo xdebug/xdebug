@@ -5,6 +5,7 @@ log_errors=0
 xdebug.default_enable=1
 xdebug.dump.GET=
 xdebug.dump.SERVER=
+xdebug.show_local_vars=0
 --FILE--
 <?php
 class Food {

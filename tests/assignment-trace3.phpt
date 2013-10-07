@@ -11,6 +11,7 @@ xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.dump.GET=
 xdebug.dump.SERVER=
+xdebug.show_local_vars=0
 --FILE--
 <?php
 $tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
