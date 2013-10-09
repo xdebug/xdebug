@@ -10,6 +10,7 @@ xdebug.show_mem_delta=0
 xdebug.collect_vars=0
 xdebug.collect_params=0
 xdebug.collect_returns=0
+xdebug.show_local_vars=0
 --FILE--
 <?php
 function foo( $a ) {

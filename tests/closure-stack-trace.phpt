@@ -12,6 +12,7 @@ xdebug.collect_params=4
 xdebug.collect_return=1
 xdebug.collect_assignments=1
 xdebug.dump.SERVER=
+xdebug.show_local_vars=0
 --FILE--
 <?php
 function test1()
