@@ -13,6 +13,7 @@ xdebug.var_display_max_length=64
 xdebug.collect_vars=1
 xdebug.collect_params=4
 xdebug.collect_returns=0
+xdebug.show_local_vars=0
 --FILE--
 <?php
 function foo( $a ) {

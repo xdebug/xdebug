@@ -6,6 +6,7 @@ xdebug.default_enable=1
 xdebug.dump.GET=
 xdebug.dump.SERVER=
 xdebug.collect_params=0
+xdebug.show_local_vars=0
 --FILE--
 <?php
 
