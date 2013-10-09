@@ -610,6 +610,18 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						keyword = *p;
 						type = XF_ST_ARRAY_INDEX_NUM;
 					}
+					/* Numerical index starting with a - */
+					if (*p[0] == '-') {
+						state = 9;
+						keyword = *p;
+					}
+					break;
+				case 9:
+					/* Numerical index starting with a - */
+					if (*p[0] >= '0' && *p[0] <= '9') {
+						state = 6;
+						type = XF_ST_ARRAY_INDEX_NUM;
+					}
 					break;
 				case 4:
 					if (*p[0] == quotechar) {
