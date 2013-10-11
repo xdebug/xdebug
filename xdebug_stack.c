@@ -558,9 +558,10 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	TSRMLS_FETCH();
 
-	va_copy(args_copy, args);
+	if (xdebug_external_error_cb) {
+		va_copy(args_copy, args);
+	}
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
-	va_end(args_copy);
 
 	error_type_str = xdebug_error_type(type);
 
@@ -770,6 +771,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	if (xdebug_external_error_cb) {
 		xdebug_external_error_cb(type, error_filename, error_lineno, format, args_copy);
+		va_end(args_copy);
 	}
 }
 
