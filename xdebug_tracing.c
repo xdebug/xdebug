@@ -483,9 +483,9 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 		xdfree(fname);
 	}
 	if (options & XDEBUG_TRACE_OPTION_APPEND) {
-		XG(trace_file) = xdebug_fopen(filename, "a", "xt", (char**) &tmp_fname);
+		XG(trace_file) = xdebug_fopen(filename, "a", (options & XDEBUG_TRACE_OPTION_NAKED_FILENAME) ? NULL : "xt", (char**) &tmp_fname);
 	} else {
-		XG(trace_file) = xdebug_fopen(filename, "w", "xt", (char**) &tmp_fname);
+		XG(trace_file) = xdebug_fopen(filename, "w", (options & XDEBUG_TRACE_OPTION_NAKED_FILENAME) ? NULL : "xt", (char**) &tmp_fname);
 	}
 	xdfree(filename);
 	if (options & XDEBUG_TRACE_OPTION_COMPUTERIZED) {
