@@ -1286,7 +1286,10 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			}
 
 			/* Adding normal properties */
-			zend_hash_apply_with_arguments(Z_OBJDEBUG_PP(struc, is_temp) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
+			myht = Z_OBJDEBUG_PP(struc, is_temp);
+			if (myht) {
+				zend_hash_apply_with_arguments(myht XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
+			}
 #else
 			/* Adding static properties */
 			if (CE_STATIC_MEMBERS(ce)) {
