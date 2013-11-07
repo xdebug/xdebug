@@ -912,7 +912,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", 16, (void**)&dummy) == FAILURE) {
 		/* If zend_error_cb has been changed by another ext, register it as external cb */
-		if (zend_error_cb != xdebug_old_error_cb) {
+		if (zend_error_cb != xdebug_new_error_cb) {
 			xdebug_external_error_cb = zend_error_cb;
 		}
 		zend_error_cb = xdebug_new_error_cb;
