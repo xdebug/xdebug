@@ -542,6 +542,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							cc_length = 0;
 							current_ce = NULL;
 							if (retval) {
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -557,6 +558,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							cc_length = 0;
 							current_ce = NULL;
 							if (retval) {
 								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
@@ -574,6 +576,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							cc_length = 0;
 							if (retval) {
 								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 								st = NULL;
@@ -606,6 +609,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 					}
 					/* Numerical index */
 					if (*p[0] >= '0' && *p[0] <= '9') {
+						cc_length = 0;
 						state = 6;
 						keyword = *p;
 						type = XF_ST_ARRAY_INDEX_NUM;
@@ -633,6 +637,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							efree(current_classname);
 						}
 						current_classname = NULL;
+						cc_length = 0;
 						if (retval) {
 							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -654,6 +659,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							efree(current_classname);
 						}
 						current_classname = NULL;
+						cc_length = 0;
 						if (retval) {
 							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							st = fetch_ht_from_zval(retval TSRMLS_CC);
