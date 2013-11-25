@@ -452,7 +452,7 @@ continue_from_static_root:
 
 			/* First we try a public property */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+			if (ht && zend_symtable_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
 				goto cleanup;
 			}
@@ -599,7 +599,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						state = 1;
 					}
 					break;
-				case 3:
+				case 3: /* Parsing in [...] */
 					/* Associative arrays */
 					if (*p[0] == '\'' || *p[0] == '"') {
 						state = 4;
