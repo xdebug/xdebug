@@ -452,7 +452,7 @@ continue_from_static_root:
 
 			/* First we try a public property */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+			if (ht && zend_symtable_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;
 				goto cleanup;
 			}
@@ -542,6 +542,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							cc_length = 0;
 							current_ce = NULL;
 							if (retval) {
 								st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -557,6 +558,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							cc_length = 0;
 							current_ce = NULL;
 							if (retval) {
 								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
@@ -574,6 +576,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 								efree(current_classname);
 							}
 							current_classname = NULL;
+							cc_length = 0;
 							if (retval) {
 								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 								st = NULL;
@@ -596,7 +599,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 						state = 1;
 					}
 					break;
-				case 3:
+				case 3: /* Parsing in [...] */
 					/* Associative arrays */
 					if (*p[0] == '\'' || *p[0] == '"') {
 						state = 4;
@@ -606,6 +609,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 					}
 					/* Numerical index */
 					if (*p[0] >= '0' && *p[0] <= '9') {
+						cc_length = 0;
 						state = 6;
 						keyword = *p;
 						type = XF_ST_ARRAY_INDEX_NUM;
@@ -633,6 +637,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							efree(current_classname);
 						}
 						current_classname = NULL;
+						cc_length = 0;
 						if (retval) {
 							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							st = fetch_ht_from_zval(retval TSRMLS_CC);
@@ -654,6 +659,7 @@ static zval* get_symbol_contents_zval(char* name, int name_length TSRMLS_DC)
 							efree(current_classname);
 						}
 						current_classname = NULL;
+						cc_length = 0;
 						if (retval) {
 							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							st = fetch_ht_from_zval(retval TSRMLS_CC);

@@ -355,6 +355,8 @@ static int xdebug_object_element_export(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRMLS_
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("%s ${%s}:%s = ", modifier, prop_class_name, prop_name), 1);
 			}
+		} else {
+			xdebug_str_add(str, xdebug_sprintf("public $%d = ", hash_key->h), 1);
 		}
 		xdebug_var_export(zv, str, level + 2, debug_zval, options TSRMLS_CC);
 		xdebug_str_addl(str, "; ", 2, 0);
@@ -665,6 +667,10 @@ static int xdebug_object_element_export_text_ansi(zval **zv XDEBUG_ZEND_HASH_APP
 			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
 			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+		} else {
+			xdebug_str_add(str, xdebug_sprintf("%s%spublic%s%s ${%d} %s=>%s\n",
+			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
+			               hash_key->h, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		}
 		xdebug_var_export_text_ansi(zv, str, mode, level + 1, debug_zval, options TSRMLS_CC);
 	}
@@ -912,6 +918,7 @@ typedef struct
 	char  type;
 	char *name;
 	int   name_len;
+	ulong index;
 	zval *zv;
 } xdebug_object_item;
 
@@ -929,6 +936,7 @@ static int object_item_add_to_merged_hash(zval **zv XDEBUG_ZEND_HASH_APPLY_TSRML
 	item->zv   = *zv;
 	item->name = (char *) hash_key->arKey;
 	item->name_len = hash_key->nKeyLength;
+	item->index = hash_key->h;
 
 	zend_hash_next_index_insert(merged, &item, sizeof(xdebug_object_item*), NULL);
 
@@ -1044,9 +1052,11 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item XDEBU
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
+		node = xdebug_xml_node_init("property");
+
 		if ((*item)->name_len != 0) {
 			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len, &prop_name, &prop_class_name);
-			node = xdebug_xml_node_init("property");
+
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_xml_add_attribute_ex(node, "name", xdstrdup(prop_name), 0, 1);
 			} else {
@@ -1061,14 +1071,21 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item XDEBU
 				}
 				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 			}
-			xdebug_xml_add_attribute_ex(node, "facet", xdebug_sprintf("%s%s", (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "", modifier), 0, 1);
+		} else { /* Numerical property name */
+			modifier = "public";
 
-			xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) (*item)->zv), 0, 1);
+			xdebug_xml_add_attribute_ex(node, "name", xdebug_sprintf("%ld", (*item)->index), 0, 1);
 
-			xdebug_xml_add_child(parent, node);
-
-			xdebug_var_export_xml_node(&((*item)->zv), full_name, node, options, level + 1 TSRMLS_CC);
+			if (parent_name) {
+				full_name = xdebug_sprintf("%s%s%ld", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index);
+				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+			}
 		}
+
+		xdebug_xml_add_attribute_ex(node, "facet", xdebug_sprintf("%s%s", (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "", modifier), 0, 1);
+		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) (*item)->zv), 0, 1);
+		xdebug_xml_add_child(parent, node);
+		xdebug_var_export_xml_node(&((*item)->zv), full_name, node, options, level + 1 TSRMLS_CC);
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
@@ -1456,6 +1473,8 @@ static int xdebug_object_element_export_fancy(zval **zv XDEBUG_ZEND_HASH_APPLY_T
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <small>(%s)</small> <font color='%s'>=&gt;</font> ", modifier, prop_name, prop_class_name, COLOR_POINTER), 1);
 			}
+		} else {
+			xdebug_str_add(str, xdebug_sprintf("<i>public</i> %d <font color='%s'>=&gt;</font> ", hash_key->h, COLOR_POINTER), 1);
 		}
 		xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}
