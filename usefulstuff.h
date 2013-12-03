@@ -40,9 +40,9 @@ typedef struct xdebug_arg {
 }
 
 #define xdebug_arg_dtor(arg) {     \
-	int i;                         \
-	for (i = 0; i < arg->c; i++) { \
-		xdfree(arg->args[i]);      \
+	int adi;                       \
+	for (adi = 0; adi < arg->c; adi++) { \
+		xdfree(arg->args[adi]);    \
 	}                              \
 	if (arg->args) {               \
 		xdfree(arg->args);         \

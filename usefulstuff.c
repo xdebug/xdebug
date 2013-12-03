@@ -286,8 +286,8 @@ char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 	/* deal with file: url's */
 	char dfp[PATH_MAX * 2];
 	const char *fp = dfp, *efp = fileurl;
-	int l = 0;
 #ifdef PHP_WIN32
+	int l = 0;
 	int i;
 #endif
 	char *tmp = NULL, *ret = NULL;;
@@ -303,8 +303,8 @@ char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 			fp++;
 		}
 		ret = xdstrdup(fp);
-		l = strlen(ret);
 #ifdef PHP_WIN32
+		l = strlen(ret);
 		/* convert '/' to '\' */
 		for (i = 0; i < l; i++) {
 			if (ret[i] == '/') {
