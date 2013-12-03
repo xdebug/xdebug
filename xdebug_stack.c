@@ -173,7 +173,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
 			int c = 0; /* Comma flag */
-			int j = 0; /* Counter */
+			unsigned int j = 0; /* Counter */
 			char *tmp_name;
 			xdebug_str log_buffer = {0, 0, NULL};
 
@@ -306,7 +306,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
 			int c = 0; /* Comma flag */
-			int j = 0; /* Counter */
+			unsigned int j = 0; /* Counter */
 			char *tmp_name;
 			
 			i = XDEBUG_LLIST_VALP(le);
@@ -897,7 +897,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 					edata->function_state.function->op_array.line_end
 				);
 			} else if (strncmp(edata->function_state.function->common.function_name, "call_user_func", 14) == 0) {
-				char *fname = NULL;
+				const char *fname = NULL;
 
 				if (edata->prev_execute_data) {
 					fname = edata->prev_execute_data->function_state.function->op_array.filename;
@@ -1261,7 +1261,7 @@ PHP_FUNCTION(xdebug_get_stack_depth)
 PHP_FUNCTION(xdebug_get_function_stack)
 {
 	xdebug_llist_element *le;
-	int                   j;
+	unsigned int          j;
 	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;

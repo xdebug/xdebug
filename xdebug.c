@@ -143,7 +143,7 @@ zend_function_entry xdebug_functions[] = {
 
 	PHP_FE(xdebug_dump_superglobals,     NULL)
 	PHP_FE(xdebug_get_headers,           NULL)
-	{NULL, NULL, NULL}
+	{NULL, NULL, 0, 0, 0}
 };
 
 zend_module_entry xdebug_module_entry = {
@@ -752,7 +752,7 @@ static void xdebug_used_var_dtor(void *dummy, void *elem)
 
 static void xdebug_stack_element_dtor(void *dummy, void *elem)
 {
-	int                   i;
+	unsigned int          i;
 	function_stack_entry *e = elem;
 
 	e->refcount--;
@@ -1080,7 +1080,7 @@ static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC)
 
 static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
 {
-	int i = 0; 
+	unsigned int i = 0;
 
 	if (!fse->used_vars) {
 		fse->used_vars = xdebug_llist_alloc(xdebug_used_var_dtor);
@@ -1094,7 +1094,7 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 	}
 
 	/* gather used variables from compiled vars information */
-	while (i < op_array->last_var) {
+	while (i < (unsigned int) op_array->last_var) {
 		xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(op_array->vars[i].name));
 		i++;
 	}
@@ -1166,13 +1166,13 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 			xdebug_log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
 		}
 		if (PG(display_errors)) {
-			xdebug_str tmp_str = { 0, 0, NULL };
-			xdebug_append_error_head(&tmp_str, PG(html_errors), "exception" TSRMLS_CC);
-			xdebug_str_add(&tmp_str, exception_trace, 0);
-			xdebug_append_error_footer(&tmp_str, PG(html_errors) TSRMLS_CC);
+			xdebug_str displ_tmp_str = { 0, 0, NULL };
+			xdebug_append_error_head(&displ_tmp_str, PG(html_errors), "exception" TSRMLS_CC);
+			xdebug_str_add(&displ_tmp_str, exception_trace, 0);
+			xdebug_append_error_footer(&displ_tmp_str, PG(html_errors) TSRMLS_CC);
 
-			php_printf("%s", tmp_str.d);
-			xdebug_str_dtor(tmp_str);
+			php_printf("%s", displ_tmp_str.d);
+			xdebug_str_dtor(displ_tmp_str);
 		}
 	}
 
@@ -1249,7 +1249,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	int                   do_return = (XG(do_trace) && XG(trace_file));
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
-	int                   eval_id = 0, clear = 0;
+	int                   clear = 0;
 	zval                 *return_val = NULL;
 
 	/* If we're evaluating for the debugger's eval capability, just bail out */
@@ -1412,7 +1412,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	 * depends on the debugger mechanism in use so we need to call a function
 	 * in the handler for it */
 	if (XG(remote_enabled) && XG(context).handler->register_eval_id && fse->function.type == XFUNC_EVAL) {
-		eval_id = XG(context).handler->register_eval_id(&(XG(context)), fse);
+		XG(context).handler->register_eval_id(&(XG(context)), fse);
 	}
 
 	/* Check for entry breakpoints */
@@ -1618,7 +1618,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 /* }}} */
 
 #if PHP_VERSION_ID >= 50300
-static void xdebug_header_remove_with_prefix(xdebug_llist *headers, char *prefix, int prefix_len TSRMLS_DC)
+static void xdebug_header_remove_with_prefix(xdebug_llist *headers, char *prefix, size_t prefix_len TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	char                 *header;
