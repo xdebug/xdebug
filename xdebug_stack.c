@@ -519,8 +519,10 @@ void xdebug_init_debugger(TSRMLS_D)
 			zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			XG(remote_enabled) = 1;
 		}
-	} else {
+	} else if (XG(context).socket == -1) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");
+	} else if (XG(context).socket == -2) {
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Time-out connecting to client. :-(\n");
 	}
 	if (!XG(remote_enabled)) {
 		xdebug_close_log(TSRMLS_C);
