@@ -165,14 +165,14 @@ typedef struct _function_stack_entry {
 	int          user_defined;
 
 	/* location properties */
-	int          level;
+	unsigned int level;
 	char        *filename;
 	int          lineno;
 	char        *include_filename;
 
 	/* argument properties */
 	int          arg_done;
-	int          varc;
+	unsigned int varc;
 	xdebug_var   *var;
 	zval        *return_value;
 	xdebug_llist *used_vars;

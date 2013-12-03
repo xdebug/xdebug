@@ -214,7 +214,7 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	/* Non standard functions */
 	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_POST_MORTEM)
 	DBGP_FUNC_ENTRY(xcmd_get_executable_lines, XDEBUG_DBGP_NONE)
-	{ NULL, NULL }
+	{ NULL, NULL, 0, 0 }
 };
 
 /*****************************************************************************
@@ -2023,7 +2023,7 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol XDEBUG_ZEND_HASH_APP
 	}
 	if (strcmp("GLOBALS", hash_key->arKey) == 0) { return 0; }
 
-	xdebug_hash_add(tmp_hash, hash_key->arKey, strlen(hash_key->arKey), hash_key->arKey);	
+	xdebug_hash_add(tmp_hash, (char*) hash_key->arKey, strlen(hash_key->arKey), hash_key->arKey);
 
 	return 0;
 }
@@ -2201,7 +2201,8 @@ DBGP_FUNC(xcmd_profiler_name_get)
 DBGP_FUNC(xcmd_get_executable_lines)
 {
 	function_stack_entry *fse;
-	int                   i, depth;
+	unsigned int          i;
+	int                   depth;
 	xdebug_xml_node      *lines, *line;
 
 	if (!CMD_OPTION('d')) {
