@@ -58,7 +58,7 @@ void xdebug_trace_function_end(function_stack_entry *fse, int function_nr TSRMLS
 
 char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *filename, int lineno TSRMLS_DC)
 {
-	int        j = 0;
+	unsigned int j = 0;
 	xdebug_str str = {0, 0, NULL};
 	char      *tmp_value;
 
@@ -95,7 +95,7 @@ char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zva
 
 static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_entry *i TSRMLS_DC)
 {
-	int        j = 0; /* Counter */
+	unsigned int j = 0; /* Counter */
 
 	xdebug_str_addl(str, "                    ", 20, 0);
 	if (XG(show_mem_delta)) {
@@ -192,7 +192,7 @@ char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_g
 static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRMLS_DC)
 {
 	int c = 0; /* Comma flag */
-	int j = 0; /* Counter */
+	unsigned int j = 0; /* Counter */
 	char *tmp_name;
 	xdebug_str str = {0, 0, NULL};
 
@@ -307,7 +307,7 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 
 
 		if (XG(collect_params) > 0) {
-			int j = 0; /* Counter */
+			unsigned int j = 0; /* Counter */
 
 			/* Nr of arguments (11) */
 			xdebug_str_add(&str, xdebug_sprintf("\t%d", i->varc), 1);
@@ -363,7 +363,7 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 static char* return_trace_stack_frame_begin_html(function_stack_entry* i, int fnr TSRMLS_DC)
 {
 	char *tmp_name;
-	int   j;
+	unsigned int j;
 	xdebug_str str = {0, 0, NULL};
 
 	xdebug_str_add(&str, "\t<tr>", 0);
