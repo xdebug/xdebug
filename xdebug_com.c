@@ -17,11 +17,11 @@
  */
 
 
-#define DEBUGGER_FAIL_SILENTLY
-
 #include <string.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <stdio.h>
+#include <fcntl.h>
 #ifndef PHP_WIN32
 #include <unistd.h>
 #endif
@@ -72,13 +72,19 @@ static int lookup_hostname(const char *addr, struct in_addr *in)
 
 int xdebug_create_socket(const char *hostname, int dport)
 {
+	struct sockaddr    sa;
 	struct sockaddr_in address;
-	int                err = -1;
 	int                sockfd;
+	int                status;
+	struct timeval     timeout;
+	int                actually_connected;
+	socklen_t          size;
 #if WIN32|WINNT
 	WORD               wVersionRequested;
 	WSADATA            wsaData;
 	char               optval = 1;
+	const char         yes = 1;
+	u_long             no = 0;
 
 	wVersionRequested = MAKEWORD(2, 2);
 	WSAStartup(wVersionRequested, &wsaData);
@@ -103,22 +109,67 @@ int xdebug_create_socket(const char *hostname, int dport)
 #endif
 		return -1;
 	}
-	while ((err = connect(sockfd, (struct sockaddr *) &address,
-						  sizeof(address))) == SOCK_ERR && errno == EAGAIN);
 
-	if (err < 0) {
-#ifndef DEBUGGER_FAIL_SILENTLY
-#if WIN32|WINNT
-		printf("create_debugger_socket(\"%s\", %d) connect: %d\n",
-				   hostname, dport, WSAGetLastError());
+	/* Put socket in non-blocking mode so we can use select for timeouts */
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 200000;
+
+#ifdef WIN32
+	ioctlsocket(sockfd, FIONBIO, (u_long*)&yes);
 #else
-		printf("create_debugger_socket(\"%s\", %d) connect: %s\n",
-				   hostname, dport, strerror(errno));
+	fcntl(sockfd, F_SETFL, O_NONBLOCK);
 #endif
+
+	/* connect */
+	status = connect(sockfd, (struct sockaddr*)&address, sizeof(address));
+	if (status < 0) {
+#ifdef WIN32
+		errno = WSAGetLastError();
+		if (errno != WSAEINPROGRESS && errno != WSAEWOULDBLOCK) {
+#else
+		if (errno != EINPROGRESS) {
 #endif
-		SCLOSE(sockfd);
-		return -1;
+			return -1;
+		}
+
+		while (1) {
+			fd_set rset, wset, eset;
+
+			FD_ZERO(&rset);
+			FD_SET(sockfd, &rset);
+			FD_ZERO(&wset);
+			FD_SET(sockfd, &wset);
+			FD_ZERO(&eset);
+			FD_SET(sockfd, &eset);
+
+			if (select(sockfd+1, &rset, &wset, &eset, &timeout) == 0) {
+				return -2;
+			}
+
+			/* if our descriptor has an error */
+			if (FD_ISSET(sockfd, &eset)) {
+				return -1;
+			}
+
+			/* if our descriptor is ready break out */
+			if (FD_ISSET(sockfd, &wset) || FD_ISSET(sockfd, &rset)) {
+				break;
+			}
+		}
+
+		actually_connected = getpeername(sockfd, &sa, &size);
+		if (actually_connected == -1) {
+			return -1;
+		}
 	}
+
+
+#ifdef WIN32
+	ioctlsocket(sockfd, FIONBIO, &no);
+#else
+	fcntl(sockfd, F_SETFL, 0);
+#endif
+
 	setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	return sockfd;
 }
