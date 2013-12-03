@@ -1800,8 +1800,6 @@ static char* xdebug_create_doc_link(xdebug_func f TSRMLS_DC)
 
 char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 {
-	char *tmp;
-
 	switch (f.type) {
 		case XFUNC_NORMAL: {
 			if (PG(html_errors) && html && f.internal) {
