@@ -689,6 +689,10 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 	xdfree(error_type_str);
 
+	if (type & XG(halt_level) & XDEBUG_ALLOWED_HALT_LEVELS) {
+		type = E_USER_ERROR;
+	}
+
 #if PHP_VERSION_ID < 50400
 
 	/* Bail out if we can't recover */
