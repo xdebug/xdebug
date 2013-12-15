@@ -55,6 +55,8 @@ extern zend_module_entry xdebug_module_entry;
 
 #include "main/SAPI.h"
 
+#define XDEBUG_ALLOWED_HALT_LEVELS (E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE )
+
 #if MEMORY_LIMIT
 # define HAVE_PHP_MEMORY_USAGE 1
 #elif PHP_VERSION_ID >= 50201
@@ -164,6 +166,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	function_stack_entry *active_fse;
 	unsigned int  prev_memory;
 	char         *file_link_format;
+	long          halt_level;
 
 	zend_bool     overload_var_dump;
 	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
