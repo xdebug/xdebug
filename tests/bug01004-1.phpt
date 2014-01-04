@@ -16,7 +16,7 @@ echo "Hi!\n";
 
 ?>
 --EXPECTF--
-Warning: strlen() expects exactly 1 parameter, 0 given in %sbug01004-1.php on line 3
+Warning: %s in %sbug01004-1.php on line 3
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01004-1.php:0
@@ -24,7 +24,7 @@ Call Stack:
 
 Hi!
 
-Warning: strlen() expects exactly 1 parameter, 0 given in %sbug01004-1.php on line 7
+Warning: %s in %sbug01004-1.php on line 7
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01004-1.php:0

@@ -123,22 +123,43 @@ static char* return_trace_stack_retval_normal(function_stack_entry* i, zval* ret
 	return str.d;
 }
 
+static char *render_variable(zval *var, int type TSRMLS_DC)
+{
+	char *tmp_value = NULL;
+
+	switch (XG(collect_params)) {
+		case 1: /* synopsis */
+		case 2:
+			tmp_value = xdebug_get_zval_synopsis(var, 0, NULL);
+			break;
+		case 3: /* full */
+		case 4: /* full (with var) */
+		default:
+			tmp_value = xdebug_get_zval_value(var, 0, NULL);
+			break;
+		case 5: /* serialized */
+			tmp_value = xdebug_get_zval_value_serialized(var, 0, NULL TSRMLS_CC);
+			break;
+	}
+
+	return tmp_value;
+}
+
 static char* return_trace_stack_retval_computerized(function_stack_entry* i, int fnr, zval* retval TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
-	char      *tmp_value;
-
-	if (XG(collect_params) != 5) {
-		return xdstrdup("");
-	}
+	char      *tmp_value = NULL;
 
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", i->level), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fnr), 1);
 	xdebug_str_add(&str, "R\t\t\t", 0);
 
-	tmp_value = xdebug_get_zval_value_serialized(retval, 0, NULL TSRMLS_CC);
+	tmp_value = render_variable(retval, XG(collect_params) TSRMLS_CC);
+
 	if (tmp_value) {
 		xdebug_str_add(&str, tmp_value, 1);
+	} else {
+		xdebug_str_add(&str, "???", 0);
 	}
 	xdebug_str_addl(&str, "\n", 2, 0);
 
@@ -322,20 +343,8 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 					xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
 				}
 
-				switch (XG(collect_params)) {
-					case 1: /* synopsis */
-					case 2:
-						tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
-						break;
-					case 3: /* full */
-					case 4: /* full (with var) */
-					default:
-						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-						break;
-					case 5: /* serialized */
-						tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
-						break;
-				}
+				tmp_value = render_variable(i->var[j].addr, XG(collect_params) TSRMLS_CC);
+
 				if (tmp_value) {
 					xdebug_str_add(&str, tmp_value, 1);
 				} else {
