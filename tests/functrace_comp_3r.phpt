@@ -1,0 +1,59 @@
+--TEST--
+Test computerized function traces (level3, comp, with return)
+--INI--
+xdebug.default_enable=1
+xdebug.profiler_enable=0
+xdebug.auto_trace=0
+xdebug.trace_format=1
+xdebug.dump_globals=0
+xdebug.show_mem_delta=0
+xdebug.collect_vars=0
+xdebug.collect_params=3
+xdebug.collect_return=1
+xdebug.collect_assignments=0
+--FILE--
+<?php
+$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
+
+function foo( $a, $b )
+{
+	return $a;
+}
+
+@foo( 42 );
+@foo( "string" );
+@foo( "string\nwi\th\nnewline" );
+@foo( 1, false );
+@foo( true, null );
+@foo( "foo", "bar", 3.1415 );
+
+xdebug_stop_trace();
+echo file_get_contents($tf);
+unlink($tf);
+?>
+--EXPECTF--
+Version: %s
+File format: 3
+TRACE START [%d-%d-%d %d:%d:%d]
+2	2	1	%f	%d
+2	3	0	%f	%d	foo	1		%sfunctrace_comp_3r.php	9	2	42	???
+2	3	1	%f	%d
+2	3	R			42
+2	4	0	%f	%d	foo	1		%sfunctrace_comp_3r.php	10	2	'string'	???
+2	4	1	%f	%d
+2	4	R			'string'
+2	5	0	%f	%d	foo	1		%sfunctrace_comp_3r.php	11	2	'string\nwi\th\nnewline'	???
+2	5	1	%f	%d
+2	5	R			'string\nwi\th\nnewline'
+2	6	0	%f	%d	foo	1		%sfunctrace_comp_3r.php	12	2	1	FALSE
+2	6	1	%f	%d
+2	6	R			1
+2	7	0	%f	%d	foo	1		%sfunctrace_comp_3r.php	13	2	TRUE	NULL
+2	7	1	%f	%d
+2	7	R			TRUE
+2	8	0	%f	%d	foo	1		%sfunctrace_comp_3r.php	14	3	'foo'	'bar'	3.1415
+2	8	1	%f	%d
+2	8	R			'foo'
+2	9	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_3r.php	16	0
+			%f	%d
+TRACE END   [%d-%d-%d %d:%d:%d]
