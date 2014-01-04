@@ -4,6 +4,7 @@ Test for xdebug.halt_level [2]
 error_level=-1
 xdebug.halt_level=0
 xdebug.default_enable=1
+xdebug.collect_params=0
 --FILE--
 <?php
 ini_set('xdebug.halt_level', E_NOTICE);
