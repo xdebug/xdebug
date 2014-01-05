@@ -1,5 +1,5 @@
 --TEST--
-Test for correct display with xdebug_var_dump()
+Test for file and link display with xdebug_var_dump()
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -7,8 +7,8 @@ xdebug.profiler_enable=0
 html_errors=1
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11
-xdebug.overload_var_dump=1
-xdebug.file_link_format=
+xdebug.overload_var_dump=2
+xdebug.file_link_format=xdebug://%f@%l
 --FILE--
 <?php
 	class TimeStuff {
@@ -32,8 +32,9 @@ xdebug.file_link_format=
 
 	var_dump($ts1);
 ?>
---EXPECT--
+--EXPECTF--
 <pre class='xdebug-var-dump' dir='ltr'>
+<small><a href='xdebug://%sxdebug_var_dump_file_link.php@%d'>%sxdebug_var_dump_file_link.php:%d</a>:</small>
 <b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
   <i>private</i> 'user_defined' <font color='#888a85'>=&gt;</font> <small>boolean</small> <font color='#75507b'>true</font>

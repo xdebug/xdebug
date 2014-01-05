@@ -211,40 +211,6 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 	}
 }
 
-static int create_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC)
-{
-	xdebug_str fname = {0, 0, NULL};
-	char      *format = XG(file_link_format);
-	
-	while (*format)
-	{
-		if (*format != '%') {
-			xdebug_str_addl(&fname, (char *) format, 1, 0);
-		} else {
-			format++;
-			switch (*format)
-			{
-				case 'f': /* filename */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", error_filename), 1);
-					break;
-
-				case 'l': /* line number */
-					xdebug_str_add(&fname, xdebug_sprintf("%d", error_lineno), 1);
-					break;
-
-				case '%': /* literal % */
-					xdebug_str_addl(&fname, "%", 1, 0);
-					break;
-			}
-		}
-		format++;
-	}
-	
-	*filename = fname.d;
-
-	return fname.l;
-}
-
 void xdebug_append_error_head(xdebug_str *str, int html, char *error_type_str TSRMLS_DC)
 {
 	char **formats = select_formats(html TSRMLS_CC);
@@ -281,7 +247,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 	if (strlen(XG(file_link_format)) > 0 && html) {
 		char *file_link;
 
-		create_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
+		xdebug_format_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
 		xdebug_str_add(str, xdebug_sprintf(formats[11], error_type_str, escaped, file_link, error_filename, error_lineno), 1);
 		xdfree(file_link);
 	} else {
@@ -407,7 +373,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
 					char *file_link;
 
-					create_file_link(&file_link, i->filename, i->lineno TSRMLS_CC);
+					xdebug_format_file_link(&file_link, i->filename, i->lineno TSRMLS_CC);
 					xdebug_str_add(str, xdebug_sprintf(formats[10], i->filename, file_link, just_filename, i->lineno), 1);
 					xdfree(file_link);
 				} else {
