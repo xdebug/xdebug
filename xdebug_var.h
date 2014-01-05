@@ -40,6 +40,7 @@ typedef struct xdebug_var_export_options {
 	int max_data;
 	int max_depth;
 	int show_hidden;
+	int show_location;
 	xdebug_var_runtime_page *runtime;
 	int no_decoration;
 } xdebug_var_export_options;
