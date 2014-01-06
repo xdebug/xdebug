@@ -47,7 +47,7 @@ typedef struct xdebug_var_export_options {
 #define XDEBUG_VAR_TYPE_NORMAL   0x00
 #define XDEBUG_VAR_TYPE_STATIC   0x01
 
-zval* xdebug_get_php_symbol(char* name, int name_length);
+zval* xdebug_get_php_symbol(char* name, int name_length TSRMLS_DC);
 char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name);
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D);

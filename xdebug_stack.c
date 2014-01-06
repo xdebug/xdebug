@@ -132,7 +132,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 
 	tmp_ht = XG(active_symbol_table);
 	XG(active_symbol_table) = EG(active_symbol_table);
-	zvar = xdebug_get_php_symbol(name, strlen(name) + 1);
+	zvar = xdebug_get_php_symbol(name, strlen(name) + 1 TSRMLS_CC);
 	XG(active_symbol_table) = tmp_ht;
 
 	formats = select_formats(PG(html_errors) TSRMLS_CC);
