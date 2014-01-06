@@ -1778,9 +1778,9 @@ PHP_FUNCTION(xdebug_debug_zval)
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
 			XG(active_symbol_table) = EG(active_symbol_table);
-			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
+			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1 TSRMLS_CC);
+			php_printf("%s: ", Z_STRVAL_PP(args[i]));
 			if (debugzval) {
-				php_printf("%s: ", Z_STRVAL_PP(args[i]));
 				if (PG(html_errors)) {
 					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
@@ -1795,6 +1795,8 @@ PHP_FUNCTION(xdebug_debug_zval)
 				}
 				xdfree(val);
 				PHPWRITE("\n", 1);
+			} else {
+				PHPWRITE("no such symbol\n", 15);
 			}
 		}
 	}
@@ -1830,13 +1832,15 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
 			XG(active_symbol_table) = EG(active_symbol_table);
-			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1);
+			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1 TSRMLS_CC);
+			printf("%s: ", Z_STRVAL_PP(args[i]));
 			if (debugzval) {
-				printf("%s: ", Z_STRVAL_PP(args[i]));
 				val = xdebug_get_zval_value(debugzval, 1, NULL);
 				printf("%s(%zd)", val, strlen(val));
 				xdfree(val);
 				printf("\n");
+			} else {
+				printf("no such symbol\n\n");
 			}
 		}
 	}
