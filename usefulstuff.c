@@ -668,6 +668,40 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 	return fname.l;
 }
 
+int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC)
+{
+	xdebug_str fname = {0, 0, NULL};
+	char      *format = XG(file_link_format);
+
+	while (*format)
+	{
+		if (*format != '%') {
+			xdebug_str_addl(&fname, (char *) format, 1, 0);
+		} else {
+			format++;
+			switch (*format)
+			{
+				case 'f': /* filename */
+					xdebug_str_add(&fname, xdebug_sprintf("%s", error_filename), 1);
+					break;
+
+				case 'l': /* line number */
+					xdebug_str_add(&fname, xdebug_sprintf("%d", error_lineno), 1);
+					break;
+
+				case '%': /* literal % */
+					xdebug_str_addl(&fname, "%", 1, 0);
+					break;
+			}
+		}
+		format++;
+	}
+
+	*filename = fname.d;
+
+	return fname.l;
+}
+
 void xdebug_open_log(TSRMLS_D)
 {
 	/* initialize remote log file */

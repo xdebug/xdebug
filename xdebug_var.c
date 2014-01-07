@@ -191,29 +191,438 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, XDEBUG_ZNODE *nod
 /*****************************************************************************
 ** PHP Variable related utility functions
 */
-zval* xdebug_get_php_symbol(char* name, int name_length)
+/*****************************************************************************
+** Data returning functions
+*/
+#define XF_ST_ROOT               0
+#define XF_ST_ARRAY_INDEX_NUM    1
+#define XF_ST_ARRAY_INDEX_ASSOC  2
+#define XF_ST_OBJ_PROPERTY       3
+#define XF_ST_STATIC_ROOT        4
+#define XF_ST_STATIC_PROPERTY    5
+
+inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 {
-	HashTable           *st = NULL;
-	zval               **retval;
-	TSRMLS_FETCH();
-
-	st = XG(active_symbol_table);
-	if (st && st->nNumOfElements && zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return *retval;
-	}
-
-	st = EG(active_op_array)->static_variables;
-	if (st) {
-		if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-			return *retval;
-		}
-	}
-	
-	st = &EG(symbol_table);
-	if (zend_hash_find(st, name, name_length, (void **) &retval) == SUCCESS) {
-		return *retval;
+	switch (Z_TYPE_P(z)) {
+		case IS_ARRAY:
+			return Z_ARRVAL_P(z);
+			break;
+		case IS_OBJECT:
+			return Z_OBJPROP_P(z);
+			break;
 	}
 	return NULL;
+}
+
+inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
+{
+	char *name;
+	zend_uint name_len;
+	zend_class_entry *tmp_ce;
+
+	if (Z_TYPE_P(z) != IS_OBJECT) {
+		return NULL;
+	}
+
+	tmp_ce = zend_get_class_entry(z TSRMLS_CC);
+	if (Z_OBJ_HT_P(z)->get_class_name == NULL ||
+		Z_OBJ_HT_P(z)->get_class_name(z, (const char **) &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+
+		if (!tmp_ce) {
+			return NULL;
+		}
+
+		*length = tmp_ce->name_length;
+		*ce = tmp_ce;
+		return estrdup(tmp_ce->name);
+	} else {
+		*ce = tmp_ce;
+	}
+
+	*length = name_len;
+	return name;
+}
+
+static char* prepare_search_key(char *name, int *name_length, char *prefix, int prefix_length)
+{
+	char *element;
+	int   extra_length = 0;
+
+	if (prefix_length) {
+		if (prefix[0] == '*') {
+			extra_length = 3;
+		} else {
+			extra_length = 2 + prefix_length;
+		}
+	}
+
+	element = malloc(*name_length + 1 + extra_length);
+	memset(element, 0, *name_length + 1 + extra_length);
+	if (extra_length) {
+		memcpy(element + 1, prefix, extra_length - 2);
+	}
+	memcpy(element + extra_length, name, *name_length);
+	*name_length += extra_length;
+
+	return element;
+}
+
+static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
+{
+	zval **retval_pp = NULL, *retval_p = NULL;
+	char  *element = NULL;
+	int    element_length = name_length;
+#if PHP_VERSION_ID >= 50400
+	zend_property_info *zpp;
+#endif
+
+	switch (type) {
+		case XF_ST_STATIC_ROOT:
+		case XF_ST_STATIC_PROPERTY:
+#if PHP_VERSION_ID < 50400
+			ht = CE_STATIC_MEMBERS(cce);
+			goto continue_from_static_root;
+#else
+			/* First we try a public,private,protected property */
+			element = prepare_search_key(name, &element_length, "", 0);
+			if (cce && &cce->properties_info && zend_hash_find(&cce->properties_info, element, element_length + 1, (void **) &zpp) == SUCCESS) {
+				retval_p = cce->static_members_table[zpp->offset];
+				goto cleanup;
+			}
+			element_length = name_length;
+
+			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
+			if (name[0] == '*') {
+				char *secondStar;
+				
+				secondStar = strstr(name + 1, "*");
+				if (secondStar) {
+					free(element);
+					element_length = name_length - (secondStar + 1 - name);
+					element = prepare_search_key(secondStar + 1, &element_length, "", 0);
+					if (cce && &cce->properties_info && zend_hash_find(&cce->properties_info, element, element_length + 1, (void **) &zpp) == SUCCESS) {
+						retval_p = cce->static_members_table[zpp->offset];
+						goto cleanup;
+					}
+				}
+			}
+
+			break;
+#endif
+
+		case XF_ST_ROOT:
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+			/* Check for compiled vars */
+			element = prepare_search_key(name, &element_length, "", 0);
+			if (XG(active_execute_data) && XG(active_op_array)) {
+				int i = 0;
+				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
+				zend_op_array *opa = XG(active_op_array);
+				zval **CV;
+
+				while (i < opa->last_var) {
+					if (opa->vars[i].hash_value == hash_value &&
+						opa->vars[i].name_len == element_length &&
+						strcmp(opa->vars[i].name, element) == 0)
+					{
+#if PHP_VERSION_ID >= 50500
+						CV = (*EX_CV_NUM(XG(active_execute_data), i));
+#else
+						CV = XG(active_execute_data)->CVs[i];
+#endif
+						if (CV) {
+							retval_p = *CV;
+							goto cleanup;
+						}
+					}
+					i++;
+				}
+			}
+			free(element);
+			ht = XG(active_symbol_table);
+#else
+			ht = XG(active_symbol_table);
+			/* break intentionally missing */
+#endif
+		case XF_ST_ARRAY_INDEX_ASSOC:
+			element = prepare_search_key(name, &name_length, "", 0);
+
+			/* Handle "this" in a different way */
+			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
+				if (XG(This)) {
+					retval_p = XG(This);
+				} else {
+					retval_p = NULL;
+				}
+				goto cleanup;
+			}
+
+			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			break;
+		case XF_ST_ARRAY_INDEX_NUM:
+			element = prepare_search_key(name, &name_length, "", 0);
+			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			break;
+		case XF_ST_OBJ_PROPERTY:
+#if PHP_VERSION_ID <= 50400
+continue_from_static_root:
+#endif
+
+			/* First we try a public property */
+			element = prepare_search_key(name, &element_length, "", 0);
+			if (ht && zend_symtable_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			element_length = name_length;
+
+			/* Then we try it again as protected property */
+			free(element);
+			element = prepare_search_key(name, &element_length, "*", 1);
+			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			element_length = name_length;
+
+			/* Then we try it again as private property */
+			free(element);
+			element = prepare_search_key(name, &element_length, ccn, ccnl);
+			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+				retval_p = *retval_pp;
+				goto cleanup;
+			}
+			element_length = name_length;
+
+			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
+			if (name[0] == '*') {
+				char *secondStar;
+				
+				secondStar = strstr(name + 1, "*");
+				if (secondStar) {
+					free(element);
+					element_length = name_length - (secondStar + 1 - name);
+					element = prepare_search_key(secondStar + 1, &element_length, name + 1, secondStar - name - 1);
+					if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
+						retval_p = *retval_pp;
+						goto cleanup;
+					}
+				}
+			}
+
+			break;
+	}
+cleanup:
+	if (element) {
+		free(element);
+	}
+	return retval_p;
+}
+
+zval* xdebug_get_php_symbol(char* name, int name_length TSRMLS_DC)
+{
+	HashTable *st = NULL;
+	int        found = -1;
+	int        state = 0;
+	char     **p = &name;
+	char      *keyword = NULL, *keyword_end = NULL;
+	int        type = XF_ST_ROOT;
+	zval      *retval = NULL;
+	char      *current_classname = NULL;
+	zend_class_entry *current_ce = NULL;
+	int        cc_length = 0;
+	char       quotechar = 0;
+
+	do {
+		if (*p[0] == '\0') {
+			found = 0;
+		} else {
+			switch (state) {
+				case 0:
+					if (*p[0] == '$') {
+						keyword = *p + 1;
+						break;
+					}
+					if (*p[0] == ':') { /* special tricks */
+						keyword = *p;
+						state = 7;
+						break;
+					}
+					keyword = *p;
+					state = 1;
+					/* break intentionally missing */
+				case 1:
+					if (*p[0] == '[') {
+						keyword_end = *p;
+						if (keyword) {
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
+							current_classname = NULL;
+							cc_length = 0;
+							current_ce = NULL;
+							if (retval) {
+								st = fetch_ht_from_zval(retval TSRMLS_CC);
+							}
+							keyword = NULL;
+						}
+						state = 3;
+					} else if (*p[0] == '-') {
+						keyword_end = *p;
+						if (keyword) {
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
+							current_classname = NULL;
+							cc_length = 0;
+							current_ce = NULL;
+							if (retval) {
+								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
+								st = fetch_ht_from_zval(retval TSRMLS_CC);
+							}
+							keyword = NULL;
+						}
+						state = 2;
+						type = XF_ST_OBJ_PROPERTY;
+					} else if (*p[0] == ':') {
+						keyword_end = *p;
+						if (keyword) {
+							retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+							if (current_classname) {
+								efree(current_classname);
+							}
+							current_classname = NULL;
+							cc_length = 0;
+							if (retval) {
+								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
+								st = NULL;
+							}
+							keyword = NULL;
+						}
+						state = 8;
+						type = XF_ST_STATIC_PROPERTY;
+					}
+					break;
+				case 2:
+					if (*p[0] != '>') {
+						keyword = *p;
+						state = 1;
+					}
+					break;
+				case 8:
+					if (*p[0] != ':') {
+						keyword = *p;
+						state = 1;
+					}
+					break;
+				case 3: /* Parsing in [...] */
+					/* Associative arrays */
+					if (*p[0] == '\'' || *p[0] == '"') {
+						state = 4;
+						keyword = *p + 1;
+						quotechar = *p[0];
+						type = XF_ST_ARRAY_INDEX_ASSOC;
+					}
+					/* Numerical index */
+					if (*p[0] >= '0' && *p[0] <= '9') {
+						cc_length = 0;
+						state = 6;
+						keyword = *p;
+						type = XF_ST_ARRAY_INDEX_NUM;
+					}
+					/* Numerical index starting with a - */
+					if (*p[0] == '-') {
+						state = 9;
+						keyword = *p;
+					}
+					break;
+				case 9:
+					/* Numerical index starting with a - */
+					if (*p[0] >= '0' && *p[0] <= '9') {
+						state = 6;
+						type = XF_ST_ARRAY_INDEX_NUM;
+					}
+					break;
+				case 4:
+					if (*p[0] == quotechar) {
+						quotechar = 0;
+						state = 5;
+						keyword_end = *p;
+						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+						if (current_classname) {
+							efree(current_classname);
+						}
+						current_classname = NULL;
+						cc_length = 0;
+						if (retval) {
+							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
+							st = fetch_ht_from_zval(retval TSRMLS_CC);
+						}
+						keyword = NULL;
+					}
+					break;
+				case 5:
+					if (*p[0] == ']') {
+						state = 1;
+					}
+					break;
+				case 6:
+					if (*p[0] == ']') {
+						state = 1;
+						keyword_end = *p;
+						retval = fetch_zval_from_symbol_table(st, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+						if (current_classname) {
+							efree(current_classname);
+						}
+						current_classname = NULL;
+						cc_length = 0;
+						if (retval) {
+							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
+							st = fetch_ht_from_zval(retval TSRMLS_CC);
+						}
+						keyword = NULL;
+					}
+					break;
+				case 7: /* special cases, started with a ":" */
+					if (*p[0] == ':') {
+						state = 1;
+						keyword_end = *p;
+
+						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
+							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+
+							st = NULL;
+
+							current_classname = estrdup(ce->name);
+							cc_length = strlen(ce->name);
+							current_ce = ce;
+							keyword = *p + 1;
+
+							type = XF_ST_STATIC_ROOT;
+						} else {
+							keyword = NULL;
+						}
+					}
+					break;
+			}
+			(*p)++;
+		}
+	} while (found < 0);
+	if (keyword != NULL) {
+		retval = fetch_zval_from_symbol_table(st, keyword, *p - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+	}
+	if (current_classname) {
+		efree(current_classname);
+	}
+	return retval;
 }
 
 char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name)
@@ -249,6 +658,7 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	options->max_data = XG(display_max_data);
 	options->max_depth = XG(display_max_depth);
 	options->show_hidden = 0;
+	options->show_location = XG(overload_var_dump) > 1;
 
 	if (options->max_children == -1 || options->max_children > XDEBUG_MAX_INT) {
 		options->max_children = XDEBUG_MAX_INT;
@@ -274,7 +684,7 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	return options;
 }
 
-xdebug_var_export_options xdebug_var_nolimit_options = { XDEBUG_MAX_INT, XDEBUG_MAX_INT, 1023, 1, NULL, 0 };
+xdebug_var_export_options xdebug_var_nolimit_options = { XDEBUG_MAX_INT, XDEBUG_MAX_INT, 1023, 1, 0, NULL, 0 };
 
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 {
@@ -694,11 +1104,11 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	if (!struc || !(*struc)) {
 		return;
 	}
+	
+	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
 	}
-	
-	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
 
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
@@ -821,6 +1231,10 @@ char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebu
 		default_options = 1;
 	}
 
+	if (options->show_location) {
+		xdebug_str_add(&str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, zend_get_executed_filename(TSRMLS_C), ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
+	}
+
 	xdebug_var_export_text_ansi(&val, (xdebug_str*) &str, mode, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
@@ -894,6 +1308,10 @@ char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xd
 	if (!options) {
 		options = xdebug_var_export_options_from_ini(TSRMLS_C);
 		default_options = 1;
+	}
+
+	if (options->show_location) {
+		xdebug_str_add(&str, xdebug_sprintf("%s%s: %d%s\n", ANSI_COLOR_BOLD, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
 	}
 
 	xdebug_var_synopsis_text_ansi(&val, (xdebug_str*) &str, mode, 1, debug_zval, options TSRMLS_CC);
@@ -1606,6 +2024,17 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 	}
 
 	xdebug_str_addl(&str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
+	if (options->show_location) {
+		if (strlen(XG(file_link_format)) > 0) {
+			char *file_link;
+
+			xdebug_format_file_link(&file_link, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+			xdebug_str_add(&str, xdebug_sprintf("\n<small><a href='%s'>%s:%d</a>:</small>", file_link, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C)), 1);
+			xdfree(file_link);
+		} else {
+			xdebug_str_add(&str, xdebug_sprintf("\n<small>%s:%d:</small>", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C)), 1);
+		}
+	}
 	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 	xdebug_str_addl(&str, "</pre>", 6, 0);
 

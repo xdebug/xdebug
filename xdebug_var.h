@@ -40,6 +40,7 @@ typedef struct xdebug_var_export_options {
 	int max_data;
 	int max_depth;
 	int show_hidden;
+	int show_location;
 	xdebug_var_runtime_page *runtime;
 	int no_decoration;
 } xdebug_var_export_options;
@@ -47,7 +48,7 @@ typedef struct xdebug_var_export_options {
 #define XDEBUG_VAR_TYPE_NORMAL   0x00
 #define XDEBUG_VAR_TYPE_STATIC   0x01
 
-zval* xdebug_get_php_symbol(char* name, int name_length);
+zval* xdebug_get_php_symbol(char* name, int name_length TSRMLS_DC);
 char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name);
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D);
