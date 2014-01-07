@@ -7,6 +7,7 @@ xdebug.scream=0
 error_reporting(E_ALL);
 html_errors=1
 xdebug.file_link_format=xdebug://%f@%l
+xdebug.force_error_reporting=0
 --FILE--
 <?php
 echo @strstr(), "\n";

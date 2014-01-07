@@ -6,6 +6,7 @@ xdebug.remote_enable=1
 xdebug.remote_autostart=1
 xdebug.remote_mode=jit
 xdebug.remote_log=/tmp/bug932.log
+xdebug.force_error_reporting=0
 --FILE--
 <?php
 touch("/tmp/bug932.log");
