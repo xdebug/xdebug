@@ -5,6 +5,7 @@ xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.scream=0
 error_reporting(E_ALL);
+xdebug.force_error_reporting=0
 --FILE--
 <?php
 echo @strstr(), "\n";

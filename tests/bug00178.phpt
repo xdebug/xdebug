@@ -15,6 +15,7 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 track_errors=1
 display_errors=0
+xdebug.force_display_errors=0
 --FILE--
 <?php
 fsockopen();
