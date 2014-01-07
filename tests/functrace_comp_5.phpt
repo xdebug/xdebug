@@ -11,6 +11,7 @@ xdebug.collect_vars=0
 xdebug.collect_params=5
 xdebug.collect_return=0
 xdebug.collect_assignments=0
+xdebug.force_error_reporting=0
 --FILE--
 <?php
 $tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
