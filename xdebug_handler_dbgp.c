@@ -1420,7 +1420,7 @@ DBGP_FUNC(property_set)
 	new_value = (char*) xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
 
 	if (CMD_OPTION('t')) {
-		symbol = get_symbol_contents_zval(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);
+		symbol = xdebug_get_php_symbol(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);
 
 		/* Handle result */
 		if (!symbol) {
