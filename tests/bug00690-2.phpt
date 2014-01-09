@@ -21,7 +21,7 @@ unlink($trace_file);
 DONE
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> xdebug_get_tracefile_name() %sbug00690-2.php:3
-                           >=> '/tmp/trace.bug690.xt'
+%w%f %w%d      >=> '/tmp/trace.bug690.xt'
                            => $trace_file = '/tmp/trace.bug690.xt' %sbug00690-2.php:3
 %w%f %w%d     -> file_get_contents('/tmp/trace.bug690.xt') %sbug00690-2.php:5
 

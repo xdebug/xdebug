@@ -27,7 +27,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $class = 'class' %sbug00701.php:4
                            => $method = 'methodName' %sbug00701.php:5
 %w%f %w%d     -> ucfirst('class') %sbug00701.php:6
-                           >=> 'Class'
+%w%f %w%d      >=> 'Class'
                            => $action_ids[???]['methodName'] = 'methodName' %sbug00701.php:6
 %w%f %w%d     -> xdebug_stop_trace() %sbug00701.php:8
 %w%f %w%d
