@@ -46,17 +46,17 @@ echo "DONE\n";
 TRACE START [%d-%d-%d %d:%d:%d]
                            => $tf = '/tmp/xdt%s.%s.xt' %sbug00756.php:18
 %w%f %w%d     -> xdebug_get_tracefile_name() %sbug00756.php:19
-                           >=> '/tmp/xdt%s.%s.xt'
+%w%f %w%d      >=> '/tmp/xdt%s.%s.xt'
                            => $trace_file = '/tmp/xdt%s.%s.xt' %sbug00756.php:19
 %w%f %w%d     -> foo::bar() %sbug00756.php:21
                              => self::bar++ %sbug00756.php:9
-                           >=> NULL
+%w%f %w%d      >=> NULL
 %w%f %w%d     -> foo->foo() %sbug00756.php:22
                              => $this->foo++ %sbug00756.php:14
-                           >=> NULL
+%w%f %w%d      >=> NULL
                            => $f = class foo { public $foo = 1 } %sbug00756.php:22
 %w%f %w%d     -> foo->foo() %sbug00756.php:23
                              => $this->foo++ %sbug00756.php:14
-                           >=> NULL
+%w%f %w%d      >=> NULL
 %w%f %w%d     -> file_get_contents('/tmp/xdt%s.%s.xt') %sbug00756.php:25
 DONE
