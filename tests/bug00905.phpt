@@ -42,17 +42,17 @@ key => c
 11 => f
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> gen() %sbug00905.php:13
-                           >=> (0 => 'a')
+%w%f %w%d      >=> (0 => 'a')
 %w%f %w%d     -> gen() %sbug00905.php:13
-                           >=> (1 => 'b')
+%w%f %w%d      >=> (1 => 'b')
 %w%f %w%d     -> gen() %sbug00905.php:13
-                           >=> ('key' => 'c')
+%w%f %w%d      >=> ('key' => 'c')
 %w%f %w%d     -> gen() %sbug00905.php:13
-                           >=> (2 => 'd')
+%w%f %w%d      >=> (2 => 'd')
 %w%f %w%d     -> gen() %sbug00905.php:13
-                           >=> (10 => 'e')
+%w%f %w%d      >=> (10 => 'e')
 %w%f %w%d     -> gen() %sbug00905.php:13
-                           >=> (11 => 'f')
+%w%f %w%d      >=> (11 => 'f')
 %w%f %w%d     -> gen() %sbug00905.php:13
 %w%f %w%d     -> xdebug_stop_trace() %sbug00905.php:17
 %w%f %w%d

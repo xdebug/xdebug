@@ -97,14 +97,18 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 {
 	unsigned int j = 0; /* Counter */
 
-	xdebug_str_addl(str, "                    ", 20, 0);
+	xdebug_str_add(str, xdebug_sprintf("%10.4f ", xdebug_get_utime() - XG(start_time)), 1);
+#if HAVE_PHP_MEMORY_USAGE
+	xdebug_str_add(str, xdebug_sprintf("%10lu ", XG_MEMORY_USAGE()), 1);
+#endif
+
 	if (XG(show_mem_delta)) {
 		xdebug_str_addl(str, "        ", 8, 0);
 	}
 	for (j = 0; j < i->level; j++) {
 		xdebug_str_addl(str, "  ", 2, 0);
 	}
-	xdebug_str_addl(str, "   >=> ", 7, 0);
+	xdebug_str_addl(str, " >=> ", 5, 0);
 }
 
 static char* return_trace_stack_retval_normal(function_stack_entry* i, zval* retval TSRMLS_DC)
