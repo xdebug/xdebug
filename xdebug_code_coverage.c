@@ -686,3 +686,8 @@ PHP_FUNCTION(xdebug_get_function_count)
 {
 	RETURN_LONG(XG(function_count));
 }
+
+PHP_FUNCTION(xdebug_code_coverage_started)
+{
+	RETURN_BOOL(XG(do_code_coverage));
+}
