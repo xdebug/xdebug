@@ -142,6 +142,7 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_start_code_coverage,   NULL)
 	PHP_FE(xdebug_stop_code_coverage,    NULL)
 	PHP_FE(xdebug_get_code_coverage,     NULL)
+	PHP_FE(xdebug_code_coverage_started, NULL)
 	PHP_FE(xdebug_get_function_count,    NULL)
 
 	PHP_FE(xdebug_dump_superglobals,     NULL)
