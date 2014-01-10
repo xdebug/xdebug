@@ -714,7 +714,7 @@ void xdebug_open_log(TSRMLS_D)
 		fprintf(XG(remote_log_file), "Log opened at %s\n", timestr);
 		fflush(XG(remote_log_file));
 		xdfree(timestr);
-	} else {
+	} else if (strlen(XG(remote_log))) {
 		php_log_err(xdebug_sprintf("XDebug could not open the remote debug file '%s'.", XG(remote_log)) TSRMLS_CC);
 	}
 }
