@@ -88,7 +88,7 @@ dbgpRun( $data, $commands );
 
 -> context_names -i 15
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="15"><context name="Locals" id=""></context><context name="Superglobals" id=""></context></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="15"><context name="Locals" id=""></context><context name="Superglobals" id=""></context><context name="User defined constants" id=""></context></response>
 
 -> run -i 16
 <?xml version="1.0" encoding="iso-8859-1"?>

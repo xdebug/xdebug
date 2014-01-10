@@ -1795,9 +1795,15 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 				full_name = xdstrdup(tmp_name);
 				xdfree(tmp_name);
 			} break;
+
 			case XDEBUG_VAR_TYPE_STATIC:
 				short_name = xdebug_sprintf("::%s", name);
 				full_name =  xdebug_sprintf("::%s", name);
+				break;
+
+			case XDEBUG_VAR_TYPE_CONSTANT:
+				short_name = xdstrdup(name);
+				full_name =  xdstrdup(name);
 				break;
 		}
 
