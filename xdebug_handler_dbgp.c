@@ -1279,6 +1279,19 @@ DBGP_FUNC(typemap_get)
 	}
 }
 
+static int add_constant_node(xdebug_xml_node *node, char *name, int name_lenth, zval *const_val, xdebug_var_export_options *options TSRMLS_DC)
+{
+	xdebug_xml_node *contents;
+
+	contents = xdebug_get_zval_value_xml_node_ex(name, const_val, XDEBUG_VAR_TYPE_CONSTANT, options TSRMLS_CC);
+	if (contents) {
+		xdebug_xml_add_attribute(contents, "facet", "constant");
+		xdebug_xml_add_child(node, contents);
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
 static int add_variable_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_xml_node *contents;
@@ -1333,8 +1346,12 @@ DBGP_FUNC(property_get)
 		} else {
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
-	} else { /* superglobals */
+	} else if (context_nr == 1) { /* superglobals */
 		XG(active_symbol_table) = &EG(symbol_table);
+	} else if (context_nr == 2) { /* constants */
+		/* Do nothing */
+	} else {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
 
 	if (CMD_OPTION('p')) {
@@ -1348,9 +1365,22 @@ DBGP_FUNC(property_get)
 	if (CMD_OPTION('m')) {
 		options->max_data= strtol(CMD_OPTION('m'), NULL, 10);
 	}
-	if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0, options TSRMLS_CC) == FAILURE) {
-		options->max_data = old_max_data;
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+	if (context_nr == 2) { /* constants */
+		zval const_val;
+
+		if (!zend_get_constant(CMD_OPTION('n'), strlen(CMD_OPTION('n')), &const_val TSRMLS_CC)) {
+			options->max_data = old_max_data;
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+		}
+		if (add_constant_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, &const_val, options TSRMLS_CC) == FAILURE) {
+			options->max_data = old_max_data;
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+		}
+	} else {
+		if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0, options TSRMLS_CC) == FAILURE) {
+			options->max_data = old_max_data;
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+		}
 	}
 	XG(active_op_array) = NULL;
 }
@@ -1599,8 +1629,8 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	function_stack_entry *fse;
 	char                 *var_name;
 
-	/* right now, we only have zero or one, one being globals, which is
-	 * always the head of the stack */
+	/* right now, we only have zero, one, or two with one being globals, which
+	 * is always the head of the stack */
 	if (context_id == 1) {
 		/* add super globals */
 		XG(active_symbol_table) = &EG(symbol_table);
@@ -1615,6 +1645,31 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		add_variable_node(node, "_SESSION", sizeof("_SESSION"), 1, 1, 0, options TSRMLS_CC);
 		add_variable_node(node, "GLOBALS", sizeof("GLOBALS"), 1, 1, 0, options TSRMLS_CC);
 		XG(active_symbol_table) = NULL;
+		return 0;
+	}
+
+	/* add user defined constants */
+	if (context_id == 2) {
+		HashPosition   pos;
+		zend_constant *val;
+
+		zend_hash_internal_pointer_reset_ex(EG(zend_constants), &pos);
+		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &val, &pos) != FAILURE) {
+			if (!val->name) {
+				/* skip special constants */
+				goto next_constant;
+			}
+
+			if (val->module_number != PHP_USER_CONSTANT) {
+				/* we're only interested in user defined constants */
+				goto next_constant;
+			}
+
+			add_constant_node(node, val->name, val->name_len, &(val->value), options TSRMLS_CC);
+next_constant:
+			zend_hash_move_forward_ex(EG(zend_constants), &pos);
+		}
+
 		return 0;
 	}
 
@@ -1723,9 +1778,15 @@ DBGP_FUNC(context_names)
 	xdebug_xml_add_attribute(child, "name", "Locals");
 	xdebug_xml_add_attribute(child, "id", "0");
 	xdebug_xml_add_child(*retval, child);
+
 	child = xdebug_xml_node_init("context");
 	xdebug_xml_add_attribute(child, "name", "Superglobals");
 	xdebug_xml_add_attribute(child, "id", "1");
+	xdebug_xml_add_child(*retval, child);
+
+	child = xdebug_xml_node_init("context");
+	xdebug_xml_add_attribute(child, "name", "User defined constants");
+	xdebug_xml_add_attribute(child, "id", "2");
 	xdebug_xml_add_child(*retval, child);
 }
 

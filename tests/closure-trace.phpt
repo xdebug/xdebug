@@ -36,9 +36,9 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => $f = class Closure {  } %sclosure-trace.php:8
 %w%f %w%d       -> {closure:%sclosure-trace.php:6-8}($a = 5, $b = 25) %sclosure-trace.php:10
 %w%f %w%d         -> strlen(125) %sclosure-trace.php:7
-                               >=> 3
-                             >=> 3
-                           >=> NULL
+%w%f %w%d          >=> 3
+%w%f %w%d        >=> 3
+%w%f %w%d      >=> NULL
 %w%f %w%d     -> xdebug_stop_trace() %sclosure-trace.php:14
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

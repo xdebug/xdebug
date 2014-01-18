@@ -35,22 +35,22 @@ unlink($tf);
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> loadFoo($test = 'view') %sbug00566-1.php:17
 %w%f %w%d       -> strlen('view') %sbug00566-1.php:12
-                             >=> 4
+%w%f %w%d        >=> 4
 %w%f %w%d       -> strlen('views') %sbug00566-1.php:14
-                             >=> 5
-                           >=> NULL
+%w%f %w%d        >=> 5
+%w%f %w%d      >=> NULL
 %w%f %w%d     -> loadMod($module = 'test') %sbug00566-1.php:18
 %w%f %w%d       -> strlen('test') %sbug00566-1.php:5
-                             >=> 4
+%w%f %w%d        >=> 4
 %w%f %w%d       -> strlen('tests') %sbug00566-1.php:7
-                             >=> 5
-                           >=> NULL
+%w%f %w%d        >=> 5
+%w%f %w%d      >=> NULL
 %w%f %w%d     -> loadMod($module = 'view') %sbug00566-1.php:19
 %w%f %w%d       -> strlen('view') %sbug00566-1.php:5
-                             >=> 4
+%w%f %w%d        >=> 4
 %w%f %w%d       -> strlen('views') %sbug00566-1.php:7
-                             >=> 5
-                           >=> NULL
+%w%f %w%d        >=> 5
+%w%f %w%d      >=> NULL
 %w%f %w%d     -> xdebug_stop_trace() %sbug00566-1.php:21
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

@@ -78,6 +78,7 @@ void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC);
 PHP_FUNCTION(xdebug_start_code_coverage);
 PHP_FUNCTION(xdebug_stop_code_coverage);
 PHP_FUNCTION(xdebug_get_code_coverage);
+PHP_FUNCTION(xdebug_code_coverage_started);
 
 PHP_FUNCTION(xdebug_get_function_count);
 
