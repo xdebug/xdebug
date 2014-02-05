@@ -316,6 +316,38 @@ char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 		ret = xdstrdup(fileurl);
 	}
 
+	if (XG(nosymlink_enable)) {
+		//replace symlink to real path
+		tmp = strstr(ret, "current");
+		if (tmp) {
+#define TXT_LEN 7
+			if (strlen(tmp) > TXT_LEN) {
+				if ((tmp[TXT_LEN] == '\\' || tmp[TXT_LEN] == '/')
+					&& ((tmp - ret > 0 && (ret[tmp - ret - 1] == '\\' || ret[tmp - ret - 1] == '/')) || tmp - ret == 0)) {
+					char *tmp_ret = NULL;
+					char buf[1024];
+					ssize_t len;
+
+					tmp_ret = xdstrdup(ret);
+					tmp_ret[tmp - ret + TXT_LEN] = '\0';
+					len = readlink(tmp_ret, buf, sizeof(buf)-1);
+
+					if (len != -1) {
+						char *correct_ret = NULL;
+
+						buf[len] = '\0';
+						ret[tmp - ret] = '\0';
+						correct_ret = xdebug_sprintf("%s%s%s", ret, buf, tmp + TXT_LEN);
+						xdfree(ret);
+						ret = correct_ret;
+					}
+					xdfree(tmp_ret);
+				}
+			}
+#undef TXT_LEN
+		}
+	}
+
 	return ret;
 }
 
@@ -331,6 +363,8 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 	int l, i, new_len;
 	char *tmp = NULL;
 	char *encoded_fileurl;
+
+	char *slash1 = NULL, *slash2 = NULL;
 
 	/* encode the url */
 	encoded_fileurl = xdebug_raw_url_encode(fileurl, strlen(fileurl), &new_len, 1);
@@ -381,6 +415,39 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 		}
 	}
 	xdfree(encoded_fileurl);
+
+	if (XG(nosymlink_enable)) {
+		if (NULL != (slash1 = strchr(tmp, '/'))) {
+			while ((slash1 - tmp < strlen(tmp)) && NULL != (slash2 = strchr(slash1, '/'))) {
+				char *s = slash1;
+				short bCorrect = 0;
+				for ( ; s < slash2 ; s++) {
+					bCorrect = 1;
+					if (!isdigit(s[0])) {
+						bCorrect = 0;
+						break;
+					}
+				}
+				if (bCorrect) {
+					char *path, *tmp_symlink;
+					char buf[1024] = {'\0',};
+					ssize_t len;
+
+					path = xdstrdup(tmp);
+					path[slash1 - tmp] = '\0';
+			
+					tmp_symlink = xdebug_sprintf("%scurrent%s", path, slash2);
+					xdfree(tmp);
+					tmp = tmp_symlink;
+					xdfree(path);
+					break;
+				}
+				else {
+					slash1 = slash2 + 1;
+				}
+			}
+		}
+	}
 	return tmp;
 }
 
