@@ -261,6 +261,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *i;
+	int    printed_frames = 0;
 	int    len;
 	char **formats = select_formats(html TSRMLS_CC);
 
@@ -383,6 +384,11 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				}
 			} else {
 				xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
+			}
+
+			printed_frames++;
+			if (XG(max_stack_frames) > 0 && printed_frames >= XG(max_stack_frames)) {
+				break;
 			}
 		}
 
