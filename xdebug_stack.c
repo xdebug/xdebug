@@ -261,6 +261,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *i;
+	int    printed_frames = 0;
 	int    len;
 	char **formats = select_formats(html TSRMLS_CC);
 
@@ -383,6 +384,11 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				}
 			} else {
 				xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
+			}
+
+			printed_frames++;
+			if (XG(max_stack_frames) > 0 && printed_frames >= XG(max_stack_frames)) {
+				break;
 			}
 		}
 
@@ -645,7 +651,10 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
-		if (xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info)) {
+		if (
+			xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info) ||
+			xdebug_hash_find(XG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)
+		) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
 				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, buffer)) {
 					XG(remote_enabled) = 0;

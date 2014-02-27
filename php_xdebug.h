@@ -148,6 +148,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	long          level;
 	xdebug_llist *stack;
 	long          max_nesting_level;
+	long          max_stack_frames;
 	zend_bool     default_enable;
 	zend_bool     collect_includes;
 	long          collect_params;
