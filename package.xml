@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2013-05-22</date>
- <time>08:54:00</time>
+ <date>2014-02-28</date>
+ <time>10:33:00</time>
  <version>
-  <release>2.2.3</release>
-  <api>2.2.3</api>
+  <release>2.2.4</release>
+  <api>2.2.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,19 +45,16 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Tue, May 21, 2013 - xdebug 2.2.3
-
-+ Added features:
-
- - Support for PHP 5.5.
+Fri, Feb 28, 2014 - xdebug 2.2.4
 
 = Fixed bugs:
 
- - Fixed bug #923: Xdebug + Netbeans + ext/MongoDB crash on MongoCursor instance
- - Fixed bug #929: Directory name management in xdebug.profiler_output_dir
- - Fixed bug #931: xdebug_str_add does not check for NULL str before calling strlen on it
- - Fixed bug #935: Document the return value from xdebug_get_code_coverage()
- - Fixed bug #947: Newlines converted when html_errors = 0
+ - Fixed bug #785: Profiler does not handle closures and call_user_func_array well.
+ - Fixed bug #963: Xdebug waits too long for response from remote client
+ - Fixed bug #976: XDebug crashes if current varibles scope contains COM object.
+ - Fixed bug #978: Inspection of array with negative keys fails
+ - Fixed bug #979: property_value -m 0 should mean all bytes, not 0 bytes
+ - Fixed bug #987: Hidden property names not shown.
  </notes>
 
  <contents>
@@ -155,6 +152,35 @@ Tue, May 21, 2013 - xdebug 2.2.3
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2013-05-22</date>
+   <time>08:54:00</time>
+   <version>
+    <release>2.2.3</release>
+    <api>2.2.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, May 21, 2013 - xdebug 2.2.3
+
++ Added features:
+
+ - Support for PHP 5.5.
+
+= Fixed bugs:
+
+ - Fixed bug #923: Xdebug + Netbeans + ext/MongoDB crash on MongoCursor instance
+ - Fixed bug #929: Directory name management in xdebug.profiler_output_dir
+ - Fixed bug #931: xdebug_str_add does not check for NULL str before calling strlen on it
+ - Fixed bug #935: Document the return value from xdebug_get_code_coverage()
+ - Fixed bug #947: Newlines converted when html_errors = 0
+   </notes>
+  </release>
 
   <release>
    <date>2013-03-23</date>
