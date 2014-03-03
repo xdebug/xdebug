@@ -64,6 +64,9 @@
 #include "xdebug_tracing.h"
 #include "usefulstuff.h"
 
+/* should this be in a different file? */
+typedef int (*strncmp_t)(const char*, const char*, size_t);
+
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
 zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
@@ -246,6 +249,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_options,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.case_sensitive_fs", "1",                PHP_INI_ALL,    OnUpdateBool,   case_sensitive_fs, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.coverage_enable", "1",                  PHP_INI_SYSTEM, OnUpdateBool,   coverage_enable,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.collect_params",  "0",                    PHP_INI_ALL,    OnUpdateLong,   collect_params,    zend_xdebug_globals, xdebug_globals)
@@ -2128,6 +2132,13 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			int   old_error_reporting;
 			zval  retval;
 			int   file_len = strlen(file);
+			strncmp_t fnamecmp = 0;
+
+			if (XG(case_sensitive_fs)) {
+				fnamecmp = (strncmp_t)memcmp;
+			} else {
+				fnamecmp = strncasecmp;
+			}
 
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				brk = XDEBUG_LLIST_VALP(le);
@@ -2139,7 +2150,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 #if PHP_WIN32
 				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && strncasecmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
 #else
-				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && fnamecmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
 #endif
 					break_ok = 1; /* Breaking is allowed by default */
 
