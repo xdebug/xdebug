@@ -34,6 +34,18 @@ void xdebug_coverage_line_dtor(void *data)
 	xdfree(line);
 }
 
+xdebug_coverage_file *xdebug_coverage_file_ctor(char *filename)
+{
+	xdebug_coverage_file *file;
+
+	file = xdmalloc(sizeof(xdebug_coverage_file));
+	file->name = xdstrdup(filename);
+	file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
+	file->branch_info = NULL;
+
+	return file;
+}
+
 void xdebug_coverage_file_dtor(void *data)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file *) data;
@@ -322,13 +334,9 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	} else {
 		/* Check if the file already exists in the hash */
 		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
-			/* The file does not exist, so we add it to the hash, and
-			 *  add a line element to the file */
-			file = xdmalloc(sizeof(xdebug_coverage_file));
-			file->name = xdstrdup(filename);
-			file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
-			file->branch_info = NULL;
-		
+			/* The file does not exist, so we add it to the hash */
+			file = xdebug_coverage_file_ctor(filename);
+
 			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
 		}
 		XG(previous_filename) = file->name;
