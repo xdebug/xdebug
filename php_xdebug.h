@@ -32,6 +32,7 @@
 #include "xdebug_handlers.h"
 #include "xdebug_hash.h"
 #include "xdebug_llist.h"
+#include "xdebug_branch_info.h"
 #include "xdebug_code_coverage.h"
 
 extern zend_module_entry xdebug_module_entry;

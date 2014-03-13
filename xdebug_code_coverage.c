@@ -38,6 +38,9 @@ void xdebug_coverage_file_dtor(void *data)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file *) data;
 
+	if (file->branch_info) {
+		xdebug_branch_info_free(file->branch_info);
+	}
 	xdebug_hash_destroy(file->lines);
 	xdfree(file->name);
 	xdfree(file);
@@ -324,6 +327,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 			file = xdmalloc(sizeof(xdebug_coverage_file));
 			file->name = xdstrdup(filename);
 			file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
+			file->branch_info = NULL;
 		
 			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
 		}
@@ -583,9 +587,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *op_array TSRMLS_DC)
 	if (branch_info) {
 		xdebug_branch_post_process(branch_info);
 		xdebug_branch_find_paths(branch_info);
-		xdebug_branch_info_dump(op_array, branch_info TSRMLS_CC);
-
-		xdebug_branch_info_free(branch_info);
+		xdebug_branch_info_add_branches_and_paths(fn, branch_info TSRMLS_CC);
 	}
 }
 
@@ -705,6 +707,60 @@ static void add_line(void *ret, xdebug_hash_element *e)
 	}
 }
 
+static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
+{
+	zval *branches, *branch, *out;
+	unsigned int i;
+
+	MAKE_STD_ZVAL(branches);
+	array_init(branches);
+
+	for (i = 0; i < branch_info->starts->size; i++) {
+		if (xdebug_set_in(branch_info->starts, i)) {
+			MAKE_STD_ZVAL(branch);
+			array_init(branch);
+			add_assoc_long(branch, "op_start", i);
+			add_assoc_long(branch, "op_end", branch_info->branches[i].end_op);
+			add_assoc_long(branch, "line_start", branch_info->branches[i].start_lineno);
+			add_assoc_long(branch, "line_end", branch_info->branches[i].end_lineno);
+
+			MAKE_STD_ZVAL(out);
+			array_init(out);
+			if (branch_info->branches[i].out[0]) {
+				add_index_long(out, branch_info->branches[i].out[0], 0);
+			}
+			if (branch_info->branches[i].out[1]) {
+				add_index_long(out, branch_info->branches[i].out[1], 0);
+			}
+			add_assoc_zval(branch, "out", out);
+			add_index_zval(branches, i, branch);
+		}
+	}
+
+	add_assoc_zval_ex(retval, "branches", 9, branches);
+}
+
+static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
+{
+	zval *paths, *path;
+	unsigned int i, j;
+
+	MAKE_STD_ZVAL(paths);
+	array_init(paths);
+
+	for (i = 0; i < branch_info->paths_count; i++) {
+		MAKE_STD_ZVAL(path);
+		array_init(path);
+
+		for (j = 0; j < branch_info->paths[i]->elements_count; j++) {
+			add_next_index_long(path, branch_info->paths[i]->elements[j]);
+		}
+		add_next_index_zval(paths, path);
+	}
+
+	add_assoc_zval_ex(retval, "paths", 6, paths);
+}
+
 static void add_file(void *ret, xdebug_hash_element *e)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file*) e->ptr;
@@ -722,6 +778,12 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	/* Sort on linenumber */
 	target_hash = HASH_OF(lines);
 	zend_hash_sort(target_hash, zend_qsort, xdebug_lineno_cmp, 0 TSRMLS_CC);
+
+	/* Add the branch and path info */
+	if (file->branch_info) {
+		add_branches(lines, file->branch_info);
+		add_paths(lines, file->branch_info);
+	}
 
 	add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, lines);
 }
