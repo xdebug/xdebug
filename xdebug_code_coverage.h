@@ -22,6 +22,7 @@
 #include "php.h"
 #include "xdebug_hash.h"
 #include "xdebug_mm.h"
+#include "xdebug_branch_info.h"
 
 typedef struct xdebug_coverage_line {
 	int lineno;
@@ -30,8 +31,9 @@ typedef struct xdebug_coverage_line {
 } xdebug_coverage_line;
 
 typedef struct xdebug_coverage_file {
-	char        *name;
-	xdebug_hash *lines;
+	char               *name;
+	xdebug_hash        *lines;
+	xdebug_branch_info *branch_info;
 } xdebug_coverage_file;
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */

@@ -20,7 +20,6 @@
 #define __HAVE_XDEBUG_BRANCH_INFO_H__
 
 #include "xdebug_set.h"
-#include "php_xdebug.h"
 
 typedef struct _xdebug_branch {
 	unsigned int start_lineno;
@@ -53,6 +52,7 @@ void xdebug_branch_post_process(xdebug_branch_info *branch_info);
 void xdebug_branch_find_paths(xdebug_branch_info *branch_info);
 
 void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info TSRMLS_DC);
+void xdebug_branch_info_add_branches_and_paths(char *filename, xdebug_branch_info *branch_info TSRMLS_DC);
 void xdebug_branch_info_free(xdebug_branch_info *branch_info);
 
 #endif
