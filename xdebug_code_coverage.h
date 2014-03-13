@@ -44,6 +44,7 @@ typedef struct xdebug_coverage_file {
 
 
 void xdebug_coverage_line_dtor(void *data);
+xdebug_coverage_file *xdebug_coverage_file_ctor(char *filename);
 void xdebug_coverage_file_dtor(void *data);
 
 int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS);

@@ -217,12 +217,8 @@ void xdebug_branch_info_add_branches_and_paths(char *filename, xdebug_branch_inf
 	} else {
 		/* Check if the file already exists in the hash */
 		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
-			/* The file does not exist, so we add it to the hash, and
-			 *  add a line element to the file */
-			file = xdmalloc(sizeof(xdebug_coverage_file));
-			file->name = xdstrdup(filename);
-			file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
-			file->branch_info = NULL;
+			/* The file does not exist, so we add it to the hash */
+			file = xdebug_coverage_file_ctor(filename);
 
 			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
 		}
