@@ -444,17 +444,20 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 	long jump_pos1 = -1;
 	long jump_pos2 = -1;
 
-	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
-	xdebug_set_add(branch_info->starts, position);
-	branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
-
 	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
+
+	if (branch_info) {
+		xdebug_set_add(branch_info->starts, position);
+		branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+	}
+
 	/* First we see if the branch has been visited, if so we bail out. */
 	if (xdebug_set_in(set, position)) {
 		return;
 	}
 
 	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
+	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	xdebug_set_add(set, position);
 	while (position < opa->last) {
 		jump_pos1 = -1;
@@ -468,10 +471,14 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			} else {
 				/*(fprintf(stderr, "\n"))*/;
 			}
-			xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
+			if (branch_info) {
+				xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
+			}
 			xdebug_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
 			if (jump_pos2 != -1 && jump_pos2 <= opa->last) {
-				xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
+				if (branch_info) {
+					xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
+				}
 				xdebug_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
 			}
 			break;
@@ -480,16 +487,20 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
 			/* fprintf(stderr, "Throw found at %d\n", position); */
-			xdebug_set_add(branch_info->ends, position);
-			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+			if (branch_info) {
+				xdebug_set_add(branch_info->ends, position);
+				branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+			}
 			break;
 		}
 
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			/* fprintf(stderr, "X* Return found\n"); */
-			xdebug_set_add(branch_info->ends, position);
-			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+			if (branch_info) {
+				xdebug_set_add(branch_info->ends, position);
+				branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+			}
 			break;
 		}
 		/* See if we have a return instruction */
@@ -500,8 +511,10 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 #endif
 		) {
 			/*(fprintf(stderr, "XDEBUG Return found\n");)*/
-			xdebug_set_add(branch_info->ends, position);
-			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+			if (branch_info) {
+				xdebug_set_add(branch_info->ends, position);
+				branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+			}
 			break;
 		}
 
@@ -523,8 +536,10 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 		}
 		position++;
 	}
-	xdebug_set_add(branch_info->ends, opa->last-1);
-	branch_info->branches[opa->last-1].start_lineno = opa->opcodes[opa->last-1].lineno;
+	if (branch_info) {
+		xdebug_set_add(branch_info->ends, opa->last-1);
+		branch_info->branches[opa->last-1].start_lineno = opa->opcodes[opa->last-1].lineno;
+	}
 }
 
 static void prefill_from_oparray(char *fn, zend_op_array *op_array TSRMLS_DC)
@@ -549,7 +564,9 @@ static void prefill_from_oparray(char *fn, zend_op_array *op_array TSRMLS_DC)
 	/* Run dead code analysis if requested */
 	if (XG(code_coverage_dead_code_analysis) && XDEBUG_PASS_TWO_DONE) {
 		set = xdebug_set_create(op_array->last);
-		branch_info = xdebug_branch_info_create(op_array->last);
+		if (XG(code_coverage_branch_check)) {
+			branch_info = xdebug_branch_info_create(op_array->last);
+		}
 
 		xdebug_analyse_oparray(op_array, set, branch_info TSRMLS_CC);
 	}
@@ -626,6 +643,7 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	}
 	XG(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
 	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
+	XG(code_coverage_branch_check) = (options & XDEBUG_CC_OPTION_BRANCH_CHECK);
 
 	if (!XG(extended_info)) {
 		php_error(E_WARNING, "You can only use code coverage when you leave the setting of 'xdebug.extended_info' to the default '1'.");
