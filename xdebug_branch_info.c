@@ -34,9 +34,16 @@ xdebug_branch_info *xdebug_branch_info_create(unsigned int size)
 
 void xdebug_branch_info_free(xdebug_branch_info *branch_info)
 {
+	unsigned int i;
+
+	for (i = 0; i < branch_info->paths_count; i++) {
+		free(branch_info->paths[i]->elements);
+		free(branch_info->paths[i]);
+	}
+	free(branch_info->paths);
 	free(branch_info->branches);
-	free(branch_info->starts);
-	free(branch_info->ends);
+	xdebug_set_free(branch_info->starts);
+	xdebug_set_free(branch_info->ends);
 	free(branch_info);
 }
 
