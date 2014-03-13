@@ -56,7 +56,8 @@ void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos
 
 void xdebug_branch_post_process(xdebug_branch_info *branch_info)
 {
-	int i, in_branch = 0, last_start = -1;
+	unsigned int i;
+	int          in_branch = 0, last_start = -1;
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (xdebug_set_in(branch_info->starts, i)) {
@@ -128,7 +129,7 @@ static unsigned int xdebug_branch_find_last_element(xdebug_path *path)
 
 static int xdebug_path_exists(xdebug_path *path, unsigned int elem1, unsigned int elem2)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < path->elements_count - 1; i++) {
 		if (path->elements[i] == elem1 && path->elements[i + 1] == elem2) {
@@ -177,8 +178,7 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 
 void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info TSRMLS_DC)
 {
-	int i, j;
-	char *fname = opa->function_name ? opa->function_name : "__main";
+	unsigned int i, j;
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (xdebug_set_in(branch_info->starts, i)) {
