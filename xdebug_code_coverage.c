@@ -554,7 +554,7 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 	}
 }
 
-static void prefill_from_oparray(char *fn, zend_op_array *op_array TSRMLS_DC)
+static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_DC)
 {
 	unsigned int i;
 	xdebug_set *set = NULL;
@@ -586,7 +586,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *op_array TSRMLS_DC)
 	/* The normal loop then finally */
 	for (i = 0; i < op_array->last; i++) {
 		zend_op opcode = op_array->opcodes[i];
-		prefill_from_opcode(fn, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
+		prefill_from_opcode(filename, opcode, set ? !xdebug_set_in(set, i) : 0 TSRMLS_CC);
 	}
 
 	if (set) {
@@ -595,7 +595,7 @@ static void prefill_from_oparray(char *fn, zend_op_array *op_array TSRMLS_DC)
 	if (branch_info) {
 		xdebug_branch_post_process(branch_info);
 		xdebug_branch_find_paths(branch_info);
-		xdebug_branch_info_add_branches_and_paths(fn, branch_info TSRMLS_CC);
+		xdebug_branch_info_add_branches_and_paths(filename, branch_info TSRMLS_CC);
 	}
 }
 
