@@ -773,7 +773,7 @@ static void add_file(void *ret, xdebug_hash_element *e)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file*) e->ptr;
 	zval                 *retval = (zval*) ret;
-	zval                 *lines;
+	zval                 *lines, *file_info;
 	HashTable            *target_hash;
 	TSRMLS_FETCH();
 
@@ -789,11 +789,17 @@ static void add_file(void *ret, xdebug_hash_element *e)
 
 	/* Add the branch and path info */
 	if (file->branch_info) {
-		add_branches(lines, file->branch_info);
-		add_paths(lines, file->branch_info);
-	}
+		MAKE_STD_ZVAL(file_info);
+		array_init(file_info);
 
-	add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, lines);
+		add_assoc_zval_ex(file_info, "lines", 6, lines);
+		add_branches(file_info, file->branch_info);
+		add_paths(file_info, file->branch_info);
+
+		add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, file_info);
+	} else {
+		add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, lines);
+	}
 }
 
 PHP_FUNCTION(xdebug_get_code_coverage)
