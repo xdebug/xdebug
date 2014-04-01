@@ -52,7 +52,7 @@ void xdebug_branch_post_process(xdebug_branch_info *branch_info);
 void xdebug_branch_find_paths(xdebug_branch_info *branch_info);
 
 void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info TSRMLS_DC);
-void xdebug_branch_info_add_branches_and_paths(char *filename, xdebug_branch_info *branch_info TSRMLS_DC);
+void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info TSRMLS_DC);
 void xdebug_branch_info_free(xdebug_branch_info *branch_info);
 
 #endif
