@@ -41,7 +41,8 @@ xdebug_coverage_file *xdebug_coverage_file_ctor(char *filename)
 	file = xdmalloc(sizeof(xdebug_coverage_file));
 	file->name = xdstrdup(filename);
 	file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
-	file->branch_info = NULL;
+	file->functions = xdebug_hash_alloc(128, xdebug_coverage_function_dtor);
+	file->has_branch_info = 0;
 
 	return file;
 }
@@ -50,12 +51,32 @@ void xdebug_coverage_file_dtor(void *data)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file *) data;
 
-	if (file->branch_info) {
-		xdebug_branch_info_free(file->branch_info);
-	}
 	xdebug_hash_destroy(file->lines);
+	xdebug_hash_destroy(file->functions);
 	xdfree(file->name);
 	xdfree(file);
+}
+
+xdebug_coverage_function *xdebug_coverage_function_ctor(char *function_name)
+{
+	xdebug_coverage_function *function;
+
+	function = xdmalloc(sizeof(xdebug_coverage_function));
+	function->name = xdstrdup(function_name);
+	function->branch_info = NULL;
+
+	return function;
+}
+
+void xdebug_coverage_function_dtor(void *data)
+{
+	xdebug_coverage_function *function = (xdebug_coverage_function *) data;
+
+	if (function->branch_info) {
+		xdebug_branch_info_free(function->branch_info);
+	}
+	xdfree(function->name);
+	xdfree(function);
 }
 
 #define XDEBUG_OPCODE_OVERRIDE(f) \
@@ -380,12 +401,9 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 	}
 }
 
-static zend_brk_cont_element* xdebug_find_brk_cont(zval *nest_levels_zval, int array_offset, zend_op_array *op_array)
+static zend_brk_cont_element* xdebug_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array)
 {
-	int nest_levels;
 	zend_brk_cont_element *jmp_to;
-
-	nest_levels = nest_levels_zval->value.lval;
 
 	do {
 		if (array_offset == -1) {
@@ -428,7 +446,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 #if PHP_VERSION_ID >= 50399
 			el = xdebug_find_brk_cont(Z_LVAL_P(opcode.op2.zv), opcode.XDEBUG_ZNODE_ELEM(op1, opline_num), opa);
 #else
-			el = xdebug_find_brk_cont(&opcode.op2.u.constant, opcode.op1.u.opline_num, opa);
+			el = xdebug_find_brk_cont(&opcode.op2.u.constant.value.lval, opcode.op1.u.opline_num, opa);
 #endif
 			if (el) {
 				*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
@@ -559,6 +577,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	unsigned int i;
 	xdebug_set *set = NULL;
 	xdebug_branch_info *branch_info = NULL;
+	const char *function_name = op_array->function_name ? op_array->function_name : "{main}";
 
 	op_array->reserved[XG(reserved_offset)] = (void*) 1;
 
@@ -595,7 +614,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	if (branch_info) {
 		xdebug_branch_post_process(branch_info);
 		xdebug_branch_find_paths(branch_info);
-		xdebug_branch_info_add_branches_and_paths(filename, branch_info TSRMLS_CC);
+		xdebug_branch_info_add_branches_and_paths(filename, (char*) function_name, branch_info TSRMLS_CC);
 	}
 }
 
@@ -769,18 +788,35 @@ static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 	add_assoc_zval_ex(retval, "paths", 6, paths);
 }
 
+static void add_cc_function(void *ret, xdebug_hash_element *e)
+{
+	xdebug_coverage_function *function = (xdebug_coverage_function*) e->ptr;
+	zval                     *retval = (zval*) ret;
+	zval                     *function_info;
+
+	MAKE_STD_ZVAL(function_info);
+	array_init(function_info);
+
+	if (function->branch_info) {
+		add_branches(function_info, function->branch_info);
+		add_paths(function_info, function->branch_info);
+	}
+
+	add_assoc_zval_ex(retval, function->name, strlen(function->name) + 1, function_info);
+}
+
 static void add_file(void *ret, xdebug_hash_element *e)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file*) e->ptr;
 	zval                 *retval = (zval*) ret;
-	zval                 *lines, *file_info;
+	zval                 *lines, *functions, *file_info;
 	HashTable            *target_hash;
 	TSRMLS_FETCH();
 
+	/* Add all the lines */
 	MAKE_STD_ZVAL(lines);
 	array_init(lines);
 
-	/* Add all the lines */
 	xdebug_hash_apply(file->lines, (void *) lines, add_line);
 
 	/* Sort on linenumber */
@@ -788,13 +824,17 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	zend_hash_sort(target_hash, zend_qsort, xdebug_lineno_cmp, 0 TSRMLS_CC);
 
 	/* Add the branch and path info */
-	if (file->branch_info) {
+	if (file->has_branch_info) {
 		MAKE_STD_ZVAL(file_info);
 		array_init(file_info);
 
+		MAKE_STD_ZVAL(functions);
+		array_init(functions);
+
+		xdebug_hash_apply(file->functions, (void *) functions, add_cc_function);
+
 		add_assoc_zval_ex(file_info, "lines", 6, lines);
-		add_branches(file_info, file->branch_info);
-		add_paths(file_info, file->branch_info);
+		add_assoc_zval_ex(file_info, "functions", 10, functions);
 
 		add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, file_info);
 	} else {

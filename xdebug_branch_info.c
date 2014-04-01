@@ -208,9 +208,10 @@ void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info
 	}
 }
 
-void xdebug_branch_info_add_branches_and_paths(char *filename, xdebug_branch_info *branch_info TSRMLS_DC)
+void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
+	xdebug_coverage_function *function;
 
 	if (strcmp(XG(previous_filename), filename) == 0) {
 		file = XG(previous_file);
@@ -226,5 +227,16 @@ void xdebug_branch_info_add_branches_and_paths(char *filename, xdebug_branch_inf
 		XG(previous_file) = file;
 	}
 
-	file->branch_info = branch_info;
+	/* Check if the function already exists in the hash */
+	if (!xdebug_hash_find(file->functions, function_name, strlen(function_name), (void *) &function)) {
+		/* The file does not exist, so we add it to the hash */
+		function = xdebug_coverage_function_ctor(function_name);
+
+		xdebug_hash_add(file->functions, function_name, strlen(function_name), function);
+	}
+
+	if (branch_info) {
+		file->has_branch_info = 1;
+	}
+	function->branch_info = branch_info;
 }
