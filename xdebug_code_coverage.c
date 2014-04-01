@@ -572,12 +572,61 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 	}
 }
 
+static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC)
+{
+	memset(tmp, 0, sizeof(xdebug_func));
+
+	if (opa->scope) {
+		tmp->type = XFUNC_MEMBER;
+		tmp->class = xdstrdup(opa->scope->name);
+		tmp->function = xdstrdup(opa->function_name);
+	} else {
+		tmp->type = XFUNC_NORMAL;
+		if (opa->function_name) {
+			if (strcmp(opa->function_name, "{closure}") == 0) {
+				tmp->function = xdebug_sprintf(
+					"{closure:%s:%d-%d}",
+					opa->filename,
+					opa->line_start,
+					opa->line_end
+				);
+			} else {
+				tmp->function = xdstrdup(opa->function_name);
+			}
+		} else {
+			tmp->function = xdstrdup("{main}");
+		}
+	}
+}
+
+static char* xdebug_func_format(xdebug_func *func TSRMLS_DC)
+{
+	switch (func->type) {
+		case XFUNC_NORMAL:
+			return xdstrdup(func->function);
+		case XFUNC_MEMBER:
+			return xdebug_sprintf("%s->%s", func->class, func->function);
+		default:
+			return xdstrdup("???");
+	}
+}
+
 static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_DC)
 {
 	unsigned int i;
 	xdebug_set *set = NULL;
 	xdebug_branch_info *branch_info = NULL;
-	const char *function_name = op_array->function_name ? op_array->function_name : "{main}";
+	char *function_name;
+	xdebug_func func_info;
+
+	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
+	function_name = xdebug_func_format(&func_info TSRMLS_CC);
+	if (func_info.class) {
+		xdfree(func_info.class);
+	}
+	if (func_info.function) {
+		xdfree(func_info.function);
+	}
 
 	op_array->reserved[XG(reserved_offset)] = (void*) 1;
 
