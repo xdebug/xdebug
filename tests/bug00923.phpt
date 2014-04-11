@@ -19,7 +19,7 @@ dbgpRun( $data, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file:///tmp/xdebug-dbgp-test.php" language="PHP" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2013 by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file:///tmp/xdebug-dbgp-test.php" language="PHP" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-201%d by Derick Rethans]]></copyright></init>
 
 -> step_into -i 1
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -35,7 +35,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n $cursor
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$cursor" fullname="$cursor" address="" type="object" classname="MongoCursor" children="1" numchildren="2" page="0" pagesize="32"><property name="slaveOkay" fullname="$cursor::slaveOkay" facet="static public" address="" type="bool"><![CDATA[0]]></property><property name="timeout" fullname="$cursor::timeout" facet="static public" address="" type="int"><![CDATA[30000]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$cursor" fullname="$cursor" address="" type="object" classname="MongoCursor" children="1" numchildren="2" page="0" pagesize="32"><property name="slaveOkay" %s></property><property name="timeout" %s></property></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
