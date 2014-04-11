@@ -78,7 +78,7 @@ int xdebug_create_socket(const char *hostname, int dport)
 	int                status;
 	struct timeval     timeout;
 	int                actually_connected;
-	socklen_t          size;
+	socklen_t          size = sizeof(sa);
 #if WIN32|WINNT
 	WORD               wVersionRequested;
 	WSADATA            wsaData;
