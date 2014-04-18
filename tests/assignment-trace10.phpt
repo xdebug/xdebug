@@ -52,4 +52,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $a = class testClass { public $a = 92236816; private $b = 4 } %sassignment-trace10.php:23
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace10.php:25
 %w%f %w%d
-RACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d]
