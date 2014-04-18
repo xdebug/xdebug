@@ -116,7 +116,11 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	} else if (is_static) { /* todo : see if you can change this and the previous cases around */
 		xdebug_str_add(&name, xdebug_sprintf("self::"), 1 );
 	}
-	if (cur_opcode->opcode >= ZEND_ASSIGN_ADD && cur_opcode->opcode <= ZEND_ASSIGN_BW_XOR ) {
+	if (cur_opcode->opcode >= ZEND_ASSIGN_ADD && cur_opcode->opcode <= ZEND_ASSIGN_BW_XOR
+#if PHP_VERSION_ID >= 50600
+		|| cur_opcode->opcode == ZEND_ASSIGN_POW
+#endif
+	) {
 		if (cur_opcode->extended_value == ZEND_ASSIGN_OBJ) {
 			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->XDEBUG_TYPE(op2), &cur_opcode->op2, &is_var), 0, options);
 			if (cur_opcode->XDEBUG_TYPE(op1) == IS_UNUSED) {
@@ -284,6 +288,9 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sub,"-=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mul,"*=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_div,"/=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mod,"%=",0)
+#if PHP_VERSION_ID >= 50600
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_pow,"**=",0)
+#endif
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sl,"<<=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sr,">>=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc,"",0)
