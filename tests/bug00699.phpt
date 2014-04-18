@@ -33,7 +33,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> require(%sbug00699.inc) %sbug00699.php:4
 %w%f %w%d     -> SomeClass->addData(string(6)) %sbug00699.php:6
 %w%f %w%d     -> count(class SomeClass) %sbug00699.php:10
-%w%f %w%d       -> SomeClass->count() %sbug00699.php:10
+%w%f %w%d       -> SomeClass->count(%S) %sbug00699.php:10
 %w%f %w%d         -> count(array(1)) %sbug00699.inc:17
 %w%f %w%d     -> xdebug_stop_trace() %sbug00699.php:14
 %w%f %w%d
