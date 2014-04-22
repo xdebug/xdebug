@@ -284,16 +284,16 @@ char *xdebug_raw_url_encode(char const *s, int len, int *new_length, int skip_sl
 char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 {
 	/* deal with file: url's */
-	char dfp[PATH_MAX * 2];
-	const char *fp = dfp, *efp = fileurl;
+	char *dfp = NULL;
+	const char *fp = NULL, *efp = fileurl;
 #ifdef PHP_WIN32
 	int l = 0;
 	int i;
 #endif
-	char *tmp = NULL, *ret = NULL;;
+	char *tmp = NULL, *ret = NULL;
 
-	memset(dfp, 0, sizeof(dfp));
-	strncpy(dfp, efp, sizeof(dfp) - 1);
+	dfp = xdstrdup(efp);
+	fp = dfp;
 	xdebug_raw_url_decode(dfp, strlen(dfp));
 	tmp = strstr(fp, "file://");
 
@@ -316,6 +316,7 @@ char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 		ret = xdstrdup(fileurl);
 	}
 
+	free(dfp);
 	return ret;
 }
 
