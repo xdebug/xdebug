@@ -176,6 +176,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			unsigned int j = 0; /* Counter */
 			char *tmp_name;
 			xdebug_str log_buffer = {0, 0, NULL};
+			int variadic_opened = 0;
 
 			i = XDEBUG_LLIST_VALP(le);
 			tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
@@ -191,9 +192,19 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				} else {
 					c = 1;
 				}
+
+				if (i->var[j].is_variadic && XG(collect_params) != 5) {
+					xdebug_str_add(&log_buffer, "...", 0);
+					variadic_opened = 1;
+				}
+
 				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
 				xdebug_str_add(&log_buffer, tmp_varname, 0);
 				xdfree(tmp_varname);
+
+				if (i->var[j].is_variadic) {
+					xdebug_str_add(&log_buffer, "variadic(", 0);
+				}
 
 				if (i->var[j].addr) {
 					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
@@ -202,6 +213,10 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				} else {
 					xdebug_str_addl(&log_buffer, "*uninitialized*", 15, 0);
 				}
+			}
+
+			if (variadic_opened) {
+				xdebug_str_add(&log_buffer, ")", 0);
 			}
 
 			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
@@ -275,6 +290,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
 			char *tmp_name;
+			int variadic_opened = 0;
 			
 			i = XDEBUG_LLIST_VALP(le);
 			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
@@ -304,11 +320,25 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 					c = 1;
 				}
 
+				if (i->var[j].is_variadic && i->var[j].addr) {
+					xdebug_str_add(str, "...", 0);
+					variadic_opened = 1;
+				}
+
 				if (i->var[j].name && XG(collect_params) == 4) {
 					if (html) {
 						xdebug_str_add(str, xdebug_sprintf("<span>$%s = </span>", i->var[j].name), 1);
 					} else {
 						xdebug_str_add(str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
+					}
+				}
+
+
+				if (i->var[j].is_variadic && i->var[j].addr) {
+					if (html) {
+						xdebug_str_add(str, "<i>variadic</i>(", 0);
+					} else {
+						xdebug_str_add(str, "variadic(", 0);
 					}
 				}
 
@@ -363,6 +393,10 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				} else {
 					xdebug_str_addl(str, "???", 3, 0);
 				}
+			}
+
+			if (variadic_opened) {
+				xdebug_str_add(str, ")", 0);
 			}
 
 			if (i->include_filename) {
@@ -1103,6 +1137,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			for (i = 0; i < arguments_sent; i++) {
 				tmp->var[tmp->varc].name = NULL;
 				tmp->var[tmp->varc].addr = NULL;
+				tmp->var[tmp->varc].is_variadic = 0;
 
 				/* Because it is possible that more parameters are sent, then
 				 * actually wanted  we can only access the name in case there
@@ -1111,6 +1146,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
 					}
+#if PHP_VERSION_ID >= 50600
+					if (op_array->arg_info[i].is_variadic) {
+						tmp->var[tmp->varc].is_variadic = 1;
+					}
+#endif
 				}
 
 				if (XG(collect_params)) {
@@ -1139,6 +1179,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
 					}
 					tmp->var[tmp->varc].addr = NULL;
+					tmp->var[tmp->varc].is_variadic = 0;
 					tmp->varc++;
 				}
 			}
@@ -1289,20 +1330,37 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		/* Add parameters */
 		MAKE_STD_ZVAL(params);
 		array_init(params);
+		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
+
 		for (j = 0; j < i->varc; j++) {
+			int variadic_opened = 0;
+
+			if (i->var[j].is_variadic) {
+				zval *vparams;
+
+				MAKE_STD_ZVAL(vparams);
+				array_init(vparams);
+
+				if (i->var[j].name) {
+					add_assoc_zval(params, i->var[j].name, vparams);
+				} else {
+					add_index_zval(params, j, vparams);
+				}
+				params = vparams;
+				variadic_opened = 1;
+			}
 			if (i->var[j].addr) {
 				argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 			} else {
-				argument = xdstrdup("");
+				argument = xdstrdup("???");
 			}
-			if (i->var[j].name) {
+			if (i->var[j].name && !variadic_opened) {
 				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
 			} else {
 				add_index_string(params, j, argument, 1);
 			}
 			xdfree(argument);
 		}
-		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
 
 		if (i->include_filename) {
 			add_assoc_string_ex(frame, "include_filename", sizeof("include_filename"), i->include_filename, 1);

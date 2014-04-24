@@ -48,6 +48,7 @@ void xdebug_stop_trace(TSRMLS_D);
 typedef struct xdebug_var {
 	char *name;
 	void *addr;
+	int   is_variadic;
 } xdebug_var;
 
 #define XFUNC_UNKNOWN        0x00

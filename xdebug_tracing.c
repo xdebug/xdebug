@@ -237,6 +237,9 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 
 	/* Printing vars */
 	if (XG(collect_params) > 0) {
+		int variadic_opened = 0;
+		int variadic_count  = 0;
+
 		for (j = 0; j < i->varc; j++) {
 			char *tmp_value;
 
@@ -246,8 +249,21 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 				c = 1;
 			}
 
+			if (i->var[j].is_variadic && i->var[j].addr) {
+				xdebug_str_add(&str, "...", 0);
+				variadic_opened = 1;
+			}
+
 			if (i->var[j].name && XG(collect_params) == 4) {
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
+			}
+
+			if (i->var[j].is_variadic && i->var[j].addr) {
+				xdebug_str_add(&str, "variadic(", 0);
+			}
+
+			if (variadic_opened && XG(collect_params) != 5) {
+				xdebug_str_add(&str, xdebug_sprintf("%d => ", variadic_count++), 1);
 			}
 
 			switch (XG(collect_params)) {
@@ -269,6 +285,10 @@ static char* return_trace_stack_frame_begin_normal(function_stack_entry* i TSRML
 			} else {
 				xdebug_str_add(&str, "???", 0);
 			}
+		}
+
+		if (variadic_opened) {
+			xdebug_str_add(&str, ")", 0);
 		}
 	}
 
@@ -342,6 +362,10 @@ static char* return_trace_stack_frame_computerized(function_stack_entry* i, int 
 				char *tmp_value;
 
 				xdebug_str_addl(&str, "\t", 1, 0);
+
+				if (i->var[j].is_variadic) {
+					xdebug_str_addl(&str, "...\t", 4, 0);
+				}
 
 				if (i->var[j].name && XG(collect_params) == 4) {
 					xdebug_str_add(&str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
@@ -510,7 +534,7 @@ char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
 	if (XG(trace_file)) {
 		if (XG(trace_format) == 1) {
 			fprintf(XG(trace_file), "Version: %s\n", XDEBUG_VERSION);
-			fprintf(XG(trace_file), "File format: 3\n");
+			fprintf(XG(trace_file), "File format: 4\n");
 		}
 		if (XG(trace_format) == 0 || XG(trace_format) == 1) {
 			str_time = xdebug_get_time();
