@@ -772,6 +772,16 @@ DBGP_FUNC(breakpoint_set)
 	if (!CMD_OPTION('t')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	} else {
+		if (
+			(strcmp(CMD_OPTION('t'), "line") != 0) && 
+			(strcmp(CMD_OPTION('t'), "conditional") != 0) &&
+			(strcmp(CMD_OPTION('t'), "call") != 0) &&
+			(strcmp(CMD_OPTION('t'), "return") != 0) &&
+			(strcmp(CMD_OPTION('t'), "exception") != 0) &&
+			(strcmp(CMD_OPTION('t'), "watch") != 0)
+		) {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
+		}
 		brk_info->type = xdstrdup(CMD_OPTION('t'));
 	}
 
