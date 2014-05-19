@@ -1392,6 +1392,7 @@ DBGP_FUNC(property_get)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 		}
 	}
+	options->max_data = old_max_data;
 	XG(active_op_array) = NULL;
 }
 
@@ -1529,6 +1530,7 @@ static int add_variable_contents_node(xdebug_xml_node *node, char *name, int nam
 DBGP_FUNC(property_value)
 {
 	int                        depth = 0;
+	int                        context_nr = 0;
 	function_stack_entry      *fse;
 	int                        old_max_data;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
@@ -1541,25 +1543,33 @@ DBGP_FUNC(property_value)
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
 	}
 
-	/* Set the symbol table corresponding with the requested stack depth */
-	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
-		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
+	if (CMD_OPTION('c')) {
+		context_nr = strtol(CMD_OPTION('c'), NULL, 10);
+	}
 
-		if (depth > 0) {
-			XG(active_execute_data) = old_fse->execute_data;
-		} else {
-			XG(active_execute_data) = EG(current_execute_data);
-		}
+	/* Set the symbol table corresponding with the requested stack depth */
+	if (context_nr == 0) { /* locals */
+		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
+			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
+
+			if (depth > 0) {
+				XG(active_execute_data) = old_fse->execute_data;
+			} else {
+				XG(active_execute_data) = EG(current_execute_data);
+			}
 #else
-		XG(active_execute_data) = fse->execute_data;
+			XG(active_execute_data) = fse->execute_data;
 #endif
-		XG(active_symbol_table) = fse->symbol_table;
-		XG(active_op_array)     = fse->op_array;
-		XG(This)                = fse->This;
-		XG(active_fse)          = fse;
-	} else {
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+			XG(active_symbol_table) = fse->symbol_table;
+			XG(active_op_array)     = fse->op_array;
+			XG(This)                = fse->This;
+			XG(active_fse)          = fse;
+		} else {
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
+		}
+	} else { /* superglobals */
+		XG(active_symbol_table) = &EG(symbol_table);
 	}
 
 	if (CMD_OPTION('p')) {
@@ -1582,6 +1592,7 @@ DBGP_FUNC(property_value)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
 	}
 	options->max_data = old_max_data;
+	XG(active_op_array) = NULL;
 }
 
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
