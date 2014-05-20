@@ -879,6 +879,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG(reserved_offset) = zend_xdebug_global_offset;
+	XG(previous_filename) = "";
+	XG(previous_file) = NULL;
 
 /* {{{ Initialize auto globals in Zend Engine 2 */
 	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);

@@ -30,15 +30,15 @@ dbgpRun( $data, $commands );
 
 -> run -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file:///home/derick/dev/php/derickr-xdebug/tests/bug01007-simpleclass.inc" lineno="13"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file:///%s/bug01007-simpleclass.inc" lineno="13"></xdebug:message></response>
 
 -> step_into -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///home/derick/dev/php/derickr-xdebug/tests/bug01007-simpleclass.inc" lineno="13"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///%s/bug01007-simpleclass.inc" lineno="13"></xdebug:message></response>
 
 -> step_into -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file:///home/derick/dev/php/derickr-xdebug/tests/bug01007-simpleclass.inc" lineno="14"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file:///%s/bug01007-simpleclass.inc" lineno="14"></xdebug:message></response>
 
 -> context_get -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
