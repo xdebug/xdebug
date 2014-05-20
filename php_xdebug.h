@@ -201,10 +201,15 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_hash  *code_coverage;
 	zend_bool     code_coverage_unused;
 	zend_bool     code_coverage_dead_code_analysis;
+	zend_bool     code_coverage_func_only;
+	xdebug_hash  *cc_func_only;
 	unsigned int  function_count;
 	int           reserved_offset;
-	char                 *previous_filename;
-	xdebug_coverage_file *previous_file;
+	char                     *previous_filename;
+	xdebug_coverage_file     *previous_file;
+	char                     *previous_funcname;
+	xdebug_cc_func_only_func *previous_func;
+	xdebug_cc_func_only_file *previous_file_func_only;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
