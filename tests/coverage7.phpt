@@ -85,7 +85,7 @@ array(2) {
         ["branches"]=>
         array(3) {
           [0]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(0)
             ["op_end"]=>
@@ -99,9 +99,11 @@ array(2) {
               [3]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [3]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(3)
             ["op_end"]=>
@@ -117,9 +119,11 @@ array(2) {
               [3]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [8]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(8)
             ["op_end"]=>
@@ -131,6 +135,8 @@ array(2) {
             ["out"]=>
             array(0) {
             }
+            ["hit"]=>
+            int(1)
           }
         }
         ["paths"]=>
@@ -162,7 +168,7 @@ array(2) {
         ["branches"]=>
         array(1) {
           [0]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(0)
             ["op_end"]=>
@@ -174,6 +180,8 @@ array(2) {
             ["out"]=>
             array(0) {
             }
+            ["hit"]=>
+            int(0)
           }
         }
         ["paths"]=>
@@ -190,7 +198,7 @@ array(2) {
         ["branches"]=>
         array(1) {
           [0]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(0)
             ["op_end"]=>
@@ -202,6 +210,8 @@ array(2) {
             ["out"]=>
             array(0) {
             }
+            ["hit"]=>
+            int(1)
           }
         }
         ["paths"]=>
@@ -218,7 +228,7 @@ array(2) {
         ["branches"]=>
         array(1) {
           [0]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(0)
             ["op_end"]=>
@@ -230,6 +240,8 @@ array(2) {
             ["out"]=>
             array(0) {
             }
+            ["hit"]=>
+            int(1)
           }
         }
         ["paths"]=>
@@ -246,7 +258,7 @@ array(2) {
         ["branches"]=>
         array(9) {
           [0]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(0)
             ["op_end"]=>
@@ -262,9 +274,11 @@ array(2) {
               [7]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [5]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(5)
             ["op_end"]=>
@@ -278,9 +292,11 @@ array(2) {
               [7]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [7]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(7)
             ["op_end"]=>
@@ -296,9 +312,11 @@ array(2) {
               [11]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [8]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(8)
             ["op_end"]=>
@@ -312,9 +330,11 @@ array(2) {
               [18]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [11]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(11)
             ["op_end"]=>
@@ -330,9 +350,11 @@ array(2) {
               [14]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [13]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(13)
             ["op_end"]=>
@@ -346,9 +368,11 @@ array(2) {
               [14]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [14]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(14)
             ["op_end"]=>
@@ -364,9 +388,11 @@ array(2) {
               [18]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [15]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(15)
             ["op_end"]=>
@@ -380,9 +406,11 @@ array(2) {
               [18]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [18]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(18)
             ["op_end"]=>
@@ -394,6 +422,8 @@ array(2) {
             ["out"]=>
             array(0) {
             }
+            ["hit"]=>
+            int(1)
           }
         }
         ["paths"]=>

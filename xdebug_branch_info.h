@@ -26,6 +26,7 @@ typedef struct _xdebug_branch {
 	unsigned int end_lineno;
 	unsigned int end_op;
 	unsigned int out[2];
+	unsigned char hit;
 } xdebug_branch;
 
 typedef struct _xdebug_path {

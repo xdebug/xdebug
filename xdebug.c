@@ -317,6 +317,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->coverage_enable      = 0;
 	xg->previous_filename    = "";
 	xg->previous_file        = NULL;
+	xg->previous_mark_filename = "";
+	xg->previous_mark_file     = NULL;
 	xg->do_code_coverage     = 0;
 	xg->breakpoint_count     = 0;
 	xg->ide_key              = NULL;
@@ -462,6 +464,9 @@ static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *cur_opcode = *EG(opline_ptr);
 
+	if (XG(do_code_coverage)) {
+		xdebug_print_opcode_info('S', execute_data, cur_opcode);
+	}
 	if (XG(do_scream)) {
 		execute_data->opline++;
 		if (cur_opcode->opcode == ZEND_BEGIN_SILENCE) {
@@ -478,6 +483,10 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = execute_data->opline;
 
+	if (XG(do_code_coverage)) {
+		zend_op *cur_opcode = *EG(opline_ptr);
+		xdebug_print_opcode_info('I', execute_data, cur_opcode);
+	}
 #if PHP_VERSION_ID >= 50399
 	if (opline->extended_value == ZEND_EVAL) {
 #else
@@ -657,6 +666,7 @@ PHP_MINIT_FUNCTION(xdebug)
 #endif
 	}
 
+	/* Override opcodes for variable assignments in traces */
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign, ZEND_ASSIGN);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_add, ZEND_ASSIGN_ADD);
@@ -686,6 +696,18 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
 	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
+
+	/* Override all the other opcodes so that we can mark when we hit a branch
+	 * start one */
+	if (XG(coverage_enable)) {
+		int i;
+
+		for (i = 0; i < 256; i++) {
+			if (zend_get_user_opcode_handler(i) == NULL) {
+				zend_set_user_opcode_handler(i, xdebug_check_branch_entry_handler);
+			}
+		}
+	}
 
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");

@@ -27,6 +27,9 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
+static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC);
+static char* xdebug_func_format(xdebug_func *func TSRMLS_DC);
+
 void xdebug_coverage_line_dtor(void *data)
 {
 	xdebug_coverage_line *line = (xdebug_coverage_line *) data;
@@ -79,6 +82,39 @@ void xdebug_coverage_function_dtor(void *data)
 	xdfree(function);
 }
 
+void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_op *cur_opcode)
+{
+	zend_op_array *op_array = execute_data->op_array;
+	char *file = (char *) op_array->filename;
+	int lineno = cur_opcode->lineno;
+	xdebug_func func_info;
+	char *function_name;
+	long opnr = execute_data->opline - execute_data->op_array->opcodes;
+
+	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
+	function_name = xdebug_func_format(&func_info TSRMLS_CC);
+	if (func_info.class) {
+		xdfree(func_info.class);
+	}
+	if (func_info.function) {
+		xdfree(func_info.function);
+	}
+
+	xdebug_branch_info_mark_reached(file, function_name, opnr TSRMLS_CC);
+	xdfree(function_name);
+}
+
+int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
+{
+	if (XG(do_code_coverage)) {
+		zend_op *cur_opcode;
+		cur_opcode = *EG(opline_ptr);
+
+		xdebug_print_opcode_info('G', execute_data, cur_opcode);
+	}
+	return ZEND_USER_OPCODE_DISPATCH;
+}
+
 #define XDEBUG_OPCODE_OVERRIDE(f) \
 	int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
 	{ \
@@ -100,6 +136,7 @@ int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 		file = (char *)op_array->filename;
 
+		xdebug_print_opcode_info('C', execute_data, cur_opcode);
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 	}
 	return ZEND_USER_OPCODE_DISPATCH;
@@ -265,8 +302,12 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 	file = (char *) op_array->filename;
 	lineno = cur_opcode->lineno;
 
-	if (do_cc && XG(do_code_coverage)) {
-		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
+	if (XG(do_code_coverage)) {
+		xdebug_print_opcode_info('=', execute_data, cur_opcode);
+	
+		if (do_cc) {
+			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
+		}
 	}
 	if (XG(do_trace) && XG(trace_file) && XG(collect_assignments)) {
 		full_varname = xdebug_find_var_name(execute_data TSRMLS_CC);
@@ -345,7 +386,7 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
 
-void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
+inline void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
@@ -809,6 +850,7 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 				add_index_long(out, branch_info->branches[i].out[1], 0);
 			}
 			add_assoc_zval(branch, "out", out);
+			add_assoc_long(branch, "hit", branch_info->branches[i].hit);
 			add_index_zval(branches, i, branch);
 		}
 	}
