@@ -57,7 +57,7 @@ array(2) {
         ["branches"]=>
         array(9) {
           [0]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(0)
             ["op_end"]=>
@@ -73,9 +73,11 @@ array(2) {
               [8]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [6]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(6)
             ["op_end"]=>
@@ -89,9 +91,11 @@ array(2) {
               [8]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [8]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(8)
             ["op_end"]=>
@@ -107,9 +111,11 @@ array(2) {
               [12]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [9]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(9)
             ["op_end"]=>
@@ -123,9 +129,11 @@ array(2) {
               [19]=>
               int(0)
             }
+            ["hit"]=>
+            int(1)
           }
           [12]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(12)
             ["op_end"]=>
@@ -141,9 +149,11 @@ array(2) {
               [15]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [14]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(14)
             ["op_end"]=>
@@ -157,9 +167,11 @@ array(2) {
               [15]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [15]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(15)
             ["op_end"]=>
@@ -175,9 +187,11 @@ array(2) {
               [19]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [16]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(16)
             ["op_end"]=>
@@ -191,9 +205,11 @@ array(2) {
               [19]=>
               int(0)
             }
+            ["hit"]=>
+            int(0)
           }
           [19]=>
-          array(5) {
+          array(6) {
             ["op_start"]=>
             int(19)
             ["op_end"]=>
@@ -205,6 +221,8 @@ array(2) {
             ["out"]=>
             array(0) {
             }
+            ["hit"]=>
+            int(1)
           }
         }
         ["paths"]=>

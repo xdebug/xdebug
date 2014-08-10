@@ -207,6 +207,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           reserved_offset;
 	char                 *previous_filename;
 	xdebug_coverage_file *previous_file;
+	char                 *previous_mark_filename;
+	xdebug_coverage_file *previous_mark_file;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
