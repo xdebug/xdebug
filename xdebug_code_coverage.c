@@ -86,7 +86,6 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_o
 {
 	zend_op_array *op_array = execute_data->op_array;
 	char *file = (char *) op_array->filename;
-	int lineno = cur_opcode->lineno;
 	xdebug_func func_info;
 	char *function_name;
 	long opnr = execute_data->opline - execute_data->op_array->opcodes;
