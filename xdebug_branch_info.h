@@ -35,15 +35,19 @@ typedef struct _xdebug_path {
 	unsigned int *elements;
 } xdebug_path;
 
+typedef struct _xdebug_path_info {
+	unsigned int     paths_count;
+	unsigned int     paths_size;
+	xdebug_path    **paths;
+} xdebug_path_info;
+
 typedef struct _xdebug_branch_info {
-	unsigned int  size;
+	unsigned int     size;
 	xdebug_set      *starts;
 	xdebug_set      *ends;
 	xdebug_branch   *branches;
 
-	unsigned int  paths_count;
-	unsigned int  paths_size;
-	xdebug_path    **paths;
+	xdebug_path_info path_info;
 } xdebug_branch_info;
 
 xdebug_branch_info *xdebug_branch_info_create(unsigned int size);

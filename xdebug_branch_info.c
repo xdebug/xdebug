@@ -25,9 +25,9 @@ xdebug_branch_info *xdebug_branch_info_create(unsigned int size)
 	tmp->starts = xdebug_set_create(size);
 	tmp->ends   = xdebug_set_create(size);
 
-	tmp->paths_count = 0;
-	tmp->paths_size  = 0;
-	tmp->paths = NULL;
+	tmp->path_info.paths_count = 0;
+	tmp->path_info.paths_size  = 0;
+	tmp->path_info.paths = NULL;
 
 	return tmp;
 }
@@ -36,11 +36,11 @@ void xdebug_branch_info_free(xdebug_branch_info *branch_info)
 {
 	unsigned int i;
 
-	for (i = 0; i < branch_info->paths_count; i++) {
-		free(branch_info->paths[i]->elements);
-		free(branch_info->paths[i]);
+	for (i = 0; i < branch_info->path_info.paths_count; i++) {
+		free(branch_info->path_info.paths[i]->elements);
+		free(branch_info->path_info.paths[i]);
 	}
-	free(branch_info->paths);
+	free(branch_info->path_info.paths);
 	free(branch_info->branches);
 	xdebug_set_free(branch_info->starts);
 	xdebug_set_free(branch_info->ends);
@@ -89,14 +89,14 @@ static void xdebug_path_add(xdebug_path *path, unsigned int nr)
 	path->elements_count++;
 }
 
-static void xdebug_branch_info_add_path(xdebug_branch_info *branch_info, xdebug_path *path)
+static void xdebug_path_info_add_path(xdebug_path_info *path_info, xdebug_path *path)
 {
-	if (branch_info->paths_count == branch_info->paths_size) {
-		branch_info->paths_size += 32;
-		branch_info->paths = realloc(branch_info->paths, sizeof(xdebug_path*) * branch_info->paths_size);
+	if (path_info->paths_count == path_info->paths_size) {
+		path_info->paths_size += 32;
+		path_info->paths = realloc(path_info->paths, sizeof(xdebug_path*) * path_info->paths_size);
 	}
-	branch_info->paths[branch_info->paths_count] = path;
-	branch_info->paths_count++;
+	path_info->paths[path_info->paths_count] = path;
+	path_info->paths_count++;
 }
 
 static xdebug_path *xdebug_path_new(xdebug_path *old_path)
@@ -145,7 +145,7 @@ static void xdebug_branch_find_path(unsigned int nr, xdebug_branch_info *branch_
 	xdebug_path *new_path;
 	int found = 0;
 
-	if (branch_info->paths_count > 65535) {
+	if (branch_info->path_info.paths_count > 65535) {
 		return;
 	}
 
@@ -165,7 +165,7 @@ static void xdebug_branch_find_path(unsigned int nr, xdebug_branch_info *branch_
 		found = 1;
 	}
 	if (!found) {
-		xdebug_branch_info_add_path(branch_info, new_path);
+		xdebug_path_info_add_path(&(branch_info->path_info), new_path);
 	} else {
 		xdebug_path_free(new_path);
 	}
@@ -199,10 +199,10 @@ void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info
 		}
 	}
 
-	for (i = 0; i < branch_info->paths_count; i++) {
+	for (i = 0; i < branch_info->path_info.paths_count; i++) {
 		printf("path #%d: ", i + 1);
-		for (j = 0; j < branch_info->paths[i]->elements_count; j++) {
-			printf("%d, ", branch_info->paths[i]->elements[j]);
+		for (j = 0; j < branch_info->path_info.paths[i]->elements_count; j++) {
+			printf("%d, ", branch_info->path_info.paths[i]->elements[j]);
 		}
 		printf("\n");
 	}
