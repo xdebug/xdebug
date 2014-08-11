@@ -866,12 +866,12 @@ static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 	MAKE_STD_ZVAL(paths);
 	array_init(paths);
 
-	for (i = 0; i < branch_info->paths_count; i++) {
+	for (i = 0; i < branch_info->path_info.paths_count; i++) {
 		MAKE_STD_ZVAL(path);
 		array_init(path);
 
-		for (j = 0; j < branch_info->paths[i]->elements_count; j++) {
-			add_next_index_long(path, branch_info->paths[i]->elements[j]);
+		for (j = 0; j < branch_info->path_info.paths[i]->elements_count; j++) {
+			add_next_index_long(path, branch_info->path_info.paths[i]->elements[j]);
 		}
 		add_next_index_zval(paths, path);
 	}
