@@ -656,17 +656,6 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	unsigned int i;
 	xdebug_set *set = NULL;
 	xdebug_branch_info *branch_info = NULL;
-	char *function_name;
-	xdebug_func func_info;
-
-	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
-	function_name = xdebug_func_format(&func_info TSRMLS_CC);
-	if (func_info.class) {
-		xdfree(func_info.class);
-	}
-	if (func_info.function) {
-		xdfree(func_info.function);
-	}
 
 	op_array->reserved[XG(reserved_offset)] = (void*) 1;
 
@@ -701,9 +690,23 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 		xdebug_set_free(set);
 	}
 	if (branch_info) {
+		char *function_name;
+		xdebug_func func_info;
+
+		xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
+		function_name = xdebug_func_format(&func_info TSRMLS_CC);
+		if (func_info.class) {
+			xdfree(func_info.class);
+		}
+		if (func_info.function) {
+			xdfree(func_info.function);
+		}
+
 		xdebug_branch_post_process(branch_info);
 		xdebug_branch_find_paths(branch_info);
 		xdebug_branch_info_add_branches_and_paths(filename, (char*) function_name, branch_info TSRMLS_CC);
+
+		xdfree(function_name);
 	}
 }
 
