@@ -176,9 +176,19 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 	xdebug_branch_find_path(0, branch_info, NULL);
 }
 
+void xdebug_path_info_dump(xdebug_path *path TSRMLS_DC)
+{
+	unsigned int i;
+
+	for (i = 0; i < path->elements_count; i++) {
+		printf("%d, ", path->elements[i]);
+	}
+	printf("\n");
+}
+
 void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info TSRMLS_DC)
 {
-	unsigned int i, j;
+	unsigned int i;
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (xdebug_set_in(branch_info->starts, i)) {
@@ -201,10 +211,7 @@ void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info
 
 	for (i = 0; i < branch_info->path_info.paths_count; i++) {
 		printf("path #%d: ", i + 1);
-		for (j = 0; j < branch_info->path_info.paths[i]->elements_count; j++) {
-			printf("%d, ", branch_info->path_info.paths[i]->elements[j]);
-		}
-		printf("\n");
+		xdebug_path_info_dump(branch_info->path_info.paths[i]);
 	}
 }
 
