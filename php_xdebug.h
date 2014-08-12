@@ -209,6 +209,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_coverage_file *previous_file;
 	char                 *previous_mark_filename;
 	xdebug_coverage_file *previous_mark_file;
+	xdebug_path_info      paths_stack;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;

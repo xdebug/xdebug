@@ -319,6 +319,9 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->previous_file        = NULL;
 	xg->previous_mark_filename = "";
 	xg->previous_mark_file     = NULL;
+	xg->paths_stack.paths_count = 0;
+	xg->paths_stack.paths_size  = 0;
+	xg->paths_stack.paths       = NULL;
 	xg->do_code_coverage     = 0;
 	xg->breakpoint_count     = 0;
 	xg->ide_key              = NULL;
@@ -1039,6 +1042,11 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	xdebug_llist_destroy(XG(headers), NULL);
 	XG(headers) = NULL;
 
+	/* Clean up path coverage array */
+	if (XG(paths_stack).paths) {
+		free(XG(paths_stack).paths);
+	}
+
 	return SUCCESS;
 }
 
@@ -1434,7 +1442,11 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
+		xdebug_path *path = xdebug_path_new(NULL);
+
 		xdebug_prefill_code_coverage(op_array TSRMLS_CC);
+		xdebug_path_info_add_path_for_level(&(XG(paths_stack)), path, XG(level));
+		printf("Start for (userland) function #%d (%s) (L%ld)\n", XG(function_count), fse->function.function, XG(level));
 	}
 
 	/* If we're in an eval, we need to create an ID for it. This ID however
@@ -1466,6 +1478,14 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 #endif
 
+	/* Check which path has been used */
+	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
+		xdebug_path *path = xdebug_path_info_get_path_for_level(&(XG(paths_stack)), XG(level));
+
+		printf("Exit for (userland) function #%d (%s) (L%ld)\nPath was: ", XG(function_count), fse->function.function, XG(level));
+		xdebug_path_info_dump(path);
+		xdebug_path_free(path);
+	}
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}
