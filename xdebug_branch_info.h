@@ -50,6 +50,10 @@ typedef struct _xdebug_branch_info {
 	xdebug_path_info path_info;
 } xdebug_branch_info;
 
+typedef struct _xdebug_current_path {
+	xdebug_path_info path_info;
+} xdebug_current_path;
+
 xdebug_branch_info *xdebug_branch_info_create(unsigned int size);
 
 void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos);
@@ -59,6 +63,13 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info);
 void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info TSRMLS_DC);
 void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info TSRMLS_DC);
 void xdebug_branch_info_free(xdebug_branch_info *branch_info);
+
+void xdebug_path_add(xdebug_path *path, unsigned int nr);
+xdebug_path *xdebug_path_new(xdebug_path *old_path);
+void xdebug_path_info_dump(xdebug_path *path TSRMLS_DC);
+void xdebug_path_free(xdebug_path *path);
+void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level);
+xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level);
 
 void xdebug_branch_info_mark_reached(char *filename, char *function_name, long opcode_nr TSRMLS_DC);
 

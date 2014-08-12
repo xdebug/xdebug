@@ -79,7 +79,7 @@ void xdebug_branch_post_process(xdebug_branch_info *branch_info)
 	}
 }
 
-static void xdebug_path_add(xdebug_path *path, unsigned int nr)
+void xdebug_path_add(xdebug_path *path, unsigned int nr)
 {
 	if (path->elements_count == path->elements_size) {
 		path->elements_size += 32;
@@ -99,7 +99,21 @@ static void xdebug_path_info_add_path(xdebug_path_info *path_info, xdebug_path *
 	path_info->paths_count++;
 }
 
-static xdebug_path *xdebug_path_new(xdebug_path *old_path)
+void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level)
+{
+	if (level > path_info->paths_size) {
+		path_info->paths_size = level + 32;
+		path_info->paths = realloc(path_info->paths, sizeof(xdebug_path*) * path_info->paths_size);
+	}
+	path_info->paths[level] = path;
+}
+
+xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level)
+{
+	return path_info->paths[level];
+}
+
+xdebug_path *xdebug_path_new(xdebug_path *old_path)
 {
 	xdebug_path *tmp;
 	tmp = calloc(1, sizeof(xdebug_path));
@@ -114,7 +128,7 @@ static xdebug_path *xdebug_path_new(xdebug_path *old_path)
 	return tmp;
 }
 
-static void xdebug_path_free(xdebug_path *path)
+void xdebug_path_free(xdebug_path *path)
 {
 	if (path->elements) {
 		free(path->elements);
@@ -245,6 +259,8 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, long o
 		
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
 		branch_info->branches[opcode_nr].hit = 1;
+		xdebug_path_add(XG(paths_stack).paths[XG(level)], opcode_nr);
+		printf("HIT BRANCH #%ld for L%ld\n", opcode_nr, XG(level));
 	}
 }
 
