@@ -17,504 +17,61 @@ xdebug.extended_info=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php
-    xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE | XDEBUG_CC_BRANCH_CHECK);
+include 'dump-branch-coverage.inc';
 
-	include 'coverage6.inc';
+xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE | XDEBUG_CC_BRANCH_CHECK);
 
-    xdebug_stop_code_coverage(false);
-    $c = xdebug_get_code_coverage();
-	ksort($c);
-	var_dump($c);
+include 'coverage6.inc';
+
+xdebug_stop_code_coverage(false);
+$c = xdebug_get_code_coverage();
+dump_branch_coverage($c);
 ?>
---EXPECTF--
+--EXPECT--
 A NOT B
+B NOT A
 2
 1
-array(2) {
-  ["%scoverage6.inc"]=>
-  array(2) {
-    ["lines"]=>
-    array(14) {
-      [2]=>
-      int(1)
-      [4]=>
-      int(1)
-      [5]=>
-      int(1)
-      [6]=>
-      int(1)
-      [7]=>
-      int(-1)
-      [8]=>
-      int(-1)
-      [9]=>
-      int(1)
-      [11]=>
-      int(1)
-      [14]=>
-      int(1)
-      [15]=>
-      int(1)
-      [16]=>
-      int(1)
-      [18]=>
-      int(1)
-      [19]=>
-      int(1)
-      [21]=>
-      int(1)
-    }
-    ["functions"]=>
-    array(3) {
-      ["{main}"]=>
-      array(2) {
-        ["branches"]=>
-        array(1) {
-          [0]=>
-          array(6) {
-            ["op_start"]=>
-            int(0)
-            ["op_end"]=>
-            int(16)
-            ["line_start"]=>
-            int(2)
-            ["line_end"]=>
-            int(21)
-            ["out"]=>
-            array(0) {
-            }
-            ["hit"]=>
-            int(1)
-          }
-        }
-        ["paths"]=>
-        array(1) {
-          [0]=>
-          array(1) {
-            [0]=>
-            int(0)
-          }
-        }
-      }
-      ["ok"]=>
-      array(2) {
-        ["branches"]=>
-        array(9) {
-          [0]=>
-          array(6) {
-            ["op_start"]=>
-            int(0)
-            ["op_end"]=>
-            int(4)
-            ["line_start"]=>
-            int(2)
-            ["line_end"]=>
-            int(4)
-            ["out"]=>
-            array(2) {
-              [5]=>
-              int(0)
-              [7]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(1)
-          }
-          [5]=>
-          array(6) {
-            ["op_start"]=>
-            int(5)
-            ["op_end"]=>
-            int(6)
-            ["line_start"]=>
-            int(4)
-            ["line_end"]=>
-            int(4)
-            ["out"]=>
-            array(1) {
-              [7]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(1)
-          }
-          [7]=>
-          array(6) {
-            ["op_start"]=>
-            int(7)
-            ["op_end"]=>
-            int(7)
-            ["line_start"]=>
-            int(4)
-            ["line_end"]=>
-            int(4)
-            ["out"]=>
-            array(2) {
-              [8]=>
-              int(0)
-              [11]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(1)
-          }
-          [8]=>
-          array(6) {
-            ["op_start"]=>
-            int(8)
-            ["op_end"]=>
-            int(10)
-            ["line_start"]=>
-            int(5)
-            ["line_end"]=>
-            int(6)
-            ["out"]=>
-            array(1) {
-              [18]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(1)
-          }
-          [11]=>
-          array(6) {
-            ["op_start"]=>
-            int(11)
-            ["op_end"]=>
-            int(12)
-            ["line_start"]=>
-            int(6)
-            ["line_end"]=>
-            int(6)
-            ["out"]=>
-            array(2) {
-              [13]=>
-              int(0)
-              [14]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(0)
-          }
-          [13]=>
-          array(6) {
-            ["op_start"]=>
-            int(13)
-            ["op_end"]=>
-            int(13)
-            ["line_start"]=>
-            int(6)
-            ["line_end"]=>
-            int(6)
-            ["out"]=>
-            array(1) {
-              [14]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(0)
-          }
-          [14]=>
-          array(6) {
-            ["op_start"]=>
-            int(14)
-            ["op_end"]=>
-            int(14)
-            ["line_start"]=>
-            int(6)
-            ["line_end"]=>
-            int(6)
-            ["out"]=>
-            array(2) {
-              [15]=>
-              int(0)
-              [18]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(0)
-          }
-          [15]=>
-          array(6) {
-            ["op_start"]=>
-            int(15)
-            ["op_end"]=>
-            int(17)
-            ["line_start"]=>
-            int(7)
-            ["line_end"]=>
-            int(8)
-            ["out"]=>
-            array(1) {
-              [18]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(0)
-          }
-          [18]=>
-          array(6) {
-            ["op_start"]=>
-            int(18)
-            ["op_end"]=>
-            int(19)
-            ["line_start"]=>
-            int(9)
-            ["line_end"]=>
-            int(9)
-            ["out"]=>
-            array(0) {
-            }
-            ["hit"]=>
-            int(1)
-          }
-        }
-        ["paths"]=>
-        array(10) {
-          [0]=>
-          array(5) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(5)
-            [2]=>
-            int(7)
-            [3]=>
-            int(8)
-            [4]=>
-            int(18)
-          }
-          [1]=>
-          array(8) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(5)
-            [2]=>
-            int(7)
-            [3]=>
-            int(11)
-            [4]=>
-            int(13)
-            [5]=>
-            int(14)
-            [6]=>
-            int(15)
-            [7]=>
-            int(18)
-          }
-          [2]=>
-          array(7) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(5)
-            [2]=>
-            int(7)
-            [3]=>
-            int(11)
-            [4]=>
-            int(13)
-            [5]=>
-            int(14)
-            [6]=>
-            int(18)
-          }
-          [3]=>
-          array(7) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(5)
-            [2]=>
-            int(7)
-            [3]=>
-            int(11)
-            [4]=>
-            int(14)
-            [5]=>
-            int(15)
-            [6]=>
-            int(18)
-          }
-          [4]=>
-          array(6) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(5)
-            [2]=>
-            int(7)
-            [3]=>
-            int(11)
-            [4]=>
-            int(14)
-            [5]=>
-            int(18)
-          }
-          [5]=>
-          array(4) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(7)
-            [2]=>
-            int(8)
-            [3]=>
-            int(18)
-          }
-          [6]=>
-          array(7) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(7)
-            [2]=>
-            int(11)
-            [3]=>
-            int(13)
-            [4]=>
-            int(14)
-            [5]=>
-            int(15)
-            [6]=>
-            int(18)
-          }
-          [7]=>
-          array(6) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(7)
-            [2]=>
-            int(11)
-            [3]=>
-            int(13)
-            [4]=>
-            int(14)
-            [5]=>
-            int(18)
-          }
-          [8]=>
-          array(6) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(7)
-            [2]=>
-            int(11)
-            [3]=>
-            int(14)
-            [4]=>
-            int(15)
-            [5]=>
-            int(18)
-          }
-          [9]=>
-          array(5) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(7)
-            [2]=>
-            int(11)
-            [3]=>
-            int(14)
-            [4]=>
-            int(18)
-          }
-        }
-      }
-      ["loop_test"]=>
-      array(2) {
-        ["branches"]=>
-        array(3) {
-          [0]=>
-          array(6) {
-            ["op_start"]=>
-            int(0)
-            ["op_end"]=>
-            int(2)
-            ["line_start"]=>
-            int(11)
-            ["line_end"]=>
-            int(14)
-            ["out"]=>
-            array(1) {
-              [3]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(1)
-          }
-          [3]=>
-          array(6) {
-            ["op_start"]=>
-            int(3)
-            ["op_end"]=>
-            int(7)
-            ["line_start"]=>
-            int(14)
-            ["line_end"]=>
-            int(15)
-            ["out"]=>
-            array(2) {
-              [8]=>
-              int(0)
-              [3]=>
-              int(0)
-            }
-            ["hit"]=>
-            int(1)
-          }
-          [8]=>
-          array(6) {
-            ["op_start"]=>
-            int(8)
-            ["op_end"]=>
-            int(9)
-            ["line_start"]=>
-            int(16)
-            ["line_end"]=>
-            int(16)
-            ["out"]=>
-            array(0) {
-            }
-            ["hit"]=>
-            int(1)
-          }
-        }
-        ["paths"]=>
-        array(2) {
-          [0]=>
-          array(3) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(3)
-            [2]=>
-            int(8)
-          }
-          [1]=>
-          array(4) {
-            [0]=>
-            int(0)
-            [1]=>
-            int(3)
-            [2]=>
-            int(3)
-            [3]=>
-            int(8)
-          }
-        }
-      }
-    }
-  }
-  ["%scoverage6.php"]=>
-  array(2) {
-    [4]=>
-    int(1)
-    [6]=>
-    int(1)
-  }
-}
+loop_test
+- branches
+  - 00; OP: 00-02; line: 12-15 HIT; out1: 03 HIT; out2: -1  X 
+  - 03; OP: 03-07; line: 15-16 HIT; out1: 08 HIT; out2: 03 HIT
+  - 08; OP: 08-09; line: 17-17 HIT; out1: -1  X ; out2: -1  X 
+- paths
+  - 0 3 8
+  - 0 3 3 8
+
+ok
+- branches
+  - 00; OP: 00-04; line: 02-04 HIT; out1: 05 HIT; out2: 07 HIT
+  - 05; OP: 05-06; line: 04-04 HIT; out1: 07 HIT; out2: -1  X 
+  - 07; OP: 07-07; line: 04-04 HIT; out1: 08 HIT; out2: 11 HIT
+  - 08; OP: 08-10; line: 05-06 HIT; out1: 11 HIT; out2: -1  X 
+  - 11; OP: 11-13; line: 07-07 HIT; out1: 14 HIT; out2: 15 HIT
+  - 14; OP: 14-14; line: 07-07 HIT; out1: 15 HIT; out2: -1  X 
+  - 15; OP: 15-15; line: 07-07 HIT; out1: 16 HIT; out2: 19 HIT
+  - 16; OP: 16-18; line: 08-09 HIT; out1: 19 HIT; out2: -1  X 
+  - 19; OP: 19-20; line: 10-10 HIT; out1: -1  X ; out2: -1  X 
+- paths
+  - 0 5 7 8 11 14 15 16 19
+  - 0 5 7 8 11 14 15 19
+  - 0 5 7 8 11 15 16 19
+  - 0 5 7 8 11 15 19
+  - 0 5 7 11 14 15 16 19
+  - 0 5 7 11 14 15 19
+  - 0 5 7 11 15 16 19
+  - 0 5 7 11 15 19
+  - 0 7 8 11 14 15 16 19
+  - 0 7 8 11 14 15 19
+  - 0 7 8 11 15 16 19
+  - 0 7 8 11 15 19
+  - 0 7 11 14 15 16 19
+  - 0 7 11 14 15 19
+  - 0 7 11 15 16 19
+  - 0 7 11 15 19
+
+{main}
+- branches
+  - 00; OP: 00-22; line: 02-23 HIT; out1: -1  X ; out2: -1  X 
+- paths
+  - 0

@@ -828,7 +828,7 @@ static void add_line(void *ret, xdebug_hash_element *e)
 
 static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 {
-	zval *branches, *branch, *out;
+	zval *branches, *branch, *out, *out_hit;
 	unsigned int i;
 
 	MAKE_STD_ZVAL(branches);
@@ -843,16 +843,28 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 			add_assoc_long(branch, "line_start", branch_info->branches[i].start_lineno);
 			add_assoc_long(branch, "line_end", branch_info->branches[i].end_lineno);
 
+			add_assoc_long(branch, "hit", branch_info->branches[i].hit);
+
 			MAKE_STD_ZVAL(out);
 			array_init(out);
 			if (branch_info->branches[i].out[0]) {
-				add_index_long(out, branch_info->branches[i].out[0], 0);
+				add_index_long(out, 0, branch_info->branches[i].out[0]);
 			}
 			if (branch_info->branches[i].out[1]) {
-				add_index_long(out, branch_info->branches[i].out[1], 0);
+				add_index_long(out, 1, branch_info->branches[i].out[1]);
 			}
 			add_assoc_zval(branch, "out", out);
-			add_assoc_long(branch, "hit", branch_info->branches[i].hit);
+
+			MAKE_STD_ZVAL(out_hit);
+			array_init(out_hit);
+			if (branch_info->branches[i].out[0]) {
+				add_index_long(out_hit, 0, branch_info->branches[i].out_hit[0]);
+			}
+			if (branch_info->branches[i].out[1]) {
+				add_index_long(out_hit, 1, branch_info->branches[i].out_hit[1]);
+			}
+			add_assoc_zval(branch, "out_hit", out_hit);
+
 			add_index_zval(branches, i, branch);
 		}
 	}
