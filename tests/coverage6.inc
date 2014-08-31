@@ -3,7 +3,8 @@ function ok($a, $b)
 {
 	if ($a && !$b) {
 		echo "A NOT B\n";
-	} else if (!$a && $b) {
+	}
+	if (!$a && $b) {
 		echo "B NOT A\n";
 	}
 }
@@ -16,5 +17,6 @@ function loop_test($a)
 }
 
 ok(true, false);
+ok(false, true);
 loop_test(2);
 ?>

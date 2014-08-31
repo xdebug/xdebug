@@ -258,9 +258,21 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, long o
 	branch_info = function->branch_info;
 		
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
+		/* Mark out for previous branch, if one is set */
+		if (XG(branches).last_branch_nr[XG(level)] != -1) {
+			if (branch_info->branches[XG(branches).last_branch_nr[XG(level)]].out[0] == opcode_nr) {
+				branch_info->branches[XG(branches).last_branch_nr[XG(level)]].out_hit[0] = 1;
+			}
+			if (branch_info->branches[XG(branches).last_branch_nr[XG(level)]].out[1] == opcode_nr) {
+				branch_info->branches[XG(branches).last_branch_nr[XG(level)]].out_hit[1] = 1;
+			}
+		}
 		branch_info->branches[opcode_nr].hit = 1;
+#ifdef DOPATHCOVERAGEEXTRA
 		xdebug_path_add(XG(paths_stack).paths[XG(level)], opcode_nr);
 		printf("HIT BRANCH #%ld for L%ld\n", opcode_nr, XG(level));
+#endif
+		XG(branches).last_branch_nr[XG(level)] = opcode_nr;
 	}
 }
 
