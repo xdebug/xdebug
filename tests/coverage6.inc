@@ -17,6 +17,9 @@ function loop_test($a)
 }
 
 ok(true, false);
+ok(true, true);
+ok(false, false);
 ok(false, true);
+loop_test(1);
 loop_test(2);
 ?>

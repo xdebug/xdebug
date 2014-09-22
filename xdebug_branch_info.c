@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "php_xdebug.h"
+#include "xdebug_str.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -41,6 +42,7 @@ void xdebug_branch_info_free(xdebug_branch_info *branch_info)
 		free(branch_info->path_info.paths[i]);
 	}
 	free(branch_info->path_info.paths);
+	xdebug_hash_destroy(branch_info->path_info.path_hash);
 	free(branch_info->branches);
 	xdebug_set_free(branch_info->starts);
 	xdebug_set_free(branch_info->ends);
@@ -101,9 +103,17 @@ static void xdebug_path_info_add_path(xdebug_path_info *path_info, xdebug_path *
 
 void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level)
 {
+	int i = 0, orig_size;
+
+	orig_size = path_info->paths_size;
+
 	if (level > path_info->paths_size) {
 		path_info->paths_size = level + 32;
 		path_info->paths = realloc(path_info->paths, sizeof(xdebug_path*) * path_info->paths_size);
+
+		for (i = orig_size; i < XG(branches).size; i++) {
+			XG(branches).last_branch_nr[i] = -1;
+		}
 	}
 	path_info->paths[level] = path;
 }
@@ -185,9 +195,30 @@ static void xdebug_branch_find_path(unsigned int nr, xdebug_branch_info *branch_
 	}
 }
 
+void xdebug_create_key_for_path(xdebug_path *path, xdebug_str *str)
+{
+	unsigned int i;
+	char temp_nr[16];
+
+	for (i = 0; i < path->elements_count; i++) {
+		snprintf(temp_nr, 15, "%u:", path->elements[i]);
+		xdebug_str_add(str, temp_nr, 0);
+	}
+}
+
 void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 {
+	unsigned int i;
+
 	xdebug_branch_find_path(0, branch_info, NULL);
+
+	branch_info->path_info.path_hash = xdebug_hash_alloc(128, NULL);
+
+	for (i = 0; i < branch_info->path_info.paths_count; i++) {
+		xdebug_str str = { 0, 0, NULL };
+		xdebug_create_key_for_path(branch_info->path_info.paths[i], &str);
+		xdebug_hash_add(branch_info->path_info.path_hash, str.d, str.l, branch_info->path_info.paths[i]);
+	}
 }
 
 void xdebug_path_info_dump(xdebug_path *path TSRMLS_DC)
@@ -234,7 +265,7 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, long o
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
 	xdebug_branch_info *branch_info;
-	
+
 	if (strcmp(XG(previous_mark_filename), filename) == 0) {
 		file = XG(previous_mark_file);
 	} else {
@@ -249,7 +280,7 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, long o
 	if (!file->has_branch_info) {
 		return;
 	}
-	
+
 	/* Check if the function already exists in the hash */
 	if (!xdebug_hash_find(file->functions, function_name, strlen(function_name), (void *) &function)) {
 		return;
@@ -258,6 +289,9 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, long o
 	branch_info = function->branch_info;
 		
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
+		char *key;
+		void *dummy;
+
 		/* Mark out for previous branch, if one is set */
 		if (XG(branches).last_branch_nr[XG(level)] != -1) {
 			if (branch_info->branches[XG(branches).last_branch_nr[XG(level)]].out[0] == opcode_nr) {
@@ -267,13 +301,53 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, long o
 				branch_info->branches[XG(branches).last_branch_nr[XG(level)]].out_hit[1] = 1;
 			}
 		}
+
+		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG(branches).last_branch_nr[XG(level)], XG(function_count));
+		if (!xdebug_hash_find(XG(visited_branches), key, strlen(key), (void*) &dummy)) {
+			xdebug_path_add(XG(paths_stack).paths[XG(level)], opcode_nr);
+			xdebug_hash_add(XG(visited_branches), key, strlen(key), NULL);
+		}
+		xdfree(key);
+
 		branch_info->branches[opcode_nr].hit = 1;
-#ifdef DOPATHCOVERAGEEXTRA
-		xdebug_path_add(XG(paths_stack).paths[XG(level)], opcode_nr);
-		printf("HIT BRANCH #%ld for L%ld\n", opcode_nr, XG(level));
-#endif
+
 		XG(branches).last_branch_nr[XG(level)] = opcode_nr;
 	}
+}
+
+void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *function_name, char *key, int key_len TSRMLS_DC)
+{
+	xdebug_coverage_file *file;
+	xdebug_coverage_function *function;
+	xdebug_branch_info *branch_info;
+	xdebug_path *path;
+
+	if (strcmp(XG(previous_mark_filename), filename) == 0) {
+		file = XG(previous_mark_file);
+	} else {
+		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
+			return;
+		}
+		XG(previous_mark_filename) = file->name;
+		XG(previous_mark_file) = file;
+	}
+
+	/* If there is no branch info, we don't have to do more */
+	if (!file->has_branch_info) {
+		return;
+	}
+
+	/* Check if the function already exists in the hash */
+	if (!xdebug_hash_find(file->functions, function_name, strlen(function_name), (void *) &function)) {
+		return;
+	}
+
+	branch_info = function->branch_info;
+
+	if (!xdebug_hash_find(branch_info->path_info.path_hash, key, key_len, (void *) &path)) {
+		return;
+	}
+	path->hit = 1;
 }
 
 void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info TSRMLS_DC)
