@@ -20,6 +20,7 @@
 #define __HAVE_XDEBUG_BRANCH_INFO_H__
 
 #include "xdebug_set.h"
+#include "xdebug_str.h"
 
 typedef struct _xdebug_branch {
 	unsigned int start_lineno;
@@ -34,26 +35,26 @@ typedef struct _xdebug_path {
 	unsigned int elements_count;
 	unsigned int elements_size;
 	unsigned int *elements;
+	unsigned char hit;
 } xdebug_path;
 
+/* Contains information for paths that belong to a set of branches (as stored in xdebug_branch_info) */
 typedef struct _xdebug_path_info {
-	unsigned int     paths_count;
-	unsigned int     paths_size;
-	xdebug_path    **paths;
+	unsigned int     paths_count; /* The number of collected paths */
+	unsigned int     paths_size;  /* The amount of slots allocated for storing paths */
+	xdebug_path    **paths;       /* An array of possible paths */
+	xdebug_hash     *path_hash;   /* A hash where each path's key is the sequence of followed branches, pointing to a path in the paths array */
 } xdebug_path_info;
 
+/* Contains all the branch information for a specific function */
 typedef struct _xdebug_branch_info {
-	unsigned int     size;
-	xdebug_set      *starts;
-	xdebug_set      *ends;
-	xdebug_branch   *branches;
+	unsigned int     size;     /* The number of stored branches */
+	xdebug_set      *starts;   /* A set of opcodes nrs where each branch starts */
+	xdebug_set      *ends;     /* A set of opcodes nrs where each ends starts */
+	xdebug_branch   *branches; /* Information about each branch */
 
-	xdebug_path_info path_info;
+	xdebug_path_info path_info; /* The paths that can be created out of these branches */
 } xdebug_branch_info;
-
-typedef struct _xdebug_current_path {
-	xdebug_path_info path_info;
-} xdebug_current_path;
 
 xdebug_branch_info *xdebug_branch_info_create(unsigned int size);
 
@@ -71,7 +72,8 @@ void xdebug_path_info_dump(xdebug_path *path TSRMLS_DC);
 void xdebug_path_free(xdebug_path *path);
 void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level);
 xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level);
+void xdebug_create_key_for_path(xdebug_path *path, xdebug_str *str);
 
 void xdebug_branch_info_mark_reached(char *filename, char *function_name, long opcode_nr TSRMLS_DC);
-
+void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *function_name, char *key, int key_len TSRMLS_DC);
 #endif

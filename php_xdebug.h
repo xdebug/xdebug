@@ -209,9 +209,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_coverage_file *previous_file;
 	char                 *previous_mark_filename;
 	xdebug_coverage_file *previous_mark_file;
-#ifdef DOPATHCOVERAGEEXTRA
 	xdebug_path_info      paths_stack;
-#endif
+	xdebug_hash          *visited_branches;
 	struct {
 		int  size;
 		int *last_branch_nr;

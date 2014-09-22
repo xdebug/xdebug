@@ -319,11 +319,9 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->previous_file        = NULL;
 	xg->previous_mark_filename = "";
 	xg->previous_mark_file     = NULL;
-#ifdef DOPATHCOVERAGEEXTRA
 	xg->paths_stack.paths_count = 0;
 	xg->paths_stack.paths_size  = 0;
 	xg->paths_stack.paths       = NULL;
-#endif
 	xg->branches.size        = 0;
 	xg->branches.last_branch_nr = NULL;
 	xg->do_code_coverage     = 0;
@@ -954,6 +952,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Initialize dump superglobals */
 	XG(dumped) = 0;
 
+	/* Initialize visisted branches hash */
+	XG(visited_branches) = xdebug_hash_alloc(2048, NULL);
+
 	/* Initialize start time */
 	XG(start_time) = xdebug_get_utime();
 
@@ -1021,6 +1022,9 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	xdebug_hash_destroy(XG(code_coverage));
 	XG(code_coverage) = NULL;
 
+	xdebug_hash_destroy(XG(visited_branches));
+	XG(visited_branches) = NULL;
+
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
 	}
@@ -1047,11 +1051,9 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	XG(headers) = NULL;
 
 	/* Clean up path coverage array */
-#ifdef DOPATHCOVERAGEEXTRA
 	if (XG(paths_stack).paths) {
 		free(XG(paths_stack).paths);
 	}
-#endif
 	if (XG(branches).last_branch_nr) {
 		free(XG(branches).last_branch_nr);
 	}
@@ -1451,19 +1453,16 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-#ifdef DOPATHCOVERAGEEXTRA
 		xdebug_path *path = xdebug_path_new(NULL);
 
-#endif
 		xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-#ifdef DOPATHCOVERAGEEXTRA
 		xdebug_path_info_add_path_for_level(&(XG(paths_stack)), path, XG(level));
-		printf("Start for (userland) function #%d (%s) (L%ld)\n", XG(function_count), fse->function.function, XG(level));
-#endif
+
 		if (XG(branches).size == 0 || XG(level) > XG(branches).size) {
 			XG(branches).size += 32;
 			XG(branches).last_branch_nr = realloc(XG(branches).last_branch_nr, sizeof(int) * XG(branches.size));
 		}
+
 		XG(branches).last_branch_nr[XG(level)] = -1;
 	}
 
@@ -1496,16 +1495,11 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 #endif
 
-#ifdef DOPATHCOVERAGEEXTRA
 	/* Check which path has been used */
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_path *path = xdebug_path_info_get_path_for_level(&(XG(paths_stack)), XG(level));
-
-		printf("Exit for (userland) function #%d (%s) (L%ld)\nPath was: ", XG(function_count), fse->function.function, XG(level));
-		xdebug_path_info_dump(path);
-		xdebug_path_free(path);
+		xdebug_code_coverage_end_of_function(op_array, fse TSRMLS_CC);
 	}
-#endif
+
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}

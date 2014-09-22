@@ -755,6 +755,39 @@ void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 	zend_hash_apply_with_arguments(CG(class_table) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, op_array->filename);
 }
 
+void xdebug_code_coverage_end_of_function(zend_op_array *op_array, function_stack_entry *fse TSRMLS_DC)
+{
+	xdebug_str str = { 0, 0, NULL };
+	xdebug_path *path = xdebug_path_info_get_path_for_level(&(XG(paths_stack)), XG(level));
+	char *file = (char *) op_array->filename;
+	xdebug_func func_info;
+	char *function_name;
+
+	if (!path) {
+		return;
+	}
+
+	xdebug_create_key_for_path(path, &str);
+
+	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
+	function_name = xdebug_func_format(&func_info TSRMLS_CC);
+	if (func_info.class) {
+		xdfree(func_info.class);
+	}
+	if (func_info.function) {
+		xdfree(func_info.function);
+	}
+
+	xdebug_branch_info_mark_end_of_function_reached(file, function_name, str.d, str.l TSRMLS_CC);
+
+	xdfree(function_name);
+	xdfree(str.d);
+
+	if (path) {
+		xdebug_path_free(path);
+	}
+}
+
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
 	long options = 0;
@@ -874,7 +907,7 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 
 static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 {
-	zval *paths, *path;
+	zval *paths, *path, *path_container;
 	unsigned int i, j;
 
 	MAKE_STD_ZVAL(paths);
@@ -884,10 +917,17 @@ static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 		MAKE_STD_ZVAL(path);
 		array_init(path);
 
+		MAKE_STD_ZVAL(path_container);
+		array_init(path_container);
+
 		for (j = 0; j < branch_info->path_info.paths[i]->elements_count; j++) {
 			add_next_index_long(path, branch_info->path_info.paths[i]->elements[j]);
 		}
-		add_next_index_zval(paths, path);
+
+		add_assoc_zval(path_container, "path", path);
+		add_assoc_long(path_container, "hit", branch_info->path_info.paths[i]->hit);
+
+		add_next_index_zval(paths, path_container);
 	}
 
 	add_assoc_zval_ex(retval, "paths", 6, paths);
