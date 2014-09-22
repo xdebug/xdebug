@@ -1341,6 +1341,9 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 				}
 			}
 			efree(class_name);
+
+			zend_hash_destroy(merged_hash);
+			FREE_HASHTABLE(merged_hash);
 			break;
 		}
 
