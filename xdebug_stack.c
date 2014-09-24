@@ -926,6 +926,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 				const char *fname = NULL;
 
 				if (edata->prev_execute_data) {
+					fname = edata->prev_execute_data->function_state.function->op_array.filename;
 					if (edata->prev_execute_data->function_state.function->type == ZEND_USER_FUNCTION) {
 						fname = edata->prev_execute_data->function_state.function->op_array.filename;
 					}
@@ -943,7 +944,6 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 				if (!fname) {
 					fname = "whoops";
 				}
-
 				tmp->function = xdebug_sprintf(
 					"%s:{%s:%d}",
 					edata->function_state.function->common.function_name,
