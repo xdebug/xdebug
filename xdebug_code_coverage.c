@@ -26,18 +26,44 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void xdebug_coverage_line_dtor(void *data)
+inline void xdebug_coverage_lines_alloc(xdebug_coverage_file *file)
 {
-	xdebug_coverage_line *line = (xdebug_coverage_line *) data;
+	file->lines_slots = 64;
+	file->lines = (xdebug_coverage_line *) xdmalloc(file->lines_slots * sizeof(xdebug_coverage_line));
+	memset(
+		file->lines,
+		0,
+		file->lines_slots * sizeof(xdebug_coverage_line));
+}
 
-	xdfree(line);
+inline void xdebug_coverage_lines_dealloc(xdebug_coverage_file *file)
+{
+	file->lines_slots = 0;
+	xdfree(file->lines);
+	file->lines = NULL;
+}
+
+inline xdebug_coverage_line* xdebug_coverage_lines_get(xdebug_coverage_file *file, int lineno) {
+	int new_size = file->lines_slots;
+	while (lineno >= new_size) {
+		new_size *= 2;
+	}
+	if (new_size > file->lines_slots) {
+		file->lines = (xdebug_coverage_line *) xdrealloc(file->lines, new_size * sizeof(xdebug_coverage_line));
+		memset(
+			&(file->lines[file->lines_slots]),
+			0,
+			(new_size - file->lines_slots) * sizeof(xdebug_coverage_line));
+		file->lines_slots = new_size;
+	}
+	return &(file->lines[lineno]);
 }
 
 void xdebug_coverage_file_dtor(void *data)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file *) data;
 
-	xdebug_hash_destroy(file->lines);
+	xdebug_coverage_lines_dealloc(file);
 	xdfree(file->name);
 	xdfree(file);
 }
@@ -322,7 +348,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 			 *  add a line element to the file */
 			file = xdmalloc(sizeof(xdebug_coverage_file));
 			file->name = xdstrdup(filename);
-			file->lines = xdebug_hash_alloc(128, xdebug_coverage_line_dtor);
+			xdebug_coverage_lines_alloc(file);
 		
 			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
 		}
@@ -330,15 +356,9 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 		XG(previous_file) = file;
 	}
 
-	/* Check if the line already exists in the hash */
-	if (!xdebug_hash_index_find(file->lines, lineno, (void *) &line)) {
-		line = xdmalloc(sizeof(xdebug_coverage_line));
-		line->lineno = lineno;
-		line->count = 0;
-		line->executable = 0;
-
-		xdebug_hash_index_add(file->lines, lineno, line);
-	}
+	/* Get the address to the line struct (will realloc if necessary) */
+	line = xdebug_coverage_lines_get(file, lineno);
+	line->hit = 1;
 
 	if (executable) {
 		if (line->executable != 1 && deadcode) {
@@ -347,7 +367,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 			line->executable = 1;
 		}
 	} else {
-		line->count++;
+		line->count = 1;
 	}
 }
 
@@ -634,31 +654,21 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	RETURN_FALSE;
 }
 
-
-static int xdebug_lineno_cmp(const void *a, const void *b TSRMLS_DC)
+static void add_lines(void *ret, xdebug_coverage_file *file)
 {
-	Bucket *f = *((Bucket **) a);
-	Bucket *s = *((Bucket **) b);
-
-	if (f->h < s->h) {
-		return -1;
-	} else if (f->h > s->h) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-
-static void add_line(void *ret, xdebug_hash_element *e)
-{
-	xdebug_coverage_line *line = (xdebug_coverage_line*) e->ptr;
 	zval                 *retval = (zval*) ret;
+	long                  lineno;
+	xdebug_coverage_line *line;
 
-	if (line->executable && (line->count == 0)) {
-		add_index_long(retval, line->lineno, -line->executable);
-	} else {
-		add_index_long(retval, line->lineno, 1);
+	for (lineno = 1; lineno < file->lines_slots; lineno++) {
+		line = &file->lines[lineno];
+		if (line->hit) {
+			if (line->executable && (line->count == 0)) {
+				add_index_long(retval, lineno, -line->executable);
+			} else {
+				add_index_long(retval, lineno, 1);
+			}
+		}
 	}
 }
 
@@ -673,12 +683,8 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	MAKE_STD_ZVAL(lines);
 	array_init(lines);
 
-	/* Add all the lines */
-	xdebug_hash_apply(file->lines, (void *) lines, add_line);
-
-	/* Sort on linenumber */
-	target_hash = HASH_OF(lines);
-	zend_hash_sort(target_hash, zend_qsort, xdebug_lineno_cmp, 0 TSRMLS_CC);
+	/* Add all the lines (in order by definition) */
+	add_lines((void *) lines, file);
 
 	add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, lines);
 }
