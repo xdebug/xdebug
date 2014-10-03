@@ -57,7 +57,8 @@ void xdebug_coverage_file_dtor(void *data);
 xdebug_coverage_function *xdebug_coverage_function_ctor(char *function_name);
 void xdebug_coverage_function_dtor(void *data);
 void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_op *cur_opcode);
-void xdebug_code_coverage_end_of_function(zend_op_array *op_array, function_stack_entry *fse TSRMLS_DC);
+void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC);
+void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC);
 
 int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS);
 int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS);

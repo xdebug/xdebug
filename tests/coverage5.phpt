@@ -32,14 +32,14 @@ A NOT B
 {main}
 - branches
   - 00; OP: 00-05; line: 02-05 HIT; out1: 06 HIT; out2: 08  X 
-  - 06; OP: 06-07; line: 05-05 HIT; out1: 08 HIT; out2: -1  X 
+  - 06; OP: 06-07; line: 05-05 HIT; out1: 08 HIT
   - 08; OP: 08-08; line: 05-05 HIT; out1: 09 HIT; out2: 12  X 
-  - 09; OP: 09-11; line: 06-07 HIT; out1: 19 HIT; out2: -1  X 
+  - 09; OP: 09-11; line: 06-07 HIT; out1: 19 HIT
   - 12; OP: 12-13; line: 07-07  X ; out1: 14  X ; out2: 15  X 
-  - 14; OP: 14-14; line: 07-07  X ; out1: 15  X ; out2: -1  X 
+  - 14; OP: 14-14; line: 07-07  X ; out1: 15  X 
   - 15; OP: 15-15; line: 07-07  X ; out1: 16  X ; out2: 19  X 
-  - 16; OP: 16-18; line: 08-09  X ; out1: 19  X ; out2: -1  X 
-  - 19; OP: 19-20; line: 11-11 HIT; out1: -1  X ; out2: -1  X 
+  - 16; OP: 16-18; line: 08-09  X ; out1: 19  X 
+  - 19; OP: 19-20; line: 11-11 HIT; out1: EX  X 
 - paths
   - 0 6 8 9 19: HIT
   - 0 6 8 12 14 15 16 19:  X 
