@@ -1453,17 +1453,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_path *path = xdebug_path_new(NULL);
-
-		xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-		xdebug_path_info_add_path_for_level(&(XG(paths_stack)), path, XG(level));
-
-		if (XG(branches).size == 0 || XG(level) > XG(branches).size) {
-			XG(branches).size += 32;
-			XG(branches).last_branch_nr = realloc(XG(branches).last_branch_nr, sizeof(int) * XG(branches.size));
-		}
-
-		XG(branches).last_branch_nr[XG(level)] = -1;
+		xdebug_code_coverage_start_of_function(op_array TSRMLS_CC);
 	}
 
 	/* If we're in an eval, we need to create an ID for it. This ID however
@@ -1497,7 +1487,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	/* Check which path has been used */
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_code_coverage_end_of_function(op_array, fse TSRMLS_CC);
+		xdebug_code_coverage_end_of_function(op_array TSRMLS_CC);
 	}
 
 	if (XG(profiler_enabled)) {

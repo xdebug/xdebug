@@ -99,7 +99,7 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_o
 		xdfree(func_info.function);
 	}
 
-	xdebug_branch_info_mark_reached(file, function_name, opnr TSRMLS_CC);
+	xdebug_branch_info_mark_reached(file, function_name, op_array, opnr TSRMLS_CC);
 	xdfree(function_name);
 }
 
@@ -486,7 +486,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 #if PHP_VERSION_ID >= 50399
 			el = xdebug_find_brk_cont(Z_LVAL_P(opcode.op2.zv), opcode.XDEBUG_ZNODE_ELEM(op1, opline_num), opa);
 #else
-			el = xdebug_find_brk_cont(&opcode.op2.u.constant.value.lval, opcode.op1.u.opline_num, opa);
+			el = xdebug_find_brk_cont(opcode.op2.u.constant.value.lval, opcode.op1.u.opline_num, opa);
 #endif
 			if (el) {
 				*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
@@ -500,19 +500,37 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		*jmp1 = position + 1;
 		*jmp2 = opcode.XDEBUG_ZNODE_ELEM(op2, opline_num);
 		return 1;
+	} else if (opcode.opcode == ZEND_CATCH) {
+		*jmp1 = position + 1;
+#if PHP_VERSION_ID >= 50400
+		if (!opcode.result.num) {
+#else
+		if (!opcode.op1.u.EA.type) {
+#endif
+			*jmp2 = opcode.extended_value;
+			if (*jmp2 == *jmp1) {
+				*jmp2 = XDEBUG_JMP_NOT_SET;
+			}
+		} else {
+			*jmp2 = XDEBUG_JMP_EXIT;
+		}
+		return 1;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3)
 	} else if (opcode.opcode == ZEND_GOTO) {
 		*jmp1 = ((long) opcode.XDEBUG_ZNODE_ELEM(op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
 		return 1;
 #endif
+	} else if (opcode.opcode == ZEND_EXIT || opcode.opcode == ZEND_THROW || opcode.opcode == ZEND_RETURN) {
+		*jmp1 = XDEBUG_JMP_EXIT;
+		return 1;
 	}
 	return 0;
 }
 
 static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xdebug_set *set, xdebug_branch_info *branch_info TSRMLS_DC)
 {
-	long jump_pos1 = -1;
-	long jump_pos2 = -1;
+	long jump_pos1 = XDEBUG_JMP_NOT_SET;
+	long jump_pos2 = XDEBUG_JMP_NOT_SET;
 
 	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
 
@@ -530,26 +548,32 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	xdebug_set_add(set, position);
 	while (position < opa->last) {
-		jump_pos1 = -1;
-		jump_pos2 = -1;
+		jump_pos1 = XDEBUG_JMP_NOT_SET;
+		jump_pos2 = XDEBUG_JMP_NOT_SET;
 
 		/* See if we have a jump instruction */
 		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
 			/*(fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);)*/
-			if (jump_pos2 != -1) {
+			if (jump_pos2 != XDEBUG_JMP_NOT_SET) {
 				/*(fprintf(stderr, ", Position 2 = %d\n", jump_pos2))*/;
 			} else {
 				/*(fprintf(stderr, "\n"))*/;
 			}
-			if (branch_info) {
-				xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
+			if (jump_pos1 == XDEBUG_JMP_EXIT || jump_pos1 != XDEBUG_JMP_NOT_SET) {
+				if (branch_info) {
+					xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
+				}
+				if (jump_pos1 != XDEBUG_JMP_EXIT) {
+					xdebug_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
+				}
 			}
-			xdebug_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
-			if (jump_pos2 != -1 && jump_pos2 <= opa->last) {
+			if (jump_pos2 == XDEBUG_JMP_EXIT || jump_pos2 != XDEBUG_JMP_NOT_SET) {
 				if (branch_info) {
 					xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
 				}
-				xdebug_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
+				if (jump_pos2 != XDEBUG_JMP_EXIT) {
+					xdebug_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
+				}
 			}
 			break;
 		}
@@ -601,8 +625,14 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 	while (position < opa->last) {
 		if (position == 0) {
 			xdebug_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
+			if (branch_info) {
+				xdebug_set_add(branch_info->entry_points, position);
+			}
 		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
 			xdebug_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
+			if (branch_info) {
+				xdebug_set_add(branch_info->entry_points, position);
+			}
 		}
 		position++;
 	}
@@ -614,28 +644,31 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 
 static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC)
 {
+	int closure = 0;
+
 	memset(tmp, 0, sizeof(xdebug_func));
 
-	if (opa->scope) {
+	if (opa->function_name) {
+		if (strcmp(opa->function_name, "{closure}") == 0) {
+			tmp->function = xdebug_sprintf(
+				"{closure:%s:%d-%d}",
+				opa->filename,
+				opa->line_start,
+				opa->line_end
+			);
+			closure = 1;
+		} else {
+			tmp->function = xdstrdup(opa->function_name);
+		}
+	} else {
+		tmp->function = xdstrdup("{main}");
+	}
+
+	if (opa->scope && !closure) {
 		tmp->type = XFUNC_MEMBER;
 		tmp->class = xdstrdup(opa->scope->name);
-		tmp->function = xdstrdup(opa->function_name);
 	} else {
 		tmp->type = XFUNC_NORMAL;
-		if (opa->function_name) {
-			if (strcmp(opa->function_name, "{closure}") == 0) {
-				tmp->function = xdebug_sprintf(
-					"{closure:%s:%d-%d}",
-					opa->filename,
-					opa->line_start,
-					opa->line_end
-				);
-			} else {
-				tmp->function = xdstrdup(opa->function_name);
-			}
-		} else {
-			tmp->function = xdstrdup("{main}");
-		}
 	}
 }
 
@@ -695,6 +728,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 
 		xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
 		function_name = xdebug_func_format(&func_info TSRMLS_CC);
+
 		if (func_info.class) {
 			xdfree(func_info.class);
 		}
@@ -702,7 +736,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 			xdfree(func_info.function);
 		}
 
-		xdebug_branch_post_process(branch_info);
+		xdebug_branch_post_process(op_array, branch_info);
 		xdebug_branch_find_paths(branch_info);
 		xdebug_branch_info_add_branches_and_paths(filename, (char*) function_name, branch_info TSRMLS_CC);
 
@@ -755,7 +789,22 @@ void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 	zend_hash_apply_with_arguments(CG(class_table) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, op_array->filename);
 }
 
-void xdebug_code_coverage_end_of_function(zend_op_array *op_array, function_stack_entry *fse TSRMLS_DC)
+void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
+{
+	xdebug_path *path = xdebug_path_new(NULL);
+
+	xdebug_prefill_code_coverage(op_array TSRMLS_CC);
+	xdebug_path_info_add_path_for_level(&(XG(paths_stack)), path, XG(level));
+
+	if (XG(branches).size == 0 || XG(level) > XG(branches).size) {
+		XG(branches).size += 32;
+		XG(branches).last_branch_nr = realloc(XG(branches).last_branch_nr, sizeof(int) * XG(branches.size));
+	}
+
+	XG(branches).last_branch_nr[XG(level)] = -1;
+}
+
+void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 {
 	xdebug_str str = { 0, 0, NULL };
 	xdebug_path *path = xdebug_path_info_get_path_for_level(&(XG(paths_stack)), XG(level));
@@ -771,6 +820,7 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array, function_stac
 
 	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
 	function_name = xdebug_func_format(&func_info TSRMLS_CC);
+
 	if (func_info.class) {
 		xdfree(func_info.class);
 	}
