@@ -88,7 +88,11 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	}
 	fprintf(XG(profile_file), "version: 1\ncreator: xdebug %s\n", XDEBUG_VERSION);
 	fprintf(XG(profile_file), "cmd: %s\npart: 1\npositions: line\n\n", script_name);
+#if HAVE_PHP_MEMORY_USAGE
+	fprintf(XG(profile_file), "events: Time Memory\n\n");
+#else
 	fprintf(XG(profile_file), "events: Time\n\n");
+#endif
 	fflush(XG(profile_file));
 	return SUCCESS;
 }
@@ -113,6 +117,11 @@ static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 	fse->profile.time += xdebug_get_utime();
 	fse->profile.time -= fse->profile.mark;
 	fse->profile.mark = 0;
+#if HAVE_PHP_MEMORY_USAGE
+	fse->profile.memory += XG_MEMORY_USAGE();
+	fse->profile.memory -= fse->profile.mem_mark;
+	fse->profile.mem_mark = 0;
+#endif
 }
 
 void xdebug_profiler_function_continue(function_stack_entry *fse)
@@ -129,6 +138,10 @@ void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC)
 {
 	fse->profile.time = 0;
 	fse->profile.mark = xdebug_get_utime();
+#if HAVE_PHP_MEMORY_USAGE
+	fse->profile.memory = 0;
+	fse->profile.mem_mark = XG_MEMORY_USAGE();
+#endif
 }
 
 
@@ -176,6 +189,9 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
 		ce->user_defined = fse->user_defined;
+#if HAVE_PHP_MEMORY_USAGE
+		ce->mem_used = fse->profile.memory;
+#endif
 
 		xdebug_llist_insert_next(fse->prev->profile.call_list, NULL, ce);
 	}
@@ -194,7 +210,11 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	xdfree(tmp_name);
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
+#if HAVE_PHP_MEMORY_USAGE
+		fprintf(XG(profile_file), "\nsummary: %lu %u\n\n", (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
+#else
 		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 1000000));
+#endif
 	}
 	fflush(XG(profile_file));
 
@@ -209,12 +229,22 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	{
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 		fse->profile.time -= call_entry->time_taken;
+#if HAVE_PHP_MEMORY_USAGE
+		fse->profile.memory -= call_entry->mem_used;
+#endif
 	}
+#if HAVE_PHP_MEMORY_USAGE
+	fprintf(XG(profile_file), "%d %lu %ld\n", default_lineno, (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
+#else
 	fprintf(XG(profile_file), "%d %lu\n", default_lineno, (unsigned long) (fse->profile.time * 1000000));
+#endif
 
 	/* update aggregate data */
 	if (XG(profiler_aggregate)) {
 		fse->aggr_entry->time_own += fse->profile.time;
+#if HAVE_PHP_MEMORY_USAGE
+		fse->aggr_entry->mem_used += fse->profile.memory;
+#endif
 	}
 
 	/* dump call list */
@@ -231,7 +261,11 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		}
 		
 		fprintf(XG(profile_file), "calls=1 0 0\n");
+#if HAVE_PHP_MEMORY_USAGE
+		fprintf(XG(profile_file), "%d %lu %ld\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 1000000), (call_entry->mem_used));
+#else
 		fprintf(XG(profile_file), "%d %lu\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 1000000));
+#endif
 	}
 	fprintf(XG(profile_file), "\n");
 	fflush(XG(profile_file));
@@ -256,9 +290,17 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 
 	fprintf(fp, "fl=%s\n", xae->filename);
 	fprintf(fp, "fn=%s\n", xae->function);
+#if HAVE_PHP_MEMORY_USAGE
+	fprintf(fp, "%d %lu %ld\n", 0, (unsigned long) (xae->time_own * 1000000), (xae->mem_used));
+#else
 	fprintf(fp, "%d %lu\n", 0, (unsigned long) (xae->time_own * 1000000));
+#endif
 	if (strcmp(xae->function, "{main}") == 0) {
+#if HAVE_PHP_MEMORY_USAGE
+		fprintf(fp, "\nsummary: %lu %lu\n\n", (unsigned long) (xae->time_inclusive * 1000000), (xae->mem_used));
+#else
 		fprintf(fp, "\nsummary: %lu\n\n", (unsigned long) (xae->time_inclusive * 1000000));
+#endif
 	}
 	if (xae->call_list) {
 		xdebug_aggregate_entry **xae_call;
@@ -267,7 +309,11 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 		while (zend_hash_get_current_data(xae->call_list, (void**)&xae_call) == SUCCESS) {
 			fprintf(fp, "cfn=%s\n", (*xae_call)->function);
 			fprintf(fp, "calls=%d 0 0\n", (*xae_call)->call_count);
+#if HAVE_PHP_MEMORY_USAGE
+			fprintf(fp, "%d %lu %ld\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 1000000), ((*xae_call)->mem_used));
+#else
 			fprintf(fp, "%d %lu\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 1000000));
+#endif
 			zend_hash_move_forward(xae->call_list);
 		}
 	}
