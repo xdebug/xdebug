@@ -94,7 +94,7 @@ static char* html_formats[13] = {
 static char** select_formats(int html TSRMLS_DC) {
 	if (html) {
 		return html_formats;
-	} 
+	}
 	else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
 		return ansi_formats;
 	}
@@ -291,7 +291,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			unsigned int j = 0; /* Counter */
 			char *tmp_name;
 			int variadic_opened = 0;
-			
+
 			i = XDEBUG_LLIST_VALP(le);
 			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
 			if (html) {
@@ -437,7 +437,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 		if (XG(show_local_vars) && XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
 			int scope_nr = XG(stack)->size;
-			
+
 			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 			if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
 				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
@@ -639,7 +639,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			if (type == E_ERROR && strncmp(buffer, "Uncaught exception", 18) == 0) {
 				xdebug_str str = {0, 0, NULL};
 				char *tmp_buf, *p;
-				
+
 				/* find first new line */
 				p = strchr(buffer, '\n');
 				if (!p) {
@@ -709,7 +709,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		case E_CORE_ERROR:
 		/* no break - intentionally */
 		case E_ERROR:
-#if PHP_VERSION_ID >= 50200 
+#if PHP_VERSION_ID >= 50200
 		case E_RECOVERABLE_ERROR:
 #endif
 		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
@@ -718,7 +718,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			EG(exit_status) = 255;
 #if HAVE_PHP_MEMORY_USAGE
 			/* restore memory limit */
-# if PHP_VERSION_ID >= 50200 
+# if PHP_VERSION_ID >= 50200
 			zend_set_memory_limit(PG(memory_limit));
 # else
 			AG(memory_limit) = PG(memory_limit);
@@ -792,11 +792,11 @@ PHP_FUNCTION(xdebug_print_function_stack)
 	function_stack_entry *i;
 	char *tmp;
 	long options = 0;
-  
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &message, &message_len, &options) == FAILURE) {
 		return;
 	}
- 
+
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
 	if (message) {
 		tmp = get_printable_stack(PG(html_errors), 0, message, i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC) TSRMLS_CC);
@@ -927,6 +927,9 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 
 				if (edata->prev_execute_data) {
 					fname = edata->prev_execute_data->function_state.function->op_array.filename;
+					if (edata->prev_execute_data->function_state.function->type == ZEND_USER_FUNCTION) {
+						fname = edata->prev_execute_data->function_state.function->op_array.filename;
+					}
 				}
 
 				if (
@@ -945,7 +948,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 					"%s:{%s:%d}",
 					edata->function_state.function->common.function_name,
 					fname,
-					edata->opline->lineno
+					edata->opline ? edata->opline->lineno : 0
 				);
 			} else {
 				tmp->function = xdstrdup(edata->function_state.function->common.function_name);
@@ -1091,7 +1094,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			cur_opcode = edata->prev_execute_data->opline;
 			if (cur_opcode) {
 				tmp->lineno = cur_opcode->lineno;
-			} 
+			}
 		}
 
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
@@ -1156,7 +1159,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				if (XG(collect_params)) {
 #if PHP_VERSION_ID >= 50300
 					if (p) {
-						param = (zval **) p++;				
+						param = (zval **) p++;
 						tmp->var[tmp->varc].addr = *param;
 					}
 #else
@@ -1374,7 +1377,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
 {
 	char *name = (char*) he->ptr;
-	
+
 	add_next_index_string(return_value, name, 1);
 }
 
@@ -1390,7 +1393,7 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 	le = XDEBUG_LLIST_TAIL(XG(stack));
 	le = XDEBUG_LLIST_PREV(le);
 	i = XDEBUG_LLIST_VALP(le);
-	
+
 	/* Add declared vars */
 	if (i->used_vars) {
 		tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
