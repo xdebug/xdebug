@@ -1,5 +1,8 @@
 --TEST--
-Test for bug #1034: path coverage
+Test for bug #1034: path coverage [1]
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip PHP 5.3 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "5.4", '<')) echo "skip PHP 5.3 needed\n"; ?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';
@@ -40,11 +43,11 @@ loopy
 trycatch
 - branches
   - 00; OP: 00-09; line: 21-24 HIT; out1: EX  X 
-  - 13; OP: 13-13; line: 26-26 HIT; out1: 14 HIT; out2: EX  X 
-  - 14; OP: 14-17; line: 27-29 HIT; out1: EX  X 
+  - 14; OP: 14-14; line: 26-26 HIT; out1: 15 HIT; out2: EX  X 
+  - 15; OP: 15-18; line: 27-29 HIT; out1: EX  X 
 - paths
   - 0: HIT
-  - 13 14: HIT
+  - 14 15: HIT
 
 {main}
 - branches

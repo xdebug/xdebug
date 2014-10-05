@@ -16,7 +16,7 @@ xdebug.trace_format=0
 xdebug.extended_info=1
 xdebug.overload_var_dump=0
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip PHP >= 5.3 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "5.3", '<')) echo "skip PHP 5.2 needed\n"; ?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';
@@ -41,7 +41,7 @@ A NOT B
   - 14; OP: 14-14; line: 07-07  X ; out1: 15  X 
   - 15; OP: 15-15; line: 07-07  X ; out1: 16  X ; out2: 19  X 
   - 16; OP: 16-18; line: 08-09  X ; out1: 19  X 
-  - 19; OP: 19-20; line: 11-11 HIT; out1: EX  X 
+  - 19; OP: 19-21; line: 11-11 HIT
 - paths
   - 0 6 8 9 19: HIT
   - 0 6 8 12 14 15 16 19:  X 
