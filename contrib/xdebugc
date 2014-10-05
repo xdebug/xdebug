@@ -1,0 +1,294 @@
+#!/bin/bash
+#
+# XDEBUG.sh : a cmdline utility to test xdebug settings, 
+#             and to easify automated, multi-user profiling and tracing.
+#
+# Copyright 2012, Coder of Salvation. All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without modification, are
+# permitted provided that the following conditions are met:
+# 
+#    1. Redistributions of source code must retain the above copyright notice, this list of
+#       conditions and the following disclaimer.
+# 
+#    2. Redistributions in binary form must reproduce the above copyright notice, this list
+#       of conditions and the following disclaimer in the documentation and/or other materials
+#       provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY Coder of Salvation ``AS IS'' AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+# ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# 
+# The views and conclusions contained in the software and documentation are those of the
+# authors and should not be interpreted as representing official policies, either expressed
+# or implied, of Coder of Salvation 
+#
+me=$(basename "$0")
+requirements="sed grep printf cut sort php echo clear"
+
+# _getarg - simple variant of getopt
+#   example: when the following command ¨./foo --foo=bla -f bla --enabled -b¨ is executed with these calls:
+#               _getarg "foo"
+#               _getarg "f"
+#               _getarg "enabled"
+#               b=$(_getarg "b"); echo "$b"
+#   output:     bla
+#               bla
+#               1
+#               1
+
+args=$(echo "$@" | sed "s/ \-\- .*//g") # strip after '--' (usually means end of options)
+_getarg(){
+  local arg_exist=$(echo "$args" | grep -e "-$1" && echo 1)
+  local lastarg=¨¨
+  if [ "$arg_exist" ]; then 
+    for arg in $args; do 
+      local match=$( echo "$arg" | grep "\-$1" && echo 1 )
+      if [ "$match" ]; then 
+        local arg_has_value=$(echo "$arg" | grep -e "-$1[=| ][A-Za-z0-9]" && echo 1)
+        if [ ! "$arg_has_value" ] ; then echo "1"; return 0; else 
+          local assign=$(echo "$arg" | sed "s/.*=//g" 2>/dev/null )
+          if [ ${#assign} == 0 ]; then echo "$lastarg"; return 0;
+          else echo "$assign"; return 0; fi
+        fi 
+        lastarg="$arg"
+      fi
+    done
+  fi
+  return 1;
+}
+
+# some global vars + cli args (initialized in init..really! hehe)
+phpfile=""
+phpargs=""
+outputfile=""
+output_dir=""
+output_name=""
+silent=""
+phpsilent=""
+
+checkrequirements(){
+  for req in $requirements; do 
+    hash "$req" 2>&-
+    if [ $? == 1 ]; then echo "sorry..you need to install '$req'"; exit; fi
+  done;
+}
+
+usage(){
+  printf "Usage: \n"
+  grep "^[^_].\+(){$" $0 | while read line; do
+    local cmd=$(echo "$line" | sed "s/(){//g")
+    local info=$(grep -C0 -A0 -B1 "$cmd(){" $0 | sed "N;s/\n.*//g" )
+    printf "    $me %-7s %-20s\n" "$cmd" "$info" | grep "#" | sed "s/#//g"
+  done; echo "";
+  printf "type '$me --manual' to see the manual + examples\n\n"
+  return 0
+}
+
+manual(){
+  if [ "$1" != "--manual" ]; then return 0; fi
+  hash pod2man 2>&-
+  if [ $? == 1 ]; then echo "sorry..you need to install 'pod2man' (perl)"; exit; fi
+  SCRIPT=`readlink -f $0`
+  echo "(please wait..)"
+  pod2man $SCRIPT > /tmp/xdebug.1
+  clear
+  if [ -f /tmp/xdebug.1 ]; then man /tmp/xdebug.1; rm /tmp/xdebug.1; fi
+  exit 0
+}
+
+# [options] <phpfile> [args]   <- simply triggers an xdebug session for Zend/Eclips/Vim 
+start(){
+  init
+  XDEBUG_CONFIG="$options_default" php "$phpfile" "$phpargs"
+}
+
+# [options] <phpfile> [args]   <- generates a .cg (cachegrind) profiler file 
+profile(){
+  init profile "$@"
+  output=$(XDEBUG_CONFIG="$options_default" php "$phpfile" $phpargs)
+  output_file="$output_dir/$output_name"
+  [[ $phpsilent == 0 ]] && echo "$output"
+  [[ $silent     == 0 ]] && [[ -f "$output_file.cg" ]] && echo ""; summarize "$output_file.cg";
+}
+
+# [options] <phpfile> [args]   <- generates a fulltrace textfile of the phprun
+trace(){
+  init trace "$@"
+  echo "*** calling die() or exit() will prevent the trace to finish       ***"
+  echo "*** quickfix: put an xdebug_stop_trace() somewhere                 ***"
+  #output=$(XDEBUG_CONFIG="$options_default" php -B "xdebug_start_trace('$output_file');" -E "xdebug_stop_trace();" $phpargs < "$phpfile")
+  #output=$(XDEBUG_CONFIG="$options_default" php "$phpfile" $phpargs)
+  output_file="$output_dir/$output_name"
+  output=$(XDEBUG_CONFIG="$options_default" php -r "xdebug_start_trace('$output_file'); include('$phpfile'); xdebug_stop_trace();" $phpargs)
+  echo "$output"
+#  [[ $phpsilent == 0 ]] && echo "$output"
+  if [[ $silent  == 0 ]]; then [[ -f "$output_file.xt" ]] && printf "\n\n*** XDEBUG TRACE OUTPUT OF '$output_file.xt' ***\n\n"; cat "$output_file.xt"; fi
+}
+
+init(){
+  idekey=$(whoami)
+  for arg in $@; do if [[ ${#phpfile} == 0 ]]; then phpfile=$(echo "$arg" | grep "\.php"); fi; done                   # set phpfile 
+  phpargs=$(echo "$@" | sed "s/.*\.php//g" )                                                                         # set phpargs
+  outputfile=$(_getarg "trace_output_name" || _getarg "profiler_output_name" || echo "$phpfile" | sed "s/\.php//g" )  # set profile/tracefile
+  output_dir=$(dirname "$outputfile" 2>/dev/null)
+  output_name=$(basename "$outputfile" 2>/dev/null)
+  silent=$(_getarg "silent" || echo 0)
+  phpsilent=$(_getarg "phpsilent" || echo 0)
+  options_default="\
+  idekey=$idekey \
+  remote_host=localhost \
+  show_exception_trace=0 \
+  show_local_vars=0 \
+  show_mem_delta=1 \
+  trace_format=0 \
+  trace_options=0 \
+  var_display_max_children=10 \
+  var_display_max_data=512 \
+  var_display_max_depth=3 \
+  "
+  if [ "$1" == "trace" ]; then
+    trace_output_name=$(echo "$output_name"|sed "s/-\%[a-z]//g")
+    options_default="$options_default phpfile=$phpfile trace_output_name=$trace_output_name trace_output_dir=$output_dir"
+  fi
+  if [ "$1" == "profile" ]; then
+    options_default="phpfile=$phpfile options_default profiler_enable=1 profiler_output_dir=$output_dir profiler_output_name=$output_name.cg"
+  fi
+  echo "[x] starting xdebug session with option sequence: "
+  allargs=$(for arg in $@; do printf "%s" "$arg" | grep "-" | grep "=" | sed "s/-//g"; done ) # parse passed xdebugvars
+  (for option in $options_default $allargs; do 
+    key=$(echo "$option" | cut -f1 -d"=")
+    value=$(echo "$option" | cut -f2 -d"=")
+    printf "[x]   %-25s : %-40s\n" "$key" "$value"; 
+  done) | sort -u
+  if [ ${#ARGV} != 0 ]; then 
+    printf "[x]   %-25s : %-40s\n" "\$argv[0]" "$ARGV"; 
+    printf "[x]   %-25s   %-40s\n" " " "hint: parse \$argv[0] in your phpfile to $_SERVER"
+  fi
+  echo " "
+}
+
+# <yourfile.cg>              <- summarizes a .cg file as simple text output
+summarize(){
+
+  cat "$1" > /tmp/xdebug.tmp
+  sed -i ':a;N;$!ba;s/\.php\n/.php /g' /tmp/xdebug.tmp
+  local bigline="========================================================\n"
+  printf "times    call\n$bigline(please wait..summarizing)\n"
+  cat /tmp/xdebug.tmp | grep "fl=" | sort -u | while read line; do
+    local call=$(echo "$line" | cut -f2 -d" " | sed "s/.*fn=//g" )
+    local file=$(echo "$line" | cut -f1 -d" " | sed "s/.*fl=//g" )
+    local count=$(grep -c "$call" "$1")
+    local file=$(basename "$file")
+    printf "%-10s %-10s\n" "$count" "$file:$call()"
+  done | sort -u | sort -n -r 
+}
+
+manual "$1" && test $# -lt 2 && checkrequirements && usage && exit 65
+"$@"
+exit 0  
+
+: <<=cut
+=head1 NAME
+
+   xdebug - a cmdline utility to easify developing/testing/profiling with xdebug
+
+=head1 SYNOPSIS
+
+   This utility demystifies the wonderfull world of XDebug's commandline usage,
+   and requires no fiddling with php.ini configuration files.
+   Its also for debugging applications on liveservers.
+
+=head1 DESCRIPTION
+
+This XDebug utility easifies (automated) multi-user profiling and tracing of php
+code. It also lets you configure XDebug's settings on the fly.
+
+=head1 WHY
+
+Quickly outputting stats on the cmdline is always handy.
+
+=head1 EXAMPLES
+
+Examples: xdebug start index.php
+          xdebug start --remote_host=84.34.34.23 index.php
+          xdebug start --remote_host=`echo $SSH_CLIENT | sed s/ .*//g` index.php
+          xdebug trace index.php arg1 arg2
+          xdebug trace --trace_output_name=mytrace index.php arg1 arg2
+          xdebug trace --collect_params=4 --show_mem_delta=1 index.php arg1 arg2 
+          xdebug profile index.php
+          xdebug profile --profile_output_name=out-%%p index.php
+          xdebug profile --profile_output_name=out-%%p index.php; xdebug summarize tmp.cg
+
+          HINT: to emulate webrequests, do this in php :
+               
+                /** 
+                 * parseCLI - simulates url behaviour using CLI input, great for cli xdebugging
+                 *
+                 * usage: [you@webserver] $ URL="http://www.foo.com/bar/?var=hoo" xdebug trace index.php arg1=bla
+                 *        [you@webserver] $ URL="http://www.foo.com/bar/?var=hoo" php index.php
+                 *        [you@webserver] $ php index.php URL="http://www.foo.com/bar/?var=hoo"
+                 */
+                function parseCLI(){
+                  global $argv;
+                  $url = getenv("URL");
+                  $url = strlen($url) ? $url : (is_array($argv) && count($argv) > 1 ? $argv[1] : "");
+                  if( strlen($url) ){
+                    $urlParsed = parse_url($url);
+                    $_SERVER['REQUEST_URI']  = $urlParsed['path'];
+                    $_SERVER['QUERY_STRING'] = $urlParsed['query'];
+                  }
+                }
+               
+               
+               
+               in php parse $argv[0] into your $_SERVER variable, or just use $_SERVER
+
+General options:  
+          --silent          - will suppress profile or traceoutput to stdout
+          --phpsilent       - will suppress php output to stdout
+
+Some XDebug options:
+          - show_exception_trace=[0|1]
+          - show_local_vars=[0|1]
+          - show_mem_delta=[0|1]
+          - trace_format=[0=txt-readable-default|1=txt-parseable|2=html]
+          - trace_options=[0=unique-outputfile|1=append-outputfile]
+          - var_display_max_children=[n]
+          - var_display_max_data=[n]
+          - var_display_max_depth=[n]
+          - ..for more see: http://xdebug.org/docs/all_settings
+
+=head1 IMPORTANT NOTE
+
+The trace-file will not be generated if one calls exit() or die()
+To solve this, run this oneliner on your source (*dangerous*), after making backups:
+
+  $ find . -name "*.php" | while read file; do grep -R "close()" $file; done;
+
+  and put this function in your startup-php-file:
+
+  function close(){
+    if( is_function("xdebug_stop_trace") ) xdebug_stop_trace();
+    exit;
+  }
+
+=head1 SEE ALSO
+
+L<php>, L<http://xdebug.org/docs/all_settings>
+
+=head1 LICENSE
+
+BSD License (so everybody can enjoy it)
+
+=head1 AUTHOR
+
+B<C>oder B<O>f B<S>alvation | info@leon.vankammen.eu
+
+=cut
