@@ -32,6 +32,7 @@
 #include "xdebug_handlers.h"
 #include "xdebug_hash.h"
 #include "xdebug_llist.h"
+#include "xdebug_branch_info.h"
 #include "xdebug_code_coverage.h"
 
 extern zend_module_entry xdebug_module_entry;
@@ -201,10 +202,19 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_hash  *code_coverage;
 	zend_bool     code_coverage_unused;
 	zend_bool     code_coverage_dead_code_analysis;
+	zend_bool     code_coverage_branch_check;
 	unsigned int  function_count;
 	int           reserved_offset;
 	char                 *previous_filename;
 	xdebug_coverage_file *previous_file;
+	char                 *previous_mark_filename;
+	xdebug_coverage_file *previous_mark_file;
+	xdebug_path_info      paths_stack;
+	xdebug_hash          *visited_branches;
+	struct {
+		int  size;
+		int *last_branch_nr;
+	} branches;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;

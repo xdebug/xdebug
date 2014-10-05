@@ -22,6 +22,7 @@
 #include "php.h"
 #include "xdebug_hash.h"
 #include "xdebug_mm.h"
+#include "xdebug_branch_info.h"
 
 typedef struct xdebug_coverage_line {
 	int lineno;
@@ -30,9 +31,16 @@ typedef struct xdebug_coverage_line {
 } xdebug_coverage_line;
 
 typedef struct xdebug_coverage_file {
-	char        *name;
-	xdebug_hash *lines;
+	char               *name;
+	xdebug_hash        *lines;
+	xdebug_hash        *functions; /* Used for branch coverage */
+	int                 has_branch_info;
 } xdebug_coverage_file;
+
+typedef struct xdebug_coverage_function {
+	char               *name;
+	xdebug_branch_info *branch_info;
+} xdebug_coverage_function;
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
 #define XDEBUG_SET_OPCODE_OVERRIDE_COMMON(oc) \
@@ -42,8 +50,17 @@ typedef struct xdebug_coverage_file {
 
 
 void xdebug_coverage_line_dtor(void *data);
+
+xdebug_coverage_file *xdebug_coverage_file_ctor(char *filename);
 void xdebug_coverage_file_dtor(void *data);
 
+xdebug_coverage_function *xdebug_coverage_function_ctor(char *function_name);
+void xdebug_coverage_function_dtor(void *data);
+void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_op *cur_opcode);
+void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC);
+void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC);
+
+int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS);
 int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS);
 
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(f) \
