@@ -71,7 +71,7 @@ foo->test_closure
 - paths
   - 0: HIT
 
-{closure:/home/derick/dev/php/derickr-xdebug/tests/coverage7.inc:21-23}
+{closure:%scoverage7.inc:21-23}
 - branches
   - 00; OP: 00-07; line: 21-23 HIT
 - paths
