@@ -317,6 +317,13 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->coverage_enable      = 0;
 	xg->previous_filename    = "";
 	xg->previous_file        = NULL;
+	xg->previous_mark_filename = "";
+	xg->previous_mark_file     = NULL;
+	xg->paths_stack.paths_count = 0;
+	xg->paths_stack.paths_size  = 0;
+	xg->paths_stack.paths       = NULL;
+	xg->branches.size        = 0;
+	xg->branches.last_branch_nr = NULL;
 	xg->do_code_coverage     = 0;
 	xg->breakpoint_count     = 0;
 	xg->ide_key              = NULL;
@@ -462,6 +469,9 @@ static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *cur_opcode = *EG(opline_ptr);
 
+	if (XG(do_code_coverage)) {
+		xdebug_print_opcode_info('S', execute_data, cur_opcode);
+	}
 	if (XG(do_scream)) {
 		execute_data->opline++;
 		if (cur_opcode->opcode == ZEND_BEGIN_SILENCE) {
@@ -478,6 +488,10 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_op *opline = execute_data->opline;
 
+	if (XG(do_code_coverage)) {
+		zend_op *cur_opcode = *EG(opline_ptr);
+		xdebug_print_opcode_info('I', execute_data, cur_opcode);
+	}
 #if PHP_VERSION_ID >= 50399
 	if (opline->extended_value == ZEND_EVAL) {
 #else
@@ -657,6 +671,7 @@ PHP_MINIT_FUNCTION(xdebug)
 #endif
 	}
 
+	/* Override opcodes for variable assignments in traces */
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign, ZEND_ASSIGN);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_add, ZEND_ASSIGN_ADD);
@@ -687,6 +702,18 @@ PHP_MINIT_FUNCTION(xdebug)
 	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
 	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
 
+	/* Override all the other opcodes so that we can mark when we hit a branch
+	 * start one */
+	if (XG(coverage_enable)) {
+		int i;
+
+		for (i = 0; i < 256; i++) {
+			if (zend_get_user_opcode_handler(i) == NULL) {
+				zend_set_user_opcode_handler(i, xdebug_check_branch_entry_handler);
+			}
+		}
+	}
+
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
 	}
@@ -698,6 +725,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_CC_BRANCH_CHECK", XDEBUG_CC_OPTION_BRANCH_CHECK, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("XDEBUG_STACK_NO_DESC", XDEBUG_STACK_NO_DESC, CONST_CS | CONST_PERSISTENT);
 
@@ -924,6 +952,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Initialize dump superglobals */
 	XG(dumped) = 0;
 
+	/* Initialize visisted branches hash */
+	XG(visited_branches) = xdebug_hash_alloc(2048, NULL);
+
 	/* Initialize start time */
 	XG(start_time) = xdebug_get_utime();
 
@@ -991,6 +1022,9 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	xdebug_hash_destroy(XG(code_coverage));
 	XG(code_coverage) = NULL;
 
+	xdebug_hash_destroy(XG(visited_branches));
+	XG(visited_branches) = NULL;
+
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
 	}
@@ -1015,6 +1049,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
 	XG(headers) = NULL;
+
+	/* Clean up path coverage array */
+	if (XG(paths_stack).paths) {
+		free(XG(paths_stack).paths);
+	}
+	if (XG(branches).last_branch_nr) {
+		free(XG(branches).last_branch_nr);
+	}
 
 	return SUCCESS;
 }
@@ -1411,7 +1453,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_prefill_code_coverage(op_array TSRMLS_CC);
+		xdebug_code_coverage_start_of_function(op_array TSRMLS_CC);
 	}
 
 	/* If we're in an eval, we need to create an ID for it. This ID however
@@ -1442,6 +1484,11 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 #else
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 #endif
+
+	/* Check which path has been used */
+	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
+		xdebug_code_coverage_end_of_function(op_array TSRMLS_CC);
+	}
 
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
