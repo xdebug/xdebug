@@ -898,6 +898,22 @@ PHP_FUNCTION(xdebug_call_file)
 }
 /* }}} */
 
+static int find_line_number_for_current_execute_point(zend_execute_data *edata TSRMLS_DC)
+{
+	zend_execute_data *ptr = edata;
+
+	while (ptr && !ptr->opline)
+	{
+		ptr = ptr->prev_execute_data;
+	}
+
+	if (ptr && ptr->opline) {
+		return ptr->opline->lineno;
+	}
+
+	return 0;
+}
+
 static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 {
 	memset(tmp, 0, sizeof(xdebug_func));
@@ -924,8 +940,9 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 				);
 			} else if (strncmp(edata->function_state.function->common.function_name, "call_user_func", 14) == 0) {
 				const char *fname = NULL;
+				int         lineno = 0;
 
-				if (edata->prev_execute_data) {
+				if (edata->prev_execute_data && edata->prev_execute_data->function_state.function->type == ZEND_USER_FUNCTION) {
 					fname = edata->prev_execute_data->function_state.function->op_array.filename;
 				}
 
@@ -941,11 +958,14 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 				if (!fname) {
 					fname = "whoops";
 				}
+
+				lineno = find_line_number_for_current_execute_point(edata TSRMLS_DC);
+
 				tmp->function = xdebug_sprintf(
 					"%s:{%s:%d}",
 					edata->function_state.function->common.function_name,
 					fname,
-					edata->opline->lineno
+					lineno
 				);
 			} else {
 				tmp->function = xdstrdup(edata->function_state.function->common.function_name);
@@ -1082,17 +1102,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
 	} else  {
-		if (edata->opline) {
-			cur_opcode = edata->opline;
-			if (cur_opcode) {
-				tmp->lineno = cur_opcode->lineno;
-			}
-		} else if (edata->prev_execute_data && edata->prev_execute_data->opline) {
-			cur_opcode = edata->prev_execute_data->opline;
-			if (cur_opcode) {
-				tmp->lineno = cur_opcode->lineno;
-			} 
-		}
+		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
 
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
 			void **p;
