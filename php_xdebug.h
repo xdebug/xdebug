@@ -176,7 +176,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAMETERS);
 
-	FILE         *trace_file;
+	xdebug_trace_handler_t *trace_handler;
+	void         *trace_context;
+
 	zend_bool     do_trace;
 	zend_bool     auto_trace;
 	zend_bool     trace_enable_trigger;
@@ -184,7 +186,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *trace_output_name;
 	long          trace_options;
 	long          trace_format;
-	char         *tracefile_name;
+	//char         *tracefile_name;
 	char         *last_exception_trace;
 	char         *last_eval_statement;
 

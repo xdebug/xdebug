@@ -292,7 +292,6 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 	zend_op       *cur_opcode, *next_opcode;
 	char          *full_varname;
 	zval          *val = NULL;
-	char          *t;
 	int            is_var;
 	function_stack_entry *fse;
 
@@ -308,7 +307,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 		}
 	}
-	if (XG(do_trace) && XG(trace_file) && XG(collect_assignments)) {
+	if (XG(do_trace) && XG(trace_context) && XG(collect_assignments)) {
 		full_varname = xdebug_find_var_name(execute_data TSRMLS_CC);
 
 		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
@@ -344,11 +343,10 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 		}
 
 		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		t = xdebug_return_trace_assignment(fse, full_varname, val, op, file, lineno TSRMLS_CC);
+		if (XG(do_trace) && XG(trace_context) && XG(collect_assignments) && XG(trace_handler)->assignment) {
+			XG(trace_handler)->assignment(XG(trace_context), fse, full_varname, val, op, file, lineno TSRMLS_CC);
+		}
 		xdfree(full_varname);
-		fprintf(XG(trace_file), "%s", t);
-		fflush(XG(trace_file));
-		xdfree(t);
 	}
 	return ZEND_USER_OPCODE_DISPATCH;
 }

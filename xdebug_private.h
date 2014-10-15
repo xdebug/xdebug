@@ -206,6 +206,23 @@ function_stack_entry *xdebug_get_stack_head(TSRMLS_D);
 function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC);
 function_stack_entry *xdebug_get_stack_tail(TSRMLS_D);
 
+typedef struct
+{
+	void *(*init)(char *fname, long options TSRMLS_DC);
+	void (*deinit)(void *ctxt TSRMLS_DC);
+	void (*write_header)(void *ctxt TSRMLS_DC);
+	void (*write_footer)(void *ctxt TSRMLS_DC);
+	char *(*get_filename)(void *ctxt TSRMLS_DC);
+	void (*function_entry)(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC);
+	void (*function_exit)(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC);
+	void (*return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC);
+#if PHP_VERSION_ID >= 50500
+	void (*generator_return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC);
+#endif
+	void (*assignment)(void *ctxt, function_stack_entry *fse, char *full_varname, zval *value, char *op, char *file, int lineno TSRMLS_DC);
+} xdebug_trace_handler_t;
+
+
 xdebug_hash* xdebug_used_var_hash_from_llist(xdebug_llist *list);
 void xdebug_init_debugger(TSRMLS_D);
 
