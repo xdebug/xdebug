@@ -26,7 +26,7 @@ void *xdebug_trace_html_init(char *fname, long options TSRMLS_DC)
 	char *used_fname;
 
 	tmp_html_context = xdmalloc(sizeof(xdebug_trace_html_context));
-	tmp_html_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname);
+	tmp_html_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname TSRMLS_CC);
 	tmp_html_context->trace_filename = used_fname;
 
 	return tmp_html_context;
@@ -129,6 +129,8 @@ xdebug_trace_handler_t xdebug_trace_handler_html =
 	xdebug_trace_html_function_entry,
 	NULL /* xdebug_trace_html_function_exit */,
 	NULL /* xdebug_trace_html_function_return_value */,
+#if PHP_VERSION_ID >= 50500
 	NULL /* xdebug_trace_html_generator_return_value */,
-	NULL, /* xdebug_trace_html_assignment */
+#endif
+	NULL /* xdebug_trace_html_assignment */
 };

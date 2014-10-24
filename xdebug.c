@@ -331,6 +331,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 	xg->stdout_mode          = 0;
 	xg->in_at                = 0;
+	xg->active_execute_data  = NULL;
+	xg->active_op_array      = NULL;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -471,7 +473,7 @@ static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *cur_opcode = *EG(opline_ptr);
 
 	if (XG(do_code_coverage)) {
-		xdebug_print_opcode_info('S', execute_data, cur_opcode);
+		xdebug_print_opcode_info('S', execute_data, cur_opcode TSRMLS_CC);
 	}
 	if (XG(do_scream)) {
 		execute_data->opline++;
@@ -491,7 +493,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (XG(do_code_coverage)) {
 		zend_op *cur_opcode = *EG(opline_ptr);
-		xdebug_print_opcode_info('I', execute_data, cur_opcode);
+		xdebug_print_opcode_info('I', execute_data, cur_opcode TSRMLS_CC);
 	}
 #if PHP_VERSION_ID >= 50399
 	if (opline->extended_value == ZEND_EVAL) {
@@ -710,6 +712,11 @@ PHP_MINIT_FUNCTION(xdebug)
 
 		for (i = 0; i < 256; i++) {
 			if (zend_get_user_opcode_handler(i) == NULL) {
+#if ZTS
+				if (i == ZEND_HANDLE_EXCEPTION) {
+					continue;
+				}
+#endif
 				zend_set_user_opcode_handler(i, xdebug_check_branch_entry_handler);
 			}
 		}

@@ -136,7 +136,7 @@ PHP_FUNCTION(xdebug_start_trace)
 PHP_FUNCTION(xdebug_stop_trace)
 {
 	if (XG(do_trace) == 1) {
-		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context)), 1);
+		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC), 1);
 		xdebug_stop_trace(TSRMLS_C);
 	} else {
 		RETVAL_FALSE;
@@ -146,8 +146,8 @@ PHP_FUNCTION(xdebug_stop_trace)
 
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
-	if (XG(trace_handler)->get_filename) {
-		RETURN_STRING(XG(trace_handler)->get_filename(XG(trace_context)), 1);
+	if (XG(do_trace) == 1 && XG(trace_handler) && XG(trace_handler)->get_filename) {
+		RETURN_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC), 1);
 	} else {
 		RETURN_FALSE;
 	}
