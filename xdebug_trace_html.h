@@ -15,20 +15,16 @@
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
-#ifndef XDEBUG_TRACING_H
-#define XDEBUG_TRACING_H
+#ifndef XDEBUG_TRACE_HTML_H
+#define XDEBUG_TRACE_HTML_H
 
-#include "php.h"
-#include "php_xdebug.h"
+#include "xdebug_tracing.h"
 
-char* xdebug_return_trace_stack_retval(function_stack_entry* i, int fnr, zval* retval TSRMLS_DC);
-#if PHP_VERSION_ID >= 50500
-char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_generator* generator TSRMLS_DC);
-#endif
-char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno TSRMLS_DC);
-FILE *xdebug_trace_open_file(char *fname, long options, char **used_fname TSRMLS_DC);
+typedef struct _xdebug_trace_html_context
+{
+	FILE *trace_file;
+	char *trace_filename;
+} xdebug_trace_html_context;
 
-void xdebug_trace_function_begin(function_stack_entry *fse, int function_nr TSRMLS_DC);
-void xdebug_trace_function_end(function_stack_entry *fse, int function_nr TSRMLS_DC);
-
+extern xdebug_trace_handler_t xdebug_trace_handler_html;
 #endif

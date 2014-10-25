@@ -313,7 +313,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->stack                = NULL;
 	xg->level                = 0;
 	xg->do_trace             = 0;
-	xg->trace_file           = NULL;
+	xg->trace_handler        = NULL;
+	xg->trace_context        = NULL;
 	xg->coverage_enable      = 0;
 	xg->previous_filename    = "";
 	xg->previous_file        = NULL;
@@ -330,6 +331,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 	xg->stdout_mode          = 0;
 	xg->in_at                = 0;
+	xg->active_execute_data  = NULL;
+	xg->active_op_array      = NULL;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -470,7 +473,7 @@ static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_op *cur_opcode = *EG(opline_ptr);
 
 	if (XG(do_code_coverage)) {
-		xdebug_print_opcode_info('S', execute_data, cur_opcode);
+		xdebug_print_opcode_info('S', execute_data, cur_opcode TSRMLS_CC);
 	}
 	if (XG(do_scream)) {
 		execute_data->opline++;
@@ -490,7 +493,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (XG(do_code_coverage)) {
 		zend_op *cur_opcode = *EG(opline_ptr);
-		xdebug_print_opcode_info('I', execute_data, cur_opcode);
+		xdebug_print_opcode_info('I', execute_data, cur_opcode TSRMLS_CC);
 	}
 #if PHP_VERSION_ID >= 50399
 	if (opline->extended_value == ZEND_EVAL) {
@@ -709,6 +712,11 @@ PHP_MINIT_FUNCTION(xdebug)
 
 		for (i = 0; i < 256; i++) {
 			if (zend_get_user_opcode_handler(i) == NULL) {
+#if ZTS
+				if (i == ZEND_HANDLE_EXCEPTION) {
+					continue;
+				}
+#endif
 				zend_set_user_opcode_handler(i, xdebug_check_branch_entry_handler);
 			}
 		}
@@ -870,8 +878,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 	XG(stack)         = xdebug_llist_alloc(xdebug_stack_element_dtor);
-	XG(trace_file)    = NULL;
-	XG(tracefile_name) = NULL;
+	XG(trace_handler) = NULL;
+	XG(trace_context) = NULL;
 	XG(profile_file)  = NULL;
 	XG(profile_filename) = NULL;
 	XG(prev_memory)   = 0;
@@ -997,7 +1005,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	xdebug_llist_destroy(XG(stack), NULL);
 	XG(stack) = NULL;
 
-	if (XG(do_trace) && XG(trace_file)) {
+	if (XG(do_trace) && XG(trace_context)) {
 		xdebug_stop_trace(TSRMLS_C);
 	}
 
@@ -1294,7 +1302,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	zval                **dummy;
 	function_stack_entry *fse, *xfse;
 	char                 *magic_cookie = NULL;
-	int                   do_return = (XG(do_trace) && XG(trace_file));
+	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
 	int                   clear = 0;
@@ -1426,7 +1434,9 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	function_nr = XG(function_count);
-	xdebug_trace_function_begin(fse, function_nr TSRMLS_CC);
+	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_entry)) {
+		XG(trace_handler)->function_entry(XG(trace_context), fse, function_nr TSRMLS_CC);
+	}
 
 	fse->symbol_table = EG(active_symbol_table);
 #if PHP_VERSION_ID < 50500
@@ -1493,25 +1503,23 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}
-
-	xdebug_trace_function_end(fse, function_nr TSRMLS_CC);
+	
+	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_exit)) {
+		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
+	}
 
 	/* Store return value in the trace file */
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file)) {
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context)) {
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-			char *t;
 #if PHP_VERSION_ID >= 50500
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-				t = xdebug_return_trace_stack_generator_retval(fse, (zend_generator *) EG(return_value_ptr_ptr) TSRMLS_CC);
+				XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(return_value_ptr_ptr) TSRMLS_CC);
 			} else {
-				t = xdebug_return_trace_stack_retval(fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+				XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
 			}
 #else
-			t = xdebug_return_trace_stack_retval(fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
 #endif
-			fprintf(XG(trace_file), "%s", t);
-			fflush(XG(trace_file));
-			xdfree(t);
 		}
 	}
 	if (clear && *EG(return_value_ptr_ptr)) {
@@ -1559,7 +1567,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
 	zend_op              *cur_opcode;
-	int                   do_return = (XG(do_trace) && XG(trace_file));
+	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
 
 	int                   restore_error_handler_situation = 0;
@@ -1574,7 +1582,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 	fse->function.internal = 1;
 
 	function_nr = XG(function_count);
-	xdebug_trace_function_begin(fse, function_nr TSRMLS_CC);
+	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_entry)) {
+		XG(trace_handler)->function_entry(XG(trace_context), fse, function_nr TSRMLS_CC);
+	}
 
 	/* Check for entry breakpoints */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
@@ -1616,18 +1626,17 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 		zend_error_cb = tmp_error_cb;
 	}
 
-	xdebug_trace_function_end(fse, function_nr TSRMLS_CC);
+	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_exit)) {
+		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
+	}
 
 	/* Store return value in the trace file */
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_file) && EG(opline_ptr)) {
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && EG(opline_ptr) && current_execute_data->opline) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->XDEBUG_TYPE(result), &(cur_opcode->result), current_execute_data TSRMLS_CC);
 			if (ret) {
-				char* t = xdebug_return_trace_stack_retval(fse, function_nr, ret TSRMLS_CC);
-				fprintf(XG(trace_file), "%s", t);
-				fflush(XG(trace_file));
-				xdfree(t);
+				XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, ret TSRMLS_CC);
 			}
 		}
 	}

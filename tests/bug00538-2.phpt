@@ -48,7 +48,7 @@ array(2) {
     ["params"]=>
     array(3) {
       ["param1"]=>
-      string(%d) "'%sxdebug'"
+      string(%d) "'%s'"
       ["param2"]=>
       string(16) "'candena\\a\\nb'"
       ["param3"]=>

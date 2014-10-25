@@ -75,6 +75,7 @@ zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata 
 	if (!zdata->opline) {
 		return NULL;
 	}
+
 	switch (op_type & 0x0F) {
 		case IS_CONST:
 #if PHP_VERSION_ID >= 50399

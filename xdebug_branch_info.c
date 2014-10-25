@@ -134,7 +134,7 @@ static void xdebug_path_info_add_path(xdebug_path_info *path_info, xdebug_path *
 	path_info->paths_count++;
 }
 
-void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level)
+void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level TSRMLS_DC)
 {
 	int i = 0, orig_size;
 
@@ -155,7 +155,7 @@ void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_pat
 	path_info->paths[level] = path;
 }
 
-xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level)
+xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level TSRMLS_DC)
 {
 	return path_info->paths[level];
 }
@@ -298,7 +298,7 @@ void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info
 
 	for (i = 0; i < branch_info->path_info.paths_count; i++) {
 		printf("path #%d: ", i + 1);
-		xdebug_path_info_dump(branch_info->path_info.paths[i]);
+		xdebug_path_info_dump(branch_info->path_info.paths[i] TSRMLS_CC);
 	}
 }
 
