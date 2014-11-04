@@ -182,6 +182,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     do_trace;
 	zend_bool     auto_trace;
 	zend_bool     trace_enable_trigger;
+	char         *trace_enable_trigger_value;
 	char         *trace_output_dir;
 	char         *trace_output_name;
 	long          trace_options;
@@ -266,6 +267,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *profiler_output_dir;
 	char         *profiler_output_name; /* "pid" or "crc32" */
 	zend_bool     profiler_enable_trigger;
+	char         *profiler_enable_trigger_value;
 	zend_bool     profiler_append;
 
 	/* profiler globals */
