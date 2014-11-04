@@ -110,7 +110,7 @@ struct _xdebug_remote_handler {
 	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
 
 	/* Breakpoints */
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *message);
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type, char *exception, int code, char *message);
 
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
