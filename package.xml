@@ -684,7 +684,7 @@ Sun, Jan 03, 2010 - xdebug 2.1.0beta1
 + Changes:
 	- Added return values for xdebug_start_code_coverage() and
 	  xdebug_stop_code_coverage() to indicate whether the action was
-	  succesfull.  xdebug_start_code_coverage() will return TRUE if the call
+	  successful.  xdebug_start_code_coverage() will return TRUE if the call
 	  enabled code coverage, and FALSE if it was already enabled.
 	  xdebug_stop_code_coverage() will return FALSE when code coverage wasn&apos;t
 	  started yet and TRUE if it was turned on.
@@ -1376,7 +1376,7 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
     - Fixed bug #102: Problems with configure for automake 1.8.
     - Fixed bug #101: crash with set_exeception_handler() and uncatched exceptions.
     - Fixed bug #99: unset variables return the name as a string with property_get.
-    - Fixed bug #98: &apos;longname&apos; attribute not returned for unintialized
+    - Fixed bug #98: &apos;longname&apos; attribute not returned for uninitialized
       property in context_get request.
     - Fixed bug #94: xdebug_sprintf misbehaves with x86_64/glibc-2.3.3
     - Fixed bug #93: Crash in lookup_hostname on x86_64

@@ -15,7 +15,7 @@ ENDXML;
     $iterator = new SimpleXMLIterator($siteXMLString);
     $projectsIterator = $iterator->xpath("//page");
 
-    // Iterate through all 3 occurances of <page> elements
+    // Iterate through all 3 occurrences of <page> elements
     foreach ($projectsIterator as $pageXML)
     {
         // Set a breakpoint somewhere inside this loop.
