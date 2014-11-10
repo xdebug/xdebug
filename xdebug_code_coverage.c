@@ -82,7 +82,7 @@ void xdebug_coverage_function_dtor(void *data)
 	xdfree(function);
 }
 
-void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_op *cur_opcode)
+void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_op *cur_opcode TSRMLS_DC)
 {
 	zend_op_array *op_array = execute_data->op_array;
 	char *file = (char *) op_array->filename;
@@ -109,7 +109,7 @@ int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_op *cur_opcode;
 		cur_opcode = *EG(opline_ptr);
 
-		xdebug_print_opcode_info('G', execute_data, cur_opcode);
+		xdebug_print_opcode_info('G', execute_data, cur_opcode TSRMLS_CC);
 	}
 	return ZEND_USER_OPCODE_DISPATCH;
 }
@@ -135,7 +135,7 @@ int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 		file = (char *)op_array->filename;
 
-		xdebug_print_opcode_info('C', execute_data, cur_opcode);
+		xdebug_print_opcode_info('C', execute_data, cur_opcode TSRMLS_CC);
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 	}
 	return ZEND_USER_OPCODE_DISPATCH;
@@ -292,7 +292,6 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 	zend_op       *cur_opcode, *next_opcode;
 	char          *full_varname;
 	zval          *val = NULL;
-	char          *t;
 	int            is_var;
 	function_stack_entry *fse;
 
@@ -302,13 +301,13 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 	lineno = cur_opcode->lineno;
 
 	if (XG(do_code_coverage)) {
-		xdebug_print_opcode_info('=', execute_data, cur_opcode);
+		xdebug_print_opcode_info('=', execute_data, cur_opcode TSRMLS_CC);
 	
 		if (do_cc) {
 			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 		}
 	}
-	if (XG(do_trace) && XG(trace_file) && XG(collect_assignments)) {
+	if (XG(do_trace) && XG(trace_context) && XG(collect_assignments)) {
 		full_varname = xdebug_find_var_name(execute_data TSRMLS_CC);
 
 		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
@@ -344,11 +343,10 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 		}
 
 		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		t = xdebug_return_trace_assignment(fse, full_varname, val, op, file, lineno TSRMLS_CC);
+		if (XG(do_trace) && XG(trace_context) && XG(collect_assignments) && XG(trace_handler)->assignment) {
+			XG(trace_handler)->assignment(XG(trace_context), fse, full_varname, val, op, file, lineno TSRMLS_CC);
+		}
 		xdfree(full_varname);
-		fprintf(XG(trace_file), "%s", t);
-		fflush(XG(trace_file));
-		xdfree(t);
 	}
 	return ZEND_USER_OPCODE_DISPATCH;
 }
@@ -794,7 +792,7 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 	xdebug_path *path = xdebug_path_new(NULL);
 
 	xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-	xdebug_path_info_add_path_for_level(&(XG(paths_stack)), path, XG(level));
+	xdebug_path_info_add_path_for_level(&(XG(paths_stack)), path, XG(level) TSRMLS_CC);
 
 	if (XG(branches).size == 0 || XG(level) > XG(branches).size) {
 		XG(branches).size += 32;
@@ -807,7 +805,7 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 {
 	xdebug_str str = { 0, 0, NULL };
-	xdebug_path *path = xdebug_path_info_get_path_for_level(&(XG(paths_stack)), XG(level));
+	xdebug_path *path = xdebug_path_info_get_path_for_level(&(XG(paths_stack)), XG(level) TSRMLS_CC);
 	char *file = (char *) op_array->filename;
 	xdebug_func func_info;
 	char *function_name;
@@ -988,13 +986,14 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 	xdebug_coverage_function *function = (xdebug_coverage_function*) e->ptr;
 	zval                     *retval = (zval*) ret;
 	zval                     *function_info;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(function_info);
 	array_init(function_info);
 
 	if (function->branch_info) {
-		add_branches(function_info, function->branch_info);
-		add_paths(function_info, function->branch_info);
+		add_branches(function_info, function->branch_info TSRMLS_CC);
+		add_paths(function_info, function->branch_info TSRMLS_CC);
 	}
 
 	add_assoc_zval_ex(retval, function->name, strlen(function->name) + 1, function_info);

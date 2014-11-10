@@ -34,7 +34,7 @@ array(4) {
   'function' =>
   string(3) "foo"
   'file' =>
-  string(80) "%sxdebug_get_function_stack_variadic.php"
+  string(%d) "%sxdebug_get_function_stack_variadic.php"
   'line' =>
   int(8)
   'params' =>
@@ -49,7 +49,7 @@ array(4) {
   'function' =>
   string(3) "foo"
   'file' =>
-  string(80) "%sxdebug_get_function_stack_variadic.php"
+  string(%d) "%sxdebug_get_function_stack_variadic.php"
   'line' =>
   int(9)
   'params' =>
@@ -67,7 +67,7 @@ array(4) {
   'function' =>
   string(3) "foo"
   'file' =>
-  string(80) "%sxdebug_get_function_stack_variadic.php"
+  string(%d) "%sxdebug_get_function_stack_variadic.php"
   'line' =>
   int(10)
   'params' =>

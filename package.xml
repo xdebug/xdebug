@@ -177,6 +177,12 @@ Tue, May 08, 2012 - xdebug 2.2.0
    <file name="xdebug_superglobals.h" role="src" />
    <file name="xdebug_tracing.c" role="src" />
    <file name="xdebug_tracing.h" role="src" />
+   <file name="xdebug_trace_textual.c" role="src" />
+   <file name="xdebug_trace_textual.h" role="src" />
+   <file name="xdebug_trace_computerized.c" role="src" />
+   <file name="xdebug_trace_computerized.h" role="src" />
+   <file name="xdebug_trace_html.c" role="src" />
+   <file name="xdebug_trace_html.h" role="src" />
    <file name="xdebug_var.c" role="src" />
    <file name="xdebug_var.h" role="src" />
    <file name="xdebug_xml.c" role="src" />
