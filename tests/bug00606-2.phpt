@@ -33,7 +33,7 @@ dbgpRun( $data, $commands );
 
 -> run -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="6" exception="Warning"><![CDATA[%s]]></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="6" exception="Warning" code="2"><![CDATA[%s]]></xdebug:message></response>
 
 -> stack_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
