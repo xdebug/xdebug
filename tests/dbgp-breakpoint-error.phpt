@@ -28,7 +28,7 @@ dbgpRun( $data, $commands );
 
 -> run -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="4" exception="Notice"><![CDATA[FOO]]></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="4" exception="Notice" code="1024"><![CDATA[FOO]]></xdebug:message></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>

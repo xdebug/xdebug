@@ -1171,7 +1171,8 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 {
-	zval *message, *file, *line, *xdebug_message_trace, *previous_exception;
+	zval *code, *message, *file, *line;
+	zval *xdebug_message_trace, *previous_exception;
 	zend_class_entry *default_ce, *exception_ce;
 	xdebug_brk_info *extra_brk_info;
 	char *exception_trace;
@@ -1184,10 +1185,12 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	default_ce = zend_exception_get_default(TSRMLS_C);
 	exception_ce = zend_get_class_entry(exception TSRMLS_CC);
 
+	code =    zend_read_property(default_ce, exception, "code",    sizeof("code")-1,    0 TSRMLS_CC);
 	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
 	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
 	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
+	convert_to_long_ex(&code);
 	convert_to_string_ex(&message);
 	convert_to_string_ex(&file);
 	convert_to_long_ex(&line);
@@ -1233,15 +1236,27 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	xdebug_do_jit(TSRMLS_C);
 
 	if (XG(remote_enabled)) {
-		/* Check if we have a breakpoint on this exception */
-		if (
-			xdebug_hash_find(XG(context).exception_breakpoints, (char *) exception_ce->name, strlen(exception_ce->name), (void *) &extra_brk_info) ||
-			xdebug_hash_find(XG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)
-		) {
-			if (xdebug_handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, Z_STRVAL_P(message))) {
-					XG(remote_enabled) = 0;
+		int exception_breakpoint_found = 0;
+
+		/* Check if we have a wild card exception breakpoint */
+		if (xdebug_hash_find(XG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)) {
+			exception_breakpoint_found = 1;
+		} else {
+			/* Check if we have a breakpoint on this exception or its parent classes */
+			zend_class_entry *ce_ptr = exception_ce;
+
+			/* Check if we have a breakpoint on this exception or its parent classes */
+			do {
+				if (xdebug_hash_find(XG(context).exception_breakpoints, (char *) ce_ptr->name, strlen(ce_ptr->name), (void *) &extra_brk_info)) {
+					exception_breakpoint_found = 1;
 				}
+				ce_ptr = ce_ptr->parent;
+			} while (!exception_breakpoint_found && ce_ptr);
+		}
+
+		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, Z_LVAL_P(code), Z_STRVAL_P(message))) {
+				XG(remote_enabled) = 0;
 			}
 		}
 	}
@@ -1261,7 +1276,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (xdebug_handle_hit_value(extra_brk_info)) {
 					if (fse->user_defined == XDEBUG_INTERNAL || (breakpoint_type == XDEBUG_BRK_FUNC_RETURN)) {
-						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, NULL)) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 							return 0;
 						}
 					} else {
@@ -2051,7 +2066,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		if (XG(context).do_break) {
 			XG(context).do_break = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
@@ -2069,7 +2084,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		if (XG(context).do_finish && XG(context).next_level == level) { /* Check for "finish" */
 			XG(context).do_finish = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
@@ -2079,7 +2094,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		if (XG(context).do_next && XG(context).next_level >= level) { /* Check for "next" */
 			XG(context).do_next = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
@@ -2089,7 +2104,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		if (XG(context).do_step) { /* Check for "step" */
 			XG(context).do_step = 0;
 
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, NULL)) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
 				XG(remote_enabled) = 0;
 				return;
 			}
@@ -2138,7 +2153,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						EG(error_reporting) = old_error_reporting;
 					}
 					if (break_ok && xdebug_handle_hit_value(brk)) {
-						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, NULL)) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 							XG(remote_enabled) = 0;
 							break;
 						}
