@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2014-04-29</date>
- <time>20:44:00</time>
+ <date>2014-11-14</date>
+ <time>15:13:00</time>
  <version>
-  <release>2.2.5</release>
-  <api>2.2.5</api>
+  <release>2.2.6</release>
+  <api>2.2.6</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,12 +45,17 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Tue, Apr 29, 2014 - xdebug 2.2.5
+Fri, Nov 14, 2014 - xdebug 2.2.6
 
 = Fixed bugs:
 
- - Fixed bug #1040: Fixed uninitialized sa value.
- - Fixed building on hurd-i386.
+ - Fixed bug #1048: Can not get $GLOBAL variable by property_value on function
+   context.
+ - Fixed bug #1073 and #1075: Segmentation fault with internal functions
+   calling internal functions.
+ - Fixed bug #1085: Fixed the tracefile analyser as the format version had been
+   bumbed.
+ - Fixed memory leaks
  </notes>
 
  <contents>
@@ -138,7 +143,7 @@ Tue, Apr 29, 2014 - xdebug 2.2.5
  <dependencies>
   <required>
    <php>
-    <min>5.1.0</min>
+    <min>5.2.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -148,6 +153,28 @@ Tue, Apr 29, 2014 - xdebug 2.2.5
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2014-04-29</date>
+   <time>20:44:00</time>
+   <version>
+    <release>2.2.5</release>
+    <api>2.2.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Apr 29, 2014 - xdebug 2.2.5
+
+= Fixed bugs:
+
+ - Fixed bug #1040: Fixed uninitialized sa value.
+ - Fixed building on hurd-i386.
+   </notes>
+  </release>
 
   <release>
    <date>2014-02-28</date>
