@@ -933,7 +933,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 					fname = "whoops";
 				}
 
-				lineno = find_line_number_for_current_execute_point(edata TSRMLS_DC);
+				lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
 
 				tmp->function = xdebug_sprintf(
 					"%s:{%s:%d}",
