@@ -99,7 +99,7 @@ int zend_xdebug_global_offset = -1;
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
 static int (*xdebug_orig_ub_write)(const char *string, unsigned int len TSRMLS_DC);
 
-static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC);
+static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC);
 
 zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       NULL)
@@ -241,6 +241,7 @@ PHP_INI_BEGIN()
 	/* Debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.trace_enable_trigger", "0",             PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   trace_enable_trigger, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_enable_trigger_value", "",          PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString,   trace_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  XDEBUG_TEMP_DIR,      PHP_INI_ALL,    OnUpdateString, trace_output_dir,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_format,      zend_xdebug_globals, xdebug_globals)
@@ -281,7 +282,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,         zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_dir",       XDEBUG_TEMP_DIR,      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable_trigger, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "1",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable_trigger, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString,   profiler_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_append,         zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_aggregate",      "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_aggregate,      zend_xdebug_globals, xdebug_globals)
 
@@ -449,6 +451,9 @@ void xdebug_env_config(TSRMLS_D)
 		} else
 		if (strcasecmp(envvar, "profiler_enable_trigger") == 0) {
 			name = "xdebug.profiler_enable_trigger";
+		} else
+		if (strcasecmp(envvar, "trace_enable") == 0) {
+			name = "xdebug.trace_enable";
 		} else
 		if (strcasecmp(envvar, "remote_log") == 0) {
 			name = "xdebug.remote_log";
@@ -940,7 +945,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
 	if (
-		(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE" TSRMLS_CC))
+		(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE", XG(trace_enable_trigger_value) TSRMLS_CC))
 		&& XG(trace_output_dir) && strlen(XG(trace_output_dir))
 	) {
 		/* In case we do an auto-trace we are not interested in the return
@@ -1105,9 +1110,9 @@ PHP_MINFO_FUNCTION(xdebug)
 	DISPLAY_INI_ENTRIES();
 }
 
-static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC)
+static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC)
 {
-	zval **dummy;
+	zval **trigger_val;
 
 	if (!setting) {
 		return 0;
@@ -1115,14 +1120,19 @@ static int xdebug_trigger_enabled(int setting, char *var_name TSRMLS_DC)
 
 	if (
 		(
-			PG(http_globals)[TRACK_VARS_GET] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, var_name, strlen(var_name) + 1, (void **) &dummy) == SUCCESS
-		) || (
-			PG(http_globals)[TRACK_VARS_POST] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, var_name, strlen(var_name) + 1, (void **) &dummy) == SUCCESS
-		) || (
-			PG(http_globals)[TRACK_VARS_COOKIE] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, var_name, strlen(var_name) + 1, (void **) &dummy) == SUCCESS
+			(
+				PG(http_globals)[TRACK_VARS_GET] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, var_name, strlen(var_name) + 1, (void **) &trigger_val) == SUCCESS
+			) || (
+				PG(http_globals)[TRACK_VARS_POST] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, var_name, strlen(var_name) + 1, (void **) &trigger_val) == SUCCESS
+			) || (
+				PG(http_globals)[TRACK_VARS_COOKIE] &&
+				zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, var_name, strlen(var_name) + 1, (void **) &trigger_val) == SUCCESS
+			)
+		) && (
+			(var_value == 0) ||
+			(strcmp(var_value, Z_STRVAL_PP(trigger_val)) == 0)
 		)
 	) {
 		return 1;
@@ -1427,7 +1437,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		/* Check for special GET/POST parameter to start profiling */
 		if (
 			!XG(profiler_enabled) &&
-			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE" TSRMLS_CC))
+			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE", XG(profiler_enable_trigger_value) TSRMLS_CC))
 		) {
 			if (xdebug_profiler_init((char *) op_array->filename TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
