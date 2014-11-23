@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2013 Derick Rethans                               |
+   | Copyright (c) 2002-2014 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,8 +22,8 @@
 #define XDEBUG_NAME       "Xdebug"
 #define XDEBUG_VERSION    "2.3.0dev"
 #define XDEBUG_AUTHOR     "Derick Rethans"
-#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2013 by Derick Rethans"
-#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2013"
+#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2014 by Derick Rethans"
+#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2014"
 #define XDEBUG_URL        "http://xdebug.org"
 #define XDEBUG_URL_FAQ    "http://xdebug.org/docs/faq#api"
 
@@ -182,6 +182,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     do_trace;
 	zend_bool     auto_trace;
 	zend_bool     trace_enable_trigger;
+	char         *trace_enable_trigger_value;
 	char         *trace_output_dir;
 	char         *trace_output_name;
 	long          trace_options;
@@ -266,6 +267,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *profiler_output_dir;
 	char         *profiler_output_name; /* "pid" or "crc32" */
 	zend_bool     profiler_enable_trigger;
+	char         *profiler_enable_trigger_value;
 	zend_bool     profiler_append;
 
 	/* profiler globals */
