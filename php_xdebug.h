@@ -191,8 +191,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *last_exception_trace;
 	char         *last_eval_statement;
 
-	zend_bool	 case_sensitive_fs;
-
 	/* variable dumping limitation settings */
 	long          display_max_children;
 	long          display_max_data;
