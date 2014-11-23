@@ -1588,7 +1588,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 		}
 	}
 
-	xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
+	if (XG(stack)) {
+		xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
+	}
 	XG(level)--;
 }
 
