@@ -9,6 +9,9 @@ class DebugClient
 
 	private function launchPhp( &$pipes )
 	{
+		@unlink( '/tmp/error-output.txt' );
+		@unlink( '/tmp/remote_log.txt' );
+
 		$descriptorspec = array(
 		   0 => array( 'pipe', 'r' ),
 		   1 => array( 'pipe', 'w' ),
@@ -50,10 +53,16 @@ class DebugClient
 		file_put_contents( '/tmp/xdebug-dbgp-test.php', $data );
 		$i = 1;
 		$socket = $this->open();
-
 		$php = $this->launchPhp( $ppipes );
+		$conn = @stream_socket_accept( $socket, 3 );
 
-		$conn = stream_socket_accept( $socket );
+		if ( $conn === false )
+		{
+			echo @file_get_contents( '/tmp/error-output.txt' ), "\n";
+			echo @file_get_contents( '/tmp/remote_log.txt' ), "\n";
+			proc_close( $php );
+			return;
+		}
 
 		// read header
 		$this->doRead( $conn );
