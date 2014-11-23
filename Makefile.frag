@@ -27,3 +27,6 @@ show-install-instructions:
 	@$(top_srcdir)/build/shtool echo -n -e %b
 	@echo
 	@echo
+
+findphp:
+	@echo $(PHP_EXECUTABLE)
