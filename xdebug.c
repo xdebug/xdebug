@@ -314,6 +314,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 	xg->stdout_mode          = 0;
 	xg->in_at                = 0;
+	xg->active_execute_data  = NULL;
+	xg->active_op_array      = NULL;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
