@@ -134,7 +134,7 @@ static void xdebug_path_info_add_path(xdebug_path_info *path_info, xdebug_path *
 	path_info->paths_count++;
 }
 
-void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level TSRMLS_DC)
+static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info, unsigned int level TSRMLS_DC)
 {
 	int i = 0, orig_size;
 
@@ -152,11 +152,17 @@ void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_pat
 			path_info->paths[i] = NULL;
 		}
 	}
+}
+
+void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level TSRMLS_DC)
+{
+	xdebug_path_info_make_sure_level_exists(path_info, level TSRMLS_CC);
 	path_info->paths[level] = path;
 }
 
 xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level TSRMLS_DC)
 {
+	xdebug_path_info_make_sure_level_exists(path_info, level TSRMLS_CC);
 	return path_info->paths[level];
 }
 
