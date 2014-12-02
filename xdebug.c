@@ -327,7 +327,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 
 	/* Get reserved offset */
-	xg->reserved_offset = zend_xdebug_global_offset;
+	xg->dead_code_analysis_tracker_offset = zend_xdebug_global_offset;
+	xg->dead_code_last_start_id = 1;
 
 	/* Override header generation in SAPI */
 	if (sapi_module.header_handler != xdebug_header_handler) {
@@ -854,7 +855,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	XG(reserved_offset) = zend_xdebug_global_offset;
+	XG(dead_code_analysis_tracker_offset) = zend_xdebug_global_offset;
+	XG(dead_code_last_start_id) = 1;
 	XG(previous_filename) = "";
 	XG(previous_file) = NULL;
 
@@ -2101,7 +2103,7 @@ ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 {
 	TSRMLS_FETCH();
-	op_array->reserved[XG(reserved_offset)] = 0;
+	op_array->reserved[XG(dead_code_analysis_tracker_offset)] = 0;
 }
 
 #ifndef ZEND_EXT_API
