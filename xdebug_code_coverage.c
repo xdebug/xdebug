@@ -688,7 +688,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	xdebug_set *set = NULL;
 	xdebug_branch_info *branch_info = NULL;
 
-	op_array->reserved[XG(reserved_offset)] = (void*) 1;
+	op_array->reserved[XG(dead_code_analysis_tracker_offset)] = (void*) XG(dead_code_last_start_id);
 
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
@@ -751,7 +751,7 @@ static int prefill_from_function_table(zend_op_array *opa XDEBUG_ZEND_HASH_APPLY
 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
-		if (opa->reserved[XG(reserved_offset)] != (void*) 1 /* && opa->filename && strcmp(opa->filename, new_filename) == 0)*/) {
+		if (opa->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
 			prefill_from_oparray((char *) opa->filename, opa TSRMLS_CC);
 		}
 	}
@@ -779,7 +779,7 @@ static int prefill_from_class_table(zend_class_entry **class_entry XDEBUG_ZEND_H
 
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
-	if (op_array->reserved[XG(reserved_offset)] != (void*) 1) {
+	if (op_array->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
 		prefill_from_oparray((char *) op_array->filename, op_array TSRMLS_CC);
 	}
 
@@ -872,6 +872,7 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 			XG(previous_file) = NULL;
 			xdebug_hash_destroy(XG(code_coverage));
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+			XG(dead_code_last_start_id)++;
 		}
 		XG(do_code_coverage) = 0;
 		RETURN_TRUE;
