@@ -34,7 +34,7 @@ events: Time
 
 fl=php:internal
 fn=php::sleep
-2 10%d
+2 100%d
 
 fl=%sbug00714.php
 fn=sleep1
@@ -42,11 +42,11 @@ fn=sleep1
 cfl=php:internal
 cfn=php::sleep
 calls=1 0 0
-2 10%d
+2 100%d
 
 fl=php:internal
 fn=php::sleep
-3 1000%d
+3 100%d
 
 fl=%sbug00714.php
 fn=sleep10
@@ -54,11 +54,11 @@ fn=sleep10
 cfl=php:internal
 cfn=php::sleep
 calls=1 0 0
-3 1000%d
+3 100%d
 
 fl=php:internal
 fn=php::sleep
-4 2000%d
+4 200%d
 
 fl=%sbug00714.php
 fn=sleep20
@@ -66,7 +66,7 @@ fn=sleep20
 cfl=php:internal
 cfn=php::sleep
 calls=1 0 0
-4 2000%d
+4 200%d
 
 fl=php:internal
 fn=php::xdebug_get_profiler_filename
