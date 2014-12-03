@@ -316,6 +316,18 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->in_at                = 0;
 	xg->active_execute_data  = NULL;
 	xg->active_op_array      = NULL;
+	xg->no_exec              = 0;
+	xg->context.program_name = NULL;
+	xg->context.list.last_file = NULL;
+	xg->context.list.last_line = 0;
+	xg->context.do_break     = 0;
+	xg->context.do_step      = 0;
+	xg->context.do_next      = 0;
+	xg->context.do_finish    = 0;
+	xg->in_execution         = 0;
+	xg->remote_enabled       = 0;
+	xg->breakpoints_allowed  = 0;
+	xg->profiler_enabled     = 0;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -1394,7 +1406,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 #endif
 	fse->This = EG(This);
 
-	if (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars)) {
+	if (XG(stack) && (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars))) {
 		/* Because include/require is treated as a stack level, we have to add used
 		 * variables in include/required files to all the stack levels above, until
 		 * we hit a function or the top level stack.  This is so that the variables
