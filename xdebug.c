@@ -335,6 +335,18 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->in_at                = 0;
 	xg->active_execute_data  = NULL;
 	xg->active_op_array      = NULL;
+	xg->no_exec              = 0;
+	xg->context.program_name = NULL;
+	xg->context.list.last_file = NULL;
+	xg->context.list.last_line = 0;
+	xg->context.do_break     = 0;
+	xg->context.do_step      = 0;
+	xg->context.do_next      = 0;
+	xg->context.do_finish    = 0;
+	xg->in_execution         = 0;
+	xg->remote_enabled       = 0;
+	xg->breakpoints_allowed  = 0;
+	xg->profiler_enabled     = 0;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -346,7 +358,21 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 
 	/* Get reserved offset */
-	xg->reserved_offset = zend_xdebug_global_offset;
+	xg->dead_code_analysis_tracker_offset = zend_xdebug_global_offset;
+	xg->dead_code_last_start_id = 1;
+
+	/* Override header generation in SAPI */
+	if (sapi_module.header_handler != xdebug_header_handler) {
+		xdebug_orig_header_handler = sapi_module.header_handler;
+		sapi_module.header_handler = xdebug_header_handler;
+	}
+	xg->headers = NULL;
+
+	/* Capturing output */
+	if (sapi_module.ub_write != xdebug_ub_write) {
+		xdebug_orig_ub_write = sapi_module.ub_write;
+		sapi_module.ub_write = xdebug_ub_write;
+	}
 }
 
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -895,7 +921,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	XG(reserved_offset) = zend_xdebug_global_offset;
+	XG(dead_code_analysis_tracker_offset) = zend_xdebug_global_offset;
+	XG(dead_code_last_start_id) = 1;
 	XG(previous_filename) = "";
 	XG(previous_file) = NULL;
 
@@ -1471,7 +1498,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 #endif
 	fse->This = EG(This);
 
-	if (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars)) {
+	if (XG(stack) && (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars))) {
 		/* Because include/require is treated as a stack level, we have to add used
 		 * variables in include/required files to all the stack levels above, until
 		 * we hit a function or the top level stack.  This is so that the variables
@@ -2222,7 +2249,7 @@ ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 {
 	TSRMLS_FETCH();
-	op_array->reserved[XG(reserved_offset)] = 0;
+	op_array->reserved[XG(dead_code_analysis_tracker_offset)] = 0;
 }
 
 #ifndef ZEND_EXT_API
