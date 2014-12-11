@@ -74,8 +74,13 @@ void xdebug_path_add(xdebug_path *path, unsigned int nr);
 xdebug_path *xdebug_path_new(xdebug_path *old_path);
 void xdebug_path_info_dump(xdebug_path *path TSRMLS_DC);
 void xdebug_path_free(xdebug_path *path);
+
+xdebug_path_info *xdebug_path_info_ctor(void);
+void xdebug_path_info_dtor(xdebug_path_info *path_info);
+
 void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level TSRMLS_DC);
 xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level TSRMLS_DC);
+
 void xdebug_create_key_for_path(xdebug_path *path, xdebug_str *str);
 
 void xdebug_branch_info_mark_reached(char *filename, char *function_name, zend_op_array *op_array, long opcode_nr TSRMLS_DC);

@@ -13,6 +13,7 @@
 #include <math.h>
 #include "php_xdebug.h"
 #include "xdebug_str.h"
+#include "xdebug_hash.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -238,6 +239,32 @@ static void xdebug_branch_find_path(unsigned int nr, xdebug_branch_info *branch_
 	}
 }
 
+xdebug_path_info *xdebug_path_info_ctor(void)
+{
+	xdebug_path_info *tmp;
+
+	tmp = xdmalloc(sizeof(xdebug_path_info));
+	tmp->paths_count = 0;
+	tmp->paths_size = 0;
+	tmp->paths = NULL;
+	tmp->path_hash = NULL;
+
+	return tmp;
+}
+
+void xdebug_path_info_dtor(xdebug_path_info *path_info)
+{
+	int i;
+
+	for (i = 0; i < path_info->paths_count; i++) {
+		xdebug_path_free(path_info->paths[i]);
+	}
+	xdfree(path_info->paths);
+	if (path_info->path_hash) {
+		xdebug_hash_destroy(path_info->path_hash);
+	}
+}
+
 void xdebug_create_key_for_path(xdebug_path *path, xdebug_str *str)
 {
 	unsigned int i;
@@ -357,7 +384,7 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, zend_o
 
 		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG(branches).last_branch_nr[XG(level)], XG(function_count));
 		if (!xdebug_hash_find(XG(visited_branches), key, strlen(key), (void*) &dummy)) {
-			xdebug_path_add(XG(paths_stack).paths[XG(level)], opcode_nr);
+			xdebug_path_add(XG(paths_stack)->paths[XG(level)], opcode_nr);
 			xdebug_hash_add(XG(visited_branches), key, strlen(key), NULL);
 		}
 		xdfree(key);

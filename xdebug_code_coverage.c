@@ -792,7 +792,7 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 	xdebug_path *path = xdebug_path_new(NULL);
 
 	xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-	xdebug_path_info_add_path_for_level(&(XG(paths_stack)), path, XG(level) TSRMLS_CC);
+	xdebug_path_info_add_path_for_level(XG(paths_stack), path, XG(level) TSRMLS_CC);
 
 	if (XG(branches).size == 0 || XG(level) > XG(branches).size) {
 		XG(branches).size += 32;
@@ -805,7 +805,7 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 {
 	xdebug_str str = { 0, 0, NULL };
-	xdebug_path *path = xdebug_path_info_get_path_for_level(&(XG(paths_stack)), XG(level) TSRMLS_CC);
+	xdebug_path *path = xdebug_path_info_get_path_for_level(XG(paths_stack), XG(level) TSRMLS_CC);
 	char *file = (char *) op_array->filename;
 	xdebug_func func_info;
 	char *function_name;
@@ -870,9 +870,13 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 		if (cleanup) {
 			XG(previous_filename) = "";
 			XG(previous_file) = NULL;
+			XG(previous_mark_filename) = "";
+			XG(previous_mark_file) = NULL;
 			xdebug_hash_destroy(XG(code_coverage));
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 			XG(dead_code_last_start_id)++;
+			xdebug_path_info_dtor(XG(paths_stack));
+			XG(paths_stack) = xdebug_path_info_ctor();
 		}
 		XG(do_code_coverage) = 0;
 		RETURN_TRUE;
