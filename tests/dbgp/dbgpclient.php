@@ -3,7 +3,7 @@ class DebugClient
 {
 	private function open()
 	{
-		$socket = stream_socket_server("tcp://0.0.0.0:9991", $errno, $errstr);
+		$socket = @stream_socket_server("tcp://0.0.0.0:9991", $errno, $errstr);
 		return $socket;
 	}
 
@@ -53,6 +53,11 @@ class DebugClient
 		file_put_contents( '/tmp/xdebug-dbgp-test.php', $data );
 		$i = 1;
 		$socket = $this->open();
+		if ( $socket === false )
+		{
+			echo "Could not create socket server - already in use?\n";
+			return;
+		}
 		$php = $this->launchPhp( $ppipes );
 		$conn = @stream_socket_accept( $socket, 3 );
 
