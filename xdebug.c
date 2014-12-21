@@ -1301,6 +1301,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
 	char            *tmp_name = NULL;
+	size_t           tmp_len = 0;
 	TSRMLS_FETCH();
 
 	/* Function breakpoints */
@@ -1323,9 +1324,13 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	}
 	/* class->function breakpoints */
 	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
-		tmp_name = xdebug_sprintf("%s::%s", fse->function.class, fse->function.function);
+		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
+		   codebases due to setlocale calls. We don't care about the locale here. */
+		tmp_len = strlen(fse->function.class) + strlen(fse->function.function) + 3;
+		tmp_name = xdmalloc(tmp_len);
+		snprintf(tmp_name, tmp_len, "%s::%s", fse->function.class, fse->function.function);
 
-		if (xdebug_hash_find(XG(context).function_breakpoints, tmp_name, strlen(tmp_name), (void *) &extra_brk_info)) {
+		if (xdebug_hash_find(XG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
 			/* Yup, breakpoint found, call handler if the breakpoint is not
 			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
