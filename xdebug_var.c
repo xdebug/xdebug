@@ -784,6 +784,9 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 	HashTable *myht;
 	char*     tmp_str;
 	int       tmp_len;
+#if PHP_VERSION_ID >= 50300
+	int       is_temp;
+#endif
 
 	if (!struc || !(*struc)) {
 		return;
@@ -846,7 +849,11 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			break;
 
 		case IS_OBJECT:
+#if PHP_VERSION_ID >= 50300
+			myht = Z_OBJDEBUG_PP(struc, is_temp);
+#else
 			myht = Z_OBJPROP_PP(struc);
+#endif
 			if (myht->nApplyCount < 1) {
 				char *class_name;
 				zend_uint class_name_len;
@@ -872,6 +879,12 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			} else {
 				xdebug_str_addl(str, "...", 3, 0);
 			}
+#if PHP_VERSION_ID >= 50300
+			if (is_temp) {
+				zend_hash_destroy(myht);
+				efree(myht);
+			}
+#endif
 			break;
 
 		case IS_RESOURCE: {
@@ -1919,6 +1932,9 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	HashTable *myht;
 	char*     tmp_str;
 	int       newlen;
+#if PHP_VERSION_ID >= 50300
+	int       is_temp;
+#endif
 
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
@@ -1985,7 +2001,11 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			break;
 
 		case IS_OBJECT:
+#if PHP_VERSION_ID >= 50300
+			myht = Z_OBJDEBUG_PP(struc, is_temp);
+#else
 			myht = Z_OBJPROP_PP(struc);
+#endif
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
@@ -2003,6 +2023,12 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 				xdebug_str_add(str, xdebug_sprintf("<i>&</i><b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
 				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_PP(struc)), 1);
 			}
+#if PHP_VERSION_ID >= 50300
+			if (is_temp) {
+				zend_hash_destroy(myht);
+				efree(myht);
+			}
+#endif
 			break;
 
 		case IS_RESOURCE: {
