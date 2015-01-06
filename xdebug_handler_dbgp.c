@@ -1794,7 +1794,7 @@ DBGP_FUNC(property_get)
 	}
 	if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0, options TSRMLS_CC) == FAILURE) {
 		options->max_data = old_max_data;
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
 	options->max_data = old_max_data;
 	XG(active_op_array) = NULL;
@@ -1870,7 +1870,7 @@ DBGP_FUNC(property_set)
 		/* Handle result */
 		if (!symbol) {
 			efree(new_value);
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		} else {
 			zval_dtor(symbol);
 			Z_TYPE_P(symbol) = IS_STRING;
@@ -1993,7 +1993,7 @@ DBGP_FUNC(property_value)
 	}
 	if (add_variable_contents_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0, options TSRMLS_CC) == FAILURE) {
 		options->max_data = old_max_data;
-		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTANT);
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
 	options->max_data = old_max_data;
 	XG(active_op_array) = NULL;
