@@ -390,7 +390,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (XG(active_execute_data) && XG(active_op_array)) {
+			if (XG(active_execute_data) && XG(active_op_array) && XG(active_execute_data)->op_array) {
 				int i = 0;
 				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
 				zend_op_array *opa = XG(active_op_array);
