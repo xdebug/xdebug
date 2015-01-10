@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2013 Derick Rethans                               |
+   | Copyright (c) 2002-2015 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.0 of the Xdebug license,    |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -118,7 +118,8 @@ typedef struct xdebug_var {
 #define XDEBUG_ERROR_EVALUATING_CODE               206
 #define XDEBUG_ERROR_INVALID_EXPRESSION            207 /* unused */
 
-#define XDEBUG_ERROR_PROPERTY_NON_EXISTANT         300
+#define XDEBUG_ERROR_PROPERTY_NON_EXISTENT         300
+#define XDEBUG_ERROR_PROPERTY_NON_EXISTANT         300 /* compatibility typo */
 #define XDEBUG_ERROR_STACK_DEPTH_INVALID           301
 #define XDEBUG_ERROR_CONTEXT_INVALID               302 /* unused */
 
