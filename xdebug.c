@@ -1197,7 +1197,6 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	convert_to_string_ex(&file);
 	convert_to_long_ex(&line);
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
 	previous_exception = zend_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 	if (previous_exception && Z_TYPE_P(previous_exception) != IS_NULL) {
 		xdebug_message_trace = zend_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1 TSRMLS_CC);
@@ -1205,7 +1204,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
 		}
 	}
-#endif
+
 	if (!PG(html_errors)) {
 		xdebug_str_addl(&tmp_str, "\n", 1, 0);
 	}
