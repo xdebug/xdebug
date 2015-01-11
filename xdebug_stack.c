@@ -1076,7 +1076,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			 * works for both internal and user defined functions.
 			 * op_array->num_args works only for user defined functions so
 			 * we're not using that here. */
-#if PHP_VERSION_ID >= 50300
 			void **curpos = NULL;
 			if ((!edata->opline) || ((edata->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (edata->opline->opcode == ZEND_DO_FCALL))) {
 				curpos = edata->function_state.arguments;
@@ -1089,13 +1088,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				arguments_wanted = arguments_sent;
 				p = curpos = NULL;
 			}
-#else
-			if (EG(argument_stack).top >= 2) {
-				p = EG(argument_stack).top_element - 2;
-				arguments_sent = (ulong) *p;
-				arguments_wanted = arguments_sent;
-			}
-#endif
 
 			if (tmp->user_defined == XDEBUG_EXTERNAL) {
 				arguments_wanted = op_array->num_args;
@@ -1128,19 +1120,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 
 				if (XG(collect_params)) {
-#if PHP_VERSION_ID >= 50300
 					if (p) {
 						param = (zval **) p++;				
 						tmp->var[tmp->varc].addr = *param;
 					}
-#else
-					param = NULL;
-					if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-						if (param) {
-							tmp->var[tmp->varc].addr = *param;
-						}
-					}
-#endif
 				}
 				tmp->varc++;
 			}
