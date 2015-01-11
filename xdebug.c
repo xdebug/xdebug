@@ -1702,7 +1702,6 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 }
 /* }}} */
 
-#if PHP_VERSION_ID >= 50300
 static void xdebug_header_remove_with_prefix(xdebug_llist *headers, char *prefix, size_t prefix_len TSRMLS_DC)
 {
 	xdebug_llist_element *le;
@@ -1721,12 +1720,10 @@ static void xdebug_header_remove_with_prefix(xdebug_llist *headers, char *prefix
 		}
 	}
 }
-#endif
 
 static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC)
 {
 	if (XG(headers)) {
-#if PHP_VERSION_ID >= 50300
 		switch (op) {
 			case SAPI_HEADER_ADD:
 				xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
@@ -1750,9 +1747,6 @@ static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, 
 			case SAPI_HEADER_SET_STATUS:
 				break;
 		}
-#else
-		xdebug_llist_insert_next(XG(headers), XDEBUG_LLIST_TAIL(XG(headers)), xdstrdup(h->header));
-#endif
 	}
 	if (xdebug_orig_header_handler) {
 		return xdebug_orig_header_handler(h, op, s TSRMLS_CC);
