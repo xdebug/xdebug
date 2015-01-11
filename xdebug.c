@@ -927,11 +927,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	}
 
 	/* Only enabled extended info when it is not disabled */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 	CG(compiler_options) = CG(compiler_options) | (XG(extended_info) ? ZEND_COMPILE_EXTENDED_INFO : 0);
-#else
-	CG(extended_info) = XG(extended_info);
-#endif
 
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
