@@ -24,23 +24,7 @@
 #include "ext/standard/php_var.h"
 #define xdebug_php_var_dump php_var_dump
 
-#if PHP_VERSION_ID >= 50399
-# define XDEBUG_ZNODE znode_op
-# define XDEBUG_ZNODE_ELEM(node,var) node.var
-# define XDEBUG_ZNODEP_ELEM(node,var) node->var
-# define XDEBUG_TYPE(t) t##_type
-# define XDEBUG_EXTENDED_VALUE(o) extended_value
-# define XDEBUG_PASS_TWO_DONE (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)
-#else
-# define XDEBUG_ZNODE znode
-# define XDEBUG_ZNODE_ELEM(node,var) node.u.var
-# define XDEBUG_ZNODEP_ELEM(node,var) node->u.var
-# define XDEBUG_TYPE(t) t.op_type
-# define XDEBUG_EXTENDED_VALUE(o) o.u.EA.type
-# define XDEBUG_PASS_TWO_DONE op_array->done_pass_two
-#endif
-
-zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata TSRMLS_DC);
+zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRMLS_DC);
 
 #include "ext/standard/base64.h"
 #define xdebug_base64_encode php_base64_encode

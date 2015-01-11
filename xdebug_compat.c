@@ -52,7 +52,7 @@
 # define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
 #endif
 
-zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata TSRMLS_DC)
+zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRMLS_DC)
 {
 	if (!zdata->opline) {
 		return NULL;
@@ -63,13 +63,13 @@ zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata 
 			return node->zv;
 			break;
 		case IS_TMP_VAR:
-			return &T(XDEBUG_ZNODEP_ELEM(node, var)).tmp_var;
+			return &T(node->var).tmp_var;
 			break;
 		case IS_VAR:
-			if (T(XDEBUG_ZNODEP_ELEM(node, var)).var.ptr) {
-				return T(XDEBUG_ZNODEP_ELEM(node, var)).var.ptr;
+			if (T(node->var).var.ptr) {
+				return T(node->var).var.ptr;
 			} else {
-				temp_variable *T = &T(XDEBUG_ZNODEP_ELEM(node, var));
+				temp_variable *T = &T(node->var);
 				zval *str = T->str_offset.str;
 
 				if (T->str_offset.str->type != IS_STRING

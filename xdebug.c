@@ -522,7 +522,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zval tmp_inc_filename;
 		int  is_var;
 
-		inc_filename = xdebug_get_zval(execute_data, opline->XDEBUG_TYPE(op1), &opline->op1, &is_var);
+		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
 		
 		/* If there is no inc_filename, we're just bailing out instead */
 		if (!inc_filename) {
@@ -1159,12 +1159,12 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 		char *cv = NULL;
 		int cv_len;
 
-		if (op_array->opcodes[i].XDEBUG_TYPE(op1) == IS_CV) {
-			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op1,var), &cv_len);
+		if (op_array->opcodes[i].op1_type == IS_CV) {
+			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.var, &cv_len);
 			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
-		if (op_array->opcodes[i].XDEBUG_TYPE(op2) == IS_CV) {
-			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].XDEBUG_ZNODE_ELEM(op2,var), &cv_len);
+		if (op_array->opcodes[i].op2_type == IS_CV) {
+			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.var, &cv_len);
 			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
 		}
 		i++;
@@ -1655,7 +1655,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && EG(opline_ptr) && current_execute_data->opline) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
-			zval *ret = xdebug_zval_ptr(cur_opcode->XDEBUG_TYPE(result), &(cur_opcode->result), current_execute_data TSRMLS_CC);
+			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data TSRMLS_CC);
 			if (ret) {
 				XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, ret TSRMLS_CC);
 			}
@@ -1694,7 +1694,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		if (XG(do_code_coverage) && XG(code_coverage_unused) && XDEBUG_PASS_TWO_DONE) {
+		if (XG(do_code_coverage) && XG(code_coverage_unused) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
 			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
 		}
 	}
