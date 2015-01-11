@@ -717,12 +717,9 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	}
 }
 
-static int prefill_from_function_table(zend_op_array *opa XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	char *new_filename;
-#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
-	TSRMLS_FETCH();
-#endif
 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
@@ -734,7 +731,7 @@ static int prefill_from_function_table(zend_op_array *opa XDEBUG_ZEND_HASH_APPLY
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-static int prefill_from_class_table(zend_class_entry **class_entry XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	char *new_filename;
 	zend_class_entry *ce;
@@ -745,7 +742,7 @@ static int prefill_from_class_table(zend_class_entry **class_entry XDEBUG_ZEND_H
 	if (ce->type == ZEND_USER_CLASS) {
 		if (!(ce->ce_flags & ZEND_XDEBUG_VISITED)) {
 			ce->ce_flags |= ZEND_XDEBUG_VISITED;
-			zend_hash_apply_with_arguments(&ce->function_table XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
+			zend_hash_apply_with_arguments(&ce->function_table TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
 		}
 	}
 
@@ -758,8 +755,8 @@ void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 		prefill_from_oparray((char *) op_array->filename, op_array TSRMLS_CC);
 	}
 
-	zend_hash_apply_with_arguments(CG(function_table)  XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, op_array->filename);
-	zend_hash_apply_with_arguments(CG(class_table) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, op_array->filename);
+	zend_hash_apply_with_arguments(CG(function_table)  TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, op_array->filename);
+	zend_hash_apply_with_arguments(CG(class_table) TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, op_array->filename);
 }
 
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)

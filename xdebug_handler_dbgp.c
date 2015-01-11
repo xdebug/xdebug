@@ -1604,7 +1604,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	}
 }
 
-static int xdebug_add_filtered_symboltable_var(zval *symbol XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_hash *tmp_hash;
 
@@ -1714,7 +1714,7 @@ next_constant:
 			/* Check for dynamically defined variables, but make sure we don't already
 			 * have them. Also blacklist superglobals and argv/argc */
 			if (XG(active_symbol_table)) {
-				zend_hash_apply_with_arguments(XG(active_symbol_table) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
+				zend_hash_apply_with_arguments(XG(active_symbol_table) TSRMLS_CC, (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
 			}
 
 			/* Add all the found variables to the node */
