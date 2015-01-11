@@ -247,9 +247,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 	zval **retval_pp = NULL, *retval_p = NULL;
 	char  *element = NULL;
 	int    element_length = name_length;
-#if PHP_VERSION_ID >= 50400
 	zend_property_info *zpp;
-#endif
 
 	switch (type) {
 		case XF_ST_STATIC_ROOT:
@@ -281,7 +279,6 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			break;
 
 		case XF_ST_ROOT:
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (XG(active_execute_data) && XG(active_execute_data)->op_array) {
@@ -310,10 +307,8 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 			}
 			free(element);
 			ht = XG(active_symbol_table);
-#else
-			ht = XG(active_symbol_table);
 			/* break intentionally missing */
-#endif
+
 		case XF_ST_ARRAY_INDEX_ASSOC:
 			element = prepare_search_key(name, &name_length, "", 0);
 
@@ -332,6 +327,7 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 				goto cleanup;
 			}
 			break;
+
 		case XF_ST_ARRAY_INDEX_NUM:
 			element = prepare_search_key(name, &name_length, "", 0);
 			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
@@ -596,11 +592,7 @@ char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **p
 {
 	const char *prop_name, *cls_name;
 
-#if PHP_VERSION_ID >= 50200
 	zend_unmangle_property_name(mangled_property, mangled_len - 1, &cls_name, &prop_name);
-#else
-	zend_unmangle_property_name(mangled_property, &cls_name, &prop_name);
-#endif
 	*property_name = (char *) prop_name;
 	*class_name = (char *) cls_name;
 	if (cls_name) {
