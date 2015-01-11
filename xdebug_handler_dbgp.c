@@ -1319,7 +1319,6 @@ DBGP_FUNC(property_get)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 			if (depth > 0) {
@@ -1327,9 +1326,6 @@ DBGP_FUNC(property_get)
 			} else {
 				XG(active_execute_data) = EG(current_execute_data);
 			}
-#else
-			XG(active_execute_data) = fse->execute_data;
-#endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
@@ -1409,7 +1405,6 @@ DBGP_FUNC(property_set)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 			if (depth > 0) {
@@ -1417,9 +1412,6 @@ DBGP_FUNC(property_set)
 			} else {
 				XG(active_execute_data) = EG(current_execute_data);
 			}
-#else
-			XG(active_execute_data) = fse->execute_data;
-#endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
@@ -1528,7 +1520,6 @@ DBGP_FUNC(property_value)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 			if (depth > 0) {
@@ -1536,9 +1527,6 @@ DBGP_FUNC(property_value)
 			} else {
 				XG(active_execute_data) = EG(current_execute_data);
 			}
-#else
-			XG(active_execute_data) = fse->execute_data;
-#endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
@@ -1672,7 +1660,6 @@ next_constant:
 
 	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 		if (depth > 0) {
@@ -1680,9 +1667,6 @@ next_constant:
 		} else {
 			XG(active_execute_data) = EG(current_execute_data);
 		}
-#else
-		XG(active_execute_data) = fse->execute_data;
-#endif
 		XG(active_symbol_table) = fse->symbol_table;
 		XG(This)                = fse->This;
 
