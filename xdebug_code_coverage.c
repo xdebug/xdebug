@@ -672,12 +672,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
-#if PHP_VERSION_ID >= 50300
-	if (op_array->last >= 3 && op_array->opcodes[op_array->last - 3].opcode == ZEND_RAISE_ABSTRACT_ERROR)
-#else
-	if (op_array->last >= 4 && op_array->opcodes[op_array->last - 4].opcode == ZEND_RAISE_ABSTRACT_ERROR)
-#endif
-	{
+	if (op_array->last >= 3 && op_array->opcodes[op_array->last - 3].opcode == ZEND_RAISE_ABSTRACT_ERROR) {
 		return;
 	}	
 
