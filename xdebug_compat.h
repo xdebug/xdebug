@@ -24,11 +24,6 @@
 #include "ext/standard/php_var.h"
 #define xdebug_php_var_dump php_var_dump
 
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
-# define zend_memrchr php_zend_memrchr
-void *php_zend_memrchr(const void *s, int c, size_t n);
-#endif
-
 #if PHP_VERSION_ID >= 50399
 # define XDEBUG_ZNODE znode_op
 # define XDEBUG_ZNODE_ELEM(node,var) node.var

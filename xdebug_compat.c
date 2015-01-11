@@ -45,24 +45,6 @@
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
 
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
-void *php_zend_memrchr(const void *s, int c, size_t n)
-{
-	register unsigned char *e;
-
-	if (n <= 0) {
-		return NULL;
-	}
-
-	for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
-		if (*e == (unsigned char)c) {
-			return (void *)e;
-		}
-	}
-
-	return NULL;
-}
-#endif
 
 #if PHP_VERSION_ID >= 50500
 # define T(offset) (*EX_TMP_VAR(zdata, offset))
