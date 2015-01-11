@@ -41,11 +41,9 @@ char* xdebug_error_type_simple(int type)
 		case E_USER_ERROR:
 			return xdstrdup("fatal-error");
 			break;
-#if PHP_VERSION_ID >= 50200
 		case E_RECOVERABLE_ERROR:
 			return xdstrdup("catchable-fatal-error");
 			break;
-#endif
 		case E_WARNING:
 		case E_CORE_WARNING:
 		case E_COMPILE_WARNING:
@@ -62,12 +60,10 @@ char* xdebug_error_type_simple(int type)
 		case E_STRICT:
 			return xdstrdup("strict-standards");
 			break;
-#if PHP_VERSION_ID >= 50300
 		case E_DEPRECATED:
 		case E_USER_DEPRECATED:
 			return xdstrdup("deprecated");
 			break;
-#endif
 		case 0:
 			return xdstrdup("xdebug");
 			break;
@@ -86,11 +82,9 @@ char* xdebug_error_type(int type)
 		case E_USER_ERROR:
 			return xdstrdup("Fatal error");
 			break;
-#if PHP_VERSION_ID >= 50200
 		case E_RECOVERABLE_ERROR:
 			return xdstrdup("Catchable fatal error");
 			break;
-#endif
 		case E_WARNING:
 		case E_CORE_WARNING:
 		case E_COMPILE_WARNING:
@@ -107,12 +101,10 @@ char* xdebug_error_type(int type)
 		case E_STRICT:
 			return xdstrdup("Strict standards");
 			break;
-#if PHP_VERSION_ID >= 50300
 		case E_DEPRECATED:
 		case E_USER_DEPRECATED:
 			return xdstrdup("Deprecated");
 			break;
-#endif
 		case 0:
 			return xdstrdup("Xdebug");
 			break;
