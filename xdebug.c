@@ -156,9 +156,7 @@ zend_module_entry xdebug_module_entry = {
 	PHP_RSHUTDOWN(xdebug),
 	PHP_MINFO(xdebug),
 	XDEBUG_VERSION,
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
 	NO_MODULE_GLOBALS,
-#endif
 	ZEND_MODULE_POST_ZEND_DEACTIVATE_N(xdebug),
 	STANDARD_MODULE_PROPERTIES_EX
 };
