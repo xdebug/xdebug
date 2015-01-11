@@ -473,11 +473,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		if (opcode.XDEBUG_TYPE(op2) == IS_CONST
 		    && opcode.XDEBUG_ZNODE_ELEM(op1, jmp_addr) != (zend_op*) 0xFFFFFFFF
 		) {
-#if PHP_VERSION_ID >= 50399
 			el = xdebug_find_brk_cont(Z_LVAL_P(opcode.op2.zv), opcode.XDEBUG_ZNODE_ELEM(op1, opline_num), opa);
-#else
-			el = xdebug_find_brk_cont(opcode.op2.u.constant.value.lval, opcode.op1.u.opline_num, opa);
-#endif
 			if (el) {
 				*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 				return 1;
@@ -492,11 +488,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		return 1;
 	} else if (opcode.opcode == ZEND_CATCH) {
 		*jmp1 = position + 1;
-#if PHP_VERSION_ID >= 50400
 		if (!opcode.result.num) {
-#else
-		if (!opcode.op1.u.EA.type) {
-#endif
 			*jmp2 = opcode.extended_value;
 			if (*jmp2 == *jmp1) {
 				*jmp2 = XDEBUG_JMP_NOT_SET;
