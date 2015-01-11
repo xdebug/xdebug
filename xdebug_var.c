@@ -769,7 +769,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		return;
 	}
 	if (debug_zval) {
-		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
@@ -907,7 +907,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 		return;
 	}
 	if (debug_zval) {
-		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
@@ -1091,7 +1091,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	
 	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
 	if (debug_zval) {
-		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 
 	switch (Z_TYPE_PP(struc)) {
@@ -1237,7 +1237,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 		return;
 	}
 	if (debug_zval) {
-		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:
@@ -1896,9 +1896,9 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 #endif
 
 	if (debug_zval) {
-		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	} else {
-		if ((*struc)->XDEBUG_IS_REF) {
+		if ((*struc)->is_ref__gc) {
 			xdebug_str_add(str, "&amp;", 0);
 		}
 	}
@@ -2080,7 +2080,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 	HashTable *myht;
 
 	if (debug_zval) {
-		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->XDEBUG_REFCOUNT, (*struc)->XDEBUG_IS_REF), 1);
+		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
 		case IS_BOOL:

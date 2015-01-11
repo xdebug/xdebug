@@ -30,13 +30,4 @@ zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRM
 #define xdebug_base64_encode php_base64_encode
 #define xdebug_base64_decode php_base64_decode
 
-
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || (PHP_MAJOR_VERSION >= 6)
-#	define XDEBUG_REFCOUNT refcount__gc
-#	define XDEBUG_IS_REF is_ref__gc
-#else
-#	define XDEBUG_REFCOUNT refcount
-#	define XDEBUG_IS_REF is_ref
-#endif
-
 #endif

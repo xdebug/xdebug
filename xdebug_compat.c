@@ -84,8 +84,8 @@ zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRM
 					T->tmp_var.value.str.val = estrndup(&c, 1);
 					T->tmp_var.value.str.len = 1;
 				}
-				T->tmp_var.XDEBUG_REFCOUNT=1;
-				T->tmp_var.XDEBUG_IS_REF=1;
+				T->tmp_var.refcount__gc=1;
+				T->tmp_var.is_ref__gc=1;
 				T->tmp_var.type = IS_STRING;
 				return &T->tmp_var;
 			}
