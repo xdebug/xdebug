@@ -547,19 +547,12 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	if (PG(last_error_file)) {
 		free(PG(last_error_file));
 	}
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
 	PG(last_error_type) = type;
-#endif
 	PG(last_error_message) = strdup(buffer);
 	PG(last_error_file) = strdup(error_filename);
 	PG(last_error_lineno) = error_lineno;
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 	error_handling  = EG(error_handling);
 	exception_class = EG(exception_class);
-#else
-	error_handling  = PG(error_handling);
-	exception_class = PG(exception_class);
-#endif
 	/* according to error handling mode, suppress error, throw exception or show it */
 	if (error_handling != EH_NORMAL && EG(in_execution)) {
 		switch (type) {
@@ -671,35 +664,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		type = E_USER_ERROR;
 	}
 
-#if PHP_VERSION_ID < 50400
-
-	/* Bail out if we can't recover */
-	switch (type) {
-		case E_CORE_ERROR:
-		/* no break - intentionally */
-		case E_ERROR:
-#if PHP_VERSION_ID >= 50200 
-		case E_RECOVERABLE_ERROR:
-#endif
-		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
-		case E_COMPILE_ERROR:
-		case E_USER_ERROR:
-			EG(exit_status) = 255;
-#if HAVE_PHP_MEMORY_USAGE
-			/* restore memory limit */
-# if PHP_VERSION_ID >= 50200 
-			zend_set_memory_limit(PG(memory_limit));
-# else
-			AG(memory_limit) = PG(memory_limit);
-# endif
-#endif
-			zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
-			zend_bailout();
-			return;
-	}
-
-#else
-
 	/* Bail out if we can't recover */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -735,8 +699,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			}
 			break;
 	}
-
-#endif
 
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		zval *tmp;
