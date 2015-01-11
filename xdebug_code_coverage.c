@@ -598,9 +598,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		/* See if we have a return instruction */
 		if (
 			opa->opcodes[position].opcode == ZEND_RETURN
-#if PHP_VERSION_ID >= 50400
 			|| opa->opcodes[position].opcode == ZEND_RETURN_BY_REF
-#endif
 		) {
 			/*(fprintf(stderr, "XDEBUG Return found\n");)*/
 			if (branch_info) {
