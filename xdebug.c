@@ -517,11 +517,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		zend_op *cur_opcode = *EG(opline_ptr);
 		xdebug_print_opcode_info('I', execute_data, cur_opcode TSRMLS_CC);
 	}
-#if PHP_VERSION_ID >= 50399
 	if (opline->extended_value == ZEND_EVAL) {
-#else
-	if (Z_LVAL(opline->op2.u.constant) == ZEND_EVAL) {
-#endif
 		zval *inc_filename;
 		zval tmp_inc_filename;
 		int  is_var;
