@@ -160,17 +160,9 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 			(next_opcode->XDEBUG_TYPE(op1) == IS_VAR || cur_opcode->XDEBUG_TYPE(op2) == IS_VAR) &&
 			prev_opcode->opcode == ZEND_FETCH_RW &&
 			prev_opcode->XDEBUG_TYPE(op1) == IS_CONST &&
-#if PHP_VERSION_ID >= 50399
 			Z_TYPE_P(prev_opcode->op1.zv) == IS_STRING
-#else
-			prev_opcode->op1.u.constant.type == IS_STRING
-#endif
 	) {
-#if PHP_VERSION_ID >= 50399
 		xdebug_str_add(&name, xdebug_sprintf("$%s", Z_STRVAL_P(prev_opcode->op1.zv)), 1);
-#else
-		xdebug_str_add(&name, xdebug_sprintf("$%s", prev_opcode->op1.u.constant.value.str.val), 1);
-#endif
 	}
 
 	is_static = (prev_opcode->XDEBUG_TYPE(op1) == IS_CONST && prev_opcode->XDEBUG_EXTENDED_VALUE(op2) == ZEND_FETCH_STATIC_MEMBER);
