@@ -315,7 +315,6 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->stdout_mode          = 0;
 	xg->in_at                = 0;
 	xg->active_execute_data  = NULL;
-	xg->active_op_array      = NULL;
 	xg->no_exec              = 0;
 	xg->context.program_name = NULL;
 	xg->context.list.last_file = NULL;

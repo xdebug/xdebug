@@ -390,10 +390,10 @@ static zval* fetch_zval_from_symbol_table(HashTable *ht, char* name, int name_le
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (XG(active_execute_data) && XG(active_op_array) && XG(active_execute_data)->op_array) {
+			if (XG(active_execute_data) && XG(active_execute_data)->op_array) {
 				int i = 0;
 				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
-				zend_op_array *opa = XG(active_op_array);
+				zend_op_array *opa = XG(active_execute_data)->op_array;
 				zval **CV;
 
 				while (i < opa->last_var) {
@@ -1771,7 +1771,6 @@ DBGP_FUNC(property_get)
 			XG(active_execute_data) = fse->execute_data;
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
-			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
 		} else {
@@ -1797,7 +1796,6 @@ DBGP_FUNC(property_get)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
 	options->max_data = old_max_data;
-	XG(active_op_array) = NULL;
 }
 
 DBGP_FUNC(property_set)
@@ -1846,7 +1844,6 @@ DBGP_FUNC(property_set)
 			XG(active_execute_data) = fse->execute_data;
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
-			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
 		} else {
@@ -1966,7 +1963,6 @@ DBGP_FUNC(property_value)
 			XG(active_execute_data) = fse->execute_data;
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
-			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
 		} else {
@@ -1996,7 +1992,6 @@ DBGP_FUNC(property_value)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
 	options->max_data = old_max_data;
-	XG(active_op_array) = NULL;
 }
 
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
@@ -2087,7 +2082,6 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		XG(active_execute_data) = fse->execute_data;
 #endif
 		XG(active_symbol_table) = fse->symbol_table;
-		XG(active_op_array)     = fse->op_array;
 		XG(This)                = fse->This;
 
 		/* Only show vars when they are scanned */
@@ -2125,7 +2119,6 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 		XG(active_symbol_table) = NULL;
 		XG(active_execute_data) = NULL;
-		XG(active_op_array)     = NULL;
 		XG(This)                = NULL;
 		return 0;
 	}
