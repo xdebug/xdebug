@@ -87,7 +87,7 @@ void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint err
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
-static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
+static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
 static int xdebug_ub_write(const char *string, unsigned int length TSRMLS_DC);
 
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
@@ -96,7 +96,7 @@ int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
 int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
 
-static int (*xdebug_orig_header_handler)(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC);
+static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
 static int (*xdebug_orig_ub_write)(const char *string, unsigned int len TSRMLS_DC);
 
 static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC);
@@ -1756,7 +1756,7 @@ static void xdebug_header_remove_with_prefix(xdebug_llist *headers, char *prefix
 }
 #endif
 
-static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sapi_headers_struct *s TSRMLS_DC)
+static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC)
 {
 	if (XG(headers)) {
 #if PHP_VERSION_ID >= 50300
@@ -1788,7 +1788,7 @@ static int xdebug_header_handler(sapi_header_struct *h XG_SAPI_HEADER_OP_DC, sap
 #endif
 	}
 	if (xdebug_orig_header_handler) {
-		return xdebug_orig_header_handler(h XG_SAPI_HEADER_OP_CC, s TSRMLS_CC);
+		return xdebug_orig_header_handler(h, op, s TSRMLS_CC);
 	}
 	return SAPI_HEADER_ADD;
 }
