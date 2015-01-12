@@ -266,7 +266,6 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 	xdebug_str_ptr_dtor(tmp);
 }
 
-
 static xdebug_xml_node* get_symbol(char* name, int name_length, xdebug_var_export_options *options TSRMLS_DC)
 {
 	zval                *retval;
@@ -1350,7 +1349,6 @@ DBGP_FUNC(property_get)
 			XG(active_execute_data) = fse->execute_data;
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
-			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
 		} else {
@@ -1393,7 +1391,6 @@ DBGP_FUNC(property_get)
 		}
 	}
 	options->max_data = old_max_data;
-	XG(active_op_array) = NULL;
 }
 
 DBGP_FUNC(property_set)
@@ -1442,7 +1439,6 @@ DBGP_FUNC(property_set)
 			XG(active_execute_data) = fse->execute_data;
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
-			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
 		} else {
@@ -1562,7 +1558,6 @@ DBGP_FUNC(property_value)
 			XG(active_execute_data) = fse->execute_data;
 #endif
 			XG(active_symbol_table) = fse->symbol_table;
-			XG(active_op_array)     = fse->op_array;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
 		} else {
@@ -1592,7 +1587,6 @@ DBGP_FUNC(property_value)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
 	options->max_data = old_max_data;
-	XG(active_op_array) = NULL;
 }
 
 static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
@@ -1708,7 +1702,6 @@ next_constant:
 		XG(active_execute_data) = fse->execute_data;
 #endif
 		XG(active_symbol_table) = fse->symbol_table;
-		XG(active_op_array)     = fse->op_array;
 		XG(This)                = fse->This;
 
 		/* Only show vars when they are scanned */
@@ -1746,7 +1739,6 @@ next_constant:
 
 		XG(active_symbol_table) = NULL;
 		XG(active_execute_data) = NULL;
-		XG(active_op_array)     = NULL;
 		XG(This)                = NULL;
 		return 0;
 	}
