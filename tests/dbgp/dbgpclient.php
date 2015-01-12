@@ -39,6 +39,7 @@ class DebugClient
 			$read = preg_replace( '@\s(appid|id|address)="\d+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@\s(idekey)="[^"]+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
+			$read = preg_replace( '@(2002-20[0-9]{2})@', '2002-2099', $read );
 			echo $read, "\n\n";
 
 			if ( preg_match( '@<stream xmlns="urn.debugger_protocol_v1" xmlns:xdebug@', $read ) )

@@ -163,7 +163,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	double        start_time;
 	HashTable    *active_symbol_table;
 	zend_execute_data *active_execute_data;
-	zend_op_array     *active_op_array;
 	zval              *This;
 	function_stack_entry *active_fse;
 	unsigned int  prev_memory;
