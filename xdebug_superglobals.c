@@ -47,11 +47,7 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 
 		if (html) {
 			val = xdebug_get_zval_value_fancy(NULL, z, &len, 0, NULL TSRMLS_CC);
-#if HAVE_PHP_MEMORY_USAGE
 			xdebug_str_add(str, xdebug_sprintf("<td colspan='3' bgcolor='#eeeeec'>"), 1);
-#else
-			xdebug_str_add(str, xdebug_sprintf("<td colspan='2' bgcolor='#eeeeec'>"), 1);
-#endif
 			xdebug_str_addl(str, val, len, 0);
 			xdebug_str_add(str, "</td>", 0);
 		} else {
@@ -62,11 +58,7 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 	} else {
 		/* not found */
 		if (html) {
-#if HAVE_PHP_MEMORY_USAGE
 			xdebug_str_add(str, "<td colspan='3' bgcolor='#eeeeec'><i>undefined</i></td>", 0);
-#else
-			xdebug_str_add(str, "<td colspan='2' bgcolor='#eeeeec'><i>undefined</i></td>", 0);
-#endif
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("\n   $%s['%s'] is undefined", name, elem), 1);
 		}
@@ -120,11 +112,7 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 	}
 
 	if (html) {
-#if HAVE_PHP_MEMORY_USAGE
 		xdebug_str_add(str, xdebug_sprintf("<tr><th colspan='5' align='left' bgcolor='#e9b96e'>Dump <i>$%s</i></th></tr>\n", name), 1);
-#else
-		xdebug_str_add(str, xdebug_sprintf("<tr><th colspan='4' align='left' bgcolor='#e9b96e'>Dump <i>$%s</i></th></tr>\n", name), 1);
-#endif
 	} else {
 		xdebug_str_add(str, xdebug_sprintf("\nDump $%s", name), 1);
 	}

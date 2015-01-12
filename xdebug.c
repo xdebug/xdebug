@@ -129,10 +129,8 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_dump_aggr_profiling_data, NULL)
 	PHP_FE(xdebug_clear_aggr_profiling_data, NULL)
 
-#if HAVE_PHP_MEMORY_USAGE
 	PHP_FE(xdebug_memory_usage,          NULL)
 	PHP_FE(xdebug_peak_memory_usage,     NULL)
-#endif
 	PHP_FE(xdebug_time_index,            NULL)
 
 	PHP_FE(xdebug_start_error_collection, NULL)
@@ -2063,17 +2061,15 @@ PHP_FUNCTION(xdebug_clear_aggr_profiling_data)
 	RETURN_TRUE;
 }
 
-#if HAVE_PHP_MEMORY_USAGE
 PHP_FUNCTION(xdebug_memory_usage)
 {
-	RETURN_LONG(XG_MEMORY_USAGE());
+	RETURN_LONG(zend_memory_usage(0 TSRMLS_CC));
 }
 
 PHP_FUNCTION(xdebug_peak_memory_usage)
 {
-	RETURN_LONG(XG_MEMORY_PEAK_USAGE());
+	RETURN_LONG(zend_memory_peak_usage(0 TSRMLS_CC));
 }
-#endif
 
 PHP_FUNCTION(xdebug_time_index)
 {
