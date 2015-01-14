@@ -320,12 +320,6 @@ char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 	return ret;
 }
 
-#if PHP_VERSION_ID >= 50400
-# define VIRTUAL_FILE_EX_TSRMLS_CC TSRMLS_CC
-#else
-# define VIRTUAL_FILE_EX_TSRMLS_CC
-#endif
-
 /* fake URI's per IETF RFC 1738 and 2396 format */
 char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 {
@@ -353,7 +347,7 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 		new_state.cwd = strdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 
-		if (!virtual_file_ex(&new_state, fileurl, NULL, 1 VIRTUAL_FILE_EX_TSRMLS_CC)) {
+		if (!virtual_file_ex(&new_state, fileurl, NULL, 1 TSRMLS_CC)) {
 			char *s = estrndup(new_state.cwd, new_state.cwd_length);
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);

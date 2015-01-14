@@ -69,11 +69,7 @@ void xdebug_trace_computerized_write_footer(void *ctxt TSRMLS_DC)
 	tmp = xdebug_sprintf("\t\t\t%f\t", u_time - XG(start_time));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
-#if HAVE_PHP_MEMORY_USAGE
-	fprintf(context->trace_file, "%lu", XG_MEMORY_USAGE());
-#else
-	fprintf(context->trace_file, "");
-#endif
+	fprintf(context->trace_file, "%lu", zend_memory_usage(0 TSRMLS_CC));
 	fprintf(context->trace_file, "\n");
 	str_time = xdebug_get_time();
 
@@ -125,11 +121,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 
 	xdebug_str_add(&str, "0\t", 0);
 	xdebug_str_add(&str, xdebug_sprintf("%f\t", fse->time - XG(start_time)), 1);
-#if HAVE_PHP_MEMORY_USAGE
 	xdebug_str_add(&str, xdebug_sprintf("%lu\t", fse->memory), 1);
-#else
-	xdebug_str_add(&str, "\t", 0);
-#endif
 	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
 	xdfree(tmp_name);
@@ -199,11 +191,7 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 
 	xdebug_str_add(&str, "1\t", 0);
 	xdebug_str_add(&str, xdebug_sprintf("%f\t", xdebug_get_utime() - XG(start_time)), 1);
-#if HAVE_PHP_MEMORY_USAGE
-	xdebug_str_add(&str, xdebug_sprintf("%lu\n", XG_MEMORY_USAGE()), 1);
-#else
-	xdebug_str_add(&str, "\n", 0);
-#endif
+	xdebug_str_add(&str, xdebug_sprintf("%lu\n", zend_memory_usage(0 TSRMLS_CC)), 1);
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);

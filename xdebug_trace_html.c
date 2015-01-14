@@ -49,9 +49,7 @@ void xdebug_trace_html_write_header(void *ctxt TSRMLS_DC)
 
 	fprintf(context->trace_file, "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
 	fprintf(context->trace_file, "\t<tr><th>#</th><th>Time</th>");
-#if HAVE_PHP_MEMORY_USAGE
 	fprintf(context->trace_file, "<th>Mem</th>");
-#endif
 	fprintf(context->trace_file, "<th colspan='2'>Function</th><th>Location</th></tr>\n");
 	fflush(context->trace_file);
 }
@@ -81,9 +79,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	xdebug_str_add(&str, "\t<tr>", 0);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", function_nr), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6f</td>", fse->time - XG(start_time)), 1);
-#if HAVE_PHP_MEMORY_USAGE
 	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", fse->memory), 1);
-#endif
 	xdebug_str_add(&str, "<td align='left'>", 0);
 	for (j = 0; j < fse->level - 1; j++) {
 		xdebug_str_add(&str, "&nbsp; &nbsp;", 0);
