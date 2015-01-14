@@ -2120,11 +2120,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 				printf("b->d: %d; ln: %d; b->l: %d; b->f: %s; f: %s, f_l: %d; b->f_l: %d\n",
 						brk->disabled, lineno, brk->lineno, brk->file, file, file_len, brk->file_len);
 #endif
-#if PHP_WIN32
 				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && strncasecmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
-#else
-				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && memcmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
-#endif
 					break_ok = 1; /* Breaking is allowed by default */
 
 					/* Check if we have a condition set for it */
