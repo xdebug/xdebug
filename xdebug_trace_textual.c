@@ -67,11 +67,7 @@ void xdebug_trace_textual_write_footer(void *ctxt TSRMLS_DC)
 	tmp = xdebug_sprintf("%10.4f ", u_time - XG(start_time));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
-#if HAVE_PHP_MEMORY_USAGE
-	fprintf(context->trace_file, "%10zu", XG_MEMORY_USAGE());
-#else
-	fprintf(context->trace_file, "%10u", 0);
-#endif
+	fprintf(context->trace_file, "%10zu", zend_memory_usage(0 TSRMLS_CC));
 	fprintf(context->trace_file, "\n");
 	str_time = xdebug_get_time();
 	fprintf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
@@ -192,9 +188,7 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 	unsigned int j = 0; /* Counter */
 
 	xdebug_str_add(str, xdebug_sprintf("%10.4f ", xdebug_get_utime() - XG(start_time)), 1);
-#if HAVE_PHP_MEMORY_USAGE
-	xdebug_str_add(str, xdebug_sprintf("%10lu ", XG_MEMORY_USAGE()), 1);
-#endif
+	xdebug_str_add(str, xdebug_sprintf("%10lu ", zend_memory_usage(0 TSRMLS_CC)), 1);
 
 	if (XG(show_mem_delta)) {
 		xdebug_str_addl(str, "        ", 8, 0);

@@ -58,30 +58,6 @@ extern zend_module_entry xdebug_module_entry;
 
 #define XDEBUG_ALLOWED_HALT_LEVELS (E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE )
 
-#if MEMORY_LIMIT
-# define HAVE_PHP_MEMORY_USAGE 1
-#elif PHP_VERSION_ID >= 50201
-# define HAVE_PHP_MEMORY_USAGE 1
-#else
-# define HAVE_PHP_MEMORY_USAGE 0
-#endif
-
-#if PHP_VERSION_ID >= 50200
-# define XG_MEMORY_USAGE()		zend_memory_usage(0 TSRMLS_CC) 
-# define XG_MEMORY_PEAK_USAGE()	zend_memory_peak_usage(0 TSRMLS_CC) 
-#else
-# define XG_MEMORY_USAGE()		AG(allocated_memory)
-# define XG_MEMORY_PEAK_USAGE()	AG(allocated_memory_peak)
-#endif
-
-#if PHP_VERSION_ID >= 50300
-# define XG_SAPI_HEADER_OP_DC   , sapi_header_op_enum op
-# define XG_SAPI_HEADER_OP_CC   , op
-#else
-# define XG_SAPI_HEADER_OP_DC
-# define XG_SAPI_HEADER_OP_CC
-#endif
-
 PHP_MINIT_FUNCTION(xdebug);
 PHP_MSHUTDOWN_FUNCTION(xdebug);
 PHP_RINIT_FUNCTION(xdebug);
@@ -136,10 +112,8 @@ PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
 PHP_FUNCTION(xdebug_get_headers);
-#if HAVE_PHP_MEMORY_USAGE
 PHP_FUNCTION(xdebug_memory_usage);
 PHP_FUNCTION(xdebug_peak_memory_usage);
-#endif
 PHP_FUNCTION(xdebug_time_index);
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)

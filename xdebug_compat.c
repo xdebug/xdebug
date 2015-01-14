@@ -45,24 +45,6 @@
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
 
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION == 1
-void *php_zend_memrchr(const void *s, int c, size_t n)
-{
-	register unsigned char *e;
-
-	if (n <= 0) {
-		return NULL;
-	}
-
-	for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
-		if (*e == (unsigned char)c) {
-			return (void *)e;
-		}
-	}
-
-	return NULL;
-}
-#endif
 
 #if PHP_VERSION_ID >= 50500
 # define T(offset) (*EX_TMP_VAR(zdata, offset))
@@ -70,7 +52,7 @@ void *php_zend_memrchr(const void *s, int c, size_t n)
 # define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
 #endif
 
-zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata TSRMLS_DC)
+zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRMLS_DC)
 {
 	if (!zdata->opline) {
 		return NULL;
@@ -78,20 +60,16 @@ zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata 
 
 	switch (op_type & 0x0F) {
 		case IS_CONST:
-#if PHP_VERSION_ID >= 50399
 			return node->zv;
-#else
-			return &node->u.constant;
-#endif
 			break;
 		case IS_TMP_VAR:
-			return &T(XDEBUG_ZNODEP_ELEM(node, var)).tmp_var;
+			return &T(node->var).tmp_var;
 			break;
 		case IS_VAR:
-			if (T(XDEBUG_ZNODEP_ELEM(node, var)).var.ptr) {
-				return T(XDEBUG_ZNODEP_ELEM(node, var)).var.ptr;
+			if (T(node->var).var.ptr) {
+				return T(node->var).var.ptr;
 			} else {
-				temp_variable *T = &T(XDEBUG_ZNODEP_ELEM(node, var));
+				temp_variable *T = &T(node->var);
 				zval *str = T->str_offset.str;
 
 				if (T->str_offset.str->type != IS_STRING
@@ -106,8 +84,8 @@ zval *xdebug_zval_ptr(int op_type, XDEBUG_ZNODE *node, zend_execute_data *zdata 
 					T->tmp_var.value.str.val = estrndup(&c, 1);
 					T->tmp_var.value.str.len = 1;
 				}
-				T->tmp_var.XDEBUG_REFCOUNT=1;
-				T->tmp_var.XDEBUG_IS_REF=1;
+				T->tmp_var.refcount__gc=1;
+				T->tmp_var.is_ref__gc=1;
 				T->tmp_var.type = IS_STRING;
 				return &T->tmp_var;
 			}

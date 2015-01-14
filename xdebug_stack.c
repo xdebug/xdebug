@@ -34,11 +34,7 @@ static char* text_formats[11] = {
 	"\n",
 	"%s: %s in %s on line %d\n",
 	"\nCall Stack:\n",
-#if HAVE_PHP_MEMORY_USAGE
 	"%10.4f %10ld %3d. %s(",
-#else
-	"%10.4f %3d. %s(",
-#endif
 	"'%s'",
 	") %s:%d\n",
 	"\n\nVariables in local scope (#%d):\n",
@@ -52,11 +48,7 @@ static char* ansi_formats[11] = {
 	"\n",
 	"[1m[31m%s[0m: %s[22m in [31m%s[0m on line [32m%d[0m[22m\n",
 	"\n[1mCall Stack:[22m\n",
-#if HAVE_PHP_MEMORY_USAGE
 	"%10.4f %10ld %3d. %s(",
-#else
-	"%10.4f %3d. %s(",
-#endif
 	"'%s'",
 	") %s:%d\n",
 	"\n\nVariables in local scope (#%d):\n",
@@ -69,20 +61,11 @@ static char* ansi_formats[11] = {
 static char* html_formats[13] = {
 	"<br />\n<font size='1'><table class='xdebug-error xe-%s%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
-#if HAVE_PHP_MEMORY_USAGE
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
 	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s( ",
-#else
-	"<tr><th align='left' bgcolor='#e9b96e' colspan='4'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
-	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4f</td><td bgcolor='#eeeeec'>%s( ",
-#endif
 	"<font color='#00bb00'>'%s'</font>",
 	" )</td><td title='%s' bgcolor='#eeeeec'>...%s<b>:</b>%d</td></tr>\n",
-#if HAVE_PHP_MEMORY_USAGE
 	"<tr><th align='left' colspan='5' bgcolor='#e9b96e'>Variables in local scope (#%d)</th></tr>\n",
-#else
-	"<tr><th align='left' colspan='4' bgcolor='#e9b96e'>Variables in local scope (#%d)</th></tr>\n",
-#endif
 	"</table></font>\n",
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec'>%s</td></tr>\n",
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
@@ -124,11 +107,9 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		return;
 	}
 
-#if PHP_VERSION_ID >= 50300
 	if (!EG(active_symbol_table)) {
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
-#endif
 
 	tmp_ht = XG(active_symbol_table);
 	XG(active_symbol_table) = EG(active_symbol_table);
@@ -247,11 +228,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 {
 	char **formats = select_formats(html TSRMLS_CC);
 	char *escaped;
-#if PHP_VERSION_ID >= 50400
 	size_t newlen;
-#else
-	int    newlen;
-#endif
 
 	if (html) {
 		escaped = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), &newlen, 0, 0, NULL TSRMLS_CC);
@@ -295,17 +272,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			i = XDEBUG_LLIST_VALP(le);
 			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
 			if (html) {
-#if HAVE_PHP_MEMORY_USAGE
 				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), i->memory, tmp_name), 1);
-#else
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), tmp_name), 1);
-#endif
 			} else {
-#if HAVE_PHP_MEMORY_USAGE
 				xdebug_str_add(str, xdebug_sprintf(formats[3], i->time - XG(start_time), i->memory, i->level, tmp_name), 1);
-#else
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->time - XG(start_time), i->level, tmp_name), 1);
-#endif
 			}
 			xdfree(tmp_name);
 
@@ -578,19 +547,12 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	if (PG(last_error_file)) {
 		free(PG(last_error_file));
 	}
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6
 	PG(last_error_type) = type;
-#endif
 	PG(last_error_message) = strdup(buffer);
 	PG(last_error_file) = strdup(error_filename);
 	PG(last_error_lineno) = error_lineno;
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 	error_handling  = EG(error_handling);
 	exception_class = EG(exception_class);
-#else
-	error_handling  = PG(error_handling);
-	exception_class = PG(exception_class);
-#endif
 	/* according to error handling mode, suppress error, throw exception or show it */
 	if (error_handling != EH_NORMAL && EG(in_execution)) {
 		switch (type) {
@@ -702,35 +664,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		type = E_USER_ERROR;
 	}
 
-#if PHP_VERSION_ID < 50400
-
-	/* Bail out if we can't recover */
-	switch (type) {
-		case E_CORE_ERROR:
-		/* no break - intentionally */
-		case E_ERROR:
-#if PHP_VERSION_ID >= 50200 
-		case E_RECOVERABLE_ERROR:
-#endif
-		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
-		case E_COMPILE_ERROR:
-		case E_USER_ERROR:
-			EG(exit_status) = 255;
-#if HAVE_PHP_MEMORY_USAGE
-			/* restore memory limit */
-# if PHP_VERSION_ID >= 50200 
-			zend_set_memory_limit(PG(memory_limit));
-# else
-			AG(memory_limit) = PG(memory_limit);
-# endif
-#endif
-			zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
-			zend_bailout();
-			return;
-	}
-
-#else
-
 	/* Bail out if we can't recover */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -766,8 +699,6 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			}
 			break;
 	}
-
-#endif
 
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		zval *tmp;
@@ -971,11 +902,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 				tmp->function = xdstrdup(edata->function_state.function->common.function_name);
 			}
 		} else {
-#if PHP_VERSION_ID >= 50399
 			switch (edata->opline->extended_value) {
-#else
-			switch (edata->opline->op2.u.constant.value.lval) {
-#endif
 				case ZEND_EVAL:
 					tmp->type = XFUNC_EVAL;
 					break;
@@ -1070,14 +997,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->filename) {
 		tmp->filename = xdstrdup("UNKNOWN?");
 	}
-#if HAVE_PHP_MEMORY_USAGE
 	tmp->prev_memory = XG(prev_memory);
-	tmp->memory = XG_MEMORY_USAGE();
+	tmp->memory = zend_memory_usage(0 TSRMLS_CC);
 	XG(prev_memory) = tmp->memory;
-#else
-	tmp->memory = 0;
-	tmp->prev_memory = 0;
-#endif
 	tmp->time   = xdebug_get_utime();
 	tmp->lineno = 0;
 	tmp->prev   = 0;
@@ -1112,7 +1034,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			 * works for both internal and user defined functions.
 			 * op_array->num_args works only for user defined functions so
 			 * we're not using that here. */
-#if PHP_VERSION_ID >= 50300
 			void **curpos = NULL;
 			if ((!edata->opline) || ((edata->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (edata->opline->opcode == ZEND_DO_FCALL))) {
 				curpos = edata->function_state.arguments;
@@ -1125,13 +1046,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				arguments_wanted = arguments_sent;
 				p = curpos = NULL;
 			}
-#else
-			if (EG(argument_stack).top >= 2) {
-				p = EG(argument_stack).top_element - 2;
-				arguments_sent = (ulong) *p;
-				arguments_wanted = arguments_sent;
-			}
-#endif
 
 			if (tmp->user_defined == XDEBUG_EXTERNAL) {
 				arguments_wanted = op_array->num_args;
@@ -1164,19 +1078,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 
 				if (XG(collect_params)) {
-#if PHP_VERSION_ID >= 50300
 					if (p) {
 						param = (zval **) p++;				
 						tmp->var[tmp->varc].addr = *param;
 					}
-#else
-					param = NULL;
-					if (zend_ptr_stack_get_arg(tmp->varc + 1, (void**) &param TSRMLS_CC) == SUCCESS) {
-						if (param) {
-							tmp->var[tmp->varc].addr = *param;
-						}
-					}
-#endif
 				}
 				tmp->varc++;
 			}

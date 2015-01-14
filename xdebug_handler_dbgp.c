@@ -896,20 +896,9 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_op_array     *original_active_op_array = EG(active_op_array);
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
-#if PHP_VERSION_ID < 50200
-	zend_bool          original_bailout_set = EG(bailout_set);
-	jmp_buf            original_bailout;
-#else
 	jmp_buf           *original_bailout = EG(bailout);
-#endif
-#if PHP_VERSION_ID >= 50300
 	void             **original_argument_stack_top = EG(argument_stack)->top;
 	void             **original_argument_stack_end = EG(argument_stack)->end;
-#endif
-
-#if PHP_VERSION_ID < 50200
-	memcpy(&original_bailout, &EG(bailout), sizeof(jmp_buf));
-#endif
 
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
@@ -931,16 +920,9 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(active_op_array) = original_active_op_array;
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
-#if PHP_VERSION_ID < 50200
-	EG(bailout_set) = original_bailout_set;
-	memcpy(&EG(bailout), &original_bailout, sizeof(jmp_buf));
-#else
 	EG(bailout) = original_bailout;
-#endif
-#if PHP_VERSION_ID >= 50300
 	EG(argument_stack)->top = original_argument_stack_top;
 	EG(argument_stack)->end = original_argument_stack_end;
-#endif
 
 	return res;
 }
@@ -1337,7 +1319,6 @@ DBGP_FUNC(property_get)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 			if (depth > 0) {
@@ -1345,9 +1326,6 @@ DBGP_FUNC(property_get)
 			} else {
 				XG(active_execute_data) = EG(current_execute_data);
 			}
-#else
-			XG(active_execute_data) = fse->execute_data;
-#endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
@@ -1427,7 +1405,6 @@ DBGP_FUNC(property_set)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 			if (depth > 0) {
@@ -1435,9 +1412,6 @@ DBGP_FUNC(property_set)
 			} else {
 				XG(active_execute_data) = EG(current_execute_data);
 			}
-#else
-			XG(active_execute_data) = fse->execute_data;
-#endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
@@ -1546,7 +1520,6 @@ DBGP_FUNC(property_value)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 			if (depth > 0) {
@@ -1554,9 +1527,6 @@ DBGP_FUNC(property_value)
 			} else {
 				XG(active_execute_data) = EG(current_execute_data);
 			}
-#else
-			XG(active_execute_data) = fse->execute_data;
-#endif
 			XG(active_symbol_table) = fse->symbol_table;
 			XG(This)                = fse->This;
 			XG(active_fse)          = fse;
@@ -1604,7 +1574,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	}
 }
 
-static int xdebug_add_filtered_symboltable_var(zval *symbol XDEBUG_ZEND_HASH_APPLY_TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_hash *tmp_hash;
 
@@ -1690,7 +1660,6 @@ next_constant:
 
 	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth TSRMLS_CC))) {
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 3) || PHP_MAJOR_VERSION >= 6
 		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1 TSRMLS_CC);
 
 		if (depth > 0) {
@@ -1698,9 +1667,6 @@ next_constant:
 		} else {
 			XG(active_execute_data) = EG(current_execute_data);
 		}
-#else
-		XG(active_execute_data) = fse->execute_data;
-#endif
 		XG(active_symbol_table) = fse->symbol_table;
 		XG(This)                = fse->This;
 
@@ -1714,7 +1680,7 @@ next_constant:
 			/* Check for dynamically defined variables, but make sure we don't already
 			 * have them. Also blacklist superglobals and argv/argc */
 			if (XG(active_symbol_table)) {
-				zend_hash_apply_with_arguments(XG(active_symbol_table) XDEBUG_ZEND_HASH_APPLY_TSRMLS_CC, (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
+				zend_hash_apply_with_arguments(XG(active_symbol_table) TSRMLS_CC, (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
 			}
 
 			/* Add all the found variables to the node */
