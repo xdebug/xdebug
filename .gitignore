@@ -32,9 +32,7 @@
 /modules
 /scan_makefile_in.awk
 /config.guess
-/*swo
-/*swp
-/*swn
+/*sw*
 tags
 /config.log
 /libtool
@@ -55,3 +53,4 @@ tags
 .svn
 /*~
 /debugclient/*.o
+/*.rej
