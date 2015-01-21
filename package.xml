@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2014-11-14</date>
- <time>15:13:00</time>
+ <date>2015-01-21</date>
+ <time>21:59:00</time>
  <version>
-  <release>2.2.6</release>
-  <api>2.2.6</api>
+  <release>2.2.7</release>
+  <api>2.2.7</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,17 +45,17 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, Nov 14, 2014 - xdebug 2.2.6
+Thu, Jan 22, 2014 - xdebug 2.2.7
 
 = Fixed bugs:
 
- - Fixed bug #1048: Can not get $GLOBAL variable by property_value on function
-   context.
- - Fixed bug #1073 and #1075: Segmentation fault with internal functions
-   calling internal functions.
- - Fixed bug #1085: Fixed the tracefile analyser as the format version had been
-   bumbed.
- - Fixed memory leaks
+ - Fixed bug #1083: Segfault when requesting a variable for a context that did
+   not have them.
+ - Fixed bug #1087: zend_execute_script or zend_eval_string in RINIT segfaults.
+ - Fixed bug #1088: Xdebug won't show dead and not executed lines at the second
+   time.
+ - Fixed bug #1098: Xdebug doesn't make use of __debugInfo.
+ - Fixed segfaults with ZTS on PHP 5.6.
  </notes>
 
  <contents>
@@ -153,6 +153,33 @@ Fri, Nov 14, 2014 - xdebug 2.2.6
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2014-11-14</date>
+   <time>15:13:00</time>
+   <version>
+    <release>2.2.6</release>
+    <api>2.2.6</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Nov 14, 2014 - xdebug 2.2.6
+
+= Fixed bugs:
+
+ - Fixed bug #1048: Can not get $GLOBAL variable by property_value on function
+   context.
+ - Fixed bug #1073 and #1075: Segmentation fault with internal functions
+   calling internal functions.
+ - Fixed bug #1085: Fixed the tracefile analyser as the format version had been
+   bumbed.
+ - Fixed memory leaks
+   </notes>
+  </release>
 
   <release>
    <date>2014-04-29</date>
