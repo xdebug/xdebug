@@ -723,7 +723,7 @@ static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_arg
 
 	new_filename = va_arg(args, char*);
 	if (opa->type == ZEND_USER_FUNCTION) {
-		if (opa->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
+		if ((long) opa->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
 			prefill_from_oparray((char *) opa->filename, opa TSRMLS_CC);
 		}
 	}
@@ -751,7 +751,7 @@ static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, in
 
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
-	if (op_array->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
+	if ((long) op_array->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
 		prefill_from_oparray((char *) op_array->filename, op_array TSRMLS_CC);
 	}
 
