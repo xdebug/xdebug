@@ -197,7 +197,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     code_coverage_dead_code_analysis;
 	unsigned int  function_count;
 	int           dead_code_analysis_tracker_offset;
-	void         *dead_code_last_start_id;
+	long          dead_code_last_start_id;
 	char                 *previous_filename;
 	xdebug_coverage_file *previous_file;
 
