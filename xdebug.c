@@ -1772,16 +1772,34 @@ PHP_FUNCTION(xdebug_var_dump)
 	zval ***args;
 	int     argc;
 	int     i, len;
-	char   *val;
-	
+	char    *val, *error;
+	zval   	retval, funcname;
+	zval *custom_var_dump;
+	zend_bool custom_var_callable;
+
 	if (!XG(overload_var_dump)) {
 		XG(orig_var_dump_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		return;
 	}
 
 	argc = ZEND_NUM_ARGS();
-	
 	args = (zval ***)emalloc(argc * sizeof(zval **));
+	
+	// Maybe add another flag to check if it allowed to have a custom_var_dump
+	
+	// This can be done better, if I only knew how to write C code 
+	ZVAL_STRING(&funcname, "xdebug_custom_var_dump", 0);
+	MAKE_STD_ZVAL(custom_var_dump);
+	ZVAL_STRING(custom_var_dump, "xdebug_custom_var_dump", 0);
+
+	// Check if there is a user defined function and if it is callable
+	// inspired by http://lxr.php.net/xref/PHP_5_4/ext/standard/type.c#356
+	custom_var_callable = zend_is_callable_ex(custom_var_dump, NULL, 0, NULL, NULL, NULL, &error TSRMLS_CC);
+	if (error) {
+ 	    // YOLO, ignore errors 
+	   efree(error);
+	}
+
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
@@ -1790,6 +1808,11 @@ PHP_FUNCTION(xdebug_var_dump)
 	for (i = 0; i < argc; i++) {
 		if (XG(default_enable) == 0) {
 			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);
+		}
+		else if (custom_var_callable) {
+                	// Looping over multiple items in var_dump is not working :( 
+			// Maybe it is better to use zend_call_function but I am not quite clear how to use it
+			call_user_function(EG(function_table), NULL, &funcname, &retval, 1, args[i] TSRMLS_CC);
 		}
 		else if (PG(html_errors)) {
 			val = xdebug_get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0, NULL TSRMLS_CC);
@@ -1807,7 +1830,6 @@ PHP_FUNCTION(xdebug_var_dump)
 			xdfree(val);
 		}
 	}
-	
 	efree(args);
 }
 /* }}} */
