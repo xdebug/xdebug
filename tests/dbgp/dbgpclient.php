@@ -7,7 +7,7 @@ class DebugClient
 		return $socket;
 	}
 
-	private function launchPhp( &$pipes )
+	private function launchPhp( &$pipes, array $ini_options = null )
 	{
 		@unlink( '/tmp/error-output.txt' );
 		@unlink( '/tmp/remote_log.txt' );
@@ -18,7 +18,17 @@ class DebugClient
 		   2 => array( 'file', '/tmp/error-output.txt', 'a' )
 		);
 
-		$cmd = "php -dxdebug.remote_enable=1 -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 -dxdebug.remote_log=/tmp/remote_log.txt /tmp/xdebug-dbgp-test.php";
+		$options = '';
+
+		if ( !is_null( $ini_options ) && count( $ini_options ) > 0 )
+		{
+			foreach ( $ini_options as $key => $value )
+			{
+				$options .= " -d{$key}=$value";
+			}
+		}
+
+		$cmd = "php $options -dxdebug.remote_enable=1 -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 -dxdebug.remote_log=/tmp/remote_log.txt /tmp/xdebug-dbgp-test.php";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -49,7 +59,7 @@ class DebugClient
 		} while( !$end );
 	}
 
-	function runTest( $data, array $commands )
+	function runTest( $data, array $commands, array $ini_options = null )
 	{
 		file_put_contents( '/tmp/xdebug-dbgp-test.php', $data );
 		$i = 1;
@@ -59,7 +69,7 @@ class DebugClient
 			echo "Could not create socket server - already in use?\n";
 			return;
 		}
-		$php = $this->launchPhp( $ppipes );
+		$php = $this->launchPhp( $ppipes, $ini_options );
 		$conn = @stream_socket_accept( $socket, 3 );
 
 		if ( $conn === false )
@@ -97,9 +107,9 @@ class DebugClient
 	}
 }
 
-function dbgpRun( $data, $commands )
+function dbgpRun( $data, $commands, array $ini_options = null)
 {
 	$t = new DebugClient;
-	$t->runTest( $data, $commands );
+	$t->runTest( $data, $commands, $ini_options );
 }
 ?>

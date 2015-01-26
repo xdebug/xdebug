@@ -1925,6 +1925,9 @@ PHP_FUNCTION(xdebug_is_enabled)
 
 PHP_FUNCTION(xdebug_break)
 {
+	/* Start JIT if requested and not yet enabled */
+	xdebug_do_jit(TSRMLS_C);
+
 	XG(context).do_break = 1;
 	RETURN_TRUE;
 }
