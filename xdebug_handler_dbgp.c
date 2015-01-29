@@ -2554,7 +2554,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	xdebug_xml_add_text(child, xdstrdup(XDEBUG_COPYRIGHT));
 	xdebug_xml_add_child(response, child);
 
-	if (strcmp(context->program_name, "-") == 0) {
+	if (strcmp(context->program_name, "-") == 0 || strcmp(context->program_name, "Command line code") == 0) {
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdstrdup("dbgp://stdin"), 0, 1);
 	} else {
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name TSRMLS_CC), 0, 1);
