@@ -1329,6 +1329,12 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	int                   clear = 0;
 	zval                 *return_val = NULL;
 
+	/* We need to do this first before the executable clauses are called */
+	if (XG(no_exec) == 1) {
+		php_printf("DEBUG SESSION ENDED");
+		return;
+	}
+
 	/* If we're evaluating for the debugger's eval capability, just bail out */
 	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", op_array->filename) == 0) {
 #if PHP_VERSION_ID < 50500
@@ -1347,11 +1353,6 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 #else
 		xdebug_old_execute_ex(execute_data TSRMLS_CC);
 #endif
-		return;
-	}
-
-	if (XG(no_exec) == 1) {
-		php_printf("DEBUG SESSION ENDED");
 		return;
 	}
 
