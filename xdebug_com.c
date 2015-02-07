@@ -126,11 +126,16 @@ int xdebug_create_socket(const char *hostname, int dport)
 #ifdef WIN32
 		errno = WSAGetLastError();
 		if (errno != WSAEINPROGRESS && errno != WSAEWOULDBLOCK) {
-#else
-		if (errno != EINPROGRESS) {
-#endif
 			return -1;
 		}
+#else
+		if (errno == EACCES) {
+			return -3;
+		}
+		if (errno != EINPROGRESS) {
+			return -1;
+		}
+#endif
 
 		while (1) {
 			fd_set rset, wset, eset;
