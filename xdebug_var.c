@@ -220,7 +220,7 @@ char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **p
 	const char *prop_name, *cls_name;
 
 #if PHP_VERSION_ID >= 50200
-	zend_unmangle_property_name(mangled_property, mangled_len - 1, &cls_name, &prop_name);
+	zend_unmangle_property_name(mangled_property, mangled_len, &cls_name, &prop_name);
 #else
 	zend_unmangle_property_name(mangled_property, &cls_name, &prop_name);
 #endif
