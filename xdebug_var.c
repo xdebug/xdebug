@@ -592,7 +592,7 @@ char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **p
 {
 	const char *prop_name, *cls_name;
 
-	zend_unmangle_property_name(mangled_property, mangled_len - 1, &cls_name, &prop_name);
+	zend_unmangle_property_name(mangled_property, mangled_len, &cls_name, &prop_name);
 	*property_name = (char *) prop_name;
 	*class_name = (char *) cls_name;
 	if (cls_name) {
