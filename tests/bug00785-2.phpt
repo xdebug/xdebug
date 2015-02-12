@@ -17,210 +17,210 @@ positions: line
 
 events: Time
 
-fl=php:internal
-fn=php::usleep
+fl=(1) php:internal
+fn=(1) php::usleep
 10 %d
 
-fl=%sbug00785-2.inc
-fn=nested2
+fl=(2) %sbug00785-2.inc
+fn=(2) nested2
 8 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 10 %d
 
-fl=php:internal
-fn=php::call_user_func_array:{%sbug00785-2.inc:24}
+fl=(1)
+fn=(3) php::call_user_func_array:{%sbug00785-2.inc:24}
 24 %d
-cfl=%sbug00785-2.inc
-cfn=nested2
+cfl=(2)
+cfn=(2)
 calls=1 0 0
 24 %d
 
-fl=php:internal
-fn=php::usleep
+fl=(1)
+fn=(1)
 4 %d
 
-fl=%sbug00785-2.inc
-fn=nested
+fl=(2)
+fn=(4) nested
 2 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::call_user_func_array:{%sbug00785-2.inc:20}
+fl=(1)
+fn=(5) php::call_user_func_array:{%sbug00785-2.inc:20}
 20 %d
-cfl=%sbug00785-2.inc
-cfn=nested
+cfl=(2)
+cfn=(4)
 calls=1 0 0
 20 %d
 
-fl=php:internal
-fn=php::usleep
+fl=(1)
+fn=(1)
 4 %d
 
-fl=%sbug00785-2.inc
-fn=nested
+fl=(2)
+fn=(4)
 2 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::call_user_func_array:{%sbug00785-2.inc:20}
+fl=(1)
+fn=(5)
 20 %d
-cfl=%sbug00785-2.inc
-cfn=nested
+cfl=(2)
+cfn=(4)
 calls=1 0 0
 20 %d
 
-fl=php:internal
-fn=php::usleep
+fl=(1)
+fn=(1)
 4 %d
 
-fl=%sbug00785-2.inc
-fn=nested
+fl=(2)
+fn=(4)
 2 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::call_user_func_array:{%sbug00785-2.inc:20}
+fl=(1)
+fn=(5)
 20 %d
-cfl=%sbug00785-2.inc
-cfn=nested
+cfl=(2)
+cfn=(4)
 calls=1 0 0
 20 %d
 
-fl=php:internal
-fn=php::usleep
+fl=(1)
+fn=(1)
 4 %d
 
-fl=%sbug00785-2.inc
-fn=nested
+fl=(2)
+fn=(4)
 2 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::call_user_func_array:{%sbug00785-2.inc:20}
+fl=(1)
+fn=(5)
 20 %d
-cfl=%sbug00785-2.inc
-cfn=nested
+cfl=(2)
+cfn=(4)
 calls=1 0 0
 20 %d
 
-fl=php:internal
-fn=php::usleep
+fl=(1)
+fn=(1)
 4 %d
 
-fl=%sbug00785-2.inc
-fn=nested
+fl=(2)
+fn=(4)
 2 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::call_user_func_array:{%sbug00785-2.inc:20}
+fl=(1)
+fn=(5)
 20 %d
-cfl=%sbug00785-2.inc
-cfn=nested
+cfl=(2)
+cfn=(4)
 calls=1 0 0
 20 %d
 
-fl=php:internal
-fn=php::usleep
+fl=(1)
+fn=(1)
 4 %d
 
-fl=%sbug00785-2.inc
-fn=nested
+fl=(2)
+fn=(4)
 2 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::call_user_func_array:{%sbug00785-2.inc:20}
+fl=(1)
+fn=(5)
 20 %d
-cfl=%sbug00785-2.inc
-cfn=nested
+cfl=(2)
+cfn=(4)
 calls=1 0 0
 20 %d
 
-fl=%sbug00785-2.inc
-fn=foo
+fl=(2)
+fn=(6) foo
 15 %d
-cfl=php:internal
-cfn=php::call_user_func_array:{%sbug00785-2.inc:20}
+cfl=(1)
+cfn=(5)
 calls=1 0 0
 20 %d
-cfl=php:internal
-cfn=php::call_user_func_array:{%sbug00785-2.inc:20}
+cfl=(1)
+cfn=(5)
 calls=1 0 0
 20 %d
-cfl=php:internal
-cfn=php::call_user_func_array:{%sbug00785-2.inc:20}
+cfl=(1)
+cfn=(5)
 calls=1 0 0
 20 %d
-cfl=php:internal
-cfn=php::call_user_func_array:{%sbug00785-2.inc:20}
+cfl=(1)
+cfn=(5)
 calls=1 0 0
 20 %d
-cfl=php:internal
-cfn=php::call_user_func_array:{%sbug00785-2.inc:20}
+cfl=(1)
+cfn=(5)
 calls=1 0 0
 20 %d
-cfl=php:internal
-cfn=php::call_user_func_array:{%sbug00785-2.inc:20}
+cfl=(1)
+cfn=(5)
 calls=1 0 0
 20 %d
 
-fl=php:internal
-fn=php::usleep
+fl=(1)
+fn=(1)
 4 %d
 
-fl=%sbug00785-2.inc
-fn=nested
+fl=(2)
+fn=(4)
 2 %d
-cfl=php:internal
-cfn=php::usleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::call_user_func:{%sbug00785-2.inc:26}
+fl=(1)
+fn=(7) php::call_user_func:{%sbug00785-2.inc:26}
 26 %d
-cfl=%sbug00785-2.inc
-cfn=nested
+cfl=(2)
+cfn=(4)
 calls=1 0 0
 26 %d
 
-fl=%sbug00785-2.inc
-fn=require_once::%sbug00785-2.inc
+fl=(2)
+fn=(8) require_once::%sbug00785-2.inc
 1 %d
-cfl=php:internal
-cfn=php::call_user_func_array:{%sbug00785-2.inc:24}
+cfl=(1)
+cfn=(3)
 calls=1 0 0
 24 %d
-cfl=%sbug00785-2.inc
-cfn=foo
+cfl=(2)
+cfn=(6)
 calls=1 0 0
 25 %d
-cfl=php:internal
-cfn=php::call_user_func:{%sbug00785-2.inc:26}
+cfl=(1)
+cfn=(7)
 calls=1 0 0
 26 %d
 
-fl=php:internal
-fn=php::xdebug_get_profiler_filename
+fl=(1)
+fn=(9) php::xdebug_get_profiler_filename
 4 %d

@@ -32,42 +32,42 @@ positions: line
 
 events: Time
 
-fl=php:internal
-fn=php::sleep
+fl=(1) php:internal
+fn=(1) php::sleep
 2 100%d
 
-fl=%sbug00714.php
-fn=sleep1
+fl=(2) %sbug00714.php
+fn=(2) sleep1
 2 %d
-cfl=php:internal
-cfn=php::sleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 2 100%d
 
-fl=php:internal
-fn=php::sleep
+fl=(1)
+fn=(1)
 3 100%d
 
-fl=%sbug00714.php
-fn=sleep10
+fl=(2)
+fn=(3) sleep10
 3 %d
-cfl=php:internal
-cfn=php::sleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 3 100%d
 
-fl=php:internal
-fn=php::sleep
+fl=(1)
+fn=(1)
 4 200%d
 
-fl=%sbug00714.php
-fn=sleep20
+fl=(2)
+fn=(4) sleep20
 4 %d
-cfl=php:internal
-cfn=php::sleep
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 4 200%d
 
-fl=php:internal
-fn=php::xdebug_get_profiler_filename
+fl=(1)
+fn=(5) php::xdebug_get_profiler_filename
 14 %d

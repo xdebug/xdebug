@@ -21,29 +21,29 @@ positions: line
 
 events: Time
 
-fl=php:internal
-fn=php::register_shutdown_function
+fl=(1) php:internal
+fn=(1) php::register_shutdown_function
 %d %d
 
-fl=php:internal
-fn=php::strlen
+fl=(1)
+fn=(2) php::strlen
 %d %d
 
-fl=%sbug00631.php
-fn={main}
+fl=(2) %sbug00631.php
+fn=(3) {main}
 
 summary: %d
 
 %d %d
-cfl=php:internal
-cfn=php::register_shutdown_function
+cfl=(1)
+cfn=(1)
 calls=1 0 0
 %d %d
-cfl=php:internal
-cfn=php::strlen
+cfl=(1)
+cfn=(2)
 calls=1 0 0
 %d %d
 
-fl=php:internal
-fn=php::xdebug_get_profiler_filename
+fl=(1)
+fn=(4) php::xdebug_get_profiler_filename
 %d %d
