@@ -57,14 +57,14 @@ am_version_clean=`echo $am_version|sed -e 's/-p[0-9]*$//'`
 if test "$am_version" = ""; then
 echo "buildconf: automake not found."
 echo "           You need automake version 1.4 or newer installed"
-echo "           to build PHP from CVS."
+echo "           to build debugclient from GIT."
 exit 1
 fi
 IFS=.; set $am_version_clean; IFS=' '
 if test "$1" = "1" -a "$2" -lt "4" || test "$1" -lt "1"; then
 echo "buildconf: automake version $am_version found."
 echo "           You need automake version 1.4 or newer installed"
-echo "           to build PHP from CVS."
+echo "           to build debugclient from GIT."
 exit 1
 else
 echo "buildconf: automake version $am_version (ok)"
@@ -78,7 +78,7 @@ lt_pversion=`$libtool --version 2>/dev/null | head -n 1 | awk '{print $4}'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.4 or newer installed"
-echo "           to build PHP from CVS."
+echo "           to build debugclient from GIT."
 exit 1
 fi
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
