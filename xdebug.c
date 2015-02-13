@@ -884,6 +884,10 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(trace_context) = NULL;
 	XG(profile_file)  = NULL;
 	XG(profile_filename) = NULL;
+	XG(profile_filename_refs) = xdebug_hash_alloc(128, NULL);
+	XG(profile_functionname_refs) = xdebug_hash_alloc(128, NULL);
+	XG(profile_last_filename_ref) = 0;
+	XG(profile_last_functionname_ref) = 0;
 	XG(prev_memory)   = 0;
 	XG(function_count) = -1;
 	XG(active_symbol_table) = NULL;
@@ -1013,6 +1017,11 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	if (XG(profile_filename)) {
 		xdfree(XG(profile_filename));
 	}
+	
+	xdebug_hash_destroy(XG(profile_filename_refs));
+	xdebug_hash_destroy(XG(profile_functionname_refs));
+	XG(profile_filename_refs) = NULL;
+	XG(profile_functionname_refs) = NULL;
 
 	if (XG(ide_key)) {
 		xdfree(XG(ide_key));

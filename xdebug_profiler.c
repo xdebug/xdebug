@@ -131,6 +131,31 @@ void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC)
 	fse->profile.mark = xdebug_get_utime();
 }
 
+static char* get_filename_ref(char *name TSRMLS_DC)
+{
+	long nr;
+
+	if (xdebug_hash_find(XG(profile_filename_refs), name, strlen(name), (void*) &nr)) {
+		return xdebug_sprintf("(%lld)", nr);
+	} else {
+		XG(profile_last_filename_ref)++;
+		xdebug_hash_add(XG(profile_filename_refs), name, strlen(name), (void*) XG(profile_last_filename_ref));
+		return xdebug_sprintf("(%lld) %s", XG(profile_last_filename_ref), name);
+	}
+}
+
+static char* get_functionname_ref(char *name TSRMLS_DC)
+{
+	long nr;
+
+	if (xdebug_hash_find(XG(profile_functionname_refs), name, strlen(name), (void*) &nr)) {
+		return xdebug_sprintf("(%lld)", nr);
+	} else {
+		XG(profile_last_functionname_ref)++;
+		xdebug_hash_add(XG(profile_functionname_refs), name, strlen(name), (void*) XG(profile_last_functionname_ref));
+		return xdebug_sprintf("(%lld) %s", XG(profile_last_functionname_ref), name);
+	}
+}
 
 void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array* op_array TSRMLS_DC)
 {
@@ -181,15 +206,28 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	}
 
 	if (fse->user_defined == XDEBUG_EXTERNAL) {
+		char *tmp_fl = NULL, *tmp_fn = NULL;
 		if (op_array) {
-			fprintf(XG(profile_file), "fl=%s\n", op_array->filename);
+			tmp_fl = get_filename_ref((char*) op_array->filename TSRMLS_CC);
+			fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
 		} else {
-			fprintf(XG(profile_file), "fl=%s\n", fse->filename);
+			tmp_fl = get_filename_ref(fse->filename TSRMLS_CC);
+			fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
 		}
-		fprintf(XG(profile_file), "fn=%s\n", tmp_name);
+		tmp_fn = get_functionname_ref(tmp_name TSRMLS_CC);
+		fprintf(XG(profile_file), "fn=%s\n", tmp_fn);
+
+		xdfree(tmp_fl);
+		xdfree(tmp_fn);
 	} else {
-		fprintf(XG(profile_file), "fl=php:internal\n");
-		fprintf(XG(profile_file), "fn=php::%s\n", tmp_name);
+		char *tmp_key = xdebug_sprintf("php::%s", tmp_name);
+		char *tmp_fl = get_filename_ref("php:internal" TSRMLS_CC);
+		char *tmp_fn = get_functionname_ref(tmp_key TSRMLS_CC);
+		fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
+		fprintf(XG(profile_file), "fn=%s\n", tmp_fn);
+		xdfree(tmp_fl);
+		xdfree(tmp_fn);
+		xdfree(tmp_key);
 	}
 	xdfree(tmp_name);
 
@@ -223,11 +261,22 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 
 		if (call_entry->user_defined == XDEBUG_EXTERNAL) {
-			fprintf(XG(profile_file), "cfl=%s\n", call_entry->filename);
-			fprintf(XG(profile_file), "cfn=%s\n", call_entry->function);
+			char *tmp_fl = NULL, *tmp_fn = NULL;
+			tmp_fl = get_filename_ref(call_entry->filename TSRMLS_CC);
+			tmp_fn = get_functionname_ref(call_entry->function TSRMLS_CC);
+			fprintf(XG(profile_file), "cfl=%s\n", tmp_fl);
+			fprintf(XG(profile_file), "cfn=%s\n", tmp_fn);
+			xdfree(tmp_fl);
+			xdfree(tmp_fn);
 		} else {
-			fprintf(XG(profile_file), "cfl=php:internal\n");
-			fprintf(XG(profile_file), "cfn=php::%s\n", call_entry->function);
+			char *tmp_key = xdebug_sprintf("php::%s", call_entry->function);
+			char *tmp_fl = get_filename_ref("php:internal" TSRMLS_CC);
+			char *tmp_fn = get_functionname_ref(tmp_key TSRMLS_CC);
+			fprintf(XG(profile_file), "cfl=%s\n", tmp_fl);
+			fprintf(XG(profile_file), "cfn=%s\n", tmp_fn);
+			xdfree(tmp_fl);
+			xdfree(tmp_fn);
+			xdfree(tmp_key);
 		}
 		
 		fprintf(XG(profile_file), "calls=1 0 0\n");
