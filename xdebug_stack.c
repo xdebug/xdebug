@@ -513,6 +513,8 @@ void xdebug_init_debugger(TSRMLS_D)
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");
 	} else if (XG(context).socket == -2) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Time-out connecting to client. :-(\n");
+	} else if (XG(context).socket == -3) {
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: No permission connecting to client. This could be SELinux related. :-(\n");
 	}
 	if (!XG(remote_enabled)) {
 		xdebug_close_log(TSRMLS_C);
