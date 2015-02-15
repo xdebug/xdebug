@@ -3,7 +3,7 @@ Test for bug #1105: Setting properties without specifying a type only works in t
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-$data = file_get_contents(dirname(__FILE__) . '/bug01105.inc');
+$data = file_get_contents(dirname(__FILE__) . '/bug01105-001.inc');
 
 $commands = array(
 	'step_into',
