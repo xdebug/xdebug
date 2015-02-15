@@ -1811,6 +1811,8 @@ DBGP_FUNC(property_set)
 	function_stack_entry      *fse;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
 	zval                      *symbol;
+	zend_execute_data         *original_execute_data;
+	zval                      **original_return_value;
 	XDEBUG_STR_SWITCH_DECL;
 
 	if (!CMD_OPTION('n')) { /* name */
@@ -1898,9 +1900,38 @@ DBGP_FUNC(property_set)
 			}
 		}
 	} else {
+		/* backup executor state */
+		if(depth > 0) {
+			original_execute_data = EG(current_execute_data);
+			original_return_value = EG(return_value_ptr_ptr);
+
+			EG(current_execute_data) = XG(active_execute_data);
+
+			EG(opline_ptr) = &EG(current_execute_data)->opline;
+			EG(active_op_array) = EG(current_execute_data)->op_array;
+			EG(return_value_ptr_ptr) = EG(current_execute_data)->original_return_value;
+			EG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+			EG(This) = EG(current_execute_data)->current_this;
+			EG(scope) = EG(current_execute_data)->current_scope;
+			EG(called_scope) = EG(current_execute_data)->current_called_scope;
+		}
+
 		/* Do the eval */
 		eval_string = xdebug_sprintf("%s = %s", CMD_OPTION('n'), new_value);
 		res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+
+		/* restore executor state */
+		if(depth > 0) {
+			EG(current_execute_data) = original_execute_data;
+
+			EG(opline_ptr) = &EG(current_execute_data)->opline;
+			EG(active_op_array) = EG(current_execute_data)->op_array;
+			EG(return_value_ptr_ptr) = original_return_value;
+			EG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+			EG(This) = EG(current_execute_data)->current_this;
+			EG(scope) = EG(current_execute_data)->current_scope;
+			EG(called_scope) = EG(current_execute_data)->current_called_scope;
+		}
 
 		/* Free data */
 		xdfree(eval_string);
