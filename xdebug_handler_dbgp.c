@@ -2040,6 +2040,10 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol XDEBUG_ZEND_HASH_APP
 
 	tmp_hash = va_arg(args, xdebug_hash *);
 
+	/* We really ought to deal properly with non-associate keys for symbol
+	 * tables, but for now, we'll just ignore them. */
+	if (!hash_key->arKey || hash_key->nKeyLength == 0) { return 0; }
+
 	if (strcmp("argc", hash_key->arKey) == 0) { return 0; }
 	if (strcmp("argv", hash_key->arKey) == 0) { return 0; }
 	if (hash_key->arKey[0] == '_') {
