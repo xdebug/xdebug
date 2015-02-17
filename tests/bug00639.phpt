@@ -29,82 +29,82 @@ positions: line
 
 events: Time
 
-fl=%sbug00639-2.inc
-fn=require::%sbug00639-2.inc
+fl=(1) %sbug00639-2.inc
+fn=(1) require::%sbug00639-2.inc
 1 %d
 
-fl=php:internal
-fn=php::strlen
+fl=(2) php:internal
+fn=(2) php::strlen
 4 %d
 
-fl=%sbug00639-2.inc
-fn=func2
+fl=(1)
+fn=(3) func2
 2 %d
-cfl=php:internal
-cfn=php::strlen
+cfl=(2)
+cfn=(2)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::strlen
+fl=(2)
+fn=(2)
 4 %d
 
-fl=%sbug00639-2.inc
-fn=func2
+fl=(1)
+fn=(3)
 2 %d
-cfl=php:internal
-cfn=php::strlen
+cfl=(2)
+cfn=(2)
 calls=1 0 0
 4 %d
 
-fl=%sbug00639.php
-fn=func1
+fl=(3) %sbug00639.php
+fn=(4) func1
 4 %d
-cfl=%sbug00639-2.inc
-cfn=func2
+cfl=(1)
+cfn=(3)
 calls=1 0 0
 6 %d
-cfl=%sbug00639-2.inc
-cfn=func2
+cfl=(1)
+cfn=(3)
 calls=1 0 0
 7 %d
 
-fl=php:internal
-fn=php::strlen
+fl=(2)
+fn=(2)
 4 %d
 
-fl=%sbug00639-2.inc
-fn=func2
+fl=(1)
+fn=(3)
 2 %d
-cfl=php:internal
-cfn=php::strlen
+cfl=(2)
+cfn=(2)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::strlen
+fl=(2)
+fn=(2)
 4 %d
 
-fl=%sbug00639-2.inc
-fn=func2
+fl=(1)
+fn=(3)
 2 %d
-cfl=php:internal
-cfn=php::strlen
+cfl=(2)
+cfn=(2)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::strlen
+fl=(2)
+fn=(2)
 4 %d
 
-fl=%sbug00639-2.inc
-fn=func2
+fl=(1)
+fn=(3)
 2 %d
-cfl=php:internal
-cfn=php::strlen
+cfl=(2)
+cfn=(2)
 calls=1 0 0
 4 %d
 
-fl=php:internal
-fn=php::xdebug_get_profiler_filename
+fl=(2)
+fn=(5) php::xdebug_get_profiler_filename
 15 %d
