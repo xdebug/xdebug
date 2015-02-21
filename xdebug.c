@@ -1016,14 +1016,14 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(previous_file) = NULL;
 
 /* {{{ Initialize auto globals in Zend Engine 2 */
-	zend_is_auto_global("_ENV",     sizeof("_ENV")-1     TSRMLS_CC);
-	zend_is_auto_global("_GET",     sizeof("_GET")-1     TSRMLS_CC);
-	zend_is_auto_global("_POST",    sizeof("_POST")-1    TSRMLS_CC);
-	zend_is_auto_global("_COOKIE",  sizeof("_COOKIE")-1  TSRMLS_CC);
-	zend_is_auto_global("_REQUEST", sizeof("_REQUEST")-1 TSRMLS_CC);
-	zend_is_auto_global("_FILES",   sizeof("_FILES")-1   TSRMLS_CC);
-	zend_is_auto_global("_SERVER",  sizeof("_SERVER")-1  TSRMLS_CC);
-	zend_is_auto_global("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_ENV")     TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_GET")     TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_POST")    TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_COOKIE")  TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_REQUEST") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_FILES")   TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_SERVER")  TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_SESSION") TSRMLS_CC);
 /* }}} */
 
 	/* Check if we have this special get variable that stops a debugging
