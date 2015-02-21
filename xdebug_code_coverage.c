@@ -82,7 +82,7 @@ void xdebug_coverage_function_dtor(void *data)
 	xdfree(function);
 }
 
-void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_op *cur_opcode TSRMLS_DC)
+void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode TSRMLS_DC)
 {
 	zend_op_array *op_array = execute_data->op_array;
 	char *file = (char *) op_array->filename;
@@ -107,7 +107,7 @@ int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (XG(do_code_coverage)) {
 		zend_op *cur_opcode;
-		cur_opcode = *EG(opline_ptr);
+		cur_opcode = execute_data->opline;
 
 		xdebug_print_opcode_info('G', execute_data, cur_opcode TSRMLS_CC);
 	}
@@ -130,7 +130,7 @@ int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 		zend_op_array *op_array = execute_data->op_array;
 
-		cur_opcode = *EG(opline_ptr);
+		cur_opcode = execute_data->opline;
 		lineno = cur_opcode->lineno;
 
 		file = (char *)op_array->filename;
@@ -152,7 +152,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	char          *zval_value = NULL;
 	xdebug_var_export_options *options;
 
-	cur_opcode = *EG(opline_ptr);
+	cur_opcode = execute_data->opline;
 	next_opcode = cur_opcode + 1;
 	prev_opcode = cur_opcode - 1;
 
@@ -287,7 +287,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 	int            is_var;
 	function_stack_entry *fse;
 
-	cur_opcode = *EG(opline_ptr);
+	cur_opcode = execute_data->opline;
 	next_opcode = cur_opcode + 1;
 	file = (char *) op_array->filename;
 	lineno = cur_opcode->lineno;

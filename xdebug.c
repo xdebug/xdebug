@@ -503,7 +503,7 @@ void xdebug_env_config(TSRMLS_D)
 
 static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *cur_opcode = *EG(opline_ptr);
+	const zend_op *cur_opcode = EG(current_execute_data)->opline;
 
 	if (XG(do_code_coverage)) {
 		xdebug_print_opcode_info('S', execute_data, cur_opcode TSRMLS_CC);
@@ -522,10 +522,10 @@ static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_op *opline = execute_data->opline;
+	const zend_op *opline = execute_data->opline;
 
 	if (XG(do_code_coverage)) {
-		zend_op *cur_opcode = *EG(opline_ptr);
+		const zend_op *cur_opcode = EG(current_execute_data)->opline;
 		xdebug_print_opcode_info('I', execute_data, cur_opcode TSRMLS_CC);
 	}
 	if (opline->extended_value == ZEND_EVAL) {
@@ -1808,8 +1808,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 	}
 
 	/* Store return value in the trace file */
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && EG(opline_ptr) && current_execute_data->opline) {
-		cur_opcode = *EG(opline_ptr);
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && current_execute_data->opline) {
+		cur_opcode = current_execute_data->opline;
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data TSRMLS_CC);
 			if (ret && XG(trace_handler)->return_value) {

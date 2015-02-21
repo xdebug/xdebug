@@ -988,7 +988,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 #if PHP_VERSION_ID < 50500
 	edata = EG(current_execute_data);
-	opline_ptr = EG(opline_ptr);
+	opline_ptr = &EG(current_execute_data)->opline;
 #else
 	if (type == XDEBUG_EXTERNAL) {
 		edata = EG(current_execute_data)->prev_execute_data;
@@ -997,7 +997,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	} else {
 		edata = EG(current_execute_data);
-		opline_ptr = EG(opline_ptr);
+		opline_ptr = &EG(current_execute_data)->opline;
 	}
 #endif
 
