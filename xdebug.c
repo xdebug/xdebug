@@ -540,7 +540,7 @@ static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 			return ZEND_USER_OPCODE_DISPATCH;
 		}
 
-		if (inc_filename->type != IS_STRING) {
+		if (Z_TYPE_P(inc_filename) != IS_STRING) {
 			tmp_inc_filename = *inc_filename;
 			zval_copy_ctor(&tmp_inc_filename);
 			convert_to_string(&tmp_inc_filename);
