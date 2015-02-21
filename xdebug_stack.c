@@ -529,9 +529,15 @@ void xdebug_init_debugger(TSRMLS_D)
 			/* The request could not be started, ignore it then */
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "E: The debug session could not be started. :-(\n");
 		} else {
+			zend_string *ini_name = zend_string_init("max_execution_time", sizeof("max_execution_time") - 1, 0);
+			zend_string *ini_val = zend_string_init("0", sizeof("0") - 1, 0);
+
 			/* All is well, turn off script time outs */
-			zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			XG(remote_enabled) = 1;
+
+			zend_string_release(ini_val);
+			zend_string_release(ini_name);
 		}
 	} else if (XG(context).socket == -1) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");

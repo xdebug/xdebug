@@ -27,8 +27,8 @@ void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str);
 
 #define DUMP_TOK(__llist) \
 	xdebug_llist_empty(&XG(__llist), NULL); \
-	if (new_value && *new_value) { \
-		char *str = estrndup(new_value, new_value_length); \
+	if (new_value && new_value->val) { \
+		char *str = estrndup(new_value->val, new_value->len); \
 		xdebug_superglobals_dump_tok(&XG(__llist), str); \
 		efree(str); \
 	} \

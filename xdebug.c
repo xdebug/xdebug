@@ -218,10 +218,10 @@ static PHP_INI_MH(OnUpdateDebugMode)
 	if (!new_value) {
 		XG(remote_mode) = XDEBUG_NONE;
 
-	} else if (strcmp(new_value, "jit") == 0) {
+	} else if (strcmp(new_value->val, "jit") == 0) {
 		XG(remote_mode) = XDEBUG_JIT;
 
-	} else if (strcmp(new_value, "req") == 0) {
+	} else if (strcmp(new_value->val, "req") == 0) {
 		XG(remote_mode) = XDEBUG_REQ;
 
 	} else {
@@ -490,7 +490,11 @@ void xdebug_env_config(TSRMLS_D)
 		}
 
 		if (name) {
-			zend_alter_ini_entry(name, strlen(name) + 1, envval, strlen(envval), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			zend_string *ini_name = zend_string_init(name, strlen(name), 0);
+			zend_string *ini_val = zend_string_init(envval, strlen(envval), 0);
+			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+			zend_string_release(ini_val);
+			zend_string_release(ini_name);
 		}
 	}
 
