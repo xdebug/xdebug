@@ -136,11 +136,11 @@ static char* get_filename_ref(char *name TSRMLS_DC)
 	long nr;
 
 	if (xdebug_hash_find(XG(profile_filename_refs), name, strlen(name), (void*) &nr)) {
-		return xdebug_sprintf("(%lld)", nr);
+		return xdebug_sprintf("(%d)", nr);
 	} else {
 		XG(profile_last_filename_ref)++;
 		xdebug_hash_add(XG(profile_filename_refs), name, strlen(name), (void*) XG(profile_last_filename_ref));
-		return xdebug_sprintf("(%lld) %s", XG(profile_last_filename_ref), name);
+		return xdebug_sprintf("(%d) %s", XG(profile_last_filename_ref), name);
 	}
 }
 
@@ -149,11 +149,11 @@ static char* get_functionname_ref(char *name TSRMLS_DC)
 	long nr;
 
 	if (xdebug_hash_find(XG(profile_functionname_refs), name, strlen(name), (void*) &nr)) {
-		return xdebug_sprintf("(%lld)", nr);
+		return xdebug_sprintf("(%d)", nr);
 	} else {
 		XG(profile_last_functionname_ref)++;
 		xdebug_hash_add(XG(profile_functionname_refs), name, strlen(name), (void*) XG(profile_last_functionname_ref));
-		return xdebug_sprintf("(%lld) %s", XG(profile_last_functionname_ref), name);
+		return xdebug_sprintf("(%d) %s", XG(profile_last_functionname_ref), name);
 	}
 }
 

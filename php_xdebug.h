@@ -249,9 +249,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *profile_file;
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;
-	long          profile_last_filename_ref;
+	int           profile_last_filename_ref;
 	xdebug_hash  *profile_functionname_refs;
-	long          profile_last_functionname_ref;
+	int           profile_last_functionname_ref;
 
 	/* DBGp globals */
 	char         *lastcmd;
