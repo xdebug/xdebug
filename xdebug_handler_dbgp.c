@@ -1331,6 +1331,7 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_op_array     *original_active_op_array = EG(active_op_array);
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
+	zval              *original_exception = EG(exception);
 #if PHP_VERSION_ID < 50200
 	zend_bool          original_bailout_set = EG(bailout_set);
 	jmp_buf            original_bailout;
@@ -1353,6 +1354,9 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
 
+	/* Reset exception in case we're triggered while being in xdebug_throw_exception_hook */
+	EG(exception) = NULL;
+
 	zend_first_try {
 		res = zend_eval_string(eval_string, ret_zval, "xdebug://debug-eval" TSRMLS_CC);
 	} zend_end_try();
@@ -1366,6 +1370,7 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(active_op_array) = original_active_op_array;
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
+	EG(exception) = original_exception;
 #if PHP_VERSION_ID < 50200
 	EG(bailout_set) = original_bailout_set;
 	memcpy(&EG(bailout), &original_bailout, sizeof(jmp_buf));
