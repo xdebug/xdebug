@@ -5,6 +5,7 @@ xdebug.max_stack_frames=-1
 xdebug.collect_params=3
 xdebug.default_enable=1
 xdebug.show_local_vars=0
+xdebug.max_nesting_level=256
 --FILE--
 <?php
 function foo($a)

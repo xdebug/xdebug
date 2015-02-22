@@ -1,6 +1,7 @@
 --TEST--
 Test for bug #777: Connection to reset on stepping over call to mysqli_init
 --SKIPIF--
+<?php if (!version_compare(phpversion(), "5.5", '>=')) echo "skip >= PHP 5.5 needed\n"; ?>
 <?php if (!extension_loaded('mysqli')) echo "skip The MySQLi extension needs to be installed\n"; ?>
 --FILE--
 <?php
