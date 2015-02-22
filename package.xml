@@ -231,10 +231,10 @@ Sun, Feb 22, 2015 - xdebug 2.3.0
  <dependencies>
   <required>
    <php>
-    <min>5.2.0</min>
+    <min>5.4.0</min>
    </php>
    <pearinstaller>
-    <min>1.4.0b1</min>
+    <min>1.9.1</min>
    </pearinstaller>
   </required>
  </dependencies>
