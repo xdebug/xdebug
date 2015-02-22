@@ -967,7 +967,6 @@ PHP_RINIT_FUNCTION(xdebug)
 {
 	zend_function *orig;
 	char *idekey;
-	zval **dummy;
 
 	/* Get the ide key for this session */
 	XG(ide_key) = NULL;
@@ -1028,20 +1027,23 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	/* Check if we have this special get variable that stops a debugging
 	 * request without executing any code */
-	if (
-		(
+	{
+		zend_string *stop_no_exec = zend_string_init(ZEND_STRL("XDEBUG_SESSION_STOP_NO_EXEC"), 0);
+		if (
 			(
-				PG(http_globals)[TRACK_VARS_GET] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP_NO_EXEC", sizeof("XDEBUG_SESSION_STOP_NO_EXEC"), (void **) &dummy) == SUCCESS
-			) || (
-				PG(http_globals)[TRACK_VARS_POST] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP_NO_EXEC", sizeof("XDEBUG_SESSION_STOP_NO_EXEC"), (void **) &dummy) == SUCCESS
+				(
+					zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), stop_no_exec) != NULL
+				) || (
+					zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), stop_no_exec) != NULL
+				)
 			)
-		)
-		&& !SG(headers_sent)
-	) {
-		php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
-		XG(no_exec) = 1;
+			&& !SG(headers_sent)
+		) {
+			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
+			XG(no_exec) = 1;
+		}
+
+		zend_string_release(stop_no_exec);
 	}
 
 	/* Only enabled extended info when it is not disabled */
@@ -1049,9 +1051,15 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
-	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", 16, (void**)&dummy) == FAILURE) {
-		zend_error_cb = xdebug_new_error_cb;
-		zend_throw_exception_hook = xdebug_throw_exception_hook;
+	{
+		zend_string *http_soapaction = zend_string_init(ZEND_STRL("HTTP_SOAPACTION"), 0);
+
+		if (XG(default_enable) && zend_hash_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), http_soapaction) == NULL) {
+			zend_error_cb = xdebug_new_error_cb;
+			zend_throw_exception_hook = xdebug_throw_exception_hook;
+		}
+
+		zend_string_release(http_soapaction);
 	}
 	XG(remote_enabled) = 0;
 	XG(profiler_enabled) = 0;
@@ -1084,14 +1092,26 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(start_time) = xdebug_get_utime();
 
 	/* Override var_dump with our own function */
-	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
-	XG(orig_var_dump_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_var_dump;
+	{
+		zend_string *var_dump = zend_string_init(ZEND_STRL("var_dump"), 0);
+
+		orig = zend_hash_find_ptr(EG(function_table), var_dump);
+		XG(orig_var_dump_func) = orig->internal_function.handler;
+		orig->internal_function.handler = zif_xdebug_var_dump;
+
+		zend_string_release(var_dump);
+	}
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
-	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
-	XG(orig_set_time_limit_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_set_time_limit;
+	{
+		zend_string *set_time_limit = zend_string_init(ZEND_STRL("set_time_limit"), 0);
+
+		orig = zend_hash_find_ptr(EG(function_table), set_time_limit);
+		XG(orig_set_time_limit_func) = orig->internal_function.handler;
+		orig->internal_function.handler = zif_xdebug_set_time_limit;
+
+		zend_string_release(set_time_limit);
+	}
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
