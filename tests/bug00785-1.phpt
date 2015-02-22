@@ -13,7 +13,7 @@ echo file_get_contents(xdebug_get_profiler_filename());
 --EXPECTF--
 int(21)
 version: 1
-creator: xdebug 2%s
+creator: xdebug 3%s
 cmd: %sbug00785-1.php
 part: 1
 positions: line

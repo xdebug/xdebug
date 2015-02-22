@@ -33,7 +33,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 bar
-Version: 2.%s
+Version: 3.%s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%f	%d
