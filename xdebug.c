@@ -1544,9 +1544,13 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 #if PHP_VERSION_ID >= 50500
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-				XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(return_value_ptr_ptr) TSRMLS_CC);
+				if (XG(trace_handler)->generator_return_value) {
+					XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(return_value_ptr_ptr) TSRMLS_CC);
+				}
 			} else {
-				XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+				if (XG(trace_handler)->return_value) {
+					XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+				}
 			}
 #else
 			XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
@@ -1666,7 +1670,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data TSRMLS_CC);
-			if (ret) {
+			if (ret && XG(trace_handler)->return_value) {
 				XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, ret TSRMLS_CC);
 			}
 		}
