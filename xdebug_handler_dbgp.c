@@ -896,6 +896,7 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_op_array     *original_active_op_array = EG(active_op_array);
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
+	zval              *original_exception = EG(exception);
 	jmp_buf           *original_bailout = EG(bailout);
 	void             **original_argument_stack_top = EG(argument_stack)->top;
 	void             **original_argument_stack_end = EG(argument_stack)->end;
@@ -906,6 +907,9 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
+
+	/* Reset exception in case we're triggered while being in xdebug_throw_exception_hook */
+	EG(exception) = NULL;
 
 	zend_first_try {
 		res = zend_eval_string(eval_string, ret_zval, "xdebug://debug-eval" TSRMLS_CC);
@@ -920,6 +924,7 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(active_op_array) = original_active_op_array;
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
+	EG(exception) = original_exception;
 	EG(bailout) = original_bailout;
 	EG(argument_stack)->top = original_argument_stack_top;
 	EG(argument_stack)->end = original_argument_stack_end;
