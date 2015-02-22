@@ -276,7 +276,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable,         zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_dir",       XDEBUG_TEMP_DIR,      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_dir,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler_output_name,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "1",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable_trigger, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_enable_trigger, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString,   profiler_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_append,         zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_aggregate",      "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler_aggregate,      zend_xdebug_globals, xdebug_globals)
@@ -1544,9 +1544,13 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 #if PHP_VERSION_ID >= 50500
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-				XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(return_value_ptr_ptr) TSRMLS_CC);
+				if (XG(trace_handler)->generator_return_value) {
+					XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(return_value_ptr_ptr) TSRMLS_CC);
+				}
 			} else {
-				XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+				if (XG(trace_handler)->return_value) {
+					XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+				}
 			}
 #else
 			XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
@@ -1666,7 +1670,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data TSRMLS_CC);
-			if (ret) {
+			if (ret && XG(trace_handler)->return_value) {
 				XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, ret TSRMLS_CC);
 			}
 		}

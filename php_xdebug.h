@@ -20,7 +20,7 @@
 #define PHP_XDEBUG_H
 
 #define XDEBUG_NAME       "Xdebug"
-#define XDEBUG_VERSION    "2.3.0dev"
+#define XDEBUG_VERSION    "3.0.0-dev"
 #define XDEBUG_AUTHOR     "Derick Rethans"
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2015 by Derick Rethans"
 #define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2015"
@@ -249,9 +249,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *profile_file;
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;
-	long          profile_last_filename_ref;
+	int           profile_last_filename_ref;
 	xdebug_hash  *profile_functionname_refs;
-	long          profile_last_functionname_ref;
+	int           profile_last_functionname_ref;
 
 	/* DBGp globals */
 	char         *lastcmd;
