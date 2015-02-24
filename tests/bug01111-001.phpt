@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1105: eval does not work when debugger is stopped in xdebug_throw_exception_hook
+Test for bug #1111: eval does not work when debugger is stopped in xdebug_throw_exception_hook
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
