@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-02-22</date>
- <time>14:48:00</time>
+ <date>2015-02-24</date>
+ <time>22:02:00</time>
  <version>
-  <release>2.3.0</release>
-  <api>2.3.0</api>
+  <release>2.3.1</release>
+  <api>2.3.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,99 +45,14 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sun, Feb 22, 2015 - xdebug 2.3.0
+Tue, Feb 24, 2015 - xdebug 2.3.1
 
 = Fixed bugs:
 
-  - Fixed bug #932: Added an error message in case the remote debug log
-    couldn't be opened
-  - Fixed bug #982: Incorrect file paths in exception stack trace
-  - Fixed bug #1094: Segmentation fault when attempting to use branch/path
-    coverage
-  - Fixed bug #1101: Debugger is not triggered on xdebug_break() in JIT mode
-  - Fixed bug #1102: Stop Xdebug from crashing when debugging PHP Code with
-    "php -r".
-  - Fixed bug #1103: XDEBUG_SESSION_STOP_NO_EXEC only stops first script
-    executed with auto_prepend|append_files
-  - Fixed bug #1104: One character non-public properties cause issues with
-    debugging
-  - Fixed bug #1105: Setting properties without specifying a type only works in
-    topmost frame (Dominik del Bondio)
-  - Fixed bug #1095: Crash when using a non-associate array key in GLOBALS
-  - Fixed bug #1111: eval does not work when debugger is stopped in
-    xdebug_throw_exception_hook (Dominik del Bondio)
-
-+ Added features:
-
-  - General
-
-    - Implemented issue #304: File name and line number info for overloaded
-      var_dump()
-    - Implemented issue #310: Allow class vars and array keys with
-      xdebug_debug_zval()
-    - Implemented issue #722: Add stack trace limit setting.
-    - Implemented issue #1003: Add option to xdebug_print_function_stack() to
-      suppress filename and line number
-    - Implemented issue #1004: Ability to halt on warning/notice
-    - Implemented issue #1023: Add support for PHP 5.6 variadics
-    - Implemented issue #1024: Add support for PHP 5.6's ASSIGN_POW
-
-  - Debugging
-
-    - Implemented issue #406: Added support for remote debugging user-defined
-      constants
-    - Implemented issue #495: Added support for the wildcard exception name '*'
-    - Implemented issue #1066: Better error message for SELinux preventing
-      debugging connections
-    - Implemented issue #1084: Added support for extended classes to trigger
-      exception breakpoints
-    - Implemented issue #1084: Added exception code as extra element to
-      debugger XML
-
-  - Tracing
-
-    - Implemented issue #341: Added the time index and memory usage for
-      function returns in normal tracefiles
-    - Implemented issue #644: Shared secret for profiler_enable_trigger and
-      trace_enable_trigger with *_value option
-    - Implemented issue #971: Added the trace file option
-      "XDEBUG_TRACE_NAKED_FILENAME" to xdebug_start_trace() to prevent the
-      ".xt" extension from being added
-    - Implemented issue #1021: Added support for return values to computerized
-      trace files
-    - Implemented issue #1022: Added support for serialized variables as format
-      in trace files in the form of option "5" for "xdebug.collect_params"
-
-  - Code coverage
-
-    - Implemented issue #380: Added xdebug_code_coverage_started()
-    - Implemented issue #1034: Add collected path and branch information to
-      xdebug_get_code_coverage() output
-
-  - Profiling
-
-    - Implement issue #1054: Support for filename and function name compression
-      in cachegrind files
-
-+ Changes:
-
-    - Implemented issue #863: Support xdebug.overload_var_dump through
-      ini_set()
-    - Implemented issue #973: Use case-insensitive filename comparison on all
-      systems (Galen Wright-Watson)
-    - Implemented issue #1015: Added the xdebug.force_display_errors and
-      xdebug.force_error_reporting php.ini-only settings to always override
-      PHP's settings for display_errors and error_reporting
-    - Implemented issue #1057: Removed trailing whitespace from example
-      xdebug.ini
-    - Implemented issue #1096: Improve performance improvement for handling
-      breakpoints by ignoring locales (Danief Sloof)
-    - Implemented issue #1100: Raise default max_nesting_level to 256
-
-- Removed features:
-
-    - Support for PHP versions lower than PHP 5.4 have been dropped.
-
+  - Fixed issue #1112: Setting an invalid xdebug.trace_format causes Xdebug to
+    crash
+  - Fixed issue #1113: xdebug.*_trigger do no longer work, due to NULL not
+    being an empty string
  </notes>
 
  <contents>
@@ -243,6 +158,114 @@ Sun, Feb 22, 2015 - xdebug 2.3.0
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-02-22</date>
+   <time>14:48:00</time>
+   <version>
+    <release>2.3.0</release>
+    <api>2.3.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Feb 22, 2015 - xdebug 2.3.0
+
+= Fixed bugs:
+
+  - Fixed bug #932: Added an error message in case the remote debug log
+    couldn't be opened
+  - Fixed bug #982: Incorrect file paths in exception stack trace
+  - Fixed bug #1094: Segmentation fault when attempting to use branch/path
+    coverage
+  - Fixed bug #1101: Debugger is not triggered on xdebug_break() in JIT mode
+  - Fixed bug #1102: Stop Xdebug from crashing when debugging PHP Code with
+    "php -r".
+  - Fixed bug #1103: XDEBUG_SESSION_STOP_NO_EXEC only stops first script
+    executed with auto_prepend|append_files
+  - Fixed bug #1104: One character non-public properties cause issues with
+    debugging
+  - Fixed bug #1105: Setting properties without specifying a type only works in
+    topmost frame (Dominik del Bondio)
+  - Fixed bug #1095: Crash when using a non-associate array key in GLOBALS
+  - Fixed bug #1111: eval does not work when debugger is stopped in
+    xdebug_throw_exception_hook (Dominik del Bondio)
+
++ Added features:
+
+  - General
+
+    - Implemented issue #304: File name and line number info for overloaded
+      var_dump()
+    - Implemented issue #310: Allow class vars and array keys with
+      xdebug_debug_zval()
+    - Implemented issue #722: Add stack trace limit setting.
+    - Implemented issue #1003: Add option to xdebug_print_function_stack() to
+      suppress filename and line number
+    - Implemented issue #1004: Ability to halt on warning/notice
+    - Implemented issue #1023: Add support for PHP 5.6 variadics
+    - Implemented issue #1024: Add support for PHP 5.6's ASSIGN_POW
+
+  - Debugging
+
+    - Implemented issue #406: Added support for remote debugging user-defined
+      constants
+    - Implemented issue #495: Added support for the wildcard exception name '*'
+    - Implemented issue #1066: Better error message for SELinux preventing
+      debugging connections
+    - Implemented issue #1084: Added support for extended classes to trigger
+      exception breakpoints
+    - Implemented issue #1084: Added exception code as extra element to
+      debugger XML
+
+  - Tracing
+
+    - Implemented issue #341: Added the time index and memory usage for
+      function returns in normal tracefiles
+    - Implemented issue #644: Shared secret for profiler_enable_trigger and
+      trace_enable_trigger with *_value option
+    - Implemented issue #971: Added the trace file option
+      "XDEBUG_TRACE_NAKED_FILENAME" to xdebug_start_trace() to prevent the
+      ".xt" extension from being added
+    - Implemented issue #1021: Added support for return values to computerized
+      trace files
+    - Implemented issue #1022: Added support for serialized variables as format
+      in trace files in the form of option "5" for "xdebug.collect_params"
+
+  - Code coverage
+
+    - Implemented issue #380: Added xdebug_code_coverage_started()
+    - Implemented issue #1034: Add collected path and branch information to
+      xdebug_get_code_coverage() output
+
+  - Profiling
+
+    - Implement issue #1054: Support for filename and function name compression
+      in cachegrind files
+
++ Changes:
+
+    - Implemented issue #863: Support xdebug.overload_var_dump through
+      ini_set()
+    - Implemented issue #973: Use case-insensitive filename comparison on all
+      systems (Galen Wright-Watson)
+    - Implemented issue #1015: Added the xdebug.force_display_errors and
+      xdebug.force_error_reporting php.ini-only settings to always override
+      PHP's settings for display_errors and error_reporting
+    - Implemented issue #1057: Removed trailing whitespace from example
+      xdebug.ini
+    - Implemented issue #1096: Improve performance improvement for handling
+      breakpoints by ignoring locales (Daniel Sloof)
+    - Implemented issue #1100: Raise default max_nesting_level to 256
+
+- Removed features:
+
+    - Support for PHP versions lower than PHP 5.4 have been dropped.
+   </notes>
+  </release>
 
   <release>
    <date>2015-01-21</date>
