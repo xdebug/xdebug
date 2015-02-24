@@ -1132,7 +1132,7 @@ static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value T
 				zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, var_name, strlen(var_name) + 1, (void **) &trigger_val) == SUCCESS
 			)
 		) && (
-			(var_value == 0) ||
+			(var_value == NULL) || (var_value[0] == '\0') ||
 			(strcmp(var_value, Z_STRVAL_PP(trigger_val)) == 0)
 		)
 	) {
