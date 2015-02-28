@@ -766,8 +766,8 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 	xdebug_prefill_code_coverage(op_array TSRMLS_CC);
 	xdebug_path_info_add_path_for_level(XG(paths_stack), path, XG(level) TSRMLS_CC);
 
-	if (XG(branches).size == 0 || XG(level) > XG(branches).size) {
-		XG(branches).size += 32;
+	if (XG(branches).size == 0 || XG(level) >= XG(branches).size) {
+		XG(branches).size = XG(level) + 32;
 		XG(branches).last_branch_nr = realloc(XG(branches).last_branch_nr, sizeof(int) * XG(branches.size));
 	}
 
