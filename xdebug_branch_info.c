@@ -141,7 +141,7 @@ static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info,
 
 	orig_size = path_info->paths_size;
 
-	if (level > path_info->paths_size) {
+	if (level >= path_info->paths_size) {
 		path_info->paths_size = level + 32;
 		path_info->paths = realloc(path_info->paths, sizeof(xdebug_path*) * path_info->paths_size);
 
