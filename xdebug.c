@@ -1201,10 +1201,22 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 
 	/* Reset var_dump and set_time_limit to the original function */
-	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
-	orig->internal_function.handler = XG(orig_var_dump_func);
-	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
-	orig->internal_function.handler = XG(orig_set_time_limit_func);
+	{
+		zend_string *var_dump = zend_string_init(ZEND_STRL("var_dump"), 0);
+
+		orig = zend_hash_find_ptr(EG(function_table), var_dump);
+		orig->internal_function.handler = XG(orig_var_dump_func);
+
+		zend_string_release(var_dump);
+	}
+	{
+		zend_string *set_time_limit = zend_string_init(ZEND_STRL("set_time_limit"), 0);
+
+		orig = zend_hash_find_ptr(EG(function_table), set_time_limit);
+		orig->internal_function.handler = XG(orig_set_time_limit_func);;
+
+		zend_string_release(set_time_limit);
+	}
 
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
