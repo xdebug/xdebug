@@ -1324,16 +1324,15 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 	/* opcode scanning time */
 	while (i < op_array->last) {
-		char *cv = NULL;
-		int cv_len;
+		zend_string *cv = NULL;
 
 		if (op_array->opcodes[i].op1_type == IS_CV) {
-			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.var, &cv_len);
-			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
+			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.var);
+			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv->val));
 		}
 		if (op_array->opcodes[i].op2_type == IS_CV) {
-			cv = (char *) zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.var, &cv_len);
-			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
+			cv = zend_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.var);
+			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv->val));
 		}
 		i++;
 	}
