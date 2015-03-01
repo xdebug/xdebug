@@ -1274,7 +1274,8 @@ PHP_MINFO_FUNCTION(xdebug)
 
 static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC)
 {
-	zval **trigger_val;
+	zval *trigger_val;
+	zend_string *var_name_string = zend_string_init(ZEND_STRL(var_name), 0);
 
 	if (!setting) {
 		return 0;
@@ -1283,18 +1284,15 @@ static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value T
 	if (
 		(
 			(
-				PG(http_globals)[TRACK_VARS_GET] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, var_name, strlen(var_name) + 1, (void **) &trigger_val) == SUCCESS
+				(trigger_val = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name_string)) != NULL
 			) || (
-				PG(http_globals)[TRACK_VARS_POST] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, var_name, strlen(var_name) + 1, (void **) &trigger_val) == SUCCESS
+				(trigger_val = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name_string)) != NULL
 			) || (
-				PG(http_globals)[TRACK_VARS_COOKIE] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, var_name, strlen(var_name) + 1, (void **) &trigger_val) == SUCCESS
+				(trigger_val = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name_string)) != NULL
 			)
 		) && (
 			(var_value == NULL) || (var_value[0] == '\0') ||
-			(strcmp(var_value, Z_STRVAL_PP(trigger_val)) == 0)
+			(strcmp(var_value, Z_STRVAL_P(trigger_val)) == 0)
 		)
 	) {
 		return 1;
@@ -1544,34 +1542,35 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	if (XG(level) == 0 && XG(in_execution)) {
+		zend_string *xdebug_session_start = zend_string_init(ZEND_STRL("XDEBUG_SESSION_START"), 0);
+		zend_string *xdebug_session = zend_string_init(ZEND_STRL("XDEBUG_SESSION"), 0);
+		zend_string *xdebug_session_stop = zend_string_init(ZEND_STRL("XDEBUG_SESSION_STOP"), 0);
+
 		/* Set session cookie if requested */
 		if (
 			((
-				PG(http_globals)[TRACK_VARS_GET] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
+				(dummy = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), xdebug_session_start)) != NULL
 			) || (
-				PG(http_globals)[TRACK_VARS_POST] &&
-				zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START"), (void **) &dummy) == SUCCESS
+				(dummy = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), xdebug_session_start)) != NULL
 			))
 			&& !SG(headers_sent)
 		) {
 			convert_to_string_ex(dummy);
-			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
+			magic_cookie = xdstrdup(Z_STRVAL_P(dummy));
 			if (XG(ide_key)) {
 				xdfree(XG(ide_key));
 			}
-			XG(ide_key) = xdstrdup(Z_STRVAL_PP(dummy));
-			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_PP(dummy), Z_STRLEN_PP(dummy), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
+			XG(ide_key) = xdstrdup(Z_STRVAL_P(dummy));
+			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
 		} else if (
-			PG(http_globals)[TRACK_VARS_COOKIE] &&
-			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (void **) &dummy) == SUCCESS
+			(dummy = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), xdebug_session)) != NULL
 		) {
 			convert_to_string_ex(dummy);
-			magic_cookie = xdstrdup(Z_STRVAL_PP(dummy));
+			magic_cookie = xdstrdup(Z_STRVAL_P(dummy));
 			if (XG(ide_key)) {
 				xdfree(XG(ide_key));
 			}
-			XG(ide_key) = xdstrdup(Z_STRVAL_PP(dummy));
+			XG(ide_key) = xdstrdup(Z_STRVAL_P(dummy));
 		} else if (getenv("XDEBUG_CONFIG")) {
 			magic_cookie = xdstrdup(getenv("XDEBUG_CONFIG"));
 			if (XG(ide_key) && *XG(ide_key) && !SG(headers_sent)) {
@@ -1582,15 +1581,11 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 		/* Remove session cookie if requested */
 		if (
-			(
-				(
-					PG(http_globals)[TRACK_VARS_GET] &&
-					zend_hash_find(PG(http_globals)[TRACK_VARS_GET]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
-				) || (
-					PG(http_globals)[TRACK_VARS_POST] &&
-					zend_hash_find(PG(http_globals)[TRACK_VARS_POST]->value.ht, "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP"), (void **) &dummy) == SUCCESS
-				)
-			)
+			((
+				zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), xdebug_session_stop) != NULL
+			) || (
+				zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), xdebug_session_stop) != NULL
+			))
 			&& !SG(headers_sent)
 		) {
 			if (magic_cookie) {
@@ -1623,6 +1618,10 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 				XG(profiler_enabled) = 1;
 			}
 		}
+
+		zend_string_release(xdebug_session_start);
+		zend_string_release(xdebug_session);
+		zend_string_release(xdebug_session_stop);
 	}
 
 	XG(level)++;
@@ -1753,18 +1752,20 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 static int check_soap_call(function_stack_entry *fse)
 {
-	zend_module_entry tmp_mod_entry;
+	int ret_val = 0;
+	zend_string *soap = zend_string_init(ZEND_STRL("soap"), 0);
 
 	if (fse->function.class && 
 		(
 			(strstr(fse->function.class, "SoapClient") != NULL) ||
 			(strstr(fse->function.class, "SoapServer") != NULL)
 		) &&
-		(zend_hash_find(&module_registry, "soap", 5, (void**) &tmp_mod_entry) == SUCCESS)
+		(zend_hash_find_ptr(&module_registry, soap) != NULL)
 	) {
-		return 1;
+		ret_val = 1;
 	}
-	return 0;
+	zend_string_release(soap);
+	return ret_val;
 }
 
 #if PHP_VERSION_ID < 50500
