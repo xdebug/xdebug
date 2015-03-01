@@ -77,8 +77,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 void (*xdebug_old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
 void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 
-void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
-void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
+void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value);
 #endif
 
 /* error callback replacement functions */
@@ -1770,7 +1770,7 @@ static int check_soap_call(function_stack_entry *fse)
 #if PHP_VERSION_ID < 50500
 void xdebug_execute_internal(zend_execute_data *current_execute_data, int return_value_used TSRMLS_DC)
 #else
-void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC)
+void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
 #endif
 {
 	zend_execute_data    *edata = EG(current_execute_data);
@@ -1814,15 +1814,15 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 	}
 #if PHP_VERSION_ID < 50500
 	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, return_value_used TSRMLS_CC);
+		xdebug_old_execute_internal(current_execute_data, return_value TSRMLS_CC);
 	} else {
-		execute_internal(current_execute_data, return_value_used TSRMLS_CC);
+		execute_internal(current_execute_data, return_value TSRMLS_CC);
 	}
 #else
 	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, fci, return_value_used TSRMLS_CC);
+		xdebug_old_execute_internal(current_execute_data, return_value TSRMLS_CC);
 	} else {
-		execute_internal(current_execute_data, fci, return_value_used TSRMLS_CC);
+		execute_internal(current_execute_data, return_value TSRMLS_CC);
 	}
 #endif
 
