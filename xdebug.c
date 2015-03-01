@@ -1347,18 +1347,19 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	char *code_str = NULL;
 	char *exception_trace;
 	xdebug_str tmp_str = { 0, 0, NULL };
+	zval rv;
 
 	if (!exception) {
 		return;
 	}
 
 	default_ce = zend_exception_get_default(TSRMLS_C);
-	exception_ce = zend_get_class_entry(exception TSRMLS_CC);
+	exception_ce = Z_OBJ_P(exception)->ce;
 
-	code =    zend_read_property(default_ce, exception, "code",    sizeof("code")-1,    0 TSRMLS_CC);
-	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
-	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
-	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
+	code =    zend_read_property(default_ce, exception, "code",    sizeof("code")-1,    0, &rv);
+	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0, &rv);
+	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0, &rv);
+	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0, &rv);
 
 	if (Z_TYPE_P(code) == IS_LONG) {
 		if (Z_LVAL_P(code) != 0) {
@@ -1368,13 +1369,14 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		code_str = xdstrdup("");
 	}
 
-	convert_to_string_ex(&message);
-	convert_to_string_ex(&file);
-	convert_to_long_ex(&line);
+	convert_to_long_ex(code);
+	convert_to_string_ex(message);
+	convert_to_string_ex(file);
+	convert_to_long_ex(line);
 
-	previous_exception = zend_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+	previous_exception = zend_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1, &rv);
 	if (previous_exception && Z_TYPE_P(previous_exception) != IS_NULL) {
-		xdebug_message_trace = zend_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1 TSRMLS_CC);
+		xdebug_message_trace = zend_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1, &rv);
 		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
 			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
 		}
