@@ -1318,7 +1318,7 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 	/* gather used variables from compiled vars information */
 	while (i < (unsigned int) op_array->last_var) {
-		xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(op_array->vars[i].name));
+		xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(op_array->vars[i]->val));
 		i++;
 	}
 
