@@ -87,7 +87,7 @@ void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint err
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
-static int xdebug_ub_write(const char *string, unsigned int length TSRMLS_DC);
+static size_t xdebug_ub_write(const char *string, size_t length);
 
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
@@ -96,7 +96,7 @@ int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
 
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
-static int (*xdebug_orig_ub_write)(const char *string, unsigned int len TSRMLS_DC);
+static size_t (*xdebug_orig_ub_write)(const char *string, size_t len);
 
 static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC);
 
@@ -953,7 +953,7 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 	}
 }
 
-int xdebug_ub_write(const char *string, unsigned int length TSRMLS_DC)
+size_t xdebug_ub_write(const char *string, size_t length)
 {
 	if (XG(remote_enabled)) {
 		if (-1 == XG(context).handler->remote_stream_output(string, length TSRMLS_CC)) {
