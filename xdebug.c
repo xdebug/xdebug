@@ -2177,7 +2177,7 @@ PHP_FUNCTION(xdebug_get_headers)
 PHP_FUNCTION(xdebug_get_profiler_filename)
 {
 	if (XG(profile_filename)) {
-		RETURN_STRING(XG(profile_filename), 1);
+		RETURN_STRING(XG(profile_filename));
 	} else {
 		RETURN_FALSE;
 	}
