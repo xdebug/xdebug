@@ -1499,7 +1499,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 #else
 void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
-	zend_op_array        *op_array = execute_data->op_array;
+	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
 #endif
 	zval                **dummy;
@@ -1789,7 +1789,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, edata->op_array, XDEBUG_INTERNAL TSRMLS_CC);
+	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_INTERNAL TSRMLS_CC);
 	fse->function.internal = 1;
 
 	function_nr = XG(function_count);

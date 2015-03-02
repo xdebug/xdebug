@@ -84,11 +84,11 @@ void xdebug_coverage_function_dtor(void *data)
 
 void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode TSRMLS_DC)
 {
-	zend_op_array *op_array = execute_data->op_array;
-	char *file = (char *) op_array->filename;
+	zend_op_array *op_array = &execute_data->func->op_array;
+	char *file = op_array->filename->val;
 	xdebug_func func_info;
 	char *function_name;
-	long opnr = execute_data->opline - execute_data->op_array->opcodes;
+	long opnr = execute_data->opline - execute_data->func->op_array.opcodes;
 
 	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
 	function_name = xdebug_func_format(&func_info TSRMLS_CC);
@@ -128,7 +128,7 @@ int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 		int      lineno;
 		char    *file;
 
-		zend_op_array *op_array = execute_data->op_array;
+		zend_op_array *op_array = &execute_data->func->op_array;
 
 		cur_opcode = execute_data->opline;
 		lineno = cur_opcode->lineno;
@@ -146,7 +146,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	zend_op       *cur_opcode, *next_opcode, *prev_opcode = NULL, *opcode_ptr;
 	zval          *dimval;
 	int            is_var, cv_len;
-	zend_op_array *op_array = execute_data->op_array;
+	zend_op_array *op_array = &execute_data->func->op_array;
 	xdebug_str     name = {0, 0, NULL};
 	int            gohungfound = 0, is_static = 0;
 	char          *zval_value = NULL;
