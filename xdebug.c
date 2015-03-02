@@ -1649,7 +1649,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 #else
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
 #endif
-	fse->This = EG(This);
+	fse->This = &EG(current_execute_data)->This;
 
 	if (XG(stack) && (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars))) {
 		/* Because include/require is treated as a stack level, we have to add used
