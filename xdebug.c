@@ -1689,8 +1689,8 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 	}
 
-	if (!EG(return_value_ptr_ptr)) {
-		EG(return_value_ptr_ptr) = &return_val;
+	if (!EG(current_execute_data)->return_value) {
+		EG(current_execute_data)->return_value = return_val;
 		clear = 1;
 	}
 
@@ -1715,25 +1715,25 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	/* Store return value in the trace file */
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context)) {
-		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
+		if (EG(current_execute_data)->return_value) {
 #if PHP_VERSION_ID >= 50500
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 				if (XG(trace_handler)->generator_return_value) {
-					XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(return_value_ptr_ptr) TSRMLS_CC);
+					XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(current_execute_data)->return_value TSRMLS_CC);
 				}
 			} else {
 				if (XG(trace_handler)->return_value) {
-					XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+					XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, EG(current_execute_data)->return_value TSRMLS_CC);
 				}
 			}
 #else
-			XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
+			XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(current_execute_data)->return_value TSRMLS_CC);
 #endif
 		}
 	}
-	if (clear && *EG(return_value_ptr_ptr)) {
-		zval_ptr_dtor(EG(return_value_ptr_ptr));
-		EG(return_value_ptr_ptr) = NULL;
+	if (clear && EG(current_execute_data)->return_value) {
+		zval_ptr_dtor(EG(current_execute_data)->return_value);
+		EG(current_execute_data)->return_value = NULL;
 	}
 
 	/* Check for return breakpoints */
