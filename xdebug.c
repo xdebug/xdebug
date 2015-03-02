@@ -1385,7 +1385,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	if (!PG(html_errors)) {
 		xdebug_str_addl(&tmp_str, "\n", 1, 0);
 	}
-	xdebug_append_error_description(&tmp_str, PG(html_errors), exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+	xdebug_append_error_description(&tmp_str, PG(html_errors), exception_ce->name->val, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
 	xdebug_append_printable_stack(&tmp_str, PG(html_errors) TSRMLS_CC);
 	exception_trace = tmp_str.d;
 	zend_update_property_string(default_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace TSRMLS_CC);
@@ -1397,7 +1397,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 
 	if (XG(show_ex_trace)) {
 		if (PG(log_errors)) {
-			xdebug_log_stack(exception_ce->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+			xdebug_log_stack(exception_ce->name->val, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
 		}
 		if (PG(display_errors)) {
 			xdebug_str displ_tmp_str = { 0, 0, NULL };
@@ -1425,7 +1425,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 
 			/* Check if we have a breakpoint on this exception or its parent classes */
 			do {
-				if (xdebug_hash_find(XG(context).exception_breakpoints, (char *) ce_ptr->name, strlen(ce_ptr->name), (void *) &extra_brk_info)) {
+				if (xdebug_hash_find(XG(context).exception_breakpoints, (char *) ce_ptr->name->val, ce_ptr->name->len, (void *) &extra_brk_info)) {
 					exception_breakpoint_found = 1;
 				}
 				ce_ptr = ce_ptr->parent;
@@ -1518,7 +1518,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	/* If we're evaluating for the debugger's eval capability, just bail out */
-	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", op_array->filename) == 0) {
+	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", op_array->filename->val) == 0) {
 #if PHP_VERSION_ID < 50500
 		xdebug_old_execute(op_array TSRMLS_CC);
 #else
@@ -1539,7 +1539,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	if (!XG(context).program_name) {
-		XG(context).program_name = xdstrdup(op_array->filename);
+		XG(context).program_name = xdstrdup(op_array->filename->val);
 	}
 
 	if (XG(level) == 0 && XG(in_execution)) {

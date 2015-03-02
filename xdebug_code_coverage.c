@@ -133,7 +133,7 @@ int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 		cur_opcode = execute_data->opline;
 		lineno = cur_opcode->lineno;
 
-		file = (char *)op_array->filename;
+		file = op_array->filename->val;
 
 		xdebug_print_opcode_info('C', execute_data, cur_opcode TSRMLS_CC);
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
@@ -289,7 +289,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 
 	cur_opcode = execute_data->opline;
 	next_opcode = cur_opcode + 1;
-	file = (char *) op_array->filename;
+	file = op_array->filename->val;
 	lineno = cur_opcode->lineno;
 
 	if (XG(do_code_coverage)) {
