@@ -2151,7 +2151,7 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 	array_init(return_value);
 	for (le = XDEBUG_LLIST_HEAD(XG(collected_errors)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
 		string = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, string, 1);
+		add_next_index_string(return_value, string);
 	}
 
 	if (clear) {
@@ -2169,7 +2169,7 @@ PHP_FUNCTION(xdebug_get_headers)
 	array_init(return_value);
 	for (le = XDEBUG_LLIST_HEAD(XG(headers)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 		string = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, string, 1);
+		add_next_index_string(return_value, string);
 	}
 }
 
