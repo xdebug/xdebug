@@ -24,7 +24,7 @@
 #include "ext/standard/php_var.h"
 #define xdebug_php_var_dump php_var_dump
 
-zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRMLS_DC);
+zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC);
 
 #include "ext/standard/base64.h"
 #define xdebug_base64_encode php_base64_encode

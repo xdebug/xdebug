@@ -106,7 +106,7 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (XG(do_code_coverage)) {
-		zend_op *cur_opcode;
+		const zend_op *cur_opcode;
 		cur_opcode = execute_data->opline;
 
 		xdebug_print_opcode_info('G', execute_data, cur_opcode TSRMLS_CC);
@@ -124,7 +124,7 @@ int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
 int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (XG(do_code_coverage)) {
-		zend_op *cur_opcode;
+		const zend_op *cur_opcode;
 		int      lineno;
 		char    *file;
 
@@ -143,7 +143,7 @@ int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 {
-	zend_op       *cur_opcode, *next_opcode, *prev_opcode = NULL, *opcode_ptr;
+	const zend_op *cur_opcode, *next_opcode, *prev_opcode = NULL, *opcode_ptr;
 	zval          *dimval;
 	int            is_var, cv_len;
 	zend_op_array *op_array = &execute_data->func->op_array;
