@@ -1643,7 +1643,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		XG(trace_handler)->function_entry(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
 
-	fse->symbol_table = EG(active_symbol_table);
+	fse->symbol_table = EG(current_execute_data)->symbol_table;
 #if PHP_VERSION_ID < 50500
 	fse->execute_data = EG(current_execute_data);
 #else
@@ -2020,7 +2020,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (!EG(active_symbol_table)) {
+	if (!EG(current_execute_data)->symbol_table) {
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
 
@@ -2072,7 +2072,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (!EG(active_symbol_table)) {
+	if (!EG(current_execute_data)->symbol_table) {
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
 
