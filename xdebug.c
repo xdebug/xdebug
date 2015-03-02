@@ -1502,7 +1502,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
 #endif
-	zval                **dummy;
+	zval                 *dummy;
 	function_stack_entry *fse, *xfse;
 	char                 *magic_cookie = NULL;
 	int                   do_return = (XG(do_trace) && XG(trace_context));
@@ -1777,7 +1777,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
-	zend_op              *cur_opcode;
+	const zend_op        *cur_opcode;
 	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
 
@@ -1959,7 +1959,7 @@ PHP_FUNCTION(xdebug_set_time_limit)
    Outputs a fancy string representation of a variable */
 PHP_FUNCTION(xdebug_var_dump)
 {
-	zval ***args;
+	zval   *args;
 	int     argc;
 	int     i, len;
 	char   *val;
@@ -1971,7 +1971,7 @@ PHP_FUNCTION(xdebug_var_dump)
 
 	argc = ZEND_NUM_ARGS();
 	
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = safe_emalloc(argc, sizeof(zval), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
@@ -1979,20 +1979,20 @@ PHP_FUNCTION(xdebug_var_dump)
 	
 	for (i = 0; i < argc; i++) {
 		if (XG(default_enable) == 0) {
-			xdebug_php_var_dump(args[i], 1 TSRMLS_CC);
+			xdebug_php_var_dump(&args[i], 1 TSRMLS_CC);
 		}
 		else if (PG(html_errors)) {
-			val = xdebug_get_zval_value_fancy(NULL, (zval*) *args[i], &len, 0, NULL TSRMLS_CC);
+			val = xdebug_get_zval_value_fancy(NULL, (zval*) &args[i], &len, 0, NULL TSRMLS_CC);
 			PHPWRITE(val, len);
 			xdfree(val);
 		}
 		else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-			val = xdebug_get_zval_value_ansi((zval*) *args[i], 0, NULL);
+			val = xdebug_get_zval_value_ansi((zval*) &args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		} 
 		else {
-			val = xdebug_get_zval_value_text((zval*) *args[i], 0, NULL);
+			val = xdebug_get_zval_value_text((zval*) &args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		}
@@ -2006,7 +2006,7 @@ PHP_FUNCTION(xdebug_var_dump)
    Outputs a fancy string representation of a variable */
 PHP_FUNCTION(xdebug_debug_zval)
 {
-	zval ***args;
+	zval   *args;
 	int     argc;
 	int     i, len;
 	char   *val;
@@ -2014,7 +2014,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 	
 	argc = ZEND_NUM_ARGS();
 	
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = safe_emalloc(argc, sizeof(zval), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
@@ -2025,10 +2025,10 @@ PHP_FUNCTION(xdebug_debug_zval)
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (Z_TYPE_PP(args[i]) == IS_STRING) {
-			XG(active_symbol_table) = EG(active_symbol_table);
-			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1 TSRMLS_CC);
-			php_printf("%s: ", Z_STRVAL_PP(args[i]));
+		if (Z_TYPE(args[i]) == IS_STRING) {
+			XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), Z_STRLEN(args[i]) + 1 TSRMLS_CC);
+			php_printf("%s: ", Z_STRVAL(args[i]));
 			if (debugzval) {
 				if (PG(html_errors)) {
 					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
@@ -2058,7 +2058,7 @@ PHP_FUNCTION(xdebug_debug_zval)
    Outputs a fancy string representation of a variable */
 PHP_FUNCTION(xdebug_debug_zval_stdout)
 {
-	zval ***args;
+	zval   *args;
 	int     argc;
 	int     i;
 	char   *val;
@@ -2066,7 +2066,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	
 	argc = ZEND_NUM_ARGS();
 	
-	args = (zval ***)emalloc(argc * sizeof(zval **));
+	args = safe_emalloc(argc, sizeof(zval), 0);
 	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
@@ -2077,10 +2077,10 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (Z_TYPE_PP(args[i]) == IS_STRING) {
-			XG(active_symbol_table) = EG(active_symbol_table);
-			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1 TSRMLS_CC);
-			printf("%s: ", Z_STRVAL_PP(args[i]));
+		if (Z_TYPE(args[i]) == IS_STRING) {
+			XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), Z_STRLEN(args[i]) + 1 TSRMLS_CC);
+			printf("%s: ", Z_STRVAL(args[i]));
 			if (debugzval) {
 				val = xdebug_get_zval_value(debugzval, 1, NULL);
 				printf("%s(%zd)", val, strlen(val));
