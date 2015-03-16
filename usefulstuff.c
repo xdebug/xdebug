@@ -650,6 +650,28 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 					}
 				}	break;
 
+				case 'K': { /* XDEBUG_FILE in cookie */
+					zval **data;
+					char *char_ptr, *strval;
+					char *sess_name;
+					
+					sess_name = "XDEBUG_FILE";
+					
+					if (PG(http_globals)[TRACK_VARS_COOKIE] &&
+						zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name) + 1, (void **) &data) == SUCCESS &&
+						Z_STRLEN_PP(data) < 100 /* Prevent any unrealistically long data being set as filename */
+					) {
+						strval = estrdup(Z_STRVAL_PP(data));
+						
+						/* replace slashes, dots, question marks, plus signs,
+						 * ampersands and spaces with underscores */
+						while ((char_ptr = strpbrk(strval, "/\\.?&+ ")) != NULL) {
+							char_ptr[0] = '_';
+						}
+						xdebug_str_add(&fname, strval, 0);
+						efree(strval);
+					}
+				}	break;
 				case '%': /* literal % */
 					xdebug_str_addl(&fname, "%", 1, 0);
 					break;
