@@ -117,6 +117,9 @@ void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_i
 
 void xdebug_path_add(xdebug_path *path, unsigned int nr)
 {
+	if (!path) {
+		return;
+	}
 	if (path->elements_count == path->elements_size) {
 		path->elements_size += 32;
 		path->elements = realloc(path->elements, sizeof(unsigned int) * path->elements_size);
