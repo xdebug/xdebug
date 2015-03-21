@@ -216,7 +216,7 @@ static void xdebug_branch_find_path(unsigned int nr, xdebug_branch_info *branch_
 	xdebug_path *new_path;
 	int found = 0;
 
-	if (branch_info->path_info.paths_count > 65535) {
+	if (branch_info->path_info.paths_count > 4095) {
 		return;
 	}
 
