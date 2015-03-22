@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-02-24</date>
- <time>22:02:00</time>
+ <date>2015-03-22</date>
+ <time>12:34:56</time>
  <version>
-  <release>2.3.1</release>
-  <api>2.3.1</api>
+  <release>2.3.2</release>
+  <api>2.3.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,14 +45,12 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Tue, Feb 24, 2015 - xdebug 2.3.1
+Sun, Mar 22, 2015 - xdebug 2.3.2
 
 = Fixed bugs:
 
-  - Fixed issue #1112: Setting an invalid xdebug.trace_format causes Xdebug to
-    crash
-  - Fixed issue #1113: xdebug.*_trigger do no longer work, due to NULL not
-    being an empty string
+  - Fixed issue #1117: Path/branch coverage sometimes crashes
+  - Fixed issue #1121: Segfaults with path/branch coverage
  </notes>
 
  <contents>
@@ -158,6 +156,30 @@ Tue, Feb 24, 2015 - xdebug 2.3.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-02-24</date>
+   <time>22:02:00</time>
+   <version>
+    <release>2.3.1</release>
+    <api>2.3.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Feb 24, 2015 - xdebug 2.3.1
+
+= Fixed bugs:
+
+  - Fixed issue #1112: Setting an invalid xdebug.trace_format causes Xdebug to
+    crash
+  - Fixed issue #1113: xdebug.*_trigger do no longer work, due to NULL not
+    being an empty string
+   </notes>
+  </release>
 
   <release>
    <date>2015-02-22</date>
@@ -2050,3 +2072,6 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
   </release>
  </changelog>
 </package>
+<!--
+vim:et:ts=1:sw=1
+-->
