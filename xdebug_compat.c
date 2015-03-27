@@ -139,6 +139,16 @@ zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int fla
 	return tmp_ce;
 }
 
+int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC)
+{
+	zval *tmp_const = NULL;
+	tmp_const = zend_get_constant_str(val, len);
+
+	*const_val = *tmp_const;
+
+	return tmp_const != NULL;
+}
+
 #else
 
 #if PHP_VERSION_ID >= 50500

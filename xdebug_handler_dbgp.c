@@ -1360,7 +1360,7 @@ DBGP_FUNC(property_get)
 	if (context_nr == 2) { /* constants */
 		zval const_val;
 
-		if (!zend_get_constant(CMD_OPTION('n'), strlen(CMD_OPTION('n')), &const_val TSRMLS_CC)) {
+		if (!xdebug_get_constant(CMD_OPTION('n'), strlen(CMD_OPTION('n')), &const_val TSRMLS_CC)) {
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
