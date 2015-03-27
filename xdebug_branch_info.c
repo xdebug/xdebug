@@ -117,6 +117,9 @@ void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_i
 
 void xdebug_path_add(xdebug_path *path, unsigned int nr)
 {
+	if (!path) {
+		return;
+	}
 	if (path->elements_count == path->elements_size) {
 		path->elements_size += 32;
 		path->elements = realloc(path->elements, sizeof(unsigned int) * path->elements_size);
@@ -141,7 +144,7 @@ static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info,
 
 	orig_size = path_info->paths_size;
 
-	if (level > path_info->paths_size) {
+	if (level >= path_info->paths_size) {
 		path_info->paths_size = level + 32;
 		path_info->paths = realloc(path_info->paths, sizeof(xdebug_path*) * path_info->paths_size);
 
@@ -213,7 +216,7 @@ static void xdebug_branch_find_path(unsigned int nr, xdebug_branch_info *branch_
 	xdebug_path *new_path;
 	int found = 0;
 
-	if (branch_info->path_info.paths_count > 65535) {
+	if (branch_info->path_info.paths_count > 4095) {
 		return;
 	}
 
