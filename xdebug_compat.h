@@ -26,8 +26,12 @@
 
 zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC);
 
-#include "ext/standard/base64.h"
-#define xdebug_base64_encode php_base64_encode
-#define xdebug_base64_decode php_base64_decode
+#if PHP_VERSION_ID >= 70000
+char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len);
+#else
+# include "ext/standard/base64.h"
+# define xdebug_base64_encode php_base64_encode
+# define xdebug_base64_decode php_base64_decode
+#endif
 
 #endif

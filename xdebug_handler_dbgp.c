@@ -29,6 +29,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "main/php_version.h"
+#include "ext/standard/base64.h"
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
@@ -1444,7 +1445,7 @@ DBGP_FUNC(property_set)
 		options->runtime[0].page = 0;
 	}
 
-	new_value = (char*) xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
+	new_value = xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
 
 	if (CMD_OPTION('t')) {
 		symbol = xdebug_get_php_symbol(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);

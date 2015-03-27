@@ -48,12 +48,24 @@
 #if PHP_VERSION_ID >= 70000
 
 #include "zend_compile.h"
+#include "ext/standard/base64.h"
 
 zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC)
 {
 	zend_free_op should_free;
 
 	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
+}
+
+char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len)
+{
+	zend_string *new_str;
+
+	new_str = php_base64_decode(data, data_len);
+
+	*new_len = new_str->len;
+
+	return new_str->val;
 }
 
 #else
