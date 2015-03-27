@@ -45,6 +45,18 @@
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
 
+#if PHP_VERSION_ID >= 70000
+
+#include "zend_compile.h"
+
+zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC)
+{
+	zend_free_op should_free;
+
+	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
+}
+
+#else
 
 #if PHP_VERSION_ID >= 50500
 # define T(offset) (*EX_TMP_VAR(zdata, offset))
@@ -52,7 +64,7 @@
 # define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
 #endif
 
-zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRMLS_DC)
+zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC)
 {
 	if (!zdata->opline) {
 		return NULL;
@@ -96,3 +108,5 @@ zval *xdebug_zval_ptr(int op_type, znode_op *node, zend_execute_data *zdata TSRM
 	}
 	return NULL;
 }
+
+#endif
