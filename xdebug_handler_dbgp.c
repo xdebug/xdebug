@@ -1456,9 +1456,11 @@ DBGP_FUNC(property_set)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		} else {
 			zval_dtor(symbol);
-			Z_TYPE_P(symbol) = IS_STRING;
-			Z_STRVAL_P(symbol) = new_value;
-			Z_STRLEN_P(symbol) = new_length;
+#if PHP_VERSION_ID >= 70000
+			ZVAL_STRINGL(symbol, new_value, new_length);
+#else
+			ZVAL_STRINGL(symbol, new_value, new_length, 0);
+#endif
 			xdebug_xml_add_attribute(*retval, "success", "1");
 
 			XDEBUG_STR_SWITCH(CMD_OPTION('t')) {
