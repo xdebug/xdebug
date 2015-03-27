@@ -1657,6 +1657,14 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 #undef HASH_KEY_VAL
 #undef HASH_KEY_LEN
 
+#if PHP_VERSION_ID >= 70000
+# define CONSTANT_NAME_VAL(k) (k)->val
+# define CONSTANT_NAME_LEN(k) (k)->len
+#else
+# define CONSTANT_NAME_VAL(k) (k)
+# define CONSTANT_NAME_LEN(k) k ## _len
+#endif
+
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
@@ -1698,7 +1706,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 				goto next_constant;
 			}
 
-			add_constant_node(node, val->name, val->name_len, &(val->value), options TSRMLS_CC);
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), CONSTANT_NAME_LEN(val->name), &(val->value), options TSRMLS_CC);
 next_constant:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
@@ -1759,6 +1767,9 @@ next_constant:
 	
 	return 1;
 }
+
+#undef CONSTANT_NAME_VAL
+#undef CONSTANT_NAME_LEN
 
 
 DBGP_FUNC(stack_depth)
