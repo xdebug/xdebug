@@ -663,7 +663,7 @@ zval* xdebug_get_php_symbol(char* name, int name_length TSRMLS_DC)
 						keyword_end = *p;
 
 						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
-							zend_class_entry *ce = zend_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+							zend_class_entry *ce = xdebug_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
 							current_classname = estrdup(ce->name);
 							cc_length = strlen(ce->name);
@@ -1704,7 +1704,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
 			zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
-			ce = zend_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			ce = xdebug_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			/* Adding static properties */
 			if (&ce->properties_info) {

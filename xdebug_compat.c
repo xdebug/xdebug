@@ -128,6 +128,17 @@ void xdebug_stripcslashes(char *str, int *len)
 	*len = nlen;
 }
 
+zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC)
+{
+	zend_class_entry *tmp_ce;
+	zend_string *classname_str = zend_string_init(classname, classname_len, 0);
+
+	tmp_ce = zend_fetch_class(classname_str, flags TSRMLS_CC);
+	zend_string_release(classname_str);
+
+	return tmp_ce;
+}
+
 #else
 
 #if PHP_VERSION_ID >= 50500
