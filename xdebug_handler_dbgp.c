@@ -1607,6 +1607,14 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	}
 }
 
+#if PHP_VERSION_ID >= 70000
+# define HASH_KEY_VAL(k) (k)->key->val
+# define HASH_KEY_LEN(k) (k)->key->len
+#else
+# define HASH_KEY_VAL(k) (k)->arKey
+# define HASH_KEY_LEN(k) (k)->nKeyLength
+#endif
+
 static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_hash *tmp_hash;
@@ -1615,36 +1623,39 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 
 	/* We really ought to deal properly with non-associate keys for symbol
 	 * tables, but for now, we'll just ignore them. */
-	if (!hash_key->arKey || hash_key->nKeyLength == 0) { return 0; }
+	if (!HASH_KEY_VAL(hash_key) || HASH_KEY_LEN(hash_key)) { return 0; }
 
-	if (strcmp("argc", hash_key->arKey) == 0) { return 0; }
-	if (strcmp("argv", hash_key->arKey) == 0) { return 0; }
-	if (hash_key->arKey[0] == '_') {
-		if (strcmp("_COOKIE", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_ENV", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_FILES", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_GET", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_POST", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_REQUEST", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_SERVER", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_SESSION", hash_key->arKey) == 0) { return 0; }
+	if (strcmp("argc", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (strcmp("argv", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (HASH_KEY_VAL(hash_key)[0] == '_') {
+		if (strcmp("_COOKIE", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_ENV", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_GET", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_POST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_REQUEST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_SERVER", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_SESSION", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 	}
-	if (hash_key->arKey[0] == 'H') {
-		if (strcmp("HTTP_COOKIE_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_ENV_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_GET_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_POST_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_POST_FILES", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_RAW_POST_DATA", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_SERVER_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_SESSION_VARS", hash_key->arKey) == 0) { return 0; }
+	if (HASH_KEY_VAL(hash_key)[0] == 'H') {
+		if (strcmp("HTTP_COOKIE_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_ENV_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_GET_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_POST_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_POST_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_RAW_POST_DATA", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_SERVER_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_SESSION_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 	}
-	if (strcmp("GLOBALS", hash_key->arKey) == 0) { return 0; }
+	if (strcmp("GLOBALS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 
-	xdebug_hash_add(tmp_hash, (char*) hash_key->arKey, strlen(hash_key->arKey), hash_key->arKey);
+	xdebug_hash_add(tmp_hash, HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), HASH_KEY_VAL(hash_key));
 
 	return 0;
 }
+
+#undef HASH_KEY_VAL
+#undef HASH_KEY_LEN
 
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
