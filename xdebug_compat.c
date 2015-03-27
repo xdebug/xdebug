@@ -68,6 +68,66 @@ char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len)
 	return new_str->val;
 }
 
+void xdebug_stripcslashes(char *str, int *len)
+{
+	char *source, *target, *end;
+	int  nlen = *len, i;
+	char numtmp[4];
+
+	for (source=str, end=str+nlen, target=str; source < end; source++) {
+		if (*source == '\\' && source+1 < end) {
+			source++;
+			switch (*source) {
+				case 'n':  *target++='\n'; nlen--; break;
+				case 'r':  *target++='\r'; nlen--; break;
+				case 'a':  *target++='\a'; nlen--; break;
+				case 't':  *target++='\t'; nlen--; break;
+				case 'v':  *target++='\v'; nlen--; break;
+				case 'b':  *target++='\b'; nlen--; break;
+				case 'f':  *target++='\f'; nlen--; break;
+				case '\\': *target++='\\'; nlen--; break;
+				case 'x':
+					if (source+1 < end && isxdigit((int)(*(source+1)))) {
+						numtmp[0] = *++source;
+						if (source+1 < end && isxdigit((int)(*(source+1)))) {
+							numtmp[1] = *++source;
+							numtmp[2] = '\0';
+							nlen-=3;
+						} else {
+							numtmp[1] = '\0';
+							nlen-=2;
+						}
+						*target++=(char)strtol(numtmp, NULL, 16);
+						break;
+					}
+					/* break is left intentionally */
+				default:
+					i=0;
+					while (source < end && *source >= '0' && *source <= '7' && i<3) {
+						numtmp[i++] = *source++;
+					}
+					if (i) {
+						numtmp[i]='\0';
+						*target++=(char)strtol(numtmp, NULL, 8);
+						nlen-=i;
+						source--;
+					} else {
+						*target++=*source;
+						nlen--;
+					}
+			}
+		} else {
+			*target++=*source;
+		}
+	}
+
+	if (nlen != 0) {
+		*target='\0';
+	}
+
+	*len = nlen;
+}
+
 #else
 
 #if PHP_VERSION_ID >= 50500

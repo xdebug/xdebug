@@ -1999,7 +1999,7 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 						int len = ptr - value_begin;
 						args->value[index] = xdcalloc(1, len + 1);
 						memcpy(args->value[index], value_begin, len);
-						php_stripcslashes(args->value[index], &len);
+						xdebug_stripcslashes(args->value[index], &len);
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;
