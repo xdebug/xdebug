@@ -1186,6 +1186,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	zval *xdebug_message_trace, *previous_exception;
 	zend_class_entry *default_ce, *exception_ce;
 	xdebug_brk_info *extra_brk_info;
+	char *code_str = NULL;
 	char *exception_trace;
 	xdebug_str tmp_str = { 0, 0, NULL };
 
@@ -1201,7 +1202,14 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
 	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
-	convert_to_long_ex(&code);
+	if (Z_TYPE_P(code) == IS_LONG) {
+		if (Z_LVAL_P(code) != 0) {
+			code_str = xdebug_sprintf("%lu", Z_LVAL_P(code));
+		}
+	} else if (Z_TYPE_P(code) != IS_STRING) {
+		code_str = xdstrdup("");
+	}
+
 	convert_to_string_ex(&message);
 	convert_to_string_ex(&file);
 	convert_to_long_ex(&line);
@@ -1265,10 +1273,15 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		}
 
 		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, Z_LVAL_P(code), Z_STRVAL_P(message))) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, code_str ? code_str : Z_STRVAL_P(code), Z_STRVAL_P(message))) {
 				XG(remote_enabled) = 0;
 			}
 		}
+	}
+
+	/* Free code_str if necessary */
+	if (code_str) {
+		xdfree(code_str);
 	}
 }
 
