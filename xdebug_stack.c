@@ -654,9 +654,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			xdebug_hash_find(XG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)
 		) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type, buffer)) {
+				char *type_str = xdebug_sprintf("%ld", type);
+
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
 					XG(remote_enabled) = 0;
 				}
+
+				xdfree(type_str);
 			}
 		}
 	}
