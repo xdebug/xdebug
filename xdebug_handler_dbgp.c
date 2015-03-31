@@ -2342,7 +2342,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	return 1;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, int code, char *message)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message)
 {
 	xdebug_xml_node *response, *error_container;
 	TSRMLS_FETCH();
@@ -2379,7 +2379,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 		xdebug_xml_add_attribute_ex(error_container, "exception", xdstrdup(exception), 0, 1);
 	}
 	if (code) {
-		xdebug_xml_add_attribute_ex(error_container, "code", xdebug_sprintf("%lu", code), 0, 1);
+		xdebug_xml_add_attribute_ex(error_container, "code", xdstrdup(code), 0, 1);
 	}
 	if (message) {
 		xdebug_xml_add_text(error_container, xdstrdup(message));
