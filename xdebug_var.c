@@ -242,6 +242,19 @@ static char* prepare_search_key(char *name, int *name_length, char *prefix, int 
 	return element;
 }
 
+static zval **get_arrayobject_storage(zval *parent TSRMLS_DC)
+{
+	zval **tmp = NULL;
+	int is_temp;
+	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
+
+	if (zend_hash_find(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage"), (void **) &tmp) == SUCCESS) {
+		return tmp;
+	}
+
+	return NULL;
+}
+
 static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
@@ -387,6 +400,19 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_len
 				if (secondStar) {
 					free(element);
 					element_length = name_length - (secondStar + 1 - name);
+
+					/* All right, time for a mega hack. It's ArrayObject access time! */
+					if (strncmp(name + 1, "ArrayObject", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
+						element = NULL;
+						if ((retval_pp = get_arrayobject_storage(parent TSRMLS_CC)) != NULL) {
+							if (retval_pp) {
+								retval_p = *retval_pp;
+								goto cleanup;
+							}
+						}
+					}
+
+					/* The normal one */
 					element = prepare_search_key(secondStar + 1, &element_length, name + 1, secondStar - name - 1);
 					if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 						retval_p = *retval_pp;
