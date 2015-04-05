@@ -343,7 +343,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_len
 
 		case XF_ST_OBJ_PROPERTY:
 			/* First we try an object handler */
-			{
+			if (cce) {
 				zval *tmp_val;
 
 				tmp_val = zend_read_property(cce, parent, name, name_length, 0 TSRMLS_CC);
