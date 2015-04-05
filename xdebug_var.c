@@ -268,7 +268,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_len
 			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
 			if (name[0] == '*') {
 				char *secondStar;
-				
+
 				secondStar = strstr(name + 1, "*");
 				if (secondStar) {
 					free(element);
@@ -382,7 +382,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_len
 			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
 			if (name[0] == '*') {
 				char *secondStar;
-				
+
 				secondStar = strstr(name + 1, "*");
 				if (secondStar) {
 					free(element);
