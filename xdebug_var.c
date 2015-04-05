@@ -264,7 +264,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_len
 	zend_property_info *zpp;
 
 	if (parent) {
-		ht = fetch_ht_from_zval(parent TSRMLS_DC);
+		ht = fetch_ht_from_zval(parent TSRMLS_CC);
 	}
 
 	switch (type) {
