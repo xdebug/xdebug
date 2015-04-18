@@ -582,7 +582,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 'u': { /* timestamp (in microseconds) */
-					char *char_ptr, *utime = xdebug_sprintf("%f", xdebug_get_utime());
+					char *char_ptr, *utime = xdebug_sprintf("%F", xdebug_get_utime());
 					
 					/* Replace . with _ (or should it be nuked?) */
 					char_ptr = strrchr(utime, '.');  

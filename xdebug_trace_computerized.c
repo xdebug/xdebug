@@ -66,7 +66,7 @@ void xdebug_trace_computerized_write_footer(void *ctxt TSRMLS_DC)
 	char   *tmp;
 
 	u_time = xdebug_get_utime();
-	tmp = xdebug_sprintf("\t\t\t%f\t", u_time - XG(start_time));
+	tmp = xdebug_sprintf("\t\t\t%F\t", u_time - XG(start_time));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 	fprintf(context->trace_file, "%lu", zend_memory_usage(0 TSRMLS_CC));
@@ -120,7 +120,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 
 	xdebug_str_add(&str, "0\t", 0);
-	xdebug_str_add(&str, xdebug_sprintf("%f\t", fse->time - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%F\t", fse->time - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%lu\t", fse->memory), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
@@ -190,7 +190,7 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
 
 	xdebug_str_add(&str, "1\t", 0);
-	xdebug_str_add(&str, xdebug_sprintf("%f\t", xdebug_get_utime() - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%F\t", xdebug_get_utime() - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%lu\n", zend_memory_usage(0 TSRMLS_CC)), 1);
 
 	fprintf(context->trace_file, "%s", str.d);
