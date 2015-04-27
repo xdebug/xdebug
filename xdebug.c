@@ -1041,14 +1041,17 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
+		XG(context).list.last_file = NULL;
 	}
 
 	if (XG(last_exception_trace)) {
 		xdfree(XG(last_exception_trace));
+		XG(last_exception_trace) = NULL;
 	}
 
 	if (XG(last_eval_statement)) {
 		efree(XG(last_eval_statement));
+		XG(last_eval_statement) = NULL;
 	}
 
 	xdebug_llist_destroy(XG(collected_errors), NULL);
@@ -1070,7 +1073,10 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 	if (XG(branches).last_branch_nr) {
 		free(XG(branches).last_branch_nr);
+		XG(branches).last_branch_nr = NULL;
+		XG(branches).size = 0;
 	}
+	XG(previous_mark_filename) = "";
 
 	return SUCCESS;
 }
