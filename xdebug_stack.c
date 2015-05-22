@@ -1110,6 +1110,18 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (XG(do_code_coverage)) {
 		xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
 	}
+	
+	if (XG(do_monitor_functions)) {
+		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
+		int   func_name_len = strlen(func_name);
+		void *dummy;
+
+		if (xdebug_hash_find(XG(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {
+			xdebug_llist_insert_next(XG(monitored_functions_found), XDEBUG_LLIST_TAIL(XG(monitored_functions_found)), xdstrdup(func_name));
+		}
+
+		xdfree(func_name);
+	}
 
 	if (XG(profiler_aggregate)) {
 		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
