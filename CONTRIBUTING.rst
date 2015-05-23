@@ -1,8 +1,8 @@
 Contributing
 ============
 
-Xdebug is hosted in GIT. The source code can be browsed through github and can
-be checked out with::
+Xdebug is hosted on Github. The source code can be browsed github and can be
+checked out with::
 
   git clone git://github.com/xdebug/xdebug.git
 
