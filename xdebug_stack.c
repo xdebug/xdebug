@@ -19,6 +19,7 @@
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
 #include "xdebug_compat.h"
+#include "xdebug_monitor.h"
 #include "xdebug_profiler.h"
 #include "xdebug_stack.h"
 #include "xdebug_str.h"
@@ -1117,7 +1118,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		void *dummy;
 
 		if (xdebug_hash_find(XG(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {
-			xdebug_llist_insert_next(XG(monitored_functions_found), XDEBUG_LLIST_TAIL(XG(monitored_functions_found)), xdstrdup(func_name));
+			xdebug_function_monitor_record(func_name, tmp->filename, tmp->lineno);
 		}
 
 		xdfree(func_name);

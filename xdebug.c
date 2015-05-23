@@ -55,6 +55,7 @@
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
+#include "xdebug_monitor.h"
 #include "xdebug_var.h"
 #include "xdebug_profiler.h"
 #include "xdebug_stack.h"
@@ -902,7 +903,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG(do_monitor_functions) = 0;
 	XG(functions_to_monitor) = NULL;
-	XG(monitored_functions_found) = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	XG(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
 	XG(dead_code_analysis_tracker_offset) = zend_xdebug_global_offset;
 	XG(dead_code_last_start_id) = 1;
 	XG(previous_filename) = "";
@@ -2018,79 +2019,6 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 	}
 }
 
-/* {{{ Function monitoring */
-static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functions_to_monitor)
-{
-	HashPosition  pos;
-	zval        **val;
-
-	zend_hash_internal_pointer_reset_ex(functions_to_monitor, &pos);
-	while (zend_hash_get_current_data_ex(functions_to_monitor, (void **) &val, &pos) != FAILURE) {
-		if (Z_TYPE_PP(val) == IS_STRING) {
-			xdebug_hash_add(internal, Z_STRVAL_PP(val), Z_STRLEN_PP(val), xdstrdup(Z_STRVAL_PP(val)));
-		}
-
-		zend_hash_move_forward_ex(functions_to_monitor, &pos);
-	}
-}
-
-static void xdebug_hash_function_monitor_dtor(char *function)
-{
-	xdfree(function);
-}
-
-PHP_FUNCTION(xdebug_start_function_monitor)
-{
-	HashTable *functions_to_monitor;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &functions_to_monitor) == FAILURE) {
-		return;
-	}
-
-	if (XG(do_monitor_functions) == 1) {
-		php_error(E_NOTICE, "Function monitoring was already started");
-	}
-
-	/* Clean and store list of functions to monitor */
-	if (XG(functions_to_monitor)) {
-		xdebug_hash_destroy(XG(functions_to_monitor));
-	}
-	XG(functions_to_monitor) = xdebug_hash_alloc(zend_hash_num_elements(functions_to_monitor), (xdebug_hash_dtor) xdebug_hash_function_monitor_dtor);
-	init_function_monitor_hash(XG(functions_to_monitor), functions_to_monitor);
-
-	XG(do_monitor_functions) = 1;
-}
-
-PHP_FUNCTION(xdebug_stop_function_monitor)
-{
-	if (XG(do_monitor_functions) == 0) {
-		php_error(E_NOTICE, "Function monitoring was not started");
-	}
-	XG(do_monitor_functions) = 0;
-}
-
-PHP_FUNCTION(xdebug_get_monitored_functions)
-{
-	xdebug_llist_element *le;
-	char                 *string;
-	zend_bool             clear = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &clear) == FAILURE) {
-		return;
-	}
-
-	array_init(return_value);
-	for (le = XDEBUG_LLIST_HEAD(XG(monitored_functions_found)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
-		string = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, string, 1);
-	}
-
-	if (clear) {
-		xdebug_llist_destroy(XG(monitored_functions_found), NULL);
-		XG(monitored_functions_found) = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	}
-}
-/* }}} */
 
 PHP_FUNCTION(xdebug_get_headers)
 {
