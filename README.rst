@@ -1,6 +1,9 @@
 Xdebug
 ------
 
+These are instructions for installing Xdebug. Please also refer to
+http://xdebug.org/support.php for support.
+
 You need to compile Xdebug separately from the rest of PHP.  Note, however,
 that you need access to the scripts ``phpize`` and ``php-config``.  If your
 system does not have ``phpize`` and ``php-config``, you will need to compile
