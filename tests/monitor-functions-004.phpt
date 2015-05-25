@@ -23,7 +23,7 @@ $f->doMethodStuff();
 var_dump(xdebug_get_monitored_functions());
 xdebug_stop_function_monitor();
 ?>
---EXPECT--
+--EXPECTF--
 array(2) {
   [0]=>
   array(3) {
