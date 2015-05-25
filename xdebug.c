@@ -55,6 +55,7 @@
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
+#include "xdebug_monitor.h"
 #include "xdebug_var.h"
 #include "xdebug_profiler.h"
 #include "xdebug_stack.h"
@@ -134,6 +135,10 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_start_error_collection, NULL)
 	PHP_FE(xdebug_stop_error_collection, NULL)
 	PHP_FE(xdebug_get_collected_errors,  NULL)
+
+	PHP_FE(xdebug_start_function_monitor, NULL)
+	PHP_FE(xdebug_stop_function_monitor, NULL)
+	PHP_FE(xdebug_get_monitored_functions, NULL)
 
 	PHP_FE(xdebug_start_code_coverage,   NULL)
 	PHP_FE(xdebug_stop_code_coverage,    NULL)
@@ -896,6 +901,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	XG(do_monitor_functions) = 0;
+	XG(functions_to_monitor) = NULL;
+	XG(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
 	XG(dead_code_analysis_tracker_offset) = zend_xdebug_global_offset;
 	XG(dead_code_last_start_id) = 1;
 	XG(previous_filename) = "";
@@ -1056,6 +1064,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	xdebug_llist_destroy(XG(collected_errors), NULL);
 	XG(collected_errors) = NULL;
+
+	xdebug_llist_destroy(XG(monitored_functions_found), NULL);
+	XG(monitored_functions_found) = NULL;
+
+	if (XG(functions_to_monitor)) {
+		xdebug_hash_destroy(XG(functions_to_monitor));
+		XG(functions_to_monitor) = NULL;
+	}
 
 	/* Reset var_dump and set_time_limit to the original function */
 	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
@@ -2002,6 +2018,7 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 		XG(collected_errors) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	}
 }
+
 
 PHP_FUNCTION(xdebug_get_headers)
 {
