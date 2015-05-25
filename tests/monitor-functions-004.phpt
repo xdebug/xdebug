@@ -30,7 +30,7 @@ array(2) {
     ["function"]=>
     string(12) "Foo::doStuff"
     ["filename"]=>
-    string(67) "/home/derick/dev/php/derickr-xdebug/tests/monitor-functions-004.php"
+    string(%d) "%smonitor-functions-004.php"
     ["lineno"]=>
     int(15)
   }
@@ -39,7 +39,7 @@ array(2) {
     ["function"]=>
     string(18) "Foo->doMethodStuff"
     ["filename"]=>
-    string(67) "/home/derick/dev/php/derickr-xdebug/tests/monitor-functions-004.php"
+    string(%d) "%smonitor-functions-004.php"
     ["lineno"]=>
     int(18)
   }

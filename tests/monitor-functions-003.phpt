@@ -20,7 +20,7 @@ array(1) {
     ["function"]=>
     string(6) "strlen"
     ["filename"]=>
-    string(67) "/home/derick/dev/php/derickr-xdebug/tests/monitor-functions-003.php"
+    string(%d) "%smonitor-functions-003.php"
     ["lineno"]=>
     int(4)
   }
@@ -32,7 +32,7 @@ array(2) {
     ["function"]=>
     string(6) "strlen"
     ["filename"]=>
-    string(67) "/home/derick/dev/php/derickr-xdebug/tests/monitor-functions-003.php"
+    string(%d) "%smonitor-functions-003.php"
     ["lineno"]=>
     int(4)
   }
@@ -41,7 +41,7 @@ array(2) {
     ["function"]=>
     string(6) "strlen"
     ["filename"]=>
-    string(67) "/home/derick/dev/php/derickr-xdebug/tests/monitor-functions-003.php"
+    string(%d) "%smonitor-functions-003.php"
     ["lineno"]=>
     int(6)
   }
