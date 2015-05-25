@@ -1118,7 +1118,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		void *dummy;
 
 		if (xdebug_hash_find(XG(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {
-			xdebug_function_monitor_record(func_name, tmp->filename, tmp->lineno);
+			xdebug_function_monitor_record(func_name, tmp->filename, tmp->lineno TSRMLS_CC);
 		}
 
 		xdfree(func_name);

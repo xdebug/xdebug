@@ -63,7 +63,7 @@ void xdebug_monitored_function_dtor(void *dummy, void *elem)
 	xdfree(mfe);
 }
 
-void xdebug_function_monitor_record(char *func_name, char *filename, int lineno)
+void xdebug_function_monitor_record(char *func_name, char *filename, int lineno TSRMLS_DC)
 {
 	xdebug_monitored_function_entry *record;
 

@@ -28,6 +28,6 @@ typedef struct xdebug_monitored_function_entry
 
 void xdebug_monitored_function_dtor(void *dummy, void *elem);
 
-void xdebug_function_monitor_record(char *func_name, char *filename, int lineno);
+void xdebug_function_monitor_record(char *func_name, char *filename, int lineno TSRMLS_DC);
 
 #endif
