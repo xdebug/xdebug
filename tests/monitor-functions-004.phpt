@@ -26,7 +26,21 @@ xdebug_stop_function_monitor();
 --EXPECT--
 array(2) {
   [0]=>
-  string(12) "Foo::doStuff"
+  array(3) {
+    ["function"]=>
+    string(12) "Foo::doStuff"
+    ["filename"]=>
+    string(67) "/home/derick/dev/php/derickr-xdebug/tests/monitor-functions-004.php"
+    ["lineno"]=>
+    int(15)
+  }
   [1]=>
-  string(18) "Foo->doMethodStuff"
+  array(3) {
+    ["function"]=>
+    string(18) "Foo->doMethodStuff"
+    ["filename"]=>
+    string(67) "/home/derick/dev/php/derickr-xdebug/tests/monitor-functions-004.php"
+    ["lineno"]=>
+    int(18)
+  }
 }

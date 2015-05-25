@@ -113,8 +113,18 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 
 	array_init(return_value);
 	for (le = XDEBUG_LLIST_HEAD(XG(monitored_functions_found)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
+		zval *entry;
+
 		mfe = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, mfe->func_name, 1);
+
+		MAKE_STD_ZVAL(entry);
+		array_init(entry);
+
+		add_assoc_string_ex(entry, "function", sizeof("function"), mfe->func_name, 1);
+		add_assoc_string_ex(entry, "filename", sizeof("filename"), mfe->filename, 1);
+		add_assoc_long(entry, "lineno", mfe->lineno);
+
+		add_next_index_zval(return_value, entry);
 	}
 
 	if (clear) {
