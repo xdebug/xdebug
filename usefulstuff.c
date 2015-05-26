@@ -344,10 +344,10 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 			cwd[0] = '\0';
 		}
 
-#if PHP_VERSION_ID < 50600
-		new_state.cwd = strdup(cwd);
-#else
+#if PHP_VERSION_ID >= 50600
 		new_state.cwd = estrdup(cwd);
+#else
+		new_state.cwd = strdup(cwd);
 #endif
 		new_state.cwd_length = strlen(cwd);
 
@@ -356,10 +356,10 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
 		}
-#if PHP_VERSION_ID < 50600
-		free(new_state.cwd);
-#else
+#if PHP_VERSION_ID >= 50600
 		efree(new_state.cwd);
+#else
+		free(new_state.cwd);
 #endif
 
 	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
