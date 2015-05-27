@@ -247,7 +247,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		xdebug_str_add(str, xdebug_sprintf(formats[1], error_type_str, escaped, error_filename, error_lineno), 1);
 	}
 
-	efree(escaped);
+	STR_FREE(escaped);
 }
 
 void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
