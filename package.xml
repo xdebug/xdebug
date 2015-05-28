@@ -204,6 +204,8 @@ Sun, Feb 22, 2015 - xdebug 2.3.0
    <file name="xdebug_llist.c" role="src" />
    <file name="xdebug_llist.h" role="src" />
    <file name="xdebug_mm.h" role="src" />
+   <file name="xdebug_monitor.c" role="src" />
+   <file name="xdebug_monitor.h" role="src" />
    <file name="xdebug_private.c" role="src" />
    <file name="xdebug_private.h" role="src" />
    <file name="xdebug_profiler.c" role="src" />

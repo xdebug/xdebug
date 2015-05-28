@@ -104,6 +104,11 @@ PHP_FUNCTION(xdebug_start_error_collection);
 PHP_FUNCTION(xdebug_stop_error_collection);
 PHP_FUNCTION(xdebug_get_collected_errors);
 
+/* function monitorin functions */
+PHP_FUNCTION(xdebug_start_function_monitor);
+PHP_FUNCTION(xdebug_stop_function_monitor);
+PHP_FUNCTION(xdebug_get_monitored_functions);
+
 /* profiling functions */
 PHP_FUNCTION(xdebug_get_profiler_filename);
 PHP_FUNCTION(xdebug_dump_aggr_profiling_data);
@@ -196,6 +201,11 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
 	xdebug_llist *collected_errors;
+
+	/* used for function monitoring */
+	zend_bool     do_monitor_functions;
+	xdebug_hash  *functions_to_monitor;
+	xdebug_llist *monitored_functions_found; /* List of functions found */
 
 	/* superglobals */
 	zend_bool     dump_globals;

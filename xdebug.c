@@ -55,6 +55,7 @@
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
+#include "xdebug_monitor.h"
 #include "xdebug_var.h"
 #include "xdebug_profiler.h"
 #include "xdebug_stack.h"
@@ -134,6 +135,10 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_start_error_collection, NULL)
 	PHP_FE(xdebug_stop_error_collection, NULL)
 	PHP_FE(xdebug_get_collected_errors,  NULL)
+
+	PHP_FE(xdebug_start_function_monitor, NULL)
+	PHP_FE(xdebug_stop_function_monitor, NULL)
+	PHP_FE(xdebug_get_monitored_functions, NULL)
 
 	PHP_FE(xdebug_start_code_coverage,   NULL)
 	PHP_FE(xdebug_stop_code_coverage,    NULL)
@@ -896,6 +901,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(last_eval_statement) = NULL;
 	XG(do_collect_errors) = 0;
 	XG(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	XG(do_monitor_functions) = 0;
+	XG(functions_to_monitor) = NULL;
+	XG(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
 	XG(dead_code_analysis_tracker_offset) = zend_xdebug_global_offset;
 	XG(dead_code_last_start_id) = 1;
 	XG(previous_filename) = "";
@@ -1041,18 +1049,29 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	if (XG(context.list.last_file)) {
 		xdfree(XG(context).list.last_file);
+		XG(context).list.last_file = NULL;
 	}
 
 	if (XG(last_exception_trace)) {
 		xdfree(XG(last_exception_trace));
+		XG(last_exception_trace) = NULL;
 	}
 
 	if (XG(last_eval_statement)) {
 		efree(XG(last_eval_statement));
+		XG(last_eval_statement) = NULL;
 	}
 
 	xdebug_llist_destroy(XG(collected_errors), NULL);
 	XG(collected_errors) = NULL;
+
+	xdebug_llist_destroy(XG(monitored_functions_found), NULL);
+	XG(monitored_functions_found) = NULL;
+
+	if (XG(functions_to_monitor)) {
+		xdebug_hash_destroy(XG(functions_to_monitor));
+		XG(functions_to_monitor) = NULL;
+	}
 
 	/* Reset var_dump and set_time_limit to the original function */
 	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
@@ -1070,7 +1089,10 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 	if (XG(branches).last_branch_nr) {
 		free(XG(branches).last_branch_nr);
+		XG(branches).last_branch_nr = NULL;
+		XG(branches).size = 0;
 	}
+	XG(previous_mark_filename) = "";
 
 	return SUCCESS;
 }
@@ -1186,6 +1208,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	zval *xdebug_message_trace, *previous_exception;
 	zend_class_entry *default_ce, *exception_ce;
 	xdebug_brk_info *extra_brk_info;
+	char *code_str = NULL;
 	char *exception_trace;
 	xdebug_str tmp_str = { 0, 0, NULL };
 
@@ -1201,7 +1224,14 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
 	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
 
-	convert_to_long_ex(&code);
+	if (Z_TYPE_P(code) == IS_LONG) {
+		if (Z_LVAL_P(code) != 0) {
+			code_str = xdebug_sprintf("%lu", Z_LVAL_P(code));
+		}
+	} else if (Z_TYPE_P(code) != IS_STRING) {
+		code_str = xdstrdup("");
+	}
+
 	convert_to_string_ex(&message);
 	convert_to_string_ex(&file);
 	convert_to_long_ex(&line);
@@ -1265,10 +1295,15 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		}
 
 		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, Z_LVAL_P(code), Z_STRVAL_P(message))) {
+			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, code_str ? code_str : Z_STRVAL_P(code), Z_STRVAL_P(message))) {
 				XG(remote_enabled) = 0;
 			}
 		}
+	}
+
+	/* Free code_str if necessary */
+	if (code_str) {
+		xdfree(code_str);
 	}
 }
 
@@ -1452,7 +1487,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	XG(level)++;
-	if (XG(level) > XG(max_nesting_level)) {
+	if (XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
@@ -1609,7 +1644,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, struct _ze
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) = NULL;
 
 	XG(level)++;
-	if (XG(level) > XG(max_nesting_level)) {
+	if (XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
@@ -1983,6 +2018,7 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 		XG(collected_errors) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	}
 }
+
 
 PHP_FUNCTION(xdebug_get_headers)
 {

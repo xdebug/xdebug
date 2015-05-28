@@ -78,7 +78,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 
 	xdebug_str_add(&str, "\t<tr>", 0);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", function_nr), 1);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6f</td>", fse->time - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6F</td>", fse->time - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", fse->memory), 1);
 	xdebug_str_add(&str, "<td align='left'>", 0);
 	for (j = 0; j < fse->level - 1; j++) {

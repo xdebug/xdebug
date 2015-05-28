@@ -64,7 +64,7 @@ void xdebug_trace_textual_write_footer(void *ctxt TSRMLS_DC)
 	char   *tmp;
 
 	u_time = xdebug_get_utime();
-	tmp = xdebug_sprintf("%10.4f ", u_time - XG(start_time));
+	tmp = xdebug_sprintf("%10.4F ", u_time - XG(start_time));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 	fprintf(context->trace_file, "%10zu", zend_memory_usage(0 TSRMLS_CC));
@@ -92,7 +92,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 
-	xdebug_str_add(&str, xdebug_sprintf("%10.4f ", fse->time - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%10.4F ", fse->time - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%10lu ", fse->memory), 1);
 	if (XG(show_mem_delta)) {
 		xdebug_str_add(&str, xdebug_sprintf("%+8ld ", fse->memory - fse->prev_memory), 1);
@@ -187,7 +187,7 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 {
 	unsigned int j = 0; /* Counter */
 
-	xdebug_str_add(str, xdebug_sprintf("%10.4f ", xdebug_get_utime() - XG(start_time)), 1);
+	xdebug_str_add(str, xdebug_sprintf("%10.4F ", xdebug_get_utime() - XG(start_time)), 1);
 	xdebug_str_add(str, xdebug_sprintf("%10lu ", zend_memory_usage(0 TSRMLS_CC)), 1);
 
 	if (XG(show_mem_delta)) {

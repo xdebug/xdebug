@@ -344,7 +344,11 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 			cwd[0] = '\0';
 		}
 
+#if PHP_VERSION_ID >= 50600
+		new_state.cwd = estrdup(cwd);
+#else
 		new_state.cwd = strdup(cwd);
+#endif
 		new_state.cwd_length = strlen(cwd);
 
 		if (!virtual_file_ex(&new_state, fileurl, NULL, 1 TSRMLS_CC)) {
@@ -352,7 +356,11 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
 		}
+#if PHP_VERSION_ID >= 50600
+		efree(new_state.cwd);
+#else
 		free(new_state.cwd);
+#endif
 
 	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
@@ -582,7 +590,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 'u': { /* timestamp (in microseconds) */
-					char *char_ptr, *utime = xdebug_sprintf("%f", xdebug_get_utime());
+					char *char_ptr, *utime = xdebug_sprintf("%F", xdebug_get_utime());
 					
 					/* Replace . with _ (or should it be nuked?) */
 					char_ptr = strrchr(utime, '.');  
