@@ -993,6 +993,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	/* Call user function locations */
 	if (
 		!tmp->filename &&
+		XG(stack) &&
 		XDEBUG_LLIST_TAIL(XG(stack)) &&
 		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) &&
 		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
