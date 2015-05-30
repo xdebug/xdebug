@@ -466,7 +466,16 @@ void xdebug_init_debugger(TSRMLS_D)
 	if (XG(remote_connect_back)) {
 		zval **remote_addr = NULL;
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking remote connect back address.\n");
-		if (zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", 21, (void**)&remote_addr) == FAILURE) {
+		if (XG(remote_addr_header) && XG(remote_addr_header)[0]) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking user configured header '%s'.\n", XG(remote_addr_header));
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), XG(remote_addr_header), strlen(XG(remote_addr_header)) + 1, (void**)&remote_addr);
+		}
+		if (!remote_addr) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'HTTP_X_FORWARDED_FOR'.\n");
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", 21, (void**)&remote_addr);
+		}
+		if (!remote_addr) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'REMOTE_ADDR'.\n");
 			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
 		}
 		if (remote_addr) {
