@@ -781,7 +781,17 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 #else
 	php_xdebug_shutdown_globals(&xdebug_globals TSRMLS_CC);
 #endif
+ 
+	/* cleanup handlers set in MINIT to xdebug_check_branch_entry_handler */
+	{
+		int i;
 
+		for (i = 0; i < 256; i++) {
+			if (zend_get_user_opcode_handler(i) == xdebug_check_branch_entry_handler) {
+				zend_set_user_opcode_handler(i, NULL);
+			}
+		}
+	}
 	return SUCCESS;
 }
 
