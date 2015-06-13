@@ -17,6 +17,8 @@ unlink ("/tmp/remote-log2.txt");
 3
 Log opened at %d-%d-%d %d:%d:%d
 I: Checking remote connect back address.
+I: Checking header 'HTTP_X_FORWARDED_FOR'.
+I: Checking header 'REMOTE_ADDR'.
 W: Remote address not found, connecting to configured address/port: doesnotexist2:9003. :-|
 E: Could not connect to client. :-(
 Log closed at %d-%d-%d %d:%d:%d

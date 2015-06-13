@@ -26,6 +26,7 @@
 #include "xdebug_superglobals.h"
 #include "xdebug_var.h"
 #include "ext/standard/html.h"
+#include "ext/standard/php_smart_str.h"
 
 #include "main/php_ini.h"
 
@@ -232,7 +233,33 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 	size_t newlen;
 
 	if (html) {
-		escaped = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), &newlen, 0, 0, NULL TSRMLS_CC);
+		char *tmp;
+		char *first_closing = strchr(buffer, ']');
+
+		/* We do need to escape HTML entities here, as HTML chars could be in
+		 * the error message. However, PHP in some circumstances also adds an
+		 * HTML link to a manual page. That bit, we don't need to escape. So
+		 * this bit of code finds the portion that doesn't need escaping, adds
+		 * it to a tmp string, and then adds an HTML escaped string for the
+		 * rest of the original buffer. */
+		if (first_closing && strstr(buffer, "() [<a href=") != NULL) {
+			smart_str special_escaped = {0};
+
+			*first_closing = '\0';
+			first_closing++;
+			smart_str_appends(&special_escaped, buffer);
+
+			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), &newlen, 0, 0, NULL TSRMLS_CC);
+			smart_str_appends(&special_escaped, tmp);
+			STR_FREE(tmp);
+
+			smart_str_0(&special_escaped);
+
+			escaped = estrdup(special_escaped.c);
+			smart_str_free(&special_escaped);
+		} else {
+			escaped = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), &newlen, 0, 0, NULL TSRMLS_CC);
+		}
 	} else {
 		escaped = estrdup(buffer);
 	}
@@ -466,7 +493,16 @@ void xdebug_init_debugger(TSRMLS_D)
 	if (XG(remote_connect_back)) {
 		zval **remote_addr = NULL;
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking remote connect back address.\n");
-		if (zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", 21, (void**)&remote_addr) == FAILURE) {
+		if (XG(remote_addr_header) && XG(remote_addr_header)[0]) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking user configured header '%s'.\n", XG(remote_addr_header));
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), XG(remote_addr_header), strlen(XG(remote_addr_header)) + 1, (void**)&remote_addr);
+		}
+		if (!remote_addr) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'HTTP_X_FORWARDED_FOR'.\n");
+			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", 21, (void**)&remote_addr);
+		}
+		if (!remote_addr) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'REMOTE_ADDR'.\n");
 			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
 		}
 		if (remote_addr) {
