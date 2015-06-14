@@ -912,9 +912,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					myht->nApplyCount++;
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export, 5, level, str, debug_zval, options, class_name);
-					myht->nApplyCount--;
 					/* Remove the ", " at the end of the string */
 					if (myht->nNumOfElements > 0) {
 						xdebug_str_chop(str, 2);
@@ -1235,9 +1233,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					myht->nApplyCount++;
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_text_ansi, 5, level, mode, str, debug_zval, options);
-					myht->nApplyCount--;
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 				}
@@ -1716,9 +1712,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			/* Adding normal properties */
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht) {
-				myht->nApplyCount++;
 				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
-				myht->nApplyCount--;
 			}
 
 			xdebug_xml_add_attribute(node, "type", "object");
@@ -1972,9 +1966,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					myht->nApplyCount++;
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_fancy, 5, level, str, debug_zval, options, Z_OBJCE_PP(struc)->name);
-					myht->nApplyCount--;
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
