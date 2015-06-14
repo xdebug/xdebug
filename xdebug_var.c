@@ -268,6 +268,19 @@ static zval **get_splobjectstorage_storage(zval *parent TSRMLS_DC)
 	return NULL;
 }
 
+static zval **get_arrayiterator_storage(zval *parent TSRMLS_DC)
+{
+	zval **tmp = NULL;
+	int is_temp;
+	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
+
+	if (zend_hash_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage"), (void **) &tmp) == SUCCESS) {
+		return tmp;
+	}
+
+	return NULL;
+}
+
 static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
@@ -429,6 +442,16 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_len
 					if (strncmp(name + 1, "ArrayObject", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
 						element = NULL;
 						if ((retval_pp = get_arrayobject_storage(parent TSRMLS_CC)) != NULL) {
+							if (retval_pp) {
+								retval_p = *retval_pp;
+								goto cleanup;
+							}
+						}
+					}
+					/* All right, time for a mega hack. It's ArrayIterator access time! */
+					if (strncmp(name + 1, "ArrayIterator", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
+						element = NULL;
+						if ((retval_pp = get_arrayiterator_storage(parent TSRMLS_CC)) != NULL) {
 							if (retval_pp) {
 								retval_p = *retval_pp;
 								goto cleanup;
