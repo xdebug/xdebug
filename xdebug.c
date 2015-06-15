@@ -783,10 +783,99 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	php_xdebug_shutdown_globals(&xdebug_globals TSRMLS_CC);
 #endif
  
-	/* cleanup handlers set in MINIT to xdebug_check_branch_entry_handler */
 	{
-		int i;
+		int i = 0;
+		zend_set_user_opcode_handler(ZEND_EXIT, NULL);
 
+#ifndef ZTS
+		/* Overload opcodes for code coverage */
+		if (XG(coverage_enable)) {
+#endif
+			zend_set_user_opcode_handler(ZEND_JMP, NULL);
+			zend_set_user_opcode_handler(ZEND_JMPZ, NULL);
+			zend_set_user_opcode_handler(ZEND_JMPZ_EX, NULL);
+			zend_set_user_opcode_handler(ZEND_JMPNZ, NULL);
+			zend_set_user_opcode_handler(ZEND_IS_IDENTICAL, NULL);
+			zend_set_user_opcode_handler(ZEND_IS_NOT_IDENTICAL, NULL);
+			zend_set_user_opcode_handler(ZEND_IS_EQUAL, NULL);
+			zend_set_user_opcode_handler(ZEND_IS_NOT_EQUAL, NULL);
+			zend_set_user_opcode_handler(ZEND_IS_SMALLER, NULL);
+			zend_set_user_opcode_handler(ZEND_IS_SMALLER_OR_EQUAL, NULL);
+			zend_set_user_opcode_handler(ZEND_BOOL_NOT, NULL);
+
+			zend_set_user_opcode_handler(ZEND_ADD, NULL);
+			zend_set_user_opcode_handler(ZEND_SUB, NULL);
+			zend_set_user_opcode_handler(ZEND_MUL, NULL);
+			zend_set_user_opcode_handler(ZEND_DIV, NULL);
+
+			zend_set_user_opcode_handler(ZEND_ADD_ARRAY_ELEMENT, NULL);
+			zend_set_user_opcode_handler(ZEND_RETURN, NULL);
+			zend_set_user_opcode_handler(ZEND_RETURN_BY_REF, NULL);
+			zend_set_user_opcode_handler(ZEND_EXT_STMT, NULL);
+			zend_set_user_opcode_handler(ZEND_RAISE_ABSTRACT_ERROR, NULL);
+			zend_set_user_opcode_handler(ZEND_SEND_VAR, NULL);
+			zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF, NULL);
+			zend_set_user_opcode_handler(ZEND_SEND_VAL, NULL);
+			zend_set_user_opcode_handler(ZEND_NEW, NULL);
+			zend_set_user_opcode_handler(ZEND_EXT_FCALL_BEGIN, NULL);
+			zend_set_user_opcode_handler(ZEND_CATCH, NULL);
+			zend_set_user_opcode_handler(ZEND_BOOL, NULL);
+			zend_set_user_opcode_handler(ZEND_ADD_CHAR, NULL);
+			zend_set_user_opcode_handler(ZEND_ADD_STRING, NULL);
+			zend_set_user_opcode_handler(ZEND_INIT_ARRAY, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_DIM_R, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_OBJ_R, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_OBJ_W, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_OBJ_FUNC_ARG, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_DIM_FUNC_ARG, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_DIM_UNSET, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_OBJ_UNSET, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_CLASS, NULL);
+			zend_set_user_opcode_handler(ZEND_FETCH_CONSTANT, NULL);
+			zend_set_user_opcode_handler(ZEND_CONCAT, NULL);
+			zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_DIM_OBJ, NULL);
+			zend_set_user_opcode_handler(ZEND_PRE_INC_OBJ, NULL);
+			zend_set_user_opcode_handler(ZEND_SWITCH_FREE, NULL);
+			zend_set_user_opcode_handler(ZEND_QM_ASSIGN, NULL);
+			zend_set_user_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, NULL);
+			zend_set_user_opcode_handler(ZEND_ADD_TRAIT, NULL);
+			zend_set_user_opcode_handler(ZEND_BIND_TRAITS, NULL);
+#ifndef ZTS
+		}
+#endif
+
+		/* Override opcodes for variable assignments in traces */
+		zend_set_user_opcode_handler(ZEND_INCLUDE_OR_EVAL, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_ADD, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_SUB, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_MUL, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_DIV, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_MOD, NULL);
+#if PHP_VERSION_ID >= 50600
+		zend_set_user_opcode_handler(ZEND_ASSIGN_POW, NULL);
+#endif
+		zend_set_user_opcode_handler(ZEND_ASSIGN_SL, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_SR, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_CONCAT, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_OR, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_AND, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_XOR, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_DIM, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_OBJ, NULL);
+		zend_set_user_opcode_handler(ZEND_PRE_INC, NULL);
+		zend_set_user_opcode_handler(ZEND_POST_INC, NULL);
+		zend_set_user_opcode_handler(ZEND_PRE_DEC, NULL);
+		zend_set_user_opcode_handler(ZEND_POST_DEC, NULL);
+		zend_set_user_opcode_handler(ZEND_PRE_INC_OBJ, NULL);
+		zend_set_user_opcode_handler(ZEND_POST_INC_OBJ, NULL);
+		zend_set_user_opcode_handler(ZEND_PRE_DEC_OBJ, NULL);
+		zend_set_user_opcode_handler(ZEND_POST_DEC_OBJ, NULL);
+
+		zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, NULL);
+		zend_set_user_opcode_handler(ZEND_END_SILENCE, NULL);
+
+		/* cleanup handlers set in MINIT to xdebug_check_branch_entry_handler */
 		for (i = 0; i < 256; i++) {
 			if (zend_get_user_opcode_handler(i) == xdebug_check_branch_entry_handler) {
 				zend_set_user_opcode_handler(i, NULL);
