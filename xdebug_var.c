@@ -32,6 +32,26 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
+{
+	zval dzval = **zval_pp;
+	HashTable *tmp;
+
+	if (Z_OBJ_HANDLER(dzval, get_debug_info)) {
+		zend_bool old_trace = XG(do_trace);
+		XG(do_trace) = 0;
+		tmp = Z_OBJ_HANDLER(dzval, get_debug_info)(&dzval, is_tmp TSRMLS_CC);
+		XG(do_trace) = old_trace;
+		return tmp;
+	} else {
+		*is_tmp = 0;
+		if (Z_OBJ_HANDLER(dzval, get_properties)) {
+			return Z_OBJPROP(dzval);
+		}
+	}
+	return NULL;
+}
+
 char* xdebug_error_type_simple(int type)
 {
 	switch (type) {
@@ -268,6 +288,19 @@ static zval **get_splobjectstorage_storage(zval *parent TSRMLS_DC)
 	return NULL;
 }
 
+static zval **get_arrayiterator_storage(zval *parent TSRMLS_DC)
+{
+	zval **tmp = NULL;
+	int is_temp;
+	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
+
+	if (zend_hash_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage"), (void **) &tmp) == SUCCESS) {
+		return tmp;
+	}
+
+	return NULL;
+}
+
 static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
@@ -429,6 +462,16 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_len
 					if (strncmp(name + 1, "ArrayObject", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
 						element = NULL;
 						if ((retval_pp = get_arrayobject_storage(parent TSRMLS_CC)) != NULL) {
+							if (retval_pp) {
+								retval_p = *retval_pp;
+								goto cleanup;
+							}
+						}
+					}
+					/* All right, time for a mega hack. It's ArrayIterator access time! */
+					if (strncmp(name + 1, "ArrayIterator", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
+						element = NULL;
+						if ((retval_pp = get_arrayiterator_storage(parent TSRMLS_CC)) != NULL) {
 							if (retval_pp) {
 								retval_p = *retval_pp;
 								goto cleanup;
@@ -856,7 +899,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			break;
 
 		case IS_OBJECT:
-			myht = Z_OBJDEBUG_PP(struc, is_temp);
+			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht->nApplyCount < 1) {
 				char *class_name;
 				zend_uint class_name_len;
@@ -1174,7 +1217,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			break;
 
 		case IS_OBJECT:
-			myht = Z_OBJDEBUG_PP(struc, is_temp);
+			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht && myht->nApplyCount < 1) {
 				char *class_name;
 				zend_uint class_name_len;
@@ -1667,7 +1710,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			}
 
 			/* Adding normal properties */
-			myht = Z_OBJDEBUG_PP(struc, is_temp);
+			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht) {
 				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
 			}
@@ -1913,7 +1956,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			break;
 
 		case IS_OBJECT:
-			myht = Z_OBJDEBUG_PP(struc, is_temp);
+			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
 			if (myht->nApplyCount < 1) {
 				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
