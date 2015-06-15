@@ -67,7 +67,11 @@ void xdebug_trace_textual_write_footer(void *ctxt TSRMLS_DC)
 	tmp = xdebug_sprintf("%10.4F ", u_time - XG(start_time));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
+#if WIN32|WINNT
+	fprintf(context->trace_file, "%10Iu", zend_memory_usage(0 TSRMLS_CC));
+#else
 	fprintf(context->trace_file, "%10zu", zend_memory_usage(0 TSRMLS_CC));
+#endif
 	fprintf(context->trace_file, "\n");
 	str_time = xdebug_get_time();
 	fprintf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
