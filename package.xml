@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-03-22</date>
- <time>12:34:56</time>
+ <date>2015-06-19</date>
+ <time>16:15:00</time>
  <version>
-  <release>2.3.2</release>
-  <api>2.3.2</api>
+  <release>2.3.3</release>
+  <api>2.3.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,12 +45,35 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sun, Mar 22, 2015 - xdebug 2.3.2
+Fri, Jun 19, 2015 - xdebug 2.3.3
 
 = Fixed bugs:
 
-  - Fixed issue #1117: Path/branch coverage sometimes crashes
-  - Fixed issue #1121: Segfaults with path/branch coverage
+  - Fixed issue #1130: Escaping issues with docrefs and HTML characters in
+    error messages
+  - Fixed issue #1133: PDO exception code value type is changed
+  - Fixed issue #1137: Windows does not support %zu formatting for sprintf
+  - Fixed issue #1140: Tracing with __debugInfo() crashes Xdebug due to a stack
+    overflow
+  - Fixed issue #1148: Can't disable max_nesting_function
+  - Fixed issue #1151: Crash when another extension calls call_user_function()
+    during RINIT
+
+  - Fixed crash with code coverage (Antony Dovgal)
+  - Fixed usage of virtual_file_ex and STR_FREE (Remi Collet)
+  - Reset overloaded opcodes at the end of each request (Eran Ifrah)
+
+= Improvements:
+
+  - Fixed issue #686: Not possible to inspect SplObjectStorage instances with
+    Xdebug
+  - Fixed issue #864: No attributes are shown if an object extends
+    ArrayIterator
+  - Fixed issue #996: Can't evaluate property of class that extends ArrayObject
+  - Fixed issue #1134: Allow introspection of ArrayObject implementation's
+    internal storage
+  - Get rid of setlocale hack, by using %F instead of %f (and speed up tracing
+    by 15-20%)
  </notes>
 
  <contents>
@@ -156,6 +179,28 @@ Sun, Mar 22, 2015 - xdebug 2.3.2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-03-22</date>
+   <time>12:34:56</time>
+   <version>
+    <release>2.3.2</release>
+    <api>2.3.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Mar 22, 2015 - xdebug 2.3.2
+
+= Fixed bugs:
+
+  - Fixed issue #1117: Path/branch coverage sometimes crashes
+  - Fixed issue #1121: Segfaults with path/branch coverage
+   </notes>
+  </release>
 
   <release>
    <date>2015-02-24</date>
