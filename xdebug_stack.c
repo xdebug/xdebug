@@ -1125,7 +1125,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				 * is an associated variable to receive the variable here. */
 				if (tmp->user_defined == XDEBUG_EXTERNAL && i < arguments_wanted) {
 					if (op_array->arg_info[i].name) {
+#if PHP_VERSION_ID >= 70000
+						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name->val);
+#else
 						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
+#endif
 					}
 #if PHP_VERSION_ID >= 50600
 					if (op_array->arg_info[i].is_variadic) {
@@ -1148,7 +1152,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
 				for (i = arguments_sent; i < arguments_wanted; i++) {
 					if (op_array->arg_info[i].name) {
+#if PHP_VERSION_ID >= 70000
+						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name->val);
+#else
 						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
+#endif
 					}
 					tmp->var[tmp->varc].addr = NULL;
 					tmp->var[tmp->varc].is_variadic = 0;
