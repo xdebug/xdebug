@@ -18,6 +18,7 @@
 
 #include "php_xdebug.h"
 
+#include "xdebug_compat.h"
 #include "xdebug_hash.h"
 #include "xdebug_monitor.h"
 
@@ -119,7 +120,7 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 
 		mfe = XDEBUG_LLIST_VALP(le);
 
-		MAKE_STD_ZVAL(entry);
+		XDEBUG_MAKE_STD_ZVAL(entry);
 		array_init(entry);
 
 		add_assoc_string_ex(entry, "function", sizeof("function"), mfe->func_name, 1);

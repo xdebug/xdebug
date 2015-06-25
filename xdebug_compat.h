@@ -31,6 +31,10 @@ char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len);
 void xdebug_stripcslashes(char *string, int *new_len);
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC);
 int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
+
+# define XDEBUG_MAKE_STD_ZVAL(zv) \
+	zv = ecalloc(sizeof(zval), 1);
+
 #else
 # include "ext/standard/base64.h"
 # define xdebug_base64_encode php_base64_encode
@@ -38,6 +42,9 @@ int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
 # define xdebug_stripcslashes php_stripcslashes
 # define xdebug_fetch_class   zend_fetch_class
 # define xdebug_get_constant  zend_get_constant
+
+# define XDEBUG_MAKE_STD_ZVAL(zv) \
+	MAKE_STD_ZVAL(zv)
 #endif
 
 #endif

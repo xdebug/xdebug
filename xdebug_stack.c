@@ -1290,7 +1290,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		/* Initialize frame array */
-		MAKE_STD_ZVAL(frame);
+		XDEBUG_MAKE_STD_ZVAL(frame);
 		array_init(frame);
 
 		/* Add data */
@@ -1305,7 +1305,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		add_assoc_long_ex(frame, "line", sizeof("line"), i->lineno);
 
 		/* Add parameters */
-		MAKE_STD_ZVAL(params);
+		XDEBUG_MAKE_STD_ZVAL(params);
 		array_init(params);
 		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
 
@@ -1315,7 +1315,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			if (i->var[j].is_variadic) {
 				zval *vparams;
 
-				MAKE_STD_ZVAL(vparams);
+				XDEBUG_MAKE_STD_ZVAL(vparams);
 				array_init(vparams);
 
 				if (i->var[j].name) {

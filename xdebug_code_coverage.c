@@ -933,22 +933,17 @@ static void add_line(void *ret, xdebug_hash_element *e)
 	}
 }
 
-#if PHP_VERSION_ID >= 70000
-# define MAKE_STD_ZVAL(branches) \
-	branches = ecalloc(sizeof(zval), 1);
-#endif
-
 static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 {
 	zval *branches, *branch, *out, *out_hit;
 	unsigned int i;
 
-	MAKE_STD_ZVAL(branches);
+	XDEBUG_MAKE_STD_ZVAL(branches);
 	array_init(branches);
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (xdebug_set_in(branch_info->starts, i)) {
-			MAKE_STD_ZVAL(branch);
+			XDEBUG_MAKE_STD_ZVAL(branch);
 			array_init(branch);
 			add_assoc_long(branch, "op_start", i);
 			add_assoc_long(branch, "op_end", branch_info->branches[i].end_op);
@@ -957,7 +952,7 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 
 			add_assoc_long(branch, "hit", branch_info->branches[i].hit);
 
-			MAKE_STD_ZVAL(out);
+			XDEBUG_MAKE_STD_ZVAL(out);
 			array_init(out);
 			if (branch_info->branches[i].out[0]) {
 				add_index_long(out, 0, branch_info->branches[i].out[0]);
@@ -967,7 +962,7 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 			}
 			add_assoc_zval(branch, "out", out);
 
-			MAKE_STD_ZVAL(out_hit);
+			XDEBUG_MAKE_STD_ZVAL(out_hit);
 			array_init(out_hit);
 			if (branch_info->branches[i].out[0]) {
 				add_index_long(out_hit, 0, branch_info->branches[i].out_hit[0]);
@@ -989,14 +984,14 @@ static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 	zval *paths, *path, *path_container;
 	unsigned int i, j;
 
-	MAKE_STD_ZVAL(paths);
+	XDEBUG_MAKE_STD_ZVAL(paths);
 	array_init(paths);
 
 	for (i = 0; i < branch_info->path_info.paths_count; i++) {
-		MAKE_STD_ZVAL(path);
+		XDEBUG_MAKE_STD_ZVAL(path);
 		array_init(path);
 
-		MAKE_STD_ZVAL(path_container);
+		XDEBUG_MAKE_STD_ZVAL(path_container);
 		array_init(path_container);
 
 		for (j = 0; j < branch_info->path_info.paths[i]->elements_count; j++) {
@@ -1019,7 +1014,7 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 	zval                     *function_info;
 	TSRMLS_FETCH();
 
-	MAKE_STD_ZVAL(function_info);
+	XDEBUG_MAKE_STD_ZVAL(function_info);
 	array_init(function_info);
 
 	if (function->branch_info) {
@@ -1039,7 +1034,7 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	TSRMLS_FETCH();
 
 	/* Add all the lines */
-	MAKE_STD_ZVAL(lines);
+	XDEBUG_MAKE_STD_ZVAL(lines);
 	array_init(lines);
 
 	xdebug_hash_apply(file->lines, (void *) lines, add_line);
@@ -1054,10 +1049,10 @@ static void add_file(void *ret, xdebug_hash_element *e)
 
 	/* Add the branch and path info */
 	if (file->has_branch_info) {
-		MAKE_STD_ZVAL(file_info);
+		XDEBUG_MAKE_STD_ZVAL(file_info);
 		array_init(file_info);
 
-		MAKE_STD_ZVAL(functions);
+		XDEBUG_MAKE_STD_ZVAL(functions);
 		array_init(functions);
 
 		xdebug_hash_apply(file->functions, (void *) functions, add_cc_function);
