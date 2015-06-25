@@ -32,6 +32,8 @@ void xdebug_stripcslashes(char *string, int *new_len);
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC);
 int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
 
+# define ADD_STRING_COPY
+
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
 
@@ -42,6 +44,8 @@ int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
 # define xdebug_stripcslashes php_stripcslashes
 # define xdebug_fetch_class   zend_fetch_class
 # define xdebug_get_constant  zend_get_constant
+
+# define ADD_STRING_COPY , 1
 
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	MAKE_STD_ZVAL(zv)

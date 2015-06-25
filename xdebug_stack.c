@@ -1295,13 +1295,13 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 		/* Add data */
 		if (i->function.function) {
-			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function, 1);
+			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function ADD_STRING_COPY);
 		}
 		if (i->function.class) {
-			add_assoc_string_ex(frame, "type",     sizeof("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic", 1);
-			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class,    1);
+			add_assoc_string_ex(frame, "type",     sizeof("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic" ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class    ADD_STRING_COPY);
 		}
-		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename, 1);
+		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename ADD_STRING_COPY);
 		add_assoc_long_ex(frame, "line", sizeof("line"), i->lineno);
 
 		/* Add parameters */
@@ -1332,15 +1332,15 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				argument = xdstrdup("???");
 			}
 			if (i->var[j].name && !variadic_opened) {
-				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument, 1);
+				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument ADD_STRING_COPY);
 			} else {
-				add_index_string(params, j, argument, 1);
+				add_index_string(params, j, argument ADD_STRING_COPY);
 			}
 			xdfree(argument);
 		}
 
 		if (i->include_filename) {
-			add_assoc_string_ex(frame, "include_filename", sizeof("include_filename"), i->include_filename, 1);
+			add_assoc_string_ex(frame, "include_filename", sizeof("include_filename"), i->include_filename ADD_STRING_COPY);
 		}
 
 		add_next_index_zval(return_value, frame);
@@ -1352,7 +1352,7 @@ void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
 {
 	char *name = (char*) he->ptr;
 	
-	add_next_index_string(return_value, name, 1);
+	add_next_index_string(return_value, name ADD_STRING_COPY);
 }
 
 /* {{{ proto array xdebug_get_declared_vars()
