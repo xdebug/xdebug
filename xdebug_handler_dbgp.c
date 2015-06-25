@@ -903,8 +903,10 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zval              *original_exception = EG(exception);
 #endif
 	jmp_buf           *original_bailout = EG(bailout);
+#if PHP_VERSION_ID < 70000
 	void             **original_argument_stack_top = EG(argument_stack)->top;
 	void             **original_argument_stack_end = EG(argument_stack)->end;
+#endif
 
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
@@ -931,8 +933,10 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(no_extensions) = original_no_extensions;
 	EG(exception) = original_exception;
 	EG(bailout) = original_bailout;
+#if PHP_VERSION_ID < 70000
 	EG(argument_stack)->top = original_argument_stack_top;
 	EG(argument_stack)->end = original_argument_stack_end;
+#endif
 
 	return res;
 }
