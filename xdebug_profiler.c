@@ -298,7 +298,7 @@ void xdebug_profiler_function_internal_end(function_stack_entry *fse TSRMLS_DC)
 	xdebug_profiler_function_user_end(fse, NULL TSRMLS_CC);
 }
 
-static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
+static int xdebug_print_aggr_entry(zval *pDest, void *argument TSRMLS_DC)
 {
 	FILE *fp = (FILE *) argument;
 	xdebug_aggregate_entry *xae = (xdebug_aggregate_entry *) pDest;
@@ -310,6 +310,15 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 		fprintf(fp, "\nsummary: %lu\n\n", (unsigned long) (xae->time_inclusive * 1000000));
 	}
 	if (xae->call_list) {
+#if PHP_VERSION_ID >= 70000
+		xdebug_aggregate_entry *xae_call;
+
+		ZEND_HASH_FOREACH_PTR(xae->call_list, xae_call) {
+			fprintf(fp, "cfn=%s\n", (xae_call)->function);
+			fprintf(fp, "calls=%d 0 0\n", (xae_call)->call_count);
+			fprintf(fp, "%d %lu\n", (xae_call)->lineno, (unsigned long) ((xae_call)->time_inclusive * 1000000));
+		} ZEND_HASH_FOREACH_END();
+#else
 		xdebug_aggregate_entry **xae_call;
 
 		zend_hash_internal_pointer_reset(xae->call_list);
@@ -319,6 +328,7 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 			fprintf(fp, "%d %lu\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 1000000));
 			zend_hash_move_forward(xae->call_list);
 		}
+#endif
 	}
 	fprintf(fp, "\n");
 	fflush(fp);

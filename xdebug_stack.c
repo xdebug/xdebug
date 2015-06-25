@@ -985,6 +985,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	int                   i = 0;
 	char                 *aggr_key = NULL;
 	int                   aggr_key_len = 0;
+#if PHP_VERSION_ID >= 70000
+	zend_string          *aggr_key_str;
+#endif
 
 #if PHP_VERSION_ID < 50500
 	edata = EG(current_execute_data);
@@ -1172,8 +1175,15 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 		aggr_key = xdebug_sprintf("%s.%s.%d", tmp->filename, func_name, tmp->lineno);
 		aggr_key_len = strlen(aggr_key);
+#if PHP_VERSION_ID >= 70000
+		aggr_key_str = zend_string_init(aggr_key, aggr_key_len, 0);
+#endif
 
+#if PHP_VERSION_ID >= 70000
+		if ((tmp->aggr_entry = zend_hash_find_ptr(&XG(aggr_calls), aggr_key_str)) == NULL) {
+#else
 		if (zend_hash_find(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void**)&tmp->aggr_entry) == FAILURE) {
+#endif
 			xdebug_aggregate_entry xae;
 
 			if (tmp->user_defined == XDEBUG_EXTERNAL) {
@@ -1189,7 +1199,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			xae.time_inclusive = 0;
 			xae.call_list = NULL;
 
+#if PHP_VERSION_ID >= 70000
+			zend_hash_add_ptr(&XG(aggr_calls), aggr_key_str, &xae);
+#else
 			zend_hash_add(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void*)&xae, sizeof(xdebug_aggregate_entry), (void**)&tmp->aggr_entry);
+#endif
 		}
 	}
 
@@ -1199,13 +1213,22 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			tmp->prev = prev;
 			if (XG(profiler_aggregate)) {
 				if (prev->aggr_entry->call_list) {
+#if PHP_VERSION_ID >= 70000
+					if (!zend_hash_exists(prev->aggr_entry->call_list, aggr_key_str)) {
+						zend_hash_add_ptr(prev->aggr_entry->call_list, aggr_key_str, tmp->aggr_entry);
+#else
 					if (!zend_hash_exists(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1)) {
 						zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
+#endif
 					}
 				} else {
 					prev->aggr_entry->call_list = xdmalloc(sizeof(HashTable));
 					zend_hash_init_ex(prev->aggr_entry->call_list, 1, NULL, NULL, 1, 0);
+#if PHP_VERSION_ID >= 70000
+					zend_hash_add_ptr(prev->aggr_entry->call_list, aggr_key_str, tmp->aggr_entry);
+#else
 					zend_hash_add(prev->aggr_entry->call_list, aggr_key, aggr_key_len+1, (void*)&tmp->aggr_entry, sizeof(xdebug_aggregate_entry*), NULL);
+#endif
 				}
 			}
 		}
@@ -1213,6 +1236,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 
 	if (XG(profiler_aggregate)) {
+#if PHP_VERSION_ID >= 70000
+		zend_string_release(aggr_key_str);
+#endif
 		xdfree(aggr_key);
 	}
 

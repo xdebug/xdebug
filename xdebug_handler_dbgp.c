@@ -1691,6 +1691,25 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 	/* add user defined constants */
 	if (context_id == 2) {
+#if PHP_VERSION_ID >= 70000
+		zend_constant *val;
+		ulong num_key;
+		zend_string *key;
+
+		ZEND_HASH_FOREACH_KEY_VAL(EG(zend_constants), num_key, key, val) {
+			if (!val->name) {
+				/* skip special constants */
+				continue;
+			}
+
+			if (val->module_number != PHP_USER_CONSTANT) {
+				/* we're only interested in user defined constants */
+				continue;
+			}
+
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), CONSTANT_NAME_LEN(val->name), &(val->value), options TSRMLS_CC);
+		} ZEND_HASH_FOREACH_END();
+#else
 		HashPosition   pos;
 		zend_constant *val;
 
@@ -1710,6 +1729,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 next_constant:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
+#endif
 
 		return 0;
 	}
