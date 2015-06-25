@@ -897,7 +897,11 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 //	zend_op_array     *original_active_op_array = EG(active_op_array);
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
+#if PHP_VERSION_ID >= 70000
+	zend_object       *original_exception = EG(exception);
+#else
 	zval              *original_exception = EG(exception);
+#endif
 	jmp_buf           *original_bailout = EG(bailout);
 	void             **original_argument_stack_top = EG(argument_stack)->top;
 	void             **original_argument_stack_end = EG(argument_stack)->end;
