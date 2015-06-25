@@ -1034,7 +1034,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	if (!tmp->filename) {
 		/* Includes/main script etc */
+#if PHP_VERSION_ID >= 70000
+		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
+#else
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
+#endif
 	}
 	/* Call user function locations */
 	if (
@@ -1187,7 +1191,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			xdebug_aggregate_entry xae;
 
 			if (tmp->user_defined == XDEBUG_EXTERNAL) {
+#if PHP_VERSION_ID >= 70000
+				xae.filename = xdstrdup(tmp->op_array->filename->val);
+#else
 				xae.filename = xdstrdup(tmp->op_array->filename);
+#endif
 			} else {
 				xae.filename = xdstrdup("php:internal");
 			}
