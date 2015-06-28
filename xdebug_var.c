@@ -37,10 +37,12 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
 	zval dzval = **zval_pp;
 	HashTable *tmp;
 
-	if (Z_OBJ_HANDLER(dzval, get_debug_info)) {
+	if (!XG(in_debug_info) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
 		zend_bool old_trace = XG(do_trace);
 		XG(do_trace) = 0;
+		XG(in_debug_info) = 1;
 		tmp = Z_OBJ_HANDLER(dzval, get_debug_info)(&dzval, is_tmp TSRMLS_CC);
+		XG(in_debug_info) = 0;
 		XG(do_trace) = old_trace;
 		return tmp;
 	} else {
