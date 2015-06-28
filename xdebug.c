@@ -317,6 +317,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->do_trace             = 0;
 	xg->trace_handler        = NULL;
 	xg->trace_context        = NULL;
+	xg->in_debug_info        = 0;
 	xg->coverage_enable      = 0;
 	xg->previous_filename    = "";
 	xg->previous_file        = NULL;
@@ -981,6 +982,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(no_exec)       = 0;
 	XG(level)         = 0;
 	XG(do_trace)      = 0;
+	XG(in_debug_info) = 0;
 	XG(coverage_enable) = 0;
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
@@ -1138,6 +1140,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	XG(level)            = 0;
 	XG(do_trace)         = 0;
+	XG(in_debug_info)    = 0;
 	XG(coverage_enable)  = 0;
 	XG(do_code_coverage) = 0;
 
