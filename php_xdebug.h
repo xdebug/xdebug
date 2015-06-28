@@ -168,6 +168,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           trace_format;
 	char         *last_exception_trace;
 	char         *last_eval_statement;
+	zend_bool     in_debug_info;
 
 	/* variable dumping limitation settings */
 	long          display_max_children;
