@@ -60,11 +60,19 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC);
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC);
 
-int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS);
-int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS);
+#if PHP_VERSION_ID >= 70000
+# define ZEND_USER_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
+# define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
+#else
+# define ZEND_USER_OPCODE_HANDLER_ARGS ZEND_OPCODE_HANDLER_ARGS
+# define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU ZEND_OPCODE_HANDLER_ARGS_PASSTHRU
+#endif
+
+int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
+int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
 
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(f) \
-	int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS)
+	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_add);

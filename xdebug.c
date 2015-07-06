@@ -90,7 +90,7 @@ static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, 
 static size_t xdebug_ub_write(const char *string, size_t length);
 
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
-int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS);
+int xdebug_exit_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
 
 int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
@@ -501,7 +501,7 @@ void xdebug_env_config(TSRMLS_D)
 	xdebug_arg_dtor(parts);
 }
 
-static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
+static int xdebug_silence_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *cur_opcode = EG(current_execute_data)->opline;
 
@@ -520,7 +520,7 @@ static int xdebug_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-static int xdebug_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
+static int xdebug_include_or_eval_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *opline = execute_data->opline;
 
@@ -673,8 +673,10 @@ PHP_MINIT_FUNCTION(xdebug)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXT_FCALL_BEGIN);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CATCH);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BOOL);
+#if PHP_VERSION_ID < 70000
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_CHAR);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_STRING);
+#endif
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_ARRAY);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_R);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_R);
@@ -817,7 +819,9 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 			zend_set_user_opcode_handler(ZEND_RETURN, NULL);
 			zend_set_user_opcode_handler(ZEND_RETURN_BY_REF, NULL);
 			zend_set_user_opcode_handler(ZEND_EXT_STMT, NULL);
+#if PHP_VERSION_ID < 70000
 			zend_set_user_opcode_handler(ZEND_RAISE_ABSTRACT_ERROR, NULL);
+#endif
 			zend_set_user_opcode_handler(ZEND_SEND_VAR, NULL);
 			zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF, NULL);
 			zend_set_user_opcode_handler(ZEND_SEND_VAL, NULL);
@@ -825,8 +829,10 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 			zend_set_user_opcode_handler(ZEND_EXT_FCALL_BEGIN, NULL);
 			zend_set_user_opcode_handler(ZEND_CATCH, NULL);
 			zend_set_user_opcode_handler(ZEND_BOOL, NULL);
+#if PHP_VERSION_ID < 70000
 			zend_set_user_opcode_handler(ZEND_ADD_CHAR, NULL);
 			zend_set_user_opcode_handler(ZEND_ADD_STRING, NULL);
+#endif
 			zend_set_user_opcode_handler(ZEND_INIT_ARRAY, NULL);
 			zend_set_user_opcode_handler(ZEND_FETCH_DIM_R, NULL);
 			zend_set_user_opcode_handler(ZEND_FETCH_OBJ_R, NULL);
@@ -840,7 +846,9 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 			zend_set_user_opcode_handler(ZEND_CONCAT, NULL);
 			zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_DIM_OBJ, NULL);
 			zend_set_user_opcode_handler(ZEND_PRE_INC_OBJ, NULL);
+#if PHP_VERSION_ID < 70000
 			zend_set_user_opcode_handler(ZEND_SWITCH_FREE, NULL);
+#endif
 			zend_set_user_opcode_handler(ZEND_QM_ASSIGN, NULL);
 			zend_set_user_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, NULL);
 			zend_set_user_opcode_handler(ZEND_ADD_TRAIT, NULL);
@@ -1866,7 +1874,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 }
 
 /* Opcode handler for exit, to be able to clean up the profiler */
-int xdebug_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
+int xdebug_exit_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 {
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_deinit(TSRMLS_C);

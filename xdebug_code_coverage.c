@@ -103,7 +103,7 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 	xdfree(function_name);
 }
 
-int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
+int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 {
 	if (XG(do_code_coverage)) {
 		const zend_op *cur_opcode;
@@ -115,13 +115,13 @@ int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 #define XDEBUG_OPCODE_OVERRIDE(f) \
-	int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
+	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS) \
 	{ \
-		return xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+		return xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU); \
 	}
 
 
-int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS)
+int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 {
 	if (XG(do_code_coverage)) {
 		const zend_op *cur_opcode;
@@ -276,7 +276,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	return name.d;
 }
 
-static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HANDLER_ARGS)
+static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCODE_HANDLER_ARGS)
 {
 	char    *file;
 	zend_op_array *op_array = &execute_data->func->op_array;
@@ -344,9 +344,9 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_OPCODE_HAN
 }
 
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN(f,o,cc) \
-	int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS) \
+	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS) \
 	{ \
-		return xdebug_common_assign_dim_handler((o), (cc), ZEND_OPCODE_HANDLER_ARGS_PASSTHRU); \
+		return xdebug_common_assign_dim_handler((o), (cc), ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU); \
 	}
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
