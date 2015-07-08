@@ -306,7 +306,7 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 
 	filename = xdebug_path_from_url(filename TSRMLS_CC);
 	stream = php_stream_open_wrapper(filename, "rb",
-			USE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			USE_PATH | XDEBUG_ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	xdfree(filename);
 
