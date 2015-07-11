@@ -31,6 +31,7 @@ char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len);
 void xdebug_stripcslashes(char *string, int *new_len);
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC);
 int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
+void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC);
 
 # define ADD_STRING_COPY
 # define XDEBUG_ENFORCE_SAFE_MODE 0x00
@@ -45,6 +46,7 @@ int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
 # define xdebug_stripcslashes php_stripcslashes
 # define xdebug_fetch_class   zend_fetch_class
 # define xdebug_get_constant  zend_get_constant
+# define xdebug_setcookie     php_setcookie
 
 # define ADD_STRING_COPY , 1
 # define XDEBUG_ENFORCE_SAFE_MODE ENFORCE_SAFE_MODE

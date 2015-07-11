@@ -149,6 +149,19 @@ int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC)
 	return tmp_const != NULL;
 }
 
+void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC)
+{
+	zend_string *name_s   = zend_string_init(name, name_len, 0);
+	zend_string *value_s  = zend_string_init(value, value_len, 0);
+	zend_string *path_s   = zend_string_init(path, path_len, 0);
+	zend_string *domain_s = zend_string_init(domain, domain_len, 0);
+	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, url_encode, httponly);
+	zend_string_release(name_s);
+	zend_string_release(value_s);
+	zend_string_release(path_s);
+	zend_string_release(domain_s);
+}
+
 #else
 
 #if PHP_VERSION_ID >= 50500
