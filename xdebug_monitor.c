@@ -138,8 +138,8 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 		XDEBUG_MAKE_STD_ZVAL(entry);
 		array_init(entry);
 
-		add_assoc_string_ex(entry, "function", sizeof("function"), mfe->func_name, 1);
-		add_assoc_string_ex(entry, "filename", sizeof("filename"), mfe->filename, 1);
+		add_assoc_string_ex(entry, "function", sizeof("function"), mfe->func_name ADD_STRING_COPY);
+		add_assoc_string_ex(entry, "filename", sizeof("filename"), mfe->filename ADD_STRING_COPY);
 		add_assoc_long(entry, "lineno", mfe->lineno);
 
 		add_next_index_zval(return_value, entry);
