@@ -26,7 +26,11 @@
 #include "xdebug_superglobals.h"
 #include "xdebug_var.h"
 #include "ext/standard/html.h"
-#include "ext/standard/php_smart_str.h"
+#if PHP_VERSION_ID >= 70000
+# include "Zend/zend_smart_str.h"
+#else
+# include "ext/standard/php_smart_str.h"
+#endif
 
 #include "main/php_ini.h"
 

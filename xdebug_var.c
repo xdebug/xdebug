@@ -19,7 +19,11 @@
 #include "php.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
-#include "ext/standard/php_smart_str.h"
+#if PHP_VERSION_ID >= 70000
+# include "Zend/zend_smart_str.h"
+#else
+# include "ext/standard/php_smart_str.h"
+#endif
 #include "zend.h"
 #include "zend_extensions.h"
 
