@@ -1047,7 +1047,17 @@ PHP_RINIT_FUNCTION(xdebug)
 			)
 			&& !SG(headers_sent)
 		) {
+#if PHP_VERSION_ID >= 70000
+			zend_string *session = zend_string_init("XDEBUG_SESSION", strlen("XDEBUG_SESSION"), 0);
+			zend_string *value   = zend_string_init("", 0, 0);
+			zend_string *path    = zend_string_init("/", 1, 0);
+			php_setcookie(session, value, time(NULL) + XG(remote_cookie_expire_time), path, 0, 1, 0);
+			zend_string_release(path);
+			zend_string_release(value);
+			zend_string_release(session);
+#else
 			php_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
+#endif
 			XG(no_exec) = 1;
 		}
 
