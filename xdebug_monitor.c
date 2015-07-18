@@ -87,7 +87,9 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 	if (XG(functions_to_monitor)) {
 		xdebug_hash_destroy(XG(functions_to_monitor));
 	}
-	XG(functions_to_monitor) = xdebug_hash_alloc(zend_hash_num_elements(functions_to_monitor), (xdebug_hash_dtor) xdebug_hash_function_monitor_dtor);
+
+	/* We add "1" here so that we don't alloc a 0-slot hash table */
+	XG(functions_to_monitor) = xdebug_hash_alloc(zend_hash_num_elements(functions_to_monitor) + 1, (xdebug_hash_dtor) xdebug_hash_function_monitor_dtor);
 	init_function_monitor_hash(XG(functions_to_monitor), functions_to_monitor);
 
 	XG(do_monitor_functions) = 1;
