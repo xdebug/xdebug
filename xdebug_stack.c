@@ -113,12 +113,20 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		return;
 	}
 
+#if PHP_VERSION_ID >= 70000
+	if (!EG(current_execute_data)->symbol_table) {
+#else
 	if (!EG(active_symbol_table)) {
+#endif
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
 
 	tmp_ht = XG(active_symbol_table);
+#if PHP_VERSION_ID >= 70000
+	XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+#else
 	XG(active_symbol_table) = EG(active_symbol_table);
+#endif
 	zvar = xdebug_get_php_symbol(name, strlen(name) + 1 TSRMLS_CC);
 	XG(active_symbol_table) = tmp_ht;
 
@@ -753,7 +761,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			break;
 	}
 
+#if PHP_VERSION_ID => 70000
+	if (PG(track_errors) && EG(current_execute_data)->symbol_table) {
+#else
 	if (PG(track_errors) && EG(active_symbol_table)) {
+#endif
 		zval *tmp;
 
 		ALLOC_ZVAL(tmp);
