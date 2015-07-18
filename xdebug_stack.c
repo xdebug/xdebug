@@ -242,10 +242,14 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 {
 	char **formats = select_formats(html TSRMLS_CC);
 	char *escaped;
-	size_t newlen;
 
 	if (html) {
-		char *tmp;
+#if PHP_VERSION_ID >= 70000
+		zend_string *tmp;
+#else
+		char  *tmp;
+		size_t newlen;
+#endif
 		char *first_closing = strchr(buffer, ']');
 
 		/* We do need to escape HTML entities here, as HTML chars could be in
@@ -261,16 +265,28 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 			first_closing++;
 			smart_str_appends(&special_escaped, buffer);
 
+#if PHP_VERSION_ID >= 70000
+			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), 0, 0, NULL TSRMLS_CC);
+			smart_str_appends(&special_escaped, tmp->val);
+			zend_string_free(tmp);
+#else
 			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), &newlen, 0, 0, NULL TSRMLS_CC);
 			smart_str_appends(&special_escaped, tmp);
 			STR_FREE(tmp);
+#endif
 
 			smart_str_0(&special_escaped);
 
-			escaped = estrdup(special_escaped.c);
+			escaped = estrdup(special_escaped.s->val);
 			smart_str_free(&special_escaped);
 		} else {
+#if PHP_VERSION_ID >= 70000
+			tmp = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), 0, 0, NULL TSRMLS_CC);
+			escaped = estrdup(tmp->val);
+			zend_string_free(tmp);
+#else
 			escaped = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), &newlen, 0, 0, NULL TSRMLS_CC);
+#endif
 		}
 	} else {
 		escaped = estrdup(buffer);
@@ -286,7 +302,11 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		xdebug_str_add(str, xdebug_sprintf(formats[1], error_type_str, escaped, error_filename, error_lineno), 1);
 	}
 
+#if PHP_VERSION_ID >= 70000
+	efree(escaped);
+#else
 	STR_FREE(escaped);
+#endif
 }
 
 void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
