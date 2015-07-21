@@ -206,6 +206,8 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			php_log_err(log_buffer.d TSRMLS_CC);
 			xdebug_str_free(&log_buffer);
 		}
+		
+		php_log_err("PHP End stack trace." TSRMLS_CC);
 	}
 }
 
