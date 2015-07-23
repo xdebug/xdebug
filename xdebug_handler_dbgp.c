@@ -1731,11 +1731,13 @@ next_constant:
 		/* Check for static variables and constants, but only if it's a static
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
+		
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 
 			xdebug_attach_static_vars(node, options, ce TSRMLS_CC);
 		}
+		
 
 		XG(active_symbol_table) = NULL;
 		XG(active_execute_data) = NULL;
