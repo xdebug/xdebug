@@ -1334,12 +1334,22 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			xdebug_str_add(str, xdebug_sprintf("%sdouble%s(%s%.*G%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc), ANSI_COLOR_RESET), 1);
 			break;
 
-		case IS_STRING:
-			if (mode == 1) {
-				tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 7 TSRMLS_CC);
-			} else {
-				tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "\0", 1 TSRMLS_CC);
-			}
+		case IS_STRING: {
+			char *pattern = (mode == 1) ? "'\\\0..\37" : "\0";
+			size_t pattern_len = (mode == 1) ? 7 : 1;
+#if PHP_VERSION_ID >= 70000
+			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
+			zend_string *tmp_zstr;
+
+			tmp_zstr = php_addcslashes(i_string, 0, pattern, pattern_len);
+
+			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
+			tmp_len = tmp_zstr->len;
+			zend_string_release(tmp_zstr);
+			zend_string_release(i_string);
+#else
+			tmp_str = php_addcslashes(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), &tmp_len, 0, pattern, pattern_len TSRMLS_CC);
+#endif
 			if (options->no_decoration) {
 				xdebug_str_addl(str, tmp_str, tmp_len, 0);
 			} else if (Z_STRLEN_P(*struc) <= (unsigned int) options->max_data) {
@@ -1355,7 +1365,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 				xdebug_str_add(str, xdebug_sprintf("%s\"...", ANSI_COLOR_RESET), 1);
 			}
 			efree(tmp_str);
-			break;
+		} break;
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
