@@ -1065,8 +1065,13 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
+#if PHP_VERSION_ID >= 70000
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_RES_P(*struc), type_name ? type_name : "Unknown"), 1);
+#else
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_P(*struc), type_name ? type_name : "Unknown"), 1);
+#endif
 			break;
 		}
 
@@ -1154,8 +1159,13 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
+#if PHP_VERSION_ID >= 70000
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_RES_P(*struc), type_name ? type_name : "Unknown"), 1);
+#else
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_LVAL_P(*struc), type_name ? type_name : "Unknown"), 1);
+#endif
 			break;
 		}
 	}
@@ -1391,9 +1401,17 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("%sresource%s(%s%ld%s) of type (%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
-			               ANSI_COLOR_RESOURCE, Z_LVAL_PP(struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+#if PHP_VERSION_ID >= 70000
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("%sresource%s(%s%ld%s) of type (%s)",
+				ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
+				ANSI_COLOR_RESOURCE, Z_RES_P(*struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+#else
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("%sresource%s(%s%ld%s) of type (%s)",
+				ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
+				ANSI_COLOR_RESOURCE, Z_LVAL_P(*struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+#endif
 			break;
 		}
 
@@ -1486,8 +1504,13 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_LVAL_PP(struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+#if PHP_VERSION_ID >= 70000
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_RES_P(*struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+#else
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_LVAL_P(*struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
+#endif
 			break;
 		}
 	}
@@ -1914,8 +1937,13 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			char *type_name;
 
 			xdebug_xml_add_attribute(node, "type", "resource");
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_xml_add_text(node, xdebug_sprintf("resource id='%ld' type='%s'", Z_LVAL_PP(struc), type_name ? type_name : "Unknown"));
+#if PHP_VERSION_ID >= 70000
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			xdebug_xml_add_text(node, xdebug_sprintf("resource id='%ld' type='%s'", Z_RES_P(*struc), type_name ? type_name : "Unknown"));
+#else
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_P(*struc) TSRMLS_CC);
+			xdebug_xml_add_text(node, xdebug_sprintf("resource id='%ld' type='%s'", Z_LVAL_P(*struc), type_name ? type_name : "Unknown"));
+#endif
 			break;
 		}
 
@@ -2163,8 +2191,12 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("<b>resource</b>(<i>%ld</i><font color='%s'>,</font> <i>%s</i>)", Z_LVAL_PP(struc), COLOR_RESOURCE, type_name ? type_name : "Unknown"), 1);
+#if PHP_VERSION_ID >= 70000
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+#else
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_P(*struc) TSRMLS_CC);
+#endif
+			xdebug_str_add(str, xdebug_sprintf("<b>resource</b>(<i>%ld</i><font color='%s'>,</font> <i>%s</i>)", Z_LVAL_P(*struc), COLOR_RESOURCE, type_name ? type_name : "Unknown"), 1);
 			break;
 		}
 
@@ -2300,8 +2332,13 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 		case IS_RESOURCE: {
 			char *type_name;
 
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>resource(%ld, %s)</font>", COLOR_RESOURCE, Z_LVAL_PP(struc), type_name ? type_name : "Unknown"), 1);
+#if PHP_VERSION_ID >= 70000
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>resource(%ld, %s)</font>", COLOR_RESOURCE, Z_RES_P(*struc), type_name ? type_name : "Unknown"), 1);
+#else
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_P(*struc) TSRMLS_CC);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>resource(%ld, %s)</font>", COLOR_RESOURCE, Z_LVAL_P(*struc), type_name ? type_name : "Unknown"), 1);
+#endif
 			break;
 		}
 	}
