@@ -1742,7 +1742,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 #endif
 		}
 	}
-	if (clear && EG(current_execute_data)->return_value) {
+	if (clear && EG(current_execute_data) && EG(current_execute_data)->return_value) {
 		zval_ptr_dtor(EG(current_execute_data)->return_value);
 		EG(current_execute_data)->return_value = NULL;
 	}
