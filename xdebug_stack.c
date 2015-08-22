@@ -1117,8 +1117,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op             **opline_ptr = NULL;
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
+#if PHP_VERSION_ID < 70000
 	zval                **param;
 	int                   i = 0;
+#endif
 	char                 *aggr_key = NULL;
 	int                   aggr_key_len = 0;
 #if PHP_VERSION_ID >= 70000
@@ -1218,7 +1220,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	} else  {
 		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
-
+#if 0
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
 			void **p;
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
@@ -1300,6 +1302,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 			}
 		}
+#endif
 	}
 
 	if (XG(do_code_coverage)) {

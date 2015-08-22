@@ -455,7 +455,9 @@ static zend_brk_cont_element* xdebug_find_brk_cont(int nest_levels, int array_of
 
 static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
+#if PHP_VERSION_ID < 70000
 	zend_op *base_address = &(opa->opcodes[0]);
+#endif
 
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
