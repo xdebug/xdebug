@@ -638,7 +638,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	error_handling  = EG(error_handling);
 	exception_class = EG(exception_class);
 	/* according to error handling mode, suppress error, throw exception or show it */
-	if (error_handling != EH_NORMAL && EG(in_execution)) {
+	if (error_handling != EH_NORMAL
+#if PHP_VERSION_ID < 70000
+		&& EG(in_execution)
+#endif
+	) {
 		switch (type) {
 			case E_CORE_ERROR:
 			case E_COMPILE_ERROR:
