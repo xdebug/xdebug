@@ -39,6 +39,10 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
 
+# define XDEBUG_APPLY_COUNT(ht) (ht->u.v.nApplyCount)
+# define HASH_KEY_VAL(k) (k)->key->val
+# define HASH_KEY_LEN(k) (k)->key->len
+
 #else
 # include "ext/standard/base64.h"
 # define xdebug_base64_encode php_base64_encode
@@ -53,6 +57,11 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	MAKE_STD_ZVAL(zv)
+
+# define XDEBUG_APPLY_COUNT(ht) (ht->nApplyCount)
+# define HASH_KEY_VAL(k) (k)->arKey
+# define HASH_KEY_LEN(k) (k)->nKeyLength
 #endif
+
 
 #endif

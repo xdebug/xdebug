@@ -519,27 +519,38 @@ static char *get_printable_stack(int html, int error_type, char *buffer, const c
 
 #define XDEBUG_LOG_PRINT(fs, string, ...) if (fs) { fprintf(fs, string, ## __VA_ARGS__); }
 
+#if PHP_VERSION_ID >= 70000
+# define XDEBUG_ZEND_HASH_STR_FIND(ht, str, size, var) var = zend_hash_str_find(Z_ARRVAL(ht), str, size);
+# define XDEBUG_ZEND_HASH_RETURN_TYPE zval *
+# define XDEBUG_ZEND_HASH_RETURN_VALUE Z_STRVAL_P
+#else
+# define XDEBUG_ZEND_HASH_STR_FIND(ht, str, size, var) zend_hash_find(Z_ARRVAL_P(ht), str, size, (void**) &var);
+# define XDEBUG_ZEND_HASH_RETURN_TYPE zval **
+# define XDEBUG_ZEND_HASH_RETURN_VALUE Z_STRVAL_PP
+#endif
+
 void xdebug_init_debugger(TSRMLS_D)
 {
 	xdebug_open_log(TSRMLS_C);
 	if (XG(remote_connect_back)) {
-		zval **remote_addr = NULL;
+		XDEBUG_ZEND_HASH_RETURN_TYPE remote_addr = NULL;
+
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking remote connect back address.\n");
 		if (XG(remote_addr_header) && XG(remote_addr_header)[0]) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking user configured header '%s'.\n", XG(remote_addr_header));
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), XG(remote_addr_header), strlen(XG(remote_addr_header)) + 1, (void**)&remote_addr);
+			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], XG(remote_addr_header), strlen(XG(remote_addr_header)) + 1, remote_addr);
 		}
 		if (!remote_addr) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'HTTP_X_FORWARDED_FOR'.\n");
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", 21, (void**)&remote_addr);
+			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], "HTTP_X_FORWARDED_FOR", 21, remote_addr);
 		}
 		if (!remote_addr) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'REMOTE_ADDR'.\n");
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", 12, (void**)&remote_addr);
+			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], "REMOTE_ADDR", 12, remote_addr);
 		}
 		if (remote_addr) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", Z_STRVAL_PP(remote_addr), XG(remote_port));
-			XG(context).socket = xdebug_create_socket(Z_STRVAL_PP(remote_addr), XG(remote_port));
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port));
+			XG(context).socket = xdebug_create_socket(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port));
 		} else {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
@@ -781,19 +792,21 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			break;
 	}
 
-#if PHP_VERSION_ID => 70000
+#if PHP_VERSION_ID >= 70000
 	if (PG(track_errors) && EG(current_execute_data)->symbol_table) {
+		zval tmp;
+		ZVAL_STRINGL(&tmp, buffer, buffer_len);
+		zend_hash_str_update(EG(current_execute_data)->symbol_table, "php_errormsg", sizeof("php_errormsg"), &tmp);
 #else
 	if (PG(track_errors) && EG(active_symbol_table)) {
-#endif
 		zval *tmp;
-
 		ALLOC_ZVAL(tmp);
 		INIT_PZVAL(tmp);
 		Z_STRVAL_P(tmp) = (char *) estrndup(buffer, buffer_len);
 		Z_STRLEN_P(tmp) = buffer_len;
 		Z_TYPE_P(tmp) = IS_STRING;
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
+#endif
 	}
 
 	efree(buffer);

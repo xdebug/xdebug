@@ -1615,14 +1615,6 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	}
 }
 
-#if PHP_VERSION_ID >= 70000
-# define HASH_KEY_VAL(k) (k)->key->val
-# define HASH_KEY_LEN(k) (k)->key->len
-#else
-# define HASH_KEY_VAL(k) (k)->arKey
-# define HASH_KEY_LEN(k) (k)->nKeyLength
-#endif
-
 static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_hash *tmp_hash;
