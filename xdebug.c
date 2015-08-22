@@ -1283,12 +1283,13 @@ PHP_MINFO_FUNCTION(xdebug)
 static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC)
 {
 	zval *trigger_val;
-	zend_string *var_name_string = zend_string_init(ZEND_STRL(var_name), 0);
+	zend_string *var_name_string;
 
 	if (!setting) {
 		return 0;
 	}
 
+	var_name_string = zend_string_init(ZEND_STRL(var_name), 0);
 	if (
 		(
 			(
@@ -1303,9 +1304,11 @@ static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value T
 			(strcmp(var_value, Z_STRVAL_P(trigger_val)) == 0)
 		)
 	) {
+		zend_string_release(var_name_string);
 		return 1;
 	}
 
+	zend_string_release(var_name_string);
 	return 0;
 }
 
