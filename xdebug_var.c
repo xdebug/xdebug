@@ -489,8 +489,14 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			if (cce) {
 				zval *tmp_val;
 
+#if PHP_VERSION_ID >= 70000
+				zval dummy;
+				tmp_val = zend_read_property(cce, parent, name, name_length, 0, &dummy);
+				if (tmp_val) {
+#else
 				tmp_val = zend_read_property(cce, parent, name, name_length, 0 TSRMLS_CC);
 				if (tmp_val && tmp_val != EG(uninitialized_zval_ptr)) {
+#endif
 					retval_p = tmp_val;
 					goto cleanup;
 				}
