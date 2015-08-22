@@ -947,6 +947,88 @@ static int find_line_number_for_current_execute_point(zend_execute_data *edata T
 	return 0;
 }
 
+#if PHP_VERSION_ID >= 70000
+static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
+{
+	memset(tmp, 0, sizeof(xdebug_func));
+
+	if (edata) {
+		if (edata->func->common.function_name) {
+			if (edata->called_scope) {
+				tmp->type = XFUNC_MEMBER;
+				if (edata->func->common.scope) { /* __autoload has no scope */
+					tmp->class = xdstrdup(edata->func->common.scope->name->val);
+				}
+			} else if (EG(scope) && edata->func->common.scope && edata->func->common.scope->name) {
+				tmp->type = XFUNC_STATIC_MEMBER;
+				tmp->class = xdstrdup(edata->func->common.scope->name->val);
+			} else {
+				tmp->type = XFUNC_NORMAL;
+			}
+			if (strcmp(edata->func->common.function_name->val, "{closure}") == 0) {
+				tmp->function = xdebug_sprintf(
+					"{closure:%s:%d-%d}",
+					edata->func->op_array.filename,
+					edata->func->op_array.line_start,
+					edata->func->op_array.line_end
+				);
+			} else if (strncmp(edata->func->common.function_name->val, "call_user_func", 14) == 0) {
+				const char *fname = NULL;
+				int         lineno = 0;
+
+				if (edata->prev_execute_data && edata->prev_execute_data->func->type == ZEND_USER_FUNCTION) {
+					fname = edata->prev_execute_data->func->op_array.filename->val;
+				}
+
+				if (
+					!fname &&
+					XDEBUG_LLIST_TAIL(XG(stack)) &&
+					XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) &&
+					((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
+				) {
+					fname = ((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename;
+				}
+
+				if (!fname) {
+					fname = "whoops";
+				}
+
+				lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
+
+				tmp->function = xdebug_sprintf(
+					"%s:{%s:%d}",
+					edata->func->common.function_name->val,
+					fname,
+					lineno
+				);
+			} else {
+				tmp->function = xdstrdup(edata->func->common.function_name->val);
+			}
+		} else {
+			switch (edata->opline->extended_value) {
+				case ZEND_EVAL:
+					tmp->type = XFUNC_EVAL;
+					break;
+				case ZEND_INCLUDE:
+					tmp->type = XFUNC_INCLUDE;
+					break;
+				case ZEND_REQUIRE:
+					tmp->type = XFUNC_REQUIRE;
+					break;
+				case ZEND_INCLUDE_ONCE:
+					tmp->type = XFUNC_INCLUDE_ONCE;
+					break;
+				case ZEND_REQUIRE_ONCE:
+					tmp->type = XFUNC_REQUIRE_ONCE;
+					break;
+				default:
+					tmp->type = XFUNC_UNKNOWN;
+					break;
+			}
+		}
+	}
+}
+#else
 static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 {
 	memset(tmp, 0, sizeof(xdebug_func));
@@ -1027,6 +1109,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 		}
 	}
 }
+#endif
 
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
