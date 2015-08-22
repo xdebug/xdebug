@@ -128,12 +128,21 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
+#if PHP_VERSION_ID >= 70000
+			zend_string *i_filename = zend_string_init(fse->include_filename, strlen(fse->include_filename), 0);
+			zend_string *escaped;
+			escaped = php_addcslashes(i_filename, 0, "'\\\0..\37", 6);
+			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped->val), 1);
+			zend_string_release(escaped);
+			zend_string_release(i_filename);
+#else
 			int tmp_len;
 
 			char *escaped;
 			escaped = php_addcslashes(fse->include_filename, strlen(fse->include_filename), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
 			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped), 1);
 			efree(escaped);
+#endif
 		} else {
 			xdebug_str_add(&str, fse->include_filename, 0);
 		}

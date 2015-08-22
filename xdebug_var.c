@@ -930,8 +930,21 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			xdebug_str_add(str, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_PP(struc)), 1);
 			break;
 
-		case IS_STRING:
-			tmp_str = php_addcslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0, "'\\\0..\37", 7 TSRMLS_CC);
+		case IS_STRING: {
+#if PHP_VERSION_ID >= 70000
+			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
+			zend_string *tmp_zstr;
+
+			tmp_zstr = php_addcslashes(i_string, 0, "'\\\0..\37", 7);
+
+			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
+			zend_string_release(tmp_zstr);
+			zend_string_release(i_string);
+#else
+			int tmp_len;
+
+			tmp_str = php_addcslashes(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), &tmp_len, 0, "'\\\0..\37", 7 TSRMLS_CC);
+#endif
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
 			} else if (Z_STRLEN_PP(struc) <= options->max_data) {
@@ -942,7 +955,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 				xdebug_str_addl(str, "...'", 4, 0);
 			}
 			efree(tmp_str);
-			break;
+		} break;
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
