@@ -1312,10 +1312,16 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 #endif
 
 	switch (Z_TYPE_P(*struc)) {
+#if PHP_VERSION_ID >= 70000
+		case IS_TRUE:
+		case IS_FALSE:
+			xdebug_str_add(str, xdebug_sprintf("%sbool%s(%s%s%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOOL, Z_TYPE_P(*struc) == IS_TRUE ? "true" : "false", ANSI_COLOR_RESET), 1);
+			break;
+#else
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("%sbool%s(%s%s%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOOL, Z_LVAL_P(*struc) ? "true" : "false", ANSI_COLOR_RESET), 1);
 			break;
-
+#endif
 		case IS_NULL:
 			xdebug_str_add(str, xdebug_sprintf("%s%sNULL%s%s", ANSI_COLOR_BOLD, ANSI_COLOR_NULL, ANSI_COLOR_RESET, ANSI_COLOR_BOLD_OFF), 1);
 			break;
