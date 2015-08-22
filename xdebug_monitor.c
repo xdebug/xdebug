@@ -28,10 +28,8 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functions_to_monitor)
 {
 	zval *val;
-	ulong num_key;
-	zend_string *key;
 
-	ZEND_HASH_FOREACH_KEY_VAL(functions_to_monitor, num_key, key, val) {
+	ZEND_HASH_FOREACH_VAL(functions_to_monitor, val) {
 		if (Z_TYPE_P(val) == IS_STRING) {
 			xdebug_hash_add(internal, Z_STRVAL_P(val), Z_STRLEN_P(val), xdstrdup(Z_STRVAL_P(val)));
 		}
