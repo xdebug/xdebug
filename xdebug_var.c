@@ -1622,7 +1622,11 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp TSRM
 		item->zv   = ce->static_members_table[zpp->offset];
 	}
 #else
+# if PHP_VERSION_ID >= 70000
+	item->zv   = &ce->static_members_table[zpp->offset];
+# else
 	item->zv   = ce->static_members_table[zpp->offset];
+# endif
 #endif
 	item->name = STR_NAME_VAL(zpp->name);
 	item->name_len = STR_NAME_LEN(zpp->name);
@@ -1800,10 +1804,18 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info TSRMLS_D
 #endif
 
 	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
+#if PHP_VERSION_ID >= 70000
+		contents = xdebug_get_zval_value_xml_node_ex(prop_name, &class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+#else
 		contents = xdebug_get_zval_value_xml_node_ex(prop_name, class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+#endif
 	} else{
 		char *priv_name = xdebug_sprintf("*%s*%s", prop_class_name, prop_name);
+#if PHP_VERSION_ID >= 70000
+		contents = xdebug_get_zval_value_xml_node_ex(priv_name, &class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+#else
 		contents = xdebug_get_zval_value_xml_node_ex(priv_name, class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+#endif
 		xdfree(priv_name);
 	}
 
