@@ -27,6 +27,7 @@
 zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC);
 
 #if PHP_VERSION_ID >= 70000
+char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len, size_t *new_len);
 char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len);
 void xdebug_stripcslashes(char *string, int *new_len);
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC);
@@ -48,6 +49,7 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 
 #else
 # include "ext/standard/base64.h"
+# define xdebug_str_to_str    php_str_to_str
 # define xdebug_base64_encode php_base64_encode
 # define xdebug_base64_decode php_base64_decode
 # define xdebug_stripcslashes php_stripcslashes

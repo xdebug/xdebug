@@ -49,12 +49,24 @@
 
 #include "zend_compile.h"
 #include "ext/standard/base64.h"
+#include "ext/standard/php_string.h"
 
 zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC)
 {
 	zend_free_op should_free;
 
 	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
+}
+
+char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len, size_t *new_len)
+{
+	zend_string *new_str;
+
+	new_str = php_str_to_str(haystack, length, needle, needle_len, str, str_len);
+
+	*new_len = new_str->len;
+
+	return new_str->val;
 }
 
 char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len)

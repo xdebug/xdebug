@@ -837,8 +837,8 @@ static int xdebug_array_element_export(zval **zv TSRMLS_DC, int num_args, va_lis
 			size_t newlen = 0;
 			char *tmp, *tmp2;
 			
-			tmp = php_str_to_str((char *) hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
-			tmp2 = php_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
+			tmp = xdebug_str_to_str(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
+			tmp2 = xdebug_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
 				efree(tmp);
 			}
@@ -1149,8 +1149,8 @@ static int xdebug_array_element_export_text_ansi(zval **zv TSRMLS_DC, int num_ar
 			size_t newlen = 0;
 			char *tmp, *tmp2;
 			
-			tmp = php_str_to_str((char *) hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
-			tmp2 = php_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
+			tmp = xdebug_str_to_str(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
+			tmp2 = xdebug_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
 				efree(tmp);
 			}
@@ -2213,33 +2213,33 @@ char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_
 ** XML encoding function
 */
 
-char* xdebug_xmlize(char *string, int len, int *newlen)
+char* xdebug_xmlize(char *string, size_t len, size_t *newlen)
 {
-	char *tmp;
-	char *tmp2;
-
 	if (len) {
-		tmp = php_str_to_str(string, len, "&", 1, "&amp;", 5, &len);
+		char *tmp;
+		char *tmp2;
 
-		tmp2 = php_str_to_str(tmp, len, ">", 1, "&gt;", 4, &len);
+		tmp = xdebug_str_to_str(string, len, "&", 1, "&amp;", 5, &len);
+
+		tmp2 = xdebug_str_to_str(tmp, len, ">", 1, "&gt;", 4, &len);
 		efree(tmp);
 
-		tmp = php_str_to_str(tmp2, len, "<", 1, "&lt;", 4, &len);
+		tmp = xdebug_str_to_str(tmp2, len, "<", 1, "&lt;", 4, &len);
 		efree(tmp2);
 
-		tmp2 = php_str_to_str(tmp, len, "\"", 1, "&quot;", 6, &len);
+		tmp2 = xdebug_str_to_str(tmp, len, "\"", 1, "&quot;", 6, &len);
 		efree(tmp);
 
-		tmp = php_str_to_str(tmp2, len, "'", 1, "&#39;", 5, &len);
+		tmp = xdebug_str_to_str(tmp2, len, "'", 1, "&#39;", 5, &len);
 		efree(tmp2);
 
-		tmp2 = php_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
+		tmp2 = xdebug_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
 		efree(tmp);
 
-		tmp = php_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
+		tmp = xdebug_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
 		efree(tmp2);
 
-		tmp2 = php_str_to_str(tmp, len, "\0", 1, "&#0;", 4, newlen);
+		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, newlen);
 		efree(tmp);
 		return tmp2;
 	} else {
