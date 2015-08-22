@@ -340,7 +340,11 @@ static zval **get_arrayiterator_storage(zval *parent TSRMLS_DC)
 	int is_temp;
 	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
 
+#if PHP_VERSION_ID >= 70000
+	if ((tmp = zend_hash_str_find_ptr(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage"))) != NULL) {
+#else
 	if (zend_hash_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage"), (void **) &tmp) == SUCCESS) {
+#endif
 		return tmp;
 	}
 
@@ -993,7 +997,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
-			if (myht->nApplyCount < 1) {
+			if (XDEBUG_APPLY_COUNT(myht) < 1) {
 				char *class_name = STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
@@ -1307,7 +1311,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
-			if (myht && myht->nApplyCount < 1) {
+			if (myht && XDEBUG_APPLY_COUNT(myht) < 1) {
 				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n",
 					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
 					ANSI_COLOR_OBJECT, STR_NAME_VAL(Z_OBJCE_P(*struc)->name), ANSI_COLOR_RESET,
