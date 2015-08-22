@@ -957,9 +957,16 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
+#if PHP_VERSION_ID >= 70000
+		case IS_TRUE:
+		case IS_FALSE:
+			xdebug_str_add(str, xdebug_sprintf("%s", Z_TYPE_P(*struc) == IS_TRUE ? "TRUE" : "FALSE"), 1);
+			break;
+#else
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("%s", Z_LVAL_PP(struc) ? "TRUE" : "FALSE"), 1);
 			break;
+#endif
 
 		case IS_NULL:
 			xdebug_str_addl(str, "NULL", 4, 0);
@@ -1098,10 +1105,19 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
+#if PHP_VERSION_ID >= 70000
+		case IS_TRUE:
+			xdebug_str_addl(str, "true", 4, 0);
+			break;
+
+		case IS_FALSE:
+			xdebug_str_addl(str, "false", 5, 0);
+			break;
+#else
 		case IS_BOOL:
 			xdebug_str_addl(str, "bool", 4, 0);
 			break;
-
+#endif
 		case IS_NULL:
 			xdebug_str_addl(str, "null", 4, 0);
 			break;
@@ -1417,10 +1433,19 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
+#if PHP_VERSION_ID >= 70000
+		case IS_TRUE:
+			xdebug_str_add(str, xdebug_sprintf("%strue%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
+			break;
+
+		case IS_FALSE:
+			xdebug_str_add(str, xdebug_sprintf("%sfalse%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
+			break;
+#else
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("%sbool%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
 			break;
-
+#endif
 		case IS_NULL:
 			xdebug_str_add(str, xdebug_sprintf("%snull%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
 			break;
@@ -1766,11 +1791,18 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	zend_uint class_name_len;
 
 	switch (Z_TYPE_PP(struc)) {
+#if PHP_VERSION_ID >= 70000
+		case IS_TRUE:
+		case IS_FALSE:
+			xdebug_xml_add_attribute(node, "type", "bool");
+			xdebug_xml_add_text(node, xdebug_sprintf("%d", Z_TYPE_P(*struc) == IS_TRUE ? 1 : 0));
+			break;
+#else
 		case IS_BOOL:
 			xdebug_xml_add_attribute(node, "type", "bool");
 			xdebug_xml_add_text(node, xdebug_sprintf("%d", Z_LVAL_PP(struc)));
 			break;
-
+#endif
 		case IS_NULL:
 			xdebug_xml_add_attribute(node, "type", "null");
 			break;
@@ -2025,9 +2057,16 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		}
 	}
 	switch (Z_TYPE_PP(struc)) {
+#if PHP_VERSION_ID >= 70000
+		case IS_TRUE:
+		case IS_FALSE:
+			xdebug_str_add(str, xdebug_sprintf("<small>boolean</small> <font color='%s'>%s</font>", COLOR_BOOL, Z_TYPE_P(*struc) == IS_TRUE ? "true" : "false"), 1);
+			break;
+#else
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("<small>boolean</small> <font color='%s'>%s</font>", COLOR_BOOL, Z_LVAL_PP(struc) ? "true" : "false"), 1);
 			break;
+#endif
 
 		case IS_NULL:
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", COLOR_NULL), 1);
@@ -2204,10 +2243,16 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 	switch (Z_TYPE_PP(struc)) {
+#if PHP_VERSION_ID >= 70000
+		case IS_TRUE:
+		case IS_FALSE:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>%s</font>", COLOR_BOOL, Z_TYPE_P(*struc) == IS_TRUE ? "true" : "false"), 1);
+			break;
+#else
 		case IS_BOOL:
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>bool</font>", COLOR_BOOL), 1);
 			break;
-
+#endif
 		case IS_NULL:
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", COLOR_NULL), 1);
 			break;
