@@ -956,7 +956,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
-	switch (Z_TYPE_PP(struc)) {
+	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
 		case IS_FALSE:
@@ -964,7 +964,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			break;
 #else
 		case IS_BOOL:
-			xdebug_str_add(str, xdebug_sprintf("%s", Z_LVAL_PP(struc) ? "TRUE" : "FALSE"), 1);
+			xdebug_str_add(str, xdebug_sprintf("%s", Z_LVAL_P(*struc) ? "TRUE" : "FALSE"), 1);
 			break;
 #endif
 
@@ -973,11 +973,11 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("%ld", Z_LVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("%ld", Z_LVAL_P(*struc)), 1);
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add(str, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_P(*struc)), 1);
 			break;
 
 		case IS_STRING: {
@@ -997,7 +997,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 #endif
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
-			} else if (Z_STRLEN_PP(struc) <= options->max_data) {
+			} else if (Z_STRLEN_P(*struc) <= (unsigned int) options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			} else {
 				xdebug_str_addl(str, "'", 1, 0);
@@ -1104,7 +1104,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
-	switch (Z_TYPE_PP(struc)) {
+	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
 			xdebug_str_addl(str, "true", 4, 0);
@@ -1131,11 +1131,11 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 			break;
 
 		case IS_STRING:
-			xdebug_str_add(str, xdebug_sprintf("string(%d)", Z_STRLEN_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("string(%d)", Z_STRLEN_P(*struc)), 1);
 			break;
 
 		case IS_ARRAY:
-			myht = Z_ARRVAL_PP(struc);
+			myht = Z_ARRVAL_P(*struc);
 			xdebug_str_add(str, xdebug_sprintf("array(%d)", myht->nNumOfElements), 1);
 			break;
 
@@ -1296,9 +1296,9 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
 
-	switch (Z_TYPE_PP(struc)) {
+	switch (Z_TYPE_P(*struc)) {
 		case IS_BOOL:
-			xdebug_str_add(str, xdebug_sprintf("%sbool%s(%s%s%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOOL, Z_LVAL_PP(struc) ? "true" : "false", ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("%sbool%s(%s%s%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOOL, Z_LVAL_P(*struc) ? "true" : "false", ANSI_COLOR_RESET), 1);
 			break;
 
 		case IS_NULL:
@@ -1306,11 +1306,11 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("%sint%s(%s%ld%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_LVAL_PP(struc), ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("%sint%s(%s%ld%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_LVAL_P(*struc), ANSI_COLOR_RESET), 1);
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add(str, xdebug_sprintf("%sdouble%s(%s%.*G%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_DOUBLE, (int) EG(precision), Z_DVAL_PP(struc), ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("%sdouble%s(%s%.*G%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc), ANSI_COLOR_RESET), 1);
 			break;
 
 		case IS_STRING:
@@ -1321,13 +1321,15 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			}
 			if (options->no_decoration) {
 				xdebug_str_addl(str, tmp_str, tmp_len, 0);
-			} else if (Z_STRLEN_PP(struc) <= options->max_data) {
-				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s%s%s\"", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
-							ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET,
-							ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), 1);
+			} else if (Z_STRLEN_P(*struc) <= (unsigned int) options->max_data) {
+				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s%s%s\"",
+					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
+					ANSI_COLOR_LONG, Z_STRLEN_P(*struc), ANSI_COLOR_RESET,
+					ANSI_COLOR_STRING, tmp_str, ANSI_COLOR_RESET), 1);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, 
-							ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET, ANSI_COLOR_STRING), 1);
+				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s",
+					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
+					ANSI_COLOR_LONG, Z_STRLEN_P(*struc), ANSI_COLOR_RESET, ANSI_COLOR_STRING), 1);
 				xdebug_str_addl(str, tmp_str, options->max_data, 0);
 				xdebug_str_add(str, xdebug_sprintf("%s\"...", ANSI_COLOR_RESET), 1);
 			}
@@ -1432,7 +1434,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
-	switch (Z_TYPE_PP(struc)) {
+	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
 			xdebug_str_add(str, xdebug_sprintf("%strue%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF), 1);
@@ -1459,11 +1461,11 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 			break;
 
 		case IS_STRING:
-			xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%d%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_STRLEN_PP(struc), ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%d%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_STRLEN_P(*struc), ANSI_COLOR_RESET), 1);
 			break;
 
 		case IS_ARRAY:
-			myht = Z_ARRVAL_PP(struc);
+			myht = Z_ARRVAL_P(*struc);
 			xdebug_str_add(str, xdebug_sprintf("array(%s%d%s)", ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
 			break;
 
@@ -1790,7 +1792,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	char *class_name;
 	zend_uint class_name_len;
 
-	switch (Z_TYPE_PP(struc)) {
+	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
 		case IS_FALSE:
@@ -1800,7 +1802,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 #else
 		case IS_BOOL:
 			xdebug_xml_add_attribute(node, "type", "bool");
-			xdebug_xml_add_text(node, xdebug_sprintf("%d", Z_LVAL_PP(struc)));
+			xdebug_xml_add_text(node, xdebug_sprintf("%d", Z_LVAL_P(*struc)));
 			break;
 #endif
 		case IS_NULL:
@@ -1809,26 +1811,26 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_LONG:
 			xdebug_xml_add_attribute(node, "type", "int");
-			xdebug_xml_add_text(node, xdebug_sprintf("%ld", Z_LVAL_PP(struc)));
+			xdebug_xml_add_text(node, xdebug_sprintf("%ld", Z_LVAL_P(*struc)));
 			break;
 
 		case IS_DOUBLE:
 			xdebug_xml_add_attribute(node, "type", "float");
-			xdebug_xml_add_text(node, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_PP(struc)));
+			xdebug_xml_add_text(node, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_P(*struc)));
 			break;
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
-			if (options->max_data == 0 || Z_STRLEN_PP(struc) <= options->max_data) {
-				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc)), Z_STRLEN_PP(struc));
+			if (options->max_data == 0 || Z_STRLEN_P(*struc) <= (unsigned int) options->max_data) {
+				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc)), Z_STRLEN_P(*struc));
 			} else {
-				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_PP(struc), options->max_data), options->max_data);
+				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), options->max_data), options->max_data);
 			}
-			xdebug_xml_add_attribute_ex(node, "size", xdebug_sprintf("%d", Z_STRLEN_PP(struc)), 0, 1);
+			xdebug_xml_add_attribute_ex(node, "size", xdebug_sprintf("%d", Z_STRLEN_P(*struc)), 0, 1);
 			break;
 
 		case IS_ARRAY:
-			myht = Z_ARRVAL_PP(struc);
+			myht = Z_ARRVAL_P(*struc);
 			xdebug_xml_add_attribute(node, "type", "array");
 			xdebug_xml_add_attribute(node, "children", myht->nNumOfElements > 0?"1":"0");
 			if (XDEBUG_APPLY_COUNT(myht) < 1) {
@@ -2056,7 +2058,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			xdebug_str_add(str, "&amp;", 0);
 		}
 	}
-	switch (Z_TYPE_PP(struc)) {
+	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
 		case IS_FALSE:
@@ -2064,7 +2066,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			break;
 #else
 		case IS_BOOL:
-			xdebug_str_add(str, xdebug_sprintf("<small>boolean</small> <font color='%s'>%s</font>", COLOR_BOOL, Z_LVAL_PP(struc) ? "true" : "false"), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>boolean</small> <font color='%s'>%s</font>", COLOR_BOOL, Z_LVAL_P(*struc) ? "true" : "false"), 1);
 			break;
 #endif
 
@@ -2073,31 +2075,31 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("<small>int</small> <font color='%s'>%ld</font>", COLOR_LONG, Z_LVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>int</small> <font color='%s'>%ld</font>", COLOR_LONG, Z_LVAL_P(*struc)), 1);
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add(str, xdebug_sprintf("<small>float</small> <font color='%s'>%.*G</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>float</small> <font color='%s'>%.*G</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc)), 1);
 			break;
 
 		case IS_STRING:
 			xdebug_str_add(str, xdebug_sprintf("<small>string</small> <font color='%s'>'", COLOR_STRING), 1);
-			if (Z_STRLEN_PP(struc) > options->max_data) {
-				tmp_str = xdebug_xmlize(Z_STRVAL_PP(struc), options->max_data, &newlen);
+			if (Z_STRLEN_P(*struc) > (unsigned int) options->max_data) {
+				tmp_str = xdebug_xmlize(Z_STRVAL_P(*struc), options->max_data, &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
 				efree(tmp_str);
 				xdebug_str_addl(str, "'...</font>", 11, 0);
 			} else {
-				tmp_str = xdebug_xmlize(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &newlen);
+				tmp_str = xdebug_xmlize(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
 				efree(tmp_str);
 				xdebug_str_addl(str, "'</font>", 8, 0);
 			}
-			xdebug_str_add(str, xdebug_sprintf(" <i>(length=%d)</i>", Z_STRLEN_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf(" <i>(length=%d)</i>", Z_STRLEN_P(*struc)), 1);
 			break;
 
 		case IS_ARRAY:
-			myht = Z_ARRVAL_PP(struc);
+			myht = Z_ARRVAL_P(*struc);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
 			if (XDEBUG_APPLY_COUNT(myht) < 1) {
 				xdebug_str_add(str, xdebug_sprintf("<b>array</b> <i>(size=%d)</i>\n", myht->nNumOfElements), 1);
@@ -2158,7 +2160,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", COLOR_NULL), 0);
 			break;
 	}
-	if (Z_TYPE_PP(struc) != IS_ARRAY && Z_TYPE_PP(struc) != IS_OBJECT) {
+	if (Z_TYPE_P(*struc) != IS_ARRAY && Z_TYPE_P(*struc) != IS_OBJECT) {
 		xdebug_str_addl(str, "\n", 1, 0);
 	}
 }
@@ -2242,7 +2244,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
-	switch (Z_TYPE_PP(struc)) {
+	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
 		case IS_FALSE:
@@ -2266,11 +2268,11 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 			break;
 
 		case IS_STRING:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>string(%d)</font>", COLOR_STRING, Z_STRLEN_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>string(%d)</font>", COLOR_STRING, Z_STRLEN_P(*struc)), 1);
 			break;
 
 		case IS_ARRAY:
-			myht = Z_ARRVAL_PP(struc);
+			myht = Z_ARRVAL_P(*struc);
 			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>array(%d)</font>", COLOR_ARRAY, myht->nNumOfElements), 1);
 			break;
 
