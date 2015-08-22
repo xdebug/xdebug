@@ -241,7 +241,11 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	char      *tmp_value = NULL;
 
 	/* Generator key */
+#if PHP_VERSION_ID >= 70000
+	tmp_value = xdebug_get_zval_value(&generator->key, 0, NULL);
+#else
 	tmp_value = xdebug_get_zval_value(generator->key, 0, NULL);
+#endif
 	if (tmp_value) {
 		xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
 
@@ -249,7 +253,11 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		xdebug_str_add(&str, tmp_value, 1);
 		xdebug_str_addl(&str, " => ", 4, 0);
 
+#if PHP_VERSION_ID >= 70000
+		tmp_value = xdebug_get_zval_value(&generator->value, 0, NULL);
+#else
 		tmp_value = xdebug_get_zval_value(generator->value, 0, NULL);
+#endif
 		if (tmp_value) {
 			xdebug_str_add(&str, tmp_value, 1);
 		}
