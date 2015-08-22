@@ -235,6 +235,17 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 	return NULL;
 }
 
+#if PHP_VERSION_ID >= 70000
+inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
+{
+	zend_string *class_name = Z_OBJ_HANDLER_P(z, get_class_name)(Z_OBJ_P(z));
+
+	*ce = Z_OBJCE_P(z);
+	*length = class_name->len;
+
+	return class_name->val;
+}
+#else
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
 {
 	char *name;
@@ -983,10 +994,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht->nApplyCount < 1) {
-				char *class_name;
-				zend_uint class_name_len;
-
-				zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
+				char *class_name = STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
 				if (level <= options->max_depth) {
@@ -1003,7 +1011,6 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 					xdebug_str_addl(str, "...", 3, 0);
 				}
 				xdebug_str_addl(str, " }", 2, 0);
-				efree(class_name);
 			} else {
 				xdebug_str_addl(str, "...", 3, 0);
 			}
@@ -1301,14 +1308,11 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht && myht->nApplyCount < 1) {
-				char *class_name;
-				zend_uint class_name_len;
-
-				zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
-				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_OBJECT, class_name, ANSI_COLOR_RESET,
-							Z_OBJ_HANDLE_PP(struc),
-							ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
-				efree(class_name);
+				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n",
+					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
+					ANSI_COLOR_OBJECT, STR_NAME_VAL(Z_OBJCE_P(*struc)->name), ANSI_COLOR_RESET,
+					Z_OBJ_HANDLE_P(*struc),
+					ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
 
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
@@ -1407,11 +1411,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 			break;
 
 		case IS_OBJECT: {
-			char *class_name;
-			zend_uint class_name_len;
-
-			zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("class %s", class_name), 1);
+			xdebug_str_add(str, xdebug_sprintf("class %s", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
 			break;
 		}
 
@@ -1795,7 +1795,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			ALLOC_HASHTABLE(merged_hash);
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
-			zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
+			class_name = STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 			ce = xdebug_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			/* Adding static properties */
@@ -1829,7 +1829,6 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 					zend_hash_apply_with_arguments(merged_hash TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_xml_node, 5, level, node, name, options, class_name);
 				}
 			}
-			efree(class_name);
 
 			zend_hash_destroy(merged_hash);
 			FREE_HASHTABLE(merged_hash);
@@ -2054,20 +2053,20 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
 			if (XDEBUG_APPLY_COUNT(myht) < 1) {
-				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
-				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_PP(struc)), 1);
+				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
+				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_P(*struc)), 1);
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
-					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_fancy, 5, level, str, debug_zval, options, Z_OBJCE_PP(struc)->name);
+					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_fancy, 5, level, str, debug_zval, options, STR_NAME_VAL(Z_OBJCE_P(*struc)->name));
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
 			} else {
-				xdebug_str_add(str, xdebug_sprintf("<i>&</i><b>object</b>(<i>%s</i>)", Z_OBJCE_PP(struc)->name), 1);
-				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_PP(struc)), 1);
+				xdebug_str_add(str, xdebug_sprintf("<i>&</i><b>object</b>(<i>%s</i>)", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
+				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_P(*struc)), 1);
 			}
 			if (is_temp) {
 				zend_hash_destroy(myht);
@@ -2199,8 +2198,8 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 			break;
 
 		case IS_OBJECT:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>object(%s)", COLOR_OBJECT, Z_OBJCE_PP(struc)->name), 1);
-			xdebug_str_add(str, xdebug_sprintf("[%d]", Z_OBJ_HANDLE_PP(struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>object(%s)", COLOR_OBJECT, STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
+			xdebug_str_add(str, xdebug_sprintf("[%d]", Z_OBJ_HANDLE_P(*struc)), 1);
 			xdebug_str_addl(str, "</font>", 7, 0);
 			break;
 
