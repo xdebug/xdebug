@@ -797,7 +797,13 @@ char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **p
 {
 	const char *prop_name, *cls_name;
 
+#if PHP_VERSION_ID >= 70000
+	zend_string *i_mangled = zend_string_init(mangled_property, mangled_len, 0);
+	zend_unmangle_property_name(i_mangled, &cls_name, &prop_name);
+	zend_string_release(i_mangled);
+#else
 	zend_unmangle_property_name(mangled_property, mangled_len, &cls_name, &prop_name);
+#endif
 	*property_name = (char *) prop_name;
 	*class_name = (char *) cls_name;
 	if (cls_name) {
