@@ -22,6 +22,7 @@
 #include "ext/standard/php_smart_string.h"
 #include "zend.h"
 #include "zend_extensions.h"
+#include "zend_smart_str.h"
 
 #include "php_xdebug.h"
 #include "xdebug_compat.h"
@@ -2282,11 +2283,19 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	XG(in_var_serialisation) = 1;
+#if PHP_VERSION_ID >= 70000
+	php_var_serialize(&buf, val, &var_hash TSRMLS_CC);
+#else
 	php_var_serialize(&buf, &val, &var_hash TSRMLS_CC);
+#endif
 	XG(in_var_serialisation) = 0;
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
+#if PHP_VERSION_ID >= 70000
+	if (buf.a) {
+#else
 	if (buf.c) {
+#endif
 		int new_len;
 		char *tmp_base64, *tmp_ret;
 
