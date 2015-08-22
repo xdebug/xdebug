@@ -1156,9 +1156,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->execute_data  = NULL;
 
 	XG(function_count)++;
-	if (edata && edata->op_array) {
+	if (edata && ZEND_USER_CODE(edata->func->type)) {
 		/* Normal function calls */
-		tmp->filename  = xdstrdup(edata->op_array->filename);
+		tmp->filename  = xdstrdup(edata->func->op_array.filename->val);
 	} else if (
 		edata &&
 		edata->prev_execute_data &&

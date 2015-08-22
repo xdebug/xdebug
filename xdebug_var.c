@@ -732,8 +732,8 @@ zval* xdebug_get_php_symbol(char* name, int name_length TSRMLS_DC)
 						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
 							zend_class_entry *ce = xdebug_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
-							current_classname = estrdup(ce->name);
-							cc_length = strlen(ce->name);
+							current_classname = estrdup(STR_NAME_VAL(ce->name));
+							cc_length = strlen(STR_NAME_VAL(ce->name));
 							current_ce = ce;
 							keyword = *p + 1;
 
@@ -1504,8 +1504,8 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp TSRM
 #else
 	item->zv   = ce->static_members_table[zpp->offset];
 #endif
-	item->name = (char *) zpp->name;
-	item->name_len = zpp->name_length;
+	item->name = STR_NAME_VAL(zpp->name);
+	item->name_len = STR_NAME_LEN(zpp->name);
 
 #if PHP_VERSION_ID >= 70000
 	zend_hash_next_index_insert_ptr(merged, item);
@@ -1673,7 +1673,11 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info TSRMLS_D
 	}
 
 	(*children_count)++;
+#if PHP_VERSION_ID >= 70000
+	modifier = xdebug_get_property_info(STR_NAME_VAL(prop_info->name), STR_NAME_LEN(prop_info->name), &prop_name, &prop_class_name);
+#else
 	modifier = xdebug_get_property_info((char *) prop_info->name, prop_info->name_length, &prop_name, &prop_class_name);
+#endif
 
 	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 		contents = xdebug_get_zval_value_xml_node_ex(prop_name, class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
@@ -1701,7 +1705,7 @@ void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	xdebug_xml_add_attribute(static_container, "name", "::");
 	xdebug_xml_add_attribute(static_container, "fullname", "::");
 	xdebug_xml_add_attribute(static_container, "type", "object");
-	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(ce->name), 0, 1);
+	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(STR_NAME_VAL(ce->name)), 0, 1);
 
 	zend_hash_apply_with_arguments(static_members TSRMLS_CC, (apply_func_args_t) xdebug_attach_property_with_contents, 5, static_container, options, ce, ce->name, &children); 
 	xdebug_xml_add_attribute(static_container, "children", children > 0 ? "1" : "0");
