@@ -850,7 +850,7 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
 	tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, 1 TSRMLS_CC);
-	RETVAL_STRING(tmp, 1);
+	RETVAL_STRING(tmp ADD_STRING_COPY);
 	xdfree(tmp);
 }
 /* }}} */
@@ -867,7 +867,7 @@ PHP_FUNCTION(xdebug_call_class)
 	}
 	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->function.class ? i->function.class : "", 1);
+		RETURN_STRING(i->function.class ? i->function.class : "" ADD_STRING_COPY);
 	} else {
 		RETURN_FALSE;
 	}
@@ -886,7 +886,7 @@ PHP_FUNCTION(xdebug_call_function)
 	}
 	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->function.function ? i->function.function : "{}", 1);
+		RETURN_STRING(i->function.function ? i->function.function : "{}" ADD_STRING_COPY);
 	} else {
 		RETURN_FALSE;
 	}
@@ -924,7 +924,7 @@ PHP_FUNCTION(xdebug_call_file)
 	}
 	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->filename, 1);
+		RETURN_STRING(i->filename ADD_STRING_COPY);
 	} else {
 		RETURN_FALSE;
 	}

@@ -125,7 +125,7 @@ PHP_FUNCTION(xdebug_start_trace)
 
 		if ((trace_fname = xdebug_start_trace(fname, options TSRMLS_CC)) != NULL) {
 			XG(do_trace) = 1;
-			RETVAL_STRING(trace_fname, 1);
+			RETVAL_STRING(trace_fname ADD_STRING_COPY);
 			xdfree(trace_fname);
 			return;
 		} else {
@@ -143,7 +143,7 @@ PHP_FUNCTION(xdebug_start_trace)
 PHP_FUNCTION(xdebug_stop_trace)
 {
 	if (XG(do_trace) == 1) {
-		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC), 1);
+		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC) ADD_STRING_COPY);
 		xdebug_stop_trace(TSRMLS_C);
 	} else {
 		RETVAL_FALSE;
@@ -154,7 +154,7 @@ PHP_FUNCTION(xdebug_stop_trace)
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
 	if (XG(do_trace) == 1 && XG(trace_handler) && XG(trace_handler)->get_filename) {
-		RETURN_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC), 1);
+		RETURN_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC) ADD_STRING_COPY);
 	} else {
 		RETURN_FALSE;
 	}
