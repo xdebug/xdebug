@@ -69,6 +69,17 @@ char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t need
 	return new_str->val;
 }
 
+char *xdebug_base64_encode(unsigned char *data, int data_len, int *new_len)
+{
+	zend_string *new_str;
+
+	new_str = php_base64_encode(data, data_len);
+
+	*new_len = new_str->len;
+
+	return new_str->val;
+}
+
 char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len)
 {
 	zend_string *new_str;

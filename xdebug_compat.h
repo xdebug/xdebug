@@ -21,6 +21,7 @@
 
 #include "php.h"
 
+#include "ext/standard/head.h"
 #include "ext/standard/php_var.h"
 #define xdebug_php_var_dump php_var_dump
 
@@ -28,6 +29,7 @@ zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdat
 
 #if PHP_VERSION_ID >= 70000
 char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len, size_t *new_len);
+char *xdebug_base64_encode(unsigned char *data, int data_len, int *new_len);
 char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len);
 void xdebug_stripcslashes(char *string, int *new_len);
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC);

@@ -2125,7 +2125,11 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 		char *tmp_base64, *tmp_ret;
 
 		/* now we need to base64 it */
+#if PHP_VERSION_ID >= 70000
+		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) buf.s->val, buf.s->len, &new_len);
+#else
 		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) buf.c, buf.len, &new_len);
+#endif
 
 		/* we need a malloc'ed and not an emalloc'ed string */
 		tmp_ret = xdstrdup(tmp_base64);
