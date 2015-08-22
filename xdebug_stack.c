@@ -341,7 +341,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
 				char *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value, *tmp_serialized;
-				int newlen;
+				size_t newlen;
 
 				if (c) {
 					xdebug_str_addl(str, ", ", 2, 0);
@@ -817,7 +817,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 PHP_FUNCTION(xdebug_print_function_stack)
 {
 	char *message = NULL;
+#if PHP_VERSION_ID >= 70000
+	size_t message_len;
+#else
 	int message_len;
+#endif
 	function_stack_entry *i;
 	char *tmp;
 	long options = 0;

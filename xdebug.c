@@ -2197,7 +2197,11 @@ PHP_FUNCTION(xdebug_get_profiler_filename)
 PHP_FUNCTION(xdebug_dump_aggr_profiling_data)
 {
 	char *prefix = NULL;
+#if PHP_VERSION_ID >= 70000
+	size_t prefix_len;
+#else
 	int prefix_len;
+#endif
 
 	if (!XG(profiler_aggregate)) {
 		RETURN_FALSE;

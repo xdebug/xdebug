@@ -110,7 +110,11 @@ void xdebug_stop_trace(TSRMLS_D)
 PHP_FUNCTION(xdebug_start_trace)
 {
 	char *fname = NULL;
+#if PHP_VERSION_ID >= 70000
+	size_t fname_len = 0;
+#else
 	int   fname_len = 0;
+#endif
 	char *trace_fname;
 	long  options = XG(trace_options);
 

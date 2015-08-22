@@ -233,7 +233,7 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
 {
 	char *name;
-	zend_uint name_len;
+	size_t name_len;
 	zend_class_entry *tmp_ce;
 
 	if (Z_TYPE_P(z) != IS_OBJECT) {
@@ -258,6 +258,7 @@ inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_e
 	*length = name_len;
 	return name;
 }
+#endif
 
 static char* prepare_search_key(char *name, int *name_length, char *prefix, int prefix_length)
 {
@@ -833,7 +834,7 @@ static int xdebug_array_element_export(zval **zv TSRMLS_DC, int num_args, va_lis
 		if (HASH_KEY_LEN(hash_key) == 0) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf("%ld => ", hash_key->h), 1);
 		} else { /* string key */
-			int newlen = 0;
+			size_t newlen = 0;
 			char *tmp, *tmp2;
 			
 			tmp = php_str_to_str((char *) hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
@@ -1145,7 +1146,7 @@ static int xdebug_array_element_export_text_ansi(zval **zv TSRMLS_DC, int num_ar
 		if (HASH_KEY_LEN(hash_key) == 0) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf("[%ld] %s=>%s\n", hash_key->h, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		} else { /* string key */
-			int newlen = 0;
+			size_t newlen = 0;
 			char *tmp, *tmp2;
 			
 			tmp = php_str_to_str((char *) hash_key->arKey, hash_key->nKeyLength, "'", 1, "\\'", 2, &newlen);
@@ -1883,7 +1884,8 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 
 static int xdebug_array_element_export_fancy(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	int level, debug_zval, newlen;
+	int level, debug_zval;
+	size_t newlen;
 	char *tmp_str;
 	xdebug_str *str;
 	xdebug_var_export_options *options;
