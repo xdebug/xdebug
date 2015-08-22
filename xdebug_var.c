@@ -405,10 +405,18 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 		case XF_ST_ROOT:
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
+#if PHP_VERSION_ID >= 70000
+			if (XG(active_execute_data) && XG(active_execute_data)->func) {
+#else
 			if (XG(active_execute_data) && XG(active_execute_data)->op_array) {
+#endif
 				int i = 0;
 				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
+#if PHP_VERSION_ID >= 70000
+				zend_op_array *opa = &XG(active_execute_data)->func->op_array;
+#else
 				zend_op_array *opa = XG(active_execute_data)->op_array;
+#endif
 				zval **CV;
 
 				while (i < opa->last_var) {
