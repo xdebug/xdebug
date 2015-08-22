@@ -19,11 +19,7 @@
 #include "php.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
-#if PHP_VERSION_ID >= 70000
-# include "Zend/zend_smart_str.h"
-#else
-# include "ext/standard/php_smart_str.h"
-#endif
+#include "ext/standard/php_smart_string.h"
 #include "zend.h"
 #include "zend_extensions.h"
 
@@ -33,6 +29,15 @@
 #include "xdebug_mm.h"
 #include "xdebug_var.h"
 #include "xdebug_xml.h"
+
+#if PHP_VERSION_ID >= 70000
+# define STR_NAME_VAL(k) (k)->val
+# define STR_NAME_LEN(k) (k)->len
+#else
+# define STR_NAME_VAL(k) (k)
+# define STR_NAME_LEN(k) (k_length)
+#endif
+
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

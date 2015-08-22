@@ -26,11 +26,7 @@
 #include "xdebug_superglobals.h"
 #include "xdebug_var.h"
 #include "ext/standard/html.h"
-#if PHP_VERSION_ID >= 70000
-# include "Zend/zend_smart_str.h"
-#else
-# include "ext/standard/php_smart_str.h"
-#endif
+#include "ext/standard/php_smart_string.h"
 
 #include "main/php_ini.h"
 
@@ -259,15 +255,15 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		 * it to a tmp string, and then adds an HTML escaped string for the
 		 * rest of the original buffer. */
 		if (first_closing && strstr(buffer, "() [<a href=") != NULL) {
-			smart_str special_escaped = {0};
+			smart_string special_escaped = {0};
 
 			*first_closing = '\0';
 			first_closing++;
-			smart_str_appends(&special_escaped, buffer);
+			smart_string_appends(&special_escaped, buffer);
 
 #if PHP_VERSION_ID >= 70000
 			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), 0, 0, NULL TSRMLS_CC);
-			smart_str_appends(&special_escaped, tmp->val);
+			smart_string_appends(&special_escaped, tmp->val);
 			zend_string_free(tmp);
 #else
 			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), &newlen, 0, 0, NULL TSRMLS_CC);
@@ -275,10 +271,10 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 			STR_FREE(tmp);
 #endif
 
-			smart_str_0(&special_escaped);
+			smart_string_0(&special_escaped);
 
-			escaped = estrdup(special_escaped.s->val);
-			smart_str_free(&special_escaped);
+			escaped = estrdup(special_escaped.c);
+			smart_string_free(&special_escaped);
 		} else {
 #if PHP_VERSION_ID >= 70000
 			tmp = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), 0, 0, NULL TSRMLS_CC);
