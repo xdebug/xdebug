@@ -276,7 +276,7 @@ inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_e
 }
 #endif
 
-static char* prepare_search_key(char *name, int *name_length, char *prefix, int prefix_length)
+static char* prepare_search_key(char *name, unsigned int *name_length, char *prefix, int prefix_length)
 {
 	char *element;
 	int   extra_length = 0;
@@ -347,12 +347,12 @@ static zval **get_arrayiterator_storage(zval *parent TSRMLS_DC)
 	return NULL;
 }
 
-static zval* fetch_zval_from_symbol_table(zval *parent, char* name, int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
+static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
 	zval **retval_pp = NULL, *retval_p = NULL;
 	char  *element = NULL;
-	int    element_length = name_length;
+	unsigned int element_length = name_length;
 	zend_property_info *zpp;
 
 	if (parent) {
