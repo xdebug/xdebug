@@ -533,7 +533,7 @@ static int xdebug_include_or_eval_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 		zval tmp_inc_filename;
 		int  is_var;
 
-		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
+		inc_filename = xdebug_get_zval(execute_data, &execute_data->func->op_array, opline->op1_type, &opline->op1, &is_var);
 		
 		/* If there is no inc_filename, we're just bailing out instead */
 		if (!inc_filename) {
