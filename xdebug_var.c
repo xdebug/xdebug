@@ -1851,7 +1851,6 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 {
 	HashTable *myht;
 	char *class_name;
-	zend_uint class_name_len;
 
 	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
@@ -2114,7 +2113,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 {
 	HashTable *myht;
 	char*     tmp_str;
-	int       newlen;
+	size_t    newlen;
 	int       is_temp;
 
 #if PHP_VERSION_ID < 70000
