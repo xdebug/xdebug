@@ -420,11 +420,19 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 				zval **CV;
 
 				while (i < opa->last_var) {
+#if PHP_VERSION_ID >= 70000
+					if (ZSTR_H(opa->vars[i]) == hash_value &&
+						ZSTR_LEN(opa->vars[i]) == element_length &&
+						strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)
+#else
 					if (opa->vars[i].hash_value == hash_value &&
 						opa->vars[i].name_len == element_length &&
-						strcmp(opa->vars[i].name, element) == 0)
+						strcmp(STR_NAME_VAL(opa->vars[i].name), element) == 0)
+#endif
 					{
-#if PHP_VERSION_ID >= 50500
+#if PHP_VERSION_ID >= 70000
+						CV = NULL;
+#elif PHP_VERSION_ID >= 50500
 						CV = (*EX_CV_NUM(XG(active_execute_data), i));
 #else
 						CV = XG(active_execute_data)->CVs[i];
