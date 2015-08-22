@@ -1147,12 +1147,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 			break;
 
 		case IS_OBJECT: {
-			char *class_name;
-			zend_uint class_name_len;
-
-			zend_get_object_classname(*struc, (const char **) &class_name, &class_name_len TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("class %s", class_name), 1);
-			efree(class_name);
+			xdebug_str_add(str, xdebug_sprintf("class %s", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
 			break;
 		}
 
