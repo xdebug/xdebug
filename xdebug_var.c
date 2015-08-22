@@ -947,15 +947,18 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 {
 	HashTable *myht;
 	char*     tmp_str;
-	int       tmp_len;
 	int       is_temp;
 
 	if (!struc || !(*struc)) {
 		return;
 	}
+
+#if PHP_VERSION_ID < 70000
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
+#endif
+
 	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
@@ -1101,9 +1104,13 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 	if (!struc || !(*struc)) {
 		return;
 	}
+
+#if PHP_VERSION_ID < 70000
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
+#endif
+
 	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
@@ -1292,9 +1299,12 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	}
 	
 	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
+
+#if PHP_VERSION_ID < 70000
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
+#endif
 
 	switch (Z_TYPE_P(*struc)) {
 		case IS_BOOL:
@@ -1431,9 +1441,13 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 	if (!struc || !(*struc)) {
 		return;
 	}
+
+#if PHP_VERSION_ID < 70000
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
+#endif
+
 	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
@@ -2051,6 +2065,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	int       newlen;
 	int       is_temp;
 
+#if PHP_VERSION_ID < 70000
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	} else {
@@ -2058,6 +2073,8 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			xdebug_str_add(str, "&amp;", 0);
 		}
 	}
+#endif
+
 	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
@@ -2241,9 +2258,12 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 {
 	HashTable *myht;
 
+#if PHP_VERSION_ID < 70000
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
+#endif
+
 	switch (Z_TYPE_P(*struc)) {
 #if PHP_VERSION_ID >= 70000
 		case IS_TRUE:
