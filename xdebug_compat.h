@@ -43,6 +43,9 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 # define HASH_KEY_VAL(k) (k)->key->val
 # define HASH_KEY_LEN(k) (k)->key->len
 
+# define ZEND_USER_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
+# define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
+
 #else
 # include "ext/standard/base64.h"
 # define xdebug_base64_encode php_base64_encode
@@ -61,6 +64,9 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 # define XDEBUG_APPLY_COUNT(ht) (ht->nApplyCount)
 # define HASH_KEY_VAL(k) (k)->arKey
 # define HASH_KEY_LEN(k) (k)->nKeyLength
+
+# define ZEND_USER_OPCODE_HANDLER_ARGS ZEND_OPCODE_HANDLER_ARGS
+# define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU ZEND_OPCODE_HANDLER_ARGS_PASSTHRU
 #endif
 
 
