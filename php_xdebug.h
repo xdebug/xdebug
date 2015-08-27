@@ -195,7 +195,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_path_info     *paths_stack;
 	xdebug_hash          *visited_branches;
 	struct {
-		int  size;
+		unsigned int  size;
 		int *last_branch_nr;
 	} branches;
 

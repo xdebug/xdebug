@@ -19,10 +19,14 @@
 #include "php.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
-#include "ext/standard/php_smart_string.h"
 #include "zend.h"
 #include "zend_extensions.h"
-#include "zend_smart_str.h"
+#if PHP_VERSION_ID >= 70000
+# include "ext/standard/php_smart_string.h"
+# include "zend_smart_str.h"
+#else
+# include "ext/standard/php_smart_str.h"
+#endif
 
 #include "php_xdebug.h"
 #include "xdebug_compat.h"
@@ -30,15 +34,6 @@
 #include "xdebug_mm.h"
 #include "xdebug_var.h"
 #include "xdebug_xml.h"
-
-#if PHP_VERSION_ID >= 70000
-# define STR_NAME_VAL(k) (k)->val
-# define STR_NAME_LEN(k) (k)->len
-#else
-# define STR_NAME_VAL(k) (k)
-# define STR_NAME_LEN(k) (k_length)
-#endif
-
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -156,14 +151,14 @@ char* xdebug_error_type(int type)
 #endif
 
 #if PHP_VERSION_ID >= 70000
-zval *xdebug_get_zval(zend_execute_data *zdata, zend_op_array *op_array, int node_type, const znode_op *node, int *is_var)
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
 {
 	zend_free_op should_free;
 
 	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_R);
 }
 #else
-zval *xdebug_get_zval(zend_execute_data *zdata, zend_op_array *op_array, int node_type, const znode_op *node, int *is_var)
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
 {
 	switch (node_type) {
 		case IS_CONST:
@@ -250,7 +245,7 @@ inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_e
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
 {
 	char *name;
-	size_t name_len;
+	SIZETorZUINT name_len;
 	zend_class_entry *tmp_ce;
 
 	if (Z_TYPE_P(z) != IS_OBJECT) {
@@ -427,7 +422,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 						strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)
 #else
 					if (opa->vars[i].hash_value == hash_value &&
-						opa->vars[i].name_len == element_length &&
+						opa->vars[i].name_len == (int) element_length &&
 						strcmp(STR_NAME_VAL(opa->vars[i].name), element) == 0)
 #endif
 					{
@@ -883,10 +878,10 @@ static int xdebug_array_element_export(zval **zv TSRMLS_DC, int num_args, va_lis
 		if (HASH_KEY_LEN(hash_key) == 0) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf("%ld => ", hash_key->h), 1);
 		} else { /* string key */
-			size_t newlen = 0;
+			SIZETorINT newlen = 0;
 			char *tmp, *tmp2;
 			
-			tmp = xdebug_str_to_str(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
+			tmp = xdebug_str_to_str((char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
 			tmp2 = xdebug_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
 				efree(tmp);
@@ -925,7 +920,7 @@ static int xdebug_object_element_export(zval **zv TSRMLS_DC, int num_args, va_li
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (HASH_KEY_LEN(hash_key) != 0) {
-			modifier = xdebug_get_property_info(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), &prop_name, &prop_class_name);
+			modifier = xdebug_get_property_info((char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
 			} else {
@@ -1001,7 +996,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 #endif
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
-			} else if (Z_STRLEN_P(*struc) <= (unsigned int) options->max_data) {
+			} else if (Z_STRLEN_P(*struc) <= options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			} else {
 				xdebug_str_addl(str, "'", 1, 0);
@@ -1037,7 +1032,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (XDEBUG_APPLY_COUNT(myht) < 1) {
-				char *class_name = STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
+				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
 				if (level <= options->max_depth) {
@@ -1232,10 +1227,10 @@ static int xdebug_array_element_export_text_ansi(zval **zv TSRMLS_DC, int num_ar
 		if (HASH_KEY_LEN(hash_key) == 0) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf("[%ld] %s=>%s\n", hash_key->h, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		} else { /* string key */
-			size_t newlen = 0;
+			SIZETorINT newlen = 0;
 			char *tmp, *tmp2;
 			
-			tmp = xdebug_str_to_str(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
+			tmp = xdebug_str_to_str((char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
 			tmp2 = xdebug_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
 				efree(tmp);
@@ -1275,7 +1270,7 @@ static int xdebug_object_element_export_text_ansi(zval **zv TSRMLS_DC, int num_a
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
 
 		if (HASH_KEY_LEN(hash_key) != 0) {
-			modifier = xdebug_get_property_info(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), &prop_name, &class_name);
+			modifier = xdebug_get_property_info((char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), &prop_name, &class_name);
 			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
 			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
@@ -1353,7 +1348,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 #endif
 			if (options->no_decoration) {
 				xdebug_str_addl(str, tmp_str, tmp_len, 0);
-			} else if (Z_STRLEN_P(*struc) <= (unsigned int) options->max_data) {
+			} else if (Z_STRLEN_P(*struc) <= options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s%s%s\"",
 					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
 					ANSI_COLOR_LONG, Z_STRLEN_P(*struc), ANSI_COLOR_RESET,
@@ -1525,7 +1520,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_RES_P(*struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
 #else
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc) TSRMLS_CC);
+			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_LVAL_P(*struc) TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_LVAL_P(*struc), ANSI_COLOR_RESET, type_name ? type_name : "Unknown"), 1);
 #endif
 			break;
@@ -1586,7 +1581,7 @@ static int object_item_add_to_merged_hash(zval **zv TSRMLS_DC, int num_args, va_
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
 	item->zv   = *zv;
-	item->name = HASH_KEY_VAL(hash_key);
+	item->name = (char*) HASH_KEY_VAL(hash_key);
 	item->name_len = HASH_KEY_LEN(hash_key);
 	item->index = hash_key->h;
 
@@ -1629,7 +1624,7 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp TSRM
 	item->zv   = ce->static_members_table[zpp->offset];
 # endif
 #endif
-	item->name = STR_NAME_VAL(zpp->name);
+	item->name = (char*) STR_NAME_VAL(zpp->name);
 	item->name_len = STR_NAME_LEN(zpp->name);
 
 #if PHP_VERSION_ID >= 70000
@@ -1881,7 +1876,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
-			if (options->max_data == 0 || Z_STRLEN_P(*struc) <= (unsigned int) options->max_data) {
+			if (options->max_data == 0 || Z_STRLEN_P(*struc) <= options->max_data) {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc)), Z_STRLEN_P(*struc));
 			} else {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), options->max_data), options->max_data);
@@ -1921,7 +1916,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			ALLOC_HASHTABLE(merged_hash);
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
-			class_name = STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
+			class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 			ce = xdebug_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			/* Adding static properties */
@@ -2056,7 +2051,7 @@ static int xdebug_array_element_export_fancy(zval **zv TSRMLS_DC, int num_args, 
 			xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", hash_key->h, COLOR_POINTER), 1);
 		} else { /* string key */
 			xdebug_str_addl(str, "'", 1, 0);
-			tmp_str = xdebug_xmlize(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key) - 1, &newlen);
+			tmp_str = xdebug_xmlize((char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key) - 1, &newlen);
 			xdebug_str_addl(str, tmp_str, newlen, 0);
 			efree(tmp_str);
 			xdebug_str_add(str, xdebug_sprintf("' <font color='%s'>=&gt;</font> ", COLOR_POINTER), 1);
@@ -2090,7 +2085,7 @@ static int xdebug_object_element_export_fancy(zval **zv TSRMLS_DC, int num_args,
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 		if (HASH_KEY_LEN(hash_key) != 0) {
-			modifier = xdebug_get_property_info(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), &prop_name, &prop_class_name);
+			modifier = xdebug_get_property_info((char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
 			} else {
@@ -2152,7 +2147,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 
 		case IS_STRING:
 			xdebug_str_add(str, xdebug_sprintf("<small>string</small> <font color='%s'>'", COLOR_STRING), 1);
-			if (Z_STRLEN_P(*struc) > (unsigned int) options->max_data) {
+			if (Z_STRLEN_P(*struc) > options->max_data) {
 				tmp_str = xdebug_xmlize(Z_STRVAL_P(*struc), options->max_data, &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
 				efree(tmp_str);
@@ -2405,7 +2400,7 @@ char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_
 ** XML encoding function
 */
 
-char* xdebug_xmlize(char *string, size_t len, size_t *newlen)
+char* xdebug_xmlize(char *string, SIZETorINT len, size_t *newlen)
 {
 	if (len) {
 		char *tmp;
@@ -2431,7 +2426,7 @@ char* xdebug_xmlize(char *string, size_t len, size_t *newlen)
 		tmp = xdebug_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
 		efree(tmp2);
 
-		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, newlen);
+		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, (int*) newlen);
 		efree(tmp);
 		return tmp2;
 	} else {

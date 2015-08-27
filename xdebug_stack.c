@@ -26,7 +26,11 @@
 #include "xdebug_superglobals.h"
 #include "xdebug_var.h"
 #include "ext/standard/html.h"
-#include "ext/standard/php_smart_string.h"
+#if PHP_VERSION_ID >= 70000
+# include "ext/standard/php_smart_string.h"
+#else
+# include "ext/standard/php_smart_str.h"
+#endif
 
 #include "main/php_ini.h"
 
@@ -255,26 +259,36 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		 * it to a tmp string, and then adds an HTML escaped string for the
 		 * rest of the original buffer. */
 		if (first_closing && strstr(buffer, "() [<a href=") != NULL) {
+#if PHP_VERSION_ID >= 70000
 			smart_string special_escaped = {0};
+#else
+			smart_str special_escaped = {0};
+#endif
 
 			*first_closing = '\0';
 			first_closing++;
-			smart_string_appends(&special_escaped, buffer);
 
 #if PHP_VERSION_ID >= 70000
+			smart_string_appends(&special_escaped, buffer);
 			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), 0, 0, NULL TSRMLS_CC);
 			smart_string_appends(&special_escaped, tmp->val);
 			zend_string_free(tmp);
 #else
+			smart_str_appends(&special_escaped, buffer);
 			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), &newlen, 0, 0, NULL TSRMLS_CC);
 			smart_str_appends(&special_escaped, tmp);
 			STR_FREE(tmp);
 #endif
 
+#if PHP_VERSION_ID >= 70000
 			smart_string_0(&special_escaped);
-
 			escaped = estrdup(special_escaped.c);
 			smart_string_free(&special_escaped);
+#else
+			smart_str_0(&special_escaped);
+			escaped = estrdup(special_escaped.c);
+			smart_str_free(&special_escaped);
+#endif
 		} else {
 #if PHP_VERSION_ID >= 70000
 			tmp = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), 0, 0, NULL TSRMLS_CC);
@@ -568,15 +582,19 @@ void xdebug_init_debugger(TSRMLS_D)
 			/* The request could not be started, ignore it then */
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "E: The debug session could not be started. :-(\n");
 		} else {
+			/* All is well, turn off script time outs */
+#if PHP_VERSION_ID >= 70000
 			zend_string *ini_name = zend_string_init("max_execution_time", sizeof("max_execution_time") - 1, 0);
 			zend_string *ini_val = zend_string_init("0", sizeof("0") - 1, 0);
 
-			/* All is well, turn off script time outs */
 			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-			XG(remote_enabled) = 1;
 
 			zend_string_release(ini_val);
 			zend_string_release(ini_name);
+#else
+			zend_alter_ini_entry("max_execution_time", sizeof("max_execution_time"), "0", strlen("0"), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+#endif
+			XG(remote_enabled) = 1;
 		}
 	} else if (XG(context).socket == -1) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");
@@ -850,7 +868,11 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
 	tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, 1 TSRMLS_CC);
-	RETVAL_STRING(tmp ADD_STRING_COPY);
+#if PHP_VERSION_ID >= 70000
+	RETVAL_STRING(tmp);
+#else
+	RETVAL_STRING(tmp, 1);
+#endif
 	xdfree(tmp);
 }
 /* }}} */
@@ -867,7 +889,11 @@ PHP_FUNCTION(xdebug_call_class)
 	}
 	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->function.class ? i->function.class : "" ADD_STRING_COPY);
+#if PHP_VERSION_ID >= 70000
+		RETURN_STRING(i->function.class ? i->function.class : "");
+#else
+		RETURN_STRING(i->function.class ? i->function.class : "", 1);
+#endif
 	} else {
 		RETURN_FALSE;
 	}
@@ -886,7 +912,11 @@ PHP_FUNCTION(xdebug_call_function)
 	}
 	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->function.function ? i->function.function : "{}" ADD_STRING_COPY);
+#if PHP_VERSION_ID >= 70000
+		RETURN_STRING(i->function.function ? i->function.function : "{}");
+#else
+		RETURN_STRING(i->function.function ? i->function.function : "{}", 1);
+#endif
 	} else {
 		RETURN_FALSE;
 	}
@@ -924,7 +954,11 @@ PHP_FUNCTION(xdebug_call_file)
 	}
 	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->filename ADD_STRING_COPY);
+#if PHP_VERSION_ID >= 70000
+		RETURN_STRING(i->filename);
+#else
+		RETURN_STRING(i->filename, 1);
+#endif
 	} else {
 		RETURN_FALSE;
 	}
@@ -1158,9 +1192,15 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->execute_data  = NULL;
 
 	XG(function_count)++;
+#if PHP_VERSION_ID >= 70000
 	if (edata && ZEND_USER_CODE(edata->func->type)) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(edata->func->op_array.filename->val);
+#else
+	if (edata && edata->op_array) {
+		/* Normal function calls */
+		tmp->filename  = xdstrdup(edata->op_array->filename);
+#endif
 	} else if (
 		edata &&
 		edata->prev_execute_data &&
@@ -1220,7 +1260,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	} else  {
 		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
-#if 0
+#if PHP_VERSION_ID < 70000
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
 			void **p;
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;

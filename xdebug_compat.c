@@ -80,7 +80,7 @@ char *xdebug_base64_encode(unsigned char *data, int data_len, int *new_len)
 	return new_str->val;
 }
 
-char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len)
+unsigned char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len)
 {
 	zend_string *new_str;
 
@@ -185,6 +185,21 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 	zend_string_release(domain_s);
 }
 
+char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len)
+{
+	zend_string *cv = NULL;
+	cv = zend_get_compiled_variable_name(op_array, uint32_t var);
+	*cv_len = cv->len;
+
+	return cv->val;
+}
+
+char *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC)
+{
+	zval dummy;
+
+	return zend_read_property(ce, exception, name, length, flags, &dummy);
+}
 #else
 
 #if PHP_VERSION_ID >= 50500
@@ -215,7 +230,7 @@ zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdat
 
 				if (T->str_offset.str->type != IS_STRING
 					|| ((int)T->str_offset.offset<0)
-					|| (T->str_offset.str->value.str.len <= T->str_offset.offset)) {
+					|| ((unsigned int) T->str_offset.str->value.str.len <= T->str_offset.offset)) {
 					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
 					T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
 					T->tmp_var.value.str.len = 0;

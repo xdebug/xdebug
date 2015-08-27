@@ -139,7 +139,7 @@ static char* get_filename_ref(char *name TSRMLS_DC)
 		return xdebug_sprintf("(%d)", nr);
 	} else {
 		XG(profile_last_filename_ref)++;
-		xdebug_hash_add(XG(profile_filename_refs), name, strlen(name), (void*) XG(profile_last_filename_ref));
+		xdebug_hash_add(XG(profile_filename_refs), name, strlen(name), (void*) (size_t) XG(profile_last_filename_ref));
 		return xdebug_sprintf("(%d) %s", XG(profile_last_filename_ref), name);
 	}
 }
@@ -152,7 +152,7 @@ static char* get_functionname_ref(char *name TSRMLS_DC)
 		return xdebug_sprintf("(%d)", nr);
 	} else {
 		XG(profile_last_functionname_ref)++;
-		xdebug_hash_add(XG(profile_functionname_refs), name, strlen(name), (void*) XG(profile_last_functionname_ref));
+		xdebug_hash_add(XG(profile_functionname_refs), name, strlen(name), (void*) (size_t) XG(profile_last_functionname_ref));
 		return xdebug_sprintf("(%d) %s", XG(profile_last_functionname_ref), name);
 	}
 }
@@ -302,7 +302,11 @@ void xdebug_profiler_function_internal_end(function_stack_entry *fse TSRMLS_DC)
 	xdebug_profiler_function_user_end(fse, NULL TSRMLS_CC);
 }
 
+#if PHP_VERSION_ID >= 70000
 static int xdebug_print_aggr_entry(zval *pDest, void *argument TSRMLS_DC)
+#else
+static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
+#endif
 {
 	FILE *fp = (FILE *) argument;
 	xdebug_aggregate_entry *xae = (xdebug_aggregate_entry *) pDest;

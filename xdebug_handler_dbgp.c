@@ -892,9 +892,12 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 {
 	int                old_error_reporting;
 	int                res = FAILURE;
-//	zval             **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
-//	zend_op          **original_opline_ptr = EG(opline_ptr);
-//	zend_op_array     *original_active_op_array = EG(active_op_array);
+#if PHP_VERSION_ID >= 70000
+#else
+	zval             **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
+	zend_op          **original_opline_ptr = EG(opline_ptr);
+	zend_op_array     *original_active_op_array = EG(active_op_array);
+#endif
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
 #if PHP_VERSION_ID >= 70000
@@ -926,9 +929,12 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(error_reporting) = old_error_reporting;
 	XG(breakpoints_allowed) = 1;
 
-//	EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
-//	EG(opline_ptr) = original_opline_ptr;
-//	EG(active_op_array) = original_active_op_array;
+#if PHP_VERSION_ID >= 70000
+#else
+	EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
+	EG(opline_ptr) = original_opline_ptr;
+	EG(active_op_array) = original_active_op_array;
+#endif
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
 	EG(exception) = original_exception;
@@ -1398,7 +1404,7 @@ static void set_vars_from_EG(TSRMLS_D)
 DBGP_FUNC(property_set)
 {
 	char                      *data = CMD_OPTION('-');
-	char                      *new_value;
+	unsigned char             *new_value;
 	int                        new_length;
 	int                        depth = 0;
 	int                        context_nr = 0;
@@ -1467,7 +1473,7 @@ DBGP_FUNC(property_set)
 #if PHP_VERSION_ID >= 70000
 			ZVAL_STRINGL(symbol, new_value, new_length);
 #else
-			ZVAL_STRINGL(symbol, new_value, new_length, 0);
+			ZVAL_STRINGL(symbol, (char*) new_value, new_length, 0);
 #endif
 			xdebug_xml_add_attribute(*retval, "success", "1");
 
@@ -1649,7 +1655,7 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 	}
 	if (strcmp("GLOBALS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 
-	xdebug_hash_add(tmp_hash, HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), HASH_KEY_VAL(hash_key));
+	xdebug_hash_add(tmp_hash, (char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), HASH_KEY_VAL(hash_key));
 
 	return 0;
 }
