@@ -1110,9 +1110,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 #if PHP_VERSION_ID >= 70000
-	if (XG(default_enable) && zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION") == NULL) {
+	if (XG(default_enable) && zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL) {
 #else
-	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", 16, (void**)&dummy) == FAILURE) {
+	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION"), (void**)&dummy) == FAILURE) {
 #endif
 		zend_error_cb = xdebug_new_error_cb;
 		zend_throw_exception_hook = xdebug_throw_exception_hook;
@@ -1150,18 +1150,18 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	/* Override var_dump with our own function */
 #if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump");
+	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
 #else
-	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
+	zend_hash_find(EG(function_table), "var_dump", sizeof("var_dump"), (void **)&orig);
 #endif
 	XG(orig_var_dump_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_var_dump;
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
 #if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit");
+	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
 #else
-	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
+	zend_hash_find(EG(function_table), "set_time_limit", sizeof("set_time_limit"), (void **)&orig);
 #endif
 	XG(orig_set_time_limit_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
@@ -1255,16 +1255,16 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	/* Reset var_dump and set_time_limit to the original function */
 #if PHP_VERSION_ID >= 70000
-	orig = zend_hash_find_ptr(EG(function_table), var_dump);
+	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
 #else
-	zend_hash_find(EG(function_table), "var_dump", 9, (void **)&orig);
+	zend_hash_find(EG(function_table), "var_dump", sizeof("var_dump"), (void **)&orig);
 #endif
 	orig->internal_function.handler = XG(orig_var_dump_func);
 
 #if PHP_VERSION_ID >= 70000
-	orig = zend_hash_find_ptr(EG(function_table), set_time_limit);
+	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
 #else
-	zend_hash_find(EG(function_table), "set_time_limit", 15, (void **)&orig);
+	zend_hash_find(EG(function_table), "set_time_limit", sizeof("set_time_limit"), (void **)&orig);
 #endif
 	orig->internal_function.handler = XG(orig_set_time_limit_func);;
 
@@ -1338,11 +1338,11 @@ static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value T
 		(
 #if PHP_VERSION_ID >= 70000
 			(
-				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name)) != NULL
+				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name, strlen(var_name))) != NULL
 			) || (
-				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name)) != NULL
+				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name, strlen(var_name))) != NULL
 			) || (
-				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name)) != NULL
+				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name, strlen(var_name))) != NULL
 			)
 #else
 			(
@@ -1635,9 +1635,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (
 #if PHP_VERSION_ID >= 70000
 			((
-				(dummy = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_START")) != NULL
+				(dummy = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
 			) || (
-				(dummy = zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_START")) != NULL
+				(dummy = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
 			))
 #else
 			((
@@ -1667,7 +1667,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 #endif
 		} else if (
 #if PHP_VERSION_ID >= 70000
-			(dummy = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION")) != NULL
+			(dummy = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
 #else
 			PG(http_globals)[TRACK_VARS_COOKIE] &&
 			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (void **) &dummy) == SUCCESS
@@ -1695,9 +1695,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (
 #if PHP_VERSION_ID >= 70000
 			((
-				zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_STOP") != NULL
+				zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
 			) || (
-				zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_STOP") != NULL
+				zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
 			))
 #else
 			((
@@ -1909,9 +1909,9 @@ static int check_soap_call(function_stack_entry *fse)
 			(strstr(fse->function.class, "SoapServer") != NULL)
 		) &&
 #if PHP_VERSION_ID >= 70000
-		(zend_hash_str_find_ptr(&module_registry, "soap") != NULL)
+		(zend_hash_str_find_ptr(&module_registry, "soap", sizeof("soap") - 1) != NULL)
 #else
-		(zend_hash_find(&module_registry, "soap", 5, (void**) &tmp_mod_entry) == SUCCESS)
+		(zend_hash_find(&module_registry, "soap", sizeof("soap"), (void**) &tmp_mod_entry) == SUCCESS)
 #endif
 	) {
 		return 1;
