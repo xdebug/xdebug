@@ -1168,11 +1168,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (type == XDEBUG_EXTERNAL) {
 		edata = EG(current_execute_data)->prev_execute_data;
 		if (edata) {
-			opline_ptr = &edata->opline;
+			opline_ptr = (zend_op**) &edata->opline;
 		}
 	} else {
 		edata = EG(current_execute_data);
-		opline_ptr = &EG(current_execute_data)->opline;
+		opline_ptr = (zend_op**) &EG(current_execute_data)->opline;
 	}
 #endif
 
