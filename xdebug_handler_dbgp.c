@@ -1703,7 +1703,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 #if PHP_VERSION_ID >= 70000
 		zend_constant *val;
 
-		ZEND_HASH_FOREACH_VAL(EG(zend_constants), val) {
+		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
 			if (!val->name) {
 				/* skip special constants */
 				continue;
