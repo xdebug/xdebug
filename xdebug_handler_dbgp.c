@@ -1632,7 +1632,7 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 
 	/* We really ought to deal properly with non-associate keys for symbol
 	 * tables, but for now, we'll just ignore them. */
-	if (!HASH_KEY_VAL(hash_key) || HASH_KEY_LEN(hash_key)) { return 0; }
+	if (!HASH_KEY_VAL(hash_key) || HASH_KEY_LEN(hash_key) == 0) { return 0; }
 
 	if (strcmp("argc", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 	if (strcmp("argv", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
