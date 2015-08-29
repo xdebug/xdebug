@@ -11,7 +11,7 @@ matrix:
     - php: nightly
 
 before_script:
-  - if [ $TRAVIS_PHP_VERSION != 'nightly' ]; phpenv config-rm xdebug.ini; fi
+  - if [ $TRAVIS_PHP_VERSION != 'nightly' ]; then phpenv config-rm xdebug.ini; fi
   - ./.travis.scripts/compile.sh
 
 notifications:
