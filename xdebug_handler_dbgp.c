@@ -1393,12 +1393,15 @@ DBGP_FUNC(property_get)
 
 static void set_vars_from_EG(TSRMLS_D)
 {
-//	EG(opline_ptr) = &EG(current_execute_data)->opline;
-//	EG(active_op_array) = EG(current_execute_data)->op_array;
-//	EG(active_symbol_table) = EG(current_execute_data)->symbol_table;
-//	EG(This) = EG(current_execute_data)->current_this;
-//	EG(scope) = EG(current_execute_data)->current_scope;
-//	EG(called_scope) = EG(current_execute_data)->current_called_scope;
+#if PHP_VERSION_ID >= 70000
+#else
+	EG(opline_ptr) = &EG(current_execute_data)->opline;
+	EG(active_op_array) = EG(current_execute_data)->op_array;
+	EG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+	EG(This) = EG(current_execute_data)->current_this;
+	EG(scope) = EG(current_execute_data)->current_scope;
+	EG(called_scope) = EG(current_execute_data)->current_called_scope;
+#endif
 }
 
 DBGP_FUNC(property_set)
