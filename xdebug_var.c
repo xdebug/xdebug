@@ -2426,7 +2426,7 @@ char* xdebug_xmlize(char *string, SIZETorINT len, size_t *newlen)
 		tmp = xdebug_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
 		efree(tmp2);
 
-		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, (int*) newlen);
+		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, (SIZETorINT*) newlen);
 		efree(tmp);
 		return tmp2;
 	} else {
