@@ -603,9 +603,28 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case 'H':   /* $_SERVER['HTTP_HOST'] */
 				case 'U':   /* $_SERVER['UNIQUE_ID'] */
 				case 'R': { /* $_SERVER['REQUEST_URI'] */
-					zval **data;
 					char *char_ptr, *strval;
+#if PHP_VERSION_ID >= 70000
+					zval *data;
+
+					if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY) {
+						switch (*format) {
+						case 'H':
+							data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_HOST", sizeof("HTTP_HOST") - 1);
+							break;
+						case 'R':
+							data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1);
+							break;
+						case 'U':
+							data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "UNIQUE_ID", sizeof("UNIQUE_ID") - 1);
+							break;
+						}
+
+						if (data) {
+							strval = estrdup(Z_STRVAL_P(data));
+#else
 					int retval = FAILURE;
+					zval **data;
 
 					if (PG(http_globals)[TRACK_VARS_SERVER]) {
 						switch (*format) {
@@ -622,6 +641,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 
 						if (retval == SUCCESS) {
 							strval = estrdup(Z_STRVAL_PP(data));
+#endif
 							
 							/* replace slashes, dots, question marks, plus
 							 * signs, ampersands, spaces and other evil chars
@@ -636,18 +656,29 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 'S': { /* session id */
+#if PHP_VERSION_ID >= 70000
+					zval *data;
+#else
 					zval **data;
+#endif
 					char *char_ptr, *strval;
 					char *sess_name;
 					
 					sess_name = zend_ini_string("session.name", sizeof("session.name"), 0);
 					
+#if PHP_VERSION_ID >= 70000
+					if (sess_name && Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) == IS_ARRAY &&
+						((data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name))) != NULL) &&
+						Z_STRLEN_P(data) < 100 /* Prevent any unrealistically long data being set as filename */
+					) {
+						strval = estrdup(Z_STRVAL_P(data));
+#else
 					if (sess_name && PG(http_globals)[TRACK_VARS_COOKIE] &&
 						zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name) + 1, (void **) &data) == SUCCESS &&
 						Z_STRLEN_PP(data) < 100 /* Prevent any unrealistically long data being set as filename */
 					) {
 						strval = estrdup(Z_STRVAL_PP(data));
-						
+#endif
 						/* replace slashes, dots, question marks, plus signs,
 						 * ampersands and spaces with underscores */
 						while ((char_ptr = strpbrk(strval, "/\\.?&+ ")) != NULL) {

@@ -27,7 +27,7 @@
 static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* output)
 {
 	char *tmp;
-	int newlen;
+	size_t newlen;
 
 	xdebug_str_addl(output, " ", 1, 0);
 

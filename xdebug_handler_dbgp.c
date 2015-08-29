@@ -29,6 +29,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "main/php_version.h"
+#include "ext/standard/base64.h"
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
@@ -305,7 +306,7 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 
 	filename = xdebug_path_from_url(filename TSRMLS_CC);
 	stream = php_stream_open_wrapper(filename, "rb",
-			USE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			USE_PATH | XDEBUG_ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	xdfree(filename);
 
@@ -891,15 +892,24 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 {
 	int                old_error_reporting;
 	int                res = FAILURE;
+#if PHP_VERSION_ID >= 70000
+#else
 	zval             **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
 	zend_op          **original_opline_ptr = EG(opline_ptr);
 	zend_op_array     *original_active_op_array = EG(active_op_array);
+#endif
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
+#if PHP_VERSION_ID >= 70000
+	zend_object       *original_exception = EG(exception);
+#else
 	zval              *original_exception = EG(exception);
+#endif
 	jmp_buf           *original_bailout = EG(bailout);
+#if PHP_VERSION_ID < 70000
 	void             **original_argument_stack_top = EG(argument_stack)->top;
 	void             **original_argument_stack_end = EG(argument_stack)->end;
+#endif
 
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
@@ -919,15 +929,20 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(error_reporting) = old_error_reporting;
 	XG(breakpoints_allowed) = 1;
 
+#if PHP_VERSION_ID >= 70000
+#else
 	EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
 	EG(opline_ptr) = original_opline_ptr;
 	EG(active_op_array) = original_active_op_array;
+#endif
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
 	EG(exception) = original_exception;
 	EG(bailout) = original_bailout;
+#if PHP_VERSION_ID < 70000
 	EG(argument_stack)->top = original_argument_stack_top;
 	EG(argument_stack)->end = original_argument_stack_end;
+#endif
 
 	return res;
 }
@@ -1359,7 +1374,7 @@ DBGP_FUNC(property_get)
 	if (context_nr == 2) { /* constants */
 		zval const_val;
 
-		if (!zend_get_constant(CMD_OPTION('n'), strlen(CMD_OPTION('n')), &const_val TSRMLS_CC)) {
+		if (!xdebug_get_constant(CMD_OPTION('n'), strlen(CMD_OPTION('n')), &const_val TSRMLS_CC)) {
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
@@ -1378,18 +1393,21 @@ DBGP_FUNC(property_get)
 
 static void set_vars_from_EG(TSRMLS_D)
 {
+#if PHP_VERSION_ID >= 70000
+#else
 	EG(opline_ptr) = &EG(current_execute_data)->opline;
 	EG(active_op_array) = EG(current_execute_data)->op_array;
 	EG(active_symbol_table) = EG(current_execute_data)->symbol_table;
 	EG(This) = EG(current_execute_data)->current_this;
 	EG(scope) = EG(current_execute_data)->current_scope;
 	EG(called_scope) = EG(current_execute_data)->current_called_scope;
+#endif
 }
 
 DBGP_FUNC(property_set)
 {
 	char                      *data = CMD_OPTION('-');
-	char                      *new_value;
+	unsigned char             *new_value;
 	int                        new_length;
 	int                        depth = 0;
 	int                        context_nr = 0;
@@ -1444,7 +1462,7 @@ DBGP_FUNC(property_set)
 		options->runtime[0].page = 0;
 	}
 
-	new_value = (char*) xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
+	new_value = xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
 
 	if (CMD_OPTION('t')) {
 		symbol = xdebug_get_php_symbol(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);
@@ -1455,9 +1473,11 @@ DBGP_FUNC(property_set)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		} else {
 			zval_dtor(symbol);
-			Z_TYPE_P(symbol) = IS_STRING;
-			Z_STRVAL_P(symbol) = new_value;
-			Z_STRLEN_P(symbol) = new_length;
+#if PHP_VERSION_ID >= 70000
+			ZVAL_STRINGL(symbol, (char*) new_value, new_length);
+#else
+			ZVAL_STRINGL(symbol, (char*) new_value, new_length, 0);
+#endif
 			xdebug_xml_add_attribute(*retval, "success", "1");
 
 			XDEBUG_STR_SWITCH(CMD_OPTION('t')) {
@@ -1612,36 +1632,47 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 
 	/* We really ought to deal properly with non-associate keys for symbol
 	 * tables, but for now, we'll just ignore them. */
-	if (!hash_key->arKey || hash_key->nKeyLength == 0) { return 0; }
+	if (!HASH_KEY_VAL(hash_key) || HASH_KEY_LEN(hash_key) == 0) { return 0; }
 
-	if (strcmp("argc", hash_key->arKey) == 0) { return 0; }
-	if (strcmp("argv", hash_key->arKey) == 0) { return 0; }
-	if (hash_key->arKey[0] == '_') {
-		if (strcmp("_COOKIE", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_ENV", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_FILES", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_GET", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_POST", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_REQUEST", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_SERVER", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_SESSION", hash_key->arKey) == 0) { return 0; }
+	if (strcmp("argc", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (strcmp("argv", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (HASH_KEY_VAL(hash_key)[0] == '_') {
+		if (strcmp("_COOKIE", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_ENV", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_GET", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_POST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_REQUEST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_SERVER", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_SESSION", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 	}
-	if (hash_key->arKey[0] == 'H') {
-		if (strcmp("HTTP_COOKIE_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_ENV_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_GET_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_POST_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_POST_FILES", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_RAW_POST_DATA", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_SERVER_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_SESSION_VARS", hash_key->arKey) == 0) { return 0; }
+	if (HASH_KEY_VAL(hash_key)[0] == 'H') {
+		if (strcmp("HTTP_COOKIE_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_ENV_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_GET_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_POST_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_POST_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_RAW_POST_DATA", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_SERVER_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_SESSION_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 	}
-	if (strcmp("GLOBALS", hash_key->arKey) == 0) { return 0; }
+	if (strcmp("GLOBALS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 
-	xdebug_hash_add(tmp_hash, (char*) hash_key->arKey, strlen(hash_key->arKey), hash_key->arKey);
+	xdebug_hash_add(tmp_hash, (char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key) - 1, HASH_KEY_VAL(hash_key));
 
 	return 0;
 }
+
+#undef HASH_KEY_VAL
+#undef HASH_KEY_LEN
+
+#if PHP_VERSION_ID >= 70000
+# define CONSTANT_NAME_VAL(k) (k)->val
+# define CONSTANT_NAME_LEN(k) (k)->len
+#else
+# define CONSTANT_NAME_VAL(k) (k)
+# define CONSTANT_NAME_LEN(k) k ## _len
+#endif
 
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
@@ -1669,6 +1700,23 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 	/* add user defined constants */
 	if (context_id == 2) {
+#if PHP_VERSION_ID >= 70000
+		zend_constant *val;
+
+		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
+			if (!val->name) {
+				/* skip special constants */
+				continue;
+			}
+
+			if (val->module_number != PHP_USER_CONSTANT) {
+				/* we're only interested in user defined constants */
+				continue;
+			}
+
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), CONSTANT_NAME_LEN(val->name), &(val->value), options TSRMLS_CC);
+		} ZEND_HASH_FOREACH_END();
+#else
 		HashPosition   pos;
 		zend_constant *val;
 
@@ -1684,10 +1732,11 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 				goto next_constant;
 			}
 
-			add_constant_node(node, val->name, val->name_len, &(val->value), options TSRMLS_CC);
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), CONSTANT_NAME_LEN(val->name), &(val->value), options TSRMLS_CC);
 next_constant:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
+#endif
 
 		return 0;
 	}
@@ -1732,7 +1781,7 @@ next_constant:
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+			zend_class_entry *ce = xdebug_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
 			xdebug_attach_static_vars(node, options, ce TSRMLS_CC);
 		}
@@ -1745,6 +1794,9 @@ next_constant:
 	
 	return 1;
 }
+
+#undef CONSTANT_NAME_VAL
+#undef CONSTANT_NAME_LEN
 
 
 DBGP_FUNC(stack_depth)
@@ -1998,7 +2050,7 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 						int len = ptr - value_begin;
 						args->value[index] = xdcalloc(1, len + 1);
 						memcpy(args->value[index], value_begin, len);
-						php_stripcslashes(args->value[index], &len);
+						xdebug_stripcslashes(args->value[index], &len);
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;

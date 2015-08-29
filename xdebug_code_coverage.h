@@ -20,6 +20,7 @@
 #define __HAVE_XDEBUG_CODE_COVERAGE_H__
 
 #include "php.h"
+#include "xdebug_compat.h"
 #include "xdebug_hash.h"
 #include "xdebug_mm.h"
 #include "xdebug_branch_info.h"
@@ -56,15 +57,15 @@ void xdebug_coverage_file_dtor(void *data);
 
 xdebug_coverage_function *xdebug_coverage_function_ctor(char *function_name);
 void xdebug_coverage_function_dtor(void *data);
-void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_op *cur_opcode TSRMLS_DC);
+void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode TSRMLS_DC);
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC);
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC);
 
-int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS);
-int xdebug_common_override_handler(ZEND_OPCODE_HANDLER_ARGS);
+int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
+int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
 
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(f) \
-	int xdebug_##f##_handler(ZEND_OPCODE_HANDLER_ARGS)
+	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_add);

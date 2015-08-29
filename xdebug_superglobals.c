@@ -69,7 +69,11 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 	}
 }
 
+#if PHP_VERSION_ID >= 70000
+static int dump_hash_elem_va(zval *pDest, int num_args, va_list args, zend_hash_key *hash_key)
+#else
 static int dump_hash_elem_va(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+#endif
 {
 	int html;
 	char *name;
@@ -79,10 +83,18 @@ static int dump_hash_elem_va(void *pDest TSRMLS_DC, int num_args, va_list args, 
 	html = va_arg(args, int);
 	str =  va_arg(args, xdebug_str *);
 
+#if PHP_VERSION_ID >= 70000
+	if (hash_key->key) {
+#else
 	if (hash_key->nKeyLength == 0) {
+#endif
 		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, str TSRMLS_CC);
 	} else {
+#if PHP_VERSION_ID >= 70000
+		dump_hash_elem(*((zval **) pDest), name, 0, (char *) hash_key->key->val, html, str TSRMLS_CC);
+#else
 		dump_hash_elem(*((zval **) pDest), name, 0, (char *) hash_key->arKey, html, str TSRMLS_CC);
+#endif
 	}
 
 	return SUCCESS;
@@ -90,7 +102,11 @@ static int dump_hash_elem_va(void *pDest TSRMLS_DC, int num_args, va_list args, 
 
 static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebug_str *str TSRMLS_DC)
 {
+#if PHP_VERSION_ID >= 70000
+	zval *z;
+#else
 	zval **z;
+#endif
 	HashTable *ht = NULL;
 	xdebug_llist_element *elem;
 
@@ -98,11 +114,23 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 		return;
 	}
 
+#if PHP_VERSION_ID >= 70000
+	{
+		zend_string *s_name = zend_string_init(name, name_len, 0);
+		if ((z = zend_hash_find(&EG(symbol_table), s_name))) {
+			if (Z_TYPE_P(z) == IS_ARRAY) {
+				ht = Z_ARRVAL_P(z);
+			}
+		}
+		zend_string_release(s_name);
+	}
+#else
 	if (zend_hash_find(&EG(symbol_table), name, name_len, (void **) &z) == SUCCESS) {
 		if (Z_TYPE_PP(z) == IS_ARRAY) {
 			ht = Z_ARRVAL_PP(z);
 		}
 	}
+#endif
 
 	if (html) {
 		xdebug_str_add(str, xdebug_sprintf("<tr><th colspan='5' align='left' bgcolor='#e9b96e'>Dump <i>$%s</i></th></tr>\n", name), 1);
@@ -113,15 +141,30 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 	elem = XDEBUG_LLIST_HEAD(l);
 
 	while (elem != NULL) {
+#if PHP_VERSION_ID >= 70000
+		zend_string *s;
+
+		s = zend_string_init(elem->ptr, strlen(elem->ptr), 0);
+#endif
+
 		if (ht && (*((char *) (elem->ptr)) == '*')) {
 			zend_hash_apply_with_arguments(ht TSRMLS_CC, dump_hash_elem_va, 3, name, html, str);
+#if PHP_VERSION_ID >= 70000
+		} else if (ht && (z = zend_hash_find(ht, s))) {
+			dump_hash_elem(z, name, 0, elem->ptr, html, str TSRMLS_CC);
+#else
 		} else if (ht && zend_hash_find(ht, elem->ptr, strlen(elem->ptr) + 1, (void **) &z) == SUCCESS) {
 			dump_hash_elem(*z, name, 0, elem->ptr, html, str TSRMLS_CC);
+#endif
 		} else if(XG(dump_undefined)) {
 			dump_hash_elem(NULL, name, 0, elem->ptr, html, str TSRMLS_CC);
 		}
 
 		elem = XDEBUG_LLIST_NEXT(elem);
+
+#if PHP_VERSION_ID >= 70000
+		zend_string_release(s);
+#endif
 	}
 }
 

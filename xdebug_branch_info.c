@@ -140,7 +140,7 @@ static void xdebug_path_info_add_path(xdebug_path_info *path_info, xdebug_path *
 
 static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info, unsigned int level TSRMLS_DC)
 {
-	int i = 0, orig_size;
+	unsigned int i = 0, orig_size;
 
 	orig_size = path_info->paths_size;
 
@@ -257,7 +257,7 @@ xdebug_path_info *xdebug_path_info_ctor(void)
 
 void xdebug_path_info_dtor(xdebug_path_info *path_info)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < path_info->paths_count; i++) {
 		xdebug_path_free(path_info->paths[i]);

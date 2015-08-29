@@ -167,12 +167,21 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
+#if PHP_VERSION_ID >= 70000
+			zend_string *i_filename = zend_string_init(fse->include_filename, strlen(fse->include_filename), 0);
+			zend_string *escaped;
+			escaped = php_addcslashes(i_filename, 0, "'\\\0..\37", 6);
+			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped->val), 1);
+			zend_string_release(escaped);
+			zend_string_release(i_filename);
+#else
 			int tmp_len;
 
 			char *escaped;
 			escaped = php_addcslashes(fse->include_filename, strlen(fse->include_filename), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
 			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped), 1);
 			efree(escaped);
+#endif
 		} else {
 			xdebug_str_add(&str, fse->include_filename, 0);
 		}
@@ -232,7 +241,11 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	char      *tmp_value = NULL;
 
 	/* Generator key */
+#if PHP_VERSION_ID >= 70000
+	tmp_value = xdebug_get_zval_value(&generator->key, 0, NULL);
+#else
 	tmp_value = xdebug_get_zval_value(generator->key, 0, NULL);
+#endif
 	if (tmp_value) {
 		xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
 
@@ -240,7 +253,11 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		xdebug_str_add(&str, tmp_value, 1);
 		xdebug_str_addl(&str, " => ", 4, 0);
 
+#if PHP_VERSION_ID >= 70000
+		tmp_value = xdebug_get_zval_value(&generator->value, 0, NULL);
+#else
 		tmp_value = xdebug_get_zval_value(generator->value, 0, NULL);
+#endif
 		if (tmp_value) {
 			xdebug_str_add(&str, tmp_value, 1);
 		}

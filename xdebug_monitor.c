@@ -18,11 +18,24 @@
 
 #include "php_xdebug.h"
 
+#include "xdebug_compat.h"
 #include "xdebug_hash.h"
 #include "xdebug_monitor.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+#if PHP_VERSION_ID >= 70000
+static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functions_to_monitor)
+{
+	zval *val;
+
+	ZEND_HASH_FOREACH_VAL(functions_to_monitor, val) {
+		if (Z_TYPE_P(val) == IS_STRING) {
+			xdebug_hash_add(internal, Z_STRVAL_P(val), Z_STRLEN_P(val), xdstrdup(Z_STRVAL_P(val)));
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+#else
 static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functions_to_monitor)
 {
 	HashPosition  pos;
@@ -37,6 +50,7 @@ static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functio
 		zend_hash_move_forward_ex(functions_to_monitor, &pos);
 	}
 }
+#endif
 
 static void xdebug_hash_function_monitor_dtor(char *function)
 {
@@ -119,11 +133,11 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 
 		mfe = XDEBUG_LLIST_VALP(le);
 
-		MAKE_STD_ZVAL(entry);
+		XDEBUG_MAKE_STD_ZVAL(entry);
 		array_init(entry);
 
-		add_assoc_string_ex(entry, "function", sizeof("function"), mfe->func_name, 1);
-		add_assoc_string_ex(entry, "filename", sizeof("filename"), mfe->filename, 1);
+		add_assoc_string_ex(entry, "function", sizeof("function"), mfe->func_name ADD_STRING_COPY);
+		add_assoc_string_ex(entry, "filename", sizeof("filename"), mfe->filename ADD_STRING_COPY);
 		add_assoc_long(entry, "lineno", mfe->lineno);
 
 		add_next_index_zval(return_value, entry);
