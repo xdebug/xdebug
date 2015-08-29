@@ -1970,7 +1970,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
 	}
-#if PHP_VERSION_ID > 70000
+#if PHP_VERSION_ID >= 70000
 	if (xdebug_old_execute_internal) {
 		xdebug_old_execute_internal(current_execute_data, return_value TSRMLS_CC);
 	} else {
@@ -1984,9 +1984,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	}
 #else
 	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, return_value TSRMLS_CC);
+		xdebug_old_execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 	} else {
-		execute_internal(current_execute_data, return_value TSRMLS_CC);
+		execute_internal(current_execute_data, return_value_used TSRMLS_CC);
 	}
 #endif
 
