@@ -188,7 +188,7 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len)
 {
 	zend_string *cv = NULL;
-	cv = zend_get_compiled_variable_name(op_array, uint32_t var);
+	cv = zend_get_compiled_variable_name(op_array, var);
 	*cv_len = cv->len;
 
 	return cv->val;
