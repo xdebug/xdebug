@@ -194,7 +194,7 @@ char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, i
 	return cv->val;
 }
 
-char *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC)
+zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC)
 {
 	zval dummy;
 

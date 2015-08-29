@@ -36,7 +36,7 @@ zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int fla
 int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
 void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC);
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
-char *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC);
+zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC);
 
 # define ADD_STRING_COPY
 # define XDEBUG_ENFORCE_SAFE_MODE 0x00
