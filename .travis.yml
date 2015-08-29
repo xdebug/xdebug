@@ -23,3 +23,6 @@ script:
   - export PATH=`dirname $MYPHP`:$PATH
   - $MYPHP -c /tmp/temp-php-config.ini -v
   - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=$MYPHP $MYPHP -c /tmp/temp-php-config.ini -dxdebug.auto_trace=0 run-tests.php -q -x --show-diff
+
+notifications:
+  irc: "irc.freenode.org#xdebug"
