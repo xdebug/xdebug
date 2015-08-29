@@ -88,7 +88,7 @@ unsigned char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_
 
 	*new_len = new_str->len;
 
-	return new_str->val;
+	return (unsigned char*) new_str->val;
 }
 
 void xdebug_stripcslashes(char *str, int *len)

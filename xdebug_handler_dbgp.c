@@ -1471,7 +1471,7 @@ DBGP_FUNC(property_set)
 		} else {
 			zval_dtor(symbol);
 #if PHP_VERSION_ID >= 70000
-			ZVAL_STRINGL(symbol, new_value, new_length);
+			ZVAL_STRINGL(symbol, (char*) new_value, new_length);
 #else
 			ZVAL_STRINGL(symbol, (char*) new_value, new_length, 0);
 #endif

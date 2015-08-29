@@ -996,7 +996,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 #endif
 			if (options->no_decoration) {
 				xdebug_str_add(str, tmp_str, 0);
-			} else if (Z_STRLEN_P(*struc) <= options->max_data) {
+			} else if ((size_t) Z_STRLEN_P(*struc) <= (size_t) options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
 			} else {
 				xdebug_str_addl(str, "'", 1, 0);
@@ -1348,7 +1348,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 #endif
 			if (options->no_decoration) {
 				xdebug_str_addl(str, tmp_str, tmp_len, 0);
-			} else if (Z_STRLEN_P(*struc) <= options->max_data) {
+			} else if ((size_t) Z_STRLEN_P(*struc) <= (size_t) options->max_data) {
 				xdebug_str_add(str, xdebug_sprintf("%sstring%s(%s%ld%s) \"%s%s%s\"",
 					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
 					ANSI_COLOR_LONG, Z_STRLEN_P(*struc), ANSI_COLOR_RESET,
@@ -1876,7 +1876,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
-			if (options->max_data == 0 || Z_STRLEN_P(*struc) <= options->max_data) {
+			if (options->max_data == 0 || (size_t) Z_STRLEN_P(*struc) <= (size_t) options->max_data) {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc)), Z_STRLEN_P(*struc));
 			} else {
 				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), options->max_data), options->max_data);
@@ -2147,7 +2147,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 
 		case IS_STRING:
 			xdebug_str_add(str, xdebug_sprintf("<small>string</small> <font color='%s'>'", COLOR_STRING), 1);
-			if (Z_STRLEN_P(*struc) > options->max_data) {
+			if ((size_t) Z_STRLEN_P(*struc) > (size_t) options->max_data) {
 				tmp_str = xdebug_xmlize(Z_STRVAL_P(*struc), options->max_data, &newlen);
 				xdebug_str_addl(str, tmp_str, newlen, 0);
 				efree(tmp_str);
