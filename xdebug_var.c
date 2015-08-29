@@ -1612,11 +1612,19 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp TSRM
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
 #if ZTS
+# if PHP_VERSION_ID >= 70000
+	if (ce->type == 1) {
+		item->zv   = &CG(static_members_table)[(zend_intptr_t) ce->static_members_table][zpp->offset];
+	} else {
+		item->zv   = &ce->static_members_table[zpp->offset];
+	}
+# else
 	if (ce->type == 1) {
 		item->zv   = CG(static_members_table)[(zend_intptr_t) ce->static_members_table][zpp->offset];
 	} else {
 		item->zv   = ce->static_members_table[zpp->offset];
 	}
+# endif
 #else
 # if PHP_VERSION_ID >= 70000
 	item->zv   = &ce->static_members_table[zpp->offset];

@@ -510,9 +510,13 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 {
 #if PHP_VERSION_ID < 70000
 	zend_op *base_address = &(opa->opcodes[0]);
+#else
+	zend_op base_address;
+	base_address = opa->opcodes[0];
 #endif
 
 	zend_op opcode = opa->opcodes[position];
+	
 	if (opcode.opcode == ZEND_JMP) {
 #if PHP_VERSION_ID >= 70000
 		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
