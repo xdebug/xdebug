@@ -500,21 +500,14 @@ static zend_brk_cont_element* xdebug_find_brk_cont(zend_uint nest_levels, int ar
 }
 
 #define XDEBUG_ZNODE_ELEM(node,var) node.var
-#if ZEND_USE_ABS_JMP_ADDR
-# define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((long)((node).jmp_addr) - (long)(base_address)) / sizeof(zend_op))
-#else
-# define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
+#if PHP_VERSION_ID >= 70000
+# define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)((int32_t)(OP_JMP_ADDR(opline, node)) / sizeof(zend_op))
 #endif
 
 static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
 #if PHP_VERSION_ID < 70000
 	zend_op *base_address = &(opa->opcodes[0]);
-#else
-# if ZEND_USE_ABS_JMP_ADDR
-	zend_long base_address;
-	base_address = &opa->opcodes[0];
-# endif
 #endif
 
 	zend_op opcode = opa->opcodes[position];
