@@ -66,11 +66,11 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => self::b = class stdClass {  } %sassignment-trace8.php:21
                              => self::b->bar = 52 %sassignment-trace8.php:22
                              => self::b->foo = class stdClass {  } %sassignment-trace8.php:23
-                             => b->foo->bar = 52 %sassignment-trace8.php:24
+                             => self::b->foo->bar = 52 %sassignment-trace8.php:24
                              => self::b = class stdClass {  } %sassignment-trace8.php:26
                              => self::b->bar = 52 %sassignment-trace8.php:27
                              => self::b->foo = class stdClass {  } %sassignment-trace8.php:28
-                             => b->foo->bar = 52 %sassignment-trace8.php:29
+                             => self::b->foo->bar = 52 %sassignment-trace8.php:29
                            => $a = class testClass { public $a = class stdClass { public $bar = 52; public $foo = class stdClass { public $bar = 52 } } } %sassignment-trace8.php:33
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace8.php:35
 %w%f %w%d
