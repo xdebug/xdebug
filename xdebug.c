@@ -1847,7 +1847,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	/* Store return value in the trace file */
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context)) {
 #if PHP_VERSION_ID >= 70000
-		if (EG(current_execute_data)->return_value) {
+		if (EG(current_execute_data) && EG(current_execute_data)->return_value) {
 #else
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 #endif
