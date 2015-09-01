@@ -1427,7 +1427,11 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		return;
 	}
 
+#if PHP_VERSION_ID >= 70000
+	default_ce = Z_OBJCE_P(exception);
+#else
 	default_ce = zend_exception_get_default(TSRMLS_C);
+#endif
 	exception_ce = Z_OBJCE_P(exception);
 
 	code =    xdebug_read_property(default_ce, exception, "code",    sizeof("code")-1,    0 TSRMLS_CC);
@@ -1456,7 +1460,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 #endif
 
 	previous_exception = xdebug_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
-	if (previous_exception && Z_TYPE_P(previous_exception) != IS_NULL) {
+	if (previous_exception && Z_TYPE_P(previous_exception) == IS_OBJECT) {
 		xdebug_message_trace = xdebug_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1 TSRMLS_CC);
 		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
 			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
