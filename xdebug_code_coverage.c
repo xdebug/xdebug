@@ -157,6 +157,33 @@ int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
+#if PHP_VERSION_ID >= 70000
+static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_opcode, const zend_op **found_opcode)
+{
+	const zend_op *opcode_ptr;
+
+	opcode_ptr = cur_opcode;
+	while (!(opcode_ptr->opcode == ZEND_EXT_STMT) && !(opcode_ptr->opcode == ZEND_FETCH_W)) {
+		opcode_ptr = opcode_ptr - 1;
+	}
+	if (opcode_ptr->opcode == ZEND_FETCH_W && opcode_ptr->extended_value == ZEND_FETCH_STATIC_MEMBER) {
+		*found_opcode = opcode_ptr;
+		return 1;
+	}
+	return 0;
+}
+#else
+static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_opcode, const zend_op **found_opcode)
+{
+	if (prev_opcode->op1_type == IS_CONST && prev_opcode->extended_value == ZEND_FETCH_STATIC_MEMBER)
+	{
+		*found_opcode = prev_opcode;
+		return 1;
+	}
+	return 0;
+}
+#endif
+
 static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 {
 	const zend_op *cur_opcode, *next_opcode, *prev_opcode = NULL, *opcode_ptr;
@@ -172,6 +199,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	int            gohungfound = 0, is_static = 0;
 	char          *zval_value = NULL;
 	xdebug_var_export_options *options;
+	const zend_op *static_opcode_ptr;
 
 #if PHP_VERSION_ID >= 70000
 	cur_opcode = execute_data->opline;
@@ -198,7 +226,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 #endif
 	}
 
-	is_static = (prev_opcode->op1_type == IS_CONST && prev_opcode->extended_value == ZEND_FETCH_STATIC_MEMBER);
+	is_static = xdebug_is_static_call(cur_opcode, prev_opcode, &static_opcode_ptr);
 	options = xdebug_var_export_options_from_ini(TSRMLS_C);
 	options->no_decoration = 1;
 
@@ -246,12 +274,21 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 
 	/* Scroll back to start of FETCHES */
 	gohungfound = 0;
-	opcode_ptr = prev_opcode;
-	while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW) {
-		opcode_ptr = opcode_ptr - 1;
+#if PHP_VERSION_ID >= 70000
+	if (!is_static) {
+#endif
+		opcode_ptr = prev_opcode;
+		while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW) {
+			opcode_ptr = opcode_ptr - 1;
+			gohungfound = 1;
+		}
+		opcode_ptr = opcode_ptr + 1;
+#if PHP_VERSION_ID >= 70000
+	} else { /* if we have a static method, we should already have found the first fetch */
+		opcode_ptr = static_opcode_ptr;
 		gohungfound = 1;
 	}
-	opcode_ptr = opcode_ptr + 1;
+#endif
 
 	if (gohungfound) {
 		do

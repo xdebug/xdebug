@@ -13,7 +13,7 @@ xdebug.overload_var_dump=0
 	class TimeStuff {
 		private $timestamp;
 
-		function TimeStuff($ts = null)
+		function __construct($ts = null)
 		{
 			$this->timestamp = $ts === null ? time() : $ts;
 		}

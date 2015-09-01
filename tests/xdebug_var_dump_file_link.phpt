@@ -18,7 +18,7 @@ xdebug.file_link_format=xdebug://%f@%l
 		protected $tm;
 		public $date;
 
-		function TimeStuff($ts = null)
+		function __construct($ts = null)
 		{
 			$this->self = &$this;
 			$this->timestamp = $ts === null ? time() : $ts;
