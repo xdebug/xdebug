@@ -969,10 +969,16 @@ static int find_line_number_for_current_execute_point(zend_execute_data *edata T
 {
 	zend_execute_data *ptr = edata;
 
+#if PHP_VERSION_ID >= 70000
+	while (ptr && (!ptr->func || !ZEND_USER_CODE(ptr->func->type))) {
+		ptr = ptr->prev_execute_data;
+	}
+#else
 	while (ptr && !ptr->opline)
 	{
 		ptr = ptr->prev_execute_data;
 	}
+#endif
 
 	if (ptr && ptr->opline) {
 		return ptr->opline->lineno;
