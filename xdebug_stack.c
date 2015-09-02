@@ -811,7 +811,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 
 #if PHP_VERSION_ID >= 70000
-	if (PG(track_errors) && EG(current_execute_data)->symbol_table) {
+	if (PG(track_errors) && EG(current_execute_data) && EG(current_execute_data)->symbol_table) {
 		zval tmp;
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
 		zend_hash_str_update(EG(current_execute_data)->symbol_table, "php_errormsg", sizeof("php_errormsg"), &tmp);
@@ -969,10 +969,16 @@ static int find_line_number_for_current_execute_point(zend_execute_data *edata T
 {
 	zend_execute_data *ptr = edata;
 
+#if PHP_VERSION_ID >= 70000
+	while (ptr && (!ptr->func || !ZEND_USER_CODE(ptr->func->type))) {
+		ptr = ptr->prev_execute_data;
+	}
+#else
 	while (ptr && !ptr->opline)
 	{
 		ptr = ptr->prev_execute_data;
 	}
+#endif
 
 	if (ptr && ptr->opline) {
 		return ptr->opline->lineno;
@@ -986,7 +992,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 {
 	memset(tmp, 0, sizeof(xdebug_func));
 
-	if (edata) {
+	if (edata && edata->func) {
 		if (edata->func->common.function_name) {
 			if (edata->called_scope) {
 				tmp->type = XFUNC_MEMBER;
@@ -1193,7 +1199,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	XG(function_count)++;
 #if PHP_VERSION_ID >= 70000
-	if (edata && ZEND_USER_CODE(edata->func->type)) {
+	if (edata && edata->func && ZEND_USER_CODE(edata->func->type)) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(edata->func->op_array.filename->val);
 #else
@@ -1213,7 +1219,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->filename) {
 		/* Includes/main script etc */
 #if PHP_VERSION_ID >= 70000
-		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
+		tmp->filename  = (op_array && op_array->filename && type == XDEBUG_EXTERNAL) ? xdstrdup(op_array->filename->val): NULL;
 #else
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
 #endif

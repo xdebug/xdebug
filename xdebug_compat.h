@@ -50,6 +50,10 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define XDEBUG_APPLY_COUNT(ht) (ht->u.v.nApplyCount)
 # define HASH_KEY_VAL(k) (k)->key->val
 # define HASH_KEY_LEN(k) (k)->key->len
+# define HASH_KEY_IS_NUMERIC(k) ((k) == NULL)
+# define HASH_APPLY_KEY_VAL(k) (k)->val
+# define HASH_APPLY_KEY_LEN(k) (k)->len + 1
+# define HASH_APPLY_NUMERIC(k) index
 
 # define ZEND_USER_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
 # define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
@@ -81,6 +85,10 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define XDEBUG_APPLY_COUNT(ht) (ht->nApplyCount)
 # define HASH_KEY_VAL(k) (k)->arKey
 # define HASH_KEY_LEN(k) (k)->nKeyLength
+# define HASH_KEY_IS_NUMERIC(k) ((k)->nKeyLength == 0)
+# define HASH_APPLY_KEY_VAL(k) (k)->arKey
+# define HASH_APPLY_KEY_LEN(k) (k)->nKeyLength
+# define HASH_APPLY_NUMERIC(k) (k)->h
 
 # define ZEND_USER_OPCODE_HANDLER_ARGS ZEND_OPCODE_HANDLER_ARGS
 # define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU ZEND_OPCODE_HANDLER_ARGS_PASSTHRU

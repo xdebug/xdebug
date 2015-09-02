@@ -61,12 +61,16 @@ zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdat
 char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len, size_t *new_len)
 {
 	zend_string *new_str;
+	char *retval;
 
 	new_str = php_str_to_str(haystack, length, needle, needle_len, str, str_len);
-
 	*new_len = new_str->len;
 
-	return new_str->val;
+	retval = estrdup(new_str->val);
+
+	zend_string_release(new_str);
+
+	return retval;
 }
 
 char *xdebug_base64_encode(unsigned char *data, int data_len, int *new_len)
