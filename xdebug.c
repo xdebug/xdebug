@@ -172,11 +172,15 @@ zend_module_entry xdebug_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
-
 ZEND_DECLARE_MODULE_GLOBALS(xdebug)
 
 #if COMPILE_DL_XDEBUG
 ZEND_GET_MODULE(xdebug)
+#if PHP_VERSION_ID >= 70000
+#	ifdef ZTS
+		ZEND_TSRMLS_CACHE_DEFINE();
+#	endif
+#endif
 #endif
 
 static PHP_INI_MH(OnUpdateServer)
@@ -1017,6 +1021,12 @@ PHP_RINIT_FUNCTION(xdebug)
 	char *idekey;
 #if PHP_VERSION_ID < 70000
 	zval **dummy;
+#endif
+
+#if PHP_VERSION_ID >= 70000
+#if defined(ZTS) && defined(COMPILE_DL_XDEBUG)
+        ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 #endif
 
 	/* Get the ide key for this session */
