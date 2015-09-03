@@ -1070,7 +1070,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 			if (strcmp(edata->func->common.function_name->val, "{closure}") == 0) {
 				tmp->function = xdebug_sprintf(
 					"{closure:%s:%d-%d}",
-					edata->func->op_array.filename,
+					edata->func->op_array.filename->val,
 					edata->func->op_array.line_start,
 					edata->func->op_array.line_end
 				);
