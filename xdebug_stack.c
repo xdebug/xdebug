@@ -1159,8 +1159,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op              *cur_opcode;
 #if PHP_VERSION_ID < 70000
 	zval                **param;
-	int                   i = 0;
 #endif
+	int                   i = 0;
 	char                 *aggr_key = NULL;
 	int                   aggr_key_len = 0;
 #if PHP_VERSION_ID >= 70000
@@ -1266,15 +1266,29 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	} else  {
 		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
-#if PHP_VERSION_ID < 70000
+
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
-			void **p;
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
 			/* This calculates how many arguments where sent to a function. It
 			 * works for both internal and user defined functions.
 			 * op_array->num_args works only for user defined functions so
 			 * we're not using that here. */
+#if PHP_VERSION_ID >= 70000
+			arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
+			arguments_wanted = arguments_sent;
+
+			if (tmp->user_defined == XDEBUG_EXTERNAL) {
+				arguments_wanted = op_array->num_args;
+			}
+
+			if (arguments_wanted > arguments_sent) {
+				arguments_storage = arguments_wanted;
+			} else {
+				arguments_storage = arguments_sent;
+			}
+#else
+			void **p;
 			void **curpos = NULL;
 			if ((!edata->opline) || ((edata->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (edata->opline->opcode == ZEND_DO_FCALL))) {
 				curpos = edata->function_state.arguments;
@@ -1297,6 +1311,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			} else {
 				arguments_storage = arguments_sent;
 			}
+#endif
 			tmp->var = xdmalloc(arguments_storage * sizeof (xdebug_var));
 
 			for (i = 0; i < arguments_sent; i++) {
@@ -1323,10 +1338,16 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 
 				if (XG(collect_params)) {
+#if PHP_VERSION_ID >= 70000
+					if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
+						tmp->var[tmp->varc].addr = ZEND_CALL_ARG(zdata, tmp->varc+1);
+					}
+#else
 					if (p) {
 						param = (zval **) p++;				
 						tmp->var[tmp->varc].addr = *param;
 					}
+#endif
 				}
 				tmp->varc++;
 			}
@@ -1348,7 +1369,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 			}
 		}
-#endif
 	}
 
 	if (XG(do_code_coverage)) {
