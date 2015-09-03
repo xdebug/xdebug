@@ -1740,7 +1740,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			!XG(profiler_enabled) &&
 			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE", XG(profiler_enable_trigger_value) TSRMLS_CC))
 		) {
-			if (xdebug_profiler_init((char *) op_array->filename TSRMLS_CC) == SUCCESS) {
+			if (xdebug_profiler_init(STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
 			}
 		}
