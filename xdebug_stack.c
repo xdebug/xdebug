@@ -1632,6 +1632,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				} else {
 					add_index_zval(params, j, vparams);
 				}
+#if PHP_VERSION_ID >= 70000
+				efree(params);
+#endif
 				params = vparams;
 				variadic_opened = 1;
 			}
@@ -1653,6 +1656,10 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		add_next_index_zval(return_value, frame);
+#if PHP_VERSION_ID >= 70000
+		efree(params);
+		efree(frame);
+#endif
 	}
 }
 /* }}} */
