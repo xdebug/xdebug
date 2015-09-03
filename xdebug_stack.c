@@ -1180,6 +1180,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		edata = EG(current_execute_data);
 		opline_ptr = (zend_op**) &EG(current_execute_data)->opline;
 	}
+	zdata = EG(current_execute_data);
 #endif
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
