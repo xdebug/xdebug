@@ -993,18 +993,21 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 	memset(tmp, 0, sizeof(xdebug_func));
 
 	if (edata && edata->func) {
-		if (edata->func->common.function_name) {
-			if (edata->called_scope) {
-				tmp->type = XFUNC_MEMBER;
-				if (edata->func->common.scope) { /* __autoload has no scope */
-					tmp->class = xdstrdup(edata->func->common.scope->name->val);
-				}
-			} else if (EG(scope) && edata->func->common.scope && edata->func->common.scope->name) {
-				tmp->type = XFUNC_STATIC_MEMBER;
+		tmp->type = XFUNC_NORMAL;
+		if (edata->This.value.obj) {
+			tmp->type = XFUNC_MEMBER;
+			if (edata->func->common.scope) {
 				tmp->class = xdstrdup(edata->func->common.scope->name->val);
 			} else {
-				tmp->type = XFUNC_NORMAL;
+				tmp->class = xdstrdup(edata->This.value.obj->ce->name->val);
 			}
+		} else {
+			if (edata->func->common.scope) {
+				tmp->type = XFUNC_STATIC_MEMBER;
+				tmp->class = xdstrdup(edata->func->common.scope->name->val);
+			}
+		}
+		if (edata->func->common.function_name) {
 			if (strcmp(edata->func->common.function_name->val, "{closure}") == 0) {
 				tmp->function = xdebug_sprintf(
 					"{closure:%s:%d-%d}",
@@ -1159,8 +1162,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op              *cur_opcode;
 #if PHP_VERSION_ID < 70000
 	zval                **param;
-	int                   i = 0;
 #endif
+	int                   i = 0;
 	char                 *aggr_key = NULL;
 	int                   aggr_key_len = 0;
 #if PHP_VERSION_ID >= 70000
@@ -1180,6 +1183,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		edata = EG(current_execute_data);
 		opline_ptr = (zend_op**) &EG(current_execute_data)->opline;
 	}
+	zdata = EG(current_execute_data);
 #endif
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
@@ -1266,15 +1270,29 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	} else  {
 		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
-#if PHP_VERSION_ID < 70000
+
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
-			void **p;
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
 			/* This calculates how many arguments where sent to a function. It
 			 * works for both internal and user defined functions.
 			 * op_array->num_args works only for user defined functions so
 			 * we're not using that here. */
+#if PHP_VERSION_ID >= 70000
+			arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
+			arguments_wanted = arguments_sent;
+
+			if (tmp->user_defined == XDEBUG_EXTERNAL) {
+				arguments_wanted = op_array->num_args;
+			}
+
+			if (arguments_wanted > arguments_sent) {
+				arguments_storage = arguments_wanted;
+			} else {
+				arguments_storage = arguments_sent;
+			}
+#else
+			void **p;
 			void **curpos = NULL;
 			if ((!edata->opline) || ((edata->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (edata->opline->opcode == ZEND_DO_FCALL))) {
 				curpos = edata->function_state.arguments;
@@ -1297,6 +1315,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			} else {
 				arguments_storage = arguments_sent;
 			}
+#endif
 			tmp->var = xdmalloc(arguments_storage * sizeof (xdebug_var));
 
 			for (i = 0; i < arguments_sent; i++) {
@@ -1309,11 +1328,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				 * is an associated variable to receive the variable here. */
 				if (tmp->user_defined == XDEBUG_EXTERNAL && i < arguments_wanted) {
 					if (op_array->arg_info[i].name) {
-#if PHP_VERSION_ID >= 70000
-						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name->val);
-#else
-						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
-#endif
+						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 					}
 #if PHP_VERSION_ID >= 50600
 					if (op_array->arg_info[i].is_variadic) {
@@ -1323,10 +1338,16 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 
 				if (XG(collect_params)) {
+#if PHP_VERSION_ID >= 70000
+					if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
+						tmp->var[tmp->varc].addr = ZEND_CALL_ARG(zdata, tmp->varc+1);
+					}
+#else
 					if (p) {
 						param = (zval **) p++;				
 						tmp->var[tmp->varc].addr = *param;
 					}
+#endif
 				}
 				tmp->varc++;
 			}
@@ -1336,11 +1357,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
 				for (i = arguments_sent; i < arguments_wanted; i++) {
 					if (op_array->arg_info[i].name) {
-#if PHP_VERSION_ID >= 70000
-						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name->val);
-#else
-						tmp->var[tmp->varc].name = xdstrdup(op_array->arg_info[i].name);
-#endif
+						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 					}
 					tmp->var[tmp->varc].addr = NULL;
 					tmp->var[tmp->varc].is_variadic = 0;
@@ -1348,7 +1365,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 			}
 		}
-#endif
 	}
 
 	if (XG(do_code_coverage)) {

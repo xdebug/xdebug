@@ -794,16 +794,18 @@ char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **p
 	const char *prop_name, *cls_name;
 
 #if PHP_VERSION_ID >= 70000
-	zend_string *i_mangled = zend_string_init(mangled_property, mangled_len, 0);
+	zend_string *i_mangled = zend_string_init(mangled_property, mangled_len - 1, 0);
 	zend_unmangle_property_name(i_mangled, &cls_name, &prop_name);
-	zend_string_release(i_mangled);
 #else
 	zend_unmangle_property_name(mangled_property, mangled_len, &cls_name, &prop_name);
 #endif
-	*property_name = (char *) prop_name;
-	*class_name = (char *) cls_name;
-	if (cls_name) {
-		if (cls_name[0] == '*') {
+	*property_name = (char *) xdstrdup(prop_name);
+	*class_name = cls_name ? xdstrdup(cls_name) : NULL;
+#if PHP_VERSION_ID >= 70000
+	zend_string_release(i_mangled);
+#endif
+	if (*class_name) {
+		if (*class_name[0] == '*') {
 			return "protected";
 		} else {
 			return "private";
@@ -917,18 +919,22 @@ static int xdebug_object_element_export(zval **zv TSRMLS_DC, int num_args, va_li
 	xdebug_var_export_options *options = va_arg(args, xdebug_var_export_options*);
 	char *class_name                   = va_arg(args, char*);
 #endif
-	char *prop_name, *modifier, *prop_class_name;
 
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
+			char *prop_name, *modifier, *prop_class_name;
+
 			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("%s ${%s}:%s = ", modifier, prop_class_name, prop_name), 1);
 			}
+
+			xdfree(prop_name);
+			xdfree(prop_class_name);
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("public $%d = ", HASH_APPLY_NUMERIC(hash_key)), 1);
 		}
@@ -1286,7 +1292,6 @@ static int xdebug_object_element_export_text_ansi(zval **zv TSRMLS_DC, int num_a
 	int debug_zval =                     va_arg(args, int);
 	xdebug_var_export_options *options = va_arg(args, xdebug_var_export_options*);
 #endif
-	char *prop_name, *class_name, *modifier;
 
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
@@ -1294,10 +1299,15 @@ static int xdebug_object_element_export_text_ansi(zval **zv TSRMLS_DC, int num_a
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
+			char *prop_name, *class_name, *modifier;
+
 			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &class_name);
 			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
 			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+
+			xdfree(prop_name);
+			xdfree(class_name);
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("%s%spublic%s%s ${%d} %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
@@ -1751,15 +1761,18 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 	char *class_name                   = va_arg(args, char *);
 #endif
 	xdebug_xml_node *node;
-	char *prop_name, *modifier, *prop_class_name;
 	char *full_name = NULL;
 
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
+		char *modifier;
+
 		node = xdebug_xml_node_init("property");
 
 		if ((*item)->name_len != 0) {
+			char *prop_name, *prop_class_name;
+
 			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len, &prop_name, &prop_class_name);
 
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
@@ -1776,6 +1789,9 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 				}
 				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 			}
+
+			xdfree(prop_name);
+			xdfree(prop_class_name);
 		} else { /* Numerical property name */
 			modifier = "public";
 
@@ -1866,6 +1882,9 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info TSRMLS_D
 #endif
 		xdfree(priv_name);
 	}
+
+	xdfree(prop_name);
+	xdfree(prop_class_name);
 
 	if (contents) {
 		xdebug_xml_add_attribute_ex(contents, "facet", xdebug_sprintf("static %s", modifier), 0, 1);
@@ -2152,7 +2171,6 @@ static int xdebug_object_element_export_fancy(zval **zv TSRMLS_DC, int num_args,
 	xdebug_var_export_options *options = va_arg(args, xdebug_var_export_options*);
 	char *class_name                   = va_arg(args, char*);
 #endif
-	char *prop_name, *modifier, *prop_class_name;
 
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
@@ -2160,12 +2178,17 @@ static int xdebug_object_element_export_fancy(zval **zv TSRMLS_DC, int num_args,
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
+			char *prop_name, *modifier, *prop_class_name;
+
 			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <small>(%s)</small> <font color='%s'>=&gt;</font> ", modifier, prop_name, prop_class_name, COLOR_POINTER), 1);
 			}
+
+			xdfree(prop_name);
+			xdfree(prop_class_name);
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("<i>public</i> %d <font color='%s'>=&gt;</font> ", HASH_APPLY_NUMERIC(hash_key), COLOR_POINTER), 1);
 		}
