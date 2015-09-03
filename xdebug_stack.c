@@ -993,18 +993,21 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 	memset(tmp, 0, sizeof(xdebug_func));
 
 	if (edata && edata->func) {
-		if (edata->func->common.function_name) {
-			if (edata->called_scope) {
-				tmp->type = XFUNC_MEMBER;
-				if (edata->func->common.scope) { /* __autoload has no scope */
-					tmp->class = xdstrdup(edata->func->common.scope->name->val);
-				}
-			} else if (EG(scope) && edata->func->common.scope && edata->func->common.scope->name) {
-				tmp->type = XFUNC_STATIC_MEMBER;
+		tmp->type = XFUNC_NORMAL;
+		if (edata->This.value.obj) {
+			tmp->type = XFUNC_MEMBER;
+			if (edata->func->common.scope) {
 				tmp->class = xdstrdup(edata->func->common.scope->name->val);
 			} else {
-				tmp->type = XFUNC_NORMAL;
+				tmp->class = xdstrdup(edata->This.value.obj->ce->name->val);
 			}
+		} else {
+			if (edata->func->common.scope) {
+				tmp->type = XFUNC_STATIC_MEMBER;
+				tmp->class = xdstrdup(edata->func->common.scope->name->val);
+			}
+		}
+		if (edata->func->common.function_name) {
 			if (strcmp(edata->func->common.function_name->val, "{closure}") == 0) {
 				tmp->function = xdebug_sprintf(
 					"{closure:%s:%d-%d}",
