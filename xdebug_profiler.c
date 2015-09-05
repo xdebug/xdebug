@@ -212,7 +212,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	if (fse->user_defined == XDEBUG_EXTERNAL) {
 		char *tmp_fl = NULL, *tmp_fn = NULL;
 		if (op_array) {
-			tmp_fl = get_filename_ref(STR_NAME_VAL(op_array->filename) TSRMLS_CC);
+			tmp_fl = get_filename_ref((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC);
 			fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
 		} else {
 			tmp_fl = get_filename_ref(fse->filename TSRMLS_CC);
