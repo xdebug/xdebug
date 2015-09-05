@@ -1070,7 +1070,7 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 			if (strcmp(edata->func->common.function_name->val, "{closure}") == 0) {
 				tmp->function = xdebug_sprintf(
 					"{closure:%s:%d-%d}",
-					edata->func->op_array.filename,
+					edata->func->op_array.filename->val,
 					edata->func->op_array.line_start,
 					edata->func->op_array.line_end
 				);
@@ -1632,6 +1632,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				} else {
 					add_index_zval(params, j, vparams);
 				}
+#if PHP_VERSION_ID >= 70000
+				efree(params);
+#endif
 				params = vparams;
 				variadic_opened = 1;
 			}
@@ -1653,6 +1656,10 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		add_next_index_zval(return_value, frame);
+#if PHP_VERSION_ID >= 70000
+		efree(params);
+		efree(frame);
+#endif
 	}
 }
 /* }}} */
