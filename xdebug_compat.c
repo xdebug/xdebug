@@ -76,23 +76,31 @@ char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t need
 char *xdebug_base64_encode(unsigned char *data, int data_len, int *new_len)
 {
 	zend_string *new_str;
+	char *retval;
 
 	new_str = php_base64_encode(data, data_len);
-
 	*new_len = new_str->len;
 
-	return new_str->val;
+	retval = estrdup(new_str->val);
+
+	zend_string_release(new_str);
+
+	return retval;
 }
 
 unsigned char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_len)
 {
 	zend_string *new_str;
+	char *retval;
 
 	new_str = php_base64_decode(data, data_len);
-
 	*new_len = new_str->len;
 
-	return (unsigned char*) new_str->val;
+	retval = estrdup(new_str->val);
+
+	zend_string_release(new_str);
+
+	return (unsigned char*) retval;
 }
 
 void xdebug_stripcslashes(char *str, int *len)
