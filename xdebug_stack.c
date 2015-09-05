@@ -319,12 +319,72 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 #endif
 }
 
+static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_level TSRMLS_DC)
+{
+	char *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value, *tmp_serialized;
+	int    len;
+	size_t newlen;
+
+	if (html) {
+		switch (collecton_level) {
+			case 1: /* synopsis */
+				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, &len, 0, NULL TSRMLS_CC);
+				xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_synop_value), 1);
+				xdfree(tmp_fancy_synop_value);
+				break;
+			case 2: /* synopsis + full in tooltip */
+				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+				tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
+				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, &len, 0, NULL TSRMLS_CC);
+				xdebug_str_add(str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
+				xdfree(tmp_value);
+				efree(tmp_fancy_value);
+				xdfree(tmp_fancy_synop_value);
+				break;
+			case 3: /* full */
+			case 4: /* full (with var_name) */
+			default:
+				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+				tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
+				xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_value), 1);
+				xdfree(tmp_value);
+				efree(tmp_fancy_value);
+				break;
+			case 5: { /* serialized */
+				tmp_serialized = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
+				xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_serialized), 1);
+				xdfree(tmp_serialized);
+			} break;
+		}
+	} else {
+		switch (collecton_level) {
+			case 1: /* synopsis */
+			case 2:
+				tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
+				break;
+			case 3: /* full */
+			case 4: /* full (with var_name) */
+			default:
+				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+				break;
+			case 5: /* serialized */
+				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
+				break;
+		}
+		if (tmp_value) {
+			xdebug_str_add(str, xdebug_sprintf("%s", tmp_value), 1);
+			xdfree(tmp_value);
+		} else {
+			xdebug_str_addl(str, "???", 3, 0);
+		}
+	}
+}
+
 void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	int    printed_frames = 0;
-	int    len;
 	char **formats = select_formats(html TSRMLS_CC);
 
 	if (XG(stack) && XG(stack)->size) {
@@ -350,9 +410,6 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
-				char *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value, *tmp_serialized;
-				size_t newlen;
-
 				if (c) {
 					xdebug_str_addl(str, ", ", 2, 0);
 				} else {
@@ -382,53 +439,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				}
 
 				if (i->var[j].addr) {
-					if (html) {
-						tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-						tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
-						tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", i->var[j].addr, &len, 0, NULL TSRMLS_CC);
-						tmp_serialized = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
-						switch (XG(collect_params)) {
-							case 1: /* synopsis */
-								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_synop_value), 1);
-								break;
-							case 2: /* synopsis + full in tooltip */
-								xdebug_str_add(str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
-								break;
-							case 3: /* full */
-							case 4: /* full (with var_name) */
-							default:
-								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_value), 1);
-								break;
-							case 5: /* serialized */
-								xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_serialized), 1);
-								break;
-						}
-						xdfree(tmp_value);
-						efree(tmp_fancy_value);
-						xdfree(tmp_fancy_synop_value);
-						xdfree(tmp_serialized);
-					} else {
-						switch (XG(collect_params)) {
-							case 1: /* synopsis */
-							case 2:
-								tmp_value = xdebug_get_zval_synopsis(i->var[j].addr, 0, NULL);
-								break;
-							case 3: /* full */
-							case 4: /* full (with var_name) */
-							default:
-								tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-								break;
-							case 5: /* serialized */
-								tmp_value = xdebug_get_zval_value_serialized(i->var[j].addr, 0, NULL TSRMLS_CC);
-								break;
-						}
-						if (tmp_value) {
-							xdebug_str_add(str, xdebug_sprintf("%s", tmp_value), 1);
-							xdfree(tmp_value);
-						} else {
-							xdebug_str_addl(str, "???", 3, 0);
-						}
-					}
+					add_single_value(str, i->var[j].addr, html, XG(collect_params) TSRMLS_CC);
 				} else {
 					xdebug_str_addl(str, "???", 3, 0);
 				}
