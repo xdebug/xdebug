@@ -862,10 +862,18 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	}
 
 #if PHP_VERSION_ID >= 70000
-	if (PG(track_errors) && EG(current_execute_data) && EG(current_execute_data)->symbol_table) {
+	if (PG(track_errors) && EG(valid_symbol_table)) {
 		zval tmp;
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
-		zend_hash_str_update(EG(current_execute_data)->symbol_table, "php_errormsg", sizeof("php_errormsg"), &tmp);
+
+		if (EG(current_execute_data)) {
+			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
+				zval_ptr_dtor(&tmp);
+			}
+		} else {
+			zend_hash_str_update(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg"), &tmp);
+		}
+	}
 #else
 	if (PG(track_errors) && EG(active_symbol_table)) {
 		zval *tmp;
@@ -875,8 +883,8 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		Z_STRLEN_P(tmp) = buffer_len;
 		Z_TYPE_P(tmp) = IS_STRING;
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
-#endif
 	}
+#endif
 
 	efree(buffer);
 }
