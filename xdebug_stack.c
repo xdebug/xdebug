@@ -1243,7 +1243,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		edata = EG(current_execute_data);
 		opline_ptr = (zend_op**) &EG(current_execute_data)->opline;
 	}
+# if PHP_VERSION_ID >= 70000
 	zdata = EG(current_execute_data);
+# endif
 #endif
 
 	tmp = xdmalloc (sizeof (function_stack_entry));
