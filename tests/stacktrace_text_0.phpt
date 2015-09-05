@@ -25,10 +25,10 @@ $a = array(
     42 => false, 'foo' => 912124,
     $c, new stdClass, fopen( '/etc/passwd', 'r' )
 );
-foo( $a );
+try { foo( $a ); } catch (Throwable $e) { /* ignore */ }
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function poo() in /%s/stacktrace%s.php on line 4
+%srror: Call to undefined function poo() in /%s/stacktrace%s.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() /%s/stacktrace%s.php:0
