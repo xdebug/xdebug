@@ -2386,6 +2386,9 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 
 char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
+#if PHP_VERSION_ID >= 70000
+	zend_object *orig_exception = EG(exception);
+#endif
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
@@ -2396,7 +2399,9 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	XG(in_var_serialisation) = 1;
 #if PHP_VERSION_ID >= 70000
+	EG(exception) = NULL;
 	php_var_serialize(&buf, val, &var_hash TSRMLS_CC);
+	orig_exception = EG(exception) = orig_exception;
 #else
 	php_var_serialize(&buf, &val, &var_hash TSRMLS_CC);
 #endif
