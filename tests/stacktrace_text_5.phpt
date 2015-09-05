@@ -1,5 +1,5 @@
 --TEST--
-Test stack traces (level4, text)
+Test stack traces (level5, text)
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
