@@ -1393,7 +1393,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 					}
-#if PHP_VERSION_ID >= 56000
+#if PHP_VERSION_ID >= 50600
 					if (op_array->arg_info[i].is_variadic) {
 						tmp->var[tmp->varc].is_variadic = 1;
 #if PHP_VERSION_ID >= 70000
