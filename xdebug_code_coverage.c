@@ -1067,10 +1067,19 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 			add_assoc_zval(branch, "out_hit", out_hit);
 
 			add_index_zval(branches, i, branch);
+#if PHP_VERSION_ID >= 70000
+			efree(out_hit);
+			efree(out);
+			efree(branch);
+#endif
 		}
 	}
 
 	add_assoc_zval_ex(retval, "branches", 9, branches);
+
+#if PHP_VERSION_ID >= 70000
+	efree(branches);
+#endif
 }
 
 static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
@@ -1096,9 +1105,18 @@ static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 		add_assoc_long(path_container, "hit", branch_info->path_info.paths[i]->hit);
 
 		add_next_index_zval(paths, path_container);
+
+#if PHP_VERSION_ID >= 70000
+		efree(path_container);
+		efree(path);
+#endif
 	}
 
 	add_assoc_zval_ex(retval, "paths", 6, paths);
+
+#if PHP_VERSION_ID >= 70000
+	efree(paths);
+#endif
 }
 
 static void add_cc_function(void *ret, xdebug_hash_element *e)
@@ -1117,6 +1135,10 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 	}
 
 	add_assoc_zval_ex(retval, function->name, strlen(function->name) + 1, function_info);
+
+#if PHP_VERSION_ID >= 70000
+	efree(function_info);
+#endif
 }
 
 static void add_file(void *ret, xdebug_hash_element *e)
@@ -1155,9 +1177,17 @@ static void add_file(void *ret, xdebug_hash_element *e)
 		add_assoc_zval_ex(file_info, "functions", 10, functions);
 
 		add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, file_info);
+#if PHP_VERSION_ID >= 70000
+		efree(functions);
+		efree(file_info);
+#endif
 	} else {
 		add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, lines);
 	}
+
+#if PHP_VERSION_ID >= 70000
+	efree(lines);
+#endif
 }
 
 PHP_FUNCTION(xdebug_get_code_coverage)

@@ -172,11 +172,15 @@ zend_module_entry xdebug_module_entry = {
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
-
 ZEND_DECLARE_MODULE_GLOBALS(xdebug)
 
 #if COMPILE_DL_XDEBUG
 ZEND_GET_MODULE(xdebug)
+#if PHP_VERSION_ID >= 70000
+#	ifdef ZTS
+		ZEND_TSRMLS_CACHE_DEFINE();
+#	endif
+#endif
 #endif
 
 static PHP_INI_MH(OnUpdateServer)
@@ -266,6 +270,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "256",                PHP_INI_ALL,    OnUpdateLong,   max_nesting_level, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.max_stack_frames",  "-1",                 PHP_INI_ALL,    OnUpdateLong,   max_stack_frames,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.overload_var_dump", "1",                PHP_INI_ALL,    OnUpdateBool,   overload_var_dump, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.show_error_trace",  "1",                PHP_INI_ALL,    OnUpdateBool,   show_error_trace,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_exception_trace",  "0",            PHP_INI_ALL,    OnUpdateBool,   show_ex_trace,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_local_vars", "0",                  PHP_INI_ALL,    OnUpdateBool,   show_local_vars,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.show_mem_delta",  "0",                  PHP_INI_ALL,    OnUpdateBool,   show_mem_delta,    zend_xdebug_globals, xdebug_globals)
@@ -1019,6 +1024,12 @@ PHP_RINIT_FUNCTION(xdebug)
 	zval **dummy;
 #endif
 
+#if PHP_VERSION_ID >= 70000
+#if defined(ZTS) && defined(COMPILE_DL_XDEBUG)
+        ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+#endif
+
 	/* Get the ide key for this session */
 	XG(ide_key) = NULL;
 	idekey = xdebug_env_key(TSRMLS_C);
@@ -1480,7 +1491,11 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	}
 	XG(last_exception_trace) = exception_trace;
 
+#if PHP_VERSION_ID >= 70000
+	if (XG(show_ex_trace) || (instanceof_function(exception_ce, zend_ce_error) && XG(show_error_trace))) {
+#else
 	if (XG(show_ex_trace)) {
+#endif
 		if (PG(log_errors)) {
 			xdebug_log_stack(STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
 		}
@@ -1740,7 +1755,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			!XG(profiler_enabled) &&
 			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE", XG(profiler_enable_trigger_value) TSRMLS_CC))
 		) {
-			if (xdebug_profiler_init(STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
+			if (xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
 			}
 		}
