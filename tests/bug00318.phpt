@@ -15,7 +15,7 @@ include(dirname(__FILE__).'/bug00318.inc'); // File with problem in it.
 xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
-Fatal error: Cannot break/continue 1 level in %sbug00318.inc on line 3
+Fatal error: %sbreak%s in %sbug00318.inc on line 3
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00318.php:0
