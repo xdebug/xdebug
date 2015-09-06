@@ -50,7 +50,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => self::foo[42] = 44 %sassignment-trace6.php:16
                              => self::bar['test'] = array () %sassignment-trace6.php:18
                              => $id = 'test' %sassignment-trace6.php:19
-                             => bar['test'][] = 55 %sassignment-trace6.php:20
+                             => self::bar['test'][] = 55 %sassignment-trace6.php:20
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace6.php:25
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]
