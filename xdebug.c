@@ -1615,8 +1615,10 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
+#if PHP_VERSION_ID < 70000
 	int                   clear = 0;
 	zval                 *return_val = NULL;
+#endif
 
 	/* We need to do this first before the executable clauses are called */
 	if (XG(no_exec) == 1) {
@@ -1830,15 +1832,12 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
 	}
 
-#if PHP_VERSION_ID >= 70000
-	if (!EG(current_execute_data)->return_value) {
-		EG(current_execute_data)->return_value = return_val;
-#else
+#if PHP_VERSION_ID < 70000
 	if (!EG(return_value_ptr_ptr)) {
 		EG(return_value_ptr_ptr) = &return_val;
-#endif
 		clear = 1;
 	}
+#endif
 
 #if PHP_VERSION_ID < 50500
 	xdebug_old_execute(op_array TSRMLS_CC);
@@ -1862,7 +1861,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	/* Store return value in the trace file */
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context)) {
 #if PHP_VERSION_ID >= 70000
-		if (EG(current_execute_data) && EG(current_execute_data)->return_value) {
+		if (execute_data && execute_data->return_value) {
 #else
 		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
 #endif
@@ -1878,7 +1877,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			} else {
 				if (XG(trace_handler)->return_value) {
 # if PHP_VERSION_ID >= 70000
-					XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, EG(current_execute_data)->return_value TSRMLS_CC);
+					XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, execute_data->return_value TSRMLS_CC);
 # else
 					XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, *EG(return_value_ptr_ptr) TSRMLS_CC);
 # endif
@@ -1889,12 +1888,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 #endif
 		}
 	}
-#if PHP_VERSION_ID >= 70000
-	if (clear && EG(current_execute_data) && EG(current_execute_data)->return_value) {
-		zval_ptr_dtor(EG(current_execute_data)->return_value);
-		EG(current_execute_data)->return_value = NULL;
-	}
-#else
+#if PHP_VERSION_ID < 70000
 	if (clear && *EG(return_value_ptr_ptr)) {
 		zval_ptr_dtor(EG(return_value_ptr_ptr));
 		EG(return_value_ptr_ptr) = NULL;
@@ -1948,7 +1942,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
+#if PHP_VERSION_ID < 70000
 	const zend_op        *cur_opcode;
+#endif
 	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
 
@@ -2024,12 +2020,12 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 
 	/* Store return value in the trace file */
 #if PHP_VERSION_ID >= 70000
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && current_execute_data->opline) {
-		cur_opcode = current_execute_data->opline;
+	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && return_value && XG(trace_handler)->return_value) {
+		XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, return_value TSRMLS_CC);
+	}
 #else
 	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && EG(opline_ptr) && current_execute_data->opline) {
 		cur_opcode = *EG(opline_ptr);
-#endif
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data TSRMLS_CC);
 			if (ret && XG(trace_handler)->return_value) {
@@ -2037,6 +2033,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 			}
 		}
 	}
+#endif
 
 	/* Check for return breakpoints */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
