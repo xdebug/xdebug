@@ -2230,7 +2230,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 	}
 
 #if PHP_VERSION_ID >= 70000
-	if (!EG(current_execute_data)->symbol_table) {
+	if (!EG(current_execute_data)->prev_execute_data->symbol_table) {
 #else
 	if (!EG(active_symbol_table)) {
 #endif
@@ -2240,7 +2240,8 @@ PHP_FUNCTION(xdebug_debug_zval)
 	for (i = 0; i < argc; i++) {
 #if PHP_VERSION_ID >= 70000
 		if (Z_TYPE(args[i]) == IS_STRING) {
-			XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+			XG(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
+			XG(active_execute_data) = EG(current_execute_data)->prev_execute_data;
 			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), Z_STRLEN(args[i]) + 1 TSRMLS_CC);
 			php_printf("%s: ", Z_STRVAL(args[i]));
 #else
@@ -2301,7 +2302,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	}
 
 #if PHP_VERSION_ID >= 70000
-	if (!EG(current_execute_data)->symbol_table) {
+	if (!EG(current_execute_data)->prev_execute_data->symbol_table) {
 #else
 	if (!EG(active_symbol_table)) {
 #endif

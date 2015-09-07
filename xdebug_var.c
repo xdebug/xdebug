@@ -407,10 +407,11 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			if (XG(active_execute_data) && XG(active_execute_data)->op_array) {
 #endif
 				int i = 0;
-				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
 #if PHP_VERSION_ID >= 70000
+				ulong hash_value = zend_inline_hash_func(element, element_length);
 				zend_op_array *opa = &XG(active_execute_data)->func->op_array;
 #else
+				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
 				zend_op_array *opa = XG(active_execute_data)->op_array;
 #endif
 				zval **CV;
@@ -427,7 +428,8 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 #endif
 					{
 #if PHP_VERSION_ID >= 70000
-						CV = NULL;
+						zval *CV_z = ZEND_CALL_VAR_NUM(XG(active_execute_data), i);
+						CV = &CV_z;
 #elif PHP_VERSION_ID >= 50500
 						CV = (*EX_CV_NUM(XG(active_execute_data), i));
 #else
