@@ -2491,7 +2491,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 	lineno = EG(current_execute_data)->opline->lineno;
 
-	file = (char *) op_array->filename;
+	file = (char*) STR_NAME_VAL(op_array->filename);
 
 	if (XG(do_code_coverage)) {
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);

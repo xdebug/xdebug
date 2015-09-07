@@ -749,12 +749,6 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 	}
 }
 
-#if PHP_VERSION_ID >= 70000
-# define STR_NAME_VAL(k) (k)->val
-#else
-# define STR_NAME_VAL(k) (k)
-#endif
-
 static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC)
 {
 	int closure = 0;
@@ -765,7 +759,7 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 		if (strcmp(STR_NAME_VAL(opa->function_name), "{closure}") == 0) {
 			tmp->function = xdebug_sprintf(
 				"{closure:%s:%d-%d}",
-				opa->filename,
+				STR_NAME_VAL(opa->filename),
 				opa->line_start,
 				opa->line_end
 			);
@@ -784,8 +778,6 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 		tmp->type = XFUNC_NORMAL;
 	}
 }
-
-#undef STR_NAME_VAL
 
 static char* xdebug_func_format(xdebug_func *func TSRMLS_DC)
 {
@@ -862,7 +854,7 @@ static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_arg
 {
 	if (opa->type == ZEND_USER_FUNCTION) {
 		if ((long) opa->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
-			prefill_from_oparray((char *) opa->filename, opa TSRMLS_CC);
+			prefill_from_oparray((char*) STR_NAME_VAL(opa->filename), opa TSRMLS_CC);
 		}
 	}
 
@@ -890,11 +882,11 @@ static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, in
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
 	if ((long) op_array->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
-		prefill_from_oparray((char *) op_array->filename, op_array TSRMLS_CC);
+		prefill_from_oparray((char*) STR_NAME_VAL(op_array->filename), op_array TSRMLS_CC);
 	}
 
-	zend_hash_apply_with_arguments(CG(function_table)  TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, op_array->filename);
-	zend_hash_apply_with_arguments(CG(class_table) TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, op_array->filename);
+	zend_hash_apply_with_arguments(CG(function_table)  TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, STR_NAME_VAL(op_array->filename));
+	zend_hash_apply_with_arguments(CG(class_table) TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, STR_NAME_VAL(op_array->filename));
 }
 
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
@@ -916,7 +908,7 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 {
 	xdebug_str str = { 0, 0, NULL };
 	xdebug_path *path = xdebug_path_info_get_path_for_level(XG(paths_stack), XG(level) TSRMLS_CC);
-	char *file = (char *) op_array->filename;
+	char *file = (char*) STR_NAME_VAL(op_array->filename);
 	xdebug_func func_info;
 	char *function_name;
 
