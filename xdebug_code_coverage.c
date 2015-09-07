@@ -1067,7 +1067,7 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 		}
 	}
 
-	add_assoc_zval_ex(retval, "branches", 9, branches);
+	add_assoc_zval_ex(retval, "branches", HASH_KEY_SIZEOF("branches"), branches);
 
 #if PHP_VERSION_ID >= 70000
 	efree(branches);
@@ -1104,7 +1104,7 @@ static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 #endif
 	}
 
-	add_assoc_zval_ex(retval, "paths", 6, paths);
+	add_assoc_zval_ex(retval, "paths", HASH_KEY_SIZEOF("paths"), paths);
 
 #if PHP_VERSION_ID >= 70000
 	efree(paths);
@@ -1126,7 +1126,7 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 		add_paths(function_info, function->branch_info TSRMLS_CC);
 	}
 
-	add_assoc_zval_ex(retval, function->name, strlen(function->name) + 1, function_info);
+	add_assoc_zval_ex(retval, function->name, HASH_KEY_STRLEN(function->name), function_info);
 
 #if PHP_VERSION_ID >= 70000
 	efree(function_info);
@@ -1165,16 +1165,16 @@ static void add_file(void *ret, xdebug_hash_element *e)
 
 		xdebug_hash_apply(file->functions, (void *) functions, add_cc_function);
 
-		add_assoc_zval_ex(file_info, "lines", 6, lines);
-		add_assoc_zval_ex(file_info, "functions", 10, functions);
+		add_assoc_zval_ex(file_info, "lines", HASH_KEY_SIZEOF("lines"), lines);
+		add_assoc_zval_ex(file_info, "functions", HASH_KEY_SIZEOF("functions"), functions);
 
-		add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, file_info);
+		add_assoc_zval_ex(retval, file->name, HASH_KEY_STRLEN(file->name), file_info);
 #if PHP_VERSION_ID >= 70000
 		efree(functions);
 		efree(file_info);
 #endif
 	} else {
-		add_assoc_zval_ex(retval, file->name, strlen(file->name) + 1, lines);
+		add_assoc_zval_ex(retval, file->name, HASH_KEY_STRLEN(file->name), lines);
 	}
 
 #if PHP_VERSION_ID >= 70000
