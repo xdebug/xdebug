@@ -26,5 +26,10 @@ try {
 }
 echo "END";
 ?>
---EXPECT--
+--EXPECTF--
+ParseError: syntax error, unexpected 'new' (T_NEW) in %sbug00422.inc on line 7
+
+Call Stack:
+    %f     %d   1. {main}() /home/derick/dev/php/derickr-xdebug/tests/bug00422-php70.php:0
+
 END
