@@ -1788,7 +1788,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 #endif
 #if PHP_VERSION_ID >= 70000
 	fse->symbol_table = EG(current_execute_data)->symbol_table;
-	fse->This = &EG(current_execute_data)->This;
+	if (Z_OBJ(EG(current_execute_data)->This)) {
+		fse->This = &EG(current_execute_data)->This;
+	}
 #else
 	fse->symbol_table = EG(active_symbol_table);
 	fse->This = EG(This);
