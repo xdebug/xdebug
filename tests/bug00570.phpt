@@ -12,7 +12,7 @@ function foo() {
 foo();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' in %sbug00570.php on line 3
+Fatal error: Uncaught%sException%sin %sbug00570.php on line 3
 
 Exception:  in %sbug00570.php on line 3
 

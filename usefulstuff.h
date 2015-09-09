@@ -55,6 +55,7 @@ char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned 
 char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end);
 void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
 char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);
+char* xdebug_strrstr(const char* haystack, const char* needle);
 double xdebug_get_utime(void);
 char* xdebug_get_time(void);
 char *xdebug_path_to_url(const char *fileurl TSRMLS_DC);

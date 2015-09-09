@@ -755,7 +755,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			char *printable_stack;
 
 			/* We need to see if we have an uncaught exception fatal error now */
+#if PHP_VERSION_ID >= 70000
+			if (type == E_ERROR && strncmp(buffer, "Uncaught ", 9) == 0) {
+#else
 			if (type == E_ERROR && strncmp(buffer, "Uncaught exception", 18) == 0) {
+#endif
 				xdebug_str str = {0, 0, NULL};
 				char *tmp_buf, *p;
 				
@@ -764,8 +768,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				if (!p) {
 					p = buffer + strlen(buffer);
 				} else {
+#if PHP_VERSION_ID >= 70000
+					/* find the last " in ", which isn't great and might not work... but in most cases it will */
+					p = xdebug_strrstr(buffer, " in ");
+#else
 					/* find last quote */
 					p = ((char *) zend_memrchr(buffer, '\'', p - buffer)) + 1;
+#endif
 				}
 				/* Create new buffer */
 				tmp_buf = calloc(p - buffer + 1, 1);
