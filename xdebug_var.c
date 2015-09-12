@@ -1632,7 +1632,11 @@ static int object_item_add_to_merged_hash(zval **zv TSRMLS_DC, int num_args, va_
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
+#if PHP_VERSION_ID >= 70000
+	item->zv   = (zval*) zv;
+#else
 	item->zv   = *zv;
+#endif
 	item->name = (char*) HASH_KEY_VAL(hash_key);
 	item->name_len = HASH_KEY_LEN(hash_key);
 	item->index = hash_key->h;
