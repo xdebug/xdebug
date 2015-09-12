@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #494: Private attributes of parent class unavailable when inheriting
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

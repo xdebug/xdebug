@@ -2,6 +2,7 @@
 Test for bug #614: local variables loses class members. (PHP >= 5.4)
 --SKIPIF--
 <?php if (version_compare(phpversion(), "5.4", '<')) echo "skip >= PHP 5.4 needed\n"; ?>
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

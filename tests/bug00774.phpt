@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #774: Xdebug generates a "bailout without bailout address"
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

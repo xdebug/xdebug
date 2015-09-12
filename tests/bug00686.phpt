@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #686: Not possible to inspect SplObjectStorage instances with Xdebug
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

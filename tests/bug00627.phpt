@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #627: breakpoints set in symlinked files don't trigger
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

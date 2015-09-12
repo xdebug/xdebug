@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #678: Xdebug segfault when IDE send "eval NonExistsClass"
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

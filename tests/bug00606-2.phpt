@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #606: evaluate a $this->... expression when $this is not accesible crash xdebug
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

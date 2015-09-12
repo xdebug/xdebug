@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1084: Add support for inheritence in exception breakpoints
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

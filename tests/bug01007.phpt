@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1007: Static Variables are showing "uninitialized" when stepping through the debug process
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
