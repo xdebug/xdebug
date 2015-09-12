@@ -141,6 +141,9 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 		add_assoc_long(entry, "lineno", mfe->lineno);
 
 		add_next_index_zval(return_value, entry);
+#if PHP_VERSION_ID >= 70000
+		efree(entry);
+#endif
 	}
 
 	if (clear) {
