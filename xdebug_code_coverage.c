@@ -281,6 +281,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	/* Scroll back to start of FETCHES */
+	/* FIXME: See whether we can do this unroll looping only once - in is_static() */
 	gohungfound = 0;
 #if PHP_VERSION_ID >= 70000
 	if (!is_static) {
