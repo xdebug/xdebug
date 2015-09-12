@@ -180,6 +180,20 @@ char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
+char* xdebug_strrstr(const char* haystack, const char* needle)
+{
+	char  *loc = NULL;
+	char  *found = NULL;
+	size_t pos = 0;
+
+	while ((found = strstr(haystack + pos, needle)) != 0) {
+		loc = found;
+		pos = (found - haystack) + 1;
+	}
+
+	return loc;
+}
+
 double xdebug_get_utime(void)
 {
 #ifdef HAVE_GETTIMEOFDAY

@@ -755,7 +755,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			char *printable_stack;
 
 			/* We need to see if we have an uncaught exception fatal error now */
+#if PHP_VERSION_ID >= 70000
+			if (type == E_ERROR && strncmp(buffer, "Uncaught ", 9) == 0) {
+#else
 			if (type == E_ERROR && strncmp(buffer, "Uncaught exception", 18) == 0) {
+#endif
 				xdebug_str str = {0, 0, NULL};
 				char *tmp_buf, *p;
 				
@@ -764,8 +768,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				if (!p) {
 					p = buffer + strlen(buffer);
 				} else {
+#if PHP_VERSION_ID >= 70000
+					/* find the last " in ", which isn't great and might not work... but in most cases it will */
+					p = xdebug_strrstr(buffer, " in ");
+#else
 					/* find last quote */
 					p = ((char *) zend_memrchr(buffer, '\'', p - buffer)) + 1;
+#endif
 				}
 				/* Create new buffer */
 				tmp_buf = calloc(p - buffer + 1, 1);
@@ -1604,19 +1613,19 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 		/* Add data */
 		if (i->function.function) {
-			add_assoc_string_ex(frame, "function", sizeof("function"), i->function.function ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), i->function.function ADD_STRING_COPY);
 		}
 		if (i->function.class) {
-			add_assoc_string_ex(frame, "type",     sizeof("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic" ADD_STRING_COPY);
-			add_assoc_string_ex(frame, "class",    sizeof("class"),    i->function.class    ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic" ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "class",    HASH_KEY_SIZEOF("class"),    i->function.class    ADD_STRING_COPY);
 		}
-		add_assoc_string_ex(frame, "file", sizeof("file"), i->filename ADD_STRING_COPY);
-		add_assoc_long_ex(frame, "line", sizeof("line"), i->lineno);
+		add_assoc_string_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename ADD_STRING_COPY);
+		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), i->lineno);
 
 		/* Add parameters */
 		XDEBUG_MAKE_STD_ZVAL(params);
 		array_init(params);
-		add_assoc_zval_ex(frame, "params", sizeof("params"), params);
+		add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
 
 		for (j = 0; j < i->varc; j++) {
 			int variadic_opened = 0;
@@ -1644,7 +1653,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				argument = xdstrdup("???");
 			}
 			if (i->var[j].name && !variadic_opened) {
-				add_assoc_string_ex(params, i->var[j].name, strlen(i->var[j].name) + 1, argument ADD_STRING_COPY);
+				add_assoc_string_ex(params, i->var[j].name, HASH_KEY_STRLEN(i->var[j].name), argument ADD_STRING_COPY);
 			} else {
 				add_index_string(params, j, argument ADD_STRING_COPY);
 			}
@@ -1652,7 +1661,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		if (i->include_filename) {
-			add_assoc_string_ex(frame, "include_filename", sizeof("include_filename"), i->include_filename ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), i->include_filename ADD_STRING_COPY);
 		}
 
 		add_next_index_zval(return_value, frame);

@@ -66,7 +66,7 @@ char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t need
 	new_str = php_str_to_str(haystack, length, needle, needle_len, str, str_len);
 	*new_len = new_str->len;
 
-	retval = estrdup(new_str->val);
+	retval = estrndup(new_str->val, new_str->len);
 
 	zend_string_release(new_str);
 
@@ -81,7 +81,7 @@ char *xdebug_base64_encode(unsigned char *data, int data_len, int *new_len)
 	new_str = php_base64_encode(data, data_len);
 	*new_len = new_str->len;
 
-	retval = estrdup(new_str->val);
+	retval = estrndup(new_str->val, new_str->len);
 
 	zend_string_release(new_str);
 
@@ -96,7 +96,7 @@ unsigned char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_
 	new_str = php_base64_decode(data, data_len);
 	*new_len = new_str->len;
 
-	retval = estrdup(new_str->val);
+	retval = estrndup(new_str->val, new_str->len);
 
 	zend_string_release(new_str);
 

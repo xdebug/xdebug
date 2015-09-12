@@ -16,7 +16,7 @@ function func(){
 func();
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' in %sbug00565.php on line 4
+Fatal error: Uncaught%sException%sin %sbug00565.php on line 4
 
 Exception:  in %sbug00565.php on line 4
 

@@ -407,10 +407,11 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			if (XG(active_execute_data) && XG(active_execute_data)->op_array) {
 #endif
 				int i = 0;
-				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
 #if PHP_VERSION_ID >= 70000
+				ulong hash_value = zend_inline_hash_func(element, element_length);
 				zend_op_array *opa = &XG(active_execute_data)->func->op_array;
 #else
+				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
 				zend_op_array *opa = XG(active_execute_data)->op_array;
 #endif
 				zval **CV;
@@ -427,7 +428,8 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 #endif
 					{
 #if PHP_VERSION_ID >= 70000
-						CV = NULL;
+						zval *CV_z = ZEND_CALL_VAR_NUM(XG(active_execute_data), i);
+						CV = &CV_z;
 #elif PHP_VERSION_ID >= 50500
 						CV = (*EX_CV_NUM(XG(active_execute_data), i));
 #else
@@ -1630,7 +1632,11 @@ static int object_item_add_to_merged_hash(zval **zv TSRMLS_DC, int num_args, va_
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
+#if PHP_VERSION_ID >= 70000
+	item->zv   = (zval*) zv;
+#else
 	item->zv   = *zv;
+#endif
 	item->name = (char*) HASH_KEY_VAL(hash_key);
 	item->name_len = HASH_KEY_LEN(hash_key);
 	item->index = hash_key->h;
@@ -1773,7 +1779,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 		if ((*item)->name_len != 0) {
 			char *prop_name, *prop_class_name;
 
-			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len, &prop_name, &prop_class_name);
+			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len + 1, &prop_name, &prop_class_name);
 
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_xml_add_attribute_ex(node, "name", xdstrdup(prop_name), 0, 1);
@@ -2031,7 +2037,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 						options->runtime[level].end_element_nr = options->max_children;
 					}
 #if PHP_VERSION_ID >= 70000
-					ZEND_HASH_FOREACH_KEY_PTR(myht, num, key, xoi_val) {
+					ZEND_HASH_FOREACH_KEY_PTR(merged_hash, num, key, xoi_val) {
 						xdebug_object_element_export_xml_node(xoi_val, num, key, level, node, name, options, class_name);
 					} ZEND_HASH_FOREACH_END();
 

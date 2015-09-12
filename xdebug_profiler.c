@@ -196,11 +196,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 
 	if (fse->prev) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
-#if PHP_VERSION_ID >= 70000
-		ce->filename = op_array ? xdstrdup(op_array->filename->val) : xdstrdup(fse->filename);
-#else
-		ce->filename = op_array ? xdstrdup(op_array->filename) : xdstrdup(fse->filename);
-#endif
+		ce->filename = op_array ? xdstrdup(STR_NAME_VAL(op_array->filename)) : xdstrdup(fse->filename);
 		ce->function = xdstrdup(tmp_name);
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
