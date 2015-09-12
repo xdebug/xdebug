@@ -1779,7 +1779,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 		if ((*item)->name_len != 0) {
 			char *prop_name, *prop_class_name;
 
-			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len, &prop_name, &prop_class_name);
+			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len + 1, &prop_name, &prop_class_name);
 
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_xml_add_attribute_ex(node, "name", xdstrdup(prop_name), 0, 1);
