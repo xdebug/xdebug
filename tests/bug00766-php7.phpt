@@ -1,7 +1,7 @@
 --TEST--
-Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (>= PHP 5.4)
+Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (>= PHP 7.0)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "5.4", '>=')) echo "skip >= PHP 5.4 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -25,14 +25,14 @@ xdebug.overload_var_dump=0
 	include 'bug00766.inc';
 	$cc = xdebug_get_code_coverage();
 	ksort($cc);
-	var_dump(array_slice($cc, 0, 1));
+	var_dump(array_slice($cc, 1, 1));
 
 	xdebug_stop_code_coverage(false);
 ?>
 --EXPECTF--
 array(1) {
   ["%sbug00766.inc"]=>
-  array(5) {
+  array(4) {
     [2]=>
     int(1)
     [6]=>
@@ -40,8 +40,6 @@ array(1) {
     [7]=>
     int(-2)
     [10]=>
-    int(1)
-    [11]=>
     int(1)
   }
 }

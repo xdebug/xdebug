@@ -1,7 +1,7 @@
 --TEST--
-Test for bug #562: Incorrect coverage information for closure function headers
+Test for bug #562: Incorrect coverage information for closure function headers (>= PHP 7.0)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
@@ -21,8 +21,8 @@ $mapped = array_map(
 var_dump( xdebug_get_code_coverage() );
 --EXPECTF--
 array(1) {
-  ["%sbug00562.php"]=>
-  array(7) {
+  ["%sbug00562-php7.php"]=>
+  array(6) {
     [4]=>
     int(1)
     [6]=>
@@ -32,8 +32,6 @@ array(1) {
     [9]=>
     int(1)
     [10]=>
-    int(1)
-    [11]=>
     int(1)
     [13]=>
     int(1)

@@ -1,7 +1,7 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (>= PHP 5.2)
+Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED (< PHP 7.0)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "5.2", '>=')) echo "skip >= PHP 5.2 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -22,32 +22,30 @@ xdebug.overload_var_dump=0
 <?php
 	xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
 
-	include 'bug00703.inc';
+	include 'bug00697.inc';
 	$cc = xdebug_get_code_coverage();
 	ksort($cc);
-	var_dump(array_slice($cc, 0, 1));
+	var_dump(array_slice($cc, 1, 1));
 
 	xdebug_stop_code_coverage(false);
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00703.inc"]=>
-  array(8) {
-    [3]=>
+  ["%sbug00697.inc"]=>
+  array(7) {
+    [2]=>
+    int(1)
+    [4]=>
+    int(1)
+    [5]=>
     int(1)
     [6]=>
     int(1)
     [7]=>
     int(1)
-    [8]=>
+    [9]=>
     int(1)
-    [11]=>
-    int(1)
-    [12]=>
-    int(1)
-    [13]=>
-    int(1)
-    [15]=>
+    [10]=>
     int(1)
   }
 }

@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #651: Incorrect code coverage after ! empty() in conditional
+Test for bug #651: Incorrect code coverage after ! empty() in conditional (< PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.overload_var_dump=0
 --FILE--
@@ -28,7 +30,7 @@ var_dump(xdebug_get_code_coverage());
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00651.php"]=>
+  ["%sbug00651a-php5.php"]=>
   array(15) {
     [5]=>
     int(1)

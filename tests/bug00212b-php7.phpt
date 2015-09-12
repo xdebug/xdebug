@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #213: Dead code analysis doesn't take catches for throws into account
+Test for bug #212: coverage coverage inaccurate (2) (>= PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -18,23 +20,16 @@ xdebug.overload_var_dump=0
 --FILE--
 <?php
 	xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );
-	$file = realpath('./tests/bug00213.inc');
+	$file = realpath('./tests/bug00212b.inc');
 	include $file;
 	$cc = xdebug_get_code_coverage();
 	xdebug_stop_code_coverage();
 	var_dump($cc[$file]);
 ?>
 --EXPECT--
-48
-array(5) {
-  [5]=>
+array(2) {
+  [7]=>
   int(1)
-  [6]=>
-  int(-2)
-  [8]=>
-  int(1)
-  [12]=>
-  int(1)
-  [14]=>
+  [9]=>
   int(1)
 }

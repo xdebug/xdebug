@@ -1,5 +1,7 @@
 --TEST--
-Test with Code Coverage with unused lines
+Test with Code Coverage (< PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -18,7 +20,7 @@ xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php
-	xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
+	xdebug_start_code_coverage();
 	$file = realpath('./tests/coverage.inc');
 	include $file;
 	$cc = xdebug_get_code_coverage();
@@ -28,15 +30,11 @@ xdebug.overload_var_dump=0
 --EXPECTF--
 This is a YYYY-MM-DD format.
 This is a YYYYMMDD HHii format.
-array(%d) {
+array(15) {
   [2]=>
   int(1)
   [4]=>
   int(1)
-  [5]=>
-  int(-1)
-  [6]=>
-  int(-1)
   [7]=>
   int(1)
   [8]=>
@@ -49,8 +47,6 @@ array(%d) {
   int(1)
   [12]=>
   int(1)
-  [14]=>
-  int(-1)
   [17]=>
   int(1)
   [18]=>

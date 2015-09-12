@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function.
+Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function. (>= PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.overload_var_dump=0
@@ -38,7 +40,7 @@ var_dump($cc[__FILE__]);
 ?>
 --EXPECT--
 2
-array(10) {
+array(9) {
   [4]=>
   int(1)
   [6]=>
@@ -46,8 +48,6 @@ array(10) {
   [7]=>
   int(1)
   [8]=>
-  int(1)
-  [9]=>
   int(1)
   [10]=>
   int(-1)

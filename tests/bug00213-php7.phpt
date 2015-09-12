@@ -1,5 +1,7 @@
 --TEST--
-Test with Code Coverage
+Test for bug #213: Dead code analysis doesn't take catches for throws into account (>= PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -7,7 +9,6 @@ xdebug.trace_options=0
 xdebug.trace_output_dir=/tmp
 xdebug.collect_params=1
 xdebug.collect_return=0
-xdebug.collect_assignments=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.dump_globals=0
@@ -18,45 +19,22 @@ xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php
-	xdebug_start_code_coverage();
-	$file = realpath('./tests/coverage.inc');
+	xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );
+	$file = realpath('./tests/bug00213.inc');
 	include $file;
 	$cc = xdebug_get_code_coverage();
 	xdebug_stop_code_coverage();
 	var_dump($cc[$file]);
 ?>
---EXPECTF--
-This is a YYYY-MM-DD format.
-This is a YYYYMMDD HHii format.
-array(15) {
-  [2]=>
+--EXPECT--
+48
+array(4) {
+  [5]=>
   int(1)
-  [4]=>
-  int(1)
-  [7]=>
-  int(1)
+  [6]=>
+  int(-2)
   [8]=>
   int(1)
-  [9]=>
-  int(1)
-  [10]=>
-  int(1)
-  [11]=>
-  int(1)
   [12]=>
-  int(1)
-  [17]=>
-  int(1)
-  [18]=>
-  int(1)
-  [20]=>
-  int(1)
-  [21]=>
-  int(1)
-  [22]=>
-  int(1)
-  [23]=>
-  int(1)
-  [25]=>
   int(1)
 }
