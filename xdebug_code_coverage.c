@@ -175,9 +175,17 @@ static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_
 #else
 static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_opcode, const zend_op **found_opcode)
 {
-	if (prev_opcode->op1_type == IS_CONST && prev_opcode->extended_value == ZEND_FETCH_STATIC_MEMBER)
+	const zend_op *opcode_ptr;
+
+	opcode_ptr = prev_opcode;
+	while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW) {
+		opcode_ptr = opcode_ptr - 1;
+	}
+	opcode_ptr++;
+
+	if (opcode_ptr->op1_type == IS_CONST && opcode_ptr->extended_value == ZEND_FETCH_STATIC_MEMBER)
 	{
-		*found_opcode = prev_opcode;
+		*found_opcode = cur_opcode;
 		return 1;
 	}
 	return 0;
@@ -273,6 +281,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	/* Scroll back to start of FETCHES */
+	/* FIXME: See whether we can do this unroll looping only once - in is_static() */
 	gohungfound = 0;
 #if PHP_VERSION_ID >= 70000
 	if (!is_static) {
