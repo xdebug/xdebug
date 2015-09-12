@@ -2037,7 +2037,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 						options->runtime[level].end_element_nr = options->max_children;
 					}
 #if PHP_VERSION_ID >= 70000
-					ZEND_HASH_FOREACH_KEY_PTR(myht, num, key, xoi_val) {
+					ZEND_HASH_FOREACH_KEY_PTR(merged_hash, num, key, xoi_val) {
 						xdebug_object_element_export_xml_node(xoi_val, num, key, level, node, name, options, class_name);
 					} ZEND_HASH_FOREACH_END();
 
