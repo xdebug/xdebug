@@ -123,7 +123,16 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 
 	tmp_ht = XG(active_symbol_table);
 #if PHP_VERSION_ID >= 70000
-	XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+	{
+		zend_execute_data *ex = EG(current_execute_data);
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+			ex = ex->prev_execute_data;
+		}
+		if (ex) {
+			XG(active_execute_data) = ex;
+			XG(active_symbol_table) = ex->symbol_table;
+		}
+	}
 #else
 	XG(active_symbol_table) = EG(active_symbol_table);
 #endif
