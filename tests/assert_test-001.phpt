@@ -31,21 +31,22 @@ function my_assert_handler ($file, $line, $code) {
 assert_options (ASSERT_CALLBACK, 'my_assert_handler');
 
 // Make an assertion that should fail
-assert (1==2);
+assert ('1==2');
 echo "\n";
 echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
 Assertion Failed:
-        File '/%s/assert_test.php'
+        File '/%s/assert_test-001.php'
         Line '21'
-        Code ''
+        Code '1==2'
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> assert_options(1, 1) /%s/assert_test.php:5
-%w%f %w%d     -> assert_options(4, 0) /%s/assert_test.php:6
-%w%f %w%d     -> assert_options(5, 1) /%s/assert_test.php:7
-%w%f %w%d     -> assert_options(2, 'my_assert_handler') /%s/assert_test.php:18
-%w%f %w%d     -> assert(FALSE) /%s/assert_test.php:21
-%w%f %w%d       -> my_assert_handler('/%s/assert_test.php', 21, '') /%s/assert_test.php:21
-%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/assert_test.php:23
+%w%f %w%d     -> assert_options(1, 1) /%s/assert_test-001.php:5
+%w%f %w%d     -> assert_options(4, 0) /%s/assert_test-001.php:6
+%w%f %w%d     -> assert_options(5, 1) /%s/assert_test-001.php:7
+%w%f %w%d     -> assert_options(2, 'my_assert_handler') /%s/assert_test-001.php:18
+%w%f %w%d     -> assert('1==2') /%s/assert_test-001.php:21
+%w%f %w%d       -> assert('1==2') /%s/assert_test-001.php:21
+%w%f %w%d       -> my_assert_handler('/%s/assert_test-001.php', 21, '1==2') /%s/assert_test-001.php:21
+%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/assert_test-001.php:23
