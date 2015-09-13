@@ -6,9 +6,9 @@ session_start();
 $_SESSION['test'] = function() { };
 echo "DONE";
 ?>
---EXPECT--
+--EXPECTF--
 DONE
-Fatal error: Uncaught exception 'Exception' with message 'Serialization of 'Closure' is not allowed' in [no active file]:0
+Fatal error: Uncaught%sSerialization of 'Closure' is not allowed%sin [no active file]:0
 Stack trace:
 #0 {main}
   thrown in [no active file] on line 0
