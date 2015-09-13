@@ -1,7 +1,5 @@
 --TEST--
 Test with Code Coverage with path and branch checking
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

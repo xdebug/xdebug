@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #931: Crash with exception in shut-down stage
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
 --FILE--
 <?php
 session_start();

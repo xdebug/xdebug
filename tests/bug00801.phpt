@@ -1,10 +1,5 @@
 --TEST--
 Test for bug #801: Segfault with streamwrapper, unclosed $fp and xdebug on destruction
---SKIPIF--
-<?php
-	// PHP 5.1 and PHP 5.2 both crash here, without Xdebug loaded
-	if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n";
-?>
 --FILE--
 <?php
 

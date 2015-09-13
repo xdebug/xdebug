@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #879: Closing brace in trait-using class definitions is counted towards code coverage. (PHP >= 5.4)
---SKIPIF--
-<?php if (version_compare(phpversion(), "5.4", '<')) echo "skip >= PHP 5.4 needed\n"; ?>
+Test for bug #879: Closing brace in trait-using class definitions is counted towards code coverage
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

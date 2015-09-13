@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #811: PHP Documentation Link
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
 --INI--
 docref_root=http://www.php.net/
 docref_ext=.php
