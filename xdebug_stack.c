@@ -1294,7 +1294,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->filename) {
 		/* Includes/main script etc */
 #if PHP_VERSION_ID >= 70000
-		tmp->filename  = (op_array && op_array->filename && type == XDEBUG_EXTERNAL) ? xdstrdup(op_array->filename->val): NULL;
+		tmp->filename  = (type == XDEBUG_EXTERNAL && op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
 #else
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
 #endif
