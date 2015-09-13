@@ -9,7 +9,7 @@ function capture() {
 }
 
 register_shutdown_function('capture');
-strlen("5");
+strrev("5");
 exit();
 ?>
 --EXPECTF--
@@ -26,7 +26,7 @@ fn=(1) php::register_shutdown_function
 %d %d
 
 fl=(1)
-fn=(2) php::strlen
+fn=(2) php::strrev
 %d %d
 
 fl=(2) %sbug00631.php

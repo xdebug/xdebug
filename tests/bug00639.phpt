@@ -34,7 +34,7 @@ fn=(1) require::%sbug00639-2.inc
 1 %d
 
 fl=(2) php:internal
-fn=(2) php::strlen
+fn=(2) php::strrev
 4 %d
 
 fl=(1)
