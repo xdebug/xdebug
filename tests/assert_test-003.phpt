@@ -60,7 +60,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> assert_options(5, 1) /%s/assert_test-003.php:7
 %w%f %w%d     -> assert_options(2, 'my_assert_handler') /%s/assert_test-003.php:18
 %w%f %w%d     -> assert('1==2', 'One is not two') /%s/assert_test-003.php:23
-%w%f %w%d       -> assert('1==2', 'One is not two') /%s/assert_test-003.php:23
+%w%f %w%d       -> %r({internal eval}\(\))|(assert\('1==2'\))%r /%s/assert_test-003.php:23
 %w%f %w%d       -> my_assert_handler('/%s/assert_test-003.php', 23, '1==2', 'One is not two') /%s/assert_test-003.php:23
 %w%f %w%d     -> Error->getMessage() /%s/assert_test-003.php:26
 %w%f %w%d     -> file_get_contents('/tmp/%s') /%s/assert_test-003.php:29

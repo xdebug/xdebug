@@ -1124,8 +1124,19 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 			} else {
 				tmp->function = xdstrdup(edata->func->common.function_name->val);
 			}
-		} else {
-			switch (edata->opline->extended_value) {
+		} else if (
+			edata &&
+			edata->func &&
+			edata->func->type == ZEND_EVAL_CODE &&
+			edata->prev_execute_data &&
+			edata->prev_execute_data->func &&
+			edata->prev_execute_data->func->common.function_name &&
+			strncmp(edata->prev_execute_data->func->common.function_name->val, "assert", 6) == 0
+		) {
+			tmp->type = XFUNC_NORMAL;
+			tmp->function = xdstrdup("{internal eval}");
+		} else if (edata && edata->prev_execute_data && edata->prev_execute_data->opline && edata->prev_execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			switch (edata->prev_execute_data->opline->extended_value) {
 				case ZEND_EVAL:
 					tmp->type = XFUNC_EVAL;
 					break;
@@ -1145,6 +1156,8 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 					tmp->type = XFUNC_UNKNOWN;
 					break;
 			}
+		} else {
+			tmp->type = XFUNC_UNKNOWN;
 		}
 	}
 }
