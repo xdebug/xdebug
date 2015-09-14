@@ -155,7 +155,7 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *n
 {
 	zend_free_op should_free;
 
-	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_R);
+	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_IS);
 }
 #else
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
