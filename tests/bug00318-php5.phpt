@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #318: Segmentation Fault in code coverage analysis
+Test for bug #318: Segmentation Fault in code coverage analysis (< PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0
@@ -18,5 +20,5 @@ xdebug_stop_code_coverage();
 Fatal error: %sbreak%s in %sbug00318.inc on line 3
 
 Call Stack:
-%w%f %w%d   1. {main}() %sbug00318.php:0
-%w%f %w%d   2. include('%sbug00318.inc') %sbug00318.php:5
+%w%f %w%d   1. {main}() %sbug00318-php5.php:0
+%w%f %w%d   2. include('%sbug00318.inc') %sbug00318-php5.php:5
