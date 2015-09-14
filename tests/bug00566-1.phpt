@@ -23,9 +23,9 @@ function loadFoo( $test )
 	strrev( $test );
 }
 
-loadFoo( 'view' );
-loadMod( 'test' );
-loadMod( 'view' );
+$a = loadFoo( 'view' );
+$a = loadMod( 'test' );
+$a = loadMod( 'view' );
 
 xdebug_stop_trace();
 echo file_get_contents($tf);
