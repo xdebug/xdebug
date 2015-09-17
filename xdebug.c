@@ -15,6 +15,7 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    |           Ilia Alshanetsky <ilia@prohost.org>                        |
    |           Harald Radi <harald.radi@nme.at>                           |
+   |           Neeke Gao <neeke@php.net>                                  |
    +----------------------------------------------------------------------+
  */
 
@@ -95,6 +96,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
 static SIZETorINT xdebug_ub_write(const char *string, SIZETorUINT length TSRMLS_DC);
 
+/* exception callback replacement functions */
+void (*xdebug_old_throw_exception_hook)(zval *exception TSRMLS_DC);
+void (*xdebug_new_throw_exception_hook)(zval *exception TSRMLS_DC);
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
 
@@ -557,7 +561,7 @@ static int xdebug_include_or_eval_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 		int  is_var;
 
 		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
-		
+
 		/* If there is no inc_filename, we're just bailing out instead */
 		if (!inc_filename) {
 			return ZEND_USER_OPCODE_DISPATCH;
@@ -658,6 +662,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	/* Replace error handler callback with our own */
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
+
+    /* Replace exception handler callback and back the old handler */
+	xdebug_old_throw_exception_hook = zend_throw_exception_hook;
+	xdebug_new_throw_exception_hook = xdebug_throw_exception_hook;
 
 	/* Get reserved offset */
 	zend_xdebug_global_offset = zend_get_resource_handle(&dummy_ext);
@@ -808,6 +816,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 #endif
 	zend_execute_internal = xdebug_old_execute_internal;
 	zend_error_cb = xdebug_old_error_cb;
+    zend_throw_exception_hook = xdebug_old_throw_exception_hook;
 
 	zend_hash_destroy(&XG(aggr_calls));
 
@@ -816,7 +825,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 #else
 	php_xdebug_shutdown_globals(&xdebug_globals TSRMLS_CC);
 #endif
- 
+
 	{
 		int i = 0;
 		zend_set_user_opcode_handler(ZEND_EXIT, NULL);
@@ -1126,7 +1135,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION"), (void**)&dummy) == FAILURE) {
 #endif
 		zend_error_cb = xdebug_new_error_cb;
-		zend_throw_exception_hook = xdebug_throw_exception_hook;
+		zend_throw_exception_hook = xdebug_new_throw_exception_hook;
 	}
 
 	XG(remote_enabled) = 0;
@@ -1195,7 +1204,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	if (XG(remote_enabled)) {
 		XG(context).handler->remote_deinit(&(XG(context)));
-		xdebug_close_socket(XG(context).socket); 
+		xdebug_close_socket(XG(context).socket);
 	}
 	if (XG(context).program_name) {
 		xdfree(XG(context).program_name);
@@ -1215,7 +1224,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	if (XG(profile_filename)) {
 		xdfree(XG(profile_filename));
 	}
-	
+
 	xdebug_hash_destroy(XG(profile_filename_refs));
 	xdebug_hash_destroy(XG(profile_functionname_refs));
 	XG(profile_filename_refs) = NULL;
@@ -1315,7 +1324,7 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
 	php_info_print_table_row(2, "IDE Key", XG(ide_key));
 	php_info_print_table_end();
-	
+
 	if (zend_xdebug_initialised == 0) {
 		php_info_print_table_start();
 		php_info_print_table_header(1, "XDEBUG NOT LOADED AS ZEND EXTENSION");
@@ -1437,6 +1446,11 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	if (!exception) {
 		return;
 	}
+
+    /* call back the old exception handler */
+    if (xdebug_old_throw_exception_hook) {
+        xdebug_old_throw_exception_hook(exception TSRMLS_CC);
+    }
 
 #if PHP_VERSION_ID >= 70000
 	default_ce = Z_OBJCE_P(exception);
@@ -1710,7 +1724,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 				xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), XG(ide_key), strlen(XG(ide_key)), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
 			}
 		}
-			
+
 
 		/* Remove session cookie if requested */
 		if (
@@ -1855,7 +1869,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
 	}
-	
+
 	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_exit)) {
 		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
@@ -1918,7 +1932,7 @@ static int check_soap_call(function_stack_entry *fse)
 	zend_module_entry tmp_mod_entry;
 #endif
 
-	if (fse->function.class && 
+	if (fse->function.class &&
 		(
 			(strstr(fse->function.class, "SoapClient") != NULL) ||
 			(strstr(fse->function.class, "SoapServer") != NULL)
@@ -2056,7 +2070,7 @@ int xdebug_exit_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_deinit(TSRMLS_C);
 	}
-	
+
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
@@ -2065,7 +2079,7 @@ int xdebug_exit_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_op_array *op_array;
-	
+
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
 
 	if (op_array) {
@@ -2157,7 +2171,7 @@ PHP_FUNCTION(xdebug_var_dump)
 	int     argc;
 	int     i, len;
 	char   *val;
-	
+
 	if (!XG(overload_var_dump)) {
 		XG(orig_var_dump_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		return;
@@ -2192,7 +2206,7 @@ PHP_FUNCTION(xdebug_var_dump)
 			val = xdebug_get_zval_value_ansi(VARI(i), 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
-		} 
+		}
 		else {
 			val = xdebug_get_zval_value_text(VARI(i), 0, NULL);
 			PHPWRITE(val, strlen(val));
@@ -2218,9 +2232,9 @@ PHP_FUNCTION(xdebug_debug_zval)
 	int     i, len;
 	char   *val;
 	zval   *debugzval;
-	
+
 	argc = ZEND_NUM_ARGS();
-	
+
 #if PHP_VERSION_ID >= 70000
 	args = safe_emalloc(argc, sizeof(zval), 0);
 #else
@@ -2272,7 +2286,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 			}
 		}
 	}
-	
+
 	efree(args);
 }
 /* }}} */
@@ -2290,9 +2304,9 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	int     i;
 	char   *val;
 	zval   *debugzval;
-	
+
 	argc = ZEND_NUM_ARGS();
-	
+
 #if PHP_VERSION_ID >= 70000
 	args = safe_emalloc(argc, sizeof(zval), 0);
 #else
@@ -2333,7 +2347,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			}
 		}
 	}
-	
+
 	efree(args);
 }
 /* }}} */
@@ -2341,13 +2355,13 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 PHP_FUNCTION(xdebug_enable)
 {
 	zend_error_cb = xdebug_new_error_cb;
-	zend_throw_exception_hook = xdebug_throw_exception_hook;
+	zend_throw_exception_hook = xdebug_new_throw_exception_hook;
 }
 
 PHP_FUNCTION(xdebug_disable)
 {
 	zend_error_cb = xdebug_old_error_cb;
-	zend_throw_exception_hook = NULL;
+	zend_throw_exception_hook = xdebug_old_throw_exception_hook;
 }
 
 PHP_FUNCTION(xdebug_is_enabled)
@@ -2516,7 +2530,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		} else {
 			level = 0;
 		}
-		
+
 		if (XG(context).do_finish && XG(context).next_level == level) { /* Check for "finish" */
 			XG(context).do_finish = 0;
 
