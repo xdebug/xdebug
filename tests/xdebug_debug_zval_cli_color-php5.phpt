@@ -1,5 +1,7 @@
 --TEST--
-Test for xdebug_debug_zval() (CLI colours)
+Test for xdebug_debug_zval() (CLI colours) (< PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=2

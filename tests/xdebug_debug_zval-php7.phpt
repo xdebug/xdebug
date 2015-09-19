@@ -1,5 +1,7 @@
 --TEST--
-Test for xdebug_debug_zval()
+Test for xdebug_debug_zval() (>= PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=0
@@ -32,16 +34,16 @@ function func(){
 func();
 ?>
 --EXPECT--
-a: (refcount=1, is_ref=0)='hoge'
-$a: (refcount=1, is_ref=0)='hoge'
-$b: (refcount=1, is_ref=0)=array ('a' => (refcount=1, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=2, is_ref=0)=6, 0 => (refcount=1, is_ref=0)=8, 1 => (refcount=1, is_ref=0)=9)
-$b['a']: (refcount=1, is_ref=0)=4
+a: (refcount=0, is_ref=0)='hoge'
+$a: (refcount=0, is_ref=0)='hoge'
+$b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
+$b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5
-b[1]: (refcount=1, is_ref=0)=9
+b[1]: (refcount=0, is_ref=0)=9
 c: (refcount=2, is_ref=1)=5
-d: (refcount=2, is_ref=0)=6
-e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=1, is_ref=0)=array (0 => (refcount=1, is_ref=0)=4, 'b' => (refcount=1, is_ref=0)=42) }
+d: (refcount=0, is_ref=0)=6
+e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=1, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
 e->bar: (refcount=2, is_ref=1)=FALSE
 e->bar['b']: no such symbol
-e->baz[0]: (refcount=1, is_ref=0)=4
-e->baz['b']: (refcount=1, is_ref=0)=42
+e->baz[0]: (refcount=0, is_ref=0)=4
+e->baz['b']: (refcount=0, is_ref=0)=42
