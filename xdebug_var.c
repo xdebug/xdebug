@@ -234,12 +234,18 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 #if PHP_VERSION_ID >= 70000
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
 {
-	zend_string *class_name = Z_OBJ_HANDLER_P(z, get_class_name)(Z_OBJ_P(z));
+	zend_string *class_name;
+
+	if (Z_TYPE_P(z) != IS_OBJECT) {
+		return NULL;
+	}
+
+	class_name = Z_OBJ_HANDLER_P(z, get_class_name)(Z_OBJ_P(z));
 
 	*ce = Z_OBJCE_P(z);
 	*length = class_name->len;
 
-	return class_name->val;
+	return estrdup(class_name->val);
 }
 #else
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
