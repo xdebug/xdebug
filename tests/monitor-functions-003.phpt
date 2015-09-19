@@ -2,35 +2,35 @@
 Function Monitor: Simple function name
 --FILE--
 <?php
-xdebug_start_function_monitor( [ 'strlen', 'array_push' ] );
+xdebug_start_function_monitor( [ 'strrev', 'array_push' ] );
 var_dump(xdebug_get_monitored_functions());
-echo strlen("yes!"), "\n";
+echo strrev("yes!"), "\n";
 var_dump(xdebug_get_monitored_functions());
-echo strlen("yes!"), "\n";
+echo strrev("yes!"), "\n";
 var_dump(xdebug_get_monitored_functions());
 xdebug_stop_function_monitor();
 ?>
 --EXPECTF--
 array(0) {
 }
-4
+!sey
 array(1) {
   [0]=>
   array(3) {
     ["function"]=>
-    string(6) "strlen"
+    string(6) "strrev"
     ["filename"]=>
     string(%d) "%smonitor-functions-003.php"
     ["lineno"]=>
     int(4)
   }
 }
-4
+!sey
 array(2) {
   [0]=>
   array(3) {
     ["function"]=>
-    string(6) "strlen"
+    string(6) "strrev"
     ["filename"]=>
     string(%d) "%smonitor-functions-003.php"
     ["lineno"]=>
@@ -39,7 +39,7 @@ array(2) {
   [1]=>
   array(3) {
     ["function"]=>
-    string(6) "strlen"
+    string(6) "strrev"
     ["filename"]=>
     string(%d) "%smonitor-functions-003.php"
     ["lineno"]=>

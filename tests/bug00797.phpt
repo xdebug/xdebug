@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #797: XDebug terminates (or Eclipse loses it?) when viewing variables
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

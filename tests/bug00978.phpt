@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #978: Inspection of array with negative keys fails
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #979: property_value -m 0 should mean all bytes, not 0 bytes
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

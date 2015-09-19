@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #903: xdebug_get_headers() returns replaced headers
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 --FILE--

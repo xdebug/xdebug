@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #265: Xdebug's error handler breaks error_get_last() (>= PHP 5.2)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.2", '>=')) echo "skip >= PHP 5.2 needed\n"; ?>
+Test for bug #265: Xdebug's error handler breaks error_get_last()
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

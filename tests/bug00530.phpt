@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #530: Xdebug returns properties out of page if there are less than max_children properties
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

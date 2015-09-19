@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #538: Error in watches and call stack parameter with string containing '\\'
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

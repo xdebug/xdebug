@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #566: Xdebug crashes when using conditional breakpoints (2)
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --INI--
 xdebug.collect_params=4
 xdebug.collect_return=1

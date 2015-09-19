@@ -155,7 +155,7 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *n
 {
 	zend_free_op should_free;
 
-	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_R);
+	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_IS);
 }
 #else
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
@@ -234,12 +234,18 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 #if PHP_VERSION_ID >= 70000
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
 {
-	zend_string *class_name = Z_OBJ_HANDLER_P(z, get_class_name)(Z_OBJ_P(z));
+	zend_string *class_name;
+
+	if (Z_TYPE_P(z) != IS_OBJECT) {
+		return NULL;
+	}
+
+	class_name = Z_OBJ_HANDLER_P(z, get_class_name)(Z_OBJ_P(z));
 
 	*ce = Z_OBJCE_P(z);
 	*length = class_name->len;
 
-	return class_name->val;
+	return estrdup(class_name->val);
 }
 #else
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
@@ -461,11 +467,11 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			}
 
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_pp = zend_hash_str_find_ptr(ht, element, name_length + 1)) != NULL)) {
+			if (ht && ((retval_p = zend_hash_str_find(ht, element, name_length)) != NULL)) {
 #else
 			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
-#endif
 				retval_p = *retval_pp;
+#endif
 				goto cleanup;
 			}
 			break;
@@ -473,11 +479,11 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 		case XF_ST_ARRAY_INDEX_NUM:
 			element = prepare_search_key(name, &name_length, "", 0);
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_pp = zend_hash_index_find_ptr(ht, strtoul(element, NULL, 10))) != NULL)) {
+			if (ht && ((retval_p = zend_hash_index_find(ht, strtoul(element, NULL, 10))) != NULL)) {
 #else
 			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
-#endif
 				retval_p = *retval_pp;
+#endif
 				goto cleanup;
 			}
 			break;
@@ -965,7 +971,19 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		return;
 	}
 
-#if PHP_VERSION_ID < 70000
+#if PHP_VERSION_ID >= 70000
+	if (debug_zval) {
+		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
+			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
+		} else {
+			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
+		}
+	}
+	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+		zval *tmpz = &((*struc)->value.ref->val);
+		struc = &tmpz;
+	}
+#else
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
@@ -1134,7 +1152,19 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 		return;
 	}
 
-#if PHP_VERSION_ID < 70000
+#if PHP_VERSION_ID >= 70000
+	if (debug_zval) {
+		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
+			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
+		} else {
+			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
+		}
+	}
+	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+		zval *tmpz = &((*struc)->value.ref->val);
+		struc = &tmpz;
+	}
+#else
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
@@ -1342,7 +1372,19 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	
 	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
 
-#if PHP_VERSION_ID < 70000
+#if PHP_VERSION_ID >= 70000
+	if (debug_zval) {
+		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
+			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
+		} else {
+			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
+		}
+	}
+	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+		zval *tmpz = &((*struc)->value.ref->val);
+		struc = &tmpz;
+	}
+#else
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
@@ -1519,7 +1561,19 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 		return;
 	}
 
-#if PHP_VERSION_ID < 70000
+#if PHP_VERSION_ID >= 70000
+	if (debug_zval) {
+		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
+			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
+		} else {
+			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
+		}
+	}
+	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+		zval *tmpz = &((*struc)->value.ref->val);
+		struc = &tmpz;
+	}
+#else
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}
@@ -2220,7 +2274,20 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	zval *val;
 #endif
 
-#if PHP_VERSION_ID < 70000
+#if PHP_VERSION_ID >= 70000
+	if (debug_zval) {
+		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
+			xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
+		} else {
+			xdebug_str_add(str, "<i>(refcount=0, is_ref=0)</i>", 0);
+		}
+	}
+	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+		zval *tmpz = &((*struc)->value.ref->val);
+		struc = &tmpz;
+		xdebug_str_add(str, "&amp;", 0);
+	}
+#else
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	} else {
@@ -2445,7 +2512,19 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 {
 	HashTable *myht;
 
-#if PHP_VERSION_ID < 70000
+#if PHP_VERSION_ID >= 70000
+	if (debug_zval) {
+		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
+			xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
+		} else {
+			xdebug_str_add(str, "<i>(refcount=0, is_ref=0)</i>", 0);
+		}
+	}
+	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+		zval *tmpz = &((*struc)->value.ref->val);
+		struc = &tmpz;
+	}
+#else
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
 	}

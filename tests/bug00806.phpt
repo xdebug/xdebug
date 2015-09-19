@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #806: 'property_get' doesn't work if array key contains a whitespace
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

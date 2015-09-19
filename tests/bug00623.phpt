@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #623: Static properties of a class can be evaluated only with difficulty
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -625,7 +625,7 @@ static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **b
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
 	if (!XG(in_var_serialisation)) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name);
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", STR_NAME_VAL(ce->name));
 	}
 	return FAILURE;
 }

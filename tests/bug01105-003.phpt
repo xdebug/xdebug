@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1105: Setting properties without specifying a type only works in topmost frame
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -2,6 +2,8 @@
 Test for bug #667: Class static members are shown in the locals when using context_get
 --XFAIL--
 It's an issue that PHP creates a compiled variable for self::$varname variables.
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

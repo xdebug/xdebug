@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #838: Xdebug shows static vars twice.
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

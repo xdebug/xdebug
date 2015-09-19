@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #886: Use the same file system protocol for file located inside PHAR in both directions
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --INI--
 xdebug.auto_trace=0
 --FILE--

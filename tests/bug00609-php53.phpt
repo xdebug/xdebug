@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #609: Xdebug and SOAP error handler conflicts (>= PHP 5.3)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
+Test for bug #609: Xdebug and SOAP error handler conflicts
 --INI--
 xdebug.default_enable=1
 --FILE--

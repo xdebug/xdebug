@@ -1,6 +1,6 @@
 <?php
 function func2()
 {
-	strlen("42");
+	strrev("42");
 }
 ?>

@@ -123,7 +123,16 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 
 	tmp_ht = XG(active_symbol_table);
 #if PHP_VERSION_ID >= 70000
-	XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+	{
+		zend_execute_data *ex = EG(current_execute_data);
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+			ex = ex->prev_execute_data;
+		}
+		if (ex) {
+			XG(active_execute_data) = ex;
+			XG(active_symbol_table) = ex->symbol_table;
+		}
+	}
 #else
 	XG(active_symbol_table) = EG(active_symbol_table);
 #endif
@@ -1115,8 +1124,19 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 			} else {
 				tmp->function = xdstrdup(edata->func->common.function_name->val);
 			}
-		} else {
-			switch (edata->opline->extended_value) {
+		} else if (
+			edata &&
+			edata->func &&
+			edata->func->type == ZEND_EVAL_CODE &&
+			edata->prev_execute_data &&
+			edata->prev_execute_data->func &&
+			edata->prev_execute_data->func->common.function_name &&
+			strncmp(edata->prev_execute_data->func->common.function_name->val, "assert", 6) == 0
+		) {
+			tmp->type = XFUNC_NORMAL;
+			tmp->function = xdstrdup("{internal eval}");
+		} else if (edata && edata->prev_execute_data && edata->prev_execute_data->opline && edata->prev_execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL) {
+			switch (edata->prev_execute_data->opline->extended_value) {
 				case ZEND_EVAL:
 					tmp->type = XFUNC_EVAL;
 					break;
@@ -1136,6 +1156,8 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 					tmp->type = XFUNC_UNKNOWN;
 					break;
 			}
+		} else {
+			tmp->type = XFUNC_UNKNOWN;
 		}
 	}
 }
@@ -1294,7 +1316,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->filename) {
 		/* Includes/main script etc */
 #if PHP_VERSION_ID >= 70000
-		tmp->filename  = (op_array && op_array->filename && type == XDEBUG_EXTERNAL) ? xdstrdup(op_array->filename->val): NULL;
+		tmp->filename  = (type == XDEBUG_EXTERNAL && op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
 #else
 		tmp->filename  = (op_array && op_array->filename) ? xdstrdup(op_array->filename): NULL;
 #endif

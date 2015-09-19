@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #421: xdebug sends back invalid characters in xml sometimes
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

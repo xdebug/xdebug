@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1104: "Notice: Corrupt member variable name" on 1-character static property
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

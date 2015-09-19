@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #785: Profiler does not handle closures well (>= PHP 5.3)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
+Test for bug #785: Profiler does not handle closures well
 --INI--
 xdebug.profiler_enable=1
 --FILE--
