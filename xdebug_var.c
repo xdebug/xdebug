@@ -467,11 +467,11 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			}
 
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_pp = zend_hash_str_find_ptr(ht, element, name_length + 1)) != NULL)) {
+			if (ht && ((retval_p = zend_hash_str_find(ht, element, name_length)) != NULL)) {
 #else
 			if (ht && zend_hash_find(ht, element, name_length + 1, (void **) &retval_pp) == SUCCESS) {
-#endif
 				retval_p = *retval_pp;
+#endif
 				goto cleanup;
 			}
 			break;
@@ -479,11 +479,11 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 		case XF_ST_ARRAY_INDEX_NUM:
 			element = prepare_search_key(name, &name_length, "", 0);
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_pp = zend_hash_index_find_ptr(ht, strtoul(element, NULL, 10))) != NULL)) {
+			if (ht && ((retval_p = zend_hash_index_find(ht, strtoul(element, NULL, 10))) != NULL)) {
 #else
 			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
-#endif
 				retval_p = *retval_pp;
+#endif
 				goto cleanup;
 			}
 			break;
