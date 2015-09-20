@@ -19,7 +19,7 @@ xdebug.trace_format=0
 --FILE--
 <?php
 try {
-$crap = new SplTempFileObject('foo');
+$crap = new SplTempFileObject(0);
 $crap->fwrite('give me a crash');
 }
 catch ( Exception $e )
