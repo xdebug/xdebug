@@ -2372,7 +2372,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
 			} else {
-				xdebug_str_addl(str, "<i>&</i><b>array</b>\n", 21, 0);
+				xdebug_str_addl(str, "<i>&amp;</i><b>array</b>\n", 21, 0);
 			}
 			break;
 
@@ -2402,7 +2402,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
 			} else {
-				xdebug_str_add(str, xdebug_sprintf("<i>&</i><b>object</b>(<i>%s</i>)", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
+				xdebug_str_add(str, xdebug_sprintf("<i>&amp;</i><b>object</b>(<i>%s</i>)", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
 				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_P(*struc)), 1);
 			}
 			if (is_temp) {
