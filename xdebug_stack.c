@@ -1436,8 +1436,12 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 				if (XG(collect_params)) {
 #if PHP_VERSION_ID >= 70000
-					if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
-						tmp->var[tmp->varc].addr = ZEND_CALL_ARG(zdata, tmp->varc+1);
+					if (i < arguments_wanted) {
+						if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
+							tmp->var[tmp->varc].addr = ZEND_CALL_ARG(zdata, tmp->varc+1);
+						}
+					} else {
+						tmp->var[tmp->varc].addr = ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted);
 					}
 #else
 					if (p) {
