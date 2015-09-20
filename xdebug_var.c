@@ -1050,9 +1050,11 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 					options->runtime[level].end_element_nr = options->max_children;
 
 #if PHP_VERSION_ID >= 70000
+					ZEND_HASH_INC_APPLY_COUNT(myht);
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_array_element_export(val, num, key, level, str, debug_zval, options);
 					} ZEND_HASH_FOREACH_END();
+					ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export, 4, level, str, debug_zval, options);
 #endif
@@ -1081,9 +1083,11 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 					options->runtime[level].end_element_nr = options->max_children;
 
 #if PHP_VERSION_ID >= 70000
+					ZEND_HASH_INC_APPLY_COUNT(myht);
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_object_element_export(val, num, key, level, str, debug_zval, options, class_name);
 					} ZEND_HASH_FOREACH_END();
+					ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export, 5, level, str, debug_zval, options, class_name);
 #endif
@@ -1456,9 +1460,11 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 					options->runtime[level].end_element_nr = options->max_children;
 
 #if PHP_VERSION_ID >= 70000
+					ZEND_HASH_INC_APPLY_COUNT(myht);
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_array_element_export_text_ansi(val, num, key, level, mode, str, debug_zval, options);
 					} ZEND_HASH_FOREACH_END();
+					ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_text_ansi, 5, level, mode, str, debug_zval, options);
 #endif
@@ -1485,9 +1491,11 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 #if PHP_VERSION_ID >= 70000
+					ZEND_HASH_INC_APPLY_COUNT(myht);
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_object_element_export_text_ansi(val, num, key, level, mode, str, debug_zval, options);
 					} ZEND_HASH_FOREACH_END();
+					ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_text_ansi, 5, level, mode, str, debug_zval, options);
 #endif
@@ -2039,9 +2047,11 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 						options->runtime[level].end_element_nr = options->max_children;
 					}
 #if PHP_VERSION_ID >= 70000
+					ZEND_HASH_INC_APPLY_COUNT(myht);
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, z_val) {
 						xdebug_array_element_export_xml_node(z_val, num, key, level, node, name, options);
 					} ZEND_HASH_FOREACH_END();
+					ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_xml_node, 4, level, node, name, options);
 #endif
@@ -2091,9 +2101,11 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 						options->runtime[level].end_element_nr = options->max_children;
 					}
 #if PHP_VERSION_ID >= 70000
+					ZEND_HASH_INC_APPLY_COUNT(merged_hash);
 					ZEND_HASH_FOREACH_KEY_PTR(merged_hash, num, key, xoi_val) {
 						xdebug_object_element_export_xml_node(xoi_val, num, key, level, node, name, options, class_name);
 					} ZEND_HASH_FOREACH_END();
+					ZEND_HASH_DEC_APPLY_COUNT(merged_hash);
 
 #else
 					zend_hash_apply_with_arguments(merged_hash TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_xml_node, 5, level, node, name, options, class_name);
@@ -2349,9 +2361,11 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 						options->runtime[level].end_element_nr = options->max_children;
 
 #if PHP_VERSION_ID >= 70000
+						ZEND_HASH_INC_APPLY_COUNT(myht);
 						ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 							xdebug_array_element_export_fancy(val, num, key, level, str, debug_zval, options);
 						} ZEND_HASH_FOREACH_END();
+						ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
 						zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_array_element_export_fancy, 4, level, str, debug_zval, options);
 #endif
@@ -2381,9 +2395,11 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 					options->runtime[level].end_element_nr = options->max_children;
 
 #if PHP_VERSION_ID >= 70000
+					ZEND_HASH_INC_APPLY_COUNT(myht);
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_object_element_export_fancy(val, num, key, level, str, debug_zval, options, class_name);
 					} ZEND_HASH_FOREACH_END();
+					ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
 					zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) xdebug_object_element_export_fancy, 5, level, str, debug_zval, options, class_name);
 #endif
