@@ -2297,15 +2297,10 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		zval *tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
-		xdebug_str_add(str, "&amp;", 0);
 	}
 #else
 	if (debug_zval) {
 		xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>,", (*struc)->refcount__gc, (*struc)->is_ref__gc), 1);
-	} else {
-		if ((*struc)->is_ref__gc) {
-			xdebug_str_add(str, "&amp;", 0);
-		}
 	}
 #endif
 
