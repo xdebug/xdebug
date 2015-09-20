@@ -47,7 +47,7 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
 
-# define XDEBUG_APPLY_COUNT(ht) (ht->u.v.nApplyCount)
+# define XDEBUG_APPLY_COUNT(ht) ZEND_HASH_GET_APPLY_COUNT(ht)
 # define HASH_KEY_VAL(k) (k)->key->val
 # define HASH_KEY_LEN(k) (k)->key->len
 # define HASH_KEY_SIZEOF(k) (sizeof(k) - 1)
