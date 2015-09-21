@@ -21,12 +21,12 @@ function foo( $a, $b )
 	return $a;
 }
 
-@foo( 42 );
-@foo( "string" );
-@foo( "string\nwi\th\nnewline" );
-@foo( 1, false );
-@foo( true, null );
-@foo( "foo", "bar", 3.1415 );
+$r = @foo( 42 );
+$r = @foo( "string" );
+$r = @foo( "string\nwi\th\nnewline" );
+$r = @foo( 1, false );
+$r = @foo( true, null );
+$r = @foo( "foo", "bar", 3.1415 );
 
 xdebug_stop_trace();
 echo file_get_contents($tf);
