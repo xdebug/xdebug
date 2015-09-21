@@ -1,5 +1,7 @@
 --TEST--
-Test with showing local variables on errors
+Test with showing local variables on errors (< PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -19,11 +21,11 @@ xdebug.show_local_vars=1
 	a(5, 6);
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function do_f() in /%s/local_vars_in_error.php on line 5
+Fatal error: Call to undefined function do_f() in /%s/local_vars_in_error-php5.php on line 5
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/local_vars_in_error.php:0
-%w%f %w%d   2. a(long, long) /%s/local_vars_in_error.php:8
+%w%f %w%d   1. {main}() /%s/local_vars_in_error-php5.php:0
+%w%f %w%d   2. a(long, long) /%s/local_vars_in_error-php5.php:8
 
 
 Variables in local scope (#2):
