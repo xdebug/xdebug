@@ -1121,8 +1121,14 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			break;
 		}
 
+#if PHP_VERSION_ID >= 70000
+		case IS_UNDEF:
+			xdebug_str_addl(str, "*uninitialized*", sizeof("*uninitialized*") - 1, 0);
+			break;
+#endif
+
 		default:
-			xdebug_str_addl(str, "NULL", 4, 0);
+			xdebug_str_addl(str, "NFC", 3, 0);
 			break;
 	}
 }
@@ -1226,6 +1232,17 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 #endif
 			break;
 		}
+
+#if PHP_VERSION_ID >= 70000
+		case IS_UNDEF:
+			xdebug_str_addl(str, "*uninitialized*", sizeof("*uninitialized*") - 1, 0);
+			break;
+#endif
+
+		default:
+			xdebug_str_addl(str, "NFC", 3, 0);
+			break;
+
 	}
 }
 
@@ -1529,8 +1546,14 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			break;
 		}
 
+#if PHP_VERSION_ID >= 70000
+		case IS_UNDEF:
+			xdebug_str_add(str, xdebug_sprintf("%s*uninitialized*%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET), 0);
+			break;
+#endif
+
 		default:
-			xdebug_str_add(str, xdebug_sprintf("%sNULL%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET), 0);
+			xdebug_str_add(str, xdebug_sprintf("%sNFC%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET), 0);
 			break;
 	}
 
@@ -1639,6 +1662,16 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 #endif
 			break;
 		}
+
+#if PHP_VERSION_ID >= 70000
+		case IS_UNDEF:
+			xdebug_str_add(str, xdebug_sprintf("%s*uninitialized*%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET), 0);
+			break;
+#endif
+
+		default:
+			xdebug_str_add(str, xdebug_sprintf("%sNFC%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET), 0);
+			break;
 	}
 }
 
@@ -2132,6 +2165,12 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			break;
 		}
 
+#if PHP_VERSION_ID >= 70000
+		case IS_UNDEF:
+			xdebug_xml_add_attribute(node, "type", "uninitialized");
+			break;
+#endif
+
 		default:
 			xdebug_xml_add_attribute(node, "type", "null");
 			break;
@@ -2425,8 +2464,14 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			break;
 		}
 
+#if PHP_VERSION_ID >= 70000
+		case IS_UNDEF:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>*uninitialized*</font>", COLOR_NULL), 0);
+			break;
+#endif
+
 		default:
-			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>null</font>", COLOR_NULL), 0);
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>NFC</font>", COLOR_NULL), 0);
 			break;
 	}
 	if (Z_TYPE_P(*struc) != IS_ARRAY && Z_TYPE_P(*struc) != IS_OBJECT) {
@@ -2591,6 +2636,16 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 #endif
 			break;
 		}
+
+#if PHP_VERSION_ID >= 70000
+		case IS_UNDEF:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>*uninitialized*</font>", COLOR_NULL), 0);
+			break;
+#endif
+
+		default:
+			xdebug_str_add(str, xdebug_sprintf("<font color='%s'>NFC</font>", COLOR_NULL), 0);
+			break;
 	}
 }
 
