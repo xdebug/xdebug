@@ -19,7 +19,7 @@ foo
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f  %w%d     -> eval('eval($any);') %sbug00558-002.php:5
 %w%f  %w%d       -> eval('printf("foo\\n");') %sbug00558-002.php(5) : eval()'d code:1
-%w%f  %w%d         -> printf() %sbug00558-002.php(5) : eval()'d code:1
+%w%f  %w%d         -> printf() %sbug00558-002.php(5) : eval()'d code(1) : eval()'d code:1
 %w%f  %w%d     -> xdebug_stop_trace() %sbug00558-002.php:7
 %w%f  %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]
