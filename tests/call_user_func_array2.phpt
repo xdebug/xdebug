@@ -16,12 +16,12 @@ xdebug.var_display_max_depth=3
 $tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
 
 include 'call_user_func_array2.inc';
-
+$c = "call_user_func_array";
 $foo = array(1, 2);
-call_user_func_array ('debug', array('foo', $foo));
+$c('debug', array('foo', $foo));
 
 $foo = 'bar';
-call_user_func_array ('debug', array('bar', $foo));
+$c('debug', array('bar', $foo));
 
 echo file_get_contents($tf);
 unlink($tf);
