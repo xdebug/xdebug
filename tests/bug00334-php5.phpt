@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #334: Code Coverage Regressions
+Test for bug #334: Code Coverage Regressions (< PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0
@@ -20,6 +22,13 @@ xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 array(2) {
+  ["%sbug00334-php5.php"]=>
+  array(2) {
+    [5]=>
+    int(1)
+    [6]=>
+    int(1)
+  }
   ["%sbug00334.inc"]=>
   array(3) {
     [5]=>
@@ -27,13 +36,6 @@ array(2) {
     [7]=>
     int(-1)
     [9]=>
-    int(1)
-  }
-  ["%sbug00334.php"]=>
-  array(2) {
-    [5]=>
-    int(1)
-    [6]=>
     int(1)
   }
 }
