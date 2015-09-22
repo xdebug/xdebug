@@ -1638,11 +1638,15 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
 	   that it's just being called to check for breakpoints with conditions */
-	if (edata && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
-#if PHP_VERSION_ID < 50500
-		xdebug_old_execute(op_array TSRMLS_CC);
-#else
+#if PHP_VERSION_ID >= 70000
+	if (edata && edata->func && ZEND_USER_CODE(edata->func->type) && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
 		xdebug_old_execute_ex(execute_data TSRMLS_CC);
+#elif PHP_VERSION_ID >= 50500
+	if (edata && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
+		xdebug_old_execute_ex(execute_data TSRMLS_CC);
+#else
+	if (edata && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
+		xdebug_old_execute(op_array TSRMLS_CC);
 #endif
 		return;
 	}
