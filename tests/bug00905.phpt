@@ -53,7 +53,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d      >=> (10 => 'e')
 %w%f %w%d     -> gen() %sbug00905.php:13
 %w%f %w%d      >=> (11 => 'f')
-%w%f %w%d     -> gen() %sbug00905.php:13
+%w%f %w%d     -> gen() %sbug00905.php:13%A
 %w%f %w%d     -> xdebug_stop_trace() %sbug00905.php:17
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]
