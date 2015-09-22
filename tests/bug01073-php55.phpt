@@ -14,10 +14,10 @@ xdebug.collect_assignments=0
 --FILE--
 <?php
 $tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$c = 'call_user_func_array';
+$c('call_user_func_array', array('printf', array("%u %u %u\n", 1,2,3)));
 
-call_user_func_array('call_user_func_array', array('printf', array("%u %u %u\n", 1,2,3)));
-
-call_user_func_array('call_user_func_array', array('call_user_func_array', array('printf', array("%u %u %u\n", 1,2,3))));
+$c('call_user_func_array', array('call_user_func_array', array('printf', array("%u %u %u\n", 1,2,3))));
 
 xdebug_stop_trace();
 echo file_get_contents($tf);

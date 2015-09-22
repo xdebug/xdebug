@@ -7,9 +7,9 @@
 
 
 
-function errors_fatal($a)
-{
-	count($a) && is_array($a);
+function errors_fatal($a) {
+	$ia = 'is_array';
+	count($a) && $ia($a);
 	return FALSE;
 }
 ?>

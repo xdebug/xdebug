@@ -14,20 +14,20 @@ xdebug.var_display_max_depth=3
 --FILE--
 <?php
 $tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
-
 function debug($var, $val) {
-    if (is_array($val) || is_object($val) || is_resource($val)) {
+    $ia = 'is_array'; $io = 'is_object'; $ir = 'is_resource';
+    if ($ia($val) || $io($val) || $ir($val)) {
         /* Do nothing */
     } else {
         /* Do nothing */
 	}
 }
-
+$c = "call_user_func_array";
 $foo = array(1, 2);
-call_user_func_array ('debug', array('foo', $foo));
+$c('debug', array('foo', $foo));
 
 $foo = 'bar';
-call_user_func_array ('debug', array('bar', $foo));
+$c('debug', array('bar', $foo));
 
 echo file_get_contents($tf);
 unlink($tf);
