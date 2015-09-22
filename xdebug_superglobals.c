@@ -172,14 +172,14 @@ char* xdebug_get_printable_superglobals(int html TSRMLS_DC)
 {
 	xdebug_str str = {0, 0, NULL};
 
-	dump_hash(&XG(server),  "_SERVER",  8, html, &str TSRMLS_CC);
-	dump_hash(&XG(get),     "_GET",     5, html, &str TSRMLS_CC);
-	dump_hash(&XG(post),    "_POST",    6, html, &str TSRMLS_CC);
-	dump_hash(&XG(cookie),  "_COOKIE",  8, html, &str TSRMLS_CC);
-	dump_hash(&XG(files),   "_FILES",   7, html, &str TSRMLS_CC);
-	dump_hash(&XG(env),     "_ENV",     5, html, &str TSRMLS_CC);
-	dump_hash(&XG(session), "_SESSION", 9, html, &str TSRMLS_CC);
-	dump_hash(&XG(request), "_REQUEST", 9, html, &str TSRMLS_CC);
+	dump_hash(&XG(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str TSRMLS_CC);
+	dump_hash(&XG(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str TSRMLS_CC);
+	dump_hash(&XG(post),    "_POST",    HASH_KEY_SIZEOF("_POST"),    html, &str TSRMLS_CC);
+	dump_hash(&XG(cookie),  "_COOKIE",  HASH_KEY_SIZEOF("_COOKIE"),  html, &str TSRMLS_CC);
+	dump_hash(&XG(files),   "_FILES",   HASH_KEY_SIZEOF("_FILES"),   html, &str TSRMLS_CC);
+	dump_hash(&XG(env),     "_ENV",     HASH_KEY_SIZEOF("_ENV"),     html, &str TSRMLS_CC);
+	dump_hash(&XG(session), "_SESSION", HASH_KEY_SIZEOF("_SESSION"), html, &str TSRMLS_CC);
+	dump_hash(&XG(request), "_REQUEST", HASH_KEY_SIZEOF("_REQUEST"), html, &str TSRMLS_CC);
 
 	return str.d;
 }
