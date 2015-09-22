@@ -1296,14 +1296,19 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	XG(function_count)++;
 #if PHP_VERSION_ID >= 70000
-	if (edata && edata->func && ZEND_USER_CODE(edata->func->type)) {
-		/* Normal function calls */
-		tmp->filename  = xdstrdup(edata->func->op_array.filename->val);
+	{
+		zend_execute_data *ptr = edata;
+		while (ptr && (!ptr->func || !ZEND_USER_CODE(ptr->func->type))) {
+			ptr = ptr->prev_execute_data;
+		}
+		if (ptr) {
+			tmp->filename = xdstrdup(ptr->func->op_array.filename->val);
+		}
+	}
 #else
 	if (edata && edata->op_array) {
 		/* Normal function calls */
 		tmp->filename  = xdstrdup(edata->op_array->filename);
-#endif
 	} else if (
 		edata &&
 		edata->prev_execute_data &&
@@ -1312,6 +1317,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	) {
 		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
 	}
+#endif
 
 	if (!tmp->filename) {
 		/* Includes/main script etc */
