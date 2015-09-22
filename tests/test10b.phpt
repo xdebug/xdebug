@@ -29,7 +29,7 @@ xdebug.trace_format=0
 	function blaat($a) {
 	}
 
-	blaat("insert blah '".D::a(D::b(D::a(D::c('blah')))));
+	$a = blaat("insert blah '".D::a(D::b(D::a(D::c('blah')))));
 	echo file_get_contents($tf);
 	unlink($tf);
 ?>
