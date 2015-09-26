@@ -163,10 +163,10 @@ static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_
 	const zend_op *opcode_ptr;
 
 	opcode_ptr = cur_opcode;
-	while (!(opcode_ptr->opcode == ZEND_EXT_STMT) && !(opcode_ptr->opcode == ZEND_FETCH_W)) {
+	while (!(opcode_ptr->opcode == ZEND_EXT_STMT) && !((opcode_ptr->opcode == ZEND_FETCH_W) || (opcode_ptr->opcode == ZEND_FETCH_RW))) {
 		opcode_ptr = opcode_ptr - 1;
 	}
-	if (opcode_ptr->opcode == ZEND_FETCH_W && opcode_ptr->extended_value == ZEND_FETCH_STATIC_MEMBER) {
+	if (((opcode_ptr->opcode == ZEND_FETCH_W) || (opcode_ptr->opcode == ZEND_FETCH_RW)) && opcode_ptr->extended_value == ZEND_FETCH_STATIC_MEMBER) {
 		*found_opcode = opcode_ptr;
 		return 1;
 	}
@@ -244,7 +244,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 #else
 		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op1.var, &cv_len)), 1);
 #endif
-	} else if (cur_opcode->op1_type == IS_VAR && cur_opcode->opcode == ZEND_ASSIGN && prev_opcode->opcode == ZEND_FETCH_W) {
+	} else if (cur_opcode->op1_type == IS_VAR && cur_opcode->opcode == ZEND_ASSIGN && (prev_opcode->opcode == ZEND_FETCH_W || prev_opcode->opcode == ZEND_FETCH_RW)) {
 		if (is_static) {
 			xdebug_str_add(&name, xdebug_sprintf("self::"), 1);
 		} else {
