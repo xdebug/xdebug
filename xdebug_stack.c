@@ -608,7 +608,7 @@ void xdebug_init_debugger(TSRMLS_D)
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking remote connect back address.\n");
 		if (XG(remote_addr_header) && XG(remote_addr_header)[0]) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking user configured header '%s'.\n", XG(remote_addr_header));
-			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], XG(remote_addr_header), strlen(XG(remote_addr_header)) + 1, remote_addr);
+			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], XG(remote_addr_header), HASH_KEY_STRLEN(XG(remote_addr_header)), remote_addr);
 		}
 		if (!remote_addr) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'HTTP_X_FORWARDED_FOR'.\n");
