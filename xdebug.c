@@ -2582,8 +2582,12 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 						/* Check the condition */
 						if (zend_eval_string(brk->condition, &retval, "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
+#if PHP_VERSION_ID >= 70000
+							break_ok = Z_TYPE(retval) == IS_TRUE;
+#else
 							convert_to_boolean(&retval);
-							break_ok = retval.value.lval;
+							break_ok = Z_BVAL(retval.value.lval;
+#endif
 							zval_dtor(&retval);
 						}
 
