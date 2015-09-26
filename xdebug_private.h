@@ -178,6 +178,9 @@ typedef struct _function_stack_entry {
 	int          arg_done;
 	unsigned int varc;
 	xdebug_var   *var;
+#if PHP_VERSION_ID >= 50600
+	int          is_variadic;
+#endif
 	zval        *return_value;
 	xdebug_llist *used_vars;
 	HashTable   *symbol_table;

@@ -86,6 +86,31 @@ char *xdebug_trace_textual_get_filename(void *ctxt TSRMLS_DC)
 	return context->trace_filename;
 }
 
+void add_single_value(xdebug_str *str, zval *zv, int collection_level TSRMLS_DC)
+{
+	char *tmp_value;
+
+	switch (collection_level) {
+		case 1: /* synopsis */
+		case 2:
+			tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
+			break;
+		case 3: /* full */
+		case 4: /* full (with var) */
+		default:
+			tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+			break;
+		case 5: /* serialized */
+			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
+			break;
+	}
+	if (tmp_value) {
+		xdebug_str_add(str, tmp_value, 1);
+	} else {
+		xdebug_str_add(str, "???", 0);
+	}
+}
+
 void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
@@ -114,17 +139,23 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 		int variadic_count  = 0;
 
 		for (j = 0; j < fse->varc; j++) {
-			char *tmp_value;
-
 			if (c) {
 				xdebug_str_addl(&str, ", ", 2, 0);
 			} else {
 				c = 1;
 			}
 
-			if (fse->var[j].is_variadic && fse->var[j].addr) {
+			if (
+				(fse->var[j].is_variadic && fse->var[j].addr)
+#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70000
+				|| (!fse->var[j].addr && fse->is_variadic && j == fse->varc - 1)
+#endif
+			) {
 				xdebug_str_add(&str, "...", 0);
 				variadic_opened = 1;
+#if PHP_VERSION_ID >= 70000
+				c = 0;
+#endif
 			}
 
 			if (fse->var[j].name && XG(collect_params) == 4) {
@@ -133,30 +164,28 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 			if (fse->var[j].is_variadic && fse->var[j].addr) {
 				xdebug_str_add(&str, "variadic(", 0);
+#if PHP_VERSION_ID >= 70000
+				continue;
+#endif
 			}
 
-			if (variadic_opened && XG(collect_params) != 5) {
+			if (
+				(variadic_opened && XG(collect_params) != 5)
+#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70000
+				&& (!(!fse->var[j].addr && fse->is_variadic && j == fse->varc - 1))
+#endif
+			) {
 				xdebug_str_add(&str, xdebug_sprintf("%d => ", variadic_count++), 1);
 			}
 
-			switch (XG(collect_params)) {
-				case 1: /* synopsis */
-				case 2:
-					tmp_value = xdebug_get_zval_synopsis(fse->var[j].addr, 0, NULL);
-					break;
-				case 3: /* full */
-				case 4: /* full (with var) */
-				default:
-					tmp_value = xdebug_get_zval_value(fse->var[j].addr, 0, NULL);
-					break;
-				case 5: /* serialized */
-					tmp_value = xdebug_get_zval_value_serialized(fse->var[j].addr, 0, NULL TSRMLS_CC);
-					break;
-			}
-			if (tmp_value) {
-				xdebug_str_add(&str, tmp_value, 1);
+			if (fse->var[j].addr) {
+				add_single_value(&str, fse->var[j].addr, XG(collect_params) TSRMLS_CC);
+#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70000
+			} else if (fse->is_variadic && j == fse->varc - 1) {
+				xdebug_str_addl(&str, "variadic(", 9, 0);
+#endif
 			} else {
-				xdebug_str_add(&str, "???", 0);
+				xdebug_str_addl(&str, "???", 3, 0);
 			}
 		}
 

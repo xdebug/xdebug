@@ -32,7 +32,7 @@ foo( "foo", "bar", 3.1415 );
 PHP Notice:  notice in %serrorlog_variadic.php on line 4
 PHP Stack trace:
 PHP   1. {main}() %serrorlog_variadic.php:0
-PHP   2. foo($a = 42, $b = *uninitialized*) %serrorlog_variadic.php:7
+PHP   2. foo($a = 42, ...$b = variadic()) %serrorlog_variadic.php:7
 PHP   3. trigger_error('notice') %serrorlog_variadic.php:4
 PHP Notice:  notice in %serrorlog_variadic.php on line 4
 PHP Stack trace:

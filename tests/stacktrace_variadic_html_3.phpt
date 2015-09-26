@@ -33,7 +33,7 @@ foo( "foo", "bar", 3.1415 );
 <tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sstacktrace_variadic_html_3.php' bgcolor='#eeeeec'>.../stacktrace_variadic_html_3.php<b>:</b>0</td></tr>
-<tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>foo( <span>42</span>, ??? )</td><td title='%sstacktrace_variadic_html_3.php' bgcolor='#eeeeec'>.../stacktrace_variadic_html_3.php<b>:</b>7</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>foo( <span>42</span>, ...<i>variadic</i>() )</td><td title='%sstacktrace_variadic_html_3.php' bgcolor='#eeeeec'>.../stacktrace_variadic_html_3.php<b>:</b>7</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.trigger-error.html' target='_new'>trigger_error</a>
 ( <span>&#39;notice&#39;</span> )</td><td title='%sstacktrace_variadic_html_3.php' bgcolor='#eeeeec'>.../stacktrace_variadic_html_3.php<b>:</b>4</td></tr>
 </table></font>
