@@ -1716,24 +1716,23 @@ typedef struct
 	zval *zv;
 } xdebug_object_item;
 
+#if PHP_VERSION_ID >= 70000
+static int object_item_add_to_merged_hash(zval *zv_nptr, zend_string *hash_key, HashTable *merged, int object_type)
+{
+	zval **zv = &zv_nptr;
+#else
 static int object_item_add_to_merged_hash(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	HashTable          *merged;
-	int                 object_type;
+	HashTable          *merged = va_arg(args, HashTable*);
+	int                 object_type = va_arg(args, int);
+#endif
 	xdebug_object_item *item;
-
-	merged = va_arg(args, HashTable*);
-	object_type = va_arg(args, int);
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
-#if PHP_VERSION_ID >= 70000
-	item->zv   = (zval*) zv;
-#else
 	item->zv   = *zv;
-#endif
-	item->name = (char*) HASH_KEY_VAL(hash_key);
-	item->name_len = HASH_KEY_LEN(hash_key);
+	item->name = (char*) HASH_APPLY_KEY_VAL(hash_key);
+	item->name_len = HASH_APPLY_KEY_LEN(hash_key);
 	item->index = hash_key->h;
 
 #if PHP_VERSION_ID >= 70000
@@ -1746,19 +1745,21 @@ static int object_item_add_to_merged_hash(zval **zv TSRMLS_DC, int num_args, va_
 }
 
 #if PHP_VERSION_ID >= 50400
+# if PHP_VERSION_ID >= 70000
+static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp, HashTable *merged, int object_type, zend_class_entry *ce)
+{
+# else
 static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	HashTable          *merged;
-	int                 object_type;
+	HashTable          *merged = va_arg(args, HashTable*);
+	int                 object_type = va_arg(args, int);
+	zend_class_entry   *ce = va_arg(args, zend_class_entry*);
+# endif
 	xdebug_object_item *item;
-	zend_class_entry   *ce;
 
 	if ((zpp->flags & ZEND_ACC_STATIC) == 0) {
 		return 0;
 	}
-	merged = va_arg(args, HashTable*);
-	object_type = va_arg(args, int);
-	ce = va_arg(args, zend_class_entry*);
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
@@ -1874,7 +1875,11 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 		if ((*item)->name_len != 0) {
 			char *prop_name, *prop_class_name;
 
+#if PHP_VERSION_ID >= 70000
+			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len, &prop_name, &prop_class_name);
+#else
 			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len + 1, &prop_name, &prop_class_name);
+#endif
 
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_xml_add_attribute_ex(node, "name", xdstrdup(prop_name), 0, 1);
@@ -2098,6 +2103,9 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			HashTable *merged_hash;
 			zend_class_entry *ce;
 			int is_temp;
+#if PHP_VERSION_ID >= 70000
+			zend_property_info *zpi_val;
+#endif
 
 			ALLOC_HASHTABLE(merged_hash);
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
@@ -2107,13 +2115,31 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 			/* Adding static properties */
 			if (&ce->properties_info) {
+#if PHP_VERSION_ID >= 70000
+				ZEND_HASH_INC_APPLY_COUNT(&ce->properties_info);
+				ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
+					object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
+				} ZEND_HASH_FOREACH_END();
+				ZEND_HASH_DEC_APPLY_COUNT(&ce->properties_info);
+#else
 				zend_hash_apply_with_arguments(&ce->properties_info TSRMLS_CC, (apply_func_args_t) object_item_add_zend_prop_to_merged_hash, 3, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
+#endif
 			}
 
 			/* Adding normal properties */
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht) {
+#if PHP_VERSION_ID >= 70000
+				zval *tmp_val;
+
+				ZEND_HASH_INC_APPLY_COUNT(myht);
+				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, tmp_val) {
+					object_item_add_to_merged_hash(tmp_val, key, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
+				} ZEND_HASH_FOREACH_END();
+				ZEND_HASH_DEC_APPLY_COUNT(myht);
+#else
 				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) object_item_add_to_merged_hash, 2, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
+#endif
 			}
 
 			xdebug_xml_add_attribute(node, "type", "object");
