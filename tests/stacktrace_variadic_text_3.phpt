@@ -30,7 +30,7 @@ Notice: notice in %sstacktrace_variadic_text_3.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %sstacktrace_variadic_text_3.php:0
-%w%f %w%d   2. foo(42, ???) %sstacktrace_variadic_text_3.php:7
+%w%f %w%d   2. foo(42, ...variadic()) %sstacktrace_variadic_text_3.php:7
 %w%f %w%d   3. trigger_error('notice') %sstacktrace_variadic_text_3.php:4
 
 
