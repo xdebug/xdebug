@@ -17,7 +17,7 @@ xdebug.trace_format=0
 
 	class foo {
 
-		function foo() {
+		function __construct() {
 			$this->a = $this;
 			$this->b = $this;
 		}
@@ -36,7 +36,7 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> foo->foo() /%s/test14b.php:16
+%w%f %w%d     -> foo->__construct() /%s/test14b.php:16
 %w%f %w%d     -> bar(class foo { public $a = ...; public $b = ... }) /%s/test14b.php:17
 %w%f %w%d     -> bar(class foo { public $a = ...; public $b = ... }) /%s/test14b.php:18
 %w%f %w%d     -> file_get_contents('/tmp/%s') /%s/test14b.php:20
