@@ -272,7 +272,11 @@ static xdebug_xml_node* get_symbol(char* name, int name_length, xdebug_var_expor
 	zval                *retval;
 
 	retval = xdebug_get_php_symbol(name, name_length TSRMLS_CC);
+#if PHP_VERSION_ID >= 70000
+	if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
+#else
 	if (retval) {
+#endif
 		return xdebug_get_zval_value_xml_node(name, retval, options TSRMLS_CC);
 	}
 
