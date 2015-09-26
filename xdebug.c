@@ -1794,6 +1794,8 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	fse->symbol_table = EG(current_execute_data)->symbol_table;
 	if (Z_OBJ(EG(current_execute_data)->This)) {
 		fse->This = &EG(current_execute_data)->This;
+	} else {
+		fse->This = NULL;
 	}
 #else
 	fse->symbol_table = EG(active_symbol_table);
