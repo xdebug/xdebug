@@ -928,6 +928,12 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_first_try {
 		res = zend_eval_string(eval_string, ret_zval, "xdebug://debug-eval" TSRMLS_CC);
 	} zend_end_try();
+#if PHP_VERSION_ID >= 70000
+	/* FIXME: Bubble up exception message to DBGp return packet */
+	if (EG(exception)) {
+		res = FAILURE;
+	}
+#endif
 
 	/* Clean up */
 	EG(error_reporting) = old_error_reporting;
