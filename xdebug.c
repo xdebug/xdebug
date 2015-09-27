@@ -2586,7 +2586,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 							break_ok = Z_TYPE(retval) == IS_TRUE;
 #else
 							convert_to_boolean(&retval);
-							break_ok = Z_BVAL(retval.value.lval;
+							break_ok = retval.value.lval;
 #endif
 							zval_dtor(&retval);
 						}
