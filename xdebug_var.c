@@ -588,11 +588,11 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 					/* The normal one */
 					element = prepare_search_key(secondStar + 1, &element_length, name + 1, secondStar - name - 1);
 #if PHP_VERSION_ID >= 70000
-					if (ht && ((retval_pp = zend_hash_str_find_ptr(ht, element, element_length + 1)) != NULL)) {
+					if (ht && ((retval_p = zend_hash_str_find(ht, element, element_length)) != NULL)) {
 #else
 					if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
-#endif
 						retval_p = *retval_pp;
+#endif
 						goto cleanup;
 					}
 				}
