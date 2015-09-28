@@ -2028,6 +2028,11 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	zend_string *key;
 	zval *z_val;
 	xdebug_object_item *xoi_val;
+
+	if (Z_TYPE_P(*struc) == IS_INDIRECT) {
+		zval *tmpz = ((*struc)->value.zv);
+		struc = &tmpz;
+	}
 #endif
 
 	switch (Z_TYPE_P(*struc)) {
