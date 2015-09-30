@@ -1876,7 +1876,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 			char *prop_name, *prop_class_name;
 
 #if PHP_VERSION_ID >= 70000
-			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len, &prop_name, &prop_class_name);
+			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len + 1, &prop_name, &prop_class_name);
 #else
 			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len + 1, &prop_name, &prop_class_name);
 #endif
