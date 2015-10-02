@@ -1945,22 +1945,21 @@ void xdebug_attach_uninitialized_var(xdebug_xml_node *node, char *name)
 	xdebug_xml_add_child(node, contents);
 }
 
+#if PHP_VERSION_ID >= 70000
+void xdebug_attach_property_with_contents(zend_property_info *prop_info, xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *class_entry, char *class_name, int *children_count)
+{
+#else
 void xdebug_attach_property_with_contents(zend_property_info *prop_info TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	xdebug_xml_node    *node;
+	xdebug_xml_node    *node = va_arg(args, xdebug_xml_node *);
+	xdebug_var_export_options *options = va_arg(args, xdebug_var_export_options *);
+	zend_class_entry   *class_entry = va_arg(args, zend_class_entry *);
+	char               *class_name = va_arg(args, char *);
+	int                *children_count = va_arg(args, int *);
+#endif
 	char               *modifier;
 	xdebug_xml_node    *contents = NULL;
-	char               *class_name;
-	zend_class_entry   *class_entry;
 	char               *prop_name, *prop_class_name;
-	xdebug_var_export_options *options;
-	int                *children_count;
-
-	node = va_arg(args, xdebug_xml_node *);
-	options = va_arg(args, xdebug_var_export_options *);
-	class_entry = va_arg(args, zend_class_entry *);
-	class_name = va_arg(args, char *);
-	children_count = va_arg(args, int *);
 
 	if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
 		return;
@@ -2005,14 +2004,24 @@ void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	HashTable        *static_members = &ce->properties_info;
 	int               children = 0;
 	xdebug_xml_node  *static_container;
+#if PHP_VERSION_ID >= 70000
+	zend_property_info *zpi;
+#endif
 
 	static_container = xdebug_xml_node_init("property");
 	xdebug_xml_add_attribute(static_container, "name", "::");
 	xdebug_xml_add_attribute(static_container, "fullname", "::");
 	xdebug_xml_add_attribute(static_container, "type", "object");
 	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(STR_NAME_VAL(ce->name)), 0, 1);
-
-	zend_hash_apply_with_arguments(static_members TSRMLS_CC, (apply_func_args_t) xdebug_attach_property_with_contents, 5, static_container, options, ce, ce->name, &children); 
+#if PHP_VERSION_ID >= 70000
+	ZEND_HASH_INC_APPLY_COUNT(static_members);
+	ZEND_HASH_FOREACH_PTR(static_members, zpi) {
+		xdebug_attach_property_with_contents(zpi, static_container, options, ce, STR_NAME_VAL(ce->name), &children);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_DEC_APPLY_COUNT(static_members);
+#else
+	zend_hash_apply_with_arguments(static_members TSRMLS_CC, (apply_func_args_t) xdebug_attach_property_with_contents, 5, static_container, options, ce, ce->name, &children);
+#endif
 	xdebug_xml_add_attribute(static_container, "children", children > 0 ? "1" : "0");
 	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", children), 0, 1);
 
