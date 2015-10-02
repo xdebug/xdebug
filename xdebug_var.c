@@ -1967,7 +1967,7 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info TSRMLS_D
 
 	(*children_count)++;
 #if PHP_VERSION_ID >= 70000
-	modifier = xdebug_get_property_info(STR_NAME_VAL(prop_info->name), STR_NAME_LEN(prop_info->name), &prop_name, &prop_class_name);
+	modifier = xdebug_get_property_info(STR_NAME_VAL(prop_info->name), STR_NAME_LEN(prop_info->name) + 1, &prop_name, &prop_class_name);
 #else
 	modifier = xdebug_get_property_info((char *) prop_info->name, prop_info->name_length, &prop_name, &prop_class_name);
 #endif
