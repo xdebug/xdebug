@@ -1300,7 +1300,7 @@ DBGP_FUNC(typemap_get)
 	}
 }
 
-static int add_constant_node(xdebug_xml_node *node, char *name, int name_lenth, zval *const_val, xdebug_var_export_options *options TSRMLS_DC)
+static int add_constant_node(xdebug_xml_node *node, char *name, zval *const_val, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_xml_node *contents;
 
@@ -1388,7 +1388,7 @@ DBGP_FUNC(property_get)
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
-		if (add_constant_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, &const_val, options TSRMLS_CC) == FAILURE) {
+		if (add_constant_node(*retval, CMD_OPTION('n'), &const_val, options TSRMLS_CC) == FAILURE) {
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
@@ -1724,7 +1724,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 				continue;
 			}
 
-			add_constant_node(node, CONSTANT_NAME_VAL(val->name), CONSTANT_NAME_LEN(val->name), &(val->value), options TSRMLS_CC);
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), &(val->value), options TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
 #else
 		HashPosition   pos;
@@ -1742,7 +1742,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 				goto next_constant;
 			}
 
-			add_constant_node(node, CONSTANT_NAME_VAL(val->name), CONSTANT_NAME_LEN(val->name), &(val->value), options TSRMLS_CC);
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), &(val->value), options TSRMLS_CC);
 next_constant:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
