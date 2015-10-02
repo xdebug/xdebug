@@ -2042,6 +2042,10 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 		zval *tmpz = ((*struc)->value.zv);
 		struc = &tmpz;
 	}
+	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+		zval *tmpz = &((*struc)->value.ref->val);
+		struc = &tmpz;
+	}
 #endif
 
 	switch (Z_TYPE_P(*struc)) {
