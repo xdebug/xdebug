@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #623: Static properties of a class can be evaluated only with difficulty
+Test for bug #623: Static properties of a class can be evaluated only with difficulty (< PHP 7.0)
+--XFAIL--
+It's an issue that PHP creates a compiled variable for self::$varname variables.
 --SKIPIF--
 <?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
@@ -45,7 +48,7 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$nameProt" fullname="$nameProt" type="uninitialized"></property><property name="::" fullname="::" type="object" classname="testclass" children="1" numchildren="3"><property name="::nameProt" fullname="::nameProt" address="" type="object" classname="testclass" children="1" numchildren="3" page="0" pagesize="32" facet="static protected"><property name="nameProt" fullname="::nameProt::nameProt" facet="static protected" address="" type="object" classname="testclass" children="1" numchildren="3"></property><property name="namePriv" fullname="::nameProt::namePriv" facet="static private" address="" type="null"></property><property name="*testclassDaddy*daddyPriv" fullname="::nameProt::*testclassDaddy*daddyPriv" facet="static private" address="" type="array" children="1" numchildren="4"></property></property><property name="::namePriv" fullname="::namePriv" address="" type="null" facet="static private"></property><property name="::*testclassDaddy*daddyPriv" fullname="::*testclassDaddy*daddyPriv" address="" type="array" children="1" numchildren="4" page="0" pagesize="32" facet="static private"><property name="0" fullname="::*testclassDaddy*daddyPriv[0]" address="" type="int"><![CDATA[1]]></property><property name="1" fullname="::*testclassDaddy*daddyPriv[1]" address="" type="int"><![CDATA[2]]></property><property name="2" fullname="::*testclassDaddy*daddyPriv[2]" address="" type="int"><![CDATA[3]]></property><property name="3" fullname="::*testclassDaddy*daddyPriv[3]" address="" type="int"><![CDATA[9]]></property></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="::" fullname="::" type="object" classname="testclass" children="1" numchildren="3"><property name="::nameProt" fullname="::nameProt" address="" type="object" classname="testclass" children="1" numchildren="3" page="0" pagesize="32" facet="static protected"><property name="nameProt" fullname="::nameProt::nameProt" facet="static protected" address="" type="object" classname="testclass" children="1" numchildren="3"></property><property name="namePriv" fullname="::nameProt::namePriv" facet="static private" address="" type="null"></property><property name="*testclassDaddy*daddyPriv" fullname="::nameProt::*testclassDaddy*daddyPriv" facet="static private" address="" type="array" children="1" numchildren="4"></property></property><property name="::namePriv" fullname="::namePriv" address="" type="null" facet="static private"></property><property name="::*testclassDaddy*daddyPriv" fullname="::*testclassDaddy*daddyPriv" address="" type="array" children="1" numchildren="4" page="0" pagesize="32" facet="static private"><property name="0" fullname="::*testclassDaddy*daddyPriv[0]" address="" type="int"><![CDATA[1]]></property><property name="1" fullname="::*testclassDaddy*daddyPriv[1]" address="" type="int"><![CDATA[2]]></property><property name="2" fullname="::*testclassDaddy*daddyPriv[2]" address="" type="int"><![CDATA[3]]></property><property name="3" fullname="::*testclassDaddy*daddyPriv[3]" address="" type="int"><![CDATA[9]]></property></property></property></response>
 
 -> property_get -i 5 -n ::
 <?xml version="1.0" encoding="iso-8859-1"?>
