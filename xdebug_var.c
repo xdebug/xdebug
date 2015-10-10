@@ -781,7 +781,7 @@ zval* xdebug_get_php_symbol(char* name TSRMLS_DC)
 						state = 1;
 						keyword_end = *p;
 
-						if (strncmp(keyword, "::", 2) == 0) { /* static class properties */
+						if (strncmp(keyword, "::", 2) == 0 && XG(active_fse)->function.class) { /* static class properties */
 							zend_class_entry *ce = xdebug_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
