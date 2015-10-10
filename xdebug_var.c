@@ -607,7 +607,7 @@ cleanup:
 	return retval_p;
 }
 
-zval* xdebug_get_php_symbol(char* name, int name_length TSRMLS_DC)
+zval* xdebug_get_php_symbol(char* name TSRMLS_DC)
 {
 	int        found = -1;
 	int        state = 0;

@@ -2250,12 +2250,12 @@ PHP_FUNCTION(xdebug_debug_zval)
 		if (Z_TYPE(args[i]) == IS_STRING) {
 			XG(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
 			XG(active_execute_data) = EG(current_execute_data)->prev_execute_data;
-			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), Z_STRLEN(args[i]) + 1 TSRMLS_CC);
+			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]) TSRMLS_CC);
 			php_printf("%s: ", Z_STRVAL(args[i]));
 #else
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
 			XG(active_symbol_table) = EG(active_symbol_table);
-			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1 TSRMLS_CC);
+			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]) TSRMLS_CC);
 			php_printf("%s: ", Z_STRVAL_PP(args[i]));
 #endif
 			if (debugzval) {
@@ -2321,12 +2321,12 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 #if PHP_VERSION_ID >= 70000
 		if (Z_TYPE(args[i]) == IS_STRING) {
 			XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
-			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), Z_STRLEN(args[i]) + 1 TSRMLS_CC);
+			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]) TSRMLS_CC);
 			printf("%s: ", Z_STRVAL(args[i]));
 #else
 		if (Z_TYPE_PP(args[i]) == IS_STRING) {
 			XG(active_symbol_table) = EG(active_symbol_table);
-			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]) + 1 TSRMLS_CC);
+			debugzval = xdebug_get_php_symbol(Z_STRVAL_PP(args[i]) TSRMLS_CC);
 			printf("%s: ", Z_STRVAL_PP(args[i]));
 #endif
 			if (debugzval) {
