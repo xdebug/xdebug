@@ -371,7 +371,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			/* First we try a public,private,protected property */
 			element = prepare_search_key(name, &element_length, "", 0);
 #if PHP_VERSION_ID >= 70000
-			if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length + 1)) != NULL)) {
+			if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
 				retval_p = &cce->static_members_table[zpp->offset];
 #else
 			if (cce && &cce->properties_info && zend_hash_find(&cce->properties_info, element, element_length + 1, (void **) &zpp) == SUCCESS) {
@@ -391,7 +391,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 					element_length = name_length - (secondStar + 1 - name);
 					element = prepare_search_key(secondStar + 1, &element_length, "", 0);
 #if PHP_VERSION_ID >= 70000
-					if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length + 1)) != NULL)) {
+					if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
 						retval_p = &cce->static_members_table[zpp->offset];
 #else
 					if (cce && &cce->properties_info && zend_hash_find(&cce->properties_info, element, element_length + 1, (void **) &zpp) == SUCCESS) {
@@ -509,7 +509,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			/* Then we try a public property */
 			element = prepare_search_key(name, &element_length, "", 0);
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_pp = zend_symtable_str_find_ptr(ht, element, element_length + 1)) != NULL)) {
+			if (ht && ((retval_pp = zend_symtable_str_find_ptr(ht, element, element_length)) != NULL)) {
 #else
 			if (ht && zend_symtable_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 #endif
@@ -522,7 +522,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			free(element);
 			element = prepare_search_key(name, &element_length, "*", 1);
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_pp = zend_hash_str_find_ptr(ht, element, element_length + 1)) != NULL)) {
+			if (ht && ((retval_pp = zend_hash_str_find_ptr(ht, element, element_length)) != NULL)) {
 #else
 			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 #endif
@@ -535,7 +535,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			free(element);
 			element = prepare_search_key(name, &element_length, ccn, ccnl);
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_pp = zend_hash_str_find_ptr(ht, element, element_length + 1)) != NULL)) {
+			if (ht && ((retval_pp = zend_hash_str_find_ptr(ht, element, element_length)) != NULL)) {
 #else
 			if (ht && zend_hash_find(ht, element, element_length + 1, (void **) &retval_pp) == SUCCESS) {
 #endif
