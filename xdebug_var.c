@@ -220,6 +220,11 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *n
 
 inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 {
+#if PHP_VERSION_ID >= 70000
+	if (Z_TYPE_P(z) == IS_REFERENCE) {
+		z = &z->value.ref->val;
+	}
+#endif
 	switch (Z_TYPE_P(z)) {
 		case IS_ARRAY:
 			return Z_ARRVAL_P(z);
