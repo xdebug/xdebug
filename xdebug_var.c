@@ -331,11 +331,14 @@ static zval **get_splobjectstorage_storage(zval *parent TSRMLS_DC)
 	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
 
 #if PHP_VERSION_ID >= 70000
-	if ((tmp = zend_hash_str_find_ptr(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage"))) != NULL) {
+	zval *np_tmp;
+	if ((np_tmp = zend_hash_str_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1)) != NULL) {
+		tmp = &np_tmp;
+		return tmp;
 #else
 	if (zend_hash_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage"), (void **) &tmp) == SUCCESS) {
-#endif
 		return tmp;
+#endif
 	}
 
 	return NULL;
@@ -348,11 +351,14 @@ static zval **get_arrayiterator_storage(zval *parent TSRMLS_DC)
 	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
 
 #if PHP_VERSION_ID >= 70000
-	if ((tmp = zend_hash_str_find_ptr(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage"))) != NULL) {
+	zval *np_tmp;
+	if ((np_tmp = zend_hash_str_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1)) != NULL) {
+		tmp = &np_tmp;
+		return tmp;
 #else
 	if (zend_hash_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage"), (void **) &tmp) == SUCCESS) {
-#endif
 		return tmp;
+#endif
 	}
 
 	return NULL;
