@@ -1728,7 +1728,7 @@ typedef struct
 } xdebug_object_item;
 
 #if PHP_VERSION_ID >= 70000
-static int object_item_add_to_merged_hash(zval *zv_nptr, zend_string *hash_key, HashTable *merged, int object_type)
+static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index, zend_string *hash_key, HashTable *merged, int object_type)
 {
 	zval **zv = &zv_nptr;
 #else
@@ -1739,12 +1739,23 @@ static int object_item_add_to_merged_hash(zval **zv TSRMLS_DC, int num_args, va_
 #endif
 	xdebug_object_item *item;
 
-	item = xdmalloc(sizeof(xdebug_object_item));
+	item = xdcalloc(1, sizeof(xdebug_object_item));
 	item->type = object_type;
 	item->zv   = *zv;
+#if PHP_VERSION_ID >= 70000
+	if (hash_key) {
+		item->name = (char*) HASH_APPLY_KEY_VAL(hash_key);
+		item->name_len = HASH_APPLY_KEY_LEN(hash_key) - 1;
+		item->index = hash_key->h;
+	} else {
+		item->name = xdebug_sprintf("%ld", index);
+		item->name_len = strlen(item->name);
+	}
+#else
 	item->name = (char*) HASH_APPLY_KEY_VAL(hash_key);
 	item->name_len = HASH_APPLY_KEY_LEN(hash_key);
 	item->index = hash_key->h;
+#endif
 
 #if PHP_VERSION_ID >= 70000
 	zend_hash_next_index_insert_ptr(merged, item);
@@ -2163,7 +2174,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 				ZEND_HASH_INC_APPLY_COUNT(myht);
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, tmp_val) {
-					object_item_add_to_merged_hash(tmp_val, key, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
+					object_item_add_to_merged_hash(tmp_val, num, key, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
 				} ZEND_HASH_FOREACH_END();
 				ZEND_HASH_DEC_APPLY_COUNT(myht);
 #else
