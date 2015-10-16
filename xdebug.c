@@ -1086,9 +1086,9 @@ PHP_RINIT_FUNCTION(xdebug)
 		if (
 			(
 				(
-					zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), stop_no_exec) != NULL
+					zend_hash_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), stop_no_exec) != NULL
 				) || (
-					zend_hash_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), stop_no_exec) != NULL
+					zend_hash_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), stop_no_exec) != NULL
 				)
 			)
 			&& !SG(headers_sent)
@@ -1121,7 +1121,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 #if PHP_VERSION_ID >= 70000
-	if (XG(default_enable) && zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL) {
+	if (XG(default_enable) && zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL) {
 #else
 	if (XG(default_enable) && zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION"), (void**)&dummy) == FAILURE) {
 #endif
@@ -1349,11 +1349,11 @@ static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value T
 		(
 #if PHP_VERSION_ID >= 70000
 			(
-				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name, strlen(var_name))) != NULL
+				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name, strlen(var_name))) != NULL
 			) || (
-				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name, strlen(var_name))) != NULL
+				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name, strlen(var_name))) != NULL
 			) || (
-				(trigger_val = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name, strlen(var_name))) != NULL
+				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name, strlen(var_name))) != NULL
 			)
 #else
 			(
@@ -1666,9 +1666,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (
 #if PHP_VERSION_ID >= 70000
 			((
-				(dummy = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
+				(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
 			) || (
-				(dummy = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
+				(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
 			))
 #else
 			((
@@ -1698,7 +1698,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 #endif
 		} else if (
 #if PHP_VERSION_ID >= 70000
-			(dummy = zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
+			(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
 #else
 			PG(http_globals)[TRACK_VARS_COOKIE] &&
 			zend_hash_find(PG(http_globals)[TRACK_VARS_COOKIE]->value.ht, "XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (void **) &dummy) == SUCCESS
@@ -1726,9 +1726,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 		if (
 #if PHP_VERSION_ID >= 70000
 			((
-				zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
+				zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
 			) || (
-				zend_hash_str_find_ptr(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
+				zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
 			))
 #else
 			((
