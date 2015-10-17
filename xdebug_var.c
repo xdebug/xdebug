@@ -314,7 +314,9 @@ static zval **get_arrayobject_storage(zval *parent TSRMLS_DC)
 	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
 
 #if PHP_VERSION_ID >= 70000
-	if ((tmp = zend_hash_str_find_ptr(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage"))) != NULL) {
+	zval *np_tmp;
+	if ((np_tmp = zend_hash_str_find(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1)) != NULL) {
+		tmp = &np_tmp;
 #else
 	if (zend_hash_find(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage"), (void **) &tmp) == SUCCESS) {
 #endif
