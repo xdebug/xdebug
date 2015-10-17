@@ -1533,7 +1533,13 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		}
 
 		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
-			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK, (char *) exception_ce->name, code_str ? code_str : Z_STRVAL_P(code), Z_STRVAL_P(message))) {
+			if (!XG(context).handler->remote_breakpoint(
+				&(XG(context)), XG(stack),
+				Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK,
+				(char*) STR_NAME_VAL(exception_ce->name),
+				code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
+				Z_STRVAL_P(message))
+			) {
 				XG(remote_enabled) = 0;
 			}
 		}
