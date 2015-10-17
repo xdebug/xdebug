@@ -179,7 +179,9 @@ int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC)
 	zval *tmp_const = NULL;
 	tmp_const = zend_get_constant_str(val, len);
 
-	*const_val = *tmp_const;
+	if (tmp_const) {
+		*const_val = *tmp_const;
+	}
 
 	return tmp_const != NULL;
 }
