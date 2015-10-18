@@ -336,11 +336,10 @@ static zval **get_splobjectstorage_storage(zval *parent TSRMLS_DC)
 	zval *np_tmp;
 	if ((np_tmp = zend_hash_str_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1)) != NULL) {
 		tmp = &np_tmp;
-		return tmp;
 #else
 	if (zend_hash_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage"), (void **) &tmp) == SUCCESS) {
-		return tmp;
 #endif
+		return tmp;
 	}
 
 	return NULL;
