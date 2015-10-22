@@ -762,11 +762,9 @@ PHP_MINIT_FUNCTION(xdebug)
 
 		for (i = 0; i < 256; i++) {
 			if (zend_get_user_opcode_handler(i) == NULL) {
-#if ZTS
 				if (i == ZEND_HANDLE_EXCEPTION) {
 					continue;
 				}
-#endif
 				zend_set_user_opcode_handler(i, xdebug_check_branch_entry_handler);
 			}
 		}
