@@ -113,7 +113,7 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 
 int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 {
-	if (XG(do_code_coverage)) {
+	if (XG(do_code_coverage) && XG(code_coverage_branch_check)) {
 		const zend_op *cur_opcode;
 #if PHP_VERSION_ID >= 70000
 		cur_opcode = execute_data->opline;
