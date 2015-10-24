@@ -105,7 +105,7 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, zend_o
 
 int xdebug_check_branch_entry_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (XG(do_code_coverage)) {
+	if (XG(do_code_coverage) && XG(code_coverage_branch_check)) {
 		zend_op *cur_opcode;
 		cur_opcode = *EG(opline_ptr);
 
