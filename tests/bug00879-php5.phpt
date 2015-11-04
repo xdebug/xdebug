@@ -34,6 +34,17 @@ var_dump($cc);
 ?>
 --EXPECTF--
 array(2) {
+  ["%sbug00879-php5.php"]=>
+  array(4) {
+    [5]=>
+    int(1)
+    [6]=>
+    int(1)
+    [8]=>
+    int(1)
+    [10]=>
+    int(1)
+  }
   ["%sbug00879.inc"]=>
   array(5) {
     [3]=>
@@ -45,17 +56,6 @@ array(2) {
     [7]=>
     int(1)
     [8]=>
-    int(1)
-  }
-  ["%sbug00879.php"]=>
-  array(4) {
-    [5]=>
-    int(1)
-    [6]=>
-    int(1)
-    [8]=>
-    int(1)
-    [10]=>
     int(1)
   }
 }
