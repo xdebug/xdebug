@@ -126,13 +126,16 @@ int xdebug_create_socket(const char *hostname, int dport)
 #ifdef WIN32
 		errno = WSAGetLastError();
 		if (errno != WSAEINPROGRESS && errno != WSAEWOULDBLOCK) {
+			close(sockfd);
 			return -1;
 		}
 #else
 		if (errno == EACCES) {
+			close(sockfd);
 			return -3;
 		}
 		if (errno != EINPROGRESS) {
+			close(sockfd);
 			return -1;
 		}
 #endif
@@ -148,11 +151,13 @@ int xdebug_create_socket(const char *hostname, int dport)
 			FD_SET(sockfd, &eset);
 
 			if (select(sockfd+1, &rset, &wset, &eset, &timeout) == 0) {
+				close(sockfd);
 				return -2;
 			}
 
 			/* if our descriptor has an error */
 			if (FD_ISSET(sockfd, &eset)) {
+				close(sockfd);
 				return -1;
 			}
 
@@ -164,6 +169,7 @@ int xdebug_create_socket(const char *hostname, int dport)
 
 		actually_connected = getpeername(sockfd, &sa, &size);
 		if (actually_connected == -1) {
+			close(sockfd);
 			return -1;
 		}
 	}
