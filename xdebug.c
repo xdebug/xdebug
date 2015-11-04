@@ -1624,6 +1624,15 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	zval                 *return_val = NULL;
 #endif
 
+#if PHP_VERSION_ID >= 70000
+	/* For PHP 7, we need to reset the opline to the start, so that all opcode
+	 * handlers are being hit. But not for generators, as that would make an
+	 * endless loop. TODO: Fix RECV handling with generators. */
+	if (!(EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR)) {
+		EX(opline) = EX(func)->op_array.opcodes;
+	}
+#endif
+
 	/* We need to do this first before the executable clauses are called */
 	if (XG(no_exec) == 1) {
 		php_printf("DEBUG SESSION ENDED");
