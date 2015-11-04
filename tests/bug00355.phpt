@@ -37,7 +37,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 HiiH
-Version: 3.%d%s
+Version: %d.%s
 File format: %d
 TRACE START [%s]
 2	2	1	%f	%d

@@ -38,7 +38,7 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-Version: 3.%d.%s
+Version: %d.%s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
 2	2	1	%f	%d

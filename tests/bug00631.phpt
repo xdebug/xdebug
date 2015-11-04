@@ -14,7 +14,7 @@ exit();
 ?>
 --EXPECTF--
 version: 1
-creator: xdebug 3.%s
+creator: xdebug %d.%s
 cmd: %sbug00631.php
 part: 1
 positions: line

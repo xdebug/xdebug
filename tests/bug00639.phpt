@@ -22,7 +22,7 @@ unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 version: 1
-creator: xdebug 3.%s
+creator: xdebug %d.%s
 cmd: %sbug00639.php
 part: 1
 positions: line
