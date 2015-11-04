@@ -1,5 +1,5 @@
 --TEST--
-Test with Code Coverage with path and branch checking
+Test with Code Coverage with path and branch checking (< PHP 7.0)
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -16,7 +16,7 @@ xdebug.trace_format=0
 xdebug.extended_info=1
 xdebug.overload_var_dump=0
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip PHP >= 5.3 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';
