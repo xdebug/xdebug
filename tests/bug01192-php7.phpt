@@ -1,7 +1,7 @@
 --TEST--
-Test for bug #1092: Dead code analysis does not work for generators with 'return;'
+Test for bug #1092: Dead code analysis does not work for generators with 'return;' (>= PHP 7.0)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "5.5", '>=')) echo "skip >= PHP 5.5 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --FILE--
 <?php
 function gen(&$output, $branch = false)
@@ -37,8 +37,8 @@ xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug01192.php"]=>
-  array(15) {
+  ["%sbug01192-php7.php"]=>
+  array(13) {
     [4]=>
     int(1)
     [6]=>
@@ -47,8 +47,6 @@ array(1) {
     int(1)
     [8]=>
     int(1)
-    [9]=>
-    int(-2)
     [10]=>
     int(-1)
     [12]=>
@@ -60,8 +58,6 @@ array(1) {
     [19]=>
     int(1)
     [20]=>
-    int(1)
-    [21]=>
     int(1)
     [22]=>
     int(1)
