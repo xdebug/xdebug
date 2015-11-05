@@ -33,8 +33,8 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-02-22</date>
- <time>14:48:00</time>
+ <date>2015-11-05</date>
+ <time>12:42:57</time>
  <version>
   <release>2.4.0beta1</release>
   <api>2.4.0beta1</api>
@@ -47,6 +47,25 @@ Xdebug also provides:
  <notes>
 Sun, Feb 22, 2015 - xdebug 2.4.0beta1
 
++ Added features:
+
+  - Implemented issue #1109: Added support for PHP 7.
+  - Implemented issue #1153: Add function monitor functionality.
+  - Implemented issue #1183: Add xdebug.show_error_trace setting to
+    allow/disallow to show a stack trace for every Error (throwable)
+
+= Fixed bugs:
+
+  - Fixed issue #1070: Too many open files error with php-fpm: connections not
+    closed. (Patch by Sean Dubois)
+  - Fixed issue #1123: With Xdebug 2.3.1, PHPUnit with coverage is
+    exponentially slower than without
+  - Fixed issue #1166: Using $this in __debugInfo() causes infinite recursion
+  - Fixed issue #1173: Segmentation fault in xdebug_get_monitored_functions()
+  - Fixed issue #1182: Using PHPStorm with PHP 7 RC1 and xdebug 2.4-dev break
+    points are passed by including setting break point at start of script
+  - Fixed issue #1192: Dead code analysis does not work for generators with
+    'return;'
  </notes>
 
  <contents>
@@ -90,9 +109,8 @@ Sun, Feb 22, 2015 - xdebug 2.4.0beta1
    <file name="LICENSE" role="doc" />
    <file name="Makefile.frag" role="src" />
    <file name="Makefile.in" role="src" />
-   <file name="NEWS" role="doc" />
    <file name="php_xdebug.h" role="src" />
-   <file name="README" role="doc" />
+   <file name="README.rst" role="doc" />
    <file name="usefulstuff.c" role="src" />
    <file name="usefulstuff.h" role="src" />
    <file name="xdebug.c" role="src" />
