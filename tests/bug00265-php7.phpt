@@ -73,12 +73,12 @@ array(4) {
   ["type"]=>
   int(1)
   ["message"]=>
-  string(148) "Uncaught Error: Call to undefined function gabba() in %sbug00265-php7.php:10
+  string(%d) "Uncaught Error: Call to undefined function gabba() in %sbug00265-php7.php:10
 Stack trace:
 #0 {main}
   thrown"
   ["file"]=>
-  string(59) "%sbug00265-php7.php"
+  string(%d) "%sbug00265-php7.php"
   ["line"]=>
   int(10)
 }

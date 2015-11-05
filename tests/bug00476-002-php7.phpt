@@ -49,26 +49,26 @@ echo "DONE\n";
 --EXPECTF--
 Fatal error: Uncaught%sFirst exception%sin %sbug00476-002-php7.php%s%d
 Stack trace:
-#0 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(11): a()
-#1 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(20): b()
-#2 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(29): c()
-#3 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(35): d()
+#0 %sbug00476-002-php7.php(11): a()
+#1 %sbug00476-002-php7.php(20): b()
+#2 %sbug00476-002-php7.php(29): c()
+#3 %sbug00476-002-php7.php(35): d()
 #4 {main}
 
-Next Exception: Second exception in /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php:13
+Next Exception: Second exception in %sbug00476-002-php7.php:13
 Stack trace:
-#0 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(20): b()
-#1 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(29): c()
-#2 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(35): d()
+#0 %sbug00476-002-php7.php(20): b()
+#1 %sbug00476-002-php7.php(29): c()
+#2 %sbug00476-002-php7.php(35): d()
 #3 {main}
 
-Next Exception: Third exception in /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php:22
+Next Exception: Third exception in %sbug00476-002-php7.php:22
 Stack trace:
-#0 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(29): c()
-#1 /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php(35): d()
+#0 %sbug00476-002-php7.php(29): c()
+#1 %sbug00476-002-php7.php(35): d()
 #2 {main}
 
-Next Exception: Fourth exception in /home/derick/dev/php/derickr-xdebug/tests/bug00476-002-php7.php on line 31
+Next Exception: Fourth exception in %sbug00476-002-php7.php on line 31
 
 Exception: First exception in %sbug00476-002-php7.php on line 5
 
