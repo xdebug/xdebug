@@ -1505,9 +1505,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		aggr_key_len = strlen(aggr_key);
 #if PHP_VERSION_ID >= 70000
 		aggr_key_str = zend_string_init(aggr_key, aggr_key_len, 0);
-#endif
-
-#if PHP_VERSION_ID >= 70000
 		if ((tmp->aggr_entry = zend_hash_find_ptr(&XG(aggr_calls), aggr_key_str)) == NULL) {
 #else
 		if (zend_hash_find(&XG(aggr_calls), aggr_key, aggr_key_len+1, (void**)&tmp->aggr_entry) == FAILURE) {
