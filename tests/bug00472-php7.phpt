@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #472: Dead Code Analysis for code coverage messed up after goto
+Test for bug #472: Dead Code Analysis for code coverage messed up after goto (>= PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -23,21 +25,19 @@ xdebug.overload_var_dump=0
 	include 'bug00472.inc';
     $cc = xdebug_get_code_coverage();
 	ksort($cc);
-	var_dump(array_slice($cc, 0, 1));
+	var_dump(array_slice($cc, 1, 1));
 
     xdebug_stop_code_coverage(false);
 ?>
 --EXPECTF--
 array(1) {
   ["%sbug00472.inc"]=>
-  array(95) {
+  array(71) {
     [7]=>
     int(1)
     [9]=>
     int(-1)
     [10]=>
-    int(-1)
-    [11]=>
     int(-1)
     [13]=>
     int(-1)
@@ -45,16 +45,12 @@ array(1) {
     int(-1)
     [15]=>
     int(-1)
-    [16]=>
-    int(-2)
     [18]=>
     int(-1)
     [19]=>
     int(-1)
     [20]=>
     int(-1)
-    [21]=>
-    int(-2)
     [23]=>
     int(-1)
     [24]=>
@@ -63,16 +59,12 @@ array(1) {
     int(-1)
     [26]=>
     int(-1)
-    [27]=>
-    int(-2)
     [29]=>
     int(-1)
     [30]=>
     int(-1)
     [31]=>
     int(-1)
-    [32]=>
-    int(-2)
     [34]=>
     int(-1)
     [35]=>
@@ -87,15 +79,9 @@ array(1) {
     int(-1)
     [43]=>
     int(-1)
-    [44]=>
-    int(-2)
     [45]=>
     int(-1)
     [46]=>
-    int(-1)
-    [47]=>
-    int(-2)
-    [48]=>
     int(-1)
     [50]=>
     int(-1)
@@ -116,12 +102,6 @@ array(1) {
     [59]=>
     int(-1)
     [60]=>
-    int(-1)
-    [61]=>
-    int(-2)
-    [62]=>
-    int(-1)
-    [63]=>
     int(-1)
     [65]=>
     int(-1)
@@ -145,14 +125,6 @@ array(1) {
     int(-1)
     [76]=>
     int(-1)
-    [77]=>
-    int(-2)
-    [78]=>
-    int(-1)
-    [79]=>
-    int(-1)
-    [80]=>
-    int(-1)
     [82]=>
     int(-1)
     [83]=>
@@ -161,15 +133,9 @@ array(1) {
     int(-1)
     [85]=>
     int(-1)
-    [86]=>
-    int(-2)
     [87]=>
     int(-1)
     [88]=>
-    int(-1)
-    [89]=>
-    int(-2)
-    [91]=>
     int(-1)
     [93]=>
     int(-1)
@@ -193,33 +159,21 @@ array(1) {
     int(-1)
     [104]=>
     int(-1)
-    [105]=>
-    int(-2)
-    [106]=>
-    int(-1)
-    [107]=>
-    int(-1)
-    [108]=>
-    int(-1)
     [112]=>
     int(-1)
     [113]=>
-    int(-1)
-    [114]=>
     int(-1)
     [115]=>
     int(-1)
     [116]=>
     int(-1)
-    [117]=>
-    int(-2)
     [118]=>
     int(-1)
     [119]=>
     int(-1)
     [120]=>
     int(-2)
-    [122]=>
+    [121]=>
     int(1)
   }
 }

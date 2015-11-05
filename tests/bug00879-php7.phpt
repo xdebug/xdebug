@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #879: Closing brace in trait-using class definitions is counted towards code coverage
+Test for bug #879: Closing brace in trait-using class definitions is counted towards code coverage (>= PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -32,20 +34,7 @@ var_dump($cc);
 ?>
 --EXPECTF--
 array(2) {
-  ["%sbug00879.inc"]=>
-  array(5) {
-    [3]=>
-    int(1)
-    [5]=>
-    int(1)
-    [6]=>
-    int(1)
-    [7]=>
-    int(1)
-    [8]=>
-    int(1)
-  }
-  ["%sbug00879.php"]=>
+  ["%sbug00879-php7.php"]=>
   array(4) {
     [5]=>
     int(1)
@@ -54,6 +43,17 @@ array(2) {
     [8]=>
     int(1)
     [10]=>
+    int(1)
+  }
+  ["%sbug00879.inc"]=>
+  array(4) {
+    [3]=>
+    int(1)
+    [5]=>
+    int(1)
+    [6]=>
+    int(1)
+    [7]=>
     int(1)
   }
 }

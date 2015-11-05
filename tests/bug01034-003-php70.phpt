@@ -25,7 +25,7 @@ Let's do some stuff!
 CAUGHT IN MAIN
 trycatch
 - branches
-  - 01; OP: 01-16; line: 06-13 HIT; out1: 17 HIT; out2: 22 HIT
+  - 00; OP: 00-16; line: 06-13 HIT; out1: 17 HIT; out2: 22 HIT
   - 17; OP: 17-18; line: 14-14 HIT; out1: 19 HIT; out2: 29 HIT
   - 19; OP: 19-20; line: 15-15 HIT; out1: 21  X ; out2: 36 HIT
   - 21; OP: 21-21; line: 15-15  X ; out1: 43  X 
@@ -41,10 +41,10 @@ trycatch
   - 55; OP: 55-56; line: 23-26 HIT; out1: 57 HIT
   - 57; OP: 57-60; line: 26-27 HIT; out1: EX  X 
 - paths
-  - 1 17 19 21 43 57:  X 
-  - 1 17 19 36: HIT
-  - 1 17 29: HIT
-  - 1 22: HIT
+  - 0 17 19 21 43 57:  X 
+  - 0 17 19 36: HIT
+  - 0 17 29: HIT
+  - 0 22: HIT
   - 46 47 57: HIT
   - 46 50 51 57:  X 
   - 46 50 54 55 57: HIT

@@ -866,7 +866,11 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	}
 }
 
+#if PHP_VERSION_ID >= 70000
+static int prefill_from_function_table(zend_op_array *opa)
+#else
 static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+#endif
 {
 	if (opa->type == ZEND_USER_FUNCTION) {
 		if ((long) opa->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
@@ -879,16 +883,31 @@ static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_arg
 
 static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
+#if PHP_VERSION_ID < 70000
 	char *new_filename;
+#endif
 	zend_class_entry *ce;
 
 	ce = *class_entry;
 
+#if PHP_VERSION_ID < 70000
 	new_filename = va_arg(args, char*);
+#endif
 	if (ce->type == ZEND_USER_CLASS) {
 		if (!(ce->ce_flags & ZEND_XDEBUG_VISITED)) {
+#if PHP_VERSION_ID >= 70000
+			zend_op_array *val;
+#endif
 			ce->ce_flags |= ZEND_XDEBUG_VISITED;
+#if PHP_VERSION_ID >= 70000
+			ZEND_HASH_INC_APPLY_COUNT(&ce->function_table);
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, val) {
+				prefill_from_function_table(val);
+			} ZEND_HASH_FOREACH_END();
+			ZEND_HASH_DEC_APPLY_COUNT(&ce->function_table);
+#else
 			zend_hash_apply_with_arguments(&ce->function_table TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
+#endif
 		}
 	}
 
