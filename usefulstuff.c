@@ -619,7 +619,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case 'R': { /* $_SERVER['REQUEST_URI'] */
 					char *char_ptr, *strval;
 #if PHP_VERSION_ID >= 70000
-					zval *data;
+					zval *data = NULL;
 
 					if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY) {
 						switch (*format) {
