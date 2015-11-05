@@ -1,6 +1,7 @@
 --TEST--
-Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work (>= PHP 7.0)
+Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work (>= PHP 7.0, ZTS)
 --SKIPIF--
+<?php if (PHP_ZTS == 0) echo "skip ZTS needed\n"; ?>
 <?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
@@ -15,5 +16,5 @@ function func(){
 func();
 ?>
 --EXPECT--
-a: (refcount=0, is_ref=0)='hoge'
-a: (refcount=0, is_ref=0)='hoge'(29)
+a: (refcount=1, is_ref=0)='hoge'
+a: (refcount=1, is_ref=0)='hoge'(29)
