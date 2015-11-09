@@ -1007,7 +1007,7 @@ Sun, Jan 03, 2010 - xdebug 2.1.0beta1
 	- Added &quot;Scream&quot; support, which disables the @ operator.
 	- Added a trace-file analysing script.
 	- Added support for debugging into phars.
-	- Added a default xdebug.ini. (Patch by Martin SchuhfuÃ
+	- Added a default xdebug.ini. (Patch by Martin Schuhfu
 	  &lt;martins@spot-media.de&gt;)
 	- Added function parameters in computerized function traces.
 	- PHP 5.3 compatibility.
