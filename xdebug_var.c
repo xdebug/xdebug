@@ -2055,6 +2055,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 {
 	HashTable *myht;
 	char *class_name;
+	SIZETorINT class_name_len;
 #if PHP_VERSION_ID >= 70000
 	zend_ulong num;
 	zend_string *key;
@@ -2152,7 +2153,8 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
 			class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
-			ce = xdebug_fetch_class(class_name, strlen(class_name), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
+			class_name_len = STR_NAME_LEN(Z_OBJCE_P(*struc)->name);
+			ce = xdebug_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			/* Adding static properties */
 			if (&ce->properties_info) {
