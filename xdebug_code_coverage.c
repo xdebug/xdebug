@@ -526,11 +526,8 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 	}
 }
 
-#if PHP_VERSION_ID >= 70000
-static zend_brk_cont_element* xdebug_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array)
-#else
+#if PHP_VERSION_ID < 70000
 static zend_brk_cont_element* xdebug_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array)
-#endif
 {
 	zend_brk_cont_element *jmp_to;
 
@@ -544,6 +541,7 @@ static zend_brk_cont_element* xdebug_find_brk_cont(zend_uint nest_levels, int ar
 	} while (--nest_levels > 0);
 	return jmp_to;
 }
+#endif
 
 #define XDEBUG_ZNODE_ELEM(node,var) node.var
 #if ZEND_USE_ABS_JMP_ADDR
@@ -587,6 +585,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 #endif
 		*jmp2 = opcode.extended_value;
 		return 1;
+#if PHP_VERSION_ID < 70000
 	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
 		zend_brk_cont_element *el;
 
@@ -595,11 +594,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		    && XDEBUG_ZNODE_ELEM(opcode.op1, jmp_addr) != (zend_op*) 0xFFFFFFFF
 #endif
 		) {
-#if PHP_VERSION_ID >= 70000
-			el = xdebug_find_brk_cont(Z_LVAL_P(RT_CONSTANT_EX(opa, opcode.op2)), XDEBUG_ZNODE_ELEM(opcode.op1, opline_num), opa);
-#else
 			el = xdebug_find_brk_cont(Z_LVAL_P(opcode.op2.zv), XDEBUG_ZNODE_ELEM(opcode.op1, opline_num), opa);
-#endif
 			if (el) {
 				*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
 				return 1;
@@ -608,6 +603,7 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 				return 0;
 			}
 		}
+#endif
 #if PHP_VERSION_ID >= 70000
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW || opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
 #else

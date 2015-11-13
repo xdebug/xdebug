@@ -383,7 +383,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			/* First we try a public,private,protected property */
 			element = prepare_search_key(name, &element_length, "", 0);
 #if PHP_VERSION_ID >= 70000
-			if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
+			if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->static_members_table) {
 				retval_p = &cce->static_members_table[zpp->offset];
 #else
 			if (cce && &cce->properties_info && zend_hash_find(&cce->properties_info, element, element_length + 1, (void **) &zpp) == SUCCESS) {
