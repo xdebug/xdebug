@@ -9,7 +9,7 @@ php:
   - 7.0
 
 before_script:
-  - if [ "$TRAVIS_PHP_VERSION" == 'nightly' -o "$TRAVIS_PHP_VERSION" == 7.0 ]; then echo "Not removing xdebug.ini"; else phpenv config-rm xdebug.ini; fi
+  - if [ "$TRAVIS_PHP_VERSION" == 'nightly' ]; then echo "Not removing xdebug.ini"; else phpenv config-rm xdebug.ini; fi
   - ./.travis.scripts/compile.sh
 
 notifications:
