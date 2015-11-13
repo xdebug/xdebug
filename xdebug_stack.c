@@ -749,7 +749,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 #ifdef PHP_WIN32
 			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
-				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
+				MessageBox(NULL, buffer, error_type_str, MB_OK);
 			}
 #endif
 			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
