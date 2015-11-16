@@ -59,7 +59,7 @@ static void xdebug_hash_function_monitor_dtor(char *function)
 
 static xdebug_monitored_function_entry *xdebug_monitored_function_init(char *func_name, char *filename, int lineno)
 {
-	xdebug_monitored_function_entry *tmp = xdmalloc(sizeof(xdebug_monitored_function_dtor));
+	xdebug_monitored_function_entry *tmp = xdmalloc(sizeof(xdebug_monitored_function_entry));
 
 	tmp->func_name = xdstrdup(func_name);
 	tmp->filename = xdstrdup(filename);
