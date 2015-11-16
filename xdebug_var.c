@@ -307,58 +307,63 @@ static char* prepare_search_key(char *name, unsigned int *name_length, char *pre
 	return element;
 }
 
-static zval **get_arrayobject_storage(zval *parent TSRMLS_DC)
+static zval *get_arrayobject_storage(zval *parent TSRMLS_DC)
 {
-	zval **tmp = NULL;
 	int is_temp;
 	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
 
 #if PHP_VERSION_ID >= 70000
-	zval *np_tmp;
-	if ((np_tmp = zend_hash_str_find(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1)) != NULL) {
-		tmp = &np_tmp;
+	zval *tmp = NULL;
+
+	if ((tmp = zend_hash_str_find(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1)) != NULL) {
+		return tmp;
 #else
+	zval **tmp = NULL;
+
 	if (zend_hash_find(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage"), (void **) &tmp) == SUCCESS) {
+		return *tmp;
 #endif
-		return tmp;
 	}
 
 	return NULL;
 }
 
-static zval **get_splobjectstorage_storage(zval *parent TSRMLS_DC)
+static zval *get_splobjectstorage_storage(zval *parent TSRMLS_DC)
 {
-	zval **tmp = NULL;
 	int is_temp;
 	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
 
 #if PHP_VERSION_ID >= 70000
-	zval *np_tmp;
-	if ((np_tmp = zend_hash_str_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1)) != NULL) {
-		tmp = &np_tmp;
+	zval *tmp = NULL;
+
+	if ((tmp = zend_hash_str_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1)) != NULL) {
+		return tmp;
 #else
+	zval **tmp = NULL;
+
 	if (zend_hash_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage"), (void **) &tmp) == SUCCESS) {
+		return *tmp;
 #endif
-		return tmp;
 	}
 
 	return NULL;
 }
 
-static zval **get_arrayiterator_storage(zval *parent TSRMLS_DC)
+static zval *get_arrayiterator_storage(zval *parent TSRMLS_DC)
 {
-	zval **tmp = NULL;
 	int is_temp;
 	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
 
 #if PHP_VERSION_ID >= 70000
-	zval *np_tmp;
-	if ((np_tmp = zend_hash_str_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1)) != NULL) {
-		tmp = &np_tmp;
+	zval *tmp = NULL;
+
+	if ((tmp = zend_hash_str_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1)) != NULL) {
 		return tmp;
 #else
+	zval **tmp = NULL;
+
 	if (zend_hash_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage"), (void **) &tmp) == SUCCESS) {
-		return tmp;
+		return *tmp;
 #endif
 	}
 
@@ -368,7 +373,10 @@ static zval **get_arrayiterator_storage(zval *parent TSRMLS_DC)
 static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
-	zval **retval_pp = NULL, *retval_p = NULL;
+	zval *retval_p = NULL;
+#if PHP_VERSION_ID < 70000
+	zval **retval_pp = NULL;
+#endif
 	char  *element = NULL;
 	unsigned int element_length = name_length;
 	zend_property_info *zpp;
@@ -559,9 +567,8 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			/* All right, time for a mega hack. It's SplObjectStorage access time! */
 			if (strncmp(ccn, "SplObjectStorage", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
 				element = NULL;
-				if ((retval_pp = get_splobjectstorage_storage(parent TSRMLS_CC)) != NULL) {
-					if (retval_pp) {
-						retval_p = *retval_pp;
+				if ((retval_p = get_splobjectstorage_storage(parent TSRMLS_CC)) != NULL) {
+					if (retval_p) {
 						goto cleanup;
 					}
 				}
@@ -579,9 +586,8 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 					/* All right, time for a mega hack. It's ArrayObject access time! */
 					if (strncmp(name + 1, "ArrayObject", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
 						element = NULL;
-						if ((retval_pp = get_arrayobject_storage(parent TSRMLS_CC)) != NULL) {
-							if (retval_pp) {
-								retval_p = *retval_pp;
+						if ((retval_p = get_arrayobject_storage(parent TSRMLS_CC)) != NULL) {
+							if (retval_p) {
 								goto cleanup;
 							}
 						}
@@ -589,9 +595,8 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 					/* All right, time for a mega hack. It's ArrayIterator access time! */
 					if (strncmp(name + 1, "ArrayIterator", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
 						element = NULL;
-						if ((retval_pp = get_arrayiterator_storage(parent TSRMLS_CC)) != NULL) {
-							if (retval_pp) {
-								retval_p = *retval_pp;
+						if ((retval_p = get_arrayiterator_storage(parent TSRMLS_CC)) != NULL) {
+							if (retval_p) {
 								goto cleanup;
 							}
 						}
