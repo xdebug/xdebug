@@ -2788,7 +2788,7 @@ char* xdebug_xmlize(char *string, SIZETorINT len, size_t *newlen)
 */
 static char* xdebug_create_doc_link(xdebug_func f TSRMLS_DC)
 {
-	char *tmp_target, *p, *retval;
+	char *tmp_target = NULL, *p, *retval;
 
 	switch (f.type) {
 		case XFUNC_NORMAL: {
