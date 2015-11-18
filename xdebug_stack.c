@@ -1136,7 +1136,10 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 			edata->prev_execute_data &&
 			edata->prev_execute_data->func &&
 			edata->prev_execute_data->func->common.function_name &&
-			strncmp(edata->prev_execute_data->func->common.function_name->val, "assert", 6) == 0
+			(
+				(strncmp(edata->prev_execute_data->func->common.function_name->val, "assert", 6) == 0) ||
+				(strncmp(edata->prev_execute_data->func->common.function_name->val, "create_function", 15) == 0)
+			)
 		) {
 			tmp->type = XFUNC_NORMAL;
 			tmp->function = xdstrdup("{internal eval}");
