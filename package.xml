@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-11-05</date>
- <time>12:42:57</time>
+ <date>2015-11-21</date>
+ <time>23:24:57</time>
  <version>
-  <release>2.4.0beta1</release>
-  <api>2.4.0beta1</api>
+  <release>2.4.0RC1</release>
+  <api>2.4.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,27 +45,16 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Sep 05, 2015 - xdebug 2.4.0beta1
-
-+ Added features:
-
-  - Implemented issue #1109: Added support for PHP 7.
-  - Implemented issue #1153: Add function monitor functionality.
-  - Implemented issue #1183: Add xdebug.show_error_trace setting to
-    allow/disallow to show a stack trace for every Error (throwable)
+Sat, Nov 21, 2015 - xdebug 2.4.0RC1
 
 = Fixed bugs:
 
-  - Fixed issue #1070: Too many open files error with php-fpm: connections not
-    closed. (Patch by Sean Dubois)
-  - Fixed issue #1123: With Xdebug 2.3.1, PHPUnit with coverage is
-    exponentially slower than without
-  - Fixed issue #1166: Using $this in __debugInfo() causes infinite recursion
-  - Fixed issue #1173: Segmentation fault in xdebug_get_monitored_functions()
-  - Fixed issue #1182: Using PHPStorm with PHP 7 RC1 and xdebug 2.4-dev break
-    points are passed by including setting break point at start of script
-  - Fixed issue #1192: Dead code analysis does not work for generators with
-    'return;'
+  - Fixed issue #1195: Segfault with code coverage and foreach
+  - Fixed issue #1200: Additional opcodes need to be overloaded for PHP 7
+  - Fixed issue #1202: Anonymous classes are not handled properly while remote debugging
+  - Fixed issue #1203: Accessing static property of a class that has no static properties crashes while remote debugging
+  - Fixed issue #1209: Segfault with building a function name for create_function
+  - Restored Windows support (Includes patches by Jan Ehrhardt)
  </notes>
 
  <contents>
@@ -172,6 +161,43 @@ Thu, Sep 05, 2015 - xdebug 2.4.0beta1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-11-05</date>
+   <time>12:42:57</time>
+   <version>
+    <release>2.4.0beta1</release>
+    <api>2.4.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Sep 05, 2015 - xdebug 2.4.0beta1
+
++ Added features:
+
+  - Implemented issue #1109: Added support for PHP 7.
+  - Implemented issue #1153: Add function monitor functionality.
+  - Implemented issue #1183: Add xdebug.show_error_trace setting to
+    allow/disallow to show a stack trace for every Error (throwable)
+
+= Fixed bugs:
+
+  - Fixed issue #1070: Too many open files error with php-fpm: connections not
+    closed. (Patch by Sean Dubois)
+  - Fixed issue #1123: With Xdebug 2.3.1, PHPUnit with coverage is
+    exponentially slower than without
+  - Fixed issue #1166: Using $this in __debugInfo() causes infinite recursion
+  - Fixed issue #1173: Segmentation fault in xdebug_get_monitored_functions()
+  - Fixed issue #1182: Using PHPStorm with PHP 7 RC1 and xdebug 2.4-dev break
+    points are passed by including setting break point at start of script
+  - Fixed issue #1192: Dead code analysis does not work for generators with
+    'return;'
+   </notes>
+  </release>
 
   <release>
    <date>2015-06-19</date>
