@@ -524,6 +524,10 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 					retval_p = tmp_val;
 					goto cleanup;
 				}
+
+				if (EG(exception)) {
+					zend_clear_exception(TSRMLS_C);
+				}
 			}
 
 			/* Then we try a public property */
