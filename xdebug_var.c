@@ -526,7 +526,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 				}
 
 				if (EG(exception)) {
-					zend_clear_exception();
+					zend_clear_exception(TSRMLS_C);
 				}
 			}
 
