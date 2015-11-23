@@ -311,6 +311,10 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 			escaped = estrdup(special_escaped.c);
 			smart_str_free(&special_escaped);
 #endif
+		} else if (strncmp(buffer, "assert()", 8) == 0) {
+			/* Also don't escape if we're in an assert, as things are already
+			 * escaped. It's all nice and consistent ey? */
+			escaped = estrdup(buffer);
 		} else {
 #if PHP_VERSION_ID >= 70000
 			tmp = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), 0, 0, NULL TSRMLS_CC);
