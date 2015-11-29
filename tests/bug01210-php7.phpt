@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1212: Coverage of sending arguments to a method (>= PHP 7.0)
+Test for bug #1210: Coverage of sending arguments to a method (>= PHP 7.0)
 --SKIPIF--
 <?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --FILE--
@@ -8,7 +8,7 @@ include 'dump-branch-coverage.inc';
 
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE | XDEBUG_CC_BRANCH_CHECK);
 
-include 'bug01212.inc';
+include 'bug01210.inc';
 
 xdebug_stop_code_coverage(false);
 $c = xdebug_get_code_coverage();
