@@ -30,7 +30,7 @@ void *xdebug_trace_computerized_init(char *fname, long options TSRMLS_DC)
 	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname TSRMLS_CC);
 	tmp_computerized_context->trace_filename = used_fname;
 
-	return tmp_computerized_context;
+	return tmp_computerized_context->trace_file ? tmp_computerized_context : NULL;
 }
 
 void xdebug_trace_computerized_deinit(void *ctxt TSRMLS_DC)

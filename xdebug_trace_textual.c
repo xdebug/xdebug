@@ -31,7 +31,7 @@ void *xdebug_trace_textual_init(char *fname, long options TSRMLS_DC)
 	tmp_textual_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname TSRMLS_CC);
 	tmp_textual_context->trace_filename = used_fname;
 
-	return tmp_textual_context;
+	return tmp_textual_context->trace_file ? tmp_textual_context : NULL;
 }
 
 void xdebug_trace_textual_deinit(void *ctxt TSRMLS_DC)

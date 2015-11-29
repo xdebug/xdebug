@@ -29,7 +29,7 @@ void *xdebug_trace_html_init(char *fname, long options TSRMLS_DC)
 	tmp_html_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname TSRMLS_CC);
 	tmp_html_context->trace_filename = used_fname;
 
-	return tmp_html_context;
+	return tmp_html_context->trace_file ? tmp_html_context : NULL;
 }
 
 void xdebug_trace_html_deinit(void *ctxt TSRMLS_DC)
