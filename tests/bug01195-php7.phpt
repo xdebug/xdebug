@@ -22,13 +22,12 @@ the end
 fe
 - branches
   - 00; OP: 00-03; line: 02-04 HIT; out1: 04 HIT; out2: 08  X 
-  - 04; OP: 04-04; line: 04-04 HIT; out1: 05 HIT; out2: 07  X 
-  - 05; OP: 05-06; line: 06-06 HIT; out1: 07 HIT
-  - 07; OP: 07-07; line: 06-06 HIT; out1: 04 HIT
+  - 04; OP: 04-04; line: 04-04 HIT; out1: 05 HIT; out2: 08 HIT
+  - 05; OP: 05-07; line: 06-06 HIT; out1: 04 HIT
   - 08; OP: 08-12; line: 06-09 HIT; out1: EX  X 
 - paths
-  - 0 4 5 7 4 7:  X 
-  - 0 4 7 4 5 7:  X 
+  - 0 4 5 4 8: HIT
+  - 0 4 8:  X 
   - 0 8:  X 
 
 {main}

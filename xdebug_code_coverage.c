@@ -605,7 +605,11 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		}
 #endif
 #if PHP_VERSION_ID >= 70000
-	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW || opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
+	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
+		*jmp1 = position + 1;
+		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+		return 1;
+	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
 #else
 	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
 #endif
