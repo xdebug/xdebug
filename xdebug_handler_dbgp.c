@@ -1821,11 +1821,12 @@ DBGP_FUNC(stack_get)
 {
 	xdebug_xml_node      *stackframe;
 	xdebug_llist_element *le;
-	int                   counter = 0, depth;
+	int                   counter = 0;
+	long                  depth;
 
 	if (CMD_OPTION('d')) {
 		depth = strtol(CMD_OPTION('d'), NULL, 10);
-		if (depth >= 0 && depth < XG(level)) {
+		if (depth >= 0 && depth < (long) XG(level)) {
 			stackframe = return_stackframe(depth TSRMLS_CC);
 			xdebug_xml_add_child(*retval, stackframe);
 		} else {
@@ -1907,7 +1908,7 @@ DBGP_FUNC(xcmd_get_executable_lines)
 {
 	function_stack_entry *fse;
 	unsigned int          i;
-	int                   depth;
+	long                  depth;
 	xdebug_xml_node      *lines, *line;
 
 	if (!CMD_OPTION('d')) {
@@ -1915,7 +1916,7 @@ DBGP_FUNC(xcmd_get_executable_lines)
 	}
 
 	depth = strtol(CMD_OPTION('d'), NULL, 10);
-	if (depth >= 0 && depth < XG(level)) {
+	if (depth >= 0 && depth < (long) XG(level)) {
 		fse = xdebug_get_stack_frame(depth TSRMLS_CC);
 	} else {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);

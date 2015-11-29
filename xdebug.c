@@ -1784,7 +1784,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	XG(level)++;
-	if (XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
+	if ((signed long) XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 
@@ -1976,7 +1976,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) = NULL;
 
 	XG(level)++;
-	if (XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
+	if ((signed long) XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
 		php_error(E_ERROR, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
 	}
 

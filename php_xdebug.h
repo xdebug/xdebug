@@ -125,7 +125,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           status;
 	int           reason;
 
-	long          level;
+	unsigned long level;
 	xdebug_llist *stack;
 	long          max_nesting_level;
 	long          max_stack_frames;
