@@ -29,7 +29,7 @@ typedef struct _xdebug_branch {
 	unsigned int start_lineno;
 	unsigned int end_lineno;
 	unsigned int end_op;
-	unsigned int out[2];
+	int          out[2];
 	unsigned char hit;
 	unsigned char out_hit[2];
 } xdebug_branch;
