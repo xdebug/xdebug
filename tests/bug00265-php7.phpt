@@ -10,6 +10,7 @@ xdebug.profiler_enable=0
 xdebug.trace_format=0
 xdebug.overload_var_dump=0
 xdebug.show_local_vars=0
+xdebug.show_error_trace=1
 --FILE--
 <?php
 register_shutdown_function( 'f' );

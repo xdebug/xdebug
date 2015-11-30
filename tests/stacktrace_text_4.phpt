@@ -14,6 +14,7 @@ xdebug.collect_vars=1
 xdebug.collect_params=4
 xdebug.collect_return=0
 xdebug.show_local_vars=0
+xdebug.show_error_trace=1
 --FILE--
 <?php
 function foo( $a ) {
