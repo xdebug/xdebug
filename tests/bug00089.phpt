@@ -8,13 +8,15 @@ xdebug.profiler_enable=0
 xdebug.show_local_vars=0
 html_errors=1
 xdebug.var_display_max_children=3
-xdebug.overload_var_dump=1
+xdebug.overload_var_dump=2
+xdebug.file_link_format=
 --FILE--
 <?php
 var_dump(array(4, array('', 2, 'node'), false));
 ?>
---EXPECT--
+--EXPECTF--
 <pre class='xdebug-var-dump' dir='ltr'>
+<small>%sbug00089.php:2:</small>
 <b>array</b> <i>(size=3)</i>
   0 <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>4</font>
   1 <font color='#888a85'>=&gt;</font> 

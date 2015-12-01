@@ -7,6 +7,7 @@ xdebug.var_display_max_depth=-1
 xdebug.cli_color=0
 html_errors=0
 xdebug.default_enable=1
+xdebug.overload_var_dump=1
 --FILE--
 <?php
 $array = array( 1, true, "string" );

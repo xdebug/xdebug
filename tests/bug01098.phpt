@@ -4,6 +4,7 @@ Test for bug #1098: Xdebug doesn't make use of __debugInfo (PHP < 5.6)
 <?php if (!version_compare(phpversion(), "5.6", '<')) echo "skip < PHP 5.6 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
+xdebug.overload_var_dump=1
 --FILE--
 <?php
 class FOo {

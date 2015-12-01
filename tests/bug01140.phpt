@@ -12,6 +12,7 @@ xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
+xdebug.overload_var_dump=1
 --FILE--
 <?php
 class Foo

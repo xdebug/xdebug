@@ -5,6 +5,7 @@ Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work
 <?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
+xdebug.overload_var_dump=2
 --FILE--
 <?php
 function func(){
