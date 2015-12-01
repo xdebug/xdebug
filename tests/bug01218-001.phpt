@@ -4,6 +4,7 @@ Test for bug #1218: Xdebug messes with the exception code, by casting it to int
 xdebug.default_enable=1
 xdebug.show_exception_trace=1
 xdebug.show_local_vars=0
+xdebug.overload_var_dump=1
 --FILE--
 <?php
 include dirname(__FILE__) . '/bug01218.inc';
