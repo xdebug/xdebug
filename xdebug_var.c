@@ -1591,7 +1591,7 @@ char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebu
 		default_options = 1;
 	}
 
-	if (options->show_location) {
+	if (options->show_location && !debug_zval) {
 		xdebug_str_add(&str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, zend_get_executed_filename(TSRMLS_C), ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
 	}
 
@@ -1706,7 +1706,7 @@ char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xd
 		default_options = 1;
 	}
 
-	if (options->show_location) {
+	if (options->show_location && !debug_zval) {
 		xdebug_str_add(&str, xdebug_sprintf("%s%s: %d%s\n", ANSI_COLOR_BOLD, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
 	}
 
@@ -2568,7 +2568,7 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 	}
 
 	xdebug_str_addl(&str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
-	if (options->show_location) {
+	if (options->show_location && !debug_zval) {
 		if (strlen(XG(file_link_format)) > 0) {
 			char *file_link;
 

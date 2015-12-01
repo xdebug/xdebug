@@ -10,10 +10,12 @@ var_dump( xdebug_get_headers( ) );
 var_dump( xdebug_get_headers( ) );
 ?>
 --EXPECTF--
+%sbug00625-2.php:3:
 array(1) {
   [0] =>
   string(38) "Content-type: text/plain;charset=utf-8"
 }
+%sbug00625-2.php:4:
 array(1) {
   [0] =>
   string(38) "Content-type: text/plain;charset=utf-8"

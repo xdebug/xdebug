@@ -4,6 +4,7 @@ Test for bug #987: Hidden property names not shown with var_dump (CLI colours)
 html_errors=0
 xdebug.cli_color=2
 xdebug.default_enable=1
+xdebug.overload_var_dump=1
 --FILE--
 <?php
 $object = (object) array('key' => 'value', 1 => 0, -4 => "foo", 3.14 => false);

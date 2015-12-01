@@ -3,6 +3,8 @@ Test for bug #328: Private properties are incorrectly enumerated in case of exte
 --INI--
 html_errors=1
 xdebug.default_enable=1
+xdebug.overload_var_dump=2
+xdebug.file_link_format=
 --FILE--
 <?php
 class Daddy
@@ -20,8 +22,9 @@ class Inherit extends Daddy
 $a = new Inherit;
 var_dump( $a );
 ?>
---EXPECT--
+--EXPECTF--
 <pre class='xdebug-var-dump' dir='ltr'>
+<small>%sbug00328.php:15:</small>
 <b>object</b>(<i>Inherit</i>)[<i>1</i>]
   <i>private</i> 'bar' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>43</font>
   <i>protected</i> 'pro' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>243</font>

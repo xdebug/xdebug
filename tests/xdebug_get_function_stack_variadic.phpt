@@ -30,6 +30,7 @@ foo( 1, false );
 foo( "foo", "bar", 3.1415 );
 ?>
 --EXPECTF--
+%sxdebug_get_function_stack_variadic.php:5:
 array(4) {
   'function' =>
   string(3) "foo"
@@ -46,6 +47,7 @@ array(4) {
     }
   }
 }
+%sxdebug_get_function_stack_variadic.php:5:
 array(4) {
   'function' =>
   string(3) "foo"
@@ -64,6 +66,7 @@ array(4) {
     }
   }
 }
+%sxdebug_get_function_stack_variadic.php:5:
 array(4) {
   'function' =>
   string(3) "foo"

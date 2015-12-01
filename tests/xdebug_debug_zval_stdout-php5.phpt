@@ -5,6 +5,7 @@ Test for xdebug_debug_zval_stdout() (< PHP 7.0)
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=0
+xdebug.overload_var_dump=2
 --FILE--
 <?php
 function func(){

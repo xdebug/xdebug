@@ -2,6 +2,7 @@
 Test for bug #903: xdebug_get_headers() returns replaced headers
 --INI--
 xdebug.default_enable=1
+xdebug.overload_var_dump=1
 --FILE--
 <?php
 header('foo: bar');

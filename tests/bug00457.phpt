@@ -7,6 +7,7 @@ xdebug.var_display_max_data=32
 xdebug.var_display_max_children=4
 xdebug.var_display_max_depth=2
 xdebug.cli_color=1
+xdebug.overload_var_dump=2
 --FILE--
 <?php
 $array = array(
@@ -36,6 +37,7 @@ $object->prop4 = "fourth element (still shows)";
 $object->prop5 = "fifth element (should not show)";
 var_dump($object);
 --EXPECTF--
+%sbug00457.php:14:
 array(5) {
   [0] =>
   string(58) "A very long string that should b"...
@@ -55,6 +57,7 @@ array(5) {
 
   (more elements)...
 }
+%sbug00457.php:27:
 class stdClass#1 (5) {
   public $prop1 =>
   string(58) "A very long string that should b"...
