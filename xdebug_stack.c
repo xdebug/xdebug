@@ -13,6 +13,7 @@
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   |           Neeke Gao <neeke@php.net>                                  |
    +----------------------------------------------------------------------+
  */
 #include "php_xdebug.h"
@@ -33,6 +34,9 @@
 #endif
 
 #include "main/php_ini.h"
+
+/* error callback replacement functions */
+void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -83,7 +87,7 @@ static char* html_formats[13] = {
 static char** select_formats(int html TSRMLS_DC) {
 	if (html) {
 		return html_formats;
-	} 
+	}
 	else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
 		return ansi_formats;
 	}
@@ -424,7 +428,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			unsigned int j = 0; /* Counter */
 			char *tmp_name;
 			int variadic_opened = 0;
-			
+
 			i = XDEBUG_LLIST_VALP(le);
 			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
 			if (html) {
@@ -536,7 +540,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 		if (XG(show_local_vars) && XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
 			int scope_nr = XG(stack)->size;
-			
+
 			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 			if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
 				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
@@ -698,6 +702,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 	TSRMLS_FETCH();
 
+     /* call back the old error handler */
+    if (xdebug_old_error_cb) {
+        xdebug_old_error_cb(type, error_filename, error_lineno, format, args);
+    }
+
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
 	error_type_str = xdebug_error_type(type);
@@ -771,7 +780,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 #endif
 				xdebug_str str = {0, 0, NULL};
 				char *tmp_buf, *p;
-				
+
 				/* find first new line */
 				p = strchr(buffer, '\n');
 				if (!p) {
@@ -920,11 +929,11 @@ PHP_FUNCTION(xdebug_print_function_stack)
 	function_stack_entry *i;
 	char *tmp;
 	long options = 0;
-  
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &message, &message_len, &options) == FAILURE) {
 		return;
 	}
- 
+
 	i = xdebug_get_stack_frame(0 TSRMLS_CC);
 	if (message) {
 		tmp = get_printable_stack(PG(html_errors), 0, message, i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC) TSRMLS_CC);
@@ -1475,7 +1484,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 					}
 #else
 					if (p) {
-						param = (zval **) p++;				
+						param = (zval **) p++;
 						tmp->var[tmp->varc].addr = *param;
 					}
 #endif
@@ -1501,7 +1510,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (XG(do_code_coverage)) {
 		xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
 	}
-	
+
 	if (XG(do_monitor_functions)) {
 		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
 		int   func_name_len = strlen(func_name);
@@ -1755,7 +1764,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
 {
 	char *name = (char*) he->ptr;
-	
+
 	add_next_index_string(return_value, name ADD_STRING_COPY);
 }
 
@@ -1771,7 +1780,7 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 	le = XDEBUG_LLIST_TAIL(XG(stack));
 	le = XDEBUG_LLIST_PREV(le);
 	i = XDEBUG_LLIST_VALP(le);
-	
+
 	/* Add declared vars */
 	if (i->used_vars) {
 		tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
