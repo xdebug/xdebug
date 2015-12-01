@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #654: Xdebug hides error message in CLI
+--SKIPIF--
+<?php if (!extension_loaded("session")) { echo "skip Session extension required\n"; } ?>
 --INI--
 error_reporting=-1
 xdebug.default_enable=1

@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #931: Crash with exception in shut-down stage
+--SKIPIF--
+<?php if (!extension_loaded("session")) { echo "skip Session extension required\n"; } ?>
 --FILE--
 <?php
 session_start();
