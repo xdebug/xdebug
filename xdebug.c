@@ -1460,12 +1460,10 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	}
 
 #if PHP_VERSION_ID >= 70000
-	convert_to_long_ex(code);
 	convert_to_string_ex(message);
 	convert_to_string_ex(file);
 	convert_to_long_ex(line);
 #else
-	convert_to_long_ex(&code);
 	convert_to_string_ex(&message);
 	convert_to_string_ex(&file);
 	convert_to_long_ex(&line);
