@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #625: xdebug_get_headers() resets header list (2)
+--ENV--
+XDEBUG_CONFIG=
 --INI--
 xdebug.default_enable=1
 default_charset=utf-8
