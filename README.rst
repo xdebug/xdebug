@@ -14,11 +14,11 @@ are slight, but important, differences between PHP versions.
 
 Once you have access to ``phpize`` and ``php-config``, do the following:
 
-1. Unpack the tarball: ``tar -xzf xdebug-2.2.x.tgz``.  Note that you do
+1. Unpack the tarball: ``tar -xzf xdebug-2.4.x.tgz``.  Note that you do
    not need to unpack the tarball inside the PHP source code tree. Xdebug is
    compiled separately, all by itself, as stated above.
 
-2. ``cd xdebug-2.2.x``
+2. ``cd xdebug-2.4.x``
 
 3. Run phpize: ``phpize``
    (or ``/path/to/phpize`` if phpize is not in your path).
