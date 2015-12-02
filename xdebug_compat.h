@@ -44,6 +44,7 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define SIZETorUINT size_t
 # define SIZETorZUINT size_t
 # define zppLONG zend_long
+# define iniLONG zend_long
 
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
@@ -82,6 +83,7 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define SIZETorUINT unsigned int
 # define SIZETorZUINT zend_uint
 # define zppLONG long
+# define iniLONG long
 
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	MAKE_STD_ZVAL(zv)

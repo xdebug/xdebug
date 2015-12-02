@@ -22,6 +22,7 @@
 #include "xdebug_var.h"
 #include "ext/standard/php_string.h"
 
+#include "xdebug_compat.h"
 #include "xdebug_tracing.h"
 #include "xdebug_trace_textual.h"
 #include "xdebug_trace_computerized.h"
@@ -38,7 +39,7 @@ xdebug_trace_handler_t *xdebug_select_trace_handler(int options TSRMLS_DC)
 		case 1: tmp = &xdebug_trace_handler_computerized; break;
 		case 2: tmp = &xdebug_trace_handler_html; break;
 		default:
-			php_error(E_NOTICE, "A wrong value for xdebug.trace_format was selected (%d), defaulting to the textual format.", XG(trace_format));
+			php_error(E_NOTICE, "A wrong value for xdebug.trace_format was selected (%d), defaulting to the textual format.", (int) XG(trace_format));
 			tmp = &xdebug_trace_handler_textual; break;
 	}
 
