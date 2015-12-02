@@ -37,15 +37,15 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n $a
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$a" fullname="$a" address="" type="object" classname="A" children="1" numchildren="2" page="0" pagesize="32"><property name="aa" fullname="$a-&gt;aa" facet="protected" address="" type="int"><![CDATA[302]]></property><property name="*ArrayIterator*storage" fullname="$a-&gt;*ArrayIterator*storage" facet="private" address="" type="array" children="1" numchildren="4"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$a" fullname="$a" type="object" classname="A" children="1" numchildren="2" page="0" pagesize="32"><property name="aa" fullname="$a-&gt;aa" facet="protected" type="int"><![CDATA[302]]></property><property name="*ArrayIterator*storage" fullname="$a-&gt;*ArrayIterator*storage" facet="private" type="array" children="1" numchildren="4"></property></property></response>
 
 -> property_get -i 5 -n $a->*ArrayIterator*storage
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$a-&gt;*ArrayIterator*storage" fullname="$a-&gt;*ArrayIterator*storage" address="" type="array" children="1" numchildren="4" page="0" pagesize="32"><property name="0" fullname="$a-&gt;*ArrayIterator*storage[0]" address="" type="int"><![CDATA[2]]></property><property name="1" fullname="$a-&gt;*ArrayIterator*storage[1]" address="" type="int"><![CDATA[3]]></property><property name="2" fullname="$a-&gt;*ArrayIterator*storage[2]" address="" type="int"><![CDATA[4]]></property><property name="3" fullname="$a-&gt;*ArrayIterator*storage[3]" address="" type="int"><![CDATA[5]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$a-&gt;*ArrayIterator*storage" fullname="$a-&gt;*ArrayIterator*storage" type="array" children="1" numchildren="4" page="0" pagesize="32"><property name="0" fullname="$a-&gt;*ArrayIterator*storage[0]" type="int"><![CDATA[2]]></property><property name="1" fullname="$a-&gt;*ArrayIterator*storage[1]" type="int"><![CDATA[3]]></property><property name="2" fullname="$a-&gt;*ArrayIterator*storage[2]" type="int"><![CDATA[4]]></property><property name="3" fullname="$a-&gt;*ArrayIterator*storage[3]" type="int"><![CDATA[5]]></property></property></response>
 
 -> property_get -i 6 -n $a->*ArrayIterator*storage[2]
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$a-&gt;*ArrayIterator*storage[2]" fullname="$a-&gt;*ArrayIterator*storage[2]" address="" type="int"><![CDATA[4]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$a-&gt;*ArrayIterator*storage[2]" fullname="$a-&gt;*ArrayIterator*storage[2]" type="int"><![CDATA[4]]></property></response>
 
 -> detach -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>

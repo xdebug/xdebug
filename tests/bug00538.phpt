@@ -36,11 +36,11 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n param2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$param2" fullname="$param2" address="" type="string" size="12" encoding="base64"><![CDATA[Y2FuZGVuYVxhXG5i]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$param2" fullname="$param2" type="string" size="12" encoding="base64"><![CDATA[Y2FuZGVuYVxhXG5i]]></property></response>
 
 -> property_get -i 5 -n param3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$param3" fullname="$param3" address="" type="string" size="20" encoding="base64"><![CDATA[Y2FuZWRhIFxcYSBcXGIgXFxcY3w=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$param3" fullname="$param3" type="string" size="20" encoding="base64"><![CDATA[Y2FuZWRhIFxcYSBcXGIgXFxcY3w=]]></property></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

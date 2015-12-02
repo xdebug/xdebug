@@ -44,7 +44,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 5 -n $a
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$a" fullname="$a" address="" type="string" size="1280" encoding="base64"><![CDATA[YWJjZGVmZ2hpamFiY2RlZmdoaWphYmNkZWZnaGlqYWI=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$a" fullname="$a" type="string" size="1280" encoding="base64"><![CDATA[YWJjZGVmZ2hpamFiY2RlZmdoaWphYmNkZWZnaGlqYWI=]]></property></response>
 
 -> property_value -i 6 -n $a
 <?xml version="1.0" encoding="iso-8859-1"?>

@@ -39,11 +39,11 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$d" fullname="$d" address="" type="object" classname="DemoClass" children="1" numchildren="1" page="0" pagesize="32"><property name="d" fullname="$d::d" facet="static protected" address="" type="array" children="1" numchildren="2"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$d" fullname="$d" type="object" classname="DemoClass" children="1" numchildren="1" page="0" pagesize="32"><property name="d" fullname="$d::d" facet="static protected" type="array" children="1" numchildren="2"></property></property></response>
 
 -> property_get -i 5 -n $d
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$d" fullname="$d" address="" type="object" classname="DemoClass" children="1" numchildren="1" page="0" pagesize="32"><property name="d" fullname="$d::d" facet="static protected" address="" type="array" children="1" numchildren="2"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$d" fullname="$d" type="object" classname="DemoClass" children="1" numchildren="1" page="0" pagesize="32"><property name="d" fullname="$d::d" facet="static protected" type="array" children="1" numchildren="2"></property></property></response>
 
 -> feature_set -i 6 -n max_depth -v 2
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -51,11 +51,11 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 7 -n $d
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$d" fullname="$d" address="" type="object" classname="DemoClass" children="1" numchildren="1" page="0" pagesize="32"><property name="d" fullname="$d::d" facet="static protected" address="" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" fullname="$d::d[0]" address="" type="int"><![CDATA[42]]></property><property name="1" fullname="$d::d[1]" address="" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$d" fullname="$d" type="object" classname="DemoClass" children="1" numchildren="1" page="0" pagesize="32"><property name="d" fullname="$d::d" facet="static protected" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" fullname="$d::d[0]" type="int"><![CDATA[42]]></property><property name="1" fullname="$d::d[1]" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></property></property></response>
 
 -> property_get -i 8 -n $d::d
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$d::d" fullname="$d::d" address="" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" fullname="$d::d[0]" address="" type="int"><![CDATA[42]]></property><property name="1" fullname="$d::d[1]" address="" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$d::d" fullname="$d::d" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" fullname="$d::d[0]" type="int"><![CDATA[42]]></property><property name="1" fullname="$d::d[1]" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></property></response>
 
 -> detach -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>

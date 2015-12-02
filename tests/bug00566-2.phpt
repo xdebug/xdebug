@@ -38,7 +38,7 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$module" fullname="$module" address="" type="string" size="5" encoding="base64"><![CDATA[dmlld3M=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$module" fullname="$module" type="string" size="5" encoding="base64"><![CDATA[dmlld3M=]]></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

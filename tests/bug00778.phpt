@@ -43,7 +43,7 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="0"><property name="$temp" fullname="$temp" address="" type="object" classname="SimpleXMLElement" children="1" numchildren="1" page="0" pagesize="32"><property name="0" fullname="$temp-&gt;0" facet="public" address="" type="string" size="1" encoding="base64"><![CDATA[Cg==]]></property></property><property name="$xml" fullname="$xml" address="" type="string" size="54" encoding="base64"><![CDATA[PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cjxyb290Pgo8L3Jvb3Q+]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="0"><property name="$temp" fullname="$temp" type="object" classname="SimpleXMLElement" children="1" numchildren="1" page="0" pagesize="32"><property name="0" fullname="$temp-&gt;0" facet="public" type="string" size="1" encoding="base64"><![CDATA[Cg==]]></property></property><property name="$xml" fullname="$xml" type="string" size="54" encoding="base64"><![CDATA[PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiID8+Cjxyb290Pgo8L3Jvb3Q+]]></property></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

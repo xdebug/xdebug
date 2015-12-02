@@ -34,4 +34,4 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$name" fullname="$name" address="" type="string" size="5" encoding="base64"><![CDATA[dmFsdWU=]]></property><property name="$nameHolder" fullname="$nameHolder" address="" type="string" size="4" encoding="base64"><![CDATA[bmFtZQ==]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$name" fullname="$name" type="string" size="5" encoding="base64"><![CDATA[dmFsdWU=]]></property><property name="$nameHolder" fullname="$nameHolder" type="string" size="4" encoding="base64"><![CDATA[bmFtZQ==]]></property></response>

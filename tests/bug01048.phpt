@@ -32,7 +32,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 2 -d 0 -c 1 -n $GLOBALS['cache']
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="2"><property name="$GLOBALS[&#39;cache&#39;]" fullname="$GLOBALS[&#39;cache&#39;]" address="" type="string" size="5" encoding="base64"><![CDATA[Y2FjaGU=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="2"><property name="$GLOBALS[&#39;cache&#39;]" fullname="$GLOBALS[&#39;cache&#39;]" type="string" size="5" encoding="base64"><![CDATA[Y2FjaGU=]]></property></response>
 
 -> property_value -i 3 -d 0 -c 1 -n $GLOBALS['cache']
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -44,7 +44,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 5 -d 0 -c 1 -n $GLOBALS['cache']
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$GLOBALS[&#39;cache&#39;]" fullname="$GLOBALS[&#39;cache&#39;]" address="" type="string" size="5" encoding="base64"><![CDATA[Y2FjaGU=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$GLOBALS[&#39;cache&#39;]" fullname="$GLOBALS[&#39;cache&#39;]" type="string" size="5" encoding="base64"><![CDATA[Y2FjaGU=]]></property></response>
 
 -> property_value -i 6 -d 0 -c 1 -n $GLOBALS['cache']
 <?xml version="1.0" encoding="iso-8859-1"?>

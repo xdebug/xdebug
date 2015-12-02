@@ -44,23 +44,23 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n $o
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$o" fullname="$o" address="" type="object" classname="stdClass" children="1" numchildren="6" page="0" pagesize="32"><property name="key" fullname="$o-&gt;key" facet="public" address="" type="string" size="5" encoding="base64"><![CDATA[dmFsdWU=]]></property><property name="1" fullname="$o-&gt;1" facet="public" address="" type="int"><![CDATA[0]]></property><property name="-4" fullname="$o-&gt;-4" facet="public" address="" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property><property name="3" fullname="$o-&gt;3" facet="public" address="" type="bool"><![CDATA[0]]></property><property name="-2" fullname="$o-&gt;-2" facet="public" address="" type="array" children="1" numchildren="4"></property><property name="5" fullname="$o-&gt;5" facet="public" address="" type="object" classname="stdClass" children="1" numchildren="4"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$o" fullname="$o" type="object" classname="stdClass" children="1" numchildren="6" page="0" pagesize="32"><property name="key" fullname="$o-&gt;key" facet="public" type="string" size="5" encoding="base64"><![CDATA[dmFsdWU=]]></property><property name="1" fullname="$o-&gt;1" facet="public" type="int"><![CDATA[0]]></property><property name="-4" fullname="$o-&gt;-4" facet="public" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property><property name="3" fullname="$o-&gt;3" facet="public" type="bool"><![CDATA[0]]></property><property name="-2" fullname="$o-&gt;-2" facet="public" type="array" children="1" numchildren="4"></property><property name="5" fullname="$o-&gt;5" facet="public" type="object" classname="stdClass" children="1" numchildren="4"></property></property></response>
 
 -> property_get -i 5 -n $o->-4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$o-&gt;-4" fullname="$o-&gt;-4" address="" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$o-&gt;-4" fullname="$o-&gt;-4" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></response>
 
 -> property_get -i 6 -n $o->3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$o-&gt;3" fullname="$o-&gt;3" address="" type="bool"><![CDATA[0]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$o-&gt;3" fullname="$o-&gt;3" type="bool"><![CDATA[0]]></property></response>
 
 -> property_get -i 7 -n $o->-2[2]
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$o-&gt;-2[2]" fullname="$o-&gt;-2[2]" address="" type="int"><![CDATA[7]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$o-&gt;-2[2]" fullname="$o-&gt;-2[2]" type="int"><![CDATA[7]]></property></response>
 
 -> property_get -i 8 -n $o->-2[8]
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$o-&gt;-2[8]" fullname="$o-&gt;-2[8]" address="" type="array" children="1" numchildren="3" page="0" pagesize="32"><property name="0" fullname="$o-&gt;-2[8][0]" address="" type="string" size="1" encoding="base64"><![CDATA[YQ==]]></property><property name="1" fullname="$o-&gt;-2[8][1]" address="" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="2" fullname="$o-&gt;-2[8][2]" address="" type="string" size="1" encoding="base64"><![CDATA[Yw==]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$o-&gt;-2[8]" fullname="$o-&gt;-2[8]" type="array" children="1" numchildren="3" page="0" pagesize="32"><property name="0" fullname="$o-&gt;-2[8][0]" type="string" size="1" encoding="base64"><![CDATA[YQ==]]></property><property name="1" fullname="$o-&gt;-2[8][1]" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="2" fullname="$o-&gt;-2[8][2]" type="string" size="1" encoding="base64"><![CDATA[Yw==]]></property></property></response>
 
 -> property_get -i 9 -n $o->-2[8]["c"]
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -68,20 +68,20 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 10 -n $o->5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="10"><property name="$o-&gt;5" fullname="$o-&gt;5" address="" type="object" classname="stdClass" children="1" numchildren="4" page="0" pagesize="32"><property name="foo" fullname="$o-&gt;5-&gt;foo" facet="public" address="" type="int"><![CDATA[1]]></property><property name="bar" fullname="$o-&gt;5-&gt;bar" facet="public" address="" type="int"><![CDATA[2]]></property><property name="baz" fullname="$o-&gt;5-&gt;baz" facet="public" address="" type="array" children="1" numchildren="3"></property><property name="b" fullname="$o-&gt;5-&gt;b" facet="public" address="" type="object" classname="b" children="1" numchildren="1"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="10"><property name="$o-&gt;5" fullname="$o-&gt;5" type="object" classname="stdClass" children="1" numchildren="4" page="0" pagesize="32"><property name="foo" fullname="$o-&gt;5-&gt;foo" facet="public" type="int"><![CDATA[1]]></property><property name="bar" fullname="$o-&gt;5-&gt;bar" facet="public" type="int"><![CDATA[2]]></property><property name="baz" fullname="$o-&gt;5-&gt;baz" facet="public" type="array" children="1" numchildren="3"></property><property name="b" fullname="$o-&gt;5-&gt;b" facet="public" type="object" classname="b" children="1" numchildren="1"></property></property></response>
 
 -> property_get -i 11 -n $o->5->bar
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="11"><property name="$o-&gt;5-&gt;bar" fullname="$o-&gt;5-&gt;bar" address="" type="int"><![CDATA[2]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="11"><property name="$o-&gt;5-&gt;bar" fullname="$o-&gt;5-&gt;bar" type="int"><![CDATA[2]]></property></response>
 
 -> property_get -i 12 -n $o->5->baz[2]
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="12"><property name="$o-&gt;5-&gt;baz[2]" fullname="$o-&gt;5-&gt;baz[2]" address="" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="12"><property name="$o-&gt;5-&gt;baz[2]" fullname="$o-&gt;5-&gt;baz[2]" type="string" size="3" encoding="base64"><![CDATA[Zm9v]]></property></response>
 
 -> property_get -i 13 -n $o->5->b
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="13"><property name="$o-&gt;5-&gt;b" fullname="$o-&gt;5-&gt;b" address="" type="object" classname="b" children="1" numchildren="1" page="0" pagesize="32"><property name="foo" fullname="$o-&gt;5-&gt;b::foo" facet="static public" address="" type="int"><![CDATA[73]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="13"><property name="$o-&gt;5-&gt;b" fullname="$o-&gt;5-&gt;b" type="object" classname="b" children="1" numchildren="1" page="0" pagesize="32"><property name="foo" fullname="$o-&gt;5-&gt;b::foo" facet="static public" type="int"><![CDATA[73]]></property></property></response>
 
 -> property_get -i 14 -n $o->5->b::foo
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="14"><property name="$o-&gt;5-&gt;b::foo" fullname="$o-&gt;5-&gt;b::foo" address="" type="int"><![CDATA[73]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="14"><property name="$o-&gt;5-&gt;b::foo" fullname="$o-&gt;5-&gt;b::foo" type="int"><![CDATA[73]]></property></response>

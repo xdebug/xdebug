@@ -54,23 +54,23 @@ dbgpRun( $data, $commands );
 
 -> eval -i 6 -- aXNzZXQoJF9TRVJWRVJbJ1BIUF9JREVfQ09ORklHJ10p
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="6"><property address="" type="bool"><![CDATA[0]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="6"><property type="bool"><![CDATA[0]]></property></response>
 
 -> eval -i 7 -- aXNzZXQoJF9TRVJWRVJbJ1NFUlZFUl9OQU1FJ10p
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="7"><property address="" type="bool"><![CDATA[0]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="7"><property type="bool"><![CDATA[0]]></property></response>
 
 -> eval -i 8 -- KHN0cmluZykoJF9TRVJWRVJbJ1NFUlZFUl9OQU1FJ10p
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="8"><property address="" type="string" size="0" encoding="base64"><![CDATA[]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="8"><property type="string" size="0" encoding="base64"><![CDATA[]]></property></response>
 
 -> eval -i 9 -- KHN0cmluZykoJF9TRVJWRVJbJ1NFUlZFUl9QT1JUJ10p
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="9"><property address="" type="string" size="0" encoding="base64"><![CDATA[]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="9"><property type="string" size="0" encoding="base64"><![CDATA[]]></property></response>
 
 -> eval -i 10 -- KHN0cmluZykoJF9TRVJWRVJbJ1JFUVVFU1RfVVJJJ10p
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="10"><property address="" type="string" size="0" encoding="base64"><![CDATA[]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="10"><property type="string" size="0" encoding="base64"><![CDATA[]]></property></response>
 
 -> breakpoint_set -i 11 -t line -n 2
 <?xml version="1.0" encoding="iso-8859-1"?>

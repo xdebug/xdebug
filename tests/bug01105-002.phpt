@@ -52,15 +52,15 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 7 -n $var -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$var" fullname="$var" address="" type="string" size="15" encoding="base64"><![CDATA[c2NvcGUwLW1vZGlmaWVk]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$var" fullname="$var" type="string" size="15" encoding="base64"><![CDATA[c2NvcGUwLW1vZGlmaWVk]]></property></response>
 
 -> property_get -i 8 -n $var -d 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$var" fullname="$var" address="" type="string" size="15" encoding="base64"><![CDATA[c2NvcGUxLW1vZGlmaWVk]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$var" fullname="$var" type="string" size="15" encoding="base64"><![CDATA[c2NvcGUxLW1vZGlmaWVk]]></property></response>
 
 -> property_get -i 9 -n $var -d 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="9"><property name="$var" fullname="$var" address="" type="string" size="15" encoding="base64"><![CDATA[c2NvcGUyLW1vZGlmaWVk]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="9"><property name="$var" fullname="$var" type="string" size="15" encoding="base64"><![CDATA[c2NvcGUyLW1vZGlmaWVk]]></property></response>
 
 -> detach -i 10
 <?xml version="1.0" encoding="iso-8859-1"?>
