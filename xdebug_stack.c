@@ -619,14 +619,14 @@ void xdebug_init_debugger(TSRMLS_D)
 			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"), remote_addr);
 		}
 		if (remote_addr) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port));
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port));
 		} else {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), XG(remote_port));
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 		}
 	} else {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connecting to configured address/port: %s:%ld.\n", XG(remote_host), XG(remote_port));
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connecting to configured address/port: %s:%ld.\n", XG(remote_host), (long int) XG(remote_port));
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
 	}
 	if (XG(context).socket >= 0) {
@@ -919,7 +919,7 @@ PHP_FUNCTION(xdebug_print_function_stack)
 #endif
 	function_stack_entry *i;
 	char *tmp;
-	long options = 0;
+	zppLONG options = 0;
   
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &message, &message_len, &options) == FAILURE) {
 		return;
@@ -959,7 +959,7 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 PHP_FUNCTION(xdebug_call_class)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -982,7 +982,7 @@ PHP_FUNCTION(xdebug_call_class)
 PHP_FUNCTION(xdebug_call_function)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -1005,7 +1005,7 @@ PHP_FUNCTION(xdebug_call_function)
 PHP_FUNCTION(xdebug_call_line)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -1024,7 +1024,7 @@ PHP_FUNCTION(xdebug_call_line)
 PHP_FUNCTION(xdebug_call_file)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
