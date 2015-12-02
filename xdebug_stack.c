@@ -919,7 +919,7 @@ PHP_FUNCTION(xdebug_print_function_stack)
 #endif
 	function_stack_entry *i;
 	char *tmp;
-	long options = 0;
+	zppLONG options = 0;
   
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &message, &message_len, &options) == FAILURE) {
 		return;
@@ -959,7 +959,7 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 PHP_FUNCTION(xdebug_call_class)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -982,7 +982,7 @@ PHP_FUNCTION(xdebug_call_class)
 PHP_FUNCTION(xdebug_call_function)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -1005,7 +1005,7 @@ PHP_FUNCTION(xdebug_call_function)
 PHP_FUNCTION(xdebug_call_line)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -1024,7 +1024,7 @@ PHP_FUNCTION(xdebug_call_line)
 PHP_FUNCTION(xdebug_call_file)
 {
 	function_stack_entry *i;
-	long depth = 0;
+	zppLONG depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;

@@ -975,7 +975,7 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
-	long options = 0;
+	zppLONG options = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
 		return;
@@ -998,7 +998,7 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
 {
-	long cleanup = 1;
+	zppLONG cleanup = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cleanup) == FAILURE) {
 		return;

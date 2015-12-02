@@ -116,7 +116,7 @@ PHP_FUNCTION(xdebug_start_trace)
 	int   fname_len = 0;
 #endif
 	char *trace_fname;
-	long  options = XG(trace_options);
+	zppLONG options = XG(trace_options);
 
 	if (XG(do_trace) == 0) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
