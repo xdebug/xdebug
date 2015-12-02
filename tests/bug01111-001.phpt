@@ -35,7 +35,7 @@ dbgpRun( $data, $commands );
 
 -> eval -i 4 -- Im1vZGlmaWVkIg==
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="4"><property address="" type="string" size="8" encoding="base64"><![CDATA[bW9kaWZpZWQ=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="4"><property type="string" size="8" encoding="base64"><![CDATA[bW9kaWZpZWQ=]]></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

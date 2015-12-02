@@ -37,11 +37,11 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 4 -c 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="2"><property name="YES" fullname="YES" address="" type="float" facet="constant"><![CDATA[3.1415926535898]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="2"><property name="YES" fullname="YES" type="float" facet="constant"><![CDATA[3.1415926535898]]></property></response>
 
 -> property_get -i 5 -c 2 -n YES
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="YES" fullname="YES" address="" type="float" facet="constant"><![CDATA[3.1415926535898]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="YES" fullname="YES" type="float" facet="constant"><![CDATA[3.1415926535898]]></property></response>
 
 -> property_get -i 6 -c 2 -n NO
 <?xml version="1.0" encoding="iso-8859-1"?>

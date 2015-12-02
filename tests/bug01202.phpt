@@ -33,15 +33,15 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="3" context="0"><property name="$a" fullname="$a" address="" type="object" classname="class@anonymous" children="1" numchildren="1" page="0" pagesize="32"><property name="a" fullname="$a-&gt;a" facet="public" address="" type="int"><![CDATA[42]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="3" context="0"><property name="$a" fullname="$a" type="object" classname="class@anonymous" children="1" numchildren="1" page="0" pagesize="32"><property name="a" fullname="$a-&gt;a" facet="public" type="int"><![CDATA[42]]></property></property></response>
 
 -> property_get -i 4 -n $a
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$a" fullname="$a" address="" type="object" classname="class@anonymous" children="1" numchildren="1" page="0" pagesize="32"><property name="a" fullname="$a-&gt;a" facet="public" address="" type="int"><![CDATA[42]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$a" fullname="$a" type="object" classname="class@anonymous" children="1" numchildren="1" page="0" pagesize="32"><property name="a" fullname="$a-&gt;a" facet="public" type="int"><![CDATA[42]]></property></property></response>
 
 -> property_get -i 5 -n $a->a
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$a-&gt;a" fullname="$a-&gt;a" address="" type="int"><![CDATA[42]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$a-&gt;a" fullname="$a-&gt;a" type="int"><![CDATA[42]]></property></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

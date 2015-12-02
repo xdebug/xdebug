@@ -36,11 +36,11 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n $storage
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$storage" fullname="$storage" address="" type="object" classname="SplObjectStorage" children="1" numchildren="1" page="0" pagesize="32"><property name="storage" fullname="$storage-&gt;storage" facet="private" address="" type="array" children="1" numchildren="2"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$storage" fullname="$storage" type="object" classname="SplObjectStorage" children="1" numchildren="1" page="0" pagesize="32"><property name="storage" fullname="$storage-&gt;storage" facet="private" type="array" children="1" numchildren="2"></property></property></response>
 
 -> property_get -i 5 -n $storage->storage
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$storage-&gt;storage" fullname="$storage-&gt;storage" address="" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="%s" fullname="$storage-&gt;storage[&#39;%s&#39;]" address="" type="array" children="1" numchildren="2"></property><property name="%s" fullname="$storage-&gt;storage[&#39;%s&#39;]" address="" type="array" children="1" numchildren="2"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$storage-&gt;storage" fullname="$storage-&gt;storage" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="%s" fullname="$storage-&gt;storage[&#39;%s&#39;]" type="array" children="1" numchildren="2"></property><property name="%s" fullname="$storage-&gt;storage[&#39;%s&#39;]" type="array" children="1" numchildren="2"></property></property></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

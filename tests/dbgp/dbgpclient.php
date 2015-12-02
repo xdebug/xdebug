@@ -46,7 +46,7 @@ class DebugClient
 			$read   = stream_get_line( $conn, 102400, "\0" );
 
 			// sanitize
-			$read = preg_replace( '@\s(appid|id|address)="[0123456789-]+?"@', ' \\1=""', $read );
+			$read = preg_replace( '@\s(appid|id)="\d+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@\s(idekey)="[^"]+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
 			$read = preg_replace( '@(2002-20[0-9]{2})@', '2002-2099', $read );

@@ -36,4 +36,4 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$connection" fullname="$connection" address="" type="object" classname="mysqli" children="%d" numchildren="%d" page="0" pagesize="32">%s/property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$connection" fullname="$connection" type="object" classname="mysqli" children="%d" numchildren="%d" page="0" pagesize="32">%s/property></response>

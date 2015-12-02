@@ -35,7 +35,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n $test->*BaseClass*private
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$test-&gt;*BaseClass*private" fullname="$test-&gt;*BaseClass*private" address="" type="array" children="1" numchildren="3" page="0" pagesize="32"><property name="0" fullname="$test-&gt;*BaseClass*private[0]" address="" type="string" size="1" encoding="base64"><![CDATA[YQ==]]></property><property name="1" fullname="$test-&gt;*BaseClass*private[1]" address="" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="2" fullname="$test-&gt;*BaseClass*private[2]" address="" type="string" size="1" encoding="base64"><![CDATA[Yw==]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$test-&gt;*BaseClass*private" fullname="$test-&gt;*BaseClass*private" type="array" children="1" numchildren="3" page="0" pagesize="32"><property name="0" fullname="$test-&gt;*BaseClass*private[0]" type="string" size="1" encoding="base64"><![CDATA[YQ==]]></property><property name="1" fullname="$test-&gt;*BaseClass*private[1]" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="2" fullname="$test-&gt;*BaseClass*private[2]" type="string" size="1" encoding="base64"><![CDATA[Yw==]]></property></property></response>
 
 -> step_into -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

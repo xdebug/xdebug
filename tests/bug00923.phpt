@@ -36,7 +36,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n $cursor
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$cursor" fullname="$cursor" address="" type="object" classname="MongoCursor" children="1" numchildren="2" page="0" pagesize="32"><property name="slaveOkay" %s></property><property name="timeout" %s></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$cursor" fullname="$cursor" type="object" classname="MongoCursor" children="1" numchildren="2" page="0" pagesize="32"><property name="slaveOkay" %s></property><property name="timeout" %s></property></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

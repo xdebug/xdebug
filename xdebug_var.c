@@ -1872,7 +1872,6 @@ static int xdebug_array_element_export_xml_node(zval **zv TSRMLS_DC, int num_arg
 		if (full_name.l) {
 			xdebug_xml_add_attribute_exl(node, "fullname", 8, full_name.d, full_name.l, 0, 1);
 		}
-		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) *zv), 0, 1);
 
 		xdebug_xml_add_child(parent, node);
 		xdebug_var_export_xml_node(zv, full_name.d, node, options, level + 1 TSRMLS_CC);
@@ -1942,7 +1941,6 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 		}
 
 		xdebug_xml_add_attribute_ex(node, "facet", xdebug_sprintf("%s%s", (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "", modifier), 0, 1);
-		xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) (*item)->zv), 0, 1);
 		xdebug_xml_add_child(parent, node);
 		xdebug_var_export_xml_node(&((*item)->zv), full_name, node, options, level + 1 TSRMLS_CC);
 	}
@@ -2287,7 +2285,6 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 		xdebug_xml_add_attribute_ex(node, "name", short_name, 0, 1);
 		xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 	}
-	xdebug_xml_add_attribute_ex(node, "address", xdebug_sprintf("%ld", (long) val), 0, 1);
 	xdebug_var_export_xml_node(&val, full_name, node, options, 0 TSRMLS_CC);
 
 	return node;

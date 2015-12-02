@@ -27,7 +27,7 @@ dbgpRun( $data, $commands );
 
 -> eval -i 2 -- JF9TRVJWRVJbJ1JFUVVFU1RfVVJJJ10=
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="2"><property address="" type="null"></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="eval" transaction_id="2"><property type="null"></property></response>
 
 -> stack_get -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>

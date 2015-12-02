@@ -38,19 +38,19 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n a
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$a" fullname="$a" address="" type="string" size="4" encoding="base64"><![CDATA[Z29nbw==]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$a" fullname="$a" type="string" size="4" encoding="base64"><![CDATA[Z29nbw==]]></property></response>
 
 -> property_get -i 5 -n this
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$this" fullname="$this" address="" type="object" classname="MyClass" children="1" numchildren="2" page="0" pagesize="32"><property name="a" fullname="$this-&gt;a" facet="private" address="" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="b" fullname="$this-&gt;b" facet="private" address="" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$this" fullname="$this" type="object" classname="MyClass" children="1" numchildren="2" page="0" pagesize="32"><property name="a" fullname="$this-&gt;a" facet="private" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="b" fullname="$this-&gt;b" facet="private" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property></property></response>
 
 -> property_get -i 6 -n this -p 0
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$this" fullname="$this" address="" type="object" classname="MyClass" children="1" numchildren="2" page="0" pagesize="32"><property name="a" fullname="$this-&gt;a" facet="private" address="" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="b" fullname="$this-&gt;b" facet="private" address="" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$this" fullname="$this" type="object" classname="MyClass" children="1" numchildren="2" page="0" pagesize="32"><property name="a" fullname="$this-&gt;a" facet="private" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property><property name="b" fullname="$this-&gt;b" facet="private" type="string" size="1" encoding="base64"><![CDATA[Yg==]]></property></property></response>
 
 -> property_get -i 7 -n this -p 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$this" fullname="$this" address="" type="object" classname="MyClass" children="1" numchildren="2" page="1" pagesize="32"></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$this" fullname="$this" type="object" classname="MyClass" children="1" numchildren="2" page="1" pagesize="32"></property></response>
 
 -> detach -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>

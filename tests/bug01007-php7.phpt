@@ -45,8 +45,8 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="0"><property name="::" fullname="::" type="object" classname="SimpleClass" children="1" numchildren="1"><property name="::hello" fullname="::hello" address="" type="string" size="5" facet="static public" encoding="base64"><![CDATA[SEVMTE8=]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="0"><property name="::" fullname="::" type="object" classname="SimpleClass" children="1" numchildren="1"><property name="::hello" fullname="::hello" type="string" size="5" facet="static public" encoding="base64"><![CDATA[SEVMTE8=]]></property></property></response>
 
 -> property_get -i 6 -n ::hello
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="::hello" fullname="::hello" address="" type="string" size="5" encoding="base64"><![CDATA[SEVMTE8=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="::hello" fullname="::hello" type="string" size="5" encoding="base64"><![CDATA[SEVMTE8=]]></property></response>
