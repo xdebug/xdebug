@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-11-21</date>
- <time>23:24:57</time>
+ <date>2015-12-02</date>
+ <time>23:31:49</time>
  <version>
-  <release>2.4.0RC1</release>
-  <api>2.4.0RC1</api>
+  <release>2.4.0RC2</release>
+  <api>2.4.0RC2</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,16 +45,24 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sat, Nov 21, 2015 - xdebug 2.4.0RC1
+Wed, Dec 02, 2015 - xdebug 2.4.0RC2
 
 = Fixed bugs:
 
-  - Fixed issue #1195: Segfault with code coverage and foreach
-  - Fixed issue #1200: Additional opcodes need to be overloaded for PHP 7
-  - Fixed issue #1202: Anonymous classes are not handled properly while remote debugging
-  - Fixed issue #1203: Accessing static property of a class that has no static properties crashes while remote debugging
-  - Fixed issue #1209: Segfault with building a function name for create_function
-  - Restored Windows support (Includes patches by Jan Ehrhardt)
+  - Fixed issue #1181: Remote debugging does not handle exceptions after using
+    zend_read_property
+  - Fixed issue #1189: Remove address attribute from remote debugging responses
+  - Fixed issue #1194: The error message is doubly HTML-encoded with assert()
+  - Fixed issue #1210: Segfault with code coverage dead code analysis and
+    foreach on PHP 7
+  - Fixed issue #1215: SIGSEGV if xdebug.trace_output_dir directory does not
+    exist
+  - Fixed issue #1217: xdebug.show_error_trace should not be enabled by default
+  - Fixed issue #1218: Xdebug messes with the exception code, by casting it to
+    int
+  - Fixed issue #1219: Set default value for xdebug.overload_var_dump to 2 to
+    include file / line numbers by default
+  - Use long for PHP 5, and zend_long for PHP 7 for ini settings in the globals
  </notes>
 
  <contents>
@@ -161,6 +169,32 @@ Sat, Nov 21, 2015 - xdebug 2.4.0RC1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-11-21</date>
+   <time>23:24:57</time>
+   <version>
+    <release>2.4.0RC1</release>
+    <api>2.4.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Nov 21, 2015 - xdebug 2.4.0RC1
+
+= Fixed bugs:
+
+  - Fixed issue #1195: Segfault with code coverage and foreach
+  - Fixed issue #1200: Additional opcodes need to be overloaded for PHP 7
+  - Fixed issue #1202: Anonymous classes are not handled properly while remote debugging
+  - Fixed issue #1203: Accessing static property of a class that has no static properties crashes while remote debugging
+  - Fixed issue #1209: Segfault with building a function name for create_function
+  - Restored Windows support (Includes patches by Jan Ehrhardt)
+   </notes>
+  </release>
 
   <release>
    <date>2015-11-05</date>
