@@ -1270,7 +1270,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	int                   aggr_key_len = 0;
 #if PHP_VERSION_ID >= 70000
 	int                   hit_variadic = 0;
-	zend_string          *aggr_key_str;
+	zend_string          *aggr_key_str = NULL;
 #endif
 
 #if PHP_VERSION_ID < 50500
