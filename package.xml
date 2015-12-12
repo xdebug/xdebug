@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-12-02</date>
- <time>23:31:49</time>
+ <date>2015-12-12</date>
+ <time>20:42:33</time>
  <version>
-  <release>2.4.0RC2</release>
-  <api>2.4.0RC2</api>
+  <release>2.4.0RC3</release>
+  <api>2.4.0RC3</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,24 +45,16 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Wed, Dec 02, 2015 - xdebug 2.4.0RC2
+Wed, Dec 12, 2015 - xdebug 2.4.0RC3
 
 = Fixed bugs:
 
-  - Fixed issue #1181: Remote debugging does not handle exceptions after using
-    zend_read_property
-  - Fixed issue #1189: Remove address attribute from remote debugging responses
-  - Fixed issue #1194: The error message is doubly HTML-encoded with assert()
-  - Fixed issue #1210: Segfault with code coverage dead code analysis and
-    foreach on PHP 7
-  - Fixed issue #1215: SIGSEGV if xdebug.trace_output_dir directory does not
-    exist
-  - Fixed issue #1217: xdebug.show_error_trace should not be enabled by default
-  - Fixed issue #1218: Xdebug messes with the exception code, by casting it to
-    int
-  - Fixed issue #1219: Set default value for xdebug.overload_var_dump to 2 to
-    include file / line numbers by default
-  - Use long for PHP 5, and zend_long for PHP 7 for ini settings in the globals
+  - Fixed issue #1221: Sort out Windows x64 PHP 7 support
+  - Fixed issue #1229: Detect GCC 4.8 and disable optimisations when it is found
+
+= Others:
+
+  - Made the test suite work for Windows too. Finally, after 13 years.
  </notes>
 
  <contents>
@@ -169,6 +161,66 @@ Wed, Dec 02, 2015 - xdebug 2.4.0RC2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-12-02</date>
+   <time>23:31:49</time>
+   <version>
+    <release>2.4.0RC2</release>
+    <api>2.4.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Dec 02, 2015 - xdebug 2.4.0RC2
+
+= Fixed bugs:
+
+  - Fixed issue #1181: Remote debugging does not handle exceptions after using
+    zend_read_property
+  - Fixed issue #1189: Remove address attribute from remote debugging responses
+  - Fixed issue #1194: The error message is doubly HTML-encoded with assert()
+  - Fixed issue #1210: Segfault with code coverage dead code analysis and
+    foreach on PHP 7
+  - Fixed issue #1215: SIGSEGV if xdebug.trace_output_dir directory does not
+    exist
+  - Fixed issue #1217: xdebug.show_error_trace should not be enabled by default
+  - Fixed issue #1218: Xdebug messes with the exception code, by casting it to
+    int
+  - Fixed issue #1219: Set default value for xdebug.overload_var_dump to 2 to
+    include file / line numbers by default
+  - Use long for PHP 5, and zend_long for PHP 7 for ini settings in the globals
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-12-12</date>
+   <time>20:42:33</time>
+   <version>
+    <release>2.4.0RC3</release>
+    <api>2.4.0RC3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Dec 12, 2015 - xdebug 2.4.0RC3
+
+= Fixed bugs:
+
+  - Fixed issue #1221: Sort out Windows x64 PHP 7 support
+  - Fixed issue #1229: Detect GCC 4.8 and disable optimisations when it is found
+
+= Others:
+
+  - Made the test suite work for Windows too. Finally, after 13 years.
+   </notes>
+  </release>
 
   <release>
    <date>2015-11-21</date>
