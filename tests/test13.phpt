@@ -12,7 +12,7 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 	function foo1 ($a)
 	{
@@ -43,17 +43,20 @@ xdebug.trace_format=0
 	$i = 'foo3';
 	$i('test\'s');
 
+	xdebug_stop_trace();
 	echo file_get_contents($tf);
 	unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> foo1('test\'s') /%s/test13.php:25
-%w%f %w%d       -> addslashes('test\'s') /%s/test13.php:6
-%w%f %w%d     -> foo4('test\'s') /%s/test13.php:27
-%w%f %w%d       -> addslashes('test\'s') /%s/test13.php:21
-%w%f %w%d     -> foo2('test\'s') /%s/test13.php:29
-%w%f %w%d       -> addslashes('test\'s') /%s/test13.php:11
-%w%f %w%d     -> foo3('test\'s') /%s/test13.php:31
-%w%f %w%d       -> addslashes('test\'s') /%s/test13.php:16
-%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/test13.php:33
+%w%f %w%d     -> foo1('test\'s') %stest13.php:25
+%w%f %w%d       -> addslashes('test\'s') %stest13.php:6
+%w%f %w%d     -> foo4('test\'s') %stest13.php:27
+%w%f %w%d       -> addslashes('test\'s') %stest13.php:21
+%w%f %w%d     -> foo2('test\'s') %stest13.php:29
+%w%f %w%d       -> addslashes('test\'s') %stest13.php:11
+%w%f %w%d     -> foo3('test\'s') %stest13.php:31
+%w%f %w%d       -> addslashes('test\'s') %stest13.php:16
+%w%f %w%d     -> xdebug_stop_trace() %stest13.php:33
+%w%f %w%d
+TRACE END   [%d-%d-%d %d:%d:%d]

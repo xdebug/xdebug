@@ -1,5 +1,5 @@
 #!/usr/bin/env php
-<?php
+<?php $line_1 = 1;
 $line_2 = 2;
 $line_3 = 3;
 

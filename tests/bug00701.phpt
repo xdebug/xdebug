@@ -11,7 +11,7 @@ xdebug.collect_return=1
 xdebug.collect_assignments=1
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 $class = "class";
 $method = "methodName";
@@ -23,7 +23,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-                           => $tf = '/tmp/xdt%s.xt' %sbug00701.php:2
+                           => $tf = '%sxdt%s.xt' %sbug00701.php:2
                            => $class = 'class' %sbug00701.php:4
                            => $method = 'methodName' %sbug00701.php:5
 %w%f %w%d     -> ucfirst('class') %sbug00701.php:6

@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #932: Show an error if Xdebug can't open the remote debug log.
+--SKIPIF--
+<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
 --INI--
 xdebug.default_enable=1
 xdebug.remote_enable=1

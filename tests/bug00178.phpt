@@ -21,7 +21,7 @@ xdebug.force_display_errors=0
 fsockopen();
 echo "> ", $php_errormsg, "\n";
 fsockopen( 'localhost', 5000, $errno, $errstr, 0.02 );
-echo "> ", $php_errormsg, "\n";
+echo "> ", str_replace( [ "\n", "\r" ], [ '', '' ], $php_errormsg ), "\n";
 ?>
 DONE
 --EXPECTF--

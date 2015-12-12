@@ -11,7 +11,7 @@ function iterateXML()
 </site>
 
 ENDXML;
-
+    $siteXMLString = str_replace( "\r\n", "\n", $siteXMLString );
     $iterator = new SimpleXMLIterator($siteXMLString);
     $projectsIterator = $iterator->xpath("//page");
 

@@ -33,23 +33,24 @@ class foo
 	}
 }
 
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 $trace_file = xdebug_get_tracefile_name();
 
 foo::bar();
 $f = new foo;
 $f->__construct();
 
+xdebug_stop_trace();
 echo file_get_contents($trace_file);
 unlink($trace_file);
 echo "DONE\n";
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-                           => $tf = '/tmp/xdt%s.%s.xt' %sbug00756-php7.php:18
+                           => $tf = '%sxdt%s.%s.xt' %sbug00756-php7.php:18
 %w%f %w%d     -> xdebug_get_tracefile_name() %sbug00756-php7.php:19
-%w%f %w%d      >=> '/tmp/xdt%s.%s.xt'
-                           => $trace_file = '/tmp/xdt%s.%s.xt' %sbug00756-php7.php:19
+%w%f %w%d      >=> '%sxdt%s.%s.xt'
+                           => $trace_file = '%sxdt%s.%s.xt' %sbug00756-php7.php:19
 %w%f %w%d     -> foo::bar() %sbug00756-php7.php:21
                              => self::bar++ %sbug00756-php7.php:9
 %w%f %w%d     -> foo->__construct() %sbug00756-php7.php:22
@@ -57,5 +58,8 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $f = class foo { public $foo = 1 } %sbug00756-php7.php:22
 %w%f %w%d     -> foo->__construct() %sbug00756-php7.php:23
                              => $this->foo++ %sbug00756-php7.php:14
-%w%f %w%d     -> file_get_contents('/tmp/xdt%s.%s.xt') %sbug00756-php7.php:25
+%w%f %w%d     -> xdebug_stop_trace() %sbug00756-php7.php:25
+%w%f %w%d
+TRACE END   [%d-%d-%d %d:%d:%d]
+
 DONE

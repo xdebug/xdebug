@@ -14,7 +14,7 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 function gen() {
     yield 'a';

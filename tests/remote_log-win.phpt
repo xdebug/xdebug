@@ -1,12 +1,12 @@
 --TEST--
-Test for Xdebug's remote log (with xdebug.remote_addr_header value)
+Test for Xdebug's remote log (Windows)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
+<?php if (substr(PHP_OS, 0, 3) != "WIN") die("skip For Windows"); ?>
 --ENV--
 I_LIKE_COOKIES=doesnotexist3
 --INI--
 xdebug.remote_enable=1
-xdebug.remote_log=/tmp/remote-log4.txt
+xdebug.remote_log=C:\Windows\Temp\remote-log4.txt
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
 xdebug.remote_host=doesnotexist2
@@ -15,8 +15,8 @@ xdebug.remote_addr_header=I_LIKE_COOKIES
 --FILE--
 <?php
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . "/remote-log4.txt");
-unlink (sys_get_temp_dir() . "/remote-log4.txt");
+echo file_get_contents("C:\\Windows\\Temp\\remote-log4.txt");
+unlink ("C:\\Windows\\Temp\\remote-log4.txt");
 ?>
 --EXPECTF--
 3

@@ -12,7 +12,7 @@ xdebug.collect_assignments=1
 xdebug.var_display_max_depth=9
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 class testClass
 {
@@ -51,7 +51,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-                           => $tf = '/tmp/%s.xt' %sassignment-trace9.php:2
+                           => $tf = '%s.xt' %sassignment-trace9.php:2
 %w%f %w%d     -> testClass->__construct($obj = class stdClass {  }) %sassignment-trace9.php:33
                              => $obj->a = array () %sassignment-trace9.php:11
                              => $obj->a['bar'] = 52 %sassignment-trace9.php:12

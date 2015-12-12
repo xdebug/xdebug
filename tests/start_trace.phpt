@@ -10,13 +10,13 @@ xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.trace_output_dir=/tmp
 xdebug.trace_output_name=trace.%c
 --FILE--
 <?php
 	$tf = xdebug_start_trace();
 	echo $tf, "\n";
+	xdebug_stop_trace();
 	unlink($tf);
 ?>
 --EXPECTF--
-/tmp/trace.%d.xt
+%strace.%d.xt

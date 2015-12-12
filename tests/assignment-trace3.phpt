@@ -15,7 +15,7 @@ xdebug.show_local_vars=0
 xdebug.force_error_reporting=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 $t = array( 'a' => 4, 'b' => 9, 'c' => 13 );
 $t['a'] += $b;

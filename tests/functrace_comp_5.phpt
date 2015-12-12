@@ -14,7 +14,7 @@ xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
 
 function foo( $a, $b )
 {
@@ -36,19 +36,19 @@ unlink($tf);
 Version: %s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
-2	2	1	%f	%d
-2	3	0	%f	%d	foo	1		%sfunctrace_comp_5.php	9	2	aTo0Mjs=	???
 2	3	1	%f	%d
-2	4	0	%f	%d	foo	1		%sfunctrace_comp_5.php	10	2	czo2OiJzdHJpbmciOw==	???
+2	4	0	%f	%d	foo	1		%sfunctrace_comp_5.php	9	2	aTo0Mjs=	???
 2	4	1	%f	%d
-2	5	0	%f	%d	foo	1		%sfunctrace_comp_5.php	11	2	czoxOToic3RyaW5nCndpdGgKbmV3bGluZSI7	???
+2	5	0	%f	%d	foo	1		%sfunctrace_comp_5.php	10	2	czo2OiJzdHJpbmciOw==	???
 2	5	1	%f	%d
-2	6	0	%f	%d	foo	1		%sfunctrace_comp_5.php	12	2	aToxOw==	YjowOw==
+2	6	0	%f	%d	foo	1		%sfunctrace_comp_5.php	11	2	czoxOToic3RyaW5nCndpdGgKbmV3bGluZSI7	???
 2	6	1	%f	%d
-2	7	0	%f	%d	foo	1		%sfunctrace_comp_5.php	13	2	YjoxOw==	Tjs=
+2	7	0	%f	%d	foo	1		%sfunctrace_comp_5.php	12	2	aToxOw==	YjowOw==
 2	7	1	%f	%d
-2	8	0	%f	%d	foo	1		%sfunctrace_comp_5.php	14	3	czozOiJmb28iOw==	czozOiJiYXIiOw==	ZDozLjE0MTUwMDAwMDAwMDAwM%s
+2	8	0	%f	%d	foo	1		%sfunctrace_comp_5.php	13	2	YjoxOw==	Tjs=
 2	8	1	%f	%d
-2	9	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_5.php	16	0
+2	9	0	%f	%d	foo	1		%sfunctrace_comp_5.php	14	3	czozOiJmb28iOw==	czozOiJiYXIiOw==	ZDozLjE0MTUwMDAwMDAwMDAwM%s
+2	9	1	%f	%d
+2	10	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_5.php	16	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d]

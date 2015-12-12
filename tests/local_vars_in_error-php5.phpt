@@ -21,11 +21,11 @@ xdebug.show_local_vars=1
 	a(5, 6);
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function do_f() in /%s/local_vars_in_error-php5.php on line 5
+Fatal error: Call to undefined function do_f() in %slocal_vars_in_error-php5.php on line 5
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/local_vars_in_error-php5.php:0
-%w%f %w%d   2. a(long, long) /%s/local_vars_in_error-php5.php:8
+%w%f %w%d   1. {main}() %slocal_vars_in_error-php5.php:0
+%w%f %w%d   2. a(long, long) %slocal_vars_in_error-php5.php:8
 
 
 Variables in local scope (#2):

@@ -12,7 +12,7 @@ xdebug.profiler_enable=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 	class a {
 
@@ -38,11 +38,14 @@ xdebug.trace_format=0
 	$B->func_a1();
 	$B->func_b1();
 
+	xdebug_stop_trace();
 	echo file_get_contents($tf);
 	unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> a->func_a1() /%s/test16b.php:25
-%w%f %w%d     -> b->func_b1() /%s/test16b.php:26
-%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/test16b.php:28
+%w%f %w%d     -> a->func_a1() %stest16b.php:25
+%w%f %w%d     -> b->func_b1() %stest16b.php:26
+%w%f %w%d     -> xdebug_stop_trace() %stest16b.php:28
+%w%f %w%d
+TRACE END   [%d-%d-%d %d:%d:%d]

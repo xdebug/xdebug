@@ -22,9 +22,9 @@ xdebug.show_error_trace=0
 	a();
 ?>
 --EXPECTF--
-Fatal error: Call to undefined function%sc() in /%s/backtrace-simple-php5.php on line 7
+Fatal error: Call to undefined function%sc() in %sbacktrace-simple-php5.php on line 7
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/backtrace-simple-php5.php:0
-%w%f %w%d   2. a() /%s/backtrace-simple-php5.php:10
-%w%f %w%d   3. b() /%s/backtrace-simple-php5.php:3
+%w%f %w%d   1. {main}() %sbacktrace-simple-php5.php:0
+%w%f %w%d   2. a() %sbacktrace-simple-php5.php:10
+%w%f %w%d   3. b() %sbacktrace-simple-php5.php:3

@@ -19,15 +19,15 @@ dbgpRun( $data, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file:///tmp/xdebug-dbgp-test.php" language="PHP" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-%d by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" fileuri="file:///%sxdebug-dbgp-test.php" language="PHP" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[http://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-%d by Derick Rethans]]></copyright></init>
 
 -> run -i 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="5"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="run" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file:///%sxdebug-dbgp-test.php" lineno="5"></xdebug:message></response>
 
 -> stack_get -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="2"><stack where="test" level="0" type="file" filename="file:///tmp/xdebug-dbgp-test.php" lineno="5"></stack><stack where="{main}" level="1" type="file" filename="file:///tmp/xdebug-dbgp-test.php" lineno="7"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="2"><stack where="test" level="0" type="file" filename="file:///%sxdebug-dbgp-test.php" lineno="5"></stack><stack where="{main}" level="1" type="file" filename="file:///%sxdebug-dbgp-test.php" lineno="7"></stack></response>
 
 -> eval -i 3 -- bmV3IE5vbkV4aXN0c0NsYXNz
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -35,7 +35,7 @@ dbgpRun( $data, $commands );
 
 -> stack_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="4"><stack where="test" level="0" type="file" filename="file:///tmp/xdebug-dbgp-test.php" lineno="5"></stack><stack where="{main}" level="1" type="file" filename="file:///tmp/xdebug-dbgp-test.php" lineno="7"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="4"><stack where="test" level="0" type="file" filename="file:///%sxdebug-dbgp-test.php" lineno="5"></stack><stack where="{main}" level="1" type="file" filename="file:///%sxdebug-dbgp-test.php" lineno="7"></stack></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

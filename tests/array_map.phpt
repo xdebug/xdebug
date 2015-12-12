@@ -16,7 +16,7 @@ xdebug.var_display_max_depth=2
 xdebug.var_display_max_children=3
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 $ar = array('a', 'bb', 'ccc');
 $r = array_map('strlen', $ar);
@@ -24,11 +24,12 @@ $r = array_map('strlen', $ar);
 echo gettype($r), "\n";
 
 echo file_get_contents($tf);
+xdebug_stop_trace();
 unlink($tf);
 ?>
 --EXPECTF--
 array
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> array_map('strlen', array (0 => 'a', 1 => 'bb', 2 => 'ccc')) /%s/array_map.php:5
-%w%f %w%d     -> gettype(array (0 => 1, 1 => 2, 2 => 3)) /%s/array_map.php:7
-%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/array_map.php:9
+%w%f %w%d     -> array_map('strlen', array (0 => 'a', 1 => 'bb', 2 => 'ccc')) %sarray_map.php:5
+%w%f %w%d     -> gettype(array (0 => 1, 1 => 2, 2 => 3)) %sarray_map.php:7
+%w%f %w%d     -> file_get_contents('/tmp/%s') %sarray_map.php:9

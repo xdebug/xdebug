@@ -14,7 +14,7 @@ xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
 
 function foo( $a, $b )
 {
@@ -36,19 +36,19 @@ unlink($tf);
 Version: %s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
-2	2	1	%f	%d
-2	3	0	%f	%d	foo	1		%sfunctrace_comp_1.php	9	2	long	???
 2	3	1	%f	%d
-2	4	0	%f	%d	foo	1		%sfunctrace_comp_1.php	10	2	string(6)	???
+2	4	0	%f	%d	foo	1		%sfunctrace_comp_1.php	9	2	long	???
 2	4	1	%f	%d
-2	5	0	%f	%d	foo	1		%sfunctrace_comp_1.php	11	2	string(19)	???
+2	5	0	%f	%d	foo	1		%sfunctrace_comp_1.php	10	2	string(6)	???
 2	5	1	%f	%d
-2	6	0	%f	%d	foo	1		%sfunctrace_comp_1.php	12	2	long	%r(bool|false)%r
+2	6	0	%f	%d	foo	1		%sfunctrace_comp_1.php	11	2	string(19)	???
 2	6	1	%f	%d
-2	7	0	%f	%d	foo	1		%sfunctrace_comp_1.php	13	2	%r(bool|true)%r	null
+2	7	0	%f	%d	foo	1		%sfunctrace_comp_1.php	12	2	long	%r(bool|false)%r
 2	7	1	%f	%d
-2	8	0	%f	%d	foo	1		%sfunctrace_comp_1.php	14	3	string(3)	string(3)	double
+2	8	0	%f	%d	foo	1		%sfunctrace_comp_1.php	13	2	%r(bool|true)%r	null
 2	8	1	%f	%d
-2	9	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_1.php	16	0
+2	9	0	%f	%d	foo	1		%sfunctrace_comp_1.php	14	3	string(3)	string(3)	double
+2	9	1	%f	%d
+2	10	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_1.php	16	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d]
