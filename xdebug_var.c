@@ -434,10 +434,10 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 #endif
 				int i = 0;
 #if PHP_VERSION_ID >= 70000
-				zend_ulong hash_value = zend_inline_hash_func(element, element_length);
+				hashULONG hash_value = zend_inline_hash_func(element, element_length);
 				zend_op_array *opa = &XG(active_execute_data)->func->op_array;
 #else
-				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
+				hashULONG hash_value = zend_inline_hash_func(element, element_length + 1);
 				zend_op_array *opa = XG(active_execute_data)->op_array;
 #endif
 				zval **CV;
