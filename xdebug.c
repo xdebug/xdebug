@@ -243,7 +243,11 @@ static PHP_INI_MH(OnUpdateDebugMode)
 #ifdef P_tmpdir
 # define XDEBUG_TEMP_DIR P_tmpdir
 #else
-# define XDEBUG_TEMP_DIR "/tmp"
+# ifdef PHP_WIN32
+#  define XDEBUG_TEMP_DIR "C:\\Windows\\Temp"
+# else
+#  define XDEBUG_TEMP_DIR "/tmp"
+# endif
 #endif
 
 PHP_INI_BEGIN()
