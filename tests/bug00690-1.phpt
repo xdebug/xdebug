@@ -9,8 +9,9 @@ xdebug.auto_trace=0
 xdebug_start_trace();
 $trace_file = xdebug_get_tracefile_name();
 echo $trace_file, "\n";
+xdebug_stop_trace();
 unlink($trace_file);
 file_put_contents($trace_file, "DONE\n");
 ?>
 --EXPECTF--
-/tmp/trace.bug690.xt
+%strace.bug690.xt

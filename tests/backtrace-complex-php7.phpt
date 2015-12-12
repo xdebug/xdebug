@@ -43,16 +43,16 @@ fucking();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Call to undefined function%sfunky_shit() in /%s/backtrace-complex-php7.php on line 28
+Fatal error: Uncaught Error: Call to undefined function%sfunky_shit() in %sbacktrace-complex-php7.php on line 28
 
 Error: Call to undefined function funky_shit() in %sbacktrace-complex-php7.php on line 28
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/backtrace-complex-php7.php:0
-%w%f %w%d   2. fucking() /%s/backtrace-complex-php7.php:31
-%w%f %w%d   3. deep() /%s/backtrace-complex-php7.php:4
-%w%f %w%d   4. nested() /%s/backtrace-complex-php7.php:8
-%w%f %w%d   5. error() /%s/backtrace-complex-php7.php:12
-%w%f %w%d   6. in() /%s/backtrace-complex-php7.php:16
-%w%f %w%d   7. func() /%s/backtrace-complex-php7.php:20
-%w%f %w%d   8. blah() /%s/backtrace-complex-php7.php:24
+%w%f %w%d   1. {main}() %sbacktrace-complex-php7.php:0
+%w%f %w%d   2. fucking() %sbacktrace-complex-php7.php:31
+%w%f %w%d   3. deep() %sbacktrace-complex-php7.php:4
+%w%f %w%d   4. nested() %sbacktrace-complex-php7.php:8
+%w%f %w%d   5. error() %sbacktrace-complex-php7.php:12
+%w%f %w%d   6. in() %sbacktrace-complex-php7.php:16
+%w%f %w%d   7. func() %sbacktrace-complex-php7.php:20
+%w%f %w%d   8. blah() %sbacktrace-complex-php7.php:24

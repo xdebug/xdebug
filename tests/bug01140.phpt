@@ -24,11 +24,12 @@ class Foo
 	}
 }
 
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 $a = new Foo;
 var_dump( $a );
 	
+xdebug_stop_trace();
 echo file_get_contents( $tf );
 unlink( $tf );
 ?>
@@ -38,5 +39,8 @@ class Foo#1 (0) {
 }
 TRACE START [%d-%d-%d %d:%d:%d]
     %f     %d     -> var_dump(class Foo {  }) %sbug01140.php:14
-    %f     %d     -> file_get_contents('/tmp/xdt%s.%s.xt') %sbug01140.php:16
+    %f     %d     -> xdebug_stop_trace() %sbug01140.php:16
+    %f     %d
+TRACE END   [%d-%d-%d %d:%d:%d]
+
 == I didn't crash ==

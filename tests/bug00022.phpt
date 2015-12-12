@@ -23,7 +23,7 @@ bararray(2) {
     ["function"]=>
     string(6) "{main}"
     ["file"]=>
-    string(%d) "/%s/bug00022.php"
+    string(%d) "%sbug00022.php"
     ["line"]=>
     int(0)
     ["params"]=>
@@ -35,7 +35,7 @@ bararray(2) {
     ["function"]=>
     string(3) "foo"
     ["file"]=>
-    string(%d) "/%s/bug00022.php"
+    string(%d) "%sbug00022.php"
     ["line"]=>
     int(7)
     ["params"]=>

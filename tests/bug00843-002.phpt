@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #843: Text output depends on php locale. [normal]
 --SKIPIF--
-<?php if (false == setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1")) print "skip locale with , not found"; ?>
+<?php
+if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows");
+if (false == setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1")) print "skip locale with , not found";
+?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
@@ -14,7 +17,7 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1");
 

@@ -434,10 +434,10 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 #endif
 				int i = 0;
 #if PHP_VERSION_ID >= 70000
-				ulong hash_value = zend_inline_hash_func(element, element_length);
+				hashULONG hash_value = zend_inline_hash_func(element, element_length);
 				zend_op_array *opa = &XG(active_execute_data)->func->op_array;
 #else
-				ulong hash_value = zend_inline_hash_func(element, element_length + 1);
+				hashULONG hash_value = zend_inline_hash_func(element, element_length + 1);
 				zend_op_array *opa = XG(active_execute_data)->op_array;
 #endif
 				zval **CV;
@@ -499,7 +499,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 		case XF_ST_ARRAY_INDEX_NUM:
 			element = prepare_search_key(name, &name_length, "", 0);
 #if PHP_VERSION_ID >= 70000
-			if (ht && ((retval_p = zend_hash_index_find(ht, strtoul(element, NULL, 10))) != NULL)) {
+			if (ht && ((retval_p = zend_hash_index_find(ht, strtoull(element, NULL, 10))) != NULL)) {
 #else
 			if (ht && zend_hash_index_find(ht, strtoul(element, NULL, 10), (void **) &retval_pp) == SUCCESS) {
 				retval_p = *retval_pp;

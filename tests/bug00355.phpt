@@ -13,7 +13,7 @@ xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
 
 function foo()
 {
@@ -40,14 +40,14 @@ HiiH
 Version: %d.%s
 File format: %d
 TRACE START [%s]
-2	2	1	%f	%d
-2	3	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'
 2	3	1	%f	%d
-2	4	0	%f	%d	foo	1		%sbug00355.php	18	0
-3	5	0	%f	%d	strrev	0		%sbug00355.php	7	1	'Hi'
-3	5	1	%f	%d
+2	4	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'
 2	4	1	%f	%d
-2	6	0	%f	%d	xdebug_stop_trace	0		%sbug00355.php	20	0
+2	5	0	%f	%d	foo	1		%sbug00355.php	18	0
+3	6	0	%f	%d	strrev	0		%sbug00355.php	7	1	'Hi'
+3	6	1	%f	%d
+2	5	1	%f	%d
+2	7	0	%f	%d	xdebug_stop_trace	0		%sbug00355.php	20	0
 			%f	%d
 TRACE END   [%s]
 

@@ -12,7 +12,7 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 // Active assert and make it quiet
 assert_options (ASSERT_ACTIVE, 1);
@@ -34,19 +34,20 @@ assert_options (ASSERT_CALLBACK, 'my_assert_handler');
 assert ('1==2');
 echo "\n";
 echo file_get_contents($tf);
+xdebug_stop_trace();
 unlink($tf);
 ?>
 --EXPECTF--
 Assertion Failed:
-        File '/%s/assert_test-001.php'
+        File '%sassert_test-001.php'
         Line '21'
         Code '1==2'
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> assert_options(1, 1) /%s/assert_test-001.php:5
-%w%f %w%d     -> assert_options(4, 0) /%s/assert_test-001.php:6
-%w%f %w%d     -> assert_options(5, 1) /%s/assert_test-001.php:7
-%w%f %w%d     -> assert_options(2, 'my_assert_handler') /%s/assert_test-001.php:18
-%w%f %w%d     -> assert('1==2') /%s/assert_test-001.php:21
-%w%f %w%d       -> %r({internal eval}\(\))|(assert\('1==2'\))%r /%s/assert_test-001.php:21
-%w%f %w%d       -> my_assert_handler('/%s/assert_test-001.php', 21, '1==2') /%s/assert_test-001.php:21
-%w%f %w%d     -> file_get_contents('/tmp/%s') /%s/assert_test-001.php:23
+%w%f %w%d     -> assert_options(1, 1) %sassert_test-001.php:5
+%w%f %w%d     -> assert_options(4, 0) %sassert_test-001.php:6
+%w%f %w%d     -> assert_options(5, 1) %sassert_test-001.php:7
+%w%f %w%d     -> assert_options(2, 'my_assert_handler') %sassert_test-001.php:18
+%w%f %w%d     -> assert('1==2') %sassert_test-001.php:21
+%w%f %w%d       -> %r({internal eval}\(\))|(assert\('1==2'\))%r %sassert_test-001.php:21
+%w%f %w%d       -> my_assert_handler('%sassert_test-001.php', 21, '1==2') %sassert_test-001.php:21
+%w%f %w%d     -> file_get_contents('%s') %sassert_test-001.php:23

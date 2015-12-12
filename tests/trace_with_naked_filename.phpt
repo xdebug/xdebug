@@ -12,16 +12,16 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/bug971', XDEBUG_TRACE_COMPUTERIZED);
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug971', XDEBUG_TRACE_COMPUTERIZED);
 echo $tf, "\n";
-unlink($tf);
 xdebug_stop_trace();
+unlink($tf);
 
-$tf = xdebug_start_trace('/tmp/bug971', XDEBUG_TRACE_COMPUTERIZED | XDEBUG_TRACE_NAKED_FILENAME);
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug971', XDEBUG_TRACE_COMPUTERIZED | XDEBUG_TRACE_NAKED_FILENAME);
 echo $tf, "\n";
-unlink($tf);
 xdebug_stop_trace();
+unlink($tf);
 ?>
 --EXPECTF--
-/tmp/bug971.xt
-/tmp/bug971
+%sbug971.xt
+%sbug971

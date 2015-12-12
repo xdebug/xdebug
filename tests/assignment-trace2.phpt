@@ -15,7 +15,7 @@ xdebug.show_local_vars=0
 xdebug.force_error_reporting=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 function test()
 {
@@ -48,7 +48,7 @@ Call Stack:
 %w%f %w%d   2. test(1, 2, 3) %sassignment-trace2.php:21
 
 TRACE START [%d-%d-%d %d:%d:%d]
-                           => $tf = '/tmp/%s.xt' %sassignment-trace2.php:2
+                           => $tf = '%s.xt' %sassignment-trace2.php:2
                            => $t = array () %sassignment-trace2.php:13
                            => $t['a'] = 98 %sassignment-trace2.php:14
                            => $t['b'] = 4 %sassignment-trace2.php:15

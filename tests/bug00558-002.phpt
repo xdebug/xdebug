@@ -4,7 +4,7 @@ Test for bug #558: PHP segfaults when running a nested eval while tracing.
 <?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 $any = 'printf("foo\n");';
 eval('eval($any);');

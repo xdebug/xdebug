@@ -5,7 +5,8 @@ function foo(\$a1, \$b1) {
   return \$a1 = \$b1;
 }
 EOD;
- eval($text);
+$text = str_replace("\r\n", "\n", $text);
+ eval( $text );
 $res = foo(3, 4);
 echo $res, "\n";
 ?>

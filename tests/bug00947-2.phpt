@@ -11,7 +11,7 @@ $t = "\0" . 'aze
 rty\r\nqwerty';
 var_dump($t, 4.34);
 ?>
---EXPECT--
-string(18) "\000aze
+--EXPECTF--
+string(%r(18|19)%r) "\000aze
 rty\r\nqwerty"
 double(4.34)

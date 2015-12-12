@@ -24,7 +24,7 @@ class Wrapper
 
     public function stream_open($path, $mode)
     {
-        $this->_fp = fopen('/tmp/asdf', $mode);
+        $this->_fp = fopen(sys_get_temp_dir() . '/asdf', $mode);
 
         return true;
     }

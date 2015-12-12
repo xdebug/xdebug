@@ -1,6 +1,13 @@
 <?php
 class DebugClient
 {
+	private $tmpDir;
+
+	public function __construct()
+	{
+		$this->tmpDir = sys_get_temp_dir();
+	}
+
 	private function open()
 	{
 		$socket = @stream_socket_server("tcp://0.0.0.0:9991", $errno, $errstr);
@@ -9,13 +16,13 @@ class DebugClient
 
 	private function launchPhp( &$pipes, array $ini_options = null )
 	{
-		@unlink( '/tmp/error-output.txt' );
-		@unlink( '/tmp/remote_log.txt' );
+		@unlink( $this->tmpDir . '/error-output.txt' );
+		@unlink( $this->tmpDir . '/remote_log.txt' );
 
 		$descriptorspec = array(
 		   0 => array( 'pipe', 'r' ),
 		   1 => array( 'pipe', 'w' ),
-		   2 => array( 'file', '/tmp/error-output.txt', 'a' )
+		   2 => array( 'file', $this->tmpDir . '/error-output.txt', 'a' )
 		);
 
 		$options = '';
@@ -28,7 +35,7 @@ class DebugClient
 			}
 		}
 
-		$cmd = "php $options -dxdebug.remote_enable=1 -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 -dxdebug.remote_log=/tmp/remote_log.txt /tmp/xdebug-dbgp-test.php";
+		$cmd = "php $options -dxdebug.remote_enable=1 -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 -dxdebug.remote_log={$this->tmpDir}/remote_log.txt {$this->tmpDir}/xdebug-dbgp-test.php";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -61,7 +68,7 @@ class DebugClient
 
 	function runTest( $data, array $commands, array $ini_options = null )
 	{
-		file_put_contents( '/tmp/xdebug-dbgp-test.php', $data );
+		file_put_contents( $this->tmpDir . '/xdebug-dbgp-test.php', $data );
 		$i = 1;
 		$socket = $this->open();
 		if ( $socket === false )
@@ -74,8 +81,8 @@ class DebugClient
 
 		if ( $conn === false )
 		{
-			echo @file_get_contents( '/tmp/error-output.txt' ), "\n";
-			echo @file_get_contents( '/tmp/remote_log.txt' ), "\n";
+			echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
+			echo @file_get_contents( $this->tmpDir . '/remote_log.txt' ), "\n";
 			proc_close( $php );
 			return;
 		}

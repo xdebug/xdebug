@@ -11,7 +11,7 @@ xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
 function test($a, $b, $c)
 {
@@ -47,7 +47,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-                           => $tf = '/tmp/%sxt' %sassignment-trace1.php:2
+                           => $tf = '%sxt' %sassignment-trace1.php:2
 %w%f %w%d     -> test($a = 1, $b = 2, $c = 3) %sassignment-trace1.php:29
                              => $d = 89 %sassignment-trace1.php:6
                              => $a += 2 %sassignment-trace1.php:7

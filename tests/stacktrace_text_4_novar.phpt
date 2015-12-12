@@ -27,13 +27,13 @@ $c = new stdClass;
 $c->bar = 100;
 $a = array(
     42 => false, 'foo' => 912124,
-    $c, new stdClass, fopen( '/etc/passwd', 'r' )
+    $c, new stdClass, fopen( __FILE__, 'r' )
 );
 try { foo( $a ); } catch (Throwable $e) { /* ignore */ }
 ?>
 --EXPECTF--
-%srror: Call to undefined function poo() in /%s/stacktrace%s.php on line 4
+%srror: Call to undefined function poo() in %sstacktrace%s.php on line 4
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/stacktrace%s.php:0
-%w%f %w%d   2. foo($a = array (42 => FALSE, 'foo' => 912124, 43 => class stdClass { public $bar = 100 }, 44 => class stdClass {  }, 45 => resource(5) of type (stream))) /%s/stacktrace%s.php:14
+%w%f %w%d   1. {main}() %sstacktrace%s.php:0
+%w%f %w%d   2. foo($a = array (42 => FALSE, 'foo' => 912124, 43 => class stdClass { public $bar = 100 }, 44 => class stdClass {  }, 45 => resource(5) of type (stream))) %sstacktrace%s.php:14

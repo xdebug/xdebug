@@ -13,7 +13,7 @@ xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
 <?php
-$tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE));
+$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 $c = 'call_user_func_array';
 $c('call_user_func_array', array('printf', array("%u %u %u\n", 1,2,3)));
 

@@ -21,11 +21,11 @@ xdebug.var_display_max_children=3
 	foo2 (4, array(array('blaat', 5, FALSE)));
 ?>
 --EXPECTF--
-Warning: Missing argument 3 for foo2()%sin /%s/backtrace-args-php5.php on line 2
+Warning: Missing argument 3 for foo2()%sin %sbacktrace-args-php5.php on line 2
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/backtrace-args-php5.php:0
-%w%f %w%d   2. foo2(long, array(1), ???) /%s/backtrace-args-php5.php:7
+%w%f %w%d   1. {main}() %sbacktrace-args-php5.php:0
+%w%f %w%d   2. foo2(long, array(1), ???) %sbacktrace-args-php5.php:7
 
 
 Variables in local scope (#2):
@@ -34,11 +34,11 @@ Variables in local scope (#2):
   $c = *uninitialized*
 
 
-Fatal error: Call to undefined function%sfoo() in /%s/backtrace-args-php5.php on line 4
+Fatal error: Call to undefined function%sfoo() in %sbacktrace-args-php5.php on line 4
 
 Call Stack:
-%w%f %w%d   1. {main}() /%s/backtrace-args-php5.php:0
-%w%f %w%d   2. foo2(long, array(1), ???) /%s/backtrace-args-php5.php:7
+%w%f %w%d   1. {main}() %sbacktrace-args-php5.php:0
+%w%f %w%d   2. foo2(long, array(1), ???) %sbacktrace-args-php5.php:7
 
 
 Variables in local scope (#2):
