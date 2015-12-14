@@ -991,7 +991,11 @@ DBGP_FUNC(eval)
 	} else {
 		ret_xml = xdebug_get_zval_value_xml_node(NULL, &ret_zval, options TSRMLS_CC);
 		xdebug_xml_add_child(*retval, ret_xml);
+#if PHP_VERSION_ID >= 70000
+		zval_ptr_dtor(&ret_zval);
+#else
 		zval_dtor(&ret_zval);
+#endif
 	}
 }
 
