@@ -117,7 +117,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 	int c = 0; /* Comma flag */
 	unsigned int j = 0; /* Counter */
 	char *tmp_name;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 
@@ -245,7 +245,7 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	char      *tmp_value;
 
 	xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
@@ -266,7 +266,7 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	char      *tmp_value = NULL;
 
 	/* Generator key */
@@ -305,7 +305,7 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	unsigned int j = 0;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	char      *tmp_value;
 
 	xdebug_str_addl(&str, "                    ", 20, 0);

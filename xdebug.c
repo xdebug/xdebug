@@ -1437,7 +1437,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	xdebug_brk_info *extra_brk_info;
 	char *code_str = NULL;
 	char *exception_trace;
-	xdebug_str tmp_str = { 0, 0, NULL };
+	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
 
 	if (!exception) {
 		return;
@@ -1503,7 +1503,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 			xdebug_log_stack(STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
 		}
 		if (PG(display_errors)) {
-			xdebug_str displ_tmp_str = { 0, 0, NULL };
+			xdebug_str displ_tmp_str = XDEBUG_STR_INITIALIZER;
 			xdebug_append_error_head(&displ_tmp_str, PG(html_errors), "exception" TSRMLS_CC);
 			xdebug_str_add(&displ_tmp_str, exception_trace, 0);
 			xdebug_append_error_footer(&displ_tmp_str, PG(html_errors) TSRMLS_CC);

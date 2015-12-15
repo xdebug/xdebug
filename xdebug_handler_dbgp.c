@@ -237,7 +237,7 @@ static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 
 static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC)
 {
-	xdebug_str  xml_message = {0, 0, NULL};
+	xdebug_str  xml_message = XDEBUG_STR_INITIALIZER;
 	xdebug_str *ret;
 
 	xdebug_str_ptr_init(ret);
@@ -301,7 +301,7 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 	php_stream *stream;
 	int    i = begin;
 	char  *line = NULL;
-	xdebug_str source = { 0, 0, NULL };
+	xdebug_str source = XDEBUG_STR_INITIALIZER;
 
 	if (i < 0) {
 		begin = 0;

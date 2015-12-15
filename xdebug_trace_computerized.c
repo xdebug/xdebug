@@ -116,7 +116,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	char *tmp_name;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
@@ -197,7 +197,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
@@ -214,7 +214,7 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	char      *tmp_value = NULL;
 
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);

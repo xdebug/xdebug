@@ -203,7 +203,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	int cv_len;
 	zend_op_array *op_array = execute_data->op_array;
 #endif
-	xdebug_str     name = {0, 0, NULL};
+	xdebug_str     name = XDEBUG_STR_INITIALIZER;
 	int            gohungfound = 0, is_static = 0;
 	char          *zval_value = NULL;
 	xdebug_var_export_options *options;
@@ -941,7 +941,7 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 {
-	xdebug_str str = { 0, 0, NULL };
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	xdebug_path *path = xdebug_path_info_get_path_for_level(XG(paths_stack), XG(level) TSRMLS_CC);
 	char *file = (char*) STR_NAME_VAL(op_array->filename);
 	xdebug_func func_info;

@@ -31,6 +31,7 @@
 void xdebug_str_add(xdebug_str *xs, char *str, int f)
 {
 	int l = strlen(str);
+
 	if (xs->l + l > xs->a - 1) {
 		xs->d = xdrealloc(xs->d, xs->a + l + XDEBUG_STR_PREALLOC);
 		xs->a = xs->a + l + XDEBUG_STR_PREALLOC;

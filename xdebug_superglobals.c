@@ -170,7 +170,7 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 
 char* xdebug_get_printable_superglobals(int html TSRMLS_DC)
 {
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	dump_hash(&XG(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str TSRMLS_CC);
 	dump_hash(&XG(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str TSRMLS_CC);
