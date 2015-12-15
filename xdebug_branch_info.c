@@ -292,7 +292,7 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 	branch_info->path_info.path_hash = xdebug_hash_alloc(128, NULL);
 
 	for (i = 0; i < branch_info->path_info.paths_count; i++) {
-		xdebug_str str = { 0, 0, NULL };
+		xdebug_str str = XDEBUG_STR_INITIALIZER;
 		xdebug_create_key_for_path(branch_info->path_info.paths[i], &str);
 		xdebug_hash_add(branch_info->path_info.path_hash, str.d, str.l, branch_info->path_info.paths[i]);
 		xdfree(str.d);

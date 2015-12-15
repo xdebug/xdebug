@@ -179,7 +179,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
 			char *tmp_name;
-			xdebug_str log_buffer = {0, 0, NULL};
+			xdebug_str log_buffer = XDEBUG_STR_INITIALIZER;
 			int variadic_opened = 0;
 
 			i = XDEBUG_LLIST_VALP(le);
@@ -567,7 +567,7 @@ static char *get_printable_stack(int html, int error_type, char *buffer, const c
 	char *append_string;
 	char *error_type_str = xdebug_error_type(error_type);
 	char *error_type_str_simple = xdebug_error_type_simple(error_type);
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	prepend_string = INI_STR("error_prepend_string");
 	append_string = INI_STR("error_append_string");
@@ -769,7 +769,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 #else
 			if (type == E_ERROR && strncmp(buffer, "Uncaught exception", 18) == 0) {
 #endif
-				xdebug_str str = {0, 0, NULL};
+				xdebug_str str = XDEBUG_STR_INITIALIZER;
 				char *tmp_buf, *p;
 				
 				/* find first new line */

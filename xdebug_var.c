@@ -1156,7 +1156,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options)
 {
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	int default_options = 0;
 	TSRMLS_FETCH();
 
@@ -1269,7 +1269,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 
 char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options)
 {
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	int default_options = 0;
 	TSRMLS_FETCH();
 
@@ -1583,7 +1583,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 
 char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	int default_options = 0;
 
 	if (!options) {
@@ -1698,7 +1698,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 
 char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	int default_options = 0;
 
 	if (!options) {
@@ -1844,7 +1844,7 @@ static int xdebug_array_element_export_xml_node(zval **zv TSRMLS_DC, int num_arg
 	xdebug_xml_node *node;
 	char *name = NULL;
 	int   name_len = 0;
-	xdebug_str full_name = { 0, 0, NULL };
+	xdebug_str full_name = XDEBUG_STR_INITIALIZER;
 
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
@@ -2556,7 +2556,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 
 char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	int default_options = 0;
 
 	if (!options) {
@@ -2726,7 +2726,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 
 char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	int default_options = 0;
 
 	if (!options) {

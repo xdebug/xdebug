@@ -74,7 +74,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 	char *tmp_name;
 	unsigned int j;
-	xdebug_str str = {0, 0, NULL};
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	xdebug_str_add(&str, "\t<tr>", 0);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", function_nr), 1);
