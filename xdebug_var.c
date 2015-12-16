@@ -986,6 +986,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 	zend_ulong num;
 	zend_string *key;
 	zval *val;
+	zval *tmpz;
 #endif
 
 	if (!struc || !(*struc)) {
@@ -1001,7 +1002,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		}
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
-		zval *tmpz = &((*struc)->value.ref->val);
+		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
 	}
 #else
