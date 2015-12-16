@@ -857,6 +857,9 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 			zend_set_user_opcode_handler(ZEND_SEND_VAR, NULL);
 			zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF, NULL);
 			zend_set_user_opcode_handler(ZEND_SEND_VAL, NULL);
+#if PHP_VERSION_ID >= 70000
+			zend_set_user_opcode_handler(ZEND_SEND_VAL_EX, NULL);
+#endif
 			zend_set_user_opcode_handler(ZEND_NEW, NULL);
 			zend_set_user_opcode_handler(ZEND_EXT_FCALL_BEGIN, NULL);
 			zend_set_user_opcode_handler(ZEND_CATCH, NULL);
