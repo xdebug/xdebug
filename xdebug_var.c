@@ -1179,6 +1179,9 @@ char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options
 static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	HashTable *myht;
+#if PHP_VERSION_ID >= 70000
+	zval *tmpz;
+#endif
 
 	if (!struc || !(*struc)) {
 		return;
@@ -1193,7 +1196,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 		}
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
-		zval *tmpz = &((*struc)->value.ref->val);
+		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
 	}
 #else
@@ -1407,6 +1410,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	zend_ulong num;
 	zend_string *key;
 	zval *val;
+	zval *tmpz;
 #endif
 
 	if (!struc || !(*struc)) {
@@ -1424,7 +1428,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 		}
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
-		zval *tmpz = &((*struc)->value.ref->val);
+		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
 	}
 #else
@@ -1609,6 +1613,9 @@ char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebu
 static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	HashTable *myht;
+#if PHP_VERSION_ID >= 70000
+	zval *tmpz;
+#endif
 
 	if (!struc || !(*struc)) {
 		return;
@@ -1623,7 +1630,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 		}
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
-		zval *tmpz = &((*struc)->value.ref->val);
+		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
 	}
 #else
@@ -2069,13 +2076,14 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	zend_string *key;
 	zval *z_val;
 	xdebug_object_item *xoi_val;
+	zval *tmpz;
 
 	if (Z_TYPE_P(*struc) == IS_INDIRECT) {
-		zval *tmpz = ((*struc)->value.zv);
+		tmpz = ((*struc)->value.zv);
 		struc = &tmpz;
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
-		zval *tmpz = &((*struc)->value.ref->val);
+		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
 	}
 #endif
@@ -2399,6 +2407,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	zend_ulong num;
 	zend_string *key;
 	zval *val;
+	zval *tmpz;
 #endif
 
 #if PHP_VERSION_ID >= 70000
@@ -2410,7 +2419,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		}
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
-		zval *tmpz = &((*struc)->value.ref->val);
+		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
 	}
 #else
@@ -2643,8 +2652,9 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	HashTable *myht;
-
 #if PHP_VERSION_ID >= 70000
+	zval *tmpz;
+
 	if (debug_zval) {
 		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
 			xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
@@ -2653,7 +2663,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 		}
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
-		zval *tmpz = &((*struc)->value.ref->val);
+		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
 	}
 #else
