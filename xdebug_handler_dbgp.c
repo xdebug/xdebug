@@ -889,7 +889,7 @@ DBGP_FUNC(breakpoint_set)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
 	}
 
-	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%d", brk_id), 0, 1);
+	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%lu", brk_id), 0, 1);
 }
 
 static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
