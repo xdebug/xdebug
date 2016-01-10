@@ -70,10 +70,10 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 }
 
 #if PHP_VERSION_ID >= 70000
-static int dump_hash_elem_va(zval *pDest, int num_args, va_list args, zend_hash_key *hash_key)
+static int dump_hash_elem_va(zval *pDest, zend_ulong index, zend_string *hash_key, char *name, int html, xdebug_str *str)
+{
 #else
 static int dump_hash_elem_va(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
-#endif
 {
 	int html;
 	char *name;
@@ -82,16 +82,13 @@ static int dump_hash_elem_va(void *pDest TSRMLS_DC, int num_args, va_list args, 
 	name = va_arg(args, char *);
 	html = va_arg(args, int);
 	str =  va_arg(args, xdebug_str *);
-
-#if PHP_VERSION_ID >= 70000
-	if (hash_key->key) {
-#else
-	if (hash_key->nKeyLength == 0) {
 #endif
+
+	if (HASH_KEY_IS_NUMERIC(hash_key)) {
 		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, str TSRMLS_CC);
 	} else {
 #if PHP_VERSION_ID >= 70000
-		dump_hash_elem(*((zval **) pDest), name, 0, (char *) hash_key->key->val, html, str TSRMLS_CC);
+		dump_hash_elem(pDest, name, 0, HASH_APPLY_KEY_VAL(hash_key), html, str TSRMLS_CC);
 #else
 		dump_hash_elem(*((zval **) pDest), name, 0, (char *) hash_key->arKey, html, str TSRMLS_CC);
 #endif
@@ -104,6 +101,9 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 {
 #if PHP_VERSION_ID >= 70000
 	zval *z;
+	zend_ulong num;
+	zend_string *key;
+	zval *val;
 #else
 	zval **z;
 #endif
@@ -148,11 +148,14 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 #endif
 
 		if (ht && (*((char *) (elem->ptr)) == '*')) {
-			zend_hash_apply_with_arguments(ht TSRMLS_CC, dump_hash_elem_va, 3, name, html, str);
 #if PHP_VERSION_ID >= 70000
+			ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num, key, val) {
+				dump_hash_elem_va(val, num, key, name, html, str);
+			} ZEND_HASH_FOREACH_END();
 		} else if (ht && (z = zend_hash_find(ht, s))) {
 			dump_hash_elem(z, name, 0, elem->ptr, html, str TSRMLS_CC);
 #else
+			zend_hash_apply_with_arguments(ht TSRMLS_CC, dump_hash_elem_va, 3, name, html, str);
 		} else if (ht && zend_hash_find(ht, elem->ptr, strlen(elem->ptr) + 1, (void **) &z) == SUCCESS) {
 			dump_hash_elem(*z, name, 0, elem->ptr, html, str TSRMLS_CC);
 #endif
