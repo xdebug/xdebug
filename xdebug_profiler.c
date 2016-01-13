@@ -86,7 +86,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	if (XG(profiler_append)) {
 		fprintf(XG(profile_file), "\n==== NEW PROFILING FILE ==============================================\n");
 	}
-	fprintf(XG(profile_file), "version: 1\ncreator: xdebug %s\n", XDEBUG_VERSION);
+	fprintf(XG(profile_file), "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
 	fprintf(XG(profile_file), "cmd: %s\npart: 1\npositions: line\n\n", script_name);
 	fprintf(XG(profile_file), "events: Time\n\n");
 	fflush(XG(profile_file));

@@ -2256,6 +2256,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name TSRMLS_CC), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
+	xdebug_xml_add_attribute_ex(response, "xdebug:language_version", PHP_VERSION, 0, 0);
 	xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);
 	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf("%d", getpid()), 0, 1);
 
