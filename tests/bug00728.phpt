@@ -22,7 +22,7 @@ string(3) "bar"
 array(0) {
 }
 version: 1
-creator: xdebug %s
+creator: xdebug %d.%s (PHP %s)
 cmd: %sbug00728.php
 part: 1
 positions: line

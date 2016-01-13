@@ -22,7 +22,7 @@ echo file_get_contents(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 version: 1
-creator: xdebug %d.%s
+creator: xdebug %d.%s (PHP %s)
 cmd: %sbug00639.php
 part: 1
 positions: line

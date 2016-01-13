@@ -25,7 +25,7 @@ Sleeping 20
 DONE
 
 version: 1
-creator: xdebug %d.%s
+creator: xdebug %d.%s (PHP %s)
 cmd: %sbug00714.php
 part: 1
 positions: line
