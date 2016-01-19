@@ -636,7 +636,11 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 	} else if (opcode.opcode == ZEND_CATCH) {
 		*jmp1 = position + 1;
 		if (!opcode.result.num) {
+#if PHP_VERSION_ID >= 70100
+			*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+#else
 			*jmp2 = opcode.extended_value;
+#endif
 			if (*jmp2 == *jmp1) {
 				*jmp2 = XDEBUG_JMP_NOT_SET;
 			}
