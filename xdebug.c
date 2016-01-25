@@ -729,6 +729,9 @@ PHP_MINIT_FUNCTION(xdebug)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_LAMBDA_FUNCTION);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_TRAIT);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_TRAITS);
+#if PHP_VERSION_ID >= 50500
+		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FAST_RET);
+#endif
 	}
 
 	/* Override opcodes for variable assignments in traces */
@@ -888,6 +891,9 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 			zend_set_user_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, NULL);
 			zend_set_user_opcode_handler(ZEND_ADD_TRAIT, NULL);
 			zend_set_user_opcode_handler(ZEND_BIND_TRAITS, NULL);
+#if PHP_VERSION_ID >= 50500
+			zend_set_user_opcode_handler(ZEND_FAST_RET, NULL);
+#endif
 #ifndef ZTS
 		}
 #endif

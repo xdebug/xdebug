@@ -655,6 +655,26 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		*jmp1 = ((long) XDEBUG_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
 #endif
 		return 1;
+
+#if PHP_VERSION_ID >= 50500
+	} else if (opcode.opcode == ZEND_FAST_CALL) {
+#if PHP_VERSION_ID >= 70000
+		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+#else
+		*jmp1 = ((long) XDEBUG_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
+#endif
+		if (opcode.extended_value) {
+			*jmp2 = XDEBUG_ZNODE_ELEM(opcode.op2, opline_num);
+		}
+		return 1;
+	} else if (opcode.opcode == ZEND_FAST_RET) {
+		*jmp1 = position + 1;
+		if (opcode.extended_value) {
+			*jmp2 = XDEBUG_ZNODE_ELEM(opcode.op2, opline_num);
+		}
+		return 1;
+#endif
+
 	} else if (
 #if PHP_VERSION_ID >= 50500
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
