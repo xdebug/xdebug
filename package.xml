@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-12-12</date>
- <time>20:42:33</time>
+ <date>2016-01-25</date>
+ <time>20:48:33</time>
  <version>
-  <release>2.4.0RC3</release>
-  <api>2.4.0RC3</api>
+  <release>2.4.0RC4</release>
+  <api>2.4.0RC4</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,16 +45,27 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Wed, Dec 12, 2015 - xdebug 2.4.0RC3
+Mon, Jan 25, 2016 - xdebug 2.4.0RC4
 
 = Fixed bugs:
 
-  - Fixed issue #1221: Sort out Windows x64 PHP 7 support
-  - Fixed issue #1229: Detect GCC 4.8 and disable optimisations when it is found
-
-= Others:
-
-  - Made the test suite work for Windows too. Finally, after 13 years.
+  - Fixed issue #1220: Segmentation fault if var_dump() output is too large.
+  - Fixed issue #1223: Xdebug crashes on PHP 7 when doing a DBGp eval command.
+  - Fixed issue #1229: Issues with GCC 4.8, which in -O2 move removes some
+    required code.
+  - Fixed issue #1235: Xdebug does not compile against PHP 7.1-dev due to
+    ZEND_FETCH_STATIC_PROP*.
+  - Fixed issue #1236: Can't remove breakpoints with negative IDs.
+  - Fixed issue #1238: Xdebug crashes with SIGSEGV while enumerating references
+    in variables.
+  - Fixed issue #1239: Crash due to changes with the CATCH opcode's jump
+    mechanism in 7.1
+  - Fixed issue #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for
+    branch/dead code analysis, and path coverage.
+  - Fixed issue #1245: xdebug_dump_superglobals dumps *uninitialized* with PHP
+    7.
+  - Fixed issue #1250: Add PHP version descriptors to debugging log and profile
+    files.
  </notes>
 
  <contents>
@@ -161,6 +172,32 @@ Wed, Dec 12, 2015 - xdebug 2.4.0RC3
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2015-12-12</date>
+   <time>20:42:33</time>
+   <version>
+    <release>2.4.0RC3</release>
+    <api>2.4.0RC3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Dec 12, 2015 - xdebug 2.4.0RC3
+
+= Fixed bugs:
+
+  - Fixed issue #1221: Sort out Windows x64 PHP 7 support
+  - Fixed issue #1229: Detect GCC 4.8 and disable optimisations when it is found
+
+= Others:
+
+  - Made the test suite work for Windows too. Finally, after 13 years.
+   </notes>
+  </release>
 
   <release>
    <date>2015-12-02</date>
