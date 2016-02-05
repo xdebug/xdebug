@@ -2190,8 +2190,18 @@ PHP_FUNCTION(xdebug_var_dump)
 	int     argc;
 	int     i, len;
 	char   *val;
-	
-	if (!XG(overload_var_dump)) {
+
+	/* Ignore our new shiny function if overload_var_dump is set to 0 *and* the
+	 * function is not being called as xdebug_var_dump() (usually, that'd be
+	 * the overloaded var_dump() of course). Fixes issue 1262. */
+	if (
+		!XG(overload_var_dump)
+#if PHP_VERSION_ID >= 70000
+		&& (strcmp("xdebug_var_dump", execute_data->func->common.function_name->val) != 0)
+#else
+		&& (strcmp("xdebug_var_dump", EG(current_execute_data)->function_state.function->common.function_name) != 0)
+#endif
+	) {
 		XG(orig_var_dump_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		return;
 	}
