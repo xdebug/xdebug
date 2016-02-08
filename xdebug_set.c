@@ -18,7 +18,6 @@
 /* $Id: xdebug_set.c,v 1.5 2010-05-07 20:39:13 derick Exp $ */
 
 #include <stdlib.h>
-#include <math.h>
 #include "xdebug_set.h"
 
 xdebug_set *xdebug_set_create(unsigned int size)
@@ -27,7 +26,7 @@ xdebug_set *xdebug_set_create(unsigned int size)
 
 	tmp = calloc(1, sizeof(xdebug_set));
 	tmp->size = size;
-	size = ceil((size + 7) / 8) + 1;
+	size = (size / 8) + 1 + ((size % 8) != 0);
 	tmp->setinfo = calloc(1, size);
 
 	return tmp;

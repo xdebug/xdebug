@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <sys/select.h>
 #ifndef PHP_WIN32
 #include <unistd.h>
 #endif
