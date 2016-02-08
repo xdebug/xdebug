@@ -118,6 +118,9 @@ static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebu
 	{
 		zend_string *s_name = zend_string_init(name, name_len, 0);
 		if ((z = zend_hash_find(&EG(symbol_table), s_name))) {
+			if (Z_TYPE_P(z) == IS_REFERENCE) {
+				z = &z->value.ref->val;
+			}
 			if (Z_TYPE_P(z) == IS_ARRAY) {
 				ht = Z_ARRVAL_P(z);
 			}
