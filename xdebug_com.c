@@ -15,14 +15,15 @@
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
    +----------------------------------------------------------------------+
  */
-
-
+#include "php_xdebug.h"
 #include <string.h>
 #include <sys/types.h>
 #include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <sys/select.h>
+#if HAVE_SYS_SELECT_H
+# include <sys/select.h>
+#endif
 #ifndef PHP_WIN32
 #include <unistd.h>
 #endif
