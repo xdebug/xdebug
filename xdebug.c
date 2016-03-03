@@ -360,6 +360,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->remote_enabled       = 0;
 	xg->breakpoints_allowed  = 0;
 	xg->profiler_enabled     = 0;
+	xg->do_monitor_functions = 0;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -1234,12 +1235,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 	if (XG(profile_file)) {
 		fclose(XG(profile_file));
+		XG(profile_file) = NULL;
 	}
 
 	if (XG(profile_filename)) {
 		xdfree(XG(profile_filename));
 	}
 	
+	XG(profiler_enabled) = 0;
 	xdebug_hash_destroy(XG(profile_filename_refs));
 	xdebug_hash_destroy(XG(profile_functionname_refs));
 	XG(profile_filename_refs) = NULL;
