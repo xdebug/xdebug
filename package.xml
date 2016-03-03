@@ -33,39 +33,30 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2016-01-25</date>
- <time>20:48:33</time>
+ <date>2016-03-03</date>
+ <time>08:47:08</time>
  <version>
-  <release>2.4.0RC4</release>
-  <api>2.4.0RC4</api>
+  <release>2.4.0</release>
+  <api>2.4.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Jan 25, 2016 - xdebug 2.4.0RC4
+Thu, Mar 03, 2016 - xdebug 2.4.0
 
 = Fixed bugs:
 
-  - Fixed issue #1220: Segmentation fault if var_dump() output is too large.
-  - Fixed issue #1223: Xdebug crashes on PHP 7 when doing a DBGp eval command.
-  - Fixed issue #1229: Issues with GCC 4.8, which in -O2 move removes some
-    required code.
-  - Fixed issue #1235: Xdebug does not compile against PHP 7.1-dev due to
-    ZEND_FETCH_STATIC_PROP*.
-  - Fixed issue #1236: Can't remove breakpoints with negative IDs.
-  - Fixed issue #1238: Xdebug crashes with SIGSEGV while enumerating references
-    in variables.
-  - Fixed issue #1239: Crash due to changes with the CATCH opcode's jump
-    mechanism in 7.1
-  - Fixed issue #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for
-    branch/dead code analysis, and path coverage.
-  - Fixed issue #1245: xdebug_dump_superglobals dumps *uninitialized* with PHP
-    7.
-  - Fixed issue #1250: Add PHP version descriptors to debugging log and profile
-    files.
+  - Fixed issue #1258: Case in PHP 7.0 and code coverage
+  - Fixed issue #1261: segmentation fault in xdebug.so with PHP 7.0 version of
+    'pkgtools' due to spl_autoload()
+  - Fixed issue #1262: overload_var_dump=0 messes with xdebug_var_dump()
+  - Fixed issue #1266: xdebug_dump_superglobals() always dumps empty  stack on
+    PHP 7
+  - Fixed issue #1267: AIX build issues
+  - Fixed issue #1270: String parsing marked not covered with PHP 7
  </notes>
 
  <contents>
@@ -174,6 +165,43 @@ Mon, Jan 25, 2016 - xdebug 2.4.0RC4
  <changelog>
 
   <release>
+   <date>2016-01-25</date>
+   <time>20:48:33</time>
+   <version>
+    <release>2.4.0RC4</release>
+    <api>2.4.0RC4</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 25, 2016 - xdebug 2.4.0RC4
+
+= Fixed bugs:
+
+  - Fixed issue #1220: Segmentation fault if var_dump() output is too large.
+  - Fixed issue #1223: Xdebug crashes on PHP 7 when doing a DBGp eval command.
+  - Fixed issue #1229: Issues with GCC 4.8, which in -O2 move removes some
+    required code.
+  - Fixed issue #1235: Xdebug does not compile against PHP 7.1-dev due to
+    ZEND_FETCH_STATIC_PROP*.
+  - Fixed issue #1236: Can't remove breakpoints with negative IDs.
+  - Fixed issue #1238: Xdebug crashes with SIGSEGV while enumerating references
+    in variables.
+  - Fixed issue #1239: Crash due to changes with the CATCH opcode's jump
+    mechanism in 7.1
+  - Fixed issue #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for
+    branch/dead code analysis, and path coverage.
+  - Fixed issue #1245: xdebug_dump_superglobals dumps *uninitialized* with PHP
+    7.
+  - Fixed issue #1250: Add PHP version descriptors to debugging log and profile
+    files.
+   </notes>
+  </release>
+
+  <release>
    <date>2015-12-12</date>
    <time>20:42:33</time>
    <version>
@@ -230,32 +258,6 @@ Wed, Dec 02, 2015 - xdebug 2.4.0RC2
   - Fixed issue #1219: Set default value for xdebug.overload_var_dump to 2 to
     include file / line numbers by default
   - Use long for PHP 5, and zend_long for PHP 7 for ini settings in the globals
-   </notes>
-  </release>
-
-  <release>
-   <date>2015-12-12</date>
-   <time>20:42:33</time>
-   <version>
-    <release>2.4.0RC3</release>
-    <api>2.4.0RC3</api>
-   </version>
-   <stability>
-    <release>beta</release>
-    <api>beta</api>
-   </stability>
-   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
-   <notes>
-Wed, Dec 12, 2015 - xdebug 2.4.0RC3
-
-= Fixed bugs:
-
-  - Fixed issue #1221: Sort out Windows x64 PHP 7 support
-  - Fixed issue #1229: Detect GCC 4.8 and disable optimisations when it is found
-
-= Others:
-
-  - Made the test suite work for Windows too. Finally, after 13 years.
    </notes>
   </release>
 
