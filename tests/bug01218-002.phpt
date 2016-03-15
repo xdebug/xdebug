@@ -1,5 +1,9 @@
 --TEST--
 Test for bug #1218: Xdebug messes with the exception code, by casting it to int (DBGp)
+--SKIPIF--
+<?php
+if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.show_exception_trace=1

@@ -20,7 +20,7 @@ xdebug.overload_var_dump=0
 --FILE--
 <?php
 	xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );
-	$file = realpath('./tests/bug00213.inc');
+	$file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'bug00213.inc';
 	include $file;
 	$cc = xdebug_get_code_coverage();
 	xdebug_stop_code_coverage();

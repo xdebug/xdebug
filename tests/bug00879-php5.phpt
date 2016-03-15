@@ -23,7 +23,7 @@ xdebug.overload_var_dump=0
 
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
 
-$file = realpath('./tests/bug00879.inc');
+$file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'bug00879.inc';
 include $file;
 
 new WithTrait;
