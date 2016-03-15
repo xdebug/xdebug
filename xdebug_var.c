@@ -35,6 +35,18 @@
 #include "xdebug_var.h"
 #include "xdebug_xml.h"
 
+/* Set correct int format to use */
+#if PHP_VERSION_ID >= 70000
+# include "Zend/zend_long.h"
+# if SIZEOF_ZEND_LONG == 4
+#  define XDEBUG_INT_FMT "%ld"
+# else
+#  define XDEBUG_INT_FMT "%lld"
+# endif
+#else
+# define XDEBUG_INT_FMT "%ld"
+#endif
+
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
@@ -1028,7 +1040,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("%ld", Z_LVAL_P(*struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT, Z_LVAL_P(*struc)), 1);
 			break;
 
 		case IS_DOUBLE:
@@ -1453,7 +1465,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("%sint%s(%s%ld%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_LVAL_P(*struc), ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("%sint%s(%s" XDEBUG_INT_FMT "%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_LVAL_P(*struc), ANSI_COLOR_RESET), 1);
 			break;
 
 		case IS_DOUBLE:
@@ -2107,7 +2119,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_LONG:
 			xdebug_xml_add_attribute(node, "type", "int");
-			xdebug_xml_add_text(node, xdebug_sprintf("%ld", Z_LVAL_P(*struc)));
+			xdebug_xml_add_text(node, xdebug_sprintf(XDEBUG_INT_FMT, Z_LVAL_P(*struc)));
 			break;
 
 		case IS_DOUBLE:
@@ -2445,7 +2457,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf("<small>int</small> <font color='%s'>%ld</font>", COLOR_LONG, Z_LVAL_P(*struc)), 1);
+			xdebug_str_add(str, xdebug_sprintf("<small>int</small> <font color='%s'>" XDEBUG_INT_FMT "</font>", COLOR_LONG, Z_LVAL_P(*struc)), 1);
 			break;
 
 		case IS_DOUBLE:
