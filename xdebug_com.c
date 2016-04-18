@@ -21,9 +21,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
-#if HAVE_SYS_SELECT_H
-# include <sys/select.h>
-#endif
+#include <sys/epoll.h>
 #ifndef PHP_WIN32
 #include <unistd.h>
 #endif
@@ -78,9 +76,11 @@ int xdebug_create_socket(const char *hostname, int dport)
 	struct sockaddr_in address;
 	int                sockfd;
 	int                status;
-	struct timeval     timeout;
 	int                actually_connected;
 	socklen_t          size = sizeof(sa);
+    int                epoll_fd, epoll_r;
+    struct epoll_event epoll_event;
+    struct epoll_event epoll_events[1];
 #if WIN32|WINNT
 	WORD               wVersionRequested;
 	WSADATA            wsaData;
@@ -112,9 +112,7 @@ int xdebug_create_socket(const char *hostname, int dport)
 		return -1;
 	}
 
-	/* Put socket in non-blocking mode so we can use select for timeouts */
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 200000;
+	/* Put socket in non-blocking mode so we can use epoll for timeouts */
 
 #ifdef WIN32
 	ioctlsocket(sockfd, FIONBIO, (u_long*)&yes);
@@ -142,32 +140,38 @@ int xdebug_create_socket(const char *hostname, int dport)
 		}
 #endif
 
+        if ((epoll_fd = epoll_create1(EPOLL_CLOEXEC)) < 0) {
+		    close(sockfd);
+			return -1;
+        }
+        epoll_event.events = EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLPRI;
+        if ((epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sockfd, &epoll_event)) != 0) {
+            close(sockfd);
+            close(epoll_fd);
+            return -1;
+        }
+
 		while (1) {
-			fd_set rset, wset, eset;
 
-			FD_ZERO(&rset);
-			FD_SET(sockfd, &rset);
-			FD_ZERO(&wset);
-			FD_SET(sockfd, &wset);
-			FD_ZERO(&eset);
-			FD_SET(sockfd, &eset);
-
-			if (select(sockfd+1, &rset, &wset, &eset, &timeout) == 0) {
+			if ((epoll_r = epoll_wait(epoll_fd, epoll_events, 1, 200)) != 1) { // timeout is 200 ms
 				close(sockfd);
-				return -2;
+                close(epoll_fd);
+				return epoll_r == 0 ? -2 : -1;
 			}
 
 			/* if our descriptor has an error */
-			if (FD_ISSET(sockfd, &eset)) {
+            if (epoll_events[0].events & (EPOLLRDHUP | EPOLLPRI | EPOLLERR | EPOLLHUP)) {
 				close(sockfd);
+                close(epoll_fd);
 				return -1;
-			}
+            }
 
 			/* if our descriptor is ready break out */
-			if (FD_ISSET(sockfd, &wset) || FD_ISSET(sockfd, &rset)) {
+            if (epoll_events[0].events & (EPOLLIN | EPOLLOUT)) {
 				break;
 			}
 		}
+        close(epoll_fd);
 
 		actually_connected = getpeername(sockfd, &sa, &size);
 		if (actually_connected == -1) {
