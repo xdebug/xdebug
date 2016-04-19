@@ -21,7 +21,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
-#if HAVE_SYS_SELECT_H
+#ifdef HAVE_EPOLL_WAIT
+# include <sys/epoll.h>
+#elif HAVE_SYS_SELECT_H
 # include <sys/select.h>
 #endif
 #ifndef PHP_WIN32
@@ -78,9 +80,15 @@ int xdebug_create_socket(const char *hostname, int dport)
 	struct sockaddr_in address;
 	int                sockfd;
 	int                status;
-	struct timeval     timeout;
 	int                actually_connected;
 	socklen_t          size = sizeof(sa);
+#ifdef HAVE_EPOLL_WAIT
+	int                epoll_fd, epoll_r;
+	struct epoll_event epoll_event;
+	struct epoll_event epoll_events[1];
+#else
+	struct timeval     timeout;
+#endif
 #if WIN32|WINNT
 	WORD               wVersionRequested;
 	WSADATA            wsaData;
@@ -112,9 +120,11 @@ int xdebug_create_socket(const char *hostname, int dport)
 		return -1;
 	}
 
-	/* Put socket in non-blocking mode so we can use select for timeouts */
+	/* Put socket in non-blocking mode so we can use select or epoll for timeouts */
+#ifndef HAVE_EPOLL_WAIT
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 200000;
+#endif
 
 #ifdef WIN32
 	ioctlsocket(sockfd, FIONBIO, (u_long*)&yes);
@@ -142,6 +152,39 @@ int xdebug_create_socket(const char *hostname, int dport)
 		}
 #endif
 
+#ifdef HAVE_EPOLL_WAIT
+		if ((epoll_fd = epoll_create1(EPOLL_CLOEXEC)) < 0) {
+			close(sockfd);
+			return -1;
+		}
+		epoll_event.events = EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLPRI;
+		if ((epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sockfd, &epoll_event)) != 0) {
+			close(sockfd);
+			close(epoll_fd);
+			return -1;
+		}
+
+		while (1) {
+			if ((epoll_r = epoll_wait(epoll_fd, epoll_events, 1, 200)) != 1) { // timeout is 200 ms
+				close(sockfd);
+				close(epoll_fd);
+				return epoll_r == 0 ? -2 : -1;
+			}
+
+			/* if our descriptor has an error */
+			if (epoll_events[0].events & (EPOLLRDHUP | EPOLLPRI | EPOLLERR | EPOLLHUP)) {
+				close(sockfd);
+				close(epoll_fd);
+				return -1;
+			}
+
+			/* if our descriptor is ready break out */
+			if (epoll_events[0].events & (EPOLLIN | EPOLLOUT)) {
+				break;
+			}
+		}
+		close(epoll_fd);
+#else
 		while (1) {
 			fd_set rset, wset, eset;
 
@@ -168,6 +211,8 @@ int xdebug_create_socket(const char *hostname, int dport)
 				break;
 			}
 		}
+#endif
+
 
 		actually_connected = getpeername(sockfd, &sa, &size);
 		if (actually_connected == -1) {
