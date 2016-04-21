@@ -23,3 +23,7 @@
 /Debug
 /Release
 /depcomp
+/debugclient.opensdf
+/debugclient.sdf
+/debugclient.v12.suo
+/debugclient.vcxproj.user
