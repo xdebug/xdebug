@@ -24,7 +24,7 @@ I: Checking user configured header 'I_LIKE_COOKIES'.
 I: Checking header 'HTTP_X_FORWARDED_FOR'.
 I: Checking header 'REMOTE_ADDR'.
 W: Remote address not found, connecting to configured address/port: doesnotexist2:9003. :-|
-W: Creating socket for 'doesnotexist2:9003', getaddrinfo: No such file or directory.
+W: Creating socket for 'doesnotexist2:9003', getaddrinfo: %s.
 E: Could not connect to client. :-(
 Log closed at %d-%d-%d %d:%d:%d
 
@@ -34,6 +34,6 @@ I: Checking user configured header 'I_LIKE_COOKIES'.
 I: Checking header 'HTTP_X_FORWARDED_FOR'.
 I: Checking header 'REMOTE_ADDR'.
 W: Remote address not found, connecting to configured address/port: doesnotexist2:9003. :-|
-W: Creating socket for 'doesnotexist2:9003', getaddrinfo: No such file or directory.
+W: Creating socket for 'doesnotexist2:9003', getaddrinfo: %s.
 E: Could not connect to client. :-(
 Log closed at %d-%d-%d %d:%d:%d
