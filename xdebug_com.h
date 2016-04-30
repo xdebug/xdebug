@@ -53,8 +53,9 @@
 	xdfree(message_buffer);     \
 }
 
+#define XDEBUG_LOG_PRINT(fs, string, ...) if (fs) { fprintf(fs, string, ## __VA_ARGS__); }
 
-int xdebug_create_socket(const char *hostname, int dport);
+int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC);
 void xdebug_close_socket(int socket);
 
 #endif

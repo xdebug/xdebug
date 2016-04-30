@@ -1,5 +1,5 @@
 #!/bin/bash
-export CFLAGS="-Wall -Wextra -Wdeclaration-after-statement -Wmissing-field-initializers -Wshadow -Wno-unused-parameter -ggdb3 -DDEBUGGER_FAIL_SILENTLY"
+export CFLAGS="-Wall -Wextra -Wdeclaration-after-statement -Wmissing-field-initializers -Wshadow -Wno-unused-parameter -ggdb3"
 phpize
 ./configure
 make all install

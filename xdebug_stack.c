@@ -18,6 +18,7 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
+#include "xdebug_com.h"
 #include "xdebug_compat.h"
 #include "xdebug_monitor.h"
 #include "xdebug_profiler.h"
@@ -587,8 +588,6 @@ static char *get_printable_stack(int html, int error_type, char *buffer, const c
 	return str.d;
 }
 
-#define XDEBUG_LOG_PRINT(fs, string, ...) if (fs) { fprintf(fs, string, ## __VA_ARGS__); }
-
 #if PHP_VERSION_ID >= 70000
 # define XDEBUG_ZEND_HASH_STR_FIND(ht, str, size, var) var = zend_hash_str_find(Z_ARRVAL(ht), str, size);
 # define XDEBUG_ZEND_HASH_RETURN_TYPE zval *
@@ -620,14 +619,14 @@ void xdebug_init_debugger(TSRMLS_D)
 		}
 		if (remote_addr) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), (long int) XG(remote_port));
-			XG(context).socket = xdebug_create_socket(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port));
+			XG(context).socket = xdebug_create_socket(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port) TSRMLS_CC);
 		} else {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), (long int) XG(remote_port));
-			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port) TSRMLS_CC);
 		}
 	} else {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connecting to configured address/port: %s:%ld.\n", XG(remote_host), (long int) XG(remote_port));
-		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port));
+		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port) TSRMLS_CC);
 	}
 	if (XG(context).socket >= 0) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connected to client. :-)\n");

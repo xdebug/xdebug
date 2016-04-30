@@ -41,9 +41,12 @@
 # define poll WSAPoll
 #endif
 
+#include "xdebug_private.h"
 #include "xdebug_com.h"
 
-int xdebug_create_socket(const char *hostname, int dport)
+ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+
+int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 {
 	struct addrinfo            hints;
 	struct addrinfo            *remote;
@@ -82,14 +85,10 @@ int xdebug_create_socket(const char *hostname, int dport)
 
 	/* Call getaddrinfo and return SOCK_ERR if the call fails for some reason */
 	if ((status = getaddrinfo(hostname, sport, &hints, &remote)) != 0) {
-#ifndef DEBUGGER_FAIL_SILENTLY
-# if WIN32|WINNT
-		printf("xdebug_create_socket(\"%s\", %d) getaddrinfo: %d\n",
-					hostname, dport, WSAGetLastError());
-# else
-		printf("xdebug_create_socket(\"%s\", %d) getaddrinfo: %s\n",
-					hostname, dport, strerror(errno));
-# endif
+#if WIN32|WINNT
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getaddrinfo: %d.\n", hostname, dport, WSAGetLastError());
+#else
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getaddrinfo: %s.\n", hostname, dport, strerror(errno));
 #endif
 		return SOCK_ERR;
 	}
@@ -99,14 +98,10 @@ int xdebug_create_socket(const char *hostname, int dport)
 		/* Try to create the socket. If the creation fails continue on with the
 		 * next IP address in the list */
 		if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == SOCK_ERR) {
-#ifndef DEBUGGER_FAIL_SILENTLY
-# if WIN32|WINNT
-			printf("xdebug_create_socket(\"%s\", %d) socket: %d\n",
-						hostname, dport, WSAGetLastError());
-# else
-			printf("xdebug_create_socket(\"%s\", %d) socket: %s\n",
-						hostname, dport, strerror(errno));
-# endif
+#if WIN32|WINNT
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', socket: %d.\n", hostname, dport, WSAGetLastError());
+#else
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', socket: %s.\n", hostname, dport, strerror(errno));
 #endif
 			continue;
 		}
@@ -128,26 +123,17 @@ int xdebug_create_socket(const char *hostname, int dport)
 #ifdef WIN32
 			errno = WSAGetLastError();
 			if (errno != WSAEINPROGRESS && errno != WSAEWOULDBLOCK) {
-# ifndef DEBUGGER_FAIL_SILENTLY
-				printf("xdebug_create_socket(\"%s\", %d) connect: %d\n",
-						   hostname, dport, errno);
-# endif
+				XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', connect: %d.\n", hostname, dport, errno);
 #else
 			if (errno == EACCES) {
-# ifndef DEBUGGER_FAIL_SILENTLY
-				printf("xdebug_create_socket(\"%s\", %d) connect: %s\n",
-						   hostname, dport, strerror(errno));
-# endif
+				XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', connect: %s.\n", hostname, dport, strerror(errno));
 				SCLOSE(sockfd);
 				sockfd = SOCK_ACCESS_ERR;
 				
 				continue;
 			}
 			if (errno != EINPROGRESS) {
-# ifndef DEBUGGER_FAIL_SILENTLY
-				printf("xdebug_create_socket(\"%s\", %d) connect: %s\n",
-						   hostname, dport, strerror(errno));
-# endif
+				XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', connect: %s.\n", hostname, dport, strerror(errno));
 #endif
 				SCLOSE(sockfd);
 				sockfd = SOCK_ERR;
@@ -162,14 +148,10 @@ int xdebug_create_socket(const char *hostname, int dport)
 				
 				/* If an error occured when doing the poll */
 				if (sockerror == SOCK_ERR) {
-#ifndef DEBUGGER_FAIL_SILENTLY
-# if WIN32|WINNT
-					printf("create_debugger_socket(\"%s\", %d) WSAPoll: %d\n",
-								hostname, dport, WSAGetLastError());
-# else
-					printf("create_debugger_socket(\"%s\", %d) poll: %s\n",
-								hostname, dport, strerror(errno));
-# endif
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -183,14 +165,10 @@ int xdebug_create_socket(const char *hostname, int dport)
 				
 				/* If the poll was successful but an error occured */
 				if (ufds[0].revents & (POLLERR | POLLHUP | POLLNVAL | POLLRDHUP)) {
-#ifndef DEBUGGER_FAIL_SILENTLY
-# if WIN32|WINNT
-					printf("create_debugger_socket(\"%s\", %d) WSAPoll: %d\n",
-								hostname, dport, WSAGetLastError());
-# else
-					printf("create_debugger_socket(\"%s\", %d) poll: %s\n",
-								hostname, dport, strerror(errno));
-# endif
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -202,14 +180,10 @@ int xdebug_create_socket(const char *hostname, int dport)
 					break;
 				} else {
 					/* We should never get here, but added as a failsafe to break out from any loops */
-#ifndef DEBUGGER_FAIL_SILENTLY
-# if WIN32|WINNT
-					printf("create_debugger_socket(\"%s\", %d) WSAPoll: %d\n",
-								hostname, dport, WSAGetLastError());
-# else
-					printf("create_debugger_socket(\"%s\", %d) poll: %s\n",
-								hostname, dport, strerror(errno));
-# endif
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -219,14 +193,10 @@ int xdebug_create_socket(const char *hostname, int dport)
 			if (sockerror > 0) {
 				actually_connected = getpeername(sockfd, (struct sockaddr *)&sa, &size);
 				if (actually_connected == -1) {
-#ifndef DEBUGGER_FAIL_SILENTLY
-# if WIN32|WINNT
-					printf("create_debugger_socket(\"%s\", %d) getpeername: %d\n",
-								hostname, dport, WSAGetLastError());
-# else
-					printf("create_debugger_socket(\"%s\", %d) getpeername: %s\n",
-								hostname, dport, strerror(errno));
-# endif
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getpeername: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getpeername: %s.\n", hostname, dport, strerror(errno));
 #endif
 					sockerror = SOCK_ERR;
 				}
