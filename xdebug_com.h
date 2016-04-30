@@ -13,15 +13,12 @@
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   |           Thomas Vanhaniemi <thomas.vanhaniemi@arcada.fi>            |
    +----------------------------------------------------------------------+
  */
 
 #ifndef __HAVE_XDEBUG_COM_H__
 #define __HAVE_XDEBUG_COM_H__
-
-#ifdef PHP_WIN32
-int inet_aton(const char *cp, struct in_addr *inp);
-#endif
 
 #if WIN32|WINNT
 # define SOCK_ERR INVALID_SOCKET
@@ -32,6 +29,8 @@ int inet_aton(const char *cp, struct in_addr *inp);
 # define SOCK_CONN_ERR -1
 # define SOCK_RECV_ERR -1
 #endif
+#define SOCK_TIMEOUT_ERR -2
+#define SOCK_ACCESS_ERR -3
 
 #if WIN32|WINNT
 #define SCLOSE(a) closesocket(a)
@@ -54,8 +53,9 @@ int inet_aton(const char *cp, struct in_addr *inp);
 	xdfree(message_buffer);     \
 }
 
+#define XDEBUG_LOG_PRINT(fs, string, ...) if (fs) { fprintf(fs, string, ## __VA_ARGS__); }
 
-int xdebug_create_socket(const char *hostname, int dport);
+int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC);
 void xdebug_close_socket(int socket);
 
 #endif

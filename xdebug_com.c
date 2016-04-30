@@ -13,6 +13,7 @@
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   |           Thomas Vanhaniemi <thomas.vanhaniemi@arcada.fi>            |
    +----------------------------------------------------------------------+
  */
 #include "php_xdebug.h"
@@ -21,169 +22,212 @@
 #include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
-#if HAVE_SYS_SELECT_H
-# include <sys/select.h>
-#endif
 #ifndef PHP_WIN32
-#include <unistd.h>
-#endif
-
-#ifdef PHP_WIN32
+# include <sys/poll.h>
+# include <unistd.h>
+# include <sys/socket.h>
+# include <netinet/tcp.h>
+# include <netdb.h>
+#else
 # include <process.h>
 # include <direct.h>
 # include "win32/time.h"
-#define PATH_MAX MAX_PATH
-#else
-# include <sys/socket.h>
-# include <netinet/in.h>
-# include <netinet/tcp.h>
-# include <arpa/inet.h>
-# include <netdb.h>
+# undef UNICODE
+# include <winsock2.h>
+# include <ws2tcpip.h>
+# include <mstcpip.h>
+# pragma comment (lib, "Ws2_32.lib")
+# define PATH_MAX MAX_PATH
+# define poll WSAPoll
 #endif
 
+#include "xdebug_private.h"
 #include "xdebug_com.h"
 
-#ifdef PHP_WIN32
-int inet_aton(const char *cp, struct in_addr *inp)
-{
-	inp->s_addr = inet_addr(cp);
-	if (inp->s_addr == INADDR_NONE) {
-		return 0;
-	}
-	return 1;
-}
-#endif
+ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-/*
- * Converts a host name to an IP address.  */
-static int lookup_hostname(const char *addr, struct in_addr *in)
+int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 {
-	struct hostent *host_info;
-
-	if (!inet_aton(addr, in)) {
-		host_info = gethostbyname(addr);
-		if (host_info == 0) {
-			/* Error: unknown host */
-			return -1;
-		}
-		*in = *((struct in_addr *) host_info->h_addr);
-	}
-	return 0;
-}
-/* }}} */
-
-int xdebug_create_socket(const char *hostname, int dport)
-{
-	struct sockaddr    sa;
-	struct sockaddr_in address;
-	int                sockfd;
-	int                status;
-	struct timeval     timeout;
-	int                actually_connected;
-	socklen_t          size = sizeof(sa);
+	struct addrinfo            hints;
+	struct addrinfo            *remote;
+	struct addrinfo            *ptr;
+	int                        status;
+	int                        sockfd;
+	int                        sockerror;
+	char                       sport[10];
+	int                        timeout = 200;
+	int                        actually_connected;
+	struct sockaddr_in6        sa;
+	socklen_t                  size = sizeof(sa);
+	struct pollfd              ufds[1];
 #if WIN32|WINNT
-	WORD               wVersionRequested;
-	WSADATA            wsaData;
-	char               optval = 1;
-	const char         yes = 1;
-	u_long             no = 0;
+	WORD                       wVersionRequested;
+	WSADATA                    wsaData;
+	char                       optval = 1;
+	const char                 yes = 1;
+	u_long                     no = 0;
 
 	wVersionRequested = MAKEWORD(2, 2);
 	WSAStartup(wVersionRequested, &wsaData);
 #else
-	long               optval = 1;
+	long                       optval = 1;
 #endif
-	memset(&address, 0, sizeof(address));
-	lookup_hostname(hostname, &address.sin_addr);
-	address.sin_family = AF_INET;
-	address.sin_port = htons((unsigned short)dport);
+	
+	/* Make a string of the port number that can be used with getaddrinfo */
+	sprintf(sport, "%d", dport);
 
-	sockfd = socket(address.sin_family, SOCK_STREAM, 0);
-	if (sockfd == SOCK_ERR) {
-#ifndef DEBUGGER_FAIL_SILENTLY
+	/* Create hints for getaddrinfo saying that we want IPv4 and IPv6 TCP stream sockets */
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = AI_PASSIVE;
+
+	/* Call getaddrinfo and return SOCK_ERR if the call fails for some reason */
+	if ((status = getaddrinfo(hostname, sport, &hints, &remote)) != 0) {
 #if WIN32|WINNT
-		printf("create_debugger_socket(\"%s\", %d) socket: %d\n",
-					hostname, dport, WSAGetLastError());
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getaddrinfo: %d.\n", hostname, dport, WSAGetLastError());
 #else
-		printf("create_debugger_socket(\"%s\", %d) socket: %s\n",
-					hostname, dport, strerror(errno));
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getaddrinfo: %s.\n", hostname, dport, strerror(errno));
 #endif
-#endif
-		return -1;
+		return SOCK_ERR;
 	}
 
-	/* Put socket in non-blocking mode so we can use select for timeouts */
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 200000;
-
-#ifdef WIN32
-	ioctlsocket(sockfd, FIONBIO, (u_long*)&yes);
+	/* Go through every returned IP address */
+	for (ptr = remote; ptr != NULL; ptr = ptr->ai_next) {
+		/* Try to create the socket. If the creation fails continue on with the
+		 * next IP address in the list */
+		if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == SOCK_ERR) {
+#if WIN32|WINNT
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', socket: %d.\n", hostname, dport, WSAGetLastError());
 #else
-	fcntl(sockfd, F_SETFL, O_NONBLOCK);
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', socket: %s.\n", hostname, dport, strerror(errno));
+#endif
+			continue;
+		}
+
+		/* Put socket in non-blocking mode so we can use poll for timeouts */
+#ifdef WIN32
+		ioctlsocket(sockfd, FIONBIO, (u_long*)&yes);
+#else
+		fcntl(sockfd, F_SETFL, O_NONBLOCK);
 #endif
 
-	/* connect */
-	status = connect(sockfd, (struct sockaddr*)&address, sizeof(address));
-	if (status < 0) {
+		/* Try to connect to the newly created socket */
+		/* Worth noting is that the port is set in the getaddrinfo call before */
+		status = connect(sockfd, ptr->ai_addr, ptr->ai_addrlen);
+		
+		/* Determine if we got a connection. If no connection could be made
+		 * we close the socket and continue with the next IP address in the list */
+		if (status < 0) {
 #ifdef WIN32
-		errno = WSAGetLastError();
-		if (errno != WSAEINPROGRESS && errno != WSAEWOULDBLOCK) {
-			close(sockfd);
-			return -1;
-		}
+			errno = WSAGetLastError();
+			if (errno != WSAEINPROGRESS && errno != WSAEWOULDBLOCK) {
+				XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', connect: %d.\n", hostname, dport, errno);
 #else
-		if (errno == EACCES) {
-			close(sockfd);
-			return -3;
-		}
-		if (errno != EINPROGRESS) {
-			close(sockfd);
-			return -1;
-		}
+			if (errno == EACCES) {
+				XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', connect: %s.\n", hostname, dport, strerror(errno));
+				SCLOSE(sockfd);
+				sockfd = SOCK_ACCESS_ERR;
+				
+				continue;
+			}
+			if (errno != EINPROGRESS) {
+				XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', connect: %s.\n", hostname, dport, strerror(errno));
 #endif
-
-		while (1) {
-			fd_set rset, wset, eset;
-
-			FD_ZERO(&rset);
-			FD_SET(sockfd, &rset);
-			FD_ZERO(&wset);
-			FD_SET(sockfd, &wset);
-			FD_ZERO(&eset);
-			FD_SET(sockfd, &eset);
-
-			if (select(sockfd+1, &rset, &wset, &eset, &timeout) == 0) {
-				close(sockfd);
-				return -2;
+				SCLOSE(sockfd);
+				sockfd = SOCK_ERR;
+				
+				continue;
 			}
 
-			/* if our descriptor has an error */
-			if (FD_ISSET(sockfd, &eset)) {
-				close(sockfd);
-				return -1;
+			ufds[0].fd = sockfd;
+			ufds[0].events = POLLIN | POLLOUT | POLLPRI;
+			while (1) {
+				sockerror = poll(ufds, 1, timeout);
+				
+				/* If an error occured when doing the poll */
+				if (sockerror == SOCK_ERR) {
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
+#endif
+					sockerror = SOCK_ERR;
+					break;
+				}
+				
+				/* A timeout occured when polling the socket */
+				if (sockerror == 0) {
+					sockerror = SOCK_TIMEOUT_ERR;
+					break;
+				}
+				
+				/* If the poll was successful but an error occured */
+				if (ufds[0].revents & (POLLERR | POLLHUP | POLLNVAL | POLLRDHUP)) {
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
+#endif
+					sockerror = SOCK_ERR;
+					break;
+				}
+				
+				/* If the poll was successful break out */
+				if (ufds[0].revents & (POLLIN | POLLOUT)) {
+					sockerror = sockfd;
+					break;
+				} else {
+					/* We should never get here, but added as a failsafe to break out from any loops */
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
+#endif
+					sockerror = SOCK_ERR;
+					break;
+				}
 			}
 
-			/* if our descriptor is ready break out */
-			if (FD_ISSET(sockfd, &wset) || FD_ISSET(sockfd, &rset)) {
-				break;
+			if (sockerror > 0) {
+				actually_connected = getpeername(sockfd, (struct sockaddr *)&sa, &size);
+				if (actually_connected == -1) {
+#if WIN32|WINNT
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getpeername: %d.\n", hostname, dport, WSAGetLastError());
+#else
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', getpeername: %s.\n", hostname, dport, strerror(errno));
+#endif
+					sockerror = SOCK_ERR;
+				}
+			}
+			
+			/* If there where some errors close the socket and continue with the next IP address */
+			if (sockerror < 0) {
+				SCLOSE(sockfd);
+				sockfd = sockerror;
+				
+				continue;
 			}
 		}
-
-		actually_connected = getpeername(sockfd, &sa, &size);
-		if (actually_connected == -1) {
-			close(sockfd);
-			return -1;
-		}
+		
+		break;
 	}
 
+	/* Free the result returned by getaddrinfo */
+	freeaddrinfo(remote);
 
+	/* If we got a socket, set the option "No delay" to true (1) */
+	if (sockfd > 0) {
 #ifdef WIN32
-	ioctlsocket(sockfd, FIONBIO, &no);
+		ioctlsocket(sockfd, FIONBIO, &no);
 #else
-	fcntl(sockfd, F_SETFL, 0);
+		fcntl(sockfd, F_SETFL, 0);
 #endif
 
-	setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+		setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+	}
+	
 	return sockfd;
 }
 

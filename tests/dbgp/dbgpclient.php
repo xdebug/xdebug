@@ -1,7 +1,32 @@
 <?php
+define( 'XDEBUG_DBGP_IPV4', 1 );
+define( 'XDEBUG_DBGP_IPV6', 2 );
+
 class DebugClient
 {
+	protected $port = 9991;
+
 	private $tmpDir;
+
+	public function getPort()
+	{
+		return $this->port;
+	}
+	
+	public function setPort($port)
+	{
+		$this->port = $port;
+	}
+
+	protected function getIPAddress()
+	{
+		return "0.0.0.0";
+	}
+
+	protected function getAddress()
+	{
+		return "tcp://" . $this->getIPAddress() . ":" . $this->getPort();
+	}
 
 	public function __construct()
 	{
@@ -10,7 +35,7 @@ class DebugClient
 
 	private function open()
 	{
-		$socket = @stream_socket_server("tcp://0.0.0.0:9991", $errno, $errstr);
+		$socket = @stream_socket_server( $this->getAddress(), $errno, $errstr );
 		return $socket;
 	}
 
@@ -24,18 +49,28 @@ class DebugClient
 		   1 => array( 'pipe', 'w' ),
 		   2 => array( 'file', $this->tmpDir . '/error-output.txt', 'a' )
 		);
+		
+		$default_options = array(
+			"xdebug.remote_enable" => "1",
+			"xdebug.remote_autostart" => "1",
+			"xdebug.remote_host" => $this->getIPAddress(),
+			"xdebug.remote_port" => $this->getPort(),
+			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt"
+		);
 
-		$options = '';
-
-		if ( !is_null( $ini_options ) && count( $ini_options ) > 0 )
+		if ( is_null( $ini_options ) )
 		{
-			foreach ( $ini_options as $key => $value )
-			{
-				$options .= " -d{$key}=$value";
-			}
+			$ini_options = array();
+		}
+		
+		$options = '';
+		$ini_options = array_merge( $default_options, $ini_options );
+		foreach ( $ini_options as $key => $value )
+		{
+			$options .= " -d{$key}=$value";
 		}
 
-		$cmd = "php $options -dxdebug.remote_enable=1 -dxdebug.remote_autostart=1 -dxdebug.remote_port=9991 -dxdebug.remote_log={$this->tmpDir}/remote_log.txt {$this->tmpDir}/xdebug-dbgp-test.php";
+		$cmd = "php $options {$this->tmpDir}/xdebug-dbgp-test.php";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -111,13 +146,68 @@ class DebugClient
 			$i++;
 		}
 		fclose( $conn );
+		fclose( $ppipes[0] );
+		fclose( $ppipes[1] );
 		proc_close( $php );
 	}
 }
 
-function dbgpRun( $data, $commands, array $ini_options = null)
+class DebugClientIPv6 extends DebugClient
 {
-	$t = new DebugClient;
+	protected function getIPAddress()
+	{
+		return "::";
+	}
+
+	protected function getAddress()
+	{
+		return "tcp://[" . $this->getIPAddress() . "]:" . $this->getPort();
+	}
+
+	public static function isSupported()
+	{
+		$ret = true;
+
+		if ( !defined( "AF_INET6" ) )
+		{
+			return false;
+		}
+		
+		$socket = socket_create( AF_INET6, SOCK_STREAM, SOL_TCP );
+
+		if ( $socket === false )
+		{
+			return false;
+		}
+		
+		if ( $ret && !socket_bind( $socket, $this->getIPAddress(), 9990 ) )
+		{
+			$ret = false;
+		}
+
+		if ( $ret && !socket_listen( $socket ) )
+		{
+			$ret = false;
+		}
+
+		socket_close( $socket );
+		unset( $socket );
+
+		return $ret;
+	}
+}
+
+function dbgpRun( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
+{
+	if ( $flags == XDEBUG_DBGP_IPV6 )
+	{
+		$t = new DebugClient();
+	}
+	else
+	{
+		$t = new DebugClientIPv6();
+	}
+
 	$t->runTest( $data, $commands, $ini_options );
 }
 ?>
