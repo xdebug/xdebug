@@ -63,6 +63,8 @@ typedef struct xdebug_var {
 #define XFUNC_REQUIRE        0x13
 #define XFUNC_REQUIRE_ONCE   0x14
 
+#define XFUNC_ZEND_PASS      0x20
+
 #define XDEBUG_IS_FUNCTION(f) (f == XFUNC_NORMAL || f == XFUNC_STATIC_MEMBER || f == XFUNC_MEMBER)
 
 #define XDEBUG_REGISTER_LONG_CONSTANT(__c) REGISTER_LONG_CONSTANT(#__c, __c, CONST_CS|CONST_PERSISTENT)

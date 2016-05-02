@@ -1070,6 +1070,13 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 {
 	memset(tmp, 0, sizeof(xdebug_func));
 
+#if PHP_VERSION_ID >= 70100
+	if (edata && edata->func && edata->func == (zend_function*) &zend_pass_function) {
+		tmp->type     = XFUNC_ZEND_PASS;
+		tmp->function = xdstrdup("{zend_pass}");
+	} else
+#endif
+
 	if (edata && edata->func) {
 		tmp->type = XFUNC_NORMAL;
 		if (edata->This.value.obj) {

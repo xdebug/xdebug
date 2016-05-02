@@ -2012,7 +2012,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	fse->function.internal = 1;
 
 	function_nr = XG(function_count);
-	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_entry)) {
+	if (XG(do_trace) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && (XG(trace_handler)->function_entry)) {
 		XG(trace_handler)->function_entry(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
 
@@ -2062,17 +2062,17 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 		zend_error_cb = tmp_error_cb;
 	}
 
-	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_exit)) {
+	if (XG(do_trace) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && (XG(trace_handler)->function_exit)) {
 		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
 
 	/* Store return value in the trace file */
 #if PHP_VERSION_ID >= 70000
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && return_value && XG(trace_handler)->return_value) {
+	if (XG(collect_return) && do_return && XG(do_trace) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && return_value && XG(trace_handler)->return_value) {
 		XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, return_value TSRMLS_CC);
 	}
 #else
-	if (XG(collect_return) && do_return && XG(do_trace) && XG(trace_context) && EG(opline_ptr) && current_execute_data->opline) {
+	if (XG(collect_return) && do_return && XG(do_trace) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && EG(opline_ptr) && current_execute_data->opline) {
 		cur_opcode = *EG(opline_ptr);
 		if (cur_opcode) {
 			zval *ret = xdebug_zval_ptr(cur_opcode->result_type, &(cur_opcode->result), current_execute_data TSRMLS_CC);
