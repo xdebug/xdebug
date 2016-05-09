@@ -1070,9 +1070,20 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 {
 	memset(tmp, 0, sizeof(xdebug_func));
 
+#if PHP_VERSION_ID >= 70100
+	if (edata && edata->func && edata->func == (zend_function*) &zend_pass_function) {
+		tmp->type     = XFUNC_ZEND_PASS;
+		tmp->function = xdstrdup("{zend_pass}");
+	} else
+#endif
+
 	if (edata && edata->func) {
 		tmp->type = XFUNC_NORMAL;
+#if PHP_VERSION_ID >= 70100
+		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
+#else
 		if (edata->This.value.obj) {
+#endif
 			tmp->type = XFUNC_MEMBER;
 			if (edata->func->common.scope) {
 				if (strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
@@ -1382,11 +1393,12 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->function.type     = XFUNC_NORMAL;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
+		tmp->lineno = 0;
 		if (opline_ptr) {
 			cur_opcode = *opline_ptr;
-			tmp->lineno = cur_opcode->lineno;
-		} else {
-			tmp->lineno = 0;
+			if (cur_opcode) {
+				tmp->lineno = cur_opcode->lineno;
+			}
 		}
 
 		if (tmp->function.type == XFUNC_EVAL) {

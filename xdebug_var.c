@@ -2890,6 +2890,10 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 			return xdstrdup("require_once");
 			break;
 
+		case XFUNC_ZEND_PASS:
+			return xdstrdup("{zend_pass}");
+			break;
+
 		default:
 			return xdstrdup("{unknown}");
 	}

@@ -1,8 +1,8 @@
 --TEST--
-Test for xdebug_debug_zval() (>= PHP 7.0, ZTS)
+Test for xdebug_debug_zval_stdout() (>= PHP 7.1, NTS)
 --SKIPIF--
-<?php if (PHP_ZTS == 0) echo "skip ZTS needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+<?php if (PHP_ZTS == 1) echo "skip NTS needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=0
@@ -35,15 +35,15 @@ function func(){
 func();
 ?>
 --EXPECT--
-a: (refcount=1, is_ref=0)='hoge'
-$a: (refcount=1, is_ref=0)='hoge'
+a: (refcount=0, is_ref=0)='hoge'
+$a: (refcount=0, is_ref=0)='hoge'
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
 $b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5
 b[1]: (refcount=0, is_ref=0)=9
 c: (refcount=2, is_ref=1)=5
 d: (refcount=0, is_ref=0)=6
-e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=1, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
+e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=2, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
 e->bar: (refcount=2, is_ref=1)=FALSE
 e->bar['b']: no such symbol
 e->baz[0]: (refcount=0, is_ref=0)=4

@@ -895,6 +895,7 @@ DBGP_FUNC(breakpoint_set)
 static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 {
 	int                old_error_reporting;
+	int                old_track_errors;
 	int                res = FAILURE;
 #if PHP_VERSION_ID >= 70000
 #else
@@ -915,9 +916,11 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	void             **original_argument_stack_end = EG(argument_stack)->end;
 #endif
 
-	/* Remember error reporting level */
+	/* Remember error reporting level and track errors */
 	old_error_reporting = EG(error_reporting);
+	old_track_errors = PG(track_errors);
 	EG(error_reporting) = 0;
+	PG(track_errors) = 0;
 
 	/* Do evaluation */
 	XG(breakpoints_allowed) = 0;
@@ -937,6 +940,7 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 
 	/* Clean up */
 	EG(error_reporting) = old_error_reporting;
+	PG(track_errors) = old_track_errors;
 	XG(breakpoints_allowed) = 1;
 
 #if PHP_VERSION_ID >= 70000
