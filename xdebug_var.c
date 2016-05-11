@@ -56,11 +56,22 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
 
 	if (!XG(in_debug_info) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
 		zend_bool old_trace = XG(do_trace);
+#if PHP_VERSION_ID >= 70000
+		zend_object *orig_exception;
+#else
+		zval *orig_exception;
+#endif
+
 		XG(do_trace) = 0;
 		XG(in_debug_info) = 1;
+		orig_exception = EG(exception);
+		EG(exception) = NULL;
+
 		tmp = Z_OBJ_HANDLER(dzval, get_debug_info)(&dzval, is_tmp TSRMLS_CC);
+
 		XG(in_debug_info) = 0;
 		XG(do_trace) = old_trace;
+		EG(exception) = orig_exception;
 		return tmp;
 	} else {
 		*is_tmp = 0;
