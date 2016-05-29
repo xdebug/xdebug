@@ -272,8 +272,10 @@ void xdebug_path_info_dtor(xdebug_path_info *path_info)
 		xdebug_path_free(path_info->paths[i]);
 	}
 	xdfree(path_info->paths);
+	path_info->paths = NULL;
 	if (path_info->path_hash) {
 		xdebug_hash_destroy(path_info->path_hash);
+		path_info->path_hash = NULL;
 	}
 }
 

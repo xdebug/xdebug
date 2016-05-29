@@ -338,7 +338,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->previous_file        = NULL;
 	xg->previous_mark_filename = "";
 	xg->previous_mark_file     = NULL;
-	xg->paths_stack = xdebug_path_info_ctor();
+	xg->paths_stack = NULL;
 	xg->branches.size        = 0;
 	xg->branches.last_branch_nr = NULL;
 	xg->do_code_coverage     = 0;
@@ -1210,6 +1210,10 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Signal that we're in a request now */
 	XG(in_execution) = 1;
 
+	XG(paths_stack) = xdebug_path_info_ctor();
+	XG(branches).size = 0;
+	XG(branches).last_branch_nr = NULL;
+
 	return SUCCESS;
 }
 
@@ -1313,6 +1317,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	/* Clean up path coverage array */
 	if (XG(paths_stack)) {
 		xdebug_path_info_dtor(XG(paths_stack));
+		XG(paths_stack) = NULL;
 	}
 	if (XG(branches).last_branch_nr) {
 		free(XG(branches).last_branch_nr);
