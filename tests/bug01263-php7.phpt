@@ -1,7 +1,8 @@
 --TEST--
-Test for bug #1210: Coverage of sending arguments to a method (>= PHP 7.0)
+Test for bug #1263: Coverage of sending arguments to a method (>= PHP 7.0.8)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.0.8", '>=')) echo "skip >= PHP 7.0.8 needed\n"; ?>
+<?php if (!extension_loaded('opcache')) echo "skip opcache required\n"; ?>
 --EXTENSIONS--
 opcache
 --INI--
