@@ -10,7 +10,7 @@ php:
 
 matrix:
   allow_failures:
-    php: nightly
+    - php: nightly
 
 before_script:
   - phpenv config-rm xdebug.ini
