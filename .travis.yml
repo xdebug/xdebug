@@ -8,6 +8,10 @@ php:
   - 7.0
   - nightly
 
+matrix:
+  allow_failures:
+    php: nightly
+
 before_script:
   - phpenv config-rm xdebug.ini
   - ./.travis.scripts/compile.sh
