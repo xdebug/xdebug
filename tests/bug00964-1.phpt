@@ -12,7 +12,7 @@ xdebug.remote_connect_back=1
 xdebug.remote_port=9003
 --FILE--
 <?php
-preg_match("#Remote address found, connecting to (192\.168\.111\.111):9003#", file_get_contents(sys_get_temp_dir() . "/bug964.txt"), $match);
+preg_match("#Remote address found, connecting to ([^:]+):9003#", file_get_contents(sys_get_temp_dir() . "/bug964.txt"), $match);
 unlink (sys_get_temp_dir() . "/bug964.txt");
 echo $match[1];
 ?>
