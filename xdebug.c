@@ -1922,7 +1922,7 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 				if (XG(trace_handler)->generator_return_value) {
 # if PHP_VERSION_ID >= 70000
-					XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(current_execute_data)->return_value TSRMLS_CC);
+					XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value TSRMLS_CC);
 # else
 					XG(trace_handler)->generator_return_value(XG(trace_context), fse, function_nr, (zend_generator*) EG(return_value_ptr_ptr) TSRMLS_CC);
 # endif
