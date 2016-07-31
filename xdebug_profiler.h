@@ -28,10 +28,12 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC);
 void xdebug_profiler_deinit(TSRMLS_D);
 int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC);
 
-void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC);
-void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
-void xdebug_profiler_function_internal_begin(function_stack_entry *fse TSRMLS_DC);
-void xdebug_profiler_function_internal_end(function_stack_entry *fse TSRMLS_DC);
+void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
+void xdebug_profiler_add_function_details_internal(function_stack_entry *fse TSRMLS_DC);
+void xdebug_profiler_free_function_details(function_stack_entry *fse TSRMLS_DC);
+
+void xdebug_profiler_function_begin(function_stack_entry *fse TSRMLS_DC);
+void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC);
 
 void xdebug_profile_call_entry_dtor(void *dummy, void *elem);
 void xdebug_profile_aggr_call_entry_dtor(void *elem);
