@@ -100,11 +100,7 @@ void xdebug_profiler_deinit(TSRMLS_D)
 
 	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
 		fse = XDEBUG_LLIST_VALP(le);
-		if (fse->user_defined == XDEBUG_INTERNAL) {
-			xdebug_profiler_function_internal_end(fse TSRMLS_CC);
-		} else {
-			xdebug_profiler_function_user_end(fse, fse->op_array TSRMLS_CC);
-		}
+		xdebug_profiler_function_end(fse TSRMLS_CC);
 	}
 }
 
@@ -123,12 +119,6 @@ void xdebug_profiler_function_continue(function_stack_entry *fse)
 void xdebug_profiler_function_pause(function_stack_entry *fse)
 {
 	xdebug_profiler_function_push(fse);
-}
-
-void xdebug_profiler_function_user_begin(function_stack_entry *fse TSRMLS_DC)
-{
-	fse->profile.time = 0;
-	fse->profile.mark = xdebug_get_utime();
 }
 
 static char* get_filename_ref(char *name TSRMLS_DC)
@@ -157,19 +147,10 @@ static char* get_functionname_ref(char *name TSRMLS_DC)
 	}
 }
 
-void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array* op_array TSRMLS_DC)
+void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC)
 {
-	xdebug_llist_element *le;
-	char                 *tmp_fname, *tmp_name;
-	int                   default_lineno = 0;
+	char *tmp_fname, *tmp_name;
 
-	if (fse->prev && !fse->prev->profile.call_list) {
-		fse->prev->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
-	}
-	if (!fse->profile.call_list) {
-		fse->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
-	}
-	xdebug_profiler_function_push(fse);
 	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 	switch (fse->function.type) {
 		case XFUNC_INCLUDE:
@@ -179,25 +160,82 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, fse->include_filename);
 			xdfree(tmp_name);
 			tmp_name = tmp_fname;
-			default_lineno = 1;
+			fse->profiler.lineno = 1;
 			break;
 
 		default:
-			if (op_array && op_array->function_name) {
-				default_lineno = op_array->line_start;
+			if (op_array/* && op_array->function_name*/) {
+				fse->profiler.lineno = fse->op_array->line_start;
 			} else {
-				default_lineno = fse->lineno;
+				fse->profiler.lineno = fse->lineno;
 			}
 			break;
 	}
-	if (default_lineno == 0) {
-		default_lineno = 1;
+	if (fse->profiler.lineno == 0) {
+		fse->profiler.lineno = 1;
 	}
+
+	if (op_array && op_array->filename) {
+		fse->profiler.filename = xdstrdup((char*) STR_NAME_VAL(op_array->filename));
+	} else {
+		fse->profiler.filename = xdstrdup(fse->filename);
+	}
+	fse->profiler.funcname = xdstrdup(tmp_name);
+	xdfree(tmp_name);
+}
+
+void xdebug_profiler_add_function_details_internal(function_stack_entry *fse TSRMLS_DC)
+{
+	char *tmp_fname, *tmp_name;
+
+	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
+	switch (fse->function.type) {
+		case XFUNC_INCLUDE:
+		case XFUNC_INCLUDE_ONCE:
+		case XFUNC_REQUIRE:
+		case XFUNC_REQUIRE_ONCE:
+			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, fse->include_filename);
+			xdfree(tmp_name);
+			tmp_name = tmp_fname;
+			fse->profiler.lineno = 1;
+			break;
+
+		default:
+			fse->profiler.lineno = fse->lineno;
+			break;
+	}
+	if (fse->profiler.lineno == 0) {
+		fse->profiler.lineno = 1;
+	}
+
+	fse->profiler.filename = xdstrdup(fse->filename);
+	fse->profiler.funcname = xdstrdup(tmp_name);
+
+	xdfree(tmp_name);
+}
+
+void xdebug_profiler_function_begin(function_stack_entry *fse TSRMLS_DC)
+{
+	fse->profile.time = 0;
+	fse->profile.mark = xdebug_get_utime();
+}
+
+void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
+{
+	xdebug_llist_element *le;
+
+	if (fse->prev && !fse->prev->profile.call_list) {
+		fse->prev->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
+	}
+	if (!fse->profile.call_list) {
+		fse->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
+	}
+	xdebug_profiler_function_push(fse);
 
 	if (fse->prev) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
-		ce->filename = op_array ? xdstrdup(STR_NAME_VAL(op_array->filename)) : xdstrdup(fse->filename);
-		ce->function = xdstrdup(tmp_name);
+		ce->filename = xdstrdup(fse->profiler.filename);
+		ce->function = xdstrdup(fse->profiler.funcname);
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
 		ce->user_defined = fse->user_defined;
@@ -205,31 +243,33 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		xdebug_llist_insert_next(fse->prev->profile.call_list, NULL, ce);
 	}
 
-	if (fse->user_defined == XDEBUG_EXTERNAL) {
-		char *tmp_fl = NULL, *tmp_fn = NULL;
-		if (op_array) {
-			tmp_fl = get_filename_ref((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC);
-			fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
-		} else {
-			tmp_fl = get_filename_ref(fse->filename TSRMLS_CC);
-			fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
-		}
-		tmp_fn = get_functionname_ref(tmp_name TSRMLS_CC);
-		fprintf(XG(profile_file), "fn=%s\n", tmp_fn);
+	/* use previously created filename and funcname (or a reference to them) to show
+	 * time spend */
+	if (fse->user_defined == XDEBUG_INTERNAL) {
+		char *tmp_key = xdebug_sprintf("php::%s", fse->profiler.funcname);
+		char *fl_ref = NULL, *fn_ref = NULL;
 
-		xdfree(tmp_fl);
-		xdfree(tmp_fn);
-	} else {
-		char *tmp_key = xdebug_sprintf("php::%s", tmp_name);
-		char *tmp_fl = get_filename_ref("php:internal" TSRMLS_CC);
-		char *tmp_fn = get_functionname_ref(tmp_key TSRMLS_CC);
-		fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
-		fprintf(XG(profile_file), "fn=%s\n", tmp_fn);
-		xdfree(tmp_fl);
-		xdfree(tmp_fn);
+		fl_ref = get_filename_ref("php:internal" TSRMLS_CC);
+		fn_ref = get_functionname_ref(tmp_key TSRMLS_CC);
+
+		fprintf(XG(profile_file), "fl=%s\n", fl_ref);
+		fprintf(XG(profile_file), "fn=%s\n", fn_ref);
+
+		xdfree(fl_ref);
+		xdfree(fn_ref);
 		xdfree(tmp_key);
+	} else {
+		char *fl_ref = NULL, *fn_ref = NULL;
+
+		fl_ref = get_filename_ref(fse->profiler.filename TSRMLS_CC);
+		fn_ref = get_functionname_ref(fse->profiler.funcname TSRMLS_CC);
+
+		fprintf(XG(profile_file), "fl=%s\n", fl_ref);
+		fprintf(XG(profile_file), "fn=%s\n", fn_ref);
+
+		xdfree(fl_ref);
+		xdfree(fn_ref);
 	}
-	xdfree(tmp_name);
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
 		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 1000000));
@@ -248,7 +288,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 		fse->profile.time -= call_entry->time_taken;
 	}
-	fprintf(XG(profile_file), "%d %lu\n", default_lineno, (unsigned long) (fse->profile.time * 1000000));
+	fprintf(XG(profile_file), "%d %lu\n", fse->profiler.lineno, (unsigned long) (fse->profile.time * 1000000));
 
 	/* update aggregate data */
 	if (XG(profiler_aggregate)) {
@@ -258,27 +298,27 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	/* dump call list */
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 	{
+		char *fl_ref = NULL, *fn_ref = NULL;
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 
-		if (call_entry->user_defined == XDEBUG_EXTERNAL) {
-			char *tmp_fl = NULL, *tmp_fn = NULL;
-			tmp_fl = get_filename_ref(call_entry->filename TSRMLS_CC);
-			tmp_fn = get_functionname_ref(call_entry->function TSRMLS_CC);
-			fprintf(XG(profile_file), "cfl=%s\n", tmp_fl);
-			fprintf(XG(profile_file), "cfn=%s\n", tmp_fn);
-			xdfree(tmp_fl);
-			xdfree(tmp_fn);
-		} else {
+		if (call_entry->user_defined == XDEBUG_INTERNAL) {
 			char *tmp_key = xdebug_sprintf("php::%s", call_entry->function);
-			char *tmp_fl = get_filename_ref("php:internal" TSRMLS_CC);
-			char *tmp_fn = get_functionname_ref(tmp_key TSRMLS_CC);
-			fprintf(XG(profile_file), "cfl=%s\n", tmp_fl);
-			fprintf(XG(profile_file), "cfn=%s\n", tmp_fn);
-			xdfree(tmp_fl);
-			xdfree(tmp_fn);
+
+			fl_ref = get_filename_ref("php:internal" TSRMLS_CC);
+			fn_ref = get_functionname_ref(tmp_key TSRMLS_CC);
+
 			xdfree(tmp_key);
+		} else {
+			fl_ref = get_filename_ref(call_entry->filename TSRMLS_CC);
+			fn_ref = get_functionname_ref(call_entry->function TSRMLS_CC);
 		}
-		
+
+		fprintf(XG(profile_file), "cfl=%s\n", fl_ref);
+		fprintf(XG(profile_file), "cfn=%s\n", fn_ref);
+
+		xdfree(fl_ref);
+		xdfree(fn_ref);
+
 		fprintf(XG(profile_file), "calls=1 0 0\n");
 		fprintf(XG(profile_file), "%d %lu\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 1000000));
 	}
@@ -286,16 +326,12 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	fflush(XG(profile_file));
 }
 
-
-void xdebug_profiler_function_internal_begin(function_stack_entry *fse TSRMLS_DC)
+void xdebug_profiler_free_function_details(function_stack_entry *fse TSRMLS_DC)
 {
-	xdebug_profiler_function_user_begin(fse TSRMLS_CC);
-}
-
-
-void xdebug_profiler_function_internal_end(function_stack_entry *fse TSRMLS_DC)
-{
-	xdebug_profiler_function_user_end(fse, NULL TSRMLS_CC);
+	xdfree(fse->profiler.funcname);
+	xdfree(fse->profiler.filename);
+	fse->profiler.funcname = NULL;
+	fse->profiler.filename = NULL;
 }
 
 #if PHP_VERSION_ID >= 70000
