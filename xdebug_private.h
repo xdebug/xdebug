@@ -196,10 +196,11 @@ typedef struct _function_stack_entry {
 
 	/* profiling properties */
 	xdebug_profile profile;
-#if 0
-	double       time_taken;	
-	unsigned int f_calls;
-#endif
+	struct {
+		int   lineno;
+		char *filename;
+		char *funcname;
+	} profiler;
 
 	/* misc properties */
 	int          refcount;

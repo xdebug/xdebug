@@ -1882,7 +1882,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_user_begin(fse TSRMLS_CC);
+		/* Calculate all elements for profile entries */
+		xdebug_profiler_add_function_details_user(fse, op_array TSRMLS_CC);
+		xdebug_profiler_function_begin(fse TSRMLS_CC);
 	}
 
 #if PHP_VERSION_ID < 70000
@@ -1898,14 +1900,16 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 #endif
 
+	if (XG(profiler_enabled)) {
+		xdebug_profiler_function_end(fse TSRMLS_CC);
+		xdebug_profiler_free_function_details(fse TSRMLS_CC);
+	}
+
 	/* Check which path has been used */
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
 		xdebug_code_coverage_end_of_function(op_array TSRMLS_CC);
 	}
 
-	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_user_end(fse, op_array TSRMLS_CC);
-	}
 	
 	if (XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_exit)) {
 		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
@@ -2036,7 +2040,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 	}
 
 	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_internal_begin(fse TSRMLS_CC);
+		xdebug_profiler_add_function_details_internal(fse TSRMLS_CC);
+		xdebug_profiler_function_begin(fse TSRMLS_CC);
 	}
 #if PHP_VERSION_ID >= 70000
 	if (xdebug_old_execute_internal) {
@@ -2059,7 +2064,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, int return
 #endif
 
 	if (XG(profiler_enabled)) {
-		xdebug_profiler_function_internal_end(fse TSRMLS_CC);
+		xdebug_profiler_function_end(fse TSRMLS_CC);
+		xdebug_profiler_free_function_details(fse TSRMLS_CC);
 	}
 
 	/* Restore SOAP situation if needed */
