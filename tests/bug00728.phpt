@@ -43,7 +43,7 @@ calls=1 0 0
 
 fl=(2)
 fn=(3) bankaccount->bar
-11 %d
+%r(11|4)%r %d
 cfl=(2)
 cfn=(2)
 calls=1 0 0
