@@ -27,10 +27,8 @@ xdebug.overload_var_dump=0
 	var_dump($cc[$file]);
 ?>
 --EXPECT--
-array(3) {
+array(2) {
   [5]=>
-  int(1)
-  [7]=>
   int(1)
   [9]=>
   int(1)
