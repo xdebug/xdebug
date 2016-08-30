@@ -13,7 +13,7 @@ matrix:
     - php: nightly
 
 before_script:
-  - phpenv config-rm xdebug.ini
+  - phpenv config-rm xdebug.ini || echo "xdebug not available"
   - ./.travis.scripts/compile.sh
 
 notifications:
