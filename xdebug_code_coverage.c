@@ -27,9 +27,6 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC);
-static char* xdebug_func_format(xdebug_func *func TSRMLS_DC);
-
 void xdebug_coverage_line_dtor(void *data)
 {
 	xdebug_coverage_line *line = (xdebug_coverage_line *) data;
@@ -801,7 +798,7 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 	}
 }
 
-static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC)
+void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC)
 {
 	int closure = 0;
 
@@ -831,7 +828,7 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 	}
 }
 
-static char* xdebug_func_format(xdebug_func *func TSRMLS_DC)
+char* xdebug_func_format(xdebug_func *func TSRMLS_DC)
 {
 	switch (func->type) {
 		case XFUNC_NORMAL:
@@ -960,7 +957,7 @@ void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 	zend_hash_apply_with_arguments(CG(class_table) TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, STR_NAME_VAL(op_array->filename));
 }
 
-void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
+void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name TSRMLS_DC)
 {
 	xdebug_path *path = xdebug_path_new(NULL);
 
@@ -975,13 +972,10 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 	XG(branches).last_branch_nr[XG(level)] = -1;
 }
 
-void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
+void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_name, char *function_name TSRMLS_DC)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	xdebug_path *path = xdebug_path_info_get_path_for_level(XG(paths_stack), XG(level) TSRMLS_CC);
-	char *file = (char*) STR_NAME_VAL(op_array->filename);
-	xdebug_func func_info;
-	char *function_name;
 
 	if (!path) {
 		return;
@@ -989,19 +983,8 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 
 	xdebug_create_key_for_path(path, &str);
 
-	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
-	function_name = xdebug_func_format(&func_info TSRMLS_CC);
+	xdebug_branch_info_mark_end_of_function_reached(file_name, function_name, str.d, str.l TSRMLS_CC);
 
-	if (func_info.class) {
-		xdfree(func_info.class);
-	}
-	if (func_info.function) {
-		xdfree(func_info.function);
-	}
-
-	xdebug_branch_info_mark_end_of_function_reached(file, function_name, str.d, str.l TSRMLS_CC);
-
-	xdfree(function_name);
 	xdfree(str.d);
 
 	if (path) {
