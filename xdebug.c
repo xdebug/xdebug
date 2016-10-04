@@ -1655,6 +1655,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	int                   clear = 0;
 	zval                 *return_val = NULL;
 #endif
+	xdebug_func           code_coverage_func_info;
+	char                 *code_coverage_function_name = NULL;
+	char                 *code_coverage_file_name = NULL;
 
 #if PHP_VERSION_ID >= 70000
 	/* For PHP 7, we need to reset the opline to the start, so that all opcode
@@ -1864,7 +1867,17 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_code_coverage_start_of_function(op_array TSRMLS_CC);
+		code_coverage_file_name = xdstrdup(STR_NAME_VAL(op_array->filename));
+		xdebug_build_fname_from_oparray(&code_coverage_func_info, op_array TSRMLS_CC);
+		code_coverage_function_name = xdebug_func_format(&code_coverage_func_info TSRMLS_CC);
+		xdebug_code_coverage_start_of_function(op_array, code_coverage_function_name TSRMLS_CC);
+
+		if (code_coverage_func_info.class) {
+			xdfree(code_coverage_func_info.class);
+		}
+		if (code_coverage_func_info.function) {
+			xdfree(code_coverage_func_info.function);
+		}
 	}
 
 	/* If we're in an eval, we need to create an ID for it. This ID however
@@ -1907,7 +1920,9 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 
 	/* Check which path has been used */
 	if (XG(do_code_coverage) && XG(code_coverage_unused)) {
-		xdebug_code_coverage_end_of_function(op_array TSRMLS_CC);
+		xdebug_code_coverage_end_of_function(op_array, code_coverage_file_name, code_coverage_function_name TSRMLS_CC);
+		xdfree(code_coverage_function_name);
+		xdfree(code_coverage_file_name);
 	}
 
 	

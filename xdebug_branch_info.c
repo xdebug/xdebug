@@ -349,16 +349,16 @@ void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info
 	}
 }
 
-void xdebug_branch_info_mark_reached(char *filename, char *function_name, zend_op_array *op_array, long opcode_nr TSRMLS_DC)
+void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_op_array *op_array, long opcode_nr TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
 	xdebug_branch_info *branch_info;
 
-	if (strcmp(XG(previous_mark_filename), filename) == 0) {
+	if (strcmp(XG(previous_mark_filename), file_name) == 0) {
 		file = XG(previous_mark_file);
 	} else {
-		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
+		if (!xdebug_hash_find(XG(code_coverage), file_name, strlen(file_name), (void *) &file)) {
 			return;
 		}
 		XG(previous_mark_filename) = file->name;
@@ -378,8 +378,8 @@ void xdebug_branch_info_mark_reached(char *filename, char *function_name, zend_o
 	branch_info = function->branch_info;
 
 	if (opcode_nr != 0 && xdebug_set_in(branch_info->entry_points, opcode_nr)) {
-		xdebug_code_coverage_end_of_function(op_array TSRMLS_CC);
-		xdebug_code_coverage_start_of_function(op_array TSRMLS_CC);
+		xdebug_code_coverage_end_of_function(op_array, file_name, function_name TSRMLS_CC);
+		xdebug_code_coverage_start_of_function(op_array, function_name TSRMLS_CC);
 	}
 		
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
