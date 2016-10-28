@@ -2097,7 +2097,7 @@ duplicate_opts:
 	return XDEBUG_ERROR_DUP_ARG;
 }
 
-static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval TSRMLS_DC)
+int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval TSRMLS_DC)
 {
 	char *cmd = NULL;
 	int res, ret = 0;

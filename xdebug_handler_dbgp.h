@@ -96,6 +96,8 @@ int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC)
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 char *xdebug_dbgp_get_revision(void);
 
+int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval TSRMLS_DC);
+
 #define xdebug_handler_dbgp {       \
 	xdebug_dbgp_init,               \
 	xdebug_dbgp_deinit,             \
