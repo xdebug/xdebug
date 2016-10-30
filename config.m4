@@ -8,10 +8,14 @@ if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([Check for supported PHP versions])
   PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
   PHP_XDEBUG_FOUND_VERNUM=`echo "${PHP_XDEBUG_FOUND_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 100 + [$]2) * 100 + [$]3;}'`
-  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "50400"; then
-    AC_MSG_ERROR([not supported. Need a PHP version >= 5.5.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "50500"; then
+    AC_MSG_ERROR([not supported. Need a PHP version >= 5.5.0 and < 7.2.0 (found $PHP_XDEBUG_FOUND_VERSION)])
   else
-    AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
+    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "70200"; then
+      AC_MSG_ERROR([not supported. Need a PHP version >= 5.5.0 and < 7.2.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+    else
+      AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
+    fi
   fi
   
   AC_DEFINE(HAVE_XDEBUG,1,[ ])

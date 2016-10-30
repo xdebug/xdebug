@@ -16,7 +16,7 @@ xdebug.force_error_reporting=0
 <?php
 $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
 
-function foo( $a, $b )
+function foo( $a )
 {
 	return $a;
 }
@@ -37,13 +37,13 @@ Version: %s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
 2	3	1	%f	%d
-2	4	0	%f	%d	foo	1		%sfunctrace_comp_2r.php	9	2	long	???
+2	4	0	%f	%d	foo	1		%sfunctrace_comp_2r.php	9	1	long
 2	4	1	%f	%d
 2	4	R			long
-2	5	0	%f	%d	foo	1		%sfunctrace_comp_2r.php	10	2	string(6)	???
+2	5	0	%f	%d	foo	1		%sfunctrace_comp_2r.php	10	1	string(6)
 2	5	1	%f	%d
 2	5	R			string(6)
-2	6	0	%f	%d	foo	1		%sfunctrace_comp_2r.php	11	2	string(19)	???
+2	6	0	%f	%d	foo	1		%sfunctrace_comp_2r.php	11	1	string(19)
 2	6	1	%f	%d
 2	6	R			string(19)
 2	7	0	%f	%d	foo	1		%sfunctrace_comp_2r.php	12	2	long	%r(bool|false)%r
