@@ -16,7 +16,7 @@ xdebug.force_error_reporting=0
 <?php
 $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
 
-function foo( $a, $b )
+function foo( $a )
 {
 	// do nothing really
 }

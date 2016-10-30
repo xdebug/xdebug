@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #212: coverage coverage inaccurate (1) (>= PHP 7.0, < PHP 7.1)
+Test for bug #212: coverage coverage inaccurate (1) (>= PHP 7.0, <= PHP 7.0.12)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n";
-if (!version_compare(phpversion(), "7.1", '<')) echo "skip < PHP 7.1 needed\n";
+if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0, <= PHP 7.0.12 needed\n";
+if (version_compare(phpversion(), "7.0.12", '>')) echo "skip >= PHP 7.0, <= PHP 7.0.12 needed\n";
 ?>
 --INI--
 xdebug.default_enable=1

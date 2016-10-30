@@ -49,7 +49,7 @@ calls=1 0 0
 
 fl=(2)
 fn=(4) bankaccount->bar
-11 %d
+4 %d
 cfl=(2)
 cfn=(3)
 calls=1 0 0
