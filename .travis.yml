@@ -9,6 +9,11 @@ php:
   - 7.1
   - nightly
 
+env:
+  matrix:
+    - USE_ZEND_ALLOC=1
+    - TEST_PHP_ARGS=-m SKIP_DBGP_TESTS=1
+
 matrix:
   allow_failures:
     - php: nightly
