@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2016-03-03</date>
- <time>08:47:08</time>
+ <date>2016-11-12</date>
+ <time>14:28:08</time>
  <version>
-  <release>2.4.0</release>
-  <api>2.4.0</api>
+  <release>2.5.0RC1</release>
+  <api>2.5.0RC1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,18 +45,23 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Mar 03, 2016 - xdebug 2.4.0
+Sat, Nov 12, 2016 - xdebug 2.5.0RC1
+
++ Added features:
+
+  - Implemented issue #998: Added support for IPv6 (Thomas Vanhaniemi)
+  - Implemented issue #1297: Initial PHP 7.1 support
 
 = Fixed bugs:
 
-  - Fixed issue #1258: Case in PHP 7.0 and code coverage
-  - Fixed issue #1261: segmentation fault in xdebug.so with PHP 7.0 version of
-    'pkgtools' due to spl_autoload()
-  - Fixed issue #1262: overload_var_dump=0 messes with xdebug_var_dump()
-  - Fixed issue #1266: xdebug_dump_superglobals() always dumps empty  stack on
-    PHP 7
-  - Fixed issue #1267: AIX build issues
-  - Fixed issue #1270: String parsing marked not covered with PHP 7
+  - Fixed issue #1295: Apache crashes (SIGSEGV) when trying to establish
+    connection when sockfd is large
+  - Fixed issue #1303: POLLRDHUP is not supported outside of Gnu/Linux
+  - Fixed issue #1331: Segfault in code coverage
+
+- Removed features:
+
+  - Support for PHP versions lower than PHP 5.5 has been dropped
  </notes>
 
  <contents>
@@ -165,6 +170,40 @@ Thu, Mar 03, 2016 - xdebug 2.4.0
  <changelog>
 
   <release>
+   <date>2016-08-02</date>
+   <time>11:47:08</time>
+   <version>
+    <release>2.4.1</release>
+    <api>2.4.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Aug 02, 2016 - xdebug 2.4.1
+
+= Fixed bugs:
+
+  - Fixed issue #1106: A thrown Exception after a class with __debugInfo gives
+    2 errors
+  - Fixed issue #1241: FAST_CALL/FAST_RET take #2
+  - Fixed issue #1246: Path and branch coverage should be initialised per
+    request, not globally
+  - Fixed issue #1263: Code coverage segmentation fault with opcache enabled
+  - Fixed issue #1277: Crash when using a userland function from RSHUTDOWN with
+    profiling enabled
+  - Fixed issue #1282: var_dump() of integers > 32 bit is broken on Windows
+  - Fixed issue #1288: Segfault when uncaught exception message does not
+    contain " in "
+  - Fixed issue #1291: Debugclient installation fails on Mac OS X
+  - Fixed issue #1326: Tracing and generators crashes with PHP 7.x
+  - Fixed issue #1333: Profiler accesses memory structures after freeing
+   </notes>
+  </release>
+
+  <release>
    <date>2016-01-25</date>
    <time>20:48:33</time>
    <version>
@@ -198,6 +237,34 @@ Mon, Jan 25, 2016 - xdebug 2.4.0RC4
     7.
   - Fixed issue #1250: Add PHP version descriptors to debugging log and profile
     files.
+   </notes>
+  </release>
+
+  <release>
+   <date>2016-03-03</date>
+   <time>08:47:08</time>
+   <version>
+    <release>2.4.0</release>
+    <api>2.4.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Mar 03, 2016 - xdebug 2.4.0
+
+= Fixed bugs:
+
+  - Fixed issue #1258: Case in PHP 7.0 and code coverage
+  - Fixed issue #1261: segmentation fault in xdebug.so with PHP 7.0 version of
+    'pkgtools' due to spl_autoload()
+  - Fixed issue #1262: overload_var_dump=0 messes with xdebug_var_dump()
+  - Fixed issue #1266: xdebug_dump_superglobals() always dumps empty  stack on
+    PHP 7
+  - Fixed issue #1267: AIX build issues
+  - Fixed issue #1270: String parsing marked not covered with PHP 7
    </notes>
   </release>
 
