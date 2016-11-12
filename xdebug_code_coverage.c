@@ -480,7 +480,7 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
 
-inline void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
+void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
