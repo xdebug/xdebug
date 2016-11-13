@@ -1,5 +1,3 @@
-sudo: false
-
 language: php
 
 php:
@@ -7,9 +5,17 @@ php:
   - 7.1
   - nightly
 
+env:
+  matrix:
+    -
+    - VALGRIND=1 SKIP_DBGP_TESTS=1
+
 matrix:
   allow_failures:
     - php: nightly
+
+install:
+  - if [ "$VALGRIND" -eq 1 ]; then sudo apt-get update -qq; sudo apt-get install -qq valgrind; export TEST_PHP_ARGS="-m"; valgrind --version; fi
 
 before_script:
   - phpenv config-rm xdebug.ini || echo "xdebug not available"
