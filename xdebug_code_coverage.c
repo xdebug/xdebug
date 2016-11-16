@@ -534,6 +534,9 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 #if PHP_VERSION_ID >= 50500
 		&& opcode.opcode != ZEND_FAST_CALL
 #endif
+#if PHP_VERSION_ID >= 50600
+		&& opcode.opcode != ZEND_RECV_VARIADIC
+#endif
 	) {
 		xdebug_count_line(fn, opcode.lineno, 1, deadcode TSRMLS_CC);
 	}
