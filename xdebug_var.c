@@ -931,7 +931,7 @@ static int xdebug_array_element_export(zval **zv TSRMLS_DC, int num_args, va_lis
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
-			xdebug_str_add(str, xdebug_sprintf("%ld => ", HASH_APPLY_NUMERIC(hash_key)), 1);
+			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " => ", HASH_APPLY_NUMERIC(hash_key)), 1);
 		} else { /* string key */
 			SIZETorINT newlen = 0;
 			char *tmp, *tmp2;
@@ -1354,7 +1354,7 @@ static int xdebug_array_element_export_text_ansi(zval **zv TSRMLS_DC, int num_ar
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
 
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
-			xdebug_str_add(str, xdebug_sprintf("[%ld] %s=>%s\n", HASH_APPLY_NUMERIC(hash_key), ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("[" XDEBUG_INT_FMT "] %s=>%s\n", HASH_APPLY_NUMERIC(hash_key), ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		} else { /* string key */
 			SIZETorINT newlen = 0;
 			char *tmp, *tmp2;
@@ -1789,7 +1789,7 @@ static int object_item_add_to_merged_hash(zval **zv TSRMLS_DC, int num_args, va_
 		item->name_len = HASH_APPLY_KEY_LEN(hash_key) - 1;
 		item->index = hash_key->h;
 	} else {
-		item->name = xdebug_sprintf("%ld", index);
+		item->name = xdebug_sprintf(XDEBUG_INT_FMT, index);
 		item->name_len = strlen(item->name);
 	}
 #else
@@ -1892,7 +1892,7 @@ static int xdebug_array_element_export_xml_node(zval **zv TSRMLS_DC, int num_arg
 				xdebug_str_addl(&full_name, "']", 2, 0);
 			}
 		} else {
-			name = xdebug_sprintf("%ld", HASH_APPLY_NUMERIC(hash_key));
+			name = xdebug_sprintf(XDEBUG_INT_FMT, HASH_APPLY_NUMERIC(hash_key));
 			name_len = strlen(name);
 			if (parent_name) {
 				xdebug_str_add(&full_name, xdebug_sprintf("%s[%s]", parent_name, name), 1);
@@ -1963,10 +1963,10 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 		} else { /* Numerical property name */
 			modifier = "public";
 
-			xdebug_xml_add_attribute_ex(node, "name", xdebug_sprintf("%ld", (*item)->index), 0, 1);
+			xdebug_xml_add_attribute_ex(node, "name", xdebug_sprintf(XDEBUG_INT_FMT, (*item)->index), 0, 1);
 
 			if (parent_name) {
-				full_name = xdebug_sprintf("%s%s%ld", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index);
+				full_name = xdebug_sprintf("%s%s" XDEBUG_INT_FMT, parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index);
 				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
 			}
 		}
@@ -2358,7 +2358,7 @@ static int xdebug_array_element_export_fancy(zval **zv TSRMLS_DC, int num_args, 
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
-			xdebug_str_add(str, xdebug_sprintf("%ld <font color='%s'>=&gt;</font> ", HASH_APPLY_NUMERIC(hash_key), COLOR_POINTER), 1);
+			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " <font color='%s'>=&gt;</font> ", HASH_APPLY_NUMERIC(hash_key), COLOR_POINTER), 1);
 		} else { /* string key */
 			xdebug_str_addl(str, "'", 1, 0);
 			tmp_str = xdebug_xmlize((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1, &newlen);
