@@ -59,17 +59,18 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 	int                        actually_connected;
 	struct sockaddr_in6        sa;
 	socklen_t                  size = sizeof(sa);
-	struct pollfd              ufds[1];
 #if WIN32|WINNT
+	WSAPOLLFD                  ufds[1] = {0};
 	WORD                       wVersionRequested;
 	WSADATA                    wsaData;
 	char                       optval = 1;
-	const char                 yes = 1;
+	u_long                     yes = 1;
 	u_long                     no = 0;
 
 	wVersionRequested = MAKEWORD(2, 2);
 	WSAStartup(wVersionRequested, &wsaData);
 #else
+	struct pollfd              ufds[1];
 	long                       optval = 1;
 #endif
 	
@@ -108,7 +109,10 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 
 		/* Put socket in non-blocking mode so we can use poll for timeouts */
 #ifdef WIN32
-		ioctlsocket(sockfd, FIONBIO, (u_long*)&yes);
+		status = ioctlsocket(sockfd, FIONBIO, &yes);
+		if (SOCKET_ERROR == status) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', FIONBIO: %d.\n", hostname, dport, WSAGetLastError());
+		}
 #else
 		fcntl(sockfd, F_SETFL, O_NONBLOCK);
 #endif
@@ -142,16 +146,27 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 			}
 
 			ufds[0].fd = sockfd;
+#if WIN32|WINNT
+			ufds[0].events = POLLIN | POLLOUT;
+#else
 			ufds[0].events = POLLIN | POLLOUT | POLLPRI;
+#endif
 			while (1) {
 				sockerror = poll(ufds, 1, timeout);
-				
+
+#if WIN32|WINNT
+				errno = WSAGetLastError();
+				if (errno == WSAEINPROGRESS || errno == WSAEWOULDBLOCK) {
+					/* XXX introduce retry count? */
+					continue;
+				}
+#endif
 				/* If an error occured when doing the poll */
 				if (sockerror == SOCK_ERR) {
 #if WIN32|WINNT
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll error: %d (%d, %d).\n", hostname, dport, WSAGetLastError(), sockerror, errno);
 #else
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll error: %s (%d).\n", hostname, dport, strerror(errno), sockerror);
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -166,9 +181,9 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 				/* If the poll was successful but an error occured */
 				if (ufds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 #if WIN32|WINNT
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', WSAPoll success, but error: %d (%d).\n", hostname, dport, WSAGetLastError(), ufds[0].revents);
 #else
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
+					XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', poll success, but error: %s (%d).\n", hostname, dport, strerror(errno), ufds[0].revents);
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -220,7 +235,10 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 	/* If we got a socket, set the option "No delay" to true (1) */
 	if (sockfd > 0) {
 #ifdef WIN32
-		ioctlsocket(sockfd, FIONBIO, &no);
+		status = ioctlsocket(sockfd, FIONBIO, &no);
+		if (SOCKET_ERROR == status) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', FIONBIO: %d.\n", hostname, dport, WSAGetLastError());
+		}
 #else
 		fcntl(sockfd, F_SETFL, 0);
 #endif
