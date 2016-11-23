@@ -457,7 +457,7 @@ static int breakpoint_admin_add(xdebug_con *context, int type, char *key)
 	TSRMLS_FETCH();
 
 	XG(breakpoint_count)++;
-	admin->id   = getpid() * 10000 + XG(breakpoint_count);
+	admin->id   = ((getpid() & 0x1ffff) * 10000) + XG(breakpoint_count);
 	admin->type = type;
 	admin->key  = xdstrdup(key);
 
