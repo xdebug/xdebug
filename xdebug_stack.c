@@ -114,7 +114,9 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		return;
 	}
 
-#if PHP_VERSION_ID >= 70000
+#if PHP_VERSION_ID >= 70100
+	if (!(ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+#elif PHP_VERSION_ID >= 70000
 	if (!EG(current_execute_data)->symbol_table) {
 #else
 	if (!EG(active_symbol_table)) {

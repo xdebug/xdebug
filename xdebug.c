@@ -1842,7 +1842,13 @@ void xdebug_execute(zend_op_array *op_array TSRMLS_DC)
 	fse->execute_data = EG(current_execute_data);
 #endif
 #if PHP_VERSION_ID >= 70000
+# if PHP_VERSION_ID >= 70100
+	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
+		fse->symbol_table = EG(current_execute_data)->symbol_table;
+	}
+# else
 	fse->symbol_table = EG(current_execute_data)->symbol_table;
+# endif
 	if (Z_OBJ(EG(current_execute_data)->This)) {
 		fse->This = &EG(current_execute_data)->This;
 	} else {
@@ -2316,7 +2322,9 @@ PHP_FUNCTION(xdebug_debug_zval)
 		WRONG_PARAM_COUNT;
 	}
 
-#if PHP_VERSION_ID >= 70000
+#if PHP_VERSION_ID >= 70100
+	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+#elif PHP_VERSION_ID >= 70000
 	if (!EG(current_execute_data)->prev_execute_data->symbol_table) {
 #else
 	if (!EG(active_symbol_table)) {
@@ -2388,7 +2396,9 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 		WRONG_PARAM_COUNT;
 	}
 
-#if PHP_VERSION_ID >= 70000
+#if PHP_VERSION_ID >= 70100
+	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+#elif PHP_VERSION_ID >= 70000
 	if (!EG(current_execute_data)->prev_execute_data->symbol_table) {
 #else
 	if (!EG(active_symbol_table)) {
