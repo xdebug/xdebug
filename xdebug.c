@@ -459,6 +459,9 @@ void xdebug_env_config(TSRMLS_D)
 			continue;
 		}
 
+		if (strcasecmp(envvar, "remote_connect_back") == 0) {
+			name = "xdebug.remote_connect_back";
+		} else
 		if (strcasecmp(envvar, "remote_enable") == 0) {
 			name = "xdebug.remote_enable";
 		} else
