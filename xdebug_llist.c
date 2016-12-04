@@ -170,7 +170,7 @@ size_t xdebug_llist_count(xdebug_llist *l)
 
 void xdebug_llist_empty(xdebug_llist *l, void *user)
 {
-	while (xdebug_llist_count(l) > 0) {
+	while (xdebug_llist_count(l) > 0 && XDEBUG_LLIST_TAIL(l)) {
 		xdebug_llist_remove(l, XDEBUG_LLIST_TAIL(l), user);
 	}
 }
