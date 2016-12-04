@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2016-11-12</date>
- <time>14:28:08</time>
+ <date>2016-12-04</date>
+ <time>18:55:08</time>
  <version>
-  <release>2.5.0RC1</release>
-  <api>2.5.0RC1</api>
+  <release>2.5.0</release>
+  <api>2.5.0</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,23 +45,26 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sat, Nov 12, 2016 - xdebug 2.5.0RC1
+Sun, Dec  4, 2016 - xdebug 2.5.0
 
 + Added features:
 
-  - Implemented issue #998: Added support for IPv6 (Thomas Vanhaniemi)
-  - Implemented issue #1297: Initial PHP 7.1 support
+  - Implemented issue #1232: add memory delta to HTML traces
+  - Implemented issue #1365: Allow remote_connect_back to be set through
+    XDEBUG_CONFIG
 
 = Fixed bugs:
 
-  - Fixed issue #1295: Apache crashes (SIGSEGV) when trying to establish
-    connection when sockfd is large
-  - Fixed issue #1303: POLLRDHUP is not supported outside of Gnu/Linux
-  - Fixed issue #1331: Segfault in code coverage
-
-- Removed features:
-
-  - Support for PHP versions lower than PHP 5.5 has been dropped
+  - Fixed issue #1168: Added defensive check to prevent infinite loop
+  - Fixed issue #1242: Xdebug on Windows with Eclipse has issues with
+    breakpoint IDs
+  - Fixed issue #1343: Wrong values of numerical keys outside 32bit range
+  - Fixed issue #1357: Function signature using variadics is reported as being
+    not executed
+  - Fixed issue #1361: Remote debugging connection issues with Windows (Anatol
+    Belski)
+  - Fixed issue #1373: Crash in zend_hash_apply_with_arguments when debugging,
+    due to unset symbol table
  </notes>
 
  <contents>
@@ -168,6 +171,39 @@ Sat, Nov 12, 2016 - xdebug 2.5.0RC1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2016-11-12</date>
+   <time>14:28:08</time>
+   <version>
+    <release>2.5.0RC1</release>
+    <api>2.5.0RC1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Nov 12, 2016 - xdebug 2.5.0RC1
+
++ Added features:
+
+  - Implemented issue #998: Added support for IPv6 (Thomas Vanhaniemi)
+  - Implemented issue #1297: Initial PHP 7.1 support
+
+= Fixed bugs:
+
+  - Fixed issue #1295: Apache crashes (SIGSEGV) when trying to establish
+    connection when sockfd is large
+  - Fixed issue #1303: POLLRDHUP is not supported outside of Gnu/Linux
+  - Fixed issue #1331: Segfault in code coverage
+
+- Removed features:
+
+  - Support for PHP versions lower than PHP 5.5 has been dropped
+   </notes>
+  </release>
 
   <release>
    <date>2016-08-02</date>
