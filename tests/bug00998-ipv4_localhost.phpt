@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #998: Test that Xdebug connects back on IPv4 with localhost as the remote host
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

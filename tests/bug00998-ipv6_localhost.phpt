@@ -2,6 +2,7 @@
 Test for bug #998: Test that Xdebug connects back on IPv6 with localhost as the remote host
 --SKIPIF--
 <?php
+if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
 require 'dbgp/dbgpclient.php';
 if (!DebugClientIPv6::isSupported()) echo "skip IPv6 support is not configured.\n";
 ?>
