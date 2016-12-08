@@ -201,11 +201,11 @@ function dbgpRun( $data, $commands, array $ini_options = null, $flags = XDEBUG_D
 {
 	if ( $flags == XDEBUG_DBGP_IPV6 )
 	{
-		$t = new DebugClient();
+		$t = new DebugClientIPv6();
 	}
 	else
 	{
-		$t = new DebugClientIPv6();
+		$t = new DebugClient();
 	}
 
 	$t->runTest( $data, $commands, $ini_options );
