@@ -66,8 +66,10 @@ struct _xdebug_con {
 
 	int                    do_step;
 	int                    do_next;
-	int                    do_finish;
 	int                    next_level;
+	int                    do_finish;
+	int                    finish_level;
+	int                    finish_func_nr;
 };
 
 #define XDEBUG_HIT_DISABLED       0

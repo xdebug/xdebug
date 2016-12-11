@@ -1071,9 +1071,11 @@ DBGP_FUNC(step_out)
 	XG(context).do_finish = 1;
 
 	if ((fse = xdebug_get_stack_tail(TSRMLS_C))) {
-		XG(context).next_level = fse->level - 1;
+		XG(context).finish_level = fse->level;
+		XG(context).finish_func_nr = fse->function_nr;
 	} else {
-		XG(context).next_level = -1;
+		XG(context).finish_level = -1;
+		XG(context).finish_func_nr = -1;
 	}
 }
 
