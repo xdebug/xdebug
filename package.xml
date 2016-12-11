@@ -106,6 +106,7 @@ Sun, Dec  4, 2016 - xdebug 2.5.0
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
    <file name="LICENSE" role="doc" />
+   <file name="xdebug.ini" role="doc" />
    <file name="Makefile.frag" role="src" />
    <file name="Makefile.in" role="src" />
    <file name="php_xdebug.h" role="src" />
