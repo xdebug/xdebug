@@ -2587,6 +2587,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	int                   lineno;
 	char                 *file;
 	int                   level = 0;
+	int                   func_nr = 0;
 	TSRMLS_FETCH();
 
 	if (!EG(current_execute_data)) {
@@ -2612,16 +2613,25 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			}
 		}
 
-		/* Get latest stack level */
+		/* Get latest stack level and function number */
 		if (XG(stack)) {
 			le = XDEBUG_LLIST_TAIL(XG(stack));
 			fse = XDEBUG_LLIST_VALP(le);
 			level = fse->level;
+			func_nr = fse->function_nr;
 		} else {
 			level = 0;
+			func_nr = 0;
 		}
-		
-		if (XG(context).do_finish && XG(context).next_level == level) { /* Check for "finish" */
+
+		/* Check for "finish" */
+		if (
+			XG(context).do_finish &&
+			(
+				(level < XG(context).finish_level) ||
+				((level == XG(context).finish_level) && (func_nr > XG(context).finish_func_nr))
+			)
+		) {
 			XG(context).do_finish = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
@@ -2631,7 +2641,8 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			return;
 		}
 
-		if (XG(context).do_next && XG(context).next_level >= level) { /* Check for "next" */
+		/* Check for "next" */
+		if (XG(context).do_next && XG(context).next_level >= level) {
 			XG(context).do_next = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
@@ -2641,7 +2652,8 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			return;
 		}
 
-		if (XG(context).do_step) { /* Check for "step" */
+		/* Check for "step" */
+		if (XG(context).do_step) {
 			XG(context).do_step = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {

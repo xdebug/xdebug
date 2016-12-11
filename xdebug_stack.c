@@ -1335,6 +1335,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 #endif
 
 	XG(function_count)++;
+	tmp->function_nr = XG(function_count);
 #if PHP_VERSION_ID >= 70000
 	{
 		zend_execute_data *ptr = edata;

@@ -15,6 +15,7 @@ $commands = array(
 	'step_into',
 	'step_out',
 	'step_into',
+	'detach',
 );
 
 dbgpRun( $data, $commands );
@@ -41,8 +42,12 @@ dbgpRun( $data, $commands );
 
 -> step_out -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_out" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file:///%sxdebug-dbgp-test.php" lineno="23"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_out" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file:///%sxdebug-dbgp-test.php" lineno="6"></xdebug:message></response>
 
 -> step_into -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="6" status="stopping" reason="ok"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file:///%sxdebug-dbgp-test.php" lineno="9"></xdebug:message></response>
+
+-> detach -i 7
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="detach" transaction_id="7" status="stopping" reason="ok"></response>
