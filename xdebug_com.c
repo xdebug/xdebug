@@ -26,6 +26,7 @@
 # include <sys/poll.h>
 # include <unistd.h>
 # include <sys/socket.h>
+# include <sys/un.h>
 # include <netinet/tcp.h>
 # include <netdb.h>
 #else
@@ -45,6 +46,29 @@
 #include "xdebug_com.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+
+#if !WIN32 && !WINNT
+static int xdebug_create_socket_unix(const char *path TSRMLS_DC)
+{
+	struct sockaddr_un sa;
+	int sockfd;
+
+	if ((sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == SOCK_ERR) {
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for 'unix://%s', socket: %s.\n", path, strerror(errno));
+		return SOCK_ERR;
+	}
+
+	sa.sun_family = AF_UNIX;
+	strncpy(sa.sun_path, path, sizeof(sa.sun_path) - 1);
+	if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) < 0) {
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for 'unix://%s', connect: %s.\n", path, strerror(errno));
+		SCLOSE(sockfd);
+		return (errno == EACCES) ? SOCK_ACCESS_ERR : SOCK_ERR;
+	}
+
+	return sockfd;
+}
+#endif
 
 int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 {
@@ -73,7 +97,16 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 	struct pollfd              ufds[1];
 	long                       optval = 1;
 #endif
-	
+
+	if (!strncmp(hostname, "unix://", strlen("unix://"))) {
+#if WIN32|WINNT
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s', Unix domain socket not supported.\n", hostname);
+		return SOCK_ERR;
+#else
+		return xdebug_create_socket_unix(hostname + strlen("unix://") TSRMLS_CC);
+#endif
+	}
+
 	/* Make a string of the port number that can be used with getaddrinfo */
 	sprintf(sport, "%d", dport);
 
