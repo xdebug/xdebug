@@ -23,5 +23,5 @@ foo($object);
 Warning: Missing argument 2 for foo(), called in %sbug00987-004.php on line 8 and defined in %sbug00987-004.php on line 4
 
 Call Stack:
-    %f     %d   1. {main}() %sbug00987-004.php:0
-    %f     %d   2. foo($a = class stdClass { public $key = 'value'; public $1 = 0; public $-4 = 'foo'; public $3 = FALSE }, $b = ???) %sbug00987-004.php:8
+%w%f %w%d   1. {main}() %sbug00987-004.php:0
+%w%f %w%d   2. foo($a = class stdClass { public $key = 'value'; public $1 = 0; public $-4 = 'foo'; public $3 = FALSE }, $b = ???) %sbug00987-004.php:8
