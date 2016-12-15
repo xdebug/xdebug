@@ -910,7 +910,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	efree(buffer);
 }
 
-/* {{{ proto array xdebug_print_function_stack([string message [, int options])
+/* {{{ proto void xdebug_print_function_stack([string message [, int options])
    Displays a stack trace */
 PHP_FUNCTION(xdebug_print_function_stack)
 {
@@ -1003,7 +1003,7 @@ PHP_FUNCTION(xdebug_call_function)
 }
 /* }}} */
 
-/* {{{ proto string xdebug_call_line()
+/* {{{ proto int xdebug_call_line()
    Returns the line number where the current function was called from. */
 PHP_FUNCTION(xdebug_call_line)
 {
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(xdebug_call_line)
 }
 /* }}} */
 
-/* {{{ proto int xdebug_call_file()
+/* {{{ proto string xdebug_call_file()
    Returns the filename where the current function was called from. */
 PHP_FUNCTION(xdebug_call_file)
 {
@@ -1655,7 +1655,7 @@ int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
 	return 0;
 }
 
-/* {{{ proto integet xdebug_get_stack_depth()
+/* {{{ proto int xdebug_get_stack_depth()
    Returns the stack depth */
 PHP_FUNCTION(xdebug_get_stack_depth)
 {

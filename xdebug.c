@@ -106,54 +106,119 @@ static SIZETorINT (*xdebug_orig_ub_write)(const char *string, SIZETorUINT len TS
 
 static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC);
 
+ZEND_BEGIN_ARG_INFO_EX(xdebug_void_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_print_function_stack_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, message)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_call_class_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, depth)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_call_function_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, depth)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_call_file_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, depth)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_call_line_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, depth)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_var_dump_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_debug_zval_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_debug_zval_stdout_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_start_trace_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, fname)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_dump_aggr_profiling_data_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, prefix)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_get_collected_errors_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, clear)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_start_function_monitor_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
+	ZEND_ARG_INFO(0, functions_to_monitor)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_get_monitored_functions_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, clear)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_start_code_coverage_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_stop_code_coverage_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, cleanup)
+ZEND_END_ARG_INFO()
+
 zend_function_entry xdebug_functions[] = {
-	PHP_FE(xdebug_get_stack_depth,       NULL)
-	PHP_FE(xdebug_get_function_stack,    NULL)
-	PHP_FE(xdebug_get_formatted_function_stack,    NULL)
-	PHP_FE(xdebug_print_function_stack,  NULL)
-	PHP_FE(xdebug_get_declared_vars,     NULL)
-	PHP_FE(xdebug_call_class,            NULL)
-	PHP_FE(xdebug_call_function,         NULL)
-	PHP_FE(xdebug_call_file,             NULL)
-	PHP_FE(xdebug_call_line,             NULL)
+	PHP_FE(xdebug_get_stack_depth,       xdebug_void_args)
+	PHP_FE(xdebug_get_function_stack,    xdebug_void_args)
+	PHP_FE(xdebug_get_formatted_function_stack,    xdebug_void_args)
+	PHP_FE(xdebug_print_function_stack,  xdebug_print_function_stack_args)
+	PHP_FE(xdebug_get_declared_vars,     xdebug_void_args)
+	PHP_FE(xdebug_call_class,            xdebug_call_class_args)
+	PHP_FE(xdebug_call_function,         xdebug_call_function_args)
+	PHP_FE(xdebug_call_file,             xdebug_call_file_args)
+	PHP_FE(xdebug_call_line,             xdebug_call_line_args)
 
-	PHP_FE(xdebug_var_dump,              NULL)
-	PHP_FE(xdebug_debug_zval,            NULL)
-	PHP_FE(xdebug_debug_zval_stdout,     NULL)
+	PHP_FE(xdebug_var_dump,              xdebug_var_dump_args)
+	PHP_FE(xdebug_debug_zval,            xdebug_debug_zval_args)
+	PHP_FE(xdebug_debug_zval_stdout,     xdebug_debug_zval_stdout_args)
 
-	PHP_FE(xdebug_enable,                NULL)
-	PHP_FE(xdebug_disable,               NULL)
-	PHP_FE(xdebug_is_enabled,            NULL)
-	PHP_FE(xdebug_break,                 NULL)
+	PHP_FE(xdebug_enable,                xdebug_void_args)
+	PHP_FE(xdebug_disable,               xdebug_void_args)
+	PHP_FE(xdebug_is_enabled,            xdebug_void_args)
+	PHP_FE(xdebug_break,                 xdebug_void_args)
 
-	PHP_FE(xdebug_start_trace,           NULL)
-	PHP_FE(xdebug_stop_trace,            NULL)
-	PHP_FE(xdebug_get_tracefile_name,    NULL)
+	PHP_FE(xdebug_start_trace,           xdebug_start_trace_args)
+	PHP_FE(xdebug_stop_trace,            xdebug_void_args)
+	PHP_FE(xdebug_get_tracefile_name,    xdebug_void_args)
 
-	PHP_FE(xdebug_get_profiler_filename, NULL)
-	PHP_FE(xdebug_dump_aggr_profiling_data, NULL)
-	PHP_FE(xdebug_clear_aggr_profiling_data, NULL)
+	PHP_FE(xdebug_get_profiler_filename, xdebug_void_args)
+	PHP_FE(xdebug_dump_aggr_profiling_data, xdebug_dump_aggr_profiling_data_args)
+	PHP_FE(xdebug_clear_aggr_profiling_data, xdebug_void_args)
 
-	PHP_FE(xdebug_memory_usage,          NULL)
-	PHP_FE(xdebug_peak_memory_usage,     NULL)
-	PHP_FE(xdebug_time_index,            NULL)
+	PHP_FE(xdebug_memory_usage,          xdebug_void_args)
+	PHP_FE(xdebug_peak_memory_usage,     xdebug_void_args)
+	PHP_FE(xdebug_time_index,            xdebug_void_args)
 
-	PHP_FE(xdebug_start_error_collection, NULL)
-	PHP_FE(xdebug_stop_error_collection, NULL)
-	PHP_FE(xdebug_get_collected_errors,  NULL)
+	PHP_FE(xdebug_start_error_collection, xdebug_void_args)
+	PHP_FE(xdebug_stop_error_collection, xdebug_void_args)
+	PHP_FE(xdebug_get_collected_errors,  xdebug_get_collected_errors_args)
 
-	PHP_FE(xdebug_start_function_monitor, NULL)
-	PHP_FE(xdebug_stop_function_monitor, NULL)
-	PHP_FE(xdebug_get_monitored_functions, NULL)
+	PHP_FE(xdebug_start_function_monitor, xdebug_start_function_monitor_args)
+	PHP_FE(xdebug_stop_function_monitor, xdebug_void_args)
+	PHP_FE(xdebug_get_monitored_functions, xdebug_get_monitored_functions_args)
 
-	PHP_FE(xdebug_start_code_coverage,   NULL)
-	PHP_FE(xdebug_stop_code_coverage,    NULL)
-	PHP_FE(xdebug_get_code_coverage,     NULL)
-	PHP_FE(xdebug_code_coverage_started, NULL)
-	PHP_FE(xdebug_get_function_count,    NULL)
+	PHP_FE(xdebug_start_code_coverage,   xdebug_start_code_coverage_args)
+	PHP_FE(xdebug_stop_code_coverage,    xdebug_stop_code_coverage_args)
+	PHP_FE(xdebug_get_code_coverage,     xdebug_void_args)
+	PHP_FE(xdebug_code_coverage_started, xdebug_void_args)
+	PHP_FE(xdebug_get_function_count,    xdebug_void_args)
 
-	PHP_FE(xdebug_dump_superglobals,     NULL)
-	PHP_FE(xdebug_get_headers,           NULL)
+	PHP_FE(xdebug_dump_superglobals,     xdebug_void_args)
+	PHP_FE(xdebug_get_headers,           xdebug_void_args)
 	{NULL, NULL, 0, 0, 0}
 };
 
