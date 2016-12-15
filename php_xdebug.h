@@ -291,7 +291,7 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #else
 #define XG(v) (xdebug_globals.v)
 #endif
-	
+
 #endif
 
 

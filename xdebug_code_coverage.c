@@ -399,7 +399,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCOD
 
 	if (XG(do_code_coverage)) {
 		xdebug_print_opcode_info('=', execute_data, cur_opcode TSRMLS_CC);
-	
+
 		if (do_cc) {
 			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 		}
@@ -859,7 +859,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	if (op_array->last >= 3 && op_array->opcodes[op_array->last - 3].opcode == ZEND_RAISE_ABSTRACT_ERROR) {
 #endif
 		return;
-	}	
+	}
 
 	/* Run dead code analysis if requested */
 	if (XG(code_coverage_dead_code_analysis) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {

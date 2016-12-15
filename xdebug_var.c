@@ -590,7 +590,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 				goto cleanup;
 			}
 			element_length = name_length;
-					
+
 			/* All right, time for a mega hack. It's SplObjectStorage access time! */
 			if (strncmp(ccn, "SplObjectStorage", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
 				element = NULL;
@@ -935,7 +935,7 @@ static int xdebug_array_element_export(zval **zv TSRMLS_DC, int num_args, va_lis
 		} else { /* string key */
 			SIZETorINT newlen = 0;
 			char *tmp, *tmp2;
-			
+
 			tmp = xdebug_str_to_str((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
 			tmp2 = xdebug_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
@@ -1358,7 +1358,7 @@ static int xdebug_array_element_export_text_ansi(zval **zv TSRMLS_DC, int num_ar
 		} else { /* string key */
 			SIZETorINT newlen = 0;
 			char *tmp, *tmp2;
-			
+
 			tmp = xdebug_str_to_str((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
 			tmp2 = xdebug_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
 			if (tmp) {
@@ -1404,14 +1404,14 @@ static int xdebug_object_element_export_text_ansi(zval **zv TSRMLS_DC, int num_a
 
 			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &class_name);
 			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
-			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
+			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET,
 			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 
 			xdfree(prop_name);
 			xdfree(class_name);
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("%s%spublic%s%s ${%d} %s=>%s\n",
-			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET, 
+			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET,
 			               HASH_APPLY_NUMERIC(hash_key), ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		}
 		xdebug_var_export_text_ansi(zv, str, mode, level + 1, debug_zval, options TSRMLS_CC);
@@ -1439,7 +1439,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	if (!struc || !(*struc)) {
 		return;
 	}
-	
+
 	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
 
 #if PHP_VERSION_ID >= 70000
@@ -1881,7 +1881,7 @@ static int xdebug_array_element_export_xml_node(zval **zv TSRMLS_DC, int num_arg
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		node = xdebug_xml_node_init("property");
-	
+
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) { /* string key */
 			name = xdstrndup(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key));
 			name_len = HASH_APPLY_KEY_LEN(hash_key) - 1;
@@ -2879,7 +2879,7 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 				);
 			}
 			break;
-		}	
+		}
 
 		case XFUNC_EVAL:
 			return xdstrdup("eval");
@@ -2909,4 +2909,3 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags TSRMLS_DC)
 			return xdstrdup("{unknown}");
 	}
 }
-

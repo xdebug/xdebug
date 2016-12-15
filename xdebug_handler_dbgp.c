@@ -777,7 +777,7 @@ DBGP_FUNC(breakpoint_set)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	} else {
 		if (
-			(strcmp(CMD_OPTION('t'), "line") != 0) && 
+			(strcmp(CMD_OPTION('t'), "line") != 0) &&
 			(strcmp(CMD_OPTION('t'), "conditional") != 0) &&
 			(strcmp(CMD_OPTION('t'), "call") != 0) &&
 			(strcmp(CMD_OPTION('t'), "return") != 0) &&
@@ -832,14 +832,14 @@ DBGP_FUNC(breakpoint_set)
 
 		/* Perhaps we have a break condition */
 		if (CMD_OPTION('-')) {
-			brk_info->condition = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length); 
+			brk_info->condition = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION('-'), strlen(CMD_OPTION('-')), &new_length);
 		}
 
 		tmp_name = xdebug_sprintf("%s$%lu", brk_info->file, brk_info->lineno);
 		brk_id = breakpoint_admin_add(context, BREAKPOINT_TYPE_LINE, tmp_name);
 		xdfree(tmp_name);
 		xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) brk_info);
-	} else 
+	} else
 
 	if ((strcmp(CMD_OPTION('t'), "call") == 0) || (strcmp(CMD_OPTION('t'), "return") == 0)) {
 		if (strcmp(CMD_OPTION('t'), "call") == 0) {
@@ -975,7 +975,7 @@ DBGP_FUNC(eval)
 	}
 
 	options = (xdebug_var_export_options*) context->options;
-	
+
 	if (CMD_OPTION('p')) {
 		options->runtime[0].page = strtol(CMD_OPTION('p'), NULL, 10);
 	} else {
@@ -1181,7 +1181,7 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_text(*retval, xdstrdup("0"));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
-		
+
 		XDEBUG_STR_CASE("language_version")
 			xdebug_xml_add_text(*retval, xdstrdup(PHP_VERSION));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
@@ -1814,7 +1814,7 @@ next_constant:
 		XG(This)                = NULL;
 		return 0;
 	}
-	
+
 	return 1;
 }
 
@@ -1885,7 +1885,7 @@ DBGP_FUNC(context_get)
 	int                        context_id = 0;
 	int                        depth = 0;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
-	
+
 	if (CMD_OPTION('c')) {
 		context_id = atol(CMD_OPTION('c'));
 	}
@@ -1894,7 +1894,7 @@ DBGP_FUNC(context_get)
 	}
 	/* Always reset to page = 0, as it might have been modified by property_get or property_value */
 	options->runtime[0].page = 0;
-	
+
 	res = attach_context_vars(*retval, options, context_id, depth, attach_used_var_with_contents TSRMLS_CC);
 	switch (res) {
 		case 1:
@@ -2084,7 +2084,7 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 			case STATE_SKIP_CHAR:
 				state = STATE_NORMAL;
 				break;
-				
+
 		}
 	} while (*ptr);
 	*ret_args = args;
@@ -2190,7 +2190,7 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
 	char *option;
 	int   ret;
 	xdebug_xml_node *response;
-	
+
 	do {
 		option = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
 		if (!option) {
@@ -2208,7 +2208,7 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
 
 		free(option);
 	} while (0 == ret);
-	
+
 	if (bail && XG(status) == DBGP_STATUS_STOPPED) {
 		zend_bailout();
 	}
@@ -2326,10 +2326,10 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		}
 		xdebug_xml_add_attribute_ex(response, "status", xdebug_dbgp_status_strings[XG(status)], 0, 0);
 		xdebug_xml_add_attribute_ex(response, "reason", xdebug_dbgp_reason_strings[XG(reason)], 0, 0);
-	
+
 		send_message(context, response TSRMLS_CC);
 		xdebug_xml_node_dtor(response);
-	
+
 		xdebug_dbgp_cmdloop(context, 0 TSRMLS_CC);
 	}
 
@@ -2383,7 +2383,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	}
 /*
 	runtime_allowed = (
-		(type != E_ERROR) && 
+		(type != E_ERROR) &&
 		(type != E_CORE_ERROR) &&
 		(type != E_COMPILE_ERROR) &&
 		(type != E_USER_ERROR)

@@ -107,4 +107,3 @@ char *xdebug_dbgp_get_revision(void);
 }
 
 #endif
-

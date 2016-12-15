@@ -22,14 +22,14 @@
 /* Memory allocators */
 #if 0
 #define xdmalloc    emalloc
-#define xdcalloc    ecalloc	
+#define xdcalloc    ecalloc
 #define xdrealloc   erealloc
 #define xdfree      efree
 #define xdstrdup    estrdup
 #define xdstrndup   estrndup
-#else  
+#else
 #define xdmalloc    malloc
-#define xdcalloc    calloc	
+#define xdcalloc    calloc
 #define xdrealloc   realloc
 #define xdfree      free
 #define xdstrdup    strdup
