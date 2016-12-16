@@ -619,6 +619,12 @@ void xdebug_init_debugger(TSRMLS_D)
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'REMOTE_ADDR'.\n");
 			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"), remote_addr);
 		}
+
+		if (remote_addr && strstr(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), "://")) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Invalid remote address provided containing URI spec '%s'.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr));
+			remote_addr = NULL;
+		}
+
 		if (remote_addr) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port) TSRMLS_CC);
