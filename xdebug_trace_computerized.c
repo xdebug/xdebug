@@ -188,7 +188,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 
 	/* Trailing \n */
 	xdebug_str_add(&str, "\n", 0);
-	
+
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
 	xdfree(str.d);

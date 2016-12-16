@@ -217,7 +217,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 	}
 
 	xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", fse->filename, fse->lineno), 1);
-	
+
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
 

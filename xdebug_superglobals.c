@@ -197,7 +197,7 @@ void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str)
 	tok = strtok(str, sep);
 	while (tok != NULL) {
 		char *p = tok + strlen(tok) - 1;
-		
+
 		while ((*tok == ' ') || (*tok == '\t')) {
 			tok++;
 		}

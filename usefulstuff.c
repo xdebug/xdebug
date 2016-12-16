@@ -126,7 +126,7 @@ char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end)
 	return ret->d;
 }
 
-void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit) 
+void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit)
 {
 	char *p1, *p2, *endp;
 
@@ -168,7 +168,7 @@ char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end)
 
 	/* let end point to the last character where needle may start */
 	end -= needle_len;
-	
+
 	while (p <= end) {
 		while (*p != first)
 			if (++p > end)
@@ -405,7 +405,7 @@ long xdebug_crc32(const char *string, int str_len)
 {
 	unsigned int crc = ~0;
 	int len;
-	
+
 	len = 0 ;
 	for (len += str_len; str_len--; ++string) {
 	    XDEBUG_CRC32(crc, *string);
@@ -549,7 +549,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char       cwd[128];
 	TSRMLS_FETCH();
-	
+
 	while (*format)
 	{
 		if (*format != '%') {
@@ -567,14 +567,14 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case 'p': /* pid */
 					xdebug_str_add(&fname, xdebug_sprintf("%ld", getpid()), 1);
 					break;
-				
+
 				case 'r': /* random number */
 					xdebug_str_add(&fname, xdebug_sprintf("%06x", (long) (1000000 * php_combined_lcg(TSRMLS_C))), 1);
 					break;
 
 				case 's': { /* script fname */
 					char *char_ptr, *script_name_tmp;
-				
+
 					/* we do not always have script_name available, so if we
 					 * don't have it and this format specifier is used then we
 					 * simple do nothing for this specifier */
@@ -605,9 +605,9 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 
 				case 'u': { /* timestamp (in microseconds) */
 					char *char_ptr, *utime = xdebug_sprintf("%F", xdebug_get_utime());
-					
+
 					/* Replace . with _ (or should it be nuked?) */
-					char_ptr = strrchr(utime, '.');  
+					char_ptr = strrchr(utime, '.');
 					if (char_ptr) {
 						char_ptr[0] = '_';
 					}
@@ -656,7 +656,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 						if (retval == SUCCESS) {
 							strval = estrdup(Z_STRVAL_PP(data));
 #endif
-							
+
 							/* replace slashes, dots, question marks, plus
 							 * signs, ampersands, spaces and other evil chars
 							 * with underscores */
@@ -677,9 +677,9 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 #endif
 					char *char_ptr, *strval;
 					char *sess_name;
-					
+
 					sess_name = zend_ini_string("session.name", sizeof("session.name"), 0);
-					
+
 #if PHP_VERSION_ID >= 70000
 					if (sess_name && Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) == IS_ARRAY &&
 						((data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name))) != NULL) &&
@@ -710,7 +710,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 		}
 		format++;
 	}
-	
+
 	*filename = fname.d;
 
 	return fname.l;

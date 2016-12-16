@@ -44,7 +44,7 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 		efree(tmp);
 	}
 	xdebug_str_addl(output, "\"", 1, 0);
-	
+
 	if (attr->next) {
 		xdebug_xml_return_attribute(attr->next, output);
 	}
@@ -57,7 +57,7 @@ static void xdebug_xml_return_text_node(xdebug_xml_text_node* node, xdebug_str* 
 		/* if cdata tags are in the text, then we must base64 encode */
 		int new_len = 0;
 		char *encoded_text;
-		
+
 		encoded_text = (char*) xdebug_base64_encode((unsigned char*) node->text, node->text_len, &new_len);
 		xdebug_str_add(output, encoded_text, 0);
 		efree(encoded_text);
@@ -167,7 +167,7 @@ void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int fr
 	xdebug_xml_text_node *node = xdmalloc(sizeof (xdebug_xml_text_node));
 	node->free_value = free_text;
 	node->encode = encode;
-	
+
 	if (xml->text) {
 		xdebug_xml_text_node_dtor(xml->text);
 	}

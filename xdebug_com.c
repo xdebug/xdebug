@@ -73,7 +73,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 	struct pollfd              ufds[1];
 	long                       optval = 1;
 #endif
-	
+
 	/* Make a string of the port number that can be used with getaddrinfo */
 	sprintf(sport, "%d", dport);
 
@@ -120,7 +120,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 		/* Try to connect to the newly created socket */
 		/* Worth noting is that the port is set in the getaddrinfo call before */
 		status = connect(sockfd, ptr->ai_addr, ptr->ai_addrlen);
-		
+
 		/* Determine if we got a connection. If no connection could be made
 		 * we close the socket and continue with the next IP address in the list */
 		if (status < 0) {
@@ -133,7 +133,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 				XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Creating socket for '%s:%d', connect: %s.\n", hostname, dport, strerror(errno));
 				SCLOSE(sockfd);
 				sockfd = SOCK_ACCESS_ERR;
-				
+
 				continue;
 			}
 			if (errno != EINPROGRESS) {
@@ -141,7 +141,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 #endif
 				SCLOSE(sockfd);
 				sockfd = SOCK_ERR;
-				
+
 				continue;
 			}
 
@@ -171,13 +171,13 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 					sockerror = SOCK_ERR;
 					break;
 				}
-				
+
 				/* A timeout occured when polling the socket */
 				if (sockerror == 0) {
 					sockerror = SOCK_TIMEOUT_ERR;
 					break;
 				}
-				
+
 				/* If the poll was successful but an error occured */
 				if (ufds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 #if WIN32|WINNT
@@ -188,7 +188,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 					sockerror = SOCK_ERR;
 					break;
 				}
-				
+
 				/* If the poll was successful break out */
 				if (ufds[0].revents & (POLLIN | POLLOUT)) {
 					sockerror = sockfd;
@@ -216,16 +216,16 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 					sockerror = SOCK_ERR;
 				}
 			}
-			
+
 			/* If there where some errors close the socket and continue with the next IP address */
 			if (sockerror < 0) {
 				SCLOSE(sockfd);
 				sockfd = sockerror;
-				
+
 				continue;
 			}
 		}
-		
+
 		break;
 	}
 
@@ -245,7 +245,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 
 		setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
 	}
-	
+
 	return sockfd;
 }
 

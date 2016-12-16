@@ -12,11 +12,11 @@
  *
  * The Original Code is vl-srm.net code.
  *
- * The Initial Developer of the Original Code is the Vulcan Logic 
- * Group.  Portions created by Vulcan Logic Group are Copyright (C) 
+ * The Initial Developer of the Original Code is the Vulcan Logic
+ * Group.  Portions created by Vulcan Logic Group are Copyright (C)
  * 2000, 2001, 2002 Vulcan Logic Group. All Rights Reserved.
  *
- * Contributor(s): Sterling Hughes <sterling@php.net> 
+ * Contributor(s): Sterling Hughes <sterling@php.net>
  * Daniel R. Kalowsky <dank@deadmime.org>
  */
 

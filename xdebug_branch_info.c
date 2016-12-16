@@ -381,7 +381,7 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 		xdebug_code_coverage_end_of_function(op_array, file_name, function_name TSRMLS_CC);
 		xdebug_code_coverage_start_of_function(op_array, function_name TSRMLS_CC);
 	}
-		
+
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
 		char *key;
 		void *dummy;

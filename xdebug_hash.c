@@ -12,11 +12,11 @@
  *
  * The Original Code is vl-srm.net code.
  *
- * The Initial Developer of the Original Code is the Vulcan Logic 
- * Group.  Portions created by Vulcan Logic Group are Copyright (C) 
+ * The Initial Developer of the Original Code is the Vulcan Logic
+ * Group.  Portions created by Vulcan Logic Group are Copyright (C)
  * 2000, 2001, 2002 Vulcan Logic Group. All Rights Reserved.
  *
- * Author(s): Sterling Hughes <sterling@php.net> 
+ * Author(s): Sterling Hughes <sterling@php.net>
  */
 
 #include <string.h>
@@ -27,7 +27,7 @@
 #include "xdebug_llist.h"
 
 /*
- * Helper function to make a null terminated string from a key 
+ * Helper function to make a null terminated string from a key
  */
 
 char *xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len)
@@ -46,7 +46,7 @@ static xdebug_ui32 xdebug_hash_str(const char *key, unsigned int key_length)
 	char *p = (char *) key;
 	char *end = (char *) key + key_length;
 	unsigned long h = 5381;
-	
+
 	while (p < end) {
 		h += h << 5;
 		h ^= (unsigned long) *p++;
@@ -69,9 +69,9 @@ static xdebug_ui32 xdebug_hash_num(xdebug_ui32 key)
 
 static void hash_element_dtor(void *u, void *ele)
 {
-	xdebug_hash_element *e = (xdebug_hash_element *) ele; 
-	xdebug_hash         *h = (xdebug_hash *) u; 
-	
+	xdebug_hash_element *e = (xdebug_hash_element *) ele;
+	xdebug_hash         *h = (xdebug_hash *) u;
+
 	if (e->key.type == XDEBUG_HASH_KEY_IS_STRING) {
 		free(e->key.value.str.val);
 	}
@@ -86,7 +86,7 @@ static void hash_element_dtor(void *u, void *ele)
 xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor)
 {
 	xdebug_hash *h;
-	int          i; 
+	int          i;
 
 	h = malloc(sizeof(xdebug_hash));
 	h->dtor  = dtor;
@@ -97,7 +97,7 @@ xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor)
 	for (i = 0; i < h->slots; ++i) {
 		h->table[i] = xdebug_llist_alloc((xdebug_llist_dtor) hash_element_dtor);
 	}
-	
+
 	return h;
 }
 
@@ -145,7 +145,7 @@ int xdebug_hash_add_or_update(xdebug_hash *h, char *str_key, unsigned int str_ke
 {
 	xdebug_hash_element  *e;
 	xdebug_hash_key       tmp;
-	xdebug_llist         *l; 
+	xdebug_llist         *l;
 	xdebug_llist_element *le;
 	int                slot;
 
