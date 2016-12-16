@@ -42,7 +42,7 @@ void xdebug_set_add(xdebug_set *set, unsigned int position)
 {
 	unsigned char *byte;
 	unsigned int   bit;
- 
+
 	byte = &(set->setinfo[position / 8]);
 	bit  = position % 8;
 

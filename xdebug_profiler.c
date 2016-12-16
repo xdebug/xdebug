@@ -59,7 +59,7 @@ void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 int xdebug_profiler_init(char *script_name TSRMLS_DC)
 {
 	char *filename = NULL, *fname = NULL;
-	
+
 	if (!strlen(XG(profiler_output_name)) ||
 		xdebug_format_output_filename(&fname, XG(profiler_output_name), script_name) <= 0
 	) {
@@ -72,7 +72,7 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 		filename = xdebug_sprintf("%s%c%s", XG(profiler_output_dir), DEFAULT_SLASH, fname);
 	}
 	xdfree(fname);
-		
+
 	if (XG(profiler_append)) {
 		XG(profile_file) = xdebug_fopen(filename, "a", NULL, &XG(profile_filename));
 	} else {
