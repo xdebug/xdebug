@@ -917,14 +917,22 @@ static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_arg
 	return ZEND_HASH_APPLY_KEEP;
 }
 
+#if PHP_VERSION_ID >= 70000
+static int prefill_from_class_table(zend_class_entry *class_entry)
+#else
 static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+#endif
 {
 #if PHP_VERSION_ID < 70000
 	char *new_filename;
 #endif
 	zend_class_entry *ce;
 
+#if PHP_VERSION_ID >= 70000
+	ce = class_entry;
+#else
 	ce = *class_entry;
+#endif
 
 #if PHP_VERSION_ID < 70000
 	new_filename = va_arg(args, char*);
@@ -952,12 +960,31 @@ static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, in
 
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
+#if PHP_VERSION_ID >= 70000
+	zend_op_array    *function_op_array;
+	zend_class_entry *class_entry;
+#endif
+
 	if ((long) op_array->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
 		prefill_from_oparray((char*) STR_NAME_VAL(op_array->filename), op_array TSRMLS_CC);
 	}
 
+#if PHP_VERSION_ID >= 70000
+	ZEND_HASH_INC_APPLY_COUNT(CG(function_table));
+	ZEND_HASH_FOREACH_PTR(CG(function_table), function_op_array) {
+		prefill_from_function_table(function_op_array);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_DEC_APPLY_COUNT(CG(function_table));
+
+	ZEND_HASH_INC_APPLY_COUNT(CG(class_table));
+	ZEND_HASH_FOREACH_PTR(CG(class_table), class_entry) {
+		prefill_from_class_table(class_entry);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_DEC_APPLY_COUNT(CG(class_table));
+#else
 	zend_hash_apply_with_arguments(CG(function_table)  TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, STR_NAME_VAL(op_array->filename));
 	zend_hash_apply_with_arguments(CG(class_table) TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, STR_NAME_VAL(op_array->filename));
+#endif
 }
 
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name TSRMLS_DC)
