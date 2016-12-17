@@ -1,5 +1,5 @@
 --TEST--
-Test for line numbers for __get, __set, __isset, __unset and __call
+Test for line numbers for __get, __set, __isset, and __unset
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -28,12 +28,6 @@ class Test {
     public function __get($offset) {
         return isset($this->container[$offset]) ? $this->container[$offset] : null;
     }
-	public function __call($func, $args) {
-		return $this->$func($args);
-	}
-	public function testFunc($args) {
-		count($args);
-	}
 }
 
 $test = new Test();
@@ -41,7 +35,6 @@ $test->test = 'test';
 $foo = $test->test;
 isset($test->test);
 unset($test->test);
-$test->testFunc('test1', 'test2');
 
 xdebug_stop_trace();
 echo file_get_contents($tf);
@@ -49,13 +42,11 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> Test->__construct() %strace_with_magic_methods.php:27
-%w%f %w%d     -> Test->__set(string(4), string(4)) %strace_with_magic_methods.php:28
-%w%f %w%d     -> Test->__get(string(4)) %strace_with_magic_methods.php:29
-%w%f %w%d     -> Test->__isset(string(4)) %strace_with_magic_methods.php:30
-%w%f %w%d     -> Test->__unset(string(4)) %strace_with_magic_methods.php:31
-%w%f %w%d     -> Test->testFunc(string(5), string(5)) %strace_with_magic_methods.php:32
-%w%f %w%d       -> count(string(5)) %strace_with_magic_methods.php:23
-%w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_methods.php:34
+%w%f %w%d     -> Test->__construct() %strace_with_magic_methods.php:21
+%w%f %w%d     -> Test->__set(string(4), string(4)) %strace_with_magic_methods.php:22
+%w%f %w%d     -> Test->__get(string(4)) %strace_with_magic_methods.php:23
+%w%f %w%d     -> Test->__isset(string(4)) %strace_with_magic_methods.php:24
+%w%f %w%d     -> Test->__unset(string(4)) %strace_with_magic_methods.php:25
+%w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_methods.php:27
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]
