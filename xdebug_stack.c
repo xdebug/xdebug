@@ -1428,7 +1428,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
 			arguments_wanted = arguments_sent;
 
-			if (tmp->user_defined == XDEBUG_EXTERNAL) {
+			if (ZEND_USER_CODE(zdata->func->type)) {
 				arguments_wanted = op_array->num_args;
 			}
 
@@ -1493,7 +1493,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 				if (XG(collect_params)) {
 #if PHP_VERSION_ID >= 70000
-					if (i < arguments_wanted) {
+					if ((i < arguments_wanted) || ((zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) && (i < arguments_sent))) {
 						if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
 							tmp->var[tmp->varc].addr = ZEND_CALL_ARG(zdata, tmp->varc+1);
 						}
