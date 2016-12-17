@@ -403,6 +403,8 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 	char  *element = NULL;
 	unsigned int element_length = name_length;
 	zend_property_info *zpp;
+	int is_temp;
+	HashTable *myht;
 
 	if (parent) {
 		ht = fetch_ht_from_zval(parent TSRMLS_CC);
@@ -532,6 +534,18 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			break;
 
 		case XF_ST_OBJ_PROPERTY:
+			/* Let's see if there is a debug handler */
+			if (parent && Z_TYPE_P(parent) == IS_OBJECT) {
+				myht = xdebug_objdebug_pp(&parent, &is_temp TSRMLS_CC);
+#if PHP_VERSION_ID >= 70000
+				if (myht && ((retval_p = zend_hash_str_find(myht, name, name_length)) != NULL)) {
+#else
+				if (myht && zend_hash_find(myht, name, name_length + 1, (void **) &retval_pp) == SUCCESS) {
+					retval_p = *retval_pp;
+#endif
+					goto cleanup;
+				}
+			}
 			/* First we try an object handler */
 			if (cce) {
 				zval *tmp_val;
