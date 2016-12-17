@@ -1,5 +1,9 @@
 --TEST--
-Test for bug #987: Hidden property names not shown with var_dump (HTML)
+Test for bug #987: Hidden property names not shown with var_dump (HTML) (< PHP 7.2)
+--SKIPIF--
+<?php
+if (!version_compare(phpversion(), "7.2", '<')) echo "skip < PHP 7.2 needed\n";
+?>
 --INI--
 html_errors=1
 xdebug.cli_color=0
@@ -14,7 +18,7 @@ var_dump($object);
 ?>
 --EXPECTF--
 <pre class='xdebug-var-dump' dir='ltr'>
-<small>%sbug00987-002.php:4:</small>
+<small>%sbug00987-002-php70.php:4:</small>
 <b>object</b>(<i>stdClass</i>)[<i>1</i>]
   <i>public</i> 'key' <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'value'</font> <i>(length=5)</i>
   <i>public</i> 1 <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>0</font>
