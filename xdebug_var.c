@@ -893,6 +893,8 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	options->max_depth = XG(display_max_depth);
 	options->show_hidden = 0;
 	options->show_location = XG(overload_var_dump) > 1;
+	options->extended_properties = 0;
+	options->force_extended = 0;
 
 	if (options->max_children == -1 || options->max_children > XDEBUG_MAX_INT) {
 		options->max_children = XDEBUG_MAX_INT;
@@ -918,7 +920,7 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	return options;
 }
 
-xdebug_var_export_options xdebug_var_nolimit_options = { XDEBUG_MAX_INT, XDEBUG_MAX_INT, 1023, 1, 0, NULL, 0 };
+xdebug_var_export_options xdebug_var_nolimit_options = { XDEBUG_MAX_INT, XDEBUG_MAX_INT, 1023, 1, 0, 0, 0, NULL, 0 };
 
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 {
@@ -1874,6 +1876,76 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp TSRM
 }
 #endif
 
+
+static void add_name_attribute_or_element(xdebug_var_export_options *options, xdebug_xml_node *node, char *field, int field_len, char *value, size_t value_len)
+{
+	size_t value_len_calculated = (value_len == SIZE_MAX) ? strlen(value) : value_len;
+
+	if (options->force_extended || (memchr(value, '\0', value_len_calculated) != NULL && options->extended_properties)) {
+		xdebug_xml_node *element;
+		char            *tmp_base64;
+		int              new_len;
+
+		options->force_extended = 1;
+
+		element = xdebug_xml_node_init(field);
+		xdebug_xml_add_attribute(element, "encoding", "base64");
+
+		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) value, value_len_calculated, &new_len);
+		xdebug_xml_add_text_ex(element, strdup(tmp_base64), new_len, 1, 0);
+		efree(tmp_base64);
+
+		xdebug_xml_add_child(node, element);
+
+		xdfree(value);
+	} else {
+		xdebug_xml_add_attribute_exl(node, field, field_len, value, value_len_calculated, 0, 1);
+	}
+}
+
+static void add_unencoded_text_value_attribute_or_element(xdebug_var_export_options *options, xdebug_xml_node *node, char *value)
+{
+	if (options->force_extended) {
+		xdebug_xml_node *element;
+		char            *tmp_base64;
+		int              new_len;
+
+		element = xdebug_xml_node_init("value");
+		xdebug_xml_add_attribute(element, "encoding", "base64");
+
+		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) value, strlen(value), &new_len);
+		xdebug_xml_add_text_ex(element, strdup(tmp_base64), new_len, 1, 0);
+		efree(tmp_base64);
+
+		xdebug_xml_add_child(node, element);
+	} else {
+		xdebug_xml_add_text(node, value);
+	}
+}
+
+static void add_encoded_text_value_attribute_or_element(xdebug_var_export_options *options, xdebug_xml_node *node, char *value, size_t value_len)
+{
+	if (options->force_extended) {
+		xdebug_xml_node *element;
+		char            *tmp_base64;
+		int              new_len;
+
+		element = xdebug_xml_node_init("value");
+		xdebug_xml_add_attribute(element, "encoding", "base64");
+
+		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) value, value_len, &new_len);
+		xdebug_xml_add_text_ex(element, strdup(tmp_base64), new_len, 1, 0);
+		efree(tmp_base64);
+
+		xdebug_xml_add_child(node, element);
+
+		xdfree(value);
+	} else {
+		xdebug_xml_add_text_encodel(node, value, value_len);
+	}
+}
+
+
 #if PHP_VERSION_ID >= 70000
 static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, xdebug_xml_node *parent, char *parent_name, xdebug_var_export_options *options)
 {
@@ -1895,6 +1967,7 @@ static int xdebug_array_element_export_xml_node(zval **zv TSRMLS_DC, int num_arg
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		node = xdebug_xml_node_init("property");
+		options->force_extended = 0;
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) { /* string key */
 			name = xdstrndup(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key));
@@ -1913,9 +1986,9 @@ static int xdebug_array_element_export_xml_node(zval **zv TSRMLS_DC, int num_arg
 			}
 		}
 
-		xdebug_xml_add_attribute_exl(node, "name", 4, name, name_len, 0, 1);
+		add_name_attribute_or_element(options, node, "name", 4, name, name_len);
 		if (full_name.l) {
-			xdebug_xml_add_attribute_exl(node, "fullname", 8, full_name.d, full_name.l, 0, 1);
+			add_name_attribute_or_element(options, node, "fullname", 8, full_name.d, full_name.l);
 		}
 
 		xdebug_xml_add_child(parent, node);
@@ -1947,6 +2020,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 		char *modifier;
 
 		node = xdebug_xml_node_init("property");
+		options->force_extended = 0;
 
 		if ((*item)->name_len != 0) {
 			char *prop_name, *prop_class_name;
@@ -1958,9 +2032,9 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 #endif
 
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-				xdebug_xml_add_attribute_ex(node, "name", xdstrdup(prop_name), 0, 1);
+				add_name_attribute_or_element(options, node, "name", 4, xdstrdup(prop_name), SIZE_MAX);
 			} else {
-				xdebug_xml_add_attribute_ex(node, "name", xdebug_sprintf("*%s*%s", prop_class_name, prop_name), 0, 1);
+				add_name_attribute_or_element(options, node, "name", 4, xdebug_sprintf("*%s*%s", prop_class_name, prop_name), SIZE_MAX);
 			}
 
 			if (parent_name) {
@@ -1969,7 +2043,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 				} else {
 					full_name = xdebug_sprintf("%s%s*%s*%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_class_name, prop_name);
 				}
-				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+				add_name_attribute_or_element(options, node, "fullname", 8, full_name, SIZE_MAX);
 			}
 
 			xdfree(prop_name);
@@ -1977,11 +2051,11 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item **item TSRML
 		} else { /* Numerical property name */
 			modifier = "public";
 
-			xdebug_xml_add_attribute_ex(node, "name", xdebug_sprintf(XDEBUG_INT_FMT, (*item)->index), 0, 1);
+			add_name_attribute_or_element(options, node, "name", 4, xdebug_sprintf(XDEBUG_INT_FMT, (*item)->index), SIZE_MAX);
 
 			if (parent_name) {
 				full_name = xdebug_sprintf("%s%s" XDEBUG_INT_FMT, parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index);
-				xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+				add_name_attribute_or_element(options, node, "fullname", 8, full_name, SIZE_MAX);
 			}
 		}
 
@@ -2004,16 +2078,17 @@ static char *prepare_variable_name(char *name)
 	return tmp_name;
 }
 
-void xdebug_attach_uninitialized_var(xdebug_xml_node *node, char *name)
+void xdebug_attach_uninitialized_var(xdebug_var_export_options *options, xdebug_xml_node *node, char *name)
 {
 	xdebug_xml_node *contents = NULL;
 	char            *tmp_name;
 
 	contents = xdebug_xml_node_init("property");
+	options->force_extended = 0;
 
 	tmp_name = prepare_variable_name(name);
-	xdebug_xml_add_attribute_ex(contents, "name", xdstrdup(tmp_name), 0, 1);
-	xdebug_xml_add_attribute_ex(contents, "fullname", xdstrdup(tmp_name), 0, 1);
+	add_name_attribute_or_element(options, contents, "name", 4, xdstrdup(tmp_name), SIZE_MAX);
+	add_name_attribute_or_element(options, contents, "fullname", 8, xdstrdup(tmp_name), SIZE_MAX);
 	xdfree(tmp_name);
 
 	xdebug_xml_add_attribute(contents, "type", "uninitialized");
@@ -2070,7 +2145,7 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info TSRMLS_D
 		xdebug_xml_add_attribute_ex(contents, "facet", xdebug_sprintf("static %s", modifier), 0, 1);
 		xdebug_xml_add_child(node, contents);
 	} else {
-		xdebug_attach_uninitialized_var(node, (char *) prop_info->name);
+		xdebug_attach_uninitialized_var(options, node, (char *) prop_info->name);
 	}
 }
 
@@ -2084,6 +2159,8 @@ void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options 
 #endif
 
 	static_container = xdebug_xml_node_init("property");
+	options->force_extended = 0;
+
 	xdebug_xml_add_attribute(static_container, "name", "::");
 	xdebug_xml_add_attribute(static_container, "fullname", "::");
 	xdebug_xml_add_attribute(static_container, "type", "object");
@@ -2130,12 +2207,12 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 		case IS_TRUE:
 		case IS_FALSE:
 			xdebug_xml_add_attribute(node, "type", "bool");
-			xdebug_xml_add_text(node, xdebug_sprintf("%d", Z_TYPE_P(*struc) == IS_TRUE ? 1 : 0));
+			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf("%d", Z_TYPE_P(*struc) == IS_TRUE ? 1 : 0));
 			break;
 #else
 		case IS_BOOL:
 			xdebug_xml_add_attribute(node, "type", "bool");
-			xdebug_xml_add_text(node, xdebug_sprintf("%d", Z_LVAL_P(*struc)));
+			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf("%d", Z_LVAL_P(*struc)));
 			break;
 #endif
 		case IS_NULL:
@@ -2144,20 +2221,20 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 		case IS_LONG:
 			xdebug_xml_add_attribute(node, "type", "int");
-			xdebug_xml_add_text(node, xdebug_sprintf(XDEBUG_INT_FMT, Z_LVAL_P(*struc)));
+			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf(XDEBUG_INT_FMT, Z_LVAL_P(*struc)));
 			break;
 
 		case IS_DOUBLE:
 			xdebug_xml_add_attribute(node, "type", "float");
-			xdebug_xml_add_text(node, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_P(*struc)));
+			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_P(*struc)));
 			break;
 
 		case IS_STRING:
 			xdebug_xml_add_attribute(node, "type", "string");
 			if (options->max_data == 0 || (size_t) Z_STRLEN_P(*struc) <= (size_t) options->max_data) {
-				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc)), Z_STRLEN_P(*struc));
+				add_encoded_text_value_attribute_or_element(options, node, xdstrndup(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc)), Z_STRLEN_P(*struc));
 			} else {
-				xdebug_xml_add_text_encodel(node, xdstrndup(Z_STRVAL_P(*struc), options->max_data), options->max_data);
+				add_encoded_text_value_attribute_or_element(options, node, xdstrndup(Z_STRVAL_P(*struc), options->max_data), options->max_data);
 			}
 			xdebug_xml_add_attribute_ex(node, "size", xdebug_sprintf("%d", Z_STRLEN_P(*struc)), 0, 1);
 			break;
@@ -2239,7 +2316,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			}
 
 			xdebug_xml_add_attribute(node, "type", "object");
-			xdebug_xml_add_attribute_ex(node, "classname", xdstrdup(class_name), 0, 1);
+			add_name_attribute_or_element(options, node, "classname", 9, xdstrdup(class_name), -1);
 			xdebug_xml_add_attribute(node, "children", merged_hash->nNumOfElements ? "1" : "0");
 
 			if (XDEBUG_APPLY_COUNT(merged_hash) < 1) {
@@ -2306,6 +2383,8 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 	char *full_name = NULL;
 
 	node = xdebug_xml_node_init("property");
+	options->force_extended = 0;
+
 	if (name) {
 		switch (var_type) {
 			case XDEBUG_VAR_TYPE_NORMAL: {
@@ -2328,8 +2407,8 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 				break;
 		}
 
-		xdebug_xml_add_attribute_ex(node, "name", short_name, 0, 1);
-		xdebug_xml_add_attribute_ex(node, "fullname", full_name, 0, 1);
+		add_name_attribute_or_element(options, node, "name", 4, short_name, SIZE_MAX);
+		add_name_attribute_or_element(options, node, "fullname", 8, full_name, SIZE_MAX);
 	}
 	xdebug_var_export_xml_node(&val, full_name, node, options, 0 TSRMLS_CC);
 

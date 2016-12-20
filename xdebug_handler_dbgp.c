@@ -1227,6 +1227,11 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("extended_properties")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", options->extended_properties));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE_DEFAULT
 			xdebug_xml_add_text(*retval, xdstrdup(lookup_cmd(CMD_OPTION('n')) ? "1" : "0"));
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION('n')) ? "1" : "0");
@@ -1280,6 +1285,10 @@ DBGP_FUNC(feature_set)
 
 		XDEBUG_STR_CASE("multiple_sessions")
 			/* FIXME: Add new boolean option check / struct field for this */
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("extended_properties")
+			options->extended_properties = strtol(CMD_OPTION('v'), NULL, 10);
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE_DEFAULT
@@ -1640,7 +1649,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
-		xdebug_attach_uninitialized_var(node, name);
+		xdebug_attach_uninitialized_var(options, node, name);
 	}
 }
 
@@ -2288,6 +2297,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	options->max_data     = 1024;
 	options->max_depth    = 1;
 	options->show_hidden  = 0;
+	options->extended_properties = 0;
+	options->force_extended      = 0;
 	options->runtime = (xdebug_var_runtime_page*) xdmalloc((options->max_depth + 1) * sizeof(xdebug_var_runtime_page));
 	for (i = 0; i < options->max_depth; i++) {
 		options->runtime[i].page = 0;
