@@ -29,6 +29,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC);
 void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC);
 void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC);
+char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const uint error_lineno, char *buffer TSRMLS_DC);
 void xdebug_do_jit(TSRMLS_D);
 int xdebug_handle_hit_value(xdebug_brk_info *brk_info);
 

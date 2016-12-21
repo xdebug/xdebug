@@ -619,6 +619,48 @@ static void php_output_error(const char *error TSRMLS_DC)
 	php_printf("%s", error);
 }
 
+char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const uint error_lineno, char *buffer TSRMLS_DC)
+{
+	char *printable_stack;
+
+	/* We need to see if we have an uncaught exception fatal error now */
+	if (type == E_ERROR && strncmp(buffer, "Uncaught ", 9) == 0) {
+		xdebug_str str = XDEBUG_STR_INITIALIZER;
+		char *tmp_buf, *p;
+
+		/* find first new line */
+		p = strchr(buffer, '\n');
+		if (!p) {
+			p = buffer + strlen(buffer);
+		} else {
+			/* find the last " in ", which isn't great and might not work... but in most cases it will */
+			p = xdebug_strrstr(buffer, " in ");
+			if (!p) {
+				p = buffer + strlen(buffer);
+			}
+		}
+		/* Create new buffer */
+		tmp_buf = calloc(p - buffer + 1, 1);
+		strncpy(tmp_buf, buffer, p - buffer );
+
+		/* Append error */
+		xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception" TSRMLS_CC);
+		xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
+		xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
+		if (XG(last_exception_trace)) {
+			xdebug_str_add(&str, XG(last_exception_trace), 0);
+		}
+		xdebug_append_error_footer(&str, PG(html_errors) TSRMLS_CC);
+
+		free(tmp_buf);
+		printable_stack = str.d;
+	} else {
+		printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1 TSRMLS_CC);
+	}
+
+	return printable_stack;
+}
+
 /* Error callback for formatting stack traces */
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
@@ -692,46 +734,13 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 		if ((PG(display_errors) || XG(force_display_errors)) && !PG(during_request_startup)) {
 			char *printable_stack;
 
-			/* We need to see if we have an uncaught exception fatal error now */
-			if (type == E_ERROR && strncmp(buffer, "Uncaught ", 9) == 0) {
-				xdebug_str str = XDEBUG_STR_INITIALIZER;
-				char *tmp_buf, *p;
+			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, buffer TSRMLS_CC);
 
-				/* find first new line */
-				p = strchr(buffer, '\n');
-				if (!p) {
-					p = buffer + strlen(buffer);
-				} else {
-					/* find the last " in ", which isn't great and might not work... but in most cases it will */
-					p = xdebug_strrstr(buffer, " in ");
-					if (!p) {
-						p = buffer + strlen(buffer);
-					}
-				}
-				/* Create new buffer */
-				tmp_buf = calloc(p - buffer + 1, 1);
-				strncpy(tmp_buf, buffer, p - buffer );
-
-				/* Append error */
-				xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception" TSRMLS_CC);
-				xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
-				xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
-				if (XG(last_exception_trace)) {
-					xdebug_str_add(&str, XG(last_exception_trace), 0);
-				}
-				xdebug_append_error_footer(&str, PG(html_errors) TSRMLS_CC);
-				php_output_error(str.d TSRMLS_CC);
-
-				xdfree(str.d);
-				free(tmp_buf);
+			if (XG(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
+				xdebug_llist_insert_next(XG(collected_errors), XDEBUG_LLIST_TAIL(XG(collected_errors)), printable_stack);
 			} else {
-				printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1 TSRMLS_CC);
-				if (XG(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
-					xdebug_llist_insert_next(XG(collected_errors), XDEBUG_LLIST_TAIL(XG(collected_errors)), printable_stack);
-				} else {
-					php_output_error(printable_stack TSRMLS_CC);
-					xdfree(printable_stack);
-				}
+				php_output_error(printable_stack TSRMLS_CC);
+				xdfree(printable_stack);
 			}
 		} else if (XG(do_collect_errors)) {
 			char *printable_stack;
@@ -743,8 +752,15 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	/* Start JIT if requested and not yet enabled */
 	xdebug_do_jit(TSRMLS_C);
 
-	/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
 	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+		/* Send notification with warning/notice/error information */
+		if (XG(context).send_notifications && !XG(context).inhibit_notifications) {
+			if (!XG(context).handler->remote_notification(&(XG(context)), error_filename, error_lineno, type, error_type_str, buffer)) {
+				XG(remote_enabled) = 0;
+			}
+		}
+
+		/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
 		if (
 			xdebug_hash_find(XG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info) ||
 			xdebug_hash_find(XG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)

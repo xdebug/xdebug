@@ -70,6 +70,9 @@ struct _xdebug_con {
 	int                    do_finish;
 	int                    finish_level;
 	int                    finish_func_nr;
+
+	int                    send_notifications;
+	int                    inhibit_notifications;
 };
 
 #define XDEBUG_HIT_DISABLED       0
@@ -116,6 +119,9 @@ struct _xdebug_remote_handler {
 
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
+
+	/* Notifications */
+	int (*remote_notification)(xdebug_con *h, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
