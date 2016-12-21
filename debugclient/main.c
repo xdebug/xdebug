@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #ifndef WIN32
-#ifdef HAVE_CONFIG_H 
+#ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
 #include <unistd.h>
