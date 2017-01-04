@@ -626,6 +626,11 @@ void xdebug_init_debugger(TSRMLS_D)
 		}
 
 		if (remote_addr) {
+			/* Use first IP according to rfc7239 */
+			char *cp = strchr(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), ',');
+			if (cp) {
+				*cp = '\0';
+			}
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port) TSRMLS_CC);
 		} else {
