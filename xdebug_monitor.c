@@ -24,7 +24,6 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-#if PHP_VERSION_ID >= 70000
 static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functions_to_monitor)
 {
 	zval *val;
@@ -35,22 +34,6 @@ static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functio
 		}
 	} ZEND_HASH_FOREACH_END();
 }
-#else
-static void init_function_monitor_hash(xdebug_hash *internal, HashTable *functions_to_monitor)
-{
-	HashPosition  pos;
-	zval        **val;
-
-	zend_hash_internal_pointer_reset_ex(functions_to_monitor, &pos);
-	while (zend_hash_get_current_data_ex(functions_to_monitor, (void **) &val, &pos) != FAILURE) {
-		if (Z_TYPE_PP(val) == IS_STRING) {
-			xdebug_hash_add(internal, Z_STRVAL_PP(val), Z_STRLEN_PP(val), xdstrdup(Z_STRVAL_PP(val)));
-		}
-
-		zend_hash_move_forward_ex(functions_to_monitor, &pos);
-	}
-}
-#endif
 
 static void xdebug_hash_function_monitor_dtor(char *function)
 {
@@ -141,9 +124,7 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 		add_assoc_long(entry, "lineno", mfe->lineno);
 
 		add_next_index_zval(return_value, entry);
-#if PHP_VERSION_ID >= 70000
 		efree(entry);
-#endif
 	}
 
 	if (clear) {

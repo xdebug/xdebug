@@ -1,7 +1,5 @@
 --TEST--
-Test for tracing assign pow (>= PHP 5.6)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.6", '>=')) echo "skip >= PHP 5.6 needed\n"; ?>
+Test for tracing assign pow
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

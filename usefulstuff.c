@@ -358,11 +358,7 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 			cwd[0] = '\0';
 		}
 
-#if PHP_VERSION_ID >= 50600
 		new_state.cwd = estrdup(cwd);
-#else
-		new_state.cwd = strdup(cwd);
-#endif
 		new_state.cwd_length = strlen(cwd);
 
 		if (!virtual_file_ex(&new_state, fileurl, NULL, 1 TSRMLS_CC)) {
@@ -370,11 +366,7 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
 		}
-#if PHP_VERSION_ID >= 50600
 		efree(new_state.cwd);
-#else
-		free(new_state.cwd);
-#endif
 
 	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
@@ -618,7 +610,6 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				case 'U':   /* $_SERVER['UNIQUE_ID'] */
 				case 'R': { /* $_SERVER['REQUEST_URI'] */
 					char *char_ptr, *strval;
-#if PHP_VERSION_ID >= 70000
 					zval *data = NULL;
 
 					if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY) {
@@ -636,27 +627,6 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 
 						if (data) {
 							strval = estrdup(Z_STRVAL_P(data));
-#else
-					int retval = FAILURE;
-					zval **data;
-
-					if (PG(http_globals)[TRACK_VARS_SERVER]) {
-						switch (*format) {
-						case 'H':
-							retval = zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_HOST", sizeof("HTTP_HOST"), (void **) &data);
-							break;
-						case 'R':
-							retval = zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &data);
-							break;
-						case 'U':
-							retval = zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "UNIQUE_ID", sizeof("UNIQUE_ID"), (void **) &data);
-							break;
-						}
-
-						if (retval == SUCCESS) {
-							strval = estrdup(Z_STRVAL_PP(data));
-#endif
-
 							/* replace slashes, dots, question marks, plus
 							 * signs, ampersands, spaces and other evil chars
 							 * with underscores */
@@ -670,29 +640,17 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 'S': { /* session id */
-#if PHP_VERSION_ID >= 70000
 					zval *data;
-#else
-					zval **data;
-#endif
 					char *char_ptr, *strval;
 					char *sess_name;
 
 					sess_name = zend_ini_string("session.name", sizeof("session.name"), 0);
 
-#if PHP_VERSION_ID >= 70000
 					if (sess_name && Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) == IS_ARRAY &&
 						((data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name))) != NULL) &&
 						Z_STRLEN_P(data) < 100 /* Prevent any unrealistically long data being set as filename */
 					) {
 						strval = estrdup(Z_STRVAL_P(data));
-#else
-					if (sess_name && PG(http_globals)[TRACK_VARS_COOKIE] &&
-						zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name) + 1, (void **) &data) == SUCCESS &&
-						Z_STRLEN_PP(data) < 100 /* Prevent any unrealistically long data being set as filename */
-					) {
-						strval = estrdup(Z_STRVAL_PP(data));
-#endif
 						/* replace slashes, dots, question marks, plus signs,
 						 * ampersands and spaces with underscores */
 						while ((char_ptr = strpbrk(strval, "/\\.?&+ ")) != NULL) {

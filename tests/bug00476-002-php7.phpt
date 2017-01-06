@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #476: Exception chanining doesn't work (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for bug #476: Exception chanining doesn't work
 --INI--
 xdebug.default_enable=1
 xdebug.dump.GET=

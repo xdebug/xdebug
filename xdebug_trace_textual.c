@@ -147,15 +147,10 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 			if (
 				(fse->var[j].is_variadic && fse->var[j].addr)
-#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70000
-				|| (!fse->var[j].addr && fse->is_variadic && j == fse->varc - 1)
-#endif
 			) {
 				xdebug_str_add(&str, "...", 0);
 				variadic_opened = 1;
-#if PHP_VERSION_ID >= 70000
 				c = 0;
-#endif
 			}
 
 			if (fse->var[j].name && XG(collect_params) == 4) {
@@ -164,26 +159,17 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 			if (fse->var[j].is_variadic && fse->var[j].addr) {
 				xdebug_str_add(&str, "variadic(", 0);
-#if PHP_VERSION_ID >= 70000
 				continue;
-#endif
 			}
 
 			if (
 				(variadic_opened && XG(collect_params) != 5)
-#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70000
-				&& (!(!fse->var[j].addr && fse->is_variadic && j == fse->varc - 1))
-#endif
 			) {
 				xdebug_str_add(&str, xdebug_sprintf("%d => ", variadic_count++), 1);
 			}
 
 			if (fse->var[j].addr) {
 				add_single_value(&str, fse->var[j].addr, XG(collect_params) TSRMLS_CC);
-#if PHP_VERSION_ID >= 50600 && PHP_VERSION_ID < 70000
-			} else if (fse->is_variadic && j == fse->varc - 1) {
-				xdebug_str_addl(&str, "variadic(", 9, 0);
-#endif
 			} else {
 				xdebug_str_addl(&str, "???", 3, 0);
 			}
@@ -196,21 +182,12 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
-#if PHP_VERSION_ID >= 70000
 			zend_string *i_filename = zend_string_init(fse->include_filename, strlen(fse->include_filename), 0);
 			zend_string *escaped;
 			escaped = php_addcslashes(i_filename, 0, "'\\\0..\37", 6);
 			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped->val), 1);
 			zend_string_release(escaped);
 			zend_string_release(i_filename);
-#else
-			int tmp_len;
-
-			char *escaped;
-			escaped = php_addcslashes(fse->include_filename, strlen(fse->include_filename), &tmp_len, 0, "'\\\0..\37", 6 TSRMLS_CC);
-			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped), 1);
-			efree(escaped);
-#endif
 		} else {
 			xdebug_str_add(&str, fse->include_filename, 0);
 		}
@@ -262,7 +239,6 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 	xdfree(str.d);
 }
 
-#if PHP_VERSION_ID >= 50500
 void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
@@ -270,11 +246,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	char      *tmp_value = NULL;
 
 	/* Generator key */
-#if PHP_VERSION_ID >= 70000
 	tmp_value = xdebug_get_zval_value(&generator->key, 0, NULL);
-#else
-	tmp_value = xdebug_get_zval_value(generator->key, 0, NULL);
-#endif
 	if (tmp_value) {
 		xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
 
@@ -282,11 +254,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		xdebug_str_add(&str, tmp_value, 1);
 		xdebug_str_addl(&str, " => ", 4, 0);
 
-#if PHP_VERSION_ID >= 70000
 		tmp_value = xdebug_get_zval_value(&generator->value, 0, NULL);
-#else
-		tmp_value = xdebug_get_zval_value(generator->value, 0, NULL);
-#endif
 		if (tmp_value) {
 			xdebug_str_add(&str, tmp_value, 1);
 		}
@@ -299,7 +267,6 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		xdfree(str.d);
 	}
 }
-#endif
 
 void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *op, char *filename, int lineno TSRMLS_DC)
 {
@@ -348,8 +315,6 @@ xdebug_trace_handler_t xdebug_trace_handler_textual =
 	xdebug_trace_textual_function_entry,
 	NULL /*xdebug_trace_textual_function_exit */,
 	xdebug_trace_textual_function_return_value,
-#if PHP_VERSION_ID >= 50500
 	xdebug_trace_textual_generator_return_value,
-#endif
 	xdebug_trace_textual_assignment
 };

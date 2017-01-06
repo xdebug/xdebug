@@ -1,8 +1,7 @@
 --TEST--
-Test for bug #842: Can't debug conditional statements without a block (TS1a) (>= PHP 7.0)
+Test for bug #842: Can't debug conditional statements without a block (TS1a)
 --SKIPIF--
 <?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

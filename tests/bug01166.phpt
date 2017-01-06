@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #1166: Using $this in __debugInfo() causes infinite recursion
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.6", '>=')) echo "skip >= PHP 5.6 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

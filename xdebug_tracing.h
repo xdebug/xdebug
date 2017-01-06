@@ -22,9 +22,7 @@
 #include "php_xdebug.h"
 
 char* xdebug_return_trace_stack_retval(function_stack_entry* i, int fnr, zval* retval TSRMLS_DC);
-#if PHP_VERSION_ID >= 50500
 char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_generator* generator TSRMLS_DC);
-#endif
 char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno TSRMLS_DC);
 FILE *xdebug_trace_open_file(char *fname, long options, char **used_fname TSRMLS_DC);
 

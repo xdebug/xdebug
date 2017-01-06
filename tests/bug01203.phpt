@@ -1,7 +1,6 @@
 --TEST--
 Test for bug #1203: Accessing static property of a class that has no static properties crashes while remote debugging
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 <?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
