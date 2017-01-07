@@ -128,11 +128,11 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	unsigned long level;
 	xdebug_llist *stack;
-	iniLONG       max_nesting_level;
-	iniLONG       max_stack_frames;
+	zend_long     max_nesting_level;
+	zend_long     max_stack_frames;
 	zend_bool     default_enable;
 	zend_bool     collect_includes;
-	iniLONG       collect_params;
+	zend_long     collect_params;
 	zend_bool     collect_return;
 	zend_bool     collect_vars;
 	zend_bool     collect_assignments;
@@ -149,8 +149,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	unsigned int  prev_memory;
 	char         *file_link_format;
 	zend_bool     force_display_errors;
-	iniLONG       force_error_reporting;
-	iniLONG       halt_level;
+	zend_long     force_error_reporting;
+	zend_long     halt_level;
 
 	zend_bool     overload_var_dump;
 	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
@@ -165,16 +165,16 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *trace_enable_trigger_value;
 	char         *trace_output_dir;
 	char         *trace_output_name;
-	iniLONG       trace_options;
-	iniLONG       trace_format;
+	zend_long     trace_options;
+	zend_long     trace_format;
 	char         *last_exception_trace;
 	char         *last_eval_statement;
 	zend_bool     in_debug_info;
 
 	/* variable dumping limitation settings */
-	iniLONG       display_max_children;
-	iniLONG       display_max_data;
-	iniLONG       display_max_depth;
+	zend_long     display_max_children;
+	zend_long     display_max_data;
+	zend_long     display_max_depth;
 
 	zend_bool     cli_color;
 	int           output_is_tty;
@@ -228,7 +228,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* remote settings */
 	zend_bool     remote_enable;  /* 0 */
-	iniLONG       remote_port;    /* 9000 */
+	zend_long     remote_port;    /* 9000 */
 	char         *remote_host;    /* localhost */
 	long          remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
 	char         *remote_handler; /* php3, gdb, dbgp */
@@ -236,7 +236,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
 	char         *remote_log;       /* Filename to log protocol communication to */
 	FILE         *remote_log_file;  /* File handler for protocol log */
-	iniLONG       remote_cookie_expire_time; /* Expire time for the remote-session cookie */
+	zend_long     remote_cookie_expire_time; /* Expire time for the remote-session cookie */
 	char         *remote_addr_header; /* User configured header to check for forwarded IP address */
 
 	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */

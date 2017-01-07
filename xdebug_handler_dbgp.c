@@ -306,7 +306,7 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 
 	filename = xdebug_path_from_url(filename TSRMLS_CC);
 	stream = php_stream_open_wrapper(filename, "rb",
-			USE_PATH | XDEBUG_ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			USE_PATH | REPORT_ERRORS,
 			NULL);
 	xdfree(filename);
 
@@ -1607,6 +1607,9 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	}
 }
 
+# define HASH_KEY_VAL(k) (k)->key->val
+# define HASH_KEY_LEN(k) (k)->key->len
+
 static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_hash *tmp_hash;
@@ -1651,9 +1654,6 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 #undef HASH_KEY_VAL
 #undef HASH_KEY_LEN
 
-# define CONSTANT_NAME_VAL(k) (k)->val
-# define CONSTANT_NAME_LEN(k) (k)->len
-
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
@@ -1693,7 +1693,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 				continue;
 			}
 
-			add_constant_node(node, CONSTANT_NAME_VAL(val->name), &(val->value), options TSRMLS_CC);
+			add_constant_node(node, val->name->val, &(val->value), options TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
 
 		return 0;
@@ -1752,10 +1752,6 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 	return 1;
 }
-
-#undef CONSTANT_NAME_VAL
-#undef CONSTANT_NAME_LEN
-
 
 DBGP_FUNC(stack_depth)
 {

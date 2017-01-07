@@ -100,7 +100,7 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 	xdfree(function_name);
 }
 
-int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 {
 	if (XG(do_code_coverage) && XG(code_coverage_branch_check)) {
 		const zend_op *cur_opcode;
@@ -112,13 +112,13 @@ int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 }
 
 #define XDEBUG_OPCODE_OVERRIDE(f) \
-	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS) \
+	int xdebug_##f##_handler(zend_execute_data *execute_data) \
 	{ \
-		return xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU); \
+		return xdebug_common_override_handler(execute_data); \
 	}
 
 
-int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+int xdebug_common_override_handler(zend_execute_data *execute_data)
 {
 	if (XG(do_code_coverage)) {
 		const zend_op *cur_opcode;
@@ -304,7 +304,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	return name.d;
 }
 
-static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCODE_HANDLER_ARGS)
+static int xdebug_common_assign_dim_handler(char *op, int do_cc, zend_execute_data *execute_data)
 {
 	char    *file;
 	zend_op_array *op_array = &execute_data->func->op_array;
@@ -372,9 +372,9 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCOD
 }
 
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN(f,o,cc) \
-	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS) \
+	int xdebug_##f##_handler(zend_execute_data *execute_data) \
 	{ \
-		return xdebug_common_assign_dim_handler((o), (cc), ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU); \
+		return xdebug_common_assign_dim_handler((o), (cc), execute_data); \
 	}
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
@@ -832,7 +832,7 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_na
 
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
-	zppLONG options = 0;
+	zend_long options = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
 		return;
@@ -855,7 +855,7 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
 {
-	zppLONG cleanup = 1;
+	zend_long cleanup = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cleanup) == FAILURE) {
 		return;

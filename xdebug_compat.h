@@ -37,30 +37,15 @@ void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
 zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC);
 
-# define ADD_STRING_COPY
-# define XDEBUG_ENFORCE_SAFE_MODE 0x00
-# define SIZETorINT size_t
-# define SIZETorUINT size_t
-# define SIZETorZUINT size_t
-# define zppLONG zend_long
-# define iniLONG zend_long
-# define hashULONG zend_ulong
-
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
 
-# define XDEBUG_APPLY_COUNT(ht) ZEND_HASH_GET_APPLY_COUNT(ht)
-# define HASH_KEY_VAL(k) (k)->key->val
-# define HASH_KEY_LEN(k) (k)->key->len
 # define HASH_KEY_SIZEOF(k) (sizeof(k) - 1)
 # define HASH_KEY_STRLEN(k) (strlen(k))
 # define HASH_KEY_IS_NUMERIC(k) ((k) == NULL)
 # define HASH_APPLY_KEY_VAL(k) (k)->val
 # define HASH_APPLY_KEY_LEN(k) (k)->len + 1
 # define HASH_APPLY_NUMERIC(k) index
-
-# define ZEND_USER_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
-# define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
 
 # define STR_NAME_VAL(k) (k)->val
 # define STR_NAME_LEN(k) (k)->len

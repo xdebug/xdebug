@@ -322,7 +322,7 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (XG(active_execute_data) && XG(active_execute_data)->func) {
 				int i = 0;
-				hashULONG hash_value = zend_inline_hash_func(element, element_length);
+				zend_ulong hash_value = zend_inline_hash_func(element, element_length);
 				zend_op_array *opa = &XG(active_execute_data)->func->op_array;
 				zval **CV;
 
@@ -743,7 +743,7 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index, zend_str
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " => ", HASH_APPLY_NUMERIC(hash_key)), 1);
 		} else { /* string key */
-			SIZETorINT newlen = 0;
+			size_t newlen = 0;
 			char *tmp, *tmp2;
 
 			tmp = xdebug_str_to_str((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
@@ -868,7 +868,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
-			if (XDEBUG_APPLY_COUNT(myht) < 1) {
+			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
 				xdebug_str_addl(str, "array (", 7, 0);
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
@@ -896,7 +896,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
-			if (XDEBUG_APPLY_COUNT(myht) < 1) {
+			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
 				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
@@ -1094,7 +1094,7 @@ static int xdebug_array_element_export_text_ansi(zval *zv_nptr, zend_ulong index
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf("[" XDEBUG_INT_FMT "] %s=>%s\n", HASH_APPLY_NUMERIC(hash_key), ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		} else { /* string key */
-			SIZETorINT newlen = 0;
+			size_t newlen = 0;
 			char *tmp, *tmp2;
 
 			tmp = xdebug_str_to_str((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
@@ -1231,7 +1231,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
-			if (XDEBUG_APPLY_COUNT(myht) < 1) {
+			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
 				xdebug_str_add(str, xdebug_sprintf("%sarray%s(%s%d%s) {\n", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
@@ -1254,7 +1254,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
-			if (myht && XDEBUG_APPLY_COUNT(myht) < 1) {
+			if (myht && ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
 				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n",
 					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
 					ANSI_COLOR_OBJECT, STR_NAME_VAL(Z_OBJCE_P(*struc)->name), ANSI_COLOR_RESET,
@@ -1753,7 +1753,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 {
 	HashTable *myht;
 	char *class_name;
-	SIZETorINT class_name_len;
+	size_t class_name_len;
 	zend_ulong num;
 	zend_string *key;
 	zval *z_val;
@@ -1804,7 +1804,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			myht = Z_ARRVAL_P(*struc);
 			xdebug_xml_add_attribute(node, "type", "array");
 			xdebug_xml_add_attribute(node, "children", myht->nNumOfElements > 0?"1":"0");
-			if (XDEBUG_APPLY_COUNT(myht) < 1) {
+			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
 				if (level < options->max_depth) {
 					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
@@ -1867,7 +1867,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			add_name_attribute_or_element(options, node, "classname", 9, xdstrdup(class_name), -1);
 			xdebug_xml_add_attribute(node, "children", merged_hash->nNumOfElements ? "1" : "0");
 
-			if (XDEBUG_APPLY_COUNT(merged_hash) < 1) {
+			if (ZEND_HASH_GET_APPLY_COUNT(merged_hash) < 1) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(merged_hash)), 0, 1);
 				if (level < options->max_depth) {
 					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
@@ -2091,7 +2091,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
-			if (XDEBUG_APPLY_COUNT(myht) < 1) {
+			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
 				xdebug_str_add(str, xdebug_sprintf("<b>array</b> <i>(size=%d)</i>\n", myht->nNumOfElements), 1);
 				if (level <= options->max_depth) {
 					if (myht->nNumOfElements) {
@@ -2119,7 +2119,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
-			if (XDEBUG_APPLY_COUNT(myht) < 1) {
+			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
 				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", class_name), 1);
 				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_P(*struc)), 1);
@@ -2333,7 +2333,7 @@ char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_
 ** XML encoding function
 */
 
-char* xdebug_xmlize(char *string, SIZETorINT len, size_t *newlen)
+char* xdebug_xmlize(char *string, size_t len, size_t *newlen)
 {
 	if (len) {
 		char *tmp;
@@ -2359,7 +2359,7 @@ char* xdebug_xmlize(char *string, SIZETorINT len, size_t *newlen)
 		tmp = xdebug_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
 		efree(tmp2);
 
-		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, (SIZETorINT*) newlen);
+		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, (size_t*) newlen);
 		efree(tmp);
 		return tmp2;
 	} else {

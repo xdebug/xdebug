@@ -79,16 +79,16 @@ void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint err
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
 static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
-static SIZETorINT xdebug_ub_write(const char *string, SIZETorUINT length TSRMLS_DC);
+static size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC);
 
 static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
-int xdebug_exit_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
+int xdebug_exit_handler(zend_execute_data *execute_data);
 
 int zend_xdebug_initialised = 0;
 int zend_xdebug_global_offset = -1;
 
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
-static SIZETorINT (*xdebug_orig_ub_write)(const char *string, SIZETorUINT len TSRMLS_DC);
+static size_t (*xdebug_orig_ub_write)(const char *string, size_t len TSRMLS_DC);
 
 static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC);
 
@@ -569,7 +569,7 @@ void xdebug_env_config(TSRMLS_D)
 	xdebug_arg_dtor(parts);
 }
 
-static int xdebug_silence_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+static int xdebug_silence_handler(zend_execute_data *execute_data)
 {
 	const zend_op *cur_opcode = EG(current_execute_data)->opline;
 
@@ -588,7 +588,7 @@ static int xdebug_silence_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-static int xdebug_include_or_eval_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+static int xdebug_include_or_eval_handler(zend_execute_data *execute_data)
 {
 	const zend_op *opline = execute_data->opline;
 
@@ -665,7 +665,7 @@ int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int s
 }
 #endif
 
-static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, SIZETorUINT *buf_len, zend_serialize_data *data TSRMLS_DC)
+static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
@@ -1011,7 +1011,7 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 	}
 }
 
-SIZETorINT xdebug_ub_write(const char *string, SIZETorUINT length TSRMLS_DC)
+size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC)
 {
 	if (XG(remote_enabled)) {
 		if (-1 == XG(context).handler->remote_stream_output(string, length TSRMLS_CC)) {
@@ -1021,18 +1021,16 @@ SIZETorINT xdebug_ub_write(const char *string, SIZETorUINT length TSRMLS_DC)
 	return xdebug_orig_ub_write(string, length TSRMLS_CC);
 }
 
-#define XDEBUG_AUTO_GLOBAL(n) zend_is_auto_global_str(ZEND_STRL(n) TSRMLS_CC)
-
 static void xdebug_init_auto_globals(TSRMLS_D)
 {
-	XDEBUG_AUTO_GLOBAL("_ENV");
-	XDEBUG_AUTO_GLOBAL("_GET");
-	XDEBUG_AUTO_GLOBAL("_POST");
-	XDEBUG_AUTO_GLOBAL("_COOKIE");
-	XDEBUG_AUTO_GLOBAL("_REQUEST");
-	XDEBUG_AUTO_GLOBAL("_FILES");
-	XDEBUG_AUTO_GLOBAL("_SERVER");
-	XDEBUG_AUTO_GLOBAL("_SESSION");
+	zend_is_auto_global_str(ZEND_STRL("_ENV") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_GET") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_POST") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_COOKIE") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_REQUEST") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_FILES") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_SERVER") TSRMLS_CC);
+	zend_is_auto_global_str(ZEND_STRL("_SESSION") TSRMLS_CC);
 }
 
 PHP_RINIT_FUNCTION(xdebug)
@@ -1888,7 +1886,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 }
 
 /* Opcode handler for exit, to be able to clean up the profiler */
-int xdebug_exit_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+int xdebug_exit_handler(zend_execute_data *execute_data)
 {
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_deinit(TSRMLS_C);
@@ -1979,7 +1977,6 @@ PHP_FUNCTION(xdebug_set_time_limit)
 
 /* {{{ proto void xdebug_var_dump(mixed var [, ...] )
    Outputs a fancy string representation of a variable */
-#define VARI(n) (zval*) &args[n]
 PHP_FUNCTION(xdebug_var_dump)
 {
 	zval   *args;
@@ -2011,17 +2008,17 @@ PHP_FUNCTION(xdebug_var_dump)
 			xdebug_php_var_dump(&args[i], 1 TSRMLS_CC);
 		}
 		else if (PG(html_errors)) {
-			val = xdebug_get_zval_value_fancy(NULL, VARI(i), &len, 0, NULL TSRMLS_CC);
+			val = xdebug_get_zval_value_fancy(NULL, (zval*) &args[i], &len, 0, NULL TSRMLS_CC);
 			PHPWRITE(val, len);
 			xdfree(val);
 		}
 		else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-			val = xdebug_get_zval_value_ansi(VARI(i), 0, NULL);
+			val = xdebug_get_zval_value_ansi((zval*) &args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		}
 		else {
-			val = xdebug_get_zval_value_text(VARI(i), 0, NULL);
+			val = xdebug_get_zval_value_text((zval*) &args[i], 0, NULL);
 			PHPWRITE(val, strlen(val));
 			xdfree(val);
 		}
@@ -2029,7 +2026,6 @@ PHP_FUNCTION(xdebug_var_dump)
 
 	efree(args);
 }
-#undef VARI
 /* }}} */
 
 /* {{{ proto void xdebug_debug_zval(mixed var [, ...] )
@@ -2190,7 +2186,7 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 	array_init(return_value);
 	for (le = XDEBUG_LLIST_HEAD(XG(collected_errors)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
 		string = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, string ADD_STRING_COPY);
+		add_next_index_string(return_value, string);
 	}
 
 	if (clear) {
@@ -2208,7 +2204,7 @@ PHP_FUNCTION(xdebug_get_headers)
 	array_init(return_value);
 	for (le = XDEBUG_LLIST_HEAD(XG(headers)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 		string = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, string ADD_STRING_COPY);
+		add_next_index_string(return_value, string);
 	}
 }
 
@@ -2225,7 +2221,7 @@ PHP_FUNCTION(xdebug_get_profiler_filename)
 PHP_FUNCTION(xdebug_dump_aggr_profiling_data)
 {
 	char *prefix = NULL;
-	SIZETorINT prefix_len;
+	size_t prefix_len;
 
 	if (!XG(profiler_aggregate)) {
 		RETURN_FALSE;

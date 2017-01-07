@@ -521,43 +521,39 @@ static char *get_printable_stack(int html, int error_type, char *buffer, const c
 	return str.d;
 }
 
-# define XDEBUG_ZEND_HASH_STR_FIND(ht, str, size, var) var = zend_hash_str_find(Z_ARRVAL(ht), str, size);
-# define XDEBUG_ZEND_HASH_RETURN_TYPE zval *
-# define XDEBUG_ZEND_HASH_RETURN_VALUE Z_STRVAL_P
-
 void xdebug_init_debugger(TSRMLS_D)
 {
 	xdebug_open_log(TSRMLS_C);
 	if (XG(remote_connect_back)) {
-		XDEBUG_ZEND_HASH_RETURN_TYPE remote_addr = NULL;
+		zval *remote_addr = NULL;
 
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking remote connect back address.\n");
 		if (XG(remote_addr_header) && XG(remote_addr_header)[0]) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking user configured header '%s'.\n", XG(remote_addr_header));
-			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], XG(remote_addr_header), HASH_KEY_STRLEN(XG(remote_addr_header)), remote_addr);
+			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XG(remote_addr_header), HASH_KEY_STRLEN(XG(remote_addr_header)));
 		}
 		if (!remote_addr) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'HTTP_X_FORWARDED_FOR'.\n");
-			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"), remote_addr);
+			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
 		}
 		if (!remote_addr) {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'REMOTE_ADDR'.\n");
-			XDEBUG_ZEND_HASH_STR_FIND(PG(http_globals)[TRACK_VARS_SERVER], "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"), remote_addr);
+			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
 		}
 
-		if (remote_addr && strstr(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), "://")) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Invalid remote address provided containing URI spec '%s'.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr));
+		if (remote_addr && strstr(Z_STRVAL_P(remote_addr), "://")) {
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Invalid remote address provided containing URI spec '%s'.\n", Z_STRVAL_P(remote_addr));
 			remote_addr = NULL;
 		}
 
 		if (remote_addr) {
 			/* Use first IP according to RFC 7239 */
-			char *cp = strchr(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), ',');
+			char *cp = strchr(Z_STRVAL_P(remote_addr), ',');
 			if (cp) {
 				*cp = '\0';
 			}
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), (long int) XG(remote_port));
-			XG(context).socket = xdebug_create_socket(XDEBUG_ZEND_HASH_RETURN_VALUE(remote_addr), XG(remote_port) TSRMLS_CC);
+			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", Z_STRVAL_P(remote_addr), (long int) XG(remote_port));
+			XG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XG(remote_port) TSRMLS_CC);
 		} else {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port) TSRMLS_CC);
@@ -828,7 +824,7 @@ PHP_FUNCTION(xdebug_print_function_stack)
 	size_t message_len;
 	function_stack_entry *i;
 	char *tmp;
-	zppLONG options = 0;
+	zend_long options = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &message, &message_len, &options) == FAILURE) {
 		return;
@@ -864,7 +860,7 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 PHP_FUNCTION(xdebug_call_class)
 {
 	function_stack_entry *i;
-	zppLONG depth = 0;
+	zend_long depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -883,7 +879,7 @@ PHP_FUNCTION(xdebug_call_class)
 PHP_FUNCTION(xdebug_call_function)
 {
 	function_stack_entry *i;
-	zppLONG depth = 0;
+	zend_long depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -902,7 +898,7 @@ PHP_FUNCTION(xdebug_call_function)
 PHP_FUNCTION(xdebug_call_line)
 {
 	function_stack_entry *i;
-	zppLONG depth = 0;
+	zend_long depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -921,7 +917,7 @@ PHP_FUNCTION(xdebug_call_line)
 PHP_FUNCTION(xdebug_call_file)
 {
 	function_stack_entry *i;
-	zppLONG depth = 0;
+	zend_long depth = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
@@ -1400,13 +1396,13 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 		/* Add data */
 		if (i->function.function) {
-			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), i->function.function ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), i->function.function);
 		}
 		if (i->function.class) {
-			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic" ADD_STRING_COPY);
-			add_assoc_string_ex(frame, "class",    HASH_KEY_SIZEOF("class"),    i->function.class    ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic");
+			add_assoc_string_ex(frame, "class",    HASH_KEY_SIZEOF("class"),    i->function.class   );
 		}
-		add_assoc_string_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename ADD_STRING_COPY);
+		add_assoc_string_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename);
 		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), i->lineno);
 
 		/* Add parameters */
@@ -1439,9 +1435,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				argument = xdstrdup("???");
 			}
 			if (i->var[j].name && !variadic_opened && argument) {
-				add_assoc_string_ex(params, i->var[j].name, HASH_KEY_STRLEN(i->var[j].name), argument ADD_STRING_COPY);
+				add_assoc_string_ex(params, i->var[j].name, HASH_KEY_STRLEN(i->var[j].name), argument);
 			} else {
-				add_index_string(params, j - 1, argument ADD_STRING_COPY);
+				add_index_string(params, j - 1, argument);
 			}
 			if (argument) {
 				xdfree(argument);
@@ -1450,7 +1446,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		if (i->include_filename) {
-			add_assoc_string_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), i->include_filename ADD_STRING_COPY);
+			add_assoc_string_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), i->include_filename);
 		}
 
 		add_next_index_zval(return_value, frame);
@@ -1464,7 +1460,7 @@ void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
 {
 	char *name = (char*) he->ptr;
 
-	add_next_index_string(return_value, name ADD_STRING_COPY);
+	add_next_index_string(return_value, name);
 }
 
 /* {{{ proto array xdebug_get_declared_vars()
