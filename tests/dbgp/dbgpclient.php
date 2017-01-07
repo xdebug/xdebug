@@ -4,7 +4,8 @@ define( 'XDEBUG_DBGP_IPV6', 2 );
 
 class DebugClient
 {
-	protected $port = 9991;
+	// free port will be selected automatically by the operating system
+	protected $port = 0;
 
 	private $tmpDir;
 
@@ -33,9 +34,15 @@ class DebugClient
 		$this->tmpDir = sys_get_temp_dir();
 	}
 
-	private function open()
+	private function open( &$errno, &$errstr )
 	{
 		$socket = @stream_socket_server( $this->getAddress(), $errno, $errstr );
+		if ($socket)
+		{
+			$name = stream_socket_get_name( $socket, false );
+			$name = explode( ":", $name );
+			$this->port = array_pop( $name );
+		}
 		return $socket;
 	}
 
@@ -106,10 +113,12 @@ class DebugClient
 	{
 		file_put_contents( $this->tmpDir . '/xdebug-dbgp-test.php', $data );
 		$i = 1;
-		$socket = $this->open();
+		$socket = $this->open( $errno, $errstr );
 		if ( $socket === false )
 		{
 			echo "Could not create socket server - already in use?\n";
+			echo "Error: {$errstr}, errno: {$errno}\n";
+			echo "Address: {$this->getAddress()}\n";
 			return;
 		}
 		$php = $this->launchPhp( $ppipes, $ini_options );

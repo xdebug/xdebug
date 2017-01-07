@@ -11,6 +11,9 @@ xdebug.collect_vars=0
 xdebug.collect_params=4
 xdebug.collect_return=0
 xdebug.collect_assignments=0
+xdebug.var_display_max_children=128
+xdebug.var_display_max_data=512
+xdebug.var_display_max_depth=3
 --FILE--
 <?php
 $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
