@@ -111,13 +111,9 @@ void xdebug_stop_trace(TSRMLS_D)
 PHP_FUNCTION(xdebug_start_trace)
 {
 	char *fname = NULL;
-#if PHP_VERSION_ID >= 70000
 	size_t fname_len = 0;
-#else
-	int   fname_len = 0;
-#endif
 	char *trace_fname;
-	zppLONG options = XG(trace_options);
+	zend_long options = XG(trace_options);
 
 	if (XG(do_trace) == 0) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
@@ -126,11 +122,7 @@ PHP_FUNCTION(xdebug_start_trace)
 
 		if ((trace_fname = xdebug_start_trace(fname, options TSRMLS_CC)) != NULL) {
 			XG(do_trace) = 1;
-#if PHP_VERSION_ID >= 70000
 			RETVAL_STRING(trace_fname);
-#else
-			RETVAL_STRING(trace_fname, 1);
-#endif
 			xdfree(trace_fname);
 			return;
 		} else {
@@ -148,11 +140,7 @@ PHP_FUNCTION(xdebug_start_trace)
 PHP_FUNCTION(xdebug_stop_trace)
 {
 	if (XG(do_trace) == 1) {
-#if PHP_VERSION_ID >= 70000
 		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC));
-#else
-		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC), 1);
-#endif
 		xdebug_stop_trace(TSRMLS_C);
 	} else {
 		RETVAL_FALSE;
@@ -163,11 +151,7 @@ PHP_FUNCTION(xdebug_stop_trace)
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
 	if (XG(do_trace) == 1 && XG(trace_handler) && XG(trace_handler)->get_filename) {
-#if PHP_VERSION_ID >= 70000
 		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC));
-#else
-		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC), 1);
-#endif
 	} else {
 		RETURN_FALSE;
 	}

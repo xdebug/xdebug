@@ -64,11 +64,11 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name TSRMLS_DC);
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_name, char *function_name TSRMLS_DC);
 
-int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
-int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS);
+int xdebug_check_branch_entry_handler(zend_execute_data *execute_data);
+int xdebug_common_override_handler(zend_execute_data *execute_data);
 
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(f) \
-	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+	int xdebug_##f##_handler(zend_execute_data *execute_data)
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_add);
@@ -76,9 +76,7 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_sub);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_mul);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_div);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_mod);
-#if PHP_VERSION_ID >= 50600
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_pow);
-#endif
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_sl);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_sr);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(pre_inc);

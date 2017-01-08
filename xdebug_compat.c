@@ -45,8 +45,6 @@
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
 
-#if PHP_VERSION_ID >= 70000
-
 #include "zend_compile.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/php_string.h"
@@ -214,57 +212,3 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 
 	return zend_read_property(ce, exception, name, length, flags, &dummy);
 }
-#else
-
-#if PHP_VERSION_ID >= 50500
-# define T(offset) (*EX_TMP_VAR(zdata, offset))
-#else
-# define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
-#endif
-
-zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC)
-{
-	if (!zdata->opline) {
-		return NULL;
-	}
-
-	switch (op_type & 0x0F) {
-		case IS_CONST:
-			return node->zv;
-			break;
-		case IS_TMP_VAR:
-			return &T(node->var).tmp_var;
-			break;
-		case IS_VAR:
-			if (T(node->var).var.ptr) {
-				return T(node->var).var.ptr;
-			} else {
-				temp_variable *T = &T(node->var);
-				zval *str = T->str_offset.str;
-
-				if (T->str_offset.str->type != IS_STRING
-					|| ((int)T->str_offset.offset<0)
-					|| ((unsigned int) T->str_offset.str->value.str.len <= T->str_offset.offset)) {
-					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
-					T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
-					T->tmp_var.value.str.len = 0;
-				} else {
-					char c = str->value.str.val[T->str_offset.offset];
-
-					T->tmp_var.value.str.val = estrndup(&c, 1);
-					T->tmp_var.value.str.len = 1;
-				}
-				T->tmp_var.refcount__gc=1;
-				T->tmp_var.is_ref__gc=1;
-				T->tmp_var.type = IS_STRING;
-				return &T->tmp_var;
-			}
-			break;
-		case IS_UNUSED:
-			return NULL;
-			break;
-	}
-	return NULL;
-}
-
-#endif

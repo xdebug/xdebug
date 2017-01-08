@@ -131,8 +131,6 @@ xdebug_trace_handler_t xdebug_trace_handler_html =
 	xdebug_trace_html_function_entry,
 	NULL /* xdebug_trace_html_function_exit */,
 	NULL /* xdebug_trace_html_function_return_value */,
-#if PHP_VERSION_ID >= 50500
 	NULL /* xdebug_trace_html_generator_return_value */,
-#endif
 	NULL /* xdebug_trace_html_assignment */
 };

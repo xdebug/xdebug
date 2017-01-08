@@ -1,7 +1,5 @@
 --TEST--
-Test with Code Coverage with unused lines (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test with Code Coverage with unused lines
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

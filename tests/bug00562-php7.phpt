@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #562: Incorrect coverage information for closure function headers (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for bug #562: Incorrect coverage information for closure function headers
 --INI--
 xdebug.coverage_enable=1
 xdebug.overload_var_dump=0

@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #1357: Function signature using variadics is reported as being not executed
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.6", '>=')) echo "skip >= PHP 5.6 needed\n"; ?>
 --FILE--
 <?php
 

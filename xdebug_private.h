@@ -27,9 +27,7 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_exceptions.h"
-#if PHP_VERSION_ID >= 50500
 #include "zend_generators.h"
-#endif
 #include "zend_exceptions.h"
 #include "zend_vm.h"
 #include "zend_hash.h"
@@ -181,9 +179,7 @@ typedef struct _function_stack_entry {
 	int          arg_done;
 	unsigned int varc;
 	xdebug_var   *var;
-#if PHP_VERSION_ID >= 50600
 	int          is_variadic;
-#endif
 	zval        *return_value;
 	xdebug_llist *used_vars;
 	HashTable   *symbol_table;
@@ -224,9 +220,7 @@ typedef struct
 	void (*function_entry)(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC);
 	void (*function_exit)(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC);
 	void (*return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC);
-#if PHP_VERSION_ID >= 50500
 	void (*generator_return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC);
-#endif
 	void (*assignment)(void *ctxt, function_stack_entry *fse, char *full_varname, zval *value, char *op, char *file, int lineno TSRMLS_DC);
 } xdebug_trace_handler_t;
 

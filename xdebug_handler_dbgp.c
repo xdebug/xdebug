@@ -272,11 +272,7 @@ static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *option
 	zval                *retval;
 
 	retval = xdebug_get_php_symbol(name TSRMLS_CC);
-#if PHP_VERSION_ID >= 70000
 	if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
-#else
-	if (retval) {
-#endif
 		return xdebug_get_zval_value_xml_node(name, retval, options TSRMLS_CC);
 	}
 
@@ -310,7 +306,7 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 
 	filename = xdebug_path_from_url(filename TSRMLS_CC);
 	stream = php_stream_open_wrapper(filename, "rb",
-			USE_PATH | XDEBUG_ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			USE_PATH | REPORT_ERRORS,
 			NULL);
 	xdfree(filename);
 
@@ -897,24 +893,10 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	int                old_error_reporting;
 	int                old_track_errors;
 	int                res = FAILURE;
-#if PHP_VERSION_ID >= 70000
-#else
-	zval             **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
-	zend_op          **original_opline_ptr = EG(opline_ptr);
-	zend_op_array     *original_active_op_array = EG(active_op_array);
-#endif
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
-#if PHP_VERSION_ID >= 70000
 	zend_object       *original_exception = EG(exception);
-#else
-	zval              *original_exception = EG(exception);
-#endif
 	jmp_buf           *original_bailout = EG(bailout);
-#if PHP_VERSION_ID < 70000
-	void             **original_argument_stack_top = EG(argument_stack)->top;
-	void             **original_argument_stack_end = EG(argument_stack)->end;
-#endif
 
 	/* Remember error reporting level and track errors */
 	old_error_reporting = EG(error_reporting);
@@ -931,32 +913,21 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_first_try {
 		res = zend_eval_string(eval_string, ret_zval, "xdebug://debug-eval" TSRMLS_CC);
 	} zend_end_try();
-#if PHP_VERSION_ID >= 70000
+
 	/* FIXME: Bubble up exception message to DBGp return packet */
 	if (EG(exception)) {
 		res = FAILURE;
 	}
-#endif
 
 	/* Clean up */
 	EG(error_reporting) = old_error_reporting;
 	PG(track_errors) = old_track_errors;
 	XG(breakpoints_allowed) = 1;
 
-#if PHP_VERSION_ID >= 70000
-#else
-	EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
-	EG(opline_ptr) = original_opline_ptr;
-	EG(active_op_array) = original_active_op_array;
-#endif
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
 	EG(exception) = original_exception;
 	EG(bailout) = original_bailout;
-#if PHP_VERSION_ID < 70000
-	EG(argument_stack)->top = original_argument_stack_top;
-	EG(argument_stack)->end = original_argument_stack_end;
-#endif
 
 	return res;
 }
@@ -995,11 +966,7 @@ DBGP_FUNC(eval)
 	} else {
 		ret_xml = xdebug_get_zval_value_xml_node(NULL, &ret_zval, options TSRMLS_CC);
 		xdebug_xml_add_child(*retval, ret_xml);
-#if PHP_VERSION_ID >= 70000
 		zval_ptr_dtor(&ret_zval);
-#else
-		zval_dtor(&ret_zval);
-#endif
 	}
 }
 
@@ -1422,15 +1389,6 @@ DBGP_FUNC(property_get)
 
 static void set_vars_from_EG(TSRMLS_D)
 {
-#if PHP_VERSION_ID >= 70000
-#else
-	EG(opline_ptr) = &EG(current_execute_data)->opline;
-	EG(active_op_array) = EG(current_execute_data)->op_array;
-	EG(active_symbol_table) = EG(current_execute_data)->symbol_table;
-	EG(This) = EG(current_execute_data)->current_this;
-	EG(scope) = EG(current_execute_data)->current_scope;
-	EG(called_scope) = EG(current_execute_data)->current_called_scope;
-#endif
 }
 
 DBGP_FUNC(property_set)
@@ -1502,11 +1460,7 @@ DBGP_FUNC(property_set)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		} else {
 			zval_dtor(symbol);
-#if PHP_VERSION_ID >= 70000
 			ZVAL_STRINGL(symbol, (char*) new_value, new_length);
-#else
-			ZVAL_STRINGL(symbol, (char*) new_value, new_length, 0);
-#endif
 			xdebug_xml_add_attribute(*retval, "success", "1");
 
 			XDEBUG_STR_SWITCH(CMD_OPTION('t')) {
@@ -1653,6 +1607,9 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	}
 }
 
+# define HASH_KEY_VAL(k) (k)->key->val
+# define HASH_KEY_LEN(k) (k)->key->len
+
 static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_hash *tmp_hash;
@@ -1661,9 +1618,8 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 
 	/* We really ought to deal properly with non-associate keys for symbol
 	 * tables, but for now, we'll just ignore them. */
-#if PHP_VERSION_ID >= 70000
 	if (!hash_key->key) { return 0; }
-#endif
+
 	if (!HASH_KEY_VAL(hash_key) || HASH_KEY_LEN(hash_key) == 0) { return 0; }
 
 	if (strcmp("argc", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
@@ -1698,14 +1654,6 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 #undef HASH_KEY_VAL
 #undef HASH_KEY_LEN
 
-#if PHP_VERSION_ID >= 70000
-# define CONSTANT_NAME_VAL(k) (k)->val
-# define CONSTANT_NAME_LEN(k) (k)->len
-#else
-# define CONSTANT_NAME_VAL(k) (k)
-# define CONSTANT_NAME_LEN(k) k ## _len
-#endif
-
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
 	function_stack_entry *fse;
@@ -1732,7 +1680,6 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 	/* add user defined constants */
 	if (context_id == 2) {
-#if PHP_VERSION_ID >= 70000
 		zend_constant *val;
 
 		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
@@ -1746,29 +1693,8 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 				continue;
 			}
 
-			add_constant_node(node, CONSTANT_NAME_VAL(val->name), &(val->value), options TSRMLS_CC);
+			add_constant_node(node, val->name->val, &(val->value), options TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
-#else
-		HashPosition   pos;
-		zend_constant *val;
-
-		zend_hash_internal_pointer_reset_ex(EG(zend_constants), &pos);
-		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &val, &pos) != FAILURE) {
-			if (!val->name) {
-				/* skip special constants */
-				goto next_constant;
-			}
-
-			if (val->module_number != PHP_USER_CONSTANT) {
-				/* we're only interested in user defined constants */
-				goto next_constant;
-			}
-
-			add_constant_node(node, CONSTANT_NAME_VAL(val->name), &(val->value), options TSRMLS_CC);
-next_constant:
-			zend_hash_move_forward_ex(EG(zend_constants), &pos);
-		}
-#endif
 
 		return 0;
 	}
@@ -1826,10 +1752,6 @@ next_constant:
 
 	return 1;
 }
-
-#undef CONSTANT_NAME_VAL
-#undef CONSTANT_NAME_LEN
-
 
 DBGP_FUNC(stack_depth)
 {

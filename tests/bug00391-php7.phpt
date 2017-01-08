@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #391: When PHP runs with Xdebug it doesn't stop executing script when type hinting leads to fatal error (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for bug #391: When PHP runs with Xdebug it doesn't stop executing script when type hinting leads to fatal error
 --INI--
 log_errors=0
 xdebug.default_enable=1

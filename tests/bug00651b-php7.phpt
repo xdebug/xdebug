@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #651: Incorrect code coverage after empty() in conditional (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for bug #651: Incorrect code coverage after empty() in conditional
 --INI--
 xdebug.overload_var_dump=0
 --FILE--

@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function. (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function.
 --INI--
 xdebug.default_enable=1
 xdebug.overload_var_dump=0
