@@ -177,10 +177,6 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *n
 
 inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 {
-	if (Z_TYPE_P(z) == IS_REFERENCE) {
-		z = &z->value.ref->val;
-	}
-
 	switch (Z_TYPE_P(z)) {
 		case IS_ARRAY:
 			return Z_ARRVAL_P(z);
@@ -195,6 +191,13 @@ inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_entry **ce TSRMLS_DC)
 {
 	zend_string *class_name;
+
+	if (Z_TYPE_P(z) == IS_INDIRECT) {
+		z = z->value.zv;
+	}
+	if (Z_TYPE_P(z) == IS_REFERENCE) {
+		z = &z->value.ref->val;
+	}
 
 	if (Z_TYPE_P(z) != IS_OBJECT) {
 		return NULL;
@@ -285,6 +288,13 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 	HashTable *myht;
 
 	if (parent) {
+		if (Z_TYPE_P(parent) == IS_INDIRECT) {
+			parent = parent->value.zv;
+		}
+		if (Z_TYPE_P(parent) == IS_REFERENCE) {
+			parent = &parent->value.ref->val;
+		}
+
 		ht = fetch_ht_from_zval(parent TSRMLS_CC);
 	}
 
@@ -469,6 +479,7 @@ cleanup:
 	if (element) {
 		free(element);
 	}
+
 	return retval_p;
 }
 
