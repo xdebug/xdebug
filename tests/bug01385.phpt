@@ -1,5 +1,5 @@
 --TEST--
-DBGP: property_value
+Test for bug #1385: Can not fetch IS_INDIRECT private properties
 --SKIPIF--
 <?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--

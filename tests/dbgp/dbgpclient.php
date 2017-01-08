@@ -37,7 +37,7 @@ class DebugClient
 	private function open( &$errno, &$errstr )
 	{
 		$socket = @stream_socket_server( $this->getAddress(), $errno, $errstr );
-		if ($socket)
+		if ( $socket )
 		{
 			$name = stream_socket_get_name( $socket, false );
 			$name = explode( ":", $name );
