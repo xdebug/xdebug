@@ -7,6 +7,10 @@ php:
   - 7.1
   - nightly
 
+matrix:
+  allow_failures:
+    - php: nightly
+
 before_script:
   - phpenv config-rm xdebug.ini || echo "xdebug not available"
   - ./.travis.scripts/compile.sh
