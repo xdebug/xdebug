@@ -263,7 +263,9 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 	xdebug_str *tmp;
 
 	tmp = make_message(context, message TSRMLS_CC);
-	SSENDL(context->socket, tmp->d, tmp->l);
+	if (SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
+		fprintf(stderr, "There was a problem sending %ld bytes on socket %d", tmp->l, context->socket);
+	}
 	xdebug_str_ptr_dtor(tmp);
 }
 
