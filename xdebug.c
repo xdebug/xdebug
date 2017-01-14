@@ -175,6 +175,7 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_enable,                xdebug_void_args)
 	PHP_FE(xdebug_disable,               xdebug_void_args)
 	PHP_FE(xdebug_is_enabled,            xdebug_void_args)
+	PHP_FE(xdebug_is_debugger_active,    xdebug_void_args)
 	PHP_FE(xdebug_break,                 xdebug_void_args)
 
 	PHP_FE(xdebug_start_trace,           xdebug_start_trace_args)
@@ -2146,6 +2147,11 @@ PHP_FUNCTION(xdebug_disable)
 PHP_FUNCTION(xdebug_is_enabled)
 {
 	RETURN_BOOL(zend_error_cb == xdebug_new_error_cb);
+}
+
+PHP_FUNCTION(xdebug_is_debugger_active)
+{
+	RETURN_BOOL(XG(remote_enabled));
 }
 
 PHP_FUNCTION(xdebug_break)
