@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #665: xdebug does not respect display_errors=stderr
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.2.4", '>=')) echo "skip >= PHP 5.2.4 needed\n"; ?>
 --FILE--
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE') . ' -d log_errors=Off -d xdebug.default_enable=On';

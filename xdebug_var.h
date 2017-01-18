@@ -49,7 +49,7 @@ typedef struct xdebug_var_export_options {
 #define XDEBUG_VAR_TYPE_STATIC   0x01
 #define XDEBUG_VAR_TYPE_CONSTANT 0x02
 
-zval* xdebug_get_php_symbol(char* name, int name_length TSRMLS_DC);
+zval* xdebug_get_php_symbol(char* name TSRMLS_DC);
 char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name);
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D);
@@ -63,10 +63,10 @@ void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC);
 void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level TSRMLS_DC);
 
-char* xdebug_xmlize(char *string, int len, int *newlen);
+char* xdebug_xmlize(char *string, SIZETorINT len, size_t *newlen);
 char* xdebug_error_type_simple(int type);
 char* xdebug_error_type(int type);
-zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, znode_op *node, int *is_var);
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var);
 char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options);
 char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 #define xdebug_get_zval_value_text(v,d,o) xdebug_get_zval_value_text_ansi(v,0,d,o TSRMLS_CC);

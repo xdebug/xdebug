@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1111: eval does not work when debugger is stopped in xdebug_throw_exception_hook
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

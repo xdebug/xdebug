@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #687: Xdebug does not show dynamically defined variable
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

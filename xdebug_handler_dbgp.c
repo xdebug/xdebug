@@ -29,6 +29,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "main/php_version.h"
+#include "ext/standard/base64.h"
 #include "TSRM.h"
 #include "php_globals.h"
 #include "php_xdebug.h"
@@ -266,23 +267,27 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 	xdebug_str_ptr_dtor(tmp);
 }
 
-static xdebug_xml_node* get_symbol(char* name, int name_length, xdebug_var_export_options *options TSRMLS_DC)
+static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *options TSRMLS_DC)
 {
 	zval                *retval;
 
-	retval = xdebug_get_php_symbol(name, name_length TSRMLS_CC);
+	retval = xdebug_get_php_symbol(name TSRMLS_CC);
+#if PHP_VERSION_ID >= 70000
+	if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
+#else
 	if (retval) {
+#endif
 		return xdebug_get_zval_value_xml_node(name, retval, options TSRMLS_CC);
 	}
 
 	return NULL;
 }
 
-static int get_symbol_contents(char* name, int name_length, xdebug_xml_node *node, xdebug_var_export_options *options TSRMLS_DC)
+static int get_symbol_contents(char* name, xdebug_xml_node *node, xdebug_var_export_options *options TSRMLS_DC)
 {
 	zval                *retval;
 
-	retval = xdebug_get_php_symbol(name, name_length TSRMLS_CC);
+	retval = xdebug_get_php_symbol(name TSRMLS_CC);
 	if (retval) {
 		xdebug_var_export_xml_node(&retval, name, node, options, 1 TSRMLS_CC);
 		return 1;
@@ -305,7 +310,7 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 
 	filename = xdebug_path_from_url(filename TSRMLS_CC);
 	stream = php_stream_open_wrapper(filename, "rb",
-			USE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			USE_PATH | XDEBUG_ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	xdfree(filename);
 
@@ -891,15 +896,24 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 {
 	int                old_error_reporting;
 	int                res = FAILURE;
+#if PHP_VERSION_ID >= 70000
+#else
 	zval             **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
 	zend_op          **original_opline_ptr = EG(opline_ptr);
 	zend_op_array     *original_active_op_array = EG(active_op_array);
+#endif
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
+#if PHP_VERSION_ID >= 70000
+	zend_object       *original_exception = EG(exception);
+#else
 	zval              *original_exception = EG(exception);
+#endif
 	jmp_buf           *original_bailout = EG(bailout);
+#if PHP_VERSION_ID < 70000
 	void             **original_argument_stack_top = EG(argument_stack)->top;
 	void             **original_argument_stack_end = EG(argument_stack)->end;
+#endif
 
 	/* Remember error reporting level */
 	old_error_reporting = EG(error_reporting);
@@ -914,20 +928,31 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	zend_first_try {
 		res = zend_eval_string(eval_string, ret_zval, "xdebug://debug-eval" TSRMLS_CC);
 	} zend_end_try();
+#if PHP_VERSION_ID >= 70000
+	/* FIXME: Bubble up exception message to DBGp return packet */
+	if (EG(exception)) {
+		res = FAILURE;
+	}
+#endif
 
 	/* Clean up */
 	EG(error_reporting) = old_error_reporting;
 	XG(breakpoints_allowed) = 1;
 
+#if PHP_VERSION_ID >= 70000
+#else
 	EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
 	EG(opline_ptr) = original_opline_ptr;
 	EG(active_op_array) = original_active_op_array;
+#endif
 	EG(current_execute_data) = original_execute_data;
 	EG(no_extensions) = original_no_extensions;
 	EG(exception) = original_exception;
 	EG(bailout) = original_bailout;
+#if PHP_VERSION_ID < 70000
 	EG(argument_stack)->top = original_argument_stack_top;
 	EG(argument_stack)->end = original_argument_stack_end;
+#endif
 
 	return res;
 }
@@ -1275,7 +1300,7 @@ DBGP_FUNC(typemap_get)
 	}
 }
 
-static int add_constant_node(xdebug_xml_node *node, char *name, int name_lenth, zval *const_val, xdebug_var_export_options *options TSRMLS_DC)
+static int add_constant_node(xdebug_xml_node *node, char *name, zval *const_val, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_xml_node *contents;
 
@@ -1288,11 +1313,11 @@ static int add_constant_node(xdebug_xml_node *node, char *name, int name_lenth, 
 	return FAILURE;
 }
 
-static int add_variable_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
+static int add_variable_node(xdebug_xml_node *node, char *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_xml_node *contents;
 
-	contents = get_symbol(name, name_length, options TSRMLS_CC);
+	contents = get_symbol(name, options TSRMLS_CC);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 		return SUCCESS;
@@ -1359,16 +1384,16 @@ DBGP_FUNC(property_get)
 	if (context_nr == 2) { /* constants */
 		zval const_val;
 
-		if (!zend_get_constant(CMD_OPTION('n'), strlen(CMD_OPTION('n')), &const_val TSRMLS_CC)) {
+		if (!xdebug_get_constant(CMD_OPTION('n'), strlen(CMD_OPTION('n')), &const_val TSRMLS_CC)) {
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
-		if (add_constant_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, &const_val, options TSRMLS_CC) == FAILURE) {
+		if (add_constant_node(*retval, CMD_OPTION('n'), &const_val, options TSRMLS_CC) == FAILURE) {
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
 	} else {
-		if (add_variable_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0, options TSRMLS_CC) == FAILURE) {
+		if (add_variable_node(*retval, CMD_OPTION('n'), 1, 0, 0, options TSRMLS_CC) == FAILURE) {
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
@@ -1378,18 +1403,21 @@ DBGP_FUNC(property_get)
 
 static void set_vars_from_EG(TSRMLS_D)
 {
+#if PHP_VERSION_ID >= 70000
+#else
 	EG(opline_ptr) = &EG(current_execute_data)->opline;
 	EG(active_op_array) = EG(current_execute_data)->op_array;
 	EG(active_symbol_table) = EG(current_execute_data)->symbol_table;
 	EG(This) = EG(current_execute_data)->current_this;
 	EG(scope) = EG(current_execute_data)->current_scope;
 	EG(called_scope) = EG(current_execute_data)->current_called_scope;
+#endif
 }
 
 DBGP_FUNC(property_set)
 {
 	char                      *data = CMD_OPTION('-');
-	char                      *new_value;
+	unsigned char             *new_value;
 	int                        new_length;
 	int                        depth = 0;
 	int                        context_nr = 0;
@@ -1444,10 +1472,10 @@ DBGP_FUNC(property_set)
 		options->runtime[0].page = 0;
 	}
 
-	new_value = (char*) xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
+	new_value = xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
 
 	if (CMD_OPTION('t')) {
-		symbol = xdebug_get_php_symbol(CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1 TSRMLS_CC);
+		symbol = xdebug_get_php_symbol(CMD_OPTION('n') TSRMLS_CC);
 
 		/* Handle result */
 		if (!symbol) {
@@ -1455,9 +1483,11 @@ DBGP_FUNC(property_set)
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		} else {
 			zval_dtor(symbol);
-			Z_TYPE_P(symbol) = IS_STRING;
-			Z_STRVAL_P(symbol) = new_value;
-			Z_STRLEN_P(symbol) = new_length;
+#if PHP_VERSION_ID >= 70000
+			ZVAL_STRINGL(symbol, (char*) new_value, new_length);
+#else
+			ZVAL_STRINGL(symbol, (char*) new_value, new_length, 0);
+#endif
 			xdebug_xml_add_attribute(*retval, "success", "1");
 
 			XDEBUG_STR_SWITCH(CMD_OPTION('t')) {
@@ -1516,11 +1546,11 @@ DBGP_FUNC(property_set)
 	}
 }
 
-static int add_variable_contents_node(xdebug_xml_node *node, char *name, int name_length, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
+static int add_variable_contents_node(xdebug_xml_node *node, char *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	int contents_found;
 
-	contents_found = get_symbol_contents(name, name_length, node, options TSRMLS_CC);
+	contents_found = get_symbol_contents(name, node, options TSRMLS_CC);
 	if (contents_found) {
 		return SUCCESS;
 	}
@@ -1582,7 +1612,7 @@ DBGP_FUNC(property_value)
 		options->max_data = old_max_data;
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
-	if (add_variable_contents_node(*retval, CMD_OPTION('n'), strlen(CMD_OPTION('n')) + 1, 1, 0, 0, options TSRMLS_CC) == FAILURE) {
+	if (add_variable_contents_node(*retval, CMD_OPTION('n'), 1, 0, 0, options TSRMLS_CC) == FAILURE) {
 		options->max_data = old_max_data;
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
@@ -1596,7 +1626,7 @@ static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, vo
 	xdebug_xml_node    *contents;
 	TSRMLS_FETCH();
 
-	contents = get_symbol(name, strlen(name), options TSRMLS_CC);
+	contents = get_symbol(name, options TSRMLS_CC);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
@@ -1612,36 +1642,50 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 
 	/* We really ought to deal properly with non-associate keys for symbol
 	 * tables, but for now, we'll just ignore them. */
-	if (!hash_key->arKey || hash_key->nKeyLength == 0) { return 0; }
+#if PHP_VERSION_ID >= 70000
+	if (!hash_key->key) { return 0; }
+#endif
+	if (!HASH_KEY_VAL(hash_key) || HASH_KEY_LEN(hash_key) == 0) { return 0; }
 
-	if (strcmp("argc", hash_key->arKey) == 0) { return 0; }
-	if (strcmp("argv", hash_key->arKey) == 0) { return 0; }
-	if (hash_key->arKey[0] == '_') {
-		if (strcmp("_COOKIE", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_ENV", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_FILES", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_GET", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_POST", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_REQUEST", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_SERVER", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("_SESSION", hash_key->arKey) == 0) { return 0; }
+	if (strcmp("argc", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (strcmp("argv", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (HASH_KEY_VAL(hash_key)[0] == '_') {
+		if (strcmp("_COOKIE", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_ENV", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_GET", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_POST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_REQUEST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_SERVER", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("_SESSION", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 	}
-	if (hash_key->arKey[0] == 'H') {
-		if (strcmp("HTTP_COOKIE_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_ENV_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_GET_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_POST_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_POST_FILES", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_RAW_POST_DATA", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_SERVER_VARS", hash_key->arKey) == 0) { return 0; }
-		if (strcmp("HTTP_SESSION_VARS", hash_key->arKey) == 0) { return 0; }
+	if (HASH_KEY_VAL(hash_key)[0] == 'H') {
+		if (strcmp("HTTP_COOKIE_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_ENV_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_GET_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_POST_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_POST_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_RAW_POST_DATA", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_SERVER_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+		if (strcmp("HTTP_SESSION_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 	}
-	if (strcmp("GLOBALS", hash_key->arKey) == 0) { return 0; }
+	if (strcmp("GLOBALS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 
-	xdebug_hash_add(tmp_hash, (char*) hash_key->arKey, strlen(hash_key->arKey), hash_key->arKey);
+	xdebug_hash_add(tmp_hash, (char*) HASH_KEY_VAL(hash_key), strlen(HASH_KEY_VAL(hash_key)), HASH_KEY_VAL(hash_key));
 
 	return 0;
 }
+
+#undef HASH_KEY_VAL
+#undef HASH_KEY_LEN
+
+#if PHP_VERSION_ID >= 70000
+# define CONSTANT_NAME_VAL(k) (k)->val
+# define CONSTANT_NAME_LEN(k) (k)->len
+#else
+# define CONSTANT_NAME_VAL(k) (k)
+# define CONSTANT_NAME_LEN(k) k ## _len
+#endif
 
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*) TSRMLS_DC)
 {
@@ -1654,21 +1698,38 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		/* add super globals */
 		XG(active_symbol_table) = &EG(symbol_table);
 		XG(active_execute_data) = NULL;
-		add_variable_node(node, "_COOKIE", sizeof("_COOKIE"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_ENV", sizeof("_ENV"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_FILES", sizeof("_FILES"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_GET", sizeof("_GET"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_POST", sizeof("_POST"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_REQUEST", sizeof("_REQUEST"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_SERVER", sizeof("_SERVER"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_SESSION", sizeof("_SESSION"), 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "GLOBALS", sizeof("GLOBALS"), 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_COOKIE", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_ENV", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_FILES", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_GET", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_POST", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_REQUEST", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_SERVER", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "_SESSION", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, "GLOBALS", 1, 1, 0, options TSRMLS_CC);
 		XG(active_symbol_table) = NULL;
 		return 0;
 	}
 
 	/* add user defined constants */
 	if (context_id == 2) {
+#if PHP_VERSION_ID >= 70000
+		zend_constant *val;
+
+		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
+			if (!val->name) {
+				/* skip special constants */
+				continue;
+			}
+
+			if (val->module_number != PHP_USER_CONSTANT) {
+				/* we're only interested in user defined constants */
+				continue;
+			}
+
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), &(val->value), options TSRMLS_CC);
+		} ZEND_HASH_FOREACH_END();
+#else
 		HashPosition   pos;
 		zend_constant *val;
 
@@ -1684,10 +1745,11 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 				goto next_constant;
 			}
 
-			add_constant_node(node, val->name, val->name_len, &(val->value), options TSRMLS_CC);
+			add_constant_node(node, CONSTANT_NAME_VAL(val->name), &(val->value), options TSRMLS_CC);
 next_constant:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
+#endif
 
 		return 0;
 	}
@@ -1722,7 +1784,7 @@ next_constant:
 
 			/* Zend engine 2 does not give us $this, eval so we can get it */
 			if (!xdebug_hash_find(tmp_hash, "this", 4, (void *) &var_name)) {
-				add_variable_node(node, "this", sizeof("this"), 1, 1, 0, options TSRMLS_CC);
+				add_variable_node(node, "this", 1, 1, 0, options TSRMLS_CC);
 			}
 
 			xdebug_hash_destroy(tmp_hash);
@@ -1732,7 +1794,7 @@ next_constant:
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = zend_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+			zend_class_entry *ce = xdebug_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
 			xdebug_attach_static_vars(node, options, ce TSRMLS_CC);
 		}
@@ -1745,6 +1807,9 @@ next_constant:
 	
 	return 1;
 }
+
+#undef CONSTANT_NAME_VAL
+#undef CONSTANT_NAME_LEN
 
 
 DBGP_FUNC(stack_depth)
@@ -1998,7 +2063,7 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 						int len = ptr - value_begin;
 						args->value[index] = xdcalloc(1, len + 1);
 						memcpy(args->value[index], value_begin, len);
-						php_stripcslashes(args->value[index], &len);
+						xdebug_stripcslashes(args->value[index], &len);
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;

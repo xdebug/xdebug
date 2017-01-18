@@ -1,12 +1,15 @@
+sudo: false
+
 language: php
 
 php:
-  - 5.6
-  - 5.5
   - 5.4
+  - 5.5
+  - 5.6
+  - 7.0
 
 before_script:
-  - phpenv config-rm xdebug.ini
+  - if [ "$TRAVIS_PHP_VERSION" == 'nightly' ]; then echo "Not removing xdebug.ini"; else phpenv config-rm xdebug.ini; fi
   - ./.travis.scripts/compile.sh
 
 notifications:
@@ -18,3 +21,6 @@ script:
   - export PATH=`dirname $MYPHP`:$PATH
   - $MYPHP -c /tmp/temp-php-config.ini -v
   - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=$MYPHP $MYPHP -c /tmp/temp-php-config.ini -dxdebug.auto_trace=0 run-tests.php -q -x --show-diff
+
+notifications:
+  irc: "irc.freenode.net#xdebug"

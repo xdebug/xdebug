@@ -1,7 +1,7 @@
 <?php
-
 function debug($var, $val) {
-    if (is_array($val) || is_object($val) || is_resource($val)) {
+    $ia = 'is_array'; $io = 'is_object'; $ir = 'is_resource';
+    if ($ia($val) || $io($val) || $ir($val)) {
         /* Do nothing */
     } else {
         /* Do nothing */

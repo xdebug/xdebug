@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #996: Can't evaluate property of class that extends ArrayObject
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #864: Not possible to inspect ArrayIterator instances with Xdebug
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
@@ -23,7 +25,7 @@ dbgpRun( $data, $commands );
 
 -> step_into -i 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="%r(3|2)%r"></xdebug:message></response>
 
 -> breakpoint_set -i 2 -t line -n 13
 <?xml version="1.0" encoding="iso-8859-1"?>

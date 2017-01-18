@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #619: Xdebug does NOT show "private" properties defined in parent classes
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

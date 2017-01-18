@@ -10,7 +10,7 @@ xdebug.profiler_enable=0
 	echo xdebug_get_function_count(). "\n";
 
 	for ($i = 0; $i < 9; $i++) {
-		strlen($i);
+		strrev($i);
 	}
 
 	echo xdebug_get_function_count(). "\n";

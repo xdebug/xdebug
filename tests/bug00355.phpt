@@ -18,13 +18,13 @@ $tf = xdebug_start_trace('/tmp/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED
 function foo()
 {
     echo "Hi";
-	echo strlen( "Hi" ), "\n";
+	echo strrev( "Hi" ), "\n";
 }
 
 function bar()
 {
     echo "There\n";
-	echo strlen( "There" ), "\n";
+	echo strrev( "There" ), "\n";
 }
 
 register_shutdown_function("bar");
@@ -36,15 +36,15 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-Hi2
-Version: 2.%d%s
+HiiH
+Version: %d.%s
 File format: %d
 TRACE START [%s]
 2	2	1	%f	%d
 2	3	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'
 2	3	1	%f	%d
 2	4	0	%f	%d	foo	1		%sbug00355.php	18	0
-3	5	0	%f	%d	strlen	0		%sbug00355.php	7	1	'Hi'
+3	5	0	%f	%d	strrev	0		%sbug00355.php	7	1	'Hi'
 3	5	1	%f	%d
 2	4	1	%f	%d
 2	6	0	%f	%d	xdebug_stop_trace	0		%sbug00355.php	20	0
@@ -52,4 +52,4 @@ TRACE START [%s]
 TRACE END   [%s]
 
 There
-5
+erehT

@@ -33,8 +33,8 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> foo(long, ???) %sfunctrace_variadics_1.php:9
-%w%f %w%d     -> foo(long, ...variadic(0 => bool)) %sfunctrace_variadics_1.php:10
+%w%f %w%d     -> foo(long, ...variadic()) %sfunctrace_variadics_1.php:9
+%w%f %w%d     -> foo(long, ...variadic(0 => %r(bool|false)%r)) %sfunctrace_variadics_1.php:10
 %w%f %w%d     -> foo(string(3), ...variadic(0 => string(3), 1 => double)) %sfunctrace_variadics_1.php:11
 %w%f %w%d     -> xdebug_stop_trace() %sfunctrace_variadics_1.php:13
 %w%f %w%d

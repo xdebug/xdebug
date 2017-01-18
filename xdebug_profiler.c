@@ -139,7 +139,7 @@ static char* get_filename_ref(char *name TSRMLS_DC)
 		return xdebug_sprintf("(%d)", nr);
 	} else {
 		XG(profile_last_filename_ref)++;
-		xdebug_hash_add(XG(profile_filename_refs), name, strlen(name), (void*) XG(profile_last_filename_ref));
+		xdebug_hash_add(XG(profile_filename_refs), name, strlen(name), (void*) (size_t) XG(profile_last_filename_ref));
 		return xdebug_sprintf("(%d) %s", XG(profile_last_filename_ref), name);
 	}
 }
@@ -152,7 +152,7 @@ static char* get_functionname_ref(char *name TSRMLS_DC)
 		return xdebug_sprintf("(%d)", nr);
 	} else {
 		XG(profile_last_functionname_ref)++;
-		xdebug_hash_add(XG(profile_functionname_refs), name, strlen(name), (void*) XG(profile_last_functionname_ref));
+		xdebug_hash_add(XG(profile_functionname_refs), name, strlen(name), (void*) (size_t) XG(profile_last_functionname_ref));
 		return xdebug_sprintf("(%d) %s", XG(profile_last_functionname_ref), name);
 	}
 }
@@ -196,7 +196,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 
 	if (fse->prev) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
-		ce->filename = op_array ? xdstrdup(op_array->filename) : xdstrdup(fse->filename);
+		ce->filename = op_array ? xdstrdup(STR_NAME_VAL(op_array->filename)) : xdstrdup(fse->filename);
 		ce->function = xdstrdup(tmp_name);
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
@@ -208,7 +208,7 @@ void xdebug_profiler_function_user_end(function_stack_entry *fse, zend_op_array*
 	if (fse->user_defined == XDEBUG_EXTERNAL) {
 		char *tmp_fl = NULL, *tmp_fn = NULL;
 		if (op_array) {
-			tmp_fl = get_filename_ref((char*) op_array->filename TSRMLS_CC);
+			tmp_fl = get_filename_ref((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC);
 			fprintf(XG(profile_file), "fl=%s\n", tmp_fl);
 		} else {
 			tmp_fl = get_filename_ref(fse->filename TSRMLS_CC);
@@ -298,7 +298,11 @@ void xdebug_profiler_function_internal_end(function_stack_entry *fse TSRMLS_DC)
 	xdebug_profiler_function_user_end(fse, NULL TSRMLS_CC);
 }
 
+#if PHP_VERSION_ID >= 70000
+static int xdebug_print_aggr_entry(zval *pDest, void *argument TSRMLS_DC)
+#else
 static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
+#endif
 {
 	FILE *fp = (FILE *) argument;
 	xdebug_aggregate_entry *xae = (xdebug_aggregate_entry *) pDest;
@@ -310,6 +314,15 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 		fprintf(fp, "\nsummary: %lu\n\n", (unsigned long) (xae->time_inclusive * 1000000));
 	}
 	if (xae->call_list) {
+#if PHP_VERSION_ID >= 70000
+		xdebug_aggregate_entry *xae_call;
+
+		ZEND_HASH_FOREACH_PTR(xae->call_list, xae_call) {
+			fprintf(fp, "cfn=%s\n", (xae_call)->function);
+			fprintf(fp, "calls=%d 0 0\n", (xae_call)->call_count);
+			fprintf(fp, "%d %lu\n", (xae_call)->lineno, (unsigned long) ((xae_call)->time_inclusive * 1000000));
+		} ZEND_HASH_FOREACH_END();
+#else
 		xdebug_aggregate_entry **xae_call;
 
 		zend_hash_internal_pointer_reset(xae->call_list);
@@ -319,6 +332,7 @@ static int xdebug_print_aggr_entry(void *pDest, void *argument TSRMLS_DC)
 			fprintf(fp, "%d %lu\n", (*xae_call)->lineno, (unsigned long) ((*xae_call)->time_inclusive * 1000000));
 			zend_hash_move_forward(xae->call_list);
 		}
+#endif
 	}
 	fprintf(fp, "\n");
 	fflush(fp);

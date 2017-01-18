@@ -1,7 +1,5 @@
 --TEST--
-Test for tracing mixed array element and property assignments in user-readable function traces (>= PHP 5.3)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.3", '>=')) echo "skip >= PHP 5.3 needed\n"; ?>
+Test for tracing mixed array element and property assignments in user-readable function traces
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -66,11 +64,11 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => self::b = array () %sassignment-trace9.php:21
                              => self::b['bar'] = array () %sassignment-trace9.php:22
                              => self::b['foo'] = class stdClass {  } %sassignment-trace9.php:23
-                             => b['foo']->bar = 52 %sassignment-trace9.php:24
+                             => self::b['foo']->bar = 52 %sassignment-trace9.php:24
                              => self::b = array () %sassignment-trace9.php:26
                              => self::b['bar'] = array () %sassignment-trace9.php:27
                              => self::b['foo'] = class stdClass {  } %sassignment-trace9.php:28
-                             => b['foo']->bar = 52 %sassignment-trace9.php:29
+                             => self::b['foo']->bar = 52 %sassignment-trace9.php:29
                            => $a = class testClass { public $a = array ('bar' => 52, 'foo' => class stdClass { public $bar = 52 }) } %sassignment-trace9.php:33
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace9.php:35
 %w%f %w%d

@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #475: Property names with null chars are not sent fully to the client
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

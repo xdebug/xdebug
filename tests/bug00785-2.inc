@@ -15,13 +15,13 @@ function nested2($a)
 function foo() {
 	$array = array( 1, 2, 3, 4, 5, 6 );
 
-	foreach ( $array as $nr )
-	{
-		call_user_func_array( 'nested', array( $nr ) );
+	foreach ( $array as $nr ) {
+		$c = 'call_user_func_array';
+		$c( 'nested', array( $nr ) );
 	}
 }
-
-call_user_func_array( 'nested2', array( 7 ) );
+$cufa = 'call_user_func_array'; $cuf = 'call_user_func';
+$cufa( 'nested2', array( 7 ) );
 foo();
-call_user_func( 'nested', 8 );
+$cuf( 'nested', 8 );
 ?>

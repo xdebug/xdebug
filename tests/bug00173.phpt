@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #173: Xdebug segfaults using SPL ArrayIterator (>= PHP 5.2)
+Test for bug #173: Xdebug segfaults using SPL ArrayIterator
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 <?php if (!extension_loaded("SPL")) print "skip No SPL available"; ?>
-<?php if (!version_compare(phpversion(), "5.2", '>=')) echo "skip >= PHP 5.2 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=1
@@ -28,7 +27,7 @@ xdebug.show_local_vars=1
 	echo "DONE\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Passed variable is not an array or object, using empty array instead' in %sbug00173.php on line 3
+Fatal error: Uncaught%sInvalidArgumentException%sPassed variable is not an array or object, using empty array instead%sin %sbug00173.php on line 3
 
 InvalidArgumentException: Passed variable is not an array or object, using empty array instead in %sbug00173.php on line 3
 

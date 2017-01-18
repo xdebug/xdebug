@@ -22,7 +22,7 @@ unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 version: 1
-creator: xdebug 2.%s
+creator: xdebug %d.%s
 cmd: %sbug00639.php
 part: 1
 positions: line
@@ -34,7 +34,7 @@ fn=(1) require::%sbug00639-2.inc
 1 %d
 
 fl=(2) php:internal
-fn=(2) php::strlen
+fn=(2) php::strrev
 4 %d
 
 fl=(1)

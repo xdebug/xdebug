@@ -2,6 +2,7 @@
 Test for bug #923: Debugging PHP with MongoDB using Cursor, causes debug session termination
 --SKIPIF--
 <?php if (!extension_loaded('mongo')) echo "skip The MongoDB extension needs to be installed\n"; ?>
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

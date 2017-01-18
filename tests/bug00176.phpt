@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #176: Segfault using SplTempFileObject (>= PHP 5.2)
+Test for bug #176: Segfault using SplTempFileObject
 --SKIPIF--
 <?php if (!extension_loaded("xdebug")) print "skip"; ?>
 <?php if (!extension_loaded("SPL")) print "skip No SPL available"; ?>
-<?php if (!version_compare(phpversion(), "5.2", '>=')) echo "skip >= PHP 5.2 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -20,7 +19,7 @@ xdebug.trace_format=0
 --FILE--
 <?php
 try {
-$crap = new SplTempFileObject('foo');
+$crap = new SplTempFileObject(0);
 $crap->fwrite('give me a crash');
 }
 catch ( Exception $e )

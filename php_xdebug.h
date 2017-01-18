@@ -20,7 +20,7 @@
 #define PHP_XDEBUG_H
 
 #define XDEBUG_NAME       "Xdebug"
-#define XDEBUG_VERSION    "2.3.4-dev"
+#define XDEBUG_VERSION    "2.4.0rc1-dev"
 #define XDEBUG_AUTHOR     "Derick Rethans"
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2015 by Derick Rethans"
 #define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2015"
@@ -104,6 +104,11 @@ PHP_FUNCTION(xdebug_start_error_collection);
 PHP_FUNCTION(xdebug_stop_error_collection);
 PHP_FUNCTION(xdebug_get_collected_errors);
 
+/* function monitorin functions */
+PHP_FUNCTION(xdebug_start_function_monitor);
+PHP_FUNCTION(xdebug_stop_function_monitor);
+PHP_FUNCTION(xdebug_get_monitored_functions);
+
 /* profiling functions */
 PHP_FUNCTION(xdebug_get_profiler_filename);
 PHP_FUNCTION(xdebug_dump_aggr_profiling_data);
@@ -132,6 +137,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     collect_assignments;
 	zend_bool     extended_info;
 	zend_bool     show_ex_trace;
+	zend_bool     show_error_trace;
 	zend_bool     show_local_vars;
 	zend_bool     show_mem_delta;
 	double        start_time;
@@ -190,13 +196,18 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_path_info     *paths_stack;
 	xdebug_hash          *visited_branches;
 	struct {
-		int  size;
+		unsigned int  size;
 		int *last_branch_nr;
 	} branches;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
 	xdebug_llist *collected_errors;
+
+	/* used for function monitoring */
+	zend_bool     do_monitor_functions;
+	xdebug_hash  *functions_to_monitor;
+	xdebug_llist *monitored_functions_found; /* List of functions found */
 
 	/* superglobals */
 	zend_bool     dump_globals;
@@ -226,6 +237,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *remote_log;       /* Filename to log protocol communication to */
 	FILE         *remote_log_file;  /* File handler for protocol log */
 	long          remote_cookie_expire_time; /* Expire time for the remote-session cookie */
+	char         *remote_addr_header; /* User configured header to check for forwarded IP address */
 
 	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
 	char         *ide_key_setting; /* Set through php.ini and friends */

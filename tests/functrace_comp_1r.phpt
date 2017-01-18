@@ -21,12 +21,12 @@ function foo( $a, $b )
 	return $a;
 }
 
-@foo( 42 );
-@foo( "string" );
-@foo( "string\nwi\th\nnewline" );
-@foo( 1, false );
-@foo( true, null );
-@foo( "foo", "bar", 3.1415 );
+$r = @foo( 42 );
+$r = @foo( "string" );
+$r = @foo( "string\nwi\th\nnewline" );
+$r = @foo( 1, false );
+$r = @foo( true, null );
+$r = @foo( "foo", "bar", 3.1415 );
 
 xdebug_stop_trace();
 echo file_get_contents($tf);
@@ -46,12 +46,12 @@ TRACE START [%d-%d-%d %d:%d:%d]
 2	5	0	%f	%d	foo	1		%sfunctrace_comp_1r.php	11	2	string(19)	???
 2	5	1	%f	%d
 2	5	R			string(19)
-2	6	0	%f	%d	foo	1		%sfunctrace_comp_1r.php	12	2	long	bool
+2	6	0	%f	%d	foo	1		%sfunctrace_comp_1r.php	12	2	long	%r(bool|false)%r
 2	6	1	%f	%d
 2	6	R			long
-2	7	0	%f	%d	foo	1		%sfunctrace_comp_1r.php	13	2	bool	null
+2	7	0	%f	%d	foo	1		%sfunctrace_comp_1r.php	13	2	%r(bool|true)%r	null
 2	7	1	%f	%d
-2	7	R			bool
+2	7	R			%r(bool|true)%r
 2	8	0	%f	%d	foo	1		%sfunctrace_comp_1r.php	14	3	string(3)	string(3)	double
 2	8	1	%f	%d
 2	8	R			string(3)

@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1083: Segfault while retrieving information about uninitiased var.
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

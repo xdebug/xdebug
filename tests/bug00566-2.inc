@@ -2,16 +2,16 @@
 
 function loadMod( $module )
 {
-	strlen( $module );
+	strrev( $module );
 	$module .= 's';
-	strlen( $module );
+	strrev( $module );
 }
 
 function loadFoo( $test )
 {
-	strlen( $test );
+	strrev( $test );
 	$test .= 's';
-	strlen( $test );
+	strrev( $test );
 }
 
 loadFoo( 'view' );

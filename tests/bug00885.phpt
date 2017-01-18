@@ -7,7 +7,7 @@ xdebug.default_enable=1
 throw new Exception("long message ".str_repeat('.', 10240));
 ?>
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'long message %s in %sbug00885.php on line 2
+Fatal error: Uncaught%sException%slong message %s in %sbug00885.php on line 2
 
 Exception: long message %s in %sbug00885.php on line 2
 

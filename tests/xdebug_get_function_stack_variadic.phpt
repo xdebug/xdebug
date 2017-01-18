@@ -42,7 +42,8 @@ array(4) {
     'a' =>
     string(2) "42"
     'b' =>
-    string(3) "???"
+    array(0) {
+    }
   }
 }
 array(4) {

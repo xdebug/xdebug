@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1101: Debugger is not triggered on xdebug_break() in jit mode.
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

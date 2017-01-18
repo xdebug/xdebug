@@ -18,7 +18,7 @@ xdebug.file_link_format=
 		protected $tm;
 		public $date;
 
-		function TimeStuff($ts = null)
+		function __construct($ts = null)
 		{
 			$this->self = &$this;
 			$this->timestamp = $ts === null ? time() : $ts;
@@ -39,7 +39,7 @@ xdebug.file_link_format=
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
   <i>private</i> 'user_defined' <font color='#888a85'>=&gt;</font> <small>boolean</small> <font color='#75507b'>true</font>
   <i>private</i> 'self' <font color='#888a85'>=&gt;</font> 
-    <i>&</i><b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
+    <i>&amp;</i><b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>protected</i> 'tm' <font color='#888a85'>=&gt;</font> 
     <b>array</b> <i>(size=11)</i>
       'seconds' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>6</font>

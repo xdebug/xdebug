@@ -96,7 +96,7 @@ class drXdebugTraceFileParser
 		$this->stackFunctions = array();
 		$header1 = fgets( $this->handle );
 		$header2 = fgets( $this->handle );
-		if ( !preg_match( '@Version: 2.*@', $header1 ) || !preg_match( '@File format: [2-4]@', $header2 ) )
+		if ( !preg_match( '@Version: [23].*@', $header1 ) || !preg_match( '@File format: [2-4]@', $header2 ) )
 		{
 			echo "\nThis file is not an Xdebug trace file made with format option '1' and version 2 to 4.\n";
 			showUsage();

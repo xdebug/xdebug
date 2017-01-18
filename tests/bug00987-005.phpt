@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #987: Hidden property names not shown while debugging
+--SKIPIF--
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
