@@ -28,6 +28,9 @@
 # include <sys/socket.h>
 # include <sys/un.h>
 # include <netinet/tcp.h>
+# if HAVE_NETINET_IN_H
+#  include <netinet/in.h>
+# endif
 # include <netdb.h>
 #else
 # include <process.h>
