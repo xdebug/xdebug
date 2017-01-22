@@ -277,15 +277,17 @@ static zval *get_arrayiterator_storage(zval *parent TSRMLS_DC)
 	return NULL;
 }
 
-static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
+static zval* fetch_zval_from_symbol_table(zval *parent, char* orig_name, unsigned int orig_name_length, int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
 	zval *retval_p = NULL;
 	char  *element = NULL;
-	unsigned int element_length = name_length;
+	unsigned int name_length;
+	unsigned int element_length;
 	zend_property_info *zpp;
 	int is_temp;
 	HashTable *myht;
+	char *name = NULL;
 
 	if (parent) {
 		if (Z_TYPE_P(parent) == IS_INDIRECT) {
@@ -297,6 +299,15 @@ static zval* fetch_zval_from_symbol_table(zval *parent, char* name, unsigned int
 
 		ht = fetch_ht_from_zval(parent TSRMLS_CC);
 	}
+
+	/* We need to strip the slashes for the " and / here */
+	name = xdmalloc(orig_name_length + 1);
+	memcpy(name, orig_name, orig_name_length);
+	name[orig_name_length] = '\0';
+	name_length = orig_name_length;
+	element_length = name_length;
+
+	xdebug_stripcslashes(name, (int *) &name_length);
 
 	switch (type) {
 		case XF_ST_STATIC_ROOT:
@@ -479,6 +490,9 @@ cleanup:
 	if (element) {
 		free(element);
 	}
+	if (name) {
+		xdfree(name);
+	}
 
 	return retval_p;
 }
@@ -604,7 +618,9 @@ zval* xdebug_get_php_symbol(char* name TSRMLS_DC)
 					}
 					break;
 				case 4:
-					if (*p[0] == quotechar) {
+					if (*p[0] == '\\') {
+						state = 10; /* Escaped character */
+					} else if (*p[0] == quotechar) {
 						quotechar = 0;
 						state = 5;
 						keyword_end = *p;
@@ -619,6 +635,9 @@ zval* xdebug_get_php_symbol(char* name TSRMLS_DC)
 						}
 						keyword = NULL;
 					}
+					break;
+				case 10: /* Escaped character */
+					state = 4;
 					break;
 				case 5:
 					if (*p[0] == ']') {
@@ -1590,14 +1609,23 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index,
 		options->force_extended = 0;
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) { /* string key */
-			name = xdstrndup(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key));
+			zend_string *i_string = zend_string_init(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), 0);
+			zend_string *tmp_fullname_zstr;
+			
+			tmp_fullname_zstr = php_addcslashes(i_string, 0, "\"\\", 2);
+
 			name_len = HASH_APPLY_KEY_LEN(hash_key) - 1;
+			name = xdstrndup(HASH_APPLY_KEY_VAL(hash_key), name_len);
+
 			if (parent_name) {
 				xdebug_str_add(&full_name, parent_name, 0);
-				xdebug_str_addl(&full_name, "['", 2, 0);
-				xdebug_str_addl(&full_name, name, name_len, 0);
-				xdebug_str_addl(&full_name, "']", 2, 0);
+				xdebug_str_addl(&full_name, "[\"", 2, 0);
+				xdebug_str_addl(&full_name, tmp_fullname_zstr->val, tmp_fullname_zstr->len - 1, 0);
+				xdebug_str_addl(&full_name, "\"]", 2, 0);
 			}
+
+			zend_string_release(tmp_fullname_zstr);
+			zend_string_release(i_string);
 		} else {
 			name = xdebug_sprintf(XDEBUG_INT_FMT, HASH_APPLY_NUMERIC(hash_key));
 			name_len = strlen(name);

@@ -15,10 +15,10 @@ $commands = array(
 	'context_get',
 	'property_get -n $a',
 	'property_get -n $a->*ArrayObject*storage',
-	'property_get -n $a->*ArrayObject*storage[\'f\']',
+	'property_get -n $a->*ArrayObject*storage["f"]',
 	'property_get -n $a->*ArrayObject*storage->$a',
 	'property_get -n $a->*ArrayObject*storage[44]',
-	'property_get -n $a->*ArrayObject*storage[\'p\']',
+	'property_get -n $a->*ArrayObject*storage["p"]',
 );
 
 dbgpRun( $data, $commands );
@@ -49,11 +49,11 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 6 -n $a->*ArrayObject*storage
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$a-&gt;*ArrayObject*storage" fullname="$a-&gt;*ArrayObject*storage" type="array" children="1" numchildren="1" page="0" pagesize="32"><property name="f" fullname="$a-&gt;*ArrayObject*storage[&#39;f&#39;]" type="string" size="7" encoding="base64"><![CDATA[Y29va2llcw==]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$a-&gt;*ArrayObject*storage" fullname="$a-&gt;*ArrayObject*storage" type="array" children="1" numchildren="1" page="0" pagesize="32"><property name="f" fullname="$a-&gt;*ArrayObject*storage[&quot;f&quot;]" type="string" size="7" encoding="base64"><![CDATA[Y29va2llcw==]]></property></property></response>
 
--> property_get -i 7 -n $a->*ArrayObject*storage['f']
+-> property_get -i 7 -n $a->*ArrayObject*storage["f"]
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$a-&gt;*ArrayObject*storage[&#39;f&#39;]" fullname="$a-&gt;*ArrayObject*storage[&#39;f&#39;]" type="string" size="7" encoding="base64"><![CDATA[Y29va2llcw==]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="$a-&gt;*ArrayObject*storage[&quot;f&quot;]" fullname="$a-&gt;*ArrayObject*storage[&quot;f&quot;]" type="string" size="7" encoding="base64"><![CDATA[Y29va2llcw==]]></property></response>
 
 -> property_get -i 8 -n $a->*ArrayObject*storage->$a
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -63,6 +63,6 @@ dbgpRun( $data, $commands );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="9" status="break" reason="ok"><error code="300"><message><![CDATA[can not get property]]></message></error></response>
 
--> property_get -i 10 -n $a->*ArrayObject*storage['p']
+-> property_get -i 10 -n $a->*ArrayObject*storage["p"]
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="10" status="break" reason="ok"><error code="300"><message><![CDATA[can not get property]]></message></error></response>
