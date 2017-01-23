@@ -48,6 +48,10 @@ function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC)
 		return NULL;
 	}
 
+	if (nr < 0) {
+		return NULL;
+	}
+
 	while (nr) {
 		nr--;
 		le = XDEBUG_LLIST_PREV(le);

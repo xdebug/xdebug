@@ -56,20 +56,20 @@ echo "\n";
 $a->aa( 1 );
 ?>
 --EXPECTF--
-1: >{main} @ %sxdebug_call.php:33
+1: >{main} @ %sxdebug_call.php:0
 
-1: >{main} @ %sxdebug_call.php:35
-2: >c @ %sxdebug_call.php:25
+1: >{main} @ %sxdebug_call.php:0
+2: >c @ %sxdebug_call.php:35
 
-1: >{main} @ %sxdebug_call.php:37
-2: a>b @ %sxdebug_call.php:18
-3: >c @ %sxdebug_call.php:25
+1: >{main} @ %sxdebug_call.php:0
+2: a>b @ %sxdebug_call.php:37
+3: >c @ %sxdebug_call.php:18
 
-1: >{main} @ %sxdebug_call.php:39
-2: a>__construct @ %sxdebug_call.php:6
-3: >c @ %sxdebug_call.php:25
+1: >{main} @ %sxdebug_call.php:0
+2: a>__construct @ %sxdebug_call.php:39
+3: >c @ %sxdebug_call.php:6
 
-1: >{main} @ %sxdebug_call.php:41
-2: a>aa @ %sxdebug_call.php:12
-3: a>b @ %sxdebug_call.php:18
-4: >c @ %sxdebug_call.php:25
+1: >{main} @ %sxdebug_call.php:0
+2: a>aa @ %sxdebug_call.php:41
+3: a>b @ %sxdebug_call.php:12
+4: >c @ %sxdebug_call.php:18
