@@ -860,16 +860,20 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 PHP_FUNCTION(xdebug_call_class)
 {
 	function_stack_entry *i;
-	zend_long depth = 0;
+	zend_long depth = 2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->function.class ? i->function.class : "");
+		if (i->function.class) {
+			RETURN_STRING(i->function.class);
+		} else {
+			RETURN_FALSE;
+		}
 	} else {
-		RETURN_FALSE;
+		return;
 	}
 }
 /* }}} */
@@ -879,16 +883,20 @@ PHP_FUNCTION(xdebug_call_class)
 PHP_FUNCTION(xdebug_call_function)
 {
 	function_stack_entry *i;
-	zend_long depth = 0;
+	zend_long depth = 2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(2 + depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth TSRMLS_CC);
 	if (i) {
-		RETURN_STRING(i->function.function ? i->function.function : "{}");
+		if (i->function.function) {
+			RETURN_STRING(i->function.function);
+		} else {
+			RETURN_FALSE;
+		}
 	} else {
-		RETURN_FALSE;
+		return;
 	}
 }
 /* }}} */
@@ -898,16 +906,16 @@ PHP_FUNCTION(xdebug_call_function)
 PHP_FUNCTION(xdebug_call_line)
 {
 	function_stack_entry *i;
-	zend_long depth = 0;
+	zend_long depth = 2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth TSRMLS_CC);
 	if (i) {
 		RETURN_LONG(i->lineno);
 	} else {
-		RETURN_FALSE;
+		return;
 	}
 }
 /* }}} */
@@ -917,16 +925,16 @@ PHP_FUNCTION(xdebug_call_line)
 PHP_FUNCTION(xdebug_call_file)
 {
 	function_stack_entry *i;
-	zend_long depth = 0;
+	zend_long depth = 2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(1 + depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth TSRMLS_CC);
 	if (i) {
 		RETURN_STRING(i->filename);
 	} else {
-		RETURN_FALSE;
+		return;
 	}
 }
 /* }}} */
