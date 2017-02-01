@@ -1127,14 +1127,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(remote_enabled) = 0;
 	XG(profiler_enabled) = 0;
 	XG(breakpoints_allowed) = 1;
-	if (
-		(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE", XG(trace_enable_trigger_value) TSRMLS_CC))
-		&& XG(trace_output_dir) && strlen(XG(trace_output_dir))
-	) {
-		/* In case we do an auto-trace we are not interested in the return
-		 * value, but we still have to free it. */
-		xdfree(xdebug_start_trace(NULL, XG(trace_options) TSRMLS_CC));
-	}
 
 	/* Initialize some debugger context properties */
 	XG(context).program_name   = NULL;
@@ -1660,6 +1652,15 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 			if (xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
 				XG(profiler_enabled) = 1;
 			}
+		}
+
+		if (
+			(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE", XG(trace_enable_trigger_value) TSRMLS_CC))
+			&& XG(trace_output_dir) && strlen(XG(trace_output_dir))
+		) {
+			/* In case we do an auto-trace we are not interested in the return
+			 * value, but we still have to free it. */
+			xdfree(xdebug_start_trace(NULL, XG(trace_options) TSRMLS_CC));
 		}
 	}
 
