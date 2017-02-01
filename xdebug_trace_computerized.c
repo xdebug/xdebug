@@ -21,13 +21,13 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_computerized_init(char *fname, long options TSRMLS_DC)
+void *xdebug_trace_computerized_init(char *fname, char *script_filename, long options TSRMLS_DC)
 {
 	xdebug_trace_computerized_context *tmp_computerized_context;
 	char *used_fname;
 
 	tmp_computerized_context = xdmalloc(sizeof(xdebug_trace_computerized_context));
-	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname TSRMLS_CC);
+	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname TSRMLS_CC);
 	tmp_computerized_context->trace_filename = used_fname;
 
 	return tmp_computerized_context->trace_file ? tmp_computerized_context : NULL;

@@ -22,13 +22,13 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_textual_init(char *fname, long options TSRMLS_DC)
+void *xdebug_trace_textual_init(char *fname, char *script_filename, long options TSRMLS_DC)
 {
 	xdebug_trace_textual_context *tmp_textual_context;
 	char *used_fname;
 
 	tmp_textual_context = xdmalloc(sizeof(xdebug_trace_textual_context));
-	tmp_textual_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname TSRMLS_CC);
+	tmp_textual_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname TSRMLS_CC);
 	tmp_textual_context->trace_filename = used_fname;
 
 	return tmp_textual_context->trace_file ? tmp_textual_context : NULL;

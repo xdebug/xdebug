@@ -1660,7 +1660,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		) {
 			/* In case we do an auto-trace we are not interested in the return
 			 * value, but we still have to free it. */
-			xdfree(xdebug_start_trace(NULL, XG(trace_options) TSRMLS_CC));
+			xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XG(trace_options) TSRMLS_CC));
 		}
 	}
 

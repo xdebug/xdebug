@@ -24,7 +24,7 @@
 char* xdebug_return_trace_stack_retval(function_stack_entry* i, int fnr, zval* retval TSRMLS_DC);
 char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_generator* generator TSRMLS_DC);
 char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno TSRMLS_DC);
-FILE *xdebug_trace_open_file(char *fname, long options, char **used_fname TSRMLS_DC);
+FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, char **used_fname TSRMLS_DC);
 
 void xdebug_trace_function_begin(function_stack_entry *fse, int function_nr TSRMLS_DC);
 void xdebug_trace_function_end(function_stack_entry *fse, int function_nr TSRMLS_DC);

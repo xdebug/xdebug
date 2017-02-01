@@ -53,7 +53,7 @@ xdebug_trace_handler_t *xdebug_select_trace_handler(int options TSRMLS_DC)
 	return tmp;
 }
 
-FILE *xdebug_trace_open_file(char *fname, long options, char **used_fname TSRMLS_DC)
+FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, char **used_fname TSRMLS_DC)
 {
 	FILE *file;
 	char *filename;
@@ -62,7 +62,7 @@ FILE *xdebug_trace_open_file(char *fname, long options, char **used_fname TSRMLS
 		filename = xdstrdup(fname);
 	} else {
 		if (!strlen(XG(trace_output_name)) ||
-			xdebug_format_output_filename(&fname, XG(trace_output_name), NULL) <= 0
+			xdebug_format_output_filename(&fname, XG(trace_output_name), script_filename) <= 0
 		) {
 			/* Invalid or empty xdebug.trace_output_name */
 			return NULL;
@@ -84,10 +84,10 @@ FILE *xdebug_trace_open_file(char *fname, long options, char **used_fname TSRMLS
 	return file;
 }
 
-char* xdebug_start_trace(char* fname, long options TSRMLS_DC)
+char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS_DC)
 {
 	XG(trace_handler) = xdebug_select_trace_handler(options TSRMLS_CC);
-	XG(trace_context) = (void*) XG(trace_handler)->init(fname, options TSRMLS_CC);
+	XG(trace_context) = (void*) XG(trace_handler)->init(fname, script_filename, options TSRMLS_CC);
 
 	if (XG(trace_context)) {
 		XG(do_trace) = 1;
@@ -116,11 +116,15 @@ PHP_FUNCTION(xdebug_start_trace)
 	zend_long options = XG(trace_options);
 
 	if (XG(do_trace) == 0) {
+		function_stack_entry *fse;
+
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
 			return;
 		}
 
-		if ((trace_fname = xdebug_start_trace(fname, options TSRMLS_CC)) != NULL) {
+		fse = xdebug_get_stack_frame(0 TSRMLS_CC);
+
+		if ((trace_fname = xdebug_start_trace(fname, fse->filename, options TSRMLS_CC)) != NULL) {
 			XG(do_trace) = 1;
 			RETVAL_STRING(trace_fname);
 			xdfree(trace_fname);
