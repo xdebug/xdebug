@@ -40,7 +40,7 @@
 #include "TSRM.h"
 #endif
 
-char* xdebug_start_trace(char* fname, long options TSRMLS_DC);
+char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS_DC);
 void xdebug_stop_trace(TSRMLS_D);
 
 typedef struct xdebug_var {
@@ -212,7 +212,7 @@ function_stack_entry *xdebug_get_stack_tail(TSRMLS_D);
 
 typedef struct
 {
-	void *(*init)(char *fname, long options TSRMLS_DC);
+	void *(*init)(char *fname, char *script_filename, long options TSRMLS_DC);
 	void (*deinit)(void *ctxt TSRMLS_DC);
 	void (*write_header)(void *ctxt TSRMLS_DC);
 	void (*write_footer)(void *ctxt TSRMLS_DC);
