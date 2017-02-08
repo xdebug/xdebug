@@ -1369,6 +1369,7 @@ DBGP_FUNC(property_get)
 	if (CMD_OPTION('m')) {
 		options->max_data= strtol(CMD_OPTION('m'), NULL, 10);
 	}
+
 	if (context_nr == 2) { /* constants */
 		zval const_val;
 
@@ -2008,6 +2009,7 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 						args->value[index] = xdcalloc(1, len + 1);
 						memcpy(args->value[index], value_begin, len);
 						xdebug_stripcslashes(args->value[index], &len);
+
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;

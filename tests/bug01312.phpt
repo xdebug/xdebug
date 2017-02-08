@@ -41,7 +41,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 4 -n $clone
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$clone" fullname="$clone" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="&#0;A&#0;testA" fullname="$clone[&#39;&#0;A&#0;testA&#39;]" type="string" size="8" encoding="base64"><![CDATA[dGVzdGFibGU=]]></property><property name="&#0;A&#0;testC" fullname="$clone[&#39;&#0;A&#0;testC&#39;]" type="object" classname="B" children="1" numchildren="1"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$clone" fullname="$clone" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="&#0;A&#0;testA" fullname="$clone[&quot;&#0;A&#0;testA&quot;]" type="string" size="8" encoding="base64"><![CDATA[dGVzdGFibGU=]]></property><property name="&#0;A&#0;testC" fullname="$clone[&quot;&#0;A&#0;testC&quot;]" type="object" classname="B" children="1" numchildren="1"></property></property></response>
 
 -> feature_set -i 5 -n extended_properties -v 1
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -49,7 +49,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 6 -n $clone
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$clone" fullname="$clone" type="array" children="1" numchildren="2" page="0" pagesize="32"><property type="string" size="8"><name encoding="base64"><![CDATA[AEEAdGVzdEE=]]></name><fullname encoding="base64"><![CDATA[JGNsb25lWycAQQB0ZXN0QSdd]]></fullname><value encoding="base64"><![CDATA[dGVzdGFibGU=]]></value></property><property type="object" children="1" numchildren="1"><name encoding="base64"><![CDATA[AEEAdGVzdEM=]]></name><fullname encoding="base64"><![CDATA[JGNsb25lWycAQQB0ZXN0Qydd]]></fullname><classname encoding="base64"><![CDATA[Qg==]]></classname></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$clone" fullname="$clone" type="array" children="1" numchildren="2" page="0" pagesize="32"><property type="string" size="8"><name encoding="base64"><![CDATA[AEEAdGVzdEE=]]></name><fullname encoding="base64"><![CDATA[JGNsb25lWyIAQQB0ZXN0QSJd]]></fullname><value encoding="base64"><![CDATA[dGVzdGFibGU=]]></value></property><property type="object" children="1" numchildren="1"><name encoding="base64"><![CDATA[AEEAdGVzdEM=]]></name><fullname encoding="base64"><![CDATA[JGNsb25lWyIAQQB0ZXN0QyJd]]></fullname><classname encoding="base64"><![CDATA[Qg==]]></classname></property></property></response>
 
 -> feature_set -i 7 -n extended_properties -v 0
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -57,7 +57,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 8 -n $clone
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$clone" fullname="$clone" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="&#0;A&#0;testA" fullname="$clone[&#39;&#0;A&#0;testA&#39;]" type="string" size="8" encoding="base64"><![CDATA[dGVzdGFibGU=]]></property><property name="&#0;A&#0;testC" fullname="$clone[&#39;&#0;A&#0;testC&#39;]" type="object" classname="B" children="1" numchildren="1"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="$clone" fullname="$clone" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="&#0;A&#0;testA" fullname="$clone[&quot;&#0;A&#0;testA&quot;]" type="string" size="8" encoding="base64"><![CDATA[dGVzdGFibGU=]]></property><property name="&#0;A&#0;testC" fullname="$clone[&quot;&#0;A&#0;testC&quot;]" type="object" classname="B" children="1" numchildren="1"></property></property></response>
 
 -> detach -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>
