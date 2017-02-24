@@ -2246,7 +2246,7 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 {
 	zend_object *orig_exception = EG(exception);
 	php_serialize_data_t var_hash;
-	smart_str buf = {0};
+	smart_str buf = { 0, 0 };
 
 	if (!val) {
 		return NULL;
