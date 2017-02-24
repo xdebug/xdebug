@@ -763,7 +763,7 @@ xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 ** Normal variable printing routines
 */
 
-static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
+static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
 {
 	zval **zv = &zv_nptr;
 
@@ -771,7 +771,7 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index, zend_str
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
-			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " => ", HASH_APPLY_NUMERIC(hash_key)), 1);
+			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " => ", index_key), 1);
 		} else { /* string key */
 			size_t newlen = 0;
 			char *tmp, *tmp2;
@@ -798,7 +798,7 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index, zend_str
 	return 0;
 }
 
-static int xdebug_object_element_export(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options, char *class_name)
+static int xdebug_object_element_export(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options, char *class_name)
 {
 	zval **zv = &zv_nptr;
 
@@ -818,7 +818,7 @@ static int xdebug_object_element_export(zval *zv_nptr, zend_ulong index, zend_st
 			xdfree(prop_name);
 			xdfree(prop_class_name);
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("public $%d = ", HASH_APPLY_NUMERIC(hash_key)), 1);
+			xdebug_str_add(str, xdebug_sprintf("public $%d = ", index_key), 1);
 		}
 		xdebug_var_export(zv, str, level + 2, debug_zval, options TSRMLS_CC);
 		xdebug_str_addl(str, "; ", 2, 0);
@@ -1112,7 +1112,7 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 #define ANSI_COLOR_BOLD          (mode == 1 ? "[1m" : "")
 #define ANSI_COLOR_BOLD_OFF      (mode == 1 ? "[22m" : "")
 
-static int xdebug_array_element_export_text_ansi(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, int mode, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
+static int xdebug_array_element_export_text_ansi(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, int mode, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
 {
 	zval **zv = &zv_nptr;
 
@@ -1122,7 +1122,7 @@ static int xdebug_array_element_export_text_ansi(zval *zv_nptr, zend_ulong index
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
 
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
-			xdebug_str_add(str, xdebug_sprintf("[" XDEBUG_INT_FMT "] %s=>%s\n", HASH_APPLY_NUMERIC(hash_key), ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("[" XDEBUG_INT_FMT "] %s=>%s\n", index_key, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		} else { /* string key */
 			size_t newlen = 0;
 			char *tmp, *tmp2;
@@ -1148,7 +1148,7 @@ static int xdebug_array_element_export_text_ansi(zval *zv_nptr, zend_ulong index
 	return 0;
 }
 
-static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, int mode, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
+static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, int mode, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
 {
 	zval **zv = &zv_nptr;
 
@@ -1170,7 +1170,7 @@ static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong inde
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("%s%spublic%s%s ${%d} %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET,
-			               HASH_APPLY_NUMERIC(hash_key), ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+			               index_key, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		}
 		xdebug_var_export_text_ansi(zv, str, mode, level + 1, debug_zval, options TSRMLS_CC);
 	}
@@ -1471,11 +1471,11 @@ typedef struct
 	char  type;
 	char *name;
 	int   name_len;
-	ulong index;
+	ulong index_key;
 	zval *zv;
 } xdebug_object_item;
 
-static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index, zend_string *hash_key, HashTable *merged, int object_type)
+static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, HashTable *merged, int object_type)
 {
 	zval **zv = &zv_nptr;
 	xdebug_object_item *item;
@@ -1487,9 +1487,9 @@ static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index, zend_
 	if (hash_key) {
 		item->name = (char*) HASH_APPLY_KEY_VAL(hash_key);
 		item->name_len = HASH_APPLY_KEY_LEN(hash_key) - 1;
-		item->index = hash_key->h;
+		item->index_key = hash_key->h;
 	} else {
-		item->name = xdebug_sprintf(XDEBUG_INT_FMT, index);
+		item->name = xdebug_sprintf(XDEBUG_INT_FMT, index_key);
 		item->name_len = strlen(item->name);
 	}
 
@@ -1594,7 +1594,7 @@ static void add_encoded_text_value_attribute_or_element(xdebug_var_export_option
 }
 
 
-static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, xdebug_xml_node *parent, char *parent_name, xdebug_var_export_options *options)
+static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_xml_node *parent, char *parent_name, xdebug_var_export_options *options)
 {
 	zval **zv = &zv_nptr;
 	xdebug_xml_node *node;
@@ -1627,7 +1627,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index,
 			zend_string_release(tmp_fullname_zstr);
 			zend_string_release(i_string);
 		} else {
-			name = xdebug_sprintf(XDEBUG_INT_FMT, HASH_APPLY_NUMERIC(hash_key));
+			name = xdebug_sprintf(XDEBUG_INT_FMT, index_key);
 			name_len = strlen(name);
 			if (parent_name) {
 				xdebug_str_add(&full_name, xdebug_sprintf("%s[%s]", parent_name, name), 1);
@@ -1646,7 +1646,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index,
 	return 0;
 }
 
-static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, zend_ulong index, zend_string *hash_key, int level, xdebug_xml_node *parent, char *parent_name, xdebug_var_export_options *options, char *class_name)
+static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_xml_node *parent, char *parent_name, xdebug_var_export_options *options, char *class_name)
 {
 	xdebug_object_item **item = &item_nptr;
 	xdebug_xml_node *node;
@@ -1685,10 +1685,10 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 		} else { /* Numerical property name */
 			modifier = "public";
 
-			add_name_attribute_or_element(options, node, "name", 4, xdebug_sprintf(XDEBUG_INT_FMT, (*item)->index), SIZE_MAX);
+			add_name_attribute_or_element(options, node, "name", 4, xdebug_sprintf(XDEBUG_INT_FMT, (*item)->index_key), SIZE_MAX);
 
 			if (parent_name) {
-				full_name = xdebug_sprintf("%s%s" XDEBUG_INT_FMT, parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index);
+				full_name = xdebug_sprintf("%s%s" XDEBUG_INT_FMT, parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index_key);
 				add_name_attribute_or_element(options, node, "fullname", 8, full_name, SIZE_MAX);
 			}
 		}
@@ -2006,7 +2006,7 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 #define COLOR_OBJECT    "#8f5902"
 #define COLOR_RESOURCE  "#2e3436"
 
-static int xdebug_array_element_export_fancy(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
+static int xdebug_array_element_export_fancy(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
 {
 	zval **zv = &zv_nptr;
 	size_t newlen;
@@ -2018,7 +2018,7 @@ static int xdebug_array_element_export_fancy(zval *zv_nptr, zend_ulong index, ze
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
-			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " <font color='%s'>=&gt;</font> ", HASH_APPLY_NUMERIC(hash_key), COLOR_POINTER), 1);
+			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " <font color='%s'>=&gt;</font> ", index_key, COLOR_POINTER), 1);
 		} else { /* string key */
 			xdebug_str_addl(str, "'", 1, 0);
 			tmp_str = xdebug_xmlize((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1, &newlen);
@@ -2036,7 +2036,7 @@ static int xdebug_array_element_export_fancy(zval *zv_nptr, zend_ulong index, ze
 	return 0;
 }
 
-static int xdebug_object_element_export_fancy(zval *zv_nptr, zend_ulong index, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options, char *class_name)
+static int xdebug_object_element_export_fancy(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options, char *class_name)
 {
 	zval **zv = &zv_nptr;
 
@@ -2058,7 +2058,7 @@ static int xdebug_object_element_export_fancy(zval *zv_nptr, zend_ulong index, z
 			xdfree(prop_name);
 			xdfree(prop_class_name);
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("<i>public</i> %d <font color='%s'>=&gt;</font> ", HASH_APPLY_NUMERIC(hash_key), COLOR_POINTER), 1);
+			xdebug_str_add(str, xdebug_sprintf("<i>public</i> %d <font color='%s'>=&gt;</font> ", index_key, COLOR_POINTER), 1);
 		}
 		xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}
