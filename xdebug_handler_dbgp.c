@@ -2036,15 +2036,15 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 				break;
 			case STATE_VALUE_FOLLOWS:
 				if ((*ptr == ' ' && opt != '-') || *ptr == '\0') {
-					int index = opt - 'a';
+					int opt_index = opt - 'a';
 
 					if (opt == '-') {
-						index = 26;
+						opt_index = 26;
 					}
 
-					if (!args->value[index]) {
-						args->value[index] = xdcalloc(1, ptr - value_begin + 1);
-						memcpy(args->value[index], value_begin, ptr - value_begin);
+					if (!args->value[opt_index]) {
+						args->value[opt_index] = xdcalloc(1, ptr - value_begin + 1);
+						memcpy(args->value[opt_index], value_begin, ptr - value_begin);
 						state = STATE_NORMAL;
 					} else {
 						goto duplicate_opts;
@@ -2060,21 +2060,21 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 					charescaped = !charescaped;
 				} else
 				if (*ptr == '"') {
-					int index = opt - 'a';
+					int opt_index = opt - 'a';
 
 					if (charescaped) {
 						charescaped = 0;
 						break;
 					}
 					if (opt == '-') {
-						index = 26;
+						opt_index = 26;
 					}
 
-					if (!args->value[index]) {
+					if (!args->value[opt_index]) {
 						int len = ptr - value_begin;
-						args->value[index] = xdcalloc(1, len + 1);
-						memcpy(args->value[index], value_begin, len);
-						xdebug_stripcslashes(args->value[index], &len);
+						args->value[opt_index] = xdcalloc(1, len + 1);
+						memcpy(args->value[opt_index], value_begin, len);
+						xdebug_stripcslashes(args->value[opt_index], &len);
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;

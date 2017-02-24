@@ -58,7 +58,6 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define HASH_KEY_IS_NUMERIC(k) ((k) == NULL)
 # define HASH_APPLY_KEY_VAL(k) (k)->val
 # define HASH_APPLY_KEY_LEN(k) (k)->len + 1
-# define HASH_APPLY_NUMERIC(k) index
 
 # define ZEND_USER_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
 # define ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
