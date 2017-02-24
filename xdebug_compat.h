@@ -45,7 +45,6 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define HASH_KEY_IS_NUMERIC(k) ((k) == NULL)
 # define HASH_APPLY_KEY_VAL(k) (k)->val
 # define HASH_APPLY_KEY_LEN(k) (k)->len + 1
-# define HASH_APPLY_NUMERIC(k) index
 
 # define STR_NAME_VAL(k) (k)->val
 # define STR_NAME_LEN(k) (k)->len

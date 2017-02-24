@@ -53,7 +53,7 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 #define READ_BUFFER_SIZE 128
 
-char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length)
+char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigned char delim, int *length)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;
@@ -69,9 +69,9 @@ char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned 
 	while (context->buffer_size < 1 || context->buffer[context->buffer_size - 1] != delim) {
 		ptr = context->buffer + context->buffer_size;
 		if (type == FD_RL_FILE) {
-			newl = read(socket, buffer, READ_BUFFER_SIZE);
+			newl = read(socketfd, buffer, READ_BUFFER_SIZE);
 		} else {
-			newl = recv(socket, buffer, READ_BUFFER_SIZE, 0);
+			newl = recv(socketfd, buffer, READ_BUFFER_SIZE, 0);
 		}
 		if (newl > 0) {
 			context->buffer = realloc(context->buffer, context->buffer_size + newl + 1);
@@ -596,14 +596,14 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 'u': { /* timestamp (in microseconds) */
-					char *char_ptr, *utime = xdebug_sprintf("%F", xdebug_get_utime());
+					char *char_ptr, *utime_str = xdebug_sprintf("%F", xdebug_get_utime());
 
 					/* Replace . with _ (or should it be nuked?) */
-					char_ptr = strrchr(utime, '.');
+					char_ptr = strrchr(utime_str, '.');
 					if (char_ptr) {
 						char_ptr[0] = '_';
 					}
-					xdebug_str_add(&fname, utime, 1);
+					xdebug_str_add(&fname, utime_str, 1);
 				}	break;
 
 				case 'H':   /* $_SERVER['HTTP_HOST'] */
