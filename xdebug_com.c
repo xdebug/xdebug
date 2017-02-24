@@ -252,7 +252,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 	return sockfd;
 }
 
-void xdebug_close_socket(int socket)
+void xdebug_close_socket(int socketfd)
 {
-	SCLOSE(socket);
+	SCLOSE(socketfd);
 }
