@@ -468,7 +468,9 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 
 static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
+#if ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
+#endif
 	
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
