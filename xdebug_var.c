@@ -2667,7 +2667,11 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 	zend_object *orig_exception = EG(exception);
 #endif
 	php_serialize_data_t var_hash;
-	smart_str buf = {0};
+#if PHP_VERSION_ID >= 70000
+	smart_str buf = { 0, 0 };
+#else
+	smart_str buf = { 0, 0, 0 };
+#endif
 
 	if (!val) {
 		return NULL;
