@@ -2283,7 +2283,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 {
 #endif
 	xdebug_llist_element *le;
-	xdebug_brk_info      *brk;
+	xdebug_brk_info      *extra_brk_info;
 	function_stack_entry *fse;
 	int                   lineno;
 	char                 *file;
@@ -2371,17 +2371,17 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			int   file_len = strlen(file);
 
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				brk = XDEBUG_LLIST_VALP(le);
+				extra_brk_info = XDEBUG_LLIST_VALP(le);
 
 #if 0
 				printf("b->d: %d; ln: %d; b->l: %d; b->f: %s; f: %s, f_l: %d; b->f_l: %d\n",
-						brk->disabled, lineno, brk->lineno, brk->file, file, file_len, brk->file_len);
+						extra_brk_info->disabled, lineno, extra_brk_info->lineno, extra_brk_info->file, file, file_len, extra_brk_info->file_len);
 #endif
-				if (!brk->disabled && lineno == brk->lineno && file_len >= brk->file_len && strncasecmp(brk->file, file + file_len - brk->file_len, brk->file_len) == 0) {
+				if (!extra_brk_info->disabled && lineno == extra_brk_info->lineno && file_len >= extra_brk_info->file_len && strncasecmp(extra_brk_info->file, file + file_len - extra_brk_info->file_len, extra_brk_info->file_len) == 0) {
 					break_ok = 1; /* Breaking is allowed by default */
 
 					/* Check if we have a condition set for it */
-					if (brk->condition) {
+					if (extra_brk_info->condition) {
 						/* If there is a condition, we disable breaking by
 						 * default and only enabled it when the code evaluates
 						 * to TRUE */
@@ -2392,7 +2392,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						EG(error_reporting) = 0;
 
 						/* Check the condition */
-						if (zend_eval_string(brk->condition, &retval, "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
+						if (zend_eval_string(extra_brk_info->condition, &retval, "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
 							break_ok = Z_TYPE(retval) == IS_TRUE;
 							zval_dtor(&retval);
 						}
@@ -2400,7 +2400,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						/* Restore error reporting level */
 						EG(error_reporting) = old_error_reporting;
 					}
-					if (break_ok && xdebug_handle_hit_value(brk)) {
+					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 							XG(remote_enabled) = 0;
 							break;
