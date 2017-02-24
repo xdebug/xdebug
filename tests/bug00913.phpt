@@ -14,7 +14,7 @@ error_reporting(0);
 var_dump($DOMDocumentNode, $DOMElementNode, $DOMAttributeNode, $DOMTextNode);
 ?>
 --EXPECTF--
-object(DOMDocument)#1 (34) {
+object(DOMDocument)#%d (%d) {
   ["doctype"]=>
   NULL
   ["implementation"]=>
@@ -68,7 +68,7 @@ object(DOMDocument)#1 (34) {
   ["lastChild"]=>
   string(22) "(object value omitted)"
   ["previousSibling"]=>
-  NULL
+  %a
   ["attributes"]=>
   NULL
   ["ownerDocument"]=>
@@ -84,7 +84,7 @@ object(DOMDocument)#1 (34) {
   ["textContent"]=>
   string(4) "Test"
 }
-object(DOMElement)#2 (17) {
+object(DOMElement)#%d (%d) {
   ["tagName"]=>
   string(7) "example"
   ["schemaTypeInfo"]=>
@@ -104,7 +104,7 @@ object(DOMElement)#2 (17) {
   ["lastChild"]=>
   string(22) "(object value omitted)"
   ["previousSibling"]=>
-  NULL
+  %a
   ["attributes"]=>
   string(22) "(object value omitted)"
   ["ownerDocument"]=>
@@ -120,7 +120,7 @@ object(DOMElement)#2 (17) {
   ["textContent"]=>
   string(4) "Test"
 }
-object(DOMAttr)#3 (20) {
+object(DOMAttr)#%d (%d) {
   ["name"]=>
   string(1) "a"
   ["specified"]=>
@@ -146,7 +146,7 @@ object(DOMAttr)#3 (20) {
   ["lastChild"]=>
   string(22) "(object value omitted)"
   ["previousSibling"]=>
-  NULL
+  %a
   ["attributes"]=>
   NULL
   ["ownerDocument"]=>
@@ -162,7 +162,7 @@ object(DOMAttr)#3 (20) {
   ["textContent"]=>
   string(1) "b"
 }
-object(DOMText)#4 (18) {
+object(DOMText)#%d (%d) {
   ["wholeText"]=>
   string(4) "Test"
   ["data"]=>
@@ -184,7 +184,7 @@ object(DOMText)#4 (18) {
   ["lastChild"]=>
   NULL
   ["previousSibling"]=>
-  NULL
+  %a
   ["attributes"]=>
   NULL
   ["ownerDocument"]=>
