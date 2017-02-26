@@ -45,26 +45,28 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sun, Dec  4, 2016 - xdebug 2.5.0
-
-+ Added features:
-
-  - Implemented issue #1232: add memory delta to HTML traces
-  - Implemented issue #1365: Allow remote_connect_back to be set through
-    XDEBUG_CONFIG
+Sun, Feb 26, 2017 - xdebug 2.5.1
 
 = Fixed bugs:
 
-  - Fixed issue #1168: Added defensive check to prevent infinite loop
-  - Fixed issue #1242: Xdebug on Windows with Eclipse has issues with
-    breakpoint IDs
-  - Fixed issue #1343: Wrong values of numerical keys outside 32bit range
-  - Fixed issue #1357: Function signature using variadics is reported as being
-    not executed
-  - Fixed issue #1361: Remote debugging connection issues with Windows (Anatol
-    Belski)
-  - Fixed issue #1373: Crash in zend_hash_apply_with_arguments when debugging,
-    due to unset symbol table
+  - Fixed issue #1057: Add xdebug.ini of all settings to package
+  - Fixed issue #1165: DBGp: step_out skips subsequent function calls
+  - Fixed issue #1180: Code coverage crashes with non-standard start/stops
+  - Fixed issue #1278: Xdebug with PHP 7 does not handle prefill-from-oparray
+    for XDEBUG_CC_UNUSED
+  - Fixed issue #1300: Xdebug functions are not exposing their signature to
+    Reflection
+  - Fixed issue #1313: Arguments to __call() trampoline picked from the wrong
+    memory location
+  - Fixed issue #1329: While printing out a stack with and function parameters,
+    XDebug reads uninitialized zvals or free()d memory
+  - Fixed issue #1381: Code Coverage misses line due to missing FETCH_DIM_W
+    overload
+  - Fixed issue #1385: can not fetch IS_INDIRECT properties
+  - Fixed issue #1386: Executable code not shown as executed/executable
+  - Fixed issue #1392: Unable to compile on FreeBSD due to missing struct
+    definition
+  - Fixed issue #1394: Code coverage does not cover instanceof (in elseif)
  </notes>
 
  <contents>
@@ -172,6 +174,42 @@ Sun, Dec  4, 2016 - xdebug 2.5.0
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2016-12-04</date>
+   <time>18:55:08</time>
+   <version>
+    <release>2.5.0</release>
+    <api>2.5.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Dec  4, 2016 - xdebug 2.5.0
+
++ Added features:
+
+  - Implemented issue #1232: add memory delta to HTML traces
+  - Implemented issue #1365: Allow remote_connect_back to be set through
+    XDEBUG_CONFIG
+
+= Fixed bugs:
+
+  - Fixed issue #1168: Added defensive check to prevent infinite loop
+  - Fixed issue #1242: Xdebug on Windows with Eclipse has issues with
+    breakpoint IDs
+  - Fixed issue #1343: Wrong values of numerical keys outside 32bit range
+  - Fixed issue #1357: Function signature using variadics is reported as being
+    not executed
+  - Fixed issue #1361: Remote debugging connection issues with Windows (Anatol
+    Belski)
+  - Fixed issue #1373: Crash in zend_hash_apply_with_arguments when debugging,
+    due to unset symbol table
+   </notes>
+  </release>
 
   <release>
    <date>2016-11-12</date>
