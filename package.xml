@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2016-12-04</date>
- <time>18:55:08</time>
+ <date>2017-02-26</date>
+ <time>14:27:26</time>
  <version>
-  <release>2.5.0</release>
-  <api>2.5.0</api>
+  <release>2.5.1</release>
+  <api>2.5.1</api>
  </version>
  <stability>
   <release>stable</release>
