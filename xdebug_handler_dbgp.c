@@ -29,6 +29,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "main/php_version.h"
+#include "main/php_network.h"
 #include "ext/standard/base64.h"
 #include "TSRM.h"
 #include "php_globals.h"
@@ -264,7 +265,9 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 
 	tmp = make_message(context, message TSRMLS_CC);
 	if (SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
-		fprintf(stderr, "There was a problem sending %ld bytes on socket %d", tmp->l, context->socket);
+		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
+		fprintf(stderr, "There was a problem sending %ld bytes on socket %d: %s", tmp->l, context->socket, sock_error);
+		efree(sock_error);
 	}
 	xdebug_str_ptr_dtor(tmp);
 }
