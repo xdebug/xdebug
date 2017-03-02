@@ -3,6 +3,7 @@ Test for bug #998: Test that Xdebug connects back on IPv6
 --SKIPIF--
 <?php
 if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
+if (getenv("TRAVIS")) { exit("skip flaky travis ipv6 support"); }
 require 'dbgp/dbgpclient.php';
 if (!DebugClientIPv6::isSupported()) echo "skip IPv6 support is not configured.\n";
 ?>
