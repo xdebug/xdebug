@@ -331,12 +331,16 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
 			}
 			if (opcode_ptr->opcode == ZEND_FETCH_DIM_W) {
+#if PHP_VERSION_ID < 70000
 				if (opcode_ptr->op2_type != IS_VAR) {
+#endif
 					zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
 					xdebug_str_add(&name, xdebug_sprintf("[%s]", zval_value), 1);
+#if PHP_VERSION_ID < 70000
 				} else {
 					xdebug_str_add(&name, xdebug_sprintf("[???]") , 1);
 				}
+#endif
 			} else if (opcode_ptr->opcode == ZEND_FETCH_OBJ_W) {
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, options);
 				xdebug_str_add(&name, xdebug_sprintf("->%s", zval_value), 1);
