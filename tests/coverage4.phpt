@@ -1,5 +1,7 @@
 --TEST--
-Test with Code Coverage with abstract methods
+Test with Code Coverage with abstract methods (< PHP 7.0)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (>= PHP 7.1.0 <= PHP 7.1.3)
+Test with Code Coverage with abstract methods (>= PHP 7.1.0, <= PHP 7.1.3)
 --SKIPIF--
 <?php if (!version_compare(phpversion(), "7.1.0", '>=')) echo "skip >= PHP 7.1.0, <= PHP 7.1.3 needed\n"; ?>
 <?php if (!version_compare(phpversion(), "7.1.3", '<=')) echo "skip >= PHP 7.1.0, <= PHP 7.1.3 needed\n"; ?>
@@ -17,34 +17,32 @@ xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
 xdebug.extended_info=1
-xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php
-	xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
+    xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
 
-	include 'bug00703.inc';
-	$cc = xdebug_get_code_coverage();
-	ksort($cc);
-	var_dump(array_slice($cc, 1, 1));
+	include 'coverage4.inc';
 
-	xdebug_stop_code_coverage(false);
+    xdebug_stop_code_coverage(false);
+    $c = xdebug_get_code_coverage();
+	ksort($c);
+	var_dump($c);
 ?>
 --EXPECTF--
-array(1) {
-  ["%sbug00703.inc"]=>
-  array(6) {
-    [3]=>
+array(2) {
+  ["%scoverage4-php70.php"]=>
+  array(2) {
+    [4]=>
     int(1)
     [6]=>
     int(1)
-    [7]=>
+  }
+  ["%scoverage4.inc"]=>
+  array(2) {
+    [2]=>
     int(1)
-    [11]=>
-    int(1)
-    [12]=>
-    int(1)
-    [15]=>
+    [26]=>
     int(1)
   }
 }

@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #1381: FETCH_DIM_W is not overloaded
+Test for bug #1386: Executable code not shown as executed/executable (>= PHP 7.1, opcache)
 --SKIPIF--
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n";
+if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -20,39 +23,46 @@ xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php
-include 'bug01381.inc';
-
-$test = new test();
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
-$test->testFunc();
+
+include 'bug01386-class2.inc';
+include 'bug01386-class1.inc';
+
+$Test1 = new TestClass();
 
 $cc = xdebug_get_code_coverage();
 ksort($cc);
-var_dump(array_slice($cc, 0, 1));
+var_dump(array_slice($cc, 0, 2));
 
 xdebug_stop_code_coverage(false);
 ?>
 --EXPECTF--
-array(1) {
-  ["%sbug01381.inc"]=>
-  array(9) {
-    [6]=>
+array(2) {
+  ["%sbug01386-class1.inc"]=>
+  array(5) {
+    [3]=>
     int(1)
     [7]=>
-    int(1)
+    int(-1)
     [8]=>
-    int(1)
-    [11]=>
-    int(1)
-    [12]=>
-    int(1)
+    int(-1)
+    [9]=>
+    int(-1)
     [13]=>
     int(1)
-    [14]=>
+  }
+  ["%sbug01386-class2.inc"]=>
+  array(5) {
+    [3]=>
     int(1)
-    [20]=>
+    [7]=>
+    int(-1)
+    [8]=>
+    int(-1)
+    [9]=>
+    int(-1)
+    [13]=>
     int(1)
-    [21]=>
-    int(-2)
   }
 }
+

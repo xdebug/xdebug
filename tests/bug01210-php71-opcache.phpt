@@ -1,8 +1,8 @@
 --TEST--
-Test for bug #1210: Coverage of sending arguments to a method (> PHP 7.0.12)
+Test for bug #1210: Coverage of sending arguments to a method (>= PHP 7.1, opcache)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php if (!version_compare(phpversion(), "7.1", '>')) echo "skip > PHP 7.1 needed\n"; ?>
+<?php if (!extension_loaded('zend opcache')) echo "skip opcache required\n"; ?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';
@@ -26,7 +26,7 @@ foo->getLoader
   - 27; OP: 27-35; line: 12-13  X ; out1: 26  X 
   - 36; OP: 36-43; line: 13-17  X ; out1: 44  X ; out2: 50  X 
   - 44; OP: 44-49; line: 18-21  X ; out1: 50  X 
-  - 50; OP: 50-59; line: 21-24  X 
+  - 50; OP: 50-57; line: 21-23  X ; out1: EX  X 
 - paths
   - 0 8 9 8 18 26 27 26 36 44 50:  X 
   - 0 8 9 8 18 26 27 26 36 50:  X 
@@ -49,6 +49,6 @@ foo->getLoader
 
 {main}
 - branches
-  - 00; OP: 00-02; line: 02-27 HIT; out1: EX  X 
+  - 00; OP: 00-01; line: 02-27 HIT; out1: EX  X 
 - paths
   - 0: HIT

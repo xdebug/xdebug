@@ -1,11 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval() (CLI colours) (>= PHP 7.1, NTS)
+Test for xdebug_debug_zval() (CLI colours) (>= PHP 7.1, ZTS, opcache)
 --SKIPIF--
-<?php
-if (PHP_ZTS == 1) echo "skip NTS needed\n";
-if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n";
-if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
-?>
+<?php if (PHP_ZTS == 0) echo "skip ZTS needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n"; ?>
+<?php if (!extension_loaded('zend opcache')) echo "skip opcache required\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=2
@@ -38,9 +36,9 @@ function func(){
 func();
 ?>
 --EXPECT--
-a: (refcount=0, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
+a: (refcount=1, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
 
-$a: (refcount=0, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
+$a: (refcount=1, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
 
 $b: (refcount=1, is_ref=0)=[1marray[22m([32m5[0m) {
   'a' =>

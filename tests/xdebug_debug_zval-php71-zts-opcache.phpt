@@ -1,9 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval() (>= PHP 7.1, ZTS)
+Test for xdebug_debug_zval() (>= PHP 7.1, ZTS, opcache)
 --SKIPIF--
 <?php if (PHP_ZTS == 0) echo "skip ZTS needed\n"; ?>
 <?php if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n"; ?>
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php if (!extension_loaded('zend opcache')) echo "skip opcache required\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=0
@@ -36,8 +36,8 @@ function func(){
 func();
 ?>
 --EXPECT--
-a: (refcount=2, is_ref=0)='hoge'
-$a: (refcount=2, is_ref=0)='hoge'
+a: (refcount=1, is_ref=0)='hoge'
+$a: (refcount=1, is_ref=0)='hoge'
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
 $b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5
