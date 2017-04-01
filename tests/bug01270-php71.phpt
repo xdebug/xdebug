@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1270: String parsing marked not covered (> PHP 7.0.12)
+Test for bug #1270: String parsing marked not covered (> PHP 7.0.12, <= PHP 7.1.3)
 --SKIPIF--
 <?php
 if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12, <= PHP 7.1.3 needed\n";
