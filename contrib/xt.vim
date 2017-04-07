@@ -72,7 +72,17 @@ endif
 let b:current_syntax = "xt"
 
 :set foldmethod=expr
-:set foldexpr=strlen(substitute(substitute(substitute(substitute(getline(v:lnum),'^TR.*$','',''),'\\s>=>','->',\"g\"),'^\\s.\\{20\\}\\(\\s\\+\\)\\?->.*$','\\1',''),'\\s\\s','\ ',\"g\"))-2
 :set foldlevel=9999
+
+" check whether xdebug.show_mem_delta=1 is set
+let s:startColumn = getline(2)[24:25]=='->' ? 22 : 31
+fu! TraceFoldLevel(ln)
+  for i in range(10, 1, -1)
+    if eval('getline(a:ln)['.s:startColumn.':]')=~'^[ ]\{'.(2*i).'\}[^\\s]'
+      return i
+  endfor
+  return 0
+endfu
+:set foldexpr=TraceFoldLevel(v:lnum)
 
 " vim: ts=8 sw=2
