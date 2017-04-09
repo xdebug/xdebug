@@ -61,30 +61,32 @@ void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos
 
 static void only_leave_first_catch(zend_op_array *opa, xdebug_branch_info *branch_info, int position)
 {
-	unsigned int exit_jmp = opa->opcodes[position].extended_value;
+	unsigned int exit_jmp;
 
 	if (opa->opcodes[position].opcode == ZEND_FETCH_CLASS) {
 		position++;
 	}
 
-#if PHP_VERSION_ID >= 70100
-	exit_jmp = position + ((signed int) opa->opcodes[position].extended_value / sizeof(zend_op));
-#else
-	exit_jmp = opa->opcodes[position].extended_value;
-#endif
-
 	if (opa->opcodes[position].opcode != ZEND_CATCH) {
 		return;
 	}
 
-	if (opa->opcodes[exit_jmp].opcode == ZEND_FETCH_CLASS) {
-		exit_jmp++;
-	}
-	if (opa->opcodes[exit_jmp].opcode == ZEND_CATCH) {
-		only_leave_first_catch(opa, branch_info, exit_jmp);
-	}
-
 	xdebug_set_remove(branch_info->entry_points, position);
+
+	if (!opa->opcodes[position].result.num) {
+#if PHP_VERSION_ID >= 70100
+		exit_jmp = position + ((signed int) opa->opcodes[position].extended_value / sizeof(zend_op));
+#else
+		exit_jmp = opa->opcodes[position].extended_value;
+#endif
+
+		if (opa->opcodes[exit_jmp].opcode == ZEND_FETCH_CLASS) {
+			exit_jmp++;
+		}
+		if (opa->opcodes[exit_jmp].opcode == ZEND_CATCH) {
+			only_leave_first_catch(opa, branch_info, exit_jmp);
+		}
+	}
 }
 
 void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_info)
