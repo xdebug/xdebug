@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1386: Executable code not shown as executed/executable
+--SKIPIF--
+<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

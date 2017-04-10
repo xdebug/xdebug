@@ -1,8 +1,10 @@
 --TEST--
 Test for bug #763: Access method of not yet defined variable aborts debug session (< PHP 7.0)
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
-<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
+<?php
+if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
+if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n";
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -221,6 +221,14 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	next_opcode = cur_opcode + 1;
 	prev_opcode = cur_opcode - 1;
 
+	if (cur_opcode->opcode == ZEND_QM_ASSIGN) {
+#if PHP_VERSION_ID >= 70000
+		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->result.var)->val), 1);
+#else
+		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->result.var, &cv_len)), 1);
+#endif
+	}
+
 	if (cur_opcode->op1_type == IS_VAR &&
 			(next_opcode->op1_type == IS_VAR || cur_opcode->op2_type == IS_VAR) &&
 			prev_opcode->opcode == ZEND_FETCH_RW &&
@@ -331,12 +339,16 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
 			}
 			if (opcode_ptr->opcode == ZEND_FETCH_DIM_W) {
+#if PHP_VERSION_ID < 70000
 				if (opcode_ptr->op2_type != IS_VAR) {
+#endif
 					zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
 					xdebug_str_add(&name, xdebug_sprintf("[%s]", zval_value), 1);
+#if PHP_VERSION_ID < 70000
 				} else {
 					xdebug_str_add(&name, xdebug_sprintf("[???]") , 1);
 				}
+#endif
 			} else if (opcode_ptr->opcode == ZEND_FETCH_OBJ_W) {
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, options);
 				xdebug_str_add(&name, xdebug_sprintf("->%s", zval_value), 1);
@@ -435,6 +447,8 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCOD
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		} else if (next_opcode->opcode == ZEND_OP_DATA) {
 			val = xdebug_get_zval(execute_data, next_opcode->op1_type, &next_opcode->op1, &is_var);
+		} else if (cur_opcode->opcode == ZEND_QM_ASSIGN) {
+			val = xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var);
 		} else {
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		}
@@ -455,6 +469,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCOD
 	}
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(qm_assign,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_add,"+=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sub,"-=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mul,"*=",0)

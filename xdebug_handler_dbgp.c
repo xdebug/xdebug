@@ -491,34 +491,34 @@ static int breakpoint_admin_remove(xdebug_con *context, char *hkey)
 	}
 }
 
-static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
+static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk_info)
 {
 	TSRMLS_FETCH();
 
-	if (brk->type) {
-		xdebug_xml_add_attribute_ex(xml, "type", xdstrdup(brk->type), 0, 1);
+	if (brk_info->type) {
+		xdebug_xml_add_attribute_ex(xml, "type", xdstrdup(brk_info->type), 0, 1);
 	}
-	if (brk->file) {
-		xdebug_xml_add_attribute_ex(xml, "filename", xdebug_path_to_url(brk->file TSRMLS_CC), 0, 1);
+	if (brk_info->file) {
+		xdebug_xml_add_attribute_ex(xml, "filename", xdebug_path_to_url(brk_info->file TSRMLS_CC), 0, 1);
 	}
-	if (brk->lineno) {
-		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", brk->lineno), 0, 1);
+	if (brk_info->lineno) {
+		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", brk_info->lineno), 0, 1);
 	}
-	if (brk->functionname) {
-		xdebug_xml_add_attribute_ex(xml, "function", xdstrdup(brk->functionname), 0, 1);
+	if (brk_info->functionname) {
+		xdebug_xml_add_attribute_ex(xml, "function", xdstrdup(brk_info->functionname), 0, 1);
 	}
-	if (brk->classname) {
-		xdebug_xml_add_attribute_ex(xml, "class", xdstrdup(brk->classname), 0, 1);
+	if (brk_info->classname) {
+		xdebug_xml_add_attribute_ex(xml, "class", xdstrdup(brk_info->classname), 0, 1);
 	}
-	if (brk->temporary) {
+	if (brk_info->temporary) {
 		xdebug_xml_add_attribute(xml, "state", "temporary");
-	} else if (brk->disabled) {
+	} else if (brk_info->disabled) {
 		xdebug_xml_add_attribute(xml, "state", "disabled");
 	} else {
 		xdebug_xml_add_attribute(xml, "state", "enabled");
 	}
-	xdebug_xml_add_attribute_ex(xml, "hit_count", xdebug_sprintf("%lu", brk->hit_count), 0, 1);
-	switch (brk->hit_condition) {
+	xdebug_xml_add_attribute_ex(xml, "hit_count", xdebug_sprintf("%lu", brk_info->hit_count), 0, 1);
+	switch (brk_info->hit_condition) {
 		case XDEBUG_HIT_GREATER_EQUAL:
 			xdebug_xml_add_attribute(xml, "hit_condition", ">=");
 			break;
@@ -529,18 +529,18 @@ static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk)
 			xdebug_xml_add_attribute(xml, "hit_condition", "%");
 			break;
 	}
-	if (brk->condition) {
+	if (brk_info->condition) {
 		xdebug_xml_node *condition = xdebug_xml_node_init("expression");
-		xdebug_xml_add_text_ex(condition, brk->condition, strlen(brk->condition), 0, 1);
+		xdebug_xml_add_text_ex(condition, brk_info->condition, strlen(brk_info->condition), 0, 1);
 		xdebug_xml_add_child(xml, condition);
 	}
-	xdebug_xml_add_attribute_ex(xml, "hit_value", xdebug_sprintf("%lu", brk->hit_value), 0, 1);
+	xdebug_xml_add_attribute_ex(xml, "hit_value", xdebug_sprintf("%lu", brk_info->hit_value), 0, 1);
 }
 
 static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 {
 	xdebug_llist_element *le;
-	xdebug_brk_info      *brk = NULL;
+	xdebug_brk_info      *brk_info = NULL;
 	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
 	TSRMLS_FETCH();
@@ -554,11 +554,11 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 			/* Second we loop through the list of file/line breakpoints to
 			 * look for our thingy */
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				brk = XDEBUG_LLIST_VALP(le);
+				brk_info = XDEBUG_LLIST_VALP(le);
 
-				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[0], brk->file_len) == 0) {
+				if (atoi(parts->args[1]) == brk_info->lineno && memcmp(brk_info->file, parts->args[0], brk_info->file_len) == 0) {
 					xdebug_arg_dtor(parts);
-					return brk;
+					return brk_info;
 				}
 			}
 
@@ -567,24 +567,24 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 			break;
 
 		case BREAKPOINT_TYPE_FUNCTION:
-			if (xdebug_hash_find(XG(context).function_breakpoints, hkey, strlen(hkey), (void *) &brk)) {
-				return brk;
+			if (xdebug_hash_find(XG(context).function_breakpoints, hkey, strlen(hkey), (void *) &brk_info)) {
+				return brk_info;
 			}
 			break;
 
 		case BREAKPOINT_TYPE_EXCEPTION:
-			if (xdebug_hash_find(XG(context).exception_breakpoints, hkey, strlen(hkey), (void *) &brk)) {
-				return brk;
+			if (xdebug_hash_find(XG(context).exception_breakpoints, hkey, strlen(hkey), (void *) &brk_info)) {
+				return brk_info;
 			}
 			break;
 	}
-	return brk;
+	return brk_info;
 }
 
 static int breakpoint_remove(int type, char *hkey)
 {
 	xdebug_llist_element *le;
-	xdebug_brk_info      *brk = NULL;
+	xdebug_brk_info      *brk_info = NULL;
 	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	int                   retval = FAILURE;
 	TSRMLS_FETCH();
@@ -598,9 +598,9 @@ static int breakpoint_remove(int type, char *hkey)
 			/* Second we loop through the list of file/line breakpoints to
 			 * look for our thingy */
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				brk = XDEBUG_LLIST_VALP(le);
+				brk_info = XDEBUG_LLIST_VALP(le);
 
-				if (atoi(parts->args[1]) == brk->lineno && memcmp(brk->file, parts->args[0], brk->file_len) == 0) {
+				if (atoi(parts->args[1]) == brk_info->lineno && memcmp(brk_info->file, parts->args[0], brk_info->file_len) == 0) {
 					xdebug_llist_remove(XG(context).line_breakpoints, le, NULL);
 					retval = SUCCESS;
 					break;
@@ -734,11 +734,11 @@ static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
 	xdebug_xml_node  *xml_node = (xdebug_xml_node*) xml;
 	xdebug_xml_node  *child;
 	xdebug_brk_admin *admin = (xdebug_brk_admin*) he->ptr;
-	xdebug_brk_info  *brk;
+	xdebug_brk_info  *brk_info;
 
 	child = xdebug_xml_node_init("breakpoint");
-	brk = breakpoint_brk_info_fetch(admin->type, admin->key);
-	breakpoint_brk_info_add(child, brk);
+	brk_info = breakpoint_brk_info_fetch(admin->type, admin->key);
+	breakpoint_brk_info_add(child, brk_info);
 	xdebug_xml_add_attribute_ex(child, "id", xdebug_sprintf("%lu", admin->id), 0, 1);
 	xdebug_xml_add_child(xml_node, child);
 }
@@ -2036,15 +2036,15 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 				break;
 			case STATE_VALUE_FOLLOWS:
 				if ((*ptr == ' ' && opt != '-') || *ptr == '\0') {
-					int index = opt - 'a';
+					int opt_index = opt - 'a';
 
 					if (opt == '-') {
-						index = 26;
+						opt_index = 26;
 					}
 
-					if (!args->value[index]) {
-						args->value[index] = xdcalloc(1, ptr - value_begin + 1);
-						memcpy(args->value[index], value_begin, ptr - value_begin);
+					if (!args->value[opt_index]) {
+						args->value[opt_index] = xdcalloc(1, ptr - value_begin + 1);
+						memcpy(args->value[opt_index], value_begin, ptr - value_begin);
 						state = STATE_NORMAL;
 					} else {
 						goto duplicate_opts;
@@ -2060,21 +2060,21 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 					charescaped = !charescaped;
 				} else
 				if (*ptr == '"') {
-					int index = opt - 'a';
+					int opt_index = opt - 'a';
 
 					if (charescaped) {
 						charescaped = 0;
 						break;
 					}
 					if (opt == '-') {
-						index = 26;
+						opt_index = 26;
 					}
 
-					if (!args->value[index]) {
+					if (!args->value[opt_index]) {
 						int len = ptr - value_begin;
-						args->value[index] = xdcalloc(1, len + 1);
-						memcpy(args->value[index], value_begin, len);
-						xdebug_stripcslashes(args->value[index], &len);
+						args->value[opt_index] = xdcalloc(1, len + 1);
+						memcpy(args->value[opt_index], value_begin, len);
+						xdebug_stripcslashes(args->value[opt_index], &len);
 						state = STATE_SKIP_CHAR;
 					} else {
 						goto duplicate_opts;

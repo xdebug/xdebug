@@ -269,6 +269,16 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	char      *tmp_value = NULL;
 
+	if (! (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
+		return;
+	}
+
+#if PHP_VERSION_ID >= 70000
+	if (generator->node.ptr.root->execute_data == NULL) {
+		return;
+	}
+#endif
+
 	/* Generator key */
 #if PHP_VERSION_ID >= 70000
 	tmp_value = xdebug_get_zval_value(&generator->key, 0, NULL);

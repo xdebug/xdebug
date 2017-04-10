@@ -30,7 +30,7 @@ void xdebug_superglobals_dump_dtor(void *user, void *ptr)
 	free(ptr);
 }
 
-static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html, xdebug_str *str TSRMLS_DC)
+static void dump_hash_elem(zval *z, char *name, long index_key, char *elem, int html, xdebug_str *str TSRMLS_DC)
 {
 	int  len;
 
@@ -38,7 +38,7 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 		if (elem) {
 			xdebug_str_add(str, xdebug_sprintf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s['%s']&nbsp;=</pre></td>", name, elem), 1);
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s[%ld]&nbsp;=</pre></td>", name, index), 1);
+			xdebug_str_add(str, xdebug_sprintf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s[%ld]&nbsp;=</pre></td>", name, index_key), 1);
 		}
 	}
 
@@ -70,7 +70,7 @@ static void dump_hash_elem(zval *z, char *name, long index, char *elem, int html
 }
 
 #if PHP_VERSION_ID >= 70000
-static int dump_hash_elem_va(zval *pDest, zend_ulong index, zend_string *hash_key, char *name, int html, xdebug_str *str)
+static int dump_hash_elem_va(zval *pDest, zend_ulong index_key, zend_string *hash_key, char *name, int html, xdebug_str *str)
 {
 #else
 static int dump_hash_elem_va(void *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
