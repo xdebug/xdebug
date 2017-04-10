@@ -1,5 +1,7 @@
 --TEST--
 Test for tracing assignments in user-readable function traces
+--SKIPIF--
+<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

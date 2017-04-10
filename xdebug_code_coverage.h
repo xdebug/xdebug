@@ -71,6 +71,7 @@ int xdebug_common_override_handler(zend_execute_data *execute_data);
 	int xdebug_##f##_handler(zend_execute_data *execute_data)
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(qm_assign);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_add);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_sub);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(assign_mul);

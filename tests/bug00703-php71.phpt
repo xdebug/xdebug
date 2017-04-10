@@ -1,7 +1,8 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (> PHP 7.0.12)
+Test for bug #703: Line in heredoc marked as not executed (>= PHP 7.1.0 <= PHP 7.1.3)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.1.0", '>=')) echo "skip >= PHP 7.1.0, <= PHP 7.1.3 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.1.3", '<=')) echo "skip >= PHP 7.1.0, <= PHP 7.1.3 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

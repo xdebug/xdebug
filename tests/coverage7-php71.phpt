@@ -1,5 +1,8 @@
 --TEST--
 Test with Code Coverage with path and branch checking (> PHP 7.0.12)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
+<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -15,8 +18,6 @@ xdebug.show_mem_delta=0
 xdebug.trace_format=0
 xdebug.extended_info=1
 xdebug.overload_var_dump=0
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

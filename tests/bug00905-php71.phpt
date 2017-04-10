@@ -44,7 +44,6 @@ key => c
 11 => f
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> gen() %sbug00905-php71.php:13
-%w%f %w%d      >=> (*uninitialized* => *uninitialized*)
 %w%f %w%d     -> gen() %sbug00905-php71.php:13
 %w%f %w%d      >=> (0 => 'a')
 %w%f %w%d     -> gen() %sbug00905-php71.php:13
@@ -57,7 +56,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d      >=> (10 => 'e')
 %w%f %w%d     -> gen() %sbug00905-php71.php:13
 %w%f %w%d      >=> (11 => 'f')
-%w%f %w%d     -> gen() %sbug00905-php71.php:13%A
+%w%f %w%d     -> gen() %sbug00905-php71.php:13
 %w%f %w%d     -> xdebug_stop_trace() %sbug00905-php71.php:17
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

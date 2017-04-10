@@ -3,6 +3,7 @@ Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work
 --SKIPIF--
 <?php if (PHP_ZTS == 0) echo "skip ZTS needed\n"; ?>
 <?php if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n"; ?>
+<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.overload_var_dump=2

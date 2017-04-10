@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #756: Tracing doesn't always understand the variables and shows IS_VAR
+--SKIPIF--
+<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
 --INI--
 xdebug.auto_trace=0
 xdebug.trace_options=0

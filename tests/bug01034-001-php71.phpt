@@ -2,6 +2,7 @@
 Test for bug #1034: path coverage [1] (> PHP 7.0.12)
 --SKIPIF--
 <?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
+<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';
