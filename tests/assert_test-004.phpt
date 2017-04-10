@@ -35,7 +35,7 @@ assert_options (ASSERT_CALLBACK, 'my_assert_handler');
 // Make an assertion that should fail
 try
 {
-	@assert ('1==2', "One is not two");
+	assert (1 == 2, "One is not two");
 } catch (AssertionError $e )
 {
 	echo "\n", $e->getMessage(), "\n";
@@ -47,19 +47,18 @@ unlink($tf);
 ?>
 --EXPECTF--
 Assertion Failed:
-        File '%sassert_test-003.php'
+        File '%sassert_test-004.php'
         Line '23'
-        Code '1==2'
+        Code ''
         Desc 'One is not two'
 One is not two
 
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> assert_options(1, 1) %sassert_test-003.php:5
-%w%f %w%d     -> assert_options(4, 0) %sassert_test-003.php:6
-%w%f %w%d     -> assert_options(5, 1) %sassert_test-003.php:7
-%w%f %w%d     -> assert_options(2, 'my_assert_handler') %sassert_test-003.php:18
-%w%f %w%d     -> assert('1==2', 'One is not two') %sassert_test-003.php:23
-%w%f %w%d       -> %r({internal eval}\(\))|(assert\('1==2'\))%r %sassert_test-003.php:23
-%w%f %w%d       -> my_assert_handler('%sassert_test-003.php', 23, '1==2', 'One is not two') %sassert_test-003.php:23
-%w%f %w%d     -> Error->getMessage() %sassert_test-003.php:26
-%w%f %w%d     -> file_get_contents('%s') %sassert_test-003.php:29
+%w%f %w%d     -> assert_options(1, 1) %sassert_test-004.php:5
+%w%f %w%d     -> assert_options(4, 0) %sassert_test-004.php:6
+%w%f %w%d     -> assert_options(5, 1) %sassert_test-004.php:7
+%w%f %w%d     -> assert_options(2, 'my_assert_handler') %sassert_test-004.php:18
+%w%f %w%d     -> assert(FALSE, 'One is not two') %sassert_test-004.php:23
+%w%f %w%d       -> my_assert_handler('%sassert_test-004.php', 23, '', 'One is not two') %sassert_test-004.php:23
+%w%f %w%d     -> Error->getMessage() %sassert_test-004.php:26
+%w%f %w%d     -> file_get_contents('%s') %sassert_test-004.php:29
