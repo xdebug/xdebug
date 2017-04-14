@@ -1804,7 +1804,7 @@ next_constant:
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = xdebug_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+			zend_class_entry *ce = xdebug_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			xdebug_attach_static_vars(node, options, ce TSRMLS_CC);
 		}

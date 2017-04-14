@@ -77,7 +77,7 @@ class DebugClient
 			$options .= " -d{$key}=$value";
 		}
 
-		$cmd = "php $options {$this->tmpDir}/xdebug-dbgp-test.php";
+		$cmd = "php $options {$this->tmpDir}/xdebug-dbgp-test.php >{$this->tmpDir}/php-error-output.txt 2>&1";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -126,6 +126,7 @@ class DebugClient
 
 		if ( $conn === false )
 		{
+			echo @file_get_contents( $this->tmpDir . '/php-error-output.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/remote_log.txt' ), "\n";
 			proc_close( $php );
@@ -158,6 +159,9 @@ class DebugClient
 		fclose( $ppipes[0] );
 		fclose( $ppipes[1] );
 		proc_close( $php );
+		
+		// echo @file_get_contents( $this->tmpDir . '/php-error-output.txt' ), "\n";
+		// echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 	}
 }
 
