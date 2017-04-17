@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2017-02-26</date>
- <time>14:27:26</time>
+ <date>2017-04-17</date>
+ <time>18:42:26</time>
  <version>
-  <release>2.5.1</release>
-  <api>2.5.1</api>
+  <release>2.5.2</release>
+  <api>2.5.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,28 +45,23 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sun, Feb 26, 2017 - xdebug 2.5.1
+Mon, Apr 17, 2017 - xdebug 2.5.2
 
 = Fixed bugs:
 
-  - Fixed issue #1057: Add xdebug.ini of all settings to package
-  - Fixed issue #1165: DBGp: step_out skips subsequent function calls
-  - Fixed issue #1180: Code coverage crashes with non-standard start/stops
-  - Fixed issue #1278: Xdebug with PHP 7 does not handle prefill-from-oparray
-    for XDEBUG_CC_UNUSED
-  - Fixed issue #1300: Xdebug functions are not exposing their signature to
-    Reflection
-  - Fixed issue #1313: Arguments to __call() trampoline picked from the wrong
-    memory location
-  - Fixed issue #1329: While printing out a stack with and function parameters,
-    XDebug reads uninitialized zvals or free()d memory
-  - Fixed issue #1381: Code Coverage misses line due to missing FETCH_DIM_W
-    overload
-  - Fixed issue #1385: can not fetch IS_INDIRECT properties
-  - Fixed issue #1386: Executable code not shown as executed/executable
-  - Fixed issue #1392: Unable to compile on FreeBSD due to missing struct
-    definition
-  - Fixed issue #1394: Code coverage does not cover instanceof (in elseif)
+  - Fixed issue #701: Functions as array indexes show ??? in trace
+  - Fixed issue #1403: Code coverage does not cover BIND_STATIC
+  - Fixed issue #1404: Execution time is calculated incorrectly
+  - Fixed issue #1413: Code coverage mishap with PHP 7.1.3
+  - Fixed issue #1414: Missing variable assignment in traces with OPcache
+    loaded
+  - Fixed issue #1415: Crash with multiple catch constructs with OPcache loaded
+  - Fixed issue #1416: Trace files should not include the first result of a
+    generator if it hasn't started yet
+  - Fixed issue #1417: Fetching properties of static class contexts fails due
+    to incorrect fetch mode
+  - Fixed issue #1419: Summary not written when script ended with
+    "pcntl_exec()"
  </notes>
 
  <contents>
@@ -174,6 +169,44 @@ Sun, Feb 26, 2017 - xdebug 2.5.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2017-04-17</date>
+   <time>18:42:26</time>
+   <version>
+    <release>2.5.2</release>
+    <api>2.5.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Feb 26, 2017 - xdebug 2.5.1
+
+= Fixed bugs:
+
+  - Fixed issue #1057: Add xdebug.ini of all settings to package
+  - Fixed issue #1165: DBGp: step_out skips subsequent function calls
+  - Fixed issue #1180: Code coverage crashes with non-standard start/stops
+  - Fixed issue #1278: Xdebug with PHP 7 does not handle prefill-from-oparray
+    for XDEBUG_CC_UNUSED
+  - Fixed issue #1300: Xdebug functions are not exposing their signature to
+    Reflection
+  - Fixed issue #1313: Arguments to __call() trampoline picked from the wrong
+    memory location
+  - Fixed issue #1329: While printing out a stack with and function parameters,
+    XDebug reads uninitialized zvals or free()d memory
+  - Fixed issue #1381: Code Coverage misses line due to missing FETCH_DIM_W
+    overload
+  - Fixed issue #1385: can not fetch IS_INDIRECT properties
+  - Fixed issue #1386: Executable code not shown as executed/executable
+  - Fixed issue #1392: Unable to compile on FreeBSD due to missing struct
+    definition
+  - Fixed issue #1394: Code coverage does not cover instanceof (in elseif)
+   </notes>
+  </release>
 
   <release>
    <date>2016-12-04</date>
