@@ -678,8 +678,24 @@ static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 	if (!CMD_OPTION('d')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
+
+	/* Copy the 'd' option to a variable */
+	char *d = CMD_OPTION('d');
+
+	/* Convert the raw d into a long */
+	errno = 0;
+	long dvalue = strtol(d, NULL, 10);
+	
+	/*Check a numeric value was passed in d */
+	if (errno) {
+		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_INVALID);
+	}
+
+	// Put a string value of dvalue back into d
+	sprintf(d,"%lu", dvalue);
+
 	/* Lets check if it exists */
-	if (breakpoint_admin_fetch(context, CMD_OPTION('d'), &type, (char**) &hkey) == SUCCESS) {
+	if (breakpoint_admin_fetch(context, d, &type, (char**) &hkey) == SUCCESS) {
 		/* so it exists, now we're going to find it in the correct hash/list
 		 * and return the info we have on it */
 		brk_info = breakpoint_brk_info_fetch(type, hkey);
@@ -890,7 +906,7 @@ DBGP_FUNC(breakpoint_set)
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED);
 	}
 
-	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%lu", brk_id), 0, 1);
+	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%d", brk_id), 0, 1);
 }
 
 static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
