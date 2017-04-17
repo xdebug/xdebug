@@ -82,6 +82,7 @@ PHP_FUNCTION(xdebug_call_file);
 PHP_FUNCTION(xdebug_call_line);
 
 PHP_FUNCTION(xdebug_set_time_limit);
+PHP_FUNCTION(xdebug_pcntl_exec);
 
 PHP_FUNCTION(xdebug_var_dump);
 PHP_FUNCTION(xdebug_debug_zval);
@@ -155,6 +156,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     overload_var_dump;
 	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAMETERS);
+	void        (*orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAMETERS);
 
 	xdebug_trace_handler_t *trace_handler;
 	void         *trace_context;
