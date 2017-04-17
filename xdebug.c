@@ -1288,6 +1288,15 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(orig_set_time_limit_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
+	/* Override pcntl_exec with our own function to be able to write profiling summary */
+#if PHP_VERSION_ID >= 70000
+	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
+#else
+	zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
+#endif
+	XG(orig_pcntl_exec_func) = orig->internal_function.handler;
+	orig->internal_function.handler = zif_xdebug_pcntl_exec;
+
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	XG(in_var_serialisation) = 0;
@@ -1381,7 +1390,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG(functions_to_monitor) = NULL;
 	}
 
-	/* Reset var_dump and set_time_limit to the original function */
+	/* Reset var_dump, set_time_limit, and pcntl_exec to the original function */
 #if PHP_VERSION_ID >= 70000
 	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
 #else
@@ -1395,6 +1404,13 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	zend_hash_find(EG(function_table), "set_time_limit", sizeof("set_time_limit"), (void **)&orig);
 #endif
 	orig->internal_function.handler = XG(orig_set_time_limit_func);;
+
+#if PHP_VERSION_ID >= 70000
+	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
+#else
+	zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
+#endif
+	orig->internal_function.handler = XG(orig_pcntl_exec_func);
 
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
@@ -2303,6 +2319,19 @@ PHP_FUNCTION(xdebug_set_time_limit)
 	if (!XG(remote_enabled)) {
 		XG(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
+}
+/* }}} */
+
+/* {{{ proto void xdebug_pcntl_exec(void)
+   Dummy function to prevent time limit from being set within the script */
+PHP_FUNCTION(xdebug_pcntl_exec)
+{
+	/* We need to stop the profiler and trace files here */
+	if (XG(profiler_enabled)) {
+		xdebug_profiler_deinit(TSRMLS_C);
+	}
+
+	XG(orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
