@@ -273,6 +273,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
 		fprintf(XG(profile_file), "\nsummary: %lu\n\n", (unsigned long) (fse->profile.time * 1000000));
+		XG(profiler_enabled) = 0;
 	}
 	fflush(XG(profile_file));
 
