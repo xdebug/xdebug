@@ -1294,8 +1294,12 @@ PHP_RINIT_FUNCTION(xdebug)
 #else
 	zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
 #endif
-	XG(orig_pcntl_exec_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_pcntl_exec;
+	if (orig) {
+		XG(orig_pcntl_exec_func) = orig->internal_function.handler;
+		orig->internal_function.handler = zif_xdebug_pcntl_exec;
+	} else {
+		XG(orig_pcntl_exec_func) = NULL;
+	}
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
@@ -1405,12 +1409,16 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 #endif
 	orig->internal_function.handler = XG(orig_set_time_limit_func);;
 
+	if (XG(orig_pcntl_exec_func)) {
 #if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
+		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
 #else
-	zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
+		zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
 #endif
-	orig->internal_function.handler = XG(orig_pcntl_exec_func);
+		if (orig) {
+			orig->internal_function.handler = XG(orig_pcntl_exec_func);
+		}
+	}
 
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
