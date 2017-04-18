@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2017-04-17</date>
- <time>18:42:26</time>
+ <date>2017-04-18</date>
+ <time>19:31:21</time>
  <version>
-  <release>2.5.2</release>
-  <api>2.5.2</api>
+  <release>2.5.3</release>
+  <api>2.5.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,23 +45,12 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Apr 17, 2017 - xdebug 2.5.2
+Mon, Apr 18, 2017 - xdebug 2.5.3
 
 = Fixed bugs:
 
-  - Fixed issue #701: Functions as array indexes show ??? in trace
-  - Fixed issue #1403: Code coverage does not cover BIND_STATIC
-  - Fixed issue #1404: Execution time is calculated incorrectly
-  - Fixed issue #1413: Code coverage mishap with PHP 7.1.3
-  - Fixed issue #1414: Missing variable assignment in traces with OPcache
-    loaded
-  - Fixed issue #1415: Crash with multiple catch constructs with OPcache loaded
-  - Fixed issue #1416: Trace files should not include the first result of a
-    generator if it hasn't started yet
-  - Fixed issue #1417: Fetching properties of static class contexts fails due
-    to incorrect fetch mode
-  - Fixed issue #1419: Summary not written when script ended with
-    "pcntl_exec()"
+  - Fixed issue #1421: Xdebug crashes when it is loaded without pcntl being
+    present
  </notes>
 
  <contents>
@@ -169,6 +158,39 @@ Mon, Apr 17, 2017 - xdebug 2.5.2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2017-04-17</date>
+   <time>18:42:26</time>
+   <version>
+    <release>2.5.2</release>
+    <api>2.5.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Apr 17, 2017 - xdebug 2.5.2
+
+= Fixed bugs:
+
+  - Fixed issue #701: Functions as array indexes show ??? in trace
+  - Fixed issue #1403: Code coverage does not cover BIND_STATIC
+  - Fixed issue #1404: Execution time is calculated incorrectly
+  - Fixed issue #1413: Code coverage mishap with PHP 7.1.3
+  - Fixed issue #1414: Missing variable assignment in traces with OPcache
+    loaded
+  - Fixed issue #1415: Crash with multiple catch constructs with OPcache loaded
+  - Fixed issue #1416: Trace files should not include the first result of a
+    generator if it hasn't started yet
+  - Fixed issue #1417: Fetching properties of static class contexts fails due
+    to incorrect fetch mode
+  - Fixed issue #1419: Summary not written when script ended with
+    "pcntl_exec()"
+   </notes>
+  </release>
 
   <release>
    <date>2017-04-17</date>
