@@ -1292,7 +1292,9 @@ PHP_RINIT_FUNCTION(xdebug)
 #if PHP_VERSION_ID >= 70000
 	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
 #else
-	zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
+	if (zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig) == FAILURE) {
+		orig = NULL;
+	}
 #endif
 	if (orig) {
 		XG(orig_pcntl_exec_func) = orig->internal_function.handler;
