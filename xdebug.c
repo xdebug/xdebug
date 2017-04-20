@@ -1127,9 +1127,78 @@ static void xdebug_init_auto_globals(TSRMLS_D)
 	XDEBUG_AUTO_GLOBAL("_SESSION");
 }
 
-PHP_RINIT_FUNCTION(xdebug)
+
+static void xdebug_overloaded_functions_setup(TSRMLS_C)
 {
 	zend_function *orig;
+
+	/* Override var_dump with our own function */
+#if PHP_VERSION_ID >= 70000
+	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
+#else
+	zend_hash_find(EG(function_table), "var_dump", sizeof("var_dump"), (void **)&orig);
+#endif
+	XG(orig_var_dump_func) = orig->internal_function.handler;
+	orig->internal_function.handler = zif_xdebug_var_dump;
+
+	/* Override set_time_limit with our own function to prevent timing out while debugging */
+#if PHP_VERSION_ID >= 70000
+	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
+#else
+	zend_hash_find(EG(function_table), "set_time_limit", sizeof("set_time_limit"), (void **)&orig);
+#endif
+	XG(orig_set_time_limit_func) = orig->internal_function.handler;
+	orig->internal_function.handler = zif_xdebug_set_time_limit;
+
+	/* Override pcntl_exec with our own function to be able to write profiling summary */
+#if PHP_VERSION_ID >= 70000
+	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
+#else
+	if (zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig) == FAILURE) {
+		orig = NULL;
+	}
+#endif
+	if (orig) {
+		XG(orig_pcntl_exec_func) = orig->internal_function.handler;
+		orig->internal_function.handler = zif_xdebug_pcntl_exec;
+	} else {
+		XG(orig_pcntl_exec_func) = NULL;
+	}
+}
+
+static void xdebug_overloaded_functions_restore(TSRMLS_C)
+{
+	zend_function *orig;
+
+#if PHP_VERSION_ID >= 70000
+	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
+#else
+	zend_hash_find(EG(function_table), "var_dump", sizeof("var_dump"), (void **)&orig);
+#endif
+	orig->internal_function.handler = XG(orig_var_dump_func);
+
+#if PHP_VERSION_ID >= 70000
+	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
+#else
+	zend_hash_find(EG(function_table), "set_time_limit", sizeof("set_time_limit"), (void **)&orig);
+#endif
+	orig->internal_function.handler = XG(orig_set_time_limit_func);;
+
+	if (XG(orig_pcntl_exec_func)) {
+#if PHP_VERSION_ID >= 70000
+		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
+#else
+		zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
+#endif
+		if (orig) {
+			orig->internal_function.handler = XG(orig_pcntl_exec_func);
+		}
+	}
+}
+
+
+PHP_RINIT_FUNCTION(xdebug)
+{
 	char *idekey;
 #if PHP_VERSION_ID < 70000
 	zval **dummy;
@@ -1270,36 +1339,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Initialize start time */
 	XG(start_time) = xdebug_get_utime();
 
-	/* Override var_dump with our own function */
-#if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
-#else
-	zend_hash_find(EG(function_table), "var_dump", sizeof("var_dump"), (void **)&orig);
-#endif
-	XG(orig_var_dump_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_var_dump;
-
-	/* Override set_time_limit with our own function to prevent timing out while debugging */
-#if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-#else
-	zend_hash_find(EG(function_table), "set_time_limit", sizeof("set_time_limit"), (void **)&orig);
-#endif
-	XG(orig_set_time_limit_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_set_time_limit;
-
-	/* Override pcntl_exec with our own function to be able to write profiling summary */
-#if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
-#else
-	zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
-#endif
-	if (orig) {
-		XG(orig_pcntl_exec_func) = orig->internal_function.handler;
-		orig->internal_function.handler = zif_xdebug_pcntl_exec;
-	} else {
-		XG(orig_pcntl_exec_func) = NULL;
-	}
+	/* Overload var_dump, set_time_limit, and pcntl_exec */
+	xdebug_overloaded_functions_setup(TSRMLS_DC);
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
@@ -1318,7 +1359,6 @@ PHP_RINIT_FUNCTION(xdebug)
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
-	zend_function *orig;
 	TSRMLS_FETCH();
 
 	if (XG(remote_enabled)) {
@@ -1394,31 +1434,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG(functions_to_monitor) = NULL;
 	}
 
-	/* Reset var_dump, set_time_limit, and pcntl_exec to the original function */
-#if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
-#else
-	zend_hash_find(EG(function_table), "var_dump", sizeof("var_dump"), (void **)&orig);
-#endif
-	orig->internal_function.handler = XG(orig_var_dump_func);
-
-#if PHP_VERSION_ID >= 70000
-	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-#else
-	zend_hash_find(EG(function_table), "set_time_limit", sizeof("set_time_limit"), (void **)&orig);
-#endif
-	orig->internal_function.handler = XG(orig_set_time_limit_func);;
-
-	if (XG(orig_pcntl_exec_func)) {
-#if PHP_VERSION_ID >= 70000
-		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
-#else
-		zend_hash_find(EG(function_table), "pcntl_exec", sizeof("pcntl_exec"), (void **)&orig);
-#endif
-		if (orig) {
-			orig->internal_function.handler = XG(orig_pcntl_exec_func);
-		}
-	}
+	/* Restore original var_dump, set_time_limit, and pcntl_exec handlers */
+	xdebug_overloaded_functions_restore(TSRMLS_DC);
 
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
