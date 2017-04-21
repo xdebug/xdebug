@@ -1128,7 +1128,7 @@ static void xdebug_init_auto_globals(TSRMLS_D)
 }
 
 
-static void xdebug_overloaded_functions_setup(TSRMLS_C)
+static void xdebug_overloaded_functions_setup(TSRMLS_D)
 {
 	zend_function *orig;
 
@@ -1166,7 +1166,7 @@ static void xdebug_overloaded_functions_setup(TSRMLS_C)
 	}
 }
 
-static void xdebug_overloaded_functions_restore(TSRMLS_C)
+static void xdebug_overloaded_functions_restore(TSRMLS_D)
 {
 	zend_function *orig;
 
@@ -1340,7 +1340,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(start_time) = xdebug_get_utime();
 
 	/* Overload var_dump, set_time_limit, and pcntl_exec */
-	xdebug_overloaded_functions_setup(TSRMLS_DC);
+	xdebug_overloaded_functions_setup(TSRMLS_C);
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
@@ -1435,7 +1435,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 
 	/* Restore original var_dump, set_time_limit, and pcntl_exec handlers */
-	xdebug_overloaded_functions_restore(TSRMLS_DC);
+	xdebug_overloaded_functions_restore(TSRMLS_C);
 
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG(headers), NULL);
