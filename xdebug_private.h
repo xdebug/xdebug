@@ -224,7 +224,7 @@ typedef struct
 	void (*function_exit)(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC);
 	void (*return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC);
 	void (*generator_return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC);
-	void (*assignment)(void *ctxt, function_stack_entry *fse, char *full_varname, zval *value, char *op, char *file, int lineno TSRMLS_DC);
+	void (*assignment)(void *ctxt, function_stack_entry *fse, char *full_varname, zval *value, char *right_full_varname, char *op, char *file, int lineno TSRMLS_DC);
 } xdebug_trace_handler_t;
 
 

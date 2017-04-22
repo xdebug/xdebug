@@ -278,7 +278,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	}
 }
 
-void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *op, char *filename, int lineno TSRMLS_DC)
+void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, char *op, char *filename, int lineno TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	unsigned int j = 0;
@@ -299,13 +299,18 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 	if (op[0] != '\0' ) { /* pre/post inc/dec ops are special */
 		xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
 
-		tmp_value = xdebug_get_zval_value(retval, 0, NULL);
-
-		if (tmp_value) {
-			xdebug_str_add(&str, tmp_value, 1);
+		if (right_full_varname) {
+			xdebug_str_add(&str, right_full_varname, 0);
 		} else {
-			xdebug_str_addl(&str, "NULL", 4, 0);
+			tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+
+			if (tmp_value) {
+				xdebug_str_add(&str, tmp_value, 1);
+			} else {
+				xdebug_str_addl(&str, "NULL", 4, 0);
+			}
 		}
+
 	}
 	xdebug_str_add(&str, xdebug_sprintf(" %s:%d\n", filename, lineno), 1);
 
