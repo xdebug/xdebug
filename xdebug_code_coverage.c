@@ -18,7 +18,9 @@
 
 #include "php_xdebug.h"
 #include "xdebug_private.h"
+#include "xdebug_filter.h"
 #include "xdebug_set.h"
+#include "xdebug_stack.h"
 #include "xdebug_var.h"
 #include "xdebug_branch_info.h"
 #include "xdebug_code_coverage.h"
@@ -102,7 +104,9 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 
 int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 {
-	if (XG(do_code_coverage) && XG(code_coverage_branch_check)) {
+	zend_op_array *op_array = &execute_data->func->op_array;
+
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
 		const zend_op *cur_opcode;
 		cur_opcode = execute_data->opline;
 
@@ -120,12 +124,13 @@ int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 
 int xdebug_common_override_handler(zend_execute_data *execute_data)
 {
-	if (XG(do_code_coverage)) {
+	zend_op_array *op_array = &execute_data->func->op_array;
+
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
 		const zend_op *cur_opcode;
 		int      lineno;
 		char    *file;
 
-		zend_op_array *op_array = &execute_data->func->op_array;
 		cur_opcode = execute_data->opline;
 		lineno = cur_opcode->lineno;
 		file = (char*) STR_NAME_VAL(op_array->filename);
@@ -352,6 +357,11 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, zend_execute_da
 	next_opcode = cur_opcode + 1;
 	file = (char*) STR_NAME_VAL(op_array->filename);
 	lineno = cur_opcode->lineno;
+
+	/* TODO TEST FOR ASSIGNMENTS IN FILTERING */
+//	if (xdebug_is_top_stack_frame_filtered(XDEBUG_FILTER_CODE_COVERAGE)) {
+//		return ZEND_USER_OPCODE_DISPATCH;
+//	}
 
 	if (XG(do_code_coverage)) {
 		xdebug_print_opcode_info('=', execute_data, cur_opcode TSRMLS_CC);
@@ -785,6 +795,21 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	 * cases. */
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
 		return;
+	}
+
+	/* Check whether this function should be filtered out */
+	{
+/*
+		function_stack_entry tmp_fse;
+		tmp_fse.filename = STR_NAME_VAL(op_array->filename);
+		xdebug_build_fname_from_oparray(&tmp_fse.function, op_array TSRMLS_CC);
+		printf("    - PREFIL FILTERED FOR %s (%s::%s): %s\n",
+			tmp_fse.filename, tmp_fse.function.class, tmp_fse.function.function,
+			op_array->reserved[XG(code_coverage_filter_offset)] ? "YES" : "NO");
+*/
+		if (op_array->reserved[XG(code_coverage_filter_offset)]) {
+			return;
+		}
 	}
 
 	/* Run dead code analysis if requested */

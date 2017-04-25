@@ -20,6 +20,7 @@
 #include "xdebug_code_coverage.h"
 #include "xdebug_com.h"
 #include "xdebug_compat.h"
+#include "xdebug_filter.h"
 #include "xdebug_monitor.h"
 #include "xdebug_profiler.h"
 #include "xdebug_stack.h"
@@ -382,6 +383,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			int variadic_opened = 0;
 
 			i = XDEBUG_LLIST_VALP(le);
+			if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_TRACING, i)) {
+				continue;
+			}
 			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
 			if (html) {
 				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG(start_time), i->memory, tmp_name), 1);
@@ -1175,6 +1179,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->symbol_table  = NULL;
 	tmp->execute_data  = NULL;
 	tmp->is_variadic   = 0;
+	tmp->filtered_tracing       = 0;
+	tmp->filtered_code_coverage = 0;
 
 	XG(function_count)++;
 	tmp->function_nr = XG(function_count);
@@ -1311,8 +1317,14 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
+	/* Now we have location and name, we can run the filter */
+	xdebug_filter_run_tracing(tmp);
+
+	/* Count code coverage line for call */
 	if (XG(do_code_coverage)) {
-		xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
+		if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_branch_check)) {
+			xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
+		}
 	}
 
 	if (XG(do_monitor_functions)) {

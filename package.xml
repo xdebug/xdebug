@@ -148,6 +148,8 @@ Sat, Dec  2, 2018 - xdebug 2.6.0alpha1
    <file name="xdebug_com.h" role="src" />
    <file name="xdebug_compat.c" role="src" />
    <file name="xdebug_compat.h" role="src" />
+   <file name="xdebug_filter.c" role="src" />
+   <file name="xdebug_filter.h" role="src" />
    <file name="xdebug_handlers.c" role="src" />
    <file name="xdebug_handlers.h" role="src" />
    <file name="xdebug_handler_dbgp.c" role="src" />
