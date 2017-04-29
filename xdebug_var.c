@@ -2019,6 +2019,7 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 	xdebug_xml_node *node;
 	char *short_name = NULL;
 	char *full_name = NULL;
+	char *full_name_copy = NULL;
 
 	node = xdebug_xml_node_init("property");
 	options->force_extended = 0;
@@ -2046,9 +2047,12 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 		}
 
 		add_name_attribute_or_element(options, node, "name", 4, short_name, SIZE_MAX);
+
+		full_name_copy = xdstrdup(full_name);
 		add_name_attribute_or_element(options, node, "fullname", 8, full_name, SIZE_MAX);
 	}
-	xdebug_var_export_xml_node(&val, full_name, node, options, 0 TSRMLS_CC);
+	xdebug_var_export_xml_node(&val, full_name_copy, node, options, 0 TSRMLS_CC);
+	xdfree(full_name_copy);
 
 	return node;
 }
