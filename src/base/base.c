@@ -275,6 +275,7 @@ normal_after_all:
 		} else if (
 			edata &&
 			edata->prev_execute_data &&
+			edata->prev_execute_data->func &&
 			edata->prev_execute_data->func->type == ZEND_USER_FUNCTION &&
 			edata->prev_execute_data->opline &&
 			edata->prev_execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL
