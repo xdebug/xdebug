@@ -279,6 +279,7 @@ void xdebug_path_info_dtor(xdebug_path_info *path_info)
 		xdebug_hash_destroy(path_info->path_hash);
 		path_info->path_hash = NULL;
 	}
+	xdfree(path_info);
 }
 
 void xdebug_create_key_for_path(xdebug_path *path, xdebug_str *str)
