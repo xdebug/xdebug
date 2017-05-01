@@ -1,0 +1,4 @@
+<?php
+z();
+function z(){}
+?>
