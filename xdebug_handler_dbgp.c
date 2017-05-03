@@ -366,6 +366,7 @@ static char* return_eval_source(char *id, int begin, int end TSRMLS_DC)
 		xdebug_arg_dtor(parts);
 		return joined;
 	}
+	xdfree(parts);
 	return NULL;
 }
 
