@@ -586,13 +586,14 @@ static int breakpoint_remove(int type, char *hkey)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk_info = NULL;
-	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	xdebug_arg           *parts = NULL;
 	int                   retval = FAILURE;
 	TSRMLS_FETCH();
 
 	switch (type) {
 		case BREAKPOINT_TYPE_LINE:
 			/* First we split the key into filename and linenumber */
+			parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 			xdebug_arg_init(parts);
 			xdebug_explode("$", hkey, parts, -1);
 
