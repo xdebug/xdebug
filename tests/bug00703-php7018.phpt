@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (>= PHP 7.0, <= PHP 7.0.12)
+Test for bug #703: Line in heredoc marked as not executed (> PHP 7.0.17, < PHP 7.1)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.0", '<')) echo "skip >= PHP 7.0, <= PHP 7.0.12 needed\n";
-if (version_compare(phpversion(), "7.0.12", '>')) echo "skip >= PHP 7.0, <= PHP 7.0.12 needed\n";
+if (!version_compare(phpversion(), "7.0.17", '>')) echo "skip > PHP 7.0.17, < PHP 7.1 needed\n";
+if (!version_compare(phpversion(), "7.1", '<')) echo "skip > PHP 7.0.17, < PHP 7.1 needed\n";
 ?>
 --INI--
 xdebug.default_enable=1
@@ -35,16 +35,14 @@ xdebug.overload_var_dump=0
 --EXPECTF--
 array(1) {
   ["%sbug00703.inc"]=>
-  array(5) {
+  array(4) {
     [3]=>
     int(1)
     [6]=>
     int(1)
-    [7]=>
-    int(1)
     [11]=>
     int(1)
-    [12]=>
+    [15]=>
     int(1)
   }
 }
