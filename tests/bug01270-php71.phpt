@@ -24,7 +24,7 @@ var_dump( array_slice( $cc, 1, 1 ) );
 --EXPECTF--
 array(1) {
   ["%sbug01270.inc"]=>
-  array(21) {
+  array(2%d) {
     [2]=>
     int(1)
     [4]=>
@@ -58,9 +58,7 @@ array(1) {
     [25]=>
     int(1)
     [27]=>
-    int(1)
-    [28]=>
-    int(1)
+    %a
     [31]=>
     int(-2)
     [33]=>

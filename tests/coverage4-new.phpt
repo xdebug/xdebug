@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with abstract methods (<= PHP 7.0.17, >= PHP 7.1.0, <= PHP 7.1.3)
+Test with Code Coverage with abstract methods (> PHP 7.0.17, > PHP 7.1.3)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.0.17", '>') && version_compare(phpversion(), "7.1.0", '<')) echo "skip <= PHP 7.0.17, >= PHP 7.1.0, <= PHP 7.1.3 needed\n";
-if (version_compare(phpversion(), "7.1.3", '>')) echo "skip <= PHP 7.0.17, >= PHP 7.1.0, <= PHP 7.1.3 needed\n";
+if (version_compare(phpversion(), "7.0.17", '<=')) echo "skip > PHP 7.0.17, > PHP 7.1.3 needed\n";
+if (version_compare(phpversion(), "7.1.0", '>=') && version_compare(phpversion(), "7.1.3", '<=')) echo "skip > PHP 7.0.17, > PHP 7.1.3 needed\n";
 ?>
 --INI--
 xdebug.default_enable=1
@@ -33,18 +33,20 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECTF--
 array(2) {
-  ["%scoverage4.inc"]=>
-  array(2) {
-    [2]=>
-    int(1)
-    [26]=>
-    int(1)
-  }
-  ["%scoverage4.php"]=>
+  ["%scoverage4-new.php"]=>
   array(2) {
     [4]=>
     int(1)
     [6]=>
+    int(1)
+  }
+  ["%scoverage4.inc"]=>
+  array(3) {
+    [2]=>
+    int(1)
+    [25]=>
+    int(1)
+    [26]=>
     int(1)
   }
 }
