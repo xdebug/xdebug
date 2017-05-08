@@ -973,17 +973,13 @@ static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS
 		if (edata->This.value.obj) {
 #endif
 			tmp->type = XFUNC_MEMBER;
-			if (edata->func->common.scope) {
-				if (strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
-					tmp->class = xdebug_sprintf(
-						"{anonymous-class:%s:%d-%d}",
-						edata->func->common.scope->info.user.filename->val,
-						edata->func->common.scope->info.user.line_start,
-						edata->func->common.scope->info.user.line_end
-					);
-				} else {
-					tmp->class = xdstrdup(edata->func->common.scope->name->val);
-				}
+			if (edata->func->common.scope && strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
+				tmp->class = xdebug_sprintf(
+					"{anonymous-class:%s:%d-%d}",
+					edata->func->common.scope->info.user.filename->val,
+					edata->func->common.scope->info.user.line_start,
+					edata->func->common.scope->info.user.line_end
+				);
 			} else {
 				tmp->class = xdstrdup(edata->This.value.obj->ce->name->val);
 			}
