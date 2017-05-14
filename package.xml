@@ -50,9 +50,8 @@ Mon, May 15, 2017 - xdebug 2.5.4
 = Fixed bugs:
 
   - Fixed issue #799: Function traces report base class instead of object name
-    (Frode E. Moe)
   - Fixed issue #1421: Fix set_time_limit hanging on PHP 5.6 when pcntl_exec
-    does not exist
+    does not exist (Frode E. Moe)
   - Fixed issue #1429: Code coverage does not cover null coalesce
   - Fixed issue #1434: Code coverage segfaults on 32-bit arch
  </notes>
