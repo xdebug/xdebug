@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2017-04-18</date>
- <time>19:31:21</time>
+ <date>2017-05-15</date>
+ <time>12:08:11</time>
  <version>
-  <release>2.5.3</release>
-  <api>2.5.3</api>
+  <release>2.5.4</release>
+  <api>2.5.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,12 +45,16 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Apr 18, 2017 - xdebug 2.5.3
+Mon, May 15, 2017 - xdebug 2.5.4
 
 = Fixed bugs:
 
-  - Fixed issue #1421: Xdebug crashes when it is loaded without pcntl being
-    present
+  - Fixed issue #799: Function traces report base class instead of object name
+    (Frode E. Moe)
+  - Fixed issue #1421: Fix set_time_limit hanging on PHP 5.6 when pcntl_exec
+    does not exist
+  - Fixed issue #1429: Code coverage does not cover null coalesce
+  - Fixed issue #1434: Code coverage segfaults on 32-bit arch
  </notes>
 
  <contents>
@@ -158,6 +162,28 @@ Mon, Apr 18, 2017 - xdebug 2.5.3
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2017-04-18</date>
+   <time>19:31:21</time>
+   <version>
+    <release>2.5.3</release>
+    <api>2.5.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Apr 18, 2017 - xdebug 2.5.3
+
+= Fixed bugs:
+
+  - Fixed issue #1421: Xdebug crashes when it is loaded without pcntl being
+    present
+   </notes>
+  </release>
 
   <release>
    <date>2017-04-17</date>
