@@ -77,7 +77,8 @@ class DebugClient
 			$options .= " -d{$key}=$value";
 		}
 
-		$cmd = "php $options {$this->tmpDir}/xdebug-dbgp-test.php >{$this->tmpDir}/php-error-output.txt 2>&1";
+		$php = getenv( 'TEST_PHP_EXECUTABLE' );
+		$cmd = "{$php} $options {$this->tmpDir}/xdebug-dbgp-test.php >{$this->tmpDir}/php-error-output.txt 2>&1";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
