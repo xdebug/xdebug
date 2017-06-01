@@ -590,10 +590,10 @@ static int breakpoint_remove(int type, char *hkey)
 	int                   retval = FAILURE;
 	TSRMLS_FETCH();
 
+	xdebug_arg_init(parts);
 	switch (type) {
 		case BREAKPOINT_TYPE_LINE:
 			/* First we split the key into filename and linenumber */
-			xdebug_arg_init(parts);
 			xdebug_explode("$", hkey, parts, -1);
 
 			/* Second we loop through the list of file/line breakpoints to
@@ -607,9 +607,6 @@ static int breakpoint_remove(int type, char *hkey)
 					break;
 				}
 			}
-
-			/* Cleaning up */
-			xdebug_arg_dtor(parts);
 			break;
 
 		case BREAKPOINT_TYPE_FUNCTION:
@@ -624,6 +621,8 @@ static int breakpoint_remove(int type, char *hkey)
 			}
 			break;
 	}
+	/* Cleaning up */
+	xdebug_arg_dtor(parts);
 	return retval;
 }
 
