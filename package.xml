@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2017-05-15</date>
+ <date>2017-06-21</date>
  <time>12:08:11</time>
  <version>
-  <release>2.5.4</release>
-  <api>2.5.4</api>
+  <release>2.5.5</release>
+  <api>2.5.5</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,15 +45,15 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, May 15, 2017 - xdebug 2.5.4
+Wed, Jun 21, 2017 - xdebug 2.5.5
 
 = Fixed bugs:
 
-  - Fixed issue #799: Function traces report base class instead of object name
-  - Fixed issue #1421: Fix set_time_limit hanging on PHP 5.6 when pcntl_exec
-    does not exist (Frode E. Moe)
-  - Fixed issue #1429: Code coverage does not cover null coalesce
-  - Fixed issue #1434: Code coverage segfaults on 32-bit arch
+  - Fixed issue #1439: TYPE_CHECK needs overloading due to smart branches
+  - Fixed issue #1444: Code Coverage misses a variable in a multi-line function
+    call
+  - Fixed issue #1446: Code Coverage misses elseif if it uses an isset with a
+    property
  </notes>
 
  <contents>
@@ -161,6 +161,31 @@ Mon, May 15, 2017 - xdebug 2.5.4
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2017-05-15</date>
+   <time>12:08:11</time>
+   <version>
+    <release>2.5.4</release>
+    <api>2.5.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, May 15, 2017 - xdebug 2.5.4
+
+= Fixed bugs:
+
+  - Fixed issue #799: Function traces report base class instead of object name
+  - Fixed issue #1421: Fix set_time_limit hanging on PHP 5.6 when pcntl_exec
+    does not exist (Frode E. Moe)
+  - Fixed issue #1429: Code coverage does not cover null coalesce
+  - Fixed issue #1434: Code coverage segfaults on 32-bit arch
+   </notes>
+  </release>
 
   <release>
    <date>2017-04-18</date>
