@@ -800,7 +800,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			break;
 	}
 
+#if PHP_VERSION_ID >= 70200
+	if (PG(track_errors) && EG(active)) {
+#else
 	if (PG(track_errors) && EG(valid_symbol_table)) {
+#endif
 		zval tmp;
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
 
