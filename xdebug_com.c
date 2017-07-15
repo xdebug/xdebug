@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #ifndef PHP_WIN32
-# include <sys/poll.h>
+# include <poll.h>
 # include <unistd.h>
 # include <sys/socket.h>
 # include <netinet/tcp.h>
