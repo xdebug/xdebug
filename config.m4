@@ -24,7 +24,7 @@ if test "$PHP_XDEBUG" != "no"; then
   CPPFLAGS="$INCLUDES $CPPFLAGS"
 
   AC_CHECK_FUNCS(gettimeofday)
-  AC_CHECK_HEADERS([netinet/in.h])
+  AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])
 
