@@ -18,6 +18,7 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
+#include "xdebug_collection.h"
 #include "xdebug_com.h"
 #include "xdebug_compat.h"
 #include "xdebug_monitor.h"
@@ -99,6 +100,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	HashTable *tmp_ht;
 	char     **formats;
 	xdebug_str *str = (xdebug_str *) argument;
+	xdebug_ptr_collection *hashes_to_free;
 	TSRMLS_FETCH();
 
 	if (!he->ptr) {
@@ -129,7 +131,9 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 			XG(active_symbol_table) = ex->symbol_table;
 		}
 	}
-	zvar = xdebug_get_php_symbol(name TSRMLS_CC);
+
+	hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
+	zvar = xdebug_get_php_symbol(name, hashes_to_free TSRMLS_CC);
 	XG(active_symbol_table) = tmp_ht;
 
 	formats = select_formats(PG(html_errors) TSRMLS_CC);
@@ -151,7 +155,11 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
 	}
 
+	/* Clean up the hashes that were copied */
+	xdebug_ptr_collection_dtor(hashes_to_free);
+
 	xdfree(contents);
+	efree(zvar);
 }
 
 void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
