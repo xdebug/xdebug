@@ -118,6 +118,8 @@ Sun, Dec  4, 2016 - xdebug 2.5.0
    <file name="xdebug_branch_info.h" role="src" />
    <file name="xdebug_code_coverage.c" role="src" />
    <file name="xdebug_code_coverage.h" role="src" />
+   <file name="xdebug_collection.c" role="src" />
+   <file name="xdebug_collection.h" role="src" />
    <file name="xdebug_com.c" role="src" />
    <file name="xdebug_com.h" role="src" />
    <file name="xdebug_compat.c" role="src" />

@@ -52,6 +52,7 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
+#include "xdebug_collection.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
@@ -2125,11 +2126,14 @@ PHP_FUNCTION(xdebug_debug_zval)
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) == IS_STRING) {
+			xdebug_ptr_collection *hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
+
 			XG(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
 			XG(active_execute_data) = EG(current_execute_data)->prev_execute_data;
-			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]) TSRMLS_CC);
+
+			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), hashes_to_free TSRMLS_CC);
 			php_printf("%s: ", Z_STRVAL(args[i]));
-			if (debugzval) {
+			if (debugzval && Z_TYPE_P(debugzval) != IS_UNDEF) {
 				if (PG(html_errors)) {
 					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
@@ -2147,6 +2151,10 @@ PHP_FUNCTION(xdebug_debug_zval)
 			} else {
 				PHPWRITE("no such symbol\n", 15);
 			}
+			efree(debugzval);
+
+			/* Clean up the hashes that were copied */
+			xdebug_ptr_collection_dtor(hashes_to_free);
 		}
 	}
 
@@ -2182,10 +2190,15 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) == IS_STRING) {
+			xdebug_ptr_collection *hashes_to_free;
+
 			XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
-			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]) TSRMLS_CC);
+
+			hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
+
+			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), hashes_to_free TSRMLS_CC);
 			printf("%s: ", Z_STRVAL(args[i]));
-			if (debugzval) {
+			if (debugzval && Z_TYPE_P(debugzval) != IS_UNDEF) {
 				val = xdebug_get_zval_value(debugzval, 1, NULL);
 				printf("%s(%zd)", val, strlen(val));
 				xdfree(val);
@@ -2193,6 +2206,10 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			} else {
 				printf("no such symbol\n\n");
 			}
+			efree(debugzval);
+
+			/* Clean up the hashes that were copied */
+			xdebug_ptr_collection_dtor(hashes_to_free);
 		}
 	}
 
