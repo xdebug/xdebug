@@ -579,7 +579,7 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 	zend_class_entry *current_ce = NULL;
 	int        cc_length = 0;
 	char       quotechar = 0;
-	zval       temp_value_in = {0};
+	zval       temp_value_in = {{0}};
 	zval      *return_retval;
 
 	do {
