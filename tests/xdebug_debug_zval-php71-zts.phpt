@@ -35,9 +35,9 @@ function func(){
 
 func();
 ?>
---EXPECT--
-a: (refcount=2, is_ref=0)='hoge'
-$a: (refcount=2, is_ref=0)='hoge'
+--EXPECTF--
+a: (refcount=%r(2|0)%r, is_ref=0)='hoge'
+$a: (refcount=%r(2|0)%r, is_ref=0)='hoge'
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
 $b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5

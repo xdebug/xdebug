@@ -9,7 +9,7 @@ xdebug.file_link_format=
 xdebug.collect_params=0
 --FILE--
 <?php
-html_entity_decode("", 0, "l<r");
+html_entity_decode("&amp;", 0, "l<r");
 ?>
 --EXPECTF--
 <br />
