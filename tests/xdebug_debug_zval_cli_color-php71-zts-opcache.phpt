@@ -36,9 +36,9 @@ function func(){
 func();
 ?>
 --EXPECTF--
-a: (refcount=%r(1|2)%r, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
+a: (refcount=%r(0|1|2)%r, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
 
-$a: (refcount=%r(1|2)%r, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
+$a: (refcount=%r(0|1|2)%r, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
 
 $b: (refcount=1, is_ref=0)=[1marray[22m([32m5[0m) {
   'a' =>
