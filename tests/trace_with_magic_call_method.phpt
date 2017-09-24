@@ -19,7 +19,7 @@ class Test {
 		return $this->$func($args);
 	}
 	private function testFunc($args) {
-		count($args);
+		array_sum($args);
 	}
 }
 
@@ -36,7 +36,7 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> Test->testFunc(string(5), string(5)) %strace_with_magic_call_method.php:15
 %w%f %w%d       -> Test->__call(string(8), array(2)) %strace_with_magic_call_method.php:15
 %w%f %w%d         -> Test->testFunc(array(2)) %strace_with_magic_call_method.php:7
-%w%f %w%d           -> count(array(2)) %strace_with_magic_call_method.php:10
+%w%f %w%d           -> array_sum(array(2)) %strace_with_magic_call_method.php:10
 %w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_call_method.php:17
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

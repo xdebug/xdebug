@@ -33,7 +33,7 @@ calls=1 0 0
 2 %d
 
 fl=(3) php:internal
-fn=(3) php::count
+fn=(3) php::array_count_values
 23 %d
 
 fl=(3)
