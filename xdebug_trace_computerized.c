@@ -226,6 +226,50 @@ void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_
 	xdfree(str.d);
 }
 
+void xdebug_trace_computerized_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *op, char *filename, int lineno TSRMLS_DC)
+{
+	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	unsigned int j = 0;
+	char *tmp_str;
+
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
+    /* no function_nr */
+	xdebug_str_add(&str, "\t", 0);
+
+	tmp_str = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
+
+	xdebug_str_add(&str, "2\t", 0);
+    /* skip time index, memory usage */
+	xdebug_str_add(&str, "\t\t", 0);
+	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_str), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
+	xdfree(tmp_str);
+
+	/* Filename and Lineno (9, 10) */
+	xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d", filename, lineno), 1);
+	xdebug_str_add(&str, xdebug_sprintf("\t%s", full_varname), 1);
+
+	if (op[0] != '\0' ) { /* pre/post inc/dec ops are special */
+		xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
+
+		tmp_str = xdebug_get_zval_value(retval, 0, NULL);
+
+		if (tmp_str) {
+			xdebug_str_add(&str, tmp_str, 1);
+		} else {
+			xdebug_str_addl(&str, "NULL", 4, 0);
+		}
+	}
+
+	/* Trailing \n */
+	xdebug_str_add(&str, "\n", 0);
+
+	fprintf(context->trace_file, "%s", str.d);
+	fflush(context->trace_file);
+	xdfree(str.d);
+}
+
 xdebug_trace_handler_t xdebug_trace_handler_computerized =
 {
 	xdebug_trace_computerized_init,
@@ -237,5 +281,5 @@ xdebug_trace_handler_t xdebug_trace_handler_computerized =
 	xdebug_trace_computerized_function_exit,
 	xdebug_trace_computerized_function_return_value,
 	NULL /* xdebug_trace_computerized_generator_return_value */,
-	NULL /* xdebug_trace_computerized_assignment */
+	xdebug_trace_computerized_assignment
 };
