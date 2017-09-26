@@ -18,7 +18,7 @@ $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_T
 
 function foo( $a )
 {
-    $aa = $a;
+	$aa = $a;
 	// do nothing really
 }
 

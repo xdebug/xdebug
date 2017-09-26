@@ -234,13 +234,13 @@ void xdebug_trace_computerized_assignment(void *ctxt, function_stack_entry *fse,
 	char *tmp_str;
 
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
-    /* no function_nr */
+	/* no function_nr */
 	xdebug_str_add(&str, "\t", 0);
 
 	tmp_str = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 
 	xdebug_str_add(&str, "2\t", 0);
-    /* skip time index, memory usage */
+	/* skip time index, memory usage */
 	xdebug_str_add(&str, "\t\t", 0);
 	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_str), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
