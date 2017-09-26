@@ -19,6 +19,16 @@ $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_T
 function foo( $a )
 {
 	$aa = $a;
+	$bar11 = 1;
+	$bar11++;
+	++$bar11;
+	$bar11--;
+	--$bar11;
+	$bar11 += 1;
+	$bar11 -= 1;
+	$bar11 *= 2;
+	$bar11 %= 2;
+	$bar11 /= 2;
 	// do nothing really
 }
 
@@ -39,6 +49,17 @@ $bar8 = "bar";
 $bar9 = 3.1415;
 @foo( $bar7, $bar8, $bar9 );
 
+$bar10 = 1;
+$bar10++;
+++$bar10;
+$bar10--;
+--$bar10;
+$bar10 += 1;
+$bar10 -= 1;
+$bar10 *= 2;
+$bar10 %= 2;
+$bar10 /= 2;
+
 xdebug_stop_trace();
 echo file_get_contents($tf);
 unlink($tf);
@@ -47,36 +68,106 @@ unlink($tf);
 Version: %s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
-2	3	1	%f	%d
-1		2			{main}	1		%sfunctrace_comp_4a.php	2	$tf = '%s'
-1		2			{main}	1		%sfunctrace_comp_4a.php	10	$bar = 42
-2	4	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	11	1	$a = 42
-2		2			foo	1		%sfunctrace_comp_4a.php	6	$aa = 42
+2	3	1	%f	%d%f
+1		A						%sfunctrace_comp_4a.php	2	$tf = '%s'
+1		A						%sfunctrace_comp_4a.php	20	$bar = 42
+2	4	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	21	1	$a = 42
+2		A						%sfunctrace_comp_4a.php	6	$aa = 42
+2		A						%sfunctrace_comp_4a.php	7	$bar11 = 1
+2		A						%sfunctrace_comp_4a.php	8	$bar11++
+2		A						%sfunctrace_comp_4a.php	9	++$bar11
+2		A						%sfunctrace_comp_4a.php	10	$bar11--
+2		A						%sfunctrace_comp_4a.php	11	--$bar11
+2		A						%sfunctrace_comp_4a.php	12	$bar11 += 1
+2		A						%sfunctrace_comp_4a.php	13	$bar11 -= 1
+2		A						%sfunctrace_comp_4a.php	14	$bar11 *= 2
+2		A						%sfunctrace_comp_4a.php	15	$bar11 %= 2
+2		A						%sfunctrace_comp_4a.php	16	$bar11 /= 2
 2	4	1	%f	%d
-1		2			{main}	1		%sfunctrace_comp_4a.php	12	$bar1 = 'string'
-2	5	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	13	1	$a = 'string'
-2		2			foo	1		%sfunctrace_comp_4a.php	6	$aa = 'string'
+1		A						%sfunctrace_comp_4a.php	22	$bar1 = 'string'
+2	5	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	23	1	$a = 'string'
+2		A						%sfunctrace_comp_4a.php	6	$aa = 'string'
+2		A						%sfunctrace_comp_4a.php	7	$bar11 = 1
+2		A						%sfunctrace_comp_4a.php	8	$bar11++
+2		A						%sfunctrace_comp_4a.php	9	++$bar11
+2		A						%sfunctrace_comp_4a.php	10	$bar11--
+2		A						%sfunctrace_comp_4a.php	11	--$bar11
+2		A						%sfunctrace_comp_4a.php	12	$bar11 += 1
+2		A						%sfunctrace_comp_4a.php	13	$bar11 -= 1
+2		A						%sfunctrace_comp_4a.php	14	$bar11 *= 2
+2		A						%sfunctrace_comp_4a.php	15	$bar11 %= 2
+2		A						%sfunctrace_comp_4a.php	16	$bar11 /= 2
 2	5	1	%f	%d
-1		2			{main}	1		%sfunctrace_comp_4a.php	14	$bar2 = 'string\nwith\nnewline'
-2	6	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	15	1	$a = 'string\nwith\nnewline'
-2		2			foo	1		%sfunctrace_comp_4a.php	6	$aa = 'string\nwith\nnewline'
+1		A						%sfunctrace_comp_4a.php	24	$bar2 = 'string\nwith\nnewline'
+2	6	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	25	1	$a = 'string\nwith\nnewline'
+2		A						%sfunctrace_comp_4a.php	6	$aa = 'string\nwith\nnewline'
+2		A						%sfunctrace_comp_4a.php	7	$bar11 = 1
+2		A						%sfunctrace_comp_4a.php	8	$bar11++
+2		A						%sfunctrace_comp_4a.php	9	++$bar11
+2		A						%sfunctrace_comp_4a.php	10	$bar11--
+2		A						%sfunctrace_comp_4a.php	11	--$bar11
+2		A						%sfunctrace_comp_4a.php	12	$bar11 += 1
+2		A						%sfunctrace_comp_4a.php	13	$bar11 -= 1
+2		A						%sfunctrace_comp_4a.php	14	$bar11 *= 2
+2		A						%sfunctrace_comp_4a.php	15	$bar11 %= 2
+2		A						%sfunctrace_comp_4a.php	16	$bar11 /= 2
 2	6	1	%f	%d
-1		2			{main}	1		%sfunctrace_comp_4a.php	16	$bar3 = 1
-1		2			{main}	1		%sfunctrace_comp_4a.php	17	$bar4 = FALSE
-2	7	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	18	2	$a = 1	FALSE
-2		2			foo	1		%sfunctrace_comp_4a.php	6	$aa = 1
+1		A						%sfunctrace_comp_4a.php	26	$bar3 = 1
+1		A						%sfunctrace_comp_4a.php	27	$bar4 = FALSE
+2	7	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	28	2	$a = 1	FALSE
+2		A						%sfunctrace_comp_4a.php	6	$aa = 1
+2		A						%sfunctrace_comp_4a.php	7	$bar11 = 1
+2		A						%sfunctrace_comp_4a.php	8	$bar11++
+2		A						%sfunctrace_comp_4a.php	9	++$bar11
+2		A						%sfunctrace_comp_4a.php	10	$bar11--
+2		A						%sfunctrace_comp_4a.php	11	--$bar11
+2		A						%sfunctrace_comp_4a.php	12	$bar11 += 1
+2		A						%sfunctrace_comp_4a.php	13	$bar11 -= 1
+2		A						%sfunctrace_comp_4a.php	14	$bar11 *= 2
+2		A						%sfunctrace_comp_4a.php	15	$bar11 %= 2
+2		A						%sfunctrace_comp_4a.php	16	$bar11 /= 2
 2	7	1	%f	%d
-1		2			{main}	1		%sfunctrace_comp_4a.php	19	$bar5 = TRUE
-1		2			{main}	1		%sfunctrace_comp_4a.php	20	$bar6 = NULL
-2	8	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	21	2	$a = TRUE	NULL
-2		2			foo	1		%sfunctrace_comp_4a.php	6	$aa = TRUE
+1		A						%sfunctrace_comp_4a.php	29	$bar5 = TRUE
+1		A						%sfunctrace_comp_4a.php	%d	$bar6 = NULL
+2	8	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	%d	2	$a = TRUE	NULL
+2		A						%sfunctrace_comp_4a.php	6	$aa = TRUE
+2		A						%sfunctrace_comp_4a.php	7	$bar11 = 1
+2		A						%sfunctrace_comp_4a.php	8	$bar11++
+2		A						%sfunctrace_comp_4a.php	9	++$bar11
+2		A						%sfunctrace_comp_4a.php	10	$bar11--
+2		A						%sfunctrace_comp_4a.php	11	--$bar11
+2		A						%sfunctrace_comp_4a.php	12	$bar11 += 1
+2		A						%sfunctrace_comp_4a.php	13	$bar11 -= 1
+2		A						%sfunctrace_comp_4a.php	14	$bar11 *= 2
+2		A						%sfunctrace_comp_4a.php	15	$bar11 %= 2
+2		A						%sfunctrace_comp_4a.php	16	$bar11 /= 2
 2	8	1	%f	%d
-1		2			{main}	1		%sfunctrace_comp_4a.php	22	$bar7 = 'foo'
-1		2			{main}	1		%sfunctrace_comp_4a.php	23	$bar8 = 'bar'
-1		2			{main}	1		%sfunctrace_comp_4a.php	24	$bar9 = 3.1415
-2	9	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	25	3	$a = 'foo'	'bar'	3.1415
-2		2			foo	1		%sfunctrace_comp_4a.php	6	$aa = 'foo'
+1		A						%sfunctrace_comp_4a.php	%d	$bar7 = 'foo'
+1		A						%sfunctrace_comp_4a.php	%d	$bar8 = 'bar'
+1		A						%sfunctrace_comp_4a.php	%d	$bar9 = 3.1415
+2	9	0	%f	%d	foo	1		%sfunctrace_comp_4a.php	%d	3	$a = 'foo'	'bar'	3.1415
+2		A						%sfunctrace_comp_4a.php	6	$aa = 'foo'
+2		A						%sfunctrace_comp_4a.php	7	$bar11 = 1
+2		A						%sfunctrace_comp_4a.php	8	$bar11++
+2		A						%sfunctrace_comp_4a.php	9	++$bar11
+2		A						%sfunctrace_comp_4a.php	10	$bar11--
+2		A						%sfunctrace_comp_4a.php	11	--$bar11
+2		A						%sfunctrace_comp_4a.php	12	$bar11 += 1
+2		A						%sfunctrace_comp_4a.php	13	$bar11 -= 1
+2		A						%sfunctrace_comp_4a.php	14	$bar11 *= 2
+2		A						%sfunctrace_comp_4a.php	15	$bar11 %= 2
+2		A						%sfunctrace_comp_4a.php	16	$bar11 /= 2
 2	9	1	%f	%d
-2	10	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_4a.php	27	0
+1		A						%sfunctrace_comp_4a.php	%d	$bar10 = 1
+1		A						%sfunctrace_comp_4a.php	%d	$bar10++
+1		A						%sfunctrace_comp_4a.php	%d	++$bar10
+1		A						%sfunctrace_comp_4a.php	40	$bar10--
+1		A						%sfunctrace_comp_4a.php	41	--$bar10
+1		A						%sfunctrace_comp_4a.php	42	$bar10 += 1
+1		A						%sfunctrace_comp_4a.php	43	$bar10 -= 1
+1		A						%sfunctrace_comp_4a.php	44	$bar10 *= 2
+1		A						%sfunctrace_comp_4a.php	45	$bar10 %= 2
+1		A						%sfunctrace_comp_4a.php	46	$bar10 /= 2
+2	10	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_4a.php	48	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d]

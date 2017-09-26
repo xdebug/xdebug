@@ -237,14 +237,9 @@ void xdebug_trace_computerized_assignment(void *ctxt, function_stack_entry *fse,
 	/* no function_nr */
 	xdebug_str_add(&str, "\t", 0);
 
-	tmp_str = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
-
-	xdebug_str_add(&str, "2\t", 0);
-	/* skip time index, memory usage */
-	xdebug_str_add(&str, "\t\t", 0);
-	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_str), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
-	xdfree(tmp_str);
+	xdebug_str_add(&str, "A\t", 0);
+	/* skip time index, memory usage, function name, user defined */
+	xdebug_str_add(&str, "\t\t\t\t", 0);
 
 	/* Filename and Lineno (9, 10) */
 	xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d", filename, lineno), 1);
