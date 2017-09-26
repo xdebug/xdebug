@@ -1,5 +1,5 @@
 --TEST--
-Test computerized function traces (level2, comp)
+Test computerized function traces (level2, comp, assignments)
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
