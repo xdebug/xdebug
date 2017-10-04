@@ -46,7 +46,7 @@ void xdebug_ptr_collection_dtor(xdebug_ptr_collection *ptr_collection)
 //fprintf(stderr, "Freeing PTR collector\n");
 }
 
-inline void xdebug_ptr_collection_add(xdebug_ptr_collection *ptr_collection, void *ptr)
+void xdebug_ptr_collection_add(xdebug_ptr_collection *ptr_collection, void *ptr)
 {
 	if (ptr_collection->count == ptr_collection->size) {
 		ptr_collection->size *= 2;
