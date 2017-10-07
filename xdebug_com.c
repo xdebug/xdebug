@@ -55,7 +55,7 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 	struct addrinfo            *remote;
 	struct addrinfo            *ptr;
 	int                        status;
-	int                        sockfd;
+	int                        sockfd = 0;
 	int                        sockerror;
 	char                       sport[10];
 	int                        timeout = 200;
