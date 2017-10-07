@@ -322,7 +322,6 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, zend_execute_da
 	zend_op_array *op_array = &execute_data->func->op_array;
 	int            lineno;
 	const zend_op *cur_opcode, *next_opcode;
-	char          *full_varname;
 	zval          *val = NULL;
 	int            is_var;
 	function_stack_entry *fse;
@@ -340,6 +339,12 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, zend_execute_da
 		}
 	}
 	if (XG(do_trace) && XG(trace_context) && XG(collect_assignments)) {
+		char *full_varname;
+
+		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
+			return ZEND_USER_OPCODE_DISPATCH;
+		}
+
 		full_varname = xdebug_find_var_name(execute_data TSRMLS_CC);
 
 		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
