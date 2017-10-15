@@ -274,17 +274,16 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 
 static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *options TSRMLS_DC)
 {
-	zval                  *retval;
-	xdebug_ptr_collection *hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
+	zval                   retval;
 	xdebug_xml_node       *tmp_node;
 
-	retval = xdebug_get_php_symbol(name, hashes_to_free TSRMLS_CC);
-	if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
-		if (strcmp(name, "this") == 0 && Z_TYPE_P(retval) == IS_NULL) {
+	xdebug_get_php_symbol(&retval, name TSRMLS_CC);
+	if (Z_TYPE(retval) != IS_UNDEF) {
+		if (strcmp(name, "this") == 0 && Z_TYPE(retval) == IS_NULL) {
 			return NULL;
 		}
-		tmp_node = xdebug_get_zval_value_xml_node(name, retval, options TSRMLS_CC);
-		xdebug_ptr_collection_dtor(hashes_to_free);
+		tmp_node = xdebug_get_zval_value_xml_node(name, &retval, options TSRMLS_CC);
+		zval_ptr_dtor_nogc(&retval);
 		return tmp_node;
 	}
 
@@ -293,13 +292,14 @@ static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *option
 
 static int get_symbol_contents(char* name, xdebug_xml_node *node, xdebug_var_export_options *options TSRMLS_DC)
 {
-	zval                  *retval;
-	xdebug_ptr_collection *hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
+	zval retval;
 
-	retval = xdebug_get_php_symbol(name, hashes_to_free TSRMLS_CC);
-	if (retval) {
-		xdebug_var_export_xml_node(&retval, name, node, options, 1 TSRMLS_CC);
-		xdebug_ptr_collection_dtor(hashes_to_free);
+	xdebug_get_php_symbol(&retval, name TSRMLS_CC);
+	if (Z_TYPE(retval) != IS_UNDEF) {
+		// TODO WTF???
+		zval *retval_ptr = &retval;
+		xdebug_var_export_xml_node(&retval_ptr, name, node, options, 1 TSRMLS_CC);
+		zval_ptr_dtor_nogc(&retval);
 		return 1;
 	}
 
@@ -1418,7 +1418,6 @@ DBGP_FUNC(property_set)
 	zval                       ret_zval;
 	function_stack_entry      *fse;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
-	zval                      *symbol;
 	zend_execute_data         *original_execute_data;
 	XDEBUG_STR_SWITCH_DECL;
 
@@ -1467,31 +1466,30 @@ DBGP_FUNC(property_set)
 	new_value = xdebug_base64_decode((unsigned char*) data, strlen(data), &new_length);
 
 	if (CMD_OPTION('t')) {
-		xdebug_ptr_collection *hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
-
-		symbol = xdebug_get_php_symbol(CMD_OPTION('n'), hashes_to_free TSRMLS_CC);
+		zval symbol;
+		xdebug_get_php_symbol(&symbol, CMD_OPTION('n') TSRMLS_CC);
 
 		/* Handle result */
-		if (!symbol) {
+		if (Z_TYPE(symbol) == IS_UNDEF) {
 			efree(new_value);
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		} else {
-			zval_dtor(symbol);
-			xdebug_ptr_collection_dtor(hashes_to_free);
-			ZVAL_STRINGL(symbol, (char*) new_value, new_length);
+			// TODO Doesn't make sense anymore in this form
+			zval_ptr_dtor_nogc(&symbol);
+			ZVAL_STRINGL(&symbol, (char*) new_value, new_length);
 			xdebug_xml_add_attribute(*retval, "success", "1");
 
 			XDEBUG_STR_SWITCH(CMD_OPTION('t')) {
 				XDEBUG_STR_CASE("bool")
-					convert_to_boolean(symbol);
+					convert_to_boolean(&symbol);
 				XDEBUG_STR_CASE_END
 
 				XDEBUG_STR_CASE("int")
-					convert_to_long(symbol);
+					convert_to_long(&symbol);
 				XDEBUG_STR_CASE_END
 
 				XDEBUG_STR_CASE("float")
-					convert_to_double(symbol);
+					convert_to_double(&symbol);
 				XDEBUG_STR_CASE_END
 
 				XDEBUG_STR_CASE("string")

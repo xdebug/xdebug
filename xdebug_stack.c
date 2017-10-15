@@ -18,7 +18,6 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
-#include "xdebug_collection.h"
 #include "xdebug_com.h"
 #include "xdebug_compat.h"
 #include "xdebug_monitor.h"
@@ -94,13 +93,12 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 {
 	int        html = *(int *)htmlq;
 	int        len;
-	zval      *zvar;
+	zval       zvar;
 	char      *contents;
 	char      *name = (char*) he->ptr;
 	HashTable *tmp_ht;
 	char     **formats;
 	xdebug_str *str = (xdebug_str *) argument;
-	xdebug_ptr_collection *hashes_to_free;
 	TSRMLS_FETCH();
 
 	if (!he->ptr) {
@@ -132,21 +130,20 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		}
 	}
 
-	hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
-	zvar = xdebug_get_php_symbol(name, hashes_to_free TSRMLS_CC);
+	xdebug_get_php_symbol(&zvar, name TSRMLS_CC);
 	XG(active_symbol_table) = tmp_ht;
 
 	formats = select_formats(PG(html_errors) TSRMLS_CC);
 
-	if (!zvar) {
+	if (Z_TYPE(zvar) == IS_UNDEF) {
 		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
 		return;
 	}
 
 	if (html) {
-		contents = xdebug_get_zval_value_fancy(NULL, zvar, &len, 0, NULL TSRMLS_CC);
+		contents = xdebug_get_zval_value_fancy(NULL, &zvar, &len, 0, NULL TSRMLS_CC);
 	} else {
-		contents = xdebug_get_zval_value(zvar, 0, NULL);
+		contents = xdebug_get_zval_value(&zvar, 0, NULL);
 	}
 
 	if (contents) {
@@ -155,11 +152,8 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
 	}
 
-	/* Clean up the hashes that were copied */
-	xdebug_ptr_collection_dtor(hashes_to_free);
-
 	xdfree(contents);
-	efree(zvar);
+	zval_ptr_dtor_nogc(&zvar);
 }
 
 void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
