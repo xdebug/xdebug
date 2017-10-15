@@ -14,7 +14,7 @@ xdebug_debug_zval('e->b[1]->@attributes["attb"]');
 attb-1
 attb-2
 e: (refcount=1, is_ref=0)=class SimpleXMLElement { public $@attributes = (refcount=1, is_ref=0)=array ('att1' => (refcount=1, is_ref=0)='att-a'); public $b = (refcount=1, is_ref=0)=array (0 => (refcount=1, is_ref=0)=class SimpleXMLElement { ... }, 1 => (refcount=1, is_ref=0)=class SimpleXMLElement { ... }) }
-e->@attributes: (refcount=1, is_ref=0)=array ('att1' => (refcount=1, is_ref=0)='att-a')
-e->@attributes["att1"]: (refcount=1, is_ref=0)='att-a'
-e->b[0]->@attributes: (refcount=1, is_ref=0)=array ('attb' => (refcount=1, is_ref=0)='attb-1')
-e->b[1]->@attributes["attb"]: (refcount=1, is_ref=0)='attb-2'
+e->@attributes: (refcount=0, is_ref=0)=array ('att1' => (refcount=1, is_ref=0)='att-a')
+e->@attributes["att1"]: (refcount=0, is_ref=0)='att-a'
+e->b[0]->@attributes: (refcount=0, is_ref=0)=array ('attb' => (refcount=1, is_ref=0)='attb-1')
+e->b[1]->@attributes["attb"]: (refcount=0, is_ref=0)='attb-2'

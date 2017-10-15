@@ -13,6 +13,7 @@
    | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
    +----------------------------------------------------------------------+
    | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   |           Nikita Popov <nikita.ppv@gmail.com>                        |
    +----------------------------------------------------------------------+
  */
 
@@ -236,49 +237,35 @@ static char* prepare_search_key(char *name, unsigned int *name_length, char *pre
 	return element;
 }
 
-static zval *get_arrayobject_storage(zval *parent TSRMLS_DC)
+static zval *get_arrayobject_storage(zval *parent, HashTable **properties, int *is_temp TSRMLS_DC)
 {
-	int is_temp;
-	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
-
-	zval *tmp = NULL;
-
-	if ((tmp = zend_hash_str_find(properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1)) != NULL) {
-		return tmp;
-	}
-
-	return NULL;
+	*properties = Z_OBJDEBUG_P(parent, *is_temp);
+	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
 }
 
-static zval *get_splobjectstorage_storage(zval *parent TSRMLS_DC)
+static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties, int *is_temp TSRMLS_DC)
 {
-	int is_temp;
-	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
-
-	zval *tmp = NULL;
-
-	if ((tmp = zend_hash_str_find(properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1)) != NULL) {
-		return tmp;
-	}
-
-	return NULL;
+	*properties = Z_OBJDEBUG_P(parent, *is_temp);
+	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
 }
 
-static zval *get_arrayiterator_storage(zval *parent TSRMLS_DC)
+static zval *get_arrayiterator_storage(zval *parent, HashTable **properties, int *is_temp TSRMLS_DC)
 {
-	int is_temp;
-	HashTable *properties = Z_OBJDEBUG_P(parent, is_temp);
-
-	zval *tmp = NULL;
-
-	if ((tmp = zend_hash_str_find(properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1)) != NULL) {
-		return tmp;
-	}
-
-	return NULL;
+	*properties = Z_OBJDEBUG_P(parent, *is_temp);
+	return zend_hash_str_find(*properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1);
 }
 
-static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsigned int orig_name_length, int type, char* ccn, int ccnl, zend_class_entry *cce, xdebug_ptr_collection *hashes_to_free TSRMLS_DC)
+static inline void maybe_destroy_ht(HashTable *ht, int is_temp)
+{
+	if (ht && is_temp) {
+		zend_hash_destroy(ht);
+		efree(ht);
+	}
+}
+
+static void fetch_zval_from_symbol_table(
+		zval *value_in, char* orig_name, unsigned int orig_name_length,
+		int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
 	char  *element = NULL;
@@ -286,20 +273,19 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 	unsigned int element_length;
 	zend_property_info *zpp;
 	int is_temp = 0;
-	int found = 0;
 	HashTable *myht = NULL;
 	char *name = NULL;
+	zval *orig_value_in = value_in;
+	zval tmp_retval;
 
-	if (value_in && Z_TYPE_P(value_in) != IS_UNDEF) {
-		if (Z_TYPE_P(value_in) == IS_INDIRECT) {
-			ZVAL_COPY(value_in, value_in->value.zv);
-		}
-		if (Z_TYPE_P(value_in) == IS_REFERENCE) {
-			ZVAL_COPY(value_in, &value_in->value.ref->val);
-		}
+	ZVAL_UNDEF(&tmp_retval);
 
-		ht = fetch_ht_from_zval(value_in TSRMLS_CC);
+	if (Z_TYPE_P(value_in) == IS_INDIRECT) {
+		value_in = Z_INDIRECT_P(value_in);
 	}
+	ZVAL_DEREF(value_in);
+
+	ht = fetch_ht_from_zval(value_in TSRMLS_CC);
 
 	/* We need to strip the slashes for the " and / here */
 	name = xdmalloc(orig_name_length + 1);
@@ -316,8 +302,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 			/* First we try a public,private,protected property */
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->static_members_table) {
-				ZVAL_COPY_VALUE(value_in, &cce->static_members_table[zpp->offset]);
-				found = 1;
+				ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
 				goto cleanup;
 			}
 			element_length = name_length;
@@ -332,8 +317,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 					element_length = name_length - (secondStar + 1 - name);
 					element = prepare_search_key(secondStar + 1, &element_length, "", 0);
 					if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
-						ZVAL_COPY_VALUE(value_in, &cce->static_members_table[zpp->offset]);
-						found = 1;
+						ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
 						goto cleanup;
 					}
 				}
@@ -358,8 +342,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 						zval *CV_z = ZEND_CALL_VAR_NUM(XG(active_execute_data), i);
 						CV = &CV_z;
 						if (CV) {
-							ZVAL_COPY_VALUE(value_in, *CV);
-							found = 1;
+							ZVAL_COPY(&tmp_retval, *CV);
 							goto cleanup;
 						}
 					}
@@ -376,19 +359,17 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
 				if (XG(This)) {
-					ZVAL_COPY_VALUE(value_in, XG(This));
+					ZVAL_COPY(&tmp_retval, XG(This));
 				} else {
-					ZVAL_NULL(value_in);
+					ZVAL_NULL(&tmp_retval);
 				}
-				found = 1;
 				goto cleanup;
 			}
 
 			if (ht) {
 				zval *tmp = zend_hash_str_find(ht, element, name_length);
 				if (tmp != NULL) {
-					ZVAL_COPY_VALUE(value_in, tmp);
-					found = 1;
+					ZVAL_COPY(&tmp_retval, tmp);
 					goto cleanup;
 				}
 			}
@@ -399,8 +380,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 			if (ht) {
 				zval *tmp = zend_hash_index_find(ht, strtoull(element, NULL, 10));
 				if (tmp != NULL) {
-					ZVAL_COPY_VALUE(value_in, tmp);
-					found = 1;
+					ZVAL_COPY(&tmp_retval, tmp);
 					goto cleanup;
 				}
 			}
@@ -413,21 +393,19 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 				if (myht) {
 					zval *tmp = zend_hash_str_find(myht, name, name_length);
 					if (tmp != NULL) {
-						ZVAL_COPY_VALUE(value_in, tmp);
-						found = 1;
+						ZVAL_COPY(&tmp_retval, tmp);
+						maybe_destroy_ht(myht, is_temp);
 						goto cleanup;
 					}
+					maybe_destroy_ht(myht, is_temp);
 				}
 			}
 			/* First we try an object handler */
 			if (cce) {
 				zval *tmp_val;
-
-				zval dummy;
-				tmp_val = zend_read_property(cce, value_in, name, name_length, 0, &dummy);
-				if (tmp_val && tmp_val != &EG(uninitialized_zval)) {
-					ZVAL_COPY_VALUE(value_in, tmp_val);
-					found = 1;
+				tmp_val = zend_read_property(cce, value_in, name, name_length, 0, &tmp_retval);
+				if (tmp_val != &tmp_retval && tmp_val != &EG(uninitialized_zval)) {
+					ZVAL_COPY(&tmp_retval, tmp_val);
 					goto cleanup;
 				}
 
@@ -441,8 +419,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 			if (ht) {
 				zval *tmp = zend_symtable_str_find(ht, element, element_length);
 				if (tmp != NULL) {
-					ZVAL_COPY_VALUE(value_in, tmp);
-					found = 1;
+					ZVAL_COPY(&tmp_retval, tmp);
 					goto cleanup;
 				}
 			}
@@ -454,8 +431,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 			if (ht) {
 				zval *tmp = zend_hash_str_find(ht, element, element_length);
 				if (tmp != NULL) {
-					ZVAL_COPY_VALUE(value_in, tmp);
-					found = 1;
+					ZVAL_COPY(&tmp_retval, tmp);
 					goto cleanup;
 				}
 			}
@@ -467,8 +443,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 			if (ht) {
 				zval *tmp = zend_hash_str_find(ht, element, element_length);
 				if (tmp != NULL) {
-					ZVAL_COPY_VALUE(value_in, tmp);
-					found = 1;
+					ZVAL_COPY(&tmp_retval, tmp);
 					goto cleanup;
 				}
 			}
@@ -476,13 +451,14 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 
 			/* All right, time for a mega hack. It's SplObjectStorage access time! */
 			if (strncmp(ccn, "SplObjectStorage", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
-				zval *tmp = get_splobjectstorage_storage(value_in TSRMLS_CC);
+				zval *tmp = get_splobjectstorage_storage(value_in, &myht, &is_temp TSRMLS_CC);
 				element = NULL;
 				if (tmp != NULL) {
-					ZVAL_COPY_VALUE(value_in, tmp);
-					found = 1;
+					ZVAL_COPY(&tmp_retval, tmp);
+					maybe_destroy_ht(myht, is_temp);
 					goto cleanup;
 				}
+				maybe_destroy_ht(myht, is_temp);
 			}
 
 			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
@@ -496,23 +472,25 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 
 					/* All right, time for a mega hack. It's ArrayObject access time! */
 					if (strncmp(name + 1, "ArrayObject", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
-						zval *tmp = get_arrayobject_storage(value_in TSRMLS_CC);
+						zval *tmp = get_arrayobject_storage(value_in, &myht, &is_temp TSRMLS_CC);
 						element = NULL;
 						if (tmp != NULL) {
-							ZVAL_COPY_VALUE(value_in, tmp);
-							found = 1;
+							ZVAL_COPY(&tmp_retval, tmp);
+							maybe_destroy_ht(myht, is_temp);
 							goto cleanup;
 						}
+						maybe_destroy_ht(myht, is_temp);
 					}
 					/* All right, time for a mega hack. It's ArrayIterator access time! */
 					if (strncmp(name + 1, "ArrayIterator", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
-						zval *tmp = get_arrayiterator_storage(value_in TSRMLS_CC);
+						zval *tmp = get_arrayiterator_storage(value_in, &myht, &is_temp TSRMLS_CC);
 						element = NULL;
 						if (tmp != NULL) {
-							ZVAL_COPY_VALUE(value_in, tmp);
-							found = 1;
+							ZVAL_COPY(&tmp_retval, tmp);
+							maybe_destroy_ht(myht, is_temp);
 							goto cleanup;
 						}
+						maybe_destroy_ht(myht, is_temp);
 					}
 
 					/* The normal one */
@@ -520,8 +498,7 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 					if (ht) {
 						zval *tmp = zend_hash_str_find(ht, element, element_length);
 						if (tmp != NULL) {
-							ZVAL_COPY_VALUE(value_in, tmp);
-							found = 1;
+							ZVAL_COPY(&tmp_retval, tmp);
 							goto cleanup;
 						}
 					}
@@ -532,10 +509,6 @@ static void fetch_zval_from_symbol_table(zval *value_in, char* orig_name, unsign
 	}
 
 cleanup:
-	if (is_temp) {
-		xdebug_ptr_collection_add(hashes_to_free, myht);
-	}
-
 	if (element) {
 		free(element);
 	}
@@ -543,24 +516,23 @@ cleanup:
 		xdfree(name);
 	}
 
-	if (!found) {
-		ZVAL_UNDEF(value_in);
-	}
+	zval_ptr_dtor_nogc(orig_value_in);
+	ZVAL_COPY_VALUE(orig_value_in, &tmp_retval);
 }
 
-inline static int is_objectish(zval value)
+inline static int is_objectish(zval *value)
 {
-	switch (Z_TYPE(value)) {
+	switch (Z_TYPE_P(value)) {
 		case IS_OBJECT:
 			return 1;
 
 		case IS_INDIRECT:
-			if (Z_TYPE_P(value.value.zv) == IS_OBJECT) {
+			if (Z_TYPE_P(Z_INDIRECT_P(value)) == IS_OBJECT) {
 				return 1;
 			}
 
 		case IS_REFERENCE:
-			if (Z_TYPE(value.value.ref->val) == IS_OBJECT) {
+			if (Z_TYPE_P(Z_REFVAL_P(value)) == IS_OBJECT) {
 				return 1;
 			}
 	}
@@ -568,7 +540,7 @@ inline static int is_objectish(zval value)
 	return 0;
 }
 
-zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TSRMLS_DC)
+void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 {
 	int        found = -1;
 	int        state = 0;
@@ -579,8 +551,8 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 	zend_class_entry *current_ce = NULL;
 	int        cc_length = 0;
 	char       quotechar = 0;
-	zval       temp_value_in;
-	zval      *return_retval;
+
+	ZVAL_UNDEF(retval);
 
 	do {
 		if (*p[0] == '\0') {
@@ -604,7 +576,7 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 					if (*p[0] == '[') {
 						keyword_end = *p;
 						if (keyword) {
-							fetch_zval_from_symbol_table(&temp_value_in, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce, hashes_to_free TSRMLS_CC);
+							fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
 								efree(current_classname);
 							}
@@ -617,15 +589,15 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 					} else if (*p[0] == '-') {
 						keyword_end = *p;
 						if (keyword) {
-							fetch_zval_from_symbol_table(&temp_value_in, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce, hashes_to_free TSRMLS_CC);
+							fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
 								efree(current_classname);
 							}
 							current_classname = NULL;
 							cc_length = 0;
 							current_ce = NULL;
-							if (is_objectish(temp_value_in)) {
-								current_classname = fetch_classname_from_zval(&temp_value_in, &cc_length, &current_ce TSRMLS_CC);
+							if (is_objectish(retval)) {
+								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							}
 							keyword = NULL;
 						}
@@ -634,14 +606,14 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 					} else if (*p[0] == ':') {
 						keyword_end = *p;
 						if (keyword) {
-							fetch_zval_from_symbol_table(&temp_value_in, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce, hashes_to_free TSRMLS_CC);
+							fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
 								efree(current_classname);
 							}
 							current_classname = NULL;
 							cc_length = 0;
-							if (is_objectish(temp_value_in)) {
-								current_classname = fetch_classname_from_zval(&temp_value_in, &cc_length, &current_ce TSRMLS_CC);
+							if (is_objectish(retval)) {
+								current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 							}
 							keyword = NULL;
 						}
@@ -696,14 +668,14 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 						quotechar = 0;
 						state = 5;
 						keyword_end = *p;
-						fetch_zval_from_symbol_table(&temp_value_in, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce, hashes_to_free TSRMLS_CC);
+						fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 						if (current_classname) {
 							efree(current_classname);
 						}
 						current_classname = NULL;
 						cc_length = 0;
-						if (is_objectish(temp_value_in)) {
-							current_classname = fetch_classname_from_zval(&temp_value_in, &cc_length, &current_ce TSRMLS_CC);
+						if (is_objectish(retval)) {
+							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 						}
 						keyword = NULL;
 					}
@@ -720,14 +692,14 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 					if (*p[0] == ']') {
 						state = 1;
 						keyword_end = *p;
-						fetch_zval_from_symbol_table(&temp_value_in, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce, hashes_to_free TSRMLS_CC);
+						fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 						if (current_classname) {
 							efree(current_classname);
 						}
 						current_classname = NULL;
 						cc_length = 0;
-						if (is_objectish(temp_value_in)) {
-							current_classname = fetch_classname_from_zval(&temp_value_in, &cc_length, &current_ce TSRMLS_CC);
+						if (is_objectish(retval)) {
+							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
 						}
 						keyword = NULL;
 					}
@@ -756,17 +728,11 @@ zval* xdebug_get_php_symbol(char* name, xdebug_ptr_collection *hashes_to_free TS
 		}
 	} while (found < 0);
 	if (keyword != NULL) {
-		fetch_zval_from_symbol_table(&temp_value_in, keyword, *p - keyword, type, current_classname, cc_length, current_ce, hashes_to_free TSRMLS_CC);
+		fetch_zval_from_symbol_table(retval, keyword, *p - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 	}
 	if (current_classname) {
 		efree(current_classname);
 	}
-
-	/* Allocate and copy the zval value */
-	XDEBUG_MAKE_STD_ZVAL(return_retval);
-	ZVAL_COPY_VALUE(return_retval, &temp_value_in);
-
-	return return_retval;
 }
 
 char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name)
@@ -2007,6 +1973,8 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 
 			zend_hash_destroy(merged_hash);
 			FREE_HASHTABLE(merged_hash);
+
+			maybe_destroy_ht(myht, is_temp);
 			break;
 		}
 

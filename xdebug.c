@@ -52,7 +52,6 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 #include "xdebug_code_coverage.h"
-#include "xdebug_collection.h"
 #include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
@@ -2106,7 +2105,6 @@ PHP_FUNCTION(xdebug_debug_zval)
 	int     argc;
 	int     i, len;
 	char   *val;
-	zval   *debugzval;
 
 	argc = ZEND_NUM_ARGS();
 
@@ -2126,24 +2124,28 @@ PHP_FUNCTION(xdebug_debug_zval)
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) == IS_STRING) {
-			xdebug_ptr_collection *hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
+			zval debugzval;
 
 			XG(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
 			XG(active_execute_data) = EG(current_execute_data)->prev_execute_data;
 
-			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), hashes_to_free TSRMLS_CC);
+			xdebug_get_php_symbol(&debugzval, Z_STRVAL(args[i]) TSRMLS_CC);
+
+			/* Reduce refcount for dumping */
+			Z_TRY_DELREF(debugzval);
+
 			php_printf("%s: ", Z_STRVAL(args[i]));
-			if (debugzval && Z_TYPE_P(debugzval) != IS_UNDEF) {
+			if (Z_TYPE(debugzval) != IS_UNDEF) {
 				if (PG(html_errors)) {
-					val = xdebug_get_zval_value_fancy(NULL, debugzval, &len, 1, NULL TSRMLS_CC);
+					val = xdebug_get_zval_value_fancy(NULL, &debugzval, &len, 1, NULL TSRMLS_CC);
 					PHPWRITE(val, len);
 				}
 				else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
-					val = xdebug_get_zval_value_ansi(debugzval, 1, NULL);
+					val = xdebug_get_zval_value_ansi(&debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}
 				else {
-					val = xdebug_get_zval_value(debugzval, 1, NULL);
+					val = xdebug_get_zval_value(&debugzval, 1, NULL);
 					PHPWRITE(val, strlen(val));
 				}
 				xdfree(val);
@@ -2151,10 +2153,10 @@ PHP_FUNCTION(xdebug_debug_zval)
 			} else {
 				PHPWRITE("no such symbol\n", 15);
 			}
-			efree(debugzval);
 
-			/* Clean up the hashes that were copied */
-			xdebug_ptr_collection_dtor(hashes_to_free);
+			/* Restore original refcount */
+			Z_TRY_ADDREF(debugzval);
+			zval_ptr_dtor_nogc(&debugzval);
 		}
 	}
 
@@ -2170,7 +2172,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	int     argc;
 	int     i;
 	char   *val;
-	zval   *debugzval;
 
 	argc = ZEND_NUM_ARGS();
 
@@ -2190,26 +2191,28 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) == IS_STRING) {
-			xdebug_ptr_collection *hashes_to_free;
+			zval debugzval;
 
 			XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
 
-			hashes_to_free = xdebug_ptr_collection_ctor(xdebug_free_hash_table);
+			xdebug_get_php_symbol(&debugzval, Z_STRVAL(args[i]) TSRMLS_CC);
 
-			debugzval = xdebug_get_php_symbol(Z_STRVAL(args[i]), hashes_to_free TSRMLS_CC);
+			/* Reduce refcount for dumping */
+			Z_TRY_DELREF(debugzval);
+
 			printf("%s: ", Z_STRVAL(args[i]));
-			if (debugzval && Z_TYPE_P(debugzval) != IS_UNDEF) {
-				val = xdebug_get_zval_value(debugzval, 1, NULL);
+			if (Z_TYPE(debugzval) != IS_UNDEF) {
+				val = xdebug_get_zval_value(&debugzval, 1, NULL);
 				printf("%s(%zd)", val, strlen(val));
 				xdfree(val);
 				printf("\n");
 			} else {
 				printf("no such symbol\n\n");
 			}
-			efree(debugzval);
 
-			/* Clean up the hashes that were copied */
-			xdebug_ptr_collection_dtor(hashes_to_free);
+			/* Restore original refcount */
+			Z_TRY_ADDREF(debugzval);
+			zval_ptr_dtor_nogc(&debugzval);
 		}
 	}
 
