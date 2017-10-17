@@ -70,7 +70,7 @@ class DebugClient
 			$ini_options = array();
 		}
 		
-		$options = '';
+		$options = (getenv('TEST_PHP_ARGS') ?: '');
 		$ini_options = array_merge( $default_options, $ini_options );
 		foreach ( $ini_options as $key => $value )
 		{
