@@ -2,6 +2,7 @@
 Test for bug #886: Use the same file system protocol for file located inside PHAR in both directions (< PHP 7.0)
 --SKIPIF--
 <?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php if (getenv("SKIP_SLOW_TESTS")) { exit("skip Excluding slow tests"); } ?>
 <?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
 --INI--
 xdebug.auto_trace=0
