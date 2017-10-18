@@ -153,7 +153,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	iniLONG       force_error_reporting;
 	iniLONG       halt_level;
 
-	zend_bool     overload_var_dump;
+	iniLONG       overload_var_dump;
 	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAMETERS);
 	void        (*orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAMETERS);
