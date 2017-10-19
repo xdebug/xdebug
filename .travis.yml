@@ -18,7 +18,7 @@ env:
 
 before_script:
   - phpenv config-rm xdebug.ini || echo "xdebug not available"
-  - ./.travis.scripts/compile.sh
+  - sh -e ./.travis.scripts/compile.sh
 
 notifications:
   email:
