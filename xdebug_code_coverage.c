@@ -486,7 +486,7 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 # define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
 #endif
 
-static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
+static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
 #if ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
@@ -494,7 +494,8 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 	
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		*jump_count = 1;
 		return 1;
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
@@ -502,46 +503,55 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		opcode.opcode == ZEND_JMPZ_EX ||
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
-		*jmp1 = position + 1;
-		*jmp2 = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[0] = position + 1;
+		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-		*jmp2 = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[1] = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
-		*jmp1 = position + 1;
-		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+		jumps[0] = position + 1;
+		jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
-		*jmp1 = position + 1;
-		*jmp2 = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[0] = position + 1;
+		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_CATCH) {
-		*jmp1 = position + 1;
+		*jump_count = 2;
+		jumps[0] = position + 1;
 		if (!opcode.result.num) {
 #if PHP_VERSION_ID >= 70100
-			*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
 #else
-			*jmp2 = opcode.extended_value;
+			jumps[1] = opcode.extended_value;
 #endif
-			if (*jmp2 == *jmp1) {
-				*jmp2 = XDEBUG_JMP_NOT_SET;
+			if (jumps[1] == jumps[0]) {
+				jumps[1] = XDEBUG_JMP_NOT_SET;
+				*jump_count = 1;
 			}
 		} else {
-			*jmp2 = XDEBUG_JMP_EXIT;
+			jumps[1] = XDEBUG_JMP_EXIT;
 		}
 		return 1;
 	} else if (opcode.opcode == ZEND_GOTO) {
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		*jump_count = 1;
 		return 1;
 
 	} else if (opcode.opcode == ZEND_FAST_CALL) {
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-		*jmp2 = position + 1;
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		jumps[1] = position + 1;
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_FAST_RET) {
-		*jmp1 = XDEBUG_JMP_EXIT;
+		jumps[0] = XDEBUG_JMP_EXIT;
+		*jump_count = 1;
 		return 1;
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
@@ -549,18 +559,45 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		opcode.opcode == ZEND_THROW ||
 		opcode.opcode == ZEND_RETURN
 	) {
-		*jmp1 = XDEBUG_JMP_EXIT;
+		jumps[0] = XDEBUG_JMP_EXIT;
+		*jump_count = 1;
 		return 1;
+#if PHP_VERSION_ID >= 70200
+	} else if (
+		opcode.opcode == ZEND_SWITCH_LONG ||
+		opcode.opcode == ZEND_SWITCH_STRING
+	) {
+		zval *array_value;
+		HashTable *myht;
+		zval *val;
+
+		array_value = RT_CONSTANT_EX(opa->literals, opcode.op2);
+		myht = Z_ARRVAL_P(array_value);
+
+		/* All 'case' statements */
+		ZEND_HASH_FOREACH_VAL_IND(myht, val) {
+			jumps[*jump_count] = position + (val->value.lval / sizeof(zend_op));
+			(*jump_count)++;
+		} ZEND_HASH_FOREACH_END();
+
+		/* The 'default' case */
+		jumps[*jump_count] = position + (opcode.extended_value / sizeof(zend_op));
+		(*jump_count)++;
+
+		/* The 'next' opcode */
+		jumps[*jump_count] = position + 1;
+		(*jump_count)++;
+
+		return 1;
+#endif
 	}
+
 	return 0;
 }
 
 static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xdebug_set *set, xdebug_branch_info *branch_info TSRMLS_DC)
 {
-	long jump_pos1 = XDEBUG_JMP_NOT_SET;
-	long jump_pos2 = XDEBUG_JMP_NOT_SET;
-
-	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
+	/* fprintf(stderr, "Branch analysis from position: %d\n", position); */
 
 	if (branch_info) {
 		xdebug_set_add(branch_info->starts, position);
@@ -572,35 +609,24 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		return;
 	}
 
-	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
+	/* fprintf(stderr, "XDEBUG Adding %d\n", position); */
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	xdebug_set_add(set, position);
 	while (position < opa->last) {
-		jump_pos1 = XDEBUG_JMP_NOT_SET;
-		jump_pos2 = XDEBUG_JMP_NOT_SET;
+		size_t jump_count = 0;
+		int    jumps[XDEBUG_BRANCH_MAX_OUTS];
+		size_t i;
 
 		/* See if we have a jump instruction */
-		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			/*(fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);)*/
-			if (jump_pos2 != XDEBUG_JMP_NOT_SET) {
-				/*(fprintf(stderr, ", Position 2 = %d\n", jump_pos2))*/;
-			} else {
-				/*(fprintf(stderr, "\n"))*/;
-			}
-			if (jump_pos1 == XDEBUG_JMP_EXIT || jump_pos1 != XDEBUG_JMP_NOT_SET) {
-				if (branch_info) {
-					xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
-				}
-				if (jump_pos1 != XDEBUG_JMP_EXIT) {
-					xdebug_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
-				}
-			}
-			if (jump_pos2 == XDEBUG_JMP_EXIT || jump_pos2 != XDEBUG_JMP_NOT_SET) {
-				if (branch_info) {
-					xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
-				}
-				if (jump_pos2 != XDEBUG_JMP_EXIT) {
-					xdebug_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
+		if (xdebug_find_jumps(opa, position, &jump_count, jumps)) {
+			for (i = 0; i < jump_count; i++) {
+				if (jumps[i] == XDEBUG_JMP_EXIT || jumps[i] != XDEBUG_JMP_NOT_SET) {
+					if (branch_info) {
+						xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, i, jumps[i]);
+					}
+					if (jumps[i] != XDEBUG_JMP_EXIT) {
+						xdebug_analyse_branch(opa, jumps[i], set, branch_info TSRMLS_CC);
+					}
 				}
 			}
 			break;
@@ -940,6 +966,8 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (xdebug_set_in(branch_info->starts, i)) {
+			size_t j = 0;
+
 			XDEBUG_MAKE_STD_ZVAL(branch);
 			array_init(branch);
 			add_assoc_long(branch, "op_start", i);
@@ -951,21 +979,19 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 
 			XDEBUG_MAKE_STD_ZVAL(out);
 			array_init(out);
-			if (branch_info->branches[i].out[0]) {
-				add_index_long(out, 0, branch_info->branches[i].out[0]);
-			}
-			if (branch_info->branches[i].out[1]) {
-				add_index_long(out, 1, branch_info->branches[i].out[1]);
+			for (j = 0; j < branch_info->branches[i].outs_count; j++) {
+				if (branch_info->branches[i].outs[j]) {
+					add_index_long(out, j, branch_info->branches[i].outs[j]);
+				}
 			}
 			add_assoc_zval(branch, "out", out);
 
 			XDEBUG_MAKE_STD_ZVAL(out_hit);
 			array_init(out_hit);
-			if (branch_info->branches[i].out[0]) {
-				add_index_long(out_hit, 0, branch_info->branches[i].out_hit[0]);
-			}
-			if (branch_info->branches[i].out[1]) {
-				add_index_long(out_hit, 1, branch_info->branches[i].out_hit[1]);
+			for (j = 0; j < branch_info->branches[i].outs_count; j++) {
+				if (branch_info->branches[i].outs[j]) {
+					add_index_long(out_hit, j, branch_info->branches[i].outs_hit[j]);
+				}
 			}
 			add_assoc_zval(branch, "out_hit", out_hit);
 
