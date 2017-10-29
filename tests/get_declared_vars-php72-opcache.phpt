@@ -1,8 +1,15 @@
 --TEST--
-Test with xdebug_get_declared_vars() (< PHP 7.2 || !opcache)
+Test with xdebug_get_declared_vars() (> PHP 7.2 && opcache)
 --SKIPIF--
 <?php
-if ( ( version_compare(phpversion(), "7.2", '>=') && extension_loaded('zend opcache'))) { echo "skip < PHP 7.2 || !opcache loaded needed\n"; };
+if (
+	! (
+		version_compare(phpversion(), "7.2", '>=') &&
+		extension_loaded('zend opcache')
+	)
+) {
+	echo "skip >= PHP 7.2 && opcache loaded needed\n";
+};
 ?>
 --INI--
 xdebug.default_enable=1
@@ -76,20 +83,12 @@ array(2) {
   string(1) "b"
 }
 1
-array(4) {
+array(2) {
   [0]=>
-  string(1) "d"
-  [1]=>
   string(1) "a"
-  [2]=>
-  string(1) "c"
-  [3]=>
+  [1]=>
   string(1) "b"
 }
 4254
-array(2) {
-  [0]=>
-  string(1) "d"
-  [1]=>
-  string(1) "c"
+array(0) {
 }
