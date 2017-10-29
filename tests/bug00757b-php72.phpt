@@ -1,8 +1,8 @@
 --TEST--
-Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function. (< PHP 7.2 || !opcache)
+Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function (>= PHP 7.2 && opcache)
 --SKIPIF--
 <?php
-if ( ( version_compare(phpversion(), "7.2", '>=') && extension_loaded('zend opcache'))) { echo "skip < PHP 7.2 || !opcache loaded needed\n"; };
+if ( ! ( version_compare(phpversion(), "7.2", '>=') && extension_loaded('zend opcache'))) { echo "skip >= PHP 7.2 && opcache loaded needed\n"; };
 ?>
 --INI--
 xdebug.default_enable=1
@@ -42,7 +42,7 @@ var_dump($cc[__FILE__]);
 ?>
 --EXPECT--
 2
-array(9) {
+array(8) {
   [4]=>
   int(1)
   [6]=>
@@ -51,8 +51,6 @@ array(9) {
   int(1)
   [8]=>
   int(1)
-  [10]=>
-  int(-1)
   [12]=>
   int(1)
   [13]=>

@@ -34,11 +34,9 @@ array(2) {
     int(1)
   }
   ["%sbug00334.inc"]=>
-  array(3) {
+  array(2) {
     [5]=>
     int(1)
-    [7]=>
-    int(-1)
     [9]=>
     int(1)
   }
