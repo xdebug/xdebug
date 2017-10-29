@@ -1,6 +1,7 @@
 --TEST--
-Test for tracing assignments in user-readable function traces (opcache)
+Test for tracing assignments in user-readable function traces (< PHP 7.2, opcache)
 --SKIPIF--
+<?php if (version_compare(phpversion(), "7.2", '>=')) echo "skip < PHP 7.2 && opcache loaded needed\n"; ?>
 <?php if (!extension_loaded('zend opcache')) echo "skip opcache required\n"; ?>
 --INI--
 xdebug.default_enable=1
