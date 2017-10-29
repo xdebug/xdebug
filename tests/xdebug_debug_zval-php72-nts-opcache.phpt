@@ -1,9 +1,11 @@
 --TEST--
-Test for xdebug_debug_zval() (= PHP 7.0, NTS)
+Test for xdebug_debug_zval() (>= PHP 7.2, NTS, opcache)
 --SKIPIF--
-<?php if (PHP_ZTS == 1) echo "skip NTS needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip = PHP 7.0 needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.1", '<')) echo "skip = PHP 7.0 needed\n"; ?>
+<?php
+if (PHP_ZTS == 1) echo "skip NTS needed\n";
+if (!version_compare(phpversion(), "7.2", '>=')) echo "skip >= PHP 7.2 needed\n";
+if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=0
@@ -35,16 +37,16 @@ function func(){
 
 func();
 ?>
---EXPECTF--
-a: (refcount=%r(0|1)%r, is_ref=0)='hoge'
-$a: (refcount=%r(0|1)%r, is_ref=0)='hoge'
+--EXPECT--
+a: no such symbol
+$a: no such symbol
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
 $b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5
 b[1]: (refcount=0, is_ref=0)=9
 c: (refcount=2, is_ref=1)=5
 d: (refcount=0, is_ref=0)=6
-e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=%r(1|2)%r, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
+e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=2, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
 e->bar: (refcount=2, is_ref=1)=FALSE
 e->bar['b']: no such symbol
 e->baz[0]: (refcount=0, is_ref=0)=4
