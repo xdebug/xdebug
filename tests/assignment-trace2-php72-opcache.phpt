@@ -1,9 +1,9 @@
 --TEST--
-Test for tracing array assignments in user-readable function traces (>= PHP 7.2, opcache)
+Test for tracing array assignments in user-readable function traces (= PHP 7.2, opcache)
 --SKIPIF--
-<?php
-if ( ! ( version_compare(phpversion(), "7.2", '>=') && extension_loaded('zend opcache'))) { echo "skip >= PHP 7.2 && opcache loaded needed\n"; };
-?>
+<?php if (!version_compare(phpversion(), "7.2", '>=')) echo "skip = PHP 7.2 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.3", '<')) echo "skip = PHP 7.2 needed\n"; ?>
+<?php if (!extension_loaded('zend opcache')) echo "skip opcache required\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
