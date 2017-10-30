@@ -30,11 +30,9 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECT--
 48
-array(5) {
+array(4) {
   [5]=>
   int(1)
-  [6]=>
-  int(-2)
   [8]=>
   int(1)
   [12]=>

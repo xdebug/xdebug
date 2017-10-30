@@ -14,7 +14,7 @@ xdebug.show_error_trace=0
 	function a($a,$b) {
 		$c = array($a, $b * $b);
 		$d = new stdClass;
-		do_f();
+		do_f($a, $b, $c, $d);
 	}
 
 	a(5, 6);

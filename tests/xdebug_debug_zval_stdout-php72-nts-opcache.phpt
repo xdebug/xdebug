@@ -1,10 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval() (>= PHP 7.1, < PHP 7.2, NTS, opcache)
+Test for xdebug_debug_zval_stdout() (>= PHP 7.2, NTS, opcache)
 --SKIPIF--
 <?php
 if (PHP_ZTS == 1) echo "skip NTS needed\n";
-if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1, < PHP 7.2 needed\n";
-if (!version_compare(phpversion(), "7.2", '<')) echo "skip >= PHP 7.1, < PHP 7.2 needed\n";
+if (!version_compare(phpversion(), "7.2", '>=')) echo "skip >= PHP 7.2 needed\n";
 if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
 ?>
 --INI--
@@ -39,8 +38,8 @@ function func(){
 func();
 ?>
 --EXPECT--
-a: (refcount=1, is_ref=0)='hoge'
-$a: (refcount=1, is_ref=0)='hoge'
+a: no such symbol
+$a: no such symbol
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
 $b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5

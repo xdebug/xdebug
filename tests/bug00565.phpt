@@ -10,7 +10,7 @@ xdebug.dump.SERVER=
 <?php
 function func(){
 	$a="hoge";
-	throw new Exception();
+	throw new Exception($a);
 }
 
 func();
@@ -18,7 +18,7 @@ func();
 --EXPECTF--
 Fatal error: Uncaught%sException%sin %sbug00565.php on line 4
 
-Exception:  in %sbug00565.php on line 4
+Exception:%sin %sbug00565.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00565.php:0

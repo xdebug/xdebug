@@ -36,35 +36,19 @@ function dump_branch_coverage($info)
 					$branch['line_start'], $branch['line_end'],
 					$branch['hit'] ? "HIT" : " X "
 				);
-				if ( isset( $branch['out'][0] ) ) 
+				foreach ( $branch['out'] as $key => $out )
 				{
-					if ( $branch['out'][0] == 2147483645 )
+					if ( $out == 2147483645 )
 					{
-						printf("; out1: EX %3s",
-							$branch['out_hit'][0] ? "HIT" : " X "
+						printf("; out%d: EX %3s", $key + 1,
+							$branch['out_hit'][$key] ? "HIT" : " X "
 						);
 					}
 					else
 					{
-						printf("; out1: %02d %3s",
-							$branch['out'][0],
-							$branch['out_hit'][0] ? "HIT" : " X "
-						);
-					}
-				}
-				if ( isset( $branch['out'][1] ) ) 
-				{
-					if ( $branch['out'][1] == 2147483645 )
-					{
-						printf("; out2: EX %3s",
-							$branch['out_hit'][1] ? "HIT" : " X "
-						);
-					}
-					else
-					{
-						printf("; out2: %02d %3s",
-							$branch['out'][1],
-							$branch['out_hit'][1] ? "HIT" : " X "
+						printf("; out%d: %02d %3s", $key + 1,
+							$branch['out'][$key],
+							$branch['out_hit'][$key] ? "HIT" : " X "
 						);
 					}
 				}

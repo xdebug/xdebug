@@ -1,9 +1,11 @@
 --TEST--
-Test for xdebug_debug_zval() (CLI colours) (= PHP 7.0, NTS)
+Test for xdebug_debug_zval() (CLI colours) (>= PHP 7.2, NTS, opcache)
 --SKIPIF--
-<?php if (PHP_ZTS == 1) echo "skip NTS needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip = PHP 7.0 needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.1", '<')) echo "skip = PHP 7.0 needed\n"; ?>
+<?php
+if (PHP_ZTS == 1) echo "skip NTS needed\n";
+if (!version_compare(phpversion(), "7.2", '>=')) echo "skip >= PHP 7.2 needed\n";
+if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=2
@@ -35,11 +37,9 @@ function func(){
 
 func();
 ?>
---EXPECTF--
-a: (refcount=%r(0|1)%r, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
-
-$a: (refcount=%r(0|1)%r, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
-
+--EXPECT--
+a: no such symbol
+$a: no such symbol
 $b: (refcount=1, is_ref=0)=[1marray[22m([32m5[0m) {
   'a' =>
   (refcount=0, is_ref=0)=[1mint[22m([32m4[0m)
@@ -69,7 +69,7 @@ e: (refcount=1, is_ref=0)=[1mclass[22m [31mstdClass[0m#1 ([32m3[0m) {
   [32m[1mpublic[22m[0m $bar [0m=>[0m
   (refcount=2, is_ref=1)=[1mbool[22m([35mfalse[0m)
   [32m[1mpublic[22m[0m $baz [0m=>[0m
-  (refcount=%r(1|2)%r, is_ref=0)=[1marray[22m([32m2[0m) {
+  (refcount=2, is_ref=0)=[1marray[22m([32m2[0m) {
     [0] [0m=>[0m
     (refcount=0, is_ref=0)=[1mint[22m([32m4[0m)
     'b' =>

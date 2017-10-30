@@ -40,7 +40,7 @@ xdebug_stop_code_coverage(false);
 --EXPECTF--
 array(2) {
   ["%sbug01386-class1.inc"]=>
-  array(6) {
+  array(5) {
     [3]=>
     int(1)
     [7]=>
@@ -49,13 +49,11 @@ array(2) {
     int(-1)
     [9]=>
     int(-1)
-    [10]=>
-    int(-2)
     [13]=>
     int(1)
   }
   ["%sbug01386-class2.inc"]=>
-  array(6) {
+  array(5) {
     [3]=>
     int(1)
     [7]=>
@@ -64,8 +62,6 @@ array(2) {
     int(-1)
     [9]=>
     int(-1)
-    [10]=>
-    int(-2)
     [13]=>
     int(1)
   }
