@@ -35,7 +35,7 @@ function func(){
 
 func();
 ?>
---EXPECT--
+--EXPECTF--
 a: (refcount=1, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
 
 $a: (refcount=1, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
@@ -69,7 +69,7 @@ e: (refcount=1, is_ref=0)=[1mclass[22m [31mstdClass[0m#1 ([32m3[0m) {
   [32m[1mpublic[22m[0m $bar [0m=>[0m
   (refcount=2, is_ref=1)=[1mbool[22m([35mfalse[0m)
   [32m[1mpublic[22m[0m $baz [0m=>[0m
-  (refcount=1, is_ref=0)=[1marray[22m([32m2[0m) {
+  (refcount=%r(1|2)%r, is_ref=0)=[1marray[22m([32m2[0m) {
     [0] [0m=>[0m
     (refcount=0, is_ref=0)=[1mint[22m([32m4[0m)
     'b' =>
