@@ -28,6 +28,7 @@ script:
   - MYPHP=`make findphp`
   - export PATH=`dirname $MYPHP`:$PATH
   - export TEST_PHP_ARGS="-dfoo=1 -n -dzend_extension=opcache.so -dopcache.enable=${USE_OPCACHE} -dopcache.enable_cli=${USE_OPCACHE} -dzend_extension=xdebug.so"
+  - export SKIP_IPV6_TESTS=1
   - $MYPHP -c /tmp/temp-php-config.ini -v
   - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=$MYPHP $MYPHP -c /tmp/temp-php-config.ini -dxdebug.auto_trace=0 run-tests.php -q -x --show-diff
 
