@@ -1568,11 +1568,28 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp, Has
 	return 0;
 }
 
+/*
+ * Returns whether we should attempt to encode name, fullname, and value as XML
+ * elements instead of attribute values, because XML doesn't support nearly all
+ * characters under ASCII 0x32.
+ */
+static int encoding_requested(char *value, size_t value_len)
+{
+	size_t i;
+
+	for (i = 0; i < value_len; i++) {
+		if (value[i] < 0x20) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 static void add_name_attribute_or_element(xdebug_var_export_options *options, xdebug_xml_node *node, char *field, int field_len, char *value, size_t value_len)
 {
 	size_t value_len_calculated = (value_len == SIZE_MAX) ? strlen(value) : value_len;
 
-	if (options->force_extended || (memchr(value, '\0', value_len_calculated) != NULL && options->extended_properties)) {
+	if (options->force_extended || (encoding_requested(value, value_len_calculated) && options->extended_properties)) {
 		xdebug_xml_node *element;
 		char            *tmp_base64;
 		int              new_len;
