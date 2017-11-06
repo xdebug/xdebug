@@ -555,14 +555,14 @@ void xdebug_init_debugger(TSRMLS_D)
 				*cp = '\0';
 			}
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", Z_STRVAL_P(remote_addr), (long int) XG(remote_port));
-			XG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XG(remote_port) TSRMLS_CC);
+			XG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XG(remote_port), XG(remote_connect_timeout) TSRMLS_CC);
 		} else {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), (long int) XG(remote_port));
-			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port) TSRMLS_CC);
+			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port), XG(remote_connect_timeout) TSRMLS_CC);
 		}
 	} else {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connecting to configured address/port: %s:%ld.\n", XG(remote_host), (long int) XG(remote_port));
-		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port) TSRMLS_CC);
+		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port), XG(remote_connect_timeout) TSRMLS_CC);
 	}
 	if (XG(context).socket >= 0) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connected to client. :-)\n");
@@ -591,7 +591,7 @@ void xdebug_init_debugger(TSRMLS_D)
 	} else if (XG(context).socket == -1) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");
 	} else if (XG(context).socket == -2) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Time-out connecting to client. :-(\n");
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Time-out connecting to client (Waited: %ld ms). :-(\n", XG(remote_connect_timeout));
 	} else if (XG(context).socket == -3) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: No permission connecting to client. This could be SELinux related. :-(\n");
 	}
