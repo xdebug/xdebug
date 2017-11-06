@@ -241,6 +241,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	FILE         *remote_log_file;  /* File handler for protocol log */
 	zend_long     remote_cookie_expire_time; /* Expire time for the remote-session cookie */
 	char         *remote_addr_header; /* User configured header to check for forwarded IP address */
+	zend_long     remote_connect_timeout; /* Timeout in MS for remote connections */
 
 	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
 	char         *ide_key_setting; /* Set through php.ini and friends */

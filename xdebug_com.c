@@ -82,7 +82,7 @@ static int xdebug_create_socket_unix(const char *path TSRMLS_DC)
 }
 #endif
 
-int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
+int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 {
 	struct addrinfo            hints;
 	struct addrinfo            *remote;
@@ -91,7 +91,6 @@ int xdebug_create_socket(const char *hostname, int dport TSRMLS_DC)
 	int                        sockfd = 0;
 	int                        sockerror;
 	char                       sport[10];
-	int                        timeout = 200;
 	int                        actually_connected;
 	struct sockaddr_in6        sa;
 	socklen_t                  size = sizeof(sa);
