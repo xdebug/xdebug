@@ -576,8 +576,10 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 
 		/* All 'case' statements */
 		ZEND_HASH_FOREACH_VAL_IND(myht, val) {
-			jumps[*jump_count] = position + (val->value.lval / sizeof(zend_op));
-			(*jump_count)++;
+			if (*jump_count < XDEBUG_BRANCH_MAX_OUTS - 2) {
+				jumps[*jump_count] = position + (val->value.lval / sizeof(zend_op));
+				(*jump_count)++;
+			}
 		} ZEND_HASH_FOREACH_END();
 
 		/* The 'default' case */

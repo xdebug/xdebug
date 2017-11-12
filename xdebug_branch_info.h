@@ -25,7 +25,7 @@
 #define XDEBUG_JMP_NOT_SET (INT_MAX-1)
 #define XDEBUG_JMP_EXIT    (INT_MAX-2)
 
-#define XDEBUG_BRANCH_MAX_OUTS 32
+#define XDEBUG_BRANCH_MAX_OUTS 64
 
 typedef struct _xdebug_branch {
 	unsigned int  start_lineno;
