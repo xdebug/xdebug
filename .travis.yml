@@ -27,10 +27,12 @@ notifications:
 script:
   - MYPHP=`make findphp`
   - export PATH=`dirname $MYPHP`:$PATH
-  - export TEST_PHP_ARGS="-dfoo=1 -n -dzend_extension=opcache.so -dopcache.enable=${USE_OPCACHE} -dopcache.enable_cli=${USE_OPCACHE} -dzend_extension=xdebug.so"
+  - TEST_PHP_ARGS="-n -d foo=1"
+  - if [[ "$USE_OPCACHE" == "1" ]]; then TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=opcache.so -d opcache.enable=1 -d opcache.enable_cli=1"; fi
+  - export TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=$PWD/modules/xdebug.so -d xdebug.auto_trace=0"
   - export SKIP_IPV6_TESTS=1
-  - $MYPHP -c /tmp/temp-php-config.ini -v
-  - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=$MYPHP $MYPHP -c /tmp/temp-php-config.ini -dxdebug.auto_trace=0 run-tests.php -q -x --show-diff
+  - $MYPHP $TEST_PHP_ARGS -v
+  - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=$MYPHP $MYPHP -n run-tests.php -q -x --show-diff
 
 after_script:
   - ./.travis.scripts/show-errors.sh
