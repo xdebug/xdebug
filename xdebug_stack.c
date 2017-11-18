@@ -67,12 +67,12 @@ static char* html_formats[13] = {
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
 	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4F</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s( ",
 	"<font color='#00bb00'>'%s'</font>",
-	" )</td><td title='%s' bgcolor='#eeeeec'>...%s<b>:</b>%d</td></tr>\n",
+	" )</td><td title='%s' bgcolor='#eeeeec'>%s<b>:</b>%d</td></tr>\n",
 	"<tr><th align='left' colspan='5' bgcolor='#e9b96e'>Variables in local scope (#%d)</th></tr>\n",
 	"</table></font>\n",
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec'>%s</td></tr>\n",
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
-	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>...%s<b>:</b>%d</a></td></tr>\n",
+	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>%s<b>:</b>%d</a></td></tr>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> SCREAM: Error suppression ignored for</th></tr>\n"
 };
@@ -439,18 +439,20 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			}
 
 			if (html) {
+				char *formatted_filename;
+				xdebug_format_filename(&formatted_filename, XG(filename_format), i->filename);
+
 				if (strlen(XG(file_link_format)) > 0) {
-					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
 					char *file_link;
 
 					xdebug_format_file_link(&file_link, i->filename, i->lineno TSRMLS_CC);
-					xdebug_str_add(str, xdebug_sprintf(formats[10], i->filename, file_link, just_filename, i->lineno), 1);
+					xdebug_str_add(str, xdebug_sprintf(formats[10], i->filename, file_link, formatted_filename, i->lineno), 1);
 					xdfree(file_link);
 				} else {
-					char *just_filename = strrchr(i->filename, DEFAULT_SLASH);
-
-					xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, just_filename, i->lineno), 1);
+					xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, formatted_filename, i->lineno), 1);
 				}
+
+				xdfree(formatted_filename);
 			} else {
 				xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
 			}

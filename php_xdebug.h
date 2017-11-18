@@ -150,6 +150,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	function_stack_entry *active_fse;
 	unsigned int  prev_memory;
 	char         *file_link_format;
+	char         *filename_format;
 	zend_bool     force_display_errors;
 	zend_long     force_error_reporting;
 	zend_long     halt_level;

@@ -4,6 +4,7 @@ Test for xdebug_print_function_stack() without description (HTML)
 xdebug.cli_color=0
 xdebug.collect_params=3
 xdebug.file_link_format=
+xdebug.filename_format=
 html_errors=1
 --FILE--
 <?php
