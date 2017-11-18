@@ -18,56 +18,56 @@ cmd: %sbug00643.php
 part: 1
 positions: line
 
-events: Time
+events: Time Memory
 
 fl=(1) %sbug00643-t2.inc
 fn=(1) require_once::%sbug00643-t2.inc
-1 %d
+1 %d %i
 
 fl=(2) %sbug00643-t1.inc
 fn=(2) require_once::%sbug00643-t1.inc
-1 %d
+1 %d %i
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-2 %d
+2 %d %i
 
 fl=(3) php:internal
 fn=(3) php::array_count_values
-23 %d
+23 %d %i
 
 fl=(3)
 fn=(3)
-12 %d
+12 %d %i
 
 fl=(3)
 fn=(4) php::is_array
-12 %d
+12 %d %i
 
 fl=(1)
 fn=(5) errors_fatal
-10 %d
+10 %d %i
 cfl=(3)
 cfn=(3)
 calls=1 0 0
-12 %d
+12 %d %i
 cfl=(3)
 cfn=(4)
 calls=1 0 0
-12 %d
+12 %d %i
 
 fl=(2)
 fn=(6) t1
-20 %d
+20 %d %i
 cfl=(3)
 cfn=(3)
 calls=1 0 0
-23 %d
+23 %d %i
 cfl=(1)
 cfn=(5)
 calls=1 0 0
-23 %d
+23 %d %i
 
 fl=(3)
 fn=(7) php::xdebug_get_profiler_filename
-7 %d
+7 %d %i
