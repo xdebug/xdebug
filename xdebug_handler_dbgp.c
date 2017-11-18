@@ -2484,17 +2484,15 @@ int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno,
 		xdebug_xml_add_attribute_ex(error_container, "type_string", xdstrdup(type_string), 0, 1);
 	}
 	if (message) {
-		xdebug_xml_add_text(error_container, xdstrdup(message));
+		char *tmp_buf;
+
+		if (type == E_ERROR && ((tmp_buf = xdebug_strip_php_stack_trace(message)) != NULL)) {
+			xdebug_xml_add_text(error_container, tmp_buf);
+		} else {
+			xdebug_xml_add_text(error_container, xdstrdup(message));
+		}
 	}
 	xdebug_xml_add_child(response, error_container);
-
-	/* Collate full message for the CDATA section */
-	{
-		char *stack_message;
-
-		stack_message = xdebug_handle_stack_trace(type, type_string, file, lineno, message);
-		xdebug_xml_add_text_encode(response, stack_message);
-	}
 
 	send_message(context, response TSRMLS_CC);
 	xdebug_xml_node_dtor(response);

@@ -619,15 +619,11 @@ static void php_output_error(const char *error TSRMLS_DC)
 	php_printf("%s", error);
 }
 
-char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const uint error_lineno, char *buffer TSRMLS_DC)
+char *xdebug_strip_php_stack_trace(char *buffer)
 {
-	char *printable_stack;
+	char *tmp_buf, *p;
 
-	/* We need to see if we have an uncaught exception fatal error now */
-	if (type == E_ERROR && strncmp(buffer, "Uncaught ", 9) == 0) {
-		xdebug_str str = XDEBUG_STR_INITIALIZER;
-		char *tmp_buf, *p;
-
+	if (strncmp(buffer, "Uncaught ", 9) == 0) {
 		/* find first new line */
 		p = strchr(buffer, '\n');
 		if (!p) {
@@ -641,7 +637,21 @@ char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *erro
 		}
 		/* Create new buffer */
 		tmp_buf = calloc(p - buffer + 1, 1);
-		strncpy(tmp_buf, buffer, p - buffer );
+		strncpy(tmp_buf, buffer, p - buffer);
+
+		return tmp_buf;
+	}
+	return NULL;
+}
+
+char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const uint error_lineno, char *buffer TSRMLS_DC)
+{
+	char *printable_stack;
+	char *tmp_buf;
+
+	/* We need to see if we have an uncaught exception fatal error now */
+	if (type == E_ERROR && ((tmp_buf = xdebug_strip_php_stack_trace(buffer)) != NULL)) {
+		xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 		/* Append error */
 		xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception" TSRMLS_CC);

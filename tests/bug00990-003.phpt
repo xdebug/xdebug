@@ -37,10 +37,7 @@ dbgpRun( $data, $commands );
 
 -> step_into -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" name="error" encoding="base64"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3" type_string="Fatal error"><![CDATA[Uncaught Error: Class 'MyClass' not found in /tmp/xdebug-dbgp-test.php:3
-Stack trace:
-#0 {main}
-  thrown]]></xdebug:message><![CDATA[PGJyIC8+Cjxmb250IHNpemU9JzEnPjx0YWJsZSBjbGFzcz0neGRlYnVnLWVycm9yIHhlLXVuY2F1Z2h0LWV4Y2VwdGlvbicgZGlyPSdsdHInIGJvcmRlcj0nMScgY2VsbHNwYWNpbmc9JzAnIGNlbGxwYWRkaW5nPScxJz4KPHRyPjx0aCBhbGlnbj0nbGVmdCcgYmdjb2xvcj0nI2Y1NzkwMCcgY29sc3Bhbj0iNSI+PHNwYW4gc3R5bGU9J2JhY2tncm91bmQtY29sb3I6ICNjYzAwMDA7IGNvbG9yOiAjZmNlOTRmOyBmb250LXNpemU6IHgtbGFyZ2U7Jz4oICEgKTwvc3Bhbj4gRmF0YWwgZXJyb3I6IFVuY2F1Z2h0IEVycm9yOiBDbGFzcyAnTXlDbGFzcycgbm90IGZvdW5kIGluIC90bXAveGRlYnVnLWRiZ3AtdGVzdC5waHAgb24gbGluZSA8aT4zPC9pPjwvdGg+PC90cj4KPHRyPjx0aCBhbGlnbj0nbGVmdCcgYmdjb2xvcj0nI2Y1NzkwMCcgY29sc3Bhbj0iNSI+PHNwYW4gc3R5bGU9J2JhY2tncm91bmQtY29sb3I6ICNjYzAwMDA7IGNvbG9yOiAjZmNlOTRmOyBmb250LXNpemU6IHgtbGFyZ2U7Jz4oICEgKTwvc3Bhbj4gRXJyb3I6IENsYXNzICdNeUNsYXNzJyBub3QgZm91bmQgaW4gL3RtcC94ZGVidWctZGJncC10ZXN0LnBocCBvbi%s]]></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" name="error"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3" type_string="Fatal error"><![CDATA[Uncaught Error: Class 'MyClass' not found]]></xdebug:message></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="stopping" reason="ok"></response>

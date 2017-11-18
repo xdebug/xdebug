@@ -37,7 +37,7 @@ dbgpRun( $data, $commands );
 
 -> step_into -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" name="error" encoding="base64"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3" type_string="Notice"><![CDATA[Undefined variable: bar]]></xdebug:message><![CDATA[Ck5vdGljZTogVW5kZWZpbmVkIHZhcmlhYmxlOiBiYXIgaW4gL3RtcC94ZGVidWctZGJncC10ZXN0LnBocCBvbi%s]]></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" name="error"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3" type_string="Notice"><![CDATA[Undefined variable: bar]]></xdebug:message></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="4"></xdebug:message></response>

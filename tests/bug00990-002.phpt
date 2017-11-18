@@ -37,10 +37,7 @@ dbgpRun( $data, $commands );
 
 -> step_into -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" name="error" encoding="base64"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3" type_string="Fatal error"><![CDATA[Uncaught Error: Class 'MyClass' not found in /tmp/xdebug-dbgp-test.php:3
-Stack trace:
-#0 {main}
-  thrown]]></xdebug:message><![CDATA[CkZhdGFsIGVycm9yOiBVbmNhdWdodCBFcnJvcjogQ2xhc3MgJ015Q2xhc3MnIG5vdCBmb3VuZCBpbiAvdG1wL3hkZWJ1Zy1kYmdwLXRlc3QucGhwIG9uIGxpbmUgMwoKRXJyb3I6IENsYXNzICdNeUNsYXNzJyBub3QgZm91bmQgaW4gL3RtcC94ZGVidWctZGJncC10ZXN0LnBocC%s]]></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" name="error"><xdebug:message filename="file:///tmp/xdebug-dbgp-test.php" lineno="3" type_string="Fatal error"><![CDATA[Uncaught Error: Class 'MyClass' not found]]></xdebug:message></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="stopping" reason="ok"></response>
