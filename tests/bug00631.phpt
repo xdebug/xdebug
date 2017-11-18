@@ -19,27 +19,27 @@ cmd: %sbug00631.php
 part: 1
 positions: line
 
-events: Time
+events: Time Memory
 
 fl=(1) php:internal
 fn=(1) php::register_shutdown_function
-%d %d
+%d %d %i
 
 fl=(1)
 fn=(2) php::strrev
-%d %d
+%d %d %i
 
 fl=(2) %sbug00631.php
 fn=(3) {main}
 
-summary: %d
+summary: %d %i
 
-%d %d
+%d %d %i
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-%d %d
+%d %d %i
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-%d %d
+%d %d %i
