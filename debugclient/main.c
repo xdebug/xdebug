@@ -56,7 +56,7 @@
 #define MSG_NOSIGNAL 0
 #endif
 
-#define DEBUGCLIENT_VERSION "0.11.0"
+#define DEBUGCLIENT_VERSION "0.12.0"
 #define DEFAULT_PORT        9000
 
 #define IPV4                4
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
 		while ((buffer = fd_read_line_delim(fd, &cxt, FD_RL_SOCKET, '\0', &length)) > 0) {
 			buffer = fd_read_line_delim(fd, &cxt, FD_RL_SOCKET, '\0', &length);
 			printf ("%s\n", buffer);
-			if (strstr(buffer, "<stream") == NULL)
+			if ((strstr(buffer, "<stream") == NULL) && (strstr(buffer, "<notify") == NULL))
 			{
 				/* The server requires a new command */
 

@@ -11,7 +11,7 @@ function dummy1(){
 function dummy2(){
 	echo 'dummy2';
 }
-if($x)
+if(false)
 	dummy1();
 else
 	dummy2();

@@ -2475,6 +2475,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						/* Remember error reporting level */
 						old_error_reporting = EG(error_reporting);
 						EG(error_reporting) = 0;
+						XG(context).inhibit_notifications = 1;
 
 						/* Check the condition */
 						if (zend_eval_string(extra_brk_info->condition, &retval, "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
@@ -2484,6 +2485,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 						/* Restore error reporting level */
 						EG(error_reporting) = old_error_reporting;
+						XG(context).inhibit_notifications = 0;
 					}
 					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {

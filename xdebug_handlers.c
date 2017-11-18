@@ -24,7 +24,7 @@
 
 xdebug_remote_handler_info handlers[] = {
 	{ "dbgp", "DBGp - Common DeBuGger Protocol", xdebug_handler_dbgp },
-	{ 0, NULL, { NULL, NULL, NULL, NULL, NULL, NULL, NULL } }
+	{ 0, NULL, { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL } }
 };
 
 xdebug_remote_handler* xdebug_handler_get(char* mode)

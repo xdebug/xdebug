@@ -93,6 +93,7 @@ int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message);
 int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC);
+int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 char *xdebug_dbgp_get_revision(void);
 
@@ -102,6 +103,7 @@ char *xdebug_dbgp_get_revision(void);
 	xdebug_dbgp_error,              \
 	xdebug_dbgp_breakpoint,         \
 	xdebug_dbgp_stream_output,      \
+	xdebug_dbgp_notification,       \
 	xdebug_dbgp_register_eval_id,   \
 	xdebug_dbgp_get_revision        \
 }
