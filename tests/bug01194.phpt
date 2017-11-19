@@ -5,6 +5,7 @@ html_errors=1
 xdebug.default_enable=1
 xdebug.collect_params=3
 xdebug.file_link_format=
+xdebug.filename_format=
 --FILE--
 <?php
 assert(0, "TEST&TEST");

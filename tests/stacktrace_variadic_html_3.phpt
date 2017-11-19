@@ -13,6 +13,7 @@ xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
 html_errors=1
+xdebug.filename_format=
 --FILE--
 <?php
 function foo( $a, ...$b )

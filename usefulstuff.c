@@ -708,6 +708,70 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
+int xdebug_format_filename(char **formatted_name, char *fmt, char *filename TSRMLS_DC)
+{
+	xdebug_str fname = XDEBUG_STR_INITIALIZER;
+	char *name, *parent, *ancester, *full = filename;
+	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	char *slash = xdebug_sprintf("%c", DEFAULT_SLASH);
+	char *format = fmt && fmt[0] ? fmt : "...%s%n"; /* If the format is empty, we use the default */
+
+	/* Create pointers for the format chars */
+	xdebug_arg_init(parts);
+	xdebug_explode(slash, filename, parts, -1);
+	name = parts->args[parts->c - 1];
+	parent = parts->c > 1 ?
+		xdebug_join(slash, parts, parts->c - 2, parts->c - 1) :
+		xdstrdup(name);
+	ancester = parts->c > 2 ?
+		xdebug_join(slash, parts, parts->c - 3, parts->c - 1) :
+		xdstrdup(parent);
+
+	/* Make sure that we at least output an empty string */
+	xdebug_str_addl(&fname, "", 0, 0);
+
+	while (*format)
+	{
+		if (*format != '%') {
+			xdebug_str_addl(&fname, (char *) format, 1, 0);
+		} else {
+			format++;
+			switch (*format)
+			{
+				case 'n': /* filename */
+					xdebug_str_add(&fname, xdebug_sprintf("%s", name), 1);
+					break;
+				case 'p': /* parent */
+					xdebug_str_add(&fname, xdebug_sprintf("%s", parent), 1);
+					break;
+				case 'a': /* ancester */
+					xdebug_str_add(&fname, xdebug_sprintf("%s", ancester), 1);
+					break;
+				case 'f': /* full path */
+					xdebug_str_add(&fname, xdebug_sprintf("%s", full), 1);
+					break;
+				case 's': /* slash */
+					xdebug_str_add(&fname, xdebug_sprintf("%c", DEFAULT_SLASH), 1);
+					break;
+				case '%': /* literal % */
+					xdebug_str_addl(&fname, "%", 1, 0);
+					break;
+			}
+		}
+		format++;
+	}
+
+	xdfree(slash);
+	xdfree(ancester);
+	xdfree(parent);
+	xdebug_arg_dtor(parts);
+
+	*formatted_name = fname.d;
+
+	return fname.l;
+}
+
+
 void xdebug_open_log(TSRMLS_D)
 {
 	/* initialize remote log file */

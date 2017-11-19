@@ -5,6 +5,7 @@ html_errors=1
 xdebug.show_exception_trace=1
 xdebug.default_enable=1
 xdebug.file_link_format=
+xdebug.filename_format=
 xdebug.dump.SERVER=
 xdebug.show_local_vars=0
 --FILE--
