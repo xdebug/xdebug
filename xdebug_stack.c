@@ -740,6 +740,28 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			}
 #endif
 			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+			if (XG(dump_globals) && !(XG(dump_once) && XG(dumped))) {
+				char *printable_stack = xdebug_get_printable_superglobals(0 TSRMLS_CC);
+
+				if (printable_stack) {
+					int pc;
+
+					xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+
+					xdebug_arg_init(parts);
+					xdebug_explode("\n", printable_stack, parts, -1);
+
+					for (pc = 0; pc < parts->c; pc++) {
+						char *tmp_line = xdebug_sprintf("PHP %s", parts->args[pc]);
+						php_log_err(tmp_line);
+						xdfree(tmp_line);
+					}
+
+					xdebug_arg_dtor(parts);
+					xdfree(printable_stack);
+					php_log_err("PHP ");
+				}
+			}
 		}
 
 		/* Display errors */
