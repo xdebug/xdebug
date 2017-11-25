@@ -1390,7 +1390,11 @@ char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebu
 	}
 
 	if (options->show_location && !debug_zval) {
-		xdebug_str_add(&str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, zend_get_executed_filename(TSRMLS_C), ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
+		char *formatted_filename;
+
+		xdebug_format_filename(&formatted_filename, XG(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
+		xdebug_str_add(&str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, formatted_filename, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
+		xdfree(formatted_filename);
 	}
 
 	xdebug_var_export_text_ansi(&val, (xdebug_str*) &str, mode, 1, debug_zval, options TSRMLS_CC);
@@ -2286,15 +2290,20 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 
 	xdebug_str_addl(&str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
 	if (options->show_location && !debug_zval) {
+		char *formatted_filename;
+		xdebug_format_filename(&formatted_filename, XG(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
+
 		if (strlen(XG(file_link_format)) > 0) {
 			char *file_link;
 
 			xdebug_format_file_link(&file_link, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
-			xdebug_str_add(&str, xdebug_sprintf("\n<small><a href='%s'>%s:%d</a>:</small>", file_link, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C)), 1);
+			xdebug_str_add(&str, xdebug_sprintf("\n<small><a href='%s'>%s:%d</a>:</small>", file_link, formatted_filename, zend_get_executed_lineno(TSRMLS_C)), 1);
 			xdfree(file_link);
 		} else {
-			xdebug_str_add(&str, xdebug_sprintf("\n<small>%s:%d:</small>", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C)), 1);
+			xdebug_str_add(&str, xdebug_sprintf("\n<small>%s:%d:</small>", formatted_filename, zend_get_executed_lineno(TSRMLS_C)), 1);
 		}
+
+		xdfree(formatted_filename);
 	}
 	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
 	xdebug_str_addl(&str, "</pre>", 6, 0);

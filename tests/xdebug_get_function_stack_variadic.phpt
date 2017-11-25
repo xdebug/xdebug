@@ -15,6 +15,7 @@ xdebug.force_error_reporting=0
 log_errors=1
 error_log=
 display_errors=0
+xdebug.filename_format=
 --FILE--
 <?php
 function foo( $a, ...$b )

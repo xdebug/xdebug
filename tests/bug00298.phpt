@@ -3,6 +3,7 @@ Test for bug #298: xdebug_var_dump & multiline strings
 --INI--
 xdebug.default_enable=1
 xdebug.file_link_format=
+xdebug.filename_format=
 xdebug.overload_var_dump=2
 --FILE--
 <?php
