@@ -440,7 +440,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 			if (html) {
 				char *formatted_filename;
-				xdebug_format_filename(&formatted_filename, XG(filename_format), i->filename);
+				xdebug_format_filename(&formatted_filename, XG(filename_format), "...%s%n", i->filename);
 
 				if (strlen(XG(file_link_format)) > 0) {
 					char *file_link;

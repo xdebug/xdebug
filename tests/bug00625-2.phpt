@@ -5,6 +5,7 @@ XDEBUG_CONFIG=
 --INI--
 xdebug.default_enable=1
 default_charset=utf-8
+xdebug.filename_format=
 --FILE--
 <?php
 header('Content-type: text/plain');

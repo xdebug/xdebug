@@ -8,6 +8,7 @@ xdebug.var_display_max_children=4
 xdebug.var_display_max_depth=2
 xdebug.cli_color=1
 xdebug.overload_var_dump=2
+xdebug.filename_format=
 --FILE--
 <?php
 $array = array(

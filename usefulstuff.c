@@ -708,17 +708,18 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
-int xdebug_format_filename(char **formatted_name, char *fmt, char *filename TSRMLS_DC)
+int xdebug_format_filename(char **formatted_name, const char *fmt, const char *default_fmt, const char *filename TSRMLS_DC)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
-	char *name, *parent, *ancester, *full = filename;
+	char *name, *parent, *ancester;
+	const char *full = filename;
 	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	char *slash = xdebug_sprintf("%c", DEFAULT_SLASH);
-	char *format = fmt && fmt[0] ? fmt : "...%s%n"; /* If the format is empty, we use the default */
+	const char *format = fmt && fmt[0] ? fmt : default_fmt; /* If the format is empty, we use the default */
 
 	/* Create pointers for the format chars */
 	xdebug_arg_init(parts);
-	xdebug_explode(slash, filename, parts, -1);
+	xdebug_explode(slash, (char*) filename, parts, -1);
 	name = parts->args[parts->c - 1];
 	parent = parts->c > 1 ?
 		xdebug_join(slash, parts, parts->c - 2, parts->c - 1) :

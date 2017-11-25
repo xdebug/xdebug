@@ -6,6 +6,7 @@ Test for bug #1343: Wrong values of numerical keys outside 32bit range
 xdebug.default_enable=1
 html_errors=0
 xdebug.overload_var_dump=2
+xdebug.filename_format=
 --FILE--
 <?php
 $ar = array();

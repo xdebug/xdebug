@@ -5,6 +5,7 @@ html_errors=1
 xdebug.default_enable=1
 xdebug.overload_var_dump=2
 xdebug.file_link_format=
+xdebug.filename_format=
 --FILE--
 <?php
 class Daddy
