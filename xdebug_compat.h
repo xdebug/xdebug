@@ -33,7 +33,7 @@ unsigned char *xdebug_base64_decode(unsigned char *data, int data_len, int *new_
 void xdebug_stripcslashes(char *string, int *new_len);
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC);
 int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC);
-void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC);
+void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC);
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
 zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC);
 
