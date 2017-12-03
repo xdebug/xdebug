@@ -44,12 +44,12 @@ echo "\n";
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>
 <pre class='xdebug-var-dump' dir='ltr'>
-<small>…/tests/xdebug_var_dump_fileformat-html.php:%d:</small>
+<small>…%etests%exdebug_var_dump_fileformat-html.php:%d:</small>
 <b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>
 <pre class='xdebug-var-dump' dir='ltr'>
-<small>«%s/tests/xdebug_var_dump_fileformat-html.php»:%d:</small>
+<small>«%s%etests%exdebug_var_dump_fileformat-html.php»:%d:</small>
 <b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>

@@ -728,9 +728,6 @@ int xdebug_format_filename(char **formatted_name, const char *fmt, const char *d
 		xdebug_join(slash, parts, parts->c - 3, parts->c - 1) :
 		xdstrdup(parent);
 
-	/* Make sure that we at least output an empty string */
-	xdebug_str_addl(&fname, "", 0, 0);
-
 	while (*format)
 	{
 		if (*format != '%') {

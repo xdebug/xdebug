@@ -45,19 +45,19 @@ echo "\n";
   [1mint[22m([32m1092515106[0m)
 }
 
-[1m…/tests/xdebug_var_dump_fileformat-ansi.php[22m:[1m17[22m:
+[1m…%etests%exdebug_var_dump_fileformat-ansi.php[22m:[1m17[22m:
 [1mclass[22m [31mTimeStuff[0m#%d ([32m1[0m) {
   [32m[1mprivate[22m[0m $timestamp [0m=>[0m
   [1mint[22m([32m1092515106[0m)
 }
 
-[1m«%s/tests/xdebug_var_dump_fileformat-ansi.php»[22m:[1m21[22m:
+[1m«%s%etests%exdebug_var_dump_fileformat-ansi.php»[22m:[1m21[22m:
 [1mclass[22m [31mTimeStuff[0m#%d ([32m1[0m) {
   [32m[1mprivate[22m[0m $timestamp [0m=>[0m
   [1mint[22m([32m1092515106[0m)
 }
 
-[1m{%s/tests/xdebug_var_dump_fileformat-ansi.php}[22m:[1m25[22m:
+[1m{%s%etests%exdebug_var_dump_fileformat-ansi.php}[22m:[1m25[22m:
 [1mclass[22m [31mTimeStuff[0m#%d ([32m1[0m) {
   [32m[1mprivate[22m[0m $timestamp [0m=>[0m
   [1mint[22m([32m1092515106[0m)
