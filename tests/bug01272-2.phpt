@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1272: property_get doesn't return attributes for SimpleXMLElement
+--SKIPIF--
+<?php if (!extension_loaded('simplexml')) echo "skip The SimpleXML extension needs to be installed\n"; ?>
 --FILE--
 <?php
 include dirname(__FILE__) . '/bug01272.inc';
