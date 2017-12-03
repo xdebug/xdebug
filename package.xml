@@ -188,7 +188,7 @@ Sat, Dec  2, 2018 - xdebug 2.6.0alpha1
  <dependencies>
   <required>
    <php>
-    <min>5.5.0</min>
+    <min>7.0.0</min>
    </php>
    <pearinstaller>
     <min>1.9.1</min>
