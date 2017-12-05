@@ -3,7 +3,20 @@
 
 ARG_WITH("xdebug", "Xdebug support", "no");
 
-if (PHP_XDEBUG == "yes") {
-	EXTENSION("xdebug", "xdebug.c xdebug_branch_info.c xdebug_code_coverage.c xdebug_com.c xdebug_compat.c xdebug_handler_dbgp.c xdebug_handlers.c xdebug_llist.c xdebug_monitor.c xdebug_hash.c xdebug_private.c xdebug_profiler.c xdebug_set.c xdebug_stack.c xdebug_str.c xdebug_superglobals.c xdebug_tracing.c xdebug_trace_textual.c xdebug_trace_computerized.c xdebug_trace_html.c xdebug_var.c xdebug_xml.c usefulstuff.c");
+if (PHP_XDEBUG != 'no') {
+	var files = 'xdebug.c xdebug_branch_info.c xdebug_code_coverage.c ' + 
+		    'xdebug_com.c xdebug_compat.c xdebug_handler_dbgp.c ' + 
+		    'xdebug_handlers.c xdebug_llist.c xdebug_monitor.c ' + 
+		    'xdebug_hash.c xdebug_private.c xdebug_profiler.c ' + 
+		    'xdebug_set.c xdebug_stack.c xdebug_str.c xdebug_superglobals.c ' + 
+		    'xdebug_tracing.c xdebug_trace_textual.c xdebug_trace_computerized.c ' +
+		    'xdebug_trace_html.c xdebug_var.c xdebug_xml.c usefulstuff.c';
+
+	if (typeof(ZEND_EXTENSION) == 'undefined') {
+		EXTENSION('xdebug', files);
+	} else {
+		ZEND_EXTENSION('xdebug', files);
+	}
+
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
 }
