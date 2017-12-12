@@ -1211,7 +1211,7 @@ static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong inde
 			xdfree(prop_name);
 			xdfree(class_name);
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("%s%spublic%s%s ${%d} %s=>%s\n",
+			xdebug_str_add(str, xdebug_sprintf("%s%spublic%s%s ${" XDEBUG_INT_FMT "} %s=>%s\n",
 			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET,
 			               index_key, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 		}
@@ -2128,7 +2128,7 @@ static int xdebug_object_element_export_fancy(zval *zv_nptr, zend_ulong index_ke
 			xdfree(prop_name);
 			xdfree(prop_class_name);
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("<i>public</i> %d <font color='%s'>=&gt;</font> ", index_key, COLOR_POINTER), 1);
+			xdebug_str_add(str, xdebug_sprintf("<i>public</i> " XDEBUG_INT_FMT " <font color='%s'>=&gt;</font> ", index_key, COLOR_POINTER), 1);
 		}
 		xdebug_var_export_fancy(zv, str, level + 1, debug_zval, options TSRMLS_CC);
 	}

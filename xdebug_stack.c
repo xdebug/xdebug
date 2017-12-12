@@ -593,7 +593,7 @@ void xdebug_init_debugger(TSRMLS_D)
 	} else if (XG(context).socket == -1) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");
 	} else if (XG(context).socket == -2) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Time-out connecting to client (Waited: %ld ms). :-(\n", XG(remote_connect_timeout));
+		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Time-out connecting to client (Waited: " ZEND_LONG_FMT " ms). :-(\n", XG(remote_connect_timeout));
 	} else if (XG(context).socket == -3) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: No permission connecting to client. This could be SELinux related. :-(\n");
 	}
