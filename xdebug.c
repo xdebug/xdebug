@@ -1706,6 +1706,15 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE", XG(profiler_enable_trigger_value) TSRMLS_CC))
 		) {
 			if (xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
+				if (!SG(headers_sent)) {
+					sapi_header_line ctr = {0};
+
+					ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG(profile_filename));
+					ctr.line_len = strlen(ctr.line);
+					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
+					xdfree(ctr.line);
+				}
+
 				XG(profiler_enabled) = 1;
 			}
 		}
