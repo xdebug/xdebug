@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2017-12-02</date>
- <time>18:53:29</time>
+ <date>2017-12-28</date>
+ <time>19:18:21</time>
  <version>
-  <release>2.6.0alpha1</release>
-  <api>2.6.0alpha1</api>
+  <release>2.6.0beta1</release>
+  <api>2.6.0beta1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,52 +45,23 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sat, Dec  2, 2018 - xdebug 2.6.0alpha1
+Thu, Dec 28, 2017 - xdebug 2.6.0beta1
 
 + Added features:
 
-  - Implemented issue #474: Added "memory" output to profiling files, to find out where memory is allocated.
-  - Implemented issue #575: Dump super globals contents to error log upon errors, just like when this would happen for stack traces.
-  - Implemented issue #964: Parse X-Forwarded-For for the first IP address when selecting the remote_connect_back host (Steve Easley).
-  - Implemented issue #990: Add DBGp: notifications for notices and warnings to be shown in IDEs.
-  - Implemented issue #1312: Implement extended_properties feature to remote debugging to support names and values with low ASCII values.
-  - Implemented issue #1323: Added xdebug.filename_format setting to configure the formatting of filenames when tracing.
-  - Implemented issue #1379: Added support for Unix domain sockets to xdebug.remote_host (Sara Golemon).
-  - Implemented issue #1380: Added xdebug_is_debugger_active() that returns true when debugger is connected.
-  - Implemented issue #1391: Added support for earlier stack frames through new argument for xdebug_call_* functions.
-  - Implemented issue #1420: Handle PHP 7.2's new methods for switch/case
-  - Implemented issue #1470: Added xdebug.remote_timeout to make connect timeout configurable.
-  - Implemented issue #1495: Make var_dump() also use the new xdebug.filename_format when formatting filenames.
+  - Fixed issue #1059: Add filter capabilities to tracing, stack traces, and code coverage.
+  - Fixed issue #1437: Add X-Profile-File-Name header when a profile file has been generated.
 
 + Improvements:
 
-  - Implemented issue #847: Added support for "%s" specifier for xdebug.trace_output_name.
-  - Implemented issue #1384: Compile warning on Ubuntu 16.04 with GCC 5.4.x.
-  - Implemented issue #1401: Improved error message in case the connection breaks.
-  - Implemented issue #1430: Change DBGp tests to use TEST_PHP_EXECUTABLE instead of hard coded 'php'
-  - Implemented issue #1484: Use FD_CLOEXEC with debugging sockets to prevent FDs from leaking to forked processes (Chris Wright).
-  - Improve the foldexpr in xt.vim to fold lines correctly (Donie Leigh).
+  - Fixed issue #1493: Run test suite in AppVeyor for Windows CI.
+  - Fixed issue #1498: Use new ZEND_EXTENSION API in config.w32 build scripts. (Kalle)
 
 = Fixed bugs:
 
-  - Fixed issue #1272: property_get doesn't return @attributes for SimpleXMLElement.
-  - Fixed issue #1305: Property names with quotes can not be fetch while debugging.
-  - Fixed issue #1431: Fix "use after free" with in add_name_attribute_or_element.
-  - Fixed issue #1432: Fixed memory leak with xdebug_path_info_dtor.
-  - Fixed issue #1449: Debugging breaks with array element keys containing low-ASCII variables.
-  - Fixed issue #1471: Tracing crashes with return_assignments and ternairy operator.
-  - Fixed issue #1474: Crashes due to variable resolving/reading mechanism not taking care of temporary hash tables correctly (Nikita Popov, Derick).
-  - Fixed issue #1481: Fixed s390x and ppc64 builds (Remi Collet).
-  - Fixed issue #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING with more than 32 cases.
-  - Fixed issue #1496: Rewrite README.rst to be more clear on how to install and build Xdebug.
-
-~ Changes:
-
-  - Fixed issue #1411: Use Error (Throwable) instead of fatal error when maximum nesting level is reached.
-
-- Removed features:
-
-  - Implemented issue #1377: Drop support for PHP 5.5 and 5.6, only PHP 7 is now supported
+  - Fixed issue #702: Check whether variables tracing also works with =&amp;.
+  - Fixed issue #1501: Xdebug var dump tries casting properties.
+  - Fixed issue #1502: SEND_REF lines are not marked as covered.
 
  </notes>
 
@@ -200,6 +171,69 @@ Sat, Dec  2, 2018 - xdebug 2.6.0alpha1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2017-12-02</date>
+   <time>18:53:29</time>
+   <version>
+    <release>2.6.0alpha1</release>
+    <api>2.6.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Dec  2, 2017 - xdebug 2.6.0alpha1
+
++ Added features:
+
+  - Implemented issue #474: Added "memory" output to profiling files, to find out where memory is allocated.
+  - Implemented issue #575: Dump super globals contents to error log upon errors, just like when this would happen for stack traces.
+  - Implemented issue #964: Parse X-Forwarded-For for the first IP address when selecting the remote_connect_back host (Steve Easley).
+  - Implemented issue #990: Add DBGp: notifications for notices and warnings to be shown in IDEs.
+  - Implemented issue #1312: Implement extended_properties feature to remote debugging to support names and values with low ASCII values.
+  - Implemented issue #1323: Added xdebug.filename_format setting to configure the formatting of filenames when tracing.
+  - Implemented issue #1379: Added support for Unix domain sockets to xdebug.remote_host (Sara Golemon).
+  - Implemented issue #1380: Added xdebug_is_debugger_active() that returns true when debugger is connected.
+  - Implemented issue #1391: Added support for earlier stack frames through new argument for xdebug_call_* functions.
+  - Implemented issue #1420: Handle PHP 7.2's new methods for switch/case
+  - Implemented issue #1470: Added xdebug.remote_timeout to make connect timeout configurable.
+  - Implemented issue #1495: Make var_dump() also use the new xdebug.filename_format when formatting filenames.
+
++ Improvements:
+
+  - Implemented issue #847: Added support for "%s" specifier for xdebug.trace_output_name.
+  - Implemented issue #1384: Compile warning on Ubuntu 16.04 with GCC 5.4.x.
+  - Implemented issue #1401: Improved error message in case the connection breaks.
+  - Implemented issue #1430: Change DBGp tests to use TEST_PHP_EXECUTABLE instead of hard coded 'php'
+  - Implemented issue #1484: Use FD_CLOEXEC with debugging sockets to prevent FDs from leaking to forked processes (Chris Wright).
+  - Improve the foldexpr in xt.vim to fold lines correctly (Donie Leigh).
+
+= Fixed bugs:
+
+  - Fixed issue #1272: property_get doesn't return @attributes for SimpleXMLElement.
+  - Fixed issue #1305: Property names with quotes can not be fetch while debugging.
+  - Fixed issue #1431: Fix "use after free" with in add_name_attribute_or_element.
+  - Fixed issue #1432: Fixed memory leak with xdebug_path_info_dtor.
+  - Fixed issue #1449: Debugging breaks with array element keys containing low-ASCII variables.
+  - Fixed issue #1471: Tracing crashes with return_assignments and ternairy operator.
+  - Fixed issue #1474: Crashes due to variable resolving/reading mechanism not taking care of temporary hash tables correctly (Nikita Popov, Derick).
+  - Fixed issue #1481: Fixed s390x and ppc64 builds (Remi Collet).
+  - Fixed issue #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING with more than 32 cases.
+  - Fixed issue #1496: Rewrite README.rst to be more clear on how to install and build Xdebug.
+
+~ Changes:
+
+  - Fixed issue #1411: Use Error (Throwable) instead of fatal error when maximum nesting level is reached.
+
+- Removed features:
+
+  - Implemented issue #1377: Drop support for PHP 5.5 and 5.6, only PHP 7 is now supported
+
+   </notes>
+  </release>
 
   <release>
    <date>2017-06-21</date>
