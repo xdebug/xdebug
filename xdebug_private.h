@@ -189,6 +189,10 @@ typedef struct _function_stack_entry {
 	zend_execute_data *execute_data;
 	zval        *This;
 
+	/* filter properties */
+	long         filtered_tracing;
+	long         filtered_code_coverage;
+
 	/* tracing properties */
 	signed long  memory;
 	signed long  prev_memory;

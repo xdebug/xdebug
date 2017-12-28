@@ -124,6 +124,9 @@ PHP_FUNCTION(xdebug_memory_usage);
 PHP_FUNCTION(xdebug_peak_memory_usage);
 PHP_FUNCTION(xdebug_time_index);
 
+/* filter functions */
+PHP_FUNCTION(xdebug_set_filter);
+
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           status;
 	int           reason;
@@ -193,6 +196,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	unsigned int  function_count;
 	int           dead_code_analysis_tracker_offset;
 	long          dead_code_last_start_id;
+	long          code_coverage_filter_offset;
 	char                 *previous_filename;
 	xdebug_coverage_file *previous_file;
 	char                 *previous_mark_filename;
@@ -289,6 +293,13 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	/* in-execution checking */
 	zend_bool  in_execution;
 	zend_bool  in_var_serialisation;
+
+	/* filters */
+	zend_long     filter_type_tracing;
+	zend_long     filter_type_profiler;
+	zend_long     filter_type_code_coverage;
+	xdebug_llist *filters_tracing;
+	xdebug_llist *filters_code_coverage;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS

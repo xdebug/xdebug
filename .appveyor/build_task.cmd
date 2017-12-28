@@ -51,7 +51,7 @@ setlocal enableextensions enabledelayedexpansion
 	set SKIP_IPV6_TESTS=1
 	set REPORT_EXIT_STATUS=1
 	echo !TEST_PHP_EXECUTABLE! !TEST_PHP_ARGS! -v
-	echo !TEST_PHP_EXECUTABLE! -n run-tests.php -q -x --show-diff %APPVEYOR_BUILD_FOLDER%\tests
+	echo !TEST_PHP_EXECUTABLE! -n run-tests.php -q -x --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp %APPVEYOR_BUILD_FOLDER%\tests
 	!TEST_PHP_EXECUTABLE! !TEST_PHP_ARGS! -v
 	!TEST_PHP_EXECUTABLE! -n run-tests.php -q -x --show-diff %APPVEYOR_BUILD_FOLDER%\tests
 
