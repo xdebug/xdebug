@@ -24,6 +24,9 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+static void xdebug_gc_stats_print_run(xdebug_gc_run *run);
+static void xdebug_gc_stats_run_free(xdebug_gc_run *run);
+
 int xdebug_gc_collect_cycles(void)
 {
 	int                ret;
@@ -69,7 +72,7 @@ int xdebug_gc_collect_cycles(void)
 	return ret;
 }
 
-void xdebug_gc_stats_run_free(xdebug_gc_run *run)
+static void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 {
 	if (run) {
 		if (run->function_name) {
@@ -132,7 +135,7 @@ void xdebug_gc_stats_stop()
 	}
 }
 
-void xdebug_gc_stats_print_run(xdebug_gc_run *run)
+static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 {
 	if (!XG(gc_stats_file)) {
 		return;

@@ -30,12 +30,9 @@ typedef struct _xdebug_gc_run {
 } xdebug_gc_run;
 
 int (*xdebug_old_gc_collect_cycles)(void);
-int xdebug_gc_collect_cycles(void);
-int xdebug_gc_stats_init(char *fname, char *script_name);
-void xdebug_gc_stats_print_run(xdebug_gc_run *run);
-void xdebug_gc_stats_run_free(xdebug_gc_run *run);
-void xdebug_gc_stats_stop();
 
-void xdebug_gc_stats_show_report();
+int xdebug_gc_stats_init(char *fname, char *script_name);
+void xdebug_gc_stats_stop();
+int xdebug_gc_collect_cycles(void);
 
 #endif
