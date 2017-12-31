@@ -23,6 +23,7 @@
 #include "php.h"
 #include "php_xdebug.h"
 #include "xdebug_gc_stats.h"
+#include "xdebug_stack.h"
 #include "zend_builtin_functions.h"
 #include "SAPI.h"
 
@@ -34,9 +35,9 @@ int xdebug_gc_collect_cycles(void)
 	uint32_t           collected;
 	xdebug_gc_run     *run;
 	zend_execute_data *execute_data;
-	zend_function     *current_function;
 	long int           memory;
 	double             start;
+	xdebug_func        tmp;
 
 	if (!XG(gc_stats_enabled)) {
 		return xdebug_old_gc_collect_cycles();
@@ -59,17 +60,10 @@ int xdebug_gc_collect_cycles(void)
 	run->memory_before = memory;
 	run->memory_after = zend_memory_usage(0);
 
-	if (execute_data && execute_data->func) {
-		current_function = execute_data->func;
+	xdebug_build_fname(&tmp, execute_data);
 
-		if (current_function->common.function_name) {
-			run->function_name = zend_string_copy(current_function->common.function_name);
-		}
-
-		if (current_function->common.scope && current_function->common.scope->name) {
-			run->class_name = zend_string_copy(current_function->common.scope->name);
-		}
-	}
+	run->function_name = tmp.function ? xdstrdup(tmp.function) : NULL;
+	run->class_name = tmp.class ? xdstrdup(tmp.class) : NULL;
 
 	zend_fetch_debug_backtrace(&(run->stack), 0, DEBUG_BACKTRACE_IGNORE_ARGS, 0 TSRMLS_CC);
 
@@ -84,10 +78,10 @@ void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 {
 	if (run) {
 		if (run->function_name) {
-			zend_string_release(run->function_name);
+			xdfree(run->function_name);
 		}
 		if (run->class_name) {
-			zend_string_release(run->class_name);
+			xdfree(run->class_name);
 		}
 		zval_ptr_dtor(&(run->stack));
 		xdfree(run);
@@ -168,7 +162,7 @@ void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->memory_before,
 			run->memory_after,
 			(float)run->memory_after / (float)run->memory_before * 100.0,
-			ZSTR_VAL(run->function_name)
+			run->function_name
 		);
 	} else if (run->class_name && run->function_name) {
 		fprintf(XG(gc_stats_file),
@@ -179,8 +173,8 @@ void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->memory_before,
 			run->memory_after,
 			(float)run->memory_after / (float)run->memory_before * 100.0,
-			ZSTR_VAL(run->class_name),
-			ZSTR_VAL(run->function_name)
+			run->class_name,
+			run->function_name
 		);
 	}
 

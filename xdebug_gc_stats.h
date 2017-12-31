@@ -24,8 +24,8 @@ typedef struct _xdebug_gc_run {
 	zend_long    duration;
 	zend_long    memory_before;
 	zend_long    memory_after;
-	zend_string *function_name;
-	zend_string *class_name;
+	char        *function_name;
+	char        *class_name;
 	zval stack;
 } xdebug_gc_run;
 
