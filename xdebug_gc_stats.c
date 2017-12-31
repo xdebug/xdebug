@@ -234,3 +234,17 @@ PHP_FUNCTION(xdebug_stop_gcstats)
 		php_error(E_NOTICE, "Garbage Collection statistics was not started");
 	}
 }
+
+/* {{{ proto void xdebug_get_gc_run_count()
+   Return number of times garbage collection was triggered. */
+PHP_FUNCTION(xdebug_get_gc_run_count)
+{
+    RETURN_LONG(GC_G(gc_runs));
+}
+
+/* {{{ proto void xdebug_get_gc_total_collected_roots()
+   Return total number of collected root variables during garbage collection. */
+PHP_FUNCTION(xdebug_get_gc_total_collected_roots)
+{
+    RETURN_LONG(GC_G(collected));
+}
