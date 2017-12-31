@@ -209,6 +209,8 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_start_gcstats,         xdebug_start_gcstats_args)
 	PHP_FE(xdebug_stop_gcstats,          xdebug_stop_gcstats_args)
 	PHP_FE(xdebug_get_gcstats_filename,  xdebug_void_args)
+	PHP_FE(xdebug_get_gc_run_count,      xdebug_void_args)
+	PHP_FE(xdebug_get_gc_total_collected_roots, xdebug_void_args)
 
 	PHP_FE(xdebug_memory_usage,          xdebug_void_args)
 	PHP_FE(xdebug_peak_memory_usage,     xdebug_void_args)

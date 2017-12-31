@@ -121,6 +121,8 @@ PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
 PHP_FUNCTION(xdebug_start_gcstats);
 PHP_FUNCTION(xdebug_stop_gcstats);
 PHP_FUNCTION(xdebug_get_gcstats_filename);
+PHP_FUNCTION(xdebug_get_gc_run_count);
+PHP_FUNCTION(xdebug_get_gc_total_collected_roots);
 
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
