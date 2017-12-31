@@ -54,6 +54,7 @@
 #include "xdebug_code_coverage.h"
 #include "xdebug_com.h"
 #include "xdebug_filter.h"
+#include "xdebug_gc_stats.h"
 #include "xdebug_llist.h"
 #include "xdebug_mm.h"
 #include "xdebug_monitor.h"
@@ -159,6 +160,13 @@ ZEND_BEGIN_ARG_INFO_EX(xdebug_stop_code_coverage_args, ZEND_SEND_BY_VAL, ZEND_RE
 	ZEND_ARG_INFO(0, cleanup)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(xdebug_start_gcstats_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, fname)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(xdebug_stop_gcstats_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(xdebug_set_filter_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 3)
 	ZEND_ARG_INFO(0, filter_group)
 	ZEND_ARG_INFO(0, filter_type)
@@ -193,6 +201,12 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_profiler_filename, xdebug_void_args)
 	PHP_FE(xdebug_dump_aggr_profiling_data, xdebug_dump_aggr_profiling_data_args)
 	PHP_FE(xdebug_clear_aggr_profiling_data, xdebug_void_args)
+
+	PHP_FE(xdebug_start_gcstats,         xdebug_start_gcstats_args)
+	PHP_FE(xdebug_stop_gcstats,          xdebug_stop_gcstats_args)
+	PHP_FE(xdebug_get_gcstats_filename,  xdebug_void_args)
+	PHP_FE(xdebug_get_gc_run_count,      xdebug_void_args)
+	PHP_FE(xdebug_get_gc_total_collected_roots, xdebug_void_args)
 
 	PHP_FE(xdebug_memory_usage,          xdebug_void_args)
 	PHP_FE(xdebug_peak_memory_usage,     xdebug_void_args)
@@ -384,6 +398,11 @@ PHP_INI_BEGIN()
 
 	/* Scream support */
 	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   do_scream,            zend_xdebug_globals, xdebug_globals)
+
+	/* GC Stats support */
+	STD_PHP_INI_BOOLEAN("xdebug.gc_stats_enable",    "0",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   gc_stats_enable,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_dir",  XDEBUG_TEMP_DIR,   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, gc_stats_output_dir,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_name", "gcstats.%p",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, gc_stats_output_name, zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
@@ -429,6 +448,10 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->filter_type_code_coverage = XDEBUG_FILTER_NONE;
 	xg->filters_tracing           = NULL;
 	xg->filters_code_coverage     = NULL;
+
+	xg->gc_stats_file = NULL;
+	xg->gc_stats_filename = NULL;
+	xg->gc_stats_enabled = 0;
 
 	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
@@ -721,6 +744,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
 
+    /* Replace garbage collection handler with our own */
+    xdebug_old_gc_collect_cycles = gc_collect_cycles;
+    gc_collect_cycles = xdebug_gc_collect_cycles;
+
 	/* Get reserved offsets */
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
 	zend_xdebug_filter_offset = zend_get_resource_handle(&dummy_ext);
@@ -876,6 +903,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	zend_execute_ex = xdebug_old_execute_ex;
 	zend_execute_internal = xdebug_old_execute_internal;
 	zend_error_cb = xdebug_old_error_cb;
+	gc_collect_cycles = xdebug_old_gc_collect_cycles;
 
 	zend_hash_destroy(&XG(aggr_calls));
 
@@ -1182,6 +1210,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(code_coverage_filter_offset) = zend_xdebug_filter_offset;
 	XG(previous_filename) = "";
 	XG(previous_file) = NULL;
+	XG(gc_stats_file) = NULL;
+	XG(gc_stats_filename) = NULL;
+	XG(gc_stats_enabled) = 0;
 
 	xdebug_init_auto_globals(TSRMLS_C);
 
@@ -1301,6 +1332,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	xdebug_hash_destroy(XG(profile_functionname_refs));
 	XG(profile_filename_refs) = NULL;
 	XG(profile_functionname_refs) = NULL;
+
+	if (XG(gc_stats_enabled)) {
+		xdebug_gc_stats_stop();
+	}
+
+	if (XG(gc_stats_filename)) {
+		xdfree(XG(gc_stats_filename));
+	}
 
 	if (XG(ide_key)) {
 		xdfree(XG(ide_key));
@@ -1762,6 +1801,12 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 			/* In case we do an auto-trace we are not interested in the return
 			 * value, but we still have to free it. */
 			xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XG(trace_options) TSRMLS_CC));
+		}
+
+		if (!XG(gc_stats_enabled) && XG(gc_stats_enable)) {
+			if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
+				XG(gc_stats_enabled) = 1;
+			}
 		}
 	}
 

@@ -1014,7 +1014,7 @@ static int find_line_number_for_current_execute_point(zend_execute_data *edata T
 	return 0;
 }
 
-static void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
+void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 {
 	memset(tmp, 0, sizeof(xdebug_func));
 

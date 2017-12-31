@@ -117,6 +117,13 @@ PHP_FUNCTION(xdebug_get_profiler_filename);
 PHP_FUNCTION(xdebug_dump_aggr_profiling_data);
 PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
 
+/* gc stats functions */
+PHP_FUNCTION(xdebug_start_gcstats);
+PHP_FUNCTION(xdebug_stop_gcstats);
+PHP_FUNCTION(xdebug_get_gcstats_filename);
+PHP_FUNCTION(xdebug_get_gc_run_count);
+PHP_FUNCTION(xdebug_get_gc_total_collected_roots);
+
 /* misc functions */
 PHP_FUNCTION(xdebug_dump_superglobals);
 PHP_FUNCTION(xdebug_get_headers);
@@ -289,6 +296,14 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	/* scream */
 	zend_bool  do_scream;
 	zend_bool  in_at;
+
+	/* garbage stats */
+	zend_bool  gc_stats_enable;
+	zend_bool  gc_stats_enabled;
+	char      *gc_stats_output_dir;
+	char      *gc_stats_output_name;
+	FILE      *gc_stats_file;
+	char      *gc_stats_filename;
 
 	/* in-execution checking */
 	zend_bool  in_execution;
