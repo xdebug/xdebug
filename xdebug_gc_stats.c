@@ -134,6 +134,8 @@ void xdebug_gc_stats_stop()
 
 static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 {
+	double reduction = (1 - (float)run->memory_after / (float)run->memory_before) * 100.0;
+
 	if (!XG(gc_stats_file)) {
 		return;
 	}
@@ -146,7 +148,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->duration / 1000.0,
 			run->memory_before,
 			run->memory_after,
-			(float)run->memory_after / (float)run->memory_before * 100.0
+			reduction
 		);
 	} else if (!run->class_name && run->function_name) {
 		fprintf(XG(gc_stats_file),
@@ -156,7 +158,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->duration / 1000.0,
 			run->memory_before,
 			run->memory_after,
-			(float)run->memory_after / (float)run->memory_before * 100.0,
+			reduction,
 			run->function_name
 		);
 	} else if (run->class_name && run->function_name) {
@@ -167,7 +169,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->duration / 1000.0,
 			run->memory_before,
 			run->memory_after,
-			(float)run->memory_after / (float)run->memory_before * 100.0,
+			reduction,
 			run->class_name,
 			run->function_name
 		);
