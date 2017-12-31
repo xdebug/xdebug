@@ -26,7 +26,6 @@ typedef struct _xdebug_gc_run {
 	zend_long    memory_after;
 	char        *function_name;
 	char        *class_name;
-	zval stack;
 } xdebug_gc_run;
 
 int (*xdebug_old_gc_collect_cycles)(void);

@@ -63,8 +63,6 @@ int xdebug_gc_collect_cycles(void)
 	run->function_name = tmp.function ? xdstrdup(tmp.function) : NULL;
 	run->class_name = tmp.class ? xdstrdup(tmp.class) : NULL;
 
-	zend_fetch_debug_backtrace(&(run->stack), 0, DEBUG_BACKTRACE_IGNORE_ARGS, 0 TSRMLS_CC);
-
 	xdebug_gc_stats_print_run(run);
 
 	xdebug_gc_stats_run_free(run);
@@ -81,7 +79,6 @@ static void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 		if (run->class_name) {
 			xdfree(run->class_name);
 		}
-		zval_ptr_dtor(&(run->stack));
 		xdfree(run);
 	}
 }
