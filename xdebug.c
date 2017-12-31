@@ -173,10 +173,6 @@ ZEND_BEGIN_ARG_INFO_EX(xdebug_set_filter_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VAL
 	ZEND_ARG_INFO(0, array_of_filters)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(xdebug_get_gc_stats_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-    ZEND_ARG_INFO(0, clear)
-ZEND_END_ARG_INFO()
-
 zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       xdebug_void_args)
 	PHP_FE(xdebug_get_function_stack,    xdebug_void_args)
