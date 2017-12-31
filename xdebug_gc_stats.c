@@ -16,11 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "php.h"
 #include "php_xdebug.h"
 #include "xdebug_gc_stats.h"
 #include "xdebug_stack.h"
