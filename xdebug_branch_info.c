@@ -1,12 +1,12 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 Derick Rethans                               |
+   | Copyright (c) 1997-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
    | http://opensource.org/licenses/bsd-license.php                       |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@derickrethans.nl>                   |
+   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
    +----------------------------------------------------------------------+
  */
 #include <stdlib.h>

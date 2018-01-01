@@ -1,5 +1,4 @@
-dnl $Id: config.m4,v 1.28 2008-07-31 00:43:35 sniper Exp $
-dnl config.m4 for extension xdebug
+dnl config.m4 for extension Xdebug
 
 PHP_ARG_ENABLE(xdebug, whether to enable Xdebug support,
 [  --enable-xdebug         Enable Xdebug support])
