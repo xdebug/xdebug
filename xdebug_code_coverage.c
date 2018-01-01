@@ -363,7 +363,7 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, zend_execute_da
 //		return ZEND_USER_OPCODE_DISPATCH;
 //	}
 
-	if (XG(do_code_coverage)) {
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
 		xdebug_print_opcode_info('=', execute_data, cur_opcode TSRMLS_CC);
 
 		if (do_cc) {
