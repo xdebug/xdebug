@@ -26,6 +26,7 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 static void xdebug_gc_stats_print_run(xdebug_gc_run *run);
 static void xdebug_gc_stats_run_free(xdebug_gc_run *run);
+int (*xdebug_old_gc_collect_cycles)(void);
 
 int xdebug_gc_collect_cycles(void)
 {

@@ -28,7 +28,7 @@ typedef struct _xdebug_gc_run {
 	char        *class_name;
 } xdebug_gc_run;
 
-int (*xdebug_old_gc_collect_cycles)(void);
+extern int (*xdebug_old_gc_collect_cycles)(void);
 
 int xdebug_gc_stats_init(char *fname, char *script_name);
 void xdebug_gc_stats_stop();
