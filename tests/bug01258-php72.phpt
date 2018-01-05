@@ -33,18 +33,24 @@ qux
 default
 array(1) {
   ["%sbug01258-php72.php"]=>
-  array(11) {
+  array(14) {
     [4]=>
     int(1)
     [5]=>
+    int(1)
+    [6]=>
     int(1)
     [7]=>
     int(1)
     [8]=>
     int(1)
+    [9]=>
+    int(1)
     [10]=>
     int(1)
     [11]=>
+    int(1)
+    [12]=>
     int(1)
     [13]=>
     int(1)
