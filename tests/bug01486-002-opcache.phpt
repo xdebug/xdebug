@@ -20,10 +20,10 @@ xdebug_stop_code_coverage();
 foo 3
 {main}
 - branches
-  - 00; OP: 00-03; line: 02-03 HIT; out1: 14  X ; out2: 21  X ; out3: 28 HIT; out4: 35  X ; out5: 42  X ; out6: 48  X ; out7: 04  X 
-  - 04; OP: 04-05; line: 04-04  X ; out1: 06  X ; out2: 14  X 
-  - 06; OP: 06-07; line: 05-05  X ; out1: 08  X ; out2: 21  X 
-  - 08; OP: 08-09; line: 06-06  X ; out1: 10  X ; out2: 28  X 
+  - 00; OP: 00-03; line: 02-03 HIT; out1: 14  X ; out2: 21  X ; out3: 28  X ; out4: 35  X ; out5: 42  X ; out6: 48  X ; out7: 04 HIT
+  - 04; OP: 04-05; line: 04-04 HIT; out1: 06 HIT; out2: 14  X 
+  - 06; OP: 06-07; line: 05-05 HIT; out1: 08 HIT; out2: 21  X 
+  - 08; OP: 08-09; line: 06-06 HIT; out1: 10  X ; out2: 28 HIT
   - 10; OP: 10-11; line: 07-07  X ; out1: 12  X ; out2: 35  X 
   - 12; OP: 12-13; line: 08-08  X ; out1: 48  X ; out2: 42  X 
   - 14; OP: 14-20; line: 04-10  X ; out1: EX  X 
@@ -35,13 +35,13 @@ foo 3
 - paths
   - 0 14:  X 
   - 0 21:  X 
-  - 0 28: HIT
+  - 0 28:  X 
   - 0 35:  X 
   - 0 42 48:  X 
   - 0 48:  X 
   - 0 4 6 8 10 12 48:  X 
   - 0 4 6 8 10 12 42 48:  X 
   - 0 4 6 8 10 35:  X 
-  - 0 4 6 8 28:  X 
+  - 0 4 6 8 28: HIT
   - 0 4 6 21:  X 
   - 0 4 14:  X
