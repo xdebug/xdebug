@@ -194,7 +194,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	int            gohungfound = 0, is_static = 0;
 	char          *zval_value = NULL;
 	xdebug_var_export_options *options;
-	const zend_op *static_opcode_ptr;
+	const zend_op *static_opcode_ptr = NULL;
 
 	next_opcode = cur_opcode + 1;
 	prev_opcode = cur_opcode - 1;
