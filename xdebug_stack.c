@@ -827,6 +827,8 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				/* bad error in module startup - no way we can live with this */
 				exit(-2);
 			}
+			XDEBUG_BREAK_INTENTIONALLY_MISSING
+
 		case E_ERROR:
 		case E_RECOVERABLE_ERROR:
 		case E_PARSE:
