@@ -290,7 +290,7 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_STATIC_PROPERTY:
 			/* First we try a public,private,protected property */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->static_members_table) {
+			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->static_members_table) {
 				ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
 				goto cleanup;
 			}
@@ -305,7 +305,7 @@ static void fetch_zval_from_symbol_table(
 					free(element);
 					element_length = name_length - (secondStar + 1 - name);
 					element = prepare_search_key(secondStar + 1, &element_length, "", 0);
-					if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
+					if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
 						ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
 						goto cleanup;
 					}
@@ -1940,13 +1940,11 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			ce = xdebug_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			/* Adding static properties */
-			if (&ce->properties_info) {
-				ZEND_HASH_INC_APPLY_COUNT(&ce->properties_info);
-				ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
-					object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
-				} ZEND_HASH_FOREACH_END();
-				ZEND_HASH_DEC_APPLY_COUNT(&ce->properties_info);
-			}
+			ZEND_HASH_INC_APPLY_COUNT(&ce->properties_info);
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
+				object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
+			} ZEND_HASH_FOREACH_END();
+			ZEND_HASH_DEC_APPLY_COUNT(&ce->properties_info);
 
 			/* Adding normal properties */
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
