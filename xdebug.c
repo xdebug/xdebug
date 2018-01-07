@@ -415,9 +415,9 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->trace_context        = NULL;
 	xg->in_debug_info        = 0;
 	xg->coverage_enable      = 0;
-	xg->previous_filename    = "";
+	xg->previous_filename    = NULL;
 	xg->previous_file        = NULL;
-	xg->previous_mark_filename = "";
+	xg->previous_mark_filename = NULL;
 	xg->previous_mark_file     = NULL;
 	xg->paths_stack = NULL;
 	xg->branches.size        = 0;
@@ -1223,7 +1223,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(dead_code_analysis_tracker_offset) = zend_xdebug_cc_run_offset;
 	XG(dead_code_last_start_id) = 1;
 	XG(code_coverage_filter_offset) = zend_xdebug_filter_offset;
-	XG(previous_filename) = "";
+	XG(previous_filename) = NULL;
 	XG(previous_file) = NULL;
 	XG(gc_stats_file) = NULL;
 	XG(gc_stats_filename) = NULL;
@@ -1416,7 +1416,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG(branches).last_branch_nr = NULL;
 		XG(branches).size = 0;
 	}
-	XG(previous_mark_filename) = "";
+	XG(previous_mark_filename) = NULL;
 
 	return SUCCESS;
 }

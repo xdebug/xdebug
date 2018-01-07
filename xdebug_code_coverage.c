@@ -471,7 +471,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
 
-	if (strcmp(XG(previous_filename), filename) == 0) {
+	if (XG(previous_filename) && strcmp(XG(previous_filename), filename) == 0) {
 		file = XG(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
@@ -974,9 +974,9 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	}
 	if (XG(do_code_coverage)) {
 		if (cleanup) {
-			XG(previous_filename) = "";
+			XG(previous_filename) = NULL;
 			XG(previous_file) = NULL;
-			XG(previous_mark_filename) = "";
+			XG(previous_mark_filename) = NULL;
 			XG(previous_mark_file) = NULL;
 			xdebug_hash_destroy(XG(code_coverage));
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);

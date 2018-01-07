@@ -339,7 +339,7 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 	xdebug_coverage_function *function;
 	xdebug_branch_info *branch_info;
 
-	if (strcmp(XG(previous_mark_filename), file_name) == 0) {
+	if (XG(previous_mark_filename) && strcmp(XG(previous_mark_filename), file_name) == 0) {
 		file = XG(previous_mark_file);
 	} else {
 		if (!xdebug_hash_find(XG(code_coverage), file_name, strlen(file_name), (void *) &file)) {
@@ -401,7 +401,7 @@ void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *funct
 	xdebug_branch_info *branch_info;
 	xdebug_path *path;
 
-	if (strcmp(XG(previous_mark_filename), filename) == 0) {
+	if (XG(previous_mark_filename) && strcmp(XG(previous_mark_filename), filename) == 0) {
 		file = XG(previous_mark_file);
 	} else {
 		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
@@ -434,7 +434,7 @@ void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_na
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
 
-	if (strcmp(XG(previous_filename), filename) == 0) {
+	if (XG(previous_filename) && strcmp(XG(previous_filename), filename) == 0) {
 		file = XG(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
