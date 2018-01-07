@@ -264,17 +264,15 @@ static inline void maybe_destroy_ht(HashTable *ht, int is_temp)
 }
 
 static void fetch_zval_from_symbol_table(
-		zval *value_in, char* orig_name, unsigned int orig_name_length,
+		zval *value_in, char *name, unsigned int name_length,
 		int type, char* ccn, int ccnl, zend_class_entry *cce TSRMLS_DC)
 {
 	HashTable *ht = NULL;
 	char  *element = NULL;
-	unsigned int name_length;
-	unsigned int element_length;
+	unsigned int element_length = name_length;
 	zend_property_info *zpp;
 	int is_temp = 0;
 	HashTable *myht = NULL;
-	char *name = NULL;
 	zval *orig_value_in = value_in;
 	zval tmp_retval;
 
@@ -286,15 +284,6 @@ static void fetch_zval_from_symbol_table(
 	ZVAL_DEREF(value_in);
 
 	ht = fetch_ht_from_zval(value_in TSRMLS_CC);
-
-	/* We need to strip the slashes for the " and / here */
-	name = xdmalloc(orig_name_length + 1);
-	memcpy(name, orig_name, orig_name_length);
-	name[orig_name_length] = '\0';
-	name_length = orig_name_length;
-	element_length = name_length;
-
-	xdebug_stripcslashes(name, (int *) &name_length);
 
 	switch (type) {
 		case XF_ST_STATIC_ROOT:
@@ -355,6 +344,7 @@ static void fetch_zval_from_symbol_table(
 
 		case XF_ST_ARRAY_INDEX_ASSOC:
 			element = prepare_search_key(name, &name_length, "", 0);
+			xdebug_stripcslashes(element, (int *) &name_length);
 
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
@@ -403,7 +393,7 @@ static void fetch_zval_from_symbol_table(
 			/* First we try an object handler */
 			if (cce) {
 				zval *tmp_val;
-				tmp_val = zend_read_property(cce, value_in, name, name_length, 0, &tmp_retval);
+				tmp_val = zend_read_property(cce, value_in, name, name_length, 1, &tmp_retval);
 				if (tmp_val != &tmp_retval && tmp_val != &EG(uninitialized_zval)) {
 					ZVAL_COPY(&tmp_retval, tmp_val);
 					goto cleanup;
@@ -511,9 +501,6 @@ static void fetch_zval_from_symbol_table(
 cleanup:
 	if (element) {
 		free(element);
-	}
-	if (name) {
-		xdfree(name);
 	}
 
 	zval_ptr_dtor_nogc(orig_value_in);
@@ -1673,10 +1660,10 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 		options->force_extended = 0;
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) { /* string key */
-			zend_string *i_string = zend_string_init(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), 0);
+			zend_string *i_string = zend_string_init(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1, 0);
 			zend_string *tmp_fullname_zstr;
 			
-			tmp_fullname_zstr = php_addcslashes(i_string, 0, "\"\\", 2);
+			tmp_fullname_zstr = php_addslashes(i_string, 0);
 
 			name_len = HASH_APPLY_KEY_LEN(hash_key) - 1;
 			name = xdstrndup(HASH_APPLY_KEY_VAL(hash_key), name_len);
@@ -1684,7 +1671,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 			if (parent_name) {
 				xdebug_str_add(&full_name, parent_name, 0);
 				xdebug_str_addl(&full_name, "[\"", 2, 0);
-				xdebug_str_addl(&full_name, tmp_fullname_zstr->val, tmp_fullname_zstr->len - 1, 0);
+				xdebug_str_addl(&full_name, tmp_fullname_zstr->val, tmp_fullname_zstr->len, 0);
 				xdebug_str_addl(&full_name, "\"]", 2, 0);
 			}
 
