@@ -60,9 +60,9 @@ char* xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len);
 
 /* Standard functions */
 xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor);
-int  xdebug_hash_add_or_update(xdebug_hash *h, char *str_key, unsigned int str_key_len, unsigned long num_key, const void *p);
-int  xdebug_hash_extended_delete(xdebug_hash *h, char *str_key, unsigned int str_key_len, unsigned long num_key);
-int  xdebug_hash_extended_find(xdebug_hash *h, char *str_key, unsigned int str_key_len, unsigned long num_key, void **p);
+int  xdebug_hash_add_or_update(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key, const void *p);
+int  xdebug_hash_extended_delete(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key);
+int  xdebug_hash_extended_find(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key, void **p);
 void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *));
 void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *, void *), void *argument);
 void xdebug_hash_destroy(xdebug_hash *h);

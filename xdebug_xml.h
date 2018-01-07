@@ -57,11 +57,11 @@ struct _xdebug_xml_node
 
 
 #define xdebug_xml_node_init(t)            xdebug_xml_node_init_ex((t), 0)
-#define xdebug_xml_add_attribute_ex(x,a,v,fa,fv) { char *ta = (a), *tv = (v); xdebug_xml_add_attribute_exl((x), (ta), strlen((ta)), (tv), strlen((tv)), fa, fv); }
+#define xdebug_xml_add_attribute_ex(x,a,v,fa,fv) { const char *ta = (a), *tv = (v); xdebug_xml_add_attribute_exl((x), (ta), strlen((ta)), (tv), strlen((tv)), fa, fv); }
 #define xdebug_xml_add_attribute(x,a,v)    xdebug_xml_add_attribute_ex((x), (a), (v), 0, 0);
 
-xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag);
-void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute, size_t attribute_len, char *value, size_t value_len, int free_name, int free_value);
+xdebug_xml_node *xdebug_xml_node_init_ex(const char *tag, int free_tag);
+void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, const char *attribute, size_t attribute_len, const char *value, size_t value_len, int free_name, int free_value);
 void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child);
 
 void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int free_text, int encode);

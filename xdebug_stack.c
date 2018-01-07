@@ -34,7 +34,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-static char* text_formats[11] = {
+static const char* text_formats[11] = {
 	"\n",
 	"%s: %s in %s on line %d\n",
 	"\nCall Stack:\n",
@@ -48,7 +48,7 @@ static char* text_formats[11] = {
 	"SCREAM:  Error suppression ignored for\n"
 };
 
-static char* ansi_formats[11] = {
+static const char* ansi_formats[11] = {
 	"\n",
 	"[1m[31m%s[0m: %s[22m in [31m%s[0m on line [32m%d[0m[22m\n",
 	"\n[1mCall Stack:[22m\n",
@@ -62,7 +62,7 @@ static char* ansi_formats[11] = {
 	"[1m[31mSCREAM[0m:  Error suppression ignored for\n"
 };
 
-static char* html_formats[13] = {
+static const char* html_formats[13] = {
 	"<br />\n<font size='1'><table class='xdebug-error xe-%s%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
@@ -78,7 +78,7 @@ static char* html_formats[13] = {
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> SCREAM: Error suppression ignored for</th></tr>\n"
 };
 
-static char** select_formats(int html TSRMLS_DC) {
+static const char** select_formats(int html TSRMLS_DC) {
 	if (html) {
 		return html_formats;
 	}
@@ -92,14 +92,14 @@ static char** select_formats(int html TSRMLS_DC) {
 
 static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
 {
-	int        html = *(int *)htmlq;
-	int        len;
-	zval       zvar;
-	char      *contents;
-	char      *name = (char*) he->ptr;
-	HashTable *tmp_ht;
-	char     **formats;
-	xdebug_str *str = (xdebug_str *) argument;
+	int          html = *(int*) htmlq;
+	int          len;
+	zval         zvar;
+	char        *contents;
+	char        *name = (char*) he->ptr;
+	HashTable   *tmp_ht;
+	const char **formats;
+	xdebug_str   *str = (xdebug_str *) argument;
 	TSRMLS_FETCH();
 
 	if (!he->ptr) {
@@ -168,7 +168,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 	xdfree(tmp_log_message);
 
 	if (XG(stack) && XG(stack)->size) {
-		php_log_err("PHP Stack trace:" TSRMLS_CC);
+		php_log_err((char*) "PHP Stack trace:" TSRMLS_CC);
 
 		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
@@ -230,9 +230,9 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 	}
 }
 
-void xdebug_append_error_head(xdebug_str *str, int html, char *error_type_str TSRMLS_DC)
+void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str TSRMLS_DC)
 {
-	char **formats = select_formats(html TSRMLS_CC);
+	const char **formats = select_formats(html TSRMLS_CC);
 
 	if (html) {
 		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str, XG(in_at) ? " xe-scream" : ""), 1);
@@ -247,9 +247,9 @@ void xdebug_append_error_head(xdebug_str *str, int html, char *error_type_str TS
 	}
 }
 
-void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
+void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
-	char **formats = select_formats(html TSRMLS_CC);
+	const char **formats = select_formats(html TSRMLS_CC);
 	char *escaped;
 
 	if (html) {
@@ -367,8 +367,8 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *i;
-	int    printed_frames = 0;
-	char **formats = select_formats(html TSRMLS_CC);
+	int                   printed_frames = 0;
+	const char          **formats = select_formats(html TSRMLS_CC);
 
 	if (XG(stack) && XG(stack)->size) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
@@ -498,12 +498,12 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC)
 {
-	char **formats = select_formats(html TSRMLS_CC);
+	const char **formats = select_formats(html TSRMLS_CC);
 
 	xdebug_str_add(str, formats[7], 0);
 }
 
-static char *get_printable_stack(int html, int error_type, char *buffer, const char *error_filename, const int error_lineno, int include_decription TSRMLS_DC)
+static char *get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription TSRMLS_DC)
 {
 	char *prepend_string;
 	char *append_string;
@@ -511,8 +511,8 @@ static char *get_printable_stack(int html, int error_type, char *buffer, const c
 	char *error_type_str_simple = xdebug_error_type_simple(error_type);
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	prepend_string = INI_STR("error_prepend_string");
-	append_string = INI_STR("error_append_string");
+	prepend_string = INI_STR((char*) "error_prepend_string");
+	append_string = INI_STR((char*) "error_append_string");
 
 	xdebug_str_add(&str, prepend_string ? prepend_string : "", 0);
 	xdebug_append_error_head(&str, html, error_type_str_simple TSRMLS_CC);
@@ -763,7 +763,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 
 					xdebug_arg_dtor(parts);
 					xdfree(printable_stack);
-					php_log_err("PHP ");
+					php_log_err((char*) "PHP ");
 				}
 			}
 		}
@@ -842,7 +842,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				) {
 					sapi_header_line ctr = { 0, 0, 0 };
 
-					ctr.line = "HTTP/1.0 500 Internal Server Error";
+					ctr.line = (char*) "HTTP/1.0 500 Internal Server Error";
 					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
 				}
@@ -851,7 +851,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
-					zend_bailout();
+					_zend_bailout((char*) __FILE__, __LINE__);
 					return;
 				}
 			}
@@ -1473,7 +1473,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), i->function.function);
 		}
 		if (i->function.class) {
-			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic");
+			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
 			add_assoc_string_ex(frame, "class",    HASH_KEY_SIZEOF("class"),    i->function.class   );
 		}
 		add_assoc_string_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename);

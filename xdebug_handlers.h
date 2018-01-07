@@ -131,8 +131,8 @@ struct _xdebug_remote_handler {
 };
 
 struct _xdebug_remote_handler_info {
-	char                  *name;
-	char                  *description;
+	const char            *name;
+	const char            *description;
 	xdebug_remote_handler  handler;
 };
 

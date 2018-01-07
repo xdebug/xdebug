@@ -52,15 +52,15 @@ typedef struct xdebug_arg {
 
 #define xdebug_fd_read_line(s,c,t) xdebug_fd_read_line_delim(s, c, t, '\n', NULL)
 char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length);
-char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end);
-void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
-char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);
+char *xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
+void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit);
+char* xdebug_memnstr(char *haystack, const char *needle, int needle_len, char *end);
 char* xdebug_strrstr(const char* haystack, const char* needle);
 double xdebug_get_utime(void);
 char* xdebug_get_time(void);
 char *xdebug_path_to_url(const char *fileurl TSRMLS_DC);
 char *xdebug_path_from_url(const char *fileurl TSRMLS_DC);
-FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname);
+FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);
 int xdebug_format_output_filename(char **filename, char *format, char *script_name);
 int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC);
 int xdebug_format_filename(char **formatted_name, const char *format, const char *default_format, const char *filename TSRMLS_DC);

@@ -80,7 +80,7 @@ typedef struct xdebug_dbgp_arg {
 #define XDEBUG_DBGP_POST_MORTEM   0x01
 
 typedef struct xdebug_dbgp_cmd {
-	char *name;
+	const char *name;
 	void (*handler)(DBGP_FUNC_PARAMETERS);
 	int  cont;
 	int  flags;

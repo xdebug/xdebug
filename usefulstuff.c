@@ -106,7 +106,7 @@ char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigne
 	return tmp;
 }
 
-char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end)
+char *xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 {
 	int         i;
 	xdebug_str *ret;
@@ -126,7 +126,7 @@ char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end)
 	return ret->d;
 }
 
-void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit)
+void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit)
 {
 	char *p1, *p2, *endp;
 
@@ -161,7 +161,7 @@ void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit)
 	}
 }
 
-char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end)
+char* xdebug_memnstr(char *haystack, const char *needle, int needle_len, char *end)
 {
 	char *p = haystack;
 	char first = *needle;
@@ -406,7 +406,7 @@ long xdebug_crc32(const char *string, int str_len)
 }
 
 #ifndef PHP_WIN32
-static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **new_fname)
+static FILE *xdebug_open_file(char *fname, const char *mode, const char *extension, char **new_fname)
 {
 	FILE *fh;
 	char *tmp_fname;
@@ -425,7 +425,7 @@ static FILE *xdebug_open_file(char *fname, char *mode, char *extension, char **n
 	return fh;
 }
 
-static FILE *xdebug_open_file_with_random_ext(char *fname, char *mode, char *extension, char **new_fname)
+static FILE *xdebug_open_file_with_random_ext(char *fname, const char *mode, const char *extension, char **new_fname)
 {
 	FILE *fh;
 	char *tmp_fname;
@@ -445,7 +445,7 @@ static FILE *xdebug_open_file_with_random_ext(char *fname, char *mode, char *ext
 	return fh;
 }
 
-FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
+FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname)
 {
 	int   r;
 	FILE *fh;
@@ -644,7 +644,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 					char *char_ptr, *strval;
 					char *sess_name;
 
-					sess_name = zend_ini_string("session.name", sizeof("session.name"), 0);
+					sess_name = zend_ini_string((char*) "session.name", sizeof("session.name"), 0);
 
 					if (sess_name && Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) == IS_ARRAY &&
 						((data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]), sess_name, strlen(sess_name))) != NULL) &&

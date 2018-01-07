@@ -134,7 +134,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 		if (fse->function.type == XFUNC_EVAL) {
 			zend_string *i_filename = zend_string_init(fse->include_filename, strlen(fse->include_filename), 0);
 			zend_string *escaped;
-			escaped = php_addcslashes(i_filename, 0, "'\\\0..\37", 6);
+			escaped = php_addcslashes(i_filename, 0, (char*) "'\\\0..\37", 6);
 			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped->val), 1);
 			zend_string_release(escaped);
 			zend_string_release(i_filename);

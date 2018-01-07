@@ -255,7 +255,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 		char *tmp_key = xdebug_sprintf("php::%s", fse->profiler.funcname);
 		char *fl_ref = NULL, *fn_ref = NULL;
 
-		fl_ref = get_filename_ref("php:internal" TSRMLS_CC);
+		fl_ref = get_filename_ref((char*) "php:internal" TSRMLS_CC);
 		fn_ref = get_functionname_ref(tmp_key TSRMLS_CC);
 
 		fprintf(XG(profile_file), "fl=%s\n", fl_ref);
@@ -313,7 +313,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 		if (call_entry->user_defined == XDEBUG_INTERNAL) {
 			char *tmp_key = xdebug_sprintf("php::%s", call_entry->function);
 
-			fl_ref = get_filename_ref("php:internal" TSRMLS_CC);
+			fl_ref = get_filename_ref((char*) "php:internal" TSRMLS_CC);
 			fn_ref = get_functionname_ref(tmp_key TSRMLS_CC);
 
 			xdfree(tmp_key);

@@ -31,7 +31,7 @@ void xdebug_superglobals_dump_dtor(void *user, void *ptr)
 	free(ptr);
 }
 
-static void dump_hash_elem(zval *z, char *name, long index_key, char *elem, int html, xdebug_str *str TSRMLS_DC)
+static void dump_hash_elem(zval *z, const char *name, long index_key, const char *elem, int html, xdebug_str *str TSRMLS_DC)
 {
 	int  len;
 
@@ -70,7 +70,7 @@ static void dump_hash_elem(zval *z, char *name, long index_key, char *elem, int 
 	}
 }
 
-static int dump_hash_elem_va(zval *pDest, zend_ulong index_key, zend_string *hash_key, char *name, int html, xdebug_str *str)
+static int dump_hash_elem_va(zval *pDest, zend_ulong index_key, zend_string *hash_key, const char *name, int html, xdebug_str *str)
 {
 	if (HASH_KEY_IS_NUMERIC(hash_key)) {
 		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, str TSRMLS_CC);
@@ -81,7 +81,7 @@ static int dump_hash_elem_va(zval *pDest, zend_ulong index_key, zend_string *has
 	return SUCCESS;
 }
 
-static void dump_hash(xdebug_llist *l, char *name, int name_len, int html, xdebug_str *str TSRMLS_DC)
+static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html, xdebug_str *str TSRMLS_DC)
 {
 	zval *z;
 	zend_ulong num;
@@ -154,7 +154,8 @@ char* xdebug_get_printable_superglobals(int html TSRMLS_DC)
 
 void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str)
 {
-	char *tok, *sep = ",";
+	char *tok;
+	const char *sep = ",";
 
 	tok = strtok(str, sep);
 	while (tok != NULL) {

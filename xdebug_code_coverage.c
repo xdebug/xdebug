@@ -342,7 +342,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	return name.d;
 }
 
-static int xdebug_common_assign_dim_handler(char *op, int do_cc, zend_execute_data *execute_data)
+static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_execute_data *execute_data)
 {
 	char    *file;
 	zend_op_array *op_array = &execute_data->func->op_array;

@@ -184,7 +184,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 		if (fse->function.type == XFUNC_EVAL) {
 			zend_string *i_filename = zend_string_init(fse->include_filename, strlen(fse->include_filename), 0);
 			zend_string *escaped;
-			escaped = php_addcslashes(i_filename, 0, "'\\\0..\37", 6);
+			escaped = php_addcslashes(i_filename, 0, (char*) "'\\\0..\37", 6);
 			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped->val), 1);
 			zend_string_release(escaped);
 			zend_string_release(i_filename);
@@ -278,7 +278,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	}
 }
 
-void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, char *op, char *filename, int lineno TSRMLS_DC)
+void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, const char *op, char *filename, int lineno TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	unsigned int j = 0;
