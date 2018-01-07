@@ -95,7 +95,6 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC);
 int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
-char *xdebug_dbgp_get_revision(void);
 
 #define xdebug_handler_dbgp {       \
 	xdebug_dbgp_init,               \
@@ -105,7 +104,6 @@ char *xdebug_dbgp_get_revision(void);
 	xdebug_dbgp_stream_output,      \
 	xdebug_dbgp_notification,       \
 	xdebug_dbgp_register_eval_id,   \
-	xdebug_dbgp_get_revision        \
 }
 
 #endif
