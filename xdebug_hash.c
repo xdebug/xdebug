@@ -112,6 +112,7 @@ xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor)
 		(__k)->value.str.len = __s_key_len; \
 		(__k)->type = XDEBUG_HASH_KEY_IS_STRING; \
 	} else { \
+		(__k)->value.str.len = 0; \
 		(__k)->value.num = __n_key; \
 		(__k)->type = XDEBUG_HASH_KEY_IS_NUM; \
 	}
