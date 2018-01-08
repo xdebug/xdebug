@@ -340,7 +340,8 @@ static void fetch_zval_from_symbol_table(
 			}
 			free(element);
 			ht = XG(active_symbol_table);
-			/* break intentionally missing */
+
+			XDEBUG_BREAK_INTENTIONALLY_MISSING
 
 		case XF_ST_ARRAY_INDEX_ASSOC:
 			element = prepare_search_key(name, &name_length, "", 0);
@@ -517,11 +518,13 @@ inline static int is_objectish(zval *value)
 			if (Z_TYPE_P(Z_INDIRECT_P(value)) == IS_OBJECT) {
 				return 1;
 			}
+			break;
 
 		case IS_REFERENCE:
 			if (Z_TYPE_P(Z_REFVAL_P(value)) == IS_OBJECT) {
 				return 1;
 			}
+			break;
 	}
 
 	return 0;
@@ -558,7 +561,9 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 					}
 					keyword = *p;
 					state = 1;
-					/* break intentionally missing */
+
+					XDEBUG_BREAK_INTENTIONALLY_MISSING
+
 				case 1:
 					if (*p[0] == '[') {
 						keyword_end = *p;

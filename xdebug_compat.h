@@ -49,4 +49,18 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, in
 # define STR_NAME_VAL(k) (k)->val
 # define STR_NAME_LEN(k) (k)->len
 
+# if defined (__GNUC__)
+#  define XDEBUG_GNUC_CHECK_VERSION(major, minor) \
+       ((__GNUC__ > (major)) ||                   \
+       ((__GNUC__ == (major)) && (__GNUC_MINOR__ >= (minor))))
+# else
+#  define XDEBUG_GNUC_CHECK_VERSION(major, minor) 0
+# endif
+
+# if XDEBUG_GNUC_CHECK_VERSION(7, 0)
+#  define XDEBUG_BREAK_INTENTIONALLY_MISSING __attribute__ ((fallthrough));
+# else
+#  define XDEBUG_BREAK_INTENTIONALLY_MISSING
+# endif
+
 #endif

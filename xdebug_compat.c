@@ -133,7 +133,8 @@ void xdebug_stripcslashes(char *str, int *len)
 						*target++=(char)strtol(numtmp, NULL, 16);
 						break;
 					}
-					/* break is left intentionally */
+					XDEBUG_BREAK_INTENTIONALLY_MISSING
+
 				default:
 					i=0;
 					while (source < end && *source >= '0' && *source <= '7' && i<3) {
