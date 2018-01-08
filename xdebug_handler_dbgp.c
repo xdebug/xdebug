@@ -69,7 +69,7 @@ static char *create_eval_key_id(int id);
 #define DBGP_STATUS_BREAK     5
 #define DBGP_STATUS_DETACHED  6
 
-char *xdebug_dbgp_status_strings[6] =
+const char *xdebug_dbgp_status_strings[6] =
 	{"", "starting", "stopping", "stopped", "running", "break"};
 
 #define DBGP_REASON_OK        0
@@ -77,12 +77,12 @@ char *xdebug_dbgp_status_strings[6] =
 #define DBGP_REASON_ABORTED   2
 #define DBGP_REASON_EXCEPTION 3
 
-char *xdebug_dbgp_reason_strings[4] =
+const char *xdebug_dbgp_reason_strings[4] =
 	{"ok", "error", "aborted", "exception"};
 
 typedef struct {
-	int   code;
-	char *message;
+	int         code;
+	const char *message;
 } xdebug_error_entry;
 
 xdebug_error_entry xdebug_error_codes[24] = {
@@ -120,7 +120,7 @@ xdebug_error_entry xdebug_error_codes[24] = {
 #define XDEBUG_STR_CASE_DEFAULT_END  }
 
 #define XDEBUG_TYPES_COUNT 8
-char *xdebug_dbgp_typemap[XDEBUG_TYPES_COUNT][3] = {
+const char *xdebug_dbgp_typemap[XDEBUG_TYPES_COUNT][3] = {
 	/* common, lang, schema */
 	{"bool",     "bool",     "xsd:boolean"},
 	{"int",      "int",      "xsd:decimal"},
@@ -926,7 +926,7 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	EG(exception) = NULL;
 
 	zend_first_try {
-		res = zend_eval_string(eval_string, ret_zval, "xdebug://debug-eval" TSRMLS_CC);
+		res = zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval" TSRMLS_CC);
 	} zend_end_try();
 
 	/* FIXME: Bubble up exception message to DBGp return packet */
@@ -1012,7 +1012,7 @@ DBGP_FUNC(stderr)
 DBGP_FUNC(stdout)
 {
 	int mode = 0;
-	char *success = "0";
+	const char *success = "0";
 
 	if (!CMD_OPTION('c')) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_INVALID_ARGS);
@@ -1697,15 +1697,15 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		/* add super globals */
 		XG(active_symbol_table) = &EG(symbol_table);
 		XG(active_execute_data) = NULL;
-		add_variable_node(node, "_COOKIE", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_ENV", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_FILES", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_GET", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_POST", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_REQUEST", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_SERVER", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "_SESSION", 1, 1, 0, options TSRMLS_CC);
-		add_variable_node(node, "GLOBALS", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_COOKIE", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_ENV", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_FILES", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_GET", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_POST", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_REQUEST", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_SERVER", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "_SESSION", 1, 1, 0, options TSRMLS_CC);
+		add_variable_node(node, (char*) "GLOBALS", 1, 1, 0, options TSRMLS_CC);
 		XG(active_symbol_table) = NULL;
 		return 0;
 	}
@@ -1761,7 +1761,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 			/* Zend engine 2 does not give us $this, eval so we can get it */
 			if (!xdebug_hash_find(tmp_hash, "this", 4, (void *) &var_name)) {
-				add_variable_node(node, "this", 1, 1, 0, options TSRMLS_CC);
+				add_variable_node(node, (char*) "this", 1, 1, 0, options TSRMLS_CC);
 			}
 
 			xdebug_hash_destroy(tmp_hash);
@@ -2144,11 +2144,6 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 ** Handlers for debug functions
 */
 
-char *xdebug_dbgp_get_revision(void)
-{
-	return "$Revision: 1.145 $";
-}
-
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
 {
 	char *option;
@@ -2174,7 +2169,7 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
 	} while (0 == ret);
 
 	if (bail && XG(status) == DBGP_STATUS_STOPPED) {
-		zend_bailout();
+		_zend_bailout((char*)__FILE__, __LINE__);
 	}
 	return ret;
 

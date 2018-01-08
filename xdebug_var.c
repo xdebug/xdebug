@@ -213,7 +213,7 @@ inline static char *fetch_classname_from_zval(zval *z, int *length, zend_class_e
 	return estrdup(class_name->val);
 }
 
-static char* prepare_search_key(char *name, unsigned int *name_length, char *prefix, int prefix_length)
+static char* prepare_search_key(char *name, unsigned int *name_length, const char *prefix, int prefix_length)
 {
 	char *element;
 	int   extra_length = 0;
@@ -290,7 +290,7 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_STATIC_PROPERTY:
 			/* First we try a public,private,protected property */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->static_members_table) {
+			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->static_members_table) {
 				ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
 				goto cleanup;
 			}
@@ -305,7 +305,7 @@ static void fetch_zval_from_symbol_table(
 					free(element);
 					element_length = name_length - (secondStar + 1 - name);
 					element = prepare_search_key(secondStar + 1, &element_length, "", 0);
-					if (cce && &cce->properties_info && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
+					if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
 						ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
 						goto cleanup;
 					}
@@ -727,7 +727,7 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 	}
 }
 
-char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name)
+const char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name)
 {
 	const char *prop_name, *cls_name;
 
@@ -841,7 +841,8 @@ static int xdebug_object_element_export(zval *zv_nptr, zend_ulong index_key, zen
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
-			char *prop_name, *modifier, *prop_class_name;
+			char *prop_name, *prop_class_name;
+			const char *modifier;
 
 			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
@@ -913,7 +914,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
 			zend_string *tmp_zstr;
 
-			tmp_zstr = php_addcslashes(i_string, 0, "'\\\0..\37", 7);
+			tmp_zstr = php_addcslashes(i_string, 0, (char*) "'\\\0..\37", 7);
 
 			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
 			zend_string_release(tmp_zstr);
@@ -1193,7 +1194,8 @@ static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong inde
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
-			char *prop_name, *class_name, *modifier;
+			char *prop_name, *class_name;
+			const char *modifier;
 
 			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &class_name);
 			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
@@ -1264,13 +1266,13 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			break;
 
 		case IS_STRING: {
-			char *pattern = (mode == 1) ? "'\\\0..\37" : "\0";
+			const char *pattern = (mode == 1) ? "'\\\0..\37" : "\0";
 			size_t pattern_len = (mode == 1) ? 7 : 1;
 
 			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
 			zend_string *tmp_zstr;
 
-			tmp_zstr = php_addcslashes(i_string, 0, pattern, pattern_len);
+			tmp_zstr = php_addcslashes(i_string, 0, (char*) pattern, pattern_len);
 
 			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
 			tmp_len = tmp_zstr->len;
@@ -1581,7 +1583,7 @@ static int encoding_requested(char *value, size_t value_len)
 	return 0;
 }
 
-static void add_name_attribute_or_element(xdebug_var_export_options *options, xdebug_xml_node *node, char *field, int field_len, char *value, size_t value_len)
+static void add_name_attribute_or_element(xdebug_var_export_options *options, xdebug_xml_node *node, const char *field, int field_len, char *value, size_t value_len)
 {
 	size_t value_len_calculated = (value_len == SIZE_MAX) ? strlen(value) : value_len;
 
@@ -1711,7 +1713,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 	if (options->runtime[level].current_element_nr >= options->runtime[level].start_element_nr &&
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
-		char *modifier;
+		const char *modifier;
 
 		node = xdebug_xml_node_init("property");
 		options->force_extended = 0;
@@ -1787,7 +1789,7 @@ void xdebug_attach_uninitialized_var(xdebug_var_export_options *options, xdebug_
 
 void xdebug_attach_property_with_contents(zend_property_info *prop_info, xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *class_entry, char *class_name, int *children_count)
 {
-	char               *modifier;
+	const char         *modifier;
 	xdebug_xml_node    *contents = NULL;
 	char               *prop_name, *prop_class_name;
 
@@ -1938,13 +1940,11 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 			ce = xdebug_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			/* Adding static properties */
-			if (&ce->properties_info) {
-				ZEND_HASH_INC_APPLY_COUNT(&ce->properties_info);
-				ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
-					object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
-				} ZEND_HASH_FOREACH_END();
-				ZEND_HASH_DEC_APPLY_COUNT(&ce->properties_info);
-			}
+			ZEND_HASH_INC_APPLY_COUNT(&ce->properties_info);
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
+				object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
+			} ZEND_HASH_FOREACH_END();
+			ZEND_HASH_DEC_APPLY_COUNT(&ce->properties_info);
 
 			/* Adding normal properties */
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
@@ -2108,7 +2108,8 @@ static int xdebug_object_element_export_fancy(zval *zv_nptr, zend_ulong index_ke
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
-			char *prop_name, *modifier, *prop_class_name;
+			char *prop_name, *prop_class_name;
+			const char *modifier;
 
 			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &prop_class_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
@@ -2414,7 +2415,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 	}
 }
 
-char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+char* xdebug_get_zval_synopsis_fancy(const char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	int default_options = 0;

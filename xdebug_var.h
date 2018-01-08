@@ -52,7 +52,7 @@ typedef struct xdebug_var_export_options {
 #define XDEBUG_VAR_TYPE_CONSTANT 0x02
 
 void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC);
-char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name);
+const char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name);
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D);
 xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D);
@@ -85,7 +85,7 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 
 char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options);
 char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
-char* xdebug_get_zval_synopsis_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
+char* xdebug_get_zval_synopsis_fancy(const char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
 
 char* xdebug_show_fname(xdebug_func t, int html, int flags TSRMLS_DC);
 

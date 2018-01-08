@@ -142,6 +142,10 @@ static void xdebug_filter_run_internal(function_stack_entry *fse, int group, lon
 			*filtered_flag = 0;
 			filter_to_run = xdebug_filter_match_namespace_blacklist;
 			break;
+
+		default:
+			/* Logically can't happen, but compilers can't detect that */
+			return;
 	}
 
 	for (k = 0; k < filters->size; k++, le = XDEBUG_LLIST_NEXT(le)) {

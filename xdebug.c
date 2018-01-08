@@ -93,7 +93,7 @@ int zend_xdebug_filter_offset = -1;
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
 static size_t (*xdebug_orig_ub_write)(const char *string, size_t len TSRMLS_DC);
 
-static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC);
+static int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value TSRMLS_DC);
 
 ZEND_BEGIN_ARG_INFO_EX(xdebug_void_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
@@ -415,9 +415,9 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->trace_context        = NULL;
 	xg->in_debug_info        = 0;
 	xg->coverage_enable      = 0;
-	xg->previous_filename    = "";
+	xg->previous_filename    = NULL;
 	xg->previous_file        = NULL;
-	xg->previous_mark_filename = "";
+	xg->previous_mark_filename = NULL;
 	xg->previous_mark_file     = NULL;
 	xg->paths_stack = NULL;
 	xg->branches.size        = 0;
@@ -538,7 +538,7 @@ void xdebug_env_config(TSRMLS_D)
 	xdebug_explode(" ", config, parts, -1);
 
 	for (i = 0; i < parts->c; ++i) {
-		char *name = NULL;
+		const char *name = NULL;
 		char *envvar = parts->args[i];
 		char *envval = NULL;
 		char *eq = strchr(envvar, '=');
@@ -1117,14 +1117,14 @@ size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC)
 
 static void xdebug_init_auto_globals(TSRMLS_D)
 {
-	zend_is_auto_global_str(ZEND_STRL("_ENV") TSRMLS_CC);
-	zend_is_auto_global_str(ZEND_STRL("_GET") TSRMLS_CC);
-	zend_is_auto_global_str(ZEND_STRL("_POST") TSRMLS_CC);
-	zend_is_auto_global_str(ZEND_STRL("_COOKIE") TSRMLS_CC);
-	zend_is_auto_global_str(ZEND_STRL("_REQUEST") TSRMLS_CC);
-	zend_is_auto_global_str(ZEND_STRL("_FILES") TSRMLS_CC);
-	zend_is_auto_global_str(ZEND_STRL("_SERVER") TSRMLS_CC);
-	zend_is_auto_global_str(ZEND_STRL("_SESSION") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_ENV") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_GET") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_POST") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_COOKIE") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_REQUEST") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_FILES") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_SERVER") TSRMLS_CC);
+	zend_is_auto_global_str((char*) ZEND_STRL("_SESSION") TSRMLS_CC);
 }
 
 
@@ -1223,7 +1223,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(dead_code_analysis_tracker_offset) = zend_xdebug_cc_run_offset;
 	XG(dead_code_last_start_id) = 1;
 	XG(code_coverage_filter_offset) = zend_xdebug_filter_offset;
-	XG(previous_filename) = "";
+	XG(previous_filename) = NULL;
 	XG(previous_file) = NULL;
 	XG(gc_stats_file) = NULL;
 	XG(gc_stats_filename) = NULL;
@@ -1245,7 +1245,7 @@ PHP_RINIT_FUNCTION(xdebug)
 			)
 			&& !SG(headers_sent)
 		) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
 			XG(no_exec) = 1;
 		}
 		zend_string_release(stop_no_exec);
@@ -1416,7 +1416,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG(branches).last_branch_nr = NULL;
 		XG(branches).size = 0;
 	}
-	XG(previous_mark_filename) = "";
+	XG(previous_mark_filename) = NULL;
 
 	return SUCCESS;
 }
@@ -1447,9 +1447,9 @@ PHP_MINFO_FUNCTION(xdebug)
 	}
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Supported protocols", "Revision");
+	php_info_print_table_header(1, "Supported protocols");
 	while (ptr->name) {
-		php_info_print_table_row(2, ptr->description, ptr->handler.get_revision());
+		php_info_print_table_row(1, ptr->description);
 		ptr++;
 	}
 	php_info_print_table_end();
@@ -1457,7 +1457,7 @@ PHP_MINFO_FUNCTION(xdebug)
 	DISPLAY_INI_ENTRIES();
 }
 
-static int xdebug_trigger_enabled(int setting, char *var_name, char *var_value TSRMLS_DC)
+static int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value TSRMLS_DC)
 {
 	zval *trigger_val;
 
@@ -1773,7 +1773,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 				xdfree(magic_cookie);
 				magic_cookie = NULL;
 			}
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
 		}
 
 		/* Start remote context if requested */
@@ -2588,7 +2588,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						XG(context).inhibit_notifications = 1;
 
 						/* Check the condition */
-						if (zend_eval_string(extra_brk_info->condition, &retval, "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
+						if (zend_eval_string(extra_brk_info->condition, &retval, (char*) "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
 							break_ok = Z_TYPE(retval) == IS_TRUE;
 							zval_dtor(&retval);
 						}
@@ -2662,14 +2662,15 @@ ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 #ifndef ZEND_EXT_API
 #define ZEND_EXT_API    ZEND_DLEXPORT
 #endif
-ZEND_EXTENSION();
+
+ZEND_EXT_API zend_extension_version_info extension_version_info = { ZEND_EXTENSION_API_NO, (char*) ZEND_EXTENSION_BUILD_ID };
 
 ZEND_DLEXPORT zend_extension zend_extension_entry = {
-	XDEBUG_NAME,
-	XDEBUG_VERSION,
-	XDEBUG_AUTHOR,
-	XDEBUG_URL_FAQ,
-	XDEBUG_COPYRIGHT_SHORT,
+	(char*) XDEBUG_NAME,
+	(char*) XDEBUG_VERSION,
+	(char*) XDEBUG_AUTHOR,
+	(char*) XDEBUG_URL_FAQ,
+	(char*) XDEBUG_COPYRIGHT_SHORT,
 	xdebug_zend_startup,
 	xdebug_zend_shutdown,
 	NULL,           /* activate_func_t */

@@ -56,12 +56,12 @@ zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdat
 	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
 }
 
-char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len, size_t *new_len)
+char *xdebug_str_to_str(char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len, size_t *new_len)
 {
 	zend_string *new_str;
 	char *retval;
 
-	new_str = php_str_to_str(haystack, length, needle, needle_len, str, str_len);
+	new_str = php_str_to_str(haystack, length, (char*) needle, needle_len, (char*) str, str_len);
 	*new_len = new_str->len;
 
 	retval = estrndup(new_str->val, new_str->len);
@@ -185,7 +185,7 @@ int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC)
 	return tmp_const != NULL;
 }
 
-void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC)
+void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC)
 {
 	zend_string *name_s   = zend_string_init(name, name_len, 0);
 	zend_string *value_s  = zend_string_init(value, value_len, 0);
@@ -207,7 +207,7 @@ char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, i
 	return cv->val;
 }
 
-zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC)
+zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags TSRMLS_DC)
 {
 	zval dummy;
 

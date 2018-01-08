@@ -283,7 +283,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           profile_last_functionname_ref;
 
 	/* DBGp globals */
-	char         *lastcmd;
+	const char   *lastcmd;
 	char         *lasttransid;
 
 	/* output redirection */

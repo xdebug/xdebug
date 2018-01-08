@@ -194,7 +194,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	int            gohungfound = 0, is_static = 0;
 	char          *zval_value = NULL;
 	xdebug_var_export_options *options;
-	const zend_op *static_opcode_ptr;
+	const zend_op *static_opcode_ptr = NULL;
 
 	next_opcode = cur_opcode + 1;
 	prev_opcode = cur_opcode - 1;
@@ -342,7 +342,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	return name.d;
 }
 
-static int xdebug_common_assign_dim_handler(char *op, int do_cc, zend_execute_data *execute_data)
+static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_execute_data *execute_data)
 {
 	char    *file;
 	zend_op_array *op_array = &execute_data->func->op_array;
@@ -471,7 +471,7 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
 
-	if (strcmp(XG(previous_filename), filename) == 0) {
+	if (XG(previous_filename) && strcmp(XG(previous_filename), filename) == 0) {
 		file = XG(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
@@ -974,9 +974,9 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	}
 	if (XG(do_code_coverage)) {
 		if (cleanup) {
-			XG(previous_filename) = "";
+			XG(previous_filename) = NULL;
 			XG(previous_file) = NULL;
-			XG(previous_mark_filename) = "";
+			XG(previous_mark_filename) = NULL;
 			XG(previous_mark_file) = NULL;
 			xdebug_hash_destroy(XG(code_coverage));
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
