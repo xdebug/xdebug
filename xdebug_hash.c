@@ -25,11 +25,6 @@
 
 
 /*
- * Forwards declarations
- */
-static int xdebug_compare_le_name(const void *le1, const void *le2);
-
-/*
  * Helper function to make a null terminated string from a key
  */
 char *xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len)
@@ -92,7 +87,7 @@ xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor_t dtor)
 
 	h = malloc(sizeof(xdebug_hash));
 	h->dtor   = dtor;
-	h->sorter = xdebug_compare_le_name;
+	h->sorter = NULL;
 	h->size   = 0;
 	h->slots  = slots;
 
@@ -244,12 +239,6 @@ void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_has
 	 }
 }
 
-static int xdebug_compare_le_name(const void *le1, const void *le2)
-{
-	return strcmp((char *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le1),
-		(char *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le2));
-}
-
 void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *, void *), void *argument)
 {
 	xdebug_llist_element  *le;
@@ -257,29 +246,33 @@ void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void
 	int                    num_items = 0;
 	xdebug_hash_element  **pp_he_list;
 
-	for (i = 0; i < h->slots; ++i) {
-		for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-			num_items += 1;
+	if (h->sorter) {
+		for (i = 0; i < h->slots; ++i) {
+			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+				num_items += 1;
+			}
+		}
+		pp_he_list = (xdebug_hash_element **) malloc((size_t) (num_items * sizeof(xdebug_hash_element **)));
+		if (pp_he_list) {
+			int j = 0;
+			for (i = 0; i < h->slots; ++i) {
+				for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+					pp_he_list[j++] = XDEBUG_LLIST_VALP(le);
+				}
+			}
+			qsort(pp_he_list, num_items, sizeof(xdebug_llist_element *), h->sorter);
+			for (i = 0; i < num_items; ++i) {
+				cb(user, pp_he_list[i], argument);
+			}
+			free((void *) pp_he_list);
+
+			return;
 		}
 	}
-	pp_he_list = (xdebug_hash_element **) malloc((size_t) (num_items * sizeof(xdebug_hash_element **)));
-	if (pp_he_list) {
-		int j = 0;
-		for (i = 0; i < h->slots; ++i) {
-			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				pp_he_list[j++] = XDEBUG_LLIST_VALP(le);
-			}
-		}
-		qsort(pp_he_list, num_items, sizeof(xdebug_llist_element *), h->sorter);
-		for (i = 0; i < num_items; ++i) {
-			cb(user, pp_he_list[i], argument);
-		}
-		free((void *) pp_he_list);
-	} else {
-		for (i = 0; i < h->slots; ++i) {
-			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
-			}
+
+	for (i = 0; i < h->slots; ++i) {
+		for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+			cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
 		}
 	}
 }
