@@ -23,10 +23,15 @@
 #include "xdebug_hash.h"
 #include "xdebug_llist.h"
 
+
+/*
+ * Forwards declarations
+ */
+static int xdebug_compare_le_name(const void *le1, const void *le2);
+
 /*
  * Helper function to make a null terminated string from a key
  */
-
 char *xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len)
 {
 	char *tmp;
@@ -80,20 +85,31 @@ static void hash_element_dtor(void *u, void *ele)
 	e = NULL;
 }
 
-xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor)
+xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor_t dtor)
 {
 	xdebug_hash *h;
 	int          i;
 
 	h = malloc(sizeof(xdebug_hash));
-	h->dtor  = dtor;
-	h->size  = 0;
-	h->slots = slots;
+	h->dtor   = dtor;
+	h->sorter = xdebug_compare_le_name;
+	h->size   = 0;
+	h->slots  = slots;
 
 	h->table = (xdebug_llist **) malloc(slots * sizeof(xdebug_llist *));
 	for (i = 0; i < h->slots; ++i) {
 		h->table[i] = xdebug_llist_alloc((xdebug_llist_dtor) hash_element_dtor);
 	}
+
+	return h;
+}
+
+xdebug_hash *xdebug_hash_alloc_with_sort(int slots, xdebug_hash_dtor_t dtor, xdebug_hash_apply_sorter_t sorter)
+{
+	xdebug_hash *h;
+
+	h = xdebug_hash_alloc(slots, dtor);
+	h->sorter = sorter;
 
 	return h;
 }
@@ -254,7 +270,7 @@ void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void
 				pp_he_list[j++] = XDEBUG_LLIST_VALP(le);
 			}
 		}
-		qsort(pp_he_list, num_items, sizeof(xdebug_llist_element *), xdebug_compare_le_name);
+		qsort(pp_he_list, num_items, sizeof(xdebug_llist_element *), h->sorter);
 		for (i = 0; i < num_items; ++i) {
 			cb(user, pp_he_list[i], argument);
 		}
