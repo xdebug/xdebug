@@ -43,11 +43,12 @@
 char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS_DC);
 void xdebug_stop_trace(TSRMLS_D);
 
-typedef struct xdebug_var {
-	char *name;
-	void *addr;
-	int   is_variadic;
-} xdebug_var;
+typedef struct xdebug_var_name {
+	char    *name;
+	size_t   length;
+	void    *addr;
+	int      is_variadic;
+} xdebug_var_name;
 
 #define XFUNC_UNKNOWN        0x00
 #define XFUNC_NORMAL         0x01
@@ -179,15 +180,15 @@ typedef struct _function_stack_entry {
 	int          function_nr;
 
 	/* argument properties */
-	int          arg_done;
-	unsigned int varc;
-	xdebug_var   *var;
-	int          is_variadic;
-	zval        *return_value;
-	xdebug_llist *used_vars;
-	HashTable   *symbol_table;
+	int                arg_done;
+	unsigned int       varc;
+	xdebug_var_name   *var;
+	int                is_variadic;
+	zval              *return_value;
+	xdebug_llist      *declared_vars;
+	HashTable         *symbol_table;
 	zend_execute_data *execute_data;
-	zval        *This;
+	zval              *This;
 
 	/* filter properties */
 	long         filtered_tracing;
@@ -232,7 +233,7 @@ typedef struct
 } xdebug_trace_handler_t;
 
 
-xdebug_hash* xdebug_used_var_hash_from_llist(xdebug_llist *list);
+xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list);
 void xdebug_init_debugger(TSRMLS_D);
 
 #endif

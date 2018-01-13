@@ -79,19 +79,29 @@ function_stack_entry *xdebug_get_stack_tail(TSRMLS_D)
 
 static void xdebug_used_var_hash_from_llist_dtor(void *data)
 {
-	/* We are not freeing anything as the list creating didn't copy the data */
+	xdebug_str *var_name = (xdebug_str*) data;
+
+	xdebug_str_free(var_name);
 }
 
-xdebug_hash* xdebug_used_var_hash_from_llist(xdebug_llist *list)
+static int xdebug_compare_le_xdebug_str(const void *le1, const void *le2)
 {
-	xdebug_hash *tmp;
-	xdebug_llist_element *le;
-	char *var_name;
+	return strcmp(
+		((xdebug_str *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le1))->d,
+		((xdebug_str *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le2))->d
+	);
+}
 
-	tmp = xdebug_hash_alloc(32, xdebug_used_var_hash_from_llist_dtor);
+xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list)
+{
+	xdebug_hash          *tmp;
+	xdebug_llist_element *le;
+	xdebug_str           *var_name;
+
+	tmp = xdebug_hash_alloc_with_sort(32, xdebug_used_var_hash_from_llist_dtor, xdebug_compare_le_xdebug_str);
 	for (le = XDEBUG_LLIST_HEAD(list); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-		var_name = (char*) XDEBUG_LLIST_VALP(le);
-		xdebug_hash_add(tmp, var_name, strlen(var_name), var_name);
+		var_name = (xdebug_str*) XDEBUG_LLIST_VALP(le);
+		xdebug_hash_add(tmp, var_name->d, var_name->l, xdebug_str_copy(var_name));
 	}
 
 	return tmp;
