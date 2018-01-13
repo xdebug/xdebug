@@ -225,7 +225,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 
 			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
 			php_log_err(log_buffer.d TSRMLS_CC);
-			xdebug_str_free(&log_buffer);
+			xdebug_str_destroy(&log_buffer);
 		}
 	}
 }

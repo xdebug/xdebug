@@ -240,9 +240,7 @@ static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC)
 {
 	xdebug_str  xml_message = XDEBUG_STR_INITIALIZER;
-	xdebug_str *ret;
-
-	xdebug_str_ptr_init(ret);
+	xdebug_str *ret = xdebug_str_new();
 
 	xdebug_xml_return_node(message, &xml_message);
 	if (XG(remote_log_file)) {
@@ -255,7 +253,7 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message TS
 	xdebug_str_add(ret, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n", 0);
 	xdebug_str_add(ret, xml_message.d, 0);
 	xdebug_str_addl(ret, "\0", 1, 0);
-	xdebug_str_dtor(xml_message);
+	xdebug_str_destroy(&xml_message);
 
 	return ret;
 }
@@ -270,7 +268,7 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 		fprintf(stderr, "There was a problem sending %ld bytes on socket %d: %s", tmp->l, context->socket, sock_error);
 		efree(sock_error);
 	}
-	xdebug_str_ptr_dtor(tmp);
+	xdebug_str_free(tmp);
 }
 
 static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *options TSRMLS_DC)
