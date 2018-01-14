@@ -28,13 +28,15 @@
 
 #define xdebug_ui32 unsigned long
 
-typedef void (*xdebug_hash_dtor)(void *);
+typedef void (*xdebug_hash_dtor_t)(void *);
+typedef int (*xdebug_hash_apply_sorter_t)(const void *le1, const void *le2);
 
 typedef struct _xdebug_hash {
-	xdebug_llist     **table;
-	xdebug_hash_dtor   dtor;
-	int             slots;
-	size_t          size;
+	xdebug_llist               **table;
+	xdebug_hash_dtor_t           dtor;
+	xdebug_hash_apply_sorter_t   sorter;
+	int                          slots;
+	size_t                       size;
 } xdebug_hash;
 
 typedef struct _xdebug_hash_key {
@@ -59,7 +61,8 @@ typedef struct _xdebug_hash_element {
 char* xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len);
 
 /* Standard functions */
-xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor);
+xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor_t dtor);
+xdebug_hash *xdebug_hash_alloc_with_sort(int slots, xdebug_hash_dtor_t dtor, xdebug_hash_apply_sorter_t sort_func);
 int  xdebug_hash_add_or_update(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key, const void *p);
 int  xdebug_hash_extended_delete(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key);
 int  xdebug_hash_extended_find(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key, void **p);

@@ -1051,13 +1051,11 @@ static void xdebug_llist_string_dtor(void *dummy, void *elem)
 	}
 }
 
-static void xdebug_used_var_dtor(void *dummy, void *elem)
+static void xdebug_declared_var_dtor(void *dummy, void *elem)
 {
-	char *s = elem;
+	xdebug_str *s = (xdebug_str*) elem;
 
-	if (s) {
-		xdfree(s);
-	}
+	xdebug_str_free(s);
 }
 
 static void xdebug_stack_element_dtor(void *dummy, void *elem)
@@ -1091,9 +1089,9 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 			xdfree(e->include_filename);
 		}
 
-		if (e->used_vars) {
-			xdebug_llist_destroy(e->used_vars, NULL);
-			e->used_vars = NULL;
+		if (e->declared_vars) {
+			xdebug_llist_destroy(e->declared_vars, NULL);
+			e->declared_vars = NULL;
 		}
 
 		if (e->profile.call_list) {
@@ -1489,20 +1487,20 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 {
 	unsigned int i = 0;
 
-	if (!fse->used_vars) {
-		fse->used_vars = xdebug_llist_alloc(xdebug_used_var_dtor);
+	if (!fse->declared_vars) {
+		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
 	}
 
 	/* Check parameters */
 	for (i = 0; i < fse->varc; i++) {
 		if (fse->var[i].name) {
-			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(fse->var[i].name));
+			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(fse->var[i].name, fse->var[i].length));
 		}
 	}
 
 	/* gather used variables from compiled vars information */
 	while (i < (unsigned int) op_array->last_var) {
-		xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(STR_NAME_VAL(op_array->vars[i])));
+		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(op_array->vars[i]), STR_NAME_LEN(op_array->vars[i])));
 		i++;
 	}
 
@@ -1513,11 +1511,11 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 		if (op_array->opcodes[i].op1_type == IS_CV) {
 			cv = (char *) xdebug_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.var, &cv_len);
-			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
+			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(cv, cv_len));
 		}
 		if (op_array->opcodes[i].op2_type == IS_CV) {
 			cv = (char *) xdebug_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.var, &cv_len);
-			xdebug_llist_insert_next(fse->used_vars, XDEBUG_LLIST_TAIL(fse->used_vars), xdstrdup(cv));
+			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(cv, cv_len));
 		}
 		i++;
 	}

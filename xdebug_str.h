@@ -23,8 +23,6 @@
 
 #define XDEBUG_STR_INITIALIZER { 0, 0, NULL }
 #define XDEBUG_STR_PREALLOC 1024
-#define xdebug_str_ptr_init(str) str = xdmalloc(sizeof(xdebug_str)); str->l = 0; str->a = 0; str->d = NULL;
-#define xdebug_str_ptr_dtor(str) xdfree(str->d); xdfree(str)
 #define xdebug_str_dtor(str)     xdfree(str.d)
 
 typedef struct xdebug_str {
@@ -35,7 +33,15 @@ typedef struct xdebug_str {
 
 void xdebug_str_add(xdebug_str *xs, const char *str, int f);
 void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f);
+void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str);
+void xdebug_str_addc(xdebug_str *xs, char letter);
 void xdebug_str_chop(xdebug_str *xs, int c);
+
+xdebug_str *xdebug_str_new(void);
+xdebug_str *xdebug_str_create_from_char(char *c);
+xdebug_str *xdebug_str_create(char *c, size_t len);
+xdebug_str *xdebug_str_copy(xdebug_str *orig);
+void xdebug_str_destroy(xdebug_str *s);
 void xdebug_str_free(xdebug_str *s);
 
 char* xdebug_sprintf (const char* fmt, ...);

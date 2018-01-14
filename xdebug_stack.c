@@ -96,7 +96,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	int          len;
 	zval         zvar;
 	char        *contents;
-	char        *name = (char*) he->ptr;
+	xdebug_str  *name = (xdebug_str*) he->ptr;
 	HashTable   *tmp_ht;
 	const char **formats;
 	xdebug_str   *str = (xdebug_str *) argument;
@@ -107,7 +107,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	}
 
 	/* Bail out on $this and $GLOBALS */
-	if (strcmp(name, "this") == 0 || strcmp(name, "GLOBALS") == 0) {
+	if (strcmp(name->d, "this") == 0 || strcmp(name->d, "GLOBALS") == 0) {
 		return;
 	}
 
@@ -131,13 +131,13 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		}
 	}
 
-	xdebug_get_php_symbol(&zvar, name TSRMLS_CC);
+	xdebug_get_php_symbol(&zvar, name->d TSRMLS_CC);
 	XG(active_symbol_table) = tmp_ht;
 
 	formats = select_formats(PG(html_errors) TSRMLS_CC);
 
 	if (Z_TYPE(zvar) == IS_UNDEF) {
-		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
+		xdebug_str_add(str, xdebug_sprintf(formats[9], name->d), 1);
 		return;
 	}
 
@@ -148,9 +148,9 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	}
 
 	if (contents) {
-		xdebug_str_add(str, xdebug_sprintf(formats[8], name, contents), 1);
+		xdebug_str_add(str, xdebug_sprintf(formats[8], name->d, contents), 1);
 	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[9], name), 1);
+		xdebug_str_add(str, xdebug_sprintf(formats[9], name->d), 1);
 	}
 
 	xdfree(contents);
@@ -225,7 +225,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 
 			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
 			php_log_err(log_buffer.d TSRMLS_CC);
-			xdebug_str_free(&log_buffer);
+			xdebug_str_destroy(&log_buffer);
 		}
 	}
 }
@@ -484,11 +484,11 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
 				scope_nr--;
 			}
-			if (i->used_vars && i->used_vars->size) {
+			if (i->declared_vars && i->declared_vars->size) {
 				xdebug_hash *tmp_hash;
 
 				xdebug_str_add(str, xdebug_sprintf(formats[6], scope_nr), 1);
-				tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
+				tmp_hash = xdebug_declared_var_hash_from_llist(i->declared_vars);
 				xdebug_hash_apply_with_argument(tmp_hash, (void*) &html, dump_used_var_with_contents, (void *) str);
 				xdebug_hash_destroy(tmp_hash);
 			}
@@ -1172,7 +1172,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->refcount      = 1;
 	tmp->level         = XG(level);
 	tmp->arg_done      = 0;
-	tmp->used_vars     = NULL;
+	tmp->declared_vars = NULL;
 	tmp->user_defined  = type;
 	tmp->filename      = NULL;
 	tmp->include_filename  = NULL;
@@ -1269,11 +1269,12 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			} else {
 				arguments_storage = arguments_sent;
 			}
-			tmp->var = xdmalloc(arguments_storage * sizeof (xdebug_var));
+			tmp->var = xdmalloc(arguments_storage * sizeof (xdebug_var_name));
 
 			for (i = 0; i < arguments_sent; i++) {
 				tmp->var[tmp->varc].name = NULL;
 				tmp->var[tmp->varc].addr = NULL;
+				tmp->var[tmp->varc].length = 0;
 				tmp->var[tmp->varc].is_variadic = 0;
 
 				/* Because it is possible that more parameters are sent, then
@@ -1282,6 +1283,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				if (tmp->user_defined == XDEBUG_EXTERNAL && i < arguments_wanted) {
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
+						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
 					}
 					if (op_array->arg_info[i].is_variadic) {
 						tmp->var[tmp->varc].is_variadic = 1;
@@ -1310,6 +1312,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				for (i = arguments_sent; i < arguments_wanted; i++) {
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
+						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
 					}
 					tmp->var[tmp->varc].addr = NULL;
 					tmp->var[tmp->varc].is_variadic = 0;
@@ -1509,7 +1512,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				argument = xdstrdup("???");
 			}
 			if (i->var[j].name && !variadic_opened && argument) {
-				add_assoc_string_ex(params, i->var[j].name, HASH_KEY_STRLEN(i->var[j].name), argument);
+				add_assoc_string_ex(params, i->var[j].name, i->var[j].length, argument);
 			} else {
 				add_index_string(params, j - 1, argument);
 			}
@@ -1532,9 +1535,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
 {
-	char *name = (char*) he->ptr;
+	xdebug_str *name = (xdebug_str*) he->ptr;
 
-	add_next_index_string(return_value, name);
+	add_next_index_string(return_value, name->d);
 }
 
 /* {{{ proto array xdebug_get_declared_vars()
@@ -1551,8 +1554,8 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 	i = XDEBUG_LLIST_VALP(le);
 
 	/* Add declared vars */
-	if (i->used_vars) {
-		tmp_hash = xdebug_used_var_hash_from_llist(i->used_vars);
+	if (i->declared_vars) {
+		tmp_hash = xdebug_declared_var_hash_from_llist(i->declared_vars);
 		xdebug_hash_apply(tmp_hash, (void *) return_value, xdebug_attach_used_var_names);
 		xdebug_hash_destroy(tmp_hash);
 	}

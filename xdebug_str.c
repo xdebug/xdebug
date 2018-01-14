@@ -65,6 +65,34 @@ void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f)
 	}
 }
 
+void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str)
+{
+	if (xs->l + str->l > xs->a - 1) {
+		xs->d = xdrealloc(xs->d, xs->a + str->l + XDEBUG_STR_PREALLOC);
+		xs->a = xs->a + str->l + XDEBUG_STR_PREALLOC;
+	}
+	if (!xs->l) {
+		xs->d[0] = '\0';
+	}
+	memcpy(xs->d + xs->l, str->d, str->l);
+	xs->d[xs->l + str->l] = '\0';
+	xs->l = xs->l + str->l;
+}
+
+void xdebug_str_addc(xdebug_str *xs, char letter)
+{
+	if (xs->l + 1 > xs->a - 1) {
+		xs->d = xdrealloc(xs->d, xs->a + 1 + XDEBUG_STR_PREALLOC);
+		xs->a = xs->a + 1 + XDEBUG_STR_PREALLOC;
+	}
+	if (!xs->l) {
+		xs->d[0] = '\0';
+	}
+	xs->d[xs->l] = letter;
+	xs->d[xs->l + 1] = '\0';
+	xs->l = xs->l + 1;
+}
+
 void xdebug_str_chop(xdebug_str *xs, int c)
 {
 	if (c > xs->l) {
@@ -75,11 +103,59 @@ void xdebug_str_chop(xdebug_str *xs, int c)
 	}
 }
 
-void xdebug_str_free(xdebug_str *s)
+xdebug_str *xdebug_str_new(void)
+{
+	xdebug_str *tmp = xdmalloc(sizeof(xdebug_str));
+	
+	tmp->l = 0;
+	tmp->a = 0;
+	tmp->d = NULL;
+
+	return tmp;
+}
+
+xdebug_str *xdebug_str_create(char *c, size_t len)
+{
+	xdebug_str *tmp = xdebug_str_new();
+
+	tmp->l = tmp->a = len;
+	tmp->a++;
+	tmp->d = xdmalloc(tmp->a);
+	memcpy(tmp->d, c, tmp->l);
+	tmp->d[tmp->l] = '\0';
+
+	return tmp;
+}
+
+xdebug_str *xdebug_str_create_from_char(char *c)
+{
+	return xdebug_str_create(c, strlen(c));
+}
+
+xdebug_str *xdebug_str_copy(xdebug_str *orig)
+{
+	xdebug_str *tmp = xdebug_str_new();
+
+	tmp->l = tmp->a = orig->l;
+	tmp->a++;
+	tmp->d = xdmalloc(tmp->a);
+	memcpy(tmp->d, orig->d, tmp->l);
+	tmp->d[orig->l] = '\0';
+
+	return tmp;
+}
+
+void xdebug_str_destroy(xdebug_str *s)
 {
 	if (s->d) {
 		xdfree(s->d);
 	}
+}
+
+void xdebug_str_free(xdebug_str *s)
+{
+	xdebug_str_destroy(s);
+	xdfree(s);
 }
 
 char *xdebug_sprintf(const char* fmt, ...)

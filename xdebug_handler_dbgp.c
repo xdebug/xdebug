@@ -240,9 +240,7 @@ static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC)
 {
 	xdebug_str  xml_message = XDEBUG_STR_INITIALIZER;
-	xdebug_str *ret;
-
-	xdebug_str_ptr_init(ret);
+	xdebug_str *ret = xdebug_str_new();
 
 	xdebug_xml_return_node(message, &xml_message);
 	if (XG(remote_log_file)) {
@@ -255,7 +253,7 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message TS
 	xdebug_str_add(ret, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n", 0);
 	xdebug_str_add(ret, xml_message.d, 0);
 	xdebug_str_addl(ret, "\0", 1, 0);
-	xdebug_str_dtor(xml_message);
+	xdebug_str_destroy(&xml_message);
 
 	return ret;
 }
@@ -270,7 +268,7 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 		fprintf(stderr, "There was a problem sending %ld bytes on socket %d: %s", tmp->l, context->socket, sock_error);
 		efree(sock_error);
 	}
-	xdebug_str_ptr_dtor(tmp);
+	xdebug_str_free(tmp);
 }
 
 static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *options TSRMLS_DC)
@@ -1624,14 +1622,14 @@ DBGP_FUNC(property_value)
 	options->max_data = old_max_data;
 }
 
-static void attach_used_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
+static void attach_declared_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
 {
-	char               *name = (char*) he->ptr;
+	xdebug_str         *name = (xdebug_str*) he->ptr;
 	xdebug_xml_node    *node = (xdebug_xml_node *) xml;
 	xdebug_xml_node    *contents;
 	TSRMLS_FETCH();
 
-	contents = get_symbol(name, options TSRMLS_CC);
+	contents = get_symbol(name->d, options TSRMLS_CC);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
@@ -1678,7 +1676,7 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol TSRMLS_DC, int num_a
 	}
 	if (strcmp("GLOBALS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
 
-	xdebug_hash_add(tmp_hash, (char*) HASH_KEY_VAL(hash_key), strlen(HASH_KEY_VAL(hash_key)), HASH_KEY_VAL(hash_key));
+	xdebug_hash_add(tmp_hash, (char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), xdebug_str_create(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key)));
 
 	return 0;
 }
@@ -1744,11 +1742,11 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		XG(This)                = fse->This;
 
 		/* Only show vars when they are scanned */
-		if (fse->used_vars) {
+		if (fse->declared_vars) {
 			xdebug_hash *tmp_hash;
 
 			/* Get a hash from all the used vars (which can have duplicates) */
-			tmp_hash = xdebug_used_var_hash_from_llist(fse->used_vars);
+			tmp_hash = xdebug_declared_var_hash_from_llist(fse->declared_vars);
 
 			/* Check for dynamically defined variables, but make sure we don't already
 			 * have them. Also blacklist superglobals and argv/argc */
@@ -1858,7 +1856,7 @@ DBGP_FUNC(context_get)
 	/* Always reset to page = 0, as it might have been modified by property_get or property_value */
 	options->runtime[0].page = 0;
 
-	res = attach_context_vars(*retval, options, context_id, depth, attach_used_var_with_contents TSRMLS_CC);
+	res = attach_context_vars(*retval, options, context_id, depth, attach_declared_var_with_contents TSRMLS_CC);
 	switch (res) {
 		case 1:
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
@@ -2255,11 +2253,11 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		options->runtime[i].current_element_nr = 0;
 	}
 
-	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_admin_dtor);
-	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
-	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_brk_dtor);
+	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_admin_dtor);
+	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_brk_dtor);
+	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
-	context->eval_id_lookup = xdebug_hash_alloc(64, (xdebug_hash_dtor) xdebug_hash_eval_info_dtor);
+	context->eval_id_lookup = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_eval_info_dtor);
 	context->eval_id_sequence = 0;
 	context->send_notifications = 0;
 	context->inhibit_notifications = 0;

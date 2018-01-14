@@ -109,9 +109,8 @@ char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigne
 char *xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 {
 	int         i;
-	xdebug_str *ret;
+	xdebug_str *ret = xdebug_str_new();
 
-	xdebug_str_ptr_init(ret);
 	if (begin < 0) {
 		begin = 0;
 	}
