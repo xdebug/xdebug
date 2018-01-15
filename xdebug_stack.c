@@ -93,9 +93,8 @@ static const char** select_formats(int html TSRMLS_DC) {
 static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
 {
 	int          html = *(int*) htmlq;
-	int          len;
 	zval         zvar;
-	char        *contents;
+	xdebug_str  *contents;
 	xdebug_str  *name = (xdebug_str*) he->ptr;
 	HashTable   *tmp_ht;
 	const char **formats;
@@ -131,7 +130,7 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		}
 	}
 
-	xdebug_get_php_symbol(&zvar, name->d TSRMLS_CC);
+	xdebug_get_php_symbol(&zvar, name);
 	XG(active_symbol_table) = tmp_ht;
 
 	formats = select_formats(PG(html_errors) TSRMLS_CC);
@@ -142,18 +141,20 @@ static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	}
 
 	if (html) {
-		contents = xdebug_get_zval_value_fancy(NULL, &zvar, &len, 0, NULL TSRMLS_CC);
+		contents = xdebug_get_zval_value_fancy(NULL, &zvar, 0, NULL);
 	} else {
 		contents = xdebug_get_zval_value(&zvar, 0, NULL);
 	}
 
 	if (contents) {
-		xdebug_str_add(str, xdebug_sprintf(formats[8], name->d, contents), 1);
+		xdebug_str_add(str, xdebug_sprintf(formats[8], name->d, contents->d), 1);
 	} else {
 		xdebug_str_add(str, xdebug_sprintf(formats[9], name->d), 1);
 	}
 
-	xdfree(contents);
+	if (contents) {
+		xdebug_str_free(contents);
+	}
 	zval_ptr_dtor_nogc(&zvar);
 }
 
@@ -185,7 +186,8 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
-				char *tmp_varname, *tmp_value;
+				char       *tmp_varname;
+				xdebug_str *tmp_value;
 
 				if (c) {
 					xdebug_str_addl(&log_buffer, ", ", 2, 0);
@@ -212,8 +214,8 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 
 				if (i->var[j].addr) {
 					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
-					xdebug_str_add(&log_buffer, tmp_value, 0);
-					xdfree(tmp_value);
+					xdebug_str_add_str(&log_buffer, tmp_value);
+					xdebug_str_free(tmp_value);
 				} else {
 					xdebug_str_addl(&log_buffer, "*uninitialized*", 15, 0);
 				}
@@ -304,39 +306,57 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 
 static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_level TSRMLS_DC)
 {
-	char *tmp_value, *tmp_fancy_value, *tmp_fancy_synop_value, *tmp_serialized;
-	int    len;
-	size_t newlen;
+	xdebug_str *tmp_value = NULL, *tmp_fancy_synop_value = NULL;
+	char       *tmp_fancy_value = NULL;
+	size_t      newlen;
 
 	if (html) {
 		switch (collecton_level) {
 			case 1: /* synopsis */
-				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, &len, 0, NULL TSRMLS_CC);
-				xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_synop_value), 1);
+				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL TSRMLS_CC);
+
+				xdebug_str_addl(str, "<span>", 6, 0);
+				xdebug_str_add_str(str, tmp_fancy_synop_value);
+				xdebug_str_addl(str, "</span>", 7, 0);
+
 				xdfree(tmp_fancy_synop_value);
 				break;
 			case 2: /* synopsis + full in tooltip */
 				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
-				tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
-				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, &len, 0, NULL TSRMLS_CC);
-				xdebug_str_add(str, xdebug_sprintf("<span title='%s'>%s</span>", tmp_fancy_value, tmp_fancy_synop_value), 1);
-				xdfree(tmp_value);
+				tmp_fancy_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
+				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL TSRMLS_CC);
+
+				xdebug_str_addl(str, "<span title='", 13, 0);
+				xdebug_str_add(str, tmp_fancy_value, 0);
+				xdebug_str_addl(str, "'>", 2, 0);
+				xdebug_str_add_str(str, tmp_fancy_synop_value);
+				xdebug_str_addl(str, "</span>", 7, 0);
+
+				xdebug_str_free(tmp_value);
 				efree(tmp_fancy_value);
-				xdfree(tmp_fancy_synop_value);
+				xdebug_str_free(tmp_fancy_synop_value);
 				break;
 			case 3: /* full */
 			case 4: /* full (with var_name) */
 			default:
 				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
-				tmp_fancy_value = xdebug_xmlize(tmp_value, strlen(tmp_value), &newlen);
-				xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_fancy_value), 1);
-				xdfree(tmp_value);
+				tmp_fancy_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
+
+				xdebug_str_addl(str, "<span>", 6, 0);
+				xdebug_str_add(str, tmp_fancy_value, 0);
+				xdebug_str_addl(str, "</span>", 7, 0);
+
+				xdebug_str_free(tmp_value);
 				efree(tmp_fancy_value);
 				break;
 			case 5: { /* serialized */
-				tmp_serialized = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
-				xdebug_str_add(str, xdebug_sprintf("<span>%s</span>", tmp_serialized), 1);
-				xdfree(tmp_serialized);
+				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
+
+				xdebug_str_addl(str, "<span>", 6, 0);
+				xdebug_str_add_str(str, tmp_value);
+				xdebug_str_addl(str, "</span>", 7, 0);
+
+				xdebug_str_free(tmp_value);
 			} break;
 		}
 	} else {
@@ -355,8 +375,8 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 				break;
 		}
 		if (tmp_value) {
-			xdebug_str_add(str, xdebug_sprintf("%s", tmp_value), 1);
-			xdfree(tmp_value);
+			xdebug_str_add_str(str, tmp_value);
+			xdebug_str_free(tmp_value);
 		} else {
 			xdebug_str_addl(str, "???", 3, 0);
 		}
@@ -1453,7 +1473,6 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
-	char                 *argument = NULL;
 
 	array_init(return_value);
 	le = XDEBUG_LLIST_HEAD(XG(stack));
@@ -1488,7 +1507,8 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
 
 		for (j = 0; j < i->varc; j++) {
-			int variadic_opened = 0;
+			int         variadic_opened = 0;
+			xdebug_str *argument = NULL;
 
 			if (i->var[j].is_variadic) {
 				zval *vparams;
@@ -1509,15 +1529,15 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			if (i->var[j].addr) {
 				argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
 			} else {
-				argument = xdstrdup("???");
+				argument = xdebug_str_create_from_char((char*) "???");
 			}
 			if (i->var[j].name && !variadic_opened && argument) {
-				add_assoc_string_ex(params, i->var[j].name, i->var[j].length, argument);
+				add_assoc_stringl_ex(params, i->var[j].name, i->var[j].length, argument->d, argument->l);
 			} else {
-				add_index_string(params, j - 1, argument);
+				add_index_stringl(params, j - 1, argument->d, argument->l);
 			}
 			if (argument) {
-				xdfree(argument);
+				xdebug_str_free(argument);
 				argument = NULL;
 			}
 		}

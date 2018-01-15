@@ -271,14 +271,14 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 	xdebug_str_free(tmp);
 }
 
-static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *options TSRMLS_DC)
+static xdebug_xml_node* get_symbol(xdebug_str *name, xdebug_var_export_options *options)
 {
 	zval                   retval;
 	xdebug_xml_node       *tmp_node;
 
 	xdebug_get_php_symbol(&retval, name TSRMLS_CC);
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		if (strcmp(name, "this") == 0 && Z_TYPE(retval) == IS_NULL) {
+		if (strcmp(name->d, "this") == 0 && Z_TYPE(retval) == IS_NULL) {
 			return NULL;
 		}
 		tmp_node = xdebug_get_zval_value_xml_node(name, &retval, options TSRMLS_CC);
@@ -289,7 +289,7 @@ static xdebug_xml_node* get_symbol(char* name, xdebug_var_export_options *option
 	return NULL;
 }
 
-static int get_symbol_contents(char* name, xdebug_xml_node *node, xdebug_var_export_options *options TSRMLS_DC)
+static int get_symbol_contents(xdebug_str *name, xdebug_xml_node *node, xdebug_var_export_options *options)
 {
 	zval retval;
 
@@ -1311,8 +1311,11 @@ DBGP_FUNC(typemap_get)
 static int add_constant_node(xdebug_xml_node *node, char *name, zval *const_val, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_xml_node *contents;
+	xdebug_str      *tmp_name;
 
-	contents = xdebug_get_zval_value_xml_node_ex(name, const_val, XDEBUG_VAR_TYPE_CONSTANT, options TSRMLS_CC);
+	tmp_name = xdebug_str_create_from_char(name);
+	contents = xdebug_get_zval_value_xml_node_ex(tmp_name, const_val, XDEBUG_VAR_TYPE_CONSTANT, options);
+	xdebug_str_free(tmp_name);
 	if (contents) {
 		xdebug_xml_add_attribute(contents, "facet", "constant");
 		xdebug_xml_add_child(node, contents);
@@ -1324,8 +1327,11 @@ static int add_constant_node(xdebug_xml_node *node, char *name, zval *const_val,
 static int add_variable_node(xdebug_xml_node *node, char *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	xdebug_xml_node *contents;
+	xdebug_str      *tmp_name;
 
-	contents = get_symbol(name, options TSRMLS_CC);
+	tmp_name = xdebug_str_create_from_char(name);
+	contents = get_symbol(tmp_name, options);
+	xdebug_str_free(tmp_name);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 		return SUCCESS;
@@ -1481,7 +1487,7 @@ DBGP_FUNC(property_set)
 
 	if (CMD_OPTION('t')) {
 		zval symbol;
-		xdebug_get_php_symbol(&symbol, CMD_OPTION('n') TSRMLS_CC);
+		xdebug_get_php_symbol(&symbol, XDEBUG_STR_WRAP_CHAR(CMD_OPTION('n')));
 
 		/* Handle result */
 		if (Z_TYPE(symbol) == IS_UNDEF) {
@@ -1552,8 +1558,11 @@ DBGP_FUNC(property_set)
 static int add_variable_contents_node(xdebug_xml_node *node, char *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	int contents_found;
+	xdebug_str *tmp_name;
 
-	contents_found = get_symbol_contents(name, node, options TSRMLS_CC);
+	tmp_name = xdebug_str_create_from_char(name);
+	contents_found = get_symbol_contents(tmp_name, node, options);
+	xdebug_str_free(tmp_name);
 	if (contents_found) {
 		return SUCCESS;
 	}
@@ -1629,7 +1638,7 @@ static void attach_declared_var_with_contents(void *xml, xdebug_hash_element* he
 	xdebug_xml_node    *contents;
 	TSRMLS_FETCH();
 
-	contents = get_symbol(name->d, options TSRMLS_CC);
+	contents = get_symbol(name, options);
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {

@@ -89,26 +89,30 @@ char *xdebug_trace_computerized_get_filename(void *ctxt TSRMLS_DC)
 	return context->trace_filename;
 }
 
-static char *render_variable(zval *var, int type TSRMLS_DC)
+static void add_single_value(xdebug_str *str, zval *zv, int collection_level TSRMLS_DC)
 {
-	char *tmp_value = NULL;
+	xdebug_str *tmp_value = NULL;
 
-	switch (XG(collect_params)) {
+	switch (collection_level) {
 		case 1: /* synopsis */
 		case 2:
-			tmp_value = xdebug_get_zval_synopsis(var, 0, NULL);
+			tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
 			break;
 		case 3: /* full */
 		case 4: /* full (with var) */
 		default:
-			tmp_value = xdebug_get_zval_value(var, 0, NULL);
+			tmp_value = xdebug_get_zval_value(zv, 0, NULL);
 			break;
 		case 5: /* serialized */
-			tmp_value = xdebug_get_zval_value_serialized(var, 0, NULL TSRMLS_CC);
+			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
 			break;
 	}
-
-	return tmp_value;
+	if (tmp_value) {
+		xdebug_str_add_str(str, tmp_value);
+		xdebug_str_free(tmp_value);
+	} else {
+		xdebug_str_add(str, "???", 0);
+	}
 }
 
 
@@ -155,8 +159,6 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 
 		/* Arguments (12-...) */
 		for (j = 0; j < fse->varc; j++) {
-			char *tmp_value;
-
 			xdebug_str_addl(&str, "\t", 1, 0);
 
 			if (fse->var[j].is_variadic) {
@@ -167,10 +169,8 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
 			}
 
-			tmp_value = render_variable(fse->var[j].addr, XG(collect_params) TSRMLS_CC);
-
-			if (tmp_value) {
-				xdebug_str_add(&str, tmp_value, 1);
+			if (fse->var[j].addr) {
+				add_single_value(&str, fse->var[j].addr, XG(collect_params));
 			} else {
 				xdebug_str_add(&str, "???", 0);
 			}
@@ -206,19 +206,13 @@ void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	char      *tmp_value = NULL;
 
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
 	xdebug_str_add(&str, "R\t\t\t", 0);
 
-	tmp_value = render_variable(return_value, XG(collect_params) TSRMLS_CC);
+	add_single_value(&str, return_value, XG(collect_params));
 
-	if (tmp_value) {
-		xdebug_str_add(&str, tmp_value, 1);
-	} else {
-		xdebug_str_add(&str, "???", 0);
-	}
 	xdebug_str_addl(&str, "\n", 2, 0);
 
 	fprintf(context->trace_file, "%s", str.d);

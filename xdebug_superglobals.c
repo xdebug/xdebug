@@ -33,8 +33,6 @@ void xdebug_superglobals_dump_dtor(void *user, void *ptr)
 
 static void dump_hash_elem(zval *z, const char *name, long index_key, const char *elem, int html, xdebug_str *str TSRMLS_DC)
 {
-	int  len;
-
 	if (html) {
 		if (elem) {
 			xdebug_str_add(str, xdebug_sprintf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s['%s']&nbsp;=</pre></td>", name, elem), 1);
@@ -44,18 +42,22 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 	}
 
 	if (z != NULL) {
-		char *val;
+		xdebug_str *val;
 
 		if (html) {
-			val = xdebug_get_zval_value_fancy(NULL, z, &len, 0, NULL TSRMLS_CC);
-			xdebug_str_add(str, xdebug_sprintf("<td colspan='3' bgcolor='#eeeeec'>"), 1);
-			xdebug_str_addl(str, val, len, 0);
-			xdebug_str_add(str, "</td>", 0);
+			val = xdebug_get_zval_value_fancy(NULL, z, 0, NULL);
+
+			xdebug_str_addl(str, "<td colspan='3' bgcolor='#eeeeec'>", 34, 0);
+			xdebug_str_add_str(str, val);
+			xdebug_str_addl(str, "</td>", 5, 0);
 		} else {
 			val = xdebug_get_zval_value(z, 0, NULL);
-			xdebug_str_add(str, xdebug_sprintf("\n   $%s['%s'] = %s", name, elem, val), 1);
+
+			xdebug_str_add(str, xdebug_sprintf("\n   $%s['%s'] = ", name, elem), 1);
+			xdebug_str_add_str(str, val);
 		}
-		xdfree(val);
+
+		xdebug_str_free(val);
 	} else {
 		/* not found */
 		if (html) {

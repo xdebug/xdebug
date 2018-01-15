@@ -86,9 +86,9 @@ char *xdebug_trace_textual_get_filename(void *ctxt TSRMLS_DC)
 	return context->trace_filename;
 }
 
-void add_single_value(xdebug_str *str, zval *zv, int collection_level TSRMLS_DC)
+static void add_single_value(xdebug_str *str, zval *zv, int collection_level TSRMLS_DC)
 {
-	char *tmp_value;
+	xdebug_str *tmp_value = NULL;
 
 	switch (collection_level) {
 		case 1: /* synopsis */
@@ -101,11 +101,12 @@ void add_single_value(xdebug_str *str, zval *zv, int collection_level TSRMLS_DC)
 			tmp_value = xdebug_get_zval_value(zv, 0, NULL);
 			break;
 		case 5: /* serialized */
-			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
+			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
 			break;
 	}
 	if (tmp_value) {
-		xdebug_str_add(str, tmp_value, 1);
+		xdebug_str_add_str(str, tmp_value);
+		xdebug_str_free(tmp_value);
 	} else {
 		xdebug_str_add(str, "???", 0);
 	}
@@ -222,28 +223,29 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	char      *tmp_value;
+	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
+	xdebug_str                   *tmp_value;
 
 	xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
 
 	tmp_value = xdebug_get_zval_value(return_value, 0, NULL);
 	if (tmp_value) {
-		xdebug_str_add(&str, tmp_value, 1);
+		xdebug_str_add_str(&str, tmp_value);
+		xdebug_str_free(tmp_value);
 	}
 	xdebug_str_addl(&str, "\n", 2, 0);
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
 
-	xdfree(str.d);
+	xdebug_str_destroy(&str);
 }
 
 void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	char      *tmp_value = NULL;
+	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
+	xdebug_str                   *tmp_value = NULL;
 
 	if (! (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
 		return;
@@ -261,29 +263,31 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
 
 		xdebug_str_addl(&str, "(", 1, 0);
-		xdebug_str_add(&str, tmp_value, 1);
+		xdebug_str_add_str(&str, tmp_value);
 		xdebug_str_addl(&str, " => ", 4, 0);
 
 		tmp_value = xdebug_get_zval_value(&generator->value, 0, NULL);
 		if (tmp_value) {
-			xdebug_str_add(&str, tmp_value, 1);
+			xdebug_str_add_str(&str, tmp_value);
+			xdebug_str_free(tmp_value);
 		}
+
 		xdebug_str_addl(&str, ")", 1, 0);
 		xdebug_str_addl(&str, "\n", 2, 0);
 
 		fprintf(context->trace_file, "%s", str.d);
 		fflush(context->trace_file);
 
-		xdfree(str.d);
+		xdebug_str_destroy(&str);
 	}
 }
 
 void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, const char *op, char *filename, int lineno TSRMLS_DC)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-	unsigned int j = 0;
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	char      *tmp_value;
+	unsigned int                  j = 0;
+	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
+	xdebug_str                   *tmp_value;
 
 	xdebug_str_addl(&str, "                    ", 20, 0);
 	if (XG(show_mem_delta)) {
@@ -305,7 +309,8 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 			tmp_value = xdebug_get_zval_value(retval, 0, NULL);
 
 			if (tmp_value) {
-				xdebug_str_add(&str, tmp_value, 1);
+				xdebug_str_add_str(&str, tmp_value);
+				xdebug_str_free(tmp_value);
 			} else {
 				xdebug_str_addl(&str, "NULL", 4, 0);
 			}
