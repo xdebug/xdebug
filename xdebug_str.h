@@ -25,6 +25,8 @@
 #define XDEBUG_STR_PREALLOC 1024
 #define xdebug_str_dtor(str)     xdfree(str.d)
 
+#define XDEBUG_STR_WRAP_CHAR(v) (&((xdebug_str){strlen(v), strlen(v)+1, ((char*)(v))}))
+
 typedef struct xdebug_str {
 	signed long l;
 	signed long a;

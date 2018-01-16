@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1514: (Root) Variable names with a NULL char are cut off at NULL char
+Test for bug #1514: Variable names with a NULL char are cut off at NULL char
 --SKIPIF--
 <?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --FILE--
@@ -12,8 +12,8 @@ $commands = array(
 	'step_into',
 	'step_into',
 	'context_get',
-	'property_get -d 0 -c 0 -n $with_\0_null_char',
-	'property_get -d 0 -c 0 -n "$with_\\\0_null_char"',
+	'feature_set -n extended_properties -v 1',
+	'context_get',
 );
 
 dbgpRun( $data, $commands );
@@ -36,12 +36,12 @@ dbgpRun( $data, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$name" fullname="$name" type="string" size="16" encoding="base64"><![CDATA[d2l0aF8AX251bGxfY2hhcg==]]></property><property name="$with_&#0;_null_char" fullname="$with_&#0;_null_char" type="uninitialized"></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$name" fullname="$name" type="string" size="16" encoding="base64"><![CDATA[d2l0aF8AX251bGxfY2hhcg==]]></property><property name="$with_&#0;_null_char" fullname="$with_&#0;_null_char" type="int"><![CDATA[42]]></property></response>
 
--> property_get -i 5 -d 0 -c 0 -n $with_\0_null_char
+-> feature_set -i 5 -n extended_properties -v 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$with_\0_null_char" fullname="$with_\0_null_char" type="int"><![CDATA[42]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="5" feature="extended_properties" success="1"></response>
 
--> property_get -i 6 -d 0 -c 0 -n "$with_\\0_null_char"
+-> context_get -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$with_\0_null_char" fullname="$with_\0_null_char" type="int"><![CDATA[42]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="6" context="0"><property name="$name" fullname="$name" type="string" size="16" encoding="base64"><![CDATA[d2l0aF8AX251bGxfY2hhcg==]]></property><property type="int"><name encoding="base64"><![CDATA[JHdpdGhfAF9udWxsX2NoYXI=]]></name><fullname encoding="base64"><![CDATA[JHdpdGhfAF9udWxsX2NoYXI=]]></fullname><value encoding="base64"><![CDATA[NDI=]]></value></property></response>

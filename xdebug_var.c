@@ -530,11 +530,12 @@ inline static int is_objectish(zval *value)
 	return 0;
 }
 
-void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
+void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 {
 	int        found = -1;
 	int        state = 0;
-	char     **p = &name;
+	char      *ptr = name->d;
+	int        ctr = 0;
 	char      *keyword = NULL, *keyword_end = NULL;
 	int        type = XF_ST_ROOT;
 	char      *current_classname = NULL;
@@ -545,28 +546,28 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 	ZVAL_UNDEF(retval);
 
 	do {
-		if (*p[0] == '\0') {
+		if (ctr == name->l) {
 			found = 0;
 		} else {
 			switch (state) {
 				case 0:
-					if (*p[0] == '$') {
-						keyword = *p + 1;
+					if (ptr[ctr] == '$') {
+						keyword = &ptr[ctr] + 1;
 						break;
 					}
-					if (*p[0] == ':') { /* special tricks */
-						keyword = *p;
+					if (ptr[ctr] == ':') { /* special tricks */
+						keyword = &ptr[ctr];
 						state = 7;
 						break;
 					}
-					keyword = *p;
+					keyword = &ptr[ctr];
 					state = 1;
 
 					XDEBUG_BREAK_INTENTIONALLY_MISSING
 
 				case 1:
-					if (*p[0] == '[') {
-						keyword_end = *p;
+					if (ptr[ctr] == '[') {
+						keyword_end = &ptr[ctr];
 						if (keyword) {
 							fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
@@ -578,8 +579,8 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 							keyword = NULL;
 						}
 						state = 3;
-					} else if (*p[0] == '-') {
-						keyword_end = *p;
+					} else if (ptr[ctr] == '-') {
+						keyword_end = &ptr[ctr];
 						if (keyword) {
 							fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
@@ -595,8 +596,8 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 						}
 						state = 2;
 						type = XF_ST_OBJ_PROPERTY;
-					} else if (*p[0] == ':') {
-						keyword_end = *p;
+					} else if (ptr[ctr] == ':') {
+						keyword_end = &ptr[ctr];
 						if (keyword) {
 							fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 							if (current_classname) {
@@ -614,52 +615,52 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 					}
 					break;
 				case 2:
-					if (*p[0] != '>') {
-						keyword = *p;
+					if (ptr[ctr] != '>') {
+						keyword = &ptr[ctr];
 						state = 1;
 					}
 					break;
 				case 8:
-					if (*p[0] != ':') {
-						keyword = *p;
+					if (ptr[ctr] != ':') {
+						keyword = &ptr[ctr];
 						state = 1;
 					}
 					break;
 				case 3: /* Parsing in [...] */
 					/* Associative arrays */
-					if (*p[0] == '\'' || *p[0] == '"') {
+					if (ptr[ctr] == '\'' || ptr[ctr] == '"') {
 						state = 4;
-						keyword = *p + 1;
-						quotechar = *p[0];
+						keyword = &ptr[ctr] + 1;
+						quotechar = ptr[ctr];
 						type = XF_ST_ARRAY_INDEX_ASSOC;
 					}
 					/* Numerical index */
-					if (*p[0] >= '0' && *p[0] <= '9') {
+					if (ptr[ctr] >= '0' && ptr[ctr] <= '9') {
 						cc_length = 0;
 						state = 6;
-						keyword = *p;
+						keyword = &ptr[ctr];
 						type = XF_ST_ARRAY_INDEX_NUM;
 					}
 					/* Numerical index starting with a - */
-					if (*p[0] == '-') {
+					if (ptr[ctr] == '-') {
 						state = 9;
-						keyword = *p;
+						keyword = &ptr[ctr];
 					}
 					break;
 				case 9:
 					/* Numerical index starting with a - */
-					if (*p[0] >= '0' && *p[0] <= '9') {
+					if (ptr[ctr] >= '0' && ptr[ctr] <= '9') {
 						state = 6;
 						type = XF_ST_ARRAY_INDEX_NUM;
 					}
 					break;
 				case 4:
-					if (*p[0] == '\\') {
+					if (ptr[ctr] == '\\') {
 						state = 10; /* Escaped character */
-					} else if (*p[0] == quotechar) {
+					} else if (ptr[ctr] == quotechar) {
 						quotechar = 0;
 						state = 5;
-						keyword_end = *p;
+						keyword_end = &ptr[ctr];
 						fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 						if (current_classname) {
 							efree(current_classname);
@@ -676,14 +677,14 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 					state = 4;
 					break;
 				case 5:
-					if (*p[0] == ']') {
+					if (ptr[ctr] == ']') {
 						state = 1;
 					}
 					break;
 				case 6:
-					if (*p[0] == ']') {
+					if (ptr[ctr] == ']') {
 						state = 1;
-						keyword_end = *p;
+						keyword_end = &ptr[ctr];
 						fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 						if (current_classname) {
 							efree(current_classname);
@@ -697,9 +698,9 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 					}
 					break;
 				case 7: /* special cases, started with a ":" */
-					if (*p[0] == ':') {
+					if (ptr[ctr] == ':') {
 						state = 1;
-						keyword_end = *p;
+						keyword_end = &ptr[ctr];
 
 						if (strncmp(keyword, "::", 2) == 0 && XG(active_fse)->function.class) { /* static class properties */
 							zend_class_entry *ce = xdebug_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
@@ -707,7 +708,7 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
 							cc_length = strlen(STR_NAME_VAL(ce->name));
 							current_ce = ce;
-							keyword = *p + 1;
+							keyword = &ptr[ctr] + 1;
 
 							type = XF_ST_STATIC_ROOT;
 						} else {
@@ -716,36 +717,40 @@ void xdebug_get_php_symbol(zval *retval, char* name TSRMLS_DC)
 					}
 					break;
 			}
-			(*p)++;
+			ctr++;
 		}
 	} while (found < 0);
 	if (keyword != NULL) {
-		fetch_zval_from_symbol_table(retval, keyword, *p - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+		fetch_zval_from_symbol_table(retval, keyword, &ptr[ctr] - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
 	}
 	if (current_classname) {
 		efree(current_classname);
 	}
 }
 
-const char* xdebug_get_property_info(char *mangled_property, int mangled_len, char **property_name, char **class_name)
+static xdebug_str* xdebug_get_property_info(char *mangled_property, int mangled_len, const char **modifier, char **class_name)
 {
-	const char *prop_name, *cls_name;
+	const char *cls_name, *tmp_prop_name;
+	size_t      tmp_prop_name_len;
+	xdebug_str *property_name;
 
 	zend_string *i_mangled = zend_string_init(mangled_property, mangled_len - 1, 0);
-	zend_unmangle_property_name(i_mangled, &cls_name, &prop_name);
-	*property_name = (char *) xdstrdup(prop_name);
+	zend_unmangle_property_name_ex(i_mangled, &cls_name, &tmp_prop_name, &tmp_prop_name_len);
+	property_name = xdebug_str_create((char*) tmp_prop_name, tmp_prop_name_len);
 	*class_name = cls_name ? xdstrdup(cls_name) : NULL;
 	zend_string_release(i_mangled);
 
 	if (*class_name) {
 		if (*class_name[0] == '*') {
-			return "protected";
+			*modifier = "protected";
 		} else {
-			return "private";
+			*modifier = "private";
 		}
 	} else {
-		return "public";
+		*modifier = "public";
 	}
+
+	return property_name;
 }
 
 #define XDEBUG_MAX_INT 2147483647
@@ -841,17 +846,25 @@ static int xdebug_object_element_export(zval *zv_nptr, zend_ulong index_key, zen
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
-			char *prop_name, *prop_class_name;
+			xdebug_str *property_name;
+			char       *prop_class_name;
 			const char *modifier;
 
-			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &prop_class_name);
+			property_name = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &modifier, &prop_class_name);
+			xdebug_str_add(str, modifier, 0);
+			xdebug_str_addl(str, " $", 2, 0);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-				xdebug_str_add(str, xdebug_sprintf("%s $%s = ", modifier, prop_name), 1);
+				xdebug_str_add_str(str, property_name);
+				xdebug_str_addl(str, " = ", 3, 0);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf("%s ${%s}:%s = ", modifier, prop_class_name, prop_name), 1);
+				xdebug_str_addc(str, '{');
+				xdebug_str_add(str, prop_class_name, 0);
+				xdebug_str_addc(str, '}');
+				xdebug_str_add_str(str, property_name);
+				xdebug_str_addl(str, " = ", 3, 0);
 			}
 
-			xdfree(prop_name);
+			xdebug_str_free(property_name);
 			xdfree(prop_class_name);
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("public $%d = ", index_key), 1);
@@ -1012,9 +1025,9 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 	}
 }
 
-char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options)
+xdebug_str* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options)
 {
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	xdebug_str *str = xdebug_str_new();
 	int default_options = 0;
 	TSRMLS_FETCH();
 
@@ -1023,14 +1036,14 @@ char* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options
 		default_options = 1;
 	}
 
-	xdebug_var_export(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_export(&val, str, 1, debug_zval, options);
 
 	if (default_options) {
 		xdfree(options->runtime);
 		xdfree(options);
 	}
 
-	return str.d;
+	return str;
 }
 
 static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
@@ -1108,9 +1121,9 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 	}
 }
 
-char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options)
+xdebug_str* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options)
 {
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	xdebug_str *str = xdebug_str_new();
 	int default_options = 0;
 	TSRMLS_FETCH();
 
@@ -1119,14 +1132,14 @@ char* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_opti
 		default_options = 1;
 	}
 
-	xdebug_var_synopsis(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_synopsis(&val, str, 1, debug_zval, options);
 
 	if (default_options) {
 		xdfree(options->runtime);
 		xdfree(options);
 	}
 
-	return str.d;
+	return str;
 }
 
 /*****************************************************************************
@@ -1194,15 +1207,18 @@ static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong inde
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2), ""), 1);
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
-			char *prop_name, *class_name;
+			char       *class_name;
+			xdebug_str *property_name;
 			const char *modifier;
 
-			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &class_name);
-			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $%s %s=>%s\n",
-			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET,
-			               prop_name, ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
+			property_name = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &modifier, &class_name);
+			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $",
+			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET), 1);
+			xdebug_str_add_str(str, property_name);
+			xdebug_str_add(str, xdebug_sprintf(" %s=>%s\n",
+			               ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 
-			xdfree(prop_name);
+			xdebug_str_free(property_name);
 			xdfree(class_name);
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("%s%spublic%s%s ${" XDEBUG_INT_FMT "} %s=>%s\n",
@@ -1373,9 +1389,9 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	xdebug_str_addl(str, "\n", 1, 0);
 }
 
-char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	xdebug_str *str = xdebug_str_new();
 	int default_options = 0;
 
 	if (!options) {
@@ -1387,18 +1403,18 @@ char* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebu
 		char *formatted_filename;
 
 		xdebug_format_filename(&formatted_filename, XG(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
-		xdebug_str_add(&str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, formatted_filename, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
+		xdebug_str_add(str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, formatted_filename, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
 		xdfree(formatted_filename);
 	}
 
-	xdebug_var_export_text_ansi(&val, (xdebug_str*) &str, mode, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_export_text_ansi(&val, str, mode, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
 		xdfree(options->runtime);
 		xdfree(options);
 	}
 
-	return str.d;
+	return str;
 }
 
 static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
@@ -1475,9 +1491,9 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 	}
 }
 
-char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+xdebug_str* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	xdebug_str *str = xdebug_str_new();
 	int default_options = 0;
 
 	if (!options) {
@@ -1486,17 +1502,17 @@ char* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xd
 	}
 
 	if (options->show_location && !debug_zval) {
-		xdebug_str_add(&str, xdebug_sprintf("%s%s: %d%s\n", ANSI_COLOR_BOLD, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
+		xdebug_str_add(str, xdebug_sprintf("%s%s: %d%s\n", ANSI_COLOR_BOLD, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
 	}
 
-	xdebug_var_synopsis_text_ansi(&val, (xdebug_str*) &str, mode, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_synopsis_text_ansi(&val, str, mode, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
 		xdfree(options->runtime);
 		xdfree(options);
 	}
 
-	return str.d;
+	return str;
 }
 
 
@@ -1648,7 +1664,7 @@ static void add_encoded_text_value_attribute_or_element(xdebug_var_export_option
 }
 
 
-static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_xml_node *parent, char *parent_name, xdebug_var_export_options *options)
+static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_xml_node *parent, xdebug_str *parent_name, xdebug_var_export_options *options)
 {
 	zval            **zv = &zv_nptr;
 	xdebug_xml_node  *node;
@@ -1664,13 +1680,13 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) { /* string key */
 			zend_string *i_string = zend_string_init(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1, 0);
 			zend_string *tmp_fullname_zstr;
-			
+
 			tmp_fullname_zstr = php_addslashes(i_string, 0);
 
 			name = xdebug_str_create(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1);
 
 			if (parent_name) {
-				xdebug_str_add(&full_name, parent_name, 0);
+				xdebug_str_add_str(&full_name, parent_name);
 				xdebug_str_addl(&full_name, "[\"", 2, 0);
 				xdebug_str_addl(&full_name, tmp_fullname_zstr->val, tmp_fullname_zstr->len, 0);
 				xdebug_str_addl(&full_name, "\"]", 2, 0);
@@ -1683,8 +1699,13 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 
 			name = xdebug_str_create(tmp_idx, strlen(tmp_idx));
 			if (parent_name) {
-				xdebug_str_add(&full_name, xdebug_sprintf("%s[%s]", parent_name, tmp_idx), 1);
+				xdebug_str_add_str(&full_name, parent_name);
+				xdebug_str_addc(&full_name, '[');
+				xdebug_str_add_str(&full_name, name);
+				xdebug_str_addc(&full_name, ']');
 			}
+
+			xdfree(tmp_idx);
 		}
 
 		add_xml_attribute_or_element(options, node, "name", 4, name);
@@ -1693,7 +1714,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 		}
 
 		xdebug_xml_add_child(parent, node);
-		xdebug_var_export_xml_node(zv, full_name.d, node, options, level + 1 TSRMLS_CC);
+		xdebug_var_export_xml_node(zv, &full_name, node, options, level + 1 TSRMLS_CC);
 
 		xdebug_str_destroy(&full_name);
 		xdebug_str_free(name);
@@ -1702,7 +1723,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 	return 0;
 }
 
-static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_xml_node *parent, char *parent_name, xdebug_var_export_options *options, char *class_name)
+static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_xml_node *parent, xdebug_str *parent_name, xdebug_var_export_options *options, char *class_name)
 {
 	xdebug_object_item **item = &item_nptr;
 	xdebug_xml_node *node;
@@ -1717,42 +1738,44 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 		options->force_extended = 0;
 
 		if ((*item)->name_len != 0) {
-			char *prop_name, *prop_class_name;
+			char       *prop_class_name;
+			xdebug_str *property_name;
 
-			modifier = xdebug_get_property_info((*item)->name, (*item)->name_len + 1, &prop_name, &prop_class_name);
+			property_name = xdebug_get_property_info((*item)->name, (*item)->name_len + 1, &modifier, &prop_class_name);
 
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-				xdebug_str *tmp_name = xdebug_str_create_from_char(prop_name);
-
-				add_xml_attribute_or_element(options, node, "name", 4, tmp_name);
-
-				xdebug_str_free(tmp_name);
+				add_xml_attribute_or_element(options, node, "name", 4, property_name);
 			} else {
-				char       *tmp_formatted_prop = xdebug_sprintf("*%s*%s", prop_class_name, prop_name);
-				xdebug_str *tmp_name = xdebug_str_create_from_char(tmp_formatted_prop);
+				xdebug_str *tmp_name = xdebug_str_new();
+
+				xdebug_str_addc(tmp_name, '*');
+				xdebug_str_add(tmp_name, prop_class_name, 0);
+				xdebug_str_addc(tmp_name, '*');
+				xdebug_str_add_str(tmp_name, property_name);
 
 				add_xml_attribute_or_element(options, node, "name", 4, tmp_name);
 
 				xdebug_str_free(tmp_name);
-				xdfree(tmp_formatted_prop);
 			}
 
 			if (parent_name) {
-				char       *tmp_formatted_prop;
+				tmp_fullname = xdebug_str_new();
 
+				xdebug_str_add_str(tmp_fullname, parent_name);
+				xdebug_str_add(tmp_fullname, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", 0);
 				if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-					tmp_formatted_prop = xdebug_sprintf("%s%s%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_name);
+					xdebug_str_add_str(tmp_fullname, property_name);
 				} else {
-					tmp_formatted_prop = xdebug_sprintf("%s%s*%s*%s", parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", prop_class_name, prop_name);
+					xdebug_str_addc(tmp_fullname, '*');
+					xdebug_str_add(tmp_fullname, prop_class_name, 0);
+					xdebug_str_addc(tmp_fullname, '*');
+					xdebug_str_add_str(tmp_fullname, property_name);
 				}
-				tmp_fullname = xdebug_str_create_from_char(tmp_formatted_prop);
 
 				add_xml_attribute_or_element(options, node, "fullname", 8, tmp_fullname);
-
-				xdfree(tmp_formatted_prop);
 			}
 
-			xdfree(prop_name);
+			xdebug_str_free(property_name);
 			xdfree(prop_class_name);
 		} else { /* Numerical property name */
 			modifier = "public";
@@ -1784,9 +1807,11 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 
 		xdebug_xml_add_attribute_ex(node, "facet", xdebug_sprintf("%s%s", (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "", modifier), 0, 1);
 		xdebug_xml_add_child(parent, node);
-		xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname->d : NULL, node, options, level + 1 TSRMLS_CC);
-				
-		xdebug_str_free(tmp_fullname);
+		xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1 TSRMLS_CC);
+
+		if (tmp_fullname) {
+			xdebug_str_free(tmp_fullname);
+		}
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
@@ -1830,24 +1855,32 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info, xdebug_
 {
 	const char         *modifier;
 	xdebug_xml_node    *contents = NULL;
-	char               *prop_name, *prop_class_name;
+	char               *prop_class_name;
+	xdebug_str         *property_name;
 
 	if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
 		return;
 	}
 
 	(*children_count)++;
-	modifier = xdebug_get_property_info(STR_NAME_VAL(prop_info->name), STR_NAME_LEN(prop_info->name) + 1, &prop_name, &prop_class_name);
+	property_name = xdebug_get_property_info(STR_NAME_VAL(prop_info->name), STR_NAME_LEN(prop_info->name) + 1, &modifier, &prop_class_name);
 
 	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-		contents = xdebug_get_zval_value_xml_node_ex(prop_name, &class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+		contents = xdebug_get_zval_value_xml_node_ex(property_name, &class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
 	} else{
-		char *priv_name = xdebug_sprintf("*%s*%s", prop_class_name, prop_name);
+		xdebug_str *priv_name = xdebug_str_new();
+
+		xdebug_str_addc(priv_name, '*');
+		xdebug_str_add(priv_name, prop_class_name, 0);
+		xdebug_str_addc(priv_name, '*');
+		xdebug_str_add_str(priv_name, property_name);
+
 		contents = xdebug_get_zval_value_xml_node_ex(priv_name, &class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
-		xdfree(priv_name);
+
+		xdebug_str_free(priv_name);
 	}
 
-	xdfree(prop_name);
+	xdebug_str_free(property_name);
 	xdfree(prop_class_name);
 
 	if (contents) {
@@ -1885,7 +1918,7 @@ void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	xdebug_xml_add_child(node, static_container);
 }
 
-void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level TSRMLS_DC)
+void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level)
 {
 	HashTable *myht;
 	zend_ulong num;
@@ -2048,7 +2081,7 @@ void xdebug_var_export_xml_node(zval **struc, char *name, xdebug_xml_node *node,
 	}
 }
 
-xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int var_type, xdebug_var_export_options *options TSRMLS_DC)
+xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(xdebug_str *name, zval *val, int var_type, xdebug_var_export_options *options)
 {
 	xdebug_xml_node *node;
 	xdebug_str      *short_name = NULL;
@@ -2060,33 +2093,32 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(char *name, zval *val, int va
 	if (name) {
 		switch (var_type) {
 			case XDEBUG_VAR_TYPE_NORMAL: {
-				xdebug_str *pre_name = xdebug_str_create_from_char(name);
-
-				short_name = prepare_variable_name(pre_name);
+				short_name = prepare_variable_name(name);
 				full_name =  xdebug_str_copy(short_name);
-				
-				xdebug_str_free(pre_name);
 			} break;
 
 			case XDEBUG_VAR_TYPE_STATIC: {
-				char *tmp_formatted_name = xdebug_sprintf("::%s", name);
+				xdebug_str tmp_formatted_name = XDEBUG_STR_INITIALIZER;
 
-				short_name = xdebug_str_create_from_char(tmp_formatted_name);
-				full_name =  xdebug_str_copy(short_name);
+				xdebug_str_addl(&tmp_formatted_name, "::", 2, 0);
+				xdebug_str_add_str(&tmp_formatted_name, name);
 
-				xdfree(tmp_formatted_name);
+				short_name = xdebug_str_copy(&tmp_formatted_name);
+				full_name =  xdebug_str_copy(&tmp_formatted_name);
+
+				xdebug_str_destroy(&tmp_formatted_name);
 			} break;
 
 			case XDEBUG_VAR_TYPE_CONSTANT:
-				short_name = xdebug_str_create_from_char(name);
-				full_name =  xdebug_str_copy(short_name);
+				short_name = xdebug_str_copy(name);
+				full_name =  xdebug_str_copy(name);
 				break;
 		}
 
 		add_xml_attribute_or_element(options, node, "name", 4, short_name);
 		add_xml_attribute_or_element(options, node, "fullname", 8, full_name);
 	}
-	xdebug_var_export_xml_node(&val, full_name ? full_name->d : NULL, node, options, 0 TSRMLS_CC);
+	xdebug_var_export_xml_node(&val, full_name ? full_name : NULL, node, options, 0 TSRMLS_CC);
 
 	if (short_name) {
 		xdebug_str_free(short_name);
@@ -2153,17 +2185,21 @@ static int xdebug_object_element_export_fancy(zval *zv_nptr, zend_ulong index_ke
 		xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 
 		if (!HASH_KEY_IS_NUMERIC(hash_key)) {
-			char *prop_name, *prop_class_name;
+			char       *prop_class_name;
+			xdebug_str *property_name;
 			const char *modifier;
 
-			modifier = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &prop_name, &prop_class_name);
+			property_name = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &modifier, &prop_class_name);
+
+			xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '", modifier), 1);
+			xdebug_str_add_str(str, property_name);
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-				xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <font color='%s'>=&gt;</font> ", modifier, prop_name, COLOR_POINTER), 1);
+				xdebug_str_add(str, xdebug_sprintf("' <font color='%s'>=&gt;</font> ", COLOR_POINTER), 1);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf("<i>%s</i> '%s' <small>(%s)</small> <font color='%s'>=&gt;</font> ", modifier, prop_name, prop_class_name, COLOR_POINTER), 1);
+				xdebug_str_add(str, xdebug_sprintf("' <small>(%s)</small> <font color='%s'>=&gt;</font> ", prop_class_name, COLOR_POINTER), 1);
 			}
 
-			xdfree(prop_name);
+			xdebug_str_free(property_name);
 			xdfree(prop_class_name);
 		} else {
 			xdebug_str_add(str, xdebug_sprintf("<i>public</i> " XDEBUG_INT_FMT " <font color='%s'>=&gt;</font> ", index_key, COLOR_POINTER), 1);
@@ -2316,9 +2352,9 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	}
 }
 
-char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+xdebug_str* xdebug_get_zval_value_fancy(char *name, zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	xdebug_str *str = xdebug_str_new();
 	int default_options = 0;
 
 	if (!options) {
@@ -2326,7 +2362,7 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 		default_options = 1;
 	}
 
-	xdebug_str_addl(&str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
+	xdebug_str_addl(str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
 		xdebug_format_filename(&formatted_filename, XG(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
@@ -2335,27 +2371,26 @@ char* xdebug_get_zval_value_fancy(char *name, zval *val, int *len, int debug_zva
 			char *file_link;
 
 			xdebug_format_file_link(&file_link, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
-			xdebug_str_add(&str, xdebug_sprintf("\n<small><a href='%s'>%s:%d</a>:</small>", file_link, formatted_filename, zend_get_executed_lineno(TSRMLS_C)), 1);
+			xdebug_str_add(str, xdebug_sprintf("\n<small><a href='%s'>%s:%d</a>:</small>", file_link, formatted_filename, zend_get_executed_lineno(TSRMLS_C)), 1);
 			xdfree(file_link);
 		} else {
-			xdebug_str_add(&str, xdebug_sprintf("\n<small>%s:%d:</small>", formatted_filename, zend_get_executed_lineno(TSRMLS_C)), 1);
+			xdebug_str_add(str, xdebug_sprintf("\n<small>%s:%d:</small>", formatted_filename, zend_get_executed_lineno(TSRMLS_C)), 1);
 		}
 
 		xdfree(formatted_filename);
 	}
-	xdebug_var_export_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
-	xdebug_str_addl(&str, "</pre>", 6, 0);
+	xdebug_var_export_fancy(&val, str, 1, debug_zval, options TSRMLS_CC);
+	xdebug_str_addl(str, "</pre>", 6, 0);
 
 	if (default_options) {
 		xdfree(options->runtime);
 		xdfree(options);
 	}
 
-	*len = str.l;
-	return str.d;
+	return str;
 }
 
-char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+xdebug_str* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
 	zend_object *orig_exception = EG(exception);
 	php_serialize_data_t var_hash;
@@ -2374,14 +2409,15 @@ char* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_exp
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.a) {
-		int new_len;
-		char *tmp_base64, *tmp_ret;
+		char       *tmp_base64;
+		int         new_len;
+		xdebug_str *tmp_ret;
 
 		/* now we need to base64 it */
 		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) buf.s->val, buf.s->len, &new_len);
 
 		/* we need a malloc'ed and not an emalloc'ed string */
-		tmp_ret = xdstrdup(tmp_base64);
+		tmp_ret = xdebug_str_create(tmp_base64, new_len);
 
 		efree(tmp_base64);
 		smart_str_free(&buf);
@@ -2460,9 +2496,9 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 	}
 }
 
-char* xdebug_get_zval_synopsis_fancy(const char *name, zval *val, int *len, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
+xdebug_str* xdebug_get_zval_synopsis_fancy(const char *name, zval *val, int debug_zval, xdebug_var_export_options *options TSRMLS_DC)
 {
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	xdebug_str *str = xdebug_str_new();
 	int default_options = 0;
 
 	if (!options) {
@@ -2470,15 +2506,14 @@ char* xdebug_get_zval_synopsis_fancy(const char *name, zval *val, int *len, int 
 		default_options = 1;
 	}
 
-	xdebug_var_synopsis_fancy(&val, (xdebug_str*) &str, 1, debug_zval, options TSRMLS_CC);
+	xdebug_var_synopsis_fancy(&val, str, 1, debug_zval, options TSRMLS_CC);
 
 	if (default_options) {
 		xdfree(options->runtime);
 		xdfree(options);
 	}
 
-	*len = str.l;
-	return str.d;
+	return str;
 }
 
 /*****************************************************************************

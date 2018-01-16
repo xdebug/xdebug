@@ -2157,10 +2157,10 @@ PHP_FUNCTION(xdebug_pcntl_exec)
    Outputs a fancy string representation of a variable */
 PHP_FUNCTION(xdebug_var_dump)
 {
-	zval   *args;
-	int     argc;
-	int     i, len;
-	char   *val;
+	zval       *args;
+	int         argc;
+	int         i;
+	xdebug_str *val;
 
 	/* Ignore our new shiny function if overload_var_dump is set to 0 *and* the
 	 * function is not being called as xdebug_var_dump() (usually, that'd be
@@ -2186,18 +2186,18 @@ PHP_FUNCTION(xdebug_var_dump)
 			xdebug_php_var_dump(&args[i], 1 TSRMLS_CC);
 		}
 		else if (PG(html_errors)) {
-			val = xdebug_get_zval_value_fancy(NULL, (zval*) &args[i], &len, 0, NULL TSRMLS_CC);
-			PHPWRITE(val, len);
+			val = xdebug_get_zval_value_fancy(NULL, (zval*) &args[i], 0, NULL);
+			PHPWRITE(val->d, val->l);
 			xdfree(val);
 		}
 		else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
 			val = xdebug_get_zval_value_ansi((zval*) &args[i], 0, NULL);
-			PHPWRITE(val, strlen(val));
+			PHPWRITE(val->d, val->l);
 			xdfree(val);
 		}
 		else {
 			val = xdebug_get_zval_value_text((zval*) &args[i], 0, NULL);
-			PHPWRITE(val, strlen(val));
+			PHPWRITE(val->d, val->l);
 			xdfree(val);
 		}
 	}
@@ -2210,10 +2210,10 @@ PHP_FUNCTION(xdebug_var_dump)
    Outputs a fancy string representation of a variable */
 PHP_FUNCTION(xdebug_debug_zval)
 {
-	zval   *args;
-	int     argc;
-	int     i, len;
-	char   *val;
+	zval       *args;
+	int         argc;
+	int         i;
+	xdebug_str *val;
 
 	argc = ZEND_NUM_ARGS();
 
@@ -2234,11 +2234,14 @@ PHP_FUNCTION(xdebug_debug_zval)
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) == IS_STRING) {
 			zval debugzval;
+			xdebug_str *tmp_name;
 
 			XG(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
 			XG(active_execute_data) = EG(current_execute_data)->prev_execute_data;
 
-			xdebug_get_php_symbol(&debugzval, Z_STRVAL(args[i]) TSRMLS_CC);
+			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
+			xdebug_get_php_symbol(&debugzval, tmp_name);
+			xdebug_str_free(tmp_name);
 
 			/* Reduce refcount for dumping */
 			Z_TRY_DELREF(debugzval);
@@ -2246,16 +2249,16 @@ PHP_FUNCTION(xdebug_debug_zval)
 			php_printf("%s: ", Z_STRVAL(args[i]));
 			if (Z_TYPE(debugzval) != IS_UNDEF) {
 				if (PG(html_errors)) {
-					val = xdebug_get_zval_value_fancy(NULL, &debugzval, &len, 1, NULL TSRMLS_CC);
-					PHPWRITE(val, len);
+					val = xdebug_get_zval_value_fancy(NULL, &debugzval, 1, NULL);
+					PHPWRITE(val->d, val->l);
 				}
 				else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
 					val = xdebug_get_zval_value_ansi(&debugzval, 1, NULL);
-					PHPWRITE(val, strlen(val));
+					PHPWRITE(val->d, val->l);
 				}
 				else {
 					val = xdebug_get_zval_value(&debugzval, 1, NULL);
-					PHPWRITE(val, strlen(val));
+					PHPWRITE(val->d, val->l);
 				}
 				xdfree(val);
 				PHPWRITE("\n", 1);
@@ -2280,7 +2283,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	zval   *args;
 	int     argc;
 	int     i;
-	char   *val;
 
 	argc = ZEND_NUM_ARGS();
 
@@ -2300,11 +2302,15 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) == IS_STRING) {
-			zval debugzval;
+			zval        debugzval;
+			xdebug_str *tmp_name;
+			xdebug_str *val;
 
 			XG(active_symbol_table) = EG(current_execute_data)->symbol_table;
 
-			xdebug_get_php_symbol(&debugzval, Z_STRVAL(args[i]) TSRMLS_CC);
+			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
+			xdebug_get_php_symbol(&debugzval, tmp_name);
+			xdebug_str_free(tmp_name);
 
 			/* Reduce refcount for dumping */
 			Z_TRY_DELREF(debugzval);
@@ -2312,8 +2318,8 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			printf("%s: ", Z_STRVAL(args[i]));
 			if (Z_TYPE(debugzval) != IS_UNDEF) {
 				val = xdebug_get_zval_value(&debugzval, 1, NULL);
-				printf("%s(%zd)", val, strlen(val));
-				xdfree(val);
+				printf("%s(%zd)", val->d, val->l);
+				xdebug_str_free(val);
 				printf("\n");
 			} else {
 				printf("no such symbol\n\n");
