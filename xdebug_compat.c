@@ -173,10 +173,10 @@ zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int fla
 	return tmp_ce;
 }
 
-int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC)
+int xdebug_get_constant(xdebug_str *val, zval *const_val TSRMLS_DC)
 {
 	zval *tmp_const = NULL;
-	tmp_const = zend_get_constant_str(val, len);
+	tmp_const = zend_get_constant_str(val->d, val->l);
 
 	if (tmp_const) {
 		*const_val = *tmp_const;

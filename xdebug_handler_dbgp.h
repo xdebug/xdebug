@@ -66,7 +66,7 @@ typedef struct xdebug_dbgp_result {
 
 /* Argument structure */
 typedef struct xdebug_dbgp_arg {
-	char *value[27]; /* one extra for - */
+	xdebug_str *value[27]; /* one extra for - */
 } xdebug_dbgp_arg;
 
 #define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args TSRMLS_DC
@@ -86,7 +86,10 @@ typedef struct xdebug_dbgp_cmd {
 	int  flags;
 } xdebug_dbgp_cmd;
 
-#define CMD_OPTION(opt)    (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])
+#define CMD_OPTION_SET(opt)        (!!(opt == '-' ? args->value[26] : args->value[(opt) - 'a']))
+#define CMD_OPTION_CHAR(opt)       (opt == '-' ? args->value[26]->d : args->value[(opt) - 'a']->d)
+#define CMD_OPTION_LEN(opt)        (opt == '-' ? args->value[26]->l : args->value[(opt) - 'a']->l)
+#define CMD_OPTION_XDEBUG_STR(opt) (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])
 
 int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
