@@ -2483,7 +2483,7 @@ int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno,
 		xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
 	}
 	if (type_string) {
-		xdebug_xml_add_attribute_ex(error_container, "type_string", xdstrdup(type_string), 0, 1);
+		xdebug_xml_add_attribute_ex(error_container, "type", xdstrdup(type_string), 0, 1);
 	}
 	if (message) {
 		char *tmp_buf;
