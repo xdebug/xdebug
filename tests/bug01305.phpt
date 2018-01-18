@@ -56,7 +56,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 6 -d 0 -c 0 -n "$settings[\"One\'s Stuff\"]"
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><error code="1"><message><![CDATA[parse error in command]]></message></error></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$settings[&quot;One&#39;s Stuff&quot;]" fullname="$settings[&quot;One&#39;s Stuff&quot;]" type="array" children="1" numchildren="1" page="0" pagesize="32"><property name="id" fullname="$settings[&quot;One&#39;s Stuff&quot;][&quot;id&quot;]" type="int"><![CDATA[1000]]></property></property></response>
 
 -> property_get -i 7 -d 0 -c 0 -n "$settings[\"Two\\\"s Stuff\"]"
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -92,7 +92,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 15 -d 0 -c 0 -n "$settings[\"One\'s Stuff\"]"
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="15"><error code="1"><message><![CDATA[parse error in command]]></message></error></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="15"><property name="$settings[&quot;One&#39;s Stuff&quot;]" fullname="$settings[&quot;One&#39;s Stuff&quot;]" type="array" children="1" numchildren="1" page="0" pagesize="32"><property name="id" fullname="$settings[&quot;One&#39;s Stuff&quot;][&quot;id&quot;]" type="int"><![CDATA[1000]]></property></property></response>
 
 -> property_get -i 16 -d 0 -c 0 -n "$settings[\"Five'sSt\\0ff\"]"
 <?xml version="1.0" encoding="iso-8859-1"?>
