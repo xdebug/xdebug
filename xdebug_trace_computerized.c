@@ -169,8 +169,8 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
 			}
 
-			if (fse->var[j].addr) {
-				add_single_value(&str, fse->var[j].addr, XG(collect_params));
+			if (!Z_ISUNDEF(fse->var[j].data)) {
+				add_single_value(&str, &(fse->var[j].data), XG(collect_params));
 			} else {
 				xdebug_str_add(&str, "???", 0);
 			}

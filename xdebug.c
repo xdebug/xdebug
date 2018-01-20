@@ -1058,7 +1058,7 @@ static void xdebug_declared_var_dtor(void *dummy, void *elem)
 	xdebug_str_free(s);
 }
 
-static void xdebug_stack_element_dtor(void *dummy, void *elem)
+static void function_stack_entry_dtor(void *dummy, void *elem)
 {
 	unsigned int          i;
 	function_stack_entry *e = elem;
@@ -1078,6 +1078,9 @@ static void xdebug_stack_element_dtor(void *dummy, void *elem)
 
 		if (e->var) {
 			for (i = 0; i < e->varc; i++) {
+				if (!Z_ISUNDEF(e->var[i].data)) {
+					ZVAL_UNDEF(&e->var[i].data);
+				}
 				if (e->var[i].name) {
 					xdfree(e->var[i].name);
 				}
@@ -1198,7 +1201,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(coverage_enable) = 0;
 	XG(do_code_coverage) = 0;
 	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
-	XG(stack)         = xdebug_llist_alloc(xdebug_stack_element_dtor);
+	XG(stack)         = xdebug_llist_alloc(function_stack_entry_dtor);
 	XG(trace_handler) = NULL;
 	XG(trace_context) = NULL;
 	XG(profile_file)  = NULL;
@@ -1950,7 +1953,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	fse->symbol_table = NULL;
 	fse->execute_data = NULL;
 	if (XG(stack)) {
-		xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
+		xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), function_stack_entry_dtor);
 	}
 	XG(level)--;
 }
@@ -2045,7 +2048,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	}
 
 	if (XG(stack)) {
-		xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), xdebug_stack_element_dtor);
+		xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), function_stack_entry_dtor);
 	}
 	XG(level)--;
 }
