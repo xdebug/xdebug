@@ -147,7 +147,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 			}
 
 			if (
-				(fse->var[j].is_variadic && fse->var[j].addr)
+				(fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data))
 			) {
 				xdebug_str_add(&str, "...", 0);
 				variadic_opened = 1;
@@ -158,7 +158,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
 			}
 
-			if (fse->var[j].is_variadic && fse->var[j].addr) {
+			if (fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data)) {
 				xdebug_str_add(&str, "variadic(", 0);
 				continue;
 			}
@@ -169,8 +169,8 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 				xdebug_str_add(&str, xdebug_sprintf("%d => ", variadic_count++), 1);
 			}
 
-			if (fse->var[j].addr) {
-				add_single_value(&str, fse->var[j].addr, XG(collect_params) TSRMLS_CC);
+			if (!Z_ISUNDEF(fse->var[j].data)) {
+				add_single_value(&str, &fse->var[j].data, XG(collect_params) TSRMLS_CC);
 			} else {
 				xdebug_str_addl(&str, "???", 3, 0);
 			}

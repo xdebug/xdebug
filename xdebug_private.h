@@ -46,7 +46,7 @@ void xdebug_stop_trace(TSRMLS_D);
 typedef struct xdebug_var_name {
 	char    *name;
 	size_t   length;
-	void    *addr;
+	zval     data;
 	int      is_variadic;
 } xdebug_var_name;
 

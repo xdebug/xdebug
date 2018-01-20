@@ -212,8 +212,8 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 					continue;
 				}
 
-				if (i->var[j].addr) {
-					tmp_value = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+				if (!Z_ISUNDEF(i->var[j].data)) {
+					tmp_value = xdebug_get_zval_value(&i->var[j].data, 0, NULL);
 					xdebug_str_add_str(&log_buffer, tmp_value);
 					xdebug_str_free(tmp_value);
 				} else {
@@ -423,7 +423,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				}
 
 				if (
-					(i->var[j].is_variadic && i->var[j].addr)
+					(i->var[j].is_variadic && Z_ISUNDEF(i->var[j].data))
 				) {
 					xdebug_str_add(str, "...", 0);
 				}
@@ -436,7 +436,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 					}
 				}
 
-				if (!variadic_opened && i->var[j].is_variadic && i->var[j].addr) {
+				if (!variadic_opened && i->var[j].is_variadic && Z_ISUNDEF(i->var[j].data)) {
 					if (html) {
 						xdebug_str_add(str, "<i>variadic</i>(", 0);
 					} else {
@@ -447,8 +447,8 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 					continue;
 				}
 
-				if (i->var[j].addr) {
-					add_single_value(str, i->var[j].addr, html, XG(collect_params) TSRMLS_CC);
+				if (!Z_ISUNDEF(i->var[j].data)) {
+					add_single_value(str, &i->var[j].data, html, XG(collect_params) TSRMLS_CC);
 				} else {
 					xdebug_str_addl(str, "???", 3, 0);
 				}
@@ -1263,7 +1263,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	} else  {
 		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
-		tmp->is_variadic = zdata->func->common.fn_flags & ZEND_ACC_VARIADIC;
+		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
 		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
@@ -1293,7 +1293,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 			for (i = 0; i < arguments_sent; i++) {
 				tmp->var[tmp->varc].name = NULL;
-				tmp->var[tmp->varc].addr = NULL;
+				ZVAL_UNDEF(&tmp->var[tmp->varc].data);
 				tmp->var[tmp->varc].length = 0;
 				tmp->var[tmp->varc].is_variadic = 0;
 
@@ -1317,10 +1317,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				if (XG(collect_params)) {
 					if ((i < arguments_wanted) || ((zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) && (i < arguments_sent))) {
 						if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
-							tmp->var[tmp->varc].addr = ZEND_CALL_ARG(zdata, tmp->varc+1);
+							ZVAL_COPY_VALUE(&(tmp->var[tmp->varc].data), ZEND_CALL_ARG(zdata, tmp->varc+1));
 						}
 					} else {
-						tmp->var[tmp->varc].addr = ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted);
+						ZVAL_COPY_VALUE(&(tmp->var[tmp->varc].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted));
 					}
 				}
 				tmp->varc++;
@@ -1334,7 +1334,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
 					}
-					tmp->var[tmp->varc].addr = NULL;
+					ZVAL_UNDEF(&tmp->var[tmp->varc].data);
 					tmp->var[tmp->varc].is_variadic = 0;
 					tmp->varc++;
 				}
@@ -1526,8 +1526,8 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				variadic_opened = 1;
 				continue;
 			}
-			if (i->var[j].addr) {
-				argument = xdebug_get_zval_value(i->var[j].addr, 0, NULL);
+			if (!Z_ISUNDEF(i->var[j].data)) {
+				argument = xdebug_get_zval_value(&i->var[j].data, 0, NULL);
 			} else {
 				argument = xdebug_str_create_from_char((char*) "???");
 			}
