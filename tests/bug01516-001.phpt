@@ -5,7 +5,7 @@ Test for bug #1516: Can't fetch variables or object properties which have \0 cha
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-$data = file_get_contents(dirname(__FILE__) . '/bug01516.inc');
+$data = file_get_contents(dirname(__FILE__) . '/bug01516-001.inc');
 
 $commands = array(
 	'step_into',
