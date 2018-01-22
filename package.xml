@@ -36,8 +36,8 @@ Xdebug also provides:
  <date>2018-01-22</date>
  <time>18:19:32</time>
  <version>
-  <release>2.6.0rc1</release>
-  <api>2.6.0rc1</api>
+  <release>2.6.0RC1</release>
+  <api>2.6.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,7 +45,7 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Jan 22, 2018 - xdebug 2.6.0rc1
+Mon, Jan 22, 2018 - xdebug 2.6.0RC1
 
 + Added features:
 
