@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2018-01-22</date>
- <time>18:19:32</time>
+ <date>2018-01-23</date>
+ <time>12:53:32</time>
  <version>
-  <release>2.6.0RC1</release>
-  <api>2.6.0RC1</api>
+  <release>2.6.0RC2</release>
+  <api>2.6.0RC2</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,29 +45,11 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Jan 22, 2018 - xdebug 2.6.0RC1
-
-+ Added features:
-
-  - Fixed issue #1506: Add garbage collection statistics feature (Benjamin Eberlei).
-  - Fixed issue #1507: Add functions to access Zend Engine garbage collection metrics (Benjamin Eberlei).
-
-+ Improvements:
-
-  - Fixed issue #1510: Change switch/case "break intentionally missing" comments to use GCC 7's new "fallthrough" attribute.
-  - Fixed issue #1511: Detect and use compiler flags through new configure option.
+Tue, Jan 23, 2018 - xdebug 2.6.0RC2
 
 = Fixed bugs:
 
-  - Fixed issue #1335: Debugging with PhpStorm sometimes gives "can not get property".
-  - Fixed issue #1454: Invalid memory read or segfaults from a __call() method.
-  - Fixed issue #1508: Code coverage filter not checked in xdebug_common_assign_dim handler.
-  - Fixed issue #1509: Code coverage missing for case inside switch with PHP 7.2.
-  - Fixed issue #1512: Xdebug does not properly encode and escape properties with quotes and \0 characters.
-  - Fixed issue #1514: Variable names with a NULL char are cut off at NULL char.
-  - Fixed issue #1515: Object property names with a NULL char are cut off at NULL char.
-  - Fixed issue #1516: Can't fetch variables or object properties which have \0 characters in them.
-  - Fixed issue #1517: Notifications incorrectly specify the error type in "type_string" instead of "type".
+  - Fixed issue #1521: xdebug_gc_stats.* missing from 2.6.0RC1 tarball
  </notes>
 
  <contents>
@@ -178,6 +160,45 @@ Mon, Jan 22, 2018 - xdebug 2.6.0RC1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2018-01-22</date>
+   <time>18:19:32</time>
+   <version>
+    <release>2.6.0RC1</release>
+    <api>2.6.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 22, 2018 - xdebug 2.6.0RC1
+
++ Added features:
+
+  - Fixed issue #1506: Add garbage collection statistics feature (Benjamin Eberlei).
+  - Fixed issue #1507: Add functions to access Zend Engine garbage collection metrics (Benjamin Eberlei).
+
++ Improvements:
+
+  - Fixed issue #1510: Change switch/case "break intentionally missing" comments to use GCC 7's new "fallthrough" attribute.
+  - Fixed issue #1511: Detect and use compiler flags through new configure option.
+
+= Fixed bugs:
+
+  - Fixed issue #1335: Debugging with PhpStorm sometimes gives "can not get property".
+  - Fixed issue #1454: Invalid memory read or segfaults from a __call() method.
+  - Fixed issue #1508: Code coverage filter not checked in xdebug_common_assign_dim handler.
+  - Fixed issue #1509: Code coverage missing for case inside switch with PHP 7.2.
+  - Fixed issue #1512: Xdebug does not properly encode and escape properties with quotes and \0 characters.
+  - Fixed issue #1514: Variable names with a NULL char are cut off at NULL char.
+  - Fixed issue #1515: Object property names with a NULL char are cut off at NULL char.
+  - Fixed issue #1516: Can't fetch variables or object properties which have \0 characters in them.
+  - Fixed issue #1517: Notifications incorrectly specify the error type in "type_string" instead of "type".
+   </notes>
+  </release>
 
   <release>
    <date>2017-12-28</date>
