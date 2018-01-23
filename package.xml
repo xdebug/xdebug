@@ -67,7 +67,7 @@ Mon, Jan 22, 2018 - xdebug 2.6.0RC1
   - Fixed issue #1514: Variable names with a NULL char are cut off at NULL char.
   - Fixed issue #1515: Object property names with a NULL char are cut off at NULL char.
   - Fixed issue #1516: Can't fetch variables or object properties which have \0 characters in them.
-  - Fixed issue $1517: Notifications incorrectly specify the error type in "type_string" instead of "type".
+  - Fixed issue #1517: Notifications incorrectly specify the error type in "type_string" instead of "type".
  </notes>
 
  <contents>
@@ -126,6 +126,8 @@ Mon, Jan 22, 2018 - xdebug 2.6.0RC1
    <file name="xdebug_compat.h" role="src" />
    <file name="xdebug_filter.c" role="src" />
    <file name="xdebug_filter.h" role="src" />
+   <file name="xdebug_gc_stats.c" role="src" />
+   <file name="xdebug_gc_stats.h" role="src" />
    <file name="xdebug_handlers.c" role="src" />
    <file name="xdebug_handlers.h" role="src" />
    <file name="xdebug_handler_dbgp.c" role="src" />
