@@ -2034,7 +2034,8 @@ static int xdebug_dbgp_parse_cmd(char *line, char **cmd, xdebug_dbgp_arg **ret_a
 						int len = ptr - value_begin;
 
 						args->value[opt_index] = xdebug_str_create(value_begin, len);
-						xdebug_stripcslashes(args->value[opt_index]->d, (int*) &(args->value[opt_index]->l));
+						xdebug_stripcslashes(args->value[opt_index]->d, &len);
+						args->value[opt_index]->l = len;
 
 						state = STATE_SKIP_CHAR;
 					} else {
