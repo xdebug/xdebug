@@ -2,7 +2,7 @@
 Test for bug #703: Line in heredoc marked as not executed (>= PHP 7.0.13, <= PHP 7.0.17)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0.12", '>=')) echo "skip >= PHP 7.0.13, <= PHP 7.0.17 needed\n";
+if (!version_compare(phpversion(), "7.0.13", '>=')) echo "skip >= PHP 7.0.13, <= PHP 7.0.17 needed\n";
 if (!version_compare(phpversion(), "7.0.17", '<=')) echo "skip >= PHP 7.0.13, <= PHP 7.0.17 needed\n";
 ?>
 --INI--
