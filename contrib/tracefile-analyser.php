@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 /*
    +----------------------------------------------------------------------+
@@ -15,7 +16,20 @@
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
- */
+*/
+
+
+/*
+   php.ini additions for operation:
+      xdebug.profiler_enable = 1
+      debug.trace_format = 1
+      xdebug.collect_includes = 1   (optional)
+*/
+
+
+error_reporting(0); // suppress notices and warnings which disrupt terminal output
+
+
 if ( $argc <= 1 || $argc > 4 )
 {
 	showUsage();
@@ -24,6 +38,7 @@ if ( $argc <= 1 || $argc > 4 )
 $fileName = $argv[1];
 $sortKey  = 'time-own';
 $elements = 25;
+
 if ( $argc > 2 )
 {
 	$sortKey = $argv[2];
@@ -32,6 +47,7 @@ if ( $argc > 2 )
 		showUsage();
 	}
 }
+
 if ( $argc > 3 )
 {
 	$elements = (int) $argv[3];
@@ -62,15 +78,24 @@ $c = 0;
 foreach( $functions as $name => $f )
 {
 	$c++;
+
 	if ( $c > $elements )
 	{
 		break;
 	}
-	printf( "%-{$maxLen}s %5d  %3.4f %8d  %3.4f %8d\n",
-		$name, $f['calls'],
-		$f['time-inclusive'], $f['memory-inclusive'],
-		$f['time-own'], $f['memory-own'] );
+
+	printf(
+		"%-{$maxLen}s %5d  %3.4f %8d  %3.4f %8d\n",
+		$name,
+		$f['calls'],
+		$f['time-inclusive'],
+		$f['memory-inclusive'],
+		$f['time-own'], $f['memory-own']
+	);
 }
+
+echo PHP_EOL;
+
 
 function showUsage()
 {
@@ -127,7 +152,7 @@ class drXdebugTraceFileParser
 		$size = fstat( $this->handle );
 		$size = $size['size'];
 		$read = 0;
-		
+
 		while ( !feof( $this->handle ) )
 		{
 			$buffer = fgets( $this->handle, 4096 );
@@ -140,6 +165,7 @@ class drXdebugTraceFileParser
 				printf( " (%5.2f%%)\n", ( $read / $size ) * 100 );
 			}
 		}
+
 		echo "\nDone.\n\n";
 	}
 
@@ -159,14 +185,17 @@ class drXdebugTraceFileParser
 		*/
 		{
 			$parts = explode( "\t", $line );
+
 			if ( count( $parts ) < 5 )
 			{
 				return;
 			}
+
 			$depth = $parts[0];
 			$funcNr = $parts[1];
 			$time = $parts[3];
 			$memory = $parts[4];
+
 			if ( $parts[2] == '0' ) // function entry
 			{
 				$funcName = $parts[5];
@@ -182,7 +211,7 @@ class drXdebugTraceFileParser
 
 				// collapse data onto functions array
 				$dTime   = $time   - $prevTime;
-				$dMemory = $memory - $prevMem;
+				$dMemory = (int) $memory - (int) $prevMem;
 
 				$this->stack[$depth - 1][3] += $dTime;
 				$this->stack[$depth - 1][4] += $dMemory;
@@ -240,4 +269,5 @@ class drXdebugTraceFileParser
 		return $result;
 	}
 }
+
 ?>
