@@ -8,6 +8,7 @@ xdebug.default_enable=1
 xdebug.var_display_max_data=32
 xdebug.var_display_max_depth=2
 xdebug.var_display_max_children=8
+xdebug.filename_format=
 --FILE--
 <?php
 $array = array(

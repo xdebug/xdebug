@@ -2,17 +2,17 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -44,7 +44,7 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 		efree(tmp);
 	}
 	xdebug_str_addl(output, "\"", 1, 0);
-	
+
 	if (attr->next) {
 		xdebug_xml_return_attribute(attr->next, output);
 	}
@@ -57,7 +57,7 @@ static void xdebug_xml_return_text_node(xdebug_xml_text_node* node, xdebug_str* 
 		/* if cdata tags are in the text, then we must base64 encode */
 		int new_len = 0;
 		char *encoded_text;
-		
+
 		encoded_text = (char*) xdebug_base64_encode((unsigned char*) node->text, node->text_len, &new_len);
 		xdebug_str_add(output, encoded_text, 0);
 		efree(encoded_text);
@@ -97,11 +97,11 @@ void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output)
 	}
 }
 
-xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag)
+xdebug_xml_node *xdebug_xml_node_init_ex(const char *tag, int free_tag)
 {
 	xdebug_xml_node *xml = xdmalloc(sizeof (xdebug_xml_node));
 
-	xml->tag = tag;
+	xml->tag = (char*) tag;
 	xml->text = NULL;
 	xml->child = NULL;
 	xml->attribute = NULL;
@@ -111,14 +111,14 @@ xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag)
 	return xml;
 }
 
-void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute, size_t attribute_len, char *value, size_t value_len, int free_name, int free_value)
+void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, const char *attribute, size_t attribute_len, const char *value, size_t value_len, int free_name, int free_value)
 {
 	xdebug_xml_attribute *attr = xdmalloc(sizeof (xdebug_xml_attribute));
 	xdebug_xml_attribute **ptr;
 
 	/* Init structure */
-	attr->name = attribute;
-	attr->value = value;
+	attr->name = (char*) attribute;
+	attr->value = (char*) value;
 	attr->name_len = attribute_len;
 	attr->value_len = value_len;
 	attr->next = NULL;
@@ -167,7 +167,7 @@ void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int fr
 	xdebug_xml_text_node *node = xdmalloc(sizeof (xdebug_xml_text_node));
 	node->free_value = free_text;
 	node->encode = encode;
-	
+
 	if (xml->text) {
 		xdebug_xml_text_node_dtor(xml->text);
 	}

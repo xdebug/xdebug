@@ -1,7 +1,5 @@
 --TEST--
-Test for segmentation fault with unusual variables (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for segmentation fault with unusual variables
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

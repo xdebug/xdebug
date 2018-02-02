@@ -1,7 +1,5 @@
 --TEST--
 xdebug_get_function_stack with variadics
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.6", '>=')) echo "skip >= PHP 5.6 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -17,6 +15,7 @@ xdebug.force_error_reporting=0
 log_errors=1
 error_log=
 display_errors=0
+xdebug.filename_format=
 --FILE--
 <?php
 function foo( $a, ...$b )

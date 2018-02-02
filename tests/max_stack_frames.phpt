@@ -16,7 +16,9 @@ function foo($a)
 foo(0);
 ?>
 --EXPECTF--
-Fatal error: Maximum function nesting level of '100' reached, aborting! in %smax_stack_frames.php on line %d
+Fatal error: Uncaught Error: Maximum function nesting level of '100' reached, aborting! in %smax_stack_frames.php on line 4
+
+Error: Maximum function nesting level of '100' reached, aborting! in %smax_stack_frames.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %smax_stack_frames.php:0

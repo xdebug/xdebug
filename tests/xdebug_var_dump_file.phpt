@@ -9,6 +9,7 @@ date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11
 xdebug.overload_var_dump=2
 xdebug.file_link_format=
+xdebug.filename_format=
 --FILE--
 <?php
 	class TimeStuff {

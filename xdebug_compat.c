@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans <derick@xdebug.org>           |
+   | Copyright (c) 2002-2018 Derick Rethans <derick@xdebug.org>           |
    |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
    |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
    |                         Zeev Suraski <zeev@zend.com>                 |
@@ -45,8 +45,6 @@
 #include "xdebug_compat.h"
 #include "zend_extensions.h"
 
-#if PHP_VERSION_ID >= 70000
-
 #include "zend_compile.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/php_string.h"
@@ -58,12 +56,12 @@ zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdat
 	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
 }
 
-char *xdebug_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len, size_t *new_len)
+char *xdebug_str_to_str(char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len, size_t *new_len)
 {
 	zend_string *new_str;
 	char *retval;
 
-	new_str = php_str_to_str(haystack, length, needle, needle_len, str, str_len);
+	new_str = php_str_to_str(haystack, length, (char*) needle, needle_len, (char*) str, str_len);
 	*new_len = new_str->len;
 
 	retval = estrndup(new_str->val, new_str->len);
@@ -135,7 +133,8 @@ void xdebug_stripcslashes(char *str, int *len)
 						*target++=(char)strtol(numtmp, NULL, 16);
 						break;
 					}
-					/* break is left intentionally */
+					XDEBUG_BREAK_INTENTIONALLY_MISSING
+
 				default:
 					i=0;
 					while (source < end && *source >= '0' && *source <= '7' && i<3) {
@@ -174,10 +173,10 @@ zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int fla
 	return tmp_ce;
 }
 
-int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC)
+int xdebug_get_constant(xdebug_str *val, zval *const_val TSRMLS_DC)
 {
 	zval *tmp_const = NULL;
-	tmp_const = zend_get_constant_str(val, len);
+	tmp_const = zend_get_constant_str(val->d, val->l);
 
 	if (tmp_const) {
 		*const_val = *tmp_const;
@@ -186,7 +185,7 @@ int xdebug_get_constant(char *val, int len, zval *const_val TSRMLS_DC)
 	return tmp_const != NULL;
 }
 
-void xdebug_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC)
+void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC)
 {
 	zend_string *name_s   = zend_string_init(name, name_len, 0);
 	zend_string *value_s  = zend_string_init(value, value_len, 0);
@@ -208,63 +207,9 @@ char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, i
 	return cv->val;
 }
 
-zval *xdebug_read_property(zend_class_entry *ce, zval *exception, char *name, int length, int flags TSRMLS_DC)
+zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags TSRMLS_DC)
 {
 	zval dummy;
 
 	return zend_read_property(ce, exception, name, length, flags, &dummy);
 }
-#else
-
-#if PHP_VERSION_ID >= 50500
-# define T(offset) (*EX_TMP_VAR(zdata, offset))
-#else
-# define T(offset) (*(temp_variable *)((char*)zdata->Ts + offset))
-#endif
-
-zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC)
-{
-	if (!zdata->opline) {
-		return NULL;
-	}
-
-	switch (op_type & 0x0F) {
-		case IS_CONST:
-			return node->zv;
-			break;
-		case IS_TMP_VAR:
-			return &T(node->var).tmp_var;
-			break;
-		case IS_VAR:
-			if (T(node->var).var.ptr) {
-				return T(node->var).var.ptr;
-			} else {
-				temp_variable *T = &T(node->var);
-				zval *str = T->str_offset.str;
-
-				if (T->str_offset.str->type != IS_STRING
-					|| ((int)T->str_offset.offset<0)
-					|| ((unsigned int) T->str_offset.str->value.str.len <= T->str_offset.offset)) {
-					zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->str_offset.offset);
-					T->tmp_var.value.str.val = STR_EMPTY_ALLOC();
-					T->tmp_var.value.str.len = 0;
-				} else {
-					char c = str->value.str.val[T->str_offset.offset];
-
-					T->tmp_var.value.str.val = estrndup(&c, 1);
-					T->tmp_var.value.str.len = 1;
-				}
-				T->tmp_var.refcount__gc=1;
-				T->tmp_var.is_ref__gc=1;
-				T->tmp_var.type = IS_STRING;
-				return &T->tmp_var;
-			}
-			break;
-		case IS_UNUSED:
-			return NULL;
-			break;
-	}
-	return NULL;
-}
-
-#endif

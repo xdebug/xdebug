@@ -1,7 +1,5 @@
 --TEST--
-Test for somewhat more complex backtrace (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for somewhat more complex backtrace
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

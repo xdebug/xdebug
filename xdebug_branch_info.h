@@ -2,15 +2,15 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
@@ -25,13 +25,16 @@
 #define XDEBUG_JMP_NOT_SET (INT_MAX-1)
 #define XDEBUG_JMP_EXIT    (INT_MAX-2)
 
+#define XDEBUG_BRANCH_MAX_OUTS 64
+
 typedef struct _xdebug_branch {
-	unsigned int start_lineno;
-	unsigned int end_lineno;
-	unsigned int end_op;
-	int          out[2];
+	unsigned int  start_lineno;
+	unsigned int  end_lineno;
+	unsigned int  end_op;
 	unsigned char hit;
-	unsigned char out_hit[2];
+	unsigned int  outs_count;
+	int           outs[XDEBUG_BRANCH_MAX_OUTS];
+	unsigned char outs_hit[XDEBUG_BRANCH_MAX_OUTS];
 } xdebug_branch;
 
 typedef struct _xdebug_path {

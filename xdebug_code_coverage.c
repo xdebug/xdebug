@@ -2,15 +2,15 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
@@ -18,7 +18,9 @@
 
 #include "php_xdebug.h"
 #include "xdebug_private.h"
+#include "xdebug_filter.h"
 #include "xdebug_set.h"
+#include "xdebug_stack.h"
 #include "xdebug_var.h"
 #include "xdebug_branch_info.h"
 #include "xdebug_code_coverage.h"
@@ -26,9 +28,6 @@
 #include "xdebug_tracing.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
-
-static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC);
-static char* xdebug_func_format(xdebug_func *func TSRMLS_DC);
 
 void xdebug_coverage_line_dtor(void *data)
 {
@@ -84,19 +83,11 @@ void xdebug_coverage_function_dtor(void *data)
 
 void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode TSRMLS_DC)
 {
-#if PHP_VERSION_ID >= 70000
 	zend_op_array *op_array = &execute_data->func->op_array;
-#else
-	zend_op_array *op_array = execute_data->op_array;
-#endif
 	char *file = (char*) STR_NAME_VAL(op_array->filename);
 	xdebug_func func_info;
 	char *function_name;
-#if PHP_VERSION_ID >= 70000
 	long opnr = execute_data->opline - execute_data->func->op_array.opcodes;
-#else
-	long opnr = execute_data->opline - execute_data->op_array->opcodes;
-#endif
 
 	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
 	function_name = xdebug_func_format(&func_info TSRMLS_CC);
@@ -111,15 +102,13 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 	xdfree(function_name);
 }
 
-int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 {
-	if (XG(do_code_coverage) && XG(code_coverage_branch_check)) {
+	zend_op_array *op_array = &execute_data->func->op_array;
+
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
 		const zend_op *cur_opcode;
-#if PHP_VERSION_ID >= 70000
 		cur_opcode = execute_data->opline;
-#else
-		cur_opcode = *EG(opline_ptr);
-#endif
 
 		xdebug_print_opcode_info('G', execute_data, cur_opcode TSRMLS_CC);
 	}
@@ -127,28 +116,23 @@ int xdebug_check_branch_entry_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 }
 
 #define XDEBUG_OPCODE_OVERRIDE(f) \
-	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS) \
+	int xdebug_##f##_handler(zend_execute_data *execute_data) \
 	{ \
-		return xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU); \
+		return xdebug_common_override_handler(execute_data); \
 	}
 
 
-int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
+int xdebug_common_override_handler(zend_execute_data *execute_data)
 {
-	if (XG(do_code_coverage)) {
+	zend_op_array *op_array = &execute_data->func->op_array;
+
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
 		const zend_op *cur_opcode;
 		int      lineno;
 		char    *file;
 
-#if PHP_VERSION_ID >= 70000
-		zend_op_array *op_array = &execute_data->func->op_array;
 		cur_opcode = execute_data->opline;
 		lineno = cur_opcode->lineno;
-#else
-		zend_op_array *op_array = execute_data->op_array;
-		cur_opcode = *EG(opline_ptr);
-		lineno = cur_opcode->lineno;
-#endif
 		file = (char*) STR_NAME_VAL(op_array->filename);
 
 		xdebug_print_opcode_info('C', execute_data, cur_opcode TSRMLS_CC);
@@ -157,7 +141,6 @@ int xdebug_common_override_handler(ZEND_USER_OPCODE_HANDLER_ARGS)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-#if PHP_VERSION_ID >= 70000
 static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_opcode, const zend_op **found_opcode)
 {
 	const zend_op *opcode_ptr;
@@ -179,65 +162,48 @@ static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_
 	}
 	return 0;
 }
-#else
-static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_opcode, const zend_op **found_opcode)
+
+static const zend_op *xdebug_find_referenced_opline(zend_execute_data *execute_data, const zend_op *cur_opcode, int op1_or_op2)
 {
-	const zend_op *opcode_ptr;
+	int op_type = (op1_or_op2 == 1) ? cur_opcode->op1_type : cur_opcode->op2_type;
 
-	opcode_ptr = prev_opcode;
-	while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW) {
-		opcode_ptr = opcode_ptr - 1;
-	}
-	opcode_ptr++;
+	if (op_type == IS_VAR) {
+		size_t variable_number = (op1_or_op2 == 1) ? cur_opcode->op1.var : cur_opcode->op2.var;
+		const zend_op *scan_opcode = cur_opcode;
+		int found = 0;
 
-	if (opcode_ptr->op1_type == IS_CONST && opcode_ptr->extended_value == ZEND_FETCH_STATIC_MEMBER)
-	{
-		*found_opcode = cur_opcode;
-		return 1;
+		/* Scroll up until we find a RES of IS_VAR with the right value */
+		do {
+			scan_opcode--;
+			if (scan_opcode->result_type == IS_VAR && scan_opcode->result.var == variable_number) {
+				found = 1;
+			}
+		} while (!found);
+		return scan_opcode;
 	}
-	return 0;
+	return NULL;
 }
-#endif
 
-static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
+static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op *cur_opcode, const zend_op *lower_bound TSRMLS_DC)
 {
-	const zend_op *cur_opcode, *next_opcode, *prev_opcode = NULL, *opcode_ptr;
+	const zend_op *next_opcode, *prev_opcode = NULL, *opcode_ptr;
 	zval          *dimval;
 	int            is_var;
-#if PHP_VERSION_ID >= 70000
 	zend_op_array *op_array = &execute_data->func->op_array;
-#else
-	int cv_len;
-	zend_op_array *op_array = execute_data->op_array;
-#endif
 	xdebug_str     name = XDEBUG_STR_INITIALIZER;
 	int            gohungfound = 0, is_static = 0;
-	char          *zval_value = NULL;
+	xdebug_str    *zval_value = NULL;
 	xdebug_var_export_options *options;
-	const zend_op *static_opcode_ptr;
+	const zend_op *static_opcode_ptr = NULL;
 
-#if PHP_VERSION_ID >= 70000
-	cur_opcode = execute_data->opline;
-#else
-	cur_opcode = *EG(opline_ptr);
-#endif
 	next_opcode = cur_opcode + 1;
 	prev_opcode = cur_opcode - 1;
 
-	if (cur_opcode->op1_type == IS_VAR &&
-			(next_opcode->op1_type == IS_VAR || cur_opcode->op2_type == IS_VAR) &&
-			prev_opcode->opcode == ZEND_FETCH_RW &&
-			prev_opcode->op1_type == IS_CONST &&
+	if (cur_opcode->opcode == ZEND_QM_ASSIGN) {
 #if PHP_VERSION_ID >= 70000
-			Z_TYPE_P(RT_CONSTANT_EX(op_array->literals, prev_opcode->op1)) == IS_STRING
+		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->result.var)->val), 1);
 #else
-			Z_TYPE_P(prev_opcode->op1.zv) == IS_STRING
-#endif
-	) {
-#if PHP_VERSION_ID >= 70000
-		xdebug_str_add(&name, xdebug_sprintf("$%s", Z_STRVAL_P(RT_CONSTANT_EX(op_array->literals, prev_opcode->op1))), 1);
-#else
-		xdebug_str_add(&name, xdebug_sprintf("$%s", Z_STRVAL_P(prev_opcode->op1.zv)), 1);
+		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->result.var, &cv_len)), 1);
 #endif
 	}
 
@@ -246,110 +212,113 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	options->no_decoration = 1;
 
 	if (cur_opcode->op1_type == IS_CV) {
-#if PHP_VERSION_ID >= 70000
-		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op1.var)->val), 1);
-#else
-		xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op1.var, &cv_len)), 1);
-#endif
+		if (!lower_bound) {
+			xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op1.var)->val), 1);
+		}
 	} else if (cur_opcode->op1_type == IS_VAR && cur_opcode->opcode == ZEND_ASSIGN && (prev_opcode->opcode == ZEND_FETCH_W || prev_opcode->opcode == ZEND_FETCH_RW)) {
 		if (is_static) {
 			xdebug_str_add(&name, xdebug_sprintf("self::"), 1);
 		} else {
 			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, prev_opcode->op1_type, &prev_opcode->op1, &is_var), 0, options);
-			xdebug_str_add(&name, xdebug_sprintf("$%s", zval_value), 1);
+			xdebug_str_addc(&name, '$');
+			xdebug_str_add_str(&name, zval_value);
+			xdebug_str_free(zval_value);
 		}
 	} else if (is_static) { /* todo : see if you can change this and the previous cases around */
 		xdebug_str_add(&name, xdebug_sprintf("self::"), 1 );
 	}
 	if ((cur_opcode->opcode >= ZEND_ASSIGN_ADD && cur_opcode->opcode <= ZEND_ASSIGN_BW_XOR)
-#if PHP_VERSION_ID >= 50600
 		|| cur_opcode->opcode == ZEND_ASSIGN_POW
-#endif
 	) {
 		if (cur_opcode->extended_value == ZEND_ASSIGN_OBJ) {
 			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
 			if (cur_opcode->op1_type == IS_UNUSED) {
-				xdebug_str_add(&name, xdebug_sprintf("$this->%s", zval_value), 1);
+				xdebug_str_addl(&name, "$this->", 7, 0);
 			} else {
-				xdebug_str_add(&name, xdebug_sprintf("->%s", zval_value), 1);
+				xdebug_str_addl(&name, "->", 2, 0);
 			}
+			xdebug_str_add_str(&name, zval_value);
+			xdebug_str_free(zval_value);
 		} else if (cur_opcode->extended_value == ZEND_ASSIGN_DIM) {
 			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, NULL);
-			xdebug_str_add(&name,xdebug_sprintf("[%s]", zval_value), 1);
+			xdebug_str_addc(&name, '[');
+			xdebug_str_add_str(&name, zval_value);
+			xdebug_str_addc(&name, ']');
+			xdebug_str_free(zval_value);
 		}
 	}
 	if (cur_opcode->opcode >= ZEND_PRE_INC_OBJ && cur_opcode->opcode <= ZEND_POST_DEC_OBJ) {
 		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
-		xdebug_str_add(&name, xdebug_sprintf("$this->%s", zval_value), 1);
-	}
-	if (zval_value) {
-		xdfree(zval_value);
-		zval_value = NULL;
+		xdebug_str_addl(&name, "$this->", 7, 0);
+		xdebug_str_add_str(&name, zval_value);
+		xdebug_str_free(zval_value);
 	}
 
 	/* Scroll back to start of FETCHES */
 	/* FIXME: See whether we can do this unroll looping only once - in is_static() */
 	gohungfound = 0;
-#if PHP_VERSION_ID >= 70000
 	if (!is_static) {
-#endif
+		if (cur_opcode == lower_bound) {
+			gohungfound = 1;
+		}
 		opcode_ptr = prev_opcode;
-		while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW) {
+		while ((opcode_ptr >= lower_bound) && (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW)) {
 			opcode_ptr = opcode_ptr - 1;
 			gohungfound = 1;
 		}
 		opcode_ptr = opcode_ptr + 1;
-#if PHP_VERSION_ID >= 70000
 	} else { /* if we have a static method, we should already have found the first fetch */
 		opcode_ptr = static_opcode_ptr;
 		gohungfound = 1;
 	}
-#endif
 
 	if (gohungfound) {
+		int cv_found = 0;
+
 		do
 		{
 			if (opcode_ptr->op1_type == IS_UNUSED && opcode_ptr->opcode == ZEND_FETCH_OBJ_W) {
 				xdebug_str_add(&name, "$this", 0);
 			}
 			if (opcode_ptr->op1_type == IS_CV) {
-#if PHP_VERSION_ID >= 70000
 				xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, opcode_ptr->op1.var)->val), 1);
-#else
-				xdebug_str_add(&name, xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, opcode_ptr->op1.var, &cv_len)), 1);
-#endif
 			}
 #if PHP_VERSION_ID >= 70100
 			if (opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_W || opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_R || opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_RW) {
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
-				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
+				xdebug_str_add_str(&name, zval_value);
+				xdebug_str_free(zval_value);
 			}
 #endif
 			if (opcode_ptr->opcode == ZEND_FETCH_W) {
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
-				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
+				xdebug_str_add_str(&name, zval_value);
+				xdebug_str_free(zval_value);
 			}
 			if (is_static && opcode_ptr->opcode == ZEND_FETCH_RW) {
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
-				xdebug_str_add(&name, xdebug_sprintf("%s", zval_value), 1);
+				xdebug_str_add_str(&name, zval_value);
+				xdebug_str_free(zval_value);
 			}
 			if (opcode_ptr->opcode == ZEND_FETCH_DIM_W) {
-				if (opcode_ptr->op2_type != IS_VAR) {
-					zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
-					xdebug_str_add(&name, xdebug_sprintf("[%s]", zval_value), 1);
-				} else {
-					xdebug_str_add(&name, xdebug_sprintf("[???]") , 1);
+				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
+				xdebug_str_addc(&name, '[');
+				if (zval_value) {
+					xdebug_str_add_str(&name, zval_value);
 				}
+				xdebug_str_addc(&name, ']');
+				xdebug_str_free(zval_value);
 			} else if (opcode_ptr->opcode == ZEND_FETCH_OBJ_W) {
 				zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, options);
-				xdebug_str_add(&name, xdebug_sprintf("->%s", zval_value), 1);
+				xdebug_str_addl(&name, "->", 2, 0);
+				xdebug_str_add_str(&name, zval_value);
+				xdebug_str_free(zval_value);
 			}
 			opcode_ptr = opcode_ptr + 1;
-			if (zval_value) {
-				xdfree(zval_value);
-				zval_value = NULL;
+			if (opcode_ptr->op1_type == IS_CV) {
+				cv_found = 1;
 			}
-		} while (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW);
+		} while (!cv_found && (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW));
 	}
 
 	if (cur_opcode->opcode == ZEND_ASSIGN_OBJ) {
@@ -365,7 +334,9 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 			xdebug_str_add(&name, "[]", 0);
 		} else {
 			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
-			xdebug_str_add(&name, xdebug_sprintf("[%s]", zval_value), 1);
+			xdebug_str_addc(&name, '[');
+			xdebug_str_add_str(&name, zval_value);
+			xdebug_str_addc(&name, ']');
 			xdfree(zval_value);
 		}
 	}
@@ -376,39 +347,42 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data TSRMLS_DC)
 	return name.d;
 }
 
-static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCODE_HANDLER_ARGS)
+static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_execute_data *execute_data)
 {
 	char    *file;
-#if PHP_VERSION_ID >= 70000
 	zend_op_array *op_array = &execute_data->func->op_array;
-#else
-	zend_op_array *op_array = execute_data->op_array;
-#endif
 	int            lineno;
 	const zend_op *cur_opcode, *next_opcode;
-	char          *full_varname;
 	zval          *val = NULL;
+	char          *right_full_varname = NULL;
 	int            is_var;
 	function_stack_entry *fse;
 
-#if PHP_VERSION_ID >= 70000
 	cur_opcode = execute_data->opline;
-#else
-	cur_opcode = *EG(opline_ptr);
-#endif
 	next_opcode = cur_opcode + 1;
 	file = (char*) STR_NAME_VAL(op_array->filename);
 	lineno = cur_opcode->lineno;
 
-	if (XG(do_code_coverage)) {
+	/* TODO TEST FOR ASSIGNMENTS IN FILTERING */
+//	if (xdebug_is_top_stack_frame_filtered(XDEBUG_FILTER_CODE_COVERAGE)) {
+//		return ZEND_USER_OPCODE_DISPATCH;
+//	}
+
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
 		xdebug_print_opcode_info('=', execute_data, cur_opcode TSRMLS_CC);
-	
+
 		if (do_cc) {
 			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 		}
 	}
 	if (XG(do_trace) && XG(trace_context) && XG(collect_assignments)) {
-		full_varname = xdebug_find_var_name(execute_data TSRMLS_CC);
+		char *full_varname;
+
+		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
+			return ZEND_USER_OPCODE_DISPATCH;
+		}
+
+		full_varname = xdebug_find_var_name(execute_data, execute_data->opline, NULL TSRMLS_CC);
 
 		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
 			char *tmp_varname;
@@ -438,13 +412,27 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCOD
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		} else if (next_opcode->opcode == ZEND_OP_DATA) {
 			val = xdebug_get_zval(execute_data, next_opcode->op1_type, &next_opcode->op1, &is_var);
+		} else if (cur_opcode->opcode == ZEND_QM_ASSIGN) {
+			val = xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var);
+		} else if (cur_opcode->opcode == ZEND_ASSIGN_REF) {
+			if (cur_opcode->op2_type == IS_CV) {
+				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op2.var)->val);
+			} else {
+				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, cur_opcode, 2);
+#if PHP_VERSION_ID <= 70100
+				const zend_op *previous_opline = xdebug_find_referenced_opline(execute_data, cur_opcode, 1);
+				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, previous_opline + 1);
+#else
+				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
+#endif
+			}
 		} else {
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		}
 
 		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
 		if (XG(do_trace) && XG(trace_context) && XG(collect_assignments) && XG(trace_handler)->assignment) {
-			XG(trace_handler)->assignment(XG(trace_context), fse, full_varname, val, op, file, lineno TSRMLS_CC);
+			XG(trace_handler)->assignment(XG(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno TSRMLS_CC);
 		}
 		xdfree(full_varname);
 	}
@@ -452,20 +440,19 @@ static int xdebug_common_assign_dim_handler(char *op, int do_cc, ZEND_USER_OPCOD
 }
 
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN(f,o,cc) \
-	int xdebug_##f##_handler(ZEND_USER_OPCODE_HANDLER_ARGS) \
+	int xdebug_##f##_handler(zend_execute_data *execute_data) \
 	{ \
-		return xdebug_common_assign_dim_handler((o), (cc), ZEND_USER_OPCODE_HANDLER_ARGS_PASSTHRU); \
+		return xdebug_common_assign_dim_handler((o), (cc), execute_data); \
 	}
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(qm_assign,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_add,"+=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sub,"-=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mul,"*=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_div,"/=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mod,"%=",0)
-#if PHP_VERSION_ID >= 50600
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_pow,"**=",0)
-#endif
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sl,"<<=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sr,">>=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc,"",0)
@@ -482,13 +469,14 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_and,"&=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_ref,"=&",1)
 
-inline void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
+void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
 
-	if (strcmp(XG(previous_filename), filename) == 0) {
+	if (XG(previous_filename) && strcmp(XG(previous_filename), filename) == 0) {
 		file = XG(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
@@ -534,27 +522,12 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 		&& opcode.opcode != ZEND_OP_DATA
 		&& opcode.opcode != ZEND_ADD_INTERFACE
 		&& opcode.opcode != ZEND_TICKS
+		&& opcode.opcode != ZEND_FAST_CALL
+		&& opcode.opcode != ZEND_RECV_VARIADIC
 	) {
 		xdebug_count_line(fn, opcode.lineno, 1, deadcode TSRMLS_CC);
 	}
 }
-
-#if PHP_VERSION_ID < 70000
-static zend_brk_cont_element* xdebug_find_brk_cont(zend_uint nest_levels, int array_offset, zend_op_array *op_array)
-{
-	zend_brk_cont_element *jmp_to;
-
-	do {
-		if (array_offset == -1) {
-			/* broken break/continue in code */
-			return NULL;
-		}
-		jmp_to = &op_array->brk_cont_array[array_offset];
-		array_offset = jmp_to->parent;
-	} while (--nest_levels > 0);
-	return jmp_to;
-}
-#endif
 
 #define XDEBUG_ZNODE_ELEM(node,var) node.var
 #if ZEND_USE_ABS_JMP_ADDR
@@ -563,19 +536,16 @@ static zend_brk_cont_element* xdebug_find_brk_cont(zend_uint nest_levels, int ar
 # define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
 #endif
 
-static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
+static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
-#if PHP_VERSION_ID < 70000 || ZEND_USE_ABS_JMP_ADDR
+#if ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
 #endif
-
+	
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
-#if PHP_VERSION_ID >= 70000
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-#else
-		*jmp1 = ((long) XDEBUG_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#endif
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		*jump_count = 1;
 		return 1;
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
@@ -583,118 +553,103 @@ static int xdebug_find_jump(zend_op_array *opa, unsigned int position, long *jmp
 		opcode.opcode == ZEND_JMPZ_EX ||
 		opcode.opcode == ZEND_JMPNZ_EX
 	) {
-		*jmp1 = position + 1;
-#if PHP_VERSION_ID >= 70000
-		*jmp2 = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-#else
-		*jmp2 = ((long) XDEBUG_ZNODE_ELEM(opcode.op2, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#endif
+		jumps[0] = position + 1;
+		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
-#if PHP_VERSION_ID >= 70000
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address) * sizeof(zend_op);
-#else
-		*jmp1 = XDEBUG_ZNODE_ELEM(opcode.op2, opline_num);
-#endif
-		*jmp2 = opcode.extended_value;
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		jumps[1] = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
+		*jump_count = 2;
 		return 1;
-#if PHP_VERSION_ID < 70000
-	} else if (opcode.opcode == ZEND_BRK || opcode.opcode == ZEND_CONT) {
-		zend_brk_cont_element *el;
-
-		if (opcode.op2_type == IS_CONST
-#ifdef ZEND_ENGINE_2
-		    && XDEBUG_ZNODE_ELEM(opcode.op1, jmp_addr) != (zend_op*) 0xFFFFFFFF
-#endif
-		) {
-			el = xdebug_find_brk_cont(Z_LVAL_P(opcode.op2.zv), XDEBUG_ZNODE_ELEM(opcode.op1, opline_num), opa);
-			if (el) {
-				*jmp1 = opcode.opcode == ZEND_BRK ? el->brk : el->cont;
-				return 1;
-			} else {
-				/* broken break/continue in code */
-				return 0;
-			}
-		}
-#endif
-#if PHP_VERSION_ID >= 70000
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
-		*jmp1 = position + 1;
-		*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+		jumps[0] = position + 1;
+		jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
-#else
-	} else if (opcode.opcode == ZEND_FE_RESET || opcode.opcode == ZEND_FE_FETCH) {
-#endif
-		*jmp1 = position + 1;
-#if PHP_VERSION_ID >= 70000
-		*jmp2 = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
-#else
-		*jmp2 = XDEBUG_ZNODE_ELEM(opcode.op2, opline_num);
-#endif
+		jumps[0] = position + 1;
+		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_CATCH) {
-		*jmp1 = position + 1;
+		*jump_count = 2;
+		jumps[0] = position + 1;
 		if (!opcode.result.num) {
 #if PHP_VERSION_ID >= 70100
-			*jmp2 = position + (opcode.extended_value / sizeof(zend_op));
+			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
 #else
-			*jmp2 = opcode.extended_value;
+			jumps[1] = opcode.extended_value;
 #endif
-			if (*jmp2 == *jmp1) {
-				*jmp2 = XDEBUG_JMP_NOT_SET;
+			if (jumps[1] == jumps[0]) {
+				jumps[1] = XDEBUG_JMP_NOT_SET;
+				*jump_count = 1;
 			}
 		} else {
-			*jmp2 = XDEBUG_JMP_EXIT;
+			jumps[1] = XDEBUG_JMP_EXIT;
 		}
 		return 1;
 	} else if (opcode.opcode == ZEND_GOTO) {
-#if PHP_VERSION_ID >= 70000
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-#else
-		*jmp1 = ((long) XDEBUG_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#endif
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		*jump_count = 1;
 		return 1;
 
-#if PHP_VERSION_ID >= 50500
 	} else if (opcode.opcode == ZEND_FAST_CALL) {
-#if PHP_VERSION_ID >= 70000
-		*jmp1 = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
-#else
-		*jmp1 = ((long) XDEBUG_ZNODE_ELEM(opcode.op1, jmp_addr) - (long) base_address) / sizeof(zend_op);
-#endif
-		if (opcode.extended_value) {
-			*jmp2 = XDEBUG_ZNODE_ELEM(opcode.op2, opline_num);
-		}
+		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
+		jumps[1] = position + 1;
+		*jump_count = 2;
 		return 1;
 	} else if (opcode.opcode == ZEND_FAST_RET) {
-		*jmp1 = position + 1;
-		if (opcode.extended_value) {
-			*jmp2 = XDEBUG_ZNODE_ELEM(opcode.op2, opline_num);
-		}
+		jumps[0] = XDEBUG_JMP_EXIT;
+		*jump_count = 1;
 		return 1;
-#endif
-
 	} else if (
-#if PHP_VERSION_ID >= 50500
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
-#endif
 		opcode.opcode == ZEND_EXIT ||
 		opcode.opcode == ZEND_THROW ||
 		opcode.opcode == ZEND_RETURN
 	) {
-		*jmp1 = XDEBUG_JMP_EXIT;
+		jumps[0] = XDEBUG_JMP_EXIT;
+		*jump_count = 1;
 		return 1;
+#if PHP_VERSION_ID >= 70200
+	} else if (
+		opcode.opcode == ZEND_SWITCH_LONG ||
+		opcode.opcode == ZEND_SWITCH_STRING
+	) {
+		zval *array_value;
+		HashTable *myht;
+		zval *val;
+
+		array_value = RT_CONSTANT_EX(opa->literals, opcode.op2);
+		myht = Z_ARRVAL_P(array_value);
+
+		/* All 'case' statements */
+		ZEND_HASH_FOREACH_VAL_IND(myht, val) {
+			if (*jump_count < XDEBUG_BRANCH_MAX_OUTS - 2) {
+				jumps[*jump_count] = position + (val->value.lval / sizeof(zend_op));
+				(*jump_count)++;
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		/* The 'default' case */
+		jumps[*jump_count] = position + (opcode.extended_value / sizeof(zend_op));
+		(*jump_count)++;
+
+		/* The 'next' opcode */
+		jumps[*jump_count] = position + 1;
+		(*jump_count)++;
+
+		return 1;
+#endif
 	}
+
 	return 0;
 }
 
 static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xdebug_set *set, xdebug_branch_info *branch_info TSRMLS_DC)
 {
-	long jump_pos1 = XDEBUG_JMP_NOT_SET;
-	long jump_pos2 = XDEBUG_JMP_NOT_SET;
-
-	/*(fprintf(stderr, "Branch analysis from position: %d\n", position);)*/
+	/* fprintf(stderr, "Branch analysis from position: %d\n", position); */
 
 	if (branch_info) {
 		xdebug_set_add(branch_info->starts, position);
@@ -706,35 +661,24 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		return;
 	}
 
-	/*(fprintf(stderr, "XDEBUG Adding %d\n", position);)*/
+	/* fprintf(stderr, "XDEBUG Adding %d\n", position); */
 	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
 	xdebug_set_add(set, position);
 	while (position < opa->last) {
-		jump_pos1 = XDEBUG_JMP_NOT_SET;
-		jump_pos2 = XDEBUG_JMP_NOT_SET;
+		size_t jump_count = 0;
+		int    jumps[XDEBUG_BRANCH_MAX_OUTS];
+		size_t i;
 
 		/* See if we have a jump instruction */
-		if (xdebug_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			/*(fprintf(stderr, "XDEBUG Jump found. Position 1 = %d", jump_pos1);)*/
-			if (jump_pos2 != XDEBUG_JMP_NOT_SET) {
-				/*(fprintf(stderr, ", Position 2 = %d\n", jump_pos2))*/;
-			} else {
-				/*(fprintf(stderr, "\n"))*/;
-			}
-			if (jump_pos1 == XDEBUG_JMP_EXIT || jump_pos1 != XDEBUG_JMP_NOT_SET) {
-				if (branch_info) {
-					xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
-				}
-				if (jump_pos1 != XDEBUG_JMP_EXIT) {
-					xdebug_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
-				}
-			}
-			if (jump_pos2 == XDEBUG_JMP_EXIT || jump_pos2 != XDEBUG_JMP_NOT_SET) {
-				if (branch_info) {
-					xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
-				}
-				if (jump_pos2 != XDEBUG_JMP_EXIT) {
-					xdebug_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
+		if (xdebug_find_jumps(opa, position, &jump_count, jumps)) {
+			for (i = 0; i < jump_count; i++) {
+				if (jumps[i] == XDEBUG_JMP_EXIT || jumps[i] != XDEBUG_JMP_NOT_SET) {
+					if (branch_info) {
+						xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, i, jumps[i]);
+					}
+					if (jumps[i] != XDEBUG_JMP_EXIT) {
+						xdebug_analyse_branch(opa, jumps[i], set, branch_info TSRMLS_CC);
+					}
 				}
 			}
 			break;
@@ -802,7 +746,7 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 	}
 }
 
-static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC)
+void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS_DC)
 {
 	int closure = 0;
 
@@ -832,7 +776,7 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 	}
 }
 
-static char* xdebug_func_format(xdebug_func *func TSRMLS_DC)
+char* xdebug_func_format(xdebug_func *func TSRMLS_DC)
 {
 	switch (func->type) {
 		case XFUNC_NORMAL:
@@ -854,13 +798,24 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
-#if PHP_VERSION_ID >= 70000
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
-#else
-	if (op_array->last >= 3 && op_array->opcodes[op_array->last - 3].opcode == ZEND_RAISE_ABSTRACT_ERROR) {
-#endif
 		return;
-	}	
+	}
+
+	/* Check whether this function should be filtered out */
+	{
+/*
+		function_stack_entry tmp_fse;
+		tmp_fse.filename = STR_NAME_VAL(op_array->filename);
+		xdebug_build_fname_from_oparray(&tmp_fse.function, op_array TSRMLS_CC);
+		printf("    - PREFIL FILTERED FOR %s (%s::%s): %s\n",
+			tmp_fse.filename, tmp_fse.function.class, tmp_fse.function.function,
+			op_array->reserved[XG(code_coverage_filter_offset)] ? "YES" : "NO");
+*/
+		if (op_array->reserved[XG(code_coverage_filter_offset)]) {
+			return;
+		}
+	}
 
 	/* Run dead code analysis if requested */
 	if (XG(code_coverage_dead_code_analysis) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
@@ -903,11 +858,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	}
 }
 
-#if PHP_VERSION_ID >= 70000
 static int prefill_from_function_table(zend_op_array *opa)
-#else
-static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
-#endif
 {
 	if (opa->type == ZEND_USER_FUNCTION) {
 		if ((long) opa->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
@@ -918,33 +869,21 @@ static int prefill_from_function_table(zend_op_array *opa TSRMLS_DC, int num_arg
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int prefill_from_class_table(zend_class_entry *class_entry)
 {
-#if PHP_VERSION_ID < 70000
-	char *new_filename;
-#endif
 	zend_class_entry *ce;
 
-	ce = *class_entry;
+	ce = class_entry;
 
-#if PHP_VERSION_ID < 70000
-	new_filename = va_arg(args, char*);
-#endif
 	if (ce->type == ZEND_USER_CLASS) {
 		if (!(ce->ce_flags & ZEND_XDEBUG_VISITED)) {
-#if PHP_VERSION_ID >= 70000
 			zend_op_array *val;
-#endif
 			ce->ce_flags |= ZEND_XDEBUG_VISITED;
-#if PHP_VERSION_ID >= 70000
 			ZEND_HASH_INC_APPLY_COUNT(&ce->function_table);
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, val) {
 				prefill_from_function_table(val);
 			} ZEND_HASH_FOREACH_END();
 			ZEND_HASH_DEC_APPLY_COUNT(&ce->function_table);
-#else
-			zend_hash_apply_with_arguments(&ce->function_table TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, new_filename);
-#endif
 		}
 	}
 
@@ -953,15 +892,27 @@ static int prefill_from_class_table(zend_class_entry **class_entry TSRMLS_DC, in
 
 void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 {
+	zend_op_array    *function_op_array;
+	zend_class_entry *class_entry;
+
 	if ((long) op_array->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
 		prefill_from_oparray((char*) STR_NAME_VAL(op_array->filename), op_array TSRMLS_CC);
 	}
 
-	zend_hash_apply_with_arguments(CG(function_table)  TSRMLS_CC, (apply_func_args_t) prefill_from_function_table, 1, STR_NAME_VAL(op_array->filename));
-	zend_hash_apply_with_arguments(CG(class_table) TSRMLS_CC, (apply_func_args_t) prefill_from_class_table, 1, STR_NAME_VAL(op_array->filename));
+	ZEND_HASH_INC_APPLY_COUNT(CG(function_table));
+	ZEND_HASH_FOREACH_PTR(CG(function_table), function_op_array) {
+		prefill_from_function_table(function_op_array);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_DEC_APPLY_COUNT(CG(function_table));
+
+	ZEND_HASH_INC_APPLY_COUNT(CG(class_table));
+	ZEND_HASH_FOREACH_PTR(CG(class_table), class_entry) {
+		prefill_from_class_table(class_entry);
+	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_DEC_APPLY_COUNT(CG(class_table));
 }
 
-void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
+void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name TSRMLS_DC)
 {
 	xdebug_path *path = xdebug_path_new(NULL);
 
@@ -976,13 +927,10 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array TSRMLS_DC)
 	XG(branches).last_branch_nr[XG(level)] = -1;
 }
 
-void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
+void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_name, char *function_name TSRMLS_DC)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	xdebug_path *path = xdebug_path_info_get_path_for_level(XG(paths_stack), XG(level) TSRMLS_CC);
-	char *file = (char*) STR_NAME_VAL(op_array->filename);
-	xdebug_func func_info;
-	char *function_name;
 
 	if (!path) {
 		return;
@@ -990,19 +938,8 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 
 	xdebug_create_key_for_path(path, &str);
 
-	xdebug_build_fname_from_oparray(&func_info, op_array TSRMLS_CC);
-	function_name = xdebug_func_format(&func_info TSRMLS_CC);
+	xdebug_branch_info_mark_end_of_function_reached(file_name, function_name, str.d, str.l TSRMLS_CC);
 
-	if (func_info.class) {
-		xdfree(func_info.class);
-	}
-	if (func_info.function) {
-		xdfree(func_info.function);
-	}
-
-	xdebug_branch_info_mark_end_of_function_reached(file, function_name, str.d, str.l TSRMLS_CC);
-
-	xdfree(function_name);
 	xdfree(str.d);
 
 	if (path) {
@@ -1012,7 +949,7 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array TSRMLS_DC)
 
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
-	zppLONG options = 0;
+	zend_long options = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
 		return;
@@ -1035,16 +972,16 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
 {
-	zppLONG cleanup = 1;
+	zend_long cleanup = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cleanup) == FAILURE) {
 		return;
 	}
 	if (XG(do_code_coverage)) {
 		if (cleanup) {
-			XG(previous_filename) = "";
+			XG(previous_filename) = NULL;
 			XG(previous_file) = NULL;
-			XG(previous_mark_filename) = "";
+			XG(previous_mark_filename) = NULL;
 			XG(previous_mark_file) = NULL;
 			xdebug_hash_destroy(XG(code_coverage));
 			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
@@ -1061,13 +998,8 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 
 static int xdebug_lineno_cmp(const void *a, const void *b TSRMLS_DC)
 {
-#if PHP_VERSION_ID >= 70000
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-#else
-	Bucket *f = *((Bucket **) a);
-	Bucket *s = *((Bucket **) b);
-#endif
 
 	if (f->h < s->h) {
 		return -1;
@@ -1101,6 +1033,8 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (xdebug_set_in(branch_info->starts, i)) {
+			size_t j = 0;
+
 			XDEBUG_MAKE_STD_ZVAL(branch);
 			array_init(branch);
 			add_assoc_long(branch, "op_start", i);
@@ -1112,38 +1046,32 @@ static void add_branches(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC
 
 			XDEBUG_MAKE_STD_ZVAL(out);
 			array_init(out);
-			if (branch_info->branches[i].out[0]) {
-				add_index_long(out, 0, branch_info->branches[i].out[0]);
-			}
-			if (branch_info->branches[i].out[1]) {
-				add_index_long(out, 1, branch_info->branches[i].out[1]);
+			for (j = 0; j < branch_info->branches[i].outs_count; j++) {
+				if (branch_info->branches[i].outs[j]) {
+					add_index_long(out, j, branch_info->branches[i].outs[j]);
+				}
 			}
 			add_assoc_zval(branch, "out", out);
 
 			XDEBUG_MAKE_STD_ZVAL(out_hit);
 			array_init(out_hit);
-			if (branch_info->branches[i].out[0]) {
-				add_index_long(out_hit, 0, branch_info->branches[i].out_hit[0]);
-			}
-			if (branch_info->branches[i].out[1]) {
-				add_index_long(out_hit, 1, branch_info->branches[i].out_hit[1]);
+			for (j = 0; j < branch_info->branches[i].outs_count; j++) {
+				if (branch_info->branches[i].outs[j]) {
+					add_index_long(out_hit, j, branch_info->branches[i].outs_hit[j]);
+				}
 			}
 			add_assoc_zval(branch, "out_hit", out_hit);
 
 			add_index_zval(branches, i, branch);
-#if PHP_VERSION_ID >= 70000
 			efree(out_hit);
 			efree(out);
 			efree(branch);
-#endif
 		}
 	}
 
 	add_assoc_zval_ex(retval, "branches", HASH_KEY_SIZEOF("branches"), branches);
 
-#if PHP_VERSION_ID >= 70000
 	efree(branches);
-#endif
 }
 
 static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
@@ -1170,17 +1098,13 @@ static void add_paths(zval *retval, xdebug_branch_info *branch_info TSRMLS_DC)
 
 		add_next_index_zval(paths, path_container);
 
-#if PHP_VERSION_ID >= 70000
 		efree(path_container);
 		efree(path);
-#endif
 	}
 
 	add_assoc_zval_ex(retval, "paths", HASH_KEY_SIZEOF("paths"), paths);
 
-#if PHP_VERSION_ID >= 70000
 	efree(paths);
-#endif
 }
 
 static void add_cc_function(void *ret, xdebug_hash_element *e)
@@ -1200,9 +1124,7 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 
 	add_assoc_zval_ex(retval, function->name, HASH_KEY_STRLEN(function->name), function_info);
 
-#if PHP_VERSION_ID >= 70000
 	efree(function_info);
-#endif
 }
 
 static void add_file(void *ret, xdebug_hash_element *e)
@@ -1221,11 +1143,7 @@ static void add_file(void *ret, xdebug_hash_element *e)
 
 	/* Sort on linenumber */
 	target_hash = HASH_OF(lines);
-#if PHP_VERSION_ID >= 70000
 	zend_hash_sort(target_hash, xdebug_lineno_cmp, 0 TSRMLS_CC);
-#else
-	zend_hash_sort(target_hash, zend_qsort, xdebug_lineno_cmp, 0 TSRMLS_CC);
-#endif
 
 	/* Add the branch and path info */
 	if (file->has_branch_info) {
@@ -1241,17 +1159,13 @@ static void add_file(void *ret, xdebug_hash_element *e)
 		add_assoc_zval_ex(file_info, "functions", HASH_KEY_SIZEOF("functions"), functions);
 
 		add_assoc_zval_ex(retval, file->name, HASH_KEY_STRLEN(file->name), file_info);
-#if PHP_VERSION_ID >= 70000
 		efree(functions);
 		efree(file_info);
-#endif
 	} else {
 		add_assoc_zval_ex(retval, file->name, HASH_KEY_STRLEN(file->name), lines);
 	}
 
-#if PHP_VERSION_ID >= 70000
 	efree(lines);
-#endif
 }
 
 PHP_FUNCTION(xdebug_get_code_coverage)

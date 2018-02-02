@@ -4,7 +4,7 @@
  * @copyright    Elizabeth Smith (c) 2009
  */
 namespace Baalat;
-abstract class Object {
+abstract class pObject {
     public function emit($name) {
         if (is_null($this->state)) {
             $this->state = new \SplObjectStorage();

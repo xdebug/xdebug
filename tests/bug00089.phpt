@@ -10,6 +10,7 @@ html_errors=1
 xdebug.var_display_max_children=3
 xdebug.overload_var_dump=2
 xdebug.file_link_format=
+xdebug.filename_format=
 --FILE--
 <?php
 var_dump(array(4, array('', 2, 'node'), false));

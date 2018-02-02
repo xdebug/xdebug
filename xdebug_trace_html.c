@@ -2,15 +2,15 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
@@ -20,13 +20,13 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_html_init(char *fname, long options TSRMLS_DC)
+void *xdebug_trace_html_init(char *fname, char *script_filename, long options TSRMLS_DC)
 {
 	xdebug_trace_html_context *tmp_html_context;
 	char *used_fname;
 
 	tmp_html_context = xdmalloc(sizeof(xdebug_trace_html_context));
-	tmp_html_context->trace_file = xdebug_trace_open_file(fname, options, (char**) &used_fname TSRMLS_CC);
+	tmp_html_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname TSRMLS_CC);
 	tmp_html_context->trace_filename = used_fname;
 
 	return tmp_html_context->trace_file ? tmp_html_context : NULL;
@@ -50,6 +50,9 @@ void xdebug_trace_html_write_header(void *ctxt TSRMLS_DC)
 	fprintf(context->trace_file, "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
 	fprintf(context->trace_file, "\t<tr><th>#</th><th>Time</th>");
 	fprintf(context->trace_file, "<th>Mem</th>");
+	if (XG(show_mem_delta)) {
+		fprintf(context->trace_file, "<th>&#948; Mem</th>");
+	}
 	fprintf(context->trace_file, "<th colspan='2'>Function</th><th>Location</th></tr>\n");
 	fflush(context->trace_file);
 }
@@ -80,6 +83,9 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", function_nr), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6F</td>", fse->time - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", fse->memory), 1);
+	if (XG(show_mem_delta)) {
+		xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%ld</td>", fse->memory - fse->prev_memory), 1);
+	}
 	xdebug_str_add(&str, "<td align='left'>", 0);
 	for (j = 0; j < fse->level - 1; j++) {
 		xdebug_str_add(&str, "&nbsp; &nbsp;", 0);
@@ -125,8 +131,6 @@ xdebug_trace_handler_t xdebug_trace_handler_html =
 	xdebug_trace_html_function_entry,
 	NULL /* xdebug_trace_html_function_exit */,
 	NULL /* xdebug_trace_html_function_return_value */,
-#if PHP_VERSION_ID >= 50500
 	NULL /* xdebug_trace_html_generator_return_value */,
-#endif
 	NULL /* xdebug_trace_html_assignment */
 };

@@ -1,7 +1,5 @@
 --TEST--
 Test for stack traces with variadics (html, 0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.6", '>=')) echo "skip >= PHP 5.6 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -15,6 +13,7 @@ xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
 html_errors=1
+xdebug.filename_format=
 --FILE--
 <?php
 function foo( $a, ...$b )

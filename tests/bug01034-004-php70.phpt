@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #1034: path coverage [4] (>= PHP 7.0)
+Test for bug #1034: path coverage [4] (>= PHP 7.0, <= PHP 7.0.12)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+<?php
+if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0, <= PHP 7.0.12\n";
+if (version_compare(phpversion(), "7.0.12", '>')) echo "skip >= PHP 7.0, <= PHP 7.0.12\n";
+?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

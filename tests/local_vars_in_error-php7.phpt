@@ -1,7 +1,5 @@
 --TEST--
-Test with showing local variables on errors (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test with showing local variables on errors
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -16,7 +14,7 @@ xdebug.show_error_trace=0
 	function a($a,$b) {
 		$c = array($a, $b * $b);
 		$d = new stdClass;
-		do_f();
+		do_f($a, $b, $c, $d);
 	}
 
 	a(5, 6);

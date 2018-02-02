@@ -4,6 +4,7 @@ Test for bug #305: xdebug exception handler doesn't properly handle special char
 html_errors=1
 xdebug.default_enable=1
 xdebug.file_link_format=xdebug://%f@%l
+xdebug.filename_format=
 --FILE--
 <?php
 throw new Exception("<MARK>");

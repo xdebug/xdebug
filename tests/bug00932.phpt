@@ -18,5 +18,5 @@ chmod("/tmp/bug932.log", 0);
 
 unlink("/tmp/bug932.log");
 ?>
---EXPECT--
-XDebug could not open the remote debug file '/tmp/bug932.log'.
+--EXPECTF--
+Xdebug could not open the remote debug file '/tmp/bug932.log'.

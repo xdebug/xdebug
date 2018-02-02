@@ -1,0 +1,82 @@
+image: Visual Studio 2015
+version: '{branch}.{build}'
+
+cache:
+  - c:\build-cache -> .appveyor.yml
+  - c:\build-cache\sdk -> .appveyor.yml
+
+environment:
+  PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
+  PHP_BUILD_OBJ_DIR: c:\obj
+  PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
+  PHP_BUILD_SDK_BRANCH: php-sdk-2.0.13
+  SDK_REMOTE: https://github.com/OSTC/php-sdk-binary-tools.git
+  SDK_BRANCH: php-sdk-2.0.13
+
+  matrix:
+    - PHP_REL: 7.2
+      ARCHITECTURE: x64
+      ZTS_STATE: enable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PHP_BUILD_CRT: vc15
+    - PHP_REL: 7.1
+      ARCHITECTURE: x64
+      ZTS_STATE: enable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+    - PHP_REL: 7.0
+      ARCHITECTURE: x64
+      ZTS_STATE: enable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+    - PHP_REL: 7.2
+      ARCHITECTURE: x64
+      ZTS_STATE: disable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PHP_BUILD_CRT: vc15
+    - PHP_REL: 7.1
+      ARCHITECTURE: x64
+      ZTS_STATE: disable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+    - PHP_REL: 7.0
+      ARCHITECTURE: x64
+      ZTS_STATE: disable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+    - PHP_REL: 7.2
+      ARCHITECTURE: x86
+      ZTS_STATE: enable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PHP_BUILD_CRT: vc15
+    - PHP_REL: 7.1
+      ARCHITECTURE: x86
+      ZTS_STATE: enable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+    - PHP_REL: 7.0
+      ARCHITECTURE: x86
+      ZTS_STATE: enable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+    - PHP_REL: 7.2
+      ARCHITECTURE: x86
+      ZTS_STATE: disable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      PHP_BUILD_CRT: vc15
+    - PHP_REL: 7.1
+      ARCHITECTURE: x86
+      ZTS_STATE: disable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+    - PHP_REL: 7.0
+      ARCHITECTURE: x86
+      ZTS_STATE: disable
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      PHP_BUILD_CRT: vc14
+
+install:
+  - .appveyor\install.cmd
+
+build_script:
+  - .appveyor\build.cmd

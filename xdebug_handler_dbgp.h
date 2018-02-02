@@ -2,17 +2,17 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -66,7 +66,7 @@ typedef struct xdebug_dbgp_result {
 
 /* Argument structure */
 typedef struct xdebug_dbgp_arg {
-	char *value[27]; /* one extra for - */
+	xdebug_str *value[27]; /* one extra for - */
 } xdebug_dbgp_arg;
 
 #define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args TSRMLS_DC
@@ -80,21 +80,24 @@ typedef struct xdebug_dbgp_arg {
 #define XDEBUG_DBGP_POST_MORTEM   0x01
 
 typedef struct xdebug_dbgp_cmd {
-	char *name;
+	const char *name;
 	void (*handler)(DBGP_FUNC_PARAMETERS);
 	int  cont;
 	int  flags;
 } xdebug_dbgp_cmd;
 
-#define CMD_OPTION(opt)    (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])
+#define CMD_OPTION_SET(opt)        (!!(opt == '-' ? args->value[26] : args->value[(opt) - 'a']))
+#define CMD_OPTION_CHAR(opt)       (opt == '-' ? args->value[26]->d : args->value[(opt) - 'a']->d)
+#define CMD_OPTION_LEN(opt)        (opt == '-' ? args->value[26]->l : args->value[(opt) - 'a']->l)
+#define CMD_OPTION_XDEBUG_STR(opt) (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])
 
 int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message);
 int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC);
+int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
-char *xdebug_dbgp_get_revision(void);
 
 #define xdebug_handler_dbgp {       \
 	xdebug_dbgp_init,               \
@@ -102,9 +105,8 @@ char *xdebug_dbgp_get_revision(void);
 	xdebug_dbgp_error,              \
 	xdebug_dbgp_breakpoint,         \
 	xdebug_dbgp_stream_output,      \
+	xdebug_dbgp_notification,       \
 	xdebug_dbgp_register_eval_id,   \
-	xdebug_dbgp_get_revision        \
 }
 
 #endif
-

@@ -2,17 +2,17 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -57,11 +57,11 @@ struct _xdebug_xml_node
 
 
 #define xdebug_xml_node_init(t)            xdebug_xml_node_init_ex((t), 0)
-#define xdebug_xml_add_attribute_ex(x,a,v,fa,fv) { char *ta = (a), *tv = (v); xdebug_xml_add_attribute_exl((x), (ta), strlen((ta)), (tv), strlen((tv)), fa, fv); }
+#define xdebug_xml_add_attribute_ex(x,a,v,fa,fv) { const char *ta = (a), *tv = (v); xdebug_xml_add_attribute_exl((x), (ta), strlen((ta)), (tv), strlen((tv)), fa, fv); }
 #define xdebug_xml_add_attribute(x,a,v)    xdebug_xml_add_attribute_ex((x), (a), (v), 0, 0);
 
-xdebug_xml_node *xdebug_xml_node_init_ex(char *tag, int free_tag);
-void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, char *attribute, size_t attribute_len, char *value, size_t value_len, int free_name, int free_value);
+xdebug_xml_node *xdebug_xml_node_init_ex(const char *tag, int free_tag);
+void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, const char *attribute, size_t attribute_len, const char *value, size_t value_len, int free_name, int free_value);
 void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child);
 
 void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int free_text, int encode);

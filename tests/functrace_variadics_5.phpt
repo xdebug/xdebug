@@ -1,7 +1,5 @@
 --TEST--
 Test for function traces with variadics (5)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.6", '>=')) echo "skip >= PHP 5.6 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -35,7 +33,7 @@ unlink($tf);
 TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> foo(aTo0Mjs=, ...variadic()) %sfunctrace_variadics_5.php:9
 %w%f %w%d     -> foo(aToxOw==, ...variadic(YjowOw==)) %sfunctrace_variadics_5.php:10
-%w%f %w%d     -> foo(czozOiJmb28iOw==, ...variadic(czozOiJiYXIiOw==, ZDozLjE0MTUwMDAwMDAwMDAwMDI7)) %sfunctrace_variadics_5.php:11
+%w%f %w%d     -> foo(czozOiJmb28iOw==, ...variadic(czozOiJiYXIiOw==, ZDozLjE0MTU%s)) %sfunctrace_variadics_5.php:11
 %w%f %w%d     -> xdebug_stop_trace() %sfunctrace_variadics_5.php:13
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

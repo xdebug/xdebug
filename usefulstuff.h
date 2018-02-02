@@ -2,17 +2,17 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -52,17 +52,18 @@ typedef struct xdebug_arg {
 
 #define xdebug_fd_read_line(s,c,t) xdebug_fd_read_line_delim(s, c, t, '\n', NULL)
 char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length);
-char *xdebug_join(char *delim, xdebug_arg *args, int begin, int end);
-void xdebug_explode(char *delim, char *str, xdebug_arg *args, int limit);
-char* xdebug_memnstr(char *haystack, char *needle, int needle_len, char *end);
+char *xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
+void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit);
+char* xdebug_memnstr(char *haystack, const char *needle, int needle_len, char *end);
 char* xdebug_strrstr(const char* haystack, const char* needle);
 double xdebug_get_utime(void);
 char* xdebug_get_time(void);
 char *xdebug_path_to_url(const char *fileurl TSRMLS_DC);
 char *xdebug_path_from_url(const char *fileurl TSRMLS_DC);
-FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname);
+FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);
 int xdebug_format_output_filename(char **filename, char *format, char *script_name);
 int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC);
+int xdebug_format_filename(char **formatted_name, const char *format, const char *default_format, const char *filename TSRMLS_DC);
 void xdebug_open_log(TSRMLS_D);
 void xdebug_close_log(TSRMLS_D);
 

@@ -9,7 +9,7 @@
 
 function errors_fatal($a) {
 	$ia = 'is_array';
-	count($a) && $ia($a);
+	array_count_values($a) && $ia($a);
 	return FALSE;
 }
 ?>

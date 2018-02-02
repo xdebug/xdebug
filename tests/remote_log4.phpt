@@ -24,6 +24,7 @@ Log opened at %d-%d-%d %d:%d:%d
 I: Checking remote connect back address.
 I: Checking user configured header 'I_LIKE_COOKIES'.
 I: Remote address found, connecting to doesnotexist3:9003.
+W: Creating socket for 'doesnotexist3:9003', getaddrinfo: %s.
 E: Could not connect to client. :-(
 Log closed at %d-%d-%d %d:%d:%d
 
@@ -31,5 +32,6 @@ Log opened at %d-%d-%d %d:%d:%d
 I: Checking remote connect back address.
 I: Checking user configured header 'I_LIKE_COOKIES'.
 I: Remote address found, connecting to doesnotexist3:9003.
+W: Creating socket for 'doesnotexist3:9003', getaddrinfo: %s.
 E: Could not connect to client. :-(
 Log closed at %d-%d-%d %d:%d:%d

@@ -2,17 +2,17 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2016 Derick Rethans                               |
+   | Copyright (c) 2002-2018 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -66,8 +66,13 @@ struct _xdebug_con {
 
 	int                    do_step;
 	int                    do_next;
-	int                    do_finish;
 	int                    next_level;
+	int                    do_finish;
+	int                    finish_level;
+	int                    finish_func_nr;
+
+	int                    send_notifications;
+	int                    inhibit_notifications;
 };
 
 #define XDEBUG_HIT_DISABLED       0
@@ -115,16 +120,16 @@ struct _xdebug_remote_handler {
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
 
+	/* Notifications */
+	int (*remote_notification)(xdebug_con *h, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
+
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
-
-	/* Information */
-	char *(*get_revision)(void);
 };
 
 struct _xdebug_remote_handler_info {
-	char                  *name;
-	char                  *description;
+	const char            *name;
+	const char            *description;
 	xdebug_remote_handler  handler;
 };
 

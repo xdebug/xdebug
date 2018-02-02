@@ -40,7 +40,7 @@ dbgpRun( $data, $commands );
 
 -> property_get -i 5 -n $storage->storage
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$storage-&gt;storage" fullname="$storage-&gt;storage" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="%s" fullname="$storage-&gt;storage[&#39;%s&#39;]" type="array" children="1" numchildren="2"></property><property name="%s" fullname="$storage-&gt;storage[&#39;%s&#39;]" type="array" children="1" numchildren="2"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="http://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$storage-&gt;storage" fullname="$storage-&gt;storage" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="%s" fullname="$storage-&gt;storage[&quot;%s&quot;]" type="array" children="1" numchildren="2"></property><property name="%s" fullname="$storage-&gt;storage[&quot;%s&quot;]" type="array" children="1" numchildren="2"></property></property></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

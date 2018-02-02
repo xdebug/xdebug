@@ -1,7 +1,5 @@
 --TEST--
 Test for stack traces with variadics (text, 5)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "5.6", '>=')) echo "skip >= PHP 5.6 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0
@@ -46,5 +44,5 @@ Notice: notice in %sstacktrace_variadic_text_5.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %sstacktrace_variadic_text_5.php:0
-%w%f %w%d   2. foo(czozOiJmb28iOw==, ...variadic(czozOiJiYXIiOw==, ZDozLjE0MTUwMDAwMDAwMDAwMDI7)) %sstacktrace_variadic_text_5.php:9
+%w%f %w%d   2. foo(czozOiJmb28iOw==, ...variadic(czozOiJiYXIiOw==, ZDozLjE0MTU%s)) %sstacktrace_variadic_text_5.php:9
 %w%f %w%d   3. trigger_error(czo2OiJub3RpY2UiOw==) %sstacktrace_variadic_text_5.php:4

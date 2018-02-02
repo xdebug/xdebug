@@ -1,8 +1,7 @@
 --TEST--
-Test for bug #623: Static properties of a class can be evaluated only with difficulty (>= PHP 7.0)
+Test for bug #623: Static properties of a class can be evaluated only with difficulty
 --SKIPIF--
 <?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

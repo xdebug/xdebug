@@ -1,22 +1,19 @@
-/* $Id: xdebug_hash.c,v 1.6 2008-11-27 18:56:26 derick Exp $ */
-
-/* The contents of this file are subject to the Vulcan Logic Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.vl-srm.net/vlpl/
- *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
- *
- * The Original Code is vl-srm.net code.
- *
- * The Initial Developer of the Original Code is the Vulcan Logic 
- * Group.  Portions created by Vulcan Logic Group are Copyright (C) 
- * 2000, 2001, 2002 Vulcan Logic Group. All Rights Reserved.
- *
- * Author(s): Sterling Hughes <sterling@php.net> 
+/*
+   +----------------------------------------------------------------------+
+   | Xdebug                                                               |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2002-2018 Derick Rethans                               |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 1.01 of the Xdebug license,   |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | https://xdebug.org/license.php                                       |
+   | If you did not receive a copy of the Xdebug license and are unable   |
+   | to obtain it through the world-wide-web, please send a note to       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
+   +----------------------------------------------------------------------+
+   | Authors: Sterling Hughes <sterling@php.net>                          |
+   +----------------------------------------------------------------------+
  */
 
 #include <string.h>
@@ -26,10 +23,10 @@
 #include "xdebug_hash.h"
 #include "xdebug_llist.h"
 
-/*
- * Helper function to make a null terminated string from a key 
- */
 
+/*
+ * Helper function to make a null terminated string from a key
+ */
 char *xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len)
 {
 	char *tmp;
@@ -46,7 +43,7 @@ static xdebug_ui32 xdebug_hash_str(const char *key, unsigned int key_length)
 	char *p = (char *) key;
 	char *end = (char *) key + key_length;
 	unsigned long h = 5381;
-	
+
 	while (p < end) {
 		h += h << 5;
 		h ^= (unsigned long) *p++;
@@ -69,9 +66,9 @@ static xdebug_ui32 xdebug_hash_num(xdebug_ui32 key)
 
 static void hash_element_dtor(void *u, void *ele)
 {
-	xdebug_hash_element *e = (xdebug_hash_element *) ele; 
-	xdebug_hash         *h = (xdebug_hash *) u; 
-	
+	xdebug_hash_element *e = (xdebug_hash_element *) ele;
+	xdebug_hash         *h = (xdebug_hash *) u;
+
 	if (e->key.type == XDEBUG_HASH_KEY_IS_STRING) {
 		free(e->key.value.str.val);
 	}
@@ -83,21 +80,32 @@ static void hash_element_dtor(void *u, void *ele)
 	e = NULL;
 }
 
-xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor)
+xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor_t dtor)
 {
 	xdebug_hash *h;
-	int          i; 
+	int          i;
 
 	h = malloc(sizeof(xdebug_hash));
-	h->dtor  = dtor;
-	h->size  = 0;
-	h->slots = slots;
+	h->dtor   = dtor;
+	h->sorter = NULL;
+	h->size   = 0;
+	h->slots  = slots;
 
 	h->table = (xdebug_llist **) malloc(slots * sizeof(xdebug_llist *));
 	for (i = 0; i < h->slots; ++i) {
 		h->table[i] = xdebug_llist_alloc((xdebug_llist_dtor) hash_element_dtor);
 	}
-	
+
+	return h;
+}
+
+xdebug_hash *xdebug_hash_alloc_with_sort(int slots, xdebug_hash_dtor_t dtor, xdebug_hash_apply_sorter_t sorter)
+{
+	xdebug_hash *h;
+
+	h = xdebug_hash_alloc(slots, dtor);
+	h->sorter = sorter;
+
 	return h;
 }
 
@@ -115,6 +123,7 @@ xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor dtor)
 		(__k)->value.str.len = __s_key_len; \
 		(__k)->type = XDEBUG_HASH_KEY_IS_STRING; \
 	} else { \
+		(__k)->value.str.len = 0; \
 		(__k)->value.num = __n_key; \
 		(__k)->type = XDEBUG_HASH_KEY_IS_NUM; \
 	}
@@ -141,17 +150,17 @@ static int xdebug_hash_key_compare(xdebug_hash_key *key1, xdebug_hash_key *key2)
 	return 0;
 }
 
-int xdebug_hash_add_or_update(xdebug_hash *h, char *str_key, unsigned int str_key_len, unsigned long num_key, const void *p)
+int xdebug_hash_add_or_update(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key, const void *p)
 {
 	xdebug_hash_element  *e;
 	xdebug_hash_key       tmp;
-	xdebug_llist         *l; 
+	xdebug_llist         *l;
 	xdebug_llist_element *le;
 	int                slot;
 
 	slot = FIND_SLOT(h, str_key, str_key_len, num_key);
 	l = h->table[slot];
-	KEY_CREATE(&tmp, str_key, str_key_len, num_key, 0);
+	KEY_CREATE(&tmp, (char*) str_key, str_key_len, num_key, 0);
 	for (le = XDEBUG_LLIST_HEAD(l); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 		if (xdebug_hash_key_compare(&tmp, &((xdebug_hash_element *) XDEBUG_LLIST_VALP(le))->key)) {
 			xdebug_hash_element *to_update = XDEBUG_LLIST_VALP(le);
@@ -164,7 +173,7 @@ int xdebug_hash_add_or_update(xdebug_hash *h, char *str_key, unsigned int str_ke
 	}
 
 	e = (xdebug_hash_element *) malloc(sizeof(xdebug_hash_element));
-	KEY_CREATE(&e->key, str_key, str_key_len, num_key, 1);
+	KEY_CREATE(&e->key, (char*) str_key, str_key_len, num_key, 1);
 	e->ptr = (void *) p;
 
 	if (xdebug_llist_insert_next(l, XDEBUG_LLIST_TAIL(l), e)) {
@@ -175,7 +184,7 @@ int xdebug_hash_add_or_update(xdebug_hash *h, char *str_key, unsigned int str_ke
 	}
 }
 
-int xdebug_hash_extended_delete(xdebug_hash *h, char *str_key, unsigned int str_key_len, xdebug_ui32 num_key)
+int xdebug_hash_extended_delete(xdebug_hash *h, const char *str_key, unsigned int str_key_len, xdebug_ui32 num_key)
 {
 	xdebug_llist         *l;
 	xdebug_llist_element *le;
@@ -185,7 +194,7 @@ int xdebug_hash_extended_delete(xdebug_hash *h, char *str_key, unsigned int str_
 	slot = FIND_SLOT(h, str_key, str_key_len, num_key);
 	l = h->table[slot];
 
-	KEY_CREATE(&tmp, str_key, str_key_len, num_key, 0);
+	KEY_CREATE(&tmp, (char*) str_key, str_key_len, num_key, 0);
 	for (le = XDEBUG_LLIST_HEAD(l); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 		if (xdebug_hash_key_compare(&tmp, &((xdebug_hash_element *) XDEBUG_LLIST_VALP(le))->key)) {
 			xdebug_llist_remove(l, le, (void *) h);
@@ -197,7 +206,7 @@ int xdebug_hash_extended_delete(xdebug_hash *h, char *str_key, unsigned int str_
 	return 0;
 }
 
-int xdebug_hash_extended_find(xdebug_hash *h, char *str_key, unsigned int str_key_len, xdebug_ui32 num_key, void **p)
+int xdebug_hash_extended_find(xdebug_hash *h, const char *str_key, unsigned int str_key_len, xdebug_ui32 num_key, void **p)
 {
 	xdebug_llist         *l;
 	xdebug_llist_element *le;
@@ -207,7 +216,7 @@ int xdebug_hash_extended_find(xdebug_hash *h, char *str_key, unsigned int str_ke
 	slot = FIND_SLOT(h, str_key, str_key_len, num_key);
 	l = h->table[slot];
 
-	KEY_CREATE(&tmp, str_key, str_key_len, num_key, 0);
+	KEY_CREATE(&tmp, (char*) str_key, str_key_len, num_key, 0);
 	for (le = XDEBUG_LLIST_HEAD(l); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 		if (xdebug_hash_key_compare(&tmp, &((xdebug_hash_element *) XDEBUG_LLIST_VALP(le))->key)) {
 			*p = ((xdebug_hash_element *) XDEBUG_LLIST_VALP(le))->ptr;
@@ -230,12 +239,6 @@ void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_has
 	 }
 }
 
-static int xdebug_compare_le_name(const void *le1, const void *le2)
-{
-	return strcmp((char *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le1),
-		(char *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le2));
-}
-
 void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *, void *), void *argument)
 {
 	xdebug_llist_element  *le;
@@ -243,29 +246,33 @@ void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void
 	int                    num_items = 0;
 	xdebug_hash_element  **pp_he_list;
 
-	for (i = 0; i < h->slots; ++i) {
-		for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-			num_items += 1;
+	if (h->sorter) {
+		for (i = 0; i < h->slots; ++i) {
+			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+				num_items += 1;
+			}
+		}
+		pp_he_list = (xdebug_hash_element **) malloc((size_t) (num_items * sizeof(xdebug_hash_element **)));
+		if (pp_he_list) {
+			int j = 0;
+			for (i = 0; i < h->slots; ++i) {
+				for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+					pp_he_list[j++] = XDEBUG_LLIST_VALP(le);
+				}
+			}
+			qsort(pp_he_list, num_items, sizeof(xdebug_llist_element *), h->sorter);
+			for (i = 0; i < num_items; ++i) {
+				cb(user, pp_he_list[i], argument);
+			}
+			free((void *) pp_he_list);
+
+			return;
 		}
 	}
-	pp_he_list = (xdebug_hash_element **) malloc((size_t) (num_items * sizeof(xdebug_hash_element **)));
-	if (pp_he_list) {
-		int j = 0;
-		for (i = 0; i < h->slots; ++i) {
-			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				pp_he_list[j++] = XDEBUG_LLIST_VALP(le);
-			}
-		}
-		qsort(pp_he_list, num_items, sizeof(xdebug_llist_element *), xdebug_compare_le_name);
-		for (i = 0; i < num_items; ++i) {
-			cb(user, pp_he_list[i], argument);
-		}
-		free((void *) pp_he_list);
-	} else {
-		for (i = 0; i < h->slots; ++i) {
-			for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
-			}
+
+	for (i = 0; i < h->slots; ++i) {
+		for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+			cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
 		}
 	}
 }

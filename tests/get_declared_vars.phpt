@@ -1,5 +1,9 @@
 --TEST--
-Test with xdebug_get_declared_vars()
+Test with xdebug_get_declared_vars() (< PHP 7.2 || !opcache)
+--SKIPIF--
+<?php
+if ( ( version_compare(phpversion(), "7.2", '>=') && extension_loaded('zend opcache'))) { echo "skip < PHP 7.2 || !opcache loaded needed\n"; };
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

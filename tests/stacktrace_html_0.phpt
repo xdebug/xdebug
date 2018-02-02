@@ -12,6 +12,7 @@ xdebug.collect_params=0
 xdebug.collect_return=0
 html_errors=1
 xdebug.file_link_format=
+xdebug.filename_format=
 xdebug.show_local_vars=0
 xdebug.show_error_trace=1
 --FILE--

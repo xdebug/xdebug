@@ -31,7 +31,7 @@ function my_assert_handler ($file, $line, $code, $desc) {
 assert_options (ASSERT_CALLBACK, 'my_assert_handler');
 
 // Make an assertion that should fail
-assert ('1==2', "One is not two");
+@assert ('1==2', "One is not two");
 echo "\n";
 echo file_get_contents($tf);
 xdebug_stop_trace();

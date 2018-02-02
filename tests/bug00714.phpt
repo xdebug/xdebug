@@ -30,44 +30,44 @@ cmd: %sbug00714.php
 part: 1
 positions: line
 
-events: Time
+events: Time Memory
 
 fl=(1) php:internal
 fn=(1) php::sleep
-2 10%d
+2 10%d %d
 
 fl=(2) %sbug00714.php
 fn=(2) sleep1
-2 %d
+2 %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-2 10%d
+2 10%d %d
 
 fl=(1)
 fn=(1)
-3 10%d
+3 10%d %d
 
 fl=(2)
 fn=(3) sleep10
-3 %d
+3 %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-3 10%d
+3 10%d %d
 
 fl=(1)
 fn=(1)
-4 20%d
+4 2%d %d
 
 fl=(2)
 fn=(4) sleep20
-4 %d
+4 %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-4 20%d
+4 2%d %d
 
 fl=(1)
 fn=(5) php::xdebug_get_profiler_filename
-14 %d
+14 %d %d

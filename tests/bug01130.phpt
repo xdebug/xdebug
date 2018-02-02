@@ -6,10 +6,11 @@ docref_ext=.php
 html_errors=1
 xdebug.default_enable=1
 xdebug.file_link_format=
+xdebug.filename_format=
 xdebug.collect_params=0
 --FILE--
 <?php
-html_entity_decode("", 0, "l<r");
+html_entity_decode("&amp;", 0, "l<r");
 ?>
 --EXPECTF--
 <br />
