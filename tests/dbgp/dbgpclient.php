@@ -1,4 +1,4 @@
-<?php
+127<?php
 define( 'XDEBUG_DBGP_IPV4', 1 );
 define( 'XDEBUG_DBGP_IPV6', 2 );
 
@@ -21,7 +21,7 @@ class DebugClient
 
 	protected function getIPAddress()
 	{
-		return "0.0.0.0";
+		return "127.0.0.1";
 	}
 
 	protected function getAddress()
@@ -174,7 +174,7 @@ class DebugClientIPv6 extends DebugClient
 {
 	protected function getIPAddress()
 	{
-		return "::";
+		return "::1";
 	}
 
 	protected function getAddress()
@@ -198,7 +198,7 @@ class DebugClientIPv6 extends DebugClient
 			return false;
 		}
 		
-		if ( $ret && !socket_bind( $socket, $this->getIPAddress(), 9990 ) )
+		if ( $ret && !socket_bind( $socket, $this->getIPAddress(), 0 ) )
 		{
 			$ret = false;
 		}
