@@ -182,37 +182,18 @@ class DebugClientIPv6 extends DebugClient
 		return "tcp://[" . $this->getIPAddress() . "]:" . $this->getPort();
 	}
 
-	public static function isSupported()
-	{
-		$ret = true;
+	public static function isSupported( &$errno, &$errstr )
+        {
+                $socket = @stream_socket_server( "tcp://[::]:0", $errno, $errstr );
 
-		if ( !defined( "AF_INET6" ) )
-		{
-			define( "AF_INET6", 10 );
-		}
-		
-		$socket = @socket_create( AF_INET6, SOCK_STREAM, SOL_TCP );
+                if ( $socket === false )
+                {
+                        return false;
+                }
 
-		if ( $socket === false )
-		{
-			return false;
-		}
-		
-		if ( $ret && !socket_bind( $socket, "::1", 0 ) )
-		{
-			$ret = false;
-		}
-
-		if ( $ret && !socket_listen( $socket ) )
-		{
-			$ret = false;
-		}
-
-		socket_close( $socket );
-		unset( $socket );
-
-		return $ret;
-	}
+                fclose( $socket );
+                return true;
+        }
 }
 
 function dbgpRun( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
