@@ -184,7 +184,7 @@ class DebugClientIPv6 extends DebugClient
 
 	public static function isSupported( &$errno, &$errstr )
         {
-                $socket = @stream_socket_server( "tcp://[::]:0", $errno, $errstr );
+                $socket = @stream_socket_server( "tcp://[::1]:0", $errno, $errstr );
 
                 if ( $socket === false )
                 {
