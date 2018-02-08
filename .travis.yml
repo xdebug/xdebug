@@ -1,4 +1,4 @@
-sudo: false
+\nsudo: false
 
 language: php
 
@@ -30,6 +30,7 @@ notifications:
     derick@xdebug.org
 
 script:
+  - sudo sh -c 'echo "\n::1 localhost\n" >> /etc/hosts'
   - export TEST_PHP_EXECUTABLE=`make findphp`
   - export PATH=`dirname $TEST_PHP_EXECUTABLE`:$PATH
   - TEST_PHP_ARGS="-n -d foo=1"
