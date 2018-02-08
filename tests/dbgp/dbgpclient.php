@@ -183,17 +183,17 @@ class DebugClientIPv6 extends DebugClient
 	}
 
 	public static function isSupported( &$errno, &$errstr )
-        {
-                $socket = @stream_socket_server( "tcp://[::1]:0", $errno, $errstr );
+	{
+		$socket = @stream_socket_server( "tcp://[::1]:0", $errno, $errstr );
 
-                if ( $socket === false )
-                {
-                        return false;
-                }
+		if ( $socket === false )
+		{
+			return false;
+		}
 
-                fclose( $socket );
-                return true;
-        }
+		fclose( $socket );
+		return true;
+	}
 }
 
 function dbgpRun( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
