@@ -21,7 +21,7 @@ class DebugClient
 
 	protected function getIPAddress()
 	{
-		return "0.0.0.0";
+		return "127.0.0.1";
 	}
 
 	protected function getAddress()
@@ -174,7 +174,7 @@ class DebugClientIPv6 extends DebugClient
 {
 	protected function getIPAddress()
 	{
-		return "::";
+		return "::1";
 	}
 
 	protected function getAddress()
@@ -182,36 +182,17 @@ class DebugClientIPv6 extends DebugClient
 		return "tcp://[" . $this->getIPAddress() . "]:" . $this->getPort();
 	}
 
-	public static function isSupported()
+	public static function isSupported( &$errno, &$errstr )
 	{
-		$ret = true;
-
-		if ( !defined( "AF_INET6" ) )
-		{
-			return false;
-		}
-		
-		$socket = socket_create( AF_INET6, SOCK_STREAM, SOL_TCP );
+		$socket = @stream_socket_server( "tcp://[::1]:0", $errno, $errstr );
 
 		if ( $socket === false )
 		{
 			return false;
 		}
-		
-		if ( $ret && !socket_bind( $socket, $this->getIPAddress(), 9990 ) )
-		{
-			$ret = false;
-		}
 
-		if ( $ret && !socket_listen( $socket ) )
-		{
-			$ret = false;
-		}
-
-		socket_close( $socket );
-		unset( $socket );
-
-		return $ret;
+		fclose( $socket );
+		return true;
 	}
 }
 

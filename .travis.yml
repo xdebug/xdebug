@@ -19,18 +19,23 @@ env:
 before_script:
   - phpenv config-rm xdebug.ini || echo "xdebug not available"
   - sh -e ./.travis.scripts/compile.sh
+  # Add an IPv6 config - see the corresponding Travis issue
+  # https://github.com/travis-ci/travis-ci/issues/8361
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then
+      sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6';
+    fi
 
 notifications:
   email:
     derick@xdebug.org
 
 script:
+  - sudo sh -c 'echo "\n::1 localhost\n" >> /etc/hosts'
   - export TEST_PHP_EXECUTABLE=`make findphp`
   - export PATH=`dirname $TEST_PHP_EXECUTABLE`:$PATH
   - TEST_PHP_ARGS="-n -d foo=1"
   - if [[ "$USE_OPCACHE" == "1" ]]; then TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=opcache.so -d opcache.enable=1 -d opcache.enable_cli=1"; fi
   - export TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=$PWD/modules/xdebug.so"
-  - export SKIP_IPV6_TESTS=1
   - export REPORT_EXIT_STATUS=1
   - $TEST_PHP_EXECUTABLE $TEST_PHP_ARGS -v
   - $TEST_PHP_EXECUTABLE -n run-tests.php -q -x --show-diff

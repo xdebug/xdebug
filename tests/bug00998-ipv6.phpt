@@ -5,7 +5,7 @@ Test for bug #998: Test that Xdebug connects back on IPv6
 if (getenv("SKIP_IPV6_TESTS")) { exit("skip Excluding IPv6 tests"); }
 if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
 require 'dbgp/dbgpclient.php';
-if (!DebugClientIPv6::isSupported()) echo "skip IPv6 support is not configured.\n";
+if (!DebugClientIPv6::isSupported($errno, $errstr)) echo "skip IPv6 support is not configured. Error: $errstr, errno: $errno\n";
 ?>
 --FILE--
 <?php
