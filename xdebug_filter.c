@@ -82,7 +82,7 @@ int xdebug_filter_match_namespace_whitelist(function_stack_entry *fse, long *fil
 		*filtered_flag = 0;
 		return 1;
 	}
-	if (fse->function.class && strcasecmp(filter, fse->function.class) == 0) {
+	if (fse->function.class && strlen(filter) > 0 && strncasecmp(filter, fse->function.class, strlen(filter)) == 0) {
 		*filtered_flag = 0;
 		return 1;
 	}
@@ -95,7 +95,7 @@ int xdebug_filter_match_namespace_blacklist(function_stack_entry *fse, long *fil
 		*filtered_flag = 1;
 		return 1;
 	}
-	if (fse->function.class && strcasecmp(filter, fse->function.class) == 0) {
+	if (fse->function.class && strlen(filter) > 0 && strncasecmp(filter, fse->function.class, strlen(filter)) == 0) {
 		*filtered_flag = 1;
 		return 1;
 	}
