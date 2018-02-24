@@ -368,10 +368,11 @@ static void xdebug_open_log(void)
 
 static void xdebug_close_log()
 {
-	long pid = getpid();
 
 	if (XG(remote_log_file)) {
+		long pid = getpid();
 		char *timestr = xdebug_get_time();
+
 		fprintf(XG(remote_log_file), "[%ld] Log closed at %s\n[%ld]\n", pid, timestr, pid);
 		fflush(XG(remote_log_file));
 		xdfree(timestr);
@@ -380,35 +381,7 @@ static void xdebug_close_log()
 	}
 }
 
-/* Remote connection activation and house keeping */
-int xdebug_is_debug_connection_active()
-{
-	return (
-		XG(remote_connection_enabled)
-	);
-}
-
-int xdebug_is_debug_connection_active_for_current_pid()
-{
-	return (
-		XG(remote_connection_enabled) && (XG(remote_connection_pid) == getpid())
-	);
-}
-
-void xdebug_mark_debug_connection_active()
-{
-	XG(remote_connection_enabled) = 1;
-	XG(remote_connection_pid) = getpid();
-}
-
-void xdebug_mark_debug_connection_not_active()
-{
-	xdebug_close_log();
-
-	XG(remote_connection_enabled) = 0;
-	XG(remote_connection_pid) = 0;
-}
-
+/* Starting the debugger */
 static void xdebug_init_debugger()
 {
 	long pid = getpid();
@@ -455,7 +428,7 @@ static void xdebug_init_debugger()
 	}
 	if (XG(context).socket >= 0) {
 		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Connected to client. :-)\n", pid);
-		xdebug_mark_debug_connection_not_active();
+		xdebug_mark_debug_connection_pending();
 
 		/* Get handler from mode */
 		XG(context).handler = xdebug_handler_get(XG(remote_handler));
@@ -487,6 +460,65 @@ static void xdebug_init_debugger()
 	if (!XG(remote_connection_enabled)) {
 		xdebug_close_log();
 	}
+}
+
+void xdebug_abort_debugger()
+{
+	if (XG(remote_connection_enabled)) {
+		xdebug_mark_debug_connection_not_active();
+	}
+}
+
+void xdebug_restart_debugger()
+{
+	xdebug_abort_debugger();
+	xdebug_init_debugger();
+}
+
+/* Remote connection activation and house keeping */
+int xdebug_is_debug_connection_active()
+{
+	return (
+		XG(remote_connection_enabled)
+	);
+}
+
+int xdebug_is_debug_connection_active_for_current_pid()
+{
+	long pid = getpid();
+
+	/* Start debugger if previously a connection was established and this
+	 * process no longer has the same PID */
+	if ((xdebug_is_debug_connection_active() && (XG(remote_connection_pid) != pid))) {
+		xdebug_restart_debugger();
+	}
+
+	return (
+		XG(remote_connection_enabled) && (XG(remote_connection_pid) == pid)
+	);
+}
+
+void xdebug_mark_debug_connection_active()
+{
+	XG(remote_connection_enabled) = 1;
+	XG(remote_connection_pid) = getpid();
+}
+
+void xdebug_mark_debug_connection_pending()
+{
+	XG(remote_connection_enabled) = 0;
+	XG(remote_connection_pid) = 0;
+}
+
+void xdebug_mark_debug_connection_not_active()
+{
+	if (XG(remote_connection_enabled)) {
+		xdebug_close_socket(XG(context).socket);
+		xdebug_close_log();
+	}
+
+	XG(remote_connection_enabled) = 0;
+	XG(remote_connection_pid) = 0;
 }
 
 void xdebug_do_jit()
