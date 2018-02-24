@@ -549,90 +549,6 @@ static char *get_printable_stack(int html, int error_type, const char *buffer, c
 	return str.d;
 }
 
-void xdebug_init_debugger(TSRMLS_D)
-{
-	xdebug_open_log(TSRMLS_C);
-	if (XG(remote_connect_back)) {
-		zval *remote_addr = NULL;
-
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking remote connect back address.\n");
-		if (XG(remote_addr_header) && XG(remote_addr_header)[0]) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking user configured header '%s'.\n", XG(remote_addr_header));
-			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XG(remote_addr_header), HASH_KEY_STRLEN(XG(remote_addr_header)));
-		}
-		if (!remote_addr) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'HTTP_X_FORWARDED_FOR'.\n");
-			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
-		}
-		if (!remote_addr) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Checking header 'REMOTE_ADDR'.\n");
-			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
-		}
-
-		if (remote_addr && strstr(Z_STRVAL_P(remote_addr), "://")) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Invalid remote address provided containing URI spec '%s'.\n", Z_STRVAL_P(remote_addr));
-			remote_addr = NULL;
-		}
-
-		if (remote_addr) {
-			/* Use first IP according to RFC 7239 */
-			char *cp = strchr(Z_STRVAL_P(remote_addr), ',');
-			if (cp) {
-				*cp = '\0';
-			}
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Remote address found, connecting to %s:%ld.\n", Z_STRVAL_P(remote_addr), (long int) XG(remote_port));
-			XG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XG(remote_port), XG(remote_connect_timeout) TSRMLS_CC);
-		} else {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), (long int) XG(remote_port));
-			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port), XG(remote_connect_timeout) TSRMLS_CC);
-		}
-	} else {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connecting to configured address/port: %s:%ld.\n", XG(remote_host), (long int) XG(remote_port));
-		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port), XG(remote_connect_timeout) TSRMLS_CC);
-	}
-	if (XG(context).socket >= 0) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "I: Connected to client. :-)\n");
-		XG(remote_enabled) = 0;
-
-		/* Get handler from mode */
-		XG(context).handler = xdebug_handler_get(XG(remote_handler));
-		if (!XG(context).handler) {
-			zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "E: The remote debug handler '%s' is not supported. :-(\n", XG(remote_handler));
-		} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
-			/* The request could not be started, ignore it then */
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "E: The debug session could not be started. :-(\n");
-		} else {
-			/* All is well, turn off script time outs */
-			zend_string *ini_name = zend_string_init("max_execution_time", sizeof("max_execution_time") - 1, 0);
-			zend_string *ini_val = zend_string_init("0", sizeof("0") - 1, 0);
-
-			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-
-			zend_string_release(ini_val);
-			zend_string_release(ini_name);
-
-			XG(remote_enabled) = 1;
-		}
-	} else if (XG(context).socket == -1) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Could not connect to client. :-(\n");
-	} else if (XG(context).socket == -2) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: Time-out connecting to client (Waited: " ZEND_LONG_FMT " ms). :-(\n", XG(remote_connect_timeout));
-	} else if (XG(context).socket == -3) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "E: No permission connecting to client. This could be SELinux related. :-(\n");
-	}
-	if (!XG(remote_enabled)) {
-		xdebug_close_log(TSRMLS_C);
-	}
-}
-
-void xdebug_do_jit(TSRMLS_D)
-{
-	if (!XG(remote_enabled) && XG(remote_enable) && (XG(remote_mode) == XDEBUG_JIT)) {
-		xdebug_init_debugger(TSRMLS_C);
-	}
-}
-
 static void php_output_error(const char *error TSRMLS_DC)
 {
 #ifdef PHP_DISPLAY_ERRORS_STDERR
@@ -810,11 +726,11 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	/* Start JIT if requested and not yet enabled */
 	xdebug_do_jit(TSRMLS_C);
 
-	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
 		/* Send notification with warning/notice/error information */
 		if (XG(context).send_notifications && !XG(context).inhibit_notifications) {
 			if (!XG(context).handler->remote_notification(&(XG(context)), error_filename, error_lineno, type, error_type_str, buffer)) {
-				XG(remote_enabled) = 0;
+				xdebug_mark_debug_connection_not_active();
 			}
 		}
 
@@ -827,7 +743,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				char *type_str = xdebug_sprintf("%ld", type);
 
 				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
-					XG(remote_enabled) = 0;
+					xdebug_mark_debug_connection_not_active();
 				}
 
 				xdfree(type_str);
@@ -1265,7 +1181,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
-		if (XG(remote_enabled) || XG(collect_params) || XG(collect_vars)) {
+		if (XG(collect_params) || XG(collect_vars) || xdebug_is_debug_connection_active_for_current_pid()) {
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
 			/* This calculates how many arguments where sent to a function. It
@@ -1415,44 +1331,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 
 	return tmp;
-}
-
-int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
-{
-	/* If this is a temporary breakpoint, disable the breakpoint */
-	if (brk_info->temporary) {
-		brk_info->disabled = 1;
-	}
-
-	/* Increase hit counter */
-	brk_info->hit_count++;
-
-	/* If the hit_value is 0, the condition check is disabled */
-	if (!brk_info->hit_value) {
-		return 1;
-	}
-
-	switch (brk_info->hit_condition) {
-		case XDEBUG_HIT_GREATER_EQUAL:
-			if (brk_info->hit_count >= brk_info->hit_value) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_EQUAL:
-			if (brk_info->hit_count == brk_info->hit_value) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_MOD:
-			if (brk_info->hit_count % brk_info->hit_value == 0) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_DISABLED:
-			return 1;
-			break;
-	}
-	return 0;
 }
 
 /* {{{ proto int xdebug_get_stack_depth()

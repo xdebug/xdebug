@@ -31,9 +31,9 @@ setlocal enableextensions enabledelayedexpansion
 		git clone -q --depth=1 --branch=PHP-%PHP_REL% https://github.com/php/php-src C:\projects\php-src
 	)
 
-	xcopy %APPVEYOR_BUILD_FOLDER% C:\projects\php-src\ext\xdebug\ /s /e /y /f
+	xcopy %APPVEYOR_BUILD_FOLDER% C:\projects\php-src\ext\xdebug\ /s /e /y /q
 
-	xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\artifacts\ /y /f
+	xcopy %APPVEYOR_BUILD_FOLDER%\LICENSE %APPVEYOR_BUILD_FOLDER%\artifacts\ /y /q
 
 	if "%APPVEYOR%" equ "True" rmdir /s /q C:\cygwin >NUL 2>NUL
 	if %errorlevel% neq 0 exit /b 3

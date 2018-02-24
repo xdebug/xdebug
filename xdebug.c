@@ -438,8 +438,12 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->context.do_next      = 0;
 	xg->context.do_finish    = 0;
 	xg->in_execution         = 0;
-	xg->remote_enabled       = 0;
-	xg->breakpoints_allowed  = 0;
+
+	xg->remote_connection_enabled = 0;
+	xg->remote_connection_pid     = 0;
+	xg->remote_log_file           = 0;
+	xg->breakpoints_allowed       = 0;
+
 	xg->profiler_enabled     = 0;
 	xg->do_monitor_functions = 0;
 
@@ -1108,7 +1112,7 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 
 size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC)
 {
-	if (XG(remote_enabled)) {
+	if (xdebug_is_debug_connection_active_for_current_pid()) {
 		if (-1 == XG(context).handler->remote_stream_output(string, length TSRMLS_CC)) {
 			return 0;
 		}
@@ -1262,9 +1266,10 @@ PHP_RINIT_FUNCTION(xdebug)
 		zend_throw_exception_hook = xdebug_throw_exception_hook;
 	}
 
-	XG(remote_enabled) = 0;
-	XG(profiler_enabled) = 0;
+	xdebug_mark_debug_connection_not_active();
 	XG(breakpoints_allowed) = 1;
+	XG(remote_log_file) = NULL;
+	XG(profiler_enabled) = 0;
 
 	/* Initialize some debugger context properties */
 	XG(context).program_name   = NULL;
@@ -1313,7 +1318,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
 	TSRMLS_FETCH();
 
-	if (XG(remote_enabled)) {
+	if (XG(remote_connection_enabled)) {
 		XG(context).handler->remote_deinit(&(XG(context)));
 		xdebug_close_socket(XG(context).socket);
 	}
@@ -1597,7 +1602,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	/* Start JIT if requested and not yet enabled */
 	xdebug_do_jit(TSRMLS_C);
 
-	if (XG(remote_enabled)) {
+	if (xdebug_is_debug_connection_active_for_current_pid()) {
 		int exception_breakpoint_found = 0;
 
 		/* Check if we have a wild card exception breakpoint */
@@ -1624,7 +1629,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 				code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
 				Z_STRVAL_P(message))
 			) {
-				XG(remote_enabled) = 0;
+				xdebug_mark_debug_connection_not_active();
 			}
 		}
 	}
@@ -1686,9 +1691,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
-	zval                 *dummy;
 	function_stack_entry *fse, *xfse;
-	char                 *magic_cookie = NULL;
 	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
@@ -1727,101 +1730,54 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		XG(context).program_name = xdstrdup(STR_NAME_VAL(op_array->filename));
 	}
 
-	if (XG(level) == 0 && XG(in_execution)) {
-		/* Set session cookie if requested */
+	if (XG(in_execution)) {
+		/* Start debugger if this is the first main script, or previously a
+		 * connection was established and this process no longer has the same
+		 * PID */
 		if (
-			((
-				(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
-			) || (
-				(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
-			))
-			&& !SG(headers_sent)
+			XG(level) == 0 ||
+			(xdebug_is_debug_connection_active() && !xdebug_is_debug_connection_active_for_current_pid())
 		) {
-			convert_to_string_ex(dummy);
-			magic_cookie = xdstrdup(Z_STRVAL_P(dummy));
-			if (XG(ide_key)) {
-				xdfree(XG(ide_key));
-			}
-			XG(ide_key) = xdstrdup(magic_cookie);
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
-		} else if (
-			(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
-		) {
-			convert_to_string_ex(dummy);
-			magic_cookie = xdstrdup(Z_STRVAL_P(dummy));
-			if (XG(ide_key)) {
-				xdfree(XG(ide_key));
-			}
-			XG(ide_key) = xdstrdup(magic_cookie);
-		} else if (getenv("XDEBUG_CONFIG")) {
-			magic_cookie = xdstrdup(getenv("XDEBUG_CONFIG"));
-			if (XG(ide_key) && *XG(ide_key) && !SG(headers_sent)) {
-				xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), XG(ide_key), strlen(XG(ide_key)), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
-			}
+			/* Start remote context if requested */
+			xdebug_do_req();
 		}
 
+		if (XG(level) == 0) {
+			/* Start profiler if requested, and we're in main script */
+			/* Check for special GET/POST parameter to start profiling */
+			if (
+				!XG(profiler_enabled) &&
+				(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE", XG(profiler_enable_trigger_value) TSRMLS_CC))
+			) {
+				if (xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
+					if (!SG(headers_sent)) {
+						sapi_header_line ctr = {0};
 
-		/* Remove session cookie if requested */
-		if (
-			((
-				zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
-			) || (
-				zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_STOP", sizeof("XDEBUG_SESSION_STOP") - 1) != NULL
-			))
-			&& !SG(headers_sent)
-		) {
-			if (magic_cookie) {
-				xdfree(magic_cookie);
-				magic_cookie = NULL;
-			}
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
-		}
+						ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG(profile_filename));
+						ctr.line_len = strlen(ctr.line);
+						sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
+						xdfree(ctr.line);
+					}
 
-		/* Start remote context if requested */
-		if (
-			(magic_cookie || XG(remote_autostart)) &&
-			!XG(remote_enabled) &&
-			XG(remote_enable) &&
-			(XG(remote_mode) == XDEBUG_REQ)
-		) {
-			xdebug_init_debugger(TSRMLS_C);
-		}
-		if (magic_cookie) {
-			xdfree(magic_cookie);
-			magic_cookie = NULL;
-		}
-
-		/* Check for special GET/POST parameter to start profiling */
-		if (
-			!XG(profiler_enabled) &&
-			(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE", XG(profiler_enable_trigger_value) TSRMLS_CC))
-		) {
-			if (xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
-				if (!SG(headers_sent)) {
-					sapi_header_line ctr = {0};
-
-					ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG(profile_filename));
-					ctr.line_len = strlen(ctr.line);
-					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-					xdfree(ctr.line);
+					XG(profiler_enabled) = 1;
 				}
-
-				XG(profiler_enabled) = 1;
 			}
-		}
 
-		if (
-			(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE", XG(trace_enable_trigger_value) TSRMLS_CC))
-			&& XG(trace_output_dir) && strlen(XG(trace_output_dir))
-		) {
-			/* In case we do an auto-trace we are not interested in the return
-			 * value, but we still have to free it. */
-			xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XG(trace_options) TSRMLS_CC));
-		}
+			/* Start auto-tracer if requested, and we're in main script */
+			if (
+				(XG(auto_trace) || xdebug_trigger_enabled(XG(trace_enable_trigger), "XDEBUG_TRACE", XG(trace_enable_trigger_value) TSRMLS_CC))
+				&& XG(trace_output_dir) && strlen(XG(trace_output_dir))
+			) {
+				/* In case we do an auto-trace we are not interested in the return
+				 * value, but we still have to free it. */
+				xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XG(trace_options) TSRMLS_CC));
+			}
 
-		if (!XG(gc_stats_enabled) && XG(gc_stats_enable)) {
-			if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
-				XG(gc_stats_enabled) = 1;
+			/* Start GC stats collector if requested, and we're in main script */
+			if (!XG(gc_stats_enabled) && XG(gc_stats_enable)) {
+				if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
+					XG(gc_stats_enabled) = 1;
+				}
 			}
 		}
 	}
@@ -1858,7 +1814,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		fse->This = NULL;
 	}
 
-	if (XG(stack) && (XG(remote_enabled) || XG(collect_vars) || XG(show_local_vars))) {
+	if (XG(stack) && (XG(collect_vars) || XG(show_local_vars) || xdebug_is_debug_connection_active_for_current_pid())) {
 		/* Because include/require is treated as a stack level, we have to add used
 		 * variables in include/required files to all the stack levels above, until
 		 * we hit a function or the top level stack.  This is so that the variables
@@ -1892,14 +1848,14 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	/* If we're in an eval, we need to create an ID for it. This ID however
 	 * depends on the debugger mechanism in use so we need to call a function
 	 * in the handler for it */
-	if (XG(remote_enabled) && XG(context).handler->register_eval_id && fse->function.type == XFUNC_EVAL) {
+	if (fse->function.type == XFUNC_EVAL && xdebug_is_debug_connection_active_for_current_pid() && XG(context).handler->register_eval_id) {
 		XG(context).handler->register_eval_id(&(XG(context)), fse);
 	}
 
 	/* Check for entry breakpoints */
-	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
 		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_CALL)) {
-			XG(remote_enabled) = 0;
+			xdebug_mark_debug_connection_not_active();
 		}
 	}
 
@@ -1944,9 +1900,9 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	/* Check for return breakpoints */
-	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
 		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
-			XG(remote_enabled) = 0;
+			xdebug_mark_debug_connection_not_active();
 		}
 	}
 
@@ -1997,9 +1953,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	}
 
 	/* Check for entry breakpoints */
-	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
 		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_CALL)) {
-			XG(remote_enabled) = 0;
+			xdebug_mark_debug_connection_not_active();
 		}
 	}
 
@@ -2041,9 +1997,9 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	}
 
 	/* Check for return breakpoints */
-	if (XG(remote_enabled) && XG(breakpoints_allowed)) {
+	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
 		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
-			XG(remote_enabled) = 0;
+			xdebug_mark_debug_connection_not_active();
 		}
 	}
 
@@ -2137,7 +2093,7 @@ static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, 
    Dummy function to prevent time limit from being set within the script */
 PHP_FUNCTION(xdebug_set_time_limit)
 {
-	if (!XG(remote_enabled)) {
+	if (!xdebug_is_debug_connection_active_for_current_pid()) {
 		XG(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 }
@@ -2357,7 +2313,7 @@ PHP_FUNCTION(xdebug_is_enabled)
 
 PHP_FUNCTION(xdebug_is_debugger_active)
 {
-	RETURN_BOOL(XG(remote_enabled));
+	RETURN_BOOL(xdebug_is_debug_connection_active_for_current_pid());
 }
 
 PHP_FUNCTION(xdebug_break)
@@ -2505,13 +2461,13 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 	}
 
-	if (XG(remote_enabled)) {
+	if (xdebug_is_debug_connection_active_for_current_pid()) {
 
 		if (XG(context).do_break) {
 			XG(context).do_break = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-				XG(remote_enabled) = 0;
+				xdebug_mark_debug_connection_not_active();
 				return;
 			}
 		}
@@ -2538,7 +2494,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			XG(context).do_finish = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
-				XG(remote_enabled) = 0;
+				xdebug_mark_debug_connection_not_active();
 				return;
 			}
 			return;
@@ -2549,7 +2505,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			XG(context).do_next = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
-				XG(remote_enabled) = 0;
+				xdebug_mark_debug_connection_not_active();
 				return;
 			}
 			return;
@@ -2560,7 +2516,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 			XG(context).do_step = 0;
 
 			if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
-				XG(remote_enabled) = 0;
+				xdebug_mark_debug_connection_not_active();
 				return;
 			}
 			return;
@@ -2606,7 +2562,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 					}
 					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-							XG(remote_enabled) = 0;
+							xdebug_mark_debug_connection_not_active();
 							break;
 						}
 						return;

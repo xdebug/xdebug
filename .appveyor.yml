@@ -2,8 +2,7 @@ image: Visual Studio 2015
 version: '{branch}.{build}'
 
 cache:
-  - c:\build-cache -> .appveyor.yml
-  - c:\build-cache\sdk -> .appveyor.yml
+  - c:\build-cache -> .appveyor.yml, .appveyor/*.cmd
 
 environment:
   PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
