@@ -17,14 +17,15 @@ unlink (sys_get_temp_dir() . "/remote-log1.txt");
 ?>
 --EXPECTF--
 3
-Log opened at %d-%d-%d %d:%d:%d
-I: Connecting to configured address/port: doesnotexist:9002.
-W: Creating socket for 'doesnotexist:9002', getaddrinfo: %s.
-E: Could not connect to client. :-(
-Log closed at %d-%d-%d %d:%d:%d
-
-Log opened at %d-%d-%d %d:%d:%d
-I: Connecting to configured address/port: doesnotexist:9002.
-W: Creating socket for 'doesnotexist:9002', getaddrinfo: %s.
-E: Could not connect to client. :-(
-Log closed at %d-%d-%d %d:%d:%d
+[%d] Log opened at %d-%d-%d %d:%d:%d
+[%d] I: Connecting to configured address/port: doesnotexist:9002.
+[%d] W: Creating socket for 'doesnotexist:9002', getaddrinfo: %s.
+[%d] E: Could not connect to client. :-(
+[%d] Log closed at %d-%d-%d %d:%d:%d
+[%d]
+[%d] Log opened at %d-%d-%d %d:%d:%d
+[%d] I: Connecting to configured address/port: doesnotexist:9002.
+[%d] W: Creating socket for 'doesnotexist:9002', getaddrinfo: %s.
+[%d] E: Could not connect to client. :-(
+[%d] Log closed at %d-%d-%d %d:%d:%d
+[%d]

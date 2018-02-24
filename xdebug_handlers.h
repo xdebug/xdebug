@@ -20,7 +20,6 @@
 #define __HAVE_XDEBUG_HANDLERS_H__
 
 #include "php_xdebug.h"
-#include "xdebug_com.h"
 #include "xdebug_llist.h"
 #include "xdebug_hash.h"
 #include "xdebug_private.h"

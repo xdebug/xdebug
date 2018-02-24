@@ -259,7 +259,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char         *ide_key_setting; /* Set through php.ini and friends */
 
 	/* remote debugging globals */
-	zend_bool     remote_enabled;
+	zend_bool     remote_connection_enabled;
+	pid_t         remote_connection_pid;
 	zend_bool     breakpoints_allowed;
 	xdebug_con    context;
 	unsigned int  breakpoint_count;
