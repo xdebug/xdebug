@@ -2468,7 +2468,7 @@ int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno,
 		char *tmp_filename = (char*) file;
 		int tmp_lineno = lineno;
 		if (check_evaled_code(NULL, &tmp_filename, &tmp_lineno, 0 TSRMLS_CC)) {
-			xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(tmp_filename), 1, 1);
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdstrdup(tmp_filename), 0, 1);
 		} else {
 			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_path_to_url(file TSRMLS_CC), 0, 1);
 		}
