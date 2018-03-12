@@ -78,6 +78,8 @@ char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigne
 			memcpy(context->buffer + context->buffer_size, buffer, newl);
 			context->buffer_size += newl;
 			context->buffer[context->buffer_size] = '\0';
+		} else if (newl == -1 && errno == EINTR) {
+			continue;
 		} else {
 			return NULL;
 		}
