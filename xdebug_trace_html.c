@@ -98,7 +98,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
-			char             *joined;
+			xdebug_str       *joined;
 			xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
 			xdebug_arg_init(parts);
@@ -106,8 +106,8 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 			joined = xdebug_join("<br />", parts, 0, 99999);
 			xdebug_arg_dtor(parts);
 
-			xdebug_str_add(&str, xdebug_sprintf("'%s'", joined), 1);
-			xdfree(joined);
+			xdebug_str_add(&str, xdebug_sprintf("'%s'", joined->d), 1);
+			xdebug_str_free(joined);
 		} else {
 			xdebug_str_add(&str, fse->include_filename, 0);
 		}
