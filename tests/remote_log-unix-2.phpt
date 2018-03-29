@@ -21,20 +21,21 @@ unlink (sys_get_temp_dir() . "/remote-log4.txt");
 ?>
 --EXPECTF--
 3
-Log opened at %d-%d-%d %d:%d:%d
-I: Checking remote connect back address.
-I: Checking user configured header 'I_LIKE_COOKIES'.
-W: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
-W: Remote address not found, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
-W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
-E: Could not connect to client. :-(
-Log closed at %d-%d-%d %d:%d:%d
-
-Log opened at %d-%d-%d %d:%d:%d
-I: Checking remote connect back address.
-I: Checking user configured header 'I_LIKE_COOKIES'.
-W: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
-W: Remote address not found, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
-W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
-E: Could not connect to client. :-(
-Log closed at %d-%d-%d %d:%d:%d
+[%d] Log opened at %d-%d-%d %d:%d:%d
+[%d] I: Checking remote connect back address.
+[%d] I: Checking user configured header 'I_LIKE_COOKIES'.
+[%d] W: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
+[%d] W: Remote address not found, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
+[%d] W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
+[%d] E: Could not connect to client. :-(
+[%d] Log closed at %d-%d-%d %d:%d:%d
+[%d]
+[%d] Log opened at %d-%d-%d %d:%d:%d
+[%d] I: Checking remote connect back address.
+[%d] I: Checking user configured header 'I_LIKE_COOKIES'.
+[%d] W: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
+[%d] W: Remote address not found, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
+[%d] W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
+[%d] E: Could not connect to client. :-(
+[%d] Log closed at %d-%d-%d %d:%d:%d
+[%d]

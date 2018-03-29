@@ -78,6 +78,8 @@ char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigne
 			memcpy(context->buffer + context->buffer_size, buffer, newl);
 			context->buffer_size += newl;
 			context->buffer[context->buffer_size] = '\0';
+		} else if (newl == -1 && errno == EINTR) {
+			continue;
 		} else {
 			return NULL;
 		}
@@ -766,34 +768,4 @@ int xdebug_format_filename(char **formatted_name, const char *fmt, const char *d
 	*formatted_name = fname.d;
 
 	return fname.l;
-}
-
-
-void xdebug_open_log(TSRMLS_D)
-{
-	/* initialize remote log file */
-	XG(remote_log_file) = NULL;
-	if (XG(remote_log) && strlen(XG(remote_log))) {
-		XG(remote_log_file) = xdebug_fopen(XG(remote_log), "a", NULL, NULL);
-	}
-	if (XG(remote_log_file)) {
-		char *timestr = xdebug_get_time();
-		fprintf(XG(remote_log_file), "Log opened at %s\n", timestr);
-		fflush(XG(remote_log_file));
-		xdfree(timestr);
-	} else if (strlen(XG(remote_log))) {
-		php_log_err(xdebug_sprintf("Xdebug could not open the remote debug file '%s'.", XG(remote_log)) TSRMLS_CC);
-	}
-}
-
-void xdebug_close_log(TSRMLS_D)
-{
-	if (XG(remote_log_file)) {
-		char *timestr = xdebug_get_time();
-		fprintf(XG(remote_log_file), "Log closed at %s\n\n", timestr);
-		fflush(XG(remote_log_file));
-		xdfree(timestr);
-		fclose(XG(remote_log_file));
-		XG(remote_log_file) = NULL;
-	}
 }
