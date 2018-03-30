@@ -306,12 +306,12 @@ static int get_symbol_contents(xdebug_str *name, xdebug_xml_node *node, xdebug_v
 	return 0;
 }
 
-static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
+static xdebug_str* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 {
 	php_stream *stream;
 	int    i = begin;
 	char  *line = NULL;
-	xdebug_str source = XDEBUG_STR_INITIALIZER;
+	xdebug_str *source = xdebug_str_new();
 
 	if (i < 0) {
 		begin = 0;
@@ -341,7 +341,7 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 	/* Read until the "end" line has been read */
 	do {
 		if (line) {
-			xdebug_str_add(&source, line, 0);
+			xdebug_str_add(source, line, 0);
 			efree(line);
 			line = NULL;
 			if (php_stream_eof(stream)) break;
@@ -356,12 +356,13 @@ static char* return_file_source(char *filename, int begin, int end TSRMLS_DC)
 		line = NULL;
 	}
 	php_stream_close(stream);
-	return source.d;
+	return source;
 }
 
-static char* return_eval_source(char *id, int begin, int end TSRMLS_DC)
+static xdebug_str* return_eval_source(char *id, int begin, int end TSRMLS_DC)
 {
-	char             *key, *joined;
+	char             *key;
+	xdebug_str       *joined;
 	xdebug_eval_info *ei;
 	xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
@@ -379,7 +380,7 @@ static char* return_eval_source(char *id, int begin, int end TSRMLS_DC)
 	return NULL;
 }
 
-static char* return_source(char *filename, int begin, int end TSRMLS_DC)
+static xdebug_str* return_source(char *filename, int begin, int end TSRMLS_DC)
 {
 	if (strncmp(filename, "dbgp://", 7) == 0) {
 		return return_eval_source(filename + 7, begin, end TSRMLS_CC);
@@ -1088,7 +1089,7 @@ DBGP_FUNC(detach)
 
 DBGP_FUNC(source)
 {
-	char *source;
+	xdebug_str *source;
 	int   begin = 0, end = 999999;
 	char *filename;
 	function_stack_entry *fse;
@@ -1118,7 +1119,8 @@ DBGP_FUNC(source)
 	if (!source) {
 		RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_CANT_OPEN_FILE);
 	} else {
-		xdebug_xml_add_text_encode(*retval, source);
+		xdebug_xml_add_text_ex(*retval, xdstrdup(source->d), source->l, 1, 1);
+		xdebug_str_free(source);
 	}
 }
 

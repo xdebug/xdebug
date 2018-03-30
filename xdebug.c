@@ -2147,17 +2147,17 @@ PHP_FUNCTION(xdebug_var_dump)
 		else if (PG(html_errors)) {
 			val = xdebug_get_zval_value_fancy(NULL, (zval*) &args[i], 0, NULL);
 			PHPWRITE(val->d, val->l);
-			xdfree(val);
+			xdebug_str_free(val);
 		}
 		else if ((XG(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XG(cli_color) == 2)) {
 			val = xdebug_get_zval_value_ansi((zval*) &args[i], 0, NULL);
 			PHPWRITE(val->d, val->l);
-			xdfree(val);
+			xdebug_str_free(val);
 		}
 		else {
 			val = xdebug_get_zval_value_text((zval*) &args[i], 0, NULL);
 			PHPWRITE(val->d, val->l);
-			xdfree(val);
+			xdebug_str_free(val);
 		}
 	}
 
