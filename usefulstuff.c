@@ -106,7 +106,7 @@ char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigne
 	return tmp;
 }
 
-char *xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
+xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 {
 	int         i;
 	xdebug_str *ret = xdebug_str_new();
@@ -122,7 +122,7 @@ char *xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 		xdebug_str_add(ret, delim, 0);
 	}
 	xdebug_str_add(ret, args->args[end], 0);
-	return ret->d;
+	return ret;
 }
 
 void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit)
@@ -710,7 +710,8 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 int xdebug_format_filename(char **formatted_name, const char *fmt, const char *default_fmt, const char *filename TSRMLS_DC)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
-	char *name, *parent, *ancester;
+	char *name;
+	xdebug_str *parent, *ancester;
 	const char *full = filename;
 	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	char *slash = xdebug_sprintf("%c", DEFAULT_SLASH);
@@ -722,10 +723,10 @@ int xdebug_format_filename(char **formatted_name, const char *fmt, const char *d
 	name = parts->args[parts->c - 1];
 	parent = parts->c > 1 ?
 		xdebug_join(slash, parts, parts->c - 2, parts->c - 1) :
-		xdstrdup(name);
+		xdebug_str_create_from_char(name);
 	ancester = parts->c > 2 ?
 		xdebug_join(slash, parts, parts->c - 3, parts->c - 1) :
-		xdstrdup(parent);
+		xdebug_str_copy(parent);
 
 	while (*format)
 	{
@@ -739,10 +740,10 @@ int xdebug_format_filename(char **formatted_name, const char *fmt, const char *d
 					xdebug_str_add(&fname, xdebug_sprintf("%s", name), 1);
 					break;
 				case 'p': /* parent */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", parent), 1);
+					xdebug_str_add(&fname, xdebug_sprintf("%s", parent->d), 1);
 					break;
 				case 'a': /* ancester */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", ancester), 1);
+					xdebug_str_add(&fname, xdebug_sprintf("%s", ancester->d), 1);
 					break;
 				case 'f': /* full path */
 					xdebug_str_add(&fname, xdebug_sprintf("%s", full), 1);
@@ -759,8 +760,8 @@ int xdebug_format_filename(char **formatted_name, const char *fmt, const char *d
 	}
 
 	xdfree(slash);
-	xdfree(ancester);
-	xdfree(parent);
+	xdebug_str_free(ancester);
+	xdebug_str_free(parent);
 	xdebug_arg_dtor(parts);
 
 	*formatted_name = fname.d;
