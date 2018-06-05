@@ -999,7 +999,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 				const char *fname = NULL;
 				int         lineno = 0;
 
-				if (edata->prev_execute_data && edata->prev_execute_data->func->type == ZEND_USER_FUNCTION) {
+				if (edata->prev_execute_data && edata->prev_execute_data->func && edata->prev_execute_data->func->type == ZEND_USER_FUNCTION) {
 					fname = edata->prev_execute_data->func->op_array.filename->val;
 				}
 
@@ -1013,7 +1013,8 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 				}
 
 				if (!fname) {
-					fname = "whoops";
+					/* It wasn't a special call_user_func after all */
+					goto normal_after_all;
 				}
 
 				lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
@@ -1025,6 +1026,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 					lineno
 				);
 			} else {
+normal_after_all:
 				tmp->function = xdstrdup(edata->func->common.function_name->val);
 			}
 		} else if (
