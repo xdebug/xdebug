@@ -1074,7 +1074,7 @@ normal_after_all:
 			edata &&
 			edata->prev_execute_data
 		) {
-			return xdebug_build_fname(tmp, edata->prev_execute_data);
+			xdebug_build_fname(tmp, edata->prev_execute_data);
 		} else {
 			tmp->type = XFUNC_UNKNOWN;
 		}
