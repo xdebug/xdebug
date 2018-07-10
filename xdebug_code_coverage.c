@@ -621,7 +621,11 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		HashTable *myht;
 		zval *val;
 
+# if PHP_VERSION_ID >= 70300
+		array_value = RT_CONSTANT(&opa->opcodes[position], opcode.op2);
+# else
 		array_value = RT_CONSTANT_EX(opa->literals, opcode.op2);
+# endif
 		myht = Z_ARRVAL_P(array_value);
 
 		/* All 'case' statements */
@@ -879,11 +883,19 @@ static int prefill_from_class_table(zend_class_entry *class_entry)
 		if (!(ce->ce_flags & ZEND_XDEBUG_VISITED)) {
 			zend_op_array *val;
 			ce->ce_flags |= ZEND_XDEBUG_VISITED;
+#if PHP_VERSION_ID >= 70300
+			GC_PROTECT_RECURSION(&ce->function_table);
+#else
 			ZEND_HASH_INC_APPLY_COUNT(&ce->function_table);
+#endif
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, val) {
 				prefill_from_function_table(val);
 			} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+			GC_UNPROTECT_RECURSION(&ce->function_table);
+#else
 			ZEND_HASH_DEC_APPLY_COUNT(&ce->function_table);
+#endif
 		}
 	}
 
@@ -899,17 +911,33 @@ void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 		prefill_from_oparray((char*) STR_NAME_VAL(op_array->filename), op_array TSRMLS_CC);
 	}
 
+#if PHP_VERSION_ID >= 70300
+	GC_PROTECT_RECURSION(CG(function_table));
+#else
 	ZEND_HASH_INC_APPLY_COUNT(CG(function_table));
+#endif
 	ZEND_HASH_FOREACH_PTR(CG(function_table), function_op_array) {
 		prefill_from_function_table(function_op_array);
 	} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+	GC_UNPROTECT_RECURSION(CG(function_table));
+#else
 	ZEND_HASH_DEC_APPLY_COUNT(CG(function_table));
+#endif
 
+#if PHP_VERSION_ID >= 70300
+	GC_PROTECT_RECURSION(CG(class_table));
+#else
 	ZEND_HASH_INC_APPLY_COUNT(CG(class_table));
+#endif
 	ZEND_HASH_FOREACH_PTR(CG(class_table), class_entry) {
 		prefill_from_class_table(class_entry);
 	} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+	GC_UNPROTECT_RECURSION(CG(class_table));
+#else
 	ZEND_HASH_DEC_APPLY_COUNT(CG(class_table));
+#endif
 }
 
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name TSRMLS_DC)

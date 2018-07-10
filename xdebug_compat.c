@@ -53,7 +53,11 @@ zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdat
 {
 	zend_free_op should_free;
 
+#if PHP_VERSION_ID >= 70300
+	return zend_get_zval_ptr(zdata->opline, op_type, node, zdata, &should_free, BP_VAR_R);
+#else
 	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
+#endif
 }
 
 char *xdebug_str_to_str(char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len, size_t *new_len)
