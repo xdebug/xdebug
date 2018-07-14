@@ -76,7 +76,7 @@ void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zva
 void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value);
 
 /* error callback replacement functions */
-void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
 
@@ -1936,7 +1936,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	int                   function_nr = 0;
 
 	int                   restore_error_handler_situation = 0;
-	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) = NULL;
+	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
 
 	XG(level)++;
 	if ((signed long) XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
