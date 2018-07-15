@@ -156,16 +156,22 @@ char* xdebug_error_type(int type)
 /*************************************************************************************************************************************/
 #define T(offset) (*(union _temp_variable *)((char*)zdata->current_execute_data->Ts + offset))
 
-zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
+zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var)
 {
 	zend_free_op should_free;
 
 #if PHP_VERSION_ID >= 70300
-	return zend_get_zval_ptr(zdata->opline, node_type, node, zdata, &should_free, BP_VAR_IS);
+	return zend_get_zval_ptr(opline, node_type, node, zdata, &should_free, BP_VAR_IS);
 #else
 	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_IS);
 #endif
 }
+
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
+{
+	return xdebug_get_zval_with_opline(zdata, zdata->opline, node_type, node, is_var);
+}
+
 
 /*****************************************************************************
 ** PHP Variable related utility functions
