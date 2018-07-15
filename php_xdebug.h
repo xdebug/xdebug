@@ -190,7 +190,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_long     display_max_data;
 	zend_long     display_max_depth;
 
-	zend_bool     cli_color;
+	zend_long     cli_color;
 	int           output_is_tty;
 
 	/* used for code coverage */
