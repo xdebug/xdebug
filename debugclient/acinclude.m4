@@ -1,6 +1,3 @@
-dnl
-dnl $Id: acinclude.m4,v 1.3 2007-02-26 14:38:42 derick Exp $
-dnl
 dnl This file contains local autoconf functions.
 dnl This source file is subject to version 1.0 of the Xdebug license,
 dnl that is bundled with this package in the file LICENSE, and is
