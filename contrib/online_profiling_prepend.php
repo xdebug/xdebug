@@ -3,8 +3,6 @@
 /* 
  * Online profiling dump - Written by Jani Taskinen <sniper@iki.fi> A.D. 2007
  *
- * $Id: online_profiling_prepend.php,v 1.3 2007-07-24 10:34:15 sniper Exp $
- *
  * Usage:
  *
  * You can either have this file included by using the php.ini

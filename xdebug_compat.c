@@ -38,7 +38,6 @@
    | IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                        |
    +----------------------------------------------------------------------+
  */
-/* $Id: xdebug_compat.c,v 1.13 2010-05-07 20:39:13 derick Exp $ */
 
 #include "php.h"
 #include "main/php_version.h"

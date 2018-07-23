@@ -15,9 +15,6 @@
 #  | Authors: Stig Bakken <ssb@fast.no>                                   |
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
-#
-# $Id: buildcheck.sh,v 1.3 2008-12-09 20:27:24 derick Exp $ 
-#
 
 echo "buildconf: checking installation..."
 
