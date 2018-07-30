@@ -69,4 +69,10 @@ zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 #  define XDEBUG_BREAK_INTENTIONALLY_MISSING
 # endif
 
+# if PHP_VERSION_ID >= 70300
+#  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ZEND_CONSTANT_MODULE_NUMBER((v))
+# else
+#  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ((v)->module_number)
+# endif
+
 #endif
