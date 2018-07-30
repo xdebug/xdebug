@@ -38,6 +38,11 @@ void xdebug_setcookie(const char *name, int name_len, char *value, int value_len
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
 zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags TSRMLS_DC);
 
+/* Recursion protection is done differently from PHP 7.3 onwards */
+zend_bool xdebug_zend_hash_is_recursive(HashTable* ht);
+zend_bool xdebug_zend_hash_apply_protection_begin(HashTable* ht);
+zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
+
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
 
