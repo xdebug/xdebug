@@ -132,6 +132,7 @@ class drXdebugTraceFileParser
 		{
 			$buffer = fgets( $this->handle, 4096 );
 			$read += strlen( $buffer );
+			$buffer = rtrim( $buffer, PHP_EOL );
 			$this->parseLine( $buffer );
 			$c++;
 
