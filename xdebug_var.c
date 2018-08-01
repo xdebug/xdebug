@@ -382,7 +382,7 @@ static void fetch_zval_from_symbol_table(
 			if (value_in && Z_TYPE_P(value_in) == IS_OBJECT) {
 				myht = xdebug_objdebug_pp(&value_in, &is_temp TSRMLS_CC);
 				if (myht) {
-					zval *tmp = zend_hash_str_find(myht, name, name_length);
+					zval *tmp = zend_symtable_str_find(myht, name, name_length);
 					if (tmp != NULL) {
 						ZVAL_COPY(&tmp_retval, tmp);
 						maybe_destroy_ht(myht, is_temp);
