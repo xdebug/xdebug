@@ -160,7 +160,11 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *n
 {
 	zend_free_op should_free;
 
+#if PHP_VERSION_ID >= 70300
+	return zend_get_zval_ptr(zdata->opline, node_type, node, zdata, &should_free, BP_VAR_IS);
+#else
 	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_IS);
+#endif
 }
 
 /*****************************************************************************
@@ -927,7 +931,11 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
 			zend_string *tmp_zstr;
 
+#if PHP_VERSION_ID >= 70300
+			tmp_zstr = php_addcslashes(i_string, (char*) "'\\\0..\37", 7);
+#else
 			tmp_zstr = php_addcslashes(i_string, 0, (char*) "'\\\0..\37", 7);
+#endif
 
 			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
 			zend_string_release(tmp_zstr);
@@ -947,18 +955,30 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
+#if PHP_VERSION_ID >= 70300
+			if (!GC_IS_RECURSIVE(myht)) {
+#else
 			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
+#endif
 				xdebug_str_addl(str, "array (", 7, 0);
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
+#if PHP_VERSION_ID >= 70300
+					GC_PROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_array_element_export(val, num, key, level, str, debug_zval, options);
 					} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+					GC_UNPROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 
 					/* Remove the ", " at the end of the string */
 					if (myht->nNumOfElements > 0) {
@@ -975,7 +995,11 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
+#if PHP_VERSION_ID >= 70300
+			if (!GC_IS_RECURSIVE(myht)) {
+#else
 			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
+#endif
 				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
@@ -984,11 +1008,19 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
+#if PHP_VERSION_ID >= 70300
+					GC_PROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_object_element_export(val, num, key, level, str, debug_zval, options, class_name);
 					} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+					GC_UNPROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 
 					/* Remove the ", " at the end of the string */
 					if (myht->nNumOfElements > 0) {
@@ -1288,7 +1320,11 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
 			zend_string *tmp_zstr;
 
+#if PHP_VERSION_ID >= 70300
+			tmp_zstr = php_addcslashes(i_string, (char*) pattern, pattern_len);
+#else
 			tmp_zstr = php_addcslashes(i_string, 0, (char*) pattern, pattern_len);
+#endif
 
 			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
 			tmp_len = tmp_zstr->len;
@@ -1314,18 +1350,30 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
+#if PHP_VERSION_ID >= 70300
+			if (!GC_IS_RECURSIVE(myht)) {
+#else
 			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
+#endif
 				xdebug_str_add(str, xdebug_sprintf("%sarray%s(%s%d%s) {\n", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
+#if PHP_VERSION_ID >= 70300
+					GC_PROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_array_element_export_text_ansi(val, num, key, level, mode, str, debug_zval, options);
 					} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+					GC_UNPROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 				}
@@ -1337,7 +1385,11 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
+#if PHP_VERSION_ID >= 70300
+			if (myht && !GC_IS_RECURSIVE(myht)) {
+#else
 			if (myht && ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
+#endif
 				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n",
 					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
 					ANSI_COLOR_OBJECT, STR_NAME_VAL(Z_OBJCE_P(*struc)->name), ANSI_COLOR_RESET,
@@ -1349,11 +1401,19 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
+#if PHP_VERSION_ID >= 70300
+					GC_PROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_object_element_export_text_ansi(val, num, key, level, mode, str, debug_zval, options);
 					} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+					GC_UNPROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 				}
@@ -1681,7 +1741,11 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 			zend_string *i_string = zend_string_init(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1, 0);
 			zend_string *tmp_fullname_zstr;
 
+#if PHP_VERSION_ID >= 70300
+			tmp_fullname_zstr = php_addslashes(i_string);
+#else
 			tmp_fullname_zstr = php_addslashes(i_string, 0);
+#endif
 
 			name = xdebug_str_create(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1);
 
@@ -1906,11 +1970,19 @@ void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	xdebug_xml_add_attribute(static_container, "type", "object");
 	xdebug_xml_add_attribute_ex(static_container, "classname", xdstrdup(STR_NAME_VAL(ce->name)), 0, 1);
 
+#if PHP_VERSION_ID >= 70300
+	GC_PROTECT_RECURSION(static_members);
+#else
 	ZEND_HASH_INC_APPLY_COUNT(static_members);
+#endif
 	ZEND_HASH_FOREACH_PTR(static_members, zpi) {
 		xdebug_attach_property_with_contents(zpi, static_container, options, ce, STR_NAME_VAL(ce->name), &children);
 	} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+	GC_UNPROTECT_RECURSION(static_members);
+#else
 	ZEND_HASH_DEC_APPLY_COUNT(static_members);
+#endif
 
 	xdebug_xml_add_attribute(static_container, "children", children > 0 ? "1" : "0");
 	xdebug_xml_add_attribute_ex(static_container, "numchildren", xdebug_sprintf("%d", children), 0, 1);
@@ -1971,7 +2043,11 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			myht = Z_ARRVAL_P(*struc);
 			xdebug_xml_add_attribute(node, "type", "array");
 			xdebug_xml_add_attribute(node, "children", myht->nNumOfElements > 0?"1":"0");
+#if PHP_VERSION_ID >= 70300
+			if (!GC_IS_RECURSIVE(myht)) {
+#else
 			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
+#endif
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", myht->nNumOfElements), 0, 1);
 				if (level < options->max_depth) {
 					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
@@ -1985,11 +2061,19 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 						options->runtime[level].end_element_nr = options->max_children;
 					}
 
+#if PHP_VERSION_ID >= 70300
+					GC_PROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, z_val) {
 						xdebug_array_element_export_xml_node(z_val, num, key, level, node, name, options);
 					} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+					GC_UNPROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 				}
 			} else {
 				xdebug_xml_add_attribute(node, "recursive", "1");
@@ -2010,29 +2094,49 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			ce = xdebug_fetch_class(class_name->d, class_name->l, ZEND_FETCH_CLASS_DEFAULT TSRMLS_CC);
 
 			/* Adding static properties */
+#if PHP_VERSION_ID >= 70300
+			GC_PROTECT_RECURSION(&ce->properties_info);
+#else
 			ZEND_HASH_INC_APPLY_COUNT(&ce->properties_info);
+#endif
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
 				object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
 			} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+			GC_UNPROTECT_RECURSION(&ce->properties_info);
+#else
 			ZEND_HASH_DEC_APPLY_COUNT(&ce->properties_info);
+#endif
 
 			/* Adding normal properties */
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			if (myht) {
 				zval *tmp_val;
 
+#if PHP_VERSION_ID >= 70300
+				GC_PROTECT_RECURSION(myht);
+#else
 				ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, tmp_val) {
 					object_item_add_to_merged_hash(tmp_val, num, key, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
 				} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+				GC_UNPROTECT_RECURSION(myht);
+#else
 				ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 			}
 
 			xdebug_xml_add_attribute(node, "type", "object");
 			add_xml_attribute_or_element(options, node, "classname", 9, class_name);
 			xdebug_xml_add_attribute(node, "children", merged_hash->nNumOfElements ? "1" : "0");
 
+#if PHP_VERSION_ID >= 70300
+			if (!GC_IS_RECURSIVE(merged_hash)) {
+#else
 			if (ZEND_HASH_GET_APPLY_COUNT(merged_hash) < 1) {
+#endif
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(merged_hash)), 0, 1);
 				if (level < options->max_depth) {
 					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
@@ -2046,11 +2150,19 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 						options->runtime[level].end_element_nr = options->max_children;
 					}
 
+#if PHP_VERSION_ID >= 70300
+					GC_PROTECT_RECURSION(merged_hash);
+#else
 					ZEND_HASH_INC_APPLY_COUNT(merged_hash);
+#endif
 					ZEND_HASH_FOREACH_KEY_PTR(merged_hash, num, key, xoi_val) {
 						xdebug_object_element_export_xml_node(xoi_val, num, key, level, node, name, options, class_name->d);
 					} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+					GC_UNPROTECT_RECURSION(merged_hash);
+#else
 					ZEND_HASH_DEC_APPLY_COUNT(merged_hash);
+#endif
 				}
 			}
 
@@ -2274,7 +2386,11 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
+#if PHP_VERSION_ID >= 70300
+			if (!GC_IS_RECURSIVE(myht)) {
+#else
 			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
+#endif
 				xdebug_str_add(str, xdebug_sprintf("<b>array</b> <i>(size=%d)</i>\n", myht->nNumOfElements), 1);
 				if (level <= options->max_depth) {
 					if (myht->nNumOfElements) {
@@ -2282,11 +2398,19 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 						options->runtime[level].start_element_nr = 0;
 						options->runtime[level].end_element_nr = options->max_children;
 
+#if PHP_VERSION_ID >= 70300
+						GC_PROTECT_RECURSION(myht);
+#else
 						ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 						ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 							xdebug_array_element_export_fancy(val, num, key, level, str, debug_zval, options);
 						} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+						GC_UNPROTECT_RECURSION(myht);
+#else
 						ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 					} else {
 						xdebug_str_add(str, xdebug_sprintf("%*s", (level * 4) - 2, ""), 1);
 						xdebug_str_add(str, xdebug_sprintf("<i><font color='%s'>empty</font></i>\n", COLOR_EMPTY), 1);
@@ -2302,7 +2426,11 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
+#if PHP_VERSION_ID >= 70300
+			if (!GC_IS_RECURSIVE(myht)) {
+#else
 			if (ZEND_HASH_GET_APPLY_COUNT(myht) < 1) {
+#endif
 				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", class_name), 1);
 				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_P(*struc)), 1);
@@ -2312,11 +2440,19 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
 
+#if PHP_VERSION_ID >= 70300
+					GC_PROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_INC_APPLY_COUNT(myht);
+#endif
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						xdebug_object_element_export_fancy(val, num, key, level, str, debug_zval, options, class_name);
 					} ZEND_HASH_FOREACH_END();
+#if PHP_VERSION_ID >= 70300
+					GC_UNPROTECT_RECURSION(myht);
+#else
 					ZEND_HASH_DEC_APPLY_COUNT(myht);
+#endif
 				} else {
 					xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 4) - 2, ""), 1);
 				}
