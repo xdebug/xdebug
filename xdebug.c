@@ -173,6 +173,10 @@ ZEND_BEGIN_ARG_INFO_EX(xdebug_set_filter_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VAL
 	ZEND_ARG_INFO(0, array_of_filters)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(xdebug_session_start_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
+	ZEND_ARG_INFO(0, session_name)
+ZEND_END_ARG_INFO()
+
 zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_get_stack_depth,       xdebug_void_args)
 	PHP_FE(xdebug_get_function_stack,    xdebug_void_args)
@@ -191,6 +195,8 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_enable,                xdebug_void_args)
 	PHP_FE(xdebug_disable,               xdebug_void_args)
 	PHP_FE(xdebug_is_enabled,            xdebug_void_args)
+	PHP_FE(xdebug_session_start,         xdebug_session_start_args)
+	PHP_FE(xdebug_session_stop,          xdebug_void_args)
 	PHP_FE(xdebug_is_debugger_active,    xdebug_void_args)
 	PHP_FE(xdebug_break,                 xdebug_void_args)
 
@@ -2309,6 +2315,31 @@ PHP_FUNCTION(xdebug_disable)
 PHP_FUNCTION(xdebug_is_enabled)
 {
 	RETURN_BOOL(zend_error_cb == xdebug_new_error_cb);
+}
+
+/* {{{ proto void xdebug_session_start([string session_name])
+   Start debug session */
+PHP_FUNCTION(xdebug_session_start)
+{
+    char *session_name = NULL;
+    size_t session_name_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &session_name, &session_name_len) == FAILURE) {
+		return;
+	}
+
+	if(session_name) {
+	    xdebug_update_ide_key(session_name);
+	}
+
+	xdebug_restart_debugger();
+}
+
+/* {{{ proto void xdebug_session_stop()
+   Stop debug session */
+PHP_FUNCTION(xdebug_session_stop)
+{
+	xdebug_abort_debugger();
 }
 
 PHP_FUNCTION(xdebug_is_debugger_active)

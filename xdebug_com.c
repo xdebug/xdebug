@@ -532,7 +532,7 @@ void xdebug_do_jit()
 	}
 }
 
-static void xdebug_update_ide_key(char *new_key)
+void xdebug_update_ide_key(char *new_key)
 {
 	if (XG(ide_key)) {
 		xdfree(XG(ide_key));

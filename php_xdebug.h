@@ -92,6 +92,8 @@ PHP_FUNCTION(xdebug_debug_zval_stdout);
 PHP_FUNCTION(xdebug_enable);
 PHP_FUNCTION(xdebug_disable);
 PHP_FUNCTION(xdebug_is_enabled);
+PHP_FUNCTION(xdebug_session_start);
+PHP_FUNCTION(xdebug_session_stop);
 
 /* breaking functions */
 PHP_FUNCTION(xdebug_is_debugger_active);
