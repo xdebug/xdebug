@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1034: path coverage [1] (> PHP 7.1, < PHP 7.3, opcache)
+--XFAIL--
+Bug #1519: PHP 7.3 support — CATCH is done differently and code coverage goes wrong
 --SKIPIF--
 <?php if (!version_compare(phpversion(), "7.1", '>')) echo "skip > PHP 7.1, < PHP 7.3 needed\n"; ?>
 <?php if (!version_compare(phpversion(), "7.3", '<')) echo "skip > PHP 7.1, < PHP 7.3 needed\n"; ?>
