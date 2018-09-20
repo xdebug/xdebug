@@ -1,0 +1,12 @@
+CXX=@CC@
+LD=@CC@
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
+
+debugclient: main.o usefulstuff.o
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+.PHONY: clean
+clean:
+	rm -f debugclient *.o

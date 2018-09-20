@@ -2,7 +2,6 @@
 /dmalloc.debug
 /malloc.debug
 /Makefile
-/Makefile.in
 /aclocal.m4
 /confdefs.h
 /config.status
@@ -27,3 +26,5 @@
 /debugclient.sdf
 /debugclient.v12.suo
 /debugclient.vcxproj.user
+/configure.in
+/*.sw?

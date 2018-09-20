@@ -1,8 +1,0 @@
-#!/bin/sh
-#
-
-dir=$1; shift
-
-for m4file in $dir/*/config.m4; do
-	echo "sinclude($m4file)"
-done

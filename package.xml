@@ -66,31 +66,19 @@ Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
     <file name="xt.vim" role="doc" />
    </dir> <!-- /contrib -->
    <dir name="debugclient">
-    <dir name="build">
-     <file name="buildcheck.sh" role="src" />
-     <file name="buildconf1.mk" role="src" />
-     <file name="buildconf2.mk" role="src" />
-     <file name="clean.mk" role="src" />
-     <file name="config-stubs" role="src" />
-    </dir> <!-- /debugclient/build -->
-    <file name="acinclude.m4" role="src" />
     <file name="buildconf" role="src" />
     <file name="config.guess" role="src" />
     <file name="config.h.in" role="src" />
     <file name="config.sub" role="src" />
     <file name="configure" role="src" />
-    <file name="configure.in" role="src" />
-    <file name="cvsclean" role="src" />
+    <file name="configure.ac" role="src" />
     <file name="debugclient.dsp" role="src" />
-    <file name="depcomp" role="src" />
     <file name="INSTALL" role="src" />
     <file name="install-sh" role="src" />
     <file name="LICENSE" role="src" />
-    <file name="ltmain.sh" role="src" />
     <file name="main.c" role="src" />
     <file name="Makefile.in" role="src" />
-    <file name="missing" role="src" />
-    <file name="mkinstalldirs" role="src" />
+    <file name="README" role="src" />
     <file name="usefulstuff.c" role="src" />
     <file name="usefulstuff.h" role="src" />
    </dir> <!-- /debugclient -->
