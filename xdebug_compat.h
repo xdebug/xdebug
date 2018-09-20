@@ -38,6 +38,11 @@ void xdebug_setcookie(const char *name, int name_len, char *value, int value_len
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
 zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags TSRMLS_DC);
 
+/* Recursion protection is done differently from PHP 7.3 onwards */
+zend_bool xdebug_zend_hash_is_recursive(HashTable* ht);
+zend_bool xdebug_zend_hash_apply_protection_begin(HashTable* ht);
+zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
+
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
 
@@ -62,6 +67,16 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *na
 #  define XDEBUG_BREAK_INTENTIONALLY_MISSING __attribute__ ((fallthrough));
 # else
 #  define XDEBUG_BREAK_INTENTIONALLY_MISSING
+# endif
+
+# if PHP_VERSION_ID >= 70300
+#  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ZEND_CONSTANT_MODULE_NUMBER((v))
+# else
+#  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ((v)->module_number)
+# endif
+
+# if PHP_VERSION_ID < 70300
+typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 # endif
 
 #endif

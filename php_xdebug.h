@@ -166,9 +166,10 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_long     halt_level;
 
 	zend_long     overload_var_dump;
-	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAMETERS);
+
+	zif_handler   orig_var_dump_func;
+	zif_handler   orig_set_time_limit_func;
+	zif_handler   orig_pcntl_exec_func;
 
 	xdebug_trace_handler_t *trace_handler;
 	void         *trace_context;
@@ -190,7 +191,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_long     display_max_data;
 	zend_long     display_max_depth;
 
-	zend_bool     cli_color;
+	zend_long     cli_color;
 	int           output_is_tty;
 
 	/* used for code coverage */

@@ -1,8 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [1] (> PHP 7.0.12, < PHP 7.3)
+Test for bug #1034: path coverage [1] (>= PHP 7.3)
+--XFAIL--
+Bug #1519: PHP 7.3 support — CATCH is done differently and code coverage goes wrong
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12, < PHP 7.3 needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.3", '<')) echo "skip > PHP 7.0.12, < PHP 7.3 needed\n"; ?>
+<?php if (!version_compare(phpversion(), "7.3", '>=')) echo "skip >= PHP 7.3\n"; ?>
 <?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
 --FILE--
 <?php

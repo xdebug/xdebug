@@ -25,6 +25,7 @@ var_dump($array);
 
 ini_set('xdebug.cli_color', 2);
 var_dump($array);
+?>
 --EXPECT--
 array(3) {
   [0] =>

@@ -68,6 +68,7 @@ char* xdebug_xmlize(char *string, size_t len, size_t *newlen);
 char* xdebug_error_type_simple(int type);
 char* xdebug_error_type(int type);
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var);
+zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var);
 xdebug_str* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options);
 xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options);
 #define xdebug_get_zval_value_text(v,d,o) xdebug_get_zval_value_text_ansi(v,0,d,o TSRMLS_CC);

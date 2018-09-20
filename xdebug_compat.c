@@ -52,7 +52,11 @@ zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdat
 {
 	zend_free_op should_free;
 
+#if PHP_VERSION_ID >= 70300
+	return zend_get_zval_ptr(zdata->opline, op_type, node, zdata, &should_free, BP_VAR_R);
+#else
 	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
+#endif
 }
 
 char *xdebug_str_to_str(char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len, size_t *new_len)
@@ -190,7 +194,11 @@ void xdebug_setcookie(const char *name, int name_len, char *value, int value_len
 	zend_string *value_s  = zend_string_init(value, value_len, 0);
 	zend_string *path_s   = zend_string_init(path, path_len, 0);
 	zend_string *domain_s = zend_string_init(domain, domain_len, 0);
+#if PHP_VERSION_ID >= 70300
+	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, httponly, NULL, url_encode);
+#else
 	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, url_encode, httponly);
+#endif
 	zend_string_release(name_s);
 	zend_string_release(value_s);
 	zend_string_release(path_s);
@@ -212,3 +220,65 @@ zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *na
 
 	return zend_read_property(ce, exception, name, length, flags, &dummy);
 }
+
+#ifdef ZEND_HASH_GET_APPLY_COUNT /* PHP 7.2 or earlier recursion protection */
+zend_bool xdebug_zend_hash_is_recursive(HashTable* ht)
+{
+	return (ZEND_HASH_GET_APPLY_COUNT(ht) > 0);
+}
+
+zend_bool xdebug_zend_hash_apply_protection_begin(HashTable* ht)
+{
+	if (!ht) {
+		return 1;
+	}
+	if (ZEND_HASH_GET_APPLY_COUNT(ht) > 0) {
+		return 0;
+	}
+	if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+		ZEND_HASH_INC_APPLY_COUNT(ht);
+	}
+	return 1;
+}
+
+zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht)
+{
+	if (!ht) {
+		return 1;
+	}
+	if (ZEND_HASH_GET_APPLY_COUNT(ht) == 0) {
+		return 0;
+	}
+	if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+		ZEND_HASH_DEC_APPLY_COUNT(ht);
+	}
+	return 1;
+}
+#else /* PHP 7.3 or later */
+zend_bool xdebug_zend_hash_is_recursive(HashTable* ht)
+{
+	return GC_IS_RECURSIVE(ht);
+}
+
+zend_bool xdebug_zend_hash_apply_protection_begin(zend_array* ht)
+{
+	if (GC_IS_RECURSIVE(ht)) {
+		return 0;
+	}
+	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+		GC_PROTECT_RECURSION(ht);
+	}
+	return 1;
+}
+
+zend_bool xdebug_zend_hash_apply_protection_end(zend_array* ht)
+{
+	if (!GC_IS_RECURSIVE(ht)) {
+		return 0;
+	}
+	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+		GC_UNPROTECT_RECURSION(ht);
+	}
+	return 1;
+}
+#endif
