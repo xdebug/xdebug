@@ -178,6 +178,36 @@ Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
   </release>
 
   <release>
+   <date>2018-08-01</date>
+   <time>23:39:23</time>
+   <version>
+    <release>2.6.1</release>
+    <api>2.6.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Aug  1, 2018 - xdebug 2.6.1
+
+= Fixed bugs:
+
+  - Fixed issue #1525: Namespace filter does equality match instead of prefix match
+  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval() (Philip Hofstetter)
+  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling
+  - Fixed issue #1556: Crash when register_shutdown_function() is called with a function named call_user_func*
+  - Fixed issue #1557: Remove 'return' in void xdebug_build_fname
+  - Fixed issue #1568: Can't debug object properties that have numeric keys
+
++ Improvements:
+
+  - Fixed issue #1487: Re-enable IPv6 test on Travis
+   </notes>
+  </release>
+
+  <release>
    <date>2018-01-29</date>
    <time>20:07:23</time>
    <version>
