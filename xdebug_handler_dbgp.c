@@ -994,7 +994,7 @@ static int xdebug_send_stream(const char *name, const char *str, uint str_length
 
 	message = xdebug_xml_node_init("stream");
 	xdebug_xml_add_attribute(message, "xmlns", "urn:debugger_protocol_v1");
-	xdebug_xml_add_attribute(message, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+	xdebug_xml_add_attribute(message, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 	xdebug_xml_add_attribute_ex(message, "type", (char *)name, 0, 0);
 	xdebug_xml_add_text_encodel(message, xdstrndup(str, str_length), str_length);
 	send_message(&XG(context), message TSRMLS_CC);
@@ -2163,7 +2163,7 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail TSRMLS_DC)
 
 		response = xdebug_xml_node_init("response");
 		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-		xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+		xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 		ret = xdebug_dbgp_parse_option(context, option, 0, response TSRMLS_CC);
 		if (ret != 1) {
 			send_message(context, response TSRMLS_CC);
@@ -2200,7 +2200,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 
 	response = xdebug_xml_node_init("init");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 
 /* {{{ XML Init Stuff*/
 	child = xdebug_xml_node_init("engine");
@@ -2285,7 +2285,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		XG(reason) = DBGP_REASON_OK;
 		response = xdebug_xml_node_init("response");
 		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-		xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+		xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 		/* lastcmd and lasttransid are not always set (for example when the
 		 * connection is severed before the first command is send) */
 		if (XG(lastcmd) && XG(lasttransid)) {
@@ -2359,7 +2359,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 
 	response = xdebug_xml_node_init("response");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 	/* lastcmd and lasttransid are not always set (for example when the
 	 * connection is severed before the first command is send) */
 	if (XG(lastcmd) && XG(lasttransid)) {
@@ -2396,7 +2396,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 
 	response = xdebug_xml_node_init("response");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 	/* lastcmd and lasttransid are not always set (for example when the
 	 * connection is severed before the first command is send) */
 	if (XG(lastcmd) && XG(lasttransid)) {
@@ -2463,7 +2463,7 @@ int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno,
 
 	response = xdebug_xml_node_init("notify");
 	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-	xdebug_xml_add_attribute(response, "xmlns:xdebug", "http://xdebug.org/dbgp/xdebug");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 	xdebug_xml_add_attribute(response, "name", "error");
 
 	error_container = xdebug_xml_node_init("xdebug:message");

@@ -5,7 +5,7 @@ Xdebug
 .. image:: https://ci.appveyor.com/api/projects/status/glp9xfsmt1p25nkn?svg=true
 
 These are instructions for installing Xdebug from a Git checkout. Please refer
-to http://xdebug.org/support.php for support.
+to https://xdebug.org/support.php for support.
 
 Introduction
 ------------

@@ -45,7 +45,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Xdebug\0"
             VALUE "ProductVersion", VERSIONSTR
-            VALUE "URL", "http://xdebug.org"
+            VALUE "URL", "https://xdebug.org"
         END
     END
     BLOCK "VarFileInfo"
