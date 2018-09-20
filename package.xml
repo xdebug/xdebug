@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2018-04-01</date>
- <time>14:41:14</time>
+ <date>2018-09-20</date>
+ <time>08:56:14</time>
  <version>
-  <release>2.7.0alpha1</release>
-  <api>2.7.0alpha1</api>
+  <release>2.7.0beta1</release>
+  <api>2.7.0beta1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,18 +45,11 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
+Thu, Sep 20, 2018 - xdebug 2.7.0beta1
 
 = Improvements:
 
-  - Fixed issue #938: Support remote debugging for PHP scripts that fork. (Sponsored by Brad Wilson)
-  - Fixed issue #1487: Re-enable IPv6 test on Travis.
-
-= Fixed bugs:
-
-  - Fixed issue #1526: Namespace filter does equality match instead of prefix match.
-  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval().
-  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling.
+  - Fixed issue #1519: PHP 7.3 support
  </notes>
 
  <contents>
@@ -155,6 +148,34 @@ Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2018-04-01</date>
+   <time>14:41:14</time>
+   <version>
+    <release>2.7.0alpha1</release>
+    <api>2.7.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
+
+= Improvements:
+
+  - Fixed issue #938: Support remote debugging for PHP scripts that fork. (Sponsored by Brad Wilson)
+  - Fixed issue #1487: Re-enable IPv6 test on Travis.
+
+= Fixed bugs:
+
+  - Fixed issue #1526: Namespace filter does equality match instead of prefix match.
+  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval().
+  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling.
+   </notes>
+  </release>
 
   <release>
    <date>2018-01-29</date>
