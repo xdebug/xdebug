@@ -1,4 +1,5 @@
-sudo: false
+sudo: true
+dist: xenial
 
 language: php
 
@@ -6,7 +7,7 @@ php:
   - 7.0
   - 7.1
   - 7.2
-  - 7.3
+  - 7.3.0RC1
   - nightly
 
 matrix:
@@ -16,6 +17,9 @@ matrix:
 env:
   - USE_OPCACHE=0
   - USE_OPCACHE=1
+
+before_install:
+  - sudo apt-get install -y libzip4
 
 before_script:
   - phpenv config-rm xdebug.ini || echo "xdebug not available"
