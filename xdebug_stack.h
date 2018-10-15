@@ -23,6 +23,8 @@
 
 #define XDEBUG_STACK_NO_DESC 0x01
 
+int xdebug_function_name_is_closure(char *fname);
+char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC);
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC);
 void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str TSRMLS_DC);
