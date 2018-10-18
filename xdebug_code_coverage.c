@@ -757,13 +757,8 @@ void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa TSRMLS
 	memset(tmp, 0, sizeof(xdebug_func));
 
 	if (opa->function_name) {
-		if (strcmp(STR_NAME_VAL(opa->function_name), "{closure}") == 0) {
-			tmp->function = xdebug_sprintf(
-				"{closure:%s:%d-%d}",
-				STR_NAME_VAL(opa->filename),
-				opa->line_start,
-				opa->line_end
-			);
+		if (xdebug_function_name_is_closure(STR_NAME_VAL(opa->function_name))) {
+			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
 			closure = 1;
 		} else {
 			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
