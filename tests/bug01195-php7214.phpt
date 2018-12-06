@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1195: Segfault with code coverage and foreach (> PHP 7.0.12, <= PHP 7.2.13)
+Test for bug #1195: Segfault with code coverage and foreach (> PHP 7.2.13)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n";
-if (!version_compare(phpversion(), "7.2.13", '<=')) echo "skip <= PHP 7.2.13 needed\n";
+if (!version_compare(phpversion(), "7.2.13", '>')) echo "skip > PHP 7.2.13 needed\n";
+if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
 if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
 ?>
 --FILE--
@@ -27,8 +27,8 @@ fe
 - branches
   - 00; OP: 00-03; line: 02-04 HIT; out1: 04 HIT; out2: 08  X 
   - 04; OP: 04-04; line: 04-04 HIT; out1: 05 HIT; out2: 08 HIT
-  - 05; OP: 05-07; line: 06-06 HIT; out1: 04 HIT
-  - 08; OP: 08-12; line: 06-09 HIT; out1: EX  X 
+  - 05; OP: 05-07; line: 06-04 HIT; out1: 04 HIT
+  - 08; OP: 08-12; line: 04-09 HIT; out1: EX  X 
 - paths
   - 0 4 5 4 8: HIT
   - 0 4 8:  X 

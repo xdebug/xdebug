@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #1530: Code coverage incorrect for last code line in a loop
---XFAIL--
-PHP bug #76046: PHP generates "FE_FREE" opcode on the wrong line.
+Test for bug #1530: Code coverage incorrect for last code line in a loop (> PHP 7.2.13)
+--SKIPIF--
+<?php
+if (!version_compare(phpversion(), "7.2.13", '>')) echo "skip > PHP 7.2.13 needed\n";
+if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

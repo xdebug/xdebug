@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1210: Coverage of sending arguments to a method (> PHP 7.0.12, <= PHP 7.2.13)
+Test for bug #1210: Coverage of sending arguments to a method (> PHP 7.2.13)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n";
-if (!version_compare(phpversion(), "7.2.13", '<=')) echo "skip <= PHP 7.2.13 needed\n";
+if (!version_compare(phpversion(), "7.2.13", '>')) echo "skip > PHP 7.2.13 needed\n";
+if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
 if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
 ?>
 --FILE--
@@ -23,11 +23,11 @@ foo->getLoader
 - branches
   - 00; OP: 00-07; line: 04-07  X ; out1: 08  X ; out2: 18  X 
   - 08; OP: 08-08; line: 07-07  X ; out1: 09  X ; out2: 18  X 
-  - 09; OP: 09-17; line: 07-08  X ; out1: 08  X 
-  - 18; OP: 18-25; line: 08-12  X ; out1: 26  X ; out2: 36  X 
+  - 09; OP: 09-17; line: 07-07  X ; out1: 08  X 
+  - 18; OP: 18-25; line: 07-12  X ; out1: 26  X ; out2: 36  X 
   - 26; OP: 26-26; line: 12-12  X ; out1: 27  X ; out2: 36  X 
-  - 27; OP: 27-35; line: 12-13  X ; out1: 26  X 
-  - 36; OP: 36-43; line: 13-17  X ; out1: 44  X ; out2: 50  X 
+  - 27; OP: 27-35; line: 12-12  X ; out1: 26  X 
+  - 36; OP: 36-43; line: 12-17  X ; out1: 44  X ; out2: 50  X 
   - 44; OP: 44-49; line: 18-21  X ; out1: 50  X 
   - 50; OP: 50-59; line: 21-24  X 
 - paths
