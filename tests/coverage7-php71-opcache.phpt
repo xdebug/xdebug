@@ -1,8 +1,11 @@
 --TEST--
-Test with Code Coverage with path and branch checking (>= PHP 7.1)
+Test with Code Coverage with path and branch checking (>= PHP 7.1, < PHP 7.3, opcache)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n"; ?>
-<?php if (!extension_loaded('zend opcache')) echo "skip opcache required\n"; ?>
+<?php
+if (version_compare(phpversion(), "7.1", '<')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
+if (version_compare(phpversion(), "7.3", '>=')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
+if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

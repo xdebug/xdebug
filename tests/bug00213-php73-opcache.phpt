@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #213: Dead code analysis doesn't take catches for throws into account (>= PHP 7.1, < PHP 7.3, opcache)
+Test for bug #213: Dead code analysis doesn't take catches for throws into account (>= PHP 7.3, opcache)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.1", '<')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
-if (version_compare(phpversion(), "7.3", '>=')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
+if (version_compare(phpversion(), "7.3", '<')) echo "skip >= PHP 7.3 needed\n";
 if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
 ?>
 --INI--
@@ -32,9 +31,11 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECT--
 48
-array(4) {
+array(5) {
   [5]=>
   int(1)
+  [6]=>
+  int(-2)
   [8]=>
   int(1)
   [12]=>

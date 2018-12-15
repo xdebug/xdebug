@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #334: Code Coverage Regressions (>= PHP 7.1, < PHP 7.3, opcache)
+Test for bug #334: Code Coverage Regressions (>= PHP 7.3, opcache)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.1", '<')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
-if (version_compare(phpversion(), "7.3", '>=')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
+if (version_compare(phpversion(), "7.3", '<')) echo "skip >= PHP 7.3 needed\n";
 if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
 ?>
 --INI--
@@ -26,7 +25,7 @@ xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 array(2) {
-  ["%sbug00334-php71-opcache.php"]=>
+  ["%sbug00334-php73-opcache.php"]=>
   array(2) {
     [5]=>
     int(1)
@@ -34,9 +33,11 @@ array(2) {
     int(1)
   }
   ["%sbug00334.inc"]=>
-  array(2) {
+  array(3) {
     [5]=>
     int(1)
+    [7]=>
+    int(-1)
     [9]=>
     int(1)
   }
