@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #1270: String parsing marked not covered (>= PHP 7.2, < PHP 7.3, opcache)
+Test for bug #1270: String parsing marked not covered (>= PHP 7.3, opcache)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.2", '<')) echo "skip >= PHP 7.2, < PHP 7.3 needed\n";
-if (version_compare(phpversion(), "7.3", '>=')) echo "skip >= PHP 7.2, < PHP 7.3 needed\n";
+if (version_compare(phpversion(), "7.3", '<')) echo "skip >= PHP 7.3 needed\n";
 if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
 ?>
 --FILE--
@@ -24,32 +23,46 @@ var_dump( array_slice( $cc, 1, 1 ) );
 --EXPECTF--
 array(1) {
   ["%sbug01270.inc"]=>
-  array(13) {
+  array(20) {
     [2]=>
     int(1)
     [4]=>
     int(1)
     [5]=>
     int(1)
+    [6]=>
+    int(-1)
     [7]=>
     int(1)
+    [9]=>
+    int(-2)
     [11]=>
     int(1)
     [13]=>
     int(1)
     [14]=>
     int(1)
+    [15]=>
+    int(-1)
     [16]=>
     int(1)
+    [18]=>
+    int(-2)
     [20]=>
     int(1)
     [22]=>
     int(1)
     [23]=>
     int(1)
+    [25]=>
+    int(-1)
     [27]=>
     int(1)
+    [31]=>
+    int(-2)
     [33]=>
     int(1)
+    [35]=>
+    int(-2)
   }
 }
