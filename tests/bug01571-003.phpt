@@ -1,11 +1,17 @@
 --TEST--
-Test for bug #1571: Code Coverage doesn't show file/line for closures in namespaces
+Test for bug #1571: Code Coverage doesn't show file/line for closures in namespaces (PHP < 7.3 || (PHP >= 7.3 && !opcache))
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.overload_var_dump=0
+--SKIPIF--
+<?php
+if (version_compare(phpversion(), "7.3", '>=') && extension_loaded('zend opcache') ) {
+    echo "skip (PHP < 7.3 || (PHP >= 7.3 && !opcache)) needed\n";
+}
+?>
 --FILE--
 <?php
 namespace Testing;

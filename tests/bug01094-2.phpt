@@ -1,5 +1,11 @@
 --TEST--
-Test for bug #1094: Segmentation fault when attempting to use branch/path coverage
+Test for bug #1094: Segmentation fault when attempting to use branch/path coverage (PHP < 7.3 || (PHP >= 7.3 && !opcache))
+--SKIPIF--
+<?php
+if (version_compare(phpversion(), "7.3", '>=') && extension_loaded('zend opcache') ) {
+	echo "skip (PHP < 7.3 || (PHP >= 7.3 && !opcache)) needed\n";
+}
+?>
 --FILE--
 <?php
 

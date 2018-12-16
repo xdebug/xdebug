@@ -949,6 +949,22 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_na
 	}
 }
 
+#if PHP_VERSION_ID >= 70300
+static int is_opcache_loaded_and_enabled()
+{
+	int          opcache_loaded = 0;
+	zend_string *extension_name;
+
+	extension_name = zend_string_init("zend opcache", sizeof("zend opcache") - 1, 0);
+	if (zend_hash_exists(&module_registry, extension_name)) {
+		opcache_loaded = 1;
+	}
+	zend_string_release_ex(extension_name, 0);
+
+	return opcache_loaded;
+}
+#endif
+
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
 	zend_long options = 0;
@@ -960,6 +976,12 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
 	XG(code_coverage_branch_check) = (options & XDEBUG_CC_OPTION_BRANCH_CHECK);
 
+#if PHP_VERSION_ID >= 70300
+	if (is_opcache_loaded_and_enabled() && XG(code_coverage_branch_check)) {
+		php_error(E_WARNING, "You can not use path/branch coverage when Zend OPcache is also loaded. Please disable Zend OPcache");
+		RETURN_FALSE;
+	} else
+#endif
 	if (!XG(extended_info)) {
 		php_error(E_WARNING, "You can only use code coverage when you leave the setting of 'xdebug.extended_info' to the default '1'.");
 		RETURN_FALSE;
