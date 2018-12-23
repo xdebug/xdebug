@@ -1173,7 +1173,9 @@ static void add_file(void *ret, xdebug_hash_element *e)
 PHP_FUNCTION(xdebug_get_code_coverage)
 {
 	array_init(return_value);
-	xdebug_hash_apply(XG(code_coverage), (void *) return_value, add_file);
+	if (XG(code_coverage)) {
+		xdebug_hash_apply(XG(code_coverage), (void *) return_value, add_file);
+	}
 }
 
 PHP_FUNCTION(xdebug_get_function_count)

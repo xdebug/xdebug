@@ -75,6 +75,11 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
 void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value);
 
+#if PHP_VERSION_ID >= 70300
+static int (*xdebug_orig_post_startup_cb)(void);
+static int xdebug_post_startup(void);
+#endif
+
 /* error callback replacement functions */
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
@@ -745,9 +750,12 @@ PHP_MINIT_FUNCTION(xdebug)
 	/* initialize aggregate call information hash */
 	zend_hash_init_ex(&XG(aggr_calls), 50, NULL, (dtor_func_t) xdebug_profile_aggr_call_entry_dtor, 1, 0);
 
-	/* Redirect compile and execute functions to our own */
+	/* Redirect compile and execute functions to our own. For PHP 7.3 and
+	 * later, we hook these in xdebug_post_startup instead */
+#if PHP_VERSION_ID < 70300
 	old_compile_file = zend_compile_file;
 	zend_compile_file = xdebug_compile_file;
+#endif
 
 	xdebug_old_execute_ex = zend_execute_ex;
 	zend_execute_ex = xdebug_execute_ex;
@@ -2606,7 +2614,31 @@ ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 
 	zend_xdebug_initialised = 1;
 
+#if PHP_VERSION_ID >= 70300
+	xdebug_orig_post_startup_cb = zend_post_startup_cb;
+	zend_post_startup_cb = xdebug_post_startup;
+
 	return zend_startup_module(&xdebug_module_entry);
+}
+
+static int xdebug_post_startup(void)
+{
+	if (xdebug_orig_post_startup_cb) {
+		int (*cb)(void) = xdebug_orig_post_startup_cb;
+
+		xdebug_orig_post_startup_cb = NULL;
+		if (cb() != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
+	old_compile_file = zend_compile_file;
+	zend_compile_file = xdebug_compile_file;
+	
+	return SUCCESS;
+#else
+	return zend_startup_module(&xdebug_module_entry);
+#endif
 }
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
