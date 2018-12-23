@@ -518,9 +518,11 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 		opcode.opcode != ZEND_EXT_NOP &&
 		opcode.opcode != ZEND_RECV &&
 		opcode.opcode != ZEND_RECV_INIT
+#if PHP_VERSION_ID < 70400
 		&& opcode.opcode != ZEND_VERIFY_ABSTRACT_CLASS
-		&& opcode.opcode != ZEND_OP_DATA
 		&& opcode.opcode != ZEND_ADD_INTERFACE
+#endif
+		&& opcode.opcode != ZEND_OP_DATA
 		&& opcode.opcode != ZEND_TICKS
 		&& opcode.opcode != ZEND_FAST_CALL
 		&& opcode.opcode != ZEND_RECV_VARIADIC
