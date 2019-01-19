@@ -1,10 +1,10 @@
 --TEST--
-Test for bug #1530: Code coverage incorrect for last code line in a loop (>= PHP 7.2.14)
+Test for bug #1530: Code coverage incorrect for last code line in a loop (>= PHP 7.2.14, opcache)
 --SKIPIF--
 <?php
 if (!version_compare(phpversion(), "7.2.14", '>=')) echo "skip >= PHP 7.2.14 needed\n";
 if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
-if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
+if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
 ?>
 --INI--
 xdebug.default_enable=1
@@ -27,7 +27,5 @@ Array
 (
     [2] => 1
     [3] => 1
-    [4] => -1
-    [5] => -1
     [9] => 1
 )
