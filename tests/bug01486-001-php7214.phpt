@@ -1,8 +1,9 @@
 --TEST--
-Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING
+Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (> PHP 7.2.13)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.2", '>=')) echo "skip >= PHP 7.2 needed\n";
+if (!version_compare(phpversion(), "7.2.13", '>')) echo "skip > PHP 7.2.13 needed\n";
+if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
 if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
 ?>
 --FILE--
@@ -107,8 +108,8 @@ foo 23
   - 346; OP: 346-352; line: 41-41 HIT; out1: 367 HIT
   - 353; OP: 353-359; line: 42-42  X ; out1: 367  X 
   - 360; OP: 360-366; line: 43-43  X ; out1: 367  X 
-  - 367; OP: 367-367; line: 43-43 HIT; out1: 02 HIT
-  - 368; OP: 368-369; line: 43-46 HIT; out1: EX  X 
+  - 367; OP: 367-367; line: 02-02 HIT; out1: 02 HIT
+  - 368; OP: 368-369; line: 02-46 HIT; out1: EX  X 
 - paths
   - 0 2 3 87 367 2 368:  X 
   - 0 2 3 94 367 2 368:  X 
