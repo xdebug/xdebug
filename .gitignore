@@ -14,6 +14,7 @@
 /config.nice
 /config.sub
 /configure
+/configure.ac
 /configure.in
 /config.status
 /config.cache
@@ -65,3 +66,4 @@ tags
 /tests/*.php
 /tests/*.sh
 /tests/phpt.*
+/C:\\Windows\\Temp\\remote-log4.txt
