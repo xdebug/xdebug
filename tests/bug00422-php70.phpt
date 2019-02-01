@@ -29,6 +29,6 @@ echo "END";
 ParseError: syntax error, unexpected 'new' (T_NEW) in %sbug00422.inc on line 7
 
 Call Stack:
-    %f     %d   1. {main}() %sbug00422-php70.php:0
+%w%f %w%d   1. {main}() %sbug00422-php70.php:0
 
 END

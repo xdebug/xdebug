@@ -44,5 +44,5 @@ bar
 	<tr><td>9</td><td>%f</td><td align='right'>%d</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bar()</td><td>%sbug01232.php(16) : eval()'d code:2</td></tr>
 	<tr><td>10</td><td>%f</td><td align='right'>%d</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>foo()</td><td>%sbug01232.php(16) : eval()'d code:3</td></tr>
 	<tr><td>11</td><td>%f</td><td align='right'>%d</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bar()</td><td>%sbug01232.php:11</td></tr>
-	<tr><td>12</td><td>%f</td><td align='right'>%d</td><td align='right'>-%d</td><td align='left'>&nbsp; &nbsp;-&gt;</td><td>xdebug_stop_trace()</td><td>%sbug01232.php:18</td></tr>
+	<tr><td>12</td><td>%f</td><td align='right'>%d</td><td align='right'>%i</td><td align='left'>&nbsp; &nbsp;-&gt;</td><td>xdebug_stop_trace()</td><td>%sbug01232.php:18</td></tr>
 </table>
