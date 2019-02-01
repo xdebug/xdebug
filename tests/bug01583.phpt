@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1583: Xdebug crashes when OPcache's compact literals optimisation is on
+--SKIPIF--
+<?php if (!extension_loaded("json")) print "skip json extension not available"; ?>
 --FILE--
 <?php
 class Foo
