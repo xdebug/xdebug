@@ -148,7 +148,13 @@ void xdebug_gc_stats_stop()
 
 static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 {
-	double reduction = (1 - (float)run->memory_after / (float)run->memory_before) * 100.0;
+	double reduction;
+
+	if (run->memory_before) {
+		reduction = (1 - (float)run->memory_after / (float)run->memory_before) * 100.0;
+	} else {
+		reduction = 0;
+	}
 
 	if (!XG(gc_stats_file)) {
 		return;

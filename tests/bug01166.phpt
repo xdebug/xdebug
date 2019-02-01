@@ -44,12 +44,12 @@ Stack trace:
   thrown in %sbug01166.php on line %d
 
 Call Stack:
-    %f     %d   1. {main}() %sbug01166.php:0
-    %f     %d   2. var_dump(class Foo {  }) %sbug01166.php:%d
+%w%f %w%d   1. {main}() %sbug01166.php:0
+%w%f %w%d   2. var_dump(class Foo {  }) %sbug01166.php:%d
 
 
 Fatal error: __debuginfo() must return an array in %sbug01166.php on line %d
 
 Call Stack:
-    %f     %d   1. {main}() %sbug01166.php:0
-    %f     %d   2. var_dump(class Foo {  }) %sbug01166.php:%d
+%w%f %w%d   1. {main}() %sbug01166.php:0
+%w%f %w%d   2. var_dump(class Foo {  }) %sbug01166.php:%d
