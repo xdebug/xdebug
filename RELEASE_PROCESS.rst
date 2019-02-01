@@ -15,11 +15,15 @@
 #. Install new package with ``pecl install xdebug-*.tgz``
 #. Commit template.rs php_xdebug.h and RELEASE_PROCESS.rst with text:
    ``Go with 2.7.0rc1`` (use lower case 'rc').
-#. Tag package with ``pecl tag <version number>``
-#. Write news item in www.xdebug.org/html/news
+#. Tag package with ``pecl tag <version number>`` (use upper case "RC").
+#. ``git push && git push --tags`` (this kicks off AppVeyor builds too)
 #. Update www.xdebug.org/html/updates.php
 #. Update www.xdebug.org/html/include/phpinfo_scanner.php
 #. Update www.xdebug.org/html/docs/include/basic.php
-
+#. Write news item in www.xdebug.org/html/news
+#. Add files from AppVeyor and source to www.xdebug.org.html/files
+#. Add the downloads, DDLs, and news file to git and commit with "Go with
+   2.7.0rc1"
+#. In Mantis, "release" the version, and make sure there is a new one.
 
 
