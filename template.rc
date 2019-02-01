@@ -14,8 +14,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 # define THANKS_GUYS ""
 #endif
 
-#define VERSIONDESC 2,7,0,4
-#define VERSIONSTR  "2.7.0beta2-dev"
+#define VERSIONDESC 2,7,0,5
+#define VERSIONSTR  "2.7.0rc1"
 
 //Version
 VS_VERSION_INFO VERSIONINFO
@@ -40,7 +40,7 @@ BEGIN
             VALUE "FileDescription", FILE_DESCRIPTION "\0"
             VALUE "FileVersion", VERSIONSTR
             VALUE "InternalName", FILE_NAME "\0"
-            VALUE "LegalCopyright", "Copyright © 2002-2018 Derick Rethans\0"
+            VALUE "LegalCopyright", "Copyright © 2002-2019 Derick Rethans\0"
             VALUE "OriginalFilename", FILE_NAME "\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Xdebug\0"

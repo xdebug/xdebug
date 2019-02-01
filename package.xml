@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2018-09-20</date>
- <time>08:56:14</time>
+ <date>2019-02-01</date>
+ <time>18:38:37</time>
  <version>
-  <release>2.7.0beta1</release>
-  <api>2.7.0beta1</api>
+  <release>2.7.0RC1</release>
+  <api>2.7.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,11 +45,15 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Sep 20, 2018 - xdebug 2.7.0beta1
+Fri, Feb  1, 2019 - xdebug 2.7.0RC1
 
-= Improvements:
+= Fixed bugs:
 
-  - Fixed issue #1519: PHP 7.3 support
+  - Fixed issue #1571: File/line information is not shown for closures in namespaces.
+  - Fixed issue #1578: Compile error due to redefinition of "zif_handler" with old GCCs.
+  - Fixed issue #1583: Xdebug crashes when OPcache's compact literals optimisation is on.
+  - Fixed issue #1598: Make path/branch coverage work with OPcache loaded for PHP 7.3 and later.
+  - Fixed issue #1620: Division by zero when GC Stats Collection runs with memory manager disabled.
  </notes>
 
  <contents>
@@ -148,6 +152,27 @@ Thu, Sep 20, 2018 - xdebug 2.7.0beta1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2018-09-20</date>
+   <time>08:56:14</time>
+   <version>
+    <release>2.7.0beta1</release>
+    <api>2.7.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Sep 20, 2018 - xdebug 2.7.0beta1
+
++ Improvements:
+
+  - Fixed issue #1519: PHP 7.3 support
+   </notes>
+  </release>
 
   <release>
    <date>2018-04-01</date>
