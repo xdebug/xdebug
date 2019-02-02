@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1272: property_get doesn't return attributes for SimpleXMLElement
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+if (!extension_loaded('simplexml')) echo "skip The SimpleXML extension needs to be installed\n";
+if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
