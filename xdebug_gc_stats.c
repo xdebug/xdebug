@@ -21,6 +21,14 @@
 #include "xdebug_stack.h"
 #include "zend_builtin_functions.h"
 #include "SAPI.h"
+#include "Zend/zend_long.h"
+
+/* Set correct int format to use */
+#if SIZEOF_ZEND_LONG == 4
+# define XDEBUG_GCINT_FMT "u"
+#else
+# define XDEBUG_GCINT_FMT "lu"
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -162,7 +170,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 
 	if (!run->function_name) {
 		fprintf(XG(gc_stats_file),
-			"%9lu | %9.2f %% | %5.2f ms | %13lu | %12lu | %8.2f %% | -\n",
+			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | -\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
 			run->duration / 1000.0,
@@ -172,7 +180,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 		);
 	} else if (!run->class_name && run->function_name) {
 		fprintf(XG(gc_stats_file),
-			"%9lu | %9.2f %% | %5.2f ms | %13lu | %12lu | %8.2f %% | %s\n",
+			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
 			run->duration / 1000.0,
@@ -183,7 +191,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 		);
 	} else if (run->class_name && run->function_name) {
 		fprintf(XG(gc_stats_file),
-			"%9lu | %9.2f %% | %5.2f ms | %13lu | %12lu | %8.2f %% | %s::%s\n",
+			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s::%s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
 			run->duration / 1000.0,
