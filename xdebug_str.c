@@ -28,17 +28,23 @@
 #include "xdebug_mm.h"
 #include "xdebug_str.h"
 
-void xdebug_str_add(xdebug_str *xs, const char *str, int f)
+static void realloc_if_needed(xdebug_str *xs, int size_to_fit)
 {
-	int l = strlen(str);
-
-	if (xs->l + l > xs->a - 1) {
-		xs->d = xdrealloc(xs->d, xs->a + l + XDEBUG_STR_PREALLOC);
-		xs->a = xs->a + l + XDEBUG_STR_PREALLOC;
+	if (!xs->a || !xs->l || xs->l + size_to_fit > xs->a - 1) {
+		xs->d = xdrealloc(xs->d, xs->a + size_to_fit + XDEBUG_STR_PREALLOC);
+		xs->a = xs->a + size_to_fit + XDEBUG_STR_PREALLOC;
 	}
 	if (!xs->l) {
 		xs->d[0] = '\0';
 	}
+}
+
+void xdebug_str_add(xdebug_str *xs, const char *str, int f)
+{
+	int l = strlen(str);
+
+	realloc_if_needed(xs, l);
+
 	memcpy(xs->d + xs->l, str, l);
 	xs->d[xs->l + l] = '\0';
 	xs->l = xs->l + l;
@@ -49,13 +55,8 @@ void xdebug_str_add(xdebug_str *xs, const char *str, int f)
 
 void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f)
 {
-	if (xs->l + le > xs->a - 1) {
-		xs->d = xdrealloc(xs->d, xs->a + le + XDEBUG_STR_PREALLOC);
-		xs->a = xs->a + le + XDEBUG_STR_PREALLOC;
-	}
-	if (!xs->l) {
-		xs->d[0] = '\0';
-	}
+	realloc_if_needed(xs, le);
+
 	memcpy(xs->d + xs->l, str, le);
 	xs->d[xs->l + le] = '\0';
 	xs->l = xs->l + le;
@@ -67,13 +68,8 @@ void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f)
 
 void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str)
 {
-	if (xs->l + str->l > xs->a - 1) {
-		xs->d = xdrealloc(xs->d, xs->a + str->l + XDEBUG_STR_PREALLOC);
-		xs->a = xs->a + str->l + XDEBUG_STR_PREALLOC;
-	}
-	if (!xs->l) {
-		xs->d[0] = '\0';
-	}
+	realloc_if_needed(xs, str->l);
+
 	memcpy(xs->d + xs->l, str->d, str->l);
 	xs->d[xs->l + str->l] = '\0';
 	xs->l = xs->l + str->l;
@@ -81,19 +77,14 @@ void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str)
 
 void xdebug_str_addc(xdebug_str *xs, char letter)
 {
-	if (xs->l + 1 > xs->a - 1) {
-		xs->d = xdrealloc(xs->d, xs->a + 1 + XDEBUG_STR_PREALLOC);
-		xs->a = xs->a + 1 + XDEBUG_STR_PREALLOC;
-	}
-	if (!xs->l) {
-		xs->d[0] = '\0';
-	}
+	realloc_if_needed(xs, 1);
+
 	xs->d[xs->l] = letter;
 	xs->d[xs->l + 1] = '\0';
 	xs->l = xs->l + 1;
 }
 
-void xdebug_str_chop(xdebug_str *xs, int c)
+void xdebug_str_chop(xdebug_str *xs, size_t c)
 {
 	if (c > xs->l) {
 		/* Do nothing if the chop amount is larger than the buffer size */

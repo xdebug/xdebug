@@ -1196,6 +1196,11 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* PHP Bug #77287 causes Xdebug to segfault if OPcache has the "compact
 	 * literals" optimisation turned on. So force it off for PHP 7.3.0 and
 	 * 7.3.1 */
+# if SIZEOF_ZEND_LONG == 4
+#  define XDEBUG_HEX8_FMT "0x%08" PRIX32
+# else
+#  define XDEBUG_HEX8_FMT "0x%08" PRIX64
+# endif
 	{
 		zend_long optimizer;
 		zend_string *key = zend_string_init(ZEND_STRL("opcache.optimization_level"), 1);
@@ -1210,7 +1215,7 @@ PHP_RINIT_FUNCTION(xdebug)
 
 		optimizer &= ~(1<<10); /* DFA based optimization */
 
-		value = strpprintf(0, "0x%08" PRIX64, optimizer);
+		value = strpprintf(0, XDEBUG_HEX8_FMT, optimizer);
 
 		zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
 
@@ -1819,7 +1824,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	XG(level)++;
 	if ((signed long) XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
-		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
+		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XG(max_nesting_level));
 	}
 
 	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
@@ -1975,7 +1980,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 
 	XG(level)++;
 	if ((signed long) XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
-		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '%ld' reached, aborting!", XG(max_nesting_level));
+		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XG(max_nesting_level));
 	}
 
 	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_INTERNAL TSRMLS_CC);

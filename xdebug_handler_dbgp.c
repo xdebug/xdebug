@@ -264,9 +264,9 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 	xdebug_str *tmp;
 
 	tmp = make_message(context, message TSRMLS_CC);
-	if (SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
+	if ((size_t) SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
 		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
-		fprintf(stderr, "There was a problem sending %ld bytes on socket %d: %s", tmp->l, context->socket, sock_error);
+		fprintf(stderr, "There was a problem sending %zd bytes on socket %d: %s", tmp->l, context->socket, sock_error);
 		efree(sock_error);
 	}
 	xdebug_str_free(tmp);

@@ -545,7 +545,7 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 	int        found = -1;
 	int        state = 0;
 	char      *ptr = name->d;
-	int        ctr = 0;
+	size_t     ctr = 0;
 	char      *keyword = NULL, *keyword_end = NULL;
 	int        type = XF_ST_ROOT;
 	char      *current_classname = NULL;
