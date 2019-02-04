@@ -12,10 +12,11 @@ xdebug.force_error_reporting=0
 --FILE--
 <?php
 touch("/tmp/bug932.log");
-chmod("/tmp/bug932.log", 0);
+shell_exec("chattr +i /tmp/bug932.log");
 
 @trigger_error('foo');
 
+shell_exec("chattr -i /tmp/bug932.log");
 unlink("/tmp/bug932.log");
 ?>
 --EXPECTF--
