@@ -626,8 +626,12 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 					break;
 				case 2:
 					if (ptr[ctr] != '>') {
-						keyword = &ptr[ctr];
-						state = 1;
+						if (ptr[ctr] == '{') {
+							state = 11;
+						} else {
+							keyword = &ptr[ctr];
+							state = 1;
+						}
 					}
 					break;
 				case 8:
@@ -724,6 +728,42 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						} else {
 							keyword = NULL;
 						}
+					}
+					break;
+
+				case 11:
+					if (ptr[ctr] == '\'' || ptr[ctr] == '"') {
+						state = 12;
+						keyword = &ptr[ctr] + 1;
+						quotechar = ptr[ctr];
+					}
+					break;
+
+				case 12: /* Inside {" */
+					if (ptr[ctr] == '\\') {
+						state = 13; /* Escaped character */
+					} else if (ptr[ctr] == quotechar) {
+						quotechar = 0;
+						state = 14;
+						keyword_end = &ptr[ctr];
+						fetch_zval_from_symbol_table(retval, keyword, keyword_end - keyword, type, current_classname, cc_length, current_ce TSRMLS_CC);
+						if (current_classname) {
+							efree(current_classname);
+						}
+						current_classname = NULL;
+						cc_length = 0;
+						if (is_objectish(retval)) {
+							current_classname = fetch_classname_from_zval(retval, &cc_length, &current_ce TSRMLS_CC);
+						}
+						keyword = NULL;
+					}
+					break;
+				case 13: /* Escaped character */
+					state = 12;
+					break;
+				case 14:
+					if (ptr[ctr] == '}') {
+						state = 1;
 					}
 					break;
 			}
@@ -1757,7 +1797,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 	return 0;
 }
 
-static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_xml_node *parent, xdebug_str *parent_name, xdebug_var_export_options *options, char *class_name)
+static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, int level, xdebug_xml_node *parent, xdebug_str *parent_name, xdebug_var_export_options *options, char *class_name)
 {
 	xdebug_object_item **item = &item_nptr;
 	xdebug_xml_node *node;
@@ -1771,7 +1811,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 		node = xdebug_xml_node_init("property");
 		options->force_extended = 0;
 
-		if ((*item)->name_len != 0) {
+		if ((*item)->name != NULL) {
 			char       *prop_class_name;
 			xdebug_str *property_name;
 
@@ -1798,7 +1838,11 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 				xdebug_str_add_str(tmp_fullname, parent_name);
 				xdebug_str_add(tmp_fullname, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", 0);
 				if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-					xdebug_str_add_str(tmp_fullname, property_name);
+					if (property_name->l> 0) {
+						xdebug_str_add_str(tmp_fullname, property_name);
+					} else {
+						xdebug_str_addl(tmp_fullname, "{\"\"}", 4, 0);
+					}
 				} else {
 					xdebug_str_addc(tmp_fullname, '*');
 					xdebug_str_add(tmp_fullname, prop_class_name, 0);
@@ -2093,7 +2137,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 					xdebug_zend_hash_apply_protection_begin(merged_hash);
 
 					ZEND_HASH_FOREACH_KEY_PTR(merged_hash, num, key, xoi_val) {
-						xdebug_object_element_export_xml_node(xoi_val, num, key, level, node, name, options, class_name->d);
+						xdebug_object_element_export_xml_node(xoi_val, level, node, name, options, class_name->d);
 					} ZEND_HASH_FOREACH_END();
 
 					xdebug_zend_hash_apply_protection_end(merged_hash);

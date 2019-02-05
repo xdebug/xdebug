@@ -1,6 +1,6 @@
 #!/bin/bash
 
-bit64=`php -r 'echo PHP_INT_SIZE == 8 ? "1" : "0";'`
+bit64=`php -n -r 'echo PHP_INT_SIZE == 8 ? "1" : "0";'`
 
 if [[ ${bit64} != "1" ]]; then
 	export CFLAGS="-m32"
