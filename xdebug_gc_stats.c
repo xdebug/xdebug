@@ -88,6 +88,7 @@ int xdebug_gc_collect_cycles(void)
 	xdebug_gc_stats_print_run(run);
 
 	xdebug_gc_stats_run_free(run);
+	xdebug_func_dtor_by_ref(&tmp);
 
 	return ret;
 }
