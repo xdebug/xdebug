@@ -13,7 +13,7 @@ xdebug.trace_format=0
 date.timezone=Europe/Oslo
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug00003-' . uniqid() . '.trace');
+	$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug00003-' . uniqid('', true) . '.trace');
 	strftime('%b %l %Y %H:%M:%S', 1061728888);
 	xdebug_stop_trace();
 	readfile($tf);
