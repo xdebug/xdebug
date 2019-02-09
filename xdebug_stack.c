@@ -986,6 +986,24 @@ char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char
 	return tmp.d;
 }
 
+/* I don't like this API, but the function_stack_entry does not keep this as a
+ * pointer, and hence we need two APIs for freeing :-S */
+void xdebug_func_dtor_by_ref(xdebug_func *elem)
+{
+	if (elem->function) {
+		xdfree(elem->function);
+	}
+	if (elem->class) {
+		xdfree(elem->class);
+	}
+}
+
+void xdebug_func_dtor(xdebug_func *elem)
+{
+	xdebug_func_dtor_by_ref(elem);
+	xdfree(elem);
+}
+
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 {
 	memset(tmp, 0, sizeof(xdebug_func));

@@ -1,8 +1,8 @@
 --TEST--
-Test for tracing array assignments in user-readable function traces (>= PHP 7.3, opcache)
+Test for tracing array assignments in user-readable function traces (>= PHP 7.3.2, opcache)
 --SKIPIF--
 <?php
-if ( ! ( version_compare(phpversion(), "7.3", '>=') && extension_loaded('zend opcache'))) { echo "skip >= PHP 7.3 && opcache loaded needed\n"; };
+if ( ! ( version_compare(phpversion(), "7.3.2", '>=') && extension_loaded('zend opcache'))) { echo "skip >= PHP 7.3.2 && opcache loaded needed\n"; };
 ?>
 --INI--
 xdebug.default_enable=1
@@ -64,6 +64,8 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => $t = array ('a' => 4, 'b' => 9, 'c' => 13, 'd' => 89) %sassignment-trace2-php73-opcache.php:7
                              => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace2-php73-opcache.php:8
                              => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace2-php73-opcache.php:9
+                             => $t['c'] /= 7 %sassignment-trace2-php73-opcache.php:10
+                             => $t['b'] *= 9 %sassignment-trace2-php73-opcache.php:11
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace2-php73-opcache.php:23
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

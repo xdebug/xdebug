@@ -2,6 +2,7 @@
 Test for Xdebug's remote log (with xdebug.remote_addr_header)
 --SKIPIF--
 <?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
+<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
 --INI--
 xdebug.remote_enable=1
 xdebug.remote_log=/tmp/remote-log3.txt

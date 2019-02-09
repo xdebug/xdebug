@@ -1078,12 +1078,8 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 	e->refcount--;
 
 	if (e->refcount == 0) {
-		if (e->function.function) {
-			xdfree(e->function.function);
-		}
-		if (e->function.class) {
-			xdfree(e->function.class);
-		}
+		xdebug_func_dtor_by_ref(&e->function);
+
 		if (e->filename) {
 			xdfree(e->filename);
 		}
