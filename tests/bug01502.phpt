@@ -1,5 +1,7 @@
 --TEST--
-Test for bug #1502: SEND_REF lines are not marked as covered.
+Test for bug #1502: SEND_REF lines are not marked as covered (PHP >= 7.1.5)
+--SKIPIF--
+<?php if (!version_compare(phpversion(), "7.1.5", '>=')) echo "skip >= PHP 7.1.5 needed\n"; ?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
