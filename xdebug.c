@@ -1950,16 +1950,29 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	XG(level)--;
 }
 
-static int check_soap_call(function_stack_entry *fse)
+static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
 {
-	if (fse->function.class &&
-		(
-			(strstr(fse->function.class, "SoapClient") != NULL) ||
-			(strstr(fse->function.class, "SoapServer") != NULL)
-		) &&
+	if (
+		fse->function.class &&
+		Z_OBJ(EX(This)) &&
+		Z_TYPE(EX(This)) == IS_OBJECT &&
 		(zend_hash_str_find_ptr(&module_registry, "soap", sizeof("soap") - 1) != NULL)
 	) {
-		return 1;
+		zend_class_entry *soap_server_ce, *soap_client_ce;
+
+		soap_server_ce = zend_hash_str_find_ptr(CG(class_table), "soapserver", 10);
+		soap_client_ce = zend_hash_str_find_ptr(CG(class_table), "soapclient", 10);
+
+		if (!soap_server_ce || !soap_client_ce) {
+			return 0;
+		}
+
+		if (
+			(instanceof_function(Z_OBJCE(EX(This)), soap_server_ce)) ||
+			(instanceof_function(Z_OBJCE(EX(This)), soap_client_ce))
+		) {
+			return 1;
+		}
 	}
 	return 0;
 }
@@ -1996,7 +2009,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	}
 
 	/* Check for SOAP */
-	if (check_soap_call(fse)) {
+	if (check_soap_call(fse, current_execute_data)) {
 		restore_error_handler_situation = 1;
 		tmp_error_cb = zend_error_cb;
 		zend_error_cb = xdebug_old_error_cb;
