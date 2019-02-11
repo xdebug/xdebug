@@ -15,7 +15,7 @@ xdebug.trace_format=0
 	require 'bug00002.inc';
 
 	$action = 'do_stuff';
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug00002.trace');
+	$tf = xdebug_start_trace(sys_get_temp_dir() . '/' . uniqid('', true) . 'bug00002.trace');
 	$action();
 	xdebug_stop_trace();
 	readfile($tf);

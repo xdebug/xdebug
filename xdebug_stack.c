@@ -784,6 +784,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
 				if (type != E_PARSE) {
+					efree(buffer);
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
