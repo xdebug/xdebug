@@ -337,7 +337,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 			xdebug_str_addc(&name, '[');
 			xdebug_str_add_str(&name, zval_value);
 			xdebug_str_addc(&name, ']');
-			xdfree(zval_value);
+			xdebug_str_free(zval_value);
 		}
 	}
 
