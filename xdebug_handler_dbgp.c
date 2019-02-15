@@ -764,7 +764,7 @@ DBGP_FUNC(breakpoint_set)
 	xdebug_brk_info      *brk_info;
 	char                 *tmp_name;
 	int                   brk_id = 0;
-	int                   new_length = 0;
+	size_t                new_length = 0;
 	function_stack_entry *fse;
 	XDEBUG_STR_SWITCH_DECL;
 
@@ -952,7 +952,7 @@ DBGP_FUNC(eval)
 	char            *eval_string;
 	xdebug_xml_node *ret_xml;
 	zval             ret_zval;
-	int              new_length;
+	size_t           new_length = 0;
 	int              res;
 	xdebug_var_export_options *options;
 
@@ -973,7 +973,7 @@ DBGP_FUNC(eval)
 
 	res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
 
-	efree(eval_string);
+	xdfree(eval_string);
 
 	/* Handle result */
 	if (res == FAILURE) {
@@ -1426,7 +1426,7 @@ static void set_vars_from_EG(TSRMLS_D)
 DBGP_FUNC(property_set)
 {
 	unsigned char             *new_value;
-	int                        new_length;
+	size_t                     new_length = 0;
 	int                        depth = 0;
 	int                        context_nr = 0;
 	int                        res;
@@ -1487,7 +1487,7 @@ DBGP_FUNC(property_set)
 
 		/* Handle result */
 		if (Z_TYPE(symbol) == IS_UNDEF) {
-			efree(new_value);
+			xdfree(new_value);
 			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		} else {
 			// TODO Doesn't make sense anymore in this form
@@ -1538,7 +1538,7 @@ DBGP_FUNC(property_set)
 
 		/* Free data */
 		xdfree(eval_string);
-		efree(new_value);
+		xdfree(new_value);
 
 		/* Handle result */
 		if (res == FAILURE) {

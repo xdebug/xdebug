@@ -142,6 +142,9 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 		}
 	}
 	$environment['TEST_PHP_EXECUTABLE'] = $php;
+} else {
+	$php = trim(`which php`);
+	$environment['TEST_PHP_EXECUTABLE'] = $php;
 }
 
 if (getenv('TEST_PHP_CGI_EXECUTABLE')) {
