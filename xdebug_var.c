@@ -1673,17 +1673,16 @@ static void add_xml_attribute_or_element(xdebug_var_export_options *options, xde
 {
 	if (options->force_extended || (encoding_requested(value->d, value->l) && options->extended_properties)) {
 		xdebug_xml_node *element;
-		char            *tmp_base64;
-		int              new_len;
+		unsigned char   *tmp_base64;
+		size_t           new_len;
 
 		options->force_extended = 1;
 
 		element = xdebug_xml_node_init(field);
 		xdebug_xml_add_attribute(element, "encoding", "base64");
 
-		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) value->d, value->l, &new_len);
-		xdebug_xml_add_text_ex(element, strdup(tmp_base64), new_len, 1, 0);
-		efree(tmp_base64);
+		tmp_base64 = xdebug_base64_encode((unsigned char*) value->d, value->l, &new_len);
+		xdebug_xml_add_text_ex(element, (char*) tmp_base64, new_len, 1, 0);
 
 		xdebug_xml_add_child(node, element);
 	} else {
@@ -1695,15 +1694,14 @@ static void add_unencoded_text_value_attribute_or_element(xdebug_var_export_opti
 {
 	if (options->force_extended) {
 		xdebug_xml_node *element;
-		char            *tmp_base64;
-		int              new_len;
+		unsigned char   *tmp_base64;
+		size_t           new_len;
 
 		element = xdebug_xml_node_init("value");
 		xdebug_xml_add_attribute(element, "encoding", "base64");
 
-		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) value, strlen(value), &new_len);
-		xdebug_xml_add_text_ex(element, strdup(tmp_base64), new_len, 1, 0);
-		efree(tmp_base64);
+		tmp_base64 = xdebug_base64_encode((unsigned char*) value, strlen(value), &new_len);
+		xdebug_xml_add_text_ex(element, (char*) tmp_base64, new_len, 1, 0);
 
 		xdebug_xml_add_child(node, element);
 	} else {
@@ -1715,15 +1713,14 @@ static void add_encoded_text_value_attribute_or_element(xdebug_var_export_option
 {
 	if (options->force_extended) {
 		xdebug_xml_node *element;
-		char            *tmp_base64;
-		int              new_len;
+		unsigned char   *tmp_base64;
+		size_t           new_len;
 
 		element = xdebug_xml_node_init("value");
 		xdebug_xml_add_attribute(element, "encoding", "base64");
 
-		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) value, value_len, &new_len);
-		xdebug_xml_add_text_ex(element, strdup(tmp_base64), new_len, 1, 0);
-		efree(tmp_base64);
+		tmp_base64 = xdebug_base64_encode((unsigned char*) value, value_len, &new_len);
+		xdebug_xml_add_text_ex(element, (char*) tmp_base64, new_len, 1, 0);
 
 		xdebug_xml_add_child(node, element);
 
@@ -1751,11 +1748,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 			zend_string *i_string = zend_string_init(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1, 0);
 			zend_string *tmp_fullname_zstr;
 
-#if PHP_VERSION_ID >= 70300
-			tmp_fullname_zstr = php_addslashes(i_string);
-#else
-			tmp_fullname_zstr = php_addslashes(i_string, 0);
-#endif
+			tmp_fullname_zstr = xdebug_addslashes(i_string);
 
 			name = xdebug_str_create(HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key) - 1);
 
@@ -2505,17 +2498,17 @@ xdebug_str* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_v
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.a) {
-		char       *tmp_base64;
-		int         new_len;
-		xdebug_str *tmp_ret;
+		unsigned char *tmp_base64;
+		size_t         new_len;
+		xdebug_str    *tmp_ret;
 
 		/* now we need to base64 it */
-		tmp_base64 = (char*) xdebug_base64_encode((unsigned char*) buf.s->val, buf.s->len, &new_len);
+		tmp_base64 = xdebug_base64_encode((unsigned char*) buf.s->val, buf.s->len, &new_len);
 
 		/* we need a malloc'ed and not an emalloc'ed string */
-		tmp_ret = xdebug_str_create(tmp_base64, new_len);
+		tmp_ret = xdebug_str_create((char*) tmp_base64, new_len);
 
-		efree(tmp_base64);
+		xdfree(tmp_base64);
 		smart_str_free(&buf);
 
 		return tmp_ret;
