@@ -10,7 +10,7 @@ jobs:
           name: Run tests with env vars
           command: php run-xdebug-tests.php -q -x --show-diff
     environment:
-      TEST_PHP_ARGS: "-n -d foo=1 -d zend_extension=xdebug.so"
+      TEST_PHP_ARGS: "-n -d foo=1 -d zend_extension=./modules/xdebug.so"
       REPORT_EXIT_STATUS: 1
 
 workflows:
