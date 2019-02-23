@@ -9,7 +9,8 @@ jobs:
       - run:
           name: Setup env vars
           command: |
-            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=${CIRCLE_WORKING_DIRECTORY}/modules/xdebug.so"' >> $BASH_ENV
+            echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
       - run:
           name: Run tests with env vars
           command: php run-xdebug-tests.php -q -x --show-diff
