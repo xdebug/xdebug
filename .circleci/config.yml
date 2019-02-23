@@ -18,7 +18,7 @@ commands:
           command: php run-xdebug-tests.php -q -x --show-diff
 
 jobs:
-  "7.3 without opcache":
+  "PHP 7.3 without opcache":
     docker:
       - image: circleci/php:7.3.2-cli-stretch
     steps:
@@ -32,7 +32,7 @@ jobs:
     environment:
       REPORT_EXIT_STATUS: 1
 
-  "7.3 with opcache":
+  "PHP 7.3 with opcache":
     docker:
       - image: circleci/php:7.3.2-cli-stretch
     steps:
@@ -46,7 +46,7 @@ jobs:
     environment:
       REPORT_EXIT_STATUS: 1
 
-  "7.2 without opcache":
+  "PHP 7.2 without opcache":
     docker:
       - image: circleci/php:7.2.15-cli-stretch
     steps:
@@ -60,7 +60,7 @@ jobs:
     environment:
       REPORT_EXIT_STATUS: 1
 
-  "7.2 with opcache":
+  "PHP 7.2 with opcache":
     docker:
       - image: circleci/php:7.2.15-cli-stretch
     steps:
@@ -74,7 +74,7 @@ jobs:
     environment:
       REPORT_EXIT_STATUS: 1
 
-  "7.1 without opcache":
+  "PHP 7.1 without opcache":
     docker:
       - image: circleci/php:7.1.26-cli-stretch
     steps:
@@ -88,7 +88,7 @@ jobs:
     environment:
       REPORT_EXIT_STATUS: 1
 
-  "7.1 with opcache":
+  "PHP 7.1 with opcache":
     docker:
       - image: circleci/php:7.1.26-cli-stretch
     steps:
@@ -106,9 +106,9 @@ workflows:
   version: 2
   testing:
     jobs:
-      - "7.3 without opcache"
-      - "7.3 with opcache"
-      - "7.2 without opcache"
-      - "7.2 with opcache"
-      - "7.1 without opcache"
-      - "7.1 with opcache"
+      - "PHP 7.3 without opcache"
+      - "PHP 7.3 with opcache"
+      - "PHP 7.2 without opcache"
+      - "PHP 7.2 with opcache"
+      - "PHP 7.1 without opcache"
+      - "PHP 7.1 with opcache"
