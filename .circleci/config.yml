@@ -41,7 +41,7 @@ jobs:
       - run:
           name: Setup extra env vars
           command: |
-            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d opcache.enable=1 -d opcache.enable_cli=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
       - run-tests
     environment:
       REPORT_EXIT_STATUS: 1
@@ -69,7 +69,7 @@ jobs:
       - run:
           name: Setup extra env vars
           command: |
-            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d opcache.enable=1 -d opcache.enable_cli=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
       - run-tests
     environment:
       REPORT_EXIT_STATUS: 1
@@ -97,7 +97,7 @@ jobs:
       - run:
           name: Setup extra env vars
           command: |
-            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d opcache.enable=1 -d opcache.enable_cli=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
       - run-tests
     environment:
       REPORT_EXIT_STATUS: 1
