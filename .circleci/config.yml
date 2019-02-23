@@ -6,23 +6,15 @@ jobs:
     steps:
       - checkout
       - run: ./.travis.scripts/compile.sh
-  test:
-    docker:
-      - image: circleci/php:7.3.2-cli-stretch
-    steps:
-      - checkout
       - run:
           name: Run tests with env vars
           command: php run-xdebug-tests.php -q -x --show-diff
-          environment:
-            TEST_PHP_ARGS: "-n -d foo=1 -d zend_extension=modules/xdebug.so"
-            REPORT_EXIT_STATUS: 1
+    environment:
+      TEST_PHP_ARGS: "-n -d foo=1 -d zend_extension=xdebug.so"
+      REPORT_EXIT_STATUS: 1
 
 workflows:
   version: 2
   build_and_test:
     jobs:
       - build
-      - test:
-          requires:
-            - build
