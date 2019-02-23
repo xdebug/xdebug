@@ -274,7 +274,8 @@ do_escape:
 			case '\"':
 			case '\\':
 				*target++ = '\\';
-				/* break is missing *intentionally* */
+				XDEBUG_BREAK_INTENTIONALLY_MISSING
+
 			default:
 				*target++ = *source;
 				break;
