@@ -9,6 +9,7 @@ jobs:
       - run:
           name: Setup env vars
           command: |
+            echo 'export XDEBUG_CONFIG="idekey=dr"' >> $BASH_ENV
             echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
             echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
       - run:
