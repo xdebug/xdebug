@@ -1,8 +1,7 @@
 version: 2.1
-jobs:
-  build_without_opcache:
-    docker:
-      - image: circleci/php:7.3.2-cli-stretch
+commands:
+  compile:
+    description: Compiles and sets-up common environment vars
     steps:
       - checkout
       - run: ./.travis.scripts/compile.sh
@@ -11,35 +10,105 @@ jobs:
           command: |
             echo 'export XDEBUG_CONFIG="idekey=dr"' >> $BASH_ENV
             echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
-            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+  run-tests:
+    description: Runs the tests
+    steps:
       - run:
           name: Run tests with env vars
           command: php run-xdebug-tests.php -q -x --show-diff
+
+jobs:
+  "7.3 without opcache":
+    docker:
+      - image: circleci/php:7.3.2-cli-stretch
+    steps:
+      - checkout
+      - compile
+      - run:
+          name: Setup extra env vars
+          command: |
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+      - run-tests
     environment:
       REPORT_EXIT_STATUS: 1
 
-  build_with_opcache:
+  "7.3 with opcache":
     docker:
       - image: circleci/php:7.3.2-cli-stretch
     steps:
       - checkout
-      - run: ./.travis.scripts/compile.sh
+      - compile
       - run:
-          name: Setup env vars
+          name: Setup extra env vars
           command: |
-            echo 'export XDEBUG_CONFIG="idekey=dr"' >> $BASH_ENV
-            echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
             echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
-            echo 'php ${TEST_PHP_ARGS}' >> $BASH_ENV
+      - run-tests
+    environment:
+      REPORT_EXIT_STATUS: 1
+
+  "7.2 without opcache":
+    docker:
+      - image: circleci/php:7.2.15-cli-stretch
+    steps:
+      - checkout
+      - compile
       - run:
-          name: Run tests with env vars
-          command: php run-xdebug-tests.php -q -x --show-diff
+          name: Setup extra env vars
+          command: |
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+      - run-tests
+    environment:
+      REPORT_EXIT_STATUS: 1
+
+  "7.2 with opcache":
+    docker:
+      - image: circleci/php:7.2.15-cli-stretch
+    steps:
+      - checkout
+      - compile
+      - run:
+          name: Setup extra env vars
+          command: |
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+      - run-tests
+    environment:
+      REPORT_EXIT_STATUS: 1
+
+  "7.1 without opcache":
+    docker:
+      - image: circleci/php:7.1.26-cli-stretch
+    steps:
+      - checkout
+      - compile
+      - run:
+          name: Setup extra env vars
+          command: |
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+      - run-tests
+    environment:
+      REPORT_EXIT_STATUS: 1
+
+  "7.1 with opcache":
+    docker:
+      - image: circleci/php:7.1.26-cli-stretch
+    steps:
+      - checkout
+      - compile
+      - run:
+          name: Setup extra env vars
+          command: |
+            echo 'export TEST_PHP_ARGS="-n -d foo=1 -d zend_extension=opcache.so -d zend_extension=${CWD}/modules/xdebug.so"' >> $BASH_ENV
+      - run-tests
     environment:
       REPORT_EXIT_STATUS: 1
 
 workflows:
   version: 2
-  build_and_test:
+  testing:
     jobs:
-      - build_without_opcache
-      - build_with_opcache
+      - "7.3 without opcache"
+      - "7.3 with opcache"
+      - "7.2 without opcache"
+      - "7.2 with opcache"
+      - "7.1 without opcache"
+      - "7.1 with opcache"
