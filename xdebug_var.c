@@ -180,12 +180,13 @@ zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *n
 /*****************************************************************************
 ** Data returning functions
 */
-#define XF_ST_ROOT               0
-#define XF_ST_ARRAY_INDEX_NUM    1
-#define XF_ST_ARRAY_INDEX_ASSOC  2
-#define XF_ST_OBJ_PROPERTY       3
-#define XF_ST_STATIC_ROOT        4
-#define XF_ST_STATIC_PROPERTY    5
+#define XF_ST_ROOT                 0
+#define XF_ST_ARRAY_INDEX_NUM      1
+#define XF_ST_ARRAY_INDEX_ASSOC    2
+#define XF_ST_OBJ_PROPERTY         3
+#define XF_ST_STATIC_ROOT          4
+#define XF_ST_STATIC_PROPERTY      5
+#define XF_ST_ESCAPED_OBJ_PROPERTY 6
 
 inline static HashTable *fetch_ht_from_zval(zval *z TSRMLS_DC)
 {
@@ -282,6 +283,7 @@ static void fetch_zval_from_symbol_table(
 	unsigned int element_length = name_length;
 	zend_property_info *zpp;
 	int is_temp = 0;
+	int free_duplicated_name = 0;
 	HashTable *myht = NULL;
 	zval *orig_value_in = value_in;
 	zval tmp_retval;
@@ -386,6 +388,13 @@ static void fetch_zval_from_symbol_table(
 				}
 			}
 			break;
+
+		case XF_ST_ESCAPED_OBJ_PROPERTY:
+			name = xdstrndup(name, name_length);
+			free_duplicated_name = 1;
+			xdebug_stripcslashes(name, (int *) &name_length);
+
+			XDEBUG_BREAK_INTENTIONALLY_MISSING
 
 		case XF_ST_OBJ_PROPERTY:
 			/* Let's see if there is a debug handler */
@@ -512,6 +521,9 @@ static void fetch_zval_from_symbol_table(
 cleanup:
 	if (element) {
 		free(element);
+	}
+	if (free_duplicated_name && name) {
+		xdfree(name);
 	}
 
 	zval_ptr_dtor_nogc(orig_value_in);
@@ -736,6 +748,7 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						state = 12;
 						keyword = &ptr[ctr] + 1;
 						quotechar = ptr[ctr];
+						type = XF_ST_ESCAPED_OBJ_PROPERTY;
 					}
 					break;
 
@@ -1830,11 +1843,27 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 
 				xdebug_str_add_str(tmp_fullname, parent_name);
 				xdebug_str_add(tmp_fullname, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", 0);
+
+				/* Only in dynamic and *public* properties can we have non-standard characters */
 				if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-					if (property_name->l> 0) {
-						xdebug_str_add_str(tmp_fullname, property_name);
-					} else {
+					if (property_name->l == 0) {
 						xdebug_str_addl(tmp_fullname, "{\"\"}", 4, 0);
+					} else {
+						if (memchr(property_name->d, '-', property_name->l) == NULL && memchr(property_name->d, '[', property_name->l) == NULL && memchr(property_name->d, '{', property_name->l) == NULL) {
+							xdebug_str_add_str(tmp_fullname, property_name);
+						} else {
+							zend_string *tmp_string = zend_string_init(property_name->d, property_name->l, 0);
+							zend_string *tmp_slashed_string;
+
+							tmp_slashed_string = xdebug_addslashes(tmp_string);
+
+							xdebug_str_addl(tmp_fullname, "{\"", 2, 0);
+							xdebug_str_addl(tmp_fullname, tmp_slashed_string->val, tmp_slashed_string->len, 0);
+							xdebug_str_addl(tmp_fullname, "\"}", 2, 0);
+
+							zend_string_release(tmp_slashed_string);
+							zend_string_release(tmp_string);
+						}
 					}
 				} else {
 					xdebug_str_addc(tmp_fullname, '*');
