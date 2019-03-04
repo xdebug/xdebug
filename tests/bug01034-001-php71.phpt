@@ -1,9 +1,11 @@
 --TEST--
 Test for bug #1034: path coverage [1] (> PHP 7.0.12, < PHP 7.3)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12, < PHP 7.3 needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.3", '<')) echo "skip > PHP 7.0.12, < PHP 7.3 needed\n"; ?>
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12, < PHP 7.3 needed\n";
+if (!version_compare(phpversion(), "7.3", '<')) echo "skip > PHP 7.0.12, < PHP 7.3 needed\n";
+if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
+?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

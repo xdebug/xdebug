@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #1034: path coverage [3] (>= PHP 7.3)
---XFAIL--
-Bug #1519: PHP 7.3 support — CATCH is done differently and code coverage goes wrong
 --SKIPIF--
 <?php if (!version_compare(phpversion(), "7.3", '>=')) echo "skip >= PHP 7.3\n"; ?>
 <?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
@@ -54,10 +52,10 @@ trycatch
 
 {main}
 - branches
-  - 00; OP: 00-30; line: 02-32 HIT; out1: 34  X 
-  - 31; OP: 31-31; line: 33-33 HIT; out1: 32 HIT; out2: EX  X 
-  - 32; OP: 32-33; line: 34-37 HIT; out1: 34 HIT
-  - 34; OP: 34-34; line: 37-37 HIT; out1: EX  X 
+  - 00; OP: 00-27; line: 02-32 HIT; out1: 31  X 
+  - 28; OP: 28-28; line: 33-33 HIT; out1: 29 HIT; out2: EX  X 
+  - 29; OP: 29-30; line: 34-37 HIT; out1: 31 HIT
+  - 31; OP: 31-31; line: 37-37 HIT; out1: EX  X 
 - paths
-  - 0 34:  X 
-  - 31 32 34: HIT
+  - 0 31:  X 
+  - 28 29 31: HIT

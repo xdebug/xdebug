@@ -530,11 +530,6 @@ static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode TSRMLS_DC
 }
 
 #define XDEBUG_ZNODE_ELEM(node,var) node.var
-#if ZEND_USE_ABS_JMP_ADDR
-# define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((long)((node).jmp_addr) - (long)(base_address)) / sizeof(zend_op))
-#else
-# define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
-#endif
 
 static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
@@ -575,11 +570,16 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 	} else if (opcode.opcode == ZEND_CATCH) {
 		*jump_count = 2;
 		jumps[0] = position + 1;
-		if (!opcode.result.num) {
-#if PHP_VERSION_ID >= 70100
-			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
+#if PHP_VERSION_ID >= 70300
+		if (!(opcode.extended_value & ZEND_LAST_CATCH)) {
+			jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 #else
+		if (!opcode.result.num) {
+# if PHP_VERSION_ID >= 70100
+			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
+# else
 			jumps[1] = opcode.extended_value;
+# endif
 #endif
 			if (jumps[1] == jumps[0]) {
 				jumps[1] = XDEBUG_JMP_NOT_SET;

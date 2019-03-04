@@ -67,6 +67,9 @@ void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos
 static void only_leave_first_catch(zend_op_array *opa, xdebug_branch_info *branch_info, int position)
 {
 	unsigned int exit_jmp;
+#if PHP_VERSION_ID >= 70300 && ZEND_USE_ABS_JMP_ADDR
+	zend_op *base_address = &(opa->opcodes[0]);
+#endif
 
 	if (opa->opcodes[position].opcode == ZEND_FETCH_CLASS) {
 		position++;
@@ -78,11 +81,16 @@ static void only_leave_first_catch(zend_op_array *opa, xdebug_branch_info *branc
 
 	xdebug_set_remove(branch_info->entry_points, position);
 
-	if (!opa->opcodes[position].result.num) {
-#if PHP_VERSION_ID >= 70100
-		exit_jmp = position + ((signed int) opa->opcodes[position].extended_value / sizeof(zend_op));
+#if PHP_VERSION_ID >= 70300
+	if (!(opa->opcodes[position].extended_value & ZEND_LAST_CATCH)) {
+		exit_jmp = XDEBUG_ZNODE_JMP_LINE(opa->opcodes[position].op2, position, base_address);
 #else
+	if (!opa->opcodes[position].result.num) {
+# if PHP_VERSION_ID >= 70100
+		exit_jmp = position + ((signed int) opa->opcodes[position].extended_value / sizeof(zend_op));
+# else
 		exit_jmp = opa->opcodes[position].extended_value;
+# endif
 #endif
 
 		if (opa->opcodes[exit_jmp].opcode == ZEND_FETCH_CLASS) {
@@ -98,12 +106,23 @@ void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_i
 {
 	unsigned int i;
 	int          in_branch = 0, last_start = -1;
+#if PHP_VERSION_ID >= 70300 && ZEND_USE_ABS_JMP_ADDR
+	zend_op *base_address = &(opa->opcodes[0]);
+#endif
 
 	/* Figure out which CATCHes are chained, and hence which ones should be
 	 * considered entry points */
 	for (i = 0; i < branch_info->entry_points->size; i++) {
 		if (xdebug_set_in(branch_info->entry_points, i) && opa->opcodes[i].opcode == ZEND_CATCH) {
-#if PHP_VERSION_ID >= 70100
+#if PHP_VERSION_ID >= 70300
+# if ZEND_USE_ABS_JMP_ADDR
+			if (opa->opcodes[i].op2.jmp_addr != NULL) {
+# else
+			if (opa->opcodes[i].op2.jmp_offset != 0) {
+# endif
+				only_leave_first_catch(opa, branch_info, XDEBUG_ZNODE_JMP_LINE(opa->opcodes[i].op2, i, base_address));
+			}
+#elif PHP_VERSION_ID >= 70100
 			only_leave_first_catch(opa, branch_info, i + ((signed int) opa->opcodes[i].extended_value / sizeof(zend_op)));
 #else
 			only_leave_first_catch(opa, branch_info, opa->opcodes[i].extended_value);
