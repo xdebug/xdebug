@@ -1471,6 +1471,21 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
+static int xdebug_info_printf(const char *fmt, ...) /* {{{ */
+{
+	char *buf;
+	size_t len, written;
+	va_list argv;
+
+	va_start(argv, fmt);
+	len = vspprintf(&buf, 0, fmt, argv);
+	va_end(argv);
+
+	written = php_output_write(buf, len);
+	efree(buf);
+	return written;
+}
+/* }}} */
 
 PHP_MINFO_FUNCTION(xdebug)
 {
@@ -1480,6 +1495,15 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_header(2, "xdebug support", "enabled");
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
 	php_info_print_table_row(2, "IDE Key", XG(ide_key));
+	php_info_print_table_end();
+
+	php_info_print_table_start();
+	if (!sapi_module.phpinfo_as_text) {
+		php_info_print_table_header(1, "Support Xdebug on Patreon");
+		xdebug_info_printf("<tr><td style='background-color: orangered; text-align: center'>%s</td></tr>\n", "<a style='font-size: large; color: white; background-color: transparent; font-weight: bold; text-decoration: underline' href='https://www.patreon.com/bePatron?u=7864328'>BECOME A PATRON</a>");
+	} else {
+		xdebug_info_printf("Support Xdebug on Patreon: https://www.patreon.com/bePatron?u=7864328\n");
+	}
 	php_info_print_table_end();
 
 	if (zend_xdebug_initialised == 0) {
