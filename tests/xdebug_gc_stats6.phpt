@@ -7,7 +7,7 @@ xdebug.gc_stats_enable=0
 <?php
 var_dump(xdebug_get_gcstats_filename());
 
-$filename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'gcstats.txt';
+$filename = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'gcstats.' . uniqid('', TRUE). '.txt';
 $actual = xdebug_start_gcstats($filename);
 
 var_dump($actual === $filename);
@@ -18,4 +18,4 @@ unlink(xdebug_get_gcstats_filename());
 --EXPECTF--
 bool(false)
 bool(true)
-string(%d) "%sgcstats.txt"
+string(%d) "%sgcstats.%s.%s.txt"
