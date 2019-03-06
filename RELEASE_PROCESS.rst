@@ -21,6 +21,8 @@
 #. Update www.xdebug.org/html/include/phpinfo_scanner.php
 #. Update www.xdebug.org/html/docs/include/basic.php
 #. Write news item in www.xdebug.org/html/news
+#. Upload the source package to PECL
+#. Write Patreon post taking the rendered news article as starting point
 #. Add files from AppVeyor and source to www.xdebug.org.html/files
 #. Add the downloads, DDLs, and news file to git and commit with "Go with
    2.7.0RC1"
