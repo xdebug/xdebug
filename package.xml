@@ -33,27 +33,26 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-02-15</date>
- <time>15:29:15</time>
+ <date>2019-03-06</date>
+ <time>11:55:24</time>
  <version>
-  <release>2.7.0RC2</release>
-  <api>2.7.0RC2</api>
+  <release>2.7.0</release>
+  <api>2.7.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, Feb 15, 2019 - xdebug 2.7.0RC2
+Wed, Mar  6, 2019 - xdebug 2.7.0
 
 = Fixed bugs:
 
-  - Fixed issue #1551: Property with value null is not represented well
-  - Fixed issue #1621: Xdebug fails to compile cleanly on 32-bit platforms
-  - Fixed issue #1625: Work around ABI conflicts in PHP 7.3.0/PHP 7.3.1
-  - Fixed issue #1628: The PHP function name being constructed to record when GC Collection runs, is not freed
-  - Fixed issue #1629: SOAP Client/Server detection code does not handle inherited classes
+  - Fixed issue #1520: Xdebug does not handle variables and properties with "-" in their name
+  - Fixed issue #1577: Code coverage path analysis with chained catch fails in PHP 7.3
+  - Fixed issue #1639: Compile warning/error on GCC 8 or Clang due to "break intentionally missing"
+  - Fixed issue #1642: Debugger gives: "Warning: Header may not contain NUL bytes"
  </notes>
 
  <contents>
@@ -152,6 +151,31 @@ Fri, Feb 15, 2019 - xdebug 2.7.0RC2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-02-15</date>
+   <time>15:29:15</time>
+   <version>
+    <release>2.7.0RC2</release>
+    <api>2.7.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Feb 15, 2019 - xdebug 2.7.0RC2
+
+= Fixed bugs:
+
+  - Fixed issue #1551: Property with value null is not represented well
+  - Fixed issue #1621: Xdebug fails to compile cleanly on 32-bit platforms
+  - Fixed issue #1625: Work around ABI conflicts in PHP 7.3.0/PHP 7.3.1
+  - Fixed issue #1628: The PHP function name being constructed to record when GC Collection runs, is not freed
+  - Fixed issue #1629: SOAP Client/Server detection code does not handle inherited classes
+   </notes>
+  </release>
 
   <release>
    <date>2019-02-01</date>
