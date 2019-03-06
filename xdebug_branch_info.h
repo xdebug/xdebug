@@ -21,6 +21,13 @@
 
 #include "xdebug_set.h"
 #include "xdebug_str.h"
+#include "zend_compile.h"
+
+#if ZEND_USE_ABS_JMP_ADDR
+# define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((long)((node).jmp_addr) - (long)(base_address)) / sizeof(zend_op))
+#else
+# define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((int32_t)((node).jmp_offset) / sizeof(zend_op)) + (opline))
+#endif
 
 #define XDEBUG_JMP_NOT_SET (INT_MAX-1)
 #define XDEBUG_JMP_EXIT    (INT_MAX-2)
