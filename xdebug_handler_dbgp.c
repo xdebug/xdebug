@@ -266,8 +266,12 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 	tmp = make_message(context, message TSRMLS_CC);
 	if ((size_t) SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
 		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
-		fprintf(stderr, "There was a problem sending %zd bytes on socket %d: %s", tmp->l, context->socket, sock_error);
+		char *utime_str = xdebug_sprintf("%F", xdebug_get_utime());
+
+		fprintf(stderr, "%s: There was a problem sending %zd bytes on socket %d: %s\n", utime_str, tmp->l, context->socket, sock_error);
+
 		efree(sock_error);
+		xdfree(utime_str);
 	}
 	xdebug_str_free(tmp);
 }
