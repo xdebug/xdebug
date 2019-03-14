@@ -462,6 +462,11 @@ static void xdebug_init_debugger()
 	}
 }
 
+void xdebug_start_debugger()
+{
+	xdebug_init_debugger();
+}
+
 void xdebug_abort_debugger()
 {
 	if (XG(remote_connection_enabled)) {

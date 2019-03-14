@@ -73,4 +73,7 @@ void xdebug_mark_debug_connection_pending(void);
 void xdebug_do_jit(TSRMLS_D);
 void xdebug_do_req();
 
+void xdebug_start_debugger(void);
+void xdebug_abort_debugger(void);
+
 #endif
