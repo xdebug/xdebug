@@ -200,7 +200,7 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_break,                 xdebug_void_args)
 
 	PHP_FE(xdebug_start_debugger,        xdebug_void_args)
-	PHP_FE(xdebug_abort_debugger,        xdebug_void_args)
+	PHP_FE(xdebug_stop_debugger,         xdebug_void_args)
 
 	PHP_FE(xdebug_start_trace,           xdebug_start_trace_args)
 	PHP_FE(xdebug_stop_trace,            xdebug_void_args)
@@ -2408,7 +2408,7 @@ PHP_FUNCTION(xdebug_start_debugger)
 	RETURN_TRUE;
 }
 
-PHP_FUNCTION(xdebug_abort_debugger)
+PHP_FUNCTION(xdebug_stop_debugger)
 {
 	xdebug_abort_debugger();
 

@@ -97,10 +97,6 @@ PHP_FUNCTION(xdebug_is_enabled);
 PHP_FUNCTION(xdebug_is_debugger_active);
 PHP_FUNCTION(xdebug_break);
 
-/* custom */
-PHP_FUNCTION(xdebug_start_debugger);
-PHP_FUNCTION(xdebug_abort_debugger);
-
 /* tracing functions */
 PHP_FUNCTION(xdebug_start_trace);
 PHP_FUNCTION(xdebug_stop_trace);
@@ -134,6 +130,10 @@ PHP_FUNCTION(xdebug_get_headers);
 PHP_FUNCTION(xdebug_memory_usage);
 PHP_FUNCTION(xdebug_peak_memory_usage);
 PHP_FUNCTION(xdebug_time_index);
+
+/* debugger functions */
+PHP_FUNCTION(xdebug_start_debugger);
+PHP_FUNCTION(xdebug_stop_debugger);
 
 /* filter functions */
 PHP_FUNCTION(xdebug_set_filter);
