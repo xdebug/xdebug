@@ -2,6 +2,12 @@
 
 PATTERN=${1:-'7.3*'}
 
+PHP=`which php`
+if [[ "${PHP}" == "" ]]; then
+	echo "Can't find a PHP binary on the path"
+	exit
+fi
+
 PHP_DIR=${PHP_DIR:-/usr/local/php}
 SYSTEM_CORES=`nproc`
 NPROC=${NPROC:-$SYSTEM_CORES}

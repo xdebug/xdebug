@@ -21,6 +21,8 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 		'_id' => $runId . '@' . $config,
 		'run' => $runId,
 		'ts' => $timeStamp,
+		'ref' => `git rev-parse --short --verify HEAD`,
+		'abbrev' => `git describe --tags`,
 		'cfg' => [
 			'config' => $config,
 			'version' => $version,
@@ -28,6 +30,9 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 			'32bit' => $_32bit,
 		],
 	];
+
+	echo "Running for:\n";
+	print_r( $status );
 
 	if ( isset( $xml['buildFailed'] ) )
 	{
