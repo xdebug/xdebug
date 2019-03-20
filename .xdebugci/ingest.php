@@ -21,8 +21,8 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 		'_id' => $runId . '@' . $config,
 		'run' => $runId,
 		'ts' => $timeStamp,
-		'ref' => `git rev-parse --short --verify HEAD`,
-		'abbrev' => `git describe --tags`,
+		'ref' => trim( `git rev-parse --short --verify HEAD` ),
+		'abbrev' => trim( `git describe --tags` ),
 		'cfg' => [
 			'config' => $config,
 			'version' => $version,
