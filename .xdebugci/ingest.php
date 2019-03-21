@@ -30,9 +30,7 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 		],
 	];
 
-	echo "Running for:\n";
-	echo "_id' => {$runId}@{$config}\n";
-	print_r( $status );
+	echo "Running for: _id' => {$runId}@{$config}\n";
 
 	if ( isset( $xml['buildFailed'] ) )
 	{
