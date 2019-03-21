@@ -18,7 +18,6 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 	$xml = SimpleXML_load_string( file_get_contents( $file ) );
 	
 	$status = [
-		'_id' => $runId . '@' . $config,
 		'run' => $runId,
 		'ts' => $timeStamp,
 		'ref' => trim( `git rev-parse --short --verify HEAD` ),
@@ -32,6 +31,7 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 	];
 
 	echo "Running for:\n";
+	echo "_id' => {$runId}@{$config}\n";
 	print_r( $status );
 
 	if ( isset( $xml['buildFailed'] ) )
@@ -71,7 +71,11 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 	}
 
 	$bulk = new \MongoDB\Driver\BulkWrite;
-	$bulk->insert( $status );
+	$bulk->update(
+		[ '_id' => $runId . '@' . $config ],
+		$status,
+		[ 'upsert' => true ]
+	);
 
 	$m->executeBulkWrite( 'ci.run', $bulk );
 }
