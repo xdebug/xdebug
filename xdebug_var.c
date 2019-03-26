@@ -1046,7 +1046,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 		case IS_OBJECT:
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 
-			if (!xdebug_zend_hash_is_recursive(myht)) {
+			if (myht && !xdebug_zend_hash_is_recursive(myht)) {
 				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
