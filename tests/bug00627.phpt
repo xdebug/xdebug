@@ -17,6 +17,7 @@ $commands = array(
 	"breakpoint_set -t line -f file://$dir/bug00627-symlink.inc -n 4",
 	"run",
 	'context_get -d 0',
+	'detach',
 );
 
 dbgpRun( $data, $commands );
@@ -40,3 +41,7 @@ dbgpRun( $data, $commands );
 -> context_get -i 4 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"></response>
+
+-> detach -i 5
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="5" status="stopping" reason="ok"></response>

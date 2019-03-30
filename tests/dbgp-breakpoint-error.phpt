@@ -12,6 +12,7 @@ $commands = array(
 	'breakpoint_set -t exception -x *',
 	'run',
 	'run',
+	'detach',
 );
 
 dbgpRun( $data, $commands );
@@ -35,3 +36,7 @@ dbgpRun( $data, $commands );
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file:///%sxdebug-dbgp-test.php" lineno="10" exception="FooException"><![CDATA[testing foo exception]]></xdebug:message></response>
+
+-> detach -i 5
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="5" status="stopping" reason="ok"></response>

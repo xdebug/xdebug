@@ -11,6 +11,7 @@ $data = file_get_contents(dirname(__FILE__) . '/bug01101.inc');
 $commands = array(
 	'step_into',
 	'context_get',
+	'detach',
 );
 
 dbgpRun( $data, $commands, array( 'xdebug.remote_mode' => 'jit' ) );
@@ -26,3 +27,7 @@ dbgpRun( $data, $commands, array( 'xdebug.remote_mode' => 'jit' ) );
 -> context_get -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="2" context="0"></response>
+
+-> detach -i 3
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="3" status="stopping" reason="ok"></response>
