@@ -78,7 +78,7 @@ class DebugClient
 		}
 
 		$php = getenv( 'TEST_PHP_EXECUTABLE' );
-		$cmd = "{$php} $options {$this->tmpDir}/xdebug-dbgp-test.php >{$this->tmpDir}/php-error-output.txt 2>&1";
+		$cmd = "{$php} $options {$this->tmpDir}/xdebug-dbgp-test.php >{$this->tmpDir}/php-stdout.txt 2>{$this->tmpDir}/php-stderr.txt";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -127,11 +127,12 @@ class DebugClient
 			return;
 		}
 		$php = $this->launchPhp( $ppipes, $ini_options );
-		$conn = @stream_socket_accept( $socket, 3 );
+		$conn = @stream_socket_accept( $socket, 20 );
 
 		if ( $conn === false )
 		{
-			echo @file_get_contents( $this->tmpDir . '/php-error-output.txt' ), "\n";
+			echo @file_get_contents( $this->tmpDir . '/php-stdout.txt' ), "\n";
+			echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/remote_log.txt' ), "\n";
 			proc_close( $php );
@@ -163,9 +164,10 @@ class DebugClient
 		fclose( $conn );
 		fclose( $ppipes[0] );
 		fclose( $ppipes[1] );
+		fclose( $socket );
 		proc_close( $php );
 		
-		// echo @file_get_contents( $this->tmpDir . '/php-error-output.txt' ), "\n";
+		echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
 		// echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 	}
 }
