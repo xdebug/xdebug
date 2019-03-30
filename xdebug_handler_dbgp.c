@@ -259,9 +259,15 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message TS
 	return ret;
 }
 
-static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC)
+static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int stage TSRMLS_DC)
 {
 	xdebug_str *tmp;
+
+	/* Sometimes we end up in 'send_message' although the debugging connection
+	 * is already closed. In that case, we early return. */
+	if (XG(status) != DBGP_STATUS_STARTING && !xdebug_is_debug_connection_active()) {
+		return;
+	}
 
 	tmp = make_message(context, message TSRMLS_CC);
 	if ((size_t) SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
@@ -275,6 +281,12 @@ static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC
 	}
 	xdebug_str_free(tmp);
 }
+
+static void send_message(xdebug_con *context, xdebug_xml_node *message TSRMLS_DC)
+{
+	send_message_ex(context, message, 0);
+}
+
 
 static xdebug_xml_node* get_symbol(xdebug_str *name, xdebug_var_export_options *options)
 {
@@ -991,10 +1003,14 @@ DBGP_FUNC(eval)
 
 /* these functions interupt PHP's output functions, so we can
    redirect to our remote debugger! */
-static int xdebug_send_stream(const char *name, const char *str, uint str_length TSRMLS_DC)
+static void xdebug_send_stream(const char *name, const char *str, uint str_length TSRMLS_DC)
 {
 	/* create an xml document to send as the stream */
 	xdebug_xml_node *message;
+
+	if (!xdebug_is_debug_connection_active()) {
+		return;
+	}
 
 	message = xdebug_xml_node_init("stream");
 	xdebug_xml_add_attribute(message, "xmlns", "urn:debugger_protocol_v1");
@@ -1004,7 +1020,7 @@ static int xdebug_send_stream(const char *name, const char *str, uint str_length
 	send_message(&XG(context), message TSRMLS_CC);
 	xdebug_xml_node_dtor(message);
 
-	return 0;
+	return;
 }
 
 
@@ -1088,6 +1104,7 @@ DBGP_FUNC(detach)
 	XG(context).handler->remote_deinit(&(XG(context)));
 	xdebug_mark_debug_connection_not_active();
 	XG(stdout_mode) = 0;
+	XG(remote_enable) = 0;
 }
 
 
@@ -2246,7 +2263,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
 
-	send_message(context, response TSRMLS_CC);
+	send_message_ex(context, response, DBGP_STATUS_STARTING TSRMLS_CC);
 	xdebug_xml_node_dtor(response);
 /* }}} */
 
@@ -2315,6 +2332,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		xdebug_llist_destroy(context->line_breakpoints, NULL);
 		xdebug_hash_destroy(context->breakpoint_list);
 		xdfree(context->buffer);
+		context->buffer = NULL;
 	}
 
 	xdebug_mark_debug_connection_not_active();
