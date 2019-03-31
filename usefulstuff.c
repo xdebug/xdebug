@@ -81,6 +81,9 @@ char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigne
 		} else if (newl == -1 && errno == EINTR) {
 			continue;
 		} else {
+			free(context->buffer);
+			context->buffer = NULL;
+			context->buffer_size = 0;
 			return NULL;
 		}
 	}
