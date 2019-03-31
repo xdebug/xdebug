@@ -2335,6 +2335,10 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		context->buffer = NULL;
 	}
 
+	if (XG(lasttransid)) {
+		xdfree(XG(lasttransid));
+		XG(lasttransid) = NULL;
+	}
 	xdebug_mark_debug_connection_not_active();
 	return 1;
 }
