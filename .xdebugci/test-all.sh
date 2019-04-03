@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATTERN=${1:-'7.3*'}
+PATTERN=${1:-'^7.3.*'}
 
 PHP=`which php`
 if [[ "${PHP}" == "" ]]; then
@@ -13,7 +13,7 @@ SYSTEM_CORES=`nproc`
 NPROC=${NPROC:-$SYSTEM_CORES}
 MYFILE=`realpath $0`
 MYDIR=`dirname ${MYFILE}`
-PHPS=`ls -vd ${PHP_DIR}/${PATTERN}`
+PHPS=$(ls -v ${PHP_DIR} | egrep ${PATTERN})
 
 mkdir -p /tmp/ptester
 rm -rf /tmp/ptester/group*.lst
