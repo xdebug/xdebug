@@ -167,7 +167,7 @@ class DebugClient
 		fclose( $socket );
 		proc_close( $php );
 		
-		echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
+		// echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
 		// echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 	}
 }
