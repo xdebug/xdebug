@@ -4,6 +4,9 @@ $m = new \MongoDB\Driver\Manager( "mongodb+srv://ci-writer:{$_ENV['CIWRITEPASSWO
 /* Create RUN ID */
 $runId =     (new \DateTimeImmutable())->format( "Y-m-d-H-i-s" );
 $timeStamp = time();
+$abbrev =    trim( `git describe --tags` );
+
+echo $abbrev, "\n";
 
 /* Read all JUNIT logs */
 foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
@@ -21,7 +24,7 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 		'run' => $runId,
 		'ts' => $timeStamp,
 		'ref' => trim( `git rev-parse --short --verify HEAD` ),
-		'abbrev' => trim( `git describe --tags` ),
+		'abbrev' => $abbrev,
 		'cfg' => [
 			'config' => $config,
 			'version' => $version,
