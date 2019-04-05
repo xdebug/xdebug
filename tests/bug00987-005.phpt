@@ -23,6 +23,7 @@ $commands = array(
 	'property_get -n $o->5->baz[2]',
 	'property_get -n $o->5->b',
 	'property_get -n $o->5->b::foo',
+	'detach',
 );
 
 dbgpRun( $data, $commands );
@@ -90,3 +91,7 @@ dbgpRun( $data, $commands );
 -> property_get -i 15 -n $o->5->b::foo
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="15"><property name="$o-&gt;5-&gt;b::foo" fullname="$o-&gt;5-&gt;b::foo" type="int"><![CDATA[73]]></property></response>
+
+-> detach -i 16
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="16" status="stopping" reason="ok"></response>

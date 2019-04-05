@@ -19,6 +19,7 @@ $commands = array(
 	'property_get -n $obj->{"two[\\\'square\\\']"}',
 	'property_get -n $obj->{"two[\\\'square\\\']"}["{with"]',
 	'property_get -n $obj->{"two[\\\'square\\\']"}["{wi\\"th"]',
+	'detach',
 );
 
 dbgpRun( $data, $commands );
@@ -70,3 +71,7 @@ dbgpRun( $data, $commands );
 -> property_get -i 11 -n $obj->{"two[\'square\']"}["{wi\"th"]
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="11"><property name="$obj-&gt;{&quot;two[\&#39;square\&#39;]&quot;}[&quot;{wi\&quot;th&quot;]" fullname="$obj-&gt;{&quot;two[\&#39;square\&#39;]&quot;}[&quot;{wi\&quot;th&quot;]" type="int"><![CDATA[4]]></property></response>
+
+-> detach -i 12
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="12" status="stopping" reason="ok"></response>
