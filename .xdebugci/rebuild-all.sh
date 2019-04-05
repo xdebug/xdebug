@@ -2,6 +2,9 @@
 
 FORCE=${1:-"YES"}
 
+MYFILE=`realpath $0`
+MYDIR=`dirname ${MYFILE}`
+
 if [[ ${FORCE} == "YES" ]]; then
 	echo "Forcing builds for all versions"
 fi
@@ -17,7 +20,7 @@ for i in /usr/local/php/*; do
 
 		LOG="/tmp/xdebug-for-${version}.log"
 		echo -n "Building: "
-		../rebuild.sh >$LOG 2>&1
+		${MYDIR}/../rebuild.sh >$LOG 2>&1
 
 		if [[ $? == 0 ]]; then
 			echo "DONE"
