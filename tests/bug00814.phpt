@@ -16,6 +16,7 @@ $commands = array(
 	'step_into',
 	'stack_get',
 	'context_get -c 1',
+	'detach',
 );
 
 dbgpRun( $data, $commands );
@@ -55,3 +56,7 @@ dbgpRun( $data, $commands );
 -> context_get -i 8 -c 1
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="8" context="1">%s</response>
+
+-> detach -i 9
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="9" status="stopping" reason="ok"></response>

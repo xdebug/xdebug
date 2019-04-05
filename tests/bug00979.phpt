@@ -18,6 +18,7 @@ $commands = array(
 	'property_value -n $a -m "-1"',
 	'property_value -n $a -m 20',
 	'property_value -n $a',
+	'detach',
 );
 
 dbgpRun( $data, $commands );
@@ -65,3 +66,7 @@ dbgpRun( $data, $commands );
 -> property_value -i 10 -n $a
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_value" transaction_id="10" type="string" size="1280" encoding="base64"><![CDATA[YWJjZGVmZ2hpamFiY2RlZmdoaWphYmNkZWZnaGlqYWI=]]></response>
+
+-> detach -i 11
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="11" status="stopping" reason="ok"></response>
