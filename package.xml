@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-03-06</date>
- <time>11:55:24</time>
+ <date>2019-04-05</date>
+ <time>12:05:02</time>
  <version>
-  <release>2.7.0</release>
-  <api>2.7.0</api>
+  <release>2.7.1</release>
+  <api>2.7.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,14 +45,13 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Wed, Mar  6, 2019 - xdebug 2.7.0
+Wed, Apr  5, 2019 - xdebug 2.7.1
 
 = Fixed bugs:
 
-  - Fixed issue #1520: Xdebug does not handle variables and properties with "-" in their name
-  - Fixed issue #1577: Code coverage path analysis with chained catch fails in PHP 7.3
-  - Fixed issue #1639: Compile warning/error on GCC 8 or Clang due to "break intentionally missing"
-  - Fixed issue #1642: Debugger gives: "Warning: Header may not contain NUL bytes"
+  - Fixed issue #1646: Missing newline in error message
+  - Fixed issue #1647: Memory corruption when a conditional breakpoint is used
+  - Fixed issue #1641: Perfomance degradation with getpid syscall (Kees Hoekzema)
  </notes>
 
  <contents>
@@ -151,6 +150,30 @@ Wed, Mar  6, 2019 - xdebug 2.7.0
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-03-06</date>
+   <time>11:55:24</time>
+   <version>
+    <release>2.7.0</release>
+    <api>2.7.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Mar  6, 2019 - xdebug 2.7.0
+
+= Fixed bugs:
+
+  - Fixed issue #1520: Xdebug does not handle variables and properties with "-" in their name
+  - Fixed issue #1577: Code coverage path analysis with chained catch fails in PHP 7.3
+  - Fixed issue #1639: Compile warning/error on GCC 8 or Clang due to "break intentionally missing"
+  - Fixed issue #1642: Debugger gives: "Warning: Header may not contain NUL bytes"
+   </notes>
+  </release>
 
   <release>
    <date>2019-02-15</date>
