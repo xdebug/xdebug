@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,10 @@
 #include "xdebug_private.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+
+const char *xdebug_log_prefix[11] = {
+	"", "E: ", "", "W: ", "", "", "", "I: ", "", "", "D: "
+};
 
 function_stack_entry *xdebug_get_stack_head(TSRMLS_D)
 {

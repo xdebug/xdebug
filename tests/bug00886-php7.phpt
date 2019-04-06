@@ -33,15 +33,15 @@ dbgpRunFile( $filename, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file:///%s" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug00886.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
 -> step_into -i 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file:///%s" lineno="2"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file://bug00886.inc" lineno="2"></xdebug:message></response>
 
 -> step_into -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file:///%s" lineno="3"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file://bug00886.inc" lineno="3"></xdebug:message></response>
 
 -> step_into -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -49,7 +49,7 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="4"><stack where="include" level="0" type="file" filename="phar://%s/tests/bug00886.phar/file1.php" lineno="2"></stack><stack where="{main}" level="1" type="file" filename="file:///%s" lineno="3"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="4"><stack where="include" level="0" type="file" filename="phar://%s/tests/bug00886.phar/file1.php" lineno="2"></stack><stack where="{main}" level="1" type="file" filename="file://bug00886.inc" lineno="3"></stack></response>
 
 -> step_into -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -73,7 +73,7 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 10
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="10"><stack where="function1" level="0" type="file" filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></stack><stack where="{main}" level="1" type="file" filename="file:///%s" lineno="4"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="10"><stack where="function1" level="0" type="file" filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></stack><stack where="{main}" level="1" type="file" filename="file://bug00886.inc" lineno="4"></stack></response>
 
 -> detach -i 11
 <?xml version="1.0" encoding="iso-8859-1"?>
