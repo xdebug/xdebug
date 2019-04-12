@@ -9,7 +9,7 @@ require 'dbgp/dbgpclient.php';
 $dir = dirname(__FILE__);
 putenv("XDEBUG_TEST_DIR=$dir");
 
-$data = file_get_contents(dirname(__FILE__) . '/bug01007-index.inc');
+$filename = dirname(__FILE__) . '/bug01007-index.inc';
 
 $commands = array(
 	'breakpoint_set -t call -m SimpleClass::displayVar',
@@ -20,11 +20,11 @@ $commands = array(
 	'property_get -n ::hello'
 );
 
-dbgpRun( $data, $commands );
+dbgpRun( $filename, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file:///%sxdebug-dbgp-test.php" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file:///%s" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
 -> breakpoint_set -i 1 -t call -m SimpleClass::displayVar
 <?xml version="1.0" encoding="iso-8859-1"?>
