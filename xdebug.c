@@ -1188,37 +1188,24 @@ PHP_RINIT_FUNCTION(xdebug)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+/* PHP Bug #77287 causes Xdebug to segfault if OPcache has the "compact
+ * literals" optimisation turned on. So force the optimisation off for PHP
+ * 7.3.0 and 7.3.1.
+ *
+ * Otherwise, only turn off optimisation when we're debugging. */
 #if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
-	/* PHP Bug #77287 causes Xdebug to segfault if OPcache has the "compact
-	 * literals" optimisation turned on. So force it off for PHP 7.3.0 and
-	 * 7.3.1 */
-# if SIZEOF_ZEND_LONG == 4
-#  define XDEBUG_HEX8_FMT "0x%08" PRIX32
-# else
-#  define XDEBUG_HEX8_FMT "0x%08" PRIX64
-# endif
 	{
-		zend_long optimizer;
+#else
+	if (XG(remote_enable)) {
+#endif
 		zend_string *key = zend_string_init(ZEND_STRL("opcache.optimization_level"), 1);
-		zend_string *value;
-
-		optimizer = INI_INT((char*) "opcache.optimization_level");
-		/* If it's empty, it relies on PHP's internal default, so we initialise
-		 * it to PHP's default in that case. */
-		if (!optimizer) {
-			optimizer = 0x7FFFBFFF;
-		}
-
-		optimizer &= ~(1<<10); /* DFA based optimization */
-
-		value = strpprintf(0, XDEBUG_HEX8_FMT, optimizer);
+		zend_string *value = zend_string_init(ZEND_STRL("0"), 1);
 
 		zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
 
 		zend_string_release(key);
 		zend_string_release(value);
 	}
-#endif
 
 	/* Get the ide key for this session */
 	XG(ide_key) = NULL;
