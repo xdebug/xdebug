@@ -46,7 +46,7 @@ class DebugClient
 		return $socket;
 	}
 
-	private function launchPhp( &$pipes, array $ini_options = null )
+	private function launchPhp( &$pipes, array $ini_options = null, $filename )
 	{
 		@unlink( $this->tmpDir . '/error-output.txt' );
 		@unlink( $this->tmpDir . '/remote_log.txt' );
@@ -78,7 +78,7 @@ class DebugClient
 		}
 
 		$php = getenv( 'TEST_PHP_EXECUTABLE' );
-		$cmd = "{$php} $options {$this->tmpDir}/xdebug-dbgp-test.php >{$this->tmpDir}/php-stdout.txt 2>{$this->tmpDir}/php-stderr.txt";
+		$cmd = "{$php} $options {$filename} >{$this->tmpDir}/php-stdout.txt 2>{$this->tmpDir}/php-stderr.txt";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -114,9 +114,10 @@ class DebugClient
 		} while( !$end );
 	}
 
-	function runTest( $data, array $commands, array $ini_options = null )
+	function runTest( $filename, array $commands, array $ini_options = null )
 	{
-		file_put_contents( $this->tmpDir . '/xdebug-dbgp-test.php', $data );
+		$filename = realpath( $filename );
+
 		$i = 1;
 		$socket = $this->open( $errno, $errstr );
 		if ( $socket === false )
@@ -126,7 +127,7 @@ class DebugClient
 			echo "Address: {$this->getAddress()}\n";
 			return;
 		}
-		$php = $this->launchPhp( $ppipes, $ini_options );
+		$php = $this->launchPhp( $ppipes, $ini_options, $filename );
 		$conn = @stream_socket_accept( $socket, 20 );
 
 		if ( $conn === false )
