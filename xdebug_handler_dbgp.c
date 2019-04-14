@@ -1452,6 +1452,7 @@ DBGP_FUNC(property_set)
 	int                        context_nr = 0;
 	int                        res;
 	char                      *eval_string;
+	const char                *cast_as;
 	zval                       ret_zval;
 	function_stack_entry      *fse;
 	xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
@@ -1502,73 +1503,62 @@ DBGP_FUNC(property_set)
 
 	new_value = xdebug_base64_decode((unsigned char*) CMD_OPTION_CHAR('-'), CMD_OPTION_LEN('-'), &new_length);
 
+	/* Set a cast, if requested through the 't' option */
+	cast_as = "";
+
 	if (CMD_OPTION_SET('t')) {
-		zval symbol;
-		xdebug_get_php_symbol(&symbol, CMD_OPTION_XDEBUG_STR('n'));
+		XDEBUG_STR_SWITCH(CMD_OPTION_CHAR('t')) {
+			XDEBUG_STR_CASE("bool")
+				cast_as = "(bool) ";
+			XDEBUG_STR_CASE_END
 
-		/* Handle result */
-		if (Z_TYPE(symbol) == IS_UNDEF) {
-			xdfree(new_value);
-			RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
-		} else {
-			// TODO Doesn't make sense anymore in this form
-			zval_ptr_dtor_nogc(&symbol);
-			ZVAL_STRINGL(&symbol, (char*) new_value, new_length);
-			xdebug_xml_add_attribute(*retval, "success", "1");
+			XDEBUG_STR_CASE("int")
+				cast_as = "(int) ";
+			XDEBUG_STR_CASE_END
 
-			XDEBUG_STR_SWITCH(CMD_OPTION_CHAR('t')) {
-				XDEBUG_STR_CASE("bool")
-					convert_to_boolean(&symbol);
-				XDEBUG_STR_CASE_END
+			XDEBUG_STR_CASE("float")
+				cast_as = "(float) ";
+			XDEBUG_STR_CASE_END
 
-				XDEBUG_STR_CASE("int")
-					convert_to_long(&symbol);
-				XDEBUG_STR_CASE_END
+			XDEBUG_STR_CASE("string")
+				cast_as = "(string) ";
+			XDEBUG_STR_CASE_END
 
-				XDEBUG_STR_CASE("float")
-					convert_to_double(&symbol);
-				XDEBUG_STR_CASE_END
-
-				XDEBUG_STR_CASE("string")
-					/* do nothing */
-				XDEBUG_STR_CASE_END
-
-				XDEBUG_STR_CASE_DEFAULT
-					xdebug_xml_add_attribute(*retval, "success", "0");
-				XDEBUG_STR_CASE_DEFAULT_END
-			}
+			XDEBUG_STR_CASE_DEFAULT
+				xdebug_xml_add_attribute(*retval, "success", "0");
+			XDEBUG_STR_CASE_DEFAULT_END
 		}
+	}
+
+	/* backup executor state */
+	if (depth > 0) {
+		original_execute_data = EG(current_execute_data);
+
+		EG(current_execute_data) = XG(active_execute_data);
+		set_vars_from_EG(TSRMLS_C);
+	}
+
+	/* Do the eval */
+	eval_string = xdebug_sprintf("%s = %s %s", CMD_OPTION_CHAR('n'), cast_as, new_value);
+	res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
+
+	/* restore executor state */
+	if (depth > 0) {
+		EG(current_execute_data) = original_execute_data;
+		set_vars_from_EG(TSRMLS_C);
+	}
+
+	/* Free data */
+	xdfree(eval_string);
+	xdfree(new_value);
+
+	/* Handle result */
+	if (res == FAILURE) {
+		/* don't send an error, send success = zero */
+		xdebug_xml_add_attribute(*retval, "success", "0");
 	} else {
-		/* backup executor state */
-		if (depth > 0) {
-			original_execute_data = EG(current_execute_data);
-
-			EG(current_execute_data) = XG(active_execute_data);
-			set_vars_from_EG(TSRMLS_C);
-		}
-
-		/* Do the eval */
-		eval_string = xdebug_sprintf("%s = %s", CMD_OPTION_CHAR('n'), new_value);
-		res = xdebug_do_eval(eval_string, &ret_zval TSRMLS_CC);
-
-		/* restore executor state */
-		if (depth > 0) {
-			EG(current_execute_data) = original_execute_data;
-			set_vars_from_EG(TSRMLS_C);
-		}
-
-		/* Free data */
-		xdfree(eval_string);
-		xdfree(new_value);
-
-		/* Handle result */
-		if (res == FAILURE) {
-			/* don't send an error, send success = zero */
-			xdebug_xml_add_attribute(*retval, "success", "0");
-		} else {
-			zval_dtor(&ret_zval);
-			xdebug_xml_add_attribute(*retval, "success", "1");
-		}
+		zval_dtor(&ret_zval);
+		xdebug_xml_add_attribute(*retval, "success", "1");
 	}
 }
 
