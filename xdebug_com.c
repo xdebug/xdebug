@@ -413,11 +413,15 @@ static void xdebug_init_debugger()
 		if (remote_addr) {
 			/* Use first IP according to RFC 7239 */
 			char *cp = strchr(Z_STRVAL_P(remote_addr), ',');
-			if (cp) {
+			int cp_found = (cp != NULL);
+			if (cp_found) {
 				*cp = '\0';
 			}
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Remote address found, connecting to %s:%ld.\n", pid, Z_STRVAL_P(remote_addr), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XG(remote_port), XG(remote_connect_timeout));
+			if (cp_found) {
+				*cp = ',';
+			}
 		} else {
 			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", pid, XG(remote_host), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port), XG(remote_connect_timeout));
