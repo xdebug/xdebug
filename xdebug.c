@@ -1756,7 +1756,13 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (xdebug_handle_hit_value(extra_brk_info)) {
-					XG(context).do_break = 1;
+					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
+							return 0;
+						}
+					} else {
+						XG(context).do_break = 1;
+					}
 				}
 			}
 		}
