@@ -82,6 +82,7 @@ PHP_FUNCTION(xdebug_call_file);
 PHP_FUNCTION(xdebug_call_line);
 
 PHP_FUNCTION(xdebug_set_time_limit);
+PHP_FUNCTION(xdebug_error_reporting);
 PHP_FUNCTION(xdebug_pcntl_exec);
 
 PHP_FUNCTION(xdebug_var_dump);
@@ -169,6 +170,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	zif_handler   orig_var_dump_func;
 	zif_handler   orig_set_time_limit_func;
+	zif_handler   orig_error_reporting_func;
 	zif_handler   orig_pcntl_exec_func;
 
 	xdebug_trace_handler_t *trace_handler;
@@ -266,6 +268,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_con    context;
 	unsigned int  breakpoint_count;
 	unsigned int  no_exec;
+	zend_long     error_reporting_override;
+	zend_bool     error_reporting_overridden;
 
 	/* profiler settings */
 	zend_bool     profiler_enable;
