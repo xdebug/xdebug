@@ -15,7 +15,7 @@ $commands = array(
 	'property_get -d 0 -c 0 -n $v->a->a'
 );
 
-dbgpRun( $filename, $commands );
+dbgpRunFile( $filename, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>

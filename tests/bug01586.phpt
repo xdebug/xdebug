@@ -18,7 +18,7 @@ $commands = array(
 	'detach',
 );
 
-dbgpRun( $filename, $commands, [ 'error_reporting' => E_ALL & ~E_STRICT ] );
+dbgpRunFile( $filename, $commands, [ 'error_reporting' => E_ALL & ~E_STRICT ] );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>

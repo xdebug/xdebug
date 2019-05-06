@@ -11,7 +11,7 @@ if (strstr(exec("getent ahostsv6 localhost"), '::1')===false) echo "skip localho
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-dbgpRun("", array(), array("xdebug.remote_host" => "localhost"), XDEBUG_DBGP_IPV6);
+dbgpRunFile("", array(), array("xdebug.remote_host" => "localhost"), XDEBUG_DBGP_IPV6);
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>

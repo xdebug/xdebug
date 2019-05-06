@@ -22,7 +22,7 @@ $commands = array(
 	'detach'
 );
 
-dbgpRun( $filename, $commands );
+dbgpRunFile( $filename, $commands );
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="iso-8859-1"?>

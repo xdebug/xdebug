@@ -5,7 +5,7 @@ Test for bug #998: Test that Xdebug connects back on IPv4
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-dbgpRun("", array(), null, XDEBUG_DBGP_IPV4);
+dbgpRunFile("", array(), null, XDEBUG_DBGP_IPV4);
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
