@@ -429,6 +429,8 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->branches.last_branch_nr = NULL;
 	xg->do_code_coverage     = 0;
 	xg->breakpoint_count     = 0;
+	xg->error_reporting_override   = 0;
+	xg->error_reporting_overridden = 0;
 	xg->ide_key              = NULL;
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 	xg->stdout_mode          = 0;
@@ -914,6 +916,8 @@ PHP_MINIT_FUNCTION(xdebug)
 	xdebug_filter_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	XG(breakpoint_count) = 0;
+	XG(error_reporting_override) = 0;
+	XG(error_reporting_overridden) = 0;
 	XG(output_is_tty) = OUTPUT_NOT_CHECKED;
 
 	return SUCCESS;
@@ -1151,6 +1155,12 @@ static void xdebug_overloaded_functions_setup(TSRMLS_D)
 	XG(orig_set_time_limit_func) = orig->internal_function.handler;
 	orig->internal_function.handler = zif_xdebug_set_time_limit;
 
+	/* Override error_reporting with our own function, to be able to give right answer during DBGp's
+	 * 'eval' commands */
+	orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
+	XG(orig_error_reporting_func) = orig->internal_function.handler;
+	orig->internal_function.handler = zif_xdebug_error_reporting;
+
 	/* Override pcntl_exec with our own function to be able to write profiling summary */
 	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
 	if (orig) {
@@ -1169,7 +1179,10 @@ static void xdebug_overloaded_functions_restore(TSRMLS_D)
 	orig->internal_function.handler = XG(orig_var_dump_func);
 
 	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-	orig->internal_function.handler = XG(orig_set_time_limit_func);;
+	orig->internal_function.handler = XG(orig_set_time_limit_func);
+
+	orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
+	orig->internal_function.handler = XG(orig_error_reporting_func);
 
 	if (XG(orig_pcntl_exec_func)) {
 		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
@@ -1312,7 +1325,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Initialize start time */
 	XG(start_time) = xdebug_get_utime();
 
-	/* Overload var_dump, set_time_limit, and pcntl_exec */
+	/* Overload var_dump, set_time_limit, error_reporting, and pcntl_exec */
 	xdebug_overloaded_functions_setup(TSRMLS_C);
 
 	XG(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
@@ -1428,7 +1441,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG(functions_to_monitor) = NULL;
 	}
 
-	/* Restore original var_dump, set_time_limit, and pcntl_exec handlers */
+	/* Restore original var_dump, set_time_limit, error_reporting, and pcntl_exec handlers */
 	xdebug_overloaded_functions_restore(TSRMLS_C);
 
 	/* Clean up collected headers */
@@ -2159,6 +2172,18 @@ PHP_FUNCTION(xdebug_set_time_limit)
 }
 /* }}} */
 
+
+/* {{{ proto int xdebug_error_reporting(void)
+   Dummy function to return original error reporting level when 'eval' has turned it into 0 */
+PHP_FUNCTION(xdebug_error_reporting)
+{
+	if (ZEND_NUM_ARGS() == 0 && XG(error_reporting_overridden) && xdebug_is_debug_connection_active_for_current_pid()) {
+		RETURN_LONG(XG(error_reporting_override));
+	}
+	XG(orig_error_reporting_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
 /* {{{ proto void xdebug_pcntl_exec(void)
    Dummy function to prevent time limit from being set within the script */
 PHP_FUNCTION(xdebug_pcntl_exec)
@@ -2584,7 +2609,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 
 		if (XG(context).line_breakpoints) {
 			int   break_ok;
-			int   old_error_reporting;
 			zval  retval;
 			int   file_len = strlen(file);
 
@@ -2606,7 +2630,8 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						break_ok = 0;
 
 						/* Remember error reporting level */
-						old_error_reporting = EG(error_reporting);
+						XG(error_reporting_override) = EG(error_reporting);
+						XG(error_reporting_overridden) = 1;
 						EG(error_reporting) = 0;
 						XG(context).inhibit_notifications = 1;
 
@@ -2617,7 +2642,8 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 						}
 
 						/* Restore error reporting level */
-						EG(error_reporting) = old_error_reporting;
+						EG(error_reporting) = XG(error_reporting_override);
+						XG(error_reporting_overridden) = 0;
 						XG(context).inhibit_notifications = 0;
 					}
 					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
