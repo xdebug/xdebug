@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-04-05</date>
- <time>12:05:02</time>
+ <date>2019-05-06</date>
+ <time>16:48:57</time>
  <version>
-  <release>2.7.1</release>
-  <api>2.7.1</api>
+  <release>2.7.2</release>
+  <api>2.7.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,13 +45,15 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Wed, Apr  5, 2019 - xdebug 2.7.1
+Mon, May  6, 2019 - xdebug 2.7.2
 
 = Fixed bugs:
 
-  - Fixed issue #1646: Missing newline in error message
-  - Fixed issue #1647: Memory corruption when a conditional breakpoint is used
-  - Fixed issue #1641: Perfomance degradation with getpid syscall (Kees Hoekzema)
+  - Fixed issue #1488: Rewrite DBGp 'property_set' to always use eval
+  - Fixed issue #1586: error_reporting()'s return value is incorrect during debugger's 'eval' command
+  - Fixed issue #1615: Turn off Zend OPcache when remote debugger is turned on
+  - Fixed issue #1656: remote_connect_back alters header if multiple values are present
+  - Fixed issue #1662: __debugInfo should not be used for user-defined classes
  </notes>
 
  <contents>
@@ -150,6 +152,29 @@ Wed, Apr  5, 2019 - xdebug 2.7.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-04-05</date>
+   <time>12:05:02</time>
+   <version>
+    <release>2.7.1</release>
+    <api>2.7.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Apr  5, 2019 - xdebug 2.7.1
+
+= Fixed bugs:
+
+  - Fixed issue #1646: Missing newline in error message
+  - Fixed issue #1647: Memory corruption when a conditional breakpoint is used
+  - Fixed issue #1641: Perfomance degradation with getpid syscall (Kees Hoekzema)
+   </notes>
+  </release>
 
   <release>
    <date>2019-03-06</date>
