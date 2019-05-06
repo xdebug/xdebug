@@ -921,7 +921,6 @@ DBGP_FUNC(breakpoint_set)
 
 static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 {
-	int                old_error_reporting;
 	int                old_track_errors;
 	int                res = FAILURE;
 	zend_execute_data *original_execute_data = EG(current_execute_data);
@@ -930,7 +929,8 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	jmp_buf           *original_bailout = EG(bailout);
 
 	/* Remember error reporting level and track errors */
-	old_error_reporting = EG(error_reporting);
+	XG(error_reporting_override) = EG(error_reporting);
+	XG(error_reporting_overridden) = 1;
 	old_track_errors = PG(track_errors);
 	EG(error_reporting) = 0;
 	PG(track_errors) = 0;
@@ -951,7 +951,8 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	}
 
 	/* Clean up */
-	EG(error_reporting) = old_error_reporting;
+	EG(error_reporting) = XG(error_reporting_override);
+	XG(error_reporting_overridden) = 0;
 	PG(track_errors) = old_track_errors;
 	XG(breakpoints_allowed) = 1;
 
