@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -131,7 +131,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	xdebug_str_add(&str, xdebug_sprintf("%F\t", fse->time - XG(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%lu\t", fse->memory), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_EXTERNAL ? 1 : 0), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_USER_DEFINED ? 1 : 0), 1);
 	xdfree(tmp_name);
 
 	if (fse->include_filename) {

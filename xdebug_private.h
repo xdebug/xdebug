@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,7 @@
 #include "zend_hash.h"
 #include "xdebug_hash.h"
 #include "xdebug_llist.h"
+#include "xdebug_set.h"
 
 #define MICRO_IN_SEC 1000000.00
 
@@ -61,10 +62,11 @@ typedef struct xdebug_var_name {
 #define XFUNC_INCLUDE_ONCE   0x12
 #define XFUNC_REQUIRE        0x13
 #define XFUNC_REQUIRE_ONCE   0x14
+#define XFUNC_MAIN           0x15
 
 #define XFUNC_ZEND_PASS      0x20
 
-#define XDEBUG_IS_FUNCTION(f) (f == XFUNC_NORMAL || f == XFUNC_STATIC_MEMBER || f == XFUNC_MEMBER)
+#define XDEBUG_IS_NORMAL_FUNCTION(f) ((f)->type == XFUNC_NORMAL || (f)->type == XFUNC_STATIC_MEMBER || (f)->type == XFUNC_MEMBER)
 
 #define XDEBUG_REGISTER_LONG_CONSTANT(__c) REGISTER_LONG_CONSTANT(#__c, __c, CONST_CS|CONST_PERSISTENT)
 
@@ -75,8 +77,8 @@ typedef struct xdebug_var_name {
 #define XDEBUG_BREAK         1
 #define XDEBUG_STEP          2
 
-#define XDEBUG_INTERNAL      1
-#define XDEBUG_EXTERNAL      2
+#define XDEBUG_BUILT_IN      1
+#define XDEBUG_USER_DEFINED  2
 
 #define XDEBUG_MAX_FUNCTION_LEN 1024
 
@@ -88,6 +90,15 @@ typedef struct xdebug_var_name {
 #define XDEBUG_CC_OPTION_UNUSED          1
 #define XDEBUG_CC_OPTION_DEAD_CODE       2
 #define XDEBUG_CC_OPTION_BRANCH_CHECK    4
+
+#define XDEBUG_LOG_ERR               1
+#define XDEBUG_LOG_WARN              3
+#define XDEBUG_LOG_COM               5
+#define XDEBUG_LOG_INFO              7
+#define XDEBUG_LOG_DEBUG            10
+#define XDEBUG_LOG_DEFAULT          "7" /* as a string, as that's what STD_PHP_INI_ENTRY wants */
+
+extern const char* xdebug_log_prefix[11];
 
 #define STATUS_STARTING   0
 #define STATUS_STOPPING   1
@@ -171,6 +182,7 @@ typedef struct _function_stack_entry {
 	/* function properties */
 	xdebug_func  function;
 	int          user_defined;
+	xdebug_set  *executable_lines_cache;
 
 	/* location properties */
 	unsigned int level;

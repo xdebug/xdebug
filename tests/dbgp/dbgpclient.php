@@ -62,7 +62,8 @@ class DebugClient
 			"xdebug.remote_autostart" => "1",
 			"xdebug.remote_host" => $this->getIPAddress(),
 			"xdebug.remote_port" => $this->getPort(),
-			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt"
+			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt",
+			"xdebug.remote_log_level" => 10,
 		);
 
 		if ( is_null( $ini_options ) )
@@ -85,6 +86,16 @@ class DebugClient
 		return $process;
 	}
 
+	function fixFilePath( $m )
+	{
+		preg_match( '@.*/(.*\.inc)@', $m[2], $fm );
+		if ( !isset( $fm[1] ) )
+		{
+			$fm[1] = '';
+		}
+		return " {$m[1]}=\"file://{$fm[1]}\"";
+	}
+
 	function doRead( $conn )
 	{
 		stream_set_timeout( $conn, 0, 1000 );
@@ -101,6 +112,7 @@ class DebugClient
 			$read = preg_replace( '@\s(xdebug:language_version)="[^"]+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
 			$read = preg_replace( '@(2002-20[0-9]{2})@', '2002-2099', $read );
+			$read = preg_replace_callback( '@\s(fileuri|filename)="file:///(.+?)"@', 'self::fixFilePath', $read );
 			echo $read, "\n\n";
 
 			if ( preg_match( '@<stream xmlns="urn.debugger_protocol_v1" xmlns:xdebug@', $read ) )
@@ -155,7 +167,10 @@ class DebugClient
 				$command = $parts[0] . " -i $i " . $parts[1];
 			}
 
-			echo "-> ", $command, "\n";
+			$sanitised = $command;
+			$sanitised = preg_replace( '@\sfile://.*/(.*\.inc)\s@', ' file://\\1 ', $sanitised );
+
+			echo "-> ", $sanitised, "\n";
 			fwrite( $conn, $command . "\0" );
 
 			$this->doRead( $conn );

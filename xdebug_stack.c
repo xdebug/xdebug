@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -500,7 +500,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			int scope_nr = XG(stack)->size;
 
 			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-			if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
+			if (i->user_defined == XDEBUG_BUILT_IN && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
 				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
 				scope_nr--;
 			}
@@ -1141,7 +1141,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	int                   hit_variadic = 0;
 	zend_string          *aggr_key_str = NULL;
 
-	if (type == XDEBUG_EXTERNAL) {
+	if (type == XDEBUG_USER_DEFINED) {
 		edata = EG(current_execute_data)->prev_execute_data;
 		if (edata) {
 			opline_ptr = (zend_op**) &edata->opline;
@@ -1169,6 +1169,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->is_variadic   = 0;
 	tmp->filtered_tracing       = 0;
 	tmp->filtered_code_coverage = 0;
+	tmp->executable_lines_cache = NULL;
 
 	XG(function_count)++;
 	tmp->function_nr = XG(function_count);
@@ -1184,7 +1185,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	if (!tmp->filename) {
 		/* Includes/main script etc */
-		tmp->filename  = (type == XDEBUG_EXTERNAL && op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
+		tmp->filename  = (type == XDEBUG_USER_DEFINED && op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
 	}
 	/* Call user function locations */
 	if (
@@ -1211,7 +1212,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->function.type) {
 		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
-		tmp->function.type     = XFUNC_NORMAL;
+		tmp->function.type     = XFUNC_MAIN;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
 		tmp->lineno = 0;
@@ -1266,7 +1267,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				/* Because it is possible that more parameters are sent, then
 				 * actually wanted  we can only access the name in case there
 				 * is an associated variable to receive the variable here. */
-				if (tmp->user_defined == XDEBUG_EXTERNAL && i < arguments_wanted) {
+				if (tmp->user_defined == XDEBUG_USER_DEFINED && i < arguments_wanted) {
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
@@ -1294,7 +1295,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 			/* Sometimes not enough arguments are send to a user defined
 			 * function, so we have to gather only the name for those extra. */
-			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
+			if (tmp->user_defined == XDEBUG_USER_DEFINED && arguments_sent < arguments_wanted) {
 				for (i = arguments_sent; i < arguments_wanted; i++) {
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
@@ -1339,7 +1340,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if ((tmp->aggr_entry = zend_hash_find_ptr(&XG(aggr_calls), aggr_key_str)) == NULL) {
 			xdebug_aggregate_entry xae;
 
-			if (tmp->user_defined == XDEBUG_EXTERNAL) {
+			if (tmp->user_defined == XDEBUG_USER_DEFINED) {
 				xae.filename = xdstrdup(tmp->op_array->filename->val);
 			} else {
 				xae.filename = xdstrdup("php:internal");
