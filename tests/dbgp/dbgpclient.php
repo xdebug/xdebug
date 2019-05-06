@@ -199,7 +199,7 @@ class DebugClientIPv6 extends DebugClient
 	}
 }
 
-function dbgpRun( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
+function dbgpRunFile( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
 {
 	if ( $flags == XDEBUG_DBGP_IPV6 )
 	{

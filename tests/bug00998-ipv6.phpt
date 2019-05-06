@@ -10,7 +10,7 @@ if (!DebugClientIPv6::isSupported($errno, $errstr)) echo "skip IPv6 support is n
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
-dbgpRun("", array(), null, XDEBUG_DBGP_IPV6);
+dbgpRunFile("", array(), null, XDEBUG_DBGP_IPV6);
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>

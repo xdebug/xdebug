@@ -19,7 +19,7 @@ $commands = array(
 	'property_value -d 0 -c 0 -n $var -p 0 -m 10000',
 );
 
-dbgpRun( $filename, $commands );
+dbgpRunFile( $filename, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>

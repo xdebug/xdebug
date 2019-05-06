@@ -14,7 +14,7 @@ $commands = array(
 	'detach',
 );
 
-dbgpRun( $filename, $commands, array( 'xdebug.remote_mode' => 'jit' ) );
+dbgpRunFile( $filename, $commands, array( 'xdebug.remote_mode' => 'jit' ) );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
