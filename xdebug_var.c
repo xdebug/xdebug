@@ -42,12 +42,26 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+static inline int object_or_ancestor_is_internal(zval dzval)
+{
+	zend_class_entry *tmp_ce = Z_OBJCE(dzval);
+
+	do {
+		if (tmp_ce->type == ZEND_INTERNAL_CLASS) {
+			return 1;
+		}
+		tmp_ce = tmp_ce->parent;
+	} while (tmp_ce);
+
+	return 0;
+}
+
 HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
 {
 	zval dzval = **zval_pp;
 	HashTable *tmp;
 
-	if (!XG(in_debug_info) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
+	if (!XG(in_debug_info) && object_or_ancestor_is_internal(dzval) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
 		zend_bool old_trace = XG(do_trace);
 		zend_object *orig_exception;
 
