@@ -58,6 +58,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 static char *create_eval_key_file(char *filename, int lineno);
 static char *create_eval_key_id(int id);
+static void line_breakpoint_resolve_helper(xdebug_con *context, function_stack_entry *fse, xdebug_brk_info *brk_info);
 
 /*****************************************************************************
 ** Constants and strings for statii and reasons
@@ -839,7 +840,6 @@ DBGP_FUNC(breakpoint_set)
 	xdebug_brk_info      *brk_info;
 	char                 *tmp_name;
 	size_t                new_length = 0;
-	function_stack_entry *fse;
 	XDEBUG_STR_SWITCH_DECL;
 
 	brk_info = xdmalloc(sizeof(xdebug_brk_info));
@@ -905,7 +905,8 @@ DBGP_FUNC(breakpoint_set)
 
 		/* If no filename is given, we use the current one */
 		if (!CMD_OPTION_SET('f')) {
-			fse = xdebug_get_stack_tail(TSRMLS_C);
+			function_stack_entry *fse = xdebug_get_stack_tail(TSRMLS_C);
+
 			if (!fse) {
 				RETURN_RESULT(XG(status), XG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 			} else {
@@ -939,6 +940,14 @@ DBGP_FUNC(breakpoint_set)
 		}
 		xdfree(tmp_name);
 		xdebug_llist_insert_next(context->line_breakpoints, XDEBUG_LLIST_TAIL(context->line_breakpoints), (void*) brk_info);
+
+		if (XG(context).resolved_breakpoints) {
+			function_stack_entry *fse = xdebug_get_stack_tail(TSRMLS_C);
+
+			if (fse) {
+				line_breakpoint_resolve_helper(context, fse, brk_info);
+			}
+		}
 	} else
 
 	if ((strcmp(CMD_OPTION_CHAR('t'), "call") == 0) || (strcmp(CMD_OPTION_CHAR('t'), "return") == 0)) {
@@ -2689,129 +2698,127 @@ static void function_breakpoint_resolve_helper(void *rctxt, xdebug_brk_info *brk
 	}
 }
 
-static void line_breakpoint_resolve_helper(void *rctxt, xdebug_brk_info *brk_info, xdebug_hash_element *he)
+static void line_breakpoint_resolve_helper(xdebug_con *context, function_stack_entry *fse, xdebug_brk_info *brk_info)
 {
-	xdebug_dbgp_resolve_context *ctxt = (xdebug_dbgp_resolve_context*) rctxt;
-
 	/* If the breakpoint's line number isn't in the function's range, bail out */
-	if (brk_info->original_lineno < ctxt->fse->op_array->line_start || brk_info->original_lineno > ctxt->fse->op_array->line_end) {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "R: Line number (%d) out of range (%d-%d)\n", brk_info->original_lineno, ctxt->fse->op_array->line_start, ctxt->fse->op_array->line_end);
+	if (brk_info->original_lineno < fse->op_array->line_start || brk_info->original_lineno > fse->op_array->line_end) {
+		context->handler->log(XDEBUG_LOG_DEBUG, "R: Line number (%d) out of range (%d-%d)\n", brk_info->original_lineno, fse->op_array->line_start, fse->op_array->line_end);
 		return;
 	}
 
 	/* If we have resolved before, we only resolve again if the current scope's
 	 * line-span is *smaller* then the one that was used for the already
 	 * resolved case */
-	if (brk_info->resolved == XDEBUG_BRK_RESOLVED && !function_span_is_smaller_than_resolved_span(ctxt->fse->op_array, &brk_info->resolved_span)) {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "R: Resolved span (%d-%d) is not smaller than function span (%d-%d)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, ctxt->fse->op_array->line_start, ctxt->fse->op_array->line_end);
+	if (brk_info->resolved == XDEBUG_BRK_RESOLVED && !function_span_is_smaller_than_resolved_span(fse->op_array, &brk_info->resolved_span)) {
+		context->handler->log(XDEBUG_LOG_DEBUG, "R: Resolved span (%d-%d) is not smaller than function span (%d-%d)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, fse->op_array->line_start, fse->op_array->line_end);
 		return;
 	} else if (brk_info->resolved != XDEBUG_BRK_RESOLVED) {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "I: Has not been resolved yet\n");
+		context->handler->log(XDEBUG_LOG_DEBUG, "I: Has not been resolved yet\n");
 	} else {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "I: Resolved span (%d-%d) is smaller than function span (%d-%d)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, ctxt->fse->op_array->line_start, ctxt->fse->op_array->line_end);
+		context->handler->log(XDEBUG_LOG_DEBUG, "I: Resolved span (%d-%d) is smaller than function span (%d-%d)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, fse->op_array->line_start, fse->op_array->line_end);
 	}
 
 	/* If we're not in a normal function or method: */
-	if (XDEBUG_IS_NORMAL_FUNCTION(&ctxt->fse->function)) {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "I: '%s' is a normal function or method (%02x)\n", ctxt->fse->function.function, ctxt->fse->function.type);
+	if (XDEBUG_IS_NORMAL_FUNCTION(&fse->function)) {
+		context->handler->log(XDEBUG_LOG_DEBUG, "I: '%s' is a normal function or method (%02x)\n", fse->function.function, fse->function.type);
 
 		/* If the 'line' breakpoint's file and current file don't match, bail out */
-		if (strcmp(brk_info->file, STR_NAME_VAL(ctxt->fse->op_array->filename)) != 0) {
-			ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "R: Breakpoint file name (%s) does not match function's file name (%s)\n", brk_info->file, STR_NAME_VAL(ctxt->fse->op_array->filename));
+		if (strcmp(brk_info->file, STR_NAME_VAL(fse->op_array->filename)) != 0) {
+			context->handler->log(XDEBUG_LOG_DEBUG, "R: Breakpoint file name (%s) does not match function's file name (%s)\n", brk_info->file, STR_NAME_VAL(fse->op_array->filename));
 			return;
 		}
 	}
 	/* else, if we're in an eval: */
-	else if (ctxt->fse->function.type == XFUNC_EVAL) {
+	else if (fse->function.type == XFUNC_EVAL) {
 		char *key, *dbgp_eval_key;
 		xdebug_eval_info *ei;
 
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "I: Current 'function' is an eval statement\n");
+		context->handler->log(XDEBUG_LOG_DEBUG, "I: Current 'function' is an eval statement\n");
 
-		key = create_eval_key_file(ctxt->fse->filename, ctxt->fse->lineno);
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "   I: Looking up eval ID for '%s'\n", key);
-		if (!xdebug_hash_find(ctxt->context->eval_id_lookup, key, strlen(key), (void *) &ei)) {
-			ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "   R: Eval ID not found\n");
+		key = create_eval_key_file(fse->filename, fse->lineno);
+		context->handler->log(XDEBUG_LOG_DEBUG, "   I: Looking up eval ID for '%s'\n", key);
+		if (!xdebug_hash_find(context->eval_id_lookup, key, strlen(key), (void *) &ei)) {
+			context->handler->log(XDEBUG_LOG_DEBUG, "   R: Eval ID not found\n");
 			xdfree(key);
 			return;
 		}
 		xdfree(key);
 
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "   I: Constructing 'filename' for eval ID '%d'\n", ei->id);
+		context->handler->log(XDEBUG_LOG_DEBUG, "   I: Constructing 'filename' for eval ID '%d'\n", ei->id);
 		dbgp_eval_key = xdebug_sprintf("dbgp://%d", ei->id);
 
 		if (strcmp(dbgp_eval_key, brk_info->file) != 0) {
-			ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "   R: Breakpoint file name (%s) does not match eval's file name (%s)\n", brk_info->file, dbgp_eval_key);
+			context->handler->log(XDEBUG_LOG_DEBUG, "   R: Breakpoint file name (%s) does not match eval's file name (%s)\n", brk_info->file, dbgp_eval_key);
 			xdfree(dbgp_eval_key);
 			return;
 		}
 		xdfree(dbgp_eval_key);
 	}
 	/* else, if we're an include or require: */
-	else if (ctxt->fse->function.type & XFUNC_INCLUDES) {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "I: Current 'function' is a file scope (%s)\n", STR_NAME_VAL(ctxt->fse->op_array->filename));
+	else if (fse->function.type & XFUNC_INCLUDES) {
+		context->handler->log(XDEBUG_LOG_DEBUG, "I: Current 'function' is a file scope (%s)\n", STR_NAME_VAL(fse->op_array->filename));
 
 		/* If the 'line' breakpoint's file and current file don't match, bail out */
-		if (strcmp(brk_info->file, STR_NAME_VAL(ctxt->fse->op_array->filename)) != 0) {
-			ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "   R: Breakpoint file name (%s) does not match file's name (%s)\n", brk_info->file, STR_NAME_VAL(ctxt->fse->op_array->filename));
+		if (strcmp(brk_info->file, STR_NAME_VAL(fse->op_array->filename)) != 0) {
+			context->handler->log(XDEBUG_LOG_DEBUG, "   R: Breakpoint file name (%s) does not match file's name (%s)\n", brk_info->file, STR_NAME_VAL(fse->op_array->filename));
 			return;
 		}
 	} else {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "R: We don't handle this function type (%02x) yet\n", ctxt->fse->function.type);
+		context->handler->log(XDEBUG_LOG_DEBUG, "R: We don't handle this function type (%02x) yet\n", fse->function.type);
 		return;
 	}
 
 	/* If the breakpoint's line number is in the set, mark as resolved */
-	if (xdebug_set_in(ctxt->executable_lines, brk_info->original_lineno)) {
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "F: Breakpoint line (%d) found in set of executable lines\n", brk_info->original_lineno);
+	if (xdebug_set_in(get_executable_lines_from_oparray(fse), brk_info->original_lineno)) {
+		context->handler->log(XDEBUG_LOG_DEBUG, "F: Breakpoint line (%d) found in set of executable lines\n", brk_info->original_lineno);
 		brk_info->resolved_lineno = brk_info->original_lineno;
-		brk_info->resolved_span.start = ctxt->fse->op_array->line_start;
-		brk_info->resolved_span.end   = ctxt->fse->op_array->line_end;
+		brk_info->resolved_span.start = fse->op_array->line_start;
+		brk_info->resolved_span.end   = fse->op_array->line_end;
 		brk_info->resolved = XDEBUG_BRK_RESOLVED;
-		xdebug_dbgp_resolved_breakpoint_notification(ctxt->context, brk_info);
+		xdebug_dbgp_resolved_breakpoint_notification(context, brk_info);
 		return;
 	} else {
 		int tmp_lineno;
 
-		ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "I: Breakpoint line (%d) NOT found in set of executable lines\n", brk_info->original_lineno);
+		context->handler->log(XDEBUG_LOG_DEBUG, "I: Breakpoint line (%d) NOT found in set of executable lines\n", brk_info->original_lineno);
 
 		/* Check for a following line in the function */
 		tmp_lineno = brk_info->original_lineno;
 		do {
 			tmp_lineno++;
 
-			if (xdebug_set_in(ctxt->executable_lines, tmp_lineno)) {
-				ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "  F: Line (%d) in set (with span: %d-%d)\n", tmp_lineno, ctxt->fse->op_array->line_start, ctxt->fse->op_array->line_end);
+			if (xdebug_set_in(get_executable_lines_from_oparray(fse), tmp_lineno)) {
+				context->handler->log(XDEBUG_LOG_DEBUG, "  F: Line (%d) in set (with span: %d-%d)\n", tmp_lineno, fse->op_array->line_start, fse->op_array->line_end);
 
 				brk_info->resolved_lineno = tmp_lineno;
-				brk_info->resolved_span.start = ctxt->fse->op_array->line_start;
-				brk_info->resolved_span.end   = ctxt->fse->op_array->line_end;
+				brk_info->resolved_span.start = fse->op_array->line_start;
+				brk_info->resolved_span.end   = fse->op_array->line_end;
 				brk_info->resolved = XDEBUG_BRK_RESOLVED;
-				xdebug_dbgp_resolved_breakpoint_notification(ctxt->context, brk_info);
+				xdebug_dbgp_resolved_breakpoint_notification(context, brk_info);
 				return;
 			} else {
-				ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "  I: Line (%d) not in set\n", tmp_lineno);
+				context->handler->log(XDEBUG_LOG_DEBUG, "  I: Line (%d) not in set\n", tmp_lineno);
 			}
-		} while (tmp_lineno < ctxt->fse->op_array->line_end && (tmp_lineno < brk_info->original_lineno + 10));
+		} while (tmp_lineno < fse->op_array->line_end && (tmp_lineno < brk_info->original_lineno + 10));
 
 		/* Check for a previous line in the function */
 		tmp_lineno = brk_info->original_lineno;
 		do {
 			tmp_lineno--;
 
-			if (xdebug_set_in(ctxt->executable_lines, tmp_lineno)) {
-				ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "  F: Line (%d) in set\n", tmp_lineno);
+			if (xdebug_set_in(get_executable_lines_from_oparray(fse), tmp_lineno)) {
+				context->handler->log(XDEBUG_LOG_DEBUG, "  F: Line (%d) in set\n", tmp_lineno);
 
 				brk_info->resolved_lineno = tmp_lineno;
-				brk_info->resolved_span.start = ctxt->fse->op_array->line_start;
-				brk_info->resolved_span.end   = ctxt->fse->op_array->line_end;
+				brk_info->resolved_span.start = fse->op_array->line_start;
+				brk_info->resolved_span.end   = fse->op_array->line_end;
 				brk_info->resolved = XDEBUG_BRK_RESOLVED;
-				xdebug_dbgp_resolved_breakpoint_notification(ctxt->context, brk_info);
+				xdebug_dbgp_resolved_breakpoint_notification(context, brk_info);
 				return;
 			} else {
-				ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "  I: Line (%d) not in set\n", tmp_lineno);
+				context->handler->log(XDEBUG_LOG_DEBUG, "  I: Line (%d) not in set\n", tmp_lineno);
 			}
-		} while (tmp_lineno > ctxt->fse->op_array->line_start && (tmp_lineno > brk_info->original_lineno - 10));
+		} while (tmp_lineno > fse->op_array->line_start && (tmp_lineno > brk_info->original_lineno - 10));
 	}
 }
 
@@ -2862,7 +2869,7 @@ static void breakpoint_resolve_helper(void *rctxt, xdebug_hash_element *he)
 	switch (brk_info->brk_type) {
 		case XDEBUG_BREAKPOINT_TYPE_LINE:
 		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL:
-			line_breakpoint_resolve_helper(rctxt, brk_info, he);
+			line_breakpoint_resolve_helper(ctxt->context, ctxt->fse, brk_info);
 			return;
 
 		case XDEBUG_BREAKPOINT_TYPE_CALL:
