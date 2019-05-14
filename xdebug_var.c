@@ -1058,6 +1058,14 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 			break;
 
 		case IS_OBJECT:
+			uint32_t refcount = GC_REFCOUNT((**struc).value.obj);
+			if (refcount <= 0 || refcount > 255) {
+				// The object got garbage collected and is no longer available,
+				// so we cannot provide any information about it (see bug #1665)
+				xdebug_str_addl(str, "*garbage-collected object*", 26, 0);
+				break;
+			}
+
 			myht = xdebug_objdebug_pp(struc, &is_temp TSRMLS_CC);
 
 			if (!xdebug_zend_hash_is_recursive(myht)) {
@@ -1185,6 +1193,13 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 			break;
 
 		case IS_OBJECT: {
+			uint32_t refcount = GC_REFCOUNT((**struc).value.obj);
+			if (refcount <= 0 || refcount > 255) {
+				// The object got garbage collected and is no longer available,
+				// so we cannot provide any information about it (see bug #1665)
+				xdebug_str_addl(str, "*garbage-collected object*", 26, 0);
+				break;
+			}
 			xdebug_str_add(str, xdebug_sprintf("class %s", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
 			break;
 		}
@@ -2530,6 +2545,17 @@ xdebug_str* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_v
 
 	if (!val) {
 		return NULL;
+	}
+
+	if (Z_TYPE_P(val) == IS_OBJECT) {
+		uint32_t refcount = GC_REFCOUNT((*val).value.obj);
+		if (refcount <= 0 || refcount > 255) {
+			// The object got garbage collected and is no longer available,
+			// so we cannot provide any information about it (see bug #1665)
+			xdebug_str* str = xdebug_str_new();
+			xdebug_str_addl(str, "*garbage-collected object*", 26, 0);
+			return str;
+		}
 	}
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
