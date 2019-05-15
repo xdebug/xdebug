@@ -224,6 +224,8 @@ typedef struct _function_stack_entry {
 	struct _function_stack_entry *prev;
 	zend_op_array *op_array;
 	xdebug_aggregate_entry *aggr_entry;
+	int gc_locked_objects_count;
+	zend_object **gc_locked_objects;
 } function_stack_entry;
 
 function_stack_entry *xdebug_get_stack_head(TSRMLS_D);
