@@ -11,11 +11,11 @@ function query($var) {
 		$var = "Country rooooooads"; // Rewriting an object var segfaults
 		throw new LogicException('I am broken');
 	} catch (Exception $ex) {
-		echo 'Segfault did not happened';
 	}
 }
 
 query(new stdClass());
+echo 'No segfault';
 ?>
 --EXPECTF--
-Segfault did not happened
+No segfault

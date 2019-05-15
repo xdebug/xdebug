@@ -11,7 +11,6 @@ function query($var) {
 		$var = "Country rooooooads"; // Rewriting an object var segfaults
 		throw new LogicException('I am broken');
 	} catch (Exception $ex) {
-		echo "Segfault did not happened\n";
 	}
 }
 
@@ -23,13 +22,8 @@ query(array("Or", "an", "array", "of", 6, "elements?"));
 query(false);
 query(true);
 query(null);
+
+echo 'No segfault';
 ?>
 --EXPECTF--
-Segfault did not happened
-Segfault did not happened
-Segfault did not happened
-Segfault did not happened
-Segfault did not happened
-Segfault did not happened
-Segfault did not happened
-Segfault did not happened
+No segfault

@@ -1293,13 +1293,13 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 					}
 					
 					if (Z_TYPE(tmp->var[tmp->varc].data) == IS_OBJECT) {
-						// Tell garbage collector to NOT gc the objects until the stack is removed
-						// Otherwise, Zend GC might remove functions parameters (or maybe other variables content)
-						// and XDebug will be stuck when trying to dump the stack frame
-						// because some variables in this stackframe will no longer exists (because being GCed)
+						/* Tell garbage collector to NOT gc the objects until the stack is removed
+						 * Otherwise, Zend GC might remove functions parameters (or maybe other variables content)
+						 * and XDebug will be stuck when trying to dump the stack frame
+						 * because some variables in this stackframe will no longer exists (because being GCed) */
 						GC_ADDREF(tmp->var[tmp->varc].data.value.obj);
 						
-						// Save the GC lock references so we can remove them once the frame is discarded
+						/* Save the GC lock references so we can remove them once the frame is discarded */
 						tmp->gc_locked_objects = realloc(tmp->gc_locked_objects, tmp->gc_locked_objects_count + 1);
 						tmp->gc_locked_objects[tmp->gc_locked_objects_count] = tmp->var[tmp->varc].data.value.obj;
 						tmp->gc_locked_objects_count++;

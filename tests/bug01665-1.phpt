@@ -12,7 +12,6 @@ function query($var) {
 		$var = "Country rooooooads"; // Rewriting an object var segfaults
 		throw new LogicException('I am broken');
 	} catch (Exception $ex) {
-		//echo 'Segfault did not happened';
 	}
 }
 
@@ -20,7 +19,7 @@ for ($i = 1e5; $i > 0; $i--) {
 	// Tests that the garbage collection occurs properly (hence the very low memory limit)
 	query(new stdClass());
 }
-echo 'Segfault did not happened';
+echo 'No segfault';
 ?>
 --EXPECTF--
-Segfault did not happened
+No segfault

@@ -1871,18 +1871,6 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	if ((signed long) XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XG(max_nesting_level));
 	}
-	
-//	if (XG(collect_params) || XG(collect_vars) || xdebug_is_debug_connection_active_for_current_pid()) {
-//		// Tell garbage collector to NOT gc the objects until the stack is removed
-//		// Otherwise, Zend GC might remove functions parameters (or maybe other variables content)
-//		// and XDebug will be stuck when trying to dump the stack frame
-//		// because some variables in this stackframe will no longer exists (because being GCed)
-//		for (i = 0; i < ZEND_CALL_NUM_ARGS(edata); i++) {
-//			if (Z_TYPE(ZEND_CALL_ARG(edata, i)) == IS_OBJECT) {
-//				GC_ADDREF(edata->value.obj);
-//			}
-//		}
-//	}
 
 	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED TSRMLS_CC);
 	fse->function.internal = 0;
@@ -1964,8 +1952,8 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 
-	// Unlocks the garbage collection of stack frame (function call arguments) objects
-	// So they can be properly GCed by PHP later on
+	/* Unlocks the garbage collection of stack frame (function call arguments) objects
+	 * So they can be properly GCed by PHP later on */
 	for (i = 0; i < fse->gc_locked_objects_count; i++) {
 		GC_DELREF(fse->gc_locked_objects[i]);
 	}
