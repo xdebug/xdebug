@@ -2033,7 +2033,6 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	function_stack_entry *fse;
 	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
-	size_t                i = 0;
 
 	int                   restore_error_handler_situation = 0;
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
