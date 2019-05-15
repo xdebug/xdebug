@@ -1169,6 +1169,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->is_variadic   = 0;
 	tmp->filtered_tracing       = 0;
 	tmp->filtered_code_coverage = 0;
+	tmp->gc_locked_objects_count = 0;
+	tmp->gc_locked_objects = NULL;
+
 
 	XG(function_count)++;
 	tmp->function_nr = XG(function_count);
@@ -1288,6 +1291,22 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 					} else {
 						ZVAL_COPY_VALUE(&(tmp->var[tmp->varc].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted));
 					}
+					if (Z_TYPE(tmp->var[tmp->varc].data) == IS_OBJECT) {
+						/* Tell garbage collector to NOT gc the objects until the stack is removed
+						 * Otherwise, Zend GC might remove functions parameters (or maybe other variables content)
+						 * and XDebug will be stuck when trying to dump the stack frame
+						 * because some variables in this stackframe will no longer exists (because being GCed) */
+						#if PHP_VERSION_ID >= 70300
+							GC_ADDREF(tmp->var[tmp->varc].data.value.obj);
+						#else
+							GC_REFCOUNT(tmp->var[tmp->varc].data.value.obj)++;
+						#endif
+
+						/* Save the GC lock references so we can remove them once the frame is discarded */
+						tmp->gc_locked_objects = realloc(tmp->gc_locked_objects, tmp->gc_locked_objects_count + 1);
+						tmp->gc_locked_objects[tmp->gc_locked_objects_count] = tmp->var[tmp->varc].data.value.obj;
+						tmp->gc_locked_objects_count++;
+					}
 				}
 				tmp->varc++;
 			}
@@ -1381,6 +1400,19 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 
 	return tmp;
+}
+
+void xdebug_remove_stack_frame(function_stack_entry *fse) {
+	size_t i = 0;
+	/* Unlocks the garbage collection of stack frame (function call arguments) objects
+	 * So these objects can be properly GCed by PHP later on */
+	for (i = 0; i < fse->gc_locked_objects_count; i++) {
+		#if PHP_VERSION_ID >= 70300
+			GC_DELREF(fse->gc_locked_objects[i]);
+		#else
+			GC_REFCOUNT(fse->gc_locked_objects[i])--;
+		#endif
+	}
 }
 
 /* {{{ proto int xdebug_get_stack_depth()

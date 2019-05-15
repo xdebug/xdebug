@@ -212,6 +212,12 @@ typedef struct _function_stack_entry {
 	struct _function_stack_entry *prev;
 	zend_op_array *op_array;
 	xdebug_aggregate_entry *aggr_entry;
+
+	/* Xdebug "locks" garbage collection of stack frame objects
+	 * to be able to dump them, so keep the list of locked objects
+	 * so we can later on "unlock" them and let PHP garbage collect them */
+	int gc_locked_objects_count;
+	zend_object **gc_locked_objects;
 } function_stack_entry;
 
 function_stack_entry *xdebug_get_stack_head(TSRMLS_D);

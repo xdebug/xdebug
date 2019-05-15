@@ -1927,6 +1927,8 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 
+	xdebug_remove_stack_frame(fse);
+
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_end(fse TSRMLS_CC);
 		xdebug_profiler_free_function_details(fse TSRMLS_CC);
@@ -2049,6 +2051,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	} else {
 		execute_internal(current_execute_data, return_value TSRMLS_CC);
 	}
+
+	xdebug_remove_stack_frame(fse);
 
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_end(fse TSRMLS_CC);
