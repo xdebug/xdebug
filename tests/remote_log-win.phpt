@@ -27,7 +27,7 @@ unlink ("C:\\Windows\\Temp\\remote-log4.txt");
 [%d] W: Creating socket for 'doesnotexist3:9003', getaddrinfo: %d.
 [%d] E: Could not connect to client. :-(
 [%d] Log closed at %d-%d-%d %d:%d:%d
-[%d]
+
 [%d] Log opened at %d-%d-%d %d:%d:%d
 [%d] I: Checking remote connect back address.
 [%d] I: Checking user configured header 'I_LIKE_COOKIES'.
@@ -35,4 +35,3 @@ unlink ("C:\\Windows\\Temp\\remote-log4.txt");
 [%d] W: Creating socket for 'doesnotexist3:9003', getaddrinfo: %d.
 [%d] E: Could not connect to client. :-(
 [%d] Log closed at %d-%d-%d %d:%d:%d
-[%d]

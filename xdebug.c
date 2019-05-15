@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -390,6 +390,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   remote_autostart,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   remote_connect_back,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, remote_log,        zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_log_level",  XDEBUG_LOG_DEFAULT,   PHP_INI_ALL,    OnUpdateLong,   remote_log_level,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, ide_key_setting,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_addr_header", "",                  PHP_INI_ALL,    OnUpdateString, remote_addr_header, zend_xdebug_globals, xdebug_globals)
@@ -603,6 +604,9 @@ void xdebug_env_config(TSRMLS_D)
 		} else
 		if (strcasecmp(envvar, "remote_log") == 0) {
 			name = "xdebug.remote_log";
+		} else
+		if (strcasecmp(envvar, "remote_log_level") == 0) {
+			name = "xdebug.remote_log_level";
 		} else
 		if (strcasecmp(envvar, "remote_cookie_expire_time") == 0) {
 			name = "xdebug.remote_cookie_expire_time";
@@ -1112,6 +1116,11 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 		if (e->profile.call_list) {
 			xdebug_llist_destroy(e->profile.call_list, NULL);
 			e->profile.call_list = NULL;
+		}
+
+		if (e->executable_lines_cache) {
+			xdebug_set_free(e->executable_lines_cache);
+			e->executable_lines_cache = NULL;
 		}
 
 		xdfree(e);
@@ -1681,6 +1690,10 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 			} while (!exception_breakpoint_found && ce_ptr);
 		}
 
+		if (XG(context).resolved_breakpoints && exception_breakpoint_found) {
+			XG(context).handler->resolve_breakpoints(&(XG(context)), XDEBUG_BREAKPOINT_TYPE_EXCEPTION, extra_brk_info);
+		}
+
 		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
 			if (!XG(context).handler->remote_breakpoint(
 				&(XG(context)), XG(stack),
@@ -1707,6 +1720,11 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	size_t           tmp_len = 0;
 	TSRMLS_FETCH();
 
+	/* When we first enter a user defined function, we need to resolve breakpoints for this function */
+	if (XG(context).resolved_breakpoints && breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL && fse->user_defined == XDEBUG_USER_DEFINED) {
+		XG(context).handler->resolve_breakpoints(&(XG(context)), XDEBUG_BREAKPOINT_TYPE_LINE|XDEBUG_BREAKPOINT_TYPE_CONDITIONAL|XDEBUG_BREAKPOINT_TYPE_CALL|XDEBUG_BREAKPOINT_TYPE_RETURN, fse);
+	}
+
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
 		if (xdebug_hash_find(XG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &extra_brk_info)) {
@@ -1714,7 +1732,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (xdebug_handle_hit_value(extra_brk_info)) {
-					if (fse->user_defined == XDEBUG_INTERNAL || (breakpoint_type == XDEBUG_BRK_FUNC_RETURN)) {
+					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
 						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 							return 0;
 						}
@@ -1738,7 +1756,13 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 			 * disabled AND handle_hit_value is happy */
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (xdebug_handle_hit_value(extra_brk_info)) {
-					XG(context).do_break = 1;
+					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
+						if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
+							return 0;
+						}
+					} else {
+						XG(context).do_break = 1;
+					}
 				}
 			}
 		}
@@ -1847,12 +1871,12 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XG(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_EXTERNAL TSRMLS_CC);
+	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED TSRMLS_CC);
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
 	if (fse && fse->prev && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
-		fse->prev->user_defined = XDEBUG_EXTERNAL;
+		fse->prev->user_defined = XDEBUG_USER_DEFINED;
 	}
 
 	function_nr = XG(function_count);
@@ -1884,7 +1908,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
 			xfse = XDEBUG_LLIST_VALP(le);
 			add_used_variables(xfse, op_array);
-			if (XDEBUG_IS_FUNCTION(xfse->function.type)) {
+			if (XDEBUG_IS_NORMAL_FUNCTION(&xfse->function)) {
 				break;
 			}
 		}
@@ -1914,7 +1938,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	/* Check for entry breakpoints */
 	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_CALL)) {
+		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL)) {
 			xdebug_mark_debug_connection_not_active();
 		}
 	}
@@ -1963,7 +1987,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	/* Check for return breakpoints */
 	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
+		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN)) {
 			xdebug_mark_debug_connection_not_active();
 		}
 	}
@@ -2018,7 +2042,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XG(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_INTERNAL TSRMLS_CC);
+	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN TSRMLS_CC);
 	fse->function.internal = 1;
 
 	function_nr = XG(function_count);
@@ -2029,7 +2053,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 
 	/* Check for entry breakpoints */
 	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_CALL)) {
+		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL)) {
 			xdebug_mark_debug_connection_not_active();
 		}
 	}
@@ -2075,7 +2099,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 
 	/* Check for return breakpoints */
 	if (xdebug_is_debug_connection_active_for_current_pid() && XG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BRK_FUNC_RETURN)) {
+		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN)) {
 			xdebug_mark_debug_connection_not_active();
 		}
 	}
@@ -2534,6 +2558,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	function_stack_entry *fse;
 	int                   lineno;
 	char                 *file;
+	int                   file_len;
 	int                   level = 0;
 	int                   func_nr = 0;
 	TSRMLS_FETCH();
@@ -2545,6 +2570,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	lineno = EG(current_execute_data)->opline->lineno;
 
 	file = (char*) STR_NAME_VAL(op_array->filename);
+	file_len = STR_NAME_LEN(op_array->filename);
 
 	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
@@ -2614,16 +2640,11 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		if (XG(context).line_breakpoints) {
 			int   break_ok;
 			zval  retval;
-			int   file_len = strlen(file);
 
 			for (le = XDEBUG_LLIST_HEAD(XG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 				extra_brk_info = XDEBUG_LLIST_VALP(le);
 
-#if 0
-				printf("b->d: %d; ln: %d; b->l: %d; b->f: %s; f: %s, f_l: %d; b->f_l: %d\n",
-						extra_brk_info->disabled, lineno, extra_brk_info->lineno, extra_brk_info->file, file, file_len, extra_brk_info->file_len);
-#endif
-				if (!extra_brk_info->disabled && lineno == extra_brk_info->lineno && file_len >= extra_brk_info->file_len && strncasecmp(extra_brk_info->file, file + file_len - extra_brk_info->file_len, extra_brk_info->file_len) == 0) {
+				if (XG(context).handler->break_on_line(&(XG(context)), extra_brk_info, file, file_len, lineno)) {
 					break_ok = 1; /* Breaking is allowed by default */
 
 					/* Check if we have a condition set for it */

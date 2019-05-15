@@ -4,6 +4,9 @@ $m = new \MongoDB\Driver\Manager( "mongodb+srv://ci-writer:{$_ENV['CIWRITEPASSWO
 /* Create RUN ID */
 $runId =     (new \DateTimeImmutable())->format( "Y-m-d-H-i-s" );
 $timeStamp = time();
+$abbrev =    trim( `git describe --tags` );
+
+echo $abbrev, "\n";
 
 /* Read all JUNIT logs */
 foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
@@ -18,11 +21,10 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 	$xml = SimpleXML_load_string( file_get_contents( $file ) );
 	
 	$status = [
-		'_id' => $runId . '@' . $config,
 		'run' => $runId,
 		'ts' => $timeStamp,
-		'ref' => `git rev-parse --short --verify HEAD`,
-		'abbrev' => `git describe --tags`,
+		'ref' => trim( `git rev-parse --short --verify HEAD` ),
+		'abbrev' => $abbrev,
 		'cfg' => [
 			'config' => $config,
 			'version' => $version,
@@ -31,8 +33,7 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 		],
 	];
 
-	echo "Running for:\n";
-	print_r( $status );
+	echo "Running for: _id' => {$runId}@{$config}\n";
 
 	if ( isset( $xml['buildFailed'] ) )
 	{
@@ -71,7 +72,11 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 	}
 
 	$bulk = new \MongoDB\Driver\BulkWrite;
-	$bulk->insert( $status );
+	$bulk->update(
+		[ '_id' => $runId . '@' . $config ],
+		$status,
+		[ 'upsert' => true ]
+	);
 
 	$m->executeBulkWrite( 'ci.run', $bulk );
 }

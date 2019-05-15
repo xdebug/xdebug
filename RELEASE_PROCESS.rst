@@ -1,6 +1,8 @@
 
 #. Mantis: Create new version if needed, and move "Fixed in version" from -dev
    to release.
+#. Make sure both the master and release branch (i.e. xdebug_2_7) are fully
+   synced and merged.
 #. For first release in minor version (i.e. 2.6.x), merge package.xml from old
    bug fix branch into master and commit::
 
@@ -16,7 +18,8 @@
 #. Commit template.rc, php_xdebug.h, package.xml, and RELEASE_PROCESS.rst with
    text: ``Go with 2.7.0RC1`` (use upper case 'RC').
 #. Tag package with ``pecl tag <version number>`` (use upper case "RC").
-#. ``git push && git push --tags`` (this kicks off AppVeyor builds too)
+#. ``git push origin master xdebug_2_7 && git push --tags``
+#. Disable extra AppVeyor build (the one without the tag)
 #. Update www.xdebug.org/html/updates.php
 #. Update www.xdebug.org/html/include/phpinfo_scanner.php
 #. Update www.xdebug.org/html/docs/include/basic.php
@@ -26,6 +29,9 @@
 #. Add files from AppVeyor and source to www.xdebug.org.html/files
 #. Add the downloads, DDLs, and news file to git and commit with "Go with
    2.7.0RC1"
-#. In Mantis, "release" the version, and make sure there is a new one.
-
-
+#. Mantis: "release" the version, and make sure there is a new one.
+#. In the release branch, update template.rc and php_xdebug.h to the new
+   version
+#. Commit template.rc and php_xdebug.h with "Back to -dev"
+#. Check out master branch, and run: git merge --strategy=ours xdebug_2_7
+#. ``git push origin master xdebug_2_7``
