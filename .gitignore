@@ -67,4 +67,3 @@ tags
 /tests/*.sh
 /tests/phpt.*
 /C:\\Windows\\Temp\\remote-log4.txt
-/.idea/
