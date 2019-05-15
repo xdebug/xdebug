@@ -17,8 +17,8 @@ function query($var) {
 }
 
 for ($i = 1e5; $i > 0; $i--) {
-    // Tests that the garbage collection occurs properly (hence the very low memory limit)
-    query(new stdClass());
+	// Tests that the garbage collection occurs properly (hence the very low memory limit)
+	query(new stdClass());
 }
 echo 'Segfault did not happened';
 ?>
