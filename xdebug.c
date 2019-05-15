@@ -1783,7 +1783,6 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	char                 *code_coverage_function_name = NULL;
 	char                 *code_coverage_file_name = NULL;
 	int                   code_coverage_init = 0;
-	size_t                i = 0;
 
 	/* For PHP 7, we need to reset the opline to the start, so that all opcode
 	 * handlers are being hit. But not for generators, as that would make an
