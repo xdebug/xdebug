@@ -1952,11 +1952,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 
-	/* Unlocks the garbage collection of stack frame (function call arguments) objects
-	 * So they can be properly GCed by PHP later on */
-	for (i = 0; i < fse->gc_locked_objects_count; i++) {
-		GC_DELREF(fse->gc_locked_objects[i]);
-	}
+	xdebug_remove_stack_frame(fse);
 	
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_end(fse TSRMLS_CC);
@@ -2038,6 +2034,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	function_stack_entry *fse;
 	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
+	size_t                i = 0;
 
 	int                   restore_error_handler_situation = 0;
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
@@ -2081,6 +2078,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 		execute_internal(current_execute_data, return_value TSRMLS_CC);
 	}
 
+	xdebug_remove_stack_frame(fse);
+	
 	if (XG(profiler_enabled)) {
 		xdebug_profiler_function_end(fse TSRMLS_CC);
 		xdebug_profiler_free_function_details(fse TSRMLS_CC);

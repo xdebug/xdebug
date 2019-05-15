@@ -1399,6 +1399,15 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	return tmp;
 }
 
+void xdebug_remove_stack_frame(function_stack_entry *fse) {
+	size_t i = 0;
+	/* Unlocks the garbage collection of stack frame (function call arguments) objects
+	 * So these objects can be properly GCed by PHP later on */
+	for (i = 0; i < fse->gc_locked_objects_count; i++) {
+		GC_DELREF(fse->gc_locked_objects[i]);
+	}
+}
+
 /* {{{ proto int xdebug_get_stack_depth()
    Returns the stack depth */
 PHP_FUNCTION(xdebug_get_stack_depth)

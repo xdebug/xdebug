@@ -29,6 +29,7 @@ void xdebug_func_dtor_by_ref(xdebug_func *elem); /* TODO: Remove this API */
 void xdebug_func_dtor(xdebug_func *elem);
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC);
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC);
+void xdebug_remove_stack_frame(function_stack_entry *fse);
 void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str TSRMLS_DC);
 void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC);
 void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC);
