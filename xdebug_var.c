@@ -328,8 +328,8 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_STATIC_PROPERTY:
 			/* First we try a public,private,protected property */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->static_members_table) {
-				ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
+			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && CE_STATIC_MEMBERS(cce)) {
+				ZVAL_COPY(&tmp_retval, &CE_STATIC_MEMBERS(cce)[zpp->offset]);
 				goto cleanup;
 			}
 			element_length = name_length;
@@ -344,7 +344,7 @@ static void fetch_zval_from_symbol_table(
 					element_length = name_length - (secondStar + 1 - name);
 					element = prepare_search_key(secondStar + 1, &element_length, "", 0);
 					if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL)) {
-						ZVAL_COPY(&tmp_retval, &cce->static_members_table[zpp->offset]);
+						ZVAL_COPY(&tmp_retval, &CE_STATIC_MEMBERS(cce)[zpp->offset]);
 						goto cleanup;
 					}
 				}
@@ -1682,14 +1682,14 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp, Has
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
-#if ZTS
+#if ZTS && PHP_VERSION_ID < 70400
 	if (ce->type == 1) {
-		item->zv   = &CG(static_members_table)[(zend_intptr_t) ce->static_members_table][zpp->offset];
+		item->zv   = &CG(static_members_table)[(zend_intptr_t) CE_STATIC_MEMBERS(ce)][zpp->offset];
 	} else {
-		item->zv   = &ce->static_members_table[zpp->offset];
+		item->zv   = &CE_STATIC_MEMBERS(ce)[zpp->offset];
 	}
 #else
-	item->zv   = &ce->static_members_table[zpp->offset];
+	item->zv   = &CE_STATIC_MEMBERS(ce)[zpp->offset];
 #endif
 	item->name = (char*) STR_NAME_VAL(zpp->name);
 	item->name_len = STR_NAME_LEN(zpp->name);
@@ -2000,7 +2000,7 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info, xdebug_
 	property_name = xdebug_get_property_info(STR_NAME_VAL(prop_info->name), STR_NAME_LEN(prop_info->name) + 1, &modifier, &prop_class_name);
 
 	if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
-		contents = xdebug_get_zval_value_xml_node_ex(property_name, &class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+		contents = xdebug_get_zval_value_xml_node_ex(property_name, &CE_STATIC_MEMBERS(class_entry)[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
 	} else{
 		xdebug_str *priv_name = xdebug_str_new();
 
@@ -2009,7 +2009,7 @@ void xdebug_attach_property_with_contents(zend_property_info *prop_info, xdebug_
 		xdebug_str_addc(priv_name, '*');
 		xdebug_str_add_str(priv_name, property_name);
 
-		contents = xdebug_get_zval_value_xml_node_ex(priv_name, &class_entry->static_members_table[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
+		contents = xdebug_get_zval_value_xml_node_ex(priv_name, &CE_STATIC_MEMBERS(class_entry)[prop_info->offset], XDEBUG_VAR_TYPE_STATIC, options TSRMLS_CC);
 
 		xdebug_str_free(priv_name);
 	}
