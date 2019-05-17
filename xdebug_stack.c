@@ -1129,7 +1129,7 @@ normal_after_all:
 	}
 }
 
-inline static gc_locker(function_stack_entry *tmp, zval *data)
+inline static void gc_locker(function_stack_entry *tmp, zval *data)
 {
 	/* Tell garbage collector to NOT gc the objects until the stack is removed
 	 * Otherwise, Zend GC might remove functions parameters (or maybe other variables content)
