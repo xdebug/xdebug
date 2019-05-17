@@ -146,20 +146,34 @@ static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_
 	const zend_op *opcode_ptr;
 
 	opcode_ptr = cur_opcode;
+
+# if PHP_VERSION_ID >= 70400
+	if (
+		(opcode_ptr->opcode == ZEND_ASSIGN_STATIC_PROP) || (opcode_ptr->opcode == ZEND_ASSIGN_STATIC_PROP_REF) ||
+		(opcode_ptr->opcode == ZEND_PRE_INC_STATIC_PROP) || (opcode_ptr->opcode == ZEND_PRE_DEC_STATIC_PROP) ||
+		(opcode_ptr->opcode == ZEND_POST_INC_STATIC_PROP) || (opcode_ptr->opcode == ZEND_POST_DEC_STATIC_PROP)
+	) {
+		*found_opcode = opcode_ptr;
+		return 1;
+	}
+# endif
 # if PHP_VERSION_ID >= 70100
 	while (!(opcode_ptr->opcode == ZEND_EXT_STMT) && !((opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_W) || (opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_RW))) {
 		opcode_ptr = opcode_ptr - 1;
 	}
 	if ((opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_W) || (opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_RW)) {
+		*found_opcode = opcode_ptr;
+		return 1;
+	}
 # else
 	while (!(opcode_ptr->opcode == ZEND_EXT_STMT) && !((opcode_ptr->opcode == ZEND_FETCH_W) || (opcode_ptr->opcode == ZEND_FETCH_RW))) {
 		opcode_ptr = opcode_ptr - 1;
 	}
 	if (((opcode_ptr->opcode == ZEND_FETCH_W) || (opcode_ptr->opcode == ZEND_FETCH_RW)) && opcode_ptr->extended_value == ZEND_FETCH_STATIC_MEMBER) {
-# endif
 		*found_opcode = opcode_ptr;
 		return 1;
 	}
+# endif
 	return 0;
 }
 
@@ -239,6 +253,13 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 			}
 			xdebug_str_add_str(&name, zval_value);
 			xdebug_str_free(zval_value);
+#if PHP_VERSION_ID >= 70400
+		} else if (cur_opcode->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var), 0, options);
+			xdebug_str_addl(&name, "self::", 6, 0);
+			xdebug_str_add_str(&name, zval_value);
+			xdebug_str_free(zval_value);
+#endif
 		} else if (cur_opcode->extended_value == ZEND_ASSIGN_DIM) {
 			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, NULL);
 			xdebug_str_addc(&name, '[');
@@ -253,6 +274,13 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		xdebug_str_add_str(&name, zval_value);
 		xdebug_str_free(zval_value);
 	}
+#if PHP_VERSION_ID >= 70400
+	if (cur_opcode->opcode >= ZEND_PRE_INC_STATIC_PROP && cur_opcode->opcode <= ZEND_POST_DEC_STATIC_PROP) {
+		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var), 0, options);
+		xdebug_str_add_str(&name, zval_value);
+		xdebug_str_free(zval_value);
+	}
+#endif
 
 	/* Scroll back to start of FETCHES */
 	/* FIXME: See whether we can do this unroll looping only once - in is_static() */
@@ -321,13 +349,24 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		} while (!cv_found && (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_W || opcode_ptr->opcode == ZEND_FETCH_RW));
 	}
 
-	if (cur_opcode->opcode == ZEND_ASSIGN_OBJ) {
+	if (
+		(cur_opcode->opcode == ZEND_ASSIGN_OBJ)
+#if PHP_VERSION_ID >= 70400
+		|| (cur_opcode->opcode == ZEND_ASSIGN_OBJ_REF)
+#endif
+	) {
 		if (cur_opcode->op1_type == IS_UNUSED) {
 			xdebug_str_add(&name, "$this", 0);
 		}
 		dimval = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		xdebug_str_add(&name, xdebug_sprintf("->%s", Z_STRVAL_P(dimval)), 1);
 	}
+#if PHP_VERSION_ID >= 70400
+	if (cur_opcode->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
+		dimval = xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var);
+		xdebug_str_add(&name, xdebug_sprintf("%s", Z_STRVAL_P(dimval)), 1);
+	}
+#endif
 
 	if (cur_opcode->opcode == ZEND_ASSIGN_DIM) {
 		if (next_opcode->opcode == ZEND_OP_DATA && cur_opcode->op2_type == IS_UNUSED) {
@@ -340,6 +379,13 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 			xdebug_str_free(zval_value);
 		}
 	}
+
+#if PHP_VERSION_ID >= 70400
+	if (cur_opcode->opcode == ZEND_ASSIGN_STATIC_PROP) {
+		dimval = xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var);
+		xdebug_str_add(&name, xdebug_sprintf("%s", Z_STRVAL_P(dimval)), 1);
+	}
+#endif
 
 	xdfree(options->runtime);
 	xdfree(options);
@@ -410,7 +456,28 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 			full_varname = tmp_varname;
 
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
-		} else if (next_opcode->opcode == ZEND_OP_DATA) {
+#if PHP_VERSION_ID >= 70400
+		} else if (cur_opcode->opcode >= ZEND_PRE_INC_STATIC_PROP && cur_opcode->opcode <= ZEND_POST_DEC_STATIC_PROP) {
+			char *tmp_varname;
+
+			switch (cur_opcode->opcode) {
+				case ZEND_PRE_INC_STATIC_PROP:  tmp_varname = xdebug_sprintf("++%s", full_varname); break;
+				case ZEND_POST_INC_STATIC_PROP: tmp_varname = xdebug_sprintf("%s++", full_varname); break;
+				case ZEND_PRE_DEC_STATIC_PROP:  tmp_varname = xdebug_sprintf("--%s", full_varname); break;
+				case ZEND_POST_DEC_STATIC_PROP: tmp_varname = xdebug_sprintf("%s--", full_varname); break;
+			}
+			xdfree(full_varname);
+			full_varname = tmp_varname;
+
+			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
+#endif
+		} else if (
+			(next_opcode->opcode == ZEND_OP_DATA)
+#if PHP_VERSION_ID >= 70400
+			&& (cur_opcode->opcode != ZEND_ASSIGN_OBJ_REF)
+			&& (cur_opcode->opcode != ZEND_ASSIGN_STATIC_PROP_REF)
+#endif
+		) {
 			val = xdebug_get_zval_with_opline(execute_data, next_opcode, next_opcode->op1_type, &next_opcode->op1, &is_var);
 		} else if (cur_opcode->opcode == ZEND_QM_ASSIGN) {
 			val = xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var);
@@ -426,6 +493,22 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
 #endif
 			}
+#if PHP_VERSION_ID >= 70400
+		} else if (cur_opcode->opcode == ZEND_ASSIGN_OBJ_REF) {
+			if (cur_opcode->op2_type == IS_CV) {
+				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op2.var)->val);
+			} else {
+				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, next_opcode, 1);
+				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
+			}
+		} else if (cur_opcode->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
+			if (cur_opcode->op2_type == IS_CV) {
+				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op2.var)->val);
+			} else {
+				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, next_opcode, 1);
+				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
+			}
+#endif
 		} else {
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		}
@@ -439,10 +522,10 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-#define XDEBUG_OPCODE_OVERRIDE_ASSIGN(f,o,cc) \
+#define XDEBUG_OPCODE_OVERRIDE_ASSIGN(f,o,do_code_coverage) \
 	int xdebug_##f##_handler(zend_execute_data *execute_data) \
 	{ \
-		return xdebug_common_assign_dim_handler((o), (cc), execute_data); \
+		return xdebug_common_assign_dim_handler((o), (do_code_coverage), execute_data); \
 	}
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
@@ -470,6 +553,15 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_ref,"=&",1)
+#if PHP_VERSION_ID >= 70400
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj_ref,"=&",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_static_prop, "=", 0);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_static_prop_ref, "=&", 0);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc_static_prop, "", 0);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec_static_prop, "", 0);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, "", 0);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, "", 0);
+#endif
 
 void xdebug_count_line(char *filename, int lineno, int executable, int deadcode TSRMLS_DC)
 {
