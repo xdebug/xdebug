@@ -1129,6 +1129,27 @@ normal_after_all:
 	}
 }
 
+inline static gc_locker(function_stack_entry *tmp, zval *data)
+{
+	/* Tell garbage collector to NOT gc the objects until the stack is removed
+	 * Otherwise, Zend GC might remove functions parameters (or maybe other variables content)
+	 * and Xdebug will be stuck when trying to dump the stack frame
+	 * because some variables in this stackframe will no longer exists (because being GCed) */
+	if (Z_TYPE_P(data) == IS_OBJECT) {
+#if PHP_VERSION_ID >= 70300
+		GC_ADDREF(data->value.obj);
+#else
+		GC_REFCOUNT(data->value.obj)++;
+#endif
+
+		/* Save the GC lock references so we can remove them once the frame is discarded */
+		tmp->gc_locked_objects = realloc(tmp->gc_locked_objects, (tmp->gc_locked_objects_count + 1) * sizeof(zend_object*));
+		tmp->gc_locked_objects[tmp->gc_locked_objects_count] = data->value.obj;
+		tmp->gc_locked_objects_count++;
+	}
+	/* What about IS_REFERENCE? or IS_INDIRECT ? */
+}
+
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
 {
 	zend_execute_data    *edata;
@@ -1291,22 +1312,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 					} else {
 						ZVAL_COPY_VALUE(&(tmp->var[tmp->varc].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted));
 					}
-					if (Z_TYPE(tmp->var[tmp->varc].data) == IS_OBJECT) {
-						/* Tell garbage collector to NOT gc the objects until the stack is removed
-						 * Otherwise, Zend GC might remove functions parameters (or maybe other variables content)
-						 * and Xdebug will be stuck when trying to dump the stack frame
-						 * because some variables in this stackframe will no longer exists (because being GCed) */
-#if PHP_VERSION_ID >= 70300
-						GC_ADDREF(tmp->var[tmp->varc].data.value.obj);
-#else
-						GC_REFCOUNT(tmp->var[tmp->varc].data.value.obj)++;
-#endif
-
-						/* Save the GC lock references so we can remove them once the frame is discarded */
-						tmp->gc_locked_objects = realloc(tmp->gc_locked_objects, tmp->gc_locked_objects_count + 1);
-						tmp->gc_locked_objects[tmp->gc_locked_objects_count] = tmp->var[tmp->varc].data.value.obj;
-						tmp->gc_locked_objects_count++;
-					}
+					gc_locker(tmp, &(tmp->var[tmp->varc].data));
 				}
 				tmp->varc++;
 			}

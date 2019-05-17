@@ -217,6 +217,7 @@ typedef struct _function_stack_entry {
 	 * to be able to dump them, so keep the list of locked objects
 	 * so we can later on "unlock" them and let PHP garbage collect them */
 	int gc_locked_objects_count;
+	/* If needed, make it more generic so you can gc-lock other zend types */
 	zend_object **gc_locked_objects;
 } function_stack_entry;
 
