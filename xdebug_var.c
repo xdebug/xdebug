@@ -264,19 +264,31 @@ static char* prepare_search_key(char *name, unsigned int *name_length, const cha
 
 static zval *get_arrayobject_storage(zval *parent, HashTable **properties, int *is_temp TSRMLS_DC)
 {
+#if PHP_VERSION_ID >= 70400
+	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
+#else
 	*properties = Z_OBJDEBUG_P(parent, *is_temp);
+#endif
 	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
 }
 
 static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties, int *is_temp TSRMLS_DC)
 {
+#if PHP_VERSION_ID >= 70400
+	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
+#else
 	*properties = Z_OBJDEBUG_P(parent, *is_temp);
+#endif
 	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
 }
 
 static zval *get_arrayiterator_storage(zval *parent, HashTable **properties, int *is_temp TSRMLS_DC)
 {
+#if PHP_VERSION_ID >= 70400
+	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
+#else
 	*properties = Z_OBJDEBUG_P(parent, *is_temp);
+#endif
 	return zend_hash_str_find(*properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1);
 }
 
@@ -284,7 +296,7 @@ static inline void maybe_destroy_ht(HashTable *ht, int is_temp)
 {
 	if (ht && is_temp) {
 		zend_hash_destroy(ht);
-		efree(ht);
+		FREE_HASHTABLE(ht);
 	}
 }
 
@@ -479,10 +491,18 @@ static void fetch_zval_from_symbol_table(
 				element = NULL;
 				if (tmp != NULL) {
 					ZVAL_COPY(&tmp_retval, tmp);
+#if PHP_VERSION_ID >= 70400
+					zend_release_properties(myht);
+#else
 					maybe_destroy_ht(myht, is_temp);
+#endif
 					goto cleanup;
 				}
+#if PHP_VERSION_ID >= 70400
+				zend_release_properties(myht);
+#else
 				maybe_destroy_ht(myht, is_temp);
+#endif
 			}
 
 			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
