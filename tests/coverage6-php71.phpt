@@ -13,7 +13,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.extended_info=1
 xdebug.overload_var_dump=0
 --SKIPIF--
 <?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>

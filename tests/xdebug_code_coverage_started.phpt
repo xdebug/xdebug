@@ -2,7 +2,6 @@
 xdebug_code_coverage_started()
 --INI--
 xdebug.default_enable=1
-xdebug.extended_info=1
 xdebug.coverage_enable=1
 xdebug.overload_var_dump=1
 --FILE--

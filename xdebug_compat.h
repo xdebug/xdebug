@@ -89,4 +89,8 @@ zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 # endif
 
+# if PHP_VERSION_ID < 70400
+#  define ZEND_COMPILE_EXTENDED_STMT ZEND_COMPILE_EXTENDED_INFO
+# endif
+
 #endif
