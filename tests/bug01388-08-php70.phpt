@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint: include files
+Test for bug #1388: Resolved Breakpoint: include files (< PHP 7.4)
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
+if (!version_compare(phpversion(), "7.4", '<')) echo "skip < PHP 7.4 needed\n";
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

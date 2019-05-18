@@ -20,7 +20,6 @@ $commands = array(
 	'step_into',
 	'step_into',
 	'stack_get',
-	'step_into',
 	"breakpoint_set -t line -f {$pharFile}/file1.php -n 6",
 	'run',
 	"source -f {$pharFile}/file1.php",
@@ -51,30 +50,26 @@ dbgpRunFile( $filename, $commands );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="4"><stack where="include" level="0" type="file" filename="phar://%s/tests/bug00886.phar/file1.php" lineno="2"></stack><stack where="{main}" level="1" type="file" filename="file://bug00886.inc" lineno="3"></stack></response>
 
--> step_into -i 5
+-> breakpoint_set -i 5 -t line -f phar://%s/tests/bug00886.phar/file1.php -n 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="5" status="break" reason="ok"><xdebug:message filename="phar://%s/tests/bug00886.phar/file2.php" lineno="2"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="5" id=""></response>
 
--> breakpoint_set -i 6 -t line -f phar://%s/tests/bug00886.phar/file1.php -n 6
+-> run -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="6" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></xdebug:message></response>
 
--> run -i 7
+-> source -i 7 -f phar://%s/tests/bug00886.phar/file1.php
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="7" status="break" reason="ok"><xdebug:message filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="source" transaction_id="7" encoding="base64"><![CDATA[PD9waHAKaW5jbHVkZSAnZmlsZTIucGhwJzsKCmZ1bmN0aW9uIGZ1bmN0aW9uMSggJGZvbyApCnsKCWVjaG8gc3RybGVuKCAkZm9vICksICJcbiI7CglmdW5jdGlvbjIoICRmb28gKTsKfQo/Pgo=]]></response>
 
--> source -i 8 -f phar://%s/tests/bug00886.phar/file1.php
+-> step_into -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="source" transaction_id="8" encoding="base64"><![CDATA[PD9waHAKaW5jbHVkZSAnZmlsZTIucGhwJzsKCmZ1bmN0aW9uIGZ1bmN0aW9uMSggJGZvbyApCnsKCWVjaG8gc3RybGVuKCAkZm9vICksICJcbiI7CglmdW5jdGlvbjIoICRmb28gKTsKfQo/Pgo=]]></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="8" status="break" reason="ok"><xdebug:message filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></xdebug:message></response>
 
--> step_into -i 9
+-> stack_get -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="9" status="break" reason="ok"><xdebug:message filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="9"><stack where="function1" level="0" type="file" filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></stack><stack where="{main}" level="1" type="file" filename="file://bug00886.inc" lineno="4"></stack></response>
 
--> stack_get -i 10
+-> detach -i 10
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="10"><stack where="function1" level="0" type="file" filename="phar://%s/tests/bug00886.phar/file1.php" lineno="6"></stack><stack where="{main}" level="1" type="file" filename="file://bug00886.inc" lineno="4"></stack></response>
-
--> detach -i 11
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="11" status="stopping" reason="ok"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="10" status="stopping" reason="ok"></response>

@@ -21,7 +21,7 @@ $commands = array(
 
 dbgpRunFile( $filename, $commands, [ 'track_errors' => 'Off' ] );
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
 <init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug01388-13.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
@@ -35,7 +35,7 @@ dbgpRunFile( $filename, $commands, [ 'track_errors' => 'Off' ] );
 
 -> run -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="10" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="%r(10|17)%r" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="7" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
