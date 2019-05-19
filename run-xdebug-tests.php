@@ -1574,23 +1574,15 @@ TEST $file
 	// Default ini settings
 	$ini_settings = array();
 
-	// Additional required extensions
-	if (array_key_exists('EXTENSIONS', $section_text)) {
-		$ext_params = array();
-		settings2array($ini_overwrites, $ext_params);
-		settings2params($ext_params);
-		$ext_dir = `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
-		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-		$loaded = explode(",", `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
-		$ext_prefix = substr(PHP_OS, 0, 3) === "WIN" ? "php_" : "";
-		foreach ($extensions as $req_ext) {
-			if (!in_array($req_ext, $loaded)) {
-				if ($req_ext == 'opcache') {
-					$ini_settings['zend_extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
-				} else {
-					$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
-				}
-			}
+	if (getenv('OPCACHE') !== false) {
+		if (getenv('OPCACHE') == 'yes') {
+			$ini_settings['opcache.enable'] = 1;
+			$ini_settings['opcache.enable_cli'] = 1;
+			$ini_settings['opcache.optimization_level'] = -1;
+		} else {
+			$ini_settings['opcache.enable'] = 0;
+			$ini_settings['opcache.enable_cli'] = 0;
+			$ini_settings['opcache.optimization_level'] = 0;
 		}
 	}
 
