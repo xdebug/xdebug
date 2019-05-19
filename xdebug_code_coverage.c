@@ -343,6 +343,15 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 				xdebug_str_free(zval_value);
 			}
 			opcode_ptr = opcode_ptr + 1;
+#if PHP_VERSION_ID < 70100
+			/* This is a hack, as we really ought to continue until we find the
+			 * right temp variable number in the "return_value" part of the
+			 * opcode. But this is only needed for PHP 7.0 so we just cop out
+			 * after the first one */
+			if (is_static && lower_bound && lower_bound->opcode == ZEND_ASSIGN_REF) {
+				cv_found = 1;
+			}
+#endif
 			if (opcode_ptr->op1_type == IS_CV) {
 				cv_found = 1;
 			}
@@ -427,8 +436,16 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
 			return ZEND_USER_OPCODE_DISPATCH;
 		}
-
+#if PHP_VERSION_ID < 70100
+		if (cur_opcode->opcode == ZEND_ASSIGN_REF) {
+			const zend_op *previous_opline = xdebug_find_referenced_opline(execute_data, cur_opcode, 1);
+			full_varname = xdebug_find_var_name(execute_data, previous_opline, cur_opcode TSRMLS_CC);
+		} else {
+			full_varname = xdebug_find_var_name(execute_data, execute_data->opline, NULL TSRMLS_CC);
+		}
+#else
 		full_varname = xdebug_find_var_name(execute_data, execute_data->opline, NULL TSRMLS_CC);
+#endif
 
 		if (cur_opcode->opcode >= ZEND_PRE_INC && cur_opcode->opcode <= ZEND_POST_DEC) {
 			char *tmp_varname;
@@ -486,7 +503,7 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op2.var)->val);
 			} else {
 				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, cur_opcode, 2);
-#if PHP_VERSION_ID <= 70100
+#if PHP_VERSION_ID < 70100
 				const zend_op *previous_opline = xdebug_find_referenced_opline(execute_data, cur_opcode, 1);
 				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, previous_opline + 1);
 #else
