@@ -327,6 +327,11 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_STATIC_ROOT:
 		case XF_ST_STATIC_PROPERTY:
 			/* First we try a public,private,protected property */
+#if PHP_VERSION_ID >= 70400
+			if (cce && (cce->type == ZEND_INTERNAL_CLASS || (cce->ce_flags & ZEND_ACC_IMMUTABLE))) {
+				zend_class_init_statics(cce);
+			}
+#endif
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && CE_STATIC_MEMBERS(cce)) {
 				ZVAL_COPY(&tmp_retval, &CE_STATIC_MEMBERS(cce)[zpp->offset]);
@@ -2150,6 +2155,12 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 			/* Adding static properties */
 			xdebug_zend_hash_apply_protection_begin(&ce->properties_info);
+
+#if PHP_VERSION_ID >= 70400
+			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
+				zend_class_init_statics(ce);
+			}
+#endif
 
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
 				object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
