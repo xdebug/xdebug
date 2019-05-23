@@ -1150,7 +1150,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		unset($pipes[0]);
 	}
 
-	$timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 60);
+	$timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 10);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
@@ -2973,6 +2973,7 @@ function junit_init_suite($suite_name)
 		'test_fail' => 0,
 		'test_error' => 0,
 		'test_skip' => 0,
+		'test_warn' => 0,
 		'suites' => array(),
 		'files' => array(),
 		'execution_time' => 0,
