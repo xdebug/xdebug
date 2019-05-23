@@ -2,8 +2,10 @@
 Test for bug #1509: Code coverage missing for case inside switch (>= PHP 7.2, opcache)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.2", '<')) echo "skip >= PHP 7.2 needed\n";
-if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+require 'tests/utils.inc';
+if ( ! ( runtime_version('7.2', '>=') && opcache_active() ) ) {
+	echo "skip >= PHP 7.2 && opcache loaded needed\n";
+}
 ?>
 --INI--
 xdebug.default_enable=1

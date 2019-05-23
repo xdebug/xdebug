@@ -2,9 +2,12 @@
 Test for bug #1530: Code coverage incorrect for last code line in a loop (>= PHP 7.2.14, opcache)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.2.14", '>=')) echo "skip >= PHP 7.2.14 needed\n";
+require 'tests/utils.inc';
 if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
-if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+
+if ( ! ( runtime_version('7.2.14', '>=') && opcache_active() ) ) {
+	echo "skip >= PHP 7.2.14 && opcache loaded needed\n";
+}
 ?>
 --INI--
 xdebug.default_enable=1

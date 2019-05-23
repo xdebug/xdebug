@@ -1,10 +1,12 @@
 --TEST--
-Test for xdebug_debug_zval() (CLI colours) (>= PHP 7.1, NTS)
+Test for xdebug_debug_zval() (CLI colours) (>= PHP 7.1, NTS, !opcache)
 --SKIPIF--
 <?php
+require 'tests/utils.inc';
 if (PHP_ZTS == 1) echo "skip NTS needed\n";
-if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n";
-if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
+if ( ! ( runtime_version('7.1', '>=') && !opcache_active()) ) {
+	echo "skip = NTS && PHP >= 7.1 && opcache not loaded needed\n";
+}
 ?>
 --INI--
 xdebug.default_enable=1

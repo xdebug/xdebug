@@ -1,9 +1,13 @@
 --TEST--
 Test for xdebug_debug_zval() (CLI colours) (= PHP 7.0, ZTS)
 --SKIPIF--
-<?php if (PHP_ZTS == 0) echo "skip ZTS needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip = PHP 7.0 needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.1", '<')) echo "skip = PHP 7.0 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+if (PHP_ZTS == 0) echo "skip ZTS needed\n";
+if ( ! ( runtime_version('7.0', '>=') && runtime_version('7.1', '<') ) ) {
+	echo "skip = ZTS && PHP 7.0 needed\n";
+}
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.cli_color=2
