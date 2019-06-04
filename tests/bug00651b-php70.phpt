@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #651: Incorrect code coverage after isset() in conditional
+Test for bug #651: Incorrect code coverage after empty() in conditional (< PHP 7.4)
+--SKIPIF--
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP < 7.4');
+?>
 --INI--
 xdebug.overload_var_dump=0
 --FILE--
@@ -9,7 +14,7 @@ xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
 
 function repeat($x)
 {
-    if ( isset($x)
+    if ( empty($x)
         AND $x !== 1
         AND $x !== 2
         AND $x !== 3)
@@ -28,7 +33,7 @@ var_dump(xdebug_get_code_coverage());
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00651c-php7.php"]=>
+  ["%sbug00651b-php70.php"]=>
   array(13) {
     [5]=>
     int(1)

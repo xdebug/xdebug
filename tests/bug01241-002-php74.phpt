@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for branch/dead code analysis (> PHP 7.0.12, < PHP 7.4, !opcache)
+Test for bug #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for branch/dead code analysis (>= PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4; !opcache');
+check_reqs('PHP >= 7.4; !opcache');
 ?>
 --FILE--
 <?php
@@ -35,9 +35,7 @@ array(2) {
     int(1)
   }
   ["%sbug01241-002.inc"]=>
-  array(9) {
-    [2]=>
-    int(1)
+  array(8) {
     [7]=>
     int(1)
     [8]=>

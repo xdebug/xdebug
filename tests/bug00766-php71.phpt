@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (> PHP 7.0.12, !opcache)
+Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (> PHP 7.0.12, < PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12; !opcache');
+check_reqs('PHP > 7.0.12,< 7.4; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1

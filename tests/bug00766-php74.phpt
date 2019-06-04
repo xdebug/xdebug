@@ -1,10 +1,9 @@
 --TEST--
-Test for bug #515: Dead Code Analysis for code coverage messed up with ticks (> PHP 7.0.12, !opcache)
+Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (>= PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12; !opcache');
-?>
+check_reqs('PHP >= 7.4; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -25,7 +24,7 @@ xdebug.overload_var_dump=0
 <?php
 	xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
 
-	include 'bug00515.inc';
+	include 'bug00766.inc';
 	$cc = xdebug_get_code_coverage();
 	ksort($cc);
 	var_dump(array_slice($cc, 1, 1));
@@ -34,25 +33,15 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00515.inc"]=>
-  array(9) {
-    [2]=>
+  ["%sbug00766.inc"]=>
+  array(4) {
+    [6]=>
     int(1)
-    [%r(3|5)%r]=>
-    int(1)
-    [9]=>
-    int(-1)
-    [10]=>
-    int(-1)
-    [12]=>
-    int(-1)
-    [14]=>
-    int(-1)
-    [18]=>
-    int(-1)
-    [19]=>
+    [7]=>
     int(-2)
-    [22]=>
+    [10]=>
+    int(1)
+    [11]=>
     int(1)
   }
 }

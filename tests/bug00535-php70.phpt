@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #535: Code coverage and return before function|class ending
+Test for bug #535: Code coverage and return before function|class ending (< PHP 7.4)
+--SKIPIF--
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP < 7.4');
+?>
 --INI--
 xdebug.overload_var_dump=0
 --FILE--
@@ -20,7 +25,7 @@ var_dump(xdebug_get_code_coverage());
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00535-php7.php"]=>
+  ["%sbug00535-php70.php"]=>
   array(5) {
     [4]=>
     int(1)

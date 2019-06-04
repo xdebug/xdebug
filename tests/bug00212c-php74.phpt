@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #212: coverage coverage inaccurate (3) (> PHP 7.0.12, < PHP 7.4)
+Test for bug #212: coverage coverage inaccurate (3) (>= PHP 7.4)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4');
+check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -29,9 +29,7 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECT--
 Hello World
-array(3) {
-  [5]=>
-  int(1)
+array(2) {
   [10]=>
   int(1)
   [12]=>

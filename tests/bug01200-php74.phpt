@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1200: Coverage of sending arguments to a method (> PHP 7.0.12, < PHP 7.4)
+Test for bug #1200: Coverage of sending arguments to a method (>= PHP 7.4)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4');
+check_reqs('PHP >= 7.4');
 ?>
 --FILE--
 <?php
@@ -20,9 +20,7 @@ xdebug_stop_code_coverage(false);
 --EXPECTF--
 array(1) {
   ["%sbug01200.inc"]=>
-  array(8) {
-    [2]=>
-    int(1)
+  array(7) {
     [6]=>
     int(1)
     [9]=>

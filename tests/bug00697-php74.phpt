@@ -1,10 +1,9 @@
 --TEST--
-Test for bug #515: Dead Code Analysis for code coverage messed up with ticks (> PHP 7.0.12, !opcache)
+Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED (>= PHP 7.4)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12; !opcache');
-?>
+check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -25,7 +24,7 @@ xdebug.overload_var_dump=0
 <?php
 	xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
 
-	include 'bug00515.inc';
+	include 'bug00697.inc';
 	$cc = xdebug_get_code_coverage();
 	ksort($cc);
 	var_dump(array_slice($cc, 1, 1));
@@ -34,25 +33,17 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00515.inc"]=>
-  array(9) {
-    [2]=>
+  ["%sbug00697.inc"]=>
+  array(5) {
+    [4]=>
     int(1)
-    [%r(3|5)%r]=>
+    [5]=>
+    int(1)
+    [7]=>
     int(1)
     [9]=>
-    int(-1)
+    int(1)
     [10]=>
-    int(-1)
-    [12]=>
-    int(-1)
-    [14]=>
-    int(-1)
-    [18]=>
-    int(-1)
-    [19]=>
-    int(-2)
-    [22]=>
     int(1)
   }
 }

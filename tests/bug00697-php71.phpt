@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED (> PHP 7.0.12)
+Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED (> PHP 7.0.12, < PHP 7.4)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12');
+check_reqs('PHP > 7.0.12,< 7.4');
 ?>
 --INI--
 xdebug.default_enable=1

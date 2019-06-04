@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #1278: Xdebug with PHP 7 does not handle prefill-from-oparray for XDEBUG_CC_UNUSED
+Test for bug #1278: Xdebug with PHP 7 does not handle prefill-from-oparray for XDEBUG_CC_UNUSED (< PHP 7.4)
+--SKIPIF--
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP < 7.4');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

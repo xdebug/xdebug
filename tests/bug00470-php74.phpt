@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #470: catch blocks marked as dead code unless executed (> PHP 7.0.12, < PHP 7.4)
+Test for bug #470: catch blocks marked as dead code unless executed (>= PHP 7.4)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4');
+check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -38,9 +38,7 @@ xdebug.overload_var_dump=0
 --EXPECTF--
 array(1) {
   ["%sbug00470.inc"]=>
-  array(6) {
-    [2]=>
-    int(1)
+  array(5) {
     [6]=>
     int(-1)
     [8]=>
@@ -55,9 +53,7 @@ array(1) {
 }
 array(1) {
   ["%sbug00470.inc"]=>
-  array(6) {
-    [2]=>
-    int(1)
+  array(5) {
     [6]=>
     int(1)
     [8]=>

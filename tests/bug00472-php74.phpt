@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #472: Dead Code Analysis for code coverage messed up after goto (> PHP 7.0.12, < PHP 7.4, !opcache)
+Test for bug #472: Dead Code Analysis for code coverage messed up after goto (>= PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4; !opcache');
+check_reqs('PHP >= 7.4; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -34,9 +34,7 @@ xdebug.overload_var_dump=0
 --EXPECTF--
 array(1) {
   ["%sbug00472.inc"]=>
-  array(71) {
-    [7]=>
-    int(1)
+  array(70) {
     [9]=>
     int(-1)
     [10]=>
