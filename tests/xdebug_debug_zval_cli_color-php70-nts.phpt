@@ -1,12 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval() (CLI colours) (= PHP 7.0, NTS)
+Test for xdebug_debug_zval() (CLI colours) (< PHP 7.1, NTS)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if (PHP_ZTS == 1) echo "skip NTS needed\n";
-if ( ! ( runtime_version('7.0', '>=') && runtime_version('7.1', '<') ) ) {
-	echo "skip = NTS && PHP 7.0 needed\n";
-}
+check_reqs('PHP <= 7.1; NTS');
 ?>
 --INI--
 xdebug.default_enable=1

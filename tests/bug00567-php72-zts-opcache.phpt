@@ -3,11 +3,7 @@ Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if (PHP_ZTS == 0) echo "skip ZTS needed\n";
-
-if ( ! ( runtime_version('7.2', '>=') && opcache_active() ) ) {
-	echo "skip >= PHP 7.2 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.2; ZTS; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

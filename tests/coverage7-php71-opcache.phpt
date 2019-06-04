@@ -3,9 +3,7 @@ Test with Code Coverage with path and branch checking (>= PHP 7.1, < PHP 7.3, op
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.1', '>=') && runtime_version('7.3', '<') && opcache_active() ) ) {
-	echo "skip >= PHP 7.1 && < PHP 7.3 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.1,< 7.3; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

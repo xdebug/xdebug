@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #699: Xdebug gets the filename wrong for the countable interface (< PHP 7.2)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.2", '<')) echo "skip < PHP 7.2 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP < 7.2');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

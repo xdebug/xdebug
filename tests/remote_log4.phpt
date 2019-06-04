@@ -1,8 +1,10 @@
 --TEST--
 Test for Xdebug's remote log (with xdebug.remote_addr_header value)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp; !win');
+?>
 --ENV--
 I_LIKE_COOKIES=doesnotexist3
 --INI--

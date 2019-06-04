@@ -1,5 +1,5 @@
 --TEST--
-Test for tracing property assignments in user-readable function traces (< PHP 7.2 || no opcache)
+Test for tracing property assignments in user-readable function traces (< PHP 7.2 || !opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';

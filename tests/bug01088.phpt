@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #1088: Xdebug won't show dead and not executed lines at the 2nd time.
+Test for bug #1088: Xdebug won't show dead and not executed lines at the 2nd time (!opcache)
 --SKIPIF--
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('!opcache');
+?>
 --FILE--
 <?php
 class TestMe

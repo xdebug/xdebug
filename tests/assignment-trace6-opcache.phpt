@@ -3,9 +3,7 @@ Test for tracing assignments in user-readable function traces (< PHP 7.2, opcach
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.2', '<') && opcache_active() ) ) {
-	echo "skip < PHP 7.2 && opcache loaded needed\n";
-}
+check_reqs('PHP < 7.2; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

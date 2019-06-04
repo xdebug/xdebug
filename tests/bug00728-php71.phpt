@@ -1,12 +1,9 @@
 --TEST--
-Test for bug #728: Profiler reports __call() invocations confusingly/wrongly. (>= PHP 7.1, < PHP 7.4)
+Test for bug #728: Profiler reports __call() invocations confusingly/wrongly (>= PHP 7.1, < PHP 7.4)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-
-if ( ! ( runtime_version('7.1', '>=') && runtime_version('7.4', '<') ) ) {
-	echo "skip >= PHP 7.1 && < PHP 7.4 needed\n";
-}
+check_reqs('PHP >= 7.1, < 7.4');
 ?>
 --INI--
 xdebug.profiler_enable=1

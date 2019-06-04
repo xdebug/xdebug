@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #842: Can't debug conditional statements without a block (TS1b)
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

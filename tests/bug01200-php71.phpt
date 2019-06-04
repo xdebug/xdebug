@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1200: Coverage of sending arguments to a method (> PHP 7.0.12)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP > 7.0.12');
+?>
 --FILE--
 <?php
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);

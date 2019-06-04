@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1305: Problems with array keys with an aposprophe
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --INI--
 xdebug.auto_trace=1
 --FILE--

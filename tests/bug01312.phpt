@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1312: DBGP: extended_properties for \0 characters in fields
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --INI--
 xdebug.remote_enable=1
 --FILE--

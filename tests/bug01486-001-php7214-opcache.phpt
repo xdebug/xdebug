@@ -3,11 +3,7 @@ Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (> PHP 7.2.13
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
-
-if ( ! ( runtime_version('7.2.13', '>') && opcache_active() ) ) {
-	echo "skip > PHP 7.2.13 && opcache loaded needed\n";
-}
+check_reqs('PHP > 7.2.13,!= 7.3.0; opcache');
 ?>
 --FILE--
 <?php

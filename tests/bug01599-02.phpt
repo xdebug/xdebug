@@ -2,10 +2,8 @@
 Test for tracing new PHP 7.4 assignment opcodes (< PHP 7.4 && opcache)
 --SKIPIF--
 <?php
-require 'utils.inc';
-if ( ! ( runtime_version( '7.4', '<' ) && opcache_active() ) ) {
-	echo "skip < PHP 7.4 && opcache active needed\n";
-};
+require 'tests/utils.inc';
+check_reqs('PHP < 7.4; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #535: Code coverage and return before function|class ending (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for bug #535: Code coverage and return before function|class ending
 --INI--
 xdebug.overload_var_dump=0
 --FILE--

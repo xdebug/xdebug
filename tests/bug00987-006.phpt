@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #987: Hidden property names not shown with var_dump
 --SKIPIF--
-<?php if (!extension_loaded('simplexml')) echo "skip The SimpleXML extension needs to be installed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('ext simplexml');
+?>
 --INI--
 html_errors=0
 xdebug.cli_color=0

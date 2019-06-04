@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1059: Crash when using a non-associate array key in a $GLOBALS element
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

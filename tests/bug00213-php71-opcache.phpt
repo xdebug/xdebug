@@ -3,9 +3,7 @@ Test for bug #213: Dead code analysis doesn't take catches for throws into accou
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.1', '>=') && opcache_active() ) ) {
-	echo "skip >= PHP 7.1 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.1; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

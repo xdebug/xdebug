@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1514: Variable names with a NULL char are cut off at NULL char
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

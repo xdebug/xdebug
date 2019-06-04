@@ -2,7 +2,8 @@
 Test for bug #987: Hidden property names not shown with var_dump (CLI) (>= PHP 7.2)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.2", '>=')) echo "skip >= PHP 7.2 needed\n";
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.2');
 ?>
 --INI--
 html_errors=0

@@ -1,8 +1,10 @@
 --TEST--
-Test for bug #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for branch/dead code analysis (> PHP 7.0.12)
+Test for bug #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for branch/dead code analysis (> PHP 7.0.12, !opcache)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP > 7.0.12; !opcache');
+?>
 --FILE--
 <?php
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);

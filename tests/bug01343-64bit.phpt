@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1343: Wrong values of numerical keys outside 32bit range
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 8) { echo "skip Only for 64bit platforms"; } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('64bit');
+?>
 --INI--
 xdebug.default_enable=1
 html_errors=0

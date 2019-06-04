@@ -3,9 +3,7 @@ Test for bug #1210: Coverage of sending arguments to a method (> PHP 7.2.13, opc
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.2.13', '>') && opcache_active() ) ) {
-	echo "skip > PHP 7.2.13 && opcache loaded needed\n";
-}
+check_reqs('PHP > 7.2.13; opcache');
 ?>
 --FILE--
 <?php

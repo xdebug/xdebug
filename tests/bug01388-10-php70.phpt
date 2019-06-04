@@ -2,8 +2,8 @@
 Test for bug #1388: Resolved Breakpoint in a closure in function [1] (< PHP 7.4)
 --SKIPIF--
 <?php
-if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
-if (!version_compare(phpversion(), "7.4", '<')) echo "skip < PHP 7.4 needed\n";
+require 'tests/utils.inc';
+check_reqs('PHP < 7.4; dbgp');
 ?>
 --FILE--
 <?php

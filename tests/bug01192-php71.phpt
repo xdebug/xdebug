@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1092: Dead code analysis does not work for generators with 'return;' (>= PHP 7.1)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.1');
+?>
 --FILE--
 <?php
 function gen(&$output, $branch = false)

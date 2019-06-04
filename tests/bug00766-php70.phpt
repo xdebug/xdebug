@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (>= PHP 7.0, <= PHP 7.0.12)
+Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (<= PHP 7.0.12)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0, <= PHP 7.0.12 needed\n";
-if (version_compare(phpversion(), "7.0.12", '>')) echo "skip >= PHP 7.0, <= PHP 7.0.12 needed\n";
+require 'tests/utils.inc';
+check_reqs('PHP <= 7.0.12');
 ?>
 --INI--
 xdebug.default_enable=1

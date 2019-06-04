@@ -1,11 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [5] (>= PHP 7.0, <= PHP 7.0.12, !opcache)
+Test for bug #1034: path coverage [5] (<= PHP 7.0.12, !opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.0', '>=') && runtime_version('7.0.12', '<=') && !opcache_active() ) ) {
-	echo "skip >= PHP 7.0 && <= PHP 7.0.12 && opcache not loaded needed\n";
-}
+check_reqs('PHP <= 7.0.12; !opcache');
 ?>
 --FILE--
 <?php

@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1501: Xdebug var dump tries casting properties (HTML)
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) { echo "skip Only for 32bit platforms"; } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('32bit');
+?>
 --INI--
 html_errors=1
 xdebug.cli_color=0

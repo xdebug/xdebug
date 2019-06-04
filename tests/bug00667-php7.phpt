@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #667: Class static members are shown in the locals when using context_get
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

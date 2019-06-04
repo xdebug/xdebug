@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1282: var_dump() of integers > 32 bit is broken on Windows
 --SKIPIF--
-<?php if (PHP_INT_SIZE != 4) { echo "skip Only for 32bit platforms"; } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('32bit');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.overload_var_dump=1

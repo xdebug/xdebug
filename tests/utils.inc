@@ -28,3 +28,119 @@ function opcache_active()
 
 	return true;
 }
+
+function check_reqs( $req_str )
+{
+	$missing = 0;
+	$errors = [];
+
+	$parts = explode( ';', $req_str );
+
+	foreach ( $parts as $key => $req )
+	{
+		$parts[$key] = $req = trim( $req );
+		$old_missing = $missing;
+
+		if ( $req === 'ZTS' )
+		{
+			$missing += ( PHP_ZTS == 0 );
+		}
+		if ( $req === 'NTS' )
+		{
+			$missing += ( PHP_ZTS == 1 );
+		}
+		if ( $req === 'opcache' )
+		{
+			$missing += ( !opcache_active() );
+		}
+		if ( $req === '!opcache' )
+		{
+			$missing += opcache_active();
+		}
+
+		if ( $req === 'linux' )
+		{
+			$missing += ( php_uname('s') != 'Linux' );
+		}
+		if ( $req === '!linux' )
+		{
+			$missing += ( php_uname('s') == 'Linux' );
+		}
+
+		if ( $req === 'sunos' )
+		{
+			$missing += ( php_uname('s') != 'SunOS' );
+		}
+		if ( $req === '!sunos' )
+		{
+			$missing += ( php_uname('s') == 'SunOS' );
+		}
+
+		if ( $req === 'win' )
+		{
+			$missing += ( substr( PHP_OS, 0, 3 ) !== 'WIN' );
+		}
+		if ( $req === '!win' )
+		{
+			$missing += ( substr( PHP_OS, 0, 3 ) === 'WIN' );
+		}
+
+		if ( substr( $req, 0, 3 ) === 'PHP' )
+		{
+			$versions_req = explode( ',', substr( $req, 4 ) );
+			foreach ( $versions_req as $version_req )
+			{
+				list( $operator, $version ) = explode( ' ', trim( $version_req ) );
+				$missing += (int) ( ! runtime_version( $version, $operator ) );
+			}
+		}
+		
+		if ( substr( $req, 0, 3 ) === 'ext' )
+		{
+			$missing += (int) ( ! extension_loaded( substr( $req, 4 ) ) );
+			$req = "'" . substr( $req, 4 ) . '\' extension';
+		}
+
+		if ( substr( $req, 0, 5 ) === 'class' )
+		{
+			$missing += (int) ( in_array( substr( $req, 6 ), get_declared_classes()) == false );
+			$req = "'" . substr( $req, 6 ) . '\' class';
+		}
+		
+		if ( $req === '32bit' )
+		{
+			$missing += ( PHP_INT_SIZE != 4 );
+		}
+		if ( $req === '64bit' )
+		{
+			$missing += ( PHP_INT_SIZE != 8 );
+		}
+		
+		if ( $req === 'unparallel' )
+		{
+			$missing += ( getenv( 'SKIP_UNPARALLEL_TESTS' ) );
+		}
+
+		if ( $req === 'dbgp' )
+		{
+			$missing += (int) ( getenv( 'SKIP_DBGP_TESTS' ) );
+			$req = "DBGp tests are disabled";
+		}
+
+		if ( $req === 'slow' )
+		{
+			$missing += (int) ( getenv( 'SKIP_SLOW_TESTS' ) );
+			$req = "Ignoring slow tests";
+		}
+
+		if ( $old_missing != $missing )
+		{
+			$errors[] = $req;
+		}
+	}
+
+	if ( $missing )
+	{
+		die( "skip required: " . join( ' && ', $parts ) . " — missing: " . join( ' && ', $errors ) );
+	}
+}

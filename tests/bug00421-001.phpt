@@ -2,8 +2,8 @@
 Test for bug #421: xdebug sends back invalid characters in xml sometimes
 --SKIPIF--
 <?php
-if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
-if (in_array('SimpleXMLIterator', get_declared_classes()) == false) { echo "skip SimpleXML extension required\n"; }
+require 'tests/utils.inc';
+check_reqs('dbgp; class SimpleXMLIterator');
 ?>
 --FILE--
 <?php

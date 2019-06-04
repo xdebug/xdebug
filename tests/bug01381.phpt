@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #1381: FETCH_DIM_W is not overloaded
+Test for bug #1381: FETCH_DIM_W is not overloaded (!opcache)
 --SKIPIF--
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('!opcache');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

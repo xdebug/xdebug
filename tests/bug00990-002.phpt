@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #990: DBGP: Add notification for notices, warnings and errors
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --INI--
 xdebug.remote_enable=1
 --FILE--

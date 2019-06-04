@@ -1,8 +1,10 @@
 --TEST--
 Test for bug #777: Connection to reset on stepping over call to mysqli_init
 --SKIPIF--
-<?php if (!extension_loaded('mysqli')) echo "skip The MySQLi extension needs to be installed\n"; ?>
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp; ext MySQLi');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -3,11 +3,7 @@ Test for bug #1530: Code coverage incorrect for last code line in a loop (>= PHP
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if (version_compare(phpversion(), "7.3.0", '==')) echo "skip PHP 7.3.0 is not supported in this test\n";
-
-if ( ! ( runtime_version('7.2.14', '>=') && opcache_active() ) ) {
-	echo "skip >= PHP 7.2.14 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.2.14,!= 7.3.0; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

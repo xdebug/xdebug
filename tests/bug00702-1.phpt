@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #702: Check whether variables tracing also works with =& (PHP >= 7.1.1)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.1.1", '>=')) echo "skip >= PHP 7.1.1 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.1.1');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

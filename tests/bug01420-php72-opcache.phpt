@@ -3,9 +3,7 @@ Test for bug #1420: handle path/branch converage for switch with jump table (>= 
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.2', '>=') && runtime_version('7.3', '<') && opcache_active() ) ) {
-	echo "skip >= PHP 7.2 && < PHP 7.3 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.2,< 7.3; opcache');
 ?>
 --FILE--
 <?php

@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #839: xdebug shows wrong data in debug (when using static class vars?)
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

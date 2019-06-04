@@ -2,8 +2,8 @@
 Test for bug #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for branch/dead code analysis (>= PHP 7.0.3, PHP <= 7.0.12)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0.3", '>=')) echo "skip >= PHP 7.0.3, <= PHP 7.0.12 needed\n";
-if (version_compare(phpversion(), "7.0.12", '>')) echo "skip >= PHP 7.0.3, <= PHP 7.0.12 needed\n";
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.0.3,<= 7.0.12');
 ?>
 --FILE--
 <?php
@@ -21,7 +21,7 @@ try
 finally
 end
 array(2) {
-  ["%sbug01241-php70.php"]=>
+  ["%sbug01241-001-php70.php"]=>
   array(2) {
     [4]=>
     int(1)

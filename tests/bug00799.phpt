@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #799: Function traces report base class instead of object name (>= PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
+Test for bug #799: Function traces report base class instead of object name
 --INI--
 xdebug.default_enable=1
 xdebug.profiler_enable=0

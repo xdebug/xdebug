@@ -1,8 +1,10 @@
 --TEST--
 Test with Code Coverage with abstract methods (>= PHP 7.1.0, <= PHP 7.1.3)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.1.0", '>=')) echo "skip >= PHP 7.1.0, <= PHP 7.1.3 needed\n"; ?>
-<?php if (!version_compare(phpversion(), "7.1.3", '<=')) echo "skip >= PHP 7.1.0, <= PHP 7.1.3 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.1.0,<= 7.1.3');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

@@ -1,10 +1,9 @@
 --TEST--
-Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work (>= PHP 7.0, NTS)
+Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work (NTS, !opcache)
 --SKIPIF--
 <?php
-if (PHP_ZTS == 1) echo "skip NTS needed\n";
-if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n";
-if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
+require 'tests/utils.inc';
+check_reqs('NTS; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1

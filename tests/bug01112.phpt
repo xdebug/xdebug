@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1112: Setting an invalid xdebug.trace_format causes Xdebug to crash
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('!win');
+?>
 --INI--
 xdebug.trace_format=42
 xdebug.auto_trace=1

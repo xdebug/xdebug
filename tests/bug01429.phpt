@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #1429: Code coverage does not cover null coalesce
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0 needed\n"; ?>
 --FILE--
 <?php
 xdebug_start_code_coverage();

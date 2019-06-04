@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1335: Debugging with PhpStorm sometimes gives "can not get property"
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

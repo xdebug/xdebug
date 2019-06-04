@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED (> PHP 7.0.12)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP > 7.0.12');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

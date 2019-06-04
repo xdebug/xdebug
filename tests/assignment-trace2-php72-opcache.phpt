@@ -1,11 +1,9 @@
 --TEST--
-Test for tracing array assignments in user-readable function traces (= PHP 7.2, opcache)
+Test for tracing array assignments in user-readable function traces (>= PHP 7.2, < PHP 7.3, opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.2', '>=') && runtime_version('7.3', '<') && opcache_active() ) ) {
-	echo "skip = PHP 7.2 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.2,< 7.3; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

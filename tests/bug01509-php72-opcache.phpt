@@ -3,9 +3,7 @@ Test for bug #1509: Code coverage missing for case inside switch (>= PHP 7.2, op
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.2', '>=') && opcache_active() ) ) {
-	echo "skip >= PHP 7.2 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.2; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

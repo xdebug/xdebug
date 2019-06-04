@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #913: "Added debug info handler to DOM objects." not supported.
+Test for bug #913: "Added debug info handler to DOM objects" not supported
 --SKIPIF--
-<?php if (!in_array("DOMDocument", get_declared_classes())) { echo "skip DOM extension required\n"; } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('class DOMDocument');
+?>
 --FILE--
 <?php
 $DOMDocumentNode = new DOMDocument();

@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #1403: Code coverage does not cover BIND_STATIC
+Test for bug #1403: Code coverage does not cover BIND_STATIC (> PHP 7.1)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.1');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

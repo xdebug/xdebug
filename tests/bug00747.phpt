@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #747: Xdebug and SOAP Server conflict
 --SKIPIF--
-<?php if (!extension_loaded("soap")) { echo "skip SOAP extension required\n"; } ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('ext soap');
+?>
 --INI--
 xdebug.default_enable=1
 --FILE--

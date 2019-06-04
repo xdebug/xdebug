@@ -1,11 +1,9 @@
 --TEST--
-Test for bug #1270: String parsing marked not covered (>= PHP 7.2)
+Test for bug #1270: String parsing marked not covered (>= PHP 7.2, opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.2', '>=') && opcache_active() ) ) {
-	echo "skip >= PHP 7.2 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.2; opcache');
 ?>
 --FILE--
 <?php

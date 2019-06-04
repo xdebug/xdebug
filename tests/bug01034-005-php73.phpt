@@ -3,9 +3,7 @@ Test for bug #1034: path coverage [5] (>= PHP 7.3, !opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if ( ! ( runtime_version('7.3', '>=') && !opcache_active() ) ) {
-	echo "skip >= PHP 7.3 && opcache not loaded needed\n";
-}
+check_reqs('PHP >= 7.3; !opcache');
 ?>
 --FILE--
 <?php

@@ -2,8 +2,8 @@
 Test for bug #654: Xdebug hides error message in CLI (>= PHP 7.2)
 --SKIPIF--
 <?php
-if (!extension_loaded("session")) { echo "skip Session extension required\n"; }
-if (!version_compare(phpversion(), "7.2", '>=')) echo "skip >= PHP 7.2 needed\n";
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.2; ext session');
 ?>
 --INI--
 error_reporting=-1

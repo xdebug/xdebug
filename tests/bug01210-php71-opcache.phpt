@@ -2,9 +2,8 @@
 Test for bug #1210: Coverage of sending arguments to a method (>= PHP 7.1, <= PHP 7.2.13, opcache)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.1", '<')) echo "skip >= PHP 7.1, <= PHP 7.2.13 needed\n";
-if (version_compare(phpversion(), "7.2.13", '>')) echo "skip >= PHP 7.1, <= PHP 7.2.13 needed\n";
-if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+require 'tests/utils.inc';
+check_reqs('PHP >= 7.1,<= 7.2.13; opcache');
 ?>
 --FILE--
 <?php

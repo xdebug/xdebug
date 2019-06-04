@@ -1,13 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval() (>= PHP 7.2, ZTS, opcache)
+Test for xdebug_debug_zval_stdout() (>= PHP 7.2, opcache)
 --SKIPIF--
 <?php
 require 'tests/utils.inc';
-if (PHP_ZTS == 0) echo "skip ZTS needed\n";
-
-if ( ! ( runtime_version('7.2', '>=') && opcache_active() ) ) {
-	echo "skip >= PHP 7.2 && opcache loaded needed\n";
-}
+check_reqs('PHP >= 7.2; opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -40,7 +36,7 @@ function func(){
 
 func();
 ?>
---EXPECTF--
+--EXPECT--
 a: no such symbol
 $a: no such symbol
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)

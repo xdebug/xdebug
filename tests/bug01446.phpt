@@ -1,7 +1,5 @@
 --TEST--
-Test for bug #1446: Code Coverage misses elseif if it uses an isset with a property (< PHP 7.0)
---SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0", '<')) echo "skip < PHP 7.0 needed\n"; ?>
+Test for bug #1446: Code Coverage misses elseif if it uses an isset with a property
 --FILE--
 <?php
 xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );
@@ -14,13 +12,13 @@ $o->doSomething();
 $cc = xdebug_get_code_coverage();
 
 ksort( $cc );
-var_dump( array_slice( $cc, 1, 1 ) );
+var_dump( array_slice( $cc, 0, 1 ) );
 ?>
 --EXPECTF--
 array(1) {
   ["%sbug01446.inc"]=>
-  array(11) {
-    [3]=>
+  array(%r(9|10)%r) {
+    [2]=>
     int(1)
     [8]=>
     int(1)
@@ -34,12 +32,8 @@ array(1) {
     int(1)
     [16]=>
     int(1)
-    [17]=>
-    int(-2)
     [19]=>
-    int(-1)
-    [20]=>
-    int(-2)
+    %a
     [23]=>
     int(1)
   }

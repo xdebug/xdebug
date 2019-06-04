@@ -1,8 +1,10 @@
 --TEST--
-Test for bug #472: Dead Code Analysis for code coverage messed up after goto (> PHP 7.0.12)
+Test for bug #472: Dead Code Analysis for code coverage messed up after goto (> PHP 7.0.12, !opcache)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+require 'tests/utils.inc';
+check_reqs('PHP > 7.0.12; !opcache');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
