@@ -31,7 +31,7 @@ setlocal enableextensions enabledelayedexpansion
 
 	if %errorlevel% neq 0 exit /b 3
 
-	cmd /c configure.bat --disable-all --with-mp=auto --enable-cli --%ZTS_STATE%-zts --enable-json --with-xdebug=shared --enable-object-out-dir=%PHP_BUILD_OBJ_DIR% --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=%DEPS_DIR%
+	cmd /c configure.bat --disable-all --enable-opcache --with-mp=auto --enable-cli --%ZTS_STATE%-zts --enable-json --with-xdebug=shared --enable-object-out-dir=%PHP_BUILD_OBJ_DIR% --with-config-file-scan-dir=%APPVEYOR_BUILD_FOLDER%\build\modules.d --with-prefix=%APPVEYOR_BUILD_FOLDER%\build --with-php-build=%DEPS_DIR%
 
 	if %errorlevel% neq 0 exit /b 3
 
@@ -45,15 +45,16 @@ setlocal enableextensions enabledelayedexpansion
 	mkdir c:\tests_tmp
 	set TEST_PHP_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%\build\php.exe
 	set TEST_PHP_JUNIT=c:\tests_tmp\tests-junit.xml
-	if "%OPCACHE%" equ "1" set TEST_PHP_ARGS=!TEST_PHP_ARGS! -d zend_extension=%APPVEYOR_BUILD_FOLDER%\build\ext\php_opcache.so -d opcache.enable=1 -d opcache.enable_cli=1
-	set TEST_PHP_ARGS=-n -d -foo=1 -d zend_extension=%APPVEYOR_BUILD_FOLDER%\build\ext\php_xdebug.dll -dxdebug.remote_enable=1
+	set TEST_PHP_ARGS=-n -d -foo=1 -d zend_extension=%APPVEYOR_BUILD_FOLDER%\build\ext\php_opcache.dll -d zend_extension=%APPVEYOR_BUILD_FOLDER%\build\ext\php_xdebug.dll -dxdebug.remote_enable=1
 	set SKIP_DBGP_TESTS=1
 	set SKIP_IPV6_TESTS=1
 	set REPORT_EXIT_STATUS=1
+	set OPCACHE=%OPCACHE%
+	echo !OPCACHE!
 	echo !TEST_PHP_EXECUTABLE! !TEST_PHP_ARGS! -v
-	echo !TEST_PHP_EXECUTABLE! -n run-tests.php -q -x --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp %APPVEYOR_BUILD_FOLDER%\tests
+	echo !TEST_PHP_EXECUTABLE! -n %APPVEYOR_BUILD_FOLDER%\run-xdebug-tests.php -q -x --show-diff %APPVEYOR_BUILD_FOLDER%\tests
 	!TEST_PHP_EXECUTABLE! !TEST_PHP_ARGS! -v
-	!TEST_PHP_EXECUTABLE! -n run-tests.php -q -x --show-diff %APPVEYOR_BUILD_FOLDER%\tests
+	!TEST_PHP_EXECUTABLE! -n %APPVEYOR_BUILD_FOLDER%\run-xdebug-tests.php -q -x --show-diff %APPVEYOR_BUILD_FOLDER%\tests
 
 	set EXIT_CODE=%errorlevel%
 	powershell -Command "$wc = New-Object 'System.Net.WebClient'; $wc.UploadFile('https://ci.appveyor.com/api/testresults/junit/%APPVEYOR_JOB_ID%', 'c:\tests_tmp\tests-junit.xml')"
