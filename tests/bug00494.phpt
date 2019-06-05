@@ -2,7 +2,7 @@
 Test for bug #494: Private attributes of parent class unavailable when inheriting
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

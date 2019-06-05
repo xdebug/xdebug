@@ -2,7 +2,7 @@
 Test for bug #678: Xdebug segfault when IDE send "eval NonExistsClass"
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #1223: Xdebug crashes on PHP 7 when doing a DBGp eval command
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

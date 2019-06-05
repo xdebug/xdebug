@@ -2,7 +2,7 @@
 Test for bug #996: Can't evaluate property of class that extends ArrayObject
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

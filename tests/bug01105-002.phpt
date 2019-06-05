@@ -2,7 +2,7 @@
 Test for bug #1105: Setting properties without specifying a type only works in topmost frame
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

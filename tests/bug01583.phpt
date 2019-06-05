@@ -2,7 +2,7 @@
 Test for bug #1583: Xdebug crashes when OPcache's compact literals optimisation is on
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('ext json');
 ?>
 --FILE--

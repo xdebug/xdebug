@@ -2,7 +2,7 @@
 Test for bug #566: Xdebug crashes when using conditional breakpoints (2)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--

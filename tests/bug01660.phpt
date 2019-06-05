@@ -2,7 +2,7 @@
 Test for bug #1660: Return breakpoints for methods don't break immediately
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

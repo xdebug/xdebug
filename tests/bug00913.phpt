@@ -2,7 +2,7 @@
 Test for bug #913: "Added debug info handler to DOM objects" not supported
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('class DOMDocument');
 ?>
 --FILE--

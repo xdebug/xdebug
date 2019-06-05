@@ -2,7 +2,7 @@
 Test for bug #1133: PDO exception code value type is changed
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('ext pdo_sqlite');
 ?>
 --FILE--

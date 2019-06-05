@@ -2,7 +2,7 @@
 Test for bug #699: Xdebug gets the filename wrong for the countable interface (< PHP 7.2)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP < 7.2');
 ?>
 --INI--

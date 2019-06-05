@@ -2,7 +2,7 @@
 Test for bug #947: Newlines converted when html_errors = 0 (ansi)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!win');
 ?>
 --INI--

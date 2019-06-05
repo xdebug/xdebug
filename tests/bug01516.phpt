@@ -2,7 +2,7 @@
 Test for bug #1516: Can't fetch variables or object properties which have \0 characters in them
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

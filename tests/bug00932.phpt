@@ -2,7 +2,7 @@
 Test for bug #932: Show an error if Xdebug can't open the remote debug log
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; !win');
 ?>
 --INI--

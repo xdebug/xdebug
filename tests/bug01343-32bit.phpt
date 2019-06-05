@@ -2,7 +2,7 @@
 Test for bug #1343: Wrong values of numerical keys outside 32bit range
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('32bit');
 ?>
 --INI--

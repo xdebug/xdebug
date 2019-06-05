@@ -2,7 +2,7 @@
 Test for bug #472: Dead Code Analysis for code coverage messed up after goto (<= PHP 7.0.12)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP <= 7.0.12');
 ?>
 --INI--

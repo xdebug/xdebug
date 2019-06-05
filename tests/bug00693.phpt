@@ -2,7 +2,7 @@
 Test for bug #693: Cachegrind files not written when filename is very long
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!win');
 if (getenv('CIRCLECI') !== false) die("skip on CircleCI");
 ?>

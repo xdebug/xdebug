@@ -2,7 +2,7 @@
 Test for tracing array assignments in user-readable function traces (>= PHP 7.3.2, opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.3.2; opcache');
 ?>
 --INI--

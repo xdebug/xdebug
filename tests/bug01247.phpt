@@ -2,7 +2,7 @@
 Test for bug #1247: xdebug.show_local_vars dumps variables with *uninitialized* values (< PHP 7.2 || no opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 if ( ! ( runtime_version('7.2', '<') || !opcache_active() ) ) {
 	echo "skip < PHP 7.2 || !opcache loaded needed\n";
 }

@@ -2,7 +2,7 @@
 Test for bug #1181: Derived class with __get gets called on fetching base class private property
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

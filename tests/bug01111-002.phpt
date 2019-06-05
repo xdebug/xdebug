@@ -2,7 +2,7 @@
 Test for bug #1111: eval does not work when debugger is stopped in xdebug_throw_exception_hook
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

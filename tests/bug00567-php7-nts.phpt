@@ -2,7 +2,7 @@
 Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work (NTS, !opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('NTS; !opcache');
 ?>
 --INI--

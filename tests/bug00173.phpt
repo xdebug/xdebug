@@ -2,7 +2,7 @@
 Test for bug #173: Xdebug segfaults using SPL ArrayIterator
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('ext SPL');
 ?>
 --INI--

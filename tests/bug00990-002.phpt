@@ -2,7 +2,7 @@
 Test for bug #990: DBGP: Add notification for notices, warnings and errors
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--

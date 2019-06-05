@@ -2,7 +2,7 @@
 Test for bug #797: XDebug terminates (or Eclipse loses it?) when viewing variables
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

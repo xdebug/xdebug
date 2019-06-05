@@ -2,7 +2,7 @@
 Test for bug #1059: Crash when using a non-associate array key in a $GLOBALS element
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

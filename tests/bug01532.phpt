@@ -2,7 +2,7 @@
 Test for bug #1532: SIGABRT when using remote debugging and an error is thrown in eval()
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

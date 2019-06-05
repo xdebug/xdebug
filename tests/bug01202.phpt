@@ -2,7 +2,7 @@
 Test for bug #1202: Anonymous classes are not handled properly while remote debugging
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

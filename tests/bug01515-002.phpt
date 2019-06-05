@@ -2,7 +2,7 @@
 Test for bug #1515: Object property names with a NULL char are cut off at NULL char (DBGp)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

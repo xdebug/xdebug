@@ -2,7 +2,7 @@
 Test with Code Coverage (> PHP 7.0.12)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP > 7.0.12');
 ?>
 --INI--

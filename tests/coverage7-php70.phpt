@@ -2,7 +2,7 @@
 Test with Code Coverage with path and branch checking (<= PHP 7.0.12)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP <= 7.0.12');
 ?>
 --INI--

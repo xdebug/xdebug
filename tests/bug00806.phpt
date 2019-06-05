@@ -2,7 +2,7 @@
 Test for bug #806: 'property_get' doesn't work if array key contains a whitespace
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

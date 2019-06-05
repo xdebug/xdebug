@@ -2,7 +2,7 @@
 Test for bug #654: Xdebug hides error message in CLI (>= PHP 7.2)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.2; ext session');
 ?>
 --INI--

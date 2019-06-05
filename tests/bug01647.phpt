@@ -2,7 +2,7 @@
 Test for bug #1647: Memory corruption when a conditional breakpoint is used
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

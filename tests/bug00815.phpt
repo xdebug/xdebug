@@ -2,7 +2,7 @@
 Test for bug #815: Xdebug crashes when 'exit' operator used in the script
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

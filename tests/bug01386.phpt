@@ -2,7 +2,7 @@
 Test for bug #1386: Executable code not shown as executed/executable (!opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!opcache');
 ?>
 --INI--

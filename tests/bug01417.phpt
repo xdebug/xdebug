@@ -2,7 +2,7 @@
 Test for bug #1417: Fetching properties of static class contexts fails due to incorrect fetch mode
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

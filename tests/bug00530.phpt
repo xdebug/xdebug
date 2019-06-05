@@ -2,7 +2,7 @@
 Test for bug #530: Xdebug returns properties out of page if there are less than max_children properties
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #1305: Problems with array keys with an aposprophe
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--

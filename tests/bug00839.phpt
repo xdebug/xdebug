@@ -2,7 +2,7 @@
 Test for bug #839: xdebug shows wrong data in debug (when using static class vars?)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

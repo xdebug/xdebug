@@ -2,7 +2,7 @@
 Test for bug #213: Dead code analysis doesn't take catches for throws into account (> PHP 7.0.12, !opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP > 7.0.12; !opcache');
 ?>
 --INI--

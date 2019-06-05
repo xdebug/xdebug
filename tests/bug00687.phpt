@@ -2,7 +2,7 @@
 Test for bug #687: Xdebug does not show dynamically defined variable
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

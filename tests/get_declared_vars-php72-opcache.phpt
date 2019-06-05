@@ -2,7 +2,7 @@
 Test with xdebug_get_declared_vars() (>= PHP 7.2, opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.2; opcache');
 ?>
 --INI--

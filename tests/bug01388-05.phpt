@@ -2,7 +2,7 @@
 Test for bug #1388: Resolved Breakpoint: resolved to changed line (WI-6916)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #931: Crash with exception in shut-down stage
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('ext session');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #964: IP retrival from X-Forwarded-For complies with RFC 7239 (with comma)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!win; unparallel');
 ?>
 --ENV--

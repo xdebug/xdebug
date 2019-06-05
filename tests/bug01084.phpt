@@ -2,7 +2,7 @@
 Test for bug #1084: Add support for inheritence in exception breakpoints
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

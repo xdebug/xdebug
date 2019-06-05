@@ -2,7 +2,7 @@
 Test for bug #688: Call to not yet defined function aborts the session
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

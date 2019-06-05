@@ -2,7 +2,7 @@
 Test for bug #1048: Can not get $GLOBAL variable by property_value on function context
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

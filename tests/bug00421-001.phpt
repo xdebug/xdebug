@@ -2,7 +2,7 @@
 Test for bug #421: xdebug sends back invalid characters in xml sometimes
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; class SimpleXMLIterator');
 ?>
 --FILE--

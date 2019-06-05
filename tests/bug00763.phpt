@@ -2,7 +2,7 @@
 Test for bug #763: Access method of not yet defined variable aborts debug session
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

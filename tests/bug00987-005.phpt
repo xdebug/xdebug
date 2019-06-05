@@ -2,7 +2,7 @@
 Test for bug #987: Hidden property names not shown while debugging
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

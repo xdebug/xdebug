@@ -2,7 +2,7 @@
 Test for bug #1083: Segfault while retrieving information about uninitiased var.
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

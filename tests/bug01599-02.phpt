@@ -2,7 +2,7 @@
 Test for tracing new PHP 7.4 assignment opcodes (< PHP 7.4 && opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP < 7.4; opcache');
 ?>
 --INI--

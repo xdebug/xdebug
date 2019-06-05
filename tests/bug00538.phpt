@@ -2,7 +2,7 @@
 Test for bug #538: Error in watches and call stack parameter with string containing '\\'
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

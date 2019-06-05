@@ -2,7 +2,7 @@
 Test for bug #1335: Debugging with PhpStorm sometimes gives "can not get property"
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

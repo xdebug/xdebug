@@ -2,7 +2,7 @@
 Test for bug #842: Can't debug conditional statements without a block (TS1a)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

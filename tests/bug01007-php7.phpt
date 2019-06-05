@@ -2,7 +2,7 @@
 Test for bug #1007: Static Variables are showing "uninitialized" when stepping through the debug process
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #840: Xdebug crashes when a class is returned by a __call method with a static var and more than 2 props
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

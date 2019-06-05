@@ -2,7 +2,7 @@
 Test for bug #703: Line in heredoc marked as not executed (>= PHP 7.0.13, <= PHP 7.0.17)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.0.13, <= 7.0.17');
 ?>
 --INI--

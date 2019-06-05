@@ -2,7 +2,7 @@
 Test for bug #923: Debugging PHP with MongoDB using Cursor, causes debug session termination
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; ext mongo');
 ?>
 --FILE--

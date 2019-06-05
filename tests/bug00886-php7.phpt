@@ -2,7 +2,7 @@
 Test for bug #886: Use the same file system protocol for file located inside PHAR in both directions
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; slow');
 ?>
 --INI--

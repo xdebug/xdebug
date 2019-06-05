@@ -2,7 +2,7 @@
 Test for bug #987: Hidden property names not shown with stack trace (< PHP 7.1)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP < 7.1');
 ?>
 --INI--

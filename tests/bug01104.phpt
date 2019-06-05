@@ -2,7 +2,7 @@
 Test for bug #1104: "Notice: Corrupt member variable name" on 1-character static property
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

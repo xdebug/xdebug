@@ -2,7 +2,7 @@
 Test for bug #567: xdebug_debug_zval() and xdebug_debug_zval_stdout() don't work (< PHP 7.1, ZTS)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP < 7.1; ZTS');
 ?>
 --INI--

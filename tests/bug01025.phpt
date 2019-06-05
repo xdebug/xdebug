@@ -2,7 +2,7 @@
 Test for bug #1025: Xdebug does not reject wrong breakpoint types (-t)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

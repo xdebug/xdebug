@@ -2,7 +2,7 @@
 Test for bug #766: Xdebug doesn't understand ZEND_RETURN_BY_REF (<= PHP 7.0.12)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP <= 7.0.12');
 ?>
 --INI--

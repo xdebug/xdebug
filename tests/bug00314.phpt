@@ -2,7 +2,7 @@
 Test for bug #314: PHP CLI Error logging thwarted when Xdebug loaded
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!win; unparallel');
 ?>
 --INI--

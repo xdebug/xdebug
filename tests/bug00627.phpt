@@ -2,7 +2,7 @@
 Test for bug #627: breakpoints set in symlinked files don't trigger
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; !win');
 ?>
 --FILE--

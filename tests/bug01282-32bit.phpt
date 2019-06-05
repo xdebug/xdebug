@@ -2,7 +2,7 @@
 Test for bug #1282: var_dump() of integers > 32 bit is broken on Windows
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('32bit');
 ?>
 --INI--

@@ -2,7 +2,7 @@
 Test for bug #475: Property names with null chars are not sent fully to the client
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #1101: Debugger is not triggered on xdebug_break() in jit mode.
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

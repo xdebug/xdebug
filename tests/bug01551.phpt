@@ -2,7 +2,7 @@
 Test for bug #1551: Can't debug properties with an empty name
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #979: property_value -m 0 should mean all bytes, not 0 bytes
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #987: Hidden property names not shown with var_dump
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('ext simplexml');
 ?>
 --INI--

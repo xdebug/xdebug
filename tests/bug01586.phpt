@@ -2,7 +2,7 @@
 Test for bug #1586: error_reporting evaluation
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

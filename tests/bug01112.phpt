@@ -2,7 +2,7 @@
 Test for bug #1112: Setting an invalid xdebug.trace_format causes Xdebug to crash
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!win');
 ?>
 --INI--

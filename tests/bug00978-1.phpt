@@ -2,7 +2,7 @@
 Test for bug #978: Inspection of array with negative keys fails
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

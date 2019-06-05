@@ -2,7 +2,7 @@
 Test for bug #879: Closing brace in trait-using class definitions is counted towards code coverage (<= PHP 7.0.12)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP <= 7.0.12');
 ?>
 --INI--

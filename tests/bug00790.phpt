@@ -2,7 +2,7 @@
 Test for bug #790: Debugging with > PHP 5.4 and stderr/stdout doesn't work [1]
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

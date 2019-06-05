@@ -2,7 +2,7 @@
 Test for bug #778: Xdebug session in Eclipse crash whenever it run into simplexml_load_string call
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; ext SimpleXML');
 ?>
 --FILE--

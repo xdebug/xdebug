@@ -2,7 +2,7 @@
 Test for bug #998: Test that Xdebug connects back on IPv4 with localhost as the remote host
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test for bug #1088: Xdebug won't show dead and not executed lines at the 2nd time (!opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!opcache');
 ?>
 --FILE--

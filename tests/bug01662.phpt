@@ -2,7 +2,7 @@
 Test for bug #1662: __debugInfo() should not be used for user-defined classes
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

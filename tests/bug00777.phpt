@@ -2,7 +2,7 @@
 Test for bug #777: Connection to reset on stepping over call to mysqli_init
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; ext MySQLi');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Test with Code Coverage with abstract methods (> PHP 7.0.17, > PHP 7.1.3)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP > 7.0.17,!= 7.1.0,!= 7.1.1,!= 7.1.2,!= 7.1.3');
 ?>
 --INI--

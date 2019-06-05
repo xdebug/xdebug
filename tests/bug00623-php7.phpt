@@ -2,7 +2,7 @@
 Test for bug #623: Static properties of a class can be evaluated only with difficulty
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

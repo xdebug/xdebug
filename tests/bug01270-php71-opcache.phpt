@@ -2,7 +2,7 @@
 Test for bug #1270: String parsing marked not covered (>= PHP 7.1.0, <= PHP 7.1.3, opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.1.0,<= 7.1.3; opcache');
 ?>
 --FILE--

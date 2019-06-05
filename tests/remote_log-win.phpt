@@ -2,7 +2,7 @@
 Test for Xdebug's remote log (Windows)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; win');
 ?>
 --ENV--

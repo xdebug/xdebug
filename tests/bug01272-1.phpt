@@ -2,7 +2,7 @@
 Test for bug #1272: property_get doesn't return attributes for SimpleXMLElement
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('ext simplexml; dbgp');
 ?>
 --FILE--

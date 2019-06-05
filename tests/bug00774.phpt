@@ -2,7 +2,7 @@
 Test for bug #774: Xdebug generates a "bailout without bailout address"
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

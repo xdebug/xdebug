@@ -2,7 +2,7 @@
 Test for bug #606: evaluate a $this->... expression when $this is not accesible crash xdebug
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

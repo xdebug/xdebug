@@ -2,7 +2,7 @@
 Test for bug #1385: Can not fetch IS_INDIRECT private properties
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

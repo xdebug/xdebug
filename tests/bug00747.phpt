@@ -2,7 +2,7 @@
 Test for bug #747: Xdebug and SOAP Server conflict
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('ext soap');
 ?>
 --INI--

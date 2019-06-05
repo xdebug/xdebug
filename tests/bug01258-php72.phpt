@@ -2,7 +2,7 @@
 Test for bug #1258: ensure case statements are covered (>= PHP 7.2)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.2');
 ?>
 --FILE--

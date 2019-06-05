@@ -2,7 +2,7 @@
 Test for bug #419: make use of P_tmpdir if defined instead of hardcoded '/tmp'
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('sunos');
 ?>
 --FILE--

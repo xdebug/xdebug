@@ -2,7 +2,7 @@
 Test for bug #1218: Xdebug messes with the exception code, by casting it to int (DBGp)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--

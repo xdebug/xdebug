@@ -2,7 +2,7 @@
 Test for bug #1512: Xdebug returns escaped property name and fullname
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--

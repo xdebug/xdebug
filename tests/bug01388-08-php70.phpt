@@ -2,7 +2,7 @@
 Test for bug #1388: Resolved Breakpoint: include files (< PHP 7.4)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP < 7.4; dbgp');
 ?>
 --FILE--

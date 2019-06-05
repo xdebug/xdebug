@@ -2,7 +2,7 @@
 Test for bug #515: Dead Code Analysis for code coverage messed up with ticks (> PHP 7.0.12, !opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP > 7.0.12; !opcache');
 ?>
 ?>

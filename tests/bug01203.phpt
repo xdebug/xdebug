@@ -2,7 +2,7 @@
 Test for bug #1203: Accessing static property of a class that has no static properties crashes while remote debugging
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

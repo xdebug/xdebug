@@ -2,7 +2,7 @@
 Test for bug #814: Xdebug craches everytime when debugging using Xdebug 2.2.0RC1, Eclipse and Windows
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--

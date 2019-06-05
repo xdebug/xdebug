@@ -2,7 +2,7 @@
 Test for bug #1568: Can't debug object properties that have numeric keys
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('dbgp; ext ds');
 ?>
 --FILE--

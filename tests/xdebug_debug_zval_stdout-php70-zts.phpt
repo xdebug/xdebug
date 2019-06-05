@@ -2,7 +2,7 @@
 Test for xdebug_debug_zval_stdout() (< PHP 7.1, ZTS)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('PHP < 7.1; ZTS');
 ?>
 --INI--

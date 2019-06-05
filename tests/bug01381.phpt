@@ -2,7 +2,7 @@
 Test for bug #1381: FETCH_DIM_W is not overloaded (!opcache)
 --SKIPIF--
 <?php
-require 'tests/utils.inc';
+require __DIR__ . '/utils.inc';
 check_reqs('!opcache');
 ?>
 --INI--
