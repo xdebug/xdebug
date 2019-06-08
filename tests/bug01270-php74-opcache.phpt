@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1270: String parsing marked not covered (>= PHP 7.2, < PHP 7.4, opcache)
+Test for bug #1270: String parsing marked not covered (>= PHP 7.4, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP >= 7.2,< 7.4; opcache');
+check_reqs('PHP >= 7.4; opcache');
 ?>
 --FILE--
 <?php
@@ -23,24 +23,18 @@ var_dump( array_slice( $cc, 1, 1 ) );
 --EXPECTF--
 array(1) {
   ["%sbug01270.inc"]=>
-  array(13) {
-    [2]=>
-    int(1)
+  array(10) {
     [4]=>
     int(1)
     [5]=>
     int(1)
     [7]=>
     int(1)
-    [11]=>
-    int(1)
     [13]=>
     int(1)
     [14]=>
     int(1)
     [16]=>
-    int(1)
-    [20]=>
     int(1)
     [22]=>
     int(1)

@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with abstract methods (> PHP 7.0.17, > PHP 7.1.3, < PHP 7.4)
+Test with Code Coverage with abstract methods (>= PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP > 7.0.17,!= 7.1.0,!= 7.1.1,!= 7.1.2,!= 7.1.3,< 7.4');
+check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -32,7 +32,7 @@ xdebug.overload_var_dump=0
 ?>
 --EXPECTF--
 array(2) {
-  ["%scoverage4-new.php"]=>
+  ["%scoverage4-php74.php"]=>
   array(2) {
     [4]=>
     int(1)
@@ -40,9 +40,7 @@ array(2) {
     int(1)
   }
   ["%scoverage4.inc"]=>
-  array(3) {
-    [2]=>
-    int(1)
+  array(2) {
     [25]=>
     int(1)
     [26]=>

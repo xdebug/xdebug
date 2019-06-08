@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #1357: Function signature using variadics is reported as being not executed
+Test for bug #1357: Function signature using variadics is reported as being not executed (< PHP 7.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('PHP < 7.4');
+?>
 --FILE--
 <?php
 
@@ -39,7 +44,7 @@ hiArray
     [0] => hi
 )
 array(1) {
-  ["%sbug01357.php"]=>
+  ["%sbug01357-php70.php"]=>
   array(12) {
     [5]=>
     int(1)

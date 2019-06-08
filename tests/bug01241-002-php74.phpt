@@ -23,7 +23,7 @@ var_dump($c);
 before true
 Do somthing
 array(2) {
-  ["%sbug01241-002-php71.php"]=>
+  ["%sbug01241-002-php74.php"]=>
   array(4) {
     [4]=>
     int(1)

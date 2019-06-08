@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with path and branch checking (> PHP 7.0.12, < PHP 7.4)
+Test with Code Coverage with path and branch checking (>= PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4');
+check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -33,8 +33,6 @@ xdebug.overload_var_dump=0
 This is a YYYY-MM-DD format.
 This is a YYYYMMDD HHii format.
 array(%d) {
-  [2]=>
-  int(1)
   [4]=>
   int(1)
   [5]=>

@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with path and branch checking (> PHP 7.0.12, < PHP 7.4)
+Test with Code Coverage (>= PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4');
+check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -22,7 +22,7 @@ xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php
-	xdebug_start_code_coverage(XDEBUG_CC_UNUSED);
+	xdebug_start_code_coverage();
 	$file = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'coverage.inc';
 	include $file;
 	$cc = xdebug_get_code_coverage();
@@ -32,13 +32,9 @@ xdebug.overload_var_dump=0
 --EXPECTF--
 This is a YYYY-MM-DD format.
 This is a YYYYMMDD HHii format.
-array(%d) {
-  [2]=>
-  int(1)
+array(11) {
   [4]=>
   int(1)
-  [5]=>
-  int(-1)
   [7]=>
   int(1)
   [8]=>
@@ -47,8 +43,6 @@ array(%d) {
   int(1)
   [11]=>
   int(1)
-  [14]=>
-  int(-1)
   [17]=>
   int(1)
   [18]=>

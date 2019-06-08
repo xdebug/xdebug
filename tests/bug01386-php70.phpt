@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1386: Executable code not shown as executed/executable (>= PHP 7.1, < PHP 7.4, opcache)
+Test for bug #1386: Executable code not shown as executed/executable (< PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP >= 7.1,< 7.4; opcache');
+check_reqs('PHP < 7.4; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -38,7 +38,7 @@ xdebug_stop_code_coverage(false);
 --EXPECTF--
 array(2) {
   ["%sbug01386-class1.inc"]=>
-  array(5) {
+  array(6) {
     [3]=>
     int(1)
     [7]=>
@@ -47,11 +47,13 @@ array(2) {
     int(-1)
     [9]=>
     int(-1)
+    [10]=>
+    int(-2)
     [13]=>
     int(1)
   }
   ["%sbug01386-class2.inc"]=>
-  array(5) {
+  array(6) {
     [3]=>
     int(1)
     [7]=>
@@ -60,6 +62,8 @@ array(2) {
     int(-1)
     [9]=>
     int(-1)
+    [10]=>
+    int(-2)
     [13]=>
     int(1)
   }
