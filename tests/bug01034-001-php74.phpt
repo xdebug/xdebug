@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [1] (>= PHP 7.3, < PHP 7.4, !opcache)
+Test for bug #1034: path coverage [1] (>= PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP >= 7.3,< 7.4; !opcache');
+check_reqs('PHP >= 7.4; !opcache');
 ?>
 --FILE--
 <?php
@@ -43,15 +43,15 @@ loopy
 
 trycatch
 - branches
-  - 00; OP: 00-08; line: 21-24 HIT; out1: EX  X 
-  - 12; OP: 12-12; line: 26-26 HIT; out1: 13 HIT; out2: EX  X 
-  - 13; OP: 13-16; line: 27-29 HIT; out1: EX  X 
+  - 00; OP: 00-06; line: 21-24 HIT; out1: EX  X 
+  - 10; OP: 10-10; line: 26-26 HIT; out1: 11 HIT; out2: EX  X 
+  - 11; OP: 11-14; line: 27-29 HIT; out1: EX  X 
 - paths
   - 0: HIT
-  - 12 13: HIT
+  - 10 11: HIT
 
 {main}
 - branches
-  - 00; OP: 00-29; line: 02-36 HIT; out1: EX  X 
+  - 00; OP: 00-15; line: 31-36 HIT; out1: EX  X 
 - paths
   - 0: HIT

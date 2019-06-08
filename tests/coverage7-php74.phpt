@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with path and branch checking (> PHP 7.0.12, < PHP 7.4, !opcache)
+Test with Code Coverage with path and branch checking (>= PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4; !opcache');
+check_reqs('PHP >= 7.4; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -69,7 +69,7 @@ foo->ok
 
 foo->test_closure
 - branches
-  - 00; OP: 00-13; line: 19-26 HIT; out1: EX  X 
+  - 00; OP: 00-11; line: 19-26 HIT; out1: EX  X 
 - paths
   - 0: HIT
 
@@ -81,6 +81,6 @@ foo->test_closure
 
 {main}
 - branches
-  - 00; OP: 00-26; line: 02-35 HIT; out1: EX  X 
+  - 00; OP: 00-16; line: 29-35 HIT; out1: EX  X 
 - paths
   - 0: HIT

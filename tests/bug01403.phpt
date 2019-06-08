@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1403: Code coverage does not cover BIND_STATIC (> PHP 7.1)
+--XFAIL--
+PHP bug #78132: PHP 7.4 and later don't associate right line number with BIND_STATIC
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';

@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [4] (> PHP 7.0.12, < PHP 7.4, !opcache)
+Test for bug #1034: path coverage [4] (>= PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP > 7.0.12,< 7.4; !opcache');
+check_reqs('PHP >= 7.4; !opcache');
 ?>
 --FILE--
 <?php
@@ -45,6 +45,6 @@ loopy
 
 {main}
 - branches
-  - 00; OP: 00-24; line: 02-26 HIT; out1: EX  X 
+  - 00; OP: 00-14; line: 22-26 HIT; out1: EX  X 
 - paths
   - 0: HIT

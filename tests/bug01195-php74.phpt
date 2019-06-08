@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1195: Segfault with code coverage and foreach (> PHP 7.2.13, < PHP 7.4, !opcache)
+Test for bug #1195: Segfault with code coverage and foreach (>= PHP 7.4, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP >= 7.2.13,!= 7.3.0,< 7.4; !opcache');
+check_reqs('PHP >= 7.4; !opcache');
 ?>
 --FILE--
 <?php
@@ -35,6 +35,6 @@ fe
 
 {main}
 - branches
-  - 00; OP: 00-08; line: 02-13 HIT; out1: EX  X 
+  - 00; OP: 00-04; line: 11-13 HIT; out1: EX  X 
 - paths
   - 0: HIT
