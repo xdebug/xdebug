@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #996: Can't evaluate property of class that extends ArrayObject
+Test for bug #996: Can't evaluate property of class that extends ArrayObject (< PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 7.4; dbgp');
 ?>
 --FILE--
 <?php
