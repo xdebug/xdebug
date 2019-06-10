@@ -1,11 +1,9 @@
 --TEST--
-Test for bug #1403: Code coverage does not cover BIND_STATIC (> PHP 7.1)
---XFAIL--
-PHP bug #78132: PHP 7.4 and later don't associate right line number with BIND_STATIC
+Test for bug #1403: Code coverage does not cover BIND_STATIC/BIND_LEXICAL (>= PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP >= 7.1');
+check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -26,7 +24,6 @@ print_r($coverage[$pathname]);
 --EXPECTF--
 Array
 (
-    [2] => 1
     [5] => 1
     [6] => 1
     [8] => 1
