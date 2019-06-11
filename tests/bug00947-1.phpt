@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #947: Newlines converted when html_errors = 0 (ansi)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('!win');
+?>
 --INI--
 html_errors=0
 xdebug.overload_var_dump=1

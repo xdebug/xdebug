@@ -2,8 +2,8 @@
 Test for bug #778: Xdebug session in Eclipse crash whenever it run into simplexml_load_string call
 --SKIPIF--
 <?php
-if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
-if (!extension_loaded("simplexml")) { echo "skip SimpleXML extension required\n"; }
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp; ext SimpleXML');
 ?>
 --FILE--
 <?php

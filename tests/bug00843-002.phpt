@@ -1,9 +1,10 @@
 --TEST--
-Test for bug #843: Text output depends on php locale. [normal]
+Test for bug #843: Text output depends on php locale [normal]
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows");
-if (false == setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1")) print "skip locale with , not found";
+require __DIR__ . '/utils.inc';
+check_reqs('!win');
+if (false == setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1")) print "skip locale not found";
 ?>
 --INI--
 xdebug.enable=1

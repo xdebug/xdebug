@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #987: Hidden property names not shown with stack trace. (< PHP 7.1)
+Test for bug #987: Hidden property names not shown with stack trace (< PHP 7.1)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.1", '<')) echo "skip < PHP 7.1 needed\n"; ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('PHP < 7.1');
+?>
 --INI--
 html_errors=0
 xdebug.cli_color=0

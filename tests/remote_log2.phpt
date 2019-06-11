@@ -1,8 +1,10 @@
 --TEST--
 Test for Xdebug's remote log (can not connect, with not-found remote callback)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp; !win');
+?>
 --INI--
 xdebug.remote_enable=1
 xdebug.remote_log=/tmp/remote-log2.txt

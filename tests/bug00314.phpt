@@ -1,8 +1,10 @@
 --TEST--
 Test for bug #314: PHP CLI Error logging thwarted when Xdebug loaded
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") { exit("skip Not for Windows"); } ?>
-<?php if (getenv("SKIP_UNPARALLEL_TESTS")) { exit("skip Excluding tests that can not be run in parallel"); } ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('!win; unparallel');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

@@ -1,7 +1,10 @@
 --TEST--
 Test for Xdebug's remote log (Windows)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) != "WIN") die("skip For Windows"); ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp; win');
+?>
 --ENV--
 I_LIKE_COOKIES=doesnotexist3
 --INI--

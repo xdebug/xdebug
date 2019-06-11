@@ -2,8 +2,8 @@
 Test for bug #627: breakpoints set in symlinked files don't trigger
 --SKIPIF--
 <?php
-if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); }
-if (substr(PHP_OS, 0, 3) == "WIN") { exit("skip Not for Windows"); }
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp; !win');
 ?>
 --FILE--
 <?php

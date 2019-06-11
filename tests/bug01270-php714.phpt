@@ -1,8 +1,10 @@
 --TEST--
-Test for bug #1270: String parsing marked not covered (> PHP 7.1.3)
+Test for bug #1270: String parsing marked not covered (> PHP 7.1.3, < PHP 7.4, !opcache)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.1.3", '>')) echo "skip > PHP 7.1.3 needed\n"; ?>
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('PHP > 7.1.3,< 7.4; !opcache');
+?>
 --FILE--
 <?php
 xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );

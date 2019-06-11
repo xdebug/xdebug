@@ -1,7 +1,10 @@
 --TEST--
-Test for bug #790: Debugging with PHP 5.4 and stderr/strout doesn't work. [2]
+Test for bug #790: Debugging with > PHP 5.4 and stderr/stdout doesn't work [2]
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

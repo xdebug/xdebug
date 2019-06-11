@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1388: Resolved Breakpoint: resolved to changed line (method)
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
@@ -19,7 +22,7 @@ $commands = array(
 
 dbgpRunFile( $filename, $commands );
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
 <init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug01388-03.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
@@ -29,7 +32,7 @@ dbgpRunFile( $filename, $commands );
 
 -> step_into -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file://bug01388-03.inc" lineno="2"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file://bug01388-03.inc" lineno="%d"></xdebug:message></response>
 
 -> breakpoint_set -i 3 -t line -n 5
 <?xml version="1.0" encoding="iso-8859-1"?>

@@ -1,8 +1,11 @@
 --TEST--
-Test for tracing property assignments in user-readable function traces (< PHP 7.2 || no opcache)
+Test for tracing property assignments in user-readable function traces (< PHP 7.2 || !opcache)
 --SKIPIF--
 <?php
-if ( ( version_compare(phpversion(), "7.2", '>=') && extension_loaded('zend opcache'))) { echo "skip < PHP 7.2 || !opcache loaded needed\n"; };
+require __DIR__ . '/utils.inc';
+if ( ! ( runtime_version('7.2', '<') || !opcache_active() ) ) {
+	echo "skip < PHP 7.2 || !opcache loaded needed\n";
+}
 ?>
 --INI--
 xdebug.default_enable=1

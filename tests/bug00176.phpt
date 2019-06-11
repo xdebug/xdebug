@@ -1,8 +1,10 @@
 --TEST--
 Test for bug #176: Segfault using SplTempFileObject
 --SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if (!extension_loaded("SPL")) print "skip No SPL available"; ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('ext SPL');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

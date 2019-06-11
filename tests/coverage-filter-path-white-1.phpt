@@ -48,9 +48,7 @@ array(2) {
     int(1)
   }
   ["%sfilter%exdebug%exdebug.php"]=>
-  array(6) {
-    [2]=>
-    int(1)
+  array(%d) {%A
     [6]=>
     int(1)
     [7]=>

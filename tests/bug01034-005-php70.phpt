@@ -1,11 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [5] (>= PHP 7.0, <= PHP 7.0.12)
+Test for bug #1034: path coverage [5] (<= PHP 7.0.12, !opcache)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0, <= PHP 7.0.12\n";
-if (version_compare(phpversion(), "7.0.12", '>')) echo "skip >= PHP 7.0, <= PHP 7.0.12\n";
-if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n";
-?>
+require __DIR__ . '/utils.inc';
+check_reqs('PHP <= 7.0.12; !opcache');
 ?>
 --FILE--
 <?php

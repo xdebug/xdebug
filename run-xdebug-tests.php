@@ -323,7 +323,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		'session' => array('session.auto_start=0'),
 		'tidy' => array('tidy.clean_output=0'),
 		'zlib' => array('zlib.output_compression=Off'),
-		'xdebug' => array('xdebug.default_enable=0'),
+		'xdebug' => array('xdebug.default_enable=0','xdebug.remote_enable=0'),
 		'mbstring' => array('mbstring.func_overload=0'),
 	);
 
@@ -1150,7 +1150,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 		unset($pipes[0]);
 	}
 
-	$timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 60);
+	$timeout = $valgrind ? 300 : ($env['TEST_TIMEOUT'] ?? 10);
 
 	while (true) {
 		/* hide errors from interrupted syscalls */
@@ -1574,23 +1574,15 @@ TEST $file
 	// Default ini settings
 	$ini_settings = array();
 
-	// Additional required extensions
-	if (array_key_exists('EXTENSIONS', $section_text)) {
-		$ext_params = array();
-		settings2array($ini_overwrites, $ext_params);
-		settings2params($ext_params);
-		$ext_dir = `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
-		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
-		$loaded = explode(",", `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
-		$ext_prefix = substr(PHP_OS, 0, 3) === "WIN" ? "php_" : "";
-		foreach ($extensions as $req_ext) {
-			if (!in_array($req_ext, $loaded)) {
-				if ($req_ext == 'opcache') {
-					$ini_settings['zend_extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
-				} else {
-					$ini_settings['extension'][] = $ext_dir . DIRECTORY_SEPARATOR . $ext_prefix . $req_ext . '.' . PHP_SHLIB_SUFFIX;
-				}
-			}
+	if (getenv('OPCACHE') !== false) {
+		if (getenv('OPCACHE') == 'yes') {
+			$ini_settings['opcache.enable'] = 1;
+			$ini_settings['opcache.enable_cli'] = 1;
+			$ini_settings['opcache.optimization_level'] = -1;
+		} else {
+			$ini_settings['opcache.enable'] = 0;
+			$ini_settings['opcache.enable_cli'] = 0;
+			$ini_settings['opcache.optimization_level'] = 0;
 		}
 	}
 
@@ -2981,6 +2973,7 @@ function junit_init_suite($suite_name)
 		'test_fail' => 0,
 		'test_error' => 0,
 		'test_skip' => 0,
+		'test_warn' => 0,
 		'suites' => array(),
 		'files' => array(),
 		'execution_time' => 0,

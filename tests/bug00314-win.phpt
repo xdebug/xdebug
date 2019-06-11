@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #314: PHP CLI Error logging thwarted when Xdebug loaded (Windows)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) != "WIN") { exit("skip For Windows only"); } ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('win');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0

@@ -1,8 +1,9 @@
 --TEST--
-Test for bug #905: Tracing for generators. (PHP >= 7.1)
+Test for bug #905: Tracing for generators (PHP >= 7.1)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1 needed\n";
+require __DIR__ . '/utils.inc';
+check_reqs('PHP >= 7.1');
 ?>
 --INI--
 xdebug.enable=1

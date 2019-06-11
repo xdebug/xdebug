@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #814: Xdebug craches everytime when debugging using Xdebug 2.2.0RC1, Eclipse and Windows
 --SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp');
+?>
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

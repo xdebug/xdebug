@@ -2,8 +2,8 @@
 Test for bug #703: Line in heredoc marked as not executed (> PHP 7.0.17, < PHP 7.1)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0.17", '>')) echo "skip > PHP 7.0.17, < PHP 7.1 needed\n";
-if (!version_compare(phpversion(), "7.1", '<')) echo "skip > PHP 7.0.17, < PHP 7.1 needed\n";
+require __DIR__ . '/utils.inc';
+check_reqs('PHP > 7.0.17, < 7.1');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -18,7 +18,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.extended_info=1
 xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--

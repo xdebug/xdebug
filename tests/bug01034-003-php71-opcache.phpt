@@ -2,9 +2,8 @@
 Test for bug #1034: path coverage [3] (> PHP 7.1, < PHP 7.3, opcache)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.1", '<')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
-if (version_compare(phpversion(), "7.3", '>=')) echo "skip >= PHP 7.1, < PHP 7.3 needed\n";
-if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+require __DIR__ . '/utils.inc';
+check_reqs('PHP >= 7.1,< 7.3; opcache');
 ?>
 --FILE--
 <?php

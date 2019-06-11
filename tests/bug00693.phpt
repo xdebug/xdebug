@@ -2,7 +2,8 @@
 Test for bug #693: Cachegrind files not written when filename is very long
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows");
+require __DIR__ . '/utils.inc';
+check_reqs('!win');
 if (getenv('CIRCLECI') !== false) die("skip on CircleCI");
 ?>
 --INI--

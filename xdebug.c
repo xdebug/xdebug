@@ -345,7 +345,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_vars,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   collect_assignments, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_ALL,    OnUpdateBool,   default_enable,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.extended_info",   "1",                  PHP_INI_SYSTEM, OnUpdateBool,   extended_info,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",  "",                   PHP_INI_ALL,    OnUpdateString, file_link_format,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.filename_format",   "",                   PHP_INI_ALL,    OnUpdateString, filename_format,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.force_display_errors", "0",             PHP_INI_SYSTEM, OnUpdateBool,   force_display_errors, zend_xdebug_globals, xdebug_globals)
@@ -838,8 +837,10 @@ PHP_MINIT_FUNCTION(xdebug)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CASE);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_QM_ASSIGN);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_LAMBDA_FUNCTION);
+#if PHP_VERSION_ID < 70400
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_TRAIT);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_TRAITS);
+#endif
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INSTANCEOF);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FAST_RET);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ROPE_ADD);
@@ -849,6 +850,11 @@ PHP_MINIT_FUNCTION(xdebug)
 #if PHP_VERSION_ID >= 70100
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_GENERATOR_CREATE);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_STATIC);
+		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_LEXICAL);
+#endif
+#if PHP_VERSION_ID >= 70400
+		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS);
+		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_INHERITED_CLASS_DELAYED);
 #endif
 #if PHP_VERSION_ID >= 70200
 		zend_set_user_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
@@ -883,7 +889,15 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc_obj, ZEND_POST_INC_OBJ);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_dec_obj, ZEND_PRE_DEC_OBJ);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec_obj, ZEND_POST_DEC_OBJ);
-
+#if PHP_VERSION_ID >= 70400
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_obj_ref, ZEND_ASSIGN_OBJ_REF);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_static_prop, ZEND_ASSIGN_STATIC_PROP);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_static_prop_ref, ZEND_ASSIGN_STATIC_PROP_REF);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_inc_static_prop, ZEND_PRE_INC_STATIC_PROP);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_dec_static_prop, ZEND_PRE_DEC_STATIC_PROP);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, ZEND_POST_INC_STATIC_PROP);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, ZEND_POST_DEC_STATIC_PROP);
+#endif
 	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
 	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
 
@@ -1007,8 +1021,10 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 			zend_set_user_opcode_handler(ZEND_CASE, NULL);
 			zend_set_user_opcode_handler(ZEND_QM_ASSIGN, NULL);
 			zend_set_user_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, NULL);
+#if PHP_VERSION_ID < 70400
 			zend_set_user_opcode_handler(ZEND_ADD_TRAIT, NULL);
 			zend_set_user_opcode_handler(ZEND_BIND_TRAITS, NULL);
+#endif
 			zend_set_user_opcode_handler(ZEND_INSTANCEOF, NULL);
 			zend_set_user_opcode_handler(ZEND_FAST_RET, NULL);
 			zend_set_user_opcode_handler(ZEND_ROPE_ADD, NULL);
@@ -1018,6 +1034,11 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 #if PHP_VERSION_ID >= 70100
 			zend_set_user_opcode_handler(ZEND_GENERATOR_CREATE, NULL);
 			zend_set_user_opcode_handler(ZEND_BIND_STATIC, NULL);
+			zend_set_user_opcode_handler(ZEND_BIND_LEXICAL, NULL);
+#endif
+#if PHP_VERSION_ID >= 70400
+			zend_set_user_opcode_handler(ZEND_DECLARE_CLASS, NULL);
+			zend_set_user_opcode_handler(ZEND_DECLARE_INHERITED_CLASS_DELAYED, NULL);
 #endif
 #ifndef ZTS
 		}
@@ -1302,7 +1323,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	}
 
 	/* Only enabled extended info when it is not disabled */
-	CG(compiler_options) = CG(compiler_options) | (XG(extended_info) ? ZEND_COMPILE_EXTENDED_INFO : 0);
+	CG(compiler_options) = CG(compiler_options) | ZEND_COMPILE_EXTENDED_STMT;
 
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */

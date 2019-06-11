@@ -2,7 +2,8 @@
 Test for bug #1629: SOAP Client/Server detection code does not handle inherited classes
 --SKIPIF--
 <?php
-if (!extension_loaded("soap")) { echo "skip SOAP extension required\n"; }
+require __DIR__ . '/utils.inc';
+check_reqs('ext soap');
 ?>
 --FILE--
 <?php
