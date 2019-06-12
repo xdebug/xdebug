@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint: resolved to changed line (normal function)
+Test for bug #1388: Resolved Breakpoint: resolved to changed line (normal function) (>= PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 7.4; dbgp');
 ?>
 --FILE--
 <?php
@@ -34,10 +34,7 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 3 -t line -n 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-02.inc" lineno="10" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
-
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="resolved"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="unresolved"></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>

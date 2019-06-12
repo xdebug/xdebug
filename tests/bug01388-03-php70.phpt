@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint: resolved to changed line (method)
+Test for bug #1388: Resolved Breakpoint: resolved to changed line (method) (< PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 7.4; dbgp');
 ?>
 --FILE--
 <?php
@@ -36,14 +36,14 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 3 -t line -n 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="unresolved"></response>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-03.inc" lineno="2" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
+
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="resolved"></response>
 
 -> breakpoint_set -i 4 -t line -n 13
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-03.inc" lineno="20" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
-
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="4" id="" resolved="resolved"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="4" id="" resolved="unresolved"></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

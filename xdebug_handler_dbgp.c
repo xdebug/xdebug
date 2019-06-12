@@ -151,6 +151,8 @@ xdebug_breakpoint_entry xdebug_breakpoint_types[XDEBUG_BREAKPOINT_TYPES_COUNT] =
 	{ XDEBUG_BREAKPOINT_TYPE_WATCH,       "watch" }
 };
 
+#define XDEBUG_DBGP_SCAN_RANGE 5
+
 /*****************************************************************************
 ** Prototypes for debug command handlers
 */
@@ -2799,7 +2801,7 @@ static void line_breakpoint_resolve_helper(xdebug_con *context, function_stack_e
 			} else {
 				context->handler->log(XDEBUG_LOG_DEBUG, "  I: Line (%d) not in set\n", tmp_lineno);
 			}
-		} while (tmp_lineno < fse->op_array->line_end && (tmp_lineno < brk_info->original_lineno + 10));
+		} while (tmp_lineno < fse->op_array->line_end && (tmp_lineno < brk_info->original_lineno + XDEBUG_DBGP_SCAN_RANGE));
 
 		/* Check for a previous line in the function */
 		tmp_lineno = brk_info->original_lineno;
@@ -2818,7 +2820,7 @@ static void line_breakpoint_resolve_helper(xdebug_con *context, function_stack_e
 			} else {
 				context->handler->log(XDEBUG_LOG_DEBUG, "  I: Line (%d) not in set\n", tmp_lineno);
 			}
-		} while (tmp_lineno > fse->op_array->line_start && (tmp_lineno > brk_info->original_lineno - 10));
+		} while (tmp_lineno > fse->op_array->line_start && (tmp_lineno > brk_info->original_lineno - XDEBUG_DBGP_SCAN_RANGE));
 	}
 }
 
