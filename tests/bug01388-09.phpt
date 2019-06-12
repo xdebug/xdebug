@@ -37,7 +37,7 @@ dbgpRunFile( $filename, $commands );
 
 -> step_into -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-09.inc" lineno="10" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-09.inc" lineno="2" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file://bug01388-09.inc" lineno="2"></xdebug:message></response>

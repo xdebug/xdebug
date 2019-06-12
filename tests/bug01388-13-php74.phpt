@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint with conditional
+Test for bug #1388: Resolved Breakpoint with conditional (>= PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 7.4; dbgp');
 ?>
 --INI--
 xdebug.collect_params=4
@@ -37,9 +37,6 @@ dbgpRunFile( $filename, $commands, [ 'track_errors' => 'Off' ] );
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="2" id="" resolved="unresolved"></response>
 
 -> run -i 3
-<?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="%r(10|17)%r" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
-
 <?xml version="1.0" encoding="iso-8859-1"?>
 <notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="7" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
 

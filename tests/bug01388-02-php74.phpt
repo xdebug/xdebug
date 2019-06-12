@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint: resolved to changed line (normal function)
+Test for bug #1388: Resolved Breakpoint: resolved to changed line (normal function) (>= PHP 7.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 7.4; dbgp');
 ?>
 --FILE--
 <?php
