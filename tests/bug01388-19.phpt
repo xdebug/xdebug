@@ -13,10 +13,10 @@ $filename = dirname(__FILE__) . '/bug01388-19.inc';
 $commands = array(
 	'feature_set -n resolved_breakpoints -v 1',
 	'step_into',
-	"breakpoint_set -t line -f file://{{$filename} -n 2",
-	"breakpoint_set -t line -f file://{{$filename} -n 4",
-	"breakpoint_set -t line -f file://{{$filename} -n 8",
-	"breakpoint_set -t line -f file://{{$filename} -n 9",
+	"breakpoint_set -t line -f file://{$filename} -n 2",
+	"breakpoint_set -t line -f file://{$filename} -n 4",
+	"breakpoint_set -t line -f file://{$filename} -n 8",
+	"breakpoint_set -t line -f file://{$filename} -n 9",
 	'run',
 	'run',
 	'run',
@@ -38,28 +38,28 @@ dbgpRunFile( $filename, $commands );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file://bug01388-19.inc" lineno="2"></xdebug:message></response>
 
--> breakpoint_set -i 3 -t line -f /home/derick/dev/php/derickr-xdebug/tests/bug01388-19.inc -n 2
+-> breakpoint_set -i 3 -t line -f file://bug01388-19.inc -n 2
 <?xml version="1.0" encoding="iso-8859-1"?>
 <notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-19.inc" lineno="2" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="resolved"></response>
 
--> breakpoint_set -i 4 -t line -f /home/derick/dev/php/derickr-xdebug/tests/bug01388-19.inc -n 4
+-> breakpoint_set -i 4 -t line -f file://bug01388-19.inc -n 4
 <?xml version="1.0" encoding="iso-8859-1"?>
 <notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-19.inc" lineno="5" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="4" id="" resolved="resolved"></response>
 
--> breakpoint_set -i 5 -t line -f /home/derick/dev/php/derickr-xdebug/tests/bug01388-19.inc -n 8
+-> breakpoint_set -i 5 -t line -f file://bug01388-19.inc -n 8
 <?xml version="1.0" encoding="iso-8859-1"?>
 <notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-19.inc" lineno="8" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="5" id="" resolved="resolved"></response>
 
--> breakpoint_set -i 6 -t line -f /home/derick/dev/php/derickr-xdebug/tests/bug01388-19.inc -n 9
+-> breakpoint_set -i 6 -t line -f file://bug01388-19.inc -n 9
 <?xml version="1.0" encoding="iso-8859-1"?>
 <notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-19.inc" lineno="9" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
