@@ -1097,7 +1097,7 @@ DBGP_FUNC(eval)
 
 /* these functions interupt PHP's output functions, so we can
    redirect to our remote debugger! */
-static void xdebug_send_stream(const char *name, const char *str, uint str_length TSRMLS_DC)
+static void xdebug_send_stream(const char *name, const char *str, unsigned int str_length TSRMLS_DC)
 {
 	/* create an xml document to send as the stream */
 	xdebug_xml_node *message;
@@ -2439,7 +2439,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	return 1;
 }
 
-int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack)
+int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_llist *stack)
 {
 	char               *errortype;
 	xdebug_xml_node     *response, *error;

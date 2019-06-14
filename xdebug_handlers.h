@@ -132,7 +132,7 @@ struct _xdebug_remote_handler {
 	int (*remote_deinit)(xdebug_con *h);
 
 	/* Stack messages */
-	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
+	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_llist *stack);
 
 	/* Breakpoints */
 	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, const char *file, int filename_len, int lineno);
