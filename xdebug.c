@@ -81,9 +81,14 @@ static int xdebug_post_startup(void);
 #endif
 
 /* error callback replacement functions */
-void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
-void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+#if PHP_VERSION_ID >= 70200
+# define XDEBUG_ERROR_LINENO_TYPE uint32_t
+#else
+# define XDEBUG_ERROR_LINENO_TYPE uint
+#endif
+void (*xdebug_old_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+void (*xdebug_new_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args);
+void xdebug_error_cb(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args);
 
 static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
 static size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC);
@@ -2052,7 +2057,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	int                   function_nr = 0;
 
 	int                   restore_error_handler_situation = 0;
-	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
+	void                (*tmp_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
 
 	XG(level)++;
 	if ((signed long) XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {

@@ -586,7 +586,7 @@ char *xdebug_strip_php_stack_trace(char *buffer)
 	return NULL;
 }
 
-char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const uint error_lineno, char *buffer TSRMLS_DC)
+char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const unsigned int error_lineno, char *buffer TSRMLS_DC)
 {
 	char *printable_stack;
 	char *tmp_buf;
@@ -614,7 +614,7 @@ char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *erro
 }
 
 /* Error callback for formatting stack traces */
-void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+void xdebug_error_cb(int type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
 {
 	char *buffer, *error_type_str;
 	int buffer_len;

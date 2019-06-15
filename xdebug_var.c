@@ -1647,11 +1647,11 @@ xdebug_str* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zv
 
 typedef struct
 {
-	char  type;
-	char *name;
-	int   name_len;
-	ulong index_key;
-	zval *zv;
+	char          type;
+	char         *name;
+	int           name_len;
+	unsigned long index_key;
+	zval         *zv;
 } xdebug_object_item;
 
 static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, HashTable *merged, int object_type)
