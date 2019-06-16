@@ -3,6 +3,8 @@
 TID="$1"
 shift
 
+PHP_DIR=${PHP_DIR:-/usr/local/php}
+
 rm -rf /tmp/ptester/thread/${TID}
 mkdir -p /tmp/ptester/thread/${TID}
 CWD=`pwd`
@@ -13,7 +15,7 @@ cp run-xdebug-tests.php /tmp/ptester/thread/${TID}
 cd /tmp/ptester/thread/${TID}
 
 for i in $@; do
-	PATH=/usr/local/php/$i/bin:$PATH
+	PATH=${PHP_DIR}/$i/bin:$PATH
 	
 	mkdir -p /tmp/ptester/thread/${TID}/$i/tmp-xdebug
 	cp -r ${CWD}/* /tmp/ptester/thread/${TID}/$i/tmp-xdebug

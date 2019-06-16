@@ -41,7 +41,7 @@ for i in `seq 0 $MAX`; do
 	GroupName=`printf group%03d.lst $i`
 
 	if [ -s /tmp/ptester/$GroupName ]; then
-		${MYDIR}/test-thread.sh $i `cat /tmp/ptester/$GroupName` &
+		PHP_DIR=${PHP_DIR} ${MYDIR}/test-thread.sh $i `cat /tmp/ptester/$GroupName` &
 	fi
 done
 
