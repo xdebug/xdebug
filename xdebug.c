@@ -859,6 +859,7 @@ PHP_MINIT_FUNCTION(xdebug)
 #endif
 #if PHP_VERSION_ID >= 70400
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS);
+		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS_DELAYED);
 #endif
 #if PHP_VERSION_ID >= 70200
 		zend_set_user_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
@@ -1042,6 +1043,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 #endif
 #if PHP_VERSION_ID >= 70400
 			zend_set_user_opcode_handler(ZEND_DECLARE_CLASS, NULL);
+			zend_set_user_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, NULL);
 #endif
 #ifndef ZTS
 		}
