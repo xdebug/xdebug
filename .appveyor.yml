@@ -8,11 +8,59 @@ environment:
   PHP_BUILD_CACHE_BASE_DIR: c:\build-cache
   PHP_BUILD_OBJ_DIR: c:\obj
   PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-  PHP_BUILD_SDK_BRANCH: php-sdk-2.1.1
+  PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0beta6
   SDK_REMOTE: https://github.com/OSTC/php-sdk-binary-tools.git
-  SDK_BRANCH: php-sdk-2.1.1
+  SDK_BRANCH: php-sdk-2.2.0beta6
 
   matrix:
+    - PHP_REL: 7.4
+      ARCHITECTURE: x64
+      ZTS_STATE: enable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: yes
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+    - PHP_REL: 7.4
+      ARCHITECTURE: x64
+      ZTS_STATE: disable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: yes
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+    - PHP_REL: 7.4
+      ARCHITECTURE: x64
+      ZTS_STATE: enable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: no
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+    - PHP_REL: 7.4
+      ARCHITECTURE: x64
+      ZTS_STATE: disable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: no
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+    - PHP_REL: 7.4
+      ARCHITECTURE: x86
+      ZTS_STATE: enable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: yes
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+    - PHP_REL: 7.4
+      ARCHITECTURE: x86
+      ZTS_STATE: disable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: yes
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+    - PHP_REL: 7.4
+      ARCHITECTURE: x86
+      ZTS_STATE: enable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: no
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+    - PHP_REL: 7.4
+      ARCHITECTURE: x86
+      ZTS_STATE: disable
+      PHP_BUILD_CRT: vs16
+      OPCACHE: no
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
     - PHP_REL: 7.3
       ARCHITECTURE: x64
       ZTS_STATE: enable
