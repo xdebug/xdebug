@@ -1,7 +1,5 @@
 --TEST--
-Test star/stop debug session at runtime
---SKIPIF--
-<?php if (getenv("SKIP_DBGP_TESTS")) { exit("skip Excluding DBGp tests"); } ?>
+Test for bug #1575: star/stop debug session at runtime
 --INI--
 xdebug.default_enable=1
 xdebug.connect_back=1
