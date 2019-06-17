@@ -2321,10 +2321,10 @@ PHP_FUNCTION(xdebug_is_enabled)
    Start debug session */
 PHP_FUNCTION(xdebug_session_start)
 {
-    char *session_name = NULL;
-    size_t session_name_len;
+	char *session_name = NULL;
+	size_t session_name_len;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &session_name, &session_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &session_name, &session_name_len) == FAILURE) {
 		return;
 	}
 
