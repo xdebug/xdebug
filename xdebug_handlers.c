@@ -47,9 +47,6 @@ xdebug_remote_handler_info* xdebug_handlers_get(void)
 
 void xdebug_brk_info_dtor(xdebug_brk_info *brk_info)
 {
-	if (brk_info->type) {
-		xdfree(brk_info->type);
-	}
 	if (brk_info->classname) {
 		xdfree(brk_info->classname);
 	}
@@ -60,7 +57,7 @@ void xdebug_brk_info_dtor(xdebug_brk_info *brk_info)
 		xdfree(brk_info->file);
 	}
 	if (brk_info->condition) {
-		efree(brk_info->condition);
+		xdfree(brk_info->condition);
 	}
 	xdfree(brk_info);
 }

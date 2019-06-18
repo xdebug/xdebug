@@ -1,8 +1,10 @@
 --TEST--
 Test for bug #1266: xdebug_dump_superglobals() always dumps empty $_SESSION stack on PHP 7
 --SKIPIF--
-<?php if (!extension_loaded("xdebug")) print "skip"; ?>
-<?php if (!extension_loaded("session")) print "skip session extension not available"; ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('ext session');
+?>
 --INI--
 xdebug.dump.SESSION=*
 --FILE--

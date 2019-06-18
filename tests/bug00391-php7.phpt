@@ -30,16 +30,16 @@ echo "And going and going...\n";
 ?>
 DONE
 --EXPECTF--
-TypeError: Argument 1 passed to B::myMethod() must be an instance of A, integer given, called in %sbug00391-php7.php on line 17 in %sbug00391-php7.php on line 10
+TypeError: Argument 1 passed to B::myMethod() must be an instance of A, int%S given, called in %sbug00391-php7.php on line 17 in %sbug00391-php7.php on line 10
 
 Call Stack:
 %w%f%w%d   1. {main}() %sbug00391-php7.php:0
 %w%f%w%d   2. B->myMethod() %sbug00391-php7.php:17
 
 
-Fatal error: Uncaught TypeError: Argument 1 passed to B::myMethod() must be an instance of A, integer given, called in %sbug00391-php7.php on line 17 and defined in %sbug00391-php7.php on line 10
+Fatal error: Uncaught TypeError: Argument 1 passed to B::myMethod() must be an instance of A, int%S given, called in %sbug00391-php7.php on line 17 and defined in %sbug00391-php7.php on line 10
 
-TypeError: Argument 1 passed to B::myMethod() must be an instance of A, integer given, called in %sbug00391-php7.php on line 17 in %sbug00391-php7.php on line 10
+TypeError: Argument 1 passed to B::myMethod() must be an instance of A, int%S given, called in %sbug00391-php7.php on line 17 in %sbug00391-php7.php on line 10
 
 Call Stack:
 %w%f%w%d   1. {main}() %sbug00391-php7.php:0

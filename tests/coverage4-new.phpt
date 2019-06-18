@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with abstract methods (> PHP 7.0.17, > PHP 7.1.3)
+Test with Code Coverage with abstract methods (> PHP 7.0.17, > PHP 7.1.3, < PHP 7.4)
 --SKIPIF--
 <?php
-if (version_compare(phpversion(), "7.0.17", '<=')) echo "skip > PHP 7.0.17, > PHP 7.1.3 needed\n";
-if (version_compare(phpversion(), "7.1.0", '>=') && version_compare(phpversion(), "7.1.3", '<=')) echo "skip > PHP 7.0.17, > PHP 7.1.3 needed\n";
+require __DIR__ . '/utils.inc';
+check_reqs('PHP > 7.0.17,!= 7.1.0,!= 7.1.1,!= 7.1.2,!= 7.1.3,< 7.4');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -18,7 +18,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.extended_info=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php

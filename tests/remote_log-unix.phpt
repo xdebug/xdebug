@@ -1,7 +1,10 @@
 --TEST--
 Test for Xdebug's remote log (with unix sockets)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp; !win');
+?>
 --ENV--
 I_LIKE_COOKIES=doesnotexist3
 --INI--
@@ -24,10 +27,9 @@ unlink (sys_get_temp_dir() . "/remote-log4.txt");
 [%d] W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
 [%d] E: Could not connect to client. :-(
 [%d] Log closed at %d-%d-%d %d:%d:%d
-[%d]
+
 [%d] Log opened at %d-%d-%d %d:%d:%d
 [%d] I: Connecting to configured address/port: unix:///tmp/xdbg.sock:0.
 [%d] W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
 [%d] E: Could not connect to client. :-(
 [%d] Log closed at %d-%d-%d %d:%d:%d
-[%d]

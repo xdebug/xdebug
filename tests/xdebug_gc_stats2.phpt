@@ -28,4 +28,4 @@ creator: xdebug %d.%s (PHP %s)
 
 Collected | Efficiency% | Duration | Memory Before | Memory After | Reduction% | Function
 ----------+-------------+----------+---------------+--------------+------------+---------
-      200 |      2.00 % |  %s ms |        %d |       %d |   %s % | gc_collect_cycles
+      200 |      2.00 % |  %s ms | %w%d | %w%d |   %s % | gc_collect_cycles

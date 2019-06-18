@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 #define __HAVE_XDEBUG_HANDLERS_H__
 
 #include "php_xdebug.h"
+#include "xdebug_compat.h"
 #include "xdebug_llist.h"
 #include "xdebug_hash.h"
 #include "xdebug_private.h"
@@ -27,6 +28,7 @@
 
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;
+typedef struct _xdebug_brk_span             xdebug_brk_span;
 typedef struct _xdebug_eval_info            xdebug_eval_info;
 typedef struct _xdebug_con                  xdebug_con;
 typedef struct _xdebug_debug_list           xdebug_debug_list;
@@ -38,9 +40,14 @@ struct _xdebug_debug_list {
 	int   last_line;
 };
 
-#define BREAKPOINT_TYPE_LINE      1
-#define BREAKPOINT_TYPE_FUNCTION  2
-#define BREAKPOINT_TYPE_EXCEPTION 4
+#define XDEBUG_BREAKPOINT_TYPE_LINE        0x01
+#define XDEBUG_BREAKPOINT_TYPE_CONDITIONAL 0x02
+#define XDEBUG_BREAKPOINT_TYPE_CALL        0x04
+#define XDEBUG_BREAKPOINT_TYPE_RETURN      0x08
+#define XDEBUG_BREAKPOINT_TYPE_EXCEPTION   0x10
+#define XDEBUG_BREAKPOINT_TYPE_WATCH       0x20
+
+#define XDEBUG_BREAKPOINT_TYPE_NAME(v) (xdebug_breakpoint_types[(int)(log2(v))]).name
 
 struct _xdebug_brk_admin {
 	int   id;
@@ -72,25 +79,39 @@ struct _xdebug_con {
 
 	int                    send_notifications;
 	int                    inhibit_notifications;
+
+	int                    resolved_breakpoints;
 };
+
+#define XDEBUG_BRK_UNRESOLVED     0
+#define XDEBUG_BRK_RESOLVED       1
 
 #define XDEBUG_HIT_DISABLED       0
 #define XDEBUG_HIT_GREATER_EQUAL  1
 #define XDEBUG_HIT_EQUAL          2
 #define XDEBUG_HIT_MOD            3
 
-#define XDEBUG_BRK_FUNC_CALL      1
-#define XDEBUG_BRK_FUNC_RETURN    2
+#define XDEBUG_RESOLVED_SPAN_MIN          -1
+#define XDEBUG_RESOLVED_SPAN_MAX  4294967295
+
+struct _xdebug_brk_span {
+	int start;
+	int end;
+};
 
 struct _xdebug_brk_info {
-	char                 *type;
+	int                   id;
+	int                   brk_type;
+	int                   resolved;
 	char                 *classname;
 	char                 *functionname;
 	char                 *exceptionname;
 	int                   function_break_type; /* XDEBUG_BRK_FUNC_* */
 	char                 *file;
 	int                   file_len;
-	int                   lineno;
+	int                   original_lineno; /* line number that was set through breakpoint_set */
+	int                   resolved_lineno; /* line number after resolving, initialised with 'original_lineno' */
+	xdebug_brk_span       resolved_span;
 	char                 *condition;
 	int                   disabled;
 	int                   temporary;
@@ -111,16 +132,19 @@ struct _xdebug_remote_handler {
 	int (*remote_deinit)(xdebug_con *h);
 
 	/* Stack messages */
-	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
+	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_llist *stack);
 
 	/* Breakpoints */
+	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, const char *file, int filename_len, int lineno);
 	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message);
+	int (*resolve_breakpoints)(xdebug_con *h, int type, void *data);
 
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
 
-	/* Notifications */
+	/* Notifications & Logging */
 	int (*remote_notification)(xdebug_con *h, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
+	void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) (*log)(int log_level, const char *fmt, ...);
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);

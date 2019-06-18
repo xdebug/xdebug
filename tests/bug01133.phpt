@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #1133: PDO exception code value type is changed
 --SKIPIF--
-<?php if (!extension_loaded('pdo_sqlite')) echo "skip The PDO/SQLite extension needs to be installed\n"; ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('ext pdo_sqlite');
+?>
 --FILE--
 <?php
 

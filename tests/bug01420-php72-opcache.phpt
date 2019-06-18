@@ -1,8 +1,10 @@
 --TEST--
-Test for bug #1420: handle path/branch converage for switch with jump table (>= PHP 7.2, opcache)
+Test for bug #1420: handle path/branch converage for switch with jump table (>= PHP 7.2, < PHP 7.3, opcache)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.2", '>=')) echo "skip >= PHP 7.2 needed\n"; ?>
-<?php if (!extension_loaded('zend opcache')) echo "skip opcache required\n"; ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('PHP >= 7.2,< 7.3; opcache');
+?>
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

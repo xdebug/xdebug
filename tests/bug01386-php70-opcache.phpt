@@ -1,10 +1,9 @@
 --TEST--
-Test for bug #1386: Executable code not shown as executed/executable (>= PHP 7.0, < PHP 7.1, opcache)
+Test for bug #1386: Executable code not shown as executed/executable (< PHP 7.1, opcache)
 --SKIPIF--
 <?php
-if (!version_compare(phpversion(), "7.0", '>=')) echo "skip >= PHP 7.0, < PHP 7.1 needed\n";
-if (!version_compare(phpversion(), "7.1", '<')) echo "skip >= PHP 7.0, < PHP 7.1 needed\n";
-if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+require __DIR__ . '/utils.inc';
+check_reqs('PHP < 7.1; opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -19,7 +18,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.extended_info=1
 xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--

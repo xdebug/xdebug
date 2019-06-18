@@ -12,7 +12,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.extended_info=1
 xdebug.show_error_trace=1
 --FILE--
 <?php
@@ -29,6 +28,6 @@ echo "END";
 ParseError: syntax error, unexpected 'new' (T_NEW) in %sbug00422.inc on line 7
 
 Call Stack:
-    %f     %d   1. {main}() %sbug00422-php70.php:0
+%w%f %w%d   1. {main}() %sbug00422-php70.php:0
 
 END

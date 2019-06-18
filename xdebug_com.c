@@ -59,24 +59,23 @@ static int xdebug_create_socket_unix(const char *path TSRMLS_DC)
 {
 	struct sockaddr_un sa;
 	int sockfd;
-	long pid = getpid();
 
 	if ((sockfd = socket(AF_UNIX, SOCK_STREAM, 0)) == SOCK_ERR) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for 'unix://%s', socket: %s.\n", pid, path, strerror(errno));
+		XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for 'unix://%s', socket: %s.\n", path, strerror(errno));
 		return SOCK_ERR;
 	}
 
 	sa.sun_family = AF_UNIX;
 	strncpy(sa.sun_path, path, sizeof(sa.sun_path) - 1);
 	if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) < 0) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for 'unix://%s', connect: %s.\n", pid, path, strerror(errno));
+		XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for 'unix://%s', connect: %s.\n", path, strerror(errno));
 		SCLOSE(sockfd);
 		return (errno == EACCES) ? SOCK_ACCESS_ERR : SOCK_ERR;
 	}
 
 	/* Prevent the socket from being inherited by exec'd children */
 	if (fcntl(sockfd, F_SETFD, FD_CLOEXEC) < 0) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for 'unix://%s', fcntl(FD_CLOEXEC): %s.\n", pid, path, strerror(errno));
+		XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for 'unix://%s', fcntl(FD_CLOEXEC): %s.\n", path, strerror(errno));
 	}
 
 	return sockfd;
@@ -95,7 +94,6 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 	int                        actually_connected;
 	struct sockaddr_in6        sa;
 	socklen_t                  size = sizeof(sa);
-	long                       pid = getpid();
 #if WIN32|WINNT
 	WSAPOLLFD                  ufds[1] = {0};
 	WORD                       wVersionRequested;
@@ -113,7 +111,7 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 
 	if (!strncmp(hostname, "unix://", strlen("unix://"))) {
 #if WIN32|WINNT
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s', Unix domain socket not supported.\n", pid, hostname);
+		XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s', Unix domain socket not supported.\n", hostname);
 		return SOCK_ERR;
 #else
 		return xdebug_create_socket_unix(hostname + strlen("unix://") TSRMLS_CC);
@@ -133,9 +131,9 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 	/* Call getaddrinfo and return SOCK_ERR if the call fails for some reason */
 	if ((status = getaddrinfo(hostname, sport, &hints, &remote)) != 0) {
 #if WIN32|WINNT
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', getaddrinfo: %d.\n", pid, hostname, dport, WSAGetLastError());
+		XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', getaddrinfo: %d.\n", hostname, dport, WSAGetLastError());
 #else
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', getaddrinfo: %s.\n", pid, hostname, dport, strerror(errno));
+		XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', getaddrinfo: %s.\n", hostname, dport, strerror(errno));
 #endif
 		return SOCK_ERR;
 	}
@@ -146,9 +144,9 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 		 * next IP address in the list */
 		if ((sockfd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol)) == SOCK_ERR) {
 #if WIN32|WINNT
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', socket: %d.\n", pid, hostname, dport, WSAGetLastError());
+			XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', socket: %d.\n", hostname, dport, WSAGetLastError());
 #else
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', socket: %s.\n", pid, hostname, dport, strerror(errno));
+			XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', socket: %s.\n", hostname, dport, strerror(errno));
 #endif
 			continue;
 		}
@@ -157,7 +155,7 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 #ifdef WIN32
 		status = ioctlsocket(sockfd, FIONBIO, &yes);
 		if (SOCKET_ERROR == status) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', FIONBIO: %d.\n", pid, hostname, dport, WSAGetLastError());
+			XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', FIONBIO: %d.\n", hostname, dport, WSAGetLastError());
 		}
 #else
 		fcntl(sockfd, F_SETFL, O_NONBLOCK);
@@ -166,7 +164,7 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 #if !WIN32 && !WINNT
 		/* Prevent the socket from being inherited by exec'd children on *nix (not necessary on Win) */
 		if (fcntl(sockfd, F_SETFD, FD_CLOEXEC) < 0) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', fcntl(FD_CLOEXEC): %s.\n", pid, hostname, dport, strerror(errno));
+			XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', fcntl(FD_CLOEXEC): %s.\n", hostname, dport, strerror(errno));
 		}
 #endif
 
@@ -180,17 +178,17 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 #ifdef WIN32
 			errno = WSAGetLastError();
 			if (errno != WSAEINPROGRESS && errno != WSAEWOULDBLOCK) {
-				XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', connect: %d.\n", pid, hostname, dport, errno);
+				XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', connect: %d.\n", hostname, dport, errno);
 #else
 			if (errno == EACCES) {
-				XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', connect: %s.\n", pid, hostname, dport, strerror(errno));
+				XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', connect: %s.\n", hostname, dport, strerror(errno));
 				SCLOSE(sockfd);
 				sockfd = SOCK_ACCESS_ERR;
 
 				continue;
 			}
 			if (errno != EINPROGRESS) {
-				XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', connect: %s.\n", pid, hostname, dport, strerror(errno));
+				XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', connect: %s.\n", hostname, dport, strerror(errno));
 #endif
 				SCLOSE(sockfd);
 				sockfd = SOCK_ERR;
@@ -217,9 +215,9 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 				/* If an error occured when doing the poll */
 				if (sockerror == SOCK_ERR) {
 #if WIN32|WINNT
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', WSAPoll error: %d (%d, %d).\n", pid, hostname, dport, WSAGetLastError(), sockerror, errno);
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', WSAPoll error: %d (%d, %d).\n", hostname, dport, WSAGetLastError(), sockerror, errno);
 #else
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', poll error: %s (%d).\n", pid, hostname, dport, strerror(errno), sockerror);
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', poll error: %s (%d).\n", hostname, dport, strerror(errno), sockerror);
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -234,9 +232,9 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 				/* If the poll was successful but an error occured */
 				if (ufds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
 #if WIN32|WINNT
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', WSAPoll success, but error: %d (%d).\n", pid, hostname, dport, WSAGetLastError(), ufds[0].revents);
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', WSAPoll success, but error: %d (%d).\n", hostname, dport, WSAGetLastError(), ufds[0].revents);
 #else
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', poll success, but error: %s (%d).\n", pid, hostname, dport, strerror(errno), ufds[0].revents);
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', poll success, but error: %s (%d).\n", hostname, dport, strerror(errno), ufds[0].revents);
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -249,9 +247,9 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 				} else {
 					/* We should never get here, but added as a failsafe to break out from any loops */
 #if WIN32|WINNT
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', WSAPoll: %d.\n", pid, hostname, dport, WSAGetLastError());
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', WSAPoll: %d.\n", hostname, dport, WSAGetLastError());
 #else
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', poll: %s.\n", pid, hostname, dport, strerror(errno));
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', poll: %s.\n", hostname, dport, strerror(errno));
 #endif
 					sockerror = SOCK_ERR;
 					break;
@@ -262,9 +260,9 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 				actually_connected = getpeername(sockfd, (struct sockaddr *)&sa, &size);
 				if (actually_connected == -1) {
 #if WIN32|WINNT
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', getpeername: %d.\n", pid, hostname, dport, WSAGetLastError());
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', getpeername: %d.\n", hostname, dport, WSAGetLastError());
 #else
-					XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', getpeername: %s.\n", pid, hostname, dport, strerror(errno));
+					XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', getpeername: %s.\n", hostname, dport, strerror(errno));
 #endif
 					sockerror = SOCK_ERR;
 				}
@@ -290,7 +288,7 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 #ifdef WIN32
 		status = ioctlsocket(sockfd, FIONBIO, &no);
 		if (SOCKET_ERROR == status) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Creating socket for '%s:%d', FIONBIO: %d.\n", pid, hostname, dport, WSAGetLastError());
+			XG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s:%d', FIONBIO: %d.\n", hostname, dport, WSAGetLastError());
 		}
 #else
 		fcntl(sockfd, F_SETFL, 0);
@@ -373,7 +371,7 @@ static void xdebug_close_log()
 		long pid = getpid();
 		char *timestr = xdebug_get_time();
 
-		fprintf(XG(remote_log_file), "[%ld] Log closed at %s\n[%ld]\n", pid, timestr, pid);
+		fprintf(XG(remote_log_file), "[%ld] Log closed at %s\n\n", pid, timestr);
 		fflush(XG(remote_log_file));
 		xdfree(timestr);
 		fclose(XG(remote_log_file));
@@ -384,60 +382,71 @@ static void xdebug_close_log()
 /* Starting the debugger */
 static void xdebug_init_debugger()
 {
-	long pid = getpid();
-
 	xdebug_open_log();
+
+	/* Get handler from mode */
+	XG(context).handler = xdebug_handler_get(XG(remote_handler));
+	if (!XG(context).handler) {
+		zend_error(E_WARNING, "The remote debug handler '%s' is not supported", XG(remote_handler));
+		return;
+	}
 
 	if (XG(remote_connect_back)) {
 		zval *remote_addr = NULL;
 
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Checking remote connect back address.\n", pid);
+		XG(context).handler->log(XDEBUG_LOG_INFO, "Checking remote connect back address.\n");
 		if (XG(remote_addr_header) && XG(remote_addr_header)[0]) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Checking user configured header '%s'.\n", pid, XG(remote_addr_header));
+			XG(context).handler->log(XDEBUG_LOG_INFO, "Checking user configured header '%s'.\n", XG(remote_addr_header));
 			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XG(remote_addr_header), HASH_KEY_STRLEN(XG(remote_addr_header)));
 		}
 		if (!remote_addr) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Checking header 'HTTP_X_FORWARDED_FOR'.\n", pid);
+			XG(context).handler->log(XDEBUG_LOG_INFO, "Checking header 'HTTP_X_FORWARDED_FOR'.\n");
 			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
 		}
 		if (!remote_addr) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Checking header 'REMOTE_ADDR'.\n", pid);
+			XG(context).handler->log(XDEBUG_LOG_INFO, "Checking header 'REMOTE_ADDR'.\n");
 			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
 		}
 
 		if (remote_addr && strstr(Z_STRVAL_P(remote_addr), "://")) {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Invalid remote address provided containing URI spec '%s'.\n", pid, Z_STRVAL_P(remote_addr));
+			XG(context).handler->log(XDEBUG_LOG_WARN, "Invalid remote address provided containing URI spec '%s'.\n", Z_STRVAL_P(remote_addr));
 			remote_addr = NULL;
 		}
 
 		if (remote_addr) {
+			char *cp = NULL;
+			int   cp_found = 0;
+
 			/* Use first IP according to RFC 7239 */
-			char *cp = strchr(Z_STRVAL_P(remote_addr), ',');
+			cp = strchr(Z_STRVAL_P(remote_addr), ',');
 			if (cp) {
 				*cp = '\0';
+				cp_found = 1;
 			}
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Remote address found, connecting to %s:%ld.\n", pid, Z_STRVAL_P(remote_addr), (long int) XG(remote_port));
+
+			XG(context).handler->log(XDEBUG_LOG_INFO, "Remote address found, connecting to %s:%ld.\n", Z_STRVAL_P(remote_addr), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XG(remote_port), XG(remote_connect_timeout));
+
+			/* Replace the ',', in case we had changed the original header due
+			 * to multiple values */
+			if (cp_found) {
+				*cp = ',';
+			}
 		} else {
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] W: Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", pid, XG(remote_host), (long int) XG(remote_port));
+			XG(context).handler->log(XDEBUG_LOG_WARN, "Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XG(remote_host), (long int) XG(remote_port));
 			XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port), XG(remote_connect_timeout));
 		}
 	} else {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Connecting to configured address/port: %s:%ld.\n", pid, XG(remote_host), (long int) XG(remote_port));
+		XG(context).handler->log(XDEBUG_LOG_INFO, "Connecting to configured address/port: %s:%ld.\n", XG(remote_host), (long int) XG(remote_port));
 		XG(context).socket = xdebug_create_socket(XG(remote_host), XG(remote_port), XG(remote_connect_timeout));
 	}
 	if (XG(context).socket >= 0) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] I: Connected to client. :-)\n", pid);
+		XG(context).handler->log(XDEBUG_LOG_INFO, "Connected to client. :-)\n");
 		xdebug_mark_debug_connection_pending();
 
-		/* Get handler from mode */
-		XG(context).handler = xdebug_handler_get(XG(remote_handler));
-		if (!XG(context).handler) {
-			zend_error(E_WARNING, "The remote debug handler '%s' is not supported.", XG(remote_handler));
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] E: The remote debug handler '%s' is not supported. :-(\n", pid, XG(remote_handler));
-		} else if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
+		if (!XG(context).handler->remote_init(&(XG(context)), XDEBUG_REQ)) {
 			/* The request could not be started, ignore it then */
-			XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] E: The debug session could not be started. :-(\n", pid);
+			XG(context).handler->log(XDEBUG_LOG_ERR, "The debug session could not be started. :-(\n");
 		} else {
 			/* All is well, turn off script time outs */
 			zend_string *ini_name = zend_string_init("max_execution_time", sizeof("max_execution_time") - 1, 0);
@@ -451,11 +460,11 @@ static void xdebug_init_debugger()
 			xdebug_mark_debug_connection_active();
 		}
 	} else if (XG(context).socket == -1) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] E: Could not connect to client. :-(\n", pid);
+		XG(context).handler->log(XDEBUG_LOG_ERR, "Could not connect to client. :-(\n");
 	} else if (XG(context).socket == -2) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] E: Time-out connecting to client (Waited: " ZEND_LONG_FMT " ms). :-(\n", pid, XG(remote_connect_timeout));
+		XG(context).handler->log(XDEBUG_LOG_ERR, "Time-out connecting to client (Waited: " ZEND_LONG_FMT " ms). :-(\n", XG(remote_connect_timeout));
 	} else if (XG(context).socket == -3) {
-		XDEBUG_LOG_PRINT(XG(remote_log_file), "[%ld] E: No permission connecting to client. This could be SELinux related. :-(\n", pid);
+		XG(context).handler->log(XDEBUG_LOG_ERR, "No permission connecting to client. This could be SELinux related. :-(\n");
 	}
 	if (!XG(remote_connection_enabled)) {
 		xdebug_close_log();
@@ -485,16 +494,14 @@ int xdebug_is_debug_connection_active()
 
 int xdebug_is_debug_connection_active_for_current_pid()
 {
-	long pid = getpid();
-
 	/* Start debugger if previously a connection was established and this
 	 * process no longer has the same PID */
-	if ((xdebug_is_debug_connection_active() && (XG(remote_connection_pid) != pid))) {
+	if ((xdebug_is_debug_connection_active() && (XG(remote_connection_pid) != getpid()))) {
 		xdebug_restart_debugger();
 	}
 
 	return (
-		XG(remote_connection_enabled) && (XG(remote_connection_pid) == pid)
+		XG(remote_connection_enabled) && (XG(remote_connection_pid) == getpid())
 	);
 }
 
@@ -557,7 +564,7 @@ static int xdebug_handle_start_session()
 		convert_to_string_ex(dummy);
 		xdebug_update_ide_key(Z_STRVAL_P(dummy));
 		
-		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
 		activate_session = 1;
 	} else if (
 		(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
@@ -568,7 +575,7 @@ static int xdebug_handle_start_session()
 		activate_session = 1;
 	} else if (getenv("XDEBUG_CONFIG")) {
 		if (XG(ide_key) && *XG(ide_key) && !SG(headers_sent)) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), XG(ide_key), strlen(XG(ide_key)), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG(ide_key), strlen(XG(ide_key)), time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
 		}
 		activate_session = 1;
 	}
@@ -587,7 +594,7 @@ static void xdebug_handle_stop_session()
 		))
 		&& !SG(headers_sent)
 	) {
-		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, (char*) "", 0, time(NULL) + XG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
 	}
 }
 

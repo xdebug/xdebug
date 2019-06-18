@@ -52,10 +52,10 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> foo::bar() %sbug00756-php7.php:21
                              => %r(\+\+self::bar|self::bar\+\+)%r %sbug00756-php7.php:9
 %w%f %w%d     -> foo->__construct() %sbug00756-php7.php:22
-                             => $this->foo++ %sbug00756-php7.php:14
+                             => %r(\$this->foo\+\+|\+\+\$this->foo)%r %sbug00756-php7.php:14
                            => $f = class foo { public $foo = 1 } %sbug00756-php7.php:22
 %w%f %w%d     -> foo->__construct() %sbug00756-php7.php:23
-                             => $this->foo++ %sbug00756-php7.php:14
+                             => %r(\$this->foo\+\+|\+\+\$this->foo)%r %sbug00756-php7.php:14
 %w%f %w%d     -> xdebug_stop_trace() %sbug00756-php7.php:25
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

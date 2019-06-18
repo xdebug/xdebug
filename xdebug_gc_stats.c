@@ -21,6 +21,14 @@
 #include "xdebug_stack.h"
 #include "zend_builtin_functions.h"
 #include "SAPI.h"
+#include "Zend/zend_long.h"
+
+/* Set correct int format to use */
+#if SIZEOF_ZEND_LONG == 4
+# define XDEBUG_GCINT_FMT "u"
+#else
+# define XDEBUG_GCINT_FMT "lu"
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -37,6 +45,9 @@ int xdebug_gc_collect_cycles(void)
 	long int           memory;
 	double             start;
 	xdebug_func        tmp;
+#if PHP_VERSION_ID >= 70300
+	zend_gc_status     status;
+#endif
 
 	if (!XG(gc_stats_enabled)) {
 		return xdebug_old_gc_collect_cycles();
@@ -44,7 +55,12 @@ int xdebug_gc_collect_cycles(void)
 
 	execute_data = EG(current_execute_data);
 
+#if PHP_VERSION_ID >= 70300
+	zend_gc_get_status(&status);
+	collected = status.collected;
+#else
 	collected = GC_G(collected);
+#endif
 	start = xdebug_get_utime();
 	memory = zend_memory_usage(0);
 
@@ -54,7 +70,12 @@ int xdebug_gc_collect_cycles(void)
 	run->function_name = NULL;
 	run->class_name = NULL;
 
+#if PHP_VERSION_ID >= 70300
+	zend_gc_get_status(&status);
+	run->collected = status.collected - collected;
+#else
 	run->collected = GC_G(collected) - collected;
+#endif
 	run->duration = xdebug_get_utime() - start;
 	run->memory_before = memory;
 	run->memory_after = zend_memory_usage(0);
@@ -67,6 +88,7 @@ int xdebug_gc_collect_cycles(void)
 	xdebug_gc_stats_print_run(run);
 
 	xdebug_gc_stats_run_free(run);
+	xdebug_func_dtor_by_ref(&tmp);
 
 	return ret;
 }
@@ -135,7 +157,13 @@ void xdebug_gc_stats_stop()
 
 static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 {
-	double reduction = (1 - (float)run->memory_after / (float)run->memory_before) * 100.0;
+	double reduction;
+
+	if (run->memory_before) {
+		reduction = (1 - (float)run->memory_after / (float)run->memory_before) * 100.0;
+	} else {
+		reduction = 0;
+	}
 
 	if (!XG(gc_stats_file)) {
 		return;
@@ -143,7 +171,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 
 	if (!run->function_name) {
 		fprintf(XG(gc_stats_file),
-			"%9lu | %9.2f %% | %5.2f ms | %13lu | %12lu | %8.2f %% | -\n",
+			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | -\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
 			run->duration / 1000.0,
@@ -153,7 +181,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 		);
 	} else if (!run->class_name && run->function_name) {
 		fprintf(XG(gc_stats_file),
-			"%9lu | %9.2f %% | %5.2f ms | %13lu | %12lu | %8.2f %% | %s\n",
+			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
 			run->duration / 1000.0,
@@ -164,7 +192,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 		);
 	} else if (run->class_name && run->function_name) {
 		fprintf(XG(gc_stats_file),
-			"%9lu | %9.2f %% | %5.2f ms | %13lu | %12lu | %8.2f %% | %s::%s\n",
+			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s::%s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
 			run->duration / 1000.0,
@@ -240,12 +268,30 @@ PHP_FUNCTION(xdebug_stop_gcstats)
    Return number of times garbage collection was triggered. */
 PHP_FUNCTION(xdebug_get_gc_run_count)
 {
+#if PHP_VERSION_ID >= 70300
+	zend_gc_status status;
+#endif
+
+#if PHP_VERSION_ID >= 70300
+	zend_gc_get_status(&status);
+	RETURN_LONG(status.runs);
+#else
     RETURN_LONG(GC_G(gc_runs));
+#endif
 }
 
 /* {{{ proto void xdebug_get_gc_total_collected_roots()
    Return total number of collected root variables during garbage collection. */
 PHP_FUNCTION(xdebug_get_gc_total_collected_roots)
 {
+#if PHP_VERSION_ID >= 70300
+	zend_gc_status status;
+#endif
+
+#if PHP_VERSION_ID >= 70300
+	zend_gc_get_status(&status);
+	RETURN_LONG(status.collected);
+#else
     RETURN_LONG(GC_G(collected));
+#endif
 }

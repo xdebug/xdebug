@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,6 +86,14 @@ typedef struct xdebug_dbgp_cmd {
 	int  flags;
 } xdebug_dbgp_cmd;
 
+typedef struct xdebug_dbgp_resolve_context {
+	xdebug_con           *context;
+	int                   breakpoint_type_set;
+	function_stack_entry *fse;
+	zend_class_entry     *exception_ce;
+	xdebug_set           *executable_lines;
+} xdebug_dbgp_resolve_context;
+
 #define CMD_OPTION_SET(opt)        (!!(opt == '-' ? args->value[26] : args->value[(opt) - 'a']))
 #define CMD_OPTION_CHAR(opt)       (opt == '-' ? args->value[26]->d : args->value[(opt) - 'a']->d)
 #define CMD_OPTION_LEN(opt)        (opt == '-' ? args->value[26]->l : args->value[(opt) - 'a']->l)
@@ -93,20 +101,26 @@ typedef struct xdebug_dbgp_cmd {
 
 int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
-int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const uint line, xdebug_llist *stack);
+int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_llist *stack);
+int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, const char *file, int file_len, int lineno);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message);
+int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, int type, void *data);
 int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC);
 int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
+void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_dbgp_log(int log_level, const char *fmt, ...);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 
-#define xdebug_handler_dbgp {       \
-	xdebug_dbgp_init,               \
-	xdebug_dbgp_deinit,             \
-	xdebug_dbgp_error,              \
-	xdebug_dbgp_breakpoint,         \
-	xdebug_dbgp_stream_output,      \
-	xdebug_dbgp_notification,       \
-	xdebug_dbgp_register_eval_id,   \
+#define xdebug_handler_dbgp {        \
+	xdebug_dbgp_init,                \
+	xdebug_dbgp_deinit,              \
+	xdebug_dbgp_error,               \
+	xdebug_dbgp_break_on_line,       \
+	xdebug_dbgp_breakpoint,          \
+	xdebug_dbgp_resolve_breakpoints, \
+	xdebug_dbgp_stream_output,       \
+	xdebug_dbgp_notification,        \
+	xdebug_dbgp_log,                 \
+	xdebug_dbgp_register_eval_id,    \
 }
 
 #endif

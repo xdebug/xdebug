@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -500,7 +500,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			int scope_nr = XG(stack)->size;
 
 			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-			if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
+			if (i->user_defined == XDEBUG_BUILT_IN && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
 				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
 				scope_nr--;
 			}
@@ -586,7 +586,7 @@ char *xdebug_strip_php_stack_trace(char *buffer)
 	return NULL;
 }
 
-char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const uint error_lineno, char *buffer TSRMLS_DC)
+char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const unsigned int error_lineno, char *buffer TSRMLS_DC)
 {
 	char *printable_stack;
 	char *tmp_buf;
@@ -614,7 +614,7 @@ char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *erro
 }
 
 /* Error callback for formatting stack traces */
-void xdebug_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+void xdebug_error_cb(int type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
 {
 	char *buffer, *error_type_str;
 	int buffer_len;
@@ -784,6 +784,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
 				if (type != E_PARSE) {
+					efree(buffer);
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
@@ -952,6 +953,58 @@ static int find_line_number_for_current_execute_point(zend_execute_data *edata T
 	return 0;
 }
 
+int xdebug_function_name_is_closure(char *fname)
+{
+	int length = strlen(fname);
+	int closure_length = strlen("{closure}");
+
+	if (length < closure_length) {
+		return 0;
+	}
+
+	if (strcmp(fname + length - closure_length, "{closure}") == 0) {
+		return 1;
+	}
+
+	return 0;
+}
+
+char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname)
+{
+	xdebug_str tmp = XDEBUG_STR_INITIALIZER;
+	char *tmp_loc_info;
+
+	xdebug_str_addl(&tmp, fname, strlen(fname) - 1, 0);
+
+	tmp_loc_info = xdebug_sprintf(
+		":%s:%d-%d}",
+		opa->filename->val,
+		opa->line_start,
+		opa->line_end
+	);
+	xdebug_str_add(&tmp, tmp_loc_info, 1);
+
+	return tmp.d;
+}
+
+/* I don't like this API, but the function_stack_entry does not keep this as a
+ * pointer, and hence we need two APIs for freeing :-S */
+void xdebug_func_dtor_by_ref(xdebug_func *elem)
+{
+	if (elem->function) {
+		xdfree(elem->function);
+	}
+	if (elem->class) {
+		xdfree(elem->class);
+	}
+}
+
+void xdebug_func_dtor(xdebug_func *elem)
+{
+	xdebug_func_dtor_by_ref(elem);
+	xdfree(elem);
+}
+
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 {
 	memset(tmp, 0, sizeof(xdebug_func));
@@ -988,13 +1041,8 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 			}
 		}
 		if (edata->func->common.function_name) {
-			if (strcmp(edata->func->common.function_name->val, "{closure}") == 0) {
-				tmp->function = xdebug_sprintf(
-					"{closure:%s:%d-%d}",
-					edata->func->op_array.filename->val,
-					edata->func->op_array.line_start,
-					edata->func->op_array.line_end
-				);
+			if (xdebug_function_name_is_closure(edata->func->common.function_name->val)) {
+				tmp->function = xdebug_wrap_closure_location_around_function_name(&edata->func->op_array, edata->func->common.function_name->val);
 			} else if (strncmp(edata->func->common.function_name->val, "call_user_func", 14) == 0) {
 				const char *fname = NULL;
 				int         lineno = 0;
@@ -1093,7 +1141,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	int                   hit_variadic = 0;
 	zend_string          *aggr_key_str = NULL;
 
-	if (type == XDEBUG_EXTERNAL) {
+	if (type == XDEBUG_USER_DEFINED) {
 		edata = EG(current_execute_data)->prev_execute_data;
 		if (edata) {
 			opline_ptr = (zend_op**) &edata->opline;
@@ -1121,6 +1169,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->is_variadic   = 0;
 	tmp->filtered_tracing       = 0;
 	tmp->filtered_code_coverage = 0;
+	tmp->executable_lines_cache = NULL;
 
 	XG(function_count)++;
 	tmp->function_nr = XG(function_count);
@@ -1136,7 +1185,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	if (!tmp->filename) {
 		/* Includes/main script etc */
-		tmp->filename  = (type == XDEBUG_EXTERNAL && op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
+		tmp->filename  = (type == XDEBUG_USER_DEFINED && op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
 	}
 	/* Call user function locations */
 	if (
@@ -1163,7 +1212,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->function.type) {
 		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
-		tmp->function.type     = XFUNC_NORMAL;
+		tmp->function.type     = XFUNC_MAIN;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
 		tmp->lineno = 0;
@@ -1218,7 +1267,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				/* Because it is possible that more parameters are sent, then
 				 * actually wanted  we can only access the name in case there
 				 * is an associated variable to receive the variable here. */
-				if (tmp->user_defined == XDEBUG_EXTERNAL && i < arguments_wanted) {
+				if (tmp->user_defined == XDEBUG_USER_DEFINED && i < arguments_wanted) {
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
@@ -1246,7 +1295,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 			/* Sometimes not enough arguments are send to a user defined
 			 * function, so we have to gather only the name for those extra. */
-			if (tmp->user_defined == XDEBUG_EXTERNAL && arguments_sent < arguments_wanted) {
+			if (tmp->user_defined == XDEBUG_USER_DEFINED && arguments_sent < arguments_wanted) {
 				for (i = arguments_sent; i < arguments_wanted; i++) {
 					if (op_array->arg_info[i].name) {
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
@@ -1291,7 +1340,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if ((tmp->aggr_entry = zend_hash_find_ptr(&XG(aggr_calls), aggr_key_str)) == NULL) {
 			xdebug_aggregate_entry xae;
 
-			if (tmp->user_defined == XDEBUG_EXTERNAL) {
+			if (tmp->user_defined == XDEBUG_USER_DEFINED) {
 				xae.filename = xdstrdup(tmp->op_array->filename->val);
 			} else {
 				xae.filename = xdstrdup("php:internal");

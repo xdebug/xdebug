@@ -2,10 +2,8 @@
 Test for xdebug_debug_zval_stdout() (>= PHP 7.1, PHP < 7.2, NTS, opcache)
 --SKIPIF--
 <?php
-if (PHP_ZTS == 1) echo "skip NTS needed\n";
-if (!version_compare(phpversion(), "7.1", '>=')) echo "skip >= PHP 7.1, < PHP 7.2 needed\n";
-if (!version_compare(phpversion(), "7.2", '<')) echo "skip >= PHP 7.1, < PHP 7.2 needed\n";
-if (!extension_loaded('zend opcache')) echo "skip opcache required\n";
+require __DIR__ . '/utils.inc';
+check_reqs('PHP >= 7.1,< 7.2; NTS; opcache');
 ?>
 --INI--
 xdebug.default_enable=1

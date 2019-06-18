@@ -33,30 +33,26 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2018-04-01</date>
- <time>14:41:14</time>
+ <date>2019-03-06</date>
+ <time>11:55:24</time>
  <version>
-  <release>2.7.0alpha1</release>
-  <api>2.7.0alpha1</api>
+  <release>2.7.0</release>
+  <api>2.7.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
-
-= Improvements:
-
-  - Fixed issue #938: Support remote debugging for PHP scripts that fork. (Sponsored by Brad Wilson)
-  - Fixed issue #1487: Re-enable IPv6 test on Travis.
+Wed, Mar  6, 2019 - xdebug 2.7.0
 
 = Fixed bugs:
 
-  - Fixed issue #1526: Namespace filter does equality match instead of prefix match.
-  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval().
-  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling.
+  - Fixed issue #1520: Xdebug does not handle variables and properties with "-" in their name
+  - Fixed issue #1577: Code coverage path analysis with chained catch fails in PHP 7.3
+  - Fixed issue #1639: Compile warning/error on GCC 8 or Clang due to "break intentionally missing"
+  - Fixed issue #1642: Debugger gives: "Warning: Header may not contain NUL bytes"
  </notes>
 
  <contents>
@@ -66,31 +62,19 @@ Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
     <file name="xt.vim" role="doc" />
    </dir> <!-- /contrib -->
    <dir name="debugclient">
-    <dir name="build">
-     <file name="buildcheck.sh" role="src" />
-     <file name="buildconf1.mk" role="src" />
-     <file name="buildconf2.mk" role="src" />
-     <file name="clean.mk" role="src" />
-     <file name="config-stubs" role="src" />
-    </dir> <!-- /debugclient/build -->
-    <file name="acinclude.m4" role="src" />
     <file name="buildconf" role="src" />
     <file name="config.guess" role="src" />
     <file name="config.h.in" role="src" />
     <file name="config.sub" role="src" />
     <file name="configure" role="src" />
-    <file name="configure.in" role="src" />
-    <file name="cvsclean" role="src" />
+    <file name="configure.ac" role="src" />
     <file name="debugclient.dsp" role="src" />
-    <file name="depcomp" role="src" />
     <file name="INSTALL" role="src" />
     <file name="install-sh" role="src" />
     <file name="LICENSE" role="src" />
-    <file name="ltmain.sh" role="src" />
     <file name="main.c" role="src" />
     <file name="Makefile.in" role="src" />
-    <file name="missing" role="src" />
-    <file name="mkinstalldirs" role="src" />
+    <file name="README" role="src" />
     <file name="usefulstuff.c" role="src" />
     <file name="usefulstuff.h" role="src" />
    </dir> <!-- /debugclient -->
@@ -167,6 +151,135 @@ Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-02-15</date>
+   <time>15:29:15</time>
+   <version>
+    <release>2.7.0RC2</release>
+    <api>2.7.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Feb 15, 2019 - xdebug 2.7.0RC2
+
+= Fixed bugs:
+
+  - Fixed issue #1551: Property with value null is not represented well
+  - Fixed issue #1621: Xdebug fails to compile cleanly on 32-bit platforms
+  - Fixed issue #1625: Work around ABI conflicts in PHP 7.3.0/PHP 7.3.1
+  - Fixed issue #1628: The PHP function name being constructed to record when GC Collection runs, is not freed
+  - Fixed issue #1629: SOAP Client/Server detection code does not handle inherited classes
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-02-01</date>
+   <time>18:38:37</time>
+   <version>
+    <release>2.7.0RC1</release>
+    <api>2.7.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Feb  1, 2019 - xdebug 2.7.0RC1
+
+= Fixed bugs:
+
+  - Fixed issue #1571: File/line information is not shown for closures in namespaces.
+  - Fixed issue #1578: Compile error due to redefinition of "zif_handler" with old GCCs.
+  - Fixed issue #1583: Xdebug crashes when OPcache's compact literals optimisation is on.
+  - Fixed issue #1598: Make path/branch coverage work with OPcache loaded for PHP 7.3 and later.
+  - Fixed issue #1620: Division by zero when GC Stats Collection runs with memory manager disabled.
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-09-20</date>
+   <time>08:56:14</time>
+   <version>
+    <release>2.7.0beta1</release>
+    <api>2.7.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Sep 20, 2018 - xdebug 2.7.0beta1
+
++ Improvements:
+
+  - Fixed issue #1519: PHP 7.3 support
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-04-01</date>
+   <time>14:41:14</time>
+   <version>
+    <release>2.7.0alpha1</release>
+    <api>2.7.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
+
+= Improvements:
+
+  - Fixed issue #938: Support remote debugging for PHP scripts that fork. (Sponsored by Brad Wilson)
+  - Fixed issue #1487: Re-enable IPv6 test on Travis.
+
+= Fixed bugs:
+
+  - Fixed issue #1526: Namespace filter does equality match instead of prefix match.
+  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval().
+  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling.
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-08-01</date>
+   <time>23:39:23</time>
+   <version>
+    <release>2.6.1</release>
+    <api>2.6.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Aug  1, 2018 - xdebug 2.6.1
+
+= Fixed bugs:
+
+  - Fixed issue #1525: Namespace filter does equality match instead of prefix match
+  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval() (Philip Hofstetter)
+  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling
+  - Fixed issue #1556: Crash when register_shutdown_function() is called with a function named call_user_func*
+  - Fixed issue #1557: Remove 'return' in void xdebug_build_fname
+  - Fixed issue #1568: Can't debug object properties that have numeric keys
+
++ Improvements:
+
+  - Fixed issue #1487: Re-enable IPv6 test on Travis
+   </notes>
+  </release>
 
   <release>
    <date>2018-01-29</date>

@@ -1,8 +1,11 @@
 --TEST--
-Test for bug #515: Dead Code Analysis for code coverage messed up with ticks (> PHP 7.0.12)
+Test for bug #515: Dead Code Analysis for code coverage messed up with ticks (> PHP 7.0.12, !opcache)
 --SKIPIF--
-<?php if (!version_compare(phpversion(), "7.0.12", '>')) echo "skip > PHP 7.0.12 needed\n"; ?>
-<?php if (extension_loaded('zend opcache')) echo "skip opcache should not be loaded\n"; ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('PHP > 7.0.12; !opcache');
+?>
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0
@@ -16,7 +19,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.extended_info=1
 xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--
@@ -36,7 +38,7 @@ array(1) {
   array(9) {
     [2]=>
     int(1)
-    [3]=>
+    [%r(3|5)%r]=>
     int(1)
     [9]=>
     int(-1)

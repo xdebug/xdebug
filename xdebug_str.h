@@ -28,8 +28,8 @@
 #define XDEBUG_STR_WRAP_CHAR(v) (&((xdebug_str){strlen(v), strlen(v)+1, ((char*)(v))}))
 
 typedef struct xdebug_str {
-	signed long l;
-	signed long a;
+	size_t l;
+	size_t a;
 	char *d;
 } xdebug_str;
 
@@ -37,7 +37,7 @@ void xdebug_str_add(xdebug_str *xs, const char *str, int f);
 void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f);
 void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str);
 void xdebug_str_addc(xdebug_str *xs, char letter);
-void xdebug_str_chop(xdebug_str *xs, int c);
+void xdebug_str_chop(xdebug_str *xs, size_t c);
 
 xdebug_str *xdebug_str_new(void);
 xdebug_str *xdebug_str_create_from_char(char *c);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -251,7 +251,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 
 	/* use previously created filename and funcname (or a reference to them) to show
 	 * time spend */
-	if (fse->user_defined == XDEBUG_INTERNAL) {
+	if (fse->user_defined == XDEBUG_BUILT_IN) {
 		char *tmp_key = xdebug_sprintf("php::%s", fse->profiler.funcname);
 		char *fl_ref = NULL, *fn_ref = NULL;
 
@@ -277,7 +277,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 		xdfree(fn_ref);
 	}
 
-	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
+	if (fse->function.type == XFUNC_MAIN) {
 		fprintf(XG(profile_file), "\nsummary: %lu %lu\n\n", (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
 		XG(profiler_enabled) = 0;
 	}
@@ -310,7 +310,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 		char *fl_ref = NULL, *fn_ref = NULL;
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 
-		if (call_entry->user_defined == XDEBUG_INTERNAL) {
+		if (call_entry->user_defined == XDEBUG_BUILT_IN) {
 			char *tmp_key = xdebug_sprintf("php::%s", call_entry->function);
 
 			fl_ref = get_filename_ref((char*) "php:internal" TSRMLS_CC);

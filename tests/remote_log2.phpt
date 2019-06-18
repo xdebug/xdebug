@@ -1,7 +1,10 @@
 --TEST--
 Test for Xdebug's remote log (can not connect, with not-found remote callback)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('dbgp; !win');
+?>
 --INI--
 xdebug.remote_enable=1
 xdebug.remote_log=/tmp/remote-log2.txt
@@ -25,7 +28,7 @@ unlink (sys_get_temp_dir() . "/remote-log2.txt");
 [%d] W: Creating socket for 'doesnotexist2:9003', getaddrinfo: %s.
 [%d] E: Could not connect to client. :-(
 [%d] Log closed at %d-%d-%d %d:%d:%d
-[%d]
+
 [%d] Log opened at %d-%d-%d %d:%d:%d
 [%d] I: Checking remote connect back address.
 [%d] I: Checking header 'HTTP_X_FORWARDED_FOR'.
@@ -34,4 +37,3 @@ unlink (sys_get_temp_dir() . "/remote-log2.txt");
 [%d] W: Creating socket for 'doesnotexist2:9003', getaddrinfo: %s.
 [%d] E: Could not connect to client. :-(
 [%d] Log closed at %d-%d-%d %d:%d:%d
-[%d]

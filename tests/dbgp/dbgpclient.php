@@ -46,7 +46,7 @@ class DebugClient
 		return $socket;
 	}
 
-	private function launchPhp( &$pipes, array $ini_options = null )
+	private function launchPhp( &$pipes, array $ini_options = null, $filename )
 	{
 		@unlink( $this->tmpDir . '/error-output.txt' );
 		@unlink( $this->tmpDir . '/remote_log.txt' );
@@ -62,7 +62,8 @@ class DebugClient
 			"xdebug.remote_autostart" => "1",
 			"xdebug.remote_host" => $this->getIPAddress(),
 			"xdebug.remote_port" => $this->getPort(),
-			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt"
+			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt",
+			"xdebug.remote_log_level" => 10,
 		);
 
 		if ( is_null( $ini_options ) )
@@ -78,11 +79,21 @@ class DebugClient
 		}
 
 		$php = getenv( 'TEST_PHP_EXECUTABLE' );
-		$cmd = "{$php} $options {$this->tmpDir}/xdebug-dbgp-test.php >{$this->tmpDir}/php-error-output.txt 2>&1";
+		$cmd = "{$php} $options {$filename} >{$this->tmpDir}/php-stdout.txt 2>{$this->tmpDir}/php-stderr.txt";
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
 		return $process;
+	}
+
+	function fixFilePath( $m )
+	{
+		preg_match( '@.*/(.*\.inc)@', $m[2], $fm );
+		if ( !isset( $fm[1] ) )
+		{
+			$fm[1] = '';
+		}
+		return " {$m[1]}=\"file://{$fm[1]}\"";
 	}
 
 	function doRead( $conn )
@@ -101,6 +112,7 @@ class DebugClient
 			$read = preg_replace( '@\s(xdebug:language_version)="[^"]+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
 			$read = preg_replace( '@(2002-20[0-9]{2})@', '2002-2099', $read );
+			$read = preg_replace_callback( '@\s(fileuri|filename)="file:///(.+?)"@', 'self::fixFilePath', $read );
 			echo $read, "\n\n";
 
 			if ( preg_match( '@<stream xmlns="urn.debugger_protocol_v1" xmlns:xdebug@', $read ) )
@@ -114,9 +126,10 @@ class DebugClient
 		} while( !$end );
 	}
 
-	function runTest( $data, array $commands, array $ini_options = null )
+	function runTest( $filename, array $commands, array $ini_options = null )
 	{
-		file_put_contents( $this->tmpDir . '/xdebug-dbgp-test.php', $data );
+		$filename = realpath( $filename );
+
 		$i = 1;
 		$socket = $this->open( $errno, $errstr );
 		if ( $socket === false )
@@ -126,12 +139,13 @@ class DebugClient
 			echo "Address: {$this->getAddress()}\n";
 			return;
 		}
-		$php = $this->launchPhp( $ppipes, $ini_options );
-		$conn = @stream_socket_accept( $socket, 3 );
+		$php = $this->launchPhp( $ppipes, $ini_options, $filename );
+		$conn = @stream_socket_accept( $socket, 20 );
 
 		if ( $conn === false )
 		{
-			echo @file_get_contents( $this->tmpDir . '/php-error-output.txt' ), "\n";
+			echo @file_get_contents( $this->tmpDir . '/php-stdout.txt' ), "\n";
+			echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/remote_log.txt' ), "\n";
 			proc_close( $php );
@@ -153,7 +167,10 @@ class DebugClient
 				$command = $parts[0] . " -i $i " . $parts[1];
 			}
 
-			echo "-> ", $command, "\n";
+			$sanitised = $command;
+			$sanitised = preg_replace( '@\sfile://.*/(.*\.inc)\s@', ' file://\\1 ', $sanitised );
+
+			echo "-> ", $sanitised, "\n";
 			fwrite( $conn, $command . "\0" );
 
 			$this->doRead( $conn );
@@ -163,9 +180,10 @@ class DebugClient
 		fclose( $conn );
 		fclose( $ppipes[0] );
 		fclose( $ppipes[1] );
+		fclose( $socket );
 		proc_close( $php );
 		
-		// echo @file_get_contents( $this->tmpDir . '/php-error-output.txt' ), "\n";
+		// echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
 		// echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 	}
 }
@@ -196,7 +214,7 @@ class DebugClientIPv6 extends DebugClient
 	}
 }
 
-function dbgpRun( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
+function dbgpRunFile( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
 {
 	if ( $flags == XDEBUG_DBGP_IPV6 )
 	{

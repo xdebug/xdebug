@@ -1,7 +1,10 @@
 --TEST--
 Test for bug #964: IP retrival from X-Forwarded-For complies with RFC 7239 (without comma)
 --SKIPIF--
-<?php if (substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows"); ?>
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('!win; unparallel');
+?>
 --ENV--
 HTTP_X_FORWARDED_FOR=192.168.111.111
 --INI--

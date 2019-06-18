@@ -55,12 +55,12 @@ static void xdebug_xml_return_text_node(xdebug_xml_text_node* node, xdebug_str* 
 	xdebug_str_addl(output, "<![CDATA[", 9, 0);
 	if (node->encode) {
 		/* if cdata tags are in the text, then we must base64 encode */
-		int new_len = 0;
-		char *encoded_text;
+		size_t         new_len = 0;
+		unsigned char *encoded_text;
 
-		encoded_text = (char*) xdebug_base64_encode((unsigned char*) node->text, node->text_len, &new_len);
-		xdebug_str_add(output, encoded_text, 0);
-		efree(encoded_text);
+		encoded_text = xdebug_base64_encode((unsigned char*) node->text, node->text_len, &new_len);
+		xdebug_str_add(output, (char*) encoded_text, 0);
+		xdfree(encoded_text);
 	} else {
 		xdebug_str_add(output, node->text, 0);
 	}
