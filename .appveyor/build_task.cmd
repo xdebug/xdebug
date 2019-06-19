@@ -46,7 +46,7 @@ setlocal enableextensions enabledelayedexpansion
 	set TEST_PHP_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%\build\php.exe
 	set TEST_PHP_JUNIT=c:\tests_tmp\tests-junit.xml
 	set TEST_PHP_ARGS=-n -d -foo=1 -d zend_extension=%APPVEYOR_BUILD_FOLDER%\build\ext\php_opcache.dll -d zend_extension=%APPVEYOR_BUILD_FOLDER%\build\ext\php_xdebug.dll -dxdebug.remote_enable=1
-	set SKIP_DBGP_TESTS=1
+	rem set SKIP_DBGP_TESTS=1
 	set SKIP_IPV6_TESTS=1
 	set REPORT_EXIT_STATUS=1
 	set OPCACHE=%OPCACHE%
