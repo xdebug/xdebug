@@ -1,5 +1,10 @@
 --TEST--
 Test for bug #714: Cachegrind files have huge (wrong) numbers in some lines
+--SKIPIF--
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('slow');
+?>
 --INI--
 xdebug.profiler_enable=1
 --FILE--
