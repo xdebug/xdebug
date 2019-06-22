@@ -3,7 +3,7 @@ Test for bug #1210: Coverage of sending arguments to a method (> PHP 7.2.13, < P
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP > 7.2.13,< 7.4; !opcache');
+check_reqs('PHP > 7.2.13,< 7.4,!= 7.3.0; !opcache');
 ?>
 --FILE--
 <?php
