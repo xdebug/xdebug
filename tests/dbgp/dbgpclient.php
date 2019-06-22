@@ -168,7 +168,7 @@ class DebugClient
 			}
 
 			$sanitised = $command;
-			$sanitised = preg_replace( '@\sfile://.*/(.*\.inc)\s@', ' file://\\1 ', $sanitised );
+			$sanitised = preg_replace( '@\sfile://.*[/\\\\](.*\.inc)\s@', ' file://\\1 ', $sanitised );
 
 			echo "-> ", $sanitised, "\n";
 			fwrite( $conn, $command . "\0" );
