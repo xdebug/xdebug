@@ -9,18 +9,26 @@ PHP_ARG_ENABLE(xdebug-dev, whether to enable Xdebug developer build flags,
 
 if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([Check for supported PHP versions])
-  PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
-  PHP_XDEBUG_FOUND_VERNUM=`echo "${PHP_XDEBUG_FOUND_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 100 + [$]2) * 100 + [$]3;}'`
-  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "70000"; then
-    AC_MSG_ERROR([not supported. Need a PHP version >= 7.0.0 and < 8.0.0 (found $PHP_XDEBUG_FOUND_VERSION)])
-  else
-    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80000"; then
-      AC_MSG_ERROR([not supported. Need a PHP version >= 7.0.0 and < 8.0.0 (found $PHP_XDEBUG_FOUND_VERSION)])
-    else
-      AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
+  if test -z "${PHP_VERSION_ID}"; then
+    if test -z "${PHP_CONFIG}"; then
+      as_fn_error $? "php-config not found" "$LINENO" 5
     fi
+    if test -z "${AWK}"; then
+      as_fn_error $? "awk not found" "$LINENO" 5
+    fi
+    PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
+    PHP_XDEBUG_FOUND_VERNUM=`echo "${PHP_XDEBUG_FOUND_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ($1 * 100  $2) * 100  $3;}'`
+  else
+    PHP_XDEBUG_FOUND_VERNUM="${PHP_VERSION_ID}"
+    PHP_XDEBUG_FOUND_VERSION="${PHP_VERSION}"
   fi
-  
+
+  if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80000"; then
+      AC_MSG_ERROR([not supported. Need a PHP version >= 7.0.0 and < 8.0.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+  else
+    AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
+  fi
+
   AC_DEFINE(HAVE_XDEBUG,1,[ ])
 
   old_CPPFLAGS=$CPPFLAGS
