@@ -33,27 +33,36 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-05-06</date>
- <time>16:48:57</time>
+ <date>2019-06-28</date>
+ <time>16:30:00</time>
  <version>
-  <release>2.7.2</release>
-  <api>2.7.2</api>
+  <release>2.8.0alpha1</release>
+  <api>2.8.0alpha1</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, May  6, 2019 - xdebug 2.7.2
+Fri, May 28, 2019 - xdebug 2.8.0alpha1
+
++ Added features:
+
+  - Implemented issue #1599: Add support for PHP 7.4
+
++ Improvements:
+
+  - Implemented issue #1388: Support 'resolved' flag for breakpoints
+  - Implemented issue #1664: Run breakpoint resolver when after a new breakpoint is added as well
 
 = Fixed bugs:
 
-  - Fixed issue #1488: Rewrite DBGp 'property_set' to always use eval
-  - Fixed issue #1586: error_reporting()'s return value is incorrect during debugger's 'eval' command
-  - Fixed issue #1615: Turn off Zend OPcache when remote debugger is turned on
-  - Fixed issue #1656: remote_connect_back alters header if multiple values are present
-  - Fixed issue #1662: __debugInfo should not be used for user-defined classes
+  - Fixed issue #1660: Return breakpoints for methods don't break immediately
+
+- Removed features:
+
+  - Fixed issue #1666: Remove xdebug.extended_info setting
  </notes>
 
  <contents>
@@ -152,6 +161,31 @@ Mon, May  6, 2019 - xdebug 2.7.2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-05-06</date>
+   <time>16:48:57</time>
+   <version>
+    <release>2.7.2</release>
+    <api>2.7.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, May  6, 2019 - xdebug 2.7.2
+
+= Fixed bugs:
+
+  - Fixed issue #1488: Rewrite DBGp 'property_set' to always use eval
+  - Fixed issue #1586: error_reporting()'s return value is incorrect during debugger's 'eval' command
+  - Fixed issue #1615: Turn off Zend OPcache when remote debugger is turned on
+  - Fixed issue #1656: remote_connect_back alters header if multiple values are present
+  - Fixed issue #1662: __debugInfo should not be used for user-defined classes
+   </notes>
+  </release>
 
   <release>
    <date>2019-04-05</date>
