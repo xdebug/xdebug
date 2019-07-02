@@ -496,6 +496,7 @@ int xdebug_is_debug_connection_active()
 
 int xdebug_is_debug_connection_active_for_current_pid()
 {
+    return XG(remote_connection_enabled);
 	/* Start debugger if previously a connection was established and this
 	 * process no longer has the same PID */
 	if ((xdebug_is_debug_connection_active() && (XG(remote_connection_pid) != getpid()))) {

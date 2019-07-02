@@ -97,8 +97,9 @@ void xdebug_profiler_deinit(TSRMLS_D)
 {
 	function_stack_entry *fse;
 	xdebug_llist_element *le;
+	GET_CUR_XG;
 
-	for (le = XDEBUG_LLIST_TAIL(XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+	for (le = XDEBUG_LLIST_TAIL(CUR_XG(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
 		fse = XDEBUG_LLIST_VALP(le);
 		xdebug_profiler_function_end(fse TSRMLS_CC);
 	}
@@ -279,7 +280,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 
 	if (fse->function.function && strcmp(fse->function.function, "{main}") == 0) {
 		fprintf(XG(profile_file), "\nsummary: %lu %lu\n\n", (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
-		XG(profiler_enabled) = 0;
+//		XG(profiler_enabled) = 0;
 	}
 	fflush(XG(profile_file));
 

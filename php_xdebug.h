@@ -19,7 +19,8 @@
 #ifndef PHP_XDEBUG_H
 #define PHP_XDEBUG_H
 
-#define XDEBUG_NAME       "Xdebug"
+//rename xdebug to sdebug, compatible with Swoole
+#define XDEBUG_NAME       "Sdebug"
 #define XDEBUG_VERSION    "2.7.3-dev"
 #define XDEBUG_AUTHOR     "Derick Rethans"
 #define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2019 by Derick Rethans"
@@ -322,6 +323,30 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_llist *filters_tracing;
 	xdebug_llist *filters_code_coverage;
 ZEND_END_MODULE_GLOBALS(xdebug)
+
+typedef struct _sw_zend_xdebug_globals {
+	long          cid;
+
+	unsigned long level;
+	xdebug_llist  *stack;
+
+	signed long   prev_memory;
+
+	xdebug_path_info     *paths_stack;
+	struct {
+        unsigned int  size;
+        int *last_branch_nr;
+    } branches;
+} sw_zend_xdebug_globals;
+
+void sw_xdebug_init(void);
+long get_cid(void);
+int add_current_context(void);
+sw_zend_xdebug_globals *get_current_context(void);
+void remove_context(long cid);
+
+#define GET_CUR_XG sw_zend_xdebug_globals *current_xdebug_globals = get_current_context();
+#define CUR_XG(v) (current_xdebug_globals->v)
 
 #ifdef ZTS
 #define XG(v) TSRMG(xdebug_globals_id, zend_xdebug_globals *, v)

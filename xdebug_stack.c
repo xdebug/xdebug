@@ -163,15 +163,16 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	char                 *tmp_log_message;
+	GET_CUR_XG;
 
 	tmp_log_message = xdebug_sprintf( "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 	php_log_err(tmp_log_message TSRMLS_CC);
 	xdfree(tmp_log_message);
 
-	if (XG(stack) && XG(stack)->size) {
+	if (CUR_XG(stack) && CUR_XG(stack)->size) {
 		php_log_err((char*) "PHP Stack trace:" TSRMLS_CC);
 
-		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
+		for (le = XDEBUG_LLIST_HEAD(CUR_XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
@@ -389,13 +390,14 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 	function_stack_entry *i;
 	int                   printed_frames = 0;
 	const char          **formats = select_formats(html TSRMLS_CC);
+	GET_CUR_XG;
 
-	if (XG(stack) && XG(stack)->size) {
-		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG(stack)));
+	if (CUR_XG(stack) && CUR_XG(stack)->size) {
+		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(CUR_XG(stack)));
 
 		xdebug_str_add(str, formats[2], 0);
 
-		for (le = XDEBUG_LLIST_HEAD(XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
+		for (le = XDEBUG_LLIST_HEAD(CUR_XG(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
@@ -496,12 +498,12 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			XG(dumped) = 1;
 		}
 
-		if (XG(show_local_vars) && XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
-			int scope_nr = XG(stack)->size;
+		if (XG(show_local_vars) && CUR_XG(stack) && XDEBUG_LLIST_TAIL(CUR_XG(stack))) {
+			int scope_nr = CUR_XG(stack)->size;
 
-			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-			if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))))) {
-				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG(stack))));
+			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack)));
+			if (i->user_defined == XDEBUG_INTERNAL && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(CUR_XG(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(CUR_XG(stack))))) {
+				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(CUR_XG(stack))));
 				scope_nr--;
 			}
 			if (i->declared_vars && i->declared_vars->size) {
@@ -621,6 +623,9 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 	xdebug_brk_info *extra_brk_info = NULL;
 	error_handling_t  error_handling;
 	zend_class_entry *exception_class;
+
+	add_current_context();
+	GET_CUR_XG;
 
 	TSRMLS_FETCH();
 
@@ -742,7 +747,7 @@ void xdebug_error_cb(int type, const char *error_filename, const uint error_line
 			if (xdebug_handle_hit_value(extra_brk_info)) {
 				char *type_str = xdebug_sprintf("%ld", type);
 
-				if (!XG(context).handler->remote_breakpoint(&(XG(context)), XG(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
+				if (!XG(context).handler->remote_breakpoint(&(XG(context)), CUR_XG(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
 					xdebug_mark_debug_connection_not_active();
 				}
 
@@ -1007,6 +1012,7 @@ void xdebug_func_dtor(xdebug_func *elem)
 
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 {
+	GET_CUR_XG;
 	memset(tmp, 0, sizeof(xdebug_func));
 
 #if PHP_VERSION_ID >= 70100
@@ -1053,11 +1059,11 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 
 				if (
 					!fname &&
-					XDEBUG_LLIST_TAIL(XG(stack)) &&
-					XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) &&
-					((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
+					XDEBUG_LLIST_TAIL(CUR_XG(stack)) &&
+					XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack))) &&
+					((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack))))->filename
 				) {
-					fname = ((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename;
+					fname = ((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack))))->filename;
 				}
 
 				if (!fname) {
@@ -1140,6 +1146,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	int                   aggr_key_len = 0;
 	int                   hit_variadic = 0;
 	zend_string          *aggr_key_str = NULL;
+	GET_CUR_XG;
 
 	if (type == XDEBUG_EXTERNAL) {
 		edata = EG(current_execute_data)->prev_execute_data;
@@ -1156,7 +1163,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->var           = NULL;
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
-	tmp->level         = XG(level);
+	tmp->level         = CUR_XG(level);
 	tmp->arg_done      = 0;
 	tmp->declared_vars = NULL;
 	tmp->user_defined  = type;
@@ -1189,20 +1196,20 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	/* Call user function locations */
 	if (
 		!tmp->filename &&
-		XG(stack) &&
-		XDEBUG_LLIST_TAIL(XG(stack)) &&
-		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))) &&
-		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename
+		CUR_XG(stack) &&
+		XDEBUG_LLIST_TAIL(CUR_XG(stack)) &&
+		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack))) &&
+		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack))))->filename
 	) {
-		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack))))->filename);
+		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack))))->filename);
 	}
 
 	if (!tmp->filename) {
 		tmp->filename = xdstrdup("UNKNOWN?");
 	}
-	tmp->prev_memory = XG(prev_memory);
+	tmp->prev_memory = CUR_XG(prev_memory);
 	tmp->memory = zend_memory_usage(0 TSRMLS_CC);
-	XG(prev_memory) = tmp->memory;
+	CUR_XG(prev_memory) = tmp->memory;
 	tmp->time   = xdebug_get_utime();
 	tmp->lineno = 0;
 	tmp->prev   = 0;
@@ -1356,9 +1363,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
-	if (XG(stack)) {
-		if (XDEBUG_LLIST_TAIL(XG(stack))) {
-			function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+	if (CUR_XG(stack)) {
+		if (XDEBUG_LLIST_TAIL(CUR_XG(stack))) {
+			function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(CUR_XG(stack)));
 			tmp->prev = prev;
 			if (XG(profiler_aggregate)) {
 				if (prev->aggr_entry->call_list) {
@@ -1372,7 +1379,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 			}
 		}
-		xdebug_llist_insert_next(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), tmp);
+		xdebug_llist_insert_next(CUR_XG(stack), XDEBUG_LLIST_TAIL(CUR_XG(stack)), tmp);
 	}
 
 	if (XG(profiler_aggregate)) {
@@ -1387,9 +1394,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
    Returns the stack depth */
 PHP_FUNCTION(xdebug_get_stack_depth)
 {
+	GET_CUR_XG;
 	/* We substract one so that the function call to xdebug_get_stack_depth()
 	 * is not part of the returned depth. */
-	RETURN_LONG(XG(stack)->size - 1);
+	RETURN_LONG(CUR_XG(stack)->size - 1);
 }
 
 /* {{{ proto array xdebug_get_function_stack()
@@ -1401,11 +1409,12 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
+	GET_CUR_XG;
 
 	array_init(return_value);
-	le = XDEBUG_LLIST_HEAD(XG(stack));
+	le = XDEBUG_LLIST_HEAD(CUR_XG(stack));
 
-	for (k = 0; k < XG(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
+	for (k = 0; k < CUR_XG(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
 		function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 
 		if (i->function.function) {
@@ -1495,9 +1504,10 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	xdebug_hash *tmp_hash;
+	GET_CUR_XG;
 
 	array_init(return_value);
-	le = XDEBUG_LLIST_TAIL(XG(stack));
+	le = XDEBUG_LLIST_TAIL(CUR_XG(stack));
 	le = XDEBUG_LLIST_PREV(le);
 	i = XDEBUG_LLIST_VALP(le);
 

@@ -24,9 +24,10 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 function_stack_entry *xdebug_get_stack_head(TSRMLS_D)
 {
 	xdebug_llist_element *le;
+	GET_CUR_XG;
 
-	if (XG(stack)) {
-		if ((le = XDEBUG_LLIST_HEAD(XG(stack)))) {
+	if (CUR_XG(stack)) {
+		if ((le = XDEBUG_LLIST_HEAD(CUR_XG(stack)))) {
 			return XDEBUG_LLIST_VALP(le);
 		} else {
 			return NULL;
@@ -39,12 +40,13 @@ function_stack_entry *xdebug_get_stack_head(TSRMLS_D)
 function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC)
 {
 	xdebug_llist_element *le;
+	GET_CUR_XG;
 
-	if (!XG(stack)) {
+	if (!CUR_XG(stack)) {
 		return NULL;
 	}
 
-	if (!(le = XDEBUG_LLIST_TAIL(XG(stack)))) {
+	if (!(le = XDEBUG_LLIST_TAIL(CUR_XG(stack)))) {
 		return NULL;
 	}
 
@@ -65,9 +67,10 @@ function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC)
 function_stack_entry *xdebug_get_stack_tail(TSRMLS_D)
 {
 	xdebug_llist_element *le;
+	GET_CUR_XG;
 
-	if (XG(stack)) {
-		if ((le = XDEBUG_LLIST_TAIL(XG(stack)))) {
+	if (CUR_XG(stack)) {
+		if ((le = XDEBUG_LLIST_TAIL(CUR_XG(stack)))) {
 			return XDEBUG_LLIST_VALP(le);
 		} else {
 			return NULL;
