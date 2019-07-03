@@ -1987,12 +1987,8 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 	CUR_XG(level)--;
 	if (do_remove_context) {
-        if (UNEXPECTED(EG(exception))) {
-            return;
-        } else {
-            remove_context(CUR_XG(cid));
-        }
-    }
+		remove_context(CUR_XG(cid));
+	}
 }
 
 static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
@@ -2033,10 +2029,10 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
 
 	int do_remove_context = 0;
-    if (add_current_context()) {
-        do_remove_context = 1;
-    }
-    GET_CUR_XG;
+	if (add_current_context()) {
+		do_remove_context = 1;
+	}
+	GET_CUR_XG;
 
 	CUR_XG(level)++;
 	if ((signed long) CUR_XG(level) > XG(max_nesting_level) && (XG(max_nesting_level) != -1)) {
@@ -2108,8 +2104,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	}
 	CUR_XG(level)--;
 	if (do_remove_context) {
-        remove_context(CUR_XG(cid));
-    }
+		remove_context(CUR_XG(cid));
+	}
 }
 
 /* Opcode handler for exit, to be able to clean up the profiler */

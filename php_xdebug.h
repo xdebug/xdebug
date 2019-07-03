@@ -334,9 +334,9 @@ typedef struct _sw_zend_xdebug_globals {
 
 	xdebug_path_info     *paths_stack;
 	struct {
-        unsigned int  size;
-        int *last_branch_nr;
-    } branches;
+		unsigned int  size;
+		int *last_branch_nr;
+	} branches;
 } sw_zend_xdebug_globals;
 
 void sw_xdebug_init(void);
