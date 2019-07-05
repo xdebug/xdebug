@@ -1,45 +1,23 @@
 进度
 ------------
-* 基于 xdebug2.7, 目前修改基本完毕了
+* 基于 xdebug2.7(https://github.com/xdebug/xdebug), 目前修改基本完毕了
 * QQ 群: 897623858
 
-======
-Xdebug
-======
-
-.. image:: https://travis-ci.org/xdebug/xdebug.svg?branch=master
-.. image:: https://ci.appveyor.com/api/projects/status/glp9xfsmt1p25nkn?svg=true
-.. image:: https://circleci.com/gh/xdebug/xdebug/tree/master.svg?style=svg
-
-These are instructions for installing Xdebug from a Git checkout. Please refer
-to https://xdebug.org/support.php for support.
-
-Introduction
+注意事项
 ------------
-
-You need to compile Xdebug separately from the rest of PHP. You need to have
-access to the scripts ``phpize`` and ``php-config``.  If your system does not
-have ``phpize`` and ``php-config``, you will need to compile and install PHP
-from a source tarball first, or install a ``php-dev`` package if your
-distribution provides one. These scripts are by-products of the PHP
-compilation and installation processes and are needed to compile external
-extensions. It is important that the source version matches the installed
-version as there are slight, but important, differences between PHP versions. 
+* 为了避免 swoole 的检测 xdebug 警告, 扩展注册的名称是 sdebug, 如果想使用 Phpunit CodeCoverage , 需要手动把检测 xdebug 的判断修改成 sdebug
+* 单步调试: 如果php不是7.3的, 建议使用 sdebug_2_6(https://github.com/mabu233/sdebug/tree/sdebug), sdebug_2_7 可能需要与phpstorm2019搭配使用
 
 Clone
 -----
 
-You can clone the Xdebug source directory with::
+You can clone the Sdebug source directory with::
 
-   git clone https://github.com/xdebug/xdebug.git
+   git clone https://github.com/mabu233/sdebug.git
 
 Then move into this new directory::
 
-	cd xdebug
-
-Although it is recommended to run the latest version from the **master**
-branch, older versions are available through tags. For example to checkout the
-2.5.5 release, you can switch to it with ``git checkout XDEBUG_2_5_5``.
+	cd sdebug
 
 Compile
 -------
@@ -84,23 +62,4 @@ The long winded way of installation is:
 	PHP 7.2.0RC6 (cli) (built: Nov 23 2017 10:30:56) ( NTS DEBUG )
 	Copyright (c) 1997-2017 The PHP Group
 	Zend Engine v3.2.0-dev, Copyright (c) 1998-2017 Zend Technologies
-		with Xdebug v2.6.0-dev, Copyright (c) 2002-2017, by Derick Rethans
-
-Support
--------
-
-For questions regarding compile issues, please write to the **xdebug-general**
-email list which you can find at https://xdebug.org/support.php#list
-
-You can also find support on IRC: ``freenode/#xdebug``. You can do that with
-your favourite client, or by using their webchat_.
-
-.. _webchat: http://webchat.freenode.net/?channels=#xdebug
-
-If you think that you encountered a bug, please file a detailed bug report
-at https://bugs.xdebug.org. You are required to create an account, this is
-so that you can be contacted for additional information and to keep out
-spam.
-
-
-Derick Rethans — derick@xdebug.org
+		with Sdebug v2.x.x-dev, Copyright (c) 2002-2017, by Derick Rethans
