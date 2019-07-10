@@ -21,6 +21,8 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+ZEND_TLS pid_t xdebug_current_pid = 0;
+
 const char *xdebug_log_prefix[11] = {
 	"", "E: ", "", "W: ", "", "", "", "I: ", "", "", "D: "
 };
@@ -110,3 +112,25 @@ xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list)
 
 	return tmp;
 }
+
+pid_t xdebug_get_pid(void)
+{
+	if (xdebug_current_pid == 0) {
+#ifndef ZTS
+		xdebug_current_pid = getpid();
+#else
+# ifdef _WIN32
+		xdebug_current_pid = GetCurrentThreadId();
+# else
+		xdebug_current_pid = (pid_t) pthread_self();
+# endif
+#endif
+	}
+	return xdebug_current_pid;
+}
+
+#ifndef _WIN32
+void xdebug_prepare_fork(void) {
+    xdebug_current_pid = 0;
+}
+#endif

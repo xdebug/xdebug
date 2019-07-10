@@ -31,6 +31,7 @@
 #ifndef PHP_WIN32
 #include <sys/time.h>
 #include <unistd.h>
+#include <pthread.h>
 #else
 #include "win32/time.h"
 #include <process.h>
@@ -942,6 +943,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	XG(error_reporting_override) = 0;
 	XG(error_reporting_overridden) = 0;
 	XG(output_is_tty) = OUTPUT_NOT_CHECKED;
+
+#ifndef _WIN32
+    pthread_atfork(NULL, NULL, xdebug_prepare_fork);
+#endif
 
 	return SUCCESS;
 }

@@ -247,6 +247,12 @@ typedef struct
 
 xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list);
 
+pid_t xdebug_get_pid(void);
+
+#ifndef _WIN32
+void xdebug_prepare_fork(void);
+#endif
+
 #endif
 
 

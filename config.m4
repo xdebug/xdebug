@@ -31,6 +31,8 @@ if test "$PHP_XDEBUG" != "no"; then
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])
 
+  PHP_CHECK_LIBRARY(pthread, pthread_atfork, [ PHP_ADD_LIBRARY(pthread,, XDEBUG_SHARED_LIBADD) ])
+
   CPPFLAGS=$old_CPPFLAGS
 
   if test "$PHP_XDEBUG_DEV" = "yes"; then
