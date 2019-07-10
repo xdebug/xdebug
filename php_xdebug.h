@@ -263,7 +263,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 
 	/* remote debugging globals */
 	zend_bool     remote_connection_enabled;
-	pid_t         remote_connection_pid;
+	zend_ulong    remote_connection_pid;
 	zend_bool     breakpoints_allowed;
 	xdebug_con    context;
 	unsigned int  breakpoint_count;

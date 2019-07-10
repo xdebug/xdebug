@@ -36,6 +36,8 @@ unsigned char *xdebug_base64_decode(unsigned char *data, size_t data_len, size_t
 zend_string *xdebug_addslashes(zend_string *str);
 void xdebug_stripcslashes(char *string, int *new_len);
 
+zend_ulong xdebug_get_pid(void);
+
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC);
 int xdebug_get_constant(xdebug_str *val, zval *const_val TSRMLS_DC);
 void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC);

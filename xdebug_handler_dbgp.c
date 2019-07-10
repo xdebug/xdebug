@@ -261,10 +261,10 @@ static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_dbgp_log(int log_level, const char *fmt, ...)
 {
 	if (XG(remote_log_file) && XG(remote_log_level) >= log_level) {
-		va_list argv;
-		long    pid = getpid();
+		va_list    argv;
+		zend_ulong pid = xdebug_get_pid();
 
-		fprintf(XG(remote_log_file), "[%ld] %s", pid, xdebug_log_prefix[log_level]);
+		fprintf(XG(remote_log_file), "[" ZEND_ULONG_FMT "] %s", pid, xdebug_log_prefix[log_level]);
 		va_start(argv, fmt);
 		vfprintf(XG(remote_log_file), fmt, argv);
 		va_end(argv);
@@ -522,7 +522,7 @@ static int breakpoint_admin_add(xdebug_con *context, int type, char *key)
 	TSRMLS_FETCH();
 
 	XG(breakpoint_count)++;
-	admin->id   = ((getpid() & 0x1ffff) * 10000) + XG(breakpoint_count);
+	admin->id   = ((xdebug_get_pid() & 0x1ffff) * 10000) + XG(breakpoint_count);
 	admin->type = type;
 	admin->key  = xdstrdup(key);
 
@@ -2344,7 +2344,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
 	xdebug_xml_add_attribute_ex(response, "xdebug:language_version", PHP_VERSION, 0, 0);
 	xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);
-	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf("%d", getpid()), 0, 1);
+	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf(ZEND_ULONG_FMT, xdebug_get_pid()), 0, 1);
 
 	if (getenv("DBGP_COOKIE")) {
 		xdebug_xml_add_attribute_ex(response, "session", xdstrdup(getenv("DBGP_COOKIE")), 0, 1);

@@ -355,6 +355,19 @@ void xdebug_stripcslashes(char *str, int *len)
 	*len = nlen;
 }
 
+zend_ulong xdebug_get_pid(void)
+{
+#ifndef ZTS
+	return (zend_ulong) getpid();
+#else
+# ifdef _WIN32
+	return (zend_ulong) GetCurrentThreadId();
+# else
+	return (zend_ulong) pthread_self();
+# endif
+#endif
+}
+
 zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC)
 {
 	zend_class_entry *tmp_ce;
