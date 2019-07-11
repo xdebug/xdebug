@@ -86,11 +86,14 @@ FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, c
 
 char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS_DC)
 {
+	if (XG(trace_context)) {
+		return NULL;
+	}
+
 	XG(trace_handler) = xdebug_select_trace_handler(options TSRMLS_CC);
 	XG(trace_context) = (void*) XG(trace_handler)->init(fname, script_filename, options TSRMLS_CC);
 
 	if (XG(trace_context)) {
-		XG(do_trace) = 1;
 		XG(trace_handler)->write_header(XG(trace_context) TSRMLS_CC);
 		return xdstrdup(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC));
 	}
@@ -100,7 +103,6 @@ char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS
 
 void xdebug_stop_trace(TSRMLS_D)
 {
-	XG(do_trace) = 0;
 	if (XG(trace_context)) {
 		XG(trace_handler)->write_footer(XG(trace_context) TSRMLS_CC);
 		XG(trace_handler)->deinit(XG(trace_context) TSRMLS_CC);
@@ -115,7 +117,7 @@ PHP_FUNCTION(xdebug_start_trace)
 	char *trace_fname;
 	zend_long options = XG(trace_options);
 
-	if (XG(do_trace) == 0) {
+	if (!XG(trace_context)) {
 		function_stack_entry *fse;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
@@ -125,7 +127,6 @@ PHP_FUNCTION(xdebug_start_trace)
 		fse = xdebug_get_stack_frame(0 TSRMLS_CC);
 
 		if ((trace_fname = xdebug_start_trace(fname, fse->filename, options TSRMLS_CC)) != NULL) {
-			XG(do_trace) = 1;
 			RETVAL_STRING(trace_fname);
 			xdfree(trace_fname);
 			return;
@@ -133,7 +134,6 @@ PHP_FUNCTION(xdebug_start_trace)
 			php_error(E_NOTICE, "Trace could not be started");
 		}
 
-		XG(do_trace) = 0;
 		RETURN_FALSE;
 	} else {
 		php_error(E_NOTICE, "Function trace already started");
@@ -143,7 +143,7 @@ PHP_FUNCTION(xdebug_start_trace)
 
 PHP_FUNCTION(xdebug_stop_trace)
 {
-	if (XG(do_trace) == 1) {
+	if (XG(trace_context)) {
 		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC));
 		xdebug_stop_trace(TSRMLS_C);
 	} else {
@@ -154,7 +154,7 @@ PHP_FUNCTION(xdebug_stop_trace)
 
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
-	if (XG(do_trace) == 1 && XG(trace_handler) && XG(trace_handler)->get_filename) {
+	if (XG(trace_context) && XG(trace_handler) && XG(trace_handler)->get_filename) {
 		RETVAL_STRING(XG(trace_handler)->get_filename(XG(trace_context) TSRMLS_CC));
 	} else {
 		RETURN_FALSE;
