@@ -40,7 +40,7 @@ script:
   - export TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=$PWD/modules/xdebug.so"
   - export REPORT_EXIT_STATUS=1
   - $TEST_PHP_EXECUTABLE $TEST_PHP_ARGS -v
-  - $TEST_PHP_EXECUTABLE -n run-tests.php -q -x --show-diff
+  - $TEST_PHP_EXECUTABLE -n run-xdebug-tests.php -q -x --show-diff
 
 after_script:
   - ./.travis.scripts/show-errors.sh
