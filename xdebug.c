@@ -871,6 +871,12 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign, ZEND_ASSIGN);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(qm_assign, ZEND_QM_ASSIGN);
+#if PHP_VERSION_ID >= 70400
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_op, ZEND_ASSIGN_OP);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_dim_op, ZEND_ASSIGN_DIM_OP);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_obj_op, ZEND_ASSIGN_OBJ_OP);
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_static_prop_op, ZEND_ASSIGN_STATIC_PROP_OP);
+#else
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_add, ZEND_ASSIGN_ADD);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_sub, ZEND_ASSIGN_SUB);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_mul, ZEND_ASSIGN_MUL);
@@ -883,6 +889,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_or, ZEND_ASSIGN_BW_OR);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_and, ZEND_ASSIGN_BW_AND);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor, ZEND_ASSIGN_BW_XOR);
+#endif
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_dim, ZEND_ASSIGN_DIM);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_obj, ZEND_ASSIGN_OBJ);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_ref, ZEND_ASSIGN_REF);
@@ -1052,18 +1059,25 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 		/* Override opcodes for variable assignments in traces */
 		zend_set_user_opcode_handler(ZEND_INCLUDE_OR_EVAL, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN, NULL);
+#if PHP_VERSION_ID >= 70400
+		zend_set_user_opcode_handler(ZEND_ASSIGN_OP, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_DIM_OP, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_OBJ_OP, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_STATIC_PROP_OP, NULL);
+#else
 		zend_set_user_opcode_handler(ZEND_ASSIGN_ADD, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_SUB, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_MUL, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_DIV, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_MOD, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_POW, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_SL, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_SR, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_CONCAT, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_OR, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_AND, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_XOR, NULL);
+		zend_set_user_opcode_handler(ZEND_ASSIGN_POW, NULL);
+#endif
 		zend_set_user_opcode_handler(ZEND_ASSIGN_DIM, NULL);
 		zend_set_user_opcode_handler(ZEND_ASSIGN_OBJ, NULL);
 		zend_set_user_opcode_handler(ZEND_PRE_INC, NULL);
