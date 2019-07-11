@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #265: Xdebug's error handler breaks error_get_last()
+Test for bug #265: Xdebug's error handler breaks error_get_last() (< PHP 7.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/utils.inc';
+check_reqs('PHP < 7.4');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.dump_globals=0
