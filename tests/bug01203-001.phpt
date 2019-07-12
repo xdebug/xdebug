@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1203: Accessing static property of a class that has no static properties crashes while remote debugging
+Test for bug #1203: Accessing static property of a class that has no static properties crashes while remote debugging [1]
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';

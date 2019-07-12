@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1202: Anonymous classes are not handled properly while remote debugging
+Test for bug #1202: Anonymous classes are not handled properly while remote debugging [1]
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';

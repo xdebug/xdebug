@@ -2368,8 +2368,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	options->max_data     = 1024;
 	options->max_depth    = 1;
 	options->show_hidden  = 0;
-	options->extended_properties = 0;
-	options->force_extended      = 0;
+	options->extended_properties         = 0;
+	options->encode_as_extended_property = 0;
 	options->runtime = (xdebug_var_runtime_page*) xdmalloc((options->max_depth + 1) * sizeof(xdebug_var_runtime_page));
 	for (i = 0; i < options->max_depth; i++) {
 		options->runtime[i].page = 0;
