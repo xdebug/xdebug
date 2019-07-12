@@ -53,7 +53,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="7" context="0"><property name="$name" fullname="$name" type="string" size="16" encoding="base64"><![CDATA[d2l0aF8AX251bGxfY2hhcg==]]></property><property name="$obj" fullname="$obj" type="object" classname="stdClass" children="1" numchildren="1" page="0" pagesize="32"><property facet="public" type="int"><name encoding="base64"><![CDATA[d2l0aF8AX251bGxfY2hhcg==]]></name><fullname encoding="base64"><![CDATA[JG9iai0+d2l0aF8AX251bGxfY2hhcg==]]></fullname><value encoding="base64"><![CDATA[NDI=]]></value></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="7" context="0"><property type="string" size="16"><name encoding="base64"><![CDATA[JG5hbWU=]]></name><fullname encoding="base64"><![CDATA[JG5hbWU=]]></fullname><value encoding="base64"><![CDATA[d2l0aF8AX251bGxfY2hhcg==]]></value></property><property name="$obj" fullname="$obj" type="object" classname="stdClass" children="1" numchildren="1" page="0" pagesize="32"><property facet="public" type="int"><name encoding="base64"><![CDATA[d2l0aF8AX251bGxfY2hhcg==]]></name><fullname encoding="base64"><![CDATA[JG9iai0+d2l0aF8AX251bGxfY2hhcg==]]></fullname><value encoding="base64"><![CDATA[NDI=]]></value></property></property></response>
 
 -> property_get -i 8 -d 0 -c 0 -n $obj
 <?xml version="1.0" encoding="iso-8859-1"?>
