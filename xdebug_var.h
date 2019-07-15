@@ -40,8 +40,8 @@ typedef struct xdebug_var_export_options {
 	int max_data;
 	int max_depth;
 	int show_hidden;
-	int extended_properties;
-	int force_extended;
+	int extended_properties;         /* Whether the feature is enabled */
+	int encode_as_extended_property; /* Whether the current node's elements need to be encoded */
 	int show_location;
 	xdebug_var_runtime_page *runtime;
 	int no_decoration;
