@@ -2412,7 +2412,7 @@ function settings2params(&$ini_settings)
 				$settings .= " -d \"$name=$val\"";
 			}
 		} else {
-			if (substr(PHP_OS, 0, 3) == "WIN" && !empty($value) && $value{0} == '"') {
+			if (substr(PHP_OS, 0, 3) == "WIN" && !empty($value) && is_string($value) && $value{0} == '"') {
 				$len = strlen($value);
 
 				if ($value{$len - 1} == '"') {
