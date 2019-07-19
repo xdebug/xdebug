@@ -379,9 +379,9 @@ int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC)
 	if (zend_hash_num_elements(&XG(aggr_calls)) == 0) return SUCCESS;
 
 	if (prefix) {
-		filename = xdebug_sprintf("%s/cachegrind.out.aggregate.%s.%ld", XG(profiler_output_dir), prefix, getpid());
+		filename = xdebug_sprintf("%s/cachegrind.out.aggregate.%s." ZEND_ULONG_FMT, XG(profiler_output_dir), prefix, (zend_ulong) xdebug_get_pid());
 	} else {
-		filename = xdebug_sprintf("%s/cachegrind.out.aggregate.%ld", XG(profiler_output_dir), getpid());
+		filename = xdebug_sprintf("%s/cachegrind.out.aggregate." ZEND_ULONG_FMT, XG(profiler_output_dir), (zend_ulong) xdebug_get_pid());
 	}
 
 	fprintf(stderr, "opening %s\n", filename);

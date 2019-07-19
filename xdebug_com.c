@@ -347,7 +347,7 @@ int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
 /* Log related functions */
 static void xdebug_open_log(void)
 {
-	long pid = getpid();
+	zend_ulong pid = xdebug_get_pid();
 
 	/* initialize remote log file */
 	XG(remote_log_file) = NULL;
@@ -356,7 +356,7 @@ static void xdebug_open_log(void)
 	}
 	if (XG(remote_log_file)) {
 		char *timestr = xdebug_get_time();
-		fprintf(XG(remote_log_file), "[%ld] Log opened at %s\n", pid, timestr);
+		fprintf(XG(remote_log_file), "[" ZEND_ULONG_FMT "] Log opened at %s\n", pid, timestr);
 		fflush(XG(remote_log_file));
 		xdfree(timestr);
 	} else if (strlen(XG(remote_log))) {
@@ -368,10 +368,10 @@ static void xdebug_close_log()
 {
 
 	if (XG(remote_log_file)) {
-		long pid = getpid();
+		zend_ulong pid = xdebug_get_pid();
 		char *timestr = xdebug_get_time();
 
-		fprintf(XG(remote_log_file), "[%ld] Log closed at %s\n\n", pid, timestr);
+		fprintf(XG(remote_log_file), "[" ZEND_ULONG_FMT "] Log closed at %s\n\n", pid, timestr);
 		fflush(XG(remote_log_file));
 		xdfree(timestr);
 		fclose(XG(remote_log_file));
@@ -496,19 +496,19 @@ int xdebug_is_debug_connection_active_for_current_pid()
 {
 	/* Start debugger if previously a connection was established and this
 	 * process no longer has the same PID */
-	if ((xdebug_is_debug_connection_active() && (XG(remote_connection_pid) != getpid()))) {
+	if ((xdebug_is_debug_connection_active() && (XG(remote_connection_pid) != xdebug_get_pid()))) {
 		xdebug_restart_debugger();
 	}
 
 	return (
-		XG(remote_connection_enabled) && (XG(remote_connection_pid) == getpid())
+		XG(remote_connection_enabled) && (XG(remote_connection_pid) == xdebug_get_pid())
 	);
 }
 
 void xdebug_mark_debug_connection_active()
 {
 	XG(remote_connection_enabled) = 1;
-	XG(remote_connection_pid) = getpid();
+	XG(remote_connection_pid) = xdebug_get_pid();
 }
 
 void xdebug_mark_debug_connection_pending()

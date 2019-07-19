@@ -561,7 +561,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 					break;
 
 				case 'p': /* pid */
-					xdebug_str_add(&fname, xdebug_sprintf("%ld", getpid()), 1);
+					xdebug_str_add(&fname, xdebug_sprintf(ZEND_ULONG_FMT, xdebug_get_pid()), 1);
 					break;
 
 				case 'r': /* random number */
