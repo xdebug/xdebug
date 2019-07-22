@@ -494,14 +494,23 @@ int xdebug_is_debug_connection_active()
 
 int xdebug_is_debug_connection_active_for_current_pid()
 {
+	zend_ulong pid;
+
+	/* Early return to save some getpid() calls */
+	if (!xdebug_is_debug_connection_active()) {
+		return 0;
+	}
+
+	pid = xdebug_get_pid();
+
 	/* Start debugger if previously a connection was established and this
 	 * process no longer has the same PID */
-	if ((xdebug_is_debug_connection_active() && (XG(remote_connection_pid) != xdebug_get_pid()))) {
+	if (XG(remote_connection_pid) != pid) {
 		xdebug_restart_debugger();
 	}
 
 	return (
-		XG(remote_connection_enabled) && (XG(remote_connection_pid) == xdebug_get_pid())
+		XG(remote_connection_enabled) && (XG(remote_connection_pid) == pid)
 	);
 }
 
