@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-06-28</date>
- <time>16:30:00</time>
+ <date>2019-07-25</date>
+ <time>15:20:11</time>
  <version>
-  <release>2.8.0alpha1</release>
-  <api>2.8.0alpha1</api>
+  <release>2.8.0beta1</release>
+  <api>2.8.0beta1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,24 +45,19 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, May 28, 2019 - xdebug 2.8.0alpha1
-
-+ Added features:
-
-  - Implemented issue #1599: Add support for PHP 7.4
-
-+ Improvements:
-
-  - Implemented issue #1388: Support 'resolved' flag for breakpoints
-  - Implemented issue #1664: Run breakpoint resolver when after a new breakpoint is added as well
+Thu, Jul 25, 2019 - xdebug 2.8.0beta1
 
 = Fixed bugs:
 
-  - Fixed issue #1660: Return breakpoints for methods don't break immediately
-
-- Removed features:
-
-  - Fixed issue #1666: Remove xdebug.extended_info setting
+  - Fixed issue #1679: Code Coverage misses static property as function
+    argument
+  - Fixed issue #1682: Invalid NULL byte in debugger XML with anonymous classes
+  - Fixed issue #1683: Xdebug does not compile due to changes to ASSIGN_ADD and
+    friends operations in PHP 7.4alpha3
+  - Fixed issue #1687: Use appropriate process ID for logging and "right
+    process" tracking
+  - Fixed issue #1688: Improve performance by using getpid() only when step
+    debugger is active
  </notes>
 
  <contents>
@@ -161,6 +156,40 @@ Fri, May 28, 2019 - xdebug 2.8.0alpha1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-06-28</date>
+   <time>16:30:00</time>
+   <version>
+    <release>2.8.0alpha1</release>
+    <api>2.8.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, May 28, 2019 - xdebug 2.8.0alpha1
+
++ Added features:
+
+  - Implemented issue #1599: Add support for PHP 7.4
+
++ Improvements:
+
+  - Implemented issue #1388: Support 'resolved' flag for breakpoints
+  - Implemented issue #1664: Run breakpoint resolver when after a new breakpoint is added as well
+
+= Fixed bugs:
+
+  - Fixed issue #1660: Return breakpoints for methods don't break immediately
+
+- Removed features:
+
+  - Fixed issue #1666: Remove xdebug.extended_info setting
+   </notes>
+  </release>
 
   <release>
    <date>2019-05-06</date>
