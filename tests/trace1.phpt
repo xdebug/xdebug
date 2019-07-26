@@ -41,7 +41,6 @@ xdebug.trace_format=0
 Version: %d.%s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
-2	3	1	%f	%d
 2	4	0	%f	%d	fibonacci_cache	1		%strace1.php	22
 3	5	0	%f	%d	fibonacci_cache	1		%strace1.php	16
 4	6	0	%f	%d	fibonacci_cache	1		%strace1.php	16

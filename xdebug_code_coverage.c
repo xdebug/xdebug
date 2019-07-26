@@ -482,7 +482,7 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 		}
 	}
-	if (XG(do_trace) && XG(trace_context) && XG(collect_assignments)) {
+	if (XG(trace_context) && XG(collect_assignments)) {
 		char *full_varname;
 
 		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
@@ -583,7 +583,7 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 		}
 
 		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		if (XG(do_trace) && XG(trace_context) && XG(collect_assignments) && XG(trace_handler)->assignment) {
+		if (XG(trace_context) && XG(collect_assignments) && XG(trace_handler)->assignment) {
 			XG(trace_handler)->assignment(XG(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno TSRMLS_CC);
 		}
 		xdfree(full_varname);

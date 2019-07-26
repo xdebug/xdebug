@@ -420,7 +420,6 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->headers              = NULL;
 	xg->stack                = NULL;
 	xg->level                = 0;
-	xg->do_trace             = 0;
 	xg->trace_handler        = NULL;
 	xg->trace_context        = NULL;
 	xg->in_debug_info        = 0;
@@ -1291,7 +1290,6 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	XG(no_exec)       = 0;
 	XG(level)         = 0;
-	XG(do_trace)      = 0;
 	XG(in_debug_info) = 0;
 	XG(coverage_enable) = 0;
 	XG(do_code_coverage) = 0;
@@ -1426,7 +1424,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	XG(filters_tracing) = NULL;
 	XG(filters_code_coverage) = NULL;
 
-	if (XG(do_trace) && XG(trace_context)) {
+	if (XG(trace_context)) {
 		xdebug_stop_trace(TSRMLS_C);
 	}
 
@@ -1459,7 +1457,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 
 	XG(level)            = 0;
-	XG(do_trace)         = 0;
+	XG(trace_context)    = NULL;
 	XG(in_debug_info)    = 0;
 	XG(coverage_enable)  = 0;
 	XG(do_code_coverage) = 0;
@@ -1822,7 +1820,6 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
 	function_stack_entry *fse, *xfse;
-	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
 	xdebug_func           code_coverage_func_info;
@@ -1926,7 +1923,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	function_nr = XG(function_count);
-	if (!fse->filtered_tracing && XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_entry)) {
+	if (!fse->filtered_tracing && XG(trace_context) && (XG(trace_handler)->function_entry)) {
 		XG(trace_handler)->function_entry(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
 
@@ -2010,12 +2007,12 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 
-	if (!fse->filtered_tracing && XG(do_trace) && XG(trace_context) && (XG(trace_handler)->function_exit)) {
+	if (!fse->filtered_tracing && XG(trace_context) && (XG(trace_handler)->function_exit)) {
 		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
 
 	/* Store return value in the trace file */
-	if (!fse->filtered_tracing && XG(collect_return) && do_return && XG(do_trace) && XG(trace_context)) {
+	if (!fse->filtered_tracing && XG(collect_return) && XG(trace_context)) {
 		if (execute_data && execute_data->return_value) {
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 				if (XG(trace_handler)->generator_return_value) {
@@ -2075,9 +2072,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
-	int                   do_return = (XG(do_trace) && XG(trace_context));
 	int                   function_nr = 0;
-
+	int                   function_call_traced = 0;
 	int                   restore_error_handler_situation = 0;
 	void                (*tmp_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
 
@@ -2091,7 +2087,8 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 
 	function_nr = XG(function_count);
 
-	if (!fse->filtered_tracing && XG(do_trace) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && (XG(trace_handler)->function_entry)) {
+	if (!fse->filtered_tracing && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && (XG(trace_handler)->function_entry)) {
+		function_call_traced = 1;
 		XG(trace_handler)->function_entry(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
 
@@ -2130,13 +2127,18 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 		zend_error_cb = tmp_error_cb;
 	}
 
-	if (!fse->filtered_tracing && XG(do_trace) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && (XG(trace_handler)->function_exit)) {
-		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
-	}
+	/* We only call the function_exit handler and return value handler if the
+	 * function call was also traced. Otherwise we end up with return trace
+	 * lines without a corresponding function call line. */
+	if (function_call_traced && !fse->filtered_tracing && XG(trace_context)) {
+		if (fse->function.type != XFUNC_ZEND_PASS && (XG(trace_handler)->function_exit)) {
+			XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
+		}
 
-	/* Store return value in the trace file */
-	if (!fse->filtered_tracing && XG(collect_return) && do_return && XG(do_trace) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && return_value && XG(trace_handler)->return_value) {
-		XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, return_value TSRMLS_CC);
+		/* Store return value in the trace file */
+		if (XG(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG(trace_handler)->return_value) {
+			XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, return_value TSRMLS_CC);
+		}
 	}
 
 	/* Check for return breakpoints */

@@ -40,7 +40,6 @@ HiiH
 Version: %d.%s
 File format: %d
 TRACE START [%s]
-2	3	1	%f	%d
 2	4	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'
 2	4	1	%f	%d
 2	5	0	%f	%d	foo	1		%sbug00355.php	18	0

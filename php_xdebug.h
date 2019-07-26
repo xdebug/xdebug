@@ -175,7 +175,6 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	xdebug_trace_handler_t *trace_handler;
 	void         *trace_context;
 
-	zend_bool     do_trace;
 	zend_bool     auto_trace;
 	zend_bool     trace_enable_trigger;
 	char         *trace_enable_trigger_value;
