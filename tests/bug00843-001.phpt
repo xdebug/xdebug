@@ -30,7 +30,6 @@ unlink($tf);
 Version: %d.%s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
-2	3	1	%d.%d	%d
 2	4	0	%d.%d	%d	setlocale	0		%sbug00843-001.php	4	%d	6	'%s'
 2	4	1	%d.%d	%d
 2	4	R			'%s'

@@ -2073,7 +2073,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
 	int                   function_nr = 0;
-
+	int                   function_call_traced = 0;
 	int                   restore_error_handler_situation = 0;
 	void                (*tmp_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
 
@@ -2088,6 +2088,7 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 	function_nr = XG(function_count);
 
 	if (!fse->filtered_tracing && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && (XG(trace_handler)->function_entry)) {
+		function_call_traced = 1;
 		XG(trace_handler)->function_entry(XG(trace_context), fse, function_nr TSRMLS_CC);
 	}
 
@@ -2126,13 +2127,18 @@ void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *retu
 		zend_error_cb = tmp_error_cb;
 	}
 
-	if (!fse->filtered_tracing && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && (XG(trace_handler)->function_exit)) {
-		XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
-	}
+	/* We only call the function_exit handler and return value handler if the
+	 * function call was also traced. Otherwise we end up with return trace
+	 * lines without a corresponding function call line. */
+	if (function_call_traced && !fse->filtered_tracing && XG(trace_context)) {
+		if (fse->function.type != XFUNC_ZEND_PASS && (XG(trace_handler)->function_exit)) {
+			XG(trace_handler)->function_exit(XG(trace_context), fse, function_nr TSRMLS_CC);
+		}
 
-	/* Store return value in the trace file */
-	if (!fse->filtered_tracing && XG(collect_return) && XG(trace_context) && fse->function.type != XFUNC_ZEND_PASS && XG(trace_context) && return_value && XG(trace_handler)->return_value) {
-		XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, return_value TSRMLS_CC);
+		/* Store return value in the trace file */
+		if (XG(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG(trace_handler)->return_value) {
+			XG(trace_handler)->return_value(XG(trace_context), fse, function_nr, return_value TSRMLS_CC);
+		}
 	}
 
 	/* Check for return breakpoints */

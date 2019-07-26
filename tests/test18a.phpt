@@ -37,7 +37,6 @@ bar
 Version: %d.%s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
-2	3	1	%f	%d
 2	4	0	%f	%d	foo	1		%stest18a.php	14	0
 3	5	0	%f	%d	bar	1		%stest18a.php	11	0
 3	5	1	%f	%d

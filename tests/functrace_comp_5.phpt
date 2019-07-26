@@ -36,7 +36,6 @@ unlink($tf);
 Version: %s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d]
-2	3	1	%f	%d
 2	4	0	%f	%d	foo	1		%sfunctrace_comp_5.php	9	1	aTo0Mjs=
 2	4	1	%f	%d
 2	5	0	%f	%d	foo	1		%sfunctrace_comp_5.php	10	1	czo2OiJzdHJpbmciOw==
