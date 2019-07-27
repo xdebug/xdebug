@@ -5,6 +5,8 @@ Test for bug #1357: Function signature using variadics is reported as being not 
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.4');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 

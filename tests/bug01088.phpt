@@ -5,6 +5,8 @@ Test for bug #1088: Xdebug won't show dead and not executed lines at the 2nd tim
 require __DIR__ . '/utils.inc';
 check_reqs('!opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 class TestMe

@@ -11,6 +11,7 @@ xdebug.auto_trace=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.overload_var_dump=0
+xdebug.coverage_enable=1
 --FILE--
 <?php
 $file = 'bug01509.inc';

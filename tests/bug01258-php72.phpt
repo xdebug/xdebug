@@ -5,6 +5,8 @@ Test for bug #1258: ensure case statements are covered (>= PHP 7.2)
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.2');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 $foo = ['bar', 'baz', 'qux', 'quux'];

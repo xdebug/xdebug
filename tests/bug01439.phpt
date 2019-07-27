@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1439: Code coverage does not cover is_object (in elseif)
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 

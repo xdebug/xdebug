@@ -1313,7 +1313,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	xdebug_filter_run_tracing(tmp);
 
 	/* Count code coverage line for call */
-	if (XG(do_code_coverage)) {
+	if (XG(code_coverage_active)) {
 		if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_branch_check)) {
 			xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
 		}

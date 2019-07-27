@@ -7,6 +7,7 @@ check_reqs('PHP >= 7.0.8; opcache');
 ?>
 --INI--
 opcache.enable_cli=1
+xdebug.coverage_enable=1
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

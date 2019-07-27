@@ -195,9 +195,9 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	int           output_is_tty;
 
 	/* used for code coverage */
-	zend_bool     coverage_enable;
-	zend_bool     do_code_coverage;
-	xdebug_hash  *code_coverage;
+	zend_bool     code_coverage_enable; /* Flag to enable code coverage (and opcode overloading) */
+	zend_bool     code_coverage_active; /* Whether code coverage is currently running */
+	xdebug_hash  *code_coverage_info;   /* Stores code coverage information */
 	zend_bool     code_coverage_unused;
 	zend_bool     code_coverage_dead_code_analysis;
 	zend_bool     code_coverage_branch_check;

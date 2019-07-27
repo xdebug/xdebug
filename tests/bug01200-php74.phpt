@@ -5,6 +5,8 @@ Test for bug #1200: Coverage of sending arguments to a method (>= PHP 7.4)
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.4');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);

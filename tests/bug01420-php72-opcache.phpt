@@ -5,6 +5,8 @@ Test for bug #1420: handle path/branch converage for switch with jump table (>= 
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.2,< 7.3; opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

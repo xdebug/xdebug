@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #670: Xdebug crashes with broken "break x" code
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 xdebug_start_code_coverage( XDEBUG_CC_DEAD_CODE | XDEBUG_CC_UNUSED );
