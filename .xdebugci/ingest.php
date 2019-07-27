@@ -2,14 +2,21 @@
 $m = new \MongoDB\Driver\Manager( "mongodb+srv://ci-writer:{$_ENV['CIWRITEPASSWORD']}@xdebugci-qftmo.mongodb.net/test?retryWrites=true" );
 
 /* Create RUN ID */
-$runId =     (new \DateTimeImmutable())->format( "Y-m-d-H-i-s" );
+$runId =     trim( file_get_contents( '/tmp/ptester/run-id.txt' ) );
 $timeStamp = time();
 $abbrev =    trim( `git describe --tags` );
 
-echo $abbrev, "\n";
+if ( $argc >= 2 )
+{
+	$pattern = $argv[1] . '.xml';
+}
+else
+{
+	$pattern = '*.xml';
+}
 
 /* Read all JUNIT logs */
-foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
+foreach ( glob( '/tmp/ptester/junit/' . $pattern ) as $file )
 {
 	preg_match( '@junit/((.*?)(-32bit)?(-zts)?)\.xml@', $file, $matches );
 
@@ -33,7 +40,7 @@ foreach ( glob( '/tmp/ptester/junit/*.xml' ) as $file )
 		],
 	];
 
-	echo "Running for: _id' => {$runId}@{$config}\n";
+	echo "           Ingesting for {$config}\n";
 
 	if ( isset( $xml['buildFailed'] ) )
 	{
