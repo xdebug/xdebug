@@ -5,6 +5,8 @@ Test for bug #1034: path coverage [4] (>= PHP 7.4, !opcache)
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.4; !opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

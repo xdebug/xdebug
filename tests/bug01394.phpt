@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1394: Code coverage does not cover instanceof (in elseif)
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 

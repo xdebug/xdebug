@@ -5,6 +5,8 @@ Test for bug #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for bra
 require __DIR__ . '/utils.inc';
 check_reqs('PHP > 7.0.12,< 7.4; !opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);

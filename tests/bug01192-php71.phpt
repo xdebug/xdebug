@@ -5,6 +5,8 @@ Test for bug #1092: Dead code analysis does not work for generators with 'return
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.1');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 function gen(&$output, $branch = false)

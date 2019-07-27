@@ -12,6 +12,7 @@ xdebug.show_mem_delta=0
 xdebug.profiler_enable=0
 xdebug.trace_format=0
 xdebug.overload_var_dump=0
+xdebug.coverage_enable=1
 --FILE--
 <?php
 // Run me from the PHP CLI

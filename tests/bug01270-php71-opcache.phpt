@@ -5,6 +5,8 @@ Test for bug #1270: String parsing marked not covered (>= PHP 7.1.0, <= PHP 7.1.
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.1.0,<= 7.1.3; opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );

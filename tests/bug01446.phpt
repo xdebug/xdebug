@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1446: Code Coverage misses elseif if it uses an isset with a property
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );

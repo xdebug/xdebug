@@ -7,6 +7,7 @@ check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.overload_var_dump=0
+xdebug.coverage_enable=1
 --FILE--
 <?php
 

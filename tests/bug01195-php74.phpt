@@ -5,6 +5,8 @@ Test for bug #1195: Segfault with code coverage and foreach (>= PHP 7.4, !opcach
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.4; !opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

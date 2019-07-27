@@ -5,6 +5,8 @@ Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (PHP >= 7.2, 
 require __DIR__ . '/utils.inc';
 check_reqs('PHP >= 7.2; !opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

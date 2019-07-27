@@ -106,7 +106,7 @@ int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
 		const zend_op *cur_opcode;
 		cur_opcode = execute_data->opline;
 
@@ -126,7 +126,7 @@ int xdebug_common_override_handler(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
 		const zend_op *cur_opcode;
 		int      lineno;
 		char    *file;
@@ -475,7 +475,7 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 //		return ZEND_USER_OPCODE_DISPATCH;
 //	}
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
 		xdebug_print_opcode_info('=', execute_data, cur_opcode TSRMLS_CC);
 
 		if (do_cc) {
@@ -657,11 +657,11 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 		file = XG(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
-		if (!xdebug_hash_find(XG(code_coverage), filename, strlen(filename), (void *) &file)) {
+		if (!xdebug_hash_find(XG(code_coverage_info), filename, strlen(filename), (void *) &file)) {
 			/* The file does not exist, so we add it to the hash */
 			file = xdebug_coverage_file_ctor(filename);
 
-			xdebug_hash_add(XG(code_coverage), filename, strlen(filename), file);
+			xdebug_hash_add(XG(code_coverage_info), filename, strlen(filename), file);
 		}
 		XG(previous_filename) = file->name;
 		XG(previous_file) = file;
@@ -1139,11 +1139,11 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
 	XG(code_coverage_branch_check) = (options & XDEBUG_CC_OPTION_BRANCH_CHECK);
 
-	if (!XG(code_coverage)) {
+	if (!XG(code_coverage_enable)) {
 		php_error(E_WARNING, "Code coverage needs to be enabled in php.ini by setting 'xdebug.coverage_enable' to '1'.");
 		RETURN_FALSE;
 	} else {
-		XG(do_code_coverage) = 1;
+		XG(code_coverage_active) = 1;
 		RETURN_TRUE;
 	}
 }
@@ -1155,19 +1155,19 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cleanup) == FAILURE) {
 		return;
 	}
-	if (XG(do_code_coverage)) {
+	if (XG(code_coverage_active)) {
 		if (cleanup) {
 			XG(previous_filename) = NULL;
 			XG(previous_file) = NULL;
 			XG(previous_mark_filename) = NULL;
 			XG(previous_mark_file) = NULL;
-			xdebug_hash_destroy(XG(code_coverage));
-			XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+			xdebug_hash_destroy(XG(code_coverage_info));
+			XG(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 			XG(dead_code_last_start_id)++;
 			xdebug_path_info_dtor(XG(paths_stack));
 			XG(paths_stack) = xdebug_path_info_ctor();
 		}
-		XG(do_code_coverage) = 0;
+		XG(code_coverage_active) = 0;
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -1349,8 +1349,8 @@ static void add_file(void *ret, xdebug_hash_element *e)
 PHP_FUNCTION(xdebug_get_code_coverage)
 {
 	array_init(return_value);
-	if (XG(code_coverage)) {
-		xdebug_hash_apply(XG(code_coverage), (void *) return_value, add_file);
+	if (XG(code_coverage_info)) {
+		xdebug_hash_apply(XG(code_coverage_info), (void *) return_value, add_file);
 	}
 }
 
@@ -1361,5 +1361,5 @@ PHP_FUNCTION(xdebug_get_function_count)
 
 PHP_FUNCTION(xdebug_code_coverage_started)
 {
-	RETURN_BOOL(XG(do_code_coverage));
+	RETURN_BOOL(XG(code_coverage_active));
 }

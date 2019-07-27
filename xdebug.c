@@ -343,7 +343,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, trace_output_name, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   trace_options,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.coverage_enable", "1",                  PHP_INI_SYSTEM, OnUpdateBool,   coverage_enable,   zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.coverage_enable", "1",                  PHP_INI_SYSTEM, OnUpdateBool,   code_coverage_enable, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.collect_params",  "0",                    PHP_INI_ALL,    OnUpdateLong,   collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   collect_return,    zend_xdebug_globals, xdebug_globals)
@@ -423,7 +423,6 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->trace_handler        = NULL;
 	xg->trace_context        = NULL;
 	xg->in_debug_info        = 0;
-	xg->coverage_enable      = 0;
 	xg->previous_filename    = NULL;
 	xg->previous_file        = NULL;
 	xg->previous_mark_filename = NULL;
@@ -431,7 +430,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xg->paths_stack = NULL;
 	xg->branches.size        = 0;
 	xg->branches.last_branch_nr = NULL;
-	xg->do_code_coverage     = 0;
+	xg->code_coverage_active = 0;
 	xg->breakpoint_count     = 0;
 	xg->error_reporting_override   = 0;
 	xg->error_reporting_overridden = 0;
@@ -633,7 +632,7 @@ void xdebug_env_config(TSRMLS_D)
 #if PHP_VERSION_ID >= 70200
 static int xdebug_switch_handler(zend_execute_data *execute_data)
 {
-	if (XG(do_code_coverage)) {
+	if (XG(code_coverage_active)) {
 		execute_data->opline++;
 		return ZEND_USER_OPCODE_CONTINUE;
 	}
@@ -646,7 +645,7 @@ static int xdebug_silence_handler(zend_execute_data *execute_data)
 	zend_op_array *op_array = &execute_data->func->op_array;
 	const zend_op *cur_opcode = EG(current_execute_data)->opline;
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
 		xdebug_print_opcode_info('S', execute_data, cur_opcode TSRMLS_CC);
 	}
 	if (XG(do_scream)) {
@@ -666,7 +665,7 @@ static int xdebug_include_or_eval_handler(zend_execute_data *execute_data)
 	zend_op_array *op_array = &execute_data->func->op_array;
 	const zend_op *opline = execute_data->opline;
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
 		const zend_op *cur_opcode = EG(current_execute_data)->opline;
 		xdebug_print_opcode_info('I', execute_data, cur_opcode TSRMLS_CC);
 	}
@@ -788,7 +787,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(exit, ZEND_EXIT);
 
 	/* Overload opcodes for code coverage */
-	if (XG(coverage_enable)) {
+	if (XG(code_coverage_enable)) {
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMP);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMPZ);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMPZ_EX);
@@ -917,7 +916,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	/* Override all the other opcodes so that we can mark when we hit a branch
 	 * start one */
-	if (XG(coverage_enable)) {
+	if (XG(code_coverage_enable)) {
 		int i;
 
 		for (i = 0; i < 256; i++) {
@@ -982,7 +981,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 
 #ifndef ZTS
 		/* Overload opcodes for code coverage */
-		if (XG(coverage_enable)) {
+		if (XG(code_coverage_enable)) {
 #endif
 			zend_set_user_opcode_handler(ZEND_JMP, NULL);
 			zend_set_user_opcode_handler(ZEND_JMPZ, NULL);
@@ -1291,9 +1290,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(no_exec)       = 0;
 	XG(level)         = 0;
 	XG(in_debug_info) = 0;
-	XG(coverage_enable) = 0;
-	XG(do_code_coverage) = 0;
-	XG(code_coverage) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+	XG(code_coverage_active) = 0;
+	XG(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
 	XG(stack)         = xdebug_llist_alloc(function_stack_entry_dtor);
 	XG(trace_handler) = NULL;
 	XG(trace_context) = NULL;
@@ -1459,11 +1457,10 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	XG(level)            = 0;
 	XG(trace_context)    = NULL;
 	XG(in_debug_info)    = 0;
-	XG(coverage_enable)  = 0;
-	XG(do_code_coverage) = 0;
+	XG(code_coverage_active) = 0;
 
-	xdebug_hash_destroy(XG(code_coverage));
-	XG(code_coverage) = NULL;
+	xdebug_hash_destroy(XG(code_coverage_info));
+	XG(code_coverage_info) = NULL;
 
 	xdebug_hash_destroy(XG(visited_branches));
 	XG(visited_branches) = NULL;
@@ -1957,7 +1954,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		}
 	}
 
-	if (!fse->filtered_code_coverage && XG(do_code_coverage) && XG(code_coverage_unused)) {
+	if (!fse->filtered_code_coverage && XG(code_coverage_active) && XG(code_coverage_unused)) {
 		code_coverage_file_name = xdstrdup(STR_NAME_VAL(op_array->filename));
 		xdebug_build_fname_from_oparray(&code_coverage_func_info, op_array TSRMLS_CC);
 		code_coverage_function_name = xdebug_func_format(&code_coverage_func_info TSRMLS_CC);
@@ -2000,7 +1997,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	/* Check which path has been used */
-	if (!fse->filtered_code_coverage && XG(do_code_coverage) && XG(code_coverage_unused) && code_coverage_init) {
+	if (!fse->filtered_code_coverage && XG(code_coverage_active) && XG(code_coverage_unused) && code_coverage_init) {
 		xdebug_code_coverage_end_of_function(op_array, code_coverage_file_name, code_coverage_function_name TSRMLS_CC);
 		xdfree(code_coverage_function_name);
 		xdfree(code_coverage_file_name);
@@ -2173,7 +2170,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		if (XG(do_code_coverage) && XG(code_coverage_unused) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
+		if (XG(code_coverage_active) && XG(code_coverage_unused) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
 			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
 		}
 	}
@@ -2616,7 +2613,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	file = (char*) STR_NAME_VAL(op_array->filename);
 	file_len = STR_NAME_LEN(op_array->filename);
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(do_code_coverage)) {
+	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
 		xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 	}
 
