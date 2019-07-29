@@ -4,8 +4,12 @@ Test for bug #631: Summary not written when script ended with "exit()"
 xdebug.profiler_enable=1
 --FILE--
 <?php
+$filename = xdebug_get_profiler_filename();
+
 function capture() {
-	echo file_get_contents(xdebug_get_profiler_filename());
+	global $filename;
+	echo file_get_contents($filename);
+	unlink($filename);
 }
 
 register_shutdown_function('capture');
@@ -22,18 +26,19 @@ positions: line
 events: Time Memory
 
 fl=(1) php:internal
-fn=(1) php::register_shutdown_function
+fn=(1) php::xdebug_get_profiler_filename
+%d %d %d
+
+fl=(1)
+fn=(2) php::register_shutdown_function
 %d %d %i
 
 fl=(1)
-fn=(2) php::strrev
+fn=(3) php::strrev
 %d %d %i
 
 fl=(2) %sbug00631.php
-fn=(3) {main}
-
-summary: %d %i
-
+fn=(4) {main}
 %d %d %i
 cfl=(1)
 cfn=(1)
@@ -43,3 +48,9 @@ cfl=(1)
 cfn=(2)
 calls=1 0 0
 %d %d %i
+cfl=(1)
+cfn=(3)
+calls=1 0 0
+%d %d %i
+
+summary: %d %i

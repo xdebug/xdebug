@@ -1297,8 +1297,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(trace_context) = NULL;
 	XG(profile_file)  = NULL;
 	XG(profile_filename) = NULL;
-	XG(profile_filename_refs) = xdebug_hash_alloc(128, NULL);
-	XG(profile_functionname_refs) = xdebug_hash_alloc(128, NULL);
+	XG(profile_filename_refs) = NULL;
+	XG(profile_functionname_refs) = NULL;
 	XG(profile_last_filename_ref) = 0;
 	XG(profile_last_functionname_ref) = 0;
 	XG(prev_memory)   = 0;
@@ -1413,6 +1413,11 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		xdfree(XG(context).program_name);
 	}
 
+	/* profiler */
+	if (XG(profiler_enabled)) {
+		xdebug_profiler_deinit();
+	}
+
 	xdebug_llist_destroy(XG(stack), NULL);
 	XG(stack) = NULL;
 
@@ -1425,21 +1430,6 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	if (XG(trace_context)) {
 		xdebug_stop_trace(TSRMLS_C);
 	}
-
-	if (XG(profile_file)) {
-		fclose(XG(profile_file));
-		XG(profile_file) = NULL;
-	}
-
-	if (XG(profile_filename)) {
-		xdfree(XG(profile_filename));
-	}
-
-	XG(profiler_enabled) = 0;
-	xdebug_hash_destroy(XG(profile_filename_refs));
-	xdebug_hash_destroy(XG(profile_functionname_refs));
-	XG(profile_filename_refs) = NULL;
-	XG(profile_functionname_refs) = NULL;
 
 	if (XG(gc_stats_enabled)) {
 		xdebug_gc_stats_stop();
@@ -1873,18 +1863,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 				!XG(profiler_enabled) &&
 				(XG(profiler_enable) || xdebug_trigger_enabled(XG(profiler_enable_trigger), "XDEBUG_PROFILE", XG(profiler_enable_trigger_value) TSRMLS_CC))
 			) {
-				if (xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename) TSRMLS_CC) == SUCCESS) {
-					if (!SG(headers_sent)) {
-						sapi_header_line ctr = {0};
-
-						ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG(profile_filename));
-						ctr.line_len = strlen(ctr.line);
-						sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-						xdfree(ctr.line);
-					}
-
-					XG(profiler_enabled) = 1;
-				}
+				xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename));
 			}
 
 			/* Start auto-tracer if requested, and we're in main script */

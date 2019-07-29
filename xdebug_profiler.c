@@ -56,16 +56,33 @@ void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 	xdfree(ce);
 }
 
-int xdebug_profiler_init(char *script_name TSRMLS_DC)
+static void profiler_write_header(FILE *file, char *script_name)
+{
+	if (XG(profiler_append)) {
+		fprintf(file, "\n==== NEW PROFILING FILE ==============================================\n");
+	}
+	fprintf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
+	fprintf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
+	fprintf(file, "events: Time Memory\n\n");
+	fflush(file);
+}
+
+void xdebug_profiler_init(char *script_name)
 {
 	char *filename = NULL, *fname = NULL;
+
+	if (XG(profiler_enabled)) {
+		return;
+	}
 
 	if (!strlen(XG(profiler_output_name)) ||
 		xdebug_format_output_filename(&fname, XG(profiler_output_name), script_name) <= 0
 	) {
 		/* Invalid or empty xdebug.profiler_output_name */
-		return FAILURE;
+		return;
 	}
+
+	/* Add a slash if none is present in the profiler_output_dir setting */
 	if (IS_SLASH(XG(profiler_output_dir)[strlen(XG(profiler_output_dir)) - 1])) {
 		filename = xdebug_sprintf("%s%s", XG(profiler_output_dir), fname);
 	} else {
@@ -81,19 +98,31 @@ int xdebug_profiler_init(char *script_name TSRMLS_DC)
 	xdfree(filename);
 
 	if (!XG(profile_file)) {
-		return FAILURE;
+		return;
 	}
-	if (XG(profiler_append)) {
-		fprintf(XG(profile_file), "\n==== NEW PROFILING FILE ==============================================\n");
+
+	profiler_write_header(XG(profile_file), script_name);
+
+	if (!SG(headers_sent)) {
+		sapi_header_line ctr = {0};
+
+		ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG(profile_filename));
+		ctr.line_len = strlen(ctr.line);
+		sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
+		xdfree(ctr.line);
 	}
-	fprintf(XG(profile_file), "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
-	fprintf(XG(profile_file), "cmd: %s\npart: 1\npositions: line\n\n", script_name);
-	fprintf(XG(profile_file), "events: Time Memory\n\n");
-	fflush(XG(profile_file));
-	return SUCCESS;
+
+	XG(profiler_start_time) = xdebug_get_utime();
+
+	XG(profiler_enabled) = 1;
+	XG(profile_filename_refs) = xdebug_hash_alloc(128, NULL);
+	XG(profile_functionname_refs) = xdebug_hash_alloc(128, NULL);
+	XG(profile_last_filename_ref) = 0;
+	XG(profile_last_functionname_ref) = 0;
+	return;
 }
 
-void xdebug_profiler_deinit(TSRMLS_D)
+void xdebug_profiler_deinit()
 {
 	function_stack_entry *fse;
 	xdebug_llist_element *le;
@@ -102,6 +131,31 @@ void xdebug_profiler_deinit(TSRMLS_D)
 		fse = XDEBUG_LLIST_VALP(le);
 		xdebug_profiler_function_end(fse TSRMLS_CC);
 	}
+		
+	fprintf(
+		XG(profile_file),
+		"summary: %lu %zd\n\n",
+		(unsigned long) ((xdebug_get_utime() - (XG(profiler_start_time))) * 1000000),
+		zend_memory_peak_usage(0)
+	);
+
+	XG(profiler_enabled) = 0;
+
+	fflush(XG(profile_file));
+
+	if (XG(profile_file)) {
+		fclose(XG(profile_file));
+		XG(profile_file) = NULL;
+	}
+
+	if (XG(profile_filename)) {
+		xdfree(XG(profile_filename));
+	}
+
+	xdebug_hash_destroy(XG(profile_filename_refs));
+	xdebug_hash_destroy(XG(profile_functionname_refs));
+	XG(profile_filename_refs) = NULL;
+	XG(profile_functionname_refs) = NULL;
 }
 
 static inline void xdebug_profiler_function_push(function_stack_entry *fse)
@@ -277,11 +331,6 @@ void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC)
 		xdfree(fn_ref);
 	}
 
-	if (fse->function.type == XFUNC_MAIN) {
-		fprintf(XG(profile_file), "\nsummary: %lu %lu\n\n", (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
-		XG(profiler_enabled) = 0;
-	}
-	fflush(XG(profile_file));
 
 	/* update aggregate data */
 	if (XG(profiler_aggregate)) {
