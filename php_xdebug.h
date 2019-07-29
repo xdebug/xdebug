@@ -279,6 +279,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	zend_bool     profiler_append;
 
 	/* profiler globals */
+	double        profiler_start_time;
 	zend_bool     profiler_enabled;
 	FILE         *profile_file;
 	char         *profile_filename;

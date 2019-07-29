@@ -24,8 +24,8 @@
 #include "php_xdebug.h"
 #include "xdebug_private.h"
 
-int xdebug_profiler_init(char *script_name TSRMLS_DC);
-void xdebug_profiler_deinit(TSRMLS_D);
+void xdebug_profiler_init(char *script_name);
+void xdebug_profiler_deinit();
 int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC);
 
 void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
