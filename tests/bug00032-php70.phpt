@@ -37,7 +37,7 @@ foo
 foo
 foo
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %sbug00032-php70.php on line 11
+Recoverable fatal error: Object of class stdClass could not be converted to string in %sbug00032-php70.php on line 11
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00032-php70.php:0

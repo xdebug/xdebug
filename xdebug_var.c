@@ -95,7 +95,7 @@ char* xdebug_error_type_simple(int type)
 			return xdstrdup("fatal-error");
 			break;
 		case E_RECOVERABLE_ERROR:
-			return xdstrdup("catchable-fatal-error");
+			return xdstrdup("recoverable-fatal-error");
 			break;
 		case E_WARNING:
 		case E_CORE_WARNING:
@@ -136,7 +136,7 @@ char* xdebug_error_type(int type)
 			return xdstrdup("Fatal error");
 			break;
 		case E_RECOVERABLE_ERROR:
-			return xdstrdup("Catchable fatal error");
+			return xdstrdup("Recoverable fatal error");
 			break;
 		case E_WARNING:
 		case E_CORE_WARNING:
