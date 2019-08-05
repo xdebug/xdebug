@@ -1,9 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval() (< PHP 7.1, NTS, !opcache)
+Test for xdebug_debug_zval() (< PHP 7.1, NTS, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP < 7.1; NTS; !opcache');
+check_reqs('PHP < 7.1; NTS; opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -45,7 +45,7 @@ $b['b']: (refcount=2, is_ref=1)=5
 b[1]: (refcount=0, is_ref=0)=9
 c: (refcount=2, is_ref=1)=5
 d: (refcount=0, is_ref=0)=6
-e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=1, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
+e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (immutable, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
 e->bar: (refcount=2, is_ref=1)=FALSE
 e->bar['b']: no such symbol
 e->baz[0]: (refcount=0, is_ref=0)=4

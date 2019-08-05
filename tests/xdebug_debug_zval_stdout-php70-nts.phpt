@@ -1,9 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval_stdout() (< PHP 7.1, NTS)
+Test for xdebug_debug_zval_stdout() (< PHP 7.1, NTS, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP < 7.1; NTS');
+check_reqs('PHP < 7.1; NTS; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -37,15 +37,15 @@ function func(){
 func();
 ?>
 --EXPECTF--
-a: (refcount=%r(0|1)%r, is_ref=0)='hoge'
-$a: (refcount=%r(0|1)%r, is_ref=0)='hoge'
+a: (interned, is_ref=0)='hoge'
+$a: (interned, is_ref=0)='hoge'
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
 $b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5
 b[1]: (refcount=0, is_ref=0)=9
 c: (refcount=2, is_ref=1)=5
 d: (refcount=0, is_ref=0)=6
-e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=%r(1|2)%r, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
+e: (refcount=1, is_ref=0)=class stdClass { public $foo = (refcount=2, is_ref=1)=FALSE; public $bar = (refcount=2, is_ref=1)=FALSE; public $baz = (refcount=1, is_ref=0)=array (0 => (refcount=0, is_ref=0)=4, 'b' => (refcount=0, is_ref=0)=42) }
 e->bar: (refcount=2, is_ref=1)=FALSE
 e->bar['b']: no such symbol
 e->baz[0]: (refcount=0, is_ref=0)=4
