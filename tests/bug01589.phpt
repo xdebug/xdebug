@@ -22,7 +22,7 @@ $abc = substr('abc', 1);
 ?>
 --EXPECTF--
 version: 1
-creator: xdebug 2%s (PHP %s)
+creator: xdebug %d.%s (PHP %s)
 cmd: %sbug01589-prepend.inc
 part: 1
 positions: line
