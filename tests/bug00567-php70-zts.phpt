@@ -18,6 +18,6 @@ function func(){
 
 func();
 ?>
---EXPECT--
-a: (refcount=1, is_ref=0)='hoge'
-a: (refcount=1, is_ref=0)='hoge'(29)
+--EXPECTF--
+a: (%s, is_ref=0)='hoge'
+a: (%s, is_ref=0)='hoge'(%d)

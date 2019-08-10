@@ -905,6 +905,37 @@ xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D)
 ** Normal variable printing routines
 */
 
+#define XDEBUG_VAR_DUMP_TEXT 0
+#define XDEBUG_VAR_DUMP_FANCY 1
+
+static void xdebug_var_info_dump(zval *struc, xdebug_str *str, zend_bool fancy)
+{
+	if (fancy) {
+		xdebug_str_add(str, "<i>(", 0);
+	} else {
+		xdebug_str_add(str, "(", 0);
+	}
+
+	if (Z_TYPE_P(struc) >= IS_STRING && Z_TYPE_P(struc) != IS_INDIRECT) {
+		if (Z_TYPE_P(struc) == IS_STRING && ZSTR_IS_INTERNED(Z_STR_P(struc))) {
+			xdebug_str_add(str, "interned", 0);
+		} else if (Z_TYPE_P(struc) == IS_ARRAY && (GC_FLAGS(Z_ARRVAL_P(struc)) & IS_ARRAY_IMMUTABLE)) {
+			xdebug_str_add(str, "immutable", 0);
+		} else {
+			xdebug_str_add(str, xdebug_sprintf("refcount=%d", Z_REFCOUNT_P(struc)), 1);
+		}
+		xdebug_str_add(str, xdebug_sprintf(", is_ref=%d", Z_TYPE_P(struc) == IS_REFERENCE), 1);
+	} else {
+		xdebug_str_add(str, "refcount=0, is_ref=0", 0);
+	}
+
+	if (fancy) {
+		xdebug_str_add(str, ")</i>", 0);
+	} else {
+		xdebug_str_add(str, ")=", 0);
+	}
+}
+
 static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
 {
 	zval **zv = &zv_nptr;
@@ -996,11 +1027,7 @@ void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval,
 	}
 
 	if (debug_zval) {
-		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
-			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
-		} else {
-			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
-		}
+		xdebug_var_info_dump(*struc, str, XDEBUG_VAR_DUMP_TEXT);
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);
@@ -1168,11 +1195,7 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 	}
 
 	if (debug_zval) {
-		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
-			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
-		} else {
-			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
-		}
+		xdebug_var_info_dump(*struc, str, XDEBUG_VAR_DUMP_TEXT);
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);
@@ -1364,11 +1387,7 @@ void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int le
 	xdebug_str_add(str, xdebug_sprintf("%*s", (level * 2) - 2, ""), 1);
 
 	if (debug_zval) {
-		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
-			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
-		} else {
-			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
-		}
+		xdebug_var_info_dump(*struc, str, XDEBUG_VAR_DUMP_TEXT);
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);
@@ -1549,11 +1568,7 @@ static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mod
 	}
 
 	if (debug_zval) {
-		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
-			xdebug_str_add(str, xdebug_sprintf("(refcount=%d, is_ref=%d)=", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
-		} else {
-			xdebug_str_add(str, "(refcount=0, is_ref=0)=", 0);
-		}
+		xdebug_var_info_dump(*struc, str, XDEBUG_VAR_DUMP_TEXT);
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);
@@ -2419,11 +2434,7 @@ void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug
 	zval *tmpz;
 
 	if (debug_zval) {
-		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
-			xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
-		} else {
-			xdebug_str_add(str, "<i>(refcount=0, is_ref=0)</i>", 0);
-		}
+		xdebug_var_info_dump(*struc, str, XDEBUG_VAR_DUMP_FANCY);
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);
@@ -2633,11 +2644,7 @@ static void xdebug_var_synopsis_fancy(zval **struc, xdebug_str *str, int level, 
 	zval *tmpz;
 
 	if (debug_zval) {
-		if (Z_TYPE_P(*struc) >= IS_STRING && Z_TYPE_P(*struc) != IS_INDIRECT) {
-			xdebug_str_add(str, xdebug_sprintf("<i>(refcount=%d, is_ref=%d)</i>", (*struc)->value.counted->gc.refcount, Z_TYPE_P(*struc) == IS_REFERENCE), 1);
-		} else {
-			xdebug_str_add(str, "<i>(refcount=0, is_ref=0)</i>", 0);
-		}
+		xdebug_var_info_dump(*struc, str, XDEBUG_VAR_DUMP_FANCY);
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);

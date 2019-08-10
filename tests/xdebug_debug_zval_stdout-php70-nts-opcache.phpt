@@ -1,9 +1,9 @@
 --TEST--
-Test for xdebug_debug_zval() (>= PHP 7.2, opcache)
+Test for xdebug_debug_zval_stdout() (< PHP 7.1, NTS; opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/utils.inc';
-check_reqs('PHP >= 7.2; opcache');
+check_reqs('PHP < 7.1; NTS; opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -36,9 +36,9 @@ function func(){
 
 func();
 ?>
---EXPECT--
-a: no such symbol
-$a: no such symbol
+--EXPECTF--
+a: (interned, is_ref=0)='hoge'
+$a: (interned, is_ref=0)='hoge'
 $b: (refcount=1, is_ref=0)=array ('a' => (refcount=0, is_ref=0)=4, 'b' => (refcount=2, is_ref=1)=5, 'c' => (refcount=0, is_ref=0)=6, 0 => (refcount=0, is_ref=0)=8, 1 => (refcount=0, is_ref=0)=9)
 $b['a']: (refcount=0, is_ref=0)=4
 $b['b']: (refcount=2, is_ref=1)=5

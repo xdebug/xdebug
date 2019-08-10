@@ -18,5 +18,5 @@ function func(){
 func();
 ?>
 --EXPECTF--
-a: (refcount=%r(0|1)%r, is_ref=0)='hoge'
-a: (refcount=%r(0|1)%r, is_ref=0)='hoge'(29)
+a: (interned, is_ref=0)='hoge'
+a: (interned, is_ref=0)='hoge'(%d)
