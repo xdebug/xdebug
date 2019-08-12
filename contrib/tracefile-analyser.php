@@ -50,6 +50,7 @@ foreach( $functions as $name => $f )
 		$maxLen = strlen( $name );
 	}
 }
+$maxLen = max( $maxLen, 8 );
 
 echo "Showing the {$elements} most costly calls sorted by '{$sortKey}'.\n\n";
 
@@ -185,6 +186,10 @@ class drXdebugTraceFileParser
 				$dTime   = $time   - $prevTime;
 				$dMemory = $memory - $prevMem;
 
+				if ( ! array_key_exists( $depth - 1, $this->stack ) )
+				{
+					$this->stack[$depth - 1] = array( '', 0, 0, 0, 0 );
+				}
 				$this->stack[$depth - 1][3] += $dTime;
 				$this->stack[$depth - 1][4] += $dMemory;
 
