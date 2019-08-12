@@ -1623,7 +1623,11 @@ TEST $file
 
 			junit_start_timer($shortname);
 
-			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
+			/* Remove auto prepend and append settings for SKIPIF */
+			$skipif_ini_settings = $ini_settings;
+			$skipif_ini_settings = preg_replace( '@-d \"auto_prepend_file=.*?\" @', '', $skipif_ini_settings );
+			$skipif_ini_settings = preg_replace( '@-d \"auto_append_file=.*?\" @', '', $skipif_ini_settings );
+			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $skipif_ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
 
 			junit_finish_timer($shortname);
 
