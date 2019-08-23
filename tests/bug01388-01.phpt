@@ -19,6 +19,7 @@ $commands = array(
 	'breakpoint_list',
 	"breakpoint_set -t line -f file://{$filename} -n 4",
 	'breakpoint_list',
+	'detach',
 );
 
 dbgpRunFile( $filename, $commands );
@@ -58,3 +59,7 @@ dbgpRunFile( $filename, $commands );
 -> breakpoint_list -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="8"><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></response>
+
+-> detach -i 9
+<?xml version="1.0" encoding="iso-8859-1"?>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="9" status="stopping" reason="ok"></response>
