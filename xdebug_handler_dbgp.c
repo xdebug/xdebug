@@ -2386,6 +2386,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->inhibit_notifications = 0;
 	context->resolved_breakpoints = 0;
 
+	xdebug_mark_debug_connection_active();
 	xdebug_dbgp_cmdloop(context, 1 TSRMLS_CC);
 
 	return 1;
@@ -2602,7 +2603,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 
 	xdebug_dbgp_cmdloop(context, 1 TSRMLS_CC);
 
-	return 1;
+	return xdebug_is_debug_connection_active_for_current_pid();
 }
 
 xdebug_set *get_executable_lines_from_oparray(function_stack_entry *fse)
