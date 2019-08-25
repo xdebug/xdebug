@@ -16,39 +16,39 @@ environment:
     - PHP_REL: 7.4
       ARCHITECTURE: x64
       ZTS_STATE: enable
-      PHP_BUILD_CRT: vs16
+      PHP_BUILD_CRT: vc15
       OPCACHE: yes
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - PHP_REL: 7.4
       ARCHITECTURE: x64
       ZTS_STATE: disable
-      PHP_BUILD_CRT: vs16
+      PHP_BUILD_CRT: vc15
       OPCACHE: yes
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - PHP_REL: 7.4
       ARCHITECTURE: x64
       ZTS_STATE: enable
-      PHP_BUILD_CRT: vs16
+      PHP_BUILD_CRT: vc15
       OPCACHE: no
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - PHP_REL: 7.4
       ARCHITECTURE: x64
       ZTS_STATE: disable
-      PHP_BUILD_CRT: vs16
+      PHP_BUILD_CRT: vc15
       OPCACHE: no
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - PHP_REL: 7.4
       ARCHITECTURE: x86
       ZTS_STATE: enable
-      PHP_BUILD_CRT: vs16
+      PHP_BUILD_CRT: vc15
       OPCACHE: no
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - PHP_REL: 7.4
       ARCHITECTURE: x86
       ZTS_STATE: disable
-      PHP_BUILD_CRT: vs16
+      PHP_BUILD_CRT: vc15
       OPCACHE: yes
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019 Preview
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - PHP_REL: 7.3
       ARCHITECTURE: x64
       ZTS_STATE: enable
