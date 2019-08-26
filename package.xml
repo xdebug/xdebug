@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-07-25</date>
- <time>15:20:11</time>
+ <date>2019-08-26</date>
+ <time>13:39:39</time>
  <version>
-  <release>2.8.0beta1</release>
-  <api>2.8.0beta1</api>
+  <release>2.8.0beta2</release>
+  <api>2.8.0beta2</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,19 +45,20 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Jul 25, 2019 - xdebug 2.8.0beta1
+Mon, Aug 26, 2019 - xdebug 2.8.0beta2
 
 = Fixed bugs:
 
-  - Fixed issue #1679: Code Coverage misses static property as function
-    argument
-  - Fixed issue #1682: Invalid NULL byte in debugger XML with anonymous classes
-  - Fixed issue #1683: Xdebug does not compile due to changes to ASSIGN_ADD and
-    friends operations in PHP 7.4alpha3
-  - Fixed issue #1687: Use appropriate process ID for logging and "right
-    process" tracking
-  - Fixed issue #1688: Improve performance by using getpid() only when step
-    debugger is active
+  - Fixed issue #1540: Code coverage should not run when turned off in php.ini
+  - Fixed issue #1573: Using an exception_handler creates an extra broken profiler file
+  - Fixed issue #1589: function names used in auto_prepend_file missing from profile file
+  - Fixed issue #1613: Wrong name displayed for Recoverable fatal error
+  - Fixed issue #1652: Problems with detach in debugger init stage
+  - Fixed issue #1676: Xdebug doesn't write trace footer for shutdown functions
+  - Fixed issue #1689: Traces show return values and exit information for functions without entry information
+  - Fixed issue #1691: Code Coverage misses fluent interface function call
+  - Fixed issue #1698: Switch PHP 7.4 Windows builds back to VS17
+  - Fixed issue #1700: Xdebug abuses possibilty immutable class flags
  </notes>
 
  <contents>
@@ -156,6 +157,35 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-07-25</date>
+   <time>15:20:11</time>
+   <version>
+    <release>2.8.0beta1</release>
+    <api>2.8.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Jul 25, 2019 - xdebug 2.8.0beta1
+
+= Fixed bugs:
+
+  - Fixed issue #1679: Code Coverage misses static property as function
+    argument
+  - Fixed issue #1682: Invalid NULL byte in debugger XML with anonymous classes
+  - Fixed issue #1683: Xdebug does not compile due to changes to ASSIGN_ADD and
+    friends operations in PHP 7.4alpha3
+  - Fixed issue #1687: Use appropriate process ID for logging and "right
+    process" tracking
+  - Fixed issue #1688: Improve performance by using getpid() only when step
+    debugger is active
+   </notes>
+  </release>
 
   <release>
    <date>2019-06-28</date>
