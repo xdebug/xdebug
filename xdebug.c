@@ -1372,7 +1372,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Initialize dump superglobals */
 	XG(dumped) = 0;
 
-	/* Initialize visisted branches hash */
+	/* Initialize visited classes and branches hash */
+	XG(visited_classes) = xdebug_hash_alloc(2048, NULL);
 	XG(visited_branches) = xdebug_hash_alloc(2048, NULL);
 
 	/* Initialize start time */
@@ -1454,6 +1455,8 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	xdebug_hash_destroy(XG(code_coverage_info));
 	XG(code_coverage_info) = NULL;
 
+	xdebug_hash_destroy(XG(visited_classes));
+	XG(visited_classes) = NULL;
 	xdebug_hash_destroy(XG(visited_branches));
 	XG(visited_branches) = NULL;
 
