@@ -139,8 +139,6 @@ extern const char* xdebug_log_prefix[11];
 
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
-#define ZEND_XDEBUG_VISITED 0x10000000
-
 typedef struct _xdebug_func {
 	char *class;
 	char *function;
