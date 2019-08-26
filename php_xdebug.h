@@ -210,6 +210,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	char                 *previous_mark_filename;
 	xdebug_coverage_file *previous_mark_file;
 	xdebug_path_info     *paths_stack;
+	xdebug_hash          *visited_classes;
 	xdebug_hash          *visited_branches;
 	struct {
 		unsigned int  size;
