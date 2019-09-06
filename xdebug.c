@@ -1140,12 +1140,10 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 
 		if (e->var) {
 			for (i = 0; i < e->varc; i++) {
-				if (!Z_ISUNDEF(e->var[i].data)) {
-					ZVAL_UNDEF(&e->var[i].data);
-				}
 				if (e->var[i].name) {
 					xdfree(e->var[i].name);
 				}
+				zval_ptr_dtor(&(e->var[i].data));
 			}
 			xdfree(e->var);
 		}
@@ -2016,6 +2014,7 @@ void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	fse->symbol_table = NULL;
 	fse->execute_data = NULL;
+
 	if (XG(stack)) {
 		xdebug_llist_remove(XG(stack), XDEBUG_LLIST_TAIL(XG(stack)), function_stack_entry_dtor);
 	}
