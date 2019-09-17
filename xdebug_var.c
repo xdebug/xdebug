@@ -2103,6 +2103,11 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 	xdebug_object_item *xoi_val;
 	zval *tmpz;
 
+	if (!*struc) {
+		xdebug_xml_add_attribute(node, "type", "uninitialized");
+		return;
+	}
+
 	if (Z_TYPE_P(*struc) == IS_INDIRECT) {
 		tmpz = ((*struc)->value.zv);
 		struc = &tmpz;
