@@ -49,7 +49,7 @@ int xdebug_gc_collect_cycles(void)
 	zend_gc_status     status;
 #endif
 
-	if (!XG(gc_stats_enabled)) {
+	if (!XG_GCSTATS(gc_stats_enabled)) {
 		return xdebug_old_gc_collect_cycles();
 	}
 
@@ -113,45 +113,45 @@ int xdebug_gc_stats_init(char *fname, char *script_name)
 	if (fname && strlen(fname)) {
 		filename = xdstrdup(fname);
 	} else {
-		if (!strlen(XG(gc_stats_output_name)) ||
-			xdebug_format_output_filename(&fname, XG(gc_stats_output_name), script_name) <= 0)
+		if (!strlen(XINI_GCSTATS(gc_stats_output_name)) ||
+			xdebug_format_output_filename(&fname, XINI_GCSTATS(gc_stats_output_name), script_name) <= 0)
 		{
 			return FAILURE;
 		}
 
-		if (IS_SLASH(XG(gc_stats_output_dir)[strlen(XG(gc_stats_output_dir)) - 1])) {
-			filename = xdebug_sprintf("%s%s", XG(gc_stats_output_dir), fname);
+		if (IS_SLASH(XINI_GCSTATS(gc_stats_output_dir)[strlen(XINI_GCSTATS(gc_stats_output_dir)) - 1])) {
+			filename = xdebug_sprintf("%s%s", XINI_GCSTATS(gc_stats_output_dir), fname);
 		} else {
-			filename = xdebug_sprintf("%s%c%s", XG(gc_stats_output_dir), DEFAULT_SLASH, fname);
+			filename = xdebug_sprintf("%s%c%s", XINI_GCSTATS(gc_stats_output_dir), DEFAULT_SLASH, fname);
 		}
 		xdfree(fname);
 	}
 
-	XG(gc_stats_file) = xdebug_fopen(filename, "w", NULL, &XG(gc_stats_filename));
+	XG_GCSTATS(gc_stats_file) = xdebug_fopen(filename, "w", NULL, &XG_GCSTATS(gc_stats_filename));
 	xdfree(filename);
 
-	if (!XG(gc_stats_file)) {
+	if (!XG_GCSTATS(gc_stats_file)) {
 		return FAILURE;
 	}
 
-	fprintf(XG(gc_stats_file), "Garbage Collection Report\n");
-	fprintf(XG(gc_stats_file), "version: 1\ncreator: xdebug %s (PHP %s)\n\n", XDEBUG_VERSION, PHP_VERSION);
+	fprintf(XG_GCSTATS(gc_stats_file), "Garbage Collection Report\n");
+	fprintf(XG_GCSTATS(gc_stats_file), "version: 1\ncreator: xdebug %s (PHP %s)\n\n", XDEBUG_VERSION, PHP_VERSION);
 
-	fprintf(XG(gc_stats_file), "Collected | Efficiency%% | Duration | Memory Before | Memory After | Reduction%% | Function\n");
-	fprintf(XG(gc_stats_file), "----------+-------------+----------+---------------+--------------+------------+---------\n");
+	fprintf(XG_GCSTATS(gc_stats_file), "Collected | Efficiency%% | Duration | Memory Before | Memory After | Reduction%% | Function\n");
+	fprintf(XG_GCSTATS(gc_stats_file), "----------+-------------+----------+---------------+--------------+------------+---------\n");
 
-	fflush(XG(gc_stats_file));
+	fflush(XG_GCSTATS(gc_stats_file));
 
 	return SUCCESS;
 }
 
 void xdebug_gc_stats_stop()
 {
-	XG(gc_stats_enabled) = 0;
+	XG_GCSTATS(gc_stats_enabled) = 0;
 
-	if (XG(gc_stats_file)) {
-		fclose(XG(gc_stats_file));
-		XG(gc_stats_file) = NULL;
+	if (XG_GCSTATS(gc_stats_file)) {
+		fclose(XG_GCSTATS(gc_stats_file));
+		XG_GCSTATS(gc_stats_file) = NULL;
 	}
 }
 
@@ -165,12 +165,12 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 		reduction = 0;
 	}
 
-	if (!XG(gc_stats_file)) {
+	if (!XG_GCSTATS(gc_stats_file)) {
 		return;
 	}
 
 	if (!run->function_name) {
-		fprintf(XG(gc_stats_file),
+		fprintf(XG_GCSTATS(gc_stats_file),
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | -\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
@@ -180,7 +180,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			reduction
 		);
 	} else if (!run->class_name && run->function_name) {
-		fprintf(XG(gc_stats_file),
+		fprintf(XG_GCSTATS(gc_stats_file),
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
@@ -191,7 +191,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->function_name
 		);
 	} else if (run->class_name && run->function_name) {
-		fprintf(XG(gc_stats_file),
+		fprintf(XG_GCSTATS(gc_stats_file),
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s::%s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
@@ -204,15 +204,15 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 		);
 	}
 
-	fflush(XG(gc_stats_file));
+	fflush(XG_GCSTATS(gc_stats_file));
 }
 
 /* {{{ proto void xdebug_get_gcstats_filename()
    Returns the name of the current garbage collection statistics report file */
 PHP_FUNCTION(xdebug_get_gcstats_filename)
 {
-	if (XG(gc_stats_filename)) {
-		RETURN_STRING(XG(gc_stats_filename));
+	if (XG_GCSTATS(gc_stats_filename)) {
+		RETURN_STRING(XG_GCSTATS(gc_stats_filename));
 	} else {
 		RETURN_FALSE;
 	}
@@ -227,7 +227,7 @@ PHP_FUNCTION(xdebug_start_gcstats)
 	size_t                fname_len = 0;
 	function_stack_entry *fse;
 
-	if (XG(gc_stats_enabled) == 0) {
+	if (XG_GCSTATS(gc_stats_enabled) == 0) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &fname, &fname_len) == FAILURE) {
 			return;
 		}
@@ -235,14 +235,14 @@ PHP_FUNCTION(xdebug_start_gcstats)
 		fse = xdebug_get_stack_frame(0 TSRMLS_CC);
 
 		if (xdebug_gc_stats_init(fname, fse->filename) == SUCCESS) {
-			XG(gc_stats_enabled) = 1;
-			RETVAL_STRING(XG(gc_stats_filename));
+			XG_GCSTATS(gc_stats_enabled) = 1;
+			RETVAL_STRING(XG_GCSTATS(gc_stats_filename));
 			return;
 		} else {
 			php_error(E_NOTICE, "Garbage Collection statistics could not be started");
 		}
 
-		XG(gc_stats_enabled) = 0;
+		XG_GCSTATS(gc_stats_enabled) = 0;
 		RETURN_FALSE;
 	} else {
 		php_error(E_NOTICE, "Garbage Collection statistics are already being collected.");
@@ -255,8 +255,8 @@ PHP_FUNCTION(xdebug_start_gcstats)
    Stop collecting garbage collection statistics */
 PHP_FUNCTION(xdebug_stop_gcstats)
 {
-	if (XG(gc_stats_enabled) == 1) {
-		RETVAL_STRING(XG(gc_stats_filename));
+	if (XG_GCSTATS(gc_stats_enabled) == 1) {
+		RETVAL_STRING(XG_GCSTATS(gc_stats_filename));
 		xdebug_gc_stats_stop();
 	} else {
 		RETVAL_FALSE;

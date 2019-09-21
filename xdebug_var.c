@@ -61,19 +61,19 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
 	zval dzval = **zval_pp;
 	HashTable *tmp;
 
-	if (!XG(in_debug_info) && object_or_ancestor_is_internal(dzval) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
-		void        *old_trace = XG(trace_context);
+	if (!XG_CORE(in_debug_info) && object_or_ancestor_is_internal(dzval) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
+		void        *old_trace = XG_TRACE(trace_context);
 		zend_object *orig_exception;
 
-		XG(trace_context) = NULL;
-		XG(in_debug_info) = 1;
+		XG_TRACE(trace_context) = NULL;
+		XG_CORE(in_debug_info) = 1;
 		orig_exception = EG(exception);
 		EG(exception) = NULL;
 
 		tmp = Z_OBJ_HANDLER(dzval, get_debug_info)(&dzval, is_tmp TSRMLS_CC);
 
-		XG(in_debug_info) = 0;
-		XG(trace_context) = old_trace;
+		XG_CORE(in_debug_info) = 0;
+		XG_TRACE(trace_context) = old_trace;
 		EG(exception) = orig_exception;
 		return tmp;
 	} else {
@@ -360,10 +360,10 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_ROOT:
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (XG(active_execute_data) && XG(active_execute_data)->func) {
+			if (XG_DBG(active_execute_data) && XG_DBG(active_execute_data)->func) {
 				int i = 0;
 				zend_ulong hash_value = zend_inline_hash_func(element, element_length);
-				zend_op_array *opa = &XG(active_execute_data)->func->op_array;
+				zend_op_array *opa = &XG_DBG(active_execute_data)->func->op_array;
 				zval **CV;
 
 				while (i < opa->last_var) {
@@ -371,7 +371,7 @@ static void fetch_zval_from_symbol_table(
 						ZSTR_LEN(opa->vars[i]) == element_length &&
 						strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)
 					{
-						zval *CV_z = ZEND_CALL_VAR_NUM(XG(active_execute_data), i);
+						zval *CV_z = ZEND_CALL_VAR_NUM(XG_DBG(active_execute_data), i);
 						CV = &CV_z;
 						if (CV) {
 							ZVAL_COPY(&tmp_retval, *CV);
@@ -382,7 +382,7 @@ static void fetch_zval_from_symbol_table(
 				}
 			}
 			free(element);
-			ht = XG(active_symbol_table);
+			ht = XG_DBG(active_symbol_table);
 
 			XDEBUG_BREAK_INTENTIONALLY_MISSING
 
@@ -392,8 +392,8 @@ static void fetch_zval_from_symbol_table(
 
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
-				if (XG(This)) {
-					ZVAL_COPY(&tmp_retval, XG(This));
+				if (XG_DBG(This)) {
+					ZVAL_COPY(&tmp_retval, XG_DBG(This));
 				} else {
 					ZVAL_NULL(&tmp_retval);
 				}
@@ -767,8 +767,8 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						state = 1;
 						keyword_end = &ptr[ctr];
 
-						if (strncmp(keyword, "::", 2) == 0 && XG(active_fse)->function.class) { /* static class properties */
-							zend_class_entry *ce = xdebug_fetch_class(XG(active_fse)->function.class, strlen(XG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+						if (strncmp(keyword, "::", 2) == 0 && XG_DBG(active_fse)->function.class) { /* static class properties */
+							zend_class_entry *ce = xdebug_fetch_class(XG_DBG(active_fse)->function.class, strlen(XG_DBG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
 							cc_length = strlen(STR_NAME_VAL(ce->name));
@@ -862,11 +862,11 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	xdebug_var_export_options *options;
 	options = xdmalloc(sizeof(xdebug_var_export_options));
 
-	options->max_children = XG(display_max_children);
-	options->max_data = XG(display_max_data);
-	options->max_depth = XG(display_max_depth);
+	options->max_children = XINI_CORE(display_max_children);
+	options->max_data = XINI_CORE(display_max_data);
+	options->max_depth = XINI_CORE(display_max_depth);
 	options->show_hidden = 0;
-	options->show_location = XG(overload_var_dump) > 1;
+	options->show_location = XINI_CORE(overload_var_dump) > 1;
 	options->extended_properties = 0;
 	options->encode_as_extended_property = 0;
 
@@ -1543,7 +1543,7 @@ xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval,
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
 
-		xdebug_format_filename(&formatted_filename, XG(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
+		xdebug_format_filename(&formatted_filename, XINI_CORE(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
 		xdebug_str_add(str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, formatted_filename, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
 		xdfree(formatted_filename);
 	}
@@ -1747,13 +1747,13 @@ static void check_if_extended_properies_are_needed(xdebug_var_export_options *op
 		options->encode_as_extended_property = 1;
 		return;
 	}
-	
+
 	/* Checking full name */
 	if (fullname && encoding_requested(fullname->d, fullname->l)) {
 		options->encode_as_extended_property = 1;
 		return;
 	}
-	
+
 	/* Checking for the value portion */
 	if (!value) {
 		return;
@@ -2580,9 +2580,9 @@ xdebug_str* xdebug_get_zval_value_fancy(char *name, zval *val, int debug_zval, x
 	xdebug_str_addl(str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
-		xdebug_format_filename(&formatted_filename, XG(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
+		xdebug_format_filename(&formatted_filename, XINI_CORE(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
 
-		if (strlen(XG(file_link_format)) > 0) {
+		if (strlen(XINI_CORE(file_link_format)) > 0) {
 			char *file_link;
 
 			xdebug_format_file_link(&file_link, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
@@ -2616,11 +2616,11 @@ xdebug_str* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_v
 	}
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
-	XG(in_var_serialisation) = 1;
+	XG_CORE(in_var_serialisation) = 1;
 	EG(exception) = NULL;
 	php_var_serialize(&buf, val, &var_hash TSRMLS_CC);
 	orig_exception = EG(exception) = orig_exception;
-	XG(in_var_serialisation) = 0;
+	XG_CORE(in_var_serialisation) = 0;
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.a) {

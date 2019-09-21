@@ -32,10 +32,15 @@
 #include "main/php_network.h"
 #include "ext/standard/base64.h"
 #include "TSRM.h"
+
 #include "php_globals.h"
 #include "php_xdebug.h"
+
 #include "xdebug_private.h"
-#include "xdebug_code_coverage.h"
+#include "xdebug_compat.h"
+
+#include "coverage/xdebug_code_coverage.h"
+
 #include "xdebug_com.h"
 #include "xdebug_compat.h"
 #include "xdebug_handler_dbgp.h"
@@ -46,8 +51,6 @@
 #include "xdebug_stack.h"
 #include "xdebug_var.h"
 #include "xdebug_xml.h"
-
-#include "xdebug_compat.h"
 
 #ifdef PHP_WIN32
 #include "win32/time.h"
@@ -1198,6 +1201,7 @@ DBGP_FUNC(detach)
 	XG_DBG(context).handler->remote_deinit(&(XG_DBG(context)));
 	xdebug_mark_debug_connection_not_active();
 	XG_DBG(stdout_mode) = 0;
+	XINI_DBG(remote_enable) = 0;
 }
 
 

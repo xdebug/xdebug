@@ -42,7 +42,7 @@ int xdebug_is_stack_frame_filtered(int filter_type, function_stack_entry *fse)
 int xdebug_is_top_stack_frame_filtered(int filter_type)
 {
 	function_stack_entry *fse;
-	fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
+	fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack)));
 	return xdebug_is_stack_frame_filtered(filter_type, fse);
 }
 
@@ -162,22 +162,22 @@ void xdebug_filter_run_tracing(function_stack_entry *fse)
 {
 	fse->filtered_tracing = 0;
 
-	if (XG(filter_type_tracing) != XDEBUG_FILTER_NONE) {
-		xdebug_filter_run_internal(fse, XDEBUG_FILTER_TRACING, &fse->filtered_tracing, XG(filter_type_tracing), XG(filters_tracing));
+	if (XG_CORE(filter_type_tracing) != XDEBUG_FILTER_NONE) {
+		xdebug_filter_run_internal(fse, XDEBUG_FILTER_TRACING, &fse->filtered_tracing, XG_CORE(filter_type_tracing), XG_CORE(filters_tracing));
 	}
 }
 
 void xdebug_filter_run_code_coverage(zend_op_array *op_array)
 {
-	op_array->reserved[XG(dead_code_analysis_tracker_offset)] = 0;
-	
-	if (XG(filter_type_code_coverage) != XDEBUG_FILTER_NONE) {
+	op_array->reserved[XG_COV(dead_code_analysis_tracker_offset)] = 0;
+
+	if (XG_CORE(filter_type_code_coverage) != XDEBUG_FILTER_NONE) {
 		function_stack_entry tmp_fse;
 
 		tmp_fse.filename = STR_NAME_VAL(op_array->filename);
 		xdebug_build_fname_from_oparray(&tmp_fse.function, op_array TSRMLS_CC);
-		xdebug_filter_run_internal(&tmp_fse, XDEBUG_FILTER_CODE_COVERAGE, &tmp_fse.filtered_code_coverage, XG(filter_type_code_coverage), XG(filters_code_coverage));
-		op_array->reserved[XG(code_coverage_filter_offset)] = (void*) tmp_fse.filtered_code_coverage;
+		xdebug_filter_run_internal(&tmp_fse, XDEBUG_FILTER_CODE_COVERAGE, &tmp_fse.filtered_code_coverage, XG_CORE(filter_type_code_coverage), XG_CORE(filters_code_coverage));
+		op_array->reserved[XG_COV(code_coverage_filter_offset)] = (void*) tmp_fse.filtered_code_coverage;
 	}
 }
 
@@ -196,13 +196,13 @@ PHP_FUNCTION(xdebug_set_filter)
 
 	switch (filter_group) {
 		case XDEBUG_FILTER_TRACING:
-			filter_list = &XG(filters_tracing);
-			XG(filter_type_tracing) = XDEBUG_FILTER_NONE;
+			filter_list = &XG_CORE(filters_tracing);
+			XG_CORE(filter_type_tracing) = XDEBUG_FILTER_NONE;
 			break;
 
 		case XDEBUG_FILTER_CODE_COVERAGE:
-			filter_list = &XG(filters_code_coverage);
-			XG(filter_type_code_coverage) = XDEBUG_FILTER_NONE;
+			filter_list = &XG_CORE(filters_code_coverage);
+			XG_CORE(filter_type_code_coverage) = XDEBUG_FILTER_NONE;
 			if (filter_type == XDEBUG_NAMESPACE_WHITELIST || filter_type == XDEBUG_NAMESPACE_BLACKLIST) {
 				php_error(E_WARNING, "The code coverage filter (XDEBUG_FILTER_CODE_COVERAGE) only supports the XDEBUG_PATH_WHITELIST, XDEBUG_PATH_BLACKLIST, and XDEBUG_FILTER_NONE filter types");
 				return;
@@ -223,11 +223,11 @@ PHP_FUNCTION(xdebug_set_filter)
 	) {
 		switch (filter_group) {
 			case XDEBUG_FILTER_TRACING:
-				XG(filter_type_tracing) = filter_type;
+				XG_CORE(filter_type_tracing) = filter_type;
 				break;
 
 			case XDEBUG_FILTER_CODE_COVERAGE:
-				XG(filter_type_code_coverage) = filter_type;
+				XG_CORE(filter_type_code_coverage) = filter_type;
 				break;
 		}
 	} else {

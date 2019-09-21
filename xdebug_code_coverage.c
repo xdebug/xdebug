@@ -106,7 +106,7 @@ int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
+	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
 		const zend_op *cur_opcode;
 		cur_opcode = execute_data->opline;
 
@@ -126,7 +126,7 @@ int xdebug_common_override_handler(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
+	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
 		const zend_op *cur_opcode;
 		int      lineno;
 		char    *file;
@@ -475,14 +475,14 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 //		return ZEND_USER_OPCODE_DISPATCH;
 //	}
 
-	if (!op_array->reserved[XG(code_coverage_filter_offset)] && XG(code_coverage_active)) {
+	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
 		xdebug_print_opcode_info('=', execute_data, cur_opcode TSRMLS_CC);
 
 		if (do_cc) {
 			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 		}
 	}
-	if (XG(trace_context) && XG(collect_assignments)) {
+	if (XG_TRACE(trace_context) && XINI_CORE(collect_assignments)) {
 		char *full_varname;
 
 		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
@@ -582,9 +582,9 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		}
 
-		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG(stack)));
-		if (XG(trace_context) && XG(collect_assignments) && XG(trace_handler)->assignment) {
-			XG(trace_handler)->assignment(XG(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno TSRMLS_CC);
+		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack)));
+		if (XG_TRACE(trace_context) && XINI_CORE(collect_assignments) && XG_TRACE(trace_handler)->assignment) {
+			XG_TRACE(trace_handler)->assignment(XG_TRACE(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno TSRMLS_CC);
 		}
 		xdfree(full_varname);
 	}
@@ -653,18 +653,18 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode 
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
 
-	if (XG(previous_filename) && strcmp(XG(previous_filename), filename) == 0) {
-		file = XG(previous_file);
+	if (XG_COV(previous_filename) && strcmp(XG_COV(previous_filename), filename) == 0) {
+		file = XG_COV(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
-		if (!xdebug_hash_find(XG(code_coverage_info), filename, strlen(filename), (void *) &file)) {
+		if (!xdebug_hash_find(XG_COV(code_coverage_info), filename, strlen(filename), (void *) &file)) {
 			/* The file does not exist, so we add it to the hash */
 			file = xdebug_coverage_file_ctor(filename);
 
-			xdebug_hash_add(XG(code_coverage_info), filename, strlen(filename), file);
+			xdebug_hash_add(XG_COV(code_coverage_info), filename, strlen(filename), file);
 		}
-		XG(previous_filename) = file->name;
-		XG(previous_file) = file;
+		XG_COV(previous_filename) = file->name;
+		XG_COV(previous_file) = file;
 	}
 
 	/* Check if the line already exists in the hash */
@@ -715,7 +715,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 #if ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
 #endif
-	
+
 	zend_op opcode = opa->opcodes[position];
 	if (opcode.opcode == ZEND_JMP) {
 		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
@@ -972,7 +972,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 	xdebug_set *set = NULL;
 	xdebug_branch_info *branch_info = NULL;
 
-	op_array->reserved[XG(dead_code_analysis_tracker_offset)] = (void*) XG(dead_code_last_start_id);
+	op_array->reserved[XG_COV(dead_code_analysis_tracker_offset)] = (void*) XG_COV(dead_code_last_start_id);
 
 	/* Check for abstract methods and simply return from this function in those
 	 * cases. */
@@ -988,17 +988,17 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 		xdebug_build_fname_from_oparray(&tmp_fse.function, op_array TSRMLS_CC);
 		printf("    - PREFIL FILTERED FOR %s (%s::%s): %s\n",
 			tmp_fse.filename, tmp_fse.function.class, tmp_fse.function.function,
-			op_array->reserved[XG(code_coverage_filter_offset)] ? "YES" : "NO");
+			op_array->reserved[XG_COV(code_coverage_filter_offset)] ? "YES" : "NO");
 */
-		if (op_array->reserved[XG(code_coverage_filter_offset)]) {
+		if (op_array->reserved[XG_COV(code_coverage_filter_offset)]) {
 			return;
 		}
 	}
 
 	/* Run dead code analysis if requested */
-	if (XG(code_coverage_dead_code_analysis) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
+	if (XG_COV(code_coverage_dead_code_analysis) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
 		set = xdebug_set_create(op_array->last);
-		if (XG(code_coverage_branch_check)) {
+		if (XG_COV(code_coverage_branch_check)) {
 			branch_info = xdebug_branch_info_create(op_array->last);
 		}
 
@@ -1039,7 +1039,7 @@ static void prefill_from_oparray(char *filename, zend_op_array *op_array TSRMLS_
 static int prefill_from_function_table(zend_op_array *opa)
 {
 	if (opa->type == ZEND_USER_FUNCTION) {
-		if ((long) opa->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
+		if ((long) opa->reserved[XG_COV(dead_code_analysis_tracker_offset)] < XG_COV(dead_code_last_start_id)) {
 			prefill_from_oparray((char*) STR_NAME_VAL(opa->filename), opa TSRMLS_CC);
 		}
 	}
@@ -1054,10 +1054,10 @@ static int mark_class_as_visited(zend_class_entry *ce)
 	char   *key = xdebug_sprintf("%08X", (uintptr_t) ce);
 	size_t  key_len = strlen(key);
 
-	if (xdebug_hash_find(XG(visited_classes), key, key_len, (void*) &dummy)) {
+	if (xdebug_hash_find(XG_COV(visited_classes), key, key_len, (void*) &dummy)) {
 		already_visited = 1;
 	} else {
-		xdebug_hash_add(XG(visited_classes), key, key_len, NULL);
+		xdebug_hash_add(XG_COV(visited_classes), key, key_len, NULL);
 	}
 
 	xdfree(key);
@@ -1089,7 +1089,7 @@ void xdebug_prefill_code_coverage(zend_op_array *op_array TSRMLS_DC)
 	zend_op_array    *function_op_array;
 	zend_class_entry *class_entry;
 
-	if ((long) op_array->reserved[XG(dead_code_analysis_tracker_offset)] < XG(dead_code_last_start_id)) {
+	if ((long) op_array->reserved[XG_COV(dead_code_analysis_tracker_offset)] < XG_COV(dead_code_last_start_id)) {
 		prefill_from_oparray((char*) STR_NAME_VAL(op_array->filename), op_array TSRMLS_CC);
 	}
 
@@ -1111,20 +1111,20 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *funct
 	xdebug_path *path = xdebug_path_new(NULL);
 
 	xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-	xdebug_path_info_add_path_for_level(XG(paths_stack), path, XG(level) TSRMLS_CC);
+	xdebug_path_info_add_path_for_level(XG_COV(paths_stack), path, XG_CORE(level) TSRMLS_CC);
 
-	if (XG(branches).size == 0 || XG(level) >= XG(branches).size) {
-		XG(branches).size = XG(level) + 32;
-		XG(branches).last_branch_nr = realloc(XG(branches).last_branch_nr, sizeof(int) * XG(branches.size));
+	if (XG_COV(branches).size == 0 || XG_CORE(level) >= XG_COV(branches).size) {
+		XG_COV(branches).size = XG_CORE(level) + 32;
+		XG_COV(branches).last_branch_nr = realloc(XG_COV(branches).last_branch_nr, sizeof(int) * XG_COV(branches.size));
 	}
 
-	XG(branches).last_branch_nr[XG(level)] = -1;
+	XG_COV(branches).last_branch_nr[XG_CORE(level)] = -1;
 }
 
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_name, char *function_name TSRMLS_DC)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	xdebug_path *path = xdebug_path_info_get_path_for_level(XG(paths_stack), XG(level) TSRMLS_CC);
+	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XG_CORE(level) TSRMLS_CC);
 
 	if (!path) {
 		return;
@@ -1148,15 +1148,15 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &options) == FAILURE) {
 		return;
 	}
-	XG(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
-	XG(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
-	XG(code_coverage_branch_check) = (options & XDEBUG_CC_OPTION_BRANCH_CHECK);
+	XG_COV(code_coverage_unused) = (options & XDEBUG_CC_OPTION_UNUSED);
+	XG_COV(code_coverage_dead_code_analysis) = (options & XDEBUG_CC_OPTION_DEAD_CODE);
+	XG_COV(code_coverage_branch_check) = (options & XDEBUG_CC_OPTION_BRANCH_CHECK);
 
-	if (!XG(code_coverage_enable)) {
+	if (!XINI_COV(code_coverage_enable)) {
 		php_error(E_WARNING, "Code coverage needs to be enabled in php.ini by setting 'xdebug.coverage_enable' to '1'.");
 		RETURN_FALSE;
 	} else {
-		XG(code_coverage_active) = 1;
+		XG_COV(code_coverage_active) = 1;
 		RETURN_TRUE;
 	}
 }
@@ -1168,19 +1168,19 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cleanup) == FAILURE) {
 		return;
 	}
-	if (XG(code_coverage_active)) {
+	if (XG_COV(code_coverage_active)) {
 		if (cleanup) {
-			XG(previous_filename) = NULL;
-			XG(previous_file) = NULL;
-			XG(previous_mark_filename) = NULL;
-			XG(previous_mark_file) = NULL;
-			xdebug_hash_destroy(XG(code_coverage_info));
-			XG(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
-			XG(dead_code_last_start_id)++;
-			xdebug_path_info_dtor(XG(paths_stack));
-			XG(paths_stack) = xdebug_path_info_ctor();
+			XG_COV(previous_filename) = NULL;
+			XG_COV(previous_file) = NULL;
+			XG_COV(previous_mark_filename) = NULL;
+			XG_COV(previous_mark_file) = NULL;
+			xdebug_hash_destroy(XG_COV(code_coverage_info));
+			XG_COV(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+			XG_COV(dead_code_last_start_id)++;
+			xdebug_path_info_dtor(XG_COV(paths_stack));
+			XG_COV(paths_stack) = xdebug_path_info_ctor();
 		}
-		XG(code_coverage_active) = 0;
+		XG_COV(code_coverage_active) = 0;
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -1362,17 +1362,17 @@ static void add_file(void *ret, xdebug_hash_element *e)
 PHP_FUNCTION(xdebug_get_code_coverage)
 {
 	array_init(return_value);
-	if (XG(code_coverage_info)) {
-		xdebug_hash_apply(XG(code_coverage_info), (void *) return_value, add_file);
+	if (XG_COV(code_coverage_info)) {
+		xdebug_hash_apply(XG_COV(code_coverage_info), (void *) return_value, add_file);
 	}
 }
 
 PHP_FUNCTION(xdebug_get_function_count)
 {
-	RETURN_LONG(XG(function_count));
+	RETURN_LONG(XG_CORE(function_count));
 }
 
 PHP_FUNCTION(xdebug_code_coverage_started)
 {
-	RETURN_BOOL(XG(code_coverage_active));
+	RETURN_BOOL(XG_COV(code_coverage_active));
 }

@@ -50,7 +50,7 @@ void xdebug_trace_html_write_header(void *ctxt TSRMLS_DC)
 	fprintf(context->trace_file, "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
 	fprintf(context->trace_file, "\t<tr><th>#</th><th>Time</th>");
 	fprintf(context->trace_file, "<th>Mem</th>");
-	if (XG(show_mem_delta)) {
+	if (XINI_CORE(show_mem_delta)) {
 		fprintf(context->trace_file, "<th>&#948; Mem</th>");
 	}
 	fprintf(context->trace_file, "<th colspan='2'>Function</th><th>Location</th></tr>\n");
@@ -81,9 +81,9 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 
 	xdebug_str_add(&str, "\t<tr>", 0);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", function_nr), 1);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6F</td>", fse->time - XG(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6F</td>", fse->time - XG_CORE(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", fse->memory), 1);
-	if (XG(show_mem_delta)) {
+	if (XINI_CORE(show_mem_delta)) {
 		xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%ld</td>", fse->memory - fse->prev_memory), 1);
 	}
 	xdebug_str_add(&str, "<td align='left'>", 0);

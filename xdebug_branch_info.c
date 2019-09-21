@@ -188,8 +188,8 @@ static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info,
 		path_info->paths_size = level + 32;
 		path_info->paths = realloc(path_info->paths, sizeof(xdebug_path*) * path_info->paths_size);
 
-		for (i = orig_size; i < XG(branches).size; i++) {
-			XG(branches).last_branch_nr[i] = -1;
+		for (i = orig_size; i < XG_COV(branches).size; i++) {
+			XG_COV(branches).last_branch_nr[i] = -1;
 		}
 
 		for (i = orig_size; i < path_info->paths_size; i++) {
@@ -307,7 +307,7 @@ void xdebug_path_info_dtor(xdebug_path_info *path_info)
 		xdebug_hash_destroy(path_info->path_hash);
 		path_info->path_hash = NULL;
 	}
-	
+
 	xdfree(path_info);
 }
 
@@ -358,14 +358,14 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 	xdebug_coverage_function *function;
 	xdebug_branch_info *branch_info;
 
-	if (XG(previous_mark_filename) && strcmp(XG(previous_mark_filename), file_name) == 0) {
-		file = XG(previous_mark_file);
+	if (XG_COV(previous_mark_filename) && strcmp(XG_COV(previous_mark_filename), file_name) == 0) {
+		file = XG_COV(previous_mark_file);
 	} else {
-		if (!xdebug_hash_find(XG(code_coverage_info), file_name, strlen(file_name), (void *) &file)) {
+		if (!xdebug_hash_find(XG_COV(code_coverage_info), file_name, strlen(file_name), (void *) &file)) {
 			return;
 		}
-		XG(previous_mark_filename) = file->name;
-		XG(previous_mark_file) = file;
+		XG_COV(previous_mark_filename) = file->name;
+		XG_COV(previous_mark_file) = file;
 	}
 
 	/* If there is no branch info, we don't have to do more */
@@ -390,26 +390,26 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 		void *dummy;
 
 		/* Mark out for previous branch, if one is set */
-		if (XG(branches).last_branch_nr[XG(level)] != -1) {
+		if (XG_COV(branches).last_branch_nr[XG_CORE(level)] != -1) {
 			size_t i = 0;
 
-			for (i = 0; i < branch_info->branches[XG(branches).last_branch_nr[XG(level)]].outs_count; i++) {
-				if (branch_info->branches[XG(branches).last_branch_nr[XG(level)]].outs[i] == opcode_nr) {
-					branch_info->branches[XG(branches).last_branch_nr[XG(level)]].outs_hit[i] = 1;
+			for (i = 0; i < branch_info->branches[XG_COV(branches).last_branch_nr[XG_CORE(level)]].outs_count; i++) {
+				if (branch_info->branches[XG_COV(branches).last_branch_nr[XG_CORE(level)]].outs[i] == opcode_nr) {
+					branch_info->branches[XG_COV(branches).last_branch_nr[XG_CORE(level)]].outs_hit[i] = 1;
 				}
 			}
 		}
 
-		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG(branches).last_branch_nr[XG(level)], XG(function_count));
-		if (!xdebug_hash_find(XG(visited_branches), key, strlen(key), (void*) &dummy)) {
-			xdebug_path_add(XG(paths_stack)->paths[XG(level)], opcode_nr);
-			xdebug_hash_add(XG(visited_branches), key, strlen(key), NULL);
+		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XG_CORE(level)], XG_CORE(function_count));
+		if (!xdebug_hash_find(XG_COV(visited_branches), key, strlen(key), (void*) &dummy)) {
+			xdebug_path_add(XG_COV(paths_stack)->paths[XG_CORE(level)], opcode_nr);
+			xdebug_hash_add(XG_COV(visited_branches), key, strlen(key), NULL);
 		}
 		xdfree(key);
 
 		branch_info->branches[opcode_nr].hit = 1;
 
-		XG(branches).last_branch_nr[XG(level)] = opcode_nr;
+		XG_COV(branches).last_branch_nr[XG_CORE(level)] = opcode_nr;
 	}
 }
 
@@ -420,14 +420,14 @@ void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *funct
 	xdebug_branch_info *branch_info;
 	xdebug_path *path;
 
-	if (XG(previous_mark_filename) && strcmp(XG(previous_mark_filename), filename) == 0) {
-		file = XG(previous_mark_file);
+	if (XG_COV(previous_mark_filename) && strcmp(XG_COV(previous_mark_filename), filename) == 0) {
+		file = XG_COV(previous_mark_file);
 	} else {
-		if (!xdebug_hash_find(XG(code_coverage_info), filename, strlen(filename), (void *) &file)) {
+		if (!xdebug_hash_find(XG_COV(code_coverage_info), filename, strlen(filename), (void *) &file)) {
 			return;
 		}
-		XG(previous_mark_filename) = file->name;
-		XG(previous_mark_file) = file;
+		XG_COV(previous_mark_filename) = file->name;
+		XG_COV(previous_mark_file) = file;
 	}
 
 	/* If there is no branch info, we don't have to do more */
@@ -453,18 +453,18 @@ void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_na
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
 
-	if (XG(previous_filename) && strcmp(XG(previous_filename), filename) == 0) {
-		file = XG(previous_file);
+	if (XG_COV(previous_filename) && strcmp(XG_COV(previous_filename), filename) == 0) {
+		file = XG_COV(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
-		if (!xdebug_hash_find(XG(code_coverage_info), filename, strlen(filename), (void *) &file)) {
+		if (!xdebug_hash_find(XG_COV(code_coverage_info), filename, strlen(filename), (void *) &file)) {
 			/* The file does not exist, so we add it to the hash */
 			file = xdebug_coverage_file_ctor(filename);
 
-			xdebug_hash_add(XG(code_coverage_info), filename, strlen(filename), file);
+			xdebug_hash_add(XG_COV(code_coverage_info), filename, strlen(filename), file);
 		}
-		XG(previous_filename) = file->name;
-		XG(previous_file) = file;
+		XG_COV(previous_filename) = file->name;
+		XG_COV(previous_file) = file;
 	}
 
 	/* Check if the function already exists in the hash */

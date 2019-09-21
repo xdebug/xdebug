@@ -681,7 +681,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
-	char      *format = XG(file_link_format);
+	char      *format = XINI_CORE(file_link_format);
 
 	while (*format)
 	{

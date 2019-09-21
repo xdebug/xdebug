@@ -128,7 +128,7 @@ static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html,
 			} ZEND_HASH_FOREACH_END();
 		} else if (ht && (z = zend_hash_find(ht, s))) {
 			dump_hash_elem(z, name, 0, elem->ptr, html, str TSRMLS_CC);
-		} else if(XG(dump_undefined)) {
+		} else if (XINI_CORE(dump_undefined)) {
 			dump_hash_elem(NULL, name, 0, elem->ptr, html, str TSRMLS_CC);
 		}
 
@@ -142,14 +142,14 @@ char* xdebug_get_printable_superglobals(int html TSRMLS_DC)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	dump_hash(&XG(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str TSRMLS_CC);
-	dump_hash(&XG(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str TSRMLS_CC);
-	dump_hash(&XG(post),    "_POST",    HASH_KEY_SIZEOF("_POST"),    html, &str TSRMLS_CC);
-	dump_hash(&XG(cookie),  "_COOKIE",  HASH_KEY_SIZEOF("_COOKIE"),  html, &str TSRMLS_CC);
-	dump_hash(&XG(files),   "_FILES",   HASH_KEY_SIZEOF("_FILES"),   html, &str TSRMLS_CC);
-	dump_hash(&XG(env),     "_ENV",     HASH_KEY_SIZEOF("_ENV"),     html, &str TSRMLS_CC);
-	dump_hash(&XG(session), "_SESSION", HASH_KEY_SIZEOF("_SESSION"), html, &str TSRMLS_CC);
-	dump_hash(&XG(request), "_REQUEST", HASH_KEY_SIZEOF("_REQUEST"), html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(post),    "_POST",    HASH_KEY_SIZEOF("_POST"),    html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(cookie),  "_COOKIE",  HASH_KEY_SIZEOF("_COOKIE"),  html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(files),   "_FILES",   HASH_KEY_SIZEOF("_FILES"),   html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(env),     "_ENV",     HASH_KEY_SIZEOF("_ENV"),     html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(session), "_SESSION", HASH_KEY_SIZEOF("_SESSION"), html, &str TSRMLS_CC);
+	dump_hash(&XG_CORE(request), "_REQUEST", HASH_KEY_SIZEOF("_REQUEST"), html, &str TSRMLS_CC);
 
 	return str.d;
 }
