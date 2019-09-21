@@ -22,7 +22,7 @@
 #include "php.h"
 #include "TSRM.h"
 #include "php_xdebug.h"
-#include "xdebug_private.h"
+#include "lib/xdebug_private.h"
 
 void xdebug_profiler_init(char *script_name);
 void xdebug_profiler_deinit();

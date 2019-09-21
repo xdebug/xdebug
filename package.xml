@@ -91,56 +91,71 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
    <file name="Makefile.frag" role="src" />
    <file name="php_xdebug.h" role="src" />
    <file name="README.rst" role="doc" />
-   <file name="usefulstuff.c" role="src" />
-   <file name="usefulstuff.h" role="src" />
    <file name="xdebug.c" role="src" />
-   <file name="xdebug_branch_info.c" role="src" />
-   <file name="xdebug_branch_info.h" role="src" />
-   <file name="xdebug_code_coverage.c" role="src" />
-   <file name="xdebug_code_coverage.h" role="src" />
-   <file name="xdebug_com.c" role="src" />
-   <file name="xdebug_com.h" role="src" />
-   <file name="xdebug_compat.c" role="src" />
-   <file name="xdebug_compat.h" role="src" />
-   <file name="xdebug_filter.c" role="src" />
-   <file name="xdebug_filter.h" role="src" />
-   <file name="xdebug_gc_stats.c" role="src" />
-   <file name="xdebug_gc_stats.h" role="src" />
-   <file name="xdebug_handlers.c" role="src" />
-   <file name="xdebug_handlers.h" role="src" />
-   <file name="xdebug_handler_dbgp.c" role="src" />
-   <file name="xdebug_handler_dbgp.h" role="src" />
-   <file name="xdebug_hash.c" role="src" />
-   <file name="xdebug_hash.h" role="src" />
-   <file name="xdebug_llist.c" role="src" />
-   <file name="xdebug_llist.h" role="src" />
-   <file name="xdebug_mm.h" role="src" />
-   <file name="xdebug_monitor.c" role="src" />
-   <file name="xdebug_monitor.h" role="src" />
-   <file name="xdebug_private.c" role="src" />
-   <file name="xdebug_private.h" role="src" />
-   <file name="xdebug_profiler.c" role="src" />
-   <file name="xdebug_profiler.h" role="src" />
-   <file name="xdebug_set.c" role="src" />
-   <file name="xdebug_set.h" role="src" />
-   <file name="xdebug_stack.c" role="src" />
-   <file name="xdebug_stack.h" role="src" />
-   <file name="xdebug_str.c" role="src" />
-   <file name="xdebug_str.h" role="src" />
-   <file name="xdebug_superglobals.c" role="src" />
-   <file name="xdebug_superglobals.h" role="src" />
-   <file name="xdebug_tracing.c" role="src" />
-   <file name="xdebug_tracing.h" role="src" />
-   <file name="xdebug_trace_textual.c" role="src" />
-   <file name="xdebug_trace_textual.h" role="src" />
-   <file name="xdebug_trace_computerized.c" role="src" />
-   <file name="xdebug_trace_computerized.h" role="src" />
-   <file name="xdebug_trace_html.c" role="src" />
-   <file name="xdebug_trace_html.h" role="src" />
-   <file name="xdebug_var.c" role="src" />
-   <file name="xdebug_var.h" role="src" />
-   <file name="xdebug_xml.c" role="src" />
-   <file name="xdebug_xml.h" role="src" />
+
+   <dir name="base">
+    <file name="xdebug_filter.c" role="src" />
+    <file name="xdebug_filter.h" role="src" />
+    <file name="xdebug_monitor.c" role="src" />
+    <file name="xdebug_monitor.h" role="src" />
+    <file name="xdebug_stack.c" role="src" />
+    <file name="xdebug_stack.h" role="src" />
+    <file name="xdebug_superglobals.c" role="src" />
+    <file name="xdebug_superglobals.h" role="src" />
+   </dir>
+   <dir name="lib">
+    <file name="usefulstuff.c" role="src" />
+    <file name="usefulstuff.h" role="src" />
+    <file name="xdebug_compat.c" role="src" />
+    <file name="xdebug_compat.h" role="src" />
+    <file name="xdebug_hash.c" role="src" />
+    <file name="xdebug_hash.h" role="src" />
+    <file name="xdebug_llist.c" role="src" />
+    <file name="xdebug_llist.h" role="src" />
+    <file name="xdebug_mm.h" role="src" />
+    <file name="xdebug_private.c" role="src" />
+    <file name="xdebug_private.h" role="src" />
+    <file name="xdebug_set.c" role="src" />
+    <file name="xdebug_set.h" role="src" />
+    <file name="xdebug_str.c" role="src" />
+    <file name="xdebug_str.h" role="src" />
+    <file name="xdebug_var.c" role="src" />
+    <file name="xdebug_var.h" role="src" />
+    <file name="xdebug_xml.c" role="src" />
+    <file name="xdebug_xml.h" role="src" />
+   </dir>
+   <dir name="coverage">
+    <file name="xdebug_branch_info.c" role="src" />
+    <file name="xdebug_branch_info.h" role="src" />
+    <file name="xdebug_code_coverage.c" role="src" />
+    <file name="xdebug_code_coverage.h" role="src" />
+   </dir>
+   <dir name="debugger">
+    <file name="xdebug_com.c" role="src" />
+    <file name="xdebug_com.h" role="src" />
+    <file name="xdebug_handlers.c" role="src" />
+    <file name="xdebug_handlers.h" role="src" />
+    <file name="xdebug_handler_dbgp.c" role="src" />
+    <file name="xdebug_handler_dbgp.h" role="src" />
+   </dir>
+   <dir name="gcstats">
+    <file name="xdebug_gc_stats.c" role="src" />
+    <file name="xdebug_gc_stats.h" role="src" />
+   </dir>
+   <dir name="profiler">
+    <file name="xdebug_profiler.c" role="src" />
+    <file name="xdebug_profiler.h" role="src" />
+   </dir>
+   <dir name="tracing">
+    <file name="xdebug_tracing.c" role="src" />
+    <file name="xdebug_tracing.h" role="src" />
+    <file name="xdebug_trace_textual.c" role="src" />
+    <file name="xdebug_trace_textual.h" role="src" />
+    <file name="xdebug_trace_computerized.c" role="src" />
+    <file name="xdebug_trace_computerized.h" role="src" />
+    <file name="xdebug_trace_html.c" role="src" />
+    <file name="xdebug_trace_html.h" role="src" />
+   </dir>
   </dir> <!-- / -->
  </contents>
  <dependencies>

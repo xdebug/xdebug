@@ -15,18 +15,19 @@
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
-#include "php_xdebug.h"
-#include "xdebug_private.h"
-#include "xdebug_str.h"
-#include "xdebug_tracing.h"
-#include "xdebug_var.h"
+#include "php.h"
 #include "ext/standard/php_string.h"
 
-#include "xdebug_compat.h"
+#include "php_xdebug.h"
 #include "xdebug_tracing.h"
 #include "xdebug_trace_textual.h"
 #include "xdebug_trace_computerized.h"
 #include "xdebug_trace_html.h"
+
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_str.h"
+#include "lib/xdebug_var.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

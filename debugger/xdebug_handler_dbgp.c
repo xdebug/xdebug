@@ -36,21 +36,18 @@
 #include "php_globals.h"
 #include "php_xdebug.h"
 
-#include "xdebug_private.h"
-#include "xdebug_compat.h"
-
-#include "coverage/xdebug_code_coverage.h"
-
 #include "xdebug_com.h"
-#include "xdebug_compat.h"
 #include "xdebug_handler_dbgp.h"
-#include "xdebug_hash.h"
-#include "xdebug_llist.h"
-#include "xdebug_mm.h"
-#include "xdebug_private.h"
-#include "xdebug_stack.h"
-#include "xdebug_var.h"
-#include "xdebug_xml.h"
+
+#include "base/xdebug_stack.h"
+#include "coverage/xdebug_code_coverage.h"
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_hash.h"
+#include "lib/xdebug_llist.h"
+#include "lib/xdebug_mm.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_var.h"
+#include "lib/xdebug_xml.h"
 
 #ifdef PHP_WIN32
 #include "win32/time.h"

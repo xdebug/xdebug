@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "php_xdebug.h"
-#include "xdebug_str.h"
-#include "xdebug_hash.h"
+#include "lib/xdebug_hash.h"
+#include "lib/xdebug_str.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

@@ -20,10 +20,13 @@
 #define __HAVE_XDEBUG_CODE_COVERAGE_H__
 
 #include "php.h"
-#include "xdebug_compat.h"
-#include "xdebug_hash.h"
-#include "xdebug_mm.h"
+
 #include "xdebug_branch_info.h"
+
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_hash.h"
+#include "lib/xdebug_mm.h"
 
 typedef struct xdebug_coverage_line {
 	int lineno;

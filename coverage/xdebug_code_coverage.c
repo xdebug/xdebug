@@ -17,15 +17,17 @@
  */
 
 #include "php_xdebug.h"
-#include "xdebug_private.h"
-#include "xdebug_filter.h"
-#include "xdebug_set.h"
-#include "xdebug_stack.h"
-#include "xdebug_var.h"
+
 #include "xdebug_branch_info.h"
 #include "xdebug_code_coverage.h"
-#include "xdebug_compat.h"
-#include "xdebug_tracing.h"
+
+#include "base/xdebug_filter.h"
+#include "base/xdebug_stack.h"
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_set.h"
+#include "lib/xdebug_var.h"
+#include "tracing/xdebug_tracing.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 

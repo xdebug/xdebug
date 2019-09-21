@@ -18,11 +18,11 @@
 
 #include "zend.h"
 #include "php_xdebug.h"
-#include "xdebug_compat.h"
-#include "xdebug_str.h"
-#include "xdebug_xml.h"
-#include "xdebug_compat.h"
-#include "xdebug_private.h"
+
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_str.h"
+#include "lib/xdebug_xml.h"
 
 #ifndef __HAVE_XDEBUG_VAR_H__
 #define __HAVE_XDEBUG_VAR_H__

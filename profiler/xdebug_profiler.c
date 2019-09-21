@@ -16,19 +16,22 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php.h"
-#include "TSRM.h"
-#include "php_globals.h"
-#include "php_xdebug.h"
-#include "Zend/zend_alloc.h"
-#include "xdebug_mm.h"
-#include "xdebug_profiler.h"
-#include "xdebug_str.h"
-#include "xdebug_var.h"
-#include "usefulstuff.h"
 #ifdef PHP_WIN32
 #include <process.h>
 #endif
+
+#include "php.h"
+#include "TSRM.h"
+#include "php_globals.h"
+#include "Zend/zend_alloc.h"
+
+#include "php_xdebug.h"
+#include "xdebug_profiler.h"
+
+#include "lib/xdebug_mm.h"
+#include "lib/xdebug_str.h"
+#include "lib/xdebug_var.h"
+#include "lib/usefulstuff.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

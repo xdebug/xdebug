@@ -18,9 +18,10 @@
 
 #include "php_xdebug.h"
 
-#include "xdebug_compat.h"
-#include "xdebug_hash.h"
 #include "xdebug_monitor.h"
+
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_hash.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

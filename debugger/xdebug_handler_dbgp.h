@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include "xdebug_handlers.h"
-#include "xdebug_xml.h"
+#include "lib/xdebug_xml.h"
 
 #define DBGP_VERSION "1.0"
 

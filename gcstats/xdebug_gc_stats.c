@@ -15,13 +15,15 @@
    | Authors: Benjamin Eberlei <kontakt@beberlei.de>                      |
    +----------------------------------------------------------------------+
  */
-
-#include "php_xdebug.h"
-#include "xdebug_gc_stats.h"
-#include "xdebug_stack.h"
+#include "php.h"
 #include "zend_builtin_functions.h"
 #include "SAPI.h"
 #include "Zend/zend_long.h"
+
+#include "php_xdebug.h"
+#include "xdebug_gc_stats.h"
+
+#include "base/xdebug_stack.h"
 
 /* Set correct int format to use */
 #if SIZEOF_ZEND_LONG == 4

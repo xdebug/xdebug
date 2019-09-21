@@ -16,8 +16,10 @@
    +----------------------------------------------------------------------+
  */
 #include "php_xdebug.h"
-#include "xdebug_private.h"
+
 #include "xdebug_filter.h"
+
+#include "lib/xdebug_private.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

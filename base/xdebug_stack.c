@@ -16,21 +16,23 @@
    +----------------------------------------------------------------------+
  */
 #include "php_xdebug.h"
-#include "xdebug_private.h"
-#include "xdebug_code_coverage.h"
-#include "xdebug_com.h"
-#include "xdebug_compat.h"
-#include "xdebug_filter.h"
-#include "xdebug_monitor.h"
-#include "xdebug_profiler.h"
-#include "xdebug_stack.h"
-#include "xdebug_str.h"
-#include "xdebug_superglobals.h"
-#include "xdebug_var.h"
-#include "ext/standard/html.h"
-#include "ext/standard/php_smart_string.h"
 
 #include "main/php_ini.h"
+
+#include "ext/standard/html.h"
+#include "ext/standard/php_smart_string.h"
+#include "xdebug_stack.h"
+
+#include "base/xdebug_filter.h"
+#include "base/xdebug_monitor.h"
+#include "base/xdebug_superglobals.h"
+#include "coverage/xdebug_code_coverage.h"
+#include "debugger/xdebug_com.h"
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_str.h"
+#include "lib/xdebug_var.h"
+#include "profiler/xdebug_profiler.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

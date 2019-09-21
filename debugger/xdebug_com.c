@@ -49,8 +49,9 @@
 # define poll WSAPoll
 #endif
 
-#include "xdebug_private.h"
 #include "xdebug_com.h"
+
+#include "lib/xdebug_private.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

@@ -15,9 +15,12 @@
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
-#include "xdebug_trace_computerized.h"
-#include "xdebug_var.h"
+#include "php.h"
 #include "ext/standard/php_string.h"
+
+#include "xdebug_trace_computerized.h"
+
+#include "lib/xdebug_var.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 

@@ -24,7 +24,7 @@
 
 #include "php.h"
 #include "main/php_version.h"
-#include "xdebug_compat.h"
+#include "lib/xdebug_compat.h"
 
 #if HAVE_XDEBUG
 
@@ -48,22 +48,22 @@
 #include "ext/standard/php_var.h"
 #include "Zend/zend_closures.h"
 
-
 #include "php_xdebug.h"
-#include "xdebug_private.h"
-#include "xdebug_code_coverage.h"
-#include "xdebug_com.h"
-#include "xdebug_filter.h"
-#include "xdebug_gc_stats.h"
-#include "xdebug_llist.h"
-#include "xdebug_mm.h"
-#include "xdebug_monitor.h"
-#include "xdebug_var.h"
-#include "xdebug_profiler.h"
-#include "xdebug_stack.h"
-#include "xdebug_superglobals.h"
-#include "xdebug_tracing.h"
-#include "usefulstuff.h"
+
+#include "base/xdebug_filter.h"
+#include "base/xdebug_monitor.h"
+#include "base/xdebug_stack.h"
+#include "base/xdebug_superglobals.h"
+#include "coverage/xdebug_code_coverage.h"
+#include "debugger/xdebug_com.h"
+#include "gcstats/xdebug_gc_stats.h"
+#include "lib/usefulstuff.h"
+#include "lib/xdebug_llist.h"
+#include "lib/xdebug_mm.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_var.h"
+#include "profiler/xdebug_profiler.h"
+#include "tracing/xdebug_tracing.h"
 
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);

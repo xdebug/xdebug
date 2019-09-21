@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-#include "xdebug_str.h"
+#include "lib/xdebug_str.h"
 
 #ifndef __HAVE_XDEBUG_XML_H__
 #define __HAVE_XDEBUG_XML_H__

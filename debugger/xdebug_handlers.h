@@ -20,11 +20,11 @@
 #define __HAVE_XDEBUG_HANDLERS_H__
 
 #include "php_xdebug.h"
-#include "xdebug_compat.h"
-#include "xdebug_llist.h"
-#include "xdebug_hash.h"
-#include "xdebug_private.h"
-#include "usefulstuff.h"
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_llist.h"
+#include "lib/xdebug_hash.h"
+#include "lib/xdebug_private.h"
+#include "lib/usefulstuff.h"
 
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;

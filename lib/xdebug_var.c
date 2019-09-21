@@ -26,11 +26,12 @@
 #include "zend_smart_str.h"
 
 #include "php_xdebug.h"
-#include "xdebug_compat.h"
-#include "xdebug_private.h"
-#include "xdebug_mm.h"
-#include "xdebug_var.h"
-#include "xdebug_xml.h"
+
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_mm.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_var.h"
+#include "lib/xdebug_xml.h"
 
 /* Set correct int format to use */
 #include "Zend/zend_long.h"

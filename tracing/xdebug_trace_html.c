@@ -16,7 +16,8 @@
    +----------------------------------------------------------------------+
  */
 #include "xdebug_trace_html.h"
-#include "xdebug_var.h"
+
+#include "lib/xdebug_var.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 

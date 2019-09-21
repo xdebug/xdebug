@@ -19,7 +19,7 @@
 #ifndef XDEBUG_STACK_H
 #define XDEBUG_STACK_H
 
-#include "xdebug_str.h"
+#include "lib/xdebug_str.h"
 
 #define XDEBUG_STACK_NO_DESC 0x01
 

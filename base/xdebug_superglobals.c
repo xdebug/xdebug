@@ -17,12 +17,14 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php_xdebug.h"
-#include "xdebug_private.h"
-#include "xdebug_var.h"
-#include "xdebug_compat.h"
-#include "xdebug_superglobals.h"
 #include "SAPI.h"
+
+#include "php_xdebug.h"
+#include "xdebug_superglobals.h"
+
+#include "lib/xdebug_compat.h"
+#include "lib/xdebug_private.h"
+#include "lib/xdebug_var.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 

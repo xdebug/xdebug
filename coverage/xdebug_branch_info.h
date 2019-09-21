@@ -19,9 +19,11 @@
 #ifndef __HAVE_XDEBUG_BRANCH_INFO_H__
 #define __HAVE_XDEBUG_BRANCH_INFO_H__
 
-#include "xdebug_set.h"
-#include "xdebug_str.h"
 #include "zend_compile.h"
+
+#include "lib/xdebug_hash.h"
+#include "lib/xdebug_set.h"
+#include "lib/xdebug_str.h"
 
 #if ZEND_USE_ABS_JMP_ADDR
 # define XDEBUG_ZNODE_JMP_LINE(node, opline, base)  (int32_t)(((long)((node).jmp_addr) - (long)(base_address)) / sizeof(zend_op))
