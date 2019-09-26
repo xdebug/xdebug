@@ -33,8 +33,8 @@
 #include <process.h>
 #endif
 #include "php_xdebug.h"
-#include "xdebug_mm.h"
-#include "xdebug_str.h"
+#include "mm.h"
+#include "str.h"
 #include "usefulstuff.h"
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/flock_compat.h"

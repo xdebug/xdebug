@@ -29,12 +29,12 @@
 
 #include "php.h"
 
-#include "coverage/xdebug_branch_info.h"
-#include "coverage/xdebug_code_coverage.h"
-#include "debugger/xdebug_handlers.h"
-#include "lib/xdebug_compat.h"
-#include "lib/xdebug_hash.h"
-#include "lib/xdebug_llist.h"
+#include "coverage/branch_info.h"
+#include "coverage/code_coverage.h"
+#include "debugger/handlers.h"
+#include "lib/compat.h"
+#include "lib/hash.h"
+#include "lib/llist.h"
 
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry

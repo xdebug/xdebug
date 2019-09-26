@@ -3,14 +3,14 @@
 ARG_WITH("xdebug", "Xdebug support", "no");
 
 if (PHP_XDEBUG != 'no') {
-	var XDEBUG_BASE_SOURCES="xdebug_filter.c xdebug_monitor.c xdebug_stack.c xdebug_superglobals.c"
-	var XDEBUG_LIB_SOURCES="usefulstuff.c xdebug_compat.c xdebug_hash.c xdebug_llist.c xdebug_private.c xdebug_set.c xdebug_str.c xdebug_var.c xdebug_xml.c"
+	var XDEBUG_BASE_SOURCES="filter.c monitor.c stack.c superglobals.c"
+	var XDEBUG_LIB_SOURCES="usefulstuff.c compat.c hash.c llist.c private.c set.c str.c var.c xml.c"
 
-	var XDEBUG_COVERAGE_SOURCES="xdebug_branch_info.c xdebug_code_coverage.c"
-	var XDEBUG_DEBUGGER_SOURCES="xdebug_com.c xdebug_handler_dbgp.c xdebug_handlers.c"
-	var XDEBUG_GCSTATS_SOURCES="xdebug_gc_stats.c"
-	var XDEBUG_PROFILER_SOURCES="xdebug_profiler.c"
-	var XDEBUG_TRACING_SOURCES="xdebug_trace_computerized.c xdebug_trace_html.c xdebug_trace_textual.c xdebug_tracing.c"
+	var XDEBUG_COVERAGE_SOURCES="branch_info.c code_coverage.c"
+	var XDEBUG_DEBUGGER_SOURCES="com.c handler_dbgp.c handlers.c"
+	var XDEBUG_GCSTATS_SOURCES="gc_stats.c"
+	var XDEBUG_PROFILER_SOURCES="profiler.c"
+	var XDEBUG_TRACING_SOURCES="trace_computerized.c trace_html.c trace_textual.c tracing.c"
 	
 	var files = "xdebug.c";
 

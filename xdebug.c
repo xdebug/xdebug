@@ -24,7 +24,7 @@
 
 #include "php.h"
 #include "main/php_version.h"
-#include "lib/xdebug_compat.h"
+#include "lib/compat.h"
 
 #if HAVE_XDEBUG
 
@@ -50,20 +50,20 @@
 
 #include "php_xdebug.h"
 
-#include "base/xdebug_filter.h"
-#include "base/xdebug_monitor.h"
-#include "base/xdebug_stack.h"
-#include "base/xdebug_superglobals.h"
-#include "coverage/xdebug_code_coverage.h"
-#include "debugger/xdebug_com.h"
-#include "gcstats/xdebug_gc_stats.h"
+#include "base/filter.h"
+#include "base/monitor.h"
+#include "base/stack.h"
+#include "base/superglobals.h"
+#include "coverage/code_coverage.h"
+#include "debugger/com.h"
+#include "gcstats/gc_stats.h"
 #include "lib/usefulstuff.h"
-#include "lib/xdebug_llist.h"
-#include "lib/xdebug_mm.h"
-#include "lib/xdebug_private.h"
-#include "lib/xdebug_var.h"
-#include "profiler/xdebug_profiler.h"
-#include "tracing/xdebug_tracing.h"
+#include "lib/llist.h"
+#include "lib/mm.h"
+#include "lib/private.h"
+#include "lib/var.h"
+#include "profiler/profiler.h"
+#include "tracing/tracing.h"
 
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
