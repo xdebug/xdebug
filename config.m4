@@ -77,16 +77,19 @@ if test "$PHP_XDEBUG" != "no"; then
 
   PHP_XDEBUG_CFLAGS="$STD_CFLAGS $MAINTAINER_CFLAGS"
 
-  XDEBUG_BASE_SOURCES="base/xdebug_filter.c base/xdebug_monitor.c base/xdebug_stack.c base/xdebug_superglobals.c"
-  XDEBUG_LIB_SOURCES="lib/usefulstuff.c lib/xdebug_compat.c lib/xdebug_hash.c lib/xdebug_llist.c lib/xdebug_private.c lib/xdebug_set.c lib/xdebug_str.c lib/xdebug_var.c lib/xdebug_xml.c"
+  XDEBUG_BASE_SOURCES="src/base/xdebug_filter.c src/base/xdebug_monitor.c src/base/xdebug_stack.c src/base/xdebug_superglobals.c"
+  XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/xdebug_compat.c src/lib/xdebug_hash.c src/lib/xdebug_llist.c src/lib/xdebug_private.c src/lib/xdebug_set.c src/lib/xdebug_str.c src/lib/xdebug_var.c src/lib/xdebug_xml.c"
 
-  XDEBUG_COVERAGE_SOURCES="coverage/xdebug_branch_info.c coverage/xdebug_code_coverage.c"
-  XDEBUG_DEBUGGER_SOURCES="debugger/xdebug_com.c debugger/xdebug_handler_dbgp.c debugger/xdebug_handlers.c"
-  XDEBUG_GCSTATS_SOURCES="gcstats/xdebug_gc_stats.c"
-  XDEBUG_PROFILER_SOURCES="profiler/xdebug_profiler.c"
-  XDEBUG_TRACING_SOURCES="tracing/xdebug_trace_computerized.c tracing/xdebug_trace_html.c tracing/xdebug_trace_textual.c tracing/xdebug_tracing.c"
+  XDEBUG_COVERAGE_SOURCES="src/coverage/xdebug_branch_info.c src/coverage/xdebug_code_coverage.c"
+  XDEBUG_DEBUGGER_SOURCES="src/debugger/xdebug_com.c src/debugger/xdebug_handler_dbgp.c src/debugger/xdebug_handlers.c"
+  XDEBUG_GCSTATS_SOURCES="src/gcstats/xdebug_gc_stats.c"
+  XDEBUG_PROFILER_SOURCES="src/profiler/xdebug_profiler.c"
+  XDEBUG_TRACING_SOURCES="src/tracing/xdebug_trace_computerized.c src/tracing/xdebug_trace_html.c src/tracing/xdebug_trace_textual.c src/tracing/xdebug_tracing.c"
 
   PHP_NEW_EXTENSION(xdebug, xdebug.c $XDEBUG_BASE_SOURCES $XDEBUG_LIB_SOURCES $XDEBUG_COVERAGE_SOURCES $XDEBUG_DEBUGGER_SOURCES $XDEBUG_GCSTATS_SOURCES $XDEBUG_PROFILER_SOURCES $XDEBUG_TRACING_SOURCES, $ext_shared,,$PHP_XDEBUG_CFLAGS,,yes)
   PHP_SUBST(XDEBUG_SHARED_LIBADD)
   PHP_ADD_MAKEFILE_FRAGMENT
+
+  PHP_ADD_INCLUDE($ext_srcdir/src)
+  PHP_ADD_INCLUDE($ext_builddir/src)
 fi

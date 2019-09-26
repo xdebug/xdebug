@@ -20,13 +20,14 @@ if (PHP_XDEBUG != 'no') {
 		ZEND_EXTENSION('xdebug', files);
 	}
 	ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + " ");
-	ADD_SOURCES(configure_module_dirname + "/base", XDEBUG_BASE_SOURCES, "xdebug");
-	ADD_SOURCES(configure_module_dirname + "/lib", XDEBUG_LIB_SOURCES, "xdebug");
-	ADD_SOURCES(configure_module_dirname + "/coverage", XDEBUG_COVERAGE_SOURCES, "xdebug");
-	ADD_SOURCES(configure_module_dirname + "/debugger", XDEBUG_DEBUGGER_SOURCES, "xdebug");
-	ADD_SOURCES(configure_module_dirname + "/gcstats", XDEBUG_GCSTATS_SOURCES, "xdebug");
-	ADD_SOURCES(configure_module_dirname + "/profiler", XDEBUG_PROFILER_SOURCES, "xdebug");
-	ADD_SOURCES(configure_module_dirname + "/tracing", XDEBUG_TRACING_SOURCES, "xdebug");
+	ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + "/src ");
+	ADD_SOURCES(configure_module_dirname + "/src/base", XDEBUG_BASE_SOURCES, "xdebug");
+	ADD_SOURCES(configure_module_dirname + "/src/lib", XDEBUG_LIB_SOURCES, "xdebug");
+	ADD_SOURCES(configure_module_dirname + "/src/coverage", XDEBUG_COVERAGE_SOURCES, "xdebug");
+	ADD_SOURCES(configure_module_dirname + "/src/debugger", XDEBUG_DEBUGGER_SOURCES, "xdebug");
+	ADD_SOURCES(configure_module_dirname + "/src/gcstats", XDEBUG_GCSTATS_SOURCES, "xdebug");
+	ADD_SOURCES(configure_module_dirname + "/src/profiler", XDEBUG_PROFILER_SOURCES, "xdebug");
+	ADD_SOURCES(configure_module_dirname + "/src/tracing", XDEBUG_TRACING_SOURCES, "xdebug");
 
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
 }
