@@ -1022,8 +1022,8 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	jmp_buf           *original_bailout = EG(bailout);
 
 	/* Remember error reporting level and track errors */
-	XG_CORE(error_reporting_override) = EG(error_reporting);
-	XG_CORE(error_reporting_overridden) = 1;
+	XG_BASE(error_reporting_override) = EG(error_reporting);
+	XG_BASE(error_reporting_overridden) = 1;
 	old_track_errors = PG(track_errors);
 	EG(error_reporting) = 0;
 	PG(track_errors) = 0;
@@ -1044,8 +1044,8 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval TSRMLS_DC)
 	}
 
 	/* Clean up */
-	EG(error_reporting) = XG_CORE(error_reporting_override);
-	XG_CORE(error_reporting_overridden) = 0;
+	EG(error_reporting) = XG_BASE(error_reporting_override);
+	XG_BASE(error_reporting_overridden) = 0;
 	PG(track_errors) = old_track_errors;
 	XG_DBG(breakpoints_allowed) = 1;
 
@@ -1911,7 +1911,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 DBGP_FUNC(stack_depth)
 {
-	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%lu", XG_CORE(level)), 0, 1);
+	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%lu", XG_BASE(level)), 0, 1);
 }
 
 DBGP_FUNC(stack_get)
@@ -1923,7 +1923,7 @@ DBGP_FUNC(stack_get)
 
 	if (CMD_OPTION_SET('d')) {
 		depth = strtol(CMD_OPTION_CHAR('d'), NULL, 10);
-		if (depth >= 0 && depth < (long) XG_CORE(level)) {
+		if (depth >= 0 && depth < (long) XG_BASE(level)) {
 			stackframe = return_stackframe(depth TSRMLS_CC);
 			xdebug_xml_add_child(*retval, stackframe);
 		} else {
@@ -1931,7 +1931,7 @@ DBGP_FUNC(stack_get)
 		}
 	} else {
 		counter = 0;
-		for (le = XDEBUG_LLIST_TAIL(XG_CORE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+		for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
 			stackframe = return_stackframe(counter TSRMLS_CC);
 			xdebug_xml_add_child(*retval, stackframe);
 			counter++;
@@ -2013,7 +2013,7 @@ DBGP_FUNC(xcmd_get_executable_lines)
 	}
 
 	depth = strtol(CMD_OPTION_CHAR('d'), NULL, 10);
-	if (depth >= 0 && depth < (long) XG_CORE(level)) {
+	if (depth >= 0 && depth < (long) XG_BASE(level)) {
 		fse = xdebug_get_stack_frame(depth TSRMLS_CC);
 	} else {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);

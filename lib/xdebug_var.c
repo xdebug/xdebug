@@ -62,18 +62,18 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
 	zval dzval = **zval_pp;
 	HashTable *tmp;
 
-	if (!XG_CORE(in_debug_info) && object_or_ancestor_is_internal(dzval) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
+	if (!XG_BASE(in_debug_info) && object_or_ancestor_is_internal(dzval) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
 		void        *old_trace = XG_TRACE(trace_context);
 		zend_object *orig_exception;
 
 		XG_TRACE(trace_context) = NULL;
-		XG_CORE(in_debug_info) = 1;
+		XG_BASE(in_debug_info) = 1;
 		orig_exception = EG(exception);
 		EG(exception) = NULL;
 
 		tmp = Z_OBJ_HANDLER(dzval, get_debug_info)(&dzval, is_tmp TSRMLS_CC);
 
-		XG_CORE(in_debug_info) = 0;
+		XG_BASE(in_debug_info) = 0;
 		XG_TRACE(trace_context) = old_trace;
 		EG(exception) = orig_exception;
 		return tmp;
@@ -863,11 +863,11 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D)
 	xdebug_var_export_options *options;
 	options = xdmalloc(sizeof(xdebug_var_export_options));
 
-	options->max_children = XINI_CORE(display_max_children);
-	options->max_data = XINI_CORE(display_max_data);
-	options->max_depth = XINI_CORE(display_max_depth);
+	options->max_children = XINI_BASE(display_max_children);
+	options->max_data = XINI_BASE(display_max_data);
+	options->max_depth = XINI_BASE(display_max_depth);
 	options->show_hidden = 0;
-	options->show_location = XINI_CORE(overload_var_dump) > 1;
+	options->show_location = XINI_BASE(overload_var_dump) > 1;
 	options->extended_properties = 0;
 	options->encode_as_extended_property = 0;
 
@@ -1544,7 +1544,7 @@ xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval,
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
 
-		xdebug_format_filename(&formatted_filename, XINI_CORE(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
+		xdebug_format_filename(&formatted_filename, XINI_BASE(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
 		xdebug_str_add(str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, formatted_filename, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(TSRMLS_C), ANSI_COLOR_BOLD_OFF), 1);
 		xdfree(formatted_filename);
 	}
@@ -2581,9 +2581,9 @@ xdebug_str* xdebug_get_zval_value_fancy(char *name, zval *val, int debug_zval, x
 	xdebug_str_addl(str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
-		xdebug_format_filename(&formatted_filename, XINI_CORE(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
+		xdebug_format_filename(&formatted_filename, XINI_BASE(filename_format), "%f", zend_get_executed_filename(TSRMLS_C));
 
-		if (strlen(XINI_CORE(file_link_format)) > 0) {
+		if (strlen(XINI_BASE(file_link_format)) > 0) {
 			char *file_link;
 
 			xdebug_format_file_link(&file_link, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
@@ -2617,11 +2617,11 @@ xdebug_str* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_v
 	}
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
-	XG_CORE(in_var_serialisation) = 1;
+	XG_BASE(in_var_serialisation) = 1;
 	EG(exception) = NULL;
 	php_var_serialize(&buf, val, &var_hash TSRMLS_CC);
 	orig_exception = EG(exception) = orig_exception;
-	XG_CORE(in_var_serialisation) = 0;
+	XG_BASE(in_var_serialisation) = 0;
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 	if (buf.a) {

@@ -84,7 +84,7 @@ static const char** select_formats(int html TSRMLS_DC) {
 	if (html) {
 		return html_formats;
 	}
-	else if ((XINI_CORE(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XINI_CORE(cli_color) == 2)) {
+	else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XINI_BASE(cli_color) == 2)) {
 		return ansi_formats;
 	}
 	else {
@@ -170,10 +170,10 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 	php_log_err(tmp_log_message TSRMLS_CC);
 	xdfree(tmp_log_message);
 
-	if (XG_CORE(stack) && XG_CORE(stack)->size) {
+	if (XG_BASE(stack) && XG_BASE(stack)->size) {
 		php_log_err((char*) "PHP Stack trace:" TSRMLS_CC);
 
-		for (le = XDEBUG_LLIST_HEAD(XG_CORE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
+		for (le = XDEBUG_LLIST_HEAD(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
@@ -198,7 +198,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				}
 
 				if (
-					(i->var[j].is_variadic && XINI_CORE(collect_params) != 5)
+					(i->var[j].is_variadic && XINI_BASE(collect_params) != 5)
 				) {
 					xdebug_str_add(&log_buffer, "...", 0);
 					variadic_opened = 1;
@@ -239,13 +239,13 @@ void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_
 	const char **formats = select_formats(html TSRMLS_CC);
 
 	if (html) {
-		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str, XG_CORE(in_at) ? " xe-scream" : ""), 1);
-		if (XG_CORE(in_at)) {
+		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str, XG_BASE(in_at) ? " xe-scream" : ""), 1);
+		if (XG_BASE(in_at)) {
 			xdebug_str_add(str, formats[12], 0);
 		}
 	} else {
 		xdebug_str_add(str, formats[0], 0);
-		if (XG_CORE(in_at)) {
+		if (XG_BASE(in_at)) {
 			xdebug_str_add(str, formats[10], 0);
 		}
 	}
@@ -293,7 +293,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		escaped = estrdup(buffer);
 	}
 
-	if (strlen(XINI_CORE(file_link_format)) > 0 && html) {
+	if (strlen(XINI_BASE(file_link_format)) > 0 && html) {
 		char *file_link;
 
 		xdebug_format_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
@@ -392,12 +392,12 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 	int                   printed_frames = 0;
 	const char          **formats = select_formats(html TSRMLS_CC);
 
-	if (XG_CORE(stack) && XG_CORE(stack)->size) {
-		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG_CORE(stack)));
+	if (XG_BASE(stack) && XG_BASE(stack)->size) {
+		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG_BASE(stack)));
 
 		xdebug_str_add(str, formats[2], 0);
 
-		for (le = XDEBUG_LLIST_HEAD(XG_CORE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
+		for (le = XDEBUG_LLIST_HEAD(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
@@ -410,9 +410,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			}
 			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
 			if (html) {
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG_CORE(start_time), i->memory, tmp_name), 1);
+				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG_BASE(start_time), i->memory, tmp_name), 1);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->time - XG_CORE(start_time), i->memory, i->level, tmp_name), 1);
+				xdebug_str_add(str, xdebug_sprintf(formats[3], i->time - XG_BASE(start_time), i->memory, i->level, tmp_name), 1);
 			}
 			xdfree(tmp_name);
 
@@ -430,7 +430,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 					xdebug_str_add(str, "...", 0);
 				}
 
-				if (i->var[j].name && XINI_CORE(collect_params) == 4) {
+				if (i->var[j].name && XINI_BASE(collect_params) == 4) {
 					if (html) {
 						xdebug_str_add(str, xdebug_sprintf("<span>$%s = </span>", i->var[j].name), 1);
 					} else {
@@ -450,7 +450,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				}
 
 				if (!Z_ISUNDEF(i->var[j].data)) {
-					add_single_value(str, &i->var[j].data, html, XINI_CORE(collect_params) TSRMLS_CC);
+					add_single_value(str, &i->var[j].data, html, XINI_BASE(collect_params) TSRMLS_CC);
 				} else {
 					xdebug_str_addl(str, "???", 3, 0);
 				}
@@ -466,9 +466,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 			if (html) {
 				char *formatted_filename;
-				xdebug_format_filename(&formatted_filename, XINI_CORE(filename_format), "...%s%n", i->filename);
+				xdebug_format_filename(&formatted_filename, XINI_BASE(filename_format), "...%s%n", i->filename);
 
-				if (strlen(XINI_CORE(file_link_format)) > 0) {
+				if (strlen(XINI_BASE(file_link_format)) > 0) {
 					char *file_link;
 
 					xdebug_format_file_link(&file_link, i->filename, i->lineno TSRMLS_CC);
@@ -484,26 +484,26 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			}
 
 			printed_frames++;
-			if (XINI_CORE(max_stack_frames) > 0 && printed_frames >= XINI_CORE(max_stack_frames)) {
+			if (XINI_BASE(max_stack_frames) > 0 && printed_frames >= XINI_BASE(max_stack_frames)) {
 				break;
 			}
 		}
 
-		if (XINI_CORE(dump_globals) && !(XINI_CORE(dump_once) && XG_CORE(dumped))) {
+		if (XINI_BASE(dump_globals) && !(XINI_BASE(dump_once) && XG_BASE(dumped))) {
 			char *tmp = xdebug_get_printable_superglobals(html TSRMLS_CC);
 
 			if (tmp) {
 				xdebug_str_add(str, tmp, 1);
 			}
-			XG_CORE(dumped) = 1;
+			XG_BASE(dumped) = 1;
 		}
 
-		if (XINI_CORE(show_local_vars) && XG_CORE(stack) && XDEBUG_LLIST_TAIL(XG_CORE(stack))) {
-			int scope_nr = XG_CORE(stack)->size;
+		if (XINI_BASE(show_local_vars) && XG_BASE(stack) && XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
+			int scope_nr = XG_BASE(stack)->size;
 
-			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack)));
-			if (i->user_defined == XDEBUG_BUILT_IN && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_CORE(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_CORE(stack))))) {
-				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_CORE(stack))));
+			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
+			if (i->user_defined == XDEBUG_BUILT_IN && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_BASE(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_BASE(stack))))) {
+				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_BASE(stack))));
 				scope_nr--;
 			}
 			if (i->declared_vars && i->declared_vars->size) {
@@ -601,8 +601,8 @@ char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *erro
 		xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception" TSRMLS_CC);
 		xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
 		xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
-		if (XG_CORE(last_exception_trace)) {
-			xdebug_str_add(&str, XG_CORE(last_exception_trace), 0);
+		if (XG_BASE(last_exception_trace)) {
+			xdebug_str_add(&str, XG_BASE(last_exception_trace), 0);
 		}
 		xdebug_append_error_footer(&str, PG(html_errors) TSRMLS_CC);
 
@@ -672,7 +672,7 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 		}
 	}
 
-	if ((EG(error_reporting | XINI_CORE(force_error_reporting))) & type) {
+	if ((EG(error_reporting | XINI_BASE(force_error_reporting))) & type) {
 		/* Log to logger */
 		if (PG(log_errors)) {
 
@@ -682,7 +682,7 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 			}
 #endif
 			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
-			if (XINI_CORE(dump_globals) && !(XINI_CORE(dump_once) && XG_CORE(dumped))) {
+			if (XINI_BASE(dump_globals) && !(XINI_BASE(dump_once) && XG_BASE(dumped))) {
 				char *printable_stack = xdebug_get_printable_superglobals(0 TSRMLS_CC);
 
 				if (printable_stack) {
@@ -707,21 +707,21 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 		}
 
 		/* Display errors */
-		if ((PG(display_errors) || XINI_CORE(force_display_errors)) && !PG(during_request_startup)) {
+		if ((PG(display_errors) || XINI_BASE(force_display_errors)) && !PG(during_request_startup)) {
 			char *printable_stack;
 
 			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, buffer TSRMLS_CC);
 
-			if (XG_CORE(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
-				xdebug_llist_insert_next(XG_CORE(collected_errors), XDEBUG_LLIST_TAIL(XG_CORE(collected_errors)), printable_stack);
+			if (XG_BASE(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
+				xdebug_llist_insert_next(XG_BASE(collected_errors), XDEBUG_LLIST_TAIL(XG_BASE(collected_errors)), printable_stack);
 			} else {
 				php_output_error(printable_stack TSRMLS_CC);
 				xdfree(printable_stack);
 			}
-		} else if (XG_CORE(do_collect_errors)) {
+		} else if (XG_BASE(do_collect_errors)) {
 			char *printable_stack;
 			printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1 TSRMLS_CC);
-			xdebug_llist_insert_next(XG_CORE(collected_errors), XDEBUG_LLIST_TAIL(XG_CORE(collected_errors)), printable_stack);
+			xdebug_llist_insert_next(XG_BASE(collected_errors), XDEBUG_LLIST_TAIL(XG_BASE(collected_errors)), printable_stack);
 		}
 	}
 
@@ -744,7 +744,7 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 			if (xdebug_handle_hit_value(extra_brk_info)) {
 				char *type_str = xdebug_sprintf("%ld", type);
 
-				if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_CORE(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
+				if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
 					xdebug_mark_debug_connection_not_active();
 				}
 
@@ -754,7 +754,7 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 	}
 	xdfree(error_type_str);
 
-	if (type & XINI_CORE(halt_level) & XDEBUG_ALLOWED_HALT_LEVELS) {
+	if (type & XINI_BASE(halt_level) & XDEBUG_ALLOWED_HALT_LEVELS) {
 		type = E_USER_ERROR;
 	}
 
@@ -1055,11 +1055,11 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 
 				if (
 					!fname &&
-					XDEBUG_LLIST_TAIL(XG_CORE(stack)) &&
-					XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack))) &&
-					((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack))))->filename
+					XDEBUG_LLIST_TAIL(XG_BASE(stack)) &&
+					XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))) &&
+					((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename
 				) {
-					fname = ((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack))))->filename;
+					fname = ((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename;
 				}
 
 				if (!fname) {
@@ -1158,7 +1158,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->var           = NULL;
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
-	tmp->level         = XG_CORE(level);
+	tmp->level         = XG_BASE(level);
 	tmp->arg_done      = 0;
 	tmp->declared_vars = NULL;
 	tmp->user_defined  = type;
@@ -1173,8 +1173,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->filtered_code_coverage = 0;
 	tmp->executable_lines_cache = NULL;
 
-	XG_CORE(function_count)++;
-	tmp->function_nr = XG_CORE(function_count);
+	XG_BASE(function_count)++;
+	tmp->function_nr = XG_BASE(function_count);
 	{
 		zend_execute_data *ptr = edata;
 		while (ptr && (!ptr->func || !ZEND_USER_CODE(ptr->func->type))) {
@@ -1192,20 +1192,20 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	/* Call user function locations */
 	if (
 		!tmp->filename &&
-		XG_CORE(stack) &&
-		XDEBUG_LLIST_TAIL(XG_CORE(stack)) &&
-		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack))) &&
-		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack))))->filename
+		XG_BASE(stack) &&
+		XDEBUG_LLIST_TAIL(XG_BASE(stack)) &&
+		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))) &&
+		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename
 	) {
-		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack))))->filename);
+		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename);
 	}
 
 	if (!tmp->filename) {
 		tmp->filename = xdstrdup("UNKNOWN?");
 	}
-	tmp->prev_memory = XG_CORE(prev_memory);
+	tmp->prev_memory = XG_BASE(prev_memory);
 	tmp->memory = zend_memory_usage(0 TSRMLS_CC);
-	XG_CORE(prev_memory) = tmp->memory;
+	XG_BASE(prev_memory) = tmp->memory;
 	tmp->time   = xdebug_get_utime();
 	tmp->lineno = 0;
 	tmp->prev   = 0;
@@ -1226,15 +1226,15 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 
 		if (tmp->function.type == XFUNC_EVAL) {
-			tmp->include_filename = xdebug_sprintf("%s", XG_CORE(last_eval_statement));
-		} else if (XINI_CORE(collect_includes)) {
+			tmp->include_filename = xdebug_sprintf("%s", XG_BASE(last_eval_statement));
+		} else if (XINI_BASE(collect_includes)) {
 			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
 		}
 	} else  {
 		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
-		if (XINI_CORE(collect_params) || XINI_CORE(collect_vars) || xdebug_is_debug_connection_active_for_current_pid()) {
+		if (XINI_BASE(collect_params) || XINI_BASE(collect_vars) || xdebug_is_debug_connection_active_for_current_pid()) {
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
 			/* This calculates how many arguments where sent to a function. It
@@ -1283,7 +1283,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 					}
 				}
 
-				if (XINI_CORE(collect_params)) {
+				if (XINI_BASE(collect_params)) {
 					if ((i < arguments_wanted) || ((zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) && (i < arguments_sent))) {
 						if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
 							ZVAL_COPY(&(tmp->var[tmp->varc].data), ZEND_CALL_ARG(zdata, tmp->varc+1));
@@ -1321,12 +1321,12 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
-	if (XG_CORE(do_monitor_functions)) {
+	if (XG_BASE(do_monitor_functions)) {
 		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
 		int   func_name_len = strlen(func_name);
 		void *dummy;
 
-		if (xdebug_hash_find(XG_CORE(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {
+		if (xdebug_hash_find(XG_BASE(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {
 			xdebug_function_monitor_record(func_name, tmp->filename, tmp->lineno TSRMLS_CC);
 		}
 
@@ -1359,9 +1359,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
-	if (XG_CORE(stack)) {
-		if (XDEBUG_LLIST_TAIL(XG_CORE(stack))) {
-			function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack)));
+	if (XG_BASE(stack)) {
+		if (XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
+			function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
 			tmp->prev = prev;
 			if (XINI_PROF(profiler_aggregate)) {
 				if (prev->aggr_entry->call_list) {
@@ -1375,7 +1375,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				}
 			}
 		}
-		xdebug_llist_insert_next(XG_CORE(stack), XDEBUG_LLIST_TAIL(XG_CORE(stack)), tmp);
+		xdebug_llist_insert_next(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), tmp);
 	}
 
 	if (XINI_PROF(profiler_aggregate)) {
@@ -1392,7 +1392,7 @@ PHP_FUNCTION(xdebug_get_stack_depth)
 {
 	/* We substract one so that the function call to xdebug_get_stack_depth()
 	 * is not part of the returned depth. */
-	RETURN_LONG(XG_CORE(stack)->size - 1);
+	RETURN_LONG(XG_BASE(stack)->size - 1);
 }
 
 /* {{{ proto array xdebug_get_function_stack()
@@ -1406,9 +1406,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	zval                 *params;
 
 	array_init(return_value);
-	le = XDEBUG_LLIST_HEAD(XG_CORE(stack));
+	le = XDEBUG_LLIST_HEAD(XG_BASE(stack));
 
-	for (k = 0; k < XG_CORE(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
+	for (k = 0; k < XG_BASE(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
 		function_stack_entry *i = XDEBUG_LLIST_VALP(le);
 
 		if (i->function.function) {
@@ -1500,7 +1500,7 @@ PHP_FUNCTION(xdebug_get_declared_vars)
 	xdebug_hash *tmp_hash;
 
 	array_init(return_value);
-	le = XDEBUG_LLIST_TAIL(XG_CORE(stack));
+	le = XDEBUG_LLIST_TAIL(XG_BASE(stack));
 	le = XDEBUG_LLIST_PREV(le);
 	i = XDEBUG_LLIST_VALP(le);
 

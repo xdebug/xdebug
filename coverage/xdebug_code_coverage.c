@@ -484,7 +484,7 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 			xdebug_count_line(file, lineno, 0, 0 TSRMLS_CC);
 		}
 	}
-	if (XG_TRACE(trace_context) && XINI_CORE(collect_assignments)) {
+	if (XG_TRACE(trace_context) && XINI_BASE(collect_assignments)) {
 		char *full_varname;
 
 		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
@@ -584,8 +584,8 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		}
 
-		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_CORE(stack)));
-		if (XG_TRACE(trace_context) && XINI_CORE(collect_assignments) && XG_TRACE(trace_handler)->assignment) {
+		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
+		if (XG_TRACE(trace_context) && XINI_BASE(collect_assignments) && XG_TRACE(trace_handler)->assignment) {
 			XG_TRACE(trace_handler)->assignment(XG_TRACE(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno TSRMLS_CC);
 		}
 		xdfree(full_varname);
@@ -1113,20 +1113,20 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *funct
 	xdebug_path *path = xdebug_path_new(NULL);
 
 	xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-	xdebug_path_info_add_path_for_level(XG_COV(paths_stack), path, XG_CORE(level) TSRMLS_CC);
+	xdebug_path_info_add_path_for_level(XG_COV(paths_stack), path, XG_BASE(level) TSRMLS_CC);
 
-	if (XG_COV(branches).size == 0 || XG_CORE(level) >= XG_COV(branches).size) {
-		XG_COV(branches).size = XG_CORE(level) + 32;
+	if (XG_COV(branches).size == 0 || XG_BASE(level) >= XG_COV(branches).size) {
+		XG_COV(branches).size = XG_BASE(level) + 32;
 		XG_COV(branches).last_branch_nr = realloc(XG_COV(branches).last_branch_nr, sizeof(int) * XG_COV(branches.size));
 	}
 
-	XG_COV(branches).last_branch_nr[XG_CORE(level)] = -1;
+	XG_COV(branches).last_branch_nr[XG_BASE(level)] = -1;
 }
 
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_name, char *function_name TSRMLS_DC)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XG_CORE(level) TSRMLS_CC);
+	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XG_BASE(level) TSRMLS_CC);
 
 	if (!path) {
 		return;
@@ -1371,7 +1371,7 @@ PHP_FUNCTION(xdebug_get_code_coverage)
 
 PHP_FUNCTION(xdebug_get_function_count)
 {
-	RETURN_LONG(XG_CORE(function_count));
+	RETURN_LONG(XG_BASE(function_count));
 }
 
 PHP_FUNCTION(xdebug_code_coverage_started)

@@ -69,7 +69,7 @@ void xdebug_trace_computerized_write_footer(void *ctxt TSRMLS_DC)
 	char   *tmp;
 
 	u_time = xdebug_get_utime();
-	tmp = xdebug_sprintf("\t\t\t%F\t", u_time - XG_CORE(start_time));
+	tmp = xdebug_sprintf("\t\t\t%F\t", u_time - XG_BASE(start_time));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
@@ -131,7 +131,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
 
 	xdebug_str_add(&str, "0\t", 0);
-	xdebug_str_add(&str, xdebug_sprintf("%F\t", fse->time - XG_CORE(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%F\t", fse->time - XG_BASE(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%lu\t", fse->memory), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_USER_DEFINED ? 1 : 0), 1);
@@ -158,7 +158,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d", fse->filename, fse->lineno), 1);
 
 
-	if (XINI_CORE(collect_params) > 0) {
+	if (XINI_BASE(collect_params) > 0) {
 		unsigned int j = 0; /* Counter */
 
 		/* Nr of arguments (11) */
@@ -172,12 +172,12 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 				xdebug_str_addl(&str, "...\t", 4, 0);
 			}
 
-			if (fse->var[j].name && XINI_CORE(collect_params) == 4) {
+			if (fse->var[j].name && XINI_BASE(collect_params) == 4) {
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {
-				add_single_value(&str, &(fse->var[j].data), XINI_CORE(collect_params));
+				add_single_value(&str, &(fse->var[j].data), XINI_BASE(collect_params));
 			} else {
 				xdebug_str_add(&str, "???", 0);
 			}
@@ -201,7 +201,7 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
 
 	xdebug_str_add(&str, "1\t", 0);
-	xdebug_str_add(&str, xdebug_sprintf("%F\t", xdebug_get_utime() - XG_CORE(start_time)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%F\t", xdebug_get_utime() - XG_BASE(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%lu\n", zend_memory_usage(0 TSRMLS_CC)), 1);
 
 	fprintf(context->trace_file, "%s", str.d);
@@ -218,7 +218,7 @@ void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
 	xdebug_str_add(&str, "R\t\t\t", 0);
 
-	add_single_value(&str, return_value, XINI_CORE(collect_params));
+	add_single_value(&str, return_value, XINI_BASE(collect_params));
 
 	xdebug_str_addl(&str, "\n", 2, 0);
 

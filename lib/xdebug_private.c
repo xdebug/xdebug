@@ -29,8 +29,8 @@ function_stack_entry *xdebug_get_stack_head(TSRMLS_D)
 {
 	xdebug_llist_element *le;
 
-	if (XG_CORE(stack)) {
-		if ((le = XDEBUG_LLIST_HEAD(XG_CORE(stack)))) {
+	if (XG_BASE(stack)) {
+		if ((le = XDEBUG_LLIST_HEAD(XG_BASE(stack)))) {
 			return XDEBUG_LLIST_VALP(le);
 		} else {
 			return NULL;
@@ -44,11 +44,11 @@ function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC)
 {
 	xdebug_llist_element *le;
 
-	if (!XG_CORE(stack)) {
+	if (!XG_BASE(stack)) {
 		return NULL;
 	}
 
-	if (!(le = XDEBUG_LLIST_TAIL(XG_CORE(stack)))) {
+	if (!(le = XDEBUG_LLIST_TAIL(XG_BASE(stack)))) {
 		return NULL;
 	}
 
@@ -70,8 +70,8 @@ function_stack_entry *xdebug_get_stack_tail(TSRMLS_D)
 {
 	xdebug_llist_element *le;
 
-	if (XG_CORE(stack)) {
-		if ((le = XDEBUG_LLIST_TAIL(XG_CORE(stack)))) {
+	if (XG_BASE(stack)) {
+		if ((le = XDEBUG_LLIST_TAIL(XG_BASE(stack)))) {
 			return XDEBUG_LLIST_VALP(le);
 		} else {
 			return NULL;

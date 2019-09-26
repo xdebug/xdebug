@@ -135,7 +135,7 @@ PHP_FUNCTION(xdebug_time_index);
 /* filter functions */
 PHP_FUNCTION(xdebug_set_filter);
 
-struct xdebug_core_info {
+struct xdebug_base_info {
 	unsigned long level;
 	xdebug_llist *stack;
 	double        start_time;
@@ -347,7 +347,7 @@ struct xdebug_gc_stats_info {
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
-	struct xdebug_core_info     core;
+	struct xdebug_base_info     base;
 	struct xdebug_stepdbg_info  stepdbg;
 	struct xdebug_trace_info    trace;
 	struct xdebug_coverage_info coverage;
@@ -361,14 +361,14 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #define XG(v) (xdebug_globals.v)
 #endif
 
-#define XG_CORE(v)     (XG(core.v))
+#define XG_BASE(v)     (XG(base.v))
 #define XG_COV(v)      (XG(coverage.v))
 #define XG_DBG(v)      (XG(stepdbg.v))
 #define XG_GCSTATS(v)  (XG(gc_stats.v))
 #define XG_PROF(v)     (XG(profiler.v))
 #define XG_TRACE(v)    (XG(trace.v))
 
-#define XINI_CORE(v)     (XG(core.settings.v))
+#define XINI_BASE(v)     (XG(base.settings.v))
 #define XINI_COV(v)      (XG(coverage.settings.v))
 #define XINI_DBG(v)      (XG(stepdbg.settings.v))
 #define XINI_GCSTATS(v)  (XG(gc_stats.settings.v))
