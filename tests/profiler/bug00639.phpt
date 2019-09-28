@@ -4,7 +4,7 @@ Test for bug #639: Xdebug profiling: output not correct - missing 'cfl='
 xdebug.profiler_enable=1
 --FILE--
 <?php
-require 'bug00639-2.inc';
+require 'bug00639.inc';
 
 function func1()
 {
@@ -29,8 +29,8 @@ positions: line
 
 events: Time Memory
 
-fl=(1) %sbug00639-2.inc
-fn=(1) require::%sbug00639-2.inc
+fl=(1) %sbug00639.inc
+fn=(1) require::%sbug00639.inc
 1 %d %i
 
 fl=(2) php:internal
