@@ -2612,7 +2612,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 		}
 
 		/* Get latest stack level and function number */
-		if (XG(stack)) {
+		if (XG(stack) && XDEBUG_LLIST_TAIL(XG(stack))) {
 			le = XDEBUG_LLIST_TAIL(XG(stack));
 			fse = XDEBUG_LLIST_VALP(le);
 			level = fse->level;
