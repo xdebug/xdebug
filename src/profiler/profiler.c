@@ -448,3 +448,9 @@ int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC)
 	fprintf(stderr, "wrote info for %d entries to %s\n", zend_hash_num_elements(&XG_PROF(aggr_calls)), filename);
 	return SUCCESS;
 }
+
+void xdebug_profiler_minit()
+{
+	/* initialize aggregate call information hash */
+	zend_hash_init_ex(&XG_PROF(aggr_calls), 50, NULL, (dtor_func_t) xdebug_profile_aggr_call_entry_dtor, 1, 0);
+}

@@ -77,7 +77,7 @@ if test "$PHP_XDEBUG" != "no"; then
 
   PHP_XDEBUG_CFLAGS="$STD_CFLAGS $MAINTAINER_CFLAGS"
 
-  XDEBUG_BASE_SOURCES="src/base/filter.c src/base/monitor.c src/base/stack.c src/base/superglobals.c"
+  XDEBUG_BASE_SOURCES="src/base/base.c src/base/filter.c src/base/monitor.c src/base/stack.c src/base/superglobals.c"
   XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/compat.c src/lib/hash.c src/lib/llist.c src/lib/private.c src/lib/set.c src/lib/str.c src/lib/var.c src/lib/xml.c"
 
   XDEBUG_COVERAGE_SOURCES="src/coverage/branch_info.c src/coverage/code_coverage.c"

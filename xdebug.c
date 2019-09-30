@@ -46,10 +46,10 @@
 #include "php_globals.h"
 #include "main/php_output.h"
 #include "ext/standard/php_var.h"
-#include "Zend/zend_closures.h"
 
 #include "php_xdebug.h"
 
+#include "base/base.h"
 #include "base/filter.h"
 #include "base/monitor.h"
 #include "base/stack.h"
@@ -65,45 +65,22 @@
 #include "profiler/profiler.h"
 #include "tracing/tracing.h"
 
-/* execution redirection functions */
-zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
-zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
-
-void (*xdebug_old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
-void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
-
-void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
-void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value);
-
 #if PHP_VERSION_ID >= 70300
 static int (*xdebug_orig_post_startup_cb)(void);
 static int xdebug_post_startup(void);
 #endif
 
-/* error callback replacement functions */
-#if PHP_VERSION_ID >= 70200
-# define XDEBUG_ERROR_LINENO_TYPE uint32_t
-#else
-# define XDEBUG_ERROR_LINENO_TYPE uint
-#endif
-void (*xdebug_old_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-void (*xdebug_new_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args);
-void xdebug_error_cb(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args);
-
 static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
 static size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC);
 
-static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC);
 int xdebug_exit_handler(zend_execute_data *execute_data);
 
 int zend_xdebug_initialised = 0;
-int zend_xdebug_cc_run_offset = -1;
 int zend_xdebug_filter_offset = -1;
+int zend_xdebug_cc_run_offset = -1;
 
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
 static size_t (*xdebug_orig_ub_write)(const char *string, size_t len TSRMLS_DC);
-
-static int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value TSRMLS_DC);
 
 ZEND_BEGIN_ARG_INFO_EX(xdebug_void_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
@@ -674,26 +651,6 @@ static int xdebug_switch_handler(zend_execute_data *execute_data)
 }
 #endif
 
-static int xdebug_silence_handler(zend_execute_data *execute_data)
-{
-	zend_op_array *op_array = &execute_data->func->op_array;
-	const zend_op *cur_opcode = EG(current_execute_data)->opline;
-
-	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		xdebug_print_opcode_info('S', execute_data, cur_opcode TSRMLS_CC);
-	}
-	if (XINI_BASE(do_scream)) {
-		execute_data->opline++;
-		if (cur_opcode->opcode == ZEND_BEGIN_SILENCE) {
-			XG_BASE(in_at) = 1;
-		} else {
-			XG_BASE(in_at) = 0;
-		}
-		return ZEND_USER_OPCODE_CONTINUE;
-	}
-	return ZEND_USER_OPCODE_DISPATCH;
-}
-
 static int xdebug_include_or_eval_handler(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
@@ -772,16 +729,6 @@ int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int s
 }
 #endif
 
-static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC)
-{
-	zend_class_entry *ce = Z_OBJCE_P(object);
-
-	if (!XG_BASE(in_var_serialisation)) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", STR_NAME_VAL(ce->name));
-	}
-	return FAILURE;
-}
-
 PHP_MINIT_FUNCTION(xdebug)
 {
 	zend_extension dummy_ext;
@@ -789,25 +736,8 @@ PHP_MINIT_FUNCTION(xdebug)
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
-	/* initialize aggregate call information hash */
-	zend_hash_init_ex(&XG_PROF(aggr_calls), 50, NULL, (dtor_func_t) xdebug_profile_aggr_call_entry_dtor, 1, 0);
-
-	/* Redirect compile and execute functions to our own. For PHP 7.3 and
-	 * later, we hook these in xdebug_post_startup instead */
-#if PHP_VERSION_ID < 70300
-	old_compile_file = zend_compile_file;
-	zend_compile_file = xdebug_compile_file;
-#endif
-
-	xdebug_old_execute_ex = zend_execute_ex;
-	zend_execute_ex = xdebug_execute_ex;
-
-	xdebug_old_execute_internal = zend_execute_internal;
-	zend_execute_internal = xdebug_execute_internal;
-
-	/* Replace error handler callback with our own */
-	xdebug_old_error_cb = zend_error_cb;
-	xdebug_new_error_cb = xdebug_error_cb;
+	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
+	xdebug_profiler_minit();
 
     /* Replace garbage collection handler with our own */
     xdebug_old_gc_collect_cycles = gc_collect_cycles;
@@ -946,8 +876,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, ZEND_POST_INC_STATIC_PROP);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, ZEND_POST_DEC_STATIC_PROP);
 #endif
-	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
-	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
 
 	/* Override all the other opcodes so that we can mark when we hit a branch
 	 * start one */
@@ -977,14 +905,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_BRANCH_CHECK", XDEBUG_CC_OPTION_BRANCH_CHECK, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("XDEBUG_STACK_NO_DESC", XDEBUG_STACK_NO_DESC, CONST_CS | CONST_PERSISTENT);
-
 	xdebug_filter_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	XG_DBG(breakpoint_count) = 0;
-	XG_BASE(error_reporting_override) = 0;
-	XG_BASE(error_reporting_overridden) = 0;
-	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
 
 	return SUCCESS;
 }
@@ -995,11 +918,6 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 		xdebug_profiler_output_aggr_data(NULL TSRMLS_CC);
 	}
 
-	/* Reset compile, execute and error callbacks */
-	zend_compile_file = old_compile_file;
-	zend_execute_ex = xdebug_old_execute_ex;
-	zend_execute_internal = xdebug_old_execute_internal;
-	zend_error_cb = xdebug_old_error_cb;
 	gc_collect_cycles = xdebug_old_gc_collect_cycles;
 
 	zend_hash_destroy(&XG_PROF(aggr_calls));
@@ -1142,69 +1060,6 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-static void xdebug_llist_string_dtor(void *dummy, void *elem)
-{
-	char *s = elem;
-
-	if (s) {
-		xdfree(s);
-	}
-}
-
-static void xdebug_declared_var_dtor(void *dummy, void *elem)
-{
-	xdebug_str *s = (xdebug_str*) elem;
-
-	xdebug_str_free(s);
-}
-
-static void function_stack_entry_dtor(void *dummy, void *elem)
-{
-	unsigned int          i;
-	function_stack_entry *e = elem;
-
-	e->refcount--;
-
-	if (e->refcount == 0) {
-		xdebug_func_dtor_by_ref(&e->function);
-
-		if (e->filename) {
-			xdfree(e->filename);
-		}
-
-		if (e->var) {
-			for (i = 0; i < e->varc; i++) {
-				if (e->var[i].name) {
-					xdfree(e->var[i].name);
-				}
-				zval_ptr_dtor(&(e->var[i].data));
-			}
-			xdfree(e->var);
-		}
-
-		if (e->include_filename) {
-			xdfree(e->include_filename);
-		}
-
-		if (e->declared_vars) {
-			xdebug_llist_destroy(e->declared_vars, NULL);
-			e->declared_vars = NULL;
-		}
-
-		if (e->profile.call_list) {
-			xdebug_llist_destroy(e->profile.call_list, NULL);
-			e->profile.call_list = NULL;
-		}
-
-		if (e->executable_lines_cache) {
-			xdebug_set_free(e->executable_lines_cache);
-			e->executable_lines_cache = NULL;
-		}
-
-		xdfree(e);
-	}
-}
-
 size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC)
 {
 	if (xdebug_is_debug_connection_active_for_current_pid()) {
@@ -1225,58 +1080,6 @@ static void xdebug_init_auto_globals(TSRMLS_D)
 	zend_is_auto_global_str((char*) ZEND_STRL("_FILES") TSRMLS_CC);
 	zend_is_auto_global_str((char*) ZEND_STRL("_SERVER") TSRMLS_CC);
 	zend_is_auto_global_str((char*) ZEND_STRL("_SESSION") TSRMLS_CC);
-}
-
-
-static void xdebug_overloaded_functions_setup(TSRMLS_D)
-{
-	zend_function *orig;
-
-	/* Override var_dump with our own function */
-	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
-	XG_BASE(orig_var_dump_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_var_dump;
-
-	/* Override set_time_limit with our own function to prevent timing out while debugging */
-	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-	XG_BASE(orig_set_time_limit_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_set_time_limit;
-
-	/* Override error_reporting with our own function, to be able to give right answer during DBGp's
-	 * 'eval' commands */
-	orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
-	XG_BASE(orig_error_reporting_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_error_reporting;
-
-	/* Override pcntl_exec with our own function to be able to write profiling summary */
-	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
-	if (orig) {
-		XG_BASE(orig_pcntl_exec_func) = orig->internal_function.handler;
-		orig->internal_function.handler = zif_xdebug_pcntl_exec;
-	} else {
-		XG_BASE(orig_pcntl_exec_func) = NULL;
-	}
-}
-
-static void xdebug_overloaded_functions_restore(TSRMLS_D)
-{
-	zend_function *orig;
-
-	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
-	orig->internal_function.handler = XG_BASE(orig_var_dump_func);
-
-	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-	orig->internal_function.handler = XG_BASE(orig_set_time_limit_func);
-
-	orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
-	orig->internal_function.handler = XG_BASE(orig_error_reporting_func);
-
-	if (XG_BASE(orig_pcntl_exec_func)) {
-		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
-		if (orig) {
-			orig->internal_function.handler = XG_BASE(orig_pcntl_exec_func);
-		}
-	}
 }
 
 
@@ -1322,11 +1125,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	xdebug_env_config(TSRMLS_C);
 
 	XG_DBG(no_exec)        = 0;
-	XG_BASE(level)         = 0;
-	XG_BASE(in_debug_info) = 0;
 	XG_COV(code_coverage_active) = 0;
 	XG_COV(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
-	XG_BASE(stack)         = xdebug_llist_alloc(function_stack_entry_dtor);
 	XG_TRACE(trace_handler) = NULL;
 	XG_TRACE(trace_context) = NULL;
 	XG_PROF(profile_file)  = NULL;
@@ -1335,17 +1135,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG_PROF(profile_functionname_refs) = NULL;
 	XG_PROF(profile_last_filename_ref) = 0;
 	XG_PROF(profile_last_functionname_ref) = 0;
-	XG_BASE(prev_memory)   = 0;
-	XG_BASE(function_count) = -1;
 	XG_DBG(active_symbol_table) = NULL;
 	XG_DBG(This) = NULL;
-	XG_BASE(last_exception_trace) = NULL;
-	XG_BASE(last_eval_statement) = NULL;
-	XG_BASE(do_collect_errors) = 0;
-	XG_BASE(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	XG_BASE(do_monitor_functions) = 0;
-	XG_BASE(functions_to_monitor) = NULL;
-	XG_BASE(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
 	XG_COV(dead_code_analysis_tracker_offset) = zend_xdebug_cc_run_offset;
 	XG_COV(dead_code_last_start_id) = 1;
 	XG_COV(code_coverage_filter_offset) = zend_xdebug_filter_offset;
@@ -1380,12 +1171,7 @@ PHP_RINIT_FUNCTION(xdebug)
 	/* Only enabled extended info when it is not disabled */
 	CG(compiler_options) = CG(compiler_options) | ZEND_COMPILE_EXTENDED_STMT;
 
-	/* Hack: We check for a soap header here, if that's existing, we don't use
-	 * Xdebug's error handler to keep soap fault from fucking up. */
-	if (XINI_BASE(default_enable) && zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL) {
-		zend_error_cb = xdebug_new_error_cb;
-		zend_throw_exception_hook = xdebug_throw_exception_hook;
-	}
+	xdebug_base_rinit();
 
 	xdebug_mark_debug_connection_not_active();
 	XG_DBG(breakpoints_allowed) = 1;
@@ -1401,37 +1187,13 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG_DBG(context).do_next        = 0;
 	XG_DBG(context).do_finish      = 0;
 
-	/* Initialize dump superglobals */
-	XG_BASE(dumped) = 0;
-
 	/* Initialize visited classes and branches hash */
 	XG_COV(visited_classes) = xdebug_hash_alloc(2048, NULL);
 	XG_COV(visited_branches) = xdebug_hash_alloc(2048, NULL);
 
-	/* Initialize start time */
-	XG_BASE(start_time) = xdebug_get_utime();
-
-	/* Overload var_dump, set_time_limit, error_reporting, and pcntl_exec */
-	xdebug_overloaded_functions_setup(TSRMLS_C);
-
-	XG_BASE(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
-
-	XG_BASE(in_var_serialisation) = 0;
-	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;
-
-	/* Signal that we're in a request now */
-	XG_BASE(in_execution) = 1;
-
 	XG_COV(paths_stack) = xdebug_path_info_ctor();
 	XG_COV(branches).size = 0;
 	XG_COV(branches).last_branch_nr = NULL;
-
-	/* filters */
-	XG_BASE(filter_type_tracing)       = XDEBUG_FILTER_NONE;
-	XG_BASE(filter_type_profiler)      = XDEBUG_FILTER_NONE;
-	XG_BASE(filter_type_code_coverage) = XDEBUG_FILTER_NONE;
-	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	XG_BASE(filters_code_coverage)     = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	return SUCCESS;
 }
@@ -1453,15 +1215,6 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		xdebug_profiler_deinit();
 	}
 
-	xdebug_llist_destroy(XG_BASE(stack), NULL);
-	XG_BASE(stack) = NULL;
-
-	/* filters */
-	xdebug_llist_destroy(XG_BASE(filters_tracing), NULL);
-	xdebug_llist_destroy(XG_BASE(filters_code_coverage), NULL);
-	XG_BASE(filters_tracing) = NULL;
-	XG_BASE(filters_code_coverage) = NULL;
-
 	if (XG_TRACE(trace_context)) {
 		xdebug_stop_trace(TSRMLS_C);
 	}
@@ -1479,9 +1232,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG_DBG(ide_key) = NULL;
 	}
 
-	XG_BASE(level)            = 0;
 	XG_TRACE(trace_context)    = NULL;
-	XG_BASE(in_debug_info)    = 0;
 	XG_COV(code_coverage_active) = 0;
 
 	xdebug_hash_destroy(XG_COV(code_coverage_info));
@@ -1497,34 +1248,6 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		XG_DBG(context).list.last_file = NULL;
 	}
 
-	if (XG_BASE(last_exception_trace)) {
-		xdfree(XG_BASE(last_exception_trace));
-		XG_BASE(last_exception_trace) = NULL;
-	}
-
-	if (XG_BASE(last_eval_statement)) {
-		efree(XG_BASE(last_eval_statement));
-		XG_BASE(last_eval_statement) = NULL;
-	}
-
-	xdebug_llist_destroy(XG_BASE(collected_errors), NULL);
-	XG_BASE(collected_errors) = NULL;
-
-	xdebug_llist_destroy(XG_BASE(monitored_functions_found), NULL);
-	XG_BASE(monitored_functions_found) = NULL;
-
-	if (XG_BASE(functions_to_monitor)) {
-		xdebug_hash_destroy(XG_BASE(functions_to_monitor));
-		XG_BASE(functions_to_monitor) = NULL;
-	}
-
-	/* Restore original var_dump, set_time_limit, error_reporting, and pcntl_exec handlers */
-	xdebug_overloaded_functions_restore(TSRMLS_C);
-
-	/* Clean up collected headers */
-	xdebug_llist_destroy(XG_BASE(headers), NULL);
-	XG_BASE(headers) = NULL;
-
 	/* Clean up path coverage array */
 	if (XG_COV(paths_stack)) {
 		xdebug_path_info_dtor(XG_COV(paths_stack));
@@ -1537,13 +1260,14 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 	XG_COV(previous_mark_filename) = NULL;
 
+	xdebug_base_post_deactivate();
+
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
-	/* Signal that we're no longer in a request */
-	XG_BASE(in_execution) = 0;
+	xdebug_base_rshutdown();
 
 	return SUCCESS;
 }
@@ -1599,601 +1323,6 @@ PHP_MINFO_FUNCTION(xdebug)
 
 	DISPLAY_INI_ENTRIES();
 }
-
-static int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value TSRMLS_DC)
-{
-	zval *trigger_val;
-
-	if (!setting) {
-		return 0;
-	}
-
-	if (
-		(
-			(
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name, strlen(var_name))) != NULL
-			) || (
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name, strlen(var_name))) != NULL
-			) || (
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name, strlen(var_name))) != NULL
-			)
-		) && (
-			(var_value == NULL) || (var_value[0] == '\0') ||
-			(strcmp(var_value, Z_STRVAL_P(trigger_val)) == 0)
-		)
-	) {
-		return 1;
-	}
-
-	return 0;
-}
-
-static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
-{
-	unsigned int i = 0;
-
-	if (!fse->declared_vars) {
-		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
-	}
-
-	/* Check parameters */
-	for (i = 0; i < fse->varc; i++) {
-		if (fse->var[i].name) {
-			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(fse->var[i].name, fse->var[i].length));
-		}
-	}
-
-	/* gather used variables from compiled vars information */
-	while (i < (unsigned int) op_array->last_var) {
-		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(op_array->vars[i]), STR_NAME_LEN(op_array->vars[i])));
-		i++;
-	}
-
-	/* opcode scanning time */
-	while (i < op_array->last) {
-		char *cv = NULL;
-		int cv_len;
-
-		if (op_array->opcodes[i].op1_type == IS_CV) {
-			cv = (char *) xdebug_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.var, &cv_len);
-			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(cv, cv_len));
-		}
-		if (op_array->opcodes[i].op2_type == IS_CV) {
-			cv = (char *) xdebug_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.var, &cv_len);
-			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(cv, cv_len));
-		}
-		i++;
-	}
-}
-
-static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
-{
-	zval *code, *message, *file, *line;
-	zval *xdebug_message_trace, *previous_exception;
-	zend_class_entry *default_ce, *exception_ce;
-	xdebug_brk_info *extra_brk_info;
-	char *code_str = NULL;
-	char *exception_trace;
-	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
-
-	if (!exception) {
-		return;
-	}
-
-	default_ce = Z_OBJCE_P(exception);
-	exception_ce = Z_OBJCE_P(exception);
-
-	code =    xdebug_read_property(default_ce, exception, "code",    sizeof("code")-1,    0 TSRMLS_CC);
-	message = xdebug_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
-	file =    xdebug_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
-	line =    xdebug_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
-
-	if (Z_TYPE_P(code) == IS_LONG) {
-		if (Z_LVAL_P(code) != 0) {
-			code_str = xdebug_sprintf("%lu", Z_LVAL_P(code));
-		}
-	} else if (Z_TYPE_P(code) != IS_STRING) {
-		code_str = xdstrdup("");
-	}
-
-	convert_to_string_ex(message);
-	convert_to_string_ex(file);
-	convert_to_long_ex(line);
-
-	previous_exception = xdebug_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
-	if (previous_exception && Z_TYPE_P(previous_exception) == IS_OBJECT) {
-		xdebug_message_trace = xdebug_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1 TSRMLS_CC);
-		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
-			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
-		}
-	}
-
-	if (!PG(html_errors)) {
-		xdebug_str_addl(&tmp_str, "\n", 1, 0);
-	}
-	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
-	xdebug_append_printable_stack(&tmp_str, PG(html_errors) TSRMLS_CC);
-	exception_trace = tmp_str.d;
-	zend_update_property_string(default_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace TSRMLS_CC);
-
-	if (XG_BASE(last_exception_trace)) {
-		xdfree(XG_BASE(last_exception_trace));
-	}
-	XG_BASE(last_exception_trace) = exception_trace;
-
-	if (XINI_BASE(show_ex_trace) || (instanceof_function(exception_ce, zend_ce_error) && XINI_BASE(show_error_trace))) {
-		if (PG(log_errors)) {
-			xdebug_log_stack(STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
-		}
-		if (PG(display_errors)) {
-			xdebug_str displ_tmp_str = XDEBUG_STR_INITIALIZER;
-			xdebug_append_error_head(&displ_tmp_str, PG(html_errors), "exception" TSRMLS_CC);
-			xdebug_str_add(&displ_tmp_str, exception_trace, 0);
-			xdebug_append_error_footer(&displ_tmp_str, PG(html_errors) TSRMLS_CC);
-
-			php_printf("%s", displ_tmp_str.d);
-			xdebug_str_dtor(displ_tmp_str);
-		}
-	}
-
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
-
-	if (xdebug_is_debug_connection_active_for_current_pid()) {
-		int exception_breakpoint_found = 0;
-
-		/* Check if we have a wild card exception breakpoint */
-		if (xdebug_hash_find(XG_DBG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)) {
-			exception_breakpoint_found = 1;
-		} else {
-			/* Check if we have a breakpoint on this exception or its parent classes */
-			zend_class_entry *ce_ptr = exception_ce;
-
-			/* Check if we have a breakpoint on this exception or its parent classes */
-			do {
-				if (xdebug_hash_find(XG_DBG(context).exception_breakpoints, (char *) STR_NAME_VAL(ce_ptr->name), STR_NAME_LEN(ce_ptr->name), (void *) &extra_brk_info)) {
-					exception_breakpoint_found = 1;
-				}
-				ce_ptr = ce_ptr->parent;
-			} while (!exception_breakpoint_found && ce_ptr);
-		}
-
-		if (XG_DBG(context).resolved_breakpoints && exception_breakpoint_found) {
-			XG_DBG(context).handler->resolve_breakpoints(&(XG_DBG(context)), XDEBUG_BREAKPOINT_TYPE_EXCEPTION, extra_brk_info);
-		}
-
-		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
-			if (!XG_DBG(context).handler->remote_breakpoint(
-				&(XG_DBG(context)), XG_BASE(stack),
-				Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK,
-				(char*) STR_NAME_VAL(exception_ce->name),
-				code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
-				Z_STRVAL_P(message))
-			) {
-				xdebug_mark_debug_connection_not_active();
-			}
-		}
-	}
-
-	/* Free code_str if necessary */
-	if (code_str) {
-		xdfree(code_str);
-	}
-}
-
-static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
-{
-	xdebug_brk_info *extra_brk_info = NULL;
-	char            *tmp_name = NULL;
-	size_t           tmp_len = 0;
-	TSRMLS_FETCH();
-
-	/* When we first enter a user defined function, we need to resolve breakpoints for this function */
-	if (XG_DBG(context).resolved_breakpoints && breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL && fse->user_defined == XDEBUG_USER_DEFINED) {
-		XG_DBG(context).handler->resolve_breakpoints(&(XG_DBG(context)), XDEBUG_BREAKPOINT_TYPE_LINE|XDEBUG_BREAKPOINT_TYPE_CONDITIONAL|XDEBUG_BREAKPOINT_TYPE_CALL|XDEBUG_BREAKPOINT_TYPE_RETURN, fse);
-	}
-
-	/* Function breakpoints */
-	if (fse->function.type == XFUNC_NORMAL) {
-		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &extra_brk_info)) {
-			/* Yup, breakpoint found, we call the handler when it's not
-			 * disabled AND handle_hit_value is happy */
-			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (xdebug_handle_hit_value(extra_brk_info)) {
-					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-							return 0;
-						}
-					} else {
-						XG_DBG(context).do_break = 1;
-					}
-				}
-			}
-		}
-	}
-	/* class->function breakpoints */
-	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
-		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
-		   codebases due to setlocale calls. We don't care about the locale here. */
-		tmp_len = strlen(fse->function.class) + strlen(fse->function.function) + 3;
-		tmp_name = xdmalloc(tmp_len);
-		snprintf(tmp_name, tmp_len, "%s::%s", fse->function.class, fse->function.function);
-
-		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
-			/* Yup, breakpoint found, call handler if the breakpoint is not
-			 * disabled AND handle_hit_value is happy */
-			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (xdebug_handle_hit_value(extra_brk_info)) {
-					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-							return 0;
-						}
-					} else {
-						XG_DBG(context).do_break = 1;
-					}
-				}
-			}
-		}
-		xdfree(tmp_name);
-	}
-	return 1;
-}
-
-void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
-{
-	zend_op_array        *op_array = &(execute_data->func->op_array);
-	zend_execute_data    *edata = execute_data->prev_execute_data;
-	function_stack_entry *fse, *xfse;
-	int                   function_nr = 0;
-	xdebug_llist_element *le;
-	xdebug_func           code_coverage_func_info;
-	char                 *code_coverage_function_name = NULL;
-	char                 *code_coverage_file_name = NULL;
-	int                   code_coverage_init = 0;
-
-	/* For PHP 7, we need to reset the opline to the start, so that all opcode
-	 * handlers are being hit. But not for generators, as that would make an
-	 * endless loop. TODO: Fix RECV handling with generators. */
-	if (!(EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR)) {
-		EX(opline) = EX(func)->op_array.opcodes;
-	}
-
-	/* We need to do this first before the executable clauses are called */
-	if (XG_DBG(no_exec) == 1) {
-		php_printf("DEBUG SESSION ENDED");
-		return;
-	}
-
-	/* If we're evaluating for the debugger's eval capability, just bail out */
-	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", STR_NAME_VAL(op_array->filename)) == 0) {
-		xdebug_old_execute_ex(execute_data TSRMLS_CC);
-		return;
-	}
-
-	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
-	   that it's just being called to check for breakpoints with conditions */
-	if (edata && edata->func && ZEND_USER_CODE(edata->func->type) && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
-		xdebug_old_execute_ex(execute_data TSRMLS_CC);
-		return;
-	}
-
-	if (!XG_DBG(context).program_name) {
-		XG_DBG(context).program_name = xdstrdup(STR_NAME_VAL(op_array->filename));
-	}
-
-	if (XG_BASE(in_execution)) {
-		/* Start debugger if this is the first main script, or previously a
-		 * connection was established and this process no longer has the same
-		 * PID */
-		if (
-			XG_BASE(level) == 0 ||
-			(xdebug_is_debug_connection_active() && !xdebug_is_debug_connection_active_for_current_pid())
-		) {
-			/* Start remote context if requested */
-			xdebug_do_req();
-		}
-
-		if (XG_BASE(level) == 0) {
-			/* Start profiler if requested, and we're in main script */
-			/* Check for special GET/POST parameter to start profiling */
-			if (
-				!XG_PROF(profiler_enabled) &&
-				(XINI_PROF(profiler_enable) || xdebug_trigger_enabled(XINI_PROF(profiler_enable_trigger), "XDEBUG_PROFILE", XINI_PROF(profiler_enable_trigger_value) TSRMLS_CC))
-			) {
-				xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename));
-			}
-
-			/* Start auto-tracer if requested, and we're in main script */
-			if (
-				(XINI_TRACE(auto_trace) || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value) TSRMLS_CC))
-				&& XINI_TRACE(trace_output_dir) && strlen(XINI_TRACE(trace_output_dir))
-			) {
-				/* In case we do an auto-trace we are not interested in the return
-				 * value, but we still have to free it. */
-				xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XINI_TRACE(trace_options) TSRMLS_CC));
-			}
-
-			/* Start GC stats collector if requested, and we're in main script */
-			if (!XG_GCSTATS(gc_stats_enabled) && XINI_GCSTATS(gc_stats_enable)) {
-				if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
-					XG_GCSTATS(gc_stats_enabled) = 1;
-				}
-			}
-		}
-	}
-
-	XG_BASE(level)++;
-	if ((signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
-		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XINI_BASE(max_nesting_level));
-	}
-
-	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED TSRMLS_CC);
-	fse->function.internal = 0;
-
-	/* A hack to make __call work with profiles. The function *is* user defined after all. */
-	if (fse && fse->prev && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
-		fse->prev->user_defined = XDEBUG_USER_DEFINED;
-	}
-
-	function_nr = XG_BASE(function_count);
-	if (!fse->filtered_tracing && XG_TRACE(trace_context) && (XG_TRACE(trace_handler)->function_entry)) {
-		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-	}
-
-	fse->execute_data = EG(current_execute_data)->prev_execute_data;
-#if PHP_VERSION_ID >= 70100
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
-		fse->symbol_table = EG(current_execute_data)->symbol_table;
-	}
-#else
-	fse->symbol_table = EG(current_execute_data)->symbol_table;
-#endif
-	if (Z_OBJ(EG(current_execute_data)->This)) {
-		fse->This = &EG(current_execute_data)->This;
-	} else {
-		fse->This = NULL;
-	}
-
-	if (XG_BASE(stack) && (XINI_BASE(collect_vars) || XINI_BASE(show_local_vars) || xdebug_is_debug_connection_active_for_current_pid())) {
-		/* Because include/require is treated as a stack level, we have to add used
-		 * variables in include/required files to all the stack levels above, until
-		 * we hit a function or the top level stack.  This is so that the variables
-		 * show up correctly where they should be.  We always call
-		 * add_used_variables on the current stack level, otherwise vars in include
-		 * files do not show up in the locals list.  */
-		for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-			xfse = XDEBUG_LLIST_VALP(le);
-			add_used_variables(xfse, op_array);
-			if (XDEBUG_IS_NORMAL_FUNCTION(&xfse->function)) {
-				break;
-			}
-		}
-	}
-
-	if (!fse->filtered_code_coverage && XG_COV(code_coverage_active) && XG_COV(code_coverage_unused)) {
-		code_coverage_file_name = xdstrdup(STR_NAME_VAL(op_array->filename));
-		xdebug_build_fname_from_oparray(&code_coverage_func_info, op_array TSRMLS_CC);
-		code_coverage_function_name = xdebug_func_format(&code_coverage_func_info TSRMLS_CC);
-		xdebug_code_coverage_start_of_function(op_array, code_coverage_function_name TSRMLS_CC);
-
-		if (code_coverage_func_info.class) {
-			xdfree(code_coverage_func_info.class);
-		}
-		if (code_coverage_func_info.function) {
-			xdfree(code_coverage_func_info.function);
-		}
-		code_coverage_init = 1;
-	}
-
-	/* If we're in an eval, we need to create an ID for it. This ID however
-	 * depends on the debugger mechanism in use so we need to call a function
-	 * in the handler for it */
-	if (fse->function.type == XFUNC_EVAL && xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(context).handler->register_eval_id) {
-		XG_DBG(context).handler->register_eval_id(&(XG_DBG(context)), fse);
-	}
-
-	/* Check for entry breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
-
-	if (XG_PROF(profiler_enabled)) {
-		/* Calculate all elements for profile entries */
-		xdebug_profiler_add_function_details_user(fse, op_array TSRMLS_CC);
-		xdebug_profiler_function_begin(fse TSRMLS_CC);
-	}
-
-	xdebug_old_execute_ex(execute_data TSRMLS_CC);
-
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_function_end(fse TSRMLS_CC);
-		xdebug_profiler_free_function_details(fse TSRMLS_CC);
-	}
-
-	/* Check which path has been used */
-	if (!fse->filtered_code_coverage && XG_COV(code_coverage_active) && XG_COV(code_coverage_unused) && code_coverage_init) {
-		xdebug_code_coverage_end_of_function(op_array, code_coverage_file_name, code_coverage_function_name TSRMLS_CC);
-		xdfree(code_coverage_function_name);
-		xdfree(code_coverage_file_name);
-	}
-
-
-	if (!fse->filtered_tracing && XG_TRACE(trace_context) && (XG_TRACE(trace_handler)->function_exit)) {
-		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-	}
-
-	/* Store return value in the trace file */
-	if (!fse->filtered_tracing && XINI_BASE(collect_return) && XG_TRACE(trace_context)) {
-		if (execute_data && execute_data->return_value) {
-			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-				if (XG_TRACE(trace_handler)->generator_return_value) {
-					XG_TRACE(trace_handler)->generator_return_value(XG_TRACE(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value TSRMLS_CC);
-				}
-			} else {
-				if (XG_TRACE(trace_handler)->return_value) {
-					XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, execute_data->return_value TSRMLS_CC);
-				}
-			}
-		}
-	}
-
-	/* Check for return breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
-
-	fse->symbol_table = NULL;
-	fse->execute_data = NULL;
-
-	if (XG_BASE(stack)) {
-		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);
-	}
-	XG_BASE(level)--;
-}
-
-static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
-{
-	if (
-		fse->function.class &&
-		Z_OBJ(EX(This)) &&
-		Z_TYPE(EX(This)) == IS_OBJECT &&
-		(zend_hash_str_find_ptr(&module_registry, "soap", sizeof("soap") - 1) != NULL)
-	) {
-		zend_class_entry *soap_server_ce, *soap_client_ce;
-
-		soap_server_ce = zend_hash_str_find_ptr(CG(class_table), "soapserver", 10);
-		soap_client_ce = zend_hash_str_find_ptr(CG(class_table), "soapclient", 10);
-
-		if (!soap_server_ce || !soap_client_ce) {
-			return 0;
-		}
-
-		if (
-			(instanceof_function(Z_OBJCE(EX(This)), soap_server_ce)) ||
-			(instanceof_function(Z_OBJCE(EX(This)), soap_client_ce))
-		) {
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
-{
-	zend_execute_data    *edata = EG(current_execute_data);
-	function_stack_entry *fse;
-	int                   function_nr = 0;
-	int                   function_call_traced = 0;
-	int                   restore_error_handler_situation = 0;
-	void                (*tmp_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
-
-	XG_BASE(level)++;
-	if ((signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
-		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XINI_BASE(max_nesting_level));
-	}
-
-	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN TSRMLS_CC);
-	fse->function.internal = 1;
-
-	function_nr = XG_BASE(function_count);
-
-	if (!fse->filtered_tracing && fse->function.type != XFUNC_ZEND_PASS && XG_TRACE(trace_context) && (XG_TRACE(trace_handler)->function_entry)) {
-		function_call_traced = 1;
-		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-	}
-
-	/* Check for entry breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
-
-	/* Check for SOAP */
-	if (check_soap_call(fse, current_execute_data)) {
-		restore_error_handler_situation = 1;
-		tmp_error_cb = zend_error_cb;
-		zend_error_cb = xdebug_old_error_cb;
-	}
-
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_add_function_details_internal(fse TSRMLS_CC);
-		xdebug_profiler_function_begin(fse TSRMLS_CC);
-	}
-
-	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, return_value TSRMLS_CC);
-	} else {
-		execute_internal(current_execute_data, return_value TSRMLS_CC);
-	}
-
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_function_end(fse TSRMLS_CC);
-		xdebug_profiler_free_function_details(fse TSRMLS_CC);
-	}
-
-	/* Restore SOAP situation if needed */
-	if (restore_error_handler_situation) {
-		zend_error_cb = tmp_error_cb;
-	}
-
-	/* We only call the function_exit handler and return value handler if the
-	 * function call was also traced. Otherwise we end up with return trace
-	 * lines without a corresponding function call line. */
-	if (function_call_traced && !fse->filtered_tracing && XG_TRACE(trace_context)) {
-		if (fse->function.type != XFUNC_ZEND_PASS && (XG_TRACE(trace_handler)->function_exit)) {
-			XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-		}
-
-		/* Store return value in the trace file */
-		if (XINI_BASE(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG_TRACE(trace_handler)->return_value) {
-			XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, return_value TSRMLS_CC);
-		}
-	}
-
-	/* Check for return breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
-
-	if (XG_BASE(stack)) {
-		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);
-	}
-	XG_BASE(level)--;
-}
-
-/* Opcode handler for exit, to be able to clean up the profiler */
-int xdebug_exit_handler(zend_execute_data *execute_data)
-{
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_deinit(TSRMLS_C);
-	}
-
-	return ZEND_USER_OPCODE_DISPATCH;
-}
-
-/* {{{ zend_op_array srm_compile_file (file_handle, type)
- *    This function provides a hook for the execution of bananas */
-zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
-{
-	zend_op_array *op_array;
-
-	op_array = old_compile_file(file_handle, type TSRMLS_CC);
-
-	if (op_array) {
-		if (XG_COV(code_coverage_active) && XG_COV(code_coverage_unused) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
-			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-		}
-	}
-	return op_array;
-}
-/* }}} */
 
 static void xdebug_header_remove_with_prefix(xdebug_llist *headers, char *prefix, size_t prefix_len TSRMLS_DC)
 {
@@ -2465,23 +1594,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 }
 /* }}} */
 
-PHP_FUNCTION(xdebug_enable)
-{
-	zend_error_cb = xdebug_new_error_cb;
-	zend_throw_exception_hook = xdebug_throw_exception_hook;
-}
-
-PHP_FUNCTION(xdebug_disable)
-{
-	zend_error_cb = xdebug_old_error_cb;
-	zend_throw_exception_hook = NULL;
-}
-
-PHP_FUNCTION(xdebug_is_enabled)
-{
-	RETURN_BOOL(zend_error_cb == xdebug_new_error_cb);
-}
-
 PHP_FUNCTION(xdebug_is_debugger_active)
 {
 	RETURN_BOOL(xdebug_is_debug_connection_active_for_current_pid());
@@ -2512,29 +1624,6 @@ PHP_FUNCTION(xdebug_stop_error_collection)
 	XG_BASE(do_collect_errors) = 0;
 }
 
-PHP_FUNCTION(xdebug_get_collected_errors)
-{
-	xdebug_llist_element *le;
-	char                 *string;
-	zend_bool             clear = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &clear) == FAILURE) {
-		return;
-	}
-
-	array_init(return_value);
-	for (le = XDEBUG_LLIST_HEAD(XG_BASE(collected_errors)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
-		string = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, string);
-	}
-
-	if (clear) {
-		xdebug_llist_destroy(XG_BASE(collected_errors), NULL);
-		XG_BASE(collected_errors) = xdebug_llist_alloc(xdebug_llist_string_dtor);
-	}
-}
-
-
 PHP_FUNCTION(xdebug_get_headers)
 {
 	xdebug_llist_element *le;
@@ -2546,7 +1635,6 @@ PHP_FUNCTION(xdebug_get_headers)
 		add_next_index_string(return_value, string);
 	}
 }
-
 
 PHP_FUNCTION(xdebug_get_profiler_filename)
 {
@@ -2793,8 +1881,7 @@ static int xdebug_post_startup(void)
 		}
 	}
 
-	old_compile_file = zend_compile_file;
-	zend_compile_file = xdebug_compile_file;
+	xdebug_base_post_startup();
 
 	return SUCCESS;
 #else

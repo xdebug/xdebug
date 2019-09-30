@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,27 +16,23 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __XDEBUG_PROFILER_H__
-#define __XDEBUG_PROFILER_H__
+#ifndef __XDEBUG_BASE_H__
+#define __XDEBUG_BASE_H__
 
-#include "php.h"
-#include "TSRM.h"
-#include "php_xdebug.h"
-#include "lib/private.h"
-
-void xdebug_profiler_init(char *script_name);
-void xdebug_profiler_deinit();
-int xdebug_profiler_output_aggr_data(const char *prefix TSRMLS_DC);
-
-void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_op_array *op_array TSRMLS_DC);
-void xdebug_profiler_add_function_details_internal(function_stack_entry *fse TSRMLS_DC);
-void xdebug_profiler_free_function_details(function_stack_entry *fse TSRMLS_DC);
-
-void xdebug_profiler_function_begin(function_stack_entry *fse TSRMLS_DC);
-void xdebug_profiler_function_end(function_stack_entry *fse TSRMLS_DC);
-
-void xdebug_profile_call_entry_dtor(void *dummy, void *elem);
-void xdebug_profile_aggr_call_entry_dtor(void *elem);
-
-void xdebug_profiler_minit();
+/* error callback replacement functions */
+#if PHP_VERSION_ID >= 70200
+# define XDEBUG_ERROR_LINENO_TYPE uint32_t
+#else
+# define XDEBUG_ERROR_LINENO_TYPE uint
 #endif
+
+void xdebug_base_minit(INIT_FUNC_ARGS);
+void xdebug_base_mshutdown();
+
+void xdebug_base_post_startup();
+
+void xdebug_base_rinit();
+void xdebug_base_post_deactivate();
+void xdebug_base_rshutdown();
+
+#endif // __XDEBUG_BASE_H__
