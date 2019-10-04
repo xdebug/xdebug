@@ -2,8 +2,10 @@ Xdebug
 ======
 
 .. image:: https://travis-ci.org/xdebug/xdebug.svg?branch=master
+    :target: https://travis-ci.org/xdebug/xdebug
 .. image:: https://ci.appveyor.com/api/projects/status/glp9xfsmt1p25nkn?svg=true
 .. image:: https://circleci.com/gh/xdebug/xdebug/tree/master.svg?style=svg
+    :target: https://circleci.com/gh/xdebug/xdebug
 
 These are instructions for installing Xdebug from a Git checkout. Please refer
 to https://xdebug.org/support.php for support.
