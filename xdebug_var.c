@@ -1974,7 +1974,9 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 
 		check_if_extended_properies_are_needed(options, tmp_name, tmp_fullname, (*item)->zv);
 		add_xml_attribute_or_element(options, node, "name", 4, tmp_name);
-		add_xml_attribute_or_element(options, node, "fullname", 8, tmp_fullname);
+		if (tmp_fullname) {
+			add_xml_attribute_or_element(options, node, "fullname", 8, tmp_fullname);
+		}
 
 		xdebug_xml_add_attribute_ex(node, "facet", xdebug_sprintf("%s%s", (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "", modifier), 0, 1);
 		xdebug_xml_add_child(parent, node);
