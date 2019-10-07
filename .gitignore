@@ -6,6 +6,12 @@
 /*.mk
 /*.la
 /.libs
+src/*.lo
+src/*.loT
+src/.libs
+src/*/*.lo
+src/*/*.loT
+src/*/.libs
 /libs.mk
 /ac*.m4
 /build

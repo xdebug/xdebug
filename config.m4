@@ -77,7 +77,19 @@ if test "$PHP_XDEBUG" != "no"; then
 
   PHP_XDEBUG_CFLAGS="$STD_CFLAGS $MAINTAINER_CFLAGS"
 
-  PHP_NEW_EXTENSION(xdebug, xdebug.c xdebug_branch_info.c xdebug_code_coverage.c xdebug_com.c xdebug_compat.c xdebug_gc_stats.c xdebug_filter.c xdebug_handler_dbgp.c xdebug_handlers.c xdebug_llist.c xdebug_monitor.c xdebug_hash.c xdebug_private.c xdebug_profiler.c xdebug_set.c xdebug_stack.c xdebug_str.c xdebug_superglobals.c xdebug_tracing.c xdebug_trace_textual.c xdebug_trace_computerized.c xdebug_trace_html.c xdebug_var.c xdebug_xml.c usefulstuff.c, $ext_shared,,$PHP_XDEBUG_CFLAGS,,yes)
+  XDEBUG_BASE_SOURCES="src/base/base.c src/base/filter.c src/base/monitor.c src/base/stack.c src/base/superglobals.c"
+  XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/compat.c src/lib/hash.c src/lib/llist.c src/lib/private.c src/lib/set.c src/lib/str.c src/lib/var.c src/lib/xml.c"
+
+  XDEBUG_COVERAGE_SOURCES="src/coverage/branch_info.c src/coverage/code_coverage.c"
+  XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/handler_dbgp.c src/debugger/handlers.c"
+  XDEBUG_GCSTATS_SOURCES="src/gcstats/gc_stats.c"
+  XDEBUG_PROFILER_SOURCES="src/profiler/profiler.c"
+  XDEBUG_TRACING_SOURCES="src/tracing/trace_computerized.c src/tracing/trace_html.c src/tracing/trace_textual.c src/tracing/tracing.c"
+
+  PHP_NEW_EXTENSION(xdebug, xdebug.c $XDEBUG_BASE_SOURCES $XDEBUG_LIB_SOURCES $XDEBUG_COVERAGE_SOURCES $XDEBUG_DEBUGGER_SOURCES $XDEBUG_GCSTATS_SOURCES $XDEBUG_PROFILER_SOURCES $XDEBUG_TRACING_SOURCES, $ext_shared,,$PHP_XDEBUG_CFLAGS,,yes)
   PHP_SUBST(XDEBUG_SHARED_LIBADD)
   PHP_ADD_MAKEFILE_FRAGMENT
+
+  PHP_ADD_INCLUDE($ext_srcdir/src)
+  PHP_ADD_INCLUDE($ext_builddir/src)
 fi
