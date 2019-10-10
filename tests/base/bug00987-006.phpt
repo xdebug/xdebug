@@ -17,6 +17,7 @@ xdebug.overload_var_dump=1
 <?php
 $xml = '<?xml version="1.0" encoding="UTF-8" ?>
 <root>
+Xdebug rocks
 </root>';
 $temp = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOERROR);
 var_dump($temp);
@@ -24,6 +25,7 @@ var_dump($temp);
 --EXPECTF--
 class SimpleXMLElement#1 (1) {
   public ${0} =>
-  string(1) "
+  string(14) "
+Xdebug rocks
 "
 }
