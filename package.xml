@@ -145,6 +145,7 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
     <dir name="gcstats">
      <file name="gc_stats.c" role="src" />
      <file name="gc_stats.h" role="src" />
+     <file name="gc_stats_private.h" role="src" />
     </dir>
     <dir name="profiler">
      <file name="profiler.c" role="src" />

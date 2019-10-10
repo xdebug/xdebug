@@ -387,9 +387,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   base.settings.do_scream,            zend_xdebug_globals, xdebug_globals)
 
 	/* GC Stats support */
-	STD_PHP_INI_BOOLEAN("xdebug.gc_stats_enable",    "0",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   gc_stats.settings.gc_stats_enable,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_dir",  XDEBUG_TEMP_DIR,   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, gc_stats.settings.gc_stats_output_dir,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_name", "gcstats.%p",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, gc_stats.settings.gc_stats_output_name, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.gc_stats_enable",    "0",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.gc_stats.enable,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_dir",  XDEBUG_TEMP_DIR,   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.gc_stats.output_dir,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_name", "gcstats.%p",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.gc_stats.output_name, zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 static void xdebug_init_base_globals(struct xdebug_base_info *xg)
@@ -472,13 +472,6 @@ static void xdebug_init_profiler_globals(struct xdebug_profiler_info *xg)
 	xg->profiler_enabled     = 0;
 }
 
-static void xdebug_init_gc_stats_globals(struct xdebug_gc_stats_info *xg)
-{
-	xg->gc_stats_file = NULL;
-	xg->gc_stats_filename = NULL;
-	xg->gc_stats_enabled = 0;
-}
-
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
 	xdebug_init_base_globals(&xg->base);
@@ -486,7 +479,7 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_init_trace_globals(&xg->trace);
 	xdebug_init_coverage_globals(&xg->coverage);
 	xdebug_init_profiler_globals(&xg->profiler);
-	xdebug_init_gc_stats_globals(&xg->gc_stats);
+	xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
 
 	/* Override header generation in SAPI */
 	if (sapi_module.header_handler != xdebug_header_handler) {
@@ -737,11 +730,8 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_INI_ENTRIES();
 
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
+	xdebug_gcstats_minit();
 	xdebug_profiler_minit();
-
-    /* Replace garbage collection handler with our own */
-    xdebug_old_gc_collect_cycles = gc_collect_cycles;
-    gc_collect_cycles = xdebug_gc_collect_cycles;
 
 	/* Get reserved offsets */
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
@@ -918,7 +908,7 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 		xdebug_profiler_output_aggr_data(NULL TSRMLS_CC);
 	}
 
-	gc_collect_cycles = xdebug_old_gc_collect_cycles;
+	xdebug_gcstats_mshutdown();
 
 	zend_hash_destroy(&XG_PROF(aggr_calls));
 
@@ -1142,9 +1132,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG_COV(code_coverage_filter_offset) = zend_xdebug_filter_offset;
 	XG_COV(previous_filename) = NULL;
 	XG_COV(previous_file) = NULL;
-	XG_GCSTATS(gc_stats_file) = NULL;
-	XG_GCSTATS(gc_stats_filename) = NULL;
-	XG_GCSTATS(gc_stats_enabled) = 0;
+
+	xdebug_gcstats_rinit();
 
 	xdebug_init_auto_globals(TSRMLS_C);
 
@@ -1219,13 +1208,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		xdebug_stop_trace(TSRMLS_C);
 	}
 
-	if (XG_GCSTATS(gc_stats_enabled)) {
-		xdebug_gc_stats_stop();
-	}
-
-	if (XG_GCSTATS(gc_stats_filename)) {
-		xdfree(XG_GCSTATS(gc_stats_filename));
-	}
+	xdebug_gcstats_post_deactivate();
 
 	if (XG_DBG(ide_key)) {
 		xdfree(XG_DBG(ide_key));

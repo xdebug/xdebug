@@ -17,28 +17,21 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __XDEBUG_GC_STATS_H__
-#define __XDEBUG_GC_STATS_H__
+#ifndef __XDEBUG_GC_STATS_PRIVATE_H__
+#define __XDEBUG_GC_STATS_PRIVATE_H__
 
-typedef struct _xdebug_gc_stats_settings_t {
-	zend_bool  enable;
-	char      *output_dir;
-	char      *output_name;
-} xdebug_gc_stats_settings_t;
+#include "gc_stats.h"
 
-typedef struct _xdebug_gc_stats_globals_t {
-	/* garbage stats */
-	zend_bool  enabled;
-	FILE      *file;
-	char      *filename;
-} xdebug_gc_stats_globals_t;
+typedef struct _xdebug_gc_run {
+	zend_long    collected;
+	zend_long    duration;
+	zend_long    memory_before;
+	zend_long    memory_after;
+	char        *function_name;
+	char        *class_name;
+} xdebug_gc_run;
 
-void xdebug_gcstats_init_if_requested(zend_op_array* op_array);
-
-void xdebug_init_gc_stats_globals(xdebug_gc_stats_globals_t *xg);
-void xdebug_gcstats_minit();
-void xdebug_gcstats_mshutdown();
-void xdebug_gcstats_rinit();
-void xdebug_gcstats_post_deactivate();
+#define XINI_GCSTATS(v)  (XG(settings.gc_stats.v))
+#define XG_GCSTATS(v)  (XG(globals.gc_stats.v))
 
 #endif
