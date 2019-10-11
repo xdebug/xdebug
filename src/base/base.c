@@ -475,11 +475,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 			}
 
 			/* Start GC stats collector if requested, and we're in main script */
-			if (!XG_GCSTATS(gc_stats_enabled) && XINI_GCSTATS(gc_stats_enable)) {
-				if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
-					XG_GCSTATS(gc_stats_enabled) = 1;
-				}
-			}
+			xdebug_gcstats_init_if_requested(op_array);
 		}
 	}
 

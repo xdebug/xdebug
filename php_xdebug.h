@@ -32,6 +32,7 @@
 #include "coverage/branch_info.h"
 #include "coverage/code_coverage.h"
 #include "debugger/handlers.h"
+#include "gcstats/gc_stats.h"
 #include "lib/compat.h"
 #include "lib/hash.h"
 #include "lib/llist.h"
@@ -333,26 +334,18 @@ struct xdebug_profiler_info {
 	} settings;
 };
 
-struct xdebug_gc_stats_info {
-	/* garbage stats */
-	zend_bool  gc_stats_enabled;
-	FILE      *gc_stats_file;
-	char      *gc_stats_filename;
-
-	struct {
-		zend_bool  gc_stats_enable;
-		char      *gc_stats_output_dir;
-		char      *gc_stats_output_name;
-	} settings;
-};
-
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct xdebug_base_info     base;
 	struct xdebug_stepdbg_info  stepdbg;
 	struct xdebug_trace_info    trace;
 	struct xdebug_coverage_info coverage;
 	struct xdebug_profiler_info profiler;
-	struct xdebug_gc_stats_info gc_stats;
+	struct {
+		xdebug_gc_stats_globals_t gc_stats;
+	} globals;
+	struct {
+		xdebug_gc_stats_settings_t gc_stats;
+	} settings;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS
@@ -364,14 +357,12 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #define XG_BASE(v)     (XG(base.v))
 #define XG_COV(v)      (XG(coverage.v))
 #define XG_DBG(v)      (XG(stepdbg.v))
-#define XG_GCSTATS(v)  (XG(gc_stats.v))
 #define XG_PROF(v)     (XG(profiler.v))
 #define XG_TRACE(v)    (XG(trace.v))
 
 #define XINI_BASE(v)     (XG(base.settings.v))
 #define XINI_COV(v)      (XG(coverage.settings.v))
 #define XINI_DBG(v)      (XG(stepdbg.settings.v))
-#define XINI_GCSTATS(v)  (XG(gc_stats.settings.v))
 #define XINI_PROF(v)     (XG(profiler.settings.v))
 #define XINI_TRACE(v)    (XG(trace.settings.v))
 
