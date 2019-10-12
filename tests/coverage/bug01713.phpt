@@ -15,10 +15,9 @@ $cc = xdebug_get_code_coverage();
 ksort( $cc );
 $fileInfo = array_values( array_slice( $cc, 0, 1 ) )[0];
 
-mustBeExecuted( $fileInfo, range( 12, 15 ) );
+mustBeExecuted( $fileInfo, range( 12, 14 ) );
 ?>
 --EXPECTF--
 line #12 is present and covered
 line #13 is present and covered
 line #14 is present and covered
-line #15 is present and covered
