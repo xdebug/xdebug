@@ -54,9 +54,8 @@ static int xdebug_silence_handler(zend_execute_data *execute_data)
 	zend_op_array *op_array = &execute_data->func->op_array;
 	const zend_op *cur_opcode = EG(current_execute_data)->opline;
 
-	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		xdebug_print_opcode_info('S', execute_data, cur_opcode TSRMLS_CC);
-	}
+	xdebug_coverage_record_silence_if_active(execute_data, op_array);
+
 	if (XINI_BASE(do_scream)) {
 		execute_data->opline++;
 		if (cur_opcode->opcode == ZEND_BEGIN_SILENCE) {
@@ -193,9 +192,7 @@ zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRML
 	op_array = old_compile_file(file_handle, type TSRMLS_CC);
 
 	if (op_array) {
-		if (XG_COV(code_coverage_active) && XG_COV(code_coverage_unused) && (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
-			xdebug_prefill_code_coverage(op_array TSRMLS_CC);
-		}
+		xdebug_coverage_compile_file(op_array);
 	}
 	return op_array;
 }
@@ -407,7 +404,6 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	function_stack_entry *fse, *xfse;
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
-	xdebug_func           code_coverage_func_info;
 	char                 *code_coverage_function_name = NULL;
 	char                 *code_coverage_file_name = NULL;
 	int                   code_coverage_init = 0;
@@ -527,20 +523,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		}
 	}
 
-	if (!fse->filtered_code_coverage && XG_COV(code_coverage_active) && XG_COV(code_coverage_unused)) {
-		code_coverage_file_name = xdstrdup(STR_NAME_VAL(op_array->filename));
-		xdebug_build_fname_from_oparray(&code_coverage_func_info, op_array TSRMLS_CC);
-		code_coverage_function_name = xdebug_func_format(&code_coverage_func_info TSRMLS_CC);
-		xdebug_code_coverage_start_of_function(op_array, code_coverage_function_name TSRMLS_CC);
-
-		if (code_coverage_func_info.class) {
-			xdfree(code_coverage_func_info.class);
-		}
-		if (code_coverage_func_info.function) {
-			xdfree(code_coverage_func_info.function);
-		}
-		code_coverage_init = 1;
-	}
+	code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_file_name, &code_coverage_function_name);
 
 	/* If we're in an eval, we need to create an ID for it. This ID however
 	 * depends on the debugger mechanism in use so we need to call a function
@@ -569,11 +552,8 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		xdebug_profiler_free_function_details(fse TSRMLS_CC);
 	}
 
-	/* Check which path has been used */
-	if (!fse->filtered_code_coverage && XG_COV(code_coverage_active) && XG_COV(code_coverage_unused) && code_coverage_init) {
-		xdebug_code_coverage_end_of_function(op_array, code_coverage_file_name, code_coverage_function_name TSRMLS_CC);
-		xdfree(code_coverage_function_name);
-		xdfree(code_coverage_file_name);
+	if (code_coverage_init) {
+		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_file_name, code_coverage_function_name);
 	}
 
 

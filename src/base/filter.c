@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -105,7 +105,7 @@ int xdebug_filter_match_namespace_blacklist(function_stack_entry *fse, long *fil
 }
 
 
-static void xdebug_filter_run_internal(function_stack_entry *fse, int group, long *filtered_flag, int type, xdebug_llist *filters)
+void xdebug_filter_run_internal(function_stack_entry *fse, int group, long *filtered_flag, int type, xdebug_llist *filters)
 {
 	xdebug_llist_element *le;
 	unsigned int          k;
@@ -166,20 +166,6 @@ void xdebug_filter_run_tracing(function_stack_entry *fse)
 
 	if (XG_BASE(filter_type_tracing) != XDEBUG_FILTER_NONE) {
 		xdebug_filter_run_internal(fse, XDEBUG_FILTER_TRACING, &fse->filtered_tracing, XG_BASE(filter_type_tracing), XG_BASE(filters_tracing));
-	}
-}
-
-void xdebug_filter_run_code_coverage(zend_op_array *op_array)
-{
-	op_array->reserved[XG_COV(dead_code_analysis_tracker_offset)] = 0;
-
-	if (XG_BASE(filter_type_code_coverage) != XDEBUG_FILTER_NONE) {
-		function_stack_entry tmp_fse;
-
-		tmp_fse.filename = STR_NAME_VAL(op_array->filename);
-		xdebug_build_fname_from_oparray(&tmp_fse.function, op_array TSRMLS_CC);
-		xdebug_filter_run_internal(&tmp_fse, XDEBUG_FILTER_CODE_COVERAGE, &tmp_fse.filtered_code_coverage, XG_BASE(filter_type_code_coverage), XG_BASE(filters_code_coverage));
-		op_array->reserved[XG_COV(code_coverage_filter_offset)] = (void*) tmp_fse.filtered_code_coverage;
 	}
 }
 

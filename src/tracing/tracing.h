@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,4 +29,5 @@ FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, c
 void xdebug_trace_function_begin(function_stack_entry *fse, int function_nr TSRMLS_DC);
 void xdebug_trace_function_end(function_stack_entry *fse, int function_nr TSRMLS_DC);
 
+void xdebug_tracing_minit(void);
 #endif

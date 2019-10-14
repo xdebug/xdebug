@@ -283,31 +283,6 @@ struct xdebug_trace_info {
 	} settings;
 };
 
-struct xdebug_coverage_info {
-	zend_bool     code_coverage_active; /* Whether code coverage is currently running */
-	xdebug_hash  *code_coverage_info;   /* Stores code coverage information */
-	zend_bool     code_coverage_unused;
-	zend_bool     code_coverage_dead_code_analysis;
-	zend_bool     code_coverage_branch_check;
-	int           dead_code_analysis_tracker_offset;
-	long          dead_code_last_start_id;
-	long          code_coverage_filter_offset;
-	char                 *previous_filename;
-	xdebug_coverage_file *previous_file;
-	char                 *previous_mark_filename;
-	xdebug_coverage_file *previous_mark_file;
-	xdebug_path_info     *paths_stack;
-	xdebug_hash          *visited_classes;
-	xdebug_hash          *visited_branches;
-	struct {
-		unsigned int  size;
-		int *last_branch_nr;
-	} branches;
-	struct {
-		zend_bool     code_coverage_enable; /* Flag to enable code coverage (and opcode overloading) */
-	} settings;
-};
-
 struct xdebug_profiler_info {
 	/* profiler globals */
 	double        profiler_start_time;
@@ -338,12 +313,13 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct xdebug_base_info     base;
 	struct xdebug_stepdbg_info  stepdbg;
 	struct xdebug_trace_info    trace;
-	struct xdebug_coverage_info coverage;
 	struct xdebug_profiler_info profiler;
 	struct {
+		xdebug_coverage_globals_t coverage;
 		xdebug_gc_stats_globals_t gc_stats;
 	} globals;
 	struct {
+		xdebug_coverage_settings_t coverage;
 		xdebug_gc_stats_settings_t gc_stats;
 	} settings;
 ZEND_END_MODULE_GLOBALS(xdebug)
@@ -355,16 +331,21 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #endif
 
 #define XG_BASE(v)     (XG(base.v))
-#define XG_COV(v)      (XG(coverage.v))
 #define XG_DBG(v)      (XG(stepdbg.v))
 #define XG_PROF(v)     (XG(profiler.v))
 #define XG_TRACE(v)    (XG(trace.v))
 
 #define XINI_BASE(v)     (XG(base.settings.v))
-#define XINI_COV(v)      (XG(coverage.settings.v))
 #define XINI_DBG(v)      (XG(stepdbg.settings.v))
 #define XINI_PROF(v)     (XG(profiler.settings.v))
 #define XINI_TRACE(v)    (XG(trace.settings.v))
+
+/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
+#define XDEBUG_SET_OPCODE_OVERRIDE_COMMON(oc) \
+	zend_set_user_opcode_handler(oc, xdebug_common_override_handler);
+
+#define XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(f,oc) \
+	zend_set_user_opcode_handler(oc, xdebug_##f##_handler);
 
 #endif
 
