@@ -986,6 +986,8 @@ void xdebug_coverage_init_oparray(zend_op_array *op_array)
 		tmp_fse.filename = STR_NAME_VAL(op_array->filename);
 		xdebug_build_fname_from_oparray(&tmp_fse.function, op_array);
 		xdebug_filter_run_internal(&tmp_fse, XDEBUG_FILTER_CODE_COVERAGE, &tmp_fse.filtered_code_coverage, XG_BASE(filter_type_code_coverage), XG_BASE(filters_code_coverage));
+		xdebug_func_dtor_by_ref(&tmp_fse.function);
+
 		op_array->reserved[XG_COV(code_coverage_filter_offset)] = (void*) tmp_fse.filtered_code_coverage;
 	}
 }
