@@ -21,6 +21,8 @@ for i in $@; do
 	cp -rT ${CWD} /tmp/ptester/thread/${TID}/$i/tmp-xdebug
 	cd /tmp/ptester/thread/${TID}/$i/tmp-xdebug
 
+	sleep 3
+
 	printf "%2d %6d: Rebuilding for %s\n" $TID $BASHPID $i
 	./rebuild.sh >/tmp/ptester/logs/$i.build.log 2>&1
 
