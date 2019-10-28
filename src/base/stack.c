@@ -1315,11 +1315,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	xdebug_filter_run_tracing(tmp);
 
 	/* Count code coverage line for call */
-	if (XG_COV(code_coverage_active)) {
-		if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_branch_check)) {
-			xdebug_count_line(tmp->filename, tmp->lineno, 0, 0 TSRMLS_CC);
-		}
-	}
+	xdebug_coverage_count_line_if_branch_check_active(op_array, tmp->filename, tmp->lineno);
 
 	if (XG_BASE(do_monitor_functions)) {
 		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);

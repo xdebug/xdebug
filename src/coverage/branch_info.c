@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2018 Derick Rethans                               |
+   | Copyright (c) 1997-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
@@ -11,7 +11,10 @@
  */
 #include <stdlib.h>
 #include <math.h>
+
 #include "php_xdebug.h"
+#include "code_coverage_private.h"
+
 #include "lib/hash.h"
 #include "lib/str.h"
 

@@ -133,6 +133,7 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="branch_info.h" role="src" />
      <file name="code_coverage.c" role="src" />
      <file name="code_coverage.h" role="src" />
+     <file name="code_coverage_private.h" role="src" />
     </dir>
     <dir name="debugger">
      <file name="com.c" role="src" />
@@ -154,6 +155,7 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
     <dir name="tracing">
      <file name="tracing.c" role="src" />
      <file name="tracing.h" role="src" />
+     <file name="tracing_private.h" role="src" />
      <file name="trace_textual.c" role="src" />
      <file name="trace_textual.h" role="src" />
      <file name="trace_computerized.c" role="src" />
