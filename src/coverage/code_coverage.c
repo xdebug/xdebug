@@ -901,7 +901,7 @@ void xdebug_coverage_count_line_if_active(zend_op_array *op_array, char *file, i
 
 void xdebug_coverage_count_line_if_branch_check_active(zend_op_array *op_array, char *file, int lineno)
 {
-	if (XG_COV(code_coverage_branch_check)) {
+	if (XG_COV(code_coverage_active) && XG_COV(code_coverage_branch_check)) {
 		xdebug_coverage_count_line_if_active(op_array, file, lineno);
 	}
 }
