@@ -33,6 +33,7 @@
 #include "coverage/code_coverage.h"
 #include "debugger/handlers.h"
 #include "gcstats/gc_stats.h"
+#include "profiler/profiler.h"
 #include "lib/compat.h"
 #include "lib/hash.h"
 #include "lib/llist.h"
@@ -283,44 +284,19 @@ struct xdebug_trace_info {
 	} settings;
 };
 
-struct xdebug_profiler_info {
-	/* profiler globals */
-	double        profiler_start_time;
-	zend_bool     profiler_enabled;
-	FILE         *profile_file;
-	char         *profile_filename;
-	xdebug_hash  *profile_filename_refs;
-	int           profile_last_filename_ref;
-	xdebug_hash  *profile_functionname_refs;
-	int           profile_last_functionname_ref;
-
-	/* aggregate profiling */
-	HashTable  aggr_calls;
-
-	struct {
-		/* profiler settings */
-		zend_bool     profiler_enable;
-		char         *profiler_output_dir;
-		char         *profiler_output_name; /* "pid" or "crc32" */
-		zend_bool     profiler_enable_trigger;
-		char         *profiler_enable_trigger_value;
-		zend_bool     profiler_append;
-		zend_bool     profiler_aggregate;
-	} settings;
-};
-
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct xdebug_base_info     base;
 	struct xdebug_stepdbg_info  stepdbg;
 	struct xdebug_trace_info    trace;
-	struct xdebug_profiler_info profiler;
 	struct {
 		xdebug_coverage_globals_t coverage;
 		xdebug_gc_stats_globals_t gc_stats;
+		xdebug_profiler_globals_t profiler;
 	} globals;
 	struct {
 		xdebug_coverage_settings_t coverage;
 		xdebug_gc_stats_settings_t gc_stats;
+		xdebug_profiler_settings_t profiler;
 	} settings;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
@@ -332,12 +308,10 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 
 #define XG_BASE(v)     (XG(base.v))
 #define XG_DBG(v)      (XG(stepdbg.v))
-#define XG_PROF(v)     (XG(profiler.v))
 #define XG_TRACE(v)    (XG(trace.v))
 
 #define XINI_BASE(v)     (XG(base.settings.v))
 #define XINI_DBG(v)      (XG(stepdbg.settings.v))
-#define XINI_PROF(v)     (XG(profiler.settings.v))
 #define XINI_TRACE(v)    (XG(trace.settings.v))
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */

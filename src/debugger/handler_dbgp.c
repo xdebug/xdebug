@@ -1994,8 +1994,10 @@ DBGP_FUNC(context_get)
 
 DBGP_FUNC(xcmd_profiler_name_get)
 {
-	if (XG_PROF(profiler_enabled) && XG_PROF(profile_filename)) {
-		xdebug_xml_add_text(*retval, xdstrdup(XG_PROF(profile_filename)));
+	char *filename = xdebug_get_profiler_filename();
+
+	if (filename) {
+		xdebug_xml_add_text(*retval, xdstrdup(filename));
 	} else {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_PROFILING_NOT_STARTED);
 	}

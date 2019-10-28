@@ -358,40 +358,10 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	return 1;
 }
 
-static int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value TSRMLS_DC)
-{
-	zval *trigger_val;
-
-	if (!setting) {
-		return 0;
-	}
-
-	if (
-		(
-			(
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name, strlen(var_name))) != NULL
-			) || (
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name, strlen(var_name))) != NULL
-			) || (
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name, strlen(var_name))) != NULL
-			)
-		) && (
-			(var_value == NULL) || (var_value[0] == '\0') ||
-			(strcmp(var_value, Z_STRVAL_P(trigger_val)) == 0)
-		)
-	) {
-		return 1;
-	}
-
-	return 0;
-}
-
 /* Opcode handler for exit, to be able to clean up the profiler */
 int xdebug_exit_handler(zend_execute_data *execute_data)
 {
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_deinit(TSRMLS_C);
-	}
+	xdebug_profiler_exit_handler();
 
 	return ZEND_USER_OPCODE_DISPATCH;
 }
@@ -452,13 +422,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 		if (XG_BASE(level) == 0) {
 			/* Start profiler if requested, and we're in main script */
-			/* Check for special GET/POST parameter to start profiling */
-			if (
-				!XG_PROF(profiler_enabled) &&
-				(XINI_PROF(profiler_enable) || xdebug_trigger_enabled(XINI_PROF(profiler_enable_trigger), "XDEBUG_PROFILE", XINI_PROF(profiler_enable_trigger_value) TSRMLS_CC))
-			) {
-				xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename));
-			}
+			xdebug_profiler_init_if_requested(op_array);
 
 			/* Start auto-tracer if requested, and we're in main script */
 			if (
@@ -539,18 +503,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		}
 	}
 
-	if (XG_PROF(profiler_enabled)) {
-		/* Calculate all elements for profile entries */
-		xdebug_profiler_add_function_details_user(fse, op_array TSRMLS_CC);
-		xdebug_profiler_function_begin(fse TSRMLS_CC);
-	}
+	xdebug_profiler_execute_ex(fse, op_array);
 
 	xdebug_old_execute_ex(execute_data TSRMLS_CC);
 
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_function_end(fse TSRMLS_CC);
-		xdebug_profiler_free_function_details(fse TSRMLS_CC);
-	}
+	xdebug_profiler_execute_ex_end(fse);
 
 	if (code_coverage_init) {
 		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_file_name, code_coverage_function_name);
@@ -657,10 +614,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		zend_error_cb = xdebug_old_error_cb;
 	}
 
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_add_function_details_internal(fse TSRMLS_CC);
-		xdebug_profiler_function_begin(fse TSRMLS_CC);
-	}
+	xdebug_profiler_execute_internal(fse);
 
 	if (xdebug_old_execute_internal) {
 		xdebug_old_execute_internal(current_execute_data, return_value TSRMLS_CC);
@@ -668,10 +622,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		execute_internal(current_execute_data, return_value TSRMLS_CC);
 	}
 
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_function_end(fse TSRMLS_CC);
-		xdebug_profiler_free_function_details(fse TSRMLS_CC);
-	}
+	xdebug_profiler_execute_internal_end(fse);
 
 	/* Restore SOAP situation if needed */
 	if (restore_error_handler_situation) {
