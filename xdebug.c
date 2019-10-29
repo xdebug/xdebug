@@ -352,13 +352,13 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.dump_undefined,    zend_xdebug_globals, xdebug_globals)
 
 	/* Profiler settings */
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler.settings.profiler_enable,         zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.profiler_output_dir",       XDEBUG_TEMP_DIR,      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler.settings.profiler_output_dir,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, profiler.settings.profiler_output_name,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler.settings.profiler_enable_trigger, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString,   profiler.settings.profiler_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler.settings.profiler_append,         zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_aggregate",      "0",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   profiler.settings.profiler_aggregate,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",         "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_enable,               zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_output_dir",       XDEBUG_TEMP_DIR,      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_output_dir,           zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_output_name,          zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_enable_trigger,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_append,               zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.profiler_aggregate",      "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_aggregate,            zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   stepdbg.settings.remote_enable,     zend_xdebug_globals, xdebug_globals)
@@ -448,18 +448,13 @@ static void xdebug_init_trace_globals(struct xdebug_trace_info *xg)
 	xg->trace_context        = NULL;
 }
 
-static void xdebug_init_profiler_globals(struct xdebug_profiler_info *xg)
-{
-	xg->profiler_enabled     = 0;
-}
-
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
 	xdebug_init_base_globals(&xg->base);
 	xdebug_init_stepdbg_globals(&xg->stepdbg);
 	xdebug_init_trace_globals(&xg->trace);
 	xdebug_init_coverage_globals(&xg->globals.coverage);
-	xdebug_init_profiler_globals(&xg->profiler);
+	xdebug_init_profiler_globals(&xg->globals.profiler);
 	xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
 
 	/* Override header generation in SAPI */
@@ -683,14 +678,9 @@ PHP_MINIT_FUNCTION(xdebug)
 
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
-	if (XINI_PROF(profiler_aggregate)) {
-		xdebug_profiler_output_aggr_data(NULL TSRMLS_CC);
-	}
-
 	xdebug_coverage_mshutdown();
 	xdebug_gcstats_mshutdown();
-
-	zend_hash_destroy(&XG_PROF(aggr_calls));
+	xdebug_profiler_mshutdown();
 
 #ifdef ZTS
 	ts_free_id(xdebug_globals_id);
@@ -808,17 +798,12 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG_DBG(no_exec)        = 0;
 	XG_TRACE(trace_handler) = NULL;
 	XG_TRACE(trace_context) = NULL;
-	XG_PROF(profile_file)  = NULL;
-	XG_PROF(profile_filename) = NULL;
-	XG_PROF(profile_filename_refs) = NULL;
-	XG_PROF(profile_functionname_refs) = NULL;
-	XG_PROF(profile_last_filename_ref) = 0;
-	XG_PROF(profile_last_functionname_ref) = 0;
 	XG_DBG(active_symbol_table) = NULL;
 	XG_DBG(This) = NULL;
 
 	xdebug_coverage_rinit();
 	xdebug_gcstats_rinit();
+	xdebug_profiler_rinit();
 
 	xdebug_init_auto_globals(TSRMLS_C);
 
@@ -850,7 +835,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	xdebug_mark_debug_connection_not_active();
 	XG_DBG(breakpoints_allowed) = 1;
 	XG_DBG(remote_log_file) = NULL;
-	XG_PROF(profiler_enabled) = 0;
 
 	/* Initialize some debugger context properties */
 	XG_DBG(context).program_name   = NULL;
@@ -876,17 +860,13 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 		xdfree(XG_DBG(context).program_name);
 	}
 
-	/* profiler */
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_deinit();
-	}
-
 	if (XG_TRACE(trace_context)) {
 		xdebug_stop_trace(TSRMLS_C);
 	}
 
 	xdebug_coverage_post_deactivate();
 	xdebug_gcstats_post_deactivate();
+	xdebug_profiler_post_deactivate();
 
 	if (XG_DBG(ide_key)) {
 		xdfree(XG_DBG(ide_key));
@@ -1044,9 +1024,7 @@ PHP_FUNCTION(xdebug_error_reporting)
 PHP_FUNCTION(xdebug_pcntl_exec)
 {
 	/* We need to stop the profiler and trace files here */
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_deinit(TSRMLS_C);
-	}
+	xdebug_profiler_pcntl_exec_handler();
 
 	XG_BASE(orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -1274,46 +1252,6 @@ PHP_FUNCTION(xdebug_get_headers)
 		string = XDEBUG_LLIST_VALP(le);
 		add_next_index_string(return_value, string);
 	}
-}
-
-PHP_FUNCTION(xdebug_get_profiler_filename)
-{
-	if (XG_PROF(profile_filename)) {
-		RETURN_STRING(XG_PROF(profile_filename));
-	} else {
-		RETURN_FALSE;
-	}
-}
-
-PHP_FUNCTION(xdebug_dump_aggr_profiling_data)
-{
-	char *prefix = NULL;
-	size_t prefix_len;
-
-	if (!XINI_PROF(profiler_aggregate)) {
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &prefix, &prefix_len) == FAILURE) {
-		return;
-	}
-
-	if (xdebug_profiler_output_aggr_data(prefix TSRMLS_CC) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-
-PHP_FUNCTION(xdebug_clear_aggr_profiling_data)
-{
-	if (!XINI_PROF(profiler_aggregate)) {
-		RETURN_FALSE;
-	}
-
-	zend_hash_clean(&XG_PROF(aggr_calls));
-
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(xdebug_memory_usage)

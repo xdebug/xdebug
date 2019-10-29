@@ -1138,10 +1138,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
 	int                   i = 0;
-	char                 *aggr_key = NULL;
-	int                   aggr_key_len = 0;
 	int                   hit_variadic = 0;
-	zend_string          *aggr_key_str = NULL;
 
 	if (type == XDEBUG_USER_DEFINED) {
 		edata = EG(current_execute_data)->prev_execute_data;
@@ -1329,55 +1326,15 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		xdfree(func_name);
 	}
 
-	if (XINI_PROF(profiler_aggregate)) {
-		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
-
-		aggr_key = xdebug_sprintf("%s.%s.%d", tmp->filename, func_name, tmp->lineno);
-		aggr_key_len = strlen(aggr_key);
-		aggr_key_str = zend_string_init(aggr_key, aggr_key_len, 0);
-		if ((tmp->aggr_entry = zend_hash_find_ptr(&XG_PROF(aggr_calls), aggr_key_str)) == NULL) {
-			xdebug_aggregate_entry xae;
-
-			if (tmp->user_defined == XDEBUG_USER_DEFINED) {
-				xae.filename = xdstrdup(tmp->op_array->filename->val);
-			} else {
-				xae.filename = xdstrdup("php:internal");
-			}
-			xae.function = func_name;
-			xae.lineno = tmp->lineno;
-			xae.user_defined = tmp->user_defined;
-			xae.call_count = 0;
-			xae.time_own = 0;
-			xae.time_inclusive = 0;
-			xae.call_list = NULL;
-
-			zend_hash_add_ptr(&XG_PROF(aggr_calls), aggr_key_str, &xae);
-		}
-	}
-
 	if (XG_BASE(stack)) {
 		if (XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
 			function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
 			tmp->prev = prev;
-			if (XINI_PROF(profiler_aggregate)) {
-				if (prev->aggr_entry->call_list) {
-					if (!zend_hash_exists(prev->aggr_entry->call_list, aggr_key_str)) {
-						zend_hash_add_ptr(prev->aggr_entry->call_list, aggr_key_str, tmp->aggr_entry);
-					}
-				} else {
-					prev->aggr_entry->call_list = xdmalloc(sizeof(HashTable));
-					zend_hash_init_ex(prev->aggr_entry->call_list, 1, NULL, NULL, 1, 0);
-					zend_hash_add_ptr(prev->aggr_entry->call_list, aggr_key_str, tmp->aggr_entry);
-				}
-			}
 		}
 		xdebug_llist_insert_next(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), tmp);
 	}
 
-	if (XINI_PROF(profiler_aggregate)) {
-		zend_string_release(aggr_key_str);
-		xdfree(aggr_key);
-	}
+	xdebug_profiler_add_aggregate_entry(tmp);
 
 	return tmp;
 }

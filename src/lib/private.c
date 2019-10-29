@@ -110,3 +110,31 @@ xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list)
 
 	return tmp;
 }
+
+int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value)
+{
+	zval *trigger_val;
+
+	if (!setting) {
+		return 0;
+	}
+
+	if (
+		(
+			(
+				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name, strlen(var_name))) != NULL
+			) || (
+				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name, strlen(var_name))) != NULL
+			) || (
+				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name, strlen(var_name))) != NULL
+			)
+		) && (
+			(var_value == NULL) || (var_value[0] == '\0') ||
+			(strcmp(var_value, Z_STRVAL_P(trigger_val)) == 0)
+		)
+	) {
+		return 1;
+	}
+
+	return 0;
+}
