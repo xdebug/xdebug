@@ -21,19 +21,19 @@
    (use upper case "RC").
 #. ``git push origin master xdebug_2_8 && git push --tags``
 #. Disable extra AppVeyor build (the one without the tag)
-#. Update www.xdebug.org/html/updates.php
-#. Update www.xdebug.org/html/include/phpinfo_scanner.php
-#. Update www.xdebug.org/html/docs/include/basic.php
-#. Write news item in www.xdebug.org/html/news
+#. Update www.xdebug.org views/home/updates.php
+#. Update www.xdebug.org src/XdebugVersion.php
+#. Update www.xdebug.org src/Controller/DocsController.php
+#. Write news item in www.xdebug.org data/news
 #. Write Patreon post taking the rendered news article as starting point
 #. Wait until AppVeyor is ready
 #. Upload the source package to PECL
-#. Add files from AppVeyor and source to www.xdebug.org.html/files
+#. Add files from AppVeyor and source to www.xdebug.org html/files
 #. Add the downloads, DDLs, and news file to git and commit with "Go with
    2.8.0alpha1"
 #. Mantis: "release" the version, and make sure there is a new one.
 #. In the release branch, update template.rc and php_xdebug.h to the new
    version
 #. Commit template.rc and php_xdebug.h with "Back to -dev"
-#. Check out master branch, and run: git merge --strategy=ours xdebug_2_7
-#. ``git push origin master xdebug_2_7``
+#. Check out master branch, and run: git merge --strategy=ours xdebug_2_8
+#. ``git push origin master xdebug_2_8``
