@@ -291,13 +291,6 @@ static PHP_INI_MH(OnUpdateSession)
 
 PHP_INI_BEGIN()
 	/* Debugger settings */
-	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   trace.settings.auto_trace,        zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.trace_enable_trigger", "0",             PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   trace.settings.trace_enable_trigger, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trace_enable_trigger_value", "",          PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString,   trace.settings.trace_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  XDEBUG_TEMP_DIR,      PHP_INI_ALL,    OnUpdateString, trace.settings.trace_output_dir,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, trace.settings.trace_output_name, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   trace.settings.trace_format,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   trace.settings.trace_options,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.coverage_enable", "1",                  PHP_INI_SYSTEM, OnUpdateBool,   settings.coverage.enable,         zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.collect_params",  "0",                    PHP_INI_ALL,    OnUpdateLong,   base.settings.collect_params,    zend_xdebug_globals, xdebug_globals)
@@ -368,6 +361,15 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.gc_stats_enable",    "0",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.gc_stats.enable,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_dir",  XDEBUG_TEMP_DIR,   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.gc_stats.output_dir,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_name", "gcstats.%p",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.gc_stats.output_name, zend_xdebug_globals, xdebug_globals)
+
+	/* Tracing settings */
+	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.auto_trace,        zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.trace_enable_trigger", "0",             PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.tracing.trace_enable_trigger, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_enable_trigger_value", "",          PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.tracing.trace_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_output_dir",  XDEBUG_TEMP_DIR,      PHP_INI_ALL,    OnUpdateString, settings.tracing.trace_output_dir,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, settings.tracing.trace_output_name, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_format,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_options,     zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 static void xdebug_init_base_globals(struct xdebug_base_info *xg)
@@ -401,20 +403,14 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 }
 
-static void xdebug_init_trace_globals(struct xdebug_trace_info *xg)
-{
-	xg->trace_handler        = NULL;
-	xg->trace_context        = NULL;
-}
-
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
 	xdebug_init_base_globals(&xg->base);
-	xdebug_init_trace_globals(&xg->trace);
 	xdebug_init_coverage_globals(&xg->globals.coverage);
 	xdebug_init_debugger_globals(&xg->globals.debugger);
 	xdebug_init_profiler_globals(&xg->globals.profiler);
 	xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
+	xdebug_init_tracing_globals(&xg->globals.tracing);
 
 	xg->library.active_execute_data  = NULL;
 
@@ -675,13 +671,11 @@ PHP_RINIT_FUNCTION(xdebug)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-	XG_TRACE(trace_handler) = NULL;
-	XG_TRACE(trace_context) = NULL;
-
 	xdebug_coverage_rinit();
 	xdebug_debugger_rinit();
 	xdebug_gcstats_rinit();
 	xdebug_profiler_rinit();
+	xdebug_tracing_rinit();
 
 	/* Get xdebug ini entries from the environment also,
 	   this can override the idekey if one is set */
@@ -699,18 +693,11 @@ PHP_RINIT_FUNCTION(xdebug)
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
-	TSRMLS_FETCH();
-
-	if (XG_TRACE(trace_context)) {
-		xdebug_stop_trace(TSRMLS_C);
-	}
-
 	xdebug_coverage_post_deactivate();
 	xdebug_debugger_post_deactivate();
 	xdebug_gcstats_post_deactivate();
 	xdebug_profiler_post_deactivate();
-
-	XG_TRACE(trace_context)    = NULL;
+	xdebug_tracing_post_deactivate();
 
 	xdebug_base_post_deactivate();
 

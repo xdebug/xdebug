@@ -15,6 +15,10 @@
    | Authors: Derick Rethans <derick@xdebug.org>                          |
    +----------------------------------------------------------------------+
  */
+#include "php.h"
+
+#include "php_xdebug.h"
+#include "tracing_private.h"
 #include "trace_html.h"
 
 #include "lib/var.h"

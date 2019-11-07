@@ -320,21 +320,9 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		}
 
 		if (XG_BASE(level) == 0) {
-			/* Start profiler if requested, and we're in main script */
-			xdebug_profiler_init_if_requested(op_array);
-
-			/* Start auto-tracer if requested, and we're in main script */
-			if (
-				(XINI_TRACE(auto_trace) || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value) TSRMLS_CC))
-				&& XINI_TRACE(trace_output_dir) && strlen(XINI_TRACE(trace_output_dir))
-			) {
-				/* In case we do an auto-trace we are not interested in the return
-				 * value, but we still have to free it. */
-				xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XINI_TRACE(trace_options) TSRMLS_CC));
-			}
-
-			/* Start GC stats collector if requested, and we're in main script */
 			xdebug_gcstats_init_if_requested(op_array);
+			xdebug_profiler_init_if_requested(op_array);
+			xdebug_tracing_init_if_requested(op_array);
 		}
 	}
 
@@ -352,9 +340,8 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	function_nr = XG_BASE(function_count);
-	if (!fse->filtered_tracing && XG_TRACE(trace_context) && (XG_TRACE(trace_handler)->function_entry)) {
-		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-	}
+
+	xdebug_tracing_execute_ex(function_nr, fse);
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
 #if PHP_VERSION_ID >= 70100
@@ -409,24 +396,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 
-	if (!fse->filtered_tracing && XG_TRACE(trace_context) && (XG_TRACE(trace_handler)->function_exit)) {
-		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-	}
-
-	/* Store return value in the trace file */
-	if (!fse->filtered_tracing && XINI_BASE(collect_return) && XG_TRACE(trace_context)) {
-		if (execute_data && execute_data->return_value) {
-			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-				if (XG_TRACE(trace_handler)->generator_return_value) {
-					XG_TRACE(trace_handler)->generator_return_value(XG_TRACE(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value TSRMLS_CC);
-				}
-			} else {
-				if (XG_TRACE(trace_handler)->return_value) {
-					XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, execute_data->return_value TSRMLS_CC);
-				}
-			}
-		}
-	}
+	xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
 
 	/* Check for return breakpoints */
 	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
@@ -486,10 +456,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	function_nr = XG_BASE(function_count);
 
-	if (!fse->filtered_tracing && fse->function.type != XFUNC_ZEND_PASS && XG_TRACE(trace_context) && (XG_TRACE(trace_handler)->function_entry)) {
-		function_call_traced = 1;
-		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-	}
+	function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
 
 	/* Check for entry breakpoints */
 	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
@@ -519,15 +486,8 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	/* We only call the function_exit handler and return value handler if the
 	 * function call was also traced. Otherwise we end up with return trace
 	 * lines without a corresponding function call line. */
-	if (function_call_traced && !fse->filtered_tracing && XG_TRACE(trace_context)) {
-		if (fse->function.type != XFUNC_ZEND_PASS && (XG_TRACE(trace_handler)->function_exit)) {
-			XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
-		}
-
-		/* Store return value in the trace file */
-		if (XINI_BASE(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG_TRACE(trace_handler)->return_value) {
-			XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, return_value TSRMLS_CC);
-		}
+	if (function_call_traced) {
+		xdebug_tracing_execute_internal_end(function_nr, fse, return_value);
 	}
 
 	/* Check for return breakpoints */

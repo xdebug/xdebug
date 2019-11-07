@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,7 @@
 #ifndef XDEBUG_TRACE_COMPUTERIZED_H
 #define XDEBUG_TRACE_COMPUTERIZED_H
 
-#include "tracing.h"
+#include "tracing_private.h"
 
 typedef struct _xdebug_trace_computerized_context
 {

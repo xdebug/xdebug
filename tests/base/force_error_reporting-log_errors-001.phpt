@@ -4,6 +4,7 @@ Test for xdebug.force_error_reporting (log_errors) [1]
 xdebug.default_enable=1
 display_errors=0
 log_errors=1
+error_log=
 xdebug.force_display_errors=0
 xdebug.force_error_reporting=E_USER_WARNING
 xdebug.collect_params=0

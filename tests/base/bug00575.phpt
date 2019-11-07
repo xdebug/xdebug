@@ -4,6 +4,7 @@ Test for bug #575: Dump super globals contents to error log
 xdebug.default_enable=1
 display_errors=0
 log_errors=1
+error_log=
 xdebug.force_display_errors=0
 xdebug.force_error_reporting=E_ALL
 xdebug.collect_params=0

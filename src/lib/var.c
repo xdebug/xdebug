@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,10 +63,10 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
 	HashTable *tmp;
 
 	if (!XG_BASE(in_debug_info) && object_or_ancestor_is_internal(dzval) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
-		void        *old_trace = XG_TRACE(trace_context);
+		void        *original_trace_context;
 		zend_object *orig_exception;
 
-		XG_TRACE(trace_context) = NULL;
+		xdebug_tracing_save_trace_context(&original_trace_context);
 		XG_BASE(in_debug_info) = 1;
 		orig_exception = EG(exception);
 		EG(exception) = NULL;
@@ -74,7 +74,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp TSRMLS_DC)
 		tmp = Z_OBJ_HANDLER(dzval, get_debug_info)(&dzval, is_tmp TSRMLS_CC);
 
 		XG_BASE(in_debug_info) = 0;
-		XG_TRACE(trace_context) = old_trace;
+		xdebug_tracing_restore_trace_context(original_trace_context);
 		EG(exception) = orig_exception;
 		return tmp;
 	} else {

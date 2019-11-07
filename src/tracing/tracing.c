@@ -687,6 +687,11 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, "", 0);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, "", 0);
 #endif
 
+void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg)
+{
+	xg->trace_handler = NULL;
+	xg->trace_context = NULL;
+}
 
 void xdebug_tracing_minit(void)
 {
@@ -733,4 +738,111 @@ void xdebug_tracing_minit(void)
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, ZEND_POST_INC_STATIC_PROP);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, ZEND_POST_DEC_STATIC_PROP);
 #endif
+}
+
+void xdebug_tracing_rinit(void)
+{
+	XG_TRACE(trace_handler) = NULL;
+	XG_TRACE(trace_context) = NULL;
+}
+
+void xdebug_tracing_post_deactivate(void)
+{
+	XG_TRACE(trace_context) = NULL;
+
+	if (XG_TRACE(trace_context)) {
+		xdebug_stop_trace(TSRMLS_C);
+	}
+}
+
+void xdebug_tracing_init_if_requested(zend_op_array *op_array)
+{
+	if (
+		(XINI_TRACE(auto_trace) || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value) TSRMLS_CC))
+		&& XINI_TRACE(trace_output_dir) && strlen(XINI_TRACE(trace_output_dir))
+	) {
+		/* In case we do an auto-trace we are not interested in the return
+		 * value, but we still have to free it. */
+		xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XINI_TRACE(trace_options) TSRMLS_CC));
+	}
+}
+
+void xdebug_tracing_execute_ex(int function_nr, function_stack_entry *fse)
+{
+	if (fse->filtered_tracing || !XG_TRACE(trace_context)) {
+		return;
+	}
+
+	if (XG_TRACE(trace_handler)->function_entry) {
+		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+	}
+}
+
+void xdebug_tracing_execute_ex_end(int function_nr, function_stack_entry *fse, zend_execute_data *execute_data)
+{
+	if (fse->filtered_tracing || !XG_TRACE(trace_context)) {
+		return;
+	}
+
+	if ((XG_TRACE(trace_handler)->function_exit)) {
+		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+	}
+
+	/* Store return value in the trace file */
+	if (XINI_BASE(collect_return)) {
+		zend_op_array *op_array = &(execute_data->func->op_array);
+
+		if (execute_data && execute_data->return_value) {
+			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+				if (XG_TRACE(trace_handler)->generator_return_value) {
+					XG_TRACE(trace_handler)->generator_return_value(XG_TRACE(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value TSRMLS_CC);
+				}
+			} else {
+				if (XG_TRACE(trace_handler)->return_value) {
+					XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, execute_data->return_value TSRMLS_CC);
+				}
+			}
+		}
+	}
+}
+
+int xdebug_tracing_execute_internal(int function_nr, function_stack_entry *fse)
+{
+	if (fse->filtered_tracing || !XG_TRACE(trace_context)) {
+		return 0;
+	}
+
+	if (fse->function.type != XFUNC_ZEND_PASS && (XG_TRACE(trace_handler)->function_entry)) {
+		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+		return 1;
+	}
+
+	return 0;
+}
+
+void xdebug_tracing_execute_internal_end(int function_nr, function_stack_entry *fse, zval *return_value)
+{
+	if (fse->filtered_tracing || !XG_TRACE(trace_context)) {
+		return;
+	}
+
+	if (fse->function.type != XFUNC_ZEND_PASS && (XG_TRACE(trace_handler)->function_exit)) {
+		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+	}
+
+	/* Store return value in the trace file */
+	if (XINI_BASE(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG_TRACE(trace_handler)->return_value) {
+		XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, return_value TSRMLS_CC);
+	}
+}
+
+void xdebug_tracing_save_trace_context(void **original_trace_context)
+{
+	*original_trace_context = XG_TRACE(trace_context);
+	XG_TRACE(trace_context) = NULL;
+}
+
+void xdebug_tracing_restore_trace_context(void *original_trace_context)
+{
+	XG_TRACE(trace_context) = original_trace_context;
 }
