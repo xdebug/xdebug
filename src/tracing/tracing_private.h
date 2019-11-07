@@ -20,6 +20,9 @@
 
 #include "tracing.h"
 
+#define XG_TRACE(v)    (XG(globals.tracing.v))
+#define XINI_TRACE(v)  (XG(settings.tracing.v))
+
 #define XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(f) \
 	int xdebug_##f##_handler(zend_execute_data *execute_data)
 

@@ -18,7 +18,8 @@
 #include "php.h"
 #include "ext/standard/php_string.h"
 
-#include "tracing.h"
+#include "php_xdebug.h"
+#include "tracing_private.h"
 #include "trace_textual.h"
 
 #include "lib/var.h"

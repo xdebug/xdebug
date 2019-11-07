@@ -18,7 +18,7 @@
 #ifndef XDEBUG_TRACE_TEXTUAL_H
 #define XDEBUG_TRACE_TEXTUAL_H
 
-#include "tracing.h"
+#include "tracing_private.h"
 
 typedef struct _xdebug_trace_textual_context
 {

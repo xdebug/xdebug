@@ -21,7 +21,6 @@
 
 #include "php.h"
 #include "TSRM.h"
-#include "php_xdebug.h"
 #include "lib/private.h"
 
 typedef struct _xdebug_profiler_globals_t {

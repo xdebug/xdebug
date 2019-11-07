@@ -34,6 +34,7 @@
 #include "debugger/debugger.h"
 #include "gcstats/gc_stats.h"
 #include "profiler/profiler.h"
+#include "tracing/tracing.h"
 #include "lib/compat.h"
 #include "lib/hash.h"
 #include "lib/llist.h"
@@ -228,21 +229,6 @@ struct xdebug_base_info {
 	} settings;
 };
 
-struct xdebug_trace_info {
-	xdebug_trace_handler_t *trace_handler;
-	void         *trace_context;
-
-	struct {
-		zend_bool     auto_trace;
-		zend_bool     trace_enable_trigger;
-		char         *trace_enable_trigger_value;
-		char         *trace_output_dir;
-		char         *trace_output_name;
-		zend_long     trace_options;
-		zend_long     trace_format;
-	} settings;
-};
-
 struct xdebug_library_info
 {
 	zend_execute_data    *active_execute_data;
@@ -254,18 +240,19 @@ struct xdebug_library_info
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct xdebug_base_info     base;
 	struct xdebug_library_info  library;
-	struct xdebug_trace_info    trace;
 	struct {
 		xdebug_coverage_globals_t coverage;
 		xdebug_debugger_globals_t debugger;
 		xdebug_gc_stats_globals_t gc_stats;
 		xdebug_profiler_globals_t profiler;
+		xdebug_tracing_globals_t  tracing;
 	} globals;
 	struct {
 		xdebug_coverage_settings_t coverage;
 		xdebug_debugger_settings_t debugger;
 		xdebug_gc_stats_settings_t gc_stats;
 		xdebug_profiler_settings_t profiler;
+		xdebug_tracing_settings_t  tracing;
 	} settings;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
@@ -277,10 +264,8 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 
 #define XG_BASE(v)     (XG(base.v))
 #define XG_LIB(v )     (XG(library.v))
-#define XG_TRACE(v)    (XG(trace.v))
 
 #define XINI_BASE(v)     (XG(base.settings.v))
-#define XINI_TRACE(v)    (XG(trace.settings.v))
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
 #define XDEBUG_SET_OPCODE_OVERRIDE_COMMON(oc) \
