@@ -6,6 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; !win');
 ?>
 --INI--
+error_log=
 xdebug.default_enable=1
 xdebug.remote_enable=1
 xdebug.remote_autostart=1
