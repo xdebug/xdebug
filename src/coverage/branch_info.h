@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,9 +82,7 @@ void xdebug_branch_info_dump(zend_op_array *opa, xdebug_branch_info *branch_info
 void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info);
 void xdebug_branch_info_free(xdebug_branch_info *branch_info);
 
-void xdebug_path_add(xdebug_path *path, unsigned int nr);
 xdebug_path *xdebug_path_new(xdebug_path *old_path);
-void xdebug_path_info_dump(xdebug_path *path);
 void xdebug_path_free(xdebug_path *path);
 
 xdebug_path_info *xdebug_path_info_ctor(void);

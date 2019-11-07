@@ -43,24 +43,16 @@ typedef struct xdebug_coverage_function {
 #define XG_COV(v)      (XG(globals.coverage.v))
 #define XINI_COV(v)    (XG(settings.coverage.v))
 
-void xdebug_coverage_line_dtor(void *data);
-
 xdebug_coverage_file *xdebug_coverage_file_ctor(char *filename);
-void xdebug_coverage_file_dtor(void *data);
 
-char* xdebug_func_format(xdebug_func *func);
 void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa);
 
 xdebug_coverage_function *xdebug_coverage_function_ctor(char *function_name);
 void xdebug_coverage_function_dtor(void *data);
-void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode);
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name);
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_name, char *function_name);
 
-int xdebug_check_branch_entry_handler(zend_execute_data *execute_data);
 int xdebug_common_override_handler(zend_execute_data *execute_data);
-
-void xdebug_count_line(char *file, int lineno, int executable, int deadcode);
 
 PHP_FUNCTION(xdebug_start_code_coverage);
 PHP_FUNCTION(xdebug_stop_code_coverage);

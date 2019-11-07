@@ -158,7 +158,7 @@ void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_i
 	}
 }
 
-void xdebug_path_add(xdebug_path *path, unsigned int nr)
+static void xdebug_path_add(xdebug_path *path, unsigned int nr)
 {
 	if (!path) {
 		return;
@@ -343,16 +343,6 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 		xdebug_hash_add(branch_info->path_info.path_hash, str.d, str.l, branch_info->path_info.paths[i]);
 		xdfree(str.d);
 	}
-}
-
-void xdebug_path_info_dump(xdebug_path *path)
-{
-	unsigned int i;
-
-	for (i = 0; i < path->elements_count; i++) {
-		printf("%d, ", path->elements[i]);
-	}
-	printf("\n");
 }
 
 void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_op_array *op_array, long opcode_nr)

@@ -34,7 +34,7 @@ int zend_xdebug_cc_run_offset = -1;
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void xdebug_coverage_line_dtor(void *data)
+static void xdebug_coverage_line_dtor(void *data)
 {
 	xdebug_coverage_line *line = (xdebug_coverage_line *) data;
 
@@ -54,7 +54,7 @@ xdebug_coverage_file *xdebug_coverage_file_ctor(char *filename)
 	return file;
 }
 
-void xdebug_coverage_file_dtor(void *data)
+static void xdebug_coverage_file_dtor(void *data)
 {
 	xdebug_coverage_file *file = (xdebug_coverage_file *) data;
 
@@ -86,7 +86,19 @@ void xdebug_coverage_function_dtor(void *data)
 	xdfree(function);
 }
 
-void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode)
+static char* xdebug_func_format(xdebug_func *func)
+{
+	switch (func->type) {
+		case XFUNC_NORMAL:
+			return xdstrdup(func->function);
+		case XFUNC_MEMBER:
+			return xdebug_sprintf("%s->%s", func->class, func->function);
+		default:
+			return xdstrdup("???");
+	}
+}
+
+static void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	char *file = (char*) STR_NAME_VAL(op_array->filename);
@@ -107,7 +119,7 @@ void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const 
 	xdfree(function_name);
 }
 
-int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
+static int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 
@@ -120,33 +132,7 @@ int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-#define XDEBUG_OPCODE_OVERRIDE(f) \
-	int xdebug_##f##_handler(zend_execute_data *execute_data) \
-	{ \
-		return xdebug_common_override_handler(execute_data); \
-	}
-
-
-int xdebug_common_override_handler(zend_execute_data *execute_data)
-{
-	zend_op_array *op_array = &execute_data->func->op_array;
-
-	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode;
-		int      lineno;
-		char    *file;
-
-		cur_opcode = execute_data->opline;
-		lineno = cur_opcode->lineno;
-		file = (char*) STR_NAME_VAL(op_array->filename);
-
-		xdebug_print_opcode_info('C', execute_data, cur_opcode);
-		xdebug_count_line(file, lineno, 0, 0);
-	}
-	return ZEND_USER_OPCODE_DISPATCH;
-}
-
-void xdebug_count_line(char *filename, int lineno, int executable, int deadcode)
+static void xdebug_count_line(char *filename, int lineno, int executable, int deadcode)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_line *line;
@@ -184,6 +170,31 @@ void xdebug_count_line(char *filename, int lineno, int executable, int deadcode)
 	} else {
 		line->count++;
 	}
+}
+
+#define XDEBUG_OPCODE_OVERRIDE(f) \
+	int xdebug_##f##_handler(zend_execute_data *execute_data) \
+	{ \
+		return xdebug_common_override_handler(execute_data); \
+	}
+
+int xdebug_common_override_handler(zend_execute_data *execute_data)
+{
+	zend_op_array *op_array = &execute_data->func->op_array;
+
+	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
+		const zend_op *cur_opcode;
+		int      lineno;
+		char    *file;
+
+		cur_opcode = execute_data->opline;
+		lineno = cur_opcode->lineno;
+		file = (char*) STR_NAME_VAL(op_array->filename);
+
+		xdebug_print_opcode_info('C', execute_data, cur_opcode);
+		xdebug_count_line(file, lineno, 0, 0);
+	}
+	return ZEND_USER_OPCODE_DISPATCH;
 }
 
 static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode)
@@ -449,18 +460,6 @@ void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
 		tmp->class = xdstrdup(STR_NAME_VAL(opa->scope->name));
 	} else {
 		tmp->type = XFUNC_NORMAL;
-	}
-}
-
-char* xdebug_func_format(xdebug_func *func)
-{
-	switch (func->type) {
-		case XFUNC_NORMAL:
-			return xdstrdup(func->function);
-		case XFUNC_MEMBER:
-			return xdebug_sprintf("%s->%s", func->class, func->function);
-		default:
-			return xdstrdup("???");
 	}
 }
 

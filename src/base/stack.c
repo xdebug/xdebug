@@ -519,7 +519,7 @@ char *xdebug_strip_php_stack_trace(char *buffer)
 	return NULL;
 }
 
-char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const unsigned int error_lineno, char *buffer)
+static char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const unsigned int error_lineno, char *buffer)
 {
 	char *printable_stack;
 	char *tmp_buf;
@@ -1340,7 +1340,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 }
 /* }}} */
 
-void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
+static void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
 {
 	xdebug_str *name = (xdebug_str*) he->ptr;
 

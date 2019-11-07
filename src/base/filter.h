@@ -21,7 +21,6 @@
 #include "php.h"
 #include "php_xdebug.h"
 
-int xdebug_filter_is_valid(void);
 int xdebug_is_stack_frame_filtered(int filter_type, function_stack_entry *fse);
 int xdebug_is_top_stack_frame_filtered(int filter_type);
 void xdebug_filter_register_constants(INIT_FUNC_ARGS);

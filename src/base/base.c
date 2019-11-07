@@ -38,15 +38,8 @@ void xdebug_error_cb(int type, const char *error_filename, const XDEBUG_ERROR_LI
 
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
-zend_op_array* xdebug_compile_file(zend_file_handle*, int);
-
 static void (*xdebug_old_execute_ex)(zend_execute_data *execute_data);
-static void xdebug_execute_ex(zend_execute_data *execute_data);
-
 static void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
-static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value);
-
-void xdebug_base_execute_internal(zend_execute_data *current_execute_data, function_stack_entry *fse, zval *return_value);
 
 static int xdebug_silence_handler(zend_execute_data *execute_data)
 {
@@ -146,7 +139,7 @@ static void xdebug_throw_exception_hook(zval *exception)
 
 /* {{{ zend_op_array xdebug_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
-zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type)
+static zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_op_array *op_array;
 

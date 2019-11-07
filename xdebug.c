@@ -439,7 +439,7 @@ static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg)
 }
 
 
-void xdebug_env_config(void)
+static void xdebug_env_config(void)
 {
 	char       *config = getenv("XDEBUG_CONFIG");
 	xdebug_arg *parts;
