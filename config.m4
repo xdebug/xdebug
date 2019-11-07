@@ -81,7 +81,7 @@ if test "$PHP_XDEBUG" != "no"; then
   XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/compat.c src/lib/hash.c src/lib/llist.c src/lib/private.c src/lib/set.c src/lib/str.c src/lib/var.c src/lib/xml.c"
 
   XDEBUG_COVERAGE_SOURCES="src/coverage/branch_info.c src/coverage/code_coverage.c"
-  XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/handler_dbgp.c src/debugger/handlers.c"
+  XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/debugger.c src/debugger/handler_dbgp.c src/debugger/handlers.c"
   XDEBUG_GCSTATS_SOURCES="src/gcstats/gc_stats.c"
   XDEBUG_PROFILER_SOURCES="src/profiler/profiler.c"
   XDEBUG_TRACING_SOURCES="src/tracing/trace_computerized.c src/tracing/trace_html.c src/tracing/trace_textual.c src/tracing/tracing.c"

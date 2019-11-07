@@ -138,6 +138,9 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
     <dir name="debugger">
      <file name="com.c" role="src" />
      <file name="com.h" role="src" />
+     <file name="debugger.c" role="src" />
+     <file name="debugger.h" role="src" />
+     <file name="debugger_private.h" role="src" />
      <file name="handlers.c" role="src" />
      <file name="handlers.h" role="src" />
      <file name="handler_dbgp.c" role="src" />

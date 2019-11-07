@@ -36,4 +36,4 @@ try { foo( $a ); } catch (Throwable $e) { /* ignore */ }
 
 Call Stack:
 %w%f %w%d   1. {main}() %sstacktrace%s.php:0
-%w%f %w%d   2. foo(array (42 => FALSE, 'foo' => 912124, 43 => class stdClass { public $bar = 100 }, 44 => class stdClass {  }, 45 => resource(5) of type (stream))) %sstacktrace%s.php:14
+%w%f %w%d   2. foo(array (42 => FALSE, 'foo' => 912124, 43 => class stdClass { public $bar = 100 }, 44 => class stdClass {  }, 45 => resource(%d) of type (stream))) %sstacktrace%s.php:14

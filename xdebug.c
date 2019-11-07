@@ -55,7 +55,6 @@
 #include "base/stack.h"
 #include "base/superglobals.h"
 #include "coverage/code_coverage.h"
-#include "debugger/com.h"
 #include "gcstats/gc_stats.h"
 #include "lib/usefulstuff.h"
 #include "lib/llist.h"
@@ -71,14 +70,12 @@ static int xdebug_post_startup(void);
 #endif
 
 static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
-static size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC);
 
 int xdebug_exit_handler(zend_execute_data *execute_data);
 
 int zend_xdebug_initialised = 0;
 
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC);
-static size_t (*xdebug_orig_ub_write)(const char *string, size_t len TSRMLS_DC);
 
 ZEND_BEGIN_ARG_INFO_EX(xdebug_void_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
@@ -282,23 +279,6 @@ static PHP_INI_MH(OnUpdateSession)
 	DUMP_TOK(session);
 }
 
-static PHP_INI_MH(OnUpdateDebugMode)
-{
-	if (!new_value) {
-		XINI_DBG(remote_mode) = XDEBUG_NONE;
-
-	} else if (strcmp(STR_NAME_VAL(new_value), "jit") == 0) {
-		XINI_DBG(remote_mode) = XDEBUG_JIT;
-
-	} else if (strcmp(STR_NAME_VAL(new_value), "req") == 0) {
-		XINI_DBG(remote_mode) = XDEBUG_REQ;
-
-	} else {
-		XINI_DBG(remote_mode) = XDEBUG_NONE;
-	}
-	return SUCCESS;
-}
-
 #ifdef P_tmpdir
 # define XDEBUG_TEMP_DIR P_tmpdir
 #else
@@ -361,19 +341,19 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_aggregate",      "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_aggregate,            zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
-	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   stepdbg.settings.remote_enable,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_handler",    "dbgp",               PHP_INI_ALL,    OnUpdateString, stepdbg.settings.remote_handler,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, stepdbg.settings.remote_host,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.debugger.remote_enable,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_handler",    "dbgp",               PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_handler,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_host,       zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
-	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   stepdbg.settings.remote_port,       zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   stepdbg.settings.remote_autostart,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   stepdbg.settings.remote_connect_back,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, stepdbg.settings.remote_log,        zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_log_level",  XDEBUG_LOG_DEFAULT,   PHP_INI_ALL,    OnUpdateLong,   stepdbg.settings.remote_log_level,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, stepdbg.settings.ide_key_setting,   zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   stepdbg.settings.remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_addr_header", "",                  PHP_INI_ALL,    OnUpdateString, stepdbg.settings.remote_addr_header, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_timeout",    "200",                PHP_INI_ALL,    OnUpdateLong,   stepdbg.settings.remote_connect_timeout, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_port,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_autostart,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_connect_back,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_log,        zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_log_level",  XDEBUG_LOG_DEFAULT,   PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_log_level,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, settings.debugger.ide_key_setting,   zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_addr_header", "",                  PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_addr_header, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.remote_timeout",    "200",                PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_connect_timeout, zend_xdebug_globals, xdebug_globals)
 
 	/* Variable display settings */
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateLong,   base.settings.display_max_children, zend_xdebug_globals, xdebug_globals)
@@ -421,27 +401,6 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 }
 
-static void xdebug_init_stepdbg_globals(struct xdebug_stepdbg_info *xg)
-{
-	xg->breakpoint_count     = 0;
-	xg->ide_key              = NULL;
-	xg->stdout_mode          = 0;
-	xg->no_exec              = 0;
-	xg->context.program_name = NULL;
-	xg->context.list.last_file = NULL;
-	xg->context.list.last_line = 0;
-	xg->context.do_break     = 0;
-	xg->context.do_step      = 0;
-	xg->context.do_next      = 0;
-	xg->context.do_finish    = 0;
-	xg->active_execute_data  = NULL;
-
-	xg->remote_connection_enabled = 0;
-	xg->remote_connection_pid     = 0;
-	xg->remote_log_file           = 0;
-	xg->breakpoints_allowed       = 0;
-}
-
 static void xdebug_init_trace_globals(struct xdebug_trace_info *xg)
 {
 	xg->trace_handler        = NULL;
@@ -451,22 +410,18 @@ static void xdebug_init_trace_globals(struct xdebug_trace_info *xg)
 static void php_xdebug_init_globals (zend_xdebug_globals *xg TSRMLS_DC)
 {
 	xdebug_init_base_globals(&xg->base);
-	xdebug_init_stepdbg_globals(&xg->stepdbg);
 	xdebug_init_trace_globals(&xg->trace);
 	xdebug_init_coverage_globals(&xg->globals.coverage);
+	xdebug_init_debugger_globals(&xg->globals.debugger);
 	xdebug_init_profiler_globals(&xg->globals.profiler);
 	xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
+
+	xg->library.active_execute_data  = NULL;
 
 	/* Override header generation in SAPI */
 	if (sapi_module.header_handler != xdebug_header_handler) {
 		xdebug_orig_header_handler = sapi_module.header_handler;
 		sapi_module.header_handler = xdebug_header_handler;
-	}
-
-	/* Capturing output */
-	if (sapi_module.ub_write != xdebug_ub_write) {
-		xdebug_orig_ub_write = sapi_module.ub_write;
-		sapi_module.ub_write = xdebug_ub_write;
 	}
 }
 
@@ -487,32 +442,6 @@ static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg TSRMLS_DC)
 	xdebug_deinit_base_globals(&xg->base);
 }
 
-char *xdebug_env_key(TSRMLS_D)
-{
-	char *ide_key;
-
-	ide_key = XINI_DBG(ide_key_setting);
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
-	ide_key = getenv("DBGP_IDEKEY");
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
-	ide_key = getenv("USER");
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
-	ide_key = getenv("USERNAME");
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
-	return NULL;
-}
 
 void xdebug_env_config(TSRMLS_D)
 {
@@ -564,10 +493,7 @@ void xdebug_env_config(TSRMLS_D)
 			name = "xdebug.remote_mode";
 		} else
 		if (strcasecmp(envvar, "idekey") == 0) {
-			if (XG_DBG(ide_key)) {
-				xdfree(XG_DBG(ide_key));
-			}
-			XG_DBG(ide_key) = xdstrdup(envval);
+			xdebug_debugger_reset_ide_key(envval);
 		} else
 		if (strcasecmp(envvar, "profiler_enable") == 0) {
 			name = "xdebug.profiler_enable";
@@ -653,6 +579,7 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
 	xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);
+	xdebug_debugger_minit();
 	xdebug_gcstats_minit();
 	xdebug_profiler_minit();
 	xdebug_tracing_minit();
@@ -670,8 +597,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_NAKED_FILENAME", XDEBUG_TRACE_OPTION_NAKED_FILENAME, CONST_CS | CONST_PERSISTENT);
 
 	xdebug_filter_register_constants(INIT_FUNC_ARGS_PASSTHRU);
-
-	XG_DBG(breakpoint_count) = 0;
 
 	return SUCCESS;
 }
@@ -731,16 +656,6 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-size_t xdebug_ub_write(const char *string, size_t length TSRMLS_DC)
-{
-	if (xdebug_is_debug_connection_active_for_current_pid()) {
-		if (-1 == XG_DBG(context).handler->remote_stream_output(string, length TSRMLS_CC)) {
-			return 0;
-		}
-	}
-	return xdebug_orig_ub_write(string, length TSRMLS_CC);
-}
-
 static void xdebug_init_auto_globals(TSRMLS_D)
 {
 	zend_is_auto_global_str((char*) ZEND_STRL("_ENV") TSRMLS_CC);
@@ -756,94 +671,28 @@ static void xdebug_init_auto_globals(TSRMLS_D)
 
 PHP_RINIT_FUNCTION(xdebug)
 {
-	char *idekey;
-
 #if defined(ZTS) && defined(COMPILE_DL_XDEBUG)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-/* PHP Bug #77287 causes Xdebug to segfault if OPcache has the "compact
- * literals" optimisation turned on. So force the optimisation off for PHP
- * 7.3.0 and 7.3.1.
- *
- * Otherwise, only turn off optimisation when we're debugging. */
-#if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
-	{
-#else
-	if (XINI_DBG(remote_enable)) {
-#endif
-		zend_string *key = zend_string_init(ZEND_STRL("opcache.optimization_level"), 1);
-		zend_string *value = zend_string_init(ZEND_STRL("0"), 1);
+	XG_TRACE(trace_handler) = NULL;
+	XG_TRACE(trace_context) = NULL;
 
-		zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
-
-		zend_string_release(key);
-		zend_string_release(value);
-	}
-
-	/* Get the ide key for this session */
-	XG_DBG(ide_key) = NULL;
-	idekey = xdebug_env_key(TSRMLS_C);
-	if (idekey && *idekey) {
-		if (XG_DBG(ide_key)) {
-			xdfree(XG_DBG(ide_key));
-		}
-		XG_DBG(ide_key) = xdstrdup(idekey);
-	}
+	xdebug_coverage_rinit();
+	xdebug_debugger_rinit();
+	xdebug_gcstats_rinit();
+	xdebug_profiler_rinit();
 
 	/* Get xdebug ini entries from the environment also,
 	   this can override the idekey if one is set */
 	xdebug_env_config(TSRMLS_C);
 
-	XG_DBG(no_exec)        = 0;
-	XG_TRACE(trace_handler) = NULL;
-	XG_TRACE(trace_context) = NULL;
-	XG_DBG(active_symbol_table) = NULL;
-	XG_DBG(This) = NULL;
-
-	xdebug_coverage_rinit();
-	xdebug_gcstats_rinit();
-	xdebug_profiler_rinit();
-
 	xdebug_init_auto_globals(TSRMLS_C);
-
-	/* Check if we have this special get variable that stops a debugging
-	 * request without executing any code */
-	{
-		zend_string *stop_no_exec = zend_string_init(ZEND_STRL("XDEBUG_SESSION_STOP_NO_EXEC"), 0);
-		if (
-			(
-				(
-					zend_hash_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), stop_no_exec) != NULL
-				) || (
-					zend_hash_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), stop_no_exec) != NULL
-				)
-			)
-			&& !SG(headers_sent)
-		) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
-			XG_DBG(no_exec) = 1;
-		}
-		zend_string_release(stop_no_exec);
-	}
 
 	/* Only enabled extended info when it is not disabled */
 	CG(compiler_options) = CG(compiler_options) | ZEND_COMPILE_EXTENDED_STMT;
 
 	xdebug_base_rinit();
-
-	xdebug_mark_debug_connection_not_active();
-	XG_DBG(breakpoints_allowed) = 1;
-	XG_DBG(remote_log_file) = NULL;
-
-	/* Initialize some debugger context properties */
-	XG_DBG(context).program_name   = NULL;
-	XG_DBG(context).list.last_file = NULL;
-	XG_DBG(context).list.last_line = 0;
-	XG_DBG(context).do_break       = 0;
-	XG_DBG(context).do_step        = 0;
-	XG_DBG(context).do_next        = 0;
-	XG_DBG(context).do_finish      = 0;
 
 	return SUCCESS;
 }
@@ -852,33 +701,16 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
 	TSRMLS_FETCH();
 
-	if (XG_DBG(remote_connection_enabled)) {
-		XG_DBG(context).handler->remote_deinit(&(XG_DBG(context)));
-		xdebug_close_socket(XG_DBG(context).socket);
-	}
-	if (XG_DBG(context).program_name) {
-		xdfree(XG_DBG(context).program_name);
-	}
-
 	if (XG_TRACE(trace_context)) {
 		xdebug_stop_trace(TSRMLS_C);
 	}
 
 	xdebug_coverage_post_deactivate();
+	xdebug_debugger_post_deactivate();
 	xdebug_gcstats_post_deactivate();
 	xdebug_profiler_post_deactivate();
 
-	if (XG_DBG(ide_key)) {
-		xdfree(XG_DBG(ide_key));
-		XG_DBG(ide_key) = NULL;
-	}
-
 	XG_TRACE(trace_context)    = NULL;
-
-	if (XG_DBG(context.list.last_file)) {
-		xdfree(XG_DBG(context).list.last_file);
-		XG_DBG(context).list.last_file = NULL;
-	}
 
 	xdebug_base_post_deactivate();
 
@@ -910,12 +742,9 @@ static int xdebug_info_printf(const char *fmt, ...) /* {{{ */
 
 PHP_MINFO_FUNCTION(xdebug)
 {
-	xdebug_remote_handler_info *ptr = xdebug_handlers_get();
-
 	php_info_print_table_start();
 	php_info_print_table_header(2, "xdebug support", "enabled");
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
-	php_info_print_table_row(2, "IDE Key", XG_DBG(ide_key));
 	php_info_print_table_end();
 
 	php_info_print_table_start();
@@ -933,13 +762,7 @@ PHP_MINFO_FUNCTION(xdebug)
 		php_info_print_table_end();
 	}
 
-	php_info_print_table_start();
-	php_info_print_table_header(1, "Supported protocols");
-	while (ptr->name) {
-		php_info_print_table_row(1, ptr->description);
-		ptr++;
-	}
-	php_info_print_table_end();
+	xdebug_debugger_minfo();
 
 	DISPLAY_INI_ENTRIES();
 }
@@ -1113,8 +936,8 @@ PHP_FUNCTION(xdebug_debug_zval)
 			zval debugzval;
 			xdebug_str *tmp_name;
 
-			XG_DBG(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
-			XG_DBG(active_execute_data) = EG(current_execute_data)->prev_execute_data;
+			XG_LIB(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
+			XG_LIB(active_execute_data) = EG(current_execute_data)->prev_execute_data;
 
 			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 			xdebug_get_php_symbol(&debugzval, tmp_name);
@@ -1183,7 +1006,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			xdebug_str *tmp_name;
 			xdebug_str *val;
 
-			XG_DBG(active_symbol_table) = EG(current_execute_data)->symbol_table;
+			XG_LIB(active_symbol_table) = EG(current_execute_data)->symbol_table;
 
 			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 			xdebug_get_php_symbol(&debugzval, tmp_name);
@@ -1215,15 +1038,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 PHP_FUNCTION(xdebug_is_debugger_active)
 {
 	RETURN_BOOL(xdebug_is_debug_connection_active_for_current_pid());
-}
-
-PHP_FUNCTION(xdebug_break)
-{
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
-
-	XG_DBG(context).do_break = 1;
-	RETURN_TRUE;
 }
 
 PHP_FUNCTION(xdebug_start_error_collection)
@@ -1277,15 +1091,9 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 {
 #endif
-	xdebug_llist_element *le;
-	xdebug_brk_info      *extra_brk_info;
-	function_stack_entry *fse;
 	int                   lineno;
 	char                 *file;
 	int                   file_len;
-	int                   level = 0;
-	int                   func_nr = 0;
-	TSRMLS_FETCH();
 
 	if (!EG(current_execute_data)) {
 		return;
@@ -1297,116 +1105,10 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
 	file_len = STR_NAME_LEN(op_array->filename);
 
 	xdebug_coverage_count_line_if_active(op_array, file, lineno);
-
-	if (xdebug_is_debug_connection_active_for_current_pid()) {
-
-		if (XG_DBG(context).do_break) {
-			XG_DBG(context).do_break = 0;
-
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
-		}
-
-		/* Get latest stack level and function number */
-		if (XG_BASE(stack) && XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
-			le = XDEBUG_LLIST_TAIL(XG_BASE(stack));
-			fse = XDEBUG_LLIST_VALP(le);
-			level = fse->level;
-			func_nr = fse->function_nr;
-		} else {
-			level = 0;
-			func_nr = 0;
-		}
-
-		/* Check for "finish" */
-		if (
-			XG_DBG(context).do_finish &&
-			(
-				(level < XG_DBG(context).finish_level) ||
-				((level == XG_DBG(context).finish_level) && (func_nr > XG_DBG(context).finish_func_nr))
-			)
-		) {
-			XG_DBG(context).do_finish = 0;
-
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
-			return;
-		}
-
-		/* Check for "next" */
-		if (XG_DBG(context).do_next && XG_DBG(context).next_level >= level) {
-			XG_DBG(context).do_next = 0;
-
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
-			return;
-		}
-
-		/* Check for "step" */
-		if (XG_DBG(context).do_step) {
-			XG_DBG(context).do_step = 0;
-
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), file, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
-			return;
-		}
-
-		if (XG_DBG(context).line_breakpoints) {
-			int   break_ok;
-			zval  retval;
-
-			for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				extra_brk_info = XDEBUG_LLIST_VALP(le);
-
-				if (XG_DBG(context).handler->break_on_line(&(XG_DBG(context)), extra_brk_info, file, file_len, lineno)) {
-					break_ok = 1; /* Breaking is allowed by default */
-
-					/* Check if we have a condition set for it */
-					if (extra_brk_info->condition) {
-						/* If there is a condition, we disable breaking by
-						 * default and only enabled it when the code evaluates
-						 * to TRUE */
-						break_ok = 0;
-
-						/* Remember error reporting level */
-						XG_BASE(error_reporting_override) = EG(error_reporting);
-						XG_BASE(error_reporting_overridden) = 1;
-						EG(error_reporting) = 0;
-						XG_DBG(context).inhibit_notifications = 1;
-
-						/* Check the condition */
-						if (zend_eval_string(extra_brk_info->condition, &retval, (char*) "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
-							break_ok = Z_TYPE(retval) == IS_TRUE;
-							zval_dtor(&retval);
-						}
-
-						/* Restore error reporting level */
-						EG(error_reporting) = XG_BASE(error_reporting_override);
-						XG_BASE(error_reporting_overridden) = 0;
-						XG_DBG(context).inhibit_notifications = 0;
-					}
-					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-							xdebug_mark_debug_connection_not_active();
-							break;
-						}
-						return;
-					}
-				}
-			}
-		}
-	}
+	xdebug_debugger_statement_call(file, file_len, lineno);
 }
 
-static void xdebug_hook_output_handlers()
+ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
 	/* Override header handler in SAPI */
 	if (xdebug_orig_header_handler == NULL) {
@@ -1414,28 +1116,7 @@ static void xdebug_hook_output_handlers()
 		sapi_module.header_handler = xdebug_header_handler;
 	}
 
-	/* Override output handler for capturing output */
-	if (xdebug_orig_ub_write == NULL) {
-		xdebug_orig_ub_write = sapi_module.ub_write;
-		sapi_module.ub_write = xdebug_ub_write;
-	}
-}
-
-static void xdebug_unhook_output_handlers()
-{
-	/* Restore original header handler in SAPI */
-	sapi_module.header_handler = xdebug_orig_header_handler;
-	xdebug_orig_header_handler = NULL;
-
-	/* Restore original output handler */
-	sapi_module.ub_write = xdebug_orig_ub_write;
-	xdebug_orig_ub_write = NULL;
-}
-
-ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
-{
-	/* Hook output handlers (header and output writer) */
-	xdebug_hook_output_handlers();
+	xdebug_debugger_zend_startup();
 
 	zend_xdebug_initialised = 1;
 
@@ -1467,8 +1148,11 @@ static int xdebug_post_startup(void)
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 {
-	/* Remove our hooks to output handlers (header and output writer) */
-	xdebug_unhook_output_handlers();
+	/* Restore original header handler in SAPI */
+	sapi_module.header_handler = xdebug_orig_header_handler;
+	xdebug_orig_header_handler = NULL;
+
+	xdebug_debugger_zend_shutdown();
 }
 
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
