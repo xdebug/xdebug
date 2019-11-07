@@ -27,7 +27,6 @@
 #include "base/monitor.h"
 #include "base/superglobals.h"
 #include "coverage/code_coverage.h"
-#include "debugger/com.h"
 #include "lib/compat.h"
 #include "lib/private.h"
 #include "lib/str.h"
@@ -80,7 +79,7 @@ static const char* html_formats[13] = {
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> SCREAM: Error suppression ignored for</th></tr>\n"
 };
 
-static const char** select_formats(int html TSRMLS_DC) {
+static const char** select_formats(int html) {
 	if (html) {
 		return html_formats;
 	}
@@ -90,74 +89,6 @@ static const char** select_formats(int html TSRMLS_DC) {
 	else {
 		return text_formats;
 	}
-}
-
-static void dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
-{
-	int          html = *(int*) htmlq;
-	zval         zvar;
-	xdebug_str  *contents;
-	xdebug_str  *name = (xdebug_str*) he->ptr;
-	HashTable   *tmp_ht;
-	const char **formats;
-	xdebug_str   *str = (xdebug_str *) argument;
-	TSRMLS_FETCH();
-
-	if (!he->ptr) {
-		return;
-	}
-
-	/* Bail out on $this and $GLOBALS */
-	if (strcmp(name->d, "this") == 0 || strcmp(name->d, "GLOBALS") == 0) {
-		return;
-	}
-
-#if PHP_VERSION_ID >= 70100
-	if (!(ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-#else
-	if (!EG(current_execute_data)->symbol_table) {
-#endif
-		zend_rebuild_symbol_table(TSRMLS_C);
-	}
-
-	tmp_ht = XG_DBG(active_symbol_table);
-	{
-		zend_execute_data *ex = EG(current_execute_data);
-		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
-			ex = ex->prev_execute_data;
-		}
-		if (ex) {
-			XG_DBG(active_execute_data) = ex;
-			XG_DBG(active_symbol_table) = ex->symbol_table;
-		}
-	}
-
-	xdebug_get_php_symbol(&zvar, name);
-	XG_DBG(active_symbol_table) = tmp_ht;
-
-	formats = select_formats(PG(html_errors) TSRMLS_CC);
-
-	if (Z_TYPE(zvar) == IS_UNDEF) {
-		xdebug_str_add(str, xdebug_sprintf(formats[9], name->d), 1);
-		return;
-	}
-
-	if (html) {
-		contents = xdebug_get_zval_value_fancy(NULL, &zvar, 0, NULL);
-	} else {
-		contents = xdebug_get_zval_value(&zvar, 0, NULL);
-	}
-
-	if (contents) {
-		xdebug_str_add(str, xdebug_sprintf(formats[8], name->d, contents->d), 1);
-	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[9], name->d), 1);
-	}
-
-	if (contents) {
-		xdebug_str_free(contents);
-	}
-	zval_ptr_dtor_nogc(&zvar);
 }
 
 void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
@@ -236,7 +167,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 
 void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str TSRMLS_DC)
 {
-	const char **formats = select_formats(html TSRMLS_CC);
+	const char **formats = select_formats(html);
 
 	if (html) {
 		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str, XG_BASE(in_at) ? " xe-scream" : ""), 1);
@@ -253,7 +184,7 @@ void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_
 
 void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
 {
-	const char **formats = select_formats(html TSRMLS_CC);
+	const char **formats = select_formats(html);
 	char *escaped;
 
 	if (html) {
@@ -390,7 +321,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	int                   printed_frames = 0;
-	const char          **formats = select_formats(html TSRMLS_CC);
+	const char          **formats = select_formats(html);
 
 	if (XG_BASE(stack) && XG_BASE(stack)->size) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG_BASE(stack)));
@@ -511,7 +442,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 				xdebug_str_add(str, xdebug_sprintf(formats[6], scope_nr), 1);
 				tmp_hash = xdebug_declared_var_hash_from_llist(i->declared_vars);
-				xdebug_hash_apply_with_argument(tmp_hash, (void*) &html, dump_used_var_with_contents, (void *) str);
+				xdebug_hash_apply_with_argument(tmp_hash, (void*) &html, xdebug_dump_used_var_with_contents, (void *) str);
 				xdebug_hash_destroy(tmp_hash);
 			}
 		}
@@ -520,7 +451,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 
 void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC)
 {
-	const char **formats = select_formats(html TSRMLS_CC);
+	const char **formats = select_formats(html);
 
 	xdebug_str_add(str, formats[7], 0);
 }
@@ -620,7 +551,6 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 {
 	char *buffer, *error_type_str;
 	int buffer_len;
-	xdebug_brk_info *extra_brk_info = NULL;
 	error_handling_t  error_handling;
 	zend_class_entry *exception_class;
 
@@ -725,33 +655,8 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 		}
 	}
 
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
+	xdebug_debugger_error_cb(error_filename, error_lineno, type, error_type_str, buffer);
 
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		/* Send notification with warning/notice/error information */
-		if (XG_DBG(context).send_notifications && !XG_DBG(context).inhibit_notifications) {
-			if (!XG_DBG(context).handler->remote_notification(&(XG_DBG(context)), error_filename, error_lineno, type, error_type_str, buffer)) {
-				xdebug_mark_debug_connection_not_active();
-			}
-		}
-
-		/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
-		if (
-			xdebug_hash_find(XG_DBG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info) ||
-			xdebug_hash_find(XG_DBG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)
-		) {
-			if (xdebug_handle_hit_value(extra_brk_info)) {
-				char *type_str = xdebug_sprintf("%ld", type);
-
-				if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), (char *) error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
-					xdebug_mark_debug_connection_not_active();
-				}
-
-				xdfree(type_str);
-			}
-		}
-	}
 	xdfree(error_type_str);
 
 	if (type & XINI_BASE(halt_level) & XDEBUG_ALLOWED_HALT_LEVELS) {

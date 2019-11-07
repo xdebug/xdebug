@@ -51,6 +51,7 @@
 
 #include "com.h"
 
+#include "debugger_private.h"
 #include "lib/private.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)

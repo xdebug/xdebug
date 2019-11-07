@@ -27,7 +27,6 @@
 #include "filter.h"
 #include "monitor.h"
 #include "stack.h"
-#include "debugger/com.h"
 #include "gcstats/gc_stats.h"
 #include "profiler/profiler.h"
 
@@ -73,7 +72,6 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	zval *code, *message, *file, *line;
 	zval *xdebug_message_trace, *previous_exception;
 	zend_class_entry *default_ce, *exception_ce;
-	xdebug_brk_info *extra_brk_info;
 	char *code_str = NULL;
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
@@ -138,44 +136,7 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 		}
 	}
 
-	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
-
-	if (xdebug_is_debug_connection_active_for_current_pid()) {
-		int exception_breakpoint_found = 0;
-
-		/* Check if we have a wild card exception breakpoint */
-		if (xdebug_hash_find(XG_DBG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)) {
-			exception_breakpoint_found = 1;
-		} else {
-			/* Check if we have a breakpoint on this exception or its parent classes */
-			zend_class_entry *ce_ptr = exception_ce;
-
-			/* Check if we have a breakpoint on this exception or its parent classes */
-			do {
-				if (xdebug_hash_find(XG_DBG(context).exception_breakpoints, (char *) STR_NAME_VAL(ce_ptr->name), STR_NAME_LEN(ce_ptr->name), (void *) &extra_brk_info)) {
-					exception_breakpoint_found = 1;
-				}
-				ce_ptr = ce_ptr->parent;
-			} while (!exception_breakpoint_found && ce_ptr);
-		}
-
-		if (XG_DBG(context).resolved_breakpoints && exception_breakpoint_found) {
-			XG_DBG(context).handler->resolve_breakpoints(&(XG_DBG(context)), XDEBUG_BREAKPOINT_TYPE_EXCEPTION, extra_brk_info);
-		}
-
-		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
-			if (!XG_DBG(context).handler->remote_breakpoint(
-				&(XG_DBG(context)), XG_BASE(stack),
-				Z_STRVAL_P(file), Z_LVAL_P(line), XDEBUG_BREAK,
-				(char*) STR_NAME_VAL(exception_ce->name),
-				code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
-				Z_STRVAL_P(message))
-			) {
-				xdebug_mark_debug_connection_not_active();
-			}
-		}
-	}
+	xdebug_debugger_throw_exception_hook(exception_ce, file, line, code, code_str, message);
 
 	/* Free code_str if necessary */
 	if (code_str) {
@@ -300,64 +261,6 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 }
 
 
-static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
-{
-	xdebug_brk_info *extra_brk_info = NULL;
-	char            *tmp_name = NULL;
-	size_t           tmp_len = 0;
-	TSRMLS_FETCH();
-
-	/* When we first enter a user defined function, we need to resolve breakpoints for this function */
-	if (XG_DBG(context).resolved_breakpoints && breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL && fse->user_defined == XDEBUG_USER_DEFINED) {
-		XG_DBG(context).handler->resolve_breakpoints(&(XG_DBG(context)), XDEBUG_BREAKPOINT_TYPE_LINE|XDEBUG_BREAKPOINT_TYPE_CONDITIONAL|XDEBUG_BREAKPOINT_TYPE_CALL|XDEBUG_BREAKPOINT_TYPE_RETURN, fse);
-	}
-
-	/* Function breakpoints */
-	if (fse->function.type == XFUNC_NORMAL) {
-		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &extra_brk_info)) {
-			/* Yup, breakpoint found, we call the handler when it's not
-			 * disabled AND handle_hit_value is happy */
-			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (xdebug_handle_hit_value(extra_brk_info)) {
-					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-							return 0;
-						}
-					} else {
-						XG_DBG(context).do_break = 1;
-					}
-				}
-			}
-		}
-	}
-	/* class->function breakpoints */
-	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
-		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
-		   codebases due to setlocale calls. We don't care about the locale here. */
-		tmp_len = strlen(fse->function.class) + strlen(fse->function.function) + 3;
-		tmp_name = xdmalloc(tmp_len);
-		snprintf(tmp_name, tmp_len, "%s::%s", fse->function.class, fse->function.function);
-
-		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
-			/* Yup, breakpoint found, call handler if the breakpoint is not
-			 * disabled AND handle_hit_value is happy */
-			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (xdebug_handle_hit_value(extra_brk_info)) {
-					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
-							return 0;
-						}
-					} else {
-						XG_DBG(context).do_break = 1;
-					}
-				}
-			}
-		}
-		xdfree(tmp_name);
-	}
-	return 1;
-}
-
 /* Opcode handler for exit, to be able to clean up the profiler */
 int xdebug_exit_handler(zend_execute_data *execute_data)
 {
@@ -385,9 +288,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		EX(opline) = EX(func)->op_array.opcodes;
 	}
 
-	/* We need to do this first before the executable clauses are called */
-	if (XG_DBG(no_exec) == 1) {
-		php_printf("DEBUG SESSION ENDED");
+	if (xdebug_debugger_bailout_if_no_exec_requested()) {
 		return;
 	}
 
@@ -404,9 +305,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		return;
 	}
 
-	if (!XG_DBG(context).program_name) {
-		XG_DBG(context).program_name = xdstrdup(STR_NAME_VAL(op_array->filename));
-	}
+	xdebug_debugger_set_program_name(op_array->filename);
 
 	if (XG_BASE(in_execution)) {
 		/* Start debugger if this is the first main script, or previously a
@@ -492,16 +391,12 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	/* If we're in an eval, we need to create an ID for it. This ID however
 	 * depends on the debugger mechanism in use so we need to call a function
 	 * in the handler for it */
-	if (fse->function.type == XFUNC_EVAL && xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(context).handler->register_eval_id) {
-		XG_DBG(context).handler->register_eval_id(&(XG_DBG(context)), fse);
+	if (fse->function.type == XFUNC_EVAL) {
+		xdebug_debugger_register_eval(fse);
 	}
 
 	/* Check for entry breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
+	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
 
 	xdebug_profiler_execute_ex(fse, op_array);
 
@@ -534,11 +429,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	/* Check for return breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
+	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
 
 	fse->symbol_table = NULL;
 	fse->execute_data = NULL;
@@ -601,11 +492,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 
 	/* Check for entry breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
+	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
 
 	/* Check for SOAP */
 	if (check_soap_call(fse, current_execute_data)) {
@@ -644,11 +531,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 
 	/* Check for return breakpoints */
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-			xdebug_mark_debug_connection_not_active();
-		}
-	}
+	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
 
 	if (XG_BASE(stack)) {
 		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);

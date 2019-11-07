@@ -31,7 +31,7 @@
 
 #include "coverage/branch_info.h"
 #include "coverage/code_coverage.h"
-#include "debugger/handlers.h"
+#include "debugger/debugger.h"
 #include "gcstats/gc_stats.h"
 #include "profiler/profiler.h"
 #include "lib/compat.h"
@@ -228,47 +228,6 @@ struct xdebug_base_info {
 	} settings;
 };
 
-struct xdebug_stepdbg_info {
-	int           status;
-	int           reason;
-	const char   *lastcmd;
-	char         *lasttransid;
-
-	zend_bool     remote_connection_enabled;
-	zend_ulong    remote_connection_pid;
-	zend_bool     breakpoints_allowed;
-	xdebug_con    context;
-	unsigned int  breakpoint_count;
-	unsigned int  no_exec;
-	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
-	FILE         *remote_log_file;  /* File handler for protocol log */
-
-	HashTable    *active_symbol_table;
-	zend_execute_data *active_execute_data;
-	zval              *This;
-	function_stack_entry *active_fse;
-
-	/* output redirection */
-	int           stdout_mode;
-
-	struct {
-		zend_bool     remote_enable;  /* 0 */
-		zend_long     remote_port;    /* 9000 */
-		char         *remote_host;    /* localhost */
-		long          remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
-		char         *remote_handler; /* php3, gdb, dbgp */
-		zend_bool     remote_autostart; /* Disables the requirement for XDEBUG_SESSION_START */
-		zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
-		char         *remote_log;       /* Filename to log protocol communication to */
-		zend_long     remote_log_level; /* Log level XDEBUG_LOG_{ERR,WARN,INFO,DEBUG} */
-		zend_long     remote_cookie_expire_time; /* Expire time for the remote-session cookie */
-		char         *remote_addr_header; /* User configured header to check for forwarded IP address */
-		zend_long     remote_connect_timeout; /* Timeout in MS for remote connections */
-
-		char         *ide_key_setting; /* Set through php.ini and friends */
-	} settings;
-};
-
 struct xdebug_trace_info {
 	xdebug_trace_handler_t *trace_handler;
 	void         *trace_context;
@@ -284,17 +243,27 @@ struct xdebug_trace_info {
 	} settings;
 };
 
+struct xdebug_library_info
+{
+	zend_execute_data    *active_execute_data;
+	function_stack_entry *active_fse;
+	HashTable            *active_symbol_table;
+	zval                 *This;
+};
+
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct xdebug_base_info     base;
-	struct xdebug_stepdbg_info  stepdbg;
+	struct xdebug_library_info  library;
 	struct xdebug_trace_info    trace;
 	struct {
 		xdebug_coverage_globals_t coverage;
+		xdebug_debugger_globals_t debugger;
 		xdebug_gc_stats_globals_t gc_stats;
 		xdebug_profiler_globals_t profiler;
 	} globals;
 	struct {
 		xdebug_coverage_settings_t coverage;
+		xdebug_debugger_settings_t debugger;
 		xdebug_gc_stats_settings_t gc_stats;
 		xdebug_profiler_settings_t profiler;
 	} settings;
@@ -307,11 +276,10 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #endif
 
 #define XG_BASE(v)     (XG(base.v))
-#define XG_DBG(v)      (XG(stepdbg.v))
+#define XG_LIB(v )     (XG(library.v))
 #define XG_TRACE(v)    (XG(trace.v))
 
 #define XINI_BASE(v)     (XG(base.settings.v))
-#define XINI_DBG(v)      (XG(stepdbg.settings.v))
 #define XINI_TRACE(v)    (XG(trace.settings.v))
 
 /* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */

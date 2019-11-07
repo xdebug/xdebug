@@ -361,10 +361,10 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_ROOT:
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (XG_DBG(active_execute_data) && XG_DBG(active_execute_data)->func) {
+			if (XG_LIB(active_execute_data) && XG_LIB(active_execute_data)->func) {
 				int i = 0;
 				zend_ulong hash_value = zend_inline_hash_func(element, element_length);
-				zend_op_array *opa = &XG_DBG(active_execute_data)->func->op_array;
+				zend_op_array *opa = &XG_LIB(active_execute_data)->func->op_array;
 				zval **CV;
 
 				while (i < opa->last_var) {
@@ -372,7 +372,7 @@ static void fetch_zval_from_symbol_table(
 						ZSTR_LEN(opa->vars[i]) == element_length &&
 						strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)
 					{
-						zval *CV_z = ZEND_CALL_VAR_NUM(XG_DBG(active_execute_data), i);
+						zval *CV_z = ZEND_CALL_VAR_NUM(XG_LIB(active_execute_data), i);
 						CV = &CV_z;
 						if (CV) {
 							ZVAL_COPY(&tmp_retval, *CV);
@@ -383,7 +383,7 @@ static void fetch_zval_from_symbol_table(
 				}
 			}
 			free(element);
-			ht = XG_DBG(active_symbol_table);
+			ht = XG_LIB(active_symbol_table);
 
 			XDEBUG_BREAK_INTENTIONALLY_MISSING
 
@@ -393,8 +393,8 @@ static void fetch_zval_from_symbol_table(
 
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
-				if (XG_DBG(This)) {
-					ZVAL_COPY(&tmp_retval, XG_DBG(This));
+				if (XG_LIB(This)) {
+					ZVAL_COPY(&tmp_retval, XG_LIB(This));
 				} else {
 					ZVAL_NULL(&tmp_retval);
 				}
@@ -768,8 +768,8 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						state = 1;
 						keyword_end = &ptr[ctr];
 
-						if (strncmp(keyword, "::", 2) == 0 && XG_DBG(active_fse)->function.class) { /* static class properties */
-							zend_class_entry *ce = xdebug_fetch_class(XG_DBG(active_fse)->function.class, strlen(XG_DBG(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
+						if (strncmp(keyword, "::", 2) == 0 && XG_LIB(active_fse)->function.class) { /* static class properties */
+							zend_class_entry *ce = xdebug_fetch_class(XG_LIB(active_fse)->function.class, strlen(XG_LIB(active_fse)->function.class), ZEND_FETCH_CLASS_SELF TSRMLS_CC);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
 							cc_length = strlen(STR_NAME_VAL(ce->name));
@@ -830,6 +830,107 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 		efree(current_classname);
 	}
 }
+
+#define XDEBUG_VAR_FORMAT_INITIALISED   0
+#define XDEBUG_VAR_FORMAT_UNINITIALISED 1
+
+static const char* text_formats[2] = {
+	"  $%s = %s\n",
+	"  $%s = *uninitialized*\n",
+};
+
+static const char* ansi_formats[2] = {
+	"  $%s = %s\n",
+	"  $%s = *uninitialized*\n",
+};
+
+static const char* html_formats[2] = {
+	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec'>%s</td></tr>\n",
+	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
+};
+
+
+static const char** get_var_format_string(int html)
+{
+	if (html) {
+		return html_formats;
+	}
+	else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XINI_BASE(cli_color) == 2)) {
+		return ansi_formats;
+	}
+	else {
+		return text_formats;
+	}
+}
+
+void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
+{
+	int          html = *(int*) htmlq;
+	zval         zvar;
+	xdebug_str  *contents;
+	xdebug_str  *name = (xdebug_str*) he->ptr;
+	HashTable   *tmp_ht;
+	const char **formats;
+	xdebug_str   *str = (xdebug_str *) argument;
+	TSRMLS_FETCH();
+
+	if (!he->ptr) {
+		return;
+	}
+
+	/* Bail out on $this and $GLOBALS */
+	if (strcmp(name->d, "this") == 0 || strcmp(name->d, "GLOBALS") == 0) {
+		return;
+	}
+
+#if PHP_VERSION_ID >= 70100
+	if (!(ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+#else
+	if (!EG(current_execute_data)->symbol_table) {
+#endif
+		zend_rebuild_symbol_table(TSRMLS_C);
+	}
+
+	tmp_ht = XG_LIB(active_symbol_table);
+	{
+		zend_execute_data *ex = EG(current_execute_data);
+		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
+			ex = ex->prev_execute_data;
+		}
+		if (ex) {
+			XG_LIB(active_execute_data) = ex;
+			XG_LIB(active_symbol_table) = ex->symbol_table;
+		}
+	}
+
+	xdebug_get_php_symbol(&zvar, name);
+	XG_LIB(active_symbol_table) = tmp_ht;
+
+	formats = get_var_format_string(PG(html_errors));
+
+	if (Z_TYPE(zvar) == IS_UNDEF) {
+		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d), 1);
+		return;
+	}
+
+	if (html) {
+		contents = xdebug_get_zval_value_fancy(NULL, &zvar, 0, NULL);
+	} else {
+		contents = xdebug_get_zval_value(&zvar, 0, NULL);
+	}
+
+	if (contents) {
+		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_INITIALISED], name->d, contents->d), 1);
+	} else {
+		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d), 1);
+	}
+
+	if (contents) {
+		xdebug_str_free(contents);
+	}
+	zval_ptr_dtor_nogc(&zvar);
+}
+
 
 static xdebug_str* xdebug_get_property_info(char *mangled_property, int mangled_len, const char **modifier, char **class_name)
 {
