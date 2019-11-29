@@ -549,16 +549,15 @@ static int mark_class_as_visited(zend_class_entry *ce)
 {
 	int     already_visited = 0;
 	void   *dummy; /* we only care about key existence, not value */
-	char   *key = xdebug_sprintf("%08X", (uintptr_t) ce);
-	size_t  key_len = strlen(key);
+	char    key[17];
 
-	if (xdebug_hash_find(XG_COV(visited_classes), key, key_len, (void*) &dummy)) {
+	snprintf(key, 17, "%016lX", (uintptr_t) ce);
+
+	if (xdebug_hash_find(XG_COV(visited_classes), key, 16, (void*) &dummy)) {
 		already_visited = 1;
 	} else {
-		xdebug_hash_add(XG_COV(visited_classes), key, key_len, NULL);
+		xdebug_hash_add(XG_COV(visited_classes), key, 16, NULL);
 	}
-
-	xdfree(key);
 
 	return already_visited;
 }
@@ -566,7 +565,7 @@ static int mark_class_as_visited(zend_class_entry *ce)
 static int prefill_from_class_table(zend_class_entry *ce)
 {
 	if (ce->type == ZEND_USER_CLASS) {
-		if (mark_class_as_visited(ce)) {
+		if (!mark_class_as_visited(ce)) {
 			zend_op_array *val;
 
 			xdebug_zend_hash_apply_protection_begin(&ce->function_table);
