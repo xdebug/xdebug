@@ -1540,14 +1540,10 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_header(2, "xdebug support", "enabled");
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
 	php_info_print_table_row(2, "IDE Key", XG(ide_key));
-	php_info_print_table_end();
-
-	php_info_print_table_start();
 	if (!sapi_module.phpinfo_as_text) {
-		php_info_print_table_header(1, "Support Xdebug on Patreon");
-		xdebug_info_printf("<tr><td style='background-color: orangered; text-align: center'>%s</td></tr>\n", "<a style='font-size: large; color: white; background-color: transparent; font-weight: bold; text-decoration: underline' href='https://www.patreon.com/bePatron?u=7864328'>BECOME A PATRON</a>");
+		xdebug_info_printf("<tr><td colspan='2' style='background-color: white; text-align: center'>%s</td></tr>\n", "<a style='color: #317E1E; background-color: transparent; font-weight: bold; text-decoration: underline' href='https://xdebug.org/support'>Support Xdebug on Patreon, GitHub, or as a business</a>");
 	} else {
-		xdebug_info_printf("Support Xdebug on Patreon: https://www.patreon.com/bePatron?u=7864328\n");
+		xdebug_info_printf("Support Xdebug on Patreon, GitHub, or as a business: https://xdebug.org/support\n");
 	}
 	php_info_print_table_end();
 
