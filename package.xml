@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-10-31</date>
+ <date>2019-12-02</date>
  <time>10:46:09</time>
  <version>
-  <release>2.8.0</release>
-  <api>2.8.0</api>
+  <release>2.8.1</release>
+  <api>2.8.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,16 +45,11 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Oct 31, 2019 - xdebug 2.8.0
+Mon, Dec  2, 2019 - xdebug 2.8.1
 
 = Fixed bugs:
 
-  - Fixed issue #1665: Segfault with garbage collection and complex function arguments
-  - Fixed issue #1699: Crash during debugging Phalcon project
-  - Fixed issue #1705: Crash while debugging with ionCube being used
-  - Fixed issue #1708: Crash on evaluating object with properties
-  - Fixed issue #1709: Wrong data type breaks tests on Big Endian build
-  - Fixed issue #1713: INIT_FCALL is not overloaded in code coverage
+  - Fixed issue #1717: Code coverage turned slow after update from 2.7.2 to 2.8.0
  </notes>
 
  <contents>
@@ -153,6 +148,32 @@ Thu, Oct 31, 2019 - xdebug 2.8.0
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2019-10-31</date>
+   <time>10:46:09</time>
+   <version>
+    <release>2.8.0</release>
+    <api>2.8.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Oct 31, 2019 - xdebug 2.8.0
+
+= Fixed bugs:
+
+  - Fixed issue #1665: Segfault with garbage collection and complex function arguments
+  - Fixed issue #1699: Crash during debugging Phalcon project
+  - Fixed issue #1705: Crash while debugging with ionCube being used
+  - Fixed issue #1708: Crash on evaluating object with properties
+  - Fixed issue #1709: Wrong data type breaks tests on Big Endian build
+  - Fixed issue #1713: INIT_FCALL is not overloaded in code coverage
+   </notes>
+  </release>
 
   <release>
    <date>2019-08-26</date>
