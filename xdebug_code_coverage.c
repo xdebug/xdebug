@@ -1068,7 +1068,7 @@ static int mark_class_as_visited(zend_class_entry *ce)
 static int prefill_from_class_table(zend_class_entry *ce)
 {
 	if (ce->type == ZEND_USER_CLASS) {
-		if (mark_class_as_visited(ce)) {
+		if (!mark_class_as_visited(ce)) {
 			zend_op_array *val;
 
 			xdebug_zend_hash_apply_protection_begin(&ce->function_table);
