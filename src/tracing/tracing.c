@@ -31,7 +31,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-xdebug_trace_handler_t *xdebug_select_trace_handler(int options TSRMLS_DC)
+static xdebug_trace_handler_t *xdebug_select_trace_handler(int options)
 {
 	xdebug_trace_handler_t *tmp;
 
@@ -85,7 +85,7 @@ FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, c
 	return file;
 }
 
-char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS_DC)
+static char* xdebug_start_trace(char* fname, char *script_filename, long options)
 {
 	if (XG_TRACE(trace_context)) {
 		return NULL;
@@ -102,7 +102,7 @@ char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS
 	return NULL;
 }
 
-void xdebug_stop_trace(TSRMLS_D)
+static void xdebug_stop_trace(TSRMLS_D)
 {
 	if (XG_TRACE(trace_context)) {
 		XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context) TSRMLS_CC);
@@ -693,7 +693,7 @@ void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg)
 	xg->trace_context = NULL;
 }
 
-void xdebug_tracing_minit(void)
+void xdebug_tracing_minit(INIT_FUNC_ARGS)
 {
 	/* Override opcodes for variable assignments in traces */
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
@@ -738,6 +738,11 @@ void xdebug_tracing_minit(void)
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, ZEND_POST_INC_STATIC_PROP);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, ZEND_POST_DEC_STATIC_PROP);
 #endif
+
+	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_APPEND", XDEBUG_TRACE_OPTION_APPEND, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_COMPUTERIZED", XDEBUG_TRACE_OPTION_COMPUTERIZED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_HTML", XDEBUG_TRACE_OPTION_HTML, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_NAKED_FILENAME", XDEBUG_TRACE_OPTION_NAKED_FILENAME, CONST_CS | CONST_PERSISTENT);
 }
 
 void xdebug_tracing_rinit(void)

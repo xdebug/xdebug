@@ -41,9 +41,6 @@
 #include "TSRM.h"
 #endif
 
-char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS_DC);
-void xdebug_stop_trace(TSRMLS_D);
-
 typedef struct xdebug_var_name {
 	char    *name;
 	size_t   length;

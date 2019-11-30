@@ -50,7 +50,7 @@ typedef struct _xdebug_tracing_settings_t {
 } xdebug_tracing_settings_t;
 
 void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg);
-void xdebug_tracing_minit(void);
+void xdebug_tracing_minit(INIT_FUNC_ARGS);
 void xdebug_tracing_rinit(void);
 void xdebug_tracing_post_deactivate(void);
 
@@ -66,7 +66,6 @@ void xdebug_tracing_restore_trace_context(void *old_trace_context);
 char* xdebug_return_trace_stack_retval(function_stack_entry* i, int fnr, zval* retval);
 char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_generator* generator);
 char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno);
-FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, char **used_fname);
 
 void xdebug_trace_function_begin(function_stack_entry *fse, int function_nr);
 void xdebug_trace_function_end(function_stack_entry *fse, int function_nr);

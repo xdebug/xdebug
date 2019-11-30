@@ -83,4 +83,6 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(post_inc_static_prop);
 XDEBUG_OPCODE_OVERRIDE_ASSIGN_DECL(post_dec_static_prop);
 #endif
 
+FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, char **used_fname);
+
 #endif
