@@ -47,7 +47,7 @@
 #include "lib/llist.h"
 #include "lib/mm.h"
 #include "lib/private.h"
-#include "lib/var.h"
+#include "lib/var_export_xml.h"
 #include "lib/xml.h"
 
 #ifdef PHP_WIN32
@@ -1743,7 +1743,7 @@ static void attach_declared_var_with_contents(void *xml, xdebug_hash_element* he
 	if (contents) {
 		xdebug_xml_add_child(node, contents);
 	} else {
-		xdebug_attach_uninitialized_var(options, node, name);
+		xdebug_var_xml_attach_uninitialized_var(options, node, name);
 	}
 }
 
@@ -1891,7 +1891,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			}
 #endif
 
-			xdebug_attach_static_vars(node, options, ce);
+			xdebug_var_xml_attach_static_vars(node, options, ce);
 		}
 
 		XG_LIB(active_symbol_table) = NULL;

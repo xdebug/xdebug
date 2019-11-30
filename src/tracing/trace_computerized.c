@@ -22,7 +22,8 @@
 #include "tracing_private.h"
 #include "trace_computerized.h"
 
-#include "lib/var.h"
+#include "lib/var_export_line.h"
+#include "lib/var_export_serialized.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
@@ -101,12 +102,12 @@ static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
 	switch (collection_level) {
 		case 1: /* synopsis */
 		case 2:
-			tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_synopsis_line(zv, 0, NULL);
 			break;
 		case 3: /* full */
 		case 4: /* full (with var) */
 		default:
-			tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
 			break;
 		case 5: /* serialized */
 			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);

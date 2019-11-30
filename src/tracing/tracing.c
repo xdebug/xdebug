@@ -27,7 +27,7 @@
 #include "lib/compat.h"
 #include "lib/private.h"
 #include "lib/str.h"
-#include "lib/var.h"
+#include "lib/var_export_line.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -323,7 +323,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		if (is_static) {
 			xdebug_str_add(&name, xdebug_sprintf("self::"), 1);
 		} else {
-			zval_value = xdebug_get_zval_value(xdebug_get_zval_with_opline(execute_data, prev_opcode, prev_opcode->op1_type, &prev_opcode->op1, &is_var), 0, options);
+			zval_value = xdebug_get_zval_value_line(xdebug_get_zval_with_opline(execute_data, prev_opcode, prev_opcode->op1_type, &prev_opcode->op1, &is_var), 0, options);
 			xdebug_str_addc(&name, '$');
 			xdebug_str_add_str(&name, zval_value);
 			xdebug_str_free(zval_value);
@@ -332,14 +332,14 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		xdebug_str_add(&name, xdebug_sprintf("self::"), 1 );
 	}
 	if (cur_opcode->opcode >= ZEND_PRE_INC_OBJ && cur_opcode->opcode <= ZEND_POST_DEC_OBJ) {
-		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
+		zval_value = xdebug_get_zval_value_line(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
 		xdebug_str_addl(&name, "$this->", 7, 0);
 		xdebug_str_add_str(&name, zval_value);
 		xdebug_str_free(zval_value);
 	}
 #if PHP_VERSION_ID >= 70400
 	if (cur_opcode->opcode >= ZEND_PRE_INC_STATIC_PROP && cur_opcode->opcode <= ZEND_POST_DEC_STATIC_PROP) {
-		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var), 0, options);
+		zval_value = xdebug_get_zval_value_line(xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var), 0, options);
 		xdebug_str_add_str(&name, zval_value);
 		xdebug_str_free(zval_value);
 	}
@@ -379,23 +379,23 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 			}
 #if PHP_VERSION_ID >= 70100
 			if (opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_W || opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_R || opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_RW) {
-				zval_value = xdebug_get_zval_value(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
+				zval_value = xdebug_get_zval_value_line(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
 				xdebug_str_add_str(&name, zval_value);
 				xdebug_str_free(zval_value);
 			}
 #endif
 			if (opcode_ptr->opcode == ZEND_FETCH_W) {
-				zval_value = xdebug_get_zval_value(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
+				zval_value = xdebug_get_zval_value_line(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
 				xdebug_str_add_str(&name, zval_value);
 				xdebug_str_free(zval_value);
 			}
 			if (is_static && opcode_ptr->opcode == ZEND_FETCH_RW) {
-				zval_value = xdebug_get_zval_value(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
+				zval_value = xdebug_get_zval_value_line(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op1_type, &opcode_ptr->op1, &is_var), 0, options);
 				xdebug_str_add_str(&name, zval_value);
 				xdebug_str_free(zval_value);
 			}
 			if (opcode_ptr->opcode == ZEND_FETCH_DIM_W || opcode_ptr->opcode == ZEND_FETCH_DIM_RW) {
-				zval_value = xdebug_get_zval_value(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
+				zval_value = xdebug_get_zval_value_line(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
 				xdebug_str_addc(&name, '[');
 				if (zval_value) {
 					xdebug_str_add_str(&name, zval_value);
@@ -403,7 +403,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 				xdebug_str_addc(&name, ']');
 				xdebug_str_free(zval_value);
 			} else if (opcode_ptr->opcode == ZEND_FETCH_OBJ_W || opcode_ptr->opcode == ZEND_FETCH_OBJ_RW) {
-				zval_value = xdebug_get_zval_value(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, options);
+				zval_value = xdebug_get_zval_value_line(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, options);
 				xdebug_str_addl(&name, "->", 2, 0);
 				xdebug_str_add_str(&name, zval_value);
 				xdebug_str_free(zval_value);
@@ -442,14 +442,14 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		xdebug_str_add(&name, xdebug_sprintf("%s", Z_STRVAL_P(dimval)), 1);
 	}
 	if (cur_opcode->opcode == ZEND_ASSIGN_DIM_OP) {
-		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, NULL);
+		zval_value = xdebug_get_zval_value_line(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, NULL);
 		xdebug_str_addc(&name, '[');
 		xdebug_str_add_str(&name, zval_value);
 		xdebug_str_addc(&name, ']');
 		xdebug_str_free(zval_value);
 	}
 	if (cur_opcode->opcode == ZEND_ASSIGN_OBJ_OP) {
-		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
+		zval_value = xdebug_get_zval_value_line(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
 		if (cur_opcode->op1_type == IS_UNUSED) {
 			xdebug_str_addl(&name, "$this->", 7, 0);
 		} else {
@@ -459,7 +459,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		xdebug_str_free(zval_value);
 	}
 	if (cur_opcode->opcode == ZEND_ASSIGN_STATIC_PROP_OP) {
-		zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var), 0, options);
+		zval_value = xdebug_get_zval_value_line(xdebug_get_zval(execute_data, cur_opcode->op1_type, &cur_opcode->op1, &is_var), 0, options);
 		xdebug_str_addl(&name, "self::", 6, 0);
 		xdebug_str_add_str(&name, zval_value);
 		xdebug_str_free(zval_value);
@@ -469,14 +469,14 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		|| cur_opcode->opcode == ZEND_ASSIGN_POW
 	) {
 		if (cur_opcode->extended_value == ZEND_ASSIGN_DIM) {
-			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, NULL);
+			zval_value = xdebug_get_zval_value_line(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, NULL);
 			xdebug_str_addc(&name, '[');
 			xdebug_str_add_str(&name, zval_value);
 			xdebug_str_addc(&name, ']');
 			xdebug_str_free(zval_value);
 		}
 		if (cur_opcode->extended_value == ZEND_ASSIGN_OBJ) {
-			zval_value = xdebug_get_zval_value(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
+			zval_value = xdebug_get_zval_value_line(xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var), 0, options);
 			if (cur_opcode->op1_type == IS_UNUSED) {
 				xdebug_str_addl(&name, "$this->", 7, 0);
 			} else {
@@ -492,7 +492,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		if (next_opcode->opcode == ZEND_OP_DATA && cur_opcode->op2_type == IS_UNUSED) {
 			xdebug_str_add(&name, "[]", 0);
 		} else {
-			zval_value = xdebug_get_zval_value(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
+			zval_value = xdebug_get_zval_value_line(xdebug_get_zval_with_opline(execute_data, opcode_ptr, opcode_ptr->op2_type, &opcode_ptr->op2, &is_var), 0, NULL);
 			xdebug_str_addc(&name, '[');
 			xdebug_str_add_str(&name, zval_value);
 			xdebug_str_addc(&name, ']');

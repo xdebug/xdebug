@@ -24,7 +24,8 @@
 
 #include "lib/compat.h"
 #include "lib/private.h"
-#include "lib/var.h"
+#include "lib/var_export_html.h"
+#include "lib/var_export_line.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
@@ -47,13 +48,13 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 		xdebug_str *val;
 
 		if (html) {
-			val = xdebug_get_zval_value_fancy(NULL, z, 0, NULL);
+			val = xdebug_get_zval_value_html(NULL, z, 0, NULL);
 
 			xdebug_str_addl(str, "<td colspan='3' bgcolor='#eeeeec'>", 34, 0);
 			xdebug_str_add_str(str, val);
 			xdebug_str_addl(str, "</td>", 5, 0);
 		} else {
-			val = xdebug_get_zval_value(z, 0, NULL);
+			val = xdebug_get_zval_value_line(z, 0, NULL);
 
 			xdebug_str_add(str, xdebug_sprintf("\n   $%s['%s'] = ", name, elem), 1);
 			xdebug_str_add_str(str, val);

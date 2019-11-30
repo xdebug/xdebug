@@ -60,7 +60,9 @@
 #include "lib/llist.h"
 #include "lib/mm.h"
 #include "lib/private.h"
-#include "lib/var.h"
+#include "lib/var_export_html.h"
+#include "lib/var_export_line.h"
+#include "lib/var_export_text.h"
 #include "profiler/profiler.h"
 #include "tracing/tracing.h"
 
@@ -864,7 +866,7 @@ PHP_FUNCTION(xdebug_var_dump)
 			xdebug_php_var_dump(&args[i], 1);
 		}
 		else if (PG(html_errors)) {
-			val = xdebug_get_zval_value_fancy(NULL, (zval*) &args[i], 0, NULL);
+			val = xdebug_get_zval_value_html(NULL, (zval*) &args[i], 0, NULL);
 			PHPWRITE(val->d, val->l);
 			xdebug_str_free(val);
 		}
@@ -927,7 +929,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 			php_printf("%s: ", Z_STRVAL(args[i]));
 			if (Z_TYPE(debugzval) != IS_UNDEF) {
 				if (PG(html_errors)) {
-					val = xdebug_get_zval_value_fancy(NULL, &debugzval, 1, NULL);
+					val = xdebug_get_zval_value_html(NULL, &debugzval, 1, NULL);
 					PHPWRITE(val->d, val->l);
 				}
 				else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty()) || (XINI_BASE(cli_color) == 2)) {
@@ -935,7 +937,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 					PHPWRITE(val->d, val->l);
 				}
 				else {
-					val = xdebug_get_zval_value(&debugzval, 1, NULL);
+					val = xdebug_get_zval_value_line(&debugzval, 1, NULL);
 					PHPWRITE(val->d, val->l);
 				}
 				xdfree(val);
@@ -995,7 +997,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 
 			printf("%s: ", Z_STRVAL(args[i]));
 			if (Z_TYPE(debugzval) != IS_UNDEF) {
-				val = xdebug_get_zval_value(&debugzval, 1, NULL);
+				val = xdebug_get_zval_value_line(&debugzval, 1, NULL);
 				printf("%s(%zd)", val->d, val->l);
 				xdebug_str_free(val);
 				printf("\n");

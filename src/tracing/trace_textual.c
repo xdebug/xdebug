@@ -22,7 +22,8 @@
 #include "tracing_private.h"
 #include "trace_textual.h"
 
-#include "lib/var.h"
+#include "lib/var_export_line.h"
+#include "lib/var_export_serialized.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
@@ -97,12 +98,12 @@ static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
 	switch (collection_level) {
 		case 1: /* synopsis */
 		case 2:
-			tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_synopsis_line(zv, 0, NULL);
 			break;
 		case 3: /* full */
 		case 4: /* full (with var) */
 		default:
-			tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
 			break;
 		case 5: /* serialized */
 			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
@@ -236,7 +237,7 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 
 	xdebug_return_trace_stack_common(&str, fse);
 
-	tmp_value = xdebug_get_zval_value(return_value, 0, NULL);
+	tmp_value = xdebug_get_zval_value_line(return_value, 0, NULL);
 	if (tmp_value) {
 		xdebug_str_add_str(&str, tmp_value);
 		xdebug_str_free(tmp_value);
@@ -266,7 +267,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 #endif
 
 	/* Generator key */
-	tmp_value = xdebug_get_zval_value(&generator->key, 0, NULL);
+	tmp_value = xdebug_get_zval_value_line(&generator->key, 0, NULL);
 	if (tmp_value) {
 		xdebug_return_trace_stack_common(&str, fse);
 
@@ -274,7 +275,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		xdebug_str_add_str(&str, tmp_value);
 		xdebug_str_addl(&str, " => ", 4, 0);
 
-		tmp_value = xdebug_get_zval_value(&generator->value, 0, NULL);
+		tmp_value = xdebug_get_zval_value_line(&generator->value, 0, NULL);
 		if (tmp_value) {
 			xdebug_str_add_str(&str, tmp_value);
 			xdebug_str_free(tmp_value);
@@ -314,7 +315,7 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 		if (right_full_varname) {
 			xdebug_str_add(&str, right_full_varname, 0);
 		} else {
-			tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+			tmp_value = xdebug_get_zval_value_line(retval, 0, NULL);
 
 			if (tmp_value) {
 				xdebug_str_add_str(&str, tmp_value);

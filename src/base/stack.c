@@ -30,7 +30,9 @@
 #include "lib/compat.h"
 #include "lib/private.h"
 #include "lib/str.h"
-#include "lib/var.h"
+#include "lib/var_export_html.h"
+#include "lib/var_export_line.h"
+#include "lib/var_export_serialized.h"
 #include "profiler/profiler.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
@@ -146,7 +148,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				}
 
 				if (!Z_ISUNDEF(i->var[j].data)) {
-					tmp_value = xdebug_get_zval_value(&i->var[j].data, 0, NULL);
+					tmp_value = xdebug_get_zval_value_line(&i->var[j].data, 0, NULL);
 					xdebug_str_add_str(&log_buffer, tmp_value);
 					xdebug_str_free(tmp_value);
 				} else {
@@ -239,48 +241,48 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 
 static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_level)
 {
-	xdebug_str *tmp_value = NULL, *tmp_fancy_synop_value = NULL;
-	char       *tmp_fancy_value = NULL;
+	xdebug_str *tmp_value = NULL, *tmp_html_synop_value = NULL;
+	char       *tmp_html_value = NULL;
 	size_t      newlen;
 
 	if (html) {
 		switch (collecton_level) {
 			case 1: /* synopsis */
-				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL);
+				tmp_html_synop_value = xdebug_get_zval_synopsis_html("", zv, 0, NULL);
 
 				xdebug_str_addl(str, "<span>", 6, 0);
-				xdebug_str_add_str(str, tmp_fancy_synop_value);
+				xdebug_str_add_str(str, tmp_html_synop_value);
 				xdebug_str_addl(str, "</span>", 7, 0);
 
-				xdfree(tmp_fancy_synop_value);
+				xdfree(tmp_html_synop_value);
 				break;
 			case 2: /* synopsis + full in tooltip */
-				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
-				tmp_fancy_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
-				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL);
+				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
+				tmp_html_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
+				tmp_html_synop_value = xdebug_get_zval_synopsis_html("", zv, 0, NULL);
 
 				xdebug_str_addl(str, "<span title='", 13, 0);
-				xdebug_str_add(str, tmp_fancy_value, 0);
+				xdebug_str_add(str, tmp_html_value, 0);
 				xdebug_str_addl(str, "'>", 2, 0);
-				xdebug_str_add_str(str, tmp_fancy_synop_value);
+				xdebug_str_add_str(str, tmp_html_synop_value);
 				xdebug_str_addl(str, "</span>", 7, 0);
 
 				xdebug_str_free(tmp_value);
-				efree(tmp_fancy_value);
-				xdebug_str_free(tmp_fancy_synop_value);
+				efree(tmp_html_value);
+				xdebug_str_free(tmp_html_synop_value);
 				break;
 			case 3: /* full */
 			case 4: /* full (with var_name) */
 			default:
-				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
-				tmp_fancy_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
+				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
+				tmp_html_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
 
 				xdebug_str_addl(str, "<span>", 6, 0);
-				xdebug_str_add(str, tmp_fancy_value, 0);
+				xdebug_str_add(str, tmp_html_value, 0);
 				xdebug_str_addl(str, "</span>", 7, 0);
 
 				xdebug_str_free(tmp_value);
-				efree(tmp_fancy_value);
+				efree(tmp_html_value);
 				break;
 			case 5: { /* serialized */
 				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
@@ -296,12 +298,12 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 		switch (collecton_level) {
 			case 1: /* synopsis */
 			case 2:
-				tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
+				tmp_value = xdebug_get_zval_synopsis_line(zv, 0, NULL);
 				break;
 			case 3: /* full */
 			case 4: /* full (with var_name) */
 			default:
-				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
 				break;
 			case 5: /* serialized */
 				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
@@ -1314,7 +1316,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				continue;
 			}
 			if (!Z_ISUNDEF(i->var[j].data)) {
-				argument = xdebug_get_zval_value(&i->var[j].data, 0, NULL);
+				argument = xdebug_get_zval_value_line(&i->var[j].data, 0, NULL);
 			} else {
 				argument = xdebug_str_create_from_char((char*) "???");
 			}
