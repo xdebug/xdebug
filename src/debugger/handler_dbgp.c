@@ -1753,9 +1753,6 @@ static void attach_declared_var_with_contents(void *xml, xdebug_hash_element* he
 	}
 }
 
-# define HASH_KEY_VAL(k) (k)->key->val
-# define HASH_KEY_LEN(k) (k)->key->len
-
 static int xdebug_add_filtered_symboltable_var(zval *symbol, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	xdebug_hash *tmp_hash;
@@ -1766,39 +1763,36 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol, int num_args, va_li
 	 * tables, but for now, we'll just ignore them. */
 	if (!hash_key->key) { return 0; }
 
-	if (!HASH_KEY_VAL(hash_key) || HASH_KEY_LEN(hash_key) == 0) { return 0; }
+	if (!hash_key->key->val || hash_key->key->len == 0) { return 0; }
 
-	if (strcmp("argc", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-	if (strcmp("argv", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-	if (HASH_KEY_VAL(hash_key)[0] == '_') {
-		if (strcmp("_COOKIE", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("_ENV", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("_GET", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("_POST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("_REQUEST", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("_SERVER", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("_SESSION", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (strcmp("argc", hash_key->key->val) == 0) { return 0; }
+	if (strcmp("argv", hash_key->key->val) == 0) { return 0; }
+	if (hash_key->key->val[0] == '_') {
+		if (strcmp("_COOKIE", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("_ENV", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("_FILES", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("_GET", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("_POST", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("_REQUEST", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("_SERVER", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("_SESSION", hash_key->key->val) == 0) { return 0; }
 	}
-	if (HASH_KEY_VAL(hash_key)[0] == 'H') {
-		if (strcmp("HTTP_COOKIE_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("HTTP_ENV_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("HTTP_GET_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("HTTP_POST_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("HTTP_POST_FILES", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("HTTP_RAW_POST_DATA", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("HTTP_SERVER_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
-		if (strcmp("HTTP_SESSION_VARS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (hash_key->key->val[0] == 'H') {
+		if (strcmp("HTTP_COOKIE_VARS", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("HTTP_ENV_VARS", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("HTTP_GET_VARS", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("HTTP_POST_VARS", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("HTTP_POST_FILES", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("HTTP_RAW_POST_DATA", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("HTTP_SERVER_VARS", hash_key->key->val) == 0) { return 0; }
+		if (strcmp("HTTP_SESSION_VARS", hash_key->key->val) == 0) { return 0; }
 	}
-	if (strcmp("GLOBALS", HASH_KEY_VAL(hash_key)) == 0) { return 0; }
+	if (strcmp("GLOBALS", hash_key->key->val) == 0) { return 0; }
 
-	xdebug_hash_add(tmp_hash, (char*) HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key), xdebug_str_create(HASH_KEY_VAL(hash_key), HASH_KEY_LEN(hash_key)));
+	xdebug_hash_add(tmp_hash, (char*) hash_key->key->val, hash_key->key->len, xdebug_str_create(hash_key->key->val, hash_key->key->len));
 
 	return 0;
 }
-
-#undef HASH_KEY_VAL
-#undef HASH_KEY_LEN
 
 static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options *options, long context_id, long depth, void (*func)(void *, xdebug_hash_element*, void*))
 {
