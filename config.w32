@@ -4,7 +4,7 @@ ARG_WITH("xdebug", "Xdebug support", "no");
 
 if (PHP_XDEBUG != 'no') {
 	var XDEBUG_BASE_SOURCES="base.c filter.c monitor.c stack.c superglobals.c"
-	var XDEBUG_LIB_SOURCES="usefulstuff.c compat.c hash.c llist.c private.c set.c str.c var.c xml.c"
+	var XDEBUG_LIB_SOURCES="usefulstuff.c compat.c crc32.c hash.c llist.c private.c set.c str.c var.c xml.c"
 
 	var XDEBUG_COVERAGE_SOURCES="branch_info.c code_coverage.c"
 	var XDEBUG_DEBUGGER_SOURCES="com.c debugger.c handler_dbgp.c handlers.c"

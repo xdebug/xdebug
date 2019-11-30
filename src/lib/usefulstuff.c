@@ -34,6 +34,7 @@
 #endif
 #include "php_xdebug.h"
 #include "mm.h"
+#include "crc32.h"
 #include "str.h"
 #include "usefulstuff.h"
 #include "ext/standard/php_lcg.h"
@@ -395,18 +396,6 @@ char *xdebug_path_to_url(const char *fileurl)
 	}
 	xdfree(encoded_fileurl);
 	return tmp;
-}
-
-long xdebug_crc32(const char *string, int str_len)
-{
-	unsigned int crc = ~0;
-	int len;
-
-	len = 0 ;
-	for (len += str_len; str_len--; ++string) {
-	    XDEBUG_CRC32(crc, *string);
-	}
-	return ~crc;
 }
 
 #ifndef PHP_WIN32
