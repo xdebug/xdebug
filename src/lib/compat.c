@@ -417,13 +417,6 @@ char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, i
 	return cv->val;
 }
 
-zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags)
-{
-	zval dummy;
-
-	return zend_read_property(ce, exception, name, length, flags, &dummy);
-}
-
 #ifdef ZEND_HASH_GET_APPLY_COUNT /* PHP 7.2 or earlier recursion protection */
 zend_bool xdebug_zend_hash_is_recursive(HashTable* ht)
 {

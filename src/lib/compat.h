@@ -42,7 +42,6 @@ zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int fla
 int xdebug_get_constant(xdebug_str *val, zval *const_val);
 void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly);
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
-zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags);
 
 /* Recursion protection is done differently from PHP 7.3 onwards */
 zend_bool xdebug_zend_hash_is_recursive(HashTable* ht);

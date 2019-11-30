@@ -68,6 +68,7 @@ static void xdebug_throw_exception_hook(zval *exception)
 	char *code_str = NULL;
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
+	zval dummy;
 
 	if (!exception) {
 		return;
@@ -76,10 +77,10 @@ static void xdebug_throw_exception_hook(zval *exception)
 	default_ce = Z_OBJCE_P(exception);
 	exception_ce = Z_OBJCE_P(exception);
 
-	code =    xdebug_read_property(default_ce, exception, "code",    sizeof("code")-1,    0);
-	message = xdebug_read_property(default_ce, exception, "message", sizeof("message")-1, 0);
-	file =    xdebug_read_property(default_ce, exception, "file",    sizeof("file")-1,    0);
-	line =    xdebug_read_property(default_ce, exception, "line",    sizeof("line")-1,    0);
+	code =    zend_read_property(default_ce, exception, "code",    sizeof("code")-1,    0, &dummy);
+	message = zend_read_property(default_ce, exception, "message", sizeof("message")-1, 0, &dummy);
+	file =    zend_read_property(default_ce, exception, "file",    sizeof("file")-1,    0, &dummy);
+	line =    zend_read_property(default_ce, exception, "line",    sizeof("line")-1,    0, &dummy);
 
 	if (Z_TYPE_P(code) == IS_LONG) {
 		if (Z_LVAL_P(code) != 0) {
@@ -93,9 +94,9 @@ static void xdebug_throw_exception_hook(zval *exception)
 	convert_to_string_ex(file);
 	convert_to_long_ex(line);
 
-	previous_exception = xdebug_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1);
+	previous_exception = zend_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1, &dummy);
 	if (previous_exception && Z_TYPE_P(previous_exception) == IS_OBJECT) {
-		xdebug_message_trace = xdebug_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1);
+		xdebug_message_trace = zend_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1, &dummy);
 		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
 			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
 		}
