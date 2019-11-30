@@ -25,6 +25,7 @@
 #include "lib/hash.h"
 #include "lib/private.h"
 #include "lib/usefulstuff.h"
+#include "debugger_private.h"
 
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;

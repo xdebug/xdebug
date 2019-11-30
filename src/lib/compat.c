@@ -48,17 +48,6 @@
 #include "ext/standard/base64.h"
 #include "ext/standard/php_string.h"
 
-zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata)
-{
-	zend_free_op should_free;
-
-#if PHP_VERSION_ID >= 70300
-	return zend_get_zval_ptr(zdata->opline, op_type, node, zdata, &should_free, BP_VAR_R);
-#else
-	return zend_get_zval_ptr(op_type, node, zdata, &should_free, BP_VAR_R);
-#endif
-}
-
 char *xdebug_str_to_str(char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len, size_t *new_len)
 {
 	zend_string *new_str;
@@ -377,18 +366,6 @@ zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int fla
 	zend_string_release(classname_str);
 
 	return tmp_ce;
-}
-
-int xdebug_get_constant(xdebug_str *val, zval *const_val)
-{
-	zval *tmp_const = NULL;
-	tmp_const = zend_get_constant_str(val->d, val->l);
-
-	if (tmp_const) {
-		*const_val = *tmp_const;
-	}
-
-	return tmp_const != NULL;
 }
 
 void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly)

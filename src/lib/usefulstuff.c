@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,66 +51,6 @@
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
-
-#define READ_BUFFER_SIZE 128
-
-char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigned char delim, int *length)
-{
-	int size = 0, newl = 0, nbufsize = 0;
-	char *tmp;
-	char *tmp_buf = NULL;
-	char *ptr;
-	char buffer[READ_BUFFER_SIZE + 1];
-
-	if (!context->buffer) {
-		context->buffer = calloc(1,1);
-		context->buffer_size = 0;
-	}
-
-	while (context->buffer_size < 1 || context->buffer[context->buffer_size - 1] != delim) {
-		ptr = context->buffer + context->buffer_size;
-		if (type == FD_RL_FILE) {
-			newl = read(socketfd, buffer, READ_BUFFER_SIZE);
-		} else {
-			newl = recv(socketfd, buffer, READ_BUFFER_SIZE, 0);
-		}
-		if (newl > 0) {
-			context->buffer = realloc(context->buffer, context->buffer_size + newl + 1);
-			memcpy(context->buffer + context->buffer_size, buffer, newl);
-			context->buffer_size += newl;
-			context->buffer[context->buffer_size] = '\0';
-		} else if (newl == -1 && errno == EINTR) {
-			continue;
-		} else {
-			free(context->buffer);
-			context->buffer = NULL;
-			context->buffer_size = 0;
-			return NULL;
-		}
-	}
-
-	ptr = memchr(context->buffer, delim, context->buffer_size);
-	size = ptr - context->buffer;
-	/* Copy that line into tmp */
-	tmp = malloc(size + 1);
-	tmp[size] = '\0';
-	memcpy(tmp, context->buffer, size);
-	/* Rewrite existing buffer */
-	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
-		tmp_buf = malloc(nbufsize + 1);
-		memcpy(tmp_buf, ptr + 1, nbufsize);
-		tmp_buf[nbufsize] = 0;
-	}
-	free(context->buffer);
-	context->buffer = tmp_buf;
-	context->buffer_size = context->buffer_size - (size + 1);
-
-	/* Return normal line */
-	if (length) {
-		*length = size;
-	}
-	return tmp;
-}
 
 xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 {

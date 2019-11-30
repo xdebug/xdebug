@@ -19,16 +19,6 @@
 #ifndef __HAVE_USEFULSTUFF_H__
 #define __HAVE_USEFULSTUFF_H__
 
-#define FD_RL_FILE    0
-#define FD_RL_SOCKET  1
-
-typedef struct _fd_buf fd_buf;
-
-struct _fd_buf {
-	char *buffer;
-	int   buffer_size;
-};
-
 typedef struct xdebug_arg {
 	int    c;
 	char **args;
@@ -50,8 +40,6 @@ typedef struct xdebug_arg {
 	xdfree(arg);                   \
 }
 
-#define xdebug_fd_read_line(s,c,t) xdebug_fd_read_line_delim(s, c, t, '\n', NULL)
-char* xdebug_fd_read_line_delim(int socket, fd_buf *context, int type, unsigned char delim, int *length);
 xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
 void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit);
 char* xdebug_memnstr(char *haystack, const char *needle, int needle_len, char *end);

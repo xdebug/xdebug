@@ -57,6 +57,7 @@
 #include <fcntl.h>
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+
 static char *create_eval_key_file(char *filename, int lineno);
 static char *create_eval_key_id(int id);
 static void line_breakpoint_resolve_helper(xdebug_con *context, function_stack_entry *fse, xdebug_brk_info *brk_info);
@@ -510,7 +511,7 @@ static xdebug_xml_node* return_stackframe(int nr)
 */
 
 /* Helper functions */
-void xdebug_hash_admin_dtor(xdebug_brk_admin *admin)
+static void xdebug_hash_admin_dtor(xdebug_brk_admin *admin)
 {
 	xdfree(admin->key);
 	xdfree(admin);
@@ -1455,6 +1456,17 @@ static int add_variable_node(xdebug_xml_node *node, xdebug_str *name, int var_on
 	return FAILURE;
 }
 
+static int xdebug_get_constant(xdebug_str *val, zval *const_val)
+{
+	zval *tmp_const = NULL;
+	tmp_const = zend_get_constant_str(val->d, val->l);
+
+	if (tmp_const) {
+		*const_val = *tmp_const;
+	}
+
+	return tmp_const != NULL;
+}
 
 DBGP_FUNC(property_get)
 {
@@ -1536,10 +1548,6 @@ DBGP_FUNC(property_get)
 		}
 	}
 	options->max_data = old_max_data;
-}
-
-static void set_vars_from_EG(void)
-{
 }
 
 DBGP_FUNC(property_set)
@@ -1633,7 +1641,6 @@ DBGP_FUNC(property_set)
 		original_execute_data = EG(current_execute_data);
 
 		EG(current_execute_data) = XG_LIB(active_execute_data);
-		set_vars_from_EG();
 	}
 
 	/* Do the eval */
@@ -1643,7 +1650,6 @@ DBGP_FUNC(property_set)
 	/* restore executor state */
 	if (depth > 0) {
 		EG(current_execute_data) = original_execute_data;
-		set_vars_from_EG();
 	}
 
 	/* Free data */
@@ -2260,6 +2266,69 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 /*****************************************************************************
 ** Handlers for debug functions
 */
+#define READ_BUFFER_SIZE 128
+
+#define FD_RL_FILE    0
+#define FD_RL_SOCKET  1
+
+
+static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigned char delim, int *length)
+{
+	int size = 0, newl = 0, nbufsize = 0;
+	char *tmp;
+	char *tmp_buf = NULL;
+	char *ptr;
+	char buffer[READ_BUFFER_SIZE + 1];
+
+	if (!context->buffer) {
+		context->buffer = calloc(1,1);
+		context->buffer_size = 0;
+	}
+
+	while (context->buffer_size < 1 || context->buffer[context->buffer_size - 1] != delim) {
+		ptr = context->buffer + context->buffer_size;
+		if (type == FD_RL_FILE) {
+			newl = read(socketfd, buffer, READ_BUFFER_SIZE);
+		} else {
+			newl = recv(socketfd, buffer, READ_BUFFER_SIZE, 0);
+		}
+		if (newl > 0) {
+			context->buffer = realloc(context->buffer, context->buffer_size + newl + 1);
+			memcpy(context->buffer + context->buffer_size, buffer, newl);
+			context->buffer_size += newl;
+			context->buffer[context->buffer_size] = '\0';
+		} else if (newl == -1 && errno == EINTR) {
+			continue;
+		} else {
+			free(context->buffer);
+			context->buffer = NULL;
+			context->buffer_size = 0;
+			return NULL;
+		}
+	}
+
+	ptr = memchr(context->buffer, delim, context->buffer_size);
+	size = ptr - context->buffer;
+	/* Copy that line into tmp */
+	tmp = malloc(size + 1);
+	tmp[size] = '\0';
+	memcpy(tmp, context->buffer, size);
+	/* Rewrite existing buffer */
+	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
+		tmp_buf = malloc(nbufsize + 1);
+		memcpy(tmp_buf, ptr + 1, nbufsize);
+		tmp_buf[nbufsize] = 0;
+	}
+	free(context->buffer);
+	context->buffer = tmp_buf;
+	context->buffer_size = context->buffer_size - (size + 1);
+
+	/* Return normal line */
+	if (length) {
+		*length = size;
+	}
+	return tmp;
+}
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
 {
@@ -2598,7 +2667,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 	return xdebug_is_debug_connection_active_for_current_pid();
 }
 
-xdebug_set *get_executable_lines_from_oparray(function_stack_entry *fse)
+static xdebug_set *get_executable_lines_from_oparray(function_stack_entry *fse)
 {
 	int         i;
 	zend_op_array *opa = fse->op_array;

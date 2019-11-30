@@ -23,6 +23,13 @@
 
 #include "lib/private.h"
 
+typedef struct _fd_buf fd_buf;
+
+struct _fd_buf {
+	char *buffer;
+	int   buffer_size;
+};
+
 #define XG_DBG(v)      (XG(globals.debugger.v))
 #define XINI_DBG(v)    (XG(settings.debugger.v))
 

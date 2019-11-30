@@ -130,6 +130,47 @@ void xdebug_debugger_register_eval(function_stack_entry *fse)
 	}
 }
 
+
+/* Remote debugger helper functions */
+static int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
+{
+	/* If this is a temporary breakpoint, disable the breakpoint */
+	if (brk_info->temporary) {
+		brk_info->disabled = 1;
+	}
+
+	/* Increase hit counter */
+	brk_info->hit_count++;
+
+	/* If the hit_value is 0, the condition check is disabled */
+	if (!brk_info->hit_value) {
+		return 1;
+	}
+
+	switch (brk_info->hit_condition) {
+		case XDEBUG_HIT_GREATER_EQUAL:
+			if (brk_info->hit_count >= brk_info->hit_value) {
+				return 1;
+			}
+			break;
+		case XDEBUG_HIT_EQUAL:
+			if (brk_info->hit_count == brk_info->hit_value) {
+				return 1;
+			}
+			break;
+		case XDEBUG_HIT_MOD:
+			if (brk_info->hit_count % brk_info->hit_value == 0) {
+				return 1;
+			}
+			break;
+		case XDEBUG_HIT_DISABLED:
+			return 1;
+			break;
+	}
+	return 0;
+}
+
+
 void xdebug_debugger_statement_call(char *file, int file_len, int lineno)
 {
 	xdebug_llist_element *le;
