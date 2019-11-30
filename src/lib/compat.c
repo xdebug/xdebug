@@ -48,7 +48,7 @@
 #include "ext/standard/base64.h"
 #include "ext/standard/php_string.h"
 
-zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata TSRMLS_DC)
+zval *xdebug_zval_ptr(int op_type, const znode_op *node, zend_execute_data *zdata)
 {
 	zend_free_op should_free;
 
@@ -368,18 +368,18 @@ zend_ulong xdebug_get_pid(void)
 #endif
 }
 
-zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags TSRMLS_DC)
+zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags)
 {
 	zend_class_entry *tmp_ce;
 	zend_string *classname_str = zend_string_init(classname, classname_len, 0);
 
-	tmp_ce = zend_fetch_class(classname_str, flags TSRMLS_CC);
+	tmp_ce = zend_fetch_class(classname_str, flags);
 	zend_string_release(classname_str);
 
 	return tmp_ce;
 }
 
-int xdebug_get_constant(xdebug_str *val, zval *const_val TSRMLS_DC)
+int xdebug_get_constant(xdebug_str *val, zval *const_val)
 {
 	zval *tmp_const = NULL;
 	tmp_const = zend_get_constant_str(val->d, val->l);
@@ -391,7 +391,7 @@ int xdebug_get_constant(xdebug_str *val, zval *const_val TSRMLS_DC)
 	return tmp_const != NULL;
 }
 
-void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_CC)
+void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly)
 {
 	zend_string *name_s   = zend_string_init(name, name_len, 0);
 	zend_string *value_s  = zend_string_init(value, value_len, 0);
@@ -417,7 +417,7 @@ char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, i
 	return cv->val;
 }
 
-zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags TSRMLS_DC)
+zval *xdebug_read_property(zend_class_entry *ce, zval *exception, const char *name, int length, int flags)
 {
 	zval dummy;
 

@@ -57,7 +57,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 #if !WIN32 && !WINNT
-static int xdebug_create_socket_unix(const char *path TSRMLS_DC)
+static int xdebug_create_socket_unix(const char *path)
 {
 	struct sockaddr_un sa;
 	int sockfd;
@@ -84,7 +84,7 @@ static int xdebug_create_socket_unix(const char *path TSRMLS_DC)
 }
 #endif
 
-int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
+int xdebug_create_socket(const char *hostname, int dport, int timeout)
 {
 	struct addrinfo            hints;
 	struct addrinfo            *remote;
@@ -116,7 +116,7 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 		XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s', Unix domain socket not supported.\n", hostname);
 		return SOCK_ERR;
 #else
-		return xdebug_create_socket_unix(hostname + strlen("unix://") TSRMLS_CC);
+		return xdebug_create_socket_unix(hostname + strlen("unix://"));
 #endif
 	}
 

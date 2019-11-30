@@ -800,7 +800,6 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 	xdebug_coverage_function *function = (xdebug_coverage_function*) e->ptr;
 	zval                     *retval = (zval*) ret;
 	zval                     *function_info;
-	TSRMLS_FETCH();
 
 	XDEBUG_MAKE_STD_ZVAL(function_info);
 	array_init(function_info);
@@ -821,7 +820,6 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	zval                 *retval = (zval*) ret;
 	zval                 *lines, *functions, *file_info;
 	HashTable            *target_hash;
-	TSRMLS_FETCH();
 
 	/* Add all the lines */
 	XDEBUG_MAKE_STD_ZVAL(lines);

@@ -33,7 +33,7 @@ void xdebug_superglobals_dump_dtor(void *user, void *ptr)
 	free(ptr);
 }
 
-static void dump_hash_elem(zval *z, const char *name, long index_key, const char *elem, int html, xdebug_str *str TSRMLS_DC)
+static void dump_hash_elem(zval *z, const char *name, long index_key, const char *elem, int html, xdebug_str *str)
 {
 	if (html) {
 		if (elem) {
@@ -77,15 +77,15 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 static int dump_hash_elem_va(zval *pDest, zend_ulong index_key, zend_string *hash_key, const char *name, int html, xdebug_str *str)
 {
 	if (HASH_KEY_IS_NUMERIC(hash_key)) {
-		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, str TSRMLS_CC);
+		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, str);
 	} else {
-		dump_hash_elem(pDest, name, 0, HASH_APPLY_KEY_VAL(hash_key), html, str TSRMLS_CC);
+		dump_hash_elem(pDest, name, 0, HASH_APPLY_KEY_VAL(hash_key), html, str);
 	}
 
 	return SUCCESS;
 }
 
-static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html, xdebug_str *str TSRMLS_DC)
+static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html, xdebug_str *str)
 {
 	zval *z;
 	zend_ulong num;
@@ -129,9 +129,9 @@ static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html,
 				dump_hash_elem_va(val, num, key, name, html, str);
 			} ZEND_HASH_FOREACH_END();
 		} else if (ht && (z = zend_hash_find(ht, s))) {
-			dump_hash_elem(z, name, 0, elem->ptr, html, str TSRMLS_CC);
+			dump_hash_elem(z, name, 0, elem->ptr, html, str);
 		} else if (XINI_BASE(dump_undefined)) {
-			dump_hash_elem(NULL, name, 0, elem->ptr, html, str TSRMLS_CC);
+			dump_hash_elem(NULL, name, 0, elem->ptr, html, str);
 		}
 
 		elem = XDEBUG_LLIST_NEXT(elem);
@@ -140,18 +140,18 @@ static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html,
 	}
 }
 
-char* xdebug_get_printable_superglobals(int html TSRMLS_DC)
+char* xdebug_get_printable_superglobals(int html)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	dump_hash(&XG_BASE(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str TSRMLS_CC);
-	dump_hash(&XG_BASE(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str TSRMLS_CC);
-	dump_hash(&XG_BASE(post),    "_POST",    HASH_KEY_SIZEOF("_POST"),    html, &str TSRMLS_CC);
-	dump_hash(&XG_BASE(cookie),  "_COOKIE",  HASH_KEY_SIZEOF("_COOKIE"),  html, &str TSRMLS_CC);
-	dump_hash(&XG_BASE(files),   "_FILES",   HASH_KEY_SIZEOF("_FILES"),   html, &str TSRMLS_CC);
-	dump_hash(&XG_BASE(env),     "_ENV",     HASH_KEY_SIZEOF("_ENV"),     html, &str TSRMLS_CC);
-	dump_hash(&XG_BASE(session), "_SESSION", HASH_KEY_SIZEOF("_SESSION"), html, &str TSRMLS_CC);
-	dump_hash(&XG_BASE(request), "_REQUEST", HASH_KEY_SIZEOF("_REQUEST"), html, &str TSRMLS_CC);
+	dump_hash(&XG_BASE(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str);
+	dump_hash(&XG_BASE(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str);
+	dump_hash(&XG_BASE(post),    "_POST",    HASH_KEY_SIZEOF("_POST"),    html, &str);
+	dump_hash(&XG_BASE(cookie),  "_COOKIE",  HASH_KEY_SIZEOF("_COOKIE"),  html, &str);
+	dump_hash(&XG_BASE(files),   "_FILES",   HASH_KEY_SIZEOF("_FILES"),   html, &str);
+	dump_hash(&XG_BASE(env),     "_ENV",     HASH_KEY_SIZEOF("_ENV"),     html, &str);
+	dump_hash(&XG_BASE(session), "_SESSION", HASH_KEY_SIZEOF("_SESSION"), html, &str);
+	dump_hash(&XG_BASE(request), "_REQUEST", HASH_KEY_SIZEOF("_REQUEST"), html, &str);
 
 	return str.d;
 }
@@ -191,9 +191,9 @@ PHP_FUNCTION(xdebug_dump_superglobals)
 		php_printf("<table class='xdebug-superglobals' dir='ltr' border='1' cellspacing='0'>\n");
 	}
 
-	superglobal_info = xdebug_get_printable_superglobals(html TSRMLS_CC);
+	superglobal_info = xdebug_get_printable_superglobals(html);
 	if (superglobal_info) {
-		php_printf("%s", xdebug_get_printable_superglobals(html TSRMLS_CC));
+		php_printf("%s", xdebug_get_printable_superglobals(html));
 	} else {
 		php_printf("<tr><td><i>No information about superglobals is available or configured.</i></td></tr>\n");
 	}

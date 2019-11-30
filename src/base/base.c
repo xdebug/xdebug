@@ -37,11 +37,11 @@ void (*xdebug_new_error_cb)(int type, const char *error_filename, const XDEBUG_E
 void xdebug_error_cb(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args);
 
 /* execution redirection functions */
-zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type TSRMLS_DC);
-zend_op_array* xdebug_compile_file(zend_file_handle*, int TSRMLS_DC);
+zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
+zend_op_array* xdebug_compile_file(zend_file_handle*, int);
 
-static void (*xdebug_old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
-static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
+static void (*xdebug_old_execute_ex)(zend_execute_data *execute_data);
+static void xdebug_execute_ex(zend_execute_data *execute_data);
 
 static void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
 static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value);
@@ -67,7 +67,7 @@ static int xdebug_silence_handler(zend_execute_data *execute_data)
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
+static void xdebug_throw_exception_hook(zval *exception)
 {
 	zval *code, *message, *file, *line;
 	zval *xdebug_message_trace, *previous_exception;
@@ -83,10 +83,10 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	default_ce = Z_OBJCE_P(exception);
 	exception_ce = Z_OBJCE_P(exception);
 
-	code =    xdebug_read_property(default_ce, exception, "code",    sizeof("code")-1,    0 TSRMLS_CC);
-	message = xdebug_read_property(default_ce, exception, "message", sizeof("message")-1, 0 TSRMLS_CC);
-	file =    xdebug_read_property(default_ce, exception, "file",    sizeof("file")-1,    0 TSRMLS_CC);
-	line =    xdebug_read_property(default_ce, exception, "line",    sizeof("line")-1,    0 TSRMLS_CC);
+	code =    xdebug_read_property(default_ce, exception, "code",    sizeof("code")-1,    0);
+	message = xdebug_read_property(default_ce, exception, "message", sizeof("message")-1, 0);
+	file =    xdebug_read_property(default_ce, exception, "file",    sizeof("file")-1,    0);
+	line =    xdebug_read_property(default_ce, exception, "line",    sizeof("line")-1,    0);
 
 	if (Z_TYPE_P(code) == IS_LONG) {
 		if (Z_LVAL_P(code) != 0) {
@@ -100,9 +100,9 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	convert_to_string_ex(file);
 	convert_to_long_ex(line);
 
-	previous_exception = xdebug_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
+	previous_exception = xdebug_read_property(default_ce, exception, "previous", sizeof("previous")-1, 1);
 	if (previous_exception && Z_TYPE_P(previous_exception) == IS_OBJECT) {
-		xdebug_message_trace = xdebug_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1 TSRMLS_CC);
+		xdebug_message_trace = xdebug_read_property(default_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1);
 		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
 			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
 		}
@@ -111,10 +111,10 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 	if (!PG(html_errors)) {
 		xdebug_str_addl(&tmp_str, "\n", 1, 0);
 	}
-	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
-	xdebug_append_printable_stack(&tmp_str, PG(html_errors) TSRMLS_CC);
+	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line));
+	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
 	exception_trace = tmp_str.d;
-	zend_update_property_string(default_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace TSRMLS_CC);
+	zend_update_property_string(default_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace);
 
 	if (XG_BASE(last_exception_trace)) {
 		xdfree(XG_BASE(last_exception_trace));
@@ -123,13 +123,13 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 
 	if (XINI_BASE(show_ex_trace) || (instanceof_function(exception_ce, zend_ce_error) && XINI_BASE(show_error_trace))) {
 		if (PG(log_errors)) {
-			xdebug_log_stack(STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line) TSRMLS_CC);
+			xdebug_log_stack(STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line));
 		}
 		if (PG(display_errors)) {
 			xdebug_str displ_tmp_str = XDEBUG_STR_INITIALIZER;
-			xdebug_append_error_head(&displ_tmp_str, PG(html_errors), "exception" TSRMLS_CC);
+			xdebug_append_error_head(&displ_tmp_str, PG(html_errors), "exception");
 			xdebug_str_add(&displ_tmp_str, exception_trace, 0);
-			xdebug_append_error_footer(&displ_tmp_str, PG(html_errors) TSRMLS_CC);
+			xdebug_append_error_footer(&displ_tmp_str, PG(html_errors));
 
 			php_printf("%s", displ_tmp_str.d);
 			xdebug_str_dtor(displ_tmp_str);
@@ -146,11 +146,11 @@ static void xdebug_throw_exception_hook(zval *exception TSRMLS_DC)
 
 /* {{{ zend_op_array xdebug_compile_file (file_handle, type)
  *    This function provides a hook for the execution of bananas */
-zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
+zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_op_array *op_array;
 
-	op_array = old_compile_file(file_handle, type TSRMLS_CC);
+	op_array = old_compile_file(file_handle, type);
 
 	if (op_array) {
 		xdebug_coverage_compile_file(op_array);
@@ -270,7 +270,7 @@ int xdebug_exit_handler(zend_execute_data *execute_data)
 }
 
 
-static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
@@ -294,14 +294,14 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	/* If we're evaluating for the debugger's eval capability, just bail out */
 	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", STR_NAME_VAL(op_array->filename)) == 0) {
-		xdebug_old_execute_ex(execute_data TSRMLS_CC);
+		xdebug_old_execute_ex(execute_data);
 		return;
 	}
 
 	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
 	   that it's just being called to check for breakpoints with conditions */
 	if (edata && edata->func && ZEND_USER_CODE(edata->func->type) && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
-		xdebug_old_execute_ex(execute_data TSRMLS_CC);
+		xdebug_old_execute_ex(execute_data);
 		return;
 	}
 
@@ -331,7 +331,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED TSRMLS_CC);
+	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED);
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
@@ -387,7 +387,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	xdebug_profiler_execute_ex(fse, op_array);
 
-	xdebug_old_execute_ex(execute_data TSRMLS_CC);
+	xdebug_old_execute_ex(execute_data);
 
 	xdebug_profiler_execute_ex_end(fse);
 
@@ -451,7 +451,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN TSRMLS_CC);
+	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN);
 	fse->function.internal = 1;
 
 	function_nr = XG_BASE(function_count);
@@ -471,9 +471,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	xdebug_profiler_execute_internal(fse);
 
 	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, return_value TSRMLS_CC);
+		xdebug_old_execute_internal(current_execute_data, return_value);
 	} else {
-		execute_internal(current_execute_data, return_value TSRMLS_CC);
+		execute_internal(current_execute_data, return_value);
 	}
 
 	xdebug_profiler_execute_internal_end(fse);
@@ -499,7 +499,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	XG_BASE(level)--;
 }
 
-static void xdebug_overloaded_functions_setup(TSRMLS_D)
+static void xdebug_overloaded_functions_setup(void)
 {
 	zend_function *orig;
 
@@ -529,7 +529,7 @@ static void xdebug_overloaded_functions_setup(TSRMLS_D)
 	}
 }
 
-static void xdebug_overloaded_functions_restore(TSRMLS_D)
+static void xdebug_overloaded_functions_restore(void)
 {
 	zend_function *orig;
 
@@ -550,12 +550,12 @@ static void xdebug_overloaded_functions_restore(TSRMLS_D)
 	}
 }
 
-static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC)
+static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
 	if (!XG_BASE(in_var_serialisation)) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", STR_NAME_VAL(ce->name));
+		zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed", STR_NAME_VAL(ce->name));
 	}
 	return FAILURE;
 }
@@ -650,7 +650,7 @@ void xdebug_base_rinit()
 	XG_BASE(filters_code_coverage)     = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	/* Overload var_dump, set_time_limit, error_reporting, and pcntl_exec */
-	xdebug_overloaded_functions_setup(TSRMLS_C);
+	xdebug_overloaded_functions_setup();
 }
 
 void xdebug_base_post_deactivate()
@@ -693,7 +693,7 @@ void xdebug_base_post_deactivate()
 	XG_BASE(filters_code_coverage) = NULL;
 
 	/* Restore original var_dump, set_time_limit, error_reporting, and pcntl_exec handlers */
-	xdebug_overloaded_functions_restore(TSRMLS_C);
+	xdebug_overloaded_functions_restore();
 }
 
 void xdebug_base_rshutdown()
@@ -725,7 +725,7 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 	char                 *string;
 	zend_bool             clear = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &clear) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &clear) == FAILURE) {
 		return;
 	}
 

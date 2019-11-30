@@ -54,7 +54,7 @@ static xdebug_trace_handler_t *xdebug_select_trace_handler(int options)
 	return tmp;
 }
 
-FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, char **used_fname TSRMLS_DC)
+FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, char **used_fname)
 {
 	FILE *file;
 	char *filename;
@@ -91,22 +91,22 @@ static char* xdebug_start_trace(char* fname, char *script_filename, long options
 		return NULL;
 	}
 
-	XG_TRACE(trace_handler) = xdebug_select_trace_handler(options TSRMLS_CC);
-	XG_TRACE(trace_context) = (void*) XG_TRACE(trace_handler)->init(fname, script_filename, options TSRMLS_CC);
+	XG_TRACE(trace_handler) = xdebug_select_trace_handler(options);
+	XG_TRACE(trace_context) = (void*) XG_TRACE(trace_handler)->init(fname, script_filename, options);
 
 	if (XG_TRACE(trace_context)) {
-		XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context) TSRMLS_CC);
-		return xdstrdup(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context) TSRMLS_CC));
+		XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context));
+		return xdstrdup(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 	}
 
 	return NULL;
 }
 
-static void xdebug_stop_trace(TSRMLS_D)
+static void xdebug_stop_trace(void)
 {
 	if (XG_TRACE(trace_context)) {
-		XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context) TSRMLS_CC);
-		XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context) TSRMLS_CC);
+		XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
+		XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context));
 		XG_TRACE(trace_context) = NULL;
 	}
 }
@@ -121,13 +121,13 @@ PHP_FUNCTION(xdebug_start_trace)
 	if (!XG_TRACE(trace_context)) {
 		function_stack_entry *fse;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &fname, &fname_len, &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl", &fname, &fname_len, &options) == FAILURE) {
 			return;
 		}
 
-		fse = xdebug_get_stack_frame(0 TSRMLS_CC);
+		fse = xdebug_get_stack_frame(0);
 
-		if ((trace_fname = xdebug_start_trace(fname, fse->filename, options TSRMLS_CC)) != NULL) {
+		if ((trace_fname = xdebug_start_trace(fname, fse->filename, options)) != NULL) {
 			RETVAL_STRING(trace_fname);
 			xdfree(trace_fname);
 			return;
@@ -145,8 +145,8 @@ PHP_FUNCTION(xdebug_start_trace)
 PHP_FUNCTION(xdebug_stop_trace)
 {
 	if (XG_TRACE(trace_context)) {
-		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context) TSRMLS_CC));
-		xdebug_stop_trace(TSRMLS_C);
+		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
+		xdebug_stop_trace();
 	} else {
 		RETVAL_FALSE;
 		php_error(E_NOTICE, "Function trace was not started");
@@ -156,7 +156,7 @@ PHP_FUNCTION(xdebug_stop_trace)
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
 	if (XG_TRACE(trace_context) && XG_TRACE(trace_handler) && XG_TRACE(trace_handler)->get_filename) {
-		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context) TSRMLS_CC));
+		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 	} else {
 		RETURN_FALSE;
 	}
@@ -312,7 +312,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	}
 
 	is_static = xdebug_is_static_call(cur_opcode, prev_opcode, &static_opcode_ptr);
-	options = xdebug_var_export_options_from_ini(TSRMLS_C);
+	options = xdebug_var_export_options_from_ini();
 	options->no_decoration = 1;
 
 	if (cur_opcode->op1_type == IS_CV) {
@@ -756,19 +756,19 @@ void xdebug_tracing_post_deactivate(void)
 	XG_TRACE(trace_context) = NULL;
 
 	if (XG_TRACE(trace_context)) {
-		xdebug_stop_trace(TSRMLS_C);
+		xdebug_stop_trace();
 	}
 }
 
 void xdebug_tracing_init_if_requested(zend_op_array *op_array)
 {
 	if (
-		(XINI_TRACE(auto_trace) || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value) TSRMLS_CC))
+		(XINI_TRACE(auto_trace) || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value)))
 		&& XINI_TRACE(trace_output_dir) && strlen(XINI_TRACE(trace_output_dir))
 	) {
 		/* In case we do an auto-trace we are not interested in the return
 		 * value, but we still have to free it. */
-		xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XINI_TRACE(trace_options) TSRMLS_CC));
+		xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XINI_TRACE(trace_options)));
 	}
 }
 
@@ -779,7 +779,7 @@ void xdebug_tracing_execute_ex(int function_nr, function_stack_entry *fse)
 	}
 
 	if (XG_TRACE(trace_handler)->function_entry) {
-		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr);
 	}
 }
 
@@ -790,7 +790,7 @@ void xdebug_tracing_execute_ex_end(int function_nr, function_stack_entry *fse, z
 	}
 
 	if ((XG_TRACE(trace_handler)->function_exit)) {
-		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr);
 	}
 
 	/* Store return value in the trace file */
@@ -800,11 +800,11 @@ void xdebug_tracing_execute_ex_end(int function_nr, function_stack_entry *fse, z
 		if (execute_data && execute_data->return_value) {
 			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 				if (XG_TRACE(trace_handler)->generator_return_value) {
-					XG_TRACE(trace_handler)->generator_return_value(XG_TRACE(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value TSRMLS_CC);
+					XG_TRACE(trace_handler)->generator_return_value(XG_TRACE(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value);
 				}
 			} else {
 				if (XG_TRACE(trace_handler)->return_value) {
-					XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, execute_data->return_value TSRMLS_CC);
+					XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, execute_data->return_value);
 				}
 			}
 		}
@@ -818,7 +818,7 @@ int xdebug_tracing_execute_internal(int function_nr, function_stack_entry *fse)
 	}
 
 	if (fse->function.type != XFUNC_ZEND_PASS && (XG_TRACE(trace_handler)->function_entry)) {
-		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+		XG_TRACE(trace_handler)->function_entry(XG_TRACE(trace_context), fse, function_nr);
 		return 1;
 	}
 
@@ -832,12 +832,12 @@ void xdebug_tracing_execute_internal_end(int function_nr, function_stack_entry *
 	}
 
 	if (fse->function.type != XFUNC_ZEND_PASS && (XG_TRACE(trace_handler)->function_exit)) {
-		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr TSRMLS_CC);
+		XG_TRACE(trace_handler)->function_exit(XG_TRACE(trace_context), fse, function_nr);
 	}
 
 	/* Store return value in the trace file */
 	if (XINI_BASE(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG_TRACE(trace_handler)->return_value) {
-		XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, return_value TSRMLS_CC);
+		XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, return_value);
 	}
 }
 

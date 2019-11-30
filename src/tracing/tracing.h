@@ -22,16 +22,16 @@
 
 typedef struct
 {
-	void *(*init)(char *fname, char *script_filename, long options TSRMLS_DC);
-	void (*deinit)(void *ctxt TSRMLS_DC);
-	void (*write_header)(void *ctxt TSRMLS_DC);
-	void (*write_footer)(void *ctxt TSRMLS_DC);
-	char *(*get_filename)(void *ctxt TSRMLS_DC);
-	void (*function_entry)(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC);
-	void (*function_exit)(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC);
-	void (*return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC);
-	void (*generator_return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC);
-	void (*assignment)(void *ctxt, function_stack_entry *fse, char *full_varname, zval *value, char *right_full_varname, const char *op, char *file, int lineno TSRMLS_DC);
+	void *(*init)(char *fname, char *script_filename, long options);
+	void (*deinit)(void *ctxt);
+	void (*write_header)(void *ctxt);
+	void (*write_footer)(void *ctxt);
+	char *(*get_filename)(void *ctxt);
+	void (*function_entry)(void *ctxt, function_stack_entry *fse, int function_nr);
+	void (*function_exit)(void *ctxt, function_stack_entry *fse, int function_nr);
+	void (*return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value);
+	void (*generator_return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator);
+	void (*assignment)(void *ctxt, function_stack_entry *fse, char *full_varname, zval *value, char *right_full_varname, const char *op, char *file, int lineno);
 } xdebug_trace_handler_t;
 
 typedef struct _xdebug_tracing_globals_t {

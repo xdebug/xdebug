@@ -22,7 +22,7 @@
 #include "php.h"
 
 void xdebug_superglobals_dump_dtor(void *, void*);
-char *xdebug_get_printable_superglobals(int html TSRMLS_DC);
+char *xdebug_get_printable_superglobals(int html);
 void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str);
 
 # define DUMP_TOK(__llist) \

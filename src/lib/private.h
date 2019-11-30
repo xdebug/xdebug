@@ -221,9 +221,9 @@ typedef struct _function_stack_entry {
 	xdebug_aggregate_entry *aggr_entry;
 } function_stack_entry;
 
-function_stack_entry *xdebug_get_stack_head(TSRMLS_D);
-function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC);
-function_stack_entry *xdebug_get_stack_tail(TSRMLS_D);
+function_stack_entry *xdebug_get_stack_head(void);
+function_stack_entry *xdebug_get_stack_frame(int nr);
+function_stack_entry *xdebug_get_stack_tail(void);
 
 
 xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list);

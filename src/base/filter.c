@@ -178,7 +178,7 @@ PHP_FUNCTION(xdebug_set_filter)
 	xdebug_llist **filter_list;
 	zval          *filters, *item;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lla", &filter_group, &filter_type, &filters) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lla", &filter_group, &filter_type, &filters) == FAILURE) {
 		return;
 	}
 

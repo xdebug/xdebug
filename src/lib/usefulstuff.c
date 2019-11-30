@@ -299,7 +299,7 @@ char *xdebug_raw_url_encode(char const *s, int len, int *new_length, int skip_sl
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
+char *xdebug_path_from_url(const char *fileurl)
 {
 	/* deal with file: url's */
 	char *dfp = NULL;
@@ -339,7 +339,7 @@ char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
+char *xdebug_path_to_url(const char *fileurl)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
@@ -365,7 +365,7 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 		new_state.cwd = estrdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 
-		if (!virtual_file_ex(&new_state, fileurl, NULL, 1 TSRMLS_CC)) {
+		if (!virtual_file_ex(&new_state, fileurl, NULL, 1)) {
 			char *s = estrndup(new_state.cwd, new_state.cwd_length);
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
@@ -433,12 +433,11 @@ static FILE *xdebug_open_file_with_random_ext(char *fname, const char *mode, con
 {
 	FILE *fh;
 	char *tmp_fname;
-	TSRMLS_FETCH();
 
 	if (extension) {
-		tmp_fname = xdebug_sprintf("%s.%06x.%s", fname, (long) (1000000 * php_combined_lcg(TSRMLS_C)), extension);
+		tmp_fname = xdebug_sprintf("%s.%06x.%s", fname, (long) (1000000 * php_combined_lcg()), extension);
 	} else {
-		tmp_fname = xdebug_sprintf("%s.%06x", fname, (long) (1000000 * php_combined_lcg(TSRMLS_C)), extension);
+		tmp_fname = xdebug_sprintf("%s.%06x", fname, (long) (1000000 * php_combined_lcg()), extension);
 	}
 	fh = fopen(tmp_fname, mode);
 	if (fh && new_fname) {
@@ -544,7 +543,6 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char       cwd[128];
-	TSRMLS_FETCH();
 
 	while (*format)
 	{
@@ -565,7 +563,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 					break;
 
 				case 'r': /* random number */
-					xdebug_str_add(&fname, xdebug_sprintf("%06x", (long) (1000000 * php_combined_lcg(TSRMLS_C))), 1);
+					xdebug_str_add(&fname, xdebug_sprintf("%06x", (long) (1000000 * php_combined_lcg())), 1);
 					break;
 
 				case 's': { /* script fname */
@@ -678,7 +676,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 	return fname.l;
 }
 
-int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC)
+int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char      *format = XINI_BASE(file_link_format);
@@ -712,7 +710,7 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
-int xdebug_format_filename(char **formatted_name, const char *fmt, const char *default_fmt, const char *filename TSRMLS_DC)
+int xdebug_format_filename(char **formatted_name, const char *fmt, const char *default_fmt, const char *filename)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char *name;

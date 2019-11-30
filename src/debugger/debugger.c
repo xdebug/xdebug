@@ -223,7 +223,7 @@ void xdebug_debugger_statement_call(char *file, int file_len, int lineno)
 						XG_DBG(context).inhibit_notifications = 1;
 
 						/* Check the condition */
-						if (zend_eval_string(extra_brk_info->condition, &retval, (char*) "xdebug conditional breakpoint" TSRMLS_CC) == SUCCESS) {
+						if (zend_eval_string(extra_brk_info->condition, &retval, (char*) "xdebug conditional breakpoint") == SUCCESS) {
 							break_ok = Z_TYPE(retval) == IS_TRUE;
 							zval_dtor(&retval);
 						}
@@ -295,7 +295,7 @@ void xdebug_debugger_error_cb(const char *error_filename, int error_lineno, int 
 	xdebug_brk_info *extra_brk_info = NULL;
 
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
+	xdebug_do_jit();
 
 	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
 		/* Send notification with warning/notice/error information */
@@ -328,7 +328,6 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	xdebug_brk_info *extra_brk_info = NULL;
 	char            *tmp_name = NULL;
 	size_t           tmp_len = 0;
-	TSRMLS_FETCH();
 
 	/* When we first enter a user defined function, we need to resolve breakpoints for this function */
 	if (XG_DBG(context).resolved_breakpoints && breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL && fse->user_defined == XDEBUG_USER_DEFINED) {
@@ -393,11 +392,11 @@ void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoin
 static size_t xdebug_ub_write(const char *string, size_t length)
 {
 	if (xdebug_is_debug_connection_active_for_current_pid()) {
-		if (-1 == XG_DBG(context).handler->remote_stream_output(string, length TSRMLS_CC)) {
+		if (-1 == XG_DBG(context).handler->remote_stream_output(string, length)) {
 			return 0;
 		}
 	}
-	return xdebug_orig_ub_write(string, length TSRMLS_CC);
+	return xdebug_orig_ub_write(string, length);
 }
 
 static void xdebug_hook_output_handlers()
@@ -502,7 +501,7 @@ void xdebug_debugger_rinit(void)
 			)
 			&& !SG(headers_sent)
 		) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0 TSRMLS_CC);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
 			XG_DBG(no_exec) = 1;
 		}
 		zend_string_release(stop_no_exec);
@@ -546,7 +545,7 @@ void xdebug_debugger_post_deactivate(void)
 PHP_FUNCTION(xdebug_break)
 {
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit(TSRMLS_C);
+	xdebug_do_jit();
 
 	XG_DBG(context).do_break = 1;
 	RETURN_TRUE;

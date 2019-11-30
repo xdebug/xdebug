@@ -83,7 +83,7 @@ static const char** select_formats(int html) {
 	if (html) {
 		return html_formats;
 	}
-	else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty(TSRMLS_C)) || (XINI_BASE(cli_color) == 2)) {
+	else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty()) || (XINI_BASE(cli_color) == 2)) {
 		return ansi_formats;
 	}
 	else {
@@ -91,18 +91,18 @@ static const char** select_formats(int html) {
 	}
 }
 
-void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
+void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *i;
 	char                 *tmp_log_message;
 
 	tmp_log_message = xdebug_sprintf( "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-	php_log_err(tmp_log_message TSRMLS_CC);
+	php_log_err(tmp_log_message);
 	xdfree(tmp_log_message);
 
 	if (XG_BASE(stack) && XG_BASE(stack)->size) {
-		php_log_err((char*) "PHP Stack trace:" TSRMLS_CC);
+		php_log_err((char*) "PHP Stack trace:");
 
 		for (le = XDEBUG_LLIST_HEAD(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
@@ -113,7 +113,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			int variadic_opened = 0;
 
 			i = XDEBUG_LLIST_VALP(le);
-			tmp_name = xdebug_show_fname(i->function, 0, 0 TSRMLS_CC);
+			tmp_name = xdebug_show_fname(i->function, 0, 0);
 			xdebug_str_add(&log_buffer, xdebug_sprintf("PHP %3d. %s(", i->level, tmp_name), 1);
 			xdfree(tmp_name);
 
@@ -159,13 +159,13 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			}
 
 			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
-			php_log_err(log_buffer.d TSRMLS_CC);
+			php_log_err(log_buffer.d);
 			xdebug_str_destroy(&log_buffer);
 		}
 	}
 }
 
-void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str TSRMLS_DC)
+void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str)
 {
 	const char **formats = select_formats(html);
 
@@ -182,7 +182,7 @@ void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_
 	}
 }
 
-void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno TSRMLS_DC)
+void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno)
 {
 	const char **formats = select_formats(html);
 	char *escaped;
@@ -204,7 +204,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 			first_closing++;
 
 			smart_string_appends(&special_escaped, buffer);
-			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), 0, 0, NULL TSRMLS_CC);
+			tmp = php_escape_html_entities((unsigned char *) first_closing, strlen(first_closing), 0, 0, NULL);
 			smart_string_appends(&special_escaped, tmp->val);
 			zend_string_free(tmp);
 
@@ -216,7 +216,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 			 * escaped. It's all nice and consistent ey? */
 			escaped = estrdup(buffer);
 		} else {
-			tmp = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), 0, 0, NULL TSRMLS_CC);
+			tmp = php_escape_html_entities((unsigned char *) buffer, strlen(buffer), 0, 0, NULL);
 			escaped = estrdup(tmp->val);
 			zend_string_free(tmp);
 		}
@@ -227,7 +227,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 	if (strlen(XINI_BASE(file_link_format)) > 0 && html) {
 		char *file_link;
 
-		xdebug_format_file_link(&file_link, error_filename, error_lineno TSRMLS_CC);
+		xdebug_format_file_link(&file_link, error_filename, error_lineno);
 		xdebug_str_add(str, xdebug_sprintf(formats[11], error_type_str, escaped, file_link, error_filename, error_lineno), 1);
 		xdfree(file_link);
 	} else {
@@ -237,7 +237,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 	efree(escaped);
 }
 
-static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_level TSRMLS_DC)
+static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_level)
 {
 	xdebug_str *tmp_value = NULL, *tmp_fancy_synop_value = NULL;
 	char       *tmp_fancy_value = NULL;
@@ -246,7 +246,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 	if (html) {
 		switch (collecton_level) {
 			case 1: /* synopsis */
-				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL TSRMLS_CC);
+				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL);
 
 				xdebug_str_addl(str, "<span>", 6, 0);
 				xdebug_str_add_str(str, tmp_fancy_synop_value);
@@ -257,7 +257,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 			case 2: /* synopsis + full in tooltip */
 				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
 				tmp_fancy_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
-				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL TSRMLS_CC);
+				tmp_fancy_synop_value = xdebug_get_zval_synopsis_fancy("", zv, 0, NULL);
 
 				xdebug_str_addl(str, "<span title='", 13, 0);
 				xdebug_str_add(str, tmp_fancy_value, 0);
@@ -283,7 +283,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 				efree(tmp_fancy_value);
 				break;
 			case 5: { /* serialized */
-				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
+				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
 
 				xdebug_str_addl(str, "<span>", 6, 0);
 				xdebug_str_add_str(str, tmp_value);
@@ -304,7 +304,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 				tmp_value = xdebug_get_zval_value(zv, 0, NULL);
 				break;
 			case 5: /* serialized */
-				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL TSRMLS_CC);
+				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
 				break;
 		}
 		if (tmp_value) {
@@ -316,7 +316,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 	}
 }
 
-void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
+void xdebug_append_printable_stack(xdebug_str *str, int html)
 {
 	xdebug_llist_element *le;
 	function_stack_entry *i;
@@ -339,7 +339,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 			if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_TRACING, i)) {
 				continue;
 			}
-			tmp_name = xdebug_show_fname(i->function, html, 0 TSRMLS_CC);
+			tmp_name = xdebug_show_fname(i->function, html, 0);
 			if (html) {
 				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG_BASE(start_time), i->memory, tmp_name), 1);
 			} else {
@@ -381,7 +381,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				}
 
 				if (!Z_ISUNDEF(i->var[j].data)) {
-					add_single_value(str, &i->var[j].data, html, XINI_BASE(collect_params) TSRMLS_CC);
+					add_single_value(str, &i->var[j].data, html, XINI_BASE(collect_params));
 				} else {
 					xdebug_str_addl(str, "???", 3, 0);
 				}
@@ -402,7 +402,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 				if (strlen(XINI_BASE(file_link_format)) > 0) {
 					char *file_link;
 
-					xdebug_format_file_link(&file_link, i->filename, i->lineno TSRMLS_CC);
+					xdebug_format_file_link(&file_link, i->filename, i->lineno);
 					xdebug_str_add(str, xdebug_sprintf(formats[10], i->filename, file_link, formatted_filename, i->lineno), 1);
 					xdfree(file_link);
 				} else {
@@ -421,7 +421,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 		}
 
 		if (XINI_BASE(dump_globals) && !(XINI_BASE(dump_once) && XG_BASE(dumped))) {
-			char *tmp = xdebug_get_printable_superglobals(html TSRMLS_CC);
+			char *tmp = xdebug_get_printable_superglobals(html);
 
 			if (tmp) {
 				xdebug_str_add(str, tmp, 1);
@@ -449,14 +449,14 @@ void xdebug_append_printable_stack(xdebug_str *str, int html TSRMLS_DC)
 	}
 }
 
-void xdebug_append_error_footer(xdebug_str *str, int html TSRMLS_DC)
+void xdebug_append_error_footer(xdebug_str *str, int html)
 {
 	const char **formats = select_formats(html);
 
 	xdebug_str_add(str, formats[7], 0);
 }
 
-static char *get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription TSRMLS_DC)
+static char *get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription)
 {
 	char *prepend_string;
 	char *append_string;
@@ -468,12 +468,12 @@ static char *get_printable_stack(int html, int error_type, const char *buffer, c
 	append_string = INI_STR((char*) "error_append_string");
 
 	xdebug_str_add(&str, prepend_string ? prepend_string : "", 0);
-	xdebug_append_error_head(&str, html, error_type_str_simple TSRMLS_CC);
+	xdebug_append_error_head(&str, html, error_type_str_simple);
 	if (include_decription) {
-		xdebug_append_error_description(&str, html, error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+		xdebug_append_error_description(&str, html, error_type_str, buffer, error_filename, error_lineno);
 	}
-	xdebug_append_printable_stack(&str, html TSRMLS_CC);
-	xdebug_append_error_footer(&str, html TSRMLS_CC);
+	xdebug_append_printable_stack(&str, html);
+	xdebug_append_error_footer(&str, html);
 	xdebug_str_add(&str, append_string ? append_string : "", 0);
 
 	xdfree(error_type_str);
@@ -482,7 +482,7 @@ static char *get_printable_stack(int html, int error_type, const char *buffer, c
 	return str.d;
 }
 
-static void php_output_error(const char *error TSRMLS_DC)
+static void php_output_error(const char *error)
 {
 #ifdef PHP_DISPLAY_ERRORS_STDERR
 	if (PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR) {
@@ -519,7 +519,7 @@ char *xdebug_strip_php_stack_trace(char *buffer)
 	return NULL;
 }
 
-char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const unsigned int error_lineno, char *buffer TSRMLS_DC)
+char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *error_filename, const unsigned int error_lineno, char *buffer)
 {
 	char *printable_stack;
 	char *tmp_buf;
@@ -529,18 +529,18 @@ char *xdebug_handle_stack_trace(int type, char *error_type_str, const char *erro
 		xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 		/* Append error */
-		xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception" TSRMLS_CC);
-		xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno TSRMLS_CC);
-		xdebug_append_printable_stack(&str, PG(html_errors) TSRMLS_CC);
+		xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception");
+		xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno);
+		xdebug_append_printable_stack(&str, PG(html_errors));
 		if (XG_BASE(last_exception_trace)) {
 			xdebug_str_add(&str, XG_BASE(last_exception_trace), 0);
 		}
-		xdebug_append_error_footer(&str, PG(html_errors) TSRMLS_CC);
+		xdebug_append_error_footer(&str, PG(html_errors));
 
 		free(tmp_buf);
 		printable_stack = str.d;
 	} else {
-		printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1 TSRMLS_CC);
+		printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1);
 	}
 
 	return printable_stack;
@@ -553,8 +553,6 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 	int buffer_len;
 	error_handling_t  error_handling;
 	zend_class_entry *exception_class;
-
-	TSRMLS_FETCH();
 
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
@@ -594,7 +592,7 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 				 * but DO NOT overwrite a pending exception
 				 */
 				if (error_handling == EH_THROW && !EG(exception)) {
-					zend_throw_error_exception(exception_class, buffer, 0, type TSRMLS_CC);
+					zend_throw_error_exception(exception_class, buffer, 0, type);
 				}
 				efree(buffer);
 				xdfree(error_type_str);
@@ -611,9 +609,9 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 				MessageBox(NULL, buffer, error_type_str, MB_OK);
 			}
 #endif
-			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno TSRMLS_CC);
+			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno);
 			if (XINI_BASE(dump_globals) && !(XINI_BASE(dump_once) && XG_BASE(dumped))) {
-				char *printable_stack = xdebug_get_printable_superglobals(0 TSRMLS_CC);
+				char *printable_stack = xdebug_get_printable_superglobals(0);
 
 				if (printable_stack) {
 					int pc;
@@ -640,17 +638,17 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 		if ((PG(display_errors) || XINI_BASE(force_display_errors)) && !PG(during_request_startup)) {
 			char *printable_stack;
 
-			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, buffer TSRMLS_CC);
+			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, buffer);
 
 			if (XG_BASE(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
 				xdebug_llist_insert_next(XG_BASE(collected_errors), XDEBUG_LLIST_TAIL(XG_BASE(collected_errors)), printable_stack);
 			} else {
-				php_output_error(printable_stack TSRMLS_CC);
+				php_output_error(printable_stack);
 				xdfree(printable_stack);
 			}
 		} else if (XG_BASE(do_collect_errors)) {
 			char *printable_stack;
-			printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1 TSRMLS_CC);
+			printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1);
 			xdebug_llist_insert_next(XG_BASE(collected_errors), XDEBUG_LLIST_TAIL(XG_BASE(collected_errors)), printable_stack);
 		}
 	}
@@ -687,14 +685,14 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 
 					ctr.line = (char*) "HTTP/1.0 500 Internal Server Error";
 					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
-					sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
 				if (type != E_PARSE) {
 					efree(buffer);
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
-					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
+					zend_objects_store_mark_destructed(&EG(objects_store));
 					_zend_bailout((char*) __FILE__, __LINE__);
 					return;
 				}
@@ -732,15 +730,15 @@ PHP_FUNCTION(xdebug_print_function_stack)
 	char *tmp;
 	zend_long options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sl", &message, &message_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl", &message, &message_len, &options) == FAILURE) {
 		return;
 	}
 
-	i = xdebug_get_stack_frame(0 TSRMLS_CC);
+	i = xdebug_get_stack_frame(0);
 	if (message) {
-		tmp = get_printable_stack(PG(html_errors), 0, message, i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC) TSRMLS_CC);
+		tmp = get_printable_stack(PG(html_errors), 0, message, i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC));
 	} else {
-		tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC) TSRMLS_CC);
+		tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC));
 	}
 	php_printf("%s", tmp);
 	xdfree(tmp);
@@ -754,8 +752,8 @@ PHP_FUNCTION(xdebug_get_formatted_function_stack)
 	function_stack_entry *i;
 	char *tmp;
 
-	i = xdebug_get_stack_frame(0 TSRMLS_CC);
-	tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, 1 TSRMLS_CC);
+	i = xdebug_get_stack_frame(0);
+	tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, 1);
 	RETVAL_STRING(tmp);
 	xdfree(tmp);
 }
@@ -768,10 +766,10 @@ PHP_FUNCTION(xdebug_call_class)
 	function_stack_entry *i;
 	zend_long depth = 2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth);
 	if (i) {
 		if (i->function.class) {
 			RETURN_STRING(i->function.class);
@@ -791,10 +789,10 @@ PHP_FUNCTION(xdebug_call_function)
 	function_stack_entry *i;
 	zend_long depth = 2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth);
 	if (i) {
 		if (i->function.function) {
 			RETURN_STRING(i->function.function);
@@ -814,10 +812,10 @@ PHP_FUNCTION(xdebug_call_line)
 	function_stack_entry *i;
 	zend_long depth = 2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth);
 	if (i) {
 		RETURN_LONG(i->lineno);
 	} else {
@@ -833,10 +831,10 @@ PHP_FUNCTION(xdebug_call_file)
 	function_stack_entry *i;
 	zend_long depth = 2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &depth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth TSRMLS_CC);
+	i = xdebug_get_stack_frame(depth);
 	if (i) {
 		RETURN_STRING(i->filename);
 	} else {
@@ -845,7 +843,7 @@ PHP_FUNCTION(xdebug_call_file)
 }
 /* }}} */
 
-static int find_line_number_for_current_execute_point(zend_execute_data *edata TSRMLS_DC)
+static int find_line_number_for_current_execute_point(zend_execute_data *edata)
 {
 	zend_execute_data *ptr = edata;
 
@@ -912,7 +910,7 @@ void xdebug_func_dtor(xdebug_func *elem)
 	xdfree(elem);
 }
 
-void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
+void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 {
 	memset(tmp, 0, sizeof(xdebug_func));
 
@@ -972,7 +970,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata TSRMLS_DC)
 					goto normal_after_all;
 				}
 
-				lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
+				lineno = find_line_number_for_current_execute_point(edata);
 
 				tmp->function = xdebug_sprintf(
 					"%s:{%s:%d}",
@@ -1036,7 +1034,7 @@ normal_after_all:
 	}
 }
 
-function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type TSRMLS_DC)
+function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type)
 {
 	zend_execute_data    *edata;
 	zend_op             **opline_ptr = NULL;
@@ -1106,13 +1104,13 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->filename = xdstrdup("UNKNOWN?");
 	}
 	tmp->prev_memory = XG_BASE(prev_memory);
-	tmp->memory = zend_memory_usage(0 TSRMLS_CC);
+	tmp->memory = zend_memory_usage(0);
 	XG_BASE(prev_memory) = tmp->memory;
 	tmp->time   = xdebug_get_utime();
 	tmp->lineno = 0;
 	tmp->prev   = 0;
 
-	xdebug_build_fname(&(tmp->function), zdata TSRMLS_CC);
+	xdebug_build_fname(&(tmp->function), zdata);
 	if (!tmp->function.type) {
 		tmp->function.function = xdstrdup("{main}");
 		tmp->function.class    = NULL;
@@ -1130,10 +1128,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		if (tmp->function.type == XFUNC_EVAL) {
 			tmp->include_filename = xdebug_sprintf("%s", XG_BASE(last_eval_statement));
 		} else if (XINI_BASE(collect_includes)) {
-			tmp->include_filename = xdstrdup(zend_get_executed_filename(TSRMLS_C));
+			tmp->include_filename = xdstrdup(zend_get_executed_filename());
 		}
 	} else  {
-		tmp->lineno = find_line_number_for_current_execute_point(edata TSRMLS_CC);
+		tmp->lineno = find_line_number_for_current_execute_point(edata);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
 		if (XINI_BASE(collect_params) || XINI_BASE(collect_vars) || xdebug_is_debug_connection_active_for_current_pid()) {
@@ -1220,12 +1218,12 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	xdebug_coverage_count_line_if_branch_check_active(op_array, tmp->filename, tmp->lineno);
 
 	if (XG_BASE(do_monitor_functions)) {
-		char *func_name = xdebug_show_fname(tmp->function, 0, 0 TSRMLS_CC);
+		char *func_name = xdebug_show_fname(tmp->function, 0, 0);
 		int   func_name_len = strlen(func_name);
 		void *dummy;
 
 		if (xdebug_hash_find(XG_BASE(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {
-			xdebug_function_monitor_record(func_name, tmp->filename, tmp->lineno TSRMLS_CC);
+			xdebug_function_monitor_record(func_name, tmp->filename, tmp->lineno);
 		}
 
 		xdfree(func_name);
