@@ -1239,8 +1239,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		xdebug_llist_insert_next(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), tmp);
 	}
 
-	xdebug_profiler_add_aggregate_entry(tmp);
-
 	return tmp;
 }
 

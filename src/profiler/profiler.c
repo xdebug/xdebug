@@ -43,17 +43,10 @@ void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg)
 
 void xdebug_profiler_minit(void)
 {
-	/* initialize aggregate call information hash */
-	zend_hash_init_ex(&XG_PROF(aggr_calls), 50, NULL, (dtor_func_t) xdebug_profile_aggr_call_entry_dtor, 1, 0);
 }
 
 void xdebug_profiler_mshutdown(void)
 {
-	if (XINI_PROF(profiler_aggregate)) {
-		xdebug_profiler_output_aggr_data(NULL);
-	}
-
-	zend_hash_destroy(&XG_PROF(aggr_calls));
 }
 
 void xdebug_profiler_rinit(void)
@@ -130,69 +123,6 @@ void xdebug_profiler_execute_internal_end(function_stack_entry *fse)
 	if (XG_PROF(profiler_enabled)) {
 		xdebug_profiler_function_end(fse);
 		xdebug_profiler_free_function_details(fse);
-	}
-}
-
-void xdebug_profiler_add_aggregate_entry(function_stack_entry *fse)
-{
-	char         *func_name;
-	char         *aggr_key = NULL;
-	int           aggr_key_len = 0;
-	zend_string  *aggr_key_str = NULL;
-
-	if (!XINI_PROF(profiler_aggregate)) {
-		return;
-	}
-
-	func_name = xdebug_show_fname(fse->function, 0, 0);
-
-	aggr_key = xdebug_sprintf("%s.%s.%d", fse->filename, func_name, fse->lineno);
-	aggr_key_len = strlen(aggr_key);
-	aggr_key_str = zend_string_init(aggr_key, aggr_key_len, 0);
-	if ((fse->aggr_entry = zend_hash_find_ptr(&XG_PROF(aggr_calls), aggr_key_str)) == NULL) {
-		xdebug_aggregate_entry xae;
-
-		if (fse->user_defined == XDEBUG_USER_DEFINED) {
-			xae.filename = xdstrdup(fse->op_array->filename->val);
-		} else {
-			xae.filename = xdstrdup("php:internal");
-		}
-		xae.function = func_name;
-		xae.lineno = fse->lineno;
-		xae.user_defined = fse->user_defined;
-		xae.call_count = 0;
-		xae.time_own = 0;
-		xae.time_inclusive = 0;
-		xae.call_list = NULL;
-
-		zend_hash_add_ptr(&XG_PROF(aggr_calls), aggr_key_str, &xae);
-	}
-
-	if (XG_BASE(stack) && XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
-		if (fse->prev->aggr_entry->call_list) {
-			if (!zend_hash_exists(fse->prev->aggr_entry->call_list, aggr_key_str)) {
-				zend_hash_add_ptr(fse->prev->aggr_entry->call_list, aggr_key_str, fse->aggr_entry);
-			}
-		} else {
-			fse->prev->aggr_entry->call_list = xdmalloc(sizeof(HashTable));
-			zend_hash_init_ex(fse->prev->aggr_entry->call_list, 1, NULL, NULL, 1, 0);
-			zend_hash_add_ptr(fse->prev->aggr_entry->call_list, aggr_key_str, fse->aggr_entry);
-		}
-	}
-
-	zend_string_release(aggr_key_str);
-	xdfree(aggr_key);
-}
-
-
-void xdebug_profile_aggr_call_entry_dtor(void *elem)
-{
-	xdebug_aggregate_entry *xae = (xdebug_aggregate_entry *) elem;
-	if (xae->filename) {
-		xdfree(xae->filename);
-	}
-	if (xae->function) {
-		xdfree(xae->function);
 	}
 }
 
@@ -485,12 +415,6 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	}
 
 
-	/* update aggregate data */
-	if (XINI_PROF(profiler_aggregate)) {
-		fse->aggr_entry->time_inclusive += fse->profile.time;
-		fse->aggr_entry->call_count++;
-	}
-
 	/* Subtract time in calledfunction from time here */
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 	{
@@ -499,12 +423,6 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		fse->profile.memory -= call_entry->mem_used;
 	}
 	fprintf(XG_PROF(profile_file), "%d %lu %ld\n", fse->profiler.lineno, (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
-
-	/* update aggregate data */
-	if (XINI_PROF(profiler_aggregate)) {
-		fse->aggr_entry->time_own += fse->profile.time;
-		fse->aggr_entry->mem_used += fse->profile.memory;
-	}
 
 	/* dump call list */
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -545,60 +463,6 @@ void xdebug_profiler_free_function_details(function_stack_entry *fse)
 	fse->profiler.filename = NULL;
 }
 
-static int xdebug_print_aggr_entry(zval *pDest, void *argument)
-{
-	FILE *fp = (FILE *) argument;
-	xdebug_aggregate_entry *xae = (xdebug_aggregate_entry *) pDest;
-
-	fprintf(fp, "fl=%s\n", xae->filename);
-	fprintf(fp, "fn=%s\n", xae->function);
-	fprintf(fp, "%d %lu %ld\n", 0, (unsigned long) (xae->time_own * 1000000), (xae->mem_used));
-	if (strcmp(xae->function, "{main}") == 0) {
-		fprintf(fp, "\nsummary: %lu %lu\n\n", (unsigned long) (xae->time_inclusive * 1000000), (xae->mem_used));
-	}
-	if (xae->call_list) {
-		xdebug_aggregate_entry *xae_call;
-
-		ZEND_HASH_FOREACH_PTR(xae->call_list, xae_call) {
-			fprintf(fp, "cfn=%s\n", (xae_call)->function);
-			fprintf(fp, "calls=%d 0 0\n", (xae_call)->call_count);
-			fprintf(fp, "%d %lu %ld\n", (xae_call)->lineno, (unsigned long) ((xae_call)->time_inclusive * 1000000), ((xae_call)->mem_used));
-		} ZEND_HASH_FOREACH_END();
-	}
-	fprintf(fp, "\n");
-	fflush(fp);
-
-	return ZEND_HASH_APPLY_KEEP;
-}
-
-int xdebug_profiler_output_aggr_data(const char *prefix)
-{
-	char *filename;
-	FILE *aggr_file;
-
-	fprintf(stderr, "in xdebug_profiler_output_aggr_data() with %d entries\n", zend_hash_num_elements(&XG_PROF(aggr_calls)));
-
-	if (zend_hash_num_elements(&XG_PROF(aggr_calls)) == 0) return SUCCESS;
-
-	if (prefix) {
-		filename = xdebug_sprintf("%s/cachegrind.out.aggregate.%s." ZEND_ULONG_FMT, XINI_PROF(profiler_output_dir), prefix, (zend_ulong) xdebug_get_pid());
-	} else {
-		filename = xdebug_sprintf("%s/cachegrind.out.aggregate." ZEND_ULONG_FMT, XINI_PROF(profiler_output_dir), (zend_ulong) xdebug_get_pid());
-	}
-
-	fprintf(stderr, "opening %s\n", filename);
-	aggr_file = xdebug_fopen(filename, "w", NULL, NULL);
-	if (!aggr_file) {
-		return FAILURE;
-	}
-	fprintf(aggr_file, "version: 0.9.6\ncmd: Aggregate\npart: 1\n\nevents: Time\n\n");
-	fflush(aggr_file);
-	zend_hash_apply_with_argument(&XG_PROF(aggr_calls), xdebug_print_aggr_entry, aggr_file);
-	fclose(aggr_file);
-	fprintf(stderr, "wrote info for %d entries to %s\n", zend_hash_num_elements(&XG_PROF(aggr_calls)), filename);
-	return SUCCESS;
-}
-
 /* Returns a *pointer* to the current profile filename, if active. NULL
  * otherwise. Calling function is responsible for duplicating immediately */
 char *xdebug_get_profiler_filename()
@@ -619,35 +483,4 @@ PHP_FUNCTION(xdebug_get_profiler_filename)
 	} else {
 		RETURN_FALSE;
 	}
-}
-
-PHP_FUNCTION(xdebug_dump_aggr_profiling_data)
-{
-	char *prefix = NULL;
-	size_t prefix_len;
-
-	if (!XINI_PROF(profiler_aggregate)) {
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &prefix, &prefix_len) == FAILURE) {
-		return;
-	}
-
-	if (xdebug_profiler_output_aggr_data(prefix) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
-}
-
-PHP_FUNCTION(xdebug_clear_aggr_profiling_data)
-{
-	if (!XINI_PROF(profiler_aggregate)) {
-		RETURN_FALSE;
-	}
-
-	zend_hash_clean(&XG_PROF(aggr_calls));
-
-	RETURN_TRUE;
 }
