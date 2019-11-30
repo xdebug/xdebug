@@ -41,9 +41,6 @@
 #include "TSRM.h"
 #endif
 
-char* xdebug_start_trace(char* fname, char *script_filename, long options TSRMLS_DC);
-void xdebug_stop_trace(TSRMLS_D);
-
 typedef struct xdebug_var_name {
 	char    *name;
 	size_t   length;
@@ -224,9 +221,9 @@ typedef struct _function_stack_entry {
 	xdebug_aggregate_entry *aggr_entry;
 } function_stack_entry;
 
-function_stack_entry *xdebug_get_stack_head(TSRMLS_D);
-function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC);
-function_stack_entry *xdebug_get_stack_tail(TSRMLS_D);
+function_stack_entry *xdebug_get_stack_head(void);
+function_stack_entry *xdebug_get_stack_frame(int nr);
+function_stack_entry *xdebug_get_stack_tail(void);
 
 
 xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list);

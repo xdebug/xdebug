@@ -57,7 +57,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 #if !WIN32 && !WINNT
-static int xdebug_create_socket_unix(const char *path TSRMLS_DC)
+static int xdebug_create_socket_unix(const char *path)
 {
 	struct sockaddr_un sa;
 	int sockfd;
@@ -84,7 +84,7 @@ static int xdebug_create_socket_unix(const char *path TSRMLS_DC)
 }
 #endif
 
-int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
+static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 {
 	struct addrinfo            hints;
 	struct addrinfo            *remote;
@@ -116,7 +116,7 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 		XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "Creating socket for '%s', Unix domain socket not supported.\n", hostname);
 		return SOCK_ERR;
 #else
-		return xdebug_create_socket_unix(hostname + strlen("unix://") TSRMLS_CC);
+		return xdebug_create_socket_unix(hostname + strlen("unix://"));
 #endif
 	}
 
@@ -305,45 +305,6 @@ int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC)
 void xdebug_close_socket(int socketfd)
 {
 	SCLOSE(socketfd);
-}
-
-/* Remote debugger helper functions */
-int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
-{
-	/* If this is a temporary breakpoint, disable the breakpoint */
-	if (brk_info->temporary) {
-		brk_info->disabled = 1;
-	}
-
-	/* Increase hit counter */
-	brk_info->hit_count++;
-
-	/* If the hit_value is 0, the condition check is disabled */
-	if (!brk_info->hit_value) {
-		return 1;
-	}
-
-	switch (brk_info->hit_condition) {
-		case XDEBUG_HIT_GREATER_EQUAL:
-			if (brk_info->hit_count >= brk_info->hit_value) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_EQUAL:
-			if (brk_info->hit_count == brk_info->hit_value) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_MOD:
-			if (brk_info->hit_count % brk_info->hit_value == 0) {
-				return 1;
-			}
-			break;
-		case XDEBUG_HIT_DISABLED:
-			return 1;
-			break;
-	}
-	return 0;
 }
 
 /* Log related functions */

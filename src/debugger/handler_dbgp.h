@@ -69,8 +69,8 @@ typedef struct xdebug_dbgp_arg {
 	xdebug_str *value[27]; /* one extra for - */
 } xdebug_dbgp_arg;
 
-#define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args TSRMLS_DC
-#define DBGP_FUNC_PASS_PARAMETERS   retval, context, args TSRMLS_CC
+#define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args
+#define DBGP_FUNC_PASS_PARAMETERS   retval, context, args
 #define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(DBGP_FUNC_PARAMETERS)
 #define DBGP_FUNC_ENTRY(name,flags)       { #name, xdebug_dbgp_handle_##name, 0, flags },
 #define DBGP_CONT_FUNC_ENTRY(name,flags)  { #name, xdebug_dbgp_handle_##name, 1, flags },
@@ -105,8 +105,8 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, const char *file, int file_len, int lineno);
 int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message);
 int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, int type, void *data);
-int xdebug_dbgp_stream_output(const char *string, unsigned int length TSRMLS_DC);
-int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
+int xdebug_dbgp_stream_output(const char *string, unsigned int length);
+int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno, int type, char *type_string, char *message);
 void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_dbgp_log(int log_level, const char *fmt, ...);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 

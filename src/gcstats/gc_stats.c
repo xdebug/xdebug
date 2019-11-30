@@ -231,11 +231,11 @@ PHP_FUNCTION(xdebug_start_gcstats)
 	function_stack_entry *fse;
 
 	if (XG_GCSTATS(enabled) == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &fname, &fname_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &fname, &fname_len) == FAILURE) {
 			return;
 		}
 
-		fse = xdebug_get_stack_frame(0 TSRMLS_CC);
+		fse = xdebug_get_stack_frame(0);
 
 		if (xdebug_gc_stats_init(fname, fse->filename) == SUCCESS) {
 			XG_GCSTATS(enabled) = 1;

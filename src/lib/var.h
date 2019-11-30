@@ -27,6 +27,14 @@
 #ifndef __HAVE_XDEBUG_VAR_H__
 #define __HAVE_XDEBUG_VAR_H__
 
+/* Set correct int format to use */
+#include "Zend/zend_long.h"
+#if SIZEOF_ZEND_LONG == 4
+# define XDEBUG_INT_FMT "%ld"
+#else
+# define XDEBUG_INT_FMT "%lld"
+#endif
+
 typedef struct
 {
 	int page; /* The number of the page to retrieve */
@@ -54,39 +62,24 @@ typedef struct xdebug_var_export_options {
 void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument);
 void xdebug_get_php_symbol(zval *retval, xdebug_str* name);
 
-xdebug_var_export_options* xdebug_var_export_options_from_ini(TSRMLS_D);
-xdebug_var_export_options* xdebug_var_get_nolimit_options(TSRMLS_D);
+xdebug_var_export_options* xdebug_var_export_options_from_ini(void);
+xdebug_var_export_options* xdebug_var_get_nolimit_options(void);
 
-void xdebug_var_export(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
-void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
-#define debug_var_export_text(struc, str, level, debug_zval, options) xdebug_var_export_text_ansi(struc, str, 0, level, debug_zval, options TSRMLS_CC);
-#define debug_var_export_ansi(struc, str, level, debug_zval, options) xdebug_var_export_text_ansi(struc, str, 1, level, debug_zval, options TSRMLS_CC);
-void xdebug_var_export_xml(zval **struc, xdebug_str *str, int level TSRMLS_DC);
-void xdebug_var_export_fancy(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options TSRMLS_DC);
-void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node *node, xdebug_var_export_options *options, int level);
+xdebug_str* xdebug_get_property_info(char *mangled_property, int mangled_len, const char **modifier, char **class_name);
+HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp);
+void xdebug_var_maybe_destroy_ht(HashTable *ht, int is_temp);
+
+#define XDEBUG_VAR_ATTR_TEXT 0
+#define XDEBUG_VAR_ATTR_HTML 1
+void xdebug_add_variable_attributes(xdebug_str *str, zval *struc, zend_bool fancy);
+
 
 char* xdebug_xmlize(char *string, size_t len, size_t *newlen);
 char* xdebug_error_type_simple(int type);
 char* xdebug_error_type(int type);
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var);
 zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var);
-xdebug_str* xdebug_get_zval_value(zval *val, int debug_zval, xdebug_var_export_options *options);
-xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options);
-#define xdebug_get_zval_value_text(v,d,o) xdebug_get_zval_value_text_ansi(v,0,d,o TSRMLS_CC);
-#define xdebug_get_zval_value_ansi(v,d,o) xdebug_get_zval_value_text_ansi(v,1,d,o TSRMLS_CC);
-xdebug_str* xdebug_get_zval_value_fancy(char *name, zval *val, int debug_zval, xdebug_var_export_options *options);
-xdebug_str* xdebug_get_zval_value_serialized(zval *val, int debug_zval, xdebug_var_export_options *options);
 
-void xdebug_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce TSRMLS_DC);
-void xdebug_attach_uninitialized_var(xdebug_var_export_options *options, xdebug_xml_node *node, xdebug_str *name);
-void xdebug_attach_static_var_with_contents(zval **zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
-#define xdebug_get_zval_value_xml_node(name, val, options) xdebug_get_zval_value_xml_node_ex(name, val, XDEBUG_VAR_TYPE_NORMAL, options)
-xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(xdebug_str *name, zval *val, int var_type, xdebug_var_export_options *options);
-
-xdebug_str* xdebug_get_zval_synopsis(zval *val, int debug_zval, xdebug_var_export_options *options);
-xdebug_str* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options);
-xdebug_str* xdebug_get_zval_synopsis_fancy(const char *name, zval *val, int debug_zval, xdebug_var_export_options *options);
-
-char* xdebug_show_fname(xdebug_func t, int html, int flags TSRMLS_DC);
+char* xdebug_show_fname(xdebug_func t, int html, int flags);
 
 #endif

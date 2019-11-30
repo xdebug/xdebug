@@ -19,6 +19,8 @@
 #ifndef __HAVE_XDEBUG_STR_H__
 #define __HAVE_XDEBUG_STR_H__
 
+#include <stddef.h>
+
 #include "mm.h"
 
 #define XDEBUG_STR_INITIALIZER { 0, 0, NULL }

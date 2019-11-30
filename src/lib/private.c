@@ -25,7 +25,7 @@ const char *xdebug_log_prefix[11] = {
 	"", "E: ", "", "W: ", "", "", "", "I: ", "", "", "D: "
 };
 
-function_stack_entry *xdebug_get_stack_head(TSRMLS_D)
+function_stack_entry *xdebug_get_stack_head(void)
 {
 	xdebug_llist_element *le;
 
@@ -40,7 +40,7 @@ function_stack_entry *xdebug_get_stack_head(TSRMLS_D)
 	}
 }
 
-function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC)
+function_stack_entry *xdebug_get_stack_frame(int nr)
 {
 	xdebug_llist_element *le;
 
@@ -66,7 +66,7 @@ function_stack_entry *xdebug_get_stack_frame(int nr TSRMLS_DC)
 	return XDEBUG_LLIST_VALP(le);
 }
 
-function_stack_entry *xdebug_get_stack_tail(TSRMLS_D)
+function_stack_entry *xdebug_get_stack_tail(void)
 {
 	xdebug_llist_element *le;
 

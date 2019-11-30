@@ -25,19 +25,19 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_html_init(char *fname, char *script_filename, long options TSRMLS_DC)
+void *xdebug_trace_html_init(char *fname, char *script_filename, long options)
 {
 	xdebug_trace_html_context *tmp_html_context;
 	char *used_fname;
 
 	tmp_html_context = xdmalloc(sizeof(xdebug_trace_html_context));
-	tmp_html_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname TSRMLS_CC);
+	tmp_html_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname);
 	tmp_html_context->trace_filename = used_fname;
 
 	return tmp_html_context->trace_file ? tmp_html_context : NULL;
 }
 
-void xdebug_trace_html_deinit(void *ctxt TSRMLS_DC)
+void xdebug_trace_html_deinit(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
@@ -48,7 +48,7 @@ void xdebug_trace_html_deinit(void *ctxt TSRMLS_DC)
 	xdfree(context);
 }
 
-void xdebug_trace_html_write_header(void *ctxt TSRMLS_DC)
+void xdebug_trace_html_write_header(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
@@ -62,7 +62,7 @@ void xdebug_trace_html_write_header(void *ctxt TSRMLS_DC)
 	fflush(context->trace_file);
 }
 
-void xdebug_trace_html_write_footer(void *ctxt TSRMLS_DC)
+void xdebug_trace_html_write_footer(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
@@ -70,14 +70,14 @@ void xdebug_trace_html_write_footer(void *ctxt TSRMLS_DC)
 	fflush(context->trace_file);
 }
 
-char *xdebug_trace_html_get_filename(void *ctxt TSRMLS_DC)
+char *xdebug_trace_html_get_filename(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
 	return context->trace_filename;
 }
 
-void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC)
+void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 	char *tmp_name;
@@ -97,7 +97,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	}
 	xdebug_str_add(&str, "-&gt;</td>", 0);
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
+	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%s(", tmp_name), 1);
 	xdfree(tmp_name);
 

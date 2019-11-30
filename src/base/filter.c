@@ -23,11 +23,6 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-int xdebug_filter_is_valid(void)
-{
-	return 0;
-}
-
 int xdebug_is_stack_frame_filtered(int filter_type, function_stack_entry *fse)
 {
 	switch (filter_type) {
@@ -60,7 +55,7 @@ void xdebug_filter_register_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_NAMESPACE_BLACKLIST", XDEBUG_NAMESPACE_BLACKLIST, CONST_CS | CONST_PERSISTENT);
 }
 
-int xdebug_filter_match_path_whitelist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_path_whitelist(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (strncasecmp(filter, fse->filename, strlen(filter)) == 0) {
 		*filtered_flag = 0;
@@ -69,7 +64,7 @@ int xdebug_filter_match_path_whitelist(function_stack_entry *fse, long *filtered
 	return 0;
 }
 
-int xdebug_filter_match_path_blacklist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_path_blacklist(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (strncasecmp(filter, fse->filename, strlen(filter)) == 0) {
 		*filtered_flag = 1;
@@ -78,7 +73,7 @@ int xdebug_filter_match_path_blacklist(function_stack_entry *fse, long *filtered
 	return 0;
 }
 
-int xdebug_filter_match_namespace_whitelist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_namespace_whitelist(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (!fse->function.class && strlen(filter) == 0) {
 		*filtered_flag = 0;
@@ -91,7 +86,7 @@ int xdebug_filter_match_namespace_whitelist(function_stack_entry *fse, long *fil
 	return 0;
 }
 
-int xdebug_filter_match_namespace_blacklist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_namespace_blacklist(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (!fse->function.class && strlen(filter) == 0) {
 		*filtered_flag = 1;
@@ -178,7 +173,7 @@ PHP_FUNCTION(xdebug_set_filter)
 	xdebug_llist **filter_list;
 	zval          *filters, *item;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lla", &filter_group, &filter_type, &filters) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lla", &filter_group, &filter_type, &filters) == FAILURE) {
 		return;
 	}
 

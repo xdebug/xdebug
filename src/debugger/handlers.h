@@ -25,6 +25,7 @@
 #include "lib/hash.h"
 #include "lib/private.h"
 #include "lib/usefulstuff.h"
+#include "debugger_private.h"
 
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;
@@ -140,10 +141,10 @@ struct _xdebug_remote_handler {
 	int (*resolve_breakpoints)(xdebug_con *h, int type, void *data);
 
 	/* Output redirection */
-	int (*remote_stream_output)(const char *string, unsigned int length TSRMLS_DC);
+	int (*remote_stream_output)(const char *string, unsigned int length);
 
 	/* Notifications & Logging */
-	int (*remote_notification)(xdebug_con *h, const char *file, long lineno, int type, char *type_string, char *message TSRMLS_DC);
+	int (*remote_notification)(xdebug_con *h, const char *file, long lineno, int type, char *type_string, char *message);
 	void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) (*log)(int log_level, const char *fmt, ...);
 
 	/* Eval ID registration and removal */

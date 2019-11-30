@@ -61,7 +61,7 @@ void xdebug_monitored_function_dtor(void *dummy, void *elem)
 	xdfree(mfe);
 }
 
-void xdebug_function_monitor_record(char *func_name, char *filename, int lineno TSRMLS_DC)
+void xdebug_function_monitor_record(char *func_name, char *filename, int lineno)
 {
 	xdebug_monitored_function_entry *record;
 
@@ -73,7 +73,7 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 {
 	HashTable *functions_to_monitor;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &functions_to_monitor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H", &functions_to_monitor) == FAILURE) {
 		return;
 	}
 
@@ -107,7 +107,7 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 	zend_bool             clear = 0;
 	xdebug_monitored_function_entry *mfe;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &clear) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &clear) == FAILURE) {
 		return;
 	}
 

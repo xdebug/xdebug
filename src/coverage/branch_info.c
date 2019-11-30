@@ -158,7 +158,7 @@ void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_i
 	}
 }
 
-void xdebug_path_add(xdebug_path *path, unsigned int nr)
+static void xdebug_path_add(xdebug_path *path, unsigned int nr)
 {
 	if (!path) {
 		return;
@@ -181,7 +181,7 @@ static void xdebug_path_info_add_path(xdebug_path_info *path_info, xdebug_path *
 	path_info->paths_count++;
 }
 
-static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info, unsigned int level TSRMLS_DC)
+static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info, unsigned int level)
 {
 	unsigned int i = 0, orig_size;
 
@@ -201,15 +201,15 @@ static void xdebug_path_info_make_sure_level_exists(xdebug_path_info *path_info,
 	}
 }
 
-void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level TSRMLS_DC)
+void xdebug_path_info_add_path_for_level(xdebug_path_info *path_info, xdebug_path *path, unsigned int level)
 {
-	xdebug_path_info_make_sure_level_exists(path_info, level TSRMLS_CC);
+	xdebug_path_info_make_sure_level_exists(path_info, level);
 	path_info->paths[level] = path;
 }
 
-xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level TSRMLS_DC)
+xdebug_path *xdebug_path_info_get_path_for_level(xdebug_path_info *path_info, unsigned int level)
 {
-	xdebug_path_info_make_sure_level_exists(path_info, level TSRMLS_CC);
+	xdebug_path_info_make_sure_level_exists(path_info, level);
 	return path_info->paths[level];
 }
 
@@ -345,17 +345,7 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 	}
 }
 
-void xdebug_path_info_dump(xdebug_path *path TSRMLS_DC)
-{
-	unsigned int i;
-
-	for (i = 0; i < path->elements_count; i++) {
-		printf("%d, ", path->elements[i]);
-	}
-	printf("\n");
-}
-
-void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_op_array *op_array, long opcode_nr TSRMLS_DC)
+void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_op_array *op_array, long opcode_nr)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
@@ -384,8 +374,8 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 	branch_info = function->branch_info;
 
 	if (opcode_nr != 0 && xdebug_set_in(branch_info->entry_points, opcode_nr)) {
-		xdebug_code_coverage_end_of_function(op_array, file_name, function_name TSRMLS_CC);
-		xdebug_code_coverage_start_of_function(op_array, function_name TSRMLS_CC);
+		xdebug_code_coverage_end_of_function(op_array, file_name, function_name);
+		xdebug_code_coverage_start_of_function(op_array, function_name);
 	}
 
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
@@ -416,7 +406,7 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 	}
 }
 
-void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *function_name, char *key, int key_len TSRMLS_DC)
+void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *function_name, char *key, int key_len)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
@@ -451,7 +441,7 @@ void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *funct
 	path->hit = 1;
 }
 
-void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info TSRMLS_DC)
+void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;

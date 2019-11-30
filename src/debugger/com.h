@@ -55,11 +55,7 @@
 	xdfree(message_buffer);     \
 }
 
-int xdebug_create_socket(const char *hostname, int dport, int timeout TSRMLS_DC);
 void xdebug_close_socket(int socket);
-
-/* Remote debugging helper functions */
-int xdebug_handle_hit_value(xdebug_brk_info *brk_info);
 
 /* Remote connection activation and house keeping */
 int xdebug_is_debug_connection_active(void);
@@ -68,7 +64,7 @@ void xdebug_stop_debugger(void);
 void xdebug_mark_debug_connection_active(void);
 void xdebug_mark_debug_connection_not_active(void);
 void xdebug_mark_debug_connection_pending(void);
-void xdebug_do_jit(TSRMLS_D);
+void xdebug_do_jit(void);
 void xdebug_do_req();
 
 #endif

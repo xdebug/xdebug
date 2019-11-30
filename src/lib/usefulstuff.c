@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,7 @@
 #endif
 #include "php_xdebug.h"
 #include "mm.h"
+#include "crc32.h"
 #include "str.h"
 #include "usefulstuff.h"
 #include "ext/standard/php_lcg.h"
@@ -50,66 +51,6 @@
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
-
-#define READ_BUFFER_SIZE 128
-
-char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigned char delim, int *length)
-{
-	int size = 0, newl = 0, nbufsize = 0;
-	char *tmp;
-	char *tmp_buf = NULL;
-	char *ptr;
-	char buffer[READ_BUFFER_SIZE + 1];
-
-	if (!context->buffer) {
-		context->buffer = calloc(1,1);
-		context->buffer_size = 0;
-	}
-
-	while (context->buffer_size < 1 || context->buffer[context->buffer_size - 1] != delim) {
-		ptr = context->buffer + context->buffer_size;
-		if (type == FD_RL_FILE) {
-			newl = read(socketfd, buffer, READ_BUFFER_SIZE);
-		} else {
-			newl = recv(socketfd, buffer, READ_BUFFER_SIZE, 0);
-		}
-		if (newl > 0) {
-			context->buffer = realloc(context->buffer, context->buffer_size + newl + 1);
-			memcpy(context->buffer + context->buffer_size, buffer, newl);
-			context->buffer_size += newl;
-			context->buffer[context->buffer_size] = '\0';
-		} else if (newl == -1 && errno == EINTR) {
-			continue;
-		} else {
-			free(context->buffer);
-			context->buffer = NULL;
-			context->buffer_size = 0;
-			return NULL;
-		}
-	}
-
-	ptr = memchr(context->buffer, delim, context->buffer_size);
-	size = ptr - context->buffer;
-	/* Copy that line into tmp */
-	tmp = malloc(size + 1);
-	tmp[size] = '\0';
-	memcpy(tmp, context->buffer, size);
-	/* Rewrite existing buffer */
-	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
-		tmp_buf = malloc(nbufsize + 1);
-		memcpy(tmp_buf, ptr + 1, nbufsize);
-		tmp_buf[nbufsize] = 0;
-	}
-	free(context->buffer);
-	context->buffer = tmp_buf;
-	context->buffer_size = context->buffer_size - (size + 1);
-
-	/* Return normal line */
-	if (length) {
-		*length = size;
-	}
-	return tmp;
-}
 
 xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 {
@@ -299,7 +240,7 @@ char *xdebug_raw_url_encode(char const *s, int len, int *new_length, int skip_sl
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
+char *xdebug_path_from_url(const char *fileurl)
 {
 	/* deal with file: url's */
 	char *dfp = NULL;
@@ -339,7 +280,7 @@ char *xdebug_path_from_url(const char *fileurl TSRMLS_DC)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
+char *xdebug_path_to_url(const char *fileurl)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
@@ -365,7 +306,7 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 		new_state.cwd = estrdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 
-		if (!virtual_file_ex(&new_state, fileurl, NULL, 1 TSRMLS_CC)) {
+		if (!virtual_file_ex(&new_state, fileurl, NULL, 1)) {
 			char *s = estrndup(new_state.cwd, new_state.cwd_length);
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
@@ -397,18 +338,6 @@ char *xdebug_path_to_url(const char *fileurl TSRMLS_DC)
 	return tmp;
 }
 
-long xdebug_crc32(const char *string, int str_len)
-{
-	unsigned int crc = ~0;
-	int len;
-
-	len = 0 ;
-	for (len += str_len; str_len--; ++string) {
-	    XDEBUG_CRC32(crc, *string);
-	}
-	return ~crc;
-}
-
 #ifndef PHP_WIN32
 static FILE *xdebug_open_file(char *fname, const char *mode, const char *extension, char **new_fname)
 {
@@ -433,12 +362,11 @@ static FILE *xdebug_open_file_with_random_ext(char *fname, const char *mode, con
 {
 	FILE *fh;
 	char *tmp_fname;
-	TSRMLS_FETCH();
 
 	if (extension) {
-		tmp_fname = xdebug_sprintf("%s.%06x.%s", fname, (long) (1000000 * php_combined_lcg(TSRMLS_C)), extension);
+		tmp_fname = xdebug_sprintf("%s.%06x.%s", fname, (long) (1000000 * php_combined_lcg()), extension);
 	} else {
-		tmp_fname = xdebug_sprintf("%s.%06x", fname, (long) (1000000 * php_combined_lcg(TSRMLS_C)), extension);
+		tmp_fname = xdebug_sprintf("%s.%06x", fname, (long) (1000000 * php_combined_lcg()), extension);
 	}
 	fh = fopen(tmp_fname, mode);
 	if (fh && new_fname) {
@@ -544,7 +472,6 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char       cwd[128];
-	TSRMLS_FETCH();
 
 	while (*format)
 	{
@@ -565,7 +492,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 					break;
 
 				case 'r': /* random number */
-					xdebug_str_add(&fname, xdebug_sprintf("%06x", (long) (1000000 * php_combined_lcg(TSRMLS_C))), 1);
+					xdebug_str_add(&fname, xdebug_sprintf("%06x", (long) (1000000 * php_combined_lcg())), 1);
 					break;
 
 				case 's': { /* script fname */
@@ -678,7 +605,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 	return fname.l;
 }
 
-int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno TSRMLS_DC)
+int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char      *format = XINI_BASE(file_link_format);
@@ -712,7 +639,7 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
-int xdebug_format_filename(char **formatted_name, const char *fmt, const char *default_fmt, const char *filename TSRMLS_DC)
+int xdebug_format_filename(char **formatted_name, const char *fmt, const char *default_fmt, const char *filename)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char *name;

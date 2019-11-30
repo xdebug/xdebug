@@ -22,23 +22,24 @@
 #include "tracing_private.h"
 #include "trace_textual.h"
 
-#include "lib/var.h"
+#include "lib/var_export_line.h"
+#include "lib/var_export_serialized.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_textual_init(char *fname, char *script_filename, long options TSRMLS_DC)
+void *xdebug_trace_textual_init(char *fname, char *script_filename, long options)
 {
 	xdebug_trace_textual_context *tmp_textual_context;
 	char *used_fname;
 
 	tmp_textual_context = xdmalloc(sizeof(xdebug_trace_textual_context));
-	tmp_textual_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname TSRMLS_CC);
+	tmp_textual_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname);
 	tmp_textual_context->trace_filename = used_fname;
 
 	return tmp_textual_context->trace_file ? tmp_textual_context : NULL;
 }
 
-void xdebug_trace_textual_deinit(void *ctxt TSRMLS_DC)
+void xdebug_trace_textual_deinit(void *ctxt)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 
@@ -49,7 +50,7 @@ void xdebug_trace_textual_deinit(void *ctxt TSRMLS_DC)
 	xdfree(context);
 }
 
-void xdebug_trace_textual_write_header(void *ctxt TSRMLS_DC)
+void xdebug_trace_textual_write_header(void *ctxt)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	char *str_time;
@@ -60,7 +61,7 @@ void xdebug_trace_textual_write_header(void *ctxt TSRMLS_DC)
 	xdfree(str_time);
 }
 
-void xdebug_trace_textual_write_footer(void *ctxt TSRMLS_DC)
+void xdebug_trace_textual_write_footer(void *ctxt)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	char   *str_time;
@@ -72,9 +73,9 @@ void xdebug_trace_textual_write_footer(void *ctxt TSRMLS_DC)
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
-	fprintf(context->trace_file, "%10Iu", zend_memory_usage(0 TSRMLS_CC));
+	fprintf(context->trace_file, "%10Iu", zend_memory_usage(0));
 #else
-	fprintf(context->trace_file, "%10zu", zend_memory_usage(0 TSRMLS_CC));
+	fprintf(context->trace_file, "%10zu", zend_memory_usage(0));
 #endif
 	fprintf(context->trace_file, "\n");
 	str_time = xdebug_get_time();
@@ -83,26 +84,26 @@ void xdebug_trace_textual_write_footer(void *ctxt TSRMLS_DC)
 	xdfree(str_time);
 }
 
-char *xdebug_trace_textual_get_filename(void *ctxt TSRMLS_DC)
+char *xdebug_trace_textual_get_filename(void *ctxt)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 
 	return context->trace_filename;
 }
 
-static void add_single_value(xdebug_str *str, zval *zv, int collection_level TSRMLS_DC)
+static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
 {
 	xdebug_str *tmp_value = NULL;
 
 	switch (collection_level) {
 		case 1: /* synopsis */
 		case 2:
-			tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_synopsis_line(zv, 0, NULL);
 			break;
 		case 3: /* full */
 		case 4: /* full (with var) */
 		default:
-			tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
 			break;
 		case 5: /* serialized */
 			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
@@ -116,7 +117,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int collection_level TSR
 	}
 }
 
-void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC)
+void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	int c = 0; /* Comma flag */
@@ -124,7 +125,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 	char *tmp_name;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
+	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
 	xdebug_str_add(&str, xdebug_sprintf("%10.4F ", fse->time - XG_BASE(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%10lu ", fse->memory), 1);
@@ -174,7 +175,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {
-				add_single_value(&str, &fse->var[j].data, XINI_BASE(collect_params) TSRMLS_CC);
+				add_single_value(&str, &fse->var[j].data, XINI_BASE(collect_params));
 			} else {
 				xdebug_str_addl(&str, "???", 3, 0);
 			}
@@ -211,12 +212,12 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 }
 
 /* Used for normal return values, and generator return values */
-static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_entry *fse TSRMLS_DC)
+static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_entry *fse)
 {
 	unsigned int j = 0; /* Counter */
 
 	xdebug_str_add(str, xdebug_sprintf("%10.4F ", xdebug_get_utime() - XG_BASE(start_time)), 1);
-	xdebug_str_add(str, xdebug_sprintf("%10lu ", zend_memory_usage(0 TSRMLS_CC)), 1);
+	xdebug_str_add(str, xdebug_sprintf("%10lu ", zend_memory_usage(0)), 1);
 
 	if (XINI_BASE(show_mem_delta)) {
 		xdebug_str_addl(str, "        ", 8, 0);
@@ -228,15 +229,15 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 }
 
 
-void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC)
+void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
 	xdebug_str                   *tmp_value;
 
-	xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
+	xdebug_return_trace_stack_common(&str, fse);
 
-	tmp_value = xdebug_get_zval_value(return_value, 0, NULL);
+	tmp_value = xdebug_get_zval_value_line(return_value, 0, NULL);
 	if (tmp_value) {
 		xdebug_str_add_str(&str, tmp_value);
 		xdebug_str_free(tmp_value);
@@ -249,7 +250,7 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 	xdebug_str_destroy(&str);
 }
 
-void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator TSRMLS_DC)
+void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
@@ -266,15 +267,15 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 #endif
 
 	/* Generator key */
-	tmp_value = xdebug_get_zval_value(&generator->key, 0, NULL);
+	tmp_value = xdebug_get_zval_value_line(&generator->key, 0, NULL);
 	if (tmp_value) {
-		xdebug_return_trace_stack_common(&str, fse TSRMLS_CC);
+		xdebug_return_trace_stack_common(&str, fse);
 
 		xdebug_str_addl(&str, "(", 1, 0);
 		xdebug_str_add_str(&str, tmp_value);
 		xdebug_str_addl(&str, " => ", 4, 0);
 
-		tmp_value = xdebug_get_zval_value(&generator->value, 0, NULL);
+		tmp_value = xdebug_get_zval_value_line(&generator->value, 0, NULL);
 		if (tmp_value) {
 			xdebug_str_add_str(&str, tmp_value);
 			xdebug_str_free(tmp_value);
@@ -290,7 +291,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	}
 }
 
-void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, const char *op, char *filename, int lineno TSRMLS_DC)
+void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, const char *op, char *filename, int lineno)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	unsigned int                  j = 0;
@@ -314,7 +315,7 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 		if (right_full_varname) {
 			xdebug_str_add(&str, right_full_varname, 0);
 		} else {
-			tmp_value = xdebug_get_zval_value(retval, 0, NULL);
+			tmp_value = xdebug_get_zval_value_line(retval, 0, NULL);
 
 			if (tmp_value) {
 				xdebug_str_add_str(&str, tmp_value);

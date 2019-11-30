@@ -22,23 +22,24 @@
 #include "tracing_private.h"
 #include "trace_computerized.h"
 
-#include "lib/var.h"
+#include "lib/var_export_line.h"
+#include "lib/var_export_serialized.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_computerized_init(char *fname, char *script_filename, long options TSRMLS_DC)
+void *xdebug_trace_computerized_init(char *fname, char *script_filename, long options)
 {
 	xdebug_trace_computerized_context *tmp_computerized_context;
 	char *used_fname;
 
 	tmp_computerized_context = xdmalloc(sizeof(xdebug_trace_computerized_context));
-	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname TSRMLS_CC);
+	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname);
 	tmp_computerized_context->trace_filename = used_fname;
 
 	return tmp_computerized_context->trace_file ? tmp_computerized_context : NULL;
 }
 
-void xdebug_trace_computerized_deinit(void *ctxt TSRMLS_DC)
+void xdebug_trace_computerized_deinit(void *ctxt)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 
@@ -49,7 +50,7 @@ void xdebug_trace_computerized_deinit(void *ctxt TSRMLS_DC)
 	xdfree(context);
 }
 
-void xdebug_trace_computerized_write_header(void *ctxt TSRMLS_DC)
+void xdebug_trace_computerized_write_header(void *ctxt)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	char *str_time;
@@ -63,7 +64,7 @@ void xdebug_trace_computerized_write_header(void *ctxt TSRMLS_DC)
 	xdfree(str_time);
 }
 
-void xdebug_trace_computerized_write_footer(void *ctxt TSRMLS_DC)
+void xdebug_trace_computerized_write_footer(void *ctxt)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	char   *str_time;
@@ -75,9 +76,9 @@ void xdebug_trace_computerized_write_footer(void *ctxt TSRMLS_DC)
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
-	fprintf(context->trace_file, "%Iu", zend_memory_usage(0 TSRMLS_CC));
+	fprintf(context->trace_file, "%Iu", zend_memory_usage(0));
 #else
-	fprintf(context->trace_file, "%zu", zend_memory_usage(0 TSRMLS_CC));
+	fprintf(context->trace_file, "%zu", zend_memory_usage(0));
 #endif
 	fprintf(context->trace_file, "\n");
 	str_time = xdebug_get_time();
@@ -87,26 +88,26 @@ void xdebug_trace_computerized_write_footer(void *ctxt TSRMLS_DC)
 	xdfree(str_time);
 }
 
-char *xdebug_trace_computerized_get_filename(void *ctxt TSRMLS_DC)
+char *xdebug_trace_computerized_get_filename(void *ctxt)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 
 	return context->trace_filename;
 }
 
-static void add_single_value(xdebug_str *str, zval *zv, int collection_level TSRMLS_DC)
+static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
 {
 	xdebug_str *tmp_value = NULL;
 
 	switch (collection_level) {
 		case 1: /* synopsis */
 		case 2:
-			tmp_value = xdebug_get_zval_synopsis(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_synopsis_line(zv, 0, NULL);
 			break;
 		case 3: /* full */
 		case 4: /* full (with var) */
 		default:
-			tmp_value = xdebug_get_zval_value(zv, 0, NULL);
+			tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
 			break;
 		case 5: /* serialized */
 			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
@@ -121,7 +122,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int collection_level TSR
 }
 
 
-void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC)
+void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	char *tmp_name;
@@ -130,7 +131,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0 TSRMLS_CC);
+	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
 	xdebug_str_add(&str, "0\t", 0);
 	xdebug_str_add(&str, xdebug_sprintf("%F\t", fse->time - XG_BASE(start_time)), 1);
@@ -194,7 +195,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	xdfree(str.d);
 }
 
-void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *fse, int function_nr TSRMLS_DC)
+void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *fse, int function_nr)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
@@ -204,14 +205,14 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 
 	xdebug_str_add(&str, "1\t", 0);
 	xdebug_str_add(&str, xdebug_sprintf("%F\t", xdebug_get_utime() - XG_BASE(start_time)), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%lu\n", zend_memory_usage(0 TSRMLS_CC)), 1);
+	xdebug_str_add(&str, xdebug_sprintf("%lu\n", zend_memory_usage(0)), 1);
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
 	xdfree(str.d);
 }
 
-void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value TSRMLS_DC)
+void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;

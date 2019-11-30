@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2019 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,22 +16,15 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_XDEBUG_SUPERGLOBALS_H__
-#define __HAVE_XDEBUG_SUPERGLOBALS_H__
+#ifndef __HAVE_XDEBUG_LIB_VAR_EXPORT_TEXT_H__
+#define __HAVE_XDEBUG_LIB_VAR_EXPORT_TEXT_H__
 
-#include "php.h"
+#include "var.h"
 
-void xdebug_superglobals_dump_dtor(void *, void*);
-char *xdebug_get_printable_superglobals(int html);
-void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str);
+xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options);
+#define xdebug_get_zval_value_text(v,d,o) xdebug_get_zval_value_text_ansi(v,0,d,o);
+#define xdebug_get_zval_value_ansi(v,d,o) xdebug_get_zval_value_text_ansi(v,1,d,o);
 
-# define DUMP_TOK(__llist) \
-	xdebug_llist_empty(&XG(base.__llist), NULL); \
-	if (new_value && new_value->val) { \
-		char *str = estrndup(new_value->val, new_value->len); \
-		xdebug_superglobals_dump_tok(&XG(base.__llist), str); \
-		efree(str); \
-	} \
-	return SUCCESS;
+xdebug_str* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options);
 
-#endif /* __HAVE_XDEBUG_SUPERGLOBALS_H__ */
+#endif
