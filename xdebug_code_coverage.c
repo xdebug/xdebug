@@ -1047,18 +1047,28 @@ static int prefill_from_function_table(zend_op_array *opa)
 	return ZEND_HASH_APPLY_KEEP;
 }
 
+/* Set correct int format to use */
+#if SIZEOF_ZEND_LONG == 4
+# define XDEBUG_PTR_KEY_LEN 8
+# define XDEBUG_PTR_KEY_FMT "%08X"
+#else
+# define XDEBUG_PTR_KEY_LEN 16
+# define XDEBUG_PTR_KEY_FMT "%016lX"
+#endif
+
+
 static int mark_class_as_visited(zend_class_entry *ce)
 {
 	int     already_visited = 0;
 	void   *dummy; /* we only care about key existence, not value */
-	char    key[17];
+	char    key[XDEBUG_PTR_KEY_LEN + 1];
 
-	snprintf(key, 17, "%016lX", (uintptr_t) ce);
+	snprintf(key, XDEBUG_PTR_KEY_LEN + 1, XDEBUG_PTR_KEY_FMT, (uintptr_t) ce);
 
-	if (xdebug_hash_find(XG(visited_classes), key, 16, (void*) &dummy)) {
+	if (xdebug_hash_find(XG(visited_classes), key, XDEBUG_PTR_KEY_LEN, (void*) &dummy)) {
 		already_visited = 1;
 	} else {
-		xdebug_hash_add(XG(visited_classes), key, 16, NULL);
+		xdebug_hash_add(XG(visited_classes), key, XDEBUG_PTR_KEY_LEN, NULL);
 	}
 
 	return already_visited;
