@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATTERN=${1:-'^7.3.*'}
+PATTERN=${1:-'^7.[34].*'}
 
 PHP=`which php`
 if [[ "${PHP}" == "" ]]; then
