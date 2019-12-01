@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+#include "php_xdebug.h"
+
 #include "ext/standard/php_smart_string.h"
 #include "Zend/zend_smart_str.h"
 
