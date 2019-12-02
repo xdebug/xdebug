@@ -151,15 +151,6 @@ struct _xdebug_remote_handler {
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
 };
 
-struct _xdebug_remote_handler_info {
-	const char            *name;
-	const char            *description;
-	xdebug_remote_handler  handler;
-};
-
-xdebug_remote_handler* xdebug_handler_get(char* mode);
-xdebug_remote_handler_info* xdebug_handlers_get(void);
-
 void xdebug_brk_info_dtor(xdebug_brk_info *brk);
 void xdebug_llist_brk_dtor(void *dummy, xdebug_brk_info *brk);
 void xdebug_hash_brk_dtor(xdebug_brk_info *brk);

@@ -52,6 +52,7 @@
 #include "com.h"
 
 #include "debugger_private.h"
+#include "handler_dbgp.h"
 #include "lib/private.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
@@ -348,11 +349,7 @@ static void xdebug_init_debugger()
 	xdebug_open_log();
 
 	/* Get handler from mode */
-	XG_DBG(context).handler = xdebug_handler_get(XINI_DBG(remote_handler));
-	if (!XG_DBG(context).handler) {
-		zend_error(E_WARNING, "The remote debug handler '%s' is not supported", XINI_DBG(remote_handler));
-		return;
-	}
+	XG_DBG(context).handler = &xdebug_handler_dbgp;
 
 	if (XINI_DBG(remote_connect_back)) {
 		zval *remote_addr = NULL;

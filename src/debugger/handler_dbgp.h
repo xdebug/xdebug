@@ -110,17 +110,6 @@ int xdebug_dbgp_notification(xdebug_con *context, const char *file, long lineno,
 void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_dbgp_log(int log_level, const char *fmt, ...);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 
-#define xdebug_handler_dbgp {        \
-	xdebug_dbgp_init,                \
-	xdebug_dbgp_deinit,              \
-	xdebug_dbgp_error,               \
-	xdebug_dbgp_break_on_line,       \
-	xdebug_dbgp_breakpoint,          \
-	xdebug_dbgp_resolve_breakpoints, \
-	xdebug_dbgp_stream_output,       \
-	xdebug_dbgp_notification,        \
-	xdebug_dbgp_log,                 \
-	xdebug_dbgp_register_eval_id,    \
-}
+extern xdebug_remote_handler xdebug_handler_dbgp;
 
 #endif

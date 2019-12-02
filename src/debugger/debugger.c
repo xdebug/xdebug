@@ -475,19 +475,9 @@ void xdebug_debugger_minit(void)
 
 void xdebug_debugger_minfo(void)
 {
-	xdebug_remote_handler_info *ptr = xdebug_handlers_get();
-
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Debugger", "enabled");
 	php_info_print_table_row(2, "IDE Key", XG_DBG(ide_key));
-	php_info_print_table_end();
-
-	php_info_print_table_start();
-	php_info_print_table_header(1, "Supported protocols");
-	while (ptr->name) {
-		php_info_print_table_row(1, ptr->description);
-		ptr++;
-	}
 	php_info_print_table_end();
 }
 
