@@ -13,10 +13,13 @@
 #. Move existing release entry down in package.xml
 #. Create a new release entry in package.xml, use upper case "RC".
 #. Reword package.xml so that it all makes sense!
+#. Rebuild from source with: ``~/bin/rebuild.sh``
+#. Run xdebug.ini update script from xdebug.org repository:
+   ``php html/docs/convert.php  > ~/dev/php/derickr-xdebug/xdebug.ini``
 #. Run "pecl package"
 #. Install new package with ``pecl install xdebug-*.tgz``
-#. Commit template.rc, php_xdebug.h, package.xml, and RELEASE_PROCESS.rst with
-   text: ``Go with 2.8.0RC1`` (use upper case 'RC').
+#. Commit template.rc, php_xdebug.h, package.xml, xdebug.ini, and
+   RELEASE_PROCESS.rst with text: ``Go with 2.8.0RC1`` (use upper case 'RC').
 #. Tag package with ``git tag -u ${GPGKEY} -m <version number> <version number>``
    (use upper case "RC").
 #. ``git push origin master xdebug_2_8 && git push --tags``
