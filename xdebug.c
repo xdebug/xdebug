@@ -1319,6 +1319,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	XG(code_coverage_filter_offset) = zend_xdebug_filter_offset;
 	XG(previous_filename) = NULL;
 	XG(previous_file) = NULL;
+	XG(coverage_prefill_function_count) = 0;
+	XG(coverage_prefill_class_count) = 0;
 	XG(gc_stats_file) = NULL;
 	XG(gc_stats_filename) = NULL;
 	XG(gc_stats_enabled) = 0;

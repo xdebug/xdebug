@@ -216,6 +216,8 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 		unsigned int  size;
 		int *last_branch_nr;
 	} branches;
+	size_t        coverage_prefill_function_count;
+	size_t        coverage_prefill_class_count;
 
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
