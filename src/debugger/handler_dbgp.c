@@ -58,6 +58,19 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+xdebug_remote_handler xdebug_handler_dbgp = {
+	xdebug_dbgp_init,
+	xdebug_dbgp_deinit,
+	xdebug_dbgp_error,
+	xdebug_dbgp_break_on_line,
+	xdebug_dbgp_breakpoint,
+	xdebug_dbgp_resolve_breakpoints,
+	xdebug_dbgp_stream_output,
+	xdebug_dbgp_notification,
+	xdebug_dbgp_log,
+	xdebug_dbgp_register_eval_id,
+};
+
 static char *create_eval_key_file(char *filename, int lineno);
 static char *create_eval_key_id(int id);
 static void line_breakpoint_resolve_helper(xdebug_con *context, function_stack_entry *fse, xdebug_brk_info *brk_info);

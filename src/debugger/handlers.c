@@ -22,29 +22,6 @@
 #include "handler_dbgp.h"
 #include "lib/mm.h"
 
-xdebug_remote_handler_info handlers[] = {
-	{ "dbgp", "DBGp - Common DeBuGger Protocol", xdebug_handler_dbgp },
-	{ 0, NULL, { NULL, NULL, NULL, NULL, NULL, NULL, NULL } }
-};
-
-xdebug_remote_handler* xdebug_handler_get(char* mode)
-{
-	xdebug_remote_handler_info *ptr = handlers;
-
-	while (ptr->name) {
-		if (strcmp(mode, ptr->name) == 0) {
-			return &ptr->handler;
-		}
-		ptr++;
-	}
-	return NULL;
-}
-
-xdebug_remote_handler_info* xdebug_handlers_get(void)
-{
-	return handlers;
-}
-
 void xdebug_brk_info_dtor(xdebug_brk_info *brk_info)
 {
 	if (brk_info->classname) {
