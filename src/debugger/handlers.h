@@ -96,8 +96,8 @@ struct _xdebug_con {
 #define XDEBUG_RESOLVED_SPAN_MAX  4294967295
 
 struct _xdebug_brk_span {
-	int start;
-	int end;
+	long start;
+	long end;
 };
 
 struct _xdebug_brk_info {
