@@ -924,6 +924,41 @@ void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 	zval_ptr_dtor_nogc(&zvar);
 }
 
+#if PHP_VERSION_ID >= 70400
+xdebug_str* xdebug_get_property_type(zval* object, zval *val)
+{
+	xdebug_str         *type_str = NULL;
+	zend_property_info *info;
+
+	if (Z_TYPE_P(val) != IS_INDIRECT) {
+		return NULL;
+	}
+	val = Z_INDIRECT_P(val);
+
+	info = zend_get_typed_property_info_for_slot(Z_OBJ_P(object), val);
+
+	if (info) {
+		type_str = xdebug_str_new();
+
+		if (ZEND_TYPE_ALLOW_NULL(info->type)) {
+			xdebug_str_addc(type_str, '?');
+		}
+		if (ZEND_TYPE_IS_CLASS(info->type)) {
+			xdebug_str_add(
+				type_str,
+				ZSTR_VAL(
+					ZEND_TYPE_IS_CE(info->type) ? ZEND_TYPE_CE(info->type)->name : ZEND_TYPE_NAME(info->type)
+				),
+				0
+			);
+		} else {
+			xdebug_str_add(type_str, zend_get_type_by_const(ZEND_TYPE_CODE(info->type)), 0);
+		}
+	}
+
+	return type_str;
+}
+#endif
 
 xdebug_str* xdebug_get_property_info(char *mangled_property, int mangled_len, const char **modifier, char **class_name)
 {
