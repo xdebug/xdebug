@@ -553,38 +553,14 @@ static int prefill_from_function_table(zend_op_array *opa)
 # define XDEBUG_PTR_KEY_FMT "%016lX"
 #endif
 
-
-static int mark_class_as_visited(zend_class_entry *ce)
-{
-	int     already_visited = 0;
-	void   *dummy; /* we only care about key existence, not value */
-	char    key[XDEBUG_PTR_KEY_LEN + 1];
-
-	snprintf(key, XDEBUG_PTR_KEY_LEN + 1, XDEBUG_PTR_KEY_FMT, (uintptr_t) ce);
-
-	if (xdebug_hash_find(XG_COV(visited_classes), key, XDEBUG_PTR_KEY_LEN, (void*) &dummy)) {
-		already_visited = 1;
-	} else {
-		xdebug_hash_add(XG_COV(visited_classes), key, XDEBUG_PTR_KEY_LEN, NULL);
-	}
-
-	return already_visited;
-}
-
 static int prefill_from_class_table(zend_class_entry *ce)
 {
 	if (ce->type == ZEND_USER_CLASS) {
-		if (!mark_class_as_visited(ce)) {
-			zend_op_array *val;
+		zend_op_array *val;
 
-			xdebug_zend_hash_apply_protection_begin(&ce->function_table);
-
-			ZEND_HASH_FOREACH_PTR(&ce->function_table, val) {
-				prefill_from_function_table(val);
-			} ZEND_HASH_FOREACH_END();
-
-			xdebug_zend_hash_apply_protection_end(&ce->function_table);
-		}
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, val) {
+			prefill_from_function_table(val);
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -599,17 +575,21 @@ static void xdebug_prefill_code_coverage(zend_op_array *op_array)
 		prefill_from_oparray((char*) STR_NAME_VAL(op_array->filename), op_array);
 	}
 
-	xdebug_zend_hash_apply_protection_begin(CG(function_table));
-	ZEND_HASH_FOREACH_PTR(CG(function_table), function_op_array) {
+	ZEND_HASH_REVERSE_FOREACH_PTR(CG(function_table), function_op_array) {
+		if (_idx == XG_COV(prefill_function_count)) {
+			break;
+		}
 		prefill_from_function_table(function_op_array);
 	} ZEND_HASH_FOREACH_END();
-	xdebug_zend_hash_apply_protection_end(CG(function_table));
+	XG_COV(prefill_function_count) = CG(function_table)->nNumUsed;
 
-	xdebug_zend_hash_apply_protection_begin(CG(class_table));
-	ZEND_HASH_FOREACH_PTR(CG(class_table), class_entry) {
+	ZEND_HASH_REVERSE_FOREACH_PTR(CG(class_table), class_entry) {
+		if (_idx == XG_COV(prefill_class_count)) {
+			break;
+		}
 		prefill_from_class_table(class_entry);
 	} ZEND_HASH_FOREACH_END();
-	xdebug_zend_hash_apply_protection_end(CG(class_table));
+	XG_COV(prefill_class_count) = CG(class_table)->nNumUsed;
 }
 
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name)
@@ -1226,9 +1206,10 @@ void xdebug_coverage_rinit(void)
 	XG_COV(code_coverage_filter_offset) = zend_xdebug_filter_offset;
 	XG_COV(previous_filename) = NULL;
 	XG_COV(previous_file) = NULL;
+	XG_COV(prefill_function_count) = 0;
+	XG_COV(prefill_class_count) = 0;
 
 	/* Initialize visited classes and branches hash */
-	XG_COV(visited_classes) = xdebug_hash_alloc(2048, NULL);
 	XG_COV(visited_branches) = xdebug_hash_alloc(2048, NULL);
 
 	XG_COV(paths_stack) = xdebug_path_info_ctor();
@@ -1243,8 +1224,6 @@ void xdebug_coverage_post_deactivate(void)
 	xdebug_hash_destroy(XG_COV(code_coverage_info));
 	XG_COV(code_coverage_info) = NULL;
 
-	xdebug_hash_destroy(XG_COV(visited_classes));
-	XG_COV(visited_classes) = NULL;
 	xdebug_hash_destroy(XG_COV(visited_branches));
 	XG_COV(visited_branches) = NULL;
 
