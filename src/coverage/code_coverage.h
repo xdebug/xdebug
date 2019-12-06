@@ -37,12 +37,13 @@ typedef struct _xdebug_coverage_globals_t {
 	int           dead_code_analysis_tracker_offset;
 	long          dead_code_last_start_id;
 	long          code_coverage_filter_offset;
+	size_t        prefill_function_count;
+	size_t        prefill_class_count;
 	char                 *previous_filename;
 	xdebug_coverage_file *previous_file;
 	char                 *previous_mark_filename;
 	xdebug_coverage_file *previous_mark_file;
 	xdebug_path_info     *paths_stack;
-	xdebug_hash          *visited_classes;
 	xdebug_hash          *visited_branches;
 	struct {
 		unsigned int  size;
