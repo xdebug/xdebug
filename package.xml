@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-07-25</date>
- <time>15:20:11</time>
+ <date>2019-12-06</date>
+ <time>11:20:44</time>
  <version>
-  <release>2.8.0beta1</release>
-  <api>2.8.0beta1</api>
+  <release>2.9.0RC1</release>
+  <api>2.9.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -45,19 +45,16 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Jul 25, 2019 - xdebug 2.8.0beta1
+Fri, Dec  6, 2019 - xdebug 2.9.0RC1
 
-= Fixed bugs:
++ Improvements:
 
-  - Fixed issue #1679: Code Coverage misses static property as function
-    argument
-  - Fixed issue #1682: Invalid NULL byte in debugger XML with anonymous classes
-  - Fixed issue #1683: Xdebug does not compile due to changes to ASSIGN_ADD and
-    friends operations in PHP 7.4alpha3
-  - Fixed issue #1687: Use appropriate process ID for logging and "right
-    process" tracking
-  - Fixed issue #1688: Improve performance by using getpid() only when step
-    debugger is active
+  - Fixed issue #1723: Class/function pre-analysis for code coverage speed improvements
+
+- Removed features:
+
+  - Fixed issue #1301: Removed aggregated profiler feature
+  - Fixed issue #1720: Remove superfluous xdebug.remote_handler setting
  </notes>
 
  <contents>
