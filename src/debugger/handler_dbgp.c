@@ -1028,7 +1028,7 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval)
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
 	zend_object       *original_exception = EG(exception);
-	jmp_buf           *original_bailout = EG(bailout);
+	JMP_BUF           *original_bailout = EG(bailout);
 
 	/* Remember error reporting level and track errors */
 	XG_BASE(error_reporting_override) = EG(error_reporting);
@@ -1776,7 +1776,7 @@ static int xdebug_add_filtered_symboltable_var(zval *symbol, int num_args, va_li
 	 * tables, but for now, we'll just ignore them. */
 	if (!hash_key->key) { return 0; }
 
-	if (!hash_key->key->val || hash_key->key->len == 0) { return 0; }
+	if (hash_key->key->val[0] == '\0') { return 0; }
 
 	if (strcmp("argc", hash_key->key->val) == 0) { return 0; }
 	if (strcmp("argv", hash_key->key->val) == 0) { return 0; }
@@ -2781,12 +2781,12 @@ static void line_breakpoint_resolve_helper(xdebug_con *context, function_stack_e
 	 * line-span is *smaller* then the one that was used for the already
 	 * resolved case */
 	if (brk_info->resolved == XDEBUG_BRK_RESOLVED && !function_span_is_smaller_than_resolved_span(fse->op_array, &brk_info->resolved_span)) {
-		context->handler->log(XDEBUG_LOG_DEBUG, "R: Resolved span (%d-%d) is not smaller than function span (%d-%d)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, fse->op_array->line_start, fse->op_array->line_end);
+		context->handler->log(XDEBUG_LOG_DEBUG, "R: Resolved span (%ld-%ld) is not smaller than function span (%u-%u)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, fse->op_array->line_start, fse->op_array->line_end);
 		return;
 	} else if (brk_info->resolved != XDEBUG_BRK_RESOLVED) {
 		context->handler->log(XDEBUG_LOG_DEBUG, "I: Has not been resolved yet\n");
 	} else {
-		context->handler->log(XDEBUG_LOG_DEBUG, "I: Resolved span (%d-%d) is smaller than function span (%d-%d)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, fse->op_array->line_start, fse->op_array->line_end);
+		context->handler->log(XDEBUG_LOG_DEBUG, "I: Resolved span (%ld-%ld) is smaller than function span (%u-%u)\n", brk_info->resolved_span.start, brk_info->resolved_span.end, fse->op_array->line_start, fse->op_array->line_end);
 	}
 
 	/* If we're not in a normal function or method: */
