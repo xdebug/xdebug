@@ -85,7 +85,7 @@ static int xdebug_array_element_export_text_ansi(zval *zv_nptr, zend_ulong index
 	return 0;
 }
 
-static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, int mode, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
+static int xdebug_object_element_export_text_ansi(zval *object, zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, int mode, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
 {
 	zval **zv = &zv_nptr;
 
@@ -98,14 +98,22 @@ static int xdebug_object_element_export_text_ansi(zval *zv_nptr, zend_ulong inde
 			char       *class_name;
 			xdebug_str *property_name;
 			const char *modifier;
+			xdebug_str *property_type = NULL;
+
+#if PHP_VERSION_ID >= 70400
+			property_type = xdebug_get_property_type(object, zv_nptr);
+#endif
 
 			property_name = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &modifier, &class_name);
-			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s $",
-			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_RESET), 1);
+			xdebug_str_add(str, xdebug_sprintf("%s%s%s%s%s%s%s $",
+			               ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, modifier, ANSI_COLOR_BOLD_OFF, property_type ? " " : "", property_type ? property_type->d : "", ANSI_COLOR_RESET), 1);
 			xdebug_str_add_str(str, property_name);
 			xdebug_str_add(str, xdebug_sprintf(" %s=>%s\n",
 			               ANSI_COLOR_POINTER, ANSI_COLOR_RESET), 1);
 
+			if (property_type) {
+				xdebug_str_free(property_type);
+			}
 			xdebug_str_free(property_name);
 			xdfree(class_name);
 		} else {
@@ -141,6 +149,10 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 
 	if (debug_zval) {
 		xdebug_add_variable_attributes(str, *struc, XDEBUG_VAR_ATTR_TEXT);
+	}
+	if (Z_TYPE_P(*struc) == IS_INDIRECT) {
+		tmpz = Z_INDIRECT_P(*struc);
+		struc = &tmpz;
 	}
 	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);
@@ -243,8 +255,8 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 
 					xdebug_zend_hash_apply_protection_begin(myht);
 
-					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
-						xdebug_object_element_export_text_ansi(val, num, key, level, mode, str, debug_zval, options);
+					ZEND_HASH_FOREACH_KEY_VAL(myht, num, key, val) {
+						xdebug_object_element_export_text_ansi(*struc, val, num, key, level, mode, str, debug_zval, options);
 					} ZEND_HASH_FOREACH_END();
 
 					xdebug_zend_hash_apply_protection_end(myht);
