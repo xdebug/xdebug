@@ -26,5 +26,7 @@ typedef struct _xdebug_trace_html_context
 	char *trace_filename;
 } xdebug_trace_html_context;
 
+xdebug_trace_html_context *xdebug_trace_html_context_ctor(FILE *trace_file, char *used_fname);
+void xdebug_trace_html_context_dtor(xdebug_trace_html_context *);
 extern xdebug_trace_handler_t xdebug_trace_handler_html;
 #endif

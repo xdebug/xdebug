@@ -27,14 +27,38 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
+xdebug_trace_textual_context *xdebug_trace_textual_context_ctor(FILE *trace_file, char *used_fname)
+{
+	xdebug_trace_textual_context *tmp_textual_context;
+
+	tmp_textual_context = xdmalloc(sizeof(xdebug_trace_textual_context));
+	tmp_textual_context->trace_file = trace_file;
+	tmp_textual_context->trace_filename = used_fname;
+
+	return tmp_textual_context;
+}
+
+void xdebug_trace_textual_context_dtor(xdebug_trace_textual_context *context)
+{
+	fclose(context->trace_file);
+	context->trace_file = NULL;
+	xdfree(context->trace_filename);
+
+	xdfree(context);
+}
 void *xdebug_trace_textual_init(char *fname, char *script_filename, long options)
 {
 	xdebug_trace_textual_context *tmp_textual_context;
+	FILE *tmp_file;
 	char *used_fname;
 
-	tmp_textual_context = xdmalloc(sizeof(xdebug_trace_textual_context));
-	tmp_textual_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname);
-	tmp_textual_context->trace_filename = used_fname;
+	tmp_file = xdebug_trace_open_file(fname, script_filename, options, (char **) &used_fname);
+
+	if (!tmp_file) {
+		return NULL;
+	}
+
+	tmp_textual_context = xdebug_trace_textual_context_ctor(tmp_file, used_fname);
 
 	return tmp_textual_context->trace_file ? tmp_textual_context : NULL;
 }
@@ -42,12 +66,7 @@ void *xdebug_trace_textual_init(char *fname, char *script_filename, long options
 void xdebug_trace_textual_deinit(void *ctxt)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-
-	fclose(context->trace_file);
-	context->trace_file = NULL;
-	xdfree(context->trace_filename);
-
-	xdfree(context);
+	xdebug_trace_textual_context_dtor(context);
 }
 
 void xdebug_trace_textual_write_header(void *ctxt)
