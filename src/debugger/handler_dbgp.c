@@ -427,14 +427,14 @@ static xdebug_str* return_eval_source(char *id, int begin, int end)
 	char             *key;
 	xdebug_str       *joined;
 	xdebug_eval_info *ei;
-	xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	xdebug_arg       *parts;
 
 	if (begin < 0) {
 		begin = 0;
 	}
 	key = create_eval_key_id(atoi(id));
 	if (xdebug_hash_find(XG_DBG(context).eval_id_lookup, key, strlen(key), (void *) &ei)) {
-		xdebug_arg_init(parts);
+		parts = xdebug_arg_ctor();
 		xdebug_explode("\n", ei->contents, parts, end + 2);
 		joined = xdebug_join("\n", parts, begin, end);
 		xdebug_arg_dtor(parts);
@@ -637,13 +637,13 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk_info = NULL;
-	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	xdebug_arg           *parts;
 
 	switch (type) {
 		case XDEBUG_BREAKPOINT_TYPE_LINE:
 		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL:
 			/* First we split the key into filename and linenumber */
-			xdebug_arg_init(parts);
+			parts = xdebug_arg_ctor();
 			xdebug_explode("$", hkey, parts, -1);
 
 			/* Second we loop through the list of file/line breakpoints to
@@ -681,14 +681,14 @@ static int breakpoint_remove(int type, char *hkey)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk_info = NULL;
-	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	xdebug_arg           *parts;
 	int                   retval = FAILURE;
 
 	switch (type) {
 		case XDEBUG_BREAKPOINT_TYPE_LINE:
 		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL:
 			/* First we split the key into filename and linenumber */
-			xdebug_arg_init(parts);
+			parts = xdebug_arg_ctor();
 			xdebug_explode("$", hkey, parts, -1);
 
 			/* Second we loop through the list of file/line breakpoints to
@@ -875,6 +875,7 @@ DBGP_FUNC(breakpoint_set)
 	brk_info->hit_condition = XDEBUG_HIT_DISABLED;
 
 	if (!CMD_OPTION_SET('t')) {
+		xdfree(brk_info);
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	} else {
 		int i;
@@ -889,6 +890,7 @@ DBGP_FUNC(breakpoint_set)
 		}
 
 		if (!found) {
+			xdfree(brk_info);
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		}
 	}

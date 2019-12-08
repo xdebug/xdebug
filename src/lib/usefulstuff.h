@@ -29,17 +29,6 @@ typedef struct xdebug_arg {
 	arg->c    = 0;                \
 }
 
-#define xdebug_arg_dtor(arg) {     \
-	int adi;                       \
-	for (adi = 0; adi < arg->c; adi++) { \
-		xdfree(arg->args[adi]);    \
-	}                              \
-	if (arg->args) {               \
-		xdfree(arg->args);         \
-	}                              \
-	xdfree(arg);                   \
-}
-
 xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
 void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit);
 char* xdebug_memnstr(char *haystack, const char *needle, int needle_len, char *end);
@@ -52,5 +41,7 @@ FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **
 int xdebug_format_output_filename(char **filename, char *format, char *script_name);
 int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno);
 int xdebug_format_filename(char **formatted_name, const char *format, const char *default_format, const char *filename);
+xdebug_arg *xdebug_arg_ctor(void);
+void xdebug_arg_dtor(xdebug_arg *arg);
 
 #endif

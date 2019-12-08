@@ -700,3 +700,28 @@ int xdebug_format_filename(char **formatted_name, const char *fmt, const char *d
 
 	return fname.l;
 }
+
+xdebug_arg *xdebug_arg_ctor(void)
+{
+	xdebug_arg *arg;
+
+	arg = (xdebug_arg *)xdmalloc(sizeof(xdebug_arg));
+	if (!arg) {
+		return NULL;
+	}
+
+	xdebug_arg_init(arg);
+	return arg;
+}
+
+void xdebug_arg_dtor(xdebug_arg *arg)
+{
+	int adi;
+	for (adi = 0; adi < arg->c; adi++) {
+		xdfree(arg->args[adi]);
+	}
+	if (arg->args) {
+		xdfree(arg->args);
+	}
+	xdfree(arg);
+}
