@@ -853,29 +853,10 @@ DBGP_FUNC(breakpoint_set)
 	size_t                new_length = 0;
 	XDEBUG_STR_SWITCH_DECL;
 
-	brk_info = xdmalloc(sizeof(xdebug_brk_info));
-	brk_info->id = -1;
-	brk_info->brk_type = -1;
-	brk_info->resolved = XDEBUG_BRK_UNRESOLVED;
-	brk_info->file = NULL;
-	brk_info->file_len = 0;
-	brk_info->original_lineno = 0;
-	brk_info->resolved_lineno = 0;
-	brk_info->resolved_span.start = XDEBUG_RESOLVED_SPAN_MIN;
-	brk_info->resolved_span.end   = XDEBUG_RESOLVED_SPAN_MAX;
-	brk_info->classname = NULL;
-	brk_info->functionname = NULL;
-	brk_info->function_break_type = 0;
-	brk_info->exceptionname = NULL;
-	brk_info->condition = NULL;
-	brk_info->disabled = 0;
-	brk_info->temporary = 0;
-	brk_info->hit_count = 0;
-	brk_info->hit_value = 0;
-	brk_info->hit_condition = XDEBUG_HIT_DISABLED;
+	brk_info = xdebug_brk_info_ctor();
 
 	if (!CMD_OPTION_SET('t')) {
-		xdfree(brk_info);
+		xdebug_brk_info_dtor(brk_info);
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	} else {
 		int i;
@@ -890,7 +871,7 @@ DBGP_FUNC(breakpoint_set)
 		}
 
 		if (!found) {
-			xdfree(brk_info);
+			xdebug_brk_info_dtor(brk_info);
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		}
 	}
