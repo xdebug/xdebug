@@ -33,19 +33,19 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-12-06</date>
- <time>11:20:44</time>
+ <date>2019-12-09</date>
+ <time>10:44:53</time>
  <version>
-  <release>2.9.0RC1</release>
-  <api>2.9.0RC1</api>
+  <release>2.9.0</release>
+  <api>2.9.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, Dec  6, 2019 - xdebug 2.9.0RC1
+Mon, Dec  9, 2019 - xdebug 2.9.0
 
 + Improvements:
 
@@ -55,6 +55,11 @@ Fri, Dec  6, 2019 - xdebug 2.9.0RC1
 
   - Fixed issue #1301: Removed aggregated profiler feature
   - Fixed issue #1720: Remove superfluous xdebug.remote_handler setting
+
+= Fixed bugs:
+
+  - Fixex issue #1722: Build warning issues on FreeBSD
+  - Fixed issue #1724: Missing property types and uninitialised values in variable dumping routines
  </notes>
 
  <contents>
