@@ -58,7 +58,7 @@ Mon, Dec  9, 2019 - xdebug 2.9.0
 
 = Fixed bugs:
 
-  - Fixex issue #1722: Build warning issues on FreeBSD
+  - Fixed issue #1722: Build warning issues on FreeBSD
   - Fixed issue #1724: Missing property types and uninitialised values in variable dumping routines
  </notes>
 
