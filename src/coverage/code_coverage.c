@@ -1030,6 +1030,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_NEW);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXT_FCALL_BEGIN);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_METHOD_CALL);
+		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_STATIC_METHOD_CALL);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_FCALL);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CATCH);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BOOL);
@@ -1140,6 +1141,7 @@ void xdebug_coverage_mshutdown(void)
 		zend_set_user_opcode_handler(ZEND_NEW, NULL);
 		zend_set_user_opcode_handler(ZEND_EXT_FCALL_BEGIN, NULL);
 		zend_set_user_opcode_handler(ZEND_INIT_METHOD_CALL, NULL);
+		zend_set_user_opcode_handler(ZEND_INIT_STATIC_METHOD_CALL, NULL);
 		zend_set_user_opcode_handler(ZEND_INIT_FCALL, NULL);
 		zend_set_user_opcode_handler(ZEND_CATCH, NULL);
 		zend_set_user_opcode_handler(ZEND_BOOL, NULL);
