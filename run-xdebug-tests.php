@@ -323,7 +323,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		'session' => array('session.auto_start=0'),
 		'tidy' => array('tidy.clean_output=0'),
 		'zlib' => array('zlib.output_compression=Off'),
-		'xdebug' => array('xdebug.default_enable=0','xdebug.remote_enable=0'),
+		'xdebug' => array('xdebug.default_enable=0','xdebug.remote_enable=0','xdebug.remote_log_level=20'),
 		'mbstring' => array('mbstring.func_overload=0'),
 	);
 

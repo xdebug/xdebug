@@ -37,6 +37,11 @@ typedef struct _xdebug_debugger_globals_t {
 	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
 	FILE         *remote_log_file;  /* File handler for protocol log */
 
+	/* breakpoint resolving */
+	size_t        function_count;
+	size_t        class_count;
+	xdebug_hash  *breakable_lines_map;
+
 	/* output redirection */
 	int           stdout_mode;
 } xdebug_debugger_globals_t;
@@ -66,6 +71,8 @@ int xdebug_debugger_bailout_if_no_exec_requested(void);
 void xdebug_debugger_set_program_name(zend_string *filename);
 void xdebug_debugger_register_eval(function_stack_entry *fse);
 
+xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa);
+
 void xdebug_debugger_statement_call(char *file, int file_len, int lineno);
 void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval *file, zval *line, zval *code, char *code_str, zval *message);
 void xdebug_debugger_error_cb(const char *error_filename, int error_lineno, int type, char *error_type_str, char *buffer);
@@ -77,6 +84,8 @@ void xdebug_debugger_minit(void);
 void xdebug_debugger_minfo(void);
 void xdebug_debugger_rinit(void);
 void xdebug_debugger_post_deactivate(void);
+
+void xdebug_debugger_compile_file(zend_op_array *op_array);
 
 PHP_FUNCTION(xdebug_break);
 

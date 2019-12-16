@@ -438,31 +438,6 @@ static void xdebug_analyse_oparray(zend_op_array *opa, xdebug_set *set, xdebug_b
 	}
 }
 
-void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
-{
-	int closure = 0;
-
-	memset(tmp, 0, sizeof(xdebug_func));
-
-	if (opa->function_name) {
-		if (xdebug_function_name_is_closure(STR_NAME_VAL(opa->function_name))) {
-			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
-			closure = 1;
-		} else {
-			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
-		}
-	} else {
-		tmp->function = xdstrdup("{main}");
-	}
-
-	if (opa->scope && !closure) {
-		tmp->type = XFUNC_MEMBER;
-		tmp->class = xdstrdup(STR_NAME_VAL(opa->scope->name));
-	} else {
-		tmp->type = XFUNC_NORMAL;
-	}
-}
-
 static void prefill_from_oparray(char *filename, zend_op_array *op_array)
 {
 	unsigned int i;
