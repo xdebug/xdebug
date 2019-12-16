@@ -30,6 +30,23 @@ struct _fd_buf {
 	int   buffer_size;
 };
 
+typedef struct _xdebug_function_lines_map_item xdebug_function_lines_map_item;
+
+struct _xdebug_function_lines_map_item {
+	size_t      line_start;
+	size_t      line_end;
+	size_t      line_span;
+	xdebug_set *lines_breakable;
+};
+
+typedef struct _xdebug_lines_list xdebug_lines_list;
+
+struct _xdebug_lines_list {
+	size_t count; /* How many function/line mappings are in the list */
+	size_t size;  /* How many function/line mappings are allocated */
+	xdebug_function_lines_map_item **functions;
+};
+
 #define XG_DBG(v)      (XG(globals.debugger.v))
 #define XINI_DBG(v)    (XG(settings.debugger.v))
 

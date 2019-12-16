@@ -8,6 +8,7 @@ check_reqs('dbgp; !win');
 --INI--
 xdebug.remote_enable=1
 xdebug.remote_log=/tmp/remote-log1.txt
+xdebug.remote_log_level=20
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=0
 xdebug.remote_host=doesnotexist

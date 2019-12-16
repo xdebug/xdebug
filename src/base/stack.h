@@ -28,6 +28,7 @@ char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char
 void xdebug_func_dtor_by_ref(xdebug_func *elem); /* TODO: Remove this API */
 void xdebug_func_dtor(xdebug_func *elem);
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata);
+void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa);
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type);
 void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str);
 void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno);
