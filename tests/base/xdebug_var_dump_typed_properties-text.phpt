@@ -46,7 +46,13 @@ class foo#1 (6) {
   public ?Fibble $z =>
   *uninitialized*
   public DateTime $a =>
-  class DateTime#2 (0) {
+  class DateTime#%d (%d) {
+    public $date =>
+    string(26) "%s"
+    public $timezone_type =>
+    int(3)
+    public $timezone =>
+    string(3) "UTC"
   }
 }
 %sxdebug_var_dump_typed_properties-text.php:15:
