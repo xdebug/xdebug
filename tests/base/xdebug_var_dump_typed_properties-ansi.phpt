@@ -46,7 +46,13 @@ var_dump(new class{public string $x;});
   [32m[1mpublic[22m ?Fibble[0m $z [0m=>[0m
   [34m*uninitialized*[0m
   [32m[1mpublic[22m DateTime[0m $a [0m=>[0m
-  [1mclass[22m [31mDateTime[0m#2 ([32m0[0m) {
+  [1mclass[22m [31mDateTime[0m#%d ([32m3[0m) {
+    [32m[1mpublic[22m[0m $date [0m=>[0m
+    [1mstring[22m([32m26[0m) "[31m%s[0m"
+    [32m[1mpublic[22m[0m $timezone_type [0m=>[0m
+    [1mint[22m([32m3[0m)
+    [32m[1mpublic[22m[0m $timezone [0m=>[0m
+    [1mstring[22m([32m3[0m) "[31mUTC[0m"
   }
 }
 [1m%sxdebug_var_dump_typed_properties-ansi.php[22m:[1m15[22m:
