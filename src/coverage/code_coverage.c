@@ -1023,6 +1023,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXT_STMT);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR_NO_REF);
+		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR_NO_REF_EX);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_REF);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAL);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAL_EX);
@@ -1134,6 +1135,7 @@ void xdebug_coverage_mshutdown(void)
 		zend_set_user_opcode_handler(ZEND_EXT_STMT, NULL);
 		zend_set_user_opcode_handler(ZEND_SEND_VAR, NULL);
 		zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF, NULL);
+		zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF_EX, NULL);
 		zend_set_user_opcode_handler(ZEND_SEND_REF, NULL);
 		zend_set_user_opcode_handler(ZEND_SEND_VAL, NULL);
 		zend_set_user_opcode_handler(ZEND_SEND_VAL_EX, NULL);
