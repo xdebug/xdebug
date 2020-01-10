@@ -185,7 +185,7 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
  <dependencies>
   <required>
    <php>
-    <min>7.0.0</min>
+    <min>7.1.0</min>
    </php>
    <pearinstaller>
     <min>1.9.1</min>
