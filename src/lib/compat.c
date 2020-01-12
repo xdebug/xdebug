@@ -370,19 +370,19 @@ zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int fla
 
 void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly)
 {
-	zend_string *name_s   = zend_string_init(name, name_len, 0);
-	zend_string *value_s  = zend_string_init(value, value_len, 0);
-	zend_string *path_s   = zend_string_init(path, path_len, 0);
-	zend_string *domain_s = zend_string_init(domain, domain_len, 0);
+	zend_string *name_s   = name ? zend_string_init(name, name_len, 0) : NULL;
+	zend_string *value_s  = value ? zend_string_init(value, value_len, 0) : NULL;
+	zend_string *path_s   = path ? zend_string_init(path, path_len, 0) : NULL;
+	zend_string *domain_s = domain ? zend_string_init(domain, domain_len, 0) : NULL;
 #if PHP_VERSION_ID >= 70300
 	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, httponly, NULL, url_encode);
 #else
 	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, url_encode, httponly);
 #endif
-	zend_string_release(name_s);
-	zend_string_release(value_s);
-	zend_string_release(path_s);
-	zend_string_release(domain_s);
+	name ? zend_string_release(name_s) : 0;
+	value ? zend_string_release(value_s) : 0;
+	path ? zend_string_release(path_s) : 0;
+	domain ? zend_string_release(domain_s) : 0;
 }
 
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len)
