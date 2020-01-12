@@ -135,7 +135,9 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 	HashTable *myht;
 	char*     tmp_str;
 	int       tmp_len;
+#if PHP_VERSION_ID < 70400
 	int       is_temp;
+#endif
 	zend_ulong num;
 	zend_string *key;
 	zval *val;
@@ -239,7 +241,11 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 			break;
 
 		case IS_OBJECT:
+#if PHP_VERSION_ID >= 70400
+			myht = xdebug_objdebug_pp(struc);
+#else
 			myht = xdebug_objdebug_pp(struc, &is_temp);
+#endif
 
 			if (!xdebug_zend_hash_is_recursive(myht)) {
 				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n",
@@ -267,10 +273,11 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 			} else {
 				xdebug_str_add(str, xdebug_sprintf("%*s...\n", (level * 2), ""), 1);
 			}
-			if (is_temp) {
-				zend_hash_destroy(myht);
-				efree(myht);
-			}
+#if PHP_VERSION_ID >= 70400
+			zend_release_properties(myht);
+#else
+			xdebug_var_maybe_destroy_ht(myht, is_temp);
+#endif
 			break;
 
 		case IS_RESOURCE: {

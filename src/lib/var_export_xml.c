@@ -567,7 +567,9 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			HashTable          *merged_hash;
 			xdebug_str         *class_name;
 			zend_class_entry   *ce;
+#if PHP_VERSION_ID < 70400 
 			int                 is_temp;
+#endif
 			zend_property_info *zpi_val;
 
 			ALLOC_HASHTABLE(merged_hash);
@@ -592,7 +594,11 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			xdebug_zend_hash_apply_protection_end(&ce->properties_info);
 
 			/* Adding normal properties */
+#if PHP_VERSION_ID >= 70400
+			myht = xdebug_objdebug_pp(struc);
+#else
 			myht = xdebug_objdebug_pp(struc, &is_temp);
+#endif
 			if (myht) {
 				zval *tmp_val;
 
@@ -637,8 +643,11 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			zend_hash_destroy(merged_hash);
 			FREE_HASHTABLE(merged_hash);
 			xdebug_str_free(class_name);
-
+#if PHP_VERSION_ID >= 70400
+			zend_release_properties(myht);
+#else
 			xdebug_var_maybe_destroy_ht(myht, is_temp);
+#endif
 			break;
 		}
 
