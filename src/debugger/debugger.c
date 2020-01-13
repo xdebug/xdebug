@@ -22,11 +22,14 @@
 #include "zend_exceptions.h"
 
 #include "debugger_private.h"
+#include "base/stack.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
 static size_t (*xdebug_orig_ub_write)(const char *string, size_t len);
 static size_t xdebug_ub_write(const char *string, size_t length);
+
+static void xdebug_line_list_dtor(xdebug_lines_list *line_list);
 
 PHP_INI_MH(OnUpdateDebugMode)
 {
@@ -122,14 +125,6 @@ void xdebug_debugger_set_program_name(zend_string *filename)
 		XG_DBG(context).program_name = xdstrdup(STR_NAME_VAL(filename));
 	}
 }
-
-void xdebug_debugger_register_eval(function_stack_entry *fse)
-{
-	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(context).handler->register_eval_id) {
-		XG_DBG(context).handler->register_eval_id(&(XG_DBG(context)), fse);
-	}
-}
-
 
 /* Remote debugger helper functions */
 static int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
@@ -312,11 +307,11 @@ void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval 
 				ce_ptr = ce_ptr->parent;
 			} while (!exception_breakpoint_found && ce_ptr);
 		}
-
+#if 0
 		if (XG_DBG(context).resolved_breakpoints && exception_breakpoint_found) {
-			XG_DBG(context).handler->resolve_breakpoints(&(XG_DBG(context)), XDEBUG_BREAKPOINT_TYPE_EXCEPTION, extra_brk_info);
+			XG_DBG(context).handler->resolve_breakpoints(&(XG_DBG(context)), extra_brk_info);
 		}
-
+#endif
 		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
 			if (!XG_DBG(context).handler->remote_breakpoint(
 				&(XG_DBG(context)), XG_BASE(stack),
@@ -369,11 +364,6 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	xdebug_brk_info *extra_brk_info = NULL;
 	char            *tmp_name = NULL;
 	size_t           tmp_len = 0;
-
-	/* When we first enter a user defined function, we need to resolve breakpoints for this function */
-	if (XG_DBG(context).resolved_breakpoints && breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL && fse->user_defined == XDEBUG_USER_DEFINED) {
-		XG_DBG(context).handler->resolve_breakpoints(&(XG_DBG(context)), XDEBUG_BREAKPOINT_TYPE_LINE|XDEBUG_BREAKPOINT_TYPE_CONDITIONAL|XDEBUG_BREAKPOINT_TYPE_CALL|XDEBUG_BREAKPOINT_TYPE_RETURN, fse);
-	}
 
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
@@ -539,7 +529,9 @@ void xdebug_debugger_rinit(void)
 	}
 
 	xdebug_mark_debug_connection_not_active();
+
 	XG_DBG(breakpoints_allowed) = 1;
+	XG_DBG(breakable_lines_map) = xdebug_hash_alloc(2048, (xdebug_hash_dtor_t) xdebug_line_list_dtor);
 	XG_DBG(remote_log_file) = NULL;
 
 	/* Initialize some debugger context properties */
@@ -571,7 +563,174 @@ void xdebug_debugger_post_deactivate(void)
 		xdfree(XG_DBG(context).list.last_file);
 		XG_DBG(context).list.last_file = NULL;
 	}
+
+	xdebug_hash_destroy(XG_DBG(breakable_lines_map));
 }
+
+xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa)
+{
+	int         i;
+	xdebug_set *tmp;
+
+	tmp = xdebug_set_create(opa->line_end);
+
+	for (i = 0; i < opa->last; i++ ) {
+		if (opa->opcodes[i].opcode == ZEND_EXT_STMT ) {
+			xdebug_set_add(tmp, opa->opcodes[i].lineno);
+		}
+	}
+
+	return tmp;
+}
+
+
+/* {{{ function/lines map collection helpers */
+static void xdebug_function_lines_map_dtor(xdebug_function_lines_map_item *lines_map)
+{
+	xdebug_set_free(lines_map->lines_breakable);
+	xdfree(lines_map);
+}
+
+static void xdebug_line_list_dtor(xdebug_lines_list *line_list)
+{
+	size_t i;
+
+	for (i  = 0; i < line_list->count; i++) {
+		xdebug_function_lines_map_dtor(line_list->functions[i]);
+	}
+	xdfree(line_list->functions);
+	xdfree(line_list);
+}
+
+static xdebug_lines_list *get_file_function_line_list(zend_string *filename)
+{
+	xdebug_lines_list *lines_list;
+
+	if (xdebug_hash_find(XG_DBG(breakable_lines_map), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &lines_list)) {
+		return lines_list;
+	}
+
+	lines_list = xdmalloc(sizeof(xdebug_lines_list));
+	lines_list->count = 0;
+	lines_list->size  = 0;
+	lines_list->functions = NULL;
+
+	xdebug_hash_add(XG_DBG(breakable_lines_map), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) lines_list);
+
+	return lines_list;
+}
+
+static void add_function_to_lines_list(xdebug_lines_list *lines_list, zend_op_array *opa)
+{
+	xdebug_function_lines_map_item *map_item = xdmalloc(sizeof(xdebug_function_lines_map_item));
+
+	map_item->line_start = opa->line_start;
+	map_item->line_end   = opa->line_end;
+	map_item->line_span  = opa->line_end - opa->line_start;
+	map_item->lines_breakable = xdebug_debugger_get_breakable_lines_from_oparray(opa);
+
+	if (lines_list->count >= lines_list->size) {
+		lines_list->size = lines_list->size == 0 ? 16 : lines_list->size * 2;
+		lines_list->functions = xdrealloc(lines_list->functions, sizeof(xdebug_function_lines_map_item *) * lines_list->size);
+	}
+	lines_list->functions[lines_list->count] = map_item;
+	lines_list->count++;
+}
+/* }}} */
+
+static void resolve_breakpoints_for_function(xdebug_lines_list *lines_list, zend_op_array *opa)
+{
+	if (!ZEND_USER_CODE(opa->type)) {
+		return;
+	}
+
+	add_function_to_lines_list(lines_list, opa);
+}
+
+static void resolve_breakpoints_for_class(xdebug_lines_list *file_function_lines_list, zend_class_entry *ce)
+{
+	zend_op_array    *function_op_array;
+
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, function_op_array) {
+		resolve_breakpoints_for_function(file_function_lines_list, function_op_array);
+	} ZEND_HASH_FOREACH_END();
+}
+
+void xdebug_debugger_compile_file(zend_op_array *op_array)
+{
+	zend_op_array    *function_op_array;
+	zend_class_entry *class_entry;
+	xdebug_lines_list *file_function_lines_list;
+
+	if (!XINI_DBG(remote_enable)) {
+		return;
+	}
+
+	file_function_lines_list = get_file_function_line_list(op_array->filename);
+
+	ZEND_HASH_REVERSE_FOREACH_PTR(CG(function_table), function_op_array) {
+		if (_idx == XG_DBG(function_count)) {
+			break;
+		}
+		resolve_breakpoints_for_function(file_function_lines_list, function_op_array);
+	} ZEND_HASH_FOREACH_END();
+	XG_DBG(function_count) = CG(function_table)->nNumUsed;
+
+	ZEND_HASH_REVERSE_FOREACH_PTR(CG(class_table), class_entry) {
+		if (_idx == XG_DBG(class_count)) {
+			break;
+		}
+		resolve_breakpoints_for_class(file_function_lines_list, class_entry);
+	} ZEND_HASH_FOREACH_END();
+	XG_DBG(class_count) = CG(class_table)->nNumUsed;
+
+	add_function_to_lines_list(file_function_lines_list, op_array);
+
+	if (!xdebug_is_debug_connection_active_for_current_pid()) {
+		return;
+	}
+
+	XG_DBG(context).handler->resolve_breakpoints(
+		&(XG_DBG(context)),
+		op_array->filename
+	);
+}
+
+static void resolve_breakpoints_for_eval(int eval_id, zend_op_array *opa)
+{
+	xdebug_lines_list *lines_list;
+	char *eval_filename = xdebug_sprintf("dbgp://%d", eval_id);
+	zend_string *eval_string = zend_string_init(eval_filename, strlen(eval_filename), 0);
+	
+	lines_list = get_file_function_line_list(eval_string);
+	add_function_to_lines_list(lines_list, opa);
+		
+	resolve_breakpoints_for_function(lines_list, opa);
+
+	if (!xdebug_is_debug_connection_active_for_current_pid()) {
+		zend_string_release(eval_string);
+		xdfree(eval_filename);
+		return;
+	}
+
+	XG_DBG(context).handler->resolve_breakpoints(
+		&(XG_DBG(context)),
+		eval_string
+	);
+		
+	zend_string_release(eval_string);
+	xdfree(eval_filename);
+}
+
+void xdebug_debugger_register_eval(function_stack_entry *fse)
+{
+	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(context).handler->register_eval_id) {
+		int eval_id = XG_DBG(context).handler->register_eval_id(&(XG_DBG(context)), fse);
+
+		resolve_breakpoints_for_eval(eval_id, fse->op_array);
+	}
+}
+
 
 PHP_FUNCTION(xdebug_break)
 {

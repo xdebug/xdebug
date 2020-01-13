@@ -148,6 +148,7 @@ static zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int typ
 
 	if (op_array) {
 		xdebug_coverage_compile_file(op_array);
+		xdebug_debugger_compile_file(op_array);
 	}
 	return op_array;
 }
@@ -196,11 +197,6 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 		if (e->profile.call_list) {
 			xdebug_llist_destroy(e->profile.call_list, NULL);
 			e->profile.call_list = NULL;
-		}
-
-		if (e->executable_lines_cache) {
-			xdebug_set_free(e->executable_lines_cache);
-			e->executable_lines_cache = NULL;
 		}
 
 		xdfree(e);

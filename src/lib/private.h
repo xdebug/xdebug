@@ -165,7 +165,6 @@ typedef struct _function_stack_entry {
 	/* function properties */
 	xdebug_func  function;
 	int          user_defined;
-	xdebug_set  *executable_lines_cache;
 
 	/* location properties */
 	unsigned int level;

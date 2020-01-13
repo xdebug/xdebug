@@ -92,13 +92,7 @@ struct _xdebug_con {
 #define XDEBUG_HIT_EQUAL          2
 #define XDEBUG_HIT_MOD            3
 
-#define XDEBUG_RESOLVED_SPAN_MIN          -1
-#define XDEBUG_RESOLVED_SPAN_MAX  4294967295
-
-struct _xdebug_brk_span {
-	long start;
-	long end;
-};
+#define XDEBUG_RESOLVED_SPAN_MAX  2147483647
 
 struct _xdebug_brk_info {
 	int                   id;
@@ -112,7 +106,6 @@ struct _xdebug_brk_info {
 	int                   file_len;
 	int                   original_lineno; /* line number that was set through breakpoint_set */
 	int                   resolved_lineno; /* line number after resolving, initialised with 'original_lineno' */
-	xdebug_brk_span       resolved_span;
 	char                 *condition;
 	int                   disabled;
 	int                   temporary;
@@ -138,7 +131,7 @@ struct _xdebug_remote_handler {
 	/* Breakpoints */
 	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, const char *file, int filename_len, int lineno);
 	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message);
-	int (*resolve_breakpoints)(xdebug_con *h, int type, void *data);
+	int (*resolve_breakpoints)(xdebug_con *h, zend_string *opa);
 
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length);

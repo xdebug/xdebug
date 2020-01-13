@@ -912,6 +912,32 @@ void xdebug_func_dtor(xdebug_func *elem)
 	xdfree(elem);
 }
 
+void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
+{
+	int closure = 0;
+
+	memset(tmp, 0, sizeof(xdebug_func));
+
+	if (opa->function_name) {
+		if (xdebug_function_name_is_closure(STR_NAME_VAL(opa->function_name))) {
+			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
+			closure = 1;
+		} else {
+			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
+		}
+	} else {
+		tmp->function = xdstrdup("{main}");
+		tmp->type = XFUNC_MAIN;
+	}
+
+	if (opa->scope && !closure) {
+		tmp->type = XFUNC_MEMBER;
+		tmp->class = xdstrdup(STR_NAME_VAL(opa->scope->name));
+	} else {
+		tmp->type = XFUNC_NORMAL;
+	}
+}
+
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 {
 	memset(tmp, 0, sizeof(xdebug_func));
@@ -1073,7 +1099,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->is_variadic   = 0;
 	tmp->filtered_tracing       = 0;
 	tmp->filtered_code_coverage = 0;
-	tmp->executable_lines_cache = NULL;
 
 	XG_BASE(function_count)++;
 	tmp->function_nr = XG_BASE(function_count);
