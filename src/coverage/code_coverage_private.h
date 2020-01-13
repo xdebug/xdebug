@@ -45,8 +45,6 @@ typedef struct xdebug_coverage_function {
 
 xdebug_coverage_file *xdebug_coverage_file_ctor(char *filename);
 
-void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa);
-
 xdebug_coverage_function *xdebug_coverage_function_ctor(char *function_name);
 void xdebug_coverage_function_dtor(void *data);
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name);
