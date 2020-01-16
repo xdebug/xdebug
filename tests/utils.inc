@@ -141,7 +141,7 @@ function check_reqs( $req_str )
 
 	if ( $missing )
 	{
-		die( "skip required: " . join( ' && ', $parts ) . " — missing: " . join( ' && ', $errors ) );
+		die( "skip required: " . join( ' && ', $parts ) . " > missing: " . join( ' && ', $errors ) );
 	}
 }
 
