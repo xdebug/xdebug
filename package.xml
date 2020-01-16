@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-12-09</date>
- <time>10:44:53</time>
+ <date>2020-01-16</date>
+ <time>14:18:51</time>
  <version>
-  <release>2.9.0</release>
-  <api>2.9.0</api>
+  <release>2.9.1</release>
+  <api>2.9.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,21 +45,16 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Dec  9, 2019 - xdebug 2.9.0
-
-+ Improvements:
-
-  - Fixed issue #1723: Class/function pre-analysis for code coverage speed improvements
-
-- Removed features:
-
-  - Fixed issue #1301: Removed aggregated profiler feature
-  - Fixed issue #1720: Remove superfluous xdebug.remote_handler setting
+Thu, Jan 16, 2020 - xdebug 2.9.1
 
 = Fixed bugs:
 
-  - Fixed issue #1722: Build warning issues on FreeBSD
-  - Fixed issue #1724: Missing property types and uninitialised values in variable dumping routines
+  - Fixed issue #1721: Header may not contain NUL bytes in Unknown on line 0
+  - Fixed issue #1727: Debugger stops more often than expected due to resolving breakpoints
+  - Fixed issue #1728: INIT_STATIC_METHOD_CALL is not overloaded
+  - Fixed issue #1731: var_dump with DateTime does not output properties (Ryan Mauger)
+  - Fixed issue #1733: SEND_VAR_NO_REF_EX opcode, used for require(), is not overloaded
+  - Fixed issue #1734: Segfault with DBGp "source" with a out-of-range start line number
  </notes>
 
  <contents>
@@ -197,6 +192,37 @@ Mon, Dec  9, 2019 - xdebug 2.9.0
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+ 
+  <release>
+   <date>2019-12-09</date>
+   <time>10:44:53</time>
+   <version>
+    <release>2.9.0</release>
+    <api>2.9.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Dec  9, 2019 - xdebug 2.9.0
+
++ Improvements:
+
+  - Fixed issue #1723: Class/function pre-analysis for code coverage speed improvements
+
+- Removed features:
+
+  - Fixed issue #1301: Removed aggregated profiler feature
+  - Fixed issue #1720: Remove superfluous xdebug.remote_handler setting
+
+= Fixed bugs:
+
+  - Fixed issue #1722: Build warning issues on FreeBSD
+  - Fixed issue #1724: Missing property types and uninitialised values in variable dumping routines
+   </notes>
+  </release>
 
   <release>
    <date>2019-12-02</date>
