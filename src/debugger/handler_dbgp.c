@@ -380,6 +380,7 @@ static xdebug_str* return_file_source(char *filename, int begin, int end)
 		begin = 0;
 		i = 0;
 	}
+	xdebug_str_addl(source, "", 0, 0);
 
 	filename = xdebug_path_from_url(filename);
 	stream = php_stream_open_wrapper(filename, "rb",
