@@ -149,7 +149,9 @@ build_script:
         $dname1 = 'php-' + $env:PHP_VER + $ts_part + '-devel-' + $env:VC.toUpper() + '-' + $env:ARCH
         if (-not (Test-Path c:\build-cache\$dname1)) {
             7z x c:\build-cache\$bname -oc:\build-cache
-            move c:\build-cache\$dname0 c:\build-cache\$dname1
+            if ($dname0 -ne $dname1) {
+                move c:\build-cache\$dname0 c:\build-cache\$dname1
+            }
         }
         cd c:\projects\xdebug
         $env:PATH = 'c:\build-cache\' + $dname1 + ';' + $env:PATH
@@ -174,7 +176,7 @@ after_build:
         if (true -eq $env:APPVEYOR_REPO_TAG) {
             $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_TAG_NAME + '-' + $env:PHP_VER.substring(0, 3) + $ts_part + '-' + $env:VC + $arch_part
         } else {
-            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT + '-' + $env:PHP_VER.substring(0, 3) + $ts_part + '-' + $env:VC + $arch_part
+            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT.substring(0, 8) + '-' + $env:PHP_VER.substring(0, 3) + $ts_part + '-' + $env:VC + $arch_part
         }
         $zip_bname = $bname + '.zip'
         $dll_bname = $bname + '.dll'
