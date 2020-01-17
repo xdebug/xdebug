@@ -1036,12 +1036,12 @@ static int xdebug_do_eval(char *eval_string, zval *ret_zval)
 	EG(error_reporting) = 0;
 	PG(track_errors) = 0;
 
-	/* Do evaluation */
 	XG_DBG(breakpoints_allowed) = 0;
 
 	/* Reset exception in case we're triggered while being in xdebug_throw_exception_hook */
 	EG(exception) = NULL;
 
+	/* Do evaluation */
 	zend_first_try {
 		res = zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval");
 	} zend_end_try();
@@ -2827,7 +2827,7 @@ static void breakpoint_resolve_helper(void *rctxt, xdebug_hash_element *he)
 	xdebug_brk_info             *brk_info;
 
 	brk_info = breakpoint_brk_info_fetch(admin->type, admin->key);
-	
+
 	ctxt->context->handler->log(XDEBUG_LOG_DEBUG, "Breakpoint %d (type: %s)\n", admin->id, XDEBUG_BREAKPOINT_TYPE_NAME(brk_info->brk_type));
 
 	/* Bail early if it's already resolved */
@@ -2862,7 +2862,7 @@ static void breakpoint_resolve_helper(void *rctxt, xdebug_hash_element *he)
 	}
 }
 
-/* Fetches the lines list for 'filename', and loops over all breakpoints to try 
+/* Fetches the lines list for 'filename', and loops over all breakpoints to try
  * to resolve them at run-time */
 int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename)
 {

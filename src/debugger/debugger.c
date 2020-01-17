@@ -289,7 +289,7 @@ void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_do_jit();
 
-	if (xdebug_is_debug_connection_active_for_current_pid()) {
+	if (xdebug_is_debug_connection_active_for_current_pid() && XG_DBG(breakpoints_allowed)) {
 		int exception_breakpoint_found = 0;
 
 		/* Check if we have a wild card exception breakpoint */
@@ -701,10 +701,10 @@ static void resolve_breakpoints_for_eval(int eval_id, zend_op_array *opa)
 	xdebug_lines_list *lines_list;
 	char *eval_filename = xdebug_sprintf("dbgp://%d", eval_id);
 	zend_string *eval_string = zend_string_init(eval_filename, strlen(eval_filename), 0);
-	
+
 	lines_list = get_file_function_line_list(eval_string);
 	add_function_to_lines_list(lines_list, opa);
-		
+
 	resolve_breakpoints_for_function(lines_list, opa);
 
 	if (!xdebug_is_debug_connection_active_for_current_pid()) {
@@ -717,7 +717,7 @@ static void resolve_breakpoints_for_eval(int eval_id, zend_op_array *opa)
 		&(XG_DBG(context)),
 		eval_string
 	);
-		
+
 	zend_string_release(eval_string);
 	xdfree(eval_filename);
 }
