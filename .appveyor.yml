@@ -149,7 +149,9 @@ build_script:
         $dname1 = 'php-' + $env:PHP_VER + $ts_part + '-devel-' + $env:VC.toUpper() + '-' + $env:ARCH
         if (-not (Test-Path c:\build-cache\$dname1)) {
             7z x c:\build-cache\$bname -oc:\build-cache
-            move c:\build-cache\$dname0 c:\build-cache\$dname1
+            if ($dname0 -ne $dname1) {
+                move c:\build-cache\$dname0 c:\build-cache\$dname1
+            }
         }
         cd c:\projects\xdebug
         $env:PATH = 'c:\build-cache\' + $dname1 + ';' + $env:PATH
