@@ -176,7 +176,7 @@ after_build:
         if (true -eq $env:APPVEYOR_REPO_TAG) {
             $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_TAG_NAME + '-' + $env:PHP_VER.substring(0, 3) + $ts_part + '-' + $env:VC + $arch_part
         } else {
-            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT + '-' + $env:PHP_VER.substring(0, 3) + $ts_part + '-' + $env:VC + $arch_part
+            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT.substring(0, 8) + '-' + $env:PHP_VER.substring(0, 3) + $ts_part + '-' + $env:VC + $arch_part
         }
         $zip_bname = $bname + '.zip'
         $dll_bname = $bname + '.dll'
