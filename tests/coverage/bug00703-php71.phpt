@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (>= PHP 7.1.0 <= PHP 7.1.3)
+Test for bug #703: Line in heredoc marked as not executed (<= PHP 7.1.3)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.1.0, <= 7.1.3');
+check_reqs('PHP <= 7.1.3');
 ?>
 --INI--
 xdebug.default_enable=1
