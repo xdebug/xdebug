@@ -942,20 +942,12 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 {
 	memset(tmp, 0, sizeof(xdebug_func));
 
-#if PHP_VERSION_ID >= 70100
 	if (edata && edata->func && edata->func == (zend_function*) &zend_pass_function) {
 		tmp->type     = XFUNC_ZEND_PASS;
 		tmp->function = xdstrdup("{zend_pass}");
-	} else
-#endif
-
-	if (edata && edata->func) {
+	} else if (edata && edata->func) {
 		tmp->type = XFUNC_NORMAL;
-#if PHP_VERSION_ID >= 70100
 		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
-#else
-		if (edata->This.value.obj) {
-#endif
 			tmp->type = XFUNC_MEMBER;
 			if (edata->func->common.scope && strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
 				tmp->class = xdebug_sprintf(

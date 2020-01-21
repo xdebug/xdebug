@@ -895,11 +895,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 		WRONG_PARAM_COUNT;
 	}
 
-#if PHP_VERSION_ID >= 70100
 	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-#else
-	if (!EG(current_execute_data)->prev_execute_data->symbol_table) {
-#endif
 		zend_rebuild_symbol_table();
 	}
 
@@ -964,11 +960,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 		WRONG_PARAM_COUNT;
 	}
 
-#if PHP_VERSION_ID >= 70100
 	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-#else
-	if (!EG(current_execute_data)->prev_execute_data->symbol_table) {
-#endif
 		zend_rebuild_symbol_table();
 	}
 
@@ -1055,14 +1047,9 @@ PHP_FUNCTION(xdebug_time_index)
 	RETURN_DOUBLE(xdebug_get_utime() - XG_BASE(start_time));
 }
 
-#if PHP_VERSION_ID >= 70100
 ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 {
 	zend_op_array *op_array = &frame->func->op_array;
-#else
-ZEND_DLEXPORT void xdebug_statement_call(zend_op_array *op_array)
-{
-#endif
 	int                   lineno;
 	char                 *file;
 	int                   file_len;

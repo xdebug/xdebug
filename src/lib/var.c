@@ -940,11 +940,7 @@ void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		return;
 	}
 
-#if PHP_VERSION_ID >= 70100
 	if (!(ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-#else
-	if (!EG(current_execute_data)->symbol_table) {
-#endif
 		zend_rebuild_symbol_table();
 	}
 
