@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #334: Code Coverage Regressions (>= PHP 7.1, opcache)
+Test for bug #334: Code Coverage Regressions (opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.1; opcache');
+check_reqs('opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -26,7 +26,7 @@ xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 array(2) {
-  ["%sbug00334-php71-opcache.php"]=>
+  ["%sbug00334-opcache.php"]=>
   array(2) {
     [5]=>
     int(1)

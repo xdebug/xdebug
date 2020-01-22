@@ -263,11 +263,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 			jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 #else
 		if (!opcode.result.num) {
-# if PHP_VERSION_ID >= 70100
 			jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
-# else
-			jumps[1] = opcode.extended_value;
-# endif
 #endif
 			if (jumps[1] == jumps[0]) {
 				jumps[1] = XDEBUG_JMP_NOT_SET;
@@ -1017,16 +1013,12 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_W);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_FUNC_ARG);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_FUNC_ARG);
-#if PHP_VERSION_ID >= 70100
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_STATIC_PROP_FUNC_ARG);
-#endif
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_UNSET);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_UNSET);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CLASS);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CONSTANT);
-#if PHP_VERSION_ID >= 70100
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CLASS_CONSTANT);
-#endif
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CONCAT);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_DIM_OBJ);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_PROP_OBJ);
@@ -1044,11 +1036,9 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ROPE_END);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_COALESCE);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_TYPE_CHECK);
-#if PHP_VERSION_ID >= 70100
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_GENERATOR_CREATE);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_STATIC);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_LEXICAL);
-#endif
 #if PHP_VERSION_ID >= 70400
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS_DELAYED);
@@ -1128,16 +1118,12 @@ void xdebug_coverage_mshutdown(void)
 		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_W, NULL);
 		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_FUNC_ARG, NULL);
 		zend_set_user_opcode_handler(ZEND_FETCH_DIM_FUNC_ARG, NULL);
-#if PHP_VERSION_ID >= 70100
 		zend_set_user_opcode_handler(ZEND_FETCH_STATIC_PROP_FUNC_ARG, NULL);
-#endif
 		zend_set_user_opcode_handler(ZEND_FETCH_DIM_UNSET, NULL);
 		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_UNSET, NULL);
 		zend_set_user_opcode_handler(ZEND_FETCH_CLASS, NULL);
 		zend_set_user_opcode_handler(ZEND_FETCH_CONSTANT, NULL);
-#if PHP_VERSION_ID >= 70100
 		zend_set_user_opcode_handler(ZEND_FETCH_CLASS_CONSTANT, NULL);
-#endif
 		zend_set_user_opcode_handler(ZEND_CONCAT, NULL);
 		zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_DIM_OBJ, NULL);
 		zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_PROP_OBJ, NULL);
@@ -1155,11 +1141,9 @@ void xdebug_coverage_mshutdown(void)
 		zend_set_user_opcode_handler(ZEND_ROPE_END, NULL);
 		zend_set_user_opcode_handler(ZEND_COALESCE, NULL);
 		zend_set_user_opcode_handler(ZEND_TYPE_CHECK, NULL);
-#if PHP_VERSION_ID >= 70100
 		zend_set_user_opcode_handler(ZEND_GENERATOR_CREATE, NULL);
 		zend_set_user_opcode_handler(ZEND_BIND_STATIC, NULL);
 		zend_set_user_opcode_handler(ZEND_BIND_LEXICAL, NULL);
-#endif
 #if PHP_VERSION_ID >= 70400
 		zend_set_user_opcode_handler(ZEND_DECLARE_CLASS, NULL);
 		zend_set_user_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, NULL);

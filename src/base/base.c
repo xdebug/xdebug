@@ -334,13 +334,9 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	xdebug_tracing_execute_ex(function_nr, fse);
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
-#if PHP_VERSION_ID >= 70100
 	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		fse->symbol_table = EG(current_execute_data)->symbol_table;
 	}
-#else
-	fse->symbol_table = EG(current_execute_data)->symbol_table;
-#endif
 	if (Z_OBJ(EG(current_execute_data)->This)) {
 		fse->This = &EG(current_execute_data)->This;
 	} else {

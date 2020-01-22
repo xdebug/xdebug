@@ -89,11 +89,7 @@ static void only_leave_first_catch(zend_op_array *opa, xdebug_branch_info *branc
 		exit_jmp = XDEBUG_ZNODE_JMP_LINE(opa->opcodes[position].op2, position, base_address);
 #else
 	if (!opa->opcodes[position].result.num) {
-# if PHP_VERSION_ID >= 70100
 		exit_jmp = position + ((signed int) opa->opcodes[position].extended_value / sizeof(zend_op));
-# else
-		exit_jmp = opa->opcodes[position].extended_value;
-# endif
 #endif
 
 		if (opa->opcodes[exit_jmp].opcode == ZEND_FETCH_CLASS) {
@@ -125,10 +121,8 @@ void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_i
 # endif
 				only_leave_first_catch(opa, branch_info, XDEBUG_ZNODE_JMP_LINE(opa->opcodes[i].op2, i, base_address));
 			}
-#elif PHP_VERSION_ID >= 70100
-			only_leave_first_catch(opa, branch_info, i + ((signed int) opa->opcodes[i].extended_value / sizeof(zend_op)));
 #else
-			only_leave_first_catch(opa, branch_info, opa->opcodes[i].extended_value);
+			only_leave_first_catch(opa, branch_info, i + ((signed int) opa->opcodes[i].extended_value / sizeof(zend_op)));
 #endif
 		}
 	}

@@ -260,11 +260,9 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		return;
 	}
 
-#if PHP_VERSION_ID >= 70000
 	if (generator->node.ptr.root->execute_data == NULL) {
 		return;
 	}
-#endif
 
 	/* Generator key */
 	tmp_value = xdebug_get_zval_value_line(&generator->key, 0, NULL);

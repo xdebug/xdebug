@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED (<= PHP 7.0.12)
+Test with Code Coverage with abstract methods (<= PHP 7.1.3)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP <= 7.0.12');
+check_reqs('PHP <= 7.1.3');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -18,32 +18,33 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
+xdebug.coverage_enable=1
 --FILE--
 <?php
-	xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
+    xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
 
-	include 'bug00697.inc';
-	$cc = xdebug_get_code_coverage();
-	ksort($cc);
-	var_dump(array_slice($cc, 1, 1));
+	include 'coverage4.inc';
 
-	xdebug_stop_code_coverage(false);
+    xdebug_stop_code_coverage(false);
+    $c = xdebug_get_code_coverage();
+	ksort($c);
+	var_dump($c);
 ?>
 --EXPECTF--
-array(1) {
-  ["%sbug00697.inc"]=>
-  array(5) {
-    [2]=>
-    int(1)
+array(2) {
+  ["%scoverage4-php71.php"]=>
+  array(2) {
     [4]=>
     int(1)
-    [5]=>
+    [6]=>
     int(1)
-    [7]=>
+  }
+  ["%scoverage4.inc"]=>
+  array(2) {
+    [2]=>
     int(1)
-    [9]=>
+    [26]=>
     int(1)
   }
 }
