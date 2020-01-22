@@ -1,10 +1,12 @@
 --TEST--
-Test for bug #1034: path coverage [2] (<= PHP 7.0.12)
+Test for bug #1034: path coverage [2] (!opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP < 7.0.12');
+check_reqs('!opcache');
 ?>
+--INI--
+xdebug.coverage_enable=1
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';
@@ -24,7 +26,7 @@ dump_branch_coverage($c);
   - 00; OP: 00-02; line: 02-02 HIT; out1: 09 HIT
   - 03; OP: 03-08; line: 03-02 HIT; out1: 09 HIT
   - 09; OP: 09-11; line: 02-02 HIT; out1: 12 HIT; out2: 03 HIT
-  - 12; OP: 12-14; line: 05-05 HIT; out1: EX  X 
+  - 12; OP: 12-14; line: 05-07 HIT; out1: EX  X 
 - paths
   - 0 9 12:  X 
   - 0 9 3 9 12: HIT

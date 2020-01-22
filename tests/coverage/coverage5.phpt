@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with path and branch checking (<= PHP 7.0.12)
+Test with Code Coverage with path and branch checking (!opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP <= 7.0.12');
+check_reqs('PHP !opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -19,6 +19,7 @@ xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
 xdebug.overload_var_dump=0
+xdebug.coverage_enable=1
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';
@@ -42,8 +43,8 @@ A NOT B
   - 12; OP: 12-14; line: 07-07  X ; out1: 15  X ; out2: 16  X 
   - 15; OP: 15-15; line: 07-07  X ; out1: 16  X 
   - 16; OP: 16-16; line: 07-07  X ; out1: 17  X ; out2: 19  X 
-  - 17; OP: 17-18; line: 08-08  X ; out1: 19  X 
-  - 19; OP: 19-19; line: 08-08 HIT; out1: EX  X 
+  - 17; OP: 17-18; line: 08-11  X ; out1: 19  X 
+  - 19; OP: 19-19; line: 11-11 HIT; out1: EX  X 
 - paths
   - 0 6 8 9 19: HIT
   - 0 6 8 12 15 16 17 19:  X 

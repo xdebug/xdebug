@@ -22,11 +22,11 @@ foreach ( glob( '/tmp/ptester/junit/' . $pattern ) as $file )
 
 	$config = $matches[1];
 	$version = $matches[2];
-	$_32bit = $matches[3] == '-32bit';
-	$zts = $matches[4] == '-zts';
+	$_32bit = isset($matches[3]) && $matches[3] == '-32bit';
+	$zts = isset($matches[4]) && $matches[4] == '-zts';
 
 	$xml = SimpleXML_load_string( file_get_contents( $file ) );
-	
+
 	$status = [
 		'run' => $runId,
 		'ts' => $timeStamp,

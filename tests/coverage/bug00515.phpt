@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed (<= PHP 7.0.12)
+Test for bug #515: Dead Code Analysis for code coverage messed up with ticks (!opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP <= 7.0.12');
+check_reqs('!opcache');
 ?>
 --INI--
 xdebug.default_enable=1
@@ -24,26 +24,34 @@ xdebug.overload_var_dump=0
 <?php
 	xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
 
-	include 'bug00703.inc';
+	include 'bug00515.inc';
 	$cc = xdebug_get_code_coverage();
 	ksort($cc);
-	var_dump(array_slice($cc, 1, 1));
+	var_dump(array_slice($cc, 0, 1));
 
 	xdebug_stop_code_coverage(false);
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug00703.inc"]=>
-  array(5) {
-    [3]=>
+  ["%sbug00515.inc"]=>
+  array(9) {
+    [2]=>
     int(1)
-    [6]=>
+    [%r(3|5)%r]=>
     int(1)
-    [7]=>
-    int(1)
-    [11]=>
-    int(1)
+    [9]=>
+    int(-1)
+    [10]=>
+    int(-1)
     [12]=>
+    int(-1)
+    [14]=>
+    int(-1)
+    [18]=>
+    int(-1)
+    [19]=>
+    int(-2)
+    [22]=>
     int(1)
   }
 }

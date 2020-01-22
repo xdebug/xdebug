@@ -1,10 +1,5 @@
 --TEST--
-Test for bug #212: coverage coverage inaccurate (2) (> PHP 7.0.12)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP > 7.0.12');
-?>
+Test for bug #212: coverage coverage inaccurate (2)
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

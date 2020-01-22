@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1263: Coverage of sending arguments to a method (>= PHP 7.0.8, opcache)
+Test for bug #1263: Coverage of sending arguments to a method (opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.0.8; opcache');
+check_reqs('opcache');
 ?>
 --INI--
 opcache.enable_cli=1
