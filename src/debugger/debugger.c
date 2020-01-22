@@ -662,7 +662,7 @@ void xdebug_debugger_compile_file(zend_op_array *op_array)
 	zend_class_entry *class_entry;
 	xdebug_lines_list *file_function_lines_list;
 
-	if (!XINI_DBG(remote_enable)) {
+	if (!XINI_DBG(remote_enable) || !XG_DBG(breakable_lines_map)) {
 		return;
 	}
 

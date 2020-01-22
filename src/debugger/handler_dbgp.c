@@ -2870,7 +2870,7 @@ int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename)
 	xdebug_lines_list *lines_list;
 
 	/* Get the lines list for the current file */
-	if (!xdebug_hash_find(XG_DBG(breakable_lines_map), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &lines_list)) {
+	if (!XG_DBG(breakable_lines_map) || !xdebug_hash_find(XG_DBG(breakable_lines_map), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &lines_list)) {
 		context->handler->log(XDEBUG_LOG_DEBUG, "E: Lines list for '%s' does not exist\n", ZSTR_VAL(filename));
 		return 0;
 	}
