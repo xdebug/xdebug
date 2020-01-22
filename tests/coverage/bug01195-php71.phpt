@@ -3,7 +3,7 @@ Test for bug #1195: Segfault with code coverage and foreach (<= PHP 7.2.13, !opc
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP < 7.2.13; !opcache');
+check_reqs('PHP <= 7.2.13; !opcache');
 ?>
 --INI--
 xdebug.coverage_enable=1
