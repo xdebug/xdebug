@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -714,11 +714,11 @@ void xdebug_tracing_rinit(void)
 
 void xdebug_tracing_post_deactivate(void)
 {
-	XG_TRACE(trace_context) = NULL;
-
 	if (XG_TRACE(trace_context)) {
 		xdebug_stop_trace();
 	}
+
+	XG_TRACE(trace_context) = NULL;
 }
 
 void xdebug_tracing_init_if_requested(zend_op_array *op_array)
