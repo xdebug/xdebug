@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-01-16</date>
- <time>14:18:51</time>
+ <date>2020-01-31</date>
+ <time>09:47:21</time>
  <version>
-  <release>2.9.1</release>
-  <api>2.9.1</api>
+  <release>2.9.2</release>
+  <api>2.9.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,16 +45,13 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Jan 16, 2020 - xdebug 2.9.1
+Fri, Jan 31, 2020 - xdebug 2.9.2
 
 = Fixed bugs:
 
-  - Fixed issue #1721: Header may not contain NUL bytes in Unknown on line 0
-  - Fixed issue #1727: Debugger stops more often than expected due to resolving breakpoints
-  - Fixed issue #1728: INIT_STATIC_METHOD_CALL is not overloaded
-  - Fixed issue #1731: var_dump with DateTime does not output properties (Ryan Mauger)
-  - Fixed issue #1733: SEND_VAR_NO_REF_EX opcode, used for require(), is not overloaded
-  - Fixed issue #1734: Segfault with DBGp "source" with a out-of-range start line number
+Fixed issue #1735: DBGp eval warning promoted to Exception can cause out-of-sync responses
+Fixed issue #1736: Segmentation fault when other extensions run PHP in RINIT
+Fixed issue #1739: Tracing footer not written
  </notes>
 
  <contents>
@@ -192,7 +189,33 @@ Thu, Jan 16, 2020 - xdebug 2.9.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
- 
+
+  <release>
+   <date>2020-01-16</date>
+   <time>14:18:51</time>
+   <version>
+    <release>2.9.1</release>
+    <api>2.9.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Jan 16, 2020 - xdebug 2.9.1
+
+= Fixed bugs:
+
+  - Fixed issue #1721: Header may not contain NUL bytes in Unknown on line 0
+  - Fixed issue #1727: Debugger stops more often than expected due to resolving breakpoints
+  - Fixed issue #1728: INIT_STATIC_METHOD_CALL is not overloaded
+  - Fixed issue #1731: var_dump with DateTime does not output properties (Ryan Mauger)
+  - Fixed issue #1733: SEND_VAR_NO_REF_EX opcode, used for require(), is not overloaded
+  - Fixed issue #1734: Segfault with DBGp "source" with a out-of-range start line number
+   </notes>
+  </release>
+
   <release>
    <date>2019-12-09</date>
    <time>10:44:53</time>
