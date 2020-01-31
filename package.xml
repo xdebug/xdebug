@@ -49,9 +49,9 @@ Fri, Jan 31, 2020 - xdebug 2.9.2
 
 = Fixed bugs:
 
-Fixed issue #1735: DBGp eval warning promoted to Exception can cause out-of-sync responses
-Fixed issue #1736: Segmentation fault when other extensions run PHP in RINIT
-Fixed issue #1739: Tracing footer not written
+  - Fixed issue #1735: DBGp eval warning promoted to Exception can cause out-of-sync responses
+  - Fixed issue #1736: Segmentation fault when other extensions run PHP in RINIT
+  - Fixed issue #1739: Tracing footer not written
  </notes>
 
  <contents>
