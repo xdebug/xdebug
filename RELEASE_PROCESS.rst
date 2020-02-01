@@ -32,8 +32,14 @@
 #. Wait until AppVeyor is ready
 #. Upload the source package to PECL
 #. Add files from AppVeyor and source to www.xdebug.org html/files
-#. Add the downloads, DDLs, and news file to git and commit with "Go with
-   2.8.0alpha1"
+#. Create sha256 files for the new releases::
+
+   for i in *2.9.2*{tgz,dll}; do \
+     echo $i; sha256sum $i | sed 's/\ .*//' > $i.sha256.txt; \
+   done
+
+#. Add the downloads, DDLs, SHA256 files, and news file to git and commit with
+   "Go with 2.8.0alpha1"
 #. Mantis: "release" the version, and make sure there is a new one.
 #. In the release branch, update template.rc and php_xdebug.h to the new
    version
