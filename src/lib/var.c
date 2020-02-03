@@ -1002,6 +1002,11 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 	info = zend_get_typed_property_info_for_slot(Z_OBJ_P(object), val);
 
 	if (info) {
+#if PHP_VERSION_ID >= 80000
+		zend_string *type_info = zend_type_to_string(info->type);
+		type_str = xdebug_str_create(ZSTR_VAL(type_info), ZSTR_LEN(type_info));
+		zend_string_release(type_info);
+#else
 		type_str = xdebug_str_new();
 
 		if (ZEND_TYPE_ALLOW_NULL(info->type)) {
@@ -1018,6 +1023,7 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 		} else {
 			xdebug_str_add(type_str, zend_get_type_by_const(ZEND_TYPE_CODE(info->type)), 0);
 		}
+#endif
 	}
 
 	return type_str;
