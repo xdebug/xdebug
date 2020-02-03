@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,6 +72,7 @@ void xdebug_debugger_set_program_name(zend_string *filename);
 void xdebug_debugger_register_eval(function_stack_entry *fse);
 
 xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa);
+int xdebug_do_eval(char *eval_string, zval *ret_zval);
 
 void xdebug_debugger_statement_call(char *file, int file_len, int lineno);
 void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval *file, zval *line, zval *code, char *code_str, zval *message);
