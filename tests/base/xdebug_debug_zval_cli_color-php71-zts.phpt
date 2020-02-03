@@ -11,14 +11,14 @@ xdebug.cli_color=2
 --FILE--
 <?php
 function func(){
-	$a="hoge";
+	$a = "ho"; $a .= "ge";
 	$b = array('a' => 4, 'b' => 5, 'c' => 6, 8, 9);
 	$c =& $b['b'];
 	$d = $b['c'];
 	$e = new stdClass;
 	$e->foo = false;
 	$e->bar =& $e->foo;
-	$e->baz = array(4, 'b' => 42);
+	$e->baz = array(4, $a => 42);
 	xdebug_debug_zval( 'a' );
 	xdebug_debug_zval( '$a' );
 	xdebug_debug_zval( '$b' );
@@ -31,21 +31,21 @@ function func(){
 	xdebug_debug_zval( "e->bar" );
 	xdebug_debug_zval( "e->bar['b']" );
 	xdebug_debug_zval( "e->baz[0]" );
-	xdebug_debug_zval( "e->baz['b']" );
+	xdebug_debug_zval( "e->baz['hoge']" );
 }
 
 func();
 ?>
 --EXPECTF--
-a: (refcount=%d, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
+a: (%s, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
 
-$a: (refcount=%d, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
+$a: (%s, is_ref=0)=[1mstring[22m([32m4[0m) "[31mhoge[0m"
 
 $b: (refcount=1, is_ref=0)=[1marray[22m([32m5[0m) {
   'a' =>
   (refcount=0, is_ref=0)=[1mint[22m([32m4[0m)
   'b' =>
-  (refcount=2, is_ref=1)=[1mint[22m([32m5[0m)
+  (refcount=%d, is_ref=1)=[1mint[22m([32m5[0m)
   'c' =>
   (refcount=0, is_ref=0)=[1mint[22m([32m6[0m)
   [0] [0m=>[0m
@@ -70,10 +70,10 @@ e: (refcount=1, is_ref=0)=[1mclass[22m [31mstdClass[0m#1 ([32m3[0m) {
   [32m[1mpublic[22m[0m $bar [0m=>[0m
   (refcount=2, is_ref=1)=[1mbool[22m([35mfalse[0m)
   [32m[1mpublic[22m[0m $baz [0m=>[0m
-  (refcount=2, is_ref=0)=[1marray[22m([32m2[0m) {
+  (refcount=%d, is_ref=0)=[1marray[22m([32m2[0m) {
     [0] [0m=>[0m
     (refcount=0, is_ref=0)=[1mint[22m([32m4[0m)
-    'b' =>
+    'hoge' =>
     (refcount=0, is_ref=0)=[1mint[22m([32m42[0m)
   }
 }
@@ -83,4 +83,4 @@ e->bar: (refcount=2, is_ref=1)=[1mbool[22m([35mfalse[0m)
 e->bar['b']: no such symbol
 e->baz[0]: (refcount=0, is_ref=0)=[1mint[22m([32m4[0m)
 
-e->baz['b']: (refcount=0, is_ref=0)=[1mint[22m([32m42[0m)
+e->baz['hoge']: (refcount=0, is_ref=0)=[1mint[22m([32m42[0m)
