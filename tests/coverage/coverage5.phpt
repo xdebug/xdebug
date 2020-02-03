@@ -3,7 +3,7 @@ Test with Code Coverage with path and branch checking (!opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP !opcache');
+check_reqs('!opcache');
 ?>
 --INI--
 xdebug.default_enable=1

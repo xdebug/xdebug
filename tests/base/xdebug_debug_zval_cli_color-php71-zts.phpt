@@ -3,7 +3,7 @@ Test for xdebug_debug_zval() (CLI colours) (>= PHP 7.1, ZTS, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.1, ZTS; !opcache');
+check_reqs('PHP >= 7.1; ZTS; !opcache');
 ?>
 --INI--
 xdebug.default_enable=1
