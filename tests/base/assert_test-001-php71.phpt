@@ -1,5 +1,10 @@
 --TEST--
-Test for assertion callbacks
+Test for assertion callbacks (PHP < 8.0)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.0');
+?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
@@ -39,15 +44,15 @@ unlink($tf);
 ?>
 --EXPECTF--
 Assertion Failed:
-        File '%sassert_test-001.php'
+        File '%sassert_test-001-php71.php'
         Line '21'
         Code '1==2'
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> assert_options(1, 1) %sassert_test-001.php:5
-%w%f %w%d     -> assert_options(4, 0) %sassert_test-001.php:6
-%w%f %w%d     -> assert_options(5, 1) %sassert_test-001.php:7
-%w%f %w%d     -> assert_options(2, 'my_assert_handler') %sassert_test-001.php:18
-%w%f %w%d     -> assert('1==2') %sassert_test-001.php:21
-%w%f %w%d       -> %r({internal eval}\(\))|(assert\('1==2'\))%r %sassert_test-001.php:21
-%w%f %w%d       -> my_assert_handler('%sassert_test-001.php', 21, '1==2') %sassert_test-001.php:21
-%w%f %w%d     -> file_get_contents('%s') %sassert_test-001.php:23
+%w%f %w%d     -> assert_options(1, 1) %sassert_test-001-php71.php:5
+%w%f %w%d     -> assert_options(4, 0) %sassert_test-001-php71.php:6
+%w%f %w%d     -> assert_options(5, 1) %sassert_test-001-php71.php:7
+%w%f %w%d     -> assert_options(2, 'my_assert_handler') %sassert_test-001-php71.php:18
+%w%f %w%d     -> assert('1==2') %sassert_test-001-php71.php:21
+%w%f %w%d       -> %r({internal eval}\(\))|(assert\('1==2'\))%r %sassert_test-001-php71.php:21
+%w%f %w%d       -> my_assert_handler('%sassert_test-001-php71.php', 21, '1==2') %sassert_test-001-php71.php:21
+%w%f %w%d     -> file_get_contents('%s') %sassert_test-001-php71.php:23
