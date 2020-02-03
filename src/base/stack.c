@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -702,11 +702,12 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 			break;
 	}
 
-#if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID < 80000
+# if PHP_VERSION_ID >= 70200
 	if (PG(track_errors) && EG(active)) {
-#else
+# else
 	if (PG(track_errors) && EG(valid_symbol_table)) {
-#endif
+# endif
 		zval tmp;
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
 
@@ -718,6 +719,7 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 			zend_hash_str_update(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg"), &tmp);
 		}
 	}
+#endif
 
 	efree(buffer);
 }
