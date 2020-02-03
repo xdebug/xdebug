@@ -1196,10 +1196,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
 					}
-					if (op_array->arg_info[i].is_variadic) {
+					if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i])) {
 						tmp->var[tmp->varc].is_variadic = 1;
 					}
-					if (op_array->arg_info[i].is_variadic && !hit_variadic) {
+					if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i]) && !hit_variadic) {
 						tmp->var[tmp->varc].is_variadic = 1;
 						hit_variadic = 1;
 					}

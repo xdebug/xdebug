@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -89,6 +89,10 @@ typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 
 # if PHP_VERSION_ID < 70400
 #  define ZEND_COMPILE_EXTENDED_STMT ZEND_COMPILE_EXTENDED_INFO
+# endif
+
+# if PHP_VERSION_ID < 80000
+#  define ZEND_ARG_IS_VARIADIC(ptr) (*ptr).is_variadic
 # endif
 
 #endif
