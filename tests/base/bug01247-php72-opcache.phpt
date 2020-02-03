@@ -21,7 +21,7 @@ postBar=baz
 function test()
 {
 	$a = 42;
-	strtr();
+	hex2bin('4');
 	$b = 4;
 
 	return $a + $b;
@@ -40,12 +40,12 @@ test();
 testDirect();
 ?>
 --EXPECTF--
-Warning: strtr() expects at least 2 parameters, 0 given in %sbug01247-php72-opcache.php on line 5
+Warning: hex2bin(): %s in %sbug01247-php72-opcache.php on line 5
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01247-php72-opcache.php:0
 %w%f %w%d   2. test() %sbug01247-php72-opcache.php:20
-%w%f %w%d   3. strtr() %sbug01247-php72-opcache.php:5
+%w%f %w%d   3. hex2bin('4') %sbug01247-php72-opcache.php:5
 
 
 Notice: test in %sbug01247-php72-opcache.php on line 14

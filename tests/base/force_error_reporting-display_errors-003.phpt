@@ -12,7 +12,7 @@ ini_set('error_reporting', 0);
 
 trigger_error('six', E_USER_WARNING);
 trigger_error('seven');
-strlen();
+hex2bin('4');
 ?>
 --EXPECTF--
 Warning: six in %sforce_error_reporting-display_errors-003.php on line 4
@@ -33,4 +33,4 @@ Warning: %s in %sforce_error_reporting-display_errors-003.php on line 6
 
 Call Stack:
 %w%f %w%d   1. {main}() %sforce_error_reporting-display_errors-003.php:0
-%w%f %w%d   2. strlen() %sforce_error_reporting-display_errors-003.php:6
+%w%f %w%d   2. hex2bin() %sforce_error_reporting-display_errors-003.php:6

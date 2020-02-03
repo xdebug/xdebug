@@ -42,7 +42,7 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="4"><stack where="strlen" level="0" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="test" level="1" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="{main}" level="2" type="file" filename="file://bug00606-002.inc" lineno="8"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="4"><stack where="hex2bin" level="0" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="test" level="1" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="{main}" level="2" type="file" filename="file://bug00606-002.inc" lineno="8"></stack></response>
 
 -> eval -i 5 -- JHRoaXMtPnByb3BlcnR5
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -50,7 +50,7 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="6"><stack where="strlen" level="0" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="test" level="1" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="{main}" level="2" type="file" filename="file://bug00606-002.inc" lineno="8"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="6"><stack where="hex2bin" level="0" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="test" level="1" type="file" filename="file://bug00606-002.inc" lineno="6"></stack><stack where="{main}" level="2" type="file" filename="file://bug00606-002.inc" lineno="8"></stack></response>
 
 -> step_into -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>

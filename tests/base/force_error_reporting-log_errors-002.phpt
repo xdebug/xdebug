@@ -14,7 +14,7 @@ ini_set('error_reporting', 0);
 
 trigger_error('four', E_USER_WARNING);
 trigger_error('five');
-strlen();
+hex2bin('4');
 ?>
 --EXPECTF--
 PHP Warning:  four in %sforce_error_reporting-log_errors-002.php on line 4
@@ -24,4 +24,4 @@ PHP   2. trigger_error() %sforce_error_reporting-log_errors-002.php:4
 PHP Warning:  %s in %sforce_error_reporting-log_errors-002.php on line 6
 PHP Stack trace:
 PHP   1. {main}() %sforce_error_reporting-log_errors-002.php:0
-PHP   2. strlen() %sforce_error_reporting-log_errors-002.php:6
+PHP   2. hex2bin() %sforce_error_reporting-log_errors-002.php:6
