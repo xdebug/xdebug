@@ -549,10 +549,11 @@ static char *xdebug_handle_stack_trace(int type, char *error_type_str, const cha
 }
 
 /* Error callback for formatting stack traces */
-void xdebug_error_cb(int type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
+void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
 {
 	char *buffer, *error_type_str;
 	int buffer_len;
+	int type = orig_type & E_ALL;
 	error_handling_t  error_handling;
 	zend_class_entry *exception_class;
 
