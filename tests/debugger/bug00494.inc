@@ -1,7 +1,7 @@
 <?php
 class abc {
         private $arr;
-        public function abc(){
+        public function __construct(){
                 $this->arr = array(
                         0 => array("some", "values"),
                         1 => array("some", "more", "values")

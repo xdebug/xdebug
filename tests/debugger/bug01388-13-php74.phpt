@@ -17,7 +17,7 @@ $filename = realpath( dirname(__FILE__) . '/bug01388-13.inc' );
 $commands = array(
 	'feature_set -n notify_ok -v 1',
 	'feature_set -n resolved_breakpoints -v 1',
-	"breakpoint_set -n 7 -f file://{$filename} -t conditional -- JG1vZHVsZSA9PSB2aWV3cw==",
+	"breakpoint_set -n 7 -f file://{$filename} -t conditional -- JG1vZHVsZSA9PSAidmlld3Mi",
 	'run',
 	'context_get',
 	'detach'
@@ -37,9 +37,9 @@ dbgpRunFile( $filename, $commands, [ 'track_errors' => 'Off' ] );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="2" feature="resolved_breakpoints" success="1"></response>
 
--> breakpoint_set -i 3 -n 7 -f file://bug01388-13.inc -t conditional -- JG1vZHVsZSA9PSB2aWV3cw==
+-> breakpoint_set -i 3 -n 7 -f file://bug01388-13.inc -t conditional -- JG1vZHVsZSA9PSAidmlld3Mi
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="7" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="7" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSAidmlld3Mi]]></expression></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="resolved"></response>

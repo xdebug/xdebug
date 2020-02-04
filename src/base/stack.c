@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -549,10 +549,11 @@ static char *xdebug_handle_stack_trace(int type, char *error_type_str, const cha
 }
 
 /* Error callback for formatting stack traces */
-void xdebug_error_cb(int type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
+void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
 {
 	char *buffer, *error_type_str;
 	int buffer_len;
+	int type = orig_type & E_ALL;
 	error_handling_t  error_handling;
 	zend_class_entry *exception_class;
 
@@ -702,11 +703,12 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 			break;
 	}
 
-#if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID < 80000
+# if PHP_VERSION_ID >= 70200
 	if (PG(track_errors) && EG(active)) {
-#else
+# else
 	if (PG(track_errors) && EG(valid_symbol_table)) {
-#endif
+# endif
 		zval tmp;
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
 
@@ -718,6 +720,7 @@ void xdebug_error_cb(int type, const char *error_filename, const unsigned int er
 			zend_hash_str_update(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg"), &tmp);
 		}
 	}
+#endif
 
 	efree(buffer);
 }
@@ -1193,10 +1196,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
 						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
 					}
-					if (op_array->arg_info[i].is_variadic) {
+					if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i])) {
 						tmp->var[tmp->varc].is_variadic = 1;
 					}
-					if (op_array->arg_info[i].is_variadic && !hit_variadic) {
+					if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i]) && !hit_variadic) {
 						tmp->var[tmp->varc].is_variadic = 1;
 						hit_variadic = 1;
 					}

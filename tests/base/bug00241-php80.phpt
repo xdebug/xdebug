@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #241: Crash in xdebug_get_function_stack()
+Test for bug #241: Crash in xdebug_get_function_stack() (>= PHP 8.0)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.0');
+?>
 --INI--
 xdebug.enable=1
 xdebug.auto_trace=0
@@ -12,7 +17,7 @@ xdebug.var_display_max_children=2
 xdebug.overload_var_dump=0
 --FILE--
 <?php
-function error_handler($errno, $string, $file, $line, $context)
+function error_handler($errno, $string, $file, $line)
 {
 	$entry = Error_Class::newError();
 }
@@ -52,7 +57,7 @@ array(5) {
     ["function"]=>
     string(6) "{main}"
     ["file"]=>
-    string(%d) "%sbug00241.php"
+    string(%d) "%sbug00241-php80.php"
     ["line"]=>
     int(0)
     ["params"]=>
@@ -64,21 +69,19 @@ array(5) {
     ["function"]=>
     string(13) "error_handler"
     ["file"]=>
-    string(%d) "%sbug00241.php"
+    string(%d) "%sbug00241-php80.php"
     ["line"]=>
     int(32)
     ["params"]=>
-    array(5) {
+    array(4) {
       ["errno"]=>
       string(1) "8"
       ["string"]=>
       string(2%d) "'Undefined index:%sFOO'"
       ["file"]=>
-      string(%d) "'%sbug00241.php'"
+      string(%d) "'%sbug00241-php80.php'"
       ["line"]=>
       string(2) "32"
-      ["context"]=>
-      string(%d) "array (%s)"
     }
   }
   [2]=>
@@ -90,7 +93,7 @@ array(5) {
     ["class"]=>
     string(11) "Error_Class"
     ["file"]=>
-    string(%d) "%sbug00241.php"
+    string(%d) "%sbug00241-php80.php"
     ["line"]=>
     int(4)
     ["params"]=>
@@ -108,7 +111,7 @@ array(5) {
     ["class"]=>
     string(11) "Error_Entry"
     ["file"]=>
-    string(%d) "%sbug00241.php"
+    string(%d) "%sbug00241-php80.php"
     ["line"]=>
     int(11)
     ["params"]=>
@@ -128,7 +131,7 @@ array(5) {
     ["class"]=>
     string(11) "Error_Class"
     ["file"]=>
-    string(%d) "%sbug00241.php"
+    string(%d) "%sbug00241-php80.php"
     ["line"]=>
     int(26)
     ["params"]=>

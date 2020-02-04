@@ -27,14 +27,14 @@ var_dump(error_get_last());
 gabba();
 ?>
 --EXPECTF--
-Notice: Undefined variable: b in %sbug00265-php74.php on line 6
+%s: Undefined variable: b in %sbug00265-php74.php on line 6
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php74.php:0
 
 array(4) {
   ["type"]=>
-  int(8)
+  int(%d)
   ["message"]=>
   string(21) "Undefined variable: b"
   ["file"]=>
@@ -43,20 +43,20 @@ array(4) {
   int(6)
 }
 
-Notice: Undefined variable: b in %sbug00265-php74.php on line 8
+%s: Undefined variable: b in %sbug00265-php74.php on line 8
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php74.php:0
 
 
-Notice: Trying to access array offset on value of type null in %sbug00265-php74.php on line 8
+%s: Trying to access array offset on value of type null in %sbug00265-php74.php on line 8
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php74.php:0
 
 array(4) {
   ["type"]=>
-  int(8)
+  int(%d)
   ["message"]=>
   string(51) "Trying to access array offset on value of type null"
   ["file"]=>

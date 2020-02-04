@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp)
 		XG_BASE(in_debug_info) = 1;
 		orig_exception = EG(exception);
 		EG(exception) = NULL;
-		
+
 #if PHP_VERSION_ID >= 70400
 		tmp = zend_get_properties_for(&dzval, ZEND_PROP_PURPOSE_DEBUG);
 #else
@@ -76,7 +76,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp)
 		XG_BASE(in_debug_info) = 0;
 		xdebug_tracing_restore_trace_context(original_trace_context);
 		EG(exception) = orig_exception;
-		
+
 		return tmp;
 	} else {
 #if PHP_VERSION_ID >= 70400
@@ -178,12 +178,16 @@ char* xdebug_error_type(int type)
 
 zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var)
 {
+#if PHP_VERSION_ID >= 80000
+	return zend_get_zval_ptr(opline, node_type, node, zdata, BP_VAR_IS);
+#else
 	zend_free_op should_free;
 
-#if PHP_VERSION_ID >= 70300
+# if PHP_VERSION_ID >= 70300
 	return zend_get_zval_ptr(opline, node_type, node, zdata, &should_free, BP_VAR_IS);
-#else
+# else
 	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_IS);
+# endif
 #endif
 }
 
@@ -324,7 +328,7 @@ static void fetch_zval_from_symbol_table(
 	char  *element = NULL;
 	unsigned int element_length = name_length;
 	zend_property_info *zpp;
-#if PHP_VERSION_ID < 70400	
+#if PHP_VERSION_ID < 70400
 	int is_temp = 0;
 #endif
 	int free_duplicated_name = 0;
@@ -448,7 +452,7 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_OBJ_PROPERTY:
 			/* Let's see if there is a debug handler */
 			if (value_in && Z_TYPE_P(value_in) == IS_OBJECT) {
-#if PHP_VERSION_ID >= 70400				
+#if PHP_VERSION_ID >= 70400
 				myht = xdebug_objdebug_pp(&value_in);
 #else
 				myht = xdebug_objdebug_pp(&value_in, &is_temp);
@@ -461,7 +465,7 @@ static void fetch_zval_from_symbol_table(
 						zend_release_properties(myht);
 #else
 						xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif						
+#endif
 						goto cleanup;
 					}
 #if PHP_VERSION_ID >= 70400
@@ -998,6 +1002,11 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 	info = zend_get_typed_property_info_for_slot(Z_OBJ_P(object), val);
 
 	if (info) {
+#if PHP_VERSION_ID >= 80000
+		zend_string *type_info = zend_type_to_string(info->type);
+		type_str = xdebug_str_create(ZSTR_VAL(type_info), ZSTR_LEN(type_info));
+		zend_string_release(type_info);
+#else
 		type_str = xdebug_str_new();
 
 		if (ZEND_TYPE_ALLOW_NULL(info->type)) {
@@ -1014,6 +1023,7 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 		} else {
 			xdebug_str_add(type_str, zend_get_type_by_const(ZEND_TYPE_CODE(info->type)), 0);
 		}
+#endif
 	}
 
 	return type_str;

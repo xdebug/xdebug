@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #178: $php_errormsg and Track errors unavailable
+Test for bug #178: $php_errormsg and Track errors unavailable (PHP < 8)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8');
+?>
 --INI--
 xdebug.default_enable=1
 xdebug.auto_trace=0

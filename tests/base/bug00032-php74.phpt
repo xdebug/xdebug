@@ -28,10 +28,10 @@ xdebug.dump_globals=0
 	echo ${new stdclass} . "\n";
 ?>
 --EXPECTF--
-Notice: Array to string conversion in %sbug00032-php74.php on line 8
+%s: Array to string conversion in %sbug00032-php74.php on line 8
 
 
-Notice: Array to string conversion in %sbug00032-php74.php on line 9
+%s: Array to string conversion in %sbug00032-php74.php on line 9
 
 foo
 foo

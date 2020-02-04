@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1018,51 +1018,6 @@ DBGP_FUNC(breakpoint_set)
 
 	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%lu", brk_info->id), 0, 1);
 	breakpoint_brk_info_add_resolved(*retval, brk_info);
-}
-
-static int xdebug_do_eval(char *eval_string, zval *ret_zval)
-{
-	int                old_track_errors;
-	int                res = FAILURE;
-	zend_execute_data *original_execute_data = EG(current_execute_data);
-	int                original_no_extensions = EG(no_extensions);
-	zend_object       *original_exception = EG(exception);
-	JMP_BUF           *original_bailout = EG(bailout);
-
-	/* Remember error reporting level and track errors */
-	XG_BASE(error_reporting_override) = EG(error_reporting);
-	XG_BASE(error_reporting_overridden) = 1;
-	old_track_errors = PG(track_errors);
-	EG(error_reporting) = 0;
-	PG(track_errors) = 0;
-
-	XG_DBG(breakpoints_allowed) = 0;
-
-	/* Reset exception in case we're triggered while being in xdebug_throw_exception_hook */
-	EG(exception) = NULL;
-
-	/* Do evaluation */
-	zend_first_try {
-		res = zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval");
-	} zend_end_try();
-
-	/* FIXME: Bubble up exception message to DBGp return packet */
-	if (EG(exception)) {
-		res = FAILURE;
-	}
-
-	/* Clean up */
-	EG(error_reporting) = XG_BASE(error_reporting_override);
-	XG_BASE(error_reporting_overridden) = 0;
-	PG(track_errors) = old_track_errors;
-	XG_DBG(breakpoints_allowed) = 1;
-
-	EG(current_execute_data) = original_execute_data;
-	EG(no_extensions) = original_no_extensions;
-	EG(exception) = original_exception;
-	EG(bailout) = original_bailout;
-
-	return res;
 }
 
 DBGP_FUNC(eval)

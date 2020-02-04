@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -165,6 +165,60 @@ static int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
 	return 0;
 }
 
+int xdebug_do_eval(char *eval_string, zval *ret_zval)
+{
+#if PHP_VERSION_ID < 80000
+	int                old_track_errors;
+#endif
+	int                res = FAILURE;
+	zend_execute_data *original_execute_data = EG(current_execute_data);
+	int                original_no_extensions = EG(no_extensions);
+	zend_object       *original_exception = EG(exception);
+	JMP_BUF           *original_bailout = EG(bailout);
+
+	/* Remember error reporting level and track errors */
+	XG_BASE(error_reporting_override) = EG(error_reporting);
+	XG_BASE(error_reporting_overridden) = 1;
+#if PHP_VERSION_ID < 80000
+	old_track_errors = PG(track_errors);
+#endif
+	EG(error_reporting) = 0;
+#if PHP_VERSION_ID < 80000
+	PG(track_errors) = 0;
+#endif
+
+	XG_DBG(context).inhibit_notifications = 1;
+	XG_DBG(breakpoints_allowed) = 0;
+
+	/* Reset exception in case we're triggered while being in xdebug_throw_exception_hook */
+	EG(exception) = NULL;
+
+	/* Do evaluation */
+	zend_first_try {
+		res = zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval");
+	} zend_end_try();
+
+	/* FIXME: Bubble up exception message to DBGp return packet */
+	if (EG(exception)) {
+		res = FAILURE;
+	}
+
+	/* Clean up */
+	EG(error_reporting) = XG_BASE(error_reporting_override);
+	XG_BASE(error_reporting_overridden) = 0;
+#if PHP_VERSION_ID < 80000
+	PG(track_errors) = old_track_errors;
+#endif
+	XG_DBG(breakpoints_allowed) = 1;
+	XG_DBG(context).inhibit_notifications = 0;
+
+	EG(current_execute_data) = original_execute_data;
+	EG(no_extensions) = original_no_extensions;
+	EG(exception) = original_exception;
+	EG(bailout) = original_bailout;
+
+	return res;
+}
 
 void xdebug_debugger_statement_call(char *file, int file_len, int lineno)
 {
@@ -236,7 +290,7 @@ void xdebug_debugger_statement_call(char *file, int file_len, int lineno)
 		}
 
 		if (XG_DBG(context).line_breakpoints) {
-			int   break_ok;
+			int   break_ok, res;
 			zval  retval;
 
 			for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
@@ -253,21 +307,11 @@ void xdebug_debugger_statement_call(char *file, int file_len, int lineno)
 						break_ok = 0;
 
 						/* Remember error reporting level */
-						XG_BASE(error_reporting_override) = EG(error_reporting);
-						XG_BASE(error_reporting_overridden) = 1;
-						EG(error_reporting) = 0;
-						XG_DBG(context).inhibit_notifications = 1;
-
-						/* Check the condition */
-						if (zend_eval_string(extra_brk_info->condition, &retval, (char*) "xdebug conditional breakpoint") == SUCCESS) {
+						res = xdebug_do_eval(extra_brk_info->condition, &retval);
+						if (res == SUCCESS) {
 							break_ok = Z_TYPE(retval) == IS_TRUE;
 							zval_dtor(&retval);
 						}
-
-						/* Restore error reporting level */
-						EG(error_reporting) = XG_BASE(error_reporting_override);
-						XG_BASE(error_reporting_overridden) = 0;
-						XG_DBG(context).inhibit_notifications = 0;
 					}
 					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
 						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), file, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
