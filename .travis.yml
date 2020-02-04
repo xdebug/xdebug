@@ -9,10 +9,6 @@ php:
   - 7.4
   - nightly
 
-matrix:
-  allow_failures:
-    - php: nightly
-
 env:
   - USE_OPCACHE=0
   - USE_OPCACHE=1
