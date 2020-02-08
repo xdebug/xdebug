@@ -863,22 +863,6 @@ static int find_line_number_for_current_execute_point(zend_execute_data *edata)
 	return 0;
 }
 
-int xdebug_function_name_is_closure(char *fname)
-{
-	int length = strlen(fname);
-	int closure_length = strlen("{closure}");
-
-	if (length < closure_length) {
-		return 0;
-	}
-
-	if (strcmp(fname + length - closure_length, "{closure}") == 0) {
-		return 1;
-	}
-
-	return 0;
-}
-
 char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname)
 {
 	xdebug_str tmp = XDEBUG_STR_INITIALIZER;
@@ -922,7 +906,7 @@ void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
 	memset(tmp, 0, sizeof(xdebug_func));
 
 	if (opa->function_name) {
-		if (xdebug_function_name_is_closure(STR_NAME_VAL(opa->function_name))) {
+		if (opa->fn_flags & ZEND_ACC_CLOSURE) {
 			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
 			closure = 1;
 		} else {
@@ -969,7 +953,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 			}
 		}
 		if (edata->func->common.function_name) {
-			if (xdebug_function_name_is_closure(edata->func->common.function_name->val)) {
+			if (edata->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 				tmp->function = xdebug_wrap_closure_location_around_function_name(&edata->func->op_array, edata->func->common.function_name->val);
 			} else if (strncmp(edata->func->common.function_name->val, "call_user_func", 14) == 0) {
 				const char *fname = NULL;
