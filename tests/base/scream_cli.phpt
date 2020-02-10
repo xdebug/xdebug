@@ -7,6 +7,7 @@ xdebug.scream=0
 error_reporting(E_ALL);
 xdebug.cli_color=2
 xdebug.force_error_reporting=0
+xdebug.collect_params=0
 --FILE--
 <?php
 echo @hex2bin('4'), "\n";

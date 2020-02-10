@@ -9,6 +9,7 @@ html_errors=1
 xdebug.file_link_format=xdebug://%f@%l
 xdebug.filename_format=
 xdebug.force_error_reporting=0
+xdebug.collect_params=0
 --FILE--
 <?php
 echo @hex2bin('4'), "\n";
