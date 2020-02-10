@@ -6,6 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP >= 7.4');
 ?>
 --INI--
+date.timezone=UTC
 xdebug.default_enable=1
 xdebug.profiler_enable=0
 xdebug.auto_trace=0
