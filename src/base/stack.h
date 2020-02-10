@@ -23,7 +23,6 @@
 
 #define XDEBUG_STACK_NO_DESC 0x01
 
-int xdebug_function_name_is_closure(char *fname);
 char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
 void xdebug_func_dtor_by_ref(xdebug_func *elem); /* TODO: Remove this API */
 void xdebug_func_dtor(xdebug_func *elem);
