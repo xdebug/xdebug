@@ -416,6 +416,9 @@ static void xdebug_init_debugger()
 
 			zend_string_release(ini_val);
 			zend_string_release(ini_name);
+
+			xdebug_mark_debug_connection_active();
+			XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), XDEBUG_CMDLOOP_BLOCK, XDEBUG_CMDLOOP_BAIL);
 		}
 	} else if (XG_DBG(context).socket == -1) {
 		XG_DBG(context).handler->log(XDEBUG_LOG_ERR, "Could not connect to client. :-(\n");
