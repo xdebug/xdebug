@@ -9,11 +9,15 @@ class DebugClient
 
 	private $tmpDir;
 
+	protected $socket;
+	protected $php;
+	protected $ppipes;
+
 	public function getPort()
 	{
 		return $this->port;
 	}
-	
+
 	public function setPort($port)
 	{
 		$this->port = $port;
@@ -56,7 +60,7 @@ class DebugClient
 		   1 => array( 'pipe', 'w' ),
 		   2 => array( 'file', $this->tmpDir . '/error-output.txt', 'a' )
 		);
-		
+
 		$default_options = array(
 			"xdebug.remote_enable" => "1",
 			"xdebug.remote_autostart" => "1",
@@ -70,7 +74,7 @@ class DebugClient
 		{
 			$ini_options = array();
 		}
-		
+
 		$options = (getenv('TEST_PHP_ARGS') ?: '');
 		$ini_options = array_merge( $default_options, $ini_options );
 		foreach ( $ini_options as $key => $value )
@@ -96,15 +100,40 @@ class DebugClient
 		return " {$m[1]}=\"file://{$fm[1]}\"";
 	}
 
-	function doRead( $conn )
+	function doRead( $conn, string $transaction_id = null )
 	{
-		stream_set_timeout( $conn, 0, 1000 );
+		stream_set_timeout( $conn, 1 );
 		do {
-			$end = true;
-			do {
-				$header = stream_get_line( $conn, 10240, "\0" );
-			} while ( $header === false );
-			$read   = stream_get_line( $conn, 102400, "\0" );
+			$trans_id = null;
+			$length = 0;
+			while ( "\0" !== ( $char = fgetc($conn) ) ) {
+				if ( $char === false ) {
+					echo "read a false for $transaction_id" . PHP_EOL;
+					return null;
+				}
+				if ( !is_numeric($char) ) {
+					echo "read a non-number for $transaction_id" . PHP_EOL;
+					return null;
+				}
+				$length = $length * 10 + (int)$char;
+			}
+
+			$read = '';
+			while ( 0 < $length ) {
+				$data = fread( $conn, $length );
+				if ( $data === false )
+				{
+					echo "read a false for $transaction_id" . PHP_EOL;
+					return null;
+				}
+				$length -= strlen( $data );
+				$read .= $data;
+			}
+			$char = fgetc( $conn );
+			if ( $char !== "\0" )
+			{
+				echo 'must end with \0' . PHP_EOL;
+			}
 
 			// sanitize
 			$read = preg_replace( '@\s(appid|id)="\d+?"@', ' \\1=""', $read );
@@ -113,34 +142,39 @@ class DebugClient
 			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
 			$read = preg_replace( '@(2002-20[0-9]{2})@', '2002-2099', $read );
 			$read = preg_replace_callback( '@\s(fileuri|filename)="file:///(.+?)"@', 'self::fixFilePath', $read );
+
 			echo $read, "\n\n";
 
 			if ( preg_match( '@<stream xmlns="urn.debugger_protocol_v1" xmlns:xdebug@', $read ) )
 			{
-				$end = false;
+				continue;
 			}
 			if ( preg_match( '@<notify xmlns="urn.debugger_protocol_v1" xmlns:xdebug@', $read ) )
 			{
-				$end = false;
+				continue;
 			}
-		} while( !$end );
+			$matches = [];
+			if ( preg_match( '@transaction_id="(?P<transaction_id>\d+)"@', $read, $matches ) )
+			{
+				$trans_id = $matches['transaction_id'] ?? null;
+			}
+		} while ( $trans_id !== $transaction_id );
 	}
 
-	function runTest( $filename, array $commands, array $ini_options = null )
+	function start( $filename, array $ini_options = null )
 	{
 		$filename = realpath( $filename );
 
-		$i = 1;
-		$socket = $this->open( $errno, $errstr );
-		if ( $socket === false )
+		$this->socket = $this->open( $errno, $errstr );
+		if ( $this->socket === false )
 		{
 			echo "Could not create socket server - already in use?\n";
 			echo "Error: {$errstr}, errno: {$errno}\n";
 			echo "Address: {$this->getAddress()}\n";
-			return;
+			return false;
 		}
-		$php = $this->launchPhp( $ppipes, $ini_options, $filename );
-		$conn = @stream_socket_accept( $socket, 20 );
+		$this->php = $this->launchPhp( $this->ppipes, $ini_options, $filename );
+		$conn = @stream_socket_accept( $this->socket, 20 );
 
 		if ( $conn === false )
 		{
@@ -148,43 +182,63 @@ class DebugClient
 			echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
 			echo @file_get_contents( $this->tmpDir . '/remote_log.txt' ), "\n";
-			proc_close( $php );
+			proc_close( $this->php );
+			return false;
+		}
+		return $conn;
+	}
+
+	function stop( $conn )
+	{
+		fclose( $conn );
+		fclose( $this->ppipes[0] );
+		fclose( $this->ppipes[1] );
+		fclose( $this->socket );
+		proc_close( $this->php );
+
+		// echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
+		// echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
+	}
+
+	function sendCommand( $conn, $command, $transaction_id )
+	{
+		// inject identifier
+		$parts = explode( ' ', $command, 2 );
+		if ( count($parts) == 1 )
+		{
+			$command = $parts[0] . " -i $transaction_id";
+		}
+		else
+		{
+			$command = $parts[0] . " -i $transaction_id " . $parts[1];
+		}
+
+		$sanitised = $command;
+		$sanitised = preg_replace( '@\sfile://.*[/\\\\](.*\.inc)\s@', ' file://\\1 ', $sanitised );
+
+		echo "-> ", $sanitised, "\n";
+		fwrite( $conn, $command . "\0" );
+	}
+
+	function runTest( $filename, array $commands, array $ini_options = null )
+	{
+		$conn = $this->start( $filename, $ini_options );
+		if ( $conn === false )
+		{
 			return;
 		}
+		$i = 1;
 
 		// read header
 		$this->doRead( $conn );
 		foreach ( $commands as $command )
 		{
-			// inject identifier
-			$parts = explode( ' ', $command, 2 );
-			if ( count( $parts ) == 1 )
-			{
-				$command = $parts[0] . " -i $i";
-			}
-			else
-			{
-				$command = $parts[0] . " -i $i " . $parts[1];
-			}
-
-			$sanitised = $command;
-			$sanitised = preg_replace( '@\sfile://.*[/\\\\](.*\.inc)\s@', ' file://\\1 ', $sanitised );
-
-			echo "-> ", $sanitised, "\n";
-			fwrite( $conn, $command . "\0" );
-
-			$this->doRead( $conn );
+			$this->sendCommand( $conn, $command, $i );
+			$this->doRead( $conn, (string)$i );
 
 			$i++;
 		}
-		fclose( $conn );
-		fclose( $ppipes[0] );
-		fclose( $ppipes[1] );
-		fclose( $socket );
-		proc_close( $php );
-		
-		// echo @file_get_contents( $this->tmpDir . '/php-stderr.txt' ), "\n";
-		// echo @file_get_contents( $this->tmpDir . '/error-output.txt' ), "\n";
+		$this->stop( $conn );
 	}
 }
 

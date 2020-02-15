@@ -61,6 +61,7 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 xdebug_remote_handler xdebug_handler_dbgp = {
 	xdebug_dbgp_init,
 	xdebug_dbgp_deinit,
+	xdebug_dbgp_cmdloop,
 	xdebug_dbgp_error,
 	xdebug_dbgp_break_on_line,
 	xdebug_dbgp_breakpoint,
@@ -172,7 +173,7 @@ xdebug_breakpoint_entry xdebug_breakpoint_types[XDEBUG_BREAKPOINT_TYPES_COUNT] =
 ** Prototypes for debug command handlers
 */
 
-/* DBGP_FUNC(break); */
+DBGP_FUNC(break);
 DBGP_FUNC(breakpoint_get);
 DBGP_FUNC(breakpoint_list);
 DBGP_FUNC(breakpoint_remove);
@@ -215,45 +216,45 @@ DBGP_FUNC(xcmd_get_executable_lines);
 */
 
 static xdebug_dbgp_cmd dbgp_commands[] = {
-	/* DBGP_FUNC_ENTRY(break) */
-	DBGP_FUNC_ENTRY(breakpoint_get,    XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(breakpoint_list,   XDEBUG_DBGP_POST_MORTEM)
-	DBGP_FUNC_ENTRY(breakpoint_remove, XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(breakpoint_set,    XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(breakpoint_update, XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(break,             XDEBUG_DBGP_ASYNC)
+	DBGP_FUNC_ENTRY(breakpoint_get,    XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(breakpoint_list,   XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(breakpoint_remove, XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(breakpoint_set,    XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(breakpoint_update, XDEBUG_DBGP_SYNC)
 
-	DBGP_FUNC_ENTRY(context_get,       XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(context_names,     XDEBUG_DBGP_POST_MORTEM)
+	DBGP_FUNC_ENTRY(context_get,       XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(context_names,     XDEBUG_DBGP_SYNC)
 
-	DBGP_FUNC_ENTRY(eval,              XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(feature_get,       XDEBUG_DBGP_POST_MORTEM)
-	DBGP_FUNC_ENTRY(feature_set,       XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(eval,              XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(feature_get,       XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(feature_set,       XDEBUG_DBGP_SYNC)
 
-	DBGP_FUNC_ENTRY(typemap_get,       XDEBUG_DBGP_POST_MORTEM)
-	DBGP_FUNC_ENTRY(property_get,      XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(property_set,      XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(property_value,    XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(typemap_get,       XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(property_get,      XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(property_set,      XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(property_value,    XDEBUG_DBGP_SYNC)
 
-	DBGP_FUNC_ENTRY(source,            XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(stack_depth,       XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(stack_get,         XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(status,            XDEBUG_DBGP_POST_MORTEM)
+	DBGP_FUNC_ENTRY(source,            XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(stack_depth,       XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(stack_get,         XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(status,            XDEBUG_DBGP_SYNC|XDEBUG_DBGP_ASYNC)
 
-	DBGP_FUNC_ENTRY(stderr,            XDEBUG_DBGP_NONE)
-	DBGP_FUNC_ENTRY(stdout,            XDEBUG_DBGP_NONE)
+	DBGP_FUNC_ENTRY(stderr,            XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(stdout,            XDEBUG_DBGP_SYNC)
 
-	DBGP_CONT_FUNC_ENTRY(run,          XDEBUG_DBGP_NONE)
-	DBGP_CONT_FUNC_ENTRY(step_into,    XDEBUG_DBGP_NONE)
-	DBGP_CONT_FUNC_ENTRY(step_out,     XDEBUG_DBGP_NONE)
-	DBGP_CONT_FUNC_ENTRY(step_over,    XDEBUG_DBGP_NONE)
+	DBGP_CONT_FUNC_ENTRY(run,          XDEBUG_DBGP_SYNC)
+	DBGP_CONT_FUNC_ENTRY(step_into,    XDEBUG_DBGP_SYNC)
+	DBGP_CONT_FUNC_ENTRY(step_out,     XDEBUG_DBGP_SYNC)
+	DBGP_CONT_FUNC_ENTRY(step_over,    XDEBUG_DBGP_SYNC)
 
-	DBGP_STOP_FUNC_ENTRY(stop,         XDEBUG_DBGP_POST_MORTEM)
-	DBGP_STOP_FUNC_ENTRY(detach,       XDEBUG_DBGP_NONE)
+	DBGP_STOP_FUNC_ENTRY(stop,         XDEBUG_DBGP_SYNC)
+	DBGP_STOP_FUNC_ENTRY(detach,       XDEBUG_DBGP_SYNC)
 
 	/* Non standard functions */
-	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_POST_MORTEM)
-	DBGP_FUNC_ENTRY(xcmd_get_executable_lines, XDEBUG_DBGP_NONE)
-	{ NULL, NULL, 0, 0 }
+	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(xcmd_get_executable_lines, XDEBUG_DBGP_SYNC)
+	{ NULL, NULL, 0 }
 };
 
 /*****************************************************************************
@@ -764,7 +765,7 @@ static int breakpoint_remove(int type, char *hkey)
 
 
 
-static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
+static int breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 {
 	int                   type;
 	char                 *hkey;
@@ -806,24 +807,33 @@ static void breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 			breakpoint_remove(type, hkey);
 			breakpoint_admin_remove(context, CMD_OPTION_CHAR('d'));
 		}
+		return XDEBUG_CMD_OK;
 	} else {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_NO_SUCH_BREAKPOINT)
 	}
 }
 
+DBGP_FUNC(break)
+{
+	XG_DBG(context).do_break = 1;
+	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[XG_DBG(status)]);
+	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG_DBG(reason)]);
+	return XDEBUG_CMD_BREAK;
+}
+
 DBGP_FUNC(breakpoint_get)
 {
-	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_GET);
+	return breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_GET);
 }
 
 DBGP_FUNC(breakpoint_remove)
 {
-	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_REMOVE);
+	return breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_REMOVE);
 }
 
 DBGP_FUNC(breakpoint_update)
 {
-	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_UPDATE);
+	return breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_UPDATE);
 }
 
 
@@ -843,6 +853,7 @@ static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
 DBGP_FUNC(breakpoint_list)
 {
 	xdebug_hash_apply(context->breakpoint_list, (void *) *retval, breakpoint_list_helper);
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(breakpoint_set)
@@ -1018,6 +1029,7 @@ DBGP_FUNC(breakpoint_set)
 
 	xdebug_xml_add_attribute_ex(*retval, "id", xdebug_sprintf("%lu", brk_info->id), 0, 1);
 	breakpoint_brk_info_add_resolved(*retval, brk_info);
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(eval)
@@ -1056,6 +1068,7 @@ DBGP_FUNC(eval)
 		xdebug_xml_add_child(*retval, ret_xml);
 		zval_ptr_dtor(&ret_zval);
 	}
+	return XDEBUG_CMD_OK;
 }
 
 /* these functions interupt PHP's output functions, so we can
@@ -1084,6 +1097,7 @@ static void xdebug_send_stream(const char *name, const char *str, unsigned int s
 DBGP_FUNC(stderr)
 {
 	xdebug_xml_add_attribute(*retval, "success", "0");
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(stdout)
@@ -1100,6 +1114,7 @@ DBGP_FUNC(stdout)
 	success = "1";
 
 	xdebug_xml_add_attribute_ex(*retval, "success", xdstrdup(success), 0, 1);
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(stop)
@@ -1107,23 +1122,31 @@ DBGP_FUNC(stop)
 	XG_DBG(status) = DBGP_STATUS_STOPPED;
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[XG_DBG(status)]);
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG_DBG(reason)]);
+	return XDEBUG_CMD_BREAK;
 }
 
 DBGP_FUNC(run)
 {
+	MARK_RUNNING(run)
+
 	xdebug_xml_add_attribute_ex(*retval, "filename", xdstrdup(context->program_name), 0, 1);
+	return XDEBUG_CMD_CONT;
 }
 
 DBGP_FUNC(step_into)
 {
+	MARK_RUNNING(step_into);
 	XG_DBG(context).do_next   = 0;
 	XG_DBG(context).do_step   = 1;
 	XG_DBG(context).do_finish = 0;
+	return XDEBUG_CMD_CONT;
 }
 
 DBGP_FUNC(step_out)
 {
 	function_stack_entry *fse;
+
+	MARK_RUNNING(step_out);
 
 	XG_DBG(context).do_next   = 0;
 	XG_DBG(context).do_step   = 0;
@@ -1136,11 +1159,14 @@ DBGP_FUNC(step_out)
 		XG_DBG(context).finish_level = -1;
 		XG_DBG(context).finish_func_nr = -1;
 	}
+	return XDEBUG_CMD_CONT;
 }
 
 DBGP_FUNC(step_over)
 {
 	function_stack_entry *fse;
+
+	MARK_RUNNING(step_over);
 
 	XG_DBG(context).do_next   = 1;
 	XG_DBG(context).do_step   = 0;
@@ -1151,17 +1177,25 @@ DBGP_FUNC(step_over)
 	} else {
 		XG_DBG(context).next_level = 0;
 	}
+	return XDEBUG_CMD_CONT;
 }
 
 DBGP_FUNC(detach)
 {
 	XG_DBG(status) = DBGP_STATUS_DETACHED;
+	XG_DBG(lastcmd) = "detach";
+	if (XG_DBG(lasttransid)) {
+		xdfree(XG_DBG(lasttransid));
+	}
+	XG_DBG(lasttransid) = xdstrdup(CMD_OPTION_CHAR('i'));
+
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[DBGP_STATUS_STOPPED]);
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG_DBG(reason)]);
 	XG_DBG(context).handler->remote_deinit(&(XG_DBG(context)));
 	xdebug_mark_debug_connection_not_active();
 	XG_DBG(stdout_mode) = 0;
 	XINI_DBG(remote_enable) = 0;
+	return XDEBUG_CMD_BREAK;
 }
 
 
@@ -1199,6 +1233,7 @@ DBGP_FUNC(source)
 	} else {
 		xdebug_xml_add_text_ex(*retval, xdstrdup(source->d), source->l, 1, 1);
 		xdebug_str_free(source);
+		return XDEBUG_CMD_OK;
 	}
 }
 
@@ -1308,6 +1343,7 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0");
 		XDEBUG_STR_CASE_DEFAULT_END
 	}
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(feature_set)
@@ -1376,6 +1412,7 @@ DBGP_FUNC(feature_set)
 	}
 	xdebug_xml_add_attribute_ex(*retval, "feature", xdstrdup(CMD_OPTION_CHAR('n')), 0, 1);
 	xdebug_xml_add_attribute_ex(*retval, "success", "1", 0, 0);
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(typemap_get)
@@ -1396,6 +1433,7 @@ DBGP_FUNC(typemap_get)
 		}
 		xdebug_xml_add_child(*retval, type);
 	}
+	return XDEBUG_CMD_OK;
 }
 
 static int add_constant_node(xdebug_xml_node *node, xdebug_str *name, zval *const_val, xdebug_var_export_options *options)
@@ -1515,6 +1553,7 @@ DBGP_FUNC(property_get)
 		}
 	}
 	options->max_data = old_max_data;
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(property_set)
@@ -1631,6 +1670,7 @@ DBGP_FUNC(property_set)
 		zval_dtor(&ret_zval);
 		xdebug_xml_add_attribute(*retval, "success", "1");
 	}
+	return XDEBUG_CMD_OK;
 }
 
 static int add_variable_contents_node(xdebug_xml_node *node, xdebug_str *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options)
@@ -1704,6 +1744,7 @@ DBGP_FUNC(property_value)
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
 	options->max_data = old_max_data;
+	return XDEBUG_CMD_OK;
 }
 
 static void attach_declared_var_with_contents(void *xml, xdebug_hash_element* he, void *options)
@@ -1873,6 +1914,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 DBGP_FUNC(stack_depth)
 {
 	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%lu", XG_BASE(level)), 0, 1);
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(stack_get)
@@ -1898,12 +1940,14 @@ DBGP_FUNC(stack_get)
 			counter++;
 		}
 	}
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(status)
 {
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[XG_DBG(status)]);
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG_DBG(reason)]);
+	return XDEBUG_CMD_OK;
 }
 
 
@@ -1925,6 +1969,7 @@ DBGP_FUNC(context_names)
 	xdebug_xml_add_attribute(child, "name", "User defined constants");
 	xdebug_xml_add_attribute(child, "id", "2");
 	xdebug_xml_add_child(*retval, child);
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(context_get)
@@ -1951,6 +1996,7 @@ DBGP_FUNC(context_get)
 	}
 
 	xdebug_xml_add_attribute_ex(*retval, "context", xdebug_sprintf("%d", context_id), 0, 1);
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(xcmd_profiler_name_get)
@@ -1962,6 +2008,7 @@ DBGP_FUNC(xcmd_profiler_name_get)
 	} else {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_PROFILING_NOT_STARTED);
 	}
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(xcmd_get_executable_lines)
@@ -1991,6 +2038,7 @@ DBGP_FUNC(xcmd_get_executable_lines)
 		}
 	}
 	xdebug_xml_add_child(*retval, lines);
+	return XDEBUG_CMD_OK;
 }
 
 
@@ -2150,7 +2198,7 @@ duplicate_opts:
 	return XDEBUG_ERROR_DUP_ARG;
 }
 
-static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval)
+static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, xdebug_xml_node *retval)
 {
 	char *cmd = NULL;
 	int res, ret = 0;
@@ -2189,25 +2237,17 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 		command = lookup_cmd(cmd);
 
 		if (command) {
-			if (command->cont) {
-				XG_DBG(status) = DBGP_STATUS_RUNNING;
-				XG_DBG(reason) = DBGP_REASON_OK;
-			}
-			XG_DBG(lastcmd) = command->name;
-			if (XG_DBG(lasttransid)) {
-				xdfree(XG_DBG(lasttransid));
-			}
-			XG_DBG(lasttransid) = xdstrdup(CMD_OPTION_CHAR('i'));
-			if (XG_DBG(status) != DBGP_STATUS_STOPPING || (XG_DBG(status) == DBGP_STATUS_STOPPING && command->flags & XDEBUG_DBGP_POST_MORTEM)) {
-				command->handler((xdebug_xml_node**) &retval, context, args);
-				ret = command->cont;
+			if ((XG_DBG(status) != DBGP_STATUS_RUNNING && (command->falgs & XDEBUG_DBGP_SYNC) == XDEBUG_DBGP_SYNC)
+				|| (XG_DBG(status) == DBGP_STATUS_RUNNING && (command->falgs & XDEBUG_DBGP_ASYNC) == XDEBUG_DBGP_ASYNC)
+			) {
+				ret = command->handler((xdebug_xml_node **)&retval, context, args);
 			} else {
 				error = xdebug_xml_node_init("error");
 				xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_COMMAND_UNAVAILABLE), 0, 1);
 				ADD_REASON_MESSAGE(XDEBUG_ERROR_COMMAND_UNAVAILABLE);
 				xdebug_xml_add_child(retval, error);
 
-				ret = -1;
+				ret = XDEBUG_CMD_ERROR;
 			}
 		} else {
 			error = xdebug_xml_node_init("error");
@@ -2215,7 +2255,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 			ADD_REASON_MESSAGE(XDEBUG_ERROR_UNIMPLEMENTED);
 			xdebug_xml_add_child(retval, error);
 
-			ret = -1;
+			ret = XDEBUG_CMD_ERROR;
 		}
 	}
 
@@ -2233,7 +2273,7 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 #define FD_RL_SOCKET  1
 
 
-static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigned char delim, int *length)
+int xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, int block, unsigned char delim, char **cmd, int *length)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;
@@ -2246,7 +2286,7 @@ static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, 
 		context->buffer_size = 0;
 	}
 
-	while (context->buffer_size < 1 || context->buffer[context->buffer_size - 1] != delim) {
+	while ((ptr = memchr(context->buffer, delim, context->buffer_size)) == NULL) {
 		ptr = context->buffer + context->buffer_size;
 		if (type == FD_RL_FILE) {
 			newl = read(socketfd, buffer, READ_BUFFER_SIZE);
@@ -2258,17 +2298,32 @@ static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, 
 			memcpy(context->buffer + context->buffer_size, buffer, newl);
 			context->buffer_size += newl;
 			context->buffer[context->buffer_size] = '\0';
-		} else if (newl == -1 && errno == EINTR) {
-			continue;
+		} else if (newl == -1) {
+#ifndef WIN32
+			if (errno == EINTR) {
+				continue;
+			}
+			if (errno == EAGAIN) {
+				return 0;
+			}
+#else
+			int lasterr = WSAGetLastError();
+
+			if (lasterr == WSAEINTR) {
+				continue;
+			}
+			if (lasterr == WSAEWOULDBLOCK || lasterr == WSAECONNABORTED) {
+				return 0;
+			}
+#endif
 		} else {
 			free(context->buffer);
 			context->buffer = NULL;
 			context->buffer_size = 0;
-			return NULL;
+			return 1;
 		}
 	}
 
-	ptr = memchr(context->buffer, delim, context->buffer_size);
 	size = ptr - context->buffer;
 	/* Copy that line into tmp */
 	tmp = malloc(size + 1);
@@ -2278,7 +2333,7 @@ static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, 
 	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
 		tmp_buf = malloc(nbufsize + 1);
 		memcpy(tmp_buf, ptr + 1, nbufsize);
-		tmp_buf[nbufsize] = 0;
+		tmp_buf[nbufsize] = '\0';
 	}
 	free(context->buffer);
 	context->buffer = tmp_buf;
@@ -2287,39 +2342,71 @@ static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, 
 	/* Return normal line */
 	if (length) {
 		*length = size;
+		*cmd = tmp;
 	}
-	return tmp;
+	return 0;
 }
 
-static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
+int xdebug_dbgp_cmdloop(xdebug_con *context, int block, int bail)
 {
 	char *option;
-	int   ret;
+	int    ret;
+	int    length;
 	xdebug_xml_node *response;
 
+#if WIN32|WINNT
+	u_long                     yes = 1;
+	u_long                     no = 0;
+	int                        status;
+#endif
+
 	do {
-		option = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', NULL);
-		if (!option) {
-			return 0;
+		option = NULL;
+		length = 0;
+		if (!block) {
+#ifdef WIN32
+			status = ioctlsocket(context->socket, FIONBIO, &yes);
+			if (SOCKET_ERROR == status) {
+				XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "setting socket to FIONBIO: %d.\n", WSAGetLastError());
+			}
+#else
+			fcntl(context->socket, F_SETFL, O_NONBLOCK);
+#endif
+		}
+		ret = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, block, '\0', &option, &length);
+		// set it back
+		if (!block) {
+#ifdef WIN32
+			status = ioctlsocket(context->socket, FIONBIO, &no);
+			if (SOCKET_ERROR == status) {
+				XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "setting socket not to FIONBIO: %d.\n", WSAGetLastError());
+			}
+#else
+			int flags = fcntl(context->socket, F_GETFL, 0);
+			fcntl(context->socket, F_SETFL, flags & ~O_NONBLOCK);
+#endif
+		}
+		if (ret || length <= 0) {
+			return ret;
 		}
 
 		response = xdebug_xml_node_init("response");
 		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
 		xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response);
-		if (ret != 1) {
+		ret = xdebug_dbgp_parse_option(context, option, response);
+		if (ret != XDEBUG_CMD_CONT) {
 			send_message(context, response);
 		}
 		xdebug_xml_node_dtor(response);
 
 		free(option);
-	} while (0 == ret);
+	} while (ret <= 0);
 
 	if (bail && XG_DBG(status) == DBGP_STATUS_STOPPED) {
+		xdebug_mark_debug_connection_not_active();
 		_zend_bailout((char*)__FILE__, __LINE__);
 	}
 	return ret;
-
 }
 
 int xdebug_dbgp_init(xdebug_con *context, int mode)
@@ -2411,9 +2498,6 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->inhibit_notifications = 0;
 	context->resolved_breakpoints = 0;
 
-	xdebug_mark_debug_connection_active();
-	xdebug_dbgp_cmdloop(context, 1);
-
 	return 1;
 }
 
@@ -2440,7 +2524,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		send_message(context, response);
 		xdebug_xml_node_dtor(response);
 
-		xdebug_dbgp_cmdloop(context, 0);
+		xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BLOCK, XDEBUG_CMDLOOP_NONBAIL);
 	}
 
 	if (xdebug_is_debug_connection_active_for_current_pid()) {
@@ -2527,7 +2611,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 		xdfree(errortype);
 	}
 
-	xdebug_dbgp_cmdloop(context, 1);
+	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BLOCK, XDEBUG_CMDLOOP_BAIL);
 
 	return 1;
 }
@@ -2622,8 +2706,6 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 		xdfree(XG_DBG(lasttransid));
 		XG_DBG(lasttransid) = NULL;
 	}
-
-	xdebug_dbgp_cmdloop(context, 1);
 
 	return xdebug_is_debug_connection_active_for_current_pid();
 }
