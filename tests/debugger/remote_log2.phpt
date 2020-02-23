@@ -7,7 +7,7 @@ check_reqs('dbgp; !win');
 ?>
 --INI--
 xdebug.remote_enable=1
-xdebug.remote_log=/tmp/remote-log2.txt
+xdebug.remote_log=/tmp/{RUNID}remote-log2.txt
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
 xdebug.remote_host=doesnotexist2
@@ -15,8 +15,8 @@ xdebug.remote_port=9003
 --FILE--
 <?php
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . "/remote-log2.txt");
-unlink (sys_get_temp_dir() . "/remote-log2.txt");
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log2.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log2.txt' );
 ?>
 --EXPECTF--
 3
