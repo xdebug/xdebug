@@ -91,14 +91,16 @@ typedef struct xdebug_dbgp_arg {
 #define DBGP_CONT_FUNC_ENTRY(name,flags)  { #name, xdebug_dbgp_handle_##name, 1, flags },
 #define DBGP_STOP_FUNC_ENTRY(name,flags)  { #name, xdebug_dbgp_handle_##name, 2, flags },
 
-#define XDEBUG_DBGP_SYNC          0x001 /* command could run at other states */ 
-#define XDEBUG_DBGP_ASYNC         0x010 /* command could run at state "run" */
+#define XDEBUG_DBGP_NONE          1 << 0
+#define XDEBUG_DBGP_SYNC          1 << 1 /* command could run at other states */
+#define XDEBUG_DBGP_ASYNC         1 << 2 /* command is valid in 'running' state */
+#define XDEBUG_DBGP_POST_MORTEM   1 << 3 /* command is valid in 'stopping' (post mortem) state */
 
 typedef struct xdebug_dbgp_cmd {
 	const char *name;
 	int (*handler)(DBGP_FUNC_PARAMETERS);
 	int  cont;
-	int  falgs;
+	int  flags;
 } xdebug_dbgp_cmd;
 
 typedef struct xdebug_dbgp_resolve_context {

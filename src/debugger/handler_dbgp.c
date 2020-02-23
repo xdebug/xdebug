@@ -88,8 +88,8 @@ static void line_breakpoint_resolve_helper(xdebug_con *context, xdebug_lines_lis
 #define DBGP_STATUS_BREAK     5
 #define DBGP_STATUS_DETACHED  6
 
-const char *xdebug_dbgp_status_strings[6] =
-	{"", "starting", "stopping", "stopped", "running", "break"};
+const char *xdebug_dbgp_status_strings[7] =
+	{"", "starting", "stopping", "stopped", "running", "break", "detached"};
 
 #define DBGP_REASON_OK        0
 #define DBGP_REASON_ERROR     1
@@ -218,19 +218,19 @@ DBGP_FUNC(xcmd_get_executable_lines);
 static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_FUNC_ENTRY(break,             XDEBUG_DBGP_ASYNC)
 	DBGP_FUNC_ENTRY(breakpoint_get,    XDEBUG_DBGP_SYNC)
-	DBGP_FUNC_ENTRY(breakpoint_list,   XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(breakpoint_list,   XDEBUG_DBGP_SYNC|XDEBUG_DBGP_POST_MORTEM)
 	DBGP_FUNC_ENTRY(breakpoint_remove, XDEBUG_DBGP_SYNC)
 	DBGP_FUNC_ENTRY(breakpoint_set,    XDEBUG_DBGP_SYNC)
 	DBGP_FUNC_ENTRY(breakpoint_update, XDEBUG_DBGP_SYNC)
 
 	DBGP_FUNC_ENTRY(context_get,       XDEBUG_DBGP_SYNC)
-	DBGP_FUNC_ENTRY(context_names,     XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(context_names,     XDEBUG_DBGP_SYNC|XDEBUG_DBGP_POST_MORTEM)
 
 	DBGP_FUNC_ENTRY(eval,              XDEBUG_DBGP_SYNC)
-	DBGP_FUNC_ENTRY(feature_get,       XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(feature_get,       XDEBUG_DBGP_SYNC|XDEBUG_DBGP_POST_MORTEM)
 	DBGP_FUNC_ENTRY(feature_set,       XDEBUG_DBGP_SYNC)
 
-	DBGP_FUNC_ENTRY(typemap_get,       XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(typemap_get,       XDEBUG_DBGP_SYNC|XDEBUG_DBGP_POST_MORTEM)
 	DBGP_FUNC_ENTRY(property_get,      XDEBUG_DBGP_SYNC)
 	DBGP_FUNC_ENTRY(property_set,      XDEBUG_DBGP_SYNC)
 	DBGP_FUNC_ENTRY(property_value,    XDEBUG_DBGP_SYNC)
@@ -238,7 +238,7 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_FUNC_ENTRY(source,            XDEBUG_DBGP_SYNC)
 	DBGP_FUNC_ENTRY(stack_depth,       XDEBUG_DBGP_SYNC)
 	DBGP_FUNC_ENTRY(stack_get,         XDEBUG_DBGP_SYNC)
-	DBGP_FUNC_ENTRY(status,            XDEBUG_DBGP_SYNC|XDEBUG_DBGP_ASYNC)
+	DBGP_FUNC_ENTRY(status,            XDEBUG_DBGP_SYNC|XDEBUG_DBGP_ASYNC|XDEBUG_DBGP_POST_MORTEM)
 
 	DBGP_FUNC_ENTRY(stderr,            XDEBUG_DBGP_SYNC)
 	DBGP_FUNC_ENTRY(stdout,            XDEBUG_DBGP_SYNC)
@@ -248,11 +248,11 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	DBGP_CONT_FUNC_ENTRY(step_out,     XDEBUG_DBGP_SYNC)
 	DBGP_CONT_FUNC_ENTRY(step_over,    XDEBUG_DBGP_SYNC)
 
-	DBGP_STOP_FUNC_ENTRY(stop,         XDEBUG_DBGP_SYNC)
-	DBGP_STOP_FUNC_ENTRY(detach,       XDEBUG_DBGP_SYNC)
+	DBGP_STOP_FUNC_ENTRY(stop,         XDEBUG_DBGP_SYNC|XDEBUG_DBGP_POST_MORTEM)
+	DBGP_STOP_FUNC_ENTRY(detach,       XDEBUG_DBGP_SYNC|XDEBUG_DBGP_POST_MORTEM)
 
 	/* Non standard functions */
-	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_SYNC)
+	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_SYNC|XDEBUG_DBGP_POST_MORTEM)
 	DBGP_FUNC_ENTRY(xcmd_get_executable_lines, XDEBUG_DBGP_SYNC)
 	{ NULL, NULL, 0 }
 };
@@ -1136,6 +1136,7 @@ DBGP_FUNC(run)
 DBGP_FUNC(step_into)
 {
 	MARK_RUNNING(step_into);
+
 	XG_DBG(context).do_next   = 0;
 	XG_DBG(context).do_step   = 1;
 	XG_DBG(context).do_finish = 0;
@@ -1182,12 +1183,8 @@ DBGP_FUNC(step_over)
 
 DBGP_FUNC(detach)
 {
+	MARK_RUNNING(detach);
 	XG_DBG(status) = DBGP_STATUS_DETACHED;
-	XG_DBG(lastcmd) = "detach";
-	if (XG_DBG(lasttransid)) {
-		xdfree(XG_DBG(lasttransid));
-	}
-	XG_DBG(lasttransid) = xdstrdup(CMD_OPTION_CHAR('i'));
 
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[DBGP_STATUS_STOPPED]);
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[XG_DBG(reason)]);
@@ -2237,8 +2234,12 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, xdebug_xml_
 		command = lookup_cmd(cmd);
 
 		if (command) {
-			if ((XG_DBG(status) != DBGP_STATUS_RUNNING && (command->falgs & XDEBUG_DBGP_SYNC) == XDEBUG_DBGP_SYNC)
-				|| (XG_DBG(status) == DBGP_STATUS_RUNNING && (command->falgs & XDEBUG_DBGP_ASYNC) == XDEBUG_DBGP_ASYNC)
+			if (
+				(XG_DBG(status) != DBGP_STATUS_RUNNING && XG_DBG(status) != DBGP_STATUS_STOPPING && (command->flags & XDEBUG_DBGP_SYNC))
+				||
+				(XG_DBG(status) == DBGP_STATUS_RUNNING && (command->flags & XDEBUG_DBGP_ASYNC))
+				||
+				(XG_DBG(status) == DBGP_STATUS_STOPPING && (command->flags & XDEBUG_DBGP_POST_MORTEM))
 			) {
 				ret = command->handler((xdebug_xml_node **)&retval, context, args);
 			} else {
