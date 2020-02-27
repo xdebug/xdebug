@@ -1306,7 +1306,7 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("supports_async")
-			xdebug_xml_add_text(*retval, xdstrdup("0"));
+			xdebug_xml_add_text(*retval, xdstrdup("1"));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
