@@ -181,7 +181,7 @@ object(DOMText)#%d (%d) {
   ["parentNode"]=>
   string(22) "(object value omitted)"
   ["childNodes"]=>
-  NULL
+  %s
   ["firstChild"]=>
   NULL
   ["lastChild"]=>
