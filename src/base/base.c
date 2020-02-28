@@ -199,7 +199,9 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 			e->profile.call_list = NULL;
 		}
 
-		xdfree(e);
+		if (!XG_BASE(stackPool)) {
+			xdfree(e);
+		}
 	}
 }
 
@@ -321,7 +323,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED);
+	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED, XG_BASE(level) - 1);
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
@@ -437,7 +439,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		zend_throw_exception_ex(zend_ce_error, 0, "Maximum function nesting level of '" ZEND_LONG_FMT "' reached, aborting!", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN);
+	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN, XG_BASE(level) - 1);
 	fse->function.internal = 1;
 
 	function_nr = XG_BASE(function_count);
@@ -602,6 +604,11 @@ void xdebug_base_rinit()
 	}
 
 	XG_BASE(stack) = xdebug_llist_alloc(function_stack_entry_dtor);
+	if (XINI_BASE(max_nesting_level) != -1 && XINI_BASE(max_nesting_level) <= 256) {
+		XG_BASE(stackPool) = xdmalloc (sizeof (function_stack_entry) * XINI_BASE(max_nesting_level));
+	} else {
+		XG_BASE(stackPool) = NULL;
+	}
 	XG_BASE(level)         = 0;
 	XG_BASE(in_debug_info) = 0;
 	XG_BASE(prev_memory)   = 0;
@@ -643,6 +650,11 @@ void xdebug_base_post_deactivate()
 {
 	xdebug_llist_destroy(XG_BASE(stack), NULL);
 	XG_BASE(stack) = NULL;
+
+	if (XG_BASE(stackPool)) {
+		xdfree(XG_BASE(stackPool));
+		XG_BASE(stackPool) = NULL;
+	}
 
 	XG_BASE(level)            = 0;
 	XG_BASE(in_debug_info)    = 0;

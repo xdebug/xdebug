@@ -1041,7 +1041,7 @@ normal_after_all:
 	}
 }
 
-function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type)
+function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type, int level)
 {
 	zend_execute_data    *edata;
 	zend_op             **opline_ptr = NULL;
@@ -1061,7 +1061,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 	zdata = EG(current_execute_data);
 
-	tmp = xdmalloc (sizeof (function_stack_entry));
+	if (XG_BASE(stackPool)) {
+		tmp = XG_BASE(stackPool) + level;
+	} else {
+		tmp = xdmalloc (sizeof (function_stack_entry));
+	}
 	tmp->var           = NULL;
 	tmp->varc          = 0;
 	tmp->refcount      = 1;
