@@ -1601,6 +1601,9 @@ TEST $file
 		if (strpos($section_text['INI'], '{PWD}') !== false) {
 			$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
 		}
+		if (strpos($section_text['INI'], '{RUNID}') !== false) {
+			$section_text['INI'] = str_replace('{RUNID}', getenv('UNIQ_RUN_ID'), $section_text['INI']);
+		}
 		settings2array(preg_split("/[\n\r]+/", $section_text['INI']), $ini_settings);
 	}
 

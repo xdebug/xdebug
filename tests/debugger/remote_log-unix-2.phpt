@@ -9,7 +9,7 @@ check_reqs('dbgp; !win');
 I_LIKE_COOKIES=unix:///tmp/haxx0r.sock
 --INI--
 xdebug.remote_enable=1
-xdebug.remote_log=/tmp/remote-log4.txt
+xdebug.remote_log=/tmp/{RUNID}remote-log4.txt
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
 xdebug.remote_host=unix:///tmp/xdbg.sock
@@ -19,8 +19,8 @@ xdebug.remote_addr_header=I_LIKE_COOKIES
 <?php
 if (sys_get_temp_dir() !== '/tmp') die('Unexpected temp dir: '.sys_get_temp_dir());
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . "/remote-log4.txt");
-unlink (sys_get_temp_dir() . "/remote-log4.txt");
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
 ?>
 --EXPECTF--
 3

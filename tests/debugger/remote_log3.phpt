@@ -7,7 +7,7 @@ check_reqs('dbgp; !win');
 ?>
 --INI--
 xdebug.remote_enable=1
-xdebug.remote_log=/tmp/remote-log3.txt
+xdebug.remote_log=/tmp/{RUNID}remote-log3.txt
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
 xdebug.remote_host=doesnotexist2
@@ -16,8 +16,8 @@ xdebug.remote_addr_header=I_LIKE_COOKIES
 --FILE--
 <?php
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . "/remote-log3.txt");
-unlink (sys_get_temp_dir() . "/remote-log3.txt");
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log3.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log3.txt' );
 ?>
 --EXPECTF--
 3
