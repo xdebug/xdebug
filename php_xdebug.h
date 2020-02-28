@@ -141,7 +141,8 @@ PHP_FUNCTION(xdebug_set_filter);
 struct xdebug_base_info {
 	unsigned long level;
 	xdebug_llist *stack;
-	function_stack_entry *stackPool;
+	function_stack_entry *stack_pool;
+	unsigned int  stack_pool_size;
 	double        start_time;
 	unsigned int  prev_memory;
 	zif_handler   orig_var_dump_func;

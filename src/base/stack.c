@@ -1041,7 +1041,7 @@ normal_after_all:
 	}
 }
 
-function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type, int level)
+function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type)
 {
 	zend_execute_data    *edata;
 	zend_op             **opline_ptr = NULL;
@@ -1049,6 +1049,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op              *cur_opcode;
 	int                   i = 0;
 	int                   hit_variadic = 0;
+	unsigned int          stack_level;
 
 	if (type == XDEBUG_USER_DEFINED) {
 		edata = EG(current_execute_data)->prev_execute_data;
@@ -1061,8 +1062,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 	zdata = EG(current_execute_data);
 
-	if (XG_BASE(stackPool)) {
-		tmp = XG_BASE(stackPool) + level;
+	stack_level = XG_BASE(level) - 1;
+	if (stack_level < XG_BASE(stack_pool_size)) {
+		tmp = XG_BASE(stack_pool) + stack_level;
 	} else {
 		tmp = xdmalloc (sizeof (function_stack_entry));
 	}
