@@ -208,10 +208,8 @@ void xdebug_profiler_init(char *script_name)
 void xdebug_profiler_deinit()
 {
 	function_stack_entry *fse;
-	xdebug_llist_element *le;
 
-	for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-		fse = XDEBUG_LLIST_VALP(le);
+	for (fse = XDEBUG_VECTOR_END(XG_BASE(stack)); fse >= XDEBUG_VECTOR_START(XG_BASE(stack)); --fse) {
 		xdebug_profiler_function_end(fse);
 	}
 
@@ -365,16 +363,17 @@ void xdebug_profiler_function_begin(function_stack_entry *fse)
 void xdebug_profiler_function_end(function_stack_entry *fse)
 {
 	xdebug_llist_element *le;
+	function_stack_entry *prev = XDEBUG_VECTOR_PREV(XG_BASE(stack), fse);
 
-	if (fse->prev && !fse->prev->profile.call_list) {
-		fse->prev->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
+	if (prev && !prev->profile.call_list) {
+		prev->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
 	}
 	if (!fse->profile.call_list) {
 		fse->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
 	}
 	xdebug_profiler_function_push(fse);
 
-	if (fse->prev) {
+	if (prev) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
 		ce->filename = xdstrdup(fse->profiler.filename);
 		ce->function = xdstrdup(fse->profiler.funcname);
@@ -383,7 +382,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		ce->user_defined = fse->user_defined;
 		ce->mem_used = fse->profile.memory;
 
-		xdebug_llist_insert_next(fse->prev->profile.call_list, NULL, ce);
+		xdebug_llist_insert_next(prev->profile.call_list, NULL, ce);
 	}
 
 	/* use previously created filename and funcname (or a reference to them) to show

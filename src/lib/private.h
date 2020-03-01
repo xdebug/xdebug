@@ -34,6 +34,7 @@
 #include "hash.h"
 #include "llist.h"
 #include "set.h"
+#include "vector.h"
 
 #define MICRO_IN_SEC 1000000.00
 
@@ -203,7 +204,6 @@ typedef struct _function_stack_entry {
 
 	/* misc properties */
 	int          refcount;
-	struct _function_stack_entry *prev;
 	zend_op_array *op_array;
 } function_stack_entry;
 

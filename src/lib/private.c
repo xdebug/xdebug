@@ -27,58 +27,26 @@ const char *xdebug_log_prefix[11] = {
 
 function_stack_entry *xdebug_get_stack_head(void)
 {
-	xdebug_llist_element *le;
-
-	if (XG_BASE(stack)) {
-		if ((le = XDEBUG_LLIST_HEAD(XG_BASE(stack)))) {
-			return XDEBUG_LLIST_VALP(le);
-		} else {
-			return NULL;
-		}
-	} else {
-		return NULL;
+	if (XDEBUG_VECTOR_NOT_EMPTY(XG_BASE(stack))) {
+		return XDEBUG_VECTOR_START(XG_BASE(stack));
 	}
+	return NULL;
 }
 
 function_stack_entry *xdebug_get_stack_frame(int nr)
 {
-	xdebug_llist_element *le;
-
-	if (!XG_BASE(stack)) {
-		return NULL;
+	if (XDEBUG_VECTOR_NOT_EMPTY(XG_BASE(stack)) && nr >=0 && nr < XDEBUG_VECTOR_SIZE(XG_BASE(stack))) {
+		return XDEBUG_VECTOR_END(XG_BASE(stack)) - nr;
 	}
-
-	if (!(le = XDEBUG_LLIST_TAIL(XG_BASE(stack)))) {
-		return NULL;
-	}
-
-	if (nr < 0) {
-		return NULL;
-	}
-
-	while (nr) {
-		nr--;
-		le = XDEBUG_LLIST_PREV(le);
-		if (!le) {
-			return NULL;
-		}
-	}
-	return XDEBUG_LLIST_VALP(le);
+	return NULL;
 }
 
 function_stack_entry *xdebug_get_stack_tail(void)
 {
-	xdebug_llist_element *le;
-
-	if (XG_BASE(stack)) {
-		if ((le = XDEBUG_LLIST_TAIL(XG_BASE(stack)))) {
-			return XDEBUG_LLIST_VALP(le);
-		} else {
-			return NULL;
-		}
-	} else {
-		return NULL;
+	if (XDEBUG_VECTOR_NOT_EMPTY(XG_BASE(stack))) {
+		return XDEBUG_VECTOR_END(XG_BASE(stack));
 	}
+	return NULL;
 }
 
 static void xdebug_used_var_hash_from_llist_dtor(void *data)

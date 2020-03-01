@@ -19,6 +19,7 @@
 #define XDEBUG_TRACING_H
 
 #include "php.h"
+#include "lib/vector.h"
 
 typedef struct
 {

@@ -1892,10 +1892,9 @@ DBGP_FUNC(stack_get)
 		}
 	} else {
 		counter = 0;
-		for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+		for (counter = 0; counter < XDEBUG_VECTOR_SIZE(XG_BASE(stack)); counter++) {
 			stackframe = return_stackframe(counter);
 			xdebug_xml_add_child(*retval, stackframe);
-			counter++;
 		}
 	}
 }
@@ -2572,7 +2571,7 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, const c
 	return 0;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message)
+int xdebug_dbgp_breakpoint(xdebug_con *context, XDEBUG_VECTOR_OF_TYPE(function_stack_entry) stack, char *file, long lineno, int type, char *exception, char *code, char *message)
 {
 	xdebug_xml_node *response, *error_container;
 

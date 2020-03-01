@@ -38,6 +38,7 @@
 #include "lib/compat.h"
 #include "lib/hash.h"
 #include "lib/llist.h"
+#include "lib/vector.h"
 
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
@@ -140,7 +141,7 @@ PHP_FUNCTION(xdebug_set_filter);
 
 struct xdebug_base_info {
 	unsigned long level;
-	xdebug_llist *stack;
+	XDEBUG_VECTOR_OF_TYPE(function_stack_entry) stack;
 	double        start_time;
 	unsigned int  prev_memory;
 	zif_handler   orig_var_dump_func;

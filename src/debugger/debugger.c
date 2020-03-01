@@ -240,9 +240,8 @@ void xdebug_debugger_statement_call(char *file, int file_len, int lineno)
 		}
 
 		/* Get latest stack level and function number */
-		if (XG_BASE(stack) && XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
-			le = XDEBUG_LLIST_TAIL(XG_BASE(stack));
-			fse = XDEBUG_LLIST_VALP(le);
+		if (XDEBUG_VECTOR_NOT_EMPTY(XG_BASE(stack))) {
+			fse = XDEBUG_VECTOR_END(XG_BASE(stack));
 			level = fse->level;
 			func_nr = fse->function_nr;
 		} else {

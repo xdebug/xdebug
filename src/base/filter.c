@@ -20,6 +20,7 @@
 #include "filter.h"
 
 #include "lib/private.h"
+#include "lib/vector.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -39,7 +40,7 @@ int xdebug_is_stack_frame_filtered(int filter_type, function_stack_entry *fse)
 int xdebug_is_top_stack_frame_filtered(int filter_type)
 {
 	function_stack_entry *fse;
-	fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
+	fse = XDEBUG_VECTOR_END(XG_BASE(stack));
 	return xdebug_is_stack_frame_filtered(filter_type, fse);
 }
 

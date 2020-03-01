@@ -161,10 +161,9 @@ static void xdebug_declared_var_dtor(void *dummy, void *elem)
 	xdebug_str_free(s);
 }
 
-static void function_stack_entry_dtor(void *dummy, void *elem)
+static void function_stack_entry_dtor(function_stack_entry *e)
 {
 	unsigned int          i;
-	function_stack_entry *e = elem;
 
 	e->refcount--;
 
@@ -198,8 +197,6 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 			xdebug_llist_destroy(e->profile.call_list, NULL);
 			e->profile.call_list = NULL;
 		}
-
-		xdfree(e);
 	}
 }
 
@@ -266,7 +263,6 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	zend_execute_data    *edata = execute_data->prev_execute_data;
 	function_stack_entry *fse, *xfse;
 	int                   function_nr = 0;
-	xdebug_llist_element *le;
 	char                 *code_coverage_function_name = NULL;
 	char                 *code_coverage_file_name = NULL;
 	int                   code_coverage_init = 0;
@@ -325,8 +321,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
-	if (fse && fse->prev && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
-		fse->prev->user_defined = XDEBUG_USER_DEFINED;
+	if (fse && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
+		function_stack_entry *prev = XDEBUG_VECTOR_PREV(XG_BASE(stack), fse);
+		if (prev) {
+			prev->user_defined = XDEBUG_USER_DEFINED;
+		}
 	}
 
 	function_nr = XG_BASE(function_count);
@@ -343,15 +342,14 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		fse->This = NULL;
 	}
 
-	if (XG_BASE(stack) && (XINI_BASE(collect_vars) || XINI_BASE(show_local_vars) || xdebug_is_debug_connection_active_for_current_pid())) {
+	if (XDEBUG_VECTOR_NOT_EMPTY(XG_BASE(stack)) && (XINI_BASE(collect_vars) || XINI_BASE(show_local_vars) || xdebug_is_debug_connection_active_for_current_pid())) {
 		/* Because include/require is treated as a stack level, we have to add used
 		 * variables in include/required files to all the stack levels above, until
 		 * we hit a function or the top level stack.  This is so that the variables
 		 * show up correctly where they should be.  We always call
 		 * add_used_variables on the current stack level, otherwise vars in include
 		 * files do not show up in the locals list.  */
-		for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-			xfse = XDEBUG_LLIST_VALP(le);
+		for (xfse = XDEBUG_VECTOR_END(XG_BASE(stack)); xfse >= XDEBUG_VECTOR_START(XG_BASE(stack)); --xfse) {
 			add_used_variables(xfse, op_array);
 			if (XDEBUG_IS_NORMAL_FUNCTION(&xfse->function)) {
 				break;
@@ -374,6 +372,8 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	xdebug_profiler_execute_ex(fse, op_array);
 
 	xdebug_old_execute_ex(execute_data);
+	//the vector may have been reallocated in that call, so we need to get the fse again
+	fse = XDEBUG_VECTOR_ELEMENT_AT(XG_BASE(stack), XG_BASE(level) - 1);
 
 	xdebug_profiler_execute_ex_end(fse);
 
@@ -390,8 +390,9 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	fse->symbol_table = NULL;
 	fse->execute_data = NULL;
 
-	if (XG_BASE(stack)) {
-		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);
+	if (XDEBUG_VECTOR_NOT_EMPTY(XG_BASE(stack))) {
+		function_stack_entry_dtor(XDEBUG_VECTOR_END(XG_BASE(stack)));
+		XDEBUG_VECTOR_POP(XG_BASE(stack));
 	}
 	XG_BASE(level)--;
 }
@@ -461,6 +462,8 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	} else {
 		execute_internal(current_execute_data, return_value);
 	}
+	//the vector may have been reallocated in that call, so we need to get the fse again
+	fse = XDEBUG_VECTOR_ELEMENT_AT(XG_BASE(stack), XG_BASE(level) - 1);
 
 	xdebug_profiler_execute_internal_end(fse);
 
@@ -479,8 +482,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	/* Check for return breakpoints */
 	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
 
-	if (XG_BASE(stack)) {
-		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);
+	if (XDEBUG_VECTOR_NOT_EMPTY(XG_BASE(stack))) {
+		function_stack_entry_dtor(XDEBUG_VECTOR_END(XG_BASE(stack)));
+		XDEBUG_VECTOR_POP(XG_BASE(stack));
 	}
 	XG_BASE(level)--;
 }
@@ -601,7 +605,6 @@ void xdebug_base_rinit()
 		zend_throw_exception_hook = xdebug_throw_exception_hook;
 	}
 
-	XG_BASE(stack) = xdebug_llist_alloc(function_stack_entry_dtor);
 	XG_BASE(level)         = 0;
 	XG_BASE(in_debug_info) = 0;
 	XG_BASE(prev_memory)   = 0;
@@ -641,8 +644,7 @@ void xdebug_base_rinit()
 
 void xdebug_base_post_deactivate()
 {
-	xdebug_llist_destroy(XG_BASE(stack), NULL);
-	XG_BASE(stack) = NULL;
+	XDEBUG_VECTOR_FREE(XG_BASE(stack));
 
 	XG_BASE(level)            = 0;
 	XG_BASE(in_debug_info)    = 0;
