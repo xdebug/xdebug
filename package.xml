@@ -66,23 +66,6 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
     <file name="tracefile-analyser.php" role="doc" />
     <file name="xt.vim" role="doc" />
    </dir> <!-- /contrib -->
-   <dir name="debugclient">
-    <file name="buildconf" role="src" />
-    <file name="config.guess" role="src" />
-    <file name="config.h.in" role="src" />
-    <file name="config.sub" role="src" />
-    <file name="configure" role="src" />
-    <file name="configure.ac" role="src" />
-    <file name="debugclient.dsp" role="src" />
-    <file name="INSTALL" role="src" />
-    <file name="install-sh" role="src" />
-    <file name="LICENSE" role="src" />
-    <file name="main.c" role="src" />
-    <file name="Makefile.in" role="src" />
-    <file name="README" role="src" />
-    <file name="usefulstuff.c" role="src" />
-    <file name="usefulstuff.h" role="src" />
-   </dir> <!-- /debugclient -->
 
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
