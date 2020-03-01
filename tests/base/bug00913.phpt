@@ -55,7 +55,7 @@ object(DOMDocument)#%d (%d) {
   ["recover"]=>
   bool(false)
   ["substituteEntities"]=>
-  bool(false)
+  %a
   ["nodeName"]=>
   string(9) "#document"
   ["nodeValue"]=>
@@ -91,7 +91,7 @@ object(DOMElement)#%d (%d) {
   ["tagName"]=>
   string(7) "example"
   ["schemaTypeInfo"]=>
-  NULL
+  %a
   ["nodeName"]=>
   string(7) "example"
   ["nodeValue"]=>
@@ -171,7 +171,7 @@ object(DOMText)#%d (%d) {
   ["data"]=>
   string(4) "Test"
   ["length"]=>
-  int(4)
+  %a
   ["nodeName"]=>
   string(5) "#text"
   ["nodeValue"]=>
