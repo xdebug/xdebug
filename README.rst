@@ -8,91 +8,111 @@ Xdebug
 .. image:: https://circleci.com/gh/xdebug/xdebug/tree/master.svg?style=svg
    :target: https://circleci.com/gh/xdebug/xdebug
 
-These are instructions for installing Xdebug from a Git checkout. Please refer
-to https://xdebug.org/support.php for support.
+Xdebug is a debugging tool for PHP. It provides step-debugging and a whole
+range of development aids, such as stack traces, a code profiler, features to
+dump the full execution of your script to a file, and more.
 
-Introduction
+Requirements
 ------------
 
-You need to compile Xdebug separately from the rest of PHP. You need to have
-access to the scripts ``phpize`` and ``php-config``.  If your system does not
-have ``phpize`` and ``php-config``, you will need to compile and install PHP
-from a source tarball first, or install a ``php-dev`` package if your
-distribution provides one. These scripts are by-products of the PHP
-compilation and installation processes and are needed to compile external
-extensions. It is important that the source version matches the installed
-version as there are slight, but important, differences between PHP versions. 
+Xdebug requires a `supported <https://php.net/support>`_ version of PHP. For
+installation it requires the `pecl` tool (available through the `php-pear`
+package), unless your Linux distribution has an Xdebug package (`php-xdebug`).
 
-Clone
------
+Installation
+------------
 
-You can clone the Xdebug source directory with::
+On most Linux distributions you can install Xdebug through its package
+manager. You can also compile from source with the `pecl` tool through `pecl
+install xdebug`. The latter also works for MacOS as long as PHP is installed
+with Homebrew.
 
-   git clone https://github.com/xdebug/xdebug.git
+On Windows, you need to `download <https://xdebug.org/download#releases>`_ a
+binary. Use the `Wizard <https://xdebug.org/wizard>`_.
 
-Then move into this new directory::
+Unless you have installed Xdebug with a package manager on Linux, you also
+need to add the following line to your `php.ini` file, or create a new Xdebug
+specific ini file `xdebug.ini` in the `conf.d` directory. In either case, it
+needs the following line added::
 
-	cd xdebug
+	zend_extension=xdebug.org
 
-Although it is recommended to run the latest version from the **master**
-branch, older versions are available through tags. For example to checkout the
-2.5.5 release, you can switch to it with ``git checkout XDEBUG_2_5_5``.
+For more extensive installation instructions, see the documentation at
+https://xdebug.org/docs/install
 
-Compile
+Configuration
+-------------
+
+Most features in Xdebug have to be opted in into. Each feature has a specific
+opt-in. For example to use the `step debugger
+<https://xdebug.org/docs/remote>`_ you need to set `xdebug.remote_enable=1` in
+your configuration file. The step debugger requires an IDE (client), of which
+there are many `available <https://xdebug.org/docs/remote#clients>`_.
+
+The documentation has instructions for each of Xdebug's features:
+https://xdebug.org/docs/ and a full list of `settings
+<https://xdebug.org/docs/all_settings>`_ is also available there.
+
+Contributing
+------------
+
+Xdebug is written in C, and extensive knowledge of PHP's internals is
+necessary to be able to contribute. Contributing guidance is available
+`separately <https://github.com/xdebug/xdebug/blob/master/CONTRIBUTING.rst>`_.
+
+Before you want to contribute, please reach out first. Either through email
+(address at the bottom), an issue in the `issue tracker
+<https://bugs.xdebug.org>`_ or preferably through IRC on Freenode's #xdebug
+channel.
+
+Testing
 -------
 
-If PHP is installed in a normal, and uncomplicated way, with default locations
-and configuration, all you will need to do is to run the following script::
+If you are familiar with compiling PHP extension from source, have a local
+checkout of Xdebug's GitHub repository, and have compiled Xdebug in that
+directory following the instructions under `installation
+<https://xdebug.org/docs/install#source>`_ you can run Xdebug's tests by
+running::
 
-	./rebuild.sh
+	php run-xdebug-tests.php
 
-This will run ``phpize``, ``./configure``, ``make clean``, ``make`` and ``make
-install``.
+The test framework requires that the PHP binary on the path has Xdebug loaded,
+with remote debugging enabled through `xdebug.remote_enable=1`. It is possible
+to skip remote debugging tests by exporting the `SKIP_DBGP_TESTS=1` environment
+variable.
 
-The long winded way of installation is:
+The `SKIP_UNPARALLEL_TESTS=1` can be used to skip test that can not run in
+parallel environments, and the `SKIP_SLOW_TESTS=1` environment variable to skip
+slow tests. The `OPCACHE` environment variable can either be `yes` or `no` and
+controls whether the test framework enables or disables OpCache.
 
-#. Run phpize: ``phpize``
-   (or ``/path/to/phpize`` if phpize is not in your path).
+Licensing
+---------
 
-#. ``./configure --enable-xdebug`` (or: ``../configure --enable-xdebug
-   --with-php-config=/path/to/php-config`` if ``php-config`` is not in your
-   path)
+Xdebug is released under `The Xdebug License
+<https://github.com/xdebug/xdebug/blob/master/LICENSE>`_, which is based on
+`The PHP License <https://github.com/php/php-src/blob/master/LICENSE>`_. It is
+an Open Source license (though not explicitly endorsed by the Open Source
+Initiative).
 
-#. Run: ``make clean``
+Further Reading
+---------------
 
-#. Run: ``make``
-
-#. Run: ``make install``
-
-#. Add the following line to ``php.ini`` (which you can find by running ``php
-   --ini``, or look at ``phpinfo()`` output): ``zend_extension="xdebug.so"``.
-
-   Please note, that sometimes the ``php.ini`` file is different for the
-   command line and for your web server. Make sure you pick the right one.
-
-#. Unless you exclusively use the command line with PHP, restart your webserver.
-
-#. Write a PHP page that calls ``phpinfo();``. Load it in a browser and
-   look for the info on the Xdebug module.  If you see it, you have been
-   successful! Alternatively, you can run ``php -v`` on the command line to
-   see that Xdebug is loaded::
-
-	$ php -v
-	PHP 7.2.0RC6 (cli) (built: Nov 23 2017 10:30:56) ( NTS DEBUG )
-	Copyright (c) 1997-2017 The PHP Group
-	Zend Engine v3.2.0-dev, Copyright (c) 1998-2017 Zend Technologies
-		with Xdebug v2.6.0-dev, Copyright (c) 2002-2017, by Derick Rethans
+Xdebug has extensive documentation its `website <https://xdebug.org/docs>`_.
+There are over a hundred settings and many functions documented. Please have a
+look through the wealth of information that Xdebug can provide to make your
+every day development with PHP easier.
 
 Support
 -------
 
-For questions regarding compile issues, please write to the **xdebug-general**
-email list which you can find at https://xdebug.org/support.php#list
+For questions regarding Xdebug, please use `StackOverflow
+<https://stackoverflow.com/questions/tagged/xdebug>`_, and tag your question
+with `xdebug`.
 
-You can also find support on IRC: ``freenode/#xdebug``. You can do that with
-your favourite client, or by using their webchat_.
-
-.. _webchat: http://webchat.freenode.net/?channels=#xdebug
+You can also find ad-hoc and sporadic support on IRC: ``freenode/#xdebug``.
+You can do that with your favourite client, or by using their `webchat
+<http://webchat.freenode.net/?channels=#xdebug>`_.
 
 If you think that you encountered a bug, please file a detailed bug report
 at https://bugs.xdebug.org. You are required to create an account, this is
