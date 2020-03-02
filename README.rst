@@ -35,7 +35,7 @@ need to add the following line to your `php.ini` file, or create a new Xdebug
 specific ini file `xdebug.ini` in the `conf.d` directory. In either case, it
 needs the following line added::
 
-	zend_extension=xdebug.org
+	zend_extension=xdebug
 
 For more extensive installation instructions, see the documentation at
 https://xdebug.org/docs/install
