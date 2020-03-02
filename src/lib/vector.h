@@ -117,8 +117,8 @@ SOFTWARE.
 	if (vec) {                                         \
 		const size_t __sz = XDEBUG_VECTOR_SIZE(vec);         \
 		if ((i) < __sz) {                              \
-			XDEBUG_VECTOR_SET_SIZE((vec), __sz - 1);         \
 			size_t __x;                                \
+			XDEBUG_VECTOR_SET_SIZE((vec), __sz - 1);         \
 			for (__x = (i); __x < (__sz - 1); ++__x) { \
 				(vec)[__x] = (vec)[__x + 1];           \
 			}                                          \
@@ -186,12 +186,15 @@ SOFTWARE.
  * @return void
  */
 #define XDEBUG_VECTOR_PUSH(vec, value)                   \
-	size_t __cap = XDEBUG_VECTOR_CAPACITY(vec);           \
-	if (__cap <= XDEBUG_VECTOR_SIZE(vec)) {               \
-		XDEBUG_VECTOR_GROW((vec), __cap + 1);             \
-	}                                               \
-	vec[XDEBUG_VECTOR_SIZE(vec)] = (value);               \
-	XDEBUG_VECTOR_SET_SIZE((vec), XDEBUG_VECTOR_SIZE(vec) + 1);
+	do {                                                \
+		size_t __cap = XDEBUG_VECTOR_CAPACITY(vec);           \
+		if (__cap <= XDEBUG_VECTOR_SIZE(vec)) {               \
+			XDEBUG_VECTOR_GROW((vec), __cap + 1);             \
+		}                                               \
+		vec[XDEBUG_VECTOR_SIZE(vec)] = (value);               \
+		XDEBUG_VECTOR_SET_SIZE((vec), XDEBUG_VECTOR_SIZE(vec) + 1); \
+	} while (0)
+
 
 /**
  * @brief XDEBUG_VECTOR_PUSH_EMPTY - adds an empty element to the end of the vector
@@ -199,10 +202,12 @@ SOFTWARE.
  * @return void
  */
 #define XDEBUG_VECTOR_PUSH_EMPTY(vec)                       \
-	size_t __cap = XDEBUG_VECTOR_CAPACITY(vec);           \
-	if (__cap <= XDEBUG_VECTOR_SIZE(vec)) {               \
-		XDEBUG_VECTOR_GROW((vec), __cap + 1);             \
-	}                                               \
-	XDEBUG_VECTOR_SET_SIZE((vec), XDEBUG_VECTOR_SIZE(vec) + 1);
+	do {                                                \
+		size_t __cap = XDEBUG_VECTOR_CAPACITY(vec);           \
+		if (__cap <= XDEBUG_VECTOR_SIZE(vec)) {               \
+			XDEBUG_VECTOR_GROW((vec), __cap + 1);             \
+		}                                               \
+		XDEBUG_VECTOR_SET_SIZE((vec), XDEBUG_VECTOR_SIZE(vec) + 1); \
+	} while (0)
 
 #endif /* vector_H_ */

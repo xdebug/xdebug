@@ -1878,7 +1878,6 @@ DBGP_FUNC(stack_depth)
 DBGP_FUNC(stack_get)
 {
 	xdebug_xml_node      *stackframe;
-	xdebug_llist_element *le;
 	int                   counter = 0;
 	long                  depth;
 

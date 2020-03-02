@@ -1245,7 +1245,6 @@ PHP_FUNCTION(xdebug_get_function_stack)
 {
 	function_stack_entry *i;
 	unsigned int          j;
-	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
 
@@ -1336,7 +1335,6 @@ static void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element
    Returns an array representing the current stack */
 PHP_FUNCTION(xdebug_get_declared_vars)
 {
-	xdebug_llist_element *le;
 	function_stack_entry *i;
 	xdebug_hash *tmp_hash;
 
