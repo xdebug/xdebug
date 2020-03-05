@@ -59,8 +59,8 @@ void xdebug_close_socket(int socket);
 
 /* Remote connection activation and house keeping */
 int xdebug_is_debug_connection_active(void);
-int xdebug_is_debug_connection_active_for_current_pid(void);
 void xdebug_stop_debugger(void);
+void xdebug_restart_debugger(void);
 void xdebug_mark_debug_connection_active(void);
 void xdebug_mark_debug_connection_not_active(void);
 void xdebug_mark_debug_connection_pending(void);

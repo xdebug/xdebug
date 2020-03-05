@@ -2515,7 +2515,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	xdebug_var_export_options *options;
 	int                        detaching = (XG_DBG(status) == DBGP_STATUS_DETACHED);
 
-	if (xdebug_is_debug_connection_active_for_current_pid()) {
+	if (xdebug_is_debug_connection_active()) {
 		XG_DBG(status) = DBGP_STATUS_STOPPING;
 		XG_DBG(reason) = DBGP_REASON_OK;
 		response = xdebug_xml_node_init("response");
@@ -2538,7 +2538,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		}
 	}
 
-	if (xdebug_is_debug_connection_active_for_current_pid()) {
+	if (xdebug_is_debug_connection_active()) {
 		options = (xdebug_var_export_options*) context->options;
 		xdfree(options->runtime);
 		xdfree(context->options);
@@ -2718,7 +2718,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, char *file,
 		XG_DBG(lasttransid) = NULL;
 	}
 
-	return xdebug_is_debug_connection_active_for_current_pid();
+	return xdebug_is_debug_connection_active();
 }
 
 static int xdebug_dbgp_resolved_breakpoint_notification(xdebug_con *context, xdebug_brk_info *brk_info)
