@@ -453,13 +453,13 @@ int xdebug_is_debug_connection_active()
 	);
 }
 
-int xdebug_is_debug_connection_active_for_current_pid()
+void xdebug_activate_connection_for_current_pid()
 {
 	zend_ulong pid;
 
 	/* Early return to save some getpid() calls */
 	if (!xdebug_is_debug_connection_active()) {
-		return 0;
+		return;
 	}
 
 	pid = xdebug_get_pid();
@@ -469,10 +469,6 @@ int xdebug_is_debug_connection_active_for_current_pid()
 	if (XG_DBG(remote_connection_pid) != pid) {
 		xdebug_restart_debugger();
 	}
-
-	return (
-		XG_DBG(remote_connection_enabled) && (XG_DBG(remote_connection_pid) == pid)
-	);
 }
 
 void xdebug_mark_debug_connection_active()
@@ -502,7 +498,7 @@ void xdebug_do_jit()
 {
 	if (
 		(XINI_DBG(remote_mode) == XDEBUG_JIT) &&
-		!xdebug_is_debug_connection_active_for_current_pid() &&
+		!xdebug_is_debug_connection_active() &&
 		XINI_DBG(remote_enable)
 	) {
 		xdebug_init_debugger();
@@ -576,7 +572,7 @@ void xdebug_do_req(void)
 
 	if (
 		XINI_DBG(remote_enable) &&
-		!xdebug_is_debug_connection_active_for_current_pid() &&
+		!xdebug_is_debug_connection_active() &&
 		(XINI_DBG(remote_autostart) || xdebug_handle_start_session())
 	) {
 		xdebug_init_debugger();
