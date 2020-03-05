@@ -640,18 +640,25 @@ static void add_function_to_lines_list(xdebug_lines_list *lines_list, zend_op_ar
 
 static void resolve_breakpoints_for_function(xdebug_lines_list *lines_list, zend_op_array *opa)
 {
-	if (!ZEND_USER_CODE(opa->type)) {
-		return;
-	}
-
 	add_function_to_lines_list(lines_list, opa);
 }
 
-static void resolve_breakpoints_for_class(xdebug_lines_list *file_function_lines_list, zend_class_entry *ce)
+static void resolve_breakpoints_for_class(xdebug_lines_list *file_function_lines_list, zend_class_entry *ce, zend_string *filename)
 {
 	zend_op_array    *function_op_array;
 
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, function_op_array) {
+		if (!ZEND_USER_CODE(function_op_array->type)) {
+			continue;
+		}
+		/* Only resolve if the file names are the same. This is needed in case
+		 * of inheritance or traits where op arrays from other files might get introduced */
+		if (ZSTR_LEN(filename) != ZSTR_LEN(function_op_array->filename)) {
+			continue;
+		}
+		if (strcmp(ZSTR_VAL(filename), ZSTR_VAL(function_op_array->filename)) != 0) {
+			continue;
+		}
 		resolve_breakpoints_for_function(file_function_lines_list, function_op_array);
 	} ZEND_HASH_FOREACH_END();
 }
@@ -672,6 +679,9 @@ void xdebug_debugger_compile_file(zend_op_array *op_array)
 		if (_idx == XG_DBG(function_count)) {
 			break;
 		}
+		if (!ZEND_USER_CODE(function_op_array->type)) {
+			continue;
+		}
 		resolve_breakpoints_for_function(file_function_lines_list, function_op_array);
 	} ZEND_HASH_FOREACH_END();
 	XG_DBG(function_count) = CG(function_table)->nNumUsed;
@@ -680,7 +690,10 @@ void xdebug_debugger_compile_file(zend_op_array *op_array)
 		if (_idx == XG_DBG(class_count)) {
 			break;
 		}
-		resolve_breakpoints_for_class(file_function_lines_list, class_entry);
+		if (class_entry->type == ZEND_INTERNAL_CLASS) {
+			continue;
+		}
+		resolve_breakpoints_for_class(file_function_lines_list, class_entry, op_array->filename);
 	} ZEND_HASH_FOREACH_END();
 	XG_DBG(class_count) = CG(class_table)->nNumUsed;
 
