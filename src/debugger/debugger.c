@@ -808,6 +808,23 @@ void xdebug_debugger_register_eval(function_stack_entry *fse)
 	}
 }
 
+void xdebug_debugger_restart_if_pid_changed()
+{
+	zend_ulong pid;
+
+	if (!xdebug_is_debug_connection_active()) {
+		return;
+	}
+
+	pid = xdebug_get_pid();
+
+	/* Start debugger if previously a connection was established and this
+	 * process no longer has the same PID */
+	if (XG_DBG(remote_connection_pid) != pid) {
+		xdebug_restart_debugger();
+	}
+}
+
 
 PHP_FUNCTION(xdebug_break)
 {

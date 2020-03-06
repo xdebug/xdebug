@@ -831,7 +831,7 @@ PHP_FUNCTION(xdebug_pcntl_fork)
 {
 	XG_BASE(orig_pcntl_fork_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
-	xdebug_activate_connection_for_current_pid();
+	xdebug_debugger_restart_if_pid_changed();
 }
 /* }}} */
 

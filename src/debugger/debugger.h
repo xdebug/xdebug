@@ -70,6 +70,7 @@ void xdebug_debugger_reset_ide_key(char *envval);
 int xdebug_debugger_bailout_if_no_exec_requested(void);
 void xdebug_debugger_set_program_name(zend_string *filename);
 void xdebug_debugger_register_eval(function_stack_entry *fse);
+void xdebug_debugger_restart_if_pid_changed(void);
 
 xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa);
 int xdebug_do_eval(char *eval_string, zval *ret_zval);

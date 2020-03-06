@@ -507,7 +507,8 @@ static void xdebug_overloaded_functions_setup(void)
 		XG_BASE(orig_pcntl_exec_func) = NULL;
 	}
 
-	/* Override pcntl_fork with our own function to be able to start the debugger for the forked process */
+	/* Override pcntl_fork with our own function to be able
+	 * to start the debugger for the forked process */
 	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_fork", sizeof("pcntl_fork") - 1);
 	if (orig) {
 		XG_BASE(orig_pcntl_fork_func) = orig->internal_function.handler;
@@ -644,7 +645,6 @@ void xdebug_base_rinit()
 	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG_BASE(filters_code_coverage)     = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
-	/* Overload var_dump, set_time_limit, error_reporting, pcntl_exec and pcntl_fork */
 	xdebug_overloaded_functions_setup();
 }
 
