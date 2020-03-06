@@ -561,17 +561,6 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 
 	error_type_str = xdebug_error_type(type);
 
-	/* Store last error message for error_get_last() */
-	if (PG(last_error_message)) {
-		free(PG(last_error_message));
-	}
-	if (PG(last_error_file)) {
-		free(PG(last_error_file));
-	}
-	PG(last_error_type) = type;
-	PG(last_error_message) = strdup(buffer);
-	PG(last_error_file) = strdup(error_filename);
-	PG(last_error_lineno) = error_lineno;
 	error_handling  = EG(error_handling);
 	exception_class = EG(exception_class);
 	/* according to error handling mode, suppress error, throw exception or show it */
@@ -601,6 +590,21 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 				xdfree(error_type_str);
 				return;
 		}
+	}
+
+	/* If we're in EH_THROW mode, don't set the last error. This is consistent with standard php_error_cb */
+	if (error_handling == EH_THROW) {
+		/* Store last error message for error_get_last() */
+		if (PG(last_error_message)) {
+			free(PG(last_error_message));
+		}
+		if (PG(last_error_file)) {
+			free(PG(last_error_file));
+		}
+		PG(last_error_type) = type;
+		PG(last_error_message) = strdup(buffer);
+		PG(last_error_file) = strdup(error_filename);
+		PG(last_error_lineno) = error_lineno;
 	}
 
 	if ((EG(error_reporting | XINI_BASE(force_error_reporting))) & type) {
