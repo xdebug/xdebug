@@ -755,7 +755,7 @@ PHP_FUNCTION(xdebug_error_reporting)
 /* }}} */
 
 /* {{{ proto void xdebug_pcntl_exec(void)
-   Dummy function to prevent time limit from being set within the script */
+   Dummy function to stop profiling when we run pcntl_exec */
 PHP_FUNCTION(xdebug_pcntl_exec)
 {
 	/* We need to stop the profiler and trace files here */
