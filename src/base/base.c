@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,8 @@
 #include "php.h"
 #include "TSRM.h"
 #include "php_globals.h"
-#include "Zend/zend_closures.h"
+#include "zend_closures.h"
+#include "zend_exceptions.h"
 
 #include "php_xdebug.h"
 
@@ -41,10 +42,10 @@ zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
 static void (*xdebug_old_execute_ex)(zend_execute_data *execute_data);
 static void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
 
-static int xdebug_silence_handler(zend_execute_data *execute_data)
+static int xdebug_silence_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
-	const zend_op *cur_opcode = EG(current_execute_data)->opline;
+	const zend_op *cur_opcode = execute_data->opline;
 
 	xdebug_coverage_record_silence_if_active(execute_data, op_array);
 
@@ -57,7 +58,8 @@ static int xdebug_silence_handler(zend_execute_data *execute_data)
 		}
 		return ZEND_USER_OPCODE_CONTINUE;
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static void xdebug_throw_exception_hook(zval *exception)
@@ -252,11 +254,13 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 
 /* Opcode handler for exit, to be able to clean up the profiler */
-int xdebug_exit_handler(zend_execute_data *execute_data)
+int xdebug_exit_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
+	const zend_op *cur_opcode = execute_data->opline;
+
 	xdebug_profiler_exit_handler();
 
-	return ZEND_USER_OPCODE_DISPATCH;
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 
@@ -567,8 +571,8 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	zend_execute_internal = xdebug_execute_internal;
 
 
-	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
-	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
+	xdebug_set_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
+	xdebug_set_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
 
 	REGISTER_LONG_CONSTANT("XDEBUG_STACK_NO_DESC", XDEBUG_STACK_NO_DESC, CONST_CS | CONST_PERSISTENT);
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2018 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,6 @@
 
 #include "debugger_private.h"
 #include "handler_dbgp.h"
-#include "lib/private.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

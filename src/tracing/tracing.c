@@ -25,7 +25,6 @@
 #include "trace_html.h"
 
 #include "lib/compat.h"
-#include "lib/private.h"
 #include "lib/str.h"
 #include "lib/var_export_line.h"
 
@@ -162,7 +161,7 @@ PHP_FUNCTION(xdebug_get_tracefile_name)
 	}
 }
 
-static int xdebug_include_or_eval_handler(zend_execute_data *execute_data)
+static int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	const zend_op *opline = execute_data->opline;
@@ -177,7 +176,7 @@ static int xdebug_include_or_eval_handler(zend_execute_data *execute_data)
 
 		/* If there is no inc_filename, we're just bailing out instead */
 		if (!inc_filename) {
-			return ZEND_USER_OPCODE_DISPATCH;
+			return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
 
 		if (Z_TYPE_P(inc_filename) != IS_STRING) {
@@ -197,7 +196,8 @@ static int xdebug_include_or_eval_handler(zend_execute_data *execute_data)
 			zval_dtor(&tmp_inc_filename);
 		}
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 #if PHP_VERSION_ID >= 70400
@@ -488,7 +488,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	return name.d;
 }
 
-static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_execute_data *execute_data)
+static int xdebug_common_assign_dim_handler(const char *op, int do_cc, XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	char    *file;
 	zend_op_array *op_array = &execute_data->func->op_array;
@@ -506,7 +506,7 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 
 	/* TODO TEST FOR ASSIGNMENTS IN FILTERING */
 //	if (xdebug_is_top_stack_frame_filtered(XDEBUG_FILTER_CODE_COVERAGE)) {
-//		return ZEND_USER_OPCODE_DISPATCH;
+//		return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 //	}
 
 	xdebug_coverage_record_assign_if_active(execute_data, op_array, do_cc);
@@ -515,7 +515,7 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 		char *full_varname;
 
 		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
-			return ZEND_USER_OPCODE_DISPATCH;
+			return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
 		full_varname = xdebug_find_var_name(execute_data, execute_data->opline, NULL);
 
@@ -603,7 +603,8 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, zend_exec
 		}
 		xdfree(full_varname);
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)

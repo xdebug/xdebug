@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/url.h"
 #include "zend.h"
+#include "zend_exceptions.h"
 #include "zend_extensions.h"
 #include "ext/standard/php_smart_string.h"
 #include "zend_smart_str.h"
@@ -29,7 +30,6 @@
 
 #include "lib/compat.h"
 #include "lib/mm.h"
-#include "lib/private.h"
 #include "lib/var.h"
 #include "lib/var_export_html.h"
 #include "lib/var_export_line.h"
@@ -67,7 +67,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp)
 		XG_BASE(in_debug_info) = 1;
 		orig_exception = EG(exception);
 		EG(exception) = NULL;
-		
+
 #if PHP_VERSION_ID >= 70400
 		tmp = zend_get_properties_for(&dzval, ZEND_PROP_PURPOSE_DEBUG);
 #else
@@ -76,7 +76,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp)
 		XG_BASE(in_debug_info) = 0;
 		xdebug_tracing_restore_trace_context(original_trace_context);
 		EG(exception) = orig_exception;
-		
+
 		return tmp;
 	} else {
 #if PHP_VERSION_ID >= 70400
@@ -324,7 +324,7 @@ static void fetch_zval_from_symbol_table(
 	char  *element = NULL;
 	unsigned int element_length = name_length;
 	zend_property_info *zpp;
-#if PHP_VERSION_ID < 70400	
+#if PHP_VERSION_ID < 70400
 	int is_temp = 0;
 #endif
 	int free_duplicated_name = 0;
@@ -378,10 +378,10 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_ROOT:
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (XG_LIB(active_execute_data) && XG_LIB(active_execute_data)->func) {
+			if (xdebug_lib_has_active_data() && xdebug_lib_has_active_function()) {
 				int i = 0;
 				zend_ulong hash_value = zend_inline_hash_func(element, element_length);
-				zend_op_array *opa = &XG_LIB(active_execute_data)->func->op_array;
+				zend_op_array *opa = xdebug_lib_get_active_func_oparray();
 				zval **CV;
 
 				while (i < opa->last_var) {
@@ -389,7 +389,7 @@ static void fetch_zval_from_symbol_table(
 						ZSTR_LEN(opa->vars[i]) == element_length &&
 						strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)
 					{
-						zval *CV_z = ZEND_CALL_VAR_NUM(XG_LIB(active_execute_data), i);
+						zval *CV_z = ZEND_CALL_VAR_NUM(xdebug_lib_get_active_data(), i);
 						CV = &CV_z;
 						if (CV) {
 							ZVAL_COPY(&tmp_retval, *CV);
@@ -400,7 +400,7 @@ static void fetch_zval_from_symbol_table(
 				}
 			}
 			free(element);
-			ht = XG_LIB(active_symbol_table);
+			ht = xdebug_lib_get_active_symbol_table();
 
 			XDEBUG_BREAK_INTENTIONALLY_MISSING
 
@@ -410,8 +410,8 @@ static void fetch_zval_from_symbol_table(
 
 			/* Handle "this" in a different way */
 			if (type == XF_ST_ROOT && strcmp("this", element) == 0) {
-				if (XG_LIB(This)) {
-					ZVAL_COPY(&tmp_retval, XG_LIB(This));
+				if (xdebug_lib_has_active_object()) {
+					ZVAL_COPY(&tmp_retval, xdebug_lib_get_active_object());
 				} else {
 					ZVAL_NULL(&tmp_retval);
 				}
@@ -448,7 +448,7 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_OBJ_PROPERTY:
 			/* Let's see if there is a debug handler */
 			if (value_in && Z_TYPE_P(value_in) == IS_OBJECT) {
-#if PHP_VERSION_ID >= 70400				
+#if PHP_VERSION_ID >= 70400
 				myht = xdebug_objdebug_pp(&value_in);
 #else
 				myht = xdebug_objdebug_pp(&value_in, &is_temp);
@@ -461,7 +461,7 @@ static void fetch_zval_from_symbol_table(
 						zend_release_properties(myht);
 #else
 						xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif						
+#endif
 						goto cleanup;
 					}
 #if PHP_VERSION_ID >= 70400
@@ -823,11 +823,12 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 					break;
 				case 7: /* special cases, started with a ":" */
 					if (ptr[ctr] == ':') {
+						function_stack_entry *active_fse = xdebug_lib_get_active_stack_entry();
 						state = 1;
 						keyword_end = &ptr[ctr];
 
-						if (strncmp(keyword, "::", 2) == 0 && XG_LIB(active_fse)->function.class) { /* static class properties */
-							zend_class_entry *ce = xdebug_fetch_class(XG_LIB(active_fse)->function.class, strlen(XG_LIB(active_fse)->function.class), ZEND_FETCH_CLASS_SELF);
+						if (strncmp(keyword, "::", 2) == 0 && active_fse->function.class) { /* static class properties */
+							zend_class_entry *ce = xdebug_fetch_class(active_fse->function.class, strlen(active_fse->function.class), ZEND_FETCH_CLASS_SELF);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
 							cc_length = strlen(STR_NAME_VAL(ce->name));
@@ -944,20 +945,20 @@ void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, vo
 		zend_rebuild_symbol_table();
 	}
 
-	tmp_ht = XG_LIB(active_symbol_table);
+	tmp_ht = xdebug_lib_get_active_symbol_table();
 	{
 		zend_execute_data *ex = EG(current_execute_data);
 		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 			ex = ex->prev_execute_data;
 		}
 		if (ex) {
-			XG_LIB(active_execute_data) = ex;
-			XG_LIB(active_symbol_table) = ex->symbol_table;
+			xdebug_lib_set_active_data(ex);
+			xdebug_lib_set_active_symbol_table(ex->symbol_table);
 		}
 	}
 
 	xdebug_get_php_symbol(&zvar, name);
-	XG_LIB(active_symbol_table) = tmp_ht;
+	xdebug_lib_set_active_symbol_table(tmp_ht);
 
 	formats = get_var_format_string(PG(html_errors));
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -504,9 +504,9 @@ void xdebug_debugger_rinit(void)
 		XG_DBG(ide_key) = xdstrdup(idekey);
 	}
 
-	XG_DBG(no_exec)        = 0;
-	XG_LIB(active_symbol_table) = NULL;
-	XG_LIB(This) = NULL;
+	XG_DBG(no_exec) = 0;
+	xdebug_lib_set_active_symbol_table(NULL);
+	xdebug_lib_set_active_object(NULL);
 
 	/* Check if we have this special get variable that stops a debugging
 	 * request without executing any code */
