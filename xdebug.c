@@ -545,7 +545,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	xdebug_library_minit();
 
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
-	xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);
 	xdebug_debugger_minit();
 	xdebug_gcstats_minit();
 	xdebug_profiler_minit();
@@ -553,6 +552,9 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	/* Overload the "exit" opcode */
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(exit, ZEND_EXIT);
+
+	/* Coverage must be last, as it has a catch all override for opcodes */
+	xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
@@ -908,7 +910,8 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			xdebug_str *tmp_name;
 			xdebug_str *val;
 
-			xdebug_lib_set_active_data(EG(current_execute_data));
+			xdebug_lib_set_active_symbol_table(EG(current_execute_data)->prev_execute_data->symbol_table);
+			xdebug_lib_set_active_data(EG(current_execute_data)->prev_execute_data);
 
 			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 			xdebug_get_php_symbol(&debugzval, tmp_name);

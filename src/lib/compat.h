@@ -91,4 +91,7 @@ typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 #  define ZEND_COMPILE_EXTENDED_STMT ZEND_COMPILE_EXTENDED_INFO
 # endif
 
+#define XDEBUG_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
+#define XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
+
 #endif

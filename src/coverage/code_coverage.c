@@ -120,17 +120,16 @@ static void xdebug_print_opcode_info(char type, zend_execute_data *execute_data,
 	xdfree(function_name);
 }
 
-static int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
+static int xdebug_check_branch_entry_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op *cur_opcode = execute_data->opline;
 
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode;
-		cur_opcode = execute_data->opline;
-
 		xdebug_print_opcode_info('G', execute_data, cur_opcode);
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static void xdebug_count_line(char *filename, int lineno, int executable, int deadcode)
@@ -173,29 +172,23 @@ static void xdebug_count_line(char *filename, int lineno, int executable, int de
 	}
 }
 
-#define XDEBUG_OPCODE_OVERRIDE(f) \
-	int xdebug_##f##_handler(zend_execute_data *execute_data) \
-	{ \
-		return xdebug_common_override_handler(execute_data); \
-	}
-
-int xdebug_common_override_handler(zend_execute_data *execute_data)
+int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op *cur_opcode = execute_data->opline;
 
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode;
 		int      lineno;
 		char    *file;
 
-		cur_opcode = execute_data->opline;
 		lineno = cur_opcode->lineno;
 		file = (char*) STR_NAME_VAL(op_array->filename);
 
 		xdebug_print_opcode_info('C', execute_data, cur_opcode);
 		xdebug_count_line(file, lineno, 0, 0);
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode)
@@ -951,15 +944,24 @@ void xdebug_coverage_init_oparray(zend_op_array *op_array)
 }
 
 #if PHP_VERSION_ID >= 70200
-static int xdebug_switch_handler(zend_execute_data *execute_data)
+static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
+	const zend_op *cur_opcode = execute_data->opline;
+
 	if (XG_COV(code_coverage_active)) {
 		execute_data->opline++;
 		return ZEND_USER_OPCODE_CONTINUE;
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 #endif
+
+#define XDEBUG_OPCODE_OVERRIDE(f) \
+	int xdebug_##f##_handler(zend_execute_data *execute_data) \
+	{ \
+		return xdebug_common_override_handler(execute_data); \
+	}
 
 
 void xdebug_coverage_minit(INIT_FUNC_ARGS)
@@ -1023,9 +1025,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CONCAT);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_DIM_OBJ);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_PROP_OBJ);
-		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_PRE_INC_OBJ);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CASE);
-		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_QM_ASSIGN);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_LAMBDA_FUNCTION);
 #if PHP_VERSION_ID < 70400
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_TRAIT);

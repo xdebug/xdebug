@@ -25,6 +25,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "compat.h"
 
 #define MICRO_IN_SEC 1000000.00
 
@@ -244,6 +245,6 @@ HashTable *xdebug_lib_get_active_symbol_table(void);
 int xdebug_isset_opcode_handler(int opcode);
 void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler);
 void xdebug_unset_opcode_handler(int opcode);
-
+int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS);
 
 #endif

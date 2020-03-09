@@ -238,6 +238,9 @@ int xdebug_isset_opcode_handler(int opcode)
 
 void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler)
 {
+	if (xdebug_isset_opcode_handler(opcode)) {
+		abort();
+	}
 	XG_LIB(original_opcode_handlers[opcode]) = zend_get_user_opcode_handler(opcode);
 	xdebug_set_add(XG_LIB(opcode_handlers_set), opcode);
 	zend_set_user_opcode_handler(opcode, handler);
@@ -248,4 +251,17 @@ void xdebug_unset_opcode_handler(int opcode)
 	if (xdebug_set_in(XG_LIB(opcode_handlers_set), opcode)) {
 		zend_set_user_opcode_handler(opcode, XG_LIB(original_opcode_handlers[opcode]));
 	}
+}
+
+int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS)
+{
+	if (xdebug_isset_opcode_handler(opcode)) {
+		user_opcode_handler_t handler = XG_LIB(original_opcode_handlers[opcode]);
+
+		if (handler) {
+			return handler(XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
+	}
+
+	return ZEND_USER_OPCODE_DISPATCH;
 }
