@@ -21,6 +21,9 @@
 
 #include "ext/standard/html.h"
 #include "ext/standard/php_smart_string.h"
+#include "zend_exceptions.h"
+#include "zend_generators.h"
+
 #include "stack.h"
 
 #include "base/filter.h"
@@ -28,7 +31,7 @@
 #include "base/superglobals.h"
 #include "coverage/code_coverage.h"
 #include "lib/compat.h"
-#include "lib/private.h"
+#include "lib/lib.h"
 #include "lib/str.h"
 #include "lib/var_export_html.h"
 #include "lib/var_export_line.h"

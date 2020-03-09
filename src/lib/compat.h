@@ -95,4 +95,7 @@ typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 #  define ZEND_ARG_IS_VARIADIC(ptr) (*ptr).is_variadic
 # endif
 
+#define XDEBUG_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
+#define XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
+
 #endif

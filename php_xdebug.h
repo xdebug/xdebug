@@ -32,6 +32,7 @@
 #include "coverage/branch_info.h"
 #include "coverage/code_coverage.h"
 #include "debugger/debugger.h"
+#include "lib/lib.h"
 #include "gcstats/gc_stats.h"
 #include "profiler/profiler.h"
 #include "tracing/tracing.h"
@@ -229,21 +230,13 @@ struct xdebug_base_info {
 	} settings;
 };
 
-struct xdebug_library_info
-{
-	zend_execute_data    *active_execute_data;
-	function_stack_entry *active_fse;
-	HashTable            *active_symbol_table;
-	zval                 *This;
-};
-
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct xdebug_base_info     base;
-	struct xdebug_library_info  library;
 	struct {
 		xdebug_coverage_globals_t coverage;
 		xdebug_debugger_globals_t debugger;
 		xdebug_gc_stats_globals_t gc_stats;
+		xdebug_library_globals_t  library;
 		xdebug_profiler_globals_t profiler;
 		xdebug_tracing_globals_t  tracing;
 	} globals;
@@ -263,24 +256,6 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #endif
 
 #define XG_BASE(v)     (XG(base.v))
-#define XG_LIB(v )     (XG(library.v))
-
 #define XINI_BASE(v)     (XG(base.settings.v))
 
-/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
-#define XDEBUG_SET_OPCODE_OVERRIDE_COMMON(oc) \
-	zend_set_user_opcode_handler(oc, xdebug_common_override_handler);
-
-#define XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(f,oc) \
-	zend_set_user_opcode_handler(oc, xdebug_##f##_handler);
-
 #endif
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

@@ -99,11 +99,12 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="crc32.h" role="src" />
      <file name="hash.c" role="src" />
      <file name="hash.h" role="src" />
+     <file name="lib.c" role="src" />
+     <file name="lib.h" role="src" />
+     <file name="lib_private.h" role="src" />
      <file name="llist.c" role="src" />
      <file name="llist.h" role="src" />
      <file name="mm.h" role="src" />
-     <file name="private.c" role="src" />
-     <file name="private.h" role="src" />
      <file name="set.c" role="src" />
      <file name="set.h" role="src" />
      <file name="str.c" role="src" />

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 #ifndef __XDEBUG_CODE_COVERAGE_H__
 #define __XDEBUG_CODE_COVERAGE_H__
 
-#include "lib/private.h"
+#include "lib/lib.h"
 
 typedef struct xdebug_coverage_file {
 	char               *name;

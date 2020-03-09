@@ -581,9 +581,9 @@ void xdebug_debugger_rinit(void)
 		XG_DBG(ide_key) = xdstrdup(idekey);
 	}
 
-	XG_DBG(no_exec)        = 0;
-	XG_LIB(active_symbol_table) = NULL;
-	XG_LIB(This) = NULL;
+	XG_DBG(no_exec) = 0;
+	xdebug_lib_set_active_symbol_table(NULL);
+	xdebug_lib_set_active_object(NULL);
 
 	/* Check if we have this special get variable that stops a debugging
 	 * request without executing any code */

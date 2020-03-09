@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
  */
 
 #include "php_xdebug.h"
+#include "zend_extensions.h"
 
 #include "branch_info.h"
 #include "code_coverage_private.h"
@@ -119,17 +120,16 @@ static void xdebug_print_opcode_info(char type, zend_execute_data *execute_data,
 	xdfree(function_name);
 }
 
-static int xdebug_check_branch_entry_handler(zend_execute_data *execute_data)
+static int xdebug_check_branch_entry_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op *cur_opcode = execute_data->opline;
 
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode;
-		cur_opcode = execute_data->opline;
-
 		xdebug_print_opcode_info('G', execute_data, cur_opcode);
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static void xdebug_count_line(char *filename, int lineno, int executable, int deadcode)
@@ -172,29 +172,23 @@ static void xdebug_count_line(char *filename, int lineno, int executable, int de
 	}
 }
 
-#define XDEBUG_OPCODE_OVERRIDE(f) \
-	int xdebug_##f##_handler(zend_execute_data *execute_data) \
-	{ \
-		return xdebug_common_override_handler(execute_data); \
-	}
-
-int xdebug_common_override_handler(zend_execute_data *execute_data)
+int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op *cur_opcode = execute_data->opline;
 
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode;
 		int      lineno;
 		char    *file;
 
-		cur_opcode = execute_data->opline;
 		lineno = cur_opcode->lineno;
 		file = (char*) STR_NAME_VAL(op_array->filename);
 
 		xdebug_print_opcode_info('C', execute_data, cur_opcode);
 		xdebug_count_line(file, lineno, 0, 0);
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode)
@@ -950,15 +944,24 @@ void xdebug_coverage_init_oparray(zend_op_array *op_array)
 }
 
 #if PHP_VERSION_ID >= 70200
-static int xdebug_switch_handler(zend_execute_data *execute_data)
+static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
+	const zend_op *cur_opcode = execute_data->opline;
+
 	if (XG_COV(code_coverage_active)) {
 		execute_data->opline++;
 		return ZEND_USER_OPCODE_CONTINUE;
 	}
-	return ZEND_USER_OPCODE_DISPATCH;
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 #endif
+
+#define XDEBUG_OPCODE_OVERRIDE(f) \
+	int xdebug_##f##_handler(zend_execute_data *execute_data) \
+	{ \
+		return xdebug_common_override_handler(execute_data); \
+	}
 
 
 void xdebug_coverage_minit(INIT_FUNC_ARGS)
@@ -1022,9 +1025,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CONCAT);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_DIM_OBJ);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_PROP_OBJ);
-		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_PRE_INC_OBJ);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CASE);
-		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_QM_ASSIGN);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_LAMBDA_FUNCTION);
 #if PHP_VERSION_ID < 70400
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_TRAIT);
@@ -1044,8 +1045,8 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS_DELAYED);
 #endif
 #if PHP_VERSION_ID >= 70200
-		zend_set_user_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
-		zend_set_user_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
+		xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
+		xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
 #endif
 	}
 
@@ -1055,11 +1056,11 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		int i;
 
 		for (i = 0; i < 256; i++) {
-			if (zend_get_user_opcode_handler(i) == NULL) {
-				if (i == ZEND_HANDLE_EXCEPTION) {
-					continue;
-				}
-				zend_set_user_opcode_handler(i, xdebug_check_branch_entry_handler);
+			if (i == ZEND_HANDLE_EXCEPTION) {
+				continue;
+			}
+			if (!xdebug_isset_opcode_handler(i)) {
+				xdebug_set_opcode_handler(i, xdebug_check_branch_entry_handler);
 			}
 		}
 	}
@@ -1067,97 +1068,6 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_BRANCH_CHECK", XDEBUG_CC_OPTION_BRANCH_CHECK, CONST_CS | CONST_PERSISTENT);
-}
-
-void xdebug_coverage_mshutdown(void)
-{
-	int i = 0;
-
-#ifndef ZTS
-	/* Overload opcodes for code coverage */
-	if (XINI_COV(enable)) {
-#endif
-		zend_set_user_opcode_handler(ZEND_JMP, NULL);
-		zend_set_user_opcode_handler(ZEND_JMPZ, NULL);
-		zend_set_user_opcode_handler(ZEND_JMPZ_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_JMPNZ, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_IDENTICAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_NOT_IDENTICAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_EQUAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_NOT_EQUAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_SMALLER, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_SMALLER_OR_EQUAL, NULL);
-		zend_set_user_opcode_handler(ZEND_BOOL_NOT, NULL);
-
-		zend_set_user_opcode_handler(ZEND_ADD, NULL);
-		zend_set_user_opcode_handler(ZEND_SUB, NULL);
-		zend_set_user_opcode_handler(ZEND_MUL, NULL);
-		zend_set_user_opcode_handler(ZEND_DIV, NULL);
-
-		zend_set_user_opcode_handler(ZEND_ADD_ARRAY_ELEMENT, NULL);
-		zend_set_user_opcode_handler(ZEND_RETURN, NULL);
-		zend_set_user_opcode_handler(ZEND_RETURN_BY_REF, NULL);
-		zend_set_user_opcode_handler(ZEND_EXT_STMT, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_REF, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAL, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAL_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_NEW, NULL);
-		zend_set_user_opcode_handler(ZEND_EXT_FCALL_BEGIN, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_METHOD_CALL, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_STATIC_METHOD_CALL, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_FCALL, NULL);
-		zend_set_user_opcode_handler(ZEND_CATCH, NULL);
-		zend_set_user_opcode_handler(ZEND_BOOL, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_ARRAY, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_DIM_R, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_R, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_W, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_FUNC_ARG, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_DIM_FUNC_ARG, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_STATIC_PROP_FUNC_ARG, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_DIM_UNSET, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_UNSET, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_CLASS, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_CONSTANT, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_CLASS_CONSTANT, NULL);
-		zend_set_user_opcode_handler(ZEND_CONCAT, NULL);
-		zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_DIM_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_PROP_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_PRE_INC_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_CASE, NULL);
-		zend_set_user_opcode_handler(ZEND_QM_ASSIGN, NULL);
-		zend_set_user_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, NULL);
-#if PHP_VERSION_ID < 70400
-		zend_set_user_opcode_handler(ZEND_ADD_TRAIT, NULL);
-		zend_set_user_opcode_handler(ZEND_BIND_TRAITS, NULL);
-#endif
-		zend_set_user_opcode_handler(ZEND_INSTANCEOF, NULL);
-		zend_set_user_opcode_handler(ZEND_FAST_RET, NULL);
-		zend_set_user_opcode_handler(ZEND_ROPE_ADD, NULL);
-		zend_set_user_opcode_handler(ZEND_ROPE_END, NULL);
-		zend_set_user_opcode_handler(ZEND_COALESCE, NULL);
-		zend_set_user_opcode_handler(ZEND_TYPE_CHECK, NULL);
-		zend_set_user_opcode_handler(ZEND_GENERATOR_CREATE, NULL);
-		zend_set_user_opcode_handler(ZEND_BIND_STATIC, NULL);
-		zend_set_user_opcode_handler(ZEND_BIND_LEXICAL, NULL);
-#if PHP_VERSION_ID >= 70400
-		zend_set_user_opcode_handler(ZEND_DECLARE_CLASS, NULL);
-		zend_set_user_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, NULL);
-#endif
-#ifndef ZTS
-	}
-#endif
-
-	/* cleanup handlers set in MINIT to xdebug_check_branch_entry_handler */
-	for (i = 0; i < 256; i++) {
-		if (zend_get_user_opcode_handler(i) == xdebug_check_branch_entry_handler) {
-			zend_set_user_opcode_handler(i, NULL);
-		}
-	}
 }
 
 void xdebug_coverage_rinit(void)

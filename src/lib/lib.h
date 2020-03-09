@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,30 +16,18 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef XDEBUG_PRIVATE_H
-#define XDEBUG_PRIVATE_H
+#ifndef __XDEBUG_LIBRARY_H__
+#define __XDEBUG_LIBRARY_H__
+
+#ifdef ZTS
+# include "TSRM.h"
+#endif
 
 #include "zend.h"
 #include "zend_API.h"
-#include "zend_alloc.h"
-#include "zend_execute.h"
-#include "zend_compile.h"
-#include "zend_constants.h"
-#include "zend_extensions.h"
-#include "zend_exceptions.h"
-#include "zend_generators.h"
-#include "zend_vm.h"
-#include "zend_hash.h"
-
-#include "hash.h"
-#include "llist.h"
-#include "set.h"
+#include "compat.h"
 
 #define MICRO_IN_SEC 1000000.00
-
-#ifdef ZTS
-#include "TSRM.h"
-#endif
 
 typedef struct xdebug_var_name {
 	char    *name;
@@ -221,13 +209,51 @@ function_stack_entry *xdebug_get_stack_tail(void);
 xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list);
 int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value);
 
+typedef struct _xdebug_library_globals_t {
+	zend_execute_data     *active_execute_data;
+	function_stack_entry  *active_stack_entry;
+	HashTable             *active_symbol_table;
+	zval                  *active_object;
+	user_opcode_handler_t  original_opcode_handlers[256];
+	xdebug_set            *opcode_handlers_set;
+} xdebug_library_globals_t;
+
+typedef struct _xdebug_library_settings_t {
+#if WIN32
+	int dummy;
 #endif
+} xdebug_library_settings_t;
 
+void xdebug_init_library_globals(xdebug_library_globals_t *xg);
+void xdebug_library_minit(void);
+void xdebug_library_mshutdown(void);
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */
+void xdebug_lib_set_active_data(zend_execute_data *execute_data);
+void xdebug_lib_set_active_object(zval *object);
+void xdebug_lib_set_active_stack_entry(function_stack_entry *fse);
+void xdebug_lib_set_active_symbol_table(HashTable *symbol_table);
+
+int xdebug_lib_has_active_data(void);
+int xdebug_lib_has_active_function(void);
+int xdebug_lib_has_active_object(void);
+int xdebug_lib_has_active_symbol_table(void);
+
+zend_execute_data *xdebug_lib_get_active_data(void);
+zend_op_array *xdebug_lib_get_active_func_oparray(void);
+zval *xdebug_lib_get_active_object(void);
+function_stack_entry *xdebug_lib_get_active_stack_entry(void);
+HashTable *xdebug_lib_get_active_symbol_table(void);
+
+/* Needed for code coverage as Zend doesn't always add EXT_STMT when expected */
+#define XDEBUG_SET_OPCODE_OVERRIDE_COMMON(oc) \
+	xdebug_set_opcode_handler(oc, xdebug_common_override_handler);
+
+#define XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(f,oc) \
+	xdebug_set_opcode_handler(oc, xdebug_##f##_handler);
+
+int xdebug_isset_opcode_handler(int opcode);
+void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler);
+void xdebug_unset_opcode_handler(int opcode);
+int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS);
+
+#endif

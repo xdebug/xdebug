@@ -20,7 +20,6 @@
 #define __XDEBUG_DEBUGGER_H__
 
 #include "com.h"
-#include "lib/private.h"
 
 typedef struct _xdebug_debugger_globals_t {
 	int           status;
