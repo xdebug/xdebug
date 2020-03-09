@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,6 @@
 #include "lib/hash.h"
 #include "lib/llist.h"
 #include "lib/mm.h"
-#include "lib/private.h"
 #include "lib/var_export_xml.h"
 #include "lib/xml.h"
 
@@ -1506,18 +1505,18 @@ DBGP_FUNC(property_get)
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1);
 
 			if (depth > 0) {
-				XG_LIB(active_execute_data) = old_fse->execute_data;
+				xdebug_lib_set_active_data(old_fse->execute_data);
 			} else {
-				XG_LIB(active_execute_data) = EG(current_execute_data);
+				xdebug_lib_set_active_data(EG(current_execute_data));
 			}
-			XG_LIB(active_symbol_table) = fse->symbol_table;
-			XG_LIB(This)                = fse->This;
-			XG_LIB(active_fse)          = fse;
+			xdebug_lib_set_active_object(fse->This);
+			xdebug_lib_set_active_stack_entry(fse);
+			xdebug_lib_set_active_symbol_table(fse->symbol_table);
 		} else {
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
 	} else if (context_nr == 1) { /* superglobals */
-		XG_LIB(active_symbol_table) = &EG(symbol_table);
+		xdebug_lib_set_active_symbol_table(&EG(symbol_table));
 	} else if (context_nr == 2) { /* constants */
 		/* Do nothing */
 	} else {
@@ -1599,18 +1598,18 @@ DBGP_FUNC(property_set)
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1);
 
 			if (depth > 0) {
-				XG_LIB(active_execute_data) = old_fse->execute_data;
+				xdebug_lib_set_active_data(old_fse->execute_data);
 			} else {
-				XG_LIB(active_execute_data) = EG(current_execute_data);
+				xdebug_lib_set_active_data(EG(current_execute_data));
 			}
-			XG_LIB(active_symbol_table) = fse->symbol_table;
-			XG_LIB(This)                = fse->This;
-			XG_LIB(active_fse)          = fse;
+			xdebug_lib_set_active_object(fse->This);
+			xdebug_lib_set_active_stack_entry(fse);
+			xdebug_lib_set_active_symbol_table(fse->symbol_table);
 		} else {
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
 	} else { /* superglobals */
-		XG_LIB(active_symbol_table) = &EG(symbol_table);
+		xdebug_lib_set_active_symbol_table(&EG(symbol_table));
 	}
 
 	if (CMD_OPTION_SET('p')) {
@@ -1652,7 +1651,7 @@ DBGP_FUNC(property_set)
 	if (depth > 0) {
 		original_execute_data = EG(current_execute_data);
 
-		EG(current_execute_data) = XG_LIB(active_execute_data);
+		EG(current_execute_data) = xdebug_lib_get_active_data();
 	}
 
 	/* Do the eval */
@@ -1715,18 +1714,18 @@ DBGP_FUNC(property_value)
 			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1);
 
 			if (depth > 0) {
-				XG_LIB(active_execute_data) = old_fse->execute_data;
+				xdebug_lib_set_active_data(old_fse->execute_data);
 			} else {
-				XG_LIB(active_execute_data) = EG(current_execute_data);
+				xdebug_lib_set_active_data(EG(current_execute_data));
 			}
-			XG_LIB(active_symbol_table) = fse->symbol_table;
-			XG_LIB(This)                = fse->This;
-			XG_LIB(active_fse)          = fse;
+			xdebug_lib_set_active_object(fse->This);
+			xdebug_lib_set_active_stack_entry(fse);
+			xdebug_lib_set_active_symbol_table(fse->symbol_table);
 		} else {
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
 	} else { /* superglobals */
-		XG_LIB(active_symbol_table) = &EG(symbol_table);
+		xdebug_lib_set_active_symbol_table(&EG(symbol_table));
 	}
 
 	if (CMD_OPTION_SET('p')) {
@@ -1815,8 +1814,8 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	 * is always the head of the stack */
 	if (context_id == 1) {
 		/* add super globals */
-		XG_LIB(active_symbol_table) = &EG(symbol_table);
-		XG_LIB(active_execute_data) = NULL;
+		xdebug_lib_set_active_symbol_table(&EG(symbol_table));
+		xdebug_lib_set_active_data(NULL);
 		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_COOKIE"),  1, 1, 0, options);
 		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_ENV"),     1, 1, 0, options);
 		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_FILES"),   1, 1, 0, options);
@@ -1826,7 +1825,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SERVER"),  1, 1, 0, options);
 		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SESSION"), 1, 1, 0, options);
 		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("GLOBALS"),  1, 1, 0, options);
-		XG_LIB(active_symbol_table) = NULL;
+		xdebug_lib_set_active_symbol_table(NULL);
 		return 0;
 	}
 
@@ -1860,12 +1859,12 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1);
 
 		if (depth > 0) {
-			XG_LIB(active_execute_data) = old_fse->execute_data;
+			xdebug_lib_set_active_data(old_fse->execute_data);
 		} else {
-			XG_LIB(active_execute_data) = EG(current_execute_data);
+			xdebug_lib_set_active_data(EG(current_execute_data));
 		}
-		XG_LIB(active_symbol_table) = fse->symbol_table;
-		XG_LIB(This)                = fse->This;
+		xdebug_lib_set_active_symbol_table(fse->symbol_table);
+		xdebug_lib_set_active_object(fse->This);
 
 		/* Only show vars when they are scanned */
 		if (fse->declared_vars) {
@@ -1876,8 +1875,8 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 			/* Check for dynamically defined variables, but make sure we don't already
 			 * have them. Also blacklist superglobals and argv/argc */
-			if (XG_LIB(active_symbol_table)) {
-				zend_hash_apply_with_arguments(XG_LIB(active_symbol_table), (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
+			if (xdebug_lib_has_active_symbol_table()) {
+				zend_hash_apply_with_arguments(xdebug_lib_get_active_symbol_table(), (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
 			}
 
 			/* Add all the found variables to the node */
@@ -1906,9 +1905,9 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			xdebug_var_xml_attach_static_vars(node, options, ce);
 		}
 
-		XG_LIB(active_symbol_table) = NULL;
-		XG_LIB(active_execute_data) = NULL;
-		XG_LIB(This)                = NULL;
+		xdebug_lib_set_active_data(NULL);
+		xdebug_lib_set_active_object(NULL);
+		xdebug_lib_set_active_symbol_table(NULL);
 		return 0;
 	}
 

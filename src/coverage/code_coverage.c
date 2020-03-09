@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,6 +17,7 @@
  */
 
 #include "php_xdebug.h"
+#include "zend_extensions.h"
 
 #include "branch_info.h"
 #include "code_coverage_private.h"
@@ -1044,8 +1045,8 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS_DELAYED);
 #endif
 #if PHP_VERSION_ID >= 70200
-		zend_set_user_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
-		zend_set_user_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
+		xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
+		xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
 #endif
 	}
 
@@ -1055,11 +1056,11 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		int i;
 
 		for (i = 0; i < 256; i++) {
-			if (zend_get_user_opcode_handler(i) == NULL) {
-				if (i == ZEND_HANDLE_EXCEPTION) {
-					continue;
-				}
-				zend_set_user_opcode_handler(i, xdebug_check_branch_entry_handler);
+			if (i == ZEND_HANDLE_EXCEPTION) {
+				continue;
+			}
+			if (!xdebug_isset_opcode_handler(i)) {
+				xdebug_set_opcode_handler(i, xdebug_check_branch_entry_handler);
 			}
 		}
 	}
@@ -1067,97 +1068,6 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_UNUSED", XDEBUG_CC_OPTION_UNUSED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_DEAD_CODE", XDEBUG_CC_OPTION_DEAD_CODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_CC_BRANCH_CHECK", XDEBUG_CC_OPTION_BRANCH_CHECK, CONST_CS | CONST_PERSISTENT);
-}
-
-void xdebug_coverage_mshutdown(void)
-{
-	int i = 0;
-
-#ifndef ZTS
-	/* Overload opcodes for code coverage */
-	if (XINI_COV(enable)) {
-#endif
-		zend_set_user_opcode_handler(ZEND_JMP, NULL);
-		zend_set_user_opcode_handler(ZEND_JMPZ, NULL);
-		zend_set_user_opcode_handler(ZEND_JMPZ_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_JMPNZ, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_IDENTICAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_NOT_IDENTICAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_EQUAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_NOT_EQUAL, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_SMALLER, NULL);
-		zend_set_user_opcode_handler(ZEND_IS_SMALLER_OR_EQUAL, NULL);
-		zend_set_user_opcode_handler(ZEND_BOOL_NOT, NULL);
-
-		zend_set_user_opcode_handler(ZEND_ADD, NULL);
-		zend_set_user_opcode_handler(ZEND_SUB, NULL);
-		zend_set_user_opcode_handler(ZEND_MUL, NULL);
-		zend_set_user_opcode_handler(ZEND_DIV, NULL);
-
-		zend_set_user_opcode_handler(ZEND_ADD_ARRAY_ELEMENT, NULL);
-		zend_set_user_opcode_handler(ZEND_RETURN, NULL);
-		zend_set_user_opcode_handler(ZEND_RETURN_BY_REF, NULL);
-		zend_set_user_opcode_handler(ZEND_EXT_STMT, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR_NO_REF_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_REF, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAL, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAL_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_SEND_VAR_EX, NULL);
-		zend_set_user_opcode_handler(ZEND_NEW, NULL);
-		zend_set_user_opcode_handler(ZEND_EXT_FCALL_BEGIN, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_METHOD_CALL, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_STATIC_METHOD_CALL, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_FCALL, NULL);
-		zend_set_user_opcode_handler(ZEND_CATCH, NULL);
-		zend_set_user_opcode_handler(ZEND_BOOL, NULL);
-		zend_set_user_opcode_handler(ZEND_INIT_ARRAY, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_DIM_R, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_R, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_W, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_FUNC_ARG, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_DIM_FUNC_ARG, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_STATIC_PROP_FUNC_ARG, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_DIM_UNSET, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_OBJ_UNSET, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_CLASS, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_CONSTANT, NULL);
-		zend_set_user_opcode_handler(ZEND_FETCH_CLASS_CONSTANT, NULL);
-		zend_set_user_opcode_handler(ZEND_CONCAT, NULL);
-		zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_DIM_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_ISSET_ISEMPTY_PROP_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_PRE_INC_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_CASE, NULL);
-		zend_set_user_opcode_handler(ZEND_QM_ASSIGN, NULL);
-		zend_set_user_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, NULL);
-#if PHP_VERSION_ID < 70400
-		zend_set_user_opcode_handler(ZEND_ADD_TRAIT, NULL);
-		zend_set_user_opcode_handler(ZEND_BIND_TRAITS, NULL);
-#endif
-		zend_set_user_opcode_handler(ZEND_INSTANCEOF, NULL);
-		zend_set_user_opcode_handler(ZEND_FAST_RET, NULL);
-		zend_set_user_opcode_handler(ZEND_ROPE_ADD, NULL);
-		zend_set_user_opcode_handler(ZEND_ROPE_END, NULL);
-		zend_set_user_opcode_handler(ZEND_COALESCE, NULL);
-		zend_set_user_opcode_handler(ZEND_TYPE_CHECK, NULL);
-		zend_set_user_opcode_handler(ZEND_GENERATOR_CREATE, NULL);
-		zend_set_user_opcode_handler(ZEND_BIND_STATIC, NULL);
-		zend_set_user_opcode_handler(ZEND_BIND_LEXICAL, NULL);
-#if PHP_VERSION_ID >= 70400
-		zend_set_user_opcode_handler(ZEND_DECLARE_CLASS, NULL);
-		zend_set_user_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, NULL);
-#endif
-#ifndef ZTS
-	}
-#endif
-
-	/* cleanup handlers set in MINIT to xdebug_check_branch_entry_handler */
-	for (i = 0; i < 256; i++) {
-		if (zend_get_user_opcode_handler(i) == xdebug_check_branch_entry_handler) {
-			zend_set_user_opcode_handler(i, NULL);
-		}
-	}
 }
 
 void xdebug_coverage_rinit(void)

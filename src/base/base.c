@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,8 @@
 #include "php.h"
 #include "TSRM.h"
 #include "php_globals.h"
-#include "Zend/zend_closures.h"
+#include "zend_closures.h"
+#include "zend_exceptions.h"
 
 #include "php_xdebug.h"
 
@@ -567,8 +568,8 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	zend_execute_internal = xdebug_execute_internal;
 
 
-	zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
-	zend_set_user_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
+	xdebug_set_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
+	xdebug_set_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
 
 	REGISTER_LONG_CONSTANT("XDEBUG_STACK_NO_DESC", XDEBUG_STACK_NO_DESC, CONST_CS | CONST_PERSISTENT);
 

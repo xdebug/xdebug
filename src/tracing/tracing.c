@@ -25,7 +25,6 @@
 #include "trace_html.h"
 
 #include "lib/compat.h"
-#include "lib/private.h"
 #include "lib/str.h"
 #include "lib/var_export_line.h"
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2019 Derick Rethans                               |
+   | Copyright (c) 2002-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,7 @@
 
 #include "TSRM.h"
 #include "SAPI.h"
+#include "zend_extensions.h"
 #include "main/php_ini.h"
 #include "ext/standard/head.h"
 #include "ext/standard/html.h"
@@ -57,9 +58,9 @@
 #include "coverage/code_coverage.h"
 #include "gcstats/gc_stats.h"
 #include "lib/usefulstuff.h"
+#include "lib/lib.h"
 #include "lib/llist.h"
 #include "lib/mm.h"
-#include "lib/private.h"
 #include "lib/var_export_html.h"
 #include "lib/var_export_line.h"
 #include "lib/var_export_text.h"
@@ -402,11 +403,10 @@ static void php_xdebug_init_globals (zend_xdebug_globals *xg)
 	xdebug_init_base_globals(&xg->base);
 	xdebug_init_coverage_globals(&xg->globals.coverage);
 	xdebug_init_debugger_globals(&xg->globals.debugger);
+	xdebug_init_library_globals(&xg->globals.library);
 	xdebug_init_profiler_globals(&xg->globals.profiler);
 	xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
 	xdebug_init_tracing_globals(&xg->globals.tracing);
-
-	xg->library.active_execute_data  = NULL;
 
 	/* Override header generation in SAPI */
 	if (sapi_module.header_handler != xdebug_header_handler) {
@@ -537,35 +537,12 @@ int xdebug_is_output_tty(void)
 	return (XG_BASE(output_is_tty));
 }
 
-#if 0
-int static xdebug_stack_insert_top(zend_stack *stack, const void *element, int size)
-{
-	int i;
-
-    if (stack->top >= stack->max) {    /* we need to allocate more memory */
-        stack->elements = (void **) erealloc(stack->elements,
-                   (sizeof(void **) * (stack->max += 64)));
-        if (!stack->elements) {
-            return FAILURE;
-        }
-    }
-
-	/* move all existing ones up */
-	for (i = stack->top; i >= 0; i--) {
-		stack->elements[i + 1] = stack->elements[i];
-	}
-
-	/* replace top handler */
-    stack->elements[0] = (void *) emalloc(size);
-    memcpy(stack->elements[0], element, size);
-    return stack->top++;
-}
-#endif
-
 PHP_MINIT_FUNCTION(xdebug)
 {
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
+
+	xdebug_library_minit();
 
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
 	xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);
@@ -588,55 +565,16 @@ PHP_MINIT_FUNCTION(xdebug)
 
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
-	xdebug_coverage_mshutdown();
 	xdebug_gcstats_mshutdown();
 	xdebug_profiler_mshutdown();
+
+	xdebug_library_mshutdown();
 
 #ifdef ZTS
 	ts_free_id(xdebug_globals_id);
 #else
 	php_xdebug_shutdown_globals(&xdebug_globals);
 #endif
-
-	{
-		zend_set_user_opcode_handler(ZEND_EXIT, NULL);
-
-		/* Override opcodes for variable assignments in traces */
-		zend_set_user_opcode_handler(ZEND_INCLUDE_OR_EVAL, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN, NULL);
-#if PHP_VERSION_ID >= 70400
-		zend_set_user_opcode_handler(ZEND_ASSIGN_OP, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_DIM_OP, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_OBJ_OP, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_STATIC_PROP_OP, NULL);
-#else
-		zend_set_user_opcode_handler(ZEND_ASSIGN_ADD, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_SUB, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_MUL, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_DIV, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_MOD, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_SL, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_SR, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_CONCAT, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_OR, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_AND, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_BW_XOR, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_POW, NULL);
-#endif
-		zend_set_user_opcode_handler(ZEND_ASSIGN_DIM, NULL);
-		zend_set_user_opcode_handler(ZEND_ASSIGN_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_PRE_INC, NULL);
-		zend_set_user_opcode_handler(ZEND_POST_INC, NULL);
-		zend_set_user_opcode_handler(ZEND_PRE_DEC, NULL);
-		zend_set_user_opcode_handler(ZEND_POST_DEC, NULL);
-		zend_set_user_opcode_handler(ZEND_PRE_INC_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_POST_INC_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_PRE_DEC_OBJ, NULL);
-		zend_set_user_opcode_handler(ZEND_POST_DEC_OBJ, NULL);
-
-		zend_set_user_opcode_handler(ZEND_BEGIN_SILENCE, NULL);
-		zend_set_user_opcode_handler(ZEND_END_SILENCE, NULL);
-	}
 
 	return SUCCESS;
 }
@@ -904,8 +842,8 @@ PHP_FUNCTION(xdebug_debug_zval)
 			zval debugzval;
 			xdebug_str *tmp_name;
 
-			XG_LIB(active_symbol_table) = EG(current_execute_data)->prev_execute_data->symbol_table;
-			XG_LIB(active_execute_data) = EG(current_execute_data)->prev_execute_data;
+			xdebug_lib_set_active_symbol_table(EG(current_execute_data)->prev_execute_data->symbol_table);
+			xdebug_lib_set_active_data(EG(current_execute_data)->prev_execute_data);
 
 			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 			xdebug_get_php_symbol(&debugzval, tmp_name);
@@ -970,7 +908,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 			xdebug_str *tmp_name;
 			xdebug_str *val;
 
-			XG_LIB(active_symbol_table) = EG(current_execute_data)->symbol_table;
+			xdebug_lib_set_active_data(EG(current_execute_data));
 
 			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
 			xdebug_get_php_symbol(&debugzval, tmp_name);
