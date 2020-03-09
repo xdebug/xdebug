@@ -213,6 +213,9 @@ typedef struct _xdebug_library_globals_t {
 } xdebug_library_globals_t;
 
 typedef struct _xdebug_library_settings_t {
+#if WIN32
+	int dummy;
+#endif
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
