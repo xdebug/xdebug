@@ -637,12 +637,15 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	RETURN_FALSE;
 }
 
-
+#if PHP_VERSION_ID >= 80000
+static int xdebug_lineno_cmp(Bucket *f, Bucket *s)
+{
+#else
 static int xdebug_lineno_cmp(const void *a, const void *b)
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-
+#endif
 	if (f->h < s->h) {
 		return -1;
 	} else if (f->h > s->h) {
