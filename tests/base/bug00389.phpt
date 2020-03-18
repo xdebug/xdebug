@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #389: Destructors called on fatal error
+Test for bug #389: Destructors called on fatal error (PHP < 8.0)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.0');
+?>
 --INI--
 log_errors=0
 xdebug.default_enable=1
