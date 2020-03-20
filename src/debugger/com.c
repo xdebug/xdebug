@@ -566,6 +566,10 @@ static void xdebug_handle_stop_session()
 
 void xdebug_do_req(void)
 {
+	if (XG_DBG(detached)) {
+		return;
+	}
+
 	if (XINI_DBG(remote_mode) != XDEBUG_REQ) {
 		return;
 	}
