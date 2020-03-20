@@ -1190,7 +1190,7 @@ DBGP_FUNC(detach)
 	XG_DBG(context).handler->remote_deinit(&(XG_DBG(context)));
 	xdebug_mark_debug_connection_not_active();
 	XG_DBG(stdout_mode) = 0;
-	XINI_DBG(remote_enable) = 0;
+	XG_DBG(detached) = 1;
 	return XDEBUG_CMD_BREAK;
 }
 
@@ -2505,6 +2505,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 {
 	xdebug_xml_node           *response;
 	xdebug_var_export_options *options;
+	int                        detaching = (XG_DBG(status) == DBGP_STATUS_DETACHED);
 
 	if (xdebug_is_debug_connection_active_for_current_pid()) {
 		XG_DBG(status) = DBGP_STATUS_STOPPING;
@@ -2524,7 +2525,9 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		send_message(context, response);
 		xdebug_xml_node_dtor(response);
 
-		xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BLOCK, XDEBUG_CMDLOOP_NONBAIL);
+		if (!detaching) {
+			xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BLOCK, XDEBUG_CMDLOOP_NONBAIL);
+		}
 	}
 
 	if (xdebug_is_debug_connection_active_for_current_pid()) {
