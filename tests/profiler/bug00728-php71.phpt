@@ -21,6 +21,7 @@ $b = new bankaccount;
 $b->bar();
 
 echo file_get_contents(xdebug_get_profiler_filename());
+@unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 string(3) "bar"
@@ -32,7 +33,7 @@ cmd: %sbug00728-php71.php
 part: 1
 positions: line
 
-events: Time Memory
+events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::{zend_pass}

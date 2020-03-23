@@ -10,6 +10,7 @@ $a = array("testing");
  
 t1();
 echo file_get_contents(xdebug_get_profiler_filename());
+@unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 version: 1
@@ -18,7 +19,7 @@ cmd: %sbug00643.php
 part: 1
 positions: line
 
-events: Time Memory
+events: Time_(µs) Memory_(bytes)
 
 fl=(1) %sbug00643-t2.inc
 fn=(1) require_once::%sbug00643-t2.inc

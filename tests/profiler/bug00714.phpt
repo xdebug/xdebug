@@ -22,6 +22,7 @@ sleep20();
 echo "DONE\n\n";
 
 echo file_get_contents(xdebug_get_profiler_filename());
+@unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 Sleeping 1
@@ -35,7 +36,7 @@ cmd: %sbug00714.php
 part: 1
 positions: line
 
-events: Time Memory
+events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::sleep

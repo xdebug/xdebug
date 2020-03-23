@@ -4,8 +4,8 @@ function capture()
 	global $filename;
 
 	echo file_get_contents($filename);
+	@unlink($filename);
 }
-
 
 if (strlen('foobar')>1) {
 	$foobar=substr('foobar', 1);

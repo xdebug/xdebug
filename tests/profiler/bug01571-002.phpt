@@ -7,6 +7,7 @@ xdebug.profiler_enable=1
 require_once('bug01571-002.inc');
  
 echo file_get_contents(xdebug_get_profiler_filename());
+@unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 version: 1
@@ -15,7 +16,7 @@ cmd: %sbug01571-002.php
 part: 1
 positions: line
 
-events: Time Memory
+events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::usleep
