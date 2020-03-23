@@ -533,6 +533,8 @@ void xdebug_debugger_rinit(void)
 	XG_DBG(breakpoints_allowed) = 1;
 	XG_DBG(detached) = 0;
 	XG_DBG(breakable_lines_map) = xdebug_hash_alloc(2048, (xdebug_hash_dtor_t) xdebug_line_list_dtor);
+	XG_DBG(function_count) = 0;
+	XG_DBG(class_count) = 0;
 	XG_DBG(remote_log_file) = NULL;
 
 	/* Initialize some debugger context properties */
