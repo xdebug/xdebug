@@ -13,6 +13,7 @@ xdebug.profiler_output_name=XDEBUG-PROFILE.%p
 header( 'Location: bar');
 header( 'HTTP/1.0 404 Not Found' );
 var_dump( xdebug_get_headers( ) );
+@unlink( xdebug_get_profiler_filename() );
 ?>
 --EXPECTF--
 %sbug01437.php:4:

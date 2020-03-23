@@ -94,7 +94,7 @@ function check_reqs( $req_str )
 				$missing += (int) ( ! runtime_version( $version, $operator ) );
 			}
 		}
-		
+
 		if ( substr( $req, 0, 3 ) === 'ext' )
 		{
 			$missing += (int) ( ! extension_loaded( substr( $req, 4 ) ) );
@@ -106,7 +106,7 @@ function check_reqs( $req_str )
 			$missing += (int) ( in_array( substr( $req, 6 ), get_declared_classes()) == false );
 			$req = "'" . substr( $req, 6 ) . '\' class';
 		}
-		
+
 		if ( $req === '32bit' )
 		{
 			$missing += ( PHP_INT_SIZE != 4 );
@@ -115,7 +115,7 @@ function check_reqs( $req_str )
 		{
 			$missing += ( PHP_INT_SIZE != 8 );
 		}
-		
+
 		if ( $req === 'unparallel' )
 		{
 			$missing += ( getenv( 'SKIP_UNPARALLEL_TESTS' ) );

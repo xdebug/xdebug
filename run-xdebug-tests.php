@@ -1635,7 +1635,7 @@ TEST $file
 			$skipif_ini_settings = $ini_settings;
 			$skipif_ini_settings = preg_replace( '@-d \"auto_prepend_file=.*?\" @', '', $skipif_ini_settings );
 			$skipif_ini_settings = preg_replace( '@-d \"auto_append_file=.*?\" @', '', $skipif_ini_settings );
-			$skipif_ini_settings .= " -d track_errors=0";
+			$skipif_ini_settings .= " -d track_errors=0 -d xdebug.profiler_enable=0";
 			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $skipif_ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
 
 			junit_finish_timer($shortname);

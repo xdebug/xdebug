@@ -7,6 +7,7 @@ xdebug.profiler_enable=1
 require_once('bug00785-002.inc');
  
 echo file_get_contents(xdebug_get_profiler_filename());
+@unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 version: 1

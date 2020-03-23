@@ -22,6 +22,7 @@ sleep20();
 echo "DONE\n\n";
 
 echo file_get_contents(xdebug_get_profiler_filename());
+@unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 Sleeping 1

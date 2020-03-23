@@ -21,6 +21,7 @@ $b = new bankaccount;
 $b->bar();
 
 echo file_get_contents(xdebug_get_profiler_filename());
+@unlink(xdebug_get_profiler_filename());
 ?>
 --EXPECTF--
 string(3) "bar"
