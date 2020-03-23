@@ -146,7 +146,7 @@ static void profiler_write_header(FILE *file, char *script_name)
 	}
 	fprintf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
 	fprintf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
-	fprintf(file, "events: Time Memory\n\n");
+	fprintf(file, "events: Time_(µs) Memory_(bytes)\n\n");
 	fflush(file);
 }
 

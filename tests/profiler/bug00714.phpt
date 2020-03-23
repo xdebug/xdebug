@@ -35,7 +35,7 @@ cmd: %sbug00714.php
 part: 1
 positions: line
 
-events: Time Memory
+events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::sleep

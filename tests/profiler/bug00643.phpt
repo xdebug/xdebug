@@ -18,7 +18,7 @@ cmd: %sbug00643.php
 part: 1
 positions: line
 
-events: Time Memory
+events: Time_(µs) Memory_(bytes)
 
 fl=(1) %sbug00643-t2.inc
 fn=(1) require_once::%sbug00643-t2.inc

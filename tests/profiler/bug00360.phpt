@@ -19,7 +19,7 @@ cmd: %sbug00360.php
 part: 1
 positions: line
 
-events: Time Memory
+events: Time_(µs) Memory_(bytes)
 
 fl=(1) %sbug00360.php
 fn=(1) func
