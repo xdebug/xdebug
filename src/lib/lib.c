@@ -30,12 +30,12 @@ const char *xdebug_log_prefix[11] = {
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
 	xg->active_execute_data  = NULL;
+	xg->opcode_handlers_set = xdebug_set_create(256);
+	memset(xg->original_opcode_handlers, 0, sizeof(xg->original_opcode_handlers));
 }
 
 void xdebug_library_minit(void)
 {
-	XG_LIB(opcode_handlers_set) = xdebug_set_create(256);
-	memset(XG_LIB(original_opcode_handlers), 0, sizeof(XG_LIB(original_opcode_handlers)));
 }
 
 void xdebug_library_mshutdown(void)
