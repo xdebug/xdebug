@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-03-13</date>
- <time>16:49:40</time>
+ <date>2020-03-23</date>
+ <time>11:12:20</time>
  <version>
-  <release>2.9.3</release>
-  <api>2.9.3</api>
+  <release>2.9.4</release>
+  <api>2.9.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,13 +45,12 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, Mar 13, 2020 - xdebug 2.9.3
+Mon, Mar 23, 2020 - xdebug 2.9.4
 
 = Fixed bugs:
 
-  - Fixed issue #1753: Resolved breakpoints use information from wrong files
-  - Fixed issue #1758: Xdebug changes error_get_last results inside a try catch
-  - Fixed issue #1759: User registered opcode handlers should call ones already set by other extensions
+  - Fixed issue #1763: Crash while setting opcode overrides in ZTS mode.
+  - Fixed issue #1766: Using the DBGp detach command disables remote debugging for the whole process.
  </notes>
 
  <contents>
@@ -190,6 +189,29 @@ Fri, Mar 13, 2020 - xdebug 2.9.3
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2020-03-13</date>
+   <time>16:49:40</time>
+   <version>
+    <release>2.9.3</release>
+    <api>2.9.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Mar 13, 2020 - xdebug 2.9.3
+
+= Fixed bugs:
+
+  - Fixed issue #1753: Resolved breakpoints use information from wrong files
+  - Fixed issue #1758: Xdebug changes error_get_last results inside a try catch
+  - Fixed issue #1759: User registered opcode handlers should call ones already set by other extensions
+   </notes>
+  </release>
 
   <release>
    <date>2020-01-31</date>
