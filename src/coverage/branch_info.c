@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2019 Derick Rethans                               |
+   | Copyright (c) 1997-2020 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
