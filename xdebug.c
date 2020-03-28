@@ -736,7 +736,7 @@ static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, 
    Dummy function to prevent time limit from being set within the script */
 PHP_FUNCTION(xdebug_set_time_limit)
 {
-	if (!xdebug_is_debug_connection_active_for_current_pid()) {
+	if (!xdebug_is_debug_connection_active()) {
 		XG_BASE(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 }
@@ -747,7 +747,7 @@ PHP_FUNCTION(xdebug_set_time_limit)
    Dummy function to return original error reporting level when 'eval' has turned it into 0 */
 PHP_FUNCTION(xdebug_error_reporting)
 {
-	if (ZEND_NUM_ARGS() == 0 && XG_BASE(error_reporting_overridden) && xdebug_is_debug_connection_active_for_current_pid()) {
+	if (ZEND_NUM_ARGS() == 0 && XG_BASE(error_reporting_overridden) && xdebug_is_debug_connection_active()) {
 		RETURN_LONG(XG_BASE(error_reporting_override));
 	}
 	XG_BASE(orig_error_reporting_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -755,13 +755,23 @@ PHP_FUNCTION(xdebug_error_reporting)
 /* }}} */
 
 /* {{{ proto void xdebug_pcntl_exec(void)
-   Dummy function to prevent time limit from being set within the script */
+   Dummy function to stop profiling when we run pcntl_exec */
 PHP_FUNCTION(xdebug_pcntl_exec)
 {
 	/* We need to stop the profiler and trace files here */
 	xdebug_profiler_pcntl_exec_handler();
 
 	XG_BASE(orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ proto int xdebug_pcntl_fork(void)
+   Dummy function to set a new connection when forking a process */
+PHP_FUNCTION(xdebug_pcntl_fork)
+{
+	XG_BASE(orig_pcntl_fork_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	xdebug_debugger_restart_if_pid_changed();
 }
 /* }}} */
 
@@ -942,7 +952,7 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 
 PHP_FUNCTION(xdebug_is_debugger_active)
 {
-	RETURN_BOOL(xdebug_is_debug_connection_active_for_current_pid());
+	RETURN_BOOL(xdebug_is_debug_connection_active());
 }
 
 PHP_FUNCTION(xdebug_start_error_collection)

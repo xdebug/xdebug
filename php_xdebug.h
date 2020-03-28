@@ -88,6 +88,7 @@ PHP_FUNCTION(xdebug_call_line);
 PHP_FUNCTION(xdebug_set_time_limit);
 PHP_FUNCTION(xdebug_error_reporting);
 PHP_FUNCTION(xdebug_pcntl_exec);
+PHP_FUNCTION(xdebug_pcntl_fork);
 
 PHP_FUNCTION(xdebug_var_dump);
 PHP_FUNCTION(xdebug_debug_zval);
@@ -148,6 +149,7 @@ struct xdebug_base_info {
 	zif_handler   orig_set_time_limit_func;
 	zif_handler   orig_error_reporting_func;
 	zif_handler   orig_pcntl_exec_func;
+	zif_handler   orig_pcntl_fork_func;
 	int           output_is_tty;
 	zend_bool     in_debug_info;
 	char         *last_exception_trace;

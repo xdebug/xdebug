@@ -1215,7 +1215,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = find_line_number_for_current_execute_point(edata);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
-		if (XINI_BASE(collect_params) || XINI_BASE(collect_vars) || xdebug_is_debug_connection_active_for_current_pid()) {
+		if (XINI_BASE(collect_params) || XINI_BASE(collect_vars) || xdebug_is_debug_connection_active()) {
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
 			/* This calculates how many arguments where sent to a function. It
