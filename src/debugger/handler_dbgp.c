@@ -2247,7 +2247,15 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, xdebug_xml_
 				ADD_REASON_MESSAGE(XDEBUG_ERROR_COMMAND_UNAVAILABLE);
 				xdebug_xml_add_child(retval, error);
 
-				ret = XDEBUG_CMD_ERROR;
+				/* Workaround for PhpStorm, which sends a 'run' command even in
+				 * the DBGP_STATUS_STOPPING state, and expects the connection
+				 * to then be severed. That's not what the spec says that
+				 * should happen. */
+				if (XG_DBG(status) == DBGP_STATUS_STOPPING && (strcmp(command->name, "run") == 0)) {
+					ret = XDEBUG_CMD_BREAK;
+				} else {
+					ret = XDEBUG_CMD_ERROR;
+				}
 			}
 		} else {
 			error = xdebug_xml_node_init("error");
