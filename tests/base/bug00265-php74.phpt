@@ -27,7 +27,7 @@ var_dump(error_get_last());
 gabba();
 ?>
 --EXPECTF--
-%s: Undefined variable: b in %sbug00265-php74.php on line 6
+%s: Undefined variable%sb in %sbug00265-php74.php on line 6
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php74.php:0
@@ -36,14 +36,14 @@ array(4) {
   ["type"]=>
   int(%d)
   ["message"]=>
-  string(21) "Undefined variable: b"
+  string(21) "Undefined variable%sb"
   ["file"]=>
   string(%d) "%sbug00265-php74.php"
   ["line"]=>
   int(6)
 }
 
-%s: Undefined variable: b in %sbug00265-php74.php on line 8
+%s: Undefined variable%sb in %sbug00265-php74.php on line 8
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php74.php:0

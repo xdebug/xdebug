@@ -48,7 +48,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-%s: Undefined variable: b in %sassignment-trace-002.php on line 8
+%s: Undefined variable%sb in %sassignment-trace-002.php on line 8
 
 Call Stack:
 %w%f %w%d   1. {main}() %sassignment-trace-002.php:0
