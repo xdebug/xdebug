@@ -246,6 +246,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 		xdebug_coverage_settings_t coverage;
 		xdebug_debugger_settings_t debugger;
 		xdebug_gc_stats_settings_t gc_stats;
+		xdebug_library_settings_t  library;
 		xdebug_profiler_settings_t profiler;
 		xdebug_tracing_settings_t  tracing;
 	} settings;

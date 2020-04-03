@@ -265,3 +265,9 @@ int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER
 
 	return ZEND_USER_OPCODE_DISPATCH;
 }
+
+/* Does not duplicate the return value, don't free */
+char *xdebug_lib_get_output_dir(void)
+{
+	return XINI_LIB(output_dir);
+}

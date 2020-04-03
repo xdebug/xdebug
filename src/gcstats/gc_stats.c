@@ -25,6 +25,7 @@
 #include "gc_stats_private.h"
 
 #include "base/stack.h"
+#include "lib/lib.h"
 
 /* Set correct int format to use */
 #if SIZEOF_ZEND_LONG == 4
@@ -116,16 +117,18 @@ static int xdebug_gc_stats_init(char *fname, char *script_name)
 	if (fname && strlen(fname)) {
 		filename = xdstrdup(fname);
 	} else {
+		char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
+
 		if (!strlen(XINI_GCSTATS(output_name)) ||
 			xdebug_format_output_filename(&fname, XINI_GCSTATS(output_name), script_name) <= 0)
 		{
 			return FAILURE;
 		}
 
-		if (IS_SLASH(XINI_GCSTATS(output_dir)[strlen(XINI_GCSTATS(output_dir)) - 1])) {
-			filename = xdebug_sprintf("%s%s", XINI_GCSTATS(output_dir), fname);
+		if (IS_SLASH(output_dir[strlen(output_dir) - 1])) {
+			filename = xdebug_sprintf("%s%s", output_dir, fname);
 		} else {
-			filename = xdebug_sprintf("%s%c%s", XINI_GCSTATS(output_dir), DEFAULT_SLASH, fname);
+			filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
 		}
 		xdfree(fname);
 	}

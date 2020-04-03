@@ -153,6 +153,7 @@ static void profiler_write_header(FILE *file, char *script_name)
 void xdebug_profiler_init(char *script_name)
 {
 	char *filename = NULL, *fname = NULL;
+	char *output_dir = NULL;
 
 	if (XG_PROF(profiler_enabled)) {
 		return;
@@ -165,11 +166,13 @@ void xdebug_profiler_init(char *script_name)
 		return;
 	}
 
-	/* Add a slash if none is present in the profiler_output_dir setting */
-	if (IS_SLASH(XINI_PROF(profiler_output_dir)[strlen(XINI_PROF(profiler_output_dir)) - 1])) {
-		filename = xdebug_sprintf("%s%s", XINI_PROF(profiler_output_dir), fname);
+	/* Add a slash if none is present in the output_dir setting */
+	output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
+
+	if (IS_SLASH(output_dir[strlen(output_dir) - 1])) {
+		filename = xdebug_sprintf("%s%s", output_dir, fname);
 	} else {
-		filename = xdebug_sprintf("%s%c%s", XINI_PROF(profiler_output_dir), DEFAULT_SLASH, fname);
+		filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
 	}
 	xdfree(fname);
 

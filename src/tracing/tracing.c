@@ -61,16 +61,22 @@ FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, c
 	if (fname && strlen(fname)) {
 		filename = xdstrdup(fname);
 	} else {
+		char *output_dir = xdebug_lib_get_output_dir();
+
 		if (!strlen(XINI_TRACE(trace_output_name)) ||
 			xdebug_format_output_filename(&fname, XINI_TRACE(trace_output_name), script_filename) <= 0
 		) {
 			/* Invalid or empty xdebug.trace_output_name */
 			return NULL;
 		}
-		if (IS_SLASH(XINI_TRACE(trace_output_dir)[strlen(XINI_TRACE(trace_output_dir)) - 1])) {
-			filename = xdebug_sprintf("%s%s", XINI_TRACE(trace_output_dir), fname);
+
+		/* Add a slash if none is present in the output_dir setting */
+		output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
+
+		if (IS_SLASH(output_dir[strlen(output_dir) - 1])) {
+			filename = xdebug_sprintf("%s%s", output_dir, fname);
 		} else {
-			filename = xdebug_sprintf("%s%c%s", XINI_TRACE(trace_output_dir), DEFAULT_SLASH, fname);
+			filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
 		}
 		xdfree(fname);
 	}
@@ -724,9 +730,11 @@ void xdebug_tracing_post_deactivate(void)
 
 void xdebug_tracing_init_if_requested(zend_op_array *op_array)
 {
+	char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
+
 	if (
 		(XINI_TRACE(auto_trace) || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value)))
-		&& XINI_TRACE(trace_output_dir) && strlen(XINI_TRACE(trace_output_dir))
+		&& output_dir && strlen(output_dir)
 	) {
 		/* In case we do an auto-trace we are not interested in the return
 		 * value, but we still have to free it. */

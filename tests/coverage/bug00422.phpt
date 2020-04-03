@@ -4,7 +4,6 @@ Test for bug #422: Segfaults when using code coverage with a parse error in the 
 xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.trace_options=0
-xdebug.trace_output_dir=/tmp
 xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.auto_profile=0

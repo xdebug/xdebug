@@ -22,7 +22,6 @@
 
 typedef struct _xdebug_gc_stats_settings_t {
 	zend_bool  enable;
-	char      *output_dir;
 	char      *output_name;
 } xdebug_gc_stats_settings_t;
 
