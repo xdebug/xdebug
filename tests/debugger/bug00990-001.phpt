@@ -40,7 +40,7 @@ dbgpRunFile( $filename, $commands );
 
 -> step_into -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="error"><xdebug:message filename="file://bug00990-001.inc" lineno="3" type="%s"><![CDATA[Undefined variable: bar]]></xdebug:message></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="error"><xdebug:message filename="file://bug00990-001.inc" lineno="3" type="%s"><![CDATA[Undefined variable%sbar]]></xdebug:message></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://bug00990-001.inc" lineno="4"></xdebug:message></response>
