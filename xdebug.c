@@ -288,7 +288,7 @@ static PHP_INI_MH(OnUpdateSession)
 
 PHP_INI_BEGIN()
 	/* Library settings */
-	STD_PHP_INI_ENTRY("xdebug.output_dir", XDEBUG_TEMP_DIR, PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.output_dir, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.output_dir", XDEBUG_TEMP_DIR, PHP_INI_ALL, OnUpdateString, settings.library.output_dir, zend_xdebug_globals, xdebug_globals)
 
 	/* Debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.coverage_enable", "1",                  PHP_INI_SYSTEM, OnUpdateBool,   settings.coverage.enable,         zend_xdebug_globals, xdebug_globals)
