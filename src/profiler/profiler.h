@@ -36,7 +36,6 @@ typedef struct _xdebug_profiler_globals_t {
 
 typedef struct _xdebug_profiler_settings_t {
 	zend_bool     profiler_enable;
-	char         *profiler_output_dir;
 	char         *profiler_output_name; /* "pid" or "crc32" */
 	zend_bool     profiler_enable_trigger;
 	char         *profiler_enable_trigger_value;

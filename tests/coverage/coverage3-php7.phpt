@@ -4,7 +4,6 @@ Test with Code Coverage with unused lines
 xdebug.default_enable=1
 xdebug.auto_trace=0
 xdebug.trace_options=0
-xdebug.trace_output_dir=/tmp
 xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.collect_assignments=0

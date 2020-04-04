@@ -3,7 +3,6 @@ Test for bug #756: Tracing doesn't always understand the variables and shows IS_
 --INI--
 xdebug.auto_trace=0
 xdebug.trace_options=0
-xdebug.trace_output_dir=/tmp
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
 xdebug.collect_params=3

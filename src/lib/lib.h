@@ -219,9 +219,7 @@ typedef struct _xdebug_library_globals_t {
 } xdebug_library_globals_t;
 
 typedef struct _xdebug_library_settings_t {
-#if WIN32
-	int dummy;
-#endif
+	char *output_dir;
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
@@ -256,4 +254,5 @@ void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler);
 void xdebug_unset_opcode_handler(int opcode);
 int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS);
 
+char *xdebug_lib_get_output_dir(void);
 #endif
