@@ -568,6 +568,7 @@ void xdebug_debugger_post_deactivate(void)
 	}
 
 	xdebug_hash_destroy(XG_DBG(breakable_lines_map));
+	XG_DBG(breakable_lines_map) = NULL;
 }
 
 xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa)
