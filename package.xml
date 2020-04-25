@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-03-23</date>
- <time>11:12:20</time>
+ <date>2020-04-25</date>
+ <time>14:56:10</time>
  <version>
-  <release>2.9.4</release>
-  <api>2.9.4</api>
+  <release>2.9.5</release>
+  <api>2.9.5</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,12 +45,13 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Mar 23, 2020 - xdebug 2.9.4
+Sat, Apr 25, 2020 - xdebug 2.9.5
 
 = Fixed bugs:
 
-  - Fixed issue #1763: Crash while setting opcode overrides in ZTS mode.
-  - Fixed issue #1766: Using the DBGp detach command disables remote debugging for the whole process.
+  - Fixed issue #1772: Crash with exception thrown inside a destructor
+  - Fixed issue #1775: Segfault when another extension compiles a PHP file during RINIT
+  - Fixed issue #1779: Nested multi-line built-in function in namespace are not covered
  </notes>
 
  <contents>
@@ -189,6 +190,28 @@ Mon, Mar 23, 2020 - xdebug 2.9.4
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+ <release>
+   <date>2020-03-23</date>
+   <time>11:12:20</time>
+   <version>
+    <release>2.9.4</release>
+    <api>2.9.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Mar 23, 2020 - xdebug 2.9.4
+
+= Fixed bugs:
+
+  - Fixed issue #1763: Crash while setting opcode overrides in ZTS mode.
+  - Fixed issue #1766: Using the DBGp detach command disables remote debugging for the whole process.
+   </notes>
+  </release>
 
   <release>
    <date>2020-03-13</date>
