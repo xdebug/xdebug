@@ -15,7 +15,7 @@
 #. Reword package.xml so that it all makes sense!
 #. Rebuild from source with: ``~/bin/rebuild.sh``
 #. Run xdebug.ini update script from xdebug.org repository:
-   ``php html/docs/convert.php  > ~/dev/php/derickr-xdebug/xdebug.ini``
+   ``php html/docs/convert.php  > ~/dev/php/xdebug-xdebug/xdebug.ini``
 #. Run "pecl package"
 #. Install new package with ``pecl install xdebug-*.tgz``
 #. Commit template.rc, php_xdebug.h, package.xml, xdebug.ini, and
