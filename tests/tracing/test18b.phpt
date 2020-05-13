@@ -34,7 +34,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 bar
-<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>
+<table style='hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto;' class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>
 	<tr><th>#</th><th>Time</th><th>Mem</th><th colspan='2'>Function</th><th>Location</th></tr>
 	<tr><td>4</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;-&gt;</td><td>foo()</td><td>%stest18b.php:14</td></tr>
 	<tr><td>5</td><td>%f</td><td align='right'>%d</td><td align='left'>&nbsp; &nbsp;&nbsp; &nbsp;-&gt;</td><td>bar()</td><td>%stest18b.php:11</td></tr>

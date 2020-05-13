@@ -52,7 +52,7 @@ void xdebug_trace_html_write_header(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
-	fprintf(context->trace_file, "<table class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
+	fprintf(context->trace_file, "<table style='hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto;' class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
 	fprintf(context->trace_file, "\t<tr><th>#</th><th>Time</th>");
 	fprintf(context->trace_file, "<th>Mem</th>");
 	if (XINI_BASE(show_mem_delta)) {
