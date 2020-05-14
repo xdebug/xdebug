@@ -53,6 +53,7 @@
 
 #include "debugger_private.h"
 #include "handler_dbgp.h"
+#include "lib/crc32.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -343,13 +344,8 @@ static void xdebug_close_log()
 }
 
 /* Starting the debugger */
-static void xdebug_init_debugger()
+static void xdebug_init_normal_debugger()
 {
-	xdebug_open_log();
-
-	/* Get handler from mode */
-	XG_DBG(context).handler = &xdebug_handler_dbgp;
-
 	if (XINI_DBG(remote_connect_back)) {
 		zval *remote_addr = NULL;
 
@@ -399,6 +395,35 @@ static void xdebug_init_debugger()
 		XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Connecting to configured address/port: %s:%ld.\n", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
 		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
 	}
+}
+
+static void xdebug_init_cloud_debugger()
+{
+	unsigned long  crc = xdebug_crc32(XINI_DBG(cloud_userid), strlen(XINI_DBG(cloud_userid)));
+	char          *host;
+
+	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a' - 1);
+
+	XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Connecting to configured address/port: %s:%ld.\n", host, 9020L);
+	XG_DBG(context).socket = xdebug_create_socket(host, 9020, XINI_DBG(remote_connect_timeout));
+
+	xdfree(host);
+}
+
+static void xdebug_init_debugger()
+{
+	xdebug_open_log();
+
+	/* Get handler from mode */
+	XG_DBG(context).handler = &xdebug_handler_dbgp;
+
+	if (strcmp(XINI_DBG(cloud_userid), "") == 0) {
+		xdebug_init_normal_debugger();
+	} else {
+		xdebug_init_cloud_debugger();
+	}
+
+	/* Check whether we're connected, or why not */
 	if (XG_DBG(context).socket >= 0) {
 		XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Connected to client. :-)\n");
 		xdebug_mark_debug_connection_pending();
@@ -426,6 +451,8 @@ static void xdebug_init_debugger()
 	} else if (XG_DBG(context).socket == -3) {
 		XG_DBG(context).handler->log(XDEBUG_LOG_ERR, "No permission connecting to client. This could be SELinux related. :-(\n");
 	}
+
+	/* Close log if connection failed */
 	if (!XG_DBG(remote_connection_enabled)) {
 		xdebug_close_log();
 	}
