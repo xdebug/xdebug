@@ -1,7 +1,8 @@
 --TEST--
 Filtered tracing: path whitelist [4]
 --INI--
-xdebug.auto_trace=0
+xdebug.mode=trace
+xdebug.start_with_request=0
 xdebug.collect_return=1
 xdebug.collect_params=4
 xdebug.collect_assignments=0

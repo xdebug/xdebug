@@ -6,7 +6,8 @@ require __DIR__ . '/../utils.inc';
 check_reqs('!win');
 ?>
 --INI--
-xdebug.profiler_enable=1
+xdebug.mode=profile
+xdebug.start_with_request=1
 auto_prepend_file=tests/profiler/bug01589-prepend.inc
 auto_append_file=tests/profiler/bug01589-append.inc
 --FILE--

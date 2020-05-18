@@ -50,6 +50,75 @@ void xdebug_library_mshutdown(void)
 	xdebug_set_free(XG_LIB(opcode_handlers_set));
 }
 
+static int xdebug_lib_set_mode_item(char *mode, int len)
+{
+	if (strncmp(mode, "off", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_OFF;
+		return 1;
+	}
+	if (strncmp(mode, "display", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_DISPLAY;
+		return 1;
+	}
+	if (strncmp(mode, "coverage", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_COVERAGE;
+		return 1;
+	}
+	if (strncmp(mode, "debug", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_STEP_DEBUG;
+		return 1;
+	}
+	if (strncmp(mode, "gcstats", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_GCSTATS;
+		return 1;
+	}
+	if (strncmp(mode, "profile", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_PROFILING;
+		return 1;
+	}
+	if (strncmp(mode, "trace", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_TRACING;
+		return 1;
+	}
+
+	return 0;
+}
+
+int xdebug_lib_set_mode(char *mode)
+{
+	char *mode_ptr = mode;
+	char *comma    = NULL;
+	int   errors   = 0;
+
+	XG_LIB(mode) = 0;
+
+	comma = strchr(mode_ptr, ',');
+	while (comma) {
+		errors += !xdebug_lib_set_mode_item(mode_ptr, comma - mode_ptr);
+		mode_ptr = comma + 1;
+		while (*mode_ptr == ' ') {
+			mode_ptr++;
+		}
+		comma = strchr(mode_ptr, ',');
+	}
+	errors += !xdebug_lib_set_mode_item(mode_ptr, strlen(mode_ptr));
+
+	return !errors;
+}
+
+int xdebug_lib_mode_is(int mode)
+{
+	if (XG_LIB(mode) & mode) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int xdebug_lib_start_at_request(void)
+{
+	return XINI_LIB(start_with_request);
+}
 
 function_stack_entry *xdebug_get_stack_head(void)
 {

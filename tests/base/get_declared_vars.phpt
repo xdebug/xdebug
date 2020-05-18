@@ -8,7 +8,7 @@ if ( ! ( runtime_version("7.2", '<') || !opcache_active() ) ) {
 };
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.auto_trace=0
 xdebug.collect_params=0
 xdebug.auto_profile=0

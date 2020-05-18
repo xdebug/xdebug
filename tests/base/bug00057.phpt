@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #57: Crash with overloading functions
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.collect_assignments=0

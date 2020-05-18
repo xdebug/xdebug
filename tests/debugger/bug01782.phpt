@@ -8,11 +8,10 @@ check_reqs('PHP >= 7.3');
 --ENV--
 XDEBUG_CONFIG=idekey=testing
 --INI--
-xdebug.default_enable=1
+xdebug.mode=debug,display
 default_charset=utf-8
 xdebug.filename_format=
 xdebug.profiler_enable=0
-xdebug.remote_enable=1
 xdebug.remote_cookie_expire_time=1234
 --FILE--
 <?php
@@ -22,5 +21,5 @@ var_dump( xdebug_get_headers( ) );
 %sbug01782.php:2:
 array(1) {
   [0] =>
-  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; expires=%s; Max-Age=1234; path=/; SameSite=Strict"
+  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; expires=%s; Max-Age=123%d; path=/; SameSite=Strict"
 }

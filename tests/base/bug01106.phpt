@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1106: A thrown Exception after a class with __debugInfo gives 2 errors
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.show_local_vars=1
 --FILE--
 <?php

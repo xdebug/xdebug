@@ -5,8 +5,6 @@ Test for bug #990: DBGP: Add notification for notices, warnings and errors
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
---INI--
-xdebug.remote_enable=1
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -1,7 +1,7 @@
 --TEST--
 Test for dumping of super globals
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.dump_globals=1
 xdebug.dump_once=0
 xdebug.dump.SERVER=argc

@@ -1,7 +1,8 @@
 --TEST--
 Test for bug #756: Tracing doesn't always understand the variables and shows IS_VAR
 --INI--
-xdebug.auto_trace=0
+xdebug.mode=trace
+xdebug.start_with_request=0
 xdebug.trace_options=0
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1

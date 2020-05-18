@@ -6,9 +6,9 @@ require __DIR__ . '/../utils.inc';
 check_reqs('64bit');
 ?>
 --INI--
+xdebug.mode=display
 html_errors=1
 xdebug.cli_color=0
-xdebug.default_enable=1
 xdebug.overload_var_dump=2
 --FILE--
 <?php

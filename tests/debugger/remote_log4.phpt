@@ -8,7 +8,7 @@ check_reqs('dbgp; !win');
 --ENV--
 I_LIKE_COOKIES=doesnotexist3
 --INI--
-xdebug.remote_enable=1
+xdebug.mode=debug
 xdebug.remote_log=/tmp/{RUNID}remote-log4.txt
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=1

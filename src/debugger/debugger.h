@@ -52,7 +52,6 @@ typedef struct _xdebug_debugger_settings_t {
 	char         *cloud_shared_key;
 
 	/* Step Debugger */
-	zend_bool     remote_enable;  /* 0 */
 	zend_long     remote_port;    /* 9000 */
 	char         *remote_host;    /* localhost */
 	long          remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */

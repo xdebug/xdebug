@@ -6,13 +6,12 @@ require __DIR__ . '/../utils.inc';
 check_reqs('opcache');
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=coverage
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.profiler_enable=0
 xdebug.trace_format=0
 xdebug.overload_var_dump=0
-xdebug.coverage_enable=1
 --FILE--
 <?php
 // Run me from the PHP CLI

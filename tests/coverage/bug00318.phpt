@@ -1,12 +1,7 @@
 --TEST--
 Test for bug #318: Segmentation Fault in code coverage analysis
 --INI--
-xdebug.default_enable=1
-xdebug.dump_globals=0
-xdebug.show_mem_delta=0
-xdebug.profiler_enable=0
-xdebug.trace_format=0
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 // Run me from the PHP CLI
@@ -17,6 +12,3 @@ xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 Fatal error: %sbreak%s in %sbug00318.inc on line 3
-
-Call Stack:
-%w%f %w%d   1. {main}() %sbug00318.php:0

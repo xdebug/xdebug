@@ -6,12 +6,11 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP >= 7.4; opcache');
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=coverage
 xdebug.auto_trace=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.overload_var_dump=0
-xdebug.coverage_enable=1
 --FILE--
 <?php
 $file = 'bug01509.inc';

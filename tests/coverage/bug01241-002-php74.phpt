@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP >= 7.4; !opcache');
 ?>
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);

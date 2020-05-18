@@ -7,8 +7,8 @@ check_reqs('PHP >= 7.2');
 ?>
 --INI--
 html_errors=0
+xdebug.mode=display
 xdebug.cli_color=0
-xdebug.default_enable=1
 xdebug.overload_var_dump=2
 xdebug.filename_format=
 --FILE--

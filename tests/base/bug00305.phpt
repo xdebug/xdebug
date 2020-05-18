@@ -2,7 +2,7 @@
 Test for bug #305: xdebug exception handler doesn't properly handle special chars
 --INI--
 html_errors=1
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.file_link_format=xdebug://%f@%l
 xdebug.filename_format=
 --FILE--

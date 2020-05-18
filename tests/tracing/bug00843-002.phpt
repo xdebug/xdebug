@@ -7,8 +7,8 @@ check_reqs('!win');
 if (false == setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1")) print "skip locale not found";
 ?>
 --INI--
-xdebug.enable=1
-xdebug.auto_trace=0
+xdebug.mode=trace
+xdebug.start_with_request=0
 xdebug.collect_params=3
 xdebug.collect_return=1
 xdebug.collect_assignments=0

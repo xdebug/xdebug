@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1733: SEND_VAR_NO_REF_EX opcode, used for require() in namespace, is not overloaded
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 require __DIR__ . '/../utils.inc';

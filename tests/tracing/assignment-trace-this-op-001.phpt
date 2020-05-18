@@ -1,9 +1,9 @@
 --TEST--
 Test for tracing $this property assign ops [1]
 --INI--
-xdebug.default_enable=1
+xdebug.mode=trace
 xdebug.profiler_enable=0
-xdebug.auto_trace=0
+xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=1
 xdebug.collect_params=4

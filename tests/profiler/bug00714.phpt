@@ -6,7 +6,8 @@ require __DIR__ . '/../utils.inc';
 check_reqs('slow');
 ?>
 --INI--
-xdebug.profiler_enable=1
+xdebug.mode=profile
+xdebug.start_with_request=1
 --FILE--
 <?php
 function sleep1() { sleep(1); }

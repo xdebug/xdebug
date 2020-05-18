@@ -1,9 +1,9 @@
 --TEST--
 Test computerized function traces (level3, comp)
 --INI--
-xdebug.default_enable=1
+xdebug.mode=trace
 xdebug.profiler_enable=0
-xdebug.auto_trace=0
+xdebug.start_with_request=0
 xdebug.trace_format=1
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0

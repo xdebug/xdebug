@@ -52,7 +52,7 @@ typedef struct _xdebug_coverage_globals_t {
 } xdebug_coverage_globals_t;
 
 typedef struct _xdebug_coverage_settings_t {
-	zend_bool     enable; /* Flag to enable code coverage (and opcode overloading) */
+	int dummy;
 } xdebug_coverage_settings_t;
 
 void xdebug_init_coverage_globals(xdebug_coverage_globals_t *xg);

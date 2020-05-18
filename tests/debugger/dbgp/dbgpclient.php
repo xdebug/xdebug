@@ -62,7 +62,7 @@ class DebugClient
 		);
 
 		$default_options = array(
-			"xdebug.remote_enable" => "1",
+			"xdebug.mode" => "debug",
 			"xdebug.remote_autostart" => "1",
 			"xdebug.remote_host" => $this->getIPAddress(),
 			"xdebug.remote_port" => $this->getPort(),

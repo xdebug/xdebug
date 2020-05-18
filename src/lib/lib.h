@@ -210,6 +210,8 @@ xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list);
 int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value);
 
 typedef struct _xdebug_library_globals_t {
+	int                    mode;
+
 	zend_execute_data     *active_execute_data;
 	function_stack_entry  *active_stack_entry;
 	HashTable             *active_symbol_table;
@@ -219,12 +221,26 @@ typedef struct _xdebug_library_globals_t {
 } xdebug_library_globals_t;
 
 typedef struct _xdebug_library_settings_t {
-	char *output_dir;
+	char      *output_dir;
+	zend_bool  start_with_request;
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
 void xdebug_library_minit(void);
 void xdebug_library_mshutdown(void);
+
+#define XDEBUG_MODE_OFF             0
+#define XDEBUG_MODE_DISPLAY      1<<0
+#define XDEBUG_MODE_COVERAGE     1<<1
+#define XDEBUG_MODE_STEP_DEBUG   1<<2
+#define XDEBUG_MODE_GCSTATS      1<<3
+#define XDEBUG_MODE_PROFILING    1<<4
+#define XDEBUG_MODE_TRACING      1<<5
+int xdebug_lib_set_mode(char *mode);
+int xdebug_lib_mode_is(int mode);
+int xdebug_lib_start_at_request();
+#define RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { return; }
+#define WARN_AND_RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { php_error(E_NOTICE, "Functionality is not enabled"); return; }
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);
 void xdebug_lib_set_active_object(zval *object);

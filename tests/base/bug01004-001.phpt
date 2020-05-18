@@ -3,7 +3,7 @@ Test for xdebug.halt_level [1]
 --INI--
 error_level=-1
 xdebug.halt_level=0
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.collect_params=0
 --FILE--
 <?php

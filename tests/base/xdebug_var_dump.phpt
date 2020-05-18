@@ -1,7 +1,7 @@
 --TEST--
 Test for correct display with xdebug_var_dump()
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.auto_trace=0
 xdebug.profiler_enable=0
 html_errors=1

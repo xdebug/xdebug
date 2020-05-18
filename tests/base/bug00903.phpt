@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #903: xdebug_get_headers() returns replaced headers
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.overload_var_dump=1
 xdebug.profiler_enable=0
 --FILE--

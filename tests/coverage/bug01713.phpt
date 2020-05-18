@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1713: INIT_FCALL is not overloaded in code coverage
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 require __DIR__ . '/../utils.inc';

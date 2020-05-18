@@ -3,7 +3,7 @@ Test for bug #625: xdebug_get_headers() resets header list (2)
 --ENV--
 XDEBUG_CONFIG=
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 default_charset=utf-8
 xdebug.filename_format=
 xdebug.profiler_enable=0

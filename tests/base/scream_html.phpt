@@ -1,7 +1,7 @@
 --TEST--
 Test for scream support (HTML)
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.auto_trace=0
 xdebug.scream=0
 error_reporting(E_ALL);

@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1094: Segmentation fault when attempting to use branch/path coverage
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 

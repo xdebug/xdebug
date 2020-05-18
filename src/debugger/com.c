@@ -504,10 +504,11 @@ void xdebug_mark_debug_connection_not_active()
 
 void xdebug_do_jit()
 {
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
 	if (
 		(XINI_DBG(remote_mode) == XDEBUG_JIT) &&
-		!xdebug_is_debug_connection_active() &&
-		XINI_DBG(remote_enable)
+		!xdebug_is_debug_connection_active()
 	) {
 		xdebug_init_debugger();
 	}
@@ -574,6 +575,8 @@ static void xdebug_handle_stop_session()
 
 void xdebug_do_req(void)
 {
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
 	if (XG_DBG(detached)) {
 		return;
 	}
@@ -583,7 +586,6 @@ void xdebug_do_req(void)
 	}
 
 	if (
-		XINI_DBG(remote_enable) &&
 		!xdebug_is_debug_connection_active() &&
 		(XINI_DBG(remote_autostart) || xdebug_handle_start_session())
 	) {

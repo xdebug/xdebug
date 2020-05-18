@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function.
 --INI--
-xdebug.default_enable=1
+xdebug.mode=coverage
 xdebug.overload_var_dump=0
 xdebug.auto_trace=0
 xdebug.trace_options=0
@@ -13,7 +13,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.coverage_enable=1
 --FILE--
 <?php
 xdebug_start_code_coverage(XDEBUG_CC_UNUSED);

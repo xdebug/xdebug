@@ -6,7 +6,8 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP >= 7.4');
 ?>
 --INI--
-xdebug.profiler_enable=1
+xdebug.mode=profile
+xdebug.start_with_request=1
 --FILE--
 <?php
 class bankaccount

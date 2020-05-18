@@ -169,9 +169,6 @@ zend_function_entry xdebug_functions[] = {
 	PHP_FE(xdebug_debug_zval,            xdebug_debug_zval_args)
 	PHP_FE(xdebug_debug_zval_stdout,     xdebug_debug_zval_stdout_args)
 
-	PHP_FE(xdebug_enable,                xdebug_void_args)
-	PHP_FE(xdebug_disable,               xdebug_void_args)
-	PHP_FE(xdebug_is_enabled,            xdebug_void_args)
 	PHP_FE(xdebug_is_debugger_active,    xdebug_void_args)
 	PHP_FE(xdebug_break,                 xdebug_void_args)
 
@@ -276,6 +273,19 @@ static PHP_INI_MH(OnUpdateSession)
 	DUMP_TOK(session);
 }
 
+static PHP_INI_MH(OnUpdateMode)
+{
+	if (!new_value || !new_value->val) {
+		return FAILURE;
+	}
+
+	if (!xdebug_lib_set_mode(new_value->val)) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 #ifdef P_tmpdir
 # define XDEBUG_TEMP_DIR P_tmpdir
 #else
@@ -288,16 +298,16 @@ static PHP_INI_MH(OnUpdateSession)
 
 PHP_INI_BEGIN()
 	/* Library settings */
-	STD_PHP_INI_ENTRY("xdebug.output_dir", XDEBUG_TEMP_DIR, PHP_INI_ALL, OnUpdateString, settings.library.output_dir, zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY(      "xdebug.mode",               "off",           PHP_INI_SYSTEM, OnUpdateMode)
+	STD_PHP_INI_BOOLEAN("xdebug.start_with_request", "0",             PHP_INI_SYSTEM, OnUpdateBool,   settings.library.start_with_request, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY(  "xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,    OnUpdateString, settings.library.output_dir,         zend_xdebug_globals, xdebug_globals)
 
 	/* Debugger settings */
-	STD_PHP_INI_BOOLEAN("xdebug.coverage_enable", "1",                  PHP_INI_SYSTEM, OnUpdateBool,   settings.coverage.enable,         zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.collect_params",  "0",                    PHP_INI_ALL,    OnUpdateLong,   base.settings.collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_return,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_vars,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_assignments, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.default_enable",  "1",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.default_enable,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",  "",                   PHP_INI_ALL,    OnUpdateString, base.settings.file_link_format,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.filename_format",   "",                   PHP_INI_ALL,    OnUpdateString, base.settings.filename_format,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.force_display_errors", "0",             PHP_INI_SYSTEM, OnUpdateBool,   base.settings.force_display_errors, zend_xdebug_globals, xdebug_globals)
@@ -325,7 +335,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.dump_undefined,    zend_xdebug_globals, xdebug_globals)
 
 	/* Profiler settings */
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable",         "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_enable,               zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_output_name,          zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_enable_trigger,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
@@ -335,7 +344,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.cloud.userid", "", PHP_INI_SYSTEM, OnUpdateString, settings.debugger.cloud_userid, zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
-	STD_PHP_INI_BOOLEAN("xdebug.remote_enable",   "0",   PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.debugger.remote_enable,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_host,       zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_port,       zend_xdebug_globals, xdebug_globals)
@@ -358,11 +366,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   base.settings.do_scream,            zend_xdebug_globals, xdebug_globals)
 
 	/* GC Stats support */
-	STD_PHP_INI_BOOLEAN("xdebug.gc_stats_enable",    "0",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.gc_stats.enable,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_name", "gcstats.%p",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.gc_stats.output_name, zend_xdebug_globals, xdebug_globals)
 
 	/* Tracing settings */
-	STD_PHP_INI_BOOLEAN("xdebug.auto_trace",      "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.auto_trace,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.trace_enable_trigger", "0",             PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.tracing.trace_enable_trigger, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_enable_trigger_value", "",          PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.tracing.trace_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, settings.tracing.trace_output_name, zend_xdebug_globals, xdebug_globals)
@@ -470,9 +476,6 @@ static void xdebug_env_config(void)
 		if (strcasecmp(envvar, "remote_connect_back") == 0) {
 			name = "xdebug.remote_connect_back";
 		} else
-		if (strcasecmp(envvar, "remote_enable") == 0) {
-			name = "xdebug.remote_enable";
-		} else
 		if (strcasecmp(envvar, "remote_port") == 0) {
 			name = "xdebug.remote_port";
 		} else
@@ -488,9 +491,6 @@ static void xdebug_env_config(void)
 		if (strcasecmp(envvar, "idekey") == 0) {
 			xdebug_debugger_reset_ide_key(envval);
 		} else
-		if (strcasecmp(envvar, "profiler_enable") == 0) {
-			name = "xdebug.profiler_enable";
-		} else
 		if (strcasecmp(envvar, "profiler_output_dir") == 0) {
 			name = "xdebug.profiler_output_dir";
 		} else
@@ -499,9 +499,6 @@ static void xdebug_env_config(void)
 		} else
 		if (strcasecmp(envvar, "profiler_enable_trigger") == 0) {
 			name = "xdebug.profiler_enable_trigger";
-		} else
-		if (strcasecmp(envvar, "trace_enable") == 0) {
-			name = "xdebug.trace_enable";
 		} else
 		if (strcasecmp(envvar, "remote_log") == 0) {
 			name = "xdebug.remote_log";
@@ -551,7 +548,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	xdebug_debugger_minit();
 	xdebug_gcstats_minit();
 	xdebug_profiler_minit();
-	xdebug_tracing_minit(INIT_FUNC_ARGS_PASSTHRU);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		xdebug_tracing_minit(INIT_FUNC_ARGS_PASSTHRU);
+	}
 
 	/* Overload the "exit" opcode */
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(exit, ZEND_EXIT);
@@ -807,7 +806,7 @@ PHP_FUNCTION(xdebug_var_dump)
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (XINI_BASE(default_enable) == 0) {
+		if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
 			xdebug_php_var_dump(&args[i], 1);
 		}
 		else if (PG(html_errors)) {

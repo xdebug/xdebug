@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('!opcache');
 ?>
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 class TestMe

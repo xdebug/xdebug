@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #212: coverage coverage inaccurate (1)
 --INI--
-xdebug.default_enable=1
+xdebug.mode=coverage
 xdebug.auto_trace=0
 xdebug.trace_options=0
 xdebug.collect_params=1
@@ -11,7 +11,6 @@ xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
-xdebug.coverage_enable=1
 xdebug.overload_var_dump=0
 --FILE--
 <?php

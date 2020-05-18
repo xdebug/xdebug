@@ -6,8 +6,8 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP >= 7.4');
 ?>
 --INI--
+xdebug.mode=coverage
 xdebug.overload_var_dump=0
-xdebug.coverage_enable=1
 --FILE--
 <?php
 

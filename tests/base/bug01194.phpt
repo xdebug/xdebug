@@ -2,7 +2,7 @@
 Test for bug #1194: The error message is doubly HTML-encoded with assert()
 --INI--
 html_errors=1
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.collect_params=3
 xdebug.file_link_format=
 xdebug.filename_format=

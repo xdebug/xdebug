@@ -2,7 +2,7 @@
 Test for bug #1323: Add config option to enable full paths in trace output
 --INI--
 html_errors=1
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.file_link_format=
 --FILE--
 <?php

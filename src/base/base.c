@@ -309,7 +309,9 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 
 			xdebug_gcstats_init_if_requested(op_array);
 			xdebug_profiler_init_if_requested(op_array);
-			xdebug_tracing_init_if_requested(op_array);
+			if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+				xdebug_tracing_init_if_requested(op_array);
+			}
 		}
 	}
 
@@ -328,7 +330,9 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 
 	function_nr = XG_BASE(function_count);
 
-	xdebug_tracing_execute_ex(function_nr, fse);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		xdebug_tracing_execute_ex(function_nr, fse);
+	}
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
 	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
@@ -378,8 +382,9 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_file_name, code_coverage_function_name);
 	}
 
-
-	xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
+	}
 
 	/* Check for return breakpoints */
 	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
@@ -439,7 +444,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	function_nr = XG_BASE(function_count);
 
-	function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
+	}
 
 	/* Check for entry breakpoints */
 	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
@@ -469,7 +476,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	/* We only call the function_exit handler and return value handler if the
 	 * function call was also traced. Otherwise we end up with return trace
 	 * lines without a corresponding function call line. */
-	if (function_call_traced) {
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING) && function_call_traced) {
 		xdebug_tracing_execute_internal_end(function_nr, fse, return_value);
 	}
 
@@ -610,7 +617,11 @@ void xdebug_base_rinit()
 {
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
-	if (XINI_BASE(default_enable) && zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL) {
+	if (
+		(xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY) || xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG))
+		&&
+		(zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL)
+	) {
 		zend_error_cb = xdebug_new_error_cb;
 		zend_throw_exception_hook = xdebug_throw_exception_hook;
 	}
@@ -699,23 +710,6 @@ void xdebug_base_rshutdown()
 {
 	/* Signal that we're no longer in a request */
 	XG_BASE(in_execution) = 0;
-}
-
-PHP_FUNCTION(xdebug_enable)
-{
-	zend_error_cb = xdebug_new_error_cb;
-	zend_throw_exception_hook = xdebug_throw_exception_hook;
-}
-
-PHP_FUNCTION(xdebug_disable)
-{
-	zend_error_cb = xdebug_old_error_cb;
-	zend_throw_exception_hook = NULL;
-}
-
-PHP_FUNCTION(xdebug_is_enabled)
-{
-	RETURN_BOOL(zend_error_cb == xdebug_new_error_cb);
 }
 
 PHP_FUNCTION(xdebug_get_collected_errors)

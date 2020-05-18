@@ -1,12 +1,12 @@
 --TEST--
 Filtered code coverage: path whitelist [1]
 --INI--
+xdebug.mode=coverage
 xdebug.auto_trace=0
 xdebug.collect_return=1
 xdebug.collect_params=4
 xdebug.collect_assignments=0
 xdebug.trace_format=0
-xdebug.coverage_enable=1
 --FILE--
 <?php
 $cwd = __DIR__; $s = DIRECTORY_SEPARATOR; $includeDir = realpath( $cwd . '/..' );
@@ -32,9 +32,7 @@ ello!
 ello!
 array(2) {
   ["%scoverage-filter-path-white-001.php"]=>
-  array(7) {
-    [5]=>
-    int(1)
+  array(6) {
     [7]=>
     int(1)
     [8]=>

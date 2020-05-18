@@ -5,8 +5,6 @@ Test for bug #1312: DBGP: extended_properties for \0 characters in fields
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
---INI--
-xdebug.remote_enable=1
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

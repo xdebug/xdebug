@@ -2,7 +2,7 @@
 Test for collection errors (3) - HTML errors
 --INI--
 display_errors=1
-xdebug.default_enable=1
+xdebug.mode=display
 html_errors=1
 xdebug.overload_var_dump=0
 xdebug.file_link_format=xdebug://%f@%l

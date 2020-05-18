@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1728: INIT_STATIC_METHOD_FCALL is not overloaded in code coverage
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 require __DIR__ . '/../utils.inc';

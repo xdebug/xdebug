@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #709: Xdebug doesn't understand E_USER_DEPRECATED
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.trace_format=0
 xdebug.collect_params=3
 --FILE--

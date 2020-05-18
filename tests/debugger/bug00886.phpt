@@ -5,11 +5,8 @@ Test for bug #886: Use the same file system protocol for file located inside PHA
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; slow');
 ?>
---INI--
-xdebug.auto_trace=0
 --FILE--
 <?php
-xdebug_start_trace( sys_get_temp_dir() . "/trace.log" );
 require 'dbgp/dbgpclient.php';
 
 $dir = dirname(__FILE__);

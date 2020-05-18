@@ -123,6 +123,8 @@ PHP_FUNCTION(xdebug_start_trace)
 	char *trace_fname;
 	zend_long options = XINI_TRACE(trace_options);
 
+	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
+
 	if (!XG_TRACE(trace_context)) {
 		function_stack_entry *fse;
 
@@ -149,6 +151,8 @@ PHP_FUNCTION(xdebug_start_trace)
 
 PHP_FUNCTION(xdebug_stop_trace)
 {
+	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
+
 	if (XG_TRACE(trace_context)) {
 		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 		xdebug_stop_trace();
@@ -160,50 +164,13 @@ PHP_FUNCTION(xdebug_stop_trace)
 
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
+	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
+
 	if (XG_TRACE(trace_context) && XG_TRACE(trace_handler) && XG_TRACE(trace_handler)->get_filename) {
 		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 	} else {
 		RETURN_FALSE;
 	}
-}
-
-static int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
-{
-	zend_op_array *op_array = &execute_data->func->op_array;
-	const zend_op *opline = execute_data->opline;
-
-	xdebug_coverage_record_include_if_active(execute_data, op_array);
-	if (opline->extended_value == ZEND_EVAL) {
-		zval *inc_filename;
-		zval tmp_inc_filename;
-		int  is_var;
-
-		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
-
-		/* If there is no inc_filename, we're just bailing out instead */
-		if (!inc_filename) {
-			return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
-
-		if (Z_TYPE_P(inc_filename) != IS_STRING) {
-			tmp_inc_filename = *inc_filename;
-			zval_copy_ctor(&tmp_inc_filename);
-			convert_to_string(&tmp_inc_filename);
-			inc_filename = &tmp_inc_filename;
-		}
-
-		/* Now let's store this info */
-		if (XG_BASE(last_eval_statement)) {
-			efree(XG_BASE(last_eval_statement));
-		}
-		XG_BASE(last_eval_statement) = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
-
-		if (inc_filename == &tmp_inc_filename) {
-			zval_dtor(&tmp_inc_filename);
-		}
-	}
-
-	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 #if PHP_VERSION_ID >= 70400
@@ -664,7 +631,6 @@ void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg)
 void xdebug_tracing_minit(INIT_FUNC_ARGS)
 {
 	/* Override opcodes for variable assignments in traces */
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign, ZEND_ASSIGN);
 	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(qm_assign, ZEND_QM_ASSIGN);
 #if PHP_VERSION_ID >= 70400
@@ -733,7 +699,7 @@ void xdebug_tracing_init_if_requested(zend_op_array *op_array)
 	char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
 
 	if (
-		(XINI_TRACE(auto_trace) || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value)))
+		(xdebug_lib_start_at_request() || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value)))
 		&& output_dir && strlen(output_dir)
 	) {
 		/* In case we do an auto-trace we are not interested in the return

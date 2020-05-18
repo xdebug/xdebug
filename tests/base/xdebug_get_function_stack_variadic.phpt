@@ -1,7 +1,7 @@
 --TEST--
 xdebug_get_function_stack with variadics
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.profiler_enable=0
 xdebug.auto_trace=0
 xdebug.trace_format=0

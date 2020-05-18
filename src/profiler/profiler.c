@@ -38,7 +38,7 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg)
 {
-	xg->profiler_enabled = 0;
+	xg->active = 0;
 }
 
 void xdebug_profiler_minit(void)
@@ -57,37 +57,46 @@ void xdebug_profiler_rinit(void)
 	XG_PROF(profile_functionname_refs) = NULL;
 	XG_PROF(profile_last_filename_ref) = 0;
 	XG_PROF(profile_last_functionname_ref) = 0;
-	XG_PROF(profiler_enabled) = 0;
+	XG_PROF(active) = 0;
+}
+
+static void deinit_if_active(void)
+{
+	if (!XG_PROF(active)) {
+		return;
+	}
+
+	xdebug_profiler_deinit();
 }
 
 void xdebug_profiler_post_deactivate(void)
 {
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_deinit();
-	}
+	deinit_if_active();
 }
 
 void xdebug_profiler_pcntl_exec_handler(void)
 {
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_deinit();
-	}
+	deinit_if_active();
 }
 
 void xdebug_profiler_exit_handler(void)
 {
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_deinit();
-	}
+	deinit_if_active();
 }
 
 
 void xdebug_profiler_init_if_requested(zend_op_array *op_array)
 {
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_PROFILING);
+
+	if (XG_PROF(active)) {
+		return;
+	}
+
 	/* Check for special GET/POST parameter to start profiling */
 	if (
-		!XG_PROF(profiler_enabled) &&
-		(XINI_PROF(profiler_enable) || xdebug_trigger_enabled(XINI_PROF(profiler_enable_trigger), "XDEBUG_PROFILE", XINI_PROF(profiler_enable_trigger_value)))
+		xdebug_lib_start_at_request() ||
+		xdebug_trigger_enabled(XINI_PROF(profiler_enable_trigger), "XDEBUG_PROFILE", XINI_PROF(profiler_enable_trigger_value))
 	) {
 		xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename));
 	}
@@ -95,35 +104,43 @@ void xdebug_profiler_init_if_requested(zend_op_array *op_array)
 
 void xdebug_profiler_execute_ex(function_stack_entry *fse, zend_op_array *op_array)
 {
-	if (XG_PROF(profiler_enabled)) {
-		/* Calculate all elements for profile entries */
-		xdebug_profiler_add_function_details_user(fse, op_array);
-		xdebug_profiler_function_begin(fse);
+	if (!XG_PROF(active)) {
+		return;
 	}
+
+	/* Calculate all elements for profile entries */
+	xdebug_profiler_add_function_details_user(fse, op_array);
+	xdebug_profiler_function_begin(fse);
 }
 
 void xdebug_profiler_execute_ex_end(function_stack_entry *fse)
 {
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_function_end(fse);
-		xdebug_profiler_free_function_details(fse);
+	if (!XG_PROF(active)) {
+		return;
 	}
+
+	xdebug_profiler_function_end(fse);
+	xdebug_profiler_free_function_details(fse);
 }
 
 void xdebug_profiler_execute_internal(function_stack_entry *fse)
 {
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_add_function_details_internal(fse);
-		xdebug_profiler_function_begin(fse);
+	if (!XG_PROF(active)) {
+		return;
 	}
+
+	xdebug_profiler_add_function_details_internal(fse);
+	xdebug_profiler_function_begin(fse);
 }
 
 void xdebug_profiler_execute_internal_end(function_stack_entry *fse)
 {
-	if (XG_PROF(profiler_enabled)) {
-		xdebug_profiler_function_end(fse);
-		xdebug_profiler_free_function_details(fse);
+	if (!XG_PROF(active)) {
+		return;
 	}
+
+	xdebug_profiler_function_end(fse);
+	xdebug_profiler_free_function_details(fse);
 }
 
 void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
@@ -155,7 +172,7 @@ void xdebug_profiler_init(char *script_name)
 	char *filename = NULL, *fname = NULL;
 	char *output_dir = NULL;
 
-	if (XG_PROF(profiler_enabled)) {
+	if (XG_PROF(active)) {
 		return;
 	}
 
@@ -200,7 +217,7 @@ void xdebug_profiler_init(char *script_name)
 
 	XG_PROF(profiler_start_time) = xdebug_get_utime();
 
-	XG_PROF(profiler_enabled) = 1;
+	XG_PROF(active) = 1;
 	XG_PROF(profile_filename_refs) = xdebug_hash_alloc(128, NULL);
 	XG_PROF(profile_functionname_refs) = xdebug_hash_alloc(128, NULL);
 	XG_PROF(profile_last_filename_ref) = 0;
@@ -225,7 +242,7 @@ void xdebug_profiler_deinit()
 		zend_memory_peak_usage(0)
 	);
 
-	XG_PROF(profiler_enabled) = 0;
+	XG_PROF(active) = 0;
 
 	fflush(XG_PROF(profile_file));
 
@@ -470,11 +487,11 @@ void xdebug_profiler_free_function_details(function_stack_entry *fse)
  * otherwise. Calling function is responsible for duplicating immediately */
 char *xdebug_get_profiler_filename()
 {
-	if (XG_PROF(profiler_enabled) && XG_PROF(profile_filename)) {
-		return XG_PROF(profile_filename);
+	if (!XG_PROF(active)) {
+		return NULL;
 	}
 
-	return NULL;
+	return XG_PROF(profile_filename);
 }
 
 PHP_FUNCTION(xdebug_get_profiler_filename)

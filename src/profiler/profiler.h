@@ -24,8 +24,8 @@
 #include "lib/lib.h"
 
 typedef struct _xdebug_profiler_globals_t {
+	zend_bool     active;
 	double        profiler_start_time;
-	zend_bool     profiler_enabled;
 	FILE         *profile_file;
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;
@@ -35,7 +35,6 @@ typedef struct _xdebug_profiler_globals_t {
 } xdebug_profiler_globals_t;
 
 typedef struct _xdebug_profiler_settings_t {
-	zend_bool     profiler_enable;
 	char         *profiler_output_name; /* "pid" or "crc32" */
 	zend_bool     profiler_enable_trigger;
 	char         *profiler_enable_trigger_value;

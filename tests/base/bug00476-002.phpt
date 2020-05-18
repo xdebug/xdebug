@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #476: Exception chanining doesn't work
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.dump.GET=
 xdebug.dump.SERVER=
 xdebug.show_local_vars=0

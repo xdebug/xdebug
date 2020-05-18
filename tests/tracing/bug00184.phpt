@@ -1,8 +1,8 @@
 --TEST--
 Test for bug #184: problem with control chars in code traces
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=1
+xdebug.mode=trace
+xdebug.start_with_request=1
 xdebug.trace_options=0
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1

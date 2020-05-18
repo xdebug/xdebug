@@ -21,13 +21,12 @@
 #define __XDEBUG_GC_STATS_H__
 
 typedef struct _xdebug_gc_stats_settings_t {
-	zend_bool  enable;
 	char      *output_name;
 } xdebug_gc_stats_settings_t;
 
 typedef struct _xdebug_gc_stats_globals_t {
 	/* garbage stats */
-	zend_bool  enabled;
+	zend_bool  active;
 	FILE      *file;
 	char      *filename;
 } xdebug_gc_stats_globals_t;

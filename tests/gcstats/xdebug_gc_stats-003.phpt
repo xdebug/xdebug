@@ -1,8 +1,9 @@
 --TEST--
 GC Stats: Stats about trigger garbage collection automatically
 --INI--
+xdebug.mode=gcstats
+xdebug.start_with_request=1
 zend.enable_gc=1
-xdebug.gc_stats_enable=1
 --FILE--
 <?php
 

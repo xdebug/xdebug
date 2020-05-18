@@ -5,6 +5,8 @@ Test for bug #931: Crash with exception in shut-down stage
 require __DIR__ . '/../utils.inc';
 check_reqs('ext session');
 ?>
+--INI--
+xdebug.mode=off
 --FILE--
 <?php
 session_start();

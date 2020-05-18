@@ -1,12 +1,11 @@
 --TEST--
 Test for bug #1571: Code Coverage doesn't show file/line for closures in namespaces
 --INI--
-xdebug.default_enable=1
+xdebug.mode=coverage
 xdebug.auto_trace=0
 xdebug.auto_profile=0
 xdebug.profiler_enable=0
 xdebug.overload_var_dump=0
-xdebug.coverage_enable=1
 --FILE--
 <?php
 namespace Testing;

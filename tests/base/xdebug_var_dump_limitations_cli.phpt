@@ -1,12 +1,12 @@
 --TEST--
 Test for display limitations with xdebug_var_dump() on CLI.
 --INI--
+xdebug.mode=display
 xdebug.var_display_max_children=-1
 xdebug.var_display_max_data=-1
 xdebug.var_display_max_depth=-1
 xdebug.cli_color=0
 html_errors=0
-xdebug.default_enable=1
 xdebug.overload_var_dump=1
 --FILE--
 <?php
