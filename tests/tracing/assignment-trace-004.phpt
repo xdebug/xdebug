@@ -2,7 +2,6 @@
 Test for tracing assignments in user-readable function traces
 --INI--
 xdebug.mode=trace,display
-xdebug.profiler_enable=0
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=1

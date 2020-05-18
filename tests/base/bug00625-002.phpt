@@ -6,7 +6,6 @@ XDEBUG_CONFIG=
 xdebug.mode=display
 default_charset=utf-8
 xdebug.filename_format=
-xdebug.profiler_enable=0
 --FILE--
 <?php
 header('Content-type: text/plain');

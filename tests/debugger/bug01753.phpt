@@ -6,7 +6,6 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--
-xdebug.auto_trace=0
 xdebug.remote_log=/tmp/xdebug.log
 xdebug.remote_log_level=50
 --FILE--

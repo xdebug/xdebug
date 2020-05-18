@@ -6,7 +6,6 @@ XDEBUG_CONFIG=
 xdebug.mode=display
 xdebug.overload_var_dump=2
 xdebug.filename_format=
-xdebug.profiler_enable=0
 --FILE--
 <?php
 header( 'Location: bar');

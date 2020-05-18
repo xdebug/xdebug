@@ -8,13 +8,11 @@ if ( ! ( runtime_version("7.2", '<') || (runtime_version("7.4", '<') && !opcache
 --INI--
 xdebug.mode=coverage
 xdebug.overload_var_dump=0
-xdebug.auto_trace=0
 xdebug.trace_options=0
 xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
-xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0

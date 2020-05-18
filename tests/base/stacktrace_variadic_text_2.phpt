@@ -2,8 +2,6 @@
 Test for stack traces with variadics (text, 2)
 --INI--
 xdebug.mode=display
-xdebug.profiler_enable=0
-xdebug.auto_trace=0
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0

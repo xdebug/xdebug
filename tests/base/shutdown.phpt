@@ -2,9 +2,7 @@
 Shutdown function
 --INI--
 xdebug.mode=display
-xdebug.auto_trace=1
 xdebug.collect_params=1
-xdebug.profiler_enable=0
 --FILE--
 <?php
 	register_shutdown_function('foo');

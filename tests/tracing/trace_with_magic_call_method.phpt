@@ -2,7 +2,6 @@
 Test for line numbers and arguments with __call
 --INI--
 xdebug.mode=trace
-xdebug.profiler_enable=0
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=0

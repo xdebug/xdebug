@@ -11,7 +11,6 @@ xdebug.collect_params=1
 xdebug.dump_globals=0
 xdebug.show_local_vars=1
 xdebug.show_mem_delta=0
-xdebug.profiler_enable=0
 xdebug.var_display_max_depth=3
 xdebug.var_display_max_children=3
 xdebug.show_error_trace=0

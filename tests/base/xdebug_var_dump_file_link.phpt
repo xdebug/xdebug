@@ -2,8 +2,6 @@
 Test for file and link display with xdebug_var_dump()
 --INI--
 xdebug.mode=display
-xdebug.auto_trace=0
-xdebug.profiler_enable=0
 html_errors=1
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11

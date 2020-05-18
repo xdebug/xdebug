@@ -4,7 +4,6 @@ Test for bug #313: Segmentation Fault in code coverage analysis on empty PHP fil
 xdebug.mode=coverage
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
-xdebug.profiler_enable=0
 xdebug.trace_format=0
 --FILE--
 <?php

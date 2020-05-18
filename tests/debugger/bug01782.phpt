@@ -11,7 +11,6 @@ XDEBUG_CONFIG=idekey=testing
 xdebug.mode=debug,display
 default_charset=utf-8
 xdebug.filename_format=
-xdebug.profiler_enable=0
 xdebug.remote_cookie_expire_time=1234
 --FILE--
 <?php

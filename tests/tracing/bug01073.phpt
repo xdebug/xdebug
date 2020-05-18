@@ -2,7 +2,6 @@
 Test for bug #1073: Segmentation Fault 11 when nesting call_user_func_array
 --INI--
 xdebug.mode=trace
-xdebug.profiler_enable=0
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=0

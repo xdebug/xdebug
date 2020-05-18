@@ -2,7 +2,6 @@
 Test for scream support
 --INI--
 xdebug.mode=display
-xdebug.auto_trace=0
 xdebug.scream=0
 error_reporting(E_ALL);
 xdebug.force_error_reporting=0

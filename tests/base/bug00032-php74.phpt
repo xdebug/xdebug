@@ -7,10 +7,8 @@ check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.mode=display
-xdebug.auto_trace=0
 xdebug.collect_params=1
 xdebug.collect_assignments=0
-xdebug.profiler_enable=0
 xdebug.show_local_vars=0
 xdebug.dump_globals=0
 --FILE--

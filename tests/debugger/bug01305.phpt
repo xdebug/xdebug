@@ -5,8 +5,6 @@ Test for bug #1305: Problems with array keys with an aposprophe
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
---INI--
-xdebug.auto_trace=1
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

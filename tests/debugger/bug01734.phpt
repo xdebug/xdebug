@@ -5,8 +5,6 @@ Test for bug #1734: Segfault with DBGp "source" with a out-of-range start line n
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
---INI--
-xdebug.auto_trace=0
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

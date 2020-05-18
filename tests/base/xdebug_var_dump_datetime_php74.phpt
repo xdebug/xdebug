@@ -7,8 +7,6 @@ check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.mode=display
-xdebug.auto_trace=0
-xdebug.profiler_enable=0
 html_errors=0
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11

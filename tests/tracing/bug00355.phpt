@@ -2,7 +2,6 @@
 Test for bug #355: Non-unique functions numbers in function traces
 --INI--
 xdebug.mode=trace
-xdebug.profiler_enable=0
 xdebug.start_with_request=0
 xdebug.trace_format=1
 xdebug.dump_globals=0

@@ -5,8 +5,6 @@ Test for bug #1735: DBGp eval warning promoted to Exception causes out-of-sync r
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
---INI--
-xdebug.auto_trace=0
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -2,7 +2,6 @@
 Filtered stack traces: path whitelist [1]
 --INI--
 xdebug.mode=display
-xdebug.auto_trace=0
 xdebug.collect_params=4
 --FILE--
 <?php

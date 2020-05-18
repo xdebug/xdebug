@@ -5,8 +5,6 @@ Test for bug #1512: Xdebug returns escaped property name and fullname
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
---INI--
-xdebug.auto_trace=1
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

@@ -3,7 +3,6 @@ Test computerized function traces (level0, comp)
 --INI--
 xdebug.mode=trace
 xdebug.mode=trace
-xdebug.profiler_enable=0
 xdebug.start_with_request=0
 xdebug.trace_format=1
 xdebug.dump_globals=0
