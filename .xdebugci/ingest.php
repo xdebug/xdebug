@@ -37,6 +37,7 @@ foreach ( glob( '/tmp/ptester/junit/' . $pattern ) as $file )
 			'version' => $version,
 			'zts' => $zts,
 			'32bit' => $_32bit,
+			'opcache' => (getenv('OPCACHE') == 'yes') ? 1 : 0,
 		],
 	];
 
