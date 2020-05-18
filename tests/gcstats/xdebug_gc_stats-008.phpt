@@ -2,7 +2,7 @@
 GC Stats: Closure with garbage
 --INI--
 xdebug.mode=gcstats
-xdebug.start_with_request=1
+xdebug.start_with_request=always
 zend.enable_gc=1
 --FILE--
 <?php

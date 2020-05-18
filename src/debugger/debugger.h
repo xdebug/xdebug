@@ -54,7 +54,6 @@ typedef struct _xdebug_debugger_settings_t {
 	/* Step Debugger */
 	zend_long     remote_port;    /* 9000 */
 	char         *remote_host;    /* localhost */
-	long          remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
 	zend_bool     remote_autostart; /* Disables the requirement for XDEBUG_SESSION_START */
 	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
 	char         *remote_log;       /* Filename to log protocol communication to */

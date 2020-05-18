@@ -286,6 +286,19 @@ static PHP_INI_MH(OnUpdateMode)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateStartWithRequest)
+{
+	if (!new_value || !new_value->val) {
+		return FAILURE;
+	}
+
+	if (!xdebug_lib_set_start_at_request(new_value->val)) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 #ifdef P_tmpdir
 # define XDEBUG_TEMP_DIR P_tmpdir
 #else
@@ -299,7 +312,7 @@ static PHP_INI_MH(OnUpdateMode)
 PHP_INI_BEGIN()
 	/* Library settings */
 	PHP_INI_ENTRY(      "xdebug.mode",               "off",           PHP_INI_SYSTEM, OnUpdateMode)
-	STD_PHP_INI_BOOLEAN("xdebug.start_with_request", "0",             PHP_INI_SYSTEM, OnUpdateBool,   settings.library.start_with_request, zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY(      "xdebug.start_with_request", "default",       PHP_INI_SYSTEM, OnUpdateStartWithRequest)
 	STD_PHP_INI_ENTRY(  "xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,    OnUpdateString, settings.library.output_dir,         zend_xdebug_globals, xdebug_globals)
 
 	/* Debugger settings */
@@ -345,7 +358,6 @@ PHP_INI_BEGIN()
 
 	/* Remote debugger settings */
 	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_host,       zend_xdebug_globals, xdebug_globals)
-	PHP_INI_ENTRY("xdebug.remote_mode",           "req",                PHP_INI_ALL,    OnUpdateDebugMode)
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_port,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_autostart,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_connect_back,  zend_xdebug_globals, xdebug_globals)

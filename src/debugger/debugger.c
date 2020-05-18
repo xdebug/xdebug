@@ -32,23 +32,6 @@ static size_t xdebug_ub_write(const char *string, size_t length);
 
 static void xdebug_line_list_dtor(xdebug_lines_list *line_list);
 
-PHP_INI_MH(OnUpdateDebugMode)
-{
-	if (!new_value) {
-		XINI_DBG(remote_mode) = XDEBUG_NONE;
-
-	} else if (strcmp(STR_NAME_VAL(new_value), "jit") == 0) {
-		XINI_DBG(remote_mode) = XDEBUG_JIT;
-
-	} else if (strcmp(STR_NAME_VAL(new_value), "req") == 0) {
-		XINI_DBG(remote_mode) = XDEBUG_REQ;
-
-	} else {
-		XINI_DBG(remote_mode) = XDEBUG_NONE;
-	}
-	return SUCCESS;
-}
-
 void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 {
 	xg->breakpoint_count     = 0;

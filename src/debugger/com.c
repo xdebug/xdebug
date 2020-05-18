@@ -506,10 +506,11 @@ void xdebug_do_jit()
 {
 	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
 
-	if (
-		(XINI_DBG(remote_mode) == XDEBUG_JIT) &&
-		!xdebug_is_debug_connection_active()
-	) {
+	if (xdebug_lib_start_at_request()) {
+		return;
+	}
+
+	if (!xdebug_is_debug_connection_active()) {
 		xdebug_init_debugger();
 	}
 }
@@ -577,11 +578,11 @@ void xdebug_do_req(void)
 {
 	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
 
-	if (XG_DBG(detached)) {
+	if (!xdebug_lib_start_at_request()) {
 		return;
 	}
 
-	if (XINI_DBG(remote_mode) != XDEBUG_REQ) {
+	if (XG_DBG(detached)) {
 		return;
 	}
 

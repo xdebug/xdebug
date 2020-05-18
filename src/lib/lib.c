@@ -115,9 +115,48 @@ int xdebug_lib_mode_is(int mode)
 	return 0;
 }
 
+int xdebug_lib_set_start_at_request(char *value)
+{
+	if (strcmp(value, "default") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_DEFAULT;
+		return 1;
+	}
+	if (strcmp(value, "always") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_ALWAYS;
+		return 1;
+	}
+	if (strcmp(value, "never") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_NEVER;
+		return 1;
+	}
+/*
+	if (strcmp(value, "trigger") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_TRIGGER;
+		return 1;
+	}
+*/
+	return 0;
+}
+
 int xdebug_lib_start_at_request(void)
 {
-	return XINI_LIB(start_with_request);
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_ALWAYS) {
+		return 1;
+	}
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_NEVER) {
+		return 0;
+	}
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
+		if (
+			xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) ||
+			xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)
+		) {
+			return 1;
+		}
+		return 0;
+	}
+
+	return 0;
 }
 
 function_stack_entry *xdebug_get_stack_head(void)

@@ -211,6 +211,7 @@ int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value);
 
 typedef struct _xdebug_library_globals_t {
 	int                    mode;
+	int                    start_with_request; /* One of the XDEBUG_START_WITH_REQUEST_* constants */
 
 	zend_execute_data     *active_execute_data;
 	function_stack_entry  *active_stack_entry;
@@ -222,7 +223,6 @@ typedef struct _xdebug_library_globals_t {
 
 typedef struct _xdebug_library_settings_t {
 	char      *output_dir;
-	zend_bool  start_with_request;
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
@@ -238,9 +238,15 @@ void xdebug_library_mshutdown(void);
 #define XDEBUG_MODE_TRACING      1<<5
 int xdebug_lib_set_mode(char *mode);
 int xdebug_lib_mode_is(int mode);
-int xdebug_lib_start_at_request();
 #define RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { return; }
 #define WARN_AND_RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { php_error(E_NOTICE, "Functionality is not enabled"); return; }
+
+#define XDEBUG_START_WITH_REQUEST_DEFAULT     1
+#define XDEBUG_START_WITH_REQUEST_ALWAYS      2
+#define XDEBUG_START_WITH_REQUEST_NEVER       3
+#define XDEBUG_START_WITH_REQUEST_TRIGGER     4
+int xdebug_lib_set_start_at_request(char *value);
+int xdebug_lib_start_at_request();
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);
 void xdebug_lib_set_active_object(zval *object);
