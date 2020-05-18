@@ -10,17 +10,18 @@ error_log=
 xdebug.mode=debug
 xdebug.remote_autostart=1
 xdebug.remote_mode=jit
-xdebug.remote_log=/tmp/bug932.log
+xdebug.remote_log=/tmp/{RUNID}bug932.log
 xdebug.remote_port=9999
 xdebug.force_error_reporting=0
 --FILE--
 <?php
-touch("/tmp/bug932.log");
-chmod("/tmp/bug932.log", 0);
+$file = '/tmp/' . getenv('UNIQ_RUN_ID') . 'bug932.log';
+touch($file);
+chmod($file, 0);
 
 @trigger_error('foo');
 
-unlink("/tmp/bug932.log");
+unlink($file);
 ?>
 --EXPECTF--
-Xdebug could not open the remote debug file '/tmp/bug932.log'.
+Xdebug could not open the remote debug file '/tmp/%Sbug932.log'.
