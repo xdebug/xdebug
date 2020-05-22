@@ -881,3 +881,8 @@ PHP_FUNCTION(xdebug_break)
 	XG_DBG(context).do_break = 1;
 	RETURN_TRUE;
 }
+
+PHP_FUNCTION(xdebug_is_debugger_active)
+{
+	RETURN_BOOL(xdebug_is_debug_connection_active());
+}

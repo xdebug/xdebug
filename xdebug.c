@@ -964,11 +964,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 }
 /* }}} */
 
-PHP_FUNCTION(xdebug_is_debugger_active)
-{
-	RETURN_BOOL(xdebug_is_debug_connection_active());
-}
-
 PHP_FUNCTION(xdebug_start_error_collection)
 {
 	if (XG_BASE(do_collect_errors) == 1) {
