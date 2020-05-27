@@ -2,7 +2,7 @@
 Test for bug #785: Profiler does not handle call_user_func_array well
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 --FILE--
 <?php
 require_once('bug00785-002.inc');

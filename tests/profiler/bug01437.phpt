@@ -4,7 +4,7 @@ Test for bug #1437: Add X-Xdebug-Profile-Filename header
 XDEBUG_CONFIG=
 --INI--
 xdebug.mode=profile,display
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 xdebug.overload_var_dump=2
 xdebug.filename_format=
 xdebug.profiler_output_name=XDEBUG-PROFILE.%p

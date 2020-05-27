@@ -2,7 +2,7 @@
 Test for bug #643: Profiler gets line numbers wrong
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 --FILE--
 <?php
 require_once('bug00643-t1.inc');

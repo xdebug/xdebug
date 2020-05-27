@@ -305,10 +305,14 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		/* Start debugger if this is the first main script */
 		if (XG_BASE(level) == 0) {
 			/* Start remote context if requested */
-			xdebug_do_req();
+			if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+				xdebug_debug_init_if_requested_at_startup();
+			}
 
 			xdebug_gcstats_init_if_requested(op_array);
-			xdebug_profiler_init_if_requested(op_array);
+			if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+				xdebug_profiler_init_if_requested(op_array);
+			}
 			if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
 				xdebug_tracing_init_if_requested(op_array);
 			}

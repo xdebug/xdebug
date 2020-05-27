@@ -87,17 +87,11 @@ void xdebug_profiler_exit_handler(void)
 
 void xdebug_profiler_init_if_requested(zend_op_array *op_array)
 {
-	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_PROFILING);
-
 	if (XG_PROF(active)) {
 		return;
 	}
 
-	/* Check for special GET/POST parameter to start profiling */
-	if (
-		xdebug_lib_start_at_request() ||
-		xdebug_trigger_enabled(XINI_PROF(profiler_enable_trigger), "XDEBUG_PROFILE", XINI_PROF(profiler_enable_trigger_value))
-	) {
+	if (xdebug_lib_start_at_request() || xdebug_lib_start_at_trigger()) {
 		xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename));
 	}
 }

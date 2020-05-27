@@ -10,7 +10,7 @@ check_reqs('dbgp');
 require 'dbgp/dbgpclient.php';
 $filename = dirname(__FILE__) . '/bug00998.inc';
 
-dbgpRunFile( $filename, [], [ 'xdebug.remote_host' => 'localhost' ], XDEBUG_DBGP_IPV4 );
+dbgpRunFile( $filename, [], [ 'xdebug.remote_host' => 'localhost' ], [ 'ipv' => 4 ] );
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="iso-8859-1"?>

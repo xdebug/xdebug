@@ -2,7 +2,7 @@
 Test for bug #639: Xdebug profiling: output not correct - missing 'cfl='
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 --FILE--
 <?php
 require 'bug00639.inc';

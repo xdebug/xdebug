@@ -41,8 +41,6 @@ typedef struct _xdebug_tracing_globals_t {
 } xdebug_tracing_globals_t;
 
 typedef struct _xdebug_tracing_settings_t {
-	zend_bool     trace_enable_trigger;
-	char         *trace_enable_trigger_value;
 	char         *trace_output_name;
 	zend_long     trace_options;
 	zend_long     trace_format;

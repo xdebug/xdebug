@@ -696,12 +696,7 @@ void xdebug_tracing_post_deactivate(void)
 
 void xdebug_tracing_init_if_requested(zend_op_array *op_array)
 {
-	char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
-
-	if (
-		(xdebug_lib_start_at_request() || xdebug_trigger_enabled(XINI_TRACE(trace_enable_trigger), "XDEBUG_TRACE", XINI_TRACE(trace_enable_trigger_value)))
-		&& output_dir && strlen(output_dir)
-	) {
+	if (xdebug_lib_start_at_request() || xdebug_lib_start_at_trigger()) {
 		/* In case we do an auto-trace we are not interested in the return
 		 * value, but we still have to free it. */
 		xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XINI_TRACE(trace_options)));

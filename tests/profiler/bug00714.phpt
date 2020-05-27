@@ -7,7 +7,7 @@ check_reqs('slow');
 ?>
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 --FILE--
 <?php
 function sleep1() { sleep(1); }

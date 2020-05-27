@@ -7,7 +7,7 @@ check_reqs('!win');
 ?>
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 auto_prepend_file=tests/profiler/bug01589-prepend.inc
 auto_append_file=tests/profiler/bug01589-append.inc
 --FILE--

@@ -223,6 +223,7 @@ typedef struct _xdebug_library_globals_t {
 
 typedef struct _xdebug_library_settings_t {
 	char      *output_dir;
+	char      *trigger_value;
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
@@ -246,7 +247,9 @@ int xdebug_lib_mode_is(int mode);
 #define XDEBUG_START_WITH_REQUEST_NEVER       3
 #define XDEBUG_START_WITH_REQUEST_TRIGGER     4
 int xdebug_lib_set_start_at_request(char *value);
-int xdebug_lib_start_at_request();
+int xdebug_lib_start_at_request(void);
+int xdebug_lib_start_at_trigger(void);
+int xdebug_lib_never_start_at_request(void);
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);
 void xdebug_lib_set_active_object(zval *object);

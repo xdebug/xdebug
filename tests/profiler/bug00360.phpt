@@ -2,7 +2,7 @@
 Test for bug #360: Function line number in profile not correct
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 --FILE--
 <?php
 function func(){

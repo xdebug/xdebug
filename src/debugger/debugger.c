@@ -329,7 +329,7 @@ void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval 
 	int block = XDEBUG_CMDLOOP_NONBLOCK;
 
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit();
+	xdebug_debug_init_if_requested_on_error();
 
 	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
 		int exception_breakpoint_found = 0;
@@ -379,7 +379,7 @@ void xdebug_debugger_error_cb(const char *error_filename, int error_lineno, int 
 	int block = XDEBUG_CMDLOOP_NONBLOCK;
 
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit();
+	xdebug_debug_init_if_requested_on_error();
 
 	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
 		/* Send notification with warning/notice/error information */
@@ -876,7 +876,7 @@ void xdebug_debugger_restart_if_pid_changed()
 PHP_FUNCTION(xdebug_break)
 {
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit();
+	xdebug_debug_init_if_requested_on_error();
 
 	XG_DBG(context).do_break = 1;
 	RETURN_TRUE;

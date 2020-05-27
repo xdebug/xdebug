@@ -64,7 +64,7 @@ void xdebug_restart_debugger(void);
 void xdebug_mark_debug_connection_active(void);
 void xdebug_mark_debug_connection_not_active(void);
 void xdebug_mark_debug_connection_pending(void);
-void xdebug_do_jit(void);
-void xdebug_do_req();
+void xdebug_debug_init_if_requested_at_startup(void);
+void xdebug_debug_init_if_requested_on_error(void);
 
 #endif

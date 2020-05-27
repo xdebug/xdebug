@@ -5,6 +5,9 @@ Test for bug #421: xdebug sends back invalid characters in xml sometimes
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; class SimpleXMLIterator');
 ?>
+--INI--
+xdebug.mode=debug
+xdebug.start_with_request=always
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

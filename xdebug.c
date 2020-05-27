@@ -311,9 +311,10 @@ static PHP_INI_MH(OnUpdateStartWithRequest)
 
 PHP_INI_BEGIN()
 	/* Library settings */
-	PHP_INI_ENTRY(      "xdebug.mode",               "off",           PHP_INI_SYSTEM, OnUpdateMode)
-	PHP_INI_ENTRY(      "xdebug.start_with_request", "default",       PHP_INI_SYSTEM, OnUpdateStartWithRequest)
-	STD_PHP_INI_ENTRY(  "xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,    OnUpdateString, settings.library.output_dir,         zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY(      "xdebug.mode",               "display",       PHP_INI_SYSTEM,                OnUpdateMode)
+	PHP_INI_ENTRY(      "xdebug.start_with_request", "default",       PHP_INI_SYSTEM,                OnUpdateStartWithRequest)
+	STD_PHP_INI_ENTRY(  "xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY(  "xdebug.trigger_value",      "",              PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value, zend_xdebug_globals, xdebug_globals)
 
 	/* Debugger settings */
 	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_includes,  zend_xdebug_globals, xdebug_globals)
@@ -349,8 +350,6 @@ PHP_INI_BEGIN()
 
 	/* Profiler settings */
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_output_name,          zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_enable_trigger", "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_enable_trigger,       zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_append,               zend_xdebug_globals, xdebug_globals)
 
 	/* Xdebug Cloud */
@@ -359,7 +358,6 @@ PHP_INI_BEGIN()
 	/* Remote debugger settings */
 	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_host,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_port,       zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.remote_autostart","0",                  PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_autostart,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_connect_back,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_log,        zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_log_level",  XDEBUG_LOG_DEFAULT,   PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_log_level,  zend_xdebug_globals, xdebug_globals)
@@ -381,8 +379,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_name", "gcstats.%p",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.gc_stats.output_name, zend_xdebug_globals, xdebug_globals)
 
 	/* Tracing settings */
-	STD_PHP_INI_BOOLEAN("xdebug.trace_enable_trigger", "0",             PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.tracing.trace_enable_trigger, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trace_enable_trigger_value", "",          PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.tracing.trace_enable_trigger_value, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, settings.tracing.trace_output_name, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_options,     zend_xdebug_globals, xdebug_globals)
@@ -508,9 +504,6 @@ static void xdebug_env_config(void)
 		} else
 		if (strcasecmp(envvar, "profiler_output_name") == 0) {
 			name = "xdebug.profiler_output_name";
-		} else
-		if (strcasecmp(envvar, "profiler_enable_trigger") == 0) {
-			name = "xdebug.profiler_enable_trigger";
 		} else
 		if (strcasecmp(envvar, "remote_log") == 0) {
 			name = "xdebug.remote_log";

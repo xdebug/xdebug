@@ -7,7 +7,7 @@ check_reqs('PHP >= 7.1, < 7.4');
 ?>
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=1
+xdebug.start_with_request=default
 --FILE--
 <?php
 class bankaccount

@@ -502,7 +502,7 @@ void xdebug_mark_debug_connection_not_active()
 	XG_DBG(remote_connection_pid) = 0;
 }
 
-void xdebug_do_jit()
+void xdebug_debug_init_if_requested_on_error()
 {
 	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
 
@@ -531,6 +531,8 @@ static int xdebug_handle_start_session()
 	/* Set session cookie if requested */
 	if (
 		((
+			(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
+		) || (
 			(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
 		) || (
 			(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), "XDEBUG_SESSION_START", sizeof("XDEBUG_SESSION_START") - 1)) != NULL
@@ -574,21 +576,20 @@ static void xdebug_handle_stop_session()
 	}
 }
 
-void xdebug_do_req(void)
+void xdebug_debug_init_if_requested_at_startup(void)
 {
-	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
-
-	if (!xdebug_lib_start_at_request()) {
-		return;
-	}
-
 	if (XG_DBG(detached)) {
 		return;
 	}
 
+	if (xdebug_is_debug_connection_active()) {
+		return;
+	}
+
 	if (
-		!xdebug_is_debug_connection_active() &&
-		(XINI_DBG(remote_autostart) || xdebug_handle_start_session())
+		xdebug_lib_start_at_request() ||
+		xdebug_lib_start_at_trigger() ||
+		(!xdebug_lib_never_start_at_request() && xdebug_handle_start_session())
 	) {
 		xdebug_init_debugger();
 	}
