@@ -220,11 +220,11 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			myht = xdebug_objdebug_pp(struc, &is_temp);
 #endif
 
-			if (!xdebug_zend_hash_is_recursive(myht)) {
+			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
 				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
 
-				if (level <= options->max_depth) {
+				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;

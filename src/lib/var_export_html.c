@@ -213,12 +213,12 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 #endif
 			xdebug_str_add(str, xdebug_sprintf("\n%*s", (level - 1) * 4, ""), 1);
 
-			if (!xdebug_zend_hash_is_recursive(myht)) {
+			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
 				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
 				xdebug_str_add(str, xdebug_sprintf("<b>object</b>(<i>%s</i>)", class_name), 1);
 				xdebug_str_add(str, xdebug_sprintf("[<i>%d</i>]\n", Z_OBJ_HANDLE_P(*struc)), 1);
 
-				if (level <= options->max_depth) {
+				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;

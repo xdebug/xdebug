@@ -567,7 +567,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			HashTable          *merged_hash;
 			xdebug_str         *class_name;
 			zend_class_entry   *ce;
-#if PHP_VERSION_ID < 70400 
+#if PHP_VERSION_ID < 70400
 			int                 is_temp;
 #endif
 			zend_property_info *zpi_val;
@@ -616,7 +616,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			xdebug_xml_add_attribute(node, "children", merged_hash->nNumOfElements ? "1" : "0");
 
 
-			if (!xdebug_zend_hash_is_recursive(myht)) {
+			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
 				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(merged_hash)), 0, 1);
 				if (level < options->max_depth) {
 					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
