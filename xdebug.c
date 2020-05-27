@@ -668,11 +668,22 @@ PHP_MINFO_FUNCTION(xdebug)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "xdebug support", "enabled");
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
+
 	if (!sapi_module.phpinfo_as_text) {
 		xdebug_info_printf("<tr><td colspan='2' style='background-color: white; text-align: center'>%s</td></tr>\n", "<a style='color: #317E1E; background-color: transparent; font-weight: bold; text-decoration: underline' href='https://xdebug.org/support'>Support Xdebug on Patreon, GitHub, or as a business</a>");
 	} else {
 		xdebug_info_printf("Support Xdebug on Patreon, GitHub, or as a business: https://xdebug.org/support\n");
 	}
+	php_info_print_table_end();
+
+	php_info_print_table_start();
+	php_info_print_table_header(2, "Feature", "Enabled/Disabled");
+	php_info_print_table_row(2, "Display", xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Coverage", xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "GC Stats", xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Profiler", xdebug_lib_mode_is(XDEBUG_MODE_PROFILING) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Step Debugger", xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Tracing", xdebug_lib_mode_is(XDEBUG_MODE_TRACING) ? "✔ enabled" : "✘ disabled");
 	php_info_print_table_end();
 
 	if (zend_xdebug_initialised == 0) {
