@@ -786,7 +786,7 @@ static void add_file(void *ret, xdebug_hash_element *e)
 	zend_hash_sort(target_hash, xdebug_lineno_cmp, 0);
 
 	/* Add the branch and path info */
-	if (file->has_branch_info) {
+	if (XG_COV(code_coverage_branch_check)) {
 		XDEBUG_MAKE_STD_ZVAL(file_info);
 		array_init(file_info);
 

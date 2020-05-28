@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #1779: INIT_NS_FCALL_BY_NAME opcode, used for built-in functions in namespace, is not overloaded
+Test for bug #1779: INIT_NS_FCALL_BY_NAME opcode, used for built-in functions in namespace, is not overloaded (>= PHP 7.1.5)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 7.1.5');
+?>
 --INI--
 xdebug.coverage_enable=1
 --FILE--
