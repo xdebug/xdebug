@@ -247,14 +247,14 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 			myht = xdebug_objdebug_pp(struc, &is_temp);
 #endif
 
-			if (!xdebug_zend_hash_is_recursive(myht)) {
+			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
 				xdebug_str_add(str, xdebug_sprintf("%sclass%s %s%s%s#%d (%s%d%s) {\n",
 					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
 					ANSI_COLOR_OBJECT, STR_NAME_VAL(Z_OBJCE_P(*struc)->name), ANSI_COLOR_RESET,
 					Z_OBJ_HANDLE_P(*struc),
-					ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET), 1);
+					ANSI_COLOR_LONG, myht ? myht->nNumOfElements : 0, ANSI_COLOR_RESET), 1);
 
-				if (level <= options->max_depth) {
+				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
 					options->runtime[level].end_element_nr = options->max_children;
