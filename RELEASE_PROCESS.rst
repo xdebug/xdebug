@@ -29,6 +29,12 @@
 #. Update www.xdebug.org src/Controller/DocsController.php
 #. Write news item in www.xdebug.org data/news
 #. Write Patreon post taking the rendered news article as starting point
+#. Mantis: "release" the version, and make sure there is a new one.
+#. In the release branch, update template.rc and php_xdebug.h to the new
+   version
+#. Commit template.rc and php_xdebug.h with "Back to -dev"
+#. Check out master branch, and run: git merge --strategy=ours xdebug_2_9
+#. ``git push origin master xdebug_2_9``
 #. Wait until AppVeyor is ready
 #. Upload the source package to PECL
 #. Add files from AppVeyor and source to www.xdebug.org html/files
@@ -40,9 +46,3 @@
 
 #. Add the downloads, DDLs, SHA256 files, and news file to git and commit with
    "Go with 2.9.5"
-#. Mantis: "release" the version, and make sure there is a new one.
-#. In the release branch, update template.rc and php_xdebug.h to the new
-   version
-#. Commit template.rc and php_xdebug.h with "Back to -dev"
-#. Check out master branch, and run: git merge --strategy=ours xdebug_2_9
-#. ``git push origin master xdebug_2_9``
