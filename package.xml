@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-04-25</date>
- <time>14:56:10</time>
+ <date>2020-05-29</date>
+ <time>11:43:03</time>
  <version>
-  <release>2.9.5</release>
-  <api>2.9.5</api>
+  <release>2.9.6</release>
+  <api>2.9.6</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,13 +45,13 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Sat, Apr 25, 2020 - xdebug 2.9.5
+Fri, May 29, 2020 - xdebug 2.9.6
 
 = Fixed bugs:
 
-  - Fixed issue #1772: Crash with exception thrown inside a destructor
-  - Fixed issue #1775: Segfault when another extension compiles a PHP file during RINIT
-  - Fixed issue #1779: Nested multi-line built-in function in namespace are not covered
+  - Fixed issue #1782: Cookie "XDEBUG_SESSION" will be soon rejected because it has the “sameSite” attribute set to none
+  - Fixed issue #1787: Branch coverage data does not always follow the lines/functions format
+  - Fixed issue #1790: Segfault in var_dump() or while debugging with protobuf extension
  </notes>
 
  <contents>
@@ -190,6 +190,29 @@ Sat, Apr 25, 2020 - xdebug 2.9.5
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2020-04-25</date>
+   <time>14:56:10</time>
+   <version>
+    <release>2.9.5</release>
+    <api>2.9.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Apr 25, 2020 - xdebug 2.9.5
+
+= Fixed bugs:
+
+  - Fixed issue #1772: Crash with exception thrown inside a destructor
+  - Fixed issue #1775: Segfault when another extension compiles a PHP file during RINIT
+  - Fixed issue #1779: Nested multi-line built-in function in namespace are not covered
+   </notes>
+ </release>
 
  <release>
    <date>2020-03-23</date>
