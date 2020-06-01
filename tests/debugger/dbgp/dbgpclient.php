@@ -47,7 +47,7 @@ class DebugClient
 		return $socket;
 	}
 
-	private function launchPhp( &$pipes, array $ini_options = [], $filename )
+	private function launchPhp( &$pipes, $filename, array $ini_options = [] )
 	{
 		@unlink( $this->tmpDir . '/error-output.txt' );
 		@unlink( $this->tmpDir . '/remote_log.txt' );
@@ -165,7 +165,7 @@ class DebugClient
 			echo "Address: {$this->getAddress()}\n";
 			return false;
 		}
-		$this->php = $this->launchPhp( $this->ppipes, $ini_options, $filename );
+		$this->php = $this->launchPhp( $this->ppipes, $filename, $ini_options );
 		$conn = @stream_socket_accept( $this->socket, isset( $options['timeout'] ) ? $options['timeout'] : 20 );
 
 		if ( $conn === false )
