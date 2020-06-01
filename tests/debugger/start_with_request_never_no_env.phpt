@@ -8,7 +8,7 @@ dbgpRunFile(
 	dirname(__FILE__) . '/empty-echo.inc',
 	['step_into', 'step_into', 'property_get -n $e', 'detach'],
 	['xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'never'],
-	['timeout' => 1],
+	['timeout' => 1]
 );
 ?>
 --EXPECT--

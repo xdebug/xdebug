@@ -7,7 +7,7 @@ require 'dbgp/dbgpclient.php';
 dbgpRunFile(
 	dirname(__FILE__) . '/break-echo.inc',
 	['stack_get', 'step_into', 'detach'],
-	['xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'default'],
+	['xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'default']
 );
 ?>
 --EXPECTF--

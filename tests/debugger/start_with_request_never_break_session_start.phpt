@@ -10,7 +10,7 @@ dbgpRunFile(
 	dirname(__FILE__) . '/break-echo.inc',
 	['stack_get', 'step_into', 'detach'],
 	['xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'never'],
-	['timeout' => 1],
+	['timeout' => 1]
 );
 ?>
 --EXPECTF--
