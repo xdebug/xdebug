@@ -72,16 +72,6 @@ static char *xdebug_debugger_get_ide_key(void)
 		return ide_key;
 	}
 
-	ide_key = getenv("USER");
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
-	ide_key = getenv("USERNAME");
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
 	return NULL;
 }
 

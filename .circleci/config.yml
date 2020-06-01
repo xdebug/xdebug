@@ -8,7 +8,6 @@ commands:
       - run:
           name: Setup env vars
           command: |
-            echo 'export XDEBUG_CONFIG="idekey=dr"' >> $BASH_ENV
             echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
   run-tests:
     description: Runs the tests
