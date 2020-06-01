@@ -1,12 +1,8 @@
 --TEST--
 Test for bug #1788: Branch coverage data does not always follow the lines/functions format
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=0
-xdebug.auto_profile=0
-xdebug.profiler_enable=0
-xdebug.overload_var_dump=0
-xdebug.coverage_enable=1
+xdebug.mode=coverage
+xdebug.start_with_request=trigger
 --FILE--
 <?php
 require dirname(__FILE__) . '/bug01788a.inc';
