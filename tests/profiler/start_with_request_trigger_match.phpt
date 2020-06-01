@@ -14,7 +14,7 @@ XDEBUG_PROFILE=something
 $fileName = xdebug_get_profiler_filename();
 
 echo file_get_contents($fileName);
-unlink($fileName);
+@unlink($fileName);
 ?>
 --EXPECTF--
 version: 1

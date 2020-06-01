@@ -11,7 +11,7 @@ xdebug.collect_assignments=0
 $fileName = xdebug_get_profiler_filename();
 
 echo file_get_contents($fileName);
-unlink($fileName);
+@unlink($fileName);
 ?>
 --EXPECTF--
 version: 1
