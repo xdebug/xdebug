@@ -1,9 +1,7 @@
 --TEST--
 Test stack traces (level0, html)
 --INI--
-xdebug.default_enable=1
-xdebug.profiler_enable=0
-xdebug.auto_trace=0
+xdebug.mode=display
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0

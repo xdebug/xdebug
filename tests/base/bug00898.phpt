@@ -1,8 +1,7 @@
 --TEST--
 Test for bug #898: Wrong works with empty string key in ArrayObject
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=0
+xdebug.mode=display
 xdebug.overload_var_dump=1
 --FILE--
 <?php

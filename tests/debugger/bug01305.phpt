@@ -5,8 +5,6 @@ Test for bug #1305: Problems with array keys with an aposprophe
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
---INI--
-xdebug.auto_trace=1
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
@@ -35,7 +33,7 @@ dbgpRunFile( $filename, $commands );
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug01305.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug01305.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
 -> step_into -i 1
 <?xml version="1.0" encoding="iso-8859-1"?>

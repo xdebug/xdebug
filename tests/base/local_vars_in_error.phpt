@@ -1,11 +1,9 @@
 --TEST--
 Test with showing local variables on errors
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=0
+xdebug.mode=display
 xdebug.collect_params=1
 xdebug.auto_profile=0
-xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_local_vars=1
 xdebug.show_error_trace=0

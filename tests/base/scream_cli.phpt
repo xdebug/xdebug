@@ -1,8 +1,7 @@
 --TEST--
 Test for scream support
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=0
+xdebug.mode=display
 xdebug.scream=0
 error_reporting(E_ALL);
 xdebug.cli_color=2

@@ -1,8 +1,7 @@
 --TEST--
 Filtered stack traces: path whitelist [1]
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=0
+xdebug.mode=display
 xdebug.collect_params=4
 --FILE--
 <?php

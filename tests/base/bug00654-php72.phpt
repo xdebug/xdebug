@@ -7,7 +7,7 @@ check_reqs('PHP >= 7.2; ext session');
 ?>
 --INI--
 error_reporting=-1
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.dump.SERVER=
 --FILE--
 <?php

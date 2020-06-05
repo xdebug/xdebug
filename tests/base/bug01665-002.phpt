@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1665: Segfault when overriding a function object parameter + xdebug.collect_params=2
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.collect_params=2
 --FILE--
 <?php

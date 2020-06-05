@@ -1,13 +1,12 @@
 --TEST--
 Test for bug #1471: Crash with tracing and ternairy op assignment
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=0
+xdebug.mode=trace
+xdebug.start_with_request=0
 xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.auto_profile=0
-xdebug.profiler_enable=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0
 --FILE--

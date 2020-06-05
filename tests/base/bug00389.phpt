@@ -7,7 +7,7 @@ check_reqs('PHP < 8.0');
 ?>
 --INI--
 log_errors=0
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.dump.GET=
 xdebug.dump.SERVER=
 xdebug.show_local_vars=0

@@ -8,7 +8,7 @@ check_reqs('PHP < 7.1');
 --INI--
 html_errors=0
 xdebug.cli_color=0
-xdebug.default_enable=1
+xdebug.mode=display
 error_reporting=-1
 xdebug.collect_params=4
 xdebug.show_local_vars=0

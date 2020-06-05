@@ -23,6 +23,7 @@
 
 #include "debugger_private.h"
 #include "base/stack.h"
+#include "lib/var.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
@@ -30,23 +31,6 @@ static size_t (*xdebug_orig_ub_write)(const char *string, size_t len);
 static size_t xdebug_ub_write(const char *string, size_t length);
 
 static void xdebug_line_list_dtor(xdebug_lines_list *line_list);
-
-PHP_INI_MH(OnUpdateDebugMode)
-{
-	if (!new_value) {
-		XINI_DBG(remote_mode) = XDEBUG_NONE;
-
-	} else if (strcmp(STR_NAME_VAL(new_value), "jit") == 0) {
-		XINI_DBG(remote_mode) = XDEBUG_JIT;
-
-	} else if (strcmp(STR_NAME_VAL(new_value), "req") == 0) {
-		XINI_DBG(remote_mode) = XDEBUG_REQ;
-
-	} else {
-		XINI_DBG(remote_mode) = XDEBUG_NONE;
-	}
-	return SUCCESS;
-}
 
 void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 {
@@ -84,16 +68,6 @@ static char *xdebug_debugger_get_ide_key(void)
 	}
 
 	ide_key = getenv("DBGP_IDEKEY");
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
-	ide_key = getenv("USER");
-	if (ide_key && *ide_key) {
-		return ide_key;
-	}
-
-	ide_key = getenv("USERNAME");
 	if (ide_key && *ide_key) {
 		return ide_key;
 	}
@@ -345,7 +319,7 @@ void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval 
 	int block = XDEBUG_CMDLOOP_NONBLOCK;
 
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit();
+	xdebug_debug_init_if_requested_on_error();
 
 	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
 		int exception_breakpoint_found = 0;
@@ -395,7 +369,7 @@ void xdebug_debugger_error_cb(const char *error_filename, int error_lineno, int 
 	int block = XDEBUG_CMDLOOP_NONBLOCK;
 
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit();
+	xdebug_debug_init_if_requested_on_error();
 
 	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
 		/* Send notification with warning/notice/error information */
@@ -523,6 +497,45 @@ static void xdebug_unhook_output_handlers()
 	xdebug_orig_ub_write = NULL;
 }
 
+static int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
+{
+	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op *opline = execute_data->opline;
+
+	xdebug_coverage_record_include_if_active(execute_data, op_array);
+	if (opline->extended_value == ZEND_EVAL) {
+		zval *inc_filename;
+		zval tmp_inc_filename;
+		int  is_var;
+
+		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
+
+		/* If there is no inc_filename, we're just bailing out instead */
+		if (!inc_filename) {
+			return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
+
+		if (Z_TYPE_P(inc_filename) != IS_STRING) {
+			tmp_inc_filename = *inc_filename;
+			zval_copy_ctor(&tmp_inc_filename);
+			convert_to_string(&tmp_inc_filename);
+			inc_filename = &tmp_inc_filename;
+		}
+
+		/* Now let's store this info */
+		if (XG_BASE(last_eval_statement)) {
+			efree(XG_BASE(last_eval_statement));
+		}
+		XG_BASE(last_eval_statement) = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
+
+		if (inc_filename == &tmp_inc_filename) {
+			zval_dtor(&tmp_inc_filename);
+		}
+	}
+
+	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
 void xdebug_debugger_zend_startup(void)
 {
 	/* Hook output handlers (header and output writer) */
@@ -537,6 +550,9 @@ void xdebug_debugger_zend_shutdown(void)
 
 void xdebug_debugger_minit(void)
 {
+	/* We override eval so that we can debug into eval statements */
+	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
+
 	XG_DBG(breakpoint_count) = 0;
 }
 
@@ -560,7 +576,7 @@ void xdebug_debugger_rinit(void)
 #if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
 	{
 #else
-	if (XINI_DBG(remote_enable)) {
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
 #endif
 		zend_string *key = zend_string_init(ZEND_STRL("opcache.optimization_level"), 1);
 		zend_string *value = zend_string_init(ZEND_STRL("0"), 1);
@@ -750,7 +766,11 @@ void xdebug_debugger_compile_file(zend_op_array *op_array)
 	zend_class_entry *class_entry;
 	xdebug_lines_list *file_function_lines_list;
 
-	if (!XINI_DBG(remote_enable) || !XG_DBG(breakable_lines_map)) {
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
+	/* The breakable_lines_map can not be set if another extension compiles
+	 * scripts during RINIT */
+	if (!XG_DBG(breakable_lines_map)) {
 		return;
 	}
 
@@ -846,8 +866,13 @@ void xdebug_debugger_restart_if_pid_changed()
 PHP_FUNCTION(xdebug_break)
 {
 	/* Start JIT if requested and not yet enabled */
-	xdebug_do_jit();
+	xdebug_debug_init_if_requested_on_error();
 
 	XG_DBG(context).do_break = 1;
 	RETURN_TRUE;
+}
+
+PHP_FUNCTION(xdebug_is_debugger_active)
+{
+	RETURN_BOOL(xdebug_is_debug_connection_active());
 }

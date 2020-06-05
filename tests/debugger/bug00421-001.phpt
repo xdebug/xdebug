@@ -5,6 +5,9 @@ Test for bug #421: xdebug sends back invalid characters in xml sometimes
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; class SimpleXMLIterator');
 ?>
+--INI--
+xdebug.mode=debug
+xdebug.start_with_request=always
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
@@ -23,7 +26,7 @@ dbgpRunFile( $filename, $commands );
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug00421.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug00421.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
 -> feature_set -i 1 -n max_depth -v 2
 <?xml version="1.0" encoding="iso-8859-1"?>

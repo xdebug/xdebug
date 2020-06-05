@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP >= 7.2,<= 7.2.13; opcache');
 ?>
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 include 'dump-branch-coverage.inc';

@@ -2,7 +2,7 @@
 Test for bug #665: xdebug does not respect display_errors=stderr
 --FILE--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE') . ' -d log_errors=Off -d xdebug.default_enable=On';
+$php = getenv('TEST_PHP_EXECUTABLE') . ' -d log_errors=Off -d xdebug.mode=Off';
 
 $force = '-d xdebug.force_display_errors=0';
 

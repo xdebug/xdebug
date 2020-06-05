@@ -26,7 +26,6 @@ const char *xdebug_log_prefix[11] = {
 	"", "E: ", "", "W: ", "", "", "", "I: ", "", "", "D: "
 };
 
-
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
 	xg->active_execute_data  = NULL;
@@ -50,6 +49,198 @@ void xdebug_library_mshutdown(void)
 	xdebug_set_free(XG_LIB(opcode_handlers_set));
 }
 
+static int xdebug_lib_set_mode_item(char *mode, int len)
+{
+	if (strncmp(mode, "off", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_OFF;
+		return 1;
+	}
+	if (strncmp(mode, "display", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_DISPLAY;
+		return 1;
+	}
+	if (strncmp(mode, "coverage", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_COVERAGE;
+		return 1;
+	}
+	if (strncmp(mode, "debug", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_STEP_DEBUG;
+		return 1;
+	}
+	if (strncmp(mode, "gcstats", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_GCSTATS;
+		return 1;
+	}
+	if (strncmp(mode, "profile", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_PROFILING;
+		return 1;
+	}
+	if (strncmp(mode, "trace", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_TRACING;
+		return 1;
+	}
+
+	return 0;
+}
+
+int xdebug_lib_set_mode(char *mode)
+{
+	char *mode_ptr = mode;
+	char *comma    = NULL;
+	int   errors   = 0;
+
+	XG_LIB(mode) = 0;
+
+	comma = strchr(mode_ptr, ',');
+	while (comma) {
+		errors += !xdebug_lib_set_mode_item(mode_ptr, comma - mode_ptr);
+		mode_ptr = comma + 1;
+		while (*mode_ptr == ' ') {
+			mode_ptr++;
+		}
+		comma = strchr(mode_ptr, ',');
+	}
+	errors += !xdebug_lib_set_mode_item(mode_ptr, strlen(mode_ptr));
+
+	return !errors;
+}
+
+int xdebug_lib_mode_is(int mode)
+{
+	if (XG_LIB(mode) & mode) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int xdebug_lib_set_start_at_request(char *value)
+{
+	if (strcmp(value, "default") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_DEFAULT;
+		return 1;
+	}
+	if (strcmp(value, "always") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_ALWAYS;
+		return 1;
+	}
+	if (strcmp(value, "never") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_NEVER;
+		return 1;
+	}
+	if (strcmp(value, "trigger") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_TRIGGER;
+		return 1;
+	}
+
+	return 0;
+}
+
+int xdebug_lib_start_at_request(void)
+{
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_ALWAYS) {
+		return 1;
+	}
+
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
+		if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int xdebug_lib_never_start_at_request(void)
+{
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_NEVER) {
+		return 1;
+	}
+
+	return 0;
+}
+
+static zval *find_in_globals(const char *element)
+{
+	zval *trigger_val = NULL;
+
+	if (
+		(
+			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]), element, strlen(element))) != NULL
+		) || (
+			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), element, strlen(element))) != NULL
+		) || (
+			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), element, strlen(element))) != NULL
+		) || (
+			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), element, strlen(element))) != NULL
+		)
+	) {
+		return trigger_val;
+	}
+
+	return NULL;
+}
+
+static int trigger_enabled(void)
+{
+	char *trigger_value = XINI_LIB(trigger_value);
+	zval *found_trigger_value = NULL;
+
+	/* First we check for the generic 'XDEBUG_TRIGGER' option */
+	found_trigger_value = find_in_globals("XDEBUG_TRIGGER");
+
+	/* If not found, we fall back to the per-mode name for backwards compatibility reasons */
+	if (!found_trigger_value) {
+		const char *fallback_name = NULL;
+
+		if (XG_LIB(mode) & XDEBUG_MODE_PROFILING) {
+			fallback_name = "XDEBUG_PROFILE";
+		} else if (XG_LIB(mode) & XDEBUG_MODE_TRACING) {
+			fallback_name = "XDEBUG_TRACE";
+		} else if (XG_LIB(mode) & XDEBUG_MODE_STEP_DEBUG) {
+			fallback_name = "XDEBUG_SESSION";
+		}
+
+		if (fallback_name) {
+			found_trigger_value = find_in_globals(fallback_name);
+		}
+	}
+
+	if (!found_trigger_value) {
+		return 0;
+	}
+
+	/* If the configured trigger value is empty, then it always triggers */
+	if (trigger_value == NULL || trigger_value[0] == '\0') {
+		return 1;
+	}
+
+	/* Check if the configured trigger value matches the one found in the
+	 * trigger element */
+	if (strcmp(trigger_value, Z_STRVAL_P(found_trigger_value)) == 0) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int xdebug_lib_start_at_trigger(void)
+{
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_TRIGGER) {
+		return trigger_enabled();
+	}
+
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
+		if (
+			xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) ||
+			xdebug_lib_mode_is(XDEBUG_MODE_TRACING)
+		) {
+			return trigger_enabled();
+		}
+	}
+
+	return 0;
+}
 
 function_stack_entry *xdebug_get_stack_head(void)
 {
@@ -136,35 +327,6 @@ xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list)
 
 	return tmp;
 }
-
-int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value)
-{
-	zval *trigger_val;
-
-	if (!setting) {
-		return 0;
-	}
-
-	if (
-		(
-			(
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), var_name, strlen(var_name))) != NULL
-			) || (
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), var_name, strlen(var_name))) != NULL
-			) || (
-				(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), var_name, strlen(var_name))) != NULL
-			)
-		) && (
-			(var_value == NULL) || (var_value[0] == '\0') ||
-			(strcmp(var_value, Z_STRVAL_P(trigger_val)) == 0)
-		)
-	) {
-		return 1;
-	}
-
-	return 0;
-}
-
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data)
 {
@@ -266,8 +428,15 @@ int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER
 	return ZEND_USER_OPCODE_DISPATCH;
 }
 
-/* Does not duplicate the return value, don't free */
+/* Does not duplicate the return value, don't free. Return NULL if it's
+ * not-set, or an empty string */
 char *xdebug_lib_get_output_dir(void)
 {
-	return XINI_LIB(output_dir);
+	char *output_dir = XINI_LIB(output_dir);
+
+	if (output_dir == NULL || output_dir[0] == '\0') {
+		return NULL;
+	}
+
+	return output_dir;
 }

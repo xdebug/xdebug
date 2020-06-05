@@ -1,11 +1,12 @@
 --TEST--
 GC Stats: Run gc_collect_cyles(); and collect stats
 --INI--
+xdebug.mode=gcstats
+xdebug.start_with_request=always
 zend.enable_gc=1
-xdebug.gc_stats_enable=1
 --FILE--
 <?php
-var_dump(ini_get("xdebug.gc_stats_enable"));
+var_dump(ini_get("xdebug.mode"));
 
 for ($i = 0; $i < 100; $i++) {
 	$a = new stdClass();
@@ -21,7 +22,7 @@ xdebug_stop_gcstats();
 unlink(xdebug_get_gcstats_filename());
 ?>
 --EXPECTF--
-string(1) "1"
+string(7) "gcstats"
 Garbage Collection Report
 version: 1
 creator: xdebug %d.%s (PHP %s)

@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #562: Incorrect coverage information for closure function headers
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 xdebug.overload_var_dump=0
 --FILE--
 <?php

@@ -8,7 +8,7 @@ if ( ! ( runtime_version('7.2', '<') || !opcache_active() ) ) {
 }
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.collect_params=4
 html_errors=0
 xdebug.dump.GET=

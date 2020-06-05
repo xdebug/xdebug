@@ -1,8 +1,9 @@
 --TEST--
 GC Stats: Start with xdebug_start_gcstats() and filename
 --INI--
+xdebug.mode=gcstats
+xdebug.start_with_request=default
 zend.enable_gc=1
-xdebug.gc_stats_enable=0
 --FILE--
 <?php
 var_dump(xdebug_get_gcstats_filename());

@@ -5,7 +5,7 @@ Test for bug #1691: Code Coverage misses fluent interface function call
 require __DIR__ . '/../utils.inc';
 ?>
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 require __DIR__ . '/../utils.inc';

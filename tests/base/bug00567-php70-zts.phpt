@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP < 7.1; ZTS');
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.overload_var_dump=2
 --FILE--
 <?php

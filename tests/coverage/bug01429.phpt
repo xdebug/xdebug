@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1429: Code coverage does not cover null coalesce
 --INI--
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 xdebug_start_code_coverage();

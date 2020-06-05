@@ -6,15 +6,14 @@ require __DIR__ . '/../utils.inc';
 check_reqs('ext SPL');
 ?>
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=1
+xdebug.mode=trace,display
+xdebug.start_with_request=always
 xdebug.trace_options=0
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
 xdebug.collect_params=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
-xdebug.profiler_enable=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0

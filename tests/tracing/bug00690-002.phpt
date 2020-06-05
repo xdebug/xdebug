@@ -6,7 +6,8 @@ require __DIR__ . '/../utils.inc';
 check_reqs('unparallel');
 ?>
 --INI--
-xdebug.auto_trace=0
+xdebug.mode=trace
+xdebug.start_with_request=0
 xdebug.trace_output_name=trace.bug690
 xdebug.trace_options=1
 xdebug.trace_format=0

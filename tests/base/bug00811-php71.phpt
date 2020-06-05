@@ -9,7 +9,7 @@ check_reqs('PHP < 8');
 docref_root=http://www.php.net/
 docref_ext=.php
 html_errors=1
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.file_link_format=
 xdebug.filename_format=
 xdebug.show_error_trace=0

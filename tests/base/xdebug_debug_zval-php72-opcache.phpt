@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP >= 7.2; opcache');
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.cli_color=0
 --FILE--
 <?php

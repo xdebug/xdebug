@@ -8,9 +8,9 @@ check_reqs('dbgp; !win');
 --ENV--
 I_LIKE_COOKIES=unix:///tmp/haxx0r.sock
 --INI--
-xdebug.remote_enable=1
+xdebug.mode=debug
+xdebug.start_with_request=always
 xdebug.remote_log=/tmp/{RUNID}remote-log4.txt
-xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
 xdebug.remote_host=unix:///tmp/xdbg.sock
 xdebug.remote_port=0

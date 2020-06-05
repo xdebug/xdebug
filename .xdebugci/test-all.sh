@@ -23,7 +23,7 @@ mkdir -p /tmp/ptester/junit
 rm -rf /tmp/ptester/junit/*
 
 # Storing Run ID
-date +'%Y-%d-%d-%H-%M-%S' > /tmp/ptester/run-id.txt
+date +'%Y-%m-%d-%H-%M-%S' > /tmp/ptester/run-id.txt
 
 c=0
 for i in $PHPS; do

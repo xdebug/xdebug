@@ -1,9 +1,8 @@
 --TEST--
 Test for tracing assignments in user-readable function traces
 --INI--
-xdebug.default_enable=1
-xdebug.profiler_enable=0
-xdebug.auto_trace=0
+xdebug.mode=trace
+xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=1
 xdebug.collect_params=3

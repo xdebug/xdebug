@@ -3,7 +3,7 @@ Test for xdebug.max_nesting_level (default) [1]
 --INI--
 xdebug.max_stack_frames=-1
 xdebug.collect_params=3
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.show_local_vars=0
 xdebug.max_nesting_level=256
 --FILE--

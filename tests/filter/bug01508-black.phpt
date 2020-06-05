@@ -1,12 +1,7 @@
 --TEST--
 Test for bug #1508: Code coverage filter not checked in xdebug_common_assign_dim handler (black list)
 --INI--
-xdebug.auto_trace=0
-xdebug.collect_return=1
-xdebug.collect_params=4
-xdebug.collect_assignments=0
-xdebug.trace_format=0
-xdebug.coverage_enable=1
+xdebug.mode=coverage
 --FILE--
 <?php
 $cwd = __DIR__; $s = DIRECTORY_SEPARATOR;

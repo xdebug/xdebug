@@ -1,7 +1,4 @@
 <?php
-define( 'XDEBUG_DBGP_IPV4', 1 );
-define( 'XDEBUG_DBGP_IPV6', 2 );
-
 class DebugClient
 {
 	// free port will be selected automatically by the operating system
@@ -50,7 +47,7 @@ class DebugClient
 		return $socket;
 	}
 
-	private function launchPhp( &$pipes, array $ini_options = null, $filename )
+	private function launchPhp( &$pipes, $filename, array $ini_options = [] )
 	{
 		@unlink( $this->tmpDir . '/error-output.txt' );
 		@unlink( $this->tmpDir . '/remote_log.txt' );
@@ -62,18 +59,13 @@ class DebugClient
 		);
 
 		$default_options = array(
-			"xdebug.remote_enable" => "1",
-			"xdebug.remote_autostart" => "1",
+			"xdebug.mode" => "debug",
+			"xdebug.start_with_request" => "always",
 			"xdebug.remote_host" => $this->getIPAddress(),
 			"xdebug.remote_port" => $this->getPort(),
 			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt",
 			"xdebug.remote_log_level" => 10,
 		);
-
-		if ( is_null( $ini_options ) )
-		{
-			$ini_options = array();
-		}
 
 		$options = (getenv('TEST_PHP_ARGS') ?: '');
 		$ini_options = array_merge( $default_options, $ini_options );
@@ -161,7 +153,7 @@ class DebugClient
 		} while ( $trans_id !== $transaction_id );
 	}
 
-	function start( $filename, array $ini_options = null )
+	function start( $filename, array $ini_options = [], array $options = [])
 	{
 		$filename = realpath( $filename );
 
@@ -173,8 +165,8 @@ class DebugClient
 			echo "Address: {$this->getAddress()}\n";
 			return false;
 		}
-		$this->php = $this->launchPhp( $this->ppipes, $ini_options, $filename );
-		$conn = @stream_socket_accept( $this->socket, 20 );
+		$this->php = $this->launchPhp( $this->ppipes, $filename, $ini_options );
+		$conn = @stream_socket_accept( $this->socket, isset( $options['timeout'] ) ? $options['timeout'] : 20 );
 
 		if ( $conn === false )
 		{
@@ -220,9 +212,9 @@ class DebugClient
 		fwrite( $conn, $command . "\0" );
 	}
 
-	function runTest( $filename, array $commands, array $ini_options = null )
+	function runTest( $filename, array $commands, array $ini_options = [], array $options = [] )
 	{
-		$conn = $this->start( $filename, $ini_options );
+		$conn = $this->start( $filename, $ini_options, $options );
 		if ( $conn === false )
 		{
 			return;
@@ -268,9 +260,9 @@ class DebugClientIPv6 extends DebugClient
 	}
 }
 
-function dbgpRunFile( $data, $commands, array $ini_options = null, $flags = XDEBUG_DBGP_IPV4 )
+function dbgpRunFile( $data, $commands, array $ini_options = [], array $options = [] )
 {
-	if ( $flags == XDEBUG_DBGP_IPV6 )
+	if ( isset( $options['ipv'] ) && $options['ipv'] == 6 )
 	{
 		$t = new DebugClientIPv6();
 	}
@@ -279,6 +271,6 @@ function dbgpRunFile( $data, $commands, array $ini_options = null, $flags = XDEB
 		$t = new DebugClient();
 	}
 
-	$t->runTest( $data, $commands, $ini_options );
+	$t->runTest( $data, $commands, $ini_options, $options );
 }
 ?>

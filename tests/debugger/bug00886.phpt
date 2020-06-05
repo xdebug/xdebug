@@ -5,11 +5,8 @@ Test for bug #886: Use the same file system protocol for file located inside PHA
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; slow');
 ?>
---INI--
-xdebug.auto_trace=0
 --FILE--
 <?php
-xdebug_start_trace( sys_get_temp_dir() . "/trace.log" );
 require 'dbgp/dbgpclient.php';
 
 $dir = dirname(__FILE__);
@@ -34,7 +31,7 @@ dbgpRunFile( $filename, $commands );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug00886.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid="" idekey=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://bug00886.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
 -> step_into -i 1
 <?xml version="1.0" encoding="iso-8859-1"?>

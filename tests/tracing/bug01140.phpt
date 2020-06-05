@@ -1,9 +1,8 @@
 --TEST--
 Test for bug #1140: Tracing with __debugInfo() crashes Xdebug due to a stack overflow
 --INI--
-xdebug.default_enable=1
-xdebug.profiler_enable=0
-xdebug.auto_trace=0
+xdebug.mode=trace,display
+xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0

@@ -1,6 +1,8 @@
 --TEST--
 GC Stats: userland statistic functions
 --INI--
+xdebug.mode=gcstats
+xdebug.start_with_request=default
 zend.enable_gc=1
 --FILE--
 <?php

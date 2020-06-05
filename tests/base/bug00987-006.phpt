@@ -7,8 +7,8 @@ check_reqs('ext simplexml');
 ?>
 --INI--
 html_errors=0
+xdebug.mode=display
 xdebug.cli_color=0
-xdebug.default_enable=1
 error_reporting=-1
 xdebug.collect_params=4
 xdebug.show_local_vars=0

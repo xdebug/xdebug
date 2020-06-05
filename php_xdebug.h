@@ -94,11 +94,6 @@ PHP_FUNCTION(xdebug_var_dump);
 PHP_FUNCTION(xdebug_debug_zval);
 PHP_FUNCTION(xdebug_debug_zval_stdout);
 
-/* activation functions */
-PHP_FUNCTION(xdebug_enable);
-PHP_FUNCTION(xdebug_disable);
-PHP_FUNCTION(xdebug_is_enabled);
-
 /* breaking functions */
 PHP_FUNCTION(xdebug_is_debugger_active);
 PHP_FUNCTION(xdebug_break);
@@ -198,7 +193,6 @@ struct xdebug_base_info {
 	struct {
 		zend_long     max_nesting_level;
 		zend_long     max_stack_frames;
-		zend_bool     default_enable;
 		zend_bool     collect_includes;
 		zend_long     collect_params;
 		zend_bool     collect_return;

@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('32bit');
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.overload_var_dump=1
 --FILE--
 <?php

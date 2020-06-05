@@ -3,10 +3,10 @@ Test for bug #1437: Add X-Xdebug-Profile-Filename header
 --ENV--
 XDEBUG_CONFIG=
 --INI--
-xdebug.default_enable=1
+xdebug.mode=profile,display
+xdebug.start_with_request=default
 xdebug.overload_var_dump=2
 xdebug.filename_format=
-xdebug.profiler_enable=1
 xdebug.profiler_output_name=XDEBUG-PROFILE.%p
 --FILE--
 <?php

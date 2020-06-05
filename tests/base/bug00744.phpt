@@ -2,8 +2,8 @@
 Test for bug #744: new lines in a PHP file from Windows are displayed with an extra white line with var_dump().
 --INI--
 html_errors=1
+xdebug.mode=display
 xdebug.overload_var_dump=2
-xdebug.default_enable=1
 xdebug.file_link_format=
 xdebug.filename_format=
 --FILE--

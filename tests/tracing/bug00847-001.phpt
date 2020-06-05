@@ -1,9 +1,10 @@
 --TEST--
 Test for bug #847: %s doesn't work in xdebug.trace_output_name (auto_trace)
 --INI--
+xdebug.mode=trace
+xdebug.start_with_request=always
 xdebug.trace_output_name=trace.%s
 xdebug.trace_options=1
-xdebug.auto_trace=1
 --FILE--
 <?php
 $trace_file = xdebug_get_tracefile_name();

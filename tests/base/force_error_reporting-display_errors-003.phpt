@@ -1,7 +1,7 @@
 --TEST--
 Test for xdebug.force_error_reporting (display_errors) [3]
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 display_errors=1
 log_errors=0
 xdebug.force_error_reporting=E_ALL

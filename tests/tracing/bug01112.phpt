@@ -6,9 +6,9 @@ require __DIR__ . '/../utils.inc';
 check_reqs('!win');
 ?>
 --INI--
+xdebug.mode=trace,display
+xdebug.start_with_request=always
 xdebug.trace_format=42
-xdebug.auto_trace=1
-xdebug.default_enable=1
 log_errors=0
 --FILE--
 <?php

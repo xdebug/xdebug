@@ -1,8 +1,8 @@
 --TEST--
 Test for bug #280: var_dump don't display key of array as expected
 --INI--
+xdebug.mode=display
 xdebug.overload_var_dump=1
-xdebug.default_enable=1
 --FILE--
 <?php
 $var = "te\0st";

@@ -53,7 +53,7 @@ static int xdebug_gc_collect_cycles(void)
 	zend_gc_status     status;
 #endif
 
-	if (!XG_GCSTATS(enabled)) {
+	if (!XG_GCSTATS(active)) {
 		return xdebug_old_gc_collect_cycles();
 	}
 
@@ -153,7 +153,7 @@ static int xdebug_gc_stats_init(char *fname, char *script_name)
 
 static void xdebug_gc_stats_stop()
 {
-	XG_GCSTATS(enabled) = 0;
+	XG_GCSTATS(active) = 0;
 
 	if (XG_GCSTATS(file)) {
 		fclose(XG_GCSTATS(file));
@@ -233,27 +233,27 @@ PHP_FUNCTION(xdebug_start_gcstats)
 	size_t                fname_len = 0;
 	function_stack_entry *fse;
 
-	if (XG_GCSTATS(enabled) == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &fname, &fname_len) == FAILURE) {
-			return;
-		}
-
-		fse = xdebug_get_stack_frame(0);
-
-		if (xdebug_gc_stats_init(fname, fse->filename) == SUCCESS) {
-			XG_GCSTATS(enabled) = 1;
-			RETVAL_STRING(XG_GCSTATS(filename));
-			return;
-		} else {
-			php_error(E_NOTICE, "Garbage Collection statistics could not be started");
-		}
-
-		XG_GCSTATS(enabled) = 0;
-		RETURN_FALSE;
-	} else {
+	if (XG_GCSTATS(active)) {
 		php_error(E_NOTICE, "Garbage Collection statistics are already being collected.");
 		RETURN_FALSE;
 	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &fname, &fname_len) == FAILURE) {
+		return;
+	}
+
+	fse = xdebug_get_stack_frame(0);
+
+	if (xdebug_gc_stats_init(fname, fse->filename) == SUCCESS) {
+		XG_GCSTATS(active) = 1;
+		RETVAL_STRING(XG_GCSTATS(filename));
+		return;
+	} else {
+		php_error(E_NOTICE, "Garbage Collection statistics could not be started");
+	}
+
+	XG_GCSTATS(active) = 0;
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -261,13 +261,13 @@ PHP_FUNCTION(xdebug_start_gcstats)
    Stop collecting garbage collection statistics */
 PHP_FUNCTION(xdebug_stop_gcstats)
 {
-	if (XG_GCSTATS(enabled) == 1) {
-		RETVAL_STRING(XG_GCSTATS(filename));
-		xdebug_gc_stats_stop();
-	} else {
-		RETVAL_FALSE;
+	if (!XG_GCSTATS(active)) {
 		php_error(E_NOTICE, "Garbage Collection statistics was not started");
+		RETURN_FALSE;
 	}
+
+	xdebug_gc_stats_stop();
+	RETURN_STRING(XG_GCSTATS(filename));
 }
 
 /* {{{ proto void xdebug_get_gc_run_count()
@@ -305,10 +305,17 @@ PHP_FUNCTION(xdebug_get_gc_total_collected_roots)
 /* {{{ helpers */
 void xdebug_gcstats_init_if_requested(zend_op_array* op_array)
 {
-	if (!XG_GCSTATS(enabled) && XINI_GCSTATS(enable)) {
-		if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
-			XG_GCSTATS(enabled) = 1;
-		}
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_GCSTATS);
+	if (!xdebug_lib_start_at_request()) {
+		return;
+	}
+
+	if (XG_GCSTATS(active)) {
+		return;
+	}
+
+	if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
+		XG_GCSTATS(active) = 1;
 	}
 }
 
@@ -319,7 +326,7 @@ void xdebug_init_gc_stats_globals(xdebug_gc_stats_globals_t *xg)
 {
 	xg->file = NULL;
 	xg->filename = NULL;
-	xg->enabled = 0;
+	xg->active = 0;
 }
 
 void xdebug_gcstats_minit()
@@ -341,7 +348,7 @@ void xdebug_gcstats_rinit()
 
 void xdebug_gcstats_post_deactivate()
 {
-	if (XG_GCSTATS(enabled)) {
+	if (XG_GCSTATS(active)) {
 		xdebug_gc_stats_stop();
 	}
 

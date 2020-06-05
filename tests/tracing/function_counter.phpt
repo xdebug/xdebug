@@ -4,7 +4,6 @@ Test for xdebug_get_function_count
 xdebug.enable=1
 xdebug.collect_params=1
 xdebug.auto_profile=0
-xdebug.profiler_enable=0
 --FILE--
 <?php
 	echo xdebug_get_function_count(). "\n";

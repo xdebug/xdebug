@@ -1,9 +1,7 @@
 --TEST--
 Test for file display with xdebug_var_dump()
 --INI--
-xdebug.default_enable=1
-xdebug.auto_trace=0
-xdebug.profiler_enable=0
+xdebug.mode=display
 html_errors=0
 xdebug.var_display_max_children=11
 xdebug.overload_var_dump=2

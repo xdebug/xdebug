@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('NTS; !opcache');
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 --FILE--
 <?php
 function func(){

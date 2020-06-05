@@ -1,7 +1,8 @@
 --TEST--
 Test for bug #785: Profiler does not handle closures well
 --INI--
-xdebug.profiler_enable=1
+xdebug.mode=profile
+xdebug.start_with_request=default
 --FILE--
 <?php
 require_once('bug00785-001.inc');

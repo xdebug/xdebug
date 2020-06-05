@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #800: var_dump(get_class(new foo\bar')) add an extra "\" in class name.
 --INI--
-xdebug.default_enable=1
+xdebug.mode=display
 xdebug.overload_var_dump=1
 --FILE--
 <?php
