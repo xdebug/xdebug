@@ -7,7 +7,7 @@ check_reqs('dbgp; !win');
 ?>
 --INI--
 xdebug.mode=debug
-xdebug.start_with_request=always
+xdebug.start_with_request=yes
 xdebug.remote_log=/tmp/{RUNID}remote-log1.txt
 xdebug.remote_log_level=20
 xdebug.remote_connect_back=0

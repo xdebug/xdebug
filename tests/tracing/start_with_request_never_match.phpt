@@ -2,7 +2,7 @@
 Starting Tracing: never, trigger match
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=never
+xdebug.start_with_request=no
 xdebug.trigger_value=SOMETHING
 xdebug.collect_params=0
 xdebug.collect_return=0

@@ -2,7 +2,7 @@
 Test for bug #1676: xdebug_trace_* deinit and write_footer not called for shutdown functions
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=always
+xdebug.start_with_request=yes
 xdebug.collect_params=4
 xdebug.collect_assignments=0
 xdebug.collect_return=0

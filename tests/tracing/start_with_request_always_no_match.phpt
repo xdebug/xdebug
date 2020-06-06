@@ -2,7 +2,7 @@
 Starting Tracing: always, no trigger match
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=always
+xdebug.start_with_request=yes
 xdebug.trigger_value=FOOBAR
 xdebug.collect_params=0
 xdebug.collect_return=0

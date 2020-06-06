@@ -9,7 +9,7 @@ check_reqs('!win; unparallel');
 HTTP_X_FORWARDED_FOR=192.168.111.111, 10.1.2.3, 10.1.2.4
 --INI--
 xdebug.mode=debug
-xdebug.start_with_request=always
+xdebug.start_with_request=yes
 xdebug.remote_log=/tmp/bug964.txt
 xdebug.remote_autostart=1
 xdebug.remote_connect_back=1

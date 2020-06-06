@@ -7,7 +7,7 @@ check_reqs('!win');
 ?>
 --INI--
 xdebug.mode=trace,display
-xdebug.start_with_request=always
+xdebug.start_with_request=yes
 xdebug.trace_format=42
 log_errors=0
 --FILE--

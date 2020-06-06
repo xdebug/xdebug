@@ -120,12 +120,12 @@ int xdebug_lib_set_start_at_request(char *value)
 		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_DEFAULT;
 		return 1;
 	}
-	if (strcmp(value, "always") == 0) {
-		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_ALWAYS;
+	if (strcmp(value, "yes") == 0 || strcmp(value, "1") == 0) {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_YES;
 		return 1;
 	}
-	if (strcmp(value, "never") == 0) {
-		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_NEVER;
+	if (strcmp(value, "no") == 0 || value[0] == '\0') {
+		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_NO;
 		return 1;
 	}
 	if (strcmp(value, "trigger") == 0) {
@@ -138,7 +138,7 @@ int xdebug_lib_set_start_at_request(char *value)
 
 int xdebug_lib_start_at_request(void)
 {
-	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_ALWAYS) {
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_YES) {
 		return 1;
 	}
 
@@ -153,7 +153,7 @@ int xdebug_lib_start_at_request(void)
 
 int xdebug_lib_never_start_at_request(void)
 {
-	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_NEVER) {
+	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_NO) {
 		return 1;
 	}
 

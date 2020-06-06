@@ -2,7 +2,7 @@
 Starting Profiler: never, trigger match
 --INI--
 xdebug.mode=profile
-xdebug.start_with_request=never
+xdebug.start_with_request=no
 xdebug.trigger_value=something
 xdebug.collect_params=0
 xdebug.collect_return=0

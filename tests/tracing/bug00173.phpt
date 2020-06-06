@@ -7,7 +7,7 @@ check_reqs('ext SPL');
 ?>
 --INI--
 xdebug.mode=trace,display
-xdebug.start_with_request=always
+xdebug.start_with_request=yes
 xdebug.trace_options=0
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
