@@ -243,8 +243,8 @@ int xdebug_lib_mode_is(int mode);
 #define WARN_AND_RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { php_error(E_NOTICE, "Functionality is not enabled"); return; }
 
 #define XDEBUG_START_WITH_REQUEST_DEFAULT     1
-#define XDEBUG_START_WITH_REQUEST_ALWAYS      2
-#define XDEBUG_START_WITH_REQUEST_NEVER       3
+#define XDEBUG_START_WITH_REQUEST_YES         2
+#define XDEBUG_START_WITH_REQUEST_NO          3
 #define XDEBUG_START_WITH_REQUEST_TRIGGER     4
 int xdebug_lib_set_start_at_request(char *value);
 int xdebug_lib_start_at_request(void);

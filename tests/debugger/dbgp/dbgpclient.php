@@ -60,7 +60,7 @@ class DebugClient
 
 		$default_options = array(
 			"xdebug.mode" => "debug",
-			"xdebug.start_with_request" => "always",
+			"xdebug.start_with_request" => "'yes'",
 			"xdebug.remote_host" => $this->getIPAddress(),
 			"xdebug.remote_port" => $this->getPort(),
 			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt",
