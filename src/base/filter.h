@@ -32,10 +32,10 @@ void xdebug_filter_run_internal(function_stack_entry *fse, int group, long *filt
 #define XDEBUG_FILTER_TRACING        0x100
 #define XDEBUG_FILTER_CODE_COVERAGE  0x200
 
-#define XDEBUG_PATH_WHITELIST        0x01
-#define XDEBUG_PATH_BLACKLIST        0x02
-#define XDEBUG_NAMESPACE_WHITELIST   0x11
-#define XDEBUG_NAMESPACE_BLACKLIST   0x12
+#define XDEBUG_PATH_INCLUDE        0x01
+#define XDEBUG_PATH_EXCLUDE        0x02
+#define XDEBUG_NAMESPACE_INCLUDE   0x11
+#define XDEBUG_NAMESPACE_EXCLUDE   0x12
 
 PHP_FUNCTION(xdebug_set_filter);
 

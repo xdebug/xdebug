@@ -1,11 +1,11 @@
 --TEST--
-Test for bug #1508: Code coverage filter not checked in xdebug_common_assign_dim handler (black list)
+Test for bug #1508: Code coverage filter not checked in xdebug_common_assign_dim handler (white list)
 --INI--
 xdebug.mode=coverage
 --FILE--
 <?php
 $cwd = __DIR__; $s = DIRECTORY_SEPARATOR;
-xdebug_set_filter(XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_PATH_BLACKLIST, [ "{$cwd}{$s}bug01508.php" ] );
+xdebug_set_filter(XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_PATH_INCLUDE, [] );
 
 $tf = xdebug_start_code_coverage( XDEBUG_CC_DEAD_CODE | XDEBUG_CC_UNUSED );
 

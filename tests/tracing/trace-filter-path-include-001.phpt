@@ -1,5 +1,5 @@
 --TEST--
-Filtered tracing: path whitelist [3]
+Filtered tracing: path include [1]
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
@@ -9,11 +9,11 @@ xdebug.collect_assignments=0
 xdebug.trace_format=0
 --FILE--
 <?php
-$cwd = __DIR__;
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_WHITELIST, [] );
+$cwd = __DIR__; $s = DIRECTORY_SEPARATOR; $includeDir = realpath( $cwd . '/..' );
+xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_INCLUDE, [ "{$includeDir}{$s}filter{$s}xdebug" ] );
 
-include "$cwd/../filter/foobar/foobar.php";
-include "$cwd/../filter/xdebug/xdebug.php";
+include "{$includeDir}/filter/foobar/foobar.php";
+include "{$includeDir}/filter/xdebug/xdebug.php";
 
 $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 
@@ -28,5 +28,7 @@ unlink($tf);
 ello!
 ello!
 TRACE START [%d-%d-%d %d:%d:%d]
+%w%f %w%d       -> strstr('Hello!\n', 'e') %sfilter%exdebug%exdebug.php:6
+%w%f %w%d        >=> 'ello!\n'
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]
