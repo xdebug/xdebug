@@ -1,5 +1,5 @@
 --TEST--
-Filtered tracing: path whitelist [2]
+Filtered tracing: path exclude [1]
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
@@ -10,7 +10,7 @@ xdebug.trace_format=0
 --FILE--
 <?php
 $cwd = __DIR__; $s = DIRECTORY_SEPARATOR; $includeDir = realpath( $cwd . '/..' );
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_WHITELIST, [ "{$includeDir}{$s}filter{$s}xdebug", "{$cwd}{$s}trace-filter" ] );
+xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}xdebug" ] );
 
 include "{$includeDir}/filter/foobar/foobar.php";
 include "{$includeDir}/filter/xdebug/xdebug.php";
@@ -28,10 +28,10 @@ unlink($tf);
 ello!
 ello!
 TRACE START [%d-%d-%d %d:%d:%d]
-%w%f %w%d     -> Foobar::foo($s = 'hi') %strace-filter-path-white-002.php:10
-%w%f %w%d     -> Xdebug::foo($s = 'hi') %strace-filter-path-white-002.php:11
-%w%f %w%d       -> strstr('Hello!\n', 'e') %sfilter%exdebug%exdebug.php:6
+%w%f %w%d     -> Foobar::foo($s = 'hi') %strace-filter-path-exclude-001.php:10
+%w%f %w%d       -> strstr('Hello!\n', 'e') %sfilter%efoobar%efoobar.php:6
 %w%f %w%d        >=> 'ello!\n'
-%w%f %w%d     -> xdebug_stop_trace() %strace-filter-path-white-002.php:13
+%w%f %w%d     -> Xdebug::foo($s = 'hi') %strace-filter-path-exclude-001.php:11
+%w%f %w%d     -> xdebug_stop_trace() %strace-filter-path-exclude-001.php:13
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]

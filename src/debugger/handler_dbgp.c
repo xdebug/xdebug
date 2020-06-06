@@ -1867,7 +1867,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			tmp_hash = xdebug_declared_var_hash_from_llist(fse->declared_vars);
 
 			/* Check for dynamically defined variables, but make sure we don't already
-			 * have them. Also blacklist superglobals and argv/argc */
+			 * have them. Also exclude superglobals and argv/argc */
 			if (xdebug_lib_has_active_symbol_table()) {
 				zend_hash_apply_with_arguments(xdebug_lib_get_active_symbol_table(), (apply_func_args_t) xdebug_add_filtered_symboltable_var, 1, tmp_hash);
 			}

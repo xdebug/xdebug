@@ -1,5 +1,5 @@
 --TEST--
-Filtered code coverage: path whitelist [1]
+Filtered code coverage: path include [1]
 --INI--
 xdebug.mode=coverage
 xdebug.collect_return=1
@@ -9,7 +9,7 @@ xdebug.trace_format=0
 --FILE--
 <?php
 $cwd = __DIR__; $s = DIRECTORY_SEPARATOR; $includeDir = realpath( $cwd . '/..' );
-xdebug_set_filter(XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_PATH_WHITELIST, [ "{$includeDir}{$s}filter{$s}xdebug" ] );
+xdebug_set_filter(XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_PATH_INCLUDE, [ "{$includeDir}{$s}filter{$s}xdebug" ] );
 
 $tf = xdebug_start_code_coverage( XDEBUG_CC_DEAD_CODE | XDEBUG_CC_UNUSED );
 
@@ -30,7 +30,7 @@ ello!
 ello!
 ello!
 array(2) {
-  ["%scoverage-filter-path-white-001.php"]=>
+  ["%scoverage-filter-path-include-001.php"]=>
   array(6) {
     [7]=>
     int(1)

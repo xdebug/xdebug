@@ -49,13 +49,13 @@ void xdebug_filter_register_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_FILTER_CODE_COVERAGE", XDEBUG_FILTER_CODE_COVERAGE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("XDEBUG_FILTER_NONE", XDEBUG_FILTER_NONE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XDEBUG_PATH_WHITELIST", XDEBUG_PATH_WHITELIST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XDEBUG_PATH_BLACKLIST", XDEBUG_PATH_BLACKLIST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XDEBUG_NAMESPACE_WHITELIST", XDEBUG_NAMESPACE_WHITELIST, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XDEBUG_NAMESPACE_BLACKLIST", XDEBUG_NAMESPACE_BLACKLIST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_PATH_INCLUDE", XDEBUG_PATH_INCLUDE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_PATH_EXCLUDE", XDEBUG_PATH_EXCLUDE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_NAMESPACE_INCLUDE", XDEBUG_NAMESPACE_INCLUDE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_NAMESPACE_EXCLUDE", XDEBUG_NAMESPACE_EXCLUDE, CONST_CS | CONST_PERSISTENT);
 }
 
-static int xdebug_filter_match_path_whitelist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_path_include(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (strncasecmp(filter, fse->filename, strlen(filter)) == 0) {
 		*filtered_flag = 0;
@@ -64,7 +64,7 @@ static int xdebug_filter_match_path_whitelist(function_stack_entry *fse, long *f
 	return 0;
 }
 
-static int xdebug_filter_match_path_blacklist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_path_exclude(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (strncasecmp(filter, fse->filename, strlen(filter)) == 0) {
 		*filtered_flag = 1;
@@ -73,7 +73,7 @@ static int xdebug_filter_match_path_blacklist(function_stack_entry *fse, long *f
 	return 0;
 }
 
-static int xdebug_filter_match_namespace_whitelist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_namespace_include(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (!fse->function.class && strlen(filter) == 0) {
 		*filtered_flag = 0;
@@ -86,7 +86,7 @@ static int xdebug_filter_match_namespace_whitelist(function_stack_entry *fse, lo
 	return 0;
 }
 
-static int xdebug_filter_match_namespace_blacklist(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_namespace_exclude(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
 	if (!fse->function.class && strlen(filter) == 0) {
 		*filtered_flag = 1;
@@ -110,34 +110,34 @@ void xdebug_filter_run_internal(function_stack_entry *fse, int group, long *filt
 	le = XDEBUG_LLIST_HEAD(filters);
 
 	switch (type) {
-		case XDEBUG_PATH_WHITELIST:
+		case XDEBUG_PATH_INCLUDE:
 			*filtered_flag = 1;
 			if (group == XDEBUG_FILTER_CODE_COVERAGE && fse->function.type & XFUNC_INCLUDES) {
 				tmp_fse.filename = fse->include_filename;
 				fse = &tmp_fse;
 			}
 
-			filter_to_run = xdebug_filter_match_path_whitelist;
+			filter_to_run = xdebug_filter_match_path_include;
 			break;
 
-		case XDEBUG_PATH_BLACKLIST:
+		case XDEBUG_PATH_EXCLUDE:
 			*filtered_flag = 0;
 			if (group == XDEBUG_FILTER_CODE_COVERAGE && fse->function.type & XFUNC_INCLUDES) {
 				tmp_fse.filename = fse->include_filename;
 				fse = &tmp_fse;
 			}
 
-			filter_to_run = xdebug_filter_match_path_blacklist;
+			filter_to_run = xdebug_filter_match_path_exclude;
 			break;
 
-		case XDEBUG_NAMESPACE_WHITELIST:
+		case XDEBUG_NAMESPACE_INCLUDE:
 			*filtered_flag = 1;
-			filter_to_run = xdebug_filter_match_namespace_whitelist;
+			filter_to_run = xdebug_filter_match_namespace_include;
 			break;
 
-		case XDEBUG_NAMESPACE_BLACKLIST:
+		case XDEBUG_NAMESPACE_EXCLUDE:
 			*filtered_flag = 0;
-			filter_to_run = xdebug_filter_match_namespace_blacklist;
+			filter_to_run = xdebug_filter_match_namespace_exclude;
 			break;
 
 		default:
@@ -186,8 +186,8 @@ PHP_FUNCTION(xdebug_set_filter)
 		case XDEBUG_FILTER_CODE_COVERAGE:
 			filter_list = &XG_BASE(filters_code_coverage);
 			XG_BASE(filter_type_code_coverage) = XDEBUG_FILTER_NONE;
-			if (filter_type == XDEBUG_NAMESPACE_WHITELIST || filter_type == XDEBUG_NAMESPACE_BLACKLIST) {
-				php_error(E_WARNING, "The code coverage filter (XDEBUG_FILTER_CODE_COVERAGE) only supports the XDEBUG_PATH_WHITELIST, XDEBUG_PATH_BLACKLIST, and XDEBUG_FILTER_NONE filter types");
+			if (filter_type == XDEBUG_NAMESPACE_INCLUDE || filter_type == XDEBUG_NAMESPACE_EXCLUDE) {
+				php_error(E_WARNING, "The code coverage filter (XDEBUG_FILTER_CODE_COVERAGE) only supports the XDEBUG_PATH_INCLUDE, XDEBUG_PATH_EXCLUDE, and XDEBUG_FILTER_NONE filter types");
 				return;
 			}
 			break;
@@ -198,10 +198,10 @@ PHP_FUNCTION(xdebug_set_filter)
 	}
 
 	if (
-		filter_type == XDEBUG_PATH_WHITELIST ||
-		filter_type == XDEBUG_PATH_BLACKLIST ||
-		filter_type == XDEBUG_NAMESPACE_WHITELIST ||
-		filter_type == XDEBUG_NAMESPACE_BLACKLIST ||
+		filter_type == XDEBUG_PATH_INCLUDE ||
+		filter_type == XDEBUG_PATH_EXCLUDE ||
+		filter_type == XDEBUG_NAMESPACE_INCLUDE ||
+		filter_type == XDEBUG_NAMESPACE_EXCLUDE ||
 		filter_type == XDEBUG_FILTER_NONE
 	) {
 		switch (filter_group) {
@@ -214,7 +214,7 @@ PHP_FUNCTION(xdebug_set_filter)
 				break;
 		}
 	} else {
-		php_error(E_WARNING, "Filter type needs to be one of XDEBUG_PATH_WHITELIST, XDEBUG_PATH_BLACKLIST, XDEBUG_NAMESPACE_WHITELIST, XDEBUG_NAMESPACE_BLACKLIST, or XDEBUG_FILTER_NONE");
+		php_error(E_WARNING, "Filter type needs to be one of XDEBUG_PATH_INCLUDE, XDEBUG_PATH_EXCLUDE, XDEBUG_NAMESPACE_INCLUDE, XDEBUG_NAMESPACE_EXCLUDE, or XDEBUG_FILTER_NONE");
 		return;
 	}
 
