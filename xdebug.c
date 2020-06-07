@@ -292,7 +292,7 @@ static PHP_INI_MH(OnUpdateStartWithRequest)
 		return FAILURE;
 	}
 
-	if (!xdebug_lib_set_start_at_request(new_value->val)) {
+	if (!xdebug_lib_set_start_with_request(new_value->val)) {
 		return FAILURE;
 	}
 

@@ -91,7 +91,7 @@ void xdebug_profiler_init_if_requested(zend_op_array *op_array)
 		return;
 	}
 
-	if (xdebug_lib_start_at_request() || xdebug_lib_start_at_trigger()) {
+	if (xdebug_lib_start_with_request() || xdebug_lib_start_with_trigger()) {
 		xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename));
 	}
 }

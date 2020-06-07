@@ -114,7 +114,7 @@ int xdebug_lib_mode_is(int mode)
 	return 0;
 }
 
-int xdebug_lib_set_start_at_request(char *value)
+int xdebug_lib_set_start_with_request(char *value)
 {
 	if (strcmp(value, "default") == 0) {
 		XG_LIB(start_with_request) = XDEBUG_START_WITH_REQUEST_DEFAULT;
@@ -136,7 +136,7 @@ int xdebug_lib_set_start_at_request(char *value)
 	return 0;
 }
 
-int xdebug_lib_start_at_request(void)
+int xdebug_lib_start_with_request(void)
 {
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_YES) {
 		return 1;
@@ -151,7 +151,7 @@ int xdebug_lib_start_at_request(void)
 	return 0;
 }
 
-int xdebug_lib_never_start_at_request(void)
+int xdebug_lib_never_start_with_request(void)
 {
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_NO) {
 		return 1;
@@ -224,7 +224,7 @@ static int trigger_enabled(void)
 	return 0;
 }
 
-int xdebug_lib_start_at_trigger(void)
+int xdebug_lib_start_with_trigger(void)
 {
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_TRIGGER) {
 		return trigger_enabled();
