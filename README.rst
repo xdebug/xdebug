@@ -60,7 +60,7 @@ Xdebug is written in C, and extensive knowledge of PHP's internals is
 necessary to be able to contribute. Contributing guidance is available
 `separately <https://github.com/xdebug/xdebug/blob/master/CONTRIBUTING.rst>`_.
 
-Before you want to contribute, please reach out first. Either through email
+Before you begin to contribute, please reach out first. Either through email
 (address at the bottom), an issue in the `issue tracker
 <https://bugs.xdebug.org>`_ or preferably through IRC on Freenode's #xdebug
 channel.
@@ -81,7 +81,7 @@ with remote debugging enabled through `xdebug.remote_enable=1`. It is possible
 to skip remote debugging tests by exporting the `SKIP_DBGP_TESTS=1` environment
 variable.
 
-The `SKIP_UNPARALLEL_TESTS=1` can be used to skip test that can not run in
+The `SKIP_UNPARALLEL_TESTS=1` can be used to skip tests that can not run in
 parallel environments, and the `SKIP_SLOW_TESTS=1` environment variable to skip
 slow tests. The `OPCACHE` environment variable can either be `yes` or `no` and
 controls whether the test framework enables or disables OpCache.
@@ -98,7 +98,7 @@ Initiative).
 Further Reading
 ---------------
 
-Xdebug has extensive documentation its `website <https://xdebug.org/docs>`_.
+Xdebug has extensive documentation on its `website <https://xdebug.org/docs>`_.
 There are over a hundred settings and many functions documented. Please have a
 look through the wealth of information that Xdebug can provide to make your
 every day development with PHP easier.
