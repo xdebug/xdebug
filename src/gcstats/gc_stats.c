@@ -306,7 +306,7 @@ PHP_FUNCTION(xdebug_get_gc_total_collected_roots)
 void xdebug_gcstats_init_if_requested(zend_op_array* op_array)
 {
 	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_GCSTATS);
-	if (!xdebug_lib_start_at_request()) {
+	if (!xdebug_lib_start_with_request()) {
 		return;
 	}
 

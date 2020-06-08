@@ -865,8 +865,13 @@ void xdebug_debugger_restart_if_pid_changed()
 
 PHP_FUNCTION(xdebug_break)
 {
-	/* Start JIT if requested and not yet enabled */
-	xdebug_debug_init_if_requested_on_error();
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
+	xdebug_debug_init_if_requested_on_xdebug_break();
+
+	if (!xdebug_is_debug_connection_active()) {
+		RETURN_FALSE;
+	}
 
 	XG_DBG(context).do_break = 1;
 	RETURN_TRUE;
