@@ -299,6 +299,19 @@ static PHP_INI_MH(OnUpdateStartWithRequest)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateStartUponError)
+{
+	if (!new_value || !new_value->val) {
+		return FAILURE;
+	}
+
+	if (!xdebug_lib_set_start_upon_error(new_value->val)) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 #ifdef P_tmpdir
 # define XDEBUG_TEMP_DIR P_tmpdir
 #else
@@ -313,6 +326,7 @@ PHP_INI_BEGIN()
 	/* Library settings */
 	PHP_INI_ENTRY(      "xdebug.mode",               "display",       PHP_INI_SYSTEM,                OnUpdateMode)
 	PHP_INI_ENTRY(      "xdebug.start_with_request", "default",       PHP_INI_SYSTEM,                OnUpdateStartWithRequest)
+	PHP_INI_ENTRY(      "xdebug.start_upon_error",   "default",       PHP_INI_SYSTEM,                OnUpdateStartUponError)
 	STD_PHP_INI_ENTRY(  "xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY(  "xdebug.trigger_value",      "",              PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value, zend_xdebug_globals, xdebug_globals)
 

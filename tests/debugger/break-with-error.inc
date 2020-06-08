@@ -1,6 +1,6 @@
 <?php
 $e = xdebug_get_headers();
-xdebug_break();
+@trigger_error('foo');
 $e = xdebug_get_headers();
-echo "Hi!\n";
+echo "Not triggered!\n";
 ?>

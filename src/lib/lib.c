@@ -160,6 +160,35 @@ int xdebug_lib_never_start_with_request(void)
 	return 0;
 }
 
+
+int xdebug_lib_set_start_upon_error(char *value)
+{
+	if (strcmp(value, "default") == 0) {
+		XG_LIB(start_upon_error) = XDEBUG_START_UPON_ERROR_DEFAULT;
+		return 1;
+	}
+	if (strcmp(value, "yes") == 0 || strcmp(value, "1") == 0) {
+		XG_LIB(start_upon_error) = XDEBUG_START_UPON_ERROR_YES;
+		return 1;
+	}
+	if (strcmp(value, "no") == 0 || value[0] == '\0') {
+		XG_LIB(start_upon_error) = XDEBUG_START_UPON_ERROR_NO;
+		return 1;
+	}
+
+	return 0;
+}
+
+int xdebug_lib_start_upon_error(void)
+{
+	if (XG_LIB(start_upon_error) == XDEBUG_START_UPON_ERROR_YES) {
+		return 1;
+	}
+
+	return 0;
+}
+
+
 static zval *find_in_globals(const char *element)
 {
 	zval *trigger_val = NULL;
@@ -224,10 +253,10 @@ static int trigger_enabled(void)
 	return 0;
 }
 
-int xdebug_lib_start_with_trigger(void)
+static int is_mode_trigger_and_enabled(int force_trigger)
 {
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_TRIGGER) {
-		return trigger_enabled();
+		return force_trigger || trigger_enabled();
 	}
 
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
@@ -235,12 +264,27 @@ int xdebug_lib_start_with_trigger(void)
 			xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) ||
 			xdebug_lib_mode_is(XDEBUG_MODE_TRACING)
 		) {
-			return trigger_enabled();
+			return force_trigger || trigger_enabled();
 		}
 	}
 
 	return 0;
 }
+
+/* Returns 1 if the mode is 'trigger', or 'default', where the default mode for
+ * a feature is to trigger, and the trigger is present. */
+int xdebug_lib_start_with_trigger(void)
+{
+	return is_mode_trigger_and_enabled(0);
+}
+
+/* Returns 1 if the mode is 'trigger', or 'default', where the default mode for
+ * a feature is to trigger. Does not check whether a trigger is present. */
+int xdebug_lib_start_if_mode_is_trigger(void)
+{
+	return is_mode_trigger_and_enabled(1);
+}
+
 
 function_stack_entry *xdebug_get_stack_head(void)
 {

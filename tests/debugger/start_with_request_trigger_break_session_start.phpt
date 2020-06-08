@@ -1,7 +1,7 @@
 --TEST--
 Starting Debugger: trigger, break, XDEBUG_SESSION_START
 --SKIPIF--
-<?php print "skip Can only be tested manually"; ?>
+<?php print "skip Can only be tested manually, as two connections need to be made and the test harnass does not support that"; ?>
 --ENV--
 XDEBUG_SESSION_START=foobar
 --FILE--

@@ -506,11 +506,24 @@ void xdebug_debug_init_if_requested_on_error()
 {
 	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
 
-	if (xdebug_lib_start_at_request()) {
+	if (!xdebug_lib_start_upon_error()) {
 		return;
 	}
 
 	if (!xdebug_is_debug_connection_active()) {
+		xdebug_init_debugger();
+	}
+}
+
+void xdebug_debug_init_if_requested_on_xdebug_break()
+{
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
+	if (xdebug_is_debug_connection_active()) {
+		return;
+	}
+
+	if (xdebug_lib_start_if_mode_is_trigger()) {
 		xdebug_init_debugger();
 	}
 }

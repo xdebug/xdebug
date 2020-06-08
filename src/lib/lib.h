@@ -212,6 +212,7 @@ int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value);
 typedef struct _xdebug_library_globals_t {
 	int                    mode;
 	int                    start_with_request; /* One of the XDEBUG_START_WITH_REQUEST_* constants */
+	int                    start_upon_error;   /* One of the XDEBUG_START_UPON_ERROR_* constants */
 
 	zend_execute_data     *active_execute_data;
 	function_stack_entry  *active_stack_entry;
@@ -249,7 +250,14 @@ int xdebug_lib_mode_is(int mode);
 int xdebug_lib_set_start_with_request(char *value);
 int xdebug_lib_start_with_request(void);
 int xdebug_lib_start_with_trigger(void);
+int xdebug_lib_start_if_mode_is_trigger(void);
 int xdebug_lib_never_start_with_request(void);
+
+#define XDEBUG_START_UPON_ERROR_DEFAULT     1
+#define XDEBUG_START_UPON_ERROR_YES         2
+#define XDEBUG_START_UPON_ERROR_NO          3
+int xdebug_lib_set_start_upon_error(char *value);
+int xdebug_lib_start_upon_error(void);
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);
 void xdebug_lib_set_active_object(zval *object);
