@@ -98,7 +98,7 @@ Initiative).
 Further Reading
 ---------------
 
-Xdebug has extensive documentation its `website <https://xdebug.org/docs>`_.
+Xdebug has extensive documentation on its `website <https://xdebug.org/docs>`_.
 There are over a hundred settings and many functions documented. Please have a
 look through the wealth of information that Xdebug can provide to make your
 every day development with PHP easier.
