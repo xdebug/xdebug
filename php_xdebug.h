@@ -74,67 +74,6 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 int xdebug_is_output_tty();
 #endif
 
-/* call stack functions */
-PHP_FUNCTION(xdebug_get_stack_depth);
-PHP_FUNCTION(xdebug_get_function_stack);
-PHP_FUNCTION(xdebug_get_formatted_function_stack);
-PHP_FUNCTION(xdebug_print_function_stack);
-PHP_FUNCTION(xdebug_get_declared_vars);
-PHP_FUNCTION(xdebug_call_class);
-PHP_FUNCTION(xdebug_call_function);
-PHP_FUNCTION(xdebug_call_file);
-PHP_FUNCTION(xdebug_call_line);
-
-PHP_FUNCTION(xdebug_set_time_limit);
-PHP_FUNCTION(xdebug_error_reporting);
-PHP_FUNCTION(xdebug_pcntl_exec);
-PHP_FUNCTION(xdebug_pcntl_fork);
-
-PHP_FUNCTION(xdebug_var_dump);
-PHP_FUNCTION(xdebug_debug_zval);
-PHP_FUNCTION(xdebug_debug_zval_stdout);
-
-/* breaking functions */
-PHP_FUNCTION(xdebug_is_debugger_active);
-PHP_FUNCTION(xdebug_break);
-
-/* tracing functions */
-PHP_FUNCTION(xdebug_start_trace);
-PHP_FUNCTION(xdebug_stop_trace);
-PHP_FUNCTION(xdebug_get_tracefile_name);
-
-/* error collecting functions */
-PHP_FUNCTION(xdebug_start_error_collection);
-PHP_FUNCTION(xdebug_stop_error_collection);
-PHP_FUNCTION(xdebug_get_collected_errors);
-
-/* function monitorin functions */
-PHP_FUNCTION(xdebug_start_function_monitor);
-PHP_FUNCTION(xdebug_stop_function_monitor);
-PHP_FUNCTION(xdebug_get_monitored_functions);
-
-/* profiling functions */
-PHP_FUNCTION(xdebug_get_profiler_filename);
-PHP_FUNCTION(xdebug_dump_aggr_profiling_data);
-PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
-
-/* gc stats functions */
-PHP_FUNCTION(xdebug_start_gcstats);
-PHP_FUNCTION(xdebug_stop_gcstats);
-PHP_FUNCTION(xdebug_get_gcstats_filename);
-PHP_FUNCTION(xdebug_get_gc_run_count);
-PHP_FUNCTION(xdebug_get_gc_total_collected_roots);
-
-/* misc functions */
-PHP_FUNCTION(xdebug_dump_superglobals);
-PHP_FUNCTION(xdebug_get_headers);
-PHP_FUNCTION(xdebug_memory_usage);
-PHP_FUNCTION(xdebug_peak_memory_usage);
-PHP_FUNCTION(xdebug_time_index);
-
-/* filter functions */
-PHP_FUNCTION(xdebug_set_filter);
-
 struct xdebug_base_info {
 	unsigned long level;
 	xdebug_llist *stack;

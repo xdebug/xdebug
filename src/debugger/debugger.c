@@ -865,7 +865,7 @@ void xdebug_debugger_restart_if_pid_changed()
 
 PHP_FUNCTION(xdebug_break)
 {
-	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+	RETURN_FALSE_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
 
 	xdebug_debug_init_if_requested_on_xdebug_break();
 

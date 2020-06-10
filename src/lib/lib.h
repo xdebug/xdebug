@@ -241,6 +241,7 @@ void xdebug_library_mshutdown(void);
 int xdebug_lib_set_mode(char *mode);
 int xdebug_lib_mode_is(int mode);
 #define RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { return; }
+#define RETURN_FALSE_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { RETURN_FALSE; }
 #define WARN_AND_RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { php_error(E_NOTICE, "Functionality is not enabled"); return; }
 
 #define XDEBUG_START_WITH_REQUEST_DEFAULT     1
