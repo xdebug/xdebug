@@ -49,6 +49,7 @@
 #include "ext/standard/php_var.h"
 
 #include "php_xdebug.h"
+#include "php_xdebug_arginfo.h"
 
 #include "base/base.h"
 #include "base/filter.h"
@@ -80,139 +81,10 @@ int zend_xdebug_initialised = 0;
 
 static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s);
 
-ZEND_BEGIN_ARG_INFO_EX(xdebug_void_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_print_function_stack_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, message)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_call_class_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, depth)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_call_function_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, depth)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_call_file_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, depth)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_call_line_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, depth)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_var_dump_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, var)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_debug_zval_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, var)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_debug_zval_stdout_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, var)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_start_trace_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, fname)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_get_collected_errors_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, clear)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_start_function_monitor_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, functions_to_monitor)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_get_monitored_functions_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, clear)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_start_code_coverage_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_stop_code_coverage_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, cleanup)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_start_gcstats_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, fname)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_stop_gcstats_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(xdebug_set_filter_args, ZEND_SEND_BY_VAL, ZEND_RETURN_VALUE, 3)
-	ZEND_ARG_INFO(0, filter_group)
-	ZEND_ARG_INFO(0, filter_type)
-	ZEND_ARG_INFO(0, array_of_filters)
-ZEND_END_ARG_INFO()
-
-zend_function_entry xdebug_functions[] = {
-	PHP_FE(xdebug_get_stack_depth,       xdebug_void_args)
-	PHP_FE(xdebug_get_function_stack,    xdebug_void_args)
-	PHP_FE(xdebug_get_formatted_function_stack,    xdebug_void_args)
-	PHP_FE(xdebug_print_function_stack,  xdebug_print_function_stack_args)
-	PHP_FE(xdebug_get_declared_vars,     xdebug_void_args)
-	PHP_FE(xdebug_call_class,            xdebug_call_class_args)
-	PHP_FE(xdebug_call_function,         xdebug_call_function_args)
-	PHP_FE(xdebug_call_file,             xdebug_call_file_args)
-	PHP_FE(xdebug_call_line,             xdebug_call_line_args)
-
-	PHP_FE(xdebug_var_dump,              xdebug_var_dump_args)
-	PHP_FE(xdebug_debug_zval,            xdebug_debug_zval_args)
-	PHP_FE(xdebug_debug_zval_stdout,     xdebug_debug_zval_stdout_args)
-
-	PHP_FE(xdebug_is_debugger_active,    xdebug_void_args)
-	PHP_FE(xdebug_break,                 xdebug_void_args)
-
-	PHP_FE(xdebug_start_trace,           xdebug_start_trace_args)
-	PHP_FE(xdebug_stop_trace,            xdebug_void_args)
-	PHP_FE(xdebug_get_tracefile_name,    xdebug_void_args)
-
-	PHP_FE(xdebug_get_profiler_filename, xdebug_void_args)
-
-	PHP_FE(xdebug_start_gcstats,         xdebug_start_gcstats_args)
-	PHP_FE(xdebug_stop_gcstats,          xdebug_stop_gcstats_args)
-	PHP_FE(xdebug_get_gcstats_filename,  xdebug_void_args)
-	PHP_FE(xdebug_get_gc_run_count,      xdebug_void_args)
-	PHP_FE(xdebug_get_gc_total_collected_roots, xdebug_void_args)
-
-	PHP_FE(xdebug_memory_usage,          xdebug_void_args)
-	PHP_FE(xdebug_peak_memory_usage,     xdebug_void_args)
-	PHP_FE(xdebug_time_index,            xdebug_void_args)
-
-	PHP_FE(xdebug_start_error_collection, xdebug_void_args)
-	PHP_FE(xdebug_stop_error_collection, xdebug_void_args)
-	PHP_FE(xdebug_get_collected_errors,  xdebug_get_collected_errors_args)
-
-	PHP_FE(xdebug_start_function_monitor, xdebug_start_function_monitor_args)
-	PHP_FE(xdebug_stop_function_monitor, xdebug_void_args)
-	PHP_FE(xdebug_get_monitored_functions, xdebug_get_monitored_functions_args)
-
-	PHP_FE(xdebug_start_code_coverage,   xdebug_start_code_coverage_args)
-	PHP_FE(xdebug_stop_code_coverage,    xdebug_stop_code_coverage_args)
-	PHP_FE(xdebug_get_code_coverage,     xdebug_void_args)
-	PHP_FE(xdebug_code_coverage_started, xdebug_void_args)
-	PHP_FE(xdebug_get_function_count,    xdebug_void_args)
-
-	PHP_FE(xdebug_dump_superglobals,     xdebug_void_args)
-	PHP_FE(xdebug_get_headers,           xdebug_void_args)
-
-	PHP_FE(xdebug_set_filter,            xdebug_set_filter_args)
-	{NULL, NULL, 0, 0, 0}
-};
-
 zend_module_entry xdebug_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"xdebug",
-	xdebug_functions,
+	ext_functions,
 	PHP_MINIT(xdebug),
 	PHP_MSHUTDOWN(xdebug),
 	PHP_RINIT(xdebug),
@@ -763,49 +635,6 @@ static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, 
 	return SAPI_HEADER_ADD;
 }
 
-
-/* {{{ proto void xdebug_set_time_limit(void)
-   Dummy function to prevent time limit from being set within the script */
-PHP_FUNCTION(xdebug_set_time_limit)
-{
-	if (!xdebug_is_debug_connection_active()) {
-		XG_BASE(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	}
-}
-/* }}} */
-
-
-/* {{{ proto int xdebug_error_reporting(void)
-   Dummy function to return original error reporting level when 'eval' has turned it into 0 */
-PHP_FUNCTION(xdebug_error_reporting)
-{
-	if (ZEND_NUM_ARGS() == 0 && XG_BASE(error_reporting_overridden) && xdebug_is_debug_connection_active()) {
-		RETURN_LONG(XG_BASE(error_reporting_override));
-	}
-	XG_BASE(orig_error_reporting_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-/* }}} */
-
-/* {{{ proto void xdebug_pcntl_exec(void)
-   Dummy function to stop profiling when we run pcntl_exec */
-PHP_FUNCTION(xdebug_pcntl_exec)
-{
-	/* We need to stop the profiler and trace files here */
-	xdebug_profiler_pcntl_exec_handler();
-
-	XG_BASE(orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-/* }}} */
-
-/* {{{ proto int xdebug_pcntl_fork(void)
-   Dummy function to set a new connection when forking a process */
-PHP_FUNCTION(xdebug_pcntl_fork)
-{
-	XG_BASE(orig_pcntl_fork_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-
-	xdebug_debugger_restart_if_pid_changed();
-}
-/* }}} */
 
 /* {{{ proto void xdebug_var_dump(mixed var [, ...] )
    Outputs a fancy string representation of a variable */

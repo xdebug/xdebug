@@ -23,6 +23,7 @@
 #include "zend_exceptions.h"
 
 #include "php_xdebug.h"
+#include "php_xdebug_arginfo.h"
 
 #include "base.h"
 #include "filter.h"
@@ -47,6 +48,13 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const XDEBUG_ERR
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
 static void (*xdebug_old_execute_ex)(zend_execute_data *execute_data);
 static void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
+
+/* Forward declarations for function overides */
+PHP_FUNCTION(xdebug_set_time_limit);
+PHP_FUNCTION(xdebug_error_reporting);
+PHP_FUNCTION(xdebug_pcntl_exec);
+PHP_FUNCTION(xdebug_pcntl_fork);
+
 
 static int xdebug_silence_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
@@ -747,3 +755,46 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 		XG_BASE(collected_errors) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	}
 }
+
+
+/* {{{ proto void xdebug_set_time_limit(void)
+   Dummy function to prevent time limit from being set within the script */
+PHP_FUNCTION(xdebug_set_time_limit)
+{
+	if (!xdebug_is_debug_connection_active()) {
+		XG_BASE(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
+}
+/* }}} */
+
+/* {{{ proto int xdebug_error_reporting(void)
+   Dummy function to return original error reporting level when 'eval' has turned it into 0 */
+PHP_FUNCTION(xdebug_error_reporting)
+{
+	if (ZEND_NUM_ARGS() == 0 && XG_BASE(error_reporting_overridden) && xdebug_is_debug_connection_active()) {
+		RETURN_LONG(XG_BASE(error_reporting_override));
+	}
+	XG_BASE(orig_error_reporting_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ proto void xdebug_pcntl_exec(void)
+   Dummy function to stop profiling when we run pcntl_exec */
+PHP_FUNCTION(xdebug_pcntl_exec)
+{
+	/* We need to stop the profiler and trace files here */
+	xdebug_profiler_pcntl_exec_handler();
+
+	XG_BASE(orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ proto int xdebug_pcntl_fork(void)
+   Dummy function to set a new connection when forking a process */
+PHP_FUNCTION(xdebug_pcntl_fork)
+{
+	XG_BASE(orig_pcntl_fork_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	xdebug_debugger_restart_if_pid_changed();
+}
+/* }}} */
