@@ -551,16 +551,54 @@ static char *xdebug_handle_stack_trace(int type, char *error_type_str, const cha
 	return printable_stack;
 }
 
+#if PHP_VERSION_ID >= 80000
+static void clear_last_error()
+{
+	if (PG(last_error_message)) {
+		zend_string_release(PG(last_error_message));
+		PG(last_error_message) = NULL;
+	}
+	if (PG(last_error_file)) {
+		free(PG(last_error_file));
+		PG(last_error_file) = NULL;
+	}
+}
+#else
+static void clear_last_error()
+{
+	if (PG(last_error_message)) {
+		char *s = PG(last_error_message);
+		PG(last_error_message) = NULL;
+		free(s);
+	}
+	if (PG(last_error_file)) {
+		char *s = PG(last_error_file);
+		PG(last_error_file) = NULL;
+		free(s);
+	}
+}
+#endif
+
 /* Error callback for formatting stack traces */
+#if PHP_VERSION_ID >= 80000
+void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
+{
+#else
 void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
 {
-	char *buffer, *error_type_str;
-	int buffer_len, display;
+	char *buffer;
+	int buffer_len;
+#endif
+
+	char *error_type_str;
+	int display;
 	int type = orig_type & E_ALL;
 	error_handling_t  error_handling;
 	zend_class_entry *exception_class;
 
+#if PHP_VERSION_ID < 80000
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
+#endif
 
 	error_type_str = xdebug_error_type(type);
 
@@ -568,7 +606,12 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
 			/* no check for PG(last_error_file) is needed since it cannot
 			 * be NULL if PG(last_error_message) is not NULL */
+
+#if PHP_VERSION_ID >= 80000
+			if (zend_string_equals(PG(last_error_message), message)
+#else
 			if (strcmp(PG(last_error_message), buffer)
+#endif
 					|| (!PG(ignore_repeated_source)
 							&& ((PG(last_error_lineno) != (int)error_lineno)
 									|| strcmp(PG(last_error_file), error_filename)))) {
@@ -583,16 +626,7 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 #if PHP_VERSION_ID < 70300
 	/* Store last error message for error_get_last() */
 	if (display) {
-		if (PG(last_error_message)) {
-			char *s = PG(last_error_message);
-			PG(last_error_message) = NULL;
-			free(s);
-		}
-		if (PG(last_error_file)) {
-			char *s = PG(last_error_file);
-			PG(last_error_file) = NULL;
-			free(s);
-		}
+		clear_last_error();
 		if (!error_filename) {
 			error_filename = "Unknown";
 		}
@@ -637,9 +671,15 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 #else
 				if (error_handling == EH_THROW && !EG(exception)) {
 #endif
+#if PHP_VERSION_ID >= 80000
+					zend_throw_error_exception(exception_class, message, 0, type);
+#else
 					zend_throw_error_exception(exception_class, buffer, 0, type);
+#endif
 				}
+#if PHP_VERSION_ID < 80000
 				efree(buffer);
+#endif
 				xdfree(error_type_str);
 				return;
 		}
@@ -648,21 +688,16 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 #if PHP_VERSION_ID >= 70300
 	/* Store last error message for error_get_last() */
 	if (display) {
-		if (PG(last_error_message)) {
-			char *s = PG(last_error_message);
-			PG(last_error_message) = NULL;
-			free(s);
-		}
-		if (PG(last_error_file)) {
-			char *s = PG(last_error_file);
-			PG(last_error_file) = NULL;
-			free(s);
-		}
+		clear_last_error();
 		if (!error_filename) {
 			error_filename = "Unknown";
 		}
 		PG(last_error_type) = type;
+# if PHP_VERSION_ID >= 80000
+		PG(last_error_message) = zend_string_copy(message);
+#else
 		PG(last_error_message) = strdup(buffer);
+#endif
 		PG(last_error_file) = strdup(error_filename);
 		PG(last_error_lineno) = error_lineno;
 	}
@@ -674,10 +709,18 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 
 #ifdef PHP_WIN32
 			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
+#if PHP_VERSION_ID >= 80000
+				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(message), GetCommandLine());
+#else
 				MessageBox(NULL, buffer, error_type_str, MB_OK);
+#endif
 			}
 #endif
+#if PHP_VERSION_ID >= 80000
+			xdebug_log_stack(error_type_str, ZSTR_VAL(message), error_filename, error_lineno);
+#else
 			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno);
+#endif
 			if (XINI_BASE(dump_globals) && !(XINI_BASE(dump_once) && XG_BASE(dumped))) {
 				char *printable_stack = xdebug_get_printable_superglobals(0);
 
@@ -706,7 +749,11 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 		if ((PG(display_errors) || XINI_BASE(force_display_errors)) && !PG(during_request_startup)) {
 			char *printable_stack;
 
+#if PHP_VERSION_ID >= 80000
+			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, ZSTR_VAL(message));
+#else
 			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, buffer);
+#endif
 
 			if (XG_BASE(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
 				xdebug_llist_insert_next(XG_BASE(collected_errors), XDEBUG_LLIST_TAIL(XG_BASE(collected_errors)), printable_stack);
@@ -716,12 +763,20 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 			}
 		} else if (XG_BASE(do_collect_errors)) {
 			char *printable_stack;
+#if PHP_VERSION_ID >= 80000
+			printable_stack = get_printable_stack(PG(html_errors), type, ZSTR_VAL(message), error_filename, error_lineno, 1);
+#else
 			printable_stack = get_printable_stack(PG(html_errors), type, buffer, error_filename, error_lineno, 1);
+#endif
 			xdebug_llist_insert_next(XG_BASE(collected_errors), XDEBUG_LLIST_TAIL(XG_BASE(collected_errors)), printable_stack);
 		}
 	}
 
+#if PHP_VERSION_ID >= 80000
+	xdebug_debugger_error_cb(error_filename, error_lineno, type, error_type_str, ZSTR_VAL(message));
+#else
 	xdebug_debugger_error_cb(error_filename, error_lineno, type, error_type_str, buffer);
+#endif
 
 	xdfree(error_type_str);
 
@@ -763,7 +818,9 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 #endif
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
+#if PHP_VERSION_ID < 80000
 					efree(buffer);
+#endif
 					zend_objects_store_mark_destructed(&EG(objects_store));
 					_zend_bailout((char*) __FILE__, __LINE__);
 					return;
@@ -797,7 +854,9 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 	}
 #endif
 
+#if PHP_VERSION_ID < 80000
 	efree(buffer);
+#endif
 }
 
 /* {{{ proto void xdebug_print_function_stack([string message [, int options])

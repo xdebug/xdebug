@@ -33,9 +33,15 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+#if PHP_VERSION_ID >= 80000
+void (*xdebug_old_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, zend_string *message);
+void (*xdebug_new_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, zend_string *message);
+void xdebug_error_cb(int orig_type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, zend_string *message);
+#else
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args);
 void xdebug_error_cb(int orig_type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args);
+#endif
 
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
@@ -436,7 +442,11 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	int                   function_nr = 0;
 	int                   function_call_traced = 0;
 	int                   restore_error_handler_situation = 0;
+#if PHP_VERSION_ID >= 80000
+	void                (*tmp_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, zend_string *message) = NULL;
+#else
 	void                (*tmp_error_cb)(int type, const char *error_filename, const XDEBUG_ERROR_LINENO_TYPE error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
+#endif
 
 	XG_BASE(level)++;
 	if ((signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
