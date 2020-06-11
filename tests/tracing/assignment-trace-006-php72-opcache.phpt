@@ -1,9 +1,9 @@
 --TEST--
-Test for tracing assignments in user-readable function traces (>= PHP 7.2, opcache)
+Test for tracing assignments in user-readable function traces (opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.2; opcache');
+check_reqs('opcache');
 ?>
 --INI--
 xdebug.mode=trace

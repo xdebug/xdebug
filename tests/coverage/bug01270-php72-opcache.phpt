@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1270: String parsing marked not covered (>= PHP 7.2, < PHP 7.4, opcache)
+Test for bug #1270: String parsing marked not covered (< PHP 7.4, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.2,< 7.4; opcache');
+check_reqs('PHP < 7.4; opcache');
 ?>
 --INI--
 xdebug.mode=coverage

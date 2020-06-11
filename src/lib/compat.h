@@ -83,10 +83,6 @@ zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 #  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ((v)->module_number)
 # endif
 
-# if PHP_VERSION_ID < 70200
-typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
-# endif
-
 # if PHP_VERSION_ID < 70400
 #  define ZEND_COMPILE_EXTENDED_STMT ZEND_COMPILE_EXTENDED_INFO
 # endif

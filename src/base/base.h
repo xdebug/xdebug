@@ -19,13 +19,6 @@
 #ifndef __XDEBUG_BASE_H__
 #define __XDEBUG_BASE_H__
 
-/* error callback replacement functions */
-#if PHP_VERSION_ID >= 70200
-# define XDEBUG_ERROR_LINENO_TYPE uint32_t
-#else
-# define XDEBUG_ERROR_LINENO_TYPE uint
-#endif
-
 void xdebug_base_minit(INIT_FUNC_ARGS);
 void xdebug_base_mshutdown();
 

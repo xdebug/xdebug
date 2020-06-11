@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (>= PHP 7.2, < PHP 7.3, opcache)
+Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (< PHP 7.3, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.2,<= 7.3; opcache');
+check_reqs('PHP < 7.3; opcache');
 ?>
 --INI--
 xdebug.mode=coverage

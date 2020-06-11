@@ -1,10 +1,5 @@
 --TEST--
-Test for bug #702: Check whether variables tracing also works with =& (with object) (PHP >= 7.1.1)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.1.1');
-?>
+Test for bug #702: Check whether variables tracing also works with =& (with object)
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0

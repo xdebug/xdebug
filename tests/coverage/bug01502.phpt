@@ -1,10 +1,5 @@
 --TEST--
-Test for bug #1502: SEND_REF lines are not marked as covered (PHP >= 7.1.5)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.1.5');
-?>
+Test for bug #1502: SEND_REF lines are not marked as covered
 --INI--
 xdebug.mode=coverage
 xdebug.trace_options=0

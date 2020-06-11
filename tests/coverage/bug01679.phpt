@@ -1,10 +1,5 @@
 --TEST--
-Test for bug #1679: Code Coverage misses static property as function argument (>= PHP 7.1)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.1');
-?>
+Test for bug #1679: Code Coverage misses static property as function argument
 --INI--
 xdebug.mode=coverage
 --FILE--

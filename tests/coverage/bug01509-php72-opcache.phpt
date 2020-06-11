@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1509: Code coverage missing for case inside switch (>= PHP 7.2, < 7.4, opcache)
+Test for bug #1509: Code coverage missing for case inside switch (< PHP 7.4, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.2,< 7.4; opcache');
+check_reqs('PHP < 7.4; opcache');
 ?>
 --INI--
 xdebug.mode=coverage

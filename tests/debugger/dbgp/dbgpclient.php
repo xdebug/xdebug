@@ -32,7 +32,8 @@ class DebugClient
 
 	public function __construct()
 	{
-		$this->tmpDir = sys_get_temp_dir();
+		$envTmpDir = getenv('TEST_TMP_DIR');
+		$this->tmpDir = $envTmpDir !== false ? $envTmpDir : sys_get_temp_dir();
 	}
 
 	private function open( &$errno, &$errstr )
