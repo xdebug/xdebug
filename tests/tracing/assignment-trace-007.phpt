@@ -1,11 +1,9 @@
 --TEST--
-Test for tracing property assignments in user-readable function traces (< PHP 7.2 || !opcache)
+Test for tracing property assignments in user-readable function traces (!opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-if ( ! ( runtime_version('7.2', '<') || !opcache_active() ) ) {
-	echo "skip < PHP 7.2 || !opcache loaded needed\n";
-}
+check_reqs('!opcache');
 ?>
 --INI--
 xdebug.mode=trace

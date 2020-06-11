@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function (>= PHP 7.2 && < PHP 7.4 && opcache)
+Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function (< PHP 7.4 && opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-if ( ! ( runtime_version("7.2", '>=') && runtime_version("7.4", '<') && opcache_active() ) ) { echo "skip >= PHP 7.2 && < PHP 7.4 && opcache\n"; };
+check_reqs('PHP < 7.4; opcache');
 ?>
 --INI--
 xdebug.mode=coverage

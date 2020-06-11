@@ -290,7 +290,6 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[0] = XDEBUG_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
-#if PHP_VERSION_ID >= 70200
 	} else if (
 		opcode.opcode == ZEND_SWITCH_LONG ||
 		opcode.opcode == ZEND_SWITCH_STRING
@@ -323,7 +322,6 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		(*jump_count)++;
 
 		return 1;
-#endif
 	}
 
 	return 0;
@@ -951,7 +949,6 @@ void xdebug_coverage_init_oparray(zend_op_array *op_array)
 	}
 }
 
-#if PHP_VERSION_ID >= 70200
 static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *cur_opcode = execute_data->opline;
@@ -963,7 +960,6 @@ static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
-#endif
 
 #define XDEBUG_OPCODE_OVERRIDE(f) \
 	int xdebug_##f##_handler(zend_execute_data *execute_data) \
@@ -1057,10 +1053,8 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS);
 	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS_DELAYED);
 #endif
-#if PHP_VERSION_ID >= 70200
 	xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
 	xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
-#endif
 
 	/* Override all the other opcodes so that we can mark when we hit a branch
 	 * start one */
