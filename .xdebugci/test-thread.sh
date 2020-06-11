@@ -16,10 +16,12 @@ cd /tmp/ptester/thread/${TID}
 
 for i in $@; do
 	PATH=${PHP_DIR}/$i/bin:$PATH
-	
-	mkdir -p /tmp/ptester/thread/${TID}/$i/tmp-xdebug
-	cp -rT ${CWD} /tmp/ptester/thread/${TID}/$i/tmp-xdebug
-	cd /tmp/ptester/thread/${TID}/$i/tmp-xdebug
+
+	BASEDIR=/tmp/ptester/thread/${TID}/$i/tmp-xdebug
+	mkdir -p ${BASEDIR}
+	mkdir -p ${BASEDIR}/tmp
+	cp -rT ${CWD} ${BASEDIR}
+	cd ${BASEDIR}
 
 	sleep 3
 
@@ -31,7 +33,7 @@ for i in $@; do
 		echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuites buildFailed=\"1\" buildLogFile=\"/tmp/ptester/logs/$i.build.log\"/>" >> /tmp/ptester/junit/${i}.xml
 	else
 		printf "%2d %6d: Testing for %s\n" $TID $BASHPID $i
-		UNIQ_RUN_ID="run-$i-id" SKIP_UNPARALLEL_TESTS=1 TEST_PHP_EXECUTABLE=`which php` TEST_PHP_JUNIT="/tmp/ptester/junit/$i.xml" php run-xdebug-tests.php /tmp/ptester/thread/${TID}/${i}/tmp-xdebug/tests >/tmp/ptester/logs/$i.log 2>&1
+		TEST_TMP_DIR=${BASEDIR}/tmp UNIQ_RUN_ID="run-$i-id" SKIP_UNPARALLEL_TESTS=1 TEST_PHP_EXECUTABLE=`which php` TEST_PHP_JUNIT="/tmp/ptester/junit/$i.xml" php run-xdebug-tests.php /tmp/ptester/thread/${TID}/${i}/tmp-xdebug/tests >/tmp/ptester/logs/$i.log 2>&1
 	fi
 
 	/usr/local/php/7.3.6/bin/php -dextension=mongodb.so ${MYDIR}/ingest.php $i
