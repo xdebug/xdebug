@@ -1,3 +1,5 @@
+$ErrorActionPreference = "Stop"
+
 $ts_part = ''
 if ($env:TS -eq '0') {
     $ts_part += '-nts'

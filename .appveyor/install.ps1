@@ -1,3 +1,5 @@
+$ErrorActionPreference = "Stop"
+
 if (-not (Test-Path 'C:\build-cache')) {
     [void](New-Item 'C:\build-cache' -ItemType 'directory')
 }
@@ -18,8 +20,9 @@ if ($env:TS -eq '0') {
 }
 $bname = "php-devel-pack-$env:PHP_VER$ts_part-Win32-$env:VC-$env:ARCH.zip"
 if (-not (Test-Path "C:\build-cache\$bname")) {
-    Invoke-WebRequest "https://windows.php.net/downloads/releases/archives/$bname" -OutFile "C:\build-cache\$bname"
-    if (-not (Test-Path "C:\build-cache\$bname")) {
+    try {
+        Invoke-WebRequest "https://windows.php.net/downloads/releases/archives/$bname" -OutFile "C:\build-cache\$bname"
+    } catch [System.Net.WebException] { 
         Invoke-WebRequest "https://windows.php.net/downloads/releases/$bname" -OutFile "C:\build-cache\$bname"
     }
 }
@@ -35,8 +38,9 @@ $env:PATH = "C:\build-cache\$dname1;$env:PATH"
 
 $bname = "php-$env:PHP_VER$ts_part-Win32-$env:VC-$env:ARCH.zip"
 if (-not (Test-Path "C:\build-cache\$bname")) {
-    Invoke-WebRequest "https://windows.php.net/downloads/releases/archives/$bname" -OutFile "C:\build-cache\$bname"
-    if (-not (Test-Path "C:\build-cache\$bname")) {
+    try {
+        Invoke-WebRequest "https://windows.php.net/downloads/releases/archives/$bname" -OutFile "C:\build-cache\$bname"
+    } catch [System.Net.WebException] { 
         Invoke-WebRequest "https://windows.php.net/downloads/releases/$bname" -OutFile "C:\build-cache\$bname"
     }
 }

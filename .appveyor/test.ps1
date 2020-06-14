@@ -1,3 +1,5 @@
+$ErrorActionPreference = "Stop"
+
 $dir = 'C:\projects\xdebug\'
 if ($env:ARCH -eq 'x64') {
     $dir += 'x64\'
@@ -24,3 +26,6 @@ $env:TEST_PHP_ARGS = $opts
 
 $env:TEST_PHP_EXECUTABLE = $php
 & $php run-xdebug-tests.php -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source C:\tests_tmp --temp-target C:\tests_tmp
+if (-not $?) {
+    throw "tests failed with errorlevel $LastExitCode"
+}
