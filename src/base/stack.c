@@ -710,7 +710,7 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 #ifdef PHP_WIN32
 			if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
 #if PHP_VERSION_ID >= 80000
-				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(message), GetCommandLine());
+				php_syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, ZSTR_VAL(message), GetCommandLine());
 #else
 				MessageBox(NULL, buffer, error_type_str, MB_OK);
 #endif
