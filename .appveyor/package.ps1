@@ -9,9 +9,9 @@ if ($env:ARCH -eq 'x64') {
     $arch_part += '-x86_64'
 }
 if ($env:APPVEYOR_REPO_TAG -eq "true") {
-    $bname = "php_xdebug-$env:APPVEYOR_REPO_TAG_NAME-" + $env:PHP_VER.substring(0, 3) + "-$env:VC$ts_part$arch_part"
+    $bname = "php_xdebug-$env:APPVEYOR_REPO_TAG_NAME-" + "$env:PHP_VER-$env:VC$ts_part$arch_part"
 } else {
-    $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT.substring(0, 8) + '-' + $env:PHP_VER.substring(0, 3) + "-$env:VC$ts_part$arch_part"
+    $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT.substring(0, 8) + "-$env:PHP_VER-$env:VC$ts_part$arch_part"
 }
 $zip_bname = "$bname.zip"
 $dll_bname = "$bname.dll"
