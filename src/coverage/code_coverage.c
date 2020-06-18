@@ -172,7 +172,7 @@ static void xdebug_count_line(char *filename, int lineno, int executable, int de
 	}
 }
 
-int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
+static int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	const zend_op *cur_opcode = execute_data->opline;
@@ -961,12 +961,6 @@ static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
-#define XDEBUG_OPCODE_OVERRIDE(f) \
-	int xdebug_##f##_handler(zend_execute_data *execute_data) \
-	{ \
-		return xdebug_common_override_handler(execute_data); \
-	}
-
 
 void xdebug_coverage_minit(INIT_FUNC_ARGS)
 {
@@ -981,77 +975,80 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
 	zend_xdebug_filter_offset = zend_get_resource_handle(&dummy_ext);
 
+	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
+	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_common_override_handler);
+
 	/* Overload opcodes for code coverage */
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMP);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMPZ);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMPZ_EX);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_JMPNZ);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_IDENTICAL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_NOT_IDENTICAL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_EQUAL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_NOT_EQUAL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_SMALLER);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_IS_SMALLER_OR_EQUAL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BOOL_NOT);
+	xdebug_set_opcode_handler(ZEND_JMP, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_JMPZ, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_JMPZ_EX, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_JMPNZ, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_IS_IDENTICAL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_IS_NOT_IDENTICAL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_IS_EQUAL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_IS_NOT_EQUAL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_IS_SMALLER, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_IS_SMALLER_OR_EQUAL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_BOOL_NOT, xdebug_common_override_handler);
 
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SUB);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_MUL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DIV);
+	xdebug_set_opcode_handler(ZEND_ADD, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SUB, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_MUL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_DIV, xdebug_common_override_handler);
 
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_ARRAY_ELEMENT);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_RETURN);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_RETURN_BY_REF);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXT_STMT);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR_NO_REF);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR_NO_REF_EX);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_REF);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAL_EX);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_SEND_VAR_EX);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_NEW);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_EXT_FCALL_BEGIN);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_METHOD_CALL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_STATIC_METHOD_CALL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_FCALL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_NS_FCALL_BY_NAME);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CATCH);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BOOL);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INIT_ARRAY);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_R);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_W);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_R);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_W);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_FUNC_ARG);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_FUNC_ARG);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_STATIC_PROP_FUNC_ARG);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_DIM_UNSET);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_OBJ_UNSET);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CLASS);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CONSTANT);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FETCH_CLASS_CONSTANT);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CONCAT);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_DIM_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ISSET_ISEMPTY_PROP_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_CASE);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_LAMBDA_FUNCTION);
+	xdebug_set_opcode_handler(ZEND_ADD_ARRAY_ELEMENT, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_RETURN, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_RETURN_BY_REF, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_EXT_STMT, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SEND_VAR, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SEND_VAR_NO_REF, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SEND_VAR_NO_REF_EX, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SEND_REF, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SEND_VAL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SEND_VAL_EX, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_SEND_VAR_EX, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_NEW, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_EXT_FCALL_BEGIN, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_INIT_METHOD_CALL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_INIT_STATIC_METHOD_CALL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_INIT_FCALL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_INIT_NS_FCALL_BY_NAME, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_CATCH, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_BOOL, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_INIT_ARRAY, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_DIM_R, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_DIM_W, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_OBJ_R, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_OBJ_W, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_OBJ_FUNC_ARG, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_DIM_FUNC_ARG, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_STATIC_PROP_FUNC_ARG, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_DIM_UNSET, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_OBJ_UNSET, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_CLASS, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_CONSTANT, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FETCH_CLASS_CONSTANT, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_CONCAT, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_ISSET_ISEMPTY_DIM_OBJ, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_ISSET_ISEMPTY_PROP_OBJ, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_CASE, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, xdebug_common_override_handler);
 #if PHP_VERSION_ID < 70400
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ADD_TRAIT);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_TRAITS);
+	xdebug_set_opcode_handler(ZEND_ADD_TRAIT, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_BIND_TRAITS, xdebug_common_override_handler);
 #endif
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_INSTANCEOF);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_FAST_RET);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ROPE_ADD);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_ROPE_END);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_COALESCE);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_TYPE_CHECK);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_GENERATOR_CREATE);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_STATIC);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_BIND_LEXICAL);
+	xdebug_set_opcode_handler(ZEND_INSTANCEOF, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FAST_RET, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_ROPE_ADD, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_ROPE_END, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_COALESCE, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_TYPE_CHECK, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_GENERATOR_CREATE, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_BIND_STATIC, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_BIND_LEXICAL, xdebug_common_override_handler);
 #if PHP_VERSION_ID >= 70400
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS);
-	XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS_DELAYED);
+	xdebug_set_opcode_handler(ZEND_DECLARE_CLASS, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, xdebug_common_override_handler);
 #endif
 	xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
 	xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);

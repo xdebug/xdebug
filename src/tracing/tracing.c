@@ -461,7 +461,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	return name.d;
 }
 
-static int xdebug_common_assign_dim_handler(const char *op, int do_cc, XDEBUG_OPCODE_HANDLER_ARGS)
+static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	char    *file;
 	zend_op_array *op_array = &execute_data->func->op_array;
@@ -481,8 +481,6 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, XDEBUG_OP
 //	if (xdebug_is_top_stack_frame_filtered(XDEBUG_FILTER_CODE_COVERAGE)) {
 //		return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 //	}
-
-	xdebug_coverage_record_assign_if_active(execute_data, op_array, do_cc);
 
 	if (XG_TRACE(trace_context) && XINI_BASE(collect_assignments)) {
 		char *full_varname;
@@ -580,46 +578,46 @@ static int xdebug_common_assign_dim_handler(const char *op, int do_cc, XDEBUG_OP
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign,"=",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(qm_assign,"=",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign, "=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(qm_assign, "=");
 #if PHP_VERSION_ID >= 70400
-XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_op,0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_dim_op,0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_obj_op,0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_static_prop_op,0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_op);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_dim_op);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_obj_op);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN_OP(assign_static_prop_op);
 #else
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_add,"+=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sub,"-=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mul,"*=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_div,"/=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mod,"%=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sl,"<<=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sr,">>=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_or,"|=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_and,"&=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor,"^=",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_pow,"**=",0)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_add, "+=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sub, "-=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mul, "*=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_div, "/=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_mod, "%=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sl, "<<=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_sr, ">>=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_or, "|=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_and, "&=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor, "^=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_pow, "**=");
 #endif
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc_obj,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_obj,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec_obj,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_obj,"",0)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_concat,".=",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim,"=",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj,"=",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_ref,"=&",1)
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc_obj, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_obj, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec_obj, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_obj, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_concat, ".=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_dim, "=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj, "=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_ref, "=&");
 #if PHP_VERSION_ID >= 70400
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj_ref,"=&",1)
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_static_prop, "=", 0);
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_static_prop_ref, "=&", 0);
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc_static_prop, "", 0);
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec_static_prop, "", 0);
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, "", 0);
-XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, "", 0);
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_obj_ref, "=&");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_static_prop, "=");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(assign_static_prop_ref, "=&");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_inc_static_prop, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(pre_dec_static_prop, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, "");
+XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, "");
 #endif
 
 void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg)
@@ -631,46 +629,47 @@ void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg)
 void xdebug_tracing_minit(INIT_FUNC_ARGS)
 {
 	/* Override opcodes for variable assignments in traces */
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign, ZEND_ASSIGN);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(qm_assign, ZEND_QM_ASSIGN);
+	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_assign_handler);
+	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_qm_assign_handler);
+
 #if PHP_VERSION_ID >= 70400
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_op, ZEND_ASSIGN_OP);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_dim_op, ZEND_ASSIGN_DIM_OP);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_obj_op, ZEND_ASSIGN_OBJ_OP);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_static_prop_op, ZEND_ASSIGN_STATIC_PROP_OP);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_OP, xdebug_assign_op_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_DIM_OP, xdebug_assign_dim_op_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_OBJ_OP, xdebug_assign_obj_op_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP_OP, xdebug_assign_static_prop_op_handler);
 #else
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_add, ZEND_ASSIGN_ADD);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_sub, ZEND_ASSIGN_SUB);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_mul, ZEND_ASSIGN_MUL);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_div, ZEND_ASSIGN_DIV);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_mod, ZEND_ASSIGN_MOD);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_pow, ZEND_ASSIGN_POW);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_sl, ZEND_ASSIGN_SL);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_sr, ZEND_ASSIGN_SR);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_concat, ZEND_ASSIGN_CONCAT);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_or, ZEND_ASSIGN_BW_OR);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_and, ZEND_ASSIGN_BW_AND);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_bw_xor, ZEND_ASSIGN_BW_XOR);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_ADD, xdebug_assign_add_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_SUB, xdebug_assign_sub_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_MUL, xdebug_assign_mul_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_DIV, xdebug_assign_div_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_MOD, xdebug_assign_mod_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_POW, xdebug_assign_pow_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_SL, xdebug_assign_sl_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_SR, xdebug_assign_sr_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_CONCAT, xdebug_assign_concat_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_OR, xdebug_assign_bw_or_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_AND, xdebug_assign_bw_and_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_XOR, xdebug_assign_bw_xor_handler);
 #endif
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_dim, ZEND_ASSIGN_DIM);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_obj, ZEND_ASSIGN_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_ref, ZEND_ASSIGN_REF);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_inc, ZEND_PRE_INC);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc, ZEND_POST_INC);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_dec, ZEND_PRE_DEC);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec, ZEND_POST_DEC);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_inc_obj, ZEND_PRE_INC_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc_obj, ZEND_POST_INC_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_dec_obj, ZEND_PRE_DEC_OBJ);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec_obj, ZEND_POST_DEC_OBJ);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_DIM, xdebug_assign_dim_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_OBJ, xdebug_assign_obj_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_REF, xdebug_assign_ref_handler);
+	xdebug_set_opcode_handler(ZEND_PRE_INC, xdebug_pre_inc_handler);
+	xdebug_set_opcode_handler(ZEND_POST_INC, xdebug_post_inc_handler);
+	xdebug_set_opcode_handler(ZEND_PRE_DEC, xdebug_pre_dec_handler);
+	xdebug_set_opcode_handler(ZEND_POST_DEC, xdebug_post_dec_handler);
+	xdebug_set_opcode_handler(ZEND_PRE_INC_OBJ, xdebug_pre_inc_obj_handler);
+	xdebug_set_opcode_handler(ZEND_POST_INC_OBJ, xdebug_post_inc_obj_handler);
+	xdebug_set_opcode_handler(ZEND_PRE_DEC_OBJ, xdebug_pre_dec_obj_handler);
+	xdebug_set_opcode_handler(ZEND_POST_DEC_OBJ, xdebug_post_dec_obj_handler);
 #if PHP_VERSION_ID >= 70400
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_obj_ref, ZEND_ASSIGN_OBJ_REF);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_static_prop, ZEND_ASSIGN_STATIC_PROP);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(assign_static_prop_ref, ZEND_ASSIGN_STATIC_PROP_REF);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_inc_static_prop, ZEND_PRE_INC_STATIC_PROP);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(pre_dec_static_prop, ZEND_PRE_DEC_STATIC_PROP);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, ZEND_POST_INC_STATIC_PROP);
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, ZEND_POST_DEC_STATIC_PROP);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_OBJ_REF, xdebug_assign_obj_ref_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP, xdebug_assign_static_prop_handler);
+	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP_REF, xdebug_assign_static_prop_ref_handler);
+	xdebug_set_opcode_handler(ZEND_PRE_INC_STATIC_PROP, xdebug_pre_inc_static_prop_handler);
+	xdebug_set_opcode_handler(ZEND_PRE_DEC_STATIC_PROP, xdebug_pre_dec_static_prop_handler);
+	xdebug_set_opcode_handler(ZEND_POST_INC_STATIC_PROP, xdebug_post_inc_static_prop_handler);
+	xdebug_set_opcode_handler(ZEND_POST_DEC_STATIC_PROP, xdebug_post_dec_static_prop_handler);
 #endif
 
 	REGISTER_LONG_CONSTANT("XDEBUG_TRACE_APPEND", XDEBUG_TRACE_OPTION_APPEND, CONST_CS | CONST_PERSISTENT);

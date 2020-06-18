@@ -31,10 +31,21 @@ void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 	xg->active_execute_data  = NULL;
 	xg->opcode_handlers_set = xdebug_set_create(256);
 	memset(xg->original_opcode_handlers, 0, sizeof(xg->original_opcode_handlers));
+	memset(xg->opcode_multi_handlers, 0, sizeof(xg->opcode_multi_handlers));
 }
 
 void xdebug_library_minit(void)
 {
+	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
+	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
+}
+
+static void xdebug_multi_opcode_handler_dtor(xdebug_multi_opcode_handler_t *ptr)
+{
+	if (ptr->next) {
+		xdebug_multi_opcode_handler_dtor(ptr->next);
+	}
+	xdfree(ptr);
 }
 
 void xdebug_library_mshutdown(void)
@@ -43,6 +54,9 @@ void xdebug_library_mshutdown(void)
 
 	/* Restore all opcode handlers that we have set */
 	for (i = 0; i < 256; i++) {
+		if (XG_LIB(opcode_multi_handlers)[i] != NULL) {
+			xdebug_multi_opcode_handler_dtor(XG_LIB(opcode_multi_handlers)[i]);
+		}
 		xdebug_unset_opcode_handler(i);
 	}
 
@@ -450,6 +464,54 @@ void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler)
 	XG_LIB(original_opcode_handlers[opcode]) = zend_get_user_opcode_handler(opcode);
 	xdebug_set_add(XG_LIB(opcode_handlers_set), opcode);
 	zend_set_user_opcode_handler(opcode, handler);
+}
+
+static int xdebug_opcode_multi_handler(zend_execute_data *execute_data)
+{
+	const zend_op *cur_opcode = execute_data->opline;
+
+	xdebug_multi_opcode_handler_t *handler_ptr = XG_LIB(opcode_multi_handlers[cur_opcode->opcode]);
+
+	while (handler_ptr) {
+		handler_ptr->handler(execute_data);
+		handler_ptr = handler_ptr->next;
+	}
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+void xdebug_set_opcode_multi_handler(int opcode)
+{
+	if (xdebug_isset_opcode_handler(opcode)) {
+		abort();
+	}
+	XG_LIB(original_opcode_handlers[opcode]) = zend_get_user_opcode_handler(opcode);
+	xdebug_set_add(XG_LIB(opcode_handlers_set), opcode);
+	zend_set_user_opcode_handler(opcode, xdebug_opcode_multi_handler);
+}
+
+void xdebug_register_with_opcode_multi_handler(int opcode, user_opcode_handler_t handler)
+{
+	xdebug_multi_opcode_handler_t *ptr;
+	xdebug_multi_opcode_handler_t *tmp = xdmalloc(sizeof(xdebug_multi_opcode_handler_t));
+	tmp->handler = handler;
+	tmp->next    = NULL;
+
+	if (!xdebug_isset_opcode_handler(opcode)) {
+		abort();
+	}
+
+	if (XG_LIB(opcode_multi_handlers)[opcode] == NULL) {
+		XG_LIB(opcode_multi_handlers)[opcode] = tmp;
+		return;
+	}
+
+	ptr = XG_LIB(opcode_multi_handlers)[opcode];
+	while (ptr->next) {
+		ptr = ptr->next;
+	}
+
+	ptr->next = tmp;
 }
 
 void xdebug_unset_opcode_handler(int opcode)
