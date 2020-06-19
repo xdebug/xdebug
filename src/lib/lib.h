@@ -241,6 +241,8 @@ void xdebug_init_library_globals(xdebug_library_globals_t *xg);
 void xdebug_library_minit(void);
 void xdebug_library_mshutdown(void);
 
+void xdebug_disable_opcache_optimizer(void);
+
 #define XDEBUG_MODE_OFF             0
 #define XDEBUG_MODE_DISPLAY      1<<0
 #define XDEBUG_MODE_COVERAGE     1<<1

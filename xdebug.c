@@ -493,6 +493,13 @@ PHP_RINIT_FUNCTION(xdebug)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+#if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
+	/* PHP Bug #77287 causes Xdebug to segfault if Opcache has the "compact
+	 * literals" optimisation turned on. So force the optimisation off for PHP
+	 * 7.3.0 and 7.3.1. */
+	xdebug_disable_opcache_optimizer();
+#endif
+
 	xdebug_coverage_rinit();
 	xdebug_debugger_rinit();
 	xdebug_gcstats_rinit();

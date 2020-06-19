@@ -568,24 +568,7 @@ void xdebug_debugger_rinit(void)
 {
 	char *idekey;
 
-/* PHP Bug #77287 causes Xdebug to segfault if OPcache has the "compact
- * literals" optimisation turned on. So force the optimisation off for PHP
- * 7.3.0 and 7.3.1.
- *
- * Otherwise, only turn off optimisation when we're debugging. */
-#if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
-	{
-#else
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
-#endif
-		zend_string *key = zend_string_init(ZEND_STRL("opcache.optimization_level"), 1);
-		zend_string *value = zend_string_init(ZEND_STRL("0"), 1);
-
-		zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
-
-		zend_string_release(key);
-		zend_string_release(value);
-	}
+	xdebug_disable_opcache_optimizer();
 
 	/* Get the ide key for this session */
 	XG_DBG(ide_key) = NULL;

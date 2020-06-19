@@ -63,6 +63,19 @@ void xdebug_library_mshutdown(void)
 	xdebug_set_free(XG_LIB(opcode_handlers_set));
 }
 
+
+void xdebug_disable_opcache_optimizer(void)
+{
+	zend_string *key = zend_string_init(ZEND_STRL("opcache.optimization_level"), 1);
+	zend_string *value = zend_string_init(ZEND_STRL("0"), 1);
+
+	zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
+
+	zend_string_release(key);
+	zend_string_release(value);
+}
+
+
 static int xdebug_lib_set_mode_item(char *mode, int len)
 {
 	if (strncmp(mode, "off", len) == 0) {
