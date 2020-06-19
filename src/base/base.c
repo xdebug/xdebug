@@ -30,6 +30,7 @@
 #include "monitor.h"
 #include "stack.h"
 #include "gcstats/gc_stats.h"
+#include "lib/var.h"
 #include "profiler/profiler.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
@@ -275,6 +276,44 @@ int xdebug_exit_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	xdebug_profiler_exit_handler();
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
+{
+	const zend_op *opline = execute_data->opline;
+	zval *inc_filename;
+	zval tmp_inc_filename;
+	int  is_var;
+
+	if (opline->extended_value != ZEND_EVAL) {
+		return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
+
+	inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
+
+	/* If there is no inc_filename, we're just bailing out instead */
+	if (!inc_filename) {
+		return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
+
+	if (Z_TYPE_P(inc_filename) != IS_STRING) {
+		tmp_inc_filename = *inc_filename;
+		zval_copy_ctor(&tmp_inc_filename);
+		convert_to_string(&tmp_inc_filename);
+		inc_filename = &tmp_inc_filename;
+	}
+
+	/* Now let's store this info */
+	if (XG_BASE(last_eval_statement)) {
+		efree(XG_BASE(last_eval_statement));
+	}
+	XG_BASE(last_eval_statement) = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
+
+	if (inc_filename == &tmp_inc_filename) {
+		zval_dtor(&tmp_inc_filename);
+	}
+
+	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 

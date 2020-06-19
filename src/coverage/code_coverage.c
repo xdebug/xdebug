@@ -191,6 +191,16 @@ static int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int xdebug_coverage_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
+{
+	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op *opline = execute_data->opline;
+
+	xdebug_coverage_record_include_if_active(execute_data, op_array);
+
+	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
 static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode)
 {
 	if (
@@ -977,6 +987,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_common_override_handler);
+	xdebug_register_with_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL, xdebug_coverage_include_or_eval_handler);
 
 	/* Overload opcodes for code coverage */
 	xdebug_set_opcode_handler(ZEND_JMP, xdebug_common_override_handler);

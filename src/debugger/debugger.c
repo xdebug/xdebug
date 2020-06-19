@@ -497,45 +497,6 @@ static void xdebug_unhook_output_handlers()
 	xdebug_orig_ub_write = NULL;
 }
 
-static int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
-{
-	zend_op_array *op_array = &execute_data->func->op_array;
-	const zend_op *opline = execute_data->opline;
-
-	xdebug_coverage_record_include_if_active(execute_data, op_array);
-	if (opline->extended_value == ZEND_EVAL) {
-		zval *inc_filename;
-		zval tmp_inc_filename;
-		int  is_var;
-
-		inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
-
-		/* If there is no inc_filename, we're just bailing out instead */
-		if (!inc_filename) {
-			return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
-
-		if (Z_TYPE_P(inc_filename) != IS_STRING) {
-			tmp_inc_filename = *inc_filename;
-			zval_copy_ctor(&tmp_inc_filename);
-			convert_to_string(&tmp_inc_filename);
-			inc_filename = &tmp_inc_filename;
-		}
-
-		/* Now let's store this info */
-		if (XG_BASE(last_eval_statement)) {
-			efree(XG_BASE(last_eval_statement));
-		}
-		XG_BASE(last_eval_statement) = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
-
-		if (inc_filename == &tmp_inc_filename) {
-			zval_dtor(&tmp_inc_filename);
-		}
-	}
-
-	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
-}
-
 void xdebug_debugger_zend_startup(void)
 {
 	/* Hook output handlers (header and output writer) */
@@ -550,9 +511,6 @@ void xdebug_debugger_zend_shutdown(void)
 
 void xdebug_debugger_minit(void)
 {
-	/* We override eval so that we can debug into eval statements */
-	xdebug_set_opcode_handler(ZEND_INCLUDE_OR_EVAL, xdebug_include_or_eval_handler);
-
 	XG_DBG(breakpoint_count) = 0;
 }
 

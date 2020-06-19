@@ -38,6 +38,7 @@ void xdebug_library_minit(void)
 {
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
 	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
+	xdebug_set_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL);
 }
 
 static void xdebug_multi_opcode_handler_dtor(xdebug_multi_opcode_handler_t *ptr)
