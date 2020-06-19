@@ -444,7 +444,7 @@ PHP_MINIT_FUNCTION(xdebug)
 	}
 
 	/* Overload the "exit" opcode */
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(exit, ZEND_EXIT);
+	xdebug_set_opcode_handler(ZEND_EXIT, xdebug_exit_handler);
 
 	/* Coverage must be last, as it has a catch all override for opcodes */
 	xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);

@@ -551,7 +551,7 @@ void xdebug_debugger_zend_shutdown(void)
 void xdebug_debugger_minit(void)
 {
 	/* We override eval so that we can debug into eval statements */
-	XDEBUG_SET_OPCODE_OVERRIDE_ASSIGN(include_or_eval, ZEND_INCLUDE_OR_EVAL);
+	xdebug_set_opcode_handler(ZEND_INCLUDE_OR_EVAL, xdebug_include_or_eval_handler);
 
 	XG_DBG(breakpoint_count) = 0;
 }

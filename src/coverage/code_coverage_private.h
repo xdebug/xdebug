@@ -49,8 +49,6 @@ void xdebug_coverage_function_dtor(void *data);
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name);
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array, char *file_name, char *function_name);
 
-int xdebug_common_override_handler(zend_execute_data *execute_data);
-
 PHP_FUNCTION(xdebug_start_code_coverage);
 PHP_FUNCTION(xdebug_stop_code_coverage);
 PHP_FUNCTION(xdebug_get_code_coverage);

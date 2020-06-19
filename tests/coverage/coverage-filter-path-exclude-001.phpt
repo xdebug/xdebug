@@ -31,7 +31,9 @@ ello!
 ello!
 array(2) {
   ["%scoverage-filter-path-exclude-001.php"]=>
-  array(6) {
+  array(7) {
+    [5]=>
+    int(1)
     [7]=>
     int(1)
     [8]=>
