@@ -977,10 +977,6 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	zend_extension dummy_ext;
 	int i;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
-		return;
-	}
-
 	/* Get reserved offsets */
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
 	zend_xdebug_filter_offset = zend_get_resource_handle(&dummy_ext);

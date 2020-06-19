@@ -302,15 +302,26 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 }
 
-static void php_xdebug_init_globals (zend_xdebug_globals *xg)
+static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 {
 	xdebug_init_base_globals(&xg->base);
-	xdebug_init_coverage_globals(&xg->globals.coverage);
-	xdebug_init_debugger_globals(&xg->globals.debugger);
 	xdebug_init_library_globals(&xg->globals.library);
-	xdebug_init_profiler_globals(&xg->globals.profiler);
-	xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
-	xdebug_init_tracing_globals(&xg->globals.tracing);
+
+	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+		xdebug_init_coverage_globals(&xg->globals.coverage);
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_init_debugger_globals(&xg->globals.debugger);
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_init_profiler_globals(&xg->globals.profiler);
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+		xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		xdebug_init_tracing_globals(&xg->globals.tracing);
+	}
 
 	/* Override header generation in SAPI */
 	if (sapi_module.header_handler != xdebug_header_handler) {
@@ -435,11 +446,17 @@ PHP_MINIT_FUNCTION(xdebug)
 	REGISTER_INI_ENTRIES();
 
 	xdebug_library_minit();
-
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
-	xdebug_debugger_minit();
-	xdebug_gcstats_minit();
-	xdebug_profiler_minit();
+
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_debugger_minit();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+		xdebug_gcstats_minit();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_minit();
+	}
 	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_minit(INIT_FUNC_ARGS_PASSTHRU);
 	}
@@ -453,7 +470,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	}
 
 	/* Coverage must be last, as it has a catch all override for opcodes */
-	xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+		xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);
+	}
 
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
@@ -466,8 +485,12 @@ PHP_MINIT_FUNCTION(xdebug)
 
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
-	xdebug_gcstats_mshutdown();
-	xdebug_profiler_mshutdown();
+	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+		xdebug_gcstats_mshutdown();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_mshutdown();
+	}
 
 	xdebug_library_mshutdown();
 
@@ -506,11 +529,21 @@ PHP_RINIT_FUNCTION(xdebug)
 	xdebug_disable_opcache_optimizer();
 #endif
 
-	xdebug_coverage_rinit();
-	xdebug_debugger_rinit();
-	xdebug_gcstats_rinit();
-	xdebug_profiler_rinit();
-	xdebug_tracing_rinit();
+	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+		xdebug_coverage_rinit();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_debugger_rinit();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+		xdebug_gcstats_rinit();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_rinit();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		xdebug_tracing_rinit();
+	}
 
 	/* Get xdebug ini entries from the environment also,
 	   this can override the idekey if one is set */
@@ -528,11 +561,21 @@ PHP_RINIT_FUNCTION(xdebug)
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
-	xdebug_coverage_post_deactivate();
-	xdebug_debugger_post_deactivate();
-	xdebug_gcstats_post_deactivate();
-	xdebug_profiler_post_deactivate();
-	xdebug_tracing_post_deactivate();
+	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+		xdebug_coverage_post_deactivate();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_debugger_post_deactivate();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+		xdebug_gcstats_post_deactivate();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_post_deactivate();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		xdebug_tracing_post_deactivate();
+	}
 
 	xdebug_base_post_deactivate();
 
@@ -591,7 +634,9 @@ PHP_MINFO_FUNCTION(xdebug)
 		php_info_print_table_end();
 	}
 
-	xdebug_debugger_minfo();
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_debugger_minfo();
+	}
 
 	DISPLAY_INI_ENTRIES();
 }
