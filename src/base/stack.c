@@ -885,20 +885,6 @@ PHP_FUNCTION(xdebug_print_function_stack)
 }
 /* }}} */
 
-/* {{{ proto array xdebug_get_formatted_function_stack()
-   Displays a stack trace */
-PHP_FUNCTION(xdebug_get_formatted_function_stack)
-{
-	function_stack_entry *i;
-	char *tmp;
-
-	i = xdebug_get_stack_frame(0);
-	tmp = get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, 1);
-	RETVAL_STRING(tmp);
-	xdfree(tmp);
-}
-/* }}} */
-
 /* {{{ proto string xdebug_call_class()
    Returns the name of the calling class */
 PHP_FUNCTION(xdebug_call_class)
