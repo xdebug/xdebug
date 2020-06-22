@@ -304,8 +304,8 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 
 static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 {
-	xdebug_init_base_globals(&xg->base);
 	xdebug_init_library_globals(&xg->globals.library);
+	xdebug_init_base_globals(&xg->base);
 
 	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
 		xdebug_init_coverage_globals(&xg->globals.coverage);

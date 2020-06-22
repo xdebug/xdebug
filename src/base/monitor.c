@@ -73,6 +73,11 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 {
 	HashTable *functions_to_monitor;
 
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+		return;
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "H", &functions_to_monitor) == FAILURE) {
 		return;
 	}
@@ -95,6 +100,11 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 
 PHP_FUNCTION(xdebug_stop_function_monitor)
 {
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+		return;
+	}
+
 	if (XG_BASE(do_monitor_functions) == 0) {
 		php_error(E_NOTICE, "Function monitoring was not started");
 	}
@@ -106,6 +116,12 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 	xdebug_llist_element *le;
 	zend_bool             clear = 0;
 	xdebug_monitored_function_entry *mfe;
+
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+		array_init(return_value);
+		return;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &clear) == FAILURE) {
 		return;

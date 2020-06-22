@@ -865,6 +865,11 @@ PHP_FUNCTION(xdebug_print_function_stack)
 	char *tmp;
 	zend_long options = 0;
 
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+		return;
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl", &message, &message_len, &options) == FAILURE) {
 		return;
 	}
@@ -1394,6 +1399,12 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
+
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+		array_init(return_value);
+		return;
+	}
 
 	array_init(return_value);
 	le = XDEBUG_LLIST_HEAD(XG_BASE(stack));

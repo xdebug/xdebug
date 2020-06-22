@@ -1,6 +1,7 @@
 --TEST--
 Test for xdebug_print_function_stack() without description
 --INI--
+xdebug.mode=display
 xdebug.cli_color=0
 xdebug.collect_params=3
 html_errors=0

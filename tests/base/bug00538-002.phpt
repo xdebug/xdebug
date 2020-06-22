@@ -1,6 +1,7 @@
 --TEST--
 Test for bug #538: Error in watches and call stack parameter with string containing '\\'
 --INI--
+xdebug.mode=display
 xdebug.collect_params=3
 xdebug.overload_var_dump=0
 --FILE--

@@ -352,23 +352,22 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		return;
 	}
 
-	xdebug_debugger_set_program_name(op_array->filename);
+	if (XG_BASE(in_execution) && XG_BASE(level) == 0) {
+		if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+			xdebug_debugger_set_program_name(op_array->filename);
+			xdebug_debug_init_if_requested_at_startup();
+		}
 
-	if (XG_BASE(in_execution)) {
-		/* Start debugger if this is the first main script */
-		if (XG_BASE(level) == 0) {
-			/* Start remote context if requested */
-			if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
-				xdebug_debug_init_if_requested_at_startup();
-			}
-
+		if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
 			xdebug_gcstats_init_if_requested(op_array);
-			if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
-				xdebug_profiler_init_if_requested(op_array);
-			}
-			if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
-				xdebug_tracing_init_if_requested(op_array);
-			}
+		}
+
+		if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+			xdebug_profiler_init_if_requested(op_array);
+		}
+
+		if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+			xdebug_tracing_init_if_requested(op_array);
 		}
 	}
 
@@ -417,23 +416,29 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		}
 	}
 
-	code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_file_name, &code_coverage_function_name);
-
-	/* If we're in an eval, we need to create an ID for it. This ID however
-	 * depends on the debugger mechanism in use so we need to call a function
-	 * in the handler for it */
-	if (fse->function.type == XFUNC_EVAL) {
-		xdebug_debugger_register_eval(fse);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+		code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_file_name, &code_coverage_function_name);
 	}
 
-	/* Check for entry breakpoints */
-	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		/* If we're in an eval, we need to create an ID for it. */
+		if (fse->function.type == XFUNC_EVAL) {
+			xdebug_debugger_register_eval(fse);
+		}
 
-	xdebug_profiler_execute_ex(fse, op_array);
+		/* Check for entry breakpoints */
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
+	}
+
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_execute_ex(fse, op_array);
+	}
 
 	xdebug_old_execute_ex(execute_data);
 
-	xdebug_profiler_execute_ex_end(fse);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_execute_ex_end(fse);
+	}
 
 	if (code_coverage_init) {
 		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_file_name, code_coverage_function_name);
@@ -443,8 +448,10 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
 	}
 
-	/* Check for return breakpoints */
-	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		/* Check for return breakpoints */
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
+	}
 
 	fse->symbol_table = NULL;
 	fse->execute_data = NULL;
@@ -509,8 +516,10 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
 	}
 
-	/* Check for entry breakpoints */
-	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		/* Check for entry breakpoints */
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
+	}
 
 	/* Check for SOAP */
 	if (check_soap_call(fse, current_execute_data)) {
@@ -519,7 +528,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		zend_error_cb = xdebug_old_error_cb;
 	}
 
-	xdebug_profiler_execute_internal(fse);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_execute_internal(fse);
+	}
 
 	if (xdebug_old_execute_internal) {
 		xdebug_old_execute_internal(current_execute_data, return_value);
@@ -527,7 +538,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		execute_internal(current_execute_data, return_value);
 	}
 
-	xdebug_profiler_execute_internal_end(fse);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		xdebug_profiler_execute_internal_end(fse);
+	}
 
 	/* Restore SOAP situation if needed */
 	if (restore_error_handler_situation) {
@@ -541,8 +554,10 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		xdebug_tracing_execute_internal_end(function_nr, fse, return_value);
 	}
 
-	/* Check for return breakpoints */
-	xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
+	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		/* Check for return breakpoints */
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
+	}
 
 	if (XG_BASE(stack)) {
 		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);

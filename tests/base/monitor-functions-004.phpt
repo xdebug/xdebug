@@ -1,5 +1,7 @@
 --TEST--
 Function Monitor: Method function name
+--INI--
+xdebug.mode=display
 --FILE--
 <?php
 class Foo
@@ -24,23 +26,24 @@ var_dump(xdebug_get_monitored_functions());
 xdebug_stop_function_monitor();
 ?>
 --EXPECTF--
+%smonitor-functions-004.php:20:
 array(2) {
-  [0]=>
+  [0] =>
   array(3) {
-    ["function"]=>
+    'function' =>
     string(12) "Foo::doStuff"
-    ["filename"]=>
+    'filename' =>
     string(%d) "%smonitor-functions-004.php"
-    ["lineno"]=>
+    'lineno' =>
     int(15)
   }
-  [1]=>
+  [1] =>
   array(3) {
-    ["function"]=>
+    'function' =>
     string(18) "Foo->doMethodStuff"
-    ["filename"]=>
+    'filename' =>
     string(%d) "%smonitor-functions-004.php"
-    ["lineno"]=>
+    'lineno' =>
     int(18)
   }
 }

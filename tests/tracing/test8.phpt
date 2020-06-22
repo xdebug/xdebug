@@ -1,7 +1,7 @@
 --TEST--
 Test for nested function calls
 --INI--
-xdebug.mode=trace
+xdebug.mode=display,trace
 xdebug.start_with_request=0
 xdebug.collect_params=3
 xdebug.collect_return=1
