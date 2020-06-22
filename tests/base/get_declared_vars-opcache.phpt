@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('opcache');
 ?>
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=0
 xdebug.auto_profile=0
 xdebug.dump_globals=0

@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1166: Using $this in __debugInfo() causes infinite recursion
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0

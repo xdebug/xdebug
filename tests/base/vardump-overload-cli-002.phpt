@@ -1,7 +1,7 @@
 --TEST--
 Test for overloaded var_dump() on the CLI with file
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=2
 html_errors=0
 xdebug.cli_color=0

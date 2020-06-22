@@ -1,7 +1,7 @@
 --TEST--
 Shutdown function
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=1
 --FILE--
 <?php

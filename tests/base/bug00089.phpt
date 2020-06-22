@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #89: var_dump shows empty strings garbled
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.show_local_vars=0
 html_errors=1

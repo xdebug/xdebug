@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('64bit');
 ?>
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 html_errors=0
 xdebug.cli_color=2
 xdebug.overload_var_dump=2

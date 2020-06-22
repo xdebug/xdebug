@@ -865,8 +865,8 @@ PHP_FUNCTION(xdebug_print_function_stack)
 	char *tmp;
 	zend_long options = 0;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
-		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
 		return;
 	}
 
@@ -1386,8 +1386,8 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	zval                 *frame;
 	zval                 *params;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
-		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
 		array_init(return_value);
 		return;
 	}

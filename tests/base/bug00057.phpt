@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #57: Crash with overloading functions
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.collect_assignments=0
 xdebug.show_mem_delta=0

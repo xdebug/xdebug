@@ -197,7 +197,7 @@ static PHP_INI_MH(OnUpdateStartUponError)
 
 PHP_INI_BEGIN()
 	/* Library settings */
-	PHP_INI_ENTRY(      "xdebug.mode",               "display",       PHP_INI_SYSTEM,                OnUpdateMode)
+	PHP_INI_ENTRY(      "xdebug.mode",               "develop",       PHP_INI_SYSTEM,                OnUpdateMode)
 	PHP_INI_ENTRY(      "xdebug.start_with_request", "default",       PHP_INI_SYSTEM,                OnUpdateStartWithRequest)
 	PHP_INI_ENTRY(      "xdebug.start_upon_error",   "default",       PHP_INI_SYSTEM,                OnUpdateStartUponError)
 	STD_PHP_INI_ENTRY(  "xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,    zend_xdebug_globals, xdebug_globals)
@@ -620,7 +620,7 @@ PHP_MINFO_FUNCTION(xdebug)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Feature", "Enabled/Disabled");
-	php_info_print_table_row(2, "Display", xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Development Aids", xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP) ? "✔ enabled" : "✘ disabled");
 	php_info_print_table_row(2, "Coverage", xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE) ? "✔ enabled" : "✘ disabled");
 	php_info_print_table_row(2, "GC Stats", xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS) ? "✔ enabled" : "✘ disabled");
 	php_info_print_table_row(2, "Profiler", xdebug_lib_mode_is(XDEBUG_MODE_PROFILING) ? "✔ enabled" : "✘ disabled");
@@ -723,7 +723,7 @@ PHP_FUNCTION(xdebug_var_dump)
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
+		if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
 			xdebug_php_var_dump(&args[i], 1);
 		}
 		else if (PG(html_errors)) {

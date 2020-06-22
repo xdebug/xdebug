@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP < 8');
 ?>
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 display_errors=0
 log_errors=1
 error_log=

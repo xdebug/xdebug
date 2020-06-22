@@ -83,8 +83,8 @@ static int xdebug_lib_set_mode_item(char *mode, int len)
 		XG_LIB(mode) |= XDEBUG_MODE_OFF;
 		return 1;
 	}
-	if (strncmp(mode, "display", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_DISPLAY;
+	if (strncmp(mode, "develop", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_DEVELOP;
 		return 1;
 	}
 	if (strncmp(mode, "coverage", len) == 0) {

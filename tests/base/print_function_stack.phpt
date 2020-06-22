@@ -1,7 +1,7 @@
 --TEST--
 Test for xdebug_print_function_stack()
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.cli_color=0
 xdebug.collect_params=3
 --FILE--

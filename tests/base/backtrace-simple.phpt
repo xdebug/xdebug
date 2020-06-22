@@ -1,7 +1,7 @@
 --TEST--
 Test for simple backtrace
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0

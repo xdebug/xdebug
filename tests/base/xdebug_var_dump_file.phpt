@@ -1,7 +1,7 @@
 --TEST--
 Test for file display with xdebug_var_dump()
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 html_errors=1
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11

@@ -7,7 +7,7 @@ check_reqs('!win');
 ?>
 --INI--
 html_errors=0
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=1
 xdebug.cli_color=2
 --FILE--

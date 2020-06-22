@@ -1,7 +1,7 @@
 --TEST--
 Test for xdebug_call_*()
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.trace_options=0
 xdebug.collect_return=0
 xdebug.collect_params=0

@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('ext soap');
 ?>
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 --FILE--
 <?php
 try {

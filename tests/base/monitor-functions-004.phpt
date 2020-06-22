@@ -1,7 +1,7 @@
 --TEST--
 Function Monitor: Method function name
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 --FILE--
 <?php
 class Foo

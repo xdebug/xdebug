@@ -694,7 +694,7 @@ void xdebug_base_rinit()
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (
-		(xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY) || xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG))
+		(xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP) || xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG))
 		&&
 		(zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL)
 	) {

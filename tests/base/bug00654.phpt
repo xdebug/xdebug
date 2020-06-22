@@ -7,7 +7,7 @@ check_reqs('ext session');
 ?>
 --INI--
 error_reporting=-1
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.dump.SERVER=
 --FILE--
 <?php

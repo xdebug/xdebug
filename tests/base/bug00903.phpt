@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #903: xdebug_get_headers() returns replaced headers
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=1
 --FILE--
 <?php

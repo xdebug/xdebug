@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #280: var_dump don't display key of array as expected
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=1
 --FILE--
 <?php

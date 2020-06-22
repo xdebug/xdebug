@@ -2,7 +2,7 @@
 Test for bug #987: Hidden property names not shown with var_dump (CLI colours)
 --INI--
 html_errors=0
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.cli_color=2
 xdebug.overload_var_dump=1
 --FILE--

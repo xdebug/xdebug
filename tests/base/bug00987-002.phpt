@@ -2,7 +2,7 @@
 Test for bug #987: Hidden property names not shown with var_dump (HTML)
 --INI--
 html_errors=1
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.cli_color=0
 xdebug.overload_var_dump=2
 xdebug.file_link_format=

@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #570: undefined symbol: zend_memrchr
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.dump.GET=
 xdebug.dump.SERVER=
 --FILE--

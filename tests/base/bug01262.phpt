@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1262: overload_var_dump=0 messes with xdebug_var_dump()
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump = 0
 html_errors = 1
 --FILE--

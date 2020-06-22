@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #1288: Segfault when uncaught exception message does not contain " in "
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 html_errors=0
 xdebug.collect_params=4
 --FILE--

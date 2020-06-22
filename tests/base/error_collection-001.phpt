@@ -2,7 +2,7 @@
 Test for collection errors (1)
 --INI--
 display_errors=1
-xdebug.mode=display
+xdebug.mode=develop
 html_errors=0
 xdebug.collect_params=4
 xdebug.overload_var_dump=0

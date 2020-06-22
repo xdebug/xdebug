@@ -244,7 +244,7 @@ void xdebug_library_mshutdown(void);
 void xdebug_disable_opcache_optimizer(void);
 
 #define XDEBUG_MODE_OFF             0
-#define XDEBUG_MODE_DISPLAY      1<<0
+#define XDEBUG_MODE_DEVELOP      1<<0
 #define XDEBUG_MODE_COVERAGE     1<<1
 #define XDEBUG_MODE_STEP_DEBUG   1<<2
 #define XDEBUG_MODE_GCSTATS      1<<3

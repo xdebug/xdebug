@@ -1,7 +1,7 @@
 --TEST--
 Test for correct display with non overloaded var_dump()
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 html_errors=1
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11

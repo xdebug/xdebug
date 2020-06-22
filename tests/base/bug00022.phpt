@@ -1,7 +1,7 @@
 --TEST--
 Test for segmentation fault with xdebug_get_function_stack() and collect_params=1
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.collect_assignments=0
 xdebug.overload_var_dump=0

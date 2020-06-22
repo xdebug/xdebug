@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('!win; unparallel');
 ?>
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0
 xdebug.trace_format=0

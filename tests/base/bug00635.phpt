@@ -3,7 +3,7 @@ Test for bug #635: Browser output broken with xdebug.show_exception_trace = 1
 --INI--
 html_errors=1
 xdebug.show_exception_trace=1
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.file_link_format=
 xdebug.filename_format=
 xdebug.dump.SERVER=

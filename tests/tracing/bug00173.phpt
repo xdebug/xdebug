@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('ext SPL');
 ?>
 --INI--
-xdebug.mode=trace,display
+xdebug.mode=trace,develop
 xdebug.start_with_request=yes
 xdebug.trace_options=0
 xdebug.trace_output_name=trace.%c

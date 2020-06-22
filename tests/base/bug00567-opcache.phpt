@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('opcache');
 ?>
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=2
 --FILE--
 <?php

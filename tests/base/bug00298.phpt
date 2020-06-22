@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #298: xdebug_var_dump & multiline strings
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.file_link_format=
 xdebug.filename_format=
 xdebug.overload_var_dump=2

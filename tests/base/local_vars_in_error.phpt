@@ -1,7 +1,7 @@
 --TEST--
 Test with showing local variables on errors
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.auto_profile=0
 xdebug.dump_globals=0

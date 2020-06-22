@@ -1,7 +1,7 @@
 --TEST--
 Function Monitor: Simple function name
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 --FILE--
 <?php
 xdebug_start_function_monitor( [ 'strrev', 'array_push' ] );

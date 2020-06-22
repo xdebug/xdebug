@@ -73,8 +73,8 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 {
 	HashTable *functions_to_monitor;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
-		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
 		return;
 	}
 
@@ -100,8 +100,8 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 
 PHP_FUNCTION(xdebug_stop_function_monitor)
 {
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
-		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
 		return;
 	}
 
@@ -117,8 +117,8 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 	zend_bool             clear = 0;
 	xdebug_monitored_function_entry *mfe;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DISPLAY)) {
-		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'display'");
+	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
 		array_init(return_value);
 		return;
 	}

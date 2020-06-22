@@ -1,7 +1,7 @@
 --TEST--
 xdebug_get_function_stack with variadics
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.show_mem_delta=0

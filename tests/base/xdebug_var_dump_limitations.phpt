@@ -1,7 +1,7 @@
 --TEST--
 Test for display limitations with xdebug_var_dump().
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.var_display_max_children=-1
 xdebug.var_display_max_data=-1
 xdebug.var_display_max_depth=-1

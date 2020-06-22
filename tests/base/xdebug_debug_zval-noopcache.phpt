@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('!opcache');
 ?>
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.cli_color=0
 --FILE--
 <?php

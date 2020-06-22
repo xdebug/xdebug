@@ -2,7 +2,7 @@
 Test for bug #947: Newlines converted when html_errors = 0 (plain)
 --INI--
 html_errors=0
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=1
 xdebug.cli_color=0
 --FILE--

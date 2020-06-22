@@ -1,7 +1,7 @@
 --TEST--
 Test for file display with xdebug_var_dump()
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 html_errors=1
 xdebug.var_display_max_children=11
 xdebug.overload_var_dump=2

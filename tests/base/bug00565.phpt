@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #565: xdebug.show_local_vars setting does not work with php 5.3
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.show_local_vars=1
 xdebug.dump.GET=

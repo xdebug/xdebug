@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #885: missing validation point returned by strchr in xdebug_error_cb.
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 --FILE--
 <?php
 throw new Exception("long message ".str_repeat('.', 10240));

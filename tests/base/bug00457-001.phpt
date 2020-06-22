@@ -2,7 +2,7 @@
 Test for bug #457: var_dump() overloading from the command line
 --INI--
 html_errors=0
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.var_display_max_data=32
 xdebug.var_display_max_children=4
 xdebug.var_display_max_depth=2

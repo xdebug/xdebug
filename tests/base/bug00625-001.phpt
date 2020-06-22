@@ -3,7 +3,7 @@ Test for bug #625: xdebug_get_headers() resets header list (1)
 --ENV--
 XDEBUG_CONFIG=
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=2
 xdebug.filename_format=
 --FILE--

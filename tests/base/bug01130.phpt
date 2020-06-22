@@ -4,7 +4,7 @@ Test for bug #1130: PHP documentation links to local manual reference are broken
 docref_root=http://www.php.net/
 docref_ext=.php
 html_errors=1
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.file_link_format=
 xdebug.filename_format=
 xdebug.collect_params=0

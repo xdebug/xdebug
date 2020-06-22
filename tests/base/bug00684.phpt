@@ -2,7 +2,7 @@
 Test for bug #684: xdebug_var_dump - IE does not support &amp;
 --INI--
 html_errors=1
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.overload_var_dump=2
 xdebug.file_link_format=
 xdebug.filename_format=

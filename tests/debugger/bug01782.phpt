@@ -8,7 +8,7 @@ check_reqs('PHP >= 7.3');
 --ENV--
 XDEBUG_CONFIG=idekey=testing
 --INI--
-xdebug.mode=debug,display
+xdebug.mode=debug,develop
 default_charset=utf-8
 xdebug.filename_format=
 xdebug.remote_cookie_expire_time=1234

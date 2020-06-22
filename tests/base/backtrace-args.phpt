@@ -1,7 +1,7 @@
 --TEST--
 Test for complex parameters to a function
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.dump_globals=0
 xdebug.show_local_vars=1

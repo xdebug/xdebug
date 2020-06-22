@@ -1,7 +1,7 @@
 --TEST--
 Filtered stack traces: namespace exclude [1]
 --INI--
-xdebug.mode=display
+xdebug.mode=develop
 xdebug.collect_params=4
 --FILE--
 <?php
