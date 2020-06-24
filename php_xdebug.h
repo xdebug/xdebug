@@ -92,9 +92,6 @@ struct xdebug_base_info {
 	unsigned int  function_count;
 	char         *last_eval_statement;
 
-	/* headers */
-	xdebug_llist *headers;
-
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
 	xdebug_llist *collected_errors;

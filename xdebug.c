@@ -73,14 +73,10 @@ static int (*xdebug_orig_post_startup_cb)(void);
 static int xdebug_post_startup(void);
 #endif
 
-static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s);
-
 int xdebug_exit_handler(zend_execute_data *execute_data);
 int xdebug_include_or_eval_handler(zend_execute_data *execute_data);
 
 int zend_xdebug_initialised = 0;
-
-static int (*xdebug_orig_header_handler)(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s);
 
 zend_module_entry xdebug_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -275,11 +271,9 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 {
 	xg->level                = 0;
 	xg->stack                = NULL;
-	xg->headers              = NULL;
 	xg->in_debug_info        = 0;
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 	xg->do_monitor_functions = 0;
-	xg->headers              = NULL;
 	xg->in_at                = 0; /* scream */
 	xg->in_execution         = 0;
 	xg->in_var_serialisation = 0;
@@ -321,12 +315,6 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 	}
 	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
 		xdebug_init_tracing_globals(&xg->globals.tracing);
-	}
-
-	/* Override header generation in SAPI */
-	if (sapi_module.header_handler != xdebug_header_handler) {
-		xdebug_orig_header_handler = sapi_module.header_handler;
-		sapi_module.header_handler = xdebug_header_handler;
 	}
 }
 
@@ -529,6 +517,8 @@ PHP_RINIT_FUNCTION(xdebug)
 	xdebug_disable_opcache_optimizer();
 #endif
 
+	xdebug_library_rinit();
+
 	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
 		xdebug_coverage_rinit();
 	}
@@ -578,6 +568,7 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 
 	xdebug_base_post_deactivate();
+	xdebug_library_post_deactivate();
 
 	return SUCCESS;
 }
@@ -640,59 +631,6 @@ PHP_MINFO_FUNCTION(xdebug)
 
 	DISPLAY_INI_ENTRIES();
 }
-
-static void xdebug_header_remove_with_prefix(xdebug_llist *headers, char *prefix, size_t prefix_len)
-{
-	xdebug_llist_element *le;
-	char                 *header;
-
-	for (le = XDEBUG_LLIST_HEAD(XG_BASE(headers)); le != NULL; /* intentionally left blank*/) {
-		header = XDEBUG_LLIST_VALP(le);
-
-		if ((strlen(header) > prefix_len + 1) && (header[prefix_len] == ':') && (strncasecmp(header, prefix, prefix_len) == 0)) {
-			xdebug_llist_element *current = le;
-
-			le = XDEBUG_LLIST_NEXT(le);
-			xdebug_llist_remove(headers, current, NULL);
-		} else {
-			le = XDEBUG_LLIST_NEXT(le);
-		}
-	}
-}
-
-static int xdebug_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s)
-{
-	if (XG_BASE(headers)) {
-		switch (op) {
-			case SAPI_HEADER_ADD:
-				xdebug_llist_insert_next(XG_BASE(headers), XDEBUG_LLIST_TAIL(XG_BASE(headers)), xdstrdup(h->header));
-				break;
-			case SAPI_HEADER_REPLACE: {
-				char *colon_offset = strchr(h->header, ':');
-
-				if (colon_offset) {
-					char save = *colon_offset;
-
-					*colon_offset = '\0';
-					xdebug_header_remove_with_prefix(XG_BASE(headers), h->header, strlen(h->header));
-					*colon_offset = save;
-				}
-
-				xdebug_llist_insert_next(XG_BASE(headers), XDEBUG_LLIST_TAIL(XG_BASE(headers)), xdstrdup(h->header));
-			} break;
-			case SAPI_HEADER_DELETE_ALL:
-				xdebug_llist_empty(XG_BASE(headers), NULL);
-			case SAPI_HEADER_DELETE:
-			case SAPI_HEADER_SET_STATUS:
-				break;
-		}
-	}
-	if (xdebug_orig_header_handler) {
-		return xdebug_orig_header_handler(h, op, s);
-	}
-	return SAPI_HEADER_ADD;
-}
-
 
 /* {{{ proto void xdebug_var_dump(mixed var [, ...] )
    Outputs a fancy string representation of a variable */
@@ -885,18 +823,6 @@ PHP_FUNCTION(xdebug_stop_error_collection)
 	XG_BASE(do_collect_errors) = 0;
 }
 
-PHP_FUNCTION(xdebug_get_headers)
-{
-	xdebug_llist_element *le;
-	char                 *string;
-
-	array_init(return_value);
-	for (le = XDEBUG_LLIST_HEAD(XG_BASE(headers)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-		string = XDEBUG_LLIST_VALP(le);
-		add_next_index_string(return_value, string);
-	}
-}
-
 PHP_FUNCTION(xdebug_memory_usage)
 {
 	RETURN_LONG(zend_memory_usage(0));
@@ -934,12 +860,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
-	/* Override header handler in SAPI */
-	if (xdebug_orig_header_handler == NULL) {
-		xdebug_orig_header_handler = sapi_module.header_handler;
-		sapi_module.header_handler = xdebug_header_handler;
-	}
-
+	xdebug_library_zend_startup();
 	xdebug_debugger_zend_startup();
 
 	zend_xdebug_initialised = 1;
@@ -972,11 +893,9 @@ static int xdebug_post_startup(void)
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 {
-	/* Restore original header handler in SAPI */
-	sapi_module.header_handler = xdebug_orig_header_handler;
-	xdebug_orig_header_handler = NULL;
-
 	xdebug_debugger_zend_shutdown();
+
+	xdebug_library_zend_shutdown();
 }
 
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)

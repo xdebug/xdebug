@@ -227,6 +227,9 @@ typedef struct _xdebug_library_globals_t {
 	HashTable             *active_symbol_table;
 	zval                  *active_object;
 
+	/* Headers */
+	xdebug_llist *headers;
+
 	user_opcode_handler_t          original_opcode_handlers[256];
 	xdebug_multi_opcode_handler_t *opcode_multi_handlers[256];
 	xdebug_set                    *opcode_handlers_set;
@@ -238,8 +241,13 @@ typedef struct _xdebug_library_settings_t {
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
+
+void xdebug_library_zend_startup(void);
+void xdebug_library_zend_shutdown(void);
 void xdebug_library_minit(void);
 void xdebug_library_mshutdown(void);
+void xdebug_library_rinit(void);
+void xdebug_library_post_deactivate(void);
 
 void xdebug_disable_opcache_optimizer(void);
 
@@ -296,4 +304,6 @@ void xdebug_register_with_opcode_multi_handler(int opcode, user_opcode_handler_t
 int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS);
 
 char *xdebug_lib_get_output_dir(void);
+
+void xdebug_llist_string_dtor(void *dummy, void *elem);
 #endif

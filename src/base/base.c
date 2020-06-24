@@ -220,15 +220,6 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 	}
 }
 
-static void xdebug_llist_string_dtor(void *dummy, void *elem)
-{
-	char *s = elem;
-
-	if (s) {
-		xdfree(s);
-	}
-}
-
 static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
 {
 	unsigned int i = 0;
@@ -714,8 +705,6 @@ void xdebug_base_rinit()
 	XG_BASE(do_monitor_functions) = 0;
 	XG_BASE(functions_to_monitor) = NULL;
 	XG_BASE(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
-	XG_BASE(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
-
 
 	/* Initialize dump superglobals */
 	XG_BASE(dumped) = 0;
@@ -767,10 +756,6 @@ void xdebug_base_post_deactivate()
 		xdebug_hash_destroy(XG_BASE(functions_to_monitor));
 		XG_BASE(functions_to_monitor) = NULL;
 	}
-
-	/* Clean up collected headers */
-	xdebug_llist_destroy(XG_BASE(headers), NULL);
-	XG_BASE(headers) = NULL;
 
 	/* filters */
 	xdebug_llist_destroy(XG_BASE(filters_tracing), NULL);
