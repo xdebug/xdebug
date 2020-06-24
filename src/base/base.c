@@ -259,16 +259,6 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 }
 
 
-/* Opcode handler for exit, to be able to clean up the profiler */
-int xdebug_exit_handler(XDEBUG_OPCODE_HANDLER_ARGS)
-{
-	const zend_op *cur_opcode = execute_data->opline;
-
-	xdebug_profiler_exit_handler();
-
-	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
-}
-
 int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *opline = execute_data->opline;

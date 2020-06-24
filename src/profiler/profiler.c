@@ -36,6 +36,8 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+int xdebug_profiler_exit_handler(XDEBUG_OPCODE_HANDLER_ARGS);
+
 void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg)
 {
 	xg->active = 0;
@@ -43,6 +45,8 @@ void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg)
 
 void xdebug_profiler_minit(void)
 {
+	/* Overload the "exit" opcode */
+	xdebug_set_opcode_handler(ZEND_EXIT, xdebug_profiler_exit_handler);
 }
 
 void xdebug_profiler_mshutdown(void)
@@ -79,9 +83,13 @@ void xdebug_profiler_pcntl_exec_handler(void)
 	deinit_if_active();
 }
 
-void xdebug_profiler_exit_handler(void)
+int xdebug_profiler_exit_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
+	const zend_op *cur_opcode = execute_data->opline;
+
 	deinit_if_active();
+
+	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 

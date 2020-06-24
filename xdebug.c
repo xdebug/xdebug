@@ -73,7 +73,6 @@ static int (*xdebug_orig_post_startup_cb)(void);
 static int xdebug_post_startup(void);
 #endif
 
-int xdebug_exit_handler(zend_execute_data *execute_data);
 int xdebug_include_or_eval_handler(zend_execute_data *execute_data);
 
 int zend_xdebug_initialised = 0;
@@ -448,9 +447,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_minit(INIT_FUNC_ARGS_PASSTHRU);
 	}
-
-	/* Overload the "exit" opcode */
-	xdebug_set_opcode_handler(ZEND_EXIT, xdebug_exit_handler);
 
 	/* Overload the "include_or_eval" opcode if the mode is 'debug' or 'trace' */
 	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) || xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
