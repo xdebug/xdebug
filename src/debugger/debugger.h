@@ -78,7 +78,7 @@ xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa)
 int xdebug_do_eval(char *eval_string, zval *ret_zval);
 
 void xdebug_debugger_statement_call(char *file, int file_len, int lineno);
-void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval *file, zval *line, zval *code, char *code_str, zval *message);
+void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
 void xdebug_debugger_error_cb(const char *error_filename, int error_lineno, int type, char *error_type_str, char *buffer);
 void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoint_type);
 

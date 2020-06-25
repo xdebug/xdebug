@@ -32,6 +32,7 @@
 #include "coverage/branch_info.h"
 #include "coverage/code_coverage.h"
 #include "debugger/debugger.h"
+#include "develop/develop.h"
 #include "lib/lib.h"
 #include "gcstats/gc_stats.h"
 #include "profiler/profiler.h"
@@ -86,34 +87,11 @@ struct xdebug_base_info {
 	zif_handler   orig_pcntl_fork_func;
 	int           output_is_tty;
 	zend_bool     in_debug_info;
-	char         *last_exception_trace;
 	zend_long     error_reporting_override;
 	zend_bool     error_reporting_overridden;
 	unsigned int  function_count;
 	char         *last_eval_statement;
-
-	/* used for collection errors */
-	zend_bool     do_collect_errors;
-	xdebug_llist *collected_errors;
-
-	/* used for function monitoring */
-	zend_bool     do_monitor_functions;
-	xdebug_hash  *functions_to_monitor;
-	xdebug_llist *monitored_functions_found; /* List of functions found */
-
-	/* superglobals */
-	zend_bool     dumped;
-	xdebug_llist  server;
-	xdebug_llist  get;
-	xdebug_llist  post;
-	xdebug_llist  cookie;
-	xdebug_llist  files;
-	xdebug_llist  env;
-	xdebug_llist  request;
-	xdebug_llist  session;
-
-	/* scream */
-	zend_bool  in_at;
+	char         *last_exception_trace;
 
 	/* in-execution checking */
 	zend_bool  in_execution;
@@ -128,37 +106,6 @@ struct xdebug_base_info {
 
 	struct {
 		zend_long     max_nesting_level;
-		zend_long     max_stack_frames;
-		zend_bool     collect_includes;
-		zend_long     collect_params;
-		zend_bool     collect_return;
-		zend_bool     collect_vars;
-		zend_bool     collect_assignments;
-		zend_bool     show_ex_trace;
-		zend_bool     show_error_trace;
-		zend_bool     show_local_vars;
-		zend_bool     show_mem_delta;
-		char         *file_link_format;
-		char         *filename_format;
-		zend_bool     force_display_errors;
-		zend_long     force_error_reporting;
-		zend_long     halt_level;
-
-		zend_long     overload_var_dump;
-
-		/* variable dumping limitation settings */
-		zend_long     display_max_children;
-		zend_long     display_max_data;
-		zend_long     display_max_depth;
-		zend_long     cli_color;
-
-		/* superglobals */
-		zend_bool     dump_globals;
-		zend_bool     dump_once;
-		zend_bool     dump_undefined;
-
-		/* scream */
-		zend_bool  do_scream;
 	} settings;
 };
 
@@ -167,6 +114,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct {
 		xdebug_coverage_globals_t coverage;
 		xdebug_debugger_globals_t debugger;
+		xdebug_develop_globals_t  develop;
 		xdebug_gc_stats_globals_t gc_stats;
 		xdebug_library_globals_t  library;
 		xdebug_profiler_globals_t profiler;
@@ -175,6 +123,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 	struct {
 		xdebug_coverage_settings_t coverage;
 		xdebug_debugger_settings_t debugger;
+		xdebug_develop_settings_t  develop;
 		xdebug_gc_stats_settings_t gc_stats;
 		xdebug_library_settings_t  library;
 		xdebug_profiler_settings_t profiler;

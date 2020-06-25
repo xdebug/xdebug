@@ -17,6 +17,7 @@
  */
 
 #include "var_export_html.h"
+#include "lib_private.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -278,9 +279,9 @@ xdebug_str* xdebug_get_zval_value_html(char *name, zval *val, int debug_zval, xd
 	xdebug_str_addl(str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
-		xdebug_format_filename(&formatted_filename, XINI_BASE(filename_format), "%f", zend_get_executed_filename());
+		xdebug_format_filename(&formatted_filename, "%f", zend_get_executed_filename());
 
-		if (strlen(XINI_BASE(file_link_format)) > 0) {
+		if (strlen(XINI_LIB(file_link_format)) > 0) {
 			char *file_link;
 
 			xdebug_format_file_link(&file_link, zend_get_executed_filename(), zend_get_executed_lineno());

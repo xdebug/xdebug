@@ -33,10 +33,14 @@
 #include <process.h>
 #endif
 #include "php_xdebug.h"
+
 #include "mm.h"
 #include "crc32.h"
 #include "str.h"
+
+#include "lib_private.h"
 #include "usefulstuff.h"
+
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/flock_compat.h"
 #include "main/php_ini.h"
@@ -608,7 +612,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
-	char      *format = XINI_BASE(file_link_format);
+	char      *format = XINI_LIB(file_link_format);
 
 	while (*format)
 	{
@@ -639,7 +643,7 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
-int xdebug_format_filename(char **formatted_name, const char *fmt, const char *default_fmt, const char *filename)
+int xdebug_format_filename(char **formatted_name, const char *default_fmt, const char *filename)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char *name;
@@ -647,6 +651,7 @@ int xdebug_format_filename(char **formatted_name, const char *fmt, const char *d
 	const char *full = filename;
 	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	char *slash = xdebug_sprintf("%c", DEFAULT_SLASH);
+	char *fmt = XINI_LIB(filename_format);
 	const char *format = fmt && fmt[0] ? fmt : default_fmt; /* If the format is empty, we use the default */
 
 	/* Create pointers for the format chars */

@@ -24,7 +24,7 @@
 #include "php_xdebug.h"
 #include "gc_stats_private.h"
 
-#include "base/stack.h"
+#include "base/base.h"
 #include "lib/lib.h"
 
 /* Set correct int format to use */

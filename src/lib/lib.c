@@ -33,6 +33,7 @@ const char *xdebug_log_prefix[11] = {
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
 	xg->headers              = NULL;
+	xg->mode                 = 0xFFFFFFFF;
 
 	xg->active_execute_data  = NULL;
 	xg->opcode_handlers_set = xdebug_set_create(256);
@@ -600,4 +601,22 @@ void xdebug_llist_string_dtor(void *dummy, void *elem)
 	if (s) {
 		xdfree(s);
 	}
+}
+
+char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname)
+{
+	xdebug_str tmp = XDEBUG_STR_INITIALIZER;
+	char *tmp_loc_info;
+
+	xdebug_str_addl(&tmp, fname, strlen(fname) - 1, 0);
+
+	tmp_loc_info = xdebug_sprintf(
+		":%s:%d-%d}",
+		opa->filename->val,
+		opa->line_start,
+		opa->line_end
+	);
+	xdebug_str_add(&tmp, tmp_loc_info, 1);
+
+	return tmp.d;
 }

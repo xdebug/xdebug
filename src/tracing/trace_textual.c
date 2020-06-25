@@ -22,6 +22,7 @@
 #include "tracing_private.h"
 #include "trace_textual.h"
 
+#include "lib/lib_private.h"
 #include "lib/var_export_line.h"
 #include "lib/var_export_serialized.h"
 
@@ -129,7 +130,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	xdebug_str_add(&str, xdebug_sprintf("%10.4F ", fse->time - XG_BASE(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%10lu ", fse->memory), 1);
-	if (XINI_BASE(show_mem_delta)) {
+	if (XINI_TRACE(show_mem_delta)) {
 		xdebug_str_add(&str, xdebug_sprintf("%+8ld ", fse->memory - fse->prev_memory), 1);
 	}
 	for (j = 0; j < fse->level; j++) {
@@ -140,7 +141,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 	xdfree(tmp_name);
 
 	/* Printing vars */
-	if (XINI_BASE(collect_params) > 0) {
+	if (XINI_LIB(collect_params) > 0) {
 		int variadic_opened = 0;
 		int variadic_count  = 0;
 
@@ -159,7 +160,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 				c = 0;
 			}
 
-			if (fse->var[j].name && XINI_BASE(collect_params) == 4) {
+			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
 			}
 
@@ -169,13 +170,13 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 			}
 
 			if (
-				(variadic_opened && XINI_BASE(collect_params) != 5)
+				(variadic_opened && XINI_LIB(collect_params) != 5)
 			) {
 				xdebug_str_add(&str, xdebug_sprintf("%d => ", variadic_count++), 1);
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {
-				add_single_value(&str, &fse->var[j].data, XINI_BASE(collect_params));
+				add_single_value(&str, &fse->var[j].data, XINI_LIB(collect_params));
 			} else {
 				xdebug_str_addl(&str, "???", 3, 0);
 			}
@@ -219,7 +220,7 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 	xdebug_str_add(str, xdebug_sprintf("%10.4F ", xdebug_get_utime() - XG_BASE(start_time)), 1);
 	xdebug_str_add(str, xdebug_sprintf("%10lu ", zend_memory_usage(0)), 1);
 
-	if (XINI_BASE(show_mem_delta)) {
+	if (XINI_TRACE(show_mem_delta)) {
 		xdebug_str_addl(str, "        ", 8, 0);
 	}
 	for (j = 0; j < fse->level; j++) {
@@ -297,7 +298,7 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 	xdebug_str                   *tmp_value;
 
 	xdebug_str_addl(&str, "                    ", 20, 0);
-	if (XINI_BASE(show_mem_delta)) {
+	if (XINI_TRACE(show_mem_delta)) {
 		xdebug_str_addl(&str, "        ", 8, 0);
 	}
 	for (j = 0; j <= fse->level; j++) {

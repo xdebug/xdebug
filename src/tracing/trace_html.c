@@ -55,7 +55,7 @@ void xdebug_trace_html_write_header(void *ctxt)
 	fprintf(context->trace_file, "<table style='hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto;' class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
 	fprintf(context->trace_file, "\t<tr><th>#</th><th>Time</th>");
 	fprintf(context->trace_file, "<th>Mem</th>");
-	if (XINI_BASE(show_mem_delta)) {
+	if (XINI_TRACE(show_mem_delta)) {
 		fprintf(context->trace_file, "<th>&#948; Mem</th>");
 	}
 	fprintf(context->trace_file, "<th colspan='2'>Function</th><th>Location</th></tr>\n");
@@ -88,7 +88,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", function_nr), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6F</td>", fse->time - XG_BASE(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", fse->memory), 1);
-	if (XINI_BASE(show_mem_delta)) {
+	if (XINI_TRACE(show_mem_delta)) {
 		xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%ld</td>", fse->memory - fse->prev_memory), 1);
 	}
 	xdebug_str_add(&str, "<td align='left'>", 0);

@@ -16,18 +16,20 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_XDEBUG_MONITOR_H__
-#define __HAVE_XDEBUG_MONITOR_H__
+#ifndef XDEBUG_STACK_H
+#define XDEBUG_STACK_H
 
-typedef struct xdebug_monitored_function_entry
-{
-	char *func_name;
-	char *filename;
-	int   lineno;
-} xdebug_monitored_function_entry;
+#include "lib/str.h"
 
-void xdebug_monitored_function_dtor(void *dummy, void *elem);
+#define XDEBUG_STACK_NO_DESC 0x01
 
-void xdebug_function_monitor_record(char *func_name, char *filename, int lineno);
+void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str);
+void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno);
+void xdebug_append_printable_stack(xdebug_str *str, int html);
+void xdebug_append_error_footer(xdebug_str *str, int html);
+void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno);
+char *xdebug_strip_php_stack_trace(char *buffer);
+char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription);
+void xdebug_throw_exception_hook(zval *exception);
 
 #endif

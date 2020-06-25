@@ -16,24 +16,10 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef XDEBUG_STACK_H
-#define XDEBUG_STACK_H
+#ifndef __XDEBUG_DEVELOP_PRIVATE_H__
+#define __XDEBUG_DEVELOP_PRIVATE_H__
 
-#include "lib/str.h"
-
-#define XDEBUG_STACK_NO_DESC 0x01
-
-char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
-void xdebug_func_dtor_by_ref(xdebug_func *elem); /* TODO: Remove this API */
-void xdebug_func_dtor(xdebug_func *elem);
-void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata);
-void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa);
-function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type);
-void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_str);
-void xdebug_append_error_description(xdebug_str *str, int html, const char *error_type_str, const char *buffer, const char *error_filename, const int error_lineno);
-void xdebug_append_printable_stack(xdebug_str *str, int html);
-void xdebug_append_error_footer(xdebug_str *str, int html);
-void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno);
-char *xdebug_strip_php_stack_trace(char *buffer);
+#define XG_DEV(v)      (XG(globals.develop.v))
+#define XINI_DEV(v)    (XG(settings.develop.v))
 
 #endif

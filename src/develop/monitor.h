@@ -16,20 +16,16 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __XDEBUG_BASE_H__
-#define __XDEBUG_BASE_H__
+#ifndef __HAVE_XDEBUG_MONITOR_H__
+#define __HAVE_XDEBUG_MONITOR_H__
 
-void xdebug_base_minit(INIT_FUNC_ARGS);
-void xdebug_base_mshutdown();
+typedef struct xdebug_monitored_function_entry
+{
+	char *func_name;
+	char *filename;
+	int   lineno;
+} xdebug_monitored_function_entry;
 
-void xdebug_base_post_startup();
+void xdebug_monitored_function_dtor(void *dummy, void *elem);
 
-void xdebug_base_rinit();
-void xdebug_base_post_deactivate();
-void xdebug_base_rshutdown();
-
-void xdebug_func_dtor_by_ref(xdebug_func *elem); /* TODO: Remove this API */
-void xdebug_func_dtor(xdebug_func *elem);
-
-void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata);
-#endif // __XDEBUG_BASE_H__
+#endif

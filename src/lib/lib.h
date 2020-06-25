@@ -236,8 +236,18 @@ typedef struct _xdebug_library_globals_t {
 } xdebug_library_globals_t;
 
 typedef struct _xdebug_library_settings_t {
-	char      *output_dir;
-	char      *trigger_value;
+	char         *output_dir;
+	char         *trigger_value;
+
+	char         *file_link_format;
+	char         *filename_format;
+
+	zend_long     collect_params;
+
+	/* variable dumping limitation settings */
+	zend_long     display_max_children;
+	zend_long     display_max_data;
+	zend_long     display_max_depth;
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
@@ -306,4 +316,5 @@ int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER
 char *xdebug_lib_get_output_dir(void);
 
 void xdebug_llist_string_dtor(void *dummy, void *elem);
+char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
 #endif

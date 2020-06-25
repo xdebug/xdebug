@@ -51,6 +51,6 @@ char *xdebug_path_from_url(const char *fileurl);
 FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);
 int xdebug_format_output_filename(char **filename, char *format, char *script_name);
 int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno);
-int xdebug_format_filename(char **formatted_name, const char *format, const char *default_format, const char *filename);
+int xdebug_format_filename(char **formatted_name, const char *default_format, const char *filename);
 
 #endif

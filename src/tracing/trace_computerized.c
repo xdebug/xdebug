@@ -22,6 +22,7 @@
 #include "tracing_private.h"
 #include "trace_computerized.h"
 
+#include "lib/lib_private.h"
 #include "lib/var_export_line.h"
 #include "lib/var_export_serialized.h"
 
@@ -161,7 +162,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d", fse->filename, fse->lineno), 1);
 
 
-	if (XINI_BASE(collect_params) > 0) {
+	if (XINI_LIB(collect_params) > 0) {
 		unsigned int j = 0; /* Counter */
 
 		/* Nr of arguments (11) */
@@ -175,12 +176,12 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 				xdebug_str_addl(&str, "...\t", 4, 0);
 			}
 
-			if (fse->var[j].name && XINI_BASE(collect_params) == 4) {
+			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
 				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {
-				add_single_value(&str, &(fse->var[j].data), XINI_BASE(collect_params));
+				add_single_value(&str, &(fse->var[j].data), XINI_LIB(collect_params));
 			} else {
 				xdebug_str_add(&str, "???", 0);
 			}
@@ -221,7 +222,7 @@ void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_
 	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
 	xdebug_str_add(&str, "R\t\t\t", 0);
 
-	add_single_value(&str, return_value, XINI_BASE(collect_params));
+	add_single_value(&str, return_value, XINI_LIB(collect_params));
 
 	xdebug_str_addl(&str, "\n", 2, 0);
 

@@ -59,7 +59,6 @@ typedef struct xdebug_var_export_options {
 #define XDEBUG_VAR_TYPE_STATIC   0x01
 #define XDEBUG_VAR_TYPE_CONSTANT 0x02
 
-void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument);
 void xdebug_get_php_symbol(zval *retval, xdebug_str* name);
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(void);

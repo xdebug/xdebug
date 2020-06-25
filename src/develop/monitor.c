@@ -16,12 +16,15 @@
    +----------------------------------------------------------------------+
  */
 
+#include "php.h"
 #include "php_xdebug.h"
 
+#include "develop_private.h"
 #include "monitor.h"
 
 #include "lib/compat.h"
 #include "lib/hash.h"
+#include "lib/var.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -66,7 +69,27 @@ void xdebug_function_monitor_record(char *func_name, char *filename, int lineno)
 	xdebug_monitored_function_entry *record;
 
 	record = xdebug_monitored_function_init(func_name, filename, lineno);
-	xdebug_llist_insert_next(XG_BASE(monitored_functions_found), XDEBUG_LLIST_TAIL(XG_BASE(monitored_functions_found)), record);
+	xdebug_llist_insert_next(XG_DEV(monitored_functions_found), XDEBUG_LLIST_TAIL(XG_DEV(monitored_functions_found)), record);
+}
+
+void xdebug_monitor_handler(function_stack_entry *fse)
+{
+	char *func_name = NULL;
+	int   func_name_len = 0;
+	void *dummy = NULL;
+
+	if (!XG_DEV(do_monitor_functions)) {
+		return;
+	}
+
+	func_name = xdebug_show_fname(fse->function, 0, 0);
+	func_name_len = strlen(func_name);
+
+	if (xdebug_hash_find(XG_DEV(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {
+		xdebug_function_monitor_record(func_name, fse->filename, fse->lineno);
+	}
+
+	xdfree(func_name);
 }
 
 PHP_FUNCTION(xdebug_start_function_monitor)
@@ -82,20 +105,20 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 		return;
 	}
 
-	if (XG_BASE(do_monitor_functions) == 1) {
+	if (XG_DEV(do_monitor_functions) == 1) {
 		php_error(E_NOTICE, "Function monitoring was already started");
 	}
 
 	/* Clean and store list of functions to monitor */
-	if (XG_BASE(functions_to_monitor)) {
-		xdebug_hash_destroy(XG_BASE(functions_to_monitor));
+	if (XG_DEV(functions_to_monitor)) {
+		xdebug_hash_destroy(XG_DEV(functions_to_monitor));
 	}
 
 	/* We add "1" here so that we don't alloc a 0-slot hash table */
-	XG_BASE(functions_to_monitor) = xdebug_hash_alloc(zend_hash_num_elements(functions_to_monitor) + 1, (xdebug_hash_dtor_t) xdebug_hash_function_monitor_dtor);
-	init_function_monitor_hash(XG_BASE(functions_to_monitor), functions_to_monitor);
+	XG_DEV(functions_to_monitor) = xdebug_hash_alloc(zend_hash_num_elements(functions_to_monitor) + 1, (xdebug_hash_dtor_t) xdebug_hash_function_monitor_dtor);
+	init_function_monitor_hash(XG_DEV(functions_to_monitor), functions_to_monitor);
 
-	XG_BASE(do_monitor_functions) = 1;
+	XG_DEV(do_monitor_functions) = 1;
 }
 
 PHP_FUNCTION(xdebug_stop_function_monitor)
@@ -105,10 +128,10 @@ PHP_FUNCTION(xdebug_stop_function_monitor)
 		return;
 	}
 
-	if (XG_BASE(do_monitor_functions) == 0) {
+	if (XG_DEV(do_monitor_functions) == 0) {
 		php_error(E_NOTICE, "Function monitoring was not started");
 	}
-	XG_BASE(do_monitor_functions) = 0;
+	XG_DEV(do_monitor_functions) = 0;
 }
 
 PHP_FUNCTION(xdebug_get_monitored_functions)
@@ -128,7 +151,7 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 	}
 
 	array_init(return_value);
-	for (le = XDEBUG_LLIST_HEAD(XG_BASE(monitored_functions_found)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
+	for (le = XDEBUG_LLIST_HEAD(XG_DEV(monitored_functions_found)); le != NULL; le = XDEBUG_LLIST_NEXT(le))	{
 		zval *entry;
 
 		mfe = XDEBUG_LLIST_VALP(le);
@@ -145,8 +168,8 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 	}
 
 	if (clear) {
-		xdebug_llist_destroy(XG_BASE(monitored_functions_found), NULL);
-		XG_BASE(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
+		xdebug_llist_destroy(XG_DEV(monitored_functions_found), NULL);
+		XG_DEV(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
 	}
 }
 /* }}} */

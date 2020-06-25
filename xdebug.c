@@ -53,10 +53,10 @@
 
 #include "base/base.h"
 #include "base/filter.h"
-#include "base/monitor.h"
-#include "base/stack.h"
-#include "base/superglobals.h"
 #include "coverage/code_coverage.h"
+#include "develop/monitor.h"
+#include "develop/stack.h"
+#include "develop/superglobals.h"
 #include "gcstats/gc_stats.h"
 #include "lib/usefulstuff.h"
 #include "lib/lib.h"
@@ -192,30 +192,35 @@ static PHP_INI_MH(OnUpdateStartUponError)
 
 PHP_INI_BEGIN()
 	/* Library settings */
-	PHP_INI_ENTRY(      "xdebug.mode",               "develop",       PHP_INI_SYSTEM,                OnUpdateMode)
-	PHP_INI_ENTRY(      "xdebug.start_with_request", "default",       PHP_INI_SYSTEM,                OnUpdateStartWithRequest)
-	PHP_INI_ENTRY(      "xdebug.start_upon_error",   "default",       PHP_INI_SYSTEM,                OnUpdateStartUponError)
-	STD_PHP_INI_ENTRY(  "xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY(  "xdebug.trigger_value",      "",              PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value, zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY(    "xdebug.mode",               "develop",       PHP_INI_SYSTEM,                OnUpdateMode)
+	PHP_INI_ENTRY(    "xdebug.start_with_request", "default",       PHP_INI_SYSTEM,                OnUpdateStartWithRequest)
+	PHP_INI_ENTRY(    "xdebug.start_upon_error",   "default",       PHP_INI_SYSTEM,                OnUpdateStartUponError)
+	STD_PHP_INI_ENTRY("xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trigger_value",      "",              PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.file_link_format",   "",              PHP_INI_ALL,                   OnUpdateString, settings.library.file_link_format, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.filename_format",    "",              PHP_INI_ALL,                   OnUpdateString, settings.library.filename_format,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.collect_params",     "0",             PHP_INI_ALL,                   OnUpdateLong,   settings.library.collect_params,   zend_xdebug_globals, xdebug_globals)
 
-	/* Debugger settings */
-	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_includes,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.collect_params",  "0",                    PHP_INI_ALL,    OnUpdateLong,   base.settings.collect_params,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_return,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_vars,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   base.settings.collect_assignments, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.file_link_format",  "",                   PHP_INI_ALL,    OnUpdateString, base.settings.file_link_format,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.filename_format",   "",                   PHP_INI_ALL,    OnUpdateString, base.settings.filename_format,   zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.force_display_errors", "0",             PHP_INI_SYSTEM, OnUpdateBool,   base.settings.force_display_errors, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.force_error_reporting", "0",              PHP_INI_SYSTEM, OnUpdateLong,   base.settings.force_error_reporting, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.halt_level",        "0",                  PHP_INI_ALL,    OnUpdateLong,   base.settings.halt_level,        zend_xdebug_globals, xdebug_globals)
+	/* Variable display settings */
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",     PHP_INI_ALL,    OnUpdateLong,   settings.library.display_max_children, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",     PHP_INI_ALL,    OnUpdateLong,   settings.library.display_max_data,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",       PHP_INI_ALL,    OnUpdateLong,   settings.library.display_max_depth,    zend_xdebug_globals, xdebug_globals)
+
+	/* Base settings */
 	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "256",                PHP_INI_ALL,    OnUpdateLong,   base.settings.max_nesting_level, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.max_stack_frames",  "-1",                 PHP_INI_ALL,    OnUpdateLong,   base.settings.max_stack_frames,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.overload_var_dump", "2",                  PHP_INI_ALL,    OnUpdateLong,   base.settings.overload_var_dump, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.show_error_trace",  "0",                PHP_INI_ALL,    OnUpdateBool,   base.settings.show_error_trace,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.show_exception_trace",  "0",            PHP_INI_ALL,    OnUpdateBool,   base.settings.show_ex_trace,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.show_local_vars", "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.show_local_vars,   zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.show_mem_delta",  "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.show_mem_delta,    zend_xdebug_globals, xdebug_globals)
+
+	/* Develop settings */
+	STD_PHP_INI_ENTRY("xdebug.cli_color",         "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.develop.cli_color,         zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.collect_includes,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.collect_vars,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.force_display_errors", "0",             PHP_INI_SYSTEM, OnUpdateBool,   settings.develop.force_display_errors, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.force_error_reporting", "0",              PHP_INI_SYSTEM, OnUpdateLong,   settings.develop.force_error_reporting, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.halt_level",        "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.develop.halt_level,        zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.max_stack_frames",  "-1",                 PHP_INI_ALL,    OnUpdateLong,   settings.develop.max_stack_frames,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.overload_var_dump", "2",                  PHP_INI_ALL,    OnUpdateLong,   settings.develop.overload_var_dump, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.show_error_trace",  "0",                PHP_INI_ALL,    OnUpdateBool,   settings.develop.show_error_trace,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.show_exception_trace",  "0",            PHP_INI_ALL,    OnUpdateBool,   settings.develop.show_ex_trace,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.show_local_vars", "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.show_local_vars,   zend_xdebug_globals, xdebug_globals)
 
 	/* Dump superglobals settings */
 	PHP_INI_ENTRY("xdebug.dump.COOKIE",           NULL,                 PHP_INI_ALL,    OnUpdateCookie)
@@ -226,9 +231,9 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("xdebug.dump.REQUEST",          NULL,                 PHP_INI_ALL,    OnUpdateRequest)
 	PHP_INI_ENTRY("xdebug.dump.SERVER",           NULL,                 PHP_INI_ALL,    OnUpdateServer)
 	PHP_INI_ENTRY("xdebug.dump.SESSION",          NULL,                 PHP_INI_ALL,    OnUpdateSession)
-	STD_PHP_INI_BOOLEAN("xdebug.dump_globals",    "1",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.dump_globals,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.dump_once",       "1",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.dump_once,         zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   base.settings.dump_undefined,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.dump_globals",    "1",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.dump_globals,      zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.dump_once",       "1",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.dump_once,         zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.dump_undefined",  "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.dump_undefined,    zend_xdebug_globals, xdebug_globals)
 
 	/* Profiler settings */
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_output_name,          zend_xdebug_globals, xdebug_globals)
@@ -248,14 +253,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.remote_addr_header", "",                  PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_addr_header, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_timeout",    "200",                PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_connect_timeout, zend_xdebug_globals, xdebug_globals)
 
-	/* Variable display settings */
-	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",         PHP_INI_ALL,    OnUpdateLong,   base.settings.display_max_children, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",         PHP_INI_ALL,    OnUpdateLong,   base.settings.display_max_data,     zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",           PHP_INI_ALL,    OnUpdateLong,   base.settings.display_max_depth,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.cli_color",                "0",           PHP_INI_ALL,    OnUpdateLong,   base.settings.cli_color,            zend_xdebug_globals, xdebug_globals)
-
 	/* Scream support */
-	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   base.settings.do_scream,            zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   settings.develop.do_scream,            zend_xdebug_globals, xdebug_globals)
 
 	/* GC Stats support */
 	STD_PHP_INI_ENTRY("xdebug.gc_stats_output_name", "gcstats.%p",      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.gc_stats.output_name, zend_xdebug_globals, xdebug_globals)
@@ -264,16 +263,16 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trace_output_name", "trace.%c",           PHP_INI_ALL,    OnUpdateString, settings.tracing.trace_output_name, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_options,     zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.show_mem_delta",  "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.show_mem_delta,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_assignments, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_return,    zend_xdebug_globals, xdebug_globals)
 PHP_INI_END()
 
 static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 {
 	xg->level                = 0;
-	xg->stack                = NULL;
 	xg->in_debug_info        = 0;
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
-	xg->do_monitor_functions = 0;
-	xg->in_at                = 0; /* scream */
 	xg->in_execution         = 0;
 	xg->in_var_serialisation = 0;
 	xg->error_reporting_override   = 0;
@@ -284,15 +283,6 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 	xg->filter_type_code_coverage = XDEBUG_FILTER_NONE;
 	xg->filters_tracing           = NULL;
 	xg->filters_code_coverage     = NULL;
-
-	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->post, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->cookie, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->files, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->env, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->request, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
 }
 
 static void php_xdebug_init_globals(zend_xdebug_globals *xg)
@@ -306,6 +296,9 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_init_debugger_globals(&xg->globals.debugger);
 	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		xdebug_init_develop_globals(&xg->globals.develop);
+	}
 	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
 		xdebug_init_profiler_globals(&xg->globals.profiler);
 	}
@@ -317,21 +310,9 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 	}
 }
 
-static void xdebug_deinit_base_globals(struct xdebug_base_info *xg)
-{
-	xdebug_llist_empty(&xg->server, NULL);
-	xdebug_llist_empty(&xg->get, NULL);
-	xdebug_llist_empty(&xg->post, NULL);
-	xdebug_llist_empty(&xg->cookie, NULL);
-	xdebug_llist_empty(&xg->files, NULL);
-	xdebug_llist_empty(&xg->env, NULL);
-	xdebug_llist_empty(&xg->request, NULL);
-	xdebug_llist_empty(&xg->session, NULL);
-}
-
 static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg)
 {
-	xdebug_deinit_base_globals(&xg->base);
+	xdebug_deinit_develop_globals(&xg->globals.develop);
 }
 
 
@@ -438,6 +419,9 @@ PHP_MINIT_FUNCTION(xdebug)
 	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_minit();
 	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		xdebug_develop_minit(INIT_FUNC_ARGS_PASSTHRU);
+	}
 	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_minit();
 	}
@@ -521,6 +505,9 @@ PHP_RINIT_FUNCTION(xdebug)
 	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_rinit();
 	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		xdebug_develop_rinit();
+	}
 	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_rinit();
 	}
@@ -552,6 +539,9 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	}
 	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_post_deactivate();
+	}
+	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+		xdebug_develop_post_deactivate();
 	}
 	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_post_deactivate();
@@ -626,212 +616,6 @@ PHP_MINFO_FUNCTION(xdebug)
 	}
 
 	DISPLAY_INI_ENTRIES();
-}
-
-/* {{{ proto void xdebug_var_dump(mixed var [, ...] )
-   Outputs a fancy string representation of a variable */
-PHP_FUNCTION(xdebug_var_dump)
-{
-	zval       *args;
-	int         argc;
-	int         i;
-	xdebug_str *val;
-
-	/* Ignore our new shiny function if overload_var_dump is set to 0 *and* the
-	 * function is not being called as xdebug_var_dump() (usually, that'd be
-	 * the overloaded var_dump() of course). Fixes issue 1262. */
-	if (
-		!XINI_BASE(overload_var_dump)
-		&& (strcmp("xdebug_var_dump", execute_data->func->common.function_name->val) != 0)
-	) {
-		XG_BASE(orig_var_dump_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		return;
-	}
-
-	argc = ZEND_NUM_ARGS();
-
-	args = safe_emalloc(argc, sizeof(zval), 0);
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	for (i = 0; i < argc; i++) {
-		if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
-			xdebug_php_var_dump(&args[i], 1);
-		}
-		else if (PG(html_errors)) {
-			val = xdebug_get_zval_value_html(NULL, (zval*) &args[i], 0, NULL);
-			PHPWRITE(val->d, val->l);
-			xdebug_str_free(val);
-		}
-		else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty()) || (XINI_BASE(cli_color) == 2)) {
-			val = xdebug_get_zval_value_ansi((zval*) &args[i], 0, NULL);
-			PHPWRITE(val->d, val->l);
-			xdebug_str_free(val);
-		}
-		else {
-			val = xdebug_get_zval_value_text((zval*) &args[i], 0, NULL);
-			PHPWRITE(val->d, val->l);
-			xdebug_str_free(val);
-		}
-	}
-
-	efree(args);
-}
-/* }}} */
-
-/* {{{ proto void xdebug_debug_zval(mixed var [, ...] )
-   Outputs a fancy string representation of a variable */
-PHP_FUNCTION(xdebug_debug_zval)
-{
-	zval       *args;
-	int         argc;
-	int         i;
-	xdebug_str *val;
-
-	argc = ZEND_NUM_ARGS();
-
-	args = safe_emalloc(argc, sizeof(zval), 0);
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-		zend_rebuild_symbol_table();
-	}
-
-	for (i = 0; i < argc; i++) {
-		if (Z_TYPE(args[i]) == IS_STRING) {
-			zval debugzval;
-			xdebug_str *tmp_name;
-
-			xdebug_lib_set_active_symbol_table(EG(current_execute_data)->prev_execute_data->symbol_table);
-			xdebug_lib_set_active_data(EG(current_execute_data)->prev_execute_data);
-
-			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
-			xdebug_get_php_symbol(&debugzval, tmp_name);
-			xdebug_str_free(tmp_name);
-
-			/* Reduce refcount for dumping */
-			Z_TRY_DELREF(debugzval);
-
-			php_printf("%s: ", Z_STRVAL(args[i]));
-			if (Z_TYPE(debugzval) != IS_UNDEF) {
-				if (PG(html_errors)) {
-					val = xdebug_get_zval_value_html(NULL, &debugzval, 1, NULL);
-					PHPWRITE(val->d, val->l);
-				}
-				else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty()) || (XINI_BASE(cli_color) == 2)) {
-					val = xdebug_get_zval_value_ansi(&debugzval, 1, NULL);
-					PHPWRITE(val->d, val->l);
-				}
-				else {
-					val = xdebug_get_zval_value_line(&debugzval, 1, NULL);
-					PHPWRITE(val->d, val->l);
-				}
-				xdfree(val);
-				PHPWRITE("\n", 1);
-			} else {
-				PHPWRITE("no such symbol\n", 15);
-			}
-
-			/* Restore original refcount */
-			Z_TRY_ADDREF(debugzval);
-			zval_ptr_dtor_nogc(&debugzval);
-		}
-	}
-
-	efree(args);
-}
-/* }}} */
-
-/* {{{ proto void xdebug_debug_zval_stdout(mixed var [, ...] )
-   Outputs a fancy string representation of a variable */
-PHP_FUNCTION(xdebug_debug_zval_stdout)
-{
-	zval   *args;
-	int     argc;
-	int     i;
-
-	argc = ZEND_NUM_ARGS();
-
-	args = safe_emalloc(argc, sizeof(zval), 0);
-	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	if (!(ZEND_CALL_INFO(EG(current_execute_data)->prev_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-		zend_rebuild_symbol_table();
-	}
-
-	for (i = 0; i < argc; i++) {
-		if (Z_TYPE(args[i]) == IS_STRING) {
-			zval        debugzval;
-			xdebug_str *tmp_name;
-			xdebug_str *val;
-
-			xdebug_lib_set_active_symbol_table(EG(current_execute_data)->prev_execute_data->symbol_table);
-			xdebug_lib_set_active_data(EG(current_execute_data)->prev_execute_data);
-
-			tmp_name = xdebug_str_create(Z_STRVAL(args[i]), Z_STRLEN(args[i]));
-			xdebug_get_php_symbol(&debugzval, tmp_name);
-			xdebug_str_free(tmp_name);
-
-			/* Reduce refcount for dumping */
-			Z_TRY_DELREF(debugzval);
-
-			printf("%s: ", Z_STRVAL(args[i]));
-			if (Z_TYPE(debugzval) != IS_UNDEF) {
-				val = xdebug_get_zval_value_line(&debugzval, 1, NULL);
-				printf("%s(%zd)", val->d, val->l);
-				xdebug_str_free(val);
-				printf("\n");
-			} else {
-				printf("no such symbol\n\n");
-			}
-
-			/* Restore original refcount */
-			Z_TRY_ADDREF(debugzval);
-			zval_ptr_dtor_nogc(&debugzval);
-		}
-	}
-
-	efree(args);
-}
-/* }}} */
-
-PHP_FUNCTION(xdebug_start_error_collection)
-{
-	if (XG_BASE(do_collect_errors) == 1) {
-		php_error(E_NOTICE, "Error collection was already started");
-	}
-	XG_BASE(do_collect_errors) = 1;
-}
-
-PHP_FUNCTION(xdebug_stop_error_collection)
-{
-	if (XG_BASE(do_collect_errors) == 0) {
-		php_error(E_NOTICE, "Error collection was not started");
-	}
-	XG_BASE(do_collect_errors) = 0;
-}
-
-PHP_FUNCTION(xdebug_memory_usage)
-{
-	RETURN_LONG(zend_memory_usage(0));
-}
-
-PHP_FUNCTION(xdebug_peak_memory_usage)
-{
-	RETURN_LONG(zend_memory_peak_usage(0));
-}
-
-PHP_FUNCTION(xdebug_time_index)
-{
-	RETURN_DOUBLE(xdebug_get_utime() - XG_BASE(start_time));
 }
 
 ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)

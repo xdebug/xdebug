@@ -22,7 +22,6 @@
 #include "zend_exceptions.h"
 
 #include "debugger_private.h"
-#include "base/stack.h"
 #include "lib/var.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
@@ -313,10 +312,11 @@ loop:
 	}
 }
 
-void xdebug_debugger_throw_exception_hook(zend_class_entry * exception_ce, zval *file, zval *line, zval *code, char *code_str, zval *message)
+void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
 {
 	xdebug_brk_info *extra_brk_info;
 	int block = XDEBUG_CMDLOOP_NONBLOCK;
+	zend_class_entry *exception_ce = Z_OBJCE_P(exception);
 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();

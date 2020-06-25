@@ -315,7 +315,7 @@ xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval,
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
 
-		xdebug_format_filename(&formatted_filename, XINI_BASE(filename_format), "%f", zend_get_executed_filename());
+		xdebug_format_filename(&formatted_filename, "%f", zend_get_executed_filename());
 		xdebug_str_add(str, xdebug_sprintf("%s%s%s:%s%d%s:\n", ANSI_COLOR_BOLD, formatted_filename, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_BOLD, zend_get_executed_lineno(), ANSI_COLOR_BOLD_OFF), 1);
 		xdfree(formatted_filename);
 	}

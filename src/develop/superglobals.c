@@ -131,7 +131,7 @@ static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html,
 			} ZEND_HASH_FOREACH_END();
 		} else if (ht && (z = zend_hash_find(ht, s))) {
 			dump_hash_elem(z, name, 0, elem->ptr, html, str);
-		} else if (XINI_BASE(dump_undefined)) {
+		} else if (XINI_DEV(dump_undefined)) {
 			dump_hash_elem(NULL, name, 0, elem->ptr, html, str);
 		}
 
@@ -145,14 +145,14 @@ char* xdebug_get_printable_superglobals(int html)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	dump_hash(&XG_BASE(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str);
-	dump_hash(&XG_BASE(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str);
-	dump_hash(&XG_BASE(post),    "_POST",    HASH_KEY_SIZEOF("_POST"),    html, &str);
-	dump_hash(&XG_BASE(cookie),  "_COOKIE",  HASH_KEY_SIZEOF("_COOKIE"),  html, &str);
-	dump_hash(&XG_BASE(files),   "_FILES",   HASH_KEY_SIZEOF("_FILES"),   html, &str);
-	dump_hash(&XG_BASE(env),     "_ENV",     HASH_KEY_SIZEOF("_ENV"),     html, &str);
-	dump_hash(&XG_BASE(session), "_SESSION", HASH_KEY_SIZEOF("_SESSION"), html, &str);
-	dump_hash(&XG_BASE(request), "_REQUEST", HASH_KEY_SIZEOF("_REQUEST"), html, &str);
+	dump_hash(&XG_DEV(server),  "_SERVER",  HASH_KEY_SIZEOF("_SERVER"),  html, &str);
+	dump_hash(&XG_DEV(get),     "_GET",     HASH_KEY_SIZEOF("_GET"),     html, &str);
+	dump_hash(&XG_DEV(post),    "_POST",    HASH_KEY_SIZEOF("_POST"),    html, &str);
+	dump_hash(&XG_DEV(cookie),  "_COOKIE",  HASH_KEY_SIZEOF("_COOKIE"),  html, &str);
+	dump_hash(&XG_DEV(files),   "_FILES",   HASH_KEY_SIZEOF("_FILES"),   html, &str);
+	dump_hash(&XG_DEV(env),     "_ENV",     HASH_KEY_SIZEOF("_ENV"),     html, &str);
+	dump_hash(&XG_DEV(session), "_SESSION", HASH_KEY_SIZEOF("_SESSION"), html, &str);
+	dump_hash(&XG_DEV(request), "_REQUEST", HASH_KEY_SIZEOF("_REQUEST"), html, &str);
 
 	return str.d;
 }

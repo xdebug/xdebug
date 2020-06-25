@@ -22,8 +22,8 @@
 #include "branch_info.h"
 #include "code_coverage_private.h"
 
+#include "base/base.h"
 #include "base/filter.h"
-#include "base/stack.h"
 #include "lib/compat.h"
 #include "lib/set.h"
 #include "lib/var.h"
@@ -96,6 +96,32 @@ static char* xdebug_func_format(xdebug_func *func)
 			return xdebug_sprintf("%s->%s", func->class, func->function);
 		default:
 			return xdstrdup("???");
+	}
+}
+
+static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
+{
+	int closure = 0;
+
+	memset(tmp, 0, sizeof(xdebug_func));
+
+	if (opa->function_name) {
+		if (opa->fn_flags & ZEND_ACC_CLOSURE) {
+			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
+			closure = 1;
+		} else {
+			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
+		}
+	} else {
+		tmp->function = xdstrdup("{main}");
+		tmp->type = XFUNC_MAIN;
+	}
+
+	if (opa->scope && !closure) {
+		tmp->type = XFUNC_MEMBER;
+		tmp->class = xdstrdup(STR_NAME_VAL(opa->scope->name));
+	} else {
+		tmp->type = XFUNC_NORMAL;
 	}
 }
 

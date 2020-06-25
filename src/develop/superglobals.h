@@ -21,15 +21,17 @@
 
 #include "php.h"
 
+#include "develop_private.h"
+
 void xdebug_superglobals_dump_dtor(void *, void*);
 char *xdebug_get_printable_superglobals(int html);
 void xdebug_superglobals_dump_tok(xdebug_llist *l, char *str);
 
 # define DUMP_TOK(__llist) \
-	xdebug_llist_empty(&XG(base.__llist), NULL); \
+	xdebug_llist_empty(&XG_DEV(__llist), NULL); \
 	if (new_value && new_value->val) { \
 		char *str = estrndup(new_value->val, new_value->len); \
-		xdebug_superglobals_dump_tok(&XG(base.__llist), str); \
+		xdebug_superglobals_dump_tok(&XG_DEV(__llist), str); \
 		efree(str); \
 	} \
 	return SUCCESS;
