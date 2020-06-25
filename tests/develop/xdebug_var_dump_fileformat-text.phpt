@@ -43,19 +43,19 @@ class TimeStuff#%d (%d) {
   int(1092515106)
 }
 
-…%ebase%exdebug_var_dump_fileformat-text.php:17:
+…%edevelop%exdebug_var_dump_fileformat-text.php:17:
 class TimeStuff#%d (%d) {
   private $timestamp =>
   int(1092515106)
 }
 
-«tests%ebase%exdebug_var_dump_fileformat-text.php»:21:
+«tests%edevelop%exdebug_var_dump_fileformat-text.php»:21:
 class TimeStuff#%d (%d) {
   private $timestamp =>
   int(1092515106)
 }
 
-{%s%etests%ebase%exdebug_var_dump_fileformat-text.php}:25:
+{%s%etests%edevelop%exdebug_var_dump_fileformat-text.php}:25:
 class TimeStuff#%d (%d) {
   private $timestamp =>
   int(1092515106)

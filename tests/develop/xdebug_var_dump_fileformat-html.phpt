@@ -42,17 +42,17 @@ echo "\n";
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>
 <pre class='xdebug-var-dump' dir='ltr'>
-<small>…%ebase%exdebug_var_dump_fileformat-html.php:%d:</small>
+<small>…%edevelop%exdebug_var_dump_fileformat-html.php:%d:</small>
 <b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>
 <pre class='xdebug-var-dump' dir='ltr'>
-<small>«tests%ebase%exdebug_var_dump_fileformat-html.php»:%d:</small>
+<small>«tests%edevelop%exdebug_var_dump_fileformat-html.php»:%d:</small>
 <b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>
 <pre class='xdebug-var-dump' dir='ltr'>
-<small>{%stests%ebase%exdebug_var_dump_fileformat-html.php}:%d:</small>
+<small>{%stests%edevelop%exdebug_var_dump_fileformat-html.php}:%d:</small>
 <b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>
