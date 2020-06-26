@@ -33,6 +33,9 @@ void xdebug_brk_info_dtor(xdebug_brk_info *brk_info)
 	if (brk_info->file) {
 		xdfree(brk_info->file);
 	}
+	if (brk_info->exceptionname) {
+		xdfree(brk_info->exceptionname);
+	}
 	if (brk_info->condition) {
 		xdfree(brk_info->condition);
 	}
