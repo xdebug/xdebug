@@ -433,13 +433,8 @@ static void xdebug_init_debugger()
 			XG_DBG(context).handler->log(XDEBUG_LOG_ERR, "The debug session could not be started. :-(\n");
 		} else {
 			/* All is well, turn off script time outs */
-			zend_string *ini_name = zend_string_init("max_execution_time", sizeof("max_execution_time") - 1, 0);
-			zend_string *ini_val = zend_string_init("0", sizeof("0") - 1, 0);
-
-			zend_alter_ini_entry(ini_name, ini_val, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-
-			zend_string_release(ini_val);
-			zend_string_release(ini_name);
+			zend_unset_timeout();
+			zend_set_timeout(EG(timeout_seconds), 0);
 
 			xdebug_mark_debug_connection_active();
 			XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), XDEBUG_CMDLOOP_BLOCK, XDEBUG_CMDLOOP_BAIL);
