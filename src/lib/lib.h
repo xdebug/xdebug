@@ -227,22 +227,47 @@ typedef struct _xdebug_library_globals_t {
 	HashTable             *active_symbol_table;
 	zval                  *active_object;
 
+	/* Headers */
+	xdebug_llist *headers;
+
+	zend_bool     dumped;
+
+	/* used for collection errors */
+	zend_bool     do_collect_errors;
+
 	user_opcode_handler_t          original_opcode_handlers[256];
 	xdebug_multi_opcode_handler_t *opcode_multi_handlers[256];
 	xdebug_set                    *opcode_handlers_set;
 } xdebug_library_globals_t;
 
 typedef struct _xdebug_library_settings_t {
-	char      *output_dir;
-	char      *trigger_value;
+	char         *output_dir;
+	char         *trigger_value;
+
+	char         *file_link_format;
+	char         *filename_format;
+
+	zend_long     collect_params;
+
+	/* variable dumping limitation settings */
+	zend_long     display_max_children;
+	zend_long     display_max_data;
+	zend_long     display_max_depth;
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
+
+void xdebug_library_zend_startup(void);
+void xdebug_library_zend_shutdown(void);
 void xdebug_library_minit(void);
 void xdebug_library_mshutdown(void);
+void xdebug_library_rinit(void);
+void xdebug_library_post_deactivate(void);
+
+void xdebug_disable_opcache_optimizer(void);
 
 #define XDEBUG_MODE_OFF             0
-#define XDEBUG_MODE_DISPLAY      1<<0
+#define XDEBUG_MODE_DEVELOP      1<<0
 #define XDEBUG_MODE_COVERAGE     1<<1
 #define XDEBUG_MODE_STEP_DEBUG   1<<2
 #define XDEBUG_MODE_GCSTATS      1<<3
@@ -294,4 +319,7 @@ void xdebug_register_with_opcode_multi_handler(int opcode, user_opcode_handler_t
 int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS);
 
 char *xdebug_lib_get_output_dir(void);
+
+void xdebug_llist_string_dtor(void *dummy, void *elem);
+char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
 #endif

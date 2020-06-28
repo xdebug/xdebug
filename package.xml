@@ -83,12 +83,6 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="base.h" role="src" />
      <file name="filter.c" role="src" />
      <file name="filter.h" role="src" />
-     <file name="monitor.c" role="src" />
-     <file name="monitor.h" role="src" />
-     <file name="stack.c" role="src" />
-     <file name="stack.h" role="src" />
-     <file name="superglobals.c" role="src" />
-     <file name="superglobals.h" role="src" />
     </dir>
     <dir name="lib">
      <file name="usefulstuff.c" role="src" />
@@ -99,6 +93,8 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="crc32.h" role="src" />
      <file name="hash.c" role="src" />
      <file name="hash.h" role="src" />
+     <file name="headers.c" role="src" />
+     <file name="headers.h" role="src" />
      <file name="lib.c" role="src" />
      <file name="lib.h" role="src" />
      <file name="lib_private.h" role="src" />
@@ -130,6 +126,17 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="code_coverage.c" role="src" />
      <file name="code_coverage.h" role="src" />
      <file name="code_coverage_private.h" role="src" />
+    </dir>
+    <dir name="develop">
+     <file name="develop.c" role="src" />
+     <file name="develop.h" role="src" />
+     <file name="monitor.c" role="src" />
+     <file name="monitor.h" role="src" />
+     <file name="php_functions.c" role="src" />
+     <file name="stack.c" role="src" />
+     <file name="stack.h" role="src" />
+     <file name="superglobals.c" role="src" />
+     <file name="superglobals.h" role="src" />
     </dir>
     <dir name="debugger">
      <file name="com.c" role="src" />

@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('PHP < 7.3; opcache');
 ?>
 --INI--
-xdebug.mode=trace,display
+xdebug.mode=trace,develop
 xdebug.trace_format=0
 xdebug.collect_vars=1
 xdebug.collect_params=3

@@ -29,6 +29,7 @@
 #include "php_xdebug.h"
 
 #include "lib/compat.h"
+#include "lib/lib_private.h"
 #include "lib/mm.h"
 #include "lib/var.h"
 #include "lib/var_export_html.h"
@@ -894,100 +895,6 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 	}
 }
 
-#define XDEBUG_VAR_FORMAT_INITIALISED   0
-#define XDEBUG_VAR_FORMAT_UNINITIALISED 1
-
-static const char* text_formats[2] = {
-	"  $%s = %s\n",
-	"  $%s = *uninitialized*\n",
-};
-
-static const char* ansi_formats[2] = {
-	"  $%s = %s\n",
-	"  $%s = *uninitialized*\n",
-};
-
-static const char* html_formats[2] = {
-	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec'>%s</td></tr>\n",
-	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
-};
-
-
-static const char** get_var_format_string(int html)
-{
-	if (html) {
-		return html_formats;
-	}
-	else if ((XINI_BASE(cli_color) == 1 && xdebug_is_output_tty()) || (XINI_BASE(cli_color) == 2)) {
-		return ansi_formats;
-	}
-	else {
-		return text_formats;
-	}
-}
-
-void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element* he, void *argument)
-{
-	int          html = *(int*) htmlq;
-	zval         zvar;
-	xdebug_str  *contents;
-	xdebug_str  *name = (xdebug_str*) he->ptr;
-	HashTable   *tmp_ht;
-	const char **formats;
-	xdebug_str   *str = (xdebug_str *) argument;
-
-	if (!he->ptr) {
-		return;
-	}
-
-	/* Bail out on $this and $GLOBALS */
-	if (strcmp(name->d, "this") == 0 || strcmp(name->d, "GLOBALS") == 0) {
-		return;
-	}
-
-	if (EG(current_execute_data) && !(ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
-		zend_rebuild_symbol_table();
-	}
-
-	tmp_ht = xdebug_lib_get_active_symbol_table();
-	{
-		zend_execute_data *ex = EG(current_execute_data);
-		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
-			ex = ex->prev_execute_data;
-		}
-		if (ex) {
-			xdebug_lib_set_active_data(ex);
-			xdebug_lib_set_active_symbol_table(ex->symbol_table);
-		}
-	}
-
-	xdebug_get_php_symbol(&zvar, name);
-	xdebug_lib_set_active_symbol_table(tmp_ht);
-
-	formats = get_var_format_string(PG(html_errors));
-
-	if (Z_TYPE(zvar) == IS_UNDEF) {
-		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d), 1);
-		return;
-	}
-
-	if (html) {
-		contents = xdebug_get_zval_value_html(NULL, &zvar, 0, NULL);
-	} else {
-		contents = xdebug_get_zval_value_line(&zvar, 0, NULL);
-	}
-
-	if (contents) {
-		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_INITIALISED], name->d, contents->d), 1);
-	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d), 1);
-	}
-
-	if (contents) {
-		xdebug_str_free(contents);
-	}
-	zval_ptr_dtor_nogc(&zvar);
-}
 
 #if PHP_VERSION_ID >= 70400
 xdebug_str* xdebug_get_property_type(zval* object, zval *val)
@@ -1063,11 +970,11 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(void)
 	xdebug_var_export_options *options;
 	options = xdmalloc(sizeof(xdebug_var_export_options));
 
-	options->max_children = XINI_BASE(display_max_children);
-	options->max_data = XINI_BASE(display_max_data);
-	options->max_depth = XINI_BASE(display_max_depth);
+	options->max_children = XINI_LIB(display_max_children);
+	options->max_data = XINI_LIB(display_max_data);
+	options->max_depth = XINI_LIB(display_max_depth);
 	options->show_hidden = 0;
-	options->show_location = XINI_BASE(overload_var_dump) > 1;
+	options->show_location = xdebug_get_overload_var_dump() > 1;
 	options->extended_properties = 0;
 	options->encode_as_extended_property = 0;
 

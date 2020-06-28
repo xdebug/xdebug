@@ -482,7 +482,7 @@ static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLE
 //		return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 //	}
 
-	if (XG_TRACE(trace_context) && XINI_BASE(collect_assignments)) {
+	if (XG_TRACE(trace_context) && XINI_TRACE(collect_assignments)) {
 		char *full_varname;
 
 		if (cur_opcode->opcode == ZEND_QM_ASSIGN && cur_opcode->result_type != IS_CV) {
@@ -569,7 +569,7 @@ static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLE
 		}
 
 		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
-		if (XG_TRACE(trace_context) && XINI_BASE(collect_assignments) && XG_TRACE(trace_handler)->assignment) {
+		if (XG_TRACE(trace_context) && XINI_TRACE(collect_assignments) && XG_TRACE(trace_handler)->assignment) {
 			XG_TRACE(trace_handler)->assignment(XG_TRACE(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno);
 		}
 		xdfree(full_varname);
@@ -724,7 +724,7 @@ void xdebug_tracing_execute_ex_end(int function_nr, function_stack_entry *fse, z
 	}
 
 	/* Store return value in the trace file */
-	if (XINI_BASE(collect_return)) {
+	if (XINI_TRACE(collect_return)) {
 		zend_op_array *op_array = &(execute_data->func->op_array);
 
 		if (execute_data && execute_data->return_value) {
@@ -766,7 +766,7 @@ void xdebug_tracing_execute_internal_end(int function_nr, function_stack_entry *
 	}
 
 	/* Store return value in the trace file */
-	if (XINI_BASE(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG_TRACE(trace_handler)->return_value) {
+	if (XINI_TRACE(collect_return) && fse->function.type != XFUNC_ZEND_PASS && return_value && XG_TRACE(trace_handler)->return_value) {
 		XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, return_value);
 	}
 }

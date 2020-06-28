@@ -44,6 +44,10 @@ typedef struct _xdebug_tracing_settings_t {
 	char         *trace_output_name;
 	zend_long     trace_options;
 	zend_long     trace_format;
+
+	zend_bool     show_mem_delta;
+	zend_bool     collect_assignments;
+	zend_bool     collect_return;
 } xdebug_tracing_settings_t;
 
 void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg);

@@ -22,8 +22,8 @@
 #include "branch_info.h"
 #include "code_coverage_private.h"
 
+#include "base/base.h"
 #include "base/filter.h"
-#include "base/stack.h"
 #include "lib/compat.h"
 #include "lib/set.h"
 #include "lib/var.h"
@@ -99,7 +99,33 @@ static char* xdebug_func_format(xdebug_func *func)
 	}
 }
 
-static void xdebug_print_opcode_info(char type, zend_execute_data *execute_data, const zend_op *cur_opcode)
+static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
+{
+	int closure = 0;
+
+	memset(tmp, 0, sizeof(xdebug_func));
+
+	if (opa->function_name) {
+		if (opa->fn_flags & ZEND_ACC_CLOSURE) {
+			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
+			closure = 1;
+		} else {
+			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
+		}
+	} else {
+		tmp->function = xdstrdup("{main}");
+		tmp->type = XFUNC_MAIN;
+	}
+
+	if (opa->scope && !closure) {
+		tmp->type = XFUNC_MEMBER;
+		tmp->class = xdstrdup(STR_NAME_VAL(opa->scope->name));
+	} else {
+		tmp->type = XFUNC_NORMAL;
+	}
+}
+
+static void xdebug_print_opcode_info(zend_execute_data *execute_data, const zend_op *cur_opcode)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	char *file = (char*) STR_NAME_VAL(op_array->filename);
@@ -126,7 +152,7 @@ static int xdebug_check_branch_entry_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	const zend_op *cur_opcode = execute_data->opline;
 
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		xdebug_print_opcode_info('G', execute_data, cur_opcode);
+		xdebug_print_opcode_info(execute_data, cur_opcode);
 	}
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -184,11 +210,21 @@ static int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 		lineno = cur_opcode->lineno;
 		file = (char*) STR_NAME_VAL(op_array->filename);
 
-		xdebug_print_opcode_info('C', execute_data, cur_opcode);
+		xdebug_print_opcode_info(execute_data, cur_opcode);
 		xdebug_count_line(file, lineno, 0, 0);
 	}
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int xdebug_coverage_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
+{
+	zend_op_array *op_array = &execute_data->func->op_array;
+	const zend_op *opline = execute_data->opline;
+
+	xdebug_coverage_record_if_active(execute_data, op_array);
+
+	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static void prefill_from_opcode(char *fn, zend_op opcode, int deadcode)
@@ -595,7 +631,7 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 	zend_long options = 0;
 
 	if (!xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
-		php_error(E_WARNING, "Code coverage needs to be enabled in php.ini by setting 'xdebug.mode' to 'coverage'.");
+		php_error(E_WARNING, "Code coverage needs to be enabled in php.ini by setting 'xdebug.mode' to 'coverage'");
 		RETURN_FALSE;
 	}
 
@@ -863,34 +899,10 @@ void xdebug_coverage_count_line_if_branch_check_active(zend_op_array *op_array, 
 	}
 }
 
-void xdebug_coverage_record_assign_if_active(zend_execute_data *execute_data, zend_op_array *op_array, int do_cc)
+void xdebug_coverage_record_if_active(zend_execute_data *execute_data, zend_op_array *op_array)
 {
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode = execute_data->opline;
-		xdebug_print_opcode_info('=', execute_data, cur_opcode);
-
-		if (do_cc) {
-			char *file   = (char*) STR_NAME_VAL(op_array->filename);
-			int   lineno = cur_opcode->lineno;
-
-			xdebug_count_line(file, lineno, 0, 0);
-		}
-	}
-}
-
-void xdebug_coverage_record_include_if_active(zend_execute_data *execute_data, zend_op_array *op_array)
-{
-	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode = execute_data->opline;
-		xdebug_print_opcode_info('I', execute_data, cur_opcode);
-	}
-}
-
-void xdebug_coverage_record_silence_if_active(zend_execute_data *execute_data, zend_op_array *op_array)
-{
-	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		const zend_op *cur_opcode = execute_data->opline;
-		xdebug_print_opcode_info('S', execute_data, cur_opcode);
+		xdebug_print_opcode_info(execute_data, execute_data->opline);
 	}
 }
 
@@ -935,30 +947,31 @@ void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_op_array *op
 
 void xdebug_coverage_init_oparray(zend_op_array *op_array)
 {
-	op_array->reserved[XG_COV(dead_code_analysis_tracker_offset)] = 0;
+	function_stack_entry tmp_fse;
 
-	if (XG_BASE(filter_type_code_coverage) != XDEBUG_FILTER_NONE) {
-		function_stack_entry tmp_fse;
-
-		tmp_fse.filename = STR_NAME_VAL(op_array->filename);
-		xdebug_build_fname_from_oparray(&tmp_fse.function, op_array);
-		xdebug_filter_run_internal(&tmp_fse, XDEBUG_FILTER_CODE_COVERAGE, &tmp_fse.filtered_code_coverage, XG_BASE(filter_type_code_coverage), XG_BASE(filters_code_coverage));
-		xdebug_func_dtor_by_ref(&tmp_fse.function);
-
-		op_array->reserved[XG_COV(code_coverage_filter_offset)] = (void*) tmp_fse.filtered_code_coverage;
+	if (XG_BASE(filter_type_code_coverage) == XDEBUG_FILTER_NONE) {
+		op_array->reserved[XG_COV(dead_code_analysis_tracker_offset)] = 0;
+		return;
 	}
+
+	tmp_fse.filename = STR_NAME_VAL(op_array->filename);
+	xdebug_build_fname_from_oparray(&tmp_fse.function, op_array);
+	xdebug_filter_run_internal(&tmp_fse, XDEBUG_FILTER_CODE_COVERAGE, &tmp_fse.filtered_code_coverage, XG_BASE(filter_type_code_coverage), XG_BASE(filters_code_coverage));
+	xdebug_func_dtor_by_ref(&tmp_fse.function);
+
+	op_array->reserved[XG_COV(code_coverage_filter_offset)] = (void*) tmp_fse.filtered_code_coverage;
 }
 
 static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *cur_opcode = execute_data->opline;
 
-	if (XG_COV(code_coverage_active)) {
-		execute_data->opline++;
-		return ZEND_USER_OPCODE_CONTINUE;
+	if (!XG_COV(code_coverage_active)) {
+		return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 
-	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
+	execute_data->opline++;
+	return ZEND_USER_OPCODE_CONTINUE;
 }
 
 
@@ -967,16 +980,13 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	zend_extension dummy_ext;
 	int i;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
-		return;
-	}
-
 	/* Get reserved offsets */
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
 	zend_xdebug_filter_offset = zend_get_resource_handle(&dummy_ext);
 
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_common_override_handler);
+	xdebug_register_with_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL, xdebug_coverage_include_or_eval_handler);
 
 	/* Overload opcodes for code coverage */
 	xdebug_set_opcode_handler(ZEND_JMP, xdebug_common_override_handler);

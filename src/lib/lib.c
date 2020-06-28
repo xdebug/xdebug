@@ -18,6 +18,8 @@
 
 #include "php_xdebug.h"
 
+#include "headers.h"
+
 #include "lib_private.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
@@ -26,18 +28,36 @@ const char *xdebug_log_prefix[11] = {
 	"", "E: ", "", "W: ", "", "", "", "I: ", "", "", "D: "
 };
 
+
+
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
+	xg->headers              = NULL;
+	xg->mode                 = 0xFFFFFFFF;
+
 	xg->active_execute_data  = NULL;
 	xg->opcode_handlers_set = xdebug_set_create(256);
 	memset(xg->original_opcode_handlers, 0, sizeof(xg->original_opcode_handlers));
 	memset(xg->opcode_multi_handlers, 0, sizeof(xg->opcode_multi_handlers));
 }
 
+
+void xdebug_library_zend_startup(void)
+{
+	xdebug_lib_zend_startup_overload_sapi_headers();
+}
+
+void xdebug_library_zend_shutdown(void)
+{
+	xdebug_lib_zend_shutdown_restore_sapi_headers();
+}
+
+
 void xdebug_library_minit(void)
 {
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
 	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
+	xdebug_set_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL);
 }
 
 static void xdebug_multi_opcode_handler_dtor(xdebug_multi_opcode_handler_t *ptr)
@@ -63,14 +83,42 @@ void xdebug_library_mshutdown(void)
 	xdebug_set_free(XG_LIB(opcode_handlers_set));
 }
 
+void xdebug_library_rinit(void)
+{
+	XG_LIB(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
+
+	XG_LIB(dumped) = 0;
+	XG_LIB(do_collect_errors) = 0;
+}
+
+void xdebug_library_post_deactivate(void)
+{
+	/* Clean up collected headers */
+	xdebug_llist_destroy(XG_LIB(headers), NULL);
+	XG_LIB(headers) = NULL;
+}
+
+
+void xdebug_disable_opcache_optimizer(void)
+{
+	zend_string *key = zend_string_init(ZEND_STRL("opcache.optimization_level"), 1);
+	zend_string *value = zend_string_init(ZEND_STRL("0"), 1);
+
+	zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
+
+	zend_string_release(key);
+	zend_string_release(value);
+}
+
+
 static int xdebug_lib_set_mode_item(char *mode, int len)
 {
 	if (strncmp(mode, "off", len) == 0) {
 		XG_LIB(mode) |= XDEBUG_MODE_OFF;
 		return 1;
 	}
-	if (strncmp(mode, "display", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_DISPLAY;
+	if (strncmp(mode, "develop", len) == 0) {
+		XG_LIB(mode) |= XDEBUG_MODE_DEVELOP;
 		return 1;
 	}
 	if (strncmp(mode, "coverage", len) == 0) {
@@ -93,6 +141,8 @@ static int xdebug_lib_set_mode_item(char *mode, int len)
 		XG_LIB(mode) |= XDEBUG_MODE_TRACING;
 		return 1;
 	}
+
+	php_error(E_WARNING, "Invalid mode '%s' set for 'xdebug.mode' configuration setting (See: https://xdebug.org/docs/all_settings#mode)", mode);
 
 	return 0;
 }
@@ -545,4 +595,31 @@ char *xdebug_lib_get_output_dir(void)
 	}
 
 	return output_dir;
+}
+
+void xdebug_llist_string_dtor(void *dummy, void *elem)
+{
+	char *s = elem;
+
+	if (s) {
+		xdfree(s);
+	}
+}
+
+char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname)
+{
+	xdebug_str tmp = XDEBUG_STR_INITIALIZER;
+	char *tmp_loc_info;
+
+	xdebug_str_addl(&tmp, fname, strlen(fname) - 1, 0);
+
+	tmp_loc_info = xdebug_sprintf(
+		":%s:%d-%d}",
+		opa->filename->val,
+		opa->line_start,
+		opa->line_end
+	);
+	xdebug_str_add(&tmp, tmp_loc_info, 1);
+
+	return tmp.d;
 }
