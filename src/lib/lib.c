@@ -86,6 +86,9 @@ void xdebug_library_mshutdown(void)
 void xdebug_library_rinit(void)
 {
 	XG_LIB(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
+
+	XG_LIB(dumped) = 0;
+	XG_LIB(do_collect_errors) = 0;
 }
 
 void xdebug_library_post_deactivate(void)

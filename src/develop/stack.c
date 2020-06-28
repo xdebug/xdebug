@@ -520,13 +520,13 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			}
 		}
 
-		if (XINI_DEV(dump_globals) && !(XINI_DEV(dump_once) && XG_DEV(dumped))) {
+		if (XINI_DEV(dump_globals) && !(XINI_DEV(dump_once) && XG_LIB(dumped))) {
 			char *tmp = xdebug_get_printable_superglobals(html);
 
 			if (tmp) {
 				xdebug_str_add(str, tmp, 1);
 			}
-			XG_DEV(dumped) = 1;
+			XG_LIB(dumped) = 1;
 		}
 
 		if (XINI_DEV(show_local_vars) && XG_BASE(stack) && XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
@@ -816,7 +816,7 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 #else
 			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno);
 #endif
-			if (XINI_DEV(dump_globals) && !(XINI_DEV(dump_once) && XG_DEV(dumped))) {
+			if (XINI_DEV(dump_globals) && !(XINI_DEV(dump_once) && XG_LIB(dumped))) {
 				char *printable_stack = xdebug_get_printable_superglobals(0);
 
 				if (printable_stack) {
@@ -850,13 +850,13 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 			printable_stack = xdebug_handle_stack_trace(type, error_type_str, error_filename, error_lineno, buffer);
 #endif
 
-			if (XG_DEV(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
+			if (XG_LIB(do_collect_errors) && (type != E_ERROR) && (type != E_COMPILE_ERROR) && (type != E_USER_ERROR)) {
 				xdebug_llist_insert_next(XG_DEV(collected_errors), XDEBUG_LLIST_TAIL(XG_DEV(collected_errors)), printable_stack);
 			} else {
 				php_output_error(printable_stack);
 				xdfree(printable_stack);
 			}
-		} else if (XG_DEV(do_collect_errors)) {
+		} else if (XG_LIB(do_collect_errors)) {
 			char *printable_stack;
 #if PHP_VERSION_ID >= 80000
 			printable_stack = xdebug_get_printable_stack(PG(html_errors), type, ZSTR_VAL(message), error_filename, error_lineno, 1);

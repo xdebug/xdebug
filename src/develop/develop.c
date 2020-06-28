@@ -71,16 +71,12 @@ void xdebug_develop_mshutdown()
 
 void xdebug_develop_rinit()
 {
-	XG_DEV(do_collect_errors) = 0;
 	XG_DEV(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	/* Function monitoring */
 	XG_DEV(do_monitor_functions) = 0;
 	XG_DEV(functions_to_monitor) = NULL;
 	XG_DEV(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
-
-	/* Initialize dump superglobals */
-	XG_DEV(dumped) = 0;
 }
 
 void xdebug_develop_post_deactivate()

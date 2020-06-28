@@ -230,6 +230,11 @@ typedef struct _xdebug_library_globals_t {
 	/* Headers */
 	xdebug_llist *headers;
 
+	zend_bool     dumped;
+
+	/* used for collection errors */
+	zend_bool     do_collect_errors;
+
 	user_opcode_handler_t          original_opcode_handlers[256];
 	xdebug_multi_opcode_handler_t *opcode_multi_handlers[256];
 	xdebug_set                    *opcode_handlers_set;

@@ -22,6 +22,7 @@
 #include "develop_private.h"
 #include "stack.h"
 
+#include "lib/lib_private.h"
 #include "lib/var_export_html.h"
 #include "lib/var_export_line.h"
 #include "lib/var_export_text.h"
@@ -216,20 +217,20 @@ PHP_FUNCTION(xdebug_start_error_collection)
 {
 	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
 
-	if (XG_DEV(do_collect_errors) == 1) {
+	if (XG_LIB(do_collect_errors) == 1) {
 		php_error(E_NOTICE, "Error collection was already started");
 	}
-	XG_DEV(do_collect_errors) = 1;
+	XG_LIB(do_collect_errors) = 1;
 }
 
 PHP_FUNCTION(xdebug_stop_error_collection)
 {
 	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
 
-	if (XG_DEV(do_collect_errors) == 0) {
+	if (XG_LIB(do_collect_errors) == 0) {
 		php_error(E_NOTICE, "Error collection was not started");
 	}
-	XG_DEV(do_collect_errors) = 0;
+	XG_LIB(do_collect_errors) = 0;
 }
 
 PHP_FUNCTION(xdebug_memory_usage)

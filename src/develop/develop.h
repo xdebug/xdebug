@@ -26,7 +26,6 @@ typedef struct _xdebug_develop_globals_t {
 	xdebug_llist *monitored_functions_found; /* List of functions found */
 
 	/* superglobals */
-	zend_bool     dumped;
 	xdebug_llist  server;
 	xdebug_llist  get;
 	xdebug_llist  post;
@@ -37,7 +36,6 @@ typedef struct _xdebug_develop_globals_t {
 	xdebug_llist  session;
 
 	/* used for collection errors */
-	zend_bool     do_collect_errors;
 	xdebug_llist *collected_errors;
 
 	/* scream */
