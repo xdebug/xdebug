@@ -163,7 +163,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				xdebug_str_add(&log_buffer, ")", 0);
 			}
 
-			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", i->filename, i->lineno), 1);
+			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", ZSTR_VAL(i->filename), i->lineno), 1);
 			php_log_err(log_buffer.d);
 			xdebug_str_destroy(&log_buffer);
 		}
@@ -492,7 +492,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			}
 
 			if (i->include_filename) {
-				xdebug_str_add(str, xdebug_sprintf(formats[4], i->include_filename), 1);
+				xdebug_str_add(str, xdebug_sprintf(formats[4], ZSTR_VAL(i->include_filename)), 1);
 			}
 
 			if (html) {
@@ -502,16 +502,16 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 				if (strlen(XINI_LIB(file_link_format)) > 0) {
 					char *file_link;
 
-					xdebug_format_file_link(&file_link, i->filename, i->lineno);
-					xdebug_str_add(str, xdebug_sprintf(formats[10], i->filename, file_link, formatted_filename, i->lineno), 1);
+					xdebug_format_file_link(&file_link, ZSTR_VAL(i->filename), i->lineno);
+					xdebug_str_add(str, xdebug_sprintf(formats[10], ZSTR_VAL(i->filename), file_link, formatted_filename, i->lineno), 1);
 					xdfree(file_link);
 				} else {
-					xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, formatted_filename, i->lineno), 1);
+					xdebug_str_add(str, xdebug_sprintf(formats[5], ZSTR_VAL(i->filename), formatted_filename, i->lineno), 1);
 				}
 
 				xdfree(formatted_filename);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf(formats[5], i->filename, i->lineno), 1);
+				xdebug_str_add(str, xdebug_sprintf(formats[5], ZSTR_VAL(i->filename), i->lineno), 1);
 			}
 
 			printed_frames++;
@@ -812,7 +812,7 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 			}
 #endif
 #if PHP_VERSION_ID >= 80000
-			xdebug_log_stack(error_type_str, ZSTR_VAL(message), error_filename, error_lineno);
+			xdebug_log_stack(error_type_str, (message), error_filename, error_lineno);
 #else
 			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno);
 #endif
@@ -867,11 +867,15 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 		}
 	}
 
+	{
+		zend_string *tmp_error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
 #if PHP_VERSION_ID >= 80000
-	xdebug_debugger_error_cb(error_filename, error_lineno, type, error_type_str, ZSTR_VAL(message));
+		xdebug_debugger_error_cb(tmp_error_filename, error_lineno, type, error_type_str, ZSTR_VAL(message));
 #else
-	xdebug_debugger_error_cb(error_filename, error_lineno, type, error_type_str, buffer);
+		xdebug_debugger_error_cb(tmp_error_filename, error_lineno, type, error_type_str, buffer);
 #endif
+		zend_string_release(tmp_error_filename);
+	}
 
 	xdfree(error_type_str);
 
@@ -1044,7 +1048,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
 			add_assoc_string_ex(frame, "class",    HASH_KEY_SIZEOF("class"),    i->function.class   );
 		}
-		add_assoc_string_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename);
+		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename);
 		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), i->lineno);
 
 		/* Add parameters */
@@ -1089,7 +1093,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		if (i->include_filename) {
-			add_assoc_string_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), i->include_filename);
+			add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), i->include_filename);
 		}
 
 		add_next_index_zval(return_value, frame);

@@ -25,7 +25,7 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_html_init(char *fname, char *script_filename, long options)
+void *xdebug_trace_html_init(char *fname, zend_string *script_filename, long options)
 {
 	xdebug_trace_html_context *tmp_html_context;
 	char *used_fname;
@@ -107,18 +107,18 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 			xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
 			xdebug_arg_init(parts);
-			xdebug_explode("\n", fse->include_filename, parts, 99999);
+			xdebug_explode("\n", ZSTR_VAL(fse->include_filename), parts, 99999);
 			joined = xdebug_join("<br />", parts, 0, 99999);
 			xdebug_arg_dtor(parts);
 
 			xdebug_str_add(&str, xdebug_sprintf("'%s'", joined->d), 1);
 			xdebug_str_free(joined);
 		} else {
-			xdebug_str_add(&str, fse->include_filename, 0);
+			xdebug_str_add(&str, ZSTR_VAL(fse->include_filename), 0);
 		}
 	}
 
-	xdebug_str_add(&str, xdebug_sprintf(")</td><td>%s:%d</td>", fse->filename, fse->lineno), 1);
+	xdebug_str_add(&str, xdebug_sprintf(")</td><td>%s:%d</td>", ZSTR_VAL(fse->filename), fse->lineno), 1);
 	xdebug_str_add(&str, "</tr>\n", 0);
 
 	fprintf(context->trace_file, "%s", str.d);

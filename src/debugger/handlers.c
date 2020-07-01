@@ -30,8 +30,8 @@ void xdebug_brk_info_dtor(xdebug_brk_info *brk_info)
 	if (brk_info->functionname) {
 		xdfree(brk_info->functionname);
 	}
-	if (brk_info->file) {
-		xdfree(brk_info->file);
+	if (brk_info->filename) {
+		zend_string_release(brk_info->filename);
 	}
 	if (brk_info->exceptionname) {
 		xdfree(brk_info->exceptionname);
@@ -57,7 +57,7 @@ void xdebug_hash_eval_info_dtor(xdebug_eval_info *ei)
 	ei->refcount--;
 
 	if (ei->refcount == 0) {
-		xdfree(ei->contents);
+		zend_string_release(ei->contents);
 		xdfree(ei);
 	} else {
 		/* refcount wasn't 0 yet, so we won't free it yet */

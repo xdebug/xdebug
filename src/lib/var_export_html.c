@@ -279,7 +279,7 @@ xdebug_str* xdebug_get_zval_value_html(char *name, zval *val, int debug_zval, xd
 	xdebug_str_addl(str, "<pre class='xdebug-var-dump' dir='ltr'>", 39, 0);
 	if (options->show_location && !debug_zval) {
 		char *formatted_filename;
-		xdebug_format_filename(&formatted_filename, "%f", zend_get_executed_filename());
+		xdebug_format_filename(&formatted_filename, "%f", zend_get_executed_filename_ex());
 
 		if (strlen(XINI_LIB(file_link_format)) > 0) {
 			char *file_link;

@@ -110,7 +110,7 @@ static void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 	}
 }
 
-static int xdebug_gc_stats_init(char *fname, char *script_name)
+static int xdebug_gc_stats_init(char *fname, zend_string *script_name)
 {
 	char *filename = NULL;
 
@@ -120,7 +120,7 @@ static int xdebug_gc_stats_init(char *fname, char *script_name)
 		char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
 
 		if (!strlen(XINI_GCSTATS(output_name)) ||
-			xdebug_format_output_filename(&fname, XINI_GCSTATS(output_name), script_name) <= 0)
+			xdebug_format_output_filename(&fname, XINI_GCSTATS(output_name), ZSTR_VAL(script_name)) <= 0)
 		{
 			return FAILURE;
 		}
@@ -314,7 +314,7 @@ void xdebug_gcstats_init_if_requested(zend_op_array* op_array)
 		return;
 	}
 
-	if (xdebug_gc_stats_init(NULL, STR_NAME_VAL(op_array->filename)) == SUCCESS) {
+	if (xdebug_gc_stats_init(NULL, op_array->filename) == SUCCESS) {
 		XG_GCSTATS(active) = 1;
 	}
 }

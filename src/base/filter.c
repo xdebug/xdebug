@@ -57,7 +57,7 @@ void xdebug_filter_register_constants(INIT_FUNC_ARGS)
 
 static int xdebug_filter_match_path_include(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
-	if (strncasecmp(filter, fse->filename, strlen(filter)) == 0) {
+	if (strncasecmp(filter, ZSTR_VAL(fse->filename), strlen(filter)) == 0) {
 		*filtered_flag = 0;
 		return 1;
 	}
@@ -66,7 +66,7 @@ static int xdebug_filter_match_path_include(function_stack_entry *fse, long *fil
 
 static int xdebug_filter_match_path_exclude(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
-	if (strncasecmp(filter, fse->filename, strlen(filter)) == 0) {
+	if (strncasecmp(filter, ZSTR_VAL(fse->filename), strlen(filter)) == 0) {
 		*filtered_flag = 1;
 		return 1;
 	}

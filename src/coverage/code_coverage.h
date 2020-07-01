@@ -22,7 +22,7 @@
 #include "lib/lib.h"
 
 typedef struct xdebug_coverage_file {
-	char               *name;
+	zend_string        *name;
 	xdebug_hash        *lines;
 	xdebug_hash        *functions; /* Used for branch coverage */
 	int                 has_branch_info;
@@ -39,9 +39,9 @@ typedef struct _xdebug_coverage_globals_t {
 	long          code_coverage_filter_offset;
 	size_t        prefill_function_count;
 	size_t        prefill_class_count;
-	char                 *previous_filename;
+	zend_string          *previous_filename;
 	xdebug_coverage_file *previous_file;
-	char                 *previous_mark_filename;
+	zend_string          *previous_mark_filename;
 	xdebug_coverage_file *previous_mark_file;
 	xdebug_path_info     *paths_stack;
 	xdebug_hash          *visited_branches;
@@ -56,13 +56,13 @@ typedef struct _xdebug_coverage_settings_t {
 } xdebug_coverage_settings_t;
 
 void xdebug_init_coverage_globals(xdebug_coverage_globals_t *xg);
-void xdebug_coverage_count_line_if_active(zend_op_array *op_array, char *file, int lineno);
-void xdebug_coverage_count_line_if_branch_check_active(zend_op_array *op_array, char *file, int lineno);
+void xdebug_coverage_count_line_if_active(zend_op_array *op_array, zend_string *file, int lineno);
+void xdebug_coverage_count_line_if_branch_check_active(zend_op_array *op_array, zend_string *file, int lineno);
 void xdebug_coverage_record_if_active(zend_execute_data *execute_data, zend_op_array *op_array);
 void xdebug_coverage_compile_file(zend_op_array *op_array);
 
-int  xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_array, char **tmp_file_name, char **tmp_function_name);
-void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_op_array *op_array, char *tmp_file_name, char *tmp_function_name);
+int  xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_array, zend_string **tmp_filename, char **tmp_function_name);
+void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_op_array *op_array, zend_string *tmp_filename, char *tmp_function_name);
 void xdebug_coverage_init_oparray(zend_op_array *op_array);
 
 void xdebug_coverage_minit(INIT_FUNC_ARGS);

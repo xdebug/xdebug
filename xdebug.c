@@ -622,8 +622,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 {
 	zend_op_array *op_array = &frame->func->op_array;
 	int                   lineno;
-	char                 *file;
-	int                   file_len;
 
 	if (!EG(current_execute_data)) {
 		return;
@@ -631,11 +629,8 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 
 	lineno = EG(current_execute_data)->opline->lineno;
 
-	file = (char*) STR_NAME_VAL(op_array->filename);
-	file_len = STR_NAME_LEN(op_array->filename);
-
-	xdebug_coverage_count_line_if_active(op_array, file, lineno);
-	xdebug_debugger_statement_call(file, file_len, lineno);
+	xdebug_coverage_count_line_if_active(op_array, op_array->filename, lineno);
+	xdebug_debugger_statement_call(op_array->filename, lineno);
 }
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)

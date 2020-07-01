@@ -90,7 +90,7 @@ struct xdebug_base_info {
 	zend_long     error_reporting_override;
 	zend_bool     error_reporting_overridden;
 	unsigned int  function_count;
-	char         *last_eval_statement;
+	zend_string  *last_eval_statement;
 	char         *last_exception_trace;
 
 	/* in-execution checking */

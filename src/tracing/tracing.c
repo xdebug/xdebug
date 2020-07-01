@@ -53,7 +53,7 @@ static xdebug_trace_handler_t *xdebug_select_trace_handler(int options)
 	return tmp;
 }
 
-FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, char **used_fname)
+FILE *xdebug_trace_open_file(char *fname, zend_string *script_filename, long options, char **used_fname)
 {
 	FILE *file;
 	char *filename;
@@ -64,7 +64,7 @@ FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, c
 		char *output_dir = xdebug_lib_get_output_dir();
 
 		if (!strlen(XINI_TRACE(trace_output_name)) ||
-			xdebug_format_output_filename(&fname, XINI_TRACE(trace_output_name), script_filename) <= 0
+			xdebug_format_output_filename(&fname, XINI_TRACE(trace_output_name), ZSTR_VAL(script_filename)) <= 0
 		) {
 			/* Invalid or empty xdebug.trace_output_name */
 			return NULL;
@@ -90,7 +90,7 @@ FILE *xdebug_trace_open_file(char *fname, char *script_filename, long options, c
 	return file;
 }
 
-static char* xdebug_start_trace(char* fname, char *script_filename, long options)
+static char* xdebug_start_trace(char* fname, zend_string *script_filename, long options)
 {
 	if (XG_TRACE(trace_context)) {
 		return NULL;
@@ -698,7 +698,7 @@ void xdebug_tracing_init_if_requested(zend_op_array *op_array)
 	if (xdebug_lib_start_with_request() || xdebug_lib_start_with_trigger()) {
 		/* In case we do an auto-trace we are not interested in the return
 		 * value, but we still have to free it. */
-		xdfree(xdebug_start_trace(NULL, STR_NAME_VAL(op_array->filename), XINI_TRACE(trace_options)));
+		xdfree(xdebug_start_trace(NULL, op_array->filename, XINI_TRACE(trace_options)));
 	}
 }
 

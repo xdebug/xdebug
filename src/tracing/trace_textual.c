@@ -28,7 +28,7 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-void *xdebug_trace_textual_init(char *fname, char *script_filename, long options)
+void *xdebug_trace_textual_init(char *fname, zend_string *script_filename, long options)
 {
 	xdebug_trace_textual_context *tmp_textual_context;
 	char *used_fname;
@@ -189,22 +189,20 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
-			zend_string *i_filename = zend_string_init(fse->include_filename, strlen(fse->include_filename), 0);
 			zend_string *escaped;
 #if PHP_VERSION_ID >= 70300
-			escaped = php_addcslashes(i_filename, (char*) "'\\\0..\37", 6);
+			escaped = php_addcslashes(fse->include_filename, (char*) "'\\\0..\37", 6);
 #else
-			escaped = php_addcslashes(i_filename, 0, (char*) "'\\\0..\37", 6);
+			escaped = php_addcslashes(fse->include_filename, 0, (char*) "'\\\0..\37", 6);
 #endif
-			xdebug_str_add(&str, xdebug_sprintf("'%s'", escaped->val), 1);
+			xdebug_str_add(&str, xdebug_sprintf("'%s'", ZSTR_VAL(escaped)), 1);
 			zend_string_release(escaped);
-			zend_string_release(i_filename);
 		} else {
-			xdebug_str_add(&str, fse->include_filename, 0);
+			xdebug_str_add(&str, ZSTR_VAL(fse->include_filename), 0);
 		}
 	}
 
-	xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", fse->filename, fse->lineno), 1);
+	xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", ZSTR_VAL(fse->filename), fse->lineno), 1);
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);

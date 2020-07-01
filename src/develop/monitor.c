@@ -44,12 +44,12 @@ static void xdebug_hash_function_monitor_dtor(char *function)
 	xdfree(function);
 }
 
-static xdebug_monitored_function_entry *xdebug_monitored_function_init(char *func_name, char *filename, int lineno)
+static xdebug_monitored_function_entry *xdebug_monitored_function_init(char *func_name, zend_string *filename, int lineno)
 {
 	xdebug_monitored_function_entry *tmp = xdmalloc(sizeof(xdebug_monitored_function_entry));
 
 	tmp->func_name = xdstrdup(func_name);
-	tmp->filename = xdstrdup(filename);
+	tmp->filename = zend_string_copy(filename);
 	tmp->lineno = lineno;
 
 	return tmp;
@@ -60,11 +60,11 @@ void xdebug_monitored_function_dtor(void *dummy, void *elem)
 	xdebug_monitored_function_entry *mfe = (xdebug_monitored_function_entry*) elem;
 
 	xdfree(mfe->func_name);
-	xdfree(mfe->filename);
+	zend_string_release(mfe->filename);
 	xdfree(mfe);
 }
 
-void xdebug_function_monitor_record(char *func_name, char *filename, int lineno)
+void xdebug_function_monitor_record(char *func_name, zend_string *filename, int lineno)
 {
 	xdebug_monitored_function_entry *record;
 
@@ -160,7 +160,7 @@ PHP_FUNCTION(xdebug_get_monitored_functions)
 		array_init(entry);
 
 		add_assoc_string_ex(entry, "function", HASH_KEY_SIZEOF("function"), mfe->func_name);
-		add_assoc_string_ex(entry, "filename", HASH_KEY_SIZEOF("filename"), mfe->filename);
+		add_assoc_string_ex(entry, "filename", HASH_KEY_SIZEOF("filename"), ZSTR_VAL(mfe->filename));
 		add_assoc_long(entry, "lineno", mfe->lineno);
 
 		add_next_index_zval(return_value, entry);

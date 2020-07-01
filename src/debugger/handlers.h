@@ -37,8 +37,8 @@ typedef struct _xdebug_remote_handler       xdebug_remote_handler;
 typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
 
 struct _xdebug_debug_list {
-	char *last_file;
-	int   last_line;
+	zend_string *last_filename;
+	int          last_line;
 };
 
 #define XDEBUG_BREAKPOINT_TYPE_LINE        0x01
@@ -61,7 +61,7 @@ struct _xdebug_con {
 	void                  *options;
 	xdebug_remote_handler *handler;
 	fd_buf                *buffer;
-	char                  *program_name;
+	zend_string           *program_name;
 	xdebug_hash           *breakpoint_list;
 	xdebug_hash           *function_breakpoints;
 	xdebug_hash           *eval_id_lookup;
@@ -102,8 +102,7 @@ struct _xdebug_brk_info {
 	char                 *functionname;
 	char                 *exceptionname;
 	int                   function_break_type; /* XDEBUG_BRK_FUNC_* */
-	char                 *file;
-	int                   file_len;
+	zend_string          *filename;
 	int                   original_lineno; /* line number that was set through breakpoint_set */
 	int                   resolved_lineno; /* line number after resolving, initialised with 'original_lineno' */
 	char                 *condition;
@@ -115,9 +114,9 @@ struct _xdebug_brk_info {
 };
 
 struct _xdebug_eval_info {
-	int   id;
-	int   refcount;
-	char *contents;
+	int          id;
+	int          refcount;
+	zend_string *contents;
 };
 
 struct _xdebug_remote_handler {
@@ -132,15 +131,15 @@ struct _xdebug_remote_handler {
 	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_llist *stack);
 
 	/* Breakpoints */
-	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, const char *file, int filename_len, int lineno);
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, char *file, long lineno, int type, char *exception, char *code, char *message);
+	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, zend_string *filename, int lineno);
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, zend_string *filename, long lineno, int type, char *exception, char *code, char *message);
 	int (*resolve_breakpoints)(xdebug_con *h, zend_string *opa);
 
 	/* Output redirection */
 	int (*remote_stream_output)(const char *string, unsigned int length);
 
 	/* Notifications & Logging */
-	int (*remote_notification)(xdebug_con *h, const char *file, long lineno, int type, char *type_string, char *message);
+	int (*remote_notification)(xdebug_con *h, zend_string *file, long lineno, int type, char *type_string, char *message);
 	void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) (*log)(int log_level, const char *fmt, ...);
 
 	/* Eval ID registration and removal */

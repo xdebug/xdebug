@@ -268,9 +268,9 @@ PHP_FUNCTION(xdebug_print_function_stack)
 
 	i = xdebug_get_stack_frame(0);
 	if (message) {
-		tmp = xdebug_get_printable_stack(PG(html_errors), 0, message, i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC));
+		tmp = xdebug_get_printable_stack(PG(html_errors), 0, message, ZSTR_VAL(i->filename), i->lineno, !(options & XDEBUG_STACK_NO_DESC));
 	} else {
-		tmp = xdebug_get_printable_stack(PG(html_errors), 0, "user triggered", i->filename, i->lineno, !(options & XDEBUG_STACK_NO_DESC));
+		tmp = xdebug_get_printable_stack(PG(html_errors), 0, "user triggered", ZSTR_VAL(i->filename), i->lineno, !(options & XDEBUG_STACK_NO_DESC));
 	}
 	php_printf("%s", tmp);
 	xdfree(tmp);
@@ -362,7 +362,7 @@ PHP_FUNCTION(xdebug_call_file)
 	}
 	i = xdebug_get_stack_frame(depth);
 	if (i) {
-		RETURN_STRING(i->filename);
+		RETURN_STR(i->filename);
 	} else {
 		return;
 	}
