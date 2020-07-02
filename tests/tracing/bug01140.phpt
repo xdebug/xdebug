@@ -5,7 +5,6 @@ xdebug.mode=trace,develop
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.dump_globals=0
-xdebug.show_mem_delta=0
 xdebug.collect_vars=0
 xdebug.collect_params=3
 xdebug.collect_return=0
