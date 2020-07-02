@@ -3,6 +3,7 @@ Test for bug #631: Summary not written when script ended with "exit()"
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=default
+xdebug.profiler_output_name=cachegrind.out.%p.%r
 --FILE--
 <?php
 $filename = xdebug_get_profiler_filename();
@@ -11,6 +12,7 @@ function capture() {
 	global $filename;
 	echo file_get_contents($filename);
 	unlink($filename);
+	@unlink(xdebug_get_profiler_filename());
 }
 
 register_shutdown_function('capture');
