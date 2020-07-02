@@ -812,7 +812,7 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 			}
 #endif
 #if PHP_VERSION_ID >= 80000
-			xdebug_log_stack(error_type_str, (message), error_filename, error_lineno);
+			xdebug_log_stack(error_type_str, ZSTR_VAL(message), error_filename, error_lineno);
 #else
 			xdebug_log_stack(error_type_str, buffer, error_filename, error_lineno);
 #endif

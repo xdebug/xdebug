@@ -214,7 +214,7 @@ void xdebug_profiler_init(char *script_name)
 		ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG_PROF(profile_filename));
 		ctr.line_len = strlen(ctr.line);
 		sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-		xdfree(ctr.line);
+		xdfree((void*) ctr.line);
 	}
 
 	XG_PROF(profiler_start_time) = xdebug_get_utime();
