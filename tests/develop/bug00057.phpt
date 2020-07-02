@@ -4,7 +4,6 @@ Test for bug #57: Crash with overloading functions
 xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.collect_assignments=0
-xdebug.show_mem_delta=0
 error_reporting=2047
 --FILE--
 <?php

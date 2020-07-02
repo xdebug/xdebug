@@ -130,9 +130,6 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	xdebug_str_add(&str, xdebug_sprintf("%10.4F ", fse->time - XG_BASE(start_time)), 1);
 	xdebug_str_add(&str, xdebug_sprintf("%10lu ", fse->memory), 1);
-	if (XINI_TRACE(show_mem_delta)) {
-		xdebug_str_add(&str, xdebug_sprintf("%+8ld ", fse->memory - fse->prev_memory), 1);
-	}
 	for (j = 0; j < fse->level; j++) {
 		xdebug_str_addl(&str, "  ", 2, 0);
 	}
@@ -218,9 +215,6 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 	xdebug_str_add(str, xdebug_sprintf("%10.4F ", xdebug_get_utime() - XG_BASE(start_time)), 1);
 	xdebug_str_add(str, xdebug_sprintf("%10lu ", zend_memory_usage(0)), 1);
 
-	if (XINI_TRACE(show_mem_delta)) {
-		xdebug_str_addl(str, "        ", 8, 0);
-	}
 	for (j = 0; j < fse->level; j++) {
 		xdebug_str_addl(str, "  ", 2, 0);
 	}
@@ -296,9 +290,6 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 	xdebug_str                   *tmp_value;
 
 	xdebug_str_addl(&str, "                    ", 20, 0);
-	if (XINI_TRACE(show_mem_delta)) {
-		xdebug_str_addl(&str, "        ", 8, 0);
-	}
 	for (j = 0; j <= fse->level; j++) {
 		xdebug_str_addl(&str, "  ", 2, 0);
 	}

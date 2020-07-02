@@ -10,7 +10,6 @@ xdebug.collect_params=3
 xdebug.collect_assignments=1
 xdebug.auto_profile=0
 xdebug.dump_globals=0
-xdebug.show_mem_delta=0
 xdebug.trace_format=0
 --FILE--
 <?php

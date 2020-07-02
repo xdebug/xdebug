@@ -4,7 +4,6 @@ Test stack traces (level4, html)
 xdebug.mode=develop
 xdebug.trace_format=0
 xdebug.dump_globals=0
-xdebug.show_mem_delta=0
 xdebug.var_display_max_children=50
 xdebug.var_display_max_depth=5
 xdebug.var_display_max_length=64
