@@ -137,16 +137,6 @@ typedef struct _xdebug_func {
 	int   internal;
 } xdebug_func;
 
-typedef struct _xdebug_call_entry {
-	int         type; /* 0 = function call, 1 = line */
-	int         user_defined;
-	char       *filename;
-	char       *function;
-	int         lineno;
-	double      time_taken;
-	long        mem_used;
-} xdebug_call_entry;
-
 typedef struct xdebug_profile {
 	double        time;
 	double        mark;
@@ -162,9 +152,9 @@ typedef struct _function_stack_entry {
 
 	/* location properties */
 	unsigned int level;
-	char        *filename;
+	zend_string *filename;
 	int          lineno;
-	char        *include_filename;
+	zend_string *include_filename;
 	int          function_nr;
 
 	/* argument properties */
@@ -190,9 +180,9 @@ typedef struct _function_stack_entry {
 	/* profiling properties */
 	xdebug_profile profile;
 	struct {
-		int   lineno;
-		char *filename;
-		char *funcname;
+		int          lineno;
+		zend_string *filename;
+		char        *funcname;
 	} profiler;
 
 	/* misc properties */

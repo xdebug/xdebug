@@ -339,19 +339,22 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 	}
 }
 
-void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_op_array *op_array, long opcode_nr)
+void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name, zend_op_array *op_array, long opcode_nr)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
 	xdebug_branch_info *branch_info;
 
-	if (XG_COV(previous_mark_filename) && strcmp(XG_COV(previous_mark_filename), file_name) == 0) {
+	if (XG_COV(previous_mark_filename) && zend_string_equals(XG_COV(previous_mark_filename), filename)) {
 		file = XG_COV(previous_mark_file);
 	} else {
-		if (!xdebug_hash_find(XG_COV(code_coverage_info), file_name, strlen(file_name), (void *) &file)) {
+		if (!xdebug_hash_find(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &file)) {
 			return;
 		}
-		XG_COV(previous_mark_filename) = file->name;
+		if (XG_COV(previous_mark_filename)) {
+			zend_string_release(XG_COV(previous_mark_filename));
+		}
+		XG_COV(previous_mark_filename) = zend_string_copy(file->name);
 		XG_COV(previous_mark_file) = file;
 	}
 
@@ -368,7 +371,7 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 	branch_info = function->branch_info;
 
 	if (opcode_nr != 0 && xdebug_set_in(branch_info->entry_points, opcode_nr)) {
-		xdebug_code_coverage_end_of_function(op_array, file_name, function_name);
+		xdebug_code_coverage_end_of_function(op_array, filename, function_name);
 		xdebug_code_coverage_start_of_function(op_array, function_name);
 	}
 
@@ -400,20 +403,21 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 	}
 }
 
-void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *function_name, char *key, int key_len)
+void xdebug_branch_info_mark_end_of_function_reached(zend_string *filename, char *function_name, char *key, int key_len)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
 	xdebug_branch_info *branch_info;
 	xdebug_path *path;
 
-	if (XG_COV(previous_mark_filename) && strcmp(XG_COV(previous_mark_filename), filename) == 0) {
+	if (XG_COV(previous_mark_filename) && zend_string_equals(XG_COV(previous_mark_filename), filename) == 0) {
 		file = XG_COV(previous_mark_file);
 	} else {
-		if (!xdebug_hash_find(XG_COV(code_coverage_info), filename, strlen(filename), (void *) &file)) {
+		if (!xdebug_hash_find(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &file)) {
 			return;
 		}
-		XG_COV(previous_mark_filename) = file->name;
+		zend_string_release(XG_COV(previous_mark_filename));
+		XG_COV(previous_mark_filename) = zend_string_copy(file->name);
 		XG_COV(previous_mark_file) = file;
 	}
 
@@ -435,22 +439,23 @@ void xdebug_branch_info_mark_end_of_function_reached(char *filename, char *funct
 	path->hit = 1;
 }
 
-void xdebug_branch_info_add_branches_and_paths(char *filename, char *function_name, xdebug_branch_info *branch_info)
+void xdebug_branch_info_add_branches_and_paths(zend_string *filename, char *function_name, xdebug_branch_info *branch_info)
 {
 	xdebug_coverage_file *file;
 	xdebug_coverage_function *function;
 
-	if (XG_COV(previous_filename) && strcmp(XG_COV(previous_filename), filename) == 0) {
+	if (XG_COV(previous_filename) && zend_string_equals(XG_COV(previous_filename), filename) == 0) {
 		file = XG_COV(previous_file);
 	} else {
 		/* Check if the file already exists in the hash */
-		if (!xdebug_hash_find(XG_COV(code_coverage_info), filename, strlen(filename), (void *) &file)) {
+		if (!xdebug_hash_find(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &file)) {
 			/* The file does not exist, so we add it to the hash */
 			file = xdebug_coverage_file_ctor(filename);
 
-			xdebug_hash_add(XG_COV(code_coverage_info), filename, strlen(filename), file);
+			xdebug_hash_add(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), file);
 		}
-		XG_COV(previous_filename) = file->name;
+		zend_string_release(XG_COV(previous_filename));
+		XG_COV(previous_filename) = zend_string_copy(file->name);
 		XG_COV(previous_file) = file;
 	}
 

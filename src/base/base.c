@@ -114,7 +114,7 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 		xdebug_func_dtor_by_ref(&e->function);
 
 		if (e->filename) {
-			xdfree(e->filename);
+			zend_string_release(e->filename);
 		}
 
 		if (e->var) {
@@ -128,7 +128,7 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 		}
 
 		if (e->include_filename) {
-			xdfree(e->include_filename);
+			zend_string_release(e->include_filename);
 		}
 
 		if (e->declared_vars) {
@@ -211,9 +211,9 @@ int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 
 	/* Now let's store this info */
 	if (XG_BASE(last_eval_statement)) {
-		efree(XG_BASE(last_eval_statement));
+		zend_string_release(XG_BASE(last_eval_statement));
 	}
-	XG_BASE(last_eval_statement) = estrndup(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename));
+	XG_BASE(last_eval_statement) = zend_string_init(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename), 0);
 
 	if (inc_filename == &tmp_inc_filename) {
 		zval_dtor(&tmp_inc_filename);
@@ -269,11 +269,11 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 			if (edata->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 				tmp->function = xdebug_wrap_closure_location_around_function_name(&edata->func->op_array, edata->func->common.function_name->val);
 			} else if (strncmp(edata->func->common.function_name->val, "call_user_func", 14) == 0) {
-				const char *fname = NULL;
-				int         lineno = 0;
+				zend_string *fname = NULL;
+				int          lineno = 0;
 
 				if (edata->prev_execute_data && edata->prev_execute_data->func && edata->prev_execute_data->func->type == ZEND_USER_FUNCTION) {
-					fname = edata->prev_execute_data->func->op_array.filename->val;
+					fname = edata->prev_execute_data->func->op_array.filename;
 				}
 
 				if (
@@ -295,7 +295,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 				tmp->function = xdebug_sprintf(
 					"%s:{%s:%d}",
 					edata->func->common.function_name->val,
-					fname,
+					ZSTR_VAL(fname),
 					lineno
 				);
 			} else {
@@ -404,13 +404,13 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			ptr = ptr->prev_execute_data;
 		}
 		if (ptr) {
-			tmp->filename = xdstrdup(ptr->func->op_array.filename->val);
+			tmp->filename = zend_string_copy(ptr->func->op_array.filename);
 		}
 	}
 
 	if (!tmp->filename) {
 		/* Includes/main script etc */
-		tmp->filename  = (type == XDEBUG_USER_DEFINED && op_array && op_array->filename) ? xdstrdup(op_array->filename->val): NULL;
+		tmp->filename  = (type == XDEBUG_USER_DEFINED && op_array && op_array->filename) ? zend_string_copy(op_array->filename) : NULL;
 	}
 	/* Call user function locations */
 	if (
@@ -420,11 +420,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))) &&
 		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename
 	) {
-		tmp->filename = xdstrdup(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename);
+		tmp->filename = zend_string_copy(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename);
 	}
 
 	if (!tmp->filename) {
-		tmp->filename = xdstrdup("UNKNOWN?");
+		tmp->filename = zend_string_init("UNKNOWN?", sizeof("UNKNOWN?") - 1, 0);
 	}
 	tmp->prev_memory = XG_BASE(prev_memory);
 	tmp->memory = zend_memory_usage(0);
@@ -448,10 +448,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			}
 		}
 
-		if (tmp->function.type == XFUNC_EVAL) {
-			tmp->include_filename = xdebug_sprintf("%s", XG_BASE(last_eval_statement));
+		if (tmp->function.type == XFUNC_EVAL && XG_BASE(last_eval_statement)) {
+			tmp->include_filename = zend_string_copy(XG_BASE(last_eval_statement));
 		} else if (XINI_DEV(collect_includes)) {
-			tmp->include_filename = xdstrdup(zend_get_executed_filename());
+			tmp->include_filename = zend_string_copy(zend_get_executed_filename_ex());
 		}
 	} else  {
 		tmp->lineno = find_line_number_for_current_execute_point(edata);
@@ -559,7 +559,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	int                   function_nr = 0;
 	xdebug_llist_element *le;
 	char                 *code_coverage_function_name = NULL;
-	char                 *code_coverage_file_name = NULL;
+	zend_string          *code_coverage_filename = NULL;
 	int                   code_coverage_init = 0;
 
 	/* For PHP 7, we need to reset the opline to the start, so that all opcode
@@ -654,7 +654,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
-		code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_file_name, &code_coverage_function_name);
+		code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_filename, &code_coverage_function_name);
 	}
 
 	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
@@ -678,7 +678,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (code_coverage_init) {
-		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_file_name, code_coverage_function_name);
+		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_filename, code_coverage_function_name);
 	}
 
 	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
@@ -973,7 +973,7 @@ void xdebug_base_post_deactivate()
 	XG_BASE(in_debug_info)    = 0;
 
 	if (XG_BASE(last_eval_statement)) {
-		efree(XG_BASE(last_eval_statement));
+		zend_string_release(XG_BASE(last_eval_statement));
 		XG_BASE(last_eval_statement) = NULL;
 	}
 	if (XG_BASE(last_exception_trace)) {

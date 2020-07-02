@@ -75,9 +75,9 @@ xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 	return ret;
 }
 
-void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit)
+void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int limit)
 {
-	char *p1, *p2, *endp;
+	const char *p1, *p2, *endp;
 
 	endp = str + strlen(str);
 
@@ -110,9 +110,9 @@ void xdebug_explode(const char *delim, char *str, xdebug_arg *args, int limit)
 	}
 }
 
-char* xdebug_memnstr(char *haystack, const char *needle, int needle_len, char *end)
+const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end)
 {
-	char *p = haystack;
+	const char *p = haystack;
 	char first = *needle;
 
 	/* let end point to the last character where needle may start */
@@ -244,11 +244,11 @@ char *xdebug_raw_url_encode(char const *s, int len, int *new_length, int skip_sl
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_from_url(const char *fileurl)
+char *xdebug_path_from_url(zend_string *fileurl)
 {
 	/* deal with file: url's */
 	char *dfp = NULL;
-	const char *fp = NULL, *efp = fileurl;
+	const char *fp = NULL, *efp = ZSTR_VAL(fileurl);
 #ifdef PHP_WIN32
 	int l = 0;
 	int i;
@@ -276,7 +276,7 @@ char *xdebug_path_from_url(const char *fileurl)
 		}
 #endif
 	} else {
-		ret = xdstrdup(fileurl);
+		ret = xdstrdup(ZSTR_VAL(fileurl));
 	}
 
 	free(dfp);
@@ -284,19 +284,19 @@ char *xdebug_path_from_url(const char *fileurl)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_to_url(const char *fileurl)
+char *xdebug_path_to_url(zend_string *fileurl)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
 	char *encoded_fileurl;
 
 	/* encode the url */
-	encoded_fileurl = xdebug_raw_url_encode(fileurl, strlen(fileurl), &new_len, 1);
+	encoded_fileurl = xdebug_raw_url_encode(ZSTR_VAL(fileurl), ZSTR_LEN(fileurl), &new_len, 1);
 
-	if (strncmp(fileurl, "phar://", 7) == 0) {
+	if (strncmp(ZSTR_VAL(fileurl), "phar://", 7) == 0) {
 		/* ignore, phar is cool */
-		tmp = xdstrdup(fileurl);
-	} else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
+		tmp = xdstrdup(ZSTR_VAL(fileurl));
+	} else if (ZSTR_VAL(fileurl)[0] != '/' && ZSTR_VAL(fileurl)[0] != '\\' && ZSTR_VAL(fileurl)[1] != ':') {
 		/* convert relative paths */
 		cwd_state new_state;
 		char cwd[MAXPATHLEN];
@@ -310,21 +310,21 @@ char *xdebug_path_to_url(const char *fileurl)
 		new_state.cwd = estrdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 
-		if (!virtual_file_ex(&new_state, fileurl, NULL, 1)) {
+		if (!virtual_file_ex(&new_state, ZSTR_VAL(fileurl), NULL, 1)) {
 			char *s = estrndup(new_state.cwd, new_state.cwd_length);
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
 		}
 		efree(new_state.cwd);
 
-	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
+	} else if (ZSTR_VAL(fileurl)[1] == '/' || ZSTR_VAL(fileurl)[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
 		/* See http://blogs.msdn.com/ie/archive/2006/12/06/file-uris-in-windows.aspx */
 		tmp = xdebug_sprintf("file:%s", encoded_fileurl);
-	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
+	} else if (ZSTR_VAL(fileurl)[0] == '/' || ZSTR_VAL(fileurl)[0] == '\\') {
 		/* convert *nix paths (eg. /path) */
 		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
-	} else if (fileurl[1] == ':') {
+	} else if (ZSTR_VAL(fileurl)[1] == ':') {
 		/* convert windows drive paths (eg. c:\path) */
 		tmp = xdebug_sprintf("file:///%s", encoded_fileurl);
 	} else {
@@ -623,7 +623,7 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 			switch (*format)
 			{
 				case 'f': /* filename */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", error_filename), 1);
+					xdebug_str_add(&fname, error_filename, 0);
 					break;
 
 				case 'l': /* line number */
@@ -643,12 +643,12 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 	return fname.l;
 }
 
-int xdebug_format_filename(char **formatted_name, const char *default_fmt, const char *filename)
+int xdebug_format_filename(char **formatted_name, const char *default_fmt, zend_string *filename)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
 	char *name;
 	xdebug_str *parent, *ancester;
-	const char *full = filename;
+	const char *full_filename = ZSTR_VAL(filename);
 	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	char *slash = xdebug_sprintf("%c", DEFAULT_SLASH);
 	char *fmt = XINI_LIB(filename_format);
@@ -656,7 +656,7 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, const
 
 	/* Create pointers for the format chars */
 	xdebug_arg_init(parts);
-	xdebug_explode(slash, (char*) filename, parts, -1);
+	xdebug_explode(slash, full_filename, parts, -1);
 	name = parts->args[parts->c - 1];
 	parent = parts->c > 1 ?
 		xdebug_join(slash, parts, parts->c - 2, parts->c - 1) :
@@ -683,7 +683,7 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, const
 					xdebug_str_add(&fname, xdebug_sprintf("%s", ancester->d), 1);
 					break;
 				case 'f': /* full path */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", full), 1);
+					xdebug_str_add(&fname, xdebug_sprintf("%s", full_filename), 1);
 					break;
 				case 's': /* slash */
 					xdebug_str_add(&fname, xdebug_sprintf("%c", DEFAULT_SLASH), 1);

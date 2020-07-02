@@ -153,7 +153,7 @@ void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 		xdfree(ce->function);
 	}
 	if (ce->filename) {
-		xdfree(ce->filename);
+		zend_string_release(ce->filename);
 	}
 	xdfree(ce);
 }
@@ -319,7 +319,7 @@ void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_o
 		case XFUNC_INCLUDE_ONCE:
 		case XFUNC_REQUIRE:
 		case XFUNC_REQUIRE_ONCE:
-			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, fse->include_filename);
+			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, ZSTR_VAL(fse->include_filename));
 			xdfree(tmp_name);
 			tmp_name = tmp_fname;
 			fse->profiler.lineno = 1;
@@ -338,9 +338,9 @@ void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_o
 	}
 
 	if (op_array && op_array->filename) {
-		fse->profiler.filename = xdstrdup((char*) STR_NAME_VAL(op_array->filename));
+		fse->profiler.filename = zend_string_copy(op_array->filename);
 	} else {
-		fse->profiler.filename = xdstrdup(fse->filename);
+		fse->profiler.filename = zend_string_copy(fse->filename);
 	}
 	fse->profiler.funcname = xdstrdup(tmp_name);
 	xdfree(tmp_name);
@@ -370,7 +370,7 @@ void xdebug_profiler_add_function_details_internal(function_stack_entry *fse)
 		fse->profiler.lineno = 1;
 	}
 
-	fse->profiler.filename = xdstrdup(fse->filename);
+	fse->profiler.filename = zend_string_copy(fse->filename);
 	fse->profiler.funcname = xdstrdup(tmp_name);
 
 	xdfree(tmp_name);
@@ -398,7 +398,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 
 	if (fse->prev) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
-		ce->filename = xdstrdup(fse->profiler.filename);
+		ce->filename = zend_string_copy(fse->profiler.filename);
 		ce->function = xdstrdup(fse->profiler.funcname);
 		ce->time_taken = fse->profile.time;
 		ce->lineno = fse->lineno;
@@ -426,7 +426,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	} else {
 		char *fl_ref = NULL, *fn_ref = NULL;
 
-		fl_ref = get_filename_ref(fse->profiler.filename);
+		fl_ref = get_filename_ref(ZSTR_VAL(fse->profiler.filename));
 		fn_ref = get_functionname_ref(fse->profiler.funcname);
 
 		fprintf(XG_PROF(profile_file), "fl=%s\n", fl_ref);
@@ -460,7 +460,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 
 			xdfree(tmp_key);
 		} else {
-			fl_ref = get_filename_ref(call_entry->filename);
+			fl_ref = get_filename_ref(ZSTR_VAL(call_entry->filename));
 			fn_ref = get_functionname_ref(call_entry->function);
 		}
 
@@ -480,7 +480,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 void xdebug_profiler_free_function_details(function_stack_entry *fse)
 {
 	xdfree(fse->profiler.funcname);
-	xdfree(fse->profiler.filename);
+	zend_string_release(fse->profiler.filename);
 	fse->profiler.funcname = NULL;
 	fse->profiler.filename = NULL;
 }

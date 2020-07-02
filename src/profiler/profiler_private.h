@@ -18,6 +18,16 @@
 #ifndef __XDEBUG_PROFILER_PRIVATE_H__
 #define __XDEBUG_PROFILER_PRIVATE_H__
 
+typedef struct _xdebug_call_entry {
+	int          type; /* 0 = function call, 1 = line */
+	int          user_defined;
+	zend_string *filename;
+	char        *function;
+	int          lineno;
+	double       time_taken;
+	long         mem_used;
+} xdebug_call_entry;
+
 #define XG_PROF(v)     (XG(globals.profiler.v))
 #define XINI_PROF(v)   (XG(settings.profiler.v))
 

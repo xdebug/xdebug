@@ -23,7 +23,7 @@
 
 typedef struct
 {
-	void *(*init)(char *fname, char *script_filename, long options);
+	void *(*init)(char *fname, zend_string *script_filename, long options);
 	void (*deinit)(void *ctxt);
 	void (*write_header)(void *ctxt);
 	void (*write_footer)(void *ctxt);
