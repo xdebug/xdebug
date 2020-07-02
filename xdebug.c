@@ -211,7 +211,6 @@ PHP_INI_BEGIN()
 
 	/* Develop settings */
 	STD_PHP_INI_ENTRY("xdebug.cli_color",         "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.develop.cli_color,         zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.collect_includes","1",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.collect_includes,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_vars",    "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.develop.collect_vars,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.force_display_errors", "0",             PHP_INI_SYSTEM, OnUpdateBool,   settings.develop.force_display_errors, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.force_error_reporting", "0",              PHP_INI_SYSTEM, OnUpdateLong,   settings.develop.force_error_reporting, zend_xdebug_globals, xdebug_globals)
