@@ -1635,7 +1635,7 @@ TEST $file
 			$skipif_ini_settings = $ini_settings;
 			$skipif_ini_settings = preg_replace( '@-d \"auto_prepend_file=.*?\" @', '', $skipif_ini_settings );
 			$skipif_ini_settings = preg_replace( '@-d \"auto_append_file=.*?\" @', '', $skipif_ini_settings );
-			$skipif_ini_settings .= " -d track_errors=0 -d xdebug.profiler_enable=0";
+			$skipif_ini_settings .= " -d track_errors=0 -d xdebug.mode=off";
 			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $skipif_ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
 
 			junit_finish_timer($shortname);
@@ -2722,7 +2722,18 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 	global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
 
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
-		echo "$result $tested [$tested_file] $extra\n";
+		switch ( $result ) {
+			case 'PASS':
+				$colour = "\e[1;32m{$result}\e[0m"; break;
+			case 'SKIP':
+				$colour = "\e[0;37m{$result}"; break;
+			case 'FAIL':
+				$colour = "\e[1;31m{$result}\e[0m"; break;
+			default:
+				$colour = "\e[1;33m{$result}\e[0m"; break;
+		}
+
+		echo "$colour $tested [$tested_file] $extra\e[0m\n";
 	} else if (!$SHOW_ONLY_GROUPS) {
 		// Write over the last line to avoid random trailing chars on next echo
 		echo str_repeat(" ", $line_length), "\r";

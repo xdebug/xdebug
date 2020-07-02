@@ -8,12 +8,12 @@ class Foo
     {
         usort(
             $array,
-            function ($x, $y) { return true; }
+            function ($x, $y) { return 1; }
         );
 
         \usort(
             $array,
-            function ($x, $y) { return true; }
+            function ($x, $y) { return 1; }
         );
 
         return $array;
