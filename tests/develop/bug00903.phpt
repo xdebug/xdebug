@@ -2,7 +2,6 @@
 Test for bug #903: xdebug_get_headers() returns replaced headers
 --INI--
 xdebug.mode=develop
-xdebug.overload_var_dump=1
 --FILE--
 <?php
 header('foo: bar');
@@ -18,6 +17,7 @@ header('Set-Cookie: remove');
 var_dump(xdebug_get_headers());
 ?>
 --EXPECTF--
+%sbug00903.php:12:
 array(3) {
   [0] =>
   string(8) "foo: baz"

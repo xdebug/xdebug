@@ -9,7 +9,6 @@ xdebug.collect_assignments=0
 xdebug.auto_profile=0
 xdebug.dump_globals=0
 xdebug.trace_format=0
-xdebug.overload_var_dump=0
 --FILE--
 <?php
 $file = 'bug00703.inc';

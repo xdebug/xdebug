@@ -7,7 +7,6 @@ xdebug.var_display_max_data=-1
 xdebug.var_display_max_depth=-1
 xdebug.cli_color=0
 html_errors=0
-xdebug.overload_var_dump=1
 --FILE--
 <?php
 $array = array( 1, true, "string" );
@@ -24,7 +23,8 @@ ini_set('xdebug.var_display_max_children', 0);
 ini_set('xdebug.var_display_max_data', -1);
 xdebug_var_dump( $array ); echo "\n\n";
 ?>
---EXPECT--
+--EXPECTF--
+%sxdebug_var_dump_limitations_cli.php:3:
 array(3) {
   [0] =>
   int(1)
@@ -35,11 +35,13 @@ array(3) {
 }
 
 
+%sxdebug_var_dump_limitations_cli.php:6:
 array(3) {
   ...
 }
 
 
+%sxdebug_var_dump_limitations_cli.php:10:
 array(3) {
   [0] =>
   int(1)
@@ -50,6 +52,7 @@ array(3) {
 }
 
 
+%sxdebug_var_dump_limitations_cli.php:14:
 array(3) {
 
   (more elements)...

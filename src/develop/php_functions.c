@@ -44,18 +44,6 @@ PHP_FUNCTION(xdebug_var_dump)
 	int         i;
 	xdebug_str *val;
 
-	/* Ignore our new shiny function if overload_var_dump is set to 0 *and* the
-	 * function is not being called as xdebug_var_dump() (usually, that'd be
-	 * the overloaded var_dump() of course). Fixes issue 1262. */
-	if (
-		(!XINI_DEV(overload_var_dump) && (strcmp("xdebug_var_dump", execute_data->func->common.function_name->val) != 0))
-		||
-		!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)
-	) {
-		XG_BASE(orig_var_dump_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		return;
-	}
-
 	argc = ZEND_NUM_ARGS();
 
 	args = safe_emalloc(argc, sizeof(zval), 0);
@@ -65,10 +53,7 @@ PHP_FUNCTION(xdebug_var_dump)
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
-			xdebug_php_var_dump(&args[i], 1);
-		}
-		else if (PG(html_errors)) {
+		if (PG(html_errors)) {
 			val = xdebug_get_zval_value_html(NULL, (zval*) &args[i], 0, NULL);
 			PHPWRITE(val->d, val->l);
 			xdebug_str_free(val);
@@ -162,8 +147,6 @@ PHP_FUNCTION(xdebug_debug_zval_stdout)
 	zval   *args;
 	int     argc;
 	int     i;
-
-	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
 
 	argc = ZEND_NUM_ARGS();
 

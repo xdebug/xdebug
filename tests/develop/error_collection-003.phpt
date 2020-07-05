@@ -4,12 +4,12 @@ Test for collection errors (3) - HTML errors
 display_errors=1
 xdebug.mode=develop
 html_errors=1
-xdebug.overload_var_dump=0
 xdebug.file_link_format=xdebug://%f@%l
 xdebug.filename_format=
 xdebug.collect_assignments=1
 xdebug.collect_return=1
 xdebug.collect_params=4
+xdebug.var_display_max_data=2048
 --FILE--
 <?php
 xdebug_start_error_collection();
@@ -17,12 +17,14 @@ xdebug_start_error_collection();
 trigger_error("An error", E_USER_WARNING);
 
 echo "Errors\n";
+ini_set('html_errors', 0);
 var_dump( xdebug_get_collected_errors() );
 ?>
 --EXPECTF--
 Errors
+%serror_collection-003.php:8:
 array(1) {
-  [0]=>
+  [0] =>
   string(%d) "<br />
 <font size='1'><table class='xdebug-error xe-warning' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
 <tr><th align='left' bgcolor='#f57900' colspan="5"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> Warning: An error in <a style='color: black' href='xdebug://%serror_collection-003.php@4'>%serror_collection-003.php</a> on line <i>4</i></th></tr>

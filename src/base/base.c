@@ -805,14 +805,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	XG_BASE(level)--;
 }
 
-static void xdebug_overloaded_functions_setup(void)
+static void xdebug_base_overloaded_functions_setup(void)
 {
 	zend_function *orig;
-
-	/* Override var_dump with our own function */
-	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
-	XG_BASE(orig_var_dump_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_var_dump;
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
 	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
@@ -845,12 +840,9 @@ static void xdebug_overloaded_functions_setup(void)
 	}
 }
 
-static void xdebug_overloaded_functions_restore(void)
+static void xdebug_base_overloaded_functions_restore(void)
 {
 	zend_function *orig;
-
-	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
-	orig->internal_function.handler = XG_BASE(orig_var_dump_func);
 
 	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
 	orig->internal_function.handler = XG_BASE(orig_set_time_limit_func);
@@ -961,7 +953,7 @@ void xdebug_base_rinit()
 	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG_BASE(filters_code_coverage)     = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
-	xdebug_overloaded_functions_setup();
+	xdebug_base_overloaded_functions_setup();
 }
 
 void xdebug_base_post_deactivate()
@@ -987,8 +979,7 @@ void xdebug_base_post_deactivate()
 	XG_BASE(filters_tracing) = NULL;
 	XG_BASE(filters_code_coverage) = NULL;
 
-	/* Restore original var_dump, set_time_limit, error_reporting, and pcntl_exec handlers */
-	xdebug_overloaded_functions_restore();
+	xdebug_base_overloaded_functions_restore();
 }
 
 void xdebug_base_rshutdown()

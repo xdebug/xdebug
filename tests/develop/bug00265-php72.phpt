@@ -9,7 +9,6 @@ check_reqs('PHP < 7.4');
 xdebug.mode=develop
 xdebug.dump_globals=0
 xdebug.trace_format=0
-xdebug.overload_var_dump=0
 xdebug.show_local_vars=0
 xdebug.show_error_trace=1
 --FILE--
@@ -30,14 +29,15 @@ Notice: Undefined variable: b in %sbug00265-php72.php on line 6
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php72.php:0
 
+%sbug00265-php72.php:7:
 array(4) {
-  ["type"]=>
+  'type' =>
   int(8)
-  ["message"]=>
+  'message' =>
   string(21) "Undefined variable: b"
-  ["file"]=>
+  'file' =>
   string(%d) "%sbug00265-php72.php"
-  ["line"]=>
+  'line' =>
   int(6)
 }
 
@@ -46,14 +46,15 @@ Notice: Undefined variable: b in %sbug00265-php72.php on line 8
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php72.php:0
 
+%sbug00265-php72.php:9:
 array(4) {
-  ["type"]=>
+  'type' =>
   int(8)
-  ["message"]=>
+  'message' =>
   string(21) "Undefined variable: b"
-  ["file"]=>
+  'file' =>
   string(%d) "%sbug00265-php72.php"
-  ["line"]=>
+  'line' =>
   int(8)
 }
 
@@ -71,16 +72,17 @@ Error: Call to undefined function gabba() in %sbug00265-php72.php on line 10
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265-php72.php:0
 
+%sbug00265-php72.php:4:
 array(4) {
-  ["type"]=>
+  'type' =>
   int(1)
-  ["message"]=>
+  'message' =>
   string(%d) "Uncaught Error: Call to undefined function gabba() in %sbug00265-php72.php:10
 Stack trace:
 #0 {main}
   thrown"
-  ["file"]=>
+  'file' =>
   string(%d) "%sbug00265-php72.php"
-  ["line"]=>
+  'line' =>
   int(10)
 }

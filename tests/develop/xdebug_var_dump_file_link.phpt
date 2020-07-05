@@ -5,7 +5,6 @@ xdebug.mode=develop
 html_errors=1
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11
-xdebug.overload_var_dump=2
 xdebug.file_link_format=xdebug://%f@%l
 xdebug.filename_format=
 --FILE--

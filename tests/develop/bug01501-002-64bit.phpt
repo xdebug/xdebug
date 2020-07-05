@@ -9,7 +9,6 @@ check_reqs('64bit');
 xdebug.mode=develop
 html_errors=1
 xdebug.cli_color=0
-xdebug.overload_var_dump=2
 --FILE--
 <?php
 

@@ -80,7 +80,6 @@ struct xdebug_base_info {
 	xdebug_llist *stack;
 	double        start_time;
 	unsigned int  prev_memory;
-	zif_handler   orig_var_dump_func;
 	zif_handler   orig_set_time_limit_func;
 	zif_handler   orig_error_reporting_func;
 	zif_handler   orig_pcntl_exec_func;

@@ -7,7 +7,6 @@ check_reqs('opcache');
 ?>
 --INI--
 xdebug.mode=develop
-xdebug.overload_var_dump=2
 --FILE--
 <?php
 function func(){

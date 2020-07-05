@@ -12,7 +12,6 @@ xdebug.cli_color=0
 error_reporting=-1
 xdebug.collect_params=4
 xdebug.show_local_vars=0
-xdebug.overload_var_dump=1
 --FILE--
 <?php
 $xml = '<?xml version="1.0" encoding="UTF-8" ?>
@@ -23,6 +22,7 @@ $temp = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOERROR);
 var_dump($temp);
 ?>
 --EXPECTF--
+%sbug00987-006.php:7:
 class SimpleXMLElement#1 (1) {
   public ${0} =>
   string(14) "

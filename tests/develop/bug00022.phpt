@@ -4,7 +4,6 @@ Test for segmentation fault with xdebug_get_function_stack() and collect_params=
 xdebug.mode=develop
 xdebug.collect_params=1
 xdebug.collect_assignments=0
-xdebug.overload_var_dump=0
 --FILE--
 <?php
 function foo($s) {
@@ -15,30 +14,31 @@ function foo($s) {
 foo('bar');
 ?>
 --EXPECTF--
-bararray(2) {
-  [0]=>
+bar%sbug00022.php:4:
+array(2) {
+  [0] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(6) "{main}"
-    ["file"]=>
+    'file' =>
     string(%d) "%sbug00022.php"
-    ["line"]=>
+    'line' =>
     int(0)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }
-  [1]=>
+  [1] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(3) "foo"
-    ["file"]=>
+    'file' =>
     string(%d) "%sbug00022.php"
-    ["line"]=>
+    'line' =>
     int(7)
-    ["params"]=>
+    'params' =>
     array(1) {
-      ["s"]=>
+      's' =>
       string(5) "'bar'"
     }
   }
