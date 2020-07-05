@@ -10,7 +10,6 @@ xdebug.auto_profile=0
 xdebug.trace_format=0
 xdebug.var_display_max_depth=5
 xdebug.var_display_max_children=4
-xdebug.overload_var_dump=0
 --FILE--
 <?php
 $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
@@ -35,80 +34,83 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
+%stest8.php:5:
 array(2) {
-  [0]=>
+  [0] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(6) "{main}"
-    ["file"]=>
+    'file' =>
     string(%d) "%stest8.php"
-    ["line"]=>
+    'line' =>
     int(0)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }
-  [1]=>
+  [1] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(1) "a"
-    ["file"]=>
+    'file' =>
     string(%d) "%stest8.php"
-    ["line"]=>
+    'line' =>
     int(17)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }
 }
+%stest8.php:5:
 array(2) {
-  [0]=>
+  [0] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(6) "{main}"
-    ["file"]=>
+    'file' =>
     string(%d) "%stest8.php"
-    ["line"]=>
+    'line' =>
     int(0)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }
-  [1]=>
+  [1] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(1) "a"
-    ["file"]=>
+    'file' =>
     string(%d) "%stest8.php"
-    ["line"]=>
+    'line' =>
     int(17)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }
 }
+%stest8.php:5:
 array(2) {
-  [0]=>
+  [0] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(6) "{main}"
-    ["file"]=>
+    'file' =>
     string(%d) "%stest8.php"
-    ["line"]=>
+    'line' =>
     int(0)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }
-  [1]=>
+  [1] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(1) "a"
-    ["file"]=>
+    'file' =>
     string(%d) "%stest8.php"
-    ["line"]=>
+    'line' =>
     int(17)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }

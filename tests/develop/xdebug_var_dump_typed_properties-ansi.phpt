@@ -10,7 +10,6 @@ date.timezone=UTC
 xdebug.mode=develop
 html_errors=0
 xdebug.var_display_max_children=11
-xdebug.overload_var_dump=2
 xdebug.cli_color=2
 xdebug.file_link_format=
 xdebug.filename_format=

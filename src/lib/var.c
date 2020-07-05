@@ -974,7 +974,7 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(void)
 	options->max_data = XINI_LIB(display_max_data);
 	options->max_depth = XINI_LIB(display_max_depth);
 	options->show_hidden = 0;
-	options->show_location = xdebug_get_overload_var_dump() > 1;
+	options->show_location = 1;
 	options->extended_properties = 0;
 	options->encode_as_extended_property = 0;
 

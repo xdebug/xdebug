@@ -12,7 +12,6 @@ xdebug.auto_profile=0
 xdebug.dump_globals=0
 xdebug.collect_vars=1
 xdebug.show_local_vars=0
-xdebug.overload_var_dump=0
 --FILE--
 <?php
 	function a($a,$b) {
@@ -54,33 +53,38 @@ xdebug.overload_var_dump=0
 	register_shutdown_function('s');
 ?>
 --EXPECTF--
+%sget_declared_vars-opcache.php:3:
 array(2) {
-  [0]=>
+  [0] =>
   string(1) "a"
-  [1]=>
+  [1] =>
   string(1) "b"
 }
 5252
+%sget_declared_vars-opcache.php:10:
 array(2) {
-  [0]=>
+  [0] =>
   string(1) "a"
-  [1]=>
+  [1] =>
   string(1) "b"
 }
 3.14159
+%sget_declared_vars-opcache.php:18:
 array(2) {
-  [0]=>
+  [0] =>
   string(1) "a"
-  [1]=>
+  [1] =>
   string(1) "b"
 }
 1
+%sget_declared_vars-opcache.php:26:
 array(2) {
-  [0]=>
+  [0] =>
   string(1) "a"
-  [1]=>
+  [1] =>
   string(1) "b"
 }
 4254
+%sget_declared_vars-opcache.php:35:
 array(0) {
 }

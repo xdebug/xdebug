@@ -8,7 +8,6 @@ check_reqs('PHP >= 7.4');
 --INI--
 xdebug.mode=coverage
 xdebug.auto_profile=0
-xdebug.overload_var_dump=0
 --FILE--
 <?php
 $file = 'bug01403.inc';

@@ -27,6 +27,24 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 static int xdebug_silence_handler(XDEBUG_OPCODE_HANDLER_ARGS);
 
+static void xdebug_develop_overloaded_functions_setup(void)
+{
+	zend_function *orig;
+
+	/* Override var_dump with our own function */
+	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
+	XG_DEV(orig_var_dump_func) = orig->internal_function.handler;
+	orig->internal_function.handler = zif_xdebug_var_dump;
+}
+
+static void xdebug_develop_overloaded_functions_restore(void)
+{
+	zend_function *orig;
+
+	orig = zend_hash_str_find_ptr(EG(function_table), "var_dump", sizeof("var_dump") - 1);
+	orig->internal_function.handler = XG_DEV(orig_var_dump_func);
+}
+
 
 void xdebug_init_develop_globals(xdebug_develop_globals_t *xg)
 {
@@ -77,6 +95,8 @@ void xdebug_develop_rinit()
 	XG_DEV(do_monitor_functions) = 0;
 	XG_DEV(functions_to_monitor) = NULL;
 	XG_DEV(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
+
+	xdebug_develop_overloaded_functions_setup();
 }
 
 void xdebug_develop_post_deactivate()
@@ -91,6 +111,8 @@ void xdebug_develop_post_deactivate()
 		xdebug_hash_destroy(XG_DEV(functions_to_monitor));
 		XG_DEV(functions_to_monitor) = NULL;
 	}
+
+	xdebug_develop_overloaded_functions_restore();
 }
 
 
@@ -112,9 +134,4 @@ static int xdebug_silence_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	}
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
-}
-
-int xdebug_get_overload_var_dump(void)
-{
-	return XINI_DEV(overload_var_dump);
 }

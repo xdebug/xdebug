@@ -3,7 +3,6 @@ Test for bug #538: Error in watches and call stack parameter with string contain
 --INI--
 xdebug.mode=develop
 xdebug.collect_params=3
-xdebug.overload_var_dump=0
 --FILE--
 <?php
     function call($param1, $param2, $param3)
@@ -25,34 +24,35 @@ candena\a\nb
 %s
 candena\a\nb
 caneda \\a \\b \\\c|
+%sbug00538-002.php:8:
 array(2) {
-  [0]=>
+  [0] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(6) "{main}"
-    ["file"]=>
+    'file' =>
     string(%d) "%sbug00538-002.php"
-    ["line"]=>
+    'line' =>
     int(0)
-    ["params"]=>
+    'params' =>
     array(0) {
     }
   }
-  [1]=>
+  [1] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(4) "call"
-    ["file"]=>
+    'file' =>
     string(%d) "%sbug00538-002.php"
-    ["line"]=>
+    'line' =>
     int(14)
-    ["params"]=>
+    'params' =>
     array(3) {
-      ["param1"]=>
+      'param1' =>
       string(%d) "'%s'"
-      ["param2"]=>
+      'param2' =>
       string(16) "'candena\\a\\nb'"
-      ["param3"]=>
+      'param3' =>
       string(29) "'caneda \\\\a \\\\b \\\\\\c|'"
     }
   }

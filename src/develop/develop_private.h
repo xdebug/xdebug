@@ -19,6 +19,8 @@
 #ifndef __XDEBUG_DEVELOP_PRIVATE_H__
 #define __XDEBUG_DEVELOP_PRIVATE_H__
 
+PHP_FUNCTION(xdebug_var_dump);
+
 #define XG_DEV(v)      (XG(globals.develop.v))
 #define XINI_DEV(v)    (XG(settings.develop.v))
 

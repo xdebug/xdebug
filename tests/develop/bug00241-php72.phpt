@@ -12,7 +12,6 @@ xdebug.collect_vars=1
 xdebug.auto_profile=0
 xdebug.var_display_max_depth=3
 xdebug.var_display_max_children=2
-xdebug.overload_var_dump=0
 --FILE--
 <?php
 function error_handler($errno, $string, $file, $line, $context)
@@ -49,94 +48,27 @@ $tmp = explode('/', trim($_SERVER['FOO'], '/'));
 echo "The End\n";
 ?>
 --EXPECTF--
+%sbug00241-php72.php:17:
 array(5) {
-  [0]=>
+  [0] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(6) "{main}"
-    ["file"]=>
+    'file' =>
     string(%d) "%sbug00241-php72.php"
-    ["line"]=>
-    int(0)
-    ["params"]=>
-    array(0) {
-    }
+
+    (more elements)...
   }
-  [1]=>
+  [1] =>
   array(4) {
-    ["function"]=>
+    'function' =>
     string(13) "error_handler"
-    ["file"]=>
+    'file' =>
     string(%d) "%sbug00241-php72.php"
-    ["line"]=>
-    int(32)
-    ["params"]=>
-    array(5) {
-      ["errno"]=>
-      string(1) "8"
-      ["string"]=>
-      string(2%d) "'Undefined index:%sFOO'"
-      ["file"]=>
-      string(%d) "'%sbug00241-php72.php'"
-      ["line"]=>
-      string(2) "32"
-      ["context"]=>
-      string(%d) "array (%s)"
-    }
+
+    (more elements)...
   }
-  [2]=>
-  array(6) {
-    ["function"]=>
-    string(8) "newError"
-    ["type"]=>
-    string(6) "static"
-    ["class"]=>
-    string(11) "Error_Class"
-    ["file"]=>
-    string(%d) "%sbug00241-php72.php"
-    ["line"]=>
-    int(4)
-    ["params"]=>
-    array(1) {
-      ["errno"]=>
-      string(%d) "%s
-    }
-  }
-  [3]=>
-  array(6) {
-    ["function"]=>
-    string(11) "__construct"
-    ["type"]=>
-    string(7) "dynamic"
-    ["class"]=>
-    string(11) "Error_Entry"
-    ["file"]=>
-    string(%d) "%sbug00241-php72.php"
-    ["line"]=>
-    int(11)
-    ["params"]=>
-    array(2) {
-      ["base"]=>
-      string(5) "FALSE"
-      ["errno"]=>
-      string(5) "FALSE"
-    }
-  }
-  [4]=>
-  array(6) {
-    ["function"]=>
-    string(5) "getBT"
-    ["type"]=>
-    string(6) "static"
-    ["class"]=>
-    string(11) "Error_Class"
-    ["file"]=>
-    string(%d) "%sbug00241-php72.php"
-    ["line"]=>
-    int(26)
-    ["params"]=>
-    array(0) {
-    }
-  }
+
+  (more elements)...
 }
 The End

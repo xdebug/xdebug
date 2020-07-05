@@ -660,8 +660,10 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	}
 	if (XG_COV(code_coverage_active)) {
 		if (cleanup) {
+			zend_string_release(XG_COV(previous_filename));
 			XG_COV(previous_filename) = NULL;
 			XG_COV(previous_file) = NULL;
+			zend_string_release(XG_COV(previous_mark_filename));
 			XG_COV(previous_mark_filename) = NULL;
 			XG_COV(previous_mark_file) = NULL;
 			xdebug_hash_destroy(XG_COV(code_coverage_info));
@@ -940,9 +942,9 @@ void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_op_array *op
 	/* Check which path has been used */
 	if (!fse->filtered_code_coverage && XG_COV(code_coverage_active) && XG_COV(code_coverage_unused)) {
 		xdebug_code_coverage_end_of_function(op_array, tmp_filename, tmp_function_name);
-		xdfree(tmp_function_name);
-		zend_string_release(tmp_filename);
 	}
+	xdfree(tmp_function_name);
+	zend_string_release(tmp_filename);
 }
 
 void xdebug_coverage_init_oparray(zend_op_array *op_array)
@@ -1119,5 +1121,13 @@ void xdebug_coverage_post_deactivate(void)
 		XG_COV(branches).last_branch_nr = NULL;
 		XG_COV(branches).size = 0;
 	}
-	XG_COV(previous_mark_filename) = NULL;
+
+	if (XG_COV(previous_filename)) {
+		zend_string_release(XG_COV(previous_filename));
+		XG_COV(previous_filename) = NULL;
+	}
+	if (XG_COV(previous_mark_filename)) {
+		zend_string_release(XG_COV(previous_mark_filename));
+		XG_COV(previous_mark_filename) = NULL;
+	}
 }

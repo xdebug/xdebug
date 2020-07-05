@@ -7,7 +7,6 @@ check_reqs('PHP >= 7.4; opcache');
 ?>
 --INI--
 xdebug.mode=coverage
-xdebug.overload_var_dump=0
 xdebug.trace_options=0
 xdebug.collect_params=1
 xdebug.collect_return=0

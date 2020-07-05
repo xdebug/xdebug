@@ -40,6 +40,9 @@ typedef struct _xdebug_develop_globals_t {
 
 	/* scream */
 	zend_bool  in_at;
+
+	/* overloaded var_dump */
+	zif_handler   orig_var_dump_func;
 } xdebug_develop_globals_t;
 
 typedef struct _xdebug_develop_settings_t {
@@ -53,7 +56,6 @@ typedef struct _xdebug_develop_settings_t {
 	zend_long     force_error_reporting;
 	zend_long     halt_level;
 
-	zend_long     overload_var_dump;
 	zend_long     cli_color;
 
 	/* superglobals */
@@ -74,7 +76,6 @@ void xdebug_develop_rinit();
 void xdebug_develop_post_deactivate();
 
 void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
-int xdebug_get_overload_var_dump(void);
 void xdebug_monitor_handler(function_stack_entry *fse);
 
 #endif

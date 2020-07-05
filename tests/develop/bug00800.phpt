@@ -2,7 +2,6 @@
 Test for bug #800: var_dump(get_class(new foo\bar')) add an extra "\" in class name.
 --INI--
 xdebug.mode=develop
-xdebug.overload_var_dump=1
 --FILE--
 <?php
 
@@ -12,5 +11,6 @@ class bar {}
 
 var_dump(get_class(new bar));
 ?>
---EXPECT--
+--EXPECTF--
+%sbug00800.php:7:
 string(7) "foo\bar"

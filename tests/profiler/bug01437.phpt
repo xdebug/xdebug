@@ -5,7 +5,6 @@ XDEBUG_CONFIG=
 --INI--
 xdebug.mode=profile,develop
 xdebug.start_with_request=default
-xdebug.overload_var_dump=2
 xdebug.filename_format=
 xdebug.profiler_output_name=XDEBUG-PROFILE.%p
 --FILE--

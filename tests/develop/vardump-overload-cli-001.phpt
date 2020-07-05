@@ -2,7 +2,6 @@
 Test for overloaded var_dump() on the CLI
 --INI--
 xdebug.mode=develop
-xdebug.overload_var_dump=1
 html_errors=0
 xdebug.cli_color=0
 xdebug.var_display_max_data=32
@@ -26,7 +25,8 @@ var_dump($array);
 ini_set('xdebug.cli_color', 2);
 var_dump($array);
 ?>
---EXPECT--
+--EXPECTF--
+%svardump-overload-cli-001.php:13:
 array(3) {
   [0] =>
   string(61) "Hello, this is a very long strin"...
@@ -59,6 +59,7 @@ array(3) {
     (more elements)...
   }
 }
+[1m%svardump-overload-cli-001.php[22m:[1m16[22m:
 [1marray[22m([32m3[0m) {
   [0] [0m=>[0m
   [1mstring[22m([32m61[0m) "[31mHello, this is a very long strin[0m"...

@@ -8,7 +8,6 @@ check_reqs('64bit');
 --INI--
 xdebug.mode=develop
 html_errors=0
-xdebug.overload_var_dump=2
 xdebug.filename_format=
 --FILE--
 <?php

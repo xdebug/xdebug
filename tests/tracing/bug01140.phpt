@@ -10,7 +10,6 @@ xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
-xdebug.overload_var_dump=1
 --FILE--
 <?php
 class Foo
@@ -33,6 +32,7 @@ unlink( $tf );
 ?>
 == I didn't crash ==
 --EXPECTF--
+%sbug01140.php:14:
 class Foo#1 (0) {
 }
 TRACE START [%d-%d-%d %d:%d:%d]
