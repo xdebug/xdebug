@@ -1,0 +1,72 @@
+xdebug.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/xdebug.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/xdebug.c -o xdebug.lo 
+src/base/base.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/base.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/base.c -o src/base/base.lo 
+src/base/filter.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/filter.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/filter.c -o src/base/filter.lo 
+src/base/monitor.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/monitor.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/monitor.c -o src/base/monitor.lo 
+src/base/stack.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/stack.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/stack.c -o src/base/stack.lo 
+src/base/superglobals.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/superglobals.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/base/superglobals.c -o src/base/superglobals.lo 
+src/lib/usefulstuff.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/usefulstuff.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/usefulstuff.c -o src/lib/usefulstuff.lo 
+src/lib/compat.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/compat.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/compat.c -o src/lib/compat.lo 
+src/lib/crc32.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/crc32.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/crc32.c -o src/lib/crc32.lo 
+src/lib/hash.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/hash.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/hash.c -o src/lib/hash.lo 
+src/lib/lib.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/lib.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/lib.c -o src/lib/lib.lo 
+src/lib/llist.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/llist.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/llist.c -o src/lib/llist.lo 
+src/lib/set.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/set.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/set.c -o src/lib/set.lo 
+src/lib/str.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/str.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/str.c -o src/lib/str.lo 
+src/lib/var.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var.c -o src/lib/var.lo 
+src/lib/var_export_html.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_html.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_html.c -o src/lib/var_export_html.lo 
+src/lib/var_export_line.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_line.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_line.c -o src/lib/var_export_line.lo 
+src/lib/var_export_serialized.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_serialized.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_serialized.c -o src/lib/var_export_serialized.lo 
+src/lib/var_export_text.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_text.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_text.c -o src/lib/var_export_text.lo 
+src/lib/var_export_xml.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_xml.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/var_export_xml.c -o src/lib/var_export_xml.lo 
+src/lib/xml.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/xml.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/lib/xml.c -o src/lib/xml.lo 
+src/coverage/branch_info.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/coverage/branch_info.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/coverage/branch_info.c -o src/coverage/branch_info.lo 
+src/coverage/code_coverage.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/coverage/code_coverage.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/coverage/code_coverage.c -o src/coverage/code_coverage.lo 
+src/debugger/com.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/com.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/com.c -o src/debugger/com.lo 
+src/debugger/debugger.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/debugger.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/debugger.c -o src/debugger/debugger.lo 
+src/debugger/handler_dbgp.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/handler_dbgp.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/handler_dbgp.c -o src/debugger/handler_dbgp.lo 
+src/debugger/handlers.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/handlers.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/debugger/handlers.c -o src/debugger/handlers.lo 
+src/gcstats/gc_stats.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/gcstats/gc_stats.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/gcstats/gc_stats.c -o src/gcstats/gc_stats.lo 
+src/profiler/profiler.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/profiler/profiler.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/profiler/profiler.c -o src/profiler/profiler.lo 
+src/tracing/trace_computerized.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/trace_computerized.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/trace_computerized.c -o src/tracing/trace_computerized.lo 
+src/tracing/trace_html.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/trace_html.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/trace_html.c -o src/tracing/trace_html.lo 
+src/tracing/trace_textual.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/trace_textual.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/trace_textual.c -o src/tracing/trace_textual.lo 
+src/tracing/tracing.lo: /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/tracing.c
+	$(LIBTOOL) --mode=compile $(CC)   -I. -I/Users/didi/PhpstormProjects/c/php-src/ext/xdebug $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)  -c /Users/didi/PhpstormProjects/c/php-src/ext/xdebug/src/tracing/tracing.c -o src/tracing/tracing.lo 
+$(phplibdir)/xdebug.la: ./xdebug.la
+	$(LIBTOOL) --mode=install cp ./xdebug.la $(phplibdir)
+
+./xdebug.la: $(shared_objects_xdebug) $(XDEBUG_SHARED_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o $@ -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $(shared_objects_xdebug) $(XDEBUG_SHARED_LIBADD)
+

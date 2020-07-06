@@ -20,7 +20,7 @@
 #define __XDEBUG_BASE_H__
 
 /* error callback replacement functions */
-#if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID > 70200
 # define XDEBUG_ERROR_LINENO_TYPE uint32_t
 #else
 # define XDEBUG_ERROR_LINENO_TYPE uint

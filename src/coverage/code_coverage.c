@@ -290,7 +290,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[0] = XDEBUG_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
-#if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID > 70200
 	} else if (
 		opcode.opcode == ZEND_SWITCH_LONG ||
 		opcode.opcode == ZEND_SWITCH_STRING
@@ -943,7 +943,7 @@ void xdebug_coverage_init_oparray(zend_op_array *op_array)
 	}
 }
 
-#if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID > 70200
 static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
 	const zend_op *cur_opcode = execute_data->opline;
@@ -1045,7 +1045,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS);
 		XDEBUG_SET_OPCODE_OVERRIDE_COMMON(ZEND_DECLARE_CLASS_DELAYED);
 #endif
-#if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID > 70200
 		xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
 		xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
 #endif

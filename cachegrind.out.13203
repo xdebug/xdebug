@@ -1,0 +1,366 @@
+version: 1
+creator: xdebug 2.9.6 (PHP 7.2.0-dev)
+cmd: /Users/didi/PhpstormProjects/php/fastdev/_intellij_phpdebug_validator.php
+part: 1
+positions: line
+
+events: Time Memory
+
+fl=(1) php:internal
+fn=(1) php::error_reporting
+3 3 64
+
+fl=(1)
+fn=(2) php::define
+5 3 64
+
+fl=(1)
+fn=(2)
+6 1 64
+
+fl=(1)
+fn=(2)
+7 0 64
+
+fl=(1)
+fn=(2)
+8 1 64
+
+fl=(2) /Users/didi/PhpstormProjects/php/fastdev/_intellij_phpdebug_validator.php
+fn=(3) hhvmVersion
+77 2 0
+
+fl=(2)
+fn=(4) createXmlHeader
+10 0 0
+
+fl=(1)
+fn=(5) php::php_ini_loaded_file
+87 0 80
+
+fl=(1)
+fn=(6) php::htmlspecialchars
+94 4 192
+
+fl=(2)
+fn=(7) createXmlElement
+15 13 112
+
+fl=(1)
+fn=(8) php::php_ini_scanned_files
+97 0 0
+
+fl=(1)
+fn=(9) php::explode
+104 2 416
+
+fl=(1)
+fn=(10) php::count
+105 1 0
+
+fl=(1)
+fn=(11) php::trim
+107 0 0
+
+fl=(1)
+fn=(6)
+114 1 192
+
+fl=(2)
+fn=(7)
+15 9 96
+
+fl=(1)
+fn=(12) php::extension_loaded
+120 2 0
+
+fl=(1)
+fn=(13) php::error_get_last
+60 0 0
+
+fl=(2)
+fn=(14) isLoadByZendExtension
+59 17 0
+cfl=(1)
+cfn=(13)
+calls=1 0 0
+60 0 0
+
+fl=(1)
+fn=(15) php::phpversion
+47 3 64
+
+fl=(1)
+fn=(6)
+47 1 192
+
+fl=(1)
+fn=(16) php::ini_get
+48 4 64
+
+fl=(1)
+fn=(6)
+48 1 192
+
+fl=(1)
+fn=(16)
+49 2 80
+
+fl=(1)
+fn=(6)
+49 0 192
+
+fl=(1)
+fn=(16)
+50 1 64
+
+fl=(1)
+fn=(6)
+50 0 192
+
+fl=(1)
+fn=(16)
+51 1 64
+
+fl=(1)
+fn=(6)
+51 2 192
+
+fl=(1)
+fn=(16)
+52 0 0
+
+fl=(1)
+fn=(6)
+52 0 192
+
+fl=(1)
+fn=(16)
+53 0 64
+
+fl=(1)
+fn=(6)
+53 0 192
+
+fl=(1)
+fn=(16)
+54 2 64
+
+fl=(1)
+fn=(6)
+54 1 192
+
+fl=(1)
+fn=(16)
+55 5 64
+
+fl=(1)
+fn=(6)
+55 1 192
+
+fl=(2)
+fn=(17) validateXdebug
+43 319 592
+cfl=(2)
+cfn=(14)
+calls=1 0 0
+46 17 0
+cfl=(1)
+cfn=(15)
+calls=1 0 0
+47 3 64
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+47 1 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+48 4 64
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+48 1 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+49 2 80
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+49 0 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+50 1 64
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+50 0 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+51 1 64
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+51 2 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+52 0 0
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+52 0 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+53 0 64
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+53 0 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+54 2 64
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+54 1 192
+cfl=(1)
+cfn=(16)
+calls=1 0 0
+55 5 64
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+55 1 192
+
+fl=(2)
+fn=(7)
+15 35 224
+
+fl=(1)
+fn=(12)
+126 2 0
+
+fl=(1)
+fn=(6)
+137 2 192
+
+fl=(1)
+fn=(6)
+140 6 192
+
+fl=(2)
+fn=(7)
+15 10 128
+
+fl=(2)
+fn=(7)
+15 10 384
+
+fl=(2)
+fn=(18) {main}
+1 22431 1456
+cfl=(1)
+cfn=(1)
+calls=1 0 0
+3 3 64
+cfl=(1)
+cfn=(2)
+calls=1 0 0
+5 3 64
+cfl=(1)
+cfn=(2)
+calls=1 0 0
+6 1 64
+cfl=(1)
+cfn=(2)
+calls=1 0 0
+7 0 64
+cfl=(1)
+cfn=(2)
+calls=1 0 0
+8 1 64
+cfl=(2)
+cfn=(3)
+calls=1 0 0
+83 2 0
+cfl=(2)
+cfn=(4)
+calls=1 0 0
+85 0 0
+cfl=(1)
+cfn=(5)
+calls=1 0 0
+87 0 80
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+94 4 192
+cfl=(2)
+cfn=(7)
+calls=1 0 0
+94 13 112
+cfl=(1)
+cfn=(8)
+calls=1 0 0
+97 0 0
+cfl=(1)
+cfn=(9)
+calls=1 0 0
+104 2 416
+cfl=(1)
+cfn=(10)
+calls=1 0 0
+105 1 0
+cfl=(1)
+cfn=(11)
+calls=1 0 0
+107 0 0
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+114 1 192
+cfl=(2)
+cfn=(7)
+calls=1 0 0
+114 9 96
+cfl=(1)
+cfn=(12)
+calls=1 0 0
+120 2 0
+cfl=(2)
+cfn=(17)
+calls=1 0 0
+122 370 2848
+cfl=(2)
+cfn=(7)
+calls=1 0 0
+123 35 224
+cfl=(1)
+cfn=(12)
+calls=1 0 0
+126 2 0
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+137 2 192
+cfl=(1)
+cfn=(6)
+calls=1 0 0
+140 6 192
+cfl=(2)
+cfn=(7)
+calls=1 0 0
+142 10 128
+cfl=(2)
+cfn=(7)
+calls=1 0 0
+145 10 384
+
+summary: 38049 500328
+

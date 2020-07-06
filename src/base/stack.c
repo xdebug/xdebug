@@ -783,7 +783,7 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 		return;
 	}
 
-#if PHP_VERSION_ID >= 70200
+#if PHP_VERSION_ID > 70200
 	if (PG(track_errors) && EG(active)) {
 #else
 	if (PG(track_errors) && EG(valid_symbol_table)) {
