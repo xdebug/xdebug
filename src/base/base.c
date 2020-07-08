@@ -153,13 +153,6 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
 	}
 
-	/* Check parameters */
-	for (i = 0; i < fse->varc; i++) {
-		if (fse->var[i].name) {
-			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(fse->var[i].name, fse->var[i].length));
-		}
-	}
-
 	/* gather used variables from compiled vars information */
 	while (i < (unsigned int) op_array->last_var) {
 		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(op_array->vars[i]), STR_NAME_LEN(op_array->vars[i])));
@@ -457,7 +450,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = find_line_number_for_current_execute_point(edata);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
-		if (XINI_LIB(collect_params) || XINI_DEV(collect_vars) || xdebug_is_debug_connection_active()) {
+		if (
+			(xdebug_lib_mode_is(XDEBUG_MODE_TRACING) || xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP))
+			&&
+			XINI_LIB(collect_params)
+		) {
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
 			/* This calculates how many arguments where sent to a function. It
