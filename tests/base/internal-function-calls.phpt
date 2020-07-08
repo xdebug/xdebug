@@ -1,8 +1,7 @@
 --TEST--
 Test for lots of calls to internal functions
 --INI--
-xdebug.enable=1
-xdebug.collect_params=1
+xdebug.mode=develop
 xdebug.auto_profile=0
 --FILE--
 <?php

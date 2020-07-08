@@ -6,7 +6,6 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--
-xdebug.collect_params=4
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 --FILE--

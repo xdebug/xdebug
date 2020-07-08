@@ -1,7 +1,7 @@
 --TEST--
 Test for xdebug_peak_memory_usage
 --INI--
-xdebug.enable=1
+xdebug.mode=develop
 xdebug.collect_params=3
 xdebug.auto_profile=0
 --FILE--
@@ -31,10 +31,15 @@ xdebug.auto_profile=0
 	echo ($d > $e) ? "Current is HIGHER than peak\n" : "Current is lower than peak\n";
 ?>
 --EXPECTF--
+%speak_memory_usage.php:22:
 int(%d)
+%speak_memory_usage.php:22:
 int(%d)
+%speak_memory_usage.php:22:
 int(%d)
+%speak_memory_usage.php:22:
 int(%d)
+%speak_memory_usage.php:22:
 int(%d)
 Current is lower than peak
 Current is lower than peak

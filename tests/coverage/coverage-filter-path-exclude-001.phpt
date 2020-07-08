@@ -3,7 +3,6 @@ Filtered code coverage: path exclude [1]
 --INI--
 xdebug.mode=coverage
 xdebug.collect_return=1
-xdebug.collect_params=4
 xdebug.collect_assignments=0
 xdebug.trace_format=0
 --FILE--
