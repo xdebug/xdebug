@@ -3,7 +3,6 @@ Test for bug #1502: SEND_REF lines are not marked as covered
 --INI--
 xdebug.mode=coverage
 xdebug.trace_options=0
-xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.auto_profile=0

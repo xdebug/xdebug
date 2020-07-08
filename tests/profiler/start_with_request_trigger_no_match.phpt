@@ -4,7 +4,6 @@ Starting Profiler: trigger, no match
 xdebug.mode=profile
 xdebug.start_with_request=trigger
 xdebug.trigger_value=something
-xdebug.collect_params=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--

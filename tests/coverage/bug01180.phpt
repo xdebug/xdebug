@@ -3,7 +3,6 @@ Test for bug #1180: Code coverage crashes with non-standard start/stops
 --INI--
 xdebug.mode=coverage
 xdebug.trace_options=0
-xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.auto_profile=0

@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('ext protobuf');
 ?>
 --INI--
-xdebug.default_enable=1
+xdebug.mode=develop
 --FILE--
 <?php
 ini_set('html_errors', 0);
