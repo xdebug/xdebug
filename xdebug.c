@@ -287,22 +287,22 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 	xdebug_init_library_globals(&xg->globals.library);
 	xdebug_init_base_globals(&xg->base);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_init_coverage_globals(&xg->globals.coverage);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_init_debugger_globals(&xg->globals.debugger);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_init_develop_globals(&xg->globals.develop);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_init_profiler_globals(&xg->globals.profiler);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_init_tracing_globals(&xg->globals.tracing);
 	}
 }
@@ -413,29 +413,29 @@ PHP_MINIT_FUNCTION(xdebug)
 	xdebug_library_minit();
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_minit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_minit(INIT_FUNC_ARGS_PASSTHRU);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_minit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_minit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_minit(INIT_FUNC_ARGS_PASSTHRU);
 	}
 
 	/* Overload the "include_or_eval" opcode if the mode is 'debug' or 'trace' */
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) || xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) || XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_register_with_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL, xdebug_include_or_eval_handler);
 	}
 
 	/* Coverage must be last, as it has a catch all override for opcodes */
-	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_coverage_minit(INIT_FUNC_ARGS_PASSTHRU);
 	}
 
@@ -450,10 +450,10 @@ PHP_MINIT_FUNCTION(xdebug)
 
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
-	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_mshutdown();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_mshutdown();
 	}
 
@@ -496,22 +496,22 @@ PHP_RINIT_FUNCTION(xdebug)
 
 	xdebug_library_rinit();
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_coverage_rinit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_rinit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_rinit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_rinit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_rinit();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_rinit();
 	}
 
@@ -531,22 +531,22 @@ PHP_RINIT_FUNCTION(xdebug)
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
-	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_coverage_post_deactivate();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_post_deactivate();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_post_deactivate();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_post_deactivate();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_post_deactivate();
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_post_deactivate();
 	}
 
@@ -594,12 +594,12 @@ PHP_MINFO_FUNCTION(xdebug)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Feature", "Enabled/Disabled");
-	php_info_print_table_row(2, "Development Aids", xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Coverage", xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "GC Stats", xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Profiler", xdebug_lib_mode_is(XDEBUG_MODE_PROFILING) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Step Debugger", xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Tracing", xdebug_lib_mode_is(XDEBUG_MODE_TRACING) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Development Aids", XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Coverage", XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "GC Stats", XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Profiler", XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Step Debugger", XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) ? "✔ enabled" : "✘ disabled");
+	php_info_print_table_row(2, "Tracing", XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) ? "✔ enabled" : "✘ disabled");
 	php_info_print_table_end();
 
 	if (zend_xdebug_initialised == 0) {
@@ -608,7 +608,7 @@ PHP_MINFO_FUNCTION(xdebug)
 		php_info_print_table_end();
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_minfo();
 	}
 

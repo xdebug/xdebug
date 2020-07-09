@@ -1018,7 +1018,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	zval                 *frame;
 	zval                 *params;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
 		array_init(return_value);
 		return;

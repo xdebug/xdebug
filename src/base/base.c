@@ -451,7 +451,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
 		if (
-			(xdebug_lib_mode_is(XDEBUG_MODE_TRACING) || xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP))
+			(XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP))
 			&&
 			XINI_LIB(collect_params)
 		) {
@@ -581,20 +581,20 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (XG_BASE(in_execution) && XG_BASE(level) == 0) {
-		if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 			xdebug_debugger_set_program_name(op_array->filename);
 			xdebug_debug_init_if_requested_at_startup();
 		}
 
-		if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 			xdebug_gcstats_init_if_requested(op_array);
 		}
 
-		if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 			xdebug_profiler_init_if_requested(op_array);
 		}
 
-		if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 			xdebug_tracing_init_if_requested(op_array);
 		}
 	}
@@ -614,10 +614,10 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 
 	function_nr = XG_BASE(function_count);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_execute_ex(function_nr, fse);
 	}
 
@@ -647,11 +647,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		}
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_filename, &code_coverage_function_name);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* If we're in an eval, we need to create an ID for it. */
 		if (fse->function.type == XFUNC_EVAL) {
 			xdebug_debugger_register_eval(fse);
@@ -661,13 +661,13 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex(fse, op_array);
 	}
 
 	xdebug_old_execute_ex(execute_data);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex_end(fse);
 	}
 
@@ -675,11 +675,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_filename, code_coverage_function_name);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for return breakpoints */
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
 	}
@@ -743,14 +743,14 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	function_nr = XG_BASE(function_count);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for entry breakpoints */
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
 	}
@@ -762,7 +762,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		xdebug_base_use_original_error_cb();
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_internal(fse);
 	}
 
@@ -772,7 +772,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		execute_internal(current_execute_data, return_value);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_internal_end(fse);
 	}
 
@@ -784,11 +784,11 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	/* We only call the function_exit handler and return value handler if the
 	 * function call was also traced. Otherwise we end up with return trace
 	 * lines without a corresponding function call line. */
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING) && function_call_traced) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && function_call_traced) {
 		xdebug_tracing_execute_internal_end(function_nr, fse, return_value);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for return breakpoints */
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
 	}
@@ -915,7 +915,7 @@ void xdebug_base_rinit()
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (
-		(xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP) || xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG))
+		(XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) || XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG))
 		&&
 		(zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL)
 	) {
@@ -1000,7 +1000,7 @@ static void xdebug_throw_exception_hook(zval *exception)
 	char *code_str = NULL;
 	zval dummy;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP) && !xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && !XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		return;
 	}
 	if (!exception) {
@@ -1026,10 +1026,10 @@ static void xdebug_throw_exception_hook(zval *exception)
 	convert_to_string_ex(file);
 	convert_to_long_ex(line);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_throw_exception_hook(exception, file, line, code, code_str, message);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_throw_exception_hook(exception, file, line, code, code_str, message);
 	}
 

@@ -630,7 +630,7 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 {
 	zend_long options = 0;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		php_error(E_WARNING, "Code coverage needs to be enabled in php.ini by setting 'xdebug.mode' to 'coverage'");
 		RETURN_FALSE;
 	}
@@ -651,7 +651,7 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 {
 	zend_long cleanup = 1;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		RETURN_FALSE;
 	}
 
