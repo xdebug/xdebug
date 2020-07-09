@@ -3,6 +3,7 @@ Test for collection errors (2) (fatal error)
 --INI--
 error_log=NULL
 xdebug.mode=develop
+xdebug.collect_params=0
 --FILE--
 <?php
 xdebug_start_error_collection();

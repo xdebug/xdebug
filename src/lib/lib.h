@@ -30,10 +30,9 @@
 #define MICRO_IN_SEC 1000000.00
 
 typedef struct xdebug_var_name {
-	char    *name;
-	size_t   length;
-	zval     data;
-	int      is_variadic;
+	zend_string *name;
+	zval         data;
+	int          is_variadic;
 } xdebug_var_name;
 
 #define XFUNC_UNKNOWN        0x00

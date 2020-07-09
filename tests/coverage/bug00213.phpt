@@ -8,7 +8,6 @@ check_reqs('!opcache');
 --INI--
 xdebug.mode=coverage
 xdebug.trace_options=0
-xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.auto_profile=0
 xdebug.dump_globals=0

@@ -140,7 +140,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 					variadic_opened = 1;
 				}
 
-				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", i->var[j].name) : xdstrdup("");
+				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", ZSTR_VAL(i->var[j].name)) : xdstrdup("");
 				xdebug_str_add(&log_buffer, tmp_varname, 0);
 				xdfree(tmp_varname);
 
@@ -463,9 +463,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 
 				if (i->var[j].name && XINI_LIB(collect_params) == 4) {
 					if (html) {
-						xdebug_str_add(str, xdebug_sprintf("<span>$%s = </span>", i->var[j].name), 1);
+						xdebug_str_add(str, xdebug_sprintf("<span>$%s = </span>", ZSTR_VAL(i->var[j].name)), 1);
 					} else {
-						xdebug_str_add(str, xdebug_sprintf("$%s = ", i->var[j].name), 1);
+						xdebug_str_add(str, xdebug_sprintf("$%s = ", ZSTR_VAL(i->var[j].name)), 1);
 					}
 				}
 
@@ -1067,7 +1067,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				array_init(vparams);
 
 				if (i->var[j].name) {
-					add_assoc_zval(params, i->var[j].name, vparams);
+					add_assoc_zval_ex(params, ZSTR_VAL(i->var[j].name), ZSTR_LEN(i->var[j].name), vparams);
 				} else {
 					add_index_zval(params, j, vparams);
 				}
@@ -1082,7 +1082,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				argument = xdebug_str_create_from_char((char*) "???");
 			}
 			if (i->var[j].name && !variadic_opened && argument) {
-				add_assoc_stringl_ex(params, i->var[j].name, i->var[j].length, argument->d, argument->l);
+				add_assoc_stringl_ex(params, ZSTR_VAL(i->var[j].name), ZSTR_LEN(i->var[j].name), argument->d, argument->l);
 			} else {
 				add_index_stringl(params, j - 1, argument->d, argument->l);
 			}

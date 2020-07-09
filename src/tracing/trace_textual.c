@@ -158,7 +158,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 			}
 
 			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
-				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
+				xdebug_str_add(&str, xdebug_sprintf("$%s = ", ZSTR_VAL(fse->var[j].name)), 1);
 			}
 
 			if (fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data)) {

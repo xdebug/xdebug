@@ -175,7 +175,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 			}
 
 			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
-				xdebug_str_add(&str, xdebug_sprintf("$%s = ", fse->var[j].name), 1);
+				xdebug_str_add(&str, xdebug_sprintf("$%s = ", ZSTR_VAL(fse->var[j].name)), 1);
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {

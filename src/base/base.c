@@ -120,7 +120,7 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 		if (e->var) {
 			for (i = 0; i < e->varc; i++) {
 				if (e->var[i].name) {
-					xdfree(e->var[i].name);
+					zend_string_release(e->var[i].name);
 				}
 				zval_ptr_dtor(&(e->var[i].data));
 			}
@@ -151,13 +151,6 @@ static void add_used_variables(function_stack_entry *fse, zend_op_array *op_arra
 
 	if (!fse->declared_vars) {
 		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
-	}
-
-	/* Check parameters */
-	for (i = 0; i < fse->varc; i++) {
-		if (fse->var[i].name) {
-			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(fse->var[i].name, fse->var[i].length));
-		}
 	}
 
 	/* gather used variables from compiled vars information */
@@ -457,7 +450,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = find_line_number_for_current_execute_point(edata);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
-		if (XINI_LIB(collect_params) || XINI_DEV(collect_vars) || xdebug_is_debug_connection_active()) {
+		if (
+			(xdebug_lib_mode_is(XDEBUG_MODE_TRACING) || xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP))
+			&&
+			XINI_LIB(collect_params)
+		) {
 			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
 
 			/* This calculates how many arguments where sent to a function. It
@@ -486,7 +483,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			for (i = 0; i < arguments_sent; i++) {
 				tmp->var[tmp->varc].name = NULL;
 				ZVAL_UNDEF(&tmp->var[tmp->varc].data);
-				tmp->var[tmp->varc].length = 0;
 				tmp->var[tmp->varc].is_variadic = 0;
 
 				/* Because it is possible that more parameters are sent, then
@@ -494,8 +490,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 				 * is an associated variable to receive the variable here. */
 				if (tmp->user_defined == XDEBUG_USER_DEFINED && i < arguments_wanted) {
 					if (op_array->arg_info[i].name) {
-						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
-						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
+						tmp->var[tmp->varc].name = zend_string_copy(op_array->arg_info[i].name);
 					}
 					if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i])) {
 						tmp->var[tmp->varc].is_variadic = 1;
@@ -523,8 +518,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			if (tmp->user_defined == XDEBUG_USER_DEFINED && arguments_sent < arguments_wanted) {
 				for (i = arguments_sent; i < arguments_wanted; i++) {
 					if (op_array->arg_info[i].name) {
-						tmp->var[tmp->varc].name = xdstrdup(STR_NAME_VAL(op_array->arg_info[i].name));
-						tmp->var[tmp->varc].length = STR_NAME_LEN(op_array->arg_info[i].name);
+						tmp->var[tmp->varc].name = zend_string_copy(op_array->arg_info[i].name);
 					}
 					ZVAL_UNDEF(&tmp->var[tmp->varc].data);
 					tmp->var[tmp->varc].is_variadic = 0;
