@@ -274,8 +274,8 @@ PHP_FUNCTION(xdebug_call_class)
 	}
 	i = xdebug_get_stack_frame(depth);
 	if (i) {
-		if (i->function.class) {
-			RETURN_STRING(i->function.class);
+		if (i->function.class_name) {
+			RETURN_STR(i->function.class_name);
 		} else {
 			RETURN_FALSE;
 		}

@@ -1044,9 +1044,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		if (i->function.function) {
 			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), i->function.function);
 		}
-		if (i->function.class) {
+		if (i->function.class_name) {
 			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
-			add_assoc_string_ex(frame, "class",    HASH_KEY_SIZEOF("class"),    i->function.class   );
+			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    i->function.class_name);
 		}
 		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename);
 		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), i->lineno);

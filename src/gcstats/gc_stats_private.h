@@ -28,7 +28,7 @@ typedef struct _xdebug_gc_run {
 	zend_long    memory_before;
 	zend_long    memory_after;
 	char        *function_name;
-	char        *class_name;
+	zend_string *class_name;
 } xdebug_gc_run;
 
 #define XINI_GCSTATS(v)  (XG(settings.gc_stats.v))

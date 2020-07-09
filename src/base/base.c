@@ -92,8 +92,8 @@ void xdebug_func_dtor_by_ref(xdebug_func *elem)
 	if (elem->function) {
 		xdfree(elem->function);
 	}
-	if (elem->class) {
-		xdfree(elem->class);
+	if (elem->class_name) {
+		zend_string_release(elem->class_name);
 	}
 }
 
@@ -243,19 +243,21 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
 			tmp->type = XFUNC_MEMBER;
 			if (edata->func->common.scope && strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
-				tmp->class = xdebug_sprintf(
+				char *tmp_class_name = xdebug_sprintf(
 					"{anonymous-class:%s:%d-%d}",
 					edata->func->common.scope->info.user.filename->val,
 					edata->func->common.scope->info.user.line_start,
 					edata->func->common.scope->info.user.line_end
 				);
+				tmp->class_name = zend_string_init(tmp_class_name, strlen(tmp_class_name), 0);
+				xdfree(tmp_class_name);
 			} else {
-				tmp->class = xdstrdup(edata->This.value.obj->ce->name->val);
+				tmp->class_name = zend_string_copy(edata->This.value.obj->ce->name);
 			}
 		} else {
 			if (edata->func->common.scope) {
 				tmp->type = XFUNC_STATIC_MEMBER;
-				tmp->class = xdstrdup(edata->func->common.scope->name->val);
+				tmp->class_name = zend_string_copy(edata->func->common.scope->name);
 			}
 		}
 		if (edata->func->common.function_name) {
@@ -428,9 +430,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	xdebug_build_fname(&(tmp->function), zdata);
 	if (!tmp->function.type) {
-		tmp->function.function = xdstrdup("{main}");
-		tmp->function.class    = NULL;
-		tmp->function.type     = XFUNC_MAIN;
+		tmp->function.function   = xdstrdup("{main}");
+		tmp->function.class_name = NULL;
+		tmp->function.type       = XFUNC_MAIN;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
 		tmp->lineno = 0;
@@ -696,7 +698,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
 {
 	if (
-		fse->function.class &&
+		fse->function.class_name &&
 		Z_OBJ(EX(This)) &&
 		Z_TYPE(EX(This)) == IS_OBJECT &&
 		(zend_hash_str_find_ptr(&module_registry, "soap", sizeof("soap") - 1) != NULL)

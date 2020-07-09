@@ -1888,7 +1888,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = xdebug_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_DEFAULT);
+			zend_class_entry *ce = zend_fetch_class(fse->function.class_name, ZEND_FETCH_CLASS_DEFAULT);
 
 #if PHP_VERSION_ID >= 70400
 			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {

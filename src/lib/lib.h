@@ -130,7 +130,7 @@ extern const char* xdebug_log_prefix[11];
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
 typedef struct _xdebug_func {
-	char *class;
+	zend_string *class_name;
 	char *function;
 	int   type;
 	int   internal;

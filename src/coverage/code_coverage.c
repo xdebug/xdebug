@@ -93,7 +93,7 @@ static char* xdebug_func_format(xdebug_func *func)
 		case XFUNC_NORMAL:
 			return xdstrdup(func->function);
 		case XFUNC_MEMBER:
-			return xdebug_sprintf("%s->%s", func->class, func->function);
+			return xdebug_sprintf("%s->%s", ZSTR_VAL(func->class_name), func->function);
 		default:
 			return xdstrdup("???");
 	}
@@ -119,7 +119,7 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 
 	if (opa->scope && !closure) {
 		tmp->type = XFUNC_MEMBER;
-		tmp->class = xdstrdup(STR_NAME_VAL(opa->scope->name));
+		tmp->class_name = zend_string_copy(opa->scope->name);
 	} else {
 		tmp->type = XFUNC_NORMAL;
 	}
@@ -134,8 +134,8 @@ static void xdebug_print_opcode_info(zend_execute_data *execute_data, const zend
 
 	xdebug_build_fname_from_oparray(&func_info, op_array);
 	function_name = xdebug_func_format(&func_info);
-	if (func_info.class) {
-		xdfree(func_info.class);
+	if (func_info.class_name) {
+		zend_string_release(func_info.class_name);
 	}
 	if (func_info.function) {
 		xdfree(func_info.function);
@@ -517,8 +517,8 @@ static void prefill_from_oparray(zend_string *filename, zend_op_array *op_array)
 		xdebug_build_fname_from_oparray(&func_info, op_array);
 		function_name = xdebug_func_format(&func_info);
 
-		if (func_info.class) {
-			xdfree(func_info.class);
+		if (func_info.class_name) {
+			zend_string_release(func_info.class_name);
 		}
 		if (func_info.function) {
 			xdfree(func_info.function);
@@ -925,8 +925,8 @@ int xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_arra
 		*tmp_function_name = xdebug_func_format(&func_info);
 		xdebug_code_coverage_start_of_function(op_array, *tmp_function_name);
 
-		if (func_info.class) {
-			xdfree(func_info.class);
+		if (func_info.class_name) {
+			zend_string_release(func_info.class_name);
 		}
 		if (func_info.function) {
 			xdfree(func_info.function);

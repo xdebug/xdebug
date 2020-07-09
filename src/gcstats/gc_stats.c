@@ -87,7 +87,7 @@ static int xdebug_gc_collect_cycles(void)
 	xdebug_build_fname(&tmp, execute_data);
 
 	run->function_name = tmp.function ? xdstrdup(tmp.function) : NULL;
-	run->class_name = tmp.class ? xdstrdup(tmp.class) : NULL;
+	run->class_name = tmp.class_name ? zend_string_copy(tmp.class_name) : NULL;
 
 	xdebug_gc_stats_print_run(run);
 
@@ -104,7 +104,7 @@ static void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 			xdfree(run->function_name);
 		}
 		if (run->class_name) {
-			xdfree(run->class_name);
+			zend_string_release(run->class_name);
 		}
 		xdfree(run);
 	}
@@ -205,7 +205,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->memory_before,
 			run->memory_after,
 			reduction,
-			run->class_name,
+			ZSTR_VAL(run->class_name),
 			run->function_name
 		);
 	}
