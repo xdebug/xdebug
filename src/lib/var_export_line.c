@@ -33,18 +33,17 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index_key, zend
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
 			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " => ", index_key), 1);
 		} else { /* string key */
-			size_t newlen = 0;
-			char *tmp, *tmp2;
+			zend_string *tmp, *tmp2;
 
-			tmp = xdebug_str_to_str((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), "'", 1, "\\'", 2, &newlen);
-			tmp2 = xdebug_str_to_str(tmp, newlen - 1, "\0", 1, "\\0", 2, &newlen);
+			tmp = php_str_to_str(ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), "'", 1, "\\'", 2);
+			tmp2 = php_str_to_str(ZSTR_VAL(tmp), ZSTR_LEN(tmp), "\0", 1, "\\0", 2);
 			if (tmp) {
-				efree(tmp);
+				zend_string_release(tmp);
 			}
 			xdebug_str_addl(str, "'", 1, 0);
 			if (tmp2) {
-				xdebug_str_addl(str, tmp2, newlen, 0);
-				efree(tmp2);
+				xdebug_str_addl(str, ZSTR_VAL(tmp2), ZSTR_LEN(tmp2), 0);
+				zend_string_release(tmp2);
 			}
 			xdebug_str_add(str, "' => ", 0);
 		}
