@@ -1048,40 +1048,78 @@ void xdebug_add_variable_attributes(xdebug_str *str, zval *struc, zend_bool html
 /*****************************************************************************
 ** XML encoding function
 */
+static const char xml_encode_count[256] = {
+	4, 1, 1, 1,  1, 1, 1, 1,  1, 1, 5, 1,  1, 5, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 6, 1,  1, 1, 5, 5,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  4, 1, 4, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+};
 
-char* xdebug_xmlize(char *string, size_t len, size_t *newlen)
+static const char* xml_encode_map[64] = {
+	"&#0;", NULL, NULL,     NULL,  NULL, NULL, NULL,    NULL,     NULL, NULL, "&#10;", NULL,  NULL,   "&#13;", NULL,   NULL,
+	NULL,   NULL, NULL,     NULL,  NULL, NULL, NULL,    NULL,     NULL, NULL, NULL,    NULL,  NULL,   NULL,    NULL,   NULL,
+	NULL,   NULL, "&quot;", NULL,  NULL, NULL, "&amp;", "&#39;",  NULL, NULL, NULL,    NULL,  NULL,   NULL,    NULL,   NULL,
+	NULL,   NULL, NULL,     NULL,  NULL, NULL, NULL,    NULL,     NULL, NULL, NULL,    NULL,  "&lt;", NULL,    "&gt;", NULL,
+};
+
+char* xdebug_xmlize(char *s_string, size_t len, size_t *newlen)
 {
-	if (len) {
-		char *tmp;
-		char *tmp2;
+	int i, w_pos;
+	int encoded_string_length = 0;
+	char *new_string;
+	const unsigned char *string = (unsigned char*) s_string;
 
-		tmp = xdebug_str_to_str(string, len, "&", 1, "&amp;", 5, &len);
-
-		tmp2 = xdebug_str_to_str(tmp, len, ">", 1, "&gt;", 4, &len);
-		efree(tmp);
-
-		tmp = xdebug_str_to_str(tmp2, len, "<", 1, "&lt;", 4, &len);
-		efree(tmp2);
-
-		tmp2 = xdebug_str_to_str(tmp, len, "\"", 1, "&quot;", 6, &len);
-		efree(tmp);
-
-		tmp = xdebug_str_to_str(tmp2, len, "'", 1, "&#39;", 5, &len);
-		efree(tmp2);
-
-		tmp2 = xdebug_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
-		efree(tmp);
-
-		tmp = xdebug_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
-		efree(tmp2);
-
-		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, (size_t*) newlen);
-		efree(tmp);
-		return tmp2;
-	} else {
-		*newlen = len;
-		return estrdup(string);
+	/* Quick bailout for empty strings */
+	if (!len) {
+		*newlen = 0;
+		return estrdup("");
 	}
+
+	/* Calculate new memory requirement */
+	for (i = 0; i < len; i++) {
+		encoded_string_length += xml_encode_count[string[i]];
+	}
+
+	/* No characters need to be encoded, so just duplicate and return */
+	if (encoded_string_length == len) {
+		*newlen = len;
+		return estrdup(s_string);
+	}
+
+	new_string = emalloc(encoded_string_length + 1);
+	w_pos = 0;
+	for (i = 0; i < len; i++) {
+		int replacement_length = xml_encode_count[string[i]];
+
+		if (replacement_length != 1) {
+			int j;
+
+			for (j = 0; j < replacement_length; j++) {
+				new_string[w_pos] = xml_encode_map[string[i]][j];
+				w_pos++;
+			}
+			continue;
+		}
+
+		new_string[w_pos] = string[i];
+		w_pos++;
+	}
+
+	new_string[w_pos] = '\0';
+	*newlen = encoded_string_length; /* remove one for null byte */
+
+	return new_string;
 }
 
 /*****************************************************************************
