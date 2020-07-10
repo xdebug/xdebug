@@ -112,7 +112,6 @@ static int xdebug_object_element_export(zval *object, zval *zv_nptr, zend_ulong 
 void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options)
 {
 	HashTable *myht;
-	char*     tmp_str;
 #if PHP_VERSION_ID < 70400
 	int       is_temp;
 #endif
@@ -120,27 +119,35 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 	zend_string *key;
 	zval *val;
 	zval *tmpz;
+	int   z_type;
 
 	if (!struc || !(*struc)) {
 		return;
 	}
 
+	z_type = Z_TYPE_P(*struc);
+
 	if (debug_zval) {
 		xdebug_add_variable_attributes(str, *struc, XDEBUG_VAR_ATTR_TEXT);
 	}
-	if (Z_TYPE_P(*struc) == IS_INDIRECT) {
+	if (z_type == IS_INDIRECT) {
 		tmpz = Z_INDIRECT_P(*struc);
 		struc = &tmpz;
+		z_type = Z_TYPE_P(*struc);
 	}
-	if (Z_TYPE_P(*struc) == IS_REFERENCE) {
+	if (z_type == IS_REFERENCE) {
 		tmpz = &((*struc)->value.ref->val);
 		struc = &tmpz;
+		z_type = Z_TYPE_P(*struc);
 	}
 
-	switch (Z_TYPE_P(*struc)) {
+	switch (z_type) {
 		case IS_TRUE:
+			xdebug_str_addl(str, "TRUE", 4, 0);
+			break;
+
 		case IS_FALSE:
-			xdebug_str_add(str, xdebug_sprintf("%s", Z_TYPE_P(*struc) == IS_TRUE ? "TRUE" : "FALSE"), 1);
+			xdebug_str_addl(str, "FALSE", 5, 0);
 			break;
 
 		case IS_NULL:
@@ -156,29 +163,26 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			break;
 
 		case IS_STRING: {
-			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
 			zend_string *tmp_zstr;
 
 #if PHP_VERSION_ID >= 70300
-			tmp_zstr = php_addcslashes(i_string, (char*) "'\\\0..\37", 7);
+			tmp_zstr = php_addcslashes(Z_STR_P(*struc), (char*) "'\\\0..\37", 7);
 #else
-			tmp_zstr = php_addcslashes(i_string, 0, (char*) "'\\\0..\37", 7);
+			tmp_zstr = php_addcslashes(Z_STR_P(*struc), 0, (char*) "'\\\0..\37", 7);
 #endif
 
-			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
-			zend_string_release(tmp_zstr);
-			zend_string_release(i_string);
-
 			if (options->no_decoration) {
-				xdebug_str_add(str, tmp_str, 0);
+				xdebug_str_addl(str, ZSTR_VAL(tmp_zstr), ZSTR_LEN(tmp_zstr), 0);
 			} else if ((size_t) Z_STRLEN_P(*struc) <= (size_t) options->max_data) {
-				xdebug_str_add(str, xdebug_sprintf("'%s'", tmp_str), 1);
+				xdebug_str_addl(str, "'", 1, 0);
+				xdebug_str_addl(str, ZSTR_VAL(tmp_zstr), ZSTR_LEN(tmp_zstr), 0);
+				xdebug_str_addl(str, "'", 1, 0);
 			} else {
 				xdebug_str_addl(str, "'", 1, 0);
-				xdebug_str_addl(str, xdebug_sprintf("%s", tmp_str), options->max_data, 1);
+				xdebug_str_addl(str, ZSTR_VAL(tmp_zstr), options->max_data, 0);
 				xdebug_str_addl(str, "...'", 4, 0);
 			}
-			efree(tmp_str);
+			zend_string_release(tmp_zstr);
 		} break;
 
 		case IS_ARRAY:
@@ -220,8 +224,9 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 #endif
 
 			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
-				char *class_name = (char*) STR_NAME_VAL(Z_OBJCE_P(*struc)->name);
-				xdebug_str_add(str, xdebug_sprintf("class %s { ", class_name), 1);
+				xdebug_str_addl(str, "class ", 6 , 0);
+				xdebug_str_add(str, ZSTR_VAL(Z_OBJCE_P(*struc)->name), 0);
+				xdebug_str_addl(str, " { ", 3 , 0);
 
 				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;
@@ -231,7 +236,7 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 					xdebug_zend_hash_apply_protection_begin(myht);
 
 					ZEND_HASH_FOREACH_KEY_VAL(myht, num, key, val) {
-						xdebug_object_element_export(*struc, val, num, key, level, str, debug_zval, options, class_name);
+						xdebug_object_element_export(*struc, val, num, key, level, str, debug_zval, options, ZSTR_VAL(Z_OBJCE_P(*struc)->name));
 					} ZEND_HASH_FOREACH_END();
 
 					xdebug_zend_hash_apply_protection_end(myht);
