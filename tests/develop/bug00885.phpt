@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #885: missing validation point returned by strchr in xdebug_error_cb.
+Test for bug #885: missing validation point returned by strchr in xdebug_error_cb
 --INI--
 xdebug.mode=develop
 --FILE--

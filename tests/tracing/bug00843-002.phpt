@@ -26,8 +26,8 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d]
-    %d.%d     %d     -> setlocale(6, 'ro_RO.UTF-8', 'de_DE.UTF-8', 'de_DE', 'de', 'german', 'ge', 'de_DE.ISO-8859-1') %sbug00843-002.php:4
-    %d.%d     %d      >=> '%s'
-    %d.%d     %d     -> xdebug_stop_trace() %sbug00843-002.php:6
-    %d.%d     %d
+%w%f %w%d     -> setlocale(6, 'ro_RO.UTF-8', 'de_DE.UTF-8', 'de_DE', 'de', 'german', 'ge', 'de_DE.ISO-8859-1') %sbug00843-002.php:4
+%w%f %w%d      >=> '%s'
+%w%f %w%d     -> xdebug_stop_trace() %sbug00843-002.php:6
+%w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d]
