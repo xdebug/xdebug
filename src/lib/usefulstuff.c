@@ -480,23 +480,23 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 	while (*format)
 	{
 		if (*format != '%') {
-			xdebug_str_addl(&fname, (char *) format, 1, 0);
+			xdebug_str_addc(&fname, *format);
 		} else {
 			format++;
 			switch (*format)
 			{
 				case 'c': /* crc32 of the current working directory */
 					if (VCWD_GETCWD(cwd, 127)) {
-						xdebug_str_add(&fname, xdebug_sprintf("%lu", xdebug_crc32(cwd, strlen(cwd))), 1);
+						xdebug_str_add_fmt(&fname, "%lu", xdebug_crc32(cwd, strlen(cwd)));
 					}
 					break;
 
 				case 'p': /* pid */
-					xdebug_str_add(&fname, xdebug_sprintf(ZEND_ULONG_FMT, xdebug_get_pid()), 1);
+					xdebug_str_add_fmt(&fname, ZEND_ULONG_FMT, xdebug_get_pid());
 					break;
 
 				case 'r': /* random number */
-					xdebug_str_add(&fname, xdebug_sprintf("%06x", (long) (1000000 * php_combined_lcg())), 1);
+					xdebug_str_add_fmt(&fname, "%06x", (long) (1000000 * php_combined_lcg()));
 					break;
 
 				case 's': { /* script fname */
@@ -527,7 +527,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 
 				case 't': { /* timestamp (in seconds) */
 					time_t the_time = time(NULL);
-					xdebug_str_add(&fname, xdebug_sprintf("%ld", the_time), 1);
+					xdebug_str_add_fmt(&fname, "%ld", the_time);
 				}	break;
 
 				case 'u': { /* timestamp (in microseconds) */
@@ -597,7 +597,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case '%': /* literal % */
-					xdebug_str_addl(&fname, "%", 1, 0);
+					xdebug_str_addc(&fname, '%');
 					break;
 			}
 		}
@@ -617,7 +617,7 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 	while (*format)
 	{
 		if (*format != '%') {
-			xdebug_str_addl(&fname, (char *) format, 1, 0);
+			xdebug_str_addc(&fname, *format);
 		} else {
 			format++;
 			switch (*format)
@@ -627,11 +627,11 @@ int xdebug_format_file_link(char **filename, const char *error_filename, int err
 					break;
 
 				case 'l': /* line number */
-					xdebug_str_add(&fname, xdebug_sprintf("%d", error_lineno), 1);
+					xdebug_str_add_fmt(&fname, "%d", error_lineno);
 					break;
 
 				case '%': /* literal % */
-					xdebug_str_addl(&fname, "%", 1, 0);
+					xdebug_str_addc(&fname, '%');
 					break;
 			}
 		}
@@ -668,28 +668,28 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, zend_
 	while (*format)
 	{
 		if (*format != '%') {
-			xdebug_str_addl(&fname, (char *) format, 1, 0);
+			xdebug_str_addc(&fname, *format);
 		} else {
 			format++;
 			switch (*format)
 			{
 				case 'n': /* filename */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", name), 1);
+					xdebug_str_add(&fname, name, 0);
 					break;
 				case 'p': /* parent */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", parent->d), 1);
+					xdebug_str_add_str(&fname, parent);
 					break;
 				case 'a': /* ancester */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", ancester->d), 1);
+					xdebug_str_add_str(&fname, ancester);
 					break;
 				case 'f': /* full path */
-					xdebug_str_add(&fname, xdebug_sprintf("%s", full_filename), 1);
+					xdebug_str_add(&fname, full_filename, 0);
 					break;
 				case 's': /* slash */
-					xdebug_str_add(&fname, xdebug_sprintf("%c", DEFAULT_SLASH), 1);
+					xdebug_str_addc(&fname, DEFAULT_SLASH);
 					break;
 				case '%': /* literal % */
-					xdebug_str_addl(&fname, "%", 1, 0);
+					xdebug_str_addc(&fname, '%');
 					break;
 			}
 		}

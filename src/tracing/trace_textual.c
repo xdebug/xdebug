@@ -114,7 +114,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
 		xdebug_str_add_str(str, tmp_value);
 		xdebug_str_free(tmp_value);
 	} else {
-		xdebug_str_add(str, "???", 0);
+		xdebug_str_add_literal(str, "???");
 	}
 }
 
@@ -128,12 +128,12 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
-	xdebug_str_add(&str, xdebug_sprintf("%10.4F ", fse->time - XG_BASE(start_time)), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%10lu ", fse->memory), 1);
+	xdebug_str_add_fmt(&str, "%10.4F ", fse->time - XG_BASE(start_time));
+	xdebug_str_add_fmt(&str, "%10lu ", fse->memory);
 	for (j = 0; j < fse->level; j++) {
-		xdebug_str_addl(&str, "  ", 2, 0);
+		xdebug_str_add_literal(&str, "  ");
 	}
-	xdebug_str_add(&str, xdebug_sprintf("-> %s(", tmp_name), 1);
+	xdebug_str_add_fmt(&str, "-> %s(", tmp_name);
 
 	xdfree(tmp_name);
 
@@ -144,7 +144,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 		for (j = 0; j < fse->varc; j++) {
 			if (c) {
-				xdebug_str_addl(&str, ", ", 2, 0);
+				xdebug_str_add_literal(&str, ", ");
 			} else {
 				c = 1;
 			}
@@ -152,35 +152,35 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 			if (
 				(fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data))
 			) {
-				xdebug_str_add(&str, "...", 0);
+				xdebug_str_add_literal(&str, "...");
 				variadic_opened = 1;
 				c = 0;
 			}
 
 			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
-				xdebug_str_add(&str, xdebug_sprintf("$%s = ", ZSTR_VAL(fse->var[j].name)), 1);
+				xdebug_str_addc(&str, '$');
+				xdebug_str_add_zstr(&str, fse->var[j].name);
+				xdebug_str_add_literal(&str, " = ");
 			}
 
 			if (fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data)) {
-				xdebug_str_add(&str, "variadic(", 0);
+				xdebug_str_add_literal(&str, "variadic(");
 				continue;
 			}
 
-			if (
-				(variadic_opened && XINI_LIB(collect_params) != 5)
-			) {
-				xdebug_str_add(&str, xdebug_sprintf("%d => ", variadic_count++), 1);
+			if (variadic_opened && XINI_LIB(collect_params) != 5) {
+				xdebug_str_add_fmt(&str, "%d => ", variadic_count++);
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {
 				add_single_value(&str, &fse->var[j].data, XINI_LIB(collect_params));
 			} else {
-				xdebug_str_addl(&str, "???", 3, 0);
+				xdebug_str_add_literal(&str, "???");
 			}
 		}
 
 		if (variadic_opened) {
-			xdebug_str_add(&str, ")", 0);
+			xdebug_str_addc(&str, ')');
 		}
 	}
 
@@ -192,14 +192,16 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 #else
 			escaped = php_addcslashes(fse->include_filename, 0, (char*) "'\\\0..\37", 6);
 #endif
-			xdebug_str_add(&str, xdebug_sprintf("'%s'", ZSTR_VAL(escaped)), 1);
+			xdebug_str_addc(&str, '\'');
+			xdebug_str_add_zstr(&str, escaped);
+			xdebug_str_addc(&str, '\'');
 			zend_string_release(escaped);
 		} else {
-			xdebug_str_add(&str, ZSTR_VAL(fse->include_filename), 0);
+			xdebug_str_add_zstr(&str, fse->include_filename);
 		}
 	}
 
-	xdebug_str_add(&str, xdebug_sprintf(") %s:%d\n", ZSTR_VAL(fse->filename), fse->lineno), 1);
+	xdebug_str_add_fmt(&str, ") %s:%d\n", ZSTR_VAL(fse->filename), fse->lineno);
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
@@ -212,13 +214,13 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 {
 	unsigned int j = 0; /* Counter */
 
-	xdebug_str_add(str, xdebug_sprintf("%10.4F ", xdebug_get_utime() - XG_BASE(start_time)), 1);
-	xdebug_str_add(str, xdebug_sprintf("%10lu ", zend_memory_usage(0)), 1);
+	xdebug_str_add_fmt(str, "%10.4F ", xdebug_get_utime() - XG_BASE(start_time));
+	xdebug_str_add_fmt(str, "%10lu ", zend_memory_usage(0));
 
 	for (j = 0; j < fse->level; j++) {
-		xdebug_str_addl(str, "  ", 2, 0);
+		xdebug_str_add_literal(str, "  ");
 	}
-	xdebug_str_addl(str, " >=> ", 5, 0);
+	xdebug_str_add_literal(str, " >=> ");
 }
 
 
@@ -235,7 +237,7 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 		xdebug_str_add_str(&str, tmp_value);
 		xdebug_str_free(tmp_value);
 	}
-	xdebug_str_addl(&str, "\n", 2, 0);
+	xdebug_str_addc(&str, '\n');
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
@@ -262,9 +264,9 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	if (tmp_value) {
 		xdebug_return_trace_stack_common(&str, fse);
 
-		xdebug_str_addl(&str, "(", 1, 0);
+		xdebug_str_addc(&str, '(');
 		xdebug_str_add_str(&str, tmp_value);
-		xdebug_str_addl(&str, " => ", 4, 0);
+		xdebug_str_add_literal(&str, " => ");
 
 		tmp_value = xdebug_get_zval_value_line(&generator->value, 0, NULL);
 		if (tmp_value) {
@@ -272,8 +274,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 			xdebug_str_free(tmp_value);
 		}
 
-		xdebug_str_addl(&str, ")", 1, 0);
-		xdebug_str_addl(&str, "\n", 2, 0);
+		xdebug_str_add_literal(&str, ")\n");
 
 		fprintf(context->trace_file, "%s", str.d);
 		fflush(context->trace_file);
@@ -289,16 +290,18 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
 	xdebug_str                   *tmp_value;
 
-	xdebug_str_addl(&str, "                    ", 20, 0);
+	xdebug_str_add_literal(&str, "                    ");
 	for (j = 0; j <= fse->level; j++) {
-		xdebug_str_addl(&str, "  ", 2, 0);
+		xdebug_str_add_literal(&str, "  ");
 	}
-	xdebug_str_addl(&str, "   => ", 6, 0);
+	xdebug_str_add_literal(&str, "   => ");
 
 	xdebug_str_add(&str, full_varname, 0);
 
 	if (op[0] != '\0' ) { /* pre/post inc/dec ops are special */
-		xdebug_str_add(&str, xdebug_sprintf(" %s ", op), 1);
+		xdebug_str_addc(&str, ' ');
+		xdebug_str_add(&str, op, 0);
+		xdebug_str_addc(&str, ' ');
 
 		if (right_full_varname) {
 			xdebug_str_add(&str, right_full_varname, 0);
@@ -309,12 +312,12 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 				xdebug_str_add_str(&str, tmp_value);
 				xdebug_str_free(tmp_value);
 			} else {
-				xdebug_str_addl(&str, "NULL", 4, 0);
+				xdebug_str_add_literal(&str, "NULL");
 			}
 		}
 
 	}
-	xdebug_str_add(&str, xdebug_sprintf(" %s:%d\n", filename, lineno), 1);
+	xdebug_str_add_fmt(&str, " %s:%d\n", filename, lineno);
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);

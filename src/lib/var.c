@@ -1019,28 +1019,28 @@ xdebug_var_export_options* xdebug_var_get_nolimit_options(void)
 void xdebug_add_variable_attributes(xdebug_str *str, zval *struc, zend_bool html)
 {
 	if (html) {
-		xdebug_str_add(str, "<i>(", 0);
+		xdebug_str_add_literal(str, "<i>(");
 	} else {
-		xdebug_str_add(str, "(", 0);
+		xdebug_str_add_literal(str, "(");
 	}
 
 	if (Z_TYPE_P(struc) >= IS_STRING && Z_TYPE_P(struc) != IS_INDIRECT) {
 		if (Z_TYPE_P(struc) == IS_STRING && ZSTR_IS_INTERNED(Z_STR_P(struc))) {
-			xdebug_str_add(str, "interned", 0);
+			xdebug_str_add_literal(str, "interned");
 		} else if (Z_TYPE_P(struc) == IS_ARRAY && (GC_FLAGS(Z_ARRVAL_P(struc)) & IS_ARRAY_IMMUTABLE)) {
-			xdebug_str_add(str, "immutable", 0);
+			xdebug_str_add_literal(str, "immutable");
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("refcount=%d", Z_REFCOUNT_P(struc)), 1);
+			xdebug_str_add_fmt(str, "refcount=%d", Z_REFCOUNT_P(struc));
 		}
-		xdebug_str_add(str, xdebug_sprintf(", is_ref=%d", Z_TYPE_P(struc) == IS_REFERENCE), 1);
+		xdebug_str_add_fmt(str, ", is_ref=%d", Z_TYPE_P(struc) == IS_REFERENCE);
 	} else {
-		xdebug_str_add(str, "refcount=0, is_ref=0", 0);
+		xdebug_str_add_literal(str, "refcount=0, is_ref=0");
 	}
 
 	if (html) {
-		xdebug_str_add(str, ")</i>", 0);
+		xdebug_str_add_literal(str, ")</i>");
 	} else {
-		xdebug_str_add(str, ")=", 0);
+		xdebug_str_add_literal(str, ")=");
 	}
 }
 

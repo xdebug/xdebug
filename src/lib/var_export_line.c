@@ -31,7 +31,7 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index_key, zend
 		options->runtime[level].current_element_nr < options->runtime[level].end_element_nr)
 	{
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
-			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT " => ", index_key), 1);
+			xdebug_str_add_fmt(str, XDEBUG_INT_FMT " => ", index_key);
 		} else { /* string key */
 			zend_string *tmp, *tmp2;
 
@@ -40,18 +40,18 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index_key, zend
 			if (tmp) {
 				zend_string_release(tmp);
 			}
-			xdebug_str_addl(str, "'", 1, 0);
+			xdebug_str_addc(str, '\'');
 			if (tmp2) {
-				xdebug_str_addl(str, ZSTR_VAL(tmp2), ZSTR_LEN(tmp2), 0);
+				xdebug_str_add_zstr(str, tmp2);
 				zend_string_release(tmp2);
 			}
-			xdebug_str_add(str, "' => ", 0);
+			xdebug_str_add_literal(str, "' => ");
 		}
 		xdebug_var_export_line(zv, str, level + 2, debug_zval, options);
-		xdebug_str_addl(str, ", ", 2, 0);
+		xdebug_str_add_literal(str, ", ");
 	}
 	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
-		xdebug_str_addl(str, "..., ", 5, 0);
+		xdebug_str_add_literal(str, "..., ");
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
@@ -79,16 +79,16 @@ static int xdebug_object_element_export(zval *object, zval *zv_nptr, zend_ulong 
 				xdebug_str_addc(str, ' ');
 				xdebug_str_add_str(str, property_type);
 			}
-			xdebug_str_addl(str, " $", 2, 0);
+			xdebug_str_add_literal(str, " $");
 			if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 				xdebug_str_add_str(str, property_name);
-				xdebug_str_addl(str, " = ", 3, 0);
+				xdebug_str_add_literal(str, " = ");
 			} else {
 				xdebug_str_addc(str, '{');
 				xdebug_str_add(str, prop_class_name, 0);
 				xdebug_str_addc(str, '}');
 				xdebug_str_add_str(str, property_name);
-				xdebug_str_addl(str, " = ", 3, 0);
+				xdebug_str_add_literal(str, " = ");
 			}
 
 			if (property_type) {
@@ -97,13 +97,13 @@ static int xdebug_object_element_export(zval *object, zval *zv_nptr, zend_ulong 
 			xdebug_str_free(property_name);
 			xdfree(prop_class_name);
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("public $%d = ", index_key), 1);
+			xdebug_str_add_fmt(str, "public $%d = ", index_key);
 		}
 		xdebug_var_export_line(zv, str, level + 2, debug_zval, options);
-		xdebug_str_addl(str, "; ", 2, 0);
+		xdebug_str_add_literal(str, "; ");
 	}
 	if (options->runtime[level].current_element_nr == options->runtime[level].end_element_nr) {
-		xdebug_str_addl(str, "...; ", 5, 0);
+		xdebug_str_add_literal(str, "...; ");
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
@@ -143,23 +143,23 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 
 	switch (z_type) {
 		case IS_TRUE:
-			xdebug_str_addl(str, "TRUE", 4, 0);
+			xdebug_str_add_literal(str, "TRUE");
 			break;
 
 		case IS_FALSE:
-			xdebug_str_addl(str, "FALSE", 5, 0);
+			xdebug_str_add_literal(str, "FALSE");
 			break;
 
 		case IS_NULL:
-			xdebug_str_addl(str, "NULL", 4, 0);
+			xdebug_str_add_literal(str, "NULL");
 			break;
 
 		case IS_LONG:
-			xdebug_str_add(str, xdebug_sprintf(XDEBUG_INT_FMT, Z_LVAL_P(*struc)), 1);
+			xdebug_str_add_fmt(str, XDEBUG_INT_FMT, Z_LVAL_P(*struc));
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add(str, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_P(*struc)), 1);
+			xdebug_str_add_fmt(str, "%.*G", (int) EG(precision), Z_DVAL_P(*struc));
 			break;
 
 		case IS_STRING: {
@@ -172,15 +172,15 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 #endif
 
 			if (options->no_decoration) {
-				xdebug_str_addl(str, ZSTR_VAL(tmp_zstr), ZSTR_LEN(tmp_zstr), 0);
+				xdebug_str_add_zstr(str, tmp_zstr);
 			} else if ((size_t) Z_STRLEN_P(*struc) <= (size_t) options->max_data) {
-				xdebug_str_addl(str, "'", 1, 0);
-				xdebug_str_addl(str, ZSTR_VAL(tmp_zstr), ZSTR_LEN(tmp_zstr), 0);
-				xdebug_str_addl(str, "'", 1, 0);
+				xdebug_str_addc(str, '\'');
+				xdebug_str_add_zstr(str, tmp_zstr);
+				xdebug_str_addc(str, '\'');
 			} else {
-				xdebug_str_addl(str, "'", 1, 0);
+				xdebug_str_addc(str, '\'');
 				xdebug_str_addl(str, ZSTR_VAL(tmp_zstr), options->max_data, 0);
-				xdebug_str_addl(str, "...'", 4, 0);
+				xdebug_str_addc(str, '\'');
 			}
 			zend_string_release(tmp_zstr);
 		} break;
@@ -189,7 +189,7 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			myht = Z_ARRVAL_P(*struc);
 
 			if (!xdebug_zend_hash_is_recursive(myht)) {
-				xdebug_str_addl(str, "array (", 7, 0);
+				xdebug_str_add_literal(str, "array (");
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
@@ -208,11 +208,11 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 						xdebug_str_chop(str, 2);
 					}
 				} else {
-					xdebug_str_addl(str, "...", 3, 0);
+					xdebug_str_add_literal(str, "...");
 				}
-				xdebug_str_addl(str, ")", 1, 0);
+				xdebug_str_addc(str, ')');
 			} else {
-				xdebug_str_addl(str, "...", 3, 0);
+				xdebug_str_add_literal(str, "...");
 			}
 			break;
 
@@ -224,9 +224,9 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 #endif
 
 			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
-				xdebug_str_addl(str, "class ", 6 , 0);
+				xdebug_str_add_literal(str, "class ");
 				xdebug_str_add(str, ZSTR_VAL(Z_OBJCE_P(*struc)->name), 0);
-				xdebug_str_addl(str, " { ", 3 , 0);
+				xdebug_str_add_literal(str, " { ");
 
 				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;
@@ -246,11 +246,11 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 						xdebug_str_chop(str, 2);
 					}
 				} else {
-					xdebug_str_addl(str, "...", 3, 0);
+					xdebug_str_add_literal(str, "...");
 				}
-				xdebug_str_addl(str, " }", 2, 0);
+				xdebug_str_add_literal(str, " }");
 			} else {
-				xdebug_str_addl(str, "...", 3, 0);
+				xdebug_str_add_literal(str, "...");
 			}
 #if PHP_VERSION_ID >= 70400
 			zend_release_properties(myht);
@@ -263,16 +263,16 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			char *type_name;
 
 			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc));
-			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_RES_P(*struc)->handle, type_name ? type_name : "Unknown"), 1);
+			xdebug_str_add_fmt(str, "resource(%ld) of type (%s)", Z_RES_P(*struc)->handle, type_name ? type_name : "Unknown");
 			break;
 		}
 
 		case IS_UNDEF:
-			xdebug_str_addl(str, "*uninitialized*", sizeof("*uninitialized*") - 1, 0);
+			xdebug_str_add_literal(str, "*uninitialized*");
 			break;
 
 		default:
-			xdebug_str_addl(str, "NFC", 3, 0);
+			xdebug_str_add_literal(str, "NFC");
 			break;
 	}
 }
@@ -316,36 +316,37 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 
 	switch (Z_TYPE_P(*struc)) {
 		case IS_TRUE:
-			xdebug_str_addl(str, "true", 4, 0);
+			xdebug_str_add_literal(str, "true");
 			break;
 
 		case IS_FALSE:
-			xdebug_str_addl(str, "false", 5, 0);
+			xdebug_str_add_literal(str, "false");
 			break;
 
 		case IS_NULL:
-			xdebug_str_addl(str, "null", 4, 0);
+			xdebug_str_add_literal(str, "null");
 			break;
 
 		case IS_LONG:
-			xdebug_str_addl(str, "long", 4, 0);
+			xdebug_str_add_literal(str, "long");
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_addl(str, "double", 6, 0);
+			xdebug_str_add_literal(str, "double");
 			break;
 
 		case IS_STRING:
-			xdebug_str_add(str, xdebug_sprintf("string(%d)", Z_STRLEN_P(*struc)), 1);
+			xdebug_str_add_fmt(str, "string(%d)", Z_STRLEN_P(*struc));
 			break;
 
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(*struc);
-			xdebug_str_add(str, xdebug_sprintf("array(%d)", myht->nNumOfElements), 1);
+			xdebug_str_add_fmt(str, "array(%d)", myht->nNumOfElements);
 			break;
 
 		case IS_OBJECT: {
-			xdebug_str_add(str, xdebug_sprintf("class %s", STR_NAME_VAL(Z_OBJCE_P(*struc)->name)), 1);
+			xdebug_str_add_literal(str, "class ");
+			xdebug_str_add(str, ZSTR_VAL(Z_OBJCE_P(*struc)->name), 0);
 			break;
 		}
 
@@ -353,16 +354,16 @@ static void xdebug_var_synopsis(zval **struc, xdebug_str *str, int level, int de
 			char *type_name;
 
 			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc));
-			xdebug_str_add(str, xdebug_sprintf("resource(%ld) of type (%s)", Z_RES_P(*struc)->handle, type_name ? type_name : "Unknown"), 1);
+			xdebug_str_add_fmt(str, "resource(%ld) of type (%s)", Z_RES_P(*struc)->handle, type_name ? type_name : "Unknown");
 			break;
 		}
 
 		case IS_UNDEF:
-			xdebug_str_addl(str, "*uninitialized*", sizeof("*uninitialized*") - 1, 0);
+			xdebug_str_add_literal(str, "*uninitialized*");
 			break;
 
 		default:
-			xdebug_str_addl(str, "NFC", 3, 0);
+			xdebug_str_add_literal(str, "NFC");
 			break;
 
 	}

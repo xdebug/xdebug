@@ -38,9 +38,9 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 {
 	if (html) {
 		if (elem) {
-			xdebug_str_add(str, xdebug_sprintf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s['%s']&nbsp;=</pre></td>", name, elem), 1);
+			xdebug_str_add_fmt(str, "<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s['%s']&nbsp;=</pre></td>", name, elem);
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s[%ld]&nbsp;=</pre></td>", name, index_key), 1);
+			xdebug_str_add_fmt(str, "<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s[%ld]&nbsp;=</pre></td>", name, index_key);
 		}
 	}
 
@@ -50,13 +50,13 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 		if (html) {
 			val = xdebug_get_zval_value_html(NULL, z, 0, NULL);
 
-			xdebug_str_addl(str, "<td colspan='3' bgcolor='#eeeeec'>", 34, 0);
+			xdebug_str_add_literal(str, "<td colspan='3' bgcolor='#eeeeec'>");
 			xdebug_str_add_str(str, val);
-			xdebug_str_addl(str, "</td>", 5, 0);
+			xdebug_str_add_literal(str, "</td>");
 		} else {
 			val = xdebug_get_zval_value_line(z, 0, NULL);
 
-			xdebug_str_add(str, xdebug_sprintf("\n   $%s['%s'] = ", name, elem), 1);
+			xdebug_str_add_fmt(str, "\n   $%s['%s'] = ", name, elem);
 			xdebug_str_add_str(str, val);
 		}
 
@@ -64,14 +64,14 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 	} else {
 		/* not found */
 		if (html) {
-			xdebug_str_add(str, "<td colspan='3' bgcolor='#eeeeec'><i>undefined</i></td>", 0);
+			xdebug_str_add_literal(str, "<td colspan='3' bgcolor='#eeeeec'><i>undefined</i></td>");
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("\n   $%s['%s'] is undefined", name, elem), 1);
+			xdebug_str_add_fmt(str, "\n   $%s['%s'] is undefined", name, elem);
 		}
 	}
 
 	if (html) {
-		xdebug_str_add(str, "</tr>\n", 0);
+		xdebug_str_add_literal(str, "</tr>\n");
 	}
 }
 
@@ -113,9 +113,9 @@ static void dump_hash(xdebug_llist *l, const char *name, int name_len, int html,
 	}
 
 	if (html) {
-		xdebug_str_add(str, xdebug_sprintf("<tr><th colspan='5' align='left' bgcolor='#e9b96e'>Dump <i>$%s</i></th></tr>\n", name), 1);
+		xdebug_str_add_fmt(str, "<tr><th colspan='5' align='left' bgcolor='#e9b96e'>Dump <i>$%s</i></th></tr>\n", name);
 	} else {
-		xdebug_str_add(str, xdebug_sprintf("\nDump $%s", name), 1);
+		xdebug_str_add_fmt(str, "\nDump $%s", name);
 	}
 
 	elem = XDEBUG_LLIST_HEAD(l);

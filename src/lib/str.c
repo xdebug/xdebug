@@ -28,7 +28,7 @@
 #include "mm.h"
 #include "str.h"
 
-static void realloc_if_needed(xdebug_str *xs, int size_to_fit)
+inline static void realloc_if_needed(xdebug_str *xs, int size_to_fit)
 {
 	if (!xs->a || !xs->l || xs->l + size_to_fit > xs->a - 1) {
 		xs->d = xdrealloc(xs->d, xs->a + size_to_fit + XDEBUG_STR_PREALLOC);
@@ -75,6 +75,15 @@ void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str)
 	xs->l = xs->l + str->l;
 }
 
+void xdebug_str_add_zstr(xdebug_str *xs, const zend_string *str)
+{
+	realloc_if_needed(xs, ZSTR_LEN(str));
+
+	memcpy(xs->d + xs->l, ZSTR_VAL(str), ZSTR_LEN(str));
+	xs->d[xs->l + ZSTR_LEN(str)] = '\0';
+	xs->l = xs->l + ZSTR_LEN(str);
+}
+
 void xdebug_str_addc(xdebug_str *xs, char letter)
 {
 	realloc_if_needed(xs, 1);
@@ -82,6 +91,38 @@ void xdebug_str_addc(xdebug_str *xs, char letter)
 	xs->d[xs->l] = letter;
 	xs->d[xs->l + 1] = '\0';
 	xs->l = xs->l + 1;
+}
+
+void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
+{
+	va_list args;
+	int size;
+	int n;
+
+	realloc_if_needed(xs, 1);
+	size = xs->a - xs->l;
+
+	va_start(args, fmt);
+	n = vsnprintf(xs->d + xs->l, size, fmt, args);
+	va_end(args);
+	if (n > -1 && n < size) {
+		xs->l += n;
+		return;
+	}
+
+	realloc_if_needed(xs, n + 1);
+	size = xs->a - xs->l;
+
+	va_start(args, fmt);
+	n = vsnprintf(xs->d + xs->l, size, fmt, args);
+	va_end(args);
+
+	if (n > -1 && n < size) {
+		xs->l += n;
+		return;
+	}
+
+	assert(0);
 }
 
 void xdebug_str_chop(xdebug_str *xs, size_t c)
