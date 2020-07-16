@@ -35,8 +35,8 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index_key, zend
 		} else { /* string key */
 			zend_string *tmp, *tmp2;
 
-			tmp = php_str_to_str(ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), "'", 1, "\\'", 2);
-			tmp2 = php_str_to_str(ZSTR_VAL(tmp), ZSTR_LEN(tmp), "\0", 1, "\\0", 2);
+			tmp = php_str_to_str(ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), (char*) "'", 1, (char*) "\\'", 2);
+			tmp2 = php_str_to_str(ZSTR_VAL(tmp), ZSTR_LEN(tmp), (char*) "\0", 1, (char*) "\\0", 2);
 			if (tmp) {
 				zend_string_release(tmp);
 			}
