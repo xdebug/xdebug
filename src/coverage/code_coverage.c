@@ -87,16 +87,36 @@ void xdebug_coverage_function_dtor(void *data)
 	xdfree(function);
 }
 
-static char* xdebug_func_format(xdebug_func *func)
+static void xdebug_func_format(char *buffer, size_t buffer_size, xdebug_func *func)
 {
-	switch (func->type) {
-		case XFUNC_NORMAL:
-			return xdstrdup(func->function);
-		case XFUNC_MEMBER:
-			return xdebug_sprintf("%s->%s", ZSTR_VAL(func->class_name), func->function);
-		default:
-			return xdstrdup("???");
+	if (func->type == XFUNC_NORMAL) {
+		int len = strlen(func->function);
+
+		if (len + 1 > buffer_size) {
+			goto error;
+		}
+		memcpy(buffer, func->function, len);
+		buffer[len] = '\0';
+		return;
 	}
+
+	if (func->type == XFUNC_MEMBER) {
+		int func_len = strlen(func->function);
+		int len = ZSTR_LEN(func->class_name) + 2 + func_len;
+
+		if (len + 1 > buffer_size) {
+			goto error;
+		}
+		memcpy(buffer, ZSTR_VAL(func->class_name), ZSTR_LEN(func->class_name));
+		memcpy(buffer + ZSTR_LEN(func->class_name), "->", 2);
+		memcpy(buffer + ZSTR_LEN(func->class_name) + 2, func->function, func_len);
+		buffer[len] = '\0';
+		return;
+	}
+
+error:
+	memcpy(buffer, "?", 1);
+	buffer[1] = '\0';
 }
 
 static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
@@ -129,11 +149,11 @@ static void xdebug_print_opcode_info(zend_execute_data *execute_data, const zend
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	xdebug_func func_info;
-	char *function_name;
+	char function_name[1024];
 	long opnr = execute_data->opline - execute_data->func->op_array.opcodes;
 
 	xdebug_build_fname_from_oparray(&func_info, op_array);
-	function_name = xdebug_func_format(&func_info);
+	xdebug_func_format(function_name, sizeof(function_name), &func_info);
 	if (func_info.class_name) {
 		zend_string_release(func_info.class_name);
 	}
@@ -142,7 +162,6 @@ static void xdebug_print_opcode_info(zend_execute_data *execute_data, const zend
 	}
 
 	xdebug_branch_info_mark_reached(op_array->filename, function_name, op_array, opnr);
-	xdfree(function_name);
 }
 
 static int xdebug_check_branch_entry_handler(XDEBUG_OPCODE_HANDLER_ARGS)
@@ -511,11 +530,11 @@ static void prefill_from_oparray(zend_string *filename, zend_op_array *op_array)
 		xdebug_set_free(set);
 	}
 	if (branch_info) {
-		char *function_name;
+		char function_name[1024];
 		xdebug_func func_info;
 
 		xdebug_build_fname_from_oparray(&func_info, op_array);
-		function_name = xdebug_func_format(&func_info);
+		xdebug_func_format(function_name, sizeof(function_name), &func_info);
 
 		if (func_info.class_name) {
 			zend_string_release(func_info.class_name);
@@ -527,8 +546,6 @@ static void prefill_from_oparray(zend_string *filename, zend_op_array *op_array)
 		xdebug_branch_post_process(op_array, branch_info);
 		xdebug_branch_find_paths(branch_info);
 		xdebug_branch_info_add_branches_and_paths(filename, (char*) function_name, branch_info);
-
-		xdfree(function_name);
 	}
 }
 
@@ -920,9 +937,12 @@ int xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_arra
 	xdebug_func func_info;
 
 	if (!fse->filtered_code_coverage && XG_COV(code_coverage_active) && XG_COV(code_coverage_unused)) {
+		char buffer[1024];
+
 		*tmp_filename = zend_string_copy(op_array->filename);
 		xdebug_build_fname_from_oparray(&func_info, op_array);
-		*tmp_function_name = xdebug_func_format(&func_info);
+		xdebug_func_format(buffer, sizeof(buffer), &func_info);
+		*tmp_function_name = xdstrdup(buffer);
 		xdebug_code_coverage_start_of_function(op_array, *tmp_function_name);
 
 		if (func_info.class_name) {
