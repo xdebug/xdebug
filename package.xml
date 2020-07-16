@@ -105,6 +105,8 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="set.h" role="src" />
      <file name="str.c" role="src" />
      <file name="str.h" role="src" />
+     <file name="timing.c" role="src" />
+     <file name="timing.h" role="src" />
      <file name="var.c" role="src" />
      <file name="var.h" role="src" />
      <file name="var_export_html.c" role="src" />

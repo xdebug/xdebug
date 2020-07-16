@@ -22,14 +22,12 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/file.h>
 #else
 #define PATH_MAX MAX_PATH
 #include <winsock2.h>
 #include <io.h>
-#include "win32/time.h"
 #include <process.h>
 #endif
 #include "php_xdebug.h"
@@ -141,37 +139,6 @@ char* xdebug_strrstr(const char* haystack, const char* needle)
 	}
 
 	return loc;
-}
-
-double xdebug_get_utime(void)
-{
-#ifdef HAVE_GETTIMEOFDAY
-	struct timeval tp;
-	long sec = 0L;
-	double msec = 0.0;
-
-	if (gettimeofday((struct timeval *) &tp, NULL) == 0) {
-		sec = tp.tv_sec;
-		msec = (double) (tp.tv_usec / MICRO_IN_SEC);
-
-		if (msec >= 1.0) {
-			msec -= (long) msec;
-		}
-		return msec + sec;
-	}
-#endif
-	return 0;
-}
-
-char* xdebug_get_time(void)
-{
-	time_t cur_time;
-	char  *str_time;
-
-	str_time = xdmalloc(24);
-	cur_time = time(NULL);
-	strftime(str_time, 24, "%Y-%m-%d %H:%M:%S", gmtime (&cur_time));
-	return str_time;
 }
 
 /* not all versions of php export this */

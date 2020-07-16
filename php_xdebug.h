@@ -41,11 +41,10 @@
 #include "lib/hash.h"
 #include "lib/llist.h"
 #include "lib/vector.h"
+#include "lib/timing.h"
 
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
-
-#define MICRO_IN_SEC 1000000.00
 
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY       1
@@ -79,6 +78,7 @@ int xdebug_is_output_tty();
 struct xdebug_base_info {
 	unsigned long level;
 	xdebug_vector *stack;
+	xdebug_nanotime_context nanotime_context;
 	double        start_time;
 	unsigned int  prev_memory;
 	zif_handler   orig_set_time_limit_func;
