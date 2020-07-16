@@ -148,16 +148,16 @@ double xdebug_get_utime(void)
 #ifdef HAVE_GETTIMEOFDAY
 	struct timeval tp;
 	long sec = 0L;
-	double msec = 0.0;
+	double secf = 0.0;
 
 	if (gettimeofday((struct timeval *) &tp, NULL) == 0) {
 		sec = tp.tv_sec;
-		msec = (double) (tp.tv_usec / MICRO_IN_SEC);
+		secf = (double) (tp.tv_usec / MICRO_IN_SEC);
 
-		if (msec >= 1.0) {
-			msec -= (long) msec;
+		if (secf >= 1.0) {
+			secf -= (long) secf;
 		}
-		return msec + sec;
+		return sec + secf;
 	}
 #endif
 	return 0;
