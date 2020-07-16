@@ -180,7 +180,7 @@ char* xdebug_error_type(int type)
 zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var)
 {
 #if PHP_VERSION_ID >= 80000
-	return zend_get_zval_ptr(opline, node_type, node, zdata, BP_VAR_IS);
+	return zend_get_zval_ptr(opline, node_type, node, zdata);
 #else
 	zend_free_op should_free;
 
