@@ -832,8 +832,8 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						state = 1;
 						keyword_end = &ptr[ctr];
 
-						if (strncmp(keyword, "::", 2) == 0 && active_fse->function.class) { /* static class properties */
-							zend_class_entry *ce = xdebug_fetch_class(active_fse->function.class, strlen(active_fse->function.class), ZEND_FETCH_CLASS_SELF);
+						if (strncmp(keyword, "::", 2) == 0 && active_fse->function.class_name) { /* static class properties */
+							zend_class_entry *ce = zend_fetch_class(active_fse->function.class_name, ZEND_FETCH_CLASS_SELF);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
 							cc_length = strlen(STR_NAME_VAL(ce->name));
@@ -1019,28 +1019,28 @@ xdebug_var_export_options* xdebug_var_get_nolimit_options(void)
 void xdebug_add_variable_attributes(xdebug_str *str, zval *struc, zend_bool html)
 {
 	if (html) {
-		xdebug_str_add(str, "<i>(", 0);
+		xdebug_str_add_literal(str, "<i>(");
 	} else {
-		xdebug_str_add(str, "(", 0);
+		xdebug_str_add_literal(str, "(");
 	}
 
 	if (Z_TYPE_P(struc) >= IS_STRING && Z_TYPE_P(struc) != IS_INDIRECT) {
 		if (Z_TYPE_P(struc) == IS_STRING && ZSTR_IS_INTERNED(Z_STR_P(struc))) {
-			xdebug_str_add(str, "interned", 0);
+			xdebug_str_add_literal(str, "interned");
 		} else if (Z_TYPE_P(struc) == IS_ARRAY && (GC_FLAGS(Z_ARRVAL_P(struc)) & IS_ARRAY_IMMUTABLE)) {
-			xdebug_str_add(str, "immutable", 0);
+			xdebug_str_add_literal(str, "immutable");
 		} else {
-			xdebug_str_add(str, xdebug_sprintf("refcount=%d", Z_REFCOUNT_P(struc)), 1);
+			xdebug_str_add_fmt(str, "refcount=%d", Z_REFCOUNT_P(struc));
 		}
-		xdebug_str_add(str, xdebug_sprintf(", is_ref=%d", Z_TYPE_P(struc) == IS_REFERENCE), 1);
+		xdebug_str_add_fmt(str, ", is_ref=%d", Z_TYPE_P(struc) == IS_REFERENCE);
 	} else {
-		xdebug_str_add(str, "refcount=0, is_ref=0", 0);
+		xdebug_str_add_literal(str, "refcount=0, is_ref=0");
 	}
 
 	if (html) {
-		xdebug_str_add(str, ")</i>", 0);
+		xdebug_str_add_literal(str, ")</i>");
 	} else {
-		xdebug_str_add(str, ")=", 0);
+		xdebug_str_add_literal(str, ")=");
 	}
 }
 
@@ -1048,40 +1048,78 @@ void xdebug_add_variable_attributes(xdebug_str *str, zval *struc, zend_bool html
 /*****************************************************************************
 ** XML encoding function
 */
+static const char xml_encode_count[256] = {
+	4, 1, 1, 1,  1, 1, 1, 1,  1, 1, 5, 1,  1, 5, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 6, 1,  1, 1, 5, 5,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  4, 1, 4, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+	1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,
+};
 
-char* xdebug_xmlize(char *string, size_t len, size_t *newlen)
+static const char* xml_encode_map[64] = {
+	"&#0;", NULL, NULL,     NULL,  NULL, NULL, NULL,    NULL,     NULL, NULL, "&#10;", NULL,  NULL,   "&#13;", NULL,   NULL,
+	NULL,   NULL, NULL,     NULL,  NULL, NULL, NULL,    NULL,     NULL, NULL, NULL,    NULL,  NULL,   NULL,    NULL,   NULL,
+	NULL,   NULL, "&quot;", NULL,  NULL, NULL, "&amp;", "&#39;",  NULL, NULL, NULL,    NULL,  NULL,   NULL,    NULL,   NULL,
+	NULL,   NULL, NULL,     NULL,  NULL, NULL, NULL,    NULL,     NULL, NULL, NULL,    NULL,  "&lt;", NULL,    "&gt;", NULL,
+};
+
+char* xdebug_xmlize(char *s_string, size_t len, size_t *newlen)
 {
-	if (len) {
-		char *tmp;
-		char *tmp2;
+	int i, w_pos;
+	int encoded_string_length = 0;
+	char *new_string;
+	const unsigned char *string = (unsigned char*) s_string;
 
-		tmp = xdebug_str_to_str(string, len, "&", 1, "&amp;", 5, &len);
-
-		tmp2 = xdebug_str_to_str(tmp, len, ">", 1, "&gt;", 4, &len);
-		efree(tmp);
-
-		tmp = xdebug_str_to_str(tmp2, len, "<", 1, "&lt;", 4, &len);
-		efree(tmp2);
-
-		tmp2 = xdebug_str_to_str(tmp, len, "\"", 1, "&quot;", 6, &len);
-		efree(tmp);
-
-		tmp = xdebug_str_to_str(tmp2, len, "'", 1, "&#39;", 5, &len);
-		efree(tmp2);
-
-		tmp2 = xdebug_str_to_str(tmp, len, "\n", 1, "&#10;", 5, &len);
-		efree(tmp);
-
-		tmp = xdebug_str_to_str(tmp2, len, "\r", 1, "&#13;", 5, &len);
-		efree(tmp2);
-
-		tmp2 = xdebug_str_to_str(tmp, len, "\0", 1, "&#0;", 4, (size_t*) newlen);
-		efree(tmp);
-		return tmp2;
-	} else {
-		*newlen = len;
-		return estrdup(string);
+	/* Quick bailout for empty strings */
+	if (!len) {
+		*newlen = 0;
+		return estrdup("");
 	}
+
+	/* Calculate new memory requirement */
+	for (i = 0; i < len; i++) {
+		encoded_string_length += xml_encode_count[string[i]];
+	}
+
+	/* No characters need to be encoded, so just duplicate and return */
+	if (encoded_string_length == len) {
+		*newlen = len;
+		return estrdup(s_string);
+	}
+
+	new_string = emalloc(encoded_string_length + 1);
+	w_pos = 0;
+	for (i = 0; i < len; i++) {
+		int replacement_length = xml_encode_count[string[i]];
+
+		if (replacement_length != 1) {
+			int j;
+
+			for (j = 0; j < replacement_length; j++) {
+				new_string[w_pos] = xml_encode_map[string[i]][j];
+				w_pos++;
+			}
+			continue;
+		}
+
+		new_string[w_pos] = string[i];
+		w_pos++;
+	}
+
+	new_string[w_pos] = '\0';
+	*newlen = encoded_string_length; /* remove one for null byte */
+
+	return new_string;
 }
 
 /*****************************************************************************
@@ -1100,9 +1138,9 @@ static char* xdebug_create_doc_link(xdebug_func f)
 		case XFUNC_STATIC_MEMBER:
 		case XFUNC_MEMBER: {
 			if (strcmp(f.function, "__construct") == 0) {
-				tmp_target = xdebug_sprintf("%s.construct", f.class);
+				tmp_target = xdebug_sprintf("%s.construct", ZSTR_VAL(f.class_name));
 			} else {
-				tmp_target = xdebug_sprintf("%s.%s", f.class, f.function);
+				tmp_target = xdebug_sprintf("%s.%s", ZSTR_VAL(f.class_name), f.function);
 			}
 			break;
 		}
@@ -1139,7 +1177,7 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags)
 				return xdebug_create_doc_link(f);
 			} else {
 				return xdebug_sprintf("%s%s%s",
-					f.class ? f.class : "?",
+					f.class_name ? ZSTR_VAL(f.class_name) : "?",
 					f.type == XFUNC_STATIC_MEMBER ? "::" : "->",
 					f.function ? f.function : "?"
 				);

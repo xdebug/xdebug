@@ -257,9 +257,9 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 
 			if (parent_name) {
 				xdebug_str_add_str(&full_name, parent_name);
-				xdebug_str_addl(&full_name, "[\"", 2, 0);
+				xdebug_str_add_literal(&full_name, "[\"");
 				xdebug_str_addl(&full_name, tmp_fullname_zstr->val, tmp_fullname_zstr->len, 0);
-				xdebug_str_addl(&full_name, "\"]", 2, 0);
+				xdebug_str_add_literal(&full_name, "\"]");
 			}
 
 			zend_string_release(tmp_fullname_zstr);
@@ -330,12 +330,16 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 				tmp_fullname = xdebug_str_new();
 
 				xdebug_str_add_str(tmp_fullname, parent_name);
-				xdebug_str_add(tmp_fullname, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", 0);
+				if ((*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY) {
+					xdebug_str_add_literal(tmp_fullname, "::");
+				} else {
+					xdebug_str_add_literal(tmp_fullname, "->");
+				}
 
 				/* Only in dynamic and *public* properties can we have non-standard characters */
 				if (strcmp(modifier, "private") != 0 || strcmp(class_name, prop_class_name) == 0) {
 					if (property_name->l == 0) {
-						xdebug_str_addl(tmp_fullname, "{\"\"}", 4, 0);
+						xdebug_str_add_literal(tmp_fullname, "{\"\"}");
 					} else {
 						if (memchr(property_name->d, '-', property_name->l) == NULL && memchr(property_name->d, '[', property_name->l) == NULL && memchr(property_name->d, '{', property_name->l) == NULL) {
 							xdebug_str_add_str(tmp_fullname, property_name);
@@ -345,9 +349,9 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 
 							tmp_slashed_string = xdebug_addslashes(tmp_string);
 
-							xdebug_str_addl(tmp_fullname, "{\"", 2, 0);
-							xdebug_str_addl(tmp_fullname, tmp_slashed_string->val, tmp_slashed_string->len, 0);
-							xdebug_str_addl(tmp_fullname, "\"}", 2, 0);
+							xdebug_str_add_literal(tmp_fullname, "{\"");
+							xdebug_str_add_zstr(tmp_fullname, tmp_slashed_string);
+							xdebug_str_add_literal(tmp_fullname, "\"}");
 
 							zend_string_release(tmp_slashed_string);
 							zend_string_release(tmp_string);
@@ -565,7 +569,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 		case IS_OBJECT: {
 			HashTable          *merged_hash;
-			xdebug_str         *class_name;
+			zend_string        *class_name;
 			zend_class_entry   *ce;
 #if PHP_VERSION_ID < 70400
 			int                 is_temp;
@@ -575,8 +579,8 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			ALLOC_HASHTABLE(merged_hash);
 			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
 
-			class_name = xdebug_str_create(STR_NAME_VAL(Z_OBJCE_P(*struc)->name), STR_NAME_LEN(Z_OBJCE_P(*struc)->name));
-			ce = xdebug_fetch_class(class_name->d, class_name->l, ZEND_FETCH_CLASS_DEFAULT);
+			class_name = Z_OBJCE_P(*struc)->name;
+			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_DEFAULT);
 
 			/* Adding static properties */
 			xdebug_zend_hash_apply_protection_begin(&ce->properties_info);
@@ -612,7 +616,12 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			}
 
 			xdebug_xml_add_attribute(node, "type", "object");
-			add_xml_attribute_or_element(options, node, "classname", 9, class_name);
+			{
+				xdebug_str tmp_str;
+				tmp_str.d = ZSTR_VAL(class_name);
+				tmp_str.l = ZSTR_LEN(class_name);
+				add_xml_attribute_or_element(options, node, "classname", 9, &tmp_str);
+			}
 			xdebug_xml_add_attribute(node, "children", merged_hash->nNumOfElements ? "1" : "0");
 
 
@@ -633,7 +642,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 					xdebug_zend_hash_apply_protection_begin(merged_hash);
 
 					ZEND_HASH_FOREACH_KEY_PTR(merged_hash, num, key, xoi_val) {
-						xdebug_object_element_export_xml_node(xoi_val, level, node, name, options, class_name->d);
+						xdebug_object_element_export_xml_node(xoi_val, level, node, name, options, ZSTR_VAL(class_name));
 					} ZEND_HASH_FOREACH_END();
 
 					xdebug_zend_hash_apply_protection_end(merged_hash);
@@ -642,7 +651,6 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 			zend_hash_destroy(merged_hash);
 			FREE_HASHTABLE(merged_hash);
-			xdebug_str_free(class_name);
 #if PHP_VERSION_ID >= 70400
 			zend_release_properties(myht);
 #else
@@ -689,7 +697,7 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(xdebug_str *name, zval *val, 
 			case XDEBUG_VAR_TYPE_STATIC: {
 				xdebug_str tmp_formatted_name = XDEBUG_STR_INITIALIZER;
 
-				xdebug_str_addl(&tmp_formatted_name, "::", 2, 0);
+				xdebug_str_add_literal(&tmp_formatted_name, "::");
 				xdebug_str_add_str(&tmp_formatted_name, name);
 
 				short_name = xdebug_str_copy(&tmp_formatted_name);

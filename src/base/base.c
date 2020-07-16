@@ -92,8 +92,8 @@ void xdebug_func_dtor_by_ref(xdebug_func *elem)
 	if (elem->function) {
 		xdfree(elem->function);
 	}
-	if (elem->class) {
-		xdfree(elem->class);
+	if (elem->class_name) {
+		zend_string_release(elem->class_name);
 	}
 }
 
@@ -243,19 +243,21 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
 			tmp->type = XFUNC_MEMBER;
 			if (edata->func->common.scope && strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
-				tmp->class = xdebug_sprintf(
+				char *tmp_class_name = xdebug_sprintf(
 					"{anonymous-class:%s:%d-%d}",
 					edata->func->common.scope->info.user.filename->val,
 					edata->func->common.scope->info.user.line_start,
 					edata->func->common.scope->info.user.line_end
 				);
+				tmp->class_name = zend_string_init(tmp_class_name, strlen(tmp_class_name), 0);
+				xdfree(tmp_class_name);
 			} else {
-				tmp->class = xdstrdup(edata->This.value.obj->ce->name->val);
+				tmp->class_name = zend_string_copy(edata->This.value.obj->ce->name);
 			}
 		} else {
 			if (edata->func->common.scope) {
 				tmp->type = XFUNC_STATIC_MEMBER;
-				tmp->class = xdstrdup(edata->func->common.scope->name->val);
+				tmp->class_name = zend_string_copy(edata->func->common.scope->name);
 			}
 		}
 		if (edata->func->common.function_name) {
@@ -350,6 +352,81 @@ normal_after_all:
 // TODO: Remove
 #define XINI_DEV(v)    (XG(settings.develop.v))
 
+static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, zend_op_array *op_array)
+{
+	int i;
+	int hit_variadic = 0;
+	int arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
+
+	/* This calculates how many arguments where sent to a function. It
+	 * works for both internal and user defined functions.
+	 * op_array->num_args works only for user defined functions so
+	 * we're not using that here. */
+	arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
+	arguments_wanted = arguments_sent;
+
+	if (ZEND_USER_CODE(zdata->func->type)) {
+		arguments_wanted = op_array->num_args;
+	}
+
+	if (ZEND_USER_CODE(zdata->func->type) && zdata->func->common.fn_flags & ZEND_ACC_VARIADIC) {
+		arguments_wanted++;
+		arguments_sent++;
+	}
+
+	if (arguments_wanted > arguments_sent) {
+		arguments_storage = arguments_wanted;
+	} else {
+		arguments_storage = arguments_sent;
+	}
+	fse->var = xdmalloc(arguments_storage * sizeof (xdebug_var_name));
+
+	for (i = 0; i < arguments_sent; i++) {
+		fse->var[fse->varc].name = NULL;
+		ZVAL_UNDEF(&fse->var[fse->varc].data);
+		fse->var[fse->varc].is_variadic = 0;
+
+		/* Because it is possible that more parameters are sent, then
+		 * actually wanted  we can only access the name in case there
+		 * is an associated variable to receive the variable here. */
+		if (fse->user_defined == XDEBUG_USER_DEFINED && i < arguments_wanted) {
+			if (op_array->arg_info[i].name) {
+				fse->var[fse->varc].name = zend_string_copy(op_array->arg_info[i].name);
+			}
+			if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i])) {
+				fse->var[fse->varc].is_variadic = 1;
+			}
+			if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i]) && !hit_variadic) {
+				fse->var[fse->varc].is_variadic = 1;
+				hit_variadic = 1;
+			}
+		}
+
+		if (XINI_LIB(collect_params)) {
+			if ((i < arguments_wanted) || ((zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) && (i < arguments_sent))) {
+				if (ZEND_CALL_ARG(zdata, fse->varc+1)) {
+					ZVAL_COPY(&(fse->var[fse->varc].data), ZEND_CALL_ARG(zdata, fse->varc+1));
+				}
+			} else {
+				ZVAL_COPY(&(fse->var[fse->varc].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted));
+			}
+		}
+		fse->varc++;
+	}
+
+	/* Sometimes not enough arguments are send to a user defined
+	 * function, so we have to gather only the name for those extra. */
+	if (fse->user_defined == XDEBUG_USER_DEFINED && arguments_sent < arguments_wanted) {
+		for (i = arguments_sent; i < arguments_wanted; i++) {
+			if (op_array->arg_info[i].name) {
+				fse->var[fse->varc].name = zend_string_copy(op_array->arg_info[i].name);
+			}
+			ZVAL_UNDEF(&fse->var[fse->varc].data);
+			fse->var[fse->varc].is_variadic = 0;
+			fse->varc++;
+		}
+	}
+}
 
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type)
 {
@@ -357,8 +434,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op             **opline_ptr = NULL;
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
-	int                   i = 0;
-	int                   hit_variadic = 0;
 
 	if (type == XDEBUG_USER_DEFINED) {
 		edata = EG(current_execute_data)->prev_execute_data;
@@ -428,9 +503,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	xdebug_build_fname(&(tmp->function), zdata);
 	if (!tmp->function.type) {
-		tmp->function.function = xdstrdup("{main}");
-		tmp->function.class    = NULL;
-		tmp->function.type     = XFUNC_MAIN;
+		tmp->function.function   = xdstrdup("{main}");
+		tmp->function.class_name = NULL;
+		tmp->function.type       = XFUNC_MAIN;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
 		tmp->lineno = 0;
@@ -446,85 +521,16 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		} else {
 			tmp->include_filename = zend_string_copy(zend_get_executed_filename_ex());
 		}
-	} else  {
+	} else {
 		tmp->lineno = find_line_number_for_current_execute_point(edata);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
 		if (
-			(xdebug_lib_mode_is(XDEBUG_MODE_TRACING) || xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP))
+			(XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP))
 			&&
 			XINI_LIB(collect_params)
 		) {
-			int    arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
-
-			/* This calculates how many arguments where sent to a function. It
-			 * works for both internal and user defined functions.
-			 * op_array->num_args works only for user defined functions so
-			 * we're not using that here. */
-			arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
-			arguments_wanted = arguments_sent;
-
-			if (ZEND_USER_CODE(zdata->func->type)) {
-				arguments_wanted = op_array->num_args;
-			}
-
-			if (ZEND_USER_CODE(zdata->func->type) && zdata->func->common.fn_flags & ZEND_ACC_VARIADIC) {
-				arguments_wanted++;
-				arguments_sent++;
-			}
-
-			if (arguments_wanted > arguments_sent) {
-				arguments_storage = arguments_wanted;
-			} else {
-				arguments_storage = arguments_sent;
-			}
-			tmp->var = xdmalloc(arguments_storage * sizeof (xdebug_var_name));
-
-			for (i = 0; i < arguments_sent; i++) {
-				tmp->var[tmp->varc].name = NULL;
-				ZVAL_UNDEF(&tmp->var[tmp->varc].data);
-				tmp->var[tmp->varc].is_variadic = 0;
-
-				/* Because it is possible that more parameters are sent, then
-				 * actually wanted  we can only access the name in case there
-				 * is an associated variable to receive the variable here. */
-				if (tmp->user_defined == XDEBUG_USER_DEFINED && i < arguments_wanted) {
-					if (op_array->arg_info[i].name) {
-						tmp->var[tmp->varc].name = zend_string_copy(op_array->arg_info[i].name);
-					}
-					if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i])) {
-						tmp->var[tmp->varc].is_variadic = 1;
-					}
-					if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i]) && !hit_variadic) {
-						tmp->var[tmp->varc].is_variadic = 1;
-						hit_variadic = 1;
-					}
-				}
-
-				if (XINI_LIB(collect_params)) {
-					if ((i < arguments_wanted) || ((zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) && (i < arguments_sent))) {
-						if (ZEND_CALL_ARG(zdata, tmp->varc+1)) {
-							ZVAL_COPY(&(tmp->var[tmp->varc].data), ZEND_CALL_ARG(zdata, tmp->varc+1));
-						}
-					} else {
-						ZVAL_COPY(&(tmp->var[tmp->varc].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted));
-					}
-				}
-				tmp->varc++;
-			}
-
-			/* Sometimes not enough arguments are send to a user defined
-			 * function, so we have to gather only the name for those extra. */
-			if (tmp->user_defined == XDEBUG_USER_DEFINED && arguments_sent < arguments_wanted) {
-				for (i = arguments_sent; i < arguments_wanted; i++) {
-					if (op_array->arg_info[i].name) {
-						tmp->var[tmp->varc].name = zend_string_copy(op_array->arg_info[i].name);
-					}
-					ZVAL_UNDEF(&tmp->var[tmp->varc].data);
-					tmp->var[tmp->varc].is_variadic = 0;
-					tmp->varc++;
-				}
-			}
+			collect_params(tmp, zdata, op_array);
 		}
 	}
 
@@ -581,20 +587,20 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (XG_BASE(in_execution) && XG_BASE(level) == 0) {
-		if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 			xdebug_debugger_set_program_name(op_array->filename);
 			xdebug_debug_init_if_requested_at_startup();
 		}
 
-		if (xdebug_lib_mode_is(XDEBUG_MODE_GCSTATS)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 			xdebug_gcstats_init_if_requested(op_array);
 		}
 
-		if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 			xdebug_profiler_init_if_requested(op_array);
 		}
 
-		if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 			xdebug_tracing_init_if_requested(op_array);
 		}
 	}
@@ -614,10 +620,10 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 
 	function_nr = XG_BASE(function_count);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_execute_ex(function_nr, fse);
 	}
 
@@ -647,11 +653,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		}
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_COVERAGE)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_filename, &code_coverage_function_name);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* If we're in an eval, we need to create an ID for it. */
 		if (fse->function.type == XFUNC_EVAL) {
 			xdebug_debugger_register_eval(fse);
@@ -661,13 +667,13 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex(fse, op_array);
 	}
 
 	xdebug_old_execute_ex(execute_data);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex_end(fse);
 	}
 
@@ -675,11 +681,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_filename, code_coverage_function_name);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for return breakpoints */
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
 	}
@@ -696,7 +702,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
 {
 	if (
-		fse->function.class &&
+		fse->function.class_name &&
 		Z_OBJ(EX(This)) &&
 		Z_TYPE(EX(This)) == IS_OBJECT &&
 		(zend_hash_str_find_ptr(&module_registry, "soap", sizeof("soap") - 1) != NULL)
@@ -743,14 +749,14 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	function_nr = XG_BASE(function_count);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for entry breakpoints */
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
 	}
@@ -762,7 +768,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		xdebug_base_use_original_error_cb();
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_internal(fse);
 	}
 
@@ -772,7 +778,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		execute_internal(current_execute_data, return_value);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_internal_end(fse);
 	}
 
@@ -784,11 +790,11 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	/* We only call the function_exit handler and return value handler if the
 	 * function call was also traced. Otherwise we end up with return trace
 	 * lines without a corresponding function call line. */
-	if (xdebug_lib_mode_is(XDEBUG_MODE_TRACING) && function_call_traced) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && function_call_traced) {
 		xdebug_tracing_execute_internal_end(function_nr, fse, return_value);
 	}
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for return breakpoints */
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
 	}
@@ -915,7 +921,7 @@ void xdebug_base_rinit()
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (
-		(xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP) || xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG))
+		(XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) || XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG))
 		&&
 		(zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_SOAPACTION", sizeof("HTTP_SOAPACTION") - 1) == NULL)
 	) {
@@ -1000,7 +1006,7 @@ static void xdebug_throw_exception_hook(zval *exception)
 	char *code_str = NULL;
 	zval dummy;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP) && !xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && !XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		return;
 	}
 	if (!exception) {
@@ -1026,10 +1032,10 @@ static void xdebug_throw_exception_hook(zval *exception)
 	convert_to_string_ex(file);
 	convert_to_long_ex(line);
 
-	if (xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_throw_exception_hook(exception, file, line, code, code_str, message);
 	}
-	if (xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_throw_exception_hook(exception, file, line, code, code_str, message);
 	}
 

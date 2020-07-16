@@ -30,7 +30,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 #define MODE_MUST_BE(m,n) \
-	if (!xdebug_lib_mode_is((m))) { \
+	if (!XDEBUG_MODE_IS((m))) { \
 		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to '%s'", (n)); \
 		return; \
 	}
@@ -274,8 +274,8 @@ PHP_FUNCTION(xdebug_call_class)
 	}
 	i = xdebug_get_stack_frame(depth);
 	if (i) {
-		if (i->function.class) {
-			RETURN_STRING(i->function.class);
+		if (i->function.class_name) {
+			RETURN_STR(i->function.class_name);
 		} else {
 			RETURN_FALSE;
 		}

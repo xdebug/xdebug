@@ -118,7 +118,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
 		xdebug_str_add_str(str, tmp_value);
 		xdebug_str_free(tmp_value);
 	} else {
-		xdebug_str_add(str, "???", 0);
+		xdebug_str_add_literal(str, "???");
 	}
 }
 
@@ -129,16 +129,20 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	char *tmp_name;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
+	xdebug_str_add_fmt(&str, "%d\t", fse->level);
+	xdebug_str_add_fmt(&str, "%d\t", function_nr);
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
-	xdebug_str_add(&str, "0\t", 0);
-	xdebug_str_add(&str, xdebug_sprintf("%F\t", fse->time - XG_BASE(start_time)), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%lu\t", fse->memory), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%s\t", tmp_name), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->user_defined == XDEBUG_USER_DEFINED ? 1 : 0), 1);
+	xdebug_str_add_literal(&str, "0\t");
+	xdebug_str_add_fmt(&str, "%F\t", fse->time - XG_BASE(start_time));
+	xdebug_str_add_fmt(&str, "%lu\t", fse->memory);
+	xdebug_str_add_fmt(&str, "%s\t", tmp_name);
+	if (fse->user_defined == XDEBUG_USER_DEFINED) {
+		xdebug_str_add_literal(&str, "1\t");
+	} else {
+		xdebug_str_add_literal(&str, "0\t");
+	}
 	xdfree(tmp_name);
 
 	if (fse->include_filename) {
@@ -149,45 +153,48 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 #else
 			escaped = php_addcslashes(fse->include_filename, 0, (char*) "'\\\0..\37", 6);
 #endif
-			xdebug_str_add(&str, xdebug_sprintf("'%s'", ZSTR_VAL(escaped)), 1);
+			xdebug_str_addc(&str, '\'');
+			xdebug_str_add_zstr(&str, escaped);
+			xdebug_str_addc(&str, '\'');
 			zend_string_release(escaped);
 		} else {
-			xdebug_str_add(&str, ZSTR_VAL(fse->include_filename), 0);
+			xdebug_str_add_zstr(&str, fse->include_filename);
 		}
 	}
 
 	/* Filename and Lineno (9, 10) */
-	xdebug_str_add(&str, xdebug_sprintf("\t%s\t%d", ZSTR_VAL(fse->filename), fse->lineno), 1);
-
+	xdebug_str_add_fmt(&str, "\t%s\t%d", ZSTR_VAL(fse->filename), fse->lineno);
 
 	if (XINI_LIB(collect_params) > 0) {
 		unsigned int j = 0; /* Counter */
 
 		/* Nr of arguments (11) */
-		xdebug_str_add(&str, xdebug_sprintf("\t%d", fse->varc), 1);
+		xdebug_str_add_fmt(&str, "\t%d", fse->varc);
 
 		/* Arguments (12-...) */
 		for (j = 0; j < fse->varc; j++) {
-			xdebug_str_addl(&str, "\t", 1, 0);
+			xdebug_str_addc(&str, '\t');
 
 			if (fse->var[j].is_variadic) {
-				xdebug_str_addl(&str, "...\t", 4, 0);
+				xdebug_str_add_literal(&str, "...\t");
 			}
 
 			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
-				xdebug_str_add(&str, xdebug_sprintf("$%s = ", ZSTR_VAL(fse->var[j].name)), 1);
+				xdebug_str_addc(&str, '$');
+				xdebug_str_add_zstr(&str, fse->var[j].name);
+				xdebug_str_add_literal(&str, " = ");
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {
 				add_single_value(&str, &(fse->var[j].data), XINI_LIB(collect_params));
 			} else {
-				xdebug_str_add(&str, "???", 0);
+				xdebug_str_add_literal(&str, "???");
 			}
 		}
 	}
 
 	/* Trailing \n */
-	xdebug_str_add(&str, "\n", 0);
+	xdebug_str_addc(&str, '\n');
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
@@ -199,12 +206,12 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
+	xdebug_str_add_fmt(&str, "%d\t", fse->level);
+	xdebug_str_add_fmt(&str, "%d\t", function_nr);
 
-	xdebug_str_add(&str, "1\t", 0);
-	xdebug_str_add(&str, xdebug_sprintf("%F\t", xdebug_get_utime() - XG_BASE(start_time)), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%lu\n", zend_memory_usage(0)), 1);
+	xdebug_str_add_literal(&str, "1\t");
+	xdebug_str_add_fmt(&str, "%F\t", xdebug_get_utime() - XG_BASE(start_time));
+	xdebug_str_add_fmt(&str, "%lu\n", zend_memory_usage(0));
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
@@ -216,13 +223,13 @@ void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", fse->level), 1);
-	xdebug_str_add(&str, xdebug_sprintf("%d\t", function_nr), 1);
-	xdebug_str_add(&str, "R\t\t\t", 0);
+	xdebug_str_add_fmt(&str, "%d\t", fse->level);
+	xdebug_str_add_fmt(&str, "%d\t", function_nr);
+	xdebug_str_add_literal(&str, "R\t\t\t");
 
 	add_single_value(&str, return_value, XINI_LIB(collect_params));
 
-	xdebug_str_addl(&str, "\n", 2, 0);
+	xdebug_str_add_literal(&str, "\n");
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);

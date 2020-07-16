@@ -130,7 +130,7 @@ extern const char* xdebug_log_prefix[11];
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
 typedef struct _xdebug_func {
-	char *class;
+	zend_string *class_name;
 	char *function;
 	int   type;
 	int   internal;
@@ -263,10 +263,11 @@ void xdebug_disable_opcache_optimizer(void);
 #define XDEBUG_MODE_PROFILING    1<<4
 #define XDEBUG_MODE_TRACING      1<<5
 int xdebug_lib_set_mode(char *mode);
-int xdebug_lib_mode_is(int mode);
-#define RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { return; }
-#define RETURN_FALSE_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { RETURN_FALSE; }
-#define WARN_AND_RETURN_IF_MODE_IS_NOT(m) if (!xdebug_lib_mode_is((m))) { php_error(E_NOTICE, "Functionality is not enabled"); return; }
+
+#define XDEBUG_MODE_IS(v) ((XG(globals.library.mode) & (v)) ? 1 : 0)
+#define RETURN_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { return; }
+#define RETURN_FALSE_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { RETURN_FALSE; }
+#define WARN_AND_RETURN_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { php_error(E_NOTICE, "Functionality is not enabled"); return; }
 
 #define XDEBUG_START_WITH_REQUEST_DEFAULT     1
 #define XDEBUG_START_WITH_REQUEST_YES         2

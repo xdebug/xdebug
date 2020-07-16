@@ -431,9 +431,9 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, in
 	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
 		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
 		   codebases due to setlocale calls. We don't care about the locale here. */
-		tmp_len = strlen(fse->function.class) + strlen(fse->function.function) + 3;
+		tmp_len = ZSTR_LEN(fse->function.class_name) + strlen(fse->function.function) + 3;
 		tmp_name = xdmalloc(tmp_len);
-		snprintf(tmp_name, tmp_len, "%s::%s", fse->function.class, fse->function.function);
+		snprintf(tmp_name, tmp_len, "%s::%s", ZSTR_VAL(fse->function.class_name), fse->function.function);
 
 		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
 			/* Yup, breakpoint found, call handler if the breakpoint is not

@@ -81,18 +81,18 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	unsigned int j;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	xdebug_str_add(&str, "\t<tr>", 0);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%d</td>", function_nr), 1);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%0.6F</td>", fse->time - XG_BASE(start_time)), 1);
-	xdebug_str_add(&str, xdebug_sprintf("<td align='right'>%lu</td>", fse->memory), 1);
-	xdebug_str_add(&str, "<td align='left'>", 0);
+	xdebug_str_add_literal(&str, "\t<tr>");
+	xdebug_str_add_fmt(&str, "<td>%d</td>", function_nr);
+	xdebug_str_add_fmt(&str, "<td>%0.6F</td>", fse->time - XG_BASE(start_time));
+	xdebug_str_add_fmt(&str, "<td align='right'>%lu</td>", fse->memory);
+	xdebug_str_add_literal(&str, "<td align='left'>");
 	for (j = 0; j < fse->level - 1; j++) {
-		xdebug_str_add(&str, "&nbsp; &nbsp;", 0);
+		xdebug_str_add_literal(&str, "&nbsp; &nbsp;");
 	}
-	xdebug_str_add(&str, "-&gt;</td>", 0);
+	xdebug_str_add_literal(&str, "-&gt;</td>");
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
-	xdebug_str_add(&str, xdebug_sprintf("<td>%s(", tmp_name), 1);
+	xdebug_str_add_fmt(&str, "<td>%s(", tmp_name);
 	xdfree(tmp_name);
 
 	if (fse->include_filename) {
@@ -105,15 +105,15 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 			joined = xdebug_join("<br />", parts, 0, 99999);
 			xdebug_arg_dtor(parts);
 
-			xdebug_str_add(&str, xdebug_sprintf("'%s'", joined->d), 1);
+			xdebug_str_add_fmt(&str, "'%s'", joined->d);
 			xdebug_str_free(joined);
 		} else {
-			xdebug_str_add(&str, ZSTR_VAL(fse->include_filename), 0);
+			xdebug_str_add_zstr(&str, fse->include_filename);
 		}
 	}
 
-	xdebug_str_add(&str, xdebug_sprintf(")</td><td>%s:%d</td>", ZSTR_VAL(fse->filename), fse->lineno), 1);
-	xdebug_str_add(&str, "</tr>\n", 0);
+	xdebug_str_add_fmt(&str, ")</td><td>%s:%d</td>", ZSTR_VAL(fse->filename), fse->lineno);
+	xdebug_str_add_literal(&str, "</tr>\n");
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);

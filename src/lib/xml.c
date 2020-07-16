@@ -29,7 +29,7 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 	char *tmp;
 	size_t newlen;
 
-	xdebug_str_addl(output, " ", 1, 0);
+	xdebug_str_addc(output, ' ');
 
 	/* attribute name */
 	tmp = xdebug_xmlize(attr->name, attr->name_len, &newlen);
@@ -37,13 +37,13 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 	efree(tmp);
 
 	/* attribute value */
-	xdebug_str_addl(output, "=\"", 2, 0);
+	xdebug_str_add_literal(output, "=\"");
 	if (attr->value) {
 		tmp = xdebug_xmlize(attr->value, attr->value_len, &newlen);
 		xdebug_str_add(output, tmp, 0);
 		efree(tmp);
 	}
-	xdebug_str_addl(output, "\"", 1, 0);
+	xdebug_str_addc(output, '\"');
 
 	if (attr->next) {
 		xdebug_xml_return_attribute(attr->next, output);
@@ -52,7 +52,7 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 
 static void xdebug_xml_return_text_node(xdebug_xml_text_node* node, xdebug_str* output)
 {
-	xdebug_str_addl(output, "<![CDATA[", 9, 0);
+	xdebug_str_add_literal(output, "<![CDATA[");
 	if (node->encode) {
 		/* if cdata tags are in the text, then we must base64 encode */
 		size_t         new_len = 0;
@@ -64,12 +64,12 @@ static void xdebug_xml_return_text_node(xdebug_xml_text_node* node, xdebug_str* 
 	} else {
 		xdebug_str_add(output, node->text, 0);
 	}
-	xdebug_str_addl(output, "]]>", 3, 0);
+	xdebug_str_add_literal(output, "]]>");
 }
 
 void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output)
 {
-	xdebug_str_addl(output, "<", 1, 0);
+	xdebug_str_addc(output, '<');
 	xdebug_str_add(output, node->tag, 0);
 
 	if (node->text && node->text->encode) {
@@ -78,7 +78,7 @@ void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output)
 	if (node->attribute) {
 		xdebug_xml_return_attribute(node->attribute, output);
 	}
-	xdebug_str_addl(output, ">", 1, 0);
+	xdebug_str_addc(output, '>');
 
 	if (node->child) {
 		xdebug_xml_return_node(node->child, output);
@@ -88,9 +88,9 @@ void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output)
 		xdebug_xml_return_text_node(node->text, output);
 	}
 
-	xdebug_str_addl(output, "</", 2, 0);
+	xdebug_str_add_literal(output, "</");
 	xdebug_str_add(output, node->tag, 0);
-	xdebug_str_addl(output, ">", 1, 0);
+	xdebug_str_addc(output, '>');
 
 	if (node->next) {
 		xdebug_xml_return_node(node->next, output);

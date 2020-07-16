@@ -119,16 +119,15 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 
 			i = XDEBUG_LLIST_VALP(le);
 			tmp_name = xdebug_show_fname(i->function, 0, 0);
-			xdebug_str_add(&log_buffer, xdebug_sprintf("PHP %3d. %s(", i->level, tmp_name), 1);
+			xdebug_str_add_fmt(&log_buffer, "PHP %3d. %s(", i->level, tmp_name);
 			xdfree(tmp_name);
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
-				char       *tmp_varname;
 				xdebug_str *tmp_value;
 
 				if (c) {
-					xdebug_str_addl(&log_buffer, ", ", 2, 0);
+					xdebug_str_add_literal(&log_buffer, ", ");
 				} else {
 					c = 1;
 				}
@@ -136,16 +135,16 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				if (
 					(i->var[j].is_variadic && XINI_LIB(collect_params) != 5)
 				) {
-					xdebug_str_add(&log_buffer, "...", 0);
+					xdebug_str_add_literal(&log_buffer, "...");
 					variadic_opened = 1;
 				}
 
-				tmp_varname = i->var[j].name ? xdebug_sprintf("$%s = ", ZSTR_VAL(i->var[j].name)) : xdstrdup("");
-				xdebug_str_add(&log_buffer, tmp_varname, 0);
-				xdfree(tmp_varname);
+				if (i->var[j].name) {
+					xdebug_str_add_fmt(&log_buffer, "$%s = ", ZSTR_VAL(i->var[j].name));
+				}
 
 				if (i->var[j].is_variadic) {
-					xdebug_str_add(&log_buffer, "variadic(", 0);
+					xdebug_str_add_literal(&log_buffer, "variadic(");
 					c = 0;
 					continue;
 				}
@@ -155,15 +154,15 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 					xdebug_str_add_str(&log_buffer, tmp_value);
 					xdebug_str_free(tmp_value);
 				} else {
-					xdebug_str_addl(&log_buffer, "*uninitialized*", 15, 0);
+					xdebug_str_add_literal(&log_buffer, "*uninitialized*");
 				}
 			}
 
 			if (variadic_opened) {
-				xdebug_str_add(&log_buffer, ")", 0);
+				xdebug_str_add_literal(&log_buffer, ")");
 			}
 
-			xdebug_str_add(&log_buffer, xdebug_sprintf(") %s:%d", ZSTR_VAL(i->filename), i->lineno), 1);
+			xdebug_str_add_fmt(&log_buffer, ") %s:%d", ZSTR_VAL(i->filename), i->lineno);
 			php_log_err(log_buffer.d);
 			xdebug_str_destroy(&log_buffer);
 		}
@@ -175,14 +174,14 @@ void xdebug_append_error_head(xdebug_str *str, int html, const char *error_type_
 	const char **formats = select_formats(html);
 
 	if (html) {
-		xdebug_str_add(str, xdebug_sprintf(formats[0], error_type_str, XG_DEV(in_at) ? " xe-scream" : ""), 1);
+		xdebug_str_add_fmt(str, formats[0], error_type_str, XG_DEV(in_at) ? " xe-scream" : "");
 		if (XG_DEV(in_at)) {
-			xdebug_str_add(str, formats[12], 0);
+			xdebug_str_add_const(str, formats[12]);
 		}
 	} else {
-		xdebug_str_add(str, formats[0], 0);
+		xdebug_str_add_const(str, formats[0]);
 		if (XG_DEV(in_at)) {
-			xdebug_str_add(str, formats[10], 0);
+			xdebug_str_add_const(str, formats[10]);
 		}
 	}
 }
@@ -233,10 +232,10 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		char *file_link;
 
 		xdebug_format_file_link(&file_link, error_filename, error_lineno);
-		xdebug_str_add(str, xdebug_sprintf(formats[11], error_type_str, escaped, file_link, error_filename, error_lineno), 1);
+		xdebug_str_add_fmt(str, formats[11], error_type_str, escaped, file_link, error_filename, error_lineno);
 		xdfree(file_link);
 	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[1], error_type_str, escaped, error_filename, error_lineno), 1);
+		xdebug_str_add_fmt(str, formats[1], error_type_str, escaped, error_filename, error_lineno);
 	}
 
 	efree(escaped);
@@ -253,9 +252,9 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 			case 1: /* synopsis */
 				tmp_html_synop_value = xdebug_get_zval_synopsis_html("", zv, 0, NULL);
 
-				xdebug_str_addl(str, "<span>", 6, 0);
+				xdebug_str_add_literal(str, "<span>");
 				xdebug_str_add_str(str, tmp_html_synop_value);
-				xdebug_str_addl(str, "</span>", 7, 0);
+				xdebug_str_add_literal(str, "</span>");
 
 				xdfree(tmp_html_synop_value);
 				break;
@@ -264,11 +263,11 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 				tmp_html_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
 				tmp_html_synop_value = xdebug_get_zval_synopsis_html("", zv, 0, NULL);
 
-				xdebug_str_addl(str, "<span title='", 13, 0);
+				xdebug_str_add_literal(str, "<span title='");
 				xdebug_str_add(str, tmp_html_value, 0);
-				xdebug_str_addl(str, "'>", 2, 0);
+				xdebug_str_add_literal(str, "'>");
 				xdebug_str_add_str(str, tmp_html_synop_value);
-				xdebug_str_addl(str, "</span>", 7, 0);
+				xdebug_str_add_literal(str, "</span>");
 
 				xdebug_str_free(tmp_value);
 				efree(tmp_html_value);
@@ -280,9 +279,9 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
 				tmp_html_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
 
-				xdebug_str_addl(str, "<span>", 6, 0);
+				xdebug_str_add_literal(str, "<span>");
 				xdebug_str_add(str, tmp_html_value, 0);
-				xdebug_str_addl(str, "</span>", 7, 0);
+				xdebug_str_add_literal(str, "</span>");
 
 				xdebug_str_free(tmp_value);
 				efree(tmp_html_value);
@@ -290,9 +289,9 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 			case 5: { /* serialized */
 				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
 
-				xdebug_str_addl(str, "<span>", 6, 0);
+				xdebug_str_add_literal(str, "<span>");
 				xdebug_str_add_str(str, tmp_value);
-				xdebug_str_addl(str, "</span>", 7, 0);
+				xdebug_str_add_literal(str, "</span>");
 
 				xdebug_str_free(tmp_value);
 			} break;
@@ -316,7 +315,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 			xdebug_str_add_str(str, tmp_value);
 			xdebug_str_free(tmp_value);
 		} else {
-			xdebug_str_addl(str, "???", 3, 0);
+			xdebug_str_add_literal(str, "???");
 		}
 	}
 }
@@ -394,7 +393,7 @@ static void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element*
 	formats = get_var_format_string(PG(html_errors));
 
 	if (Z_TYPE(zvar) == IS_UNDEF) {
-		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d), 1);
+		xdebug_str_add_fmt(str, formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d);
 		return;
 	}
 
@@ -405,9 +404,9 @@ static void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element*
 	}
 
 	if (contents) {
-		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_INITIALISED], name->d, contents->d), 1);
+		xdebug_str_add_fmt(str, formats[XDEBUG_VAR_FORMAT_INITIALISED], name->d, contents->d);
 	} else {
-		xdebug_str_add(str, xdebug_sprintf(formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d), 1);
+		xdebug_str_add_fmt(str, formats[XDEBUG_VAR_FORMAT_UNINITIALISED], name->d);
 	}
 
 	if (contents) {
@@ -426,7 +425,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 	if (XG_BASE(stack) && XG_BASE(stack)->size) {
 		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG_BASE(stack)));
 
-		xdebug_str_add(str, formats[2], 0);
+		xdebug_str_add_const(str, formats[2]);
 
 		for (le = XDEBUG_LLIST_HEAD(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 		{
@@ -441,16 +440,16 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			}
 			tmp_name = xdebug_show_fname(i->function, html, 0);
 			if (html) {
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->level, i->time - XG_BASE(start_time), i->memory, tmp_name), 1);
+				xdebug_str_add_fmt(str, formats[3], i->level, i->time - XG_BASE(start_time), i->memory, tmp_name);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf(formats[3], i->time - XG_BASE(start_time), i->memory, i->level, tmp_name), 1);
+				xdebug_str_add_fmt(str, formats[3], i->time - XG_BASE(start_time), i->memory, i->level, tmp_name);
 			}
 			xdfree(tmp_name);
 
 			/* Printing vars */
 			for (j = 0; j < i->varc; j++) {
 				if (c) {
-					xdebug_str_addl(str, ", ", 2, 0);
+					xdebug_str_add_literal(str, ", ");
 				} else {
 					c = 1;
 				}
@@ -458,22 +457,26 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 				if (
 					(i->var[j].is_variadic && Z_ISUNDEF(i->var[j].data))
 				) {
-					xdebug_str_add(str, "...", 0);
+					xdebug_str_add_literal(str, "...");
 				}
 
 				if (i->var[j].name && XINI_LIB(collect_params) == 4) {
 					if (html) {
-						xdebug_str_add(str, xdebug_sprintf("<span>$%s = </span>", ZSTR_VAL(i->var[j].name)), 1);
+						xdebug_str_add_literal(str, "<span>$");
+						xdebug_str_add_zstr(str, i->var[j].name);
+						xdebug_str_add_literal(str, " = </span>");
 					} else {
-						xdebug_str_add(str, xdebug_sprintf("$%s = ", ZSTR_VAL(i->var[j].name)), 1);
+						xdebug_str_add_literal(str, "$");
+						xdebug_str_add_zstr(str, i->var[j].name);
+						xdebug_str_add_literal(str, " = ");
 					}
 				}
 
 				if (!variadic_opened && i->var[j].is_variadic && Z_ISUNDEF(i->var[j].data)) {
 					if (html) {
-						xdebug_str_add(str, "<i>variadic</i>(", 0);
+						xdebug_str_add_literal(str, "<i>variadic</i>(");
 					} else {
-						xdebug_str_add(str, "variadic(", 0);
+						xdebug_str_add_literal(str, "variadic(");
 					}
 					c = 0;
 					variadic_opened = 1;
@@ -483,16 +486,24 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 				if (!Z_ISUNDEF(i->var[j].data)) {
 					add_single_value(str, &i->var[j].data, html, XINI_LIB(collect_params));
 				} else {
-					xdebug_str_addl(str, "???", 3, 0);
+					xdebug_str_add_literal(str, "???");
 				}
 			}
 
 			if (variadic_opened) {
-				xdebug_str_add(str, ")", 0);
+				xdebug_str_add_literal(str, ")");
 			}
 
 			if (i->include_filename) {
-				xdebug_str_add(str, xdebug_sprintf(formats[4], ZSTR_VAL(i->include_filename)), 1);
+				if (html) {
+					xdebug_str_add_literal(str, "<font color='#00bb00'>'");
+					xdebug_str_add_zstr(str, i->include_filename);
+					xdebug_str_add_literal(str, "</font>");
+				} else {
+					xdebug_str_addc(str, '\'');
+					xdebug_str_add_zstr(str, i->include_filename);
+					xdebug_str_addc(str, '\'');
+				}
 			}
 
 			if (html) {
@@ -503,15 +514,15 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 					char *file_link;
 
 					xdebug_format_file_link(&file_link, ZSTR_VAL(i->filename), i->lineno);
-					xdebug_str_add(str, xdebug_sprintf(formats[10], ZSTR_VAL(i->filename), file_link, formatted_filename, i->lineno), 1);
+					xdebug_str_add_fmt(str, formats[10], ZSTR_VAL(i->filename), file_link, formatted_filename, i->lineno);
 					xdfree(file_link);
 				} else {
-					xdebug_str_add(str, xdebug_sprintf(formats[5], ZSTR_VAL(i->filename), formatted_filename, i->lineno), 1);
+					xdebug_str_add_fmt(str, formats[5], ZSTR_VAL(i->filename), formatted_filename, i->lineno);
 				}
 
 				xdfree(formatted_filename);
 			} else {
-				xdebug_str_add(str, xdebug_sprintf(formats[5], ZSTR_VAL(i->filename), i->lineno), 1);
+				xdebug_str_add_fmt(str, formats[5], ZSTR_VAL(i->filename), i->lineno);
 			}
 
 			printed_frames++;
@@ -540,7 +551,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			if (i->declared_vars && i->declared_vars->size) {
 				xdebug_hash *tmp_hash;
 
-				xdebug_str_add(str, xdebug_sprintf(formats[6], scope_nr), 1);
+				xdebug_str_add_fmt(str, formats[6], scope_nr);
 				tmp_hash = xdebug_declared_var_hash_from_llist(i->declared_vars);
 				xdebug_hash_apply_with_argument(tmp_hash, (void*) &html, xdebug_dump_used_var_with_contents, (void *) str);
 				xdebug_hash_destroy(tmp_hash);
@@ -553,7 +564,7 @@ void xdebug_append_error_footer(xdebug_str *str, int html)
 {
 	const char **formats = select_formats(html);
 
-	xdebug_str_add(str, formats[7], 0);
+	xdebug_str_add_const(str, formats[7]);
 }
 
 char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription)
@@ -567,14 +578,18 @@ char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, c
 	prepend_string = INI_STR((char*) "error_prepend_string");
 	append_string = INI_STR((char*) "error_append_string");
 
-	xdebug_str_add(&str, prepend_string ? prepend_string : "", 0);
+	if (prepend_string) {
+		xdebug_str_add(&str, prepend_string, 0);
+	}
 	xdebug_append_error_head(&str, html, error_type_str_simple);
 	if (include_decription) {
 		xdebug_append_error_description(&str, html, error_type_str, buffer, error_filename, error_lineno);
 	}
 	xdebug_append_printable_stack(&str, html);
 	xdebug_append_error_footer(&str, html);
-	xdebug_str_add(&str, append_string ? append_string : "", 0);
+	if (append_string) {
+		xdebug_str_add(&str, append_string, 0);
+	}
 
 	xdfree(error_type_str);
 	xdfree(error_type_str_simple);
@@ -971,7 +986,7 @@ void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line
 	}
 
 	if (!PG(html_errors)) {
-		xdebug_str_addl(&tmp_str, "\n", 1, 0);
+		xdebug_str_addc(&tmp_str, '\n');
 	}
 	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line));
 	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
@@ -1018,7 +1033,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	zval                 *frame;
 	zval                 *params;
 
-	if (!xdebug_lib_mode_is(XDEBUG_MODE_DEVELOP)) {
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
 		array_init(return_value);
 		return;
@@ -1044,9 +1059,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		if (i->function.function) {
 			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), i->function.function);
 		}
-		if (i->function.class) {
+		if (i->function.class_name) {
 			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
-			add_assoc_string_ex(frame, "class",    HASH_KEY_SIZEOF("class"),    i->function.class   );
+			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    i->function.class_name);
 		}
 		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename);
 		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), i->lineno);

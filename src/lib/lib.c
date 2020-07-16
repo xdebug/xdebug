@@ -169,15 +169,6 @@ int xdebug_lib_set_mode(char *mode)
 	return !errors;
 }
 
-int xdebug_lib_mode_is(int mode)
-{
-	if (XG_LIB(mode) & mode) {
-		return 1;
-	}
-
-	return 0;
-}
-
 int xdebug_lib_set_start_with_request(char *value)
 {
 	if (strcmp(value, "default") == 0) {
@@ -207,7 +198,7 @@ int xdebug_lib_start_with_request(void)
 	}
 
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
-		if (xdebug_lib_mode_is(XDEBUG_MODE_PROFILING)) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 			return 1;
 		}
 	}
@@ -325,8 +316,8 @@ static int is_mode_trigger_and_enabled(int force_trigger)
 
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
 		if (
-			xdebug_lib_mode_is(XDEBUG_MODE_STEP_DEBUG) ||
-			xdebug_lib_mode_is(XDEBUG_MODE_TRACING)
+			XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) ||
+			XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)
 		) {
 			return force_trigger || trigger_enabled();
 		}

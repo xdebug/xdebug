@@ -295,11 +295,11 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 	xdebug_xml_return_node(message, &xml_message);
 	context->handler->log(XDEBUG_LOG_COM, "-> %s\n\n", xml_message.d);
 
-	xdebug_str_add(ret, xdebug_sprintf("%d", xml_message.l + sizeof("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n") - 1), 1);
-	xdebug_str_addl(ret, "\0", 1, 0);
-	xdebug_str_add(ret, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n", 0);
+	xdebug_str_add_fmt(ret, "%d", xml_message.l + sizeof("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n") - 1);
+	xdebug_str_addc(ret, '\0');
+	xdebug_str_add_literal(ret, "<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>\n");
 	xdebug_str_add(ret, xml_message.d, 0);
-	xdebug_str_addl(ret, "\0", 1, 0);
+	xdebug_str_addc(ret, '\0');
 	xdebug_str_destroy(&xml_message);
 
 	return ret;
@@ -380,7 +380,7 @@ static xdebug_str* return_file_source(zend_string *filename, int begin, int end)
 		begin = 0;
 		i = 0;
 	}
-	xdebug_str_addl(source, "", 0, 0);
+	xdebug_str_add_literal(source, "");
 
 	tmp_filename = xdebug_path_from_url(filename);
 	stream = php_stream_open_wrapper(tmp_filename, "rb",
@@ -1888,7 +1888,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = xdebug_fetch_class(fse->function.class, strlen(fse->function.class), ZEND_FETCH_CLASS_DEFAULT);
+			zend_class_entry *ce = zend_fetch_class(fse->function.class_name, ZEND_FETCH_CLASS_DEFAULT);
 
 #if PHP_VERSION_ID >= 70400
 			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {

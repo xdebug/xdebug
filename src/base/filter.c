@@ -75,11 +75,11 @@ static int xdebug_filter_match_path_exclude(function_stack_entry *fse, long *fil
 
 static int xdebug_filter_match_namespace_include(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
-	if (!fse->function.class && strlen(filter) == 0) {
+	if (!fse->function.class_name && filter[0] == '\0') {
 		*filtered_flag = 0;
 		return 1;
 	}
-	if (fse->function.class && strlen(filter) > 0 && strncasecmp(filter, fse->function.class, strlen(filter)) == 0) {
+	if (fse->function.class_name && filter[0] != '\0' && strncasecmp(filter, ZSTR_VAL(fse->function.class_name), strlen(filter)) == 0) {
 		*filtered_flag = 0;
 		return 1;
 	}
@@ -88,11 +88,11 @@ static int xdebug_filter_match_namespace_include(function_stack_entry *fse, long
 
 static int xdebug_filter_match_namespace_exclude(function_stack_entry *fse, long *filtered_flag, char *filter)
 {
-	if (!fse->function.class && strlen(filter) == 0) {
+	if (!fse->function.class_name && filter[0] == '\0') {
 		*filtered_flag = 1;
 		return 1;
 	}
-	if (fse->function.class && strlen(filter) > 0 && strncasecmp(filter, fse->function.class, strlen(filter)) == 0) {
+	if (fse->function.class_name && filter[0] != '\0' && strncasecmp(filter, ZSTR_VAL(fse->function.class_name), strlen(filter)) == 0) {
 		*filtered_flag = 1;
 		return 1;
 	}

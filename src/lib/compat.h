@@ -36,7 +36,6 @@ void xdebug_stripcslashes(char *string, int *new_len);
 
 zend_ulong xdebug_get_pid(void);
 
-zend_class_entry *xdebug_fetch_class(char *classname, int classname_len, int flags);
 void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly);
 char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
 
