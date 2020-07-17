@@ -15,5 +15,5 @@ try {
 echo "END";
 ?>
 --EXPECTF--
-syntax error, unexpected 'new' (T_NEW)
+syntax error, unexpected%Snew%S
 END
