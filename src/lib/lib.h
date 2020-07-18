@@ -27,8 +27,6 @@
 #include "zend_API.h"
 #include "compat.h"
 
-#define XDEBUG_NANOS_IN_SEC 1000000000
-
 typedef struct xdebug_var_name {
 	zend_string *name;
 	zval         data;

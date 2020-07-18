@@ -896,6 +896,7 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
 
+	XG_BASE(nanotime_init) = xdebug_get_nanotime_init();
 	XG_BASE(error_reporting_override) = 0;
 	XG_BASE(error_reporting_overridden) = 0;
 	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
@@ -938,11 +939,6 @@ void xdebug_base_rinit()
 	XG_BASE(last_exception_trace) = NULL;
 
 	/* Initialize start time */
-	XG_BASE(nanotime_start_abs) = xdebug_get_nanotime_abs_internal();
-	XG_BASE(nanotime_start_rel) = xdebug_get_nanotime_rel_internal();
-#if PHP_WIN32
-	XG_BASE(nanotime_win_freq)  = xdebug_get_nanotime_win_freq_internal();
-#endif
 	XG_BASE(start_time) = xdebug_get_utime();
 
 	XG_BASE(in_var_serialisation) = 0;

@@ -40,6 +40,7 @@
 #include "lib/compat.h"
 #include "lib/hash.h"
 #include "lib/llist.h"
+#include "lib/timing.h"
 
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
@@ -76,11 +77,7 @@ int xdebug_is_output_tty();
 struct xdebug_base_info {
 	unsigned long level;
 	xdebug_llist *stack;
-	uint64_t nanotime_start_abs;
-	uint64_t nanotime_start_rel;
-#if PHP_WIN32
-	uint64_t nanotime_win_freq;
-#endif
+	xdebug_nanotime_init nanotime_init;
 	double        start_time;
 	unsigned int  prev_memory;
 	zif_handler   orig_set_time_limit_func;

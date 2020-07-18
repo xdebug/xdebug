@@ -13,15 +13,27 @@
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@xdebug.org>                          |
+   |          Michael Voříšek <mvorisek@mvorisek.cz>                      |
    +----------------------------------------------------------------------+
  */
 
-#ifndef __XDEBUG_LIBRARY_PRIVATE_H__
-#define __XDEBUG_LIBRARY_PRIVATE_H__
+#ifndef __XDEBUG_TIMING_H__
+#define __XDEBUG_TIMING_H__
 
-#include "lib.h"
+#define NANOS_IN_SEC 1000000000
+#define NANOS_IN_MICROSEC 1000
 
-#define XG_LIB(v)      (XG(globals.library.v))
-#define XINI_LIB(v)    (XG(settings.library.v))
+typedef struct _xdebug_nanotime_init {
+	uint64_t start_abs;
+#if PHP_WIN32
+	uint64_t win_freq;
+#endif
+	uint64_t start_rel;
+} xdebug_nanotime_init;
+
+uint64_t xdebug_get_nanotime(void);
+xdebug_nanotime_init xdebug_get_nanotime_init(void);
+double xdebug_get_utime(void);
+char* xdebug_get_time(void);
 
 #endif

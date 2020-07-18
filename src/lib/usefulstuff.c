@@ -22,18 +22,13 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/file.h>
 #else
 #define PATH_MAX MAX_PATH
 #include <winsock2.h>
 #include <io.h>
-#include "win32/time.h"
 #include <process.h>
-#endif
-#ifdef __APPLE__
-#include <mach/mach_time.h>
 #endif
 #include "php_xdebug.h"
 
@@ -144,84 +139,6 @@ char* xdebug_strrstr(const char* haystack, const char* needle)
 	}
 
 	return loc;
-}
-
-uint64_t xdebug_get_nanotime_abs_internal(void)
-{
-#ifdef HAVE_GETTIMEOFDAY
-    struct timeval tp;
-
-    if (gettimeofday(&tp, NULL) == 0) {
-        return (uint64_t)tp.tv_sec * XDEBUG_NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
-    }
-#endif
-
-    return 0;
-}
-
-uint64_t xdebug_get_nanotime_rel_internal(void)
-{
-#ifdef _SC_MONOTONIC_CLOCK
-	struct timespec ts;
-#elif PHP_WIN32
-	LARGE_INTEGER tcounter;
-#endif
-
-	// Linux/Unix
-#ifdef _SC_MONOTONIC_CLOCK
-	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-		return (uint64_t)ts.tv_sec * XDEBUG_NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
-	}
-
-	return 0;
-#endif
-
-	// Windows
-#if PHP_WIN32
-	QueryPerformanceCounter(&tcounter);
-	return (uint64_t)tcounter.QuadPart * (XDEBUG_NANOS_IN_SEC / XG_BASE(nanotime_win_freq)); // fix before merge, we should use at least 96b aritmethics here (64b c * 32b nanos_in_sec) / 64b freq
-#endif
-
-	// Mac
-#ifdef __APPLE__
-	return = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
-#endif
-
-	// fallback if better platform specific relative time library is not available
-	return xdebug_get_nanotime_abs_internal();
-}
-
-uint64_t xdebug_get_nanotime(void)
-{
-	return XG_BASE(nanotime_start_abs) + (xdebug_get_nanotime_rel_internal() - XG_BASE(nanotime_start_rel));
-}
-
-#if PHP_WIN32
-uint64_t xdebug_get_nanotime_win_freq_internal(void)
-{
-	LARGE_INTEGER tcounter;
-
-	QueryPerformanceFrequency(&tcounter);
-	return (uint64_t)tcounter.QuadPart;
-}
-#endif
-
-double xdebug_get_utime(void)
-{
-	return xdebug_get_nanotime() / (double)XDEBUG_NANOS_IN_SEC;
-}
-
-char* xdebug_get_time(void)
-{
-    uint64_t nanotime;
-    time_t time_secs;
-	char  *res;
-
-    nanotime = xdebug_get_nanotime_abs_internal();
-    time_secs = (time_t)(nanotime / XDEBUG_NANOS_IN_SEC);
-    res = xdmalloc(24);
-	strftime(res, 24, "%Y-%m-%d %H:%M:%S", gmtime(&time_secs));
-	return res;
 }
 
 /* not all versions of php export this */
