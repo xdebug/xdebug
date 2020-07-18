@@ -32,6 +32,9 @@
 #include "win32/time.h"
 #include <process.h>
 #endif
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#endif
 #include "php_xdebug.h"
 
 #include "mm.h"
@@ -143,35 +146,132 @@ char* xdebug_strrstr(const char* haystack, const char* needle)
 	return loc;
 }
 
+// this function is intended to be removed once this PR is complete
 double xdebug_get_utime(void)
 {
+    return xdebug_nanotime_to_ts(xdebug_get_nanotime());
+}
+
+// do not export this function, only for xdebug_get_nanotime()
+uint64_t xdebug_get_nanotime_abs_internal(void)
+{
+    uint64_t nanotime_abs;
 #ifdef HAVE_GETTIMEOFDAY
-	struct timeval tp;
-	long sec = 0L;
-	double secf = 0.0;
-
-	if (gettimeofday((struct timeval *) &tp, NULL) == 0) {
-		sec = tp.tv_sec;
-		secf = (double) (tp.tv_usec / MICRO_IN_SEC);
-
-		if (secf >= 1.0) {
-			secf -= (long) secf;
-		}
-		return sec + secf;
-	}
+    struct timeval tp;
 #endif
-	return 0;
+
+    // gettimeofday() is defined almost on every platform usually with microsecond local precision
+#ifdef HAVE_GETTIMEOFDAY
+    if (gettimeofday(&tp, NULL) == 0) {
+        nanotime_abs = (uint64_t)tp.tv_sec * XDEBUG_NANO_IN_SEC + (uint64_t)tp.tv_usec * 1000; // 1000 us in ns
+
+        return nanotime_abs;
+    }
+#endif
+
+    nanotime_abs = 0;
+
+    return nanotime_abs;
+}
+
+static uint64_t xdebug_get_nanotime_first_rel = 2;
+static uint64_t xdebug_get_nanotime_first_abs = 2;
+#if PHP_WIN32
+static uint64_t xdebug_get_nanotime_win_freq = 2;
+#endif
+
+uint64_t xdebug_get_nanotime(void)
+{
+    uint64_t nanotime_rel;
+#ifdef _SC_MONOTONIC_CLOCK
+    struct timespec ts;
+#endif
+#if PHP_WIN32
+    LARGE_INTEGER tcounter;
+#endif
+
+    // 1. query absolute time with at least microsecond local precision
+    // only once and store it
+    if (xdebug_get_nanotime_first_abs == 2) {
+        xdebug_get_nanotime_first_abs = xdebug_get_nanotime_abs_internal();
+        if (xdebug_get_nanotime_first_abs == 2) {
+            // code should be never reached
+            // make sure it is never called twice
+            xdebug_get_nanotime_first_abs = 0;
+        }
+    }
+
+    // 2. query relative/monotonic time with good precision (<100 ns) and reasonable query speed (<30 ns)
+
+    // Linux/Unix
+#ifdef _SC_MONOTONIC_CLOCK
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        nanotime_rel = (uint64_t)ts.tv_sec * XDEBUG_NANO_IN_SEC + (uint64_t)ts.tv_nsec;
+
+        goto xdebug_get_nanotime_end;
+    }
+#endif
+
+    // Windows
+#if PHP_WIN32
+    if (xdebug_get_nanotime_win_freq == 2) {
+        QueryPerformanceFrequency(&tcounter);
+        xdebug_get_nanotime_win_freq = (uint64_t)tcounter.QuadPart;
+        if (xdebug_get_nanotime_win_freq == 2) {
+            // code should be never reached
+            // make sure it is never called twice
+            xdebug_get_nanotime_win_freq = 1;
+        }
+    }
+
+    QueryPerformanceCounter(&tcounter);
+    nanotime_rel = (uint64_t)tcounter.QuadPart * (XDEBUG_NANO_IN_SEC / xdebug_get_nanotime_win_freq);
+
+    goto xdebug_get_nanotime_end;
+#endif
+
+    // Mac
+#ifdef __APPLE__
+    nanotime_rel = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+
+    goto xdebug_get_nanotime_end;
+#endif
+
+    // fallback if better platform specific relative time library is not available
+    nanotime_rel = xdebug_get_nanotime_abs_internal();
+
+xdebug_get_nanotime_end:
+
+    if (xdebug_get_nanotime_first_rel == 2) {
+        xdebug_get_nanotime_first_rel = nanotime_rel;
+        if (xdebug_get_nanotime_first_rel == 2) {
+            // code should be never reached
+            // make sure it is never called twice
+            xdebug_get_nanotime_first_rel = 0;
+        }
+    }
+
+    return (nanotime_rel - xdebug_get_nanotime_first_rel) + xdebug_get_nanotime_first_abs;
+}
+
+// result may be inaccurate because large value (seconds since epoch stored)
+// stored as double has limited resolution of about 1 microsecond
+double xdebug_nanotime_to_ts(uint64_t nanotime)
+{
+    return nanotime / (double)XDEBUG_NANO_IN_SEC;
 }
 
 char* xdebug_get_time(void)
 {
-	time_t cur_time;
-	char  *str_time;
+    uint64_t nanotime;
+    time_t time_secs;
+	char  *res;
 
-	str_time = xdmalloc(24);
-	cur_time = time(NULL);
-	strftime(str_time, 24, "%Y-%m-%d %H:%M:%S", gmtime (&cur_time));
-	return str_time;
+    nanotime = xdebug_get_nanotime_abs_internal();
+    time_secs = (time_t)(nanotime / XDEBUG_NANO_IN_SEC);
+    res = xdmalloc(24);
+	strftime(res, 24, "%Y-%m-%d %H:%M:%S", gmtime(&time_secs));
+	return res;
 }
 
 /* not all versions of php export this */

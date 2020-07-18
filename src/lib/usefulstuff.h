@@ -44,7 +44,9 @@ xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int limit);
 const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end);
 char* xdebug_strrstr(const char* haystack, const char* needle);
-double xdebug_get_utime(void);
+double xdebug_get_utime(void); // this function is intended to be removed once this PR is complete
+uint64_t xdebug_get_nanotime(void);
+double xdebug_nanotime_to_ts(uint64_t nanotime);
 char* xdebug_get_time(void);
 char *xdebug_path_to_url(zend_string *fileurl);
 char *xdebug_path_from_url(zend_string *fileurl);
