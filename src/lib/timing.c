@@ -23,22 +23,40 @@
 	// for MFllMulDiv()
 	#include <mfapi.h>
 	#pragma comment(lib, "mfplat.lib")
+	#include <versionhelpers.h>
 #else
 	#include <sys/time.h>
 #endif
-#ifdef __APPLE__
+#if __APPLE__
 	#include <mach/mach_time.h>
 #endif
 
 #include "timing.h"
 
+#if PHP_WIN32
+	#define WIN_NANOS_IN_TICK 100
+	#define WIN_TICKS_SINCE_1601_JAN_1 116444736000000000ULL
+#endif
+
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-static uint64_t xdebug_get_nanotime_abs(void)
+static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init nanotime_init)
 {
-	#ifdef HAVE_GETTIMEOFDAY
+	#if PHP_WIN32
+		FILETIME filetime;
+	#endif
+	#if HAVE_GETTIMEOFDAY
 		struct timeval tp;
+	#endif
 
+	#if PHP_WIN32
+		if (nanotime_init.win_precise_time_func != NULL) {
+			nanotime_init.win_precise_time_func(&filetime);
+			return ((((uint64_t)filetime.dwHighDateTime << 32) + (uint64_t)filetime.dwLowDateTime) - WIN_TICKS_SINCE_1601_JAN_1)
+				* WIN_NANOS_IN_TICK;
+		}
+	#endif
+	#if HAVE_GETTIMEOFDAY
 		if (gettimeofday(&tp, NULL) == 0) {
 			return (uint64_t)tp.tv_sec * NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
 		}
@@ -49,14 +67,14 @@ static uint64_t xdebug_get_nanotime_abs(void)
 
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 {
-	#ifdef _SC_MONOTONIC_CLOCK
+	#if _SC_MONOTONIC_CLOCK
 		struct timespec ts;
 	#elif PHP_WIN32
 		LARGE_INTEGER tcounter;
 	#endif
 
 	// Linux/Unix
-	#ifdef _SC_MONOTONIC_CLOCK
+	#if _SC_MONOTONIC_CLOCK
 		if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
 			return (uint64_t)ts.tv_sec * NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
 		}
@@ -76,12 +94,12 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 	#endif
 
 	// Mac
-	#ifdef __APPLE__
+	#if __APPLE__
 		return = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
 	#endif
 
 	// fallback if better platform specific relative time library is not available
-	return xdebug_get_nanotime_abs();
+	return xdebug_get_nanotime_abs(nanotime_init);
 }
 
 uint64_t xdebug_get_nanotime(void)
@@ -96,7 +114,18 @@ xdebug_nanotime_init xdebug_get_nanotime_init(void)
 		LARGE_INTEGER tcounter;
 	#endif
 
-	res.start_abs = xdebug_get_nanotime_abs();
+	#if PHP_WIN32
+		if (IsWindows8OrGreater) {
+			res.win_precise_time_func = (WIN_PRECISE_TIME_FUNC)GetProcAddress(
+				GetModuleHandle(TEXT("kernel32.dll")),
+				"GetSystemTimePreciseAsFileTime"
+			);
+		} else {
+			res.win_precise_time_func = NULL;
+		}
+	#endif
+	res.start_abs = xdebug_get_nanotime_abs(res);
+
 	#if PHP_WIN32
 		QueryPerformanceFrequency(&tcounter);
 		res.win_freq = (uint64_t)tcounter.QuadPart;
@@ -117,7 +146,7 @@ char* xdebug_get_time(void)
 	time_t time_secs;
 	char  *res;
 
-	nanotime = xdebug_get_nanotime_abs();
+	nanotime = xdebug_get_nanotime_abs(XG_BASE(nanotime_init));
 	time_secs = (time_t)(nanotime / NANOS_IN_SEC);
 	res = xdmalloc(24);
 	strftime(res, 24, "%Y-%m-%d %H:%M:%S", gmtime(&time_secs));

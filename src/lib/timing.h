@@ -23,12 +23,17 @@
 #define NANOS_IN_SEC 1000000000
 #define NANOS_IN_MICROSEC 1000
 
+#if PHP_WIN32
+	typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
+#endif
+
 typedef struct _xdebug_nanotime_init {
 	uint64_t start_abs;
-#if PHP_WIN32
-	uint64_t win_freq;
-#endif
 	uint64_t start_rel;
+	#if PHP_WIN32
+		WIN_PRECISE_TIME_FUNC win_precise_time_func;
+		uint64_t win_freq;
+	#endif
 } xdebug_nanotime_init;
 
 uint64_t xdebug_get_nanotime(void);
