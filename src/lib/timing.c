@@ -62,21 +62,23 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init nanotime_init)
 	return 0;
 }
 
-static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
-{
-	uint32_t mul = 1, freq32;
-	uint64_t q, r;
+#if PHP_WIN32
+	static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
+	{
+		uint32_t mul = 1, freq32;
+		uint64_t q, r;
 
-	while (freq >= (1ULL << 32)) {
-		freq /= 2;
-		mul *= 2;
+		while (freq >= (1ULL << 32)) {
+			freq /= 2;
+			mul *= 2;
+		}
+		freq32 = (uint32_t)freq;
+
+		q = counter / freq32;
+		r = counter % freq32;
+		return (q * NANOS_IN_SEC + (r * NANOS_IN_SEC) / freq32) * mul;
 	}
-	freq32 = (uint32_t)freq;
-
-	q = counter / freq32;
-	r = counter % freq32;
-	return (q * NANOS_IN_SEC + (r * NANOS_IN_SEC) / freq32) * mul;
-}
+#endif
 
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 {
