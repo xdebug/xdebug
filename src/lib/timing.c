@@ -140,15 +140,32 @@ double xdebug_get_utime(void)
 	return xdebug_get_nanotime() / (double)NANOS_IN_SEC;
 }
 
+char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision)
+{
+	char *res;
+	time_t secs;
+	unsigned char i;
+
+	secs = (time_t)(nanotime / NANOS_IN_SEC);
+	if (precision > 0) {
+		res = xdmalloc(30);
+	} else {
+		res = xdmalloc(20);
+	}
+	strftime(res, 20, "%Y-%m-%d %H:%M:%S", gmtime(&secs));
+	if (precision > 0) {
+		sprintf(res + 19, ".%09u", (uint32_t)(nanotime % NANOS_IN_SEC));
+		if (precision < 9) {
+			*(res + 20 + precision) = '\0';
+		}
+	}
+	return res;
+}
+
 char* xdebug_get_time(void)
 {
 	uint64_t nanotime;
-	time_t time_secs;
-	char  *res;
-
+	
 	nanotime = xdebug_get_nanotime_abs(XG_BASE(nanotime_init));
-	time_secs = (time_t)(nanotime / NANOS_IN_SEC);
-	res = xdmalloc(24);
-	strftime(res, 24, "%Y-%m-%d %H:%M:%S", gmtime(&time_secs));
-	return res;
+	return xdebug_nanotime_to_chars(nanotime, 0);
 }
