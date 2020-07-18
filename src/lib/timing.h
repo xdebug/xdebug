@@ -30,9 +30,10 @@
 typedef struct _xdebug_nanotime_init {
 	uint64_t start_abs;
 	uint64_t start_rel;
+	uint64_t last_abs;
+	uint64_t last_rel;
 	#if PHP_WIN32
 		WIN_PRECISE_TIME_FUNC win_precise_time_func;
-		uint64_t win_freq;
 	#endif
 } xdebug_nanotime_init;
 

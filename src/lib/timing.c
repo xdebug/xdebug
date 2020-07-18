@@ -42,50 +42,20 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init nanotime_init)
 	#if PHP_WIN32
 		FILETIME filetime;
 	#endif
+	#if _SC_MONOTONIC_CLOCK
+		struct timespec ts;
+	#endif
 	#if HAVE_GETTIMEOFDAY
 		struct timeval tp;
 	#endif
 
+	// Windows
 	#if PHP_WIN32
 		if (nanotime_init.win_precise_time_func != NULL) {
 			nanotime_init.win_precise_time_func(&filetime);
 			return ((((uint64_t)filetime.dwHighDateTime << 32) + (uint64_t)filetime.dwLowDateTime) - WIN_TICKS_SINCE_1601_JAN_1)
 				* WIN_NANOS_IN_TICK;
 		}
-	#endif
-	#if HAVE_GETTIMEOFDAY
-		if (gettimeofday(&tp, NULL) == 0) {
-			return (uint64_t)tp.tv_sec * NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
-		}
-	#endif
-
-	return 0;
-}
-
-#if PHP_WIN32
-	static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
-	{
-		uint32_t mul = 1, freq32;
-		uint64_t q, r;
-
-		while (freq >= (1ULL << 32)) {
-			freq /= 2;
-			mul *= 2;
-		}
-		freq32 = (uint32_t)freq;
-
-		q = counter / freq32;
-		r = counter % freq32;
-		return (q * NANOS_IN_SEC + (r * NANOS_IN_SEC) / freq32) * mul;
-	}
-#endif
-
-static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
-{
-	#if _SC_MONOTONIC_CLOCK
-		struct timespec ts;
-	#elif PHP_WIN32
-		LARGE_INTEGER tcounter;
 	#endif
 
 	// Linux/Unix
@@ -97,35 +67,55 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 		return 0;
 	#endif
 
-	// Windows
-	#if PHP_WIN32
-		QueryPerformanceCounter(&tcounter);
-		return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_init.win_freq);
+	// fallback if better platform specific time is not available
+	#if HAVE_GETTIMEOFDAY
+		if (gettimeofday(&tp, NULL) == 0) {
+			return (uint64_t)tp.tv_sec * NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
+		}
 	#endif
 
+	return 0;
+}
+
+static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
+{
 	// Mac
+	// should be fast but can be relative
 	#if __APPLE__
-		return = clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+		return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
 	#endif
 
-	// fallback if better platform specific relative time library is not available
-	return xdebug_get_nanotime_abs(nanotime_init);
+	return 0;
 }
 
 uint64_t xdebug_get_nanotime(void)
 {
+	uint64_t nanotime;
 	xdebug_nanotime_init nanotime_init;
 
 	nanotime_init = XG_BASE(nanotime_init);
-	return nanotime_init.start_abs + (xdebug_get_nanotime_rel(nanotime_init) - nanotime_init.start_rel);
+
+	nanotime = xdebug_get_nanotime_rel(nanotime_init);
+	if (nanotime > 0) {
+		if (nanotime <= nanotime_init.last_rel) {
+			nanotime_init.last_rel++;
+			nanotime = nanotime_init.last_rel;
+		}
+		nanotime = nanotime_init.start_abs + (xdebug_get_nanotime_rel(nanotime_init) - nanotime_init.start_rel);
+	} else {
+		nanotime = xdebug_get_nanotime_abs(nanotime_init);
+		if (nanotime <= nanotime_init.last_abs) {
+			nanotime_init.last_abs++;
+			nanotime = nanotime_init.last_abs;
+		}
+	}
+
+	return nanotime;
 }
 
 xdebug_nanotime_init xdebug_get_nanotime_init(void)
 {
 	xdebug_nanotime_init res;
-	#if PHP_WIN32
-		LARGE_INTEGER tcounter;
-	#endif
 
 	#if PHP_WIN32
 		if (IsWindows8OrGreater) {
@@ -138,12 +128,9 @@ xdebug_nanotime_init xdebug_get_nanotime_init(void)
 		}
 	#endif
 	res.start_abs = xdebug_get_nanotime_abs(res);
-
-	#if PHP_WIN32
-		QueryPerformanceFrequency(&tcounter);
-		res.win_freq = (uint64_t)tcounter.QuadPart;
-	#endif
 	res.start_rel = xdebug_get_nanotime_rel(res);
+	res.last_abs = 0;
+	res.last_rel = 0;
 
 	return res;
 }
