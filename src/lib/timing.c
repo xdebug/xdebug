@@ -164,7 +164,7 @@ char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision)
 char* xdebug_get_time(void)
 {
 	uint64_t nanotime;
-	
+
 	nanotime = xdebug_get_nanotime_abs(XG_BASE(nanotime_init));
 	return xdebug_nanotime_to_chars(nanotime, 0);
 }
