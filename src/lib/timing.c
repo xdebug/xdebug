@@ -20,9 +20,6 @@
 #include "php_xdebug.h"
 #if PHP_WIN32
 	#include "win32/time.h"
-	// for MFllMulDiv()
-	#include <mfapi.h>
-	#pragma comment(lib, "mfplat.lib")
 	#include <versionhelpers.h>
 #else
 	#include <sys/time.h>
@@ -65,6 +62,22 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init nanotime_init)
 	return 0;
 }
 
+static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
+{
+	uint32_t mul = 1, freq32;
+	uint64_t q, r;
+
+	while (freq >= (1ULL << 32)) {
+		freq /= 2;
+		mul *= 2;
+	}
+	freq32 = (uint32_t)freq;
+
+	q = counter / freq32;
+	r = counter % freq32;
+	return (q * NANOS_IN_SEC + (r * NANOS_IN_SEC) / freq32) * mul;
+}
+
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 {
 	#if _SC_MONOTONIC_CLOCK
@@ -85,12 +98,7 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 	// Windows
 	#if PHP_WIN32
 		QueryPerformanceCounter(&tcounter);
-		return (uint64_t)MFllMulDiv(
-			tcounter.QuadPart,
-			NANOS_IN_SEC,
-			nanotime_init.win_freq,
-			(nanotime_init.win_freq / 2)
-		);
+		return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_init.win_freq);
 	#endif
 
 	// Mac
@@ -104,7 +112,10 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 
 uint64_t xdebug_get_nanotime(void)
 {
-	return XG_BASE(nanotime_init).start_abs + (xdebug_get_nanotime_rel(XG_BASE(nanotime_init)) - XG_BASE(nanotime_init).start_rel);
+	xdebug_nanotime_init nanotime_init;
+
+	nanotime_init = XG_BASE(nanotime_init);
+	return nanotime_init.start_abs + (xdebug_get_nanotime_rel(nanotime_init) - nanotime_init.start_rel);
 }
 
 xdebug_nanotime_init xdebug_get_nanotime_init(void)
@@ -144,7 +155,6 @@ char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision)
 {
 	char *res;
 	time_t secs;
-	unsigned char i;
 
 	secs = (time_t)(nanotime / NANOS_IN_SEC);
 	if (precision > 0) {
