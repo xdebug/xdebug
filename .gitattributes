@@ -1,0 +1,2 @@
+/tests/debugger/bug00627-symlink.inc -text -filter
+/tests/develop/bug00744.phpt -text -filter
