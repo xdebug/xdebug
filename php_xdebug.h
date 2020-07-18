@@ -76,6 +76,11 @@ int xdebug_is_output_tty();
 struct xdebug_base_info {
 	unsigned long level;
 	xdebug_llist *stack;
+	uint64_t nanotime_start_abs;
+	uint64_t nanotime_start_rel;
+#if PHP_WIN32
+	uint64_t nanotime_win_freq;
+#endif
 	double        start_time;
 	unsigned int  prev_memory;
 	zif_handler   orig_set_time_limit_func;
@@ -102,7 +107,7 @@ struct xdebug_base_info {
 	xdebug_llist *filters_code_coverage;
 
 	struct {
-		zend_long     max_nesting_level;
+		zend_long max_nesting_level;
 	} settings;
 };
 

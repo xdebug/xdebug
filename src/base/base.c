@@ -938,6 +938,11 @@ void xdebug_base_rinit()
 	XG_BASE(last_exception_trace) = NULL;
 
 	/* Initialize start time */
+	XG_BASE(nanotime_start_abs) = xdebug_get_nanotime_abs_internal();
+	XG_BASE(nanotime_start_rel) = xdebug_get_nanotime_rel_internal();
+#if PHP_WIN32
+	XG_BASE(nanotime_win_freq)  = xdebug_get_nanotime_win_freq_internal();
+#endif
 	XG_BASE(start_time) = xdebug_get_utime();
 
 	XG_BASE(in_var_serialisation) = 0;

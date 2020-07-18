@@ -24,4 +24,6 @@
 #define XG_LIB(v)      (XG(globals.library.v))
 #define XINI_LIB(v)    (XG(settings.library.v))
 
+#define NANOS_IN_MICROSEC 1000
+
 #endif

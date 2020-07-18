@@ -27,8 +27,7 @@
 #include "zend_API.h"
 #include "compat.h"
 
-#define XDEBUG_MICRO_IN_SEC 1000000 // 1e6, must be integer
-#define XDEBUG_NANO_IN_SEC 1000000000 // 1e9, must be integer
+#define XDEBUG_NANOS_IN_SEC 1000000000
 
 typedef struct xdebug_var_name {
 	zend_string *name;
