@@ -30,6 +30,8 @@
 
 #include "timing.h"
 
+#define NANOTIME_MIN_STEP 10
+
 #if PHP_WIN32
 	#define WIN_NANOS_IN_TICK 100
 	#define WIN_TICKS_SINCE_1601_JAN_1 116444736000000000ULL
@@ -37,7 +39,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init nanotime_init)
+static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init *nanotime_init)
 {
 	#if PHP_WIN32
 		FILETIME filetime;
@@ -51,8 +53,8 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init nanotime_init)
 
 	// Windows
 	#if PHP_WIN32
-		if (nanotime_init.win_precise_time_func != NULL) {
-			nanotime_init.win_precise_time_func(&filetime);
+		if (nanotime_init->win_precise_time_func != NULL) {
+			nanotime_init->win_precise_time_func(&filetime);
 			return ((((uint64_t)filetime.dwHighDateTime << 32) + (uint64_t)filetime.dwLowDateTime) - WIN_TICKS_SINCE_1601_JAN_1)
 				* WIN_NANOS_IN_TICK;
 		}
@@ -95,15 +97,15 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init nanotime_init)
 	}
 #endif
 
-static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
+static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init *nanotime_init)
 {
 	// Windows Windows 7 and lower
 	#if PHP_WIN32
 		LARGE_INTEGER tcounter;
 
-		if (nanotime_init.win_precise_time_func == NULL) {
+		if (nanotime_init->win_precise_time_func == NULL) {
 			QueryPerformanceCounter(&tcounter);
-			return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_init.win_freq);
+			return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_init->win_freq);
 		}
 	#endif
 
@@ -119,23 +121,25 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init nanotime_init)
 uint64_t xdebug_get_nanotime(void)
 {
 	uint64_t nanotime;
-	xdebug_nanotime_init nanotime_init;
+	xdebug_nanotime_init *nanotime_init;
 
-	nanotime_init = XG_BASE(nanotime_init);
+	nanotime_init = &XG_BASE(nanotime_init);
 
 	nanotime = xdebug_get_nanotime_rel(nanotime_init);
 	if (nanotime > 0) {
-		if (nanotime <= nanotime_init.last_rel) {
-			nanotime_init.last_rel++;
-			nanotime = nanotime_init.last_rel;
+		if (nanotime < nanotime_init->last_rel + NANOTIME_MIN_STEP) {
+            nanotime_init->last_rel += NANOTIME_MIN_STEP;
+			nanotime = nanotime_init->last_rel;
 		}
-		nanotime = nanotime_init.start_abs + (xdebug_get_nanotime_rel(nanotime_init) - nanotime_init.start_rel);
+		nanotime_init->last_rel = nanotime;
+		nanotime = nanotime_init->start_abs + (xdebug_get_nanotime_rel(nanotime_init) - nanotime_init->start_rel);
 	} else {
 		nanotime = xdebug_get_nanotime_abs(nanotime_init);
-		if (nanotime <= nanotime_init.last_abs) {
-			nanotime_init.last_abs++;
-			nanotime = nanotime_init.last_abs;
+		if (nanotime < nanotime_init->last_abs + NANOTIME_MIN_STEP) {
+            nanotime_init->last_abs += NANOTIME_MIN_STEP;
+			nanotime = nanotime_init->last_abs;
 		}
+		nanotime_init->last_abs = nanotime;
 	}
 
 	return nanotime;
@@ -160,8 +164,8 @@ xdebug_nanotime_init xdebug_get_nanotime_init(void)
 			res.win_freq = (uint64_t)tcounter.QuadPart;
 		}
 	#endif
-	res.start_abs = xdebug_get_nanotime_abs(res);
-	res.start_rel = xdebug_get_nanotime_rel(res);
+	res.start_abs = xdebug_get_nanotime_abs(&res);
+	res.start_rel = xdebug_get_nanotime_rel(&res);
 	res.last_abs = 0;
 	res.last_rel = 0;
 
@@ -198,6 +202,6 @@ char* xdebug_get_time(void)
 {
 	uint64_t nanotime;
 
-	nanotime = xdebug_get_nanotime_abs(XG_BASE(nanotime_init));
+	nanotime = xdebug_get_nanotime();
 	return xdebug_nanotime_to_chars(nanotime, 0);
 }
