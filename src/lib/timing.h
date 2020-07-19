@@ -20,28 +20,30 @@
 #ifndef __XDEBUG_TIMING_H__
 #define __XDEBUG_TIMING_H__
 
-#define NANOS_IN_SEC 1000000000
+#define NANOS_IN_SEC      1000000000
 #define NANOS_IN_MICROSEC 1000
 
 #if PHP_WIN32
-	typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
+typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
 #endif
 
-typedef struct _xdebug_nanotime_init {
+typedef struct _xdebug_nanotime_context {
 	uint64_t start_abs;
 	uint64_t start_rel;
 	uint64_t last_abs;
 	uint64_t last_rel;
-	#if PHP_WIN32
-		WIN_PRECISE_TIME_FUNC win_precise_time_func;
-		uint64_t win_freq;
-	#endif
-} xdebug_nanotime_init;
+#if PHP_WIN32
+	WIN_PRECISE_TIME_FUNC win_precise_time_func;
+	uint64_t win_freq;
+#endif
+} xdebug_nanotime_context;
+
+xdebug_nanotime_context xdebug_nanotime_init(void);
 
 uint64_t xdebug_get_nanotime(void);
-xdebug_nanotime_init xdebug_get_nanotime_init(void);
 double xdebug_get_utime(void);
-char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision);
 char* xdebug_get_time(void);
+
+char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision);
 
 #endif

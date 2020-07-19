@@ -77,7 +77,7 @@ int xdebug_is_output_tty();
 struct xdebug_base_info {
 	unsigned long level;
 	xdebug_llist *stack;
-	xdebug_nanotime_init nanotime_init;
+	xdebug_nanotime_context nanotime_context;
 	double        start_time;
 	unsigned int  prev_memory;
 	zif_handler   orig_set_time_limit_func;
@@ -104,7 +104,7 @@ struct xdebug_base_info {
 	xdebug_llist *filters_code_coverage;
 
 	struct {
-		zend_long max_nesting_level;
+		zend_long     max_nesting_level;
 	} settings;
 };
 

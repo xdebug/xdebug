@@ -19,13 +19,13 @@
 
 #include "php_xdebug.h"
 #if PHP_WIN32
-	#include "win32/time.h"
-	#include <versionhelpers.h>
+# include "win32/time.h"
+# include <versionhelpers.h>
 #else
-	#include <sys/time.h>
+# include <sys/time.h>
 #endif
 #if __APPLE__
-	#include <mach/mach_time.h>
+# include <mach/mach_time.h>
 #endif
 
 #include "timing.h"
@@ -33,87 +33,87 @@
 #define NANOTIME_MIN_STEP 10
 
 #if PHP_WIN32
-	#define WIN_NANOS_IN_TICK 100
-	#define WIN_TICKS_SINCE_1601_JAN_1 116444736000000000ULL
+# define WIN_NANOS_IN_TICK          100
+# define WIN_TICKS_SINCE_1601_JAN_1 116444736000000000ULL
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_init *nanotime_init)
+static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_context *nanotime_context)
 {
-	#if PHP_WIN32
-		FILETIME filetime;
-	#endif
-	#if _SC_MONOTONIC_CLOCK
-		struct timespec ts;
-	#endif
-	#if HAVE_GETTIMEOFDAY
-		struct timeval tp;
-	#endif
+#if PHP_WIN32
+	FILETIME filetime;
+#endif
+#if _SC_MONOTONIC_CLOCK
+	struct timespec ts;
+#endif
+#if HAVE_GETTIMEOFDAY
+	struct timeval tp;
+#endif
 
 	// Windows
-	#if PHP_WIN32
-		if (nanotime_init->win_precise_time_func != NULL) {
-			nanotime_init->win_precise_time_func(&filetime);
-			return ((((uint64_t)filetime.dwHighDateTime << 32) + (uint64_t)filetime.dwLowDateTime) - WIN_TICKS_SINCE_1601_JAN_1)
-				* WIN_NANOS_IN_TICK;
-		}
-	#endif
+#if PHP_WIN32
+	if (nanotime_context->win_precise_time_func != NULL) {
+		nanotime_context->win_precise_time_func(&filetime);
+		return ((((uint64_t)filetime.dwHighDateTime << 32) + (uint64_t)filetime.dwLowDateTime) - WIN_TICKS_SINCE_1601_JAN_1)
+			* WIN_NANOS_IN_TICK;
+	}
+#endif
 
 	// Linux/Unix
-	#if _SC_MONOTONIC_CLOCK
-		if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-			return (uint64_t)ts.tv_sec * NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
-		}
+#if _SC_MONOTONIC_CLOCK
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+		return (uint64_t)ts.tv_sec * NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
+	}
 
-		return 0;
-	#endif
+	return 0;
+#endif
 
 	// fallback if better platform specific time is not available
-	#if HAVE_GETTIMEOFDAY
-		if (gettimeofday(&tp, NULL) == 0) {
-			return (uint64_t)tp.tv_sec * NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
-		}
-	#endif
+#if HAVE_GETTIMEOFDAY
+	if (gettimeofday(&tp, NULL) == 0) {
+		return (uint64_t)tp.tv_sec * NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
+	}
+#endif
 
 	return 0;
 }
 
 #if PHP_WIN32
-	static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
-	{
-		uint32_t mul = 1, freq32;
-		uint64_t q, r;
+static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
+{
+	uint32_t mul = 1, freq32;
+	uint64_t q, r;
 
-		while (freq >= (1ULL << 32)) {
-			freq /= 2;
-			mul *= 2;
-		}
-		freq32 = (uint32_t)freq;
+	while (freq >= (1ULL << 32)) {
+		freq /= 2;
+		mul *= 2;
+	}
+	freq32 = (uint32_t)freq;
 
-		q = counter / freq32;
-		r = counter % freq32;
-		return (q * NANOS_IN_SEC + (r * NANOS_IN_SEC) / freq32) * mul;
+	q = counter / freq32;
+	r = counter % freq32;
+	return (q * NANOS_IN_SEC + (r * NANOS_IN_SEC) / freq32) * mul;
+}
+#endif
+
+static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
+{
+	// Windows Windows 7 and lower
+#if PHP_WIN32
+	LARGE_INTEGER tcounter;
+
+	if (nanotime_context->win_precise_time_func == NULL) {
+		QueryPerformanceCounter(&tcounter);
+		return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_context->win_freq);
 	}
 #endif
 
-static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init *nanotime_init)
-{
-	// Windows Windows 7 and lower
-	#if PHP_WIN32
-		LARGE_INTEGER tcounter;
-
-		if (nanotime_init->win_precise_time_func == NULL) {
-			QueryPerformanceCounter(&tcounter);
-			return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_init->win_freq);
-		}
-	#endif
-
 	// Mac
 	// should be fast but can be relative
-	#if __APPLE__
-		return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
-	#endif
+#if __APPLE__
+	return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+#endif
 
 	return 0;
 }
@@ -121,55 +121,53 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_init *nanotime_init)
 uint64_t xdebug_get_nanotime(void)
 {
 	uint64_t nanotime;
-	xdebug_nanotime_init *nanotime_init;
+	xdebug_nanotime_context *context;
 
-	nanotime_init = &XG_BASE(nanotime_init);
+	context = &XG_BASE(nanotime_context);
 
-	nanotime = xdebug_get_nanotime_rel(nanotime_init);
+	nanotime = xdebug_get_nanotime_rel(context);
 	if (nanotime > 0) {
-		if (nanotime < nanotime_init->last_rel + NANOTIME_MIN_STEP) {
-            nanotime_init->last_rel += NANOTIME_MIN_STEP;
-			nanotime = nanotime_init->last_rel;
+		if (nanotime < context->last_rel + NANOTIME_MIN_STEP) {
+			context->last_rel += NANOTIME_MIN_STEP;
+			nanotime = context->last_rel;
 		}
-		nanotime_init->last_rel = nanotime;
-		nanotime = nanotime_init->start_abs + (xdebug_get_nanotime_rel(nanotime_init) - nanotime_init->start_rel);
+		context->last_rel = nanotime;
+		nanotime = context->start_abs + (xdebug_get_nanotime_rel(context) - context->start_rel);
 	} else {
-		nanotime = xdebug_get_nanotime_abs(nanotime_init);
-		if (nanotime < nanotime_init->last_abs + NANOTIME_MIN_STEP) {
-            nanotime_init->last_abs += NANOTIME_MIN_STEP;
-			nanotime = nanotime_init->last_abs;
+		nanotime = xdebug_get_nanotime_abs(context);
+		if (nanotime < context->last_abs + NANOTIME_MIN_STEP) {
+			context->last_abs += NANOTIME_MIN_STEP;
+			nanotime = context->last_abs;
 		}
-		nanotime_init->last_abs = nanotime;
+		context->last_abs = nanotime;
 	}
 
 	return nanotime;
 }
 
-xdebug_nanotime_init xdebug_get_nanotime_init(void)
+xdebug_nanotime_context xdebug_nanotime_init(void)
 {
-	xdebug_nanotime_init res;
-	#if PHP_WIN32
-		LARGE_INTEGER tcounter;
-	#endif
+	xdebug_nanotime_context context;
+#if PHP_WIN32
+	LARGE_INTEGER tcounter;
 
-	#if PHP_WIN32
-		if (IsWindows8OrGreater()) {
-			res.win_precise_time_func = (WIN_PRECISE_TIME_FUNC)GetProcAddress(
-				GetModuleHandle(TEXT("kernel32.dll")),
-				"GetSystemTimePreciseAsFileTime"
-			);
-		} else {
-			res.win_precise_time_func = NULL;
-			QueryPerformanceFrequency(&tcounter);
-			res.win_freq = (uint64_t)tcounter.QuadPart;
-		}
-	#endif
-	res.start_abs = xdebug_get_nanotime_abs(&res);
-	res.start_rel = xdebug_get_nanotime_rel(&res);
-	res.last_abs = 0;
-	res.last_rel = 0;
+	if (IsWindows8OrGreater()) {
+		context.win_precise_time_func = (WIN_PRECISE_TIME_FUNC)GetProcAddress(
+			GetModuleHandle(TEXT("kernel32.dll")),
+			"GetSystemTimePreciseAsFileTime"
+		);
+	} else {
+		context.win_precise_time_func = NULL;
+		QueryPerformanceFrequency(&tcounter);
+		context.win_freq = (uint64_t)tcounter.QuadPart;
+	}
+#endif
+	context.start_abs = xdebug_get_nanotime_abs(&context);
+	context.start_rel = xdebug_get_nanotime_rel(&context);
+	context.last_abs = 0;
+	context.last_rel = 0;
 
-	return res;
+	return context;
 }
 
 double xdebug_get_utime(void)
