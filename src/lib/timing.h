@@ -38,7 +38,7 @@ typedef struct _xdebug_nanotime_context {
 #endif
 } xdebug_nanotime_context;
 
-xdebug_nanotime_context xdebug_nanotime_init(void);
+void xdebug_nanotime_init(void);
 
 uint64_t xdebug_get_nanotime(void);
 double xdebug_get_utime(void);

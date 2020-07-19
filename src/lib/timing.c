@@ -118,6 +118,31 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 	return 0;
 }
 
+void xdebug_nanotime_init(void)
+{
+	xdebug_nanotime_context context = {0};
+#if PHP_WIN32
+	LARGE_INTEGER tcounter;
+
+	if (IsWindows8OrGreater()) {
+		context.win_precise_time_func = (WIN_PRECISE_TIME_FUNC)GetProcAddress(
+			GetModuleHandle(TEXT("kernel32.dll")),
+			"GetSystemTimePreciseAsFileTime"
+		);
+	} else {
+		context.win_precise_time_func = NULL;
+		QueryPerformanceFrequency(&tcounter);
+		context.win_freq = (uint64_t)tcounter.QuadPart;
+	}
+#endif
+	context.start_abs = xdebug_get_nanotime_abs(&context);
+	context.start_rel = xdebug_get_nanotime_rel(&context);
+	context.last_abs = 0;
+	context.last_rel = 0;
+
+	XG_BASE(nanotime_context) = context;
+}
+
 uint64_t xdebug_get_nanotime(void)
 {
 	uint64_t nanotime;
@@ -145,34 +170,17 @@ uint64_t xdebug_get_nanotime(void)
 	return nanotime;
 }
 
-xdebug_nanotime_context xdebug_nanotime_init(void)
-{
-	xdebug_nanotime_context context;
-#if PHP_WIN32
-	LARGE_INTEGER tcounter;
-
-	if (IsWindows8OrGreater()) {
-		context.win_precise_time_func = (WIN_PRECISE_TIME_FUNC)GetProcAddress(
-			GetModuleHandle(TEXT("kernel32.dll")),
-			"GetSystemTimePreciseAsFileTime"
-		);
-	} else {
-		context.win_precise_time_func = NULL;
-		QueryPerformanceFrequency(&tcounter);
-		context.win_freq = (uint64_t)tcounter.QuadPart;
-	}
-#endif
-	context.start_abs = xdebug_get_nanotime_abs(&context);
-	context.start_rel = xdebug_get_nanotime_rel(&context);
-	context.last_abs = 0;
-	context.last_rel = 0;
-
-	return context;
-}
-
 double xdebug_get_utime(void)
 {
 	return xdebug_get_nanotime() / (double)NANOS_IN_SEC;
+}
+
+char* xdebug_get_time(void)
+{
+	uint64_t nanotime;
+
+	nanotime = xdebug_get_nanotime();
+	return xdebug_nanotime_to_chars(nanotime, 0);
 }
 
 char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision)
@@ -194,12 +202,4 @@ char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision)
 		}
 	}
 	return res;
-}
-
-char* xdebug_get_time(void)
-{
-	uint64_t nanotime;
-
-	nanotime = xdebug_get_nanotime();
-	return xdebug_nanotime_to_chars(nanotime, 0);
 }
