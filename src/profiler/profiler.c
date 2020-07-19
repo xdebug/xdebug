@@ -474,7 +474,6 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		fprintf(XG_PROF(profile_file), "%d %lu %lu\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 1000000), call_entry->mem_used >= 0 ? call_entry->mem_used : 0);
 	}
 	fprintf(XG_PROF(profile_file), "\n");
-	fflush(XG_PROF(profile_file));
 }
 
 void xdebug_profiler_free_function_details(function_stack_entry *fse)
