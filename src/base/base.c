@@ -108,41 +108,37 @@ static void function_stack_entry_dtor(void *dummy, void *elem)
 	unsigned int          i;
 	function_stack_entry *e = elem;
 
-	e->refcount--;
+	xdebug_func_dtor_by_ref(&e->function);
 
-	if (e->refcount == 0) {
-		xdebug_func_dtor_by_ref(&e->function);
-
-		if (e->filename) {
-			zend_string_release(e->filename);
-		}
-
-		if (e->var) {
-			for (i = 0; i < e->varc; i++) {
-				if (e->var[i].name) {
-					zend_string_release(e->var[i].name);
-				}
-				zval_ptr_dtor(&(e->var[i].data));
-			}
-			xdfree(e->var);
-		}
-
-		if (e->include_filename) {
-			zend_string_release(e->include_filename);
-		}
-
-		if (e->declared_vars) {
-			xdebug_llist_destroy(e->declared_vars, NULL);
-			e->declared_vars = NULL;
-		}
-
-		if (e->profile.call_list) {
-			xdebug_llist_destroy(e->profile.call_list, NULL);
-			e->profile.call_list = NULL;
-		}
-
-		xdfree(e);
+	if (e->filename) {
+		zend_string_release(e->filename);
 	}
+
+	if (e->var) {
+		for (i = 0; i < e->varc; i++) {
+			if (e->var[i].name) {
+				zend_string_release(e->var[i].name);
+			}
+			zval_ptr_dtor(&(e->var[i].data));
+		}
+		xdfree(e->var);
+	}
+
+	if (e->include_filename) {
+		zend_string_release(e->include_filename);
+	}
+
+	if (e->declared_vars) {
+		xdebug_llist_destroy(e->declared_vars, NULL);
+		e->declared_vars = NULL;
+	}
+
+	if (e->profile.call_list) {
+		xdebug_llist_destroy(e->profile.call_list, NULL);
+		e->profile.call_list = NULL;
+	}
+
+	xdfree(e);
 }
 
 static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
@@ -449,7 +445,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp = xdmalloc (sizeof (function_stack_entry));
 	tmp->var           = NULL;
 	tmp->varc          = 0;
-	tmp->refcount      = 1;
 	tmp->level         = XG_BASE(level);
 	tmp->arg_done      = 0;
 	tmp->declared_vars = NULL;
