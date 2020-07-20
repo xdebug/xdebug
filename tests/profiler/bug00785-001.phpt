@@ -158,8 +158,8 @@ fn=(6) require_once::%sbug00785-001.inc
 cfl=(2)
 cfn=(5)
 calls=1 0 0
-12 %d %d
+12 %d %d%r
 
-fl=(1)
-fn=(7) php::xdebug_get_profiler_filename
-4 %d %d
+fl=\(1\)
+fn=\(7\) php::xdebug_get_profiler_filename
+4 \d+ \d+|%r

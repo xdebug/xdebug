@@ -19,8 +19,8 @@ cmd: %sstart_with_request_default_no_env.php
 part: 1
 positions: line
 
-events: Time_(µs) Memory_(bytes)
+events: Time_(µs) Memory_(bytes)%r
 
-fl=(1) php:internal
-fn=(1) php::xdebug_get_profiler_filename
-2 %d %d
+fl=\(1\) php:internal
+fn=\(1\) php::xdebug_get_profiler_filename
+2 \d+ \d+|%r

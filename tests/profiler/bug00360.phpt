@@ -25,8 +25,8 @@ events: Time_(µs) Memory_(bytes)
 
 fl=(1) %sbug00360.php
 fn=(1) func
-2 %d %d
+2 %d %d%r
 
-fl=(2) php:internal
-fn=(2) php::xdebug_get_profiler_filename
-8 %d %d
+fl=\(2\) php:internal
+fn=\(2\) php::xdebug_get_profiler_filename
+8 \d+ \d+|%r
