@@ -221,8 +221,8 @@ calls=1 0 0
 cfl=(1)
 cfn=(7)
 calls=1 0 0
-26 %d %i
+26 %d %i%r
 
-fl=(1)
-fn=(9) php::xdebug_get_profiler_filename
-4 %d %i
+fl=\(1\)
+fn=\(9\) php::xdebug_get_profiler_filename
+4 \d+ \d+|%r

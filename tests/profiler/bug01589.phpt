@@ -32,11 +32,11 @@ events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::substr
-11 %d %d
+12 %d %d
 
 fl=(1)
 fn=(2) php::register_shutdown_function
-16 %d %d
+17 %d %d
 
 fl=(2) %sbug01589-prepend.inc
 fn=(3) {main}
@@ -44,11 +44,11 @@ fn=(3) {main}
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-11 %d %d
+12 %d %d
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-16 %d %d
+17 %d %d
 
 fl=(1)
 fn=(1)
@@ -80,4 +80,8 @@ calls=1 0 0
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-9 %d %d
+9 %d %d%r
+
+fl=\(1\)
+fn=\(4\)
+6 \d+ \d+|%r

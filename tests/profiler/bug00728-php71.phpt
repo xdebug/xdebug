@@ -58,8 +58,8 @@ fn=(4) bankaccount->bar
 cfl=(2)
 cfn=(3)
 calls=1 0 0
-11 %d %i
+11 %d %i%r
 
-fl=(1)
-fn=(5) php::xdebug_get_profiler_filename
-13 %d %i
+fl=\(1\)
+fn=\(5\) php::xdebug_get_profiler_filename
+13 \d+ \d+|%r

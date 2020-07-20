@@ -3,6 +3,7 @@ function capture()
 {
 	global $filename;
 
+	xdebug_get_profiler_filename(); // flush profile file
 	echo file_get_contents($filename);
 	@unlink($filename);
 }
