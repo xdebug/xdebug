@@ -56,6 +56,8 @@ void xdebug_profiler_mshutdown(void)
 void xdebug_profiler_rinit(void)
 {
 	XG_PROF(profile_file)  = NULL;
+    XG_PROF(profile_file_buffer_len) = 0;
+	XG_PROF(profile_file_buffer) = NULL;
 	XG_PROF(profile_filename) = NULL;
 	XG_PROF(profile_filename_refs) = NULL;
 	XG_PROF(profile_functionname_refs) = NULL;
@@ -158,15 +160,43 @@ void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 	xdfree(ce);
 }
 
-static void profiler_write_header(FILE *file, char *script_name)
+static void profiler_fflush(char incl_file_flush)
+{
+	fwrite(XG_PROF(profile_file_buffer), sizeof(char), XG_PROF(profile_file_buffer_len), XG_PROF(profile_file));
+	XG_PROF(profile_file_buffer_len) = 0;
+
+	if (incl_file_flush) {
+		fflush(XG_PROF(profile_file));
+	}
+}
+
+static inline void profiler_fprintf_pre()
+{
+	if (XG_PROF(profile_file_buffer_len) >= PROFILE_FILE_BUFFER_SIZE / 2) {
+		profiler_fflush(0);
+	}
+}
+
+static inline void profiler_fprintf_post(int len)
+{
+	if (len >= 0) {
+		XG_PROF(profile_file_buffer_len) += len;
+	}
+}
+
+#define profiler_fprintf(format, ...) { \
+		profiler_fprintf_pre(); \
+		profiler_fprintf_post(sprintf(XG_PROF(profile_file_buffer) + XG_PROF(profile_file_buffer_len), format, __VA_ARGS__)); \
+	}
+
+static void profiler_write_header(char *script_name)
 {
 	if (XINI_PROF(profiler_append)) {
-		fprintf(file, "\n==== NEW PROFILING FILE ==============================================\n");
+		profiler_fprintf("\n==== NEW PROFILING FILE ==============================================\n");
 	}
-	fprintf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
-	fprintf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
-	fprintf(file, "events: Time_(µs) Memory_(bytes)\n\n");
-	fflush(file);
+	profiler_fprintf("version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
+	profiler_fprintf("cmd: %s\npart: 1\npositions: line\n\n", script_name);
+	profiler_fprintf("events: Time_(µs) Memory_(bytes)\n\n");
 }
 
 void xdebug_profiler_init(char *script_name)
@@ -206,7 +236,10 @@ void xdebug_profiler_init(char *script_name)
 		return;
 	}
 
-	profiler_write_header(XG_PROF(profile_file), script_name);
+    XG_PROF(profile_file_buffer_len) = 0;
+	XG_PROF(profile_file_buffer) = xdmalloc(PROFILE_FILE_BUFFER_SIZE);
+
+	profiler_write_header(script_name);
 
 	if (!SG(headers_sent)) {
 		sapi_header_line ctr = {0};
@@ -246,11 +279,14 @@ void xdebug_profiler_deinit()
 
 	XG_PROF(active) = 0;
 
-	fflush(XG_PROF(profile_file));
+	profiler_fflush(1);
 
 	if (XG_PROF(profile_file)) {
 		fclose(XG_PROF(profile_file));
 		XG_PROF(profile_file) = NULL;
+        XG_PROF(profile_file_buffer_len) = 0;
+        xdfree(XG_PROF(profile_file_buffer));
+        XG_PROF(profile_file_buffer) = NULL;
 	}
 
 	if (XG_PROF(profile_filename)) {
@@ -417,8 +453,8 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		fl_ref = get_filename_ref((char*) "php:internal");
 		fn_ref = get_functionname_ref(tmp_key);
 
-		fprintf(XG_PROF(profile_file), "fl=%s\n", fl_ref);
-		fprintf(XG_PROF(profile_file), "fn=%s\n", fn_ref);
+		profiler_fprintf("fl=%s\n", fl_ref);
+		profiler_fprintf("fn=%s\n", fn_ref);
 
 		xdfree(fl_ref);
 		xdfree(fn_ref);
@@ -429,8 +465,8 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		fl_ref = get_filename_ref(ZSTR_VAL(fse->profiler.filename));
 		fn_ref = get_functionname_ref(fse->profiler.funcname);
 
-		fprintf(XG_PROF(profile_file), "fl=%s\n", fl_ref);
-		fprintf(XG_PROF(profile_file), "fn=%s\n", fn_ref);
+		profiler_fprintf("fl=%s\n", fl_ref);
+		profiler_fprintf("fn=%s\n", fn_ref);
 
 		xdfree(fl_ref);
 		xdfree(fn_ref);
@@ -444,7 +480,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		fse->profile.time -= call_entry->time_taken;
 		fse->profile.memory -= call_entry->mem_used;
 	}
-	fprintf(XG_PROF(profile_file), "%d %lu %ld\n", fse->profiler.lineno, (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
+	profiler_fprintf("%d %lu %ld\n", fse->profiler.lineno, (unsigned long) (fse->profile.time * 1000000), (fse->profile.memory));
 
 	/* dump call list */
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -464,16 +500,16 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 			fn_ref = get_functionname_ref(call_entry->function);
 		}
 
-		fprintf(XG_PROF(profile_file), "cfl=%s\n", fl_ref);
-		fprintf(XG_PROF(profile_file), "cfn=%s\n", fn_ref);
+		profiler_fprintf("cfl=%s\n", fl_ref);
+		profiler_fprintf("cfn=%s\n", fn_ref);
 
 		xdfree(fl_ref);
 		xdfree(fn_ref);
 
-		fprintf(XG_PROF(profile_file), "calls=1 0 0\n");
-		fprintf(XG_PROF(profile_file), "%d %lu %ld\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 1000000), (call_entry->mem_used));
+		profiler_fprintf("calls=1 0 0\n");
+		profiler_fprintf("%d %lu %ld\n", call_entry->lineno, (unsigned long) (call_entry->time_taken * 1000000), (call_entry->mem_used));
 	}
-	fprintf(XG_PROF(profile_file), "\n");
+	profiler_fprintf("\n");
 }
 
 void xdebug_profiler_free_function_details(function_stack_entry *fse)
@@ -492,7 +528,7 @@ char *xdebug_get_profiler_filename()
 		return NULL;
 	}
 
-	fflush(XG_PROF(profile_file));
+	profiler_fflush(1);
 
 	return XG_PROF(profile_filename);
 }

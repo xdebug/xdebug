@@ -23,10 +23,14 @@
 #include "TSRM.h"
 #include "lib/lib.h"
 
+#define PROFILE_FILE_BUFFER_SIZE 131072
+
 typedef struct _xdebug_profiler_globals_t {
 	zend_bool     active;
 	double        profiler_start_time;
 	FILE         *profile_file;
+	char         *profile_file_buffer;
+	int           profile_file_buffer_len;
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;
 	int           profile_last_filename_ref;
