@@ -270,8 +270,7 @@ void xdebug_profiler_deinit()
 		xdebug_profiler_function_end(fse);
 	}
 
-	fprintf(
-		XG_PROF(profile_file),
+	profiler_fprintf(
 		"summary: %lu %zd\n\n",
 		(unsigned long) ((xdebug_get_utime() - (XG_PROF(profiler_start_time))) * 1000000),
 		zend_memory_peak_usage(0)
