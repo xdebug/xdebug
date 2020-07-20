@@ -184,9 +184,9 @@ static inline void profiler_fprintf_post(int len)
 	}
 }
 
-#define profiler_fprintf(format, ...) { \
+#define profiler_fprintf(...) { \
 		profiler_fprintf_pre(); \
-		profiler_fprintf_post(sprintf(XG_PROF(profile_file_buffer) + XG_PROF(profile_file_buffer_len), format, __VA_ARGS__)); \
+		profiler_fprintf_post(sprintf(XG_PROF(profile_file_buffer) + XG_PROF(profile_file_buffer_len), __VA_ARGS__)); \
 	}
 
 static void profiler_write_header(char *script_name)
