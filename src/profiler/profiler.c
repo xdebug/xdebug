@@ -492,6 +492,8 @@ char *xdebug_get_profiler_filename()
 		return NULL;
 	}
 
+	fflush(XG_PROF(profile_file));
+
 	return XG_PROF(profile_filename);
 }
 
