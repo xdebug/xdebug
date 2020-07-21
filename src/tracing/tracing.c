@@ -572,7 +572,7 @@ static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLE
 			val = xdebug_get_zval(execute_data, cur_opcode->op2_type, &cur_opcode->op2, &is_var);
 		}
 
-		fse = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
+		fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 		if (XG_TRACE(trace_context) && XINI_TRACE(collect_assignments) && XG_TRACE(trace_handler)->assignment) {
 			XG_TRACE(trace_handler)->assignment(XG_TRACE(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno);
 		}

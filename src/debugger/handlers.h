@@ -25,6 +25,7 @@
 #include "lib/hash.h"
 #include "lib/lib.h"
 #include "lib/usefulstuff.h"
+#include "lib/vector.h"
 #include "debugger_private.h"
 
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
@@ -128,11 +129,11 @@ struct _xdebug_remote_handler {
 	int (*cmdloop)(xdebug_con *h, int block, int bail);
 
 	/* Stack messages */
-	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_llist *stack);
+	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_vector *stack);
 
 	/* Breakpoints */
 	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, zend_string *filename, int lineno);
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_llist *stack, zend_string *filename, long lineno, int type, char *exception, char *code, char *message);
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, char *message);
 	int (*resolve_breakpoints)(xdebug_con *h, zend_string *opa);
 
 	/* Output redirection */

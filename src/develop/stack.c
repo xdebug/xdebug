@@ -98,18 +98,19 @@ static const char** select_formats(int html) {
 
 void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno)
 {
-	xdebug_llist_element *le;
-	function_stack_entry *i;
 	char                 *tmp_log_message;
 
 	tmp_log_message = xdebug_sprintf( "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
 	php_log_err(tmp_log_message);
 	xdfree(tmp_log_message);
 
-	if (XG_BASE(stack) && XG_BASE(stack)->size) {
+	if (XG_BASE(stack) && XDEBUG_VECTOR_COUNT(XG_BASE(stack)) > 0) {
+		int                   i;
+		function_stack_entry *fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
+
 		php_log_err((char*) "PHP Stack trace:");
 
-		for (le = XDEBUG_LLIST_HEAD(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
+		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, fse++)
 		{
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
@@ -117,13 +118,12 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			xdebug_str log_buffer = XDEBUG_STR_INITIALIZER;
 			int variadic_opened = 0;
 
-			i = XDEBUG_LLIST_VALP(le);
-			tmp_name = xdebug_show_fname(i->function, 0, 0);
-			xdebug_str_add_fmt(&log_buffer, "PHP %3d. %s(", i->level, tmp_name);
+			tmp_name = xdebug_show_fname(fse->function, 0, 0);
+			xdebug_str_add_fmt(&log_buffer, "PHP %3d. %s(", fse->level, tmp_name);
 			xdfree(tmp_name);
 
 			/* Printing vars */
-			for (j = 0; j < i->varc; j++) {
+			for (j = 0; j < fse->varc; j++) {
 				xdebug_str *tmp_value;
 
 				if (c) {
@@ -133,24 +133,24 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				}
 
 				if (
-					(i->var[j].is_variadic && XINI_LIB(collect_params) != 5)
+					(fse->var[j].is_variadic && XINI_LIB(collect_params) != 5)
 				) {
 					xdebug_str_add_literal(&log_buffer, "...");
 					variadic_opened = 1;
 				}
 
-				if (i->var[j].name) {
-					xdebug_str_add_fmt(&log_buffer, "$%s = ", ZSTR_VAL(i->var[j].name));
+				if (fse->var[j].name) {
+					xdebug_str_add_fmt(&log_buffer, "$%s = ", ZSTR_VAL(fse->var[j].name));
 				}
 
-				if (i->var[j].is_variadic) {
+				if (fse->var[j].is_variadic) {
 					xdebug_str_add_literal(&log_buffer, "variadic(");
 					c = 0;
 					continue;
 				}
 
-				if (!Z_ISUNDEF(i->var[j].data)) {
-					tmp_value = xdebug_get_zval_value_line(&i->var[j].data, 0, NULL);
+				if (!Z_ISUNDEF(fse->var[j].data)) {
+					tmp_value = xdebug_get_zval_value_line(&fse->var[j].data, 0, NULL);
 					xdebug_str_add_str(&log_buffer, tmp_value);
 					xdebug_str_free(tmp_value);
 				} else {
@@ -162,7 +162,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				xdebug_str_add_literal(&log_buffer, ")");
 			}
 
-			xdebug_str_add_fmt(&log_buffer, ") %s:%d", ZSTR_VAL(i->filename), i->lineno);
+			xdebug_str_add_fmt(&log_buffer, ") %s:%d", ZSTR_VAL(fse->filename), fse->lineno);
 			php_log_err(log_buffer.d);
 			xdebug_str_destroy(&log_buffer);
 		}
@@ -417,37 +417,35 @@ static void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element*
 
 void xdebug_append_printable_stack(xdebug_str *str, int html)
 {
-	xdebug_llist_element *le;
-	function_stack_entry *i;
 	int                   printed_frames = 0;
 	const char          **formats = select_formats(html);
 
-	if (XG_BASE(stack) && XG_BASE(stack)->size) {
-		i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_HEAD(XG_BASE(stack)));
+	if (XG_BASE(stack) && XDEBUG_VECTOR_COUNT(XG_BASE(stack)) > 0) {
+		int                   i;
+		function_stack_entry *fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
 
 		xdebug_str_add_const(str, formats[2]);
 
-		for (le = XDEBUG_LLIST_HEAD(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_NEXT(le))
+		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, fse++)
 		{
 			int c = 0; /* Comma flag */
 			unsigned int j = 0; /* Counter */
 			char *tmp_name;
 			int variadic_opened = 0;
 
-			i = XDEBUG_LLIST_VALP(le);
-			if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_TRACING, i)) {
+			if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_TRACING, fse)) {
 				continue;
 			}
-			tmp_name = xdebug_show_fname(i->function, html, 0);
+			tmp_name = xdebug_show_fname(fse->function, html, 0);
 			if (html) {
-				xdebug_str_add_fmt(str, formats[3], i->level, i->time - XG_BASE(start_time), i->memory, tmp_name);
+				xdebug_str_add_fmt(str, formats[3], fse->level, fse->time - XG_BASE(start_time), fse->memory, tmp_name);
 			} else {
-				xdebug_str_add_fmt(str, formats[3], i->time - XG_BASE(start_time), i->memory, i->level, tmp_name);
+				xdebug_str_add_fmt(str, formats[3], fse->time - XG_BASE(start_time), fse->memory, fse->level, tmp_name);
 			}
 			xdfree(tmp_name);
 
 			/* Printing vars */
-			for (j = 0; j < i->varc; j++) {
+			for (j = 0; j < fse->varc; j++) {
 				if (c) {
 					xdebug_str_add_literal(str, ", ");
 				} else {
@@ -455,24 +453,24 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 				}
 
 				if (
-					(i->var[j].is_variadic && Z_ISUNDEF(i->var[j].data))
+					(fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data))
 				) {
 					xdebug_str_add_literal(str, "...");
 				}
 
-				if (i->var[j].name && XINI_LIB(collect_params) == 4) {
+				if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
 					if (html) {
 						xdebug_str_add_literal(str, "<span>$");
-						xdebug_str_add_zstr(str, i->var[j].name);
+						xdebug_str_add_zstr(str, fse->var[j].name);
 						xdebug_str_add_literal(str, " = </span>");
 					} else {
 						xdebug_str_add_literal(str, "$");
-						xdebug_str_add_zstr(str, i->var[j].name);
+						xdebug_str_add_zstr(str, fse->var[j].name);
 						xdebug_str_add_literal(str, " = ");
 					}
 				}
 
-				if (!variadic_opened && i->var[j].is_variadic && Z_ISUNDEF(i->var[j].data)) {
+				if (!variadic_opened && fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data)) {
 					if (html) {
 						xdebug_str_add_literal(str, "<i>variadic</i>(");
 					} else {
@@ -483,8 +481,8 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 					continue;
 				}
 
-				if (!Z_ISUNDEF(i->var[j].data)) {
-					add_single_value(str, &i->var[j].data, html, XINI_LIB(collect_params));
+				if (!Z_ISUNDEF(fse->var[j].data)) {
+					add_single_value(str, &fse->var[j].data, html, XINI_LIB(collect_params));
 				} else {
 					xdebug_str_add_literal(str, "???");
 				}
@@ -494,35 +492,35 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 				xdebug_str_add_literal(str, ")");
 			}
 
-			if (i->include_filename) {
+			if (fse->include_filename) {
 				if (html) {
 					xdebug_str_add_literal(str, "<font color='#00bb00'>'");
-					xdebug_str_add_zstr(str, i->include_filename);
+					xdebug_str_add_zstr(str, fse->include_filename);
 					xdebug_str_add_literal(str, "</font>");
 				} else {
 					xdebug_str_addc(str, '\'');
-					xdebug_str_add_zstr(str, i->include_filename);
+					xdebug_str_add_zstr(str, fse->include_filename);
 					xdebug_str_addc(str, '\'');
 				}
 			}
 
 			if (html) {
 				char *formatted_filename;
-				xdebug_format_filename(&formatted_filename, "...%s%n", i->filename);
+				xdebug_format_filename(&formatted_filename, "...%s%n", fse->filename);
 
 				if (strlen(XINI_LIB(file_link_format)) > 0) {
 					char *file_link;
 
-					xdebug_format_file_link(&file_link, ZSTR_VAL(i->filename), i->lineno);
-					xdebug_str_add_fmt(str, formats[10], ZSTR_VAL(i->filename), file_link, formatted_filename, i->lineno);
+					xdebug_format_file_link(&file_link, ZSTR_VAL(fse->filename), fse->lineno);
+					xdebug_str_add_fmt(str, formats[10], ZSTR_VAL(fse->filename), file_link, formatted_filename, fse->lineno);
 					xdfree(file_link);
 				} else {
-					xdebug_str_add_fmt(str, formats[5], ZSTR_VAL(i->filename), formatted_filename, i->lineno);
+					xdebug_str_add_fmt(str, formats[5], ZSTR_VAL(fse->filename), formatted_filename, fse->lineno);
 				}
 
 				xdfree(formatted_filename);
 			} else {
-				xdebug_str_add_fmt(str, formats[5], ZSTR_VAL(i->filename), i->lineno);
+				xdebug_str_add_fmt(str, formats[5], ZSTR_VAL(fse->filename), fse->lineno);
 			}
 
 			printed_frames++;
@@ -540,19 +538,19 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			XG_LIB(dumped) = 1;
 		}
 
-		if (XINI_DEV(show_local_vars) && XG_BASE(stack) && XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
-			int scope_nr = XG_BASE(stack)->size;
+		if (XINI_DEV(show_local_vars) && XG_BASE(stack) && XDEBUG_VECTOR_TAIL(XG_BASE(stack))) {
+			int scope_nr = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
 
-			i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
-			if (i->user_defined == XDEBUG_BUILT_IN && XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_BASE(stack))) && XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_BASE(stack))))) {
-				i = XDEBUG_LLIST_VALP(XDEBUG_LLIST_PREV(XDEBUG_LLIST_TAIL(XG_BASE(stack))));
+			fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+			if (fse->user_defined == XDEBUG_BUILT_IN && fse->prev) {
+				fse = fse->prev;
 				scope_nr--;
 			}
-			if (i->declared_vars && i->declared_vars->size) {
+			if (fse->declared_vars && fse->declared_vars->size) {
 				xdebug_hash *tmp_hash;
 
 				xdebug_str_add_fmt(str, formats[6], scope_nr);
-				tmp_hash = xdebug_declared_var_hash_from_llist(i->declared_vars);
+				tmp_hash = xdebug_declared_var_hash_from_llist(fse->declared_vars);
 				xdebug_hash_apply_with_argument(tmp_hash, (void*) &html, xdebug_dump_used_var_with_contents, (void *) str);
 				xdebug_hash_destroy(tmp_hash);
 			}
@@ -1020,16 +1018,16 @@ PHP_FUNCTION(xdebug_get_stack_depth)
 {
 	/* We substract one so that the function call to xdebug_get_stack_depth()
 	 * is not part of the returned depth. */
-	RETURN_LONG(XG_BASE(stack)->size - 1);
+	RETURN_LONG(XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1);
 }
 
 /* {{{ proto array xdebug_get_function_stack()
    Returns an array representing the current stack */
 PHP_FUNCTION(xdebug_get_function_stack)
 {
-	xdebug_llist_element *le;
+	function_stack_entry *fse;
+	unsigned int          i;
 	unsigned int          j;
-	unsigned int          k;
 	zval                 *frame;
 	zval                 *params;
 
@@ -1040,13 +1038,12 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	}
 
 	array_init(return_value);
-	le = XDEBUG_LLIST_HEAD(XG_BASE(stack));
 
-	for (k = 0; k < XG_BASE(stack)->size - 1; k++, le = XDEBUG_LLIST_NEXT(le)) {
-		function_stack_entry *i = XDEBUG_LLIST_VALP(le);
+	fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
 
-		if (i->function.function) {
-			if (strcmp(i->function.function, "xdebug_get_function_stack") == 0) {
+	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++) {
+		if (fse->function.function) {
+			if (strcmp(fse->function.function, "xdebug_get_function_stack") == 0) {
 				return;
 			}
 		}
@@ -1056,33 +1053,33 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		array_init(frame);
 
 		/* Add data */
-		if (i->function.function) {
-			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), i->function.function);
+		if (fse->function.function) {
+			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), fse->function.function);
 		}
-		if (i->function.class_name) {
-			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (i->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
-			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    i->function.class_name);
+		if (fse->function.class_name) {
+			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (fse->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
+			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    fse->function.class_name);
 		}
-		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), i->filename);
-		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), i->lineno);
+		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), fse->filename);
+		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), fse->lineno);
 
 		/* Add parameters */
 		XDEBUG_MAKE_STD_ZVAL(params);
 		array_init(params);
 		add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
 
-		for (j = 0; j < i->varc; j++) {
+		for (j = 0; j < fse->varc; j++) {
 			int         variadic_opened = 0;
 			xdebug_str *argument = NULL;
 
-			if (i->var[j].is_variadic) {
+			if (fse->var[j].is_variadic) {
 				zval *vparams;
 
 				XDEBUG_MAKE_STD_ZVAL(vparams);
 				array_init(vparams);
 
-				if (i->var[j].name) {
-					add_assoc_zval_ex(params, ZSTR_VAL(i->var[j].name), ZSTR_LEN(i->var[j].name), vparams);
+				if (fse->var[j].name) {
+					add_assoc_zval_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), vparams);
 				} else {
 					add_index_zval(params, j, vparams);
 				}
@@ -1091,13 +1088,13 @@ PHP_FUNCTION(xdebug_get_function_stack)
 				variadic_opened = 1;
 				continue;
 			}
-			if (!Z_ISUNDEF(i->var[j].data)) {
-				argument = xdebug_get_zval_value_line(&i->var[j].data, 0, NULL);
+			if (!Z_ISUNDEF(fse->var[j].data)) {
+				argument = xdebug_get_zval_value_line(&fse->var[j].data, 0, NULL);
 			} else {
 				argument = xdebug_str_create_from_char((char*) "???");
 			}
-			if (i->var[j].name && !variadic_opened && argument) {
-				add_assoc_stringl_ex(params, ZSTR_VAL(i->var[j].name), ZSTR_LEN(i->var[j].name), argument->d, argument->l);
+			if (fse->var[j].name && !variadic_opened && argument) {
+				add_assoc_stringl_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), argument->d, argument->l);
 			} else {
 				add_index_stringl(params, j - 1, argument->d, argument->l);
 			}
@@ -1107,8 +1104,8 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			}
 		}
 
-		if (i->include_filename) {
-			add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), i->include_filename);
+		if (fse->include_filename) {
+			add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), fse->include_filename);
 		}
 
 		add_next_index_zval(return_value, frame);
@@ -1126,21 +1123,22 @@ static void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element
 }
 
 /* {{{ proto array xdebug_get_declared_vars()
-   Returns an array representing the current stack */
+   Returns an array representing the variables in the current scope */
 PHP_FUNCTION(xdebug_get_declared_vars)
 {
-	xdebug_llist_element *le;
-	function_stack_entry *i;
+	function_stack_entry *fse;
 	xdebug_hash *tmp_hash;
 
 	array_init(return_value);
-	le = XDEBUG_LLIST_TAIL(XG_BASE(stack));
-	le = XDEBUG_LLIST_PREV(le);
-	i = XDEBUG_LLIST_VALP(le);
+	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+
+	/* Go one back otherwise we would return the variables defined in this
+	 * internal function, which isn't possible, and also useles */
+	fse--;
 
 	/* Add declared vars */
-	if (i->declared_vars) {
-		tmp_hash = xdebug_declared_var_hash_from_llist(i->declared_vars);
+	if (fse->declared_vars) {
+		tmp_hash = xdebug_declared_var_hash_from_llist(fse->declared_vars);
 		xdebug_hash_apply(tmp_hash, (void *) return_value, xdebug_attach_used_var_names);
 		xdebug_hash_destroy(tmp_hash);
 	}
