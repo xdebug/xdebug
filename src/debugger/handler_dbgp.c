@@ -47,6 +47,7 @@
 #include "lib/llist.h"
 #include "lib/mm.h"
 #include "lib/var_export_xml.h"
+#include "lib/vector.h"
 #include "lib/xml.h"
 
 #ifdef PHP_WIN32
@@ -917,7 +918,7 @@ DBGP_FUNC(breakpoint_set)
 
 		/* If no filename is given, we use the current one */
 		if (!CMD_OPTION_SET('f')) {
-			function_stack_entry *fse = xdebug_get_stack_tail();
+			function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 			if (!fse) {
 				RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
@@ -1151,7 +1152,7 @@ DBGP_FUNC(step_out)
 	XG_DBG(context).do_step   = 0;
 	XG_DBG(context).do_finish = 1;
 
-	if ((fse = xdebug_get_stack_tail())) {
+	if ((fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack)))) {
 		XG_DBG(context).finish_level = fse->level;
 		XG_DBG(context).finish_func_nr = fse->function_nr;
 	} else {
@@ -1171,7 +1172,7 @@ DBGP_FUNC(step_over)
 	XG_DBG(context).do_step   = 0;
 	XG_DBG(context).do_finish = 0;
 
-	if ((fse = xdebug_get_stack_tail())) {
+	if ((fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack)))) {
 		XG_DBG(context).next_level = fse->level;
 	} else {
 		XG_DBG(context).next_level = 0;
@@ -1202,7 +1203,7 @@ DBGP_FUNC(source)
 	function_stack_entry *fse;
 
 	if (!CMD_OPTION_SET('f')) {
-		if ((fse = xdebug_get_stack_tail())) {
+		if ((fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack)))) {
 			filename = zend_string_copy(fse->filename);
 		} else {
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
@@ -1917,7 +1918,7 @@ DBGP_FUNC(stack_depth)
 DBGP_FUNC(stack_get)
 {
 	xdebug_xml_node      *stackframe;
-	xdebug_llist_element *le;
+	function_stack_entry *le;
 	int                   counter = 0;
 	long                  depth;
 
@@ -1931,7 +1932,7 @@ DBGP_FUNC(stack_get)
 		}
 	} else {
 		counter = 0;
-		for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
+		for (le = XDEBUG_VECTOR_TAIL(XG_BASE(stack)); le != NULL; le = le->prev) {
 			stackframe = return_stackframe(counter);
 			xdebug_xml_add_child(*retval, stackframe);
 			counter++;
@@ -2562,7 +2563,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	return 1;
 }
 
-int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_llist *stack)
+int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_vector *stack)
 {
 	char               *errortype;
 	xdebug_xml_node     *response, *error;
@@ -2670,7 +2671,7 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_st
 	return 0;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_llist *stack, zend_string *filename, long lineno, int type, char *exception, char *code, char *message)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, char *message)
 {
 	xdebug_xml_node *response, *error_container;
 
