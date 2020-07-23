@@ -117,6 +117,7 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="var_export_text.h" role="src" />
      <file name="var_export_xml.c" role="src" />
      <file name="var_export_xml.h" role="src" />
+     <file name="vector.h" role="src" />
      <file name="xml.c" role="src" />
      <file name="xml.h" role="src" />
     </dir>

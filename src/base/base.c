@@ -103,45 +103,39 @@ void xdebug_func_dtor(xdebug_func *elem)
 	xdfree(elem);
 }
 
-static void function_stack_entry_dtor(void *dummy, void *elem)
+static void function_stack_entry_dtor(void *elem)
 {
 	unsigned int          i;
 	function_stack_entry *e = elem;
 
-	e->refcount--;
+	xdebug_func_dtor_by_ref(&e->function);
 
-	if (e->refcount == 0) {
-		xdebug_func_dtor_by_ref(&e->function);
+	if (e->filename) {
+		zend_string_release(e->filename);
+	}
 
-		if (e->filename) {
-			zend_string_release(e->filename);
-		}
-
-		if (e->var) {
-			for (i = 0; i < e->varc; i++) {
-				if (e->var[i].name) {
-					zend_string_release(e->var[i].name);
-				}
-				zval_ptr_dtor(&(e->var[i].data));
+	if (e->var) {
+		for (i = 0; i < e->varc; i++) {
+			if (e->var[i].name) {
+				zend_string_release(e->var[i].name);
 			}
-			xdfree(e->var);
+			zval_ptr_dtor(&(e->var[i].data));
 		}
+		xdfree(e->var);
+	}
 
-		if (e->include_filename) {
-			zend_string_release(e->include_filename);
-		}
+	if (e->include_filename) {
+		zend_string_release(e->include_filename);
+	}
 
-		if (e->declared_vars) {
-			xdebug_llist_destroy(e->declared_vars, NULL);
-			e->declared_vars = NULL;
-		}
+	if (e->declared_vars) {
+		xdebug_llist_destroy(e->declared_vars, NULL);
+		e->declared_vars = NULL;
+	}
 
-		if (e->profile.call_list) {
-			xdebug_llist_destroy(e->profile.call_list, NULL);
-			e->profile.call_list = NULL;
-		}
-
-		xdfree(e);
+	if (e->profile.call_list) {
+		xdebug_llist_destroy(e->profile.call_list, NULL);
+		e->profile.call_list = NULL;
 	}
 }
 
@@ -271,13 +265,12 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 					fname = edata->prev_execute_data->func->op_array.filename;
 				}
 
-				if (
-					!fname &&
-					XDEBUG_LLIST_TAIL(XG_BASE(stack)) &&
-					XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))) &&
-					((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename
-				) {
-					fname = ((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename;
+				if (!fname) {
+					function_stack_entry *tmp_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+
+					if (tmp_fse->filename) {
+						fname = tmp_fse->filename;
+					}
 				}
 
 				if (!fname) {
@@ -446,23 +439,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 	zdata = EG(current_execute_data);
 
-	tmp = xdmalloc (sizeof (function_stack_entry));
-	tmp->var           = NULL;
-	tmp->varc          = 0;
-	tmp->refcount      = 1;
+	tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
 	tmp->level         = XG_BASE(level);
-	tmp->arg_done      = 0;
-	tmp->declared_vars = NULL;
 	tmp->user_defined  = type;
-	tmp->filename      = NULL;
-	tmp->include_filename  = NULL;
-	tmp->profile.call_list = NULL;
 	tmp->op_array      = op_array;
-	tmp->symbol_table  = NULL;
-	tmp->execute_data  = NULL;
-	tmp->is_variadic   = 0;
-	tmp->filtered_tracing       = 0;
-	tmp->filtered_code_coverage = 0;
 
 	XG_BASE(function_count)++;
 	tmp->function_nr = XG_BASE(function_count);
@@ -481,14 +461,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->filename  = (type == XDEBUG_USER_DEFINED && op_array && op_array->filename) ? zend_string_copy(op_array->filename) : NULL;
 	}
 	/* Call user function locations */
-	if (
-		!tmp->filename &&
-		XG_BASE(stack) &&
-		XDEBUG_LLIST_TAIL(XG_BASE(stack)) &&
-		XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))) &&
-		((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename
-	) {
-		tmp->filename = zend_string_copy(((function_stack_entry*) XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack))))->filename);
+	if (!tmp->filename && XG_BASE(stack)) {
+		function_stack_entry *tail_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+		if (tail_fse->filename) {
+			tmp->filename = zend_string_copy(tail_fse->filename);
+		}
 	}
 
 	if (!tmp->filename) {
@@ -541,11 +518,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	xdebug_coverage_count_line_if_branch_check_active(op_array, tmp->filename, tmp->lineno);
 
 	if (XG_BASE(stack)) {
-		if (XDEBUG_LLIST_TAIL(XG_BASE(stack))) {
-			function_stack_entry *prev = XDEBUG_LLIST_VALP(XDEBUG_LLIST_TAIL(XG_BASE(stack)));
+		if (XDEBUG_VECTOR_COUNT(XG_BASE(stack)) > 1) {
+			function_stack_entry *prev = (function_stack_entry*) xdebug_vector_element_get(XG_BASE(stack), XDEBUG_VECTOR_COUNT(XG_BASE(stack))-2);
 			tmp->prev = prev;
 		}
-		xdebug_llist_insert_next(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), tmp);
 	}
 
 	return tmp;
@@ -555,9 +531,8 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
-	function_stack_entry *fse, *xfse;
+	function_stack_entry *fse, *le;
 	int                   function_nr = 0;
-	xdebug_llist_element *le;
 	char                 *code_coverage_function_name = NULL;
 	zend_string          *code_coverage_filename = NULL;
 	int                   code_coverage_init = 0;
@@ -644,10 +619,9 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		 * show up correctly where they should be.  We always call
 		 * add_used_variables on the current stack level, otherwise vars in include
 		 * files do not show up in the locals list.  */
-		for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-			xfse = XDEBUG_LLIST_VALP(le);
-			add_used_variables(xfse, op_array);
-			if (XDEBUG_IS_NORMAL_FUNCTION(&xfse->function)) {
+		for (le = XDEBUG_VECTOR_TAIL(XG_BASE(stack)); le != NULL; le = le->prev) {
+			add_used_variables(le, op_array);
+			if (XDEBUG_IS_NORMAL_FUNCTION(&le->function)) {
 				break;
 			}
 		}
@@ -673,6 +647,10 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 
 	xdebug_old_execute_ex(execute_data);
 
+	/* Re-acquire the tail as nested calls through xdebug_old_execute_ex()
+	 * might have reallocated the vector */
+	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex_end(fse);
 	}
@@ -694,7 +672,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	fse->execute_data = NULL;
 
 	if (XG_BASE(stack)) {
-		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);
+		xdebug_vector_pop(XG_BASE(stack));
 	}
 	XG_BASE(level)--;
 }
@@ -778,6 +756,10 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		execute_internal(current_execute_data, return_value);
 	}
 
+	/* Re-acquire the tail as nested calls through
+	 * xdebug_old_execute_internal() might have reallocated the vector */
+	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_internal_end(fse);
 	}
@@ -800,7 +782,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 
 	if (XG_BASE(stack)) {
-		xdebug_llist_remove(XG_BASE(stack), XDEBUG_LLIST_TAIL(XG_BASE(stack)), function_stack_entry_dtor);
+		xdebug_vector_pop(XG_BASE(stack));
 	}
 	XG_BASE(level)--;
 }
@@ -929,7 +911,7 @@ void xdebug_base_rinit()
 		xdebug_base_use_xdebug_throw_exception_hook();
 	}
 
-	XG_BASE(stack) = xdebug_llist_alloc(function_stack_entry_dtor);
+	XG_BASE(stack) = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
 	XG_BASE(level)         = 0;
 	XG_BASE(in_debug_info) = 0;
 	XG_BASE(prev_memory)   = 0;
@@ -958,7 +940,7 @@ void xdebug_base_rinit()
 
 void xdebug_base_post_deactivate()
 {
-	xdebug_llist_destroy(XG_BASE(stack), NULL);
+	xdebug_vector_destroy(XG_BASE(stack));
 	XG_BASE(stack) = NULL;
 
 	XG_BASE(level)            = 0;

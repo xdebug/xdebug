@@ -341,60 +341,16 @@ int xdebug_lib_start_if_mode_is_trigger(void)
 }
 
 
-function_stack_entry *xdebug_get_stack_head(void)
-{
-	xdebug_llist_element *le;
-
-	if (XG_BASE(stack)) {
-		if ((le = XDEBUG_LLIST_HEAD(XG_BASE(stack)))) {
-			return XDEBUG_LLIST_VALP(le);
-		} else {
-			return NULL;
-		}
-	} else {
-		return NULL;
-	}
-}
-
 function_stack_entry *xdebug_get_stack_frame(int nr)
 {
-	xdebug_llist_element *le;
-
 	if (!XG_BASE(stack)) {
 		return NULL;
 	}
-
-	if (!(le = XDEBUG_LLIST_TAIL(XG_BASE(stack)))) {
+	if (nr < 0 || nr >= XDEBUG_VECTOR_COUNT(XG_BASE(stack))) {
 		return NULL;
 	}
 
-	if (nr < 0) {
-		return NULL;
-	}
-
-	while (nr) {
-		nr--;
-		le = XDEBUG_LLIST_PREV(le);
-		if (!le) {
-			return NULL;
-		}
-	}
-	return XDEBUG_LLIST_VALP(le);
-}
-
-function_stack_entry *xdebug_get_stack_tail(void)
-{
-	xdebug_llist_element *le;
-
-	if (XG_BASE(stack)) {
-		if ((le = XDEBUG_LLIST_TAIL(XG_BASE(stack)))) {
-			return XDEBUG_LLIST_VALP(le);
-		} else {
-			return NULL;
-		}
-	} else {
-		return NULL;
-	}
+	return xdebug_vector_element_get(XG_BASE(stack), XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - nr - 1);
 }
 
 static void xdebug_used_var_hash_from_llist_dtor(void *data)

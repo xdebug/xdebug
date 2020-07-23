@@ -230,10 +230,8 @@ void xdebug_profiler_init(char *script_name)
 void xdebug_profiler_deinit()
 {
 	function_stack_entry *fse;
-	xdebug_llist_element *le;
 
-	for (le = XDEBUG_LLIST_TAIL(XG_BASE(stack)); le != NULL; le = XDEBUG_LLIST_PREV(le)) {
-		fse = XDEBUG_LLIST_VALP(le);
+	for (fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack)); fse != NULL; fse = fse->prev) {
 		xdebug_profiler_function_end(fse);
 	}
 
