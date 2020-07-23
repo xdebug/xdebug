@@ -170,7 +170,7 @@ char* xdebug_get_time(void)
 
 	str_time = xdmalloc(24);
 	cur_time = time(NULL);
-	strftime(str_time, 24, "%Y-%m-%d %H:%M:%S", gmtime (&cur_time));
+	strftime(str_time, 24, "%Y-%m-%d %H:%M:%S", localtime (&cur_time));
 	return str_time;
 }
 
