@@ -341,32 +341,39 @@ static xdebug_xml_node* get_symbol(xdebug_str *name, xdebug_var_export_options *
 	xdebug_xml_node       *tmp_node;
 
 	xdebug_get_php_symbol(&retval, name);
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		if (strcmp(name->d, "this") == 0 && Z_TYPE(retval) == IS_NULL) {
-			return NULL;
-		}
-		tmp_node = xdebug_get_zval_value_xml_node(name, &retval, options);
-		zval_ptr_dtor_nogc(&retval);
-		return tmp_node;
+
+	if (Z_TYPE(retval) == IS_UNDEF) {
+		return NULL;
 	}
 
-	return NULL;
+	if (strcmp(name->d, "this") == 0 && Z_TYPE(retval) == IS_NULL) {
+		return NULL;
+	}
+
+	tmp_node = xdebug_get_zval_value_xml_node(name, &retval, options);
+	zval_ptr_dtor_nogc(&retval);
+
+	return tmp_node;
 }
 
 static int get_symbol_contents(xdebug_str *name, xdebug_xml_node *node, xdebug_var_export_options *options)
 {
 	zval retval;
+	zval *retval_ptr;
 
 	xdebug_get_php_symbol(&retval, name);
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		// TODO WTF???
-		zval *retval_ptr = &retval;
-		xdebug_var_export_xml_node(&retval_ptr, name, node, options, 1);
-		zval_ptr_dtor_nogc(&retval);
-		return 1;
+
+	if (Z_TYPE(retval) == IS_UNDEF) {
+		return 0;
 	}
 
-	return 0;
+	// TODO WTF???
+	retval_ptr = &retval;
+
+	xdebug_var_export_xml_node(&retval_ptr, name, node, options, 1);
+	zval_ptr_dtor_nogc(&retval);
+
+	return 1;
 }
 
 static xdebug_str* return_file_source(zend_string *filename, int begin, int end)
@@ -434,15 +441,19 @@ static xdebug_str* return_eval_source(char *id, int begin, int end)
 	if (begin < 0) {
 		begin = 0;
 	}
+
 	key = create_eval_key_id(atoi(id));
-	if (xdebug_hash_find(XG_DBG(context).eval_id_lookup, key, strlen(key), (void *) &ei)) {
-		xdebug_arg_init(parts);
-		xdebug_explode("\n", ZSTR_VAL(ei->contents), parts, end + 2);
-		joined = xdebug_join("\n", parts, begin, end);
-		xdebug_arg_dtor(parts);
-		return joined;
+
+	if (!xdebug_hash_find(XG_DBG(context).eval_id_lookup, key, strlen(key), (void *) &ei)) {
+		return NULL;
 	}
-	return NULL;
+
+	xdebug_arg_init(parts);
+	xdebug_explode("\n", ZSTR_VAL(ei->contents), parts, end + 2);
+	joined = xdebug_join("\n", parts, begin, end);
+	xdebug_arg_dtor(parts);
+
+	return joined;
 }
 
 static int is_dbgp_url(zend_string *filename)
@@ -550,23 +561,23 @@ static int breakpoint_admin_fetch(xdebug_con *context, char *hkey, int *type, ch
 {
 	xdebug_brk_admin *admin;
 
-	if (xdebug_hash_find(context->breakpoint_list, hkey, strlen(hkey), (void *) &admin)) {
-		*type = admin->type;
-		*key  = admin->key;
-		return SUCCESS;
-	} else {
+	if (!xdebug_hash_find(context->breakpoint_list, hkey, strlen(hkey), (void *) &admin)) {
 		return FAILURE;
 	}
 
+	*type = admin->type;
+	*key  = admin->key;
+
+	return SUCCESS;
 }
 
 static int breakpoint_admin_remove(xdebug_con *context, char *hkey)
 {
-	if (xdebug_hash_delete(context->breakpoint_list, hkey, strlen(hkey))) {
-		return SUCCESS;
-	} else {
+	if (!xdebug_hash_delete(context->breakpoint_list, hkey, strlen(hkey))) {
 		return FAILURE;
 	}
+
+	return SUCCESS;
 }
 
 static void breakpoint_brk_info_add_resolved(xdebug_xml_node *xml, xdebug_brk_info *brk_info)
@@ -574,6 +585,7 @@ static void breakpoint_brk_info_add_resolved(xdebug_xml_node *xml, xdebug_brk_in
 	if (!XG_DBG(context).resolved_breakpoints) {
 		return;
 	}
+
 	if (brk_info->resolved == XDEBUG_BRK_RESOLVED) {
 		xdebug_xml_add_attribute(xml, "resolved", "resolved");
 	} else {
@@ -773,41 +785,43 @@ static int breakpoint_do_action(DBGP_FUNC_PARAMETERS, int action)
 	if (!CMD_OPTION_SET('d')) {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
+
 	/* Lets check if it exists */
-	if (breakpoint_admin_fetch(context, CMD_OPTION_CHAR('d'), &type, (char**) &hkey) == SUCCESS) {
-		/* so it exists, now we're going to find it in the correct hash/list
-		 * and return the info we have on it */
-		brk_info = breakpoint_brk_info_fetch(type, hkey);
-
-		if (action == BREAKPOINT_ACTION_UPDATE) {
-			if (CMD_OPTION_SET('s')) {
-				BREAKPOINT_CHANGE_STATE();
-			}
-			if (CMD_OPTION_SET('n')) {
-				brk_info->original_lineno = strtol(CMD_OPTION_CHAR('n'), NULL, 10);
-				brk_info->resolved_lineno = brk_info->original_lineno;
-			}
-			if (CMD_OPTION_SET('h')) {
-				brk_info->hit_value = strtol(CMD_OPTION_CHAR('h'), NULL, 10);
-			}
-			if (CMD_OPTION_SET('o')) {
-				BREAKPOINT_CHANGE_OPERATOR();
-			}
-		}
-
-		breakpoint_node = xdebug_xml_node_init("breakpoint");
-		breakpoint_brk_info_add(breakpoint_node, brk_info);
-		xdebug_xml_add_child(*retval, breakpoint_node);
-
-		if (action == BREAKPOINT_ACTION_REMOVE) {
-			/* Now we remove the crap */
-			breakpoint_remove(type, hkey);
-			breakpoint_admin_remove(context, CMD_OPTION_CHAR('d'));
-		}
-		return XDEBUG_CMD_OK;
-	} else {
+	if (breakpoint_admin_fetch(context, CMD_OPTION_CHAR('d'), &type, (char**) &hkey) == FAILURE) {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_NO_SUCH_BREAKPOINT)
 	}
+
+	/* so it exists, now we're going to find it in the correct hash/list
+	 * and return the info we have on it */
+	brk_info = breakpoint_brk_info_fetch(type, hkey);
+
+	if (action == BREAKPOINT_ACTION_UPDATE) {
+		if (CMD_OPTION_SET('s')) {
+			BREAKPOINT_CHANGE_STATE();
+		}
+		if (CMD_OPTION_SET('n')) {
+			brk_info->original_lineno = strtol(CMD_OPTION_CHAR('n'), NULL, 10);
+			brk_info->resolved_lineno = brk_info->original_lineno;
+		}
+		if (CMD_OPTION_SET('h')) {
+			brk_info->hit_value = strtol(CMD_OPTION_CHAR('h'), NULL, 10);
+		}
+		if (CMD_OPTION_SET('o')) {
+			BREAKPOINT_CHANGE_OPERATOR();
+		}
+	}
+
+	breakpoint_node = xdebug_xml_node_init("breakpoint");
+	breakpoint_brk_info_add(breakpoint_node, brk_info);
+	xdebug_xml_add_child(*retval, breakpoint_node);
+
+	if (action == BREAKPOINT_ACTION_REMOVE) {
+		/* Now we remove the crap */
+		breakpoint_remove(type, hkey);
+		breakpoint_admin_remove(context, CMD_OPTION_CHAR('d'));
+	}
+
+	return XDEBUG_CMD_OK;
 }
 
 DBGP_FUNC(break)
@@ -1439,12 +1453,14 @@ static int add_constant_node(xdebug_xml_node *node, xdebug_str *name, zval *cons
 	xdebug_xml_node *contents;
 
 	contents = xdebug_get_zval_value_xml_node_ex(name, const_val, XDEBUG_VAR_TYPE_CONSTANT, options);
-	if (contents) {
-		xdebug_xml_add_attribute(contents, "facet", "constant");
-		xdebug_xml_add_child(node, contents);
-		return SUCCESS;
+	if (!contents) {
+		return FAILURE;
 	}
-	return FAILURE;
+
+	xdebug_xml_add_attribute(contents, "facet", "constant");
+	xdebug_xml_add_child(node, contents);
+
+	return SUCCESS;
 }
 
 static int add_variable_node(xdebug_xml_node *node, xdebug_str *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options)
@@ -1452,11 +1468,13 @@ static int add_variable_node(xdebug_xml_node *node, xdebug_str *name, int var_on
 	xdebug_xml_node *contents;
 
 	contents = get_symbol(name, options);
-	if (contents) {
-		xdebug_xml_add_child(node, contents);
-		return SUCCESS;
+	if (!contents) {
+		return FAILURE;
 	}
-	return FAILURE;
+
+	xdebug_xml_add_child(node, contents);
+
+	return SUCCESS;
 }
 
 static int xdebug_get_constant(xdebug_str *val, zval *const_val)
@@ -1464,11 +1482,13 @@ static int xdebug_get_constant(xdebug_str *val, zval *const_val)
 	zval *tmp_const = NULL;
 	tmp_const = zend_get_constant_str(val->d, val->l);
 
-	if (tmp_const) {
-		*const_val = *tmp_const;
+	if (!tmp_const) {
+		return 0;
 	}
 
-	return tmp_const != NULL;
+	*const_val = *tmp_const;
+
+	return 1;
 }
 
 DBGP_FUNC(property_get)
@@ -1676,10 +1696,12 @@ static int add_variable_contents_node(xdebug_xml_node *node, xdebug_str *name, i
 	int contents_found;
 
 	contents_found = get_symbol_contents(name, node, options);
-	if (contents_found) {
-		return SUCCESS;
+
+	if (!contents_found) {
+		return FAILURE;
 	}
-	return FAILURE;
+
+	return SUCCESS;
 }
 
 DBGP_FUNC(property_value)
@@ -1752,11 +1774,12 @@ static void attach_declared_var_with_contents(void *xml, xdebug_hash_element* he
 	xdebug_xml_node    *contents;
 
 	contents = get_symbol(name, options);
-	if (contents) {
-		xdebug_xml_add_child(node, contents);
-	} else {
+	if (!contents) {
 		xdebug_var_xml_attach_uninitialized_var(options, node, name);
+		return;
 	}
+
+	xdebug_xml_add_child(node, contents);
 }
 
 static int xdebug_add_filtered_symboltable_var(zval *symbol, int num_args, va_list args, zend_hash_key *hash_key)
@@ -2001,11 +2024,12 @@ DBGP_FUNC(xcmd_profiler_name_get)
 {
 	char *filename = xdebug_get_profiler_filename();
 
-	if (filename) {
-		xdebug_xml_add_text(*retval, xdstrdup(filename));
-	} else {
+	if (!filename) {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_PROFILING_NOT_STARTED);
 	}
+
+	xdebug_xml_add_text(*retval, xdstrdup(filename));
+
 	return XDEBUG_CMD_OK;
 }
 

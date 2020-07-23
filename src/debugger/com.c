@@ -330,70 +330,76 @@ static void xdebug_open_log(void)
 
 static void xdebug_close_log()
 {
+	zend_ulong pid;
+	char *timestr;
 
-	if (XG_DBG(remote_log_file)) {
-		zend_ulong pid = xdebug_get_pid();
-		char *timestr = xdebug_get_time();
-
-		fprintf(XG_DBG(remote_log_file), "[" ZEND_ULONG_FMT "] Log closed at %s\n\n", pid, timestr);
-		fflush(XG_DBG(remote_log_file));
-		xdfree(timestr);
-		fclose(XG_DBG(remote_log_file));
-		XG_DBG(remote_log_file) = NULL;
+	if (!XG_DBG(remote_log_file)) {
+		return;
 	}
+
+	pid = xdebug_get_pid();
+	timestr = xdebug_get_time();
+
+	fprintf(XG_DBG(remote_log_file), "[" ZEND_ULONG_FMT "] Log closed at %s\n\n", pid, timestr);
+	fflush(XG_DBG(remote_log_file));
+	xdfree(timestr);
+	fclose(XG_DBG(remote_log_file));
+	XG_DBG(remote_log_file) = NULL;
 }
 
 /* Starting the debugger */
 static void xdebug_init_normal_debugger()
 {
-	if (XINI_DBG(remote_connect_back)) {
-		zval *remote_addr = NULL;
+	zval *remote_addr = NULL;
+	char *cp = NULL;
+	int   cp_found = 0;
 
-		XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking remote connect back address.\n");
-		if (XINI_DBG(remote_addr_header) && XINI_DBG(remote_addr_header)[0]) {
-			XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking user configured header '%s'.\n", XINI_DBG(remote_addr_header));
-			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XINI_DBG(remote_addr_header), HASH_KEY_STRLEN(XINI_DBG(remote_addr_header)));
-		}
-		if (!remote_addr) {
-			XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking header 'HTTP_X_FORWARDED_FOR'.\n");
-			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
-		}
-		if (!remote_addr) {
-			XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking header 'REMOTE_ADDR'.\n");
-			remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
-		}
 
-		if (remote_addr && strstr(Z_STRVAL_P(remote_addr), "://")) {
-			XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "Invalid remote address provided containing URI spec '%s'.\n", Z_STRVAL_P(remote_addr));
-			remote_addr = NULL;
-		}
-
-		if (remote_addr) {
-			char *cp = NULL;
-			int   cp_found = 0;
-
-			/* Use first IP according to RFC 7239 */
-			cp = strchr(Z_STRVAL_P(remote_addr), ',');
-			if (cp) {
-				*cp = '\0';
-				cp_found = 1;
-			}
-
-			XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Remote address found, connecting to %s:%ld.\n", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(remote_port));
-			XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
-
-			/* Replace the ',', in case we had changed the original header due
-			 * to multiple values */
-			if (cp_found) {
-				*cp = ',';
-			}
-		} else {
-			XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
-			XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
-		}
-	} else {
+	if (!XINI_DBG(remote_connect_back)) {
 		XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Connecting to configured address/port: %s:%ld.\n", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
 		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+		return;
+	}
+
+	XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking remote connect back address.\n");
+	if (XINI_DBG(remote_addr_header) && XINI_DBG(remote_addr_header)[0]) {
+		XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking user configured header '%s'.\n", XINI_DBG(remote_addr_header));
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XINI_DBG(remote_addr_header), HASH_KEY_STRLEN(XINI_DBG(remote_addr_header)));
+	}
+	if (!remote_addr) {
+		XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking header 'HTTP_X_FORWARDED_FOR'.\n");
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
+	}
+	if (!remote_addr) {
+		XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Checking header 'REMOTE_ADDR'.\n");
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
+	}
+
+	if (remote_addr && strstr(Z_STRVAL_P(remote_addr), "://")) {
+		XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "Invalid remote address provided containing URI spec '%s'.\n", Z_STRVAL_P(remote_addr));
+		remote_addr = NULL;
+	}
+
+	if (!remote_addr) {
+		XG_DBG(context).handler->log(XDEBUG_LOG_WARN, "Remote address not found, connecting to configured address/port: %s:%ld. :-|\n", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+		return;
+	}
+
+	/* Use first IP according to RFC 7239 */
+	cp = strchr(Z_STRVAL_P(remote_addr), ',');
+	if (cp) {
+		*cp = '\0';
+		cp_found = 1;
+	}
+
+	XG_DBG(context).handler->log(XDEBUG_LOG_INFO, "Remote address found, connecting to %s:%ld.\n", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(remote_port));
+	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+
+	/* Replace the ',', in case we had changed the original header due
+	 * to multiple values */
+	if (cp_found) {
+		*cp = ',';
 	}
 }
 
@@ -469,9 +475,7 @@ void xdebug_restart_debugger()
 /* Remote connection activation and house keeping */
 int xdebug_is_debug_connection_active()
 {
-	return (
-		XG_DBG(remote_connection_enabled)
-	);
+	return XG_DBG(remote_connection_enabled);
 }
 
 void xdebug_mark_debug_connection_active()

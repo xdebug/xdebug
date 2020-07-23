@@ -203,6 +203,7 @@ PHP_FUNCTION(xdebug_start_error_collection)
 	if (XG_LIB(do_collect_errors) == 1) {
 		php_error(E_NOTICE, "Error collection was already started");
 	}
+
 	XG_LIB(do_collect_errors) = 1;
 }
 
@@ -213,6 +214,7 @@ PHP_FUNCTION(xdebug_stop_error_collection)
 	if (XG_LIB(do_collect_errors) == 0) {
 		php_error(E_NOTICE, "Error collection was not started");
 	}
+
 	XG_LIB(do_collect_errors) = 0;
 }
 
@@ -239,7 +241,7 @@ PHP_FUNCTION(xdebug_print_function_stack)
 {
 	char *message = NULL;
 	size_t message_len;
-	function_stack_entry *i;
+	function_stack_entry *fse;
 	char *tmp;
 	zend_long options = 0;
 
@@ -249,11 +251,11 @@ PHP_FUNCTION(xdebug_print_function_stack)
 		return;
 	}
 
-	i = xdebug_get_stack_frame(0);
+	fse = xdebug_get_stack_frame(0);
 	if (message) {
-		tmp = xdebug_get_printable_stack(PG(html_errors), 0, message, ZSTR_VAL(i->filename), i->lineno, !(options & XDEBUG_STACK_NO_DESC));
+		tmp = xdebug_get_printable_stack(PG(html_errors), 0, message, ZSTR_VAL(fse->filename), fse->lineno, !(options & XDEBUG_STACK_NO_DESC));
 	} else {
-		tmp = xdebug_get_printable_stack(PG(html_errors), 0, "user triggered", ZSTR_VAL(i->filename), i->lineno, !(options & XDEBUG_STACK_NO_DESC));
+		tmp = xdebug_get_printable_stack(PG(html_errors), 0, "user triggered", ZSTR_VAL(fse->filename), fse->lineno, !(options & XDEBUG_STACK_NO_DESC));
 	}
 	php_printf("%s", tmp);
 	xdfree(tmp);
@@ -264,7 +266,7 @@ PHP_FUNCTION(xdebug_print_function_stack)
    Returns the name of the calling class */
 PHP_FUNCTION(xdebug_call_class)
 {
-	function_stack_entry *i;
+	function_stack_entry *fse;
 	zend_long depth = 2;
 
 	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
@@ -272,16 +274,17 @@ PHP_FUNCTION(xdebug_call_class)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth);
-	if (i) {
-		if (i->function.class_name) {
-			RETURN_STR(i->function.class_name);
-		} else {
-			RETURN_FALSE;
-		}
-	} else {
+
+	fse = xdebug_get_stack_frame(depth);
+	if (!fse) {
 		return;
 	}
+
+	if (!fse->function.class_name) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STR(fse->function.class_name);
 }
 /* }}} */
 
@@ -289,7 +292,7 @@ PHP_FUNCTION(xdebug_call_class)
    Returns the function name from which the current function was called from. */
 PHP_FUNCTION(xdebug_call_function)
 {
-	function_stack_entry *i;
+	function_stack_entry *fse;
 	zend_long depth = 2;
 
 	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
@@ -297,16 +300,17 @@ PHP_FUNCTION(xdebug_call_function)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth);
-	if (i) {
-		if (i->function.function) {
-			RETURN_STRING(i->function.function);
-		} else {
-			RETURN_FALSE;
-		}
-	} else {
+
+	fse = xdebug_get_stack_frame(depth);
+	if (!fse) {
 		return;
 	}
+
+	if (!fse->function.function) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(fse->function.function);
 }
 /* }}} */
 
@@ -314,7 +318,7 @@ PHP_FUNCTION(xdebug_call_function)
    Returns the line number where the current function was called from. */
 PHP_FUNCTION(xdebug_call_line)
 {
-	function_stack_entry *i;
+	function_stack_entry *fse;
 	zend_long depth = 2;
 
 	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
@@ -322,12 +326,13 @@ PHP_FUNCTION(xdebug_call_line)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth);
-	if (i) {
-		RETURN_LONG(i->lineno);
-	} else {
+
+	fse = xdebug_get_stack_frame(depth);
+	if (!fse) {
 		return;
 	}
+
+	RETURN_LONG(fse->lineno);
 }
 /* }}} */
 
@@ -335,7 +340,7 @@ PHP_FUNCTION(xdebug_call_line)
    Returns the filename where the current function was called from. */
 PHP_FUNCTION(xdebug_call_file)
 {
-	function_stack_entry *i;
+	function_stack_entry *fse;
 	zend_long depth = 2;
 
 	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
@@ -343,12 +348,13 @@ PHP_FUNCTION(xdebug_call_file)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &depth) == FAILURE) {
 		return;
 	}
-	i = xdebug_get_stack_frame(depth);
-	if (i) {
-		RETURN_STR(i->filename);
-	} else {
+
+	fse = xdebug_get_stack_frame(depth);
+	if (!fse) {
 		return;
 	}
+
+	RETURN_STR(fse->filename);
 }
 /* }}} */
 
@@ -370,8 +376,10 @@ PHP_FUNCTION(xdebug_get_collected_errors)
 		add_next_index_string(return_value, string);
 	}
 
-	if (clear) {
-		xdebug_llist_destroy(XG_DEV(collected_errors), NULL);
-		XG_DEV(collected_errors) = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	if (!clear) {
+		return;
 	}
+
+	xdebug_llist_destroy(XG_DEV(collected_errors), NULL);
+	XG_DEV(collected_errors) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 }
