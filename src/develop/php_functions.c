@@ -124,7 +124,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 					val = xdebug_get_zval_value_line(&debugzval, 1, NULL);
 					PHPWRITE(val->d, val->l);
 				}
-				xdfree(val);
+				xdebug_str_free(val);
 				PHPWRITE("\n", 1);
 			} else {
 				PHPWRITE("no such symbol\n", 15);

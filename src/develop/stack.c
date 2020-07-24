@@ -258,7 +258,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_
 				xdebug_str_add_str(str, tmp_html_synop_value);
 				xdebug_str_add_literal(str, "</span>");
 
-				xdfree(tmp_html_synop_value);
+				xdebug_str_free(tmp_html_synop_value);
 				break;
 			case 2: /* synopsis + full in tooltip */
 				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
