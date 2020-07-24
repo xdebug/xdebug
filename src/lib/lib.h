@@ -185,7 +185,6 @@ typedef struct _function_stack_entry {
 	} profiler;
 
 	/* misc properties */
-	struct _function_stack_entry *prev;
 	zend_op_array *op_array;
 } function_stack_entry;
 
