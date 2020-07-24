@@ -42,40 +42,43 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_context *nanotime_context)
 {
 #if PHP_WIN32
-	FILETIME filetime;
-#endif
-#if _SC_MONOTONIC_CLOCK
-	struct timespec ts;
-#endif
-#if HAVE_GETTIMEOFDAY
-	struct timeval tp;
-#endif
+	// Windows, win_precise_time_func is only available on Win 8 and later.
+	{
+		FILETIME filetime;
 
-	// Windows
-#if PHP_WIN32
-	if (nanotime_context->win_precise_time_func != NULL) {
-		nanotime_context->win_precise_time_func(&filetime);
-		return ((((uint64_t)filetime.dwHighDateTime << 32) + (uint64_t)filetime.dwLowDateTime) - WIN_TICKS_SINCE_1601_JAN_1)
-			* WIN_NANOS_IN_TICK;
+		if (nanotime_context->win_precise_time_func != NULL) {
+			nanotime_context->win_precise_time_func(&filetime);
+			return ((((uint64_t)filetime.dwHighDateTime << 32) + (uint64_t)filetime.dwLowDateTime) - WIN_TICKS_SINCE_1601_JAN_1)
+				* WIN_NANOS_IN_TICK;
+		}
 	}
 #endif
 
-	// Linux/Unix
-#if _SC_MONOTONIC_CLOCK
-	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-		return (uint64_t)ts.tv_sec * NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
-	}
+#if HAVE_CLOCK_GETTIME & CLOCK_MONOTONIC
+	// Linux/Unix with clock_gettime
+	{
+	   struct timespec ts;
 
-	return 0;
-#endif
-
-	// fallback if better platform specific time is not available
-#if HAVE_GETTIMEOFDAY
-	if (gettimeofday(&tp, NULL) == 0) {
-		return (uint64_t)tp.tv_sec * NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
+		if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+			return (uint64_t)ts.tv_sec * NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
+		}
 	}
 #endif
 
+#if HAVE_GETTIMEOFDAY | PHP_WIN32
+	// Fallback to gettimeofday() if better platform specific time is not
+	// available. gettimeofday() is always available in PHP on Windows, as it's
+	// expose through 'win32/time.[ch]'
+	{
+		struct timeval tp;
+
+		if (gettimeofday(&tp, NULL) == 0) {
+			return (uint64_t)tp.tv_sec * NANOS_IN_SEC + (uint64_t)tp.tv_usec * NANOS_IN_MICROSEC;
+		}
+	}
+#endif
+
+	// We give up
 	return 0;
 }
 
@@ -97,30 +100,34 @@ static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t f
 }
 #endif
 
+
+// Windows 7 and lower
+#if PHP_WIN32
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
 {
-	// Windows Windows 7 and lower
-#if PHP_WIN32
 	LARGE_INTEGER tcounter;
 
 	if (nanotime_context->win_precise_time_func == NULL) {
 		QueryPerformanceCounter(&tcounter);
 		return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_context->win_freq);
 	}
-#endif
-
-	// Mac
-	// should be fast but can be relative
-#if __APPLE__
-	return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
-#endif
-
-	return 0;
 }
+#endif
+
+// Mac
+// should be fast but can be relative
+#if __APPLE__
+static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
+{
+	return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
+}
+#endif
+
 
 void xdebug_nanotime_init(void)
 {
 	xdebug_nanotime_context context = {0};
+
 #if PHP_WIN32
 	LARGE_INTEGER tcounter;
 
@@ -133,12 +140,18 @@ void xdebug_nanotime_init(void)
 		context.win_precise_time_func = NULL;
 		QueryPerformanceFrequency(&tcounter);
 		context.win_freq = (uint64_t)tcounter.QuadPart;
+		context.use_rel_time = 1;
 	}
 #endif
+#if __APPLE__
+	context.use_rel_time = 1;
+#endif
 	context.start_abs = xdebug_get_nanotime_abs(&context);
-	context.start_rel = xdebug_get_nanotime_rel(&context);
 	context.last_abs = 0;
+#if PHP_WIN32 | __APPLE__
+	context.start_rel = xdebug_get_nanotime_rel(&context);
 	context.last_rel = 0;
+#endif
 
 	XG_BASE(nanotime_context) = context;
 }
@@ -150,22 +163,30 @@ uint64_t xdebug_get_nanotime(void)
 
 	context = &XG_BASE(nanotime_context);
 
-	nanotime = xdebug_get_nanotime_rel(context);
-	if (nanotime > 0) {
+#if PHP_WIN32 | __APPLE__
+	/* Relative timing */
+	if (context->use_rel_time) {
+		nanotime = xdebug_get_nanotime_rel(context);
+
 		if (nanotime < context->last_rel + NANOTIME_MIN_STEP) {
 			context->last_rel += NANOTIME_MIN_STEP;
 			nanotime = context->last_rel;
 		}
 		context->last_rel = nanotime;
-		nanotime = context->start_abs + (xdebug_get_nanotime_rel(context) - context->start_rel);
-	} else {
-		nanotime = xdebug_get_nanotime_abs(context);
-		if (nanotime < context->last_abs + NANOTIME_MIN_STEP) {
-			context->last_abs += NANOTIME_MIN_STEP;
-			nanotime = context->last_abs;
-		}
-		context->last_abs = nanotime;
+		nanotime = context->start_abs + (nanotime - context->start_rel);
+
+		return nanotime;
 	}
+#endif
+
+	/* Absolute timing */
+	nanotime = xdebug_get_nanotime_abs(context);
+
+	if (nanotime < context->last_abs + NANOTIME_MIN_STEP) {
+		context->last_abs += NANOTIME_MIN_STEP;
+		nanotime = context->last_abs;
+	}
+	context->last_abs = nanotime;
 
 	return nanotime;
 }
