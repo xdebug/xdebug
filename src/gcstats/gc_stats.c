@@ -99,15 +99,17 @@ static int xdebug_gc_collect_cycles(void)
 
 static void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 {
-	if (run) {
-		if (run->function_name) {
-			xdfree(run->function_name);
-		}
-		if (run->class_name) {
-			zend_string_release(run->class_name);
-		}
-		xdfree(run);
+	if (!run) {
+		return;
 	}
+
+	if (run->function_name) {
+		xdfree(run->function_name);
+	}
+	if (run->class_name) {
+		zend_string_release(run->class_name);
+	}
+	xdfree(run);
 }
 
 static int xdebug_gc_stats_init(char *fname, zend_string *script_name)
@@ -248,9 +250,9 @@ PHP_FUNCTION(xdebug_start_gcstats)
 		XG_GCSTATS(active) = 1;
 		RETVAL_STRING(XG_GCSTATS(filename));
 		return;
-	} else {
-		php_error(E_NOTICE, "Garbage Collection statistics could not be started");
 	}
+
+	php_error(E_NOTICE, "Garbage Collection statistics could not be started");
 
 	XG_GCSTATS(active) = 0;
 	RETURN_FALSE;

@@ -70,10 +70,13 @@ static zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int typ
 
 	op_array = old_compile_file(file_handle, type);
 
-	if (op_array) {
-		xdebug_coverage_compile_file(op_array);
-		xdebug_debugger_compile_file(op_array);
+	if (!op_array) {
+		return NULL;
 	}
+
+	xdebug_coverage_compile_file(op_array);
+	xdebug_debugger_compile_file(op_array);
+
 	return op_array;
 }
 /* }}} */

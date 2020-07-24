@@ -675,24 +675,27 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &cleanup) == FAILURE) {
 		return;
 	}
-	if (XG_COV(code_coverage_active)) {
-		if (cleanup) {
-			zend_string_release(XG_COV(previous_filename));
-			XG_COV(previous_filename) = NULL;
-			XG_COV(previous_file) = NULL;
-			zend_string_release(XG_COV(previous_mark_filename));
-			XG_COV(previous_mark_filename) = NULL;
-			XG_COV(previous_mark_file) = NULL;
-			xdebug_hash_destroy(XG_COV(code_coverage_info));
-			XG_COV(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
-			XG_COV(dead_code_last_start_id)++;
-			xdebug_path_info_dtor(XG_COV(paths_stack));
-			XG_COV(paths_stack) = xdebug_path_info_ctor();
-		}
-		XG_COV(code_coverage_active) = 0;
-		RETURN_TRUE;
+	if (!XG_COV(code_coverage_active)) {
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
+
+	if (cleanup) {
+		zend_string_release(XG_COV(previous_filename));
+		XG_COV(previous_filename) = NULL;
+		XG_COV(previous_file) = NULL;
+		zend_string_release(XG_COV(previous_mark_filename));
+		XG_COV(previous_mark_filename) = NULL;
+		XG_COV(previous_mark_file) = NULL;
+		xdebug_hash_destroy(XG_COV(code_coverage_info));
+		XG_COV(code_coverage_info) = xdebug_hash_alloc(32, xdebug_coverage_file_dtor);
+		XG_COV(dead_code_last_start_id)++;
+		xdebug_path_info_dtor(XG_COV(paths_stack));
+		XG_COV(paths_stack) = xdebug_path_info_ctor();
+	}
+
+	XG_COV(code_coverage_active) = 0;
+
+	RETURN_TRUE;
 }
 
 #if PHP_VERSION_ID >= 80000
@@ -872,9 +875,12 @@ static void add_file(void *ret, xdebug_hash_element *e)
 PHP_FUNCTION(xdebug_get_code_coverage)
 {
 	array_init(return_value);
-	if (XG_COV(code_coverage_info)) {
-		xdebug_hash_apply(XG_COV(code_coverage_info), (void *) return_value, add_file);
+
+	if (!XG_COV(code_coverage_info)) {
+		return;
 	}
+
+	xdebug_hash_apply(XG_COV(code_coverage_info), (void *) return_value, add_file);
 }
 
 PHP_FUNCTION(xdebug_get_function_count)

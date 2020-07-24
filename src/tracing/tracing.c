@@ -99,21 +99,23 @@ static char* xdebug_start_trace(char* fname, zend_string *script_filename, long 
 	XG_TRACE(trace_handler) = xdebug_select_trace_handler(options);
 	XG_TRACE(trace_context) = (void*) XG_TRACE(trace_handler)->init(fname, script_filename, options);
 
-	if (XG_TRACE(trace_context)) {
-		XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context));
-		return xdstrdup(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
+	if (!XG_TRACE(trace_context)) {
+		return NULL;
 	}
 
-	return NULL;
+	XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context));
+	return xdstrdup(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 }
 
 static void xdebug_stop_trace(void)
 {
-	if (XG_TRACE(trace_context)) {
-		XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
-		XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context));
-		XG_TRACE(trace_context) = NULL;
+	if (!XG_TRACE(trace_context)) {
+		return;
 	}
+
+	XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
+	XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context));
+	XG_TRACE(trace_context) = NULL;
 }
 
 PHP_FUNCTION(xdebug_start_trace)
@@ -122,55 +124,54 @@ PHP_FUNCTION(xdebug_start_trace)
 	size_t fname_len = 0;
 	char *trace_fname;
 	zend_long options = XINI_TRACE(trace_options);
+	function_stack_entry *fse;
 
 	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
 
-	if (!XG_TRACE(trace_context)) {
-		function_stack_entry *fse;
-
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl", &fname, &fname_len, &options) == FAILURE) {
-			return;
-		}
-
-		fse = xdebug_get_stack_frame(0);
-
-		if ((trace_fname = xdebug_start_trace(fname, fse->filename, options)) != NULL) {
-			RETVAL_STRING(trace_fname);
-			xdfree(trace_fname);
-			return;
-		} else {
-			php_error(E_NOTICE, "Trace could not be started");
-		}
-
-		RETURN_FALSE;
-	} else {
+	if (XG_TRACE(trace_context)) {
 		php_error(E_NOTICE, "Function trace already started");
 		RETURN_FALSE;
 	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sl", &fname, &fname_len, &options) == FAILURE) {
+		return;
+	}
+
+	fse = xdebug_get_stack_frame(0);
+
+	if ((trace_fname = xdebug_start_trace(fname, fse->filename, options)) != NULL) {
+		RETVAL_STRING(trace_fname);
+		xdfree(trace_fname);
+		return;
+	} else {
+		php_error(E_NOTICE, "Trace could not be started");
+	}
+
+	RETURN_FALSE;
 }
 
 PHP_FUNCTION(xdebug_stop_trace)
 {
 	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
 
-	if (XG_TRACE(trace_context)) {
-		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
-		xdebug_stop_trace();
-	} else {
+	if (!XG_TRACE(trace_context)) {
 		RETVAL_FALSE;
 		php_error(E_NOTICE, "Function trace was not started");
 	}
+
+	RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
+	xdebug_stop_trace();
 }
 
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
 	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
 
-	if (XG_TRACE(trace_context) && XG_TRACE(trace_handler) && XG_TRACE(trace_handler)->get_filename) {
-		RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
-	} else {
+	if (!(XG_TRACE(trace_context) && XG_TRACE(trace_handler) && XG_TRACE(trace_handler)->get_filename)) {
 		RETURN_FALSE;
 	}
+
+	RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 }
 
 #if PHP_VERSION_ID >= 70400
@@ -223,23 +224,28 @@ static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_
 
 static const zend_op *xdebug_find_referenced_opline(zend_execute_data *execute_data, const zend_op *cur_opcode, int op1_or_op2)
 {
+	size_t variable_number;
+	const zend_op *scan_opcode;
+	int found;
 	int op_type = (op1_or_op2 == 1) ? cur_opcode->op1_type : cur_opcode->op2_type;
 
-	if (op_type == IS_VAR) {
-		size_t variable_number = (op1_or_op2 == 1) ? cur_opcode->op1.var : cur_opcode->op2.var;
-		const zend_op *scan_opcode = cur_opcode;
-		int found = 0;
-
-		/* Scroll up until we find a RES of IS_VAR with the right value */
-		do {
-			scan_opcode--;
-			if (scan_opcode->result_type == IS_VAR && scan_opcode->result.var == variable_number) {
-				found = 1;
-			}
-		} while (!found);
-		return scan_opcode;
+	if (op_type != IS_VAR) {
+		return NULL;
 	}
-	return NULL;
+
+	variable_number = (op1_or_op2 == 1) ? cur_opcode->op1.var : cur_opcode->op2.var;
+	scan_opcode = cur_opcode;
+	found = 0;
+
+	/* Scroll up until we find a RES of IS_VAR with the right value */
+	do {
+		scan_opcode--;
+		if (scan_opcode->result_type == IS_VAR && scan_opcode->result.var == variable_number) {
+			found = 1;
+		}
+	} while (!found);
+
+	return scan_opcode;
 }
 
 static int is_fetch_op(const zend_op *op)
@@ -577,6 +583,7 @@ static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLE
 			XG_TRACE(trace_handler)->assignment(XG_TRACE(trace_context), fse, full_varname, val, right_full_varname, op, file, lineno);
 		}
 		xdfree(full_varname);
+		xdfree(right_full_varname);
 	}
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -719,6 +726,8 @@ void xdebug_tracing_execute_ex(int function_nr, function_stack_entry *fse)
 
 void xdebug_tracing_execute_ex_end(int function_nr, function_stack_entry *fse, zend_execute_data *execute_data)
 {
+	zend_op_array *op_array;
+
 	if (fse->filtered_tracing || !XG_TRACE(trace_context)) {
 		return;
 	}
@@ -728,19 +737,23 @@ void xdebug_tracing_execute_ex_end(int function_nr, function_stack_entry *fse, z
 	}
 
 	/* Store return value in the trace file */
-	if (XINI_TRACE(collect_return)) {
-		zend_op_array *op_array = &(execute_data->func->op_array);
+	if (!XINI_TRACE(collect_return)) {
+		return;
+	}
 
-		if (execute_data && execute_data->return_value) {
-			if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-				if (XG_TRACE(trace_handler)->generator_return_value) {
-					XG_TRACE(trace_handler)->generator_return_value(XG_TRACE(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value);
-				}
-			} else {
-				if (XG_TRACE(trace_handler)->return_value) {
-					XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, execute_data->return_value);
-				}
-			}
+	op_array = &(execute_data->func->op_array);
+
+	if (!execute_data || !execute_data->return_value) {
+		return;
+	}
+
+	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+		if (XG_TRACE(trace_handler)->generator_return_value) {
+			XG_TRACE(trace_handler)->generator_return_value(XG_TRACE(trace_context), fse, function_nr, (zend_generator*) execute_data->return_value);
+		}
+	} else {
+		if (XG_TRACE(trace_handler)->return_value) {
+			XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, function_nr, execute_data->return_value);
 		}
 	}
 }

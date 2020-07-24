@@ -59,7 +59,5 @@ void xdebug_hash_eval_info_dtor(xdebug_eval_info *ei)
 	if (ei->refcount == 0) {
 		zend_string_release(ei->contents);
 		xdfree(ei);
-	} else {
-		/* refcount wasn't 0 yet, so we won't free it yet */
 	}
 }

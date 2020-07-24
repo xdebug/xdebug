@@ -498,9 +498,9 @@ PHP_FUNCTION(xdebug_get_profiler_filename)
 {
 	char *filename = xdebug_get_profiler_filename();
 
-	if (filename) {
-		RETURN_STRING(filename);
-	} else {
+	if (!filename) {
 		RETURN_FALSE;
 	}
+
+	RETURN_STRING(filename);
 }
