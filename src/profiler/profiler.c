@@ -229,9 +229,10 @@ void xdebug_profiler_init(char *script_name)
 
 void xdebug_profiler_deinit()
 {
-	function_stack_entry *fse;
+	function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+	int                   i;
 
-	for (fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack)); fse != NULL; fse = fse->prev) {
+	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, fse--) {
 		xdebug_profiler_function_end(fse);
 	}
 
@@ -386,16 +387,17 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 {
 	xdebug_llist_element *le;
 
-	if (fse->prev && !fse->prev->profile.call_list) {
-		fse->prev->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
+	if (xdebug_vector_element_is_valid(XG_BASE(stack), fse - 1) && !(fse - 1)->profile.call_list) {
+		(fse - 1)->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
 	}
 	if (!fse->profile.call_list) {
 		fse->profile.call_list = xdebug_llist_alloc(xdebug_profile_call_entry_dtor);
 	}
 	xdebug_profiler_function_push(fse);
 
-	if (fse->prev) {
+	if (xdebug_vector_element_is_valid(XG_BASE(stack), fse - 1)) {
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
+
 		ce->filename = zend_string_copy(fse->profiler.filename);
 		ce->function = xdstrdup(fse->profiler.funcname);
 		ce->time_taken = fse->profile.time;
@@ -403,7 +405,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		ce->user_defined = fse->user_defined;
 		ce->mem_used = fse->profile.memory;
 
-		xdebug_llist_insert_next(fse->prev->profile.call_list, NULL, ce);
+		xdebug_llist_insert_next((fse - 1)->profile.call_list, NULL, ce);
 	}
 
 	/* use previously created filename and funcname (or a reference to them) to show

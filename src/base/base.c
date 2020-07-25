@@ -479,7 +479,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	XG_BASE(prev_memory) = tmp->memory;
 	tmp->time   = xdebug_get_utime();
 	tmp->lineno = 0;
-	tmp->prev   = 0;
 
 	xdebug_build_fname(&(tmp->function), zdata);
 	if (!tmp->function.type) {
@@ -520,13 +519,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	/* Count code coverage line for call */
 	xdebug_coverage_count_line_if_branch_check_active(op_array, tmp->filename, tmp->lineno);
 
-	if (XG_BASE(stack)) {
-		if (XDEBUG_VECTOR_COUNT(XG_BASE(stack)) > 1) {
-			function_stack_entry *prev = (function_stack_entry*) xdebug_vector_element_get(XG_BASE(stack), XDEBUG_VECTOR_COUNT(XG_BASE(stack))-2);
-			tmp->prev = prev;
-		}
-	}
-
 	return tmp;
 }
 
@@ -534,7 +526,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
-	function_stack_entry *fse, *le;
+	function_stack_entry *fse;
 	int                   function_nr = 0;
 	char                 *code_coverage_function_name = NULL;
 	zend_string          *code_coverage_filename = NULL;
@@ -592,8 +584,8 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
-	if (fse && fse->prev && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
-		fse->prev->user_defined = XDEBUG_USER_DEFINED;
+	if (fse && xdebug_vector_element_is_valid(XG_BASE(stack), fse - 1) && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
+		(fse - 1)->user_defined = XDEBUG_USER_DEFINED;
 	}
 
 	function_nr = XG_BASE(function_count);
@@ -622,9 +614,12 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		 * show up correctly where they should be.  We always call
 		 * add_used_variables on the current stack level, otherwise vars in include
 		 * files do not show up in the locals list.  */
-		for (le = XDEBUG_VECTOR_TAIL(XG_BASE(stack)); le != NULL; le = le->prev) {
-			add_used_variables(le, op_array);
-			if (XDEBUG_IS_NORMAL_FUNCTION(&le->function)) {
+		function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+		int                   i;
+
+		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
+			add_used_variables(loop_fse, op_array);
+			if (XDEBUG_IS_NORMAL_FUNCTION(&loop_fse->function)) {
 				break;
 			}
 		}

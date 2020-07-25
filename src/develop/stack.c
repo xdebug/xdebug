@@ -546,8 +546,8 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 		int scope_nr = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
 
 		fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-		if (fse->user_defined == XDEBUG_BUILT_IN && fse->prev) {
-			fse = fse->prev;
+		if (fse->user_defined == XDEBUG_BUILT_IN && xdebug_vector_element_is_valid(XG_BASE(stack), fse -1)) {
+			fse = fse - 1;
 			scope_nr--;
 		}
 		if (fse->declared_vars && fse->declared_vars->size) {

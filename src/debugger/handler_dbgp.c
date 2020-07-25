@@ -1940,10 +1940,8 @@ DBGP_FUNC(stack_depth)
 
 DBGP_FUNC(stack_get)
 {
-	xdebug_xml_node      *stackframe;
-	function_stack_entry *le;
-	int                   counter = 0;
-	long                  depth;
+	xdebug_xml_node *stackframe;
+	long             depth;
 
 	if (CMD_OPTION_SET('d')) {
 		depth = strtol(CMD_OPTION_CHAR('d'), NULL, 10);
@@ -1954,11 +1952,12 @@ DBGP_FUNC(stack_get)
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 		}
 	} else {
-		counter = 0;
-		for (le = XDEBUG_VECTOR_TAIL(XG_BASE(stack)); le != NULL; le = le->prev) {
-			stackframe = return_stackframe(counter);
+		function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+		int                   i = 0;
+
+		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, fse--) {
+			stackframe = return_stackframe(i);
 			xdebug_xml_add_child(*retval, stackframe);
-			counter++;
 		}
 	}
 	return XDEBUG_CMD_OK;

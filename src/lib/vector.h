@@ -73,6 +73,17 @@ static inline void *xdebug_vector_element_get(xdebug_vector *v, size_t index)
 	return ((char*) v->data + (index * (v)->element_size));
 }
 
+static inline int xdebug_vector_element_is_valid(xdebug_vector *v, void *element)
+{
+	if ((char*) element < (char*) v->data) {
+		return 0;
+	}
+	if ((char*) element > ((char*) v->data + ((v->count - 1) * v->element_size))) {
+		return 0;
+	}
+
+	return 1;
+}
 
 #define XDEBUG_VECTOR_HEAD(v) xdebug_vector_element_get((v), 0)
 #define XDEBUG_VECTOR_TAIL(v) xdebug_vector_element_get((v), (v)->count-1)
