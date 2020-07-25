@@ -193,7 +193,7 @@ void xdebug_str_free(xdebug_str *s)
 char *xdebug_sprintf(const char* fmt, ...)
 {
 	char   *new_str;
-	int     size = 1;
+	int     size = 32;
 	va_list args;
 
 	new_str = (char *) xdmalloc(size);
