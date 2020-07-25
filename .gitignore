@@ -73,3 +73,7 @@ tags
 *.sh
 phpt.*
 /C:\\Windows\\Temp\\remote-log4.txt
+
+# Exclude files we like
+!php_xdebug.stub.php
+!run-xdebug-tests.php
