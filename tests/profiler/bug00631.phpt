@@ -34,26 +34,26 @@ fn=(1) php::xdebug_get_profiler_filename
 
 fl=(1)
 fn=(2) php::register_shutdown_function
-%d %d %i
+%d %d %d
 
 fl=(1)
 fn=(3) php::strrev
-%d %d %i
+%d %d %d
 
 fl=(2) %sbug00631.php
 fn=(4) {main}
-%d %d %i
+%d %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-%d %d %i
+%d %d %d
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-%d %d %i
+%d %d %d
 cfl=(1)
 cfn=(3)
 calls=1 0 0
-%d %d %i
+%d %d %d
 
-summary: %d %i
+summary: %d %d

@@ -38,28 +38,28 @@ events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::{zend_pass}
-10 %d %i
+10 %d %d
 
 fl=(1)
 fn=(2) php::var_dump
-6 %d %i
+6 %d %d
 
 fl=(2) %sbug00728-php71.php
 fn=(3) bankaccount->__call
-4 %d %i
+4 %d %d
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-6 %d %i
+6 %d %d
 
 fl=(2)
 fn=(4) bankaccount->bar
-4 %d %i
+4 %d %d
 cfl=(2)
 cfn=(3)
 calls=1 0 0
-11 %d %i
+11 %d %d
 
 fl=(1)
 fn=(5) php::xdebug_get_profiler_filename
-13 %d %i
+13 %d %d
