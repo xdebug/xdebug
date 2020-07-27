@@ -30,6 +30,7 @@ typedef struct _xdebug_profiler_globals_t {
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;
 	int           profile_last_filename_ref;
+	int           php_internal_seen_before;
 	xdebug_hash  *profile_functionname_refs;
 	int           profile_last_functionname_ref;
 } xdebug_profiler_globals_t;
