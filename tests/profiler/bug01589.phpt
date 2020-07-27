@@ -72,7 +72,7 @@ fn=(4) php::xdebug_get_profiler_filename
 
 fl=(4) %sbug01589-append.inc
 fn=(3)
-1 %d %i
+1 %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0

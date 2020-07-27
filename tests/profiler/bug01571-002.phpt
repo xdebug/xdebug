@@ -21,24 +21,24 @@ events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::usleep
-4 %d %i
+4 %d %d
 
 fl=(2) %sbug01571-002.inc
 fn=(2) Testing\{closure:%sbug01571-002.inc:4-4}
-4 %d %i
+4 %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-4 %d %i
+4 %d %d
 
 fl=(2)
 fn=(3) require_once::%sbug01571-002.inc
-1 %d %i
+1 %d %d
 cfl=(2)
 cfn=(2)
 calls=1 0 0
-5 %d %i
+5 %d %d
 
 fl=(1)
 fn=(4) php::xdebug_get_profiler_filename
-4 %d %i
+4 %d %d
