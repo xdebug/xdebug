@@ -22,8 +22,4 @@ cmd: %sstart_with_request_trigger_match.php
 part: 1
 positions: line
 
-events: Time_(µs) Memory_(bytes)%r
-
-fl=\(1\) php:internal
-fn=\(1\) php::xdebug_get_profiler_filename
-2 \d+ \d+|%r
+events: Time_(µs) Memory_(bytes)

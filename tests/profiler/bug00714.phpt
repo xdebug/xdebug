@@ -73,8 +73,4 @@ fn=(4) sleep20
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-4 2%d %d%r
-
-fl=\(1\)
-fn=\(5\) php::xdebug_get_profiler_filename
-14 \d+ \d+|%r
+4 2%d %d

@@ -80,8 +80,4 @@ calls=1 0 0
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-9 %d %d%r
-
-fl=\(1\)
-fn=\(4\)
-6 \d+ \d+|%r
+9 %d %d
