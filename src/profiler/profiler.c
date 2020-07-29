@@ -519,7 +519,6 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 
 	fprintf(XG_PROF(profile_file), "%s", file_buffer.d);
 	xdebug_str_dtor(file_buffer);
-	fflush(XG_PROF(profile_file));
 }
 
 void xdebug_profiler_free_function_details(function_stack_entry *fse)
