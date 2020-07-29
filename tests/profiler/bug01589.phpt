@@ -35,11 +35,15 @@ fn=(1) php::substr
 11 %d %d
 
 fl=(1)
-fn=(2) php::register_shutdown_function
-16 %d %d
+fn=(2) php::xdebug_get_profiler_filename
+17 %d %d
+
+fl=(1)
+fn=(3) php::register_shutdown_function
+18 %d %d
 
 fl=(2) %sbug01589-prepend.inc
-fn=(3) {main}
+fn=(4) {main}
 1 %d %d
 cfl=(1)
 cfn=(1)
@@ -48,14 +52,18 @@ calls=1 0 0
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-16 %d %d
+17 %d %d
+cfl=(1)
+cfn=(3)
+calls=1 0 0
+18 %d %d
 
 fl=(1)
 fn=(1)
 7 %d %d
 
 fl=(3) %sbug01589.php
-fn=(3)
+fn=(4)
 1 %d %d
 cfl=(1)
 cfn=(1)
@@ -66,18 +74,12 @@ fl=(1)
 fn=(1)
 3 %d %d
 
-fl=(1)
-fn=(4) php::xdebug_get_profiler_filename
-9 %d %d
-
 fl=(4) %sbug01589-append.inc
-fn=(3)
+fn=(4)
 1 %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0
 3 %d %d
-cfl=(1)
-cfn=(4)
-calls=1 0 0
-9 %d %d
+
+summary: %d %d

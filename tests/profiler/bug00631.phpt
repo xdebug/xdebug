@@ -6,17 +6,10 @@ xdebug.start_with_request=default
 xdebug.profiler_output_name=cachegrind.out.%p.%r
 --FILE--
 <?php
-$filename = xdebug_get_profiler_filename();
+require_once 'capture-profile.inc';
 
-function capture() {
-	global $filename;
-	echo file_get_contents($filename);
-	unlink($filename);
-	@unlink(xdebug_get_profiler_filename());
-}
-
-register_shutdown_function('capture');
 strrev("5");
+
 exit();
 ?>
 --EXPECTF--
@@ -30,30 +23,38 @@ events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::xdebug_get_profiler_filename
-%d %d %d
+2 %d %d
 
 fl=(1)
 fn=(2) php::register_shutdown_function
-%d %d %d
+10 %d %d
 
-fl=(1)
-fn=(3) php::strrev
-%d %d %d
-
-fl=(2) %sbug00631.php
-fn=(4) {main}
-%d %d %d
+fl=(2) %scapture-profile.inc
+fn=(3) require_once::%scapture-profile.inc
+1 %d %d
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-%d %d %d
+2 %d %d
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-%d %d %d
-cfl=(1)
+10 %d %d
+
+fl=(1)
+fn=(4) php::strrev
+4 %d %d
+
+fl=(3) %sbug00631.php
+fn=(5) {main}
+1 %d %d
+cfl=(2)
 cfn=(3)
 calls=1 0 0
-%d %d %d
+2 %d %d
+cfl=(1)
+cfn=(4)
+calls=1 0 0
+4 %d %d
 
 summary: %d %d

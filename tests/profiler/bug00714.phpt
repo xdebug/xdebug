@@ -10,6 +10,8 @@ xdebug.mode=profile
 xdebug.start_with_request=default
 --FILE--
 <?php
+require_once 'capture-profile.inc';
+
 function sleep1() { sleep(1); }
 function sleep10() { sleep(1); }
 function sleep20() { sleep(2); }
@@ -22,8 +24,7 @@ echo "Sleeping 20\n";
 sleep20();
 echo "DONE\n\n";
 
-echo file_get_contents(xdebug_get_profiler_filename());
-@unlink(xdebug_get_profiler_filename());
+exit();
 ?>
 --EXPECTF--
 Sleeping 1
@@ -40,41 +41,79 @@ positions: line
 events: Time_(µs) Memory_(bytes)
 
 fl=(1) php:internal
-fn=(1) php::sleep
-2 10%d %d
+fn=(1) php::xdebug_get_profiler_filename
+2 %d %d
 
-fl=(2) %sbug00714.php
-fn=(2) sleep1
+fl=(1)
+fn=(2) php::register_shutdown_function
+10 %d %d
+
+fl=(2) %scapture-profile.inc
+fn=(3) require_once::%scapture-profile.inc
+1 %d %d
+cfl=(1)
+cfn=(1)
+calls=1 0 0
 2 %d %d
 cfl=(1)
-cfn=(1)
+cfn=(2)
 calls=1 0 0
-2 10%d %d
+10 %d %d
 
 fl=(1)
-fn=(1)
-3 10%d %d
+fn=(4) php::sleep
+4 10%d 0
 
-fl=(2)
-fn=(3) sleep10
-3 %d %d
-cfl=(1)
-cfn=(1)
-calls=1 0 0
-3 10%d %d
-
-fl=(1)
-fn=(1)
-4 2%d %d
-
-fl=(2)
-fn=(4) sleep20
+fl=(3) %sbug00714.php
+fn=(5) sleep1
 4 %d %d
 cfl=(1)
-cfn=(1)
+cfn=(4)
 calls=1 0 0
-4 2%d %d
+4 10%d 0
 
 fl=(1)
-fn=(5) php::xdebug_get_profiler_filename
-14 %d %d
+fn=(4)
+5 10%d 0
+
+fl=(3)
+fn=(6) sleep10
+5 %d %d
+cfl=(1)
+cfn=(4)
+calls=1 0 0
+5 10%d 0
+
+fl=(1)
+fn=(4)
+6 20%d 0
+
+fl=(3)
+fn=(7) sleep20
+6 %d %d
+cfl=(1)
+cfn=(4)
+calls=1 0 0
+6 20%d 0
+
+fl=(3)
+fn=(8) {main}
+1 %d %d
+cfl=(2)
+cfn=(3)
+calls=1 0 0
+2 %d %d
+cfl=(3)
+cfn=(5)
+calls=1 0 0
+9 10%d 0
+cfl=(3)
+cfn=(6)
+calls=1 0 0
+11 10%d 0
+cfl=(3)
+cfn=(7)
+calls=1 0 0
+13 20%d 0
+
+summary: %d %d

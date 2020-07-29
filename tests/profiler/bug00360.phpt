@@ -5,14 +5,15 @@ xdebug.mode=profile
 xdebug.start_with_request=default
 --FILE--
 <?php
+require_once 'capture-profile.inc';
+
 function func(){
-1+1;
+	1+1;
 }
 
 func();
 
-echo file_get_contents(xdebug_get_profiler_filename());
-@unlink(xdebug_get_profiler_filename());
+exit();
 ?>
 --EXPECTF--
 version: 1
@@ -23,10 +24,40 @@ positions: line
 
 events: Time_(µs) Memory_(bytes)
 
-fl=(2) %sbug00360.php
-fn=(1) func
+fl=(1) php:internal
+fn=(1) php::xdebug_get_profiler_filename
 2 %d %d
 
-fl=(1) php:internal
-fn=(2) php::xdebug_get_profiler_filename
+fl=(1)
+fn=(2) php::register_shutdown_function
+10 %d %d
+
+fl=(2) %scapture-profile.inc
+fn=(3) require_once::%scapture-profile.inc
+1 %d %d
+cfl=(1)
+cfn=(1)
+calls=1 0 0
+2 %d %d
+cfl=(1)
+cfn=(2)
+calls=1 0 0
+10 %d %d
+
+fl=(3) %sbug00360.php
+fn=(4) func
+4 %d %d
+
+fl=(3)
+fn=(5) {main}
+1 %d %d
+cfl=(2)
+cfn=(3)
+calls=1 0 0
+2 %d %d
+cfl=(3)
+cfn=(4)
+calls=1 0 0
 8 %d %d
+
+summary: %d %d
