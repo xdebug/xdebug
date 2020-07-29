@@ -377,8 +377,13 @@ static void xdebug_env_config(void)
 		if (strcasecmp(envvar, "remote_cookie_expire_time") == 0) {
 			name = "xdebug.remote_cookie_expire_time";
 		}
-		else if (strcasecmp(envvar, "cli_color") == 0) {
+		else
+		if (strcasecmp(envvar, "cli_color") == 0) {
 			name = "xdebug.cli_color";
+		}
+		else
+		if (strcasecmp(envvar, "mode") == 0) {
+			name = "xdebug.mode";
 		}
 
 		if (name) {
