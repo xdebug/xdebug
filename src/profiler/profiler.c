@@ -100,6 +100,10 @@ void xdebug_profiler_init_if_requested(zend_op_array *op_array)
 		return;
 	}
 
+	if (EG(flags) & EG_FLAGS_IN_SHUTDOWN) {
+		return;
+	}
+
 	if (xdebug_lib_start_with_request() || xdebug_lib_start_with_trigger()) {
 		xdebug_profiler_init((char*) STR_NAME_VAL(op_array->filename));
 	}
