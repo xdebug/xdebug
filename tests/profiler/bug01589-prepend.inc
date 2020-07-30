@@ -13,5 +13,7 @@ if (strlen('foobar')>1) {
 else {
 	$foobar='';
 }
+
+$filename = xdebug_get_profiler_filename();
 register_shutdown_function('capture');
 ?>

@@ -6,5 +6,5 @@ else {
 	$foobar='';
 }
 
-$filename = xdebug_get_profiler_filename();
+exit();
 ?>
