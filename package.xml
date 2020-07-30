@@ -181,6 +181,7 @@ Fri, May 29, 2020 - xdebug 2.9.6
   <required>
    <php>
     <min>7.1.0</min>
+    <max>7.4.99</min>
    </php>
    <pearinstaller>
     <min>1.9.1</min>
