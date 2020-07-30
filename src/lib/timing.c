@@ -79,6 +79,7 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_context *nanotime_contex
 #endif
 
 	// We give up
+	php_error(E_WARNING, "Xdebug could not determine a suitable clock source on your system");
 	return 0;
 }
 
