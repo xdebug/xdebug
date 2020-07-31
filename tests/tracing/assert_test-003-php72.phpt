@@ -56,7 +56,7 @@ Assertion Failed:
         Desc 'One is not two'
 One is not two
 
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> assert_options(1, 1) %sassert_test-003-php72.php:5
 %w%f %w%d     -> assert_options(4, 0) %sassert_test-003-php72.php:6
 %w%f %w%d     -> assert_options(5, 1) %sassert_test-003-php72.php:7

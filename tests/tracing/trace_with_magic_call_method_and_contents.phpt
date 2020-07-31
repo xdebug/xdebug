@@ -30,7 +30,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Test->__construct() %strace_with_magic_call_method_and_contents.php:14
 %w%f %w%d     -> Test->testFunc('test1', 'test2') %strace_with_magic_call_method_and_contents.php:15
 %w%f %w%d       -> Test->__call($func = 'testFunc', $args = array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method_and_contents.php:15
@@ -38,4 +38,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d           -> array_sum(array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method_and_contents.php:10
 %w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_call_method_and_contents.php:17
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

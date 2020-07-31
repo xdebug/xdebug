@@ -23,11 +23,11 @@ unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-unix.txt' );
 ?>
 --EXPECTF--
 3
-[%d] Log opened at %d-%d-%d %d:%d:%d
+[%d] Log opened at %d-%d-%d %d:%d:%d.%d
 [%d] I: Checking remote connect back address.
 [%d] I: Checking user configured header 'I_LIKE_COOKIES'.
 [%d] W: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
 [%d] W: Remote address not found, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
 [%d] W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
 [%d] E: Could not connect to client. :-(
-[%d] Log closed at %d-%d-%d %d:%d:%d
+[%d] Log closed at %d-%d-%d %d:%d:%d.%d

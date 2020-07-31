@@ -24,7 +24,7 @@ xdebug_stop_trace();
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> array_map('strlen', array (0 => 'a', 1 => 'bb', 2 => 'ccc')) %sarray_map.php:5
 %w%f %w%d       -> strlen('a') %sarray_map.php:5
 %w%f %w%d       -> strlen('bb') %sarray_map.php:5

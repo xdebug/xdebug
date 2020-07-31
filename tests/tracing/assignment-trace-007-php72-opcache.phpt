@@ -50,7 +50,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-007-php72-opcache.php:2
 %w%f %w%d     -> test($a = 1, $b = 2, $c = 3) %sassignment-trace-007-php72-opcache.php:29
                              => $a += 2 %sassignment-trace-007-php72-opcache.php:7
@@ -66,4 +66,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $a = class testClass { public $a = NULL; private $b = NULL; protected $c = NULL } %sassignment-trace-007-php72-opcache.php:30
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-007-php72-opcache.php:32
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

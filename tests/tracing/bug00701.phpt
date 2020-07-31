@@ -21,7 +21,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%sxdt%s.xt' %sbug00701.php:2
                            => $class = 'class' %sbug00701.php:4
                            => $method = 'methodName' %sbug00701.php:5
@@ -30,4 +30,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $action_ids['Class']['methodName'] = 'methodName' %sbug00701.php:6
 %w%f %w%d     -> xdebug_stop_trace() %sbug00701.php:8
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -24,8 +24,8 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> A\{closure:%sbug01571-001.php:6-8}(1, class Closure {  }) %sbug01571-001.php:9
 %w%f %w%d     -> xdebug_stop_trace() %sbug01571-001.php:11
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

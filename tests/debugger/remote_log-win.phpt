@@ -23,10 +23,10 @@ unlink ("C:\\Windows\\Temp\\remote-log4.txt");
 ?>
 --EXPECTF--
 3
-[%d] Log opened at %d-%d-%d %d:%d:%d
+[%d] Log opened at %d-%d-%d %d:%d:%d.%d
 [%d] I: Checking remote connect back address.
 [%d] I: Checking user configured header 'I_LIKE_COOKIES'.
 [%d] I: Remote address found, connecting to doesnotexist3:9003.
 [%d] W: Creating socket for 'doesnotexist3:9003', getaddrinfo: %d.
 [%d] E: Could not connect to client. :-(
-[%d] Log closed at %d-%d-%d %d:%d:%d
+[%d] Log closed at %d-%d-%d %d:%d:%d.%d

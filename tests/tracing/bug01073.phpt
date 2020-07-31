@@ -26,7 +26,7 @@ unlink($tf);
 --EXPECTF--
 1 2 3
 1 2 3
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> call_user_func_array:{%sbug01073.php:4}('call_user_func_array', array (0 => 'printf', 1 => array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3))) %sbug01073.php:4
 %w%f %w%d       -> call_user_func_array:{%sbug01073.php:4}('printf', array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3)) %sbug01073.php:4
 %w%f %w%d         -> printf('%u %u %u\n', 1, 2, 3) %sbug01073.php:4
@@ -36,4 +36,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d           -> printf('%u %u %u\n', 1, 2, 3) %sbug01073.php:6
 %w%f %w%d     -> xdebug_stop_trace() %sbug01073.php:8
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

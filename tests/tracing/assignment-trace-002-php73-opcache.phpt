@@ -50,7 +50,7 @@ Call Stack:
 %w%f %w%d   1. {main}() %sassignment-trace-002-php73-opcache.php:0
 %w%f %w%d   2. test(1, 2, 3) %sassignment-trace-002-php73-opcache.php:21
 
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-002-php73-opcache.php:2
                            => $t = array () %sassignment-trace-002-php73-opcache.php:13
                            => $t['a'] = 98 %sassignment-trace-002-php73-opcache.php:14
@@ -67,4 +67,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => $t['b'] *= 9 %sassignment-trace-002-php73-opcache.php:11
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-002-php73-opcache.php:23
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

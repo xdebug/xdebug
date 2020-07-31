@@ -27,10 +27,10 @@ unlink($tf);
 --EXPECTF--
 Version: %d.%s
 File format: %d
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 2	4	0	%d.%d	%d	setlocale	0		%sbug00843-001.php	4	%d	%d	'%s'
 2	4	1	%d.%d	%d
 2	4	R			'%s'
 2	5	0	%d.%d	%d	xdebug_stop_trace	0		%sbug00843-001.php	6	0
 			%d.%d	%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

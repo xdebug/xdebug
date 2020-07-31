@@ -33,7 +33,7 @@ unlink($tf);
 --EXPECTF--
 Version: %s
 File format: %d
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 2	4	0	%f	%d	foo	1		%sfunctrace_comp_3.php	9	1	42
 2	4	1	%f	%d
 2	5	0	%f	%d	foo	1		%sfunctrace_comp_3.php	10	1	'string'
@@ -48,4 +48,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 2	9	1	%f	%d
 2	10	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_3.php	16	0
 			%f	%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

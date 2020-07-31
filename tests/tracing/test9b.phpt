@@ -33,7 +33,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> DBHelper::quote('test\'s') %stest9b.php:18
 %w%f %w%d       -> addslashes('test\'s') %stest9b.php:6
 %w%f %w%d     -> DBHelper::quote('test\'s') %stest9b.php:18
@@ -42,4 +42,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> DB->query('insert blah \' blah') %stest9b.php:19
 %w%f %w%d     -> xdebug_stop_trace() %stest9b.php:20
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -25,8 +25,8 @@ unlink($tf);
 ?>
 --EXPECTF--
 test
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> DB::query('test') %stest20b.php:9
 %w%f %w%d     -> xdebug_stop_trace() %stest20b.php:11
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

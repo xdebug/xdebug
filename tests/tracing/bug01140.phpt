@@ -35,10 +35,10 @@ unlink( $tf );
 %sbug01140.php:14:
 class Foo#1 (0) {
 }
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> var_dump(class Foo {  }) %sbug01140.php:14
 %w%f %w%d     -> xdebug_stop_trace() %sbug01140.php:16
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]
 
 == I didn't crash ==

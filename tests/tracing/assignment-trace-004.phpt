@@ -30,11 +30,11 @@ unlink($tf);
 Call Stack:
 %w%f %w%d   1. {main}() %sassignment-trace-004.php:0
 
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s' %sassignment-trace-004.php:2
                            => $t = 42 %sassignment-trace-004.php:4
                            => $t += %r(NULL|\*uninitialized\*)%r %sassignment-trace-004.php:5
                            => $t += %r(NULL|\*uninitialized\*)%r %sassignment-trace-004.php:6
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-004.php:8
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

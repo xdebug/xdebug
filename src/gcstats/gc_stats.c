@@ -47,7 +47,7 @@ static int xdebug_gc_collect_cycles(void)
 	xdebug_gc_run     *run;
 	zend_execute_data *execute_data;
 	long int           memory;
-	double             start;
+	uint64_t           start;
 	xdebug_func        tmp;
 #if PHP_VERSION_ID >= 70300
 	zend_gc_status     status;
@@ -65,7 +65,7 @@ static int xdebug_gc_collect_cycles(void)
 #else
 	collected = GC_G(collected);
 #endif
-	start = xdebug_get_utime();
+	start = xdebug_get_nanotime();
 	memory = zend_memory_usage(0);
 
 	ret = xdebug_old_gc_collect_cycles();
@@ -80,7 +80,7 @@ static int xdebug_gc_collect_cycles(void)
 #else
 	run->collected = GC_G(collected) - collected;
 #endif
-	run->duration = xdebug_get_utime() - start;
+	run->duration = xdebug_get_nanotime() - start;
 	run->memory_before = memory;
 	run->memory_after = zend_memory_usage(0);
 
@@ -182,7 +182,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | -\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
-			run->duration / 1000.0,
+			run->duration / (double)NANOS_IN_MILLISEC,
 			run->memory_before,
 			run->memory_after,
 			reduction
@@ -192,7 +192,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
-			run->duration / 1000.0,
+			run->duration / (double)NANOS_IN_MILLISEC,
 			run->memory_before,
 			run->memory_after,
 			reduction,
@@ -203,7 +203,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s::%s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
-			run->duration / 1000.0,
+			run->duration / (double)NANOS_IN_MILLISEC,
 			run->memory_before,
 			run->memory_after,
 			reduction,

@@ -135,8 +135,8 @@ typedef struct _xdebug_func {
 } xdebug_func;
 
 typedef struct xdebug_profile {
-	double        time;
-	double        mark;
+	uint64_t      nanotime;
+	uint64_t      nanotime_mark;
 	long          memory;
 	long          mem_mark;
 	xdebug_llist *call_list;
@@ -171,7 +171,7 @@ typedef struct _function_stack_entry {
 	/* tracing properties */
 	signed long  memory;
 	signed long  prev_memory;
-	double       time;
+	uint64_t     nanotime;
 
 	/* profiling properties */
 	xdebug_profile profile;

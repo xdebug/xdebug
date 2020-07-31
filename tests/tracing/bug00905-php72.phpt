@@ -36,7 +36,7 @@ key => c
 2 => d
 10 => e
 11 => f
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> gen() %sbug00905-php72.php:13
 %w%f %w%d     -> gen() %sbug00905-php72.php:13
 %w%f %w%d      >=> (0 => 'a')
@@ -53,4 +53,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> gen() %sbug00905-php72.php:13
 %w%f %w%d     -> xdebug_stop_trace() %sbug00905-php72.php:17
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

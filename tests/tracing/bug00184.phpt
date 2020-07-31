@@ -23,7 +23,7 @@ xdebug.var_display_max_children=33
 	echo "DONE\n";
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d   -> {main}() %sbug00184.php:0
 %w%f %w%d     -> xdebug_get_tracefile_name() %sbug00184.php:2
 %w%f %w%d      >=> '%strace.%d.xt'
@@ -33,6 +33,6 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d      >=> 'foobar'
 %w%f %w%d     -> xdebug_stop_trace() %sbug00184.php:4
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]
 
 DONE

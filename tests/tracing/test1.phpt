@@ -30,11 +30,11 @@ xdebug.var_display_max_children=3
 ?>
 --EXPECTF--
 15
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> include(%stest_class.inc) %stest1.php:11
 %w%f %w%d     -> foo(5) %stest1.php:13
 %w%f %w%d       -> een->foo2(15, array (0 => 'blaat', 1 => 5, 2 => FALSE)) %stest1.php:7
 %w%f %w%d         -> een->hang() %stest_class.inc:10
 %w%f %w%d     -> xdebug_stop_trace() %stest1.php:14
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]
