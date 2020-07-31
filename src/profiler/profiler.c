@@ -521,7 +521,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	}
 	xdebug_str_addc(&file_buffer, '\n');
 
-	fprintf(XG_PROF(profile_file), "%s", file_buffer.d);
+	fwrite(file_buffer.d, sizeof(char), file_buffer.l, XG_PROF(profile_file));
 	xdebug_str_dtor(file_buffer);
 }
 
