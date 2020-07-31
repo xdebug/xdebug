@@ -879,6 +879,8 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(error_reporting_override) = 0;
 	XG_BASE(error_reporting_overridden) = 0;
 	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
+
+	xdebug_nanotime_init();
 }
 
 void xdebug_base_mshutdown()
