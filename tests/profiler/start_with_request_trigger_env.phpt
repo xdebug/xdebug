@@ -21,4 +21,4 @@ cmd: %sstart_with_request_trigger_env.php
 part: 1
 positions: line
 
-events: Time_(µs) Memory_(bytes)
+events: Time_(10ns) Memory_(bytes)

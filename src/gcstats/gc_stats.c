@@ -47,7 +47,7 @@ static int xdebug_gc_collect_cycles(void)
 	xdebug_gc_run     *run;
 	zend_execute_data *execute_data;
 	long int           memory;
-	double             start;
+	uint64_t           start;
 	xdebug_func        tmp;
 #if PHP_VERSION_ID >= 70300
 	zend_gc_status     status;
@@ -65,7 +65,7 @@ static int xdebug_gc_collect_cycles(void)
 #else
 	collected = GC_G(collected);
 #endif
-	start = xdebug_get_utime();
+	start = xdebug_get_nanotime();
 	memory = zend_memory_usage(0);
 
 	ret = xdebug_old_gc_collect_cycles();
@@ -80,7 +80,7 @@ static int xdebug_gc_collect_cycles(void)
 #else
 	run->collected = GC_G(collected) - collected;
 #endif
-	run->duration = xdebug_get_utime() - start;
+	run->duration = (xdebug_get_nanotime() - start) / (double)NANOS_IN_SEC;
 	run->memory_before = memory;
 	run->memory_after = zend_memory_usage(0);
 

@@ -65,12 +65,12 @@ void xdebug_trace_textual_write_header(void *ctxt)
 void xdebug_trace_textual_write_footer(void *ctxt)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-	char   *str_time;
-	double  u_time;
-	char   *tmp;
+	char     *str_time;
+	uint64_t  nanotime;
+	char     *tmp;
 
-	u_time = xdebug_get_utime();
-	tmp = xdebug_sprintf("%10.4F ", u_time - XG_BASE(start_time));
+	nanotime = xdebug_get_nanotime();
+	tmp = xdebug_sprintf("%10.4F ", (nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
@@ -128,7 +128,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
-	xdebug_str_add_fmt(&str, "%10.4F ", fse->time - XG_BASE(start_time));
+	xdebug_str_add_fmt(&str, "%10.4F ", (fse->nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
 	xdebug_str_add_fmt(&str, "%10lu ", fse->memory);
 	for (j = 0; j < fse->level; j++) {
 		xdebug_str_add_literal(&str, "  ");
@@ -214,7 +214,7 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 {
 	unsigned int j = 0; /* Counter */
 
-	xdebug_str_add_fmt(str, "%10.4F ", xdebug_get_utime() - XG_BASE(start_time));
+	xdebug_str_add_fmt(str, "%10.4F ", (xdebug_get_nanotime() - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
 	xdebug_str_add_fmt(str, "%10lu ", zend_memory_usage(0));
 
 	for (j = 0; j < fse->level; j++) {

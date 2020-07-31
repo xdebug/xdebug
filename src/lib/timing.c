@@ -192,11 +192,6 @@ uint64_t xdebug_get_nanotime(void)
 	return nanotime;
 }
 
-double xdebug_get_utime(void)
-{
-	return xdebug_get_nanotime() / (double)NANOS_IN_SEC;
-}
-
 char* xdebug_get_time(void)
 {
 	uint64_t nanotime;

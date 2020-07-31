@@ -13,6 +13,7 @@
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@xdebug.org>                          |
+   |          Michael Voříšek <mvorisek@mvorisek.cz>                      |
    +----------------------------------------------------------------------+
  */
 
@@ -25,7 +26,7 @@
 
 typedef struct _xdebug_profiler_globals_t {
 	zend_bool     active;
-	double        profiler_start_time;
+	uint64_t      profiler_start_nanotime;
 	FILE         *profile_file;
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;

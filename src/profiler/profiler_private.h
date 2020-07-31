@@ -24,7 +24,7 @@ typedef struct _xdebug_call_entry {
 	zend_string *filename;
 	char        *function;
 	int          lineno;
-	double       time_taken;
+	uint64_t     nanotime_taken;
 	long         mem_used;
 } xdebug_call_entry;
 

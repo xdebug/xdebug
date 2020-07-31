@@ -44,7 +44,6 @@ typedef struct _xdebug_nanotime_context {
 void xdebug_nanotime_init(void);
 
 uint64_t xdebug_get_nanotime(void);
-double xdebug_get_utime(void);
 char* xdebug_get_time(void);
 
 char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision);

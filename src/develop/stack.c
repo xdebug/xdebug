@@ -442,9 +442,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 		}
 		tmp_name = xdebug_show_fname(fse->function, html, 0);
 		if (html) {
-			xdebug_str_add_fmt(str, formats[3], fse->level, fse->time - XG_BASE(start_time), fse->memory, tmp_name);
+			xdebug_str_add_fmt(str, formats[3], fse->level, (fse->nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC, fse->memory, tmp_name);
 		} else {
-			xdebug_str_add_fmt(str, formats[3], fse->time - XG_BASE(start_time), fse->memory, fse->level, tmp_name);
+			xdebug_str_add_fmt(str, formats[3], (fse->nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC, fse->memory, fse->level, tmp_name);
 		}
 		xdfree(tmp_name);
 

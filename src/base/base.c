@@ -477,7 +477,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	tmp->prev_memory = XG_BASE(prev_memory);
 	tmp->memory = zend_memory_usage(0);
 	XG_BASE(prev_memory) = tmp->memory;
-	tmp->time   = xdebug_get_utime();
+	tmp->nanotime = xdebug_get_nanotime();
 	tmp->lineno = 0;
 
 	xdebug_build_fname(&(tmp->function), zdata);
@@ -915,7 +915,7 @@ void xdebug_base_rinit()
 	XG_BASE(last_exception_trace) = NULL;
 
 	/* Initialize start time */
-	XG_BASE(start_time) = xdebug_get_utime();
+	XG_BASE(start_nanotime) = xdebug_get_nanotime();
 
 	XG_BASE(in_var_serialisation) = 0;
 	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;

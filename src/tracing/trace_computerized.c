@@ -68,12 +68,12 @@ void xdebug_trace_computerized_write_header(void *ctxt)
 void xdebug_trace_computerized_write_footer(void *ctxt)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
-	char   *str_time;
-	double  u_time;
-	char   *tmp;
+	char    *str_time;
+	uint64_t nanotime;
+	char    *tmp;
 
-	u_time = xdebug_get_utime();
-	tmp = xdebug_sprintf("\t\t\t%F\t", u_time - XG_BASE(start_time));
+	nanotime = xdebug_get_nanotime();
+	tmp = xdebug_sprintf("\t\t\t%F\t", (nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
@@ -135,7 +135,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
 	xdebug_str_add_literal(&str, "0\t");
-	xdebug_str_add_fmt(&str, "%F\t", fse->time - XG_BASE(start_time));
+	xdebug_str_add_fmt(&str, "%F\t", (fse->nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
 	xdebug_str_add_fmt(&str, "%lu\t", fse->memory);
 	xdebug_str_add_fmt(&str, "%s\t", tmp_name);
 	if (fse->user_defined == XDEBUG_USER_DEFINED) {
@@ -210,7 +210,7 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 	xdebug_str_add_fmt(&str, "%d\t", function_nr);
 
 	xdebug_str_add_literal(&str, "1\t");
-	xdebug_str_add_fmt(&str, "%F\t", xdebug_get_utime() - XG_BASE(start_time));
+	xdebug_str_add_fmt(&str, "%F\t", (xdebug_get_nanotime() - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
 	xdebug_str_add_fmt(&str, "%lu\n", zend_memory_usage(0));
 
 	fprintf(context->trace_file, "%s", str.d);
