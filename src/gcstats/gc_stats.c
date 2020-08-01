@@ -80,7 +80,7 @@ static int xdebug_gc_collect_cycles(void)
 #else
 	run->collected = GC_G(collected) - collected;
 #endif
-	run->duration = (xdebug_get_nanotime() - start) / (double)NANOS_IN_SEC;
+	run->duration = xdebug_get_nanotime() - start;
 	run->memory_before = memory;
 	run->memory_after = zend_memory_usage(0);
 
@@ -182,7 +182,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | -\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
-			run->duration / 1000.0,
+			run->duration * 1000.0 / (double)NANOS_IN_SEC,
 			run->memory_before,
 			run->memory_after,
 			reduction
@@ -192,7 +192,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
-			run->duration / 1000.0,
+			run->duration * 1000.0 / (double)NANOS_IN_SEC,
 			run->memory_before,
 			run->memory_after,
 			reduction,
@@ -203,7 +203,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			"%9" XDEBUG_GCINT_FMT " | %9.2f %% | %5.2f ms | %13" XDEBUG_GCINT_FMT " | %12" XDEBUG_GCINT_FMT " | %8.2f %% | %s::%s\n",
 			run->collected,
 			(run->collected / 10000.0) * 100.0,
-			run->duration / 1000.0,
+			run->duration * 1000.0 / (double)NANOS_IN_SEC,
 			run->memory_before,
 			run->memory_after,
 			reduction,
