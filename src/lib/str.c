@@ -39,21 +39,7 @@ inline static void realloc_if_needed(xdebug_str *xs, int size_to_fit)
 	}
 }
 
-void xdebug_str_add(xdebug_str *xs, const char *str, int f)
-{
-	int l = strlen(str);
-
-	realloc_if_needed(xs, l);
-
-	memcpy(xs->d + xs->l, str, l);
-	xs->d[xs->l + l] = '\0';
-	xs->l = xs->l + l;
-	if (f) {
-		xdfree((char*) str);
-	}
-}
-
-void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f)
+inline static void xdebug_str_internal_addl(xdebug_str *xs, const char *str, int le, int f)
 {
 	realloc_if_needed(xs, le);
 
@@ -66,22 +52,24 @@ void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f)
 	}
 }
 
+void xdebug_str_add(xdebug_str *xs, const char *str, int f)
+{
+	xdebug_str_internal_addl(xs, str, strlen(str), f);
+}
+
+void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f)
+{
+	xdebug_str_internal_addl(xs, str, le, f);
+}
+
 void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str)
 {
-	realloc_if_needed(xs, str->l);
-
-	memcpy(xs->d + xs->l, str->d, str->l);
-	xs->d[xs->l + str->l] = '\0';
-	xs->l = xs->l + str->l;
+    xdebug_str_internal_addl(xs, str->d, str->l, 0);
 }
 
 void xdebug_str_add_zstr(xdebug_str *xs, const zend_string *str)
 {
-	realloc_if_needed(xs, ZSTR_LEN(str));
-
-	memcpy(xs->d + xs->l, ZSTR_VAL(str), ZSTR_LEN(str));
-	xs->d[xs->l + ZSTR_LEN(str)] = '\0';
-	xs->l = xs->l + ZSTR_LEN(str);
+    xdebug_str_internal_addl(xs, ZSTR_VAL(str), ZSTR_LEN(str), 0);
 }
 
 void xdebug_str_addc(xdebug_str *xs, char letter)
@@ -112,7 +100,7 @@ void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num)
 		}
 	} while (num != 0L);
 
-	xdebug_str_addl(xs, pos, &buffer[20] - pos, 0);
+	xdebug_str_internal_addl(xs, pos, &buffer[20] - pos, 0);
 }
 
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
