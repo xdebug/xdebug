@@ -42,6 +42,7 @@ void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f);
 void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str);
 void xdebug_str_add_zstr(xdebug_str *xs, const zend_string *str);
 void xdebug_str_addc(xdebug_str *xs, char letter);
+void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num);
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...);
 #define xdebug_str_add_literal(s,l) xdebug_str_addl((s), (l), sizeof(l)-1, 0)
 #define xdebug_str_add_const(s,l) xdebug_str_addl((s), (l), strlen(l), 0)
