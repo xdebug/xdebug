@@ -601,11 +601,6 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		fse->symbol_table = EG(current_execute_data)->symbol_table;
 	}
-	if (Z_OBJ(EG(current_execute_data)->This)) {
-		fse->This = &EG(current_execute_data)->This;
-	} else {
-		fse->This = NULL;
-	}
 
 	if (XG_BASE(stack) && (XINI_DEV(collect_vars) || XINI_DEV(show_local_vars) || xdebug_is_debug_connection_active())) {
 		/* Because include/require is treated as a stack level, we have to add used

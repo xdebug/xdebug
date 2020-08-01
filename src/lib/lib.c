@@ -386,11 +386,7 @@ xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list)
 void xdebug_lib_set_active_data(zend_execute_data *execute_data)
 {
 	XG_LIB(active_execute_data) = execute_data;
-}
-
-void xdebug_lib_set_active_object(zval *object)
-{
-	XG_LIB(active_object) = object;
+	XG_LIB(active_object) = execute_data ? &execute_data->This : NULL;
 }
 
 void xdebug_lib_set_active_stack_entry(function_stack_entry *fse)

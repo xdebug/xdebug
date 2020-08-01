@@ -26,7 +26,7 @@ int xdebug_is_top_stack_frame_filtered(int filter_type);
 void xdebug_filter_register_constants(INIT_FUNC_ARGS);
 void xdebug_filter_run_tracing(function_stack_entry *fse);
 void xdebug_filter_run_code_coverage(zend_op_array *op_array);
-void xdebug_filter_run_internal(function_stack_entry *fse, int group, long *filtered_flag, int type, xdebug_llist *filters);
+void xdebug_filter_run_internal(function_stack_entry *fse, int group, unsigned char *filtered_flag, int type, xdebug_llist *filters);
 
 #define XDEBUG_FILTER_NONE           0x000
 #define XDEBUG_FILTER_TRACING        0x100

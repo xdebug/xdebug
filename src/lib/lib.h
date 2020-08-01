@@ -144,30 +144,29 @@ typedef struct xdebug_profile {
 
 typedef struct _function_stack_entry {
 	/* function properties */
-	xdebug_func  function;
-	int          user_defined;
-
-	/* location properties */
-	unsigned int level;
-	zend_string *filename;
-	int          lineno;
-	zend_string *include_filename;
-	int          function_nr;
+	xdebug_func    function;
+	unsigned int   function_nr;
+	unsigned short level;
+	unsigned char  user_defined;
 
 	/* argument properties */
-	int                arg_done;
-	unsigned int       varc;
+	unsigned char      varc;
 	xdebug_var_name   *var;
-	int                is_variadic;
 	zval              *return_value;
 	xdebug_llist      *declared_vars;
 	HashTable         *symbol_table;
 	zend_execute_data *execute_data;
-	zval              *This;
+	unsigned char      is_variadic;
+	unsigned char      arg_done;
 
 	/* filter properties */
-	long         filtered_tracing;
-	long         filtered_code_coverage;
+	unsigned char filtered_tracing;
+	unsigned char filtered_code_coverage;
+
+	/* location properties */
+	int          lineno;
+	zend_string *filename;
+	zend_string *include_filename;
 
 	/* tracing properties */
 	signed long  memory;
@@ -280,7 +279,6 @@ int xdebug_lib_set_start_upon_error(char *value);
 int xdebug_lib_start_upon_error(void);
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);
-void xdebug_lib_set_active_object(zval *object);
 void xdebug_lib_set_active_stack_entry(function_stack_entry *fse);
 void xdebug_lib_set_active_symbol_table(HashTable *symbol_table);
 

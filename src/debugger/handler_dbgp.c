@@ -1521,7 +1521,6 @@ DBGP_FUNC(property_get)
 			} else {
 				xdebug_lib_set_active_data(EG(current_execute_data));
 			}
-			xdebug_lib_set_active_object(fse->This);
 			xdebug_lib_set_active_stack_entry(fse);
 			xdebug_lib_set_active_symbol_table(fse->symbol_table);
 		} else {
@@ -1615,7 +1614,6 @@ DBGP_FUNC(property_set)
 			} else {
 				xdebug_lib_set_active_data(EG(current_execute_data));
 			}
-			xdebug_lib_set_active_object(fse->This);
 			xdebug_lib_set_active_stack_entry(fse);
 			xdebug_lib_set_active_symbol_table(fse->symbol_table);
 		} else {
@@ -1734,7 +1732,6 @@ DBGP_FUNC(property_value)
 			} else {
 				xdebug_lib_set_active_data(EG(current_execute_data));
 			}
-			xdebug_lib_set_active_object(fse->This);
 			xdebug_lib_set_active_stack_entry(fse);
 			xdebug_lib_set_active_symbol_table(fse->symbol_table);
 		} else {
@@ -1882,7 +1879,6 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			xdebug_lib_set_active_data(EG(current_execute_data));
 		}
 		xdebug_lib_set_active_symbol_table(fse->symbol_table);
-		xdebug_lib_set_active_object(fse->This);
 
 		/* Only show vars when they are scanned */
 		if (fse->declared_vars) {
@@ -1924,7 +1920,6 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		}
 
 		xdebug_lib_set_active_data(NULL);
-		xdebug_lib_set_active_object(NULL);
 		xdebug_lib_set_active_symbol_table(NULL);
 		return 0;
 	}

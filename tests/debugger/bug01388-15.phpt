@@ -88,4 +88,4 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 14
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="14" context="0"><property name="$this" fullname="$this" type="object" classname="test_class" children="0" numchildren="0" page="0" pagesize="32"></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="14" context="0"></response>
