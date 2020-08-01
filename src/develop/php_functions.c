@@ -232,7 +232,7 @@ PHP_FUNCTION(xdebug_time_index)
 {
 	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
 
-	RETURN_DOUBLE((xdebug_get_nanotime() - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+	RETURN_DOUBLE(XDEBUG_SECONDS_SINCE_START(xdebug_get_nanotime()));
 }
 
 /* {{{ proto void xdebug_print_function_stack([string message [, int options])

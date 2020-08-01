@@ -83,7 +83,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 
 	xdebug_str_add_literal(&str, "\t<tr>");
 	xdebug_str_add_fmt(&str, "<td>%d</td>", function_nr);
-	xdebug_str_add_fmt(&str, "<td>%0.6F</td>", (fse->nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+	xdebug_str_add_fmt(&str, "<td>%0.6F</td>", XDEBUG_SECONDS_SINCE_START(fse->nanotime));
 	xdebug_str_add_fmt(&str, "<td align='right'>%lu</td>", fse->memory);
 	xdebug_str_add_literal(&str, "<td align='left'>");
 	for (j = 0; j < fse->level - 1; j++) {

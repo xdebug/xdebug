@@ -319,7 +319,7 @@ static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int s
 	tmp = make_message(context, message);
 	if ((size_t) SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
 		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
-		char *utime_str = xdebug_sprintf("%F", xdebug_get_nanotime() / (double)NANOS_IN_SEC);
+		char *utime_str = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 
 		fprintf(stderr, "%s: There was a problem sending %zd bytes on socket %d: %s\n", utime_str, tmp->l, context->socket, sock_error);
 

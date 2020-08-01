@@ -56,10 +56,11 @@ void xdebug_trace_textual_write_header(void *ctxt)
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	char *str_time;
 
-	str_time = xdebug_get_time();
+	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 	fprintf(context->trace_file, "TRACE START [%s]\n", str_time);
-	fflush(context->trace_file);
 	xdfree(str_time);
+
+	fflush(context->trace_file);
 }
 
 void xdebug_trace_textual_write_footer(void *ctxt)
@@ -70,7 +71,7 @@ void xdebug_trace_textual_write_footer(void *ctxt)
 	char     *tmp;
 
 	nanotime = xdebug_get_nanotime();
-	tmp = xdebug_sprintf("%10.4F ", (nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+	tmp = xdebug_sprintf("%10.4F ", XDEBUG_SECONDS_SINCE_START(nanotime));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
@@ -79,10 +80,12 @@ void xdebug_trace_textual_write_footer(void *ctxt)
 	fprintf(context->trace_file, "%10zu", zend_memory_usage(0));
 #endif
 	fprintf(context->trace_file, "\n");
-	str_time = xdebug_get_time();
+
+	str_time = xdebug_nanotime_to_chars(nanotime, 6);
 	fprintf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
-	fflush(context->trace_file);
 	xdfree(str_time);
+
+	fflush(context->trace_file);
 }
 
 char *xdebug_trace_textual_get_filename(void *ctxt)
@@ -128,7 +131,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
-	xdebug_str_add_fmt(&str, "%10.4F ", (fse->nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+	xdebug_str_add_fmt(&str, "%10.4F ", XDEBUG_SECONDS_SINCE_START(fse->nanotime));
 	xdebug_str_add_fmt(&str, "%10lu ", fse->memory);
 	for (j = 0; j < fse->level; j++) {
 		xdebug_str_add_literal(&str, "  ");
@@ -214,7 +217,7 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 {
 	unsigned int j = 0; /* Counter */
 
-	xdebug_str_add_fmt(str, "%10.4F ", (xdebug_get_nanotime() - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+	xdebug_str_add_fmt(str, "%10.4F ", XDEBUG_SECONDS_SINCE_START(xdebug_get_nanotime()));
 	xdebug_str_add_fmt(str, "%10lu ", zend_memory_usage(0));
 
 	for (j = 0; j < fse->level; j++) {

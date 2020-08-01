@@ -59,10 +59,11 @@ void xdebug_trace_computerized_write_header(void *ctxt)
 	fprintf(context->trace_file, "Version: %s\n", XDEBUG_VERSION);
 	fprintf(context->trace_file, "File format: 4\n");
 
-	str_time = xdebug_get_time();
+	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 	fprintf(context->trace_file, "TRACE START [%s]\n", str_time);
-	fflush(context->trace_file);
 	xdfree(str_time);
+
+	fflush(context->trace_file);
 }
 
 void xdebug_trace_computerized_write_footer(void *ctxt)
@@ -73,7 +74,8 @@ void xdebug_trace_computerized_write_footer(void *ctxt)
 	char    *tmp;
 
 	nanotime = xdebug_get_nanotime();
-	tmp = xdebug_sprintf("\t\t\t%F\t", (nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+
+	tmp = xdebug_sprintf("\t\t\t%F\t", XDEBUG_SECONDS_SINCE_START(nanotime));
 	fprintf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
@@ -82,11 +84,12 @@ void xdebug_trace_computerized_write_footer(void *ctxt)
 	fprintf(context->trace_file, "%zu", zend_memory_usage(0));
 #endif
 	fprintf(context->trace_file, "\n");
-	str_time = xdebug_get_time();
 
+	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 	fprintf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
-	fflush(context->trace_file);
 	xdfree(str_time);
+
+	fflush(context->trace_file);
 }
 
 char *xdebug_trace_computerized_get_filename(void *ctxt)
@@ -135,7 +138,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
 	xdebug_str_add_literal(&str, "0\t");
-	xdebug_str_add_fmt(&str, "%F\t", (fse->nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+	xdebug_str_add_fmt(&str, "%F\t", XDEBUG_SECONDS_SINCE_START(fse->nanotime));
 	xdebug_str_add_fmt(&str, "%lu\t", fse->memory);
 	xdebug_str_add_fmt(&str, "%s\t", tmp_name);
 	if (fse->user_defined == XDEBUG_USER_DEFINED) {
@@ -210,7 +213,7 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 	xdebug_str_add_fmt(&str, "%d\t", function_nr);
 
 	xdebug_str_add_literal(&str, "1\t");
-	xdebug_str_add_fmt(&str, "%F\t", (xdebug_get_nanotime() - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC);
+	xdebug_str_add_fmt(&str, "%F\t", XDEBUG_SECONDS_SINCE_START(xdebug_get_nanotime()));
 	xdebug_str_add_fmt(&str, "%lu\n", zend_memory_usage(0));
 
 	fprintf(context->trace_file, "%s", str.d);

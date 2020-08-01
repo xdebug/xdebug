@@ -175,7 +175,7 @@ static void profiler_write_header(FILE *file, char *script_name)
 	fflush(file);
 }
 
-#define NANOTIME_SCALE_10NS(nanotime) ((unsigned long)((nanotime + 5) / 10))
+#define NANOTIME_SCALE_10NS(nanotime) ((unsigned long)(((nanotime) + 5) / 10))
 
 void xdebug_profiler_init(char *script_name)
 {

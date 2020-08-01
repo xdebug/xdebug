@@ -192,14 +192,6 @@ uint64_t xdebug_get_nanotime(void)
 	return nanotime;
 }
 
-char* xdebug_get_time(void)
-{
-	uint64_t nanotime;
-
-	nanotime = xdebug_get_nanotime();
-	return xdebug_nanotime_to_chars(nanotime, 0);
-}
-
 char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision)
 {
 	char *res;

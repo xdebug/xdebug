@@ -311,7 +311,8 @@ void xdebug_close_socket(int socketfd)
 /* Log related functions */
 static void xdebug_open_log(void)
 {
-	zend_ulong pid = xdebug_get_pid();
+	zend_ulong pid;
+	char *timestr;
 
 	/* initialize remote log file */
 	XG_DBG(remote_log_file) = NULL;
@@ -319,7 +320,10 @@ static void xdebug_open_log(void)
 		XG_DBG(remote_log_file) = xdebug_fopen(XINI_DBG(remote_log), "a", NULL, NULL);
 	}
 	if (XG_DBG(remote_log_file)) {
-		char *timestr = xdebug_get_time();
+
+		pid = xdebug_get_pid();
+		timestr = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
+
 		fprintf(XG_DBG(remote_log_file), "[" ZEND_ULONG_FMT "] Log opened at %s\n", pid, timestr);
 		fflush(XG_DBG(remote_log_file));
 		xdfree(timestr);
@@ -338,7 +342,7 @@ static void xdebug_close_log()
 	}
 
 	pid = xdebug_get_pid();
-	timestr = xdebug_get_time();
+	timestr = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 
 	fprintf(XG_DBG(remote_log_file), "[" ZEND_ULONG_FMT "] Log closed at %s\n\n", pid, timestr);
 	fflush(XG_DBG(remote_log_file));
