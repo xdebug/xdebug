@@ -55,7 +55,7 @@ void xdebug_filter_register_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_NAMESPACE_EXCLUDE", XDEBUG_NAMESPACE_EXCLUDE, CONST_CS | CONST_PERSISTENT);
 }
 
-static int xdebug_filter_match_path_include(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_path_include(function_stack_entry *fse, unsigned char *filtered_flag, char *filter)
 {
 	if (strncasecmp(filter, ZSTR_VAL(fse->filename), strlen(filter)) == 0) {
 		*filtered_flag = 0;
@@ -64,7 +64,7 @@ static int xdebug_filter_match_path_include(function_stack_entry *fse, long *fil
 	return 0;
 }
 
-static int xdebug_filter_match_path_exclude(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_path_exclude(function_stack_entry *fse, unsigned char *filtered_flag, char *filter)
 {
 	if (strncasecmp(filter, ZSTR_VAL(fse->filename), strlen(filter)) == 0) {
 		*filtered_flag = 1;
@@ -73,7 +73,7 @@ static int xdebug_filter_match_path_exclude(function_stack_entry *fse, long *fil
 	return 0;
 }
 
-static int xdebug_filter_match_namespace_include(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_namespace_include(function_stack_entry *fse, unsigned char *filtered_flag, char *filter)
 {
 	if (!fse->function.class_name && filter[0] == '\0') {
 		*filtered_flag = 0;
@@ -86,7 +86,7 @@ static int xdebug_filter_match_namespace_include(function_stack_entry *fse, long
 	return 0;
 }
 
-static int xdebug_filter_match_namespace_exclude(function_stack_entry *fse, long *filtered_flag, char *filter)
+static int xdebug_filter_match_namespace_exclude(function_stack_entry *fse, unsigned char *filtered_flag, char *filter)
 {
 	if (!fse->function.class_name && filter[0] == '\0') {
 		*filtered_flag = 1;
@@ -100,12 +100,12 @@ static int xdebug_filter_match_namespace_exclude(function_stack_entry *fse, long
 }
 
 
-void xdebug_filter_run_internal(function_stack_entry *fse, int group, long *filtered_flag, int type, xdebug_llist *filters)
+void xdebug_filter_run_internal(function_stack_entry *fse, int group, unsigned char *filtered_flag, int type, xdebug_llist *filters)
 {
 	xdebug_llist_element *le;
 	unsigned int          k;
 	function_stack_entry  tmp_fse;
-	int (*filter_to_run)(function_stack_entry *fse, long *filtered_flag, char *filter);
+	int (*filter_to_run)(function_stack_entry *fse, unsigned char *filtered_flag, char *filter);
 
 	le = XDEBUG_LLIST_HEAD(filters);
 

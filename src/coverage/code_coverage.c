@@ -987,7 +987,7 @@ void xdebug_coverage_init_oparray(zend_op_array *op_array)
 	xdebug_filter_run_internal(&tmp_fse, XDEBUG_FILTER_CODE_COVERAGE, &tmp_fse.filtered_code_coverage, XG_BASE(filter_type_code_coverage), XG_BASE(filters_code_coverage));
 	xdebug_func_dtor_by_ref(&tmp_fse.function);
 
-	op_array->reserved[XG_COV(code_coverage_filter_offset)] = (void*) tmp_fse.filtered_code_coverage;
+	op_array->reserved[XG_COV(code_coverage_filter_offset)] = (void*) (size_t) tmp_fse.filtered_code_coverage;
 }
 
 static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
