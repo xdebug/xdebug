@@ -472,11 +472,14 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		fse->profile.time -= call_entry->time_taken;
 		fse->profile.memory -= call_entry->mem_used;
 	}
-	xdebug_str_add_fmt(
-		&file_buffer, "%d %lu %lu\n",
-		fse->profiler.lineno,
-		(unsigned long) (fse->profile.time * 1000000), fse->profile.memory >= 0 ? fse->profile.memory : 0
-	);
+
+	/* Adds %d %lu %lu, with lineno, time, and memory */
+	xdebug_str_add_uint64(&file_buffer, fse->profiler.lineno);
+	xdebug_str_addc(&file_buffer, ' ');
+	xdebug_str_add_uint64(&file_buffer, (unsigned long) (fse->profile.time * 1000000));
+	xdebug_str_addc(&file_buffer, ' ');
+	xdebug_str_add_uint64(&file_buffer, fse->profile.memory >= 0 ? fse->profile.memory : 0);
+	xdebug_str_addc(&file_buffer, '\n');
 
 	/* dump call list */
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
@@ -512,12 +515,14 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		}
 
 		xdebug_str_add_literal(&file_buffer, "calls=1 0 0\n");
-		xdebug_str_add_fmt(
-			&file_buffer, "%d %lu %lu\n",
-			call_entry->lineno,
-			(unsigned long) (call_entry->time_taken * 1000000),
-			call_entry->mem_used >= 0 ? call_entry->mem_used : 0
-		);
+
+		/* Adds %d %lu %lu, with lineno, time, and memory */
+		xdebug_str_add_uint64(&file_buffer, call_entry->lineno);
+		xdebug_str_addc(&file_buffer, ' ');
+		xdebug_str_add_uint64(&file_buffer, (unsigned long) (call_entry->time_taken * 1000000));
+		xdebug_str_addc(&file_buffer, ' ');
+		xdebug_str_add_uint64(&file_buffer, call_entry->mem_used >= 0 ? call_entry->mem_used : 0);
+		xdebug_str_addc(&file_buffer, '\n');
 	}
 	xdebug_str_addc(&file_buffer, '\n');
 

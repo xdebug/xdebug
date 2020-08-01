@@ -93,6 +93,28 @@ void xdebug_str_addc(xdebug_str *xs, char letter)
 	xs->l = xs->l + 1;
 }
 
+void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num)
+{
+	char buffer[21];
+	char *pos;
+	int digit;
+
+	pos = &buffer[20];
+	*pos = '\0';
+
+	do {
+		digit = num % 10;
+		num = num / 10;
+		if (digit < 10) {
+			*--pos = '0' + digit;
+		} else {
+			*--pos = 'a' + digit - 10;
+		}
+	} while (num != 0L);
+
+	xdebug_str_addl(xs, pos, &buffer[20] - pos, 0);
+}
+
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 {
 	va_list args;
