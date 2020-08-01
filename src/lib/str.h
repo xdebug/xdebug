@@ -37,8 +37,8 @@ typedef struct xdebug_str {
 	char *d;
 } xdebug_str;
 
-void xdebug_str_add(xdebug_str *xs, const char *str, int f);
 void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f);
+void xdebug_str_add(xdebug_str *xs, const char *str, int f);
 void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str);
 void xdebug_str_add_zstr(xdebug_str *xs, const zend_string *str);
 void xdebug_str_addc(xdebug_str *xs, char letter);
