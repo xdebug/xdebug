@@ -33,7 +33,7 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> D::c('blah') %stest10b.php:19
 %w%f %w%d      >=> 'c'
 %w%f %w%d     -> D::a('c') %stest10b.php:19
@@ -46,4 +46,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d      >=> NULL
 %w%f %w%d     -> xdebug_stop_trace() %stest10b.php:20
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -43,7 +43,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s' %sassignment-trace-006-php72-opcache.php:2
 %w%f %w%d     -> foo::test() %sassignment-trace-006-php72-opcache.php:23
                              => self::foo = array () %sassignment-trace-006-php72-opcache.php:11
@@ -55,4 +55,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => self::bar['test'][] = 55 %sassignment-trace-006-php72-opcache.php:20
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-006-php72-opcache.php:25
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -45,7 +45,7 @@ Assertion Failed:
         File '%sassert_test-001-php72.php'
         Line '21'
         Code '1==2'
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> assert_options(1, 1) %sassert_test-001-php72.php:5
 %w%f %w%d     -> assert_options(4, 0) %sassert_test-001-php72.php:6
 %w%f %w%d     -> assert_options(5, 1) %sassert_test-001-php72.php:7

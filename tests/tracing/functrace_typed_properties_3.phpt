@@ -42,10 +42,10 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> DateTime->__construct() %sfunctrace_typed_properties_3.php:16
 %w%f %w%d     -> test(class foo { public $v = 3.1415926535898; public $w = NULL; private string $x = *uninitialized*; protected int $y = 42; public ?Fibble $z = *uninitialized*; public DateTime $a = class DateTime { public $date = '%s'; public $timezone_type = 3; public $timezone = 'UTC' } }) %sfunctrace_typed_properties_3.php:18
 %w%f %w%d     -> test(class class@anonymous { public string $x = *uninitialized* }) %sfunctrace_typed_properties_3.php:19
 %w%f %w%d     -> xdebug_stop_trace() %sfunctrace_typed_properties_3.php:21
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

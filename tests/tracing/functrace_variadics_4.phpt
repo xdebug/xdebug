@@ -28,10 +28,10 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> foo($a = 42, ...$b = variadic()) %sfunctrace_variadics_4.php:9
 %w%f %w%d     -> foo($a = 1, ...$b = variadic(0 => FALSE)) %sfunctrace_variadics_4.php:10
 %w%f %w%d     -> foo($a = 'foo', ...$b = variadic(0 => 'bar', 1 => 3.1415)) %sfunctrace_variadics_4.php:11
 %w%f %w%d     -> xdebug_stop_trace() %sfunctrace_variadics_4.php:13
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -49,7 +49,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-009.php:2
 %w%f %w%d     -> testClass->__construct($obj = class stdClass {  }) %sassignment-trace-009.php:33
                              => $obj->a = array () %sassignment-trace-009.php:11
@@ -71,4 +71,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $a = class testClass { public $a = array ('bar' => 52, 'foo' => class stdClass { public $bar = 52 }) } %sassignment-trace-009.php:33
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-009.php:35
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

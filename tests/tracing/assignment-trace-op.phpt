@@ -31,7 +31,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-op.php:2
                            => $a = 0 %sassignment-trace-op.php:4
                            => $a += 42 %sassignment-trace-op.php:6
@@ -47,4 +47,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $a **= 2 %sassignment-trace-op.php:16
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-op.php:18
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

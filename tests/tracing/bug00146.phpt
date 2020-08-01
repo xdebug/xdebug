@@ -25,9 +25,9 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> foo(array ('te"st\'s' => 42)) %sbug00146.php:10
 %w%f %w%d      >=> array ('te"st\'s' => 42)
 %w%f %w%d     -> xdebug_stop_trace() %sbug00146.php:12
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

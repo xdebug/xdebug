@@ -26,7 +26,7 @@ unlink($trace_file);
 --EXPECTF--
 %strace.bug690.xt
 DONE
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> xdebug_get_tracefile_name() %sbug00690-002.php:3
 %w%f %w%d      >=> '%strace.bug690.xt'
                            => $trace_file = '%strace.bug690.xt' %sbug00690-002.php:3

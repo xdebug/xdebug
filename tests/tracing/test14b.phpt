@@ -34,10 +34,10 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> foo->__construct() %stest14b.php:16
 %w%f %w%d     -> bar(class foo { public $a = ...; public $b = ... }) %stest14b.php:17
 %w%f %w%d     -> bar(class foo { public $a = ...; public $b = ... }) %stest14b.php:18
 %w%f %w%d     -> xdebug_stop_trace() %stest14b.php:20
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

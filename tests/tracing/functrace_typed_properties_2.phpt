@@ -41,10 +41,10 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> DateTime->__construct() %sfunctrace_typed_properties_2.php:16
 %w%f %w%d     -> test(class foo) %sfunctrace_typed_properties_2.php:18
 %w%f %w%d     -> test(class class@anonymous) %sfunctrace_typed_properties_2.php:19
 %w%f %w%d     -> xdebug_stop_trace() %sfunctrace_typed_properties_2.php:21
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

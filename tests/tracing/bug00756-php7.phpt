@@ -42,7 +42,7 @@ unlink($trace_file);
 echo "DONE\n";
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%sxdt%s.%s.xt' %sbug00756-php7.php:18
 %w%f %w%d     -> xdebug_get_tracefile_name() %sbug00756-php7.php:19
 %w%f %w%d      >=> '%sxdt%s.%s.xt'
@@ -56,6 +56,6 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => %r(\$this->foo\+\+|\+\+\$this->foo)%r %sbug00756-php7.php:14
 %w%f %w%d     -> xdebug_stop_trace() %sbug00756-php7.php:25
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]
 
 DONE

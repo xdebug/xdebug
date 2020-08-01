@@ -31,7 +31,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sbug00702-001.php:2
                            => $a = 42 %sbug00702-001.php:4
                            => $b =& $a %sbug00702-001.php:5
@@ -44,4 +44,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $array[] =& $array[2][1] %sbug00702-001.php:14
 %w%f %w%d     -> xdebug_stop_trace() %sbug00702-001.php:16
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

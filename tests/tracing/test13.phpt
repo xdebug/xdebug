@@ -46,7 +46,7 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> foo1('test\'s') %stest13.php:25
 %w%f %w%d       -> addslashes('test\'s') %stest13.php:6
 %w%f %w%d     -> foo4('test\'s') %stest13.php:27
@@ -57,4 +57,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d       -> addslashes('test\'s') %stest13.php:16
 %w%f %w%d     -> xdebug_stop_trace() %stest13.php:33
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

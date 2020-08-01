@@ -26,7 +26,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> include(%scall_user_func_array-002.inc) %scall_user_func_array-002.php:4
 %w%f %w%d     -> call_user_func_array:{%scall_user_func_array-002.php:7}('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) %scall_user_func_array-002.php:7
 %w%f %w%d       -> debug('foo', array (0 => 1, 1 => 2)) %scall_user_func_array-002.php:7
@@ -38,4 +38,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d         -> is_resource('bar') %scall_user_func_array-002.inc:4
 %w%f %w%d     -> xdebug_stop_trace() %scall_user_func_array-002.php:12
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

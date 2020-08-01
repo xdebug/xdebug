@@ -40,7 +40,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Test->__construct() %strace_with_magic_methods.php:21
 %w%f %w%d     -> Test->__set(string(4), string(4)) %strace_with_magic_methods.php:22
 %w%f %w%d     -> Test->__get(string(4)) %strace_with_magic_methods.php:23
@@ -48,4 +48,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d     -> Test->__unset(string(4)) %strace_with_magic_methods.php:25
 %w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_methods.php:27
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]
