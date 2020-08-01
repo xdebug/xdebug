@@ -175,7 +175,7 @@ static void profiler_write_header(FILE *file, char *script_name)
 	fflush(file);
 }
 
-#define profiler_nanotime_scale(nanotime) ((unsigned long)((nanotime + 5) / 10))
+#define NANOTIME_SCALE_10NS(nanotime) ((unsigned long)((nanotime + 5) / 10))
 
 void xdebug_profiler_init(char *script_name)
 {
@@ -247,7 +247,7 @@ void xdebug_profiler_deinit()
 	fprintf(
 		XG_PROF(profile_file),
 		"summary: %lu %zd\n\n",
-		profiler_nanotime_scale(xdebug_get_nanotime() - XG_PROF(profiler_start_nanotime)),
+		NANOTIME_SCALE_10NS(xdebug_get_nanotime() - XG_PROF(profiler_start_nanotime)),
 		zend_memory_peak_usage(0)
 	);
 
@@ -476,7 +476,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	/* Adds %d %lu %lu, with lineno, time, and memory */
 	xdebug_str_add_uint64(&file_buffer, fse->profiler.lineno);
 	xdebug_str_addc(&file_buffer, ' ');
-	xdebug_str_add_uint64(&file_buffer, profiler_nanotime_scale(fse->profile.nanotime));
+	xdebug_str_add_uint64(&file_buffer, NANOTIME_SCALE_10NS(fse->profile.nanotime));
 	xdebug_str_addc(&file_buffer, ' ');
 	xdebug_str_add_uint64(&file_buffer, fse->profile.memory >= 0 ? fse->profile.memory : 0);
 	xdebug_str_addc(&file_buffer, '\n');
@@ -519,7 +519,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		/* Adds %d %lu %lu, with lineno, time, and memory */
 		xdebug_str_add_uint64(&file_buffer, call_entry->lineno);
 		xdebug_str_addc(&file_buffer, ' ');
-		xdebug_str_add_uint64(&file_buffer, profiler_nanotime_scale(call_entry->nanotime_taken));
+		xdebug_str_add_uint64(&file_buffer, NANOTIME_SCALE_10NS(call_entry->nanotime_taken));
 		xdebug_str_addc(&file_buffer, ' ');
 		xdebug_str_add_uint64(&file_buffer, call_entry->mem_used >= 0 ? call_entry->mem_used : 0);
 		xdebug_str_addc(&file_buffer, '\n');
