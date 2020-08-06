@@ -3,7 +3,7 @@ Test for bug #886: Use the same file system protocol for file located inside PHA
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp; slow');
+check_reqs('dbgp; slow; !osx');
 ?>
 --FILE--
 <?php

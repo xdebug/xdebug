@@ -10,7 +10,7 @@ I_LIKE_COOKIES=doesnotexist3
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.remote_log=/tmp/{RUNID}remote-log4.txt
+xdebug.remote_log={TMPDIR}/{RUNID}remote-log4.txt
 xdebug.remote_connect_back=1
 xdebug.remote_host=doesnotexist2
 xdebug.remote_port=9003
