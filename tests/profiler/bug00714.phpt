@@ -62,7 +62,7 @@ calls=1 0 0
 
 fl=(1)
 fn=(4) php::sleep
-4 10%d 0
+4 10%r(\d{7})%r 0
 
 fl=(3) %sbug00714.php
 fn=(5) sleep1
@@ -70,11 +70,11 @@ fn=(5) sleep1
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-4 10%d 0
+4 10%r(\d{7})%r 0
 
 fl=(1)
 fn=(4)
-5 10%d 0
+5 10%r(\d{7})%r 0
 
 fl=(3)
 fn=(6) sleep10
@@ -82,11 +82,11 @@ fn=(6) sleep10
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-5 10%d 0
+5 10%r(\d{7})%r 0
 
 fl=(1)
 fn=(4)
-6 20%d 0
+6 20%r(\d{7})%r 0
 
 fl=(3)
 fn=(7) sleep20
@@ -94,7 +94,7 @@ fn=(7) sleep20
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-6 20%d 0
+6 20%r(\d{7})%r 0
 
 fl=(3)
 fn=(8) {main}
@@ -106,14 +106,14 @@ calls=1 0 0
 cfl=(3)
 cfn=(5)
 calls=1 0 0
-9 10%d 0
+9 10%r(\d{7})%r 0
 cfl=(3)
 cfn=(6)
 calls=1 0 0
-11 10%d 0
+11 10%r(\d{7})%r 0
 cfl=(3)
 cfn=(7)
 calls=1 0 0
-13 20%d 0
+13 20%r(\d{7})%r 0
 
 summary: %d %d
