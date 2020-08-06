@@ -272,9 +272,9 @@ void xdebug_profiler_deinit()
 
 static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 {
-	fse->profile.nanotime += xdebug_get_nanotime() - fse->profile.nanotime_mark;
+	fse->profile.nanotime += (xdebug_get_nanotime() - fse->profile.nanotime_mark);
 	fse->profile.nanotime_mark = 0;
-	fse->profile.memory += zend_memory_usage(0) - fse->profile.mem_mark;
+	fse->profile.memory += (zend_memory_usage(0) - fse->profile.mem_mark);
 	fse->profile.mem_mark = 0;
 }
 

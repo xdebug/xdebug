@@ -320,7 +320,6 @@ static void xdebug_open_log(void)
 		XG_DBG(remote_log_file) = xdebug_fopen(XINI_DBG(remote_log), "a", NULL, NULL);
 	}
 	if (XG_DBG(remote_log_file)) {
-
 		pid = xdebug_get_pid();
 		timestr = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 

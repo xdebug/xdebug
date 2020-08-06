@@ -493,7 +493,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 't': { /* timestamp (in seconds) */
-                    xdebug_str_add(&fname, xdebug_nanotime_to_chars(xdebug_get_nanotime(), 0), 1);
+					xdebug_str_add(&fname, xdebug_nanotime_to_chars(xdebug_get_nanotime(), 0), 1);
 				}	break;
 
 				case 'u': { /* timestamp (in microseconds) */
