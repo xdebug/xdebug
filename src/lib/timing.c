@@ -143,13 +143,8 @@ void xdebug_nanotime_init(void)
 		context.win_freq = (uint64_t)tcounter.QuadPart;
 		context.use_rel_time = 1;
 	}
-#endif
 
-#if __APPLE__
-	context.use_rel_time = 1;
-#endif
-
-#ifdef CLOCK_MONOTONIC
+#elif __APPLE__ | CLOCK_MONOTONIC
 	context.use_rel_time = 1;
 #endif
 

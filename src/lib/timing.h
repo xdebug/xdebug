@@ -48,6 +48,6 @@ uint64_t xdebug_get_nanotime(void);
 
 char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision);
 
-#define XDEBUG_SECONDS_SINCE_START(nanotime) ((nanotime - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC)
+#define XDEBUG_SECONDS_SINCE_START(nanotime) (((nanotime) - XG_BASE(start_nanotime)) / (double)NANOS_IN_SEC)
 
 #endif
