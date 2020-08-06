@@ -54,17 +54,6 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_context *nanotime_contex
 	}
 #endif
 
-#if HAVE_CLOCK_GETTIME & CLOCK_MONOTONIC
-	// Linux/Unix with clock_gettime
-	{
-	   struct timespec ts;
-
-		if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-			return (uint64_t)ts.tv_sec * NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
-		}
-	}
-#endif
-
 #if HAVE_GETTIMEOFDAY | PHP_WIN32
 	// Fallback to gettimeofday() if better platform specific time is not
 	// available. gettimeofday() is always available in PHP on Windows, as it's
@@ -113,17 +102,28 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 		return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_context->win_freq);
 	}
 }
-#endif
 
 // Mac
 // should be fast but can be relative
-#if __APPLE__
+#elif __APPLE__
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
 {
 	return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
 }
-#endif
 
+// Linux/Unix with clock_gettime
+#elif CLOCK_MONOTONIC
+static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
+{
+	struct timespec ts;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+		return (uint64_t)ts.tv_sec * NANOS_IN_SEC + (uint64_t)ts.tv_nsec;
+	}
+
+	return 0;
+}
+#endif
 
 void xdebug_nanotime_init(void)
 {
@@ -143,13 +143,14 @@ void xdebug_nanotime_init(void)
 		context.win_freq = (uint64_t)tcounter.QuadPart;
 		context.use_rel_time = 1;
 	}
-#endif
-#if __APPLE__
+
+#elif __APPLE__ | CLOCK_MONOTONIC
 	context.use_rel_time = 1;
 #endif
+
 	context.start_abs = xdebug_get_nanotime_abs(&context);
 	context.last_abs = 0;
-#if PHP_WIN32 | __APPLE__
+#if PHP_WIN32 | __APPLE__ | CLOCK_MONOTONIC
 	context.start_rel = xdebug_get_nanotime_rel(&context);
 	context.last_rel = 0;
 #endif
@@ -164,7 +165,7 @@ uint64_t xdebug_get_nanotime(void)
 
 	context = &XG_BASE(nanotime_context);
 
-#if PHP_WIN32 | __APPLE__
+#if PHP_WIN32 | __APPLE__ | CLOCK_MONOTONIC
 	/* Relative timing */
 	if (context->use_rel_time) {
 		nanotime = xdebug_get_nanotime_rel(context);
