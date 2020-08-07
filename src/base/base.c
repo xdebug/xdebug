@@ -976,8 +976,13 @@ void xdebug_base_use_xdebug_error_cb(void)
 	zend_error_cb = xdebug_new_error_cb;
 }
 
+#if PHP_VERSION_ID >= 80000
+static void xdebug_throw_exception_hook(zend_object *exception)
+{
+#else
 static void xdebug_throw_exception_hook(zval *exception)
 {
+#endif
 	zval *code, *message, *file, *line;
 	zend_class_entry *exception_ce;
 	char *code_str = NULL;
@@ -986,11 +991,16 @@ static void xdebug_throw_exception_hook(zval *exception)
 	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && !XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		return;
 	}
+
 	if (!exception) {
 		return;
 	}
 
+#if PHP_VERSION_ID >= 80000
+	exception_ce = exception->ce;
+#else
 	exception_ce = Z_OBJCE_P(exception);
+#endif
 
 	code =    zend_read_property(exception_ce, exception, "code",    sizeof("code")-1,    0, &dummy);
 	message = zend_read_property(exception_ce, exception, "message", sizeof("message")-1, 0, &dummy);
