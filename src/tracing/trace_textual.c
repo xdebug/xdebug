@@ -150,7 +150,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 			}
 
 			if (
-				(fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data))
+				(fse->var[j].is_variadic)
 			) {
 				xdebug_str_add_literal(&str, "...");
 				variadic_opened = 1;
@@ -163,7 +163,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 				xdebug_str_add_literal(&str, " = ");
 			}
 
-			if (fse->var[j].is_variadic && Z_ISUNDEF(fse->var[j].data)) {
+			if (fse->var[j].is_variadic) {
 				xdebug_str_add_literal(&str, "variadic(");
 				continue;
 			}

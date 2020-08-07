@@ -29,4 +29,4 @@ React_Exception: waa in %sbug01288.php on line 12
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01288.php:0
-%w%f %w%d   2. {closure:%sbug01288.php:12-12}(8, 'Undefined %SSERVER_PROTOCOL%S', '%sbug01288.php', %s) %sbug01288.php:15
+%w%f %w%d   2. {closure:%sbug01288.php:12-12}(%d, 'Undefined %SSERVER_PROTOCOL%S', '%sbug01288.php', %s) %sbug01288.php:15
