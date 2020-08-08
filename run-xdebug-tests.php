@@ -2207,7 +2207,7 @@ COMMAND $cmd
 		}
 	}
 
-	if (!$passed) {
+	if (!$passed || $leaked) {
 
 		// write .exp
 		if (strpos($log_format, 'E') !== false && file_put_contents($exp_filename, $wanted, FILE_BINARY) === false) {

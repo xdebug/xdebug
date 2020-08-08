@@ -479,7 +479,11 @@ static void fetch_zval_from_symbol_table(
 			/* First we try an object handler */
 			if (cce) {
 				zval *tmp_val;
+#if PHP_VERSION_ID >= 80000
+				tmp_val = zend_read_property(cce, Z_OBJ_P(value_in), name, name_length, 1, &tmp_retval);
+#else
 				tmp_val = zend_read_property(cce, value_in, name, name_length, 1, &tmp_retval);
+#endif
 				if (tmp_val != &tmp_retval && tmp_val != &EG(uninitialized_zval)) {
 					ZVAL_COPY(&tmp_retval, tmp_val);
 					goto cleanup;

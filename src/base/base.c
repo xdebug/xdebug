@@ -30,6 +30,7 @@
 #include "develop/develop.h"
 #include "gcstats/gc_stats.h"
 #include "lib/lib_private.h"
+#include "lib/var_export_line.h"
 #include "lib/var.h"
 #include "profiler/profiler.h"
 
@@ -348,80 +349,107 @@ normal_after_all:
 // TODO: Remove
 #define XINI_DEV(v)    (XG(settings.develop.v))
 
+#define NO_VARIADIC    INT_MAX
+#define DEBUG          0
+
 static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, zend_op_array *op_array)
 {
 	int i;
-	int hit_variadic = 0;
-	int arguments_sent = 0, arguments_wanted = 0, arguments_storage = 0;
+	int is_variadic       = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
+	int is_trampoline     = !!(zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	int variadic_at_pos   = NO_VARIADIC;
+	int names_expected    = 0;
+	int arguments_sent    = 0;
+	int arguments_storage = 0;
 
-	/* This calculates how many arguments where sent to a function. It
-	 * works for both internal and user defined functions.
-	 * op_array->num_args works only for user defined functions so
-	 * we're not using that here. */
 	arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
-	arguments_wanted = arguments_sent;
 
+	/* If this is a user defined function, the op_array contains the number of
+	 * (named) arguments. */
 	if (ZEND_USER_CODE(zdata->func->type)) {
-		arguments_wanted = op_array->num_args;
+		names_expected = op_array->num_args;
+
+#if DEBUG
+		fprintf(stderr, "\nF: %s\n - CALL_NUM_ARGS: %d, op_array->num_args: %d, is_variadic: %d, trampoline: %d\n", fse->function.function, ZEND_CALL_NUM_ARGS(zdata), op_array->num_args, is_variadic, is_trampoline);
+#endif
+
+		/* If this function is variadic, we have an extra name field in arg_info, and also an extra
+		 * argument sent to the function. */
+		if (is_variadic && !is_trampoline) {
+			names_expected++;
+			arguments_sent++;
+		}
 	}
 
-	if (ZEND_USER_CODE(zdata->func->type) && zdata->func->common.fn_flags & ZEND_ACC_VARIADIC) {
-		arguments_wanted++;
-		arguments_sent++;
-	}
-
-	if (arguments_wanted > arguments_sent) {
-		arguments_storage = arguments_wanted;
+	/* Pick the highest of "expected arguments" and "arguments given" (also
+	 * taking into account the extra one for variadics */
+	if (names_expected > arguments_sent) {
+		arguments_storage = names_expected;
 	} else {
 		arguments_storage = arguments_sent;
 	}
-	fse->var = xdmalloc(arguments_storage * sizeof (xdebug_var_name));
 
-	for (i = 0; i < arguments_sent; i++) {
-		fse->var[fse->varc].name = NULL;
-		ZVAL_UNDEF(&fse->var[fse->varc].data);
-		fse->var[fse->varc].is_variadic = 0;
+	fse->varc = arguments_storage;
+	fse->var = xdmalloc(fse->varc * sizeof(xdebug_var_name));
 
-		/* Because it is possible that more parameters are sent, then
-		 * actually wanted  we can only access the name in case there
-		 * is an associated variable to receive the variable here. */
-		if (fse->user_defined == XDEBUG_USER_DEFINED && i < arguments_wanted) {
-			if (op_array->arg_info[i].name) {
-				fse->var[fse->varc].name = zend_string_copy(op_array->arg_info[i].name);
-			}
-			if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i])) {
-				fse->var[fse->varc].is_variadic = 1;
-			}
-			if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i]) && !hit_variadic) {
-				fse->var[fse->varc].is_variadic = 1;
-				hit_variadic = 1;
-			}
-		}
+#if DEBUG
+	fprintf(stderr, " - names_expected: %d, arguments_sent: %d, arguments_storage: %d, fse->varc: %d\n", names_expected, arguments_sent, arguments_storage, fse->varc);
+#endif
 
-		if (XINI_LIB(collect_params)) {
-			if ((i < arguments_wanted) || ((zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) && (i < arguments_sent))) {
-				if (ZEND_CALL_ARG(zdata, fse->varc+1)) {
-					ZVAL_COPY(&(fse->var[fse->varc].data), ZEND_CALL_ARG(zdata, fse->varc+1));
-				}
-			} else {
-				ZVAL_COPY(&(fse->var[fse->varc].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - arguments_wanted));
-			}
-		}
-		fse->varc++;
+	/* Initialise everything in storage */
+	for (i = 0; i < fse->varc; i++) {
+		fse->var[i].name = NULL;
+		ZVAL_UNDEF(&fse->var[i].data);
+		fse->var[i].is_variadic = 0;
 	}
 
-	/* Sometimes not enough arguments are send to a user defined
-	 * function, so we have to gather only the name for those extra. */
-	if (fse->user_defined == XDEBUG_USER_DEFINED && arguments_sent < arguments_wanted) {
-		for (i = arguments_sent; i < arguments_wanted; i++) {
+	/* Collect Names */
+	if (fse->user_defined == XDEBUG_USER_DEFINED) {
+		for (i = 0; i < names_expected; i++) {
 			if (op_array->arg_info[i].name) {
-				fse->var[fse->varc].name = zend_string_copy(op_array->arg_info[i].name);
+				fse->var[i].name = zend_string_copy(op_array->arg_info[i].name);
 			}
-			ZVAL_UNDEF(&fse->var[fse->varc].data);
-			fse->var[fse->varc].is_variadic = 0;
-			fse->varc++;
+
+			/* If an argument is a variadic, then we mark that on this 'name',
+			 * and also remember which position the variadic started */
+			if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i]) && variadic_at_pos == NO_VARIADIC) {
+				fse->var[i].is_variadic = 1;
+				variadic_at_pos = i;
+			}
 		}
 	}
+
+	if (!XINI_LIB(collect_params)) {
+		return;
+	}
+
+	/* Collect Arguments */
+	for (i = 0; i < fse->varc; i++) {
+		/* The index in ZEND_CALL_ARG is 1-based */
+#if DEBUG
+		fprintf(stderr, "Copying argument %d: ", i);
+#endif
+		if (i < names_expected || (fse->user_defined != XDEBUG_USER_DEFINED) || is_trampoline) {
+#if DEBUG
+			fprintf(stderr, "ARG ");
+#endif
+			ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_ARG(zdata, i + 1));
+		} else {
+#if DEBUG
+			fprintf(stderr, "VAR_NUM ");
+#endif
+			ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - names_expected));
+		}
+#if DEBUG
+		fprintf(stderr, "OK\n");
+#endif
+	}
+
+#if DEBUG
+	for (i = 0; i < fse->varc; i++) {
+		fprintf(stderr, "%2d %-20s %c %s\n", i, fse->var[i].name ? ZSTR_VAL(fse->var[i].name) : "---", fse->var[i].is_variadic ? 'V' : ' ', xdebug_get_zval_value_line(&fse->var[i].data, 0, NULL)->d);
+	}
+#endif
 }
 
 function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type)
@@ -976,8 +1004,13 @@ void xdebug_base_use_xdebug_error_cb(void)
 	zend_error_cb = xdebug_new_error_cb;
 }
 
+#if PHP_VERSION_ID >= 80000
+static void xdebug_throw_exception_hook(zend_object *exception)
+{
+#else
 static void xdebug_throw_exception_hook(zval *exception)
 {
+#endif
 	zval *code, *message, *file, *line;
 	zend_class_entry *exception_ce;
 	char *code_str = NULL;
@@ -986,11 +1019,16 @@ static void xdebug_throw_exception_hook(zval *exception)
 	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && !XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		return;
 	}
+
 	if (!exception) {
 		return;
 	}
 
+#if PHP_VERSION_ID >= 80000
+	exception_ce = exception->ce;
+#else
 	exception_ce = Z_OBJCE_P(exception);
+#endif
 
 	code =    zend_read_property(exception_ce, exception, "code",    sizeof("code")-1,    0, &dummy);
 	message = zend_read_property(exception_ce, exception, "message", sizeof("message")-1, 0, &dummy);

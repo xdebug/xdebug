@@ -971,17 +971,27 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 #endif
 }
 
+#if PHP_VERSION_ID >= 80000
+void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
+{
+	zend_class_entry *exception_ce = exception->ce;
+#else
 void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
 {
+	zend_class_entry *exception_ce = Z_OBJCE_P(exception);
+#endif
 	zval *xdebug_message_trace, *previous_exception;
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
 	zval dummy;
-	zend_class_entry *exception_ce = Z_OBJCE_P(exception);
 
 	previous_exception = zend_read_property(exception_ce, exception, "previous", sizeof("previous")-1, 1, &dummy);
 	if (previous_exception && Z_TYPE_P(previous_exception) == IS_OBJECT) {
+#if PHP_VERSION_ID >= 80000
+		xdebug_message_trace = zend_read_property(exception_ce, Z_OBJ_P(previous_exception), "xdebug_message", sizeof("xdebug_message")-1, 1, &dummy);
+#else
 		xdebug_message_trace = zend_read_property(exception_ce, previous_exception, "xdebug_message", sizeof("xdebug_message")-1, 1, &dummy);
+#endif
 		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
 			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
 		}

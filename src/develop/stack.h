@@ -30,6 +30,5 @@ void xdebug_append_error_footer(xdebug_str *str, int html);
 void xdebug_log_stack(const char *error_type_str, char *buffer, const char *error_filename, const int error_lineno);
 char *xdebug_strip_php_stack_trace(char *buffer);
 char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription);
-void xdebug_throw_exception_hook(zval *exception);
 
 #endif
