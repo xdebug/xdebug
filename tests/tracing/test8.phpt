@@ -116,7 +116,7 @@ array(2) {
   }
 }
 aa2ba
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> a() %stest8.php:17
 %w%f %w%d       -> xdebug_get_function_stack() %stest8.php:5
 %w%f %w%d        >=> array (0 => array ('function' => '{main}', 'file' => '%stest8.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%stest8.php', 'line' => 17, 'params' => array ()))
@@ -145,4 +145,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d      >=> 'aa2ba'
 %w%f %w%d     -> xdebug_stop_trace() %stest8.php:19
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

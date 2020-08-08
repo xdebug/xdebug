@@ -79,7 +79,7 @@ struct xdebug_base_info {
 	unsigned long level;
 	xdebug_vector *stack;
 	xdebug_nanotime_context nanotime_context;
-	double        start_time;
+	uint64_t      start_nanotime;
 	unsigned int  prev_memory;
 	zif_handler   orig_set_time_limit_func;
 	zif_handler   orig_error_reporting_func;

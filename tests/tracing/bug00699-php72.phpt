@@ -27,11 +27,11 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> dirname(string(%d)) %sbug00699-php72.php:4
 %w%f %w%d     -> require(%sbug00699.inc) %sbug00699-php72.php:4
 %w%f %w%d     -> SomeClass->addData(string(6)) %sbug00699-php72.php:6
 %w%f %w%d     -> SomeClass->count(%S) %sbug00699-php72.php:10
 %w%f %w%d     -> xdebug_stop_trace() %sbug00699-php72.php:14
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

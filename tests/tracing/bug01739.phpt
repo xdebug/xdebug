@@ -28,7 +28,7 @@ unlink( sys_get_temp_dir() . '/1739' . $id . '.xt' );
 ?>
 --EXPECTF--
 bar
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> foo() %sbug01739.php:%d
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

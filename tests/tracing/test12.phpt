@@ -29,8 +29,8 @@ xdebug.var_display_max_children=6
 ?>
 --EXPECTF--
 514.12
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> a(5, 9.12, FALSE, array ('h' => 9.12, 0 => array (0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5), 1 => array (0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5), 2 => array (0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5), 'p' => 8.88)) %stest12.php:11
 %w%f %w%d     -> xdebug_stop_trace() %stest12.php:13
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

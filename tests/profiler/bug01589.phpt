@@ -28,7 +28,7 @@ cmd: %sbug01589-prepend.inc
 part: 1
 positions: line
 
-events: Time_(µs) Memory_(bytes)
+events: Time_(10ns) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::substr

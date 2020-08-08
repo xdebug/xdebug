@@ -27,11 +27,11 @@ unlink($tf);
 --EXPECTF--
 ello!
 ello!
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Foobar::foo($s = 'hi') %strace-filter-path-exclude-001.php:10
 %w%f %w%d       -> strstr('Hello!\n', 'e') %sfilter%efoobar%efoobar.php:6
 %w%f %w%d        >=> 'ello!\n'
 %w%f %w%d     -> Xdebug::foo($s = 'hi') %strace-filter-path-exclude-001.php:11
 %w%f %w%d     -> xdebug_stop_trace() %strace-filter-path-exclude-001.php:13
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

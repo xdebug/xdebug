@@ -23,7 +23,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s' %sbug00501.php:2
                            => $i = 10 %sbug00501.php:4
                            => ++$i %sbug00501.php:%r(7|6)%r
@@ -31,5 +31,5 @@ TRACE START [%d-%d-%d %d:%d:%d]
                            => $i += 33 %sbug00501.php:8
 %w%f %w%d     -> xdebug_stop_trace() %sbug00501.php:10
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]
 

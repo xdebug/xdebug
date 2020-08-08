@@ -13,6 +13,7 @@
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
    | Authors: Derick Rethans <derick@xdebug.org>                          |
+   |          Michael Voříšek <mvorisek@mvorisek.cz>                      |
    +----------------------------------------------------------------------+
  */
 
@@ -170,9 +171,11 @@ static void profiler_write_header(FILE *file, char *script_name)
 	}
 	fprintf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
 	fprintf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
-	fprintf(file, "events: Time_(µs) Memory_(bytes)\n\n");
+	fprintf(file, "events: Time_(10ns) Memory_(bytes)\n\n");
 	fflush(file);
 }
+
+#define NANOTIME_SCALE_10NS(nanotime) ((unsigned long)(((nanotime) + 5) / 10))
 
 void xdebug_profiler_init(char *script_name)
 {
@@ -222,7 +225,7 @@ void xdebug_profiler_init(char *script_name)
 		xdfree((void*) ctr.line);
 	}
 
-	XG_PROF(profiler_start_time) = xdebug_get_utime();
+	XG_PROF(profiler_start_nanotime) = xdebug_get_nanotime();
 
 	XG_PROF(active) = 1;
 	XG_PROF(profile_filename_refs) = xdebug_hash_alloc(128, xdfree);
@@ -244,7 +247,7 @@ void xdebug_profiler_deinit()
 	fprintf(
 		XG_PROF(profile_file),
 		"summary: %lu %zd\n\n",
-		(unsigned long) ((xdebug_get_utime() - (XG_PROF(profiler_start_time))) * 1000000),
+		NANOTIME_SCALE_10NS(xdebug_get_nanotime() - XG_PROF(profiler_start_nanotime)),
 		zend_memory_peak_usage(0)
 	);
 
@@ -269,17 +272,15 @@ void xdebug_profiler_deinit()
 
 static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 {
-	fse->profile.time += xdebug_get_utime();
-	fse->profile.time -= fse->profile.mark;
-	fse->profile.mark = 0;
-	fse->profile.memory += zend_memory_usage(0);
-	fse->profile.memory -= fse->profile.mem_mark;
+	fse->profile.nanotime += (xdebug_get_nanotime() - fse->profile.nanotime_mark);
+	fse->profile.nanotime_mark = 0;
+	fse->profile.memory += (zend_memory_usage(0) - fse->profile.mem_mark);
 	fse->profile.mem_mark = 0;
 }
 
 void xdebug_profiler_function_continue(function_stack_entry *fse)
 {
-	fse->profile.mark = xdebug_get_utime();
+	fse->profile.nanotime_mark = xdebug_get_nanotime();
 }
 
 void xdebug_profiler_function_pause(function_stack_entry *fse)
@@ -392,8 +393,8 @@ void xdebug_profiler_add_function_details_internal(function_stack_entry *fse)
 
 void xdebug_profiler_function_begin(function_stack_entry *fse)
 {
-	fse->profile.time = 0;
-	fse->profile.mark = xdebug_get_utime();
+	fse->profile.nanotime = 0;
+	fse->profile.nanotime_mark = xdebug_get_nanotime();
 	fse->profile.memory = 0;
 	fse->profile.mem_mark = zend_memory_usage(0);
 }
@@ -425,7 +426,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 
 		ce->filename = zend_string_copy(fse->profiler.filename);
 		ce->function = xdstrdup(fse->profiler.funcname);
-		ce->time_taken = fse->profile.time;
+		ce->nanotime_taken = fse->profile.nanotime;
 		ce->lineno = fse->lineno;
 		ce->user_defined = fse->user_defined;
 		ce->mem_used = fse->profile.memory;
@@ -448,7 +449,6 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 			xdebug_str_add_literal(&file_buffer, "fl=(1)\n");
 		} else {
 			xdebug_str_add_literal(&file_buffer, "fl=(1) php:internal\n");
-
 			XG_PROF(php_internal_seen_before) = 1;
 		}
 		xdebug_str_add_literal(&file_buffer, "fn=");
@@ -469,14 +469,14 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	for (le = XDEBUG_LLIST_HEAD(fse->profile.call_list); le != NULL; le = XDEBUG_LLIST_NEXT(le))
 	{
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
-		fse->profile.time -= call_entry->time_taken;
+		fse->profile.nanotime -= call_entry->nanotime_taken;
 		fse->profile.memory -= call_entry->mem_used;
 	}
 
 	/* Adds %d %lu %lu, with lineno, time, and memory */
 	xdebug_str_add_uint64(&file_buffer, fse->profiler.lineno);
 	xdebug_str_addc(&file_buffer, ' ');
-	xdebug_str_add_uint64(&file_buffer, (unsigned long) (fse->profile.time * 1000000));
+	xdebug_str_add_uint64(&file_buffer, NANOTIME_SCALE_10NS(fse->profile.nanotime));
 	xdebug_str_addc(&file_buffer, ' ');
 	xdebug_str_add_uint64(&file_buffer, fse->profile.memory >= 0 ? fse->profile.memory : 0);
 	xdebug_str_addc(&file_buffer, '\n');
@@ -519,7 +519,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		/* Adds %d %lu %lu, with lineno, time, and memory */
 		xdebug_str_add_uint64(&file_buffer, call_entry->lineno);
 		xdebug_str_addc(&file_buffer, ' ');
-		xdebug_str_add_uint64(&file_buffer, (unsigned long) (call_entry->time_taken * 1000000));
+		xdebug_str_add_uint64(&file_buffer, NANOTIME_SCALE_10NS(call_entry->nanotime_taken));
 		xdebug_str_addc(&file_buffer, ' ');
 		xdebug_str_add_uint64(&file_buffer, call_entry->mem_used >= 0 ? call_entry->mem_used : 0);
 		xdebug_str_addc(&file_buffer, '\n');

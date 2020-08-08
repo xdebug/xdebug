@@ -38,7 +38,7 @@ cmd: %sbug00714.php
 part: 1
 positions: line
 
-events: Time_(µs) Memory_(bytes)
+events: Time_(10ns) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::xdebug_get_profiler_filename
@@ -62,7 +62,7 @@ calls=1 0 0
 
 fl=(1)
 fn=(4) php::sleep
-4 %r(10|11)%r%d 0
+4 1%r(\d{8})%r 0
 
 fl=(3) %sbug00714.php
 fn=(5) sleep1
@@ -70,11 +70,11 @@ fn=(5) sleep1
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-4 %r(10|11)%r%d 0
+4 1%r(\d{8})%r 0
 
 fl=(1)
 fn=(4)
-5 %r(10|11)%r%d 0
+5 1%r(\d{8})%r 0
 
 fl=(3)
 fn=(6) sleep10
@@ -82,11 +82,11 @@ fn=(6) sleep10
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-5 %r(10|11)%r%d 0
+5 1%r(\d{8})%r 0
 
 fl=(1)
 fn=(4)
-6 %r(20|21)%r%d 0
+6 2%r(\d{8})%r 0
 
 fl=(3)
 fn=(7) sleep20
@@ -94,7 +94,7 @@ fn=(7) sleep20
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-6 %r(20|21)%r%d 0
+6 2%r(\d{8})%r 0
 
 fl=(3)
 fn=(8) {main}
@@ -106,14 +106,14 @@ calls=1 0 0
 cfl=(3)
 cfn=(5)
 calls=1 0 0
-9 %r(10|11)%r%d 0
+9 1%r(\d{8})%r 0
 cfl=(3)
 cfn=(6)
 calls=1 0 0
-11 %r(10|11)%r%d 0
+11 1%r(\d{8})%r 0
 cfl=(3)
 cfn=(7)
 calls=1 0 0
-13 %r(20|21)%r%d 0
+13 2%r(\d{8})%r 0
 
 summary: %d %d

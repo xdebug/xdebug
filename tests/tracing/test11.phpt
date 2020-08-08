@@ -24,9 +24,9 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> blaat() %stest11.php:9
 %w%f %w%d      >=> NULL
 %w%f %w%d     -> xdebug_stop_trace() %stest11.php:11
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

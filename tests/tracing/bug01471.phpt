@@ -20,10 +20,10 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s' %sbug01471.php:2
                            => $ff = 'bb' %sbug01471.php:4
                            => $c = 0 %sbug01471.php:5
 %w%f %w%d     -> xdebug_stop_trace() %sbug01471.php:7
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

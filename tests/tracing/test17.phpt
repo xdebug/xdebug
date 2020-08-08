@@ -20,8 +20,8 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 55555
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> str_repeat('5', 5) %stest17.php:4
 %w%f %w%d     -> xdebug_stop_trace() %stest17.php:6
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

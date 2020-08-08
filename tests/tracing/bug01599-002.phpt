@@ -42,7 +42,7 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s' %sbug01599-002.php:2
 %w%f %w%d     -> foo::test() %sbug01599-002.php:22
                              => self::var1 = 42 %sbug01599-002.php:12
@@ -55,4 +55,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
                              => --self::var4 %sbug01599-002.php:19
 %w%f %w%d     -> xdebug_stop_trace() %sbug01599-002.php:24
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

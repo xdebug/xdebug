@@ -32,7 +32,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 bar
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> foo() %stest18.php:14
 %w%f %w%d       -> bar() %stest18.php:11
 %w%f %w%d     -> eval('$foo = foo();\nbar();\nfoo();\n') %stest18.php:16
@@ -43,4 +43,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d         -> bar() %stest18.php:11
 %w%f %w%d     -> xdebug_stop_trace() %stest18.php:18
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

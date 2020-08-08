@@ -35,7 +35,7 @@ cmd: %sbug00728-php71.php
 part: 1
 positions: line
 
-events: Time_(µs) Memory_(bytes)
+events: Time_(10ns) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::xdebug_get_profiler_filename

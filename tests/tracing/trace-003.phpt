@@ -36,7 +36,7 @@ xdebug.trace_format=0
 	unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> fibonacci_cache(50) %strace-003.php:22
 %w%f %w%d       -> fibonacci_cache(49) %strace-003.php:16
 %w%f %w%d         -> fibonacci_cache(48) %strace-003.php:16
@@ -136,4 +136,4 @@ TRACE START [%d-%d-%d %d:%d:%d]
 %w%f %w%d       -> fibonacci_cache(48) %strace-003.php:16
 %w%f %w%d     -> xdebug_stop_trace() %strace-003.php:23
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

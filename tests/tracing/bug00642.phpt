@@ -40,11 +40,11 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-TRACE START [%d-%d-%d %d:%d:%d]
+TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Test->offsetSet(string(4), string(4)) %sbug00642.php:22
 %w%f %w%d     -> Test->offsetGet(string(4)) %sbug00642.php:23
 %w%f %w%d     -> Test->offsetExists(string(4)) %sbug00642.php:24
 %w%f %w%d     -> Test->offsetUnset(string(4)) %sbug00642.php:25
 %w%f %w%d     -> xdebug_stop_trace() %sbug00642.php:27
 %w%f %w%d
-TRACE END   [%d-%d-%d %d:%d:%d]
+TRACE END   [%d-%d-%d %d:%d:%d.%d]
