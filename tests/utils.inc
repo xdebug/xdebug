@@ -85,6 +85,15 @@ function check_reqs( $req_str )
 			$missing += ( substr( PHP_OS, 0, 3 ) === 'WIN' );
 		}
 
+		if ( $req === 'osx' )
+		{
+			$missing += ( PHP_OS !== 'Darwin' );
+		}
+		if ( $req === '!osx' )
+		{
+			$missing += ( PHP_OS === 'Darwin' );
+		}
+
 		if ( substr( $req, 0, 3 ) === 'PHP' )
 		{
 			$versions_req = explode( ',', substr( $req, 4 ) );

@@ -10,17 +10,16 @@ I_LIKE_COOKIES=unix:///tmp/haxx0r.sock
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.remote_log=/tmp/{RUNID}remote-log4.txt
+xdebug.remote_log={TMPDIR}/{RUNID}remote-unix.txt
 xdebug.remote_connect_back=1
 xdebug.remote_host=unix:///tmp/xdbg.sock
 xdebug.remote_port=0
 xdebug.remote_addr_header=I_LIKE_COOKIES
 --FILE--
 <?php
-if (sys_get_temp_dir() !== '/tmp') die('Unexpected temp dir: '.sys_get_temp_dir());
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
-unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-unix.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-unix.txt' );
 ?>
 --EXPECTF--
 3
