@@ -19,9 +19,12 @@
 #ifndef __XDEBUG_LIBRARY_PRIVATE_H__
 #define __XDEBUG_LIBRARY_PRIVATE_H__
 
-#include "lib.h"
-
 #define XG_LIB(v)      (XG(globals.library.v))
 #define XINI_LIB(v)    (XG(settings.library.v))
+
+void xdebug_open_log(void);
+void xdebug_close_log(void);
+
+void XDEBUG_ATTRIBUTE_FORMAT(printf, 3, 4) xdebug_log(int channel, int log_level, const char *fmt, ...);
 
 #endif

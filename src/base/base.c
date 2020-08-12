@@ -30,6 +30,7 @@
 #include "develop/develop.h"
 #include "gcstats/gc_stats.h"
 #include "lib/lib_private.h"
+#include "lib/log.h"
 #include "lib/var_export_line.h"
 #include "lib/var.h"
 #include "profiler/profiler.h"

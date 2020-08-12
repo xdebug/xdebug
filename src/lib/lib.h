@@ -73,15 +73,6 @@ typedef struct xdebug_var_name {
 #define XDEBUG_CC_OPTION_DEAD_CODE       2
 #define XDEBUG_CC_OPTION_BRANCH_CHECK    4
 
-#define XDEBUG_LOG_ERR               1
-#define XDEBUG_LOG_WARN              3
-#define XDEBUG_LOG_COM               5
-#define XDEBUG_LOG_INFO              7
-#define XDEBUG_LOG_DEBUG            10
-#define XDEBUG_LOG_DEFAULT          "7" /* as a string, as that's what STD_PHP_INI_ENTRY wants */
-
-extern const char* xdebug_log_prefix[11];
-
 #define STATUS_STARTING   0
 #define STATUS_STOPPING   1
 #define STATUS_STOPPED    2
@@ -217,6 +208,8 @@ typedef struct _xdebug_library_globals_t {
 	/* used for collection errors */
 	zend_bool     do_collect_errors;
 
+	FILE         *log_file;  /* File handler for protocol log */
+
 	user_opcode_handler_t          original_opcode_handlers[256];
 	xdebug_multi_opcode_handler_t *opcode_multi_handlers[256];
 	xdebug_set                    *opcode_handlers_set;
@@ -235,6 +228,10 @@ typedef struct _xdebug_library_settings_t {
 	zend_long     display_max_children;
 	zend_long     display_max_data;
 	zend_long     display_max_depth;
+
+	/* Logging settings */
+	char         *log;       /* Filename to log protocol communication to */
+	zend_long     log_level; /* Log level XDEBUG_LOG_{ERR,WARN,INFO,DEBUG} */
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);

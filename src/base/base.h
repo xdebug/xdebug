@@ -32,4 +32,6 @@ void xdebug_func_dtor_by_ref(xdebug_func *elem); /* TODO: Remove this API */
 void xdebug_func_dtor(xdebug_func *elem);
 
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata);
+
+void xdebug_print_info(void);
 #endif // __XDEBUG_BASE_H__

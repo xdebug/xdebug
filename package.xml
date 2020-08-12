@@ -97,6 +97,8 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="headers.h" role="src" />
      <file name="lib.c" role="src" />
      <file name="lib.h" role="src" />
+     <file name="log.c" role="src" />
+     <file name="log.h" role="src" />
      <file name="lib_private.h" role="src" />
      <file name="llist.c" role="src" />
      <file name="llist.h" role="src" />
