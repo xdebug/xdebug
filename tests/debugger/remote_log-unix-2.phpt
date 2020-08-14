@@ -28,6 +28,6 @@ Xdebug: [Step Debug] Could not connect to debugging client. Tried: unix:///tmp/x
 [%d] [Step Debug] INFO: Checking remote connect back address.
 [%d] [Step Debug] INFO: Checking user configured header 'I_LIKE_COOKIES'.
 [%d] [Step Debug] WARN: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
-[%d] [Step Debug] WARN: Remote address not found, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
+[%d] [Step Debug] WARN: Remote address not found in headers, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
 [%d] [Step Debug] WARN: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
 [%d] [Step Debug] ERR: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.remote_host/xdebug.remote_port) :-(

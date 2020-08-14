@@ -354,7 +354,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 
 	if (!remote_addr) {
 		xdebug_str_add_fmt(connection_attempts, "%s:%ld (fallback through xdebug.remote_host/xdebug.remote_port)", XINI_DBG(remote_host), XINI_DBG(remote_port));
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_WARN, "Remote address not found, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_WARN, "Remote address not found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
 
 		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
 		return;
@@ -367,10 +367,17 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 		cp_found = 1;
 	}
 
-	xdebug_str_add_fmt(connection_attempts, "%s:%ld (from %s)", Z_STRVAL_P(remote_addr), XINI_DBG(remote_port), header);
+	xdebug_str_add_fmt(connection_attempts, "%s:%ld (from %s HTTP header)", Z_STRVAL_P(remote_addr), XINI_DBG(remote_port), header);
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Remote address found, connecting to %s:%ld.", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(remote_port));
 
 	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+
+	if (XG_DBG(context).socket < 0) {
+		xdebug_str_add_fmt(connection_attempts, ", %s:%ld (fallback through xdebug.remote_host/xdebug.remote_port)", XINI_DBG(remote_host), XINI_DBG(remote_port));
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_WARN, "Could not connect to remote address as found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
+
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+	}
 
 	/* Replace the ',', in case we had changed the original header due
 	 * to multiple values */
