@@ -35,7 +35,6 @@ typedef struct _xdebug_debugger_globals_t {
 	unsigned int  breakpoint_count;
 	unsigned int  no_exec;
 	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
-	FILE         *remote_log_file;  /* File handler for protocol log */
 
 	/* breakpoint resolving */
 	size_t        function_count;
@@ -55,8 +54,6 @@ typedef struct _xdebug_debugger_settings_t {
 	zend_long     remote_port;    /* 9000 */
 	char         *remote_host;    /* localhost */
 	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
-	char         *remote_log;       /* Filename to log protocol communication to */
-	zend_long     remote_log_level; /* Log level XDEBUG_LOG_{ERR,WARN,INFO,DEBUG} */
 	zend_long     remote_cookie_expire_time; /* Expire time for the remote-session cookie */
 	char         *remote_addr_header; /* User configured header to check for forwarded IP address */
 	zend_long     remote_connect_timeout; /* Timeout in MS for remote connections */

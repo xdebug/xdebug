@@ -30,6 +30,7 @@
 #include "profiler.h"
 #include "profiler_private.h"
 
+#include "lib/log.h"
 #include "lib/mm.h"
 #include "lib/str.h"
 #include "lib/var.h"
@@ -201,17 +202,16 @@ void xdebug_profiler_init(char *script_name)
 	} else {
 		filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
 	}
-	xdfree(fname);
 
 	if (XINI_PROF(profiler_append)) {
 		XG_PROF(profile_file) = xdebug_fopen(filename, "a", NULL, &XG_PROF(profile_filename));
 	} else {
 		XG_PROF(profile_file) = xdebug_fopen(filename, "w", NULL, &XG_PROF(profile_filename));
 	}
-	xdfree(filename);
 
 	if (!XG_PROF(profile_file)) {
-		return;
+		xdebug_log_diagnose_permissions(XLOG_CHAN_PROFILE, output_dir, fname);
+		goto return_and_free_names;
 	}
 
 	profiler_write_header(XG_PROF(profile_file), script_name);
@@ -232,7 +232,10 @@ void xdebug_profiler_init(char *script_name)
 	XG_PROF(profile_functionname_refs) = xdebug_hash_alloc(128, xdfree);
 	XG_PROF(profile_last_filename_ref) = 1;
 	XG_PROF(profile_last_functionname_ref) = 0;
-	return;
+
+return_and_free_names:
+	xdfree(filename);
+	xdfree(fname);
 }
 
 void xdebug_profiler_deinit()

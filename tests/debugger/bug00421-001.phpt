@@ -7,7 +7,6 @@ check_reqs('dbgp; class SimpleXMLIterator');
 ?>
 --INI--
 xdebug.mode=debug
-xdebug.start_with_request=yes
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';

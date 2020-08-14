@@ -61,6 +61,7 @@
 #include "lib/usefulstuff.h"
 #include "lib/lib.h"
 #include "lib/llist.h"
+#include "lib/log.h"
 #include "lib/mm.h"
 #include "lib/var_export_html.h"
 #include "lib/var_export_line.h"
@@ -201,6 +202,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.filename_format",    "",              PHP_INI_ALL,                   OnUpdateString, settings.library.filename_format,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.collect_params",     "0",             PHP_INI_ALL,                   OnUpdateLong,   settings.library.collect_params,   zend_xdebug_globals, xdebug_globals)
 
+	STD_PHP_INI_ENTRY("xdebug.log",       "",           PHP_INI_ALL, OnUpdateString, settings.library.log,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.log_level", XLOG_DEFAULT, PHP_INI_ALL, OnUpdateLong,   settings.library.log_level, zend_xdebug_globals, xdebug_globals)
+
 	/* Variable display settings */
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_children", "128",     PHP_INI_ALL,    OnUpdateLong,   settings.library.display_max_children, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_data",     "512",     PHP_INI_ALL,    OnUpdateLong,   settings.library.display_max_data,     zend_xdebug_globals, xdebug_globals)
@@ -244,8 +248,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_host,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_port,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_connect_back,  zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_log",        "",                   PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_log,        zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_log_level",  XDEBUG_LOG_DEFAULT,   PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_log_level,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, settings.debugger.ide_key_setting,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_addr_header", "",                  PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_addr_header, zend_xdebug_globals, xdebug_globals)
@@ -563,44 +565,9 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 	return SUCCESS;
 }
 
-static int xdebug_info_printf(const char *fmt, ...) /* {{{ */
-{
-	char *buf;
-	size_t len, written;
-	va_list argv;
-
-	va_start(argv, fmt);
-	len = vspprintf(&buf, 0, fmt, argv);
-	va_end(argv);
-
-	written = php_output_write(buf, len);
-	efree(buf);
-	return written;
-}
-/* }}} */
-
 PHP_MINFO_FUNCTION(xdebug)
 {
-	php_info_print_table_start();
-	php_info_print_table_header(2, "xdebug support", "enabled");
-	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
-
-	if (!sapi_module.phpinfo_as_text) {
-		xdebug_info_printf("<tr><td colspan='2' style='background-color: white; text-align: center'>%s</td></tr>\n", "<a style='color: #317E1E; background-color: transparent; font-weight: bold; text-decoration: underline' href='https://xdebug.org/support'>Support Xdebug on Patreon, GitHub, or as a business</a>");
-	} else {
-		xdebug_info_printf("Support Xdebug on Patreon, GitHub, or as a business: https://xdebug.org/support\n");
-	}
-	php_info_print_table_end();
-
-	php_info_print_table_start();
-	php_info_print_table_header(2, "Feature", "Enabled/Disabled");
-	php_info_print_table_row(2, "Development Aids", XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Coverage", XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "GC Stats", XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Profiler", XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Step Debugger", XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Tracing", XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_end();
+	xdebug_print_info();
 
 	if (zend_xdebug_initialised == 0) {
 		php_info_print_table_start();

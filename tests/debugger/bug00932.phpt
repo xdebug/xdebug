@@ -6,22 +6,9 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; !win');
 ?>
 --INI--
-xdebug.mode=debug
-xdebug.start_with_request=no
-xdebug.start_upon_error=yes
-error_log=
-xdebug.remote_log=/tmp/{RUNID}bug932.log
-xdebug.remote_port=9999
-xdebug.force_error_reporting=0
+xdebug.log=/doesnotexist/bug932.log
 --FILE--
 <?php
-$file = '/tmp/' . getenv('UNIQ_RUN_ID') . 'bug932.log';
-touch($file);
-chmod($file, 0);
-
-@trigger_error('foo');
-
-unlink($file);
 ?>
 --EXPECTF--
-Xdebug could not open the remote debug file '/tmp/%Sbug932.log'.
+Xdebug: [Log Files] File '/doesnotexist/bug932.log' could not be opened.

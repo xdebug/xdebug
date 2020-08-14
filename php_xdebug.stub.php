@@ -124,6 +124,12 @@ function xdebug_get_tracefile_name() {}
 
 /* -----------------------------------------------------------------------*/
 
+/* Show diagnostic information */
+/** @return void */
+function xdebug_info() {}
+
+/* -----------------------------------------------------------------------*/
+
 /* Returns whether a debugging session is active */
 function xdebug_is_debugger_active(): bool {}
 

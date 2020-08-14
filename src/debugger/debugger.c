@@ -47,7 +47,6 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 
 	xg->remote_connection_enabled = 0;
 	xg->remote_connection_pid     = 0;
-	xg->remote_log_file           = 0;
 	xg->breakpoints_allowed       = 0;
 
 	/* Capturing output */
@@ -573,7 +572,6 @@ void xdebug_debugger_rinit(void)
 	XG_DBG(breakable_lines_map) = xdebug_hash_alloc(2048, (xdebug_hash_dtor_t) xdebug_line_list_dtor);
 	XG_DBG(function_count) = 0;
 	XG_DBG(class_count) = 0;
-	XG_DBG(remote_log_file) = NULL;
 
 	/* Initialize some debugger context properties */
 	XG_DBG(context).program_name   = NULL;

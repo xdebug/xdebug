@@ -323,7 +323,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
 		'session' => array('session.auto_start=0'),
 		'tidy' => array('tidy.clean_output=0'),
 		'zlib' => array('zlib.output_compression=Off'),
-		'xdebug' => array('xdebug.mode=off','xdebug.start_with_request=default','xdebug.remote_log_level=20'),
+		'xdebug' => array('xdebug.mode=off','xdebug.start_with_request=default','xdebug.log_level=20'),
 		'mbstring' => array('mbstring.func_overload=0'),
 	);
 
@@ -1639,6 +1639,7 @@ TEST $file
 			$skipif_ini_settings = $ini_settings;
 			$skipif_ini_settings = preg_replace( '@-d \"auto_prepend_file=.*?\" @', '', $skipif_ini_settings );
 			$skipif_ini_settings = preg_replace( '@-d \"auto_append_file=.*?\" @', '', $skipif_ini_settings );
+			$skipif_ini_settings = preg_replace( '@-d \"xdebug\.log=.*?\" @', '', $skipif_ini_settings );
 			$skipif_ini_settings .= " -d track_errors=0 -d xdebug.mode=off";
 			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $skipif_ini_settings $no_file_cache -d display_errors=0 \"$test_skipif\"", $env);
 

@@ -24,16 +24,12 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-const char *xdebug_log_prefix[11] = {
-	"", "E: ", "", "W: ", "", "", "", "I: ", "", "", "D: "
-};
-
-
-
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
 	xg->headers              = NULL;
 	xg->mode                 = 0xFFFFFFFF;
+
+	xg->log_file             = 0;
 
 	xg->active_execute_data  = NULL;
 	xg->opcode_handlers_set = xdebug_set_create(256);
@@ -85,10 +81,14 @@ void xdebug_library_mshutdown(void)
 
 void xdebug_library_rinit(void)
 {
+	XG_LIB(diagnosis_buffer) = xdebug_str_new();
+	xdebug_open_log();
+
 	XG_LIB(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	XG_LIB(dumped) = 0;
 	XG_LIB(do_collect_errors) = 0;
+
 }
 
 void xdebug_library_post_deactivate(void)
@@ -96,6 +96,10 @@ void xdebug_library_post_deactivate(void)
 	/* Clean up collected headers */
 	xdebug_llist_destroy(XG_LIB(headers), NULL);
 	XG_LIB(headers) = NULL;
+
+
+	xdebug_close_log();
+	xdebug_str_free(XG_LIB(diagnosis_buffer));
 }
 
 

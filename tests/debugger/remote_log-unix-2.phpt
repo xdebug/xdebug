@@ -10,7 +10,7 @@ I_LIKE_COOKIES=unix:///tmp/haxx0r.sock
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.remote_log={TMPDIR}/{RUNID}remote-unix.txt
+xdebug.log={TMPDIR}/{RUNID}remote-unix.txt
 xdebug.remote_connect_back=1
 xdebug.remote_host=unix:///tmp/xdbg.sock
 xdebug.remote_port=0
@@ -22,12 +22,12 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remot
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-unix.txt' );
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.remote_host/xdebug.remote_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
-[%d] I: Checking remote connect back address.
-[%d] I: Checking user configured header 'I_LIKE_COOKIES'.
-[%d] W: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
-[%d] W: Remote address not found, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
-[%d] W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
-[%d] E: Could not connect to client. :-(
-[%d] Log closed at %d-%d-%d %d:%d:%d.%d
+[%d] [Step Debug] INFO: Checking remote connect back address.
+[%d] [Step Debug] INFO: Checking user configured header 'I_LIKE_COOKIES'.
+[%d] [Step Debug] WARN: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
+[%d] [Step Debug] WARN: Remote address not found in headers, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
+[%d] [Step Debug] WARN: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
+[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.remote_host/xdebug.remote_port) :-(

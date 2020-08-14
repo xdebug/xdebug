@@ -26,6 +26,7 @@
 
 #include "base/base.h"
 #include "lib/lib.h"
+#include "lib/log.h"
 
 /* Set correct int format to use */
 #if SIZEOF_ZEND_LONG == 4
@@ -112,33 +113,38 @@ static void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 	xdfree(run);
 }
 
-static int xdebug_gc_stats_init(char *fname, zend_string *script_name)
+static int xdebug_gc_stats_init(char *requested_filename, zend_string *script_name)
 {
-	char *filename = NULL;
+	char *filename_to_use = NULL;
+	char *generated_filename = NULL;
+	char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
 
-	if (fname && strlen(fname)) {
-		filename = xdstrdup(fname);
+	if (requested_filename && strlen(requested_filename)) {
+		filename_to_use = xdstrdup(requested_filename);
 	} else {
-		char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
-
 		if (!strlen(XINI_GCSTATS(output_name)) ||
-			xdebug_format_output_filename(&fname, XINI_GCSTATS(output_name), ZSTR_VAL(script_name)) <= 0)
+			xdebug_format_output_filename(&generated_filename, XINI_GCSTATS(output_name), ZSTR_VAL(script_name)) <= 0)
 		{
 			return FAILURE;
 		}
 
 		if (IS_SLASH(output_dir[strlen(output_dir) - 1])) {
-			filename = xdebug_sprintf("%s%s", output_dir, fname);
+			filename_to_use = xdebug_sprintf("%s%s", output_dir, generated_filename);
 		} else {
-			filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
+			filename_to_use = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, generated_filename);
 		}
-		xdfree(fname);
 	}
 
-	XG_GCSTATS(file) = xdebug_fopen(filename, "w", NULL, &XG_GCSTATS(filename));
-	xdfree(filename);
+	XG_GCSTATS(file) = xdebug_fopen(filename_to_use, "w", NULL, &XG_GCSTATS(filename));
+	xdfree(filename_to_use);
 
 	if (!XG_GCSTATS(file)) {
+		xdebug_log_diagnose_permissions(XLOG_CHAN_GCSTATS, output_dir, filename_to_use);
+
+		if (generated_filename) {
+			xdfree(generated_filename);
+		}
+
 		return FAILURE;
 	}
 
@@ -149,6 +155,10 @@ static int xdebug_gc_stats_init(char *fname, zend_string *script_name)
 	fprintf(XG_GCSTATS(file), "----------+-------------+----------+---------------+--------------+------------+---------\n");
 
 	fflush(XG_GCSTATS(file));
+
+	if (generated_filename) {
+		xdfree(generated_filename);
+	}
 
 	return SUCCESS;
 }
