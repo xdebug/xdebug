@@ -6,7 +6,6 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
 --INI--
-xdebug.log=/tmp/xdebug.log
 xdebug.log_level=50
 --FILE--
 <?php

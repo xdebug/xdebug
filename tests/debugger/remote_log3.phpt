@@ -20,12 +20,13 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remot
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log3.txt' );
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: doesnotexist2:9003 (fallback through xdebug.remote_host/xdebug.remote_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
-[%d] DBG: I: Checking remote connect back address.
-[%d] DBG: I: Checking user configured header 'I_LIKE_COOKIES'.
-[%d] DBG: I: Checking header 'HTTP_X_FORWARDED_FOR'.
-[%d] DBG: I: Checking header 'REMOTE_ADDR'.
-[%d] DBG: W: Remote address not found, connecting to configured address/port: doesnotexist2:9003. :-|
-[%d] DBG: W: Creating socket for 'doesnotexist2:9003', getaddrinfo: %s.
-[%d] DBG: E: Could not connect to client. :-(
+[%d] [Step Debug] INFO: Checking remote connect back address.
+[%d] [Step Debug] INFO: Checking user configured header 'I_LIKE_COOKIES'.
+[%d] [Step Debug] INFO: Checking header 'HTTP_X_FORWARDED_FOR'.
+[%d] [Step Debug] INFO: Checking header 'REMOTE_ADDR'.
+[%d] [Step Debug] WARN: Remote address not found, connecting to configured address/port: doesnotexist2:9003. :-|
+[%d] [Step Debug] WARN: Creating socket for 'doesnotexist2:9003', getaddrinfo: %s.
+[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: doesnotexist2:9003 (fallback through xdebug.remote_host/xdebug.remote_port) :-(

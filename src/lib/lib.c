@@ -81,13 +81,14 @@ void xdebug_library_mshutdown(void)
 
 void xdebug_library_rinit(void)
 {
-	XG_LIB(log_file) = NULL;
+	XG_LIB(diagnosis_buffer) = xdebug_str_new();
 	xdebug_open_log();
 
 	XG_LIB(headers) = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	XG_LIB(dumped) = 0;
 	XG_LIB(do_collect_errors) = 0;
+
 }
 
 void xdebug_library_post_deactivate(void)
@@ -96,7 +97,9 @@ void xdebug_library_post_deactivate(void)
 	xdebug_llist_destroy(XG_LIB(headers), NULL);
 	XG_LIB(headers) = NULL;
 
+
 	xdebug_close_log();
+	xdebug_str_free(XG_LIB(diagnosis_buffer));
 }
 
 

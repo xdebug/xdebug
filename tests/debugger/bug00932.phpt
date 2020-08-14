@@ -11,4 +11,4 @@ xdebug.log=/doesnotexist/bug932.log
 <?php
 ?>
 --EXPECTF--
-Xdebug could not open the remote debug file '/doesnotexist/bug932.log'.
+Xdebug: [Log Files] File '/doesnotexist/bug932.log' could not be opened.

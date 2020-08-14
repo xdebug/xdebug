@@ -6,7 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; !win');
 ?>
 --ENV--
-I_LIKE_COOKIES=doesnotexist3
+I_LIKE_COOKIES=cookiehost
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
@@ -22,10 +22,11 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remot
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: cookiehost:9003 (from I_LIKE_COOKIES) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
-[%d] DBG: I: Checking remote connect back address.
-[%d] DBG: I: Checking user configured header 'I_LIKE_COOKIES'.
-[%d] DBG: I: Remote address found, connecting to doesnotexist3:9003.
-[%d] DBG: W: Creating socket for 'doesnotexist3:9003', getaddrinfo: %s.
-[%d] DBG: E: Could not connect to client. :-(
+[%d] [Step Debug] INFO: Checking remote connect back address.
+[%d] [Step Debug] INFO: Checking user configured header 'I_LIKE_COOKIES'.
+[%d] [Step Debug] INFO: Remote address found, connecting to cookiehost:9003.
+[%d] [Step Debug] WARN: Creating socket for 'cookiehost:9003', getaddrinfo: %s.
+[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: cookiehost:9003 (from I_LIKE_COOKIES) :-(

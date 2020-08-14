@@ -17,15 +17,19 @@ xdebug.remote_port=9003
 xdebug.remote_addr_header=I_LIKE_COOKIES
 --FILE--
 <?php
+@unlink ("C:\\Windows\\Temp\\remote-log4.txt");
 echo strlen("foo"), "\n";
 echo file_get_contents("C:\\Windows\\Temp\\remote-log4.txt");
-unlink ("C:\\Windows\\Temp\\remote-log4.txt");
+@unlink ("C:\\Windows\\Temp\\remote-log4.txt");
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: doesnotexist3:9003 (from I_LIKE_COOKIES HTTP header), doesnotexist2:9003 (fallback through xdebug.remote_host/xdebug.remote_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
-[%d] DBG: I: Checking remote connect back address.
-[%d] DBG: I: Checking user configured header 'I_LIKE_COOKIES'.
-[%d] DBG: I: Remote address found, connecting to doesnotexist3:9003.
-[%d] DBG: W: Creating socket for 'doesnotexist3:9003', getaddrinfo: %d.
-[%d] DBG: E: Could not connect to client. :-(
+[%d] [Step Debug] INFO: Checking remote connect back address.
+[%d] [Step Debug] INFO: Checking user configured header 'I_LIKE_COOKIES'.
+[%d] [Step Debug] INFO: Remote address found, connecting to doesnotexist3:9003.
+[%d] [Step Debug] WARN: Creating socket for 'doesnotexist3:9003', getaddrinfo: %d.
+[%d] [Step Debug] WARN: Could not connect to remote address as found in headers, connecting to configured address/port: doesnotexist2:9003. :-|
+[%d] [Step Debug] WARN: Creating socket for 'doesnotexist2:9003', getaddrinfo: 11001.
+[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: doesnotexist3:9003 (from I_LIKE_COOKIES HTTP header), doesnotexist2:9003 (fallback through xdebug.remote_host/xdebug.remote_port) :-(

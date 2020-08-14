@@ -20,8 +20,9 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remot
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log1.txt' );
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: doesnotexist:9002 (through xdebug.remote_host/xdebug.remote_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
-[%d] DBG: I: Connecting to configured address/port: doesnotexist:9002.
-[%d] DBG: W: Creating socket for 'doesnotexist:9002', getaddrinfo: %s.
-[%d] DBG: E: Could not connect to client. :-(
+[%d] [Step Debug] INFO: Connecting to configured address/port: doesnotexist:9002.
+[%d] [Step Debug] WARN: Creating socket for 'doesnotexist:9002', getaddrinfo: %s.
+[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: doesnotexist:9002 (through xdebug.remote_host/xdebug.remote_port) :-(

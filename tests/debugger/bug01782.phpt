@@ -17,6 +17,7 @@ xdebug.remote_cookie_expire_time=1234
 var_dump( xdebug_get_headers( ) );
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] %sTried: localhost:9000 (through xdebug.remote_host/xdebug.remote_port) :-(
 %sbug01782.php:2:
 array(1) {
   [0] =>

@@ -209,6 +209,7 @@ typedef struct _xdebug_library_globals_t {
 	zend_bool     do_collect_errors;
 
 	FILE         *log_file;  /* File handler for protocol log */
+	xdebug_str   *diagnosis_buffer;
 
 	user_opcode_handler_t          original_opcode_handlers[256];
 	xdebug_multi_opcode_handler_t *opcode_multi_handlers[256];

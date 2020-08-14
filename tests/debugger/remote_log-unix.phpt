@@ -20,8 +20,9 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remot
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (through xdebug.remote_host/xdebug.remote_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
-[%d] DBG: I: Connecting to configured address/port: unix:///tmp/xdbg.sock:0.
-[%d] DBG: W: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
-[%d] DBG: E: Could not connect to client. :-(
+[%d] [Step Debug] INFO: Connecting to configured address/port: unix:///tmp/xdbg.sock:0.
+[%d] [Step Debug] WARN: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
+[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (through xdebug.remote_host/xdebug.remote_port) :-(

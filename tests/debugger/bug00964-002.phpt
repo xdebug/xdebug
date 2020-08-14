@@ -25,4 +25,5 @@ unlink( sys_get_temp_dir() . "/bug964.txt" );
 echo $match[1];
 ?>
 --EXPECTF--
+Xdebug: [Step Debug] Time-out connecting to debugging client (192.168.111.111:9003 (from HTTP_X_FORWARDED_FOR)), waited: 200 ms. :-(
 192.168.111.111
