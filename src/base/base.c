@@ -1073,6 +1073,8 @@ PHP_FUNCTION(xdebug_set_time_limit)
 	if (!xdebug_is_debug_connection_active()) {
 		XG_BASE(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
