@@ -24,13 +24,21 @@
 #include "lib_private.h"
 #include "log.h"
 
+#define XDEBUG_DOCS_BASE "http://gargle:9980/docs/"
+
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
+const char *xdebug_level_msg_prefix[11] = {
+	"", "E", "", "W", "", "", "", "I", "", "", "D"
+};
 const char *xdebug_log_prefix[11] = {
 	"", "ERR: ", "", "WARN: ", "", "", "", "INFO: ", "", "", "DEBUG: "
 };
 const char *xdebug_log_prefix_emoji[11] = {
 	"", "🛑 ", "", "⚠️ ", "", "", "", "🛈 ", "", "", "• "
+};
+const char *xdebug_channel_msg_prefix[5] = {
+	"LOG-", "DBG-", "GC-", "PROF-", "TRACE-"
 };
 const char *xdebug_channel_name[5] = {
 	"[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] "
@@ -61,7 +69,7 @@ static inline void xdebug_internal_log(int channel, int log_level, const char *m
 #define TR_START "<tr><td class=\"e\">"
 #define TR_END   "</td></tr>\n"
 
-static inline void xdebug_diagnostic_log(int channel, int log_level, const char *message)
+static inline void xdebug_diagnostic_log(int channel, int log_level, const char *error_code, const char *message)
 {
 	if (log_level > XLOG_WARN) {
 		return;
@@ -77,7 +85,14 @@ static inline void xdebug_diagnostic_log(int channel, int log_level, const char 
 		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "</td><td class=\"v\">");
 		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_channel_name[channel], 0);
 		xdebug_str_add(XG_LIB(diagnosis_buffer), message, 0);
-		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "</td></tr>");
+		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "</td><td class=\"d\"><a href=\"" XDEBUG_DOCS_BASE "errors#");
+		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_channel_msg_prefix[channel], 0);
+		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_level_msg_prefix[log_level], 0);
+		if (error_code) {
+			xdebug_str_addc(XG_LIB(diagnosis_buffer), '-');
+			xdebug_str_add(XG_LIB(diagnosis_buffer), error_code, 0);
+		}
+		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "\">🖹</a></td></tr>");
 	}
 
 	xdebug_str_addc(XG_LIB(diagnosis_buffer), '\n');
@@ -100,7 +115,7 @@ static inline void xdebug_php_log(int channel, int log_level, const char *messag
 	xdebug_str_destroy(&formatted_message);
 }
 
-void XDEBUG_ATTRIBUTE_FORMAT(printf, 3, 4) xdebug_log(int channel, int log_level, const char *fmt, ...)
+void XDEBUG_ATTRIBUTE_FORMAT(printf, 4, 5) xdebug_log_ex(int channel, int log_level, const char *error_code, const char *fmt, ...)
 {
 	char    message[512];
 	va_list argv;
@@ -115,7 +130,7 @@ void XDEBUG_ATTRIBUTE_FORMAT(printf, 3, 4) xdebug_log(int channel, int log_level
 
 	xdebug_internal_log(channel, log_level, message);
 
-	xdebug_diagnostic_log(channel, log_level, message);
+	xdebug_diagnostic_log(channel, log_level, error_code, message);
 
 	xdebug_php_log(channel, log_level, message);
 }
@@ -132,7 +147,7 @@ static void log_filename_not_opened(int channel, const char *directory, const ch
 	}
 	xdebug_str_add(&full_filename, filename, 0);
 
-	xdebug_log(channel, XLOG_ERR, "File '%s' could not be opened.", full_filename.d);
+	xdebug_log_ex(channel, XLOG_ERR, "OPEN", "File '%s' could not be opened.", full_filename.d);
 
 	xdebug_str_destroy(&full_filename);
 }
@@ -151,16 +166,16 @@ void xdebug_log_diagnose_permissions(int channel, const char *directory, const c
 	}
 
 	if (stat(directory, &dir_info) == -1) {
-		xdebug_log(channel, XLOG_WARN, "%s: %s", directory, strerror(errno));
+		xdebug_log_ex(channel, XLOG_WARN, "STAT", "%s: %s", directory, strerror(errno));
 		return;
 	}
 
 	if (!S_ISDIR(dir_info.st_mode)) {
-		xdebug_log(channel, XLOG_WARN, "The path '%s' is not a directory.", directory);
+		xdebug_log_ex(channel, XLOG_WARN, "NOTDIR", "The path '%s' is not a directory.", directory);
 		return;
 	}
 
-	xdebug_log(channel, XLOG_WARN, "The path '%s' has the permissions: 0%03o.", directory, dir_info.st_mode & 0777);
+	xdebug_log_ex(channel, XLOG_WARN, "PERM", "The path '%s' has the permissions: 0%03o.", directory, dir_info.st_mode & 0777);
 #endif
 }
 
@@ -185,6 +200,21 @@ static void print_logo(void)
 	PUTS("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"176\" height=\"91\" viewBox=\"0 0 351 181\"><title>Xdebug</title><g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#FFF\"><g transform=\"translate(5 5)\"><path fill=\"#317E1E\" fill-rule=\"nonzero\" stroke-width=\"5\" d=\"M127.9 85.5l68.2 70.7.4 17.3h-38.6l-60.8-59.7-60 59.7h-39v-17.6l69.7-69.8-69.6-71.2V-2.5h38.7l60.2 60 61-60h38.3v16l-68.5 72z\"></path><circle cx=\"75.9\" cy=\"74.6\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"105.1\" cy=\"85\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"158.4\" cy=\"15\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"50.9\" cy=\"140\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"180.4\" cy=\"158.5\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><path stroke-linecap=\"square\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M32.6 158.2L42 149M104.3 69.1l49.4-49.4\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M102.3 82.7L30.3 10H11.2M167.4 10H183M11.2 160.7l79.2-78\"></path><path stroke-linejoin=\"round\" stroke-opacity=\".7\" stroke-width=\"4\" d=\"M116.3 74.6L181 10\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M20.7 19.7l52.7 52.6\"></path><path stroke-linejoin=\"round\" stroke-opacity=\".7\" stroke-width=\"4\" d=\"M116.3 96.7l32 32\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M155.2 133.6l22.1 22M53.6 137.5L97 94.9l67.1 66.6h4.9\"></path></g><g fill=\"#000\" fill-rule=\"nonzero\" stroke-width=\"4\"><path d=\"M158.3 107.7V72.9c0-.5 0-.5-.8-.5-.7 0-.7 0-.7.6v34.7c0 .6 0 .5.7.5.8 0 .7 0 .7-.5zm3.9 11.2a22.5 22.5 0 0 1-20-.7c-3.4-2-5.2-4.8-5.2-8.4V69.6c0-3 1.5-5.6 4.3-7.4a17 17 0 0 1 9.2-2.4c3 0 5.6.3 7.7 1V47H178v73h-15l-.8-1.1zM200.9 84V73.2c0-.8 0-.8-.8-.8s-.8 0-.8.8V84h1.6zm-1.6 12.5v11c0 .7 0 .7.8.7.7 0 .8 0 .8-.8V97.2h19.8v10.4c0 8.9-7.3 13.2-20.7 13.2-13.3 0-20.5-4.5-20.5-13.7V73.6c0-9.2 7.2-13.8 20.5-13.8 13.4 0 20.7 4.4 20.7 13.4v23.3h-21.4zM243.3 107.7V73c0-.6 0-.6-.7-.6-.8 0-.8 0-.8.5v34.8c0 .6 0 .5.8.5.7 0 .7 0 .7-.5zm-5.4 11.1l-.9 1.3h-15V47h19.8v13.8c2.1-.7 4.7-1 7.9-1 3.1 0 6.1.8 8.8 2.3 3 1.6 4.6 4.2 4.6 7.5v40.2c0 3.6-1.8 6.4-5.3 8.4a22.5 22.5 0 0 1-19.9.6zM285.8 119.7c-2.1.8-4.7 1.1-7.8 1.1a17 17 0 0 1-9.1-2.4c-2.8-1.7-4.4-4.2-4.4-7.2v-51h19.8v47.5c0 .6 0 .5.8.5.7 0 .7 0 .7-.4V60h19.8v60h-19.8v-.4zM328.3 108.3V73c0-.6 0-.6-.7-.6-.8 0-.8 0-.8.6V108c0 .6 0 .6.8.6.7 0 .7 0 .7-.4zm-.9 11.8c-2 .5-4.2.7-6.9.7a17 17 0 0 1-9.1-2.4c-2.9-1.7-4.4-4.2-4.4-7.2V71c0-7.4 5.2-11.2 14.6-11.2 2.3 0 5 .7 8.3 2l1.7-1.7H348v57.3c0 4.4-1 9.5-2.8 12-2.1 3.2-7.7 4.5-17 4.5h-18.4v-12h14.9c1.1 0 2-.7 2.7-1.8z\"></path></g></g></svg>");
 }
 
+void print_feature_row(const char *name, int flag, const char *doc_name)
+{
+	if (!sapi_module.phpinfo_as_text) {
+		PUTS("<tr>");
+		PUTS("<td class=\"e\">");
+		PUTS(name);
+		PUTS("</td><td class=\"v\">");
+		PUTS(XDEBUG_MODE_IS(flag) ? "✔ enabled" : "✘ disabled");
+		PUTS("</td><td class=\"d\"><a href=\"" XDEBUG_DOCS_BASE);
+		PUTS(doc_name);
+		PUTS("\">🖹</a></td></tr>\n");
+	} else {
+		php_info_print_table_row(2, name, XDEBUG_MODE_IS(flag) ? "✔ enabled" : "✘ disabled");
+	}
+}
 
 void xdebug_print_info(void)
 {
@@ -204,13 +234,17 @@ void xdebug_print_info(void)
 	php_info_print_table_end();
 
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Feature", "Enabled/Disabled");
-	php_info_print_table_row(2, "Development Aids", XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Coverage", XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "GC Stats", XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Profiler", XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Step Debugger", XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) ? "✔ enabled" : "✘ disabled");
-	php_info_print_table_row(2, "Tracing", XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) ? "✔ enabled" : "✘ disabled");
+	if (!sapi_module.phpinfo_as_text) {
+		php_info_print_table_header(3, "Feature", "Enabled/Disabled", "Docs");
+	} else {
+		php_info_print_table_header(2, "Feature", "Enabled/Disabled");
+	}
+	print_feature_row("Development Aids", XDEBUG_MODE_DEVELOP, "develop");
+	print_feature_row("Coverage", XDEBUG_MODE_COVERAGE, "code_coverage");
+	print_feature_row("GC Stats", XDEBUG_MODE_GCSTATS, "garbage_collection");
+	print_feature_row("Profiler", XDEBUG_MODE_PROFILING, "profiler");
+	print_feature_row("Step Debugger", XDEBUG_MODE_STEP_DEBUG, "remote");
+	print_feature_row("Tracing", XDEBUG_MODE_TRACING, "trace");
 	php_info_print_table_end();
 }
 
@@ -248,15 +282,100 @@ static void xdebug_print_php_section(void)
 	php_info_print_table_end();
 }
 
+static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
+{
+    if (ini_entry->displayer) {
+        ini_entry->displayer(ini_entry, type);
+    } else {
+        const char *display_string;
+        size_t display_string_length;
+        int esc_html=0;
+
+        if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
+            if (ini_entry->orig_value && ZSTR_VAL(ini_entry->orig_value)[0]) {
+                display_string = ZSTR_VAL(ini_entry->orig_value);
+                display_string_length = ZSTR_LEN(ini_entry->orig_value);
+                esc_html = !sapi_module.phpinfo_as_text;
+            } else {
+                if (!sapi_module.phpinfo_as_text) {
+                    display_string = "<i>no value</i>";
+                    display_string_length = sizeof("<i>no value</i>") - 1;
+                } else {
+                    display_string = "no value";
+                    display_string_length = sizeof("no value") - 1;
+                }
+            }
+        } else if (ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) {
+            display_string = ZSTR_VAL(ini_entry->value);
+            display_string_length = ZSTR_LEN(ini_entry->value);
+            esc_html = !sapi_module.phpinfo_as_text;
+        } else {
+            if (!sapi_module.phpinfo_as_text) {
+                display_string = "<i>no value</i>";
+                display_string_length = sizeof("<i>no value</i>") - 1;
+            } else {
+                display_string = "no value";
+                display_string_length = sizeof("no value") - 1;
+            }
+        }
+
+        if (esc_html) {
+            zend_html_puts(display_string, display_string_length);
+        } else {
+            PHPWRITE(display_string, display_string_length);
+        }
+    }
+}
+
 static void xdebug_print_settings(void)
 {
-	zend_module_entry *zend_module;
+	zend_module_entry *module;
+	zend_ini_entry *ini_entry;
+	int module_number;
 	zend_string *name = zend_string_init("xdebug", 6, 0);
 
-	zend_module = zend_hash_find_ptr(&module_registry, name);
+	module = zend_hash_find_ptr(&module_registry, name);
 	zend_string_release(name);
 
-	DISPLAY_INI_ENTRIES();
+	if (!module) {
+		return;
+	}
+
+	module_number = module->module_number;
+
+	php_info_print_table_start();
+	if (!sapi_module.phpinfo_as_text) {
+		php_info_print_table_header(4, "Directive", "Local Value", "Master Value", "Docs");
+	} else {
+		php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
+	}
+
+    ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+        if (ini_entry->module_number != module_number) {
+            continue;
+        }
+        if (!sapi_module.phpinfo_as_text) {
+            PUTS("<tr>");
+            PUTS("<td class=\"e\">");
+            PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+            PUTS("</td><td class=\"v\">");
+            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+            PUTS("</td><td class=\"v\">");
+            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+			PUTS("</td><td class=\"d\"><a href=\"" XDEBUG_DOCS_BASE "all_settings#");
+            PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PUTS("\">🖹</a></td></tr>\n");
+        } else {
+            PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+            PUTS(" => ");
+            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+            PUTS(" => ");
+            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+            PUTS("\n");
+        }
+    } ZEND_HASH_FOREACH_END();
+
+	php_info_print_table_end();
 }
 
 static void print_html_header(void)
@@ -272,8 +391,7 @@ static void print_html_header(void)
 	PUTS("<style type=\"text/css\">\n");
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
-	PUTS("a:link {color: #009; text-decoration: none; background-color: #fff;}\n");
-	PUTS("a:hover {text-decoration: underline;}\n");
+	PUTS("a:link, a:hover, a:visited {color: black; text-decoration: underline;}\n");
 	PUTS("table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px #ccc;}\n");
 	PUTS(".center {text-align: center;}\n");
 	PUTS(".center table {margin: 1em auto; text-align: left;}\n");
@@ -288,6 +406,7 @@ static void print_html_header(void)
 	PUTS(".v {background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word;}\n");
 	PUTS(".i {background-color: #ddd; text-align: center; font-size: 1em; font-family: serif; width: 1em;}\n");
 	PUTS(".v i {color: #999;}\n");
+	PUTS(".d {background-color: #ddd; width: 1em; text-align: center;}\n");
 	PUTS(".l {background-color: #bbde94;}\n");
 	PUTS("img {float: right; border: 0;}\n");
 	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
@@ -317,7 +436,12 @@ PHP_FUNCTION(xdebug_info)
 	xdebug_print_info();
 
 	php_info_print_table_start();
-	php_info_print_table_colspan_header(2, (char*) "Diagnostic Log");
+	if (!sapi_module.phpinfo_as_text) {
+		php_info_print_table_colspan_header(3, (char*) "Diagnostic Log");
+		PUTS("<tr class=\"h\"><th colspan=\"2\">Message</th><th>Docs</th></tr>\n");
+	} else {
+		php_info_print_table_colspan_header(2, (char*) "Diagnostic Log");
+	}
 	php_output_write(XG_LIB(diagnosis_buffer)->d, XG_LIB(diagnosis_buffer)->l);
 	php_info_print_table_end();
 
