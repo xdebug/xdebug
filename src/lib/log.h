@@ -29,6 +29,7 @@
 #include "zend_API.h"
 #include "compat.h"
 
+#define XLOG_CRIT      0
 #define XLOG_ERR       1
 #define XLOG_WARN      3
 #define XLOG_COM       5
@@ -36,11 +37,12 @@
 #define XLOG_DEBUG    10
 #define XLOG_DEFAULT "7" /* as a string, as that's what STD_PHP_INI_ENTRY wants */
 
-#define XLOG_CHAN_LOGFILE  0
-#define XLOG_CHAN_DEBUG    1
-#define XLOG_CHAN_GCSTATS  2
-#define XLOG_CHAN_PROFILE  3
-#define XLOG_CHAN_TRACE    4
+#define XLOG_CHAN_CONFIG   0
+#define XLOG_CHAN_LOGFILE  1
+#define XLOG_CHAN_DEBUG    2
+#define XLOG_CHAN_GCSTATS  3
+#define XLOG_CHAN_PROFILE  4
+#define XLOG_CHAN_TRACE    5
 
 extern const char* xdebug_log_prefix[11];
 

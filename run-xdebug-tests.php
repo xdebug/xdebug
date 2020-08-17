@@ -1632,6 +1632,9 @@ TEST $file
 				$env['USE_ZEND_ALLOC'] = '1';
 				$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 			}
+			if (!array_key_exists('XDEBUG_MODE', $env)) {
+				$env['XDEBUG_MODE'] = "";
+			}
 
 			junit_start_timer($shortname);
 
@@ -1934,6 +1937,10 @@ TEST $file
 		$env['USE_ZEND_ALLOC'] = '1';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 	}
+	if (!array_key_exists('XDEBUG_MODE', $env)) {
+		$env['XDEBUG_MODE'] = "";
+	}
+
 
 	if ($DETAILED) echo "
 CONTENT_LENGTH  = " . $env['CONTENT_LENGTH'] . "
