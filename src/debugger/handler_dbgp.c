@@ -306,7 +306,7 @@ static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int s
 		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
 		char *utime_str = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_WARN, "%s: There was a problem sending %zd bytes on socket %d: %s.", utime_str, tmp->l, context->socket, sock_error);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SENDERR", "%s: There was a problem sending %zd bytes on socket %d: %s.", utime_str, tmp->l, context->socket, sock_error);
 
 		efree(sock_error);
 		xdfree(utime_str);
@@ -2380,7 +2380,7 @@ int xdebug_dbgp_cmdloop(xdebug_con *context, int block, int bail)
 #ifdef WIN32
 			status = ioctlsocket(context->socket, FIONBIO, &yes);
 			if (SOCKET_ERROR == status) {
-				xdebug_log(XLOG_CHAN_DEBUG, XLOG_WARN, "setting socket to FIONBIO: %d.", WSAGetLastError());
+				xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "BIO", "setting socket to FIONBIO: %d.", WSAGetLastError());
 			}
 #else
 			fcntl(context->socket, F_SETFL, O_NONBLOCK);
@@ -2392,7 +2392,7 @@ int xdebug_dbgp_cmdloop(xdebug_con *context, int block, int bail)
 #ifdef WIN32
 			status = ioctlsocket(context->socket, FIONBIO, &no);
 			if (SOCKET_ERROR == status) {
-				xdebug_log(XLOG_CHAN_DEBUG, XLOG_WARN, "setting socket not to FIONBIO: %d.", WSAGetLastError());
+				xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "BIO", "setting socket not to FIONBIO: %d.", WSAGetLastError());
 			}
 #else
 			int flags = fcntl(context->socket, F_GETFL, 0);

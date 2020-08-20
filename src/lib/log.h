@@ -44,7 +44,8 @@
 
 extern const char* xdebug_log_prefix[11];
 
-void XDEBUG_ATTRIBUTE_FORMAT(printf, 3, 4) xdebug_log(int channel, int log_level, const char *fmt, ...);
+void XDEBUG_ATTRIBUTE_FORMAT(printf, 4, 5) xdebug_log_ex(int channel, int log_level, const char *error_code, const char *fmt, ...);
+#define xdebug_log(c,l,f, ...) xdebug_log_ex((c), (l), NULL, (f), ##__VA_ARGS__)
 void xdebug_log_diagnose_permissions(int channel, const char *directory, const char *filename);
 
 #endif
