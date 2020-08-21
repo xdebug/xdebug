@@ -24,24 +24,33 @@
 #include "lib_private.h"
 #include "log.h"
 
-#define XDEBUG_DOCS_BASE "http://gargle:9980/docs/"
+static char* xdebug_docs_base(void)
+{
+	char *env = getenv("XDEBUG_DOCS_BASE");
+
+	if (env) {
+		return env;
+	}
+
+	return (char*) "https://xdebug.org/docs/";
+}
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
 const char *xdebug_level_msg_prefix[11] = {
-	"", "E", "", "W", "", "", "", "I", "", "", "D"
+	"C", "E", "", "W", "", "", "", "I", "", "", "D"
 };
 const char *xdebug_log_prefix[11] = {
-	"", "ERR: ", "", "WARN: ", "", "", "", "INFO: ", "", "", "DEBUG: "
+	"CRIT:", "ERR: ", "", "WARN: ", "", "", "", "INFO: ", "", "", "DEBUG: "
 };
 const char *xdebug_log_prefix_emoji[11] = {
-	"", "🛑 ", "", "⚠️ ", "", "", "", "🛈 ", "", "", "• "
+	"☠", "🛑 ", "", "⚠️ ", "", "", "", "🛈 ", "", "", "• "
 };
-const char *xdebug_channel_msg_prefix[5] = {
-	"LOG-", "DBG-", "GC-", "PROF-", "TRACE-"
+const char *xdebug_channel_msg_prefix[6] = {
+	"CFG-", "LOG-", "DBG-", "GC-", "PROF-", "TRACE-"
 };
-const char *xdebug_channel_name[5] = {
-	"[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] "
+const char *xdebug_channel_name[6] = {
+	"[Config] ", "[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] "
 };
 
 static inline void xdebug_internal_log(int channel, int log_level, const char *message)
@@ -71,7 +80,7 @@ static inline void xdebug_internal_log(int channel, int log_level, const char *m
 
 static inline void xdebug_diagnostic_log(int channel, int log_level, const char *error_code, const char *message)
 {
-	if (log_level > XLOG_WARN) {
+	if (!XG_LIB(diagnosis_buffer) || log_level > XLOG_WARN) {
 		return;
 	}
 
@@ -85,7 +94,9 @@ static inline void xdebug_diagnostic_log(int channel, int log_level, const char 
 		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "</td><td class=\"v\">");
 		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_channel_name[channel], 0);
 		xdebug_str_add(XG_LIB(diagnosis_buffer), message, 0);
-		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "</td><td class=\"d\"><a href=\"" XDEBUG_DOCS_BASE "errors#");
+		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "</td><td class=\"d\"><a href=\"");
+		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_docs_base(), 0);
+		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "errors#");
 		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_channel_msg_prefix[channel], 0);
 		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_level_msg_prefix[log_level], 0);
 		if (error_code) {
@@ -98,7 +109,7 @@ static inline void xdebug_diagnostic_log(int channel, int log_level, const char 
 	xdebug_str_addc(XG_LIB(diagnosis_buffer), '\n');
 }
 
-static inline void xdebug_php_log(int channel, int log_level, const char *message)
+static inline void xdebug_php_log(int channel, int log_level, const char *error_code, const char *message)
 {
 	xdebug_str formatted_message = XDEBUG_STR_INITIALIZER;
 
@@ -109,6 +120,17 @@ static inline void xdebug_php_log(int channel, int log_level, const char *messag
 	xdebug_str_add_const(&formatted_message, "Xdebug: ");
 	xdebug_str_add(&formatted_message, xdebug_channel_name[channel], 0);
 	xdebug_str_add(&formatted_message, message, 0);
+
+	if (error_code && log_level == XLOG_CRIT) {
+		xdebug_str_add_const(&formatted_message, " (See: ");
+		xdebug_str_add(&formatted_message, xdebug_docs_base(), 0);
+		xdebug_str_add_const(&formatted_message, "errors#");
+		xdebug_str_add(&formatted_message, xdebug_channel_msg_prefix[channel], 0);
+		xdebug_str_add(&formatted_message, xdebug_level_msg_prefix[log_level], 0);
+		xdebug_str_addc(&formatted_message, '-');
+		xdebug_str_add(&formatted_message, error_code, 0);
+		xdebug_str_addc(&formatted_message, ')');
+	}
 
 	php_log_err(formatted_message.d);
 
@@ -132,7 +154,7 @@ void XDEBUG_ATTRIBUTE_FORMAT(printf, 4, 5) xdebug_log_ex(int channel, int log_le
 
 	xdebug_diagnostic_log(channel, log_level, error_code, message);
 
-	xdebug_php_log(channel, log_level, message);
+	xdebug_php_log(channel, log_level, error_code, message);
 }
 
 static void log_filename_not_opened(int channel, const char *directory, const char *filename)
@@ -208,7 +230,8 @@ void print_feature_row(const char *name, int flag, const char *doc_name)
 		PUTS(name);
 		PUTS("</td><td class=\"v\">");
 		PUTS(XDEBUG_MODE_IS(flag) ? "✔ enabled" : "✘ disabled");
-		PUTS("</td><td class=\"d\"><a href=\"" XDEBUG_DOCS_BASE);
+		PUTS("</td><td class=\"d\"><a href=\"");
+		PUTS(xdebug_docs_base());
 		PUTS(doc_name);
 		PUTS("\">🖹</a></td></tr>\n");
 	} else {
@@ -362,7 +385,9 @@ static void xdebug_print_settings(void)
             php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
             PUTS("</td><td class=\"v\">");
             php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-			PUTS("</td><td class=\"d\"><a href=\"" XDEBUG_DOCS_BASE "all_settings#");
+			PUTS("</td><td class=\"d\"><a href=\"");
+			PUTS(xdebug_docs_base());
+			PUTS("all_settings#");
             PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
 			PUTS("\">🖹</a></td></tr>\n");
         } else {

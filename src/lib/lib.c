@@ -21,6 +21,7 @@
 #include "headers.h"
 
 #include "lib_private.h"
+#include "log.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
@@ -35,6 +36,9 @@ void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 	xg->opcode_handlers_set = xdebug_set_create(256);
 	memset(xg->original_opcode_handlers, 0, sizeof(xg->original_opcode_handlers));
 	memset(xg->opcode_multi_handlers, 0, sizeof(xg->opcode_multi_handlers));
+
+	XINI_LIB(log_level)  = 0;
+	xg->diagnosis_buffer = NULL;
 }
 
 
@@ -146,12 +150,10 @@ static int xdebug_lib_set_mode_item(char *mode, int len)
 		return 1;
 	}
 
-	php_error(E_WARNING, "Invalid mode '%s' set for 'xdebug.mode' configuration setting (See: https://xdebug.org/docs/all_settings#mode)", mode);
-
 	return 0;
 }
 
-int xdebug_lib_set_mode(char *mode)
+static int xdebug_lib_set_mode_from_setting(char *mode)
 {
 	char *mode_ptr = mode;
 	char *comma    = NULL;
@@ -171,6 +173,28 @@ int xdebug_lib_set_mode(char *mode)
 	errors += !xdebug_lib_set_mode_item(mode_ptr, strlen(mode_ptr));
 
 	return !errors;
+}
+
+int xdebug_lib_set_mode(char *mode)
+{
+	char *config = getenv("XDEBUG_MODE");
+	int   result = 0;
+
+	if (config && strlen(config)) {
+		result = xdebug_lib_set_mode_from_setting(config);
+
+		if (!result) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "ENVMODE", "Invalid mode '%s' set for 'XDEBUG_MODE' environment variable", config);
+		}
+	} else {
+		result = xdebug_lib_set_mode_from_setting(mode);
+
+		if (!result) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "MODE", "Invalid mode '%s' set for 'xdebug.mode' configuration setting", mode);
+		}
+	}
+
+	return result;
 }
 
 int xdebug_lib_set_start_with_request(char *value)
