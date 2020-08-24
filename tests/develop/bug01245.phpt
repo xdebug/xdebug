@@ -19,7 +19,7 @@ Notice: TEST in %sbug01245.php on line 2
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01245.php:0
-%w%f %w%d   2. trigger_error('TEST') %sbug01245.php:2
+%w%f %w%d   2. trigger_error($message = 'TEST') %sbug01245.php:2
 
 Dump $_GET
    $_GET['getFoo'] = 'bar'

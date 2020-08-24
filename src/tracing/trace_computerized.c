@@ -170,17 +170,18 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 
 	if (XINI_LIB(collect_params) > 0) {
 		unsigned int j = 0; /* Counter */
+		int sent_variables = fse->varc;
+
+		if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
+			sent_variables--;
+		}
 
 		/* Nr of arguments (11) */
-		xdebug_str_add_fmt(&str, "\t%d", fse->varc);
+		xdebug_str_add_fmt(&str, "\t%d", sent_variables);
 
 		/* Arguments (12-...) */
-		for (j = 0; j < fse->varc; j++) {
+		for (j = 0; j < sent_variables; j++) {
 			xdebug_str_addc(&str, '\t');
-
-			if (fse->var[j].is_variadic) {
-				xdebug_str_add_literal(&str, "...\t");
-			}
 
 			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
 				xdebug_str_addc(&str, '$');
