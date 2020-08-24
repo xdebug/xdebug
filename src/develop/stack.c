@@ -1144,33 +1144,3 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	}
 }
 /* }}} */
-
-static void xdebug_attach_used_var_names(void *return_value, xdebug_hash_element *he)
-{
-	xdebug_str *name = (xdebug_str*) he->ptr;
-
-	add_next_index_string(return_value, name->d);
-}
-
-/* {{{ proto array xdebug_get_declared_vars()
-   Returns an array representing the variables in the current scope */
-PHP_FUNCTION(xdebug_get_declared_vars)
-{
-	function_stack_entry *fse;
-	xdebug_hash *tmp_hash;
-
-	array_init(return_value);
-	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-
-	/* Go one back otherwise we would return the variables defined in this
-	 * internal function, which isn't possible, and also useles */
-	fse--;
-
-	/* Add declared vars */
-	if (fse->declared_vars) {
-		tmp_hash = xdebug_declared_var_hash_from_llist(fse->declared_vars);
-		xdebug_hash_apply(tmp_hash, (void *) return_value, xdebug_attach_used_var_names);
-		xdebug_hash_destroy(tmp_hash);
-	}
-}
-/* }}} */

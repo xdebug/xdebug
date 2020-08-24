@@ -48,7 +48,6 @@ typedef struct _xdebug_develop_globals_t {
 typedef struct _xdebug_develop_settings_t {
 
 	zend_long     max_stack_frames;
-	zend_bool     collect_vars;
 	zend_bool     show_ex_trace;
 	zend_bool     show_error_trace;
 	zend_bool     show_local_vars;
