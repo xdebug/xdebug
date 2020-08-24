@@ -7,7 +7,6 @@ html_errors=1
 xdebug.mode=develop
 xdebug.file_link_format=
 xdebug.filename_format=
-xdebug.collect_params=0
 --FILE--
 <?php
 html_entity_decode("&amp;", 0, "l<r");
@@ -20,5 +19,5 @@ html_entity_decode("&amp;", 0, "l<r");
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sbug01130.php' bgcolor='#eeeeec'>...%sbug01130.php<b>:</b>0</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.html-entity-decode.php' target='_new'>html_entity_decode</a>
-(  )</td><td title='%sbug01130.php' bgcolor='#eeeeec'>...%sbug01130.php<b>:</b>2</td></tr>
+( <span>$string = </span><span>&#39;&amp;amp;&#39;</span>, <span>$quote_style = </span><span>0</span>, <span>$encoding = </span><span>&#39;l&lt;r&#39;</span> )</td><td title='%sbug01130.php' bgcolor='#eeeeec'>...%sbug01130.php<b>:</b>2</td></tr>
 </table></font>

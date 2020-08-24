@@ -2,7 +2,6 @@
 Test for bug #1245: xdebug_dump_superglobals dumps *uninitialized* with PHP 7
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=4
 html_errors=0
 xdebug.dump.GET=*
 xdebug.dump.POST=*

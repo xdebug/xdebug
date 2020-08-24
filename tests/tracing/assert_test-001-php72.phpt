@@ -8,7 +8,6 @@ check_reqs('PHP < 8.0');
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
-xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
@@ -46,11 +45,11 @@ Assertion Failed:
         Line '21'
         Code '1==2'
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> assert_options(1, 1) %sassert_test-001-php72.php:5
-%w%f %w%d     -> assert_options(4, 0) %sassert_test-001-php72.php:6
-%w%f %w%d     -> assert_options(5, 1) %sassert_test-001-php72.php:7
-%w%f %w%d     -> assert_options(2, 'my_assert_handler') %sassert_test-001-php72.php:18
-%w%f %w%d     -> assert('1==2') %sassert_test-001-php72.php:21
+%w%f %w%d     -> assert_options($what = 1, $value = 1) %sassert_test-001-php72.php:5
+%w%f %w%d     -> assert_options($what = 4, $value = 0) %sassert_test-001-php72.php:6
+%w%f %w%d     -> assert_options($what = 5, $value = 1) %sassert_test-001-php72.php:7
+%w%f %w%d     -> assert_options($what = 2, $value = 'my_assert_handler') %sassert_test-001-php72.php:18
+%w%f %w%d     -> assert($assertion = '1==2') %sassert_test-001-php72.php:21
 %w%f %w%d       -> %r({internal eval}\(\))|(assert\('1==2'\))%r %sassert_test-001-php72.php:21
-%w%f %w%d       -> my_assert_handler('%sassert_test-001-php72.php', 21, '1==2') %sassert_test-001-php72.php:21
-%w%f %w%d     -> file_get_contents('%s') %sassert_test-001-php72.php:23
+%w%f %w%d       -> my_assert_handler($file = '%sassert_test-001-php72.php', $line = 21, $code = '1==2') %sassert_test-001-php72.php:21
+%w%f %w%d     -> file_get_contents($filename = '%s') %sassert_test-001-php72.php:23

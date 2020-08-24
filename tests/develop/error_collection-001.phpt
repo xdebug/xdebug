@@ -4,7 +4,6 @@ Test for collection errors (1)
 display_errors=1
 xdebug.mode=develop
 html_errors=0
-xdebug.collect_params=4
 --FILE--
 <?php
 xdebug_start_error_collection();

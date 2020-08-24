@@ -7,6 +7,7 @@ check_reqs('64bit');
 ?>
 --INI--
 xdebug.mode=develop
+xdebug.file_link_format=
 --FILE--
 <?php
 ini_set( 'html_errors', 0 );

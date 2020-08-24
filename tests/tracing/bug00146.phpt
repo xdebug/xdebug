@@ -3,7 +3,6 @@ Test for bug #146: Array key names with quotes in traces are not escaped
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
-xdebug.collect_params=3
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
@@ -26,7 +25,7 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> foo(array ('te"st\'s' => 42)) %sbug00146.php:10
+%w%f %w%d     -> foo($a = array ('te"st\'s' => 42)) %sbug00146.php:10
 %w%f %w%d      >=> array ('te"st\'s' => 42)
 %w%f %w%d     -> xdebug_stop_trace() %sbug00146.php:12
 %w%f %w%d

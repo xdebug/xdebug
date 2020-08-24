@@ -11,7 +11,6 @@ xdebug.start_with_request=yes
 xdebug.trace_options=0
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
-xdebug.collect_params=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
 xdebug.dump_globals=0
@@ -32,7 +31,7 @@ InvalidArgumentException: Passed variable is not an array or object%sin %sbug001
 
 Call Stack:
 %w%f%w%d   1. {main}() %sbug00173.php:0
-%w%f%w%d   2. ArrayIterator->__construct(null) %sbug00173.php:3
+%w%f%w%d   2. ArrayIterator->__construct($array = NULL) %sbug00173.php:3
 
 
 Variables in local scope (#1):

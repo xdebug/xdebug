@@ -11,7 +11,6 @@ xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.collect_vars=0
-xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
@@ -41,7 +40,7 @@ unlink( $tf );
 class Foo#1 (0) {
 }
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> var_dump(...variadic(0 => class Foo {  })) %sbug01140-php74.php:14
+%w%f %w%d     -> var_dump(...$vars = variadic(0 => class Foo {  })) %sbug01140-php74.php:14
 %w%f %w%d     -> xdebug_stop_trace() %sbug01140-php74.php:16
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

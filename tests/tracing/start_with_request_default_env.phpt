@@ -3,7 +3,6 @@ Starting Tracing: default, environment
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=default
-xdebug.collect_params=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 --ENV--

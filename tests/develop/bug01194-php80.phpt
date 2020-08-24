@@ -9,7 +9,6 @@ check_reqs('PHP >= 8.0');
 assert.exception=0
 html_errors=1
 xdebug.mode=develop
-xdebug.collect_params=3
 xdebug.file_link_format=
 xdebug.filename_format=
 --FILE--
@@ -24,5 +23,5 @@ assert(0, "TEST&TEST");
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sbug01194-php80.php' bgcolor='#eeeeec'>...%sbug01194-php80.php<b>:</b>0</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.assert.html' target='_new'>assert</a>
-( <span>%r(0|FALSE)%r</span>, <span>&#39;TEST&amp;TEST&#39;</span> )</td><td title='%sbug01194-php80.php' bgcolor='#eeeeec'>...%sbug01194-php80.php<b>:</b>2</td></tr>
+( <span>$assertion = </span><span>%r(0|FALSE)%r</span>, <span>$description = </span><span>&#39;TEST&amp;TEST&#39;</span> )</td><td title='%sbug01194-php80.php' bgcolor='#eeeeec'>...%sbug01194-php80.php<b>:</b>2</td></tr>
 </table></font>

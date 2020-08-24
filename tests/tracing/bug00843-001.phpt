@@ -9,7 +9,6 @@ if (false == setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "ger
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
-xdebug.collect_params=3
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0

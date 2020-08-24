@@ -4,7 +4,6 @@ Test for xdebug.halt_level [1]
 error_level=-1
 xdebug.halt_level=0
 xdebug.mode=develop
-xdebug.collect_params=0
 --FILE--
 <?php
 ini_set('xdebug.halt_level', 0);
@@ -21,7 +20,7 @@ Warning: %s in %sbug01004-001.php on line 3
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01004-001.php:0
-%w%f %w%d   2. hex2bin() %sbug01004-001.php:3
+%w%f %w%d   2. hex2bin($data = '5') %sbug01004-001.php:3
 
 Hi!
 
@@ -29,4 +28,4 @@ Warning: %s in %sbug01004-001.php on line 7
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01004-001.php:0
-%w%f %w%d   2. hex2bin() %sbug01004-001.php:7
+%w%f %w%d   2. hex2bin($data = '5') %sbug01004-001.php:7

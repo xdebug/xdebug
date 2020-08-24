@@ -223,8 +223,6 @@ typedef struct _xdebug_library_settings_t {
 	char         *file_link_format;
 	char         *filename_format;
 
-	zend_long     collect_params;
-
 	/* variable dumping limitation settings */
 	zend_long     display_max_children;
 	zend_long     display_max_data;

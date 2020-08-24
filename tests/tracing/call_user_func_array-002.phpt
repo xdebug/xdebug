@@ -3,7 +3,6 @@ Test call_user_func_array() with multiple files
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
-xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
@@ -28,14 +27,14 @@ unlink($tf);
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> include(%scall_user_func_array-002.inc) %scall_user_func_array-002.php:4
-%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-002.php:7}('debug', array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) %scall_user_func_array-002.php:7
-%w%f %w%d       -> debug('foo', array (0 => 1, 1 => 2)) %scall_user_func_array-002.php:7
-%w%f %w%d         -> is_array(array (0 => 1, 1 => 2)) %scall_user_func_array-002.inc:4
-%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-002.php:10}('debug', array (0 => 'bar', 1 => 'bar')) %scall_user_func_array-002.php:10
-%w%f %w%d       -> debug('bar', 'bar') %scall_user_func_array-002.php:10
-%w%f %w%d         -> is_array('bar') %scall_user_func_array-002.inc:4
-%w%f %w%d         -> is_object('bar') %scall_user_func_array-002.inc:4
-%w%f %w%d         -> is_resource('bar') %scall_user_func_array-002.inc:4
+%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-002.php:7}($function%S = 'debug', $%s = array (0 => 'foo', 1 => array (0 => 1, 1 => 2))) %scall_user_func_array-002.php:7
+%w%f %w%d       -> debug($var = 'foo', $val = array (0 => 1, 1 => 2)) %scall_user_func_array-002.php:7
+%w%f %w%d         -> is_array($%s = array (0 => 1, 1 => 2)) %scall_user_func_array-002.inc:4
+%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-002.php:10}($function%S = 'debug', $%s = array (0 => 'bar', 1 => 'bar')) %scall_user_func_array-002.php:10
+%w%f %w%d       -> debug($var = 'bar', $val = 'bar') %scall_user_func_array-002.php:10
+%w%f %w%d         -> is_array($%s = 'bar') %scall_user_func_array-002.inc:4
+%w%f %w%d         -> is_object($%s = 'bar') %scall_user_func_array-002.inc:4
+%w%f %w%d         -> is_resource($%s = 'bar') %scall_user_func_array-002.inc:4
 %w%f %w%d     -> xdebug_stop_trace() %scall_user_func_array-002.php:12
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

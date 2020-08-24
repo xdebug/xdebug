@@ -2,6 +2,7 @@
 Test for bug #280: var_dump don't display key of array as expected
 --INI--
 xdebug.mode=develop
+xdebug.file_link_format=
 --FILE--
 <?php
 $var = "te\0st";

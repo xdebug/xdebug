@@ -5,7 +5,6 @@ xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=0
-xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
@@ -42,10 +41,10 @@ unlink($tf);
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Test->__construct() %strace_with_magic_methods.php:21
-%w%f %w%d     -> Test->__set(string(4), string(4)) %strace_with_magic_methods.php:22
-%w%f %w%d     -> Test->__get(string(4)) %strace_with_magic_methods.php:23
-%w%f %w%d     -> Test->__isset(string(4)) %strace_with_magic_methods.php:24
-%w%f %w%d     -> Test->__unset(string(4)) %strace_with_magic_methods.php:25
+%w%f %w%d     -> Test->__set($offset = 'test', $value = 'test') %strace_with_magic_methods.php:22
+%w%f %w%d     -> Test->__get($offset = 'test') %strace_with_magic_methods.php:23
+%w%f %w%d     -> Test->__isset($offset = 'test') %strace_with_magic_methods.php:24
+%w%f %w%d     -> Test->__unset($offset = 'test') %strace_with_magic_methods.php:25
 %w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_methods.php:27
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

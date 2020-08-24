@@ -4,7 +4,6 @@ Filtered tracing: namespace exclude [3]
 xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.collect_return=1
-xdebug.collect_params=4
 xdebug.collect_assignments=0
 xdebug.trace_format=0
 --FILE--

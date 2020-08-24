@@ -6,6 +6,7 @@ xdebug.var_display_max_children=-1
 xdebug.var_display_max_data=-1
 xdebug.var_display_max_depth=-1
 html_errors=1
+xdebug.file_link_format=
 --FILE--
 <?php
 $array = array( 1, true, "string" );

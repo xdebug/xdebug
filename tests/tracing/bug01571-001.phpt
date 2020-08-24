@@ -3,7 +3,6 @@ Test for bug #1571: Stack traces don't show file/line for closures in namespaces
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
-xdebug.collect_params=4
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0

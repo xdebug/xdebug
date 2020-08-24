@@ -2,7 +2,6 @@
 Test for bug #57: Crash with overloading functions
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=1
 xdebug.collect_assignments=0
 error_reporting=2047
 --FILE--

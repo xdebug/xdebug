@@ -419,10 +419,6 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 		}
 	}
 
-	if (!XINI_LIB(collect_params)) {
-		return;
-	}
-
 	/* Collect Arguments */
 	for (i = 0; i < arguments_sent; i++) {
 		/* The index in ZEND_CALL_ARG is 1-based */
@@ -503,10 +499,6 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 			fse->var[i].is_variadic = 1;
 			variadic_at_pos = i;
 		}
-	}
-
-	if (!XINI_LIB(collect_params)) {
-		return;
 	}
 
 	/* Collect Arguments */
@@ -618,11 +610,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		tmp->lineno = find_line_number_for_current_execute_point(edata);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
 
-		if (
-			(XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP))
-			&&
-			XINI_LIB(collect_params)
-		) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 			if (ZEND_USER_CODE(zdata->func->type)) {
 				collect_params(tmp, zdata, op_array);
 			} else {

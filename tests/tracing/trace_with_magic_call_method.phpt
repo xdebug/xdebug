@@ -5,7 +5,6 @@ xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=0
-xdebug.collect_params=1
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
@@ -32,10 +31,10 @@ unlink($tf);
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Test->__construct() %strace_with_magic_call_method.php:14
-%w%f %w%d     -> Test->testFunc(string(5), string(5)) %strace_with_magic_call_method.php:15
-%w%f %w%d       -> Test->__call(string(8), array(2)) %strace_with_magic_call_method.php:15
-%w%f %w%d         -> Test->testFunc(array(2)) %strace_with_magic_call_method.php:7
-%w%f %w%d           -> array_sum(array(2)) %strace_with_magic_call_method.php:10
+%w%f %w%d     -> Test->testFunc('test1', 'test2') %strace_with_magic_call_method.php:15
+%w%f %w%d       -> Test->__call($func = 'testFunc', $args = array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method.php:15
+%w%f %w%d         -> Test->testFunc($args = array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method.php:7
+%w%f %w%d           -> array_sum($ar%s = array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method.php:10
 %w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_call_method.php:17
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -9,7 +9,6 @@ check_reqs('PHP < 7.4');
 xdebug.mode=develop
 xdebug.trace_options=0
 xdebug.collect_return=1
-xdebug.collect_params=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
 xdebug.dump_globals=0

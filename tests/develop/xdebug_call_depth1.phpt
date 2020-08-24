@@ -4,7 +4,6 @@ Test for xdebug_call_*(1)
 xdebug.mode=develop
 xdebug.trace_options=0
 xdebug.collect_return=0
-xdebug.collect_params=0
 xdebug.auto_profile=0
 xdebug.dump_globals=0
 xdebug.trace_format=0

@@ -24,7 +24,6 @@
 
 #include "lib/lib_private.h"
 #include "lib/var_export_line.h"
-#include "lib/var_export_serialized.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
@@ -95,24 +94,12 @@ char *xdebug_trace_textual_get_filename(void *ctxt)
 	return context->trace_filename;
 }
 
-static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
+static void add_single_value(xdebug_str *str, zval *zv)
 {
 	xdebug_str *tmp_value = NULL;
 
-	switch (collection_level) {
-		case 1: /* synopsis */
-		case 2:
-			tmp_value = xdebug_get_zval_synopsis_line(zv, 0, NULL);
-			break;
-		case 3: /* full */
-		case 4: /* full (with var) */
-		default:
-			tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
-			break;
-		case 5: /* serialized */
-			tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
-			break;
-	}
+	tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
+
 	if (tmp_value) {
 		xdebug_str_add_str(str, tmp_value);
 		xdebug_str_free(tmp_value);
@@ -121,18 +108,67 @@ static void add_single_value(xdebug_str *str, zval *zv, int collection_level)
 	}
 }
 
-void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
+static void add_arguments(xdebug_str *line_entry, function_stack_entry *fse)
 {
-	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
-	int c = 0; /* Comma flag */
 	unsigned int j = 0; /* Counter */
-	char *tmp_name;
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	int c = 0; /* Comma flag */
+	int variadic_opened = 0;
+	int variadic_count  = 0;
 	int sent_variables = fse->varc;
 
 	if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
 		sent_variables--;
 	}
+
+	for (j = 0; j < sent_variables; j++) {
+		if (c) {
+			xdebug_str_add_literal(line_entry, ", ");
+		} else {
+			c = 1;
+		}
+
+		if (fse->var[j].is_variadic) {
+			xdebug_str_add_literal(line_entry, "...");
+			variadic_opened = 1;
+			c = 0;
+		}
+
+		if (fse->var[j].name) {
+			xdebug_str_addc(line_entry, '$');
+			xdebug_str_add_zstr(line_entry, fse->var[j].name);
+			xdebug_str_add_literal(line_entry, " = ");
+		}
+
+		if (fse->var[j].is_variadic) {
+			xdebug_str_add_literal(line_entry, "variadic(");
+			if (Z_ISUNDEF(fse->var[j].data)) {
+				continue;
+			}
+			c = 1;
+		}
+
+		if (variadic_opened) {
+			xdebug_str_add_fmt(line_entry, "%d => ", variadic_count++);
+		}
+
+		if (!Z_ISUNDEF(fse->var[j].data)) {
+			add_single_value(line_entry, &fse->var[j].data);
+		} else {
+			xdebug_str_add_literal(line_entry, "???");
+		}
+	}
+
+	if (variadic_opened) {
+		xdebug_str_addc(line_entry, ')');
+	}
+}
+
+void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
+{
+	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
+	unsigned int j = 0; /* Counter */
+	char *tmp_name;
+	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
@@ -145,55 +181,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	xdfree(tmp_name);
 
-	/* Printing vars */
-	if (XINI_LIB(collect_params) > 0) {
-		int variadic_opened = 0;
-		int variadic_count  = 0;
-
-		for (j = 0; j < sent_variables; j++) {
-			if (c) {
-				xdebug_str_add_literal(&str, ", ");
-			} else {
-				c = 1;
-			}
-
-			if (
-				(fse->var[j].is_variadic)
-			) {
-				xdebug_str_add_literal(&str, "...");
-				variadic_opened = 1;
-				c = 0;
-			}
-
-			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
-				xdebug_str_addc(&str, '$');
-				xdebug_str_add_zstr(&str, fse->var[j].name);
-				xdebug_str_add_literal(&str, " = ");
-			}
-
-			if (fse->var[j].is_variadic) {
-				xdebug_str_add_literal(&str, "variadic(");
-				if (Z_ISUNDEF(fse->var[j].data)) {
-					continue;
-				}
-				c = 1;
-			}
-
-			if (variadic_opened && XINI_LIB(collect_params) != 5) {
-				xdebug_str_add_fmt(&str, "%d => ", variadic_count++);
-			}
-
-			if (!Z_ISUNDEF(fse->var[j].data)) {
-				add_single_value(&str, &fse->var[j].data, XINI_LIB(collect_params));
-			} else {
-				xdebug_str_add_literal(&str, "???");
-			}
-		}
-
-		if (variadic_opened) {
-			xdebug_str_addc(&str, ')');
-		}
-	}
+	add_arguments(&str, fse);
 
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {

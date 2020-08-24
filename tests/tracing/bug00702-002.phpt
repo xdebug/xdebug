@@ -6,7 +6,6 @@ xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.collect_vars=0
-xdebug.collect_params=0
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.force_error_reporting=0
