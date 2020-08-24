@@ -35,12 +35,9 @@ array(4) {
   'line' =>
   int(8)
   'params' =>
-  array(2) {
+  array(1) {
     'a' =>
     string(2) "42"
-    'b' =>
-    array(0) {
-    }
   }
 }
 %sxdebug_get_function_stack_variadic.php:5:

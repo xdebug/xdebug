@@ -120,13 +120,18 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 		char *tmp_name;
 		xdebug_str log_buffer = XDEBUG_STR_INITIALIZER;
 		int variadic_opened = 0;
+		int sent_variables = fse->varc;
+
+		if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
+			sent_variables--;
+		}
 
 		tmp_name = xdebug_show_fname(fse->function, 0, 0);
 		xdebug_str_add_fmt(&log_buffer, "PHP %3d. %s(", fse->level, tmp_name);
 		xdfree(tmp_name);
 
 		/* Printing vars */
-		for (j = 0; j < fse->varc; j++) {
+		for (j = 0; j < sent_variables; j++) {
 			xdebug_str *tmp_value;
 
 			if (c) {
@@ -436,6 +441,11 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 		unsigned int j = 0; /* Counter */
 		char *tmp_name;
 		int variadic_opened = 0;
+		int sent_variables = fse->varc;
+
+		if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
+			sent_variables--;
+		}
 
 		if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_TRACING, fse)) {
 			continue;
@@ -449,7 +459,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 		xdfree(tmp_name);
 
 		/* Printing vars */
-		for (j = 0; j < fse->varc; j++) {
+		for (j = 0; j < sent_variables; j++) {
 			if (c) {
 				xdebug_str_add_literal(str, ", ");
 			} else {
@@ -1056,10 +1066,16 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
 
 	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++) {
+		int sent_variables = fse->varc;
+
 		if (fse->function.function) {
 			if (strcmp(fse->function.function, "xdebug_get_function_stack") == 0) {
 				return;
 			}
+		}
+
+		if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
+			sent_variables--;
 		}
 
 		/* Initialize frame array */
@@ -1082,7 +1098,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		array_init(params);
 		add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
 
-		for (j = 0; j < fse->varc; j++) {
+		for (j = 0; j < sent_variables; j++) {
 			int         variadic_opened = 0;
 			xdebug_str *argument = NULL;
 

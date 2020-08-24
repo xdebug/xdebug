@@ -31,11 +31,11 @@ ello!
 ello!
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Foobar::foo($s = 'hi') %strace-filter-ns-exclude-001.php:10
-%w%f %w%d       -> strstr('Hello!\n', 'e') %sfilter%efoobar%efoobar.php:6
+%w%f %w%d       -> strstr($haystack = 'Hello!\n', $needle = 'e') %sfilter%efoobar%efoobar.php:6
 %w%f %w%d        >=> 'ello!\n'
-%w%f %w%d       -> strstr('Hello!\n', 'e') %sfilter%exdebug%exdebug.php:6
+%w%f %w%d       -> strstr($haystack = 'Hello!\n', $needle = 'e') %sfilter%exdebug%exdebug.php:6
 %w%f %w%d        >=> 'ello!\n'
-%w%f %w%d       -> strstr('Hello!\n', 'e') %sfilter%exdebug%exdebug.php:6
+%w%f %w%d       -> strstr($haystack = 'Hello!\n', $needle = 'e') %sfilter%exdebug%exdebug.php:6
 %w%f %w%d        >=> 'ello!\n'
 %w%f %w%d     -> xdebug_stop_trace() %strace-filter-ns-exclude-001.php:14
 %w%f %w%d

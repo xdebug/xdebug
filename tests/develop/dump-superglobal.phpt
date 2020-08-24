@@ -24,7 +24,7 @@ Notice: foo in %sdump-superglobal.php on line 2
 
 Call Stack:
 %w%f %w%d   1. {main}() %sdump-superglobal.php:0
-%w%f %w%d   2. trigger_error('foo') %sdump-superglobal.php:2
+%w%f %w%d   2. trigger_error($message = 'foo') %sdump-superglobal.php:2
 
 Dump $_SERVER
    $_SERVER['argc'] = 1
@@ -34,7 +34,7 @@ Notice: foo in %sdump-superglobal.php on line 6
 
 Call Stack:
 %w%f %w%d   1. {main}() %sdump-superglobal.php:0
-%w%f %w%d   2. trigger_error('foo') %sdump-superglobal.php:6
+%w%f %w%d   2. trigger_error($message = 'foo') %sdump-superglobal.php:6
 
 -------------
 
@@ -42,7 +42,7 @@ Notice: foo in %sdump-superglobal.php on line 10
 
 Call Stack:
 %w%f %w%d   1. {main}() %sdump-superglobal.php:0
-%w%f %w%d   2. trigger_error('foo') %sdump-superglobal.php:10
+%w%f %w%d   2. trigger_error($message = 'foo') %sdump-superglobal.php:10
 
 Dump $_SERVER
    $_SERVER['argc'] = 1

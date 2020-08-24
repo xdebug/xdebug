@@ -353,7 +353,7 @@ normal_after_all:
 #define NO_VARIADIC    INT_MAX
 #define DEBUG          0
 
-static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, zend_op_array *op_array)
+static void collect_params_internal(function_stack_entry *fse, zend_execute_data *zdata, zend_op_array *op_array)
 {
 	int i;
 	int is_variadic       = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
@@ -365,21 +365,18 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 
 	arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
 
-	/* If this is a user defined function, the op_array contains the number of
-	 * (named) arguments. */
-	if (ZEND_USER_CODE(zdata->func->type)) {
-		names_expected = op_array->num_args;
-
+	names_expected = zdata->func->internal_function.num_args;
+	if (names_expected > arguments_sent) {
+		names_expected = arguments_sent;
+	}
 #if DEBUG
-		fprintf(stderr, "\nF: %s\n - CALL_NUM_ARGS: %d, op_array->num_args: %d, is_variadic: %d, trampoline: %d\n", fse->function.function, ZEND_CALL_NUM_ARGS(zdata), op_array->num_args, is_variadic, is_trampoline);
+	fprintf(stderr, "\nF: %s\n - CALL_NUM_ARGS: %d, op_array->num_args: %d, is_variadic: %d, trampoline: %d\n", fse->function.function, ZEND_CALL_NUM_ARGS(zdata), op_array->num_args, is_variadic, is_trampoline);
 #endif
 
-		/* If this function is variadic, we have an extra name field in arg_info, and also an extra
-		 * argument sent to the function. */
-		if (is_variadic && !is_trampoline) {
-			names_expected++;
-			arguments_sent++;
-		}
+	/* If this function is variadic, we have an extra name field in arg_info, and also an extra
+	 * argument sent to the function. */
+	if (is_variadic && !is_trampoline) {
+		names_expected++;
 	}
 
 	/* Pick the highest of "expected arguments" and "arguments given" (also
@@ -405,11 +402,13 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 	}
 
 	/* Collect Names */
-	if (fse->user_defined == XDEBUG_USER_DEFINED) {
-		for (i = 0; i < names_expected; i++) {
-			if (op_array->arg_info[i].name) {
-				fse->var[i].name = zend_string_copy(op_array->arg_info[i].name);
-			}
+	for (i = 0; i < names_expected; i++) {
+		if (op_array->arg_info[i].name) {
+			fse->var[i].name = zend_string_init(
+				zdata->func->internal_function.arg_info[i].name,
+				strlen(zdata->func->internal_function.arg_info[i].name),
+				0
+			);
 
 			/* If an argument is a variadic, then we mark that on this 'name',
 			 * and also remember which position the variadic started */
@@ -425,12 +424,98 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 	}
 
 	/* Collect Arguments */
+	for (i = 0; i < arguments_sent; i++) {
+		/* The index in ZEND_CALL_ARG is 1-based */
+#if DEBUG
+		fprintf(stderr, "Copying argument %d: ", i);
+		fprintf(stderr, "ARG ");
+#endif
+		ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_ARG(zdata, i + 1));
+#if DEBUG
+		fprintf(stderr, "OK\n");
+#endif
+	}
+
+#if DEBUG
+	for (i = 0; i < fse->varc; i++) {
+		fprintf(stderr, "%2d %-20s %c %s\n", i, fse->var[i].name ? ZSTR_VAL(fse->var[i].name) : "---", fse->var[i].is_variadic ? 'V' : ' ', xdebug_get_zval_value_line(&fse->var[i].data, 0, NULL)->d);
+	}
+#endif
+}
+
+static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, zend_op_array *op_array)
+{
+	int i;
+	int is_variadic       = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
+	int is_trampoline     = !!(zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	int variadic_at_pos   = NO_VARIADIC;
+	int names_expected    = 0;
+	int arguments_sent    = 0;
+	int arguments_storage = 0;
+
+	arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
+
+	/* The op_array contains the number of * (named) arguments. */
+	names_expected = op_array->num_args;
+
+#if DEBUG
+		fprintf(stderr, "\nF: %s\n - CALL_NUM_ARGS: %d, op_array->num_args: %d, is_variadic: %d, trampoline: %d\n", fse->function.function, ZEND_CALL_NUM_ARGS(zdata), op_array->num_args, is_variadic, is_trampoline);
+#endif
+
+	/* If this function is variadic, we have an extra name field in arg_info, and also an extra
+	 * argument sent to the function. */
+	if (is_variadic && !is_trampoline) {
+		names_expected++;
+		arguments_sent++;
+	}
+
+	/* Pick the highest of "expected arguments" and "arguments given" (also
+	 * taking into account the extra one for variadics */
+	if (names_expected > arguments_sent) {
+		arguments_storage = names_expected;
+	} else {
+		arguments_storage = arguments_sent;
+	}
+
+	fse->varc = arguments_storage;
+	fse->var = xdmalloc(fse->varc * sizeof(xdebug_var_name));
+
+#if DEBUG
+	fprintf(stderr, " - names_expected: %d, arguments_sent: %d, arguments_storage: %d, fse->varc: %d\n", names_expected, arguments_sent, arguments_storage, fse->varc);
+#endif
+
+	/* Initialise everything in storage */
+	for (i = 0; i < fse->varc; i++) {
+		fse->var[i].name = NULL;
+		ZVAL_UNDEF(&fse->var[i].data);
+		fse->var[i].is_variadic = 0;
+	}
+
+	/* Collect Names */
+	for (i = 0; i < names_expected; i++) {
+		if (op_array->arg_info[i].name) {
+			fse->var[i].name = zend_string_copy(op_array->arg_info[i].name);
+		}
+
+		/* If an argument is a variadic, then we mark that on this 'name',
+		 * and also remember which position the variadic started */
+		if (ZEND_ARG_IS_VARIADIC(&op_array->arg_info[i]) && variadic_at_pos == NO_VARIADIC) {
+			fse->var[i].is_variadic = 1;
+			variadic_at_pos = i;
+		}
+	}
+
+	if (!XINI_LIB(collect_params)) {
+		return;
+	}
+
+	/* Collect Arguments */
 	for (i = 0; i < fse->varc; i++) {
 		/* The index in ZEND_CALL_ARG is 1-based */
 #if DEBUG
 		fprintf(stderr, "Copying argument %d: ", i);
 #endif
-		if (i < names_expected || (fse->user_defined != XDEBUG_USER_DEFINED) || is_trampoline) {
+		if (i < names_expected || is_trampoline) {
 #if DEBUG
 			fprintf(stderr, "ARG ");
 #endif
@@ -538,7 +623,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 			&&
 			XINI_LIB(collect_params)
 		) {
-			collect_params(tmp, zdata, op_array);
+			if (ZEND_USER_CODE(zdata->func->type)) {
+				collect_params(tmp, zdata, op_array);
+			} else {
+				collect_params_internal(tmp, zdata, op_array);
+			}
 		}
 	}
 

@@ -128,6 +128,11 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 	unsigned int j = 0; /* Counter */
 	char *tmp_name;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
+	int sent_variables = fse->varc;
+
+	if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
+		sent_variables--;
+	}
 
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
@@ -145,7 +150,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 		int variadic_opened = 0;
 		int variadic_count  = 0;
 
-		for (j = 0; j < fse->varc; j++) {
+		for (j = 0; j < sent_variables; j++) {
 			if (c) {
 				xdebug_str_add_literal(&str, ", ");
 			} else {
@@ -168,7 +173,10 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 			if (fse->var[j].is_variadic) {
 				xdebug_str_add_literal(&str, "variadic(");
-				continue;
+				if (Z_ISUNDEF(fse->var[j].data)) {
+					continue;
+				}
+				c = 1;
 			}
 
 			if (variadic_opened && XINI_LIB(collect_params) != 5) {
