@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7e8ac943a34a9f1dcb37cce52c380d9096fd8106 */
+ * Stub hash: 5211f4025131d20d9c5ba907c7dace5b70f82311 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_break, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -31,8 +31,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_get_collected_errors, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, emptyList, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
-
-#define arginfo_xdebug_get_declared_vars arginfo_xdebug_get_code_coverage
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_get_function_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -125,7 +123,6 @@ ZEND_FUNCTION(xdebug_debug_zval_stdout);
 ZEND_FUNCTION(xdebug_dump_superglobals);
 ZEND_FUNCTION(xdebug_get_code_coverage);
 ZEND_FUNCTION(xdebug_get_collected_errors);
-ZEND_FUNCTION(xdebug_get_declared_vars);
 ZEND_FUNCTION(xdebug_get_function_count);
 ZEND_FUNCTION(xdebug_get_function_stack);
 ZEND_FUNCTION(xdebug_get_gc_run_count);
@@ -168,7 +165,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xdebug_dump_superglobals, arginfo_xdebug_dump_superglobals)
 	ZEND_FE(xdebug_get_code_coverage, arginfo_xdebug_get_code_coverage)
 	ZEND_FE(xdebug_get_collected_errors, arginfo_xdebug_get_collected_errors)
-	ZEND_FE(xdebug_get_declared_vars, arginfo_xdebug_get_declared_vars)
 	ZEND_FE(xdebug_get_function_count, arginfo_xdebug_get_function_count)
 	ZEND_FE(xdebug_get_function_stack, arginfo_xdebug_get_function_stack)
 	ZEND_FE(xdebug_get_gc_run_count, arginfo_xdebug_get_gc_run_count)

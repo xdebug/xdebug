@@ -720,7 +720,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		fse->symbol_table = EG(current_execute_data)->symbol_table;
 	}
 
-	if (XG_BASE(stack) && (XINI_DEV(collect_vars) || XINI_DEV(show_local_vars) || xdebug_is_debug_connection_active())) {
+	if (XG_BASE(stack) && (XINI_DEV(show_local_vars) || xdebug_is_debug_connection_active())) {
 		/* Because include/require is treated as a stack level, we have to add used
 		 * variables in include/required files to all the stack levels above, until
 		 * we hit a function or the top level stack.  This is so that the variables

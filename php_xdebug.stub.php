@@ -66,11 +66,6 @@ function xdebug_get_collected_errors(bool $emptyList = false): array {}
 
 /* -----------------------------------------------------------------------*/
 
-/* Returns declared variables */
-function xdebug_get_declared_vars(): array {}
-
-/* -----------------------------------------------------------------------*/
-
 /* Returns the number of functions that have been called */
 function xdebug_get_function_count(): int {}
 
