@@ -3,7 +3,6 @@ xdebug_start_trace() without filename
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
-xdebug.collect_params=1
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0

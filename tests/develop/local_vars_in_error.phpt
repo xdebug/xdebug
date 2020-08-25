@@ -2,7 +2,6 @@
 Test with showing local variables on errors
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=1
 xdebug.auto_profile=0
 xdebug.dump_globals=0
 xdebug.show_local_vars=1
@@ -24,7 +23,7 @@ Error: Call to undefined function do_f() in %slocal_vars_in_error.php on line 5
 
 Call Stack:
 %w%f %w%d   1. {main}() %slocal_vars_in_error.php:0
-%w%f %w%d   2. a(long, long) %slocal_vars_in_error.php:8
+%w%f %w%d   2. a($a = 5, $b = 6) %slocal_vars_in_error.php:8
 
 
 Variables in local scope (#2):

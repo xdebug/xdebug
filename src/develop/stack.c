@@ -35,7 +35,6 @@
 #include "lib/str.h"
 #include "lib/var_export_html.h"
 #include "lib/var_export_line.h"
-#include "lib/var_export_serialized.h"
 #include "profiler/profiler.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
@@ -140,9 +139,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 				c = 1;
 			}
 
-			if (
-				(fse->var[j].is_variadic && XINI_LIB(collect_params) != 5)
-			) {
+			if (fse->var[j].is_variadic) {
 				xdebug_str_add_literal(&log_buffer, "...");
 				variadic_opened = 1;
 			}
@@ -248,76 +245,25 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 	efree(escaped);
 }
 
-static void add_single_value(xdebug_str *str, zval *zv, int html, int collecton_level)
+static void add_single_value(xdebug_str *str, zval *zv, int html)
 {
-	xdebug_str *tmp_value = NULL, *tmp_html_synop_value = NULL;
+	xdebug_str *tmp_value = NULL;
 	char       *tmp_html_value = NULL;
 	size_t      newlen;
 
 	if (html) {
-		switch (collecton_level) {
-			case 1: /* synopsis */
-				tmp_html_synop_value = xdebug_get_zval_synopsis_html("", zv, 0, NULL);
+		tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
+		tmp_html_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
 
-				xdebug_str_add_literal(str, "<span>");
-				xdebug_str_add_str(str, tmp_html_synop_value);
-				xdebug_str_add_literal(str, "</span>");
+		xdebug_str_add_literal(str, "<span>");
+		xdebug_str_add(str, tmp_html_value, 0);
+		xdebug_str_add_literal(str, "</span>");
 
-				xdebug_str_free(tmp_html_synop_value);
-				break;
-			case 2: /* synopsis + full in tooltip */
-				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
-				tmp_html_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
-				tmp_html_synop_value = xdebug_get_zval_synopsis_html("", zv, 0, NULL);
-
-				xdebug_str_add_literal(str, "<span title='");
-				xdebug_str_add(str, tmp_html_value, 0);
-				xdebug_str_add_literal(str, "'>");
-				xdebug_str_add_str(str, tmp_html_synop_value);
-				xdebug_str_add_literal(str, "</span>");
-
-				xdebug_str_free(tmp_value);
-				efree(tmp_html_value);
-				xdebug_str_free(tmp_html_synop_value);
-				break;
-			case 3: /* full */
-			case 4: /* full (with var_name) */
-			default:
-				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
-				tmp_html_value = xdebug_xmlize(tmp_value->d, tmp_value->l, &newlen);
-
-				xdebug_str_add_literal(str, "<span>");
-				xdebug_str_add(str, tmp_html_value, 0);
-				xdebug_str_add_literal(str, "</span>");
-
-				xdebug_str_free(tmp_value);
-				efree(tmp_html_value);
-				break;
-			case 5: { /* serialized */
-				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
-
-				xdebug_str_add_literal(str, "<span>");
-				xdebug_str_add_str(str, tmp_value);
-				xdebug_str_add_literal(str, "</span>");
-
-				xdebug_str_free(tmp_value);
-			} break;
-		}
+		xdebug_str_free(tmp_value);
+		efree(tmp_html_value);
 	} else {
-		switch (collecton_level) {
-			case 1: /* synopsis */
-			case 2:
-				tmp_value = xdebug_get_zval_synopsis_line(zv, 0, NULL);
-				break;
-			case 3: /* full */
-			case 4: /* full (with var_name) */
-			default:
-				tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
-				break;
-			case 5: /* serialized */
-				tmp_value = xdebug_get_zval_value_serialized(zv, 0, NULL);
-				break;
-		}
+		tmp_value = xdebug_get_zval_value_line(zv, 0, NULL);
+
 		if (tmp_value) {
 			xdebug_str_add_str(str, tmp_value);
 			xdebug_str_free(tmp_value);
@@ -472,7 +418,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 				xdebug_str_add_literal(str, "...");
 			}
 
-			if (fse->var[j].name && XINI_LIB(collect_params) == 4) {
+			if (fse->var[j].name) {
 				if (html) {
 					xdebug_str_add_literal(str, "<span>$");
 					xdebug_str_add_zstr(str, fse->var[j].name);
@@ -496,7 +442,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			}
 
 			if (!Z_ISUNDEF(fse->var[j].data)) {
-				add_single_value(str, &fse->var[j].data, html, XINI_LIB(collect_params));
+				add_single_value(str, &fse->var[j].data, html);
 			} else {
 				xdebug_str_add_literal(str, "???");
 			}

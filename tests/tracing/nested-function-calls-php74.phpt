@@ -8,7 +8,6 @@ check_reqs('PHP < 8.0');
 --INI--
 xdebug.mode=develop,trace
 xdebug.start_with_request=0
-xdebug.collect_params=3
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
@@ -125,28 +124,28 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> a() %snested-function-calls-php74.php:17
 %w%f %w%d       -> xdebug_get_function_stack() %snested-function-calls-php74.php:5
 %w%f %w%d        >=> array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ()))
-%w%f %w%d       -> var_dump(...variadic(0 => array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ())))) %snested-function-calls-php74.php:5
+%w%f %w%d       -> var_dump(...$vars = variadic(0 => array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ())))) %snested-function-calls-php74.php:5
 %w%f %w%d        >=> NULL
 %w%f %w%d      >=> 'a'
-%w%f %w%d     -> b(2) %snested-function-calls-php74.php:17
+%w%f %w%d     -> b($b = 2) %snested-function-calls-php74.php:17
 %w%f %w%d      >=> '2b'
-%w%f %w%d     -> c('a', '2b') %snested-function-calls-php74.php:17
+%w%f %w%d     -> c($a = 'a', $b = '2b') %snested-function-calls-php74.php:17
 %w%f %w%d      >=> '2ba'
 %w%f %w%d     -> a() %snested-function-calls-php74.php:17
 %w%f %w%d       -> xdebug_get_function_stack() %snested-function-calls-php74.php:5
 %w%f %w%d        >=> array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ()))
-%w%f %w%d       -> var_dump(...variadic(0 => array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ())))) %snested-function-calls-php74.php:5
+%w%f %w%d       -> var_dump(...$vars = variadic(0 => array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ())))) %snested-function-calls-php74.php:5
 %w%f %w%d        >=> NULL
 %w%f %w%d      >=> 'a'
 %w%f %w%d     -> a() %snested-function-calls-php74.php:17
 %w%f %w%d       -> xdebug_get_function_stack() %snested-function-calls-php74.php:5
 %w%f %w%d        >=> array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ()))
-%w%f %w%d       -> var_dump(...variadic(0 => array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ())))) %snested-function-calls-php74.php:5
+%w%f %w%d       -> var_dump(...$vars = variadic(0 => array (0 => array ('function' => '{main}', 'file' => '%snested-function-calls-php74.php', 'line' => 0, 'params' => array ()), 1 => array ('function' => 'a', 'file' => '%snested-function-calls-php74.php', 'line' => 17, 'params' => array ())))) %snested-function-calls-php74.php:5
 %w%f %w%d        >=> NULL
 %w%f %w%d      >=> 'a'
-%w%f %w%d     -> c('a', 'a') %snested-function-calls-php74.php:17
+%w%f %w%d     -> c($a = 'a', $b = 'a') %snested-function-calls-php74.php:17
 %w%f %w%d      >=> 'aa'
-%w%f %w%d     -> c('2ba', 'aa') %snested-function-calls-php74.php:17
+%w%f %w%d     -> c($a = '2ba', $b = 'aa') %snested-function-calls-php74.php:17
 %w%f %w%d      >=> 'aa2ba'
 %w%f %w%d     -> xdebug_stop_trace() %snested-function-calls-php74.php:19
 %w%f %w%d

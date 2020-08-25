@@ -5,7 +5,6 @@ xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.collect_assignments=0
 xdebug.collect_return=0
-xdebug.collect_params=0
 xdebug.trace_format=0
 --FILE--
 <?php
@@ -24,7 +23,7 @@ foo
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f  %w%d     -> eval('eval($any);') %sbug00558-002.php:5
 %w%f  %w%d       -> eval('printf("foo\\n");') %sbug00558-002.php(5) : eval()'d code:1
-%w%f  %w%d         -> printf() %sbug00558-002.php(5) : eval()'d code(1) : eval()'d code:1
+%w%f  %w%d         -> printf($format = 'foo\n') %sbug00558-002.php(5) : eval()'d code(1) : eval()'d code:1
 %w%f  %w%d     -> xdebug_stop_trace() %sbug00558-002.php:7
 %w%f  %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

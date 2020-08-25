@@ -2,7 +2,6 @@
 Filtered stack traces: path include [1]
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=4
 --FILE--
 <?php
 $includeDir = realpath( __DIR__ . '/..' ); $s = DIRECTORY_SEPARATOR;

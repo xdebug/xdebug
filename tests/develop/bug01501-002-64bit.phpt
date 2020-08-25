@@ -9,6 +9,7 @@ check_reqs('64bit');
 xdebug.mode=develop
 html_errors=1
 xdebug.cli_color=0
+xdebug.file_link_format=
 --FILE--
 <?php
 

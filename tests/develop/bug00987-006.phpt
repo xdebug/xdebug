@@ -10,7 +10,6 @@ html_errors=0
 xdebug.mode=develop
 xdebug.cli_color=0
 error_reporting=-1
-xdebug.collect_params=4
 xdebug.show_local_vars=0
 --FILE--
 <?php

@@ -5,7 +5,6 @@ log_errors=0
 xdebug.mode=develop
 xdebug.dump.GET=
 xdebug.dump.SERVER=
-xdebug.collect_params=0
 xdebug.show_local_vars=0
 xdebug.show_error_trace=1
 --FILE--
@@ -34,7 +33,7 @@ TypeError: %SA, int%S given, called in %sbug00391.php on line 17 in %sbug00391.p
 
 Call Stack:
 %w%f%w%d   1. {main}() %sbug00391.php:0
-%w%f%w%d   2. B->myMethod() %sbug00391.php:17
+%w%f%w%d   2. B->myMethod($y = 123) %sbug00391.php:17
 
 
 Fatal error: %SA, int%S given, called in %sbug00391.php on line 17 and defined in %sbug00391.php on line 10
@@ -43,4 +42,4 @@ TypeError: %SA, int%S given, called in %sbug00391.php on line 17 in %sbug00391.p
 
 Call Stack:
 %w%f%w%d   1. {main}() %sbug00391.php:0
-%w%f%w%d   2. B->myMethod() %sbug00391.php:17
+%w%f%w%d   2. B->myMethod($y = 123) %sbug00391.php:17

@@ -6,7 +6,6 @@ xdebug.scream=0
 error_reporting(E_ALL);
 xdebug.cli_color=2
 xdebug.force_error_reporting=0
-xdebug.collect_params=0
 --FILE--
 <?php
 echo @hex2bin('4'), "\n";
@@ -21,4 +20,4 @@ echo @hex2bin('4'), "\n";
 
 [1mCall Stack:[22m
 %w%f %w%d   1. {main}() %sscream_cli.php:0
-%w%f %w%d   2. hex2bin() %sscream_cli.php:4
+%w%f %w%d   2. hex2bin($data = '4') %sscream_cli.php:4

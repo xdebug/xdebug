@@ -15,7 +15,6 @@ xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=1
-xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--

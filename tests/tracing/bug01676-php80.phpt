@@ -8,7 +8,6 @@ check_reqs('PHP >= 8.0');
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=yes
-xdebug.collect_params=4
 xdebug.collect_assignments=0
 xdebug.collect_return=0
 --FILE--

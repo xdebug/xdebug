@@ -2,7 +2,6 @@
 Test for bug #538: Error in watches and call stack parameter with string containing '\\'
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=3
 --FILE--
 <?php
     function call($param1, $param2, $param3)

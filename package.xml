@@ -115,8 +115,6 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
      <file name="var_export_html.h" role="src" />
      <file name="var_export_line.c" role="src" />
      <file name="var_export_line.h" role="src" />
-     <file name="var_export_serialized.c" role="src" />
-     <file name="var_export_serialized.h" role="src" />
      <file name="var_export_text.c" role="src" />
      <file name="var_export_text.h" role="src" />
      <file name="var_export_xml.c" role="src" />

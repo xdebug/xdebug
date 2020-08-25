@@ -9,7 +9,6 @@ if (false == setlocale(LC_ALL, "ro_RO.UTF-8", "de_DE.UTF-8", "de_DE", "de", "ger
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
-xdebug.collect_params=3
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.auto_profile=0
@@ -26,7 +25,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> setlocale(%d, ...variadic(0 => 'ro_RO.UTF-8', 1 => 'de_DE.UTF-8', 2 => 'de_DE', 3 => 'de', 4 => 'german', 5 => 'ge', 6 => 'de_DE.ISO-8859-1')) %sbug00843-002-php74.php:4
+%w%f %w%d     -> setlocale($category = %d, ...$locales = variadic(0 => 'ro_RO.UTF-8', 1 => 'de_DE.UTF-8', 2 => 'de_DE', 3 => 'de', 4 => 'german', 5 => 'ge', 6 => 'de_DE.ISO-8859-1')) %sbug00843-002-php74.php:4
 %w%f %w%d      >=> '%s'
 %w%f %w%d     -> xdebug_stop_trace() %sbug00843-002-php74.php:6
 %w%f %w%d

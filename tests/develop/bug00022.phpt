@@ -2,7 +2,6 @@
 Test for segmentation fault with xdebug_get_function_stack() and collect_params=1
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=1
 xdebug.collect_assignments=0
 --FILE--
 <?php

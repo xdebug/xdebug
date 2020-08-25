@@ -2,7 +2,6 @@
 Test for complex parameters to a function
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=1
 xdebug.dump_globals=0
 xdebug.show_local_vars=1
 xdebug.var_display_max_depth=3
@@ -24,7 +23,7 @@ Error: Call to undefined function foo() in %sbacktrace-args.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbacktrace-args.php:0
-%w%f %w%d   2. foo2(long, array(1)) %sbacktrace-args.php:7
+%w%f %w%d   2. foo2($a = 4, $b = array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))) %sbacktrace-args.php:7
 
 
 Variables in local scope (#2):

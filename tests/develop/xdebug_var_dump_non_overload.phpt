@@ -5,6 +5,7 @@ xdebug.mode=off
 html_errors=1
 date.timezone=Europe/Oslo
 xdebug.var_display_max_children=11
+xdebug.file_link_format=
 --FILE--
 <?php
 class TimeStuff {

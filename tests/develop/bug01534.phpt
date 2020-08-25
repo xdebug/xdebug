@@ -2,7 +2,6 @@
 Test for bug #1534: Segfault when exception thrown in a closure bound to class scope
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=4
 --FILE--
 <?php
 try {

@@ -13,7 +13,6 @@ xdebug.trace_options=1
 xdebug.trace_format=0
 xdebug.collect_assignments=1
 xdebug.collect_return=1
-xdebug.collect_params=4
 --FILE--
 <?php
 xdebug_start_trace();

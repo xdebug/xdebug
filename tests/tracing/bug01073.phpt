@@ -5,7 +5,6 @@ xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
 xdebug.collect_vars=0
-xdebug.collect_params=3
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.var_display_max_children=128
@@ -27,13 +26,13 @@ unlink($tf);
 1 2 3
 1 2 3
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> call_user_func_array:{%sbug01073.php:4}('call_user_func_array', array (0 => 'printf', 1 => array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3))) %sbug01073.php:4
-%w%f %w%d       -> call_user_func_array:{%sbug01073.php:4}('printf', array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3)) %sbug01073.php:4
-%w%f %w%d         -> printf('%u %u %u\n', ...variadic(0 => 1, 1 => 2, 2 => 3)) %sbug01073.php:4
-%w%f %w%d     -> call_user_func_array:{%sbug01073.php:6}('call_user_func_array', array (0 => 'call_user_func_array', 1 => array (0 => 'printf', 1 => array (...)))) %sbug01073.php:6
-%w%f %w%d       -> call_user_func_array:{%sbug01073.php:6}('call_user_func_array', array (0 => 'printf', 1 => array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3))) %sbug01073.php:6
-%w%f %w%d         -> call_user_func_array:{%sbug01073.php:6}('printf', array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3)) %sbug01073.php:6
-%w%f %w%d           -> printf('%u %u %u\n', ...variadic(0 => 1, 1 => 2, 2 => 3)) %sbug01073.php:6
+%w%f %w%d     -> call_user_func_array:{%sbug01073.php:4}($function%S = 'call_user_func_array', $%s = array (0 => 'printf', 1 => array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3))) %sbug01073.php:4
+%w%f %w%d       -> call_user_func_array:{%sbug01073.php:4}($function%S = 'printf', $%s = array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3)) %sbug01073.php:4
+%w%f %w%d         -> printf($format = '%u %u %u\n', ...$args = variadic(0 => 1, 1 => 2, 2 => 3)) %sbug01073.php:4
+%w%f %w%d     -> call_user_func_array:{%sbug01073.php:6}($function%S = 'call_user_func_array', $%s = array (0 => 'call_user_func_array', 1 => array (0 => 'printf', 1 => array (...)))) %sbug01073.php:6
+%w%f %w%d       -> call_user_func_array:{%sbug01073.php:6}($function%S = 'call_user_func_array', $%s = array (0 => 'printf', 1 => array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3))) %sbug01073.php:6
+%w%f %w%d         -> call_user_func_array:{%sbug01073.php:6}($function%S = 'printf', $%s = array (0 => '%u %u %u\n', 1 => 1, 2 => 2, 3 => 3)) %sbug01073.php:6
+%w%f %w%d           -> printf($format = '%u %u %u\n', ...$args = variadic(0 => 1, 1 => 2, 2 => 3)) %sbug01073.php:6
 %w%f %w%d     -> xdebug_stop_trace() %sbug01073.php:8
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

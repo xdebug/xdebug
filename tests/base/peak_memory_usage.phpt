@@ -2,7 +2,6 @@
 Test for xdebug_peak_memory_usage
 --INI--
 xdebug.mode=develop
-xdebug.collect_params=3
 xdebug.auto_profile=0
 --FILE--
 <?php
