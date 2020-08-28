@@ -84,6 +84,38 @@ static int xdebug_create_socket_unix(const char *path)
 }
 #endif
 
+#if !WIN32 && !WINNT
+void set_keepalive_options(int fd)
+{
+	int optval = 1;
+	int optlen = sizeof(optval);
+	int ret;
+
+	ret = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
+	if (ret) {
+		return;
+	}
+
+	optval = 600;
+	ret = setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
+	if (ret) {
+		return;
+	}
+
+	optval = 20;
+	ret = setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
+	if (ret) {
+		return;
+	}
+
+	optval = 60;
+	ret = setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
+	if (ret) {
+		return;
+	}
+}
+#endif
+
 static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 {
 	struct addrinfo            hints;
@@ -297,6 +329,9 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 #endif
 
 		setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(optval));
+#if !WIN32 && !WINNT
+		set_keepalive_options(sockfd);
+#endif
 	}
 
 	return sockfd;
