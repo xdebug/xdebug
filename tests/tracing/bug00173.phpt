@@ -25,9 +25,9 @@ xdebug.show_local_vars=1
 	echo "DONE\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught%sInvalidArgumentException%sPassed variable is not an array or object%sin %sbug00173.php on line 3
+Fatal error: Uncaught%sarray%sin %sbug00173.php on line 3
 
-InvalidArgumentException: Passed variable is not an array or object%sin %sbug00173.php on line 3
+%s: %sarray%sin %sbug00173.php on line 3
 
 Call Stack:
 %w%f%w%d   1. {main}() %sbug00173.php:0

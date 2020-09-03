@@ -279,6 +279,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
 		*jump_count = 1;
 		return 1;
+
 	} else if (
 		opcode.opcode == ZEND_JMPZ ||
 		opcode.opcode == ZEND_JMPNZ ||
@@ -289,21 +290,25 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		*jump_count = 2;
 		return 1;
+
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		jumps[1] = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
 		*jump_count = 2;
 		return 1;
+
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
 		jumps[0] = position + 1;
 		jumps[1] = position + (opcode.extended_value / sizeof(zend_op));
 		*jump_count = 2;
 		return 1;
+
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
 		jumps[0] = position + 1;
 		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		*jump_count = 2;
 		return 1;
+
 	} else if (opcode.opcode == ZEND_CATCH) {
 		*jump_count = 2;
 		jumps[0] = position + 1;
@@ -322,6 +327,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 			jumps[1] = XDEBUG_JMP_EXIT;
 		}
 		return 1;
+
 	} else if (opcode.opcode == ZEND_GOTO) {
 		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op1, position, base_address);
 		*jump_count = 1;
@@ -332,20 +338,28 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[1] = position + 1;
 		*jump_count = 2;
 		return 1;
+
 	} else if (opcode.opcode == ZEND_FAST_RET) {
 		jumps[0] = XDEBUG_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
+
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
 		opcode.opcode == ZEND_EXIT ||
 		opcode.opcode == ZEND_THROW ||
+#if PHP_VERSION_ID >= 80000
+		opcode.opcode == ZEND_MATCH_ERROR ||
+#endif
 		opcode.opcode == ZEND_RETURN
 	) {
 		jumps[0] = XDEBUG_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
 	} else if (
+# if PHP_VERSION_ID >= 80000
+		opcode.opcode == ZEND_MATCH ||
+# endif
 		opcode.opcode == ZEND_SWITCH_LONG ||
 		opcode.opcode == ZEND_SWITCH_STRING
 	) {
@@ -372,9 +386,15 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[*jump_count] = position + (opcode.extended_value / sizeof(zend_op));
 		(*jump_count)++;
 
-		/* The 'next' opcode */
-		jumps[*jump_count] = position + 1;
-		(*jump_count)++;
+# if PHP_VERSION_ID >= 80000
+		if (opcode.opcode != ZEND_MATCH) {
+# endif
+			/* The 'next' opcode */
+			jumps[*jump_count] = position + 1;
+			(*jump_count)++;
+# if PHP_VERSION_ID >= 80000
+		}
+# endif
 
 		return 1;
 	}
