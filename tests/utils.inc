@@ -173,4 +173,24 @@ function mustBeExecuted( array $coverageInfo, array $lines )
 		echo "line #${line} is present and covered\n";
 	}
 }
+
+function mustNotBeExecuted( array $coverageInfo, array $lines )
+{
+	foreach ( $lines as $line )
+	{
+		if ( !array_key_exists( $line, $coverageInfo ) )
+		{
+			echo "FAIL: line #${line} is not present in coverage info\n";
+			continue;
+		}
+
+		if ( $coverageInfo[$line] === 1 )
+		{
+			echo "FAIL: line #${line} is covered\n";
+			continue;
+		}
+
+		echo "line #${line} is present and not covered\n";
+	}
+}
 ?>
