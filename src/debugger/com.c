@@ -321,7 +321,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 		xdebug_str_add_fmt(connection_attempts, "%s:%ld (through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
-		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 		return;
 	}
 
@@ -356,7 +356,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 		xdebug_str_add_fmt(connection_attempts, "%s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "HDR", "Remote address not found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
-		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(remote_connect_timeout));
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 		return;
 	}
 
@@ -370,13 +370,13 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	xdebug_str_add_fmt(connection_attempts, "%s:%ld (from %s HTTP header)", Z_STRVAL_P(remote_addr), XINI_DBG(client_port), header);
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Remote address found, connecting to %s:%ld.", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(client_port));
 
-	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(client_port), XINI_DBG(remote_connect_timeout));
+	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 
 	if (XG_DBG(context).socket < 0) {
 		xdebug_str_add_fmt(connection_attempts, ", %s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "CON", "Could not connect to remote address as found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
-		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(remote_connect_timeout));
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 	}
 
 	/* Replace the ',', in case we had changed the original header due
@@ -394,7 +394,7 @@ static void xdebug_init_cloud_debugger()
 	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a' - 1);
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", host, 9020L);
-	XG_DBG(context).socket = xdebug_create_socket(host, 9020, XINI_DBG(remote_connect_timeout));
+	XG_DBG(context).socket = xdebug_create_socket(host, 9020, XINI_DBG(connect_timeout_ms));
 
 	xdfree(host);
 }
@@ -431,7 +431,7 @@ static void xdebug_init_debugger()
 	} else if (XG_DBG(context).socket == -1) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOCON", "Could not connect to debugging client. Tried: %s :-(", connection_attempts->d);
 	} else if (XG_DBG(context).socket == -2) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s :-(", XINI_DBG(remote_connect_timeout), connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s :-(", XINI_DBG(connect_timeout_ms), connection_attempts->d);
 	} else if (XG_DBG(context).socket == -3) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related. :-(", connection_attempts->d);
 	}
