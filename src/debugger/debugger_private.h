@@ -47,6 +47,8 @@ struct _xdebug_lines_list {
 	xdebug_function_lines_map_item **functions;
 };
 
+#define XDEBUG_COOKIE_EXPIRE_TIME 3600
+
 #define XG_DBG(v)      (XG(globals.debugger.v))
 #define XINI_DBG(v)    (XG(settings.debugger.v))
 

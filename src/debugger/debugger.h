@@ -54,7 +54,6 @@ typedef struct _xdebug_debugger_settings_t {
 	zend_long     client_port;    /* 9000 */
 	char         *client_host;    /* localhost */
 	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
-	zend_long     remote_cookie_expire_time; /* Expire time for the remote-session cookie */
 	char         *remote_addr_header; /* User configured header to check for forwarded IP address */
 	zend_long     connect_timeout_ms; /* Timeout in MS for remote connections */
 

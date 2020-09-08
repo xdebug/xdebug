@@ -11,7 +11,6 @@ XDEBUG_CONFIG=idekey=testing
 xdebug.mode=debug,develop
 default_charset=utf-8
 xdebug.filename_format=
-xdebug.remote_cookie_expire_time=1234
 --FILE--
 <?php
 var_dump( xdebug_get_headers( ) );
@@ -21,5 +20,5 @@ Xdebug: [Step Debug] %sTried: localhost:9000 (through xdebug.client_host/xdebug.
 %sbug01782.php:2:
 array(1) {
   [0] =>
-  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; expires=%s; Max-Age=123%d; path=/; SameSite=Strict"
+  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; expires=%s; Max-Age=3%d; path=/; SameSite=Strict"
 }

@@ -533,7 +533,7 @@ static int xdebug_handle_start_session()
 		convert_to_string_ex(dummy);
 		xdebug_update_ide_key(Z_STRVAL_P(dummy));
 
-		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
 		activate_session = 1;
 	} else if (
 		(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
@@ -544,7 +544,7 @@ static int xdebug_handle_start_session()
 		activate_session = 1;
 	} else if (getenv("XDEBUG_CONFIG")) {
 		if (XG_DBG(ide_key) && *XG_DBG(ide_key) && !SG(headers_sent)) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
 		}
 		activate_session = 1;
 	}
@@ -563,7 +563,7 @@ static void xdebug_handle_stop_session()
 		))
 		&& !SG(headers_sent)
 	) {
-		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, (char*) "", 0, time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, (char*) "", 0, time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
 	}
 }
 

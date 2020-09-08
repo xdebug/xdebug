@@ -247,7 +247,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.client_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.client_port,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_connect_back,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, settings.debugger.ide_key_setting,   zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_addr_header", "",                  PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_addr_header, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.connect_timeout_ms", "200",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.connect_timeout_ms, zend_xdebug_globals, xdebug_globals)
 
@@ -368,10 +367,7 @@ static void xdebug_env_config(void)
 		if (strcasecmp(envvar, "remote_log_level") == 0) {
 			name = "xdebug.remote_log_level";
 		} else
-		if (strcasecmp(envvar, "remote_cookie_expire_time") == 0) {
-			name = "xdebug.remote_cookie_expire_time";
-		}
-		else if (strcasecmp(envvar, "cli_color") == 0) {
+		if (strcasecmp(envvar, "cli_color") == 0) {
 			name = "xdebug.cli_color";
 		}
 
