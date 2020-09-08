@@ -355,17 +355,17 @@ static void xdebug_env_config(void)
 		if (strcasecmp(envvar, "idekey") == 0) {
 			xdebug_debugger_reset_ide_key(envval);
 		} else
-		if (strcasecmp(envvar, "profiler_output_dir") == 0) {
-			name = "xdebug.profiler_output_dir";
+		if (strcasecmp(envvar, "output_dir") == 0) {
+			name = "xdebug.output_dir";
 		} else
 		if (strcasecmp(envvar, "profiler_output_name") == 0) {
 			name = "xdebug.profiler_output_name";
 		} else
-		if (strcasecmp(envvar, "remote_log") == 0) {
-			name = "xdebug.remote_log";
+		if (strcasecmp(envvar, "log") == 0) {
+			name = "xdebug.log";
 		} else
-		if (strcasecmp(envvar, "remote_log_level") == 0) {
-			name = "xdebug.remote_log_level";
+		if (strcasecmp(envvar, "log_level") == 0) {
+			name = "xdebug.log_level";
 		} else
 		if (strcasecmp(envvar, "cli_color") == 0) {
 			name = "xdebug.cli_color";
