@@ -243,8 +243,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.cloud.userid", "", PHP_INI_SYSTEM, OnUpdateString, settings.debugger.cloud_userid, zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
-	STD_PHP_INI_ENTRY("xdebug.remote_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, settings.debugger.remote_host,       zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.remote_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_port,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.client_host",       "localhost",          PHP_INI_ALL,    OnUpdateString, settings.debugger.client_host,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.client_port",       "9000",               PHP_INI_ALL,    OnUpdateLong,   settings.debugger.client_port,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.remote_connect_back","0",               PHP_INI_ALL,    OnUpdateBool,   settings.debugger.remote_connect_back,  zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.idekey",            "",                   PHP_INI_ALL,    OnUpdateString, settings.debugger.ide_key_setting,   zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.remote_cookie_expire_time", "3600",       PHP_INI_ALL,    OnUpdateLong,   settings.debugger.remote_cookie_expire_time, zend_xdebug_globals, xdebug_globals)
@@ -347,17 +347,11 @@ static void xdebug_env_config(void)
 		if (strcasecmp(envvar, "remote_connect_back") == 0) {
 			name = "xdebug.remote_connect_back";
 		} else
-		if (strcasecmp(envvar, "remote_port") == 0) {
-			name = "xdebug.remote_port";
+		if (strcasecmp(envvar, "client_port") == 0) {
+			name = "xdebug.client_port";
 		} else
-		if (strcasecmp(envvar, "remote_host") == 0) {
-			name = "xdebug.remote_host";
-		} else
-		if (strcasecmp(envvar, "remote_handler") == 0) {
-			name = "xdebug.remote_handler";
-		} else
-		if (strcasecmp(envvar, "remote_mode") == 0) {
-			name = "xdebug.remote_mode";
+		if (strcasecmp(envvar, "client_host") == 0) {
+			name = "xdebug.client_host";
 		} else
 		if (strcasecmp(envvar, "idekey") == 0) {
 			xdebug_debugger_reset_ide_key(envval);
