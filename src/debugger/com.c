@@ -318,10 +318,10 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	const char *header = NULL;
 
 	if (!XINI_DBG(remote_connect_back)) {
-		xdebug_str_add_fmt(connection_attempts, "%s:%ld (through xdebug.remote_host/xdebug.remote_port)", XINI_DBG(remote_host), XINI_DBG(remote_port));
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
+		xdebug_str_add_fmt(connection_attempts, "%s:%ld (through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
-		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 		return;
 	}
 
@@ -353,10 +353,10 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	}
 
 	if (!remote_addr) {
-		xdebug_str_add_fmt(connection_attempts, "%s:%ld (fallback through xdebug.remote_host/xdebug.remote_port)", XINI_DBG(remote_host), XINI_DBG(remote_port));
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "HDR", "Remote address not found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
+		xdebug_str_add_fmt(connection_attempts, "%s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "HDR", "Remote address not found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
-		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 		return;
 	}
 
@@ -367,16 +367,16 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 		cp_found = 1;
 	}
 
-	xdebug_str_add_fmt(connection_attempts, "%s:%ld (from %s HTTP header)", Z_STRVAL_P(remote_addr), XINI_DBG(remote_port), header);
-	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Remote address found, connecting to %s:%ld.", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(remote_port));
+	xdebug_str_add_fmt(connection_attempts, "%s:%ld (from %s HTTP header)", Z_STRVAL_P(remote_addr), XINI_DBG(client_port), header);
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Remote address found, connecting to %s:%ld.", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(client_port));
 
-	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 
 	if (XG_DBG(context).socket < 0) {
-		xdebug_str_add_fmt(connection_attempts, ", %s:%ld (fallback through xdebug.remote_host/xdebug.remote_port)", XINI_DBG(remote_host), XINI_DBG(remote_port));
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "CON", "Could not connect to remote address as found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(remote_host), (long int) XINI_DBG(remote_port));
+		xdebug_str_add_fmt(connection_attempts, ", %s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "CON", "Could not connect to remote address as found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
-		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(remote_host), XINI_DBG(remote_port), XINI_DBG(remote_connect_timeout));
+		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 	}
 
 	/* Replace the ',', in case we had changed the original header due
@@ -394,7 +394,7 @@ static void xdebug_init_cloud_debugger()
 	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a' - 1);
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", host, 9020L);
-	XG_DBG(context).socket = xdebug_create_socket(host, 9020, XINI_DBG(remote_connect_timeout));
+	XG_DBG(context).socket = xdebug_create_socket(host, 9020, XINI_DBG(connect_timeout_ms));
 
 	xdfree(host);
 }
@@ -431,7 +431,7 @@ static void xdebug_init_debugger()
 	} else if (XG_DBG(context).socket == -1) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOCON", "Could not connect to debugging client. Tried: %s :-(", connection_attempts->d);
 	} else if (XG_DBG(context).socket == -2) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s :-(", XINI_DBG(remote_connect_timeout), connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s :-(", XINI_DBG(connect_timeout_ms), connection_attempts->d);
 	} else if (XG_DBG(context).socket == -3) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related. :-(", connection_attempts->d);
 	}
@@ -533,7 +533,7 @@ static int xdebug_handle_start_session()
 		convert_to_string_ex(dummy);
 		xdebug_update_ide_key(Z_STRVAL_P(dummy));
 
-		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
 		activate_session = 1;
 	} else if (
 		(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
@@ -544,7 +544,7 @@ static int xdebug_handle_start_session()
 		activate_session = 1;
 	} else if (getenv("XDEBUG_CONFIG")) {
 		if (XG_DBG(ide_key) && *XG_DBG(ide_key) && !SG(headers_sent)) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
 		}
 		activate_session = 1;
 	}
@@ -563,7 +563,7 @@ static void xdebug_handle_stop_session()
 		))
 		&& !SG(headers_sent)
 	) {
-		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, (char*) "", 0, time(NULL) + XINI_DBG(remote_cookie_expire_time), "/", 1, NULL, 0, 0, 1, 0);
+		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, (char*) "", 0, time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
 	}
 }
 

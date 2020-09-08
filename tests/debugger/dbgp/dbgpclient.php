@@ -62,10 +62,8 @@ class DebugClient
 		$default_options = array(
 			"xdebug.mode" => "debug",
 			"xdebug.start_with_request" => "'yes'",
-			"xdebug.remote_host" => $this->getIPAddress(),
-			"xdebug.remote_port" => $this->getPort(),
-			"xdebug.remote_log" => "{$this->tmpDir}/remote_log.txt",
-			"xdebug.remote_log_level" => 10,
+			"xdebug.client_host" => $this->getIPAddress(),
+			"xdebug.client_port" => $this->getPort(),
 		);
 
 		$options = (getenv('TEST_PHP_ARGS') ?: '');

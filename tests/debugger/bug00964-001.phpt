@@ -12,7 +12,7 @@ xdebug.mode=debug
 xdebug.start_with_request=yes
 xdebug.log={TMPDIR}/bug964.txt
 xdebug.remote_connect_back=1
-xdebug.remote_port=9003
+xdebug.client_port=9003
 --FILE--
 <?php
 preg_match(
@@ -24,5 +24,5 @@ unlink( sys_get_temp_dir() . "/bug964.txt" );
 echo $match[1];
 ?>
 --EXPECTF--
-Xdebug: [Step Debug] Could not connect to debugging client. Tried: 192.168.111.111:9003 (from HTTP_X_FORWARDED_FOR HTTP header), localhost:9003 (fallback through xdebug.remote_host/xdebug.remote_port) :-(
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: 192.168.111.111:9003 (from HTTP_X_FORWARDED_FOR HTTP header), localhost:9003 (fallback through xdebug.client_host/xdebug.client_port) :-(
 192.168.111.111

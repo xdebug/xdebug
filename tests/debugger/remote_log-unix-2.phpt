@@ -12,8 +12,8 @@ xdebug.mode=debug
 xdebug.start_with_request=yes
 xdebug.log={TMPDIR}/{RUNID}remote-unix.txt
 xdebug.remote_connect_back=1
-xdebug.remote_host=unix:///tmp/xdbg.sock
-xdebug.remote_port=0
+xdebug.client_host=unix:///tmp/xdbg.sock
+xdebug.client_port=0
 xdebug.remote_addr_header=I_LIKE_COOKIES
 --FILE--
 <?php
@@ -22,7 +22,7 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remot
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-unix.txt' );
 ?>
 --EXPECTF--
-Xdebug: [Step Debug] Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.remote_host/xdebug.remote_port) :-(
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.client_host/xdebug.client_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
 [%d] [Step Debug] INFO: Checking remote connect back address.
@@ -30,4 +30,4 @@ Xdebug: [Step Debug] Could not connect to debugging client. Tried: unix:///tmp/x
 [%d] [Step Debug] WARN: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
 [%d] [Step Debug] WARN: Remote address not found in headers, connecting to configured address/port: unix:///tmp/xdbg.sock:0. :-|
 [%d] [Step Debug] WARN: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
-[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.remote_host/xdebug.remote_port) :-(
+[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.client_host/xdebug.client_port) :-(

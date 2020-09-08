@@ -51,12 +51,11 @@ typedef struct _xdebug_debugger_settings_t {
 	char         *cloud_shared_key;
 
 	/* Step Debugger */
-	zend_long     remote_port;    /* 9000 */
-	char         *remote_host;    /* localhost */
+	zend_long     client_port;    /* 9000 */
+	char         *client_host;    /* localhost */
 	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
-	zend_long     remote_cookie_expire_time; /* Expire time for the remote-session cookie */
 	char         *remote_addr_header; /* User configured header to check for forwarded IP address */
-	zend_long     remote_connect_timeout; /* Timeout in MS for remote connections */
+	zend_long     connect_timeout_ms; /* Timeout in MS for remote connections */
 
 	char         *ide_key_setting; /* Set through php.ini and friends */
 } xdebug_debugger_settings_t;
