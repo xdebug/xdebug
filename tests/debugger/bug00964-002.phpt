@@ -11,7 +11,6 @@ HTTP_X_FORWARDED_FOR=192.168.111.111, 10.1.2.3, 10.1.2.4
 xdebug.mode=debug
 xdebug.start_with_request=yes
 xdebug.log={TMPDIR}/bug964.txt
-xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
 xdebug.client_port=9003
 --FILE--

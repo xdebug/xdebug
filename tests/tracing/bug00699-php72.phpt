@@ -4,7 +4,6 @@ Test for bug #699: Xdebug gets the filename wrong for the countable interface
 xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
-xdebug.collect_vars=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
