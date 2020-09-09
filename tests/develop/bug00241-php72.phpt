@@ -7,7 +7,6 @@ check_reqs('PHP < 8.0');
 ?>
 --INI--
 xdebug.mode=develop
-xdebug.collect_vars=1
 xdebug.auto_profile=0
 xdebug.var_display_max_depth=3
 xdebug.var_display_max_children=2

@@ -6,7 +6,6 @@ XDEBUG_CONFIG="idekey=foobar"
 --INI--
 xdebug.mode=debug
 xdebug.remote_addr_header=I_LIKE_COOKIES
-xdebug.remote_autostart=1
 xdebug.remote_connect_back=1
 xdebug.client_port=9999
 --FILE--

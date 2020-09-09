@@ -24,7 +24,7 @@
 #include "lib_private.h"
 #include "log.h"
 
-static char* xdebug_docs_base(void)
+char* xdebug_lib_docs_base(void)
 {
 	char *env = getenv("XDEBUG_DOCS_BASE");
 
@@ -95,7 +95,7 @@ static inline void xdebug_diagnostic_log(int channel, int log_level, const char 
 		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_channel_name[channel], 0);
 		xdebug_str_add(XG_LIB(diagnosis_buffer), message, 0);
 		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "</td><td class=\"d\"><a href=\"");
-		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_docs_base(), 0);
+		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_lib_docs_base(), 0);
 		xdebug_str_add_const(XG_LIB(diagnosis_buffer), "errors#");
 		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_channel_msg_prefix[channel], 0);
 		xdebug_str_add(XG_LIB(diagnosis_buffer), xdebug_level_msg_prefix[log_level], 0);
@@ -123,7 +123,7 @@ static inline void xdebug_php_log(int channel, int log_level, const char *error_
 
 	if (error_code && log_level == XLOG_CRIT) {
 		xdebug_str_add_const(&formatted_message, " (See: ");
-		xdebug_str_add(&formatted_message, xdebug_docs_base(), 0);
+		xdebug_str_add(&formatted_message, xdebug_lib_docs_base(), 0);
 		xdebug_str_add_const(&formatted_message, "errors#");
 		xdebug_str_add(&formatted_message, xdebug_channel_msg_prefix[channel], 0);
 		xdebug_str_add(&formatted_message, xdebug_level_msg_prefix[log_level], 0);
@@ -231,7 +231,7 @@ void print_feature_row(const char *name, int flag, const char *doc_name)
 		PUTS("</td><td class=\"v\">");
 		PUTS(XDEBUG_MODE_IS(flag) ? "✔ enabled" : "✘ disabled");
 		PUTS("</td><td class=\"d\"><a href=\"");
-		PUTS(xdebug_docs_base());
+		PUTS(xdebug_lib_docs_base());
 		PUTS(doc_name);
 		PUTS("\">🖹</a></td></tr>\n");
 	} else {
@@ -386,7 +386,7 @@ static void xdebug_print_settings(void)
             PUTS("</td><td class=\"v\">");
             php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
 			PUTS("</td><td class=\"d\"><a href=\"");
-			PUTS(xdebug_docs_base());
+			PUTS(xdebug_lib_docs_base());
 			PUTS("all_settings#");
             PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
 			PUTS("\">🖹</a></td></tr>\n");

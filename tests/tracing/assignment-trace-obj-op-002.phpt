@@ -4,7 +4,6 @@ Test for tracing property assign ops [2]
 xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
-xdebug.collect_vars=1
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--
