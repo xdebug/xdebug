@@ -391,7 +391,7 @@ static void xdebug_init_cloud_debugger()
 	unsigned long  crc = xdebug_crc32(XINI_DBG(cloud_userid), strlen(XINI_DBG(cloud_userid)));
 	char          *host;
 
-	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a' - 1);
+	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a');
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", host, 9020L);
 	XG_DBG(context).socket = xdebug_create_socket(host, 9020, XINI_DBG(connect_timeout_ms));
