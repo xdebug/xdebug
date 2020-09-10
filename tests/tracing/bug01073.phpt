@@ -4,7 +4,6 @@ Test for bug #1073: Segmentation Fault 11 when nesting call_user_func_array
 xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
-xdebug.collect_vars=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.var_display_max_children=128

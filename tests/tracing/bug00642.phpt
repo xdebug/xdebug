@@ -4,7 +4,6 @@ Test for bug #642: No line number for offsetGet and offsetSet
 xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
-xdebug.collect_vars=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--

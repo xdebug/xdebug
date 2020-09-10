@@ -4,7 +4,6 @@ Test for line numbers and arguments with __call including contents
 xdebug.mode=trace
 xdebug.start_with_request=0
 xdebug.trace_format=0
-xdebug.collect_vars=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--

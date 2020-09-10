@@ -7,7 +7,6 @@ xdebug.dump_globals=0
 xdebug.var_display_max_children=50
 xdebug.var_display_max_depth=5
 xdebug.var_display_max_length=64
-xdebug.collect_vars=1
 xdebug.collect_return=0
 xdebug.show_local_vars=0
 xdebug.show_error_trace=1

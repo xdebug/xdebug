@@ -181,6 +181,31 @@ static PHP_INI_MH(OnUpdateStartUponError)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateRemovedSetting)
+{
+	if (new_value && new_value->val && strlen(new_value->val) > 0) {
+		xdebug_log_ex(
+			XLOG_CHAN_CONFIG, XLOG_CRIT, "REMOVED",
+			"The setting '%s' has been removed, see the upgrading guide at %supgrade_guide#changed-%s",
+			ZSTR_VAL(entry->name), xdebug_lib_docs_base(), ZSTR_VAL(entry->name)
+		);
+	}
+	return FAILURE;
+}
+
+static PHP_INI_MH(OnUpdateChangedSetting)
+{
+	if (new_value && new_value->val && strlen(new_value->val) > 0) {
+		xdebug_log_ex(
+			XLOG_CHAN_CONFIG, XLOG_CRIT, "CHANGED",
+			"The setting '%s' has been renamed, see the upgrading guide at %supgrade_guide#changed-%s",
+			ZSTR_VAL(entry->name), xdebug_lib_docs_base(), ZSTR_VAL(entry->name)
+		);
+	}
+	return FAILURE;
+}
+
+
 #ifdef P_tmpdir
 # define XDEBUG_TEMP_DIR P_tmpdir
 #else
@@ -262,6 +287,35 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_options,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_assignments, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_return,    zend_xdebug_globals, xdebug_globals)
+
+	/* Removed/Changed settings */
+	PHP_INI_ENTRY("xdebug.auto_trace",                    "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.collect_includes",              "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
+	PHP_INI_ENTRY("xdebug.collect_params",                "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
+	PHP_INI_ENTRY("xdebug.collect_vars",                  "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
+	PHP_INI_ENTRY("xdebug.coverage_enable",               "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.default_enable",                "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.extended_info",                 "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
+	PHP_INI_ENTRY("xdebug.gc_stats_enable",               "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.gc_stats_output_dir",           "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.overload_var_dump",             "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
+	PHP_INI_ENTRY("xdebug.profiler_enable",               "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.profiler_enable_trigger",       "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.profiler_output_dir",           "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_autostart",              "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_enable",                 "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_handler",                "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
+	PHP_INI_ENTRY("xdebug.remote_host",                   "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_log",                    "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_log_level",              "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_mode",                   "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_port",                   "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.remote_timeout",                "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.show_mem_delta",                "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
+	PHP_INI_ENTRY("xdebug.trace_output_dir",              "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.trace_enable_trigger",          "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	PHP_INI_ENTRY("xdebug.trace_enable_trigger_value",    "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
 PHP_INI_END()
 
 static void xdebug_init_base_globals(struct xdebug_base_info *xg)
