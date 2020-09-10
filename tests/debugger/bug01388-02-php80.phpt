@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint: resolved to changed line (normal function) (PHP 7.4)
+Test for bug #1388: Resolved Breakpoint: resolved to changed line (normal function) (>= PHP 8.0)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.4, < 8.0; dbgp');
+check_reqs('PHP >= 8.0; dbgp');
 ?>
 --FILE--
 <?php
@@ -14,7 +14,7 @@ $commands = array(
 	'feature_set -n notify_ok -v 1',
 	'feature_set -n resolved_breakpoints -v 1',
 	'step_into',
-	'breakpoint_set -t line -n 4',
+	'breakpoint_set -t line -n 3',
 	'run',
 	'detach',
 );
@@ -37,16 +37,16 @@ dbgpRunFile( $filename, $commands );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file://bug01388-02.inc" lineno="%d"></xdebug:message></response>
 
--> breakpoint_set -i 4 -t line -n 4
+-> breakpoint_set -i 4 -t line -n 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-02.inc" lineno="5" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-02.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="4" id="" resolved="resolved"></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://bug01388-02.inc" lineno="5"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://bug01388-02.inc" lineno="4"></xdebug:message></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint in a closure in function [1] (PHP 7.4)
+Test for bug #1388: Resolved Breakpoint in a closure in function [1] (>= PHP 8.0)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.4, < 8.0; dbgp');
+check_reqs('PHP >= 8.0; dbgp');
 ?>
 --FILE--
 <?php
@@ -13,7 +13,7 @@ $filename = realpath( dirname(__FILE__) . '/bug01388-10.inc' );
 $commands = array(
 	'feature_set -n notify_ok -v 1',
 	'feature_set -n resolved_breakpoints -v 1',
-	"breakpoint_set -t line -f file://{$filename} -n 6",
+	"breakpoint_set -t line -f file://{$filename} -n 5",
 	'step_into',
 	'step_into',
 	'stack_get',
@@ -37,9 +37,9 @@ dbgpRunFile( $filename, $commands );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="2" feature="resolved_breakpoints" success="1"></response>
 
--> breakpoint_set -i 3 -t line -f file://bug01388-10.inc -n 6
+-> breakpoint_set -i 3 -t line -f file://bug01388-10.inc -n 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-10.inc" lineno="7" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-10.inc" lineno="6" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="resolved"></response>
@@ -62,7 +62,7 @@ dbgpRunFile( $filename, $commands );
 
 -> step_into -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="8" status="break" reason="ok"><xdebug:message filename="file://bug01388-10.inc" lineno="7"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="8" status="break" reason="ok"><xdebug:message filename="file://bug01388-10.inc" lineno="6"></xdebug:message></response>
 
 -> step_into -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>

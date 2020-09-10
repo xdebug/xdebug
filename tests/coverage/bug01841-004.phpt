@@ -1,7 +1,5 @@
 --TEST--
 Test for bug #1841: 'match' keyword, expression case [4]
---XFAIL--
-PHP shows assignment on wrong line (8 instead of 6)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
