@@ -124,10 +124,6 @@ void xdebug_profiler_execute_ex(function_stack_entry *fse, zend_op_array *op_arr
 
 void xdebug_profiler_execute_ex_end(function_stack_entry *fse)
 {
-	if (!XG_PROF(active)) {
-		return;
-	}
-
 	xdebug_profiler_function_end(fse);
 	xdebug_profiler_free_function_details(fse);
 }
@@ -413,6 +409,10 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	xdebug_str file_buffer = XDEBUG_STR_INITIALIZER;
 	char tmp_key[TMP_KEY_BUFFER_LEN];
 
+	if (!XG_PROF(active)) {
+		return;
+	}
+
 	/* The temporary key always starts with 'php::' */
 	memcpy(tmp_key, TMP_KEY_PREFIX, TMP_KEY_PREFIX_LEN);
 
@@ -535,10 +535,14 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 
 void xdebug_profiler_free_function_details(function_stack_entry *fse)
 {
-	xdfree(fse->profiler.funcname);
-	zend_string_release(fse->profiler.filename);
-	fse->profiler.funcname = NULL;
-	fse->profiler.filename = NULL;
+	if (fse->profiler.funcname) {
+		xdfree(fse->profiler.funcname);
+		fse->profiler.funcname = NULL;
+	}
+	if (fse->profiler.filename) {
+		zend_string_release(fse->profiler.filename);
+		fse->profiler.filename = NULL;
+	}
 }
 
 /* Returns a *pointer* to the current profile filename, if active. NULL
