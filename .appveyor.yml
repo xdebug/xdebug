@@ -145,6 +145,9 @@ build_script:
         $dname1 = 'php-' + $env:PHP_VERSION + $ts_part + '-devel-' + $env:VC.toUpper() + '-' + $env:ARCH
         if (-not (Test-Path c:\build-cache\$dname1)) {
             7z x -aoa c:\build-cache\$bname -oc:\build-cache
+            if ($env:PHP_VERSION.split('-').length -gt 1) {
+                move "c:\build-cache\php-$($env:PHP_VERSION.split('-')[0])-devel-$($env:VC.toUpper())-$env:ARCH" c:\build-cache\$dname0
+            }
             if ($dname0 -ne $dname1) {
                 move c:\build-cache\$dname0 c:\build-cache\$dname1
             }
