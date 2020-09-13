@@ -1,7 +1,7 @@
 <?php
 function a()
 {
-	$maybe = 3;
+	$maybe = 1;
 
 	$a = match($maybe) {
 		1 => "one",

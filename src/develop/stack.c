@@ -1034,9 +1034,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 		if (fse->function.class_name) {
 			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (fse->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
-			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    fse->function.class_name);
+			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    zend_string_copy(fse->function.class_name));
 		}
-		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), fse->filename);
+		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), zend_string_copy(fse->filename));
 		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), fse->lineno);
 
 		/* Add parameters */
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		}
 
 		if (fse->include_filename) {
-			add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), fse->include_filename);
+			add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), zend_string_copy(fse->include_filename));
 		}
 
 		add_next_index_zval(return_value, frame);

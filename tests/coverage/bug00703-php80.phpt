@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #703: Line in heredoc marked as not executed
+Test for bug #703: Line in heredoc marked as not executed (>= PHP 8.0)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.0');
+?>
 --INI--
 xdebug.mode=coverage
 xdebug.trace_options=0
@@ -24,10 +29,14 @@ var_dump( $cc[$pathname] );
 
 ?>
 --EXPECTF--
-array(4) {
+array(6) {
   [3]=>
   int(1)
+  [5]=>
+  int(1)
   [6]=>
+  int(1)
+  [10]=>
   int(1)
   [11]=>
   int(1)

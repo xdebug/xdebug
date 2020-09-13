@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint: resolved with breakpoint set in current scope
+Test for bug #1388: Resolved Breakpoint: resolved with breakpoint set in current scope (>= PHP 8.0)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 8.0; dbgp');
 ?>
 --FILE--
 <?php
@@ -14,7 +14,7 @@ $commands = array(
 	'feature_set -n notify_ok -v 1',
 	'feature_set -n resolved_breakpoints -v 1',
 	'step_into',
-	"breakpoint_set -t line -f file://{$filename} -n 3",
+	"breakpoint_set -t line -f file://{$filename} -n 2",
 	'run',
 );
 
@@ -34,11 +34,11 @@ dbgpRunFile( $filename, $commands );
 
 -> step_into -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file://bug01388-20.inc" lineno="4"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="3" status="break" reason="ok"><xdebug:message filename="file://bug01388-20.inc" lineno="3"></xdebug:message></response>
 
--> breakpoint_set -i 4 -t line -f file://bug01388-20.inc -n 3
+-> breakpoint_set -i 4 -t line -f file://bug01388-20.inc -n 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-20.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-20.inc" lineno="3" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="4" id="" resolved="resolved"></response>

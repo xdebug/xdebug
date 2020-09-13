@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved Breakpoint in a closure
+Test for bug #1388: Resolved Breakpoint in a closure (< PHP 8.0)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 8.0; dbgp');
 ?>
 --FILE--
 <?php
