@@ -17,7 +17,7 @@ session_start();
 --EXPECTF--
 FOO
 
-Warning: session_start(): Cannot start session when headers already sent in %sbug00654.php on line 3
+Warning: session_start(): %sheaders%ssent in %sbug00654.php on line 3
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00654.php:0
