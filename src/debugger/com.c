@@ -104,24 +104,28 @@ void set_keepalive_options(int fd)
 
 	ret = setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen);
 	if (ret) {
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "KEEPALIVE", "Could not set SO_KEEPALIVE: %s.", strerror(errno));
 		return;
 	}
 
 	optval = 600;
 	ret = setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
 	if (ret) {
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "KEEPALIVE", "Could not set TCP_KEEPIDLE to %d: %s.", optval, strerror(errno));
 		return;
 	}
 
 	optval = 20;
 	ret = setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
 	if (ret) {
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "KEEPALIVE", "Could not set TCP_KEEPCNT to %d: %s.", optval, strerror(errno));
 		return;
 	}
 
 	optval = 60;
 	ret = setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
 	if (ret) {
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "KEEPALIVE", "Could not set TCP_KEEPINTVL to %d: %s.", optval, strerror(errno));
 		return;
 	}
 }
