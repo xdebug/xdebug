@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-05-29</date>
- <time>11:43:03</time>
+ <date>2020-09-16</date>
+ <time>15:11:45</time>
  <version>
-  <release>2.9.6</release>
-  <api>2.9.6</api>
+  <release>2.9.7</release>
+  <api>2.9.7</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,13 +45,11 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, May 29, 2020 - xdebug 2.9.6
+Wed, Sep 16, 2020 - xdebug 2.9.7
 
 = Fixed bugs:
 
-  - Fixed issue #1782: Cookie "XDEBUG_SESSION" will be soon rejected because it has the “sameSite” attribute set to none
-  - Fixed issue #1787: Branch coverage data does not always follow the lines/functions format
-  - Fixed issue #1790: Segfault in var_dump() or while debugging with protobuf extension
+  - Fixed issue #1839: Add keepalive options to debugging socket
  </notes>
 
  <contents>
@@ -181,7 +179,7 @@ Fri, May 29, 2020 - xdebug 2.9.6
   <required>
    <php>
     <min>7.1.0</min>
-    <max>7.4.99</min>
+    <max>7.4.99</max>
    </php>
    <pearinstaller>
     <min>1.9.1</min>
@@ -191,6 +189,29 @@ Fri, May 29, 2020 - xdebug 2.9.6
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2020-05-29</date>
+   <time>11:43:03</time>
+   <version>
+    <release>2.9.6</release>
+    <api>2.9.6</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, May 29, 2020 - xdebug 2.9.6
+
+= Fixed bugs:
+
+  - Fixed issue #1782: Cookie "XDEBUG_SESSION" will be soon rejected because it has the “sameSite” attribute set to none
+  - Fixed issue #1787: Branch coverage data does not always follow the lines/functions format
+  - Fixed issue #1790: Segfault in var_dump() or while debugging with protobuf extension
+   </notes>
+  </release>
 
   <release>
    <date>2020-04-25</date>
