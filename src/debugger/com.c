@@ -85,6 +85,15 @@ static int xdebug_create_socket_unix(const char *path)
 #endif
 
 #if !WIN32 && !WINNT
+
+/* For OSX */
+#if !defined(SOL_TCP) && defined(IPPROTO_TCP) && defined(__APPLE__)
+# define SOL_TCP IPPROTO_TCP
+#endif
+#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE) && defined(__APPLE__)
+# define TCP_KEEPIDLE TCP_KEEPALIVE
+#endif
+
 void set_keepalive_options(int fd)
 {
 	int optval = 1;
