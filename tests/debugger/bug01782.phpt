@@ -22,5 +22,5 @@ var_dump( xdebug_get_headers( ) );
 %sbug01782.php:2:
 array(1) {
   [0] =>
-  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; expires=%s; Max-Age=1234; path=/; SameSite=Strict"
+  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; expires=%s; Max-Age=123%d; path=/; SameSite=Strict"
 }
