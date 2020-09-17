@@ -29,7 +29,7 @@ $a = new Foo( [ 1,2,3 ] );
 var_dump( $a );
 ?>
 --EXPECTF--
-Warning: Uncaught%sLogicException%sThe object is in an invalid state as the parent constructor was not called%sin %sbug01166.php:14
+Warning: Uncaught%sThe object is in an invalid state as the parent constructor was not called%sin %sbug01166.php:14
 Stack trace:
 #0 [internal function]: IteratorIterator->rewind()
 #1 %sbug01166.php(%d): iterator_count(Object(Foo))
