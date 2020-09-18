@@ -22,6 +22,7 @@ src/codec/enc32be.c
 src/codec/enc32le.c
 src/codec/enc64be.c
 src/ec/ec_all_m31.c
+src/ec/ec_c25519_m31.c
 src/ec/ec_c25519_m64.c
 src/ec/ec_p256_m64.c
 src/ec/ec_prime_i31.c
