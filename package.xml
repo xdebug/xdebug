@@ -224,11 +224,13 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
       </dir>
       <dir name="ec">
        <file name="ec_all_m31.c" role="src" />
+       <file name="ec_c25519_m31.c" role="src" />
        <file name="ec_c25519_m64.c" role="src" />
        <file name="ecdsa_atr.c" role="src" />
        <file name="ecdsa_i31_bits.c" role="src" />
        <file name="ecdsa_i31_vrfy_asn1.c" role="src" />
        <file name="ecdsa_i31_vrfy_raw.c" role="src" />
+       <file name="ec_p256_m31.c" role="src" />
        <file name="ec_p256_m64.c" role="src" />
        <file name="ec_prime_i31.c" role="src" />
        <file name="ec_secp256r1.c" role="src" />
@@ -248,6 +250,7 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
        <file name="i31_fmont.c" role="src" />
        <file name="i31_iszero.c" role="src" />
        <file name="i31_modpow.c" role="src" />
+       <file name="i31_modpow2.c" role="src" />
        <file name="i31_montmul.c" role="src" />
        <file name="i31_muladd.c" role="src" />
        <file name="i31_ninv31.c" role="src" />
@@ -268,7 +271,9 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
       <dir name="rsa">
        <file name="rsa_default_pkcs1_vrfy.c" role="src" />
        <file name="rsa_default_pub.c" role="src" />
+       <file name="rsa_i31_pkcs1_vrfy.c" role="src" />
        <file name="rsa_i62_pkcs1_vrfy.c" role="src" />
+       <file name="rsa_i31_pub.c" role="src" />
        <file name="rsa_i62_pub.c" role="src" />
        <file name="rsa_pkcs1_sig_unpad.c" role="src" />
       </dir>
