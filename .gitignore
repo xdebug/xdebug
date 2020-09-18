@@ -8,6 +8,9 @@
 /*.la
 /.libs
 src/*.dep
+*.lo
+*.loT
+.libs
 src/*.lo
 src/*.loT
 src/.libs
