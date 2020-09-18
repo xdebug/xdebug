@@ -2247,11 +2247,13 @@ static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, 
 */
 #define READ_BUFFER_SIZE 128
 
-#define FD_RL_FILE    0
 #define FD_RL_SOCKET  1
+#ifdef HAVE_XDEBUG_SSL
+# define FD_RL_SSL_SOCKET 2
+#endif
 
 
-static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, unsigned char delim, int *length)
+static int xdebug_fd_read_line_delim(xdebug_con *context,  unsigned char delim, char **cmd, int *length)
 {
 	int size = 0, newl = 0, nbufsize = 0;
 	char *tmp;
@@ -2259,54 +2261,67 @@ static char* xdebug_fd_read_line_delim(int socketfd, fd_buf *context, int type, 
 	char *ptr;
 	char buffer[READ_BUFFER_SIZE + 1];
 
-	if (!context->buffer) {
-		context->buffer = calloc(1,1);
-		context->buffer_size = 0;
+	if (!context->read_buffer->buffer) {
+		context->read_buffer->buffer = xdcalloc(1,1);
+		context->read_buffer->buffer_size = 0;
 	}
 
-	while (context->buffer_size < 1 || context->buffer[context->buffer_size - 1] != delim) {
-		ptr = context->buffer + context->buffer_size;
-		if (type == FD_RL_FILE) {
-			newl = read(socketfd, buffer, READ_BUFFER_SIZE);
-		} else {
-			newl = recv(socketfd, buffer, READ_BUFFER_SIZE, 0);
-		}
+	while ((ptr = memchr(context->read_buffer->buffer, delim, context->read_buffer->buffer_size)) == NULL) {
+		ptr = context->read_buffer->buffer + context->read_buffer->buffer_size;
+		newl = recv(context->socket, buffer, READ_BUFFER_SIZE, 0);
 		if (newl > 0) {
-			context->buffer = realloc(context->buffer, context->buffer_size + newl + 1);
-			memcpy(context->buffer + context->buffer_size, buffer, newl);
-			context->buffer_size += newl;
-			context->buffer[context->buffer_size] = '\0';
-		} else if (newl == -1 && errno == EINTR) {
-			continue;
+			context->read_buffer->buffer = realloc(context->read_buffer->buffer, context->read_buffer->buffer_size + newl + 1);
+			memcpy(context->read_buffer->buffer + context->read_buffer->buffer_size, buffer, newl);
+			context->read_buffer->buffer_size += newl;
+			context->read_buffer->buffer[context->read_buffer->buffer_size] = '\0';
+		} else if (newl == -1) {
+#ifndef WIN32
+			if (errno == EINTR) {
+				continue;
+			}
+			if (errno == EAGAIN) {
+				return 0;
+			}
+#else
+			int lasterr = WSAGetLastError();
+
+			if (lasterr == WSAEINTR) {
+				continue;
+			}
+			if (lasterr == WSAEWOULDBLOCK || lasterr == WSAECONNABORTED) {
+				return 0;
+			}
+#endif
 		} else {
-			free(context->buffer);
-			context->buffer = NULL;
-			context->buffer_size = 0;
-			return NULL;
+			free(context->read_buffer->buffer);
+			context->read_buffer->buffer = NULL;
+			context->read_buffer->buffer_size = 0;
+			return 1;
 		}
 	}
 
-	ptr = memchr(context->buffer, delim, context->buffer_size);
-	size = ptr - context->buffer;
+	size = ptr - context->read_buffer->buffer;
+
 	/* Copy that line into tmp */
 	tmp = malloc(size + 1);
 	tmp[size] = '\0';
-	memcpy(tmp, context->buffer, size);
+	memcpy(tmp, context->read_buffer->buffer, size);
 	/* Rewrite existing buffer */
-	if ((nbufsize = context->buffer_size - size - 1)  > 0) {
+	if ((nbufsize = context->read_buffer->buffer_size - size - 1)  > 0) {
 		tmp_buf = malloc(nbufsize + 1);
 		memcpy(tmp_buf, ptr + 1, nbufsize);
 		tmp_buf[nbufsize] = 0;
 	}
-	free(context->buffer);
-	context->buffer = tmp_buf;
-	context->buffer_size = context->buffer_size - (size + 1);
+	xdfree(context->read_buffer->buffer);
+	context->read_buffer->buffer = tmp_buf;
+	context->read_buffer->buffer_size = context->read_buffer->buffer_size - (size + 1);
 
 	/* Return normal line */
 	if (length) {
 		*length = size;
+		*cmd = tmp;
 	}
-	return tmp;
+	return 0;
 }
 
 static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
@@ -2319,9 +2334,9 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
 	do {
 		length = 0;
 
-		option = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', &length);
-		if (!option) {
-			return 0;
+		ret = xdebug_fd_read_line_delim(context, '\0', &option, &length);
+		if (ret || length <= 0) {
+			return ret;
 		}
 
 		response = xdebug_xml_node_init("response");
@@ -2406,9 +2421,9 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		xdebug_xml_add_attribute_ex(response, "idekey", xdstrdup(XG_DBG(ide_key)), 0, 1);
 	}
 
-	context->buffer = xdmalloc(sizeof(fd_buf));
-	context->buffer->buffer = NULL;
-	context->buffer->buffer_size = 0;
+	context->read_buffer = xdmalloc(sizeof(socket_read_buffer));
+	context->read_buffer->buffer = NULL;
+	context->read_buffer->buffer_size = 0;
 
 	send_message_ex(context, response, DBGP_STATUS_STARTING);
 	xdebug_xml_node_dtor(response);
@@ -2483,8 +2498,8 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 		xdebug_hash_destroy(context->eval_id_lookup);
 		xdebug_llist_destroy(context->line_breakpoints, NULL);
 		xdebug_hash_destroy(context->breakpoint_list);
-		xdfree(context->buffer);
-		context->buffer = NULL;
+		xdfree(context->read_buffer);
+		context->read_buffer = NULL;
 	}
 
 	if (XG_DBG(lasttransid)) {

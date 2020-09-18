@@ -64,7 +64,7 @@ struct _xdebug_con {
 	int                    host_type; /* XDEBUG_NORMAL, XDEBUG_CLOUD, XDEBUG_CLOUD_FROM_TRIGGER_VALUE */
 	void                  *options;
 	xdebug_remote_handler *handler;
-	fd_buf                *buffer;
+	socket_read_buffer    *read_buffer;
 	zend_string           *program_name;
 	xdebug_hash           *breakpoint_list;
 	xdebug_hash           *function_breakpoints;
