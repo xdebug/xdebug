@@ -6,6 +6,9 @@
 /*.mk
 /*.la
 /.libs
+*.lo
+*.loT
+.libs
 src/*.lo
 src/*.loT
 src/.libs
