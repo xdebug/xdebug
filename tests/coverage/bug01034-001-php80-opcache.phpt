@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [1] (>= PHP 8.0, !opcache)
+Test for bug #1034: path coverage [1] (>= PHP 8.0, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.0; !opcache');
+check_reqs('PHP >= 8.0; opcache');
 ?>
 --INI--
 xdebug.mode=coverage
@@ -45,12 +45,12 @@ loopy
 
 trycatch
 - branches
-  - 00; OP: 00-05; line: 23-24 HIT; out1: EX  X 
-  - 09; OP: 09-09; line: 26-26 HIT; out1: 10 HIT; out2: EX  X 
-  - 10; OP: 10-13; line: 27-29 HIT; out1: EX  X 
+  - 00; OP: 00-04; line: 24-24 HIT; out1: EX  X 
+  - 05; OP: 05-05; line: 26-26 HIT; out1: 06 HIT; out2: EX  X 
+  - 06; OP: 06-09; line: 27-29 HIT; out1: EX  X 
 - paths
   - 0: HIT
-  - 9 10: HIT
+  - 5 6: HIT
 
 {main}
 - branches
