@@ -28,6 +28,8 @@
 #include "lib/vector.h"
 #include "debugger_private.h"
 
+#include "../../lib/bearssl/inc/bearssl.h"
+
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;
 typedef struct _xdebug_brk_span             xdebug_brk_span;
@@ -57,8 +59,20 @@ struct _xdebug_brk_admin {
 	char *key;
 };
 
+#define XDEBUG_SSL_OFF 0
+#define XDEBUG_SSL_ON  1
+
 struct _xdebug_con {
 	int                    socket;
+
+	struct {
+		int                     enabled;
+		br_ssl_client_context   sc;
+		br_x509_minimal_context xc;
+		unsigned char           iobuf[BR_SSL_BUFSIZE_BIDI];
+		br_sslio_context        ioc;
+	} ssl;
+
 	void                  *options;
 	xdebug_remote_handler *handler;
 	socket_read_buffer    *read_buffer;
