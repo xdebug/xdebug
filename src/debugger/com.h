@@ -31,26 +31,8 @@
 #define SOCK_TIMEOUT_ERR -2
 #define SOCK_ACCESS_ERR -3
 
-#if WIN32|WINNT
-#define SCLOSE(a) closesocket(a)
-#define SSENDL(a,b,c) send(a,b,c,0)
-#define SSEND(a,b) send(a,b,strlen(b),0)
-#define SREAD(a,b,c) recv(a,b,c,0)
-#else
-#define SCLOSE(a) close(a)
-#define SSENDL(a,b,c) write(a,b,c)
-#define SSEND(a,b) write(a,b,strlen(b))
-#define SREAD(a,b,c) read(a,b,c)
-#endif
-
-
-#define SENDMSG(socket, str) {  \
-	char *message_buffer;       \
-                                \
-	message_buffer = str;       \
-	SSEND(socket, message_buffer); \
-	xdfree(message_buffer);     \
-}
+size_t xdebug_read_data(xdebug_con *context, char *buffer, size_t buffer_size);
+size_t xdebug_send_data(xdebug_con *context, char *data, size_t length);
 
 void xdebug_close_socket(int socket);
 

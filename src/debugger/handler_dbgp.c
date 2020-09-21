@@ -299,7 +299,7 @@ static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int s
 	}
 
 	tmp = make_message(context, message);
-	if ((size_t) SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
+	if (!xdebug_send_data(context, tmp->d, tmp->l)) {
 		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
 		char *utime_str = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 
@@ -2268,7 +2268,7 @@ static int xdebug_fd_read_line_delim(xdebug_con *context,  unsigned char delim, 
 
 	while ((ptr = memchr(context->read_buffer->buffer, delim, context->read_buffer->buffer_size)) == NULL) {
 		ptr = context->read_buffer->buffer + context->read_buffer->buffer_size;
-		newl = recv(context->socket, buffer, READ_BUFFER_SIZE, 0);
+		newl = xdebug_read_data(context, buffer, READ_BUFFER_SIZE);
 		if (newl > 0) {
 			context->read_buffer->buffer = realloc(context->read_buffer->buffer, context->read_buffer->buffer_size + newl + 1);
 			memcpy(context->read_buffer->buffer + context->read_buffer->buffer_size, buffer, newl);
