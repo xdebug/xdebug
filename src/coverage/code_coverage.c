@@ -1025,12 +1025,17 @@ static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 
 void xdebug_coverage_minit(INIT_FUNC_ARGS)
 {
-	zend_extension dummy_ext;
 	int i;
 
 	/* Get reserved offsets */
+#if PHP_VERSION_ID >= 80000
+	zend_xdebug_cc_run_offset = zend_get_resource_handle(XDEBUG_NAME);
+	zend_xdebug_filter_offset = zend_get_resource_handle(XDEBUG_NAME);
+#else
+	zend_extension dummy_ext;
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
 	zend_xdebug_filter_offset = zend_get_resource_handle(&dummy_ext);
+#endif
 
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_common_override_handler);
