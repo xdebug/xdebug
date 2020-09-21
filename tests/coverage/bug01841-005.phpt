@@ -25,17 +25,17 @@ xdebug_stop_code_coverage();
 --EXPECTF--
 a
 - branches
-  - 00; OP: 00-06; line: 02-06 HIT; out1: 07 HIT; out2: 10  X 
-  - 07; OP: 07-08; line: 08-08 HIT; out1: 09  X ; out2: 12 HIT
-  - 09; OP: 09-09; line: 08-08  X ; out1: 14  X 
-  - 10; OP: 10-11; line: 07-07  X ; out1: 16  X 
-  - 12; OP: 12-13; line: 08-08 HIT; out1: 16 HIT
-  - 14; OP: 14-15; line: 09-09  X ; out1: 16  X 
-  - 16; OP: 16-21; line: 09-13 HIT
+  - 00; OP: 00-05; line: 04-06 HIT; out1: 06 HIT; out2: 09  X 
+  - 06; OP: 06-07; line: 08-08 HIT; out1: 08  X ; out2: 11 HIT
+  - 08; OP: 08-08; line: 08-08  X ; out1: 13  X 
+  - 09; OP: 09-10; line: 07-07  X ; out1: 15  X 
+  - 11; OP: 11-12; line: 08-08 HIT; out1: 15 HIT
+  - 13; OP: 13-14; line: 09-09  X ; out1: 15  X 
+  - 15; OP: 15-20; line: 09-13 HIT
 - paths
-  - 0 7 9 14 16:  X 
-  - 0 7 12 16: HIT
-  - 0 10 16:  X 
+  - 0 6 8 13 15:  X 
+  - 0 6 11 15: HIT
+  - 0 9 15:  X 
 
 {main}
 - branches

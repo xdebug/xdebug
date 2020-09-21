@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [5] (>= PHP 7.4, opcache)
+Test for bug #1034: path coverage [5] (>= PHP 7.4, < PHP 8.0, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.4; opcache');
+check_reqs('PHP >= 7.4,< 8.0; opcache');
 ?>
 --INI--
 xdebug.mode=coverage

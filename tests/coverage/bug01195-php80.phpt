@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1195: Segfault with code coverage and foreach (>= PHP 7.4, < PHP 8.0, !opcache)
+Test for bug #1195: Segfault with code coverage and foreach (>= PHP 8.0, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.4,< 8.0; !opcache');
+check_reqs('PHP >= 8.0; !opcache');
 ?>
 --INI--
 xdebug.mode=coverage
@@ -26,14 +26,14 @@ foo
 the end
 fe
 - branches
-  - 00; OP: 00-03; line: 02-04 HIT; out1: 04 HIT; out2: 08  X 
-  - 04; OP: 04-04; line: 04-04 HIT; out1: 05 HIT; out2: 08 HIT
-  - 05; OP: 05-07; line: 06-04 HIT; out1: 04 HIT
-  - 08; OP: 08-12; line: 04-09 HIT; out1: EX  X 
+  - 00; OP: 00-02; line: 02-04 HIT; out1: 03 HIT; out2: 07  X 
+  - 03; OP: 03-03; line: 04-04 HIT; out1: 04 HIT; out2: 07 HIT
+  - 04; OP: 04-06; line: 06-04 HIT; out1: 03 HIT
+  - 07; OP: 07-11; line: 04-09 HIT; out1: EX  X 
 - paths
-  - 0 4 5 4 8: HIT
-  - 0 4 8:  X 
-  - 0 8:  X 
+  - 0 3 4 3 7: HIT
+  - 0 3 7:  X 
+  - 0 7:  X 
 
 {main}
 - branches
