@@ -15,9 +15,9 @@ function foo($a)
 foo(0);
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Maximum function nesting level of '100' reached, aborting! in %smax_stack_frames.php on line 4
+Fatal error: Uncaught Error: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '100' frames in %smax_stack_frames.php on line 4
 
-Error: Maximum function nesting level of '100' reached, aborting! in %smax_stack_frames.php on line 4
+Error: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '100' frames in %smax_stack_frames.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %smax_stack_frames.php:0
