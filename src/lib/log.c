@@ -219,7 +219,21 @@ static int xdebug_info_printf(const char *fmt, ...) /* {{{ */
 
 static void print_logo(void)
 {
-	PUTS("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"176\" height=\"91\" viewBox=\"0 0 351 181\"><title>Xdebug</title><g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#FFF\"><g transform=\"translate(5 5)\"><path fill=\"#317E1E\" fill-rule=\"nonzero\" stroke-width=\"5\" d=\"M127.9 85.5l68.2 70.7.4 17.3h-38.6l-60.8-59.7-60 59.7h-39v-17.6l69.7-69.8-69.6-71.2V-2.5h38.7l60.2 60 61-60h38.3v16l-68.5 72z\"></path><circle cx=\"75.9\" cy=\"74.6\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"105.1\" cy=\"85\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"158.4\" cy=\"15\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"50.9\" cy=\"140\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"180.4\" cy=\"158.5\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><path stroke-linecap=\"square\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M32.6 158.2L42 149M104.3 69.1l49.4-49.4\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M102.3 82.7L30.3 10H11.2M167.4 10H183M11.2 160.7l79.2-78\"></path><path stroke-linejoin=\"round\" stroke-opacity=\".7\" stroke-width=\"4\" d=\"M116.3 74.6L181 10\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M20.7 19.7l52.7 52.6\"></path><path stroke-linejoin=\"round\" stroke-opacity=\".7\" stroke-width=\"4\" d=\"M116.3 96.7l32 32\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M155.2 133.6l22.1 22M53.6 137.5L97 94.9l67.1 66.6h4.9\"></path></g><g fill=\"#000\" fill-rule=\"nonzero\" stroke-width=\"4\"><path d=\"M158.3 107.7V72.9c0-.5 0-.5-.8-.5-.7 0-.7 0-.7.6v34.7c0 .6 0 .5.7.5.8 0 .7 0 .7-.5zm3.9 11.2a22.5 22.5 0 0 1-20-.7c-3.4-2-5.2-4.8-5.2-8.4V69.6c0-3 1.5-5.6 4.3-7.4a17 17 0 0 1 9.2-2.4c3 0 5.6.3 7.7 1V47H178v73h-15l-.8-1.1zM200.9 84V73.2c0-.8 0-.8-.8-.8s-.8 0-.8.8V84h1.6zm-1.6 12.5v11c0 .7 0 .7.8.7.7 0 .8 0 .8-.8V97.2h19.8v10.4c0 8.9-7.3 13.2-20.7 13.2-13.3 0-20.5-4.5-20.5-13.7V73.6c0-9.2 7.2-13.8 20.5-13.8 13.4 0 20.7 4.4 20.7 13.4v23.3h-21.4zM243.3 107.7V73c0-.6 0-.6-.7-.6-.8 0-.8 0-.8.5v34.8c0 .6 0 .5.8.5.7 0 .7 0 .7-.5zm-5.4 11.1l-.9 1.3h-15V47h19.8v13.8c2.1-.7 4.7-1 7.9-1 3.1 0 6.1.8 8.8 2.3 3 1.6 4.6 4.2 4.6 7.5v40.2c0 3.6-1.8 6.4-5.3 8.4a22.5 22.5 0 0 1-19.9.6zM285.8 119.7c-2.1.8-4.7 1.1-7.8 1.1a17 17 0 0 1-9.1-2.4c-2.8-1.7-4.4-4.2-4.4-7.2v-51h19.8v47.5c0 .6 0 .5.8.5.7 0 .7 0 .7-.4V60h19.8v60h-19.8v-.4zM328.3 108.3V73c0-.6 0-.6-.7-.6-.8 0-.8 0-.8.6V108c0 .6 0 .6.8.6.7 0 .7 0 .7-.4zm-.9 11.8c-2 .5-4.2.7-6.9.7a17 17 0 0 1-9.1-2.4c-2.9-1.7-4.4-4.2-4.4-7.2V71c0-7.4 5.2-11.2 14.6-11.2 2.3 0 5 .7 8.3 2l1.7-1.7H348v57.3c0 4.4-1 9.5-2.8 12-2.1 3.2-7.7 4.5-17 4.5h-18.4v-12h14.9c1.1 0 2-.7 2.7-1.8z\"></path></g></g></svg>");
+	if (!sapi_module.phpinfo_as_text) {
+		PUTS("<tr><td colspan=\"2\" class=\"l\">");
+		PUTS("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"176\" height=\"91\" viewBox=\"0 0 351 181\"><title>Xdebug</title><g fill=\"none\" fill-rule=\"evenodd\" stroke=\"#FFF\"><g transform=\"translate(5 5)\"><path fill=\"#317E1E\" fill-rule=\"nonzero\" stroke-width=\"5\" d=\"M127.9 85.5l68.2 70.7.4 17.3h-38.6l-60.8-59.7-60 59.7h-39v-17.6l69.7-69.8-69.6-71.2V-2.5h38.7l60.2 60 61-60h38.3v16l-68.5 72z\"></path><circle cx=\"75.9\" cy=\"74.6\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"105.1\" cy=\"85\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"158.4\" cy=\"15\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"50.9\" cy=\"140\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><circle cx=\"180.4\" cy=\"158.5\" r=\"3.5\" stroke-opacity=\".8\" stroke-width=\"4\"></circle><path stroke-linecap=\"square\" stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M32.6 158.2L42 149M104.3 69.1l49.4-49.4\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M102.3 82.7L30.3 10H11.2M167.4 10H183M11.2 160.7l79.2-78\"></path><path stroke-linejoin=\"round\" stroke-opacity=\".7\" stroke-width=\"4\" d=\"M116.3 74.6L181 10\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M20.7 19.7l52.7 52.6\"></path><path stroke-linejoin=\"round\" stroke-opacity=\".7\" stroke-width=\"4\" d=\"M116.3 96.7l32 32\"></path><path stroke-linejoin=\"round\" stroke-width=\"4\" d=\"M155.2 133.6l22.1 22M53.6 137.5L97 94.9l67.1 66.6h4.9\"></path></g><g fill=\"#000\" fill-rule=\"nonzero\" stroke-width=\"4\"><path d=\"M158.3 107.7V72.9c0-.5 0-.5-.8-.5-.7 0-.7 0-.7.6v34.7c0 .6 0 .5.7.5.8 0 .7 0 .7-.5zm3.9 11.2a22.5 22.5 0 0 1-20-.7c-3.4-2-5.2-4.8-5.2-8.4V69.6c0-3 1.5-5.6 4.3-7.4a17 17 0 0 1 9.2-2.4c3 0 5.6.3 7.7 1V47H178v73h-15l-.8-1.1zM200.9 84V73.2c0-.8 0-.8-.8-.8s-.8 0-.8.8V84h1.6zm-1.6 12.5v11c0 .7 0 .7.8.7.7 0 .8 0 .8-.8V97.2h19.8v10.4c0 8.9-7.3 13.2-20.7 13.2-13.3 0-20.5-4.5-20.5-13.7V73.6c0-9.2 7.2-13.8 20.5-13.8 13.4 0 20.7 4.4 20.7 13.4v23.3h-21.4zM243.3 107.7V73c0-.6 0-.6-.7-.6-.8 0-.8 0-.8.5v34.8c0 .6 0 .5.8.5.7 0 .7 0 .7-.5zm-5.4 11.1l-.9 1.3h-15V47h19.8v13.8c2.1-.7 4.7-1 7.9-1 3.1 0 6.1.8 8.8 2.3 3 1.6 4.6 4.2 4.6 7.5v40.2c0 3.6-1.8 6.4-5.3 8.4a22.5 22.5 0 0 1-19.9.6zM285.8 119.7c-2.1.8-4.7 1.1-7.8 1.1a17 17 0 0 1-9.1-2.4c-2.8-1.7-4.4-4.2-4.4-7.2v-51h19.8v47.5c0 .6 0 .5.8.5.7 0 .7 0 .7-.4V60h19.8v60h-19.8v-.4zM328.3 108.3V73c0-.6 0-.6-.7-.6-.8 0-.8 0-.8.6V108c0 .6 0 .6.8.6.7 0 .7 0 .7-.4zm-.9 11.8c-2 .5-4.2.7-6.9.7a17 17 0 0 1-9.1-2.4c-2.9-1.7-4.4-4.2-4.4-7.2V71c0-7.4 5.2-11.2 14.6-11.2 2.3 0 5 .7 8.3 2l1.7-1.7H348v57.3c0 4.4-1 9.5-2.8 12-2.1 3.2-7.7 4.5-17 4.5h-18.4v-12h14.9c1.1 0 2-.7 2.7-1.8z\"></path></g></g></svg>");
+		PUTS("</td></tr>\n");
+	} else {
+		PUTS("\33[1m__   __   _      _                 \n"
+		     "\33[1m\\ \\ / /  | |    | |                \n"
+		     "\33[1m \\ V / __| | ___| |__  _   _  __ _ \n"
+		     "\33[1m  > < / _` |/ _ \\ '_ \\| | | |/ _` |\n"
+		     "\33[1m / . \\ (_| |  __/ |_) | |_| | (_| |\n"
+		     "\33[1m/_/ \\_\\__,_|\\___|_.__/ \\__,_|\\__, |\n"
+		     "\33[1m                              __/ |\n"
+		     "\33[1m                             |___/ \n\n\33[0m");
+
+	}
 }
 
 void print_feature_row(const char *name, int flag, const char *doc_name)
@@ -243,9 +257,7 @@ void xdebug_print_info(void)
 {
 	php_info_print_table_start();
 
-	PUTS("<tr><td colspan=\"2\" class=\"l\">");
 	print_logo();
-	PUTS("</td></tr>\n");
 
 	php_info_print_table_row(2, "Version", XDEBUG_VERSION);
 
