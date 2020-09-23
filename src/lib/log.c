@@ -63,6 +63,15 @@ static inline void xdebug_internal_log(int channel, int log_level, const char *m
 
 	pid = xdebug_get_pid();
 
+	if (!XG_LIB(log_opened_message_sent) && XG_LIB(log_open_timestring)) {
+		XG_LIB(log_opened_message_sent) = 1;
+
+		fprintf(XG_LIB(log_file), "[" ZEND_ULONG_FMT "] Log opened at %s\n", pid, XG_LIB(log_open_timestring));
+		fflush(XG_LIB(log_file));
+		xdfree(XG_LIB(log_open_timestring));
+		XG_LIB(log_open_timestring) = NULL;
+	}
+
 	fprintf(
 		XG_LIB(log_file),
 		"[" ZEND_ULONG_FMT "] %s%s%s\n",
@@ -491,21 +500,16 @@ PHP_FUNCTION(xdebug_info)
 
 void xdebug_open_log(void)
 {
-	zend_ulong pid;
-	char *timestr;
-
 	/* initialize remote log file */
 	XG_LIB(log_file) = NULL;
+	XG_LIB(log_opened_message_sent) = 0;
+	XG_LIB(log_open_timestring) = NULL;
+
 	if (XINI_LIB(log) && strlen(XINI_LIB(log))) {
 		XG_LIB(log_file) = xdebug_fopen(XINI_LIB(log), "a", NULL, NULL);
 	}
 	if (XG_LIB(log_file)) {
-		pid = xdebug_get_pid();
-		timestr = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
-
-		fprintf(XG_LIB(log_file), "[" ZEND_ULONG_FMT "] Log opened at %s\n", pid, timestr);
-		fflush(XG_LIB(log_file));
-		xdfree(timestr);
+		XG_LIB(log_open_timestring) = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 	} else if (strlen(XINI_LIB(log))) {
 		xdebug_log_diagnose_permissions(XLOG_CHAN_LOGFILE, NULL, XINI_LIB(log));
 	}
@@ -513,19 +517,28 @@ void xdebug_open_log(void)
 
 void xdebug_close_log()
 {
-	zend_ulong pid;
 	char *timestr;
 
 	if (!XG_LIB(log_file)) {
 		return;
 	}
 
-	pid = xdebug_get_pid();
-	timestr = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
+	if (XG_LIB(log_opened_message_sent)) {
+		zend_ulong pid;
 
-	fprintf(XG_LIB(log_file), "[" ZEND_ULONG_FMT "] Log closed at %s\n\n", pid, timestr);
-	fflush(XG_LIB(log_file));
-	xdfree(timestr);
+		pid = xdebug_get_pid();
+		timestr = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
+
+		fprintf(XG_LIB(log_file), "[" ZEND_ULONG_FMT "] Log closed at %s\n\n", pid, timestr);
+		fflush(XG_LIB(log_file));
+		xdfree(timestr);
+	}
+
+	if (XG_LIB(log_open_timestring)) {
+		xdfree(XG_LIB(log_open_timestring));
+		XG_LIB(log_open_timestring) = NULL;
+	}
+
 	fclose(XG_LIB(log_file));
 	XG_LIB(log_file) = NULL;
 }
