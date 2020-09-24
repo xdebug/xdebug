@@ -36,7 +36,7 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-this-op-002.php:2
                            => $a = class test {  } %sassignment-trace-this-op-002.php:3
 %w%f %w%d     -> test->assign() %sassignment-trace-this-op-002.php:19
-                             => $this->test = array ('foo' => 0) %sassignment-trace-this-op-002.php:5
+                             => $this->test = ['foo' => 0] %sassignment-trace-this-op-002.php:5
                              => $this->test['foo'] += 42 %sassignment-trace-this-op-002.php:6
                              => $this->test['foo'] -= 2 %sassignment-trace-this-op-002.php:7
                              => $this->test['foo'] *= 2 %sassignment-trace-this-op-002.php:8

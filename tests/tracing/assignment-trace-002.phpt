@@ -51,7 +51,7 @@ Call Stack:
 
 TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-002.php:2
-                           => $t = array () %sassignment-trace-002.php:13
+                           => $t = [] %sassignment-trace-002.php:13
                            => $t['a'] = 98 %sassignment-trace-002.php:14
                            => $t['b'] = 4 %sassignment-trace-002.php:15
                            => $t['b'] -= 8 %sassignment-trace-002.php:16
@@ -59,7 +59,7 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $t['b'] <<= 1 %sassignment-trace-002.php:18
                            => $t['c'] = 0.125 %sassignment-trace-002.php:19
 %w%f %w%d     -> test(1, 2, 3) %sassignment-trace-002.php:21
-                             => $t = array ('a' => 4, 'b' => 9, 'c' => 13) %sassignment-trace-002.php:6
+                             => $t = ['a' => 4, 'b' => 9, 'c' => 13] %sassignment-trace-002.php:6
                              => $t['d'] = 89 %sassignment-trace-002.php:7
                              => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace-002.php:8
                              => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace-002.php:9

@@ -34,10 +34,10 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $a = 42 %sbug00702-001.php:4
                            => $b =& $a %sbug00702-001.php:5
                            => $b = 43 %sbug00702-001.php:6
-                           => $array = array (0 => 1, 1 => 2) %sbug00702-001.php:8
+                           => $array = [0 => 1, 1 => 2] %sbug00702-001.php:8
                            => $array[] = 3 %sbug00702-001.php:9
                            => $array[] =& $array[2] %sbug00702-001.php:10
-                           => $array = array (0 => 1, 1 => 2, 2 => array (0 => 3, 1 => 4, 2 => 6)) %sbug00702-001.php:12
+                           => $array = [0 => 1, 1 => 2, 2 => [0 => 3, 1 => 4, 2 => 6]] %sbug00702-001.php:12
                            => $array[] = 4 %sbug00702-001.php:13
                            => $array[] =& $array[2][1] %sbug00702-001.php:14
 %w%f %w%d     -> xdebug_stop_trace() %sbug00702-001.php:16

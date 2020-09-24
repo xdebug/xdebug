@@ -45,4 +45,4 @@ Call Stack:
 
 Dump $_SERVER
    $_SERVER['argc'] = 1
-   $_SERVER['argv'] = array (0 => '%sdump-superglobal.php')
+   $_SERVER['argv'] = [0 => '%sdump-superglobal.php']

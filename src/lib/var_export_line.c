@@ -189,7 +189,11 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			myht = Z_ARRVAL_P(*struc);
 
 			if (!xdebug_zend_hash_is_recursive(myht)) {
-				xdebug_str_add_literal(str, "array (");
+				if (debug_zval) {
+					xdebug_str_add_literal(str, "array (");
+				} else {
+					xdebug_str_addc(str, '[');
+				}
 				if (level <= options->max_depth) {
 					options->runtime[level].current_element_nr = 0;
 					options->runtime[level].start_element_nr = 0;
@@ -210,7 +214,7 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 				} else {
 					xdebug_str_add_literal(str, "...");
 				}
-				xdebug_str_addc(str, ')');
+				xdebug_str_addc(str, debug_zval ? ')' : ']');
 			} else {
 				xdebug_str_add_literal(str, "...");
 			}
