@@ -432,6 +432,24 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 #endif
 	}
 
+#if PHP_VERSION_ID >= 80000
+	if (ZEND_CALL_INFO(zdata) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_string *name;
+		zval        *param;
+		int          i = fse->varc;
+
+		fse->varc += zend_hash_num_elements(zdata->extra_named_params);
+		fse->var = xdrealloc(fse->var, fse->varc * sizeof(xdebug_var_name));
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(zdata->extra_named_params, name, param) {
+			fse->var[i].name = zend_string_copy(name);
+			ZVAL_COPY(&(fse->var[i].data), param);
+			fse->var[i].is_variadic = 0;
+			i++;
+		} ZEND_HASH_FOREACH_END();
+	}
+#endif
+
 #if DEBUG
 	for (i = 0; i < fse->varc; i++) {
 		fprintf(stderr, "%2d %-20s %c %s\n", i, fse->var[i].name ? ZSTR_VAL(fse->var[i].name) : "---", fse->var[i].is_variadic ? 'V' : ' ', xdebug_get_zval_value_line(&fse->var[i].data, 0, NULL)->d);
@@ -522,6 +540,24 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 		fprintf(stderr, "OK\n");
 #endif
 	}
+
+#if PHP_VERSION_ID >= 80000
+	if (ZEND_CALL_INFO(zdata) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zend_string *name;
+		zval        *param;
+		int          i = fse->varc;
+
+		fse->varc += zend_hash_num_elements(zdata->extra_named_params);
+		fse->var = xdrealloc(fse->var, fse->varc * sizeof(xdebug_var_name));
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(zdata->extra_named_params, name, param) {
+			fse->var[i].name = zend_string_copy(name);
+			ZVAL_COPY(&(fse->var[i].data), param);
+			fse->var[i].is_variadic = 0;
+			i++;
+		} ZEND_HASH_FOREACH_END();
+	}
+#endif
 
 #if DEBUG
 	for (i = 0; i < fse->varc; i++) {
