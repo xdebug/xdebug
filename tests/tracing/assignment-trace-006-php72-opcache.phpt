@@ -44,12 +44,12 @@ unlink($tf);
 TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s' %sassignment-trace-006-php72-opcache.php:2
 %w%f %w%d     -> foo::test() %sassignment-trace-006-php72-opcache.php:23
-                             => self::foo = array () %sassignment-trace-006-php72-opcache.php:11
+                             => self::foo = [] %sassignment-trace-006-php72-opcache.php:11
                              => self::foo[] = 42 %sassignment-trace-006-php72-opcache.php:12
                              => self::var = 'var' %sassignment-trace-006-php72-opcache.php:13
                              => self::var2 = 'var' %sassignment-trace-006-php72-opcache.php:14
                              => self::foo[42] = 44 %sassignment-trace-006-php72-opcache.php:16
-                             => self::bar['test'] = array () %sassignment-trace-006-php72-opcache.php:18
+                             => self::bar['test'] = [] %sassignment-trace-006-php72-opcache.php:18
                              => self::bar['test'][] = 55 %sassignment-trace-006-php72-opcache.php:20
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-006-php72-opcache.php:25
 %w%f %w%d

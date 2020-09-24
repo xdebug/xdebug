@@ -50,7 +50,7 @@ Call Stack:
 
 TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-002-php73-opcache.php:2
-                           => $t = array () %sassignment-trace-002-php73-opcache.php:13
+                           => $t = [] %sassignment-trace-002-php73-opcache.php:13
                            => $t['a'] = 98 %sassignment-trace-002-php73-opcache.php:14
                            => $t['b'] = 4 %sassignment-trace-002-php73-opcache.php:15
                            => $t['b'] -= 8 %sassignment-trace-002-php73-opcache.php:16
@@ -58,7 +58,7 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $t['b'] <<= 1 %sassignment-trace-002-php73-opcache.php:18
                            => $t['c'] = 0.125 %sassignment-trace-002-php73-opcache.php:19
 %w%f %w%d     -> test(1, 2, 3) %sassignment-trace-002-php73-opcache.php:21
-                             => $t = array ('a' => 4, 'b' => 9, 'c' => 13, 'd' => 89) %sassignment-trace-002-php73-opcache.php:7
+                             => $t = ['a' => 4, 'b' => 9, 'c' => 13, 'd' => 89] %sassignment-trace-002-php73-opcache.php:7
                              => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace-002-php73-opcache.php:8
                              => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace-002-php73-opcache.php:9
                              => $t['c'] /= 7 %sassignment-trace-002-php73-opcache.php:10

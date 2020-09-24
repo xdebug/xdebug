@@ -31,9 +31,9 @@ unlink($tf);
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> Test->__construct() %strace_with_magic_call_method.php:14
 %w%f %w%d     -> Test->testFunc('test1', 'test2') %strace_with_magic_call_method.php:15
-%w%f %w%d       -> Test->__call($func = 'testFunc', $args = array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method.php:15
-%w%f %w%d         -> Test->testFunc($args = array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method.php:7
-%w%f %w%d           -> array_sum($ar%s = array (0 => 'test1', 1 => 'test2')) %strace_with_magic_call_method.php:10
+%w%f %w%d       -> Test->__call($func = 'testFunc', $args = [0 => 'test1', 1 => 'test2']) %strace_with_magic_call_method.php:15
+%w%f %w%d         -> Test->testFunc($args = [0 => 'test1', 1 => 'test2']) %strace_with_magic_call_method.php:7
+%w%f %w%d           -> array_sum($ar%s = [0 => 'test1', 1 => 'test2']) %strace_with_magic_call_method.php:10
 %w%f %w%d     -> xdebug_stop_trace() %strace_with_magic_call_method.php:17
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

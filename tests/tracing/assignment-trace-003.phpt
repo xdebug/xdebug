@@ -30,7 +30,7 @@ Call Stack:
 
 TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s' %sassignment-trace-003.php:2
-                           => $t = array ('a' => 4, 'b' => 9, 'c' => 13) %sassignment-trace-003.php:4
+                           => $t = ['a' => 4, 'b' => 9, 'c' => 13] %sassignment-trace-003.php:4
                            => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace-003.php:5
                            => $t['a'] += %r(NULL|\*uninitialized\*)%r %sassignment-trace-003.php:6
 %w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-003.php:8

@@ -36,7 +36,7 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-static-prop-op-002.php:2
                            => $a = class test {  } %sassignment-trace-static-prop-op-002.php:3
 %w%f %w%d     -> test->assign() %sassignment-trace-static-prop-op-002.php:19
-                             => self::test = array ('foo' => 0) %sassignment-trace-static-prop-op-002.php:4
+                             => self::test = ['foo' => 0] %sassignment-trace-static-prop-op-002.php:4
                              => self::test['foo'] = 0 %sassignment-trace-static-prop-op-002.php:5
                              => self::test['foo'] += 42 %sassignment-trace-static-prop-op-002.php:6
                              => self::test['foo'] -= 2 %sassignment-trace-static-prop-op-002.php:7

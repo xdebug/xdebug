@@ -31,7 +31,7 @@ unlink($tf);
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-obj-op-003.php:2
-                           => $a = array ('foo' => class stdClass {  }) %sassignment-trace-obj-op-003.php:4
+                           => $a = ['foo' => class stdClass {  }] %sassignment-trace-obj-op-003.php:4
                            => $a['foo']->test = 0 %sassignment-trace-obj-op-003.php:5
                            => $a['foo']->test += 42 %sassignment-trace-obj-op-003.php:6
                            => $a['foo']->test -= 2 %sassignment-trace-obj-op-003.php:7

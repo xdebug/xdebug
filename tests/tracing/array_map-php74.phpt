@@ -29,7 +29,7 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> array_map($callback = 'strlen', ...$arrays = variadic(0 => array (0 => 'a', 1 => 'bb', 2 => 'ccc'))) %sarray_map-php74.php:5
+%w%f %w%d     -> array_map($callback = 'strlen', ...$arrays = variadic(0 => [0 => 'a', 1 => 'bb', 2 => 'ccc'])) %sarray_map-php74.php:5
 %w%f %w%d       -> strlen($str = 'a') %sarray_map-php74.php:5
 %w%f %w%d       -> strlen($str = 'bb') %sarray_map-php74.php:5
 %w%f %w%d       -> strlen($str = 'ccc') %sarray_map-php74.php:5

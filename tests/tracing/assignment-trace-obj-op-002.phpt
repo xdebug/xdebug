@@ -32,7 +32,7 @@ unlink($tf);
 TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $tf = '%s.xt' %sassignment-trace-obj-op-002.php:2
                            => $a = class stdClass {  } %sassignment-trace-obj-op-002.php:4
-                           => $a->test = array ('foo' => 0) %sassignment-trace-obj-op-002.php:5
+                           => $a->test = ['foo' => 0] %sassignment-trace-obj-op-002.php:5
                            => $a->test['foo'] += 42 %sassignment-trace-obj-op-002.php:6
                            => $a->test['foo'] -= 2 %sassignment-trace-obj-op-002.php:7
                            => $a->test['foo'] *= 2 %sassignment-trace-obj-op-002.php:8

@@ -29,5 +29,5 @@ Call Stack:
 Variables in local scope (#2):
   $a = 5
   $b = 6
-  $c = array (0 => 5, 1 => 36)
+  $c = [0 => 5, 1 => 36]
   $d = class stdClass {  }

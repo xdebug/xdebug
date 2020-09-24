@@ -35,7 +35,7 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
                            => $b = 43 %sbug00702-002.php:6
                            => $object = class stdClass {  } %sbug00702-002.php:8
                            => $object->foo = 'bar' %sbug00702-002.php:9
-                           => $object->array = array (0 => 1, 1 => 2, 2 => 3, 3 => 5, 4 => 8, 5 => 13) %sbug00702-002.php:10
+                           => $object->array = [0 => 1, 1 => 2, 2 => 3, 3 => 5, 4 => 8, 5 => 13] %sbug00702-002.php:10
                            => $object->bar =& $object->foo %sbug00702-002.php:11
                            => $object->array[] =& $object->foo %sbug00702-002.php:12
                            => $object->array[] =& $object->array[4] %sbug00702-002.php:13

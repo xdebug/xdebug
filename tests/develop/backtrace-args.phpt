@@ -23,9 +23,9 @@ Error: Call to undefined function foo() in %sbacktrace-args.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbacktrace-args.php:0
-%w%f %w%d   2. foo2($a = 4, $b = array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))) %sbacktrace-args.php:7
+%w%f %w%d   2. foo2($a = 4, $b = [0 => [0 => 'blaat', 1 => 5, 2 => FALSE]]) %sbacktrace-args.php:7
 
 
 Variables in local scope (#2):
   $a = 4
-  $b = array (0 => array (0 => 'blaat', 1 => 5, 2 => FALSE))
+  $b = [0 => [0 => 'blaat', 1 => 5, 2 => FALSE]]

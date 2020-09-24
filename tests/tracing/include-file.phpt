@@ -32,7 +32,7 @@ xdebug.var_display_max_children=3
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> include(%stest_class.inc) %sinclude-file.php:11
 %w%f %w%d     -> foo($a = 5) %sinclude-file.php:13
-%w%f %w%d       -> een->foo2(15, array (0 => 'blaat', 1 => 5, 2 => FALSE)) %sinclude-file.php:7
+%w%f %w%d       -> een->foo2(15, [0 => 'blaat', 1 => 5, 2 => FALSE]) %sinclude-file.php:7
 %w%f %w%d         -> een->hang() %stest_class.inc:10
 %w%f %w%d     -> xdebug_stop_trace() %sinclude-file.php:14
 %w%f %w%d

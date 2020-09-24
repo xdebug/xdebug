@@ -25,8 +25,8 @@ xdebug.trace_format=0
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> foo($a = array ('te"st\'s' => 42)) %sbug00146.php:10
-%w%f %w%d      >=> array ('te"st\'s' => 42)
+%w%f %w%d     -> foo($a = ['te"st\'s' => 42]) %sbug00146.php:10
+%w%f %w%d      >=> ['te"st\'s' => 42]
 %w%f %w%d     -> xdebug_stop_trace() %sbug00146.php:12
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
