@@ -375,6 +375,8 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
 		char *key;
 		void *dummy;
+		xdebug_llist_element *le = XDEBUG_LLIST_TAIL(XG_BASE(stack));
+		function_stack_entry *tail_fse = XDEBUG_LLIST_VALP(le);
 
 		/* Mark out for previous branch, if one is set */
 		if (XG_COV(branches).last_branch_nr[XG_BASE(level)] != -1) {
@@ -387,7 +389,8 @@ void xdebug_branch_info_mark_reached(char *file_name, char *function_name, zend_
 			}
 		}
 
-		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XG_BASE(level)], XG_BASE(function_count));
+		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XG_BASE(level)], tail_fse->function_nr);
+
 		if (!xdebug_hash_find(XG_COV(visited_branches), key, strlen(key), (void*) &dummy)) {
 			xdebug_path_add(XG_COV(paths_stack)->paths[XG_BASE(level)], opcode_nr);
 			xdebug_hash_add(XG_COV(visited_branches), key, strlen(key), NULL);
