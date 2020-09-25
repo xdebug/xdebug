@@ -136,7 +136,11 @@ static void add_arguments(xdebug_str *line_entry, function_stack_entry *fse)
 		if (fse->var[j].name) {
 			xdebug_str_addc(line_entry, '$');
 			xdebug_str_add_zstr(line_entry, fse->var[j].name);
-			xdebug_str_add_literal(line_entry, " = ");
+			if (variadic_opened && !fse->var[j].is_variadic) {
+				xdebug_str_add_literal(line_entry, " => ");
+			} else {
+				xdebug_str_add_literal(line_entry, " = ");
+			}
 		}
 
 		if (fse->var[j].is_variadic) {
@@ -147,7 +151,7 @@ static void add_arguments(xdebug_str *line_entry, function_stack_entry *fse)
 			c = 1;
 		}
 
-		if (variadic_opened) {
+		if (variadic_opened && (!fse->var[j].name || fse->var[j].is_variadic)) {
 			xdebug_str_add_fmt(line_entry, "%d => ", variadic_count++);
 		}
 
