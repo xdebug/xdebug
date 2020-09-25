@@ -43,6 +43,7 @@
 #define XLOG_CHAN_GCSTATS  3
 #define XLOG_CHAN_PROFILE  4
 #define XLOG_CHAN_TRACE    5
+#define XLOG_CHAN_COVERAGE 6
 
 extern const char* xdebug_log_prefix[11];
 

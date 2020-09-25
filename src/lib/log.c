@@ -46,11 +46,11 @@ const char *xdebug_log_prefix[11] = {
 const char *xdebug_log_prefix_emoji[11] = {
 	"☠", "🛑 ", "", "⚠️ ", "", "", "", "🛈 ", "", "", "• "
 };
-const char *xdebug_channel_msg_prefix[6] = {
-	"CFG-", "LOG-", "DBG-", "GC-", "PROF-", "TRACE-"
+const char *xdebug_channel_msg_prefix[7] = {
+	"CFG-", "LOG-", "DBG-", "GC-", "PROF-", "TRACE-", "COV-"
 };
-const char *xdebug_channel_name[6] = {
-	"[Config] ", "[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] "
+const char *xdebug_channel_name[7] = {
+	"[Config] ", "[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] ", "[Coverage] "
 };
 
 static inline void xdebug_internal_log(int channel, int log_level, const char *message)
