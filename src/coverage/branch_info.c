@@ -16,6 +16,7 @@
 #include "code_coverage_private.h"
 
 #include "lib/hash.h"
+#include "lib/log.h"
 #include "lib/str.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
@@ -382,6 +383,7 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
 		char *key;
 		void *dummy;
+		function_stack_entry *tail_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 		/* Mark out for previous branch, if one is set */
 		if (XG_COV(branches).last_branch_nr[XG_BASE(level)] != -1) {
@@ -394,7 +396,8 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 			}
 		}
 
-		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XG_BASE(level)], XG_BASE(function_count));
+		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XG_BASE(level)], tail_fse->function_nr);
+
 		if (!xdebug_hash_find(XG_COV(visited_branches), key, strlen(key), (void*) &dummy)) {
 			xdebug_path_add(XG_COV(paths_stack)->paths[XG_BASE(level)], opcode_nr);
 			xdebug_hash_add(XG_COV(visited_branches), key, strlen(key), NULL);
