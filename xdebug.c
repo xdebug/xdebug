@@ -626,6 +626,10 @@ PHP_MINFO_FUNCTION(xdebug)
 
 ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 {
+	if (EXPECTED(XG(globals.library.mode) == XDEBUG_MODE_OFF)) {
+		return;
+	}
+
 	zend_op_array *op_array = &frame->func->op_array;
 	int                   lineno;
 

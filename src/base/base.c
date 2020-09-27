@@ -666,6 +666,11 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
+	if (EXPECTED(XG(globals.library.mode) == XDEBUG_MODE_OFF)) {
+		xdebug_old_execute_ex(execute_data);
+		return;
+	}
+
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
 	function_stack_entry *fse;
@@ -841,6 +846,15 @@ static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute
 
 static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
 {
+	if (XG(globals.library.mode) == XDEBUG_MODE_OFF) {
+		if (xdebug_old_execute_internal) {
+			xdebug_old_execute_internal(current_execute_data, return_value);
+		} else {
+			execute_internal(current_execute_data, return_value);
+		}
+		return;
+	}
+
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
 	int                   function_nr = 0;
