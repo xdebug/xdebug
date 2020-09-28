@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-09-16</date>
- <time>15:11:45</time>
+ <date>2020-09-28</date>
+ <time>11:21:33</time>
  <version>
-  <release>2.9.7</release>
-  <api>2.9.7</api>
+  <release>2.9.8</release>
+  <api>2.9.8</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,11 +45,12 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Wed, Sep 16, 2020 - xdebug 2.9.7
+Mon, Sep 28, 2020 - xdebug 2.9.8
 
 = Fixed bugs:
 
-  - Fixed issue #1839: Add keepalive options to debugging socket
+  - Fixed issue #1851: Paths are not counted as coveraged with loops calling function
+  - Fixed issue #1855: Build issues on FreeBSD
  </notes>
 
  <contents>
@@ -189,6 +190,27 @@ Wed, Sep 16, 2020 - xdebug 2.9.7
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2020-09-16</date>
+   <time>15:11:45</time>
+   <version>
+    <release>2.9.7</release>
+    <api>2.9.7</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Sep 16, 2020 - xdebug 2.9.7
+
+= Fixed bugs:
+
+  - Fixed issue #1839: Add keepalive options to debugging socket
+   </notes>
+  </release>
 
   <release>
    <date>2020-05-29</date>
