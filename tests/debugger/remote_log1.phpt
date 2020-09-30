@@ -10,7 +10,7 @@ xdebug.mode=debug
 xdebug.start_with_request=yes
 xdebug.log={TMPDIR}/{RUNID}remote-log1.txt
 xdebug.log_level=20
-xdebug.remote_connect_back=0
+xdebug.discover_client_host=0
 xdebug.client_host=doesnotexist
 xdebug.client_port=9002
 --FILE--

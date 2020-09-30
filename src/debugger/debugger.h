@@ -53,7 +53,7 @@ typedef struct _xdebug_debugger_settings_t {
 	/* Step Debugger */
 	zend_long     client_port;    /* 9000 */
 	char         *client_host;    /* localhost */
-	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
+	zend_bool     discover_client_host; /* (try to) connect back to the HTTP requestor */
 	char         *remote_addr_header; /* User configured header to check for forwarded IP address */
 	zend_long     connect_timeout_ms; /* Timeout in MS for remote connections */
 
