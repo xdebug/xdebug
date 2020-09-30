@@ -11,12 +11,12 @@ HTTP_X_FORWARDED_FOR=192.168.111.111
 xdebug.mode=debug
 xdebug.start_with_request=yes
 xdebug.log={TMPDIR}/bug964.txt
-xdebug.remote_connect_back=1
+xdebug.discover_client_host=1
 xdebug.client_port=9003
 --FILE--
 <?php
 preg_match(
-	"#Remote address found, connecting to ([^:]+):9003#",
+	"#Client host discovered through HTTP header, connecting to ([^:]+):9003#",
 	file_get_contents( sys_get_temp_dir() . "/bug964.txt" ),
 	$match
 );

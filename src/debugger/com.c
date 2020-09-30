@@ -365,7 +365,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	int   cp_found = 0;
 	const char *header = NULL;
 
-	if (!XINI_DBG(remote_connect_back)) {
+	if (!XINI_DBG(discover_client_host)) {
 		xdebug_str_add_fmt(connection_attempts, "%s:%ld (through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
@@ -402,7 +402,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 
 	if (!remote_addr) {
 		xdebug_str_add_fmt(connection_attempts, "%s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "HDR", "Remote address not found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "HDR", "Could not discover client host through HTTP headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
 		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 		return;
@@ -416,13 +416,13 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	}
 
 	xdebug_str_add_fmt(connection_attempts, "%s:%ld (from %s HTTP header)", Z_STRVAL_P(remote_addr), XINI_DBG(client_port), header);
-	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Remote address found, connecting to %s:%ld.", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(client_port));
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Client host discovered through HTTP header, connecting to %s:%ld.", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(client_port));
 
 	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 
 	if (XG_DBG(context).socket < 0) {
 		xdebug_str_add_fmt(connection_attempts, ", %s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "CON", "Could not connect to remote address as found in headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "CON", "Could not connect to client host discovered through HTTP headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
 		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 	}
