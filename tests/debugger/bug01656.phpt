@@ -1,12 +1,12 @@
 --TEST--
-Test for bug #1656: remote_connect_back alters header if multiple values are present
+Test for bug #1656: discover_client_host alters header if multiple values are present
 --ENV--
 I_LIKE_COOKIES=127.0.0.1, 127.0.0.2
 XDEBUG_CONFIG="idekey=foobar"
 --INI--
 xdebug.mode=debug
 xdebug.remote_addr_header=I_LIKE_COOKIES
-xdebug.remote_connect_back=1
+xdebug.discover_client_host=1
 xdebug.client_port=9999
 --FILE--
 <?php
