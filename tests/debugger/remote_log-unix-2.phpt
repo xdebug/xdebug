@@ -14,7 +14,7 @@ xdebug.log={TMPDIR}/{RUNID}remote-unix.txt
 xdebug.discover_client_host=1
 xdebug.client_host=unix:///tmp/xdbg.sock
 xdebug.client_port=0
-xdebug.remote_addr_header=I_LIKE_COOKIES
+xdebug.client_discovery_header=I_LIKE_COOKIES
 --FILE--
 <?php
 echo strlen("foo"), "\n";

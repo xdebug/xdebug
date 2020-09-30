@@ -374,11 +374,11 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	}
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking remote connect back address.");
-	if (XINI_DBG(remote_addr_header) && XINI_DBG(remote_addr_header)[0]) {
-		header = XINI_DBG(remote_addr_header);
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking user configured header '%s'.", XINI_DBG(remote_addr_header));
+	if (XINI_DBG(client_discovery_header) && XINI_DBG(client_discovery_header)[0]) {
+		header = XINI_DBG(client_discovery_header);
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking user configured header '%s'.", XINI_DBG(client_discovery_header));
 
-		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XINI_DBG(remote_addr_header), HASH_KEY_STRLEN(XINI_DBG(remote_addr_header)));
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XINI_DBG(client_discovery_header), HASH_KEY_STRLEN(XINI_DBG(client_discovery_header)));
 	}
 	if (!remote_addr) {
 		header = "HTTP_X_FORWARDED_FOR";

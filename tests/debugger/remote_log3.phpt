@@ -1,5 +1,5 @@
 --TEST--
-Test for Xdebug's remote log (with xdebug.remote_addr_header)
+Test for Xdebug's remote log (with xdebug.client_discovery_header)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
@@ -12,7 +12,7 @@ xdebug.log={TMPDIR}/{RUNID}remote-log3.txt
 xdebug.discover_client_host=1
 xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
-xdebug.remote_addr_header=I_LIKE_COOKIES
+xdebug.client_discovery_header=I_LIKE_COOKIES
 --FILE--
 <?php
 echo strlen("foo"), "\n";

@@ -5,7 +5,7 @@ I_LIKE_COOKIES=127.0.0.1, 127.0.0.2
 XDEBUG_CONFIG="idekey=foobar"
 --INI--
 xdebug.mode=debug
-xdebug.remote_addr_header=I_LIKE_COOKIES
+xdebug.client_discovery_header=I_LIKE_COOKIES
 xdebug.discover_client_host=1
 xdebug.client_port=9999
 --FILE--
