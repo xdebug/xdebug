@@ -18,4 +18,4 @@ Warning: two in %sforce_error_reporting-display_errors-001.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %sforce_error_reporting-display_errors-001.php:0
-%w%f %w%d   2. trigger_error($message = 'two', $error_type = 512) %sforce_error_reporting-display_errors-001.php:4
+%w%f %w%d   2. trigger_error($message = 'two', $error_%s = 512) %sforce_error_reporting-display_errors-001.php:4

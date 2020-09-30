@@ -20,4 +20,4 @@ Notice: two in %sforce_display_errors.php on line 5
 
 Call Stack:
 %w%f %w%d   1. {main}() %sforce_display_errors.php:0
-%w%f %w%d   2. trigger_error($message = 'two', $error_type = 1024) %sforce_display_errors.php:5
+%w%f %w%d   2. trigger_error($message = 'two', $error_%s = 1024) %sforce_display_errors.php:5

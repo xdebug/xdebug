@@ -19,7 +19,7 @@ hex2bin('4');
 PHP Warning:  six in %sforce_error_reporting-log_errors-003.php on line 4
 PHP Stack trace:
 PHP   1. {main}() %sforce_error_reporting-log_errors-003.php:0
-PHP   2. trigger_error($message = 'six', $error_type = 512) %sforce_error_reporting-log_errors-003.php:4
+PHP   2. trigger_error($message = 'six', $error_%s = 512) %sforce_error_reporting-log_errors-003.php:4
 PHP Notice:  seven in %sforce_error_reporting-log_errors-003.php on line 5
 PHP Stack trace:
 PHP   1. {main}() %sforce_error_reporting-log_errors-003.php:0
@@ -27,4 +27,4 @@ PHP   2. trigger_error($message = 'seven') %sforce_error_reporting-log_errors-00
 PHP Warning:  %s in %sforce_error_reporting-log_errors-003.php on line 6
 PHP Stack trace:
 PHP   1. {main}() %sforce_error_reporting-log_errors-003.php:0
-PHP   2. hex2bin($data = '4') %sforce_error_reporting-log_errors-003.php:6
+PHP   2. hex2bin($%s = '4') %sforce_error_reporting-log_errors-003.php:6

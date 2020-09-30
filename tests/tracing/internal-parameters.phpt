@@ -20,7 +20,7 @@ xdebug.trace_format=0
 --EXPECTF--
 55555
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> str_repeat($input = '5', $mult = 5) %sinternal-parameters.php:4
+%w%f %w%d     -> str_repeat($%s = '5', $%s = 5) %sinternal-parameters.php:4
 %w%f %w%d     -> xdebug_stop_trace() %sinternal-parameters.php:6
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

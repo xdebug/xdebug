@@ -51,9 +51,9 @@ Assertion Failed:
 One is not two
 
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> assert_options($what = 1, $value = 1) %sassert_test-004.php:5
-%w%f %w%d     -> assert_options($what = 4, $value = 0) %sassert_test-004.php:6
-%w%f %w%d     -> assert_options($what = 2, $value = 'my_assert_handler') %sassert_test-004.php:18
+%w%f %w%d     -> assert_options($%s = 1, $value = 1) %sassert_test-004.php:5
+%w%f %w%d     -> assert_options($%s = 4, $value = 0) %sassert_test-004.php:6
+%w%f %w%d     -> assert_options($%s = 2, $value = 'my_assert_handler') %sassert_test-004.php:18
 %w%f %w%d     -> assert($assertion = FALSE, $description = 'One is not two') %sassert_test-004.php:23
 %w%f %w%d       -> my_assert_handler($file = '%sassert_test-004.php', $line = 23, $code = %r(''|NULL)%r, $desc = 'One is not two') %sassert_test-004.php:23
 %w%f %w%d     -> AssertionError->getMessage() %sassert_test-004.php:26
