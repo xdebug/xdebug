@@ -14,7 +14,7 @@ xdebug.log=C:\Windows\Temp\remote-log4.txt
 xdebug.discover_client_host=1
 xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
-xdebug.remote_addr_header=I_LIKE_COOKIES
+xdebug.client_discovery_header=I_LIKE_COOKIES
 --FILE--
 <?php
 @unlink ("C:\\Windows\\Temp\\remote-log4.txt");
