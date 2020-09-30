@@ -89,10 +89,10 @@ static int xdebug_create_socket_unix(const char *path)
 #if !WIN32 && !WINNT
 
 /* For OSX and FreeBSD */
-#if !defined(SOL_TCP) && defined(IPPROTO_TCP) && (defined(__APPLE__) || defined(__FreeBSD__))
+#if !defined(SOL_TCP) && defined(IPPROTO_TCP)
 # define SOL_TCP IPPROTO_TCP
 #endif
-#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE) && defined(__APPLE__)
+#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE)
 # define TCP_KEEPIDLE TCP_KEEPALIVE
 #endif
 
