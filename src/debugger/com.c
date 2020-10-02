@@ -436,7 +436,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 
 static void xdebug_init_cloud_debugger()
 {
-	unsigned long  crc = xdebug_crc32(XINI_DBG(cloud_userid), strlen(XINI_DBG(cloud_userid)));
+	unsigned long  crc = xdebug_crc32(XINI_DBG(cloud_id), strlen(XINI_DBG(cloud_id)));
 	char          *host;
 
 	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a');
@@ -454,7 +454,7 @@ static void xdebug_init_debugger()
 	/* Get handler from mode */
 	XG_DBG(context).handler = &xdebug_handler_dbgp;
 
-	if (strcmp(XINI_DBG(cloud_userid), "") == 0) {
+	if (strcmp(XINI_DBG(cloud_id), "") == 0) {
 		xdebug_init_normal_debugger(connection_attempts);
 	} else {
 		xdebug_init_cloud_debugger();

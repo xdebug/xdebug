@@ -2475,8 +2475,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		xdebug_xml_add_attribute_ex(response, "session", xdstrdup(getenv("DBGP_COOKIE")), 0, 1);
 	}
 
-	if (XINI_DBG(cloud_userid) && *XINI_DBG(cloud_userid)) {
-		xdebug_xml_add_attribute_ex(response, "xdebug:userid", xdstrdup(XINI_DBG(cloud_userid)), 0, 1);
+	if (XINI_DBG(cloud_id) && *XINI_DBG(cloud_id)) {
+		xdebug_xml_add_attribute_ex(response, "xdebug:userid", xdstrdup(XINI_DBG(cloud_id)), 0, 1);
 	} else if (XG_DBG(ide_key) && *XG_DBG(ide_key)) {
 		xdebug_xml_add_attribute_ex(response, "idekey", xdstrdup(XG_DBG(ide_key)), 0, 1);
 	}
