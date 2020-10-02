@@ -271,7 +271,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_append,               zend_xdebug_globals, xdebug_globals)
 
 	/* Xdebug Cloud */
-	STD_PHP_INI_ENTRY("xdebug.cloud.userid", "", PHP_INI_SYSTEM, OnUpdateString, settings.debugger.cloud_userid, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.cloud_id", "", PHP_INI_SYSTEM, OnUpdateString, settings.debugger.cloud_id, zend_xdebug_globals, xdebug_globals)
 
 	/* Remote debugger settings */
 	STD_PHP_INI_ENTRY("xdebug.client_host",             "localhost", PHP_INI_ALL, OnUpdateString, settings.debugger.client_host,               zend_xdebug_globals, xdebug_globals)
@@ -412,6 +412,9 @@ static void xdebug_env_config(void)
 		} else
 		if (strcasecmp(envvar, "client_host") == 0) {
 			name = "xdebug.client_host";
+		} else
+		if (strcasecmp(envvar, "cloud_id") == 0) {
+			name = "xdebug.cloud_id";
 		} else
 		if (strcasecmp(envvar, "idekey") == 0) {
 			xdebug_debugger_reset_ide_key(envval);
