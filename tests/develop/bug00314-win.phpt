@@ -24,10 +24,10 @@ Warning: Error in %sbug00314-win.php on line 3
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00314-win.php:0
-%w%f %w%d   2. trigger_error($message = 'Error', $error_type = 512) %sbug00314-win.php:3
+%w%f %w%d   2. trigger_error($message = 'Error', $error_%s = 512) %sbug00314-win.php:3
 
 FROM LOG
 [%d-%s-%d %d:%d:%d%s] PHP Warning:  Error in %sbug00314-win.php on line 3
 [%d-%s-%d %d:%d:%d%s] PHP Stack trace:
 [%d-%s-%d %d:%d:%d%s] PHP   1. {main}() %sbug00314-win.php:0
-[%d-%s-%d %d:%d:%d%s] PHP   2. trigger_error($message = 'Error', $error_type = 512) %sbug00314-win.php:3
+[%d-%s-%d %d:%d:%d%s] PHP   2. trigger_error($message = 'Error', $error_%s = 512) %sbug00314-win.php:3
