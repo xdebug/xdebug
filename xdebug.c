@@ -183,6 +183,9 @@ static PHP_INI_MH(OnUpdateStartUponError)
 
 static PHP_INI_MH(OnUpdateRemovedSetting)
 {
+	if (! (EG(error_reporting) & E_DEPRECATED)) {
+		return SUCCESS;
+	}
 	if (new_value && new_value->val && strlen(new_value->val) > 0) {
 		xdebug_log_ex(
 			XLOG_CHAN_CONFIG, XLOG_CRIT, "REMOVED",
@@ -195,6 +198,9 @@ static PHP_INI_MH(OnUpdateRemovedSetting)
 
 static PHP_INI_MH(OnUpdateChangedSetting)
 {
+	if (! (EG(error_reporting) & E_DEPRECATED)) {
+		return SUCCESS;
+	}
 	if (new_value && new_value->val && strlen(new_value->val) > 0) {
 		xdebug_log_ex(
 			XLOG_CHAN_CONFIG, XLOG_CRIT, "CHANGED",
