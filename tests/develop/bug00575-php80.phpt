@@ -24,7 +24,7 @@ trigger_error('seven');
 PHP Warning:  six in %sbug00575-php80.php on line 4
 PHP Stack trace:
 PHP   1. {main}() %sbug00575-php80.php:0
-PHP   2. trigger_error($message = 'six', $error_type = 512) %sbug00575-php80.php:4
+PHP   2. trigger_error($message = 'six', $error_level = 512) %sbug00575-php80.php:4
 PHP 
 PHP Dump $_SERVER%A
 PHP 

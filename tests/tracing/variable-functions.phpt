@@ -47,13 +47,13 @@ xdebug.trace_format=0
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> foo1($a = 'test\'s') %svariable-functions.php:25
-%w%f %w%d       -> addslashes($str = 'test\'s') %svariable-functions.php:6
+%w%f %w%d       -> addslashes($str%S = 'test\'s') %svariable-functions.php:6
 %w%f %w%d     -> foo4($a = 'test\'s') %svariable-functions.php:27
-%w%f %w%d       -> addslashes($str = 'test\'s') %svariable-functions.php:21
+%w%f %w%d       -> addslashes($str%S = 'test\'s') %svariable-functions.php:21
 %w%f %w%d     -> foo2($a = 'test\'s') %svariable-functions.php:29
-%w%f %w%d       -> addslashes($str = 'test\'s') %svariable-functions.php:11
+%w%f %w%d       -> addslashes($str%S = 'test\'s') %svariable-functions.php:11
 %w%f %w%d     -> foo3($a = 'test\'s') %svariable-functions.php:31
-%w%f %w%d       -> addslashes($str = 'test\'s') %svariable-functions.php:16
+%w%f %w%d       -> addslashes($str%S = 'test\'s') %svariable-functions.php:16
 %w%f %w%d     -> xdebug_stop_trace() %svariable-functions.php:33
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

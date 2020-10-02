@@ -34,9 +34,9 @@ unlink($tf);
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> DBHelper::quote($s = 'test\'s') %snested-static-method-calls.php:18
-%w%f %w%d       -> addslashes($str = 'test\'s') %snested-static-method-calls.php:6
+%w%f %w%d       -> addslashes($str%S = 'test\'s') %snested-static-method-calls.php:6
 %w%f %w%d     -> DBHelper::quote($s = 'test\'s') %snested-static-method-calls.php:18
-%w%f %w%d       -> addslashes($str = 'test\'s') %snested-static-method-calls.php:6
+%w%f %w%d       -> addslashes($str%S = 'test\'s') %snested-static-method-calls.php:6
 %w%f %w%d     -> DB->query($s = 'insert blah \'test\\\'stest\\\'s\' blah') %snested-static-method-calls.php:18
 %w%f %w%d     -> DB->query($s = 'insert blah \' blah') %snested-static-method-calls.php:19
 %w%f %w%d     -> xdebug_stop_trace() %snested-static-method-calls.php:20

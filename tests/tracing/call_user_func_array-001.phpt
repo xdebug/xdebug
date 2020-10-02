@@ -32,10 +32,10 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-001.php:13}($function%S = 'debug', $%s = [0 => 'foo', 1 => [0 => 1, 1 => 2]]) %scall_user_func_array-001.php:13
+%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-001.php:13}($%s = 'debug', $%s = [0 => 'foo', 1 => [0 => 1, 1 => 2]]) %scall_user_func_array-001.php:13
 %w%f %w%d       -> debug($var = 'foo', $val = [0 => 1, 1 => 2]) %scall_user_func_array-001.php:13
 %w%f %w%d         -> is_array($%s = [0 => 1, 1 => 2]) %scall_user_func_array-001.php:5
-%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-001.php:16}($function%S = 'debug', $%s = [0 => 'bar', 1 => 'bar']) %scall_user_func_array-001.php:16
+%w%f %w%d     -> call_user_func_array:{%scall_user_func_array-001.php:16}($%s = 'debug', $%s = [0 => 'bar', 1 => 'bar']) %scall_user_func_array-001.php:16
 %w%f %w%d       -> debug($var = 'bar', $val = 'bar') %scall_user_func_array-001.php:16
 %w%f %w%d         -> is_array($%s = 'bar') %scall_user_func_array-001.php:5
 %w%f %w%d         -> is_object($%s = 'bar') %scall_user_func_array-001.php:5

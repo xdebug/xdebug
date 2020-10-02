@@ -19,4 +19,4 @@ strlen();
 PHP Warning:  two in %sforce_error_reporting-log_errors-001.php on line 4
 PHP Stack trace:
 PHP   1. {main}() %sforce_error_reporting-log_errors-001.php:0
-PHP   2. trigger_error($message = 'two', $error_type = 512) %sforce_error_reporting-log_errors-001.php:4
+PHP   2. trigger_error($message = 'two', $error_%s = 512) %sforce_error_reporting-log_errors-001.php:4

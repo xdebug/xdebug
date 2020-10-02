@@ -31,7 +31,7 @@ array(1) {
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%serror_collection-003.php' bgcolor='#eeeeec'><a style='color: black' href='xdebug://%serror_collection-003.php@0'>...%serror_collection-003.php<b>:</b>0</a></td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.trigger-error.html' target='_new'>trigger_error</a>
-( <span>$message = </span><span>&#39;An error&#39;</span>, <span>$error_type = </span><span>512</span> )</td><td title='%serror_collection-003.php' bgcolor='#eeeeec'><a style='color: black' href='xdebug://%serror_collection-003.php@4'>...%serror_collection-003.php<b>:</b>4</a></td></tr>
+( <span>$message = </span><span>&#39;An error&#39;</span>, <span>$error_%s = </span><span>512</span> )</td><td title='%serror_collection-003.php' bgcolor='#eeeeec'><a style='color: black' href='xdebug://%serror_collection-003.php@4'>...%serror_collection-003.php<b>:</b>4</a></td></tr>
 </table></font>
 "
 }

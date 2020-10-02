@@ -44,7 +44,7 @@ Warning: hex2bin(): %s in %sbug01247-opcache.php on line 5
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01247-opcache.php:0
 %w%f %w%d   2. test() %sbug01247-opcache.php:20
-%w%f %w%d   3. hex2bin($data = '4') %sbug01247-opcache.php:5
+%w%f %w%d   3. hex2bin($%s = '4') %sbug01247-opcache.php:5
 
 
 Notice: test in %sbug01247-opcache.php on line 14

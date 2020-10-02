@@ -20,7 +20,7 @@ Warning: %s in %sbug01004-001.php on line 3
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01004-001.php:0
-%w%f %w%d   2. hex2bin($data = '5') %sbug01004-001.php:3
+%w%f %w%d   2. hex2bin($%s = '5') %sbug01004-001.php:3
 
 Hi!
 
@@ -28,4 +28,4 @@ Warning: %s in %sbug01004-001.php on line 7
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug01004-001.php:0
-%w%f %w%d   2. hex2bin($data = '5') %sbug01004-001.php:7
+%w%f %w%d   2. hex2bin($%s = '5') %sbug01004-001.php:7

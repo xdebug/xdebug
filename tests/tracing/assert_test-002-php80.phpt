@@ -44,9 +44,9 @@ Assertion Failed:
         Line '19'
         Desc 'One is not two'
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> assert_options($what = 1, $value = 1) %sassert_test-002-php80.php:5
-%w%f %w%d     -> assert_options($what = 4, $value = 0) %sassert_test-002-php80.php:6
-%w%f %w%d     -> assert_options($what = 2, $value = 'my_assert_handler') %sassert_test-002-php80.php:16
+%w%f %w%d     -> assert_options($option = 1, $value = 1) %sassert_test-002-php80.php:5
+%w%f %w%d     -> assert_options($option = 4, $value = 0) %sassert_test-002-php80.php:6
+%w%f %w%d     -> assert_options($option = 2, $value = 'my_assert_handler') %sassert_test-002-php80.php:16
 %w%f %w%d     -> assert($assertion = FALSE, $description = 'One is not two') %sassert_test-002-php80.php:19
 %w%f %w%d       -> my_assert_handler($file = '%sassert_test-002-php80.php', $line = 19, $code = NULL, $desc = 'One is not two') %sassert_test-002-php80.php:19
 %w%f %w%d     -> file_get_contents($filename = '%s') %sassert_test-002-php80.php:21

@@ -36,7 +36,7 @@ Call Stack:
 %w%f %w%d   1. {main}() %sstack-filter-ns-exclude-001.php:0
 %w%f %w%d   3. Stack\Two->callObj($name = 'error', ...$arguments = variadic('Error triggered!')) %sone.php:13
 %w%f %w%d   4. Stack\Three->error($value = 'Error triggered!') %stwo.php:13
-%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_type = 512) %sthree.php:18
+%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_%s = 512) %sthree.php:18
 
 
 Warning: Error triggered! in %sthree.php on line 18
@@ -45,7 +45,7 @@ Call Stack:
 %w%f %w%d   1. {main}() %sstack-filter-ns-exclude-001.php:0
 %w%f %w%d   3. Stack\Two->callObj($name = 'error', ...$arguments = variadic('Error triggered!')) %sone.php:13
 %w%f %w%d   4. Stack\Three->error($value = 'Error triggered!') %stwo.php:13
-%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_type = 512) %sthree.php:18
+%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_%s = 512) %sthree.php:18
 
 
 Warning: Error triggered! in %sthree.php on line 18
@@ -53,7 +53,7 @@ Warning: Error triggered! in %sthree.php on line 18
 Call Stack:
 %w%f %w%d   1. {main}() %sstack-filter-ns-exclude-001.php:0
 %w%f %w%d   4. Stack\Three->error($value = 'Error triggered!') %stwo.php:13
-%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_type = 512) %sthree.php:18
+%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_%s = 512) %sthree.php:18
 
 
 Warning: Error triggered! in %sthree.php on line 18
@@ -61,7 +61,7 @@ Warning: Error triggered! in %sthree.php on line 18
 Call Stack:
 %w%f %w%d   1. {main}() %sstack-filter-ns-exclude-001.php:0
 %w%f %w%d   2. Stack\One->callObj($name = 'callObj', ...$arguments = variadic('error', 'Error triggered!')) %sstack-filter-ns-exclude-001.php:22
-%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_type = 512) %sthree.php:18
+%w%f %w%d   5. trigger_error($message = 'Error triggered!', $error_%s = 512) %sthree.php:18
 
 
 Warning: Error triggered! in %sthree.php on line 18

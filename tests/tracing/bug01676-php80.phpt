@@ -33,7 +33,7 @@ string(11) "in shutdown"
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d   -> {main}() %sbug01676-php80.php:0
 %w%f %w%d     -> xdebug_get_tracefile_name() %sbug01676-php80.php:12
-%w%f %w%d     -> register_shutdown_function($function = 'shutdown') %sbug01676-php80.php:14
+%w%f %w%d     -> register_shutdown_function($callback = 'shutdown') %sbug01676-php80.php:14
 %w%f %w%d     -> var_dump($value = 'foo') %sbug01676-php80.php:15
 %w%f %w%d   -> shutdown() %sbug01676-php80.php:0
 %w%f %w%d     -> var_dump($value = 'in shutdown') %sbug01676-php80.php:5
