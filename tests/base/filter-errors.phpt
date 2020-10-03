@@ -3,6 +3,7 @@ xdebug_set_filter() wrong arguments
 --INI--
 html_errors=0
 display_errors=1
+xdebug.mode=coverage
 --FILE--
 <?php
 xdebug_set_filter(42, XDEBUG_PATH_EXCLUDE, [ "xdebug" ] );

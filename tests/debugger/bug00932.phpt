@@ -6,6 +6,7 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp; !win');
 ?>
 --INI--
+xdebug.mode=develop
 xdebug.log=/doesnotexist/bug932.log
 --FILE--
 <?php
