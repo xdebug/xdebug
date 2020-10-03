@@ -464,6 +464,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
+	if (XDEBUG_MODE_IS_OFF()) {
+		return SUCCESS;
+	}
+
 	xdebug_library_minit();
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
 
@@ -504,6 +508,10 @@ PHP_MINIT_FUNCTION(xdebug)
 
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
+	if (XDEBUG_MODE_IS_OFF()) {
+		return SUCCESS;
+	}
+
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_mshutdown();
 	}
@@ -540,6 +548,10 @@ PHP_RINIT_FUNCTION(xdebug)
 #if defined(ZTS) && defined(COMPILE_DL_XDEBUG)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
+
+	if (XDEBUG_MODE_IS_OFF()) {
+		return SUCCESS;
+	}
 
 #if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
 	/* PHP Bug #77287 causes Xdebug to segfault if Opcache has the "compact
@@ -585,6 +597,10 @@ PHP_RINIT_FUNCTION(xdebug)
 
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 {
+	if (XDEBUG_MODE_IS_OFF()) {
+		return SUCCESS;
+	}
+
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_coverage_post_deactivate();
 	}
@@ -612,6 +628,10 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 
 PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
+	if (XDEBUG_MODE_IS_OFF()) {
+		return SUCCESS;
+	}
+
 	xdebug_base_rshutdown();
 
 	return SUCCESS;
@@ -638,6 +658,10 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 {
 	zend_op_array *op_array = &frame->func->op_array;
 	int                   lineno;
+
+	if (XDEBUG_MODE_IS_OFF()) {
+		return;
+	}
 
 	if (!EG(current_execute_data)) {
 		return;
@@ -691,6 +715,10 @@ ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
 
 ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 {
+	if (XDEBUG_MODE_IS_OFF()) {
+		return;
+	}
+
 	xdebug_coverage_init_oparray(op_array);
 }
 
