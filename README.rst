@@ -15,7 +15,7 @@ dump the full execution of your script to a file, and more.
 Requirements
 ------------
 
-Xdebug requires a `supported <https://php.net/support>`_ version of PHP. For
+Xdebug requires a `supported version <https://www.php.net/supported-versions.php>`_ of PHP. For
 installation it requires the `pecl` tool (available through the `php-pear`
 package), unless your Linux distribution has an Xdebug package (`php-xdebug`).
 
