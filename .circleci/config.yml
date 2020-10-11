@@ -20,6 +20,9 @@ jobs:
   "PHP 7 4 without opcache":
     docker:
       - image: circleci/php:7.4.0-cli-buster
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PW
     steps:
       - checkout
       - compile
@@ -34,6 +37,9 @@ jobs:
   "PHP 7 4 with opcache":
     docker:
       - image: circleci/php:7.4.0-cli-buster
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PW
     steps:
       - checkout
       - compile
@@ -48,6 +54,9 @@ jobs:
   "PHP 7 3 without opcache":
     docker:
       - image: circleci/php:7.3.2-cli-stretch
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PW
     steps:
       - checkout
       - compile
@@ -62,6 +71,9 @@ jobs:
   "PHP 7 3 with opcache":
     docker:
       - image: circleci/php:7.3.2-cli-stretch
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PW
     steps:
       - checkout
       - compile
@@ -76,6 +88,9 @@ jobs:
   "PHP 7 2 without opcache":
     docker:
       - image: circleci/php:7.2.15-cli-stretch
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PW
     steps:
       - checkout
       - compile
@@ -90,6 +105,9 @@ jobs:
   "PHP 7 2 with opcache":
     docker:
       - image: circleci/php:7.2.15-cli-stretch
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PW
     steps:
       - checkout
       - compile
