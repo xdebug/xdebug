@@ -8,7 +8,7 @@ xdebug.file_link_format=xdebug://%f@%l
 xdebug.filename_format=
 xdebug.collect_assignments=1
 xdebug.collect_return=1
-xdebug.var_display_max_data=2048
+xdebug.var_display_max_data=-1
 --FILE--
 <?php
 xdebug_start_error_collection();
