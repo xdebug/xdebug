@@ -33,24 +33,97 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-09-28</date>
- <time>11:21:33</time>
+ <date>2020-10-14</date>
+ <time>16:08:58</time>
  <version>
-  <release>2.9.8</release>
-  <api>2.9.8</api>
+  <release>3.0.0beta1</release>
+  <api>3.0.0beta1</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Sep 28, 2020 - xdebug 2.9.8
+Wed, Oct 14, 2020 - xdebug 3.0.0beta1
+
+This is a BETA release, and not ready for production environments.
+
+Xdebug 3 has many changes. Please read the upgrade guide at
+https://3.xdebug.org/docs/upgrade_guide
+
+Xdebug 3 documentation is available at https://3.xdebug.org/docs
+
+-------------
+
++ New features:
+
+  - Implemented issue #1762: Introduce feature modes
+  - Implemented issue #1793: Add xdebug.start_upon_error setting to cover the removed xdebug.remote_mode=jit feature.
+  - Implemented issue #1797: Implement generic logging
+  - Implemented issue #1801: Rename mode 'display' to mode 'develop'
+  - Implemented issue #1831: Add diagnostics function xdebug_info()
+  - Implemented issue #1833: Add links to documentation in diagnostic log
+  - Implemented issue #1837: Support for associative variadic variable names (PHP 8)
+  - Implemented issue #1841: Add support for PHP 8 'match' keyword
+
+- Removed features:
+
+  - Implemented issue #1795: Deprecate PHP 7.1 support
+
+  - Implemented issue #1786: Remove idekey value fallback to USER/USERNAME environment variable
+  - Implemented issue #1809: Remove "overload_var_dump" setting
+  - Implemented issue #1810: Remove collect_vars and xdebug_get_declared_vars()
+  - Implemented issue #1812: Remove show_mem_delta setting
+  - Implemented issue #1838: Remove collect_params setting, and always default it to "4"
+  - Implemented issue #1847: Remove xdebug.remote_cookie_expire_time setting
+
+= Changes:
+
+  - Implemented issue #1378: Unfortunate coupling of default_enable=1 and remote_mode=jit
+  - Implemented issue #1773: Replace all xdebug.*_output_dir settings with xdebug.output_dir
+  - Implemented issue #1785: Replace xdebug.remote_mode and xdebug.auto_trace with generic "start-with-request" setting
+  - Implemented issue #1791: Replace xdebug.*trigger*, xdebug.*trigger_value*, with xdebug.start_with_request=trigger and xdebug.trigger_value
+  - Implemented issue #1792: Change start_with_request=always/never to start_with_request=yes/no
+  - Implemented issue #1794: Replace the filter's blacklist/whitelist with exclude/include
+  - Implemented issue #1811: Remove xdebug.collect_includes setting and always include them
+  - Implemented issue #1844: Add deprecation warning for removed and renamed configuration setting names
+  - Implemented issue #1845: Rename xdebug.remote_{host,port} to xdebug.client_{host,port}
+  - Implemented issue #1846: Rename setting xdebug.remote_timeout to xdebug.connect_timeout_ms
+  - Implemented issue #1848: Change default Xdebug port from 9000 to 9003
+  - Implemented issue #1850: Change array variable output in tracing to use modern [] syntax
+  - Implemented issue #1856: Rename xdebug.remote_connect_back to xdebug.discover_client_host
+  - Implemented issue #1857: Rename xdebug.remote_addr_header to xdebug.client_discovery_header
+
++ Improvements:
+
+  - Implemented issue #1016: Support for pause-execution (Robert Lu)
+  - Implemented issue #1680: Update var dumping routines to include relevant information for interned strings and immutable arrays
+  - Implemented issue #1712: Add unit to profiler data types
+  - Implemented issue #1743: Figuring out whether a call is a closure uses string comparisions instead of checking the ACC flag (Benjamin Eberlei)
+  - Implemented issue #1752: Use a stack pool to manage stack entries instead of allocating and deallocating entries
+  - Implemented issue #1755: Overload pcntl_fork() to prevent performance degradation by calling xdebug_get_pid often (Carlos Granados)
+  - Implemented issue #1781: Include 'Xdebug' in max nesting level error message
+  - Implemented issue #1783: Stacktrace needs vertical scrolling on small screens (Tobias Tom)
+  - Implemented issue #1789: Provide PHP stubs for Xdebug's functions
+  - Implemented issue #1807: Document Xdebug installation with yum and apt
+  - Implemented issue #1813: Make sure that the xdebug_init_*_globals don't do more than they need to, and that init is only done when xdebug.mode != off
+  - Implemented issue #1817: Switch filename storage from char*/size_t to zend_string*
+  - Implemented issue #1818: Switch variable storage from char*/size_t to zend_string*
+  - Implemented issue #1820: Increase time tracing precision (Michael Voříšek)
+  - Implemented issue #1824: Allow Xdebug's mode to be set through an environment variable
+  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Voříšek)
+  - Implemented issue #1826: Reduce profiler memory allocation and call overhead
+  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Voříšek)
+  - Implemented issue #1832: If connect back host can not be contacted, fallback to remote_host/port
+  - Implemented issue #1858: Only open/close log if there is an actual message to log
+  - Implemented issue #1860: Allow xdebug.cloud_id to be set through an environment variable
 
 = Fixed bugs:
 
-  - Fixed issue #1851: Paths are not counted as coveraged with loops calling function
-  - Fixed issue #1855: Build issues on FreeBSD
+  - Fixed issue #1756: Php process won't exit after running connected to a client
+  - Fixed issue #1823: Profiler generates negative data for memory usage
+  - Fixed issue #1834: Return type must be bool in overloaded set_time_limit
  </notes>
 
  <contents>
@@ -70,6 +143,7 @@ Mon, Sep 28, 2020 - xdebug 2.9.8
 
    <file name="xdebug.c" role="src" />
    <file name="php_xdebug.h" role="src" />
+   <file name="php_xdebug_arginfo.h" role="src" />
    <dir name="src">
     <dir name="base">
      <file name="base.c" role="src" />
@@ -126,6 +200,7 @@ Mon, Sep 28, 2020 - xdebug 2.9.8
     <dir name="develop">
      <file name="develop.c" role="src" />
      <file name="develop.h" role="src" />
+     <file name="develop_private.h" role="src" />
      <file name="monitor.c" role="src" />
      <file name="monitor.h" role="src" />
      <file name="php_functions.c" role="src" />
@@ -183,6 +258,28 @@ Mon, Sep 28, 2020 - xdebug 2.9.8
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2020-09-28</date>
+   <time>11:21:33</time>
+   <version>
+    <release>2.9.8</release>
+    <api>2.9.8</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Sep 28, 2020 - xdebug 2.9.8
+
+= Fixed bugs:
+
+  - Fixed issue #1851: Paths are not counted as coveraged with loops calling function
+  - Fixed issue #1855: Build issues on FreeBSD
+   </notes>
+  </release>
 
   <release>
    <date>2020-09-16</date>
