@@ -33,31 +33,24 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2019-07-25</date>
- <time>15:20:11</time>
+ <date>2020-09-28</date>
+ <time>11:21:33</time>
  <version>
-  <release>2.8.0beta1</release>
-  <api>2.8.0beta1</api>
+  <release>2.9.8</release>
+  <api>2.9.8</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Jul 25, 2019 - xdebug 2.8.0beta1
+Mon, Sep 28, 2020 - xdebug 2.9.8
 
 = Fixed bugs:
 
-  - Fixed issue #1679: Code Coverage misses static property as function
-    argument
-  - Fixed issue #1682: Invalid NULL byte in debugger XML with anonymous classes
-  - Fixed issue #1683: Xdebug does not compile due to changes to ASSIGN_ADD and
-    friends operations in PHP 7.4alpha3
-  - Fixed issue #1687: Use appropriate process ID for logging and "right
-    process" tracking
-  - Fixed issue #1688: Improve performance by using getpid() only when step
-    debugger is active
+  - Fixed issue #1851: Paths are not counted as coveraged with loops calling function
+  - Fixed issue #1855: Build issues on FreeBSD
  </notes>
 
  <contents>
@@ -190,6 +183,198 @@ Thu, Jul 25, 2019 - xdebug 2.8.0beta1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2020-09-16</date>
+   <time>15:11:45</time>
+   <version>
+    <release>2.9.7</release>
+    <api>2.9.7</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Sep 16, 2020 - xdebug 2.9.7
+
+= Fixed bugs:
+
+  - Fixed issue #1839: Add keepalive options to debugging socket
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-05-29</date>
+   <time>11:43:03</time>
+   <version>
+    <release>2.9.6</release>
+    <api>2.9.6</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, May 29, 2020 - xdebug 2.9.6
+
+= Fixed bugs:
+
+  - Fixed issue #1782: Cookie "XDEBUG_SESSION" will be soon rejected because it has the “sameSite” attribute set to none
+  - Fixed issue #1787: Branch coverage data does not always follow the lines/functions format
+  - Fixed issue #1790: Segfault in var_dump() or while debugging with protobuf extension
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-04-25</date>
+   <time>14:56:10</time>
+   <version>
+    <release>2.9.5</release>
+    <api>2.9.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Apr 25, 2020 - xdebug 2.9.5
+
+= Fixed bugs:
+
+  - Fixed issue #1772: Crash with exception thrown inside a destructor
+  - Fixed issue #1775: Segfault when another extension compiles a PHP file during RINIT
+  - Fixed issue #1779: Nested multi-line built-in function in namespace are not covered
+   </notes>
+ </release>
+
+ <release>
+   <date>2020-03-23</date>
+   <time>11:12:20</time>
+   <version>
+    <release>2.9.4</release>
+    <api>2.9.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Mar 23, 2020 - xdebug 2.9.4
+
+= Fixed bugs:
+
+  - Fixed issue #1763: Crash while setting opcode overrides in ZTS mode.
+  - Fixed issue #1766: Using the DBGp detach command disables remote debugging for the whole process.
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-03-13</date>
+   <time>16:49:40</time>
+   <version>
+    <release>2.9.3</release>
+    <api>2.9.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Mar 13, 2020 - xdebug 2.9.3
+
+= Fixed bugs:
+
+  - Fixed issue #1753: Resolved breakpoints use information from wrong files
+  - Fixed issue #1758: Xdebug changes error_get_last results inside a try catch
+  - Fixed issue #1759: User registered opcode handlers should call ones already set by other extensions
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-01-31</date>
+   <time>09:47:21</time>
+   <version>
+    <release>2.9.2</release>
+    <api>2.9.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Jan 31, 2020 - xdebug 2.9.2
+
+= Fixed bugs:
+
+  - Fixed issue #1735: DBGp eval warning promoted to Exception can cause out-of-sync responses
+  - Fixed issue #1736: Segmentation fault when other extensions run PHP in RINIT
+  - Fixed issue #1739: Tracing footer not written
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-01-16</date>
+   <time>14:18:51</time>
+   <version>
+    <release>2.9.1</release>
+    <api>2.9.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Jan 16, 2020 - xdebug 2.9.1
+
+= Fixed bugs:
+
+  - Fixed issue #1721: Header may not contain NUL bytes in Unknown on line 0
+  - Fixed issue #1727: Debugger stops more often than expected due to resolving breakpoints
+  - Fixed issue #1728: INIT_STATIC_METHOD_CALL is not overloaded
+  - Fixed issue #1731: var_dump with DateTime does not output properties (Ryan Mauger)
+  - Fixed issue #1733: SEND_VAR_NO_REF_EX opcode, used for require(), is not overloaded
+  - Fixed issue #1734: Segfault with DBGp "source" with a out-of-range start line number
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-12-09</date>
+   <time>10:44:53</time>
+   <version>
+    <release>2.9.0</release>
+    <api>2.9.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Dec  9, 2019 - xdebug 2.9.0
+
++ Improvements:
+
+  - Fixed issue #1723: Class/function pre-analysis for code coverage speed improvements
+
+- Removed features:
+
+  - Fixed issue #1301: Removed aggregated profiler feature
+  - Fixed issue #1720: Remove superfluous xdebug.remote_handler setting
+
+= Fixed bugs:
+
+  - Fixed issue #1722: Build warning issues on FreeBSD
+  - Fixed issue #1724: Missing property types and uninitialised values in variable dumping routines
+   </notes>
+  </release>
 
   <release>
    <date>2019-12-02</date>
