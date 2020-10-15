@@ -32,23 +32,29 @@ environment:
           VC: vs16
           OPCACHE: yes
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-        - PHP_VER: 7.4
-          ARCH: x64
-          TS: 1
-          VC: vc15
-          OPCACHE: yes
-          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-        - PHP_VER: 7.4
+        - PHP_VER: 8.0
           ARCH: x64
           TS: 0
-          VC: vc15
+          VC: vs16
+          OPCACHE: no
+          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+        - PHP_VER: 8.0
+          ARCH: x86
+          TS: 1
+          VC: vs16
+          OPCACHE: no
+          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+        - PHP_VER: 8.0
+          ARCH: x86
+          TS: 0
+          VC: vs16
           OPCACHE: yes
-          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
         - PHP_VER: 7.4
           ARCH: x64
           TS: 1
           VC: vc15
-          OPCACHE: no
+          OPCACHE: yes
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
         - PHP_VER: 7.4
           ARCH: x64
