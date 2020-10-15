@@ -71,9 +71,7 @@ PHP_RSHUTDOWN_FUNCTION(xdebug);
 PHP_MINFO_FUNCTION(xdebug);
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 
-#ifndef PHP_WIN32
 int xdebug_is_output_tty();
-#endif
 
 struct xdebug_base_info {
 	unsigned long level;
