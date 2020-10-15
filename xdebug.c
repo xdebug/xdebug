@@ -456,7 +456,7 @@ int xdebug_is_output_tty(void)
 #ifndef PHP_WIN32
 		XG_BASE(output_is_tty) = isatty(STDOUT_FILENO);
 #else
-		XG_BASE(output_is_tty) = getenv("ANSICON");
+		XG_BASE(output_is_tty) = getenv("ANSICON") != NULL;
 #endif
 	}
 	return (XG_BASE(output_is_tty));
