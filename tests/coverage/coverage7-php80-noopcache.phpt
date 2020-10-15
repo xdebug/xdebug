@@ -67,7 +67,7 @@ foo->test_closure
 - paths
   - 0: HIT
 
-{closure:%stests/coverage/coverage7.inc:21-23}
+{closure:%scoverage7.inc:21-23}
 - branches
   - 00; OP: 00-06; line: 21-23 HIT
 - paths
