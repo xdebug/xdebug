@@ -419,7 +419,7 @@ lock: /* Yes yes, an evil goto label here!!! */
 	return fh;
 }
 #else
-FILE *xdebug_fopen(char *fname, char *mode, char *extension, char **new_fname)
+FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname)
 {
 	char *tmp_fname;
 	FILE *ret;
