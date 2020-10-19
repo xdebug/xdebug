@@ -40,7 +40,7 @@
 #. Add files from AppVeyor and source to www.xdebug.org html/files
 #. Create sha256 files for the new releases::
 
-   for i in *2.9.*{tgz,dll}; do \
+   for i in *3.0.*{tgz,dll}; do \
      echo $i; sha256sum $i | sed 's/\ .*//' > $i.sha256.txt; \
    done
 
