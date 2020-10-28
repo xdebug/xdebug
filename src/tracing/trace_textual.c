@@ -258,32 +258,34 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 		return;
 	}
 
-	if (generator->node.ptr.root->execute_data == NULL) {
+	if (generator->execute_data == NULL) {
 		return;
 	}
 
 	/* Generator key */
 	tmp_value = xdebug_get_zval_value_line(&generator->key, 0, NULL);
-	if (tmp_value) {
-		xdebug_return_trace_stack_common(&str, fse);
-
-		xdebug_str_addc(&str, '(');
-		xdebug_str_add_str(&str, tmp_value);
-		xdebug_str_add_literal(&str, " => ");
-
-		tmp_value = xdebug_get_zval_value_line(&generator->value, 0, NULL);
-		if (tmp_value) {
-			xdebug_str_add_str(&str, tmp_value);
-			xdebug_str_free(tmp_value);
-		}
-
-		xdebug_str_add_literal(&str, ")\n");
-
-		fprintf(context->trace_file, "%s", str.d);
-		fflush(context->trace_file);
-
-		xdebug_str_destroy(&str);
+	if (!tmp_value) {
+		return;
 	}
+
+	xdebug_return_trace_stack_common(&str, fse);
+
+	xdebug_str_addc(&str, '(');
+	xdebug_str_add_str(&str, tmp_value);
+	xdebug_str_add_literal(&str, " => ");
+
+	tmp_value = xdebug_get_zval_value_line(&generator->value, 0, NULL);
+	if (tmp_value) {
+		xdebug_str_add_str(&str, tmp_value);
+		xdebug_str_free(tmp_value);
+	}
+
+	xdebug_str_add_literal(&str, ")\n");
+
+	fprintf(context->trace_file, "%s", str.d);
+	fflush(context->trace_file);
+
+	xdebug_str_destroy(&str);
 }
 
 void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, const char *op, char *filename, int lineno)
