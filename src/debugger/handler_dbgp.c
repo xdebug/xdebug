@@ -2477,7 +2477,8 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 
 	if (XINI_DBG(cloud_id) && *XINI_DBG(cloud_id)) {
 		xdebug_xml_add_attribute_ex(response, "xdebug:userid", xdstrdup(XINI_DBG(cloud_id)), 0, 1);
-	} else if (XG_DBG(ide_key) && *XG_DBG(ide_key)) {
+	}
+	if (XG_DBG(ide_key) && *XG_DBG(ide_key)) {
 		xdebug_xml_add_attribute_ex(response, "idekey", xdstrdup(XG_DBG(ide_key)), 0, 1);
 	}
 
