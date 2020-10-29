@@ -438,12 +438,12 @@ static void print_html_header(void)
 	PUTS("body {background-color: #fff; color: #222; font-family: sans-serif;}\n");
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
 	PUTS("a:link, a:hover, a:visited {color: black; text-decoration: underline;}\n");
-	PUTS("table {border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px #ccc;}\n");
+	PUTS("table {border-collapse: separate; border: 1px solid #666; width: 934px; box-shadow: 1px 2px 3px #ccc; border-bottom: none; border-right: none; border-spacing: 0;}\n");
 	PUTS(".center {text-align: center;}\n");
 	PUTS(".center table {margin: 1em auto; text-align: left;}\n");
 	PUTS(".center th {text-align: center !important;}\n");
-	PUTS("td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px;}\n");
-	PUTS("th {top: 0; background: inherit;}\n");
+	PUTS("td, th {border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px; border-left: none; border-top: none;}\n");
+	PUTS("th {top: 0; background: inherit; position: sticky;}\n");
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
 	PUTS(".p {text-align: left;}\n");
