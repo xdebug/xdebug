@@ -19,7 +19,11 @@
 #define XDEBUG_TRACING_H
 
 #include "php.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
 #include "zend_generators.h"
+#pragma GCC diagnostic pop
 
 typedef struct
 {
