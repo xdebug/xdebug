@@ -488,7 +488,9 @@ PHP_FUNCTION(xdebug_info)
 	} else {
 		php_info_print_table_colspan_header(2, (char*) "Diagnostic Log");
 	}
-	php_output_write(XG_LIB(diagnosis_buffer)->d, XG_LIB(diagnosis_buffer)->l);
+	if (XG_LIB(diagnosis_buffer)) {
+		php_output_write(XG_LIB(diagnosis_buffer)->d, XG_LIB(diagnosis_buffer)->l);
+	}
 	php_info_print_table_end();
 
 	xdebug_print_php_section();
