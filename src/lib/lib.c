@@ -293,16 +293,16 @@ static zval *find_in_globals(const char *element)
 	return NULL;
 }
 
-static int trigger_enabled(void)
+static int trigger_enabled(char **found_trigger_value)
 {
-	char *trigger_value = XINI_LIB(trigger_value);
-	zval *found_trigger_value = NULL;
+	char *shared_secret = XINI_LIB(trigger_value);
+	zval *z_found_trigger_value = NULL;
 
 	/* First we check for the generic 'XDEBUG_TRIGGER' option */
-	found_trigger_value = find_in_globals("XDEBUG_TRIGGER");
+	z_found_trigger_value = find_in_globals("XDEBUG_TRIGGER");
 
 	/* If not found, we fall back to the per-mode name for backwards compatibility reasons */
-	if (!found_trigger_value) {
+	if (!z_found_trigger_value) {
 		const char *fallback_name = NULL;
 
 		if (XG_LIB(mode) & XDEBUG_MODE_PROFILING) {
@@ -314,32 +314,42 @@ static int trigger_enabled(void)
 		}
 
 		if (fallback_name) {
-			found_trigger_value = find_in_globals(fallback_name);
+			z_found_trigger_value = find_in_globals(fallback_name);
 		}
 	}
 
-	if (!found_trigger_value) {
+	if (!z_found_trigger_value) {
+		if (found_trigger_value != NULL) {
+			*found_trigger_value = NULL;
+		}
 		return 0;
 	}
 
-	/* If the configured trigger value is empty, then it always triggers */
-	if (trigger_value == NULL || trigger_value[0] == '\0') {
+	/* If the configured shared secret trigger value is empty, then it always
+	 * triggers */
+	if (shared_secret == NULL || shared_secret[0] == '\0') {
+		if (found_trigger_value != NULL) {
+			*found_trigger_value = xdstrdup(Z_STRVAL_P(z_found_trigger_value));
+		}
 		return 1;
 	}
 
 	/* Check if the configured trigger value matches the one found in the
 	 * trigger element */
-	if (strcmp(trigger_value, Z_STRVAL_P(found_trigger_value)) == 0) {
+	if (strcmp(shared_secret, Z_STRVAL_P(z_found_trigger_value)) == 0) {
+		if (found_trigger_value != NULL) {
+			*found_trigger_value = xdstrdup(Z_STRVAL_P(z_found_trigger_value));
+		}
 		return 1;
 	}
 
 	return 0;
 }
 
-static int is_mode_trigger_and_enabled(int force_trigger)
+static int is_mode_trigger_and_enabled(int force_trigger, char **found_trigger_value)
 {
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_TRIGGER) {
-		return force_trigger || trigger_enabled();
+		return force_trigger || trigger_enabled(found_trigger_value);
 	}
 
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
@@ -347,7 +357,7 @@ static int is_mode_trigger_and_enabled(int force_trigger)
 			XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) ||
 			XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)
 		) {
-			return force_trigger || trigger_enabled();
+			return force_trigger || trigger_enabled(found_trigger_value);
 		}
 	}
 
@@ -355,17 +365,18 @@ static int is_mode_trigger_and_enabled(int force_trigger)
 }
 
 /* Returns 1 if the mode is 'trigger', or 'default', where the default mode for
- * a feature is to trigger, and the trigger is present. */
-int xdebug_lib_start_with_trigger(void)
+ * a feature is to trigger, and the trigger is present. If found_trigger_value
+ * is not NULL, then it is set to the found trigger value */
+int xdebug_lib_start_with_trigger(char **found_trigger_value)
 {
-	return is_mode_trigger_and_enabled(0);
+	return is_mode_trigger_and_enabled(0, found_trigger_value);
 }
 
 /* Returns 1 if the mode is 'trigger', or 'default', where the default mode for
  * a feature is to trigger. Does not check whether a trigger is present. */
 int xdebug_lib_start_if_mode_is_trigger(void)
 {
-	return is_mode_trigger_and_enabled(1);
+	return is_mode_trigger_and_enabled(1, NULL);
 }
 
 
