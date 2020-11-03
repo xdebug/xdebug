@@ -32,7 +32,7 @@ var_dump(new class{public string $x;});
 ?>
 --EXPECTF--
 %sxdebug_var_dump_typed_properties-text.php:14:
-class foo#1 (6) {
+class foo#%d (6) {
   public $v =>
   double(3.1415926535898)
   public $w =>
@@ -54,7 +54,7 @@ class foo#1 (6) {
   }
 }
 %sxdebug_var_dump_typed_properties-text.php:15:
-class class@anonymous#3 (1) {
+class class@anonymous#%d (1) {
   public string $x =>
   *uninitialized*
 }

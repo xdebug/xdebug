@@ -64,7 +64,7 @@ c: (refcount=2, is_ref=1)=[1mint[22m([32m5[0m)
 
 d: (refcount=0, is_ref=0)=[1mint[22m([32m6[0m)
 
-e: (refcount=1, is_ref=0)=[1mclass[22m [31mstdClass[0m#1 ([32m3[0m) {
+e: (refcount=1, is_ref=0)=[1mclass[22m [31mstdClass[0m#%d ([32m3[0m) {
   [32m[1mpublic[22m[0m $foo [0m=>[0m
   (refcount=2, is_ref=1)=[1mbool[22m([35mfalse[0m)
   [32m[1mpublic[22m[0m $bar [0m=>[0m

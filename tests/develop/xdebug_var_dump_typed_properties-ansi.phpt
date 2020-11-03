@@ -32,7 +32,7 @@ var_dump(new class{public string $x;});
 ?>
 --EXPECTF--
 [1m%sxdebug_var_dump_typed_properties-ansi.php[22m:[1m14[22m:
-[1mclass[22m [31mfoo[0m#1 ([32m6[0m) {
+[1mclass[22m [31mfoo[0m#%d ([32m6[0m) {
   [32m[1mpublic[22m[0m $v [0m=>[0m
   [1mdouble[22m([33m3.1415926535898[0m)
   [32m[1mpublic[22m[0m $w [0m=>[0m
@@ -54,7 +54,7 @@ var_dump(new class{public string $x;});
   }
 }
 [1m%sxdebug_var_dump_typed_properties-ansi.php[22m:[1m15[22m:
-[1mclass[22m [31mclass@anonymous[0m#3 ([32m1[0m) {
+[1mclass[22m [31mclass@anonymous[0m#%d ([32m1[0m) {
   [32m[1mpublic[22m string[0m $x [0m=>[0m
   [34m*uninitialized*[0m
 }

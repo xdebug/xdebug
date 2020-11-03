@@ -36,6 +36,7 @@ $object->prop3 = "third element";
 $object->prop4 = "fourth element (still shows)";
 $object->prop5 = "fifth element (should not show)";
 var_dump($object);
+?>
 --EXPECTF--
 %sbug00457-001.php:14:
 array(5) {
@@ -58,7 +59,7 @@ array(5) {
   (more elements)...
 }
 %sbug00457-001.php:27:
-class stdClass#1 (5) {
+class stdClass#%d (5) {
   public $prop1 =>
   string(58) "A very long string that should b"...
   public $array =>

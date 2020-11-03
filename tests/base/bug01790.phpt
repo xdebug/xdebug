@@ -35,7 +35,7 @@ class Google\Protobuf\Timestamp#%d (0) {
 
 <pre class='xdebug-var-dump' dir='ltr'>
 <small>%sbug01790.php:%d:</small>
-<b>object</b>(<i>Google\Protobuf\Timestamp</i>)[<i>1</i>]
+<b>object</b>(<i>Google\Protobuf\Timestamp</i>)[<i>%d</i>]
   ...
 </pre>
 
@@ -44,4 +44,4 @@ class Google\Protobuf\Timestamp#%d (0) {
 %sbug01790.php:%d:
 class Google\Protobuf\Timestamp#%d (0) {
   ...
-}
+}%A

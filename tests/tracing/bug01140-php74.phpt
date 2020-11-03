@@ -36,7 +36,7 @@ unlink( $tf );
 == I didn't crash ==
 --EXPECTF--
 %sbug01140-php74.php:14:
-class Foo#1 (0) {
+class Foo#%d (0) {
 }
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> var_dump(...$vars = variadic(0 => class Foo {  })) %sbug01140-php74.php:14

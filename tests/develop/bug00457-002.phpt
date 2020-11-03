@@ -36,6 +36,7 @@ $object->prop3 = "third element";
 $object->prop4 = "fourth element (still shows)";
 $object->prop5 = "fifth element (should not show)";
 var_dump($object);
+?>
 --EXPECTF--
 [1m%sbug00457-002.php[22m:[1m14[22m:
 [1marray[22m([32m5[0m) {
@@ -58,7 +59,7 @@ var_dump($object);
   (more elements)...
 }
 [1m%sbug00457-002.php[22m:[1m27[22m:
-[1mclass[22m [31mstdClass[0m#1 ([32m5[0m) {
+[1mclass[22m [31mstdClass[0m#%d ([32m5[0m) {
   [32m[1mpublic[22m[0m $prop1 [0m=>[0m
   [1mstring[22m([32m58[0m) "[31mA very long string that should b[0m"...
   [32m[1mpublic[22m[0m $array [0m=>[0m
