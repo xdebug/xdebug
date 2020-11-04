@@ -698,6 +698,12 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		return;
 	}
 
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		xdebug_old_execute_ex(execute_data);
+		return;
+	}
+
 	if (XG_BASE(in_execution) && XG_BASE(level) == 0) {
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 			xdebug_debugger_set_program_name(op_array->filename);
@@ -851,6 +857,16 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 #else
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
 #endif
+
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		if (xdebug_old_execute_internal) {
+			xdebug_old_execute_internal(current_execute_data, return_value);
+		} else {
+			execute_internal(current_execute_data, return_value);
+		}
+		return;
+	}
 
 	XG_BASE(level)++;
 	if ((signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {

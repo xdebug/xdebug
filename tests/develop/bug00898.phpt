@@ -11,7 +11,7 @@ var_dump($example);
 ?>
 --EXPECTF--
 %sbug00898.php:5:
-class ArrayObject#1 (1) {
+class ArrayObject#%d (1) {
   private $storage =>
   array(1) {
     '' =>

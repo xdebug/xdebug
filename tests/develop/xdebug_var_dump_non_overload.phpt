@@ -25,16 +25,16 @@ echo "\n";
 var_dump($ts1);
 ?>
 --EXPECTF--
-object(TimeStuff)#1 (1) {
+object(TimeStuff)#%d (1) {
   ["timestamp%sprivat%s]=>
   int(1092515106)
 }
 <pre class='xdebug-var-dump' dir='ltr'>
 <small>%sxdebug_var_dump_non_overload.php:14:</small>
-<b>object</b>(<i>TimeStuff</i>)[<i>1</i>]
+<b>object</b>(<i>TimeStuff</i>)[<i>%d</i>]
   <i>private</i> 'timestamp' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1092515106</font>
 </pre>
-object(TimeStuff)#1 (1) {
+object(TimeStuff)#%d (1) {
   ["timestamp%sprivat%s]=>
   int(1092515106)
 }

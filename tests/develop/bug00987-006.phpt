@@ -22,7 +22,7 @@ var_dump($temp);
 ?>
 --EXPECTF--
 %sbug00987-006.php:7:
-class SimpleXMLElement#1 (1) {
+class SimpleXMLElement#%d (1) {
   public ${0} =>
   string(14) "
 Xdebug rocks

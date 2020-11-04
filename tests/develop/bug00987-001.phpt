@@ -13,7 +13,7 @@ var_dump($object);
 ?>
 --EXPECTF--
 %sbug00987-001.php:4:
-class stdClass#1 (4) {
+class stdClass#%d (4) {
   public $key =>
   string(5) "value"
   public $1 =>

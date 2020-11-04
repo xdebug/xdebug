@@ -15,9 +15,10 @@ xdebug.filename_format=
 --FILE--
 <?php
 var_dump(new DateTimeImmutable('2019-12-20 13:00:00+0000'));
+?>
 --EXPECTF--
 %sxdebug_var_dump_datetime-php74.php:%d:
-class DateTimeImmutable#1 (3) {
+class DateTimeImmutable#%d (3) {
   public $date =>
   string(26) "2019-12-20 13:00:00.000000"
   public $timezone_type =>

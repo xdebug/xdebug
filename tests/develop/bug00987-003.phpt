@@ -12,7 +12,7 @@ var_dump($object);
 ?>
 --EXPECTF--
 [1m%sbug00987-003.php[22m:[1m4[22m:
-[1mclass[22m [31mstdClass[0m#1 ([32m4[0m) {
+[1mclass[22m [31mstdClass[0m#%d ([32m4[0m) {
   [32m[1mpublic[22m[0m $key [0m=>[0m
   [1mstring[22m([32m5[0m) "[31mvalue[0m"
   [32m[1mpublic[22m[0m $1 [0m=>[0m

@@ -25,7 +25,7 @@ var_dump( $a );
 --EXPECTF--
 <pre class='xdebug-var-dump' dir='ltr'>
 <small>%sbug00328.php:15:</small>
-<b>object</b>(<i>Inherit</i>)[<i>1</i>]
+<b>object</b>(<i>Inherit</i>)[<i>%d</i>]
   <i>private</i> 'bar' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>43</font>
   <i>protected</i> 'pro' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>243</font>
   <i>public</i> 'pub' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>343</font>
