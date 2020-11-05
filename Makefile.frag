@@ -33,3 +33,8 @@ findphp:
 
 clean-tests:
 	rm -f tests/*.diff tests/*.exp tests/*.log tests/*.out tests/*.php tests/*.sh tests/*.mem
+
+test:
+	@echo "Xdebug can not be tested with 'make test', please refer to:"
+	@echo "    https://github.com/xdebug/xdebug#testing"
+	@echo
