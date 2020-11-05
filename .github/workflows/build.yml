@@ -1,0 +1,55 @@
+name: Build
+
+on:
+    push:
+        branches: [master]
+    pull_request:
+    release:
+        types: [created]
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+        name: Build and test
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [7.2, 7.3, 7.4, 8.0, 8.1]
+                use-opcache: [true, false]
+
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "${{ matrix.php }}"
+                    coverage: none
+                    ini-values: "session.save_path=/tmp"
+                    tools: pecl
+
+            -   name: Compile
+                run: ./.build.scripts/compile.sh
+
+            -   name: Find PHP
+                run: |
+                    TEST_PHP_EXECUTABLE=`make findphp`
+                    echo "Found PHP in: $TEST_PHP_EXECUTABLE"
+                    echo "TEST_PHP_EXECUTABLE=$TEST_PHP_EXECUTABLE" >> $GITHUB_ENV
+
+            -   name: Define PHP arguments
+                run: |
+                    TEST_PHP_ARGS="-n -d foo=yes"
+                    [[ "${{ matrix.use-opcache }}" != "true" ]] || TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=opcache.so -d opcache.enable=1 -d opcache.enable_cli=1"
+                    TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=$PWD/modules/xdebug.so"
+                    echo "Test PHP arguments: $TEST_PHP_ARGS"
+                    echo "TEST_PHP_ARGS=$TEST_PHP_ARGS" >> $GITHUB_ENV
+
+            -   name: Run tests
+                run: |
+                    $TEST_PHP_EXECUTABLE $TEST_PHP_ARGS -v
+                    $TEST_PHP_EXECUTABLE -n run-xdebug-tests.php -q -x --show-diff
+
+            -   name: Show errors
+                if: ${{ failure() }}
+                run: ./.build.scripts/show-errors.sh

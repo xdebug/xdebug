@@ -1,8 +1,8 @@
 Xdebug
 ======
 
-.. image:: https://travis-ci.org/xdebug/xdebug.svg?branch=master
-   :target: https://travis-ci.org/xdebug/xdebug
+.. image:: https://github.com/xdebug/xdebug/workflows/Build/badge.svg
+   :target: https://github.com/xdebug/xdebug/actions?query=workflow%3ABuild
 .. image:: https://ci.appveyor.com/api/projects/status/glp9xfsmt1p25nkn?svg=true
    :target: https://ci.appveyor.com/project/derickr/xdebug
 .. image:: https://circleci.com/gh/xdebug/xdebug/tree/master.svg?style=svg
