@@ -4,7 +4,7 @@ commands:
     description: Compiles and sets-up common environment vars
     steps:
       - checkout
-      - run: ./.travis.scripts/compile.sh
+      - run: ./.build.scripts/compile.sh
       - run:
           name: Setup env vars
           command: |

@@ -29,7 +29,7 @@ jobs:
                     tools: pecl
 
             -   name: Compile
-                run: ./.travis.scripts/compile.sh
+                run: ./.build.scripts/compile.sh
 
             -   name: Find PHP
                 run: |
@@ -52,4 +52,4 @@ jobs:
 
             -   name: Show errors
                 if: ${{ failure() }}
-                run: ./.travis.scripts/show-errors.sh
+                run: ./.build.scripts/show-errors.sh
