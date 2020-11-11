@@ -87,12 +87,12 @@ static int xdebug_create_socket_unix(const char *path)
 #if !WIN32 && !WINNT
 
 /* For OSX and FreeBSD */
-#if !defined(SOL_TCP) && defined(IPPROTO_TCP)
-# define SOL_TCP IPPROTO_TCP
-#endif
-#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE)
-# define TCP_KEEPIDLE TCP_KEEPALIVE
-#endif
+# if !defined(SOL_TCP) && defined(IPPROTO_TCP)
+#  define SOL_TCP IPPROTO_TCP
+# endif
+# if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE)
+#  define TCP_KEEPIDLE TCP_KEEPALIVE
+# endif
 
 void set_keepalive_options(int fd)
 {
@@ -111,19 +111,23 @@ void set_keepalive_options(int fd)
 		return;
 	}
 
+# if defined(TCP_KEEPCNT)
 	optval = 20;
 	ret = setsockopt(fd, SOL_TCP, TCP_KEEPCNT, &optval, optlen);
 	if (ret) {
 		return;
 	}
+# endif
 
+# if defined(TCP_KEEPINTVL)
 	optval = 60;
 	ret = setsockopt(fd, SOL_TCP, TCP_KEEPINTVL, &optval, optlen);
 	if (ret) {
 		return;
 	}
+# endif
 }
-#endif
+#endif  // !WIN32 && !WINNT
 
 static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 {
