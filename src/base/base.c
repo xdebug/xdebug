@@ -616,11 +616,20 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	if (!tmp->filename) {
 		tmp->filename = zend_string_init("UNKNOWN?", sizeof("UNKNOWN?") - 1, 0);
 	}
+	tmp->lineno = 0;
+
 	tmp->prev_memory = XG_BASE(prev_memory);
 	tmp->memory = zend_memory_usage(0);
 	XG_BASE(prev_memory) = tmp->memory;
-	tmp->nanotime = xdebug_get_nanotime();
-	tmp->lineno = 0;
+
+	/* Only get the time when it is actually going to be used. Profiling is not
+	 * included, because it has its own points when it reads the current time.
+	 * */
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		tmp->nanotime = xdebug_get_nanotime();
+	} else {
+		tmp->nanotime = 0;
+	}
 
 	xdebug_build_fname(&(tmp->function), zdata);
 	if (!tmp->function.type) {
