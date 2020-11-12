@@ -125,9 +125,6 @@ struct _xdebug_remote_handler {
 	int (*remote_init)(xdebug_con *h, int mode);
 	int (*remote_deinit)(xdebug_con *h);
 
-	/* command loop */
-	int (*cmdloop)(xdebug_con *h, int block, int bail);
-
 	/* Stack messages */
 	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_vector *stack);
 
