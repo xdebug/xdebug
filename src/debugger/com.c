@@ -476,9 +476,6 @@ static void xdebug_init_debugger()
 			/* All is well, turn off script time outs */
 			zend_unset_timeout();
 			zend_set_timeout(EG(timeout_seconds), 0);
-
-			xdebug_mark_debug_connection_active();
-			XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), XDEBUG_CMDLOOP_BLOCK, XDEBUG_CMDLOOP_BAIL);
 		}
 	} else if (XG_DBG(context).socket == -1) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOCON", "Could not connect to debugging client. Tried: %s :-(", connection_attempts->d);

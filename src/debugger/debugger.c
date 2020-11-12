@@ -199,25 +199,17 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 	function_stack_entry *fse;
 	int                   level = 0;
 	int                   func_nr = 0;
-	int                   block = XDEBUG_CMDLOOP_NONBLOCK;
 
 	if (xdebug_is_debug_connection_active()) {
-
 		if (XG_DBG(context).do_break) {
-			block = XDEBUG_CMDLOOP_BLOCK;
 			XG_DBG(context).do_break = 0;
 
 			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 				xdebug_mark_debug_connection_not_active();
+				return;
 			}
-			if (xdebug_is_debug_connection_active()) {
-				XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), block, XDEBUG_CMDLOOP_BAIL);
-			}
-			block = XDEBUG_CMDLOOP_NONBLOCK;
 		}
-	}
 
-	if (xdebug_is_debug_connection_active()) {
 		/* Get latest stack level and function number */
 		if (XG_BASE(stack) && XDEBUG_VECTOR_TAIL(XG_BASE(stack))) {
 			fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
@@ -236,35 +228,35 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 				((level == XG_DBG(context).finish_level) && (func_nr > XG_DBG(context).finish_func_nr))
 			)
 		) {
-			block = XDEBUG_CMDLOOP_BLOCK;
 			XG_DBG(context).do_finish = 0;
 
 			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
 				xdebug_mark_debug_connection_not_active();
+				return;
 			}
-			goto loop;
+			return;
 		}
 
 		/* Check for "next" */
 		if (XG_DBG(context).do_next && XG_DBG(context).next_level >= level) {
-			block = XDEBUG_CMDLOOP_BLOCK;
 			XG_DBG(context).do_next = 0;
 
 			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
 				xdebug_mark_debug_connection_not_active();
+				return;
 			}
-			goto loop;
+			return;
 		}
 
 		/* Check for "step" */
 		if (XG_DBG(context).do_step) {
-			block = XDEBUG_CMDLOOP_BLOCK;
 			XG_DBG(context).do_step = 0;
 
 			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL)) {
 				xdebug_mark_debug_connection_not_active();
+				return;
 			}
-			goto loop;
+			return;
 		}
 
 		if (XG_DBG(context).line_breakpoints) {
@@ -292,21 +284,15 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 						}
 					}
 					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
-						block = XDEBUG_CMDLOOP_BLOCK;
 						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 							xdebug_mark_debug_connection_not_active();
 							break;
 						}
-						goto loop;
+						return;
 					}
 				}
 			}
 		}
-	}
-
-loop:
-	if (xdebug_is_debug_connection_active()) {
-		XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), block, XDEBUG_CMDLOOP_BAIL);
 	}
 }
 
@@ -320,7 +306,6 @@ void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *lin
 	zend_class_entry *exception_ce = Z_OBJCE_P(exception);
 #endif
 	xdebug_brk_info *extra_brk_info;
-	int block = XDEBUG_CMDLOOP_NONBLOCK;
 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
@@ -349,7 +334,6 @@ void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *lin
 		}
 #endif
 		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
-			block = XDEBUG_CMDLOOP_BLOCK;
 			if (!XG_DBG(context).handler->remote_breakpoint(
 				&(XG_DBG(context)), XG_BASE(stack),
 				Z_STR_P(file), Z_LVAL_P(line), XDEBUG_BREAK,
@@ -361,16 +345,11 @@ void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *lin
 			}
 		}
 	}
-
-	if (xdebug_is_debug_connection_active()) {
-		XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), block, XDEBUG_CMDLOOP_BAIL);
-	}
 }
 
 void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int type, char *error_type_str, char *buffer)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
-	int block = XDEBUG_CMDLOOP_NONBLOCK;
 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
@@ -390,7 +369,6 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 		) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
 				char *type_str = xdebug_sprintf("%ld", type);
-				block = XDEBUG_CMDLOOP_BLOCK;
 
 				if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer)) {
 					xdebug_mark_debug_connection_not_active();
@@ -400,13 +378,9 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 			}
 		}
 	}
-
-	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
-		XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), block, XDEBUG_CMDLOOP_BAIL);
-	}
 }
 
-static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, int *block_loop)
+static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
 	char            *tmp_name = NULL;
@@ -420,7 +394,6 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, in
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (xdebug_handle_hit_value(extra_brk_info)) {
 					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						*block_loop = XDEBUG_CMDLOOP_BLOCK;
 						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 							return 0;
 						}
@@ -445,7 +418,6 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, in
 			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 				if (xdebug_handle_hit_value(extra_brk_info)) {
 					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						*block_loop = XDEBUG_CMDLOOP_BLOCK;
 						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL)) {
 							return 0;
 						}
@@ -462,15 +434,9 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, in
 
 void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 {
-	int block = XDEBUG_CMDLOOP_NONBLOCK;
-	if (XG_DBG(breakpoints_allowed)) {
-		if (xdebug_is_debug_connection_active()) {
-			if (!handle_breakpoints(fse, breakpoint_type, &block)) {
-				xdebug_mark_debug_connection_not_active();
-			}
-		}
-		if (xdebug_is_debug_connection_active()) {
-			XG_DBG(context).handler->cmdloop(&(XG_DBG(context)), block, XDEBUG_CMDLOOP_BAIL);
+	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
+		if (!handle_breakpoints(fse, breakpoint_type)) {
+			xdebug_mark_debug_connection_not_active();
 		}
 	}
 }
