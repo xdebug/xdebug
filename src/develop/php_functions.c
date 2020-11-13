@@ -284,7 +284,7 @@ PHP_FUNCTION(xdebug_call_class)
 		RETURN_FALSE;
 	}
 
-	RETURN_STR(fse->function.class_name);
+	RETURN_STR_COPY(fse->function.class_name);
 }
 /* }}} */
 
@@ -354,7 +354,7 @@ PHP_FUNCTION(xdebug_call_file)
 		return;
 	}
 
-	RETURN_STR(fse->filename);
+	RETURN_STR_COPY(fse->filename);
 }
 /* }}} */
 
