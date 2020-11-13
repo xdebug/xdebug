@@ -364,6 +364,9 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 	int arguments_storage = 0;
 
 	arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
+	if (arguments_sent > USHRT_MAX) {
+		return;
+	}
 
 	names_expected = zdata->func->internal_function.num_args;
 	if (names_expected > arguments_sent) {

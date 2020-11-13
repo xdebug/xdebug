@@ -59,8 +59,8 @@ typedef struct xdebug_var_name {
 #define XDEBUG_BREAK         1
 #define XDEBUG_STEP          2
 
-#define XDEBUG_BUILT_IN      1
-#define XDEBUG_USER_DEFINED  2
+#define XDEBUG_BUILT_IN      0
+#define XDEBUG_USER_DEFINED  1
 
 #define XDEBUG_MAX_FUNCTION_LEN 1024
 
@@ -137,11 +137,11 @@ typedef struct _function_stack_entry {
 	/* function properties */
 	xdebug_func    function;
 	unsigned int   function_nr;
-	unsigned short level;
-	unsigned char  user_defined;
+	unsigned short user_defined:1;
+	unsigned short level:15;
 
 	/* argument properties */
-	unsigned char      varc;
+	unsigned short     varc;
 	xdebug_var_name   *var;
 	zval              *return_value;
 	xdebug_llist      *declared_vars;
