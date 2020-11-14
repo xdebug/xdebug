@@ -2309,6 +2309,9 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
 		length = 0;
 
 		option = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', &length);
+		if (!option) {
+			return 0;
+		}
 
 		response = xdebug_xml_node_init("response");
 		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
