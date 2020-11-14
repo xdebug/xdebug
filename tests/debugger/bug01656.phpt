@@ -2,9 +2,9 @@
 Test for bug #1656: discover_client_host alters header if multiple values are present
 --ENV--
 I_LIKE_COOKIES=127.0.0.1, 127.0.0.2
-XDEBUG_CONFIG="idekey=foobar"
 --INI--
 xdebug.mode=debug
+xdebug.start_with_request=yes
 xdebug.client_discovery_header=I_LIKE_COOKIES
 xdebug.discover_client_host=1
 xdebug.client_port=9999
