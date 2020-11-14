@@ -594,8 +594,8 @@ static int xdebug_handle_start_session()
 	} else if (getenv("XDEBUG_CONFIG")) {
 		if (XG_DBG(ide_key) && *XG_DBG(ide_key) && !SG(headers_sent)) {
 			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
+			activate_session = 1;
 		}
-		activate_session = 1;
 	}
 
 	return activate_session;
