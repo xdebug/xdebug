@@ -420,7 +420,7 @@ static xdebug_str* return_eval_source(char *id, int begin, int end)
 	char             *key;
 	xdebug_str       *joined;
 	xdebug_eval_info *ei;
-	xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	xdebug_arg       *parts;
 
 	if (begin < 0) {
 		begin = 0;
@@ -432,7 +432,7 @@ static xdebug_str* return_eval_source(char *id, int begin, int end)
 		return NULL;
 	}
 
-	xdebug_arg_init(parts);
+	parts = xdebug_arg_ctor();
 	xdebug_explode("\n", ZSTR_VAL(ei->contents), parts, end + 2);
 	joined = xdebug_join("\n", parts, begin, end);
 	xdebug_arg_dtor(parts);
@@ -632,13 +632,14 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk_info = NULL;
-	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 
 	switch (type) {
 		case XDEBUG_BREAKPOINT_TYPE_LINE:
-		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL:
+		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL: {
+			xdebug_arg *parts;
+
 			/* First we split the key into filename and linenumber */
-			xdebug_arg_init(parts);
+			parts = xdebug_arg_ctor();
 			xdebug_explode("$", hkey, parts, -1);
 
 			/* Second we loop through the list of file/line breakpoints to
@@ -654,7 +655,9 @@ static xdebug_brk_info* breakpoint_brk_info_fetch(int type, char *hkey)
 
 			/* Cleaning up */
 			xdebug_arg_dtor(parts);
+
 			break;
+		}
 
 		case XDEBUG_BREAKPOINT_TYPE_CALL:
 		case XDEBUG_BREAKPOINT_TYPE_RETURN:
@@ -676,14 +679,15 @@ static int breakpoint_remove(int type, char *hkey)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *brk_info = NULL;
-	xdebug_arg           *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
 	int                   retval = FAILURE;
 
 	switch (type) {
 		case XDEBUG_BREAKPOINT_TYPE_LINE:
-		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL:
+		case XDEBUG_BREAKPOINT_TYPE_CONDITIONAL: {
+			xdebug_arg *parts;
+
 			/* First we split the key into filename and linenumber */
-			xdebug_arg_init(parts);
+			parts = xdebug_arg_ctor();
 			xdebug_explode("$", hkey, parts, -1);
 
 			/* Second we loop through the list of file/line breakpoints to
@@ -694,6 +698,7 @@ static int breakpoint_remove(int type, char *hkey)
 				if (atoi(parts->args[1]) == brk_info->original_lineno && memcmp(ZSTR_VAL(brk_info->filename), parts->args[0], ZSTR_LEN(brk_info->filename)) == 0) {
 					xdebug_llist_remove(XG_DBG(context).line_breakpoints, le, NULL);
 					retval = SUCCESS;
+					xdebug_arg_dtor(parts);
 					break;
 				}
 			}
@@ -701,6 +706,7 @@ static int breakpoint_remove(int type, char *hkey)
 			/* Cleaning up */
 			xdebug_arg_dtor(parts);
 			break;
+		}
 
 		case XDEBUG_BREAKPOINT_TYPE_CALL:
 		case XDEBUG_BREAKPOINT_TYPE_RETURN:

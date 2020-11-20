@@ -389,8 +389,7 @@ static void xdebug_env_config(void)
 		return;
 	}
 
-	parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
-	xdebug_arg_init(parts);
+	parts = xdebug_arg_ctor();
 	xdebug_explode(" ", config, parts, -1);
 
 	for (i = 0; i < parts->c; ++i) {

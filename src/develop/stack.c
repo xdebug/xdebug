@@ -795,9 +795,8 @@ void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned i
 				if (printable_stack) {
 					int pc;
 
-					xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+					xdebug_arg *parts = xdebug_arg_ctor();
 
-					xdebug_arg_init(parts);
 					xdebug_explode("\n", printable_stack, parts, -1);
 
 					for (pc = 0; pc < parts->c; pc++) {

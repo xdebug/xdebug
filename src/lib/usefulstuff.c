@@ -54,6 +54,29 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+xdebug_arg *xdebug_arg_ctor(void)
+{
+	xdebug_arg *tmp = /*(xdebug_arg*)*/ xdmalloc(sizeof(xdebug_arg));
+
+	tmp->args = NULL;
+	tmp->c    = 0;
+
+	return tmp;
+}
+
+void xdebug_arg_dtor(xdebug_arg *arg)
+{
+	int i;
+
+	for (i = 0; i < arg->c; i++) {
+		xdfree(arg->args[i]);
+	}
+	if (arg->args) {
+		xdfree(arg->args);
+	}
+	xdfree(arg);
+}
+
 xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 {
 	int         i;
@@ -615,13 +638,13 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, zend_
 	char *name;
 	xdebug_str *parent, *ancester;
 	const char *full_filename = ZSTR_VAL(filename);
-	xdebug_arg *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+	xdebug_arg *parts;
 	char *slash = xdebug_sprintf("%c", DEFAULT_SLASH);
 	char *fmt = XINI_LIB(filename_format);
 	const char *format = fmt && fmt[0] ? fmt : default_fmt; /* If the format is empty, we use the default */
 
 	/* Create pointers for the format chars */
-	xdebug_arg_init(parts);
+	parts = xdebug_arg_ctor();
 	xdebug_explode(slash, full_filename, parts, -1);
 	name = parts->args[parts->c - 1];
 	parent = parts->c > 1 ?

@@ -24,21 +24,8 @@ typedef struct xdebug_arg {
 	char **args;
 } xdebug_arg;
 
-#define xdebug_arg_init(arg) {    \
-	arg->args = NULL;             \
-	arg->c    = 0;                \
-}
-
-#define xdebug_arg_dtor(arg) {     \
-	int adi;                       \
-	for (adi = 0; adi < arg->c; adi++) { \
-		xdfree(arg->args[adi]);    \
-	}                              \
-	if (arg->args) {               \
-		xdfree(arg->args);         \
-	}                              \
-	xdfree(arg);                   \
-}
+xdebug_arg *xdebug_arg_ctor(void);
+void xdebug_arg_dtor(xdebug_arg *arg);
 
 xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
 void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int limit);
