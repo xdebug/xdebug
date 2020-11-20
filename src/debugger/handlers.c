@@ -22,6 +22,30 @@
 #include "handler_dbgp.h"
 #include "lib/mm.h"
 
+xdebug_brk_info *xdebug_brk_info_ctor(void)
+{
+	xdebug_brk_info *tmp = xdmalloc(sizeof(xdebug_brk_info));
+
+	tmp->id = -1;
+	tmp->brk_type = -1;
+	tmp->resolved = XDEBUG_BRK_UNRESOLVED;
+	tmp->filename = NULL;
+	tmp->original_lineno = 0;
+	tmp->resolved_lineno = 0;
+	tmp->classname = NULL;
+	tmp->functionname = NULL;
+	tmp->function_break_type = 0;
+	tmp->exceptionname = NULL;
+	tmp->condition = NULL;
+	tmp->disabled = 0;
+	tmp->temporary = 0;
+	tmp->hit_count = 0;
+	tmp->hit_value = 0;
+	tmp->hit_condition = XDEBUG_HIT_DISABLED;
+
+	return tmp;
+}
+
 void xdebug_brk_info_dtor(xdebug_brk_info *brk_info)
 {
 	if (brk_info->classname) {
