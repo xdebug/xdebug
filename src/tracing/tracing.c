@@ -88,7 +88,7 @@ FILE *xdebug_trace_open_file(char *requested_filename, zend_string *script_filen
 	}
 
 	if (!file) {
-		xdebug_log_diagnose_permissions(XLOG_CHAN_TRACE, output_dir, filename_to_use + strlen(output_dir) + 1);
+		xdebug_log_diagnose_permissions(XLOG_CHAN_TRACE, output_dir, generated_filename);
 	}
 
 	if (generated_filename) {
