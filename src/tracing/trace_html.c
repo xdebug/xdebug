@@ -98,9 +98,9 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
 			xdebug_str       *joined;
-			xdebug_arg       *parts = (xdebug_arg*) xdmalloc(sizeof(xdebug_arg));
+			xdebug_arg       *parts;
 
-			xdebug_arg_init(parts);
+			parts = xdebug_arg_ctor();
 			xdebug_explode("\n", ZSTR_VAL(fse->include_filename), parts, 99999);
 			joined = xdebug_join("<br />", parts, 0, 99999);
 			xdebug_arg_dtor(parts);
