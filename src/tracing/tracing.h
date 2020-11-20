@@ -73,4 +73,6 @@ char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zva
 
 void xdebug_trace_function_begin(function_stack_entry *fse, int function_nr);
 void xdebug_trace_function_end(function_stack_entry *fse, int function_nr);
+
+char *xdebug_get_trace_filename(void);
 #endif

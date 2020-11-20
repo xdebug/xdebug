@@ -475,23 +475,100 @@ static void print_html_footer(void)
 	php_output_write("</div></body></html>", strlen("</div></body></html>"));
 }
 
+static void print_diagnostic_log(void)
+{
+	php_info_print_table_start();
+	if (!sapi_module.phpinfo_as_text) {
+		php_info_print_table_colspan_header(3, (char*) "Diagnostic Log");
+	} else {
+		php_info_print_table_colspan_header(2, (char*) "Diagnostic Log");
+	}
+	if (XG_LIB(diagnosis_buffer) && XG_LIB(diagnosis_buffer)->l) {
+		if (!sapi_module.phpinfo_as_text) {
+			PUTS("<tr class=\"h\"><th colspan=\"2\">Message</th><th>Docs</th></tr>\n");
+		}
+		php_output_write(XG_LIB(diagnosis_buffer)->d, XG_LIB(diagnosis_buffer)->l);
+	} else {
+		if (!sapi_module.phpinfo_as_text) {
+			PUTS("<tr><td class=\"v\" colspan=\"3\">No messages</td></tr>\n");
+		} else {
+			PUTS("No messages\n");
+		}
+	}
+	php_info_print_table_end();
+}
+
+static void print_profile_information(void)
+{
+	char *file_name;
+
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
+		return;
+	}
+
+	file_name = xdebug_get_profiler_filename();
+
+	php_info_print_table_start();
+	if (!sapi_module.phpinfo_as_text) {
+		PUTS("<tr class=\"h\"><th colspan=\"2\">Profiler</th><th>Docs</th></tr>\n");
+		if (file_name) {
+			xdebug_info_printf("<tr><td class=\"e\">Profile File</td><td class=\"v\">%s</td><td class=\"d\"><a href=\"%sprofiler\">🖹</a></td></tr>\n",
+				file_name, xdebug_lib_docs_base());
+		} else {
+			xdebug_info_printf("<tr><td colspan=\"2\" class=\"d\">Profiler is not active</td><td class=\"d\"><a href=\"%sprofiler\">🖹</a></td></tr>\n",
+				xdebug_lib_docs_base());
+		}
+	} else {
+		php_info_print_table_colspan_header(2, (char*) "Profiler");
+		if (file_name) {
+			php_info_print_table_row(2, "Profile File", file_name);
+		} else {
+			PUTS("Profiler is not active\n");
+		}
+	}
+	php_info_print_table_end();
+}
+
+static void print_trace_information(void)
+{
+	char *file_name;
+
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
+		return;
+	}
+
+	file_name = xdebug_get_trace_filename();
+
+	php_info_print_table_start();
+	if (!sapi_module.phpinfo_as_text) {
+		PUTS("<tr class=\"h\"><th colspan=\"2\">Function Tracing</th><th>Docs</th></tr>\n");
+		if (file_name) {
+			xdebug_info_printf("<tr><td class=\"e\">Trace File</td><td class=\"v\">%s</td><td class=\"d\"><a href=\"%strace\">🖹</a></td></tr>\n",
+				file_name, xdebug_lib_docs_base());
+		} else {
+			xdebug_info_printf("<tr><td colspan=\"2\" class=\"d\">Function tracing is not active</td><td class=\"d\"><a href=\"%strace\">🖹</a></td></tr>\n",
+				xdebug_lib_docs_base());
+		}
+	} else {
+		php_info_print_table_colspan_header(2, (char*) "Function Tracing");
+		if (file_name) {
+			php_info_print_table_row(2, "Trace File", file_name);
+		} else {
+			PUTS("Function tracing is not active\n");
+		}
+	}
+	php_info_print_table_end();
+}
+
 PHP_FUNCTION(xdebug_info)
 {
 	print_html_header();
 
 	xdebug_print_info();
 
-	php_info_print_table_start();
-	if (!sapi_module.phpinfo_as_text) {
-		php_info_print_table_colspan_header(3, (char*) "Diagnostic Log");
-		PUTS("<tr class=\"h\"><th colspan=\"2\">Message</th><th>Docs</th></tr>\n");
-	} else {
-		php_info_print_table_colspan_header(2, (char*) "Diagnostic Log");
-	}
-	if (XG_LIB(diagnosis_buffer)) {
-		php_output_write(XG_LIB(diagnosis_buffer)->d, XG_LIB(diagnosis_buffer)->l);
-	}
-	php_info_print_table_end();
+	print_diagnostic_log();
+	print_profile_information();
+	print_trace_information();
 
 	xdebug_print_php_section();
 
