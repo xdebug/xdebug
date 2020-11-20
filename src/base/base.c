@@ -736,7 +736,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	XG_BASE(level)++;
-	if ((signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
@@ -881,7 +881,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 
 	XG_BASE(level)++;
-	if ((signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
