@@ -88,7 +88,7 @@ FILE *xdebug_trace_open_file(char *requested_filename, zend_string *script_filen
 	}
 
 	if (!file) {
-		xdebug_log_diagnose_permissions(XLOG_CHAN_TRACE, output_dir, filename_to_use);
+		xdebug_log_diagnose_permissions(XLOG_CHAN_TRACE, output_dir, filename_to_use + strlen(output_dir) + 1);
 	}
 
 	if (generated_filename) {
@@ -125,6 +125,15 @@ static void xdebug_stop_trace(void)
 	XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
 	XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context));
 	XG_TRACE(trace_context) = NULL;
+}
+
+char *xdebug_get_trace_filename(void)
+{
+	if (!(XG_TRACE(trace_context) && XG_TRACE(trace_handler) && XG_TRACE(trace_handler)->get_filename)) {
+		return NULL;
+	}
+
+	return XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context));
 }
 
 PHP_FUNCTION(xdebug_start_trace)
@@ -174,13 +183,16 @@ PHP_FUNCTION(xdebug_stop_trace)
 
 PHP_FUNCTION(xdebug_get_tracefile_name)
 {
+	char *filename;
+
 	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
 
-	if (!(XG_TRACE(trace_context) && XG_TRACE(trace_handler) && XG_TRACE(trace_handler)->get_filename)) {
+	filename = xdebug_get_trace_filename();
+	if (!filename) {
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
+	RETVAL_STRING(filename);
 }
 
 #if PHP_VERSION_ID >= 70400
