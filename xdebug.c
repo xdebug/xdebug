@@ -189,7 +189,7 @@ static PHP_INI_MH(OnUpdateRemovedSetting)
 	if (! (EG(error_reporting) & E_DEPRECATED)) {
 		return SUCCESS;
 	}
-	if (new_value && new_value->val && strlen(new_value->val) > 0) {
+	if (new_value && new_value->val && strlen(new_value->val) > 0 && strncmp("This setting", new_value->val, 11) != 0) {
 		xdebug_log_ex(
 			XLOG_CHAN_CONFIG, XLOG_CRIT, "REMOVED",
 			"The setting '%s' has been removed, see the upgrading guide at %supgrade_guide#changed-%s",
@@ -204,7 +204,7 @@ static PHP_INI_MH(OnUpdateChangedSetting)
 	if (! (EG(error_reporting) & E_DEPRECATED)) {
 		return SUCCESS;
 	}
-	if (new_value && new_value->val && strlen(new_value->val) > 0) {
+	if (new_value && new_value->val && strlen(new_value->val) > 0 && strncmp("This setting", new_value->val, 11) != 0) {
 		xdebug_log_ex(
 			XLOG_CHAN_CONFIG, XLOG_CRIT, "CHANGED",
 			"The setting '%s' has been renamed, see the upgrading guide at %supgrade_guide#changed-%s",
@@ -224,6 +224,9 @@ static PHP_INI_MH(OnUpdateChangedSetting)
 #  define XDEBUG_TEMP_DIR "/tmp"
 # endif
 #endif
+
+#define XDEBUG_REMOVED_INI_ENTRY(n) PHP_INI_ENTRY((n), "This setting has been removed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#removed-" # n, PHP_INI_ALL, OnUpdateRemovedSetting)
+#define XDEBUG_CHANGED_INI_ENTRY(n) PHP_INI_ENTRY((n), "This setting has been changed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-" # n, PHP_INI_ALL, OnUpdateChangedSetting)
 
 PHP_INI_BEGIN()
 	/* Library settings */
@@ -298,34 +301,34 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_return,    zend_xdebug_globals, xdebug_globals)
 
 	/* Removed/Changed settings */
-	PHP_INI_ENTRY("xdebug.auto_trace",                    "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.collect_includes",              "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
-	PHP_INI_ENTRY("xdebug.collect_params",                "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
-	PHP_INI_ENTRY("xdebug.collect_vars",                  "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
-	PHP_INI_ENTRY("xdebug.coverage_enable",               "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.default_enable",                "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.extended_info",                 "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
-	PHP_INI_ENTRY("xdebug.gc_stats_enable",               "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.gc_stats_output_dir",           "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.overload_var_dump",             "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
-	PHP_INI_ENTRY("xdebug.profiler_enable",               "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.profiler_enable_trigger",       "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.profiler_enable_trigger_value", "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.profiler_output_dir",           "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_autostart",              "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_connect_back",           "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_enable",                 "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_handler",                "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
-	PHP_INI_ENTRY("xdebug.remote_host",                   "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_log",                    "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_log_level",              "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_mode",                   "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_port",                   "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.remote_timeout",                "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.show_mem_delta",                "", PHP_INI_SYSTEM, OnUpdateRemovedSetting)
-	PHP_INI_ENTRY("xdebug.trace_output_dir",              "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.trace_enable_trigger",          "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
-	PHP_INI_ENTRY("xdebug.trace_enable_trigger_value",    "", PHP_INI_SYSTEM, OnUpdateChangedSetting)
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.auto_trace")
+	XDEBUG_REMOVED_INI_ENTRY("xdebug.collect_includes")
+	XDEBUG_REMOVED_INI_ENTRY("xdebug.collect_params")
+	XDEBUG_REMOVED_INI_ENTRY("xdebug.collect_vars")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.coverage_enable")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.default_enable")
+	XDEBUG_REMOVED_INI_ENTRY("xdebug.extended_info")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.gc_stats_enable")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.gc_stats_output_dir")
+	XDEBUG_REMOVED_INI_ENTRY("xdebug.overload_var_dump")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.profiler_enable")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.profiler_enable_trigger")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.profiler_enable_trigger_value")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.profiler_output_dir")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_autostart")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_connect_back")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_enable")
+	XDEBUG_REMOVED_INI_ENTRY("xdebug.remote_handler")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_host")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_log")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_log_level")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_mode")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_port")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.remote_timeout")
+	XDEBUG_REMOVED_INI_ENTRY("xdebug.show_mem_delta")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.trace_output_dir")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.trace_enable_trigger")
+	XDEBUG_CHANGED_INI_ENTRY("xdebug.trace_enable_trigger_value")
 PHP_INI_END()
 
 static void xdebug_init_base_globals(struct xdebug_base_info *xg)
