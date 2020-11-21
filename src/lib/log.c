@@ -398,6 +398,12 @@ static void xdebug_print_settings(void)
         if (ini_entry->module_number != module_number) {
             continue;
         }
+
+		/* Hack to not show changed and removed settings */
+		if (strcmp(ZSTR_VAL(ini_entry->name), "xdebug.auto_trace") == 0) {
+			break;
+		}
+
         if (!sapi_module.phpinfo_as_text) {
             PUTS("<tr>");
             PUTS("<td class=\"e\">");
