@@ -328,47 +328,47 @@ static void xdebug_print_php_section(void)
 
 static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 {
-    if (ini_entry->displayer) {
-        ini_entry->displayer(ini_entry, type);
-    } else {
-        const char *display_string;
-        size_t display_string_length;
-        int esc_html=0;
+	if (ini_entry->displayer) {
+		ini_entry->displayer(ini_entry, type);
+	} else {
+		const char *display_string;
+		size_t display_string_length;
+		int esc_html=0;
 
-        if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-            if (ini_entry->orig_value && ZSTR_VAL(ini_entry->orig_value)[0]) {
-                display_string = ZSTR_VAL(ini_entry->orig_value);
-                display_string_length = ZSTR_LEN(ini_entry->orig_value);
-                esc_html = !sapi_module.phpinfo_as_text;
-            } else {
-                if (!sapi_module.phpinfo_as_text) {
-                    display_string = "<i>no value</i>";
-                    display_string_length = sizeof("<i>no value</i>") - 1;
-                } else {
-                    display_string = "no value";
-                    display_string_length = sizeof("no value") - 1;
-                }
-            }
-        } else if (ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) {
-            display_string = ZSTR_VAL(ini_entry->value);
-            display_string_length = ZSTR_LEN(ini_entry->value);
-            esc_html = !sapi_module.phpinfo_as_text;
-        } else {
-            if (!sapi_module.phpinfo_as_text) {
-                display_string = "<i>no value</i>";
-                display_string_length = sizeof("<i>no value</i>") - 1;
-            } else {
-                display_string = "no value";
-                display_string_length = sizeof("no value") - 1;
-            }
-        }
+		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
+			if (ini_entry->orig_value && ZSTR_VAL(ini_entry->orig_value)[0]) {
+				display_string = ZSTR_VAL(ini_entry->orig_value);
+				display_string_length = ZSTR_LEN(ini_entry->orig_value);
+				esc_html = !sapi_module.phpinfo_as_text;
+			} else {
+				if (!sapi_module.phpinfo_as_text) {
+					display_string = "<i>no value</i>";
+					display_string_length = sizeof("<i>no value</i>") - 1;
+				} else {
+					display_string = "no value";
+					display_string_length = sizeof("no value") - 1;
+				}
+			}
+		} else if (ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) {
+			display_string = ZSTR_VAL(ini_entry->value);
+			display_string_length = ZSTR_LEN(ini_entry->value);
+			esc_html = !sapi_module.phpinfo_as_text;
+		} else {
+			if (!sapi_module.phpinfo_as_text) {
+				display_string = "<i>no value</i>";
+				display_string_length = sizeof("<i>no value</i>") - 1;
+			} else {
+				display_string = "no value";
+				display_string_length = sizeof("no value") - 1;
+			}
+		}
 
-        if (esc_html) {
-            zend_html_puts(display_string, display_string_length);
-        } else {
-            PHPWRITE(display_string, display_string_length);
-        }
-    }
+		if (esc_html) {
+			zend_html_puts(display_string, display_string_length);
+		} else {
+			PHPWRITE(display_string, display_string_length);
+		}
+	}
 }
 
 static void xdebug_print_settings(void)
@@ -394,39 +394,45 @@ static void xdebug_print_settings(void)
 		php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
 	}
 
-    ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
-        if (ini_entry->module_number != module_number) {
-            continue;
-        }
-        if (!sapi_module.phpinfo_as_text) {
-            PUTS("<tr>");
-            PUTS("<td class=\"e\">");
-            PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
-            PUTS("</td><td class=\"v\">");
-            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-            PUTS("</td><td class=\"v\">");
-            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+	ZEND_HASH_FOREACH_PTR(EG(ini_directives), ini_entry) {
+		if (ini_entry->module_number != module_number) {
+			continue;
+		}
+
+		/* Hack to not show changed and removed settings */
+		if (strcmp(ZSTR_VAL(ini_entry->name), "xdebug.auto_trace") == 0) {
+			break;
+		}
+
+		if (!sapi_module.phpinfo_as_text) {
+			PUTS("<tr>");
+			PUTS("<td class=\"e\">");
+			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PUTS("</td><td class=\"v\">");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			PUTS("</td><td class=\"v\">");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
 			PUTS("</td><td class=\"d\"><a href=\"");
 			PUTS(xdebug_lib_docs_base());
 			PUTS("all_settings#");
-            PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
 			PUTS("\">🖹</a></td></tr>\n");
-        } else {
-            PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
-            PUTS(" => ");
-            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-            PUTS(" => ");
-            php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-            PUTS("\n");
-        }
-    } ZEND_HASH_FOREACH_END();
+		} else {
+			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			PUTS(" => ");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			PUTS(" => ");
+			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
+			PUTS("\n");
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	php_info_print_table_end();
 }
 
 static void print_html_header(void)
 {
-    if (sapi_module.phpinfo_as_text) {
+	if (sapi_module.phpinfo_as_text) {
 		return;
 	}
 
@@ -468,7 +474,7 @@ static void print_html_header(void)
 
 static void print_html_footer(void)
 {
-    if (sapi_module.phpinfo_as_text) {
+	if (sapi_module.phpinfo_as_text) {
 		return;
 	}
 
