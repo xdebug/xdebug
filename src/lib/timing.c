@@ -112,7 +112,7 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 }
 
 // Linux/Unix with clock_gettime
-#elif CLOCK_MONOTONIC
+#elif defined(CLOCK_MONOTONIC)
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
 {
 	struct timespec ts;
@@ -144,13 +144,13 @@ void xdebug_nanotime_init(void)
 		context.use_rel_time = 1;
 	}
 
-#elif __APPLE__ | CLOCK_MONOTONIC
+#elif __APPLE__ | defined(CLOCK_MONOTONIC)
 	context.use_rel_time = 1;
 #endif
 
 	context.start_abs = xdebug_get_nanotime_abs(&context);
 	context.last_abs = 0;
-#if PHP_WIN32 | __APPLE__ | CLOCK_MONOTONIC
+#if PHP_WIN32 | __APPLE__ | defined(CLOCK_MONOTONIC)
 	context.start_rel = xdebug_get_nanotime_rel(&context);
 	context.last_rel = 0;
 #endif
@@ -165,7 +165,7 @@ uint64_t xdebug_get_nanotime(void)
 
 	context = &XG_BASE(nanotime_context);
 
-#if PHP_WIN32 | __APPLE__ | CLOCK_MONOTONIC
+#if PHP_WIN32 | __APPLE__ | defined(CLOCK_MONOTONIC)
 	/* Relative timing */
 	if (context->use_rel_time) {
 		nanotime = xdebug_get_nanotime_rel(context);
