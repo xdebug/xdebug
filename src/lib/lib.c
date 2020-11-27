@@ -593,6 +593,12 @@ char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char
 	xdebug_str tmp = XDEBUG_STR_INITIALIZER;
 	char *tmp_loc_info;
 
+	if (fname[strlen(fname) - 1] != '}') {
+		xdebug_str_add(&tmp, fname, 0);
+
+		return tmp.d;
+	}
+
 	xdebug_str_addl(&tmp, fname, strlen(fname) - 1, 0);
 
 	tmp_loc_info = xdebug_sprintf(
