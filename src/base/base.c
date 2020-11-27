@@ -261,7 +261,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 		}
 		if (edata->func->common.function_name) {
 			if (edata->func->common.fn_flags & ZEND_ACC_CLOSURE) {
-				tmp->function = xdebug_wrap_closure_location_around_function_name(&edata->func->op_array, edata->func->common.function_name->val);
+				tmp->function = xdebug_wrap_closure_location_around_function_name(&edata->func->op_array, STR_NAME_VAL(edata->func->common.function_name));
 			} else if (strncmp(edata->func->common.function_name->val, "call_user_func", 14) == 0) {
 				zend_string *fname = NULL;
 				int          lineno = 0;
