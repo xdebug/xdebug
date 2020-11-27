@@ -698,7 +698,6 @@ static int breakpoint_remove(int type, char *hkey)
 				if (atoi(parts->args[1]) == brk_info->original_lineno && memcmp(ZSTR_VAL(brk_info->filename), parts->args[0], ZSTR_LEN(brk_info->filename)) == 0) {
 					xdebug_llist_remove(XG_DBG(context).line_breakpoints, le, NULL);
 					retval = SUCCESS;
-					xdebug_arg_dtor(parts);
 					break;
 				}
 			}
