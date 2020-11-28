@@ -28,6 +28,7 @@
 #include "base.h"
 #include "filter.h"
 #include "develop/develop.h"
+#include "develop/stack.h"
 #include "gcstats/gc_stats.h"
 #include "lib/lib_private.h"
 #include "lib/log.h"
@@ -40,11 +41,11 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 #if PHP_VERSION_ID >= 80000
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
-void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
+static void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 #else
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
-void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
+void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
+static void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 #endif
 
 /* execution redirection functions */
@@ -1085,7 +1086,11 @@ void xdebug_base_rinit()
 	XG_BASE(last_exception_trace) = NULL;
 
 	/* Initialize start time */
-	XG_BASE(start_nanotime) = xdebug_get_nanotime();
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		XG_BASE(start_nanotime) = xdebug_get_nanotime();
+	} else {
+		XG_BASE(start_nanotime) = 0;
+	}
 
 	XG_BASE(in_var_serialisation) = 0;
 	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;
@@ -1135,6 +1140,53 @@ void xdebug_base_rshutdown()
 	XG_BASE(in_execution) = 0;
 }
 
+/* Error callback for formatting stack traces */
+#if PHP_VERSION_ID >= 80000
+static void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
+{
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		int type                        = orig_type & E_ALL;
+		char *error_type_str            = xdebug_error_type(type);
+		zend_string *tmp_error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
+
+		xdebug_debugger_error_cb(tmp_error_filename, error_lineno, type, error_type_str, ZSTR_VAL(message));
+
+		zend_string_release(tmp_error_filename);
+		xdfree(error_type_str);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		xdebug_develop_error_cb(orig_type, error_filename, error_lineno, message);
+	} else {
+		xdebug_old_error_cb(orig_type, error_filename, error_lineno, message);
+	}
+}
+#else
+static void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
+{
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		int          type               = orig_type & E_ALL;
+		char        *error_type_str     = xdebug_error_type(type);
+		zend_string *tmp_error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
+		char        *buffer;
+		va_list      new_args;
+
+		va_copy(new_args, args);
+		vspprintf(&buffer, PG(log_errors_max_len), format, new_args);
+		va_end(new_args);
+
+		xdebug_debugger_error_cb(tmp_error_filename, error_lineno, type, error_type_str, buffer);
+
+		efree(buffer);
+		zend_string_release(tmp_error_filename);
+		xdfree(error_type_str);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		xdebug_develop_error_cb(orig_type, error_filename, error_lineno, format, args);
+	} else {
+		xdebug_old_error_cb(orig_type, error_filename, error_lineno, format, args);
+	}
+}
+#endif
 
 void xdebug_base_use_original_error_cb(void)
 {

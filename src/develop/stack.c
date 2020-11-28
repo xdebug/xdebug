@@ -649,10 +649,10 @@ static void clear_last_error()
 
 /* Error callback for formatting stack traces */
 #if PHP_VERSION_ID >= 80000
-void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
+void xdebug_develop_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
 {
 #else
-void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
+void xdebug_develop_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
 {
 	char *buffer;
 	int buffer_len;
