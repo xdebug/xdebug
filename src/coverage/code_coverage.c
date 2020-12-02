@@ -648,7 +648,7 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array, zend_string *
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XG_BASE(level));
 
-	if (!path) {
+	if (!path || !path->elements) {
 		return;
 	}
 
