@@ -77,7 +77,7 @@ running::
 	php run-xdebug-tests.php
 
 The test framework requires that the PHP binary on the path has Xdebug loaded,
-with remote debugging enabled through `xdebug.remote_enable=1`. It is possible
+with remote debugging enabled through `xdebug.mode=debug`. It is possible
 to skip remote debugging tests by exporting the `SKIP_DBGP_TESTS=1` environment
 variable.
 
