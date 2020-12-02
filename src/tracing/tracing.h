@@ -57,6 +57,7 @@ void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg);
 void xdebug_tracing_minit(INIT_FUNC_ARGS);
 void xdebug_tracing_rinit(void);
 void xdebug_tracing_post_deactivate(void);
+void xdebug_tracing_register_constants(INIT_FUNC_ARGS);
 
 void xdebug_tracing_init_if_requested(zend_op_array *op_array);
 void xdebug_tracing_execute_ex(int function_nr, function_stack_entry *fse);

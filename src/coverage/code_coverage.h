@@ -69,6 +69,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS);
 void xdebug_coverage_mshutdown(void);
 void xdebug_coverage_rinit(void);
 void xdebug_coverage_post_deactivate(void);
+void xdebug_coverage_register_constants(INIT_FUNC_ARGS);
 
 PHP_FUNCTION(xdebug_start_code_coverage);
 PHP_FUNCTION(xdebug_stop_code_coverage);

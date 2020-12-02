@@ -504,7 +504,9 @@ PHP_MINIT_FUNCTION(xdebug)
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
 	}
 
+	xdebug_coverage_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 	xdebug_filter_register_constants(INIT_FUNC_ARGS_PASSTHRU);
+	xdebug_tracing_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
