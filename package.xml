@@ -171,7 +171,9 @@ https://xdebug.org/docs/upgrade_guide
    <file name="LICENSE" role="doc" />
    <file name="xdebug.ini" role="doc" />
    <file name="Makefile.frag" role="src" />
+   <file name="CONTRIBUTING.rst" role="doc" />
    <file name="README.rst" role="doc" />
+   <file name="run-xdebug-tests.php" role="src" />
 
    <file name="xdebug.c" role="src" />
    <file name="php_xdebug.h" role="src" />
