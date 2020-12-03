@@ -516,18 +516,16 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 				}	break;
 
 				case 't': { /* timestamp (in seconds) */
-					xdebug_str_add(&fname, xdebug_nanotime_to_chars(xdebug_get_nanotime(), 0), 1);
+					xdebug_str_add_fmt(&fname, "%lu", xdebug_get_nanotime() / NANOS_IN_SEC);
 				}	break;
 
 				case 'u': { /* timestamp (in microseconds) */
-					char *char_ptr, *utime_str = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
+					uint64_t nanotime = xdebug_get_nanotime();
 
-					/* Replace . with _ (or should it be nuked?) */
-					char_ptr = strrchr(utime_str, '.');
-					if (char_ptr) {
-						char_ptr[0] = '_';
-					}
-					xdebug_str_add(&fname, utime_str, 1);
+					xdebug_str_add_fmt(&fname, "%lu.%06d",
+						nanotime / NANOS_IN_SEC,
+						(nanotime % NANOS_IN_SEC) / NANOS_IN_MICROSEC
+					);
 				}	break;
 
 				case 'H':   /* $_SERVER['HTTP_HOST'] */
