@@ -475,6 +475,7 @@ static void xdebug_init_debugger()
 		} else {
 			/* All is well, turn off script time outs */
 			zend_unset_timeout();
+			EG(timeout_seconds) = 0;
 			zend_set_timeout(EG(timeout_seconds), 0);
 		}
 	} else if (XG_DBG(context).socket == -1) {
