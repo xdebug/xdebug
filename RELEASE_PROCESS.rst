@@ -20,10 +20,9 @@
 #. Install new package with ``pecl install xdebug-*.tgz``
 #. Commit template.rc, php_xdebug.h, package.xml, xdebug.ini, and
    RELEASE_PROCESS.rst with text: ``Go with 3.0.1`` (use upper case 'RC').
-#. Tag package with ``git tag -u ${GPGKEY} -m <version number> <version number>``
+#. Tag package with ``~/bin/tag-sign.sh <version number>``
    (use upper case "RC").
-#. ``git push origin master xdebug_3_0 && git push --tags``
-#. Disable extra AppVeyor build (the one without the tag)
+#. ``git push origin <version nummer> && git push origin master``
 #. Update www.xdebug.org views/home/updates.php
 #. Update www.xdebug.org src/XdebugVersion.php
 #. Update www.xdebug.org src/Controller/DocsController.php
