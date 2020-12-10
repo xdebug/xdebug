@@ -1038,6 +1038,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 #endif
 
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
+	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_OBJ, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL, xdebug_coverage_include_or_eval_handler);
 
