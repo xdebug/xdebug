@@ -108,12 +108,14 @@ void set_keepalive_options(int fd)
 		return;
 	}
 
+# if defined(TCP_KEEPIDLE)
 	optval = 600;
 	ret = setsockopt(fd, SOL_TCP, TCP_KEEPIDLE, &optval, optlen);
 	if (ret) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "KEEPALIVE", "Could not set TCP_KEEPIDLE to %d: %s.", optval, strerror(errno));
 		return;
 	}
+# endif
 
 # if defined(TCP_KEEPCNT)
 	optval = 20;
