@@ -292,7 +292,7 @@ xdebug_str* xdebug_get_zval_value_html(char *name, zval *val, int debug_zval, xd
 		char *formatted_filename;
 		xdebug_format_filename(&formatted_filename, "%f", zend_get_executed_filename_ex());
 
-		if (strlen(XINI_LIB(file_link_format)) > 0) {
+		if (strlen(XINI_LIB(file_link_format)) > 0 && strcmp(zend_get_executed_filename(), "Unknown") != 0) {
 			char *file_link;
 
 			xdebug_format_file_link(&file_link, zend_get_executed_filename(), zend_get_executed_lineno());
