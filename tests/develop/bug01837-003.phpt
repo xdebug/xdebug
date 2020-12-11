@@ -29,8 +29,7 @@ takeThemAll("test", 42, arg2: M_PI);
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>0</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>takeThemAll( <span>$one = </span><span>&#39;test&#39;</span>, ...<span>$args = </span><i>variadic</i>(<span>$arg1 = </span><span>42</span>, <span>$arg2 = </span><span>3.1415926535898</span>) )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>7</td></tr>
-<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>
-(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
 </table></font>
 <br />
 <font size='1'><table class='xdebug-error xe-xdebug' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
@@ -39,8 +38,7 @@ takeThemAll("test", 42, arg2: M_PI);
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>0</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>takeThemAll( <span>$one = </span><span>&#39;test&#39;</span>, ...<span>$args = </span><i>variadic</i>(<span>$arg1 = </span><span>42</span>, <span>$arg2 = </span><span>3.1415926535898</span>) )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>8</td></tr>
-<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>
-(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
 </table></font>
 <br />
 <font size='1'><table class='xdebug-error xe-xdebug' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
@@ -49,8 +47,7 @@ takeThemAll("test", 42, arg2: M_PI);
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>0</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>takeThemAll( <span>$one = </span><span>&#39;test&#39;</span>, ...<span>$args = </span><i>variadic</i>(<span>$arg1 = </span><span>42</span>, <span>$arg2 = </span><span>3.1415926535898</span>) )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>9</td></tr>
-<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>
-(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
 </table></font>
 <br />
 <font size='1'><table class='xdebug-error xe-xdebug' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
@@ -59,8 +56,7 @@ takeThemAll("test", 42, arg2: M_PI);
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>0</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>takeThemAll( <span>$one = </span><span>&#39;test&#39;</span>, ...<span>$args = </span><i>variadic</i>(<span>42</span>, <span>3.1415926535898</span>) )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>10</td></tr>
-<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>
-(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
 </table></font>
 <br />
 <font size='1'><table class='xdebug-error xe-xdebug' dir='ltr' border='1' cellspacing='0' cellpadding='1'>
@@ -69,6 +65,5 @@ takeThemAll("test", 42, arg2: M_PI);
 <tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>
 <tr><td bgcolor='#eeeeec' align='center'>1</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>{main}(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>0</td></tr>
 <tr><td bgcolor='#eeeeec' align='center'>2</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'>takeThemAll( <span>$one = </span><span>&#39;test&#39;</span>, ...<span>$args = </span><i>variadic</i>(<span>42</span>, <span>$arg2 = </span><span>3.1415926535898</span>) )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>11</td></tr>
-<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>
-(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
+<tr><td bgcolor='#eeeeec' align='center'>3</td><td bgcolor='#eeeeec' align='center'>%f</td><td bgcolor='#eeeeec' align='right'>%d</td><td bgcolor='#eeeeec'><a href='http://www.php.net/function.xdebug-print-function-stack.html' target='_new'>xdebug_print_function_stack</a>(  )</td><td title='%sbug01837-003.php' bgcolor='#eeeeec'>%sbug01837-003.php<b>:</b>4</td></tr>
 </table></font>

@@ -21,6 +21,7 @@
 #include "php_globals.h"
 #include "zend_closures.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces.h"
 
 #include "php_xdebug.h"
 #include "php_xdebug_arginfo.h"
@@ -618,7 +619,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	}
 
 	if (!tmp->filename) {
-		tmp->filename = zend_string_init("UNKNOWN?", sizeof("UNKNOWN?") - 1, 0);
+		tmp->filename = zend_string_init("Unknown", sizeof("Unknown") - 1, 0);
 	}
 	tmp->lineno = 0;
 
@@ -1237,7 +1238,10 @@ static void xdebug_throw_exception_hook(zval *exception)
 		code_str = xdstrdup("");
 	}
 
-	convert_to_string_ex(message);
+	if (Z_TYPE_P(message) != IS_STRING) {
+		message = NULL;
+	}
+
 	convert_to_string_ex(file);
 	convert_to_long_ex(line);
 

@@ -232,7 +232,7 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 		}
 	}
 
-	if (strlen(XINI_LIB(file_link_format)) > 0 && html) {
+	if (strlen(XINI_LIB(file_link_format)) > 0 && html && strcmp(error_filename, "Unknown") != 0) {
 		char *file_link;
 
 		xdebug_format_file_link(&file_link, error_filename, error_lineno);
@@ -468,7 +468,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			char *formatted_filename;
 			xdebug_format_filename(&formatted_filename, "...%s%n", fse->filename);
 
-			if (strlen(XINI_LIB(file_link_format)) > 0) {
+			if (strlen(XINI_LIB(file_link_format)) > 0 && strcmp(ZSTR_VAL(fse->filename), "Unknown") != 0) {
 				char *file_link;
 
 				xdebug_format_file_link(&file_link, ZSTR_VAL(fse->filename), fse->lineno);
@@ -955,7 +955,7 @@ void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line
 	if (!PG(html_errors)) {
 		xdebug_str_addc(&tmp_str, '\n');
 	}
-	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line));
+	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), message ? Z_STRVAL_P(message) : "", Z_STRVAL_P(file), Z_LVAL_P(line));
 	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
 	exception_trace = tmp_str.d;
 	zend_update_property_string(exception_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace);

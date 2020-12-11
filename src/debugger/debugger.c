@@ -339,7 +339,7 @@ void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *lin
 				Z_STR_P(file), Z_LVAL_P(line), XDEBUG_BREAK,
 				(char*) STR_NAME_VAL(exception_ce->name),
 				code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
-				Z_STRVAL_P(message))
+				message ? Z_STRVAL_P(message) : "")
 			) {
 				xdebug_mark_debug_connection_not_active();
 			}
