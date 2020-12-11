@@ -1154,7 +1154,7 @@ static char* xdebug_create_doc_link(xdebug_func f)
 		*p = '-';
 	}
 
-	retval = xdebug_sprintf("<a href='%s%s%s' target='_new'>%s</a>\n",
+	retval = xdebug_sprintf("<a href='%s%s%s' target='_new'>%s</a>",
 		(PG(docref_root) && PG(docref_root)[0]) ? PG(docref_root) : "http://www.php.net/",
 		tmp_target, PG(docref_ext), f.function);
 
