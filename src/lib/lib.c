@@ -56,6 +56,7 @@ void xdebug_library_zend_shutdown(void)
 void xdebug_library_minit(void)
 {
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
+	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_OBJ);
 	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
 	xdebug_set_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL);
 }
