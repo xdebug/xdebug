@@ -119,6 +119,13 @@ static int xdebug_gc_stats_init(char *requested_filename, zend_string *script_na
 	char *generated_filename = NULL;
 	char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
 
+#if PHP_VERSION_ID >= 70300
+	if (!gc_enabled()) {
+		xdebug_log_ex(XLOG_CHAN_GCSTATS, XLOG_ERR, "DISABLED", "PHP's Garbage Collection is disabled");
+		return FAILURE;
+	}
+#endif
+
 	if (requested_filename && strlen(requested_filename)) {
 		filename_to_use = xdstrdup(requested_filename);
 	} else {
@@ -168,6 +175,12 @@ static void xdebug_gc_stats_stop()
 	XG_GCSTATS(active) = 0;
 
 	if (XG_GCSTATS(file)) {
+#if PHP_VERSION_ID >= 70300
+		if (!gc_enabled()) {
+			fprintf(XG_GCSTATS(file), "Garbage Collection Disabled End\n");
+			xdebug_log_ex(XLOG_CHAN_GCSTATS, XLOG_ERR, "DISABLED", "PHP's Garbage Collection is disabled at the end of the script");
+		}
+#endif
 		fclose(XG_GCSTATS(file));
 		XG_GCSTATS(file) = NULL;
 	}
@@ -361,7 +374,7 @@ void xdebug_gcstats_rinit()
 	xdebug_init_gc_stats_globals(&XG(globals).gc_stats);
 }
 
-void xdebug_gcstats_post_deactivate()
+void xdebug_gcstats_rshutdown()
 {
 	if (XG_GCSTATS(active)) {
 		xdebug_gc_stats_stop();
