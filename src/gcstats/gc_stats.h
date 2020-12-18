@@ -37,6 +37,6 @@ void xdebug_init_gc_stats_globals(xdebug_gc_stats_globals_t *xg);
 void xdebug_gcstats_minit();
 void xdebug_gcstats_mshutdown();
 void xdebug_gcstats_rinit();
-void xdebug_gcstats_post_deactivate();
+void xdebug_gcstats_rshutdown();
 
 #endif

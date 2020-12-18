@@ -615,9 +615,6 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_post_deactivate();
 	}
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
-		xdebug_gcstats_post_deactivate();
-	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_post_deactivate();
 	}
@@ -635,6 +632,10 @@ PHP_RSHUTDOWN_FUNCTION(xdebug)
 {
 	if (XDEBUG_MODE_IS_OFF()) {
 		return SUCCESS;
+	}
+
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
+		xdebug_gcstats_rshutdown();
 	}
 
 	xdebug_base_rshutdown();
