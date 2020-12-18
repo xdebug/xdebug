@@ -553,7 +553,7 @@ void xdebug_debug_init_if_requested_on_xdebug_break()
 		return;
 	}
 
-	if (xdebug_lib_start_if_mode_is_trigger()) {
+	if (xdebug_lib_start_if_mode_is_trigger(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_init_debugger();
 	}
 }
@@ -634,7 +634,7 @@ void xdebug_debug_init_if_requested_at_startup(void)
 	if (
 		xdebug_lib_start_with_request() ||
 		(!xdebug_lib_never_start_with_request() && xdebug_handle_start_session()) ||
-		xdebug_lib_start_with_trigger(&found_trigger_value)
+		xdebug_lib_start_with_trigger(XDEBUG_MODE_STEP_DEBUG, &found_trigger_value)
 	) {
 		if (found_trigger_value) {
 			xdebug_update_ide_key(found_trigger_value);
