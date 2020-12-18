@@ -730,7 +730,7 @@ void xdebug_tracing_post_deactivate(void)
 
 void xdebug_tracing_init_if_requested(zend_op_array *op_array)
 {
-	if (xdebug_lib_start_with_request() || xdebug_lib_start_with_trigger(NULL)) {
+	if (xdebug_lib_start_with_request() || xdebug_lib_start_with_trigger(XDEBUG_MODE_TRACING, NULL)) {
 		/* In case we do an auto-trace we are not interested in the return
 		 * value, but we still have to free it. */
 		xdfree(xdebug_start_trace(NULL, op_array->filename, XINI_TRACE(trace_options)));
