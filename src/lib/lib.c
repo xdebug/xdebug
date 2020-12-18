@@ -294,7 +294,7 @@ static zval *find_in_globals(const char *element)
 	return NULL;
 }
 
-static int trigger_enabled(char **found_trigger_value)
+static int trigger_enabled(int for_mode, char **found_trigger_value)
 {
 	char *shared_secret = XINI_LIB(trigger_value);
 	zval *z_found_trigger_value = NULL;
@@ -306,11 +306,11 @@ static int trigger_enabled(char **found_trigger_value)
 	if (!z_found_trigger_value) {
 		const char *fallback_name = NULL;
 
-		if (XG_LIB(mode) & XDEBUG_MODE_PROFILING) {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) && (for_mode == XDEBUG_MODE_PROFILING)) {
 			fallback_name = "XDEBUG_PROFILE";
-		} else if (XG_LIB(mode) & XDEBUG_MODE_TRACING) {
+		} else if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && (for_mode == XDEBUG_MODE_TRACING)) {
 			fallback_name = "XDEBUG_TRACE";
-		} else if (XG_LIB(mode) & XDEBUG_MODE_STEP_DEBUG) {
+		} else if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) && (for_mode == XDEBUG_MODE_STEP_DEBUG)) {
 			fallback_name = "XDEBUG_SESSION";
 		}
 
@@ -347,10 +347,10 @@ static int trigger_enabled(char **found_trigger_value)
 	return 0;
 }
 
-static int is_mode_trigger_and_enabled(int force_trigger, char **found_trigger_value)
+static int is_mode_trigger_and_enabled(int for_mode, int force_trigger, char **found_trigger_value)
 {
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_TRIGGER) {
-		return force_trigger || trigger_enabled(found_trigger_value);
+		return force_trigger || trigger_enabled(for_mode, found_trigger_value);
 	}
 
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
@@ -358,7 +358,7 @@ static int is_mode_trigger_and_enabled(int force_trigger, char **found_trigger_v
 			XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) ||
 			XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)
 		) {
-			return force_trigger || trigger_enabled(found_trigger_value);
+			return force_trigger || trigger_enabled(for_mode, found_trigger_value);
 		}
 	}
 
@@ -368,16 +368,16 @@ static int is_mode_trigger_and_enabled(int force_trigger, char **found_trigger_v
 /* Returns 1 if the mode is 'trigger', or 'default', where the default mode for
  * a feature is to trigger, and the trigger is present. If found_trigger_value
  * is not NULL, then it is set to the found trigger value */
-int xdebug_lib_start_with_trigger(char **found_trigger_value)
+int xdebug_lib_start_with_trigger(int for_mode, char **found_trigger_value)
 {
-	return is_mode_trigger_and_enabled(0, found_trigger_value);
+	return is_mode_trigger_and_enabled(for_mode, 0, found_trigger_value);
 }
 
 /* Returns 1 if the mode is 'trigger', or 'default', where the default mode for
  * a feature is to trigger. Does not check whether a trigger is present. */
-int xdebug_lib_start_if_mode_is_trigger(void)
+int xdebug_lib_start_if_mode_is_trigger(int for_mode)
 {
-	return is_mode_trigger_and_enabled(1, NULL);
+	return is_mode_trigger_and_enabled(for_mode, 1, NULL);
 }
 
 
