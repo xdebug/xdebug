@@ -151,8 +151,9 @@ typedef struct _function_stack_entry {
 	unsigned char      arg_done;
 
 	/* filter properties */
-	unsigned char filtered_tracing;
 	unsigned char filtered_code_coverage;
+	unsigned char filtered_stack;
+	unsigned char filtered_tracing;
 
 	/* location properties */
 	int          lineno;

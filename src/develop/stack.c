@@ -393,7 +393,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			sent_variables--;
 		}
 
-		if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_TRACING, fse)) {
+		if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_STACK, fse)) {
 			continue;
 		}
 		tmp_name = xdebug_show_fname(fse->function, html, 0);

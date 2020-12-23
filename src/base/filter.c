@@ -20,17 +20,21 @@
 #include "filter.h"
 
 #include "lib/lib.h"
+#include "lib/log.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 int xdebug_is_stack_frame_filtered(int filter_type, function_stack_entry *fse)
 {
 	switch (filter_type) {
-		case XDEBUG_FILTER_TRACING:
-			return fse->filtered_tracing;
-
 		case XDEBUG_FILTER_CODE_COVERAGE:
 			return fse->filtered_code_coverage;
+
+		case XDEBUG_FILTER_STACK:
+			return fse->filtered_stack;
+
+		case XDEBUG_FILTER_TRACING:
+			return fse->filtered_tracing;
 	}
 
 	return 0;
@@ -45,8 +49,9 @@ int xdebug_is_top_stack_frame_filtered(int filter_type)
 
 void xdebug_filter_register_constants(INIT_FUNC_ARGS)
 {
-	REGISTER_LONG_CONSTANT("XDEBUG_FILTER_TRACING", XDEBUG_FILTER_TRACING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_FILTER_CODE_COVERAGE", XDEBUG_FILTER_CODE_COVERAGE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_FILTER_STACK", XDEBUG_FILTER_STACK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XDEBUG_FILTER_TRACING", XDEBUG_FILTER_TRACING, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("XDEBUG_FILTER_NONE", XDEBUG_FILTER_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XDEBUG_PATH_INCLUDE", XDEBUG_PATH_INCLUDE, CONST_CS | CONST_PERSISTENT);
@@ -155,10 +160,14 @@ void xdebug_filter_run_internal(function_stack_entry *fse, int group, unsigned c
 	}
 }
 
-void xdebug_filter_run_tracing(function_stack_entry *fse)
+void xdebug_filter_run(function_stack_entry *fse)
 {
+	fse->filtered_stack   = 0;
 	fse->filtered_tracing = 0;
 
+	if (XG_BASE(filter_type_stack) != XDEBUG_FILTER_NONE) {
+		xdebug_filter_run_internal(fse, XDEBUG_FILTER_STACK, &fse->filtered_stack, XG_BASE(filter_type_stack), XG_BASE(filters_stack));
+	}
 	if (XG_BASE(filter_type_tracing) != XDEBUG_FILTER_NONE) {
 		xdebug_filter_run_internal(fse, XDEBUG_FILTER_TRACING, &fse->filtered_tracing, XG_BASE(filter_type_tracing), XG_BASE(filters_tracing));
 	}
@@ -178,12 +187,12 @@ PHP_FUNCTION(xdebug_set_filter)
 	}
 
 	switch (filter_group) {
-		case XDEBUG_FILTER_TRACING:
-			filter_list = &XG_BASE(filters_tracing);
-			XG_BASE(filter_type_tracing) = XDEBUG_FILTER_NONE;
-			break;
-
 		case XDEBUG_FILTER_CODE_COVERAGE:
+			if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+				xdebug_log_ex(XLOG_CHAN_BASE, XLOG_WARN, "COV-FILTER", "Can not set a filter for code coverage, because Xdebug mode does not include 'coverage'");
+				return;
+			}
+
 			filter_list = &XG_BASE(filters_code_coverage);
 			XG_BASE(filter_type_code_coverage) = XDEBUG_FILTER_NONE;
 			if (filter_type == XDEBUG_NAMESPACE_INCLUDE || filter_type == XDEBUG_NAMESPACE_EXCLUDE) {
@@ -192,8 +201,28 @@ PHP_FUNCTION(xdebug_set_filter)
 			}
 			break;
 
+		case XDEBUG_FILTER_STACK:
+			if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+				xdebug_log_ex(XLOG_CHAN_BASE, XLOG_WARN, "DEV-FILTER", "Can not set a stack filter, because Xdebug mode does not include 'develop'");
+				return;
+			}
+
+			filter_list = &XG_BASE(filters_stack);
+			XG_BASE(filter_type_stack) = XDEBUG_FILTER_NONE;
+			break;
+
+		case XDEBUG_FILTER_TRACING:
+			if (!XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
+				xdebug_log_ex(XLOG_CHAN_BASE, XLOG_WARN, "TRACE-FILTER", "Can not set a filter for tracing, because Xdebug mode does not include 'trace'");
+				return;
+			}
+
+			filter_list = &XG_BASE(filters_tracing);
+			XG_BASE(filter_type_tracing) = XDEBUG_FILTER_NONE;
+			break;
+
 		default:
-			php_error(E_WARNING, "Filter group needs to be one of XDEBUG_FILTER_TRACING or XDEBUG_FILTER_CODE_COVERAGE");
+			php_error(E_WARNING, "Filter group needs to be one of XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_FILTER_STACK, or XDEBUG_FILTER_TRACING");
 			return;
 	}
 
@@ -205,12 +234,16 @@ PHP_FUNCTION(xdebug_set_filter)
 		filter_type == XDEBUG_FILTER_NONE
 	) {
 		switch (filter_group) {
-			case XDEBUG_FILTER_TRACING:
-				XG_BASE(filter_type_tracing) = filter_type;
-				break;
-
 			case XDEBUG_FILTER_CODE_COVERAGE:
 				XG_BASE(filter_type_code_coverage) = filter_type;
+				break;
+
+			case XDEBUG_FILTER_STACK:
+				XG_BASE(filter_type_stack) = filter_type;
+				break;
+
+			case XDEBUG_FILTER_TRACING:
+				XG_BASE(filter_type_tracing) = filter_type;
 				break;
 		}
 	} else {
