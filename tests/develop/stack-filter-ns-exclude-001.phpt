@@ -14,19 +14,19 @@ $three = new \Stack\Three( new stdClass );
 $two = new \Stack\Two( $three );
 $one = new \Stack\One( $two );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_NAMESPACE_EXCLUDE, [ 'Stack\One' ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_NAMESPACE_EXCLUDE, [ 'Stack\One' ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_NAMESPACE_EXCLUDE, [ '\Stack\One' ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_NAMESPACE_EXCLUDE, [ '\Stack\One' ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_NAMESPACE_EXCLUDE, [ '\Stack\One', 'Stack\Two' ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_NAMESPACE_EXCLUDE, [ '\Stack\One', 'Stack\Two' ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_NAMESPACE_EXCLUDE, [ 'Stack\Two', 'Stack\Three' ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_NAMESPACE_EXCLUDE, [ 'Stack\Two', 'Stack\Three' ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_NAMESPACE_EXCLUDE, [ '', 'Stack\Two' ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_NAMESPACE_EXCLUDE, [ '', 'Stack\Two' ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 ?>
 --EXPECTF--

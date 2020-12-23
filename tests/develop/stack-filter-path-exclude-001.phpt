@@ -14,25 +14,25 @@ $three = new \Stack\Three( new stdClass );
 $two = new \Stack\Two( $three );
 $one = new \Stack\One( $two );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}one" ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}one" ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}one.php" ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}one.php" ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}one.p", "{$includeDir}{$s}filter{$s}stack{$s}two.php" ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}one.p", "{$includeDir}{$s}filter{$s}stack{$s}two.php" ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}t" ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}{$s}filter{$s}stack{$s}t" ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ 'x' ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_PATH_EXCLUDE, [ 'x' ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}" ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_PATH_EXCLUDE, [ "{$includeDir}" ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 
-xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_EXCLUDE, [ '' ] );
+xdebug_set_filter(XDEBUG_FILTER_STACK, XDEBUG_PATH_EXCLUDE, [ '' ] );
 $one->callObj( 'callObj', 'error', 'Error triggered!' );
 ?>
 --EXPECTF--
