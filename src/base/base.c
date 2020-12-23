@@ -669,8 +669,8 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
-	/* Now we have location and name, we can run the filter */
-	xdebug_filter_run_tracing(tmp);
+	/* Now we have location and name, we can run the filter (for stack and tracing)*/
+	xdebug_filter_run(tmp);
 
 	/* Count code coverage line for call */
 	xdebug_coverage_count_line_if_branch_check_active(op_array, tmp->filename, tmp->lineno);
@@ -1100,11 +1100,12 @@ void xdebug_base_rinit()
 	XG_BASE(in_execution) = 1;
 
 	/* filters */
-	XG_BASE(filter_type_tracing)       = XDEBUG_FILTER_NONE;
-	XG_BASE(filter_type_profiler)      = XDEBUG_FILTER_NONE;
 	XG_BASE(filter_type_code_coverage) = XDEBUG_FILTER_NONE;
-	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	XG_BASE(filter_type_stack)         = XDEBUG_FILTER_NONE;
+	XG_BASE(filter_type_tracing)       = XDEBUG_FILTER_NONE;
 	XG_BASE(filters_code_coverage)     = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	XG_BASE(filters_stack)             = xdebug_llist_alloc(xdebug_llist_string_dtor);
+	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	xdebug_base_overloaded_functions_setup();
 }

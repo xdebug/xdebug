@@ -14,7 +14,7 @@ xdebug_set_filter(XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_NAMESPACE_EXCLUDE, [ "xdeb
 xdebug_set_filter(XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_NAMESPACE_INCLUDE, [ "xdebug" ] );
 ?>
 --EXPECTF--
-Warning: Filter group needs to be one of XDEBUG_FILTER_TRACING or XDEBUG_FILTER_CODE_COVERAGE in %sfilter-errors.php on line 2
+Warning: Filter group needs to be one of XDEBUG_FILTER_CODE_COVERAGE, XDEBUG_FILTER_STACK, or XDEBUG_FILTER_TRACING in %sfilter-errors.php on line 2
 
 Warning: Filter type needs to be one of XDEBUG_PATH_INCLUDE, XDEBUG_PATH_EXCLUDE, XDEBUG_NAMESPACE_INCLUDE, XDEBUG_NAMESPACE_EXCLUDE, or XDEBUG_FILTER_NONE in %sfilter-errors.php on line 4
 

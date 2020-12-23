@@ -96,11 +96,12 @@ struct xdebug_base_info {
 	zend_bool  in_var_serialisation;
 
 	/* filters */
-	zend_long     filter_type_tracing;
-	zend_long     filter_type_profiler;
 	zend_long     filter_type_code_coverage;
-	xdebug_llist *filters_tracing;
+	zend_long     filter_type_stack;
+	zend_long     filter_type_tracing;
 	xdebug_llist *filters_code_coverage;
+	xdebug_llist *filters_stack;
+	xdebug_llist *filters_tracing;
 
 	struct {
 		zend_long     max_nesting_level;

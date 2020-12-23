@@ -339,11 +339,12 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 	xg->error_reporting_override   = 0;
 	xg->error_reporting_overridden = 0;
 
-	xg->filter_type_tracing       = XDEBUG_FILTER_NONE;
-	xg->filter_type_profiler      = XDEBUG_FILTER_NONE;
 	xg->filter_type_code_coverage = XDEBUG_FILTER_NONE;
-	xg->filters_tracing           = NULL;
+	xg->filter_type_stack         = XDEBUG_FILTER_NONE;
+	xg->filter_type_tracing       = XDEBUG_FILTER_NONE;
 	xg->filters_code_coverage     = NULL;
+	xg->filters_stack             = NULL;
+	xg->filters_tracing           = NULL;
 }
 
 static void php_xdebug_init_globals(zend_xdebug_globals *xg)
