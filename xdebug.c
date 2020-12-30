@@ -228,11 +228,53 @@ static PHP_INI_MH(OnUpdateChangedSetting)
 #define XDEBUG_REMOVED_INI_ENTRY(n) PHP_INI_ENTRY((n), "This setting has been removed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#removed-" # n, PHP_INI_ALL, OnUpdateRemovedSetting)
 #define XDEBUG_CHANGED_INI_ENTRY(n) PHP_INI_ENTRY((n), "This setting has been changed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-" # n, PHP_INI_ALL, OnUpdateChangedSetting)
 
+static const char *xdebug_start_with_request_types[5] = { "", "default", "yes", "no", "trigger" };
+
+ZEND_INI_DISP(display_start_with_request)
+{
+	char *value;
+
+	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
+		value = ZSTR_VAL(ini_entry->orig_value);
+	} else if (ini_entry->value) {
+		value = ZSTR_VAL(ini_entry->value);
+	} else {
+		value = NULL;
+	}
+	if (value) {
+		ZEND_PUTS(xdebug_start_with_request_types[xdebug_lib_get_start_with_request()]);
+	} else {
+		ZEND_PUTS("?");
+	}
+}
+
+
+static const char *xdebug_start_upon_error_types[4] = { "", "default", "yes", "no" };
+
+ZEND_INI_DISP(display_start_upon_error)
+{
+	char *value;
+
+	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
+		value = ZSTR_VAL(ini_entry->orig_value);
+	} else if (ini_entry->value) {
+		value = ZSTR_VAL(ini_entry->value);
+	} else {
+		value = NULL;
+	}
+	if (value) {
+		ZEND_PUTS(xdebug_start_upon_error_types[xdebug_lib_get_start_upon_error()]);
+	} else {
+		ZEND_PUTS("?");
+	}
+}
+
+
 PHP_INI_BEGIN()
 	/* Library settings */
 	PHP_INI_ENTRY(    "xdebug.mode",               "develop",       PHP_INI_SYSTEM,                OnUpdateMode)
-	PHP_INI_ENTRY(    "xdebug.start_with_request", "default",       PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartWithRequest)
-	PHP_INI_ENTRY(    "xdebug.start_upon_error",   "default",       PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartUponError)
+	PHP_INI_ENTRY_EX( "xdebug.start_with_request", "default",       PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartWithRequest, display_start_with_request)
+	PHP_INI_ENTRY_EX( "xdebug.start_upon_error",   "default",       PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartUponError,   display_start_upon_error)
 	STD_PHP_INI_ENTRY("xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trigger_value",      "",              PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",   "",              PHP_INI_ALL,                   OnUpdateString, settings.library.file_link_format, zend_xdebug_globals, xdebug_globals)
