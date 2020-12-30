@@ -271,12 +271,14 @@ int xdebug_lib_start_with_request(void);
 int xdebug_lib_start_with_trigger(int for_mode, char **found_trigger_value);
 int xdebug_lib_start_if_mode_is_trigger(int for_mode);
 int xdebug_lib_never_start_with_request(void);
+int xdebug_lib_get_start_with_request(void);
 
 #define XDEBUG_START_UPON_ERROR_DEFAULT     1
 #define XDEBUG_START_UPON_ERROR_YES         2
 #define XDEBUG_START_UPON_ERROR_NO          3
 int xdebug_lib_set_start_upon_error(char *value);
 int xdebug_lib_start_upon_error(void);
+int xdebug_lib_get_start_upon_error(void);
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);
 void xdebug_lib_set_active_stack_entry(function_stack_entry *fse);

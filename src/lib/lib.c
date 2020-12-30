@@ -198,6 +198,11 @@ int xdebug_lib_set_mode(char *mode)
 	return result;
 }
 
+int xdebug_lib_get_start_with_request(void)
+{
+	return XG_LIB(start_with_request);
+}
+
 int xdebug_lib_set_start_with_request(char *value)
 {
 	if (strcmp(value, "default") == 0) {
@@ -244,6 +249,11 @@ int xdebug_lib_never_start_with_request(void)
 	return 0;
 }
 
+
+int xdebug_lib_get_start_upon_error(void)
+{
+	return XG_LIB(start_upon_error);
+}
 
 int xdebug_lib_set_start_upon_error(char *value)
 {
