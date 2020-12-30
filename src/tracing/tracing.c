@@ -683,7 +683,7 @@ void xdebug_tracing_minit(INIT_FUNC_ARGS)
 	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_AND, xdebug_assign_bw_and_handler);
 	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_XOR, xdebug_assign_bw_xor_handler);
 #endif
-	xdebug_set_opcode_handler(ZEND_ASSIGN_DIM, xdebug_assign_dim_handler);
+	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_DIM, xdebug_assign_dim_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_OBJ, xdebug_assign_obj_handler);
 	xdebug_set_opcode_handler(ZEND_ASSIGN_REF, xdebug_assign_ref_handler);
 	xdebug_set_opcode_handler(ZEND_PRE_INC, xdebug_pre_inc_handler);
