@@ -264,6 +264,7 @@ void print_feature_row(const char *name, int flag, const char *doc_name)
 
 void xdebug_print_info(void)
 {
+	/* Header block */
 	php_info_print_table_start();
 
 	print_logo();
@@ -277,18 +278,27 @@ void xdebug_print_info(void)
 	}
 	php_info_print_table_end();
 
+	/* Modes block */
 	php_info_print_table_start();
+
+	php_info_print_table_colspan_header(
+		sapi_module.phpinfo_as_text ? 2 : 3,
+		(char*) (XG_LIB(mode_from_environment) ? "Enabled Features<br/>(through 'XDEBUG_MODE' env variable)" : "Enabled Features<br/>(through 'xdebug.mode' setting)")
+	);
+
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print_table_header(3, "Feature", "Enabled/Disabled", "Docs");
 	} else {
 		php_info_print_table_header(2, "Feature", "Enabled/Disabled");
 	}
+
 	print_feature_row("Development Aids", XDEBUG_MODE_DEVELOP, "develop");
 	print_feature_row("Coverage", XDEBUG_MODE_COVERAGE, "code_coverage");
 	print_feature_row("GC Stats", XDEBUG_MODE_GCSTATS, "garbage_collection");
 	print_feature_row("Profiler", XDEBUG_MODE_PROFILING, "profiler");
 	print_feature_row("Step Debugger", XDEBUG_MODE_STEP_DEBUG, "remote");
 	print_feature_row("Tracing", XDEBUG_MODE_TRACING, "trace");
+
 	php_info_print_table_end();
 }
 
