@@ -27,8 +27,9 @@ extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
-	xg->headers              = NULL;
-	xg->mode                 = 0xFFFFFFFF;
+	xg->headers               = NULL;
+	xg->mode                  = 0xFFFFFFFF;
+	xg->mode_from_environment = 0;
 
 	xg->log_file             = 0;
 
@@ -94,7 +95,6 @@ void xdebug_library_rinit(void)
 
 	XG_LIB(dumped) = 0;
 	XG_LIB(do_collect_errors) = 0;
-
 }
 
 void xdebug_library_post_deactivate(void)
@@ -182,18 +182,23 @@ int xdebug_lib_set_mode(char *mode)
 	char *config = getenv("XDEBUG_MODE");
 	int   result = 0;
 
+	/* XDEBUG_MODE environment variable */
 	if (config && strlen(config)) {
 		result = xdebug_lib_set_mode_from_setting(config);
 
 		if (!result) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "ENVMODE", "Invalid mode '%s' set for 'XDEBUG_MODE' environment variable", config);
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "ENVMODE", "Invalid mode '%s' set for 'XDEBUG_MODE' environment variable, fall back to 'xdebug.mode' configuration setting", config);
+		} else {
+			XG_LIB(mode_from_environment) = 1;
+			return result;
 		}
-	} else {
-		result = xdebug_lib_set_mode_from_setting(mode);
+	}
 
-		if (!result) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "MODE", "Invalid mode '%s' set for 'xdebug.mode' configuration setting", mode);
-		}
+	/* 'xdebug.mode' configuration setting */
+	result = xdebug_lib_set_mode_from_setting(mode);
+
+	if (!result) {
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "MODE", "Invalid mode '%s' set for 'xdebug.mode' configuration setting", mode);
 	}
 
 	return result;
