@@ -195,6 +195,7 @@ typedef struct _xdebug_library_globals_t {
 	int                    mode;
 	int                    start_with_request; /* One of the XDEBUG_START_WITH_REQUEST_* constants */
 	int                    start_upon_error;   /* One of the XDEBUG_START_UPON_ERROR_* constants */
+	int                    mode_from_environment; /* Keeps track whether the mode was set with XDEBUG_MODE for diagnostics purposes */
 
 	zend_execute_data     *active_execute_data;
 	function_stack_entry  *active_stack_entry;
