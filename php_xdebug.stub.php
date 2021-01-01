@@ -205,7 +205,8 @@ function xdebug_stop_gcstats(): string {}
 /* -----------------------------------------------------------------------*/
 
 /* Stops the current function trace */
-function xdebug_stop_trace(): string {}
+/** @return false|string */
+function xdebug_stop_trace() {}
 
 /* -----------------------------------------------------------------------*/
 
