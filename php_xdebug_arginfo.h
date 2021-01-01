@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 95145fdba2974f8f169c5993c5071a562a23336c */
+ * Stub hash: 9d87dddf04d7a449030c53dffa66766ab4fc137e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_break, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -99,8 +99,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_xdebug_stop_function_monitor arginfo_xdebug_dump_superglobals
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_stop_gcstats, 0, 0, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_xdebug_stop_gcstats arginfo_xdebug_dump_superglobals
 
 #define arginfo_xdebug_stop_trace arginfo_xdebug_dump_superglobals
 
