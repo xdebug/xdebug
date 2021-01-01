@@ -200,7 +200,8 @@ function xdebug_stop_function_monitor() {}
 /* -----------------------------------------------------------------------*/
 
 /* Stops the current garbage collection statistics collection */
-function xdebug_stop_gcstats(): string {}
+/** @return false|string */
+function xdebug_stop_gcstats() {}
 
 /* -----------------------------------------------------------------------*/
 
