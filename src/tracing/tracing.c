@@ -173,8 +173,8 @@ PHP_FUNCTION(xdebug_stop_trace)
 	WARN_AND_RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_TRACING);
 
 	if (!XG_TRACE(trace_context)) {
-		RETVAL_FALSE;
 		php_error(E_NOTICE, "Function trace was not started");
+		RETURN_FALSE;
 	}
 
 	RETVAL_STRING(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
