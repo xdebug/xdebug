@@ -1,10 +1,11 @@
 --TEST--
-Starting Profiler: trigger, environment
+Starting Profiler: trigger, environment [2]
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=trigger
 xdebug.collect_return=0
 xdebug.collect_assignments=0
+variables_order=EPGCS
 --ENV--
 XDEBUG_PROFILE=anything
 --FILE--
@@ -17,7 +18,7 @@ echo file_get_contents($fileName);
 --EXPECTF--
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sstart_with_request_trigger_env.php
+cmd: %sstart_with_request_trigger_env-002.php
 part: 1
 positions: line
 

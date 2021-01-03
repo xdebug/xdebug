@@ -289,9 +289,14 @@ int xdebug_lib_start_upon_error(void)
 }
 
 
-static zval *find_in_globals(const char *element)
+static const char *find_in_globals(const char *element)
 {
 	zval *trigger_val = NULL;
+	const char *env_value = getenv(element);
+
+	if (env_value) {
+		return env_value;
+	}
 
 	if (
 		(
@@ -304,7 +309,7 @@ static zval *find_in_globals(const char *element)
 			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), element, strlen(element))) != NULL
 		)
 	) {
-		return trigger_val;
+		return Z_STRVAL_P(trigger_val);
 	}
 
 	return NULL;
@@ -313,13 +318,13 @@ static zval *find_in_globals(const char *element)
 static int trigger_enabled(int for_mode, char **found_trigger_value)
 {
 	char *shared_secret = XINI_LIB(trigger_value);
-	zval *z_found_trigger_value = NULL;
+	const char *trigger_value = NULL;
 
 	/* First we check for the generic 'XDEBUG_TRIGGER' option */
-	z_found_trigger_value = find_in_globals("XDEBUG_TRIGGER");
+	trigger_value = find_in_globals("XDEBUG_TRIGGER");
 
 	/* If not found, we fall back to the per-mode name for backwards compatibility reasons */
-	if (!z_found_trigger_value) {
+	if (!trigger_value) {
 		const char *fallback_name = NULL;
 
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) && (for_mode == XDEBUG_MODE_PROFILING)) {
@@ -331,11 +336,11 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 		}
 
 		if (fallback_name) {
-			z_found_trigger_value = find_in_globals(fallback_name);
+			trigger_value = find_in_globals(fallback_name);
 		}
 	}
 
-	if (!z_found_trigger_value) {
+	if (!trigger_value) {
 		if (found_trigger_value != NULL) {
 			*found_trigger_value = NULL;
 		}
@@ -346,16 +351,16 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 	 * triggers */
 	if (shared_secret == NULL || shared_secret[0] == '\0') {
 		if (found_trigger_value != NULL) {
-			*found_trigger_value = xdstrdup(Z_STRVAL_P(z_found_trigger_value));
+			*found_trigger_value = xdstrdup(trigger_value);
 		}
 		return 1;
 	}
 
 	/* Check if the configured trigger value matches the one found in the
 	 * trigger element */
-	if (strcmp(shared_secret, Z_STRVAL_P(z_found_trigger_value)) == 0) {
+	if (strcmp(shared_secret, trigger_value) == 0) {
 		if (found_trigger_value != NULL) {
-			*found_trigger_value = xdstrdup(Z_STRVAL_P(z_found_trigger_value));
+			*found_trigger_value = xdstrdup(trigger_value);
 		}
 		return 1;
 	}

@@ -1,5 +1,5 @@
 --TEST--
-Starting Debugger: default, XDEBUG_SESSION_START
+Starting Debugger: default, XDEBUG_SESSION_START [1]
 --ENV--
 XDEBUG_SESSION_START=foobar
 --FILE--
@@ -9,7 +9,7 @@ require 'dbgp/dbgpclient.php';
 dbgpRunFile(
 	dirname(__FILE__) . '/empty-echo.inc',
 	['step_into', 'step_into', 'property_get -n $e', 'detach'],
-	['xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'default']
+	['xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'default', 'variables_order' => 'PGCS']
 );
 ?>
 --EXPECTF--

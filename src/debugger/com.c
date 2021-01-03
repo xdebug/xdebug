@@ -570,6 +570,7 @@ static int xdebug_handle_start_session()
 {
 	int   activate_session = 0;
 	zval *dummy;
+	char *dummy_env;
 
 	/* Set session cookie if requested */
 	if (
@@ -586,6 +587,16 @@ static int xdebug_handle_start_session()
 		xdebug_update_ide_key(Z_STRVAL_P(dummy));
 
 		xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, Z_STRVAL_P(dummy), Z_STRLEN_P(dummy), time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
+		activate_session = 1;
+	} else if (
+		(dummy_env = getenv("XDEBUG_SESSION_START")) != NULL
+	) {
+		xdebug_update_ide_key(dummy_env);
+
+		if (!SG(headers_sent)) {
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
+		}
+
 		activate_session = 1;
 	} else if (
 		(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
