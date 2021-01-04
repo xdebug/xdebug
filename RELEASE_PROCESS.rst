@@ -8,26 +8,14 @@
 
        git diff HEAD..xdebug_3_0 package.xml | patch -p1
 
-#. Update template.rc and php_xdebug.h with new version number. Use upper
-   case "RC".
+#. Run: php ~/bin/make-xdebug-release.php <version>
 #. Move existing release entry down in package.xml
-#. Create a new release entry in package.xml, use upper case "RC".
-#. Reword package.xml so that it all makes sense!
-#. Rebuild from source with: ``~/bin/rebuild.sh``
-#. Run xdebug.ini update script from xdebug.org repository:
-   ``php html/docs/convert.php  > ~/dev/php/xdebug-xdebug/xdebug.ini``
-#. Run "pecl package"
-#. Install new package with ``pecl install xdebug-*.tgz``
-#. Commit template.rc, php_xdebug.h, package.xml, xdebug.ini, and
-   RELEASE_PROCESS.rst with text: ``Go with 3.0.1`` (use upper case 'RC').
-#. Tag package with ``~/bin/tag-sign.sh <version number>``
-   (use upper case "RC").
-#. ``git push origin <version nummer> && git push origin master``
-#. Update www.xdebug.org views/home/updates.php
-#. Update www.xdebug.org src/XdebugVersion.php
-#. Update www.xdebug.org src/Controller/DocsController.php
-#. Write news item in www.xdebug.org data/news
+#. Include new snippet in /tmp/package.xml
+#. Run commands from output
+#. Update www.xdebug.org views/home/updates.php with snippet
+#. Update www.xdebug.org src/XdebugVersion.php with snippet
 #. Write Patreon post taking the rendered news article as starting point
+
 #. Mantis: "release" the version, and make sure there is a new one.
 #. In the release branch, update template.rc and php_xdebug.h to the new
    version

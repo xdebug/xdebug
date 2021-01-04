@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2020-12-04</date>
- <time>15:53:10</time>
+ <date>2021-01-04</date>
+ <time>17:08:58</time>
  <version>
-  <release>3.0.1</release>
-  <api>3.0.1</api>
+  <release>3.0.2</release>
+  <api>3.0.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,19 +45,24 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, Dec  4, 2020 - xdebug 3.0.1
+Mon, Jan 04, 2021 - Xdebug 3.0.2
 
 = Fixed bugs:
 
-  - Fixed issue #1893: Crash with ext-fiber and xdebug.mode=coverage
-  - Fixed issue #1896: Segfault with closures that are not created from user code
-  - Fixed issue #1897: Crash when removing a breakpoint
-  - Fixed issue #1900: Update README and add run-xdebug-tests.php to package
-  - Fixed issue #1901: Stack traces are shown (with a broken time) when Xdebug's mode includes 'debug' but not 'develop' or 'trace'
-  - Fixed issue #1902: Compillation failure on AIX
-  - Fixed issue #1903: Constants should always be available, regardless of which mode Xdebug is in
-  - Fixed issue #1904: Profile and trace files using %t or %u do not get the right names
-  - Fixed issue #1905: Debugger does not disable request timeouts
+  - Fixed issue #1907: Empty exception message when setting the $message property to a stringable object
+  - Fixed issue #1910: Code coverage misses constructor property promotion code
+  - Fixed issue #1914: Compillation failure on OpenBSD
+  - Fixed issue #1915: Debugger should only start with XDEBUG_SESSION and not XDEBUG_PROFILE
+  - Fixed issue #1918: Warn if PHP's Garbage Collection is disabled in gc_stats mode
+  - Fixed issue #1919: Crash when enabling filter without the right mode active
+  - Fixed issue #1921: Xdebug does not start step debugging if start_with_request=trigger
+  - Fixed issue #1922: Code coverage misses array assignment lines
+  - Fixed issue #1924: Deprecated INI settings displayed in phpinfo()
+  - Fixed issue #1925: xdebug.start_with_request and start_upon_error display inconsistent values
+  - Fixed issue #1926: Add Xdebug mode's source to xdebug_info() output
+  - Fixed issue #1927: Crash when calling xdebug_stop_trace without a trace in progress
+  - Fixed issue #1928: xdebug_stop_gcstats() can also return false
+
  </notes>
 
  <contents>
@@ -194,6 +199,35 @@ Fri, Dec  4, 2020 - xdebug 3.0.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+ 
+  <release>
+   <date>2020-12-04</date>
+   <time>15:53:10</time>
+   <version>
+    <release>3.0.1</release>
+    <api>3.0.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Dec  4, 2020 - xdebug 3.0.1
+
+= Fixed bugs:
+
+  - Fixed issue #1893: Crash with ext-fiber and xdebug.mode=coverage
+  - Fixed issue #1896: Segfault with closures that are not created from user code
+  - Fixed issue #1897: Crash when removing a breakpoint
+  - Fixed issue #1900: Update README and add run-xdebug-tests.php to package
+  - Fixed issue #1901: Stack traces are shown (with a broken time) when Xdebug's mode includes 'debug' but not 'develop' or 'trace'
+  - Fixed issue #1902: Compillation failure on AIX
+  - Fixed issue #1903: Constants should always be available, regardless of which mode Xdebug is in
+  - Fixed issue #1904: Profile and trace files using %t or %u do not get the right names
+  - Fixed issue #1905: Debugger does not disable request timeouts
+   </notes>
+  </release>
 
   <release>
    <date>2020-11-25</date>
