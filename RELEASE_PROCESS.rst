@@ -17,12 +17,14 @@
 #. Write Patreon post taking the rendered news article as starting point
 
 #. Mantis: "release" the version, and make sure there is a new one.
+
+#. Wait until AppVeyor is ready
+
 #. In the release branch, update template.rc and php_xdebug.h to the new
    version
 #. Commit template.rc and php_xdebug.h with "Back to -dev"
 #. Check out master branch, and run: git merge --strategy=ours xdebug_3_0
 #. ``git push origin master xdebug_3_0``
-#. Wait until AppVeyor is ready
 #. Add files from AppVeyor and source to www.xdebug.org html/files
 #. Create sha256 files for the new releases::
 
