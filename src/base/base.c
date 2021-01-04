@@ -1128,8 +1128,9 @@ void xdebug_base_post_deactivate()
 	}
 
 	/* filters */
-	xdebug_llist_destroy(XG_BASE(filters_tracing), NULL);
 	xdebug_llist_destroy(XG_BASE(filters_code_coverage), NULL);
+	xdebug_llist_destroy(XG_BASE(filters_stack), NULL);
+	xdebug_llist_destroy(XG_BASE(filters_tracing), NULL);
 	XG_BASE(filters_tracing) = NULL;
 	XG_BASE(filters_code_coverage) = NULL;
 
