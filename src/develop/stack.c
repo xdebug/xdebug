@@ -771,7 +771,7 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 	}
 #endif
 
-	if ((EG(error_reporting | XINI_DEV(force_error_reporting))) & type) {
+	if ((EG(error_reporting) | XINI_DEV(force_error_reporting)) & type) {
 		/* Log to logger */
 		if (PG(log_errors)) {
 
