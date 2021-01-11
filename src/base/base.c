@@ -85,13 +85,6 @@ static zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int typ
 }
 /* }}} */
 
-static void xdebug_declared_var_dtor(void *dummy, void *elem)
-{
-	xdebug_str *s = (xdebug_str*) elem;
-
-	xdebug_str_free(s);
-}
-
 /* I don't like this API, but the function_stack_entry does not keep this as a
  * pointer, and hence we need two APIs for freeing :-S */
 void xdebug_func_dtor_by_ref(xdebug_func *elem)
@@ -145,38 +138,6 @@ static void function_stack_entry_dtor(void *elem)
 		e->profile.call_list = NULL;
 	}
 }
-
-static void add_used_variables(function_stack_entry *fse, zend_op_array *op_array)
-{
-	unsigned int i = 0;
-
-	if (!fse->declared_vars) {
-		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
-	}
-
-	/* gather used variables from compiled vars information */
-	while (i < (unsigned int) op_array->last_var) {
-		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(op_array->vars[i]), STR_NAME_LEN(op_array->vars[i])));
-		i++;
-	}
-
-	/* opcode scanning time */
-	while (i < op_array->last) {
-		char *cv = NULL;
-		int cv_len;
-
-		if (op_array->opcodes[i].op1_type == IS_CV) {
-			cv = (char *) xdebug_get_compiled_variable_name(op_array, op_array->opcodes[i].op1.var, &cv_len);
-			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(cv, cv_len));
-		}
-		if (op_array->opcodes[i].op2_type == IS_CV) {
-			cv = (char *) xdebug_get_compiled_variable_name(op_array, op_array->opcodes[i].op2.var, &cv_len);
-			xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(cv, cv_len));
-		}
-		i++;
-	}
-}
-
 
 int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 {
@@ -769,13 +730,13 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		 * variables in include/required files to all the stack levels above, until
 		 * we hit a function or the top level stack.  This is so that the variables
 		 * show up correctly where they should be.  We always call
-		 * add_used_variables on the current stack level, otherwise vars in include
-		 * files do not show up in the locals list.  */
+		 * xdebug_lib_register_compiled_variables on the current stack level,
+		 * otherwise vars in include files do not show up in the locals list. */
 		function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 		int                   i;
 
 		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
-			add_used_variables(loop_fse, op_array);
+			xdebug_lib_register_compiled_variables(loop_fse, op_array);
 			if (XDEBUG_IS_NORMAL_FUNCTION(&loop_fse->function)) {
 				break;
 			}

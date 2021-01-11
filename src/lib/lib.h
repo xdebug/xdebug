@@ -307,4 +307,6 @@ char *xdebug_lib_get_output_dir(void);
 
 void xdebug_llist_string_dtor(void *dummy, void *elem);
 char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
+
+void xdebug_lib_register_compiled_variables(function_stack_entry *fse, zend_op_array *op_array);
 #endif
