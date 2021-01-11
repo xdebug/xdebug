@@ -782,6 +782,24 @@ PHP_FUNCTION(xdebug_break)
 		RETURN_FALSE;
 	}
 
+	/* Go through every stack frame to register compiled variables */
+	{
+		function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+		int                   i;
+
+		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
+			if (loop_fse->declared_vars) {
+				continue;
+			}
+
+			if (loop_fse->user_defined == XDEBUG_BUILT_IN) {
+				continue;
+			}
+
+			xdebug_lib_register_compiled_variables(loop_fse, loop_fse->op_array);
+		}
+	}
+
 	XG_DBG(context).do_break = 1;
 	RETURN_TRUE;
 }
