@@ -3,7 +3,7 @@ Test for bug #1048: Can not get $GLOBAL variable by property_value on function c
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('dbgp; PHP < 8.1');
 ?>
 --FILE--
 <?php
