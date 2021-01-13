@@ -410,8 +410,8 @@ static void xdebug_print_settings(void)
 		}
 
 		/* Hack to not show changed and removed settings */
-		if (strcmp(ZSTR_VAL(ini_entry->name), "xdebug.auto_trace") == 0) {
-			break;
+		if (ini_entry->value && strncmp(ZSTR_VAL(ini_entry->value), "This setting has", 16) == 0) {
+			continue;
 		}
 
 		if (!sapi_module.phpinfo_as_text) {
