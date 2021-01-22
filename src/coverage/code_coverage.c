@@ -1094,6 +1094,7 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	xdebug_set_opcode_handler(ZEND_FETCH_CONSTANT, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_FETCH_CLASS_CONSTANT, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_CONCAT, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FAST_CONCAT, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_ISSET_ISEMPTY_DIM_OBJ, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_ISSET_ISEMPTY_PROP_OBJ, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_CASE, xdebug_common_override_handler);
