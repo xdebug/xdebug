@@ -98,25 +98,25 @@ environment:
           VC: vc15
           OPCACHE: yes
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-        - PHP_VER: 7.2
+        - PHP_VER: 7.2.34
           ARCH: x64
           TS: 1
           VC: vc15
           OPCACHE: yes
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-        - PHP_VER: 7.2
+        - PHP_VER: 7.2.34
           ARCH: x64
           TS: 0
           VC: vc15
           OPCACHE: no
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-        - PHP_VER: 7.2
+        - PHP_VER: 7.2.34
           ARCH: x86
           TS: 1
           VC: vc15
           OPCACHE: no
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-        - PHP_VER: 7.2
+        - PHP_VER: 7.2.34
           ARCH: x86
           TS: 0
           VC: vc15
@@ -126,23 +126,30 @@ environment:
 build_script:
     ps: |
         $ErrorActionPreference = "Stop"
-        $gareleases = Invoke-WebRequest https://windows.php.net/downloads/releases/releases.json | ConvertFrom-Json
-        $qareleases = Invoke-WebRequest https://windows.php.net/downloads/qa/releases.json | ConvertFrom-Json
-        $garev = [regex]::split($gareleases.$env:PHP_VER.version, '[^\d]')[2]
-        $qarev = [regex]::split($qareleases.$env:PHP_VER.version, '[^\d]')[2]
-        if ($qarev -gt $garev) {
-            $env:PHP_VERSION = $qareleases.$env:PHP_VER.version
-            $env:PHP_RELEASE = 'QA'
+        if (2 -le ([regex]::Matches($env:PHP_VER, '\.').count)) {
+            $env:PHP_VERSION = $env:PHP_VER
+            $env:PHP_RELEASE = 'LEGACY'
         } else {
-            $env:PHP_VERSION = $gareleases.$env:PHP_VER.version
-            $env:PHP_RELEASE = 'GA'
+            $gareleases = Invoke-WebRequest https://windows.php.net/downloads/releases/releases.json | ConvertFrom-Json
+            $qareleases = Invoke-WebRequest https://windows.php.net/downloads/qa/releases.json | ConvertFrom-Json
+            $garev = [regex]::split($gareleases.$env:PHP_VER.version, '[^\d]')[2]
+            $qarev = [regex]::split($qareleases.$env:PHP_VER.version, '[^\d]')[2]
+            if ($qarev -gt $garev) {
+                $env:PHP_VERSION = $qareleases.$env:PHP_VER.version
+                $env:PHP_RELEASE = 'QA'
+            } else {
+                $env:PHP_VERSION = $gareleases.$env:PHP_VER.version
+                $env:PHP_RELEASE = 'GA'
+            }
         }
         $ts_part = ''
         if ('0' -eq $env:TS) { $ts_part = '-nts' }
         $bname = 'php-devel-pack-' + $env:PHP_VERSION + $ts_part + '-Win32-' + $env:VC.toUpper() + '-' + $env:ARCH + '.zip'
         if (-not (Test-Path c:\build-cache\$bname)) {
-            if ($env:PHP_RELEASE -eq 'GA') {
-                Invoke-WebRequest "http://windows.php.net/downloads/releases/$bname" -OutFile "c:\build-cache\$bname"
+            if ($env:PHP_RELEASE -eq 'LEGACY') {
+                Invoke-WebRequest "https://windows.php.net/downloads/releases/archives/$bname" -OutFile "c:\build-cache\$bname"
+            } elseif ($env:PHP_RELEASE -eq 'GA') {
+                Invoke-WebRequest "https://windows.php.net/downloads/releases/$bname" -OutFile "c:\build-cache\$bname"
             } else {
                 Invoke-WebRequest "https://windows.php.net/downloads/qa/$bname" -OutFile "c:\build-cache\$bname"
             }
@@ -183,9 +190,9 @@ after_build:
         $arch_part = ''
         if ('x64' -eq $env:ARCH) { $arch_part = '-x86_64' }
         if ($env:APPVEYOR_REPO_TAG -eq "true") {
-            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_TAG_NAME + '-' + $env:PHP_VER + '-' + $env:VC + $ts_part + $arch_part
+            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_TAG_NAME + '-' + $env:PHP_VER.substring(0, 3) + '-' + $env:VC + $ts_part + $arch_part
         } else {
-            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT.substring(0, 8) + '-' + $env:PHP_VER + '-' + $env:VC + $ts_part + $arch_part
+            $bname = 'php_xdebug-' + $env:APPVEYOR_REPO_COMMIT.substring(0, 8) + '-' + $env:PHP_VER.substring(0, 3) + '-' + $env:VC + $ts_part + $arch_part
         }
         $zip_bname = $bname + '.zip'
         $dll_bname = $bname + '.dll'
@@ -206,8 +213,10 @@ test_script:
         if ('0' -eq $env:TS) { $ts_part = '-nts' }
         $bname = 'php-' + $env:PHP_VERSION + $ts_part + '-Win32-' + $env:VC.toUpper() + '-' + $env:ARCH + '.zip'
         if (-not (Test-Path c:\build-cache\$bname)) {
-            if ($env:PHP_RELEASE -eq 'GA') {
-                Invoke-WebRequest "http://windows.php.net/downloads/releases/$bname" -OutFile "c:\build-cache\$bname"
+            if ($env:PHP_RELEASE -eq 'LEGACY') {
+                Invoke-WebRequest "https://windows.php.net/downloads/releases/archives/$bname" -OutFile "c:\build-cache\$bname"
+            } elseif ($env:PHP_RELEASE -eq 'GA') {
+                Invoke-WebRequest "https://windows.php.net/downloads/releases/$bname" -OutFile "c:\build-cache\$bname"
             } else {
                 Invoke-WebRequest "https://windows.php.net/downloads/qa/$bname" -OutFile "c:\build-cache\$bname"
             }
