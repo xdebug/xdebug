@@ -30,9 +30,9 @@
 
 /* Set correct int format to use */
 #if SIZEOF_ZEND_LONG == 4
-# define XDEBUG_GCINT_FMT "u"
+# define XDEBUG_GCINT_FMT "d"
 #else
-# define XDEBUG_GCINT_FMT "lu"
+# define XDEBUG_GCINT_FMT "ld"
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
