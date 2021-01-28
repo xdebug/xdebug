@@ -24,21 +24,33 @@
 #define NANOS_IN_MILLISEC 1000000
 #define NANOS_IN_SEC      1000000000
 
+#if PHP_WIN32 && (__i386__ || __x86_64__ || _M_IX86 || _M_X64)
+#define WIN_SUPPORTS_RDTSC 1
+#else
+#define WIN_SUPPORTS_RDTSC 0
+#endif
+
+
 #if PHP_WIN32
 typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
 #endif
 
 typedef struct _xdebug_nanotime_context {
-	uint64_t start_abs;
-	uint64_t last_abs;
+	uint64_t     start_abs;
+	uint64_t     last_abs;
 #if PHP_WIN32 | __APPLE__ | defined(CLOCK_MONOTONIC)
-	uint64_t start_rel;
-	uint64_t last_rel;
-	int      use_rel_time;
+	uint64_t     start_rel;
+	uint64_t     last_rel;
+	unsigned int use_rel_time;
 #endif
 #if PHP_WIN32
 	WIN_PRECISE_TIME_FUNC win_precise_time_func;
-	uint64_t win_freq;
+#if WIN_SUPPORTS_RDTSC
+	uint64_t     win_freq;
+	uint64_t     start_rdtsc;
+	double       rdtsc_to_nanos;
+	uint64_t     last_abs_rdtsc;
+#endif
 #endif
 } xdebug_nanotime_context;
 
