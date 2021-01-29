@@ -148,6 +148,15 @@ static void xdebug_nanotime_init_calibrate_rdtsc()
 	} while (nanotime - start_nanotime < 2 * NANOS_IN_MILLISEC);
 	context->rdtsc_to_nanos = (nanotime - start_nanotime) / (double)(xdebug_get_rdtsc() - context->start_rdtsc);
 }
+
+void xdebug_nanotime_init_tsc_clock(void)
+{
+	if (XG_BASE(nanotime_context).rdtsc_to_nanos > 0) {
+		return;
+	}
+
+	xdebug_nanotime_init_calibrate_rdtsc();
+}
 #endif
 
 void xdebug_nanotime_init(void)
@@ -179,10 +188,6 @@ void xdebug_nanotime_init(void)
 #endif
 
 	XG_BASE(nanotime_context) = context;
-
-#if WIN_SUPPORTS_RDTSC
-	xdebug_nanotime_init_calibrate_rdtsc();
-#endif
 }
 
 uint64_t xdebug_get_nanotime(void)
