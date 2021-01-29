@@ -108,4 +108,4 @@ cfn=(9)
 calls=1 0 0
 8 %d %d
 
-summary: %d %d
+summary: %d+%d %d

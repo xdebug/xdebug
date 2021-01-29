@@ -116,4 +116,4 @@ cfn=(7)
 calls=1 0 0
 13 2%r(\d{8})%r 0
 
-summary: %d %d
+summary: %d+%d %d

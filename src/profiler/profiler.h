@@ -28,6 +28,8 @@
 typedef struct _xdebug_profiler_globals_t {
 	zend_bool     active;
 	uint64_t      profiler_start_nanotime;
+	uint64_t      profiler_nanotime_snapshot; // snapshot of xdebug_get_nanotime() when xdebug profiler function is entered
+	uint64_t      profiler_nanotime_penalty; // time spent in xdebug profiler, updated when xdebug profiler function is leaved
 	FILE         *profile_file;
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;

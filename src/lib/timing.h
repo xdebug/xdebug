@@ -52,6 +52,7 @@ typedef struct _xdebug_nanotime_context {
 	uint64_t     last_abs_rdtsc;
 #endif
 #endif
+	unsigned int get_nanotime_func_overhead;
 } xdebug_nanotime_context;
 
 void xdebug_nanotime_init(void);

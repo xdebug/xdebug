@@ -67,6 +67,44 @@ void xdebug_profiler_rinit(void)
 	XG_PROF(active) = 0;
 }
 
+static uint64_t profiler_nanotime_get()
+{
+	if (XG_PROF(profiler_nanotime_snapshot) == 0) {
+
+		// debug, if there is no snapshot, use the current time
+		return xdebug_get_nanotime() - XG_PROF(profiler_nanotime_penalty);
+
+		// emit an error here, code should never get here
+		fprintf(stderr, "Profiler nanotime snapshot was not created!");
+	}
+
+	return XG_PROF(profiler_nanotime_snapshot) - XG_PROF(profiler_nanotime_penalty);
+}
+
+static void profiler_nanotime_snapshot_enter()
+{
+	uint64_t nanotime = xdebug_get_nanotime();
+
+	if (XG_PROF(profiler_nanotime_snapshot) != 0) {
+		// emit an error here, code should never get here
+		fprintf(stderr, "Profiler nanotime snapshot was already created!");
+	}
+
+	XG_PROF(profiler_nanotime_snapshot) = nanotime;
+}
+
+static void profiler_nanotime_snapshot_leave()
+{
+	if (XG_PROF(profiler_nanotime_snapshot) == 0) {
+		// emit an error here, code should never get here
+		fprintf(stderr, "Profiler nanotime snapshot was not created!");
+	}
+
+	XG_PROF(profiler_nanotime_penalty) += (xdebug_get_nanotime() - XG_PROF(profiler_nanotime_snapshot))
+		+ XG_BASE(nanotime_context).get_nanotime_func_overhead;
+	XG_PROF(profiler_nanotime_snapshot) = 0;
+}
+
 static void deinit_if_active(void)
 {
 	if (!XG_PROF(active)) {
@@ -118,14 +156,18 @@ void xdebug_profiler_execute_ex(function_stack_entry *fse, zend_op_array *op_arr
 	}
 
 	/* Calculate all elements for profile entries */
+	profiler_nanotime_snapshot_enter();
 	xdebug_profiler_add_function_details_user(fse, op_array);
 	xdebug_profiler_function_begin(fse);
+	profiler_nanotime_snapshot_leave();
 }
 
 void xdebug_profiler_execute_ex_end(function_stack_entry *fse)
 {
+	profiler_nanotime_snapshot_enter();
 	xdebug_profiler_function_end(fse);
 	xdebug_profiler_free_function_details(fse);
+	profiler_nanotime_snapshot_leave();
 }
 
 void xdebug_profiler_execute_internal(function_stack_entry *fse)
@@ -134,8 +176,10 @@ void xdebug_profiler_execute_internal(function_stack_entry *fse)
 		return;
 	}
 
+	profiler_nanotime_snapshot_enter();
 	xdebug_profiler_add_function_details_internal(fse);
 	xdebug_profiler_function_begin(fse);
+	profiler_nanotime_snapshot_leave();
 }
 
 void xdebug_profiler_execute_internal_end(function_stack_entry *fse)
@@ -144,8 +188,10 @@ void xdebug_profiler_execute_internal_end(function_stack_entry *fse)
 		return;
 	}
 
+	profiler_nanotime_snapshot_enter();
 	xdebug_profiler_function_end(fse);
 	xdebug_profiler_free_function_details(fse);
+	profiler_nanotime_snapshot_leave();
 }
 
 void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
@@ -222,6 +268,7 @@ void xdebug_profiler_init(char *script_name)
 	}
 
 	XG_PROF(profiler_start_nanotime) = xdebug_get_nanotime();
+	XG_PROF(profiler_nanotime_penalty) = 0;
 
 #if WIN_SUPPORTS_RDTSC
 	if (XINI_PROF(profiler_tsc_as_clock)) {
@@ -251,8 +298,9 @@ void xdebug_profiler_deinit()
 
 	fprintf(
 		XG_PROF(profile_file),
-		"summary: %lu %zd\n\n",
-		NANOTIME_SCALE_10NS(xdebug_get_nanotime() - XG_PROF(profiler_start_nanotime)),
+		"summary: %lu+%lu %zd\n\n",
+		NANOTIME_SCALE_10NS(xdebug_get_nanotime() - XG_PROF(profiler_start_nanotime) - XG_PROF(profiler_nanotime_penalty)),
+		NANOTIME_SCALE_10NS(XG_PROF(profiler_nanotime_penalty)),
 		zend_memory_peak_usage(0)
 	);
 
@@ -277,7 +325,7 @@ void xdebug_profiler_deinit()
 
 static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 {
-	fse->profile.nanotime += (xdebug_get_nanotime() - fse->profile.nanotime_mark);
+	fse->profile.nanotime += (profiler_nanotime_get() - fse->profile.nanotime_mark);
 	fse->profile.nanotime_mark = 0;
 	fse->profile.memory += (zend_memory_usage(0) - fse->profile.mem_mark);
 	fse->profile.mem_mark = 0;
@@ -285,7 +333,7 @@ static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 
 void xdebug_profiler_function_continue(function_stack_entry *fse)
 {
-	fse->profile.nanotime_mark = xdebug_get_nanotime();
+	fse->profile.nanotime_mark = profiler_nanotime_get();
 }
 
 void xdebug_profiler_function_pause(function_stack_entry *fse)
@@ -399,7 +447,7 @@ void xdebug_profiler_add_function_details_internal(function_stack_entry *fse)
 void xdebug_profiler_function_begin(function_stack_entry *fse)
 {
 	fse->profile.nanotime = 0;
-	fse->profile.nanotime_mark = xdebug_get_nanotime();
+	fse->profile.nanotime_mark = profiler_nanotime_get();
 	fse->profile.memory = 0;
 	fse->profile.mem_mark = zend_memory_usage(0);
 }
