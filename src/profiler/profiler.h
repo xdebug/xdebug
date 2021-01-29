@@ -23,10 +23,13 @@
 #include "php.h"
 #include "TSRM.h"
 #include "lib/lib.h"
+#include "lib/timing.h"
 
 typedef struct _xdebug_profiler_globals_t {
 	zend_bool     active;
 	uint64_t      profiler_start_nanotime;
+	uint64_t      profiler_nanotime_snapshot; // snapshot of xdebug_get_nanotime() when xdebug profiler function is entered
+	uint64_t      profiler_nanotime_penalty; // time spent in xdebug profiler, updated when xdebug profiler function is leaved
 	FILE         *profile_file;
 	char         *profile_filename;
 	xdebug_hash  *profile_filename_refs;
@@ -39,6 +42,9 @@ typedef struct _xdebug_profiler_globals_t {
 typedef struct _xdebug_profiler_settings_t {
 	char         *profiler_output_name; /* "pid" or "crc32" */
 	zend_bool     profiler_append;
+#if WIN_SUPPORTS_RDTSC
+	zend_bool     profiler_tsc_as_clock;
+#endif
 } xdebug_profiler_settings_t;
 
 void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg);

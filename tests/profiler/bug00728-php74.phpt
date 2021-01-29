@@ -89,4 +89,4 @@ cfn=(6)
 calls=1 0 0
 13 %d %d
 
-summary: %d %d
+summary: %d+%d %d

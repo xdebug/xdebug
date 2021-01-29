@@ -193,4 +193,4 @@ cfn=(9)
 calls=1 0 0
 4 %d %d
 
-summary: %d %d
+summary: %d+%d %d

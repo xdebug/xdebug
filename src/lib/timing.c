@@ -30,7 +30,8 @@
 
 #include "timing.h"
 
-#define NANOTIME_MIN_STEP 10
+#define NANOTIME_MIN_STEP 2
+#define NANOTIME_MIN_STEP_EXCL_OVERHEAD 1
 
 #if PHP_WIN32
 # define WIN_NANOS_IN_TICK          100
@@ -73,7 +74,7 @@ static uint64_t xdebug_get_nanotime_abs(xdebug_nanotime_context *nanotime_contex
 }
 
 #if PHP_WIN32
-static uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
+static inline uint64_t xdebug_counter_and_freq_to_nanotime(uint64_t counter, uint64_t freq)
 {
 	uint32_t mul = 1, freq32;
 	uint64_t q, r;
@@ -125,6 +126,68 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 }
 #endif
 
+#if WIN_SUPPORTS_RDTSC
+static inline uint64_t xdebug_get_rdtsc()
+{
+	return __rdtsc();
+}
+
+static void xdebug_nanotime_init_calibrate_rdtsc()
+{
+	uint64_t start_nanotime, nanotime;
+	xdebug_nanotime_context *context;
+
+	context = &XG_BASE(nanotime_context);
+
+	/* Calibrate TSC scale, wait at least 2 ms from start */
+	context->rdtsc_to_nanos = 0;
+	start_nanotime = xdebug_get_nanotime();
+	context->start_rdtsc = xdebug_get_rdtsc();
+	do {
+		__nop();
+		nanotime = xdebug_get_nanotime();
+	} while (nanotime - start_nanotime < 2 * NANOS_IN_MILLISEC);
+	context->rdtsc_to_nanos = (nanotime - start_nanotime) / (double)(xdebug_get_rdtsc() - context->start_rdtsc);
+}
+
+void xdebug_nanotime_init_tsc_clock(void)
+{
+	if (XG_BASE(nanotime_context).rdtsc_to_nanos > 0) {
+		return;
+	}
+
+	xdebug_nanotime_init_calibrate_rdtsc();
+}
+#endif
+
+static void xdebug_nanotime_init_get_nanotime_func_overhead()
+{
+	int i, j;
+	uint64_t t, t_last, t_diff_sum;
+	unsigned int t_diff_min;
+
+	XG_BASE(nanotime_context).get_nanotime_func_overhead = NANOTIME_MIN_STEP - NANOTIME_MIN_STEP_EXCL_OVERHEAD;
+
+	/* 10k iterations total, average overhead is 30 ns per get nanotime call,
+	 * thus total time is about 0.3 ms */
+	t_diff_min = UINT_MAX;
+	for (i = 0; i < 100; i++) {
+		t_diff_sum = 0;
+		t_last = xdebug_get_nanotime();
+		for (j = 0; j < 100; j++) {
+			t = xdebug_get_nanotime();
+			t_diff_sum += (t - t_last);
+			t_last = t;
+		}
+
+		if (t_diff_sum / j < t_diff_min) {
+			t_diff_min = t_diff_sum / j;
+		}
+	}
+
+	XG_BASE(nanotime_context).get_nanotime_func_overhead = t_diff_min;
+}
+
 void xdebug_nanotime_init(void)
 {
 	xdebug_nanotime_context context = {0};
@@ -149,29 +212,48 @@ void xdebug_nanotime_init(void)
 #endif
 
 	context.start_abs = xdebug_get_nanotime_abs(&context);
-	context.last_abs = 0;
 #if PHP_WIN32 | __APPLE__ | defined(CLOCK_MONOTONIC)
 	context.start_rel = xdebug_get_nanotime_rel(&context);
-	context.last_rel = 0;
 #endif
 
 	XG_BASE(nanotime_context) = context;
+
+	xdebug_nanotime_init_get_nanotime_func_overhead();
 }
 
 uint64_t xdebug_get_nanotime(void)
 {
 	uint64_t nanotime;
 	xdebug_nanotime_context *context;
+	unsigned int min_step;
 
 	context = &XG_BASE(nanotime_context);
+
+	min_step = XG_BASE(nanotime_context).get_nanotime_func_overhead + NANOTIME_MIN_STEP_EXCL_OVERHEAD;
+#if WIN_SUPPORTS_RDTSC
+	/* Windows has no timer with better resolution than 100 ns, use TSC timer which is
+	 * incremented at a constant rate on modern CPUs.
+	 * see https://stackoverflow.com/questions/63205226/better-than-100ns-resolution-timers-in-windows */
+	if (context->rdtsc_to_nanos > 0) {
+		nanotime = context->start_abs + (uint64_t)((xdebug_get_rdtsc() - context->start_rdtsc) * context->rdtsc_to_nanos);
+
+		if (nanotime < context->last_abs_rdtsc + min_step) {
+			context->last_abs_rdtsc += min_step;
+			nanotime = context->last_abs_rdtsc;
+		}
+		context->last_abs_rdtsc = nanotime;
+
+		return nanotime;
+	}
+#endif
 
 #if PHP_WIN32 | __APPLE__ | defined(CLOCK_MONOTONIC)
 	/* Relative timing */
 	if (context->use_rel_time) {
 		nanotime = xdebug_get_nanotime_rel(context);
 
-		if (nanotime < context->last_rel + NANOTIME_MIN_STEP) {
-			context->last_rel += NANOTIME_MIN_STEP;
+		if (nanotime < context->last_rel + min_step) {
+			context->last_rel += min_step;
 			nanotime = context->last_rel;
 		}
 		context->last_rel = nanotime;
@@ -184,8 +266,8 @@ uint64_t xdebug_get_nanotime(void)
 	/* Absolute timing */
 	nanotime = xdebug_get_nanotime_abs(context);
 
-	if (nanotime < context->last_abs + NANOTIME_MIN_STEP) {
-		context->last_abs += NANOTIME_MIN_STEP;
+	if (nanotime < context->last_abs + min_step) {
+		context->last_abs += min_step;
 		nanotime = context->last_abs;
 	}
 	context->last_abs = nanotime;
