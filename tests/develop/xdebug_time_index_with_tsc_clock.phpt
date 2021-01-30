@@ -2,7 +2,6 @@
 xdebug_time_index() with TSC clock (for profiler on Windows and x86 platform only)
 --INI--
 xdebug.mode=develop,profile
-xdebug.profiler_tsc_as_clock=1
 xdebug.start_with_request=default
 xdebug.profiler_output_name=cachegrind.out.%p.%r
 --FILE--

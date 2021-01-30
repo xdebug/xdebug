@@ -327,9 +327,6 @@ PHP_INI_BEGIN()
 	/* Profiler settings */
 	STD_PHP_INI_ENTRY("xdebug.profiler_output_name",      "cachegrind.out.%p",  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.profiler.profiler_output_name,          zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.profiler_append",         "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_append,               zend_xdebug_globals, xdebug_globals)
-#if WIN_SUPPORTS_RDTSC
-	STD_PHP_INI_BOOLEAN("xdebug.profiler_tsc_as_clock",   "0",                  PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateBool,   settings.profiler.profiler_tsc_as_clock,         zend_xdebug_globals, xdebug_globals)
-#endif
 
 	/* Xdebug Cloud */
 	STD_PHP_INI_ENTRY("xdebug.cloud_id", "", PHP_INI_SYSTEM, OnUpdateString, settings.debugger.cloud_id, zend_xdebug_globals, xdebug_globals)

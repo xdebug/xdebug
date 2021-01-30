@@ -57,9 +57,6 @@ typedef struct _xdebug_nanotime_context {
 void xdebug_nanotime_init(void);
 
 uint64_t xdebug_get_nanotime(void);
-#if WIN_SUPPORTS_RDTSC
-void xdebug_nanotime_init_tsc_clock(void);
-#endif
 
 char* xdebug_nanotime_to_chars(uint64_t nanotime, unsigned char precision);
 

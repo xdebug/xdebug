@@ -23,7 +23,6 @@
 #include "php.h"
 #include "TSRM.h"
 #include "lib/lib.h"
-#include "lib/timing.h"
 
 typedef struct _xdebug_profiler_globals_t {
 	zend_bool     active;
@@ -40,9 +39,6 @@ typedef struct _xdebug_profiler_globals_t {
 typedef struct _xdebug_profiler_settings_t {
 	char         *profiler_output_name; /* "pid" or "crc32" */
 	zend_bool     profiler_append;
-#if WIN_SUPPORTS_RDTSC
-	zend_bool     profiler_tsc_as_clock;
-#endif
 } xdebug_profiler_settings_t;
 
 void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg);

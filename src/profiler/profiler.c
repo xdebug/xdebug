@@ -223,12 +223,6 @@ void xdebug_profiler_init(char *script_name)
 
 	XG_PROF(profiler_start_nanotime) = xdebug_get_nanotime();
 
-#if WIN_SUPPORTS_RDTSC
-	if (XINI_PROF(profiler_tsc_as_clock)) {
-		xdebug_nanotime_init_tsc_clock();
-	}
-#endif
-
 	XG_PROF(active) = 1;
 	XG_PROF(profile_filename_refs) = xdebug_hash_alloc(128, xdfree);
 	XG_PROF(profile_functionname_refs) = xdebug_hash_alloc(128, xdfree);
