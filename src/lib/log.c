@@ -122,6 +122,10 @@ static inline void xdebug_php_log(int channel, int log_level, const char *error_
 {
 	xdebug_str formatted_message = XDEBUG_STR_INITIALIZER;
 
+    if (XG_LIB(log_file) && log_level > XLOG_CRIT) {
+        return;
+    }
+
 	if (log_level > XLOG_ERR) {
 		return;
 	}
