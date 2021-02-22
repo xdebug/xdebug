@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2021-01-04</date>
- <time>17:08:58</time>
+ <date>2021-02-22</date>
+ <time>10:53:09</time>
  <version>
-  <release>3.0.2</release>
-  <api>3.0.2</api>
+  <release>3.0.3</release>
+  <api>3.0.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,23 +45,14 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Jan 04, 2021 - Xdebug 3.0.2
+Mon, Feb 22, 2021 - Xdebug 3.0.3
 
 = Fixed bugs:
 
-  - Fixed issue #1907: Empty exception message when setting the $message property to a stringable object
-  - Fixed issue #1910: Code coverage misses constructor property promotion code
-  - Fixed issue #1914: Compillation failure on OpenBSD
-  - Fixed issue #1915: Debugger should only start with XDEBUG_SESSION and not XDEBUG_PROFILE
-  - Fixed issue #1918: Warn if PHP's Garbage Collection is disabled in gc_stats mode
-  - Fixed issue #1919: Crash when enabling filter without the right mode active
-  - Fixed issue #1921: Xdebug does not start step debugging if start_with_request=trigger
-  - Fixed issue #1922: Code coverage misses array assignment lines
-  - Fixed issue #1924: Deprecated INI settings displayed in phpinfo()
-  - Fixed issue #1925: xdebug.start_with_request and start_upon_error display inconsistent values
-  - Fixed issue #1926: Add Xdebug mode's source to xdebug_info() output
-  - Fixed issue #1927: Crash when calling xdebug_stop_trace without a trace in progress
-  - Fixed issue #1928: xdebug_stop_gcstats() can also return false
+  - Fixed issue #1930: No local variables with trigger and xdebug_break()
+  - Fixed issue #1931: xdebug_info() output misses configuration settings if phpinfo() has been called
+  - Fixed issue #1932: One line in multi-line string concatenation is not covered
+  - Fixed issue #1940: Wrong type used for showing GC Stats reports
 
  </notes>
 
@@ -199,6 +190,40 @@ Mon, Jan 04, 2021 - Xdebug 3.0.2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2021-01-04</date>
+   <time>17:08:58</time>
+   <version>
+    <release>3.0.2</release>
+    <api>3.0.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 04, 2021 - Xdebug 3.0.2
+
+= Fixed bugs:
+
+  - Fixed issue #1907: Empty exception message when setting the $message property to a stringable object
+  - Fixed issue #1910: Code coverage misses constructor property promotion code
+  - Fixed issue #1914: Compillation failure on OpenBSD
+  - Fixed issue #1915: Debugger should only start with XDEBUG_SESSION and not XDEBUG_PROFILE
+  - Fixed issue #1918: Warn if PHP's Garbage Collection is disabled in gc_stats mode
+  - Fixed issue #1919: Crash when enabling filter without the right mode active
+  - Fixed issue #1921: Xdebug does not start step debugging if start_with_request=trigger
+  - Fixed issue #1922: Code coverage misses array assignment lines
+  - Fixed issue #1924: Deprecated INI settings displayed in phpinfo()
+  - Fixed issue #1925: xdebug.start_with_request and start_upon_error display inconsistent values
+  - Fixed issue #1926: Add Xdebug mode's source to xdebug_info() output
+  - Fixed issue #1927: Crash when calling xdebug_stop_trace without a trace in progress
+  - Fixed issue #1928: xdebug_stop_gcstats() can also return false
+
+   </notes>
+  </release>
  
   <release>
    <date>2020-12-04</date>
