@@ -14,6 +14,7 @@
 #. Run commands from output
 #. Update www.xdebug.org views/home/updates.php with snippet
 #. Update www.xdebug.org src/XdebugVersion.php with snippet
+#. Update pre-generated www.xdebug.org data/news/... file
 #. Write Patreon post taking the rendered news article as starting point
 
 #. Mantis: "release" the version, and make sure there is a new one.
