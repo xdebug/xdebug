@@ -1,14 +1,17 @@
 /.deps
 /Makefile
+/*.dep
 /*.lo
 /*.loT
 /*.slo
 /*.mk
 /*.la
 /.libs
+src/*.dep
 src/*.lo
 src/*.loT
 src/.libs
+src/*/*.dep
 src/*/*.lo
 src/*/*.loT
 src/*/.libs
