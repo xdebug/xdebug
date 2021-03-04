@@ -567,6 +567,16 @@ static void prefill_from_oparray(zend_string *filename, zend_op_array *op_array)
 		xdebug_branch_find_paths(branch_info);
 		xdebug_branch_info_add_branches_and_paths(filename, (char*) function_name, branch_info);
 	}
+
+#if PHP_VERSION_ID >= 80100
+	if (!op_array->num_dynamic_func_defs) {
+		return;
+	}
+
+	for (i = 0; i < op_array->num_dynamic_func_defs; i++) {
+		prefill_from_oparray(filename, op_array->dynamic_func_defs[i]);
+	}
+#endif
 }
 
 static int prefill_from_function_table(zend_op_array *opa)
