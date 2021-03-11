@@ -381,6 +381,15 @@ static ZEND_COLD void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 	}
 }
 
+static int if_overridden_xdebug_mode(char *name)
+{
+	if ((strcmp("xdebug.mode", name) == 0) && XG_LIB(mode_from_environment)) {
+		return 1;
+	}
+
+	return 0;
+}
+
 static void xdebug_print_settings(void)
 {
 	zend_module_entry *module;
@@ -418,8 +427,15 @@ static void xdebug_print_settings(void)
 			PUTS("<tr>");
 			PUTS("<td class=\"e\">");
 			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			if (if_overridden_xdebug_mode(ZSTR_VAL(ini_entry->name))) {
+				PUTS(" (through XDEBUG_MODE)");
+			}
 			PUTS("</td><td class=\"v\">");
-			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			if (if_overridden_xdebug_mode(ZSTR_VAL(ini_entry->name))) {
+				PUTS(getenv("XDEBUG_MODE"));
+			} else {
+				php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			}
 			PUTS("</td><td class=\"v\">");
 			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
 			PUTS("</td><td class=\"d\"><a href=\"");
@@ -429,8 +445,15 @@ static void xdebug_print_settings(void)
 			PUTS("\">🖹</a></td></tr>\n");
 		} else {
 			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
+			if (if_overridden_xdebug_mode(ZSTR_VAL(ini_entry->name))) {
+				PUTS(" (through XDEBUG_MODE)");
+			}
 			PUTS(" => ");
-			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			if (if_overridden_xdebug_mode(ZSTR_VAL(ini_entry->name))) {
+				PUTS(getenv("XDEBUG_MODE"));
+			} else {
+				php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
+			}
 			PUTS(" => ");
 			php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
 			PUTS("\n");
