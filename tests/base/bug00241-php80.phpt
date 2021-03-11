@@ -42,7 +42,7 @@ class Error_Entry
 
 set_error_handler('error_handler');
 
-$tmp = explode('/', trim($_SERVER['FOO'], '/'));
+$tmp = $_SERVER['FOO'];
 echo "The End\n";
 ?>
 --EXPECTF--
