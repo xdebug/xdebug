@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #614: local variables loses class members
+Test for bug #614: local variables loses class members (< PHP 8.1)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 8.1; dbgp');
 ?>
 --FILE--
 <?php

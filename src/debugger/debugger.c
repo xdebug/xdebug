@@ -641,6 +641,16 @@ static void add_function_to_lines_list(xdebug_lines_list *lines_list, zend_op_ar
 	}
 	lines_list->functions[lines_list->count] = map_item;
 	lines_list->count++;
+
+#if PHP_VERSION_ID >= 80100
+	if (opa->num_dynamic_func_defs) {
+		uint32_t i;
+
+		for (i = 0; i < opa->num_dynamic_func_defs; i++) {
+			add_function_to_lines_list(lines_list, opa->dynamic_func_defs[i]);
+		}
+	}
+#endif
 }
 /* }}} */
 

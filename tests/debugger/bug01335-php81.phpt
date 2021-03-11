@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1335: Debugging with PhpStorm sometimes gives "can not get property"
+Test for bug #1335: Debugging with PhpStorm sometimes gives "can not get property" (>= PHP 8.1)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 8.1; dbgp');
 ?>
 --FILE--
 <?php
@@ -50,11 +50,11 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="0"><property name="$b" fullname="$b" type="object" classname="TestA\TestB\TestC\B" children="1" numchildren="2" page="0" pagesize="32"><property name="data2" fullname="$b-&gt;data2" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property><property name="*TestA\TestB\TestC\A*data1" fullname="$b-&gt;*TestA\TestB\TestC\A*data1" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property></property><property name="$x" fullname="$x" type="uninitialized"></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="0"><property name="$b" fullname="$b" type="object" classname="TestA\TestB\TestC\B" children="1" numchildren="2" page="0" pagesize="32"><property name="*TestA\TestB\TestC\A*data1" fullname="$b-&gt;*TestA\TestB\TestC\A*data1" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property><property name="data2" fullname="$b-&gt;data2" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property></property><property name="$x" fullname="$x" type="uninitialized"></property></response>
 
 -> property_get -i 6 -d 0 -c 0 -n $b
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$b" fullname="$b" type="object" classname="TestA\TestB\TestC\B" children="1" numchildren="2" page="0" pagesize="32"><property name="data2" fullname="$b-&gt;data2" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property><property name="*TestA\TestB\TestC\A*data1" fullname="$b-&gt;*TestA\TestB\TestC\A*data1" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$b" fullname="$b" type="object" classname="TestA\TestB\TestC\B" children="1" numchildren="2" page="0" pagesize="32"><property name="*TestA\TestB\TestC\A*data1" fullname="$b-&gt;*TestA\TestB\TestC\A*data1" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property><property name="data2" fullname="$b-&gt;data2" facet="private" type="object" classname="TestA\TestB\TestC\C" children="1" numchildren="1"></property></property></response>
 
 -> property_get -i 7 -d 0 -c 0 -n $b->*TestA\TestB\TestC\A*data1
 <?xml version="1.0" encoding="iso-8859-1"?>
