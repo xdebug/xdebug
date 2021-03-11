@@ -9,7 +9,7 @@ on:
 
 jobs:
     tests:
-        runs-on: ubuntu-18.04
+        runs-on: ubuntu-latest
         name: Build and test
         strategy:
             fail-fast: false
