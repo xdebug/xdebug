@@ -93,7 +93,7 @@ class DebugClient
 
 	function doRead( $conn, string $transaction_id = null )
 	{
-		stream_set_timeout( $conn, 1 );
+		stream_set_timeout( $conn, 3 );
 		do {
 			$trans_id = null;
 			$length = 0;
