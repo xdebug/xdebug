@@ -581,15 +581,15 @@ static int xdebug_common_assign_dim_handler(const char *op, XDEBUG_OPCODE_HANDLE
 			}
 #if PHP_VERSION_ID >= 70400
 		} else if (cur_opcode->opcode == ZEND_ASSIGN_OBJ_REF) {
-			if (cur_opcode->op2_type == IS_CV) {
-				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op2.var)->val);
+			if (next_opcode->op1_type == IS_CV) {
+				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, next_opcode->op1.var)->val);
 			} else {
 				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, next_opcode, 1);
 				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
 			}
 		} else if (cur_opcode->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
-			if (cur_opcode->op2_type == IS_CV) {
-				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, cur_opcode->op2.var)->val);
+			if (next_opcode->op1_type == IS_CV) {
+				right_full_varname = xdebug_sprintf("$%s", zend_get_compiled_variable_name(op_array, next_opcode->op1.var)->val);
 			} else {
 				const zend_op *referenced_opline = xdebug_find_referenced_opline(execute_data, next_opcode, 1);
 				right_full_varname = xdebug_find_var_name(execute_data, referenced_opline, NULL);
