@@ -353,6 +353,13 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 #if !WIN32 && !WINNT
 		set_keepalive_options(sockfd);
 #endif
+
+		/* Now we have a socket, update the last seen hostname and port */
+		if (XG_DBG(context).connected_hostname) {
+			xdfree(XG_DBG(context).connected_hostname);
+		}
+		XG_DBG(context).connected_hostname = xdstrdup(hostname);
+		XG_DBG(context).connected_port = dport;
 	}
 
 	return sockfd;

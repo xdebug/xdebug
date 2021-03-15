@@ -1151,6 +1151,11 @@ DBGP_FUNC(detach)
 	xdebug_mark_debug_connection_not_active();
 	XG_DBG(stdout_mode) = 0;
 	XG_DBG(detached) = 1;
+
+	if (CMD_OPTION_SET('-')) {
+		XG_DBG(context).detached_message = xdstrdup(CMD_OPTION_CHAR('-'));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "DETACH", "Debug client detached: %s.", XG_DBG(context).detached_message);
+	}
 }
 
 
