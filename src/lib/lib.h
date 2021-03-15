@@ -268,7 +268,7 @@ int xdebug_lib_set_mode(char *mode);
 #define XDEBUG_START_WITH_REQUEST_NO          3
 #define XDEBUG_START_WITH_REQUEST_TRIGGER     4
 int xdebug_lib_set_start_with_request(char *value);
-int xdebug_lib_start_with_request(void);
+int xdebug_lib_start_with_request(int for_mode);
 int xdebug_lib_start_with_trigger(int for_mode, char **found_trigger_value);
 int xdebug_lib_start_if_mode_is_trigger(int for_mode);
 int xdebug_lib_never_start_with_request(void);

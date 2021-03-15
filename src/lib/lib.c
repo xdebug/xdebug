@@ -231,14 +231,14 @@ int xdebug_lib_set_start_with_request(char *value)
 	return 0;
 }
 
-int xdebug_lib_start_with_request(void)
+int xdebug_lib_start_with_request(int for_mode)
 {
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_YES) {
 		return 1;
 	}
 
 	if (XG_LIB(start_with_request) == XDEBUG_START_WITH_REQUEST_DEFAULT) {
-		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
+		if (for_mode == XDEBUG_MODE_PROFILING && XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 			return 1;
 		}
 	}
