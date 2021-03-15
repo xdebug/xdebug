@@ -7,24 +7,31 @@
  xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>xdebug</name>
  <channel>pecl.php.net</channel>
- <summary>Provides functions for function traces and profiling</summary>
- <description>The Xdebug extension helps you debugging your script by providing a lot of
-valuable debug information. The debug information that Xdebug can provide
-includes the following:
+ <summary>Xdebug is a debugging and productivity extension for PHP</summary>
+ <description>
+Xdebug and provides a range of features to improve the PHP development
+experience.
 
-    * stack and function traces in error messages with:
-          o full parameter display for user defined functions
-          o function name, file name and line indications
-          o support for member functions
-    * memory allocation
-    * protection for infinite recursions
+Step Debugging
+    A way to step through your code in your IDE or editor while the script is
+    executing.
 
-Xdebug also provides:
+Improvements to PHP's error reporting
+    An improved var_dump() function, stack traces for Notices, Warnings, Errors
+    and Exceptions to highlight the code path to the error
 
-    * profiling information for PHP scripts
-    * code coverage analysis
-    * capabilities to debug your scripts interactively with a debug client
+Tracing
+    Writes every function call, with arguments and invocation location to disk.
+    Optionally also includes every variable assignment and return value for
+    each function.
 
+Profiling
+    Allows you, with the help of visualisation tools, to analyse the
+    performance of your PHP application and find bottlenecks.
+
+Code Coverage Analysis
+    To show which parts of your code base are executed when running unit tests
+    with PHP Unit.
  </description>
  <lead>
   <name>Derick Rethans</name>
