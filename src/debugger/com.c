@@ -643,7 +643,7 @@ void xdebug_debug_init_if_requested_at_startup(void)
 	}
 
 	if (
-		xdebug_lib_start_with_request() ||
+		xdebug_lib_start_with_request(XDEBUG_MODE_STEP_DEBUG) ||
 		(!xdebug_lib_never_start_with_request() && xdebug_handle_start_session()) ||
 		xdebug_lib_start_with_trigger(XDEBUG_MODE_STEP_DEBUG, &found_trigger_value)
 	) {
