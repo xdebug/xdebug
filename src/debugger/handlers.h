@@ -83,6 +83,11 @@ struct _xdebug_con {
 	int                    inhibit_notifications;
 
 	int                    resolved_breakpoints;
+
+	/* Statistics and diagnostics */
+	char *connected_hostname;
+	int   connected_port;
+	char *detached_message;
 };
 
 #define XDEBUG_BRK_UNRESOLVED     0

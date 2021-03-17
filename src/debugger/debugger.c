@@ -54,6 +54,11 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 		xdebug_orig_ub_write = sapi_module.ub_write;
 		sapi_module.ub_write = xdebug_ub_write;
 	}
+
+	/* Statistics and diagnostics */
+	xg->context.connected_hostname = NULL;
+	xg->context.connected_port = 0;
+	xg->context.detached_message = NULL;
 }
 
 static char *xdebug_debugger_get_ide_key(void)
@@ -547,6 +552,11 @@ void xdebug_debugger_rinit(void)
 	XG_DBG(context).do_step        = 0;
 	XG_DBG(context).do_next        = 0;
 	XG_DBG(context).do_finish      = 0;
+
+	/* Statistics and diagnostics */
+	XG_DBG(context).connected_hostname = NULL;
+	XG_DBG(context).connected_port = 0;
+	XG_DBG(context).detached_message = NULL;
 }
 
 void xdebug_debugger_post_deactivate(void)
@@ -571,6 +581,16 @@ void xdebug_debugger_post_deactivate(void)
 
 	xdebug_hash_destroy(XG_DBG(breakable_lines_map));
 	XG_DBG(breakable_lines_map) = NULL;
+
+	if (XG_DBG(context).connected_hostname) {
+		xdfree(XG_DBG(context).connected_hostname);
+		XG_DBG(context).connected_hostname = NULL;
+	}
+
+	if (XG_DBG(context).detached_message) {
+		xdfree(XG_DBG(context).detached_message);
+		XG_DBG(context).detached_message = NULL;
+	}
 }
 
 xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 
 #include "lib_private.h"
 #include "log.h"
+#include "var.h"
 
 char* xdebug_lib_docs_base(void)
 {
@@ -568,6 +569,117 @@ static void print_profile_information(void)
 	php_info_print_table_end();
 }
 
+static void print_step_debug_information(void)
+{
+	int is_active;
+
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		return;
+	}
+
+	is_active = xdebug_is_debug_connection_active();
+
+	php_info_print_table_start();
+	if (!sapi_module.phpinfo_as_text) {
+		PUTS("<tr class=\"h\"><th colspan=\"2\">Step Debugging</th><th>Docs</th></tr>\n");
+		xdebug_info_printf(
+			"<tr><td class=\"e\">Debugger</td><td class=\"v\">%s</td>"
+			"<td class=\"d\"><a href=\"%sstep_debug\">🖹</a></td></tr>\n",
+				is_active ? "Active" : (XG_DBG(detached) ? "Detached" : "Not Active"), xdebug_lib_docs_base());
+		if (XG_DBG(context).connected_hostname) {
+			if (strcmp(XINI_DBG(cloud_id), "") == 0) {
+				xdebug_info_printf(
+					"<tr><td class=\"e\">Connected Client</td><td class=\"v\">%s:%d</td><td class=\"d\">&nbsp;</td></tr>\n",
+					XG_DBG(context).connected_hostname, XG_DBG(context).connected_port
+				);
+			} else {
+				xdebug_info_printf(
+					"<tr><td class=\"e\">Xdebug Cloud Host</td><td class=\"v\">%s:%d</td><td class=\"d\">&nbsp;</td></tr>\n",
+					XG_DBG(context).connected_hostname, XG_DBG(context).connected_port
+				);
+				xdebug_info_printf(
+					"<tr><td class=\"e\">Xdebug Cloud ID</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+					XINI_DBG(cloud_id)
+				);
+			}
+		}
+		if (XG_DBG(detached)) {
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Detached</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).detached_message ? XG_DBG(context).detached_message : "Yes"
+			);
+		} else if (XG_DBG(context).options) {
+			xdebug_var_export_options *options;
+			PUTS("<tr class=\"h\"><th colspan=\"3\">DBGp Settings</th></tr>\n");
+
+			options = (xdebug_var_export_options*) XG_DBG(context).options;
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Max Children</td><td class=\"v\">%d</td><td class=\"d\">&nbsp;</td></tr>\n",
+				options->max_children
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Max Data</td><td class=\"v\">%d</td><td class=\"d\">&nbsp;</td></tr>\n",
+				options->max_data
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Max Depth</td><td class=\"v\">%d</td><td class=\"d\">&nbsp;</td></tr>\n",
+				options->max_depth
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Show Hidden Properties</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				options->show_hidden ? "Yes" : "No"
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Extended Properties</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				options->extended_properties ? "Yes" : "No"
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Notifications</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).send_notifications ? "Yes" : "No"
+			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Resolved Breakpoints</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).resolved_breakpoints ? "Yes" : "No"
+			);
+		}
+	} else {
+		php_info_print_table_colspan_header(2, (char*) "Step Debugging");
+		if (is_active) {
+			PUTS("Debugger is active\n");
+		} else {
+			PUTS("Debugger is not active\n");
+		}
+		if (XG_DBG(context).connected_hostname) {
+			if (strcmp(XINI_DBG(cloud_id), "") == 0) {
+				xdebug_info_printf("Connected Client => %s:%d\n",
+					XG_DBG(context).connected_hostname, XG_DBG(context).connected_port
+				);
+			} else {
+				xdebug_info_printf(
+					"Xdebug Cloud Host => %s:%d\n",
+					XG_DBG(context).connected_hostname, XG_DBG(context).connected_port
+				);
+				xdebug_info_printf("Xdebug Cloud ID => %s\n", XINI_DBG(cloud_id));
+			}
+		}
+		if (XG_DBG(detached)) {
+			xdebug_info_printf("Detached => %s\n", XG_DBG(context).detached_message ? XG_DBG(context).detached_message : "Yes");
+		} else if (XG_DBG(context).options) {
+			xdebug_var_export_options *options = (xdebug_var_export_options*) XG_DBG(context).options;
+
+			PUTS("\nDBGp Settings\n");
+			xdebug_info_printf("Max Children => %d\n", options->max_children);
+			xdebug_info_printf("Max Data => %d\n", options->max_data);
+			xdebug_info_printf("Max Depth => %d\n", options->max_depth);
+			xdebug_info_printf("Show Hidden Properties => %s\n", options->show_hidden ? "Yes" : "No");
+			xdebug_info_printf("Extended Properties => %s\n", options->extended_properties ? "Yes" : "No");
+			xdebug_info_printf("Notifications => %s\n", XG_DBG(context).send_notifications ? "Yes" : "No");
+			xdebug_info_printf("Resolved Breakpoints => %s\n", XG_DBG(context).resolved_breakpoints ? "Yes" : "No");
+		}
+	}
+	php_info_print_table_end();
+}
+
 static void print_trace_information(void)
 {
 	char *file_name;
@@ -606,6 +718,7 @@ PHP_FUNCTION(xdebug_info)
 	xdebug_print_info();
 
 	print_diagnostic_log();
+	print_step_debug_information();
 	print_profile_information();
 	print_trace_information();
 
