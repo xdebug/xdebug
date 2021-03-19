@@ -773,3 +773,90 @@ void xdebug_close_log()
 	fclose(XG_LIB(log_file));
 	XG_LIB(log_file) = NULL;
 }
+
+static int xdebug_has_named_mode(char *name, int len)
+{
+	if (strncmp(name, "off", len) == 0) {		
+		return XDEBUG_MODE_IS_OFF();		
+	}
+	if (strncmp(name, "develop", len) == 0) {
+		return XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP);
+	}
+	if (strncmp(name, "coverage", len) == 0) {		
+		return XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE);
+	}
+	if (strncmp(name, "debug", len) == 0) {
+		return XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG);
+	}
+	if (strncmp(name, "gcstats", len) == 0) {
+		return XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS);
+	}
+	if (strncmp(name, "profile", len) == 0) {
+		return XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING);
+	}
+	if (strncmp(name, "trace", len) == 0) {
+		return XDEBUG_MODE_IS(XDEBUG_MODE_TRACING);
+	}
+
+	return 0;
+}
+
+PHP_FUNCTION(xdebug_mode)
+{
+	char *mode = NULL;
+	size_t mode_len = 0;	
+	char *comma = NULL;
+	xdebug_str mode_out = XDEBUG_STR_INITIALIZER;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &mode, &mode_len) == FAILURE) {
+		return;
+	}
+
+	if (mode) {
+		comma = strchr(mode, ',');
+		while (comma) {
+			if (!xdebug_has_named_mode(mode, comma - mode)) {
+				RETURN_FALSE;
+			}
+			mode = comma + 1;
+			while (*mode == ' ') {
+				mode++;
+			}
+			comma = strchr(mode, ',');
+		}
+		
+		if (!xdebug_has_named_mode(mode, strlen(mode))) {
+			RETURN_FALSE;
+		}
+
+		RETURN_TRUE;
+	}
+
+	if (XDEBUG_MODE_IS_OFF()) {
+		xdebug_str_add_literal(&mode_out, "off");
+	} else {
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+			xdebug_str_add_literal(&mode_out, "develop,");
+		}
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+			xdebug_str_add_literal(&mode_out, "coverage,");
+		}
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+			xdebug_str_add_literal(&mode_out, "debug,");
+		}
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
+			xdebug_str_add_literal(&mode_out, "gcstats,");
+		}
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
+			xdebug_str_add_literal(&mode_out, "profile,");
+		}
+		if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
+			xdebug_str_add_literal(&mode_out, "trace,");
+		}
+		xdebug_str_chop(&mode_out, 1);
+	}
+
+	RETVAL_STRING(mode_out.d);
+
+	xdebug_str_destroy(&mode_out);
+}
