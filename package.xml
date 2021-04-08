@@ -33,11 +33,11 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2021-02-22</date>
- <time>10:53:09</time>
+ <date>2021-04-08</date>
+ <time>10:32:42</time>
  <version>
-  <release>3.0.3</release>
-  <api>3.0.3</api>
+  <release>3.0.4</release>
+  <api>3.0.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -45,15 +45,15 @@ Xdebug also provides:
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Feb 22, 2021 - Xdebug 3.0.3
+Thu, Apr 08, 2021 - Xdebug 3.0.4
 
 = Fixed bugs:
 
-  - Fixed issue #1930: No local variables with trigger and xdebug_break()
-  - Fixed issue #1931: xdebug_info() output misses configuration settings if phpinfo() has been called
-  - Fixed issue #1932: One line in multi-line string concatenation is not covered
-  - Fixed issue #1940: Wrong type used for showing GC Stats reports
-
+  - Fixed issue #1802: Improve xdebug.org home page
+  - Fixed issue #1944: tracing is started without trigger, when profiler is also enabled
+  - Fixed issue #1947: xdebug_info() settings section does not show the modes that are overridden by XDEBUG_MODE
+  - Fixed issue #1950: Assignment trace with ASSIGN_OBJ_REF crashes
+  - Fixed issue #1954: Calling xdebug_start_trace without mode including tracing results in a fatal error
  </notes>
 
  <contents>
@@ -190,6 +190,30 @@ Mon, Feb 22, 2021 - Xdebug 3.0.3
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2021-02-22</date>
+   <time>10:53:09</time>
+   <version>
+    <release>3.0.3</release>
+    <api>3.0.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Feb 22, 2021 - Xdebug 3.0.3
+
+= Fixed bugs:
+
+  - Fixed issue #1930: No local variables with trigger and xdebug_break()
+  - Fixed issue #1931: xdebug_info() output misses configuration settings if phpinfo() has been called
+  - Fixed issue #1932: One line in multi-line string concatenation is not covered
+  - Fixed issue #1940: Wrong type used for showing GC Stats reports
+   </notes>
+  </release>
 
   <release>
    <date>2021-01-04</date>
