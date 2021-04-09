@@ -30,7 +30,7 @@ fn=(1) php::xdebug_get_profiler_filename
 
 fl=(1)
 fn=(2) php::register_shutdown_function
-10 %d %d
+16 %d %d
 
 fl=(2) %scapture-profile.inc
 fn=(3) require_once::%scapture-profile.inc
@@ -42,7 +42,7 @@ calls=1 0 0
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-10 %d %d
+16 %d %d
 
 fl=(3) %sbug00360.php
 fn=(4) func

@@ -32,15 +32,15 @@ events: Time_(10ns) Memory_(bytes)
 
 fl=(1) php:internal
 fn=(1) php::substr
-11 %d %d
-
-fl=(1)
-fn=(2) php::xdebug_get_profiler_filename
 17 %d %d
 
 fl=(1)
+fn=(2) php::xdebug_get_profiler_filename
+23 %d %d
+
+fl=(1)
 fn=(3) php::register_shutdown_function
-18 %d %d
+24 %d %d
 
 fl=(2) %sbug01589-prepend.inc
 fn=(4) {main}
@@ -48,15 +48,15 @@ fn=(4) {main}
 cfl=(1)
 cfn=(1)
 calls=1 0 0
-11 %d %d
+17 %d %d
 cfl=(1)
 cfn=(2)
 calls=1 0 0
-17 %d %d
+23 %d %d
 cfl=(1)
 cfn=(3)
 calls=1 0 0
-18 %d %d
+24 %d %d
 
 fl=(1)
 fn=(1)

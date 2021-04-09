@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -161,15 +161,15 @@ void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 	xdfree(ce);
 }
 
-static void profiler_write_header(FILE *file, char *script_name)
+static void profiler_write_header(PROF_FILE_TYPE file, char *script_name)
 {
 	if (XINI_PROF(profiler_append)) {
-		fprintf(file, "\n==== NEW PROFILING FILE ==============================================\n");
+		prof_printf(file, "\n==== NEW PROFILING FILE ==============================================\n");
 	}
-	fprintf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
-	fprintf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
-	fprintf(file, "events: Time_(10ns) Memory_(bytes)\n\n");
-	fflush(file);
+	prof_printf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
+	prof_printf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
+	prof_printf(file, "events: Time_(10ns) Memory_(bytes)\n\n");
+	prof_flush(file);
 }
 
 #define NANOTIME_SCALE_10NS(nanotime) ((unsigned long)(((nanotime) + 5) / 10))
@@ -199,10 +199,13 @@ void xdebug_profiler_init(char *script_name)
 		filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
 	}
 
-	if (XINI_PROF(profiler_append)) {
-		XG_PROF(profile_file) = xdebug_fopen(filename, "a", NULL, &XG_PROF(profile_filename));
-	} else {
-		XG_PROF(profile_file) = xdebug_fopen(filename, "w", NULL, &XG_PROF(profile_filename));
+	{
+#ifdef HAVE_XDEBUG_ZLIB
+		FILE *tmp_file = xdebug_fopen(filename, XINI_PROF(profiler_append) ? "a" : "w", "gz", &XG_PROF(profile_filename));
+		XG_PROF(profile_file) = gzdopen(fileno(tmp_file), XINI_PROF(profiler_append) ? "a" : "w");
+#else
+		XG_PROF(profile_file) = xdebug_fopen(filename, XINI_PROF(profiler_append) ? "a" : "w", NULL, &XG_PROF(profile_filename));
+#endif
 	}
 
 	if (!XG_PROF(profile_file)) {
@@ -243,7 +246,7 @@ void xdebug_profiler_deinit()
 		xdebug_profiler_function_end(fse);
 	}
 
-	fprintf(
+	prof_printf(
 		XG_PROF(profile_file),
 		"summary: %lu %zd\n\n",
 		NANOTIME_SCALE_10NS(xdebug_get_nanotime() - XG_PROF(profiler_start_nanotime)),
@@ -252,10 +255,10 @@ void xdebug_profiler_deinit()
 
 	XG_PROF(active) = 0;
 
-	fflush(XG_PROF(profile_file));
+	prof_flush(XG_PROF(profile_file));
 
 	if (XG_PROF(profile_file)) {
-		fclose(XG_PROF(profile_file));
+		prof_close(XG_PROF(profile_file));
 		XG_PROF(profile_file) = NULL;
 	}
 
@@ -529,7 +532,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	}
 	xdebug_str_addc(&file_buffer, '\n');
 
-	fwrite(file_buffer.d, sizeof(char), file_buffer.l, XG_PROF(profile_file));
+	prof_write(file_buffer.d, sizeof(char), file_buffer.l, XG_PROF(profile_file));
 	xdebug_str_dtor(file_buffer);
 }
 
