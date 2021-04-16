@@ -309,7 +309,7 @@ char *xdebug_path_to_url(zend_string *fileurl)
 
 	} else if (ZSTR_VAL(fileurl)[1] == '/' || ZSTR_VAL(fileurl)[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
-		/* See http://blogs.msdn.com/ie/archive/2006/12/06/file-uris-in-windows.aspx */
+		/* See https://docs.microsoft.com/en-us/archive/blogs/ie/file-uris-in-windows */
 		tmp = xdebug_sprintf("file:%s", encoded_fileurl);
 	} else if (ZSTR_VAL(fileurl)[0] == '/' || ZSTR_VAL(fileurl)[0] == '\\') {
 		/* convert *nix paths (eg. /path) */
