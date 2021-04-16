@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -567,6 +567,9 @@ PHP_MINIT_FUNCTION(xdebug)
 PHP_MSHUTDOWN_FUNCTION(xdebug)
 {
 	if (XDEBUG_MODE_IS_OFF()) {
+#ifdef ZTS
+		ts_free_id(xdebug_globals_id);
+#endif
 		return SUCCESS;
 	}
 
