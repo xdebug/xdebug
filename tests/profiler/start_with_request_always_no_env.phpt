@@ -9,7 +9,9 @@ xdebug.collect_assignments=0
 <?php
 $fileName = xdebug_get_profiler_filename();
 
-echo file_get_contents($fileName);
+$fp = preg_match( '@gz$@', $fileName ) ? gzopen( $fileName, 'r' ) : fopen( $fileName, 'r' );
+echo stream_get_contents( $fp );
+
 @unlink($fileName);
 ?>
 --EXPECTF--

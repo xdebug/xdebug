@@ -4,8 +4,12 @@ PHP_ARG_ENABLE(xdebug, whether to enable Xdebug support,
 [  --enable-xdebug         Enable Xdebug support])
 
 PHP_ARG_ENABLE(xdebug-dev, whether to enable Xdebug developer build flags,
-[  --enable-xdebug-dev       Xdebug: Enable developer flags],, no)
+[  --enable-xdebug-dev              Xdebug: Enable developer flags],, no)
 
+PHP_ARG_WITH(xdebug-compression, [whether to compress profiler files (requires zlib)],
+[  --without-xdebug-compression     Xdebug: Disable compression through zlib],yes,no)
+
+m4_include([build/pkg.m4])
 
 if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([Check for supported PHP versions])
@@ -31,6 +35,15 @@ if test "$PHP_XDEBUG" != "no"; then
   AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])
+
+  if test "$PHP_XDEBUG_COMPRESSION" != "no"; then
+    PKG_CHECK_MODULES([ZLIB], [zlib >= 1.2.9],[
+      PHP_EVAL_LIBLINE($ZLIB_LIBS, XDEBUG_SHARED_LIBADD)
+      PHP_EVAL_INCLINE($ZLIB_CFLAGS)
+
+      AC_DEFINE(HAVE_XDEBUG_ZLIB,1,[ ])
+    ],[ ])
+  fi
 
   CPPFLAGS=$old_CPPFLAGS
 
