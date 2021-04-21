@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,8 +57,13 @@ struct _xdebug_brk_admin {
 	char *key;
 };
 
+#define XDEBUG_NORMAL                   0x01
+#define XDEBUG_CLOUD                    0x02
+#define XDEBUG_CLOUD_FROM_TRIGGER_VALUE 0x03
+
 struct _xdebug_con {
 	int                    socket;
+	int                    host_type; /* XDEBUG_NORMAL, XDEBUG_CLOUD, XDEBUG_CLOUD_FROM_TRIGGER_VALUE */
 	void                  *options;
 	xdebug_remote_handler *handler;
 	fd_buf                *buffer;

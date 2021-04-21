@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2381,10 +2381,13 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		xdebug_xml_add_attribute_ex(response, "session", xdstrdup(getenv("DBGP_COOKIE")), 0, 1);
 	}
 
-	if (XINI_DBG(cloud_id) && *XINI_DBG(cloud_id)) {
+	if (XG_DBG(context).host_type == XDEBUG_CLOUD && XINI_DBG(cloud_id) && *XINI_DBG(cloud_id)) {
 		xdebug_xml_add_attribute_ex(response, "xdebug:userid", xdstrdup(XINI_DBG(cloud_id)), 0, 1);
 	}
-	if (XG_DBG(ide_key) && *XG_DBG(ide_key)) {
+	if (XG_DBG(context).host_type == XDEBUG_CLOUD_FROM_TRIGGER_VALUE && XG_DBG(ide_key) && *XG_DBG(ide_key)) {
+		xdebug_xml_add_attribute_ex(response, "xdebug:userid", xdstrdup(XG_DBG(ide_key)), 0, 1);
+	}
+	if (XG_DBG(context).host_type == XDEBUG_NORMAL && XG_DBG(ide_key) && *XG_DBG(ide_key)) {
 		xdebug_xml_add_attribute_ex(response, "idekey", xdstrdup(XG_DBG(ide_key)), 0, 1);
 	}
 
