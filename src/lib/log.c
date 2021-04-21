@@ -246,7 +246,7 @@ static void print_logo(void)
 	}
 }
 
-void print_feature_row(const char *name, int flag, const char *doc_name)
+static void print_feature_row(const char *name, int flag, const char *doc_name)
 {
 	if (!sapi_module.phpinfo_as_text) {
 		PUTS("<tr>");
@@ -282,10 +282,17 @@ void xdebug_print_info(void)
 	/* Modes block */
 	php_info_print_table_start();
 
-	php_info_print_table_colspan_header(
-		sapi_module.phpinfo_as_text ? 2 : 3,
-		(char*) (XG_LIB(mode_from_environment) ? "Enabled Features<br/>(through 'XDEBUG_MODE' env variable)" : "Enabled Features<br/>(through 'xdebug.mode' setting)")
-	);
+	if (!sapi_module.phpinfo_as_text) {
+		php_info_print_table_colspan_header(
+			3,
+			(char*) (XG_LIB(mode_from_environment) ? "Enabled Features<br/>(through 'XDEBUG_MODE' env variable)" : "Enabled Features<br/>(through 'xdebug.mode' setting)")
+		);
+	} else {
+		php_info_print_table_colspan_header(
+			2,
+			(char*) (XG_LIB(mode_from_environment) ? "Enabled Features (through 'XDEBUG_MODE' env variable)" : "Enabled Features (through 'xdebug.mode' setting)")
+		);
+	}
 
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print_table_header(3, "Feature", "Enabled/Disabled", "Docs");
@@ -711,7 +718,7 @@ static void print_trace_information(void)
 	php_info_print_table_end();
 }
 
-PHP_FUNCTION(xdebug_info)
+static void xdebug_display_all_info(void)
 {
 	print_html_header();
 
@@ -727,6 +734,52 @@ PHP_FUNCTION(xdebug_info)
 	xdebug_print_settings();
 
 	print_html_footer();
+}
+
+static void info_modes_set(INTERNAL_FUNCTION_PARAMETERS)
+{
+	array_init_size(return_value, 6);
+
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+		add_next_index_stringl(return_value, "coverage", 8);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		add_next_index_stringl(return_value, "debug", 5);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		add_next_index_stringl(return_value, "develop", 7);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
+		add_next_index_stringl(return_value, "gcstats", 7);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
+		add_next_index_stringl(return_value, "profile", 7);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
+		add_next_index_stringl(return_value, "trace", 5);
+	}
+}
+
+PHP_FUNCTION(xdebug_info)
+{
+	zend_string *group = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(group)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (group == NULL) {
+		xdebug_display_all_info();
+		return;
+	}
+
+	if (zend_string_equals_literal(group, "mode")) {
+		info_modes_set(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		return;
+	}
+
+	php_error_docref(NULL, E_WARNING, "The information group '%s' is not available", ZSTR_VAL(group));
 }
 
 void xdebug_open_log(void)
