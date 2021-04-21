@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -447,9 +447,9 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	}
 }
 
-static void xdebug_init_cloud_debugger()
+static void xdebug_init_cloud_debugger(const char *cloud_id)
 {
-	unsigned long  crc = xdebug_crc32(XINI_DBG(cloud_id), strlen(XINI_DBG(cloud_id)));
+	unsigned long  crc = xdebug_crc32(cloud_id, strlen(cloud_id));
 	char          *host;
 
 	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a');
@@ -460,6 +460,24 @@ static void xdebug_init_cloud_debugger()
 	xdfree(host);
 }
 
+/**
+ * dXXXXXXa-cXXa-4XX7-9XX3-fXXXXXXXXXX0
+ */
+static int ide_key_is_cloud_id()
+{
+	const char *k = XG_DBG(ide_key);
+
+	if (strlen(k) != 36) {
+		return 0;
+	}
+
+	if (k[8] != '-' || k[13] != '-' || k[18] != '-' || k[23] != '-') {
+		return 0;
+	}
+
+	return 1;
+}
+
 static void xdebug_init_debugger()
 {
 	xdebug_str *connection_attempts = xdebug_str_new();
@@ -467,10 +485,15 @@ static void xdebug_init_debugger()
 	/* Get handler from mode */
 	XG_DBG(context).handler = &xdebug_handler_dbgp;
 
-	if (strcmp(XINI_DBG(cloud_id), "") == 0) {
-		xdebug_init_normal_debugger(connection_attempts);
+	if (strcmp(XINI_DBG(cloud_id), "") != 0) {
+		xdebug_init_cloud_debugger(XINI_DBG(cloud_id));
+		XG_DBG(context).host_type = XDEBUG_CLOUD;
+	} else if (XG_DBG(ide_key) && ide_key_is_cloud_id()) {
+		xdebug_init_cloud_debugger(XG_DBG(ide_key));
+		XG_DBG(context).host_type = XDEBUG_CLOUD_FROM_TRIGGER_VALUE;
 	} else {
-		xdebug_init_cloud_debugger();
+		xdebug_init_normal_debugger(connection_attempts);
+		XG_DBG(context).host_type = XDEBUG_NORMAL;
 	}
 
 	/* Check whether we're connected, or why not */
