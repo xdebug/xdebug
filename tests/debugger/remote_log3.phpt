@@ -20,7 +20,6 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remot
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log3.txt' );
 ?>
 --EXPECTF--
-Xdebug: [Step Debug] Could not connect to debugging client. Tried: doesnotexist2:9003 (fallback through xdebug.client_host/xdebug.client_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
 [%d] [Step Debug] INFO: Checking remote connect back address.
