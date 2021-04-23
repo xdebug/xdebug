@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1f39dc9f957609f28ad544ac0e4d6cef0a57d789 */
+ * Stub hash: cb57aba1b1ecda1728b596febea758e2c693384d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_break, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -53,7 +53,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_xdebug_get_tracefile_name arginfo_xdebug_dump_superglobals
 
-#define arginfo_xdebug_info arginfo_xdebug_dump_superglobals
+ZEND_BEGIN_ARG_INFO_EX(arginfo_xdebug_info, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, category, IS_STRING, 0, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_xdebug_is_debugger_active arginfo_xdebug_break
 
