@@ -39,7 +39,11 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-#if PHP_VERSION_ID >= 80000
+#if PHP_VERSION_ID >= 80100
+void (*xdebug_old_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+void (*xdebug_new_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+static void xdebug_error_cb(int orig_type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+#elif PHP_VERSION_ID >= 80000
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 static void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -828,7 +832,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	int                   function_nr = 0;
 	int                   function_call_traced = 0;
 	int                   restore_error_handler_situation = 0;
-#if PHP_VERSION_ID >= 80000
+#if PHP_VERSION_ID >= 80100
+	void                (*tmp_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
+#elif PHP_VERSION_ID >= 80000
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
 #else
 	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
@@ -1106,7 +1112,24 @@ void xdebug_base_rshutdown()
 }
 
 /* Error callback for formatting stack traces */
-#if PHP_VERSION_ID >= 80000
+#if PHP_VERSION_ID >= 80100
+static void xdebug_error_cb(int orig_type, zend_string *error_filename, const unsigned int error_lineno, zend_string *message)
+{
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		int type                        = orig_type & E_ALL;
+		char *error_type_str            = xdebug_error_type(type);
+
+		xdebug_debugger_error_cb(error_filename, error_lineno, type, error_type_str, ZSTR_VAL(message));
+
+		xdfree(error_type_str);
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		xdebug_develop_error_cb(orig_type, error_filename, error_lineno, message);
+	} else {
+		xdebug_old_error_cb(orig_type, error_filename, error_lineno, message);
+	}
+}
+#elif PHP_VERSION_ID >= 80000
 static void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
 {
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {

@@ -31,7 +31,9 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 char *xdebug_strip_php_stack_trace(char *buffer);
 char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription);
 
-#if PHP_VERSION_ID >= 80000
+#if PHP_VERSION_ID >= 80100
+void xdebug_develop_error_cb(int orig_type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+#elif PHP_VERSION_ID >= 80000
 void xdebug_develop_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 #else
 void xdebug_develop_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args);
