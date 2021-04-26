@@ -23,7 +23,6 @@ echo file_get_contents("C:\\Windows\\Temp\\remote-log4.txt");
 @unlink ("C:\\Windows\\Temp\\remote-log4.txt");
 ?>
 --EXPECTF--
-Xdebug: [Step Debug] Could not connect to debugging client. Tried: doesnotexist3:9003 (from I_LIKE_COOKIES HTTP header), doesnotexist2:9003 (fallback through xdebug.client_host/xdebug.client_port) :-(
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
 [%d] [Step Debug] INFO: Checking remote connect back address.

@@ -24,5 +24,4 @@ unlink( sys_get_temp_dir() . "/bug964.txt" );
 echo $match[1];
 ?>
 --EXPECTF--
-Xdebug: [Step Debug] Could not connect to debugging client. Tried: 192.168.111.111:9003 (from HTTP_X_FORWARDED_FOR HTTP header), localhost:9003 (fallback through xdebug.client_host/xdebug.client_port) :-(
 192.168.111.111

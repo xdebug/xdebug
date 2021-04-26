@@ -54,12 +54,12 @@ const char *xdebug_channel_name[8] = {
 	"[Config] ", "[Log Files] ", "[Step Debug] ", "[GC Stats] ", "[Profiler] ", "[Tracing] ", "[Coverage] ", "[Base] "
 };
 
-static inline void xdebug_internal_log(int channel, int log_level, const char *message)
+static inline int xdebug_internal_log(int channel, int log_level, const char *message)
 {
 	zend_ulong pid;
 
 	if (!XG_LIB(log_file)) {
-		return;
+		return 0;
 	}
 
 	pid = xdebug_get_pid();
@@ -83,6 +83,8 @@ static inline void xdebug_internal_log(int channel, int log_level, const char *m
 	);
 
 	fflush(XG_LIB(log_file));
+
+	return 1;
 }
 
 #define TR_START "<tr><td class=\"e\">"
@@ -151,6 +153,7 @@ void XDEBUG_ATTRIBUTE_FORMAT(printf, 4, 5) xdebug_log_ex(int channel, int log_le
 {
 	char    message[512];
 	va_list argv;
+	int     logged_to_xdebug_log = 0;
 
 	if (XINI_LIB(log_level) < log_level) {
 		return;
@@ -160,11 +163,13 @@ void XDEBUG_ATTRIBUTE_FORMAT(printf, 4, 5) xdebug_log_ex(int channel, int log_le
 	vsnprintf(message, sizeof(message), fmt, argv);
 	va_end(argv);
 
-	xdebug_internal_log(channel, log_level, message);
+	logged_to_xdebug_log = xdebug_internal_log(channel, log_level, message);
 
 	xdebug_diagnostic_log(channel, log_level, error_code, message);
 
-	xdebug_php_log(channel, log_level, error_code, message);
+	if (!logged_to_xdebug_log || XINI_LIB(log_level) == XLOG_CRIT) {
+		xdebug_php_log(channel, log_level, error_code, message);
+	}
 }
 
 static void log_filename_not_opened(int channel, const char *directory, const char *filename)
