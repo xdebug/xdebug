@@ -273,41 +273,31 @@ static char* prepare_search_key(char *name, unsigned int *name_length, const cha
 	return element;
 }
 
-#if PHP_VERSION_ID >= 70400
-static zval *get_arrayobject_storage(zval *parent, HashTable **properties)
+char *replace_star_by_null(const char *name, int name_length)
 {
-	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
-	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
+	char *tmp = xdstrdup(name);
+	int   i;
+
+	for (i = 0; i < name_length; i++) {
+		if (tmp[i] == '*') {
+			tmp[i] = '\0';
+		}
+	}
+
+	return tmp;
 }
 
+#if PHP_VERSION_ID >= 70400
 static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties)
 {
 	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
 	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
 }
-
-static zval *get_arrayiterator_storage(zval *parent, HashTable **properties)
-{
-	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
-	return zend_hash_str_find(*properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1);
-}
 #else
-static zval *get_arrayobject_storage(zval *parent, HashTable **properties, int *is_temp)
-{
-	*properties = Z_OBJDEBUG_P(parent, *is_temp);
-	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
-}
-
 static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties, int *is_temp)
 {
 	*properties = Z_OBJDEBUG_P(parent, *is_temp);
 	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
-}
-
-static zval *get_arrayiterator_storage(zval *parent, HashTable **properties, int *is_temp)
-{
-	*properties = Z_OBJDEBUG_P(parent, *is_temp);
-	return zend_hash_str_find(*properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1);
 }
 #endif
 
@@ -459,6 +449,7 @@ static void fetch_zval_from_symbol_table(
 				myht = xdebug_objdebug_pp(&value_in, &is_temp);
 #endif
 				if (myht) {
+					/* As a normal (public) property */
 					zval *tmp = zend_symtable_str_find(myht, name, name_length);
 					if (tmp != NULL) {
 						ZVAL_COPY(&tmp_retval, tmp);
@@ -469,6 +460,24 @@ static void fetch_zval_from_symbol_table(
 #endif
 						goto cleanup;
 					}
+
+					/* As a private property */
+					{
+						char *unmangled = replace_star_by_null(name, name_length);
+						zval *tmp = zend_symtable_str_find(myht, unmangled, name_length);
+						if (tmp != NULL) {
+							ZVAL_COPY(&tmp_retval, tmp);
+#if PHP_VERSION_ID >= 70400
+							zend_release_properties(myht);
+#else
+							xdebug_var_maybe_destroy_ht(myht, is_temp);
+#endif
+							xdfree(unmangled);
+							goto cleanup;
+						}
+						xdfree(unmangled);
+					}
+
 #if PHP_VERSION_ID >= 70400
 					zend_release_properties(myht);
 #else
@@ -551,75 +560,6 @@ static void fetch_zval_from_symbol_table(
 #else
 				xdebug_var_maybe_destroy_ht(myht, is_temp);
 #endif
-			}
-
-			/* Then we try to see whether the first char is * and use the part between * and * as class name for the private property */
-			if (name[0] == '*') {
-				char *secondStar;
-
-				secondStar = strstr(name + 1, "*");
-				if (secondStar) {
-					free(element);
-					element_length = name_length - (secondStar + 1 - name);
-
-					/* All right, time for a mega hack. It's ArrayObject access time! */
-					if (strncmp(name + 1, "ArrayObject", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
-#if PHP_VERSION_ID >= 70400
-						zval *tmp = get_arrayobject_storage(value_in, &myht);
-#else
-						zval *tmp = get_arrayobject_storage(value_in, &myht, &is_temp);
-#endif
-						element = NULL;
-						if (tmp != NULL) {
-							ZVAL_COPY(&tmp_retval, tmp);
-#if PHP_VERSION_ID >= 70400
-							zend_release_properties(myht);
-#else
-							xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
-							goto cleanup;
-						}
-#if PHP_VERSION_ID >= 70400
-						zend_release_properties(myht);
-#else
-						xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
-					}
-					/* All right, time for a mega hack. It's ArrayIterator access time! */
-					if (strncmp(name + 1, "ArrayIterator", secondStar - name - 1) == 0 && strncmp(secondStar + 1, "storage", element_length) == 0) {
-#if PHP_VERSION_ID >= 70400
-						zval *tmp = get_arrayiterator_storage(value_in, &myht);
-#else
-						zval *tmp = get_arrayiterator_storage(value_in, &myht, &is_temp);
-#endif
-						element = NULL;
-						if (tmp != NULL) {
-							ZVAL_COPY(&tmp_retval, tmp);
-#if PHP_VERSION_ID >= 70400
-							zend_release_properties(myht);
-#else
-							xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
-							goto cleanup;
-						}
-#if PHP_VERSION_ID >= 70400
-						zend_release_properties(myht);
-#else
-						xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
-
-					}
-
-					/* The normal one */
-					element = prepare_search_key(secondStar + 1, &element_length, name + 1, secondStar - name - 1);
-					if (ht) {
-						zval *tmp = zend_hash_str_find(ht, element, element_length);
-						if (tmp != NULL) {
-							ZVAL_COPY(&tmp_retval, tmp);
-							goto cleanup;
-						}
-					}
-				}
 			}
 
 			break;
