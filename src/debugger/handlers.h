@@ -76,6 +76,7 @@ struct _xdebug_con {
 	xdebug_hash           *exception_breakpoints;
 	xdebug_debug_list      list;
 	int                    do_break;
+	xdebug_brk_info       *pending_breakpoint;
 
 	int                    do_step;
 	int                    do_next;
@@ -88,6 +89,7 @@ struct _xdebug_con {
 	int                    inhibit_notifications;
 
 	int                    resolved_breakpoints;
+	int                    breakpoint_details;
 
 	/* Statistics and diagnostics */
 	char *connected_hostname;
@@ -140,7 +142,7 @@ struct _xdebug_remote_handler {
 
 	/* Breakpoints */
 	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, zend_string *filename, int lineno);
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message);
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info);
 	int (*resolve_breakpoints)(xdebug_con *h, zend_string *opa);
 
 	/* Output redirection */

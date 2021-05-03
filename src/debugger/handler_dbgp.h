@@ -101,7 +101,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
 int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_vector *stack);
 int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_string *filename, int lineno);
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message);
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info);
 int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename);
 int xdebug_dbgp_stream_output(const char *string, unsigned int length);
 int xdebug_dbgp_notification(xdebug_con *context, zend_string *filename, long lineno, int type, char *type_string, char *message);

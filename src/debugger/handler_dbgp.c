@@ -1299,6 +1299,11 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("breakpoint_details")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", XG_DBG(context).breakpoint_details));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE_DEFAULT
 			xdebug_xml_add_text(*retval, xdstrdup(lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0"));
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0");
@@ -1364,6 +1369,10 @@ DBGP_FUNC(feature_set)
 
 		XDEBUG_STR_CASE("resolved_breakpoints")
 			XG_DBG(context).resolved_breakpoints = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("breakpoint_details")
+			XG_DBG(context).breakpoint_details = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE_DEFAULT
@@ -2422,6 +2431,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->send_notifications = 0;
 	context->inhibit_notifications = 0;
 	context->resolved_breakpoints = 0;
+	context->breakpoint_details = 0;
 
 	xdebug_mark_debug_connection_active();
 	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BAIL);
@@ -2587,7 +2597,7 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_st
 	return 0;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info)
 {
 	xdebug_xml_node *response, *error_container;
 
@@ -2629,6 +2639,12 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_strin
 		xdebug_xml_add_text(error_container, xdstrdup(message));
 	}
 	xdebug_xml_add_child(response, error_container);
+
+	if (XG_DBG(context).breakpoint_details && brk_info) {
+		xdebug_xml_node *breakpoint_node = xdebug_xml_node_init("xdebug:breakpoint");
+		breakpoint_brk_info_add(breakpoint_node, brk_info);
+		xdebug_xml_add_child(response, breakpoint_node);
+	}
 
 	send_message(context, response);
 	xdebug_xml_node_dtor(response);

@@ -653,6 +653,10 @@ static void print_step_debug_information(void)
 				"<tr><td class=\"e\">Resolved Breakpoints</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
 				XG_DBG(context).resolved_breakpoints ? "Yes" : "No"
 			);
+			xdebug_info_printf(
+				"<tr><td class=\"e\">Breakpoint Details</td><td class=\"v\">%s</td><td class=\"d\">&nbsp;</td></tr>\n",
+				XG_DBG(context).breakpoint_details ? "Yes" : "No"
+			);
 		}
 	} else {
 		php_info_print_table_colspan_header(2, (char*) "Step Debugging");
@@ -687,6 +691,7 @@ static void print_step_debug_information(void)
 			xdebug_info_printf("Extended Properties => %s\n", options->extended_properties ? "Yes" : "No");
 			xdebug_info_printf("Notifications => %s\n", XG_DBG(context).send_notifications ? "Yes" : "No");
 			xdebug_info_printf("Resolved Breakpoints => %s\n", XG_DBG(context).resolved_breakpoints ? "Yes" : "No");
+			xdebug_info_printf("Breakpoint Details => %s\n", XG_DBG(context).breakpoint_details ? "Yes" : "No");
 		}
 	}
 	php_info_print_table_end();
