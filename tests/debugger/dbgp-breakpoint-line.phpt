@@ -38,7 +38,7 @@ dbgpRunFile( $filename, $commands );
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-line.inc" lineno="3"></xdebug:message><xdebug:breakpoint type="line" filename="file://dbgp-breakpoint-line.inc" lineno="3" state="enabled" hit_count="1" hit_value="0" id=""></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-line.inc" lineno="3"></xdebug:message><breakpoint type="line" filename="file://dbgp-breakpoint-line.inc" lineno="3" state="enabled" hit_count="1" hit_value="0" id=""></breakpoint></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

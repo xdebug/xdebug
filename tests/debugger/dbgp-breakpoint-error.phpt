@@ -39,11 +39,11 @@ dbgpRunFile( $filename, $commands );
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="4" exception="Notice" code="1024"><![CDATA[FOO]]></xdebug:message><xdebug:breakpoint type="exception" exception="*" state="enabled" hit_count="1" hit_value="0" id=""></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="4" exception="Notice" code="1024"><![CDATA[FOO]]></xdebug:message><breakpoint type="exception" exception="*" state="enabled" hit_count="1" hit_value="0" id=""></breakpoint></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="10" exception="FooException"><![CDATA[testing foo exception]]></xdebug:message><xdebug:breakpoint type="exception" exception="*" state="enabled" hit_count="2" hit_value="0" id=""></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="10" exception="FooException"><![CDATA[testing foo exception]]></xdebug:message><breakpoint type="exception" exception="*" state="enabled" hit_count="2" hit_value="0" id=""></breakpoint></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

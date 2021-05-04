@@ -40,11 +40,11 @@ dbgpRunFile( $filename, $commands );
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4"></xdebug:message><xdebug:breakpoint type="conditional" filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4" state="enabled" hit_count="1" hit_value="0" id=""><expression encoding="base64"><![CDATA[JGNoYW5jZSA+IDQw]]></expression></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4"></xdebug:message><breakpoint type="conditional" filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4" state="enabled" hit_count="1" hit_value="0" id=""><expression encoding="base64"><![CDATA[JGNoYW5jZSA+IDQw]]></expression></breakpoint></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4"></xdebug:message><xdebug:breakpoint type="conditional" filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4" state="enabled" hit_count="2" hit_value="0" id=""><expression encoding="base64"><![CDATA[JGNoYW5jZSA+IDQw]]></expression></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4"></xdebug:message><breakpoint type="conditional" filename="file://dbgp-breakpoint-line-with-condition.inc" lineno="4" state="enabled" hit_count="2" hit_value="0" id=""><expression encoding="base64"><![CDATA[JGNoYW5jZSA+IDQw]]></expression></breakpoint></response>
 
 -> step_into -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

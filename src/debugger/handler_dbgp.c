@@ -2641,7 +2641,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_strin
 	xdebug_xml_add_child(response, error_container);
 
 	if (XG_DBG(context).breakpoint_details && brk_info) {
-		xdebug_xml_node *breakpoint_node = xdebug_xml_node_init("xdebug:breakpoint");
+		xdebug_xml_node *breakpoint_node = xdebug_xml_node_init("breakpoint");
 		breakpoint_brk_info_add(breakpoint_node, brk_info);
 		xdebug_xml_add_child(response, breakpoint_node);
 	}
