@@ -41,19 +41,19 @@ dbgpRunFile( $filename, $commands );
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="15"></xdebug:message><xdebug:breakpoint type="return" function="breaking::staticMe" state="enabled" hit_count="1" hit_value="0" id=""></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="15"></xdebug:message><breakpoint type="return" function="breaking::staticMe" state="enabled" hit_count="1" hit_value="0" id=""></breakpoint></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="18"></xdebug:message><xdebug:breakpoint type="return" function="breaking::onMe" state="enabled" hit_count="1" hit_value="0" id=""></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="18"></xdebug:message><breakpoint type="return" function="breaking::onMe" state="enabled" hit_count="1" hit_value="0" id=""></breakpoint></response>
 
 -> run -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="19"></xdebug:message><xdebug:breakpoint type="return" function="breaking::staticMe" state="enabled" hit_count="2" hit_value="0" id=""></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="19"></xdebug:message><breakpoint type="return" function="breaking::staticMe" state="enabled" hit_count="2" hit_value="0" id=""></breakpoint></response>
 
 -> run -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="7" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="20"></xdebug:message><xdebug:breakpoint type="return" function="breaking::onMe" state="enabled" hit_count="2" hit_value="0" id=""></xdebug:breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="7" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-method.inc" lineno="20"></xdebug:message><breakpoint type="return" function="breaking::onMe" state="enabled" hit_count="2" hit_value="0" id=""></breakpoint></response>
 
 -> detach -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
