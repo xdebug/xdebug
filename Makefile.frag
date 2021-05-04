@@ -38,3 +38,14 @@ test:
 	@echo "Xdebug can not be tested with 'make test', please refer to:"
 	@echo "    https://github.com/xdebug/xdebug#testing"
 	@echo
+
+test-coverage:
+	$(MAKE) clean
+	CCACHE_DISABLE=1 EXTRA_CFLAGS=--coverage $(MAKE) all
+	TEST_PHP_ARGS="-n -d zend_extension=$(top_srcdir)/.libs/xdebug.so" php run-xdebug-tests.php
+
+test-coverage-lcov: test-coverage
+	lcov -c --directory . --output-file $(top_srcdir)/.coverage.lcov
+
+test-coverage-html: test-coverage-lcov
+	genhtml $(top_srcdir)/.coverage.lcov --output-directory=/tmp/html
