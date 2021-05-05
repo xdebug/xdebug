@@ -1031,6 +1031,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	unsigned int          j;
 	zval                 *frame;
 	zval                 *params;
+	int                   variadic_opened = 0;
 
 	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
@@ -1076,7 +1077,6 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
 
 		for (j = 0; j < sent_variables; j++) {
-			int         variadic_opened = 0;
 			xdebug_str *argument = NULL;
 
 			if (fse->var[j].is_variadic) {
@@ -1103,7 +1103,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			if (fse->var[j].name && !variadic_opened && argument) {
 				add_assoc_stringl_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), argument->d, argument->l);
 			} else {
-				add_index_stringl(params, j - 1, argument->d, argument->l);
+				add_index_stringl(params, j - variadic_opened, argument->d, argument->l);
 			}
 			if (argument) {
 				xdebug_str_free(argument);
