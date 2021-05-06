@@ -296,6 +296,8 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 	if (cur_opcode->opcode == ZEND_QM_ASSIGN) {
 		xdebug_str_addc(&name, '$');
 		xdebug_str_add(&name, zend_get_compiled_variable_name(op_array, cur_opcode->result.var)->val, 0);
+
+		return name.d;
 	}
 
 	is_static = xdebug_is_static_call(cur_opcode, prev_opcode, &static_opcode_ptr);

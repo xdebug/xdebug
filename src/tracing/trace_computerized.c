@@ -223,6 +223,48 @@ void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_
 	xdfree(str.d);
 }
 
+void xdebug_trace_computerized_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, const char *op, char *filename, int lineno)
+{
+	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
+	xdebug_str                         str = XDEBUG_STR_INITIALIZER;
+	xdebug_str                        *tmp_value;
+
+	xdebug_str_add_fmt(&str, "%d\t", fse->level);
+	/* no function_nr */
+	xdebug_str_add_literal(&str, "\t");
+
+	xdebug_str_add_literal(&str, "A\t");
+	/* skip time index, memory usage, function name, user defined */
+	xdebug_str_add_literal(&str, "\t\t\t\t");
+
+	/* Filename and Lineno (9, 10) */
+	xdebug_str_add_fmt(&str, "\t%s\t%d", filename, lineno);
+	xdebug_str_add_fmt(&str, "\t%s", full_varname);
+
+	if (op[0] != '\0' ) { /* pre/post inc/dec ops are special */
+		xdebug_str_addc(&str, ' ');
+		xdebug_str_add(&str, op, 0);
+		xdebug_str_addc(&str, ' ');
+
+		tmp_value = xdebug_get_zval_value_line(retval, 0, NULL);
+
+		if (tmp_value) {
+			xdebug_str_add_str(&str, tmp_value);
+			xdebug_str_free(tmp_value);
+		} else {
+			xdebug_str_add_literal(&str, "NULL");
+		}
+	}
+
+	/* Trailing \n */
+	xdebug_str_add_literal(&str, "\n");
+
+	fprintf(context->trace_file, "%s", str.d);
+	fflush(context->trace_file);
+
+	xdfree(str.d);
+}
+
 xdebug_trace_handler_t xdebug_trace_handler_computerized =
 {
 	xdebug_trace_computerized_init,
@@ -234,5 +276,5 @@ xdebug_trace_handler_t xdebug_trace_handler_computerized =
 	xdebug_trace_computerized_function_exit,
 	xdebug_trace_computerized_function_return_value,
 	NULL /* xdebug_trace_computerized_generator_return_value */,
-	NULL /* xdebug_trace_computerized_assignment */
+	xdebug_trace_computerized_assignment
 };
