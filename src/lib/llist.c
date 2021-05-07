@@ -12,8 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Sterling Hughes <sterling@php.net>                          |
-   +----------------------------------------------------------------------+
  */
 
 #include <stdlib.h>

@@ -12,10 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
-   |          Ilia Alshanetsky <ilia@prohost.org>                         |
-   |          Harald Radi <harald.radi@nme.at>                            |
-   +----------------------------------------------------------------------+
  */
 
 #ifdef HAVE_CONFIG_H

@@ -12,9 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
-   |          Thomas Vanhaniemi <thomas.vanhaniemi@arcada.fi>             |
-   +----------------------------------------------------------------------+
  */
 #include "php_xdebug.h"
 #include <string.h>

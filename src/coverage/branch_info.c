@@ -6,8 +6,6 @@
    | available through the LICENSE file, or online at                     |
    | http://opensource.org/licenses/bsd-license.php                       |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@derickrethans.nl>                    |
-   +----------------------------------------------------------------------+
  */
 #include <stdlib.h>
 #include <math.h>

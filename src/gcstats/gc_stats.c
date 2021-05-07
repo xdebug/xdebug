@@ -12,9 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Benjamin Eberlei <kontakt@beberlei.de>                      |
-   |          Derick Rethans <derick@xdebug.org>                          |
-   +----------------------------------------------------------------------+
  */
 #include "php.h"
 #include "zend_builtin_functions.h"

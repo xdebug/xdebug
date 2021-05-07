@@ -13,8 +13,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
-   +----------------------------------------------------------------------+
  */
 if ( $argc <= 1 || $argc > 4 )
 {
@@ -128,7 +126,7 @@ class drXdebugTraceFileParser
 		$size = fstat( $this->handle );
 		$size = $size['size'];
 		$read = 0;
-		
+
 		while ( !feof( $this->handle ) )
 		{
 			$buffer = fgets( $this->handle, 4096 );
@@ -235,7 +233,7 @@ class drXdebugTraceFileParser
 
 		if ( $sortKey !== null )
 		{
-			uasort( $result, 
+			uasort( $result,
 				function( $a, $b ) use ( $sortKey )
 				{
 					return ( $a[$sortKey] > $b[$sortKey] ) ? -1 : ( $a[$sortKey] < $b[$sortKey] ? 1 : 0 );

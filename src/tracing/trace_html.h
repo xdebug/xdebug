@@ -12,8 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
-   +----------------------------------------------------------------------+
  */
 #ifndef XDEBUG_TRACE_HTML_H
 #define XDEBUG_TRACE_HTML_H

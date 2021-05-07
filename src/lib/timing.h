@@ -12,9 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
-   |          Michael Voříšek <mvorisek@mvorisek.cz>                      |
-   +----------------------------------------------------------------------+
  */
 
 #ifndef __XDEBUG_TIMING_H__

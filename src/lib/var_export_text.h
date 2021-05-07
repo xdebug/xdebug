@@ -12,8 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
-   +----------------------------------------------------------------------+
  */
 
 #ifndef __HAVE_XDEBUG_LIB_VAR_EXPORT_TEXT_H__

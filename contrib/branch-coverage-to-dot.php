@@ -13,8 +13,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
-   | Authors: Derick Rethans <derick@xdebug.org>                          |
-   +----------------------------------------------------------------------+
  */
 function branch_coverage_to_dot( $info, $pathInsteadOfBranch = true )
 {
@@ -58,14 +56,14 @@ function branch_coverage_to_dot( $info, $pathInsteadOfBranch = true )
 
 				if ( ! $pathInsteadOfBranch )
 				{
-					if ( isset( $branch['out'][0] ) ) 
+					if ( isset( $branch['out'][0] ) )
 					{
 						$output .= sprintf( "\t\"__%s_%d\" -> \"__%s_%d\" %s;\n",
 							$fname, $bnr, $fname, $branch['out'][0],
 							$branch['out_hit'][0] ? '' : '[style=dashed]'
 						);
 					}
-					if ( isset( $branch['out'][1] ) ) 
+					if ( isset( $branch['out'][1] ) )
 					{
 						$output .= sprintf( "\t\"__%s_%d\" -> \"__%s_%d\" %s;\n",
 							$fname, $bnr, $fname, $branch['out'][1],
