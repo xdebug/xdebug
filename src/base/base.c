@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,12 @@
 #include "zend_closures.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+
+#if PHP_VERSION_ID >= 80100
+# include "base_private.h"
+# include "Zend/zend_fibers.h"
+# include "Zend/zend_observer.h"
+#endif
 
 #include "php_xdebug.h"
 #include "php_xdebug_arginfo.h"
@@ -554,7 +560,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zdata = EG(current_execute_data);
 
 	tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
-	tmp->level         = XG_BASE(level);
+	tmp->level         = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
 	tmp->user_defined  = type;
 	tmp->op_array      = op_array;
 
@@ -682,7 +688,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		return;
 	}
 
-	if (XG_BASE(in_execution) && XG_BASE(level) == 0) {
+	if (XG_BASE(in_execution) && XDEBUG_VECTOR_COUNT(XG_BASE(stack)) == 0) {
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 			xdebug_debugger_set_program_name(op_array->filename);
 			xdebug_debug_init_if_requested_at_startup();
@@ -701,8 +707,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		}
 	}
 
-	XG_BASE(level)++;
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
@@ -793,7 +798,6 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	if (XG_BASE(stack)) {
 		xdebug_vector_pop(XG_BASE(stack));
 	}
-	XG_BASE(level)--;
 }
 
 static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
@@ -848,8 +852,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		return;
 	}
 
-	XG_BASE(level)++;
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XG_BASE(level) > XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
@@ -915,7 +918,6 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	if (XG_BASE(stack)) {
 		xdebug_vector_pop(XG_BASE(stack));
 	}
-	XG_BASE(level)--;
 }
 
 static void xdebug_base_overloaded_functions_setup(void)
@@ -988,6 +990,96 @@ static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **b
 	return FAILURE;
 }
 
+#if PHP_VERSION_ID >= 80100
+static struct xdebug_fiber_entry* xdebug_fiber_entry_ctor(xdebug_vector *stack)
+{
+	struct xdebug_fiber_entry *tmp = xdmalloc(sizeof(struct xdebug_fiber_entry));
+
+	tmp->stack = stack;
+
+	return tmp;
+}
+
+static void xdebug_fiber_entry_dtor(struct xdebug_fiber_entry *entry)
+{
+	xdebug_vector_destroy(entry->stack);
+	xdfree(entry);
+}
+
+static xdebug_str *create_key_for_fiber(zend_fiber *fiber)
+{
+	xdebug_str *tmp = xdebug_str_new();
+
+	xdebug_str_add_fmt(tmp, "{fiber:%0" PRIXPTR "}", ((uintptr_t) fiber));
+
+	return tmp;
+}
+
+static void add_fiber_main(zend_fiber *fiber)
+{
+	xdebug_str           *key = create_key_for_fiber(fiber);
+	function_stack_entry *tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
+
+	tmp->level = 0;
+	tmp->user_defined = XDEBUG_BUILT_IN;
+	tmp->function.type = XFUNC_FIBER;
+	tmp->function.class_name = NULL;
+	tmp->function.function = xdstrdup(key->d);
+}
+
+static xdebug_vector* create_stack_for_fiber(zend_fiber *fiber)
+{
+	xdebug_vector             *tmp_stack = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
+	xdebug_str                *key       = create_key_for_fiber(fiber);
+	struct xdebug_fiber_entry *entry     = xdebug_fiber_entry_ctor(tmp_stack);
+
+	xdebug_hash_add(XG_BASE(fiber_stacks), key->d, key->l, entry);
+
+	xdebug_str_free(key);
+
+	return tmp_stack;
+}
+
+static void remove_stack_for_fiber(zend_fiber *fiber)
+{
+	xdebug_str *key = create_key_for_fiber(fiber);
+
+	xdebug_hash_delete(XG_BASE(fiber_stacks), key->d, key->l);
+
+	xdebug_str_free(key);
+}
+
+static xdebug_vector *find_stack_for_fiber(zend_fiber *fiber)
+{
+	struct xdebug_fiber_entry *entry = NULL;
+	xdebug_str                *key = create_key_for_fiber(fiber);
+
+	xdebug_hash_find(XG_BASE(fiber_stacks), key->d, key->l, (void*) &entry);
+
+	xdebug_str_free(key);
+
+	return entry->stack;
+}
+
+static void xdebug_fiber_switch_observer(zend_fiber *from, zend_fiber *to)
+{
+	xdebug_vector *current_stack;
+
+	if (from && from->status & ZEND_FIBER_STATUS_FINISHED) {
+		remove_stack_for_fiber(from);
+	}
+	if (to && to->status == ZEND_FIBER_STATUS_INIT) {
+		current_stack = create_stack_for_fiber(to);
+	} else {
+		current_stack = find_stack_for_fiber(to);
+	}
+	XG_BASE(stack) = current_stack;
+
+	if (to && to->status == ZEND_FIBER_STATUS_INIT) {
+		add_fiber_main(to);
+	}
+}
+#endif
 
 void xdebug_base_minit(INIT_FUNC_ARGS)
 {
@@ -1014,6 +1106,10 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
 
 	xdebug_nanotime_init();
+
+#if PHP_VERSION_ID >= 80100
+	zend_observer_fiber_switch_register(xdebug_fiber_switch_observer);
+#endif
 }
 
 void xdebug_base_mshutdown()
@@ -1044,8 +1140,12 @@ void xdebug_base_rinit()
 		xdebug_base_use_xdebug_throw_exception_hook();
 	}
 
+#if PHP_VERSION_ID >= 80100
+	XG_BASE(fiber_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
+	XG_BASE(stack) = create_stack_for_fiber(NULL);
+#else
 	XG_BASE(stack) = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
-	XG_BASE(level)         = 0;
+#endif
 	XG_BASE(in_debug_info) = 0;
 	XG_BASE(prev_memory)   = 0;
 	XG_BASE(function_count) = -1;
@@ -1078,10 +1178,14 @@ void xdebug_base_rinit()
 
 void xdebug_base_post_deactivate()
 {
+#if PHP_VERSION_ID >= 80100
+	xdebug_hash_destroy(XG_BASE(fiber_stacks));
+	XG_BASE(fiber_stacks) = NULL;
+#else
 	xdebug_vector_destroy(XG_BASE(stack));
+#endif
 	XG_BASE(stack) = NULL;
 
-	XG_BASE(level)            = 0;
 	XG_BASE(in_debug_info)    = 0;
 
 	if (XG_BASE(last_eval_statement)) {

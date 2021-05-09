@@ -76,8 +76,10 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 int xdebug_is_output_tty();
 
 struct xdebug_base_info {
-	unsigned long level;
 	xdebug_vector *stack;
+#if PHP_VERSION_ID >= 80100
+	xdebug_hash   *fiber_stacks;
+#endif
 	xdebug_nanotime_context nanotime_context;
 	uint64_t      start_nanotime;
 	unsigned int  prev_memory;

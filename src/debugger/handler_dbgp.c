@@ -1878,7 +1878,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 DBGP_FUNC(stack_depth)
 {
-	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%lu", XG_BASE(level)), 0, 1);
+	xdebug_xml_add_attribute_ex(*retval, "depth", xdebug_sprintf("%lu", XDEBUG_VECTOR_COUNT(XG_BASE(stack))), 0, 1);
 }
 
 DBGP_FUNC(stack_get)
@@ -1888,7 +1888,7 @@ DBGP_FUNC(stack_get)
 
 	if (CMD_OPTION_SET('d')) {
 		depth = strtol(CMD_OPTION_CHAR('d'), NULL, 10);
-		if (depth >= 0 && depth < (long) XG_BASE(level)) {
+		if (depth >= 0 && depth < (long) XDEBUG_VECTOR_COUNT(XG_BASE(stack))) {
 			stackframe = return_stackframe(depth);
 			xdebug_xml_add_child(*retval, stackframe);
 		} else {
@@ -1981,7 +1981,7 @@ DBGP_FUNC(xcmd_get_executable_lines)
 	}
 
 	depth = strtol(CMD_OPTION_CHAR('d'), NULL, 10);
-	if (depth >= 0 && depth < (long) XG_BASE(level)) {
+	if (depth >= 0 && depth < (long) XDEBUG_VECTOR_COUNT(XG_BASE(stack))) {
 		fse = xdebug_get_stack_frame(depth);
 	} else {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);

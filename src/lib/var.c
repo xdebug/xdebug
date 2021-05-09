@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1153,6 +1153,12 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags)
 		case XFUNC_ZEND_PASS:
 			return xdstrdup("{zend_pass}");
 			break;
+
+#if PHP_VERSION_ID >= 80100
+		case XFUNC_FIBER:
+			return xdstrdup(f.function);
+			break;
+#endif
 
 		default:
 			return xdstrdup("{unknown}");
