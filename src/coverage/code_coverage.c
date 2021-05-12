@@ -641,20 +641,20 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *funct
 	xdebug_path *path = xdebug_path_new(NULL);
 
 	xdebug_prefill_code_coverage(op_array);
-	xdebug_path_info_add_path_for_level(XG_COV(paths_stack), path, XG_BASE(level));
+	xdebug_path_info_add_path_for_level(XG_COV(paths_stack), path, XDEBUG_VECTOR_COUNT(XG_BASE(stack)));
 
-	if (XG_COV(branches).size == 0 || XG_BASE(level) >= XG_COV(branches).size) {
-		XG_COV(branches).size = XG_BASE(level) + 32;
+	if (XG_COV(branches).size == 0 || XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XG_COV(branches).size) {
+		XG_COV(branches).size = XDEBUG_VECTOR_COUNT(XG_BASE(stack)) + 32;
 		XG_COV(branches).last_branch_nr = realloc(XG_COV(branches).last_branch_nr, sizeof(int) * XG_COV(branches.size));
 	}
 
-	XG_COV(branches).last_branch_nr[XG_BASE(level)] = -1;
+	XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] = -1;
 }
 
 void xdebug_code_coverage_end_of_function(zend_op_array *op_array, zend_string *filename, char *function_name)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XG_BASE(level));
+	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XDEBUG_VECTOR_COUNT(XG_BASE(stack)));
 
 	if (!path || !path->elements) {
 		return;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,6 +43,9 @@ typedef struct xdebug_var_name {
 #define XFUNC_REQUIRE        0x13
 #define XFUNC_REQUIRE_ONCE   0x14
 #define XFUNC_MAIN           0x15
+#if PHP_VERSION_ID >= 80100
+# define XFUNC_FIBER         0x16
+#endif
 
 #define XFUNC_ZEND_PASS      0x20
 

@@ -384,27 +384,27 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 		function_stack_entry *tail_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 		/* Mark out for previous branch, if one is set */
-		if (XG_COV(branches).last_branch_nr[XG_BASE(level)] != -1) {
+		if (XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] != -1) {
 			size_t i = 0;
 
-			for (i = 0; i < branch_info->branches[XG_COV(branches).last_branch_nr[XG_BASE(level)]].outs_count; i++) {
-				if (branch_info->branches[XG_COV(branches).last_branch_nr[XG_BASE(level)]].outs[i] == opcode_nr) {
-					branch_info->branches[XG_COV(branches).last_branch_nr[XG_BASE(level)]].outs_hit[i] = 1;
+			for (i = 0; i < branch_info->branches[XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))]].outs_count; i++) {
+				if (branch_info->branches[XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))]].outs[i] == opcode_nr) {
+					branch_info->branches[XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))]].outs_hit[i] = 1;
 				}
 			}
 		}
 
-		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XG_BASE(level)], tail_fse->function_nr);
+		key = xdebug_sprintf("%d:%d:%d", opcode_nr, XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))], tail_fse->function_nr);
 
 		if (!xdebug_hash_find(XG_COV(visited_branches), key, strlen(key), (void*) &dummy)) {
-			xdebug_path_add(XG_COV(paths_stack)->paths[XG_BASE(level)], opcode_nr);
+			xdebug_path_add(XG_COV(paths_stack)->paths[XDEBUG_VECTOR_COUNT(XG_BASE(stack))], opcode_nr);
 			xdebug_hash_add(XG_COV(visited_branches), key, strlen(key), NULL);
 		}
 		xdfree(key);
 
 		branch_info->branches[opcode_nr].hit = 1;
 
-		XG_COV(branches).last_branch_nr[XG_BASE(level)] = opcode_nr;
+		XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] = opcode_nr;
 	}
 }
 
