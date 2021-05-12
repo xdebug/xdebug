@@ -50,7 +50,7 @@ static int encoding_requested(char *value, size_t value_len)
 	return 0;
 }
 
-static void check_if_extended_properies_are_needed(xdebug_var_export_options *options, xdebug_str *name, xdebug_str *fullname, zval *value)
+static void check_if_extended_properties_are_needed(xdebug_var_export_options *options, xdebug_str *name, xdebug_str *fullname, zval *value)
 {
 	if (!options->extended_properties || options->encode_as_extended_property) {
 		return;
@@ -276,7 +276,7 @@ static int xdebug_array_element_export_xml_node(zval *zv_nptr, zend_ulong index_
 			xdfree(tmp_idx);
 		}
 
-		check_if_extended_properies_are_needed(options, name, full_name.l ? &full_name : NULL, *zv);
+		check_if_extended_properties_are_needed(options, name, full_name.l ? &full_name : NULL, *zv);
 		add_xml_attribute_or_element(options, node, "name", 4, name);
 		if (full_name.l) {
 			add_xml_attribute_or_element(options, node, "fullname", 8, &full_name);
@@ -389,7 +389,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 			}
 		}
 
-		check_if_extended_properies_are_needed(options, tmp_name, tmp_fullname, (*item)->zv);
+		check_if_extended_properties_are_needed(options, tmp_name, tmp_fullname, (*item)->zv);
 		add_xml_attribute_or_element(options, node, "name", 4, tmp_name);
 		if (tmp_fullname) {
 			add_xml_attribute_or_element(options, node, "fullname", 8, tmp_fullname);
@@ -710,7 +710,7 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(xdebug_str *name, zval *val, 
 				break;
 		}
 
-		check_if_extended_properies_are_needed(options, short_name, full_name, val);
+		check_if_extended_properties_are_needed(options, short_name, full_name, val);
 		add_xml_attribute_or_element(options, node, "name", 4, short_name);
 		add_xml_attribute_or_element(options, node, "fullname", 8, full_name);
 	}
