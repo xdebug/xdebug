@@ -149,25 +149,27 @@ static inline void xdebug_php_log(int channel, int log_level, const char *error_
 
 void XDEBUG_ATTRIBUTE_FORMAT(printf, 4, 5) xdebug_log_ex(int channel, int log_level, const char *error_code, const char *fmt, ...)
 {
-	char    message[512];
-	va_list argv;
-	int     logged_to_xdebug_log = 0;
+	xdebug_str message = XDEBUG_STR_INITIALIZER;
+	va_list    argv;
+	int        logged_to_xdebug_log = 0;
 
 	if (XINI_LIB(log_level) < log_level) {
 		return;
 	}
 
 	va_start(argv, fmt);
-	vsnprintf(message, sizeof(message), fmt, argv);
+	xdebug_str_add_va_fmt(&message, fmt, argv);
 	va_end(argv);
 
-	logged_to_xdebug_log = xdebug_internal_log(channel, log_level, message);
+	logged_to_xdebug_log = xdebug_internal_log(channel, log_level, message.d);
 
-	xdebug_diagnostic_log(channel, log_level, error_code, message);
+	xdebug_diagnostic_log(channel, log_level, error_code, message.d);
 
 	if (!logged_to_xdebug_log || XINI_LIB(log_level) == XLOG_CRIT) {
-		xdebug_php_log(channel, log_level, error_code, message);
+		xdebug_php_log(channel, log_level, error_code, message.d);
 	}
+
+	xdebug_str_destroy(&message);
 }
 
 static void log_filename_not_opened(int channel, const char *directory, const char *filename)

@@ -101,18 +101,18 @@ void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num)
 	xdebug_str_internal_addl(xs, pos, &buffer[20] - pos, 0);
 }
 
-void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
+void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 {
-	va_list args;
 	int size;
 	int n;
+	va_list argv_size, argv_copy;
 
 	realloc_if_needed(xs, 1);
 	size = xs->a - xs->l;
 
-	va_start(args, fmt);
-	n = vsnprintf(xs->d + xs->l, size, fmt, args);
-	va_end(args);
+	va_copy(argv_size, argv);
+	n = vsnprintf(xs->d + xs->l, size, fmt, argv_size);
+	va_end(argv_size);
 	if (n > -1 && n < size) {
 		xs->l += n;
 		return;
@@ -121,9 +121,9 @@ void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 	realloc_if_needed(xs, n + 1);
 	size = xs->a - xs->l;
 
-	va_start(args, fmt);
-	n = vsnprintf(xs->d + xs->l, size, fmt, args);
-	va_end(args);
+	va_copy(argv_copy, argv);
+	n = vsnprintf(xs->d + xs->l, size, fmt, argv_copy);
+	va_end(argv_copy);
 
 	if (n > -1 && n < size) {
 		xs->l += n;
@@ -131,6 +131,15 @@ void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 	}
 
 	assert(0);
+}
+
+void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
+{
+	va_list args;
+
+	va_start(args, fmt);
+	xdebug_str_add_va_fmt(xs, fmt, args);
+	va_end(args);
 }
 
 void xdebug_str_chop(xdebug_str *xs, size_t c)
