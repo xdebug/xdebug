@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #913: "Added debug info handler to DOM objects" not supported
+Test for bug #913: "Added debug info handler to DOM objects" not supported (< PHP 8.1)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('class DOMDocument');
+check_reqs('PHP < 8.1; class DOMDocument');
 ?>
 --FILE--
 <?php
