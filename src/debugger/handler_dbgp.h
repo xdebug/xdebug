@@ -103,6 +103,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_strin
 int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename);
 int xdebug_dbgp_stream_output(const char *string, unsigned int length);
 int xdebug_dbgp_notification(xdebug_con *context, zend_string *filename, long lineno, int type, char *type_string, char *message);
+int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lineno, zval *data);
 void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_dbgp_log(int log_level, const char *fmt, ...);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
 

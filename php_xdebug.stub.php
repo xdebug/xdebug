@@ -119,7 +119,7 @@ function xdebug_get_tracefile_name() {}
 
 /* -----------------------------------------------------------------------*/
 
-/* Show diagnostic information */
+/* Show and retrieve diagnostic information */
 /** @return mixed */
 function xdebug_info(string $category = null) {}
 
@@ -132,6 +132,11 @@ function xdebug_is_debugger_active(): bool {}
 
 /* Returns the current memory usage */
 function xdebug_memory_usage(): int {}
+
+/* -----------------------------------------------------------------------*/
+
+/* Sends data to a debugging client */
+function xdebug_notify(mixed $data): bool {}
 
 /* -----------------------------------------------------------------------*/
 
