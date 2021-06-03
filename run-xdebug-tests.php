@@ -818,7 +818,7 @@ HELP;
 		}
 	}
 
-	if (strlen($conf_passed)) {
+	if ($conf_passed && strlen($conf_passed)) {
 		if (substr(PHP_OS, 0, 3) == "WIN") {
 			$pass_options .= " -c " . escapeshellarg($conf_passed);
 		} else {
