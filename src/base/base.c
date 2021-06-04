@@ -1065,7 +1065,7 @@ static void xdebug_fiber_switch_observer(zend_fiber *from, zend_fiber *to)
 {
 	xdebug_vector *current_stack;
 
-	if (from && from->status & ZEND_FIBER_STATUS_FINISHED) {
+	if (from && from->status == ZEND_FIBER_STATUS_DEAD) {
 		remove_stack_for_fiber(from);
 	}
 	if (to && to->status == ZEND_FIBER_STATUS_INIT) {
