@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cb57aba1b1ecda1728b596febea758e2c693384d */
+ * Stub hash: 0c71112b47e4e0884ae85607eb36d3ef12158a3a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_break, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -60,6 +60,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_xdebug_is_debugger_active arginfo_xdebug_break
 
 #define arginfo_xdebug_memory_usage arginfo_xdebug_get_function_count
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_notify, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_xdebug_peak_memory_usage arginfo_xdebug_get_function_count
 
@@ -137,6 +141,7 @@ ZEND_FUNCTION(xdebug_get_tracefile_name);
 ZEND_FUNCTION(xdebug_info);
 ZEND_FUNCTION(xdebug_is_debugger_active);
 ZEND_FUNCTION(xdebug_memory_usage);
+ZEND_FUNCTION(xdebug_notify);
 ZEND_FUNCTION(xdebug_peak_memory_usage);
 ZEND_FUNCTION(xdebug_print_function_stack);
 ZEND_FUNCTION(xdebug_set_filter);
@@ -179,6 +184,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xdebug_info, arginfo_xdebug_info)
 	ZEND_FE(xdebug_is_debugger_active, arginfo_xdebug_is_debugger_active)
 	ZEND_FE(xdebug_memory_usage, arginfo_xdebug_memory_usage)
+	ZEND_FE(xdebug_notify, arginfo_xdebug_notify)
 	ZEND_FE(xdebug_peak_memory_usage, arginfo_xdebug_peak_memory_usage)
 	ZEND_FE(xdebug_print_function_stack, arginfo_xdebug_print_function_stack)
 	ZEND_FE(xdebug_set_filter, arginfo_xdebug_set_filter)

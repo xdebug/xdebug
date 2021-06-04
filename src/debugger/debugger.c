@@ -847,3 +847,29 @@ PHP_FUNCTION(xdebug_is_debugger_active)
 {
 	RETURN_BOOL(xdebug_is_debug_connection_active());
 }
+
+PHP_FUNCTION(xdebug_notify)
+{
+	function_stack_entry *fse;
+	zval *data;
+
+	RETURN_FALSE_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
+	if (!xdebug_is_debug_connection_active()) {
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &data) == FAILURE) {
+		return;
+	}
+
+	fse = xdebug_get_stack_frame(0);
+
+	XG_DBG(context).handler->user_notification(
+		&(XG_DBG(context)),
+		fse->filename, fse->lineno,
+		data
+	);
+
+	RETURN_TRUE;
+}

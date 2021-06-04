@@ -65,6 +65,7 @@ xdebug_remote_handler xdebug_handler_dbgp = {
 	xdebug_dbgp_resolve_breakpoints,
 	xdebug_dbgp_stream_output,
 	xdebug_dbgp_notification,
+	xdebug_dbgp_user_notify,
 	xdebug_dbgp_register_eval_id,
 };
 
@@ -2910,6 +2911,48 @@ int xdebug_dbgp_notification(xdebug_con *context, zend_string *filename, long li
 		}
 	}
 	xdebug_xml_add_child(response, error_container);
+
+	send_message(context, response);
+	xdebug_xml_node_dtor(response);
+
+	return 1;
+}
+
+int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lineno, zval *data)
+{
+	xdebug_xml_node *response, *data_node, *location_node;
+	xdebug_var_export_options *options;
+
+	if (!context->send_notifications) {
+		return 0;
+	}
+
+	response = xdebug_xml_node_init("notify");
+	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+	xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
+	xdebug_xml_add_attribute(response, "name", "user");
+
+	options = (xdebug_var_export_options*) context->options;
+	options->encode_as_extended_property = 0;
+
+	location_node = xdebug_xml_node_init("xdebug:location");
+	if (filename) {
+		char *tmp_filename = NULL;
+
+		if (check_evaled_code(filename, &tmp_filename)) {
+			xdebug_xml_add_attribute_ex(location_node, "filename", tmp_filename, 0, 0);
+		} else {
+			xdebug_xml_add_attribute_ex(location_node, "filename", xdebug_path_to_url(filename), 0, 1);
+		}
+	}
+	if (lineno) {
+		xdebug_xml_add_attribute_ex(location_node, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
+	}
+	xdebug_xml_add_child(response, location_node);
+
+	data_node = xdebug_xml_node_init("property");
+	xdebug_var_export_xml_node(&data, NULL, data_node, options, 0);
+	xdebug_xml_add_child(response, data_node);
 
 	send_message(context, response);
 	xdebug_xml_node_dtor(response);

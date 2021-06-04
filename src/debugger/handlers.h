@@ -148,6 +148,7 @@ struct _xdebug_remote_handler {
 
 	/* Notifications & Logging */
 	int (*remote_notification)(xdebug_con *h, zend_string *file, long lineno, int type, char *type_string, char *message);
+	int (*user_notification)(xdebug_con *h, zend_string *filename, long lineno, zval *data);
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
