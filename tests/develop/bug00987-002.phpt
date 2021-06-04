@@ -8,7 +8,7 @@ xdebug.file_link_format=
 xdebug.filename_format=
 --FILE--
 <?php
-$object = (object) array('key' => 'value', 1 => 0, -4 => "foo", 3.14 => false);
+$object = (object) array('key' => 'value', 1 => 0, -4 => "foo", (int) 3.14 => false);
 
 var_dump($object);
 ?>
