@@ -145,6 +145,11 @@ static PHP_INI_MH(OnUpdateSession)
 	DUMP_TOK(session);
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpointer-bool-conversion"
+#endif
+
 static PHP_INI_MH(OnUpdateMode)
 {
 	if (!new_value || !new_value->val) {
@@ -213,6 +218,10 @@ static PHP_INI_MH(OnUpdateChangedSetting)
 	}
 	return FAILURE;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 
 #ifdef P_tmpdir
