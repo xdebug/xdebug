@@ -1006,7 +1006,7 @@ static void xdebug_fiber_entry_dtor(struct xdebug_fiber_entry *entry)
 	xdfree(entry);
 }
 
-static xdebug_str *create_key_for_fiber(zend_fiber *fiber)
+static xdebug_str *create_key_for_fiber(zend_fiber_context *fiber)
 {
 	xdebug_str *tmp = xdebug_str_new();
 
@@ -1015,7 +1015,7 @@ static xdebug_str *create_key_for_fiber(zend_fiber *fiber)
 	return tmp;
 }
 
-static void add_fiber_main(zend_fiber *fiber)
+static void add_fiber_main(zend_fiber_context *fiber)
 {
 	xdebug_str           *key = create_key_for_fiber(fiber);
 	function_stack_entry *tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
@@ -1027,7 +1027,7 @@ static void add_fiber_main(zend_fiber *fiber)
 	tmp->function.function = xdstrdup(key->d);
 }
 
-static xdebug_vector* create_stack_for_fiber(zend_fiber *fiber)
+static xdebug_vector* create_stack_for_fiber(zend_fiber_context *fiber)
 {
 	xdebug_vector             *tmp_stack = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
 	xdebug_str                *key       = create_key_for_fiber(fiber);
@@ -1040,7 +1040,7 @@ static xdebug_vector* create_stack_for_fiber(zend_fiber *fiber)
 	return tmp_stack;
 }
 
-static void remove_stack_for_fiber(zend_fiber *fiber)
+static void remove_stack_for_fiber(zend_fiber_context *fiber)
 {
 	xdebug_str *key = create_key_for_fiber(fiber);
 
@@ -1049,7 +1049,7 @@ static void remove_stack_for_fiber(zend_fiber *fiber)
 	xdebug_str_free(key);
 }
 
-static xdebug_vector *find_stack_for_fiber(zend_fiber *fiber)
+static xdebug_vector *find_stack_for_fiber(zend_fiber_context *fiber)
 {
 	struct xdebug_fiber_entry *entry = NULL;
 	xdebug_str                *key = create_key_for_fiber(fiber);
@@ -1061,7 +1061,7 @@ static xdebug_vector *find_stack_for_fiber(zend_fiber *fiber)
 	return entry->stack;
 }
 
-static void xdebug_fiber_switch_observer(zend_fiber *from, zend_fiber *to)
+static void xdebug_fiber_switch_observer(zend_fiber_context *from, zend_fiber_context *to)
 {
 	xdebug_vector *current_stack;
 
@@ -1142,7 +1142,7 @@ void xdebug_base_rinit()
 
 #if PHP_VERSION_ID >= 80100
 	XG_BASE(fiber_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
-	XG_BASE(stack) = create_stack_for_fiber(NULL);
+	XG_BASE(stack) = create_stack_for_fiber(EG(main_fiber));
 #else
 	XG_BASE(stack) = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
 #endif

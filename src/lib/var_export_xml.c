@@ -614,6 +614,16 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			}
 
 			xdebug_xml_add_attribute(node, "type", "object");
+
+#if PHP_VERSION_ID >= 80100 // Enums
+			{
+				zend_class_entry *ce = Z_OBJCE_P(*struc);
+				if (ce->ce_flags & ZEND_ACC_ENUM) {
+					xdebug_xml_add_attribute(node, "facet", "enum");
+				}
+			}
+#endif
+
 			{
 				xdebug_str tmp_str;
 				tmp_str.d = ZSTR_VAL(class_name);

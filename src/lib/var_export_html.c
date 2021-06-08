@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,9 @@
 
 #include "var_export_html.h"
 #include "lib_private.h"
+#if PHP_VERSION_ID >= 80100
+# include "zend_enum.h"
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -212,7 +215,38 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 			}
 			break;
 
-		case IS_OBJECT:
+		case IS_OBJECT: {
+#if PHP_VERSION_ID >= 80100
+			zend_class_entry *ce = Z_OBJCE_P(*struc);
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
+				xdebug_str_add_fmt(
+					str, "<b>enum</b>(<i>%s::%s</i>)",
+					ZSTR_VAL(ce->name),
+					Z_STRVAL_P(case_name_zval)
+				);
+				if (ce->enum_backing_type != IS_UNDEF) {
+					zval *value = zend_enum_fetch_case_value(Z_OBJ_P(*struc));
+
+					if (ce->enum_backing_type == IS_LONG) {
+						xdebug_str_add_fmt(
+							str, " : <small>int</small> <font color='%s'>" XDEBUG_INT_FMT "</font>",
+							COLOR_LONG, Z_LVAL_P(value)
+						);
+					}
+
+					if (ce->enum_backing_type == IS_STRING) {
+						xdebug_str_add_fmt(
+							str, " : <small>string</small> <font color='%s'>'%s'</font> <i>(length=%d)</i>",
+							COLOR_STRING, Z_STRVAL_P(value), Z_STRLEN_P(value)
+						);
+					}
+				}
+				xdebug_str_addc(str, '\n');
+				break;
+			}
+#endif
+
 #if PHP_VERSION_ID >= 70400
 			myht = xdebug_objdebug_pp(struc);
 #else
@@ -253,6 +287,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 			xdebug_var_maybe_destroy_ht(myht, is_temp);
 #endif
 			break;
+		}
 
 		case IS_RESOURCE: {
 			char *type_name;
@@ -359,9 +394,18 @@ static void xdebug_var_synopsis_html(zval **struc, xdebug_str *str, int level, i
 			xdebug_str_add_fmt(str, "<font color='%s'>array(%d)</font>", COLOR_ARRAY, myht->nNumOfElements);
 			break;
 
-		case IS_OBJECT:
+		case IS_OBJECT: {
+#if PHP_VERSION_ID >= 80100
+			zend_class_entry *ce = Z_OBJCE_P(*struc);
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
+				xdebug_str_add_fmt( str, "<font color='%s'>enum(%s::%s)</font>", COLOR_OBJECT, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
+				break;
+			}
+#endif
+
 			xdebug_str_add_fmt(str, "<font color='%s'>object(%s)[%d]</font>", COLOR_OBJECT, ZSTR_VAL(Z_OBJCE_P(*struc)->name), Z_OBJ_HANDLE_P(*struc));
-			break;
+		} break;
 
 		case IS_RESOURCE: {
 			char *type_name;
