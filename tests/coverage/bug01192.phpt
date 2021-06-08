@@ -4,41 +4,22 @@ Test for bug #1192: Dead code analysis does not work for generators with 'return
 xdebug.mode=coverage
 --FILE--
 <?php
-function gen(&$output, $branch = false)
-{
-	yield;
-
-	if($branch) {
-		$output = 'branched';
-		return;
-	} // This line is never covered.
-	$output = 'did not branch';
-
-}
-
-function testGen()
-{
-	$output = '';
-	$gen = gen($output, true);
-
-	while($gen->valid()) {
-		$gen->next();
-	}
-}
-
 xdebug_start_code_coverage (XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE);
+
+include 'bug01192.inc';
 
 testGen();
 
-$c = xdebug_get_code_coverage();
-ksort($c);
-var_dump($c);
+$cc = xdebug_get_code_coverage();
+ksort($cc);
+var_dump(array_slice($cc, 0, 1));
+
 xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 array(1) {
-  ["%sbug01192.php"]=>
-  array(14) {
+  ["%sbug01192.inc"]=>
+  array(13) {
     [2]=>
     int(1)
     [4]=>
@@ -63,9 +44,7 @@ array(1) {
     int(1)
     [22]=>
     int(1)
-    [26]=>
-    int(1)
-    [28]=>
+    [23]=>
     int(1)
   }
 }

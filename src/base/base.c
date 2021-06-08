@@ -712,11 +712,13 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 	}
 
-	/* Now we have location and name, we can run the filter (for stack and tracing)*/
+	/* Now we have location and name, we can run the filter (for stack, code coverage, and tracing)*/
 	xdebug_filter_run(tmp);
 
 	/* Count code coverage line for call */
-	xdebug_coverage_count_line_if_branch_check_active(op_array, tmp->filename, tmp->lineno);
+	if (type == XDEBUG_USER_DEFINED) {
+		xdebug_coverage_count_line_if_branch_check_active(tmp);
+	}
 
 	return tmp;
 }
