@@ -16,6 +16,9 @@
 
 #include "php.h"
 #include "ext/standard/php_string.h"
+#if PHP_VERSION_ID >= 80100
+# include "zend_enum.h"
+#endif
 
 #include "var_export_line.h"
 
@@ -218,7 +221,35 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			}
 			break;
 
-		case IS_OBJECT:
+		case IS_OBJECT: {
+#if PHP_VERSION_ID >= 80100
+			zend_class_entry *ce = Z_OBJCE_P(*struc);
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
+				xdebug_str_add_fmt(str, "enum %s::%s", ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
+
+				if (ce->enum_backing_type != IS_UNDEF) {
+					zval *value = zend_enum_fetch_case_value(Z_OBJ_P(*struc));
+
+					if (ce->enum_backing_type == IS_LONG) {
+						xdebug_str_add_fmt(str, "(" XDEBUG_INT_FMT ")", Z_LVAL_P(value));
+					}
+
+					if (ce->enum_backing_type == IS_STRING) {
+						zend_string *tmp_zstr = php_addcslashes(Z_STR_P(value), (char*) "'\\\0..\37", 7);
+
+						xdebug_str_add_literal(str, "('");
+						xdebug_str_add_zstr(str, tmp_zstr);
+						xdebug_str_add_literal(str, "')");
+
+						zend_string_release(tmp_zstr);
+					}
+				}
+
+				break;
+			}
+#endif
+
 #if PHP_VERSION_ID >= 70400
 			myht = xdebug_objdebug_pp(struc);
 #else
@@ -260,6 +291,7 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			xdebug_var_maybe_destroy_ht(myht, is_temp);
 #endif
 			break;
+		}
 
 		case IS_RESOURCE: {
 			char *type_name;
