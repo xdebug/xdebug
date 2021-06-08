@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,10 @@
 
 #include "php.h"
 #include "ext/standard/php_string.h"
+#if PHP_VERSION_ID >= 80100
+# include "zend_enum.h"
+#endif
+
 
 #include "php_xdebug.h"
 
@@ -251,7 +255,41 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 			}
 			break;
 
-		case IS_OBJECT:
+		case IS_OBJECT: {
+#if PHP_VERSION_ID >= 80100
+			zend_class_entry *ce = Z_OBJCE_P(*struc);
+			if (ce->ce_flags & ZEND_ACC_ENUM) {
+				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
+				xdebug_str_add_fmt(
+					str, "%senum%s %s%s%s::%s%s%s",
+					ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF,
+					ANSI_COLOR_OBJECT, ZSTR_VAL(ce->name), ANSI_COLOR_RESET,
+					ANSI_COLOR_STRING, Z_STRVAL_P(case_name_zval), ANSI_COLOR_RESET
+				);
+				if (ce->enum_backing_type != IS_UNDEF) {
+					zval *value = zend_enum_fetch_case_value(Z_OBJ_P(*struc));
+
+					if (ce->enum_backing_type == IS_LONG) {
+						xdebug_str_add_fmt(
+							str, " : %s%s%s(%s%d%s)",
+							ANSI_COLOR_BOLD, "int", ANSI_COLOR_RESET,
+							ANSI_COLOR_LONG, Z_LVAL_P(value), ANSI_COLOR_RESET
+						);
+					}
+
+					if (ce->enum_backing_type == IS_STRING) {
+						xdebug_str_add_fmt(
+							str, " : %s%s%s(%s\"%s\"%s)",
+							ANSI_COLOR_BOLD, "string", ANSI_COLOR_RESET,
+							ANSI_COLOR_STRING, Z_STRVAL_P(value), ANSI_COLOR_RESET
+						);
+					}
+				}
+				xdebug_str_addc(str, ';');
+				break;
+			}
+#endif
+
 #if PHP_VERSION_ID >= 70400
 			myht = xdebug_objdebug_pp(struc);
 #else
@@ -292,6 +330,7 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 			xdebug_var_maybe_destroy_ht(myht, is_temp);
 #endif
 			break;
+		}
 
 		case IS_RESOURCE: {
 			char *type_name;
