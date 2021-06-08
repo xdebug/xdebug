@@ -275,6 +275,15 @@ void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void
 	}
 }
 
+void xdebug_hash_empty(xdebug_hash *h)
+{
+	int i;
+
+    for (i = 0; i < h->slots; ++i) {
+		xdebug_llist_empty(h->table[i], (void *) h);
+	}
+}
+
 void xdebug_hash_destroy(xdebug_hash *h)
 {
 	int i;

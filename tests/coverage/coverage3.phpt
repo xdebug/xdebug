@@ -10,30 +10,23 @@ xdebug.dump_globals=0
 xdebug.trace_format=0
 --FILE--
 <?php
-    function a($b)
-    {
-        if ($b == 0)
-        {
-            return true;
-        }
-        else
-        if ($b == 1)
-        {
-            return false;
-        }
-    };
+xdebug_start_code_coverage(true);
 
-    xdebug_start_code_coverage(true);
+include 'coverage3.inc';
 
-    a(1);
+a(1);
 
-    xdebug_stop_code_coverage(false);
-    var_dump(xdebug_get_code_coverage());
+xdebug_stop_code_coverage(false);
+$cc = xdebug_get_code_coverage();
+ksort($cc);
+var_dump($cc);
 ?>
 --EXPECTF--
-array(1) {
-  ["%scoverage3.php"]=>
+array(2) {
+  ["%scoverage3.inc"]=>
   array(7) {
+    [2]=>
+    int(1)
     [4]=>
     int(1)
     [6]=>
@@ -44,9 +37,16 @@ array(1) {
     int(1)
     [13]=>
     int(-1)
-    [17]=>
+    [14]=>
     int(1)
-    [19]=>
+  }
+  ["%scoverage3.php"]=>
+  array(3) {
+    [4]=>
+    int(1)
+    [6]=>
+    int(1)
+    [8]=>
     int(1)
   }
 }

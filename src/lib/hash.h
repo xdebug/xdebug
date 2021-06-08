@@ -66,6 +66,7 @@ int  xdebug_hash_extended_delete(xdebug_hash *h, const char *str_key, unsigned i
 int  xdebug_hash_extended_find(xdebug_hash *h, const char *str_key, unsigned int str_key_len, unsigned long num_key, void **p);
 void xdebug_hash_apply(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *));
 void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void *, xdebug_hash_element *, void *), void *argument);
+void xdebug_hash_empty(xdebug_hash *h);
 void xdebug_hash_destroy(xdebug_hash *h);
 
 #define xdebug_hash_find(h, key, key_len, p) xdebug_hash_extended_find(h, key, key_len, 0, p)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,22 +19,16 @@
 
 #include "lib/lib.h"
 
-typedef struct xdebug_coverage_file {
-	zend_string        *name;
-	xdebug_hash        *lines;
-	xdebug_hash        *functions; /* Used for branch coverage */
-	int                 has_branch_info;
-} xdebug_coverage_file;
+typedef struct xdebug_coverage_file xdebug_coverage_file;
 
 typedef struct _xdebug_coverage_globals_t {
 	zend_bool     code_coverage_active; /* Whether code coverage is currently running */
-	xdebug_hash  *code_coverage_info;   /* Stores code coverage information */
+	xdebug_hash  *info;                 /* Stores the analysed information */
 	zend_bool     code_coverage_unused;
 	zend_bool     code_coverage_dead_code_analysis;
 	zend_bool     code_coverage_branch_check;
-	int           dead_code_analysis_tracker_offset;
-	long          dead_code_last_start_id;
 	long          code_coverage_filter_offset;
+	long          code_coverage_has_scanned_offset;
 	size_t        prefill_function_count;
 	size_t        prefill_class_count;
 	zend_string          *previous_filename;

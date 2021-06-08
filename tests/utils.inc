@@ -204,4 +204,10 @@ function mustNotBeExecuted( array $coverageInfo, array $lines )
 		echo "line #${line} is present and not covered\n";
 	}
 }
+
+function x_sort(array $array)
+{
+	sort($array);
+	return $array;
+}
 ?>
