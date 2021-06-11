@@ -1065,17 +1065,17 @@ static void xdebug_fiber_switch_observer(zend_fiber_context *from, zend_fiber_co
 {
 	xdebug_vector *current_stack;
 
-	if (from && from->status == ZEND_FIBER_STATUS_DEAD) {
+	if (from->status == ZEND_FIBER_STATUS_DEAD) {
 		remove_stack_for_fiber(from);
 	}
-	if (to && to->status == ZEND_FIBER_STATUS_INIT) {
+	if (to->status == ZEND_FIBER_STATUS_INIT) {
 		current_stack = create_stack_for_fiber(to);
 	} else {
 		current_stack = find_stack_for_fiber(to);
 	}
 	XG_BASE(stack) = current_stack;
 
-	if (to && to->status == ZEND_FIBER_STATUS_INIT) {
+	if (to->status == ZEND_FIBER_STATUS_INIT) {
 		add_fiber_main(to);
 	}
 }
@@ -1142,7 +1142,7 @@ void xdebug_base_rinit()
 
 #if PHP_VERSION_ID >= 80100
 	XG_BASE(fiber_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
-	XG_BASE(stack) = create_stack_for_fiber(EG(main_fiber));
+	XG_BASE(stack) = create_stack_for_fiber(EG(main_fiber_context));
 #else
 	XG_BASE(stack) = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
 #endif
