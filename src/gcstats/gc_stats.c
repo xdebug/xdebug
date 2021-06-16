@@ -26,11 +26,7 @@
 #include "lib/log.h"
 
 /* Set correct int format to use */
-#if SIZEOF_ZEND_LONG == 4
-# define XDEBUG_GCINT_FMT "d"
-#else
-# define XDEBUG_GCINT_FMT "ld"
-#endif
+#define XDEBUG_GCINT_FMT ZEND_LONG_FMT_SPEC
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 

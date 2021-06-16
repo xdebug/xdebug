@@ -143,11 +143,11 @@ static PHP_INI_MH(OnUpdateSession)
 
 static PHP_INI_MH(OnUpdateMode)
 {
-	if (!new_value || !new_value->val) {
+	if (!new_value) {
 		return FAILURE;
 	}
 
-	if (!xdebug_lib_set_mode(new_value->val)) {
+	if (!xdebug_lib_set_mode(ZSTR_VAL(new_value))) {
 		return FAILURE;
 	}
 
@@ -156,11 +156,11 @@ static PHP_INI_MH(OnUpdateMode)
 
 static PHP_INI_MH(OnUpdateStartWithRequest)
 {
-	if (!new_value || !new_value->val) {
+	if (!new_value) {
 		return FAILURE;
 	}
 
-	if (!xdebug_lib_set_start_with_request(new_value->val)) {
+	if (!xdebug_lib_set_start_with_request(ZSTR_VAL(new_value))) {
 		return FAILURE;
 	}
 
@@ -169,11 +169,11 @@ static PHP_INI_MH(OnUpdateStartWithRequest)
 
 static PHP_INI_MH(OnUpdateStartUponError)
 {
-	if (!new_value || !new_value->val) {
+	if (!new_value) {
 		return FAILURE;
 	}
 
-	if (!xdebug_lib_set_start_upon_error(new_value->val)) {
+	if (!xdebug_lib_set_start_upon_error(ZSTR_VAL(new_value))) {
 		return FAILURE;
 	}
 
@@ -185,7 +185,7 @@ static PHP_INI_MH(OnUpdateRemovedSetting)
 	if (! (EG(error_reporting) & E_DEPRECATED)) {
 		return SUCCESS;
 	}
-	if (new_value && new_value->val && strlen(new_value->val) > 0 && strncmp("This setting", new_value->val, 11) != 0) {
+	if (new_value && ZSTR_LEN(new_value) > 0 && strncmp("This setting", ZSTR_VAL(new_value), 11) != 0) {
 		xdebug_log_ex(
 			XLOG_CHAN_CONFIG, XLOG_CRIT, "REMOVED",
 			"The setting '%s' has been removed, see the upgrading guide at %supgrade_guide#changed-%s",
@@ -200,7 +200,7 @@ static PHP_INI_MH(OnUpdateChangedSetting)
 	if (! (EG(error_reporting) & E_DEPRECATED)) {
 		return SUCCESS;
 	}
-	if (new_value && new_value->val && strlen(new_value->val) > 0 && strncmp("This setting", new_value->val, 11) != 0) {
+	if (new_value && ZSTR_LEN(new_value) > 0 && strncmp("This setting", ZSTR_VAL(new_value), 11) != 0) {
 		xdebug_log_ex(
 			XLOG_CHAN_CONFIG, XLOG_CRIT, "CHANGED",
 			"The setting '%s' has been renamed, see the upgrading guide at %supgrade_guide#changed-%s",
