@@ -282,6 +282,8 @@ int xdebug_lib_set_start_upon_error(char *value);
 int xdebug_lib_start_upon_error(void);
 int xdebug_lib_get_start_upon_error(void);
 
+const char *xdebug_lib_mode_from_value(int mode);
+
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);
 void xdebug_lib_set_active_stack_entry(function_stack_entry *fse);
 void xdebug_lib_set_active_symbol_table(HashTable *symbol_table);

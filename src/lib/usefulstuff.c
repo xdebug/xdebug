@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -160,6 +160,34 @@ char* xdebug_strrstr(const char* haystack, const char* needle)
 	}
 
 	return loc;
+}
+
+char *xdebug_trim(const char *str)
+{
+	char *trimmed = NULL, *begin = (char *) str, *end = NULL;
+
+	/* trim leading space */
+	while (isspace((unsigned char) *begin)) {
+		++begin;
+	}
+
+	/* All spaces */
+	if (*begin == '\0') {
+		return xdstrdup("");
+	}
+
+	/* trim trailing space */
+	end = begin + strlen(begin) - 1;
+	while (end > begin && isspace((unsigned char) *end)) {
+		--end;
+	}
+	end++;
+
+	trimmed = xdmalloc(end - begin);
+	memcpy(trimmed, begin, (end - begin));
+	trimmed[(end - begin)] = '\0';
+
+	return trimmed;
 }
 
 /* not all versions of php export this */
