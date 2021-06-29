@@ -313,18 +313,41 @@ static const char *find_in_globals(const char *element)
 	return NULL;
 }
 
-static int trigger_enabled(int for_mode, char **found_trigger_value)
+static int has_shared_secret(void)
 {
 	char *shared_secret = XINI_LIB(trigger_value);
+
+	if (shared_secret != NULL && shared_secret[0] != '\0') {
+		return 1;
+	}
+
+	return 0;
+}
+
+static int does_shared_secret_match(const char *trigger_value, char **found_trigger_value)
+{
+	char *shared_secret = XINI_LIB(trigger_value);
+
+	if (strcmp(shared_secret, trigger_value) == 0) {
+		if (found_trigger_value != NULL) {
+			*found_trigger_value = xdstrdup(trigger_value);
+		}
+		return 1;
+	}
+
+	return 0;
+}
+
+static int trigger_enabled(int for_mode, char **found_trigger_value)
+{
 	const char *trigger_value = NULL;
+	const char *fallback_name = NULL;
 
 	/* First we check for the generic 'XDEBUG_TRIGGER' option */
 	trigger_value = find_in_globals("XDEBUG_TRIGGER");
 
 	/* If not found, we fall back to the per-mode name for backwards compatibility reasons */
 	if (!trigger_value) {
-		const char *fallback_name = NULL;
-
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) && (for_mode == XDEBUG_MODE_PROFILING)) {
 			fallback_name = "XDEBUG_PROFILE";
 		} else if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && (for_mode == XDEBUG_MODE_TRACING)) {
@@ -333,21 +356,24 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 			fallback_name = "XDEBUG_SESSION";
 		}
 
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "TRIG-1", "Trigger value for 'XDEBUG_TRIGGER' not found, falling back to '%s'", fallback_name);
+
 		if (fallback_name) {
 			trigger_value = find_in_globals(fallback_name);
 		}
 	}
 
 	if (!trigger_value) {
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "TRIG-2", "Trigger value for '%s' not found, so not activating", fallback_name);
+
 		if (found_trigger_value != NULL) {
 			*found_trigger_value = NULL;
 		}
 		return 0;
 	}
 
-	/* If the configured shared secret trigger value is empty, then it always
-	 * triggers */
-	if (shared_secret == NULL || shared_secret[0] == '\0') {
+	/* If there is no configured shared secret trigger, always trigger */
+	if (!has_shared_secret()) {
 		if (found_trigger_value != NULL) {
 			*found_trigger_value = xdstrdup(trigger_value);
 		}
@@ -356,10 +382,7 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 
 	/* Check if the configured trigger value matches the one found in the
 	 * trigger element */
-	if (strcmp(shared_secret, trigger_value) == 0) {
-		if (found_trigger_value != NULL) {
-			*found_trigger_value = xdstrdup(trigger_value);
-		}
+	if (does_shared_secret_match(trigger_value, found_trigger_value)) {
 		return 1;
 	}
 
