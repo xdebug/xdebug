@@ -286,6 +286,25 @@ int xdebug_lib_start_upon_error(void)
 	return 0;
 }
 
+const char *xdebug_lib_mode_from_value(int mode)
+{
+	switch (mode) {
+		case XDEBUG_MODE_DEVELOP:
+			return "develop";
+		case XDEBUG_MODE_COVERAGE:
+			return "coverage";
+		case XDEBUG_MODE_STEP_DEBUG:
+			return "debug";
+		case XDEBUG_MODE_GCSTATS:
+			return "gcstats";
+		case XDEBUG_MODE_PROFILING:
+			return "profile";
+		case XDEBUG_MODE_TRACING:
+			return "trace";
+		default:
+			return "?";
+	}
+}
 
 static const char *find_in_globals(const char *element)
 {
@@ -313,41 +332,120 @@ static const char *find_in_globals(const char *element)
 	return NULL;
 }
 
-static int trigger_enabled(int for_mode, char **found_trigger_value)
+static int has_shared_secret(void)
 {
 	char *shared_secret = XINI_LIB(trigger_value);
+
+	if (shared_secret != NULL && shared_secret[0] != '\0') {
+		return 1;
+	}
+
+	return 0;
+}
+
+static int does_shared_secret_match_single(int mode, const char *trimmed_trigger_value, const char *trimmed_shared_secret, char **found_trigger_value)
+{
+	if (strcmp(trimmed_shared_secret, trimmed_trigger_value) == 0) {
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_DEBUG, "TRGSEC-MATCH", "The trigger value '%s' matched the shared secret '%s' for mode '%s'", trimmed_trigger_value, trimmed_shared_secret, xdebug_lib_mode_from_value(mode));
+
+		if (found_trigger_value != NULL) {
+			*found_trigger_value = xdstrdup(trimmed_trigger_value);
+		}
+
+		return 1;
+	}
+
+	return 0;
+}
+
+static int does_shared_secret_match(int mode, const char *trigger_value, char **found_trigger_value)
+{
+	int         retval = 0;
+	const char *shared_secret = XINI_LIB(trigger_value);
+	char       *trimmed_trigger_value = xdebug_trim(trigger_value);
+
+	/* Check we have a multi-value-shared secret setting */
+	if (strchr(shared_secret, ',') != NULL) {
+		int         i;
+		xdebug_arg *values = xdebug_arg_ctor();
+
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_DEBUG, "TRGSEC-MULT", "The shared secret (xdebug.trigger_value) is multi-value for mode '%s'", xdebug_lib_mode_from_value(mode));
+
+		xdebug_explode(",", shared_secret, values, -1);
+
+		for (i = 0; i < values->c; i++) {
+			char *trimmed_shared_secret = xdebug_trim(values->args[i]);
+
+			retval = does_shared_secret_match_single(mode, trimmed_trigger_value, trimmed_shared_secret, found_trigger_value);
+
+			xdfree(trimmed_shared_secret);
+
+			/* Jump out of the loop if we found a match */
+			if (retval != 0) {
+				break;
+			}
+		}
+
+		xdebug_arg_dtor(values);
+
+		if (retval == 0) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-MNO", "The trigger value '%s' did not match any of the shared secrets (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, xdebug_lib_mode_from_value(mode));
+		}
+	} else {
+		char *trimmed_shared_secret = xdebug_trim(shared_secret);
+
+		retval = does_shared_secret_match_single(mode, trimmed_trigger_value, trimmed_shared_secret, found_trigger_value);
+
+		xdfree(trimmed_shared_secret);
+
+		if (retval == 0) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-NO", "The trigger value '%s' did not match the shared secret (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, xdebug_lib_mode_from_value(mode));
+		}
+	}
+
+	xdfree(trimmed_trigger_value);
+
+	return retval;
+}
+
+static int trigger_enabled(int for_mode, char **found_trigger_value)
+{
 	const char *trigger_value = NULL;
+	const char *trigger_name = "XDEBUG_TRIGGER";
+
+	xdebug_log(XLOG_CHAN_CONFIG, XLOG_DEBUG, "Checking if trigger 'XDEBUG_TRIGGER' is enabled for mode '%s'", xdebug_lib_mode_from_value(for_mode));
 
 	/* First we check for the generic 'XDEBUG_TRIGGER' option */
-	trigger_value = find_in_globals("XDEBUG_TRIGGER");
+	trigger_value = find_in_globals(trigger_name);
 
 	/* If not found, we fall back to the per-mode name for backwards compatibility reasons */
 	if (!trigger_value) {
-		const char *fallback_name = NULL;
-
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) && (for_mode == XDEBUG_MODE_PROFILING)) {
-			fallback_name = "XDEBUG_PROFILE";
+			trigger_name = "XDEBUG_PROFILE";
 		} else if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && (for_mode == XDEBUG_MODE_TRACING)) {
-			fallback_name = "XDEBUG_TRACE";
+			trigger_name = "XDEBUG_TRACE";
 		} else if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) && (for_mode == XDEBUG_MODE_STEP_DEBUG)) {
-			fallback_name = "XDEBUG_SESSION";
+			trigger_name = "XDEBUG_SESSION";
 		}
 
-		if (fallback_name) {
-			trigger_value = find_in_globals(fallback_name);
+		if (trigger_name) {
+			xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "Trigger value for 'XDEBUG_TRIGGER' not found, falling back to '%s'", trigger_name);
+			trigger_value = find_in_globals(trigger_name);
 		}
 	}
 
 	if (!trigger_value) {
+		xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "Trigger value for '%s' not found, so not activating", trigger_name);
+
 		if (found_trigger_value != NULL) {
 			*found_trigger_value = NULL;
 		}
 		return 0;
 	}
 
-	/* If the configured shared secret trigger value is empty, then it always
-	 * triggers */
-	if (shared_secret == NULL || shared_secret[0] == '\0') {
+	/* If there is no configured shared secret trigger, always trigger */
+	if (!has_shared_secret()) {
+		xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "No shared secret: Activating");
 		if (found_trigger_value != NULL) {
 			*found_trigger_value = xdstrdup(trigger_value);
 		}
@@ -356,10 +454,7 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 
 	/* Check if the configured trigger value matches the one found in the
 	 * trigger element */
-	if (strcmp(shared_secret, trigger_value) == 0) {
-		if (found_trigger_value != NULL) {
-			*found_trigger_value = xdstrdup(trigger_value);
-		}
+	if (does_shared_secret_match(for_mode, trigger_value, found_trigger_value)) {
 		return 1;
 	}
 

@@ -63,7 +63,7 @@ $loop = new EventLoop;
 $fiber = new Fiber(function () use ($loop, $read): void {
     echo "Waiting for data...\n";
 
-    $fiber = Fiber::this();
+    $fiber = Fiber::getCurrent();
     $loop->read($read, fn() => $fiber->resume());
     Fiber::suspend();
 
