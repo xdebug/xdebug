@@ -411,32 +411,31 @@ static int does_shared_secret_match(int mode, const char *trigger_value, char **
 static int trigger_enabled(int for_mode, char **found_trigger_value)
 {
 	const char *trigger_value = NULL;
-	const char *fallback_name = NULL;
+	const char *trigger_name = "XDEBUG_TRIGGER";
 
 	xdebug_log(XLOG_CHAN_CONFIG, XLOG_DEBUG, "Checking if trigger 'XDEBUG_TRIGGER' is enabled for mode '%s'", xdebug_lib_mode_from_value(for_mode));
 
 	/* First we check for the generic 'XDEBUG_TRIGGER' option */
-	trigger_value = find_in_globals("XDEBUG_TRIGGER");
+	trigger_value = find_in_globals(trigger_name);
 
 	/* If not found, we fall back to the per-mode name for backwards compatibility reasons */
 	if (!trigger_value) {
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING) && (for_mode == XDEBUG_MODE_PROFILING)) {
-			fallback_name = "XDEBUG_PROFILE";
+			trigger_name = "XDEBUG_PROFILE";
 		} else if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && (for_mode == XDEBUG_MODE_TRACING)) {
-			fallback_name = "XDEBUG_TRACE";
+			trigger_name = "XDEBUG_TRACE";
 		} else if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) && (for_mode == XDEBUG_MODE_STEP_DEBUG)) {
-			fallback_name = "XDEBUG_SESSION";
+			trigger_name = "XDEBUG_SESSION";
 		}
 
-		xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "Trigger value for 'XDEBUG_TRIGGER' not found, falling back to '%s'", fallback_name);
-
-		if (fallback_name) {
-			trigger_value = find_in_globals(fallback_name);
+		if (trigger_name) {
+			xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "Trigger value for 'XDEBUG_TRIGGER' not found, falling back to '%s'", trigger_name);
+			trigger_value = find_in_globals(trigger_name);
 		}
 	}
 
 	if (!trigger_value) {
-		xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "Trigger value for '%s' not found, so not activating", fallback_name);
+		xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "Trigger value for '%s' not found, so not activating", trigger_name);
 
 		if (found_trigger_value != NULL) {
 			*found_trigger_value = NULL;
