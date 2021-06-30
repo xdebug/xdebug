@@ -39,7 +39,7 @@ unlink($tf);
 --EXPECTF--
 A Test
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> B->bar() %sbug00799.php:22
+%w%f %w%d     -> A->bar() %sbug00799.php:22
 %w%f %w%d     -> xdebug_stop_trace() %sbug00799.php:24
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

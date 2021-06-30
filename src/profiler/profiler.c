@@ -327,7 +327,7 @@ void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_o
 {
 	char *tmp_fname, *tmp_name;
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
 	switch (fse->function.type) {
 		case XFUNC_INCLUDE:
 		case XFUNC_INCLUDE_ONCE:
@@ -364,7 +364,7 @@ void xdebug_profiler_add_function_details_internal(function_stack_entry *fse)
 {
 	char *tmp_fname, *tmp_name;
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
 	switch (fse->function.type) {
 		case XFUNC_INCLUDE:
 		case XFUNC_INCLUDE_ONCE:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,11 +78,11 @@ static int xdebug_filter_match_path_exclude(function_stack_entry *fse, unsigned 
 
 static int xdebug_filter_match_namespace_include(function_stack_entry *fse, unsigned char *filtered_flag, char *filter)
 {
-	if (!fse->function.class_name && filter[0] == '\0') {
+	if (!fse->function.object_class && filter[0] == '\0') {
 		*filtered_flag = 0;
 		return 1;
 	}
-	if (fse->function.class_name && filter[0] != '\0' && strncasecmp(filter, ZSTR_VAL(fse->function.class_name), strlen(filter)) == 0) {
+	if (fse->function.object_class && filter[0] != '\0' && strncasecmp(filter, ZSTR_VAL(fse->function.object_class), strlen(filter)) == 0) {
 		*filtered_flag = 0;
 		return 1;
 	}
@@ -91,11 +91,11 @@ static int xdebug_filter_match_namespace_include(function_stack_entry *fse, unsi
 
 static int xdebug_filter_match_namespace_exclude(function_stack_entry *fse, unsigned char *filtered_flag, char *filter)
 {
-	if (!fse->function.class_name && filter[0] == '\0') {
+	if (!fse->function.object_class && filter[0] == '\0') {
 		*filtered_flag = 1;
 		return 1;
 	}
-	if (fse->function.class_name && filter[0] != '\0' && strncasecmp(filter, ZSTR_VAL(fse->function.class_name), strlen(filter)) == 0) {
+	if (fse->function.object_class && filter[0] != '\0' && strncasecmp(filter, ZSTR_VAL(fse->function.object_class), strlen(filter)) == 0) {
 		*filtered_flag = 1;
 		return 1;
 	}

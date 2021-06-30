@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,14 +100,14 @@ static void xdebug_func_format(char *buffer, size_t buffer_size, xdebug_func *fu
 
 	if (func->type == XFUNC_MEMBER) {
 		int func_len = strlen(func->function);
-		int len = ZSTR_LEN(func->class_name) + 2 + func_len;
+		int len = ZSTR_LEN(func->object_class) + 2 + func_len;
 
 		if (len + 1 > buffer_size) {
 			goto error;
 		}
-		memcpy(buffer, ZSTR_VAL(func->class_name), ZSTR_LEN(func->class_name));
-		memcpy(buffer + ZSTR_LEN(func->class_name), "->", 2);
-		memcpy(buffer + ZSTR_LEN(func->class_name) + 2, func->function, func_len);
+		memcpy(buffer, ZSTR_VAL(func->object_class), ZSTR_LEN(func->object_class));
+		memcpy(buffer + ZSTR_LEN(func->object_class), "->", 2);
+		memcpy(buffer + ZSTR_LEN(func->object_class) + 2, func->function, func_len);
 		buffer[len] = '\0';
 		return;
 	}
@@ -137,7 +137,7 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 
 	if (opa->scope && !closure) {
 		tmp->type = XFUNC_MEMBER;
-		tmp->class_name = zend_string_copy(opa->scope->name);
+		tmp->object_class = zend_string_copy(opa->scope->name);
 	} else {
 		tmp->type = XFUNC_NORMAL;
 	}
@@ -152,8 +152,11 @@ static void xdebug_print_opcode_info(zend_execute_data *execute_data, const zend
 
 	xdebug_build_fname_from_oparray(&func_info, op_array);
 	xdebug_func_format(function_name, sizeof(function_name), &func_info);
-	if (func_info.class_name) {
-		zend_string_release(func_info.class_name);
+	if (func_info.object_class) {
+		zend_string_release(func_info.object_class);
+	}
+	if (func_info.scope_class) {
+		zend_string_release(func_info.scope_class);
 	}
 	if (func_info.function) {
 		xdfree(func_info.function);
@@ -554,8 +557,11 @@ static void prefill_from_oparray(zend_string *filename, zend_op_array *op_array)
 		xdebug_build_fname_from_oparray(&func_info, op_array);
 		xdebug_func_format(function_name, sizeof(function_name), &func_info);
 
-		if (func_info.class_name) {
-			zend_string_release(func_info.class_name);
+		if (func_info.object_class) {
+			zend_string_release(func_info.object_class);
+		}
+		if (func_info.scope_class) {
+			zend_string_release(func_info.scope_class);
 		}
 		if (func_info.function) {
 			xdfree(func_info.function);
@@ -983,8 +989,11 @@ int xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_arra
 		*tmp_function_name = xdstrdup(buffer);
 		xdebug_code_coverage_start_of_function(op_array, *tmp_function_name);
 
-		if (func_info.class_name) {
-			zend_string_release(func_info.class_name);
+		if (func_info.object_class) {
+			zend_string_release(func_info.object_class);
+		}
+		if (func_info.scope_class) {
+			zend_string_release(func_info.scope_class);
 		}
 		if (func_info.function) {
 			xdfree(func_info.function);
