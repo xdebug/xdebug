@@ -343,30 +343,69 @@ static int has_shared_secret(void)
 	return 0;
 }
 
-static int does_shared_secret_match(int mode, const char *trigger_value, char **found_trigger_value)
+static int does_shared_secret_match_single(int mode, const char *trimmed_trigger_value, const char *trimmed_shared_secret, char **found_trigger_value)
 {
-	char *trimmed_shared_secret = xdebug_trim(XINI_LIB(trigger_value));
-	char *trimmed_trigger_value = xdebug_trim(trigger_value);
-
 	if (strcmp(trimmed_shared_secret, trimmed_trigger_value) == 0) {
-		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "TRGSEC-MATCH", "The trigger value '%s' matched the shared secret '%s' for mode '%s'", trimmed_trigger_value, trimmed_shared_secret, xdebug_lib_mode_from_value(mode));
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_DEBUG, "TRGSEC-MATCH", "The trigger value '%s' matched the shared secret '%s' for mode '%s'", trimmed_trigger_value, trimmed_shared_secret, xdebug_lib_mode_from_value(mode));
 
 		if (found_trigger_value != NULL) {
-			*found_trigger_value = trimmed_trigger_value;
-		} else {
-			xdfree(trimmed_trigger_value);
+			*found_trigger_value = xdstrdup(trimmed_trigger_value);
 		}
-		xdfree(trimmed_shared_secret);
 
 		return 1;
 	}
 
-	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-NOMATCH", "The trigger value '%s' did not match the shared secret '%s' for mode '%s'", trimmed_trigger_value, trimmed_shared_secret, xdebug_lib_mode_from_value(mode));
+	return 0;
+}
+
+static int does_shared_secret_match(int mode, const char *trigger_value, char **found_trigger_value)
+{
+	int         retval = 0;
+	const char *shared_secret = XINI_LIB(trigger_value);
+	char       *trimmed_trigger_value = xdebug_trim(trigger_value);
+
+	/* Check we have a multi-value-shared secret setting */
+	if (strchr(shared_secret, ',') != NULL) {
+		int         i;
+		xdebug_arg *values = xdebug_arg_ctor();
+
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_DEBUG, "TRGSEC-MULT", "The shared secret (xdebug.trigger_value) is multi-value for mode '%s'", xdebug_lib_mode_from_value(mode));
+
+		xdebug_explode(",", shared_secret, values, -1);
+
+		for (i = 0; i < values->c; i++) {
+			char *trimmed_shared_secret = xdebug_trim(values->args[i]);
+
+			retval = does_shared_secret_match_single(mode, trimmed_trigger_value, trimmed_shared_secret, found_trigger_value);
+
+			xdfree(trimmed_shared_secret);
+
+			/* Jump out of the loop if we found a match */
+			if (retval != 0) {
+				break;
+			}
+		}
+
+		xdebug_arg_dtor(values);
+
+		if (retval == 0) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-MNO", "The trigger value '%s' did not match any of the shared secrets (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, xdebug_lib_mode_from_value(mode));
+		}
+	} else {
+		char *trimmed_shared_secret = xdebug_trim(shared_secret);
+
+		retval = does_shared_secret_match_single(mode, trimmed_trigger_value, trimmed_shared_secret, found_trigger_value);
+
+		xdfree(trimmed_shared_secret);
+
+		if (retval == 0) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-NO", "The trigger value '%s' did not match the shared secret (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, xdebug_lib_mode_from_value(mode));
+		}
+	}
 
 	xdfree(trimmed_trigger_value);
-	xdfree(trimmed_shared_secret);
 
-	return 0;
+	return retval;
 }
 
 static int trigger_enabled(int for_mode, char **found_trigger_value)
