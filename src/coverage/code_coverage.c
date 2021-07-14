@@ -708,10 +708,14 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	}
 
 	if (cleanup) {
-		zend_string_release(XG_COV(previous_filename));
+		if (XG_COV(previous_filename)) {
+			zend_string_release(XG_COV(previous_filename));
+		}
 		XG_COV(previous_filename) = NULL;
 		XG_COV(previous_file) = NULL;
-		zend_string_release(XG_COV(previous_mark_filename));
+		if (XG_COV(previous_mark_filename)) {
+			zend_string_release(XG_COV(previous_mark_filename));
+		}
 		XG_COV(previous_mark_filename) = NULL;
 		XG_COV(previous_mark_file) = NULL;
 		xdebug_hash_destroy(XG_COV(code_coverage_info));
