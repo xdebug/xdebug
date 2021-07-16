@@ -146,7 +146,7 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 #if PHP_VERSION_ID < 80000
 	int                old_track_errors;
 #endif
-	int                res = FAILURE;
+	int                res = 1;
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
 	zend_object       *original_exception = EG(exception);
@@ -171,12 +171,17 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 
 	/* Do evaluation */
 	zend_first_try {
-		res = zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval");
+		res = (zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval") == SUCCESS);
 	} zend_end_try();
 
 	/* FIXME: Bubble up exception message to DBGp return packet */
 	if (EG(exception)) {
-		res = FAILURE;
+#if PHP_VERSION_ID >= 80000
+		if (!res) {
+			zend_clear_exception();
+		}
+#endif
+		res = 0;
 	}
 
 	/* Clean up */
@@ -285,7 +290,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 
 						/* Remember error reporting level */
 						res = xdebug_do_eval(extra_brk_info->condition, &retval);
-						if (res == SUCCESS) {
+						if (res) {
 							break_ok = Z_TYPE(retval) == IS_TRUE;
 							zval_dtor(&retval);
 						}

@@ -1035,7 +1035,7 @@ DBGP_FUNC(eval)
 	xdfree(eval_string);
 
 	/* Handle result */
-	if (res == FAILURE) {
+	if (!res) {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_EVALUATING_CODE);
 	} else {
 		ret_xml = xdebug_get_zval_value_xml_node(NULL, &ret_zval, options);
@@ -1631,7 +1631,7 @@ DBGP_FUNC(property_set)
 	xdfree(new_value);
 
 	/* Handle result */
-	if (res == FAILURE) {
+	if (!res) {
 		/* don't send an error, send success = zero */
 		xdebug_xml_add_attribute(*retval, "success", "0");
 	} else {
