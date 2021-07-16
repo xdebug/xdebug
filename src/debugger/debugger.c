@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -542,7 +542,7 @@ void xdebug_debugger_rinit(void)
 			)
 			&& !SG(headers_sent)
 		) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, time(NULL) + XDEBUG_COOKIE_EXPIRE_TIME, "/", 1, NULL, 0, 0, 1, 0);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, 0, "/", 1, NULL, 0, 0, 1, 0);
 			XG_DBG(no_exec) = 1;
 		}
 		zend_string_release(stop_no_exec);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,8 +44,6 @@ struct _xdebug_lines_list {
 	size_t size;  /* How many function/line mappings are allocated */
 	xdebug_function_lines_map_item **functions;
 };
-
-#define XDEBUG_COOKIE_EXPIRE_TIME 3600
 
 #define XG_DBG(v)      (XG(globals.debugger.v))
 #define XINI_DBG(v)    (XG(settings.debugger.v))

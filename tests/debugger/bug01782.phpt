@@ -21,5 +21,5 @@ Xdebug: [Step Debug] %sTried: localhost:9172 (through xdebug.client_host/xdebug.
 %sbug01782.php:2:
 array(1) {
   [0] =>
-  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; expires=%s; Max-Age=3%d; path=/; SameSite=Strict"
+  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; path=/; SameSite=Strict"
 }
