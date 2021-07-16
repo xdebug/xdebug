@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1782: Make sure we use SameSite=Strict cookies (>= PHP 7.3)
+Test for bug #1782: Make sure we use SameSite=Lax cookies (>= PHP 7.3)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
@@ -21,5 +21,5 @@ Xdebug: [Step Debug] %sTried: localhost:9172 (through xdebug.client_host/xdebug.
 %sbug01782.php:2:
 array(1) {
   [0] =>
-  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; path=/; SameSite=Strict"
+  string(%d) "Set-Cookie: XDEBUG_SESSION=testing; path=/; SameSite=Lax"
 }

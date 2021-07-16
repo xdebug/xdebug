@@ -26,7 +26,7 @@ dbgpRunFile(
 
 -> property_get -i 3 -n $e
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="3"><property name="$e" fullname="$e" type="array" children="1" numchildren="1" page="0" pagesize="32"><property name="0" fullname="$e[0]" type="string" size="%d" encoding="base64"><![CDATA[U2V0LUNvb2tpZTogWERFQlVHX1NFU1NJT049Zm9vYmFyOyBleHBp%s]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="3"><property name="$e" fullname="$e" type="array" children="1" numchildren="1" page="0" pagesize="32"><property name="0" fullname="$e[0]" type="string" size="%d" encoding="base64"><![CDATA[U2V0LUNvb2tpZTogWERFQlVHX1NFU1NJT049Zm9vYmFyOyB%s]]></property></property></response>
 
 -> detach -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
