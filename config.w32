@@ -13,7 +13,7 @@ if (PHP_XDEBUG != 'no') {
 	var XDEBUG_DEVELOP_SOURCES="develop.c monitor.c php_functions.c stack.c superglobals.c"
 	var XDEBUG_GCSTATS_SOURCES="gc_stats.c"
 	var XDEBUG_PROFILER_SOURCES="profiler.c"
-	var XDEBUG_TRACING_SOURCES="trace_computerized.c trace_html.c trace_textual.c tracing.c"
+	var XDEBUG_TRACING_SOURCES="trace_computerized.c trace_flamegraph.c trace_html.c trace_textual.c tracing.c"
 	
 	var files = "xdebug.c";
 

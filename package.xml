@@ -181,12 +181,14 @@ Wed, Sep 06, 2023 - Xdebug 3.3.0alpha2
      <file name="tracing.c" role="src" />
      <file name="tracing.h" role="src" />
      <file name="tracing_private.h" role="src" />
-     <file name="trace_textual.c" role="src" />
-     <file name="trace_textual.h" role="src" />
      <file name="trace_computerized.c" role="src" />
      <file name="trace_computerized.h" role="src" />
      <file name="trace_html.c" role="src" />
      <file name="trace_html.h" role="src" />
+     <file name="trace_flamegraph.c" role="src" />
+     <file name="trace_flamegraph.h" role="src" />
+     <file name="trace_textual.c" role="src" />
+     <file name="trace_textual.h" role="src" />
     </dir>
    </dir>
   </dir> <!-- / -->
