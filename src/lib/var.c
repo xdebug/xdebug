@@ -343,7 +343,7 @@ static void fetch_zval_from_symbol_table(
 			}
 #endif
 			element = prepare_search_key(name, &element_length, "", 0);
-			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && CE_STATIC_MEMBERS(cce)) {
+			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->default_static_members_count && CE_STATIC_MEMBERS(cce)) {
 				ZVAL_COPY(&tmp_retval, &CE_STATIC_MEMBERS(cce)[zpp->offset]);
 				goto cleanup;
 			}
