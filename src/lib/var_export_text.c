@@ -16,6 +16,7 @@
 
 #include "php.h"
 #include "ext/standard/php_string.h"
+#include "Zend/zend_closures.h"
 #if PHP_VERSION_ID >= 80100
 # include "zend_enum.h"
 #endif
@@ -132,6 +133,43 @@ static int xdebug_object_element_export_text_ansi(zval *object, zval *zv_nptr, z
 	options->runtime[level].current_element_nr++;
 	return 0;
 }
+
+static void handle_closure(xdebug_str *str, zval *obj, int level, int mode)
+{
+	const zend_function *closure_function;
+
+	if (Z_TYPE_P(obj) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(obj), zend_ce_closure)) {
+		return;
+	}
+
+#if PHP_VERSION_ID >= 80000
+	closure_function = zend_get_closure_method_def(Z_OBJ_P(obj));
+#else
+	closure_function = zend_get_closure_method_def(obj);
+#endif
+
+	xdebug_str_add_fmt(
+		str, "%*s%s%svirtual%s $closure =>\n%*s\"",
+		(level * 4) - 2, "",
+		ANSI_COLOR_MODIFIER, ANSI_COLOR_BOLD, ANSI_COLOR_RESET,
+		(level * 4) - 2, ""
+	);
+
+	if (closure_function->common.scope) {
+		if (closure_function->common.fn_flags & ZEND_ACC_STATIC) {
+			xdebug_str_add_fmt(str, "%s", ANSI_COLOR_OBJECT);
+			xdebug_str_add_zstr(str, closure_function->common.scope->name);
+			xdebug_str_add_fmt(str, "%s::", ANSI_COLOR_RESET);
+		} else {
+			xdebug_str_add_fmt(str, "%s$this%s->", ANSI_COLOR_OBJECT, ANSI_COLOR_RESET);
+		}
+	}
+
+	xdebug_str_add_fmt(str, "%s", ANSI_COLOR_STRING);
+	xdebug_str_add_zstr(str, closure_function->common.function_name);
+	xdebug_str_add_fmt(str, "%s\"\n", ANSI_COLOR_RESET);
+}
+
 
 static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options)
 {
@@ -304,6 +342,8 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 					Z_OBJ_HANDLE_P(*struc),
 					ANSI_COLOR_LONG, myht ? myht->nNumOfElements : 0, ANSI_COLOR_RESET
 				);
+
+				handle_closure(str, *struc, level, mode);
 
 				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;
