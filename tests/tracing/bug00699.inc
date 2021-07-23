@@ -4,7 +4,7 @@ class SomeClass implements Countable {
 
     public function addData($var) {
         $this->data[] = $var;
-    }   
+    }
 
 
 
@@ -13,8 +13,8 @@ class SomeClass implements Countable {
 
 
 
-    public function count() {
+    public function count() : int {
         return count($this->data);
-    }   
+    }
 }
 ?>

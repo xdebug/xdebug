@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #642: No line number for offsetGet and offsetSet (PHP >= 8.0)
+Test for bug #642: No line number for offsetGet and offsetSet (PHP < 8.0)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.0');
+check_reqs('PHP < 8.0');
 ?>
 --INI--
 xdebug.mode=trace
@@ -18,16 +18,16 @@ $tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
 class Test implements ArrayAccess {
     private $container = array();
     
-    public function offsetSet($offset, $value) : void {
+    public function offsetSet($offset, $value) {
         $this->container[$offset] = $value;
     }
-    public function offsetExists($offset) : bool {
+    public function offsetExists($offset) {
         return isset($this->container[$offset]);
     }
-    public function offsetUnset($offset) : void {
+    public function offsetUnset($offset) {
         unset($this->container[$offset]);
     }
-    public function offsetGet($offset) : mixed {
+    public function offsetGet($offset) {
         return isset($this->container[$offset]) ? $this->container[$offset] : null;
     }
 }
@@ -44,10 +44,10 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> Test->offsetSet($offset = 'test', $value = 'test') %sbug00642-php80.php:22
-%w%f %w%d     -> Test->offsetGet($offset = 'test') %sbug00642-php80.php:23
-%w%f %w%d     -> Test->offsetExists($offset = 'test') %sbug00642-php80.php:24
-%w%f %w%d     -> Test->offsetUnset($offset = 'test') %sbug00642-php80.php:25
-%w%f %w%d     -> xdebug_stop_trace() %sbug00642-php80.php:27
+%w%f %w%d     -> Test->offsetSet($offset = 'test', $value = 'test') %sbug00642-php74.php:22
+%w%f %w%d     -> Test->offsetGet($offset = 'test') %sbug00642-php74.php:23
+%w%f %w%d     -> Test->offsetExists($offset = 'test') %sbug00642-php74.php:24
+%w%f %w%d     -> Test->offsetUnset($offset = 'test') %sbug00642-php74.php:25
+%w%f %w%d     -> xdebug_stop_trace() %sbug00642-php74.php:27
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
