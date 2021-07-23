@@ -411,8 +411,8 @@ function save_or_mail_results()
 			if ($sum_results['FAILED']) {
 				foreach ($PHP_FAILED_TESTS['FAILED'] as $test_info) {
 					$failed_tests_data .= $sep . $test_info['name'] . $test_info['info'];
-					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']), FILE_BINARY);
-					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']), FILE_BINARY);
+					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['output']));
+					$failed_tests_data .= $sep . file_get_contents(realpath($test_info['diff']));
 					$failed_tests_data .= $sep . "\n\n";
 				}
 				$status = "failed";
@@ -1376,7 +1376,7 @@ TEST $file
 					$section_text[$key] = dirname($file) . '/' . trim(str_replace('..', '', $section_text[$key]));
 
 					if (file_exists($section_text[$key])) {
-						$section_text[$prefix] = file_get_contents($section_text[$key], FILE_BINARY);
+						$section_text[$prefix] = file_get_contents($section_text[$key]);
 						unset($section_text[$key]);
 					} else {
 						$bork_info = "could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
@@ -2218,12 +2218,12 @@ COMMAND $cmd
 	if (!$passed || $leaked) {
 
 		// write .exp
-		if (strpos($log_format, 'E') !== false && file_put_contents($exp_filename, $wanted, FILE_BINARY) === false) {
+		if (strpos($log_format, 'E') !== false && file_put_contents($exp_filename, $wanted) === false) {
 			error("Cannot create expected test output - $exp_filename");
 		}
 
 		// write .out
-		if (strpos($log_format, 'O') !== false && file_put_contents($output_filename, $output, FILE_BINARY) === false) {
+		if (strpos($log_format, 'O') !== false && file_put_contents($output_filename, $output) === false) {
 			error("Cannot create test output - $output_filename");
 		}
 
@@ -2233,7 +2233,7 @@ COMMAND $cmd
 			$diff = "# original source file: $shortname\n" . $diff;
 		}
 		show_file_block('diff', $diff);
-		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, $diff, FILE_BINARY) === false) {
+		if (strpos($log_format, 'D') !== false && file_put_contents($diff_filename, $diff) === false) {
 			error("Cannot create test diff - $diff_filename");
 		}
 
@@ -2241,7 +2241,7 @@ COMMAND $cmd
 		if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, "#!/bin/sh
 
 {$cmd}
-", FILE_BINARY) === false) {
+") === false) {
 			error("Cannot create test shell script - $sh_filename");
 		}
 		chmod($sh_filename, 0755);
@@ -2253,7 +2253,7 @@ $wanted
 ---- ACTUAL OUTPUT
 $output
 ---- FAILED
-", FILE_BINARY) === false) {
+") === false) {
 			error("Cannot create test log - $log_filename");
 			error_report($file, $log_filename, $tested);
 		}
