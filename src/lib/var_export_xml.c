@@ -468,6 +468,12 @@ void xdebug_var_xml_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_
 
 	xdebug_zend_hash_apply_protection_begin(static_members);
 
+#if PHP_VERSION_ID >= 80100
+	if (ce->default_static_members_count && !CE_STATIC_MEMBERS(ce)) {
+		zend_class_init_statics(ce);
+	}
+#endif
+
 	ZEND_HASH_FOREACH_PTR(static_members, zpi) {
 		xdebug_var_xml_attach_property_with_contents(zpi, static_container, options, ce, STR_NAME_VAL(ce->name), &children);
 	} ZEND_HASH_FOREACH_END();
@@ -585,7 +591,9 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			/* Adding static properties */
 			xdebug_zend_hash_apply_protection_begin(&ce->properties_info);
 
-#if PHP_VERSION_ID >= 70400
+#if PHP_VERSION_ID >= 80100
+			zend_class_init_statics(ce);
+#elif PHP_VERSION_ID >= 70400
 			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 				zend_class_init_statics(ce);
 			}
