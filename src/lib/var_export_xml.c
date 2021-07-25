@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,6 +15,7 @@
  */
 
 #include "var_export_xml.h"
+#include "Zend/zend_closures.h"
 
 static xdebug_str *prepare_variable_name(xdebug_str *name)
 {
@@ -467,6 +468,12 @@ void xdebug_var_xml_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_
 
 	xdebug_zend_hash_apply_protection_begin(static_members);
 
+#if PHP_VERSION_ID >= 80100
+	if (ce->default_static_members_count && !CE_STATIC_MEMBERS(ce)) {
+		zend_class_init_statics(ce);
+	}
+#endif
+
 	ZEND_HASH_FOREACH_PTR(static_members, zpi) {
 		xdebug_var_xml_attach_property_with_contents(zpi, static_container, options, ce, STR_NAME_VAL(ce->name), &children);
 	} ZEND_HASH_FOREACH_END();
@@ -572,6 +579,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 #if PHP_VERSION_ID < 70400
 			int                 is_temp;
 #endif
+			int                 extra_children = 0;
 			zend_property_info *zpi_val;
 
 			ALLOC_HASHTABLE(merged_hash);
@@ -583,7 +591,9 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			/* Adding static properties */
 			xdebug_zend_hash_apply_protection_begin(&ce->properties_info);
 
-#if PHP_VERSION_ID >= 70400
+#if PHP_VERSION_ID >= 80100
+			zend_class_init_statics(ce);
+#elif PHP_VERSION_ID >= 70400
 			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 				zend_class_init_statics(ce);
 			}
@@ -624,6 +634,63 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			}
 #endif
 
+			if (instanceof_function(Z_OBJCE_P(*struc), zend_ce_closure)) {
+				xdebug_xml_node *closure_cont, *closure_func;
+#if PHP_VERSION_ID >= 80000
+				const zend_function *closure_function = zend_get_closure_method_def(Z_OBJ_P(*struc));
+#else
+				const zend_function *closure_function = zend_get_closure_method_def(*struc);
+#endif
+
+				xdebug_xml_add_attribute(node, "facet", "closure");
+
+				closure_cont = xdebug_xml_node_init("property");
+				xdebug_xml_add_attribute(closure_cont, "facet", "virtual readonly");
+				xdebug_xml_add_attribute(closure_cont, "name", "{closure}");
+				xdebug_xml_add_attribute(closure_cont, "type", "array");
+				xdebug_xml_add_attribute(closure_cont, "children", "1");
+				xdebug_xml_add_attribute(closure_cont, "page", "0");
+				xdebug_xml_add_attribute(closure_cont, "pagesize", "2");
+
+				if (closure_function->common.scope) {
+					xdebug_xml_node *closure_scope = xdebug_xml_node_init("property");
+					xdebug_xml_add_attribute(closure_scope, "facet", "readonly");
+					xdebug_xml_add_attribute(closure_scope, "name", "scope");
+					xdebug_xml_add_attribute(closure_scope, "type", "string");
+
+					if (closure_function->common.fn_flags & ZEND_ACC_STATIC) {
+						xdebug_xml_add_text_ex(
+							closure_scope,
+							ZSTR_VAL(closure_function->common.scope->name),
+							ZSTR_LEN(closure_function->common.scope->name),
+							0, 0
+						);
+					} else {
+						xdebug_xml_add_text_ex(closure_scope, (char*) "$this", 6, 0, 0);
+					}
+
+					xdebug_xml_add_child(closure_cont, closure_scope);
+					xdebug_xml_add_attribute(closure_cont, "numchildren", "2");
+				} else {
+					xdebug_xml_add_attribute(closure_cont, "numchildren", "1");
+				}
+
+				closure_func = xdebug_xml_node_init("property");
+				xdebug_xml_add_attribute(closure_func, "facet", "readonly");
+				xdebug_xml_add_attribute(closure_func, "name", "function");
+				xdebug_xml_add_attribute(closure_func, "type", "string");
+				xdebug_xml_add_text_ex(
+					closure_func,
+					ZSTR_VAL(closure_function->common.function_name),
+					ZSTR_LEN(closure_function->common.function_name),
+					0, 0
+				);
+				xdebug_xml_add_child(closure_cont, closure_func);
+
+				xdebug_xml_add_child(node, closure_cont);
+				extra_children = 1;
+			}
+
 			{
 				xdebug_str tmp_str;
 				tmp_str.d = ZSTR_VAL(class_name);
@@ -634,7 +701,11 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 
 			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
-				xdebug_xml_add_attribute_ex(node, "numchildren", xdebug_sprintf("%d", zend_hash_num_elements(merged_hash)), 0, 1);
+				xdebug_xml_add_attribute_ex(
+					node, "numchildren",
+					xdebug_sprintf("%d", zend_hash_num_elements(merged_hash) + extra_children),
+					0, 1
+				);
 				if (level < options->max_depth) {
 					xdebug_xml_add_attribute_ex(node, "page", xdebug_sprintf("%d", options->runtime[level].page), 0, 1);
 					xdebug_xml_add_attribute_ex(node, "pagesize", xdebug_sprintf("%d", options->max_children), 0, 1);

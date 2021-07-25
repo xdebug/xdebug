@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #642: No line number for offsetGet and offsetSet
+Test for bug #642: No line number for offsetGet and offsetSet (PHP < 8.0)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.0');
+?>
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=0
@@ -39,10 +44,10 @@ unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> Test->offsetSet($offset = 'test', $value = 'test') %sbug00642.php:22
-%w%f %w%d     -> Test->offsetGet($offset = 'test') %sbug00642.php:23
-%w%f %w%d     -> Test->offsetExists($offset = 'test') %sbug00642.php:24
-%w%f %w%d     -> Test->offsetUnset($offset = 'test') %sbug00642.php:25
-%w%f %w%d     -> xdebug_stop_trace() %sbug00642.php:27
+%w%f %w%d     -> Test->offsetSet($offset = 'test', $value = 'test') %sbug00642-php74.php:22
+%w%f %w%d     -> Test->offsetGet($offset = 'test') %sbug00642-php74.php:23
+%w%f %w%d     -> Test->offsetExists($offset = 'test') %sbug00642-php74.php:24
+%w%f %w%d     -> Test->offsetUnset($offset = 'test') %sbug00642-php74.php:25
+%w%f %w%d     -> xdebug_stop_trace() %sbug00642-php74.php:27
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

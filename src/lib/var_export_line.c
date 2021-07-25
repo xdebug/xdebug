@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,6 +16,7 @@
 
 #include "php.h"
 #include "ext/standard/php_string.h"
+#include "Zend/zend_closures.h"
 #if PHP_VERSION_ID >= 80100
 # include "zend_enum.h"
 #endif
@@ -108,6 +109,35 @@ static int xdebug_object_element_export(zval *object, zval *zv_nptr, zend_ulong 
 	}
 	options->runtime[level].current_element_nr++;
 	return 0;
+}
+
+static void handle_closure(xdebug_str *str, zval *obj)
+{
+	const zend_function *closure_function;
+
+	if (Z_TYPE_P(obj) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(obj), zend_ce_closure)) {
+		return;
+	}
+
+#if PHP_VERSION_ID >= 80000
+	closure_function = zend_get_closure_method_def(Z_OBJ_P(obj));
+#else
+	closure_function = zend_get_closure_method_def(obj);
+#endif
+
+	xdebug_str_add_literal(str, "virtual $closure = \"");
+
+	if (closure_function->common.scope) {
+		if (closure_function->common.fn_flags & ZEND_ACC_STATIC) {
+			xdebug_str_add_zstr(str, closure_function->common.scope->name);
+			xdebug_str_add_literal(str, "::");
+		} else {
+			xdebug_str_add_literal(str, "$this->");
+		}
+	}
+	xdebug_str_add_zstr(str, closure_function->common.function_name);
+
+	xdebug_str_add_literal(str, "\", ");
 }
 
 void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options)
@@ -260,6 +290,8 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 				xdebug_str_add_literal(str, "class ");
 				xdebug_str_add(str, ZSTR_VAL(Z_OBJCE_P(*struc)->name), 0);
 				xdebug_str_add_literal(str, " { ");
+
+				handle_closure(str, *struc);
 
 				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;

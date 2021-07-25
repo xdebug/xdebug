@@ -12,11 +12,11 @@ xdebug.mode=debug
 xdebug.start_with_request=yes
 xdebug.log={TMPDIR}/bug964.txt
 xdebug.discover_client_host=1
-xdebug.client_port=9003
+xdebug.client_port=9903
 --FILE--
 <?php
 preg_match(
-	"#Client host discovered through HTTP header, connecting to ([^:]+):9003#",
+	"#Client host discovered through HTTP header, connecting to ([^:]+):9903#",
 	file_get_contents( sys_get_temp_dir() . "/bug964.txt" ),
 	$match
 );
