@@ -57,13 +57,13 @@ echo file_get_contents($tf);
 unlink($tf);
 ?>
 --EXPECTF--
-{main};A;AA 0
-{main};A;AB;ABA 0
-{main};A;AB;ABB %d
-{main};A;AB 0
-{main};A;AA 0
-{main};A;AB;ABA 0
-{main};A;AB;ABB %d
-{main};A;AB 0
-{main};A;AC %d
-{main};A %d
+A;AA 0
+A;AB;ABA 0
+A;AB;ABB %d
+A;AB 0
+A;AA 0
+A;AB;ABA 0
+A;AB;ABB %d
+A;AB 0
+A;AC %d
+A %d

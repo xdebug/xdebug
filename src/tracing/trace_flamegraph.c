@@ -25,78 +25,62 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
-flamegraph_list *list_item_create()
+flamegraph_stack *fg_stack_create()
 {
-	flamegraph_list *ret;
-
-	ret = xdmalloc(sizeof(flamegraph_list));
+	flamegraph_stack *ret;
+	ret = xdmalloc(sizeof(flamegraph_stack));
 	ret->head = NULL;
-
 	return ret;
 }
 
-void list_item_free(flamegraph_list *values)
+void fg_stack_free(flamegraph_stack *stack)
 {
-	flamegraph_list_item *cur, *prev;
-
-	cur = values->head;
+	flamegraph_stack_item *cur, *prev;
+	cur = stack->head;
 	while (cur) {
 		prev = cur->next;
+		xdfree(cur->prefix);
 		xdfree(cur);
 		cur = prev;
 	}
-	xdfree(values);
+	xdfree(stack);
 }
 
-/* Increment or set value at given key, values are added to head since we will
-   always attempt to access recently added items, when processing direct
-   children in execution stack. */
-void list_item_inc(flamegraph_list *values, int key, int inc)
+static inline void fg_stack_inc(flamegraph_stack *stack, int inc)
 {
-	flamegraph_list_item *cur, *item;
-
-	cur = values->head;
-	while (cur) {
-		if (cur->key == key) {
-			cur->value += inc;
-			return;
-		}
-		cur = cur->next;
+	if (NULL == stack->head) {
+		return;
 	}
-
-	item = xdmalloc(sizeof(flamegraph_list_item));
-	item->key = key;
-	item->value = inc;
-	item->next = values->head;
-	values->head = item;
+	stack->head->value += inc;
 }
 
-/* Remove the given key, return its value, or 0 if missing. */
-int list_item_del(flamegraph_list *values, int key)
+static inline void fg_stack_push(flamegraph_stack *stack, char *prefix)
 {
-	int ret = 0;
-	flamegraph_list_item *cur = NULL, *prev = NULL;
-
-	cur = values->head;
-	while (cur) {
-		if (cur->key == key) {
-			ret = cur->value;
-			if (NULL == prev) {
-				values->head = cur; /* Removing head. */
-			} else {
-				prev->next = cur->next;
-			}
-			xdfree(cur);
-			return ret;
-		}
-		prev = cur;
-		cur = cur->next;
-	}
-
-	return ret;
+	flamegraph_stack_item *item;
+	item = xdmalloc(sizeof(flamegraph_stack_item));
+	item->prefix = xdstrdup(prefix);
+	item->value = 0;
+	item->next = stack->head;
+	stack->head = item;
 }
 
-int compute_inclusive_value(xdebug_trace_flamegraph_context *context, function_stack_entry *fse)
+static inline flamegraph_stack_item *fg_stack_get_head(flamegraph_stack *stack)
+{
+	return stack->head;
+}
+
+static inline flamegraph_stack_item *fg_stack_pop(flamegraph_stack *stack)
+{
+	flamegraph_stack_item *item;
+	if (NULL == stack->head) {
+		return 0;
+	}
+	item = stack->head;
+	stack->head = item->next;
+	return item;
+}
+
+static inline int compute_inclusive_value(xdebug_trace_flamegraph_context *context, function_stack_entry *fse)
 {
 	int value = 0, current_mem;
 
@@ -142,7 +126,7 @@ void *xdebug_trace_flamegraph_init_cost(char *fname, zend_string *script_filenam
 
 	if (tmp_flamegraph_context) {
 		tmp_flamegraph_context->mode = XDEBUG_TRACE_OPTION_FLAMEGRAPH_COST;
-		tmp_flamegraph_context->values = list_item_create();
+		tmp_flamegraph_context->stack = fg_stack_create();
 	}
 
 	return tmp_flamegraph_context;
@@ -154,7 +138,7 @@ void *xdebug_trace_flamegraph_init_mem(char *fname, zend_string *script_filename
 
 	if (tmp_flamegraph_context) {
 		tmp_flamegraph_context->mode = XDEBUG_TRACE_OPTION_FLAMEGRAPH_MEM;
-		tmp_flamegraph_context->values = list_item_create();
+		tmp_flamegraph_context->stack = fg_stack_create();
 	}
 
 	return tmp_flamegraph_context;
@@ -164,8 +148,8 @@ void xdebug_trace_flamegraph_deinit(void *ctxt)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
 
-	if (NULL != context->values) {
-		list_item_free(context->values);
+	if (NULL != context->stack) {
+		fg_stack_free(context->stack);
 	}
 
 	fclose(context->trace_file);
@@ -192,41 +176,50 @@ char *xdebug_trace_flamegraph_get_filename(void *ctxt)
 
 void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
 {
+	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
+	flamegraph_stack_item *head = fg_stack_get_head(context->stack);
+	char *tmp_name, *prefix;
+
+	tmp_name = xdebug_show_fname(fse->function, 0, 0);
+
+	/* Insert an item into the custom stack which yields path prefix and
+	   a 0 value for the current function, if this function calls children
+	   they will append their costs to it. Once we reach out this function
+	   we will remove the element from the stack. */
+	if (NULL == head) {
+		/* Root function. */
+		fg_stack_push(context->stack, tmp_name);
+	} else {
+		prefix = xdmalloc(strlen(head->prefix) + 1 + strlen(tmp_name));
+		sprintf(prefix, "%s;%s", head->prefix, tmp_name);
+		fg_stack_push(context->stack, prefix);
+		xdfree(prefix);
+	}
+
+	xdfree(tmp_name);
 }
 
 void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse, int function_nr)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	char *tmp_name;
-	int value, child_delta;
-	function_stack_entry *parent_fse;
-	size_t i;
-	size_t stack_size = XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1;
+	int inclusive, self;
+	flamegraph_stack_item *stack_item = fg_stack_pop(context->stack);
 
-	value = compute_inclusive_value(context, fse);
-
-	/* This will always include the full stack instead of starting where
-	   xdebug_start_trace() was called in the stack. There's no trivial
-	   solution because xdebug_stop_trace() could be called lower in the
-	   stack, and this would yield a broken trace file. */
-	for (i = 0; i < stack_size; ++i) {
-		parent_fse = xdebug_vector_element_get(XG_BASE(stack), i);
-		if (NULL != parent_fse) {
-			tmp_name = xdebug_show_fname(parent_fse->function, 0, 0);
-			xdebug_str_add_fmt(&str, "%s;", tmp_name);
-		}
-	}
-	/* Catch direct parent and add child timing. */
-	if (NULL != parent_fse) {
-		list_item_inc(context->values, parent_fse->function_nr, value);
+	if (NULL == stack_item) {
+		/* This should never happen, better be safe than sorry. */
+		/* @todo log error? */
+		return;
 	}
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0);
+	inclusive = compute_inclusive_value(context, fse);
+	self = inclusive - stack_item->value;
+	xdebug_str_add_fmt(&str, "%s %d\n", stack_item->prefix, self);
+	xdfree(stack_item->prefix);
+	xdfree(stack_item);
 
-	/* Subtract child self cost, in order to keep on non-inclusive cost. */
-	child_delta = list_item_del(context->values, fse->function_nr);
-	xdebug_str_add_fmt(&str, "%s %d\n", tmp_name, value - child_delta);
+	/* Increment head value (which is now parent) by inclusive cost. */
+	fg_stack_inc(context->stack, inclusive);
 
 	fprintf(context->trace_file, "%s", str.d);
 	fflush(context->trace_file);
