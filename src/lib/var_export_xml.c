@@ -129,8 +129,10 @@ void xdebug_var_xml_attach_uninitialized_var(xdebug_var_export_options *options,
 ** XML node printing routines
 */
 
-#define XDEBUG_OBJECT_ITEM_TYPE_PROPERTY        1
-#define XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY 2
+#define XDEBUG_OBJECT_ITEM_TYPE_PROPERTY           0
+#define XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY 1<<0
+#define XDEBUG_OBJECT_ITEM_TYPE_READONLY        1<<1
+
 
 typedef struct
 {
@@ -329,7 +331,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 				tmp_fullname = xdebug_str_new();
 
 				xdebug_str_add_str(tmp_fullname, parent_name);
-				if ((*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY) {
+				if ((*item)->type & XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY) {
 					xdebug_str_add_literal(tmp_fullname, "::");
 				} else {
 					xdebug_str_add_literal(tmp_fullname, "->");
@@ -383,7 +385,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 			if (parent_name) {
 				char       *tmp_formatted_prop;
 
-				tmp_formatted_prop = xdebug_sprintf("%s%s" XDEBUG_INT_FMT, parent_name, (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index_key);
+				tmp_formatted_prop = xdebug_sprintf("%s%s" XDEBUG_INT_FMT, parent_name, (*item)->type & XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "::" : "->", (*item)->index_key);
 				tmp_fullname = xdebug_str_create_from_char(tmp_formatted_prop);
 
 				xdfree(tmp_formatted_prop);
@@ -396,7 +398,16 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 			add_xml_attribute_or_element(options, node, "fullname", 8, tmp_fullname);
 		}
 
-		xdebug_xml_add_attribute_ex(node, "facet", xdebug_sprintf("%s%s", (*item)->type == XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "", modifier), 0, 1);
+
+		xdebug_xml_add_attribute_ex(
+			node, "facet",
+			xdebug_sprintf("%s%s%s",
+				(*item)->type & XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "",
+				modifier,
+				(*item)->type & XDEBUG_OBJECT_ITEM_TYPE_READONLY ? " readonly" : ""
+			),
+			0, 1
+		);
 		xdebug_xml_add_child(parent, node);
 		xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
 
@@ -617,7 +628,28 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 				xdebug_zend_hash_apply_protection_begin(myht);
 
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, tmp_val) {
-					object_item_add_to_merged_hash(tmp_val, num, key, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_PROPERTY);
+					int flags = XDEBUG_OBJECT_ITEM_TYPE_PROPERTY;
+
+#if PHP_VERSION_ID >= 80100
+					if (ce->type != ZEND_INTERNAL_CLASS) {
+						const char         *cls_name, *tmp_prop_name;
+						size_t              tmp_prop_name_len;
+						zend_string        *unmangled;
+						zend_property_info *info;
+
+						zend_unmangle_property_name_ex(key, &cls_name, &tmp_prop_name, &tmp_prop_name_len);
+						unmangled = zend_string_init_interned(tmp_prop_name, tmp_prop_name_len, 0);
+
+						info = zend_get_property_info(Z_OBJCE_P(*struc), unmangled, 1);
+
+						zend_string_release(unmangled);
+
+						if (info && info != ZEND_WRONG_PROPERTY_INFO && info->flags & ZEND_ACC_READONLY) {
+							flags |= XDEBUG_OBJECT_ITEM_TYPE_READONLY;
+						}
+					}
+#endif
+					object_item_add_to_merged_hash(tmp_val, num, key, merged_hash, flags);
 				} ZEND_HASH_FOREACH_END();
 
 				xdebug_zend_hash_apply_protection_end(myht);
