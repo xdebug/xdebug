@@ -853,8 +853,18 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 	if (info) {
 #if PHP_VERSION_ID >= 80000
 		zend_string *type_info = zend_type_to_string(info->type);
-		type_str = xdebug_str_create(ZSTR_VAL(type_info), ZSTR_LEN(type_info));
+		type_str = xdebug_str_new();
+
+# if PHP_VERSION_ID >= 80100
+		if (info->flags & ZEND_ACC_READONLY) {
+			xdebug_str_add_literal(type_str, "readonly ");
+		}
+# endif
+
+		xdebug_str_add_zstr(type_str, type_info);
+
 		zend_string_release(type_info);
+
 #else
 		type_str = xdebug_str_new();
 
