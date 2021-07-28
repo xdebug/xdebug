@@ -24,7 +24,6 @@ typedef struct _flamegraph_function
 {
 	xdebug_str *prefix;
 	int value;
-	struct _flamegraph_function *next;
 } flamegraph_function;
 
 typedef struct _xdebug_trace_flamegraph_context

@@ -45,7 +45,7 @@ static inline void fg_function_dtor(flamegraph_function *function)
 static inline xdebug_str *fg_function_key(const int function_nr) {
 	xdebug_str *key = xdebug_str_new();
 
-	xdebug_str_add_fmt(key, "fun-%d", function_nr);
+	xdebug_str_add_fmt(key, "%d", function_nr);
 
 	return key;
 }
@@ -53,38 +53,34 @@ static inline xdebug_str *fg_function_key(const int function_nr) {
 static inline void fg_function_add(const xdebug_trace_flamegraph_context *context, const int function_nr, const flamegraph_function *function) {
 	xdebug_str *key = fg_function_key(function_nr);
 
-	/* @todo This call always segfault badly. */
-	xdebug_hash_add(context->functions, key->d, key->l, function);
+	xdebug_hash_add(context->functions, key->d, key->l, (void*) function);
 
 	xdebug_str_free(key);
 }
 
 static inline flamegraph_function *fg_function_find(const xdebug_trace_flamegraph_context *context, const int function_nr) {
-	flamegraph_function *function;
+	flamegraph_function *function = NULL;
 	xdebug_str          *key = fg_function_key(function_nr);
 
-	xdebug_hash_find(context->functions, key->d, key->l, (void*) function);
+	xdebug_hash_find(context->functions, key->d, key->l, (void*) &function);
 
 	xdebug_str_free(key);
 
 	return function;
 }
 
-static inline flamegraph_function *fg_function_delete(const xdebug_trace_flamegraph_context *context, const int function_nr) {
-	flamegraph_function *function;
+static inline void fg_function_delete(const xdebug_trace_flamegraph_context *context, const int function_nr) {
 	xdebug_str          *key = fg_function_key(function_nr);
 
 	xdebug_hash_delete(context->functions, key->d, key->l);
 
 	xdebug_str_free(key);
-
-	return function;
 }
 
 /* Find parent function in xdebug stack, which is Fiber-safe. */
 static inline function_stack_entry *fg_parent_find() {
 	function_stack_entry *parent_fse;
-	int                   parent_index = XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1;
+	int                   parent_index = XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 2;
 
 	parent_fse = xdebug_vector_element_get(XG_BASE(stack), parent_index);
 
@@ -199,7 +195,6 @@ void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fs
 	function_stack_entry            *parent_fse;
 	flamegraph_function             *function;
 	flamegraph_function             *parent_function;
-	xdebug_str                      *key;
 	xdebug_str                      *prefix = xdebug_str_new();
 	char                            *tmp_name;
 
@@ -213,7 +208,7 @@ void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fs
 		xdebug_str_add_fmt(prefix, tmp_name);
 	} else {
 		/* Find value in our custom hashmap in order to compute prefix. */
-		parent_function = fg_function_find(context, fse->function_nr);
+		parent_function = fg_function_find(context, parent_fse->function_nr);
 		if (NULL == parent_function) {
 			/* No function found is a bug, we should have one.
 			   treat it as it was a top-level function. */
@@ -249,7 +244,7 @@ void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse
 
 	inclusive = compute_inclusive_value(context, fse);
 	self = inclusive - function->value;
-	xdebug_str_add_fmt(&str, "%s %d\n", function->prefix, self);
+	xdebug_str_add_fmt(&str, "%s %d\n", function->prefix->d, self);
 
 	/* xdebug_hash_delete() will free the function. */
 	fg_function_delete(context, fse->function_nr);
