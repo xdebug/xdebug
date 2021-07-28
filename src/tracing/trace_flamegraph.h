@@ -20,26 +20,19 @@
 
 #include "tracing_private.h"
 
-typedef struct _flamegraph_stack_item
+typedef struct _flamegraph_function
 {
-	char *prefix;
+	xdebug_str *prefix;
 	int value;
-	struct _flamegraph_stack_item *next;
-} flamegraph_stack_item;
-
-/* Implemented as a linked-list, but size will never be more than the current
-   stack depth, so I guess this will not hurt performances too badly. */
-typedef struct flamegraph_stack
-{
-	flamegraph_stack_item *head;
-} flamegraph_stack;
+	struct _flamegraph_function *next;
+} flamegraph_function;
 
 typedef struct _xdebug_trace_flamegraph_context
 {
 	FILE *trace_file;
 	char *trace_filename;
 	int mode;
-	flamegraph_stack *stack;
+	xdebug_hash *functions;
 } xdebug_trace_flamegraph_context;
 
 extern xdebug_trace_handler_t xdebug_trace_handler_flamegraph_cost;
