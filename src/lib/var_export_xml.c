@@ -661,7 +661,12 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			{
 				zend_class_entry *ce = Z_OBJCE_P(*struc);
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
-					xdebug_xml_add_attribute(node, "facet", "enum");
+					xdebug_str *value = xdebug_xml_get_attribute_value(node, "facet");
+					if (value) {
+						xdebug_str_add_literal(value, " enum");
+					} else {
+						xdebug_xml_add_attribute(node, "facet", "enum");
+					}
 				}
 			}
 #endif

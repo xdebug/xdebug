@@ -50,7 +50,7 @@ void xdebug_str_chop(xdebug_str *xs, size_t c);
 
 xdebug_str *xdebug_str_new(void);
 xdebug_str *xdebug_str_create_from_char(char *c);
-xdebug_str *xdebug_str_create(char *c, size_t len);
+xdebug_str *xdebug_str_create(const char *c, size_t len);
 xdebug_str *xdebug_str_copy(xdebug_str *orig);
 void xdebug_str_destroy(xdebug_str *s);
 void xdebug_str_free(xdebug_str *s);

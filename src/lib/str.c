@@ -163,7 +163,7 @@ xdebug_str *xdebug_str_new(void)
 	return tmp;
 }
 
-xdebug_str *xdebug_str_create(char *c, size_t len)
+xdebug_str *xdebug_str_create(const char *c, size_t len)
 {
 	xdebug_str *tmp = xdebug_str_new();
 
