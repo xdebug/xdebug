@@ -25,13 +25,11 @@ typedef struct _xdebug_xml_node xdebug_xml_node;
 
 struct _xdebug_xml_attribute
 {
-	char *name;
-	char *value;
-	int   name_len;
-	int   value_len;
+	char                         *name;
+	int                           name_len;
+	xdebug_str                   *value;
 	struct _xdebug_xml_attribute *next;
-	int   free_name;
-	int   free_value;
+	int                           free_name;
 };
 
 /* todo: support multiple text nodes inside an element */
@@ -67,6 +65,8 @@ void xdebug_xml_add_text(xdebug_xml_node *xml, char *text);
 void xdebug_xml_add_text_encode(xdebug_xml_node *xml, char *text);
 #define xdebug_xml_add_textl(x,t,l) 	 xdebug_xml_add_text_ex((x), (t), (l), 1, 0)
 #define xdebug_xml_add_text_encodel(x,t,l)  xdebug_xml_add_text_ex((x), (t), (l), 1, 1)
+
+xdebug_str *xdebug_xml_get_attribute_value(xdebug_xml_node *xml, const char *attribute);
 
 void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output);
 void xdebug_xml_node_dtor(xdebug_xml_node* xml);

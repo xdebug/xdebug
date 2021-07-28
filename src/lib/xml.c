@@ -37,7 +37,7 @@ static void xdebug_xml_return_attribute(xdebug_xml_attribute* attr, xdebug_str* 
 	/* attribute value */
 	xdebug_str_add_literal(output, "=\"");
 	if (attr->value) {
-		tmp = xdebug_xmlize(attr->value, attr->value_len, &newlen);
+		tmp = xdebug_xmlize(attr->value->d, attr->value->l, &newlen);
 		xdebug_str_add(output, tmp, 0);
 		efree(tmp);
 	}
@@ -116,12 +116,14 @@ void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, const char *attribute, s
 
 	/* Init structure */
 	attr->name = (char*) attribute;
-	attr->value = (char*) value;
 	attr->name_len = attribute_len;
-	attr->value_len = value_len;
+	attr->value = xdebug_str_create(value, value_len);
 	attr->next = NULL;
 	attr->free_name = free_name;
-	attr->free_value = free_value;
+
+	if (free_value) {
+		xdfree((char*) value); /* This is ugly, but it's to preserve BC */
+	}
 
 	/* Find last attribute in node */
 	ptr = &xml->attribute;
@@ -129,6 +131,20 @@ void xdebug_xml_add_attribute_exl(xdebug_xml_node* xml, const char *attribute, s
 		ptr = &(*ptr)->next;
 	}
 	*ptr = attr;
+}
+
+xdebug_str *xdebug_xml_get_attribute_value(xdebug_xml_node *xml, const char *attribute)
+{
+	xdebug_xml_attribute **ptr = &xml->attribute;
+
+	while (*ptr != NULL) {
+		if (strcmp((*ptr)->name, attribute) == 0) {
+			return (*ptr)->value;
+		}
+		ptr = &(*ptr)->next;
+	}
+
+	return NULL;
 }
 
 void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child)
@@ -185,9 +201,7 @@ static void xdebug_xml_attribute_dtor(xdebug_xml_attribute *attr)
 	if (attr->free_name) {
 		xdfree(attr->name);
 	}
-	if (attr->free_value) {
-		xdfree(attr->value);
-	}
+	xdebug_str_free(attr->value);
 	xdfree(attr);
 }
 
