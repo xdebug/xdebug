@@ -1,13 +1,9 @@
 --TEST--
-Test for bug #1732 - Trace flamegraph trace when xdebug_stop_trace() is called lower in the stack. 
+Tracing: Flamegraph output is consistent when xdebug_stop_trace() is called lower in the stack
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=4
-xdebug.dump_globals=0
-xdebug.collect_return=0
-xdebug.collect_assignments=0
-xdebug.force_error_reporting=0
 --FILE--
 <?php
 global $tf;

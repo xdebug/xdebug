@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -177,9 +177,11 @@ char *xdebug_trace_flamegraph_get_filename(void *ctxt)
 void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
-	flamegraph_stack_item *head = fg_stack_get_head(context->stack);
-	char *tmp_name, *prefix;
+	flamegraph_stack_item           *head;
+	char                            *tmp_name;
+	char                            *prefix;
 
+	head = fg_stack_get_head(context->stack);
 	tmp_name = xdebug_show_fname(fse->function, 0, 0);
 
 	/* Insert an item into the custom stack which yields path prefix and
@@ -202,9 +204,12 @@ void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fs
 void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse, int function_nr)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
-	int inclusive, self;
-	flamegraph_stack_item *stack_item = fg_stack_pop(context->stack);
+	xdebug_str                       str = XDEBUG_STR_INITIALIZER;
+	int                              inclusive;
+	int                              self;
+	flamegraph_stack_item           *stack_item;
+
+	stack_item = fg_stack_pop(context->stack);
 
 	if (NULL == stack_item) {
 		/* This should never happen, better be safe than sorry. */

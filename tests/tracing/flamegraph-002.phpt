@@ -1,13 +1,9 @@
 --TEST--
-Test for bug #1732 - Trace flamegraph format output for memory
+Tracing: Flamegraph for memory
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=4
-xdebug.dump_globals=0
-xdebug.collect_return=0
-xdebug.collect_assignments=0
-xdebug.force_error_reporting=0
 --FILE--
 <?php
 // This forcefully creates some memory leaks to yield meaningful numbers

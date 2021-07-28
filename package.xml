@@ -279,10 +279,10 @@ https://xdebug.org/docs/upgrade_guide
      <file name="trace_textual.h" role="src" />
      <file name="trace_computerized.c" role="src" />
      <file name="trace_computerized.h" role="src" />
-     <file name="trace_html.c" role="src" />
-     <file name="trace_html.h" role="src" />
      <file name="trace_flamegraph.c" role="src" />
      <file name="trace_flamegraph.h" role="src" />
+     <file name="trace_html.c" role="src" />
+     <file name="trace_html.h" role="src" />
     </dir>
    </dir>
   </dir> <!-- / -->
