@@ -227,7 +227,6 @@ void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse
 	fg_stack_inc(context->stack, inclusive);
 
 	fprintf(context->trace_file, "%s", str.d);
-	fflush(context->trace_file);
 	xdfree(str.d);
 }
 
