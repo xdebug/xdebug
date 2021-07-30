@@ -80,6 +80,7 @@ struct _xdebug_con {
 	int                    do_next;
 	int                    next_level;
 	int                    do_finish;
+	int                    do_connect_to_client;
 	int                    finish_level;
 	int                    finish_func_nr;
 

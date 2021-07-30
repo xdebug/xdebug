@@ -43,6 +43,7 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 	xg->context.do_step      = 0;
 	xg->context.do_next      = 0;
 	xg->context.do_finish    = 0;
+	xg->context.do_connect_to_client = 0;
 
 	xg->remote_connection_enabled = 0;
 	xg->remote_connection_pid     = 0;
@@ -94,6 +95,25 @@ int xdebug_debugger_bailout_if_no_exec_requested(void)
 	}
 	return 0;
 }
+
+static void register_compiled_variables(void)
+{
+	function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+	int                   i;
+
+	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
+		if (loop_fse->declared_vars) {
+			continue;
+		}
+
+		if (loop_fse->user_defined == XDEBUG_BUILT_IN) {
+			continue;
+		}
+
+		xdebug_lib_register_compiled_variables(loop_fse, loop_fse->op_array);
+	}
+}
+
 
 void xdebug_debugger_set_program_name(zend_string *filename)
 {
@@ -208,6 +228,15 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 	function_stack_entry *fse;
 	int                   level = 0;
 	int                   func_nr = 0;
+
+	if (XG_DBG(context).do_connect_to_client) {
+		XG_DBG(context).do_connect_to_client = 0;
+
+		if (!xdebug_is_debug_connection_active()) {
+			xdebug_debug_init_if_requested_on_xdebug_break();
+			register_compiled_variables();
+		}
+	}
 
 	if (xdebug_is_debug_connection_active()) {
 		if (XG_DBG(context).do_break) {
@@ -565,6 +594,7 @@ void xdebug_debugger_rinit(void)
 	XG_DBG(context).do_step        = 0;
 	XG_DBG(context).do_next        = 0;
 	XG_DBG(context).do_finish      = 0;
+	XG_DBG(context).do_connect_to_client = 0;
 
 	/* Statistics and diagnostics */
 	XG_DBG(context).connected_hostname = NULL;
@@ -814,7 +844,6 @@ void xdebug_debugger_restart_if_pid_changed()
 	}
 }
 
-
 PHP_FUNCTION(xdebug_break)
 {
 	RETURN_FALSE_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
@@ -825,26 +854,20 @@ PHP_FUNCTION(xdebug_break)
 		RETURN_FALSE;
 	}
 
-	/* Go through every stack frame to register compiled variables */
-	{
-		function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-		int                   i;
-
-		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
-			if (loop_fse->declared_vars) {
-				continue;
-			}
-
-			if (loop_fse->user_defined == XDEBUG_BUILT_IN) {
-				continue;
-			}
-
-			xdebug_lib_register_compiled_variables(loop_fse, loop_fse->op_array);
-		}
-	}
+	register_compiled_variables();
 
 	XG_DBG(context).do_break = 1;
 	XG_DBG(context).pending_breakpoint = NULL;
+
+	RETURN_TRUE;
+}
+
+PHP_FUNCTION(xdebug_connect_to_client)
+{
+	RETURN_FALSE_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
+	XG_DBG(context).do_connect_to_client = 1;
+
 	RETURN_TRUE;
 }
 

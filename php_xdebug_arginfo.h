@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0c71112b47e4e0884ae85607eb36d3ef12158a3a */
+ * Stub hash: 106dc9e13697295d8aa247e42268c7a119a6b5a8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xdebug_break, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -15,6 +15,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_xdebug_call_line arginfo_xdebug_call_class
 
 #define arginfo_xdebug_code_coverage_started arginfo_xdebug_break
+
+#define arginfo_xdebug_connect_to_client arginfo_xdebug_break
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xdebug_debug_zval, 0, 0, 0)
 	ZEND_ARG_VARIADIC_TYPE_INFO(0, varname, IS_STRING, 0)
@@ -123,6 +125,7 @@ ZEND_FUNCTION(xdebug_call_file);
 ZEND_FUNCTION(xdebug_call_function);
 ZEND_FUNCTION(xdebug_call_line);
 ZEND_FUNCTION(xdebug_code_coverage_started);
+ZEND_FUNCTION(xdebug_connect_to_client);
 ZEND_FUNCTION(xdebug_debug_zval);
 ZEND_FUNCTION(xdebug_debug_zval_stdout);
 ZEND_FUNCTION(xdebug_dump_superglobals);
@@ -166,6 +169,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xdebug_call_function, arginfo_xdebug_call_function)
 	ZEND_FE(xdebug_call_line, arginfo_xdebug_call_line)
 	ZEND_FE(xdebug_code_coverage_started, arginfo_xdebug_code_coverage_started)
+	ZEND_FE(xdebug_connect_to_client, arginfo_xdebug_connect_to_client)
 	ZEND_FE(xdebug_debug_zval, arginfo_xdebug_debug_zval)
 	ZEND_FE(xdebug_debug_zval_stdout, arginfo_xdebug_debug_zval_stdout)
 	ZEND_FE(xdebug_dump_superglobals, arginfo_xdebug_dump_superglobals)
