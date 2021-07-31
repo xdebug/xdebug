@@ -87,6 +87,19 @@ static inline function_stack_entry *fg_parent_find() {
 	return parent_fse;
 }
 
+/* This function computes the 'self' cost for a function trace output.
+   By only including the 'inclusive' function cost, then in each stack, all
+   functions will have more or less the same cost, each top level will have
+   only a few nanosec less than the previous: in this scenario, the generated
+   flamegraph will look flat, it will not highlight functions that really did
+   cost a lot.
+   The 'self' cost is simply computed by removing children function call cost
+   from its own inclusive value.
+   This is true as well for memory cost, in order to identify a potential leak
+   it must identify the function that allocated memory, if we don't sub children
+   cost from parent cost, once again the generated flamegraph will look linear
+   and it will be harder to deduce which function did allocate.
+ */
 static inline int compute_inclusive_value(const xdebug_trace_flamegraph_context *context, const function_stack_entry *fse)
 {
 	int value = 0, current_mem;
