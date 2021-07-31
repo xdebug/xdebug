@@ -37,7 +37,7 @@ static flamegraph_function *fg_function_ctor()
 static inline void fg_function_dtor(flamegraph_function *function)
 {
 	if (NULL != function->prefix) {
-		xdfree(function->prefix);
+		xdebug_str_free(function->prefix);
 	}
 	xdfree(function);
 }
