@@ -105,13 +105,24 @@ static char* xdebug_start_trace(char* fname, zend_string *script_filename, long 
 	}
 
 	XG_TRACE(trace_handler) = xdebug_select_trace_handler(options);
-	XG_TRACE(trace_context) = (void*) XG_TRACE(trace_handler)->init(fname, script_filename, options);
+	if (XG_TRACE(trace_handler)->init) {
+		XG_TRACE(trace_context) = (void*) XG_TRACE(trace_handler)->init(fname, script_filename, options);
+	} else {
+		/* @todo emit and error to expose broken handler */
+		return NULL;
+	}
 
 	if (!XG_TRACE(trace_context)) {
 		return NULL;
 	}
 
-	XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context));
+	if (XG_TRACE(trace_handler)->write_header) {
+		XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context));
+	}
+
+	/* @todo missing get_filename in the handler would cause a segfault here,
+	   a default implementation could be set (most are copy/pasted anywhere in
+	   existing implementations). */
 	return xdstrdup(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 }
 
@@ -121,8 +132,15 @@ static void xdebug_stop_trace(void)
 		return;
 	}
 
-	XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
-	XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context));
+	if (XG_TRACE(trace_handler)->write_footer) {
+		XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
+	}
+	if (XG_TRACE(trace_handler)->deinit) {
+		XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context));
+	} else {
+		/* @todo there should an explicit error here to expose to the handler developer
+		   that a missing deinit handlers means a memory leak. */
+	}
 	XG_TRACE(trace_context) = NULL;
 }
 
