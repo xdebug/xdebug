@@ -773,8 +773,8 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 						state = 1;
 						keyword_end = &ptr[ctr];
 
-						if (strncmp(keyword, "::", 2) == 0 && active_fse->function.class_name) { /* static class properties */
-							zend_class_entry *ce = zend_fetch_class(active_fse->function.class_name, ZEND_FETCH_CLASS_SELF);
+						if (strncmp(keyword, "::", 2) == 0 && active_fse->function.object_class) { /* static class properties */
+							zend_class_entry *ce = zend_fetch_class(active_fse->function.object_class, ZEND_FETCH_CLASS_SELF);
 
 							current_classname = estrdup(STR_NAME_VAL(ce->name));
 							cc_length = strlen(STR_NAME_VAL(ce->name));
@@ -1089,9 +1089,9 @@ static char* xdebug_create_doc_link(xdebug_func f)
 		case XFUNC_STATIC_MEMBER:
 		case XFUNC_MEMBER: {
 			if (strcmp(f.function, "__construct") == 0) {
-				tmp_target = xdebug_sprintf("%s.construct", ZSTR_VAL(f.class_name));
+				tmp_target = xdebug_sprintf("%s.construct", ZSTR_VAL(f.object_class));
 			} else {
-				tmp_target = xdebug_sprintf("%s.%s", ZSTR_VAL(f.class_name), f.function);
+				tmp_target = xdebug_sprintf("%s.%s", ZSTR_VAL(f.object_class), f.function);
 			}
 			break;
 		}
@@ -1110,11 +1110,11 @@ static char* xdebug_create_doc_link(xdebug_func f)
 	return retval;
 }
 
-char* xdebug_show_fname(xdebug_func f, int html, int flags)
+char* xdebug_show_fname(xdebug_func f, int flags)
 {
 	switch (f.type) {
 		case XFUNC_NORMAL: {
-			if (PG(html_errors) && html && f.internal) {
+			if (PG(html_errors) && (flags & XDEBUG_SHOW_FNAME_ALLOW_HTML) && f.internal) {
 				return xdebug_create_doc_link(f);
 			} else {
 				return xdstrdup(f.function);
@@ -1124,11 +1124,19 @@ char* xdebug_show_fname(xdebug_func f, int html, int flags)
 
 		case XFUNC_STATIC_MEMBER:
 		case XFUNC_MEMBER: {
-			if (PG(html_errors) && html && f.internal) {
+			if (PG(html_errors) && (flags & XDEBUG_SHOW_FNAME_ALLOW_HTML) && f.internal) {
 				return xdebug_create_doc_link(f);
 			} else {
+				if (f.scope_class && !(flags & XDEBUG_SHOW_FNAME_IGNORE_SCOPE)) {
+					return xdebug_sprintf("%s%s%s",
+						ZSTR_VAL(f.scope_class),
+						f.type == XFUNC_STATIC_MEMBER ? "::" : "->",
+						f.function ? f.function : "?"
+					);
+				}
+
 				return xdebug_sprintf("%s%s%s",
-					f.class_name ? ZSTR_VAL(f.class_name) : "?",
+					f.object_class ? ZSTR_VAL(f.object_class) : "?",
 					f.type == XFUNC_STATIC_MEMBER ? "::" : "->",
 					f.function ? f.function : "?"
 				);

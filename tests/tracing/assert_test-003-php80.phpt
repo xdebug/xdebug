@@ -58,5 +58,5 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> assert_options($option = 2, $value = 'my_assert_handler') %sassert_test-003-php80.php:16
 %w%f %w%d     -> assert($assertion = FALSE, $description = 'One is not two') %sassert_test-003-php80.php:21
 %w%f %w%d       -> my_assert_handler($file = '%sassert_test-003-php80.php', $line = 21, $code = NULL, $desc = 'One is not two') %sassert_test-003-php80.php:21
-%w%f %w%d     -> AssertionError->getMessage() %sassert_test-003-php80.php:24
+%w%f %w%d     -> Error->getMessage() %sassert_test-003-php80.php:24
 %w%f %w%d     -> file_get_contents($filename = '%s') %sassert_test-003-php80.php:27

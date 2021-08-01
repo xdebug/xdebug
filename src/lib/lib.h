@@ -120,7 +120,8 @@ typedef struct xdebug_var_name {
 #define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
 
 typedef struct _xdebug_func {
-	zend_string *class_name;
+	zend_string *object_class;
+	zend_string *scope_class;
 	char *function;
 	int   type;
 	int   internal;

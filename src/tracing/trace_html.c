@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -89,7 +89,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	}
 	xdebug_str_add_literal(&str, "-&gt;</td>");
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
 	xdebug_str_add_fmt(&str, "<td>%s(", tmp_name);
 	xdfree(tmp_name);
 

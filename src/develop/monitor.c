@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,7 +80,7 @@ void xdebug_monitor_handler(function_stack_entry *fse)
 		return;
 	}
 
-	func_name = xdebug_show_fname(fse->function, 0, 0);
+	func_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
 	func_name_len = strlen(func_name);
 
 	if (xdebug_hash_find(XG_DEV(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {

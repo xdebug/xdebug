@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,7 +123,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			sent_variables--;
 		}
 
-		tmp_name = xdebug_show_fname(fse->function, 0, 0);
+		tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
 		xdebug_str_add_fmt(&log_buffer, "PHP %3d. %s(", fse->level, tmp_name);
 		xdfree(tmp_name);
 
@@ -394,7 +394,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 		if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_STACK, fse)) {
 			continue;
 		}
-		tmp_name = xdebug_show_fname(fse->function, html, 0);
+		tmp_name = xdebug_show_fname(fse->function, (html ? XDEBUG_SHOW_FNAME_ALLOW_HTML : 0) | XDEBUG_SHOW_FNAME_TODO);
 		if (html) {
 			xdebug_str_add_fmt(str, formats[3], fse->level, XDEBUG_SECONDS_SINCE_START(fse->nanotime), fse->memory, tmp_name);
 		} else {
@@ -1062,9 +1062,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		if (fse->function.function) {
 			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), fse->function.function);
 		}
-		if (fse->function.class_name) {
+		if (fse->function.object_class) {
 			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (fse->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
-			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    zend_string_copy(fse->function.class_name));
+			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    zend_string_copy(fse->function.object_class));
 		}
 		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), zend_string_copy(fse->filename));
 		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), fse->lineno);

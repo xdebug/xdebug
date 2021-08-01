@@ -100,8 +100,11 @@ void xdebug_func_dtor_by_ref(xdebug_func *elem)
 	if (elem->function) {
 		xdfree(elem->function);
 	}
-	if (elem->class_name) {
-		zend_string_release(elem->class_name);
+	if (elem->object_class) {
+		zend_string_release(elem->object_class);
+	}
+	if (elem->scope_class) {
+		zend_string_release(elem->scope_class);
 	}
 }
 
@@ -213,21 +216,24 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
 			tmp->type = XFUNC_MEMBER;
 			if (edata->func->common.scope && strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
-				char *tmp_class_name = xdebug_sprintf(
+				char *tmp_object_class = xdebug_sprintf(
 					"{anonymous-class:%s:%d-%d}",
 					edata->func->common.scope->info.user.filename->val,
 					edata->func->common.scope->info.user.line_start,
 					edata->func->common.scope->info.user.line_end
 				);
-				tmp->class_name = zend_string_init(tmp_class_name, strlen(tmp_class_name), 0);
-				xdfree(tmp_class_name);
+				tmp->object_class = zend_string_init(tmp_object_class, strlen(tmp_object_class), 0);
+				xdfree(tmp_object_class);
 			} else {
-				tmp->class_name = zend_string_copy(edata->This.value.obj->ce->name);
+				if (edata->func->common.scope) {
+					tmp->scope_class = zend_string_copy(edata->func->common.scope->name);
+				}
+				tmp->object_class = zend_string_copy(edata->This.value.obj->ce->name);
 			}
 		} else {
 			if (edata->func->common.scope) {
 				tmp->type = XFUNC_STATIC_MEMBER;
-				tmp->class_name = zend_string_copy(edata->func->common.scope->name);
+				tmp->object_class = zend_string_copy(edata->func->common.scope->name);
 			}
 		}
 		if (edata->func->common.function_name) {
@@ -608,9 +614,10 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	xdebug_build_fname(&(tmp->function), zdata);
 	if (!tmp->function.type) {
-		tmp->function.function   = xdstrdup("{main}");
-		tmp->function.class_name = NULL;
-		tmp->function.type       = XFUNC_MAIN;
+		tmp->function.function     = xdstrdup("{main}");
+		tmp->function.object_class = NULL;
+		tmp->function.scope_class  = NULL;
+		tmp->function.type         = XFUNC_MAIN;
 
 	} else if (tmp->function.type & XFUNC_INCLUDES) {
 		tmp->lineno = 0;
@@ -803,7 +810,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
 {
 	if (
-		fse->function.class_name &&
+		fse->function.object_class &&
 		Z_OBJ(EX(This)) &&
 		Z_TYPE(EX(This)) == IS_OBJECT &&
 		(zend_hash_str_find_ptr(&module_registry, "soap", sizeof("soap") - 1) != NULL)
@@ -1023,7 +1030,8 @@ static void add_fiber_main(zend_fiber_context *fiber)
 	tmp->level = 0;
 	tmp->user_defined = XDEBUG_BUILT_IN;
 	tmp->function.type = XFUNC_FIBER;
-	tmp->function.class_name = NULL;
+	tmp->function.object_class = NULL;
+	tmp->function.scope_class = NULL;
 	tmp->function.function = xdstrdup(key->d);
 }
 

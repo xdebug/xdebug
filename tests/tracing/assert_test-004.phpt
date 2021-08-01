@@ -56,5 +56,5 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> assert_options($%s = 2, $value = 'my_assert_handler') %sassert_test-004.php:18
 %w%f %w%d     -> assert($assertion = FALSE, $description = 'One is not two') %sassert_test-004.php:23
 %w%f %w%d       -> my_assert_handler($file = '%sassert_test-004.php', $line = 23, $code = %r(''|NULL)%r, $desc = 'One is not two') %sassert_test-004.php:23
-%w%f %w%d     -> AssertionError->getMessage() %sassert_test-004.php:26
+%w%f %w%d     -> Error->getMessage() %sassert_test-004.php:26
 %w%f %w%d     -> file_get_contents($filename = '%s') %sassert_test-004.php:29

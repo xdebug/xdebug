@@ -478,7 +478,7 @@ static xdebug_xml_node* return_stackframe(int nr)
 	fse = xdebug_get_stack_frame(nr);
 	fse_prev = xdebug_get_stack_frame(nr - 1);
 
-	tmp_fname = xdebug_show_fname(fse->function, 0, 0);
+	tmp_fname = xdebug_show_fname(fse->function, 0);
 
 	tmp = xdebug_xml_node_init("stack");
 	xdebug_xml_add_attribute_ex(tmp, "where", xdstrdup(tmp_fname), 0, 1);
@@ -1858,7 +1858,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		 * method call as we attach constants and static properties to "this"
 		 * too normally. */
 		if (fse->function.type == XFUNC_STATIC_MEMBER) {
-			zend_class_entry *ce = zend_fetch_class(fse->function.class_name, ZEND_FETCH_CLASS_DEFAULT);
+			zend_class_entry *ce = zend_fetch_class(fse->function.object_class, ZEND_FETCH_CLASS_DEFAULT);
 
 #if PHP_VERSION_ID >= 70400
 			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
