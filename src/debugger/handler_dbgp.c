@@ -1467,7 +1467,13 @@ DBGP_FUNC(property_get)
 	/* Set the symbol table corresponding with the requested stack depth */
 	if (context_nr == 0) { /* locals */
 		if ((fse = xdebug_get_stack_frame(depth))) {
-			function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1);
+			function_stack_entry *old_fse;
+
+			if (!fse->user_defined) {
+				RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
+			}
+
+			old_fse = xdebug_get_stack_frame(depth - 1);
 
 			if (depth > 0) {
 				xdebug_lib_set_active_data(old_fse->execute_data);

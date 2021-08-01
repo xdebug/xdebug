@@ -38,6 +38,11 @@ function xdebug_code_coverage_started(): bool {}
 
 /* -----------------------------------------------------------------------*/
 
+/* Attempts to connect to a debugging client if it's not connected yet */
+function xdebug_connect_to_client(): bool {}
+
+/* -----------------------------------------------------------------------*/
+
 /* Displays information about a variable */
 /** @return void */
 function xdebug_debug_zval(string ...$varname) {}
