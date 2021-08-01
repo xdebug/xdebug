@@ -23,6 +23,8 @@
 #include "zend_generators.h"
 #pragma GCC diagnostic pop
 
+/* In order to implement a trace handler, "init", "deinit" and "get_filename"
+   members implementation is mandatory, all others can safely be set to NULL. */
 typedef struct
 {
 	void *(*init)(char *fname, zend_string *script_filename, long options);
