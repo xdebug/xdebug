@@ -38,7 +38,7 @@ function xdebug_code_coverage_started(): bool {}
 
 /* -----------------------------------------------------------------------*/
 
-/* Attempts to connect to a debugging client if it's not connected yet */
+/* Instructs Xdebug to establish a debugging session */
 function xdebug_connect_to_client(): bool {}
 
 /* -----------------------------------------------------------------------*/
