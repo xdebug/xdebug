@@ -305,7 +305,7 @@ void xdebug_print_info(void)
 		php_info_print_table_header(2, "Feature", "Enabled/Disabled");
 	}
 
-	print_feature_row("Development Aids", XDEBUG_MODE_DEVELOP, "develop");
+	print_feature_row("Development Helpers", XDEBUG_MODE_DEVELOP, "develop");
 	print_feature_row("Coverage", XDEBUG_MODE_COVERAGE, "code_coverage");
 	print_feature_row("GC Stats", XDEBUG_MODE_GCSTATS, "garbage_collection");
 	print_feature_row("Profiler", XDEBUG_MODE_PROFILING, "profiler");

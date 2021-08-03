@@ -9,7 +9,7 @@ Xdebug
    :target: https://circleci.com/gh/xdebug/xdebug
 
 Xdebug is a debugging tool for PHP. It provides step-debugging and a whole
-range of development aids, such as stack traces, a code profiler, features to
+range of development helpers, such as stack traces, a code profiler, features to
 dump the full execution of your script to a file, and more.
 
 Requirements

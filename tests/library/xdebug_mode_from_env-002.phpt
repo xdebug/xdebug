@@ -11,4 +11,4 @@ XDEBUG_MODE=develop,profile
 xdebug_info();
 ?>
 --EXPECTF--
-%Athrough 'XDEBUG_MODE' env variable%ADevelopment Aids => ✔ enabled%AProfiler => ✔ enabled%A
+%Athrough 'XDEBUG_MODE' env variable%ADevelopment Helpers => ✔ enabled%AProfiler => ✔ enabled%A
