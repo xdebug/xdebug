@@ -54,8 +54,7 @@ void xdebug_profiler_mshutdown(void)
 
 void xdebug_profiler_rinit(void)
 {
-	XG_PROF(profile_file)  = NULL;
-	XG_PROF(profile_filename) = NULL;
+	xdebug_init_generic_file(&XG_PROF(profile_file));
 	XG_PROF(profile_filename_refs) = NULL;
 	XG_PROF(profile_functionname_refs) = NULL;
 	XG_PROF(profile_last_filename_ref) = 0;
@@ -158,15 +157,15 @@ void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 	xdfree(ce);
 }
 
-static void profiler_write_header(PROF_FILE_TYPE file, char *script_name)
+static void profiler_write_header(xdebug_file *file, char *script_name)
 {
 	if (XINI_PROF(profiler_append)) {
-		prof_printf(file, "\n==== NEW PROFILING FILE ==============================================\n");
+		xdebug_generic_fprintf(file, "\n==== NEW PROFILING FILE ==============================================\n");
 	}
-	prof_printf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
-	prof_printf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
-	prof_printf(file, "events: Time_(10ns) Memory_(bytes)\n\n");
-	prof_flush(file);
+	xdebug_generic_fprintf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
+	xdebug_generic_fprintf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
+	xdebug_generic_fprintf(file, "events: Time_(10ns) Memory_(bytes)\n\n");
+	xdebug_generic_flush(file);
 }
 
 #define NANOTIME_SCALE_10NS(nanotime) ((unsigned long)(((nanotime) + 5) / 10))
@@ -196,26 +195,17 @@ void xdebug_profiler_init(char *script_name)
 		filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
 	}
 
-	{
-#ifdef HAVE_XDEBUG_ZLIB
-		FILE *tmp_file = xdebug_fopen(filename, XINI_PROF(profiler_append) ? "a" : "w", "gz", &XG_PROF(profile_filename));
-		XG_PROF(profile_file) = gzdopen(fileno(tmp_file), XINI_PROF(profiler_append) ? "a" : "w");
-#else
-		XG_PROF(profile_file) = xdebug_fopen(filename, XINI_PROF(profiler_append) ? "a" : "w", NULL, &XG_PROF(profile_filename));
-#endif
-	}
-
-	if (!XG_PROF(profile_file)) {
-		xdebug_log_diagnose_permissions(XLOG_CHAN_PROFILE, output_dir, fname);
+	if (!xdebug_generic_fopen(&XG_PROF(profile_file), filename, XINI_PROF(profiler_append) ? "a" : "w")) {
+		xdebug_log_diagnose_permissions(XLOG_CHAN_PROFILE, output_dir, XG_PROF(profile_file).name);
 		goto return_and_free_names;
 	}
 
-	profiler_write_header(XG_PROF(profile_file), script_name);
+	profiler_write_header(&XG_PROF(profile_file), script_name);
 
 	if (!SG(headers_sent)) {
 		sapi_header_line ctr = {0};
 
-		ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG_PROF(profile_filename));
+		ctr.line = xdebug_sprintf("X-Xdebug-Profile-Filename: %s", XG_PROF(profile_file).name);
 		ctr.line_len = strlen(ctr.line);
 		sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 		xdfree((void*) ctr.line);
@@ -243,8 +233,8 @@ void xdebug_profiler_deinit()
 		xdebug_profiler_function_end(fse);
 	}
 
-	prof_printf(
-		XG_PROF(profile_file),
+	xdebug_generic_fprintf(
+		&XG_PROF(profile_file),
 		"summary: %lu %zd\n\n",
 		NANOTIME_SCALE_10NS(xdebug_get_nanotime() - XG_PROF(profiler_start_nanotime)),
 		zend_memory_peak_usage(0)
@@ -252,15 +242,11 @@ void xdebug_profiler_deinit()
 
 	XG_PROF(active) = 0;
 
-	prof_flush(XG_PROF(profile_file));
+	xdebug_generic_flush(&XG_PROF(profile_file));
 
-	if (XG_PROF(profile_file)) {
-		prof_close(XG_PROF(profile_file));
-		XG_PROF(profile_file) = NULL;
-	}
-
-	if (XG_PROF(profile_filename)) {
-		xdfree(XG_PROF(profile_filename));
+	if (XG_PROF(profile_file).type != XDEBUG_FILE_TYPE_NULL) {
+		xdebug_generic_fclose(&XG_PROF(profile_file));
+		xdebug_free_generic_file(&XG_PROF(profile_file));
 	}
 
 	xdebug_hash_destroy(XG_PROF(profile_filename_refs));
@@ -529,7 +515,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	}
 	xdebug_str_addc(&file_buffer, '\n');
 
-	prof_write(file_buffer.d, sizeof(char), file_buffer.l, XG_PROF(profile_file));
+	xdebug_generic_fwrite(file_buffer.d, sizeof(char), file_buffer.l, &XG_PROF(profile_file));
 	xdebug_str_dtor(file_buffer);
 }
 
@@ -553,7 +539,7 @@ char *xdebug_get_profiler_filename()
 		return NULL;
 	}
 
-	return XG_PROF(profile_filename);
+	return XG_PROF(profile_file).name;
 }
 
 PHP_FUNCTION(xdebug_get_profiler_filename)

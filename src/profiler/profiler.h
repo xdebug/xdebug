@@ -23,27 +23,10 @@
 
 #include "php_xdebug.h"
 
-#if HAVE_XDEBUG_ZLIB
-# include <zlib.h>
-# define PROF_FILE_TYPE    gzFile
-# define prof_printf       gzprintf
-# define prof_write        gzfwrite
-# define prof_flush(f)     gzflush((f), Z_FULL_FLUSH)
-# define prof_close        gzclose
-#else
-# define PROF_FILE_TYPE    FILE*
-# define prof_printf       fprintf
-# define prof_write        fwrite
-# define prof_flush(f)     fflush((f))
-# define prof_close        fclose
-#endif
-
-
 typedef struct _xdebug_profiler_globals_t {
 	zend_bool       active;
 	uint64_t        profiler_start_nanotime;
-	PROF_FILE_TYPE  profile_file;
-	char           *profile_filename;
+	xdebug_file     profile_file;
 	xdebug_hash    *profile_filename_refs;
 	int             profile_last_filename_ref;
 	int             php_internal_seen_before;
