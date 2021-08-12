@@ -276,15 +276,22 @@ ZEND_INI_DISP(display_start_upon_error)
 }
 
 
+#if HAVE_XDEBUG_ZLIB
+# define USE_COMPRESSION_DEFAULT "1"
+#else
+# define USE_COMPRESSION_DEFAULT "0"
+#endif
+
 PHP_INI_BEGIN()
 	/* Library settings */
-	PHP_INI_ENTRY(    "xdebug.mode",               "develop",       PHP_INI_SYSTEM,                OnUpdateMode)
-	PHP_INI_ENTRY_EX( "xdebug.start_with_request", "default",       PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartWithRequest, display_start_with_request)
-	PHP_INI_ENTRY_EX( "xdebug.start_upon_error",   "default",       PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartUponError,   display_start_upon_error)
-	STD_PHP_INI_ENTRY("xdebug.output_dir",         XDEBUG_TEMP_DIR, PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,       zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.trigger_value",      "",              PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value,    zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.file_link_format",   "",              PHP_INI_ALL,                   OnUpdateString, settings.library.file_link_format, zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.filename_format",    "",              PHP_INI_ALL,                   OnUpdateString, settings.library.filename_format,  zend_xdebug_globals, xdebug_globals)
+	PHP_INI_ENTRY(    "xdebug.mode",               "develop",               PHP_INI_SYSTEM,                OnUpdateMode)
+	PHP_INI_ENTRY_EX( "xdebug.start_with_request", "default",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartWithRequest, display_start_with_request)
+	PHP_INI_ENTRY_EX( "xdebug.start_upon_error",   "default",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartUponError,   display_start_upon_error)
+	STD_PHP_INI_ENTRY("xdebug.output_dir",         XDEBUG_TEMP_DIR,         PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,       zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.use_compression",    USE_COMPRESSION_DEFAULT, PHP_INI_ALL,                   OnUpdateBool,   settings.library.use_compression,  zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.trigger_value",      "",                      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.file_link_format",   "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.file_link_format, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.filename_format",    "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.filename_format,  zend_xdebug_globals, xdebug_globals)
 
 	STD_PHP_INI_ENTRY("xdebug.log",       "",           PHP_INI_ALL, OnUpdateString, settings.library.log,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.log_level", XLOG_DEFAULT, PHP_INI_ALL, OnUpdateLong,   settings.library.log_level, zend_xdebug_globals, xdebug_globals)

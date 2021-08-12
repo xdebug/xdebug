@@ -511,22 +511,26 @@ void xdebug_free_generic_file(xdebug_file *xf)
 
 int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *mode)
 {
+	if (XINI_LIB(use_compression)) {
 #ifdef HAVE_XDEBUG_ZLIB
-	FILE *tmp_file = xdebug_fopen((char*) filename, mode, "gz", &(file->name));
+		FILE *tmp_file = xdebug_fopen((char*) filename, mode, "gz", &(file->name));
 
-	if (!tmp_file) {
-		return 0;
-	}
+		if (!tmp_file) {
+			return 0;
+		}
 
-	file->type = XDEBUG_FILE_TYPE_GZ;
-	file->fp.gz = gzdopen(fileno(tmp_file), mode);
+		file->type = XDEBUG_FILE_TYPE_GZ;
+		file->fp.gz = gzdopen(fileno(tmp_file), mode);
 
-	if (!file->fp.gz) {
-		return 0;
-	}
+		if (!file->fp.gz) {
+			return 0;
+		}
 
-	return 1;
+		return 1;
 #else
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "NOZLIB", "Cannot create a compressed file, because support for zlib has not been compiled in");
+#endif
+	}
 	file->type = XDEBUG_FILE_TYPE_NORMAL;
 	file->fp.normal = xdebug_fopen((char*) filename, mode, NULL, &(file->name));
 
@@ -535,7 +539,6 @@ int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *mo
 	}
 
 	return 1;
-#endif
 }
 
 int XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_generic_fprintf(xdebug_file *file, const char *fmt, ...)

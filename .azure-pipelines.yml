@@ -36,6 +36,7 @@ jobs:
       configurationName: 'OSX_PHP_80_ZTS'
       phpVersion: '8.0.0'
       configurationParameters: '--enable-debug --enable-zts'
+      xdebugConfigurationParameters: '--without-xdebug-compression'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_74_ZTS'
