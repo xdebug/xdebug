@@ -32,6 +32,7 @@ if test "$PHP_XDEBUG" != "no"; then
 
   AC_CHECK_FUNCS(gettimeofday)
   AC_CHECK_FUNCS(clock_gettime)
+  AC_CHECK_FUNCS(clock_gettime_nsec_np)
   AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])
