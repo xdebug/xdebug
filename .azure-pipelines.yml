@@ -14,17 +14,17 @@ jobs:
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_80'
-      phpVersion: '8.0.0'
+      phpVersion: '8.0.9'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_74'
-      phpVersion: '7.4.13'
+      phpVersion: '7.4.22'
       configurationParameters: '--enable-debug --disable-maintainer-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_73'
-      phpVersion: '7.3.25'
+      phpVersion: '7.3.29'
       configurationParameters: '--enable-debug --disable-maintainer-zts'
   - template: .azure/macos/job.yml
     parameters:
