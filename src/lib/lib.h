@@ -229,6 +229,10 @@ typedef struct _xdebug_library_settings_t {
 	char         *file_link_format;
 	char         *filename_format;
 
+	/* Whether to use zlib compression for profiling and trace files, if ZLIB support
+	 * is enabled */
+	zend_bool     use_compression;
+
 	/* variable dumping limitation settings */
 	zend_long     display_max_children;
 	zend_long     display_max_data;

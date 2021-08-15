@@ -313,6 +313,18 @@ void xdebug_print_info(void)
 	print_feature_row("Tracing", XDEBUG_MODE_TRACING, "trace");
 
 	php_info_print_table_end();
+
+	/* Optional compiled in features */
+	php_info_print_table_start();
+	php_info_print_table_colspan_header(2, (char*) "Optional Features");
+
+#if HAVE_XDEBUG_ZLIB
+	php_info_print_table_row(2, "Compressed File Support", "yes (gzip)");
+#else
+	php_info_print_table_row(2, "Compressed File Support", "no");
+#endif
+
+	php_info_print_table_end();
 }
 
 PHPAPI extern char *php_ini_opened_path;
@@ -770,6 +782,16 @@ static void info_modes_set(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
+static void info_extension_flags_set(INTERNAL_FUNCTION_PARAMETERS)
+{
+	array_init_size(return_value, 1);
+
+#if HAVE_XDEBUG_ZLIB
+	add_next_index_stringl(return_value, "compression", 11);
+#endif
+}
+
+
 PHP_FUNCTION(xdebug_info)
 {
 	zend_string *group = NULL;
@@ -786,6 +808,10 @@ PHP_FUNCTION(xdebug_info)
 
 	if (zend_string_equals_literal(group, "mode")) {
 		info_modes_set(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		return;
+	}
+	if (zend_string_equals_literal(group, "extension-flags")) {
+		info_extension_flags_set(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		return;
 	}
 
