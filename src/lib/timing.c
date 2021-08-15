@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,11 +22,10 @@
 # include <sys/time.h>
 #endif
 
-#if defined(__APPLE__) && HAVE_CLOCK_GETTIME_NSEC_NP
-# define APPLE_WITH_HP_CLOCK 1
-# include <mach/mach_time.h>
-#else
-# define APPLE_WITH_HP_CLOCK 0
+#if HAVE_CLOCK_GETTIME_NSEC_NP
+# if defined(__APPLE)
+#  include <mach/mach_time.h>
+# endif
 #endif
 
 #include "timing.h"
@@ -106,14 +105,14 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 
 // Mac
 // should be fast but can be relative
-#elif APPLE_WITH_HP_CLOCK
+#elif HAVE_CLOCK_GETTIME_NSEC_NP
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
 {
 	return clock_gettime_nsec_np(CLOCK_UPTIME_RAW);
 }
 
 // Linux/Unix with clock_gettime
-#elif defined(CLOCK_MONOTONIC)
+#elif HAVE_CLOCK_GETTIME
 static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_context)
 {
 	struct timespec ts;
@@ -145,13 +144,13 @@ void xdebug_nanotime_init(void)
 		context.use_rel_time = 1;
 	}
 
-#elif APPLE_WITH_HP_CLOCK | defined(CLOCK_MONOTONIC)
+#elif defined(HAVE_CLOCK_GETTIME) | defined(HAVE_CLOCK_GETTIME_NSEC_NP)
 	context.use_rel_time = 1;
 #endif
 
 	context.start_abs = xdebug_get_nanotime_abs(&context);
 	context.last_abs = 0;
-#if PHP_WIN32 | APPLE_WITH_HP_CLOCK | defined(CLOCK_MONOTONIC)
+#if PHP_WIN32 | defined(HAVE_CLOCK_GETTIME) | defined(HAVE_CLOCK_GETTIME_NSEC_NP)
 	context.start_rel = xdebug_get_nanotime_rel(&context);
 	context.last_rel = 0;
 #endif
@@ -166,7 +165,7 @@ uint64_t xdebug_get_nanotime(void)
 
 	context = &XG_BASE(nanotime_context);
 
-#if PHP_WIN32 | APPLE_WITH_HP_CLOCK | defined(CLOCK_MONOTONIC)
+#if PHP_WIN32 | defined(HAVE_CLOCK_GETTIME) | defined(HAVE_CLOCK_GETTIME_NSEC_NP)
 	/* Relative timing */
 	if (context->use_rel_time) {
 		nanotime = xdebug_get_nanotime_rel(context);
