@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@ typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
 typedef struct _xdebug_nanotime_context {
 	uint64_t start_abs;
 	uint64_t last_abs;
-#if PHP_WIN32 | __APPLE__ | defined(CLOCK_MONOTONIC)
+#if PHP_WIN32 | defined(HAVE_CLOCK_GETTIME) | defined(HAVE_CLOCK_GETTIME_NSEC_NP)
 	uint64_t start_rel;
 	uint64_t last_rel;
 	int      use_rel_time;
