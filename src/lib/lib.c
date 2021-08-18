@@ -358,7 +358,7 @@ static int does_shared_secret_match_single(int mode, const char *trimmed_trigger
 	return 0;
 }
 
-static int does_shared_secret_match(int mode, const char *trigger_value, char **found_trigger_value)
+static int does_shared_secret_match(int mode, const char *trigger_name, const char *trigger_value, char **found_trigger_value)
 {
 	int         retval = 0;
 	const char *shared_secret = XINI_LIB(trigger_value);
@@ -389,7 +389,7 @@ static int does_shared_secret_match(int mode, const char *trigger_value, char **
 		xdebug_arg_dtor(values);
 
 		if (retval == 0) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-MNO", "The trigger value '%s' did not match any of the shared secrets (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, xdebug_lib_mode_from_value(mode));
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-MNO", "The trigger value '%s', as set through '%s', did not match any of the shared secrets (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, trigger_name, xdebug_lib_mode_from_value(mode));
 		}
 	} else {
 		char *trimmed_shared_secret = xdebug_trim(shared_secret);
@@ -399,7 +399,7 @@ static int does_shared_secret_match(int mode, const char *trigger_value, char **
 		xdfree(trimmed_shared_secret);
 
 		if (retval == 0) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-NO", "The trigger value '%s' did not match the shared secret (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, xdebug_lib_mode_from_value(mode));
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TRGSEC-NO", "The trigger value '%s', as set through '%s', did not match the shared secret (xdebug.trigger_value) for mode '%s'", trimmed_trigger_value, trigger_name, xdebug_lib_mode_from_value(mode));
 		}
 	}
 
@@ -454,7 +454,7 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 
 	/* Check if the configured trigger value matches the one found in the
 	 * trigger element */
-	if (does_shared_secret_match(for_mode, trigger_value, found_trigger_value)) {
+	if (does_shared_secret_match(for_mode, trigger_name, trigger_value, found_trigger_value)) {
 		return 1;
 	}
 

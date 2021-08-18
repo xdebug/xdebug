@@ -610,6 +610,8 @@ static int xdebug_handle_start_session()
 		))
 		&& !SG(headers_sent)
 	) {
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "Found 'XDEBUG_SESSION_START' HTTP variable, with value '%s'", Z_STRVAL_P(dummy));
+
 		convert_to_string_ex(dummy);
 		xdebug_update_ide_key(Z_STRVAL_P(dummy));
 
@@ -618,6 +620,8 @@ static int xdebug_handle_start_session()
 	} else if (
 		(dummy_env = getenv("XDEBUG_SESSION_START")) != NULL
 	) {
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "Found 'XDEBUG_SESSION_START' ENV variable, with value '%s'", dummy_env);
+
 		xdebug_update_ide_key(dummy_env);
 
 		if (!SG(headers_sent)) {
@@ -625,14 +629,9 @@ static int xdebug_handle_start_session()
 		}
 
 		activate_session = 1;
-	} else if (
-		(dummy = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), "XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1)) != NULL
-	) {
-		convert_to_string_ex(dummy);
-		xdebug_update_ide_key(Z_STRVAL_P(dummy));
-
-		activate_session = 1;
 	} else if (getenv("XDEBUG_CONFIG")) {
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "Found 'XDEBUG_CONFIG' ENV variable");
+
 		if (XG_DBG(ide_key) && *XG_DBG(ide_key) && !SG(headers_sent)) {
 			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), 0, "/", 1, NULL, 0, 0, 1, 0);
 			activate_session = 1;
