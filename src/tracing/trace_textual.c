@@ -172,7 +172,7 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 	char *tmp_name;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
-	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
 
 	xdebug_str_add_fmt(&str, "%10.4F ", XDEBUG_SECONDS_SINCE_START(fse->nanotime));
 	xdebug_str_add_fmt(&str, "%10lu ", fse->memory);

@@ -80,7 +80,7 @@ void xdebug_monitor_handler(function_stack_entry *fse)
 		return;
 	}
 
-	func_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
+	func_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
 	func_name_len = strlen(func_name);
 
 	if (xdebug_hash_find(XG_DEV(functions_to_monitor), func_name, func_name_len, (void *) &dummy)) {

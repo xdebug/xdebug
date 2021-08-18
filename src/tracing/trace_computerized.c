@@ -143,7 +143,7 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	xdebug_str_add_fmt(&str, "%d\t", fse->level);
 	xdebug_str_add_fmt(&str, "%d\t", function_nr);
 
-	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
 
 	xdebug_str_add_literal(&str, "0\t");
 	xdebug_str_add_fmt(&str, "%F\t", XDEBUG_SECONDS_SINCE_START(fse->nanotime));
