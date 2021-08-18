@@ -85,7 +85,7 @@ char* xdebug_error_type(int type);
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var);
 zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var);
 
-#define XDEBUG_SHOW_FNAME_TODO             0
+#define XDEBUG_SHOW_FNAME_DEFAULT          0
 #define XDEBUG_SHOW_FNAME_ALLOW_HTML    1<<1
 #define XDEBUG_SHOW_FNAME_IGNORE_SCOPE  1<<2
 char* xdebug_show_fname(xdebug_func t, int flags);

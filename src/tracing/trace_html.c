@@ -89,7 +89,7 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	}
 	xdebug_str_add_literal(&str, "-&gt;</td>");
 
-	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
 	xdebug_str_add_fmt(&str, "<td>%s(", tmp_name);
 	xdfree(tmp_name);
 

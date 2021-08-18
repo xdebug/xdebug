@@ -123,7 +123,7 @@ void xdebug_log_stack(const char *error_type_str, char *buffer, const char *erro
 			sent_variables--;
 		}
 
-		tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_TODO);
+		tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
 		xdebug_str_add_fmt(&log_buffer, "PHP %3d. %s(", fse->level, tmp_name);
 		xdfree(tmp_name);
 
@@ -394,7 +394,7 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 		if (xdebug_is_stack_frame_filtered(XDEBUG_FILTER_STACK, fse)) {
 			continue;
 		}
-		tmp_name = xdebug_show_fname(fse->function, (html ? XDEBUG_SHOW_FNAME_ALLOW_HTML : 0) | XDEBUG_SHOW_FNAME_TODO);
+		tmp_name = xdebug_show_fname(fse->function, html ? XDEBUG_SHOW_FNAME_ALLOW_HTML : XDEBUG_SHOW_FNAME_DEFAULT);
 		if (html) {
 			xdebug_str_add_fmt(str, formats[3], fse->level, XDEBUG_SECONDS_SINCE_START(fse->nanotime), fse->memory, tmp_name);
 		} else {
