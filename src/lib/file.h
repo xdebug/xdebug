@@ -14,30 +14,41 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __HAVE_USEFULSTUFF_H__
-#define __HAVE_USEFULSTUFF_H__
+#ifndef __HAVE_LIB_FILE_H__
+#define __HAVE_LIB_FILE_H__
 
 #include "php_xdebug.h"
 #include "src/lib/compat.h"
 
-typedef struct xdebug_arg {
-	int    c;
-	char **args;
-} xdebug_arg;
+#if HAVE_XDEBUG_ZLIB
+# include <zlib.h>
+#endif
 
-xdebug_arg *xdebug_arg_ctor(void);
-void xdebug_arg_dtor(xdebug_arg *arg);
+#define XDEBUG_FILE_TYPE_NULL    0
+#define XDEBUG_FILE_TYPE_NORMAL  1
+#if HAVE_XDEBUG_ZLIB
+# define XDEBUG_FILE_TYPE_GZ     2
+#endif
 
-xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end);
-void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int limit);
-const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end);
-char* xdebug_strrstr(const char* haystack, const char* needle);
-char *xdebug_trim(const char *str);
-char *xdebug_path_to_url(zend_string *fileurl);
-char *xdebug_path_from_url(zend_string *fileurl);
-FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);
-int xdebug_format_output_filename(char **filename, char *format, char *script_name);
-int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno);
-int xdebug_format_filename(char **formatted_name, const char *default_format, zend_string *filename);
+typedef struct _xdebug_file {
+	int type;
+	union {
+		FILE   *normal;
+#if HAVE_XDEBUG_ZLIB
+		gzFile  gz;
+#endif
+	} fp;
+	char *name;
+} xdebug_file;
+
+xdebug_file *xdebug_file_ctor(void);
+void xdebug_file_dtor(xdebug_file *xf);
+void xdebug_file_init(xdebug_file *xf);
+void xdebug_file_deinit(xdebug_file *xf);
+int xdebug_file_open(xdebug_file *file, const char *filename, const char *extension, const char *mode);
+int xdebug_file_flush(xdebug_file *file);
+int XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_file_printf(xdebug_file *file, const char *fmt, ...);
+size_t xdebug_file_write(const void *ptr, size_t size, size_t nmemb, xdebug_file *file);
+int xdebug_file_close(xdebug_file *file);
 
 #endif

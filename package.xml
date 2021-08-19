@@ -199,6 +199,8 @@ https://xdebug.org/docs/upgrade_guide
      <file name="compat.h" role="src" />
      <file name="crc32.c" role="src" />
      <file name="crc32.h" role="src" />
+     <file name="file.c" role="src" />
+     <file name="file.h" role="src" />
      <file name="hash.c" role="src" />
      <file name="hash.h" role="src" />
      <file name="headers.c" role="src" />

@@ -19,6 +19,7 @@
 
 #include "php.h"
 #include "TSRM.h"
+#include "lib/file.h"
 #include "lib/lib.h"
 
 #include "php_xdebug.h"

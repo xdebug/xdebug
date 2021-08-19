@@ -39,7 +39,8 @@ void xdebug_trace_textual_deinit(void *ctxt)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 
-	xdebug_generic_fclose(context->trace_file);
+	xdebug_file_close(context->trace_file);
+	xdebug_file_dtor(context->trace_file);
 	context->trace_file = NULL;
 
 	xdfree(context);
@@ -51,10 +52,10 @@ void xdebug_trace_textual_write_header(void *ctxt)
 	char *str_time;
 
 	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
-	xdebug_generic_fprintf(context->trace_file, "TRACE START [%s]\n", str_time);
+	xdebug_file_printf(context->trace_file, "TRACE START [%s]\n", str_time);
 	xdfree(str_time);
 
-	xdebug_generic_flush(context->trace_file);
+	xdebug_file_flush(context->trace_file);
 }
 
 void xdebug_trace_textual_write_footer(void *ctxt)
@@ -66,20 +67,20 @@ void xdebug_trace_textual_write_footer(void *ctxt)
 
 	nanotime = xdebug_get_nanotime();
 	tmp = xdebug_sprintf("%10.4F ", XDEBUG_SECONDS_SINCE_START(nanotime));
-	xdebug_generic_fprintf(context->trace_file, "%s", tmp);
+	xdebug_file_printf(context->trace_file, "%s", tmp);
 	xdfree(tmp);
 #if WIN32|WINNT
-	xdebug_generic_fprintf(context->trace_file, "%10Iu", zend_memory_usage(0));
+	xdebug_file_printf(context->trace_file, "%10Iu", zend_memory_usage(0));
 #else
-	xdebug_generic_fprintf(context->trace_file, "%10zu", zend_memory_usage(0));
+	xdebug_file_printf(context->trace_file, "%10zu", zend_memory_usage(0));
 #endif
-	xdebug_generic_fprintf(context->trace_file, "\n");
+	xdebug_file_printf(context->trace_file, "\n");
 
 	str_time = xdebug_nanotime_to_chars(nanotime, 6);
-	xdebug_generic_fprintf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
+	xdebug_file_printf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
 	xdfree(str_time);
 
-	xdebug_generic_flush(context->trace_file);
+	xdebug_file_flush(context->trace_file);
 }
 
 char *xdebug_trace_textual_get_filename(void *ctxt)
@@ -201,8 +202,8 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	xdebug_str_add_fmt(&str, ") %s:%d\n", ZSTR_VAL(fse->filename), fse->lineno);
 
-	xdebug_generic_fprintf(context->trace_file, "%s", str.d);
-	xdebug_generic_flush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 
 	xdfree(str.d);
 }
@@ -237,8 +238,8 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 	}
 	xdebug_str_addc(&str, '\n');
 
-	xdebug_generic_fprintf(context->trace_file, "%s", str.d);
-	xdebug_generic_flush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 
 	xdebug_str_destroy(&str);
 }
@@ -277,8 +278,8 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 
 	xdebug_str_add_literal(&str, ")\n");
 
-	xdebug_generic_fprintf(context->trace_file, "%s", str.d);
-	xdebug_generic_flush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 
 	xdebug_str_destroy(&str);
 }
@@ -319,8 +320,8 @@ void xdebug_trace_textual_assignment(void *ctxt, function_stack_entry *fse, char
 	}
 	xdebug_str_add_fmt(&str, " %s:%d\n", filename, lineno);
 
-	xdebug_generic_fprintf(context->trace_file, "%s", str.d);
-	xdebug_generic_flush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 
 	xdfree(str.d);
 }

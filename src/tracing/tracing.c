@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,7 +80,7 @@ xdebug_file *xdebug_trace_open_file(char *requested_filename, zend_string *scrip
 		}
 	}
 
-	if (!xdebug_generic_fopen(
+	if (!xdebug_file_open(
 		file,
 		filename_to_use,
 		(options & XDEBUG_TRACE_OPTION_NAKED_FILENAME) ? NULL : "xt",
