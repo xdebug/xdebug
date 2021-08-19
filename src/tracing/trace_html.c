@@ -26,11 +26,9 @@ extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 void *xdebug_trace_html_init(char *fname, zend_string *script_filename, long options)
 {
 	xdebug_trace_html_context *tmp_html_context;
-	char *used_fname;
 
 	tmp_html_context = xdmalloc(sizeof(xdebug_trace_html_context));
-	tmp_html_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname);
-	tmp_html_context->trace_filename = used_fname;
+	tmp_html_context->trace_file = xdebug_trace_open_file(fname, script_filename, options);
 
 	return tmp_html_context->trace_file ? tmp_html_context : NULL;
 }
@@ -39,9 +37,8 @@ void xdebug_trace_html_deinit(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
-	fclose(context->trace_file);
+	xdebug_generic_fclose(context->trace_file);
 	context->trace_file = NULL;
-	xdfree(context->trace_filename);
 
 	xdfree(context);
 }
@@ -50,26 +47,26 @@ void xdebug_trace_html_write_header(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
-	fprintf(context->trace_file, "<table style='hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto;' class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
-	fprintf(context->trace_file, "\t<tr><th>#</th><th>Time</th>");
-	fprintf(context->trace_file, "<th>Mem</th>");
-	fprintf(context->trace_file, "<th colspan='2'>Function</th><th>Location</th></tr>\n");
-	fflush(context->trace_file);
+	xdebug_generic_fprintf(context->trace_file, "<table style='hyphens: auto; -webkit-hyphens: auto; -ms-hyphens: auto;' class='xdebug-trace' dir='ltr' border='1' cellspacing='0'>\n");
+	xdebug_generic_fprintf(context->trace_file, "\t<tr><th>#</th><th>Time</th>");
+	xdebug_generic_fprintf(context->trace_file, "<th>Mem</th>");
+	xdebug_generic_fprintf(context->trace_file, "<th colspan='2'>Function</th><th>Location</th></tr>\n");
+	xdebug_generic_flush(context->trace_file);
 }
 
 void xdebug_trace_html_write_footer(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
-	fprintf(context->trace_file, "</table>\n");
-	fflush(context->trace_file);
+	xdebug_generic_fprintf(context->trace_file, "</table>\n");
+	xdebug_generic_flush(context->trace_file);
 }
 
 char *xdebug_trace_html_get_filename(void *ctxt)
 {
 	xdebug_trace_html_context *context = (xdebug_trace_html_context*) ctxt;
 
-	return context->trace_filename;
+	return context->trace_file->name;
 }
 
 void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
@@ -113,8 +110,8 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse, int
 	xdebug_str_add_fmt(&str, ")</td><td>%s:%d</td>", ZSTR_VAL(fse->filename), fse->lineno);
 	xdebug_str_add_literal(&str, "</tr>\n");
 
-	fprintf(context->trace_file, "%s", str.d);
-	fflush(context->trace_file);
+	xdebug_generic_fprintf(context->trace_file, "%s", str.d);
+	xdebug_generic_flush(context->trace_file);
 	xdfree(str.d);
 }
 

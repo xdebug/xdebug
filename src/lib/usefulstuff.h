@@ -41,9 +41,10 @@ typedef struct _xdebug_file {
 	char *name;
 } xdebug_file;
 
+xdebug_file *xdebug_file_ctor(void);
 void xdebug_init_generic_file(xdebug_file *xf);
 void xdebug_free_generic_file(xdebug_file *xf);
-int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *mode);
+int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *extension, const char *mode);
 int xdebug_generic_flush(xdebug_file *file);
 int XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_generic_fprintf(xdebug_file *file, const char *fmt, ...);
 size_t xdebug_generic_fwrite(const void *ptr, size_t size, size_t nmemb, xdebug_file *file);

@@ -195,7 +195,7 @@ void xdebug_profiler_init(char *script_name)
 		filename = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, fname);
 	}
 
-	if (!xdebug_generic_fopen(&XG_PROF(profile_file), filename, XINI_PROF(profiler_append) ? "a" : "w")) {
+	if (!xdebug_generic_fopen(&XG_PROF(profile_file), filename, NULL, XINI_PROF(profiler_append) ? "a" : "w")) {
 		xdebug_log_diagnose_permissions(XLOG_CHAN_PROFILE, output_dir, XG_PROF(profile_file).name);
 		goto return_and_free_names;
 	}

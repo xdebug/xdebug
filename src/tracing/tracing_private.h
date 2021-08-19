@@ -78,6 +78,6 @@ int xdebug_post_inc_static_prop_handler(zend_execute_data *execute_data);
 int xdebug_post_dec_static_prop_handler(zend_execute_data *execute_data);
 #endif
 
-FILE *xdebug_trace_open_file(char *fname, zend_string *script_filename, long options, char **used_fname);
+xdebug_file *xdebug_trace_open_file(char *fname, zend_string *script_filename, long options);
 
 #endif

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,8 +20,7 @@
 
 typedef struct _xdebug_trace_computerized_context
 {
-	FILE *trace_file;
-	char *trace_filename;
+	xdebug_file *trace_file;
 } xdebug_trace_computerized_context;
 
 extern xdebug_trace_handler_t xdebug_trace_handler_computerized;

@@ -499,6 +499,14 @@ void xdebug_init_generic_file(xdebug_file *xf)
 	xf->name      = NULL;
 }
 
+xdebug_file *xdebug_file_ctor(void)
+{
+	xdebug_file *tmp = xdmalloc(sizeof(xdebug_file));
+	xdebug_init_generic_file(tmp);
+
+	return tmp;
+}
+
 void xdebug_free_generic_file(xdebug_file *xf)
 {
 	xf->type = XDEBUG_FILE_TYPE_NULL;
@@ -509,11 +517,16 @@ void xdebug_free_generic_file(xdebug_file *xf)
 	xdfree(xf->name);
 }
 
-int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *mode)
+int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *extension, const char *mode)
 {
 	if (XINI_LIB(use_compression)) {
 #ifdef HAVE_XDEBUG_ZLIB
-		FILE *tmp_file = xdebug_fopen((char*) filename, mode, "gz", &(file->name));
+		FILE *tmp_file;
+		char *combined_extension;
+
+		combined_extension = extension ? xdebug_sprintf("%s.gz", extension) : xdstrdup("gz");
+		tmp_file = xdebug_fopen((char*) filename, mode, combined_extension, &(file->name));
+		xdfree(combined_extension);
 
 		if (!tmp_file) {
 			return 0;
@@ -532,7 +545,7 @@ int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *mo
 #endif
 	}
 	file->type = XDEBUG_FILE_TYPE_NORMAL;
-	file->fp.normal = xdebug_fopen((char*) filename, mode, NULL, &(file->name));
+	file->fp.normal = xdebug_fopen((char*) filename, mode, extension, &(file->name));
 
 	if (!file->fp.normal) {
 		return 0;
