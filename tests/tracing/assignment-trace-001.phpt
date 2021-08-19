@@ -12,7 +12,7 @@ xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 function test($a, $b, $c)
 {
@@ -43,12 +43,10 @@ test(1, 2, 3);
 $a = new testClass;
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-                           => $tf = '%sxt' %sassignment-trace-001.php:2
+                             => $tf = '%sxt%S' %s:%d
 %w%f %w%d     -> test($a = 1, $b = 2, $c = 3) %sassignment-trace-001.php:29
                              => $d = 89 %sassignment-trace-001.php:6
                              => $a += 2 %sassignment-trace-001.php:7
@@ -62,6 +60,6 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
                              => $this->b <<= 1 %sassignment-trace-001.php:24
                              => $this->c = 0.125 %sassignment-trace-001.php:25
                            => $a = class testClass { public $a = 98; private $b = 4; protected $c = 0.125 } %sassignment-trace-001.php:30
-%w%f %w%d     -> xdebug_stop_trace() %sassignment-trace-001.php:32
+%w%f %w%d     -> xdebug_stop_trace() %s:%d
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

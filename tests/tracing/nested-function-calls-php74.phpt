@@ -7,16 +7,15 @@ check_reqs('PHP < 8.0');
 ?>
 --INI--
 xdebug.mode=develop,trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=1
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 xdebug.var_display_max_depth=5
 xdebug.var_display_max_children=4
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 function a () {
 	var_dump (xdebug_get_function_stack());
@@ -34,8 +33,6 @@ function c ($a, $b) {
 echo c(c(a(),b(2)), c(a(), a())), "\n";
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 %snested-function-calls-php74.php:5:

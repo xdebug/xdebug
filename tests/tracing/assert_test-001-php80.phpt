@@ -8,14 +8,13 @@ check_reqs('PHP >= 8.0');
 --INI--
 assert.exception=0
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 // Active assert and make it quiet
 assert_options (ASSERT_ACTIVE, 1);
@@ -35,9 +34,8 @@ assert_options (ASSERT_CALLBACK, 'my_assert_handler');
 // Make an assertion that should fail
 @assert (1 == 2);
 echo "\n";
-echo file_get_contents($tf);
+
 xdebug_stop_trace();
-unlink($tf);
 ?>
 --EXPECTF--
 Assertion Failed:
@@ -50,4 +48,6 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> assert_options($option = 2, $value = 'my_assert_handler') %sassert_test-001-php80.php:17
 %w%f %w%d     -> assert($assertion = FALSE, $description = 'assert(1 == 2)') %sassert_test-001-php80.php:20
 %w%f %w%d       -> my_assert_handler($file = '%sassert_test-001-php80.php', $line = 20, $dummy = NULL, $code = 'assert(1 == 2)') %sassert_test-001-php80.php:20
-%w%f %w%d     -> file_get_contents($filename = '%s') %sassert_test-001-php80.php:22
+%w%f %w%d     -> xdebug_stop_trace() %s:%d
+%w%f %w%d
+TRACE END   [%d-%d-%d %d:%d:%d.%d]

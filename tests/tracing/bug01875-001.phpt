@@ -6,14 +6,13 @@ require __DIR__ . '/../utils.inc';
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 $input = '<!DOCTYPE html><body><svg><altGlyph /><altGlyphDef /><altGlyphItem /><animateColor /><animateMotion /><animateTransform /><clipPath /><feBlend /><feColorMatrix /><feComponentTransfer /><feComposite /><feConvolveMatrix /><feDiffuseLighting /><feDisplacementMap /><feDistantLight /><feFlood /><feFuncA /><feFuncB /><feFuncG /><feFuncR /><feGaussianBlur /><feImage /><feMerge /><feMergeNode /><feMorphology /><feOffset /><fePointLight /><feSpecularLighting /><feSpotLight /><feTile /><feTurbulence /><foreignObject /><glyphRef /><linearGradient /><radialGradient /><textPath /></svg>';
 $chars = preg_split('//u', $input, -1, PREG_SPLIT_NO_EMPTY);
@@ -22,8 +21,6 @@ $a = [];
 array_push($a, ...$chars);
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

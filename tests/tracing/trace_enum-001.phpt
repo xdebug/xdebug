@@ -7,13 +7,13 @@ check_reqs('PHP >= 8.1');
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 enum Language {
 	case English;
@@ -40,8 +40,6 @@ xdebug_var_dump( $lang, $eur, $time );
 echo "\n";
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 %strace_enum-001.php:25:
@@ -52,7 +50,7 @@ enum Currency::EUR : string("€");
 enum Unit::Hour : int(3600);
 
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w             => $tf = '%s' %strace_enum-001.php:2
+%w               => $tf = '%s' %s
 %w             => $lang = enum Language::Gàidhlig %strace_enum-001.php:9
 %w             => $eur = enum Currency::EUR('€') %strace_enum-001.php:15
 %w             => $time = enum Unit::Hour(3600) %strace_enum-001.php:23

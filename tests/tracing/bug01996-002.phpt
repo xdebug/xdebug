@@ -7,13 +7,13 @@ check_reqs('PHP >= 8.1');
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 
 $closure = substr(...);
@@ -34,12 +34,10 @@ $closure = $dateTime->format(...);
 
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w             => $tf = '%s' %sbug01996-002.php:2
+%w               => $tf = '%s' %s
 %w             => $closure = class Closure { virtual $closure = "substr", public $parameter = ['$string' => '<required>', '$offset' => '<required>', '$length' => '<optional>'] } %sbug01996-002.php:5
 %w             => $closure = class Closure { virtual $closure = "user_defined", public $parameter = ['$a' => '<required>', '$b' => '<required>'] } %sbug01996-002.php:12
 %w             => $closure = class Closure { virtual $closure = "DateTimeImmutable::createFromFormat", public $parameter = ['$format' => '<required>', '$datetime' => '<required>', '$timezone' => '<optional>'] } %sbug01996-002.php:15

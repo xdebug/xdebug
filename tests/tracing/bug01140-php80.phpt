@@ -7,7 +7,7 @@ check_reqs('PHP >= 8.0');
 ?>
 --INI--
 xdebug.mode=trace,develop
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.collect_return=0
@@ -24,24 +24,21 @@ class Foo
 	}
 }
 
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 $a = new Foo;
 var_dump( $a );
 	
 xdebug_stop_trace();
-echo file_get_contents( $tf );
-unlink( $tf );
 ?>
 == I didn't crash ==
 --EXPECTF--
 %sbug01140-php80.php:14:
 class Foo#1 (0) {
 }
+== I didn't crash ==
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> var_dump($value = class Foo {  }) %sbug01140-php80.php:14
 %w%f %w%d     -> xdebug_stop_trace() %sbug01140-php80.php:16
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
-
-== I didn't crash ==

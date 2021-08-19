@@ -2,7 +2,7 @@
 Test for bug #1073: Segmentation Fault 11 when nesting call_user_func_array
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
@@ -11,15 +11,13 @@ xdebug.var_display_max_data=512
 xdebug.var_display_max_depth=3
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 $c = 'call_user_func_array';
 $c('call_user_func_array', array('printf', array("%u %u %u\n", 1,2,3)));
 
 $c('call_user_func_array', array('call_user_func_array', array('printf', array("%u %u %u\n", 1,2,3))));
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 1 2 3

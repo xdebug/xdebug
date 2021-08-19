@@ -2,16 +2,15 @@
 Test for bug #1571: Stack traces don't show file/line for closures in namespaces
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=1
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
 namespace A;
 
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 $a = function(){
 
@@ -19,8 +18,6 @@ $a = function(){
 $a(1, $a);
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

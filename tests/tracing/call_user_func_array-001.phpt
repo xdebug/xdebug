@@ -2,15 +2,14 @@
 Test for file/line correctness with call_user_func_array()
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 xdebug.var_display_max_depth=3
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 function debug($var, $val) {
     $ia = 'is_array'; $io = 'is_object'; $ir = 'is_resource';
     if ($ia($val) || $io($val) || $ir($val)) {
@@ -27,8 +26,6 @@ $foo = 'bar';
 $c('debug', array('bar', $foo));
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

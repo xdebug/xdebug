@@ -2,47 +2,44 @@
 Test for variable function calls
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
-	function foo1 ($a)
-	{
-		return addslashes ($a);
-	}
+function foo1 ($a)
+{
+	return addslashes ($a);
+}
 
-	function foo2 ($a)
-	{
-		return addslashes ($a);
-	}
+function foo2 ($a)
+{
+	return addslashes ($a);
+}
 
-	function foo3 ($a)
-	{
-		return addslashes ($a);
-	}
+function foo3 ($a)
+{
+	return addslashes ($a);
+}
 
-	function foo4 ($a)
-	{
-		return addslashes ($a);
-	}
+function foo4 ($a)
+{
+	return addslashes ($a);
+}
 
-	$f = 'foo1';
-	$f('test\'s');
-	$g = 'foo4';
-	$g('test\'s');
-	$h = 'foo2';
-	$h('test\'s');
-	$i = 'foo3';
-	$i('test\'s');
+$f = 'foo1';
+$f('test\'s');
+$g = 'foo4';
+$g('test\'s');
+$h = 'foo2';
+$h('test\'s');
+$i = 'foo3';
+$i('test\'s');
 
-	xdebug_stop_trace();
-	echo file_get_contents($tf);
-	unlink($tf);
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

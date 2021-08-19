@@ -6,13 +6,13 @@ require __DIR__ . '/../utils.inc';
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 
 $closure = Closure::fromCallable('substr');
@@ -37,13 +37,11 @@ $closure("Y-m-d\n");
 
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 NO!NO!2021 07 22
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w             => $tf = '%s' %sbug01996-001.php:2
+%w               => $tf = '%sxt%S' %s:%d
 %w%f %w%d     -> Closure::fromCallable($call%s = 'substr') %sbug01996-001.php:5
 %w             => $closure = class Closure { virtual $closure = "substr", public $parameter = ['$%s' => '<required>', '$%s' => '<required>', '$length' => '<optional>'] } %sbug01996-001.php:5
 %w%f %w%d     -> substr($%s = 'OH NO!', $%s = 3) %sbug01996-001.php:6

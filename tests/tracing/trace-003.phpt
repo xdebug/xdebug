@@ -2,37 +2,34 @@
 Trace test with fibonacci numbers (format=0)
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
-    function fibonacci_cache ($n)
-    {
-        if (isset ($GLOBALS['fcache'][$n])) {
-            return $GLOBALS['fcache'][$n];
-        }
+require_once 'capture-trace.inc';
+function fibonacci_cache ($n)
+{
+	if (isset ($GLOBALS['fcache'][$n])) {
+		return $GLOBALS['fcache'][$n];
+	}
 
-        if ($n == 0) {
-            return 0;
-        } else if ($n == 1) {
-            return 1;
-        } else if ($n == 2) {
-            return 1;
-        } else {
-            $t = fibonacci_cache($n - 1) + fibonacci_cache($n - 2);
-            $GLOBALS['fcache'][$n] = $t;
-            return $t;
-        }
-    }
+	if ($n == 0) {
+		return 0;
+	} else if ($n == 1) {
+		return 1;
+	} else if ($n == 2) {
+		return 1;
+	} else {
+		$t = fibonacci_cache($n - 1) + fibonacci_cache($n - 2);
+		$GLOBALS['fcache'][$n] = $t;
+		return $t;
+	}
+}
 
-	fibonacci_cache(50);
-	xdebug_stop_trace();
-	echo file_get_contents($tf);
-	unlink($tf);
+fibonacci_cache(50);
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

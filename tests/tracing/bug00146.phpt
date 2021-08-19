@@ -2,26 +2,23 @@
 Test for bug #146: Array key names with quotes in traces are not escaped
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=1
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
-	function foo($a)
-	{
-		return $a;
-	}
+function foo($a)
+{
+	return $a;
+}
 
-	$array = array("te\"st's" => 42);
-	$a = foo($array);
+$array = array("te\"st's" => 42);
+$a = foo($array);
 
-	xdebug_stop_trace();
-	echo file_get_contents($tf);
-	unlink($tf);
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

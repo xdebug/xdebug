@@ -12,17 +12,16 @@ xdebug.trace_options=0
 xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.dump_globals=0
 xdebug.trace_format=0
 xdebug.show_local_vars=1
 --FILE--
 <?php
-	$trace_file = xdebug_get_tracefile_name();
-	new ArrayIterator(NULL);
-	echo file_get_contents($trace_file);
-	unlink($trace_file);
-	echo "DONE\n";
+$trace_file = xdebug_get_tracefile_name();
+new ArrayIterator(NULL);
+echo file_get_contents($trace_file);
+unlink($trace_file);
+echo "DONE\n";
 ?>
 --EXPECTF--
 Fatal error: Uncaught%sarray%sin %sbug00173.php on line 3
@@ -35,4 +34,4 @@ Call Stack:
 
 
 Variables in local scope (#1):
-  $trace_file = '%s.%d.xt'
+  $trace_file = '%s.%d.xt%S'

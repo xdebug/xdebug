@@ -13,4 +13,4 @@ xdebug_stop_trace();
 unlink($trace_file);
 ?>
 --EXPECTF--
-%strace.%s_tests_tracing_bug00847-001_php.xt
+%strace.%s_tests_tracing_bug00847-001_php.xt%S

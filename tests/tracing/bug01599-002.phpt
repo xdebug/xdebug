@@ -7,13 +7,13 @@ check_reqs('PHP < 7.4; opcache');
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=0
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 class foo {
 	static public $var1;
@@ -36,12 +36,10 @@ class foo {
 foo::test();
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-                           => $tf = '%s' %sbug01599-002.php:2
+                             => $tf = '%sxt%S' %s:%d
 %w%f %w%d     -> foo::test() %sbug01599-002.php:22
                              => self::var1 = 42 %sbug01599-002.php:12
                              => self::var2 = 42 %sbug01599-002.php:13

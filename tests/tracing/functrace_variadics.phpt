@@ -2,7 +2,7 @@
 Test for function traces with variadics
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=0
 xdebug.dump_globals=0
 xdebug.collect_return=0
@@ -10,7 +10,7 @@ xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 function foo( $a, ...$b )
 {
@@ -22,8 +22,6 @@ foo( 1, false );
 foo( "foo", "bar", 3.1415 );
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

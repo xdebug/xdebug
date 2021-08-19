@@ -12,13 +12,11 @@ xdebug.collect_assignments=0
 xdebug.collect_return=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 var_dump( 42 );
 
 xdebug_stop_trace();
-echo file_get_contents( $tf );
-unlink( $tf );
 ?>
 --EXPECTF--
 int(42)

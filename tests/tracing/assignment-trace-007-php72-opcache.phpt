@@ -7,13 +7,13 @@ check_reqs('opcache');
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=0
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 function test($a, $b, $c)
 {
@@ -44,12 +44,10 @@ test(1, 2, 3);
 $a = new testClass( new StdClass );
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-                           => $tf = '%s.xt' %sassignment-trace-007-php72-opcache.php:2
+                             => $tf = '%sxt%S' %s:%d
 %w%f %w%d     -> test($a = 1, $b = 2, $c = 3) %sassignment-trace-007-php72-opcache.php:29
                              => $a += 2 %sassignment-trace-007-php72-opcache.php:7
                              => $c /= 7 %sassignment-trace-007-php72-opcache.php:8
