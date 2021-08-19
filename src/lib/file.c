@@ -80,7 +80,16 @@ int xdebug_file_open(xdebug_file *file, const char *filename, const char *extens
 
 		return 1;
 #else
-		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "NOZLIB", "Cannot create a compressed file, because support for zlib has not been compiled in");
+		char *combined_extension;
+
+		combined_extension = extension ? xdebug_sprintf("%s.gz", extension) : xdstrdup("gz");
+		xdebug_log_ex(
+			XLOG_CHAN_CONFIG, XLOG_WARN, "NOZLIB",
+			"Cannot create the compressed file '%s.%s', because support for zlib has not been compiled in. Falling back to '%s%s%s'",
+			filename, combined_extension,
+			filename, extension ? "." : "", extension ? extension : ""
+		);
+		xdfree(combined_extension);
 #endif
 	}
 	file->type = XDEBUG_FILE_TYPE_NORMAL;
