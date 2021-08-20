@@ -14,7 +14,7 @@ xdebug.dump_globals=0
 xdebug.force_error_reporting=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_COMPUTERIZED);
+require_once 'capture-trace.inc';
 
 function foo( $a )
 {
@@ -61,16 +61,15 @@ $bar10 %= 2;
 $bar10 /= 2;
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 Version: %s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-1		A						%sfunctrace_comp_assign.php	2	$tf = '%s'
+2		A						%s	%d	$tf = '%s'
+2	1	1	%f	%d
 1		A						%sfunctrace_comp_assign.php	20	$bar = 42
-2	4	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	21	1	42
+2	7	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	21	1	42
 2		A						%sfunctrace_comp_assign.php	6	$aa = 42
 2		A						%sfunctrace_comp_assign.php	7	$bar11 = 1
 2		A						%sfunctrace_comp_assign.php	8	++$bar11
@@ -82,9 +81,9 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%sfunctrace_comp_assign.php	14	$bar11 *= 2
 2		A						%sfunctrace_comp_assign.php	15	$bar11 %= 2
 2		A						%sfunctrace_comp_assign.php	16	$bar11 /= 2
-2	4	1	%f	%d
+2	7	1	%f	%d
 1		A						%sfunctrace_comp_assign.php	22	$bar1 = 'string'
-2	5	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	23	1	'string'
+2	8	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	23	1	'string'
 2		A						%sfunctrace_comp_assign.php	6	$aa = 'string'
 2		A						%sfunctrace_comp_assign.php	7	$bar11 = 1
 2		A						%sfunctrace_comp_assign.php	8	++$bar11
@@ -96,9 +95,9 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%sfunctrace_comp_assign.php	14	$bar11 *= 2
 2		A						%sfunctrace_comp_assign.php	15	$bar11 %= 2
 2		A						%sfunctrace_comp_assign.php	16	$bar11 /= 2
-2	5	1	%f	%d
+2	8	1	%f	%d
 1		A						%sfunctrace_comp_assign.php	24	$bar2 = 'string\nwith\nnewline'
-2	6	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	25	1	'string\nwith\nnewline'
+2	9	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	25	1	'string\nwith\nnewline'
 2		A						%sfunctrace_comp_assign.php	6	$aa = 'string\nwith\nnewline'
 2		A						%sfunctrace_comp_assign.php	7	$bar11 = 1
 2		A						%sfunctrace_comp_assign.php	8	++$bar11
@@ -110,10 +109,10 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%sfunctrace_comp_assign.php	14	$bar11 *= 2
 2		A						%sfunctrace_comp_assign.php	15	$bar11 %= 2
 2		A						%sfunctrace_comp_assign.php	16	$bar11 /= 2
-2	6	1	%f	%d
+2	9	1	%f	%d
 1		A						%sfunctrace_comp_assign.php	26	$bar3 = 1
 1		A						%sfunctrace_comp_assign.php	27	$bar4 = FALSE
-2	7	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	28	2	1	FALSE
+2	10	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	28	2	1	FALSE
 2		A						%sfunctrace_comp_assign.php	6	$aa = 1
 2		A						%sfunctrace_comp_assign.php	7	$bar11 = 1
 2		A						%sfunctrace_comp_assign.php	8	++$bar11
@@ -125,10 +124,10 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%sfunctrace_comp_assign.php	14	$bar11 *= 2
 2		A						%sfunctrace_comp_assign.php	15	$bar11 %= 2
 2		A						%sfunctrace_comp_assign.php	16	$bar11 /= 2
-2	7	1	%f	%d
+2	10	1	%f	%d
 1		A						%sfunctrace_comp_assign.php	29	$bar5 = TRUE
 1		A						%sfunctrace_comp_assign.php	%d	$bar6 = NULL
-2	8	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	%d	2	TRUE	NULL
+2	11	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	%d	2	TRUE	NULL
 2		A						%sfunctrace_comp_assign.php	6	$aa = TRUE
 2		A						%sfunctrace_comp_assign.php	7	$bar11 = 1
 2		A						%sfunctrace_comp_assign.php	8	++$bar11
@@ -140,11 +139,11 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%sfunctrace_comp_assign.php	14	$bar11 *= 2
 2		A						%sfunctrace_comp_assign.php	15	$bar11 %= 2
 2		A						%sfunctrace_comp_assign.php	16	$bar11 /= 2
-2	8	1	%f	%d
+2	11	1	%f	%d
 1		A						%sfunctrace_comp_assign.php	%d	$bar7 = 'foo'
 1		A						%sfunctrace_comp_assign.php	%d	$bar8 = 'bar'
 1		A						%sfunctrace_comp_assign.php	%d	$bar9 = 3.1415
-2	9	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	%d	3	'foo'	'bar'	3.1415
+2	12	0	%f	%d	foo	1		%sfunctrace_comp_assign.php	%d	3	'foo'	'bar'	3.1415
 2		A						%sfunctrace_comp_assign.php	6	$aa = 'foo'
 2		A						%sfunctrace_comp_assign.php	7	$bar11 = 1
 2		A						%sfunctrace_comp_assign.php	8	++$bar11
@@ -156,7 +155,7 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%sfunctrace_comp_assign.php	14	$bar11 *= 2
 2		A						%sfunctrace_comp_assign.php	15	$bar11 %= 2
 2		A						%sfunctrace_comp_assign.php	16	$bar11 /= 2
-2	9	1	%f	%d
+2	12	1	%f	%d
 1		A						%sfunctrace_comp_assign.php	%d	$bar10 = 1
 1		A						%sfunctrace_comp_assign.php	%d	++$bar10
 1		A						%sfunctrace_comp_assign.php	%d	++$bar10
@@ -167,6 +166,6 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 1		A						%sfunctrace_comp_assign.php	44	$bar10 *= 2
 1		A						%sfunctrace_comp_assign.php	45	$bar10 %= 2
 1		A						%sfunctrace_comp_assign.php	46	$bar10 /= 2
-2	10	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_assign.php	48	0
+2	13	0	%f	%d	xdebug_stop_trace	0		%sfunctrace_comp_assign.php	48	0
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

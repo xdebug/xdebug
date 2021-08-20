@@ -1,14 +1,14 @@
 --TEST--
-Test for bug #1739: 
+Test for bug #1739: Tracing footer not written
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_options=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.dump_globals=0
 xdebug.trace_format=0
+xdebug.use_compression=0
 --FILE--
 <?php
 $id = getenv( 'UNIQ_RUN_ID' ) ? getenv( 'UNIQ_RUN_ID' ) : '';

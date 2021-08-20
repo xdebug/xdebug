@@ -2,30 +2,27 @@
 Test with include file
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 xdebug.var_display_max_depth=1
 xdebug.var_display_max_children=3
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
-	function foo ($a)
-	{
-		$c = new een();
-		$b = $a * 3;
-		$c->foo2 ($b, array ('blaat', 5, FALSE));
-		return $b;
-	}
+require_once 'capture-trace.inc';
+function foo ($a)
+{
+	$c = new een();
+	$b = $a * 3;
+	$c->foo2 ($b, array ('blaat', 5, FALSE));
+	return $b;
+}
 
-	include ('test_class.inc');
+include ('test_class.inc');
 
-	echo foo(5), "\n";
-	xdebug_stop_trace();
-	echo file_get_contents($tf);
-	unlink($tf);
+echo foo(5), "\n";
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 15

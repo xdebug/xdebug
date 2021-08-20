@@ -7,12 +7,13 @@ check_reqs('unparallel');
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_output_name=trace.bug690
 xdebug.trace_options=1
 xdebug.trace_format=0
 xdebug.collect_assignments=1
 xdebug.collect_return=1
+xdebug.use_compression=0
 --FILE--
 <?php
 xdebug_start_trace();

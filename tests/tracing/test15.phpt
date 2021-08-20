@@ -2,34 +2,31 @@
 Test for variable member functions
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
-	class a {
+class a {
 
-		function func_a1() {
-		}
-
-		function func_a2() {
-		}
-
+	function func_a1() {
 	}
 
-	$A = new a;
-	$A->func_a1();
+	function func_a2() {
+	}
 
-	$a = 'func_a2';
-	$A->$a();
+}
 
-	xdebug_stop_trace();
-	echo file_get_contents($tf);
-	unlink($tf);
+$A = new a;
+$A->func_a1();
+
+$a = 'func_a2';
+$A->$a();
+
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

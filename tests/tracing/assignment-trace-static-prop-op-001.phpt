@@ -2,13 +2,13 @@
 Test for tracing $static-prop property assign ops [1]
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=0
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 $a = new test;
 class test { static $test; function assign() {
 	self::$test = 0;
@@ -28,12 +28,10 @@ class test { static $test; function assign() {
 $a->assign();
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-                           => $tf = '%s.xt' %sassignment-trace-static-prop-op-001.php:2
+                             => $tf = '%sxt%S' %s:%d
                            => $a = class test {  } %sassignment-trace-static-prop-op-001.php:3
 %w%f %w%d     -> test->assign() %sassignment-trace-static-prop-op-001.php:19
                              => self::test = 0 %sassignment-trace-static-prop-op-001.php:5

@@ -2,13 +2,13 @@
 Test for tracing array assign ops
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.trace_format=0
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 $a['foo'][3]['test'] = 0;
 
@@ -25,12 +25,10 @@ $a['foo'][3]['test'] ^= 0xf00f;
 $a['foo'][3]['test'] **= 2;
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-                           => $tf = '%s.xt' %sassignment-trace-dim-op.php:2
+                             => $tf = '%sxt%S' %s:%d
                            => $a['foo'][3]['test'] = 0 %sassignment-trace-dim-op.php:4
                            => $a['foo'][3]['test'] += 42 %sassignment-trace-dim-op.php:6
                            => $a['foo'][3]['test'] -= 2 %sassignment-trace-dim-op.php:7

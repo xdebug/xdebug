@@ -2,45 +2,42 @@
 Test for class members
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
-xdebug.auto_profile=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
-	class aaa {
-		public $c1;
-		public $c2;
-		function a1 () {
-			return 'a1';
-		}
-		function a2 () {
-			return 'a2';
-		}
+class aaa {
+	public $c1;
+	public $c2;
+	function a1 () {
+		return 'a1';
 	}
-
-	class bbb {
-		function b1 () {
-			return 'a1';
-		}
-		function b2 () {
-			return 'a2';
-		}
+	function a2 () {
+		return 'a2';
 	}
+}
+
+class bbb {
+	function b1 () {
+		return 'a1';
+	}
+	function b2 () {
+		return 'a2';
+	}
+}
 
 
-	$a = new aaa;
-	$b = new bbb;
-	$a->a1();
-	$b->b1();
-	$a->a2();
+$a = new aaa;
+$b = new bbb;
+$a->a1();
+$b->b1();
+$a->a2();
 
-	xdebug_stop_trace();
-	echo file_get_contents($tf);
-	unlink($tf);
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

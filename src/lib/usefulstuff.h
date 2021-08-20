@@ -20,35 +20,6 @@
 #include "php_xdebug.h"
 #include "src/lib/compat.h"
 
-#if HAVE_XDEBUG_ZLIB
-# include <zlib.h>
-#endif
-
-#define XDEBUG_FILE_TYPE_NULL    0
-#define XDEBUG_FILE_TYPE_NORMAL  1
-#if HAVE_XDEBUG_ZLIB
-# define XDEBUG_FILE_TYPE_GZ     2
-#endif
-
-typedef struct _xdebug_file {
-	int type;
-	union {
-		FILE   *normal;
-#if HAVE_XDEBUG_ZLIB
-		gzFile  gz;
-#endif
-	} fp;
-	char *name;
-} xdebug_file;
-
-void xdebug_init_generic_file(xdebug_file *xf);
-void xdebug_free_generic_file(xdebug_file *xf);
-int xdebug_generic_fopen(xdebug_file *file, const char *filename, const char *mode);
-int xdebug_generic_flush(xdebug_file *file);
-int XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_generic_fprintf(xdebug_file *file, const char *fmt, ...);
-size_t xdebug_generic_fwrite(const void *ptr, size_t size, size_t nmemb, xdebug_file *file);
-int xdebug_generic_fclose(xdebug_file *file);
-
 typedef struct xdebug_arg {
 	int    c;
 	char **args;

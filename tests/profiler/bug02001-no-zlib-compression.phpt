@@ -9,7 +9,7 @@ check_reqs('!ext-flag compression; !win');
 xdebug.mode=profile
 xdebug.start_with_request=default
 xdebug.use_compression=1
-xdebug.profiler_output_name=cachegrind.out.%R.end
+xdebug.profiler_output_name=cachegrind.out
 xdebug.log={TMPDIR}/{RUNID}bug2001-no-zlib-compression.txt
 --FILE--
 <?php
@@ -23,6 +23,6 @@ echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'bug20
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'bug2001-no-zlib-compression.txt' );
 ?>
 --EXPECTF--
-string(%d) "%send"
+string(%d) "%scachegrind.out"
 [%d] Log opened at %s
-[%d] [Config] WARN: Cannot create a compressed file, because support for zlib has not been compiled in
+[%d] [Config] WARN: Cannot create the compressed file '%s.out.gz', because support for zlib has not been compiled in. Falling back to '%s.out'

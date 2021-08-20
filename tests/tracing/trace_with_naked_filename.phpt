@@ -2,11 +2,11 @@
 Test trace with "naked filename"
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
+xdebug.use_compression=0
 --FILE--
 <?php
 $tf = xdebug_start_trace(sys_get_temp_dir() . '/bug971' . uniqid('', true), XDEBUG_TRACE_COMPUTERIZED);

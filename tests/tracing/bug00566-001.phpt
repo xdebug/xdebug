@@ -5,10 +5,10 @@ xdebug.mode=trace
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.trace_format=0
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 --FILE--
 <?php
-$tf = xdebug_start_trace('%s'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 function loadMod( $module )
 {
 	strrev( $module );
@@ -28,8 +28,6 @@ $a = loadMod( 'test' );
 $a = loadMod( 'view' );
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

@@ -18,7 +18,12 @@ function shutdown() {
 	var_dump("in shutdown");
 
 	xdebug_stop_trace();
-	echo file_get_contents($tf);
+	if (preg_match('@\.gz$@', $tf)) {
+		$fp = gzopen($tf, 'r');
+		echo stream_get_contents($fp);
+	} else {
+		echo file_get_contents($tf);
+	}
 	unlink($tf);
 }
 
@@ -32,9 +37,9 @@ string(3) "foo"
 string(11) "in shutdown"
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d   -> {main}() %sbug01676-php74.php:0
-%w%f %w%d     -> xdebug_get_tracefile_name() %sbug01676-php74.php:12
-%w%f %w%d     -> register_shutdown_function($function_name = 'shutdown') %sbug01676-php74.php:14
-%w%f %w%d     -> var_dump(...$vars = variadic(0 => 'foo')) %sbug01676-php74.php:15
+%w%f %w%d     -> xdebug_get_tracefile_name() %sbug01676-php74.php:17
+%w%f %w%d     -> register_shutdown_function($function_name = 'shutdown') %sbug01676-php74.php:19
+%w%f %w%d     -> var_dump(...$vars = variadic(0 => 'foo')) %sbug01676-php74.php:20
 %w%f %w%d   -> shutdown() %sbug01676-php74.php:0
 %w%f %w%d     -> var_dump(...$vars = variadic(0 => 'in shutdown')) %sbug01676-php74.php:5
 %w%f %w%d     -> xdebug_stop_trace() %sbug01676-php74.php:7

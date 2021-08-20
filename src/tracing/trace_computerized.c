@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,11 +28,9 @@ extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 void *xdebug_trace_computerized_init(char *fname, zend_string *script_filename, long options)
 {
 	xdebug_trace_computerized_context *tmp_computerized_context;
-	char *used_fname;
 
 	tmp_computerized_context = xdmalloc(sizeof(xdebug_trace_computerized_context));
-	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname);
-	tmp_computerized_context->trace_filename = used_fname;
+	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, script_filename, options);
 
 	return tmp_computerized_context->trace_file ? tmp_computerized_context : NULL;
 }
@@ -41,9 +39,9 @@ void xdebug_trace_computerized_deinit(void *ctxt)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 
-	fclose(context->trace_file);
+	xdebug_file_close(context->trace_file);
+	xdebug_file_dtor(context->trace_file);
 	context->trace_file = NULL;
-	xdfree(context->trace_filename);
 
 	xdfree(context);
 }
@@ -53,14 +51,14 @@ void xdebug_trace_computerized_write_header(void *ctxt)
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	char *str_time;
 
-	fprintf(context->trace_file, "Version: %s\n", XDEBUG_VERSION);
-	fprintf(context->trace_file, "File format: 4\n");
+	xdebug_file_printf(context->trace_file, "Version: %s\n", XDEBUG_VERSION);
+	xdebug_file_printf(context->trace_file, "File format: 4\n");
 
 	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
-	fprintf(context->trace_file, "TRACE START [%s]\n", str_time);
+	xdebug_file_printf(context->trace_file, "TRACE START [%s]\n", str_time);
 	xdfree(str_time);
 
-	fflush(context->trace_file);
+	xdebug_file_flush(context->trace_file);
 }
 
 void xdebug_trace_computerized_write_footer(void *ctxt)
@@ -68,32 +66,29 @@ void xdebug_trace_computerized_write_footer(void *ctxt)
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	char    *str_time;
 	uint64_t nanotime;
-	char    *tmp;
 
 	nanotime = xdebug_get_nanotime();
 
-	tmp = xdebug_sprintf("\t\t\t%F\t", XDEBUG_SECONDS_SINCE_START(nanotime));
-	fprintf(context->trace_file, "%s", tmp);
-	xdfree(tmp);
+	xdebug_file_printf(context->trace_file, "\t\t\t%F\t", XDEBUG_SECONDS_SINCE_START(nanotime));
 #if WIN32|WINNT
-	fprintf(context->trace_file, "%Iu", zend_memory_usage(0));
+	xdebug_file_printf(context->trace_file, "%Iu", zend_memory_usage(0));
 #else
-	fprintf(context->trace_file, "%zu", zend_memory_usage(0));
+	xdebug_file_printf(context->trace_file, "%zu", zend_memory_usage(0));
 #endif
-	fprintf(context->trace_file, "\n");
+	xdebug_file_printf(context->trace_file, "\n");
 
 	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
-	fprintf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
+	xdebug_file_printf(context->trace_file, "TRACE END   [%s]\n\n", str_time);
 	xdfree(str_time);
 
-	fflush(context->trace_file);
+	xdebug_file_flush(context->trace_file);
 }
 
 char *xdebug_trace_computerized_get_filename(void *ctxt)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 
-	return context->trace_filename;
+	return context->trace_file->name;
 }
 
 static void add_single_value(xdebug_str *str, zval *zv)
@@ -181,8 +176,8 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	/* Trailing \n */
 	xdebug_str_addc(&str, '\n');
 
-	fprintf(context->trace_file, "%s", str.d);
-	fflush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 	xdfree(str.d);
 }
 
@@ -198,8 +193,8 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 	xdebug_str_add_fmt(&str, "%F\t", XDEBUG_SECONDS_SINCE_START(xdebug_get_nanotime()));
 	xdebug_str_add_fmt(&str, "%lu\n", zend_memory_usage(0));
 
-	fprintf(context->trace_file, "%s", str.d);
-	fflush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 	xdfree(str.d);
 }
 
@@ -216,8 +211,8 @@ void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_
 
 	xdebug_str_add_literal(&str, "\n");
 
-	fprintf(context->trace_file, "%s", str.d);
-	fflush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 	xdfree(str.d);
 }
 
@@ -257,8 +252,8 @@ void xdebug_trace_computerized_assignment(void *ctxt, function_stack_entry *fse,
 	/* Trailing \n */
 	xdebug_str_add_literal(&str, "\n");
 
-	fprintf(context->trace_file, "%s", str.d);
-	fflush(context->trace_file);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
+	xdebug_file_flush(context->trace_file);
 
 	xdfree(str.d);
 }

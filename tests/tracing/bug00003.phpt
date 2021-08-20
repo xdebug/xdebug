@@ -2,19 +2,16 @@
 Test for bug #3: Crash tracing to file
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 date.timezone=Europe/Oslo
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/bug00003-' . uniqid('', true) . '.trace');
-	@strftime('%b %l %Y %H:%M:%S', 1061728888);
-	xdebug_stop_trace();
-	readfile($tf);
-	unlink($tf);
+require_once 'capture-trace.inc';
+@strftime('%b %l %Y %H:%M:%S', 1061728888);
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 

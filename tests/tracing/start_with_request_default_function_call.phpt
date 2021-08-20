@@ -7,12 +7,16 @@ xdebug.collect_return=0
 xdebug.collect_assignments=0
 --FILE--
 <?php
-$fileName = xdebug_start_trace();
+$tf = xdebug_start_trace();
 
 xdebug_stop_trace();
 
-echo file_get_contents($fileName);
-unlink($fileName);
+if (preg_match('@\.gz$@', $tf)) {
+	$fp = gzopen($tf, 'r');
+	echo stream_get_contents($fp);
+} else {
+	echo file_get_contents($tf);
+}
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

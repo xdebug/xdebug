@@ -7,13 +7,13 @@ check_reqs('PHP >= 8.1');
 ?>
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.trace_format=0
 --FILE--
 <?php
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
+require_once 'capture-trace.inc';
 
 
 class WithReadOnlyProps
@@ -30,12 +30,10 @@ $obj = new WithReadOnlyProps(ro_string: "New Value");
 
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w             => $tf = '%s' %sbug01999.php:2
+%w               => $tf = '%s' %s
 %w%f %w%d     -> WithReadOnlyProps->__construct($static_string = 'two', $ro_string = 'New Value') %sbug01999.php:15
 %w               => $this->static_string = 'two' %sbug01999.php:9
 %w               => $this->ro_string = 'New Value' %sbug01999.php:9

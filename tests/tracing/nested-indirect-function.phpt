@@ -2,34 +2,31 @@
 Test for nested indirect function call
 --INI--
 xdebug.mode=trace
-xdebug.start_with_request=0
+xdebug.start_with_request=no
 xdebug.collect_return=1
 xdebug.collect_assignments=0
-xdebug.auto_profile=0
 xdebug.trace_format=0
 --FILE--
 <?php
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE));
-	class D
-	{
-		static function a($x) {
-			return 'a';
-		}
-		static function b($x) {
-			return 'b';
-		}
-		static function c($x) {
-			return 'c';
-		}
+require_once 'capture-trace.inc';
+class D
+{
+	static function a($x) {
+		return 'a';
 	}
-
-	function blaat($a) {
+	static function b($x) {
+		return 'b';
 	}
+	static function c($x) {
+		return 'c';
+	}
+}
 
-	$a = blaat("insert blah '".D::a(D::b(D::a(D::c('blah')))));
-	xdebug_stop_trace();
-	echo file_get_contents($tf);
-	unlink($tf);
+function blaat($a) {
+}
+
+$a = blaat("insert blah '".D::a(D::b(D::a(D::c('blah')))));
+xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]

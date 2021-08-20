@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,9 +52,9 @@ static xdebug_trace_handler_t *xdebug_select_trace_handler(int options)
 	return tmp;
 }
 
-FILE *xdebug_trace_open_file(char *requested_filename, zend_string *script_filename, long options, char **used_fname)
+xdebug_file *xdebug_trace_open_file(char *requested_filename, zend_string *script_filename, long options)
 {
-	FILE *file;
+	xdebug_file *file = xdebug_file_ctor();
 	char *filename_to_use;
 	char *generated_filename = NULL;
 	char *output_dir = xdebug_lib_get_output_dir(); /* not duplicated */
@@ -79,13 +79,13 @@ FILE *xdebug_trace_open_file(char *requested_filename, zend_string *script_filen
 			filename_to_use = xdebug_sprintf("%s%c%s", output_dir, DEFAULT_SLASH, generated_filename);
 		}
 	}
-	if (options & XDEBUG_TRACE_OPTION_APPEND) {
-		file = xdebug_fopen(filename_to_use, "a", (options & XDEBUG_TRACE_OPTION_NAKED_FILENAME) ? NULL : "xt", used_fname);
-	} else {
-		file = xdebug_fopen(filename_to_use, "w", (options & XDEBUG_TRACE_OPTION_NAKED_FILENAME) ? NULL : "xt", used_fname);
-	}
 
-	if (!file) {
+	if (!xdebug_file_open(
+		file,
+		filename_to_use,
+		(options & XDEBUG_TRACE_OPTION_NAKED_FILENAME) ? NULL : "xt",
+		(options & XDEBUG_TRACE_OPTION_APPEND) ? "a" : "w"
+	)) {
 		xdebug_log_diagnose_permissions(XLOG_CHAN_TRACE, output_dir, generated_filename);
 	}
 
