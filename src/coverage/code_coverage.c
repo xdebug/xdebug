@@ -700,13 +700,13 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
 {
-	zend_long cleanup = 1;
+	zend_bool cleanup = 1;
 
 	if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &cleanup) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &cleanup) == FAILURE) {
 		return;
 	}
 	if (!XG_COV(code_coverage_active)) {
