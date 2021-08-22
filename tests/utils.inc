@@ -207,7 +207,7 @@ function mustNotBeExecuted( array $coverageInfo, array $lines )
 
 function x_sort(array $array)
 {
-	sort($array);
+	asort($array);
 	return $array;
 }
 ?>
