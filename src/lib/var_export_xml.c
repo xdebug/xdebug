@@ -661,12 +661,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			{
 				zend_class_entry *ce = Z_OBJCE_P(*struc);
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
-					xdebug_str *value = xdebug_xml_get_attribute_value(node, "facet");
-					if (value) {
-						xdebug_str_add_literal(value, " enum");
-					} else {
-						xdebug_xml_add_attribute(node, "facet", "enum");
-					}
+					xdebug_xml_expand_attribute_value(node, "facet", "enum");
 				}
 			}
 #endif
@@ -679,7 +674,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 				const zend_function *closure_function = zend_get_closure_method_def(*struc);
 #endif
 
-				xdebug_xml_add_attribute(node, "facet", "closure");
+				xdebug_xml_expand_attribute_value(node, "facet", "closure");
 
 				closure_cont = xdebug_xml_node_init("property");
 				xdebug_xml_add_attribute(closure_cont, "facet", "virtual readonly");

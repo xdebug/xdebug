@@ -67,6 +67,14 @@ void xdebug_xml_add_text_encode(xdebug_xml_node *xml, char *text);
 #define xdebug_xml_add_text_encodel(x,t,l)  xdebug_xml_add_text_ex((x), (t), (l), 1, 1)
 
 xdebug_str *xdebug_xml_get_attribute_value(xdebug_xml_node *xml, const char *attribute);
+#define xdebug_xml_expand_attribute_value(n,a,v) { \
+	xdebug_str *orig_value = xdebug_xml_get_attribute_value((n), (a)); \
+	if (orig_value) { \
+		xdebug_str_add_literal(orig_value, " " v); \
+	} else { \
+		xdebug_xml_add_attribute((n), (a), (v)); \
+	} \
+}
 
 void xdebug_xml_return_node(xdebug_xml_node* node, struct xdebug_str *output);
 void xdebug_xml_node_dtor(xdebug_xml_node* xml);
