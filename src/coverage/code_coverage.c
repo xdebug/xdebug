@@ -119,14 +119,22 @@ error:
 
 static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa)
 {
-	int closure = 0;
+	int wrapped = 0;
 
 	memset(tmp, 0, sizeof(xdebug_func));
 
 	if (opa->function_name) {
 		if (opa->fn_flags & ZEND_ACC_CLOSURE) {
 			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
-			closure = 1;
+			wrapped = 1;
+#if PHP_VERSION_ID >= 70400
+		} else if (
+			opa->fn_flags & ZEND_ACC_TRAIT_CLONE
+			|| (opa->scope && opa->scope->ce_flags & ZEND_ACC_TRAIT)
+		) {
+			tmp->function = xdebug_wrap_location_around_function_name("trait-method", opa, STR_NAME_VAL(opa->function_name));
+			wrapped = 1;
+#endif
 		} else {
 			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
 		}
@@ -135,7 +143,7 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 		tmp->type = XFUNC_MAIN;
 	}
 
-	if (opa->scope && !closure) {
+	if (opa->scope && !wrapped) {
 		tmp->type = XFUNC_MEMBER;
 		tmp->object_class = zend_string_copy(opa->scope->name);
 	} else {
