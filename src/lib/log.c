@@ -346,9 +346,7 @@ static void xdebug_print_php_section(void)
 
 #ifdef ZTS
 	php_info_print_table_row(2, "Thread Safety", "enabled");
-# if PHP_VERSION_ID >= 70300
 	php_info_print_table_row(2, "Thread API", tsrm_api_name());
-# endif
 #else
 	php_info_print_table_row(2, "Thread Safety", "disabled");
 #endif

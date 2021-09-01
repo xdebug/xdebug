@@ -49,7 +49,7 @@ enum Currency::EUR : string("€");
 %strace_enum-002.php:25:
 enum Unit::Hour : int(3600);
 
-Version: 3.1.0-dev
+Version: %s
 File format: 4
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 2		A						%s	%d	$tf = '%s'

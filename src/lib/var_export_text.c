@@ -235,11 +235,7 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 			zend_string *i_string = zend_string_init(Z_STRVAL_P(*struc), Z_STRLEN_P(*struc), 0);
 			zend_string *tmp_zstr;
 
-#if PHP_VERSION_ID >= 70300
 			tmp_zstr = php_addcslashes(i_string, (char*) pattern, pattern_len);
-#else
-			tmp_zstr = php_addcslashes(i_string, 0, (char*) pattern, pattern_len);
-#endif
 
 			tmp_str = estrndup(tmp_zstr->val, tmp_zstr->len);
 			tmp_len = tmp_zstr->len;
