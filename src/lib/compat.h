@@ -74,12 +74,6 @@ zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 #  define XDEBUG_ATTRIBUTE_FORMAT(type, idx, first)
 # endif
 
-# if PHP_VERSION_ID >= 70300
-#  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ZEND_CONSTANT_MODULE_NUMBER((v))
-# else
-#  define XDEBUG_ZEND_CONSTANT_MODULE_NUMBER(v) ((v)->module_number)
-# endif
-
 # if PHP_VERSION_ID < 70400
 #  define ZEND_COMPILE_EXTENDED_STMT ZEND_COMPILE_EXTENDED_INFO
 # endif

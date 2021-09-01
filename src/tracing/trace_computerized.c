@@ -154,11 +154,9 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
 			zend_string *escaped;
-#if PHP_VERSION_ID >= 70300
+
 			escaped = php_addcslashes(fse->include_filename, (char*) "'\\\0..\37", 6);
-#else
-			escaped = php_addcslashes(fse->include_filename, 0, (char*) "'\\\0..\37", 6);
-#endif
+
 			xdebug_str_addc(&str, '\'');
 			xdebug_str_add_zstr(&str, escaped);
 			xdebug_str_addc(&str, '\'');

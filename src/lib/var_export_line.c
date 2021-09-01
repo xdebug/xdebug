@@ -196,11 +196,7 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 		case IS_STRING: {
 			zend_string *tmp_zstr;
 
-#if PHP_VERSION_ID >= 70300
 			tmp_zstr = php_addcslashes(Z_STR_P(*struc), (char*) "'\\\0..\37", 7);
-#else
-			tmp_zstr = php_addcslashes(Z_STR_P(*struc), 0, (char*) "'\\\0..\37", 7);
-#endif
 
 			if (options->no_decoration) {
 				xdebug_str_add_zstr(str, tmp_zstr);

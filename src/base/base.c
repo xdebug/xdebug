@@ -1096,13 +1096,6 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
 
-	/* Redirect compile and execute functions to our own. For PHP 7.3 and
-	 * later, we hook these in xdebug_post_startup instead */
-#if PHP_VERSION_ID < 70300
-	old_compile_file = zend_compile_file;
-	zend_compile_file = xdebug_compile_file;
-#endif
-
 	xdebug_old_execute_ex = zend_execute_ex;
 	zend_execute_ex = xdebug_execute_ex;
 

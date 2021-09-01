@@ -703,28 +703,11 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 			display = 1;
 	}
 
-#if PHP_VERSION_ID < 70300
-	/* Store last error message for error_get_last() */
-	if (display) {
-		clear_last_error();
-		if (!error_filename) {
-			error_filename = "Unknown";
-		}
-		PG(last_error_type) = type;
-		PG(last_error_message) = strdup(buffer);
-		PG(last_error_file) = strdup(error_filename);
-		PG(last_error_lineno) = error_lineno;
-	}
-#endif
 	error_handling  = EG(error_handling);
 	exception_class = EG(exception_class);
-#if PHP_VERSION_ID >= 70300
+
 	/* according to error handling mode, throw exception or show it */
 	if (error_handling == EH_THROW) {
-#else
-	/* according to error handling mode, suppress error, throw exception or show it */
-	if (error_handling != EH_NORMAL) {
-#endif
 		switch (type) {
 			case E_ERROR:
 			case E_CORE_ERROR:
@@ -746,11 +729,7 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 				/* throw an exception if we are in EH_THROW mode
 				 * but DO NOT overwrite a pending exception
 				 */
-#if PHP_VERSION_ID >= 70300
 				if (!EG(exception)) {
-#else
-				if (error_handling == EH_THROW && !EG(exception)) {
-#endif
 #if PHP_VERSION_ID >= 80000
 					zend_throw_error_exception(exception_class, message, 0, type);
 #else
@@ -765,31 +744,29 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 		}
 	}
 
-#if PHP_VERSION_ID >= 70300
 	/* Store last error message for error_get_last() */
 	if (display) {
 		clear_last_error();
 		if (!error_filename) {
-# if PHP_VERSION_ID >= 80100
+#if PHP_VERSION_ID >= 80100
 			error_filename = zend_string_init(ZEND_STRL("Unknown"), 0);
-# else
+#else
 			error_filename = "Unknown";
-# endif
+#endif
 		}
 		PG(last_error_type) = type;
-# if PHP_VERSION_ID >= 80000
+#if PHP_VERSION_ID >= 80000
 		PG(last_error_message) = zend_string_copy(message);
-# else
+#else
 		PG(last_error_message) = strdup(buffer);
-# endif
-# if PHP_VERSION_ID >= 80100
+#endif
+#if PHP_VERSION_ID >= 80100
 		PG(last_error_file) = zend_string_copy(error_filename);
-# else
+#else
 		PG(last_error_file) = strdup(error_filename);
-# endif
+#endif
 		PG(last_error_lineno) = error_lineno;
 	}
-#endif
 
 	if ((EG(error_reporting) | XINI_DEV(force_error_reporting)) & type) {
 		/* Log to logger */

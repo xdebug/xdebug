@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1530: Code coverage incorrect for last code line in a loop (>= PHP 7.2.14, opcache)
+Test for bug #1530: Code coverage incorrect for last code line in a loop (>= PHP 7.3.1, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.2.14,!= 7.3.0; opcache');
+check_reqs('PHP >= 7.3.1; opcache');
 ?>
 --INI--
 xdebug.mode=coverage

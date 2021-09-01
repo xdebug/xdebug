@@ -68,7 +68,7 @@
 #if PHP_VERSION_ID >= 80000
 static zend_result (*xdebug_orig_post_startup_cb)(void);
 static zend_result xdebug_post_startup(void);
-#elif PHP_VERSION_ID >= 70300
+#else
 static int (*xdebug_orig_post_startup_cb)(void);
 static int xdebug_post_startup(void);
 #endif
@@ -616,7 +616,7 @@ PHP_RINIT_FUNCTION(xdebug)
 		return SUCCESS;
 	}
 
-#if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
+#if PHP_VERSION_ID <= 70301
 	/* PHP Bug #77287 causes Xdebug to segfault if Opcache has the "compact
 	 * literals" optimisation turned on. So force the optimisation off for PHP
 	 * 7.3.0 and 7.3.1. */
@@ -744,7 +744,6 @@ ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 
 	zend_xdebug_initialised = 1;
 
-#if PHP_VERSION_ID >= 70300
 	xdebug_orig_post_startup_cb = zend_post_startup_cb;
 	zend_post_startup_cb = xdebug_post_startup;
 
@@ -765,9 +764,6 @@ static int xdebug_post_startup(void)
 	xdebug_base_post_startup();
 
 	return SUCCESS;
-#else
-	return zend_startup_module(&xdebug_module_entry);
-#endif
 }
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)
