@@ -72,9 +72,11 @@ int xdebug_file_open(xdebug_file *file, const char *filename, const char *extens
 		}
 
 		file->type = XDEBUG_FILE_TYPE_GZ;
+		file->fp.normal = tmp_file;
 		file->fp.gz = gzdopen(fileno(tmp_file), mode);
 
 		if (!file->fp.gz) {
+			fclose(tmp_file);
 			return 0;
 		}
 
@@ -155,8 +157,14 @@ int xdebug_file_close(xdebug_file *file)
 		case XDEBUG_FILE_TYPE_NORMAL:
 			return fclose(file->fp.normal);
 #if HAVE_XDEBUG_ZLIB
-		case XDEBUG_FILE_TYPE_GZ:
-			return gzclose(file->fp.gz);
+		case XDEBUG_FILE_TYPE_GZ: {
+			int gzret;
+
+			gzret = gzclose(file->fp.gz);
+			fclose(file->fp.normal);
+
+			return gzret;
+		}
 #endif
 		default:
 			xdebug_log_ex(XLOG_CHAN_BASE, XLOG_CRIT, "FTYPE", "Unknown file type used with '%s'", file->name);
