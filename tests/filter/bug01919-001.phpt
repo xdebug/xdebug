@@ -1,5 +1,10 @@
 --TEST--
 Test for bug #1919: Crash with XDEBUG_FILTER_CODE_COVERAGE without xdebug.mode=coverage
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('!win');
+?>
 --INI--
 xdebug.mode=develop
 xdebug.log={TMPDIR}/{RUNID}issue1919-001.txt

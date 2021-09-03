@@ -1,5 +1,10 @@
 --TEST--
 Test for bug #1919: Crash with XDEBUG_FILTER_TRACING without xdebug.mode=trace
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('!win');
+?>
 --INI--
 xdebug.mode=develop
 xdebug.log={TMPDIR}/{RUNID}issue1919-002.txt
