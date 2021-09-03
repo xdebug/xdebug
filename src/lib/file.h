@@ -32,7 +32,7 @@
 
 typedef struct _xdebug_file {
 	int type;
-	union {
+	struct {
 		FILE   *normal;
 #if HAVE_XDEBUG_ZLIB
 		gzFile  gz;
