@@ -215,7 +215,7 @@ static const char *get_assign_operation(uint32_t extended_value)
 }
 #endif
 
-static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_opcode, const zend_op **found_opcode)
+static int xdebug_is_static_call(const zend_op *first_opcode, const zend_op *cur_opcode, const zend_op *prev_opcode, const zend_op **found_opcode)
 {
 	const zend_op *opcode_ptr;
 
@@ -233,6 +233,9 @@ static int xdebug_is_static_call(const zend_op *cur_opcode, const zend_op *prev_
 # endif
 	while (!(opcode_ptr->opcode == ZEND_EXT_STMT) && !((opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_W) || (opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_RW))) {
 		opcode_ptr = opcode_ptr - 1;
+		if (opcode_ptr < first_opcode) {
+			return 0;
+		}
 	}
 	if ((opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_W) || (opcode_ptr->opcode == ZEND_FETCH_STATIC_PROP_RW)) {
 		*found_opcode = opcode_ptr;
@@ -298,7 +301,7 @@ static char *xdebug_find_var_name(zend_execute_data *execute_data, const zend_op
 		return name.d;
 	}
 
-	is_static = xdebug_is_static_call(cur_opcode, prev_opcode, &static_opcode_ptr);
+	is_static = xdebug_is_static_call(op_array->opcodes, cur_opcode, prev_opcode, &static_opcode_ptr);
 	options = xdebug_var_export_options_from_ini();
 	options->no_decoration = 1;
 
