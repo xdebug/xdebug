@@ -108,21 +108,22 @@ jobs:
                     $xdebug_dll_opt = 'TEST_PHP_ARGS=-n -d zend_extension=' + $dir + '\php_xdebug.dll'
                     echo $xdebug_dll_opt >> $env:GITHUB_ENV
 
-                    $fn = 'php_xdebug-${{env.XDEBUG_VERSION}}-${{matrix.php}}'
+                    $artifact_name = 'php_xdebug-${{env.XDEBUG_VERSION}}-${{matrix.php}}'
 
-                    if ('7.2' -eq '${{matrix.php}}') { $fn = $fn + '-vc15' }
-                    if ('7.3' -eq '${{matrix.php}}') { $fn = $fn + '-vc15' }
-                    if ('7.4' -eq '${{matrix.php}}') { $fn = $fn + '-vc15' }
-                    if ('8.0' -eq '${{matrix.php}}') { $fn = $fn + '-vs16' }
-                    if ('8.1' -eq '${{matrix.php}}') { $fn = $fn + '-vs16' }
+                    if ('7.2' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
+                    if ('7.3' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
+                    if ('7.4' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
+                    if ('8.0' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
+                    if ('8.1' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
 
-                    if ('ts' -eq '${{matrix.ts}}') { $fn = $fn + '-nts' }
-                    if ('x64' -eq '${{matrix.arch}}') { $fn = $fn + '-x86_64' }
+                    if ('ts' -eq '${{matrix.ts}}') { $artifact_name = $artifact_name + '-nts' }
+                    if ('x64' -eq '${{matrix.arch}}') { $artifact_name = $artifact_name + '-x86_64' }
 
-                    $fn = $fn + ".dll"
+                    $xdebug_artifact_name = "ARTIFACT_NAME=" + $artifact_name
+                    echo $xdebug_artifact_name >> $env:GITHUB_ENV
 
                     $from = $dir + '\php_xdebug.dll'
-                    $to = $dir + '\' + $fn
+                    $to = $dir + '\' + $artifact_name + ".dll"
                     Copy-Item $from -Destination $to
                     $xdebug_artifact = "ARTIFACT=" + $to
                     echo $xdebug_artifact >> $env:GITHUB_ENV
@@ -143,5 +144,5 @@ jobs:
                 - name: Upload artifacts
                   uses: actions/upload-artifact@v2
                   with:
-                      name: ${{matrix.php}}-${{matrix.arch}}-${{matrix.ts}}
+                      name: ${{env.ARTIFACT_NAME}}
                       path: ${{env.ARTIFACT}}
