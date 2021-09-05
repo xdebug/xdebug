@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2021-04-08</date>
- <time>10:32:42</time>
+ <date>2021-09-05</date>
+ <time>16:22:41</time>
  <version>
-  <release>3.0.4</release>
-  <api>3.0.4</api>
+  <release>3.1.0beta1</release>
+  <api>3.1.0beta1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,15 +52,51 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Thu, Apr 08, 2021 - Xdebug 3.0.4
+Sun, Sep 05, 2021 - Xdebug 3.1.0beta1
+
++ New features:
+  
+  - Fixed issue #1738: Add xdebug_notify() function to send data through DBGp to a debugging client
+  - Fixed issue #1853: Enable profile compression for cachegrind files
+  - Fixed issue #1898: API for querying the currently active mode(s)
+  - Fixed issue #1972: Add support for PHP 8.1 Fibers
+  - Fixed issue #1974: Add gzip support to trace files
+  - Fixed issue #1997: Added xdebug_connect_to_client() to attempt a debugging connect while running code
+  - Fixed issue #2001: Add 'xdebug.use_compression' setting to turn on/off compression for profiling files
+  - Fixed issue #2013: Support PHP 8.1
+
++ Improvements:
+
+  - Fixed issue #1472: Add assignments to computer readable trace format
+  - Fixed issue #1890: Add connected client and protocol features to diagnostic page
+  - Fixed issue #1933: Allow for cloud ID to be set through the trigger
+  - Fixed issue #1969: Provide breakpoint ID / info in DBGp run command responses
+  - Fixed issue #1976: Switch debug session cookie to Lax, and remove expiry time
+  - Fixed issue #1980: PHP 8.1: Mark enum classes as &quot;enum&quot;
+  - Fixed issue #1986: Add support for multiple trigger values
+  - Fixed issue #1996: Add support for Closure visualisation in traces, debugging, and Xdebug's var_dump
+  - Fixed issue #1999: Add &quot;readonly&quot; facet to PHP 8.1 readonly properties
 
 = Fixed bugs:
 
-  - Fixed issue #1802: Improve xdebug.org home page
-  - Fixed issue #1944: tracing is started without trigger, when profiler is also enabled
-  - Fixed issue #1947: xdebug_info() settings section does not show the modes that are overridden by XDEBUG_MODE
-  - Fixed issue #1950: Assignment trace with ASSIGN_OBJ_REF crashes
-  - Fixed issue #1954: Calling xdebug_start_trace without mode including tracing results in a fatal error
+  - Fixed issue #1938: Branches in traits aren’t marked as executed
+  - Fixed issue #1948: Do not redirect warning and error messages to PHP's error log if an Xdebug log is active
+  - Fixed issue #1949: private properties for internal classes can't be fetched for debugging
+  - Fixed issue #1963: php exit code = -1073741819 when xdebug.mode = off (Windows Thread Safe Only)
+  - Fixed issue #1970: xdebug_get_function_stack with unnamed (internal) parameters have wrong index
+  - Fixed issue #1978: Xdebug's log messages are cut off at 512 bytes
+  - Fixed issue #1989: Profiling does not output correct class when parent keyword is used
+  - Fixed issue #1992: Code Coverage with filter produces Segmentation fault on xdebug_stop_code_coverage()
+  - Fixed issue #1993: eval-ing broken code causes stepping to break
+  - Fixed issue #1998: Double facet attribute generated for enums that are stored in properties
+  - Fixed issue #2004: Figure out what &quot;XDEBUG_SHOW_FNAME_TODO&quot; define is for
+  - Fixed issue #2008: Using the XDEBUG_SESSION cookie could bypass shared-secret checks
+  - Fixed issue #2009: xdebug_stop_code_coverage's argument has type mismatch
+  - Fixed issue #2011: Closures as protected properties have double facet XML attribute
+
++ Documentation
+  
+  - Fixed issue #1537: Add links to documentation to various different &quot;features&quot; after wizard has run
  </notes>
 
  <contents>
@@ -189,7 +225,7 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
   <required>
    <php>
     <min>7.2.0</min>
-    <max>8.0.99</max>
+    <max>8.1.99</max>
    </php>
    <pearinstaller>
     <min>1.9.1</min>
@@ -199,6 +235,31 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2021-04-08</date>
+   <time>10:32:42</time>
+   <version>
+    <release>3.0.4</release>
+    <api>3.0.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Apr 08, 2021 - Xdebug 3.0.4
+
+= Fixed bugs:
+
+  - Fixed issue #1802: Improve xdebug.org home page
+  - Fixed issue #1944: tracing is started without trigger, when profiler is also enabled
+  - Fixed issue #1947: xdebug_info() settings section does not show the modes that are overridden by XDEBUG_MODE
+  - Fixed issue #1950: Assignment trace with ASSIGN_OBJ_REF crashes
+  - Fixed issue #1954: Calling xdebug_start_trace without mode including tracing results in a fatal error
+   </notes>
+  </release>
 
   <release>
    <date>2021-02-22</date>
