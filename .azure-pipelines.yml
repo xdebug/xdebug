@@ -9,7 +9,8 @@ jobs:
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_81'
-      phpVersion: '8.1.0'
+      phpVersion: 'branch'
+      phpBranch: 'PHP-8.1'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
@@ -29,7 +30,8 @@ jobs:
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_81_ZTS'
-      phpVersion: '8.1.0'
+      phpVersion: 'branch'
+      phpBranch: 'PHP-8.1'
       configurationParameters: '--enable-debug --enable-zts'
   - template: .azure/macos/job.yml
     parameters:
