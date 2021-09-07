@@ -47,8 +47,8 @@ Code Coverage Analysis
   <api>3.0.4</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
@@ -83,6 +83,9 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
    <file name="xdebug.c" role="src" />
    <file name="php_xdebug.h" role="src" />
    <file name="php_xdebug_arginfo.h" role="src" />
+   <dir name="build">
+    <file name="pkg.m4" role="src" />
+   </dir>
    <dir name="src">
     <dir name="base">
      <file name="base.c" role="src" />
