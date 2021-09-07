@@ -6,6 +6,7 @@ on:
     pull_request:
     release:
         types: [created]
+    create:
 
 jobs:
     ubuntu:
