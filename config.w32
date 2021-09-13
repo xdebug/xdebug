@@ -31,5 +31,11 @@ if (PHP_XDEBUG != 'no') {
 	ADD_SOURCES(configure_module_dirname + "/src/profiler", XDEBUG_PROFILER_SOURCES, "xdebug");
 	ADD_SOURCES(configure_module_dirname + "/src/tracing", XDEBUG_TRACING_SOURCES, "xdebug");
 
+	if (CHECK_LIB("zlib_a.lib", "xdebug", PHP_XDEBUG) &&
+		CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
+	) {
+		AC_DEFINE('HAVE_XDEBUG_ZLIB', 1);
+	}
+
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
 }

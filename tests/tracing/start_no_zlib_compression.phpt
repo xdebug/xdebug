@@ -3,7 +3,7 @@ Compression: no zlib, use_compression=1
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!ext-flag compression; !win');
+check_reqs('!ext-flag compression');
 ?>
 --INI--
 xdebug.mode=trace
