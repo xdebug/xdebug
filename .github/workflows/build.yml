@@ -94,7 +94,7 @@ jobs:
                   shell: powershell
                   run: |
                     $versions = @{"7.0" = "vc14"; "7.1" = "vc14"; "7.2" = "vc15"; "7.3" = "vc15"; "7.4" = "vc15"; "8.0" = "vs16"; "8.1" = "vs16"}
-                    phpsdk_deps -b ${{matrix.php}} -a ${{matrix.arch}} -t $versions."${{matrix.php}}"" -s staging -d ..\deps -u
+                    phpsdk_deps -b ${{matrix.php}} -a ${{matrix.arch}} -t $versions."${{matrix.php}}" -s staging -d ..\deps -u
                 - name: Generate Build Files
                   run: phpize
                 - name: Configure Build
