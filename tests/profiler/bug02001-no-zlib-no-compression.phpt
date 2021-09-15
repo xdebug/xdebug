@@ -12,11 +12,10 @@ xdebug.use_compression=0
 xdebug.profiler_output_name=cachegrind.out.%R.end
 --FILE--
 <?php
+require_once 'capture-profile.inc';
 $file = xdebug_get_profiler_filename();
 var_dump($file);
-if ($file) {
-	unlink($file);
-}
 ?>
 --EXPECTF--
 string(%d) "%send"
+%A
