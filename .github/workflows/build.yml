@@ -63,7 +63,7 @@ jobs:
                 shell: cmd
         strategy:
             matrix:
-                php: ["7.4", "8.0", "8.1"]
+                php: ["7.4"]
                 arch: [x64, x86]
                 ts: [nts, ts]
         steps:
