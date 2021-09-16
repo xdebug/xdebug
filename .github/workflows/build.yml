@@ -64,8 +64,8 @@ jobs:
         strategy:
             matrix:
                 php: ["8.0"]
-                arch: [x64, x86]
-                ts: [nts, ts]
+                arch: [x64]
+                ts: [nts]
         steps:
                 - name: Checkout Xdebug
                   uses: actions/checkout@v2
