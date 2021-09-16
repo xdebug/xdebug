@@ -70,11 +70,7 @@ void xdebug_trace_computerized_write_footer(void *ctxt)
 	nanotime = xdebug_get_nanotime();
 
 	xdebug_file_printf(context->trace_file, "\t\t\t%F\t", XDEBUG_SECONDS_SINCE_START(nanotime));
-#if WIN32|WINNT
-	xdebug_file_printf(context->trace_file, "%Iu", zend_memory_usage(0));
-#else
 	xdebug_file_printf(context->trace_file, "%zu", zend_memory_usage(0));
-#endif
 	xdebug_file_printf(context->trace_file, "\n");
 
 	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
