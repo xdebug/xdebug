@@ -63,7 +63,7 @@ jobs:
                 shell: cmd
         strategy:
             matrix:
-                php: ["7.4"]
+                php: ["8.0"]
                 arch: [x64, x86]
                 ts: [nts, ts]
         steps:
@@ -100,7 +100,7 @@ jobs:
                 - name: Generate Build Files
                   run: phpize
                 - name: Configure Build
-                  run: configure --with-xdebug --with-xdebug-compression --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
+                  run: configure --with-xdebug --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
                 - name: Build
                   run: nmake
                 - name: Define Xdebug Module Env
