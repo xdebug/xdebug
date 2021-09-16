@@ -384,6 +384,7 @@ PHP_INI_END()
 static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 {
 	xg->level                = 0;
+	xg->stack                = NULL;
 	xg->in_debug_info        = 0;
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 	xg->in_execution         = 0;
