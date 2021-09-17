@@ -38,12 +38,13 @@ int xdebug_is_stack_frame_filtered(int filter_type, function_stack_entry *fse)
 	return 0;
 }
 
-int xdebug_is_top_stack_frame_filtered(int filter_type)
-{
-	function_stack_entry *fse;
-	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-	return xdebug_is_stack_frame_filtered(filter_type, fse);
-}
+// Still used, but commented in xdebug_common_assign_dim_handler()
+//int xdebug_is_top_stack_frame_filtered(int filter_type)
+//{
+//	function_stack_entry *fse;
+//	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+//	return xdebug_is_stack_frame_filtered(filter_type, fse);
+//}
 
 void xdebug_filter_register_constants(INIT_FUNC_ARGS)
 {

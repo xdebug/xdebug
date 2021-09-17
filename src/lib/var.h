@@ -60,7 +60,6 @@ typedef struct xdebug_var_export_options {
 void xdebug_get_php_symbol(zval *retval, xdebug_str* name);
 
 xdebug_var_export_options* xdebug_var_export_options_from_ini(void);
-xdebug_var_export_options* xdebug_var_get_nolimit_options(void);
 
 #if PHP_VERSION_ID >= 70400
 xdebug_str* xdebug_get_property_type(zval* object, zval *val);
@@ -82,8 +81,8 @@ void xdebug_add_variable_attributes(xdebug_str *str, zval *struc, zend_bool fanc
 char* xdebug_xmlize(char *s_string, size_t len, size_t *newlen);
 char* xdebug_error_type_simple(int type);
 char* xdebug_error_type(int type);
-zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var);
-zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var);
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node);
+zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node);
 
 #define XDEBUG_SHOW_FNAME_DEFAULT          0
 #define XDEBUG_SHOW_FNAME_ALLOW_HTML    1<<1

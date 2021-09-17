@@ -33,7 +33,7 @@ typedef struct
 	void (*function_entry)(void *ctxt, function_stack_entry *fse, int function_nr);
 	void (*function_exit)(void *ctxt, function_stack_entry *fse, int function_nr);
 	void (*return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value);
-	void (*generator_return_value)(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator);
+	void (*generator_return_value)(void *ctxt, function_stack_entry *fse, zend_generator *generator);
 	void (*assignment)(void *ctxt, function_stack_entry *fse, char *full_varname, zval *value, char *right_full_varname, const char *op, char *file, int lineno);
 } xdebug_trace_handler_t;
 
@@ -65,13 +65,6 @@ void xdebug_tracing_execute_internal_end(int function_nr, function_stack_entry *
 
 void xdebug_tracing_save_trace_context(void **old_trace_context);
 void xdebug_tracing_restore_trace_context(void *old_trace_context);
-
-char* xdebug_return_trace_stack_retval(function_stack_entry* i, int fnr, zval* retval);
-char* xdebug_return_trace_stack_generator_retval(function_stack_entry* i, zend_generator* generator);
-char* xdebug_return_trace_assignment(function_stack_entry *i, char *varname, zval *retval, char *op, char *file, int fileno);
-
-void xdebug_trace_function_begin(function_stack_entry *fse, int function_nr);
-void xdebug_trace_function_end(function_stack_entry *fse, int function_nr);
 
 char *xdebug_get_trace_filename(void);
 #endif

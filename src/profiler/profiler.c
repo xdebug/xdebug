@@ -263,16 +263,6 @@ static inline void xdebug_profiler_function_push(function_stack_entry *fse)
 	fse->profile.mem_mark = 0;
 }
 
-void xdebug_profiler_function_continue(function_stack_entry *fse)
-{
-	fse->profile.nanotime_mark = xdebug_get_nanotime();
-}
-
-void xdebug_profiler_function_pause(function_stack_entry *fse)
-{
-	xdebug_profiler_function_push(fse);
-}
-
 static inline void add_filename_ref(xdebug_str *buffer, char *name)
 {
 	char *ref;

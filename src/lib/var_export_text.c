@@ -27,8 +27,6 @@
 #include "var_export_text.h"
 
 static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options);
-#define xdebug_var_export_text(struc, str, level, debug_zval, options) xdebug_var_export_text_ansi(struc, str, 0, level, debug_zval, options);
-#define xdebug_var_export_ansi(struc, str, level, debug_zval, options) xdebug_var_export_text_ansi(struc, str, 1, level, debug_zval, options);
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -43,8 +41,6 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 #define ANSI_COLOR_NULL          (mode == 1 ? "[34m" : "")
 #define ANSI_COLOR_DOUBLE        (mode == 1 ? "[33m" : "")
 #define ANSI_COLOR_STRING        (mode == 1 ? "[31m" : "")
-#define ANSI_COLOR_EMPTY         (mode == 1 ? "[30m" : "")
-#define ANSI_COLOR_ARRAY         (mode == 1 ? "[33m" : "")
 #define ANSI_COLOR_OBJECT        (mode == 1 ? "[31m" : "")
 #define ANSI_COLOR_RESOURCE      (mode == 1 ? "[36m" : "")
 #define ANSI_COLOR_MODIFIER      (mode == 1 ? "[32m" : "")
@@ -423,101 +419,3 @@ xdebug_str* xdebug_get_zval_value_text_ansi(zval *val, int mode, int debug_zval,
 
 	return str;
 }
-
-static void xdebug_var_synopsis_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options)
-{
-	HashTable *myht;
-	zval *tmpz;
-	int   z_type;
-
-	if (!struc || !(*struc)) {
-		return;
-	}
-
-	z_type = Z_TYPE_P(*struc);
-
-	if (debug_zval) {
-		xdebug_add_variable_attributes(str, *struc, XDEBUG_VAR_ATTR_TEXT);
-	}
-	if (z_type == IS_REFERENCE) {
-		tmpz = &((*struc)->value.ref->val);
-		struc = &tmpz;
-		z_type = Z_TYPE_P(*struc);
-	}
-
-	switch (z_type) {
-		case IS_TRUE:
-			xdebug_str_add_fmt(str, "%strue%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
-			break;
-
-		case IS_FALSE:
-			xdebug_str_add_fmt(str, "%sfalse%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
-			break;
-
-		case IS_NULL:
-			xdebug_str_add_fmt(str, "%snull%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
-			break;
-
-		case IS_LONG:
-			xdebug_str_add_fmt(str, "%sint%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
-			break;
-
-		case IS_DOUBLE:
-			xdebug_str_add_fmt(str, "%sdouble%s", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF);
-			break;
-
-		case IS_STRING:
-			xdebug_str_add_fmt(str, "%sstring%s(%s%d%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_LONG, Z_STRLEN_P(*struc), ANSI_COLOR_RESET);
-			break;
-
-		case IS_ARRAY:
-			myht = Z_ARRVAL_P(*struc);
-			xdebug_str_add_fmt(str, "array(%s%d%s)", ANSI_COLOR_LONG, myht->nNumOfElements, ANSI_COLOR_RESET);
-			break;
-
-		case IS_OBJECT:
-			xdebug_str_add_fmt(str, "class %s", ZSTR_VAL(Z_OBJCE_P(*struc)->name));
-			break;
-
-		case IS_RESOURCE: {
-			char *type_name;
-
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc));
-			xdebug_str_add_fmt(str, "resource(%s%ld%s) of type (%s)", ANSI_COLOR_LONG, Z_RES_P(*struc)->handle, ANSI_COLOR_RESET, type_name ? type_name : "Unknown");
-			break;
-		}
-
-		case IS_UNDEF:
-			xdebug_str_add_fmt(str, "%s*uninitialized*%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET);
-			break;
-
-		default:
-			xdebug_str_add_fmt(str, "%sNFC%s", ANSI_COLOR_NULL, ANSI_COLOR_RESET);
-			break;
-	}
-}
-
-xdebug_str* xdebug_get_zval_synopsis_text_ansi(zval *val, int mode, int debug_zval, xdebug_var_export_options *options)
-{
-	xdebug_str *str = xdebug_str_new();
-	int default_options = 0;
-
-	if (!options) {
-		options = xdebug_var_export_options_from_ini();
-		default_options = 1;
-	}
-
-	if (options->show_location && !debug_zval) {
-		xdebug_str_add_fmt(str, "%s%s: %d%s\n", ANSI_COLOR_BOLD, zend_get_executed_filename(), zend_get_executed_lineno(), ANSI_COLOR_BOLD_OFF);
-	}
-
-	xdebug_var_synopsis_text_ansi(&val, str, mode, 1, debug_zval, options);
-
-	if (default_options) {
-		xdfree(options->runtime);
-		xdfree(options);
-	}
-
-	return str;
-}
-

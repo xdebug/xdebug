@@ -40,10 +40,7 @@ typedef struct _xdebug_llist {
 xdebug_llist *xdebug_llist_alloc(xdebug_llist_dtor dtor);
 void xdebug_llist_init(xdebug_llist *l, xdebug_llist_dtor dtor);
 int xdebug_llist_insert_next(xdebug_llist *l, xdebug_llist_element *e, const void *p);
-int xdebug_llist_insert_prev(xdebug_llist *l, xdebug_llist_element *e, const void *p);
 int xdebug_llist_remove(xdebug_llist *l, xdebug_llist_element *e, void *user);
-int xdebug_llist_remove_next(xdebug_llist *l, xdebug_llist_element *e, void *user);
-xdebug_llist_element *xdebug_llist_jump(xdebug_llist *l, int where, int pos);
 size_t xdebug_llist_count(xdebug_llist *l);
 void xdebug_llist_empty(xdebug_llist *l, void *user);
 void xdebug_llist_destroy(xdebug_llist *l, void *user);
@@ -59,10 +56,7 @@ void xdebug_llist_destroy(xdebug_llist *l, void *user);
 #define XDEBUG_LLIST_HEAD(__l) ((__l)->head)
 #define XDEBUG_LLIST_TAIL(__l) ((__l)->tail)
 #define XDEBUG_LLIST_NEXT(__e) ((__e)->next)
-#define XDEBUG_LLIST_PREV(__e) ((__e)->prev)
 #define XDEBUG_LLIST_VALP(__e) ((__e)->ptr)
-#define XDEBUG_LLIST_IS_TAIL(__e) ((__e)->next ? 0 : 1)
-#define XDEBUG_LLIST_IS_HEAD(__e) ((__e)->prev ? 0 : 1)
 #define XDEBUG_LLIST_COUNT(__l) ((__l)->size)
 
 #endif /* __XDEBUG_LLIST_H__ */

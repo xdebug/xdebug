@@ -28,16 +28,13 @@
 
 typedef struct _xdebug_brk_admin            xdebug_brk_admin;
 typedef struct _xdebug_brk_info             xdebug_brk_info;
-typedef struct _xdebug_brk_span             xdebug_brk_span;
 typedef struct _xdebug_eval_info            xdebug_eval_info;
 typedef struct _xdebug_con                  xdebug_con;
 typedef struct _xdebug_debug_list           xdebug_debug_list;
 typedef struct _xdebug_remote_handler       xdebug_remote_handler;
-typedef struct _xdebug_remote_handler_info  xdebug_remote_handler_info;
 
 struct _xdebug_debug_list {
 	zend_string *last_filename;
-	int          last_line;
 };
 
 #define XDEBUG_BREAKPOINT_TYPE_LINE        0x01
@@ -136,12 +133,9 @@ struct _xdebug_remote_handler {
 	int (*remote_init)(xdebug_con *h, int mode);
 	int (*remote_deinit)(xdebug_con *h);
 
-	/* Stack messages */
-	int (*remote_error)(xdebug_con *h, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_vector *stack);
-
 	/* Breakpoints */
-	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, zend_string *filename, int lineno);
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info);
+	int (*break_on_line)(xdebug_brk_info *brk, zend_string *filename, int lineno);
+	int (*remote_breakpoint)(xdebug_con *h, zend_string *filename, long lineno, char *exception, char *code, const char *message, xdebug_brk_info *brk_info);
 	int (*resolve_breakpoints)(xdebug_con *h, zend_string *opa);
 
 	/* Output redirection */

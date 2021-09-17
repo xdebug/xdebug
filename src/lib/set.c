@@ -58,7 +58,7 @@ void xdebug_set_remove(xdebug_set *set, unsigned int position)
 	*byte = *byte & ~(1 << bit);
 }
 
-int xdebug_set_in_ex(xdebug_set *set, unsigned int position, int noisy)
+int xdebug_set_in_ex(xdebug_set *set, unsigned int position)
 {
 	unsigned char *byte;
 	unsigned int   bit;
@@ -67,15 +67,4 @@ int xdebug_set_in_ex(xdebug_set *set, unsigned int position, int noisy)
 	bit  = position % 8;
 
 	return (*byte & (1 << bit));
-}
-
-void xdebug_set_dump(xdebug_set *set)
-{
-	unsigned int i;
-
-	for (i = 0; i < set->size; i++) {
-		if (xdebug_set_in_ex(set, i, 0)) {
-			printf("%02d ", i);
-		}
-	}
 }

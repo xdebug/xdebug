@@ -34,8 +34,6 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 #define COLOR_DOUBLE    "#f57900"
 #define COLOR_STRING    "#cc0000"
 #define COLOR_EMPTY     "#888a85"
-#define COLOR_ARRAY     "#ce5c00"
-#define COLOR_OBJECT    "#8f5902"
 #define COLOR_RESOURCE  "#2e3436"
 
 static int xdebug_array_element_export_html(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, int level, xdebug_str *str, int debug_zval, xdebug_var_export_options *options)
@@ -343,7 +341,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 	}
 }
 
-xdebug_str* xdebug_get_zval_value_html(char *name, zval *val, int debug_zval, xdebug_var_export_options *options)
+xdebug_str* xdebug_get_zval_value_html(zval *val, int debug_zval, xdebug_var_export_options *options)
 {
 	xdebug_str *str = xdebug_str_new();
 	int default_options = 0;
@@ -372,103 +370,6 @@ xdebug_str* xdebug_get_zval_value_html(char *name, zval *val, int debug_zval, xd
 	}
 	xdebug_var_export_html(&val, str, 1, debug_zval, options);
 	xdebug_str_add_literal(str, "</pre>");
-
-	if (default_options) {
-		xdfree(options->runtime);
-		xdfree(options);
-	}
-
-	return str;
-}
-
-static void xdebug_var_synopsis_html(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options)
-{
-	HashTable *myht;
-	zval *tmpz;
-	int   z_type;
-
-	z_type = Z_TYPE_P(*struc);
-
-	if (debug_zval) {
-		xdebug_add_variable_attributes(str, *struc, XDEBUG_VAR_ATTR_HTML);
-	}
-	if (z_type == IS_REFERENCE) {
-		tmpz = &((*struc)->value.ref->val);
-		struc = &tmpz;
-	}
-
-	switch (z_type) {
-		case IS_TRUE:
-			xdebug_str_add_fmt(str, "<font color='%s'>true</font>", COLOR_BOOL);
-			break;
-
-		case IS_FALSE:
-			xdebug_str_add_fmt(str, "<font color='%s'>false</font>", COLOR_BOOL);
-			break;
-
-		case IS_NULL:
-			xdebug_str_add_fmt(str, "<font color='%s'>null</font>", COLOR_NULL);
-			break;
-
-		case IS_LONG:
-			xdebug_str_add_fmt(str, "<font color='%s'>long</font>", COLOR_LONG);
-			break;
-
-		case IS_DOUBLE:
-			xdebug_str_add_fmt(str, "<font color='%s'>double</font>", COLOR_DOUBLE);
-			break;
-
-		case IS_STRING:
-			xdebug_str_add_fmt(str, "<font color='%s'>string(%d)</font>", COLOR_STRING, Z_STRLEN_P(*struc));
-			break;
-
-		case IS_ARRAY:
-			myht = Z_ARRVAL_P(*struc);
-			xdebug_str_add_fmt(str, "<font color='%s'>array(%d)</font>", COLOR_ARRAY, myht->nNumOfElements);
-			break;
-
-		case IS_OBJECT: {
-#if PHP_VERSION_ID >= 80100
-			zend_class_entry *ce = Z_OBJCE_P(*struc);
-			if (ce->ce_flags & ZEND_ACC_ENUM) {
-				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
-				xdebug_str_add_fmt( str, "<font color='%s'>enum(%s::%s)</font>", COLOR_OBJECT, ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
-				break;
-			}
-#endif
-
-			xdebug_str_add_fmt(str, "<font color='%s'>object(%s)[%d]</font>", COLOR_OBJECT, ZSTR_VAL(Z_OBJCE_P(*struc)->name), Z_OBJ_HANDLE_P(*struc));
-		} break;
-
-		case IS_RESOURCE: {
-			char *type_name;
-
-			type_name = (char *) zend_rsrc_list_get_rsrc_type(Z_RES_P(*struc));
-			xdebug_str_add_fmt(str, "<font color='%s'>resource(%ld, %s)</font>", COLOR_RESOURCE, Z_RES_P(*struc)->handle, type_name ? type_name : "Unknown");
-			break;
-		}
-
-		case IS_UNDEF:
-			xdebug_str_add_fmt(str, "<font color='%s'>*uninitialized*</font>", COLOR_NULL);
-			break;
-
-		default:
-			xdebug_str_add_fmt(str, "<font color='%s'>NFC</font>", COLOR_NULL);
-			break;
-	}
-}
-
-xdebug_str* xdebug_get_zval_synopsis_html(const char *name, zval *val, int debug_zval, xdebug_var_export_options *options)
-{
-	xdebug_str *str = xdebug_str_new();
-	int default_options = 0;
-
-	if (!options) {
-		options = xdebug_var_export_options_from_ini();
-		default_options = 1;
-	}
-
-	xdebug_var_synopsis_html(&val, str, 1, debug_zval, options);
 
 	if (default_options) {
 		xdfree(options->runtime);

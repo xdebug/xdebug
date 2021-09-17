@@ -45,7 +45,7 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 		xdebug_str *val;
 
 		if (html) {
-			val = xdebug_get_zval_value_html(NULL, z, 0, NULL);
+			val = xdebug_get_zval_value_html(z, 0, NULL);
 
 			xdebug_str_add_literal(str, "<td colspan='3' bgcolor='#eeeeec'>");
 			xdebug_str_add_str(str, val);

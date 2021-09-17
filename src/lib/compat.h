@@ -22,9 +22,6 @@
 
 #include "ext/standard/head.h"
 #include "ext/standard/php_var.h"
-#define xdebug_php_var_dump php_var_dump
-
-char *xdebug_str_to_str(char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len, size_t *new_len);
 
 unsigned char *xdebug_base64_encode(unsigned char *data, size_t data_len, size_t *new_len);
 unsigned char *xdebug_base64_decode(unsigned char *data, size_t data_len, size_t *new_len);
@@ -35,7 +32,6 @@ void xdebug_stripcslashes(char *string, int *new_len);
 zend_ulong xdebug_get_pid(void);
 
 void xdebug_setcookie(const char *name, int name_len, char *value, int value_len, time_t expires, const char *path, int path_len, const char *domain, int domain_len, int secure, int url_encode, int httponly);
-char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len);
 
 /* Recursion protection is done differently from PHP 7.3 onwards */
 zend_bool xdebug_zend_hash_is_recursive(HashTable* ht);

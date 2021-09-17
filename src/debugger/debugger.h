@@ -46,7 +46,6 @@ typedef struct _xdebug_debugger_globals_t {
 typedef struct _xdebug_debugger_settings_t {
 	/* Cloud */
 	char         *cloud_id;
-	char         *cloud_shared_key;
 
 	/* Step Debugger */
 	zend_long     client_port;    /* 9000 */

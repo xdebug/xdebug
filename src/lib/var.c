@@ -172,9 +172,8 @@ char* xdebug_error_type(int type)
 }
 
 /*************************************************************************************************************************************/
-#define T(offset) (*(union _temp_variable *)((char*)zdata->current_execute_data->Ts + offset))
 
-zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var)
+zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node)
 {
 #if PHP_VERSION_ID >= 80000
 	return zend_get_zval_ptr(opline, node_type, node, zdata);
@@ -189,9 +188,9 @@ zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *oplin
 #endif
 }
 
-zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
+zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node)
 {
-	return xdebug_get_zval_with_opline(zdata, zdata->opline, node_type, node, is_var);
+	return xdebug_get_zval_with_opline(zdata, zdata->opline, node_type, node);
 }
 
 
@@ -953,19 +952,9 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(void)
 	return options;
 }
 
-xdebug_var_export_options xdebug_var_nolimit_options = { XDEBUG_MAX_INT, XDEBUG_MAX_INT, 1023, 1, 0, 0, 0, NULL, 0 };
-
-xdebug_var_export_options* xdebug_var_get_nolimit_options(void)
-{
-	return &xdebug_var_nolimit_options;
-}
-
 /*****************************************************************************
 ** Normal variable printing routines
 */
-
-#define XDEBUG_VAR_ATTR_TEXT 0
-#define XDEBUG_VAR_ATTR_FANCY 1
 
 void xdebug_add_variable_attributes(xdebug_str *str, zval *struc, zend_bool html)
 {

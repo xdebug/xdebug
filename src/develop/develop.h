@@ -67,15 +67,14 @@ typedef struct _xdebug_develop_settings_t {
 void xdebug_init_develop_globals(xdebug_develop_globals_t *xg);
 void xdebug_deinit_develop_globals(xdebug_develop_globals_t *xg);
 
-void xdebug_develop_minit();
-void xdebug_develop_mshutdown();
+void xdebug_develop_minit(INIT_FUNC_ARGS);
 void xdebug_develop_rinit();
 void xdebug_develop_post_deactivate();
 
 #if PHP_VERSION_ID >= 80000
-void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
+void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *message);
 #else
-void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
+void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line, zval *message);
 #endif
 void xdebug_monitor_handler(function_stack_entry *fse);
 

@@ -51,19 +51,12 @@ typedef struct xdebug_var_name {
 
 #define XDEBUG_IS_NORMAL_FUNCTION(f) ((f)->type == XFUNC_NORMAL || (f)->type == XFUNC_STATIC_MEMBER || (f)->type == XFUNC_MEMBER)
 
-#define XDEBUG_REGISTER_LONG_CONSTANT(__c) REGISTER_LONG_CONSTANT(#__c, __c, CONST_CS|CONST_PERSISTENT)
-
 #define XDEBUG_NONE          0
 #define XDEBUG_JIT           1
 #define XDEBUG_REQ           2
 
-#define XDEBUG_BREAK         1
-#define XDEBUG_STEP          2
-
 #define XDEBUG_BUILT_IN      0
 #define XDEBUG_USER_DEFINED  1
-
-#define XDEBUG_MAX_FUNCTION_LEN 1024
 
 #define XDEBUG_TRACE_OPTION_APPEND         1
 #define XDEBUG_TRACE_OPTION_COMPUTERIZED   2
@@ -73,20 +66,6 @@ typedef struct xdebug_var_name {
 #define XDEBUG_CC_OPTION_UNUSED          1
 #define XDEBUG_CC_OPTION_DEAD_CODE       2
 #define XDEBUG_CC_OPTION_BRANCH_CHECK    4
-
-#define STATUS_STARTING   0
-#define STATUS_STOPPING   1
-#define STATUS_STOPPED    2
-#define STATUS_RUNNING    3
-#define STATUS_BREAK      4
-
-#define REASON_OK         0
-#define REASON_ERROR      1
-#define REASON_ABORTED    2
-#define REASON_EXCEPTION  3
-
-#define XDEBUG_CMDLOOP_NONBLOCK                      0
-#define XDEBUG_CMDLOOP_BLOCK                         1
 
 #define XDEBUG_CMDLOOP_NONBAIL                       0
 #define XDEBUG_CMDLOOP_BAIL                          1
@@ -103,9 +82,9 @@ typedef struct xdebug_var_name {
 
 #define XDEBUG_ERROR_BREAKPOINT_NOT_SET            200
 #define XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED 201
-#define XDEBUG_ERROR_BREAKPOINT_INVALID            202
-#define XDEBUG_ERROR_BREAKPOINT_NO_CODE            203
-#define XDEBUG_ERROR_BREAKPOINT_INVALID_STATE      204
+#define XDEBUG_ERROR_BREAKPOINT_INVALID            202 /* unused */
+#define XDEBUG_ERROR_BREAKPOINT_NO_CODE            203 /* unused */
+#define XDEBUG_ERROR_BREAKPOINT_INVALID_STATE      204 /* unused */
 #define XDEBUG_ERROR_NO_SUCH_BREAKPOINT            205
 #define XDEBUG_ERROR_EVALUATING_CODE               206
 #define XDEBUG_ERROR_INVALID_EXPRESSION            207 /* unused */
@@ -150,7 +129,6 @@ typedef struct _function_stack_entry {
 	HashTable         *symbol_table;
 	zend_execute_data *execute_data;
 	unsigned char      is_variadic;
-	unsigned char      arg_done;
 
 	/* filter properties */
 	unsigned char filtered_code_coverage;
@@ -183,7 +161,6 @@ function_stack_entry *xdebug_get_stack_frame(int nr);
 
 
 xdebug_hash* xdebug_declared_var_hash_from_llist(xdebug_llist *list);
-int xdebug_trigger_enabled(int setting, const char *var_name, char *var_value);
 
 typedef struct _xdebug_multi_opcode_handler_t xdebug_multi_opcode_handler_t;
 

@@ -20,7 +20,6 @@
 #include "var.h"
 
 void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options);
-xdebug_str* xdebug_get_zval_value_html(char *name, zval *val, int debug_zval, xdebug_var_export_options *options);
-xdebug_str* xdebug_get_zval_synopsis_html(const char *name, zval *val, int debug_zval, xdebug_var_export_options *options);
+xdebug_str* xdebug_get_zval_value_html(zval *val, int debug_zval, xdebug_var_export_options *options);
 
 #endif

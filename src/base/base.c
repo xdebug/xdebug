@@ -108,12 +108,6 @@ void xdebug_func_dtor_by_ref(xdebug_func *elem)
 	}
 }
 
-void xdebug_func_dtor(xdebug_func *elem)
-{
-	xdebug_func_dtor_by_ref(elem);
-	xdfree(elem);
-}
-
 static void function_stack_entry_dtor(void *elem)
 {
 	unsigned int          i;
@@ -155,13 +149,12 @@ int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	const zend_op *opline = execute_data->opline;
 	zval *inc_filename;
 	zval tmp_inc_filename;
-	int  is_var;
 
 	if (opline->extended_value != ZEND_EVAL) {
 		return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 
-	inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
+	inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1);
 
 	/* If there is no inc_filename, we're just bailing out instead */
 	if (!inc_filename) {
@@ -787,7 +780,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (code_coverage_init) {
-		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_filename, code_coverage_function_name);
+		xdebug_coverage_execute_ex_end(fse, code_coverage_filename, code_coverage_function_name);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
@@ -1120,15 +1113,6 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 #endif
 }
 
-void xdebug_base_mshutdown()
-{
-	/* Reset compile, execute and error callbacks */
-	zend_compile_file = old_compile_file;
-	zend_execute_ex = xdebug_old_execute_ex;
-	zend_execute_internal = xdebug_old_execute_internal;
-	zend_error_cb = xdebug_old_error_cb;
-}
-
 void xdebug_base_post_startup()
 {
 	old_compile_file = zend_compile_file;
@@ -1343,7 +1327,7 @@ static void xdebug_throw_exception_hook(zval *exception)
 	convert_to_long_ex(line);
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
-		xdebug_develop_throw_exception_hook(exception, file, line, code, code_str, message);
+		xdebug_develop_throw_exception_hook(exception, file, line, message);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_throw_exception_hook(exception, file, line, code, code_str, message);

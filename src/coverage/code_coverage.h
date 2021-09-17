@@ -60,11 +60,10 @@ void xdebug_coverage_record_if_active(zend_execute_data *execute_data, zend_op_a
 void xdebug_coverage_compile_file(zend_op_array *op_array);
 
 int  xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_array, zend_string **tmp_filename, char **tmp_function_name);
-void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_op_array *op_array, zend_string *tmp_filename, char *tmp_function_name);
+void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_string *tmp_filename, char *tmp_function_name);
 void xdebug_coverage_init_oparray(zend_op_array *op_array);
 
 void xdebug_coverage_minit(INIT_FUNC_ARGS);
-void xdebug_coverage_mshutdown(void);
 void xdebug_coverage_rinit(void);
 void xdebug_coverage_post_deactivate(void);
 void xdebug_coverage_register_constants(INIT_FUNC_ARGS);

@@ -55,9 +55,6 @@ typedef struct _xdebug_hash_element {
 	xdebug_hash_key  key;
 } xdebug_hash_element;
 
-/* Helper functions */
-char* xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len);
-
 /* Standard functions */
 xdebug_hash *xdebug_hash_alloc(int slots, xdebug_hash_dtor_t dtor);
 xdebug_hash *xdebug_hash_alloc_with_sort(int slots, xdebug_hash_dtor_t dtor, xdebug_hash_apply_sorter_t sort_func);
@@ -71,10 +68,7 @@ void xdebug_hash_destroy(xdebug_hash *h);
 #define xdebug_hash_find(h, key, key_len, p) xdebug_hash_extended_find(h, key, key_len, 0, p)
 #define xdebug_hash_delete(h, key, key_len) xdebug_hash_extended_delete(h, key, key_len, 0)
 #define xdebug_hash_add(h, key, key_len, p) xdebug_hash_add_or_update(h, key, key_len, 0, p)
-#define xdebug_hash_update xdebug_hash_add
 #define xdebug_hash_index_find(h, key, p) xdebug_hash_extended_find(h, NULL, 0, key, p)
-#define xdebug_hash_index_delete(h, key) xdebug_hash_extended_delete(h, NULL, 0, key)
 #define xdebug_hash_index_add(h, key, p) xdebug_hash_add_or_update(h, NULL, 0, key, p)
-#define xdebug_hash_index_update xdebug_hash_index_add
 
 #endif /* __XDEBUG_HASH_H__ */

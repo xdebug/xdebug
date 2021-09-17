@@ -18,7 +18,6 @@
 #define __XDEBUG_BASE_H__
 
 void xdebug_base_minit(INIT_FUNC_ARGS);
-void xdebug_base_mshutdown();
 
 void xdebug_base_post_startup();
 
@@ -27,7 +26,6 @@ void xdebug_base_post_deactivate();
 void xdebug_base_rshutdown();
 
 void xdebug_func_dtor_by_ref(xdebug_func *elem); /* TODO: Remove this API */
-void xdebug_func_dtor(xdebug_func *elem);
 
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata);
 

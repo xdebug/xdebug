@@ -43,20 +43,10 @@
 #define SREAD(a,b,c) read(a,b,c)
 #endif
 
-
-#define SENDMSG(socket, str) {  \
-	char *message_buffer;       \
-                                \
-	message_buffer = str;       \
-	SSEND(socket, message_buffer); \
-	xdfree(message_buffer);     \
-}
-
 void xdebug_close_socket(int socket);
 
 /* Remote connection activation and house keeping */
 int xdebug_is_debug_connection_active(void);
-void xdebug_stop_debugger(void);
 void xdebug_restart_debugger(void);
 void xdebug_mark_debug_connection_active(void);
 void xdebug_mark_debug_connection_not_active(void);

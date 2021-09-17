@@ -21,6 +21,5 @@
 
 void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options);
 xdebug_str* xdebug_get_zval_value_line(zval *val, int debug_zval, xdebug_var_export_options *options);
-xdebug_str* xdebug_get_zval_synopsis_line(zval *val, int debug_zval, xdebug_var_export_options *options);
 
 #endif

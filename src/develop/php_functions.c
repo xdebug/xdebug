@@ -52,7 +52,7 @@ PHP_FUNCTION(xdebug_var_dump)
 
 	for (i = 0; i < argc; i++) {
 		if (PG(html_errors)) {
-			val = xdebug_get_zval_value_html(NULL, (zval*) &args[i], 0, NULL);
+			val = xdebug_get_zval_value_html((zval*) &args[i], 0, NULL);
 			PHPWRITE(val->d, val->l);
 			xdebug_str_free(val);
 		}
@@ -111,7 +111,7 @@ PHP_FUNCTION(xdebug_debug_zval)
 			php_printf("%s: ", Z_STRVAL(args[i]));
 			if (Z_TYPE(debugzval) != IS_UNDEF) {
 				if (PG(html_errors)) {
-					val = xdebug_get_zval_value_html(NULL, &debugzval, 1, NULL);
+					val = xdebug_get_zval_value_html(&debugzval, 1, NULL);
 					PHPWRITE(val->d, val->l);
 				}
 				else if ((XINI_DEV(cli_color) == 1 && xdebug_is_output_tty()) || (XINI_DEV(cli_color) == 2)) {

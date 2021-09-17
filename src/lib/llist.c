@@ -68,36 +68,6 @@ int xdebug_llist_insert_next(xdebug_llist *l, xdebug_llist_element *e, const voi
 	return 1;
 }
 
-int xdebug_llist_insert_prev(xdebug_llist *l, xdebug_llist_element *e, const void *p)
-{
-	xdebug_llist_element *ne;
-
-	if (!e) {
-		e = XDEBUG_LLIST_HEAD(l);
-	}
-
-	ne = (xdebug_llist_element *) malloc(sizeof(xdebug_llist_element));
-	ne->ptr = (void *) p;
-	if (l->size == 0) {
-		l->head = ne;
-		l->head->prev = NULL;
-		l->head->next = NULL;
-		l->tail = ne;
-	} else {
-		ne->next = e;
-		ne->prev = e->prev;
-		if (e->prev)
-			e->prev->next = ne;
-		else
-			l->head = ne;
-		e->prev = ne;
-	}
-
-	++l->size;
-
-	return 0;
-}
-
 int xdebug_llist_remove(xdebug_llist *l, xdebug_llist_element *e, void *user)
 {
 	if (e == NULL || l->size == 0)
@@ -125,37 +95,6 @@ int xdebug_llist_remove(xdebug_llist *l, xdebug_llist_element *e, void *user)
 	--l->size;
 
 	return 0;
-}
-
-int xdebug_llist_remove_next(xdebug_llist *l, xdebug_llist_element *e, void *user)
-{
-	return xdebug_llist_remove(l, e->next, user);
-}
-
-int xdebug_llist_remove_prev(xdebug_llist *l, xdebug_llist_element *e, void *user)
-{
-	return xdebug_llist_remove(l, e->prev, user);
-}
-
-xdebug_llist_element *xdebug_llist_jump(xdebug_llist *l, int where, int pos)
-{
-    xdebug_llist_element *e=NULL;
-    int i;
-
-    if (where == LIST_HEAD) {
-        e = XDEBUG_LLIST_HEAD(l);
-        for (i = 0; i < pos; ++i) {
-            e = XDEBUG_LLIST_NEXT(e);
-        }
-    }
-    else if (where == LIST_TAIL) {
-        e = XDEBUG_LLIST_TAIL(l);
-        for (i = 0; i < pos; ++i) {
-            e = XDEBUG_LLIST_PREV(e);
-        }
-    }
-
-    return e;
 }
 
 size_t xdebug_llist_count(xdebug_llist *l)

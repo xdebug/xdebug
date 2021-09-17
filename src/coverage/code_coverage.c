@@ -151,7 +151,7 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 	}
 }
 
-static void xdebug_print_opcode_info(zend_execute_data *execute_data, const zend_op *cur_opcode)
+static void xdebug_print_opcode_info(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array = &execute_data->func->op_array;
 	xdebug_func func_info;
@@ -179,7 +179,7 @@ static int xdebug_check_branch_entry_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	const zend_op *cur_opcode = execute_data->opline;
 
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		xdebug_print_opcode_info(execute_data, cur_opcode);
+		xdebug_print_opcode_info(execute_data);
 	}
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -238,7 +238,7 @@ static int xdebug_common_override_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 
 		lineno = cur_opcode->lineno;
 
-		xdebug_print_opcode_info(execute_data, cur_opcode);
+		xdebug_print_opcode_info(execute_data);
 		xdebug_count_line(op_array->filename, lineno, 0, 0);
 	}
 
@@ -274,8 +274,6 @@ static void prefill_from_opcode(zend_string *filename, zend_op opcode, int deadc
 		xdebug_count_line(filename, opcode.lineno, 1, deadcode);
 	}
 }
-
-#define XDEBUG_ZNODE_ELEM(node,var) node.var
 
 static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
@@ -602,15 +600,6 @@ static int prefill_from_function_table(zend_op_array *opa)
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-/* Set correct int format to use */
-#if SIZEOF_ZEND_LONG == 4
-# define XDEBUG_PTR_KEY_LEN 8
-# define XDEBUG_PTR_KEY_FMT "%08X"
-#else
-# define XDEBUG_PTR_KEY_LEN 16
-# define XDEBUG_PTR_KEY_FMT "%016lX"
-#endif
-
 static int prefill_from_class_table(zend_class_entry *ce)
 {
 	if (ce->type == ZEND_USER_CLASS) {
@@ -650,7 +639,7 @@ static void xdebug_prefill_code_coverage(zend_op_array *op_array)
 	XG_COV(prefill_class_count) = CG(class_table)->nNumUsed;
 }
 
-void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name)
+void xdebug_code_coverage_start_of_function(zend_op_array *op_array)
 {
 	xdebug_path *path = xdebug_path_new(NULL);
 
@@ -665,7 +654,7 @@ void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *funct
 	XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] = -1;
 }
 
-void xdebug_code_coverage_end_of_function(zend_op_array *op_array, zend_string *filename, char *function_name)
+void xdebug_code_coverage_end_of_function(zend_string *filename, char *function_name)
 {
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XDEBUG_VECTOR_COUNT(XG_BASE(stack)));
@@ -973,7 +962,7 @@ void xdebug_coverage_count_line_if_branch_check_active(zend_op_array *op_array, 
 void xdebug_coverage_record_if_active(zend_execute_data *execute_data, zend_op_array *op_array)
 {
 	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
-		xdebug_print_opcode_info(execute_data, execute_data->opline);
+		xdebug_print_opcode_info(execute_data);
 	}
 }
 
@@ -995,7 +984,7 @@ int xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_arra
 		xdebug_build_fname_from_oparray(&func_info, op_array);
 		xdebug_func_format(buffer, sizeof(buffer), &func_info);
 		*tmp_function_name = xdstrdup(buffer);
-		xdebug_code_coverage_start_of_function(op_array, *tmp_function_name);
+		xdebug_code_coverage_start_of_function(op_array);
 
 		if (func_info.object_class) {
 			zend_string_release(func_info.object_class);
@@ -1012,11 +1001,11 @@ int xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_arra
 	return 0;
 }
 
-void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_op_array *op_array, zend_string *tmp_filename, char *tmp_function_name)
+void xdebug_coverage_execute_ex_end(function_stack_entry *fse, zend_string *tmp_filename, char *tmp_function_name)
 {
 	/* Check which path has been used */
 	if (!fse->filtered_code_coverage && XG_COV(code_coverage_active) && XG_COV(code_coverage_unused)) {
-		xdebug_code_coverage_end_of_function(op_array, tmp_filename, tmp_function_name);
+		xdebug_code_coverage_end_of_function(tmp_filename, tmp_function_name);
 	}
 	xdfree(tmp_function_name);
 	zend_string_release(tmp_filename);

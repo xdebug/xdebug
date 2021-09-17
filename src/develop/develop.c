@@ -81,10 +81,6 @@ void xdebug_develop_minit(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("XDEBUG_STACK_NO_DESC", XDEBUG_STACK_NO_DESC, CONST_CS | CONST_PERSISTENT);
 }
 
-void xdebug_develop_mshutdown()
-{
-}
-
 void xdebug_develop_rinit()
 {
 	XG_DEV(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);

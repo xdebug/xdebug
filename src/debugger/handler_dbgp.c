@@ -59,7 +59,6 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 xdebug_remote_handler xdebug_handler_dbgp = {
 	xdebug_dbgp_init,
 	xdebug_dbgp_deinit,
-	xdebug_dbgp_error,
 	xdebug_dbgp_break_on_line,
 	xdebug_dbgp_breakpoint,
 	xdebug_dbgp_resolve_breakpoints,
@@ -89,8 +88,6 @@ const char *xdebug_dbgp_status_strings[7] =
 
 #define DBGP_REASON_OK        0
 #define DBGP_REASON_ERROR     1
-#define DBGP_REASON_ABORTED   2
-#define DBGP_REASON_EXCEPTION 3
 
 const char *xdebug_dbgp_reason_strings[4] =
 	{"ok", "error", "aborted", "exception"};
@@ -250,7 +247,7 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 	/* Non standard functions */
 	DBGP_FUNC_ENTRY(xcmd_profiler_name_get,    XDEBUG_DBGP_POST_MORTEM)
 	DBGP_FUNC_ENTRY(xcmd_get_executable_lines, XDEBUG_DBGP_NONE)
-	{ NULL, NULL, 0 }
+	{ NULL, NULL, 0, 0 }
 };
 
 /*****************************************************************************
@@ -270,7 +267,7 @@ static xdebug_dbgp_cmd* lookup_cmd(char *cmd)
 	return NULL;
 }
 
-static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
+static xdebug_str *make_message(xdebug_xml_node *message)
 {
 	xdebug_str  xml_message = XDEBUG_STR_INITIALIZER;
 	xdebug_str *ret = xdebug_str_new();
@@ -288,7 +285,7 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 	return ret;
 }
 
-static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int stage)
+static void send_message(xdebug_con *context, xdebug_xml_node *message)
 {
 	xdebug_str *tmp;
 
@@ -298,7 +295,7 @@ static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int s
 		return;
 	}
 
-	tmp = make_message(context, message);
+	tmp = make_message(message);
 	if ((size_t) SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
 		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
 		char *utime_str = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
@@ -310,12 +307,6 @@ static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int s
 	}
 	xdebug_str_free(tmp);
 }
-
-static void send_message(xdebug_con *context, xdebug_xml_node *message)
-{
-	send_message_ex(context, message, 0);
-}
-
 
 static xdebug_xml_node* get_symbol(xdebug_str *name, xdebug_var_export_options *options)
 {
@@ -1416,7 +1407,7 @@ static int add_constant_node(xdebug_xml_node *node, xdebug_str *name, zval *cons
 	return SUCCESS;
 }
 
-static int add_variable_node(xdebug_xml_node *node, xdebug_str *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options)
+static int add_variable_node(xdebug_xml_node *node, xdebug_str *name, xdebug_var_export_options *options)
 {
 	xdebug_xml_node *contents;
 
@@ -1520,7 +1511,7 @@ DBGP_FUNC(property_get)
 		int add_var_retval;
 
 		XG_DBG(context).inhibit_notifications = 1;
-		add_var_retval = add_variable_node(*retval, CMD_OPTION_XDEBUG_STR('n'), 1, 0, 0, options);
+		add_var_retval = add_variable_node(*retval, CMD_OPTION_XDEBUG_STR('n'), options);
 		XG_DBG(context).inhibit_notifications = 0;
 
 		if (add_var_retval) {
@@ -1646,7 +1637,7 @@ DBGP_FUNC(property_set)
 	}
 }
 
-static int add_variable_contents_node(xdebug_xml_node *node, xdebug_str *name, int var_only, int non_null, int no_eval, xdebug_var_export_options *options)
+static int add_variable_contents_node(xdebug_xml_node *node, xdebug_str *name, xdebug_var_export_options *options)
 {
 	int contents_found;
 
@@ -1713,7 +1704,7 @@ DBGP_FUNC(property_value)
 		options->max_data = old_max_data;
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 	}
-	if (add_variable_contents_node(*retval, CMD_OPTION_XDEBUG_STR('n'), 1, 0, 0, options) == FAILURE) {
+	if (add_variable_contents_node(*retval, CMD_OPTION_XDEBUG_STR('n'), options) == FAILURE) {
 		options->max_data = old_max_data;
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 	}
@@ -1787,15 +1778,15 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		/* add super globals */
 		xdebug_lib_set_active_symbol_table(&EG(symbol_table));
 		xdebug_lib_set_active_data(NULL);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_COOKIE"),  1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_ENV"),     1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_FILES"),   1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_GET"),     1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_POST"),    1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_REQUEST"), 1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SERVER"),  1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SESSION"), 1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("GLOBALS"),  1, 1, 0, options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_COOKIE"),  options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_ENV"),     options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_FILES"),   options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_GET"),     options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_POST"),    options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_REQUEST"), options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SERVER"),  options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SESSION"), options);
+		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("GLOBALS"),  options);
 		xdebug_lib_set_active_symbol_table(NULL);
 		return 0;
 	}
@@ -1854,7 +1845,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 
 			/* Zend engine 2 does not give us $this, eval so we can get it */
 			if (!xdebug_hash_find(tmp_hash, "this", 4, (void *) &var_name)) {
-				add_variable_node(node, XDEBUG_STR_WRAP_CHAR("this"), 1, 1, 0, options);
+				add_variable_node(node, XDEBUG_STR_WRAP_CHAR("this"), options);
 			}
 
 			xdebug_hash_destroy(tmp_hash);
@@ -2162,7 +2153,7 @@ duplicate_opts:
 	return XDEBUG_ERROR_DUP_ARG;
 }
 
-static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, int flags, xdebug_xml_node *retval)
+static int xdebug_dbgp_parse_option(xdebug_con *context, char* line, xdebug_xml_node *retval)
 {
 	char *cmd = NULL;
 	int res, ret = 0;
@@ -2325,7 +2316,7 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
 		response = xdebug_xml_node_init("response");
 		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
 		xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
-		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+		ret = xdebug_dbgp_parse_option(context, option, response);
 		if (ret != 1) {
 			send_message(context, response);
 		}
@@ -2408,7 +2399,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
 
-	send_message_ex(context, response, DBGP_STATUS_STARTING);
+	send_message(context, response);
 	xdebug_xml_node_dtor(response);
 /* }}} */
 
@@ -2493,75 +2484,7 @@ int xdebug_dbgp_deinit(xdebug_con *context)
 	return 1;
 }
 
-int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char *message, const char *location, const unsigned int line, xdebug_vector *stack)
-{
-	char               *errortype;
-	xdebug_xml_node     *response, *error;
-
-	if (exception_type) {
-		errortype = exception_type;
-	} else {
-		errortype = xdebug_error_type(type);
-	}
-
-	if (exception_type) {
-		XG_DBG(status) = DBGP_STATUS_BREAK;
-		XG_DBG(reason) = DBGP_REASON_EXCEPTION;
-	} else {
-		switch (type) {
-			case E_CORE_ERROR:
-			/* no break - intentionally */
-			case E_ERROR:
-			/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
-			case E_COMPILE_ERROR:
-			case E_USER_ERROR:
-				XG_DBG(status) = DBGP_STATUS_STOPPING;
-				XG_DBG(reason) = DBGP_REASON_ABORTED;
-				break;
-			default:
-				XG_DBG(status) = DBGP_STATUS_BREAK;
-				XG_DBG(reason) = DBGP_REASON_ERROR;
-		}
-	}
-/*
-	runtime_allowed = (
-		(type != E_ERROR) &&
-		(type != E_CORE_ERROR) &&
-		(type != E_COMPILE_ERROR) &&
-		(type != E_USER_ERROR)
-	) ? XDEBUG_BREAKPOINT | XDEBUG_RUNTIME : 0;
-*/
-
-	response = xdebug_xml_node_init("response");
-	xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
-	xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
-	/* lastcmd and lasttransid are not always set (for example when the
-	 * connection is severed before the first command is send) */
-	if (XG_DBG(lastcmd) && XG_DBG(lasttransid)) {
-		xdebug_xml_add_attribute_ex(response, "command", XG_DBG(lastcmd), 0, 0);
-		xdebug_xml_add_attribute_ex(response, "transaction_id", XG_DBG(lasttransid), 0, 0);
-	}
-	xdebug_xml_add_attribute(response, "status", xdebug_dbgp_status_strings[XG_DBG(status)]);
-	xdebug_xml_add_attribute(response, "reason", xdebug_dbgp_reason_strings[XG_DBG(reason)]);
-
-	error = xdebug_xml_node_init("error");
-	xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", type), 0, 1);
-	xdebug_xml_add_attribute_ex(error, "exception", xdstrdup(errortype), 0, 1);
-	xdebug_xml_add_text(error, xdstrdup(message));
-	xdebug_xml_add_child(response, error);
-
-	send_message(context, response);
-	xdebug_xml_node_dtor(response);
-	if (!exception_type) {
-		xdfree(errortype);
-	}
-
-	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BAIL);
-
-	return 1;
-}
-
-int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_string *filename, int lineno)
+int xdebug_dbgp_break_on_line(xdebug_brk_info *brk, zend_string *filename, int lineno)
 {
 	char *tmp_file     = ZSTR_VAL(filename);
 	int   tmp_file_len = ZSTR_LEN(filename);
@@ -2601,7 +2524,7 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_st
 	return 0;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info)
+int xdebug_dbgp_breakpoint(xdebug_con *context, zend_string *filename, long lineno, char *exception, char *code, const char *message, xdebug_brk_info *brk_info)
 {
 	xdebug_xml_node *response, *error_container;
 

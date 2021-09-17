@@ -48,21 +48,6 @@
 #include "ext/standard/base64.h"
 #include "ext/standard/php_string.h"
 
-char *xdebug_str_to_str(char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len, size_t *new_len)
-{
-	zend_string *new_str;
-	char *retval;
-
-	new_str = php_str_to_str(haystack, length, (char*) needle, needle_len, (char*) str, str_len);
-	*new_len = new_str->len;
-
-	retval = estrndup(new_str->val, new_str->len);
-
-	zend_string_release(new_str);
-
-	return retval;
-}
-
 /* {{{ base64 tables */
 static const char base64_table[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -374,15 +359,6 @@ void xdebug_setcookie(const char *name, int name_len, char *value, int value_len
 	value ? zend_string_release(value_s) : 0;
 	path ? zend_string_release(path_s) : 0;
 	domain ? zend_string_release(domain_s) : 0;
-}
-
-char *xdebug_get_compiled_variable_name(zend_op_array *op_array, uint32_t var, int *cv_len)
-{
-	zend_string *cv = NULL;
-	cv = zend_get_compiled_variable_name(op_array, var);
-	*cv_len = cv->len;
-
-	return cv->val;
 }
 
 #ifdef ZEND_HASH_GET_APPLY_COUNT /* PHP 7.2 or earlier recursion protection */

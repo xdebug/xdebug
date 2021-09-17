@@ -85,9 +85,6 @@ static inline int xdebug_internal_log(int channel, int log_level, const char *me
 	return 1;
 }
 
-#define TR_START "<tr><td class=\"e\">"
-#define TR_END   "</td></tr>\n"
-
 static inline void xdebug_diagnostic_log(int channel, int log_level, const char *error_code, const char *message)
 {
 	if (!XG_LIB(diagnosis_buffer) || log_level > XLOG_WARN) {

@@ -21,21 +21,6 @@
 #include "hash.h"
 #include "llist.h"
 
-
-/*
- * Helper function to make a null terminated string from a key
- */
-char *xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len)
-{
-	char *tmp;
-
-	tmp = calloc (key->value.str.len + 1, 1);
-	memcpy(tmp, key->value.str.val, key->value.str.len);
-	*new_len = key->value.str.len;
-
-	return tmp;
-}
-
 static xdebug_ui32 xdebug_hash_str(const char *key, unsigned int key_length)
 {
 	char *p = (char *) key;

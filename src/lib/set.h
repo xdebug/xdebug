@@ -25,9 +25,8 @@ typedef struct _xdebug_set {
 xdebug_set *xdebug_set_create(unsigned int size);
 void xdebug_set_add(xdebug_set *set, unsigned int position);
 void xdebug_set_remove(xdebug_set *set, unsigned int position);
-#define xdebug_set_in(x,y) xdebug_set_in_ex(x,y,1)
-int xdebug_set_in_ex(xdebug_set *set, unsigned int position, int noisy);
-void xdebug_set_dump(xdebug_set *set);
+#define xdebug_set_in(x,y) xdebug_set_in_ex(x,y)
+int xdebug_set_in_ex(xdebug_set *set, unsigned int position);
 void xdebug_set_free(xdebug_set *set);
 
 #endif

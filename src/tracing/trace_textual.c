@@ -240,7 +240,7 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 	xdebug_str_destroy(&str);
 }
 
-void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator)
+void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, zend_generator *generator)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	xdebug_str                    str = XDEBUG_STR_INITIALIZER;

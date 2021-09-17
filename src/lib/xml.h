@@ -62,8 +62,6 @@ void xdebug_xml_add_child(xdebug_xml_node *xml, xdebug_xml_node *child);
 
 void xdebug_xml_add_text_ex(xdebug_xml_node *xml, char *text, int length, int free_text, int encode);
 void xdebug_xml_add_text(xdebug_xml_node *xml, char *text);
-void xdebug_xml_add_text_encode(xdebug_xml_node *xml, char *text);
-#define xdebug_xml_add_textl(x,t,l) 	 xdebug_xml_add_text_ex((x), (t), (l), 1, 0)
 #define xdebug_xml_add_text_encodel(x,t,l)  xdebug_xml_add_text_ex((x), (t), (l), 1, 1)
 
 xdebug_str *xdebug_xml_get_attribute_value(xdebug_xml_node *xml, const char *attribute);

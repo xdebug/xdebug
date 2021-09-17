@@ -347,7 +347,7 @@ static void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element*
 	}
 
 	if (html) {
-		contents = xdebug_get_zval_value_html(NULL, &zvar, 0, NULL);
+		contents = xdebug_get_zval_value_html(&zvar, 0, NULL);
 	} else {
 		contents = xdebug_get_zval_value_line(&zvar, 0, NULL);
 	}
@@ -957,11 +957,11 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 }
 
 #if PHP_VERSION_ID >= 80000
-void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
+void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *message)
 {
 	zend_class_entry *exception_ce = exception->ce;
 #else
-void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
+void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line, zval *message)
 {
 	zend_class_entry *exception_ce = Z_OBJCE_P(exception);
 #endif

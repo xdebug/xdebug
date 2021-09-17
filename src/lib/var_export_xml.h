@@ -21,7 +21,6 @@
 #include "xml.h"
 
 void xdebug_var_xml_attach_static_vars(xdebug_xml_node *node, xdebug_var_export_options *options, zend_class_entry *ce);
-void xdebug_var_xml_attach_static_var_with_contents(zval **zv, int num_args, va_list args, zend_hash_key *hash_key);
 void xdebug_var_xml_attach_uninitialized_var(xdebug_var_export_options *options, xdebug_xml_node *node, xdebug_str *name);
 
 #define xdebug_get_zval_value_xml_node(name, val, options) xdebug_get_zval_value_xml_node_ex(name, val, XDEBUG_VAR_TYPE_NORMAL, options)

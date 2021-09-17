@@ -374,8 +374,8 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 	branch_info = function->branch_info;
 
 	if (opcode_nr != 0 && xdebug_set_in(branch_info->entry_points, opcode_nr)) {
-		xdebug_code_coverage_end_of_function(op_array, filename, function_name);
-		xdebug_code_coverage_start_of_function(op_array, function_name);
+		xdebug_code_coverage_end_of_function(filename, function_name);
+		xdebug_code_coverage_start_of_function(op_array);
 	}
 
 	if (xdebug_set_in(branch_info->starts, opcode_nr)) {
