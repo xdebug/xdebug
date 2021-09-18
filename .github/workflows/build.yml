@@ -63,7 +63,7 @@ jobs:
                 shell: cmd
         strategy:
             matrix:
-                php: ["7.4", "8.0", "8.1"]
+                php: ["7.2", "7.3", "7.4", "8.0", "8.1"]
                 arch: [x64, x86]
                 ts: [nts, ts]
         steps:
@@ -99,8 +99,12 @@ jobs:
                     Expand-Archive zlib-1.2.11.zip ..\deps
                 - name: Generate Build Files
                   run: phpize
-                - name: Configure Build
+                - name: Configure Build with Compression
+                  if: ${{matrix.version >= 7.4}}
                   run: configure --with-xdebug --with-xdebug-compression --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
+                - name: Configure Build without Compression
+                  if: ${{matrix.version < 7.4}}
+                  run: configure --with-xdebug --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
                 - name: Build
                   run: nmake
                 - name: Define Xdebug Module Env
