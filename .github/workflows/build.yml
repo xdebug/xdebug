@@ -145,8 +145,8 @@ jobs:
                     chcp 65001
                     echo "REPORT_EXIT_STATUS=1" >> $env:GITHUB_ENV
                     echo "TEST_PHP_EXECUTABLE=${{steps.setup-php.outputs.prefix}}\php.exe" >> $env:GITHUB_ENV
-                    echo "TEMP=(Get-Item -LiteralPath $Env:TEMP).FullName" >> $env:GITHUB_ENV
-                    echo "TMP=(Get-Item -LiteralPath $Env:TMP).FullName" >> $env:GITHUB_ENV
+                    echo "TEMP=$((Get-Item -LiteralPath $Env:TEMP).FullName)" >> $env:GITHUB_ENV
+                    echo "TMP=$((Get-Item -LiteralPath $Env:TMP).FullName)" >> $env:GITHUB_ENV
                     echo "XDEBUG_MODE=" >> $env:GITHUB_ENV
                 - name: Run Tests
                   run: |
