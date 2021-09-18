@@ -117,7 +117,6 @@ jobs:
                     $dir = $dir + 'Release'
                     if ('ts' -eq '${{matrix.ts}}') { $dir = $dir + '_TS' }
                     $xdebug_dll_opt = 'TEST_PHP_ARGS=-n -d zend_extension=' + $dir + '\php_xdebug.dll'
-                    $xdebug_dll_opt += ' -d sys_temp_dir=' + (Get-Item -LiteralPath $Env:TEMP).FullName
                     echo $xdebug_dll_opt >> $env:GITHUB_ENV
 
                     $artifact_name = 'php_xdebug-${{env.XDEBUG_VERSION}}-${{matrix.php}}'
@@ -146,6 +145,8 @@ jobs:
                     chcp 65001
                     echo "REPORT_EXIT_STATUS=1" >> $env:GITHUB_ENV
                     echo "TEST_PHP_EXECUTABLE=${{steps.setup-php.outputs.prefix}}\php.exe" >> $env:GITHUB_ENV
+                    echo "TEMP=(Get-Item -LiteralPath $Env:TEMP).FullName" >> $env:GITHUB_ENV
+                    echo "TMP=(Get-Item -LiteralPath $Env:TMP).FullName" >> $env:GITHUB_ENV
                     echo "XDEBUG_MODE=" >> $env:GITHUB_ENV
                 - name: Run Tests
                   run: |
