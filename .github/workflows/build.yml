@@ -100,10 +100,10 @@ jobs:
                 - name: Generate Build Files
                   run: phpize
                 - name: Configure Build with Compression
-                  if: ${{matrix.version >= "7.4"}}
+                  if: ${{matrix.version >= 7.4}}
                   run: configure --with-xdebug --with-xdebug-compression --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
                 - name: Configure Build without Compression
-                  if: ${{matrix.version < "7.4"}}
+                  if: ${{matrix.version < 7.4}}
                   run: configure --with-xdebug --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
                 - name: Build
                   run: nmake
