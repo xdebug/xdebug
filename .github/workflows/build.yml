@@ -117,6 +117,7 @@ jobs:
                     $dir = $dir + 'Release'
                     if ('ts' -eq '${{matrix.ts}}') { $dir = $dir + '_TS' }
                     $xdebug_dll_opt = 'TEST_PHP_ARGS=-n -d zend_extension=' + $dir + '\php_xdebug.dll'
+                    $xdebug_dll_opt += ' -d sys_temp_dir=' + (Get-Item -LiteralPath $Env:TEMP).FullName
                     echo $xdebug_dll_opt >> $env:GITHUB_ENV
 
                     $artifact_name = 'php_xdebug-${{env.XDEBUG_VERSION}}-${{matrix.php}}'
