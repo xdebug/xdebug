@@ -34,7 +34,7 @@ if (PHP_XDEBUG != 'no') {
 	ADD_SOURCES(configure_module_dirname + "/src/tracing", XDEBUG_TRACING_SOURCES, "xdebug");
 
 	// PHP_ZLIB is "yes"/"no" for in-tree builds, but boolean for phpize builds
-	var XDEBUG_ZLIB = (!MODE_PHIZE && PHP_ZLIB == "yes") || (MODE_PHPIZE && PHP_ZLIB);
+	var XDEBUG_ZLIB = (!MODE_PHPIZE && PHP_ZLIB == "yes") || (MODE_PHPIZE && PHP_ZLIB);
 
 	if (PHP_XDEBUG_COMPRESSION != "no") {
 		if (((!XDEBUG_ZLIB) && (CHECK_LIB("zlib_a.lib;zlib.lib", "xdebug", PHP_XDEBUG))) ||
