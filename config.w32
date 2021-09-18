@@ -33,9 +33,13 @@ if (PHP_XDEBUG != 'no') {
 	ADD_SOURCES(configure_module_dirname + "/src/profiler", XDEBUG_PROFILER_SOURCES, "xdebug");
 	ADD_SOURCES(configure_module_dirname + "/src/tracing", XDEBUG_TRACING_SOURCES, "xdebug");
 
+	// PHP_ZLIB is "yes"/"no" for in-tree builds, but boolean for phpize builds
+	var XDEBUG_ZLIB = (!MODE_PHPIZE && PHP_ZLIB == "yes") || (MODE_PHPIZE && PHP_ZLIB);
+
 	if (PHP_XDEBUG_COMPRESSION != "no") {
-		if (((!PHP_ZLIB) && (CHECK_LIB("zlib_a.lib;zlib.lib", "xdebug", PHP_XDEBUG))) ||
-			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "xdebug", PHP_XDEBUG)) || (PHP_ZLIB && (!PHP_ZLIB_SHARED))
+		if (((!XDEBUG_ZLIB) && (CHECK_LIB("zlib_a.lib;zlib.lib", "xdebug", PHP_XDEBUG))) ||
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "xdebug", PHP_XDEBUG)) ||
+			(XDEBUG_ZLIB && (!PHP_ZLIB_SHARED))
 		) {
 			AC_DEFINE('HAVE_XDEBUG_ZLIB', 1);
 		}
