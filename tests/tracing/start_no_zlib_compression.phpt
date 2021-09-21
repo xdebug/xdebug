@@ -3,7 +3,7 @@ Compression: no zlib, use_compression=1
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!ext-flag compression; !win');
+check_reqs('!ext-flag compression');
 ?>
 --INI--
 xdebug.mode=trace
@@ -27,6 +27,9 @@ if (preg_match('@\.gz$@', $tf)) {
 }
 
 echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'start_no_zlib_compression.txt' );
+?>
+--CLEAN--
+<?php
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'start_no_zlib_compression.txt' );
 ?>
 --EXPECTF--

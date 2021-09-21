@@ -2,6 +2,8 @@
 
 ARG_WITH("xdebug", "Xdebug support", "no");
 
+ARG_WITH("xdebug-compression", "whether to compress profiler files (requires zlib)", "no");
+
 if (PHP_XDEBUG != 'no') {
 	var XDEBUG_BASE_SOURCES="base.c filter.c"
 	var XDEBUG_LIB_SOURCES="usefulstuff.c compat.c crc32.c file.c hash.c headers.c lib.c llist.c log.c set.c str.c timing.c var.c var_export_html.c var_export_line.c var_export_text.c var_export_xml.c xml.c"
@@ -30,6 +32,18 @@ if (PHP_XDEBUG != 'no') {
 	ADD_SOURCES(configure_module_dirname + "/src/gcstats", XDEBUG_GCSTATS_SOURCES, "xdebug");
 	ADD_SOURCES(configure_module_dirname + "/src/profiler", XDEBUG_PROFILER_SOURCES, "xdebug");
 	ADD_SOURCES(configure_module_dirname + "/src/tracing", XDEBUG_TRACING_SOURCES, "xdebug");
+
+	// PHP_ZLIB is "yes"/"no" for in-tree builds, but boolean for phpize builds
+	var XDEBUG_ZLIB = (!MODE_PHPIZE && PHP_ZLIB == "yes") || (MODE_PHPIZE && PHP_ZLIB);
+
+	if (PHP_XDEBUG_COMPRESSION != "no") {
+		if (((!XDEBUG_ZLIB) && (CHECK_LIB("zlib_a.lib;zlib.lib", "xdebug", PHP_XDEBUG))) ||
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "xdebug", PHP_XDEBUG)) ||
+			(XDEBUG_ZLIB && (!PHP_ZLIB_SHARED))
+		) {
+			AC_DEFINE('HAVE_XDEBUG_ZLIB', 1);
+		}
+	}
 
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
 }

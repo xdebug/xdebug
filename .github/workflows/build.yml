@@ -90,9 +90,20 @@ jobs:
                   with:
                       arch: ${{matrix.arch}}
                       toolset: ${{steps.setup-php.outputs.toolset}}
+                - name: Install zlib dependency
+                  shell: powershell
+                  run: |
+                    $versions = @{"7.0" = "vc14"; "7.1" = "vc14"; "7.2" = "vc15"; "7.3" = "vc15"; "7.4" = "vc15"; "8.0" = "vs16"; "8.1" = "vs16"}
+                    $crt = $versions."${{matrix.php}}"
+                    Invoke-WebRequest https://windows.php.net/downloads/php-sdk/deps/$crt/${{matrix.arch}}/zlib-1.2.11-$crt-${{matrix.arch}}.zip -OutFile zlib-1.2.11.zip
+                    Expand-Archive zlib-1.2.11.zip ..\deps
                 - name: Generate Build Files
                   run: phpize
-                - name: Configure Build
+                - name: Configure Build with Compression
+                  if: ${{matrix.version >= 7.4}}
+                  run: configure --with-xdebug --with-xdebug-compression --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
+                - name: Configure Build without Compression
+                  if: ${{matrix.version < 7.4}}
                   run: configure --with-xdebug --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
                 - name: Build
                   run: nmake
@@ -134,6 +145,8 @@ jobs:
                     chcp 65001
                     echo "REPORT_EXIT_STATUS=1" >> $env:GITHUB_ENV
                     echo "TEST_PHP_EXECUTABLE=${{steps.setup-php.outputs.prefix}}\php.exe" >> $env:GITHUB_ENV
+                    echo "TEMP=$((Get-Item -LiteralPath $Env:TEMP).FullName)" >> $env:GITHUB_ENV
+                    echo "TMP=$((Get-Item -LiteralPath $Env:TMP).FullName)" >> $env:GITHUB_ENV
                     echo "XDEBUG_MODE=" >> $env:GITHUB_ENV
                 - name: Run Tests
                   run: |
