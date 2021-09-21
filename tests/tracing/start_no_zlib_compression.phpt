@@ -27,6 +27,9 @@ if (preg_match('@\.gz$@', $tf)) {
 }
 
 echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'start_no_zlib_compression.txt' );
+?>
+--CLEAN--
+<?php
 unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'start_no_zlib_compression.txt' );
 ?>
 --EXPECTF--
