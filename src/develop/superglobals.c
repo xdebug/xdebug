@@ -53,7 +53,11 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 		} else {
 			val = xdebug_get_zval_value_line(z, 0, NULL);
 
-			xdebug_str_add_fmt(str, "\n   $%s['%s'] = ", name, elem);
+			if (elem) {
+				xdebug_str_add_fmt(str, "\n   $%s['%s'] = ", name, elem);
+			} else {
+				xdebug_str_add_fmt(str, "\n   $%s[%ld] = ", name, index_key);
+			}
 			xdebug_str_add_str(str, val);
 		}
 
@@ -62,8 +66,10 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 		/* not found */
 		if (html) {
 			xdebug_str_add_literal(str, "<td colspan='3' bgcolor='#eeeeec'><i>undefined</i></td>");
-		} else {
+		} else if (elem) {
 			xdebug_str_add_fmt(str, "\n   $%s['%s'] is undefined", name, elem);
+		} else {
+			xdebug_str_add_fmt(str, "\n   $%s[%ld] is undefined", name, index_key);
 		}
 	}
 
@@ -75,7 +81,7 @@ static void dump_hash_elem(zval *z, const char *name, long index_key, const char
 static int dump_hash_elem_va(zval *pDest, zend_ulong index_key, zend_string *hash_key, const char *name, int html, xdebug_str *str)
 {
 	if (HASH_KEY_IS_NUMERIC(hash_key)) {
-		dump_hash_elem(*((zval **) pDest), name, hash_key->h, NULL, html, str);
+		dump_hash_elem(pDest, name, index_key, NULL, html, str);
 	} else {
 		dump_hash_elem(pDest, name, 0, HASH_APPLY_KEY_VAL(hash_key), html, str);
 	}
