@@ -10,6 +10,7 @@ PHP_ARG_WITH(xdebug-compression, [whether to compress profiler files (requires z
 [  --without-xdebug-compression     Xdebug: Disable compression through zlib],yes,no)
 
 m4_include([build/pkg.m4])
+m4_include([build/clocks.m4])
 
 if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([Check for supported PHP versions])
@@ -30,9 +31,8 @@ if test "$PHP_XDEBUG" != "no"; then
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS="$INCLUDES $CPPFLAGS"
 
-  AC_CHECK_FUNCS(gettimeofday)
-  AC_CHECK_FUNCS(clock_gettime)
-  AC_CHECK_FUNCS(clock_gettime_nsec_np)
+  AC_XDEBUG_CLOCK
+
   AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])

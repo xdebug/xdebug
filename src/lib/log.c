@@ -324,6 +324,19 @@ void xdebug_print_info(void)
 	php_info_print_table_row(2, "Compressed File Support", "no");
 #endif
 
+#if WIN32
+	php_info_print_table_row(2, "Clock Source", XG_BASE(nanotime_context).use_rel_time ? "QueryPerformanceFrequency" : "GetSystemTimePreciseAsFileTime");
+#else
+# if HAVE_XDEBUG_CLOCK_GETTIME_NSEC_NP
+	php_info_print_table_row(2, "Clock Source", "clock_gettime_nsec_np");
+# elif HAVE_XDEBUG_CLOCK_GETTIME
+	php_info_print_table_row(2, "Clock Source", "clock_gettime");
+# else
+	php_info_print_table_row(2, "Clock Source", "gettimeofday");
+# endif
+#endif
+
+
 	php_info_print_table_end();
 }
 
