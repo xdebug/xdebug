@@ -215,7 +215,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 		tmp->type = XFUNC_NORMAL;
 		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
 			tmp->type = XFUNC_MEMBER;
-			if (edata->func->common.scope && strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
+			if (edata->func->common.scope && strstr(edata->func->common.scope->name->val, "@anonymous") != NULL) {
 				char *tmp_object_class = xdebug_sprintf(
 					"{anonymous-class:%s:%d-%d}",
 					edata->func->common.scope->info.user.filename->val,
