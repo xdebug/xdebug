@@ -451,10 +451,12 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	}
 	/* class->function breakpoints */
 	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
-		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
-		   codebases due to setlocale calls. We don't care about the locale here. */
-		tmp_len = ZSTR_LEN(fse->function.object_class) + strlen(fse->function.function) + 3;
+		/* Using strlen(ZSTR_VAL(...)) here to cut of the string at the first \0, which is needed
+		 * for anonymous classes, in combination with the snprintf() below */
+		tmp_len = strlen(ZSTR_VAL(fse->function.object_class)) + strlen(fse->function.function) + 3;
 		tmp_name = xdmalloc(tmp_len);
+		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
+		 * codebases due to setlocale calls. We don't care about the locale here. */
 		snprintf(tmp_name, tmp_len, "%s::%s", ZSTR_VAL(fse->function.object_class), fse->function.function);
 
 		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
