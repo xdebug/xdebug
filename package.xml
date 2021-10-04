@@ -84,6 +84,7 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
    <file name="php_xdebug.h" role="src" />
    <file name="php_xdebug_arginfo.h" role="src" />
    <dir name="build">
+    <file name="clocks.m4" role="src" />
     <file name="pkg.m4" role="src" />
    </dir>
    <dir name="src">
