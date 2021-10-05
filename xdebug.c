@@ -523,6 +523,8 @@ PHP_MINIT_FUNCTION(xdebug)
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
+	xdebug_nanotime_init();
+
 	if (XDEBUG_MODE_IS_OFF()) {
 		return SUCCESS;
 	}
