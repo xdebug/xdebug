@@ -164,6 +164,14 @@ uint64_t xdebug_get_nanotime(void)
 	xdebug_nanotime_context *context;
 
 	context = &XG_BASE(nanotime_context);
+#if PHP_WIN32
+	if (IsWindows8OrGreater()) {
+		context->win_precise_time_func = (WIN_PRECISE_TIME_FUNC)GetProcAddress(
+			GetModuleHandle(TEXT("kernel32.dll")),
+			"GetSystemTimePreciseAsFileTime"
+		);
+	}
+#endif
 
 #if PHP_WIN32 | HAVE_XDEBUG_CLOCK_GETTIME | HAVE_XDEBUG_CLOCK_GETTIME_NSEC_NP
 	/* Relative timing */
