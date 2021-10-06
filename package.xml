@@ -124,6 +124,7 @@ Mon, Oct 04, 2021 - Xdebug 3.1.0
     <dir name="base">
      <file name="base.c" role="src" />
      <file name="base.h" role="src" />
+     <file name="base_globals.h" role="src" />
      <file name="base_private.h" role="src" />
      <file name="filter.c" role="src" />
      <file name="filter.h" role="src" />

@@ -31,6 +31,7 @@
 # include "config.h"
 #endif
 
+#include "base/base_globals.h"
 #include "coverage/branch_info.h"
 #include "coverage/code_coverage.h"
 #include "debugger/debugger.h"
@@ -75,46 +76,9 @@ ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 
 int xdebug_is_output_tty();
 
-struct xdebug_base_info {
-	xdebug_vector *stack;
-#if PHP_VERSION_ID >= 80100
-	xdebug_hash   *fiber_stacks;
-#endif
-	xdebug_nanotime_context nanotime_context;
-	uint64_t      start_nanotime;
-	unsigned int  prev_memory;
-	zif_handler   orig_set_time_limit_func;
-	zif_handler   orig_error_reporting_func;
-	zif_handler   orig_pcntl_exec_func;
-	zif_handler   orig_pcntl_fork_func;
-	int           output_is_tty;
-	zend_bool     in_debug_info;
-	zend_long     error_reporting_override;
-	zend_bool     error_reporting_overridden;
-	unsigned int  function_count;
-	zend_string  *last_eval_statement;
-	char         *last_exception_trace;
-
-	/* in-execution checking */
-	zend_bool  in_execution;
-	zend_bool  in_var_serialisation;
-
-	/* filters */
-	zend_long     filter_type_code_coverage;
-	zend_long     filter_type_stack;
-	zend_long     filter_type_tracing;
-	xdebug_llist *filters_code_coverage;
-	xdebug_llist *filters_stack;
-	xdebug_llist *filters_tracing;
-
-	struct {
-		zend_long     max_nesting_level;
-	} settings;
-};
-
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
-	struct xdebug_base_info     base;
 	struct {
+		xdebug_base_globals_t     base;
 		xdebug_coverage_globals_t coverage;
 		xdebug_debugger_globals_t debugger;
 		xdebug_develop_globals_t  develop;
@@ -124,6 +88,7 @@ ZEND_BEGIN_MODULE_GLOBALS(xdebug)
 		xdebug_tracing_globals_t  tracing;
 	} globals;
 	struct {
+		xdebug_base_settings_t     base;
 		xdebug_coverage_settings_t coverage;
 		xdebug_debugger_settings_t debugger;
 		xdebug_develop_settings_t  develop;
@@ -140,7 +105,7 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #define XG(v) (xdebug_globals.v)
 #endif
 
-#define XG_BASE(v)     (XG(base.v))
-#define XINI_BASE(v)     (XG(base.settings.v))
+#define XG_BASE(v)     (XG(globals.base.v))
+#define XINI_BASE(v)     (XG(settings.base.v))
 
 #endif
