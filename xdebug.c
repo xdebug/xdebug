@@ -409,6 +409,8 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_init_coverage_globals(&xg->globals.coverage);
+	} else {
+		xg->globals.coverage.code_coverage_active = 0;
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_init_debugger_globals(&xg->globals.debugger);

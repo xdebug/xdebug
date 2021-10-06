@@ -972,7 +972,7 @@ void xdebug_coverage_count_line_if_branch_check_active(zend_op_array *op_array, 
 
 void xdebug_coverage_record_if_active(zend_execute_data *execute_data, zend_op_array *op_array)
 {
-	if (!op_array->reserved[XG_COV(code_coverage_filter_offset)] && XG_COV(code_coverage_active)) {
+	if (XG_COV(code_coverage_active) && !op_array->reserved[XG_COV(code_coverage_filter_offset)]) {
 		xdebug_print_opcode_info(execute_data, execute_data->opline);
 	}
 }
