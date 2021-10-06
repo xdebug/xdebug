@@ -39,7 +39,7 @@ typedef struct _xdebug_nanotime_context {
 #endif
 } xdebug_nanotime_context;
 
-void xdebug_nanotime_init(void);
+void xdebug_nanotime_init(struct xdebug_base_info *xg);
 
 uint64_t xdebug_get_nanotime(void);
 

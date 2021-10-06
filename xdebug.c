@@ -406,6 +406,7 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 {
 	xdebug_init_library_globals(&xg->globals.library);
 	xdebug_init_base_globals(&xg->base);
+	xdebug_nanotime_init(&xg->base);
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_init_coverage_globals(&xg->globals.coverage);
