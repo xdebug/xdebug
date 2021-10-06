@@ -19,8 +19,27 @@
 
 #include "lib/hash.h"
 #include "lib/llist.h"
-#include "lib/timing.h"
 #include "lib/vector.h"
+
+
+#if PHP_WIN32
+typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
+#endif
+
+typedef struct _xdebug_nanotime_context {
+	uint64_t start_abs;
+	uint64_t last_abs;
+#if PHP_WIN32 | HAVE_XDEBUG_CLOCK_GETTIME | HAVE_XDEBUG_CLOCK_GETTIME_NSEC_NP
+	uint64_t start_rel;
+	uint64_t last_rel;
+	int      use_rel_time;
+#endif
+#if PHP_WIN32
+	WIN_PRECISE_TIME_FUNC win_precise_time_func;
+	uint64_t win_freq;
+#endif
+} xdebug_nanotime_context;
+
 
 typedef struct _xdebug_base_globals_t {
 	xdebug_vector *stack;

@@ -400,6 +400,8 @@ static void xdebug_init_base_globals(xdebug_base_globals_t *xg)
 	xg->filters_code_coverage     = NULL;
 	xg->filters_stack             = NULL;
 	xg->filters_tracing           = NULL;
+
+	xdebug_nanotime_init(xg);
 }
 
 static void php_xdebug_init_globals(zend_xdebug_globals *xg)
