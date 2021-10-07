@@ -15,6 +15,7 @@
  */
 
 #include "php_xdebug.h"
+
 #if PHP_WIN32
 # include "win32/time.h"
 # include <versionhelpers.h>
@@ -125,7 +126,7 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 }
 #endif
 
-void xdebug_nanotime_init(void)
+void xdebug_nanotime_init(xdebug_base_globals_t *base)
 {
 	xdebug_nanotime_context context = {0};
 
@@ -155,7 +156,7 @@ void xdebug_nanotime_init(void)
 	context.last_rel = 0;
 #endif
 
-	XG_BASE(nanotime_context) = context;
+	base->nanotime_context = context;
 }
 
 uint64_t xdebug_get_nanotime(void)
