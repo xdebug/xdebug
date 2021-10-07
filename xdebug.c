@@ -404,6 +404,8 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 
 static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 {
+	memset(&xg->globals, 0, sizeof(xg->globals));
+
 	xdebug_init_library_globals(&xg->globals.library);
 	xdebug_init_base_globals(&xg->base);
 
