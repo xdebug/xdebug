@@ -401,8 +401,12 @@ static void xdebug_init_base_globals(xdebug_base_globals_t *xg)
 	xg->filters_stack             = NULL;
 	xg->filters_tracing           = NULL;
 
+	xg->php_version_compile_time = PHP_VERSION;
+	xg->php_version_run_time     = zend_get_module_version("standard");
+
 	xdebug_nanotime_init(xg);
 }
+
 
 static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 {
