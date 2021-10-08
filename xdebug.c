@@ -435,9 +435,11 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 	}
 }
 
-static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg)
+static void php_xdebug_shutdown_globals(zend_xdebug_globals *xg)
 {
-	xdebug_deinit_develop_globals(&xg->globals.develop);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		xdebug_deinit_develop_globals(&xg->globals.develop);
+	}
 }
 
 
