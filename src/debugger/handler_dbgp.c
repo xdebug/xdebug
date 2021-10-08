@@ -1240,7 +1240,7 @@ DBGP_FUNC(feature_get)
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE("language_version")
-			xdebug_xml_add_text(*retval, xdstrdup(PHP_VERSION));
+			xdebug_xml_add_text(*retval, xdstrdup(XG_BASE(php_version_run_time)));
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
@@ -2388,7 +2388,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
-	xdebug_xml_add_attribute_ex(response, "xdebug:language_version", PHP_VERSION, 0, 0);
+	xdebug_xml_add_attribute_ex(response, "xdebug:language_version", XG_BASE(php_version_run_time), 0, 0);
 	xdebug_xml_add_attribute_ex(response, "protocol_version", DBGP_VERSION, 0, 0);
 	xdebug_xml_add_attribute_ex(response, "appid", xdebug_sprintf(ZEND_ULONG_FMT, xdebug_get_pid()), 0, 1);
 
