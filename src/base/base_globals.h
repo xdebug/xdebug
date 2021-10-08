@@ -72,6 +72,10 @@ typedef struct _xdebug_base_globals_t {
 	xdebug_llist *filters_code_coverage;
 	xdebug_llist *filters_stack;
 	xdebug_llist *filters_tracing;
+
+	/* PHP versions */
+	const char   *php_version_compile_time;
+	const char   *php_version_run_time;
 } xdebug_base_globals_t;
 
 typedef struct _xdebug_base_settings_t {

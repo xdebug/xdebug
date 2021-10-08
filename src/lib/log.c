@@ -350,7 +350,8 @@ static void xdebug_print_php_section(void)
 	php_info_print_table_colspan_header(2, (char*) "PHP");
 
 	php_info_print_table_colspan_header(2, (char*) "Build Configuration");
-	php_info_print_table_row(2, "Version", PHP_VERSION);
+	php_info_print_table_row(2, "Version (Run Time)", XG_BASE(php_version_run_time));
+	php_info_print_table_row(2, "Version (Compile Time)", XG_BASE(php_version_compile_time));
 #if ZEND_DEBUG
 	php_info_print_table_row(2, "Debug Build", "yes");
 #else

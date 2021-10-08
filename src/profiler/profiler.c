@@ -162,7 +162,7 @@ static void profiler_write_header(xdebug_file *file, char *script_name)
 	if (XINI_PROF(profiler_append)) {
 		xdebug_file_printf(file, "\n==== NEW PROFILING FILE ==============================================\n");
 	}
-	xdebug_file_printf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, PHP_VERSION);
+	xdebug_file_printf(file, "version: 1\ncreator: xdebug %s (PHP %s)\n", XDEBUG_VERSION, XG_BASE(php_version_run_time));
 	xdebug_file_printf(file, "cmd: %s\npart: 1\npositions: line\n\n", script_name);
 	xdebug_file_printf(file, "events: Time_(10ns) Memory_(bytes)\n\n");
 	xdebug_file_flush(file);
