@@ -659,10 +659,7 @@ void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg)
 {
 	xg->trace_handler = NULL;
 	xg->trace_context = NULL;
-}
 
-void xdebug_tracing_minit(INIT_FUNC_ARGS)
-{
 	/* Override opcodes for variable assignments in traces */
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_assign_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_qm_assign_handler);

@@ -547,9 +547,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_minit();
 	}
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_minit(INIT_FUNC_ARGS_PASSTHRU);
-	}
 
 	/* Overload the "include_or_eval" opcode if the mode is 'debug' or 'trace' */
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) || XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {

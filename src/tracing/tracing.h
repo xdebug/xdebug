@@ -52,7 +52,6 @@ typedef struct _xdebug_tracing_settings_t {
 } xdebug_tracing_settings_t;
 
 void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg);
-void xdebug_tracing_minit(INIT_FUNC_ARGS);
 void xdebug_tracing_rinit(void);
 void xdebug_tracing_post_deactivate(void);
 void xdebug_tracing_register_constants(INIT_FUNC_ARGS);
