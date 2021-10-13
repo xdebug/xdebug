@@ -440,6 +440,8 @@ static void php_xdebug_shutdown_globals(zend_xdebug_globals *xg)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_deinit_develop_globals(&xg->globals.develop);
 	}
+
+	xdebug_shutdown_library_globals(&xg->globals.library);
 }
 
 
@@ -537,7 +539,6 @@ PHP_MINIT_FUNCTION(xdebug)
 		return SUCCESS;
 	}
 
-	xdebug_library_minit();
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -592,8 +593,6 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_mshutdown();
 	}
-
-	xdebug_library_mshutdown();
 
 #ifdef ZTS
 	ts_free_id(xdebug_globals_id);

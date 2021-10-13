@@ -23,6 +23,14 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
+static void xdebug_multi_opcode_handler_dtor(xdebug_multi_opcode_handler_t *ptr)
+{
+	if (ptr->next) {
+		xdebug_multi_opcode_handler_dtor(ptr->next);
+	}
+	xdfree(ptr);
+}
+
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
 	xg->headers               = NULL;
@@ -32,14 +40,35 @@ void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 	xg->log_file             = 0;
 
 	xg->active_execute_data  = NULL;
-	xg->opcode_handlers_set  = NULL;
+
+	xg->opcode_handlers_set = xdebug_set_create(256);
 	memset(xg->original_opcode_handlers, 0, sizeof(xg->original_opcode_handlers));
 	memset(xg->opcode_multi_handlers, 0, sizeof(xg->opcode_multi_handlers));
+
+	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
+	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_DIM);
+	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_OBJ);
+	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
+	xdebug_set_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL);
 
 	XINI_LIB(log_level)  = 0;
 	xg->diagnosis_buffer = NULL;
 }
 
+void xdebug_shutdown_library_globals(xdebug_library_globals_t *xg)
+{
+	int i;
+
+	/* Restore all opcode handlers that we have set */
+	for (i = 0; i < 256; i++) {
+		if (xg->opcode_multi_handlers[i] != NULL) {
+			xdebug_multi_opcode_handler_dtor(xg->opcode_multi_handlers[i]);
+		}
+		xdebug_unset_opcode_handler(i);
+	}
+
+	xdebug_set_free(xg->opcode_handlers_set);
+}
 
 void xdebug_library_zend_startup(void)
 {
@@ -51,39 +80,6 @@ void xdebug_library_zend_shutdown(void)
 	xdebug_lib_zend_shutdown_restore_sapi_headers();
 }
 
-
-void xdebug_library_minit(void)
-{
-	XG_LIB(opcode_handlers_set) = xdebug_set_create(256);
-	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
-	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_DIM);
-	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_OBJ);
-	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
-	xdebug_set_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL);
-}
-
-static void xdebug_multi_opcode_handler_dtor(xdebug_multi_opcode_handler_t *ptr)
-{
-	if (ptr->next) {
-		xdebug_multi_opcode_handler_dtor(ptr->next);
-	}
-	xdfree(ptr);
-}
-
-void xdebug_library_mshutdown(void)
-{
-	int i;
-
-	/* Restore all opcode handlers that we have set */
-	for (i = 0; i < 256; i++) {
-		if (XG_LIB(opcode_multi_handlers)[i] != NULL) {
-			xdebug_multi_opcode_handler_dtor(XG_LIB(opcode_multi_handlers)[i]);
-		}
-		xdebug_unset_opcode_handler(i);
-	}
-
-	xdebug_set_free(XG_LIB(opcode_handlers_set));
-}
 
 void xdebug_library_rinit(void)
 {

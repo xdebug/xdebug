@@ -244,11 +244,10 @@ typedef struct _xdebug_library_settings_t {
 } xdebug_library_settings_t;
 
 void xdebug_init_library_globals(xdebug_library_globals_t *xg);
+void xdebug_shutdown_library_globals(xdebug_library_globals_t *xg);
 
 void xdebug_library_zend_startup(void);
 void xdebug_library_zend_shutdown(void);
-void xdebug_library_minit(void);
-void xdebug_library_mshutdown(void);
 void xdebug_library_rinit(void);
 void xdebug_library_post_deactivate(void);
 
