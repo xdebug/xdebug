@@ -527,11 +527,6 @@ void xdebug_debugger_zend_shutdown(void)
 	xdebug_unhook_output_handlers();
 }
 
-void xdebug_debugger_minit(void)
-{
-	XG_DBG(breakpoint_count) = 0;
-}
-
 void xdebug_debugger_minfo(void)
 {
 	php_info_print_table_start();

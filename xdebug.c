@@ -541,9 +541,6 @@ PHP_MINIT_FUNCTION(xdebug)
 
 	xdebug_base_minit(INIT_FUNC_ARGS_PASSTHRU);
 
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
-		xdebug_debugger_minit();
-	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_minit(INIT_FUNC_ARGS_PASSTHRU);
 	}
