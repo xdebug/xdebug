@@ -415,23 +415,30 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 	xdebug_init_library_globals(&xg->globals.library);
 	xdebug_init_base_globals(&xg->globals.base);
 
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
-		xdebug_init_coverage_globals(&xg->globals.coverage);
+	/* Overload the "include_or_eval" opcode if the mode is 'debug' or 'trace' */
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) || XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
+		xdebug_register_with_opcode_multi_handler(&xg->globals.library, ZEND_INCLUDE_OR_EVAL, xdebug_include_or_eval_handler);
 	}
+
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_init_debugger_globals(&xg->globals.debugger);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
-		xdebug_init_develop_globals(&xg->globals.develop);
+		xdebug_init_develop_globals(&xg->globals.library, &xg->globals.develop);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
-		xdebug_init_profiler_globals(&xg->globals.profiler);
+		xdebug_init_profiler_globals(&xg->globals.library, &xg->globals.profiler);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_init_gc_stats_globals(&xg->globals.gc_stats);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_init_tracing_globals(&xg->globals.tracing);
+		xdebug_init_tracing_globals(&xg->globals.library, &xg->globals.tracing);
+	}
+
+	/* Coverage must be last, as it has a catch all override for opcodes */
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+		xdebug_init_coverage_globals(&xg->globals.library, &xg->globals.coverage);
 	}
 }
 
@@ -546,11 +553,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_minit();
-	}
-
-	/* Overload the "include_or_eval" opcode if the mode is 'debug' or 'trace' */
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) || XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_register_with_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL, xdebug_include_or_eval_handler);
 	}
 
 	/* Coverage must be last, as it has a catch all override for opcodes */

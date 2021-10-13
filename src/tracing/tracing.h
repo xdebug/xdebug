@@ -51,7 +51,7 @@ typedef struct _xdebug_tracing_settings_t {
 	zend_bool     collect_return;
 } xdebug_tracing_settings_t;
 
-void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg);
+void xdebug_init_tracing_globals(xdebug_library_globals_t *xlg, xdebug_tracing_globals_t *xtg);
 void xdebug_tracing_rinit(void);
 void xdebug_tracing_post_deactivate(void);
 void xdebug_tracing_register_constants(INIT_FUNC_ARGS);

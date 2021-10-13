@@ -53,7 +53,7 @@ typedef struct _xdebug_coverage_settings_t {
 	int dummy;
 } xdebug_coverage_settings_t;
 
-void xdebug_init_coverage_globals(xdebug_coverage_globals_t *xg);
+void xdebug_init_coverage_globals(xdebug_library_globals_t *xlg, xdebug_coverage_globals_t *xcg);
 void xdebug_coverage_count_line_if_active(zend_op_array *op_array, zend_string *file, int lineno);
 void xdebug_coverage_count_line_if_branch_check_active(zend_op_array *op_array, zend_string *file, int lineno);
 void xdebug_coverage_record_if_active(zend_execute_data *execute_data, zend_op_array *op_array);

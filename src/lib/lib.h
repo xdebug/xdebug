@@ -303,11 +303,12 @@ zval *xdebug_lib_get_active_object(void);
 function_stack_entry *xdebug_lib_get_active_stack_entry(void);
 HashTable *xdebug_lib_get_active_symbol_table(void);
 
-int xdebug_isset_opcode_handler(int opcode);
-void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler);
-void xdebug_unset_opcode_handler(int opcode);
-void xdebug_set_opcode_multi_handler(int opcode);
-void xdebug_register_with_opcode_multi_handler(int opcode, user_opcode_handler_t handler);
+int xdebug_isset_opcode_handler(xdebug_library_globals_t *xg, int opcode);
+void xdebug_set_opcode_handler(xdebug_library_globals_t *xg, int opcode, user_opcode_handler_t handler);
+void xdebug_unset_opcode_handler(xdebug_library_globals_t *xg, int opcode);
+void xdebug_set_opcode_multi_handler(xdebug_library_globals_t *xg, int opcode);
+
+void xdebug_register_with_opcode_multi_handler(xdebug_library_globals_t *xg, int opcode, user_opcode_handler_t handler);
 int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS);
 
 char *xdebug_lib_get_output_dir(void);

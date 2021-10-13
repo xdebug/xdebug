@@ -44,24 +44,24 @@ static void xdebug_develop_overloaded_functions_restore(void)
 }
 
 
-void xdebug_init_develop_globals(xdebug_develop_globals_t *xg)
+void xdebug_init_develop_globals(xdebug_library_globals_t *xlg, xdebug_develop_globals_t *xdg)
 {
-	xg->do_monitor_functions = 0;
+	xdg->do_monitor_functions = 0;
 
-	xg->in_at                = 0; /* scream */
+	xdg->in_at                = 0; /* scream */
 
-	xdebug_llist_init(&xg->server, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->get, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->post, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->cookie, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->files, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->env, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->request, xdebug_superglobals_dump_dtor);
-	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->server, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->get, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->post, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->cookie, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->files, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->env, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->request, xdebug_superglobals_dump_dtor);
+	xdebug_llist_init(&xdg->session, xdebug_superglobals_dump_dtor);
 
 	/* Overload opcodes for 'scream' */
-	xdebug_set_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
-	xdebug_set_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_BEGIN_SILENCE, xdebug_silence_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_END_SILENCE, xdebug_silence_handler);
 }
 
 void xdebug_shutdown_develop_globals(xdebug_develop_globals_t *xg)

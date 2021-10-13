@@ -655,53 +655,53 @@ XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_inc_static_prop, "");
 XDEBUG_OPCODE_OVERRIDE_ASSIGN(post_dec_static_prop, "");
 #endif
 
-void xdebug_init_tracing_globals(xdebug_tracing_globals_t *xg)
+void xdebug_init_tracing_globals(xdebug_library_globals_t *xlg, xdebug_tracing_globals_t *xtg)
 {
-	xg->trace_handler = NULL;
-	xg->trace_context = NULL;
+	xtg->trace_handler = NULL;
+	xtg->trace_context = NULL;
 
 	/* Override opcodes for variable assignments in traces */
-	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_assign_handler);
-	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_qm_assign_handler);
+	xdebug_register_with_opcode_multi_handler(xlg, ZEND_ASSIGN, xdebug_assign_handler);
+	xdebug_register_with_opcode_multi_handler(xlg, ZEND_QM_ASSIGN, xdebug_qm_assign_handler);
 
 #if PHP_VERSION_ID >= 70400
-	xdebug_set_opcode_handler(ZEND_ASSIGN_OP, xdebug_assign_op_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_DIM_OP, xdebug_assign_dim_op_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_OBJ_OP, xdebug_assign_obj_op_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP_OP, xdebug_assign_static_prop_op_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_OP, xdebug_assign_op_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_DIM_OP, xdebug_assign_dim_op_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_OBJ_OP, xdebug_assign_obj_op_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_STATIC_PROP_OP, xdebug_assign_static_prop_op_handler);
 #else
-	xdebug_set_opcode_handler(ZEND_ASSIGN_ADD, xdebug_assign_add_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_SUB, xdebug_assign_sub_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_MUL, xdebug_assign_mul_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_DIV, xdebug_assign_div_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_MOD, xdebug_assign_mod_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_POW, xdebug_assign_pow_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_SL, xdebug_assign_sl_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_SR, xdebug_assign_sr_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_CONCAT, xdebug_assign_concat_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_OR, xdebug_assign_bw_or_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_AND, xdebug_assign_bw_and_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_BW_XOR, xdebug_assign_bw_xor_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_ADD, xdebug_assign_add_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_SUB, xdebug_assign_sub_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_MUL, xdebug_assign_mul_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_DIV, xdebug_assign_div_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_MOD, xdebug_assign_mod_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_POW, xdebug_assign_pow_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_SL, xdebug_assign_sl_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_SR, xdebug_assign_sr_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_CONCAT, xdebug_assign_concat_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_BW_OR, xdebug_assign_bw_or_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_BW_AND, xdebug_assign_bw_and_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_BW_XOR, xdebug_assign_bw_xor_handler);
 #endif
-	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_DIM, xdebug_assign_dim_handler);
-	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_OBJ, xdebug_assign_obj_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_REF, xdebug_assign_ref_handler);
-	xdebug_set_opcode_handler(ZEND_PRE_INC, xdebug_pre_inc_handler);
-	xdebug_set_opcode_handler(ZEND_POST_INC, xdebug_post_inc_handler);
-	xdebug_set_opcode_handler(ZEND_PRE_DEC, xdebug_pre_dec_handler);
-	xdebug_set_opcode_handler(ZEND_POST_DEC, xdebug_post_dec_handler);
-	xdebug_set_opcode_handler(ZEND_PRE_INC_OBJ, xdebug_pre_inc_obj_handler);
-	xdebug_set_opcode_handler(ZEND_POST_INC_OBJ, xdebug_post_inc_obj_handler);
-	xdebug_set_opcode_handler(ZEND_PRE_DEC_OBJ, xdebug_pre_dec_obj_handler);
-	xdebug_set_opcode_handler(ZEND_POST_DEC_OBJ, xdebug_post_dec_obj_handler);
+	xdebug_register_with_opcode_multi_handler(xlg, ZEND_ASSIGN_DIM, xdebug_assign_dim_handler);
+	xdebug_register_with_opcode_multi_handler(xlg, ZEND_ASSIGN_OBJ, xdebug_assign_obj_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_REF, xdebug_assign_ref_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_PRE_INC, xdebug_pre_inc_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_POST_INC, xdebug_post_inc_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_PRE_DEC, xdebug_pre_dec_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_POST_DEC, xdebug_post_dec_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_PRE_INC_OBJ, xdebug_pre_inc_obj_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_POST_INC_OBJ, xdebug_post_inc_obj_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_PRE_DEC_OBJ, xdebug_pre_dec_obj_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_POST_DEC_OBJ, xdebug_post_dec_obj_handler);
 #if PHP_VERSION_ID >= 70400
-	xdebug_set_opcode_handler(ZEND_ASSIGN_OBJ_REF, xdebug_assign_obj_ref_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP, xdebug_assign_static_prop_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP_REF, xdebug_assign_static_prop_ref_handler);
-	xdebug_set_opcode_handler(ZEND_PRE_INC_STATIC_PROP, xdebug_pre_inc_static_prop_handler);
-	xdebug_set_opcode_handler(ZEND_PRE_DEC_STATIC_PROP, xdebug_pre_dec_static_prop_handler);
-	xdebug_set_opcode_handler(ZEND_POST_INC_STATIC_PROP, xdebug_post_inc_static_prop_handler);
-	xdebug_set_opcode_handler(ZEND_POST_DEC_STATIC_PROP, xdebug_post_dec_static_prop_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_OBJ_REF, xdebug_assign_obj_ref_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_STATIC_PROP, xdebug_assign_static_prop_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_ASSIGN_STATIC_PROP_REF, xdebug_assign_static_prop_ref_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_PRE_INC_STATIC_PROP, xdebug_pre_inc_static_prop_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_PRE_DEC_STATIC_PROP, xdebug_pre_dec_static_prop_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_POST_INC_STATIC_PROP, xdebug_post_inc_static_prop_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_POST_DEC_STATIC_PROP, xdebug_post_dec_static_prop_handler);
 #endif
 }
 

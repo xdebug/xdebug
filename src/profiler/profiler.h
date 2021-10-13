@@ -40,7 +40,7 @@ typedef struct _xdebug_profiler_settings_t {
 	zend_bool     profiler_append;
 } xdebug_profiler_settings_t;
 
-void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg);
+void xdebug_init_profiler_globals(xdebug_library_globals_t *xlg, xdebug_profiler_globals_t *xg);
 void xdebug_profiler_rinit(void);
 void xdebug_profiler_post_deactivate(void);
 

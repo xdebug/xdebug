@@ -37,12 +37,12 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 int xdebug_profiler_exit_handler(XDEBUG_OPCODE_HANDLER_ARGS);
 
-void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg)
+void xdebug_init_profiler_globals(xdebug_library_globals_t *xlg, xdebug_profiler_globals_t *xpg)
 {
-	xg->active = 0;
+	xpg->active = 0;
 
 	/* Overload the "exit" opcode */
-	xdebug_set_opcode_handler(ZEND_EXIT, xdebug_profiler_exit_handler);
+	xdebug_set_opcode_handler(xlg, ZEND_EXIT, xdebug_profiler_exit_handler);
 }
 
 

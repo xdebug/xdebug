@@ -45,11 +45,11 @@ void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 	memset(xg->original_opcode_handlers, 0, sizeof(xg->original_opcode_handlers));
 	memset(xg->opcode_multi_handlers, 0, sizeof(xg->opcode_multi_handlers));
 
-	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
-	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_DIM);
-	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_OBJ);
-	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
-	xdebug_set_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL);
+	xdebug_set_opcode_multi_handler(xg, ZEND_ASSIGN);
+	xdebug_set_opcode_multi_handler(xg, ZEND_ASSIGN_DIM);
+	xdebug_set_opcode_multi_handler(xg, ZEND_ASSIGN_OBJ);
+	xdebug_set_opcode_multi_handler(xg, ZEND_QM_ASSIGN);
+	xdebug_set_opcode_multi_handler(xg, ZEND_INCLUDE_OR_EVAL);
 
 	XINI_LIB(log_level)  = 0;
 	xg->diagnosis_buffer = NULL;
@@ -64,7 +64,7 @@ void xdebug_shutdown_library_globals(xdebug_library_globals_t *xg)
 		if (xg->opcode_multi_handlers[i] != NULL) {
 			xdebug_multi_opcode_handler_dtor(xg->opcode_multi_handlers[i]);
 		}
-		xdebug_unset_opcode_handler(i);
+		xdebug_unset_opcode_handler(xg, i);
 	}
 
 	xdebug_set_free(xg->opcode_handlers_set);
@@ -595,18 +595,18 @@ zval *xdebug_lib_get_active_object(void)
 	return XG_LIB(active_object);
 }
 
-int xdebug_isset_opcode_handler(int opcode)
+int xdebug_isset_opcode_handler(xdebug_library_globals_t *xg, int opcode)
 {
-	return xdebug_set_in(XG_LIB(opcode_handlers_set), opcode);
+	return xdebug_set_in(xg->opcode_handlers_set, opcode);
 }
 
-void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler)
+void xdebug_set_opcode_handler(xdebug_library_globals_t *xg, int opcode, user_opcode_handler_t handler)
 {
-	if (xdebug_isset_opcode_handler(opcode)) {
+	if (xdebug_isset_opcode_handler(xg, opcode)) {
 		abort();
 	}
-	XG_LIB(original_opcode_handlers[opcode]) = zend_get_user_opcode_handler(opcode);
-	xdebug_set_add(XG_LIB(opcode_handlers_set), opcode);
+	xg->original_opcode_handlers[opcode] = zend_get_user_opcode_handler(opcode);
+	xdebug_set_add(xg->opcode_handlers_set, opcode);
 	zend_set_user_opcode_handler(opcode, handler);
 }
 
@@ -624,24 +624,24 @@ static int xdebug_opcode_multi_handler(zend_execute_data *execute_data)
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
-void xdebug_set_opcode_multi_handler(int opcode)
+void xdebug_set_opcode_multi_handler(xdebug_library_globals_t *xg, int opcode)
 {
-	if (xdebug_isset_opcode_handler(opcode)) {
+	if (xdebug_isset_opcode_handler(xg, opcode)) {
 		abort();
 	}
-	XG_LIB(original_opcode_handlers[opcode]) = zend_get_user_opcode_handler(opcode);
-	xdebug_set_add(XG_LIB(opcode_handlers_set), opcode);
+	xg->original_opcode_handlers[opcode] = zend_get_user_opcode_handler(opcode);
+	xdebug_set_add(xg->opcode_handlers_set, opcode);
 	zend_set_user_opcode_handler(opcode, xdebug_opcode_multi_handler);
 }
 
-void xdebug_register_with_opcode_multi_handler(int opcode, user_opcode_handler_t handler)
+void xdebug_register_with_opcode_multi_handler(xdebug_library_globals_t *xg, int opcode, user_opcode_handler_t handler)
 {
 	xdebug_multi_opcode_handler_t *ptr;
 	xdebug_multi_opcode_handler_t *tmp = xdmalloc(sizeof(xdebug_multi_opcode_handler_t));
 	tmp->handler = handler;
 	tmp->next    = NULL;
 
-	if (!xdebug_isset_opcode_handler(opcode)) {
+	if (!xdebug_isset_opcode_handler(xg, opcode)) {
 		abort();
 	}
 
@@ -658,7 +658,7 @@ void xdebug_register_with_opcode_multi_handler(int opcode, user_opcode_handler_t
 	ptr->next = tmp;
 }
 
-void xdebug_unset_opcode_handler(int opcode)
+void xdebug_unset_opcode_handler(xdebug_library_globals_t *xg, int opcode)
 {
 	if (xdebug_set_in(XG_LIB(opcode_handlers_set), opcode)) {
 		zend_set_user_opcode_handler(opcode, XG_LIB(original_opcode_handlers[opcode]));
@@ -667,8 +667,10 @@ void xdebug_unset_opcode_handler(int opcode)
 
 int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER_ARGS)
 {
-	if (xdebug_isset_opcode_handler(opcode)) {
-		user_opcode_handler_t handler = XG_LIB(original_opcode_handlers[opcode]);
+	xdebug_library_globals_t* xg = &XG(globals.library);
+
+	if (xdebug_isset_opcode_handler(xg, opcode)) {
+		user_opcode_handler_t handler = xg->original_opcode_handlers[opcode];
 
 		if (handler) {
 			return handler(XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);

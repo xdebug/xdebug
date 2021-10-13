@@ -64,7 +64,7 @@ typedef struct _xdebug_develop_settings_t {
 	zend_bool  do_scream;
 } xdebug_develop_settings_t;
 
-void xdebug_init_develop_globals(xdebug_develop_globals_t *xg);
+void xdebug_init_develop_globals(xdebug_library_globals_t *xlg, xdebug_develop_globals_t *xdg);
 void xdebug_shutdown_develop_globals(xdebug_develop_globals_t *xg);
 
 void xdebug_develop_minit();
