@@ -1125,10 +1125,6 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
 
-	XG_BASE(error_reporting_override) = 0;
-	XG_BASE(error_reporting_overridden) = 0;
-	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
-
 #if PHP_VERSION_ID >= 80100
 	zend_observer_fiber_switch_register(xdebug_fiber_switch_observer);
 #endif
