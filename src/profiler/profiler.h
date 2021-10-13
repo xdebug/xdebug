@@ -41,8 +41,6 @@ typedef struct _xdebug_profiler_settings_t {
 } xdebug_profiler_settings_t;
 
 void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg);
-void xdebug_profiler_minit(void);
-void xdebug_profiler_mshutdown(void);
 void xdebug_profiler_rinit(void);
 void xdebug_profiler_post_deactivate(void);
 

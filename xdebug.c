@@ -547,9 +547,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_minit();
 	}
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
-		xdebug_profiler_minit();
-	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_minit(INIT_FUNC_ARGS_PASSTHRU);
 	}
@@ -586,9 +583,6 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_GCSTATS)) {
 		xdebug_gcstats_mshutdown();
-	}
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
-		xdebug_profiler_mshutdown();
 	}
 
 #ifdef ZTS
