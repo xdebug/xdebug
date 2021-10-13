@@ -58,9 +58,13 @@ void xdebug_init_develop_globals(xdebug_develop_globals_t *xg)
 	xdebug_llist_init(&xg->env, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->request, xdebug_superglobals_dump_dtor);
 	xdebug_llist_init(&xg->session, xdebug_superglobals_dump_dtor);
+
+	/* Overload opcodes for 'scream' */
+	xdebug_set_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
+	xdebug_set_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
 }
 
-void xdebug_deinit_develop_globals(xdebug_develop_globals_t *xg)
+void xdebug_shutdown_develop_globals(xdebug_develop_globals_t *xg)
 {
 	xdebug_llist_empty(&xg->server, NULL);
 	xdebug_llist_empty(&xg->get, NULL);
@@ -74,15 +78,7 @@ void xdebug_deinit_develop_globals(xdebug_develop_globals_t *xg)
 
 void xdebug_develop_minit(INIT_FUNC_ARGS)
 {
-	/* Overload opcodes for 'scream' */
-	xdebug_set_opcode_handler(ZEND_BEGIN_SILENCE, xdebug_silence_handler);
-	xdebug_set_opcode_handler(ZEND_END_SILENCE, xdebug_silence_handler);
-
 	REGISTER_LONG_CONSTANT("XDEBUG_STACK_NO_DESC", XDEBUG_STACK_NO_DESC, CONST_CS | CONST_PERSISTENT);
-}
-
-void xdebug_develop_mshutdown()
-{
 }
 
 void xdebug_develop_rinit()

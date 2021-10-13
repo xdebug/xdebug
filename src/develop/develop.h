@@ -65,10 +65,9 @@ typedef struct _xdebug_develop_settings_t {
 } xdebug_develop_settings_t;
 
 void xdebug_init_develop_globals(xdebug_develop_globals_t *xg);
-void xdebug_deinit_develop_globals(xdebug_develop_globals_t *xg);
+void xdebug_shutdown_develop_globals(xdebug_develop_globals_t *xg);
 
 void xdebug_develop_minit();
-void xdebug_develop_mshutdown();
 void xdebug_develop_rinit();
 void xdebug_develop_post_deactivate();
 
