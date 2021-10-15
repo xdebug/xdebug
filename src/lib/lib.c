@@ -32,7 +32,7 @@ void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 	xg->log_file             = 0;
 
 	xg->active_execute_data  = NULL;
-	xg->opcode_handlers_set  = NULL;
+	xg->opcode_handlers_set = xdebug_set_create(256);
 	memset(xg->original_opcode_handlers, 0, sizeof(xg->original_opcode_handlers));
 	memset(xg->opcode_multi_handlers, 0, sizeof(xg->opcode_multi_handlers));
 
@@ -54,7 +54,6 @@ void xdebug_library_zend_shutdown(void)
 
 void xdebug_library_minit(void)
 {
-	XG_LIB(opcode_handlers_set) = xdebug_set_create(256);
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_DIM);
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_OBJ);
