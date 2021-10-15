@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2021-10-04</date>
- <time>09:33:42</time>
+ <date>2021-10-15</date>
+ <time>13:19:59</time>
  <version>
-  <release>3.1.0</release>
-  <api>3.1.0</api>
+  <release>3.1.1</release>
+  <api>3.1.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,48 +52,18 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Oct 04, 2021 - Xdebug 3.1.0
+Fri, Oct 15, 2021 - Xdebug 3.1.1
 
 = Fixed bugs:
 
-  - Fixed issue #1472: Add assignments to computer readable trace format
-  - Fixed issue #1537: Add links to documentation to various different &quot;features&quot; after wizard has run
-  - Fixed issue #1738: Add xdebug_notify() function to send data through DBGp to a debugging client
-  - Fixed issue #1853: Enable profile compression for cachegrind files
-  - Fixed issue #1890: Add connected client and protocol features to diagnostic page
-  - Fixed issue #1898: API for querying the currently active mode(s)
-  - Fixed issue #1933: Allow for cloud ID to be set through the trigger
-  - Fixed issue #1938: Branches in traits aren’t marked as executed
-  - Fixed issue #1948: Do not redirect warning and error messages to PHP's error log if an Xdebug log is active
-  - Fixed issue #1949: private properties for internal classes can't be fetched for debugging
-  - Fixed issue #1963: php exit code = -1073741819 when xdebug.mode = off (Windows Thread Safe Only)
-  - Fixed issue #1969: Provide breakpoint ID / info in DBGp run command responses
-  - Fixed issue #1970: xdebug_get_function_stack with unnamed (internal) parameters have wrong index
-  - Fixed issue #1972: Add support for PHP 8.1 Fibers
-  - Fixed issue #1974: Add gzip support to trace files
-  - Fixed issue #1976: Switch debug session cookie to Lax, and remove expiry time
-  - Fixed issue #1978: Xdebug's log messages are cut off at 512 bytes
-  - Fixed issue #1980: PHP 8.1: Mark enum classes as &quot;enum&quot;
-  - Fixed issue #1986: Add support for multiple trigger values
-  - Fixed issue #1989: Profiling does not output correct class when parent keyword is used
-  - Fixed issue #1992: Code Coverage with filter produces Segmentation fault on xdebug_stop_code_coverage()
-  - Fixed issue #1993: eval-ing broken code causes stepping to break
-  - Fixed issue #1996: Add support for Closure visualisation in traces, debugging, and Xdebug's var_dump
-  - Fixed issue #1997: Added xdebug_connect_to_client() to attempt a debugging connect while running code
-  - Fixed issue #1998: Double facet attribute generated for enums that are stored in properties
-  - Fixed issue #1999: Add &quot;readonly&quot; facet to PHP 8.1 readonly properties
-  - Fixed issue #2001: Add 'xdebug.use_compression' setting to turn on/off compression for profiling files
-  - Fixed issue #2004: Figure out what &quot;XDEBUG_SHOW_FNAME_TODO&quot; define is for
-  - Fixed issue #2007: xdebug 3.x fails to build on OS X 10.11 or earlier due to clock_gettime_nsec_np requirement
-  - Fixed issue #2008: Using the XDEBUG_SESSION cookie could bypass shared-secret checks
-  - Fixed issue #2009: xdebug_stop_code_coverage's argument has type mismatch
-  - Fixed issue #2011: Closures as protected properties have double facet XML attribute
-  - Fixed issue #2013: Support PHP 8.1
-  - Fixed issue #2018: zlib compression support on Windows
-  - Fixed issue #2019: Xdebug crash because of uninitialized memory
-  - Fixed issue #2020: segfault if xdebug.dump.GET=* and integer key without value in URL
-  - Fixed issue #2021: Segmentation fault due to NULL bytes in internal anonymous class names
-  - Fixed issue #2025: Anonymous classes which extend are not detected as anonymous classes since PHP 8.0
+  - Fixed issue #2016: apache gives no output with xdebug 3.1.0b2 installed
+  - Fixed issue #2024: Apache restarts in a loop under PHP 8.1.0 RC3
+  - Fixed issue #2029: incorrect and inaccurate date and time displayed in xdebug.log and trace files
+  - Fixed issue #2030: PhpStorm step-debug not working on PHP 8.0.11
+  - Fixed issue #2032: Use runtime PHP version in DBGp and info pages instead of compiled-against version
+  - Fixed issue #2034: Xdebug throws a Segmentation fault when 'set_time_limit' function is disabled
+  - Fixed issue #2035: Xdebug block everything with localhost in XAMMP
+
  </notes>
 
  <contents>
@@ -257,6 +227,64 @@ Tue, Sep 07, 2021 - Xdebug 3.1.0beta2
 = Fixed bugs:
   - This is a packaging fix only release. The package missed a file that were needed
     for building on PHP 7.2 and 8.1.
+   </notes>
+  </release>
+ 
+  <release>
+   <date>2021-10-04</date>
+   <time>09:33:42</time>
+   <version>
+    <release>3.1.0</release>
+    <api>3.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Oct 04, 2021 - Xdebug 3.1.0
+
+= Fixed bugs:
+
+  - Fixed issue #1472: Add assignments to computer readable trace format
+  - Fixed issue #1537: Add links to documentation to various different &quot;features&quot; after wizard has run
+  - Fixed issue #1738: Add xdebug_notify() function to send data through DBGp to a debugging client
+  - Fixed issue #1853: Enable profile compression for cachegrind files
+  - Fixed issue #1890: Add connected client and protocol features to diagnostic page
+  - Fixed issue #1898: API for querying the currently active mode(s)
+  - Fixed issue #1933: Allow for cloud ID to be set through the trigger
+  - Fixed issue #1938: Branches in traits aren’t marked as executed
+  - Fixed issue #1948: Do not redirect warning and error messages to PHP's error log if an Xdebug log is active
+  - Fixed issue #1949: private properties for internal classes can't be fetched for debugging
+  - Fixed issue #1963: php exit code = -1073741819 when xdebug.mode = off (Windows Thread Safe Only)
+  - Fixed issue #1969: Provide breakpoint ID / info in DBGp run command responses
+  - Fixed issue #1970: xdebug_get_function_stack with unnamed (internal) parameters have wrong index
+  - Fixed issue #1972: Add support for PHP 8.1 Fibers
+  - Fixed issue #1974: Add gzip support to trace files
+  - Fixed issue #1976: Switch debug session cookie to Lax, and remove expiry time
+  - Fixed issue #1978: Xdebug's log messages are cut off at 512 bytes
+  - Fixed issue #1980: PHP 8.1: Mark enum classes as &quot;enum&quot;
+  - Fixed issue #1986: Add support for multiple trigger values
+  - Fixed issue #1989: Profiling does not output correct class when parent keyword is used
+  - Fixed issue #1992: Code Coverage with filter produces Segmentation fault on xdebug_stop_code_coverage()
+  - Fixed issue #1993: eval-ing broken code causes stepping to break
+  - Fixed issue #1996: Add support for Closure visualisation in traces, debugging, and Xdebug's var_dump
+  - Fixed issue #1997: Added xdebug_connect_to_client() to attempt a debugging connect while running code
+  - Fixed issue #1998: Double facet attribute generated for enums that are stored in properties
+  - Fixed issue #1999: Add &quot;readonly&quot; facet to PHP 8.1 readonly properties
+  - Fixed issue #2001: Add 'xdebug.use_compression' setting to turn on/off compression for profiling files
+  - Fixed issue #2004: Figure out what &quot;XDEBUG_SHOW_FNAME_TODO&quot; define is for
+  - Fixed issue #2007: xdebug 3.x fails to build on OS X 10.11 or earlier due to clock_gettime_nsec_np requirement
+  - Fixed issue #2008: Using the XDEBUG_SESSION cookie could bypass shared-secret checks
+  - Fixed issue #2009: xdebug_stop_code_coverage's argument has type mismatch
+  - Fixed issue #2011: Closures as protected properties have double facet XML attribute
+  - Fixed issue #2013: Support PHP 8.1
+  - Fixed issue #2018: zlib compression support on Windows
+  - Fixed issue #2019: Xdebug crash because of uninitialized memory
+  - Fixed issue #2020: segfault if xdebug.dump.GET=* and integer key without value in URL
+  - Fixed issue #2021: Segmentation fault due to NULL bytes in internal anonymous class names
+  - Fixed issue #2025: Anonymous classes which extend are not detected as anonymous classes since PHP 8.0
    </notes>
   </release>
 
