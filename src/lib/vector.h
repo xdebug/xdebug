@@ -105,6 +105,9 @@ static inline xdebug_vector *xdebug_vector_alloc(size_t element_size, xdebug_vec
 
 static inline void xdebug_vector_destroy(xdebug_vector *v)
 {
+	while (XDEBUG_VECTOR_COUNT(v)) {
+		xdebug_vector_pop(v);
+	}
 	xdfree(v->data);
 	xdfree(v);
 }
