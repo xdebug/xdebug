@@ -324,6 +324,19 @@ void xdebug_print_info(void)
 	php_info_print_table_row(2, "Compressed File Support", "no");
 #endif
 
+#if WIN32
+	php_info_print_table_row(2, "Clock Source", XG_BASE(nanotime_context).use_rel_time ? "QueryPerformanceFrequency" : "GetSystemTimePreciseAsFileTime");
+#else
+# if HAVE_XDEBUG_CLOCK_GETTIME_NSEC_NP
+	php_info_print_table_row(2, "Clock Source", "clock_gettime_nsec_np");
+# elif HAVE_XDEBUG_CLOCK_GETTIME
+	php_info_print_table_row(2, "Clock Source", "clock_gettime");
+# else
+	php_info_print_table_row(2, "Clock Source", "gettimeofday");
+# endif
+#endif
+
+
 	php_info_print_table_end();
 }
 
@@ -337,7 +350,8 @@ static void xdebug_print_php_section(void)
 	php_info_print_table_colspan_header(2, (char*) "PHP");
 
 	php_info_print_table_colspan_header(2, (char*) "Build Configuration");
-	php_info_print_table_row(2, "Version", PHP_VERSION);
+	php_info_print_table_row(2, "Version (Run Time)", XG_BASE(php_version_run_time));
+	php_info_print_table_row(2, "Version (Compile Time)", XG_BASE(php_version_compile_time));
 #if ZEND_DEBUG
 	php_info_print_table_row(2, "Debug Build", "yes");
 #else
@@ -346,9 +360,7 @@ static void xdebug_print_php_section(void)
 
 #ifdef ZTS
 	php_info_print_table_row(2, "Thread Safety", "enabled");
-# if PHP_VERSION_ID >= 70300
 	php_info_print_table_row(2, "Thread API", tsrm_api_name());
-# endif
 #else
 	php_info_print_table_row(2, "Thread Safety", "disabled");
 #endif

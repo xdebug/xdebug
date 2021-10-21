@@ -181,11 +181,7 @@ zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *oplin
 #else
 	zend_free_op should_free;
 
-# if PHP_VERSION_ID >= 70300
 	return zend_get_zval_ptr(opline, node_type, node, zdata, &should_free, BP_VAR_IS);
-# else
-	return zend_get_zval_ptr(node_type, node, zdata, &should_free, BP_VAR_IS);
-# endif
 #endif
 }
 

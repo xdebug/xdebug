@@ -70,11 +70,7 @@ void xdebug_trace_computerized_write_footer(void *ctxt)
 	nanotime = xdebug_get_nanotime();
 
 	xdebug_file_printf(context->trace_file, "\t\t\t%F\t", XDEBUG_SECONDS_SINCE_START(nanotime));
-#if WIN32|WINNT
-	xdebug_file_printf(context->trace_file, "%Iu", zend_memory_usage(0));
-#else
 	xdebug_file_printf(context->trace_file, "%zu", zend_memory_usage(0));
-#endif
 	xdebug_file_printf(context->trace_file, "\n");
 
 	str_time = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
@@ -154,11 +150,9 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
 			zend_string *escaped;
-#if PHP_VERSION_ID >= 70300
+
 			escaped = php_addcslashes(fse->include_filename, (char*) "'\\\0..\37", 6);
-#else
-			escaped = php_addcslashes(fse->include_filename, 0, (char*) "'\\\0..\37", 6);
-#endif
+
 			xdebug_str_addc(&str, '\'');
 			xdebug_str_add_zstr(&str, escaped);
 			xdebug_str_addc(&str, '\'');

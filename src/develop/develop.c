@@ -119,7 +119,9 @@ static int xdebug_silence_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	zend_op_array *op_array = &execute_data->func->op_array;
 	const zend_op *cur_opcode = execute_data->opline;
 
-	xdebug_coverage_record_if_active(execute_data, op_array);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+		xdebug_coverage_record_if_active(execute_data, op_array);
+	}
 
 	if (XINI_DEV(do_scream)) {
 		execute_data->opline++;

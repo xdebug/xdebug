@@ -184,7 +184,7 @@ char *xdebug_trim(const char *str)
 	}
 	end++;
 
-	trimmed = xdmalloc(end - begin);
+	trimmed = xdmalloc(end - begin + 1);
 	memcpy(trimmed, begin, (end - begin));
 	trimmed[(end - begin)] = '\0';
 

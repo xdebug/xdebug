@@ -29,9 +29,9 @@ Initial Set-up
     git remote add upstream git://github.com/xdebug/xdebug.git
     git fetch upstream
 
-- Add a tracking branch for ``xdebug 3.0``::
+- Add a tracking branch for Xdebug 3.1::
 
-    git checkout --track origin/xdebug_3_0
+    git checkout --track origin/xdebug_3_1
 
 Branches
 --------
@@ -40,18 +40,18 @@ There are two branches in operation:
 
 ``master``
 	This is were all new feature Pull Requests should be targeted at
-``xdebug_3_0``
+``xdebug_3_1``
 	This is were all bug fix Pull Requests should be targeted at. The
 	maintainer will add them to ``master`` too when merging the Pull Request.
 
 Working on a Pull Request
 -------------------------
 
-- Make sure that your ``master`` and ``xdebug_3_0`` branches are up to date
+- Make sure that your ``master`` and ``xdebug_3_1`` branches are up to date
   with the ``upstream`` repository.
 - Create an issue in the `issue tracker <https://bugs.xdebug.org>`_ (if none
   exists yet).
-- Switch to the right target branch (``master`` for features, ``xdebug_3_0``
+- Switch to the right target branch (``master`` for features, ``xdebug_3_1``
   for bug fixes).
 - Create a feature branch::
 
@@ -89,7 +89,7 @@ Working on a Pull Request
   will be targeting, for example to rebase against the current bug fix
   branch::
 
-    git fetch upstream && git rebase upstream/xdebug_3_0
+    git fetch upstream && git rebase upstream/xdebug_3_1
 
 - Push your changes to your remote repository::
 

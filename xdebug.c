@@ -68,7 +68,7 @@
 #if PHP_VERSION_ID >= 80000
 static zend_result (*xdebug_orig_post_startup_cb)(void);
 static zend_result xdebug_post_startup(void);
-#elif PHP_VERSION_ID >= 70300
+#else
 static int (*xdebug_orig_post_startup_cb)(void);
 static int xdebug_post_startup(void);
 #endif
@@ -302,7 +302,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.var_display_max_depth",    "3",       PHP_INI_ALL,    OnUpdateLong,   settings.library.display_max_depth,    zend_xdebug_globals, xdebug_globals)
 
 	/* Base settings */
-	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "256",                PHP_INI_ALL,    OnUpdateLong,   base.settings.max_nesting_level, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.max_nesting_level", "256",                PHP_INI_ALL,    OnUpdateLong,   settings.base.max_nesting_level, zend_xdebug_globals, xdebug_globals)
 
 	/* Develop settings */
 	STD_PHP_INI_ENTRY("xdebug.cli_color",         "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.develop.cli_color,         zend_xdebug_globals, xdebug_globals)
@@ -384,8 +384,9 @@ PHP_INI_BEGIN()
 	XDEBUG_CHANGED_INI_ENTRY(xdebug.trace_enable_trigger_value)
 PHP_INI_END()
 
-static void xdebug_init_base_globals(struct xdebug_base_info *xg)
+static void xdebug_init_base_globals(xdebug_base_globals_t *xg)
 {
+	xg->stack                = NULL;
 	xg->in_debug_info        = 0;
 	xg->output_is_tty        = OUTPUT_NOT_CHECKED;
 	xg->in_execution         = 0;
@@ -399,12 +400,20 @@ static void xdebug_init_base_globals(struct xdebug_base_info *xg)
 	xg->filters_code_coverage     = NULL;
 	xg->filters_stack             = NULL;
 	xg->filters_tracing           = NULL;
+
+	xg->php_version_compile_time = PHP_VERSION;
+	xg->php_version_run_time     = zend_get_module_version("standard");
+
+	xdebug_nanotime_init(xg);
 }
+
 
 static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 {
+	memset(&xg->globals, 0, sizeof(xg->globals));
+
 	xdebug_init_library_globals(&xg->globals.library);
-	xdebug_init_base_globals(&xg->base);
+	xdebug_init_base_globals(&xg->globals.base);
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		xdebug_init_coverage_globals(&xg->globals.coverage);
@@ -426,9 +435,11 @@ static void php_xdebug_init_globals(zend_xdebug_globals *xg)
 	}
 }
 
-static void php_xdebug_shutdown_globals (zend_xdebug_globals *xg)
+static void php_xdebug_shutdown_globals(zend_xdebug_globals *xg)
 {
-	xdebug_deinit_develop_globals(&xg->globals.develop);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		xdebug_deinit_develop_globals(&xg->globals.develop);
+	}
 }
 
 
@@ -616,7 +627,7 @@ PHP_RINIT_FUNCTION(xdebug)
 		return SUCCESS;
 	}
 
-#if PHP_VERSION_ID >= 70300 && PHP_VERSION_ID <= 70301
+#if PHP_VERSION_ID <= 70301
 	/* PHP Bug #77287 causes Xdebug to segfault if Opcache has the "compact
 	 * literals" optimisation turned on. So force the optimisation off for PHP
 	 * 7.3.0 and 7.3.1. */
@@ -744,7 +755,6 @@ ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 
 	zend_xdebug_initialised = 1;
 
-#if PHP_VERSION_ID >= 70300
 	xdebug_orig_post_startup_cb = zend_post_startup_cb;
 	zend_post_startup_cb = xdebug_post_startup;
 
@@ -765,9 +775,6 @@ static int xdebug_post_startup(void)
 	xdebug_base_post_startup();
 
 	return SUCCESS;
-#else
-	return zend_startup_module(&xdebug_module_entry);
-#endif
 }
 
 ZEND_DLEXPORT void xdebug_zend_shutdown(zend_extension *extension)

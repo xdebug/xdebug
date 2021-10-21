@@ -209,7 +209,7 @@ int xdebug_hash_extended_find(xdebug_hash *h, const char *str_key, unsigned int 
 	xdebug_llist         *l;
 	xdebug_llist_element *le;
 	xdebug_hash_key       tmp;
-	int                slot;
+	int                   slot;
 
 	slot = FIND_SLOT(h, str_key, str_key_len, num_key);
 	l = h->table[slot];

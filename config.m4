@@ -10,16 +10,17 @@ PHP_ARG_WITH(xdebug-compression, [whether to compress profiler files (requires z
 [  --without-xdebug-compression     Xdebug: Disable compression through zlib],yes,no)
 
 m4_include([build/pkg.m4])
+m4_include([build/clocks.m4])
 
 if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([Check for supported PHP versions])
   PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
   PHP_XDEBUG_FOUND_VERNUM=`echo "${PHP_XDEBUG_FOUND_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 100 + [$]2) * 100 + [$]3;}'`
-  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "70200"; then
-    AC_MSG_ERROR([not supported. Need a PHP version >= 7.2.0 and < 8.2.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+  if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "70300"; then
+    AC_MSG_ERROR([not supported. Need a PHP version >= 7.3.0 and < 8.3.0 (found $PHP_XDEBUG_FOUND_VERSION)])
   else
-    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80200"; then
-      AC_MSG_ERROR([not supported. Need a PHP version >= 7.2.0 and < 8.2.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80300"; then
+      AC_MSG_ERROR([not supported. Need a PHP version >= 7.3.0 and < 8.3.0 (found $PHP_XDEBUG_FOUND_VERSION)])
     else
       AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
     fi
@@ -30,9 +31,8 @@ if test "$PHP_XDEBUG" != "no"; then
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS="$INCLUDES $CPPFLAGS"
 
-  AC_CHECK_FUNCS(gettimeofday)
-  AC_CHECK_FUNCS(clock_gettime)
-  AC_CHECK_FUNCS(clock_gettime_nsec_np)
+  AC_XDEBUG_CLOCK
+
   AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])

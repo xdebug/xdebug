@@ -143,6 +143,12 @@ typedef struct
 	zval         *zv;
 } xdebug_object_item;
 
+static void merged_hash_object_item_dtor(zval *data)
+{
+	 xdebug_object_item *item = Z_PTR_P(data);
+
+	 xdfree(item);
+}
 
 static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, HashTable *merged, int object_type)
 {
@@ -594,7 +600,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			zend_property_info *zpi_val;
 
 			ALLOC_HASHTABLE(merged_hash);
-			zend_hash_init(merged_hash, 128, NULL, NULL, 0);
+			zend_hash_init(merged_hash, 128, NULL, merged_hash_object_item_dtor, 0);
 
 			class_name = Z_OBJCE_P(*struc)->name;
 			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_DEFAULT);
@@ -661,12 +667,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			{
 				zend_class_entry *ce = Z_OBJCE_P(*struc);
 				if (ce->ce_flags & ZEND_ACC_ENUM) {
-					xdebug_str *value = xdebug_xml_get_attribute_value(node, "facet");
-					if (value) {
-						xdebug_str_add_literal(value, " enum");
-					} else {
-						xdebug_xml_add_attribute(node, "facet", "enum");
-					}
+					xdebug_xml_expand_attribute_value(node, "facet", "enum");
 				}
 			}
 #endif
@@ -679,7 +680,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 				const zend_function *closure_function = zend_get_closure_method_def(*struc);
 #endif
 
-				xdebug_xml_add_attribute(node, "facet", "closure");
+				xdebug_xml_expand_attribute_value(node, "facet", "closure");
 
 				closure_cont = xdebug_xml_node_init("property");
 				xdebug_xml_add_attribute(closure_cont, "facet", "virtual readonly");

@@ -40,129 +40,27 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2020-11-25</date>
- <time>16:00:00</time>
+ <date>2021-04-08</date>
+ <time>10:32:42</time>
  <version>
-  <release>3.0.0</release>
-  <api>3.0.0</api>
+  <release>3.0.4</release>
+  <api>3.0.4</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Wed, Nov 25, 2020 - xdebug 3.0.0
-
-Xdebug 3 includes major changes in functionality compared to Xdebug 2. The
-primary way how you turn on functionality is through the new xdebug.mode PHP
-configuration setting. This made it possible to massively increase performance
-in many of Xdebug's sub systems as Xdebug is now much more conservative in
-which hooks are enabled.
-
-Configuration changes, massive performance improvements, and PHP 8 support are
-the primary features in Xdebug 3, but there is much more. The upgrade guide
-lists the changes in great detail, please read it:
-
-https://xdebug.org/docs/upgrade_guide
-
--------------
-
-+ New features:
-
-  - Implemented issue #1762: Introduce feature modes
-  - Implemented issue #1793: Add xdebug.start_upon_error setting to cover the removed xdebug.remote_mode=jit feature.
-  - Implemented issue #1797: Implement generic logging
-  - Implemented issue #1801: Rename mode 'display' to mode 'develop'
-  - Implemented issue #1831: Add diagnostics function xdebug_info()
-  - Implemented issue #1833: Add links to documentation in diagnostic log
-  - Implemented issue #1837: Support for associative variadic variable names (PHP 8)
-  - Implemented issue #1841: Add support for PHP 8 'match' keyword
-
-+ Improvements:
-
-  - Implemented issue #1680: Update var dumping routines to include relevant information for interned strings and immutable arrays
-  - Implemented issue #1712: Add unit to profiler data types
-  - Implemented issue #1743: Figuring out whether a call is a closure uses string comparisions instead of checking the ACC flag (Benjamin Eberlei)
-  - Implemented issue #1752: Use a stack pool to manage stack entries instead of allocating and deallocating entries
-  - Implemented issue #1755: Overload pcntl_fork() to prevent performance degradation by calling xdebug_get_pid often (Carlos Granados)
-  - Implemented issue #1781: Include 'Xdebug' in max nesting level error message
-  - Implemented issue #1783: Stacktrace needs vertical scrolling on small screens (Tobias Tom)
-  - Implemented issue #1789: Provide PHP stubs for Xdebug's functions
-  - Implemented issue #1807: Document Xdebug installation with yum and apt
-  - Implemented issue #1813: Make sure that the xdebug_init_*_globals don't do more than they need to, and that init is only done when xdebug.mode != off
-  - Implemented issue #1817: Switch filename storage from char*/size_t to zend_string*
-  - Implemented issue #1818: Switch variable storage from char*/size_t to zend_string*
-  - Implemented issue #1820: Increase time tracing precision (Michael Voříšek)
-  - Implemented issue #1824: Allow Xdebug's mode to be set through an environment variable
-  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Voříšek)
-  - Implemented issue #1826: Reduce profiler memory allocation and call overhead
-  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Voříšek)
-  - Implemented issue #1832: If connect back host can not be contacted, fallback to remote_host/port
-  - Implemented issue #1858: Only open/close log if there is an actual message to log
-  - Implemented issue #1860: Allow xdebug.cloud_id to be set through an environment variable
-  - Implemented issue #1814: Don't obtain the current time when it's not needed
-  - Implemented issue #1835: Add current trace and profile file name, to diagnostic page
-  - Implemented issue #1885: Change xdebug.start_with_ settings to PHP_INI_SYSTEM|PHP_INI_PERDIR
-  - Implemented issue #1889: max_nesting_level should only trigger in "develop" mode
-
-- Removed features:
-
-  - Implemented issue #1795: Deprecate PHP 7.1 support
-
-  - Implemented issue #1786: Remove idekey value fallback to USER/USERNAME environment variable
-  - Implemented issue #1809: Remove "overload_var_dump" setting
-  - Implemented issue #1810: Remove collect_vars and xdebug_get_declared_vars()
-  - Implemented issue #1812: Remove show_mem_delta setting
-  - Implemented issue #1838: Remove collect_params setting, and always default it to "4"
-  - Implemented issue #1847: Remove xdebug.remote_cookie_expire_time setting
-  - Implemented issue #1016: Removed support for pause-execution (introduced in beta1)
-  - Implemented issue #1868: Remove xdebug_disable and xdebug_enabled
-  - Implemented issue #1883: Function xdebug_is_enabled has been removed
-
-= Changes:
-
-  - Implemented issue #1378: Unfortunate coupling of default_enable=1 and remote_mode=jit
-  - Implemented issue #1773: Replace all xdebug.*_output_dir settings with xdebug.output_dir
-  - Implemented issue #1785: Replace xdebug.remote_mode and xdebug.auto_trace with generic "start-with-request" setting
-  - Implemented issue #1791: Replace xdebug.*trigger*, xdebug.*trigger_value*, with xdebug.start_with_request=trigger and xdebug.trigger_value
-  - Implemented issue #1792: Change start_with_request=always/never to start_with_request=yes/no
-  - Implemented issue #1794: Replace the filter's blacklist/whitelist with exclude/include
-  - Implemented issue #1811: Remove xdebug.collect_includes setting and always include them
-  - Implemented issue #1843: Adjust XDEBUG_CONFIG checks, and document what can be set through it
-  - Implemented issue #1844: Add deprecation warning for removed and renamed configuration setting names
-  - Implemented issue #1845: Rename xdebug.remote_{host,port} to xdebug.client_{host,port}
-  - Implemented issue #1846: Rename setting xdebug.remote_timeout to xdebug.connect_timeout_ms
-  - Implemented issue #1848: Change default Xdebug port from 9000 to 9003
-  - Implemented issue #1850: Change array variable output in tracing to use modern [] syntax
-  - Implemented issue #1856: Rename xdebug.remote_connect_back to xdebug.discover_client_host
-  - Implemented issue #1857: Rename xdebug.remote_addr_header to xdebug.client_discovery_header
+Thu, Apr 08, 2021 - Xdebug 3.0.4
 
 = Fixed bugs:
 
-  - Fixed issue #1608: XDEBUG_CONFIG env var make sessions automatically START ever (at least send the XDEBUG_SESSION cookie)
-  - Fixed issue #1726: Memory leaks spotted in various places in typical error code paths
-  - Fixed issue #1757: Pause-execution feature degrades performance
-  - Fixed issue #1864: Incompatibility with PCS and protobuf extensions
-  - Fixed issue #1870: XDEBUG_SESSION_START URL parameter does not override XDEBUG_SESSION cookie
-  - Fixed issue #1871: The "idekey" is not set when debugging is started through XDEBUG_SESSION cookie
-  - Fixed issue #1873: xdebug_info() segfaults if the diagnostic buffer is empty
-  - Fixed issue #1874: Incompatibility with protobuf extension
-  - Fixed issue #1875: Overflow with large amounts of elements for variadics
-  - Fixed issue #1878: Compilation failure: Socket options TCP_KEEPCNT and TCP_KEEPINTVL do not exist on Solaris 10 Sparc
-  - Fixed issue #1880: Bundled unit test tests/debugger/bug00886.phar misses to load phar extension
-  - Fixed issue #1887: Crash bug with xdebug_call_class and xdebug_call_file
-  - Fixed issue #1756: Php process won't exit after running connected to a client
-  - Fixed issue #1823: Profiler generates negative data for memory usage
-  - Fixed issue #1834: Return type must be bool in overloaded set_time_limit
-  - Fixed issue #1888: Make headers sticky in xdebug_info() output
-
-+ Documentation
-
-  - Fixed issue #1865: Document XDEBUG_TRIGGER environment variable
-  - Fixed issue #1866: Document comma separated xdebug.mode values
-  - Fixed issue #1884: Document where Xdebug's settings can be set
-  - Fixed issue #1892: Document changed/removed ini settings in the upgrade guide with the links provided
+  - Fixed issue #1802: Improve xdebug.org home page
+  - Fixed issue #1944: tracing is started without trigger, when profiler is also enabled
+  - Fixed issue #1947: xdebug_info() settings section does not show the modes that are overridden by XDEBUG_MODE
+  - Fixed issue #1950: Assignment trace with ASSIGN_OBJ_REF crashes
+  - Fixed issue #1954: Calling xdebug_start_trace without mode including tracing results in a fatal error
  </notes>
 
  <contents>
@@ -185,10 +83,16 @@ https://xdebug.org/docs/upgrade_guide
    <file name="xdebug.c" role="src" />
    <file name="php_xdebug.h" role="src" />
    <file name="php_xdebug_arginfo.h" role="src" />
+   <dir name="build">
+    <file name="clocks.m4" role="src" />
+    <file name="pkg.m4" role="src" />
+   </dir>
    <dir name="src">
     <dir name="base">
      <file name="base.c" role="src" />
      <file name="base.h" role="src" />
+     <file name="base_globals.h" role="src" />
+     <file name="base_private.h" role="src" />
      <file name="filter.c" role="src" />
      <file name="filter.h" role="src" />
     </dir>
@@ -301,6 +205,220 @@ https://xdebug.org/docs/upgrade_guide
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2021-02-22</date>
+   <time>10:53:09</time>
+   <version>
+    <release>3.0.3</release>
+    <api>3.0.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Feb 22, 2021 - Xdebug 3.0.3
+
+= Fixed bugs:
+
+  - Fixed issue #1930: No local variables with trigger and xdebug_break()
+  - Fixed issue #1931: xdebug_info() output misses configuration settings if phpinfo() has been called
+  - Fixed issue #1932: One line in multi-line string concatenation is not covered
+  - Fixed issue #1940: Wrong type used for showing GC Stats reports
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-01-04</date>
+   <time>17:08:58</time>
+   <version>
+    <release>3.0.2</release>
+    <api>3.0.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 04, 2021 - Xdebug 3.0.2
+
+= Fixed bugs:
+
+  - Fixed issue #1907: Empty exception message when setting the $message property to a stringable object
+  - Fixed issue #1910: Code coverage misses constructor property promotion code
+  - Fixed issue #1914: Compillation failure on OpenBSD
+  - Fixed issue #1915: Debugger should only start with XDEBUG_SESSION and not XDEBUG_PROFILE
+  - Fixed issue #1918: Warn if PHP's Garbage Collection is disabled in gc_stats mode
+  - Fixed issue #1919: Crash when enabling filter without the right mode active
+  - Fixed issue #1921: Xdebug does not start step debugging if start_with_request=trigger
+  - Fixed issue #1922: Code coverage misses array assignment lines
+  - Fixed issue #1924: Deprecated INI settings displayed in phpinfo()
+  - Fixed issue #1925: xdebug.start_with_request and start_upon_error display inconsistent values
+  - Fixed issue #1926: Add Xdebug mode's source to xdebug_info() output
+  - Fixed issue #1927: Crash when calling xdebug_stop_trace without a trace in progress
+  - Fixed issue #1928: xdebug_stop_gcstats() can also return false
+
+   </notes>
+  </release>
+ 
+  <release>
+   <date>2020-12-04</date>
+   <time>15:53:10</time>
+   <version>
+    <release>3.0.1</release>
+    <api>3.0.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Dec  4, 2020 - xdebug 3.0.1
+
+= Fixed bugs:
+
+  - Fixed issue #1893: Crash with ext-fiber and xdebug.mode=coverage
+  - Fixed issue #1896: Segfault with closures that are not created from user code
+  - Fixed issue #1897: Crash when removing a breakpoint
+  - Fixed issue #1900: Update README and add run-xdebug-tests.php to package
+  - Fixed issue #1901: Stack traces are shown (with a broken time) when Xdebug's mode includes 'debug' but not 'develop' or 'trace'
+  - Fixed issue #1902: Compillation failure on AIX
+  - Fixed issue #1903: Constants should always be available, regardless of which mode Xdebug is in
+  - Fixed issue #1904: Profile and trace files using %t or %u do not get the right names
+  - Fixed issue #1905: Debugger does not disable request timeouts
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-11-25</date>
+   <time>16:00:00</time>
+   <version>
+    <release>3.0.0</release>
+    <api>3.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Nov 25, 2020 - xdebug 3.0.0
+
+Xdebug 3 includes major changes in functionality compared to Xdebug 2. The
+primary way how you turn on functionality is through the new xdebug.mode PHP
+configuration setting. This made it possible to massively increase performance
+in many of Xdebug's sub systems as Xdebug is now much more conservative in
+which hooks are enabled.
+
+Configuration changes, massive performance improvements, and PHP 8 support are
+the primary features in Xdebug 3, but there is much more. The upgrade guide
+lists the changes in great detail, please read it:
+
+https://xdebug.org/docs/upgrade_guide
+
+-------------
+
++ New features:
+
+  - Implemented issue #1762: Introduce feature modes
+  - Implemented issue #1793: Add xdebug.start_upon_error setting to cover the removed xdebug.remote_mode=jit feature.
+  - Implemented issue #1797: Implement generic logging
+  - Implemented issue #1801: Rename mode 'display' to mode 'develop'
+  - Implemented issue #1831: Add diagnostics function xdebug_info()
+  - Implemented issue #1833: Add links to documentation in diagnostic log
+  - Implemented issue #1837: Support for associative variadic variable names (PHP 8)
+  - Implemented issue #1841: Add support for PHP 8 'match' keyword
+
++ Improvements:
+
+  - Implemented issue #1680: Update var dumping routines to include relevant information for interned strings and immutable arrays
+  - Implemented issue #1712: Add unit to profiler data types
+  - Implemented issue #1743: Figuring out whether a call is a closure uses string comparisions instead of checking the ACC flag (Benjamin Eberlei)
+  - Implemented issue #1752: Use a stack pool to manage stack entries instead of allocating and deallocating entries
+  - Implemented issue #1755: Overload pcntl_fork() to prevent performance degradation by calling xdebug_get_pid often (Carlos Granados)
+  - Implemented issue #1781: Include 'Xdebug' in max nesting level error message
+  - Implemented issue #1783: Stacktrace needs vertical scrolling on small screens (Tobias Tom)
+  - Implemented issue #1789: Provide PHP stubs for Xdebug's functions
+  - Implemented issue #1807: Document Xdebug installation with yum and apt
+  - Implemented issue #1813: Make sure that the xdebug_init_*_globals don't do more than they need to, and that init is only done when xdebug.mode != off
+  - Implemented issue #1817: Switch filename storage from char*/size_t to zend_string*
+  - Implemented issue #1818: Switch variable storage from char*/size_t to zend_string*
+  - Implemented issue #1820: Increase time tracing precision (Michael Voříšek)
+  - Implemented issue #1824: Allow Xdebug's mode to be set through an environment variable
+  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Voříšek)
+  - Implemented issue #1826: Reduce profiler memory allocation and call overhead
+  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Voříšek)
+  - Implemented issue #1832: If connect back host can not be contacted, fallback to remote_host/port
+  - Implemented issue #1858: Only open/close log if there is an actual message to log
+  - Implemented issue #1860: Allow xdebug.cloud_id to be set through an environment variable
+  - Implemented issue #1814: Don't obtain the current time when it's not needed
+  - Implemented issue #1835: Add current trace and profile file name, to diagnostic page
+  - Implemented issue #1885: Change xdebug.start_with_ settings to PHP_INI_SYSTEM|PHP_INI_PERDIR
+  - Implemented issue #1889: max_nesting_level should only trigger in "develop" mode
+
+- Removed features:
+
+  - Implemented issue #1795: Deprecate PHP 7.1 support
+
+  - Implemented issue #1786: Remove idekey value fallback to USER/USERNAME environment variable
+  - Implemented issue #1809: Remove "overload_var_dump" setting
+  - Implemented issue #1810: Remove collect_vars and xdebug_get_declared_vars()
+  - Implemented issue #1812: Remove show_mem_delta setting
+  - Implemented issue #1838: Remove collect_params setting, and always default it to "4"
+  - Implemented issue #1847: Remove xdebug.remote_cookie_expire_time setting
+  - Implemented issue #1016: Removed support for pause-execution (introduced in beta1)
+  - Implemented issue #1868: Remove xdebug_disable and xdebug_enabled
+  - Implemented issue #1883: Function xdebug_is_enabled has been removed
+
+= Changes:
+
+  - Implemented issue #1378: Unfortunate coupling of default_enable=1 and remote_mode=jit
+  - Implemented issue #1773: Replace all xdebug.*_output_dir settings with xdebug.output_dir
+  - Implemented issue #1785: Replace xdebug.remote_mode and xdebug.auto_trace with generic "start-with-request" setting
+  - Implemented issue #1791: Replace xdebug.*trigger*, xdebug.*trigger_value*, with xdebug.start_with_request=trigger and xdebug.trigger_value
+  - Implemented issue #1792: Change start_with_request=always/never to start_with_request=yes/no
+  - Implemented issue #1794: Replace the filter's blacklist/whitelist with exclude/include
+  - Implemented issue #1811: Remove xdebug.collect_includes setting and always include them
+  - Implemented issue #1843: Adjust XDEBUG_CONFIG checks, and document what can be set through it
+  - Implemented issue #1844: Add deprecation warning for removed and renamed configuration setting names
+  - Implemented issue #1845: Rename xdebug.remote_{host,port} to xdebug.client_{host,port}
+  - Implemented issue #1846: Rename setting xdebug.remote_timeout to xdebug.connect_timeout_ms
+  - Implemented issue #1848: Change default Xdebug port from 9000 to 9003
+  - Implemented issue #1850: Change array variable output in tracing to use modern [] syntax
+  - Implemented issue #1856: Rename xdebug.remote_connect_back to xdebug.discover_client_host
+  - Implemented issue #1857: Rename xdebug.remote_addr_header to xdebug.client_discovery_header
+
+= Fixed bugs:
+
+  - Fixed issue #1608: XDEBUG_CONFIG env var make sessions automatically START ever (at least send the XDEBUG_SESSION cookie)
+  - Fixed issue #1726: Memory leaks spotted in various places in typical error code paths
+  - Fixed issue #1757: Pause-execution feature degrades performance
+  - Fixed issue #1864: Incompatibility with PCS and protobuf extensions
+  - Fixed issue #1870: XDEBUG_SESSION_START URL parameter does not override XDEBUG_SESSION cookie
+  - Fixed issue #1871: The "idekey" is not set when debugging is started through XDEBUG_SESSION cookie
+  - Fixed issue #1873: xdebug_info() segfaults if the diagnostic buffer is empty
+  - Fixed issue #1874: Incompatibility with protobuf extension
+  - Fixed issue #1875: Overflow with large amounts of elements for variadics
+  - Fixed issue #1878: Compilation failure: Socket options TCP_KEEPCNT and TCP_KEEPINTVL do not exist on Solaris 10 Sparc
+  - Fixed issue #1880: Bundled unit test tests/debugger/bug00886.phar misses to load phar extension
+  - Fixed issue #1887: Crash bug with xdebug_call_class and xdebug_call_file
+  - Fixed issue #1756: Php process won't exit after running connected to a client
+  - Fixed issue #1823: Profiler generates negative data for memory usage
+  - Fixed issue #1834: Return type must be bool in overloaded set_time_limit
+  - Fixed issue #1888: Make headers sticky in xdebug_info() output
+
++ Documentation
+
+  - Fixed issue #1865: Document XDEBUG_TRIGGER environment variable
+  - Fixed issue #1866: Document comma separated xdebug.mode values
+  - Fixed issue #1884: Document where Xdebug's settings can be set
+  - Fixed issue #1892: Document changed/removed ini settings in the upgrade guide with the links provided
+   </notes>
+  </release>
 
   <release>
    <date>2020-11-16</date>

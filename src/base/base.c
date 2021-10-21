@@ -215,7 +215,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 		tmp->type = XFUNC_NORMAL;
 		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
 			tmp->type = XFUNC_MEMBER;
-			if (edata->func->common.scope && strcmp(edata->func->common.scope->name->val, "class@anonymous") == 0) {
+			if (edata->func->common.scope && strstr(edata->func->common.scope->name->val, "@anonymous") != NULL) {
 				char *tmp_object_class = xdebug_sprintf(
 					"{anonymous-class:%s:%d-%d}",
 					edata->func->common.scope->info.user.filename->val,
@@ -933,14 +933,22 @@ static void xdebug_base_overloaded_functions_setup(void)
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
 	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-	XG_BASE(orig_set_time_limit_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_set_time_limit;
+	if (orig) {
+		XG_BASE(orig_set_time_limit_func) = orig->internal_function.handler;
+		orig->internal_function.handler = zif_xdebug_set_time_limit;
+	} else {
+		XG_BASE(orig_set_time_limit_func) = NULL;
+	}
 
 	/* Override error_reporting with our own function, to be able to give right answer during DBGp's
 	 * 'eval' commands */
 	orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
-	XG_BASE(orig_error_reporting_func) = orig->internal_function.handler;
-	orig->internal_function.handler = zif_xdebug_error_reporting;
+	if (orig) {
+		XG_BASE(orig_error_reporting_func) = orig->internal_function.handler;
+		orig->internal_function.handler = zif_xdebug_error_reporting;
+	} else {
+		XG_BASE(orig_error_reporting_func) = NULL;
+	}
 
 	/* Override pcntl_exec with our own function to be able to write profiling summary */
 	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
@@ -966,11 +974,19 @@ static void xdebug_base_overloaded_functions_restore(void)
 {
 	zend_function *orig;
 
-	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-	orig->internal_function.handler = XG_BASE(orig_set_time_limit_func);
+	if (XG_BASE(orig_set_time_limit_func)) {
+		orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
+		if (orig) {
+			orig->internal_function.handler = XG_BASE(orig_set_time_limit_func);
+		}
+	}
 
-	orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
-	orig->internal_function.handler = XG_BASE(orig_error_reporting_func);
+	if (XG_BASE(orig_error_reporting_func)) {
+		orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
+		if (orig) {
+			orig->internal_function.handler = XG_BASE(orig_error_reporting_func);
+		}
+	}
 
 	if (XG_BASE(orig_pcntl_exec_func)) {
 		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
@@ -1096,13 +1112,6 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
 
-	/* Redirect compile and execute functions to our own. For PHP 7.3 and
-	 * later, we hook these in xdebug_post_startup instead */
-#if PHP_VERSION_ID < 70300
-	old_compile_file = zend_compile_file;
-	zend_compile_file = xdebug_compile_file;
-#endif
-
 	xdebug_old_execute_ex = zend_execute_ex;
 	zend_execute_ex = xdebug_execute_ex;
 
@@ -1112,8 +1121,6 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(error_reporting_override) = 0;
 	XG_BASE(error_reporting_overridden) = 0;
 	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
-
-	xdebug_nanotime_init();
 
 #if PHP_VERSION_ID >= 80100
 	zend_observer_fiber_switch_register(xdebug_fiber_switch_observer);
