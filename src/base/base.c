@@ -1043,12 +1043,22 @@ static void add_fiber_main(zend_fiber_context *fiber)
 	xdebug_str           *key = create_key_for_fiber(fiber);
 	function_stack_entry *tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
 
-	tmp->level = 0;
+	tmp->level        = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
 	tmp->user_defined = XDEBUG_BUILT_IN;
 	tmp->function.type = XFUNC_FIBER;
 	tmp->function.object_class = NULL;
 	tmp->function.scope_class = NULL;
 	tmp->function.function = xdstrdup(key->d);
+	tmp->filename = zend_string_copy(zend_get_executed_filename_ex());
+	tmp->lineno = zend_get_executed_lineno();
+
+	tmp->prev_memory = XG_BASE(prev_memory);
+	tmp->memory = zend_memory_usage(0);
+	XG_BASE(prev_memory) = tmp->memory;
+
+	tmp->nanotime = xdebug_get_nanotime();
+
+	xdebug_str_free(key);
 }
 
 static xdebug_vector* create_stack_for_fiber(zend_fiber_context *fiber)
@@ -1322,6 +1332,17 @@ static void xdebug_throw_exception_hook(zval *exception)
 	if (!exception) {
 		return;
 	}
+
+#if PHP_VERSION_ID >= 80000
+	if (zend_is_unwind_exit(exception)) {
+		return;
+	}
+#endif
+#if PHP_VERSION_ID >= 80100
+	if (zend_is_graceful_exit(exception)) {
+		return;
+	}
+#endif
 
 #if PHP_VERSION_ID >= 80000
 	exception_ce = exception->ce;
