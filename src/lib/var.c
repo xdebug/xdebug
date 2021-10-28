@@ -49,15 +49,19 @@ static inline int object_or_ancestor_is_internal(zval dzval)
 	return 0;
 }
 #if PHP_VERSION_ID >= 70400
-HashTable *xdebug_objdebug_pp(zval **zval_pp)
+HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
 #else
-HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp)
+HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags)
 #endif
 {
 	zval dzval = **zval_pp;
 	HashTable *tmp;
 
-	if (!XG_BASE(in_debug_info) && object_or_ancestor_is_internal(dzval) && Z_OBJ_HANDLER(dzval, get_debug_info)) {
+	if (
+		!XG_BASE(in_debug_info) &&
+		(object_or_ancestor_is_internal(dzval) || (flags & XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO)) &&
+		Z_OBJ_HANDLER(dzval, get_debug_info)
+	) {
 		void        *original_trace_context;
 		zend_object *orig_exception;
 
@@ -441,9 +445,9 @@ static void fetch_zval_from_symbol_table(
 			/* Let's see if there is a debug handler */
 			if (value_in && Z_TYPE_P(value_in) == IS_OBJECT) {
 #if PHP_VERSION_ID >= 70400
-				myht = xdebug_objdebug_pp(&value_in);
+				myht = xdebug_objdebug_pp(&value_in, XDEBUG_VAR_OBJDEBUG_DEFAULT);
 #else
-				myht = xdebug_objdebug_pp(&value_in, &is_temp);
+				myht = xdebug_objdebug_pp(&value_in, &is_temp, XDEBUG_VAR_OBJDEBUG_DEFAULT);
 #endif
 				if (myht) {
 					/* As a normal (public) property */

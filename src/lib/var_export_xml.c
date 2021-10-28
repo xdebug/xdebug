@@ -624,9 +624,9 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 			/* Adding normal properties */
 #if PHP_VERSION_ID >= 70400
-			myht = xdebug_objdebug_pp(struc);
+			myht = xdebug_objdebug_pp(struc, XDEBUG_VAR_OBJDEBUG_DEFAULT);
 #else
-			myht = xdebug_objdebug_pp(struc, &is_temp);
+			myht = xdebug_objdebug_pp(struc, &is_temp, XDEBUG_VAR_OBJDEBUG_DEFAULT);
 #endif
 			if (myht) {
 				zval *tmp_val;

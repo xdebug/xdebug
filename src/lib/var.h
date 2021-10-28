@@ -66,10 +66,13 @@ xdebug_var_export_options* xdebug_var_get_nolimit_options(void);
 xdebug_str* xdebug_get_property_type(zval* object, zval *val);
 #endif
 xdebug_str* xdebug_get_property_info(char *mangled_property, int mangled_len, const char **modifier, char **class_name);
+
+#define XDEBUG_VAR_OBJDEBUG_DEFAULT        0x00
+#define XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO  0x01
 #if PHP_VERSION_ID >= 70400
-HashTable *xdebug_objdebug_pp(zval **zval_pp);
+HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags);
 #else
-HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp);
+HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags);
 void xdebug_var_maybe_destroy_ht(HashTable *ht, int is_temp);
 #endif
 
