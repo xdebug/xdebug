@@ -279,9 +279,9 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 #endif
 
 #if PHP_VERSION_ID >= 70400
-			myht = xdebug_objdebug_pp(struc);
+			myht = xdebug_objdebug_pp(struc, XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO);
 #else
-			myht = xdebug_objdebug_pp(struc, &is_temp);
+			myht = xdebug_objdebug_pp(struc, &is_temp, XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO);
 #endif
 			xdebug_str_add_fmt(str, "\n%*s", (level - 1) * 4, "");
 
