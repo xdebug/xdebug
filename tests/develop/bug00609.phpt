@@ -12,8 +12,8 @@ xdebug.mode=develop
 try {
 	  $sc = new SoapClient("some-wrong.wsdl", array('exceptions' => true));
 } catch (Exception $e) {
-	  echo 'Error Caught :-)';
+	  echo 'Error Caught';
 }
 ?>
 --EXPECTF--
-Error Caught :-)
+Error Caught
