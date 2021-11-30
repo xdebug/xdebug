@@ -20,5 +20,5 @@ xdebug.client_discovery_header=I_LIKE_COOKIES
 echo strlen("foo"), "\n";
 ?>
 --EXPECTF--
-Xdebug: [Step Debug] Could not connect to debugging client. Tried: cookiehost:9003 (from I_LIKE_COOKIES HTTP header), doesnotexist2:9003 (fallback through xdebug.client_host/xdebug.client_port) :-(
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: cookiehost:9003 (from I_LIKE_COOKIES HTTP header), doesnotexist2:9003 (fallback through xdebug.client_host/xdebug.client_port).
 3

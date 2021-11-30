@@ -12,7 +12,7 @@ xdebug.mode=develop
 try {
 	  $sc = new SoapServer("some-wrong.wsdl", array('exceptions' => true));
 } catch (Exception $e) {
-	  echo 'Error Caught :-)';
+	  echo 'Error Caught';
 }
 ?>
 --EXPECTF--
