@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2021-10-15</date>
- <time>13:19:59</time>
+ <date>2021-12-01</date>
+ <time>15:41:13</time>
  <version>
-  <release>3.1.1</release>
-  <api>3.1.1</api>
+  <release>3.1.2</release>
+  <api>3.1.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,17 +52,14 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Fri, Oct 15, 2021 - Xdebug 3.1.1
+Wed, Dec 01, 2021 - Xdebug 3.1.2
 
 = Fixed bugs:
 
-  - Fixed issue #2016: apache gives no output with xdebug 3.1.0b2 installed
-  - Fixed issue #2024: Apache restarts in a loop under PHP 8.1.0 RC3
-  - Fixed issue #2029: incorrect and inaccurate date and time displayed in xdebug.log and trace files
-  - Fixed issue #2030: PhpStorm step-debug not working on PHP 8.0.11
-  - Fixed issue #2032: Use runtime PHP version in DBGp and info pages instead of compiled-against version
-  - Fixed issue #2034: Xdebug throws a Segmentation fault when 'set_time_limit' function is disabled
-  - Fixed issue #2035: Xdebug block everything with localhost in XAMMP
+  - Fixed issue #2036: Segfault on fiber switch in finally block in garbage collected fiber
+  - Fixed issue #2037: Crash when profile file can not be created
+  - Fixed issue #2041: __debugInfo is not used for var_dump output
+  - Fixed issue #2046: Segault on xdebug_get_function_stack inside a Fiber
 
  </notes>
 
@@ -208,25 +205,32 @@ Fri, Oct 15, 2021 - Xdebug 3.1.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
- 
+
   <release>
-   <date>2021-09-07</date>
-   <time>13:53:49</time>
+   <date>2021-10-15</date>
+   <time>13:19:59</time>
    <version>
-    <release>3.1.0beta2</release>
-    <api>3.1.0beta2</api>
+    <release>3.1.1</release>
+    <api>3.1.1</api>
    </version>
    <stability>
-    <release>beta</release>
-    <api>beta</api>
+    <release>stable</release>
+    <api>stable</api>
    </stability>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
    <notes>
-Tue, Sep 07, 2021 - Xdebug 3.1.0beta2
+Fri, Oct 15, 2021 - Xdebug 3.1.1
 
 = Fixed bugs:
-  - This is a packaging fix only release. The package missed a file that were needed
-    for building on PHP 7.2 and 8.1.
+
+  - Fixed issue #2016: apache gives no output with xdebug 3.1.0b2 installed
+  - Fixed issue #2024: Apache restarts in a loop under PHP 8.1.0 RC3
+  - Fixed issue #2029: incorrect and inaccurate date and time displayed in xdebug.log and trace files
+  - Fixed issue #2030: PhpStorm step-debug not working on PHP 8.0.11
+  - Fixed issue #2032: Use runtime PHP version in DBGp and info pages instead of compiled-against version
+  - Fixed issue #2034: Xdebug throws a Segmentation fault when 'set_time_limit' function is disabled
+  - Fixed issue #2035: Xdebug block everything with localhost in XAMMP
+
    </notes>
   </release>
  
@@ -285,6 +289,27 @@ Mon, Oct 04, 2021 - Xdebug 3.1.0
   - Fixed issue #2020: segfault if xdebug.dump.GET=* and integer key without value in URL
   - Fixed issue #2021: Segmentation fault due to NULL bytes in internal anonymous class names
   - Fixed issue #2025: Anonymous classes which extend are not detected as anonymous classes since PHP 8.0
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-09-07</date>
+   <time>13:53:49</time>
+   <version>
+    <release>3.1.0beta2</release>
+    <api>3.1.0beta2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Sep 07, 2021 - Xdebug 3.1.0beta2
+
+= Fixed bugs:
+  - This is a packaging fix only release. The package missed a file that were needed
+    for building on PHP 7.2 and 8.1.
    </notes>
   </release>
 
