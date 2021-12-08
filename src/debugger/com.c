@@ -412,7 +412,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 
 	if (!remote_addr) {
 		xdebug_str_add_fmt(connection_attempts, "%s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "HDR", "Could not discover client host through HTTP headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "HDR", "Could not discover client host through HTTP headers, connecting to configured address/port: %s:%ld.", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
 		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 		return;
@@ -432,7 +432,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 
 	if (XG_DBG(context).socket < 0) {
 		xdebug_str_add_fmt(connection_attempts, ", %s:%ld (fallback through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "CON", "Could not connect to client host discovered through HTTP headers, connecting to configured address/port: %s:%ld. :-|", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "CON", "Could not connect to client host discovered through HTTP headers, connecting to configured address/port: %s:%ld.", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
 		XG_DBG(context).socket = xdebug_create_socket(XINI_DBG(client_host), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 	}
@@ -495,12 +495,12 @@ static void xdebug_init_debugger()
 
 	/* Check whether we're connected, or why not */
 	if (XG_DBG(context).socket >= 0) {
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connected to debugging client: %s. :-)", connection_attempts->d);
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connected to debugging client: %s.", connection_attempts->d);
 		xdebug_mark_debug_connection_pending();
 
 		if (!XG_DBG(context).handler->remote_init(&(XG_DBG(context)), XDEBUG_REQ)) {
 			/* The request could not be started, ignore it then */
-			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "SES-INIT", "The debug session could not be started. Tried: %s. :-(", connection_attempts->d);
+			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "SES-INIT", "The debug session could not be started. Tried: %s.", connection_attempts->d);
 		} else {
 			/* All is well, turn off script time outs */
 			zend_unset_timeout();
@@ -508,11 +508,11 @@ static void xdebug_init_debugger()
 			zend_set_timeout(EG(timeout_seconds), 0);
 		}
 	} else if (XG_DBG(context).socket == -1) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOCON", "Could not connect to debugging client. Tried: %s :-(", connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOCON", "Could not connect to debugging client. Tried: %s.", connection_attempts->d);
 	} else if (XG_DBG(context).socket == -2) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s :-(", XINI_DBG(connect_timeout_ms), connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s.", XINI_DBG(connect_timeout_ms), connection_attempts->d);
 	} else if (XG_DBG(context).socket == -3) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related. :-(", connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related.", connection_attempts->d);
 	}
 
 	xdebug_str_free(connection_attempts);

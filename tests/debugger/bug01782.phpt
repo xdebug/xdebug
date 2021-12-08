@@ -17,7 +17,7 @@ xdebug.client_port=9172
 var_dump( xdebug_get_headers( ) );
 ?>
 --EXPECTF--
-Xdebug: [Step Debug] %sTried: localhost:9172 (through xdebug.client_host/xdebug.client_port) :-(
+Xdebug: [Step Debug] %sTried: localhost:9172 (through xdebug.client_host/xdebug.client_port).
 %sbug01782.php:2:
 array(1) {
   [0] =>
