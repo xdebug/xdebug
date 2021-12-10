@@ -67,6 +67,7 @@ xdebug_file *xdebug_trace_open_file(char *requested_filename, zend_string *scrip
 			xdebug_format_output_filename(&generated_filename, XINI_TRACE(trace_output_name), ZSTR_VAL(script_filename)) <= 0
 		) {
 			/* Invalid or empty xdebug.trace_output_name */
+			xdebug_file_dtor(file);
 			return NULL;
 		}
 
