@@ -30,7 +30,12 @@ void *xdebug_trace_html_init(char *fname, zend_string *script_filename, long opt
 	tmp_html_context = xdmalloc(sizeof(xdebug_trace_html_context));
 	tmp_html_context->trace_file = xdebug_trace_open_file(fname, script_filename, options);
 
-	return tmp_html_context->trace_file ? tmp_html_context : NULL;
+	if (!tmp_html_context->trace_file) {
+		xdfree(tmp_html_context);
+		return NULL;
+	}
+
+	return tmp_html_context;
 }
 
 void xdebug_trace_html_deinit(void *ctxt)
