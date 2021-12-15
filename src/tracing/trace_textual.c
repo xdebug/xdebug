@@ -32,7 +32,12 @@ void *xdebug_trace_textual_init(char *fname, zend_string *script_filename, long 
 	tmp_textual_context = xdmalloc(sizeof(xdebug_trace_textual_context));
 	tmp_textual_context->trace_file = xdebug_trace_open_file(fname, script_filename, options);
 
-	return tmp_textual_context->trace_file ? tmp_textual_context : NULL;
+	if (!tmp_textual_context->trace_file) {
+		xdfree(tmp_textual_context);
+		return NULL;
+	}
+
+	return tmp_textual_context;
 }
 
 void xdebug_trace_textual_deinit(void *ctxt)

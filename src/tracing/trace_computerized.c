@@ -32,7 +32,12 @@ void *xdebug_trace_computerized_init(char *fname, zend_string *script_filename, 
 	tmp_computerized_context = xdmalloc(sizeof(xdebug_trace_computerized_context));
 	tmp_computerized_context->trace_file = xdebug_trace_open_file(fname, script_filename, options);
 
-	return tmp_computerized_context->trace_file ? tmp_computerized_context : NULL;
+	if (!tmp_computerized_context->trace_file) {
+		xdfree(tmp_computerized_context);
+		return NULL;
+	}
+
+	return tmp_computerized_context;
 }
 
 void xdebug_trace_computerized_deinit(void *ctxt)
