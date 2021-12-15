@@ -166,7 +166,7 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 #if PHP_VERSION_ID < 80000
 	int                old_track_errors;
 #endif
-	int                res = 1;
+	volatile int       res = 1;
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
 	zend_object       *original_exception = EG(exception);
