@@ -196,11 +196,9 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 
 	/* FIXME: Bubble up exception message to DBGp return packet */
 	if (EG(exception)) {
-#if PHP_VERSION_ID >= 70400
 		if (!res) {
 			zend_clear_exception();
 		}
-#endif
 		res = 0;
 	}
 
