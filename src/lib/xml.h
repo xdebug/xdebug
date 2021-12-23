@@ -70,7 +70,8 @@ xdebug_str *xdebug_xml_get_attribute_value(xdebug_xml_node *xml, const char *att
 #define xdebug_xml_expand_attribute_value(n,a,v) { \
 	xdebug_str *orig_value = xdebug_xml_get_attribute_value((n), (a)); \
 	if (orig_value) { \
-		xdebug_str_add_literal(orig_value, " " v); \
+		xdebug_str_addc(orig_value, ' '); \
+		xdebug_str_add(orig_value, v, 0); \
 	} else { \
 		xdebug_xml_add_attribute((n), (a), (v)); \
 	} \
