@@ -405,15 +405,14 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 		}
 
 
-		xdebug_xml_add_attribute_ex(
-			node, "facet",
-			xdebug_sprintf("%s%s%s",
-				(*item)->type & XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY ? "static " : "",
-				modifier,
-				(*item)->type & XDEBUG_OBJECT_ITEM_TYPE_READONLY ? " readonly" : ""
-			),
-			0, 1
-		);
+		if ((*item)->type & XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY) {
+			xdebug_xml_expand_attribute_value(node, "facet", "static");
+		}
+		xdebug_xml_expand_attribute_value(node, "facet", modifier);
+		if ((*item)->type & XDEBUG_OBJECT_ITEM_TYPE_READONLY) {
+			xdebug_xml_expand_attribute_value(node, "facet", "readonly");
+		}
+
 		xdebug_xml_add_child(parent, node);
 		xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
 
@@ -461,7 +460,8 @@ static void xdebug_var_xml_attach_property_with_contents(zend_property_info *pro
 	xdfree(prop_class_name);
 
 	if (contents) {
-		xdebug_xml_add_attribute_ex(contents, "facet", xdebug_sprintf("static %s", modifier), 0, 1);
+		xdebug_xml_expand_attribute_value(contents, "facet", "static");
+		xdebug_xml_expand_attribute_value(contents, "facet", modifier);
 		xdebug_xml_add_child(node, contents);
 	} else {
 		xdebug_var_xml_attach_uninitialized_var(options, node, xdebug_str_create(ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name)));
