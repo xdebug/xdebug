@@ -62,7 +62,7 @@ calls=1 0 0
 
 fl=(1)
 fn=(4) php::sleep
-4 1%r(\d{8})%r 0
+4 %r(1\d{8}|9\d{7})%r 0
 
 fl=(3) %sbug00714.php
 fn=(5) sleep1
@@ -70,7 +70,7 @@ fn=(5) sleep1
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-4 1%r(\d{8})%r 0
+4 %r(1\d{8}|9\d{7})%r 0
 
 fl=(1)
 fn=(4)
