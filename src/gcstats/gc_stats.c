@@ -136,17 +136,18 @@ static int xdebug_gc_stats_init(char *requested_filename, zend_string *script_na
 	}
 
 	XG_GCSTATS(file) = xdebug_fopen(filename_to_use, "w", NULL, &XG_GCSTATS(filename));
-	xdfree(filename_to_use);
 
 	if (!XG_GCSTATS(file)) {
 		xdebug_log_diagnose_permissions(XLOG_CHAN_GCSTATS, output_dir, filename_to_use);
 
+		xdfree(filename_to_use);
 		if (generated_filename) {
 			xdfree(generated_filename);
 		}
 
 		return FAILURE;
 	}
+	xdfree(filename_to_use);
 
 	fprintf(XG_GCSTATS(file), "Garbage Collection Report\n");
 	fprintf(XG_GCSTATS(file), "version: 1\ncreator: xdebug %s (PHP %s)\n\n", XDEBUG_VERSION, PHP_VERSION);
