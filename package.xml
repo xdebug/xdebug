@@ -56,6 +56,8 @@ Tue, Feb 01, 2022 - Xdebug 3.1.3
 
 = Fixed bugs:
 
+  - Fixed issue #2049: evaling broken code (still) causes unhandled exception in PHP 7.4
+  - Fixed issue #2052: Memory leak when a trace file can't be opened because xdebug.trace_output_name is invalid
   - Fixed issue #2054: Slowdown when calling a function with long string parameters
   - Fixed issue #2055: Debugger creates XML with double facet attribute
 
