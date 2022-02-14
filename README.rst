@@ -12,7 +12,7 @@ Xdebug is a debugging tool for PHP. It provides step-debugging and a whole
 range of development helpers, such as stack traces, a code profiler, features to
 dump the full execution of your script to a file, and more.
 
-.. image:: https://images.repography.com/23031058/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3.svg
+.. image:: https://images.repography.com/0/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3.svg
 
 Requirements
 ------------
