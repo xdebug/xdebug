@@ -318,14 +318,18 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 					} ZEND_HASH_FOREACH_END();
 
 					xdebug_zend_hash_apply_protection_end(myht);
-
-					/* Remove the ", " at the end of the string */
-					if (myht->nNumOfElements > 0) {
-						xdebug_str_chop(str, 2);
-					}
 				} else {
 					xdebug_str_add_literal(str, "...");
 				}
+				/* Remove the ", " and "; " at the end of the string */
+				if (
+					str->l > 2 &&
+					((str->d[str->l - 2] == ',') || (str->d[str->l - 2] == ';' )) &&
+					(str->d[str->l - 1] == ' ')
+				) {
+					xdebug_str_chop(str, 2);
+				}
+
 				xdebug_str_add_literal(str, " }");
 			} else {
 				xdebug_str_add_literal(str, "...");
