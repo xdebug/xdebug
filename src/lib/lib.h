@@ -279,6 +279,7 @@ int xdebug_lib_start_with_trigger(int for_mode, char **found_trigger_value);
 int xdebug_lib_start_if_mode_is_trigger(int for_mode);
 int xdebug_lib_never_start_with_request(void);
 int xdebug_lib_get_start_with_request(void);
+int xdebug_lib_has_shared_secret(void);
 
 #define XDEBUG_START_UPON_ERROR_DEFAULT     1
 #define XDEBUG_START_UPON_ERROR_YES         2
