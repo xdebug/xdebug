@@ -22,6 +22,9 @@
 #include "zend_extensions.h"
 #include "ext/standard/php_smart_string.h"
 #include "zend_smart_str.h"
+#if PHP_VERSION_ID >= 80000
+#include "zend_closures.h"
+#endif
 
 #include "php_xdebug.h"
 
@@ -48,6 +51,44 @@ static inline int object_or_ancestor_is_internal(zval dzval)
 
 	return 0;
 }
+
+#if PHP_VERSION_ID >= 80000
+typedef struct _xdebug_zend_closure_copy {
+	zend_object       std;
+	zend_function     func;
+	zval              this_ptr;
+	zend_class_entry *called_scope;
+	zif_handler       orig_internal_handler;
+} xdebug_zend_closure_copy;
+
+static int object_with_missing_closure_variables(zval dzval)
+{
+	zend_class_entry         *tmp_ce  = NULL;
+	xdebug_zend_closure_copy *closure = NULL;
+
+	if (Z_TYPE(dzval) != IS_OBJECT) {
+		return 0;
+	}
+
+	tmp_ce = Z_OBJCE(dzval);
+	if (tmp_ce != zend_ce_closure) {
+		return 0;
+	}
+
+	closure = (xdebug_zend_closure_copy *) Z_OBJ(dzval);
+
+	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
+		HashTable *static_variables = ZEND_MAP_PTR_GET(closure->func.op_array.static_variables_ptr);
+
+		if (!static_variables) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+#endif
+
 #if PHP_VERSION_ID >= 70400
 HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
 #else
@@ -60,6 +101,9 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags)
 	if (
 		!XG_BASE(in_debug_info) &&
 		(object_or_ancestor_is_internal(dzval) || (flags & XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO)) &&
+#if PHP_VERSION_ID >= 80000
+		!object_with_missing_closure_variables(dzval) &&
+#endif
 		Z_OBJ_HANDLER(dzval, get_debug_info)
 	) {
 		void        *original_trace_context;
