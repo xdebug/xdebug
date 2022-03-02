@@ -80,23 +80,17 @@ jobs:
                     echo $xdebug_version >> $env:GITHUB_ENV
                 - name: Setup PHP
                   id: setup-php
-                  uses: cmb69/setup-php-sdk@v0.2
+                  uses: cmb69/setup-php-sdk@v0.5
                   with:
                       version: ${{matrix.php}}
                       arch: ${{matrix.arch}}
                       ts: ${{matrix.ts}}
+                      deps: zlib
                 - name: Enable Developer Command Prompt
                   uses: ilammy/msvc-dev-cmd@v1
                   with:
                       arch: ${{matrix.arch}}
                       toolset: ${{steps.setup-php.outputs.toolset}}
-                - name: Install zlib dependency
-                  shell: powershell
-                  run: |
-                    $versions = @{"7.0" = "vc14"; "7.1" = "vc14"; "7.2" = "vc15"; "7.3" = "vc15"; "7.4" = "vc15"; "8.0" = "vs16"; "8.1" = "vs16"}
-                    $crt = $versions."${{matrix.php}}"
-                    Invoke-WebRequest https://windows.php.net/downloads/php-sdk/deps/$crt/${{matrix.arch}}/zlib-1.2.11-$crt-${{matrix.arch}}.zip -OutFile zlib-1.2.11.zip
-                    Expand-Archive zlib-1.2.11.zip ..\deps
                 - name: Generate Build Files
                   run: phpize
                 - name: Configure Build with Compression
