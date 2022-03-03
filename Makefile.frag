@@ -19,7 +19,7 @@ show-install-instructions:
 	@echo   "  |                                                                      |"
 	@echo   "  |                                                                      |"
 	@echo   "  |   NOTE: Please disregard the message                                 |"
-	@echo   "  |       You should add \"extension=xdebug.so\" to php.ini                |"
+	@echo   "  |       You should add \"zend_extension=xdebug.so\" to php.ini         |"
 	@echo   "  |   that is emitted by the PECL installer. This does not work for      |"
 	@echo   "  |   Xdebug.                                                            |"
 	@echo   "  |                                                                      |"
