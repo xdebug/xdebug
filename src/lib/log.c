@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -336,6 +336,12 @@ void xdebug_print_info(void)
 # endif
 #endif
 
+	if (XG_BASE(private_tmp)) {
+		php_info_print_table_row(2, "Systemd Private Temp Directory", XG_BASE(private_tmp));
+	} else {
+		php_info_print_table_row(2, "Systemd Private Temp Directory", "not enabled");
+	}
+
 
 	php_info_print_table_end();
 }
@@ -427,6 +433,23 @@ static int if_overridden_xdebug_mode(char *name)
 	return 0;
 }
 
+static int is_using_private_tmp_directory(char *file_name)
+{
+	if (!file_name) {
+		return 0;
+	}
+	return (XG_BASE(private_tmp) && (strstr(file_name, "/tmp") == file_name));
+}
+
+static const char* private_tmp_directory(char *file_name)
+{
+	if (is_using_private_tmp_directory(file_name)) {
+		return XG_BASE(private_tmp);
+	}
+
+	return "";
+}
+
 static void xdebug_print_settings(void)
 {
 	zend_module_entry *module;
@@ -465,12 +488,25 @@ static void xdebug_print_settings(void)
 			PUTS("<td class=\"e\">");
 			PHPWRITE(ZSTR_VAL(ini_entry->name), ZSTR_LEN(ini_entry->name));
 			if (if_overridden_xdebug_mode(ZSTR_VAL(ini_entry->name))) {
-				PUTS(" (through XDEBUG_MODE)");
+				PUTS(" <small>(through XDEBUG_MODE)</small>");
 			}
 			PUTS("</td><td class=\"v\">");
 			if (if_overridden_xdebug_mode(ZSTR_VAL(ini_entry->name))) {
 				PUTS(getenv("XDEBUG_MODE"));
 			} else {
+				/* Hack for Systemd PrivateTmp */
+				if (
+					(
+						(strcmp(ZSTR_VAL(ini_entry->name), "xdebug.output_dir") == 0) ||
+						(strcmp(ZSTR_VAL(ini_entry->name), "xdebug.log") == 0)
+					) &&
+					(ini_entry->value && ZSTR_VAL(ini_entry->value)[0]) &&
+					is_using_private_tmp_directory(ZSTR_VAL(ini_entry->value))
+				) {
+					PUTS(XG_BASE(private_tmp));
+				}
+
+				/* Normal value */
 				php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
 			}
 			PUTS("</td><td class=\"v\">");
@@ -588,8 +624,10 @@ static void print_profile_information(void)
 	if (!sapi_module.phpinfo_as_text) {
 		PUTS("<tr class=\"h\"><th colspan=\"2\">Profiler</th><th>Docs</th></tr>\n");
 		if (file_name) {
-			xdebug_info_printf("<tr><td class=\"e\">Profile File</td><td class=\"v\">%s</td><td class=\"d\"><a href=\"%sprofiler\">🖹</a></td></tr>\n",
-				file_name, xdebug_lib_docs_base());
+			xdebug_info_printf("<tr><td class=\"e\">Profile File</td><td class=\"v\">%s%s</td><td class=\"d\"><a href=\"%sprofiler\">🖹</a></td></tr>\n",
+				private_tmp_directory(file_name),
+				file_name,
+				xdebug_lib_docs_base());
 		} else {
 			xdebug_info_printf("<tr><td colspan=\"2\" class=\"d\">Profiler is not active</td><td class=\"d\"><a href=\"%sprofiler\">🖹</a></td></tr>\n",
 				xdebug_lib_docs_base());
@@ -597,6 +635,9 @@ static void print_profile_information(void)
 	} else {
 		php_info_print_table_colspan_header(2, (char*) "Profiler");
 		if (file_name) {
+			if (is_using_private_tmp_directory(file_name)) {
+				php_info_print_table_row(2, "Profile File Directory", XG_BASE(private_tmp));
+			}
 			php_info_print_table_row(2, "Profile File", file_name);
 		} else {
 			PUTS("Profiler is not active\n");
@@ -735,8 +776,10 @@ static void print_trace_information(void)
 	if (!sapi_module.phpinfo_as_text) {
 		PUTS("<tr class=\"h\"><th colspan=\"2\">Function Tracing</th><th>Docs</th></tr>\n");
 		if (file_name) {
-			xdebug_info_printf("<tr><td class=\"e\">Trace File</td><td class=\"v\">%s</td><td class=\"d\"><a href=\"%strace\">🖹</a></td></tr>\n",
-				file_name, xdebug_lib_docs_base());
+			xdebug_info_printf("<tr><td class=\"e\">Trace File</td><td class=\"v\">%s%s</td><td class=\"d\"><a href=\"%strace\">🖹</a></td></tr>\n",
+				private_tmp_directory(file_name),
+				file_name,
+				xdebug_lib_docs_base());
 		} else {
 			xdebug_info_printf("<tr><td colspan=\"2\" class=\"d\">Function tracing is not active</td><td class=\"d\"><a href=\"%strace\">🖹</a></td></tr>\n",
 				xdebug_lib_docs_base());
@@ -744,6 +787,9 @@ static void print_trace_information(void)
 	} else {
 		php_info_print_table_colspan_header(2, (char*) "Function Tracing");
 		if (file_name) {
+			if (is_using_private_tmp_directory(file_name)) {
+				php_info_print_table_row(2, "Trace File Directory", XG_BASE(private_tmp));
+			}
 			php_info_print_table_row(2, "Trace File", file_name);
 		} else {
 			PUTS("Function tracing is not active\n");

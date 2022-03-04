@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,6 +64,9 @@ typedef struct _xdebug_base_globals_t {
 	/* in-execution checking */
 	zend_bool  in_execution;
 	zend_bool  in_var_serialisation;
+
+	/* Systemd Private Temp */
+	char         *private_tmp;
 
 	/* filters */
 	zend_long     filter_type_code_coverage;
