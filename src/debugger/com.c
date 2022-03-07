@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -636,6 +636,12 @@ static int xdebug_handle_start_session()
 			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, XG_DBG(ide_key), strlen(XG_DBG(ide_key)), 0, "/", 1, NULL, 0, 0, 1, 0);
 			activate_session = 1;
 		}
+	}
+
+	/* Make sure that if we have a trigger value configured, we don't start the session unless it matches */
+	if (activate_session && xdebug_lib_has_shared_secret()) {
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_INFO, "TRGSEC-LEGACY", "Not activating through legacy method because xdebug.trigger_value is set");
+		activate_session = 0;
 	}
 
 	return activate_session;

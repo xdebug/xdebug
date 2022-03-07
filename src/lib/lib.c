@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -332,7 +332,7 @@ static const char *find_in_globals(const char *element)
 	return NULL;
 }
 
-static int has_shared_secret(void)
+int xdebug_lib_has_shared_secret(void)
 {
 	char *shared_secret = XINI_LIB(trigger_value);
 
@@ -444,7 +444,7 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 	}
 
 	/* If there is no configured shared secret trigger, always trigger */
-	if (!has_shared_secret()) {
+	if (!xdebug_lib_has_shared_secret()) {
 		xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "No shared secret: Activating");
 		if (found_trigger_value != NULL) {
 			*found_trigger_value = xdstrdup(trigger_value);
