@@ -63,6 +63,15 @@ int xdebug_file_open(xdebug_file *file, const char *filename, const char *extens
 		FILE *tmp_file;
 		char *combined_extension;
 
+		/* Can't use profiler append with compression */
+		if (strcmp(mode, "a") == 0) {
+			xdebug_log_ex(
+				XLOG_CHAN_CONFIG, XLOG_WARN, "ZLIB-A",
+				"Cannot append to profiling file while file compression is turned on. Falling back to creating an uncompressed file"
+			);
+			goto uncompressed;
+		}
+
 		combined_extension = extension ? xdebug_sprintf("%s.gz", extension) : xdstrdup("gz");
 		tmp_file = xdebug_fopen((char*) filename, mode, combined_extension, &(file->name));
 		xdfree(combined_extension);
@@ -94,6 +103,10 @@ int xdebug_file_open(xdebug_file *file, const char *filename, const char *extens
 		xdfree(combined_extension);
 #endif
 	}
+
+#ifdef HAVE_XDEBUG_ZLIB
+uncompressed:
+#endif
 	file->type = XDEBUG_FILE_TYPE_NORMAL;
 	file->fp.normal = xdebug_fopen((char*) filename, mode, extension, &(file->name));
 
