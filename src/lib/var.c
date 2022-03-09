@@ -333,12 +333,24 @@ char *replace_star_by_null(const char *name, int name_length)
 }
 
 #if PHP_VERSION_ID >= 70400
+static zval *get_arrayobject_storage(zval *parent, HashTable **properties)
+{
+	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
+	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
+}
+
 static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties)
 {
 	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
 	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
 }
 #else
+static zval *get_arrayobject_storage(zval *parent, HashTable **properties, int *is_temp)
+{
+	*properties = Z_OBJDEBUG_P(parent, *is_temp);
+	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
+}
+
 static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties, int *is_temp)
 {
 	*properties = Z_OBJDEBUG_P(parent, *is_temp);
@@ -582,6 +594,29 @@ static void fetch_zval_from_symbol_table(
 				}
 			}
 			element_length = name_length;
+
+			if (strncmp(ccn, "ArrayObject", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
+#if PHP_VERSION_ID >= 70400
+				zval *tmp = get_arrayobject_storage(value_in, &myht);
+#else
+				zval *tmp = get_arrayobject_storage(value_in, &myht, &is_temp);
+#endif
+				element = NULL;
+				if (tmp != NULL) {
+					ZVAL_COPY(&tmp_retval, tmp);
+#if PHP_VERSION_ID >= 70400
+					zend_release_properties(myht);
+#else
+					xdebug_var_maybe_destroy_ht(myht, is_temp);
+#endif
+					goto cleanup;
+				}
+#if PHP_VERSION_ID >= 70400
+				zend_release_properties(myht);
+#else
+				xdebug_var_maybe_destroy_ht(myht, is_temp);
+#endif
+			}
 
 			/* All right, time for a mega hack. It's SplObjectStorage access time! */
 			if (strncmp(ccn, "SplObjectStorage", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
