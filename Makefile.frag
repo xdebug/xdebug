@@ -49,3 +49,11 @@ test-coverage-lcov: test-coverage
 
 test-coverage-html: test-coverage-lcov
 	genhtml $(top_srcdir)/.coverage.lcov --output-directory=/tmp/html
+
+show-log-codes:
+	@for i in `find -name \*.c`; do \
+		clang -DHAVE_XDEBUG_ZLIB=1 -Xclang -ast-dump=json -fsyntax-only $$i -I . -I /usr/local/php/8.1dev/include/php/main -I /usr/local/php/8.1dev/include/php/Zend -I /usr/local/php/8.1dev/include/php/TSRM -I /usr/local/php/8.1dev/include/php -I src > /tmp/file.c.json; \
+		php -dmemory_limit=4G ./contrib/extract-log-calls.php /tmp/file.c.json; \
+		clang -Xclang -ast-dump=json -fsyntax-only $$i -I . -I /usr/local/php/8.1dev/include/php/main -I /usr/local/php/8.1dev/include/php/Zend -I /usr/local/php/8.1dev/include/php/TSRM -I /usr/local/php/8.1dev/include/php -I src > /tmp/file.c.json; \
+		php -dmemory_limit=4G ./contrib/extract-log-calls.php /tmp/file.c.json; \
+	done | sort | uniq
