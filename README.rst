@@ -15,7 +15,28 @@ Xdebug is a debugging tool for PHP. It provides step-debugging and a whole
 range of development helpers, such as stack traces, a code profiler, features to
 dump the full execution of your script to a file, and more.
 
-.. image:: https://images.repography.com/0/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3.svg
+|Repography logo| / Recent activity |Time period|
+-----
+|recent-activity_timeline| |recent-activity_prs| |recent-activity_words| |recent-activity_users|
+
+.. |Time period| image:: https://images.repography.com/0/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3_badge.svg
+   :alt: Time period
+   :target: https://repography.com
+.. |Repography logo| image:: https://images.repography.com/logo.svg
+   :alt: Repography logo
+   :target: https://repography.com
+.. |recent-activity_timeline| image:: https://images.repography.com/0/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3_timeline.svg
+   :alt: Timeline graph
+   :target: https://github.com/xdebug/xdebug/commits
+.. |recent-activity_prs| image:: https://images.repography.com/0/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3_prs.svg
+   :alt: Pull request status graph
+   :target: https://github.com/xdebug/xdebug/pulls
+.. |recent-activity_words| image:: https://images.repography.com/0/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3_words.svg
+   :alt: Trending topics
+   :target: https://github.com/xdebug/xdebug/commits
+.. |recent-activity_users| image:: https://images.repography.com/0/xdebug/xdebug/recent-activity/ef1290ac5bfa674f07dcfa4f915ce6b3_users.svg
+   :alt: Top contributors
+   :target: https://github.com/xdebug/xdebug/graphs/contributors
 
 Requirements
 ------------
