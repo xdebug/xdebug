@@ -50,6 +50,7 @@
 
 #include "debugger_private.h"
 #include "handler_dbgp.h"
+#include "ip_info.h"
 #include "lib/crc32.h"
 #include "lib/log.h"
 
@@ -133,6 +134,46 @@ void set_keepalive_options(int fd)
 # endif
 }
 #endif  // !WIN32 && !WINNT
+
+static char* resolve_pseudo_hosts(const char *requested_hostname)
+{
+#if __linux__
+	/* Does it start with 'xdebug://' ? */
+	if (strncmp(requested_hostname, "xdebug://", strlen("xdebug://")) != 0) {
+		return NULL;
+	}
+
+	/* Check for 'gateway' pseudo host */
+	if (strcmp(requested_hostname, "xdebug://gateway") == 0) {
+		char *gateway = xdebug_get_gateway_ip();
+
+		if (!gateway) {
+			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "GATEWAY", "Could not find network gateway to use for 'gateway' pseudo-host.");
+			return NULL;
+		}
+
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Found 'gateway' pseudo-host, with IP address '%s'.", gateway);
+		return gateway;
+	}
+
+	/* Check for 'nameserver' pseudo host */
+	if (strcmp(requested_hostname, "xdebug://nameserver") == 0) {
+		char *gateway = xdebug_get_private_nameserver();
+
+		if (!gateway) {
+			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "NAMESERVER", "Could not find a private network nameserver for 'nameserver' pseudo-host.");
+			return NULL;
+		}
+
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Found 'nameserver' pseudo-host, with IP address '%s'.", gateway);
+		return gateway;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "UNKNOWN-PSEUDO", "Unknown pseudo-host: '%s', only 'gateway' or 'nameserver' are supported.", requested_hostname + strlen("xdebug://"));
+#endif
+
+	return NULL;
+}
 
 static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 {
@@ -332,7 +373,7 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 		break;
 	}
 
-	/* Free the result returned by getaddrinfo */
+	/* Free the result returned by getaddrinfo, as well as the duplicated hostname */
 	freeaddrinfo(remote);
 
 	/* If we got a socket, set the option "No delay" to true (1) */
@@ -376,6 +417,17 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	const char *header = NULL;
 
 	if (!XINI_DBG(discover_client_host)) {
+		char *pseudo_hostname = resolve_pseudo_hosts(XINI_DBG(client_host));
+
+		if (pseudo_hostname) {
+			xdebug_str_add_fmt(connection_attempts, "%s:%ld (through xdebug.client_host/xdebug.client_port, from %s)", pseudo_hostname, XINI_DBG(client_port), XINI_DBG(client_host));
+			xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to resolved address/port: %s:%ld.", pseudo_hostname, (long int) XINI_DBG(client_port));
+
+			XG_DBG(context).socket = xdebug_create_socket(pseudo_hostname, XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
+			xdfree(pseudo_hostname);
+			return;
+		}
+
 		xdebug_str_add_fmt(connection_attempts, "%s:%ld (through xdebug.client_host/xdebug.client_port)", XINI_DBG(client_host), XINI_DBG(client_port));
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", XINI_DBG(client_host), (long int) XINI_DBG(client_port));
 
