@@ -57,6 +57,9 @@ void xdebug_library_minit(void)
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN);
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_DIM);
 	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_OBJ);
+#if PHP_VERSION_ID >= 70400
+	xdebug_set_opcode_multi_handler(ZEND_ASSIGN_STATIC_PROP);
+#endif
 	xdebug_set_opcode_multi_handler(ZEND_QM_ASSIGN);
 	xdebug_set_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL);
 }

@@ -700,7 +700,7 @@ void xdebug_tracing_minit(INIT_FUNC_ARGS)
 	xdebug_set_opcode_handler(ZEND_POST_DEC_OBJ, xdebug_post_dec_obj_handler);
 #if PHP_VERSION_ID >= 70400
 	xdebug_set_opcode_handler(ZEND_ASSIGN_OBJ_REF, xdebug_assign_obj_ref_handler);
-	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP, xdebug_assign_static_prop_handler);
+	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_STATIC_PROP, xdebug_assign_static_prop_handler);
 	xdebug_set_opcode_handler(ZEND_ASSIGN_STATIC_PROP_REF, xdebug_assign_static_prop_ref_handler);
 	xdebug_set_opcode_handler(ZEND_PRE_INC_STATIC_PROP, xdebug_pre_inc_static_prop_handler);
 	xdebug_set_opcode_handler(ZEND_PRE_DEC_STATIC_PROP, xdebug_pre_dec_static_prop_handler);
