@@ -1069,6 +1069,11 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_DIM, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_OBJ, xdebug_common_override_handler);
+#if PHP_VERSION_ID >= 70400
+	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_STATIC_PROP, xdebug_common_override_handler);
+#else
+	xdebug_set_opcode_handler(ZEND_FETCH_STATIC_PROP_W, xdebug_common_override_handler);
+#endif
 	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL, xdebug_coverage_include_or_eval_handler);
 
