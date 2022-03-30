@@ -3,7 +3,7 @@ Test for bug #2006: Removing second call breakpoint with same function name cras
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp; NTS');
+check_reqs('dbgp; NTS; !win');
 ?>
 --FILE--
 <?php
