@@ -39,11 +39,11 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 3 -t line -f file://bug01388-01.inc -n 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="{{PID}}0001"></response>
 
 -> breakpoint_list -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="4"><breakpoint type="line" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="4"><breakpoint type="line" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> feature_set -i 5 -n resolved_breakpoints -v 1
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -55,18 +55,18 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_list -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="7"><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="7"><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> breakpoint_set -i 8 -t line -f file://bug01388-01.inc -n 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0002"></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="8" id="" resolved="resolved"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="8" id="{{PID}}0002" resolved="resolved"></response>
 
 -> breakpoint_list -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="9"><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="9"><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> detach -i 10
 <?xml version="1.0" encoding="iso-8859-1"?>

@@ -38,10 +38,10 @@ dbgpRunFile( $filename, $commands, [ 'track_errors' => 'Off' ] );
 
 -> breakpoint_set -i 3 -n 7 -f file://bug01388-13.inc -t conditional -- JG1vZHVsZSA9PSB2aWV3cw==
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="7" state="enabled" hit_count="0" hit_value="0" id=""><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="conditional" resolved="resolved" filename="file://bug01388-13.inc" lineno="7" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"><expression encoding="base64"><![CDATA[JG1vZHVsZSA9PSB2aWV3cw==]]></expression></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="resolved"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="{{PID}}0001" resolved="resolved"></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>

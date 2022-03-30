@@ -9,6 +9,7 @@ class DebugClient
 	protected $socket;
 	protected $php;
 	protected $ppipes;
+	private   $pid = null;
 
 	public function getPort()
 	{
@@ -75,6 +76,9 @@ class DebugClient
 
 		$php = getenv( 'TEST_PHP_EXECUTABLE' );
 		$cmd = "{$php} $options {$filename} >{$this->tmpDir}/php-stdout.txt 2>{$this->tmpDir}/php-stderr.txt";
+		if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
+			$cmd = "exec {$cmd}";
+		}
 		$cwd = dirname( __FILE__ );
 
 		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
@@ -127,7 +131,8 @@ class DebugClient
 			}
 
 			// sanitize
-			$read = preg_replace( '@\s(appid|id)="\d+?"@', ' \\1=""', $read );
+			$read = preg_replace( '@(?<!"Locals") id="\d+?(\d{4})"@', ' id="{{PID}}\\1"', $read );
+			$read = preg_replace( '@\s(appid)="\d+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@\s(xdebug:language_version)="[^"]+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
 			$read = preg_replace( '@(2002-20[0-9]{2})@', '2002-2099', $read );
@@ -203,6 +208,9 @@ class DebugClient
 			$command = $parts[0] . " -i $transaction_id " . $parts[1];
 		}
 
+		/* Replace PID macro */
+		$command = str_replace( "{{PID}}", $this->pid & 0x1ffff, $command );
+
 		$sanitised = $command;
 		$sanitised = preg_replace( '@\sfile://.*[/\\\\](.*\.inc)\s@', ' file://\\1 ', $sanitised );
 
@@ -218,6 +226,8 @@ class DebugClient
 			return;
 		}
 		$i = 1;
+		$procInfo = proc_get_status( $this->php );
+		$this->pid = $procInfo['pid'];
 
 		// read header
 		$this->doRead( $conn );

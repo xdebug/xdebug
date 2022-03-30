@@ -32,23 +32,23 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 2 -t return -m breakOnMe
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="2" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="2" id="{{PID}}0001"></response>
 
 -> breakpoint_set -i 3 -t return -m array_reverse
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="{{PID}}0002"></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-function.inc" lineno="7"></xdebug:message><breakpoint type="return" function="breakOnMe" state="enabled" hit_count="1" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-function.inc" lineno="7"></xdebug:message><breakpoint type="return" function="breakOnMe" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-function.inc" lineno="10"></xdebug:message><breakpoint type="return" function="array_reverse" state="enabled" hit_count="1" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-function.inc" lineno="10"></xdebug:message><breakpoint type="return" function="array_reverse" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0002"></breakpoint></response>
 
 -> run -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-function.inc" lineno="13"></xdebug:message><breakpoint type="return" function="array_reverse" state="enabled" hit_count="2" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-call-function.inc" lineno="13"></xdebug:message><breakpoint type="return" function="array_reverse" state="enabled" hit_count="2" hit_value="0" id="{{PID}}0002"></breakpoint></response>
 
 -> detach -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
