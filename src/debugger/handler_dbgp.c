@@ -827,7 +827,7 @@ DBGP_FUNC(breakpoint_update)
 }
 
 
-static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
+static void breakpoint_list_helper(void *xml, xdebug_hash_element *he, void *dummy)
 {
 	xdebug_xml_node  *xml_node = (xdebug_xml_node*) xml;
 	xdebug_xml_node  *child;
@@ -842,7 +842,7 @@ static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
 
 DBGP_FUNC(breakpoint_list)
 {
-	xdebug_hash_apply(context->breakpoint_list, (void *) *retval, breakpoint_list_helper);
+	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) *retval, breakpoint_list_helper, NULL);
 }
 
 DBGP_FUNC(breakpoint_set)
@@ -2343,6 +2343,14 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
 
 }
 
+static int xdebug_compare_brk_info(const void *le1, const void *le2)
+{
+	xdebug_brk_info *a = (xdebug_brk_info *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le1);
+	xdebug_brk_info *b = (xdebug_brk_info *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le2);
+
+	return (a->id > b->id);
+}
+
 int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
 	xdebug_var_export_options *options;
@@ -2428,7 +2436,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		options->runtime[i].current_element_nr = 0;
 	}
 
-	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_admin_dtor);
+	context->breakpoint_list = xdebug_hash_alloc_with_sort(64, (xdebug_hash_dtor_t) xdebug_hash_admin_dtor, xdebug_compare_brk_info);
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_brk_dtor);
 	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
@@ -2832,7 +2840,7 @@ static void line_breakpoint_resolve_helper(xdebug_con *context, xdebug_lines_lis
 	}
 }
 
-static void breakpoint_resolve_helper(void *rctxt, xdebug_hash_element *he)
+static void breakpoint_resolve_helper(void *rctxt, xdebug_hash_element *he, void *dummy)
 {
 	xdebug_dbgp_resolve_context *ctxt = (xdebug_dbgp_resolve_context*) rctxt;
 	xdebug_brk_admin            *admin = (xdebug_brk_admin*) he->ptr;
@@ -2886,7 +2894,7 @@ int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename)
 	resolv_ctxt.context = context;
 	resolv_ctxt.filename = filename;
 	resolv_ctxt.lines_list = lines_list;
-	xdebug_hash_apply(context->breakpoint_list, (void *) &resolv_ctxt, breakpoint_resolve_helper);
+	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) &resolv_ctxt, breakpoint_resolve_helper, NULL);
 
 	return 1;
 }
