@@ -30,11 +30,11 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 1 -t exception -x Warning
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id="{{PID}}0001"></response>
 
 -> breakpoint_list -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="2"><breakpoint type="exception" exception="Warning" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="2"><breakpoint type="exception" exception="Warning" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> run -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>

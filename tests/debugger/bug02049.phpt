@@ -57,7 +57,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_names -i 6 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="6"><context name="Locals" id=""></context><context name="Superglobals" id=""></context><context name="User defined constants" id=""></context></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="6"><context name="Locals" id="0"></context><context name="Superglobals" id="1"></context><context name="User defined constants" id="2"></context></response>
 
 -> context_get -i 7 -d 0 -c 0
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -69,7 +69,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_names -i 9 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="9"><context name="Locals" id=""></context><context name="Superglobals" id=""></context><context name="User defined constants" id=""></context></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="9"><context name="Locals" id="0"></context><context name="Superglobals" id="1"></context><context name="User defined constants" id="2"></context></response>
 
 -> context_get -i 10 -d 0 -c 0
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -85,7 +85,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_names -i 13 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="13"><context name="Locals" id=""></context><context name="Superglobals" id=""></context><context name="User defined constants" id=""></context></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="13"><context name="Locals" id="0"></context><context name="Superglobals" id="1"></context><context name="User defined constants" id="2"></context></response>
 
 -> context_get -i 14 -d 0 -c 0
 <?xml version="1.0" encoding="iso-8859-1"?>

@@ -51,7 +51,7 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 5 -t line -f phar://%s/tests/debugger/bug00886.phar/file1.php -n 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="5" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="5" id="{{PID}}0001"></response>
 
 -> run -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

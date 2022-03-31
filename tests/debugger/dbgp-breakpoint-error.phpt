@@ -35,15 +35,15 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 3 -t exception -x *
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="{{PID}}0001"></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="4" exception="Notice" code="1024"><![CDATA[FOO]]></xdebug:message><breakpoint type="exception" exception="*" state="enabled" hit_count="1" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="4" exception="Notice" code="1024"><![CDATA[FOO]]></xdebug:message><breakpoint type="exception" exception="*" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="10" exception="FooException"><![CDATA[testing foo exception]]></xdebug:message><breakpoint type="exception" exception="*" state="enabled" hit_count="2" hit_value="0" id=""></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-error.inc" lineno="10" exception="FooException"><![CDATA[testing foo exception]]></xdebug:message><breakpoint type="exception" exception="*" state="enabled" hit_count="2" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

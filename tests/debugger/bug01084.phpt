@@ -28,7 +28,7 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 1 -t exception -x FooBarException
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id="{{PID}}0001"></response>
 
 -> run -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -36,7 +36,7 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 3 -t exception -x FooException
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="{{PID}}0002"></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -48,7 +48,7 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 6 -t exception -x *
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="6" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="6" id="{{PID}}0003"></response>
 
 -> run -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
