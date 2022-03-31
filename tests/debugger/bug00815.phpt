@@ -77,11 +77,11 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 11 -t line -n 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="11" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="11" id="{{PID}}0001"></response>
 
 -> breakpoint_set -i 12 -t line -n 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="12" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="12" id="{{PID}}0002"></response>
 
 -> stack_get -i 13
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -93,7 +93,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_names -i 15
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="15"><context name="Locals" id=""></context><context name="Superglobals" id=""></context><context name="User defined constants" id=""></context></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="15"><context name="Locals" id="0"></context><context name="Superglobals" id="1"></context><context name="User defined constants" id="2"></context></response>
 
 -> run -i 16
 <?xml version="1.0" encoding="iso-8859-1"?>

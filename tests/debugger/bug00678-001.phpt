@@ -27,7 +27,7 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 1 -t line -f file://bug00678-001.inc -n 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id="{{PID}}0001"></response>
 
 -> run -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>

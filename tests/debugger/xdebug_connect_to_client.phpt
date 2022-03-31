@@ -42,7 +42,7 @@ dbgpRunFile( $filename, $commands, $settings );
 
 -> breakpoint_set -i 3 -t line -n 8 -- JGkgPT0gNA==
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="{{PID}}0001"></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>

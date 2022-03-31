@@ -827,7 +827,7 @@ DBGP_FUNC(breakpoint_update)
 }
 
 
-static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
+static void breakpoint_list_helper(void *xml, xdebug_hash_element *he, void *dummy)
 {
 	xdebug_xml_node  *xml_node = (xdebug_xml_node*) xml;
 	xdebug_xml_node  *child;
@@ -842,14 +842,12 @@ static void breakpoint_list_helper(void *xml, xdebug_hash_element *he)
 
 DBGP_FUNC(breakpoint_list)
 {
-	xdebug_hash_apply(context->breakpoint_list, (void *) *retval, breakpoint_list_helper);
+	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) *retval, breakpoint_list_helper, NULL);
 }
 
 DBGP_FUNC(breakpoint_set)
 {
 	xdebug_brk_info      *brk_info;
-	char                 *tmp_name;
-	size_t                new_length = 0;
 	XDEBUG_STR_SWITCH_DECL;
 
 	brk_info = xdebug_brk_info_ctor();
@@ -888,6 +886,9 @@ DBGP_FUNC(breakpoint_set)
 	}
 
 	if ((strcmp(CMD_OPTION_CHAR('t'), "line") == 0) || (strcmp(CMD_OPTION_CHAR('t'), "conditional") == 0)) {
+		size_t  new_length = 0;
+		char   *tmp_name;
+
 		if (!CMD_OPTION_SET('n')) {
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		}
@@ -945,6 +946,9 @@ DBGP_FUNC(breakpoint_set)
 	} else
 
 	if ((strcmp(CMD_OPTION_CHAR('t'), "call") == 0) || (strcmp(CMD_OPTION_CHAR('t'), "return") == 0)) {
+		void *dummy = NULL;
+		char *tmp_name;
+
 		if (strcmp(CMD_OPTION_CHAR('t'), "call") == 0) {
 			brk_info->function_break_type = XDEBUG_BREAKPOINT_TYPE_CALL;
 		} else {
@@ -955,35 +959,41 @@ DBGP_FUNC(breakpoint_set)
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
 		}
 		brk_info->functionname = xdstrdup(CMD_OPTION_CHAR('m'));
-		if (CMD_OPTION_SET('a')) {
-			int   res;
 
+		if (CMD_OPTION_SET('a')) {
 			brk_info->classname = xdstrdup(CMD_OPTION_CHAR('a'));
-			tmp_name = xdebug_sprintf("%s::%s", CMD_OPTION_CHAR('a'), CMD_OPTION_CHAR('m'));
-			res = xdebug_hash_add(context->function_breakpoints, tmp_name, strlen(tmp_name), (void*) brk_info);
+			tmp_name = xdebug_sprintf(
+				"%c/%s::%s",
+				brk_info->function_break_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+				CMD_OPTION_CHAR('a'), CMD_OPTION_CHAR('m')
+			);
+		} else {
+			tmp_name = xdebug_sprintf(
+				"%c/%s",
+				brk_info->function_break_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+				CMD_OPTION_CHAR('m')
+			);
+		}
+
+		if (xdebug_hash_find(context->function_breakpoints, tmp_name, strlen(tmp_name), (void*) &dummy)) {
+			xdfree(tmp_name);
+			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_BREAKPOINT_NOT_SET);
+		}
+
+		if (!xdebug_hash_add(context->function_breakpoints, tmp_name, strlen(tmp_name), brk_info)) {
+			xdfree(tmp_name);
+			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_BREAKPOINT_NOT_SET);
+		} else {
 			if (brk_info->function_break_type == XDEBUG_BREAKPOINT_TYPE_CALL) {
 				brk_info->id = breakpoint_admin_add(context, XDEBUG_BREAKPOINT_TYPE_CALL, tmp_name);
 			} else {
 				brk_info->id = breakpoint_admin_add(context, XDEBUG_BREAKPOINT_TYPE_RETURN, tmp_name);
 			}
-			xdfree(tmp_name);
-
-			if (!res) {
-				RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
-			}
-		} else {
-			if (!xdebug_hash_add(context->function_breakpoints, CMD_OPTION_CHAR('m'), CMD_OPTION_LEN('m'), (void*) brk_info)) {
-				RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_BREAKPOINT_NOT_SET);
-			} else {
-				if (brk_info->function_break_type == XDEBUG_BREAKPOINT_TYPE_CALL) {
-					brk_info->id = breakpoint_admin_add(context, XDEBUG_BREAKPOINT_TYPE_CALL, CMD_OPTION_CHAR('m'));
-				} else {
-					brk_info->id = breakpoint_admin_add(context, XDEBUG_BREAKPOINT_TYPE_RETURN, CMD_OPTION_CHAR('m'));
-				}
-			}
 		}
 
 		brk_info->resolved = XDEBUG_BRK_RESOLVED;
+
+		xdfree(tmp_name);
 	} else
 
 	if (strcmp(CMD_OPTION_CHAR('t'), "exception") == 0) {
@@ -2343,6 +2353,14 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
 
 }
 
+static int xdebug_compare_brk_info(const void *le1, const void *le2)
+{
+	xdebug_brk_info *a = (xdebug_brk_info *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le1);
+	xdebug_brk_info *b = (xdebug_brk_info *) XDEBUG_LLIST_VALP(*(xdebug_llist_element **) le2);
+
+	return (a->id > b->id);
+}
+
 int xdebug_dbgp_init(xdebug_con *context, int mode)
 {
 	xdebug_var_export_options *options;
@@ -2428,7 +2446,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		options->runtime[i].current_element_nr = 0;
 	}
 
-	context->breakpoint_list = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_admin_dtor);
+	context->breakpoint_list = xdebug_hash_alloc_with_sort(64, (xdebug_hash_dtor_t) xdebug_hash_admin_dtor, xdebug_compare_brk_info);
 	context->function_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_brk_dtor);
 	context->exception_breakpoints = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_hash_brk_dtor);
 	context->line_breakpoints = xdebug_llist_alloc((xdebug_llist_dtor) xdebug_llist_brk_dtor);
@@ -2832,7 +2850,7 @@ static void line_breakpoint_resolve_helper(xdebug_con *context, xdebug_lines_lis
 	}
 }
 
-static void breakpoint_resolve_helper(void *rctxt, xdebug_hash_element *he)
+static void breakpoint_resolve_helper(void *rctxt, xdebug_hash_element *he, void *dummy)
 {
 	xdebug_dbgp_resolve_context *ctxt = (xdebug_dbgp_resolve_context*) rctxt;
 	xdebug_brk_admin            *admin = (xdebug_brk_admin*) he->ptr;
@@ -2886,7 +2904,7 @@ int xdebug_dbgp_resolve_breakpoints(xdebug_con *context, zend_string *filename)
 	resolv_ctxt.context = context;
 	resolv_ctxt.filename = filename;
 	resolv_ctxt.lines_list = lines_list;
-	xdebug_hash_apply(context->breakpoint_list, (void *) &resolv_ctxt, breakpoint_resolve_helper);
+	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) &resolv_ctxt, breakpoint_resolve_helper, NULL);
 
 	return 1;
 }

@@ -28,7 +28,7 @@ dbgpRunFile( $filename, $commands, [ 'track_errors' => 'Off' ] );
 
 -> breakpoint_set -i 1 -n 7 -t conditional -f file://bug00566-002.inc -- JG1vZHVsZSA9PSAidmlld3Mi
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id=""></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="1" id="{{PID}}0001"></response>
 
 -> run -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>

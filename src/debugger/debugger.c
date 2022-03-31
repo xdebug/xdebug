@@ -424,57 +424,62 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 
 static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 {
-	xdebug_brk_info *extra_brk_info = NULL;
 	char            *tmp_name = NULL;
 	size_t           tmp_len = 0;
+	xdebug_brk_info *extra_brk_info = NULL;
 
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
-		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, fse->function.function, strlen(fse->function.function), (void *) &extra_brk_info)) {
-			/* Yup, breakpoint found, we call the handler when it's not
-			 * disabled AND handle_hit_value is happy */
-			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (xdebug_handle_hit_value(extra_brk_info)) {
-					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info)) {
-							return 0;
-						}
-					} else {
-						XG_DBG(context).do_break = 1;
-						XG_DBG(context).pending_breakpoint = extra_brk_info;
-					}
-				}
-			}
-		}
+		tmp_len = 2 + strlen(fse->function.function) + 1;
+		tmp_name = xdmalloc(tmp_len);
+		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
+		 * codebases due to setlocale calls. We don't care about the locale here. */
+		snprintf(
+			tmp_name, tmp_len,
+			"%c/%s",
+			breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+			fse->function.function
+		);
 	}
 	/* class->function breakpoints */
 	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
 		/* Using strlen(ZSTR_VAL(...)) here to cut of the string at the first \0, which is needed
 		 * for anonymous classes, in combination with the snprintf() below */
-		tmp_len = strlen(ZSTR_VAL(fse->function.object_class)) + strlen(fse->function.function) + 3;
+		tmp_len = 2 + strlen(ZSTR_VAL(fse->function.object_class)) + 2 + strlen(fse->function.function) + 1;
 		tmp_name = xdmalloc(tmp_len);
 		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
 		 * codebases due to setlocale calls. We don't care about the locale here. */
-		snprintf(tmp_name, tmp_len, "%s::%s", ZSTR_VAL(fse->function.object_class), fse->function.function);
+		snprintf(
+			tmp_name, tmp_len,
+			"%c/%s::%s",
+			breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+			ZSTR_VAL(fse->function.object_class), fse->function.function
+		);
+	}
+	/* Unknown */
+	else {
+		return 1;
+	}
 
-		if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
-			/* Yup, breakpoint found, call handler if the breakpoint is not
-			 * disabled AND handle_hit_value is happy */
-			if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
-				if (xdebug_handle_hit_value(extra_brk_info)) {
-					if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info)) {
-							return 0;
-						}
-					} else {
-						XG_DBG(context).do_break = 1;
-						XG_DBG(context).pending_breakpoint = extra_brk_info;
+	if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
+		/* Yup, breakpoint found, call handler if the breakpoint is not
+		 * disabled AND handle_hit_value is happy */
+		if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
+			if (xdebug_handle_hit_value(extra_brk_info)) {
+				if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
+					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info)) {
+						xdfree(tmp_name);
+						return 0;
 					}
+				} else {
+					XG_DBG(context).do_break = 1;
+					XG_DBG(context).pending_breakpoint = extra_brk_info;
 				}
 			}
 		}
-		xdfree(tmp_name);
 	}
+	xdfree(tmp_name);
+
 	return 1;
 }
 

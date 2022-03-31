@@ -34,10 +34,10 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_set -i 3 -t line -f file://bug01388-06.inc -n 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-06.inc" lineno="2" state="enabled" hit_count="0" hit_value="0" id=""></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-06.inc" lineno="2" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="" resolved="resolved"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="3" id="{{PID}}0001" resolved="resolved"></response>
 
 -> run -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
