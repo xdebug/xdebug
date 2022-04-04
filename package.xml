@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2022-02-01</date>
- <time>16:29:04</time>
+ <date>2022-04-04</date>
+ <time>11:33:07</time>
  <version>
-  <release>3.1.3</release>
-  <api>3.1.3</api>
+  <release>3.1.4</release>
+  <api>3.1.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,14 +52,18 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Tue, Feb 01, 2022 - Xdebug 3.1.3
+Mon, Apr 04, 2022 - Xdebug 3.1.4
 
 = Fixed bugs:
 
-  - Fixed issue #2049: evaling broken code (still) causes unhandled exception in PHP 7.4
-  - Fixed issue #2052: Memory leak when a trace file can't be opened because xdebug.trace_output_name is invalid
-  - Fixed issue #2054: Slowdown when calling a function with long string parameters
-  - Fixed issue #2055: Debugger creates XML with double facet attribute
+  - Fixed issue #2006: Removing second call breakpoint with same function name
+  - Fixed issue #2060: XDebug breaks the Symfony &quot;PhpFilesAdapter&quot; cache adapter
+  - Fixed issue #2061: Possible use after free with GC Stats
+  - Fixed issue #2063: Can't inspect ArrayObject storage elements
+  - Fixed issue #2064: Segmentation fault in symfony cache
+  - Fixed issue #2068: Debug session can be started with &quot;XDEBUG_SESSION_START=anything&quot; when xdebug.trigger_value is set
+  - Fixed issue #2069: Warn when profiler_append is used together with zlib compression
+  - Fixed issue #2075: Code coverage misses static array assignment lines
 
  </notes>
 
@@ -205,6 +209,31 @@ Tue, Feb 01, 2022 - Xdebug 3.1.3
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+ 
+  <release>
+   <date>2022-02-01</date>
+   <time>16:29:04</time>
+   <version>
+    <release>3.1.3</release>
+    <api>3.1.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Feb 01, 2022 - Xdebug 3.1.3
+
+= Fixed bugs:
+
+  - Fixed issue #2049: evaling broken code (still) causes unhandled exception in PHP 7.4
+  - Fixed issue #2052: Memory leak when a trace file can't be opened because xdebug.trace_output_name is invalid
+  - Fixed issue #2054: Slowdown when calling a function with long string parameters
+  - Fixed issue #2055: Debugger creates XML with double facet attribute
+
+   </notes>
+  </release>
 
   <release>
    <date>2021-12-01</date>
