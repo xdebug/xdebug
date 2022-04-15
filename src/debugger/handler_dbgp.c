@@ -1422,7 +1422,7 @@ static int add_constant_node(xdebug_xml_node *node, xdebug_str *name, zval *cons
 		return FAILURE;
 	}
 
-	xdebug_xml_add_attribute(contents, "facet", "constant");
+	xdebug_xml_expand_attribute_value(contents, "facet", "constant");
 	xdebug_xml_add_child(node, contents);
 
 	return SUCCESS;
