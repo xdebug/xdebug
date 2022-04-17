@@ -49,6 +49,10 @@ static xdebug_trace_handler_t *xdebug_select_trace_handler(int options)
 		tmp = &xdebug_trace_handler_html;
 	}
 
+	if (!tmp->init || !tmp->deinit || !tmp->get_filename) {
+		xdebug_log_ex(XLOG_CHAN_TRACE, XLOG_CRIT, "HNDLR", "Broken trace handler for format '%d', missing 'init', 'deinit', or 'get_filename'  handler", options);
+	}
+
 	return tmp;
 }
 
@@ -105,13 +109,19 @@ static char* xdebug_start_trace(char* fname, zend_string *script_filename, long 
 	}
 
 	XG_TRACE(trace_handler) = xdebug_select_trace_handler(options);
-	XG_TRACE(trace_context) = (void*) XG_TRACE(trace_handler)->init(fname, script_filename, options);
+	if (!XG_TRACE(trace_handler)) {
+		return NULL;
+	}
 
+	XG_TRACE(trace_context) = (void*) XG_TRACE(trace_handler)->init(fname, script_filename, options);
 	if (!XG_TRACE(trace_context)) {
 		return NULL;
 	}
 
-	XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context));
+	if (XG_TRACE(trace_handler)->write_header) {
+		XG_TRACE(trace_handler)->write_header(XG_TRACE(trace_context));
+	}
+
 	return xdstrdup(XG_TRACE(trace_handler)->get_filename(XG_TRACE(trace_context)));
 }
 
@@ -121,7 +131,9 @@ static void xdebug_stop_trace(void)
 		return;
 	}
 
-	XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
+	if (XG_TRACE(trace_handler)->write_footer) {
+		XG_TRACE(trace_handler)->write_footer(XG_TRACE(trace_context));
+	}
 	XG_TRACE(trace_handler)->deinit(XG_TRACE(trace_context));
 	XG_TRACE(trace_context) = NULL;
 }
