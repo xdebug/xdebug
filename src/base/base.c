@@ -769,7 +769,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		}
 
 		/* Check for entry breakpoints */
-		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL, NULL);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
@@ -795,8 +795,14 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		zval *return_value = NULL;
+
+		if (execute_data->return_value && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
+			return_value = execute_data->return_value;
+		}
+
 		/* Check for return breakpoints */
-		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN, return_value);
 	}
 
 	fse->symbol_table = NULL;
@@ -877,7 +883,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for entry breakpoints */
-		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL);
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL, NULL);
 	}
 
 	/* Check for SOAP */
@@ -919,7 +925,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		/* Check for return breakpoints */
-		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN);
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN, return_value);
 	}
 
 	if (XG_BASE(stack)) {

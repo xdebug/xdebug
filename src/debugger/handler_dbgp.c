@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1314,6 +1314,11 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("breakpoint_include_return_value")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", XG_DBG(context).breakpoint_include_return_value));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE_DEFAULT
 			xdebug_xml_add_text(*retval, xdstrdup(lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0"));
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0");
@@ -1383,6 +1388,10 @@ DBGP_FUNC(feature_set)
 
 		XDEBUG_STR_CASE("breakpoint_details")
 			XG_DBG(context).breakpoint_details = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("breakpoint_include_return_value")
+			XG_DBG(context).breakpoint_include_return_value = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE_DEFAULT
@@ -2456,6 +2465,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->inhibit_notifications = 0;
 	context->resolved_breakpoints = 0;
 	context->breakpoint_details = 0;
+	context->breakpoint_include_return_value = 0;
 
 	xdebug_mark_debug_connection_active();
 	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BAIL);
@@ -2639,7 +2649,7 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_st
 	return 0;
 }
 
-int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info)
+int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info, zval *return_value)
 {
 	xdebug_xml_node *response, *error_container;
 
@@ -2682,6 +2692,18 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_strin
 		xdebug_xml_add_text(error_container, xdstrdup(message));
 	}
 	xdebug_xml_add_child(response, error_container);
+
+	if (XG_DBG(context).breakpoint_include_return_value && return_value) {
+		xdebug_xml_node *return_value_container, *tmp_node;
+		xdebug_var_export_options *options = (xdebug_var_export_options*) context->options;
+
+		return_value_container = xdebug_xml_node_init("xdebug:return_value");
+		tmp_node = xdebug_get_zval_value_xml_node(NULL, return_value, options);
+
+		xdebug_xml_add_child(return_value_container, tmp_node);
+
+		xdebug_xml_add_child(response, return_value_container);
+	}
 
 	if (XG_DBG(context).breakpoint_details && brk_info) {
 		xdebug_xml_node *breakpoint_node = xdebug_xml_node_init("breakpoint");

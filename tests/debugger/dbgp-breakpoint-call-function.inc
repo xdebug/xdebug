@@ -7,8 +7,8 @@ function breakOnMe()
 breakOnMe();
 
 $array = range( 0, 7 );
-array_reverse( $array );
+$array = array_reverse( $array );
 
-$array = array_push( $array, 42 );
-array_reverse( $array );
+array_push( $array, 42 );
+$array = array_reverse( $array );
 ?>

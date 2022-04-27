@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -89,6 +89,7 @@ struct _xdebug_con {
 
 	int                    resolved_breakpoints;
 	int                    breakpoint_details;
+	int                    breakpoint_include_return_value;
 
 	/* Statistics and diagnostics */
 	char *connected_hostname;
@@ -141,7 +142,7 @@ struct _xdebug_remote_handler {
 
 	/* Breakpoints */
 	int (*break_on_line)(xdebug_con *h, xdebug_brk_info *brk, zend_string *filename, int lineno);
-	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info);
+	int (*remote_breakpoint)(xdebug_con *h, xdebug_vector *stack, zend_string *filename, long lineno, int type, char *exception, char *code, const char *message, xdebug_brk_info *brk_info, zval *return_value);
 	int (*resolve_breakpoints)(xdebug_con *h, zend_string *opa);
 
 	/* Output redirection */
