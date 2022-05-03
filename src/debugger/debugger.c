@@ -20,6 +20,7 @@
 #include "zend_exceptions.h"
 
 #include "debugger_private.h"
+#include "lib/log.h"
 #include "lib/var.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
@@ -480,6 +481,17 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 		}
 	}
 	xdfree(tmp_name);
+
+	if (
+		(XG_DBG(context).breakpoint_include_return_value) &&
+		(breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN) &&
+		(XG_DBG(context).do_step || XG_DBG(context).do_finish) &&
+		return_value
+	) {
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
+			return 0;
+		}
+	}
 
 	return 1;
 }

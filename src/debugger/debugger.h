@@ -24,6 +24,7 @@ typedef struct _xdebug_debugger_globals_t {
 	int           reason;
 	const char   *lastcmd;
 	char         *lasttransid;
+	zval         *current_return_value;
 
 	zend_bool     remote_connection_enabled;
 	zend_ulong    remote_connection_pid;
@@ -61,6 +62,8 @@ typedef struct _xdebug_debugger_settings_t {
 PHP_INI_MH(OnUpdateDebugMode);
 
 void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg);
+
+#define XDEBUG_RETURN_VALUE_VAR_NAME "__RETURN_VALUE"
 
 void xdebug_debugger_reset_ide_key(char *envval);
 int xdebug_debugger_bailout_if_no_exec_requested(void);

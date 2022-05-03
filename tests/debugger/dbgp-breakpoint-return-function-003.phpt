@@ -50,15 +50,15 @@ dbgpRunFile( $filename, $commands );
 
 -> run -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-003.inc" lineno="21"></xdebug:message><breakpoint type="return" function="__construct" class="Foo" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0002"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-003.inc" lineno="22"></xdebug:message><breakpoint type="return" function="__construct" class="Foo" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0002"></breakpoint></response>
 
 -> run -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="7" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-003.inc" lineno="24"></xdebug:message><xdebug:return_value><property type="object" classname="Foo" children="1" numchildren="2" page="0" pagesize="32"><property name="x" facet="public" type="int"><![CDATA[42]]></property><property name="y" facet="public" type="float"><![CDATA[2.7]]></property></property></xdebug:return_value><breakpoint type="return" function="breakOnMe" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0001"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="7" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-003.inc" lineno="25"></xdebug:message><xdebug:return_value><property type="object" classname="Foo" children="1" numchildren="2" page="0" pagesize="32"><property name="x" facet="public" type="int"><![CDATA[42]]></property><property name="y" facet="public" type="float"><![CDATA[2.7]]></property></property></xdebug:return_value><breakpoint type="return" function="breakOnMe" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> run -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="8" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-003.inc" lineno="26"></xdebug:message><xdebug:return_value><property type="float"><![CDATA[113.4]]></property></xdebug:return_value><breakpoint type="return" function="product" class="Foo" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0003"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="8" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-003.inc" lineno="27"></xdebug:message><xdebug:return_value><property type="float"><![CDATA[113.4]]></property></xdebug:return_value><breakpoint type="return" function="product" class="Foo" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0003"></breakpoint></response>
 
 -> detach -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>

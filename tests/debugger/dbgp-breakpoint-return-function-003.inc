@@ -12,6 +12,7 @@ class Foo
 
 	public function product()
 	{
+		$ocean = 'yes';
 		return $this->x * $this->y;
 	}
 }

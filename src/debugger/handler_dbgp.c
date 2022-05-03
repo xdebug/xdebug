@@ -1544,7 +1544,7 @@ DBGP_FUNC(property_get)
 		add_var_retval = add_variable_node(*retval, CMD_OPTION_XDEBUG_STR('n'), 1, 0, 0, options);
 		XG_DBG(context).inhibit_notifications = 0;
 
-		if (add_var_retval) {
+		if (add_var_retval == FAILURE) {
 			options->max_data = old_max_data;
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_PROPERTY_NON_EXISTENT);
 		}
@@ -1842,6 +1842,21 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			add_constant_node(node, tmp_name, &(val->value), options);
 			xdebug_str_free(tmp_name);
 		} ZEND_HASH_FOREACH_END();
+
+		return 0;
+	}
+
+	/* Add return value special one if set and depth = 0 */
+	if (XG_DBG(context).breakpoint_include_return_value && XG_DBG(current_return_value) && depth == 0) {
+		xdebug_xml_node *tmp_node;
+		xdebug_str *name = xdebug_str_create_from_const_char("$"XDEBUG_RETURN_VALUE_VAR_NAME);
+
+		tmp_node = xdebug_get_zval_value_xml_node(name, XG_DBG(current_return_value), options);
+		xdebug_xml_expand_attribute_value(tmp_node, "facet", "virtual");
+		xdebug_xml_expand_attribute_value(tmp_node, "facet", "return_value");
+
+		xdebug_xml_add_child(node, tmp_node);
+		xdebug_str_free(name);
 
 		return 0;
 	}
@@ -2720,7 +2735,17 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_strin
 		XG_DBG(lasttransid) = NULL;
 	}
 
+	XG_DBG(current_return_value) = return_value;
+	if (XG_DBG(current_return_value)) {
+		Z_TRY_ADDREF_P(XG_DBG(current_return_value));
+	}
+
 	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BAIL);
+
+	if (XG_DBG(current_return_value)) {
+		Z_TRY_DELREF_P(XG_DBG(current_return_value));
+	}
+	XG_DBG(current_return_value) = NULL;
 
 	return xdebug_is_debug_connection_active();
 }
