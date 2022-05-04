@@ -166,6 +166,8 @@ Thu, Apr 08, 2021 - Xdebug 3.0.4
      <file name="handlers.h" role="src" />
      <file name="handler_dbgp.c" role="src" />
      <file name="handler_dbgp.h" role="src" />
+     <file name="ip_info.c" role="src" />
+     <file name="ip_info.h" role="src" />
     </dir>
     <dir name="gcstats">
      <file name="gc_stats.c" role="src" />

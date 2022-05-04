@@ -1173,6 +1173,7 @@ int read_systemd_private_tmp_directory(char **private_tmp)
 
 	/* Clean up and return */
 	xdebug_arg_dtor(lines);
+	fclose(mountinfo_fd);
 	return retval;
 }
 #endif
