@@ -3,7 +3,7 @@ DBGP: return value in specially stepped context
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 7.4; dbgp');
 ?>
 --FILE--
 <?php

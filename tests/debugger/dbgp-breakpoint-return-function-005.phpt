@@ -3,7 +3,7 @@ DBGP: return value with 'step_out'
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 7.4; dbgp');
 ?>
 --FILE--
 <?php
