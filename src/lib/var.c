@@ -424,6 +424,15 @@ static void fetch_zval_from_symbol_table(
 			break;
 
 		case XF_ST_ROOT:
+			/* Check for return value */
+			if (
+				XG_DBG(current_return_value) &&
+				(strncmp(name, XDEBUG_RETURN_VALUE_VAR_NAME, name_length) == 0)
+			) {
+				ZVAL_COPY(&tmp_retval, XG_DBG(current_return_value));
+				goto cleanup;
+			}
+
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (xdebug_lib_has_active_data() && xdebug_lib_has_active_function()) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 #include "zend_exceptions.h"
 
 #include "debugger_private.h"
+#include "lib/log.h"
 #include "lib/var.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
@@ -243,7 +244,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 			XG_DBG(context).do_break = 0;
 			XG_DBG(context).pending_breakpoint = NULL;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, brk_info)) {
+			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, brk_info, NULL)) {
 				xdebug_mark_debug_connection_not_active();
 				return;
 			}
@@ -269,7 +270,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		) {
 			XG_DBG(context).do_finish = 0;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL)) {
+			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 				xdebug_mark_debug_connection_not_active();
 				return;
 			}
@@ -280,7 +281,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		if (XG_DBG(context).do_next && XG_DBG(context).next_level >= level) {
 			XG_DBG(context).do_next = 0;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL)) {
+			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 				xdebug_mark_debug_connection_not_active();
 				return;
 			}
@@ -291,7 +292,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		if (XG_DBG(context).do_step) {
 			XG_DBG(context).do_step = 0;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL)) {
+			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 				xdebug_mark_debug_connection_not_active();
 				return;
 			}
@@ -323,7 +324,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 						}
 					}
 					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info)) {
+						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, NULL)) {
 							xdebug_mark_debug_connection_not_active();
 							break;
 						}
@@ -380,7 +381,8 @@ void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *lin
 					(char*) STR_NAME_VAL(exception_ce->name),
 					code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
 					message ? Z_STRVAL_P(message) : "",
-					extra_brk_info
+					extra_brk_info,
+					NULL
 				)
 			) {
 				xdebug_mark_debug_connection_not_active();
@@ -412,7 +414,7 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 			if (xdebug_handle_hit_value(extra_brk_info)) {
 				char *type_str = xdebug_sprintf("%ld", type);
 
-				if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer, extra_brk_info)) {
+				if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer, extra_brk_info, NULL)) {
 					xdebug_mark_debug_connection_not_active();
 				}
 
@@ -422,7 +424,7 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 	}
 }
 
-static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
+static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
 {
 	char            *tmp_name = NULL;
 	size_t           tmp_len = 0;
@@ -467,7 +469,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 		if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
 				if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info)) {
+					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
 						xdfree(tmp_name);
 						return 0;
 					}
@@ -480,13 +482,24 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
 	}
 	xdfree(tmp_name);
 
+	if (
+		(XG_DBG(context).breakpoint_include_return_value) &&
+		(breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN) &&
+		(XG_DBG(context).do_step || XG_DBG(context).do_finish) &&
+		return_value
+	) {
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
+			return 0;
+		}
+	}
+
 	return 1;
 }
 
-void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoint_type)
+void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
 {
 	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
-		if (!handle_breakpoints(fse, breakpoint_type)) {
+		if (!handle_breakpoints(fse, breakpoint_type, return_value)) {
 			xdebug_mark_debug_connection_not_active();
 		}
 	}

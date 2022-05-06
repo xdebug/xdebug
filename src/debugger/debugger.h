@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@ typedef struct _xdebug_debugger_globals_t {
 	int           reason;
 	const char   *lastcmd;
 	char         *lasttransid;
+	zval         *current_return_value;
 
 	zend_bool     remote_connection_enabled;
 	zend_ulong    remote_connection_pid;
@@ -62,6 +63,8 @@ PHP_INI_MH(OnUpdateDebugMode);
 
 void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg);
 
+#define XDEBUG_RETURN_VALUE_VAR_NAME "__RETURN_VALUE"
+
 void xdebug_debugger_reset_ide_key(char *envval);
 int xdebug_debugger_bailout_if_no_exec_requested(void);
 void xdebug_debugger_set_program_name(zend_string *filename);
@@ -78,7 +81,7 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
 #endif
 void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int type, char *error_type_str, char *buffer);
-void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoint_type);
+void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value);
 
 void xdebug_debugger_zend_startup(void);
 void xdebug_debugger_zend_shutdown(void);
