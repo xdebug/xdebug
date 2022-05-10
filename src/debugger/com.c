@@ -158,6 +158,7 @@ static char* resolve_pseudo_hosts(const char *requested_hostname)
 
 	/* Check for 'nameserver' pseudo host */
 	if (strcmp(requested_hostname, "xdebug://nameserver") == 0) {
+#if XDEBUG_NAMESERVER_SUPPORT
 		char *gateway = xdebug_get_private_nameserver();
 
 		if (!gateway) {
@@ -167,9 +168,13 @@ static char* resolve_pseudo_hosts(const char *requested_hostname)
 
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Found 'nameserver' pseudo-host, with IP address '%s'.", gateway);
 		return gateway;
+# else
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "PSEUDO-GW-NO-SUPPORT", "Pseudo-host: '%s' is not supported on this host.", requested_hostname + strlen("xdebug://"));
+		return NULL;
+# endif
 	}
 
-	xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "UNKNOWN-PSEUDO", "Unknown pseudo-host: '%s', only 'gateway' or 'nameserver' are supported.", requested_hostname + strlen("xdebug://"));
+	xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "PSEUDO-UNKNOWN", "Unknown pseudo-host: '%s', only 'gateway' or 'nameserver' are supported.", requested_hostname + strlen("xdebug://"));
 #endif
 
 	return NULL;

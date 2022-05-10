@@ -15,7 +15,17 @@
  */
 
 #ifdef __linux__
+
+#include "php_xdebug.h"
+
 char *xdebug_get_ip_for_interface(const char *iface);
 char *xdebug_get_gateway_ip(void);
+
+#if HAVE_RES_NINIT && HAVE_RES_NCLOSE
+# define XDEBUG_NAMESERVER_SUPPORT 1
 char *xdebug_get_private_nameserver(void);
+#else
+# define XDEBUG_NAMESERVER_SUPPORT 0
+#endif
+
 #endif  /* __linux__ */

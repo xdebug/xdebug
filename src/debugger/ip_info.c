@@ -231,6 +231,7 @@ char *xdebug_get_gateway_ip(void)
 
 /***/
 
+#if XDEBUG_NAMESERVER_SUPPORT
 char *xdebug_get_private_nameserver(void)
 {
 	res_state res = malloc(sizeof(struct __res_state));
@@ -264,6 +265,7 @@ char *xdebug_get_private_nameserver(void)
 
 	return nameserver;
 }
+#endif  /* XDEBUG_NAMESERVER_SUPPORT */
 
 
 # if 0
