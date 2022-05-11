@@ -34,6 +34,7 @@ if test "$PHP_XDEBUG" != "no"; then
   AC_XDEBUG_CLOCK
 
   AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
+  AC_CHECK_FUNCS(res_ninit res_nclose)
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])
 
