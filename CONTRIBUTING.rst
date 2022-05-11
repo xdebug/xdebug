@@ -39,10 +39,10 @@ Branches
 There are two branches in operation:
 
 ``master``
-	This is were all new feature Pull Requests should be targeted at
+    This is were all new feature Pull Requests should be targeted at
 ``xdebug_3_1``
-	This is were all bug fix Pull Requests should be targeted at. The
-	maintainer will add them to ``master`` too when merging the Pull Request.
+    This is were all bug fix Pull Requests should be targeted at. The
+    maintainer will add them to ``master`` too when merging the Pull Request.
 
 Working on a Pull Request
 -------------------------
@@ -70,7 +70,7 @@ Working on a Pull Request
   example, for code coverage that is ``tests/coverage``. Test case names
   should follow the following pattern::
 
-  	tests/{feature-group}bug0{issue-number}.phpt
+    tests/{feature-group}bug0{issue-number}.phpt
 
   If you need more than one test, append ``-001`` after the issue number.
 
@@ -80,10 +80,10 @@ Working on a Pull Request
 
 - Before you submit a PR, make sure each commit is a single logical unit. The
   main commit that implements the issue, should have as commit message ``Fixed
-  bug #1893: `` followed by the Summary of the issue in the issue tracker. The
+  issue #1893: `` followed by the Summary of the issue in the issue tracker. The
   message should state what the change was about. For example::
 
-  	Fixed bug #1893: Crash with ext-fiber with xdebug.mode=coverage
+    Fixed issue #1893: Crash with ext-fiber with xdebug.mode=coverage
 
 - Before you submit a PR, make sure to rebase first on the branch that you
   will be targeting, for example to rebase against the current bug fix
