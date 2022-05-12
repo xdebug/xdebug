@@ -19,7 +19,13 @@
 #include "php_xdebug.h"
 
 char *xdebug_get_ip_for_interface(const char *iface);
+
+#if HAVE_LINUX_RTNETLINK_H
+# define XDEBUG_GATEWAY_SUPPORT 1
 char *xdebug_get_gateway_ip(void);
+#else
+# define XDEBUG_GATEWAY_SUPPORT 0
+#endif
 
 #if HAVE_RES_NINIT && HAVE_RES_NCLOSE
 # define XDEBUG_NAMESERVER_SUPPORT 1
