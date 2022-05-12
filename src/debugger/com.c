@@ -145,6 +145,7 @@ static char* resolve_pseudo_hosts(const char *requested_hostname)
 
 	/* Check for 'gateway' pseudo host */
 	if (strcmp(requested_hostname, "xdebug://gateway") == 0) {
+#if XDEBUG_GATEWAY_SUPPORT
 		char *gateway = xdebug_get_gateway_ip();
 
 		if (!gateway) {
@@ -154,6 +155,10 @@ static char* resolve_pseudo_hosts(const char *requested_hostname)
 
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Found 'gateway' pseudo-host, with IP address '%s'.", gateway);
 		return gateway;
+#else
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "PSEUDO-GW-NO-SUPPORT", "Pseudo-host: '%s' is not supported on this host.", requested_hostname + strlen("xdebug://"));
+		return NULL;
+# endif
 	}
 
 	/* Check for 'nameserver' pseudo host */
@@ -169,7 +174,7 @@ static char* resolve_pseudo_hosts(const char *requested_hostname)
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Found 'nameserver' pseudo-host, with IP address '%s'.", gateway);
 		return gateway;
 # else
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "PSEUDO-GW-NO-SUPPORT", "Pseudo-host: '%s' is not supported on this host.", requested_hostname + strlen("xdebug://"));
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "PSEUDO-NS-NO-SUPPORT", "Pseudo-host: '%s' is not supported on this host.", requested_hostname + strlen("xdebug://"));
 		return NULL;
 # endif
 	}
