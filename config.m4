@@ -34,7 +34,19 @@ if test "$PHP_XDEBUG" != "no"; then
   AC_XDEBUG_CLOCK
 
   AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
-  AC_CHECK_FUNCS(res_ninit res_nclose)
+  case $host_os in
+  linux*)
+    AC_CHECK_HEADERS([linux/rtnetlink.h], [], [
+      case $host_os in
+        linux-musl*)
+          AC_MSG_ERROR([rtnetlink.h is required, install the linux-headers package: apk add --update linux-headers])
+      esac
+      AC_MSG_ERROR([rtnetlink.h is required, please make sure it is available by installing the correct package])
+    ])
+  esac
+
+  PHP_CHECK_FUNC(res_ninit, resolv)
+  PHP_CHECK_FUNC(res_nclose, resolv)
 
   PHP_CHECK_LIBRARY(m, cos, [ PHP_ADD_LIBRARY(m,, XDEBUG_SHARED_LIBADD) ])
 

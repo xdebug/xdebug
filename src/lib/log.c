@@ -336,6 +336,17 @@ void xdebug_print_info(void)
 # endif
 #endif
 
+#if HAVE_LINUX_RTNETLINK_H
+	php_info_print_table_row(2, "'xdebug://gateway' pseudo-host support", "yes");
+#else
+	php_info_print_table_row(2, "'xdebug://gateway' pseudo-host support", "no");
+#endif
+#if HAVE_RES_NINIT
+	php_info_print_table_row(2, "'xdebug://nameserver' pseudo-host support", "yes");
+#else
+	php_info_print_table_row(2, "'xdebug://nameserver' pseudo-host support", "no");
+#endif
+
 	if (XG_BASE(private_tmp)) {
 		php_info_print_table_row(2, "Systemd Private Temp Directory", XG_BASE(private_tmp));
 	} else {

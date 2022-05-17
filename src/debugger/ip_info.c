@@ -28,6 +28,9 @@
 #include <arpa/nameser.h>
 #include <resolv.h>
 
+#include "ip_info.h"
+
+#if XDEBUG_GATEWAY_SUPPORT
 
 #define BUFFER_SIZE		4096
 
@@ -228,6 +231,7 @@ char *xdebug_get_gateway_ip(void)
 
     return NULL;
 }
+#endif /* XDEBUG_GATEWAY_SUPPORT */
 
 /***/
 
