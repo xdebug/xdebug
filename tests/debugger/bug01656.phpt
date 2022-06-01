@@ -8,6 +8,8 @@ xdebug.start_with_request=yes
 xdebug.client_discovery_header=I_LIKE_COOKIES
 xdebug.discover_client_host=1
 xdebug.client_port=9999
+xdebug.log=
+xdebug.log_level=10
 --FILE--
 <?php
 var_dump( $_SERVER['I_LIKE_COOKIES'] );
