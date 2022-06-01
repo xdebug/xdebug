@@ -1852,8 +1852,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		xdebug_str *name = xdebug_str_create_from_const_char("$"XDEBUG_RETURN_VALUE_VAR_NAME);
 
 		tmp_node = xdebug_get_zval_value_xml_node(name, XG_DBG(current_return_value), options);
-		xdebug_xml_expand_attribute_value(tmp_node, "facet", "virtual");
-		xdebug_xml_expand_attribute_value(tmp_node, "facet", "return_value");
+		xdebug_xml_expand_attribute_value(tmp_node, "facet", "readonly return_value virtual");
 
 		xdebug_xml_add_child(node, tmp_node);
 		xdebug_str_free(name);

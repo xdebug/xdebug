@@ -74,7 +74,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="9" context="0"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="object" classname="Foo" children="1" numchildren="2" page="0" pagesize="32" facet="virtual return_value"><property name="x" fullname="$__RETURN_VALUE-&gt;x" facet="public" type="int"><![CDATA[42]]></property><property name="y" fullname="$__RETURN_VALUE-&gt;y" facet="public" type="float"><![CDATA[2.7]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="9" context="0"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="object" classname="Foo" children="1" numchildren="2" page="0" pagesize="32" facet="readonly return_value virtual"><property name="x" fullname="$__RETURN_VALUE-&gt;x" facet="public" type="int"><![CDATA[42]]></property><property name="y" fullname="$__RETURN_VALUE-&gt;y" facet="public" type="float"><![CDATA[2.7]]></property></property></response>
 
 -> context_get -i 10 -d 1
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -110,7 +110,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 18
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="18" context="0"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="float" facet="virtual return_value"><![CDATA[113.4]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="18" context="0"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="float" facet="readonly return_value virtual"><![CDATA[113.4]]></property></response>
 
 -> context_get -i 19 -d 1
 <?xml version="1.0" encoding="iso-8859-1"?>
