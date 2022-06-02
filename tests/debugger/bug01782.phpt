@@ -12,6 +12,8 @@ xdebug.mode=debug,develop
 default_charset=utf-8
 xdebug.filename_format=
 xdebug.client_port=9172
+xdebug.log=
+xdebug.log_level=10
 --FILE--
 <?php
 var_dump( xdebug_get_headers( ) );

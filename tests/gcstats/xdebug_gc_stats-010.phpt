@@ -10,6 +10,8 @@ xdebug.mode=gcstats
 xdebug.start_with_request=yes
 zend.enable_gc=1
 report_memleaks=0
+xdebug.log=
+xdebug.log_level=10
 --FILE--
 <?php
 

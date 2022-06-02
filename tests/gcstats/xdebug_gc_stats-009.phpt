@@ -9,6 +9,8 @@ check_reqs('PHP >= 7.3');
 xdebug.mode=gcstats
 xdebug.start_with_request=yes
 zend.enable_gc=0
+xdebug.log=
+xdebug.log_level=10
 --FILE--
 <?php
 ?>
