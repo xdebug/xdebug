@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2022-04-04</date>
- <time>11:33:07</time>
+ <date>2022-06-06</date>
+ <time>16:30:05</time>
  <version>
-  <release>3.1.4</release>
-  <api>3.1.4</api>
+  <release>3.1.5</release>
+  <api>3.1.5</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,18 +52,15 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Apr 04, 2022 - Xdebug 3.1.4
+Mon, Jun 06, 2022 - Xdebug 3.1.5
 
 = Fixed bugs:
 
-  - Fixed issue #2006: Removing second call breakpoint with same function name
-  - Fixed issue #2060: XDebug breaks the Symfony &quot;PhpFilesAdapter&quot; cache adapter
-  - Fixed issue #2061: Possible use after free with GC Stats
-  - Fixed issue #2063: Can't inspect ArrayObject storage elements
-  - Fixed issue #2064: Segmentation fault in symfony cache
-  - Fixed issue #2068: Debug session can be started with &quot;XDEBUG_SESSION_START=anything&quot; when xdebug.trigger_value is set
-  - Fixed issue #2069: Warn when profiler_append is used together with zlib compression
-  - Fixed issue #2075: Code coverage misses static array assignment lines
+  - Fixed issue #2056: Install documentation gives wrong arch for installation on M1 Macs
+  - Fixed issue #2082: phpize --clean removes required clocks.m4 file
+  - Fixed issue #2083: Constant defined with an enum case produce double &quot;facet&quot; attribute in context_get response
+  - Fixed issue #2085: Crash when used with source guardian encoded files
+  - Fixed issue #2090: Segfault in __callStatic() after FFI initialization
 
  </notes>
 
@@ -210,6 +207,34 @@ Mon, Apr 04, 2022 - Xdebug 3.1.4
  <zendextsrcrelease />
  <changelog>
  
+  <release>
+   <date>2022-04-04</date>
+   <time>11:33:07</time>
+   <version>
+    <release>3.1.4</release>
+    <api>3.1.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Apr 04, 2022 - Xdebug 3.1.4
+
+= Fixed bugs:
+
+  - Fixed issue #2006: Removing second call breakpoint with same function name
+  - Fixed issue #2060: XDebug breaks the Symfony &quot;PhpFilesAdapter&quot; cache adapter
+  - Fixed issue #2061: Possible use after free with GC Stats
+  - Fixed issue #2063: Can't inspect ArrayObject storage elements
+  - Fixed issue #2064: Segmentation fault in symfony cache
+  - Fixed issue #2068: Debug session can be started with &quot;XDEBUG_SESSION_START=anything&quot; when xdebug.trigger_value is set
+  - Fixed issue #2069: Warn when profiler_append is used together with zlib compression
+  - Fixed issue #2075: Code coverage misses static array assignment lines
+   </notes>
+  </release>
+
   <release>
    <date>2022-02-01</date>
    <time>16:29:04</time>
