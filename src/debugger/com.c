@@ -418,6 +418,34 @@ void xdebug_close_socket(int socketfd)
 	SCLOSE(socketfd);
 }
 
+static zval *get_client_discovery_address(const char **header)
+{
+	zval *remote_addr = NULL;
+
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking remote connect back address.");
+
+	if (XINI_DBG(client_discovery_header) && XINI_DBG(client_discovery_header)[0]) {
+		*header = XINI_DBG(client_discovery_header);
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking user configured header '%s'.", XINI_DBG(client_discovery_header));
+
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XINI_DBG(client_discovery_header), HASH_KEY_STRLEN(XINI_DBG(client_discovery_header)));
+	}
+	if (!remote_addr) {
+		*header = "HTTP_X_FORWARDED_FOR";
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking header 'HTTP_X_FORWARDED_FOR'.");
+
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
+	}
+	if (!remote_addr) {
+		*header = "REMOTE_ADDR";
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking header 'REMOTE_ADDR'.");
+
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
+	}
+
+	return remote_addr;
+}
+
 /* Starting the debugger */
 static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 {
@@ -445,25 +473,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 		return;
 	}
 
-	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking remote connect back address.");
-	if (XINI_DBG(client_discovery_header) && XINI_DBG(client_discovery_header)[0]) {
-		header = XINI_DBG(client_discovery_header);
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking user configured header '%s'.", XINI_DBG(client_discovery_header));
-
-		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XINI_DBG(client_discovery_header), HASH_KEY_STRLEN(XINI_DBG(client_discovery_header)));
-	}
-	if (!remote_addr) {
-		header = "HTTP_X_FORWARDED_FOR";
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking header 'HTTP_X_FORWARDED_FOR'.");
-
-		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
-	}
-	if (!remote_addr) {
-		header = "REMOTE_ADDR";
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking header 'REMOTE_ADDR'.");
-
-		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
-	}
+	remote_addr = get_client_discovery_address(&header);
 
 	if (remote_addr && strstr(Z_STRVAL_P(remote_addr), "://")) {
 		header = NULL;
