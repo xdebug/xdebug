@@ -12,7 +12,7 @@ xdebug.log={TMPDIR}/{RUNID}remote-log3.txt
 xdebug.discover_client_host=1
 xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
-xdebug.client_discovery_header=I_LIKE_COOKIES
+xdebug.client_discovery_header=I_LIKE_COOKIES,HTTP_X_FORWARDED_FOR,REMOTE_ADDR
 --FILE--
 <?php
 echo strlen("foo"), "\n";
@@ -22,8 +22,8 @@ unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log3.txt' );
 --EXPECTF--
 3
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
-[%d] [Step Debug] INFO: Checking remote connect back address.
-[%d] [Step Debug] INFO: Checking user configured header 'I_LIKE_COOKIES'.
+[%d] [Step Debug] INFO: Checking for client discovery headers: 'I_LIKE_COOKIES,HTTP_X_FORWARDED_FOR,REMOTE_ADDR'.
+[%d] [Step Debug] INFO: Checking header 'I_LIKE_COOKIES'.
 [%d] [Step Debug] INFO: Checking header 'HTTP_X_FORWARDED_FOR'.
 [%d] [Step Debug] INFO: Checking header 'REMOTE_ADDR'.
 [%d] [Step Debug] WARN: Could not discover client host through HTTP headers, connecting to configured address/port: doesnotexist2:9003.
