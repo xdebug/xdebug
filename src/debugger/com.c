@@ -418,32 +418,33 @@ void xdebug_close_socket(int socketfd)
 	SCLOSE(socketfd);
 }
 
-static zval *get_client_discovery_address(const char **header)
+static zval *get_client_discovery_address(char **header)
 {
-	zval *remote_addr = NULL;
+	xdebug_arg *headers;
+	int         i;
+	zval       *remote_addr = NULL;
 
-	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking remote connect back address.");
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking for client discovery headers: '%s'.", XINI_DBG(client_discovery_header));
 
-	if (XINI_DBG(client_discovery_header) && XINI_DBG(client_discovery_header)[0]) {
-		*header = XINI_DBG(client_discovery_header);
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking user configured header '%s'.", XINI_DBG(client_discovery_header));
+	headers = xdebug_arg_ctor();
+	xdebug_explode(",", XINI_DBG(client_discovery_header), headers, -1);
 
-		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), XINI_DBG(client_discovery_header), HASH_KEY_STRLEN(XINI_DBG(client_discovery_header)));
+	for (i = 0; i < headers->c; ++i) {
+		char *header_name = xdebug_trim(headers->args[i]);
+
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking header '%s'.", header_name);
+		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), header_name, HASH_KEY_STRLEN(header_name));
+
+		if (remote_addr) {
+			*header = header_name;
+			xdebug_arg_dtor(headers);
+			return remote_addr;
+		}
+
+		xdfree(header_name);
 	}
-	if (!remote_addr) {
-		*header = "HTTP_X_FORWARDED_FOR";
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking header 'HTTP_X_FORWARDED_FOR'.");
 
-		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_X_FORWARDED_FOR", HASH_KEY_SIZEOF("HTTP_X_FORWARDED_FOR"));
-	}
-	if (!remote_addr) {
-		*header = "REMOTE_ADDR";
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Checking header 'REMOTE_ADDR'.");
-
-		remote_addr = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REMOTE_ADDR", HASH_KEY_SIZEOF("REMOTE_ADDR"));
-	}
-
-	return remote_addr;
+	return NULL;
 }
 
 /* Starting the debugger */
@@ -452,7 +453,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	zval *remote_addr = NULL;
 	char *cp = NULL;
 	int   cp_found = 0;
-	const char *header = NULL;
+	char *header = NULL;
 
 	if (!XINI_DBG(discover_client_host)) {
 		char *pseudo_hostname = resolve_pseudo_hosts(XINI_DBG(client_host));
@@ -473,6 +474,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 		return;
 	}
 
+	/* Discover client host section */
 	remote_addr = get_client_discovery_address(&header);
 
 	if (remote_addr && strstr(Z_STRVAL_P(remote_addr), "://")) {
@@ -499,6 +501,7 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 
 	xdebug_str_add_fmt(connection_attempts, "%s:%ld (from %s HTTP header)", Z_STRVAL_P(remote_addr), XINI_DBG(client_port), header);
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Client host discovered through HTTP header, connecting to %s:%ld.", Z_STRVAL_P(remote_addr), (long int) XINI_DBG(client_port));
+	xdfree(header);
 
 	XG_DBG(context).socket = xdebug_create_socket(Z_STRVAL_P(remote_addr), XINI_DBG(client_port), XINI_DBG(connect_timeout_ms));
 
