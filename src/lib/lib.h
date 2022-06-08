@@ -223,6 +223,8 @@ typedef struct _xdebug_library_globals_t {
 } xdebug_library_globals_t;
 
 typedef struct _xdebug_library_settings_t {
+	char         *requested_mode;
+
 	char         *output_dir;
 	char         *trigger_value;
 
@@ -261,7 +263,7 @@ void xdebug_disable_opcache_optimizer(void);
 #define XDEBUG_MODE_GCSTATS      1<<3
 #define XDEBUG_MODE_PROFILING    1<<4
 #define XDEBUG_MODE_TRACING      1<<5
-int xdebug_lib_set_mode(char *mode);
+int xdebug_lib_set_mode(const char *mode);
 
 #define XDEBUG_MODE_IS_OFF() ((XG(globals.library.mode) == XDEBUG_MODE_OFF))
 #define XDEBUG_MODE_IS(v) ((XG(globals.library.mode) & (v)) ? 1 : 0)
