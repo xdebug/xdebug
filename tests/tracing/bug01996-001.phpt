@@ -10,6 +10,7 @@ xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=1
 xdebug.trace_format=0
+date.timezone=UTC
 --FILE--
 <?php
 require_once 'capture-trace.inc';
