@@ -122,7 +122,7 @@ void xdebug_disable_opcache_optimizer(void)
 }
 
 
-static int xdebug_lib_set_mode_item(char *mode, int len)
+static int xdebug_lib_set_mode_item(const char *mode, int len)
 {
 	if (strncmp(mode, "off", len) == 0) {
 		XG_LIB(mode) |= XDEBUG_MODE_OFF;
@@ -156,11 +156,11 @@ static int xdebug_lib_set_mode_item(char *mode, int len)
 	return 0;
 }
 
-static int xdebug_lib_set_mode_from_setting(char *mode)
+static int xdebug_lib_set_mode_from_setting(const char *mode)
 {
-	char *mode_ptr = mode;
-	char *comma    = NULL;
-	int   errors   = 0;
+	const char *mode_ptr = mode;
+	char       *comma    = NULL;
+	int         errors   = 0;
 
 	XG_LIB(mode) = 0;
 
@@ -178,7 +178,7 @@ static int xdebug_lib_set_mode_from_setting(char *mode)
 	return !errors;
 }
 
-int xdebug_lib_set_mode(char *mode)
+int xdebug_lib_set_mode(const char *mode)
 {
 	char *config = getenv("XDEBUG_MODE");
 	int   result = 0;

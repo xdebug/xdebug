@@ -141,19 +141,6 @@ static PHP_INI_MH(OnUpdateSession)
 	DUMP_TOK(session);
 }
 
-static PHP_INI_MH(OnUpdateMode)
-{
-	if (!new_value) {
-		return FAILURE;
-	}
-
-	if (!xdebug_lib_set_mode(ZSTR_VAL(new_value))) {
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-
 static PHP_INI_MH(OnUpdateStartWithRequest)
 {
 	if (!new_value) {
@@ -284,7 +271,7 @@ ZEND_INI_DISP(display_start_upon_error)
 
 PHP_INI_BEGIN()
 	/* Library settings */
-	PHP_INI_ENTRY(    "xdebug.mode",               "develop",               PHP_INI_SYSTEM,                OnUpdateMode)
+	STD_PHP_INI_ENTRY("xdebug.mode",               "develop",               PHP_INI_SYSTEM,                OnUpdateString, settings.library.requested_mode,   zend_xdebug_globals, xdebug_globals)
 	PHP_INI_ENTRY_EX( "xdebug.start_with_request", "default",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartWithRequest, display_start_with_request)
 	PHP_INI_ENTRY_EX( "xdebug.start_upon_error",   "default",               PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateStartUponError,   display_start_upon_error)
 	STD_PHP_INI_ENTRY("xdebug.output_dir",         XDEBUG_TEMP_DIR,         PHP_INI_ALL,                   OnUpdateString, settings.library.output_dir,       zend_xdebug_globals, xdebug_globals)
@@ -532,6 +519,11 @@ PHP_MINIT_FUNCTION(xdebug)
 {
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
+
+	/* Locking in mode as it currently is */
+	if (!xdebug_lib_set_mode(XG(settings.library.requested_mode))) {
+		xdebug_lib_set_mode("develop");
+	}
 
 	if (XDEBUG_MODE_IS_OFF()) {
 		return SUCCESS;

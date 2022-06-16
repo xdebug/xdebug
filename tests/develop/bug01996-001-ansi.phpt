@@ -8,6 +8,7 @@ require __DIR__ . '/../utils.inc';
 xdebug.mode=develop
 html_errors=0
 xdebug.cli_color=2
+date.timezone=UTC
 --FILE--
 <?php
 $closure = Closure::fromCallable('substr');
