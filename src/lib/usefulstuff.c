@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,18 +16,20 @@
 
 #include <stdlib.h>
 #include <string.h>
+
 #ifndef WIN32
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/resource.h>
-#include <sys/file.h>
+# include <unistd.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <sys/resource.h>
+# include <sys/file.h>
 #else
-#define PATH_MAX MAX_PATH
-#include <winsock2.h>
-#include <io.h>
-#include <process.h>
+# define PATH_MAX MAX_PATH
+# include <winsock2.h>
+# include <io.h>
+# include <process.h>
 #endif
+
 #include "php_xdebug.h"
 
 #include "mm.h"

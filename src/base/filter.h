@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
 #ifndef XDEBUG_FILTER_H
 #define XDEBUG_FILTER_H
 
-#include "php.h"
+#include "lib/php-header.h"
 #include "php_xdebug.h"
 
 int xdebug_is_stack_frame_filtered(int filter_type, function_stack_entry *fse);

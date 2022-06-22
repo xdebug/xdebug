@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
 #include <string.h>
 #include <locale.h>
 
-#include "php.h"
+#include "lib/php-header.h"
 #include "ext/standard/php_string.h"
 
 #include "mm.h"

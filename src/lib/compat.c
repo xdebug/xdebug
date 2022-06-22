@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans <derick@xdebug.org>           |
+   | Copyright (c) 2002-2022 Derick Rethans <derick@xdebug.org>           |
    |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
    |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
    |                         Zeev Suraski <zeev@zend.com>                 |
@@ -39,7 +39,7 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php.h"
+#include "lib/php-header.h"
 #include "main/php_version.h"
 #include "compat.h"
 #include "zend_extensions.h"
