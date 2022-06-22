@@ -8,7 +8,7 @@ class Assert
 
 	function __call($name, $args)
 	{
-		echo $name, ': ', join( ', ', $args ), "\n";
+		echo rtrim( $name . ': ' . join( ', ', $args ) ), "\n";
 		return $this;
 	}
 }

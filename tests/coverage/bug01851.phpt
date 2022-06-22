@@ -25,6 +25,6 @@ dump_branch_coverage($c);
 %a
 - paths
   - 0 %d %d %d %d: HIT
-  - 0 %d %d:  X 
-  - 0 %d:  X 
+  - 0 %d %d:  X
+  - 0 %d:  X
 %a

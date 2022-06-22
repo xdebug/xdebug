@@ -18,7 +18,7 @@ include "{$includeDir}/filter/xdebug/xdebug.php";
 Foobar::foo("hi");
 XDEBUG::foo("hi");
 Xdebug::foo("hi");
-	
+
 $result = xdebug_get_code_coverage();
 ksort( $result );
 

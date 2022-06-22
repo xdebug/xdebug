@@ -2,7 +2,7 @@
 function loopy($i)
 {
 	for ($j = 0; $j < $i; $j++) {
-		echo $j, ' ';
+		echo $j;
 	}
 	echo "\n";
 }

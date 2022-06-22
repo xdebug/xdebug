@@ -28,7 +28,7 @@ that: -0.123, latitude
 range: -90, 90
 that: 52.5, longitude
 range: -140, 140
-verifyNow: 
+verifyNow:
 line #20 is present and covered
 line #21 is present and covered
 line #22 is present and covered

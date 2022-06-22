@@ -300,11 +300,13 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		*jump_count = 2;
 		return 1;
 
+#if PHP_VERSION_ID < 80200
 	} else if (opcode.opcode == ZEND_JMPZNZ) {
 		jumps[0] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
 		jumps[1] = position + ((int32_t) opcode.extended_value / (int32_t) sizeof(zend_op));
 		*jump_count = 2;
 		return 1;
+#endif
 
 	} else if (opcode.opcode == ZEND_FE_FETCH_R || opcode.opcode == ZEND_FE_FETCH_RW) {
 		jumps[0] = position + 1;

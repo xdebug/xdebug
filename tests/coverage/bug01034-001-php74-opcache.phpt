@@ -20,40 +20,40 @@ $c = xdebug_get_code_coverage();
 dump_branch_coverage($c);
 ?>
 --EXPECTF--
-0 1 2 3 
+0123
 !42
 caught
 ifelse
 - branches
   - 00; OP: 00-04; line: 10-12 HIT; out1: 05  X ; out2: 08 HIT
-  - 05; OP: 05-07; line: 13-13  X ; out1: 12  X 
-  - 08; OP: 08-11; line: 15-16 HIT; out1: EX  X 
-  - 12; OP: 12-15; line: 18-19  X ; out1: EX  X 
+  - 05; OP: 05-07; line: 13-13  X ; out1: 12  X
+  - 08; OP: 08-11; line: 15-16 HIT; out1: EX  X
+  - 12; OP: 12-15; line: 18-19  X ; out1: EX  X
 - paths
-  - 0 5 12:  X 
+  - 0 5 12:  X
   - 0 8: HIT
 
 loopy
 - branches
-  - 00; OP: 00-04; line: 02-04 HIT; out1: 10 HIT
-  - 05; OP: 05-09; line: 05-04 HIT; out1: 10 HIT
-  - 10; OP: 10-12; line: 04-04 HIT; out1: 13 HIT; out2: 05 HIT
-  - 13; OP: 13-16; line: 07-08 HIT; out1: EX  X 
+  - 00; OP: 00-04; line: 02-04 HIT; out1: 08 HIT
+  - 05; OP: 05-07; line: 05-04 HIT; out1: 08 HIT
+  - 08; OP: 08-10; line: 04-04 HIT; out1: 11 HIT; out2: 05 HIT
+  - 11; OP: 11-14; line: 07-08 HIT; out1: EX  X
 - paths
-  - 0 10 13: HIT
-  - 0 10 5 10 13: HIT
+  - 0 8 11: HIT
+  - 0 8 5 8 11: HIT
 
 trycatch
 - branches
-  - 00; OP: 00-05; line: 21-24 HIT; out1: EX  X 
-  - 06; OP: 06-06; line: 26-26 HIT; out1: 07 HIT; out2: EX  X 
-  - 07; OP: 07-10; line: 27-29 HIT; out1: EX  X 
+  - 00; OP: 00-05; line: 21-24 HIT; out1: EX  X
+  - 06; OP: 06-06; line: 26-26 HIT; out1: 07 HIT; out2: EX  X
+  - 07; OP: 07-10; line: 27-29 HIT; out1: EX  X
 - paths
   - 0: HIT
   - 6 7: HIT
 
 {main}
 - branches
-  - 00; OP: 00-15; line: 31-36 HIT; out1: EX  X 
+  - 00; OP: 00-15; line: 31-36 HIT; out1: EX  X
 - paths
   - 0: HIT

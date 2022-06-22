@@ -30,7 +30,9 @@ function dump_branch_coverage($info)
 			echo $fname, "\n", "- branches\n";
 			foreach ( $function['branches'] as $bnr => $branch )
 			{
-				printf( "  - %02d; OP: %02d-%02d; line: %02d-%02d %3s",
+				$str = '';
+
+				$str .= sprintf( "  - %02d; OP: %02d-%02d; line: %02d-%02d %3s",
 					$bnr,
 					$branch['op_start'], $branch['op_end'],
 					$branch['line_start'], $branch['line_end'],
@@ -40,26 +42,26 @@ function dump_branch_coverage($info)
 				{
 					if ( $out == 2147483645 )
 					{
-						printf("; out%d: EX %3s", $key + 1,
+						$str .= sprintf("; out%d: EX %3s", $key + 1,
 							$branch['out_hit'][$key] ? "HIT" : " X "
 						);
 					}
 					else
 					{
-						printf("; out%d: %02d %3s", $key + 1,
+						$str .= sprintf("; out%d: %02d %3s", $key + 1,
 							$branch['out'][$key],
 							$branch['out_hit'][$key] ? "HIT" : " X "
 						);
 					}
 				}
-				echo "\n";
+				echo rtrim( $str ). "\n";
 			}
 
 			echo "- paths\n";
 			foreach( $function['paths'] as $path )
 			{
 				echo '  - ', join( " ", $path['path'] ), ': ';
-				echo $path['hit'] ? "HIT\n" : " X \n";
+				echo $path['hit'] ? "HIT\n" : " X\n";
 			}
 			echo "\n";
 		}

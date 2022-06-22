@@ -20,13 +20,13 @@ $c = xdebug_get_code_coverage();
 dump_branch_coverage($c);
 ?>
 --EXPECTF--
-0 1 2 3 4 
+01234
 {main}
 - branches
-  - 00; OP: 00-02; line: 02-02 HIT; out1: 09 HIT
-  - 03; OP: 03-08; line: 03-02 HIT; out1: 09 HIT
-  - 09; OP: 09-11; line: 02-02 HIT; out1: 12 HIT; out2: 03 HIT
-  - 12; OP: 12-14; line: 05-07 HIT; out1: EX  X 
+  - 00; OP: 00-02; line: 02-02 HIT; out1: 07 HIT
+  - 03; OP: 03-06; line: 03-02 HIT; out1: 07 HIT
+  - 07; OP: 07-09; line: 02-02 HIT; out1: 10 HIT; out2: 03 HIT
+  - 10; OP: 10-12; line: 05-07 HIT; out1: EX  X
 - paths
-  - 0 9 12:  X 
-  - 0 9 3 9 12: HIT
+  - 0 7 10:  X
+  - 0 7 3 7 10: HIT
