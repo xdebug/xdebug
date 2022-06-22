@@ -12,7 +12,7 @@ xdebug.trace_format=0
 require_once 'capture-trace.inc';
 
 class foo {
-
+	public $a, $b;
 	function __construct() {
 		$this->a = $this;
 		$this->b = $this;

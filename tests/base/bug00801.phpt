@@ -15,6 +15,7 @@ class Handler
 
 class Wrapper
 {
+    public $context;
     protected $_fp;
 
     public function stream_close()
