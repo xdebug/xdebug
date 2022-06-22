@@ -63,7 +63,7 @@ jobs:
                 shell: cmd
         strategy:
             matrix:
-                php: ["7.4", "8.0", "8.1"]
+                php: ["7.4", "8.0", "8.1", "8.2"]
                 arch: [x64, x86]
                 ts: [nts, ts]
         steps:
@@ -80,7 +80,7 @@ jobs:
                     echo $xdebug_version >> $env:GITHUB_ENV
                 - name: Setup PHP
                   id: setup-php
-                  uses: cmb69/setup-php-sdk@v0.5
+                  uses: cmb69/setup-php-sdk@679db664987b6f5de6ecc4732e9ce649a689e4e5
                   with:
                       version: ${{matrix.php}}
                       arch: ${{matrix.arch}}
@@ -114,6 +114,7 @@ jobs:
                     if ('7.4' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
                     if ('8.0' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
                     if ('8.1' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
+                    if ('8.2' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
 
                     if ('nts' -eq '${{matrix.ts}}') { $artifact_name = $artifact_name + '-nts' }
                     if ('x64' -eq '${{matrix.arch}}') { $artifact_name = $artifact_name + '-x86_64' }
