@@ -600,10 +600,10 @@ static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk_i
 	if (brk_info->exceptionname) {
 		xdebug_xml_add_attribute_ex(xml, "exception", xdstrdup(brk_info->exceptionname), 0, 1);
 	}
-	if (brk_info->temporary) {
-		xdebug_xml_add_attribute(xml, "state", "temporary");
-	} else if (brk_info->disabled) {
+	if (brk_info->disabled) {
 		xdebug_xml_add_attribute(xml, "state", "disabled");
+	} else if (brk_info->temporary) {
+		xdebug_xml_add_attribute(xml, "state", "temporary");
 	} else {
 		xdebug_xml_add_attribute(xml, "state", "enabled");
 	}
