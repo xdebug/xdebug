@@ -220,13 +220,67 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 	return res;
 }
 
+int next_condition_met(void)
+{
+	function_stack_entry *fse;
+	int                   level = 0;
+
+	if (!XG_DBG(context).do_next) {
+		return 0;
+	}
+
+	/* Get latest stack level and function number */
+	if (XG_BASE(stack) && XDEBUG_VECTOR_TAIL(XG_BASE(stack))) {
+		fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+		level = fse->level;
+	}
+
+	if (XG_DBG(context).next_level >= level) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int finish_condition_met(int break_at_return_scope)
+{
+	function_stack_entry *fse;
+	int                   level = 0;
+	int                   func_nr = 0;
+
+	if (!XG_DBG(context).do_finish) {
+		return 0;
+	}
+
+	/* Get latest stack level and function number */
+	if (XG_BASE(stack) && XDEBUG_VECTOR_TAIL(XG_BASE(stack))) {
+		fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+		level = fse->level;
+		func_nr = fse->function_nr;
+	}
+
+	if (!break_at_return_scope && level < XG_DBG(context).finish_level) {
+		return 1;
+	}
+
+	if (break_at_return_scope && level <= XG_DBG(context).finish_level) {
+		return 1;
+	}
+
+	if (
+		(level == XG_DBG(context).finish_level) &&
+		(func_nr > XG_DBG(context).finish_func_nr)
+	) {
+		return 1;
+	}
+
+	return 0;
+}
+
 void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *extra_brk_info;
-	function_stack_entry *fse;
-	int                   level = 0;
-	int                   func_nr = 0;
 
 	if (XG_DBG(context).do_connect_to_client) {
 		XG_DBG(context).do_connect_to_client = 0;
@@ -250,24 +304,8 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 			}
 		}
 
-		/* Get latest stack level and function number */
-		if (XG_BASE(stack) && XDEBUG_VECTOR_TAIL(XG_BASE(stack))) {
-			fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-			level = fse->level;
-			func_nr = fse->function_nr;
-		} else {
-			level = 0;
-			func_nr = 0;
-		}
-
 		/* Check for "finish" */
-		if (
-			XG_DBG(context).do_finish &&
-			(
-				(level < XG_DBG(context).finish_level) ||
-				((level == XG_DBG(context).finish_level) && (func_nr > XG_DBG(context).finish_func_nr))
-			)
-		) {
+		if (finish_condition_met(0)) {
 			XG_DBG(context).do_finish = 0;
 
 			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
@@ -278,7 +316,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		}
 
 		/* Check for "next" */
-		if (XG_DBG(context).do_next && XG_DBG(context).next_level >= level) {
+		if (next_condition_met()) {
 			XG_DBG(context).do_next = 0;
 
 			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
@@ -485,9 +523,16 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 	if (
 		(XG_DBG(context).breakpoint_include_return_value) &&
 		(breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN) &&
-		(XG_DBG(context).do_step || XG_DBG(context).do_finish) &&
 		return_value
 	) {
+		if (XG_DBG(context).do_step) {
+			XG_DBG(context).do_step = 0;
+		} else if (finish_condition_met(1)) {
+			XG_DBG(context).do_finish = 0;
+		} else {
+			return 1;
+		}
+
 		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
 			return 0;
 		}
