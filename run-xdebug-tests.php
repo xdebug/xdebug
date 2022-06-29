@@ -2052,6 +2052,18 @@ TEST $file
     //$ini_overwrites[] = 'setting=value';
     settings2array($ini_overwrites, $ini_settings);
 
+    if (getenv('OPCACHE') !== false) {
+        if (getenv('OPCACHE') == 'yes') {
+            $ini_settings['opcache.enable'] = 1;
+            $ini_settings['opcache.enable_cli'] = 1;
+            $ini_settings['opcache.optimization_level'] = -1;
+        } else {
+            $ini_settings['opcache.enable'] = 0;
+            $ini_settings['opcache.enable_cli'] = 0;
+            $ini_settings['opcache.optimization_level'] = 0;
+        }
+    }
+
     $orig_ini_settings = settings2params($ini_settings);
 
     if ($file_cache !== null) {
