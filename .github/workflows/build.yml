@@ -15,7 +15,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [7.3, 7.4, 8.0, 8.1]
+                php: [7.4, 8.0, 8.1]
                 use-opcache: [true, false]
 
         steps:
@@ -63,7 +63,7 @@ jobs:
                 shell: cmd
         strategy:
             matrix:
-                php: ["7.3", "7.4", "8.0", "8.1"]
+                php: ["7.4", "8.0", "8.1"]
                 arch: [x64, x86]
                 ts: [nts, ts]
         steps:
@@ -93,12 +93,8 @@ jobs:
                       toolset: ${{steps.setup-php.outputs.toolset}}
                 - name: Generate Build Files
                   run: phpize
-                - name: Configure Build with Compression
-                  if: ${{ matrix.php != '7.2' && matrix.php != '7.3' }}
+                - name: Configure Build
                   run: configure --with-xdebug --with-xdebug-compression --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
-                - name: Configure Build without Compression
-                  if: ${{ matrix.php == '7.2' || matrix.php == '7.3' }}
-                  run: configure --with-xdebug --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
                 - name: Build
                   run: nmake
                 - name: Define Xdebug Module Env
@@ -115,8 +111,6 @@ jobs:
 
                     $artifact_name = 'php_xdebug-${{env.XDEBUG_VERSION}}-${{matrix.php}}'
 
-                    if ('7.2' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
-                    if ('7.3' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
                     if ('7.4' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
                     if ('8.0' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
                     if ('8.1' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }

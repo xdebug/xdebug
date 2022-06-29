@@ -15,37 +15,26 @@ jobs:
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_80'
-      phpVersion: '8.0.9'
+      phpVersion: '8.0.20'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_74'
-      phpVersion: '7.4.22'
-      configurationParameters: '--enable-debug --disable-maintainer-zts'
-  - template: .azure/macos/job.yml
-    parameters:
-      configurationName: 'OSX_PHP_73'
-      phpVersion: '7.3.29'
+      phpVersion: '7.4.30'
       configurationParameters: '--enable-debug --disable-maintainer-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_81_ZTS'
-      phpVersion: 'branch'
-      phpBranch: 'PHP-8.1'
+      phpVersion: '8.1.7'
       configurationParameters: '--enable-debug --enable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_80_ZTS'
-      phpVersion: '8.0.0'
+      phpVersion: '8.0.20'
       configurationParameters: '--enable-debug --enable-zts'
       xdebugConfigurationParameters: '--without-xdebug-compression'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_74_ZTS'
-      phpVersion: '7.4.13'
-      configurationParameters: '--enable-debug --enable-maintainer-zts'
-  - template: .azure/macos/job.yml
-    parameters:
-      configurationName: 'OSX_PHP_73_ZTS'
-      phpVersion: '7.3.25'
+      phpVersion: '7.4.30'
       configurationParameters: '--enable-debug --enable-maintainer-zts'
