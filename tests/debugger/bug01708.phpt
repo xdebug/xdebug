@@ -2,7 +2,7 @@
 Test for bug #1708: Crash on evaluating object with properties
 --SKIPIF--
 <?php
-require __DIR__ . '/utils.inc';
+require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--
