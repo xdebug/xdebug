@@ -3336,11 +3336,14 @@ function show_result(
                 case 'LEAK&FAIL':
                     // Light Red
                     $color = "\e[1;31m{$result}\e[0m"; break;
+                case 'SKIP':
+                    // Dimmed
+                    $color = "\e[0;37m{$result}"; break;
                 default: // Yellow
                     $color = "\e[1;33m{$result}\e[0m"; break;
             }
 
-            echo "$color $tested [$tested_file] $extra\n";
+            echo "$color $tested [$tested_file] $extra\e[0m\n";
         } else {
             echo "$result $tested [$tested_file] $extra\n";
         }
