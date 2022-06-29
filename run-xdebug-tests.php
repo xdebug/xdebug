@@ -2116,10 +2116,21 @@ TEST $file
             $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
         }
 
+        if (!array_key_exists('XDEBUG_MODE', $env)) {
+            $env['XDEBUG_MODE'] = "";
+        }
+
+        /* Remove auto prepend and append settings for SKIPIF */
+        $skipif_ini_settings = $orig_ini_settings;
+        $skipif_ini_settings = preg_replace( '@-d \"auto_prepend_file=.*?\" @', '', $skipif_ini_settings );
+        $skipif_ini_settings = preg_replace( '@-d \"auto_append_file=.*?\" @', '', $skipif_ini_settings );
+        $skipif_ini_settings = preg_replace( '@-d \"xdebug\.log=.*?\" @', '', $skipif_ini_settings );
+        $skipif_ini_settings .= " -d track_errors=0 -d xdebug.mode=off";
+
         $junit->startTimer($shortname);
 
         $startTime = microtime(true);
-        $commandLine = "$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
+        $commandLine = "$extra $php $pass_options $extra_options -q $skipif_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0";
         $output = $skipCache->checkSkip($commandLine, $test->getSection('SKIPIF'), $test_skipif, $temp_skipif, $env);
 
         $time = microtime(true) - $startTime;
