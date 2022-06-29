@@ -619,13 +619,6 @@ PHP_RINIT_FUNCTION(xdebug)
 		return SUCCESS;
 	}
 
-#if PHP_VERSION_ID <= 70301
-	/* PHP Bug #77287 causes Xdebug to segfault if Opcache has the "compact
-	 * literals" optimisation turned on. So force the optimisation off for PHP
-	 * 7.3.0 and 7.3.1. */
-	xdebug_disable_opcache_optimizer();
-#endif
-
 	xdebug_library_rinit();
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
