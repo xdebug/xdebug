@@ -99,9 +99,9 @@ Options:
                 <sdir> the path to your source files and <tdir> some patch in
                 your web page hierarchy with <url> pointing to <tdir>.
 
-    --keep-[all|php|skip|clean]
-                Do not delete 'all' files, 'php' test file, 'skip' or 'clean'
-                file.
+    --keep-[all|php|skip|after|clean]
+                Do not delete 'all' files, 'php' test file, 'skip', 'after',
+                or 'clean' file.
 
     --set-timeout <n>
                 Set timeout for individual tests, where <n> is the number of
@@ -112,9 +112,9 @@ Options:
                 Sets the number of lines of surrounding context to print for diffs.
                 The default value is 3.
 
-    --show-[all|php|skip|clean|exp|diff|out|mem]
-                Show 'all' files, 'php' test file, 'skip' or 'clean' file. You
-                can also use this to show the output 'out', the expected result
+    --show-[all|php|skip|clean|after|exp|diff|out|mem]
+                Show 'all' files, 'php' test file, 'skip', 'after', or 'clean' file.
+                You can also use this to show the output 'out', the expected result
                 'exp', the difference between them 'diff' or the valgrind log
                 'mem'. The result types get written independent of the log format,
                 however 'diff' only exists when a test fails.
@@ -362,7 +362,7 @@ function main(): void
     $num_repeats = 1;
 
     $cfgtypes = ['show', 'keep'];
-    $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
+    $cfgfiles = ['skip', 'php', 'after', 'clean', 'out', 'diff', 'exp', 'mem'];
     $cfg = [];
 
     foreach ($cfgtypes as $type) {
@@ -1924,6 +1924,8 @@ TEST $file
     $test_file = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'php';
     $temp_skipif = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
     $test_skipif = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'skip.php';
+    $temp_after = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'after.php';
+    $test_after = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'after.php';
     $temp_clean = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
     $test_clean = $test_dir . DIRECTORY_SEPARATOR . $main_file_name . 'clean.php';
     $preload_filename = $temp_dir . DIRECTORY_SEPARATOR . $main_file_name . 'preload.php';
@@ -1954,6 +1956,7 @@ TEST $file
             'sh' => $sh_filename,
             'php' => $temp_file,
             'skip' => $temp_skipif,
+            'after' => $temp_after,
             'clean' => $temp_clean
         ];
     }
@@ -1976,6 +1979,8 @@ TEST $file
     @unlink($temp_skipif);
     @unlink($test_skipif);
     @unlink($tmp_post);
+    @unlink($temp_after);
+    @unlink($test_after);
     @unlink($temp_clean);
     @unlink($test_clean);
     @unlink($preload_filename);
@@ -2426,6 +2431,16 @@ COMMAND $cmd
             'diff' => '',
             'info' => $time / 1000000000,
         ];
+    }
+
+    // Things to run after the test (like, final)
+    if ($test->sectionNotEmpty('AFTER')) {
+        show_file_block('after', $test->getSection('AFTER'));
+        save_text($test_clean, trim($test->getSection('AFTER')), $temp_clean);
+
+        $extra = !IS_WINDOWS ?
+            "unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
+        $out .= system_with_timeout("$extra $orig_php $pass_options -q $orig_ini_settings $no_file_cache \"$test_clean\"", $env);
     }
 
     // Remember CLEAN output to report borked test if it otherwise passes.
@@ -3749,7 +3764,7 @@ class TestFile
         'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
         'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
         'INI', 'ENV', 'EXTENSIONS',
-        'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
+        'SKIPIF', 'XFAIL', 'XLEAK', 'AFTER', 'CLEAN',
         'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
     ];
 
