@@ -283,32 +283,20 @@ PHP_FUNCTION(xdebug_stop_gcstats)
    Return number of times garbage collection was triggered. */
 PHP_FUNCTION(xdebug_get_gc_run_count)
 {
-#if PHP_VERSION_ID >= 70300
 	zend_gc_status status;
-#endif
 
-#if PHP_VERSION_ID >= 70300
 	zend_gc_get_status(&status);
 	RETURN_LONG(status.runs);
-#else
-    RETURN_LONG(GC_G(gc_runs));
-#endif
 }
 
 /* {{{ proto void xdebug_get_gc_total_collected_roots()
    Return total number of collected root variables during garbage collection. */
 PHP_FUNCTION(xdebug_get_gc_total_collected_roots)
 {
-#if PHP_VERSION_ID >= 70300
 	zend_gc_status status;
-#endif
 
-#if PHP_VERSION_ID >= 70300
 	zend_gc_get_status(&status);
 	RETURN_LONG(status.collected);
-#else
-    RETURN_LONG(GC_G(collected));
-#endif
 }
 
 /* {{{ helpers */

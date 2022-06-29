@@ -199,28 +199,16 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			} else if ((size_t) Z_STRLEN_P(*struc) <= (size_t) options->max_data) {
 				zend_string *tmp_zstr;
 
-#if PHP_VERSION_ID >= 70300
 				tmp_zstr = php_addcslashes(Z_STR_P(*struc), (char*) "'\\\0..\37", 7);
-#else
-				tmp_zstr = php_addcslashes(Z_STR_P(*struc), 0, (char*) "'\\\0..\37", 7);
-#endif
+
 				xdebug_str_addc(str, '\'');
 				xdebug_str_add_zstr(str, tmp_zstr);
 				xdebug_str_addc(str, '\'');
 
 				zend_string_release(tmp_zstr);
 			} else {
-#if PHP_VERSION_ID >= 70300
 				zend_string *tmp_zstr = php_addcslashes_str(ZSTR_VAL(Z_STR_P(*struc)), options->max_data, (char*) "'\\\0..\37", 7);
-#else
-				zend_string *tmp_zstr = NULL;
-				zend_string *truncated_zstr = zend_string_copy(Z_STR_P(*struc));
 
-				truncated_zstr = zend_string_truncate(truncated_zstr, options->max_data, 0);
-				tmp_zstr = php_addcslashes(truncated_zstr, 0, (char*) "'\\\0..\37", 7);
-
-				zend_string_release(truncated_zstr);
-#endif
 				xdebug_str_addc(str, '\'');
 				xdebug_str_add_zstr(str, tmp_zstr);
 				xdebug_str_add_literal(str, "\'...");
