@@ -1715,6 +1715,7 @@ function run_worker(): void
 
     while (($command = fgets($workerSock))) {
         $command = unserialize(base64_decode($command));
+        $command["env"]["TEST_PHP_WORKER"] = getenv('TEST_PHP_WORKER');
 
         switch ($command["type"]) {
             case "run_tests":
@@ -2073,6 +2074,8 @@ TEST $file
     // these may overwrite the test defaults...
     if ($test->hasSection('INI')) {
         $ini = str_replace('{PWD}', dirname($file), $test->getSection('INI'));
+        $ini = str_replace('{RUNID}', getenv('UNIQ_RUN_ID'), $ini);
+        $ini = str_replace('{TEST_PHP_WORKER}', getenv('TEST_PHP_WORKER'), $ini);
         $ini = str_replace('{TMP}', sys_get_temp_dir(), $ini);
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
         $ini = preg_replace('/{MAIL:(\S+)}/', $replacement, $ini);

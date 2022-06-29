@@ -11,7 +11,7 @@ xdebug.start_with_request=yes
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.use_compression=1
-xdebug.log={TMPDIR}/{RUNID}/start_no_zlib_compression.txt
+xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}/start_no_zlib_compression.txt
 --FILE--
 <?php
 $tf = xdebug_get_tracefile_name();
@@ -26,11 +26,11 @@ if (preg_match('@\.gz$@', $tf)) {
 	echo file_get_contents($tf);
 }
 
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'start_no_zlib_compression.txt' );
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_no_zlib_compression.txt' );
 ?>
 --CLEAN--
 <?php
-unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'start_no_zlib_compression.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_no_zlib_compression.txt' );
 ?>
 --EXPECTF--
 %s.xt

@@ -6,7 +6,7 @@ XDEBUG_SESSION_START=foobar
 <?php
 require 'dbgp/dbgpclient.php';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'start_with_request_trigger_session_start_shared_secret-001.txt';
+$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_with_request_trigger_session_start_shared_secret-001.txt';
 @unlink( $xdebugLogFileName );
 
 dbgpRunFile(

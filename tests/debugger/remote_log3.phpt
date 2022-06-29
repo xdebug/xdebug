@@ -8,7 +8,7 @@ check_reqs('dbgp; !win');
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.log={TMPDIR}/{RUNID}remote-log3.txt
+xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}remote-log3.txt
 xdebug.discover_client_host=1
 xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
@@ -16,8 +16,8 @@ xdebug.client_discovery_header=I_LIKE_COOKIES,HTTP_X_FORWARDED_FOR,REMOTE_ADDR
 --FILE--
 <?php
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log3.txt' );
-unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log3.txt' );
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-log3.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-log3.txt' );
 ?>
 --EXPECTF--
 3

@@ -10,14 +10,14 @@ I_LIKE_COOKIES=doesnotexist3
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.log={TMPDIR}/{RUNID}remote-log4.txt
+xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}remote-log4.txt
 xdebug.client_host=unix:///tmp/xdbg.sock
 xdebug.client_port=0
 --FILE--
 <?php
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
-unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-log4.txt' );
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-log4.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-log4.txt' );
 ?>
 --EXPECTF--
 3
