@@ -898,7 +898,7 @@ More .INIs  : " , (function_exists(\'php_ini_scanned_files\') ? str_replace("\n"
         'session' => ['session.auto_start=0'],
         'tidy' => ['tidy.clean_output=0'],
         'zlib' => ['zlib.output_compression=Off'],
-        'xdebug' => ['xdebug.mode=off'],
+        'xdebug' => ['xdebug.mode=off','xdebug.start_with_request=default','xdebug.log_level=20'],
     ];
 
     foreach ($info_params_ex as $ext => $ini_overwrites_ex) {
@@ -2424,6 +2424,10 @@ TEST $file
         $env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
         $cmd = $valgrind->wrapCommand($cmd, $memcheck_filename, strpos($test_file, "pcre") !== false);
+    }
+
+    if (!array_key_exists('XDEBUG_MODE', $env)) {
+        $env['XDEBUG_MODE'] = "";
     }
 
     if ($DETAILED) {
