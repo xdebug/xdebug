@@ -907,26 +907,6 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 			break;
 	}
 
-#if PHP_VERSION_ID < 70400
-	/* Log if necessary */
-	if (!display) {
-		efree(buffer);
-		return;
-	}
-
-	if (PG(track_errors) && EG(active)) {
-		zval tmp;
-		ZVAL_STRINGL(&tmp, buffer, buffer_len);
-
-		if (EG(current_execute_data)) {
-			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0) == FAILURE) {
-				zval_ptr_dtor(&tmp);
-			}
-		} else {
-			zend_hash_str_update(&EG(symbol_table), "php_errormsg", sizeof("php_errormsg"), &tmp);
-		}
-	}
-#endif
 
 #if PHP_VERSION_ID < 80000
 	efree(buffer);
