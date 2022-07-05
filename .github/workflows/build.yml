@@ -15,7 +15,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [7.4, 8.0, 8.1]
+                php: [8.0, 8.1]
                 use-opcache: [true, false]
                 experimental: [false]
                 include:
@@ -73,7 +73,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: ["7.4", "8.0", "8.1"]
+                php: ["8.0", "8.1"]
                 arch: [x64, x86]
                 ts: [nts, ts]
                 experimental: [false]
@@ -131,7 +131,6 @@ jobs:
 
                     $artifact_name = 'php_xdebug-${{env.XDEBUG_VERSION}}-${{matrix.php}}'
 
-                    if ('7.4' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vc15' }
                     if ('8.0' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
                     if ('8.1' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
                     if ('8.2' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }

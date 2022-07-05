@@ -660,11 +660,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 			if (instanceof_function(Z_OBJCE_P(*struc), zend_ce_closure)) {
 				xdebug_xml_node *closure_cont, *closure_func;
-#if PHP_VERSION_ID >= 80000
 				const zend_function *closure_function = zend_get_closure_method_def(Z_OBJ_P(*struc));
-#else
-				const zend_function *closure_function = zend_get_closure_method_def(*struc);
-#endif
 
 				xdebug_xml_expand_attribute_value(node, "facet", "closure");
 

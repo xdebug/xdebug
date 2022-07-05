@@ -22,9 +22,7 @@
 #include "zend_extensions.h"
 #include "ext/standard/php_smart_string.h"
 #include "zend_smart_str.h"
-#if PHP_VERSION_ID >= 80000
 #include "zend_closures.h"
-#endif
 
 #include "php_xdebug.h"
 
@@ -52,7 +50,6 @@ static inline int object_or_ancestor_is_internal(zval dzval)
 	return 0;
 }
 
-#if PHP_VERSION_ID >= 80000
 typedef struct _xdebug_zend_closure_copy {
 	zend_object       std;
 	zend_function     func;
@@ -87,7 +84,6 @@ static int object_with_missing_closure_variables(zval dzval)
 
 	return 0;
 }
-#endif
 
 HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
 {
@@ -97,9 +93,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
 	if (
 		!XG_BASE(in_debug_info) &&
 		(object_or_ancestor_is_internal(dzval) || (flags & XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO)) &&
-#if PHP_VERSION_ID >= 80000
 		!object_with_missing_closure_variables(dzval) &&
-#endif
 		Z_OBJ_HANDLER(dzval, get_debug_info)
 	) {
 		void        *original_trace_context;
@@ -210,13 +204,7 @@ char* xdebug_error_type(int type)
 
 zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var)
 {
-#if PHP_VERSION_ID >= 80000
 	return zend_get_zval_ptr(opline, node_type, node, zdata);
-#else
-	zend_free_op should_free;
-
-	return zend_get_zval_ptr(opline, node_type, node, zdata, &should_free, BP_VAR_IS);
-#endif
 }
 
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
@@ -493,11 +481,7 @@ static void fetch_zval_from_symbol_table(
 			/* First we try an object handler */
 			if (cce) {
 				zval *tmp_val;
-#if PHP_VERSION_ID >= 80000
 				tmp_val = zend_read_property(cce, Z_OBJ_P(value_in), name, name_length, 1, &tmp_retval);
-#else
-				tmp_val = zend_read_property(cce, value_in, name, name_length, 1, &tmp_retval);
-#endif
 				if (tmp_val != &tmp_retval && tmp_val != &EG(uninitialized_zval)) {
 					ZVAL_COPY(&tmp_retval, tmp_val);
 					goto cleanup;
@@ -857,7 +841,6 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 	info = zend_get_typed_property_info_for_slot(Z_OBJ_P(object), val);
 
 	if (info) {
-#if PHP_VERSION_ID >= 80000
 		zend_string *type_info = zend_type_to_string(info->type);
 		type_str = xdebug_str_new();
 
@@ -868,27 +851,7 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 # endif
 
 		xdebug_str_add_zstr(type_str, type_info);
-
 		zend_string_release(type_info);
-
-#else
-		type_str = xdebug_str_new();
-
-		if (ZEND_TYPE_ALLOW_NULL(info->type)) {
-			xdebug_str_addc(type_str, '?');
-		}
-		if (ZEND_TYPE_IS_CLASS(info->type)) {
-			xdebug_str_add(
-				type_str,
-				ZSTR_VAL(
-					ZEND_TYPE_IS_CE(info->type) ? ZEND_TYPE_CE(info->type)->name : ZEND_TYPE_NAME(info->type)
-				),
-				0
-			);
-		} else {
-			xdebug_str_add(type_str, zend_get_type_by_const(ZEND_TYPE_CODE(info->type)), 0);
-		}
-#endif
 	}
 
 	return type_str;

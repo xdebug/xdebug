@@ -74,12 +74,6 @@ zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 #  define XDEBUG_ATTRIBUTE_FORMAT(type, idx, first)
 # endif
 
-# if PHP_VERSION_ID < 80000
-#  define ZEND_ARG_IS_VARIADIC(ptr) (*ptr).is_variadic
-#  define ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(a, b, c, d, e)  ZEND_ARG_TYPE_INFO((a), b, (c), (d))
-#  define IS_MIXED 0
-# endif
-
 #define XDEBUG_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
 #define XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
 

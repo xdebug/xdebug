@@ -124,11 +124,7 @@ static void handle_closure(xdebug_str *str, zval *obj, int level)
 		return;
 	}
 
-#if PHP_VERSION_ID >= 80000
 	closure_function = zend_get_closure_method_def(Z_OBJ_P(obj));
-#else
-	closure_function = zend_get_closure_method_def(obj);
-#endif
 
 	xdebug_str_add_fmt(str, "%*s<i>virtual</i> 'closure' <font color='%s'>'", (level * 4) - 2, "", COLOR_STRING);
 

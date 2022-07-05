@@ -164,9 +164,6 @@ static int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
 
 int xdebug_do_eval(char *eval_string, zval *ret_zval)
 {
-#if PHP_VERSION_ID < 80000
-	int                old_track_errors;
-#endif
 	volatile int       res = 1;
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	int                original_no_extensions = EG(no_extensions);
@@ -176,13 +173,7 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 	/* Remember error reporting level and track errors */
 	XG_BASE(error_reporting_override) = EG(error_reporting);
 	XG_BASE(error_reporting_overridden) = 1;
-#if PHP_VERSION_ID < 80000
-	old_track_errors = PG(track_errors);
-#endif
 	EG(error_reporting) = 0;
-#if PHP_VERSION_ID < 80000
-	PG(track_errors) = 0;
-#endif
 
 	XG_DBG(context).inhibit_notifications = 1;
 	XG_DBG(breakpoints_allowed) = 0;
@@ -206,9 +197,6 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 	/* Clean up */
 	EG(error_reporting) = XG_BASE(error_reporting_override);
 	XG_BASE(error_reporting_overridden) = 0;
-#if PHP_VERSION_ID < 80000
-	PG(track_errors) = old_track_errors;
-#endif
 	XG_DBG(breakpoints_allowed) = 1;
 	XG_DBG(context).inhibit_notifications = 0;
 
@@ -374,15 +362,9 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 	}
 }
 
-#if PHP_VERSION_ID >= 80000
 void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
 {
 	zend_class_entry *exception_ce = exception->ce;
-#else
-void xdebug_debugger_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
-{
-	zend_class_entry *exception_ce = Z_OBJCE_P(exception);
-#endif
 	xdebug_brk_info *extra_brk_info;
 
 	/* Start JIT if requested and not yet enabled */

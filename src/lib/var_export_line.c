@@ -117,11 +117,7 @@ static void handle_closure(xdebug_str *str, zval *obj)
 		return;
 	}
 
-#if PHP_VERSION_ID >= 80000
 	closure_function = zend_get_closure_method_def(Z_OBJ_P(obj));
-#else
-	closure_function = zend_get_closure_method_def(obj);
-#endif
 
 	xdebug_str_add_literal(str, "virtual $closure = \"");
 

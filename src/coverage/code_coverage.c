@@ -348,18 +348,14 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
 		opcode.opcode == ZEND_EXIT ||
 		opcode.opcode == ZEND_THROW ||
-#if PHP_VERSION_ID >= 80000
 		opcode.opcode == ZEND_MATCH_ERROR ||
-#endif
 		opcode.opcode == ZEND_RETURN
 	) {
 		jumps[0] = XDEBUG_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
 	} else if (
-# if PHP_VERSION_ID >= 80000
 		opcode.opcode == ZEND_MATCH ||
-# endif
 		opcode.opcode == ZEND_SWITCH_LONG ||
 		opcode.opcode == ZEND_SWITCH_STRING
 	) {
@@ -382,15 +378,11 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[*jump_count] = position + (opcode.extended_value / sizeof(zend_op));
 		(*jump_count)++;
 
-# if PHP_VERSION_ID >= 80000
 		if (opcode.opcode != ZEND_MATCH) {
-# endif
 			/* The 'next' opcode */
 			jumps[*jump_count] = position + 1;
 			(*jump_count)++;
-# if PHP_VERSION_ID >= 80000
 		}
-# endif
 
 		return 1;
 	}
@@ -731,15 +723,8 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	RETURN_TRUE;
 }
 
-#if PHP_VERSION_ID >= 80000
 static int xdebug_lineno_cmp(Bucket *f, Bucket *s)
 {
-#else
-static int xdebug_lineno_cmp(const void *a, const void *b)
-{
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-#endif
 	if (f->h < s->h) {
 		return -1;
 	} else if (f->h > s->h) {
@@ -1044,14 +1029,8 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	int i;
 
 	/* Get reserved offsets */
-#if PHP_VERSION_ID >= 80000
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(XDEBUG_NAME);
 	zend_xdebug_filter_offset = zend_get_resource_handle(XDEBUG_NAME);
-#else
-	zend_extension dummy_ext;
-	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
-	zend_xdebug_filter_offset = zend_get_resource_handle(&dummy_ext);
-#endif
 
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_DIM, xdebug_common_override_handler);
