@@ -95,7 +95,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
 HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags)
 #endif
 {
-	zval dzval = **zval_pp;
+	zval       dzval = **zval_pp;
 	HashTable *tmp;
 
 	if (
@@ -104,7 +104,8 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags)
 #if PHP_VERSION_ID >= 80000
 		!object_with_missing_closure_variables(dzval) &&
 #endif
-		Z_OBJ_HANDLER(dzval, get_debug_info)
+		Z_OBJ_HANDLER(dzval, get_debug_info) &&
+		!EG(exception)
 	) {
 		void        *original_trace_context;
 		zend_object *orig_exception;
