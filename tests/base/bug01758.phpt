@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #1758: Xdebug changes error_get_last results inside a try catch
+--INI--
+xdebug.mode=develop
 --FILE--
 <?php
 register_shutdown_function(function () {
@@ -11,5 +13,6 @@ try {
 } catch (Exception $e) {
 }
 ?>
---EXPECT--
+--EXPECTF--
+%sbug01758.php:%d:
 NULL
