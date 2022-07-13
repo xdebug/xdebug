@@ -87,14 +87,15 @@ static int object_with_missing_closure_variables(zval dzval)
 
 HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
 {
-	zval dzval = **zval_pp;
+	zval       dzval = **zval_pp;
 	HashTable *tmp;
 
 	if (
 		!XG_BASE(in_debug_info) &&
 		(object_or_ancestor_is_internal(dzval) || (flags & XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO)) &&
 		!object_with_missing_closure_variables(dzval) &&
-		Z_OBJ_HANDLER(dzval, get_debug_info)
+		Z_OBJ_HANDLER(dzval, get_debug_info) &&
+		!EG(exception)
 	) {
 		void        *original_trace_context;
 		zend_object *orig_exception;
