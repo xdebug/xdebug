@@ -83,9 +83,7 @@ static int xdebug_object_element_export_html(zval *object, zval *zv_nptr, zend_u
 			xdebug_str *property_type = NULL;
 			const char *modifier;
 
-#if PHP_VERSION_ID >= 70400
 			property_type = xdebug_get_property_type(object, zv_nptr);
-#endif
 			property_name = xdebug_get_property_info((char*) HASH_APPLY_KEY_VAL(hash_key), HASH_APPLY_KEY_LEN(hash_key), &modifier, &prop_class_name);
 
 			xdebug_str_add_fmt(str, "<i>%s</i> ", modifier);
@@ -126,11 +124,7 @@ static void handle_closure(xdebug_str *str, zval *obj, int level)
 		return;
 	}
 
-#if PHP_VERSION_ID >= 80000
 	closure_function = zend_get_closure_method_def(Z_OBJ_P(obj));
-#else
-	closure_function = zend_get_closure_method_def(obj);
-#endif
 
 	xdebug_str_add_fmt(str, "%*s<i>virtual</i> 'closure' <font color='%s'>'", (level * 4) - 2, "", COLOR_STRING);
 
@@ -153,9 +147,6 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 	HashTable *myht;
 	char*     tmp_str;
 	size_t    newlen;
-#if PHP_VERSION_ID < 70400
-	int       is_temp;
-#endif
 	zend_ulong num;
 	zend_string *key;
 	zval *val;
@@ -278,11 +269,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 			}
 #endif
 
-#if PHP_VERSION_ID >= 70400
 			myht = xdebug_objdebug_pp(struc, XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO);
-#else
-			myht = xdebug_objdebug_pp(struc, &is_temp, XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO);
-#endif
 			xdebug_str_add_fmt(str, "\n%*s", (level - 1) * 4, "");
 
 			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
@@ -314,11 +301,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 				xdebug_str_add_literal(str, "</i>)");
 				xdebug_str_add_fmt(str, "[<i>%d</i>]\n", Z_OBJ_HANDLE_P(*struc));
 			}
-#if PHP_VERSION_ID >= 70400
 			zend_release_properties(myht);
-#else
-			xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 			break;
 		}
 

@@ -72,11 +72,7 @@ void xdebug_develop_mshutdown();
 void xdebug_develop_rinit();
 void xdebug_develop_post_deactivate();
 
-#if PHP_VERSION_ID >= 80000
 void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
-#else
-void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
-#endif
 void xdebug_monitor_handler(function_stack_entry *fse);
 
 #endif

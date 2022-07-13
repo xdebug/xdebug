@@ -183,15 +183,7 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp, Has
 
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
-#if ZTS && PHP_VERSION_ID < 70400
-	if (ce->type == 1) {
-		item->zv   = &CG(static_members_table)[(zend_intptr_t) CE_STATIC_MEMBERS(ce)][zpp->offset];
-	} else {
-		item->zv   = &CE_STATIC_MEMBERS(ce)[zpp->offset];
-	}
-#else
 	item->zv   = &CE_STATIC_MEMBERS(ce)[zpp->offset];
-#endif
 	item->name = (char*) STR_NAME_VAL(zpp->name);
 	item->name_len = STR_NAME_LEN(zpp->name);
 
@@ -593,9 +585,6 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			HashTable          *merged_hash;
 			zend_string        *class_name;
 			zend_class_entry   *ce;
-#if PHP_VERSION_ID < 70400
-			int                 is_temp;
-#endif
 			int                 extra_children = 0;
 			zend_property_info *zpi_val;
 
@@ -610,7 +599,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 #if PHP_VERSION_ID >= 80100
 			zend_class_init_statics(ce);
-#elif PHP_VERSION_ID >= 70400
+#else
 			if (ce->type == ZEND_INTERNAL_CLASS || (ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
 				zend_class_init_statics(ce);
 			}
@@ -623,11 +612,8 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			xdebug_zend_hash_apply_protection_end(&ce->properties_info);
 
 			/* Adding normal properties */
-#if PHP_VERSION_ID >= 70400
 			myht = xdebug_objdebug_pp(struc, XDEBUG_VAR_OBJDEBUG_DEFAULT);
-#else
-			myht = xdebug_objdebug_pp(struc, &is_temp, XDEBUG_VAR_OBJDEBUG_DEFAULT);
-#endif
+
 			if (myht) {
 				zval *tmp_val;
 
@@ -674,11 +660,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 			if (instanceof_function(Z_OBJCE_P(*struc), zend_ce_closure)) {
 				xdebug_xml_node *closure_cont, *closure_func;
-#if PHP_VERSION_ID >= 80000
 				const zend_function *closure_function = zend_get_closure_method_def(Z_OBJ_P(*struc));
-#else
-				const zend_function *closure_function = zend_get_closure_method_def(*struc);
-#endif
 
 				xdebug_xml_expand_attribute_value(node, "facet", "closure");
 
@@ -768,11 +750,8 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 			zend_hash_destroy(merged_hash);
 			FREE_HASHTABLE(merged_hash);
-#if PHP_VERSION_ID >= 70400
 			zend_release_properties(myht);
-#else
-			xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
+
 			break;
 		}
 

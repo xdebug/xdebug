@@ -47,14 +47,10 @@ ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 void (*xdebug_old_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*xdebug_new_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 static void xdebug_error_cb(int orig_type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
-#elif PHP_VERSION_ID >= 80000
+#else
 void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
 static void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
-#else
-void (*xdebug_old_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-void (*xdebug_new_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-static void xdebug_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 #endif
 
 /* execution redirection functions */
@@ -413,7 +409,6 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 #endif
 	}
 
-#if PHP_VERSION_ID >= 80000
 	if (ZEND_CALL_INFO(zdata) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_string *name;
 		zval        *param;
@@ -429,7 +424,6 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 			i++;
 		} ZEND_HASH_FOREACH_END();
 	}
-#endif
 
 #if DEBUG
 	for (i = 0; i < fse->varc; i++) {
@@ -522,7 +516,6 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 #endif
 	}
 
-#if PHP_VERSION_ID >= 80000
 	if (ZEND_CALL_INFO(zdata) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zend_string *name;
 		zval        *param;
@@ -538,7 +531,6 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 			i++;
 		} ZEND_HASH_FOREACH_END();
 	}
-#endif
 
 #if DEBUG
 	for (i = 0; i < fse->varc; i++) {
@@ -849,10 +841,8 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	int                   restore_error_handler_situation = 0;
 #if PHP_VERSION_ID >= 80100
 	void                (*tmp_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
-#elif PHP_VERSION_ID >= 80000
-	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
 #else
-	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0) = NULL;
+	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
 #endif
 
 	/* If the stack vector hasn't been initialised yet, we should abort immediately */
@@ -1340,7 +1330,7 @@ static void xdebug_error_cb(int orig_type, zend_string *error_filename, const un
 		xdebug_old_error_cb(orig_type, error_filename, error_lineno, message);
 	}
 }
-#elif PHP_VERSION_ID >= 80000
+#else
 static void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, zend_string *message)
 {
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -1359,32 +1349,6 @@ static void xdebug_error_cb(int orig_type, const char *error_filename, const uns
 		xdebug_old_error_cb(orig_type, error_filename, error_lineno, message);
 	}
 }
-#else
-static void xdebug_error_cb(int orig_type, const char *error_filename, const unsigned int error_lineno, const char *format, va_list args)
-{
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
-		int          type               = orig_type & E_ALL;
-		char        *error_type_str     = xdebug_error_type(type);
-		zend_string *tmp_error_filename = zend_string_init(error_filename, strlen(error_filename), 0);
-		char        *buffer;
-		va_list      new_args;
-
-		va_copy(new_args, args);
-		vspprintf(&buffer, PG(log_errors_max_len), format, new_args);
-		va_end(new_args);
-
-		xdebug_debugger_error_cb(tmp_error_filename, error_lineno, type, error_type_str, buffer);
-
-		efree(buffer);
-		zend_string_release(tmp_error_filename);
-		xdfree(error_type_str);
-	}
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
-		xdebug_develop_error_cb(orig_type, error_filename, error_lineno, format, args);
-	} else {
-		xdebug_old_error_cb(orig_type, error_filename, error_lineno, format, args);
-	}
-}
 #endif
 
 void xdebug_base_use_original_error_cb(void)
@@ -1397,13 +1361,8 @@ void xdebug_base_use_xdebug_error_cb(void)
 	zend_error_cb = xdebug_new_error_cb;
 }
 
-#if PHP_VERSION_ID >= 80000
 static void xdebug_throw_exception_hook(zend_object *exception)
 {
-#else
-static void xdebug_throw_exception_hook(zval *exception)
-{
-#endif
 	zval *code, *message, *file, *line;
 	zend_class_entry *exception_ce;
 	char *code_str = NULL;
@@ -1417,22 +1376,17 @@ static void xdebug_throw_exception_hook(zval *exception)
 		return;
 	}
 
-#if PHP_VERSION_ID >= 80000
 	if (zend_is_unwind_exit(exception)) {
 		return;
 	}
-#endif
+
 #if PHP_VERSION_ID >= 80100
 	if (zend_is_graceful_exit(exception)) {
 		return;
 	}
 #endif
 
-#if PHP_VERSION_ID >= 80000
 	exception_ce = exception->ce;
-#else
-	exception_ce = Z_OBJCE_P(exception);
-#endif
 
 	code =    zend_read_property(exception_ce, exception, "code",    sizeof("code")-1,    0, &dummy);
 	message = zend_read_property(exception_ce, exception, "message", sizeof("message")-1, 0, &dummy);

@@ -127,14 +127,12 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 		if (opa->fn_flags & ZEND_ACC_CLOSURE) {
 			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
 			wrapped = 1;
-#if PHP_VERSION_ID >= 70400
 		} else if (
 			opa->fn_flags & ZEND_ACC_TRAIT_CLONE
 			|| (opa->scope && opa->scope->ce_flags & ZEND_ACC_TRAIT)
 		) {
 			tmp->function = xdebug_wrap_location_around_function_name("trait-method", opa, STR_NAME_VAL(opa->function_name));
 			wrapped = 1;
-#endif
 		} else {
 			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
 		}
@@ -262,10 +260,6 @@ static void prefill_from_opcode(zend_string *filename, zend_op opcode, int deadc
 		opcode.opcode != ZEND_EXT_NOP &&
 		opcode.opcode != ZEND_RECV &&
 		opcode.opcode != ZEND_RECV_INIT
-#if PHP_VERSION_ID < 70400
-		&& opcode.opcode != ZEND_VERIFY_ABSTRACT_CLASS
-		&& opcode.opcode != ZEND_ADD_INTERFACE
-#endif
 		&& opcode.opcode != ZEND_OP_DATA
 		&& opcode.opcode != ZEND_TICKS
 		&& opcode.opcode != ZEND_FAST_CALL
@@ -354,18 +348,14 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
 		opcode.opcode == ZEND_EXIT ||
 		opcode.opcode == ZEND_THROW ||
-#if PHP_VERSION_ID >= 80000
 		opcode.opcode == ZEND_MATCH_ERROR ||
-#endif
 		opcode.opcode == ZEND_RETURN
 	) {
 		jumps[0] = XDEBUG_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
 	} else if (
-# if PHP_VERSION_ID >= 80000
 		opcode.opcode == ZEND_MATCH ||
-# endif
 		opcode.opcode == ZEND_SWITCH_LONG ||
 		opcode.opcode == ZEND_SWITCH_STRING
 	) {
@@ -388,15 +378,11 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[*jump_count] = position + (opcode.extended_value / sizeof(zend_op));
 		(*jump_count)++;
 
-# if PHP_VERSION_ID >= 80000
 		if (opcode.opcode != ZEND_MATCH) {
-# endif
 			/* The 'next' opcode */
 			jumps[*jump_count] = position + 1;
 			(*jump_count)++;
-# if PHP_VERSION_ID >= 80000
 		}
-# endif
 
 		return 1;
 	}
@@ -737,15 +723,8 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 	RETURN_TRUE;
 }
 
-#if PHP_VERSION_ID >= 80000
 static int xdebug_lineno_cmp(Bucket *f, Bucket *s)
 {
-#else
-static int xdebug_lineno_cmp(const void *a, const void *b)
-{
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-#endif
 	if (f->h < s->h) {
 		return -1;
 	} else if (f->h > s->h) {
@@ -1050,23 +1029,13 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	int i;
 
 	/* Get reserved offsets */
-#if PHP_VERSION_ID >= 80000
 	zend_xdebug_cc_run_offset = zend_get_resource_handle(XDEBUG_NAME);
 	zend_xdebug_filter_offset = zend_get_resource_handle(XDEBUG_NAME);
-#else
-	zend_extension dummy_ext;
-	zend_xdebug_cc_run_offset = zend_get_resource_handle(&dummy_ext);
-	zend_xdebug_filter_offset = zend_get_resource_handle(&dummy_ext);
-#endif
 
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_DIM, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_OBJ, xdebug_common_override_handler);
-#if PHP_VERSION_ID >= 70400
 	xdebug_register_with_opcode_multi_handler(ZEND_ASSIGN_STATIC_PROP, xdebug_common_override_handler);
-#else
-	xdebug_set_opcode_handler(ZEND_FETCH_STATIC_PROP_W, xdebug_common_override_handler);
-#endif
 	xdebug_register_with_opcode_multi_handler(ZEND_QM_ASSIGN, xdebug_common_override_handler);
 	xdebug_register_with_opcode_multi_handler(ZEND_INCLUDE_OR_EVAL, xdebug_coverage_include_or_eval_handler);
 
@@ -1126,10 +1095,6 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	xdebug_set_opcode_handler(ZEND_ISSET_ISEMPTY_PROP_OBJ, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_CASE, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_DECLARE_LAMBDA_FUNCTION, xdebug_common_override_handler);
-#if PHP_VERSION_ID < 70400
-	xdebug_set_opcode_handler(ZEND_ADD_TRAIT, xdebug_common_override_handler);
-	xdebug_set_opcode_handler(ZEND_BIND_TRAITS, xdebug_common_override_handler);
-#endif
 	xdebug_set_opcode_handler(ZEND_INSTANCEOF, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_FAST_RET, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_ROPE_ADD, xdebug_common_override_handler);
@@ -1139,10 +1104,8 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	xdebug_set_opcode_handler(ZEND_GENERATOR_CREATE, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_BIND_STATIC, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_BIND_LEXICAL, xdebug_common_override_handler);
-#if PHP_VERSION_ID >= 70400
 	xdebug_set_opcode_handler(ZEND_DECLARE_CLASS, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, xdebug_common_override_handler);
-#endif
 	xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
 	xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
 

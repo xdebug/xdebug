@@ -65,13 +65,8 @@
 #include "profiler/profiler.h"
 #include "tracing/tracing.h"
 
-#if PHP_VERSION_ID >= 80000
 static zend_result (*xdebug_orig_post_startup_cb)(void);
 static zend_result xdebug_post_startup(void);
-#else
-static int (*xdebug_orig_post_startup_cb)(void);
-static int xdebug_post_startup(void);
-#endif
 
 int xdebug_include_or_eval_handler(zend_execute_data *execute_data);
 

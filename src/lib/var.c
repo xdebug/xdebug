@@ -22,9 +22,7 @@
 #include "zend_extensions.h"
 #include "ext/standard/php_smart_string.h"
 #include "zend_smart_str.h"
-#if PHP_VERSION_ID >= 80000
 #include "zend_closures.h"
-#endif
 
 #include "php_xdebug.h"
 
@@ -52,7 +50,6 @@ static inline int object_or_ancestor_is_internal(zval dzval)
 	return 0;
 }
 
-#if PHP_VERSION_ID >= 80000
 typedef struct _xdebug_zend_closure_copy {
 	zend_object       std;
 	zend_function     func;
@@ -87,13 +84,8 @@ static int object_with_missing_closure_variables(zval dzval)
 
 	return 0;
 }
-#endif
 
-#if PHP_VERSION_ID >= 70400
 HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
-#else
-HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags)
-#endif
 {
 	zval dzval = **zval_pp;
 	HashTable *tmp;
@@ -101,9 +93,7 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags)
 	if (
 		!XG_BASE(in_debug_info) &&
 		(object_or_ancestor_is_internal(dzval) || (flags & XDEBUG_VAR_OBJDEBUG_USE_DEBUGINFO)) &&
-#if PHP_VERSION_ID >= 80000
 		!object_with_missing_closure_variables(dzval) &&
-#endif
 		Z_OBJ_HANDLER(dzval, get_debug_info)
 	) {
 		void        *original_trace_context;
@@ -114,25 +104,15 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int *is_tmp, int flags)
 		orig_exception = EG(exception);
 		EG(exception) = NULL;
 
-#if PHP_VERSION_ID >= 70400
 		tmp = zend_get_properties_for(&dzval, ZEND_PROP_PURPOSE_DEBUG);
-#else
-		tmp = Z_OBJ_HANDLER(dzval, get_debug_info)(&dzval, is_tmp);
-#endif
+
 		XG_BASE(in_debug_info) = 0;
 		xdebug_tracing_restore_trace_context(original_trace_context);
 		EG(exception) = orig_exception;
 
 		return tmp;
 	} else {
-#if PHP_VERSION_ID >= 70400
 		return zend_get_properties_for(&dzval, ZEND_PROP_PURPOSE_VAR_EXPORT);
-#else
-		*is_tmp = 0;
-		if (Z_OBJ_HANDLER(dzval, get_properties)) {
-			return Z_OBJPROP(dzval);
-		}
-#endif
 	}
 	return NULL;
 }
@@ -224,13 +204,7 @@ char* xdebug_error_type(int type)
 
 zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *opline, int node_type, const znode_op *node, int *is_var)
 {
-#if PHP_VERSION_ID >= 80000
 	return zend_get_zval_ptr(opline, node_type, node, zdata);
-#else
-	zend_free_op should_free;
-
-	return zend_get_zval_ptr(opline, node_type, node, zdata, &should_free, BP_VAR_IS);
-#endif
 }
 
 zval *xdebug_get_zval(zend_execute_data *zdata, int node_type, const znode_op *node, int *is_var)
@@ -328,7 +302,6 @@ char *replace_star_by_null(const char *name, int name_length)
 	return tmp;
 }
 
-#if PHP_VERSION_ID >= 70400
 static zval *get_arrayobject_storage(zval *parent, HashTable **properties)
 {
 	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
@@ -340,29 +313,6 @@ static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties)
 	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
 	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
 }
-#else
-static zval *get_arrayobject_storage(zval *parent, HashTable **properties, int *is_temp)
-{
-	*properties = Z_OBJDEBUG_P(parent, *is_temp);
-	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
-}
-
-static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties, int *is_temp)
-{
-	*properties = Z_OBJDEBUG_P(parent, *is_temp);
-	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
-}
-#endif
-
-#if PHP_VERSION_ID < 70400
-void xdebug_var_maybe_destroy_ht(HashTable *ht, int is_temp)
-{
-	if (ht && is_temp) {
-		zend_hash_destroy(ht);
-		FREE_HASHTABLE(ht);
-	}
-}
-#endif
 
 static void fetch_zval_from_symbol_table(
 		zval *value_in, char *name, unsigned int name_length,
@@ -372,9 +322,6 @@ static void fetch_zval_from_symbol_table(
 	char  *element = NULL;
 	unsigned int element_length = name_length;
 	zend_property_info *zpp;
-#if PHP_VERSION_ID < 70400
-	int is_temp = 0;
-#endif
 	int free_duplicated_name = 0;
 	HashTable *myht = NULL;
 	zval *orig_value_in = value_in;
@@ -393,11 +340,10 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_STATIC_ROOT:
 		case XF_ST_STATIC_PROPERTY:
 			/* First we try a public,private,protected property */
-#if PHP_VERSION_ID >= 70400
 			if (cce && (cce->type == ZEND_INTERNAL_CLASS || (cce->ce_flags & ZEND_ACC_IMMUTABLE))) {
 				zend_class_init_statics(cce);
 			}
-#endif
+
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (cce && ((zpp = zend_hash_str_find_ptr(&cce->properties_info, element, element_length)) != NULL) && cce->default_static_members_count && CE_STATIC_MEMBERS(cce)) {
 				ZVAL_COPY(&tmp_retval, &CE_STATIC_MEMBERS(cce)[zpp->offset]);
@@ -505,21 +451,14 @@ static void fetch_zval_from_symbol_table(
 		case XF_ST_OBJ_PROPERTY:
 			/* Let's see if there is a debug handler */
 			if (value_in && Z_TYPE_P(value_in) == IS_OBJECT) {
-#if PHP_VERSION_ID >= 70400
 				myht = xdebug_objdebug_pp(&value_in, XDEBUG_VAR_OBJDEBUG_DEFAULT);
-#else
-				myht = xdebug_objdebug_pp(&value_in, &is_temp, XDEBUG_VAR_OBJDEBUG_DEFAULT);
-#endif
+
 				if (myht) {
 					/* As a normal (public) property */
 					zval *tmp = zend_symtable_str_find(myht, name, name_length);
 					if (tmp != NULL) {
 						ZVAL_COPY(&tmp_retval, tmp);
-#if PHP_VERSION_ID >= 70400
 						zend_release_properties(myht);
-#else
-						xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 						goto cleanup;
 					}
 
@@ -529,32 +468,20 @@ static void fetch_zval_from_symbol_table(
 						zval *tmp = zend_symtable_str_find(myht, unmangled, name_length);
 						if (tmp != NULL) {
 							ZVAL_COPY(&tmp_retval, tmp);
-#if PHP_VERSION_ID >= 70400
 							zend_release_properties(myht);
-#else
-							xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 							xdfree(unmangled);
 							goto cleanup;
 						}
 						xdfree(unmangled);
 					}
 
-#if PHP_VERSION_ID >= 70400
 					zend_release_properties(myht);
-#else
-					xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 				}
 			}
 			/* First we try an object handler */
 			if (cce) {
 				zval *tmp_val;
-#if PHP_VERSION_ID >= 80000
 				tmp_val = zend_read_property(cce, Z_OBJ_P(value_in), name, name_length, 1, &tmp_retval);
-#else
-				tmp_val = zend_read_property(cce, value_in, name, name_length, 1, &tmp_retval);
-#endif
 				if (tmp_val != &tmp_retval && tmp_val != &EG(uninitialized_zval)) {
 					ZVAL_COPY(&tmp_retval, tmp_val);
 					goto cleanup;
@@ -601,50 +528,26 @@ static void fetch_zval_from_symbol_table(
 			element_length = name_length;
 
 			if (strncmp(ccn, "ArrayObject", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
-#if PHP_VERSION_ID >= 70400
 				zval *tmp = get_arrayobject_storage(value_in, &myht);
-#else
-				zval *tmp = get_arrayobject_storage(value_in, &myht, &is_temp);
-#endif
 				element = NULL;
 				if (tmp != NULL) {
 					ZVAL_COPY(&tmp_retval, tmp);
-#if PHP_VERSION_ID >= 70400
 					zend_release_properties(myht);
-#else
-					xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 					goto cleanup;
 				}
-#if PHP_VERSION_ID >= 70400
 				zend_release_properties(myht);
-#else
-				xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 			}
 
 			/* All right, time for a mega hack. It's SplObjectStorage access time! */
 			if (strncmp(ccn, "SplObjectStorage", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
-#if PHP_VERSION_ID >= 70400
 				zval *tmp = get_splobjectstorage_storage(value_in, &myht);
-#else
-				zval *tmp = get_splobjectstorage_storage(value_in, &myht, &is_temp);
-#endif
 				element = NULL;
 				if (tmp != NULL) {
 					ZVAL_COPY(&tmp_retval, tmp);
-#if PHP_VERSION_ID >= 70400
 					zend_release_properties(myht);
-#else
-					xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 					goto cleanup;
 				}
-#if PHP_VERSION_ID >= 70400
 				zend_release_properties(myht);
-#else
-				xdebug_var_maybe_destroy_ht(myht, is_temp);
-#endif
 			}
 
 			break;
@@ -925,7 +828,6 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 }
 
 
-#if PHP_VERSION_ID >= 70400
 xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 {
 	xdebug_str         *type_str = NULL;
@@ -939,7 +841,6 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 	info = zend_get_typed_property_info_for_slot(Z_OBJ_P(object), val);
 
 	if (info) {
-#if PHP_VERSION_ID >= 80000
 		zend_string *type_info = zend_type_to_string(info->type);
 		type_str = xdebug_str_new();
 
@@ -950,32 +851,11 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 # endif
 
 		xdebug_str_add_zstr(type_str, type_info);
-
 		zend_string_release(type_info);
-
-#else
-		type_str = xdebug_str_new();
-
-		if (ZEND_TYPE_ALLOW_NULL(info->type)) {
-			xdebug_str_addc(type_str, '?');
-		}
-		if (ZEND_TYPE_IS_CLASS(info->type)) {
-			xdebug_str_add(
-				type_str,
-				ZSTR_VAL(
-					ZEND_TYPE_IS_CE(info->type) ? ZEND_TYPE_CE(info->type)->name : ZEND_TYPE_NAME(info->type)
-				),
-				0
-			);
-		} else {
-			xdebug_str_add(type_str, zend_get_type_by_const(ZEND_TYPE_CODE(info->type)), 0);
-		}
-#endif
 	}
 
 	return type_str;
 }
-#endif
 
 xdebug_str* xdebug_get_property_info(char *mangled_property, int mangled_len, const char **modifier, char **class_name)
 {
