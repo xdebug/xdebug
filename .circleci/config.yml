@@ -14,7 +14,7 @@ commands:
     steps:
       - run:
           name: Run tests with env vars
-          command: php run-xdebug-tests.php -q -x --show-diff
+          command: php run-xdebug-tests.php -j8 -q -x --show-diff
 
 jobs:
   "PHP 8 1 without opcache":

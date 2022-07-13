@@ -58,7 +58,7 @@ jobs:
                 continue-on-error: ${{ matrix.experimental }}
                 run: |
                     $TEST_PHP_EXECUTABLE $TEST_PHP_ARGS -v
-                    $TEST_PHP_EXECUTABLE -n run-xdebug-tests.php -q -x --show-diff
+                    $TEST_PHP_EXECUTABLE -n run-xdebug-tests.php -j8 -q -x --show-diff
 
             -   name: Show errors
                 if: ${{ failure() }}
@@ -162,7 +162,7 @@ jobs:
                     echo "Artifact: ${{ env.ARTIFACT }}"
                     echo "TEST_PHP_ARGS: ${{ env.TEST_PHP_ARGS }}"
                     echo "Found PHP in: ${{ env.TEST_PHP_EXECUTABLE }}"
-                    php run-xdebug-tests.php -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp
+                    php run-xdebug-tests.php -j8 -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp
                 - name: Upload artifacts
                   uses: actions/upload-artifact@v2
                   with:
