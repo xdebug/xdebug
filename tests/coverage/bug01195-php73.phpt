@@ -26,17 +26,17 @@ foo
 the end
 fe
 - branches
-  - 00; OP: 00-03; line: 02-04 HIT; out1: 04 HIT; out2: 08  X 
+  - 00; OP: 00-03; line: 02-04 HIT; out1: 04 HIT; out2: 08  X
   - 04; OP: 04-04; line: 04-04 HIT; out1: 05 HIT; out2: 08 HIT
   - 05; OP: 05-07; line: 06-04 HIT; out1: 04 HIT
-  - 08; OP: 08-12; line: 04-09 HIT; out1: EX  X 
+  - 08; OP: 08-12; line: 04-09 HIT; out1: EX  X
 - paths
   - 0 4 5 4 8: HIT
-  - 0 4 8:  X 
-  - 0 8:  X 
+  - 0 4 8:  X
+  - 0 8:  X
 
 {main}
 - branches
-  - 00; OP: 00-08; line: 02-13 HIT; out1: EX  X 
+  - 00; OP: 00-08; line: 02-13 HIT; out1: EX  X
 - paths
   - 0: HIT

@@ -32,7 +32,7 @@ App\Bar->useTrait
 
 {main}
 - branches
-  - 00; OP: 00-%d; line: %d-16 HIT; out1: EX  X 
+  - 00; OP: 00-%d; line: %d-16 HIT; out1: EX  X
 - paths
   - 0: HIT
 
@@ -44,6 +44,6 @@ returnsTrue{trait-method:%sbug01938-FooTrait.inc:9-12}
 
 {main}
 - branches
-  - 00; OP: 00-%d; line: %d-14 HIT; out1: EX  X 
+  - 00; OP: 00-%d; line: %d-14 HIT; out1: EX  X
 - paths
   - 0: HIT

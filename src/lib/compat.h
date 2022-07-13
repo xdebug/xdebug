@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,7 @@
 #ifndef __HAVE_XDEBUG_COMPAT_H__
 #define __HAVE_XDEBUG_COMPAT_H__
 
-#include "php.h"
+#include "lib/php-header.h"
 #include "str.h"
 
 #include "ext/standard/head.h"

@@ -3,6 +3,8 @@ namespace Stack;
 
 class Two
 {
+	public $obj;
+
 	function __construct( $object )
 	{
 		$this->obj = $object;

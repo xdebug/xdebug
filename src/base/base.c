@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
-#include "php.h"
+#include "lib/php-header.h"
 #include "TSRM.h"
 #include "php_globals.h"
 #include "zend_closures.h"

@@ -19,7 +19,7 @@
 
 #include <stddef.h>
 
-#include "php.h"
+#include "lib/php-header.h"
 
 #include "mm.h"
 

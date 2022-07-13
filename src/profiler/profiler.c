@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,7 @@
 #include <process.h>
 #endif
 
-#include "php.h"
+#include "lib/php-header.h"
 #include "TSRM.h"
 #include "php_globals.h"
 #include "Zend/zend_alloc.h"

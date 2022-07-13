@@ -10,7 +10,7 @@ xdebug.collect_assignments=1
 <?php
 require_once 'capture-trace.inc';
 $a = new test;
-class test { function assign() {
+class test { public $test; function assign() {
 	$this->test = ['foo' => 0];
 	$this->test['foo'] += 42;
 	$this->test['foo'] -= 2;
@@ -32,7 +32,7 @@ xdebug_stop_trace();
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
                              => $tf = '%sxt%S' %s:%d
-                           => $a = class test {  } %sassignment-trace-this-op-002.php:3
+                           => $a = class test { public $test = NULL } %sassignment-trace-this-op-002.php:3
 %w%f %w%d     -> test->assign() %sassignment-trace-this-op-002.php:19
                              => $this->test = ['foo' => 0] %sassignment-trace-this-op-002.php:5
                              => $this->test['foo'] += 42 %sassignment-trace-this-op-002.php:6

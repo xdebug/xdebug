@@ -20,7 +20,7 @@ $c = xdebug_get_code_coverage();
 dump_branch_coverage($c);
 ?>
 --EXPECTF--
-0 
+0
 A HIT
 B HIT
 ifthenelse
@@ -29,24 +29,24 @@ ifthenelse
   - 05; OP: 05-06; line: 15-17 HIT; out1: 07 HIT
   - 07; OP: 07-08; line: 17-17 HIT; out1: 09 HIT; out2: 11 HIT
   - 09; OP: 09-10; line: 18-20 HIT; out1: 11 HIT
-  - 11; OP: 11-12; line: 20-20 HIT; out1: EX  X 
+  - 11; OP: 11-12; line: 20-20 HIT; out1: EX  X
 - paths
-  - 0 5 7 9 11:  X 
+  - 0 5 7 9 11:  X
   - 0 5 7 11: HIT
   - 0 7 9 11: HIT
-  - 0 7 11:  X 
+  - 0 7 11:  X
 
 loopy
 - branches
   - 00; OP: 00-02; line: 02-06 HIT; out1: 03 HIT
-  - 03; OP: 03-08; line: 06-08 HIT; out1: 09 HIT; out2: 03  X 
-  - 09; OP: 09-12; line: 09-10 HIT; out1: EX  X 
+  - 03; OP: 03-06; line: 06-08 HIT; out1: 07 HIT; out2: 03  X
+  - 07; OP: 07-10; line: 09-10 HIT; out1: EX  X
 - paths
-  - 0 3 9: HIT
-  - 0 3 3 9:  X 
+  - 0 3 7: HIT
+  - 0 3 3 7:  X
 
 {main}
 - branches
-  - 00; OP: 00-24; line: 02-26 HIT; out1: EX  X 
+  - 00; OP: 00-24; line: 02-26 HIT; out1: EX  X
 - paths
   - 0: HIT

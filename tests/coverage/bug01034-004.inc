@@ -3,7 +3,7 @@ function loopy($i)
 {
 	do
 	{
-		echo $i, ' ';
+		echo $i;
 
 	} while( $i-- );
 	echo "\n";

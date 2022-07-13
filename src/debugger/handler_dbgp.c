@@ -20,7 +20,7 @@
 #include <unistd.h>
 #endif
 
-#include "php.h"
+#include "lib/php-header.h"
 #include "SAPI.h"
 
 #include "ext/standard/php_string.h"

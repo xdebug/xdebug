@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1992: Code Coverage with filter can crash on xdebug_stop_code_coverage() 
+Test for bug #1992: Code Coverage with filter can crash on xdebug_stop_code_coverage()
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';

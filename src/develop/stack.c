@@ -965,6 +965,10 @@ void xdebug_develop_throw_exception_hook(zval *exception, zval *file, zval *line
 	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), message ? Z_STRVAL_P(message) : "", Z_STRVAL_P(file), Z_LVAL_P(line));
 	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
 	exception_trace = tmp_str.d;
+
+#if PHP_VERSION_ID >= 80200
+	exception_ce->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+#endif
 	zend_update_property_string(exception_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace);
 
 	if (XG_BASE(last_exception_trace)) {
