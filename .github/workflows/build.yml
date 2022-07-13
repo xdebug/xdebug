@@ -15,8 +15,16 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [7.4, 8.0, 8.1, 8.2]
+                php: [7.4, 8.0, 8.1]
                 use-opcache: [true, false]
+                experimental: [false]
+                include:
+                  - php: 8.2
+                    use-opcache: true
+                    experimental: true
+                  - php: 8.2
+                    use-opcache: false
+                    experimental: true
 
         steps:
             -   uses: actions/checkout@v2
@@ -47,6 +55,7 @@ jobs:
                     echo "TEST_PHP_ARGS=$TEST_PHP_ARGS" >> $GITHUB_ENV
 
             -   name: Run tests
+                continue-on-error: ${{ matrix.experimental }}
                 run: |
                     $TEST_PHP_EXECUTABLE $TEST_PHP_ARGS -v
                     $TEST_PHP_EXECUTABLE -n run-xdebug-tests.php -q -x --show-diff
@@ -64,9 +73,19 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: ["7.4", "8.0", "8.1", "8.2"]
+                php: ["7.4", "8.0", "8.1"]
                 arch: [x64, x86]
                 ts: [nts, ts]
+                experimental: [false]
+                include:
+                  - php: "8.2"
+                    arch: x64
+                    ts: nts
+                    experimental: true
+                  - php: "8.2"
+                    arch: x64
+                    ts: ts
+                    experimental: true
         steps:
                 - name: Checkout Xdebug
                   uses: actions/checkout@v2
@@ -139,6 +158,7 @@ jobs:
                     echo "TMP=$((Get-Item -LiteralPath $Env:TMP).FullName)" >> $env:GITHUB_ENV
                     echo "XDEBUG_MODE=" >> $env:GITHUB_ENV
                 - name: Run Tests
+                  continue-on-error: ${{ matrix.experimental }}
                   run: |
                     echo "Artifact: ${{ env.ARTIFACT }}"
                     echo "TEST_PHP_ARGS: ${{ env.TEST_PHP_ARGS }}"
