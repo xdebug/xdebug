@@ -139,6 +139,7 @@ function check_reqs( $req_str )
 		if ( $req === 'unparallel' )
 		{
 			$missing += ( getenv( 'SKIP_UNPARALLEL_TESTS' ) );
+			$missing += ( getenv( 'TEST_PHP_WORKER' ) !== false );
 		}
 
 		if ( $req === 'dbgp' )

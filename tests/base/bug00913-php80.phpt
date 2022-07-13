@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #913: "Added debug info handler to DOM objects" not supported (< PHP 8.1)
+--INI--
+xdebug.mode=develop
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
@@ -17,189 +19,221 @@ error_reporting(0);
 var_dump($DOMDocumentNode, $DOMElementNode, $DOMAttributeNode, $DOMTextNode);
 ?>
 --EXPECTF--
-object(DOMDocument)#%d (%d) {
-  ["doctype"]=>
+%sbug00913-php80.php:%d:
+class DOMDocument#%d (38) {
+  public $doctype =>
   NULL
-  ["implementation"]=>
+  public $implementation =>
   string(22) "(object value omitted)"
-  ["documentElement"]=>
+  public $documentElement =>
   string(22) "(object value omitted)"
-  ["actualEncoding"]=>
+  public $actualEncoding =>
   NULL
-  ["encoding"]=>
+  public $encoding =>
   NULL
-  ["xmlEncoding"]=>
+  public $xmlEncoding =>
   NULL
-  ["standalone"]=>
+  public $standalone =>
   bool(true)
-  ["xmlStandalone"]=>
+  public $xmlStandalone =>
   bool(true)
-  ["version"]=>
+  public $version =>
   string(3) "1.0"
-  ["xmlVersion"]=>
+  public $xmlVersion =>
   string(3) "1.0"
-  ["strictErrorChecking"]=>
+  public $strictErrorChecking =>
   bool(true)
-  ["documentURI"]=>
+  public $documentURI =>
   string(%d) "%s"
-  ["config"]=>
+  public $config =>
   NULL
-  ["formatOutput"]=>
+  public $formatOutput =>
   bool(false)
-  ["validateOnParse"]=>
+  public $validateOnParse =>
   bool(false)
-  ["resolveExternals"]=>
+  public $resolveExternals =>
   bool(false)
-  ["preserveWhiteSpace"]=>
+  public $preserveWhiteSpace =>
   bool(true)
-  ["recover"]=>
+  public $recover =>
   bool(false)
-  ["substituteEntities"]=>
-  %a
-  ["nodeName"]=>
-  string(9) "#document"
-  ["nodeValue"]=>
-  NULL
-  ["nodeType"]=>
-  int(9)
-  ["parentNode"]=>
-  NULL
-  ["childNodes"]=>
+  public $substituteEntities =>
+  bool(false)
+  public $firstElementChild =>
   string(22) "(object value omitted)"
-  ["firstChild"]=>
+  public $lastElementChild =>
   string(22) "(object value omitted)"
-  ["lastChild"]=>
-  string(22) "(object value omitted)"
-  ["previousSibling"]=>
-  %a
-  ["attributes"]=>
-  NULL
-  ["ownerDocument"]=>
-  NULL
-  ["namespaceURI"]=>
-  NULL
-  ["prefix"]=>
-  string(0) ""
-  ["localName"]=>
-  NULL
-  ["baseURI"]=>
-  string(%d) "%s"
-  ["textContent"]=>
-  string(4) "Test"
-}
-object(DOMElement)#%d (%d) {
-  ["tagName"]=>
-  string(7) "example"
-  ["schemaTypeInfo"]=>
-  %a
-  ["nodeName"]=>
-  string(7) "example"
-  ["nodeValue"]=>
-  string(4) "Test"
-  ["nodeType"]=>
+  public $childElementCount =>
   int(1)
-  ["parentNode"]=>
-  string(22) "(object value omitted)"
-  ["childNodes"]=>
-  string(22) "(object value omitted)"
-  ["firstChild"]=>
-  string(22) "(object value omitted)"
-  ["lastChild"]=>
-  string(22) "(object value omitted)"
-  ["previousSibling"]=>
-  %a
-  ["attributes"]=>
-  string(22) "(object value omitted)"
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
+  public $nodeName =>
+  string(9) "#document"
+  public $nodeValue =>
   NULL
-  ["prefix"]=>
+  public $nodeType =>
+  int(9)
+  public $parentNode =>
+  NULL
+  public $childNodes =>
+  string(22) "(object value omitted)"
+  public $firstChild =>
+  string(22) "(object value omitted)"
+  public $lastChild =>
+  string(22) "(object value omitted)"
+  public $previousSibling =>
+  NULL
+  public $nextSibling =>
+  NULL
+  public $attributes =>
+  NULL
+  public $ownerDocument =>
+  NULL
+  public $namespaceURI =>
+  NULL
+  public $prefix =>
   string(0) ""
-  ["localName"]=>
+  public $localName =>
+  NULL
+  public $baseURI =>
+  string(%d) "%s"
+  public $textContent =>
+  string(4) "Test"
+}
+%sbug00913-php80.php:%d:
+class DOMElement#2 (23) {
+  public $tagName =>
   string(7) "example"
-  ["baseURI"]=>
+  public $schemaTypeInfo =>
+  NULL
+  public $firstElementChild =>
+  NULL
+  public $lastElementChild =>
+  NULL
+  public $childElementCount =>
+  int(0)
+  public $previousElementSibling =>
+  NULL
+  public $nextElementSibling =>
+  NULL
+  public $nodeName =>
+  string(7) "example"
+  public $nodeValue =>
+  string(4) "Test"
+  public $nodeType =>
+  int(1)
+  public $parentNode =>
+  string(22) "(object value omitted)"
+  public $childNodes =>
+  string(22) "(object value omitted)"
+  public $firstChild =>
+  string(22) "(object value omitted)"
+  public $lastChild =>
+  string(22) "(object value omitted)"
+  public $previousSibling =>
+  NULL
+  public $nextSibling =>
+  NULL
+  public $attributes =>
+  string(22) "(object value omitted)"
+  public $ownerDocument =>
+  string(22) "(object value omitted)"
+  public $namespaceURI =>
+  NULL
+  public $prefix =>
+  string(0) ""
+  public $localName =>
+  string(7) "example"
+  public $baseURI =>
   string(%d) "%s"
-  ["textContent"]=>
+  public $textContent =>
   string(4) "Test"
 }
-object(DOMAttr)#%d (%d) {
-  ["name"]=>
+%sbug00913-php80.php:%d:
+class DOMAttr#3 (21) {
+  public $name =>
   string(1) "a"
-  ["specified"]=>
+  public $specified =>
   bool(true)
-  ["value"]=>
+  public $value =>
   string(1) "b"
-  ["ownerElement"]=>
+  public $ownerElement =>
   string(22) "(object value omitted)"
-  ["schemaTypeInfo"]=>
+  public $schemaTypeInfo =>
   NULL
-  ["nodeName"]=>
+  public $nodeName =>
   string(1) "a"
-  ["nodeValue"]=>
+  public $nodeValue =>
   string(1) "b"
-  ["nodeType"]=>
+  public $nodeType =>
   int(2)
-  ["parentNode"]=>
+  public $parentNode =>
   string(22) "(object value omitted)"
-  ["childNodes"]=>
+  public $childNodes =>
   string(22) "(object value omitted)"
-  ["firstChild"]=>
+  public $firstChild =>
   string(22) "(object value omitted)"
-  ["lastChild"]=>
+  public $lastChild =>
   string(22) "(object value omitted)"
-  ["previousSibling"]=>
-  %a
-  ["attributes"]=>
+  public $previousSibling =>
   NULL
-  ["ownerDocument"]=>
-  string(22) "(object value omitted)"
-  ["namespaceURI"]=>
+  public $nextSibling =>
   NULL
-  ["prefix"]=>
+  public $attributes =>
+  NULL
+  public $ownerDocument =>
+  string(22) "(object value omitted)"
+  public $namespaceURI =>
+  NULL
+  public $prefix =>
   string(0) ""
-  ["localName"]=>
+  public $localName =>
   string(1) "a"
-  ["baseURI"]=>
+  public $baseURI =>
   string(%d) "%s"
-  ["textContent"]=>
+  public $textContent =>
   string(1) "b"
 }
-object(DOMText)#%d (%d) {
-  ["wholeText"]=>
+%sbug00913-php80.php:%d:
+class DOMText#4 (21) {
+  public $wholeText =>
   string(4) "Test"
-  ["data"]=>
+  public $data =>
   string(4) "Test"
-  ["length"]=>
-  %a
-  ["nodeName"]=>
+  public $length =>
+  int(4)
+  public $previousElementSibling =>
+  NULL
+  public $nextElementSibling =>
+  NULL
+  public $nodeName =>
   string(5) "#text"
-  ["nodeValue"]=>
+  public $nodeValue =>
   string(4) "Test"
-  ["nodeType"]=>
+  public $nodeType =>
   int(3)
-  ["parentNode"]=>
+  public $parentNode =>
   string(22) "(object value omitted)"
-  ["childNodes"]=>
-  %s
-  ["firstChild"]=>
-  NULL
-  ["lastChild"]=>
-  NULL
-  ["previousSibling"]=>
-  %a
-  ["attributes"]=>
-  NULL
-  ["ownerDocument"]=>
+  public $childNodes =>
   string(22) "(object value omitted)"
-  ["namespaceURI"]=>
+  public $firstChild =>
   NULL
-  ["prefix"]=>
+  public $lastChild =>
+  NULL
+  public $previousSibling =>
+  NULL
+  public $nextSibling =>
+  NULL
+  public $attributes =>
+  NULL
+  public $ownerDocument =>
+  string(22) "(object value omitted)"
+  public $namespaceURI =>
+  NULL
+  public $prefix =>
   string(0) ""
-  ["localName"]=>
+  public $localName =>
   NULL
-  ["baseURI"]=>
+  public $baseURI =>
   string(%d) "%s"
-  ["textContent"]=>
+  public $textContent =>
   string(4) "Test"
 }

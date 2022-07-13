@@ -1,5 +1,7 @@
 --TEST--
 Test for bug #2041: __debugInfo is not used for var_dump output
+--INI--
+xdebug.mode=develop
 --FILE--
 <?php
 final class X
@@ -23,7 +25,8 @@ $a = new X('supersecret');
 var_dump($a);
 ?>
 --EXPECTF--
-object(X)#1 (%d) {
-  ["secretValue"]=>
+%sbug02041.php:%d:
+class X#%d (1) {
+  public $secretValue =>
   string(8) "********"
 }

@@ -10,7 +10,7 @@ I_LIKE_COOKIES=unix:///tmp/haxx0r.sock
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.log={TMPDIR}/{RUNID}remote-unix.txt
+xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}remote-unix.txt
 xdebug.discover_client_host=1
 xdebug.client_host=unix:///tmp/xdbg.sock
 xdebug.client_port=0
@@ -18,8 +18,8 @@ xdebug.client_discovery_header=I_LIKE_COOKIES
 --FILE--
 <?php
 echo strlen("foo"), "\n";
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-unix.txt' );
-unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . 'remote-unix.txt' );
+echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-unix.txt' );
+unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-unix.txt' );
 ?>
 --EXPECTF--
 3

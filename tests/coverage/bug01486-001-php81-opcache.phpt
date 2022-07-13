@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (opcache)
+Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (< PHP 8.2, opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('opcache');
+check_reqs('PHP < 8.2; opcache');
 ?>
 --INI--
 xdebug.mode=coverage

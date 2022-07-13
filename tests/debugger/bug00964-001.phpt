@@ -10,7 +10,7 @@ HTTP_X_FORWARDED_FOR=192.168.111.111
 --INI--
 xdebug.mode=debug
 xdebug.start_with_request=yes
-xdebug.log={TMPDIR}/bug964.txt
+xdebug.log={TMP}/bug964.txt
 xdebug.discover_client_host=1
 xdebug.client_port=9903
 --FILE--
