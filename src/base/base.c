@@ -19,6 +19,10 @@
 #include "php_globals.h"
 #include "zend_closures.h"
 #include "zend_exceptions.h"
+#if PHP_VERSION_ID >= 80200
+# include "zend_attributes.h"
+#endif
+
 #include "zend_interfaces.h"
 
 #if PHP_VERSION_ID >= 80100
@@ -330,12 +334,13 @@ normal_after_all:
 static void collect_params_internal(function_stack_entry *fse, zend_execute_data *zdata, zend_op_array *op_array)
 {
 	int i;
-	int is_variadic       = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
-	int is_trampoline     = !!(zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
-	int variadic_at_pos   = NO_VARIADIC;
-	int names_expected    = 0;
-	int arguments_sent    = 0;
-	int arguments_storage = 0;
+	int is_variadic        = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
+	int is_trampoline      = !!(zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	int variadic_at_pos    = NO_VARIADIC;
+	int variadic_sensitive = 0;
+	int names_expected     = 0;
+	int arguments_sent     = 0;
+	int arguments_storage  = 0;
 
 	arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
 	if (arguments_sent > USHRT_MAX) {
@@ -398,12 +403,36 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 
 	/* Collect Arguments */
 	for (i = 0; i < arguments_sent; i++) {
+#if PHP_VERSION_ID >= 80200
+		zend_attribute *attribute;
+#else
+		void *attribute = NULL;
+#endif
+
 		/* The index in ZEND_CALL_ARG is 1-based */
 #if DEBUG
-		fprintf(stderr, "Copying argument %d: ", i);
-		fprintf(stderr, "ARG ");
+		fprintf(stderr, "Copying argument %d\n", i);
 #endif
-		ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_ARG(zdata, i + 1));
+#if PHP_VERSION_ID >= 80200
+		attribute = zend_get_parameter_attribute_str(
+			zdata->func->common.attributes,
+			"sensitiveparameter",
+			sizeof("sensitiveparameter") - 1,
+			i
+		);
+#endif
+		if (attribute && fse->var[i].is_variadic) {
+			variadic_sensitive = 1;
+		}
+# if DEBUG
+		fprintf(stderr, "SENSTIVIVE %d ", attribute != NULL);
+# endif
+
+		if ((variadic_sensitive || attribute != NULL) && !fse->var[i].is_variadic) {
+			ZVAL_STRING(&(fse->var[i].data), "[Sensitive Parameter]");
+		} else {
+			ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_ARG(zdata, i + 1));
+		}
 #if DEBUG
 		fprintf(stderr, "OK\n");
 #endif
@@ -435,12 +464,13 @@ static void collect_params_internal(function_stack_entry *fse, zend_execute_data
 static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, zend_op_array *op_array)
 {
 	int i;
-	int is_variadic       = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
-	int is_trampoline     = !!(zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
-	int variadic_at_pos   = NO_VARIADIC;
-	int names_expected    = 0;
-	int arguments_sent    = 0;
-	int arguments_storage = 0;
+	int is_variadic        = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
+	int is_trampoline      = !!(zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
+	int variadic_at_pos    = NO_VARIADIC;
+	int variadic_sensitive = 0;
+	int names_expected     = 0;
+	int arguments_sent     = 0;
+	int arguments_storage  = 0;
 
 	arguments_sent = ZEND_CALL_NUM_ARGS(zdata);
 
@@ -496,6 +526,12 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 
 	/* Collect Arguments */
 	for (i = 0; i < fse->varc; i++) {
+#if PHP_VERSION_ID >= 80200
+		zend_attribute *attribute;
+#else
+		void *attribute = NULL;
+#endif
+
 		/* The index in ZEND_CALL_ARG is 1-based */
 #if DEBUG
 		fprintf(stderr, "Copying argument %d: ", i);
@@ -504,12 +540,35 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 #if DEBUG
 			fprintf(stderr, "ARG ");
 #endif
-			ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_ARG(zdata, i + 1));
+#if PHP_VERSION_ID >= 80200
+			attribute = zend_get_parameter_attribute_str(
+				zdata->func->common.attributes,
+				"sensitiveparameter",
+				sizeof("sensitiveparameter") - 1,
+				i
+			);
+#endif
+			if (attribute && fse->var[i].is_variadic) {
+				variadic_sensitive = 1;
+			}
+# if DEBUG
+			fprintf(stderr, "SENSITIVE %d ", attribute != NULL);
+# endif
+
+			if ((variadic_sensitive || attribute != NULL) && !fse->var[i].is_variadic) {
+				ZVAL_STRING(&(fse->var[i].data), "[Sensitive Parameter]");
+			} else {
+				ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_ARG(zdata, i + 1));
+			}
 		} else {
 #if DEBUG
 			fprintf(stderr, "VAR_NUM ");
 #endif
-			ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - names_expected));
+			if (variadic_sensitive) {
+				ZVAL_STRING(&(fse->var[i].data), "[Sensitive Parameter]");
+			} else {
+				ZVAL_COPY(&(fse->var[i].data), ZEND_CALL_VAR_NUM(zdata, zdata->func->op_array.last_var + zdata->func->op_array.T + i - names_expected));
+			}
 		}
 #if DEBUG
 		fprintf(stderr, "OK\n");
