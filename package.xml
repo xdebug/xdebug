@@ -40,28 +40,45 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2022-06-06</date>
- <time>16:30:05</time>
+ <date>2022-07-20</date>
+ <time>15:57:59</time>
  <version>
-  <release>3.1.5</release>
-  <api>3.1.5</api>
+  <release>3.2.0alpha1</release>
+  <api>3.2.0alpha1</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Jun 06, 2022 - Xdebug 3.1.5
+Wed, Jul 20, 2022 - Xdebug 3.2.0alpha1
+
++ New features:
+
+  - Fixed issue #1819: Allow a list of headers in &#039;xdebug.client_discovery_header&#039;
+  - Fixed issue #2079: Add pseudo hosts xdebug://gateway and xdebug://nameserver
+  - Fixed issue #2087: Introduce step for the return state and virtual property for return value
+  - Fixed issue #2104: Add support for PHP 8.2 &quot;SensitiveParameter&quot; attribute
+
++ Improvements:
+  
+  - Fixed issue #2086: Include return value in return breakpoint interruption response
+
+- Removed features:
+  
+  - Fixed issue #2014: Drop support for PHP 7.2
+  - Fixed issue #2102: Drop support for PHP 7.3
+  - Fixed issue #2103: Drop support for PHP 7.4
 
 = Fixed bugs:
 
-  - Fixed issue #2056: Install documentation gives wrong arch for installation on M1 Macs
-  - Fixed issue #2082: phpize --clean removes required clocks.m4 file
-  - Fixed issue #2083: Constant defined with an enum case produce double &quot;facet&quot; attribute in context_get response
-  - Fixed issue #2085: Crash when used with source guardian encoded files
-  - Fixed issue #2090: Segfault in __callStatic() after FFI initialization
-
+  - Fixed issue #2002: xdebug_trace_handler_t handler members are not always checked for NULL when executing
+  - Fixed issue #2045: Inapproriate frowny face
+  - Fixed issue #2062: Profiler can&#039;t able to write cachegrind file at /tmp
+  - Fixed issue #2089: Alpine Linux does not support res_ninit
+  - Fixed issue #2093: Fatal error: linux/rtnetlink.h: No such file or directory  linux/rtnetlink.h
+  - Fixed issue #2098: With breakpoint_include_return_value enabled step_out break at every function
  </notes>
 
  <contents>
@@ -208,6 +225,32 @@ Mon, Jun 06, 2022 - Xdebug 3.1.5
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+ 
+  <release>
+   <date>2022-06-06</date>
+   <time>16:30:05</time>
+   <version>
+    <release>3.1.5</release>
+    <api>3.1.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jun 06, 2022 - Xdebug 3.1.5
+
+= Fixed bugs:
+
+  - Fixed issue #2056: Install documentation gives wrong arch for installation on M1 Macs
+  - Fixed issue #2082: phpize --clean removes required clocks.m4 file
+  - Fixed issue #2083: Constant defined with an enum case produce double &quot;facet&quot; attribute in context_get response
+  - Fixed issue #2085: Crash when used with source guardian encoded files
+  - Fixed issue #2090: Segfault in __callStatic() after FFI initialization
+
+   </notes>
+  </release>
  
   <release>
    <date>2022-04-04</date>
