@@ -118,6 +118,7 @@ Mon, Jun 06, 2022 - Xdebug 3.1.5
      <file name="llist.c" role="src" />
      <file name="llist.h" role="src" />
      <file name="mm.h" role="src" />
+     <file name="php-header.h" role="src" />
      <file name="set.c" role="src" />
      <file name="set.h" role="src" />
      <file name="str.c" role="src" />
