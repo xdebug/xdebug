@@ -54,7 +54,22 @@
 #include "lib/crc32.h"
 #include "lib/log.h"
 
+#include "../../lib/bearssl/inc/bearssl.h"
+
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
+
+static int check_ssl_status(xdebug_con *context)
+{
+	int err;
+
+	err = br_ssl_engine_last_error(&context->ssl.sc.eng);
+	if (err != 0) {
+		fprintf(stderr, "SSL error %d\n", err);
+		return 0;
+	}
+
+	return 1;
+}
 
 #if !WIN32 && !WINNT
 static int xdebug_create_socket_unix(const char *path)
@@ -71,7 +86,7 @@ static int xdebug_create_socket_unix(const char *path)
 	strncpy(sa.sun_path, path, sizeof(sa.sun_path) - 1);
 	if (connect(sockfd, (struct sockaddr*)&sa, sizeof(sa)) < 0) {
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "UNIX", "Creating socket for 'unix://%s', connect: %s.", path, strerror(errno));
-		SCLOSE(sockfd);
+		xdebug_close_socket(sockfd);
 		return (errno == EACCES) ? SOCK_ACCESS_ERR : SOCK_ERR;
 	}
 
@@ -285,7 +300,7 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 #else
 			if (errno == EACCES) {
 				xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SOCK3", "Creating socket for '%s:%d', connect: %s.", hostname, dport, strerror(errno));
-				SCLOSE(sockfd);
+				xdebug_close_socket(sockfd);
 				sockfd = SOCK_ACCESS_ERR;
 
 				continue;
@@ -293,7 +308,7 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 			if (errno != EINPROGRESS) {
 				xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SOCK3", "Creating socket for '%s:%d', connect: %s.", hostname, dport, strerror(errno));
 #endif
-				SCLOSE(sockfd);
+				xdebug_close_socket(sockfd);
 				sockfd = SOCK_ERR;
 
 				continue;
@@ -373,7 +388,7 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 
 			/* If there where some errors close the socket and continue with the next IP address */
 			if (sockerror < 0) {
-				SCLOSE(sockfd);
+				xdebug_close_socket(sockfd);
 				sockfd = sockerror;
 
 				continue;
@@ -413,9 +428,39 @@ static int xdebug_create_socket(const char *hostname, int dport, int timeout)
 	return sockfd;
 }
 
+size_t xdebug_read_data(xdebug_con *context, char *buffer, size_t buffer_size)
+{
+	if (context->ssl.enabled) {
+		return br_sslio_read(&context->ssl.ioc, buffer, buffer_size);
+	} else {
+		return recv(context->socket, buffer, buffer_size, 0);
+	}
+}
+
+size_t xdebug_send_data(xdebug_con *context, char *data, size_t length)
+{
+	if (context->ssl.enabled) {
+		br_sslio_write(&context->ssl.ioc, data, length);
+
+		br_sslio_flush(&context->ssl.ioc);
+		return check_ssl_status(context);
+	} else {
+#if WIN32|WINNT
+		return length == send(context->socket, data, length, 0);
+#else
+		return length == write(context->socket, data, length);
+#endif
+	}
+}
+
+
 void xdebug_close_socket(int socketfd)
 {
-	SCLOSE(socketfd);
+#if WIN32|WINNT
+	closesocket(socketfd);
+#else
+	close(socketfd);
+#endif
 }
 
 static zval *get_client_discovery_address(char **header)
@@ -519,15 +564,20 @@ static void xdebug_init_normal_debugger(xdebug_str *connection_attempts)
 	}
 }
 
-static void xdebug_init_cloud_debugger(const char *cloud_id)
+static char *calculate_cloud_host(const char *cloud_id)
 {
-	unsigned long  crc = xdebug_crc32(cloud_id, strlen(cloud_id));
-	char          *host;
+	unsigned long crc = xdebug_crc32(cloud_id, strlen(cloud_id));
 
-	host = xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a');
+	return xdebug_sprintf("%c.cloud.xdebug.com", (crc & 0x0f) + 'a');
+}
 
-	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", host, 9020L);
-	XG_DBG(context).socket = xdebug_create_socket(host, 9020, XINI_DBG(connect_timeout_ms));
+static void xdebug_init_cloud_debugger(const char *cloud_id, xdebug_str *connection_attempts)
+{
+	char *host = calculate_cloud_host(cloud_id);
+
+	xdebug_str_add_fmt(connection_attempts, "%s:%ld (Xdebug Cloud)", host, 9023L);
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connecting to configured address/port: %s:%ld.", host, 9023L);
+	XG_DBG(context).socket = xdebug_create_socket(host, 9023, XINI_DBG(connect_timeout_ms));
 
 	xdfree(host);
 }
@@ -550,19 +600,79 @@ static int ide_key_is_cloud_id()
 	return 1;
 }
 
+#include "xdebugorg.h"
+
+/*
+ * Low-level data read callback for the simplified SSL I/O API.
+ */
+static int
+sock_read(void *ctx, unsigned char *buf, size_t len)
+{
+	for (;;) {
+		ssize_t rlen;
+
+		rlen = read(*(int *)ctx, buf, len);
+		if (rlen <= 0) {
+			if (rlen < 0 && errno == EINTR) {
+				continue;
+			}
+			return -1;
+		}
+		return (int)rlen;
+	}
+}
+
+/*
+ * Low-level data write callback for the simplified SSL I/O API.
+ */
+static int
+sock_write(void *ctx, const unsigned char *buf, size_t len)
+{
+	for (;;) {
+		ssize_t wlen;
+
+		wlen = write(*(int *)ctx, buf, len);
+		if (wlen <= 0) {
+			if (wlen < 0 && errno == EINTR) {
+				continue;
+			}
+			return -1;
+		}
+		return (int)wlen;
+	}
+}
+
+static int switch_to_ssl(const char *used_cloud_id, xdebug_con *context)
+{
+	char *host = calculate_cloud_host(used_cloud_id);
+
+	br_ssl_client_init_full(&context->ssl.sc, &context->ssl.xc, TAs, TAs_NUM);
+
+	br_ssl_engine_set_buffer(&context->ssl.sc.eng, &context->ssl.iobuf, sizeof(context->ssl.iobuf), 1);
+
+	br_ssl_client_reset(&context->ssl.sc, host, 0);
+	xdfree(host);
+
+	br_sslio_init(&context->ssl.ioc, &context->ssl.sc.eng, sock_read, &context->socket, sock_write, &context->socket);
+	return check_ssl_status(context);
+}
+
 static void xdebug_init_debugger()
 {
 	xdebug_str *connection_attempts = xdebug_str_new();
+	const char *used_cloud_id = NULL;
 
 	/* Get handler from mode */
 	XG_DBG(context).handler = &xdebug_handler_dbgp;
 
 	if (strcmp(XINI_DBG(cloud_id), "") != 0) {
-		xdebug_init_cloud_debugger(XINI_DBG(cloud_id));
+		xdebug_init_cloud_debugger(XINI_DBG(cloud_id), connection_attempts);
 		XG_DBG(context).host_type = XDEBUG_CLOUD;
+		used_cloud_id = XINI_DBG(cloud_id);
 	} else if (XG_DBG(ide_key) && ide_key_is_cloud_id()) {
-		xdebug_init_cloud_debugger(XG_DBG(ide_key));
+		xdebug_init_cloud_debugger(XG_DBG(ide_key), connection_attempts);
 		XG_DBG(context).host_type = XDEBUG_CLOUD_FROM_TRIGGER_VALUE;
+		used_cloud_id = XINI_DBG(cloud_id);
 	} else {
 		xdebug_init_normal_debugger(connection_attempts);
 		XG_DBG(context).host_type = XDEBUG_NORMAL;
@@ -572,6 +682,14 @@ static void xdebug_init_debugger()
 	if (XG_DBG(context).socket >= 0) {
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_INFO, "Connected to debugging client: %s.", connection_attempts->d);
 		xdebug_mark_debug_connection_pending();
+
+		if (used_cloud_id) {
+			if (!switch_to_ssl(used_cloud_id, &XG_DBG(context))) {
+				xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "SES-INIT-SSL", "SSL could not be enabled. :-(");
+				goto free_data;
+			}
+			XG_DBG(context).ssl.enabled = 1;
+		}
 
 		if (!XG_DBG(context).handler->remote_init(&(XG_DBG(context)), XDEBUG_REQ)) {
 			/* The request could not be started, ignore it then */
@@ -590,6 +708,7 @@ static void xdebug_init_debugger()
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related.", connection_attempts->d);
 	}
 
+free_data:
 	xdebug_str_free(connection_attempts);
 }
 

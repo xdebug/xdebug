@@ -193,6 +193,120 @@ Mon, Jun 06, 2022 - Xdebug 3.1.5
      <file name="trace_html.h" role="src" />
     </dir>
    </dir>
+   <dir name="lib">
+    <dir name="bearssl">
+     <file name="LICENSE.txt" role="doc" />
+     <dir name="inc">
+      <file name="bearssl_aead.h" role="src" />
+      <file name="bearssl_block.h" role="src" />
+      <file name="bearssl_ec.h" role="src" />
+      <file name="bearssl.h" role="src" />
+      <file name="bearssl_hash.h" role="src" />
+      <file name="bearssl_hmac.h" role="src" />
+      <file name="bearssl_kdf.h" role="src" />
+      <file name="bearssl_pem.h" role="src" />
+      <file name="bearssl_prf.h" role="src" />
+      <file name="bearssl_rand.h" role="src" />
+      <file name="bearssl_rsa.h" role="src" />
+      <file name="bearssl_ssl.h" role="src" />
+      <file name="bearssl_x509.h" role="src" />
+     </dir>
+     <dir name="src">
+      <file name="config.h" role="src" />
+      <file name="inner.h" role="src" />
+      <dir name="aead">
+       <file name="ccm.c" role="src" />
+      </dir>
+      <dir name="codec">
+       <file name="ccopy.c" role="src" />
+       <file name="dec32be.c" role="src" />
+       <file name="dec32le.c" role="src" />
+       <file name="dec64be.c" role="src" />
+       <file name="enc32be.c" role="src" />
+       <file name="enc32le.c" role="src" />
+       <file name="enc64be.c" role="src" />
+      </dir>
+      <dir name="ec">
+       <file name="ec_all_m31.c" role="src" />
+       <file name="ec_c25519_m31.c" role="src" />
+       <file name="ec_c25519_m64.c" role="src" />
+       <file name="ecdsa_atr.c" role="src" />
+       <file name="ecdsa_i31_bits.c" role="src" />
+       <file name="ecdsa_i31_vrfy_asn1.c" role="src" />
+       <file name="ecdsa_i31_vrfy_raw.c" role="src" />
+       <file name="ec_p256_m31.c" role="src" />
+       <file name="ec_p256_m64.c" role="src" />
+       <file name="ec_prime_i31.c" role="src" />
+       <file name="ec_secp256r1.c" role="src" />
+       <file name="ec_secp384r1.c" role="src" />
+       <file name="ec_secp521r1.c" role="src" />
+      </dir>
+      <dir name="hash">
+       <file name="multihash.c" role="src" />
+       <file name="sha2small.c" role="src" />
+      </dir>
+      <dir name="int">
+       <file name="i31_add.c" role="src" />
+       <file name="i31_bitlen.c" role="src" />
+       <file name="i31_decmod.c" role="src" />
+       <file name="i31_decode.c" role="src" />
+       <file name="i31_encode.c" role="src" />
+       <file name="i31_fmont.c" role="src" />
+       <file name="i31_iszero.c" role="src" />
+       <file name="i31_modpow.c" role="src" />
+       <file name="i31_modpow2.c" role="src" />
+       <file name="i31_montmul.c" role="src" />
+       <file name="i31_muladd.c" role="src" />
+       <file name="i31_ninv31.c" role="src" />
+       <file name="i31_rshift.c" role="src" />
+       <file name="i31_sub.c" role="src" />
+       <file name="i31_tmont.c" role="src" />
+       <file name="i32_div32.c" role="src" />
+       <file name="i62_modpow2.c" role="src" />
+      </dir>
+      <dir name="mac">
+       <file name="hmac.c" role="src" />
+       <file name="hmac_ct.c" role="src" />
+      </dir>
+      <dir name="rand">
+       <file name="hmac_drbg.c" role="src" />
+       <file name="sysrng.c" role="src" />
+      </dir>
+      <dir name="rsa">
+       <file name="rsa_default_pkcs1_vrfy.c" role="src" />
+       <file name="rsa_default_pub.c" role="src" />
+       <file name="rsa_i31_pkcs1_vrfy.c" role="src" />
+       <file name="rsa_i62_pkcs1_vrfy.c" role="src" />
+       <file name="rsa_i31_pub.c" role="src" />
+       <file name="rsa_i62_pub.c" role="src" />
+       <file name="rsa_pkcs1_sig_unpad.c" role="src" />
+      </dir>
+      <dir name="ssl">
+       <file name="prf.c" role="src" />
+       <file name="prf_sha256.c" role="src" />
+       <file name="ssl_client.c" role="src" />
+       <file name="ssl_client_default_rsapub.c" role="src" />
+       <file name="ssl_client_full.c" role="src" />
+       <file name="ssl_engine.c" role="src" />
+       <file name="ssl_engine_default_chapol.c" role="src" />
+       <file name="ssl_engine_default_ecdsa.c" role="src" />
+       <file name="ssl_engine_default_rsavrfy.c" role="src" />
+       <file name="ssl_hs_client.c" role="src" />
+       <file name="ssl_io.c" role="src" />
+       <file name="ssl_rec_chapol.c" role="src" />
+      </dir>
+      <dir name="symcipher">
+       <file name="chacha20_ct.c" role="src" />
+       <file name="chacha20_sse2.c" role="src" />
+       <file name="poly1305_ctmul.c" role="src" />
+       <file name="poly1305_ctmulq.c" role="src" />
+      </dir>
+      <dir name="x509">
+       <file name="x509_minimal.c" role="src" />
+      </dir>
+     </dir>
+    </dir>
+   </dir>
   </dir> <!-- / -->
  </contents>
  <dependencies>

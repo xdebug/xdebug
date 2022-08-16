@@ -21,9 +21,9 @@
 
 #include "lib/lib.h"
 
-typedef struct _fd_buf fd_buf;
+typedef struct _socket_read_buffer socket_read_buffer;
 
-struct _fd_buf {
+struct _socket_read_buffer {
 	char *buffer;
 	int   buffer_size;
 };

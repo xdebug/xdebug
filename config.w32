@@ -1,6 +1,7 @@
 // vim:ft=javascript
 
 ARG_WITH("xdebug", "Xdebug support", "no");
+ARG_WITH("xdebug-ssl", "Xdebug SSL support (needed for Xdebug Cloud)", "yes");
 
 ARG_WITH("xdebug-compression", "whether to compress profiler files (requires zlib)", "no");
 
@@ -43,6 +44,36 @@ if (PHP_XDEBUG != 'no') {
 		) {
 			AC_DEFINE('HAVE_XDEBUG_ZLIB', 1);
 		}
+	}
+
+	if (PHP_XDEBUG_SSL == 'yes') {
+		BEARSSL_AEAD_SOURCES="ccm.c"
+		BEARSSL_CODEC_SOURCES="ccopy.c dec32be.c dec32le.c dec64be.c enc32be.c enc32le.c enc64be.c"
+		BEARSSL_EC_SOURCES="ec_all_m31.c ec_c25519_m31.c ec_c25519_m64.c ec_p256_m31.c ec_p256_m64.c ec_prime_i31.c ec_secp256r1.c ec_secp384r1.c ec_secp521r1.c ecdsa_atr.c ecdsa_i31_bits.c ecdsa_i31_vrfy_asn1.c ecdsa_i31_vrfy_raw.c"
+		BEARSSL_HASH_SOURCES="multihash.c sha2small.c"
+		BEARSSL_INT_SOURCES="i31_add.c i31_bitlen.c i31_decmod.c i31_decode.c i31_encode.c i31_fmont.c i31_iszero.c i31_modpow.c i31_modpow2.c i31_montmul.c i31_muladd.c i31_ninv31.c i31_rshift.c i31_sub.c i31_tmont.c i32_div32.c i62_modpow2.c"
+		BEARSSL_MAC_SOURCES="hmac.c hmac_ct.c"
+		BEARSSL_RAND_SOURCES="hmac_drbg.c sysrng.c"
+		BEARSSL_RSA_SOURCES="rsa_default_pkcs1_vrfy.c rsa_default_pub.c rsa_i31_pkcs1_vrfy.c rsa_i62_pkcs1_vrfy.c rsa_i31_pub.c rsa_i62_pub.c rsa_pkcs1_sig_unpad.c"
+		BEARSSL_SSL_SOURCES="prf.c prf_sha256.c ssl_client.c ssl_client_default_rsapub.c ssl_client_full.c ssl_engine.c ssl_engine_default_chapol.c ssl_engine_default_ecdsa.c ssl_engine_default_rsavrfy.c ssl_hs_client.c ssl_io.c ssl_rec_chapol.c"
+		BEARSSL_SYMCIPHER_SOURCES="chacha20_ct.c chacha20_sse2.c poly1305_ctmul.c poly1305_ctmulq.c"
+		BEARSSL_X509_SOURCES="x509_minimal.c"
+
+		ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + "/lib/bearssl/inc ");
+		ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + "/lib/bearssl/src ");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/aead", BEARSSL_AEAD_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/codec", BEARSSL_CODEC_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/ec", BEARSSL_EC_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/hash", BEARSSL_HASH_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/int", BEARSSL_INT_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/mac", BEARSSL_MAC_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/rand", BEARSSL_RAND_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/rsa", BEARSSL_RSA_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/ssl", BEARSSL_SSL_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/symcipher", BEARSSL_SYMCIPHER_SOURCES, "xdebug");
+		ADD_SOURCES(configure_module_dirname + "/lib/bearssl/src/x509", BEARSSL_X509_SOURCES, "xdebug");
+	
+		AC_DEFINE("HAVE_XDEBUG_SSL", 1, "Xdebug SSL support");
 	}
 
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
