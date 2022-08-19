@@ -9,8 +9,8 @@ PHP_ARG_ENABLE(xdebug-dev, whether to enable Xdebug developer build flags,
 PHP_ARG_WITH(xdebug-compression, [whether to compress profiler files (requires zlib)],
 [  --without-xdebug-compression     Xdebug: Disable compression through zlib],yes,no)
 
-m4_include([m4/pkg.m4])
-m4_include([m4/clocks.m4])
+m4_include(PHP_EXT_BUILDDIR(xdebug)[/m4/pkg.m4])
+m4_include(PHP_EXT_BUILDDIR(xdebug)[/m4/clocks.m4])
 
 if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([Check for supported PHP versions])
