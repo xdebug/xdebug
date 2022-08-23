@@ -19,6 +19,9 @@
 
 #include "handlers.h"
 
+#define XDEBUG_CLIENT_PORT_S "9003"
+#define XDEBUG_CLOUD_PORT    9020L
+
 #if WIN32|WINNT
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
