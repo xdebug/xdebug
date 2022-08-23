@@ -53,6 +53,7 @@
 #include "develop/monitor.h"
 #include "develop/stack.h"
 #include "develop/superglobals.h"
+#include "debugger/com.h"
 #include "gcstats/gc_stats.h"
 #include "lib/usefulstuff.h"
 #include "lib/lib.h"
@@ -316,13 +317,13 @@ PHP_INI_BEGIN()
 	/* Xdebug Cloud */
 	STD_PHP_INI_ENTRY("xdebug.cloud_id", "", PHP_INI_SYSTEM, OnUpdateString, settings.debugger.cloud_id, zend_xdebug_globals, xdebug_globals)
 
-	/* Remote debugger settings */
-	STD_PHP_INI_ENTRY("xdebug.client_host",             "localhost", PHP_INI_ALL, OnUpdateString, settings.debugger.client_host,               zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.client_port",             "9003",      PHP_INI_ALL, OnUpdateLong,   settings.debugger.client_port,               zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_BOOLEAN("xdebug.discover_client_host",  "0",         PHP_INI_ALL, OnUpdateBool,   settings.debugger.discover_client_host,      zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.client_discovery_header", "HTTP_X_FORWARDED_FOR,REMOTE_ADDR", PHP_INI_ALL, OnUpdateString, settings.debugger.client_discovery_header,   zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.idekey",                  "",          PHP_INI_ALL, OnUpdateString, settings.debugger.ide_key_setting,           zend_xdebug_globals, xdebug_globals)
-	STD_PHP_INI_ENTRY("xdebug.connect_timeout_ms",      "200",       PHP_INI_ALL, OnUpdateLong,   settings.debugger.connect_timeout_ms,        zend_xdebug_globals, xdebug_globals)
+	/* Step debugger settings */
+	STD_PHP_INI_ENTRY("xdebug.client_host",             "localhost",                        PHP_INI_ALL, OnUpdateString, settings.debugger.client_host,             zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.client_port",             XDEBUG_CLIENT_PORT_S,               PHP_INI_ALL, OnUpdateLong,   settings.debugger.client_port,             zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.discover_client_host",  "0",                                PHP_INI_ALL, OnUpdateBool,   settings.debugger.discover_client_host,    zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.client_discovery_header", "HTTP_X_FORWARDED_FOR,REMOTE_ADDR", PHP_INI_ALL, OnUpdateString, settings.debugger.client_discovery_header, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.idekey",                  "",                                 PHP_INI_ALL, OnUpdateString, settings.debugger.ide_key_setting,         zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_ENTRY("xdebug.connect_timeout_ms",      "200",                              PHP_INI_ALL, OnUpdateLong,   settings.debugger.connect_timeout_ms,      zend_xdebug_globals, xdebug_globals)
 
 	/* Scream support */
 	STD_PHP_INI_BOOLEAN("xdebug.scream",                 "0",           PHP_INI_ALL,    OnUpdateBool,   settings.develop.do_scream,            zend_xdebug_globals, xdebug_globals)
