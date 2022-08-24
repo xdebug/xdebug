@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2022-07-25</date>
- <time>10:07:50</time>
+ <date>2022-08-24</date>
+ <time>09:21:42</time>
  <version>
-  <release>3.2.0alpha2</release>
-  <api>3.2.0alpha2</api>
+  <release>3.2.0alpha3</release>
+  <api>3.2.0alpha3</api>
  </version>
  <stability>
   <release>beta</release>
@@ -52,11 +52,11 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Jul 25, 2022 - Xdebug 3.2.0alpha2
+Wed, Aug 24, 2022 - Xdebug 3.2.0alpha3
 
-= Fixed bugs:
++ Improvements:
 
-  - Fixed issue #2105: 3.2.0alpha1 package misses the php-header.h file
+  - Fixed issue #2112: Force &#039;return_value&#039; breakpoint information and step to &#039;on&#039; temporarily
 
  </notes>
 
@@ -205,6 +205,28 @@ Mon, Jul 25, 2022 - Xdebug 3.2.0alpha2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2022-07-25</date>
+   <time>10:07:50</time>
+   <version>
+    <release>3.2.0alpha2</release>
+    <api>3.2.0alpha2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jul 25, 2022 - Xdebug 3.2.0alpha2
+
+= Fixed bugs:
+
+  - Fixed issue #2105: 3.2.0alpha1 package misses the php-header.h file
+
+   </notes>
+  </release>
 
   <release>
    <date>2022-07-20</date>
