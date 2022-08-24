@@ -50,7 +50,7 @@ typedef struct _xdebug_debugger_settings_t {
 	char         *cloud_shared_key;
 
 	/* Step Debugger */
-	zend_long     client_port;    /* 9000 */
+	zend_long     client_port;    /* 9003 */
 	char         *client_host;    /* localhost */
 	zend_bool     discover_client_host; /* (try to) connect back to the HTTP requestor */
 	char         *client_discovery_header; /* User configured header to check for forwarded IP address */
