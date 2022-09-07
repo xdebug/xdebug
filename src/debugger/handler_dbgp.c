@@ -964,13 +964,13 @@ DBGP_FUNC(breakpoint_set)
 			brk_info->classname = xdstrdup(CMD_OPTION_CHAR('a'));
 			tmp_name = xdebug_sprintf(
 				"%c/%s::%s",
-				brk_info->function_break_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+				(brk_info->function_break_type & XDEBUG_BREAKPOINT_TYPE_CALL) ? 'C' : 'R',
 				CMD_OPTION_CHAR('a'), CMD_OPTION_CHAR('m')
 			);
 		} else {
 			tmp_name = xdebug_sprintf(
 				"%c/%s",
-				brk_info->function_break_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+				(brk_info->function_break_type & XDEBUG_BREAKPOINT_TYPE_CALL) ? 'C' : 'R',
 				CMD_OPTION_CHAR('m')
 			);
 		}
@@ -984,7 +984,7 @@ DBGP_FUNC(breakpoint_set)
 			xdfree(tmp_name);
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_BREAKPOINT_NOT_SET);
 		} else {
-			if (brk_info->function_break_type == XDEBUG_BREAKPOINT_TYPE_CALL) {
+			if (brk_info->function_break_type & XDEBUG_BREAKPOINT_TYPE_CALL) {
 				brk_info->id = breakpoint_admin_add(context, XDEBUG_BREAKPOINT_TYPE_CALL, tmp_name);
 			} else {
 				brk_info->id = breakpoint_admin_add(context, XDEBUG_BREAKPOINT_TYPE_RETURN, tmp_name);
