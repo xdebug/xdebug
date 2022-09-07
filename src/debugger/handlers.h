@@ -46,6 +46,9 @@ struct _xdebug_debug_list {
 #define XDEBUG_BREAKPOINT_TYPE_RETURN      0x08
 #define XDEBUG_BREAKPOINT_TYPE_EXCEPTION   0x10
 #define XDEBUG_BREAKPOINT_TYPE_WATCH       0x20
+#define XDEBUG_BREAKPOINT_TYPES_MASK       0x3F
+
+#define XDEBUG_BREAKPOINT_TYPE_EXTERNAL    0x40 // user-defined PHP function
 
 #define XDEBUG_BREAKPOINT_TYPE_NAME(v) (xdebug_breakpoint_types[(int)(log2(v))]).name
 

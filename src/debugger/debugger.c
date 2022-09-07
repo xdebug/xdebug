@@ -46,9 +46,10 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 	xg->context.do_finish    = 0;
 	xg->context.do_connect_to_client = 0;
 
-	xg->remote_connection_enabled = 0;
-	xg->remote_connection_pid     = 0;
-	xg->breakpoints_allowed       = 0;
+	xg->remote_connection_enabled  = 0;
+	xg->remote_connection_pid      = 0;
+	xg->breakpoints_allowed        = 0;
+	xg->suppress_return_value_step = 0;
 
 	/* Capturing output */
 	if (sapi_module.ub_write != xdebug_ub_write) {
@@ -198,6 +199,7 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 	EG(error_reporting) = XG_BASE(error_reporting_override);
 	XG_BASE(error_reporting_overridden) = 0;
 	XG_DBG(breakpoints_allowed) = 1;
+	XG_DBG(suppress_return_value_step) = 0;
 	XG_DBG(context).inhibit_notifications = 0;
 
 	EG(current_execute_data) = original_execute_data;
@@ -280,6 +282,8 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 	}
 
 	if (xdebug_is_debug_connection_active()) {
+		XG_DBG(suppress_return_value_step) = 0;
+
 		if (XG_DBG(context).do_break) {
 			xdebug_brk_info *brk_info = XG_DBG(context).pending_breakpoint;
 
@@ -373,6 +377,8 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
 		int exception_breakpoint_found = 0;
 
+		XG_DBG(suppress_return_value_step) = 1;
+
 		/* Check if we have a wild card exception breakpoint */
 		if (xdebug_hash_find(XG_DBG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)) {
 			exception_breakpoint_found = 1;
@@ -459,7 +465,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 		snprintf(
 			tmp_name, tmp_len,
 			"%c/%s",
-			breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+			(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_CALL) ? 'C' : 'R',
 			fse->function.function
 		);
 	}
@@ -474,7 +480,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 		snprintf(
 			tmp_name, tmp_len,
 			"%c/%s::%s",
-			breakpoint_type == XDEBUG_BREAKPOINT_TYPE_CALL ? 'C' : 'R',
+			(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_CALL) ? 'C' : 'R',
 			ZSTR_VAL(fse->function.object_class), fse->function.function
 		);
 	}
@@ -486,9 +492,9 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 	if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
 		/* Yup, breakpoint found, call handler if the breakpoint is not
 		 * disabled AND handle_hit_value is happy */
-		if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == breakpoint_type)) {
+		if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == (breakpoint_type & XDEBUG_BREAKPOINT_TYPES_MASK))) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
-				if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN)) {
+				if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN)) {
 					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
 						xdfree(tmp_name);
 						return 0;
@@ -504,7 +510,8 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 
 	if (
 		(XG_DBG(context).breakpoint_include_return_value) &&
-		(breakpoint_type == XDEBUG_BREAKPOINT_TYPE_RETURN) &&
+		(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN) &&
+		!(XG_DBG(suppress_return_value_step)) &&
 		return_value
 	) {
 		if (XG_DBG(context).do_step) {
@@ -625,6 +632,7 @@ void xdebug_debugger_rinit(void)
 	xdebug_mark_debug_connection_not_active();
 
 	XG_DBG(breakpoints_allowed) = 1;
+	XG_DBG(suppress_return_value_step) = 0;
 	XG_DBG(detached) = 0;
 	XG_DBG(breakable_lines_map) = xdebug_hash_alloc(2048, (xdebug_hash_dtor_t) xdebug_line_list_dtor);
 	XG_DBG(function_count) = 0;

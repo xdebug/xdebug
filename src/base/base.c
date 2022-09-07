@@ -820,7 +820,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		}
 
 		/* Check for entry breakpoints */
-		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL, NULL);
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_CALL|XDEBUG_BREAKPOINT_TYPE_EXTERNAL, NULL);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
@@ -853,7 +853,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		}
 
 		/* Check for return breakpoints */
-		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN, return_value);
+		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN|XDEBUG_BREAKPOINT_TYPE_EXTERNAL, return_value);
 	}
 
 	fse->symbol_table = NULL;
