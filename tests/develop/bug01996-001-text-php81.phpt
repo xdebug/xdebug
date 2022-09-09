@@ -1,8 +1,9 @@
 --TEST--
-Test for bug #1996: Show wrapped callable for closures (text)
+Test for bug #1996: Show wrapped callable for closures (text) (< PHP 8.2)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.2');
 ?>
 --INI--
 xdebug.mode=develop
@@ -31,7 +32,7 @@ $closure = Closure::fromCallable([$dateTime, 'format']);
 var_dump($closure);
 ?>
 --EXPECTF--
-%sbug01996-001-text.php:3:
+%sbug01996-001-text-php81.php:3:
 class Closure#1 (1) {
   virtual $closure =>
   "substr"
@@ -45,7 +46,7 @@ class Closure#1 (1) {
     string(10) "<optional>"
   }
 }
-%sbug01996-001-text.php:11:
+%sbug01996-001-text-php81.php:11:
 class Closure#2 (1) {
   virtual $closure =>
   "user_defined"
@@ -57,7 +58,7 @@ class Closure#2 (1) {
     string(10) "<required>"
   }
 }
-%sbug01996-001-text.php:15:
+%sbug01996-001-text-php81.php:15:
 class Closure#1 (1) {
   virtual $closure =>
   "DateTimeImmutable::createFromFormat"
@@ -71,7 +72,7 @@ class Closure#1 (1) {
     string(10) "<optional>"
   }
 }
-%sbug01996-001-text.php:20:
+%sbug01996-001-text-php81.php:20:
 class Closure#3 (2) {
   virtual $closure =>
   "$this->format"

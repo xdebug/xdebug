@@ -109,6 +109,7 @@ static int xdebug_object_element_export(zval *object, zval *zv_nptr, zend_ulong 
 	return 0;
 }
 
+#if PHP_VERSION_ID < 80200
 static void handle_closure(xdebug_str *str, zval *obj)
 {
 	const zend_function *closure_function;
@@ -133,6 +134,7 @@ static void handle_closure(xdebug_str *str, zval *obj)
 
 	xdebug_str_add_literal(str, "\", ");
 }
+#endif
 
 void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_zval, xdebug_var_export_options *options)
 {
@@ -279,7 +281,9 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 				xdebug_str_add(str, ZSTR_VAL(Z_OBJCE_P(*struc)->name), 0);
 				xdebug_str_add_literal(str, " { ");
 
+#if PHP_VERSION_ID < 80200
 				handle_closure(str, *struc);
+#endif
 
 				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;
