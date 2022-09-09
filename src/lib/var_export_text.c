@@ -132,6 +132,7 @@ static int xdebug_object_element_export_text_ansi(zval *object, zval *zv_nptr, z
 	return 0;
 }
 
+#if PHP_VERSION_ID < 80200
 static void handle_closure(xdebug_str *str, zval *obj, int level, int mode)
 {
 	const zend_function *closure_function;
@@ -163,7 +164,7 @@ static void handle_closure(xdebug_str *str, zval *obj, int level, int mode)
 	xdebug_str_add_zstr(str, closure_function->common.function_name);
 	xdebug_str_add_fmt(str, "%s\"\n", ANSI_COLOR_RESET);
 }
-
+#endif
 
 static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode, int level, int debug_zval, xdebug_var_export_options *options)
 {
@@ -326,7 +327,9 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 					ANSI_COLOR_LONG, myht ? myht->nNumOfElements : 0, ANSI_COLOR_RESET
 				);
 
+#if PHP_VERSION_ID < 80200
 				handle_closure(str, *struc, level, mode);
+#endif
 
 				if (myht && (level <= options->max_depth)) {
 					options->runtime[level].current_element_nr = 0;

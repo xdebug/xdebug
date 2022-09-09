@@ -1,17 +1,17 @@
 --TEST--
-Test for bug #1996: Show wrapped callable for first class callables (PHP >= 8.1, text)
+Test for bug #1996: Show wrapped callable for closures (text) (>= PHP 8.2)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1');
+check_reqs('PHP >= 8.2');
 ?>
 --INI--
 xdebug.mode=develop
 html_errors=0
-xdebug.cli_color=0
+date.timezone=UTC
 --FILE--
 <?php
-$closure = substr(...);
+$closure = Closure::fromCallable('substr');
 var_dump($closure);
 
 
@@ -19,23 +19,23 @@ function user_defined($a, $b)
 {
 	return substr($a, $b);
 }
-$closure = user_defined(...);
+$closure = Closure::fromCallable('user_defined');
 var_dump($closure);
 
 
-$closure = DateTimeImmutable::createFromFormat(...);
+$closure = Closure::fromCallable(['DateTimeImmutable', 'createFromFormat']);
 var_dump($closure);
 
 
 $dateTime = new DateTimeImmutable("2021-07-22");
-$closure = $dateTime->format(...);
+$closure = Closure::fromCallable([$dateTime, 'format']);
 var_dump($closure);
 ?>
 --EXPECTF--
-%sbug01996-002-text.php:3:
-class Closure#1 (1) {
-  virtual $closure =>
-  "substr"
+%sbug01996-001-text-php82.php:3:
+class Closure#1 (2) {
+  public $function =>
+  string(6) "substr"
   public $parameter =>
   array(3) {
     '$string' =>
@@ -46,10 +46,10 @@ class Closure#1 (1) {
     string(10) "<optional>"
   }
 }
-%sbug01996-002-text.php:11:
-class Closure#2 (1) {
-  virtual $closure =>
-  "user_defined"
+%sbug01996-001-text-php82.php:11:
+class Closure#2 (2) {
+  public $function =>
+  string(12) "user_defined"
   public $parameter =>
   array(2) {
     '$a' =>
@@ -58,10 +58,10 @@ class Closure#2 (1) {
     string(10) "<required>"
   }
 }
-%sbug01996-002-text.php:15:
-class Closure#1 (1) {
-  virtual $closure =>
-  "DateTimeImmutable::createFromFormat"
+%sbug01996-001-text-php82.php:15:
+class Closure#1 (2) {
+  public $function =>
+  string(35) "DateTimeImmutable::createFromFormat"
   public $parameter =>
   array(3) {
     '$format' =>
@@ -72,10 +72,10 @@ class Closure#1 (1) {
     string(10) "<optional>"
   }
 }
-%sbug01996-002-text.php:20:
-class Closure#3 (2) {
-  virtual $closure =>
-  "$this->format"
+%sbug01996-001-text-php82.php:20:
+class Closure#3 (3) {
+  public $function =>
+  string(25) "DateTimeImmutable::format"
   public $this =>
   class DateTimeImmutable#2 (3) {
     public $date =>
