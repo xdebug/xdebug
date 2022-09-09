@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2011: Protected closure facets
+Test for bug #2011: Protected closure facets (< PHP 8.2)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 8.2; dbgp');
 ?>
 --FILE--
 <?php

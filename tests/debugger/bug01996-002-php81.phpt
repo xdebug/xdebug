@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1996: Visualing closures with first class callable syntax (>= PHP 8.1)
+Test for bug #1996: Visualing closures with first class callable syntax (PHP 8.1)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1; dbgp');
+check_reqs('PHP >= 8.1,< 8.2; dbgp');
 ?>
 --FILE--
 <?php

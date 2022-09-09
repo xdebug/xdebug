@@ -659,10 +659,9 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 #endif
 
 			if (instanceof_function(Z_OBJCE_P(*struc), zend_ce_closure)) {
+#if PHP_VERSION_ID < 80200
 				xdebug_xml_node *closure_cont, *closure_func;
 				const zend_function *closure_function = zend_get_closure_method_def(Z_OBJ_P(*struc));
-
-				xdebug_xml_expand_attribute_value(node, "facet", "closure");
 
 				closure_cont = xdebug_xml_node_init("property");
 				xdebug_xml_add_attribute(closure_cont, "facet", "virtual readonly");
@@ -709,6 +708,9 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 				xdebug_xml_add_child(node, closure_cont);
 				extra_children = 1;
+#endif
+
+				xdebug_xml_expand_attribute_value(node, "facet", "closure");
 			}
 
 			{
