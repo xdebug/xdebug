@@ -189,7 +189,7 @@ class DebugClient
 		return $conn;
 	}
 
-	function stop( $conn )
+	function stop( $conn, array $options = [] )
 	{
 		fclose( $conn );
 		fclose( $this->ppipes[0] );
@@ -197,6 +197,10 @@ class DebugClient
 		fclose( $this->socket );
 		proc_close( $this->php );
 
+		if ( array_key_exists( 'show-stdout', $options ) && $options['show-stdout'] )
+		{
+			echo @file_get_contents( $this->tmpDir . 'php-stdout.txt' ), "\n";
+		}
 		// echo @file_get_contents( $this->tmpDir . 'php-stderr.txt' ), "\n";
 		// echo @file_get_contents( $this->tmpDir . 'error-output.txt' ), "\n";
 	}
@@ -244,7 +248,7 @@ class DebugClient
 
 			$i++;
 		}
-		$this->stop( $conn );
+		$this->stop( $conn, $options );
 	}
 }
 

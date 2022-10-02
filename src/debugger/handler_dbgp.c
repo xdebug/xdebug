@@ -849,6 +849,23 @@ DBGP_FUNC(breakpoint_list)
 	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) *retval, breakpoint_list_helper, NULL);
 }
 
+static void warn_if_breakpoint_file_does_not_exist(xdebug_brk_info *brk_info)
+{
+#ifndef WIN32
+	if (brk_info && brk_info->filename && strstr(ZSTR_VAL(brk_info->filename), "://") == NULL) {
+		struct stat buf;
+
+		if (stat(ZSTR_VAL(brk_info->filename), &buf) != 0) {
+			xdebug_log_ex(
+				XLOG_CHAN_DEBUG, XLOG_WARN,
+				"BRKFILE",
+				"Breakpoint file name does not exist: %s (%s).", ZSTR_VAL(brk_info->filename), strerror(errno)
+			);
+		}
+	}
+#endif
+}
+
 DBGP_FUNC(breakpoint_set)
 {
 	xdebug_brk_info      *brk_info;
@@ -925,6 +942,8 @@ DBGP_FUNC(breakpoint_set)
 			zend_string_release(tmp_f);
 			xdfree(tmp_path);
 		}
+
+		warn_if_breakpoint_file_does_not_exist(brk_info);
 
 		/* Perhaps we have a break condition */
 		if (CMD_OPTION_SET('-')) {
