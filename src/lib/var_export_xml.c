@@ -719,7 +719,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 				tmp_str.l = ZSTR_LEN(class_name);
 				add_xml_attribute_or_element(options, node, "classname", 9, &tmp_str);
 			}
-			xdebug_xml_add_attribute(node, "children", merged_hash->nNumOfElements ? "1" : "0");
+			xdebug_xml_add_attribute(node, "children", (merged_hash->nNumOfElements || extra_children) ? "1" : "0");
 
 
 			if (!myht || !xdebug_zend_hash_is_recursive(myht)) {
