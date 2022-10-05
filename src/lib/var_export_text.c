@@ -217,7 +217,7 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add_fmt(str, "%sdouble%s(%s%.*G%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc), ANSI_COLOR_RESET);
+			xdebug_str_add_fmt(str, "%sdouble%s(%s%.*H%s)", ANSI_COLOR_BOLD, ANSI_COLOR_BOLD_OFF, ANSI_COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc), ANSI_COLOR_RESET);
 			break;
 
 		case IS_STRING: {
