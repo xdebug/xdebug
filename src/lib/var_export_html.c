@@ -187,7 +187,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add_fmt(str, "<small>float</small> <font color='%s'>%.*G</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc));
+			xdebug_str_add_fmt(str, "<small>float</small> <font color='%s'>%.*H</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc));
 			break;
 
 		case IS_STRING:

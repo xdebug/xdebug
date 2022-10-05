@@ -536,7 +536,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 		case IS_DOUBLE:
 			xdebug_xml_add_attribute(node, "type", "float");
-			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf("%.*G", (int) EG(precision), Z_DVAL_P(*struc)));
+			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf("%.*H", (int) EG(precision), Z_DVAL_P(*struc)));
 			break;
 
 		case IS_STRING:

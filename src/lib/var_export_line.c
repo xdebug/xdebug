@@ -183,7 +183,7 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add_fmt(str, "%.*G", (int) EG(precision), Z_DVAL_P(*struc));
+			xdebug_str_add_fmt(str, "%.*H", (int) EG(precision), Z_DVAL_P(*struc));
 			break;
 
 		case IS_STRING: {
