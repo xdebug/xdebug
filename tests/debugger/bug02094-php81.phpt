@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2094: Public static property with closure data type have double facet XML attribute
+Test for bug #2094: Public static property with closure data type have double facet XML attribute (< PHP 8.2)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 8.2; dbgp');
 ?>
 --FILE--
 <?php
@@ -38,7 +38,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="::" fullname="::" type="object" classname="Test" children="1" numchildren="1"><property name="::bar" fullname="::bar" type="object" facet="closure static public" classname="Closure" children="0" numchildren="%d" page="0" pagesize="32">%S</property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="::" fullname="::" type="object" classname="Test" children="1" numchildren="1"><property name="::bar" fullname="::bar" type="object" facet="closure static public" classname="Closure" children="1" numchildren="1" page="0" pagesize="32"><property facet="virtual readonly" name="{closure}" type="array" children="1" page="0" pagesize="2" numchildren="1"><property facet="readonly" name="function" type="string"><![CDATA[{closure}]]></property></property></property></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
