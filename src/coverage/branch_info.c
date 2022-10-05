@@ -109,7 +109,11 @@ void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_i
 	for (i = 0; i < branch_info->entry_points->size; i++) {
 		if (xdebug_set_in(branch_info->entry_points, i) && opa->opcodes[i].opcode == ZEND_CATCH) {
 #if ZEND_USE_ABS_JMP_ADDR
+# if PHP_VERSION_ID >= 80200
+			if (opa->opcodes[i].op2.jmp_addr != (void*) -1) {
+# else
 			if (opa->opcodes[i].op2.jmp_addr != NULL) {
+# endif
 #else
 			if (opa->opcodes[i].op2.jmp_offset != 0) {
 #endif
