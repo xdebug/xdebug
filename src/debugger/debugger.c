@@ -371,10 +371,16 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 	zend_class_entry *exception_ce = exception->ce;
 	xdebug_brk_info *extra_brk_info;
 
+	register_compiled_variables();
+
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
 
-	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
+	if (!xdebug_is_debug_connection_active() || !XG_DBG(breakpoints_allowed)) {
+		return;
+	}
+
+	{
 		int exception_breakpoint_found = 0;
 
 		XG_DBG(suppress_return_value_step) = 1;
@@ -421,31 +427,35 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 {
 	xdebug_brk_info *extra_brk_info = NULL;
 
+	register_compiled_variables();
+
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
 
-	if (xdebug_is_debug_connection_active() && XG_DBG(breakpoints_allowed)) {
-		/* Send notification with warning/notice/error information */
-		if (XG_DBG(context).send_notifications && !XG_DBG(context).inhibit_notifications) {
-			if (!XG_DBG(context).handler->remote_notification(&(XG_DBG(context)), error_filename, error_lineno, type, error_type_str, buffer)) {
+	if (!xdebug_is_debug_connection_active() || !XG_DBG(breakpoints_allowed)) {
+		return;
+	}
+
+	/* Send notification with warning/notice/error information */
+	if (XG_DBG(context).send_notifications && !XG_DBG(context).inhibit_notifications) {
+		if (!XG_DBG(context).handler->remote_notification(&(XG_DBG(context)), error_filename, error_lineno, type, error_type_str, buffer)) {
+			xdebug_mark_debug_connection_not_active();
+		}
+	}
+
+	/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
+	if (
+		xdebug_hash_find(XG_DBG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info) ||
+		xdebug_hash_find(XG_DBG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)
+	) {
+		if (xdebug_handle_hit_value(extra_brk_info)) {
+			char *type_str = xdebug_sprintf("%ld", type);
+
+			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer, extra_brk_info, NULL)) {
 				xdebug_mark_debug_connection_not_active();
 			}
-		}
 
-		/* Check for the pseudo exceptions to allow breakpoints on PHP error statuses */
-		if (
-			xdebug_hash_find(XG_DBG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info) ||
-			xdebug_hash_find(XG_DBG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)
-		) {
-			if (xdebug_handle_hit_value(extra_brk_info)) {
-				char *type_str = xdebug_sprintf("%ld", type);
-
-				if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer, extra_brk_info, NULL)) {
-					xdebug_mark_debug_connection_not_active();
-				}
-
-				xdfree(type_str);
-			}
+			xdfree(type_str);
 		}
 	}
 }
