@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package
  packagerversion="1.9.4" version="2.0"
- xmlns="http://pear.php.net/dtd/package-2.0" 
- xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" 
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xmlns="http://pear.php.net/dtd/package-2.0"
+ xmlns:tasks="http://pear.php.net/dtd/tasks-1.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>xdebug</name>
  <channel>pecl.php.net</channel>
@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2022-08-24</date>
- <time>09:21:42</time>
+ <date>2022-10-10</date>
+ <time>15:52:03</time>
  <version>
-  <release>3.2.0alpha3</release>
-  <api>3.2.0alpha3</api>
+  <release>3.2.0RC1</release>
+  <api>3.2.0RC1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -52,11 +52,17 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Wed, Aug 24, 2022 - Xdebug 3.2.0alpha3
+Mon, Oct 10, 2022 - Xdebug 3.2.0RC1
 
-+ Improvements:
+= Fixed bugs:
 
-  - Fixed issue #2112: Force &#039;return_value&#039; breakpoint information and step to &#039;on&#039; temporarily
+  - Fixed issue #2113: Crash at step_into after thrown exception with return value debugging en
+  - Fixed issue #2117: Removed emulated properties for closures, as PHP 8.2 adds debug information for them
+  - Fixed issue #2121: Xdebug does not use local independent float-to-string functions
+  - Fixed issue #2122: Local variables are not available when using start_upon_error
+  - Fixed issue #2123: Add warning in log and diagnositics information when a breakpoint is set on a non-existing file
+  - Fixed issue #2124: Xdebug incorrectly reports that there are no children for static closure properties, even thought there are
+  - Fixed issue #2125: Crash with PHP 8.2 on 32-bit due to change in &quot;not set&quot; value with CATCH opcode
 
  </notes>
 
@@ -207,6 +213,27 @@ Wed, Aug 24, 2022 - Xdebug 3.2.0alpha3
  <changelog>
 
   <release>
+   <date>2022-08-24</date>
+   <time>09:21:42</time>
+   <version>
+    <release>3.2.0alpha3</release>
+    <api>3.2.0alpha3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Aug 24, 2022 - Xdebug 3.2.0alpha3
+
++ Improvements:
+
+  - Fixed issue #2112: Force &#039;return_value&#039; breakpoint information and step to &#039;on&#039; temporarily
+   </notes>
+  </release>
+
+  <release>
    <date>2022-07-25</date>
    <time>10:07:50</time>
    <version>
@@ -251,11 +278,11 @@ Wed, Jul 20, 2022 - Xdebug 3.2.0alpha1
   - Fixed issue #2104: Add support for PHP 8.2 &quot;SensitiveParameter&quot; attribute
 
 + Improvements:
-  
+
   - Fixed issue #2086: Include return value in return breakpoint interruption response
 
 - Removed features:
-  
+
   - Fixed issue #2014: Drop support for PHP 7.2
   - Fixed issue #2102: Drop support for PHP 7.3
   - Fixed issue #2103: Drop support for PHP 7.4
@@ -270,7 +297,7 @@ Wed, Jul 20, 2022 - Xdebug 3.2.0alpha1
   - Fixed issue #2098: With breakpoint_include_return_value enabled step_out break at every function
    </notes>
   </release>
- 
+
   <release>
    <date>2022-06-06</date>
    <time>16:30:05</time>
@@ -296,7 +323,7 @@ Mon, Jun 06, 2022 - Xdebug 3.1.5
 
    </notes>
   </release>
- 
+
   <release>
    <date>2022-04-04</date>
    <time>11:33:07</time>
@@ -401,7 +428,7 @@ Fri, Oct 15, 2021 - Xdebug 3.1.1
 
    </notes>
   </release>
- 
+
   <release>
    <date>2021-10-04</date>
    <time>09:33:42</time>
@@ -497,7 +524,7 @@ Tue, Sep 07, 2021 - Xdebug 3.1.0beta2
 Sun, Sep 05, 2021 - Xdebug 3.1.0beta1
 
 + New features:
-  
+
   - Fixed issue #1738: Add xdebug_notify() function to send data through DBGp to a debugging client
   - Fixed issue #1853: Enable profile compression for cachegrind files
   - Fixed issue #1898: API for querying the currently active mode(s)
@@ -537,7 +564,7 @@ Sun, Sep 05, 2021 - Xdebug 3.1.0beta1
   - Fixed issue #2011: Closures as protected properties have double facet XML attribute
 
 + Documentation
-  
+
   - Fixed issue #1537: Add links to documentation to various different &quot;features&quot; after wizard has run
    </notes>
   </release>
@@ -624,7 +651,7 @@ Mon, Jan 04, 2021 - Xdebug 3.0.2
 
    </notes>
   </release>
- 
+
   <release>
    <date>2020-12-04</date>
    <time>15:53:10</time>
@@ -2454,7 +2481,7 @@ Sat, Mar 23, 2013 - xdebug 2.2.2
 	- Fixed bug #818: Require a php script in the PHP_RINIT causes Xdebug to crash.
 	- Fixed bug #903: xdebug_get_headers() returns replaced headers.
 	- Fixed bug #905: Support PHP 5.5 and generators.
-	- Fixed bug #920: AM_CONFIG_HEADER is depreciated. 
+	- Fixed bug #920: AM_CONFIG_HEADER is depreciated.
    </notes>
   </release>
 
@@ -2952,7 +2979,7 @@ Sun, Jan 03, 2010 - xdebug 2.1.0beta1
   + New settings:
 	- xdebug.collect_assignments, which enables the emitting of variable
 	  assignments in function traces.
-	- xdebug.file_line_format, to generate a link with a specific format for 
+	- xdebug.file_line_format, to generate a link with a specific format for
 	  every filename that Xdebug outputs.
 	- xdebug.overload_var_dump, which allows you to turn off Xdebug&apos;s version
 	  of var_dump().
@@ -3179,7 +3206,7 @@ Sat, Oct 20, 2007 - xdebug 2.0.1
 + Changes:
 	- Improved code coverage performance dramatically.
 	- PHP 5.3 compatibility (no namespaces yet though).
-	
+
 = Fixed bugs:
 	- Fixed bug #301: Loading would cause SIGBUS on Solaris 10 SPARC. (Patch by
 	  Sean Chalmers)
@@ -3229,7 +3256,7 @@ Wed, Jul 18, 2007 - xdebug 2.0.0
 	- Fixed bug #280: var_dump() doesn&apos;t display key of array as expected.
 	- Fixed bug #278: Code Coverage Issue.
 	- Fixed bug #273: Remote debugging: context_get does not return context id.
-	- Fixed bug #270: Debugger aborts when PHP&apos;s eval() is encountered. 
+	- Fixed bug #270: Debugger aborts when PHP&apos;s eval() is encountered.
 	- Fixed bug #265: XDebug breaks error_get_last() .
 	- Fixed bug #261: Code coverage issues by overloading zend_assign_dim.
 
@@ -3538,11 +3565,11 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
 + Added new features:
     - Implemented FR #161: var_dump doesn&apos;t show lengths for strings.
     - Implemented FR #158: Function calls from the {main} scope always have the
-      line number 0. 
+      line number 0.
     - Implemented FR #156: it&apos;s impossible to know the time taken by the last
       func call in xdebug trace mode 0.
     - Implemented FR #153: xdebug_get_declared_vars().
-    
+
 = Fixed bugs:
     - Fixed shutdown crash with ZTS on Win32
     - Fixed bad memory leak when a E_ERROR of exceeding memory_limit was
@@ -3632,11 +3659,11 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
    <notes>
 + Added new features:
     - DBGP: Added error messages to returned errors (in most cases)
-  
+
 + Added new functions:
     - xdebug_debug_zval() to debug zvals by printing its refcounts and is_ref
       values.
-  
+
 = Changed features:
     - xdebug_code_coverage_stop() will now clean up the code coverage array,
       unless you specify FALSE as parameter.
@@ -3721,7 +3748,7 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
     - xdebug.extended_info: turns off the generation of extended opcodes that
       are needed for stepping and breakpoints for the remote debugger. This is
       useful incase you want to profile memory usage as the generation of this
-      extended info increases memory usage of oparrrays by about 33%. 
+      extended info increases memory usage of oparrrays by about 33%.
     - xdebug.profiler_output_dir: profiler output directory.
     - xdebug.profiler_enable: enable the profiler.
     - xdebug.show_local_vars: turn off the showing of local variables in the
@@ -3904,7 +3931,7 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
 + Additions to the remote debugger: &quot;eval&quot; (evaluate any PHP code from the
   debugger client). (Derick)
 + Added profiling support to xdebug. This introduces 3 new functions,
-  xdebug_start_profiling() that begins profiling process, 
+  xdebug_start_profiling() that begins profiling process,
   xdebug_stop_profiling() that ends the profiling process and
   xdebug_dump_function_trace() that dumps the profiling data. (Ilia)
 + Implemented the &quot;kill&quot; (kills the running script) and &quot;delete&quot; (removes
