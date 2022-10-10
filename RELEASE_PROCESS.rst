@@ -21,15 +21,15 @@
 
 #. In the release branch, update template.rc and php_xdebug.h to the new
    version
-#. Commit template.rc and php_xdebug.h with "Back to -dev"
-#. Check out master branch, and run: git merge --strategy=ours xdebug_3_2
+#. Commit template.rc and php_xdebug.h with ``Back to -dev``
+#. Check out master branch, and run: ``git merge --strategy=ours xdebug_3_2``
 #. ``git push origin master xdebug_3_2``
 #. Add files from GHA and source to www.xdebug.org html/files
 #. Create sha256 files for the new releases::
 
-   for i in *3.2.*{tgz,dll}; do \
-     echo $i; sha256sum $i | sed 's/\ .*//' > $i.sha256.txt; \
-   done
+    for i in *3.2.*{tgz,dll}; do \
+      echo $i; sha256sum $i | sed 's/\ .*//' > $i.sha256.txt; \
+    done
 
 #. Add the downloads, DDLs, SHA256 files, and news file to git and commit with
    "Go with 3.2.1"
