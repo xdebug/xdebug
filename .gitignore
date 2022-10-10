@@ -80,3 +80,4 @@ phpt.*
 # Exclude files we like
 !php_xdebug.stub.php
 !run-xdebug-tests.php
+!make-release.php

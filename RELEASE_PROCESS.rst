@@ -8,13 +8,13 @@
 
        git diff HEAD..xdebug_3_2 package.xml | patch -p1
 
-#. Run: php ~/bin/make-xdebug-release.php <version>
-#. Move existing release entry down in package.xml
-#. Include new snippet in /tmp/package.xml
+#. Run: ``php .build.scripts/make-release.php <version>``
+#. Move existing release entry down in ``package.xml``
+#. Include new snippet in ``/tmp/package.xml``
 #. Run commands from output
-#. Update www.xdebug.org views/home/updates.php with snippet
-#. Update www.xdebug.org src/XdebugVersion.php with snippet
-#. Update pre-generated www.xdebug.org data/news/... file
+#. Update www.xdebug.org ``views/home/updates.php`` with snippet
+#. Update www.xdebug.org ``src/XdebugVersion.php`` with snippet
+#. Update pre-generated www.xdebug.org ``data/news/...`` file
 #. Write Patreon post taking the rendered news article as starting point
 
 #. Mantis: "release" the version, and make sure there is a new one.
