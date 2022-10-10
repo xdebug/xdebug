@@ -2,7 +2,9 @@ name: Build
 
 on:
     push:
-        branches: [master, xdebug_3_2]
+        branches:
+            - 'master'
+            - 'xdebug_*'
     pull_request:
     release:
         types: [created]
