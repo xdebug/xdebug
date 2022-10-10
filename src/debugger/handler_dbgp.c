@@ -2500,7 +2500,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->inhibit_notifications = 0;
 	context->resolved_breakpoints = 0;
 	context->breakpoint_details = 0;
-	context->breakpoint_include_return_value = 1;
+	context->breakpoint_include_return_value = 0;
 
 	xdebug_mark_debug_connection_active();
 	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BAIL);
