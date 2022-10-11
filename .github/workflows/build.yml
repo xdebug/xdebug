@@ -17,16 +17,9 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [8.0, 8.1]
+                php: [8.0, 8.1, 8.2]
                 use-opcache: [true, false]
                 experimental: [false]
-                include:
-                  - php: 8.2
-                    use-opcache: true
-                    experimental: true
-                  - php: 8.2
-                    use-opcache: false
-                    experimental: true
 
         steps:
             -   uses: actions/checkout@v2
@@ -75,19 +68,10 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: ["8.0", "8.1"]
-                arch: [x64, x86]
+                php: ["8.0", "8.1", "8.2"]
+                arch: [x64]
                 ts: [nts, ts]
                 experimental: [false]
-                include:
-                  - php: "8.2"
-                    arch: x64
-                    ts: nts
-                    experimental: true
-                  - php: "8.2"
-                    arch: x64
-                    ts: ts
-                    experimental: true
         steps:
                 - name: Checkout Xdebug
                   uses: actions/checkout@v2
