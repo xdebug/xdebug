@@ -19,7 +19,7 @@ commands:
 jobs:
   "PHP 8 1 without opcache":
     docker:
-      - image: cimg/php:8.1.7
+      - image: cimg/php:8.1.11
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PW
@@ -36,7 +36,7 @@ jobs:
 
   "PHP 8 1 with opcache":
     docker:
-      - image: cimg/php:8.1.7
+      - image: cimg/php:8.1.11
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PW
@@ -53,7 +53,7 @@ jobs:
 
   "PHP 8 0 without opcache":
     docker:
-      - image: cimg/php:8.0.20
+      - image: cimg/php:8.0.24
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PW
@@ -70,7 +70,7 @@ jobs:
 
   "PHP 8 0 with opcache":
     docker:
-      - image: cimg/php:8.0.20
+      - image: cimg/php:8.0.24
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PW
