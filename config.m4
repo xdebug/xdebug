@@ -14,7 +14,11 @@ m4_include(PHP_EXT_BUILDDIR(xdebug)[/m4/clocks.m4])
 
 if test "$PHP_XDEBUG" != "no"; then
   AC_MSG_CHECKING([Check for supported PHP versions])
-  PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
+  if test "$PHP_VERSION" != ""; then
+    PHP_XDEBUG_FOUND_VERSION="$PHP_VERSION"
+  else
+    PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
+  fi
   PHP_XDEBUG_FOUND_VERNUM=`echo "${PHP_XDEBUG_FOUND_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 100 + [$]2) * 100 + [$]3;}'`
   if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80000"; then
     AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.3.0 (found $PHP_XDEBUG_FOUND_VERSION)])
@@ -116,7 +120,7 @@ if test "$PHP_XDEBUG" != "no"; then
   XDEBUG_PROFILER_SOURCES="src/profiler/profiler.c"
   XDEBUG_TRACING_SOURCES="src/tracing/trace_computerized.c src/tracing/trace_html.c src/tracing/trace_textual.c src/tracing/tracing.c"
 
-  PHP_NEW_EXTENSION(xdebug, xdebug.c $XDEBUG_BASE_SOURCES $XDEBUG_LIB_SOURCES $XDEBUG_COVERAGE_SOURCES $XDEBUG_DEBUGGER_SOURCES $XDEBUG_DEVELOP_SOURCES $XDEBUG_GCSTATS_SOURCES $XDEBUG_PROFILER_SOURCES $XDEBUG_TRACING_SOURCES, $ext_shared,,$PHP_XDEBUG_CFLAGS,,yes)
+  PHP_NEW_EXTENSION(xdebug, xdebug.c $XDEBUG_BASE_SOURCES $XDEBUG_LIB_SOURCES $XDEBUG_COVERAGE_SOURCES $XDEBUG_DEBUGGER_SOURCES $XDEBUG_DEVELOP_SOURCES $XDEBUG_GCSTATS_SOURCES $XDEBUG_PROFILER_SOURCES $XDEBUG_TRACING_SOURCES, yes,,$PHP_XDEBUG_CFLAGS,,yes)
   PHP_ADD_BUILD_DIR(PHP_EXT_BUILDDIR(xdebug)[/src/base])
   PHP_ADD_BUILD_DIR(PHP_EXT_BUILDDIR(xdebug)[/src/lib])
   PHP_ADD_BUILD_DIR(PHP_EXT_BUILDDIR(xdebug)[/src/coverage])
@@ -128,6 +132,7 @@ if test "$PHP_XDEBUG" != "no"; then
   PHP_SUBST(XDEBUG_SHARED_LIBADD)
   PHP_ADD_MAKEFILE_FRAGMENT
 
+  PHP_ADD_INCLUDE($ext_srcdir)
   PHP_ADD_INCLUDE($ext_srcdir/src)
   PHP_ADD_INCLUDE($ext_builddir/src)
 fi
