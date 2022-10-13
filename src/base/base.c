@@ -1193,6 +1193,11 @@ int read_systemd_private_tmp_directory(char **private_tmp)
 
 	/* Read contents and split in lines */
 	bytes_read = fread(buffer, 1, sizeof(buffer), mountinfo_fd);
+	if (!bytes_read) {
+		fclose(mountinfo_fd);
+		return retval;
+	}
+
 	lines = xdebug_arg_ctor();
 	xdebug_explode("\n", buffer, lines, -1);
 
