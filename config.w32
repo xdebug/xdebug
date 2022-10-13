@@ -18,9 +18,9 @@ if (PHP_XDEBUG != 'no') {
 	var files = "xdebug.c";
 
 	if (typeof(ZEND_EXTENSION) == 'undefined') {
-		EXTENSION('xdebug', files);
+		EXTENSION('xdebug', files, 'yes');
 	} else {
-		ZEND_EXTENSION('xdebug', files);
+		ZEND_EXTENSION('xdebug', files, 'yes');
 	}
 	ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + " ");
 	ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + "/src ");
