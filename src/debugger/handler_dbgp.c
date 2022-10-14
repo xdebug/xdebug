@@ -1828,18 +1828,20 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	/* right now, we only have zero, one, or two with one being globals, which
 	 * is always the head of the stack */
 	if (context_id == 1) {
+		zend_ulong   num;
+		zend_string *key;
+		zval        *val;
+
 		/* add super globals */
 		xdebug_lib_set_active_symbol_table(&EG(symbol_table));
 		xdebug_lib_set_active_data(NULL);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_COOKIE"),  1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_ENV"),     1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_FILES"),   1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_GET"),     1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_POST"),    1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_REQUEST"), 1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SERVER"),  1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("_SESSION"), 1, 1, 0, options);
-		add_variable_node(node, XDEBUG_STR_WRAP_CHAR("GLOBALS"),  1, 1, 0, options);
+
+		ZEND_HASH_FOREACH_KEY_VAL_IND(&EG(symbol_table), num, key, val) {
+			if (!HASH_KEY_IS_NUMERIC(key)) {
+				add_variable_node(node, XDEBUG_STR_WRAP_CHAR(HASH_APPLY_KEY_VAL(key)),  1, 1, 0, options);
+			}
+		} ZEND_HASH_FOREACH_END();
+
 		xdebug_lib_set_active_symbol_table(NULL);
 		return 0;
 	}
