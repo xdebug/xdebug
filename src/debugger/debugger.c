@@ -633,7 +633,7 @@ void xdebug_debugger_rinit(void)
 			)
 			&& !SG(headers_sent)
 		) {
-			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION"), (char*) "", 0, 0, "/", 1, NULL, 0, 0, 1, 0);
+			xdebug_setcookie("XDEBUG_SESSION", sizeof("XDEBUG_SESSION") - 1, (char*) "", 0, 0, "/", 1, NULL, 0, 0, 1, 0);
 			XG_DBG(no_exec) = 1;
 		}
 		zend_string_release(stop_no_exec);
