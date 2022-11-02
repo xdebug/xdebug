@@ -124,7 +124,7 @@ static void handle_closure(xdebug_str *str, zval *obj)
 
 	if (closure_function->common.scope) {
 		if (closure_function->common.fn_flags & ZEND_ACC_STATIC) {
-			xdebug_str_add_zstr(str, closure_function->common.scope->name);
+			xdebug_str_add(str, ZSTR_VAL(closure_function->common.scope->name), 0);
 			xdebug_str_add_literal(str, "::");
 		} else {
 			xdebug_str_add_literal(str, "$this->");
