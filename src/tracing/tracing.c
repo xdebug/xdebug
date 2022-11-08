@@ -89,7 +89,7 @@ xdebug_file *xdebug_trace_open_file(char *requested_filename, zend_string *scrip
 		file,
 		filename_to_use,
 		(options & XDEBUG_TRACE_OPTION_NAKED_FILENAME) ? NULL : "xt",
-		(options & XDEBUG_TRACE_OPTION_APPEND) ? "a" : "w"
+		(options & XDEBUG_TRACE_OPTION_APPEND) ? "ab" : "wb"
 	)) {
 		xdebug_log_diagnose_permissions(XLOG_CHAN_TRACE, output_dir, generated_filename);
 	}
