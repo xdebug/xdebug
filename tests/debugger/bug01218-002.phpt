@@ -30,4 +30,4 @@ dbgpRunFile( $filename, $commands );
 
 -> run -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file://bug01218.inc" lineno="12" exception="StringCodeException" code="SomeString"><![CDATA[test]]></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file://bug01218.inc" lineno="15" exception="StringCodeException" code="SomeString"><![CDATA[test]]></xdebug:message></response>
