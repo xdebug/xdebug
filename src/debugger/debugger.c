@@ -409,7 +409,8 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 			if (
 				!XG_DBG(context).handler->remote_breakpoint(
 					&(XG_DBG(context)), XG_BASE(stack),
-					Z_STR_P(file), Z_LVAL_P(line), XDEBUG_BREAK,
+					zend_get_executed_filename_ex(), zend_get_executed_lineno(),
+					XDEBUG_BREAK,
 					(char*) STR_NAME_VAL(exception_ce->name),
 					code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
 					message ? Z_STRVAL_P(message) : "",
