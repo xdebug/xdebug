@@ -830,6 +830,25 @@ DBGP_FUNC(breakpoint_update)
 	breakpoint_do_action(DBGP_FUNC_PASS_PARAMETERS, BREAKPOINT_ACTION_UPDATE);
 }
 
+static void breakpoint_exists_helper(void *retval, xdebug_hash_element *he, void *key_to_match)
+{
+	int *line_found = (int *) retval;
+
+	xdebug_brk_admin *admin = (xdebug_brk_admin*) he->ptr;
+
+	if (strcmp(admin->key, (const char*) key_to_match) == 0) {
+		*line_found = 1;
+	}
+}
+
+static int line_breakpoint_exists(xdebug_con *context, const char *key)
+{
+	int line_found = 0;
+
+	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) &line_found, breakpoint_exists_helper, (void*) key);
+
+	return line_found;
+}
 
 static void breakpoint_list_helper(void *xml, xdebug_hash_element *he, void *dummy)
 {
@@ -951,6 +970,14 @@ DBGP_FUNC(breakpoint_set)
 		}
 
 		tmp_name = xdebug_sprintf("%s$%lu", ZSTR_VAL(brk_info->filename), brk_info->original_lineno);
+
+		if (line_breakpoint_exists(context, tmp_name)) {
+			xdfree(tmp_name);
+
+			xdebug_brk_info_dtor(brk_info);
+			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_BREAKPOINT_NOT_SET);
+		}
+
 		if (strcmp(CMD_OPTION_CHAR('t'), "line") == 0) {
 			brk_info->id = breakpoint_admin_add(context, XDEBUG_BREAKPOINT_TYPE_LINE, tmp_name);
 		} else {
