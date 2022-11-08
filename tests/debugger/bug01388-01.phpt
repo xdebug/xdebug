@@ -18,8 +18,6 @@ $commands = array(
 	'feature_set -n resolved_breakpoints -v 1',
 	'feature_get -n resolved_breakpoints',
 	'breakpoint_list',
-	"breakpoint_set -t line -f file://{$filename} -n 4",
-	'breakpoint_list',
 	'detach',
 );
 
@@ -57,17 +55,6 @@ dbgpRunFile( $filename, $commands );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="7"><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
--> breakpoint_set -i 8 -t line -f file://bug01388-01.inc -n 4
+-> detach -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0002"></breakpoint></notify>
-
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="8" id="{{PID}}0002" resolved="resolved"></response>
-
--> breakpoint_list -i 9
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="9"><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint><breakpoint type="line" resolved="unresolved" filename="file://bug01388-01.inc" lineno="4" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
-
--> detach -i 10
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="10" status="stopping" reason="ok"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="detach" transaction_id="8" status="stopping" reason="ok"></response>

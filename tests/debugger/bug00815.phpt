@@ -22,7 +22,6 @@ $commands = array(
 	'eval -- KHN0cmluZykoJF9TRVJWRVJbJ1NFUlZFUl9QT1JUJ10p',
 	'eval -- KHN0cmluZykoJF9TRVJWRVJbJ1JFUVVFU1RfVVJJJ10p',
 	'breakpoint_set -t line -n 2',
-	'breakpoint_set -t line -n 2',
 	'stack_get',
 	'stack_get',
 	'context_names',
@@ -79,22 +78,18 @@ dbgpRunFile( $filename, $commands );
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="11" id="{{PID}}0001"></response>
 
--> breakpoint_set -i 12 -t line -n 2
+-> stack_get -i 12
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="12" id="{{PID}}0002"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="12"><stack where="{main}" level="0" type="file" filename="file://bug00815.inc" lineno="2"></stack></response>
 
 -> stack_get -i 13
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="13"><stack where="{main}" level="0" type="file" filename="file://bug00815.inc" lineno="2"></stack></response>
 
--> stack_get -i 14
+-> context_names -i 14
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="14"><stack where="{main}" level="0" type="file" filename="file://bug00815.inc" lineno="2"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="14"><context name="Locals" id="0"></context><context name="Superglobals" id="1"></context><context name="User defined constants" id="2"></context></response>
 
--> context_names -i 15
+-> run -i 15
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_names" transaction_id="15"><context name="Locals" id="0"></context><context name="Superglobals" id="1"></context><context name="User defined constants" id="2"></context></response>
-
--> run -i 16
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="16" status="stopping" reason="ok"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="15" status="stopping" reason="ok"></response>
