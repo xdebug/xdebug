@@ -299,6 +299,30 @@ Wed, Jul 20, 2022 - Xdebug 3.2.0alpha1
   </release>
 
   <release>
+   <date>2022-11-08</date>
+   <time>13:08:25</time>
+   <version>
+    <release>3.1.6</release>
+    <api>3.1.6</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+  Tue, Nov 08, 2022 - Xdebug 3.1.6
+
+  = Fixed bugs:
+
+    - Fixed issue #2100: "Fatal error: debuginfo() must return an array" when Exception is thrown from debugInfo in PHP 8.x
+    - Fixed issue #2101: When a temporary breakpoint is hit, breakpoint_list should show it as disabled
+    - Fixed issue #2129: Cannot read snapshot Gzip-compressed data is corrupt
+
+   </notes>
+  </release>
+
+  <release>
    <date>2022-06-06</date>
    <time>16:30:05</time>
    <version>
