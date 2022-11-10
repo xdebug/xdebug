@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2022-10-10</date>
- <time>15:52:03</time>
+ <date>2022-11-10</date>
+ <time>09:56:57</time>
  <version>
-  <release>3.2.0RC1</release>
-  <api>3.2.0RC1</api>
+  <release>3.2.0RC2</release>
+  <api>3.2.0RC2</api>
  </version>
  <stability>
   <release>beta</release>
@@ -52,17 +52,19 @@ Code Coverage Analysis
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
  <notes>
-Mon, Oct 10, 2022 - Xdebug 3.2.0RC1
+Thu, Nov 10, 2022 - Xdebug 3.2.0RC2
 
 = Fixed bugs:
 
-  - Fixed issue #2113: Crash at step_into after thrown exception with return value debugging en
-  - Fixed issue #2117: Removed emulated properties for closures, as PHP 8.2 adds debug information for them
-  - Fixed issue #2121: Xdebug does not use local independent float-to-string functions
-  - Fixed issue #2122: Local variables are not available when using start_upon_error
-  - Fixed issue #2123: Add warning in log and diagnositics information when a breakpoint is set on a non-existing file
-  - Fixed issue #2124: Xdebug incorrectly reports that there are no children for static closure properties, even thought there are
-  - Fixed issue #2125: Crash with PHP 8.2 on 32-bit due to change in &quot;not set&quot; value with CATCH opcode
+  - Fixed issue #2100: "Fatal error: debuginfo() must return an array" when Exception is thrown from debugInfo in PHP 8.x
+  - Fixed issue #2101: When a temporary breakpoint is hit, breakpoint_list should show it as disabled
+  - Fixed issue #2126: Problems with retrieving global variables
+  - Fixed issue #2127: Tracing does not handle NUL char in anonymous closure scope
+  - Fixed issue #2129: Cannot read snapshot Gzip-compressed data is corrupt
+  - Fixed issue #2133: Warning with regards to extra NUL character in xdebug_setcookie call
+  - Fixed issue #2134: Xdebug stops at the line where the exception is created, not where it is thrown
+  - Fixed issue #2135: Xdebug stops twice at the same line after a call breakpoint or xdebug_break()
+  - Fixed issue #2136: Duplicate line/conditional breakpoints are not rejected
 
  </notes>
 
@@ -211,6 +213,34 @@ Mon, Oct 10, 2022 - Xdebug 3.2.0RC1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2022-10-10</date>
+   <time>15:52:03</time>
+   <version>
+    <release>3.2.0RC1</release>
+    <api>3.2.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+  Mon, Oct 10, 2022 - Xdebug 3.2.0RC1
+
+  = Fixed bugs:
+
+    - Fixed issue #2113: Crash at step_into after thrown exception with return value debugging en
+    - Fixed issue #2117: Removed emulated properties for closures, as PHP 8.2 adds debug information for them
+    - Fixed issue #2121: Xdebug does not use local independent float-to-string functions
+    - Fixed issue #2122: Local variables are not available when using start_upon_error
+    - Fixed issue #2123: Add warning in log and diagnositics information when a breakpoint is set on a non-existing file
+    - Fixed issue #2124: Xdebug incorrectly reports that there are no children for static closure properties, even thought there are
+    - Fixed issue #2125: Crash with PHP 8.2 on 32-bit due to change in &quot;not set&quot; value with CATCH opcode
+
+   </notes>
+  </release>
 
   <release>
    <date>2022-08-24</date>
