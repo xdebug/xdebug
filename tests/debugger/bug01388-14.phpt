@@ -20,7 +20,6 @@ $commands = array(
 	'breakpoint_set -t call -m SimpleClass::displayVar',
 	'run',
 	'step_into',
-	'step_into',
 	'context_get',
 	'property_get -n ::hello'
 );
@@ -49,16 +48,12 @@ dbgpRunFile( $filename, $commands );
 
 -> step_into -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://bug01388-14-simpleclass.inc" lineno="13"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://bug01388-14-simpleclass.inc" lineno="14"></xdebug:message></response>
 
--> step_into -i 6
+-> context_get -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://bug01388-14-simpleclass.inc" lineno="14"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="6" context="0"><property name="::" fullname="::" type="object" classname="SimpleClass" children="1" numchildren="1"><property name="::hello" fullname="::hello" type="string" size="5" facet="static public" encoding="base64"><![CDATA[SEVMTE8=]]></property></property></response>
 
--> context_get -i 7
+-> property_get -i 7 -n ::hello
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="7" context="0"><property name="::" fullname="::" type="object" classname="SimpleClass" children="1" numchildren="1"><property name="::hello" fullname="::hello" type="string" size="5" facet="static public" encoding="base64"><![CDATA[SEVMTE8=]]></property></property></response>
-
--> property_get -i 8 -n ::hello
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="8"><property name="::hello" fullname="::hello" type="string" size="5" encoding="base64"><![CDATA[SEVMTE8=]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="7"><property name="::hello" fullname="::hello" type="string" size="5" encoding="base64"><![CDATA[SEVMTE8=]]></property></response>
