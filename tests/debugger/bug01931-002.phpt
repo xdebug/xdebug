@@ -16,7 +16,6 @@ $commands = array(
 	'stack_get',
 	'context_get -d 0',
 	'step_into',
-	'step_into',
 	'stack_get',
 	'context_get -d 0',
 	'context_get -d 1',
@@ -50,32 +49,28 @@ dbgpRunFile( $filename, $commands, $settings );
 
 -> step_into -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://bug01931-002.inc" lineno="13"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://bug01931-002.inc" lineno="4"></xdebug:message></response>
 
--> step_into -i 5
+-> stack_get -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://bug01931-002.inc" lineno="4"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="5"><stack where="test" level="0" type="file" filename="file://bug01931-002.inc" lineno="4"></stack><stack where="{main}" level="1" type="file" filename="file://bug01931-002.inc" lineno="13"></stack></response>
 
--> stack_get -i 6
+-> context_get -i 6 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="6"><stack where="test" level="0" type="file" filename="file://bug01931-002.inc" lineno="4"></stack><stack where="{main}" level="1" type="file" filename="file://bug01931-002.inc" lineno="13"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="6" context="0"><property name="$local" fullname="$local" type="uninitialized"></property><property name="$local_three" fullname="$local_three" type="uninitialized"></property><property name="$local_two" fullname="$local_two" type="uninitialized"></property></response>
 
--> context_get -i 7 -d 0
+-> context_get -i 7 -d 1
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="7" context="0"><property name="$local" fullname="$local" type="uninitialized"></property><property name="$local_three" fullname="$local_three" type="uninitialized"></property><property name="$local_two" fullname="$local_two" type="uninitialized"></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="7" context="0"><property name="$another_local" fullname="$another_local" type="int"><![CDATA[423]]></property></response>
 
--> context_get -i 8 -d 1
+-> step_into -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="8" context="0"><property name="$another_local" fullname="$another_local" type="int"><![CDATA[423]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="8" status="break" reason="ok"><xdebug:message filename="file://bug01931-002.inc" lineno="6"></xdebug:message></response>
 
 -> step_into -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="9" status="break" reason="ok"><xdebug:message filename="file://bug01931-002.inc" lineno="6"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="9" status="break" reason="ok"><xdebug:message filename="file://bug01931-002.inc" lineno="8"></xdebug:message></response>
 
--> step_into -i 10
+-> context_get -i 10 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="10" status="break" reason="ok"><xdebug:message filename="file://bug01931-002.inc" lineno="8"></xdebug:message></response>
-
--> context_get -i 11 -d 0
-<?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="11" context="0"><property name="$local" fullname="$local" type="int"><![CDATA[1]]></property><property name="$local_three" fullname="$local_three" type="uninitialized"></property><property name="$local_two" fullname="$local_two" type="string" size="3" encoding="base64"><![CDATA[dHdv]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="10" context="0"><property name="$local" fullname="$local" type="int"><![CDATA[1]]></property><property name="$local_three" fullname="$local_three" type="uninitialized"></property><property name="$local_two" fullname="$local_two" type="string" size="3" encoding="base64"><![CDATA[dHdv]]></property></response>
