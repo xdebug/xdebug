@@ -77,11 +77,11 @@ dbgpRunFile( $filename, $commands );
 
 -> step_over -i 11
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_over" transaction_id="11" status="break" reason="ok"><xdebug:message filename="file://bug02049.inc" lineno="5"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_over" transaction_id="11" status="break" reason="ok"><xdebug:message filename="file://bug02049.inc" lineno="6"></xdebug:message></response>
 
 -> stack_get -i 12
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="12"><stack where="{main}" level="0" type="file" filename="file://bug02049.inc" lineno="5"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="12"><stack where="{main}" level="0" type="file" filename="file://bug02049.inc" lineno="6"></stack></response>
 
 -> context_names -i 13 -d 0
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -93,7 +93,7 @@ dbgpRunFile( $filename, $commands );
 
 -> step_over -i 15
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_over" transaction_id="15" status="break" reason="ok"><xdebug:message filename="file://bug02049.inc" lineno="6"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_over" transaction_id="15" status="break" reason="ok"><xdebug:message filename="file://bug02049.inc" lineno="7"></xdebug:message></response>
 
 -> detach -i 16
 <?xml version="1.0" encoding="iso-8859-1"?>

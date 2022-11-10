@@ -294,6 +294,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 				xdebug_mark_debug_connection_not_active();
 				return;
 			}
+			return;
 		}
 
 		/* Check for "finish" */
