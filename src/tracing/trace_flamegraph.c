@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,13 +36,14 @@ static flamegraph_function *fg_function_ctor()
 
 static inline void fg_function_dtor(flamegraph_function *function)
 {
-	if (NULL != function->prefix) {
+	if (function->prefix) {
 		xdebug_str_free(function->prefix);
 	}
 	xdfree(function);
 }
 
-static inline xdebug_str *fg_function_key(const int function_nr) {
+static inline xdebug_str *fg_function_key(const int function_nr)
+{
 	xdebug_str *key = xdebug_str_new();
 
 	xdebug_str_add_fmt(key, "%d", function_nr);
@@ -50,7 +51,8 @@ static inline xdebug_str *fg_function_key(const int function_nr) {
 	return key;
 }
 
-static inline void fg_function_add(const xdebug_trace_flamegraph_context *context, const int function_nr, const flamegraph_function *function) {
+static inline void fg_function_add(const xdebug_trace_flamegraph_context *context, const int function_nr, const flamegraph_function *function)
+{
 	xdebug_str *key = fg_function_key(function_nr);
 
 	xdebug_hash_add(context->functions, key->d, key->l, (void*) function);
@@ -58,7 +60,8 @@ static inline void fg_function_add(const xdebug_trace_flamegraph_context *contex
 	xdebug_str_free(key);
 }
 
-static inline flamegraph_function *fg_function_find(const xdebug_trace_flamegraph_context *context, const int function_nr) {
+static inline flamegraph_function *fg_function_find(const xdebug_trace_flamegraph_context *context, const int function_nr)
+{
 	flamegraph_function *function = NULL;
 	xdebug_str          *key = fg_function_key(function_nr);
 
@@ -69,8 +72,9 @@ static inline flamegraph_function *fg_function_find(const xdebug_trace_flamegrap
 	return function;
 }
 
-static inline void fg_function_delete(const xdebug_trace_flamegraph_context *context, const int function_nr) {
-	xdebug_str          *key = fg_function_key(function_nr);
+static inline void fg_function_delete(const xdebug_trace_flamegraph_context *context, const int function_nr)
+{
+	xdebug_str *key = fg_function_key(function_nr);
 
 	xdebug_hash_delete(context->functions, key->d, key->l);
 
@@ -78,7 +82,8 @@ static inline void fg_function_delete(const xdebug_trace_flamegraph_context *con
 }
 
 /* Find parent function in xdebug stack, which is Fiber-safe. */
-static inline function_stack_entry *fg_parent_find() {
+static inline function_stack_entry *fg_parent_find()
+{
 	function_stack_entry *parent_fse;
 	int                   parent_index = XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 2;
 
@@ -87,33 +92,28 @@ static inline function_stack_entry *fg_parent_find() {
 	return parent_fse;
 }
 
-/* This function computes the 'self' cost for a function trace output.
-   By only including the 'inclusive' function cost, then in each stack, all
-   functions will have more or less the same cost, each top level will have
-   only a few nanosec less than the previous: in this scenario, the generated
-   flamegraph will look flat, it will not highlight functions that really did
-   cost a lot.
-   The 'self' cost is simply computed by removing children function call cost
-   from its own inclusive value.
-   This is true as well for memory cost, in order to identify a potential leak
-   it must identify the function that allocated memory, if we don't sub children
-   cost from parent cost, once again the generated flamegraph will look linear
-   and it will be harder to deduce which function did allocate.
- */
+/* This function computes the 'self' cost for a function trace output. By only including the
+ * 'inclusive' function cost, then in each stack, all functions will have more or less the same
+ * cost, each top level will have only a few nanosec less than the previous: in this scenario, the
+ * generated flamegraph will look flat, it will not highlight functions that really did cost a lot.
+ * The 'self' cost is simply computed by removing children function call cost from its own inclusive
+ * value. This is true as well for memory cost, in order to identify a potential leak it must
+ * identify the function that allocated memory, if we don't sub children cost from parent cost, once
+ * again the generated flamegraph will look linear and it will be harder to deduce which function
+ * did allocate. */
 static inline int compute_inclusive_value(const xdebug_trace_flamegraph_context *context, const function_stack_entry *fse)
 {
 	int value = 0, current_mem;
 
 	switch (context->mode) {
 		case XDEBUG_TRACE_OPTION_FLAMEGRAPH_MEM:
-			/* We compare with 'memory' because 'prev_memory' is not memory when
-			   starting the function execution, 'memory' is. */
+			/* We compare with 'memory' because 'prev_memory' is not memory when starting the
+			 * function execution, 'memory' is. */
 			current_mem = zend_memory_usage(0);
 			if (current_mem < fse->memory) {
-				/* When memory is below 0, flamegraph generator will error, and
-				   you won't have a good visual.
-				   This happens when garbage collection happened during this
-				   function and freed something it didn't allocate, I guess. */
+				/* When memory is below 0, flamegraph generator will error, and you won't have a
+				 * good visual. This happens when garbage collection happened during this function
+				 * and freed something it didn't allocate, I guess. */
 				value = 0;
 			} else {
 				value = current_mem - fse->memory;
@@ -168,16 +168,16 @@ void xdebug_trace_flamegraph_deinit(void *ctxt)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
 
-	if (NULL == context) {
+	if (!context) {
 		return;
 	}
 
-	if (NULL != context->functions) {
+	if (context->functions) {
 		xdebug_hash_destroy(context->functions);
 		context->functions = NULL;
 	}
 
-	if (NULL != context->trace_file) {
+	if (context->trace_file) {
 		fclose(context->trace_file);
 		context->trace_file = NULL;
 		xdfree(context->trace_filename);
@@ -185,14 +185,6 @@ void xdebug_trace_flamegraph_deinit(void *ctxt)
 	}
 
 	xdfree(context);
-}
-
-void xdebug_trace_flamegraph_write_header(void *ctxt)
-{
-}
-
-void xdebug_trace_flamegraph_write_footer(void *ctxt)
-{
 }
 
 char *xdebug_trace_flamegraph_get_filename(void *ctxt)
@@ -216,15 +208,15 @@ void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fs
 
 	parent_fse = fg_parent_find();
 
-	if (NULL == parent_fse) {
+	if (!parent_fse) {
 		/* No parent means we are top-level, prefix is function name. */
 		xdebug_str_add_fmt(prefix, tmp_name);
 	} else {
 		/* Find value in our custom hashmap in order to compute prefix. */
 		parent_function = fg_function_find(context, parent_fse->function_nr);
-		if (NULL == parent_function) {
-			/* No function found is a bug, we should have one.
-			   treat it as it was a top-level function. */
+		if (!parent_function) {
+			/* No function found is a bug, we should have one. treat it as it was a top-level
+			 * function. */
 			xdebug_str_add_fmt(prefix, tmp_name);
 		} else {
 			xdebug_str_add_fmt(prefix, "%s;%s", parent_function->prefix->d, tmp_name);
@@ -250,7 +242,7 @@ void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse
 
 	function = fg_function_find(context, fse->function_nr);
 
-	if (NULL == function) {
+	if (!function) {
 		/* This should never happen, better be safe than sorry. */
 		return;
 	}
@@ -264,9 +256,9 @@ void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse
 
 	/* Increment head value (which is now parent) by inclusive cost. */
 	parent_fse = fg_parent_find();
-	if (NULL != parent_fse) {
+	if (parent_fse) {
 		parent_function = fg_function_find(context, parent_fse->function_nr);
-		if (NULL != parent_function) {
+		if (parent_function) {
 			parent_function->value += inclusive;
 		}
 	}
@@ -275,38 +267,30 @@ void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse
 	xdfree(str.d);
 }
 
-void xdebug_trace_flamegraph_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value)
-{
-}
-
-void xdebug_trace_flamegraph_assignment(void *ctxt, function_stack_entry *fse, char *full_varname, zval *retval, char *right_full_varname, const char *op, char *filename, int lineno)
-{
-}
-
 xdebug_trace_handler_t xdebug_trace_handler_flamegraph_cost =
 {
 	xdebug_trace_flamegraph_init_cost,
 	xdebug_trace_flamegraph_deinit,
-	xdebug_trace_flamegraph_write_header,
-	xdebug_trace_flamegraph_write_footer,
+	NULL /* xdebug_trace_flamegraph_write_header */,
+	NULL /* xdebug_trace_flamegraph_write_footer */,
 	xdebug_trace_flamegraph_get_filename,
 	xdebug_trace_flamegraph_function_entry,
 	xdebug_trace_flamegraph_function_exit,
-	xdebug_trace_flamegraph_function_return_value,
+	NULL /* xdebug_trace_flamegraph_function_return_value */,
 	NULL /* xdebug_trace_flamegraph_generator_return_value */,
-	xdebug_trace_flamegraph_assignment
+	NULL /* xdebug_trace_flamegraph_assignment */
 };
 
 xdebug_trace_handler_t xdebug_trace_handler_flamegraph_mem =
 {
 	xdebug_trace_flamegraph_init_mem,
 	xdebug_trace_flamegraph_deinit,
-	xdebug_trace_flamegraph_write_header,
-	xdebug_trace_flamegraph_write_footer,
+	NULL /* xdebug_trace_flamegraph_write_header */,
+	NULL /* xdebug_trace_flamegraph_write_footer */,
 	xdebug_trace_flamegraph_get_filename,
 	xdebug_trace_flamegraph_function_entry,
 	xdebug_trace_flamegraph_function_exit,
-	xdebug_trace_flamegraph_function_return_value,
+	NULL /* xdebug_trace_flamegraph_function_return_value */,
 	NULL /* xdebug_trace_flamegraph_generator_return_value */,
-	xdebug_trace_flamegraph_assignment
+	NULL /* xdebug_trace_flamegraph_assignment */
 };
