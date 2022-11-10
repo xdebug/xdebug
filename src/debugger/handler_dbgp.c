@@ -1855,15 +1855,13 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	/* right now, we only have zero, one, or two with one being globals, which
 	 * is always the head of the stack */
 	if (context_id == 1) {
-		zend_ulong   num;
 		zend_string *key;
-		zval        *val;
 
 		/* add super globals */
 		xdebug_lib_set_active_symbol_table(&EG(symbol_table));
 		xdebug_lib_set_active_data(NULL);
 
-		ZEND_HASH_FOREACH_KEY_VAL_IND(&EG(symbol_table), num, key, val) {
+		ZEND_HASH_FOREACH_STR_KEY(&EG(symbol_table), key) {
 			if (!HASH_KEY_IS_NUMERIC(key)) {
 				add_variable_node(node, XDEBUG_STR_WRAP_CHAR(HASH_APPLY_KEY_VAL(key)),  1, 1, 0, options);
 			}
