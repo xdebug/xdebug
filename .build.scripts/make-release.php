@@ -250,9 +250,9 @@ $xml = <<<ENDXML
     private const VERSIONS =  [
         '7.0' => [ 'src' => '2.8.1',                        ],
         '7.1' => [ 'src' => '2.9.8',       'win' => '2.9.8' ],
-        '7.2' => [ 'src' => '3.1.5',       'win' => '3.1.5' ],
-        '7.3' => [ 'src' => '3.1.5',       'win' => '3.1.5' ],
-        '7.4' => [ 'src' => '3.1.5',       'win' => '3.1.5' ],
+        '7.2' => [ 'src' => '3.1.6',       'win' => '3.1.6' ],
+        '7.3' => [ 'src' => '3.1.6',       'win' => '3.1.6' ],
+        '7.4' => [ 'src' => '3.1.6',       'win' => '3.1.6' ],
         '8.0' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
         '8.1' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
         '8.2' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ]
