@@ -21,14 +21,13 @@
 typedef struct _flamegraph_function
 {
 	xdebug_str *prefix;
-	int value;
+	int         value;
 } flamegraph_function;
 
 typedef struct _xdebug_trace_flamegraph_context
 {
-	FILE *trace_file;
-	char *trace_filename;
-	int mode;
+	xdebug_file *trace_file;
+	int          mode;
 	xdebug_hash *functions;
 } xdebug_trace_flamegraph_context;
 

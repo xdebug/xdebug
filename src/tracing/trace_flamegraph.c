@@ -13,7 +13,7 @@
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
  */
-#include "php.h"
+#include "lib/php-header.h"
 #include "ext/standard/php_string.h"
 
 #include "php_xdebug.h"
@@ -128,60 +128,45 @@ static inline int compute_inclusive_value(const xdebug_trace_flamegraph_context 
 	return value;
 }
 
-xdebug_trace_flamegraph_context *xdebug_trace_flamegraph_init(char *fname, zend_string *script_filename, long options)
+xdebug_trace_flamegraph_context *xdebug_trace_flamegraph_init(char *fname, zend_string *script_filename, int mode, long options)
 {
 	xdebug_trace_flamegraph_context *tmp_flamegraph_context;
-	char *used_fname;
 
 	tmp_flamegraph_context = xdmalloc(sizeof(xdebug_trace_flamegraph_context));
-	tmp_flamegraph_context->trace_file = xdebug_trace_open_file(fname, script_filename, options, (char**) &used_fname);
-	tmp_flamegraph_context->trace_filename = used_fname;
+	tmp_flamegraph_context->trace_file = xdebug_trace_open_file(fname, script_filename, options);
 
-	return tmp_flamegraph_context->trace_file ? tmp_flamegraph_context : NULL;
+	if (!tmp_flamegraph_context->trace_file) {
+		xdfree(tmp_flamegraph_context);
+		return NULL;
+	}
+
+	tmp_flamegraph_context->mode = mode;
+	tmp_flamegraph_context->functions = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) fg_function_dtor);
+
+	return tmp_flamegraph_context;
 }
 
 void *xdebug_trace_flamegraph_init_cost(char *fname, zend_string *script_filename, long options)
 {
-	xdebug_trace_flamegraph_context *tmp_flamegraph_context = xdebug_trace_flamegraph_init(fname, script_filename, options);
-
-	if (tmp_flamegraph_context) {
-		tmp_flamegraph_context->mode = XDEBUG_TRACE_OPTION_FLAMEGRAPH_COST;
-		tmp_flamegraph_context->functions = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) fg_function_dtor);
-	}
-
-	return tmp_flamegraph_context;
+	return xdebug_trace_flamegraph_init(fname, script_filename, XDEBUG_TRACE_OPTION_FLAMEGRAPH_COST, options);
 }
 
 void *xdebug_trace_flamegraph_init_mem(char *fname, zend_string *script_filename, long options)
 {
-	xdebug_trace_flamegraph_context *tmp_flamegraph_context = xdebug_trace_flamegraph_init(fname, script_filename, options);
-
-	if (tmp_flamegraph_context) {
-		tmp_flamegraph_context->mode = XDEBUG_TRACE_OPTION_FLAMEGRAPH_MEM;
-		tmp_flamegraph_context->functions = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) fg_function_dtor);
-	}
-
-	return tmp_flamegraph_context;
+	return xdebug_trace_flamegraph_init(fname, script_filename, XDEBUG_TRACE_OPTION_FLAMEGRAPH_MEM, options);
 }
 
 void xdebug_trace_flamegraph_deinit(void *ctxt)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
 
-	if (!context) {
-		return;
-	}
+	xdebug_file_close(context->trace_file);
+	xdebug_file_dtor(context->trace_file);
+	context->trace_file = NULL;
 
 	if (context->functions) {
 		xdebug_hash_destroy(context->functions);
 		context->functions = NULL;
-	}
-
-	if (context->trace_file) {
-		fclose(context->trace_file);
-		context->trace_file = NULL;
-		xdfree(context->trace_filename);
-		context->trace_filename = NULL;
 	}
 
 	xdfree(context);
@@ -191,7 +176,7 @@ char *xdebug_trace_flamegraph_get_filename(void *ctxt)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
 
-	return context->trace_filename;
+	return context->trace_file->name;
 }
 
 void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
@@ -203,7 +188,7 @@ void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fs
 	xdebug_str                      *prefix = xdebug_str_new();
 	char                            *tmp_name;
 
-	tmp_name = xdebug_show_fname(fse->function, 0, 0);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
 	function = fg_function_ctor();
 
 	parent_fse = fg_parent_find();
@@ -263,7 +248,7 @@ void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse
 		}
 	}
 
-	fprintf(context->trace_file, "%s", str.d);
+	xdebug_file_printf(context->trace_file, "%s", str.d);
 	xdfree(str.d);
 }
 

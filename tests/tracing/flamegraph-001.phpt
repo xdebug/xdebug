@@ -6,6 +6,8 @@ xdebug.start_with_request=no
 xdebug.trace_format=3
 --FILE--
 <?php
+require_once 'capture-trace.inc';
+
 function ABB() {
 }
 
@@ -31,13 +33,9 @@ function A() {
     AC();
 }
 
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_FLAMEGRAPH_COST);
-
 A();
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 A;AA %d

@@ -1,5 +1,5 @@
 --TEST--
-Tracing: Flamegraph with fiber
+Tracing: Flamegraph with Fiber
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=no
@@ -7,19 +7,15 @@ xdebug.trace_format=3
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1; tracing');
+check_reqs('PHP >= 8.1');
 ?>
 --FILE--
 <?php
-
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_FLAMEGRAPH_COST);
+require_once 'capture-trace.inc';
 
 require dirname(__FILE__) . '/fiber-001.inc';
 
 xdebug_stop_trace();
-
-echo file_get_contents($tf);
-unlink($tf);
 
 /*
  * You have to understand that in the following output, when Fiber::start()
@@ -57,18 +53,18 @@ unlink($tf);
 dirname %d
 require;Fiber->__construct %d
 require;Fiber->__construct %d
-{closure:%s/fiber-001.inc:27-29};A;AA %d
+{closure:%sfiber-001.inc:27-29};A;AA %d
 require;Fiber->start %d
-{closure:%s/fiber-001.inc:31-33};B;BA %d
+{closure:%sfiber-001.inc:31-33};B;BA %d
 require;Fiber->start %d
-{closure:%s/fiber-001.inc:27-29};A;Fiber::suspend %d
-{closure:%s/fiber-001.inc:27-29};A;AB %d
-{closure:%s/fiber-001.inc:27-29};A %d
-{closure:%s/fiber-001.inc:27-29} %d
+{closure:%sfiber-001.inc:27-29};A;Fiber::suspend %d
+{closure:%sfiber-001.inc:27-29};A;AB %d
+{closure:%sfiber-001.inc:27-29};A %d
+{closure:%sfiber-001.inc:27-29} %d
 require;Fiber->resume %d
-{closure:%s/fiber-001.inc:31-33};B;Fiber::suspend %d
-{closure:%s/fiber-001.inc:31-33};B;BB %d
-{closure:%s/fiber-001.inc:31-33};B %d
-{closure:%s/fiber-001.inc:31-33} %d
+{closure:%sfiber-001.inc:31-33};B;Fiber::suspend %d
+{closure:%sfiber-001.inc:31-33};B;BB %d
+{closure:%sfiber-001.inc:31-33};B %d
+{closure:%sfiber-001.inc:31-33} %d
 require;Fiber->resume %d
 require %d

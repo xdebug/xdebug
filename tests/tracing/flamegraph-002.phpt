@@ -6,6 +6,8 @@ xdebug.start_with_request=no
 xdebug.trace_format=4
 --FILE--
 <?php
+require_once 'capture-trace.inc';
+
 // This forcefully creates some memory leaks to yield meaningful numbers
 // in the generated output, so that we will have some results to see.
 global $memoryLeak;
@@ -44,13 +46,9 @@ function A() {
     AC();
 }
 
-$tf = xdebug_start_trace(sys_get_temp_dir() . '/'. uniqid('xdt', TRUE), XDEBUG_TRACE_FLAMEGRAPH_MEM);
-
 A();
 
 xdebug_stop_trace();
-echo file_get_contents($tf);
-unlink($tf);
 ?>
 --EXPECTF--
 A;AA 0
