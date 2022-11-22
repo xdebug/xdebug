@@ -291,6 +291,7 @@ static xdebug_str *make_message(xdebug_con *context, xdebug_xml_node *message)
 static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int stage)
 {
 	xdebug_str *tmp;
+	size_t      bytes_written;
 
 	/* Sometimes we end up in 'send_message' although the debugging connection
 	 * is already closed. In that case, we early return. */
@@ -299,15 +300,36 @@ static void send_message_ex(xdebug_con *context, xdebug_xml_node *message, int s
 	}
 
 	tmp = make_message(context, message);
-	if ((size_t) SSENDL(context->socket, tmp->d, tmp->l) != tmp->l) {
-		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
-		char *utime_str = xdebug_nanotime_to_chars(xdebug_get_nanotime(), 6);
 
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SENDERR", "%s: There was a problem sending %zd bytes on socket %d: %s.", utime_str, tmp->l, context->socket, sock_error);
+	bytes_written = SSENDL(context->socket, tmp->d, tmp->l);
+
+	/* Error */
+	if (bytes_written == -1) {
+		int   current_errno = php_socket_errno();
+		char *sock_error = php_socket_strerror(current_errno, NULL, 0);
+
+		if (current_errno == EPIPE) {
+			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "REMCLOSE", "The debugging client closed the connection on socket %d: %s (error: %d).", context->socket, sock_error, current_errno);
+			xdebug_abort_debugger();
+		} else {
+			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SENDERR", "There was a problem sending %zd bytes on socket %d: %s (error: %d).", tmp->l, context->socket, sock_error, current_errno);
+		}
 
 		efree(sock_error);
-		xdfree(utime_str);
+
+		xdebug_str_free(tmp);
+		return;
 	}
+
+	/* Not enough written, we'll allow that for now */
+	if (bytes_written != tmp->l) {
+		char *sock_error = php_socket_strerror(php_socket_errno(), NULL, 0);
+
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SENDERR", "There was a problem sending %zd bytes on socket %d: only %zd bytes were written: %s.", tmp->l, context->socket, bytes_written, sock_error);
+
+		efree(sock_error);
+	}
+
 	xdebug_str_free(tmp);
 }
 
