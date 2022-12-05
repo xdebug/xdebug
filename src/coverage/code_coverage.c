@@ -632,13 +632,19 @@ static void xdebug_prefill_code_coverage(zend_op_array *op_array)
 void xdebug_code_coverage_start_of_function(zend_op_array *op_array, char *function_name)
 {
 	xdebug_path *path = xdebug_path_new(NULL);
+	int orig_size = XG_COV(branches).size;
 
 	xdebug_prefill_code_coverage(op_array);
 	xdebug_path_info_add_path_for_level(XG_COV(paths_stack), path, XDEBUG_VECTOR_COUNT(XG_BASE(stack)));
 
-	if (XG_COV(branches).size == 0 || XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XG_COV(branches).size) {
+	if (orig_size == 0 || XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= orig_size) {
+		size_t i = 0;
+
 		XG_COV(branches).size = XDEBUG_VECTOR_COUNT(XG_BASE(stack)) + 32;
 		XG_COV(branches).last_branch_nr = realloc(XG_COV(branches).last_branch_nr, sizeof(int) * XG_COV(branches.size));
+		for (i = orig_size; i < XG_COV(branches).size; i++) {
+			XG_COV(branches).last_branch_nr[i] = -1;
+		}
 	}
 
 	XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] = -1;
