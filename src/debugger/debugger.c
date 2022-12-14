@@ -100,8 +100,14 @@ int xdebug_debugger_bailout_if_no_exec_requested(void)
 
 static void register_compiled_variables(void)
 {
-	function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+	function_stack_entry *loop_fse;
 	int                   i;
+
+	if (!XG_BASE(stack)) {
+		return;
+	}
+
+	loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
 		if (loop_fse->declared_vars) {
