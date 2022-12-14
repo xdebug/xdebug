@@ -11,7 +11,7 @@ xdebug.start_with_request=yes
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.use_compression=1
-xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}/start_no_zlib_compression.txt
+xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}start_no_zlib_compression.txt
 --FILE--
 <?php
 $tf = xdebug_get_tracefile_name();
