@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
  */
 
+#include <errno.h>
+
 #include "php_xdebug.h"
 #include "ext/standard/info.h"
 
