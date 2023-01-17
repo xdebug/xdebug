@@ -899,6 +899,11 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
    Returns the stack depth */
 PHP_FUNCTION(xdebug_get_stack_depth)
 {
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
+		RETURN_LONG(0);
+	}
+
 	/* We substract one so that the function call to xdebug_get_stack_depth()
 	 * is not part of the returned depth. */
 	RETURN_LONG(XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1);

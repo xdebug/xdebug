@@ -67,7 +67,8 @@ function xdebug_get_code_coverage(): array {}
 /* -----------------------------------------------------------------------*/
 
 /* Returns all collected error messages */
-function xdebug_get_collected_errors(bool $emptyList = false): array {}
+/** @return void */
+function xdebug_get_collected_errors(bool $emptyList = false) {}
 
 /* -----------------------------------------------------------------------*/
 
