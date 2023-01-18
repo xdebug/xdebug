@@ -228,7 +228,10 @@ PHP_FUNCTION(xdebug_peak_memory_usage)
 
 PHP_FUNCTION(xdebug_time_index)
 {
-	MODE_MUST_BE(XDEBUG_MODE_DEVELOP, "develop");
+	if (!XDEBUG_MODE_IS((XDEBUG_MODE_DEVELOP))) {
+		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
+		RETURN_DOUBLE(0.0);
+	}
 
 	RETURN_DOUBLE(XDEBUG_SECONDS_SINCE_START(xdebug_get_nanotime()));
 }

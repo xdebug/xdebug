@@ -99,6 +99,10 @@ PHP_FUNCTION(xdebug_get_headers)
 	char                 *string;
 
 	array_init(return_value);
+
+	if (!XG_LIB(headers)) {
+		return;
+	}
 	for (le = XDEBUG_LLIST_HEAD(XG_LIB(headers)); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 		string = XDEBUG_LLIST_VALP(le);
 		add_next_index_string(return_value, string);
