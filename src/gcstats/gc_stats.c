@@ -253,7 +253,7 @@ PHP_FUNCTION(xdebug_start_gcstats)
 
 	fse = xdebug_get_stack_frame(0);
 
-	if (xdebug_gc_stats_init(fname, fse->filename) == SUCCESS) {
+	if (fse && xdebug_gc_stats_init(fname, fse->filename) == SUCCESS) {
 		XG_GCSTATS(active) = 1;
 		RETVAL_STRING(XG_GCSTATS(filename));
 		return;
