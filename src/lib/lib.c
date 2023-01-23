@@ -157,7 +157,6 @@ static int xdebug_lib_set_mode_item(const char *mode, int len)
 		XG_LIB(mode) |= XDEBUG_MODE_TRACING;
 		return 1;
 	}
-	xdebug_mode = XG_LIB(mode);
 
 	return 0;
 }
@@ -180,6 +179,8 @@ static int xdebug_lib_set_mode_from_setting(const char *mode)
 		comma = strchr(mode_ptr, ',');
 	}
 	errors += !xdebug_lib_set_mode_item(mode_ptr, strlen(mode_ptr));
+
+	xdebug_mode = XG_LIB(mode);
 
 	return !errors;
 }
