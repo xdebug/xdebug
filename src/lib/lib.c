@@ -23,6 +23,10 @@
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
+/* Remember these settings for ZTS, to ensure consistent behaviour across all threads */
+static int xdebug_mode;
+static int xdebug_mode_from_environment;
+
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
 	xg->headers               = NULL;
@@ -87,6 +91,9 @@ void xdebug_library_mshutdown(void)
 
 void xdebug_library_rinit(void)
 {
+	XG_LIB(mode) = xdebug_mode;
+	XG_LIB(mode_from_environment) = xdebug_mode_from_environment;
+
 	XG_LIB(diagnosis_buffer) = xdebug_str_new();
 	xdebug_open_log();
 
@@ -123,31 +130,31 @@ void xdebug_disable_opcache_optimizer(void)
 static int xdebug_lib_set_mode_item(const char *mode, int len)
 {
 	if (strncmp(mode, "off", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_OFF;
+		xdebug_mode |= XDEBUG_MODE_OFF;
 		return 1;
 	}
 	if (strncmp(mode, "develop", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_DEVELOP;
+		xdebug_mode |= XDEBUG_MODE_DEVELOP;
 		return 1;
 	}
 	if (strncmp(mode, "coverage", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_COVERAGE;
+		xdebug_mode |= XDEBUG_MODE_COVERAGE;
 		return 1;
 	}
 	if (strncmp(mode, "debug", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_STEP_DEBUG;
+		xdebug_mode |= XDEBUG_MODE_STEP_DEBUG;
 		return 1;
 	}
 	if (strncmp(mode, "gcstats", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_GCSTATS;
+		xdebug_mode |= XDEBUG_MODE_GCSTATS;
 		return 1;
 	}
 	if (strncmp(mode, "profile", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_PROFILING;
+		xdebug_mode |= XDEBUG_MODE_PROFILING;
 		return 1;
 	}
 	if (strncmp(mode, "trace", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_TRACING;
+		xdebug_mode |= XDEBUG_MODE_TRACING;
 		return 1;
 	}
 
@@ -160,7 +167,7 @@ static int xdebug_lib_set_mode_from_setting(const char *mode)
 	char       *comma    = NULL;
 	int         errors   = 0;
 
-	XG_LIB(mode) = 0;
+	xdebug_mode = 0;
 
 	comma = strchr(mode_ptr, ',');
 	while (comma) {
@@ -188,7 +195,7 @@ int xdebug_lib_set_mode(const char *mode)
 		if (!result) {
 			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "ENVMODE", "Invalid mode '%s' set for 'XDEBUG_MODE' environment variable, fall back to 'xdebug.mode' configuration setting", config);
 		} else {
-			XG_LIB(mode_from_environment) = 1;
+			xdebug_mode_from_environment = 1;
 			return result;
 		}
 	}
