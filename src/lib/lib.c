@@ -157,6 +157,7 @@ static int xdebug_lib_set_mode_item(const char *mode, int len)
 		xdebug_mode |= XDEBUG_MODE_TRACING;
 		return 1;
 	}
+	XG_LIB(mode) = xdebug_mode;
 
 	return 0;
 }
@@ -196,6 +197,7 @@ int xdebug_lib_set_mode(const char *mode)
 			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_CRIT, "ENVMODE", "Invalid mode '%s' set for 'XDEBUG_MODE' environment variable, fall back to 'xdebug.mode' configuration setting", config);
 		} else {
 			xdebug_mode_from_environment = 1;
+			XG_LIB(mode_from_environment) = 1;
 			return result;
 		}
 	}
