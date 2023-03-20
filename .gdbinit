@@ -36,3 +36,5 @@ define pxdset
 	end
 	printf "\n"
 end
+
+set $xg = ((zend_xdebug_globals*) (*((void ***) tsrm_get_ls_cache()))[xdebug_globals_id-1])
