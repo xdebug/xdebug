@@ -70,7 +70,9 @@ static zend_result xdebug_post_startup(void);
 
 int xdebug_include_or_eval_handler(zend_execute_data *execute_data);
 
+/* True globals */
 int zend_xdebug_initialised = 0;
+int xdebug_global_mode = 0;
 
 zend_module_entry xdebug_module_entry = {
 	STANDARD_MODULE_HEADER,
