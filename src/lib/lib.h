@@ -25,6 +25,8 @@
 #include "zend_API.h"
 #include "compat.h"
 
+extern int xdebug_global_mode;
+
 typedef struct xdebug_var_name {
 	zend_string *name;
 	zval         data;
@@ -194,7 +196,6 @@ struct _xdebug_multi_opcode_handler_t
 };
 
 typedef struct _xdebug_library_globals_t {
-	int                    mode;
 	int                    start_with_request; /* One of the XDEBUG_START_WITH_REQUEST_* constants */
 	int                    start_upon_error;   /* One of the XDEBUG_START_UPON_ERROR_* constants */
 	int                    mode_from_environment; /* Keeps track whether the mode was set with XDEBUG_MODE for diagnostics purposes */
@@ -265,8 +266,8 @@ void xdebug_disable_opcache_optimizer(void);
 #define XDEBUG_MODE_TRACING      1<<5
 int xdebug_lib_set_mode(const char *mode);
 
-#define XDEBUG_MODE_IS_OFF() ((XG(globals.library.mode) == XDEBUG_MODE_OFF))
-#define XDEBUG_MODE_IS(v) ((XG(globals.library.mode) & (v)) ? 1 : 0)
+#define XDEBUG_MODE_IS_OFF() ((xdebug_global_mode == XDEBUG_MODE_OFF))
+#define XDEBUG_MODE_IS(v) ((xdebug_global_mode & (v)) ? 1 : 0)
 #define RETURN_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { return; }
 #define RETURN_FALSE_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { RETURN_FALSE; }
 #define WARN_AND_RETURN_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { php_error(E_NOTICE, "Functionality is not enabled"); return; }

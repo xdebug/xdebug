@@ -26,7 +26,6 @@ extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 void xdebug_init_library_globals(xdebug_library_globals_t *xg)
 {
 	xg->headers               = NULL;
-	xg->mode                  = 0xFFFFFFFF;
 	xg->mode_from_environment = 0;
 
 	xg->log_file             = 0;
@@ -123,31 +122,31 @@ void xdebug_disable_opcache_optimizer(void)
 static int xdebug_lib_set_mode_item(const char *mode, int len)
 {
 	if (strncmp(mode, "off", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_OFF;
+		xdebug_global_mode |= XDEBUG_MODE_OFF;
 		return 1;
 	}
 	if (strncmp(mode, "develop", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_DEVELOP;
+		xdebug_global_mode |= XDEBUG_MODE_DEVELOP;
 		return 1;
 	}
 	if (strncmp(mode, "coverage", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_COVERAGE;
+		xdebug_global_mode |= XDEBUG_MODE_COVERAGE;
 		return 1;
 	}
 	if (strncmp(mode, "debug", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_STEP_DEBUG;
+		xdebug_global_mode |= XDEBUG_MODE_STEP_DEBUG;
 		return 1;
 	}
 	if (strncmp(mode, "gcstats", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_GCSTATS;
+		xdebug_global_mode |= XDEBUG_MODE_GCSTATS;
 		return 1;
 	}
 	if (strncmp(mode, "profile", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_PROFILING;
+		xdebug_global_mode |= XDEBUG_MODE_PROFILING;
 		return 1;
 	}
 	if (strncmp(mode, "trace", len) == 0) {
-		XG_LIB(mode) |= XDEBUG_MODE_TRACING;
+		xdebug_global_mode |= XDEBUG_MODE_TRACING;
 		return 1;
 	}
 
@@ -160,7 +159,7 @@ static int xdebug_lib_set_mode_from_setting(const char *mode)
 	char       *comma    = NULL;
 	int         errors   = 0;
 
-	XG_LIB(mode) = 0;
+	xdebug_global_mode = 0;
 
 	comma = strchr(mode_ptr, ',');
 	while (comma) {
