@@ -42,7 +42,7 @@ Call Stack:
 %w%f %w%d   1. {main}() %sbug00265.php:0
 
 
-%s: Trying to access array offset on value of type null in %sbug00265.php on line 8
+%s: Trying to access array offset on %Snull in %sbug00265.php on line 8
 
 Call Stack:
 %w%f %w%d   1. {main}() %sbug00265.php:0
@@ -52,7 +52,7 @@ array(4) {
   'type' =>
   int(%d)
   'message' =>
-  string(51) "Trying to access array offset on value of type null"
+  string(%d) "Trying to access array offset on %Snull"
   'file' =>
   string(%d) "%sbug00265.php"
   'line' =>

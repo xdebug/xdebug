@@ -7,6 +7,7 @@ xdebug.dump_globals=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.force_error_reporting=0
+xdebug.var_display_max_data=256
 log_errors=1
 error_log=
 display_errors=0

@@ -849,9 +849,10 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
 {
 	zend_class_entry *exception_ce = exception->ce;
-	zval *xdebug_message_trace, *previous_exception;
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
+#if PHP_VERSION_ID < 80200
+	zval *xdebug_message_trace, *previous_exception;
 	zval dummy;
 
 	previous_exception = zend_read_property(exception_ce, exception, "previous", sizeof("previous")-1, 1, &dummy);
@@ -861,6 +862,7 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
 		}
 	}
+#endif
 
 	if (!PG(html_errors)) {
 		xdebug_str_addc(&tmp_str, '\n');
@@ -869,10 +871,9 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
 	exception_trace = tmp_str.d;
 
-#if PHP_VERSION_ID >= 80200
-	exception_ce->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
-#endif
+#if PHP_VERSION_ID < 80200
 	zend_update_property_string(exception_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace);
+#endif
 
 	if (XG_BASE(last_exception_trace)) {
 		xdfree(XG_BASE(last_exception_trace));
