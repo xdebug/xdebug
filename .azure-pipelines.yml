@@ -8,22 +8,28 @@ trigger:
 jobs:
   - template: .azure/macos/job.yml
     parameters:
+      configurationName: 'OSX_PHP_MASTER'
+      phpVersion: 'branch'
+      phpBranch: 'master'
+      configurationParameters: '--enable-debug --disable-zts'
+  - template: .azure/macos/job.yml
+    parameters:
       configurationName: 'OSX_PHP_82'
-      phpVersion: '8.2.1'
+      phpVersion: '8.2.4'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_82_ZTS'
-      phpVersion: '8.2.1'
+      phpVersion: '8.2.4'
       configurationParameters: '--enable-debug --enable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_81'
-      phpVersion: '8.1.14'
+      phpVersion: '8.1.17'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_80_ZTS'
-      phpVersion: '8.0.20'
+      phpVersion: '8.0.28'
       configurationParameters: '--enable-debug --enable-zts'
       xdebugConfigurationParameters: '--without-xdebug-compression'
