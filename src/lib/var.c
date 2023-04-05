@@ -314,10 +314,10 @@ static int handle_spl_classes(
 	zval *value_in, char **element, HashTable **myht, zval *tmp_retval
 )
 {
+	zval *tmp;
+
 	/* ArrayObject, ArrayIterator, and SplObjectStorage uses a private 'storage' property */
 	if (strncmp(prop_name, "storage", prop_name_len) == 0) {
-		zval *tmp;
-
 		if (strncmp(class_name, "ArrayObject", class_name_len) == 0) {
 			tmp = get_spl_storage(value_in, myht, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
 		} else if (strncmp(class_name, "ArrayIterator", class_name_len) == 0) {
@@ -327,15 +327,33 @@ static int handle_spl_classes(
 		} else {
 			return 1;
 		}
-
-		*element = NULL;
-		if (tmp != NULL) {
-			ZVAL_COPY(tmp_retval, tmp);
-			zend_release_properties(*myht);
-			return 0;
+	} else
+	/* SplDoublyLinkedList uses a private 'dllist' property */
+	if (strncmp(prop_name, "dllist", prop_name_len) == 0) {
+		if (strncmp(class_name, "SplDoublyLinkedList", class_name_len) == 0) {
+			tmp = get_spl_storage(value_in, myht, "\0SplDoublyLinkedList\0dllist", sizeof("*SplDoublyLinkedList*dllist") - 1);
+		} else {
+			return 1;
 		}
-		zend_release_properties(*myht);
+	} else
+	/* SplPriorityQueue uses a private 'heap' property */
+	if (strncmp(prop_name, "heap", prop_name_len) == 0) {
+		if (strncmp(class_name, "SplPriorityQueue", class_name_len) == 0) {
+			tmp = get_spl_storage(value_in, myht, "\0SplPriorityQueue\0heap", sizeof("*SplPriorityQueue*heap") - 1);
+		} else {
+			return 1;
+		}
+	} else {
+		return 1;
 	}
+
+	*element = NULL;
+	if (tmp != NULL) {
+		ZVAL_COPY(tmp_retval, tmp);
+		zend_release_properties(*myht);
+		return 0;
+	}
+	zend_release_properties(*myht);
 
 	return 1;
 }
