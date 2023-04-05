@@ -337,6 +337,44 @@ static int handle_spl_classes(
 		zend_release_properties(*myht);
 	}
 
+	/* SplDoublyLinkedList uses a private 'dllist' property */
+	if (strncmp(prop_name, "dllist", prop_name_len) == 0) {
+		zval *tmp;
+
+		if (strncmp(class_name, "SplDoublyLinkedList", class_name_len) == 0) {
+			tmp = get_spl_storage(value_in, myht, "\0SplDoublyLinkedList\0dllist", sizeof("*SplDoublyLinkedList*dllist") - 1);
+		} else {
+			return 1;
+		}
+
+		*element = NULL;
+		if (tmp != NULL) {
+			ZVAL_COPY(tmp_retval, tmp);
+			zend_release_properties(*myht);
+			return 0;
+		}
+		zend_release_properties(*myht);
+	}
+
+	/* SplPriorityQueue uses a private 'heap' property */
+	if (strncmp(prop_name, "heap", prop_name_len) == 0) {
+		zval *tmp;
+
+		if (strncmp(class_name, "SplPriorityQueue", class_name_len) == 0) {
+			tmp = get_spl_storage(value_in, myht, "\0SplPriorityQueue\0heap", sizeof("*SplPriorityQueue*heap") - 1);
+		} else {
+			return 1;
+		}
+
+		*element = NULL;
+		if (tmp != NULL) {
+			ZVAL_COPY(tmp_retval, tmp);
+			zend_release_properties(*myht);
+			return 0;
+		}
+		zend_release_properties(*myht);
+	}
+
 	return 1;
 }
 
