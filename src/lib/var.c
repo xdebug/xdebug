@@ -309,6 +309,12 @@ static zval *get_arrayobject_storage(zval *parent, HashTable **properties)
 	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
 }
 
+static zval *get_arrayiterator_storage(zval *parent, HashTable **properties)
+{
+	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
+	return zend_hash_str_find(*properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1);
+}
+
 static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties)
 {
 	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
@@ -530,6 +536,17 @@ static void fetch_zval_from_symbol_table(
 
 			if (strncmp(ccn, "ArrayObject", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
 				zval *tmp = get_arrayobject_storage(value_in, &myht);
+				element = NULL;
+				if (tmp != NULL) {
+					ZVAL_COPY(&tmp_retval, tmp);
+					zend_release_properties(myht);
+					goto cleanup;
+				}
+				zend_release_properties(myht);
+			}
+
+			if (strncmp(ccn, "ArrayIterator", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
+				zval *tmp = get_arrayiterator_storage(value_in, &myht);
 				element = NULL;
 				if (tmp != NULL) {
 					ZVAL_COPY(&tmp_retval, tmp);
