@@ -303,22 +303,41 @@ char *replace_star_by_null(const char *name, int name_length)
 	return tmp;
 }
 
-static zval *get_arrayobject_storage(zval *parent, HashTable **properties)
+static inline zval *get_spl_storage(zval *parent, HashTable **properties, const char *prop_name, int prop_name_len)
 {
 	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
-	return zend_hash_str_find(*properties, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
+	return zend_hash_str_find(*properties, prop_name, prop_name_len);
 }
 
-static zval *get_arrayiterator_storage(zval *parent, HashTable **properties)
+static int handle_spl_classes(
+	const char *class_name, int class_name_len, const char *prop_name, int prop_name_len,
+	zval *value_in, char **element, HashTable **myht, zval *tmp_retval
+)
 {
-	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
-	return zend_hash_str_find(*properties, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1);
-}
+	/* ArrayObject, ArrayIterator, and SplObjectStorage uses a private 'storage' property */
+	if (strncmp(prop_name, "storage", prop_name_len) == 0) {
+		zval *tmp;
 
-static zval *get_splobjectstorage_storage(zval *parent, HashTable **properties)
-{
-	*properties = zend_get_properties_for(parent, ZEND_PROP_PURPOSE_DEBUG);
-	return zend_hash_str_find(*properties, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
+		if (strncmp(class_name, "ArrayObject", class_name_len) == 0) {
+			tmp = get_spl_storage(value_in, myht, "\0ArrayObject\0storage", sizeof("*ArrayObject*storage") - 1);
+		} else if (strncmp(class_name, "ArrayIterator", class_name_len) == 0) {
+			tmp = get_spl_storage(value_in, myht, "\0ArrayIterator\0storage", sizeof("*ArrayIterator*storage") - 1);
+		} else if (strncmp(class_name, "SplObjectStorage", class_name_len) == 0) {
+			tmp = get_spl_storage(value_in, myht, "\0SplObjectStorage\0storage", sizeof("*SplObjectStorage*storage") - 1);
+		} else {
+			return 1;
+		}
+
+		*element = NULL;
+		if (tmp != NULL) {
+			ZVAL_COPY(tmp_retval, tmp);
+			zend_release_properties(*myht);
+			return 0;
+		}
+		zend_release_properties(*myht);
+	}
+
+	return 1;
 }
 
 static void fetch_zval_from_symbol_table(
@@ -534,38 +553,8 @@ static void fetch_zval_from_symbol_table(
 			}
 			element_length = name_length;
 
-			if (strncmp(ccn, "ArrayObject", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
-				zval *tmp = get_arrayobject_storage(value_in, &myht);
-				element = NULL;
-				if (tmp != NULL) {
-					ZVAL_COPY(&tmp_retval, tmp);
-					zend_release_properties(myht);
-					goto cleanup;
-				}
-				zend_release_properties(myht);
-			}
-
-			if (strncmp(ccn, "ArrayIterator", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
-				zval *tmp = get_arrayiterator_storage(value_in, &myht);
-				element = NULL;
-				if (tmp != NULL) {
-					ZVAL_COPY(&tmp_retval, tmp);
-					zend_release_properties(myht);
-					goto cleanup;
-				}
-				zend_release_properties(myht);
-			}
-
-			/* All right, time for a mega hack. It's SplObjectStorage access time! */
-			if (strncmp(ccn, "SplObjectStorage", ccnl) == 0 && strncmp(name, "storage", name_length) == 0) {
-				zval *tmp = get_splobjectstorage_storage(value_in, &myht);
-				element = NULL;
-				if (tmp != NULL) {
-					ZVAL_COPY(&tmp_retval, tmp);
-					zend_release_properties(myht);
-					goto cleanup;
-				}
-				zend_release_properties(myht);
+			if (!handle_spl_classes(ccn, ccnl, name, name_length, value_in, &element, &myht, &tmp_retval)) {
+				goto cleanup;
 			}
 
 			break;
