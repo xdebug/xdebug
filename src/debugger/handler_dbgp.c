@@ -1897,21 +1897,17 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	/* add user defined constants */
 	if (context_id == 2) {
 		zend_constant *val;
+		zend_string   *const_name;
 
-		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
+		ZEND_HASH_FOREACH_STR_KEY_PTR(EG(zend_constants), const_name, val) {
 			xdebug_str *tmp_name;
-
-			if (!val->name) {
-				/* skip special constants */
-				continue;
-			}
 
 			if (ZEND_CONSTANT_MODULE_NUMBER(val) != PHP_USER_CONSTANT) {
 				/* we're only interested in user defined constants */
 				continue;
 			}
 
-			tmp_name = xdebug_str_create(val->name->val, val->name->len);
+			tmp_name = xdebug_str_create(ZSTR_VAL(const_name), ZSTR_LEN(const_name));
 			add_constant_node(node, tmp_name, &(val->value), options);
 			xdebug_str_free(tmp_name);
 		} ZEND_HASH_FOREACH_END();
