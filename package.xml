@@ -50,7 +50,7 @@ Code Coverage Analysis
   <release>stable</release>
   <api>stable</api>
  </stability>
- <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+ <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
 Mon, Jun 06, 2022 - Xdebug 3.1.5
 
