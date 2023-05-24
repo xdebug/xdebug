@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -623,7 +623,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 					int flags = XDEBUG_OBJECT_ITEM_TYPE_PROPERTY;
 
 #if PHP_VERSION_ID >= 80100
-					if (ce->type != ZEND_INTERNAL_CLASS) {
+					if (ce->type != ZEND_INTERNAL_CLASS && !HASH_KEY_IS_NUMERIC(key)) {
 						const char         *cls_name, *tmp_prop_name;
 						size_t              tmp_prop_name_len;
 						zend_string        *unmangled;
