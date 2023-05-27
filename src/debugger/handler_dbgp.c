@@ -1219,11 +1219,7 @@ DBGP_FUNC(step_over)
 
 	if ((fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack)))) {
 		XG_DBG(context).next_level = fse->level;
-		if (EG(current_execute_data)->opline->lineno == fse->op_array->line_end) {
-			XG_DBG(context).next_stack = NULL;
-		} else {
-			XG_DBG(context).next_stack = XG_BASE(stack);
-		}
+		XG_DBG(context).next_stack = XG_BASE(stack);
 	} else {
 		XG_DBG(context).next_level = 0;
 		XG_DBG(context).next_stack = NULL;
