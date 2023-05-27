@@ -78,6 +78,7 @@ struct _xdebug_con {
 	xdebug_debug_list      list;
 	int                    do_break;
 	xdebug_brk_info       *pending_breakpoint;
+	xdebug_vector         *next_stack;
 
 	int                    do_step;
 	int                    do_next;
