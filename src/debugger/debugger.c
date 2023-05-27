@@ -231,8 +231,14 @@ int next_condition_met(void)
 		level = fse->level;
 	}
 
-	if (XG_DBG(context).next_level >= level) {
-		return 1;
+	if (XG_DBG(context).next_stack != NULL) {
+		if ((XG_DBG(context).next_stack == XG_BASE(stack)) && (XG_DBG(context).next_level >= level)) {
+			return 1;
+		}
+	} else {
+		if (XG_DBG(context).next_level >= level) {
+			return 1;
+		}
 	}
 
 	return 0;
