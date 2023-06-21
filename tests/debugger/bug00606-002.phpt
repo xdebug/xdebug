@@ -46,7 +46,7 @@ dbgpRunFile( $filename, $commands );
 
 -> eval -i 5 -- JHRoaXMtPnByb3BlcnR5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="eval" transaction_id="5" status="break" reason="ok"><error code="206"><message><![CDATA[error evaluating code]]></message></error></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="eval" transaction_id="5" status="break" reason="ok"><error code="206"><message><![CDATA[error evaluating code: %s]]></message></error></response>
 
 -> stack_get -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>

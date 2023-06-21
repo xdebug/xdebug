@@ -169,7 +169,7 @@ static int xdebug_handle_hit_value(xdebug_brk_info *brk_info)
 	return 0;
 }
 
-int xdebug_do_eval(char *eval_string, zval *ret_zval)
+int xdebug_do_eval(char *eval_string, zval *ret_zval, zend_string **return_message)
 {
 	volatile int       res = 1;
 	zend_execute_data *original_execute_data = EG(current_execute_data);
@@ -193,8 +193,22 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval)
 		res = (zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval") == SUCCESS);
 	} zend_end_try();
 
-	/* FIXME: Bubble up exception message to DBGp return packet */
 	if (EG(exception)) {
+		if (return_message != NULL) {
+			zend_class_entry *base_ce;
+			zval *prop, rv;
+
+			*return_message = NULL;
+
+			base_ce = zend_get_exception_base(EG(exception));
+			if (base_ce) {
+				prop = zend_read_property_ex(base_ce, EG(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), 1, &rv);
+				if (prop) {
+					*return_message = zval_get_string(prop);
+				}
+			}
+		}
+
 		if (!res) {
 			zend_clear_exception();
 		}
@@ -354,7 +368,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 						break_ok = 0;
 
 						/* Remember error reporting level */
-						res = xdebug_do_eval(extra_brk_info->condition, &retval);
+						res = xdebug_do_eval(extra_brk_info->condition, &retval, NULL);
 						if (res) {
 							break_ok = Z_TYPE(retval) == IS_TRUE;
 							zval_dtor(&retval);

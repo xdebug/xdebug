@@ -31,33 +31,33 @@ typedef struct xdebug_dbgp_result {
 
 #define ADD_REASON_MESSAGE(c) { \
 	xdebug_xml_node *message = xdebug_xml_node_init("message"); \
-	xdebug_error_entry *error_entry = &xdebug_error_codes[0]; \
-	\
-	while (error_entry->message) { \
-		if ((c) == error_entry->code) { \
-			xdebug_xml_add_text(message, xdstrdup(error_entry->message)); \
-			xdebug_xml_add_child(error, message); \
-		} \
-		error_entry++; \
-	} \
+	xdebug_xml_add_text(message, xdstrdup(error_message_from_code(c))); \
+	xdebug_xml_add_child(error, message); \
 }
 
 #define RETURN_RESULT(s, r, c) { \
 	xdebug_xml_node *error = xdebug_xml_node_init("error"); \
 	xdebug_xml_node *message = xdebug_xml_node_init("message"); \
-	xdebug_error_entry *error_entry = &xdebug_error_codes[0]; \
 	\
 	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[(s)]); \
 	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[(r)]); \
 	xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%u", (c)), 0, 1); \
+	xdebug_xml_add_text(message, xdstrdup(error_message_from_code(c))); \
+	xdebug_xml_add_child(error, message); \
 	\
-	while (error_entry->message) { \
-		if ((c) == error_entry->code) { \
-			xdebug_xml_add_text(message, xdstrdup(error_entry->message)); \
-			xdebug_xml_add_child(error, message); \
-		} \
-		error_entry++; \
-	} \
+	xdebug_xml_add_child(*retval, error); \
+	return; \
+}
+
+#define RETURN_RESULT_WITH_MESSAGE(s, r, c, m) { \
+	xdebug_xml_node *error = xdebug_xml_node_init("error"); \
+	xdebug_xml_node *message = xdebug_xml_node_init("message"); \
+	\
+	xdebug_xml_add_attribute(*retval, "status", xdebug_dbgp_status_strings[(s)]); \
+	xdebug_xml_add_attribute(*retval, "reason", xdebug_dbgp_reason_strings[(r)]); \
+	xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%u", (c)), 0, 1); \
+	xdebug_xml_add_text(message, (m)); \
+	xdebug_xml_add_child(error, message); \
 	xdebug_xml_add_child(*retval, error); \
 	return; \
 }
