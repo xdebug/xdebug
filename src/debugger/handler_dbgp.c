@@ -128,6 +128,19 @@ xdebug_error_entry xdebug_error_codes[24] = {
 	{  -1, NULL }
 };
 
+static const char *error_message_from_code(int code)
+{
+	xdebug_error_entry *error_entry = &xdebug_error_codes[0];
+
+	while (error_entry->message) {
+		if (code == error_entry->code) {
+			return error_entry->message;
+		}
+		error_entry++;
+	}
+	return NULL;
+}
+
 #define XDEBUG_STR_SWITCH_DECL       char *__switch_variable
 #define XDEBUG_STR_SWITCH(s)         __switch_variable = (s);
 #define XDEBUG_STR_CASE(s)           if (strcmp(__switch_variable, s) == 0) {
@@ -1099,6 +1112,7 @@ DBGP_FUNC(eval)
 	size_t           new_length = 0;
 	int              res;
 	xdebug_var_export_options *options;
+	zend_string     *return_message;
 
 	if (!CMD_OPTION_SET('-')) {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
@@ -1115,13 +1129,18 @@ DBGP_FUNC(eval)
 	/* base64 decode eval string */
 	eval_string = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION_CHAR('-'), CMD_OPTION_LEN('-'), &new_length);
 
-	res = xdebug_do_eval(eval_string, &ret_zval);
+	res = xdebug_do_eval(eval_string, &ret_zval, &return_message);
 
 	xdfree(eval_string);
 
 	/* Handle result */
 	if (!res) {
-		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_EVALUATING_CODE);
+		if (return_message) {
+			RETURN_RESULT_WITH_MESSAGE(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_EVALUATING_CODE, xdebug_sprintf("%s: %s", error_message_from_code(XDEBUG_ERROR_EVALUATING_CODE), ZSTR_VAL(return_message)));
+			zend_string_release(return_message);
+		} else {
+			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_EVALUATING_CODE);
+		}
 	} else {
 		ret_xml = xdebug_get_zval_value_xml_node(NULL, &ret_zval, options);
 		xdebug_xml_add_child(*retval, ret_xml);
@@ -1719,7 +1738,7 @@ DBGP_FUNC(property_set)
 
 	/* Do the eval */
 	eval_string = xdebug_sprintf("%s = %s %s", CMD_OPTION_CHAR('n'), cast_as, new_value);
-	res = xdebug_do_eval(eval_string, &ret_zval);
+	res = xdebug_do_eval(eval_string, &ret_zval, NULL);
 
 	/* restore executor state */
 	if (depth > 0) {

@@ -52,7 +52,7 @@ dbgpRunFile( $filename, $commands );
 
 -> eval -i 6 -- JHJlc3VsdEpzb24=
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="eval" transaction_id="6" status="break" reason="ok"><error code="206"><message><![CDATA[error evaluating code]]></message></error></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="eval" transaction_id="6" status="break" reason="ok"><error code="206"><message><![CDATA[error evaluating code:%s]]></message></error></response>
 
 -> context_names -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
