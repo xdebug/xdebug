@@ -852,6 +852,27 @@ void xdebug_get_php_symbol(zval *retval, xdebug_str* name)
 	}
 }
 
+/* Copied from Zend/zend_objects_API.h and instead of a ZEND_ASSERT it returns NULL */
+static zend_property_info *xdebug_get_property_info_for_slot(zend_object *obj, zval *val)
+{
+	zend_property_info **table = obj->ce->properties_info_table;
+	intptr_t prop_num = val - obj->properties_table;
+
+	if (prop_num < 0 || prop_num >= obj->ce->default_properties_count) {
+		return NULL;
+	}
+
+	return table[prop_num];
+}
+
+static zend_property_info *xdebug_get_typed_property_info_for_slot(zend_object *obj, zval *val)
+{
+	zend_property_info *prop_info = xdebug_get_property_info_for_slot(obj, val);
+	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
+		return prop_info;
+	}
+	return NULL;
+}
 
 xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 {
@@ -863,7 +884,7 @@ xdebug_str* xdebug_get_property_type(zval* object, zval *val)
 	}
 	val = Z_INDIRECT_P(val);
 
-	info = zend_get_typed_property_info_for_slot(Z_OBJ_P(object), val);
+	info = xdebug_get_typed_property_info_for_slot(Z_OBJ_P(object), val);
 
 	if (info) {
 		zend_string *type_info = zend_type_to_string(info->type);
