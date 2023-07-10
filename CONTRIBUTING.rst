@@ -4,7 +4,7 @@ Contributing
 Xdebug is hosted on Github. The source code can be browsed there and can be
 checked out with::
 
-  git clone git://github.com/xdebug/xdebug.git
+  git clone https://github.com/xdebug/xdebug.git
 
 If you think you want to fix a bug or work on a new feature, then you need to
 follow the instructions below. Please reach out first to discuss your
@@ -26,7 +26,7 @@ Initial Set-up
 
 - Add the original repository as ``upstream`` remote::
 
-    git remote add upstream git://github.com/xdebug/xdebug.git
+    git remote add upstream https://github.com/xdebug/xdebug.git
     git fetch upstream
 
 - Add a tracking branch for Xdebug 3.1::
