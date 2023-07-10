@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1034: path coverage [1] (!opcache)
+Test for bug #1034: path coverage [1] (!opcache, <= PHP 8.2.8)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
+check_reqs('PHP <= 8.2.8; !opcache');
 ?>
 --INI--
 xdebug.mode=coverage

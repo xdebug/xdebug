@@ -1,9 +1,9 @@
 --TEST--
-Test with Code Coverage with path and branch checking (!opcache)
+Test with Code Coverage with path and branch checking (!opcache, <= PHP 8.2.8)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
+check_reqs('PHP <= 8.2.8; !opcache');
 ?>
 --INI--
 xdebug.mode=coverage
