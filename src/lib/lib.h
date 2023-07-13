@@ -152,6 +152,7 @@ typedef struct _function_stack_entry {
 	HashTable         *symbol_table;
 	zend_execute_data *execute_data;
 	unsigned char      is_variadic;
+	unsigned char      is_trampoline;
 	unsigned char      arg_done;
 
 	/* filter properties */
