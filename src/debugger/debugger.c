@@ -118,6 +118,10 @@ static void register_compiled_variables(void)
 			continue;
 		}
 
+		if (loop_fse->is_trampoline) {
+			continue;
+		}
+
 		xdebug_lib_register_compiled_variables(loop_fse, loop_fse->op_array);
 	}
 }

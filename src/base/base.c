@@ -687,6 +687,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	} else {
 		tmp->lineno = find_line_number_for_current_execute_point(edata);
 		tmp->is_variadic = !!(zdata->func->common.fn_flags & ZEND_ACC_VARIADIC);
+		tmp->is_trampoline = !!(zdata->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE);
 
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 			if (ZEND_USER_CODE(zdata->func->type)) {
@@ -848,7 +849,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		zval *return_value = NULL;
 
-		if (execute_data->return_value && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
+		if (!fse->is_trampoline && execute_data->return_value && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
 			return_value = execute_data->return_value;
 		}
 
