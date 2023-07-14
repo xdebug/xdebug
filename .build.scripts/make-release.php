@@ -42,13 +42,16 @@ function getAllFixedIssuesForVersion( $version_id )
 {
 	global $url;
 
-	echo "Fetching issues\n";
+	echo "Fetching issues: ";
 	$page      = 1;
 	$page_size = 100;
 	$found     = [];
 
 	do {
-		$r = json_decode( file_get_contents( "{$url}/issues?page_size={$page_size}&page={$page}" ) );
+		$pageUrl = "{$url}/issues?page_size={$page_size}&page={$page}";
+		echo " {$page}";
+
+		$r = json_decode( file_get_contents( $pageUrl ) );
 
 		foreach ( $r->issues as $issue )
 		{
@@ -61,6 +64,8 @@ function getAllFixedIssuesForVersion( $version_id )
 	} while( count( $r->issues ) > 0 );
 
 	ksort( $found );
+
+	echo "\n\n";
 	return $found;
 }
 
@@ -90,7 +95,7 @@ $xml = <<<ENDXML
   <release>{$stability}</release>
   <api>{$stability}</api>
  </stability>
- <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+ <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
 {$long_date} - Xdebug {$release_version}
 
@@ -347,6 +352,12 @@ else
 	echo "OK\n";
 }
 
+$issues = getAllFixedIssuesForVersion( $r->id );
+if ( count( $issues) == 0 )
+{
+	die("There are no issues for version {$release_version}");
+}
+
 updateGIT();
 updateTemplateRC( $release_version );
 updatePhpXdebugH( $release_version );
@@ -358,8 +369,6 @@ echo "\nRun the following commands:\n\n";
 peclPackage();
 installPeclPackage( $release_version );
 showGitCommands( $release_version );
-
-$issues = getAllFixedIssuesForVersion( $r->id );
 
 writePackageXMLInclusion( $release_version, $issues );
 createUpdatesSection( $release_version, $issues );
