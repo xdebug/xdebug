@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2023-03-21</date>
- <time>16:35:27</time>
+ <date>2023-07-14</date>
+ <time>09:14:53</time>
  <version>
-  <release>3.2.1</release>
-  <api>3.2.1</api>
+  <release>3.2.2</release>
+  <api>3.2.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,14 +52,14 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Tue, Mar 21, 2023 - Xdebug 3.2.1
+Fri, Jul 14, 2023 - Xdebug 3.2.2
 
 = Fixed bugs:
 
-  - Fixed issue #2144: Xdebug 3.2.0 ignores xdebug.mode and enables all features
-  - Fixed issue #2145: Xdebug 3.2.0 crash PHP on Windows if xdebug.mode = off
-  - Fixed issue #2146: apache2 segfaulting with version 3.2.0 on PHP 8.0
-  - Fixed issue #2148: Icon for link to docs in xdebug_info() HTML output does not always render correctly
+  - Fixed issue #2175: Crash with EXC_BAD_ACCESS in xdebug_str_create
+  - Fixed issue #2180: Crash on extended SplFixedArray
+  - Fixed issue #2182: Segfault with ArrayObject on stack
+  - Fixed issue #2186: Segfault with trampoline functions and debugger activation
 
  </notes>
 
@@ -208,6 +208,31 @@ Tue, Mar 21, 2023 - Xdebug 3.2.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2023-03-21</date>
+   <time>16:35:27</time>
+   <version>
+    <release>3.2.1</release>
+    <api>3.2.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Tue, Mar 21, 2023 - Xdebug 3.2.1
+
+= Fixed bugs:
+
+  - Fixed issue #2144: Xdebug 3.2.0 ignores xdebug.mode and enables all features
+  - Fixed issue #2145: Xdebug 3.2.0 crash PHP on Windows if xdebug.mode = off
+  - Fixed issue #2146: apache2 segfaulting with version 3.2.0 on PHP 8.0
+  - Fixed issue #2148: Icon for link to docs in xdebug_info() HTML output does not always render correctly
+
+   </notes>
+  </release>
 
   <release>
    <date>2022-12-08</date>
