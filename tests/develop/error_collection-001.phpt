@@ -23,7 +23,5 @@ Warning: An error in %serror_collection-001.php on line 4
 
 Call Stack:
 %w%f %w%d   1. {main}() %serror_collection-001.php:0
-%w%f %w%d   2. trigger_error($message = 'An error', $error_%s = 512) %serror_collection-001.php:4
-
-"
+%w%f %w%d   2. trigger_error($message = 'An error', $error_%s = 512) %A
 }
