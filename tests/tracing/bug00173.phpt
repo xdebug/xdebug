@@ -34,4 +34,4 @@ Call Stack:
 
 
 Variables in local scope (#1):
-  $trace_file = '%s.%d.xt%S'
+  $trace_file = '%s.%d.%sxt%S'
