@@ -3,7 +3,7 @@ Test for step_over fiber 001: step_over command don't step into other fiber
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 8.1; dbgp');
 ?>
 --FILE--
 <?php
