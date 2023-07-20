@@ -19,7 +19,7 @@ jobs:
             matrix:
                 php: [8.0, 8.1, 8.2]
                 use-opcache: [true, false]
-                experimental: [false]
+                experimental: [true]
 
         steps:
             -   uses: actions/checkout@v2
