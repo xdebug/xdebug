@@ -2,17 +2,15 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2015 Derick Rethans                               |
+   | Copyright (c) 2002-2022 Derick Rethans                               |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0 of the Xdebug license,    |
+   | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
-   | http://xdebug.derickrethans.nl/license.php                           |
+   | https://xdebug.org/license.php                                       |
    | If you did not receive a copy of the Xdebug license and are unable   |
    | to obtain it through the world-wide-web, please send a note to       |
-   | xdebug@derickrethans.nl so we can mail you a copy immediately.       |
-   +----------------------------------------------------------------------+
-   | Authors:  Derick Rethans <derick@xdebug.org>                         |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
  */
 
@@ -20,25 +18,36 @@
 #define PHP_XDEBUG_H
 
 #define XDEBUG_NAME       "Xdebug"
-#define XDEBUG_VERSION    "3.0.0-dev"
+#define XDEBUG_VERSION    "3.3.0-dev"
 #define XDEBUG_AUTHOR     "Derick Rethans"
-#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2015 by Derick Rethans"
-#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2015"
-#define XDEBUG_URL        "http://xdebug.org"
-#define XDEBUG_URL_FAQ    "http://xdebug.org/docs/faq#api"
+#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2022 by Derick Rethans"
+#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2022"
+#define XDEBUG_URL        "https://xdebug.org"
+#define XDEBUG_URL_FAQ    "https://xdebug.org/docs/faq#api"
 
-#include "php.h"
+#include "lib/php-header.h"
 
-#include "xdebug_handlers.h"
-#include "xdebug_hash.h"
-#include "xdebug_llist.h"
-#include "xdebug_branch_info.h"
-#include "xdebug_code_coverage.h"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#include "base/base_globals.h"
+#include "coverage/branch_info.h"
+#include "coverage/code_coverage.h"
+#include "debugger/debugger.h"
+#include "develop/develop.h"
+#include "lib/lib.h"
+#include "gcstats/gc_stats.h"
+#include "profiler/profiler.h"
+#include "tracing/tracing.h"
+#include "lib/compat.h"
+#include "lib/hash.h"
+#include "lib/llist.h"
+#include "lib/vector.h"
+#include "lib/timing.h"
 
 extern zend_module_entry xdebug_module_entry;
 #define phpext_xdebug_ptr &xdebug_module_entry
-
-#define MICRO_IN_SEC 1000000.00
 
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY       1
@@ -65,212 +74,29 @@ PHP_RSHUTDOWN_FUNCTION(xdebug);
 PHP_MINFO_FUNCTION(xdebug);
 ZEND_MODULE_POST_ZEND_DEACTIVATE_D(xdebug);
 
-#ifndef PHP_WIN32
 int xdebug_is_output_tty();
-#endif
-
-/* call stack functions */
-PHP_FUNCTION(xdebug_get_stack_depth);
-PHP_FUNCTION(xdebug_get_function_stack);
-PHP_FUNCTION(xdebug_get_formatted_function_stack);
-PHP_FUNCTION(xdebug_print_function_stack);
-PHP_FUNCTION(xdebug_get_declared_vars);
-PHP_FUNCTION(xdebug_call_class);
-PHP_FUNCTION(xdebug_call_function);
-PHP_FUNCTION(xdebug_call_file);
-PHP_FUNCTION(xdebug_call_line);
-
-PHP_FUNCTION(xdebug_set_time_limit);
-
-PHP_FUNCTION(xdebug_var_dump);
-PHP_FUNCTION(xdebug_debug_zval);
-PHP_FUNCTION(xdebug_debug_zval_stdout);
-
-/* activation functions */
-PHP_FUNCTION(xdebug_enable);
-PHP_FUNCTION(xdebug_disable);
-PHP_FUNCTION(xdebug_is_enabled);
-
-/* breaking functions */
-PHP_FUNCTION(xdebug_break);
-
-/* tracing functions */
-PHP_FUNCTION(xdebug_start_trace);
-PHP_FUNCTION(xdebug_stop_trace);
-PHP_FUNCTION(xdebug_get_tracefile_name);
-
-/* error collecting functions */
-PHP_FUNCTION(xdebug_start_error_collection);
-PHP_FUNCTION(xdebug_stop_error_collection);
-PHP_FUNCTION(xdebug_get_collected_errors);
-
-/* profiling functions */
-PHP_FUNCTION(xdebug_get_profiler_filename);
-PHP_FUNCTION(xdebug_dump_aggr_profiling_data);
-PHP_FUNCTION(xdebug_clear_aggr_profiling_data);
-
-/* misc functions */
-PHP_FUNCTION(xdebug_dump_superglobals);
-PHP_FUNCTION(xdebug_get_headers);
-PHP_FUNCTION(xdebug_memory_usage);
-PHP_FUNCTION(xdebug_peak_memory_usage);
-PHP_FUNCTION(xdebug_time_index);
 
 ZEND_BEGIN_MODULE_GLOBALS(xdebug)
-	int           status;
-	int           reason;
-
-	long          level;
-	xdebug_llist *stack;
-	long          max_nesting_level;
-	long          max_stack_frames;
-	zend_bool     default_enable;
-	zend_bool     collect_includes;
-	long          collect_params;
-	zend_bool     collect_return;
-	zend_bool     collect_vars;
-	zend_bool     collect_assignments;
-	zend_bool     extended_info;
-	zend_bool     show_ex_trace;
-	zend_bool     show_local_vars;
-	zend_bool     show_mem_delta;
-	double        start_time;
-	HashTable    *active_symbol_table;
-	zend_execute_data *active_execute_data;
-	zval              *This;
-	function_stack_entry *active_fse;
-	unsigned int  prev_memory;
-	char         *file_link_format;
-	zend_bool     force_display_errors;
-	long          force_error_reporting;
-	long          halt_level;
-
-	zend_bool     overload_var_dump;
-	void        (*orig_var_dump_func)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAMETERS);
-
-	xdebug_trace_handler_t *trace_handler;
-	void         *trace_context;
-
-	zend_bool     do_trace;
-	zend_bool     auto_trace;
-	zend_bool     trace_enable_trigger;
-	char         *trace_enable_trigger_value;
-	char         *trace_output_dir;
-	char         *trace_output_name;
-	long          trace_options;
-	//char         *tracefile_name;
-	int           trace_format;
-	char         *last_exception_trace;
-	char         *last_eval_statement;
-
-	/* variable dumping limitation settings */
-	long          display_max_children;
-	long          display_max_data;
-	long          display_max_depth;
-
-	zend_bool     cli_color;
-	int           output_is_tty;
-
-	/* used for code coverage */
-	zend_bool     coverage_enable;
-	zend_bool     do_code_coverage;
-	xdebug_hash  *code_coverage;
-	zend_bool     code_coverage_unused;
-	zend_bool     code_coverage_dead_code_analysis;
-	zend_bool     code_coverage_branch_check;
-	unsigned int  function_count;
-	int           dead_code_analysis_tracker_offset;
-	long          dead_code_last_start_id;
-	char                 *previous_filename;
-	xdebug_coverage_file *previous_file;
-	char                 *previous_mark_filename;
-	xdebug_coverage_file *previous_mark_file;
-	xdebug_path_info     *paths_stack;
-	xdebug_hash          *visited_branches;
 	struct {
-		int  size;
-		int *last_branch_nr;
-	} branches;
-
-	/* used for collection errors */
-	zend_bool     do_collect_errors;
-	xdebug_llist *collected_errors;
-
-	/* superglobals */
-	zend_bool     dump_globals;
-	zend_bool     dump_once;
-	zend_bool     dump_undefined;
-	zend_bool     dumped;
-	xdebug_llist  server;
-	xdebug_llist  get;
-	xdebug_llist  post;
-	xdebug_llist  cookie;
-	xdebug_llist  files;
-	xdebug_llist  env;
-	xdebug_llist  request;
-	xdebug_llist  session;
-
-	/* headers */
-	xdebug_llist *headers;
-
-	/* remote settings */
-	zend_bool     remote_enable;  /* 0 */
-	long          remote_port;    /* 9000 */
-	char         *remote_host;    /* localhost */
-	long          remote_mode;    /* XDEBUG_NONE, XDEBUG_JIT, XDEBUG_REQ */
-	char         *remote_handler; /* php3, gdb, dbgp */
-	zend_bool     remote_autostart; /* Disables the requirement for XDEBUG_SESSION_START */
-	zend_bool     remote_connect_back;   /* connect back to the HTTP requestor */
-	char         *remote_log;       /* Filename to log protocol communication to */
-	FILE         *remote_log_file;  /* File handler for protocol log */
-	long          remote_cookie_expire_time; /* Expire time for the remote-session cookie */
-
-	char         *ide_key; /* As Xdebug uses it, from environment, USER, USERNAME or empty */
-	char         *ide_key_setting; /* Set through php.ini and friends */
-
-	/* remote debugging globals */
-	zend_bool     remote_enabled;
-	zend_bool     breakpoints_allowed;
-	xdebug_con    context;
-	unsigned int  breakpoint_count;
-	unsigned int  no_exec;
-
-	/* profiler settings */
-	zend_bool     profiler_enable;
-	char         *profiler_output_dir;
-	char         *profiler_output_name; /* "pid" or "crc32" */
-	zend_bool     profiler_enable_trigger;
-	char         *profiler_enable_trigger_value;
-	zend_bool     profiler_append;
-
-	/* profiler globals */
-	zend_bool     profiler_enabled;
-	FILE         *profile_file;
-	char         *profile_filename;
-	xdebug_hash  *profile_filename_refs;
-	int           profile_last_filename_ref;
-	xdebug_hash  *profile_functionname_refs;
-	int           profile_last_functionname_ref;
-
-	/* DBGp globals */
-	char         *lastcmd;
-	char         *lasttransid;
-
-	/* output redirection */
-	int           stdout_mode;
-
-	/* aggregate profiling */
-	HashTable  aggr_calls;
-	zend_bool  profiler_aggregate;
-
-	/* scream */
-	zend_bool  do_scream;
-	zend_bool  in_at;
-
-	/* in-execution checking */
-	zend_bool  in_execution;
-	zend_bool  in_var_serialisation;
+		xdebug_base_globals_t     base;
+		xdebug_coverage_globals_t coverage;
+		xdebug_debugger_globals_t debugger;
+		xdebug_develop_globals_t  develop;
+		xdebug_gc_stats_globals_t gc_stats;
+		xdebug_library_globals_t  library;
+		xdebug_profiler_globals_t profiler;
+		xdebug_tracing_globals_t  tracing;
+	} globals;
+	struct {
+		xdebug_base_settings_t     base;
+		xdebug_coverage_settings_t coverage;
+		xdebug_debugger_settings_t debugger;
+		xdebug_develop_settings_t  develop;
+		xdebug_gc_stats_settings_t gc_stats;
+		xdebug_library_settings_t  library;
+		xdebug_profiler_settings_t profiler;
+		xdebug_tracing_settings_t  tracing;
+	} settings;
 ZEND_END_MODULE_GLOBALS(xdebug)
 
 #ifdef ZTS
@@ -278,14 +104,8 @@ ZEND_END_MODULE_GLOBALS(xdebug)
 #else
 #define XG(v) (xdebug_globals.v)
 #endif
-	
+
+#define XG_BASE(v)     (XG(globals.base.v))
+#define XINI_BASE(v)     (XG(settings.base.v))
+
 #endif
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

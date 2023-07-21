@@ -7,24 +7,31 @@
  xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>xdebug</name>
  <channel>pecl.php.net</channel>
- <summary>Provides functions for function traces and profiling</summary>
- <description>The Xdebug extension helps you debugging your script by providing a lot of
-valuable debug information. The debug information that Xdebug can provide
-includes the following:
+ <summary>Xdebug is a debugging and productivity extension for PHP</summary>
+ <description>
+Xdebug and provides a range of features to improve the PHP development
+experience.
 
-    * stack and function traces in error messages with:
-          o full parameter display for user defined functions
-          o function name, file name and line indications
-          o support for member functions
-    * memory allocation
-    * protection for infinite recursions
+Step Debugging
+    A way to step through your code in your IDE or editor while the script is
+    executing.
 
-Xdebug also provides:
+Improvements to PHP's error reporting
+    An improved var_dump() function, stack traces for Notices, Warnings, Errors
+    and Exceptions to highlight the code path to the error
 
-    * profiling information for PHP scripts
-    * code coverage analysis
-    * capabilities to debug your scripts interactively with a debug client
-  
+Tracing
+    Writes every function call, with arguments and invocation location to disk.
+    Optionally also includes every variable assignment and return value for
+    each function.
+
+Profiling
+    Allows you, with the help of visualisation tools, to analyse the
+    performance of your PHP application and find bottlenecks.
+
+Code Coverage Analysis
+    To show which parts of your code base are executed when running unit tests
+    with PHP Unit.
  </description>
  <lead>
   <name>Derick Rethans</name>
@@ -33,18 +40,2080 @@ Xdebug also provides:
   <active>yes</active>
  </lead>
 
- <date>2015-02-22</date>
- <time>14:48:00</time>
+ <date>2022-06-06</date>
+ <time>16:30:05</time>
  <version>
-  <release>2.3.0</release>
-  <api>2.3.0</api>
+  <release>3.1.5</release>
+  <api>3.1.5</api>
  </version>
  <stability>
   <release>stable</release>
   <api>stable</api>
  </stability>
- <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+ <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
+Mon, Jun 06, 2022 - Xdebug 3.1.5
+
+= Fixed bugs:
+
+  - Fixed issue #2056: Install documentation gives wrong arch for installation on M1 Macs
+  - Fixed issue #2082: phpize --clean removes required clocks.m4 file
+  - Fixed issue #2083: Constant defined with an enum case produce double &quot;facet&quot; attribute in context_get response
+  - Fixed issue #2085: Crash when used with source guardian encoded files
+  - Fixed issue #2090: Segfault in __callStatic() after FFI initialization
+
+ </notes>
+
+ <contents>
+  <dir name="/">
+   <dir name="contrib">
+    <file name="tracefile-analyser.php" role="doc" />
+    <file name="xt.vim" role="doc" />
+   </dir> <!-- /contrib -->
+
+   <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="LICENSE" role="doc" />
+   <file name="xdebug.ini" role="doc" />
+   <file name="Makefile.frag" role="src" />
+   <file name="CONTRIBUTING.rst" role="doc" />
+   <file name="README.rst" role="doc" />
+   <file name="run-xdebug-tests.php" role="src" />
+
+   <file name="xdebug.c" role="src" />
+   <file name="php_xdebug.h" role="src" />
+   <file name="php_xdebug_arginfo.h" role="src" />
+   <dir name="m4">
+    <file name="clocks.m4" role="src" />
+    <file name="pkg.m4" role="src" />
+   </dir>
+   <dir name="src">
+    <dir name="base">
+     <file name="base.c" role="src" />
+     <file name="base.h" role="src" />
+     <file name="base_globals.h" role="src" />
+     <file name="base_private.h" role="src" />
+     <file name="filter.c" role="src" />
+     <file name="filter.h" role="src" />
+    </dir>
+    <dir name="lib">
+     <file name="usefulstuff.c" role="src" />
+     <file name="usefulstuff.h" role="src" />
+     <file name="compat.c" role="src" />
+     <file name="compat.h" role="src" />
+     <file name="crc32.c" role="src" />
+     <file name="crc32.h" role="src" />
+     <file name="file.c" role="src" />
+     <file name="file.h" role="src" />
+     <file name="hash.c" role="src" />
+     <file name="hash.h" role="src" />
+     <file name="headers.c" role="src" />
+     <file name="headers.h" role="src" />
+     <file name="lib.c" role="src" />
+     <file name="lib.h" role="src" />
+     <file name="log.c" role="src" />
+     <file name="log.h" role="src" />
+     <file name="lib_private.h" role="src" />
+     <file name="llist.c" role="src" />
+     <file name="llist.h" role="src" />
+     <file name="mm.h" role="src" />
+     <file name="php-header.h" role="src" />
+     <file name="set.c" role="src" />
+     <file name="set.h" role="src" />
+     <file name="str.c" role="src" />
+     <file name="str.h" role="src" />
+     <file name="timing.c" role="src" />
+     <file name="timing.h" role="src" />
+     <file name="var.c" role="src" />
+     <file name="var.h" role="src" />
+     <file name="var_export_html.c" role="src" />
+     <file name="var_export_html.h" role="src" />
+     <file name="var_export_line.c" role="src" />
+     <file name="var_export_line.h" role="src" />
+     <file name="var_export_text.c" role="src" />
+     <file name="var_export_text.h" role="src" />
+     <file name="var_export_xml.c" role="src" />
+     <file name="var_export_xml.h" role="src" />
+     <file name="vector.h" role="src" />
+     <file name="xml.c" role="src" />
+     <file name="xml.h" role="src" />
+    </dir>
+    <dir name="coverage">
+     <file name="branch_info.c" role="src" />
+     <file name="branch_info.h" role="src" />
+     <file name="code_coverage.c" role="src" />
+     <file name="code_coverage.h" role="src" />
+     <file name="code_coverage_private.h" role="src" />
+    </dir>
+    <dir name="develop">
+     <file name="develop.c" role="src" />
+     <file name="develop.h" role="src" />
+     <file name="develop_private.h" role="src" />
+     <file name="monitor.c" role="src" />
+     <file name="monitor.h" role="src" />
+     <file name="php_functions.c" role="src" />
+     <file name="stack.c" role="src" />
+     <file name="stack.h" role="src" />
+     <file name="superglobals.c" role="src" />
+     <file name="superglobals.h" role="src" />
+    </dir>
+    <dir name="debugger">
+     <file name="com.c" role="src" />
+     <file name="com.h" role="src" />
+     <file name="debugger.c" role="src" />
+     <file name="debugger.h" role="src" />
+     <file name="debugger_private.h" role="src" />
+     <file name="handlers.c" role="src" />
+     <file name="handlers.h" role="src" />
+     <file name="handler_dbgp.c" role="src" />
+     <file name="handler_dbgp.h" role="src" />
+     <file name="ip_info.c" role="src" />
+     <file name="ip_info.h" role="src" />
+    </dir>
+    <dir name="gcstats">
+     <file name="gc_stats.c" role="src" />
+     <file name="gc_stats.h" role="src" />
+     <file name="gc_stats_private.h" role="src" />
+    </dir>
+    <dir name="profiler">
+     <file name="profiler.c" role="src" />
+     <file name="profiler.h" role="src" />
+     <file name="profiler_private.h" role="src" />
+    </dir>
+    <dir name="tracing">
+     <file name="tracing.c" role="src" />
+     <file name="tracing.h" role="src" />
+     <file name="tracing_private.h" role="src" />
+     <file name="trace_textual.c" role="src" />
+     <file name="trace_textual.h" role="src" />
+     <file name="trace_computerized.c" role="src" />
+     <file name="trace_computerized.h" role="src" />
+     <file name="trace_html.c" role="src" />
+     <file name="trace_html.h" role="src" />
+    </dir>
+   </dir>
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>8.0.0</min>
+    <max>8.2.99</max>
+   </php>
+   <pearinstaller>
+    <min>1.9.1</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>xdebug</providesextension>
+ <zendextsrcrelease />
+ <changelog>
+ 
+  <release>
+   <date>2022-04-04</date>
+   <time>11:33:07</time>
+   <version>
+    <release>3.1.4</release>
+    <api>3.1.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Apr 04, 2022 - Xdebug 3.1.4
+
+= Fixed bugs:
+
+  - Fixed issue #2006: Removing second call breakpoint with same function name
+  - Fixed issue #2060: XDebug breaks the Symfony &quot;PhpFilesAdapter&quot; cache adapter
+  - Fixed issue #2061: Possible use after free with GC Stats
+  - Fixed issue #2063: Can't inspect ArrayObject storage elements
+  - Fixed issue #2064: Segmentation fault in symfony cache
+  - Fixed issue #2068: Debug session can be started with &quot;XDEBUG_SESSION_START=anything&quot; when xdebug.trigger_value is set
+  - Fixed issue #2069: Warn when profiler_append is used together with zlib compression
+  - Fixed issue #2075: Code coverage misses static array assignment lines
+   </notes>
+  </release>
+
+  <release>
+   <date>2022-02-01</date>
+   <time>16:29:04</time>
+   <version>
+    <release>3.1.3</release>
+    <api>3.1.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Feb 01, 2022 - Xdebug 3.1.3
+
+= Fixed bugs:
+
+  - Fixed issue #2049: evaling broken code (still) causes unhandled exception in PHP 7.4
+  - Fixed issue #2052: Memory leak when a trace file can't be opened because xdebug.trace_output_name is invalid
+  - Fixed issue #2054: Slowdown when calling a function with long string parameters
+  - Fixed issue #2055: Debugger creates XML with double facet attribute
+
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-12-01</date>
+   <time>15:41:13</time>
+   <version>
+    <release>3.1.2</release>
+    <api>3.1.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Dec 01, 2021 - Xdebug 3.1.2
+
+= Fixed bugs:
+
+  - Fixed issue #2036: Segfault on fiber switch in finally block in garbage collected fiber
+  - Fixed issue #2037: Crash when profile file can not be created
+  - Fixed issue #2041: __debugInfo is not used for var_dump output
+  - Fixed issue #2046: Segault on xdebug_get_function_stack inside a Fiber
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-10-15</date>
+   <time>13:19:59</time>
+   <version>
+    <release>3.1.1</release>
+    <api>3.1.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Oct 15, 2021 - Xdebug 3.1.1
+
+= Fixed bugs:
+
+  - Fixed issue #2016: apache gives no output with xdebug 3.1.0b2 installed
+  - Fixed issue #2024: Apache restarts in a loop under PHP 8.1.0 RC3
+  - Fixed issue #2029: incorrect and inaccurate date and time displayed in xdebug.log and trace files
+  - Fixed issue #2030: PhpStorm step-debug not working on PHP 8.0.11
+  - Fixed issue #2032: Use runtime PHP version in DBGp and info pages instead of compiled-against version
+  - Fixed issue #2034: Xdebug throws a Segmentation fault when 'set_time_limit' function is disabled
+  - Fixed issue #2035: Xdebug block everything with localhost in XAMMP
+
+   </notes>
+  </release>
+ 
+  <release>
+   <date>2021-10-04</date>
+   <time>09:33:42</time>
+   <version>
+    <release>3.1.0</release>
+    <api>3.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Oct 04, 2021 - Xdebug 3.1.0
+
+= Fixed bugs:
+
+  - Fixed issue #1472: Add assignments to computer readable trace format
+  - Fixed issue #1537: Add links to documentation to various different &quot;features&quot; after wizard has run
+  - Fixed issue #1738: Add xdebug_notify() function to send data through DBGp to a debugging client
+  - Fixed issue #1853: Enable profile compression for cachegrind files
+  - Fixed issue #1890: Add connected client and protocol features to diagnostic page
+  - Fixed issue #1898: API for querying the currently active mode(s)
+  - Fixed issue #1933: Allow for cloud ID to be set through the trigger
+  - Fixed issue #1938: Branches in traits aren’t marked as executed
+  - Fixed issue #1948: Do not redirect warning and error messages to PHP's error log if an Xdebug log is active
+  - Fixed issue #1949: private properties for internal classes can't be fetched for debugging
+  - Fixed issue #1963: php exit code = -1073741819 when xdebug.mode = off (Windows Thread Safe Only)
+  - Fixed issue #1969: Provide breakpoint ID / info in DBGp run command responses
+  - Fixed issue #1970: xdebug_get_function_stack with unnamed (internal) parameters have wrong index
+  - Fixed issue #1972: Add support for PHP 8.1 Fibers
+  - Fixed issue #1974: Add gzip support to trace files
+  - Fixed issue #1976: Switch debug session cookie to Lax, and remove expiry time
+  - Fixed issue #1978: Xdebug's log messages are cut off at 512 bytes
+  - Fixed issue #1980: PHP 8.1: Mark enum classes as &quot;enum&quot;
+  - Fixed issue #1986: Add support for multiple trigger values
+  - Fixed issue #1989: Profiling does not output correct class when parent keyword is used
+  - Fixed issue #1992: Code Coverage with filter produces Segmentation fault on xdebug_stop_code_coverage()
+  - Fixed issue #1993: eval-ing broken code causes stepping to break
+  - Fixed issue #1996: Add support for Closure visualisation in traces, debugging, and Xdebug's var_dump
+  - Fixed issue #1997: Added xdebug_connect_to_client() to attempt a debugging connect while running code
+  - Fixed issue #1998: Double facet attribute generated for enums that are stored in properties
+  - Fixed issue #1999: Add &quot;readonly&quot; facet to PHP 8.1 readonly properties
+  - Fixed issue #2001: Add 'xdebug.use_compression' setting to turn on/off compression for profiling files
+  - Fixed issue #2004: Figure out what &quot;XDEBUG_SHOW_FNAME_TODO&quot; define is for
+  - Fixed issue #2007: xdebug 3.x fails to build on OS X 10.11 or earlier due to clock_gettime_nsec_np requirement
+  - Fixed issue #2008: Using the XDEBUG_SESSION cookie could bypass shared-secret checks
+  - Fixed issue #2009: xdebug_stop_code_coverage's argument has type mismatch
+  - Fixed issue #2011: Closures as protected properties have double facet XML attribute
+  - Fixed issue #2013: Support PHP 8.1
+  - Fixed issue #2018: zlib compression support on Windows
+  - Fixed issue #2019: Xdebug crash because of uninitialized memory
+  - Fixed issue #2020: segfault if xdebug.dump.GET=* and integer key without value in URL
+  - Fixed issue #2021: Segmentation fault due to NULL bytes in internal anonymous class names
+  - Fixed issue #2025: Anonymous classes which extend are not detected as anonymous classes since PHP 8.0
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-09-07</date>
+   <time>13:53:49</time>
+   <version>
+    <release>3.1.0beta2</release>
+    <api>3.1.0beta2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Sep 07, 2021 - Xdebug 3.1.0beta2
+
+= Fixed bugs:
+  - This is a packaging fix only release. The package missed a file that were needed
+    for building on PHP 7.2 and 8.1.
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-09-05</date>
+   <time>16:22:41</time>
+   <version>
+    <release>3.1.0beta1</release>
+    <api>3.1.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Sep 05, 2021 - Xdebug 3.1.0beta1
+
++ New features:
+  
+  - Fixed issue #1738: Add xdebug_notify() function to send data through DBGp to a debugging client
+  - Fixed issue #1853: Enable profile compression for cachegrind files
+  - Fixed issue #1898: API for querying the currently active mode(s)
+  - Fixed issue #1972: Add support for PHP 8.1 Fibers
+  - Fixed issue #1974: Add gzip support to trace files
+  - Fixed issue #1997: Added xdebug_connect_to_client() to attempt a debugging connect while running code
+  - Fixed issue #2001: Add 'xdebug.use_compression' setting to turn on/off compression for profiling files
+  - Fixed issue #2013: Support PHP 8.1
+
++ Improvements:
+
+  - Fixed issue #1472: Add assignments to computer readable trace format
+  - Fixed issue #1890: Add connected client and protocol features to diagnostic page
+  - Fixed issue #1933: Allow for cloud ID to be set through the trigger
+  - Fixed issue #1969: Provide breakpoint ID / info in DBGp run command responses
+  - Fixed issue #1976: Switch debug session cookie to Lax, and remove expiry time
+  - Fixed issue #1980: PHP 8.1: Mark enum classes as &quot;enum&quot;
+  - Fixed issue #1986: Add support for multiple trigger values
+  - Fixed issue #1996: Add support for Closure visualisation in traces, debugging, and Xdebug's var_dump
+  - Fixed issue #1999: Add &quot;readonly&quot; facet to PHP 8.1 readonly properties
+
+= Fixed bugs:
+
+  - Fixed issue #1938: Branches in traits aren’t marked as executed
+  - Fixed issue #1948: Do not redirect warning and error messages to PHP's error log if an Xdebug log is active
+  - Fixed issue #1949: private properties for internal classes can't be fetched for debugging
+  - Fixed issue #1963: php exit code = -1073741819 when xdebug.mode = off (Windows Thread Safe Only)
+  - Fixed issue #1970: xdebug_get_function_stack with unnamed (internal) parameters have wrong index
+  - Fixed issue #1978: Xdebug's log messages are cut off at 512 bytes
+  - Fixed issue #1989: Profiling does not output correct class when parent keyword is used
+  - Fixed issue #1992: Code Coverage with filter produces Segmentation fault on xdebug_stop_code_coverage()
+  - Fixed issue #1993: eval-ing broken code causes stepping to break
+  - Fixed issue #1998: Double facet attribute generated for enums that are stored in properties
+  - Fixed issue #2004: Figure out what &quot;XDEBUG_SHOW_FNAME_TODO&quot; define is for
+  - Fixed issue #2008: Using the XDEBUG_SESSION cookie could bypass shared-secret checks
+  - Fixed issue #2009: xdebug_stop_code_coverage's argument has type mismatch
+  - Fixed issue #2011: Closures as protected properties have double facet XML attribute
+
++ Documentation
+  
+  - Fixed issue #1537: Add links to documentation to various different &quot;features&quot; after wizard has run
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-04-08</date>
+   <time>10:32:42</time>
+   <version>
+    <release>3.0.4</release>
+    <api>3.0.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Apr 08, 2021 - Xdebug 3.0.4
+
+= Fixed bugs:
+
+  - Fixed issue #1802: Improve xdebug.org home page
+  - Fixed issue #1944: tracing is started without trigger, when profiler is also enabled
+  - Fixed issue #1947: xdebug_info() settings section does not show the modes that are overridden by XDEBUG_MODE
+  - Fixed issue #1950: Assignment trace with ASSIGN_OBJ_REF crashes
+  - Fixed issue #1954: Calling xdebug_start_trace without mode including tracing results in a fatal error
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-02-22</date>
+   <time>10:53:09</time>
+   <version>
+    <release>3.0.3</release>
+    <api>3.0.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Feb 22, 2021 - Xdebug 3.0.3
+
+= Fixed bugs:
+
+  - Fixed issue #1930: No local variables with trigger and xdebug_break()
+  - Fixed issue #1931: xdebug_info() output misses configuration settings if phpinfo() has been called
+  - Fixed issue #1932: One line in multi-line string concatenation is not covered
+  - Fixed issue #1940: Wrong type used for showing GC Stats reports
+   </notes>
+  </release>
+
+  <release>
+   <date>2021-01-04</date>
+   <time>17:08:58</time>
+   <version>
+    <release>3.0.2</release>
+    <api>3.0.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 04, 2021 - Xdebug 3.0.2
+
+= Fixed bugs:
+
+  - Fixed issue #1907: Empty exception message when setting the $message property to a stringable object
+  - Fixed issue #1910: Code coverage misses constructor property promotion code
+  - Fixed issue #1914: Compillation failure on OpenBSD
+  - Fixed issue #1915: Debugger should only start with XDEBUG_SESSION and not XDEBUG_PROFILE
+  - Fixed issue #1918: Warn if PHP's Garbage Collection is disabled in gc_stats mode
+  - Fixed issue #1919: Crash when enabling filter without the right mode active
+  - Fixed issue #1921: Xdebug does not start step debugging if start_with_request=trigger
+  - Fixed issue #1922: Code coverage misses array assignment lines
+  - Fixed issue #1924: Deprecated INI settings displayed in phpinfo()
+  - Fixed issue #1925: xdebug.start_with_request and start_upon_error display inconsistent values
+  - Fixed issue #1926: Add Xdebug mode's source to xdebug_info() output
+  - Fixed issue #1927: Crash when calling xdebug_stop_trace without a trace in progress
+  - Fixed issue #1928: xdebug_stop_gcstats() can also return false
+
+   </notes>
+  </release>
+ 
+  <release>
+   <date>2020-12-04</date>
+   <time>15:53:10</time>
+   <version>
+    <release>3.0.1</release>
+    <api>3.0.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Dec  4, 2020 - xdebug 3.0.1
+
+= Fixed bugs:
+
+  - Fixed issue #1893: Crash with ext-fiber and xdebug.mode=coverage
+  - Fixed issue #1896: Segfault with closures that are not created from user code
+  - Fixed issue #1897: Crash when removing a breakpoint
+  - Fixed issue #1900: Update README and add run-xdebug-tests.php to package
+  - Fixed issue #1901: Stack traces are shown (with a broken time) when Xdebug's mode includes 'debug' but not 'develop' or 'trace'
+  - Fixed issue #1902: Compillation failure on AIX
+  - Fixed issue #1903: Constants should always be available, regardless of which mode Xdebug is in
+  - Fixed issue #1904: Profile and trace files using %t or %u do not get the right names
+  - Fixed issue #1905: Debugger does not disable request timeouts
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-11-25</date>
+   <time>16:00:00</time>
+   <version>
+    <release>3.0.0</release>
+    <api>3.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Nov 25, 2020 - xdebug 3.0.0
+
+Xdebug 3 includes major changes in functionality compared to Xdebug 2. The
+primary way how you turn on functionality is through the new xdebug.mode PHP
+configuration setting. This made it possible to massively increase performance
+in many of Xdebug's sub systems as Xdebug is now much more conservative in
+which hooks are enabled.
+
+Configuration changes, massive performance improvements, and PHP 8 support are
+the primary features in Xdebug 3, but there is much more. The upgrade guide
+lists the changes in great detail, please read it:
+
+https://xdebug.org/docs/upgrade_guide
+
+-------------
+
++ New features:
+
+  - Implemented issue #1762: Introduce feature modes
+  - Implemented issue #1793: Add xdebug.start_upon_error setting to cover the removed xdebug.remote_mode=jit feature.
+  - Implemented issue #1797: Implement generic logging
+  - Implemented issue #1801: Rename mode 'display' to mode 'develop'
+  - Implemented issue #1831: Add diagnostics function xdebug_info()
+  - Implemented issue #1833: Add links to documentation in diagnostic log
+  - Implemented issue #1837: Support for associative variadic variable names (PHP 8)
+  - Implemented issue #1841: Add support for PHP 8 'match' keyword
+
++ Improvements:
+
+  - Implemented issue #1680: Update var dumping routines to include relevant information for interned strings and immutable arrays
+  - Implemented issue #1712: Add unit to profiler data types
+  - Implemented issue #1743: Figuring out whether a call is a closure uses string comparisions instead of checking the ACC flag (Benjamin Eberlei)
+  - Implemented issue #1752: Use a stack pool to manage stack entries instead of allocating and deallocating entries
+  - Implemented issue #1755: Overload pcntl_fork() to prevent performance degradation by calling xdebug_get_pid often (Carlos Granados)
+  - Implemented issue #1781: Include 'Xdebug' in max nesting level error message
+  - Implemented issue #1783: Stacktrace needs vertical scrolling on small screens (Tobias Tom)
+  - Implemented issue #1789: Provide PHP stubs for Xdebug's functions
+  - Implemented issue #1807: Document Xdebug installation with yum and apt
+  - Implemented issue #1813: Make sure that the xdebug_init_*_globals don't do more than they need to, and that init is only done when xdebug.mode != off
+  - Implemented issue #1817: Switch filename storage from char*/size_t to zend_string*
+  - Implemented issue #1818: Switch variable storage from char*/size_t to zend_string*
+  - Implemented issue #1820: Increase time tracing precision (Michael Voříšek)
+  - Implemented issue #1824: Allow Xdebug's mode to be set through an environment variable
+  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Voříšek)
+  - Implemented issue #1826: Reduce profiler memory allocation and call overhead
+  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Voříšek)
+  - Implemented issue #1832: If connect back host can not be contacted, fallback to remote_host/port
+  - Implemented issue #1858: Only open/close log if there is an actual message to log
+  - Implemented issue #1860: Allow xdebug.cloud_id to be set through an environment variable
+  - Implemented issue #1814: Don't obtain the current time when it's not needed
+  - Implemented issue #1835: Add current trace and profile file name, to diagnostic page
+  - Implemented issue #1885: Change xdebug.start_with_ settings to PHP_INI_SYSTEM|PHP_INI_PERDIR
+  - Implemented issue #1889: max_nesting_level should only trigger in "develop" mode
+
+- Removed features:
+
+  - Implemented issue #1795: Deprecate PHP 7.1 support
+
+  - Implemented issue #1786: Remove idekey value fallback to USER/USERNAME environment variable
+  - Implemented issue #1809: Remove "overload_var_dump" setting
+  - Implemented issue #1810: Remove collect_vars and xdebug_get_declared_vars()
+  - Implemented issue #1812: Remove show_mem_delta setting
+  - Implemented issue #1838: Remove collect_params setting, and always default it to "4"
+  - Implemented issue #1847: Remove xdebug.remote_cookie_expire_time setting
+  - Implemented issue #1016: Removed support for pause-execution (introduced in beta1)
+  - Implemented issue #1868: Remove xdebug_disable and xdebug_enabled
+  - Implemented issue #1883: Function xdebug_is_enabled has been removed
+
+= Changes:
+
+  - Implemented issue #1378: Unfortunate coupling of default_enable=1 and remote_mode=jit
+  - Implemented issue #1773: Replace all xdebug.*_output_dir settings with xdebug.output_dir
+  - Implemented issue #1785: Replace xdebug.remote_mode and xdebug.auto_trace with generic "start-with-request" setting
+  - Implemented issue #1791: Replace xdebug.*trigger*, xdebug.*trigger_value*, with xdebug.start_with_request=trigger and xdebug.trigger_value
+  - Implemented issue #1792: Change start_with_request=always/never to start_with_request=yes/no
+  - Implemented issue #1794: Replace the filter's blacklist/whitelist with exclude/include
+  - Implemented issue #1811: Remove xdebug.collect_includes setting and always include them
+  - Implemented issue #1843: Adjust XDEBUG_CONFIG checks, and document what can be set through it
+  - Implemented issue #1844: Add deprecation warning for removed and renamed configuration setting names
+  - Implemented issue #1845: Rename xdebug.remote_{host,port} to xdebug.client_{host,port}
+  - Implemented issue #1846: Rename setting xdebug.remote_timeout to xdebug.connect_timeout_ms
+  - Implemented issue #1848: Change default Xdebug port from 9000 to 9003
+  - Implemented issue #1850: Change array variable output in tracing to use modern [] syntax
+  - Implemented issue #1856: Rename xdebug.remote_connect_back to xdebug.discover_client_host
+  - Implemented issue #1857: Rename xdebug.remote_addr_header to xdebug.client_discovery_header
+
+= Fixed bugs:
+
+  - Fixed issue #1608: XDEBUG_CONFIG env var make sessions automatically START ever (at least send the XDEBUG_SESSION cookie)
+  - Fixed issue #1726: Memory leaks spotted in various places in typical error code paths
+  - Fixed issue #1757: Pause-execution feature degrades performance
+  - Fixed issue #1864: Incompatibility with PCS and protobuf extensions
+  - Fixed issue #1870: XDEBUG_SESSION_START URL parameter does not override XDEBUG_SESSION cookie
+  - Fixed issue #1871: The "idekey" is not set when debugging is started through XDEBUG_SESSION cookie
+  - Fixed issue #1873: xdebug_info() segfaults if the diagnostic buffer is empty
+  - Fixed issue #1874: Incompatibility with protobuf extension
+  - Fixed issue #1875: Overflow with large amounts of elements for variadics
+  - Fixed issue #1878: Compilation failure: Socket options TCP_KEEPCNT and TCP_KEEPINTVL do not exist on Solaris 10 Sparc
+  - Fixed issue #1880: Bundled unit test tests/debugger/bug00886.phar misses to load phar extension
+  - Fixed issue #1887: Crash bug with xdebug_call_class and xdebug_call_file
+  - Fixed issue #1756: Php process won't exit after running connected to a client
+  - Fixed issue #1823: Profiler generates negative data for memory usage
+  - Fixed issue #1834: Return type must be bool in overloaded set_time_limit
+  - Fixed issue #1888: Make headers sticky in xdebug_info() output
+
++ Documentation
+
+  - Fixed issue #1865: Document XDEBUG_TRIGGER environment variable
+  - Fixed issue #1866: Document comma separated xdebug.mode values
+  - Fixed issue #1884: Document where Xdebug's settings can be set
+  - Fixed issue #1892: Document changed/removed ini settings in the upgrade guide with the links provided
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-11-16</date>
+   <time>10:08:58</time>
+   <version>
+    <release>3.0.0RC1</release>
+    <api>3.0.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Nov 16, 2020 - xdebug 3.0.0RC1
+
+This is a BETA release, and not ready for production environments.
+
+Xdebug 3 has many changes. Please read the upgrade guide at
+https://3.xdebug.org/docs/upgrade_guide
+
+Xdebug 3 documentation is available at https://3.xdebug.org/docs
+
+-------------
+
++ Improvements:
+
+  - Implemented issue #1814: Don't obtain the current time when it's not needed
+  - Implemented issue #1885: Change xdebug.start_with_ settings to PHP_INI_SYSTEM|PHP_INI_PERDIR
+
+- Removed features:
+
+  - Implemented issue #1016: Removed support for pause-execution (introduced in beta1)
+  - Implemented issue #1868: Remove xdebug_disable and xdebug_enabled
+  - Implemented issue #1883: Function xdebug_is_enabled has been removed
+
+= Fixed bugs:
+
+  - Fixed issue #1608: XDEBUG_CONFIG env var make sessions automatically START ever (at least send the XDEBUG_SESSION cookie)
+  - Fixed issue #1757: Pause-execution feature degrades performance
+  - Fixed issue #1864: Incompatibility with PCS and protobuf extensions
+  - Fixed issue #1870: XDEBUG_SESSION_START URL parameter does not override XDEBUG_SESSION cookie
+  - Fixed issue #1871: The "idekey" is not set when debugging is started through XDEBUG_SESSION cookie
+  - Fixed issue #1873: xdebug_info() segfaults if the diagnostic buffer is empty
+  - Fixed issue #1874: Incompatibility with protobuf extension
+  - Fixed issue #1875: Overflow with large amounts of elements for variadics
+  - Fixed issue #1878: Compilation failure: Socket options TCP_KEEPCNT and TCP_KEEPINTVL do not exist on Solaris 10 Sparc
+  - Fixed issue #1880: Bundled unit test tests/debugger/bug00886.phar misses to load phar extension
+  - Fixed issue #1887: Crash bug with xdebug_call_class and xdebug_call_file
+
++ Documentation
+
+  - Fixed issue #1865: Document XDEBUG_TRIGGER environment variable
+  - Fixed issue #1866: Document comma separated xdebug.mode values
+  - Fixed issue #1884: Document where Xdebug's settings can be set
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-10-14</date>
+   <time>16:08:58</time>
+   <version>
+    <release>3.0.0beta1</release>
+    <api>3.0.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Oct 14, 2020 - xdebug 3.0.0beta1
+
+This is a BETA release, and not ready for production environments.
+
+Xdebug 3 has many changes. Please read the upgrade guide at
+https://3.xdebug.org/docs/upgrade_guide
+
+Xdebug 3 documentation is available at https://3.xdebug.org/docs
+
+-------------
+
++ New features:
+
+  - Implemented issue #1762: Introduce feature modes
+  - Implemented issue #1793: Add xdebug.start_upon_error setting to cover the removed xdebug.remote_mode=jit feature.
+  - Implemented issue #1797: Implement generic logging
+  - Implemented issue #1801: Rename mode 'display' to mode 'develop'
+  - Implemented issue #1831: Add diagnostics function xdebug_info()
+  - Implemented issue #1833: Add links to documentation in diagnostic log
+  - Implemented issue #1837: Support for associative variadic variable names (PHP 8)
+  - Implemented issue #1841: Add support for PHP 8 'match' keyword
+
+- Removed features:
+
+  - Implemented issue #1795: Deprecate PHP 7.1 support
+
+  - Implemented issue #1786: Remove idekey value fallback to USER/USERNAME environment variable
+  - Implemented issue #1809: Remove "overload_var_dump" setting
+  - Implemented issue #1810: Remove collect_vars and xdebug_get_declared_vars()
+  - Implemented issue #1812: Remove show_mem_delta setting
+  - Implemented issue #1838: Remove collect_params setting, and always default it to "4"
+  - Implemented issue #1847: Remove xdebug.remote_cookie_expire_time setting
+
+= Changes:
+
+  - Implemented issue #1378: Unfortunate coupling of default_enable=1 and remote_mode=jit
+  - Implemented issue #1773: Replace all xdebug.*_output_dir settings with xdebug.output_dir
+  - Implemented issue #1785: Replace xdebug.remote_mode and xdebug.auto_trace with generic "start-with-request" setting
+  - Implemented issue #1791: Replace xdebug.*trigger*, xdebug.*trigger_value*, with xdebug.start_with_request=trigger and xdebug.trigger_value
+  - Implemented issue #1792: Change start_with_request=always/never to start_with_request=yes/no
+  - Implemented issue #1794: Replace the filter's blacklist/whitelist with exclude/include
+  - Implemented issue #1811: Remove xdebug.collect_includes setting and always include them
+  - Implemented issue #1844: Add deprecation warning for removed and renamed configuration setting names
+  - Implemented issue #1845: Rename xdebug.remote_{host,port} to xdebug.client_{host,port}
+  - Implemented issue #1846: Rename setting xdebug.remote_timeout to xdebug.connect_timeout_ms
+  - Implemented issue #1848: Change default Xdebug port from 9000 to 9003
+  - Implemented issue #1850: Change array variable output in tracing to use modern [] syntax
+  - Implemented issue #1856: Rename xdebug.remote_connect_back to xdebug.discover_client_host
+  - Implemented issue #1857: Rename xdebug.remote_addr_header to xdebug.client_discovery_header
+
++ Improvements:
+
+  - Implemented issue #1680: Update var dumping routines to include relevant information for interned strings and immutable arrays
+  - Implemented issue #1712: Add unit to profiler data types
+  - Implemented issue #1743: Figuring out whether a call is a closure uses string comparisions instead of checking the ACC flag (Benjamin Eberlei)
+  - Implemented issue #1752: Use a stack pool to manage stack entries instead of allocating and deallocating entries
+  - Implemented issue #1755: Overload pcntl_fork() to prevent performance degradation by calling xdebug_get_pid often (Carlos Granados)
+  - Implemented issue #1781: Include 'Xdebug' in max nesting level error message
+  - Implemented issue #1783: Stacktrace needs vertical scrolling on small screens (Tobias Tom)
+  - Implemented issue #1789: Provide PHP stubs for Xdebug's functions
+  - Implemented issue #1807: Document Xdebug installation with yum and apt
+  - Implemented issue #1813: Make sure that the xdebug_init_*_globals don't do more than they need to, and that init is only done when xdebug.mode != off
+  - Implemented issue #1817: Switch filename storage from char*/size_t to zend_string*
+  - Implemented issue #1818: Switch variable storage from char*/size_t to zend_string*
+  - Implemented issue #1820: Increase time tracing precision (Michael Voříšek)
+  - Implemented issue #1824: Allow Xdebug's mode to be set through an environment variable
+  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Voříšek)
+  - Implemented issue #1826: Reduce profiler memory allocation and call overhead
+  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Voříšek)
+  - Implemented issue #1832: If connect back host can not be contacted, fallback to remote_host/port
+  - Implemented issue #1858: Only open/close log if there is an actual message to log
+  - Implemented issue #1860: Allow xdebug.cloud_id to be set through an environment variable
+
+= Fixed bugs:
+
+  - Fixed issue #1756: Php process won't exit after running connected to a client
+  - Fixed issue #1823: Profiler generates negative data for memory usage
+  - Fixed issue #1834: Return type must be bool in overloaded set_time_limit
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-09-28</date>
+   <time>11:21:33</time>
+   <version>
+    <release>2.9.8</release>
+    <api>2.9.8</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Sep 28, 2020 - xdebug 2.9.8
+
+= Fixed bugs:
+
+  - Fixed issue #1851: Paths are not counted as coveraged with loops calling function
+  - Fixed issue #1855: Build issues on FreeBSD
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-09-16</date>
+   <time>15:11:45</time>
+   <version>
+    <release>2.9.7</release>
+    <api>2.9.7</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Sep 16, 2020 - xdebug 2.9.7
+
+= Fixed bugs:
+
+  - Fixed issue #1839: Add keepalive options to debugging socket
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-05-29</date>
+   <time>11:43:03</time>
+   <version>
+    <release>2.9.6</release>
+    <api>2.9.6</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, May 29, 2020 - xdebug 2.9.6
+
+= Fixed bugs:
+
+  - Fixed issue #1782: Cookie "XDEBUG_SESSION" will be soon rejected because it has the “sameSite” attribute set to none
+  - Fixed issue #1787: Branch coverage data does not always follow the lines/functions format
+  - Fixed issue #1790: Segfault in var_dump() or while debugging with protobuf extension
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-04-25</date>
+   <time>14:56:10</time>
+   <version>
+    <release>2.9.5</release>
+    <api>2.9.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Apr 25, 2020 - xdebug 2.9.5
+
+= Fixed bugs:
+
+  - Fixed issue #1772: Crash with exception thrown inside a destructor
+  - Fixed issue #1775: Segfault when another extension compiles a PHP file during RINIT
+  - Fixed issue #1779: Nested multi-line built-in function in namespace are not covered
+   </notes>
+ </release>
+
+ <release>
+   <date>2020-03-23</date>
+   <time>11:12:20</time>
+   <version>
+    <release>2.9.4</release>
+    <api>2.9.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Mar 23, 2020 - xdebug 2.9.4
+
+= Fixed bugs:
+
+  - Fixed issue #1763: Crash while setting opcode overrides in ZTS mode.
+  - Fixed issue #1766: Using the DBGp detach command disables remote debugging for the whole process.
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-03-13</date>
+   <time>16:49:40</time>
+   <version>
+    <release>2.9.3</release>
+    <api>2.9.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Mar 13, 2020 - xdebug 2.9.3
+
+= Fixed bugs:
+
+  - Fixed issue #1753: Resolved breakpoints use information from wrong files
+  - Fixed issue #1758: Xdebug changes error_get_last results inside a try catch
+  - Fixed issue #1759: User registered opcode handlers should call ones already set by other extensions
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-01-31</date>
+   <time>09:47:21</time>
+   <version>
+    <release>2.9.2</release>
+    <api>2.9.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Jan 31, 2020 - xdebug 2.9.2
+
+= Fixed bugs:
+
+  - Fixed issue #1735: DBGp eval warning promoted to Exception can cause out-of-sync responses
+  - Fixed issue #1736: Segmentation fault when other extensions run PHP in RINIT
+  - Fixed issue #1739: Tracing footer not written
+   </notes>
+  </release>
+
+  <release>
+   <date>2020-01-16</date>
+   <time>14:18:51</time>
+   <version>
+    <release>2.9.1</release>
+    <api>2.9.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Jan 16, 2020 - xdebug 2.9.1
+
+= Fixed bugs:
+
+  - Fixed issue #1721: Header may not contain NUL bytes in Unknown on line 0
+  - Fixed issue #1727: Debugger stops more often than expected due to resolving breakpoints
+  - Fixed issue #1728: INIT_STATIC_METHOD_CALL is not overloaded
+  - Fixed issue #1731: var_dump with DateTime does not output properties (Ryan Mauger)
+  - Fixed issue #1733: SEND_VAR_NO_REF_EX opcode, used for require(), is not overloaded
+  - Fixed issue #1734: Segfault with DBGp "source" with a out-of-range start line number
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-12-09</date>
+   <time>10:44:53</time>
+   <version>
+    <release>2.9.0</release>
+    <api>2.9.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Dec  9, 2019 - xdebug 2.9.0
+
++ Improvements:
+
+  - Fixed issue #1723: Class/function pre-analysis for code coverage speed improvements
+
+- Removed features:
+
+  - Fixed issue #1301: Removed aggregated profiler feature
+  - Fixed issue #1720: Remove superfluous xdebug.remote_handler setting
+
+= Fixed bugs:
+
+  - Fixed issue #1722: Build warning issues on FreeBSD
+  - Fixed issue #1724: Missing property types and uninitialised values in variable dumping routines
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-12-02</date>
+   <time>10:46:09</time>
+   <version>
+    <release>2.8.1</release>
+    <api>2.8.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Dec  2, 2019 - xdebug 2.8.1
+
+= Fixed bugs:
+
+  - Fixed issue #1717: Code coverage turned slow after update from 2.7.2 to 2.8.0
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-10-31</date>
+   <time>10:46:09</time>
+   <version>
+    <release>2.8.0</release>
+    <api>2.8.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Oct 31, 2019 - xdebug 2.8.0
+
+= Fixed bugs:
+
+  - Fixed issue #1665: Segfault with garbage collection and complex function arguments
+  - Fixed issue #1699: Crash during debugging Phalcon project
+  - Fixed issue #1705: Crash while debugging with ionCube being used
+  - Fixed issue #1708: Crash on evaluating object with properties
+  - Fixed issue #1709: Wrong data type breaks tests on Big Endian build
+  - Fixed issue #1713: INIT_FCALL is not overloaded in code coverage
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-08-26</date>
+   <time>13:39:39</time>
+   <version>
+    <release>2.8.0beta2</release>
+    <api>2.8.0beta2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Aug 26, 2019 - xdebug 2.8.0beta2
+
+= Fixed bugs:
+
+  - Fixed issue #1540: Code coverage should not run when turned off in php.ini
+  - Fixed issue #1573: Using an exception_handler creates an extra broken profiler file
+  - Fixed issue #1589: function names used in auto_prepend_file missing from profile file
+  - Fixed issue #1613: Wrong name displayed for Recoverable fatal error
+  - Fixed issue #1652: Problems with detach in debugger init stage
+  - Fixed issue #1676: Xdebug doesn't write trace footer for shutdown functions
+  - Fixed issue #1689: Traces show return values and exit information for functions without entry information
+  - Fixed issue #1691: Code Coverage misses fluent interface function call
+  - Fixed issue #1698: Switch PHP 7.4 Windows builds back to VS17
+  - Fixed issue #1700: Xdebug abuses possibilty immutable class flags
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-07-25</date>
+   <time>15:20:11</time>
+   <version>
+    <release>2.8.0beta1</release>
+    <api>2.8.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Jul 25, 2019 - xdebug 2.8.0beta1
+
+= Fixed bugs:
+
+  - Fixed issue #1679: Code Coverage misses static property as function
+    argument
+  - Fixed issue #1682: Invalid NULL byte in debugger XML with anonymous classes
+  - Fixed issue #1683: Xdebug does not compile due to changes to ASSIGN_ADD and
+    friends operations in PHP 7.4alpha3
+  - Fixed issue #1687: Use appropriate process ID for logging and "right
+    process" tracking
+  - Fixed issue #1688: Improve performance by using getpid() only when step
+    debugger is active
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-06-28</date>
+   <time>16:30:00</time>
+   <version>
+    <release>2.8.0alpha1</release>
+    <api>2.8.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, May 28, 2019 - xdebug 2.8.0alpha1
+
++ Added features:
+
+  - Implemented issue #1599: Add support for PHP 7.4
+
++ Improvements:
+
+  - Implemented issue #1388: Support 'resolved' flag for breakpoints
+  - Implemented issue #1664: Run breakpoint resolver when after a new breakpoint is added as well
+
+= Fixed bugs:
+
+  - Fixed issue #1660: Return breakpoints for methods don't break immediately
+
+- Removed features:
+
+  - Fixed issue #1666: Remove xdebug.extended_info setting
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-05-06</date>
+   <time>16:48:57</time>
+   <version>
+    <release>2.7.2</release>
+    <api>2.7.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, May  6, 2019 - xdebug 2.7.2
+
+= Fixed bugs:
+
+  - Fixed issue #1488: Rewrite DBGp 'property_set' to always use eval
+  - Fixed issue #1586: error_reporting()'s return value is incorrect during debugger's 'eval' command
+  - Fixed issue #1615: Turn off Zend OPcache when remote debugger is turned on
+  - Fixed issue #1656: remote_connect_back alters header if multiple values are present
+  - Fixed issue #1662: __debugInfo should not be used for user-defined classes
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-04-05</date>
+   <time>12:05:02</time>
+   <version>
+    <release>2.7.1</release>
+    <api>2.7.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Apr  5, 2019 - xdebug 2.7.1
+
+= Fixed bugs:
+
+  - Fixed issue #1646: Missing newline in error message
+  - Fixed issue #1647: Memory corruption when a conditional breakpoint is used
+  - Fixed issue #1641: Perfomance degradation with getpid syscall (Kees Hoekzema)
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-03-06</date>
+   <time>11:55:24</time>
+   <version>
+    <release>2.7.0</release>
+    <api>2.7.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Mar  6, 2019 - xdebug 2.7.0
+
+= Fixed bugs:
+
+  - Fixed issue #1520: Xdebug does not handle variables and properties with "-" in their name
+  - Fixed issue #1577: Code coverage path analysis with chained catch fails in PHP 7.3
+  - Fixed issue #1639: Compile warning/error on GCC 8 or Clang due to "break intentionally missing"
+  - Fixed issue #1642: Debugger gives: "Warning: Header may not contain NUL bytes"
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-02-15</date>
+   <time>15:29:15</time>
+   <version>
+    <release>2.7.0RC2</release>
+    <api>2.7.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Feb 15, 2019 - xdebug 2.7.0RC2
+
+= Fixed bugs:
+
+  - Fixed issue #1551: Property with value null is not represented well
+  - Fixed issue #1621: Xdebug fails to compile cleanly on 32-bit platforms
+  - Fixed issue #1625: Work around ABI conflicts in PHP 7.3.0/PHP 7.3.1
+  - Fixed issue #1628: The PHP function name being constructed to record when GC Collection runs, is not freed
+  - Fixed issue #1629: SOAP Client/Server detection code does not handle inherited classes
+   </notes>
+  </release>
+
+  <release>
+   <date>2019-02-01</date>
+   <time>18:38:37</time>
+   <version>
+    <release>2.7.0RC1</release>
+    <api>2.7.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Feb  1, 2019 - xdebug 2.7.0RC1
+
+= Fixed bugs:
+
+  - Fixed issue #1571: File/line information is not shown for closures in namespaces.
+  - Fixed issue #1578: Compile error due to redefinition of "zif_handler" with old GCCs.
+  - Fixed issue #1583: Xdebug crashes when OPcache's compact literals optimisation is on.
+  - Fixed issue #1598: Make path/branch coverage work with OPcache loaded for PHP 7.3 and later.
+  - Fixed issue #1620: Division by zero when GC Stats Collection runs with memory manager disabled.
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-09-20</date>
+   <time>08:56:14</time>
+   <version>
+    <release>2.7.0beta1</release>
+    <api>2.7.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Sep 20, 2018 - xdebug 2.7.0beta1
+
++ Improvements:
+
+  - Fixed issue #1519: PHP 7.3 support
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-04-01</date>
+   <time>14:41:14</time>
+   <version>
+    <release>2.7.0alpha1</release>
+    <api>2.7.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Apr  1, 2018 - xdebug 2.7.0alpha1
+
+= Improvements:
+
+  - Fixed issue #938: Support remote debugging for PHP scripts that fork. (Sponsored by Brad Wilson)
+  - Fixed issue #1487: Re-enable IPv6 test on Travis.
+
+= Fixed bugs:
+
+  - Fixed issue #1526: Namespace filter does equality match instead of prefix match.
+  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval().
+  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling.
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-08-01</date>
+   <time>23:39:23</time>
+   <version>
+    <release>2.6.1</release>
+    <api>2.6.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Aug  1, 2018 - xdebug 2.6.1
+
+= Fixed bugs:
+
+  - Fixed issue #1525: Namespace filter does equality match instead of prefix match
+  - Fixed issue #1532: SIGABRT when using remote debugging and an error is thrown in eval() (Philip Hofstetter)
+  - Fixed issue #1543: Various memory leaks due to changes in (internal) string handling
+  - Fixed issue #1556: Crash when register_shutdown_function() is called with a function named call_user_func*
+  - Fixed issue #1557: Remove 'return' in void xdebug_build_fname
+  - Fixed issue #1568: Can't debug object properties that have numeric keys
+
++ Improvements:
+
+  - Fixed issue #1487: Re-enable IPv6 test on Travis
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-01-29</date>
+   <time>20:07:23</time>
+   <version>
+    <release>2.6.0</release>
+    <api>2.6.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 29, 2018 - xdebug 2.6.0
+
+= Fixed bugs:
+
+  - Fixed issue #1522: Remote debugging test failures on s390 (Big Endian).
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-01-23</date>
+   <time>12:53:32</time>
+   <version>
+    <release>2.6.0RC2</release>
+    <api>2.6.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Jan 23, 2018 - xdebug 2.6.0RC2
+
+= Fixed bugs:
+
+  - Fixed issue #1521: xdebug_gc_stats.* missing from 2.6.0RC1 tarball
+   </notes>
+  </release>
+
+  <release>
+   <date>2018-01-22</date>
+   <time>18:19:32</time>
+   <version>
+    <release>2.6.0RC1</release>
+    <api>2.6.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 22, 2018 - xdebug 2.6.0RC1
+
++ Added features:
+
+  - Fixed issue #1506: Add garbage collection statistics feature (Benjamin Eberlei).
+  - Fixed issue #1507: Add functions to access Zend Engine garbage collection metrics (Benjamin Eberlei).
+
++ Improvements:
+
+  - Fixed issue #1510: Change switch/case "break intentionally missing" comments to use GCC 7's new "fallthrough" attribute.
+  - Fixed issue #1511: Detect and use compiler flags through new configure option.
+
+= Fixed bugs:
+
+  - Fixed issue #1335: Debugging with PhpStorm sometimes gives "can not get property".
+  - Fixed issue #1454: Invalid memory read or segfaults from a __call() method.
+  - Fixed issue #1508: Code coverage filter not checked in xdebug_common_assign_dim handler.
+  - Fixed issue #1509: Code coverage missing for case inside switch with PHP 7.2.
+  - Fixed issue #1512: Xdebug does not properly encode and escape properties with quotes and \0 characters.
+  - Fixed issue #1514: Variable names with a NULL char are cut off at NULL char.
+  - Fixed issue #1515: Object property names with a NULL char are cut off at NULL char.
+  - Fixed issue #1516: Can't fetch variables or object properties which have \0 characters in them.
+  - Fixed issue #1517: Notifications incorrectly specify the error type in "type_string" instead of "type".
+   </notes>
+  </release>
+
+  <release>
+   <date>2017-12-28</date>
+   <time>19:18:21</time>
+   <version>
+    <release>2.6.0beta1</release>
+    <api>2.6.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Dec 28, 2017 - xdebug 2.6.0beta1
+
++ Added features:
+
+  - Fixed issue #1059: Add filter capabilities to tracing, stack traces, and code coverage.
+  - Fixed issue #1437: Add X-Profile-File-Name header when a profile file has been generated.
+
++ Improvements:
+
+  - Fixed issue #1493: Run test suite in AppVeyor for Windows CI.
+  - Fixed issue #1498: Use new ZEND_EXTENSION API in config.w32 build scripts. (Kalle)
+
+= Fixed bugs:
+
+  - Fixed issue #702: Check whether variables tracing also works with =&amp;.
+  - Fixed issue #1501: Xdebug var dump tries casting properties.
+  - Fixed issue #1502: SEND_REF lines are not marked as covered.
+
+   </notes>
+  </release>
+
+  <release>
+   <date>2017-12-02</date>
+   <time>18:53:29</time>
+   <version>
+    <release>2.6.0alpha1</release>
+    <api>2.6.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Dec  2, 2017 - xdebug 2.6.0alpha1
+
++ Added features:
+
+  - Implemented issue #474: Added "memory" output to profiling files, to find out where memory is allocated.
+  - Implemented issue #575: Dump super globals contents to error log upon errors, just like when this would happen for stack traces.
+  - Implemented issue #964: Parse X-Forwarded-For for the first IP address when selecting the remote_connect_back host (Steve Easley).
+  - Implemented issue #990: Add DBGp: notifications for notices and warnings to be shown in IDEs.
+  - Implemented issue #1312: Implement extended_properties feature to remote debugging to support names and values with low ASCII values.
+  - Implemented issue #1323: Added xdebug.filename_format setting to configure the formatting of filenames when tracing.
+  - Implemented issue #1379: Added support for Unix domain sockets to xdebug.remote_host (Sara Golemon).
+  - Implemented issue #1380: Added xdebug_is_debugger_active() that returns true when debugger is connected.
+  - Implemented issue #1391: Added support for earlier stack frames through new argument for xdebug_call_* functions.
+  - Implemented issue #1420: Handle PHP 7.2's new methods for switch/case
+  - Implemented issue #1470: Added xdebug.remote_timeout to make connect timeout configurable.
+  - Implemented issue #1495: Make var_dump() also use the new xdebug.filename_format when formatting filenames.
+
++ Improvements:
+
+  - Implemented issue #847: Added support for "%s" specifier for xdebug.trace_output_name.
+  - Implemented issue #1384: Compile warning on Ubuntu 16.04 with GCC 5.4.x.
+  - Implemented issue #1401: Improved error message in case the connection breaks.
+  - Implemented issue #1430: Change DBGp tests to use TEST_PHP_EXECUTABLE instead of hard coded 'php'
+  - Implemented issue #1484: Use FD_CLOEXEC with debugging sockets to prevent FDs from leaking to forked processes (Chris Wright).
+  - Improve the foldexpr in xt.vim to fold lines correctly (Donie Leigh).
+
+= Fixed bugs:
+
+  - Fixed issue #1272: property_get doesn't return @attributes for SimpleXMLElement.
+  - Fixed issue #1305: Property names with quotes can not be fetch while debugging.
+  - Fixed issue #1431: Fix "use after free" with in add_name_attribute_or_element.
+  - Fixed issue #1432: Fixed memory leak with xdebug_path_info_dtor.
+  - Fixed issue #1449: Debugging breaks with array element keys containing low-ASCII variables.
+  - Fixed issue #1471: Tracing crashes with return_assignments and ternairy operator.
+  - Fixed issue #1474: Crashes due to variable resolving/reading mechanism not taking care of temporary hash tables correctly (Nikita Popov, Derick).
+  - Fixed issue #1481: Fixed s390x and ppc64 builds (Remi Collet).
+  - Fixed issue #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING with more than 32 cases.
+  - Fixed issue #1496: Rewrite README.rst to be more clear on how to install and build Xdebug.
+
+~ Changes:
+
+  - Fixed issue #1411: Use Error (Throwable) instead of fatal error when maximum nesting level is reached.
+
+- Removed features:
+
+  - Implemented issue #1377: Drop support for PHP 5.5 and 5.6, only PHP 7 is now supported
+
+   </notes>
+  </release>
+
+  <release>
+   <date>2017-06-21</date>
+   <time>12:08:11</time>
+   <version>
+    <release>2.5.5</release>
+    <api>2.5.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+= Fixed bugs:
+
+  - Fixed issue #1439: TYPE_CHECK needs overloading due to smart branches
+  - Fixed issue #1444: Code Coverage misses a variable in a multi-line function
+    call
+  - Fixed issue #1446: Code Coverage misses elseif if it uses an isset with a
+    property
+   </notes>
+  </release>
+
+  <release>
+   <date>2017-05-15</date>
+   <time>12:08:11</time>
+   <version>
+    <release>2.5.4</release>
+    <api>2.5.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, May 15, 2017 - xdebug 2.5.4
+
+= Fixed bugs:
+
+  - Fixed issue #799: Function traces report base class instead of object name
+  - Fixed issue #1421: Fix set_time_limit hanging on PHP 5.6 when pcntl_exec
+    does not exist (Frode E. Moe)
+  - Fixed issue #1429: Code coverage does not cover null coalesce
+  - Fixed issue #1434: Code coverage segfaults on 32-bit arch
+   </notes>
+  </release>
+
+  <release>
+   <date>2017-04-18</date>
+   <time>19:31:21</time>
+   <version>
+    <release>2.5.3</release>
+    <api>2.5.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Apr 18, 2017 - xdebug 2.5.3
+
+= Fixed bugs:
+
+  - Fixed issue #1421: Xdebug crashes when it is loaded without pcntl being
+    present
+   </notes>
+  </release>
+
+  <release>
+   <date>2017-04-17</date>
+   <time>18:42:26</time>
+   <version>
+    <release>2.5.2</release>
+    <api>2.5.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Apr 17, 2017 - xdebug 2.5.2
+
+= Fixed bugs:
+
+  - Fixed issue #701: Functions as array indexes show ??? in trace
+  - Fixed issue #1403: Code coverage does not cover BIND_STATIC
+  - Fixed issue #1404: Execution time is calculated incorrectly
+  - Fixed issue #1413: Code coverage mishap with PHP 7.1.3
+  - Fixed issue #1414: Missing variable assignment in traces with OPcache
+    loaded
+  - Fixed issue #1415: Crash with multiple catch constructs with OPcache loaded
+  - Fixed issue #1416: Trace files should not include the first result of a
+    generator if it hasn't started yet
+  - Fixed issue #1417: Fetching properties of static class contexts fails due
+    to incorrect fetch mode
+  - Fixed issue #1419: Summary not written when script ended with
+    "pcntl_exec()"
+   </notes>
+  </release>
+
+  <release>
+   <date>2017-04-17</date>
+   <time>18:42:26</time>
+   <version>
+    <release>2.5.2</release>
+    <api>2.5.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Feb 26, 2017 - xdebug 2.5.1
+
+= Fixed bugs:
+
+  - Fixed issue #1057: Add xdebug.ini of all settings to package
+  - Fixed issue #1165: DBGp: step_out skips subsequent function calls
+  - Fixed issue #1180: Code coverage crashes with non-standard start/stops
+  - Fixed issue #1278: Xdebug with PHP 7 does not handle prefill-from-oparray
+    for XDEBUG_CC_UNUSED
+  - Fixed issue #1300: Xdebug functions are not exposing their signature to
+    Reflection
+  - Fixed issue #1313: Arguments to __call() trampoline picked from the wrong
+    memory location
+  - Fixed issue #1329: While printing out a stack with and function parameters,
+    XDebug reads uninitialized zvals or free()d memory
+  - Fixed issue #1381: Code Coverage misses line due to missing FETCH_DIM_W
+    overload
+  - Fixed issue #1385: can not fetch IS_INDIRECT properties
+  - Fixed issue #1386: Executable code not shown as executed/executable
+  - Fixed issue #1392: Unable to compile on FreeBSD due to missing struct
+    definition
+  - Fixed issue #1394: Code coverage does not cover instanceof (in elseif)
+   </notes>
+  </release>
+
+  <release>
+   <date>2016-12-04</date>
+   <time>18:55:08</time>
+   <version>
+    <release>2.5.0</release>
+    <api>2.5.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Dec  4, 2016 - xdebug 2.5.0
+
++ Added features:
+
+  - Implemented issue #1232: add memory delta to HTML traces
+  - Implemented issue #1365: Allow remote_connect_back to be set through
+    XDEBUG_CONFIG
+
+= Fixed bugs:
+
+  - Fixed issue #1168: Added defensive check to prevent infinite loop
+  - Fixed issue #1242: Xdebug on Windows with Eclipse has issues with
+    breakpoint IDs
+  - Fixed issue #1343: Wrong values of numerical keys outside 32bit range
+  - Fixed issue #1357: Function signature using variadics is reported as being
+    not executed
+  - Fixed issue #1361: Remote debugging connection issues with Windows (Anatol
+    Belski)
+  - Fixed issue #1373: Crash in zend_hash_apply_with_arguments when debugging,
+    due to unset symbol table
+   </notes>
+  </release>
+
+  <release>
+   <date>2016-11-12</date>
+   <time>14:28:08</time>
+   <version>
+    <release>2.5.0RC1</release>
+    <api>2.5.0RC1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Nov 12, 2016 - xdebug 2.5.0RC1
+
++ Added features:
+
+  - Implemented issue #998: Added support for IPv6 (Thomas Vanhaniemi)
+  - Implemented issue #1297: Initial PHP 7.1 support
+
+= Fixed bugs:
+
+  - Fixed issue #1295: Apache crashes (SIGSEGV) when trying to establish
+    connection when sockfd is large
+  - Fixed issue #1303: POLLRDHUP is not supported outside of Gnu/Linux
+  - Fixed issue #1331: Segfault in code coverage
+
+- Removed features:
+
+  - Support for PHP versions lower than PHP 5.5 has been dropped
+   </notes>
+  </release>
+
+  <release>
+   <date>2016-08-02</date>
+   <time>11:47:08</time>
+   <version>
+    <release>2.4.1</release>
+    <api>2.4.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Aug 02, 2016 - xdebug 2.4.1
+
+= Fixed bugs:
+
+  - Fixed issue #1106: A thrown Exception after a class with __debugInfo gives
+    2 errors
+  - Fixed issue #1241: FAST_CALL/FAST_RET take #2
+  - Fixed issue #1246: Path and branch coverage should be initialised per
+    request, not globally
+  - Fixed issue #1263: Code coverage segmentation fault with opcache enabled
+  - Fixed issue #1277: Crash when using a userland function from RSHUTDOWN with
+    profiling enabled
+  - Fixed issue #1282: var_dump() of integers > 32 bit is broken on Windows
+  - Fixed issue #1288: Segfault when uncaught exception message does not
+    contain " in "
+  - Fixed issue #1291: Debugclient installation fails on Mac OS X
+  - Fixed issue #1326: Tracing and generators crashes with PHP 7.x
+  - Fixed issue #1333: Profiler accesses memory structures after freeing
+   </notes>
+  </release>
+
+  <release>
+   <date>2016-01-25</date>
+   <time>20:48:33</time>
+   <version>
+    <release>2.4.0RC4</release>
+    <api>2.4.0RC4</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Mon, Jan 25, 2016 - xdebug 2.4.0RC4
+
+= Fixed bugs:
+
+  - Fixed issue #1220: Segmentation fault if var_dump() output is too large.
+  - Fixed issue #1223: Xdebug crashes on PHP 7 when doing a DBGp eval command.
+  - Fixed issue #1229: Issues with GCC 4.8, which in -O2 move removes some
+    required code.
+  - Fixed issue #1235: Xdebug does not compile against PHP 7.1-dev due to
+    ZEND_FETCH_STATIC_PROP*.
+  - Fixed issue #1236: Can't remove breakpoints with negative IDs.
+  - Fixed issue #1238: Xdebug crashes with SIGSEGV while enumerating references
+    in variables.
+  - Fixed issue #1239: Crash due to changes with the CATCH opcode's jump
+    mechanism in 7.1
+  - Fixed issue #1241: Xdebug doesn't handle FAST_RET and FAST_CALL opcodes for
+    branch/dead code analysis, and path coverage.
+  - Fixed issue #1245: xdebug_dump_superglobals dumps *uninitialized* with PHP
+    7.
+  - Fixed issue #1250: Add PHP version descriptors to debugging log and profile
+    files.
+   </notes>
+  </release>
+
+  <release>
+   <date>2016-03-03</date>
+   <time>08:47:08</time>
+   <version>
+    <release>2.4.0</release>
+    <api>2.4.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Mar 03, 2016 - xdebug 2.4.0
+
+= Fixed bugs:
+
+  - Fixed issue #1258: Case in PHP 7.0 and code coverage
+  - Fixed issue #1261: segmentation fault in xdebug.so with PHP 7.0 version of
+    'pkgtools' due to spl_autoload()
+  - Fixed issue #1262: overload_var_dump=0 messes with xdebug_var_dump()
+  - Fixed issue #1266: xdebug_dump_superglobals() always dumps empty  stack on
+    PHP 7
+  - Fixed issue #1267: AIX build issues
+  - Fixed issue #1270: String parsing marked not covered with PHP 7
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-12-12</date>
+   <time>20:42:33</time>
+   <version>
+    <release>2.4.0RC3</release>
+    <api>2.4.0RC3</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Dec 12, 2015 - xdebug 2.4.0RC3
+
+= Fixed bugs:
+
+  - Fixed issue #1221: Sort out Windows x64 PHP 7 support
+  - Fixed issue #1229: Detect GCC 4.8 and disable optimisations when it is found
+
+= Others:
+
+  - Made the test suite work for Windows too. Finally, after 13 years.
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-12-02</date>
+   <time>23:31:49</time>
+   <version>
+    <release>2.4.0RC2</release>
+    <api>2.4.0RC2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Wed, Dec 02, 2015 - xdebug 2.4.0RC2
+
+= Fixed bugs:
+
+  - Fixed issue #1181: Remote debugging does not handle exceptions after using
+    zend_read_property
+  - Fixed issue #1189: Remove address attribute from remote debugging responses
+  - Fixed issue #1194: The error message is doubly HTML-encoded with assert()
+  - Fixed issue #1210: Segfault with code coverage dead code analysis and
+    foreach on PHP 7
+  - Fixed issue #1215: SIGSEGV if xdebug.trace_output_dir directory does not
+    exist
+  - Fixed issue #1217: xdebug.show_error_trace should not be enabled by default
+  - Fixed issue #1218: Xdebug messes with the exception code, by casting it to
+    int
+  - Fixed issue #1219: Set default value for xdebug.overload_var_dump to 2 to
+    include file / line numbers by default
+  - Use long for PHP 5, and zend_long for PHP 7 for ini settings in the globals
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-11-21</date>
+   <time>23:24:57</time>
+   <version>
+    <release>2.4.0RC1</release>
+    <api>2.4.0RC1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sat, Nov 21, 2015 - xdebug 2.4.0RC1
+
+= Fixed bugs:
+
+  - Fixed issue #1195: Segfault with code coverage and foreach
+  - Fixed issue #1200: Additional opcodes need to be overloaded for PHP 7
+  - Fixed issue #1202: Anonymous classes are not handled properly while remote debugging
+  - Fixed issue #1203: Accessing static property of a class that has no static properties crashes while remote debugging
+  - Fixed issue #1209: Segfault with building a function name for create_function
+  - Restored Windows support (Includes patches by Jan Ehrhardt)
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-11-05</date>
+   <time>12:42:57</time>
+   <version>
+    <release>2.4.0beta1</release>
+    <api>2.4.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Thu, Sep 05, 2015 - xdebug 2.4.0beta1
+
++ Added features:
+
+  - Implemented issue #1109: Added support for PHP 7.
+  - Implemented issue #1153: Add function monitor functionality.
+  - Implemented issue #1183: Add xdebug.show_error_trace setting to
+    allow/disallow to show a stack trace for every Error (throwable)
+
+= Fixed bugs:
+
+  - Fixed issue #1070: Too many open files error with php-fpm: connections not
+    closed. (Patch by Sean Dubois)
+  - Fixed issue #1123: With Xdebug 2.3.1, PHPUnit with coverage is
+    exponentially slower than without
+  - Fixed issue #1166: Using $this in __debugInfo() causes infinite recursion
+  - Fixed issue #1173: Segmentation fault in xdebug_get_monitored_functions()
+  - Fixed issue #1182: Using PHPStorm with PHP 7 RC1 and xdebug 2.4-dev break
+    points are passed by including setting break point at start of script
+  - Fixed issue #1192: Dead code analysis does not work for generators with
+    'return;'
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-06-19</date>
+   <time>16:15:00</time>
+   <version>
+    <release>2.3.3</release>
+    <api>2.3.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Fri, Jun 19, 2015 - xdebug 2.3.3
+
+= Fixed bugs:
+
+  - Fixed issue #1130: Escaping issues with docrefs and HTML characters in
+    error messages
+  - Fixed issue #1133: PDO exception code value type is changed
+  - Fixed issue #1137: Windows does not support %zu formatting for sprintf
+  - Fixed issue #1140: Tracing with __debugInfo() crashes Xdebug due to a stack
+    overflow
+  - Fixed issue #1148: Can't disable max_nesting_function
+  - Fixed issue #1151: Crash when another extension calls call_user_function()
+    during RINIT
+
+  - Fixed crash with code coverage (Antony Dovgal)
+  - Fixed usage of virtual_file_ex and STR_FREE (Remi Collet)
+  - Reset overloaded opcodes at the end of each request (Eran Ifrah)
+
+= Improvements:
+
+  - Fixed issue #686: Not possible to inspect SplObjectStorage instances with
+    Xdebug
+  - Fixed issue #864: No attributes are shown if an object extends
+    ArrayIterator
+  - Fixed issue #996: Can't evaluate property of class that extends ArrayObject
+  - Fixed issue #1134: Allow introspection of ArrayObject implementation's
+    internal storage
+  - Get rid of setlocale hack, by using %F instead of %f (and speed up tracing
+    by 15-20%)
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-03-22</date>
+   <time>12:34:56</time>
+   <version>
+    <release>2.3.2</release>
+    <api>2.3.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Sun, Mar 22, 2015 - xdebug 2.3.2
+
+= Fixed bugs:
+
+  - Fixed issue #1117: Path/branch coverage sometimes crashes
+  - Fixed issue #1121: Segfaults with path/branch coverage
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-02-24</date>
+   <time>22:02:00</time>
+   <version>
+    <release>2.3.1</release>
+    <api>2.3.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
+Tue, Feb 24, 2015 - xdebug 2.3.1
+
+= Fixed bugs:
+
+  - Fixed issue #1112: Setting an invalid xdebug.trace_format causes Xdebug to
+    crash
+  - Fixed issue #1113: xdebug.*_trigger do no longer work, due to NULL not
+    being an empty string
+   </notes>
+  </release>
+
+  <release>
+   <date>2015-02-22</date>
+   <time>14:48:00</time>
+   <version>
+    <release>2.3.0</release>
+    <api>2.3.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD style</license>
+   <notes>
 Sun, Feb 22, 2015 - xdebug 2.3.0
 
 = Fixed bugs:
@@ -131,118 +2200,14 @@ Sun, Feb 22, 2015 - xdebug 2.3.0
     - Implemented issue #1057: Removed trailing whitespace from example
       xdebug.ini
     - Implemented issue #1096: Improve performance improvement for handling
-      breakpoints by ignoring locales (Danief Sloof)
+      breakpoints by ignoring locales (Daniel Sloof)
     - Implemented issue #1100: Raise default max_nesting_level to 256
 
 - Removed features:
 
     - Support for PHP versions lower than PHP 5.4 have been dropped.
-
- </notes>
-
- <contents>
-  <dir name="/">
-   <dir name="contrib">
-    <file name="tracefile-analyser.php" role="doc" />
-    <file name="xt.vim" role="doc" />
-   </dir> <!-- /contrib -->
-   <dir name="debugclient">
-    <dir name="build">
-     <file name="buildcheck.sh" role="src" />
-     <file name="buildconf1.mk" role="src" />
-     <file name="buildconf2.mk" role="src" />
-     <file name="clean.mk" role="src" />
-     <file name="config-stubs" role="src" />
-    </dir> <!-- /debugclient/build -->
-    <file name="acinclude.m4" role="src" />
-    <file name="buildconf" role="src" />
-    <file name="config.guess" role="src" />
-    <file name="config.h.in" role="src" />
-    <file name="config.sub" role="src" />
-    <file name="configure" role="src" />
-    <file name="configure.in" role="src" />
-    <file name="cvsclean" role="src" />
-    <file name="debugclient.dsp" role="src" />
-    <file name="depcomp" role="src" />
-    <file name="INSTALL" role="src" />
-    <file name="install-sh" role="src" />
-    <file name="LICENSE" role="src" />
-    <file name="ltmain.sh" role="src" />
-    <file name="main.c" role="src" />
-    <file name="Makefile.in" role="src" />
-    <file name="missing" role="src" />
-    <file name="mkinstalldirs" role="src" />
-    <file name="usefulstuff.c" role="src" />
-    <file name="usefulstuff.h" role="src" />
-   </dir> <!-- /debugclient -->
-   <file name="config.m4" role="src" />
-   <file name="config.w32" role="src" />
-   <file name="CREDITS" role="doc" />
-   <file name="LICENSE" role="doc" />
-   <file name="Makefile.frag" role="src" />
-   <file name="Makefile.in" role="src" />
-   <file name="NEWS" role="doc" />
-   <file name="php_xdebug.h" role="src" />
-   <file name="README" role="doc" />
-   <file name="usefulstuff.c" role="src" />
-   <file name="usefulstuff.h" role="src" />
-   <file name="xdebug.c" role="src" />
-   <file name="xdebug_branch_info.c" role="src" />
-   <file name="xdebug_branch_info.h" role="src" />
-   <file name="xdebug_code_coverage.c" role="src" />
-   <file name="xdebug_code_coverage.h" role="src" />
-   <file name="xdebug_com.c" role="src" />
-   <file name="xdebug_com.h" role="src" />
-   <file name="xdebug_compat.c" role="src" />
-   <file name="xdebug_compat.h" role="src" />
-   <file name="xdebug_handlers.c" role="src" />
-   <file name="xdebug_handlers.h" role="src" />
-   <file name="xdebug_handler_dbgp.c" role="src" />
-   <file name="xdebug_handler_dbgp.h" role="src" />
-   <file name="xdebug_hash.c" role="src" />
-   <file name="xdebug_hash.h" role="src" />
-   <file name="xdebug_llist.c" role="src" />
-   <file name="xdebug_llist.h" role="src" />
-   <file name="xdebug_mm.h" role="src" />
-   <file name="xdebug_private.c" role="src" />
-   <file name="xdebug_private.h" role="src" />
-   <file name="xdebug_profiler.c" role="src" />
-   <file name="xdebug_profiler.h" role="src" />
-   <file name="xdebug_set.c" role="src" />
-   <file name="xdebug_set.h" role="src" />
-   <file name="xdebug_stack.c" role="src" />
-   <file name="xdebug_stack.h" role="src" />
-   <file name="xdebug_str.c" role="src" />
-   <file name="xdebug_str.h" role="src" />
-   <file name="xdebug_superglobals.c" role="src" />
-   <file name="xdebug_superglobals.h" role="src" />
-   <file name="xdebug_tracing.c" role="src" />
-   <file name="xdebug_tracing.h" role="src" />
-   <file name="xdebug_trace_textual.c" role="src" />
-   <file name="xdebug_trace_textual.h" role="src" />
-   <file name="xdebug_trace_computerized.c" role="src" />
-   <file name="xdebug_trace_computerized.h" role="src" />
-   <file name="xdebug_trace_html.c" role="src" />
-   <file name="xdebug_trace_html.h" role="src" />
-   <file name="xdebug_var.c" role="src" />
-   <file name="xdebug_var.h" role="src" />
-   <file name="xdebug_xml.c" role="src" />
-   <file name="xdebug_xml.h" role="src" />
-  </dir> <!-- / -->
- </contents>
- <dependencies>
-  <required>
-   <php>
-    <min>5.4.0</min>
-   </php>
-   <pearinstaller>
-    <min>1.9.1</min>
-   </pearinstaller>
-  </required>
- </dependencies>
- <providesextension>xdebug</providesextension>
- <zendextsrcrelease />
- <changelog>
+   </notes>
+  </release>
 
   <release>
    <date>2015-01-21</date>
@@ -879,7 +2844,7 @@ Sun, Jan 03, 2010 - xdebug 2.1.0beta1
 	- Added &quot;Scream&quot; support, which disables the @ operator.
 	- Added a trace-file analysing script.
 	- Added support for debugging into phars.
-	- Added a default xdebug.ini. (Patch by Martin SchuhfuÃ
+	- Added a default xdebug.ini. (Patch by Martin Schuhfu
 	  &lt;martins@spot-media.de&gt;)
 	- Added function parameters in computerized function traces.
 	- PHP 5.3 compatibility.
@@ -2027,3 +3992,6 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
   </release>
  </changelog>
 </package>
+<!--
+vim:et:ts=1:sw=1
+-->

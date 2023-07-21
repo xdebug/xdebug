@@ -1,4 +1,19 @@
 <?php
+/*
+   +----------------------------------------------------------------------+
+   | Xdebug                                                               |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2002-2018 Derick Rethans                               |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 1.01 of the Xdebug license,   |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | https://xdebug.org/license.php                                       |
+   | If you did not receive a copy of the Xdebug license and are unable   |
+   | to obtain it through the world-wide-web, please send a note to       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
+   +----------------------------------------------------------------------+
+ */
 if ( $argc <= 1 || $argc > 4 )
 {
 	showUsage();
@@ -33,6 +48,7 @@ foreach( $functions as $name => $f )
 		$maxLen = strlen( $name );
 	}
 }
+$maxLen = max( $maxLen, 8 );
 
 echo "Showing the {$elements} most costly calls sorted by '{$sortKey}'.\n\n";
 
@@ -96,7 +112,7 @@ class drXdebugTraceFileParser
 		$this->stackFunctions = array();
 		$header1 = fgets( $this->handle );
 		$header2 = fgets( $this->handle );
-		if ( !preg_match( '@Version: 2.*@', $header1 ) || !preg_match( '@File format: [2-4]@', $header2 ) )
+		if ( !preg_match( '@Version: [23].*@', $header1 ) || !preg_match( '@File format: [2-4]@', $header2 ) )
 		{
 			echo "\nThis file is not an Xdebug trace file made with format option '1' and version 2 to 4.\n";
 			showUsage();
@@ -110,11 +126,12 @@ class drXdebugTraceFileParser
 		$size = fstat( $this->handle );
 		$size = $size['size'];
 		$read = 0;
-		
+
 		while ( !feof( $this->handle ) )
 		{
 			$buffer = fgets( $this->handle, 4096 );
 			$read += strlen( $buffer );
+			$buffer = rtrim( $buffer, PHP_EOL );
 			$this->parseLine( $buffer );
 			$c++;
 
@@ -167,6 +184,10 @@ class drXdebugTraceFileParser
 				$dTime   = $time   - $prevTime;
 				$dMemory = $memory - $prevMem;
 
+				if ( ! array_key_exists( $depth - 1, $this->stack ) )
+				{
+					$this->stack[$depth - 1] = array( '', 0, 0, 0, 0 );
+				}
 				$this->stack[$depth - 1][3] += $dTime;
 				$this->stack[$depth - 1][4] += $dMemory;
 
@@ -212,7 +233,7 @@ class drXdebugTraceFileParser
 
 		if ( $sortKey !== null )
 		{
-			uasort( $result, 
+			uasort( $result,
 				function( $a, $b ) use ( $sortKey )
 				{
 					return ( $a[$sortKey] > $b[$sortKey] ) ? -1 : ( $a[$sortKey] < $b[$sortKey] ? 1 : 0 );

@@ -1,21 +1,19 @@
 <?php
 
-/* 
+/*
  * Online profiling dump - Written by Jani Taskinen <sniper@iki.fi> A.D. 2007
- *
- * $Id: online_profiling_prepend.php,v 1.3 2007-07-24 10:34:15 sniper Exp $
  *
  * Usage:
  *
  * You can either have this file included by using the php.ini
  * directive "auto_prepend_file" or including it in your script.
- * 
+ *
  * Passing XDEBUG_PROFILE in GET/POST/COOKIE enables the output.
  *
  * Example of download.php:
 
   <?php
-   
+
   if (file_exists("/{$_GET['file']}"))
   {
     $filesize=filesize("/{$_GET['file']}");
@@ -45,13 +43,13 @@
  xdebug.profiler_aggregate = Off
  xdebug.profiler_output_name = %H.%S ; <HTTP_HOST>.<SESSION_ID>
  xdebug.extended_info = 1
- 
- * 
+
+ *
  */
 
 function xdebug_profiler_shutdown_cb()
 {
-  $is_xmlhttprequest = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'); 
+  $is_xmlhttprequest = (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
 
   if (isset($_REQUEST['XDEBUG_PROFILE']))
   {
@@ -105,14 +103,14 @@ DATA;
   /* Output box with toggles to enable/disable profiler and annotation */
   if (!$is_xmlhttprequest)
   {
-    $profiler = isset($_REQUEST['XDEBUG_PROFILE']) ? 
+    $profiler = isset($_REQUEST['XDEBUG_PROFILE']) ?
     array
     (
       'enabled' => 1,
       'checked' => 'checked="checked"',
       'display' => 'inline',
-    ) : 
-    array 
+    ) :
+    array
     (
       'enabled' => 0,
       'checked' => '',

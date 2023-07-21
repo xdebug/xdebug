@@ -1,0 +1,156 @@
+name: Build
+
+on:
+    push:
+        branches:
+            - 'master'
+            - 'xdebug_*'
+    pull_request:
+    release:
+        types: [created]
+    create:
+
+jobs:
+    ubuntu:
+        runs-on: ubuntu-latest
+        name: "Linux: Build and test"
+        strategy:
+            fail-fast: false
+            matrix:
+                php: [8.0, 8.1, 8.2]
+                use-opcache: [true, false]
+                experimental: [false]
+
+        steps:
+            -   uses: actions/checkout@v2
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "${{ matrix.php }}"
+                    coverage: none
+                    ini-values: "session.save_path=/tmp"
+                    tools: pecl
+
+            -   name: Compile
+                run: ./.build.scripts/compile.sh
+
+            -   name: Find PHP
+                run: |
+                    TEST_PHP_EXECUTABLE=`make findphp`
+                    echo "Found PHP in: $TEST_PHP_EXECUTABLE"
+                    echo "TEST_PHP_EXECUTABLE=$TEST_PHP_EXECUTABLE" >> $GITHUB_ENV
+
+            -   name: Define PHP arguments
+                run: |
+                    TEST_PHP_ARGS="-n -d foo=yes -d session.save_path=/tmp"
+                    [[ "${{ matrix.use-opcache }}" != "true" ]] || TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=opcache.so -d opcache.enable=1 -d opcache.enable_cli=1"
+                    TEST_PHP_ARGS="$TEST_PHP_ARGS -d zend_extension=$PWD/modules/xdebug.so"
+                    echo "Test PHP arguments: $TEST_PHP_ARGS"
+                    echo "TEST_PHP_ARGS=$TEST_PHP_ARGS" >> $GITHUB_ENV
+
+            -   name: Run tests
+                continue-on-error: ${{ matrix.experimental }}
+                run: |
+                    $TEST_PHP_EXECUTABLE $TEST_PHP_ARGS -v
+                    $TEST_PHP_EXECUTABLE -n run-xdebug-tests.php -j8 -q -x --show-diff
+
+            -   name: Show errors
+                if: ${{ failure() }}
+                run: ./.build.scripts/show-errors.sh
+
+    windows:
+        runs-on: windows-latest
+        name: "Windows: Build and test"
+        defaults:
+            run:
+                shell: cmd
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ["8.0", "8.1", "8.2"]
+                arch: [x64]
+                ts: [nts, ts]
+                experimental: [false]
+        steps:
+                - name: Checkout Xdebug
+                  uses: actions/checkout@v2
+                - name: Extract Xdebug Version
+                  shell: powershell
+                  run: |
+                    chcp 65001
+                    $r = Select-String -Path php_xdebug.h -Pattern 'XDEBUG_VERSION\s+"(.*)"'
+                    $s = $r.Matches[0].Groups[1]
+                    echo "$s"
+                    $xdebug_version = 'XDEBUG_VERSION=' + $s
+                    echo $xdebug_version >> $env:GITHUB_ENV
+                - name: Setup PHP
+                  id: setup-php
+                  uses: cmb69/setup-php-sdk@679db664987b6f5de6ecc4732e9ce649a689e4e5
+                  with:
+                      version: ${{matrix.php}}
+                      arch: ${{matrix.arch}}
+                      ts: ${{matrix.ts}}
+                      deps: zlib
+                - name: Enable Developer Command Prompt
+                  uses: ilammy/msvc-dev-cmd@v1
+                  with:
+                      arch: ${{matrix.arch}}
+                      toolset: ${{steps.setup-php.outputs.toolset}}
+                - name: Generate Build Files
+                  run: phpize
+                - name: Configure Build
+                  run: configure --with-xdebug --with-xdebug-compression --enable-debug-pack --with-prefix=${{steps.setup-php.outputs.prefix}}
+                - name: Build
+                  run: nmake
+                - name: Define Xdebug Module Env
+                  shell: powershell
+                  run: |
+                    chcp 65001
+
+                    $dir = (Get-Location).Path + '\'
+                    if ('x64' -eq '${{matrix.arch}}') { $dir = $dir + 'x64\' }
+                    $dir = $dir + 'Release'
+                    if ('ts' -eq '${{matrix.ts}}') { $dir = $dir + '_TS' }
+                    $xdebug_dll_opt = 'TEST_PHP_ARGS=-n -d zend_extension=' + $dir + '\php_xdebug.dll'
+                    echo $xdebug_dll_opt >> $env:GITHUB_ENV
+
+                    $artifact_name = 'php_xdebug-${{env.XDEBUG_VERSION}}-${{matrix.php}}'
+
+                    if ('8.0' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
+                    if ('8.1' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
+                    if ('8.2' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
+
+                    if ('nts' -eq '${{matrix.ts}}') { $artifact_name = $artifact_name + '-nts' }
+                    if ('x64' -eq '${{matrix.arch}}') { $artifact_name = $artifact_name + '-x86_64' }
+
+                    $xdebug_artifact_name = "ARTIFACT_NAME=" + $artifact_name
+                    echo $xdebug_artifact_name >> $env:GITHUB_ENV
+
+                    $from = $dir + '\php_xdebug.dll'
+                    $to = $dir + '\' + $artifact_name + ".dll"
+                    Copy-Item $from -Destination $to
+                    $xdebug_artifact = "ARTIFACT=" + $to
+                    echo $xdebug_artifact >> $env:GITHUB_ENV
+
+                - name: Define Other Environment
+                  shell: powershell
+                  run: |
+                    chcp 65001
+                    echo "REPORT_EXIT_STATUS=1" >> $env:GITHUB_ENV
+                    echo "TEST_PHP_EXECUTABLE=${{steps.setup-php.outputs.prefix}}\php.exe" >> $env:GITHUB_ENV
+                    echo "TEMP=$((Get-Item -LiteralPath $Env:TEMP).FullName)" >> $env:GITHUB_ENV
+                    echo "TMP=$((Get-Item -LiteralPath $Env:TMP).FullName)" >> $env:GITHUB_ENV
+                    echo "XDEBUG_MODE=" >> $env:GITHUB_ENV
+                - name: Run Tests
+                  continue-on-error: ${{ matrix.experimental }}
+                  run: |
+                    echo "Artifact: ${{ env.ARTIFACT }}"
+                    echo "TEST_PHP_ARGS: ${{ env.TEST_PHP_ARGS }}"
+                    echo "Found PHP in: ${{ env.TEST_PHP_EXECUTABLE }}"
+                    php run-xdebug-tests.php -j8 -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp
+                - name: Upload artifacts
+                  uses: actions/upload-artifact@v2
+                  with:
+                      name: ${{env.ARTIFACT_NAME}}
+                      path: ${{env.ARTIFACT}}

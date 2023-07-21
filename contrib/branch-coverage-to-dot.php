@@ -1,4 +1,19 @@
 <?php
+/*
+   +----------------------------------------------------------------------+
+   | Xdebug                                                               |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 2002-2018 Derick Rethans                               |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 1.01 of the Xdebug license,   |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | https://xdebug.org/license.php                                       |
+   | If you did not receive a copy of the Xdebug license and are unable   |
+   | to obtain it through the world-wide-web, please send a note to       |
+   | derick@xdebug.org so we can mail you a copy immediately.             |
+   +----------------------------------------------------------------------+
+ */
 function branch_coverage_to_dot( $info, $pathInsteadOfBranch = true )
 {
 	$output = '';
@@ -41,14 +56,14 @@ function branch_coverage_to_dot( $info, $pathInsteadOfBranch = true )
 
 				if ( ! $pathInsteadOfBranch )
 				{
-					if ( isset( $branch['out'][0] ) ) 
+					if ( isset( $branch['out'][0] ) )
 					{
 						$output .= sprintf( "\t\"__%s_%d\" -> \"__%s_%d\" %s;\n",
 							$fname, $bnr, $fname, $branch['out'][0],
 							$branch['out_hit'][0] ? '' : '[style=dashed]'
 						);
 					}
-					if ( isset( $branch['out'][1] ) ) 
+					if ( isset( $branch['out'][1] ) )
 					{
 						$output .= sprintf( "\t\"__%s_%d\" -> \"__%s_%d\" %s;\n",
 							$fname, $bnr, $fname, $branch['out'][1],
