@@ -22,7 +22,7 @@ jobs:
                 experimental: [false]
 
         steps:
-            -   uses: actions/checkout@v2
+            -   uses: actions/checkout@v3
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
@@ -74,7 +74,7 @@ jobs:
                 experimental: [false]
         steps:
                 - name: Checkout Xdebug
-                  uses: actions/checkout@v2
+                  uses: actions/checkout@v3
                 - name: Extract Xdebug Version
                   shell: powershell
                   run: |
