@@ -8,6 +8,7 @@ xdebug.collect_assignments=0
 xdebug.trace_format=0
 zend.assertions=1
 assert.exception=1
+error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 require_once 'capture-trace.inc';

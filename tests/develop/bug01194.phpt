@@ -2,6 +2,7 @@
 Test for bug #1194: The error message is doubly HTML-encoded with assert()
 --INI--
 assert.exception=0
+error_reporting=E_ALL & ~E_DEPRECATED
 html_errors=1
 xdebug.mode=develop
 xdebug.file_link_format=
