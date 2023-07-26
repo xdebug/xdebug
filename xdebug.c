@@ -744,7 +744,7 @@ ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 	return zend_startup_module(&xdebug_module_entry);
 }
 
-static int xdebug_post_startup(void)
+static zend_result xdebug_post_startup(void)
 {
 	if (xdebug_orig_post_startup_cb) {
 		int (*cb)(void) = xdebug_orig_post_startup_cb;

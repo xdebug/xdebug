@@ -496,7 +496,7 @@ FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **
 int xdebug_format_output_filename(char **filename, char *format, char *script_name)
 {
 	xdebug_str fname = XDEBUG_STR_INITIALIZER;
-	char       cwd[128];
+	char       cwd[MAXPATHLEN];
 
 	while (*format)
 	{
@@ -507,7 +507,7 @@ int xdebug_format_output_filename(char **filename, char *format, char *script_na
 			switch (*format)
 			{
 				case 'c': /* crc32 of the current working directory */
-					if (VCWD_GETCWD(cwd, 127)) {
+					if (VCWD_GETCWD(cwd, MAXPATHLEN - 1)) {
 						xdebug_str_add_fmt(&fname, "%lu", xdebug_crc32(cwd, strlen(cwd)));
 					}
 					break;
