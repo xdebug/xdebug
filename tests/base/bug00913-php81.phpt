@@ -20,7 +20,7 @@ var_dump($DOMDocumentNode, $DOMElementNode, $DOMAttributeNode, $DOMTextNode);
 ?>
 --EXPECTF--
 %sbug00913-php81.php:%d:
-class DOMDocument#1 (38) {
+class DOMDocument#1 (%d) {
   public $config =>
   NULL
   public $doctype =>
@@ -72,7 +72,7 @@ class DOMDocument#1 (38) {
   public $nodeType =>
   int(9)
   public $parentNode =>
-  NULL
+  %A
   public $childNodes =>
   string(22) "(object value omitted)"
   public $firstChild =>
@@ -84,7 +84,7 @@ class DOMDocument#1 (38) {
   public $nextSibling =>
   NULL
   public $attributes =>
-  NULL
+  %A
   public $ownerDocument =>
   NULL
   public $namespaceURI =>
@@ -99,11 +99,11 @@ class DOMDocument#1 (38) {
   string(4) "Test"
 }
 %sbug00913-php81.php:%d:
-class DOMElement#2 (23) {
+class DOMElement#2 (%d) {
   public $schemaTypeInfo =>
   NULL
   public $tagName =>
-  string(7) "example"
+  %A
   public $firstElementChild =>
   NULL
   public $lastElementChild =>
@@ -121,7 +121,7 @@ class DOMElement#2 (23) {
   public $nodeType =>
   int(1)
   public $parentNode =>
-  string(22) "(object value omitted)"
+  %A
   public $childNodes =>
   string(22) "(object value omitted)"
   public $firstChild =>
@@ -133,7 +133,7 @@ class DOMElement#2 (23) {
   public $nextSibling =>
   NULL
   public $attributes =>
-  string(22) "(object value omitted)"
+  %A
   public $ownerDocument =>
   string(22) "(object value omitted)"
   public $namespaceURI =>
@@ -148,7 +148,7 @@ class DOMElement#2 (23) {
   string(4) "Test"
 }
 %sbug00913-php81.php:%d:
-class DOMAttr#3 (21) {
+class DOMAttr#3 (%d) {
   public $specified =>
   bool(true)
   public $schemaTypeInfo =>
@@ -166,7 +166,7 @@ class DOMAttr#3 (21) {
   public $nodeType =>
   int(2)
   public $parentNode =>
-  string(22) "(object value omitted)"
+  %A
   public $childNodes =>
   string(22) "(object value omitted)"
   public $firstChild =>
@@ -178,7 +178,7 @@ class DOMAttr#3 (21) {
   public $nextSibling =>
   NULL
   public $attributes =>
-  NULL
+  %A
   public $ownerDocument =>
   string(22) "(object value omitted)"
   public $namespaceURI =>
@@ -193,7 +193,7 @@ class DOMAttr#3 (21) {
   string(1) "b"
 }
 %sbug00913-php81.php:%d:
-class DOMText#4 (21) {
+class DOMText#4 (%d) {
   public $wholeText =>
   string(4) "Test"
   public $data =>
@@ -211,7 +211,7 @@ class DOMText#4 (21) {
   public $nodeType =>
   int(3)
   public $parentNode =>
-  string(22) "(object value omitted)"
+  %A
   public $childNodes =>
   string(22) "(object value omitted)"
   public $firstChild =>
@@ -223,7 +223,7 @@ class DOMText#4 (21) {
   public $nextSibling =>
   NULL
   public $attributes =>
-  NULL
+  %A
   public $ownerDocument =>
   string(22) "(object value omitted)"
   public $namespaceURI =>

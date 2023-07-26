@@ -2,6 +2,7 @@
 Test for assertion callbacks
 --INI--
 assert.exception=0
+error_reporting=E_ALL & ~E_DEPRECATED
 xdebug.mode=trace
 xdebug.start_with_request=no
 xdebug.collect_return=0
