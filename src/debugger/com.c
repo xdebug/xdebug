@@ -46,6 +46,8 @@
 # define poll WSAPoll
 #endif
 
+#include "Zend/zend_extensions.h"
+
 #include "com.h"
 
 #include "debugger_private.h"
@@ -550,12 +552,38 @@ static int ide_key_is_cloud_id()
 	return 1;
 }
 
+static void warn_if_opcache_is_loaded_after_xdebug()
+{
+	bool xdebug_loaded = false;
+	zend_llist_element *ext_ptr = zend_extensions.head;
+
+	do
+	{
+		zend_extension *zext = (zend_extension *)ext_ptr->data;
+
+		if (strcmp(zext->name, "Xdebug") == 0) {
+			xdebug_loaded = true;
+		}
+
+		if (strcmp(zext->name, "Zend OPcache") == 0) {
+			if (xdebug_loaded) {
+				xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "OPCACHE", "Debugger is not working optimally, as Xdebug is loaded before Zend OPcache");
+			}
+			return;
+		}
+
+		ext_ptr = ext_ptr->next;
+	} while (ext_ptr != NULL);
+}
+
 static void xdebug_init_debugger()
 {
 	xdebug_str *connection_attempts = xdebug_str_new();
 
 	/* Get handler from mode */
 	XG_DBG(context).handler = &xdebug_handler_dbgp;
+
+	warn_if_opcache_is_loaded_after_xdebug();
 
 	if (strcmp(XINI_DBG(cloud_id), "") != 0) {
 		xdebug_init_cloud_debugger(XINI_DBG(cloud_id));
