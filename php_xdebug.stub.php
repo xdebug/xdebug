@@ -78,7 +78,7 @@ function xdebug_get_function_count(): int {}
 /* -----------------------------------------------------------------------*/
 
 /* Returns information about the stack */
-function xdebug_get_function_stack(): array {}
+function xdebug_get_function_stack(array $options = []): array {}
 
 /* -----------------------------------------------------------------------*/
 

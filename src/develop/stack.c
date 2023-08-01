@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -914,12 +914,14 @@ PHP_FUNCTION(xdebug_get_stack_depth)
    Returns an array representing the current stack */
 PHP_FUNCTION(xdebug_get_function_stack)
 {
-	function_stack_entry *fse;
+	function_stack_entry *fse, *next_fse;
 	unsigned int          i;
 	unsigned int          j;
 	zval                 *frame;
 	zval                 *params;
 	int                   variadic_opened = 0;
+	HashTable            *options = NULL;
+	bool                  add_local_vars = false;
 
 	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
@@ -927,11 +929,24 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		return;
 	}
 
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_HT_OR_NULL(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (options) {
+		zval *value = zend_hash_str_find(options, "local_vars", sizeof("local_vars") - 1);
+		if (value) {
+			add_local_vars = (Z_TYPE_P(value) == IS_TRUE);
+		}
+	}
+
 	array_init(return_value);
 
 	fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
+	next_fse = fse + 1;
 
-	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++) {
+	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++, next_fse++) {
 		int sent_variables = fse->varc;
 
 		if (fse->function.function) {
@@ -996,6 +1011,32 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			if (argument) {
 				xdebug_str_free(argument);
 				argument = NULL;
+			}
+		}
+
+		if (add_local_vars) {
+			zval variables;
+
+			array_init(&variables);
+
+			add_assoc_zval_ex(frame, "variables", HASH_KEY_SIZEOF("variables"), &variables);
+
+			xdebug_lib_set_active_data(next_fse->execute_data);
+			xdebug_lib_set_active_symbol_table(fse->symbol_table);
+
+			for (j = 0; j < (unsigned int) fse->op_array->last_var; j++) {
+				xdebug_str *symbol_name;
+				zval symbol;
+
+				symbol_name = xdebug_str_create_from_char(fse->op_array->vars[j]->val);
+				xdebug_get_php_symbol(&symbol, symbol_name);
+				xdebug_str_free(symbol_name);
+
+				if (Z_TYPE(symbol) == IS_UNDEF) {
+					add_assoc_null_ex(&variables, fse->op_array->vars[j]->val, fse->op_array->vars[j]->len);
+				} else {
+					add_assoc_zval_ex(&variables, fse->op_array->vars[j]->val, fse->op_array->vars[j]->len, &symbol);
+				}
 			}
 		}
 
