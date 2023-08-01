@@ -36,9 +36,9 @@ class DOMDocument#1 (%d) {
   public $xmlEncoding =>
   NULL
   public $standalone =>
-  bool(true)
+  bool(%s)
   public $xmlStandalone =>
-  bool(true)
+  bool(%s)
   public $version =>
   string(3) "1.0"
   public $xmlVersion =>
