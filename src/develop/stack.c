@@ -271,6 +271,142 @@ static void add_single_value(xdebug_str *str, zval *zv, int html)
 	}
 }
 
+static void zval_from_stack_add_frame_parameters(zval *frame, function_stack_entry *fse)
+{
+	unsigned int  j;
+	zval         *params;
+	int           variadic_opened = 0;
+	int           sent_variables = fse->varc;
+
+	if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
+		sent_variables--;
+	}
+
+	XDEBUG_MAKE_STD_ZVAL(params);
+	array_init(params);
+	add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
+
+	for (j = 0; j < sent_variables; j++) {
+		xdebug_str *argument = NULL;
+
+		if (fse->var[j].is_variadic) {
+			zval *vparams;
+
+			XDEBUG_MAKE_STD_ZVAL(vparams);
+			array_init(vparams);
+
+			if (fse->var[j].name) {
+				add_assoc_zval_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), vparams);
+			} else {
+				add_index_zval(params, j, vparams);
+			}
+			efree(params);
+			params = vparams;
+			variadic_opened = 1;
+			continue;
+		}
+		if (!Z_ISUNDEF(fse->var[j].data)) {
+			argument = xdebug_get_zval_value_line(&fse->var[j].data, 0, NULL);
+		} else {
+			argument = xdebug_str_create_from_char((char*) "???");
+		}
+		if (fse->var[j].name && !variadic_opened && argument) {
+			add_assoc_stringl_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), argument->d, argument->l);
+		} else {
+			add_index_stringl(params, j - variadic_opened, argument->d, argument->l);
+		}
+		if (argument) {
+			xdebug_str_free(argument);
+			argument = NULL;
+		}
+	}
+
+	efree(params);
+}
+
+static void zval_from_stack_add_frame_variables(zval *frame, zend_execute_data *edata, HashTable *symbols, zend_op_array *opa)
+{
+	unsigned int j;
+	zval         variables;
+
+	array_init(&variables);
+
+	add_assoc_zval_ex(frame, "variables", HASH_KEY_SIZEOF("variables"), &variables);
+
+	xdebug_lib_set_active_data(edata);
+	xdebug_lib_set_active_symbol_table(symbols);
+
+	for (j = 0; j < (unsigned int) opa->last_var; j++) {
+		xdebug_str *symbol_name;
+		zval        symbol;
+
+		symbol_name = xdebug_str_create_from_char(opa->vars[j]->val);
+		xdebug_get_php_symbol(&symbol, symbol_name);
+		xdebug_str_free(symbol_name);
+
+		if (Z_TYPE(symbol) == IS_UNDEF) {
+			add_assoc_null_ex(&variables, opa->vars[j]->val, opa->vars[j]->len);
+		} else {
+			add_assoc_zval_ex(&variables, opa->vars[j]->val, opa->vars[j]->len, &symbol);
+		}
+	}
+}
+
+static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, zend_execute_data *edata, bool add_local_vars)
+{
+	zval                 *frame;
+
+	if (fse->function.function) {
+		if (strcmp(fse->function.function, "xdebug_get_function_stack") == 0) {
+			return;
+		}
+	}
+
+	/* Initialize frame array */
+	XDEBUG_MAKE_STD_ZVAL(frame);
+	array_init(frame);
+
+	/* Add data */
+	if (fse->function.function) {
+		add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), fse->function.function);
+	}
+	if (fse->function.object_class) {
+		add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (fse->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
+		add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    zend_string_copy(fse->function.object_class));
+	}
+	add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), zend_string_copy(fse->filename));
+	add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), fse->lineno);
+
+	zval_from_stack_add_frame_parameters(frame, fse);
+
+	if (add_local_vars && fse->op_array && fse->op_array->vars) {
+		zval_from_stack_add_frame_variables(frame, edata, fse->symbol_table, fse->op_array);
+	}
+
+	if (fse->include_filename) {
+		add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), zend_string_copy(fse->include_filename));
+	}
+
+	add_next_index_zval(output, frame);
+	efree(frame);
+}
+
+static void zval_from_stack(zval *output, bool add_local_vars)
+{
+	function_stack_entry *fse, *next_fse;
+	unsigned int          i;
+
+	array_init(output);
+
+	fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
+	next_fse = fse + 1;
+
+	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++, next_fse++) {
+		zval_from_stack_add_frame(output, fse, next_fse->execute_data, add_local_vars);
+	}
+}
+
+
 #define XDEBUG_VAR_FORMAT_INITIALISED   0
 #define XDEBUG_VAR_FORMAT_UNINITIALISED 1
 
@@ -851,6 +987,7 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	zend_class_entry *exception_ce = exception->ce;
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
+
 #if PHP_VERSION_ID < 80200
 	zval *xdebug_message_trace, *previous_exception;
 	zval dummy;
@@ -863,6 +1000,17 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 		}
 	}
 #endif
+
+	if (XG_DEV(last_exception_obj_ptr) != NULL) {
+		zval_ptr_dtor(&XG_DEV(last_exception_stack_trace));
+		XG_DEV(last_exception_obj_ptr) = NULL;
+	}
+
+	/* Remember last stack trace so it can be retrieved in an exception handler through
+	 * xdebug_get_function_stack(['from_exception' => $e]) */
+	XG_DEV(last_exception_obj_ptr) = exception;
+	zval_from_stack(&XG_DEV(last_exception_stack_trace), true);
+	zval_from_stack_add_frame(&XG_DEV(last_exception_stack_trace), XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true);
 
 	if (!PG(html_errors)) {
 		xdebug_str_addc(&tmp_str, '\n');
@@ -914,12 +1062,6 @@ PHP_FUNCTION(xdebug_get_stack_depth)
    Returns an array representing the current stack */
 PHP_FUNCTION(xdebug_get_function_stack)
 {
-	function_stack_entry *fse, *next_fse;
-	unsigned int          i;
-	unsigned int          j;
-	zval                 *frame;
-	zval                 *params;
-	int                   variadic_opened = 0;
 	HashTable            *options = NULL;
 	bool                  add_local_vars = false;
 
@@ -935,118 +1077,26 @@ PHP_FUNCTION(xdebug_get_function_stack)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (options) {
-		zval *value = zend_hash_str_find(options, "local_vars", sizeof("local_vars") - 1);
+		zval *value;
+
+		value = zend_hash_str_find(options, "from_exception", sizeof("from_exception") - 1);
+		if (value && Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), zend_ce_throwable)) {
+			if (Z_OBJ_P(value) == XG_DEV(last_exception_obj_ptr)) {
+				Z_TRY_ADDREF(XG_DEV(last_exception_stack_trace));
+				ZVAL_COPY_VALUE(return_value, &XG_DEV(last_exception_stack_trace));
+			} else {
+				array_init(return_value);
+			}
+			return;
+		}
+
+		value = zend_hash_str_find(options, "local_vars", sizeof("local_vars") - 1);
 		if (value) {
 			add_local_vars = (Z_TYPE_P(value) == IS_TRUE);
 		}
 	}
 
-	array_init(return_value);
+	zval_from_stack(return_value, add_local_vars);
 
-	fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
-	next_fse = fse + 1;
-
-	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++, next_fse++) {
-		int sent_variables = fse->varc;
-
-		if (fse->function.function) {
-			if (strcmp(fse->function.function, "xdebug_get_function_stack") == 0) {
-				return;
-			}
-		}
-
-		if (sent_variables > 0 && fse->var[sent_variables-1].is_variadic && Z_ISUNDEF(fse->var[sent_variables-1].data)) {
-			sent_variables--;
-		}
-
-		/* Initialize frame array */
-		XDEBUG_MAKE_STD_ZVAL(frame);
-		array_init(frame);
-
-		/* Add data */
-		if (fse->function.function) {
-			add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), fse->function.function);
-		}
-		if (fse->function.object_class) {
-			add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (fse->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
-			add_assoc_str_ex(frame,    "class",    HASH_KEY_SIZEOF("class"),    zend_string_copy(fse->function.object_class));
-		}
-		add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), zend_string_copy(fse->filename));
-		add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), fse->lineno);
-
-		/* Add parameters */
-		XDEBUG_MAKE_STD_ZVAL(params);
-		array_init(params);
-		add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
-
-		for (j = 0; j < sent_variables; j++) {
-			xdebug_str *argument = NULL;
-
-			if (fse->var[j].is_variadic) {
-				zval *vparams;
-
-				XDEBUG_MAKE_STD_ZVAL(vparams);
-				array_init(vparams);
-
-				if (fse->var[j].name) {
-					add_assoc_zval_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), vparams);
-				} else {
-					add_index_zval(params, j, vparams);
-				}
-				efree(params);
-				params = vparams;
-				variadic_opened = 1;
-				continue;
-			}
-			if (!Z_ISUNDEF(fse->var[j].data)) {
-				argument = xdebug_get_zval_value_line(&fse->var[j].data, 0, NULL);
-			} else {
-				argument = xdebug_str_create_from_char((char*) "???");
-			}
-			if (fse->var[j].name && !variadic_opened && argument) {
-				add_assoc_stringl_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), argument->d, argument->l);
-			} else {
-				add_index_stringl(params, j - variadic_opened, argument->d, argument->l);
-			}
-			if (argument) {
-				xdebug_str_free(argument);
-				argument = NULL;
-			}
-		}
-
-		if (add_local_vars) {
-			zval variables;
-
-			array_init(&variables);
-
-			add_assoc_zval_ex(frame, "variables", HASH_KEY_SIZEOF("variables"), &variables);
-
-			xdebug_lib_set_active_data(next_fse->execute_data);
-			xdebug_lib_set_active_symbol_table(fse->symbol_table);
-
-			for (j = 0; j < (unsigned int) fse->op_array->last_var; j++) {
-				xdebug_str *symbol_name;
-				zval symbol;
-
-				symbol_name = xdebug_str_create_from_char(fse->op_array->vars[j]->val);
-				xdebug_get_php_symbol(&symbol, symbol_name);
-				xdebug_str_free(symbol_name);
-
-				if (Z_TYPE(symbol) == IS_UNDEF) {
-					add_assoc_null_ex(&variables, fse->op_array->vars[j]->val, fse->op_array->vars[j]->len);
-				} else {
-					add_assoc_zval_ex(&variables, fse->op_array->vars[j]->val, fse->op_array->vars[j]->len, &symbol);
-				}
-			}
-		}
-
-		if (fse->include_filename) {
-			add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), zend_string_copy(fse->include_filename));
-		}
-
-		add_next_index_zval(return_value, frame);
-		efree(params);
-		efree(frame);
-	}
 }
 /* }}} */

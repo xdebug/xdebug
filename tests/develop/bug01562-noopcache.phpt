@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #1562: Variables with xdebug_get_function_stack
+Test for bug #1562: Variables with xdebug_get_function_stack (!opcache)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('!opcache');
+?>
 --INI--
 xdebug.mode=develop
 xdebug.auto_profile=0
@@ -46,14 +51,14 @@ class Error_Entry
 $e = new Error_Entry(1, 2);
 ?>
 --EXPECTF--
-%sbug01562.php:17:
+%sbug01562-noopcache.php:17:
 array(4) {
   [0] =>
   array(5) {
     'function' =>
     string(6) "{main}"
     'file' =>
-    string(62) "%sbug01562.php"
+    string(%d) "%sbug01562-noopcache.php"
     'line' =>
     int(0)
     'params' =>
@@ -74,7 +79,7 @@ array(4) {
     'class' =>
     string(11) "Error_Entry"
     'file' =>
-    string(62) "%sbug01562.php"
+    string(%d) "%sbug01562-noopcache.php"
     'line' =>
     int(39)
     'params' =>
@@ -85,11 +90,13 @@ array(4) {
       string(1) "2"
     }
     'variables' =>
-    array(2) {
+    array(3) {
       'base' =>
       int(1)
       'errno' =>
       int(2)
+      'return' =>
+      NULL
     }
   }
   [2] =>
@@ -101,7 +108,7 @@ array(4) {
     'class' =>
     string(11) "Error_Class"
     'file' =>
-    string(62) "%sbug01562.php"
+    string(%d) "%sbug01562-noopcache.php"
     'line' =>
     int(35)
     'params' =>
@@ -110,7 +117,7 @@ array(4) {
       string(4) "TRUE"
     }
     'variables' =>
-    array(2) {
+    array(3) {
       'errno' =>
       bool(true)
       'elephpant' =>
@@ -120,6 +127,8 @@ array(4) {
         private float $PIE =>
         double(3.1415926535898)
       }
+      'randoVar' =>
+      int(42)
     }
   }
   [3] =>
@@ -131,7 +140,7 @@ array(4) {
     'class' =>
     string(11) "Error_Class"
     'file' =>
-    string(62) "%sbug01562.php"
+    string(%d) "%sbug01562-noopcache.php"
     'line' =>
     int(26)
     'params' =>

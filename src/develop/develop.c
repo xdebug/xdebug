@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,7 +94,20 @@ void xdebug_develop_rinit()
 	XG_DEV(functions_to_monitor) = NULL;
 	XG_DEV(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
 
+	/* Admin for last exception trace */
+	XG_DEV(last_exception_obj_ptr) = NULL;
+	ZVAL_UNDEF(&XG_DEV(last_exception_stack_trace));
+
 	xdebug_develop_overloaded_functions_setup();
+}
+
+void xdebug_develop_rshutdown()
+{
+	/* Admin for last exception trace */
+	if (XG_DEV(last_exception_obj_ptr)) {
+		XG_DEV(last_exception_obj_ptr) = NULL;
+		zval_ptr_dtor(&XG_DEV(last_exception_stack_trace));
+	}
 }
 
 void xdebug_develop_post_deactivate()
