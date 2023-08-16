@@ -128,9 +128,9 @@ array(3) {
     'params' =>
     array(2) {
       'base' =>
-      string(1) "1"
+      int(1)
       'errno' =>
-      string(1) "2"
+      int(2)
     }
     'variables' =>
     array(3) {
@@ -157,7 +157,7 @@ array(3) {
     'params' =>
     array(1) {
       'errno' =>
-      string(4) "TRUE"
+      bool(true)
     }
     'variables' =>
     array(2) {

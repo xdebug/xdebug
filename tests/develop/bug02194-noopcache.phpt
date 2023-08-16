@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #2195: xdebug_get_function_stack(['from_exception']) (!opcache)
+Test for bug #2194: Variables with xdebug_get_function_stack (!opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
@@ -11,29 +11,31 @@ xdebug.auto_profile=0
 xdebug.var_display_max_depth=4
 --FILE--
 <?php
-class Handlers
+class Elephpant
 {
 	function __construct(private string $title, private float $PIE) {}
 
-	static function exceptionHandler($exception)
+	function __toString()
 	{
-		var_dump( xdebug_get_function_stack( [ 'local_vars' => true ] ), xdebug_get_function_stack( [ 'from_exception' => $exception ] ) );
+		return "{$this->title} loves {$this->PIE}";
 	}
-}
-
-class Elephpant
-{
-	function __construct(private string $title, private string $PIE) {}
 }
 
 class Error_Class
 {
+	public static function getBT($what)
+	{
+		$tmp = xdebug_get_function_stack( ['local_vars' => true, 'params_as_values' => true ] );
+		var_dump($tmp);
+
+		echo $tmp[3]['params']['what'], "\n";
+	}
+
 	public static function newError($errno = false)
 	{
 		$elephpant = new Elephpant("Bluey", M_PI);
 		$randoVar = 42;
-
-		throw new Exception();
+		return self::getBT($elephpant);
 	}
 
 }
@@ -46,45 +48,17 @@ class Error_Entry
 	}
 }
 
-set_exception_handler(['Handlers', 'exceptionHandler']);
 $e = new Error_Entry(1, 2);
-
 ?>
 --EXPECTF--
-%sbug02195-exception-noopcache.php:8:
-array(1) {
-  [0] =>
-  array(7) {
-    'function' =>
-    string(16) "exceptionHandler"
-    'type' =>
-    string(6) "static"
-    'class' =>
-    string(8) "Handlers"
-    'file' =>
-    string(%d) "%sbug02195-exception-noopcache.php"
-    'line' =>
-    int(0)
-    'params' =>
-    array(1) {
-      'exception' =>
-      string(%d) "class Exception { %s
-    }
-    'variables' =>
-    array(1) {
-      'exception' =>
-      NULL
-    }
-  }
-}
-%sbug02195-exception-noopcache.php:8:
-array(3) {
+%sbug02194-noopcache.php:17:
+array(4) {
   [0] =>
   array(5) {
     'function' =>
     string(6) "{main}"
     'file' =>
-    string(%d) "%sbug02195-exception-noopcache.php"
+    string(%d) "%sbug02194-noopcache.php"
     'line' =>
     int(0)
     'params' =>
@@ -105,9 +79,9 @@ array(3) {
     'class' =>
     string(11) "Error_Entry"
     'file' =>
-    string(%d) "%sbug02195-exception-noopcache.php"
+    string(%d) "%sbug02194-noopcache.php"
     'line' =>
-    int(38)
+    int(39)
     'params' =>
     array(2) {
       'base' =>
@@ -134,9 +108,9 @@ array(3) {
     'class' =>
     string(11) "Error_Class"
     'file' =>
-    string(%d) "%sbug02195-exception-noopcache.php"
+    string(%d) "%sbug02194-noopcache.php"
     'line' =>
-    int(33)
+    int(35)
     'params' =>
     array(1) {
       'errno' =>
@@ -147,14 +121,50 @@ array(3) {
       'errno' =>
       bool(true)
       'elephpant' =>
-      class Elephpant#%d (2) {
+      class Elephpant#2 (2) {
         private string $title =>
         string(5) "Bluey"
-        private string $PIE =>
-        string(%d) "3.14159265%d"
+        private float $PIE =>
+        double(3.1415926535898)
       }
       'randoVar' =>
       int(42)
     }
   }
+  [3] =>
+  array(7) {
+    'function' =>
+    string(5) "getBT"
+    'type' =>
+    string(6) "static"
+    'class' =>
+    string(11) "Error_Class"
+    'file' =>
+    string(%d) "%sbug02194-noopcache.php"
+    'line' =>
+    int(26)
+    'params' =>
+    array(1) {
+      'what' =>
+      class Elephpant#2 (2) {
+        private string $title =>
+        string(5) "Bluey"
+        private float $PIE =>
+        double(3.1415926535898)
+      }
+    }
+    'variables' =>
+    array(2) {
+      'what' =>
+      class Elephpant#2 (2) {
+        private string $title =>
+        string(5) "Bluey"
+        private float $PIE =>
+        double(3.1415926535898)
+      }
+      'tmp' =>
+      NULL
+    }
+  }
 }
+Bluey loves 3.1415926535%s

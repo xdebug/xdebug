@@ -271,7 +271,7 @@ static void add_single_value(xdebug_str *str, zval *zv, int html)
 	}
 }
 
-static void zval_from_stack_add_frame_parameters(zval *frame, function_stack_entry *fse)
+static void zval_from_stack_add_frame_parameters(zval *frame, function_stack_entry *fse, bool params_as_values)
 {
 	unsigned int  j;
 	zval         *params;
@@ -287,7 +287,6 @@ static void zval_from_stack_add_frame_parameters(zval *frame, function_stack_ent
 	add_assoc_zval_ex(frame, "params", HASH_KEY_SIZEOF("params"), params);
 
 	for (j = 0; j < sent_variables; j++) {
-		xdebug_str *argument = NULL;
 
 		if (fse->var[j].is_variadic) {
 			zval *vparams;
@@ -305,19 +304,45 @@ static void zval_from_stack_add_frame_parameters(zval *frame, function_stack_ent
 			variadic_opened = 1;
 			continue;
 		}
-		if (!Z_ISUNDEF(fse->var[j].data)) {
-			argument = xdebug_get_zval_value_line(&fse->var[j].data, 0, NULL);
+
+		if (params_as_values) {
+			/* Named parameters */
+			if (fse->var[j].name && !variadic_opened) {
+				if (Z_TYPE(fse->var[j].data) == IS_UNDEF) {
+					add_assoc_null_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name));
+				} else {
+					Z_TRY_ADDREF(fse->var[j].data);
+					add_assoc_zval_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), &fse->var[j].data);
+				}
+				continue;
+			}
+
+			/* Unnamed or Variadic parameters */
+			if (Z_TYPE(fse->var[j].data) == IS_UNDEF) {
+				add_index_null(params, j - variadic_opened);
+			} else {
+				Z_TRY_ADDREF(fse->var[j].data);
+				add_index_zval(params, j - variadic_opened, &fse->var[j].data);
+			}
+
+			continue;
 		} else {
-			argument = xdebug_str_create_from_char((char*) "???");
-		}
-		if (fse->var[j].name && !variadic_opened && argument) {
-			add_assoc_stringl_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), argument->d, argument->l);
-		} else {
-			add_index_stringl(params, j - variadic_opened, argument->d, argument->l);
-		}
-		if (argument) {
-			xdebug_str_free(argument);
-			argument = NULL;
+			xdebug_str *argument = NULL;
+
+			if (!Z_ISUNDEF(fse->var[j].data)) {
+				argument = xdebug_get_zval_value_line(&fse->var[j].data, 0, NULL);
+			} else {
+				argument = xdebug_str_create_from_char((char*) "???");
+			}
+			if (fse->var[j].name && !variadic_opened && argument) {
+				add_assoc_stringl_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), argument->d, argument->l);
+			} else {
+				add_index_stringl(params, j - variadic_opened, argument->d, argument->l);
+			}
+			if (argument) {
+				xdebug_str_free(argument);
+				argument = NULL;
+			}
 		}
 	}
 
@@ -352,7 +377,7 @@ static void zval_from_stack_add_frame_variables(zval *frame, zend_execute_data *
 	}
 }
 
-static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, zend_execute_data *edata, bool add_local_vars)
+static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, zend_execute_data *edata, bool add_local_vars, bool params_as_values)
 {
 	zval                 *frame;
 
@@ -377,7 +402,7 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 	add_assoc_str_ex(frame, "file", HASH_KEY_SIZEOF("file"), zend_string_copy(fse->filename));
 	add_assoc_long_ex(frame, "line", HASH_KEY_SIZEOF("line"), fse->lineno);
 
-	zval_from_stack_add_frame_parameters(frame, fse);
+	zval_from_stack_add_frame_parameters(frame, fse, params_as_values);
 
 	if (add_local_vars && fse->op_array && fse->op_array->vars) {
 		zval_from_stack_add_frame_variables(frame, edata, fse->symbol_table, fse->op_array);
@@ -391,7 +416,7 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 	efree(frame);
 }
 
-static void zval_from_stack(zval *output, bool add_local_vars)
+static void zval_from_stack(zval *output, bool add_local_vars, bool params_as_values)
 {
 	function_stack_entry *fse, *next_fse;
 	unsigned int          i;
@@ -402,7 +427,7 @@ static void zval_from_stack(zval *output, bool add_local_vars)
 	next_fse = fse + 1;
 
 	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++, next_fse++) {
-		zval_from_stack_add_frame(output, fse, next_fse->execute_data, add_local_vars);
+		zval_from_stack_add_frame(output, fse, next_fse->execute_data, add_local_vars, params_as_values);
 	}
 }
 
@@ -1009,8 +1034,8 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	/* Remember last stack trace so it can be retrieved in an exception handler through
 	 * xdebug_get_function_stack(['from_exception' => $e]) */
 	XG_DEV(last_exception_obj_ptr) = exception;
-	zval_from_stack(&XG_DEV(last_exception_stack_trace), true);
-	zval_from_stack_add_frame(&XG_DEV(last_exception_stack_trace), XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true);
+	zval_from_stack(&XG_DEV(last_exception_stack_trace), true, true);
+	zval_from_stack_add_frame(&XG_DEV(last_exception_stack_trace), XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
 
 	if (!PG(html_errors)) {
 		xdebug_str_addc(&tmp_str, '\n');
@@ -1064,6 +1089,7 @@ PHP_FUNCTION(xdebug_get_function_stack)
 {
 	HashTable            *options = NULL;
 	bool                  add_local_vars = false;
+	bool                  params_as_values = false;
 
 	if (!XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		php_error(E_WARNING, "Function must be enabled in php.ini by setting 'xdebug.mode' to 'develop'");
@@ -1087,6 +1113,14 @@ PHP_FUNCTION(xdebug_get_function_stack)
 			} else {
 				array_init(return_value);
 			}
+
+			if (
+				(zend_hash_str_find(options, "local_vars", sizeof("local_vars") - 1)) ||
+				(zend_hash_str_find(options, "params_as_values", sizeof("params_as_values") - 1))
+			) {
+				php_error(E_WARNING, "The 'local_vars' or 'params_as_values' options are ignored when used with the 'from_exception' option");
+			}
+
 			return;
 		}
 
@@ -1094,9 +1128,14 @@ PHP_FUNCTION(xdebug_get_function_stack)
 		if (value) {
 			add_local_vars = (Z_TYPE_P(value) == IS_TRUE);
 		}
+
+		value = zend_hash_str_find(options, "params_as_values", sizeof("params_as_values") - 1);
+		if (value) {
+			params_as_values = (Z_TYPE_P(value) == IS_TRUE);
+		}
 	}
 
-	zval_from_stack(return_value, add_local_vars);
+	zval_from_stack(return_value, add_local_vars, params_as_values);
 
 }
 /* }}} */
