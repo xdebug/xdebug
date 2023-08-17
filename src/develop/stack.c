@@ -381,12 +381,6 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 {
 	zval                 *frame;
 
-	if (fse->function.function) {
-		if (strcmp(fse->function.function, "xdebug_get_function_stack") == 0) {
-			return;
-		}
-	}
-
 	/* Initialize frame array */
 	XDEBUG_MAKE_STD_ZVAL(frame);
 	array_init(frame);
