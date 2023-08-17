@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -857,9 +857,6 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		xdebug_debugger_handle_breakpoints(fse, XDEBUG_BREAKPOINT_TYPE_RETURN|XDEBUG_BREAKPOINT_TYPE_EXTERNAL, return_value);
 	}
 
-	fse->symbol_table = NULL;
-	fse->execute_data = NULL;
-
 	if (XG_BASE(stack)) {
 		xdebug_vector_pop(XG_BASE(stack));
 	}
@@ -929,6 +926,11 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
+	}
+
+	fse->execute_data = EG(current_execute_data)->prev_execute_data;
+	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
+		fse->symbol_table = EG(current_execute_data)->symbol_table;
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {

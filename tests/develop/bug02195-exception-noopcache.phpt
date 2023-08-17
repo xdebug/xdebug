@@ -73,7 +73,21 @@ array(1) {
     'variables' =>
     array(1) {
       'exception' =>
-      NULL
+      class Exception#3 (7) {
+        protected $message =>
+        string(0) ""
+        private %S$string =>
+        string(0) ""
+        protected $code =>
+        int(0)
+        protected %S$file =>
+        string(%d) "%sbug02195-exception-noopcache.php"
+        protected %S$line =>
+        int(24)
+        private array $trace =>%A
+        private ?Throwable $previous =>
+        NULL
+      }
     }
   }
 }

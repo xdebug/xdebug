@@ -76,13 +76,13 @@ array(1) {
       class Exception#3 (7) {
         protected $message =>
         string(0) ""
-        private string $string =>
+        private %S$string =>
         string(0) ""
         protected $code =>
         int(0)
-        protected string $file =>
+        protected %S$file =>
         string(%d) "%sbug02195-exception-opcache.php"
-        protected int $line =>
+        protected %S$line =>
         int(24)
         private array $trace =>
         array(2) {
