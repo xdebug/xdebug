@@ -1018,7 +1018,7 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 			break;
 		}
 
-		if (XG_DEV(last_exception_obj_ptr) == Z_OBJ_P(z_previous_exception)) {
+		if (XG_DEV(last_exception_trace).obj_ptr[0] == Z_OBJ_P(z_previous_exception)) {
 			xdebug_str_add_fmt(&tmp_str, "\n\tPrevious trace for %x found\n", z_previous_exception);
 		} else {
 			xdebug_str_add_fmt(&tmp_str, "\n\tPrevious trace for %x NOT found\n", z_previous_exception);
@@ -1026,16 +1026,16 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 		previous_exception_obj = Z_OBJ_P(z_previous_exception);
 	} while (true);
 
-	if (XG_DEV(last_exception_obj_ptr) != NULL) {
-		zval_ptr_dtor(&XG_DEV(last_exception_stack_trace));
-		XG_DEV(last_exception_obj_ptr) = NULL;
+	if (XG_DEV(last_exception_trace).obj_ptr[0] != NULL) {
+		zval_ptr_dtor(&XG_DEV(last_exception_trace).stack_trace[0]);
+		XG_DEV(last_exception_trace).obj_ptr[0] = NULL;
 	}
 
 	/* Remember last stack trace so it can be retrieved in an exception handler through
 	 * xdebug_get_function_stack(['from_exception' => $e]) */
-	XG_DEV(last_exception_obj_ptr) = exception;
-	zval_from_stack(&XG_DEV(last_exception_stack_trace), true, true);
-	zval_from_stack_add_frame(&XG_DEV(last_exception_stack_trace), XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
+	XG_DEV(last_exception_trace).obj_ptr[0] = exception;
+	zval_from_stack(&XG_DEV(last_exception_trace).stack_trace[0], true, true);
+	zval_from_stack_add_frame(&XG_DEV(last_exception_trace).stack_trace[0], XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
 
 	if (!PG(html_errors)) {
 		xdebug_str_addc(&tmp_str, '\n');
@@ -1103,9 +1103,9 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 		value = zend_hash_str_find(options, "from_exception", sizeof("from_exception") - 1);
 		if (value && Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), zend_ce_throwable)) {
-			if (Z_OBJ_P(value) == XG_DEV(last_exception_obj_ptr)) {
-				Z_TRY_ADDREF(XG_DEV(last_exception_stack_trace));
-				ZVAL_COPY_VALUE(return_value, &XG_DEV(last_exception_stack_trace));
+			if (Z_OBJ_P(value) == XG_DEV(last_exception_trace).obj_ptr[0]) {
+				Z_TRY_ADDREF(XG_DEV(last_exception_trace).stack_trace[0]);
+				ZVAL_COPY_VALUE(return_value, &XG_DEV(last_exception_trace).stack_trace[0]);
 			} else {
 				array_init(return_value);
 			}

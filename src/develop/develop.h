@@ -17,6 +17,8 @@
 #ifndef __XDEBUG_DEVELOP_H__
 #define __XDEBUG_DEVELOP_H__
 
+#define XDEBUG_LAST_EXCEPTION_TRACE_SLOTS 8
+
 typedef struct _xdebug_develop_globals_t {
 	/* used for function monitoring */
 	zend_bool     do_monitor_functions;
@@ -43,8 +45,11 @@ typedef struct _xdebug_develop_globals_t {
 	zif_handler   orig_var_dump_func;
 
 	/* last exception stack trace */
-	zend_object *last_exception_obj_ptr;
-	zval         last_exception_stack_trace;
+	struct {
+		int          next_slot;
+		zend_object *obj_ptr[XDEBUG_LAST_EXCEPTION_TRACE_SLOTS];
+		zval         stack_trace[XDEBUG_LAST_EXCEPTION_TRACE_SLOTS];
+	} last_exception_trace;
 } xdebug_develop_globals_t;
 
 typedef struct _xdebug_develop_settings_t {

@@ -87,6 +87,8 @@ void xdebug_develop_mshutdown()
 
 void xdebug_develop_rinit()
 {
+	int i;
+
 	XG_DEV(collected_errors)  = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
 	/* Function monitoring */
@@ -95,18 +97,26 @@ void xdebug_develop_rinit()
 	XG_DEV(monitored_functions_found) = xdebug_llist_alloc(xdebug_monitored_function_dtor);
 
 	/* Admin for last exception trace */
-	XG_DEV(last_exception_obj_ptr) = NULL;
-	ZVAL_UNDEF(&XG_DEV(last_exception_stack_trace));
+	XG_DEV(last_exception_trace).next_slot = 0;
+	for (i = 0; i < XDEBUG_LAST_EXCEPTION_TRACE_SLOTS; i++) {
+		XG_DEV(last_exception_trace).obj_ptr[i] = NULL;
+		ZVAL_UNDEF(&XG_DEV(last_exception_trace).stack_trace[i]);
+	}
 
 	xdebug_develop_overloaded_functions_setup();
 }
 
 void xdebug_develop_rshutdown()
 {
+	int i;
+
 	/* Admin for last exception trace */
-	if (XG_DEV(last_exception_obj_ptr)) {
-		XG_DEV(last_exception_obj_ptr) = NULL;
-		zval_ptr_dtor(&XG_DEV(last_exception_stack_trace));
+	XG_DEV(last_exception_trace).next_slot = 0;
+	for (i = 0; i < XDEBUG_LAST_EXCEPTION_TRACE_SLOTS; i++) {
+		if (XG_DEV(last_exception_trace).obj_ptr[i]) {
+			XG_DEV(last_exception_trace).obj_ptr[i] = NULL;
+			zval_ptr_dtor(&XG_DEV(last_exception_trace).stack_trace[i]);
+		}
 	}
 }
 
