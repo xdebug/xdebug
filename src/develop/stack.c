@@ -1007,18 +1007,24 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
 
-#if PHP_VERSION_ID < 80200
-	zval *xdebug_message_trace, *previous_exception;
+	zval *z_previous_exception;
+	zend_object *previous_exception_obj = exception;
 	zval dummy;
 
-	previous_exception = zend_read_property(exception_ce, exception, "previous", sizeof("previous")-1, 1, &dummy);
-	if (previous_exception && Z_TYPE_P(previous_exception) == IS_OBJECT) {
-		xdebug_message_trace = zend_read_property(exception_ce, Z_OBJ_P(previous_exception), "xdebug_message", sizeof("xdebug_message")-1, 1, &dummy);
-		if (xdebug_message_trace && Z_TYPE_P(xdebug_message_trace) != IS_NULL) {
-			xdebug_str_add(&tmp_str, Z_STRVAL_P(xdebug_message_trace), 0);
+	/* Loop over previous exceptions until there are none left */
+	do {
+		z_previous_exception = zend_read_property(exception_ce, previous_exception_obj, "previous", sizeof("previous")-1, 1, &dummy);
+		if (!z_previous_exception || Z_TYPE_P(z_previous_exception) != IS_OBJECT) {
+			break;
 		}
-	}
-#endif
+
+		if (XG_DEV(last_exception_obj_ptr) == Z_OBJ_P(z_previous_exception)) {
+			xdebug_str_add_fmt(&tmp_str, "\n\tPrevious trace for %x found\n", z_previous_exception);
+		} else {
+			xdebug_str_add_fmt(&tmp_str, "\n\tPrevious trace for %x NOT found\n", z_previous_exception);
+		}
+		previous_exception_obj = Z_OBJ_P(z_previous_exception);
+	} while (true);
 
 	if (XG_DEV(last_exception_obj_ptr) != NULL) {
 		zval_ptr_dtor(&XG_DEV(last_exception_stack_trace));
@@ -1037,10 +1043,6 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), message ? Z_STRVAL_P(message) : "", Z_STRVAL_P(file), Z_LVAL_P(line));
 	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
 	exception_trace = tmp_str.d;
-
-#if PHP_VERSION_ID < 80200
-	zend_update_property_string(exception_ce, exception, "xdebug_message", sizeof("xdebug_message")-1, exception_trace);
-#endif
 
 	if (XG_BASE(last_exception_trace)) {
 		xdfree(XG_BASE(last_exception_trace));
