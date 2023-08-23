@@ -37,7 +37,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-static const char* text_formats[11] = {
+static const char* text_formats[21] = {
 	"\n",
 	"%s: %s in %s on line %d\n",
 	"\nCall Stack:\n",
@@ -48,10 +48,22 @@ static const char* text_formats[11] = {
 	"\n",
 	"  $%s = %s\n",
 	"  $%s = *uninitialized*\n",
-	"SCREAM:  Error suppression ignored for\n"
+	"SCREAM:  Error suppression ignored for\n",
+	NULL,
+	NULL,
+
+	// 13+ (for xdebug_append_printable_stack_from_zval)
+	"\n\tCall Stack:\n",
+	"",
+	"\tThe stack is empty or not available\n",
+	"\t%10.4F %10ld %3d. %s() %s:%d\n",
+	"\n\t",
+	"\n\tNested Exceptions:\n",
+	"", // nested exceptions footer
+	NULL // alternative to 16 for html only
 };
 
-static const char* ansi_formats[11] = {
+static const char* ansi_formats[21] = {
 	"\n",
 	"[1m[31m%s[0m: %s[22m in [31m%s[0m on line [32m%d[0m[22m\n",
 	"\n[1mCall Stack:[22m\n",
@@ -62,10 +74,22 @@ static const char* ansi_formats[11] = {
 	"\n",
 	"  $%s = %s\n",
 	"  $%s = *uninitialized*\n",
-	"[1m[31mSCREAM[0m:  Error suppression ignored for\n"
+	"[1m[31mSCREAM[0m:  Error suppression ignored for\n",
+	NULL,
+	NULL,
+
+	// 13+ (for xdebug_append_printable_stack_from_zval)
+	"\n\t[1mCall Stack:[22m\n",
+	"",
+	"\tThe stack is empty or not available\n",
+	"\t%10.4F %10ld %3d. %s() %s:%d\n",
+	"\n\t",
+	"\n\t[1mNested Exceptions:[22m\n",
+	"", // nested exceptions footer
+	NULL // alternative to 16 for html only
 };
 
-static const char* html_formats[13] = {
+static const char* html_formats[21] = {
 	"<br />\n<font size='1'><table class='xdebug-error xe-%s%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
@@ -78,7 +102,17 @@ static const char* html_formats[13] = {
 	"<tr><td colspan='2' align='right' bgcolor='#eeeeec' valign='top'><pre>$%s&nbsp;=</pre></td><td colspan='3' bgcolor='#eeeeec' valign='top'><i>Undefined</i></td></tr>\n",
 	" )</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>%s<b>:</b>%d</a></td></tr>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in <a style='color: black' href='%s'>%s</a> on line <i>%d</i></th></tr>\n",
-	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> SCREAM: Error suppression ignored for</th></tr>\n"
+	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> SCREAM: Error suppression ignored for</th></tr>\n",
+
+	// 13+ (for xdebug_append_printable_stack_from_zval)
+	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
+	"",
+	"<tr><td colspan='5' bgcolor='#eeeeec'>The stack is empty or not available</td></tr>\n",
+	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4F</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s()</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>%s<b>:</b>%d</a></td></tr>\n",
+	"<table class='xdebug-error xe-nested' style='width: 80%; margin: 1em' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
+	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Nested Exceptions</th></tr><tr><td colspan='5'>\n",
+	"</table></tr>\n", // nested exceptions footer
+	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4F</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s()</td><td title='%s' bgcolor='#eeeeec'>%s<b>:</b>%d</td></tr>\n"
 };
 
 static const char** select_formats(int html)
@@ -241,6 +275,32 @@ void xdebug_append_error_description(xdebug_str *str, int html, const char *erro
 	}
 
 	efree(escaped);
+}
+
+static void xdebug_append_error_description_from_object(xdebug_str *str, int html, zval *exception_obj)
+{
+	zval *message, *file, *line;
+	zval dummy;
+
+	if (Z_TYPE_P(exception_obj) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(exception_obj), zend_ce_throwable)) {
+		return;
+	}
+
+	message = zend_read_property(Z_OBJCE_P(exception_obj), Z_OBJ_P(exception_obj), "message", sizeof("message")-1, 1, &dummy);
+	file = zend_read_property(Z_OBJCE_P(exception_obj), Z_OBJ_P(exception_obj), "file", sizeof("file")-1, 1, &dummy);
+	line = zend_read_property(Z_OBJCE_P(exception_obj), Z_OBJ_P(exception_obj), "line", sizeof("line")-1, 1, &dummy);
+
+	if (!message || !file || !line || Z_TYPE_P(message) != IS_STRING || Z_TYPE_P(file) != IS_STRING || Z_TYPE_P(line) != IS_LONG) {
+		return;
+	}
+
+	xdebug_append_error_description(str, html, STR_NAME_VAL(Z_OBJCE_P(exception_obj)->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line));
+}
+
+static void xdebug_append_sub_header(xdebug_str *str, int html)
+{
+	const char **formats = select_formats(html);
+	xdebug_str_add_const(str, formats[17]);
 }
 
 static void add_single_value(xdebug_str *str, zval *zv, int html)
@@ -427,6 +487,37 @@ static void zval_from_stack(zval *output, bool add_local_vars, bool params_as_va
 	}
 }
 
+/* Helpers for last_exception_trace slots */
+
+static zval *last_exception_find_trace(zend_object *obj)
+{
+	int i;
+
+	for (i = 0; i < XDEBUG_LAST_EXCEPTION_TRACE_SLOTS; i++) {
+		if (obj == XG_DEV(last_exception_trace).obj_ptr[i]) {
+			return &XG_DEV(last_exception_trace).stack_trace[i];
+		}
+	}
+	return NULL;
+}
+
+static zval *last_exception_get_slot(zend_object *obj)
+{
+	int slot = XG_DEV(last_exception_trace).next_slot;
+
+	if (XG_DEV(last_exception_trace).obj_ptr[slot] != NULL) {
+		zval_ptr_dtor(&XG_DEV(last_exception_trace).stack_trace[slot]);
+		XG_DEV(last_exception_trace).obj_ptr[slot] = NULL;
+	}
+
+	XG_DEV(last_exception_trace).obj_ptr[slot] = obj;
+
+	XG_DEV(last_exception_trace).next_slot = (slot + 1 == XDEBUG_LAST_EXCEPTION_TRACE_SLOTS ? 0 : slot + 1);
+
+	return &XG_DEV(last_exception_trace).stack_trace[slot];
+}
+
+/* Formatting variables */
 
 #define XDEBUG_VAR_FORMAT_INITIALISED   0
 #define XDEBUG_VAR_FORMAT_UNINITIALISED 1
@@ -519,6 +610,91 @@ static void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element*
 		xdebug_str_free(contents);
 	}
 	zval_ptr_dtor_nogc(&zvar);
+}
+
+void xdebug_append_printable_stack_from_zval(xdebug_str *str, zval *trace, int html)
+{
+	const char **formats = select_formats(html);
+	zval        *frame;
+	int          counter = 0;
+
+	xdebug_str_add_const(str, formats[13]); // header
+
+	if (!trace || Z_TYPE_P(trace) != IS_ARRAY) {
+		xdebug_str_add_const(str, formats[15]); // message
+		xdebug_str_add_const(str, formats[14]); // footer
+		return;
+	}
+
+	ZEND_HASH_FOREACH_VAL_IND(HASH_OF(trace), frame) {
+		zval *time, *memory, *class, *type, *function, *file, *line;
+		char *combined_function;
+
+		counter++;
+
+		if (Z_TYPE_P(frame) != IS_ARRAY) {
+			continue;
+		}
+
+		time = zend_hash_str_find(HASH_OF(frame), "time", 4);
+		memory = zend_hash_str_find(HASH_OF(frame), "memory", 6);
+		class = zend_hash_str_find(HASH_OF(frame), "class", 5);
+		type = zend_hash_str_find(HASH_OF(frame), "type", 4);
+		function = zend_hash_str_find(HASH_OF(frame), "function", 8);
+		file = zend_hash_str_find(HASH_OF(frame), "file", 4);
+		line = zend_hash_str_find(HASH_OF(frame), "line", 4);
+
+		if (!time || !memory || !function || !file || !line) {
+			continue;
+		}
+
+		if (Z_TYPE_P(time) != IS_DOUBLE || Z_TYPE_P(memory) != IS_LONG || Z_TYPE_P(function) != IS_STRING || Z_TYPE_P(file) != IS_STRING || Z_TYPE_P(line) != IS_LONG) {
+			continue;
+		}
+
+		if (class && type && Z_TYPE_P(class) == IS_STRING && Z_TYPE_P(type) == IS_STRING) {
+			combined_function = xdebug_sprintf("%s%s%s", Z_STRVAL_P(class), strcmp(Z_STRVAL_P(type), "static") == 0 ? "::" : "->", Z_STRVAL_P(function));
+		} else {
+			combined_function = xdstrdup(Z_STRVAL_P(function));
+		}
+
+		if (html) {
+			char *formatted_filename;
+			xdebug_format_filename(&formatted_filename, "...%s%n", Z_STR_P(file));
+
+			if (strlen(XINI_LIB(file_link_format)) > 0 && strcmp(Z_STRVAL_P(file), "Unknown") != 0) {
+				char *file_link;
+
+				xdebug_format_file_link(&file_link, Z_STRVAL_P(file), Z_LVAL_P(line));
+				xdebug_str_add_fmt(str, formats[16], counter, Z_DVAL_P(time), Z_LVAL_P(memory), combined_function, Z_STRVAL_P(file), file_link, formatted_filename, Z_LVAL_P(line));
+				xdfree(file_link);
+			} else {
+				xdebug_str_add_fmt(str, formats[20], counter, Z_DVAL_P(time), Z_LVAL_P(memory), combined_function, Z_STRVAL_P(file), formatted_filename, Z_LVAL_P(line));
+			}
+
+			xdfree(formatted_filename);
+		} else {
+			xdebug_str_add_fmt(str, formats[16], Z_DVAL_P(time), Z_LVAL_P(memory), counter, combined_function, Z_STRVAL_P(file), Z_LVAL_P(line));
+		}
+		xdfree(combined_function);
+
+	} ZEND_HASH_FOREACH_END();
+
+	xdebug_str_add_const(str, formats[14]); // footer
+}
+
+static void xdebug_append_nested_section_header(xdebug_str *str, int html)
+{
+	const char **formats = select_formats(html);
+
+	xdebug_str_add_const(str, formats[18]);
+}
+
+static void xdebug_append_nested_section_footer(xdebug_str *str, int html)
+{
+	const char **formats = select_formats(html);
+
+	xdebug_str_add_const(str, formats[19]);
 }
 
 void xdebug_append_printable_stack(xdebug_str *str, int html)
@@ -1009,48 +1185,62 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
 
-	zval *z_previous_exception;
+	zval *z_previous_exception, *z_last_exception_slot, *z_previous_trace;
 	zend_object *previous_exception_obj = exception;
 	zval dummy;
-
-	/* Loop over previous exceptions until there are none left */
-	do {
-		z_previous_exception = zend_read_property(exception_ce, previous_exception_obj, "previous", sizeof("previous")-1, 1, &dummy);
-		if (!z_previous_exception || Z_TYPE_P(z_previous_exception) != IS_OBJECT) {
-			break;
-		}
-
-		if (XG_DEV(last_exception_trace).obj_ptr[0] == Z_OBJ_P(z_previous_exception)) {
-			xdebug_str_add_fmt(&tmp_str, "\n\tPrevious trace for %x found\n", z_previous_exception);
-		} else {
-			xdebug_str_add_fmt(&tmp_str, "\n\tPrevious trace for %x NOT found\n", z_previous_exception);
-		}
-		previous_exception_obj = Z_OBJ_P(z_previous_exception);
-	} while (true);
-
-	if (XG_DEV(last_exception_trace).obj_ptr[0] != NULL) {
-		zval_ptr_dtor(&XG_DEV(last_exception_trace).stack_trace[0]);
-		XG_DEV(last_exception_trace).obj_ptr[0] = NULL;
-	}
-
-	/* Remember last stack trace so it can be retrieved in an exception handler through
-	 * xdebug_get_function_stack(['from_exception' => $e]) */
-	XG_DEV(last_exception_trace).obj_ptr[0] = exception;
-	zval_from_stack(&XG_DEV(last_exception_trace).stack_trace[0], true, true);
-	zval_from_stack_add_frame(&XG_DEV(last_exception_trace).stack_trace[0], XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
 
 	if (!PG(html_errors)) {
 		xdebug_str_addc(&tmp_str, '\n');
 	}
 	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), message ? Z_STRVAL_P(message) : "", Z_STRVAL_P(file), Z_LVAL_P(line));
 	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
+
+	/* Loop over previous exceptions until there are none left */
+	{
+		bool first = true;
+		bool found = false;
+
+		do {
+			z_previous_exception = zend_read_property(exception_ce, previous_exception_obj, "previous", sizeof("previous")-1, 1, &dummy);
+			if (!z_previous_exception || Z_TYPE_P(z_previous_exception) != IS_OBJECT) {
+				break;
+			}
+
+			if (first) {
+				first = false;
+				found = true;
+				xdebug_append_nested_section_header(&tmp_str, PG(html_errors));
+			}
+
+			xdebug_append_sub_header(&tmp_str, PG(html_errors));
+			xdebug_append_error_description_from_object(&tmp_str, PG(html_errors), z_previous_exception);
+
+			z_previous_trace = last_exception_find_trace(Z_OBJ_P(z_previous_exception));
+			xdebug_append_printable_stack_from_zval(&tmp_str, z_previous_trace, PG(html_errors));
+
+			previous_exception_obj = Z_OBJ_P(z_previous_exception);
+		} while (true);
+
+		if (found) {
+			xdebug_append_nested_section_footer(&tmp_str, PG(html_errors));
+		}
+	}
+
+	/* Remember last stack trace so it can be retrieved in an exception handler through
+	 * xdebug_get_function_stack(['from_exception' => $e]) */
+	z_last_exception_slot = last_exception_get_slot(exception);
+	zval_from_stack(z_last_exception_slot, true, true);
+	zval_from_stack_add_frame(z_last_exception_slot, XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
+
 	exception_trace = tmp_str.d;
 
+	/* Save */
 	if (XG_BASE(last_exception_trace)) {
 		xdfree(XG_BASE(last_exception_trace));
 	}
 	XG_BASE(last_exception_trace) = exception_trace;
 
+	/* Display if expected */
 	if (XINI_DEV(show_ex_trace) || (instanceof_function(exception_ce, zend_ce_error) && XINI_DEV(show_error_trace))) {
 		if (PG(log_errors)) {
 			xdebug_log_stack(STR_NAME_VAL(exception_ce->name), Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line));
