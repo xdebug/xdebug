@@ -26,7 +26,11 @@ caneda \\a \\b \\\c|
 %sbug00538-002.php:8:
 array(2) {
   [0] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -38,7 +42,11 @@ array(2) {
     }
   }
   [1] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(4) "call"
     'file' =>

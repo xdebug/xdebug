@@ -16,7 +16,11 @@ foo('bar');
 bar%sbug00022.php:4:
 array(2) {
   [0] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -28,7 +32,11 @@ array(2) {
     }
   }
   [1] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(3) "foo"
     'file' =>

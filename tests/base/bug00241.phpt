@@ -4,7 +4,7 @@ Test for bug #241: Crash in xdebug_get_function_stack()
 xdebug.mode=develop
 xdebug.auto_profile=0
 xdebug.var_display_max_depth=3
-xdebug.var_display_max_children=2
+xdebug.var_display_max_children=4
 --FILE--
 <?php
 function error_handler($errno, $string, $file, $line)
@@ -44,7 +44,11 @@ echo "The End\n";
 %sbug00241.php:17:
 array(5) {
   [0] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -53,11 +57,41 @@ array(5) {
     (more elements)...
   }
   [1] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(13) "error_handler"
     'file' =>
     string(%d) "%sbug00241.php"
+
+    (more elements)...
+  }
+  [2] =>
+  array(8) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
+    'function' =>
+    string(8) "newError"
+    'type' =>
+    string(6) "static"
+
+    (more elements)...
+  }
+  [3] =>
+  array(8) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
+    'function' =>
+    string(11) "__construct"
+    'type' =>
+    string(7) "dynamic"
 
     (more elements)...
   }
