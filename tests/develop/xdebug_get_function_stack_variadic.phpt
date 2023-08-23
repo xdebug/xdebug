@@ -25,7 +25,11 @@ foo( "foo", "bar", 3.1415 );
 ?>
 --EXPECTF--
 %sxdebug_get_function_stack_variadic.php:5:
-array(4) {
+array(6) {
+  'time' =>
+  double(%f)
+  'memory' =>
+  int(%d)
   'function' =>
   string(3) "foo"
   'file' =>
@@ -39,7 +43,11 @@ array(4) {
   }
 }
 %sxdebug_get_function_stack_variadic.php:5:
-array(4) {
+array(6) {
+  'time' =>
+  double(%f)
+  'memory' =>
+  int(%d)
   'function' =>
   string(3) "foo"
   'file' =>
@@ -58,7 +66,11 @@ array(4) {
   }
 }
 %sxdebug_get_function_stack_variadic.php:5:
-array(4) {
+array(6) {
+  'time' =>
+  double(%f)
+  'memory' =>
+  int(%d)
   'function' =>
   string(3) "foo"
   'file' =>

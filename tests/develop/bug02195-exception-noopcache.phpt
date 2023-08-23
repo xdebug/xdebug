@@ -54,7 +54,11 @@ $e = new Error_Entry(1, 2);
 %sbug02195-exception-noopcache.php:8:
 array(1) {
   [0] =>
-  array(7) {
+  array(9) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(16) "exceptionHandler"
     'type' =>
@@ -94,7 +98,11 @@ array(1) {
 %sbug02195-exception-noopcache.php:8:
 array(3) {
   [0] =>
-  array(5) {
+  array(7) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -111,7 +119,11 @@ array(3) {
     }
   }
   [1] =>
-  array(7) {
+  array(9) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(11) "__construct"
     'type' =>
@@ -140,7 +152,11 @@ array(3) {
     }
   }
   [2] =>
-  array(7) {
+  array(9) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(8) "newError"
     'type' =>

@@ -7,7 +7,7 @@ xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.trace_format=0
 xdebug.var_display_max_depth=5
-xdebug.var_display_max_children=4
+xdebug.var_display_max_children=6
 --FILE--
 <?php
 require_once 'capture-trace.inc';
@@ -33,7 +33,11 @@ xdebug_stop_trace();
 %snested-function-calls.php:5:
 array(2) {
   [0] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -45,7 +49,11 @@ array(2) {
     }
   }
   [1] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(1) "a"
     'file' =>
@@ -60,7 +68,11 @@ array(2) {
 %snested-function-calls.php:5:
 array(2) {
   [0] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -72,7 +84,11 @@ array(2) {
     }
   }
   [1] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(1) "a"
     'file' =>
@@ -87,7 +103,11 @@ array(2) {
 %snested-function-calls.php:5:
 array(2) {
   [0] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -99,7 +119,11 @@ array(2) {
     }
   }
   [1] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(1) "a"
     'file' =>
@@ -115,8 +139,8 @@ aa2ba
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> a() %snested-function-calls.php:17
 %w%f %w%d       -> xdebug_get_function_stack() %snested-function-calls.php:5
-%w%f %w%d        >=> [0 => ['function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]
-%w%f %w%d       -> var_dump($value = [0 => ['function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]) %snested-function-calls.php:5
+%w%f %w%d        >=> [0 => ['time' => %f, 'memory' => %d, 'function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['time' => %f, 'memory' => %d, 'function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]
+%w%f %w%d       -> var_dump($value = [0 => ['time' => %f, 'memory' => %d, 'function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['time' => %f, 'memory' => %d, 'function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]) %snested-function-calls.php:5
 %w%f %w%d        >=> NULL
 %w%f %w%d      >=> 'a'
 %w%f %w%d     -> b($b = 2) %snested-function-calls.php:17
@@ -125,14 +149,14 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d      >=> '2ba'
 %w%f %w%d     -> a() %snested-function-calls.php:17
 %w%f %w%d       -> xdebug_get_function_stack() %snested-function-calls.php:5
-%w%f %w%d        >=> [0 => ['function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]
-%w%f %w%d       -> var_dump($value = [0 => ['function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]) %snested-function-calls.php:5
+%w%f %w%d        >=> [0 => ['time' => %f, 'memory' => %d, 'function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['time' => %f, 'memory' => %d, 'function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]
+%w%f %w%d       -> var_dump($value = [0 => ['time' => %f, 'memory' => %d, 'function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['time' => %f, 'memory' => %d, 'function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]) %snested-function-calls.php:5
 %w%f %w%d        >=> NULL
 %w%f %w%d      >=> 'a'
 %w%f %w%d     -> a() %snested-function-calls.php:17
 %w%f %w%d       -> xdebug_get_function_stack() %snested-function-calls.php:5
-%w%f %w%d        >=> [0 => ['function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]
-%w%f %w%d       -> var_dump($value = [0 => ['function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]) %snested-function-calls.php:5
+%w%f %w%d        >=> [0 => ['time' => %f, 'memory' => %d, 'function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['time' => %f, 'memory' => %d, 'function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]
+%w%f %w%d       -> var_dump($value = [0 => ['time' => %f, 'memory' => %d, 'function' => '{main}', 'file' => '%snested-function-calls.php', 'line' => 0, 'params' => []], 1 => ['time' => %f, 'memory' => %d, 'function' => 'a', 'file' => '%snested-function-calls.php', 'line' => 17, 'params' => []]]) %snested-function-calls.php:5
 %w%f %w%d        >=> NULL
 %w%f %w%d      >=> 'a'
 %w%f %w%d     -> c($a = 'a', $b = 'a') %snested-function-calls.php:17

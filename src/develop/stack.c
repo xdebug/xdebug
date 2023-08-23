@@ -386,6 +386,8 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 	array_init(frame);
 
 	/* Add data */
+	add_assoc_double_ex(frame, "time", HASH_KEY_SIZEOF("time"), XDEBUG_SECONDS_SINCE_START(fse->nanotime));
+	add_assoc_long_ex(frame, "memory", HASH_KEY_SIZEOF("memory"), fse->memory);
 	if (fse->function.function) {
 		add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), fse->function.function);
 	}

@@ -38,7 +38,11 @@ foo( true );
 %sxdebug_get_function_stack_exception_handler.php:4:
 array(1) {
   [0] =>
-  array(4) {
+  array(6) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(24) "custom_exception_handler"
     'file' =>

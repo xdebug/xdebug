@@ -54,7 +54,11 @@ $e = new Error_Entry(1, 2);
 %sbug01562-opcache.php:17:
 array(4) {
   [0] =>
-  array(5) {
+  array(7) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(6) "{main}"
     'file' =>
@@ -71,7 +75,11 @@ array(4) {
     }
   }
   [1] =>
-  array(7) {
+  array(9) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(11) "__construct"
     'type' =>
@@ -98,7 +106,11 @@ array(4) {
     }
   }
   [2] =>
-  array(7) {
+  array(9) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(8) "newError"
     'type' =>
@@ -128,7 +140,11 @@ array(4) {
     }
   }
   [3] =>
-  array(7) {
+  array(9) {
+    'time' =>
+    double(%f)
+    'memory' =>
+    int(%d)
     'function' =>
     string(5) "getBT"
     'type' =>
