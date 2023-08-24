@@ -37,7 +37,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
-static const char* text_formats[21] = {
+static const char* text_formats[22] = {
 	"\n",
 	"%s: %s in %s on line %d\n",
 	"\nCall Stack:\n",
@@ -53,17 +53,18 @@ static const char* text_formats[21] = {
 	NULL,
 
 	// 13+ (for xdebug_append_printable_stack_from_zval)
-	"\n\tCall Stack:\n",
+	"\n%sCall Stack:\n",
 	"",
-	"\tThe stack is empty or not available\n",
-	"\t%10.4F %10ld %3d. %s() %s:%d\n",
-	"\n\t",
-	"\n\tNested Exceptions:\n",
+	"%sThe stack is empty or not available\n",
+	"%s%10.4F %10ld %3d. %s() %s:%d\n",
+	"\n%s",
+	"\n%sNested Exceptions:\n",
 	"", // nested exceptions footer
-	NULL // alternative to 16 for html only
+	NULL, // alternative to 16 for html only
+	"\t" // indenter
 };
 
-static const char* ansi_formats[21] = {
+static const char* ansi_formats[22] = {
 	"\n",
 	"[1m[31m%s[0m: %s[22m in [31m%s[0m on line [32m%d[0m[22m\n",
 	"\n[1mCall Stack:[22m\n",
@@ -79,17 +80,18 @@ static const char* ansi_formats[21] = {
 	NULL,
 
 	// 13+ (for xdebug_append_printable_stack_from_zval)
-	"\n\t[1mCall Stack:[22m\n",
+	"\n%s[1mCall Stack:[22m\n",
 	"",
-	"\tThe stack is empty or not available\n",
-	"\t%10.4F %10ld %3d. %s() %s:%d\n",
-	"\n\t",
-	"\n\t[1mNested Exceptions:[22m\n",
+	"%sThe stack is empty or not available\n",
+	"%s%10.4F %10ld %3d. %s() %s:%d\n",
+	"\n%s",
+	"\n%s[1mNested Exceptions:[22m\n",
 	"", // nested exceptions footer
-	NULL // alternative to 16 for html only
+	NULL, // alternative to 16 for html only
+	"\t" // indenter
 };
 
-static const char* html_formats[21] = {
+static const char* html_formats[22] = {
 	"<br />\n<font size='1'><table class='xdebug-error xe-%s%s' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> %s: %s in %s on line <i>%d</i></th></tr>\n",
 	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
@@ -105,14 +107,15 @@ static const char* html_formats[21] = {
 	"<tr><th align='left' bgcolor='#f57900' colspan=\"5\"><span style='background-color: #cc0000; color: #fce94f; font-size: x-large;'>( ! )</span> SCREAM: Error suppression ignored for</th></tr>\n",
 
 	// 13+ (for xdebug_append_printable_stack_from_zval)
-	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
+	"%s<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Call Stack</th></tr>\n<tr><th align='center' bgcolor='#eeeeec'>#</th><th align='left' bgcolor='#eeeeec'>Time</th><th align='left' bgcolor='#eeeeec'>Memory</th><th align='left' bgcolor='#eeeeec'>Function</th><th align='left' bgcolor='#eeeeec'>Location</th></tr>\n",
 	"",
-	"<tr><td colspan='5' bgcolor='#eeeeec'>The stack is empty or not available</td></tr>\n",
-	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4F</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s()</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>%s<b>:</b>%d</a></td></tr>\n",
-	"<table class='xdebug-error xe-nested' style='width: 80%; margin: 1em' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
-	"<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Nested Exceptions</th></tr><tr><td colspan='5'>\n",
+	"%s<tr><td colspan='5' bgcolor='#eeeeec'>The stack is empty or not available</td></tr>\n",
+	"%s<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4F</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s()</td><td title='%s' bgcolor='#eeeeec'><a style='color: black' href='%s'>%s<b>:</b>%d</a></td></tr>\n",
+	"%s<table class='xdebug-error xe-nested' style='width: 80%; margin: 1em' dir='ltr' border='1' cellspacing='0' cellpadding='1'>\n",
+	"%s<tr><th align='left' bgcolor='#e9b96e' colspan='5'>Nested Exceptions</th></tr><tr><td colspan='5'>\n",
 	"</table></tr>\n", // nested exceptions footer
-	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4F</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s()</td><td title='%s' bgcolor='#eeeeec'>%s<b>:</b>%d</td></tr>\n"
+	"<tr><td bgcolor='#eeeeec' align='center'>%d</td><td bgcolor='#eeeeec' align='center'>%.4F</td><td bgcolor='#eeeeec' align='right'>%ld</td><td bgcolor='#eeeeec'>%s()</td><td title='%s' bgcolor='#eeeeec'>%s<b>:</b>%d</td></tr>\n",
+	"" // indenter (not used for HTML)
 };
 
 static const char** select_formats(int html)
@@ -300,7 +303,7 @@ static void xdebug_append_error_description_from_object(xdebug_str *str, int htm
 static void xdebug_append_sub_header(xdebug_str *str, int html)
 {
 	const char **formats = select_formats(html);
-	xdebug_str_add_const(str, formats[17]);
+	xdebug_str_add_fmt(str, formats[17], formats[21]);
 }
 
 static void add_single_value(xdebug_str *str, zval *zv, int html)
@@ -612,16 +615,16 @@ static void xdebug_dump_used_var_with_contents(void *htmlq, xdebug_hash_element*
 	zval_ptr_dtor_nogc(&zvar);
 }
 
-void xdebug_append_printable_stack_from_zval(xdebug_str *str, zval *trace, int html)
+void xdebug_append_printable_stack_from_zval(xdebug_str *str, bool indent, zval *trace, int html)
 {
 	const char **formats = select_formats(html);
 	zval        *frame;
 	int          counter = 0;
 
-	xdebug_str_add_const(str, formats[13]); // header
+	xdebug_str_add_fmt(str, formats[13], indent ? formats[21] : ""); // header
 
 	if (!trace || Z_TYPE_P(trace) != IS_ARRAY) {
-		xdebug_str_add_const(str, formats[15]); // message
+		xdebug_str_add_fmt(str, formats[15], indent ? formats[21] : ""); // message
 		xdebug_str_add_const(str, formats[14]); // footer
 		return;
 	}
@@ -666,7 +669,7 @@ void xdebug_append_printable_stack_from_zval(xdebug_str *str, zval *trace, int h
 				char *file_link;
 
 				xdebug_format_file_link(&file_link, Z_STRVAL_P(file), Z_LVAL_P(line));
-				xdebug_str_add_fmt(str, formats[16], counter, Z_DVAL_P(time), Z_LVAL_P(memory), combined_function, Z_STRVAL_P(file), file_link, formatted_filename, Z_LVAL_P(line));
+				xdebug_str_add_fmt(str, formats[16], formats[21], counter, Z_DVAL_P(time), Z_LVAL_P(memory), combined_function, Z_STRVAL_P(file), file_link, formatted_filename, Z_LVAL_P(line));
 				xdfree(file_link);
 			} else {
 				xdebug_str_add_fmt(str, formats[20], counter, Z_DVAL_P(time), Z_LVAL_P(memory), combined_function, Z_STRVAL_P(file), formatted_filename, Z_LVAL_P(line));
@@ -674,7 +677,7 @@ void xdebug_append_printable_stack_from_zval(xdebug_str *str, zval *trace, int h
 
 			xdfree(formatted_filename);
 		} else {
-			xdebug_str_add_fmt(str, formats[16], Z_DVAL_P(time), Z_LVAL_P(memory), counter, combined_function, Z_STRVAL_P(file), Z_LVAL_P(line));
+			xdebug_str_add_fmt(str, formats[16], indent ? formats[21] : "", Z_DVAL_P(time), Z_LVAL_P(memory), counter, combined_function, Z_STRVAL_P(file), Z_LVAL_P(line));
 		}
 		xdfree(combined_function);
 
@@ -683,11 +686,11 @@ void xdebug_append_printable_stack_from_zval(xdebug_str *str, zval *trace, int h
 	xdebug_str_add_const(str, formats[14]); // footer
 }
 
-static void xdebug_append_nested_section_header(xdebug_str *str, int html)
+static void xdebug_append_nested_section_header(xdebug_str *str, bool indent, int html)
 {
 	const char **formats = select_formats(html);
 
-	xdebug_str_add_const(str, formats[18]);
+	xdebug_str_add_fmt(str, formats[18], indent ? formats[21] : "");
 }
 
 static void xdebug_append_nested_section_footer(xdebug_str *str, int html)
@@ -1193,7 +1196,13 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 		xdebug_str_addc(&tmp_str, '\n');
 	}
 	xdebug_append_error_description(&tmp_str, PG(html_errors), STR_NAME_VAL(exception_ce->name), message ? Z_STRVAL_P(message) : "", Z_STRVAL_P(file), Z_LVAL_P(line));
-	xdebug_append_printable_stack(&tmp_str, PG(html_errors));
+
+	z_previous_trace = last_exception_find_trace(exception);
+	if (z_previous_trace) {
+		xdebug_append_printable_stack_from_zval(&tmp_str, false, z_previous_trace, PG(html_errors));
+	} else {
+		xdebug_append_printable_stack(&tmp_str, PG(html_errors));
+	}
 
 	/* Loop over previous exceptions until there are none left */
 	{
@@ -1209,14 +1218,14 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 			if (first) {
 				first = false;
 				found = true;
-				xdebug_append_nested_section_header(&tmp_str, PG(html_errors));
+				xdebug_append_nested_section_header(&tmp_str, true, PG(html_errors));
 			}
 
 			xdebug_append_sub_header(&tmp_str, PG(html_errors));
 			xdebug_append_error_description_from_object(&tmp_str, PG(html_errors), z_previous_exception);
 
 			z_previous_trace = last_exception_find_trace(Z_OBJ_P(z_previous_exception));
-			xdebug_append_printable_stack_from_zval(&tmp_str, z_previous_trace, PG(html_errors));
+			xdebug_append_printable_stack_from_zval(&tmp_str, true, z_previous_trace, PG(html_errors));
 
 			previous_exception_obj = Z_OBJ_P(z_previous_exception);
 		} while (true);
