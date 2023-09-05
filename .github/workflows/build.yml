@@ -102,7 +102,7 @@ jobs:
                     echo $xdebug_version >> $env:GITHUB_ENV
                 - name: Setup PHP
                   id: setup-php
-                  uses: cmb69/setup-php-sdk@679db664987b6f5de6ecc4732e9ce649a689e4e5
+                  uses: derickr/setup-php-sdk@b35e22e1afa909692a93556f46ea667037ad593f
                   with:
                       version: ${{matrix.php}}
                       arch: ${{matrix.arch}}
