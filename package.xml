@@ -655,7 +655,7 @@ Mon, Oct 04, 2021 - Xdebug 3.1.0
   - Fixed issue #1890: Add connected client and protocol features to diagnostic page
   - Fixed issue #1898: API for querying the currently active mode(s)
   - Fixed issue #1933: Allow for cloud ID to be set through the trigger
-  - Fixed issue #1938: Branches in traits aren’t marked as executed
+  - Fixed issue #1938: Branches in traits aren't marked as executed
   - Fixed issue #1948: Do not redirect warning and error messages to PHP's error log if an Xdebug log is active
   - Fixed issue #1949: private properties for internal classes can't be fetched for debugging
   - Fixed issue #1963: php exit code = -1073741819 when xdebug.mode = off (Windows Thread Safe Only)
@@ -750,7 +750,7 @@ Sun, Sep 05, 2021 - Xdebug 3.1.0beta1
 
 = Fixed bugs:
 
-  - Fixed issue #1938: Branches in traits aren’t marked as executed
+  - Fixed issue #1938: Branches in traits aren't marked as executed
   - Fixed issue #1948: Do not redirect warning and error messages to PHP's error log if an Xdebug log is active
   - Fixed issue #1949: private properties for internal classes can't be fetched for debugging
   - Fixed issue #1963: php exit code = -1073741819 when xdebug.mode = off (Windows Thread Safe Only)
@@ -937,11 +937,11 @@ https://xdebug.org/docs/upgrade_guide
   - Implemented issue #1813: Make sure that the xdebug_init_*_globals don't do more than they need to, and that init is only done when xdebug.mode != off
   - Implemented issue #1817: Switch filename storage from char*/size_t to zend_string*
   - Implemented issue #1818: Switch variable storage from char*/size_t to zend_string*
-  - Implemented issue #1820: Increase time tracing precision (Michael Voříšek)
+  - Implemented issue #1820: Increase time tracing precision (Michael Vorisek)
   - Implemented issue #1824: Allow Xdebug's mode to be set through an environment variable
-  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Voříšek)
+  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Vorisek)
   - Implemented issue #1826: Reduce profiler memory allocation and call overhead
-  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Voříšek)
+  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Vorisek)
   - Implemented issue #1832: If connect back host can not be contacted, fallback to remote_host/port
   - Implemented issue #1858: Only open/close log if there is an actual message to log
   - Implemented issue #1860: Allow xdebug.cloud_id to be set through an environment variable
@@ -1144,11 +1144,11 @@ Xdebug 3 documentation is available at https://3.xdebug.org/docs
   - Implemented issue #1813: Make sure that the xdebug_init_*_globals don't do more than they need to, and that init is only done when xdebug.mode != off
   - Implemented issue #1817: Switch filename storage from char*/size_t to zend_string*
   - Implemented issue #1818: Switch variable storage from char*/size_t to zend_string*
-  - Implemented issue #1820: Increase time tracing precision (Michael Voříšek)
+  - Implemented issue #1820: Increase time tracing precision (Michael Vorisek)
   - Implemented issue #1824: Allow Xdebug's mode to be set through an environment variable
-  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Voříšek)
+  - Implemented issue #1825: Improve profiler performance by not calling fflush after every function (Michael Vorisek)
   - Implemented issue #1826: Reduce profiler memory allocation and call overhead
-  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Voříšek)
+  - Implemented issue #1829: Switch to 10ns profiler resolution (Michael Vorisek)
   - Implemented issue #1832: If connect back host can not be contacted, fallback to remote_host/port
   - Implemented issue #1858: Only open/close log if there is an actual message to log
   - Implemented issue #1860: Allow xdebug.cloud_id to be set through an environment variable
@@ -1221,7 +1221,7 @@ Fri, May 29, 2020 - xdebug 2.9.6
 
 = Fixed bugs:
 
-  - Fixed issue #1782: Cookie "XDEBUG_SESSION" will be soon rejected because it has the “sameSite” attribute set to none
+  - Fixed issue #1782: Cookie "XDEBUG_SESSION" will be soon rejected because it has the "sameSite" attribute set to none
   - Fixed issue #1787: Branch coverage data does not always follow the lines/functions format
   - Fixed issue #1790: Segfault in var_dump() or while debugging with protobuf extension
    </notes>
@@ -3480,7 +3480,7 @@ Wed, Jul 18, 2007 - xdebug 2.0.0
    <notes>
 Wed, May 17, 2007 - xdebug 2.0.0rc4
 + Changes:
-	- Use Âµ seconds instead of a tenths of Âµ seconds to avoid confusion in
+	- Use � seconds instead of a tenths of � seconds to avoid confusion in
 	  profile information.
 	- Changed xdebug.profiler_output_name and xdebug.trace_output_name to use
 	  modifier tags:
@@ -4309,5 +4309,5 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
  </changelog>
 </package>
 <!--
-vim:et:ts=1:sw=1
+vim:et:ts=1:sw=1:fileencoding=latin1
 -->
