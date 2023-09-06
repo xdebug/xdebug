@@ -40,26 +40,40 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2023-07-14</date>
- <time>09:14:53</time>
+ <date>2023-09-06</date>
+ <time>09:53:58</time>
  <version>
-  <release>3.2.2</release>
-  <api>3.2.2</api>
+  <release>3.3.0alpha1</release>
+  <api>3.3.0alpha1</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Fri, Jul 14, 2023 - Xdebug 3.2.2
+Wed, Sep 06, 2023 - Xdebug 3.3.0alpha1
+
++ New features:
+
+  - Fixed issue #2171: Support for PHP 8.3
+
++ Improvements:
+
+  - Fixed issue #1562: Add &#039;local_vars&#039; option to &#039;xdebug_get_function_stack&#039; to include variables for each st
+  - Fixed issue #2170: Show contents of Spl&#039;s ArrayIterator while debugging
+  - Fixed issue #2172: Show contents of SplDoublyLinkedList and SplPriorityQueue while debugging
+  - Fixed issue #2183: Bubble up exception message when using code evalution through protocol
+  - Fixed issue #2188: Step over with fibers does still step into fiber routines
+  - Fixed issue #2194: Add &#039;params_as_values&#039; option to &#039;xdebug_get_function_stack&#039; to return data as values
+  - Fixed issue #2195: Add &#039;from_exception&#039; option to &#039;xdebug_get_function_stack&#039; to return the stack trace where an exception was thrown
+  - Fixed issue #2197: Add time index and memory to output of xdebug_get_function_stack
 
 = Fixed bugs:
 
-  - Fixed issue #2175: Crash with EXC_BAD_ACCESS in xdebug_str_create
-  - Fixed issue #2180: Crash on extended SplFixedArray
-  - Fixed issue #2182: Segfault with ArrayObject on stack
-  - Fixed issue #2186: Segfault with trampoline functions and debugger activation
+  - Fixed issue #450: &quot;Incomplete&quot; backtraces when an exception gets rethrown
+  - Fixed issue #476: Exception chaining does not work properly
+  - Fixed issue #2132: Errors when mountinfo does not have enough information for finding systemd private tmp directory
 
  </notes>
 
@@ -208,6 +222,30 @@ Fri, Jul 14, 2023 - Xdebug 3.2.2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2023-07-14</date>
+   <time>09:14:53</time>
+   <version>
+    <release>3.2.2</release>
+    <api>3.2.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Fri, Jul 14, 2023 - Xdebug 3.2.2
+
+= Fixed bugs:
+
+  - Fixed issue #2175: Crash with EXC_BAD_ACCESS in xdebug_str_create
+  - Fixed issue #2180: Crash on extended SplFixedArray
+  - Fixed issue #2182: Segfault with ArrayObject on stack
+  - Fixed issue #2186: Segfault with trampoline functions and debugger activation
+   </notes>
+  </release>
 
   <release>
    <date>2023-03-21</date>

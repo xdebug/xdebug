@@ -1,6 +1,6 @@
 <?php
 if ($argc <= 1) {
-	die("Usage: {$argv[0]} <version>");
+	die("Usage: {$argv[0]} <version> <<'from_master'>>");
 }
 
 $xdebugRepo    = '/home/derick/dev/php/xdebug-xdebug';
@@ -10,6 +10,12 @@ $url = "https://bugs.xdebug.org/api/rest/";
 $project_id = 1;
 
 $release_version = $argv[1];
+
+$from_master = false;
+if ( $argc == 3 ) {
+	$from_master = ( $argv[2] == 'from_master' );
+}
+
 $stability = 'stable';
 
 if ( preg_match( '/beta|alpha|RC|rc/', $release_version ) )
@@ -142,12 +148,16 @@ function createVersion( $project_id, $release_version )
 }
 */
 
-function updateGIT()
+function updateGIT( bool $from_master )
 {
 	`git checkout master`;
 	`git pull origin master`;
-	`git checkout xdebug_3_2`;
-	`git pull origin xdebug_3_2`;
+
+	if ( !$from_master )
+	{
+		`git checkout xdebug_3_2`;
+		`git pull origin xdebug_3_2`;
+	}
 }
 
 function updateTemplateRC( $release_version )
@@ -358,7 +368,7 @@ if ( count( $issues) == 0 )
 	die("There are no issues for version {$release_version}");
 }
 
-updateGIT();
+updateGIT( $from_master );
 updateTemplateRC( $release_version );
 updatePhpXdebugH( $release_version );
 rebuild();

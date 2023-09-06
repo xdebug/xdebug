@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,10 +18,10 @@
 #define PHP_XDEBUG_H
 
 #define XDEBUG_NAME       "Xdebug"
-#define XDEBUG_VERSION    "3.3.0-dev"
+#define XDEBUG_VERSION    "3.3.0alpha1"
 #define XDEBUG_AUTHOR     "Derick Rethans"
-#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2022 by Derick Rethans"
-#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2022"
+#define XDEBUG_COPYRIGHT  "Copyright (c) 2002-2023 by Derick Rethans"
+#define XDEBUG_COPYRIGHT_SHORT "Copyright (c) 2002-2023"
 #define XDEBUG_URL        "https://xdebug.org"
 #define XDEBUG_URL_FAQ    "https://xdebug.org/docs/faq#api"
 
