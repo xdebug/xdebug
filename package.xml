@@ -3501,7 +3501,7 @@ Wed, Jul 18, 2007 - xdebug 2.0.0
    <notes>
 Wed, May 17, 2007 - xdebug 2.0.0rc4
 + Changes:
-	- Use µ seconds instead of a tenths of µ seconds to avoid confusion in
+	- Use microseconds instead of a tenths of microseconds to avoid confusion in
 	  profile information.
 	- Changed xdebug.profiler_output_name and xdebug.trace_output_name to use
 	  modifier tags:
@@ -4330,5 +4330,5 @@ Sun, Dec 24, 2006 - xdebug 2.0.0rc2
  </changelog>
 </package>
 <!--
-vim:et:ts=1:sw=1:fileencoding=latin1
+vim:et:ts=1:sw=1:fileencoding=ascii
 -->
