@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,6 +42,7 @@ static xdebug_trace_handler_t *xdebug_select_trace_handler(int options)
 			tmp = &xdebug_trace_handler_textual; break;
 	}
 
+	/* Override handler based on options */
 	if (options & XDEBUG_TRACE_OPTION_COMPUTERIZED) {
 		tmp = &xdebug_trace_handler_computerized;
 	}

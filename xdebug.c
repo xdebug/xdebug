@@ -338,12 +338,12 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trace_format",      "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_format,      zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.trace_options",     "0",                  PHP_INI_ALL,    OnUpdateLong,   settings.tracing.trace_options,     zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_assignments", "0",              PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_assignments, zend_xdebug_globals, xdebug_globals)
+	STD_PHP_INI_BOOLEAN("xdebug.collect_params", "1",                   PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_params,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_BOOLEAN("xdebug.collect_return",  "0",                  PHP_INI_ALL,    OnUpdateBool,   settings.tracing.collect_return,    zend_xdebug_globals, xdebug_globals)
 
 	/* Removed/Changed settings */
 	XDEBUG_CHANGED_INI_ENTRY(xdebug.auto_trace)
 	XDEBUG_REMOVED_INI_ENTRY(xdebug.collect_includes)
-	XDEBUG_REMOVED_INI_ENTRY(xdebug.collect_params)
 	XDEBUG_REMOVED_INI_ENTRY(xdebug.collect_vars)
 	XDEBUG_CHANGED_INI_ENTRY(xdebug.coverage_enable)
 	XDEBUG_CHANGED_INI_ENTRY(xdebug.default_enable)
