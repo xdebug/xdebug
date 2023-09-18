@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,10 +67,10 @@ typedef struct xdebug_var_name {
 
 #define XDEBUG_MAX_FUNCTION_LEN 1024
 
-#define XDEBUG_TRACE_OPTION_APPEND         1
-#define XDEBUG_TRACE_OPTION_COMPUTERIZED   2
-#define XDEBUG_TRACE_OPTION_HTML           4
-#define XDEBUG_TRACE_OPTION_NAKED_FILENAME 8
+#define XDEBUG_TRACE_OPTION_APPEND         0x01
+#define XDEBUG_TRACE_OPTION_COMPUTERIZED   0x02
+#define XDEBUG_TRACE_OPTION_HTML           0x04
+#define XDEBUG_TRACE_OPTION_NAKED_FILENAME 0x08
 
 #define XDEBUG_CC_OPTION_UNUSED          1
 #define XDEBUG_CC_OPTION_DEAD_CODE       2

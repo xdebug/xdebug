@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -182,7 +182,9 @@ void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, 
 
 	xdfree(tmp_name);
 
-	add_arguments(&str, fse);
+	if (XINI_TRACE(collect_params)) {
+		add_arguments(&str, fse);
+	}
 
 	if (fse->include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
