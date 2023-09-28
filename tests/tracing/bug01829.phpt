@@ -2,6 +2,7 @@
 Test for bug #1829: Range and precision of time
 --INI--
 xdebug.mode=trace
+xdebug.trace_format=0
 xdebug.start_with_request=no
 xdebug.collect_assignments=0
 xdebug.collect_return=0

@@ -2,6 +2,7 @@
 Starting Tracing: default, function call
 --INI--
 xdebug.mode=trace
+xdebug.trace_format=0
 xdebug.trigger_value=FOOBAR
 xdebug.collect_return=0
 xdebug.collect_assignments=0
