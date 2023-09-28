@@ -162,6 +162,11 @@ typedef struct _function_stack_entry {
 	unsigned char filtered_stack;
 	unsigned char filtered_tracing;
 
+	/* coverage properties */
+	bool         code_coverage_init;
+	char        *code_coverage_function_name;
+	zend_string *code_coverage_filename;
+
 	/* location properties */
 	int          lineno;
 	zend_string *filename;
