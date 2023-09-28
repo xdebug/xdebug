@@ -707,15 +707,36 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	return tmp;
 }
 
-static void xdebug_execute_ex(zend_execute_data *execute_data)
+static bool should_run_handler(zend_op_array *op_array, zend_execute_data *edata)
+{
+	if (xdebug_debugger_bailout_if_no_exec_requested()) {
+		return false;
+	}
+
+	/* If we're evaluating for the debugger's eval capability, just bail out */
+	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", STR_NAME_VAL(op_array->filename)) == 0) {
+		return false;
+	}
+
+	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
+	   that it's just being called to check for breakpoints with conditions */
+	if (edata && edata->func && ZEND_USER_CODE(edata->func->type) && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
+		return false;
+	}
+
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return false;
+	}
+
+	return true;
+}
+
+static void xdebug_execute_ex_begin(zend_execute_data *execute_data)
 {
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	zend_execute_data    *edata = execute_data->prev_execute_data;
 	function_stack_entry *fse;
-	int                   function_nr = 0;
-	char                 *code_coverage_function_name = NULL;
-	zend_string          *code_coverage_filename = NULL;
-	int                   code_coverage_init = 0;
 
 	/* For PHP 7, we need to reset the opline to the start, so that all opcode
 	 * handlers are being hit. But not for generators, as that would make an
@@ -724,26 +745,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		EX(opline) = EX(func)->op_array.opcodes;
 	}
 
-	if (xdebug_debugger_bailout_if_no_exec_requested()) {
-		return;
-	}
-
-	/* If we're evaluating for the debugger's eval capability, just bail out */
-	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", STR_NAME_VAL(op_array->filename)) == 0) {
-		xdebug_old_execute_ex(execute_data);
-		return;
-	}
-
-	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
-	   that it's just being called to check for breakpoints with conditions */
-	if (edata && edata->func && ZEND_USER_CODE(edata->func->type) && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
-		xdebug_old_execute_ex(execute_data);
-		return;
-	}
-
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		xdebug_old_execute_ex(execute_data);
+	if (!should_run_handler(op_array, edata)) {
 		return;
 	}
 
@@ -778,13 +780,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		(fse - 1)->user_defined = XDEBUG_USER_DEFINED;
 	}
 
-	function_nr = XG_BASE(function_count);
-
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_execute_ex(function_nr, fse);
+		xdebug_tracing_execute_ex(fse->function_nr, fse);
 	}
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
@@ -811,7 +811,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
-		code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_filename, &code_coverage_function_name);
+		fse->code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &fse->code_coverage_filename, &fse->code_coverage_function_name);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -827,29 +827,36 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex(fse, op_array);
 	}
+}
 
-	xdebug_old_execute_ex(execute_data);
+static void xdebug_execute_ex_end(zend_execute_data *execute_data, zval *retval)
+{
+	zend_op_array        *op_array = &(execute_data->func->op_array);
+	zend_execute_data    *edata = execute_data->prev_execute_data;
+	function_stack_entry *fse;
 
-	/* Re-acquire the tail as nested calls through xdebug_old_execute_ex()
-	 * might have reallocated the vector */
+	if (!should_run_handler(op_array, edata)) {
+		return;
+	}
+
 	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex_end(fse);
 	}
 
-	if (code_coverage_init) {
-		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_filename, code_coverage_function_name);
+	if (fse->code_coverage_init) {
+		xdebug_coverage_execute_ex_end(fse, op_array, fse->code_coverage_filename, fse->code_coverage_function_name);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
+		xdebug_tracing_execute_ex_end(fse->function_nr, fse, execute_data);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		zval *return_value = NULL;
 
-		if (!fse->is_trampoline && execute_data->return_value && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
+		if (!fse->is_trampoline && retval && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
 			return_value = execute_data->return_value;
 		}
 
@@ -860,6 +867,15 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	if (XG_BASE(stack)) {
 		xdebug_vector_pop(XG_BASE(stack));
 	}
+}
+
+static void xdebug_execute_ex(zend_execute_data *execute_data)
+{
+	xdebug_execute_ex_begin(execute_data);
+
+	xdebug_old_execute_ex(execute_data);
+
+	xdebug_execute_ex_end(execute_data, execute_data->return_value);
 }
 
 static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute_data)
