@@ -707,7 +707,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	return tmp;
 }
 
-static void xdebug_execute_ex_begin_user_code(zend_execute_data *execute_data)
+/** Function interceptors and dispatchers to modules ***********************/
+
+static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 {
 	zend_op_array     *op_array = &(execute_data->func->op_array);
 	zend_execute_data *edata = execute_data->prev_execute_data;
@@ -801,7 +803,7 @@ static void xdebug_execute_ex_begin_user_code(zend_execute_data *execute_data)
 	}
 }
 
-static void xdebug_execute_ex_end_user_code(zend_execute_data *execute_data, zval *retval)
+static void xdebug_execute_user_code_end(zend_execute_data *execute_data, zval *retval)
 {
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	function_stack_entry *fse;
@@ -868,32 +870,17 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 	return true;
 }
 
-
-static void xdebug_execute_ex_begin(zend_execute_data *execute_data)
-{
-	if (should_run_user_handler(execute_data)) {
-		xdebug_execute_ex_begin_user_code(execute_data);
-	}
-}
-
-static void xdebug_execute_ex_end(zend_execute_data *execute_data, zval *retval)
-{
-	if (should_run_user_handler(execute_data)) {
-		xdebug_execute_ex_end_user_code(execute_data, retval);
-	}
-}
-
 /* We still need this to do "include", "require", and "eval" */
 static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
 	if (!should_run_user_handler(execute_data)) {
-		xdebug_execute_ex_begin_user_code(execute_data);
+		xdebug_execute_user_code_begin(execute_data);
 	}
 
 	xdebug_old_execute_ex(execute_data);
 
 	if (!should_run_user_handler(execute_data)) {
-		xdebug_execute_ex_end_user_code(execute_data, execute_data->return_value);
+		xdebug_execute_user_code_end(execute_data, execute_data->return_value);
 	}
 }
 
@@ -939,7 +926,7 @@ static bool should_run_internal_handler(zend_execute_data *execute_data)
 }
 
 
-static void xdebug_execute_internal_begin(zend_execute_data *current_execute_data, zval *return_value)
+static void xdebug_execute_internal_begin(zend_execute_data *current_execute_data)
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
@@ -1016,7 +1003,7 @@ static void xdebug_execute_internal_end(zend_execute_data *current_execute_data,
 static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
 {
 	if (should_run_internal_handler(current_execute_data)) {
-		xdebug_execute_internal_begin(current_execute_data, return_value);
+		xdebug_execute_internal_begin(current_execute_data);
 	}
 
 	if (xdebug_old_execute_internal) {
@@ -1030,6 +1017,37 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 }
 
+
+static void xdebug_execute_begin(zend_execute_data *execute_data)
+{
+	if (should_run_user_handler(execute_data)) {
+		xdebug_execute_user_code_begin(execute_data);
+	}
+#if 0
+	if (should_run_internal_handler(execute_data)) {
+		xdebug_execute_internal_begin(execute_data);
+	}
+#endif
+}
+
+static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
+{
+	if (should_run_user_handler(execute_data)) {
+		xdebug_execute_user_code_end(execute_data, retval);
+	}
+#if 0
+	if (should_run_internal_handler(execute_data)) {
+		xdebug_execute_internal_end(execute_data, retval);
+	}
+#endif
+}
+
+
+static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *execute_data)
+{
+	return (zend_observer_fcall_handlers){xdebug_execute_begin, xdebug_execute_end};
+}
+/***************************************************************************/
 
 static void xdebug_base_overloaded_functions_setup(void)
 {
@@ -1118,6 +1136,7 @@ static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **b
 }
 
 #if PHP_VERSION_ID >= 80100
+/** Handling fibers ********************************************************/
 static struct xdebug_fiber_entry* xdebug_fiber_entry_ctor(xdebug_vector *stack)
 {
 	struct xdebug_fiber_entry *tmp = xdmalloc(sizeof(struct xdebug_fiber_entry));
@@ -1221,6 +1240,7 @@ static void xdebug_fiber_switch_observer(zend_fiber_context *from, zend_fiber_co
 		add_fiber_main(to);
 	}
 }
+/***************************************************************************/
 #endif
 
 #ifdef __linux__
@@ -1290,11 +1310,6 @@ int read_systemd_private_tmp_directory(char **private_tmp)
 	return retval;
 }
 #endif
-
-static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *execute_data)
-{
-	return (zend_observer_fcall_handlers){xdebug_execute_ex_begin, xdebug_execute_ex_end};
-}
 
 void xdebug_base_minit(INIT_FUNC_ARGS)
 {
