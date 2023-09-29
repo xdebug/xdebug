@@ -54,7 +54,7 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="7"><stack where="myMethod" level="0" type="file" filename="file://bug02113-002.inc" lineno="15"></stack><stack where="{main}" level="1" type="file" filename="file://bug02113-002.inc" lineno="15"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="7"><stack where="myMethod" level="0" type="file" filename="file://bug02113-002.inc" lineno="11"></stack><stack where="{main}" level="1" type="file" filename="file://bug02113-002.inc" lineno="15"></stack></response>
 
 -> context_get -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
