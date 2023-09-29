@@ -924,28 +924,25 @@ static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute
 	return 0;
 }
 
-static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
+static bool should_run_internal_handler(zend_execute_data *execute_data)
+{
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return false;
+	}
+
+	if (!execute_data || !execute_data->func || ZEND_USER_CODE(execute_data->func->type)) {
+		return false;
+	}
+
+	return true;
+}
+
+
+static void xdebug_execute_internal_begin(zend_execute_data *current_execute_data, zval *return_value)
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
-	int                   function_nr = 0;
-	int                   function_call_traced = 0;
-	int                   restore_error_handler_situation = 0;
-#if PHP_VERSION_ID >= 80100
-	void                (*tmp_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
-#else
-	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
-#endif
-
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		if (xdebug_old_execute_internal) {
-			xdebug_old_execute_internal(current_execute_data, return_value);
-		} else {
-			execute_internal(current_execute_data, return_value);
-		}
-		return;
-	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
@@ -954,13 +951,11 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN);
 	fse->function.internal = 1;
 
-	function_nr = XG_BASE(function_count);
-
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
+		fse->function_call_traced = xdebug_tracing_execute_internal(fse->function_nr, fse);
 	}
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
@@ -975,20 +970,18 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	/* Check for SOAP */
 	if (check_soap_call(fse, current_execute_data)) {
-		restore_error_handler_situation = 1;
-		tmp_error_cb = zend_error_cb;
+		fse->soap_error_cb = zend_error_cb;
 		xdebug_base_use_original_error_cb();
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_internal(fse);
 	}
+}
 
-	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, return_value);
-	} else {
-		execute_internal(current_execute_data, return_value);
-	}
+static void xdebug_execute_internal_end(zend_execute_data *current_execute_data, zval *return_value)
+{
+	function_stack_entry *fse;
 
 	/* Re-acquire the tail as nested calls through
 	 * xdebug_old_execute_internal() might have reallocated the vector */
@@ -999,15 +992,15 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 
 	/* Restore SOAP situation if needed */
-	if (restore_error_handler_situation) {
-		zend_error_cb = tmp_error_cb;
+	if (fse->soap_error_cb) {
+		zend_error_cb = fse->soap_error_cb;
 	}
 
 	/* We only call the function_exit handler and return value handler if the
 	 * function call was also traced. Otherwise we end up with return trace
 	 * lines without a corresponding function call line. */
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && function_call_traced) {
-		xdebug_tracing_execute_internal_end(function_nr, fse, return_value);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && fse->function_call_traced) {
+		xdebug_tracing_execute_internal_end(fse->function_nr, fse, return_value);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -1019,6 +1012,24 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		xdebug_vector_pop(XG_BASE(stack));
 	}
 }
+
+static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
+{
+	if (should_run_internal_handler(current_execute_data)) {
+		xdebug_execute_internal_begin(current_execute_data, return_value);
+	}
+
+	if (xdebug_old_execute_internal) {
+		xdebug_old_execute_internal(current_execute_data, return_value);
+	} else {
+		execute_internal(current_execute_data, return_value);
+	}
+
+	if (should_run_internal_handler(current_execute_data)) {
+		xdebug_execute_internal_end(current_execute_data, return_value);
+	}
+}
+
 
 static void xdebug_base_overloaded_functions_setup(void)
 {
