@@ -1002,7 +1002,9 @@ static void xdebug_execute_internal_end(zend_execute_data *current_execute_data,
 
 static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
 {
-	if (should_run_internal_handler(current_execute_data)) {
+	bool run_internal_handler = should_run_internal_handler(current_execute_data);
+
+	if (run_internal_handler) {
 		xdebug_execute_internal_begin(current_execute_data);
 	}
 
@@ -1012,7 +1014,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		execute_internal(current_execute_data, return_value);
 	}
 
-	if (should_run_internal_handler(current_execute_data)) {
+	if (run_internal_handler) {
 		xdebug_execute_internal_end(current_execute_data, return_value);
 	}
 }
