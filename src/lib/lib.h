@@ -174,6 +174,7 @@ typedef struct _function_stack_entry {
 	signed long  memory;
 	signed long  prev_memory;
 	uint64_t     nanotime;
+	bool         function_call_traced;
 
 	/* profiling properties */
 	xdebug_profile profile;
@@ -185,6 +186,11 @@ typedef struct _function_stack_entry {
 
 	/* misc properties */
 	zend_op_array *op_array;
+#if PHP_VERSION_ID >= 80100
+	void           (*soap_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
+#else
+	void           (*soap_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message);
+#endif
 } function_stack_entry;
 
 function_stack_entry *xdebug_get_stack_frame(int nr);
