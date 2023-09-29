@@ -65,22 +65,14 @@ calls=1 0 0
 8 %d %d
 
 fl=(3)
-fn=(6) bankaccount->bar
-6 %d %d
-cfl=(3)
-cfn=(5)
-calls=1 0 0
-13 %d %d
-
-fl=(3)
-fn=(7) {main}
+fn=(6) {main}
 1 %d %d
 cfl=(2)
 cfn=(3)
 calls=1 0 0
 2 %d %d
 cfl=(3)
-cfn=(6)
+cfn=(5)
 calls=1 0 0
 13 %d %d
 

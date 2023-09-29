@@ -60,7 +60,7 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="7"><stack where="test1" level="0" type="file" filename="file://bug01388-15.inc" lineno="29"></stack><stack where="{main}" level="1" type="file" filename="file://bug01388-15.inc" lineno="29"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="7"><stack where="test1" level="0" type="file" filename="file://bug01388-15.inc" lineno="7"></stack><stack where="{main}" level="1" type="file" filename="file://bug01388-15.inc" lineno="29"></stack></response>
 
 -> context_get -i 8
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -72,7 +72,7 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 10
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="10"><stack where="test_class::test2" level="0" type="file" filename="file://bug01388-15.inc" lineno="30"></stack><stack where="{main}" level="1" type="file" filename="file://bug01388-15.inc" lineno="30"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="10"><stack where="test_class::test2" level="0" type="file" filename="file://bug01388-15.inc" lineno="17"></stack><stack where="{main}" level="1" type="file" filename="file://bug01388-15.inc" lineno="30"></stack></response>
 
 -> context_get -i 11
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -84,8 +84,8 @@ dbgpRunFile( $filename, $commands );
 
 -> stack_get -i 13
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="13"><stack where="test_class-&gt;test3" level="0" type="file" filename="file://bug01388-15.inc" lineno="33"></stack><stack where="{main}" level="1" type="file" filename="file://bug01388-15.inc" lineno="33"></stack></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="stack_get" transaction_id="13"><stack where="test_class-&gt;test3" level="0" type="file" filename="file://bug01388-15.inc" lineno="25"></stack><stack where="{main}" level="1" type="file" filename="file://bug01388-15.inc" lineno="33"></stack></response>
 
 -> context_get -i 14
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="14" context="0"></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="14" context="0"><property name="$this" fullname="$this" type="object" classname="test_class" children="0" numchildren="0" page="0" pagesize="32"></property></response>
