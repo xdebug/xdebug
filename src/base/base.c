@@ -870,16 +870,28 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 	return true;
 }
 
+/* This is confusing. On PHP 8.1 we flip the logic, as normal user functions
+ * are handled through the Observer API. Once PHP 8.0 support is dropped, the
+ * negation should be **added** to the usage below in xdebug_execute_ex. */
+static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
+{
+#if PHP_VERSION_ID >= 80100
+	return !should_run_user_handler(execute_data);
+#else
+	return should_run_user_handler(execute_data);
+#endif
+}
+
 /* We still need this to do "include", "require", and "eval" */
 static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
-	if (!should_run_user_handler(execute_data)) {
+	if (should_run_user_handler_wrapper(execute_data)) {
 		xdebug_execute_user_code_begin(execute_data);
 	}
 
 	xdebug_old_execute_ex(execute_data);
 
-	if (!should_run_user_handler(execute_data)) {
+	if (should_run_user_handler_wrapper(execute_data)) {
 		xdebug_execute_user_code_end(execute_data, execute_data->return_value);
 	}
 }
@@ -1020,6 +1032,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 }
 
 
+#if PHP_VERSION_ID >= 80100
 static void xdebug_execute_begin(zend_execute_data *execute_data)
 {
 	if (should_run_user_handler(execute_data)) {
@@ -1044,11 +1057,11 @@ static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
 #endif
 }
 
-
 static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *execute_data)
 {
 	return (zend_observer_fcall_handlers){xdebug_execute_begin, xdebug_execute_end};
 }
+#endif
 /***************************************************************************/
 
 static void xdebug_base_overloaded_functions_setup(void)
@@ -1320,8 +1333,10 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
 
+#if PHP_VERSION_ID >= 80100
 	/* User Code Functions */
 	zend_observer_fcall_register(xdebug_observer_init);
+#endif
 
 	/* Include, Require, Eval */
 	xdebug_old_execute_ex = zend_execute_ex;

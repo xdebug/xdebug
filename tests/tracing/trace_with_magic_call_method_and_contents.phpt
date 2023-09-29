@@ -1,5 +1,10 @@
 --TEST--
-Test for line numbers and arguments with __call including contents
+Test for line numbers and arguments with __call including contents (>= PHP 8.1)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.1');
+?>
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=no

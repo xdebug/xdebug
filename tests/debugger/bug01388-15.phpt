@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1388: Resolved function return breakpoint
+Test for bug #1388: Resolved function return breakpoint (>= PHP 8.1)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP >= 8.1; dbgp');
 ?>
 --FILE--
 <?php

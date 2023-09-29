@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #905: Tracing for generators
+Test for bug #905: Tracing for generators (>= PHP 8.1)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.1');
+?>
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=no
