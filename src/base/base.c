@@ -756,7 +756,7 @@ static void xdebug_execute_ex_begin_user_code(zend_execute_data *execute_data)
 		xdebug_monitor_handler(fse);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_execute_ex(fse->function_nr, fse);
+		xdebug_tracing_execute_ex(fse);
 	}
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
@@ -817,7 +817,7 @@ static void xdebug_execute_ex_end_user_code(zend_execute_data *execute_data, zva
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_execute_ex_end(fse->function_nr, fse, execute_data);
+		xdebug_tracing_execute_ex_end(fse, execute_data);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -955,7 +955,7 @@ static void xdebug_execute_internal_begin(zend_execute_data *current_execute_dat
 		xdebug_monitor_handler(fse);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		fse->function_call_traced = xdebug_tracing_execute_internal(fse->function_nr, fse);
+		fse->function_call_traced = xdebug_tracing_execute_internal(fse);
 	}
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
@@ -1000,7 +1000,7 @@ static void xdebug_execute_internal_end(zend_execute_data *current_execute_data,
 	 * function call was also traced. Otherwise we end up with return trace
 	 * lines without a corresponding function call line. */
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && fse->function_call_traced) {
-		xdebug_tracing_execute_internal_end(fse->function_nr, fse, return_value);
+		xdebug_tracing_execute_internal_end(fse, return_value);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {

@@ -164,7 +164,7 @@ static void add_arguments(xdebug_str *line_entry, function_stack_entry *fse)
 	}
 }
 
-void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
+void xdebug_trace_textual_function_entry(void *ctxt, function_stack_entry *fse)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	unsigned int j = 0; /* Counter */
@@ -224,7 +224,7 @@ static void xdebug_return_trace_stack_common(xdebug_str *str, function_stack_ent
 }
 
 
-void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value)
+void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry *fse, zval *return_value)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
@@ -245,7 +245,7 @@ void xdebug_trace_textual_function_return_value(void *ctxt, function_stack_entry
 	xdebug_str_destroy(&str);
 }
 
-void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zend_generator *generator)
+void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entry *fse, zend_generator *generator)
 {
 	xdebug_trace_textual_context *context = (xdebug_trace_textual_context*) ctxt;
 	xdebug_str                    str = XDEBUG_STR_INITIALIZER;
