@@ -130,14 +130,14 @@ static void add_arguments(xdebug_str *line_entry, function_stack_entry *fse)
 	}
 }
 
-void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
+void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *fse)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	char *tmp_name;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	xdebug_str_add_fmt(&str, "%d\t", fse->level);
-	xdebug_str_add_fmt(&str, "%d\t", function_nr);
+	xdebug_str_add_fmt(&str, "%d\t", fse->function_nr);
 
 	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
 
@@ -182,13 +182,13 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	xdfree(str.d);
 }
 
-void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *fse, int function_nr)
+void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *fse)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	xdebug_str_add_fmt(&str, "%d\t", fse->level);
-	xdebug_str_add_fmt(&str, "%d\t", function_nr);
+	xdebug_str_add_fmt(&str, "%d\t", fse->function_nr);
 
 	xdebug_str_add_literal(&str, "1\t");
 	xdebug_str_add_fmt(&str, "%F\t", XDEBUG_SECONDS_SINCE_START(xdebug_get_nanotime()));
@@ -199,13 +199,13 @@ void xdebug_trace_computerized_function_exit(void *ctxt, function_stack_entry *f
 	xdfree(str.d);
 }
 
-void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_entry *fse, int function_nr, zval *return_value)
+void xdebug_trace_computerized_function_return_value(void *ctxt, function_stack_entry *fse, zval *return_value)
 {
 	xdebug_trace_computerized_context *context = (xdebug_trace_computerized_context*) ctxt;
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 
 	xdebug_str_add_fmt(&str, "%d\t", fse->level);
-	xdebug_str_add_fmt(&str, "%d\t", function_nr);
+	xdebug_str_add_fmt(&str, "%d\t", fse->function_nr);
 	xdebug_str_add_literal(&str, "R\t\t\t");
 
 	add_single_value(&str, return_value);
