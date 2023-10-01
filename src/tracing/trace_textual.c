@@ -270,6 +270,7 @@ void xdebug_trace_textual_generator_return_value(void *ctxt, function_stack_entr
 	xdebug_str_addc(&str, '(');
 	xdebug_str_add_str(&str, tmp_value);
 	xdebug_str_add_literal(&str, " => ");
+	xdebug_str_free(tmp_value);
 
 	tmp_value = xdebug_get_zval_value_line(&generator->value, 0, NULL);
 	if (tmp_value) {
