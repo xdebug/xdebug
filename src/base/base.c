@@ -885,13 +885,15 @@ static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
 /* We still need this to do "include", "require", and "eval" */
 static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
-	if (should_run_user_handler_wrapper(execute_data)) {
+	bool run_user_handler = should_run_user_handler_wrapper(execute_data);
+
+	if (run_user_handler) {
 		xdebug_execute_user_code_begin(execute_data);
 	}
 
 	xdebug_old_execute_ex(execute_data);
 
-	if (should_run_user_handler_wrapper(execute_data)) {
+	if (run_user_handler) {
 		xdebug_execute_user_code_end(execute_data, execute_data->return_value);
 	}
 }
