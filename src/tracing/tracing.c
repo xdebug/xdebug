@@ -664,6 +664,8 @@ void xdebug_tracing_rinit(void)
 {
 	XG_TRACE(trace_handler) = NULL;
 	XG_TRACE(trace_context) = NULL;
+
+	xdebug_disable_opcache_optimizer();
 }
 
 void xdebug_tracing_post_deactivate(void)

@@ -1,10 +1,5 @@
 --TEST--
-Test computerized function traces (comp, with assignments) (!opcache)
---SKIPIF--
-<?php
-require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
-?>
+Test computerized function traces (comp, with assignments)
 --INI--
 xdebug.mode=trace
 xdebug.collect_return=0

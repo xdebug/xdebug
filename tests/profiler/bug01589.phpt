@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1589: function names used in auto_prepend_file missing
+Test for bug #1589: function names used in auto_prepend_file missing (!opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!win');
+check_reqs('!win; !opcache');
 ?>
 --INI--
 xdebug.mode=profile
