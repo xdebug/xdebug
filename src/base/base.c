@@ -1014,6 +1014,7 @@ static void xdebug_execute_internal_end(zend_execute_data *current_execute_data,
 	}
 }
 
+#if PHP_VERSION_ID < 80200
 static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
 {
 	bool run_internal_handler = should_run_internal_handler(current_execute_data);
@@ -1032,7 +1033,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		xdebug_execute_internal_end(current_execute_data, return_value);
 	}
 }
-
+#endif
 
 #if PHP_VERSION_ID >= 80100
 static void xdebug_execute_begin(zend_execute_data *execute_data)
@@ -1040,7 +1041,7 @@ static void xdebug_execute_begin(zend_execute_data *execute_data)
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_begin(execute_data);
 	}
-#if 0
+#if PHP_VERSION_ID >= 80200
 	if (should_run_internal_handler(execute_data)) {
 		xdebug_execute_internal_begin(execute_data);
 	}
@@ -1052,7 +1053,7 @@ static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_end(execute_data, retval);
 	}
-#if 0
+#if PHP_VERSION_ID >= 80200
 	if (should_run_internal_handler(execute_data)) {
 		xdebug_execute_internal_end(execute_data, retval);
 	}
@@ -1344,9 +1345,11 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_execute_ex = zend_execute_ex;
 	zend_execute_ex = xdebug_execute_ex;
 
-	/* Internal Functions */
+#if PHP_VERSION_ID < 80200
+	/* Internal Functions, since 8.2 they're also observed */
 	xdebug_old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
+#endif
 
 	XG_BASE(error_reporting_override) = 0;
 	XG_BASE(error_reporting_overridden) = 0;
