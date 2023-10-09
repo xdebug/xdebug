@@ -13,7 +13,7 @@ m4_include([m4/pkg.m4])
 m4_include([m4/clocks.m4])
 
 if test "$PHP_XDEBUG" != "no"; then
-  AC_MSG_CHECKING([Check for supported PHP versions])
+  AC_MSG_CHECKING([for supported PHP version])
   PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
   PHP_XDEBUG_FOUND_VERNUM=`${PHP_CONFIG} --vernum`
   if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80000"; then
