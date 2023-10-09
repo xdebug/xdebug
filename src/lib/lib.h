@@ -335,5 +335,5 @@ void xdebug_llist_string_dtor(void *dummy, void *elem);
 char* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, char *fname);
 char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
 
-void xdebug_lib_register_compiled_variables(function_stack_entry *fse, zend_op_array *op_array);
+void xdebug_lib_register_compiled_variables(function_stack_entry *fse);
 #endif

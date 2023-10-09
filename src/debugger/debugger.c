@@ -122,7 +122,7 @@ static void register_compiled_variables(void)
 			continue;
 		}
 
-		xdebug_lib_register_compiled_variables(loop_fse, loop_fse->op_array);
+		xdebug_lib_register_compiled_variables(loop_fse);
 	}
 }
 

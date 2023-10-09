@@ -777,7 +777,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		int                   i;
 
 		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
-			xdebug_lib_register_compiled_variables(loop_fse, op_array);
+			xdebug_lib_register_compiled_variables(loop_fse);
 			if (XDEBUG_IS_NORMAL_FUNCTION(&loop_fse->function)) {
 				break;
 			}

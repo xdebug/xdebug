@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -746,7 +746,7 @@ static void xdebug_declared_var_dtor(void *dummy, void *elem)
 	xdebug_str_free(s);
 }
 
-void xdebug_lib_register_compiled_variables(function_stack_entry *fse, zend_op_array *op_array)
+void xdebug_lib_register_compiled_variables(function_stack_entry *fse)
 {
 	unsigned int i = 0;
 
@@ -754,13 +754,13 @@ void xdebug_lib_register_compiled_variables(function_stack_entry *fse, zend_op_a
 		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
 	}
 
-	if (!op_array->vars) {
+	if (!fse->op_array->vars) {
 		return;
 	}
 
 	/* gather used variables from compiled vars information */
-	while (i < (unsigned int) op_array->last_var) {
-		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(op_array->vars[i]), STR_NAME_LEN(op_array->vars[i])));
+	while (i < (unsigned int) fse->op_array->last_var) {
+		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(fse->op_array->vars[i]), STR_NAME_LEN(fse->op_array->vars[i])));
 		i++;
 	}
 }
