@@ -766,24 +766,6 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		fse->symbol_table = EG(current_execute_data)->symbol_table;
 	}
 
-	if (XG_BASE(stack) && (XINI_DEV(show_local_vars) || xdebug_is_debug_connection_active())) {
-		/* Because include/require is treated as a stack level, we have to add used
-		 * variables in include/required files to all the stack levels above, until
-		 * we hit a function or the top level stack.  This is so that the variables
-		 * show up correctly where they should be.  We always call
-		 * xdebug_lib_register_compiled_variables on the current stack level,
-		 * otherwise vars in include files do not show up in the locals list. */
-		function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-		int                   i;
-
-		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
-			xdebug_lib_register_compiled_variables(loop_fse);
-			if (XDEBUG_IS_NORMAL_FUNCTION(&loop_fse->function)) {
-				break;
-			}
-		}
-	}
-
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
 		fse->code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &fse->code_coverage_filename, &fse->code_coverage_function_name);
 	}

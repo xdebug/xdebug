@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1953,6 +1953,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth))) {
 		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1);
+		bool must_add_this = true;
 
 		if (depth > 0) {
 			xdebug_lib_set_active_data(old_fse->execute_data);
@@ -1962,6 +1963,8 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		xdebug_lib_set_active_symbol_table(fse->symbol_table);
 
 		/* Only show vars when they are scanned */
+		xdebug_lib_register_compiled_variables(fse);
+
 		if (fse->declared_vars) {
 			xdebug_hash *tmp_hash;
 
@@ -1978,11 +1981,15 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 			xdebug_hash_apply_with_argument(tmp_hash, (void *) node, func, (void *) options);
 
 			/* Zend engine 2 does not give us $this, eval so we can get it */
-			if (!xdebug_hash_find(tmp_hash, "this", 4, (void *) &var_name)) {
-				add_variable_node(node, XDEBUG_STR_WRAP_CHAR("this"), 1, 1, 0, options);
+			if (xdebug_hash_find(tmp_hash, "this", 4, (void *) &var_name)) {
+				must_add_this = false;
 			}
 
 			xdebug_hash_destroy(tmp_hash);
+		}
+
+		if (must_add_this) {
+			add_variable_node(node, XDEBUG_STR_WRAP_CHAR("this"), 1, 1, 0, options);
 		}
 
 		/* Check for static variables and constants, but only if it's a static

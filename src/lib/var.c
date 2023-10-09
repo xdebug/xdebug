@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -431,7 +431,7 @@ static void fetch_zval_from_symbol_table(
 				zend_op_array *opa = xdebug_lib_get_active_func_oparray();
 				zval **CV;
 
-				while (i < opa->last_var) {
+				while (opa->vars && i < opa->last_var) {
 					if (ZSTR_H(opa->vars[i]) == hash_value &&
 						ZSTR_LEN(opa->vars[i]) == element_length &&
 						strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)

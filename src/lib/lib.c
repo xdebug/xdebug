@@ -750,13 +750,15 @@ void xdebug_lib_register_compiled_variables(function_stack_entry *fse)
 {
 	unsigned int i = 0;
 
-	if (!fse->declared_vars) {
-		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
+	if (fse->declared_vars) {
+		return;
 	}
 
 	if (!fse->op_array->vars) {
 		return;
 	}
+
+	fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
 
 	/* gather used variables from compiled vars information */
 	while (i < (unsigned int) fse->op_array->last_var) {

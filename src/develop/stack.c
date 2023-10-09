@@ -840,6 +840,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			fse = fse - 1;
 			scope_nr--;
 		}
+
+		xdebug_lib_register_compiled_variables(fse);
+
 		if (fse->declared_vars && fse->declared_vars->size) {
 			xdebug_hash *tmp_hash;
 

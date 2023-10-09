@@ -98,35 +98,6 @@ int xdebug_debugger_bailout_if_no_exec_requested(void)
 	return 0;
 }
 
-static void register_compiled_variables(void)
-{
-	function_stack_entry *loop_fse;
-	int                   i;
-
-	if (!XG_BASE(stack)) {
-		return;
-	}
-
-	loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-
-	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
-		if (loop_fse->declared_vars) {
-			continue;
-		}
-
-		if (loop_fse->user_defined == XDEBUG_BUILT_IN) {
-			continue;
-		}
-
-		if (loop_fse->is_trampoline) {
-			continue;
-		}
-
-		xdebug_lib_register_compiled_variables(loop_fse);
-	}
-}
-
-
 void xdebug_debugger_set_program_name(zend_string *filename)
 {
 	if (!XG_DBG(context).program_name) {
@@ -307,7 +278,6 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 
 		if (!xdebug_is_debug_connection_active()) {
 			xdebug_debug_init_if_requested_on_xdebug_break();
-			register_compiled_variables();
 		}
 	}
 
@@ -402,8 +372,6 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 	zend_class_entry *exception_ce = exception->ce;
 	xdebug_brk_info *extra_brk_info;
 
-	register_compiled_variables();
-
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
 
@@ -458,8 +426,6 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int type, char *error_type_str, char *buffer)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
-
-	register_compiled_variables();
 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
@@ -948,8 +914,6 @@ PHP_FUNCTION(xdebug_break)
 	if (!xdebug_is_debug_connection_active()) {
 		RETURN_FALSE;
 	}
-
-	register_compiled_variables();
 
 	XG_DBG(context).do_break = 1;
 	XG_DBG(context).pending_breakpoint = NULL;
