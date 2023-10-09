@@ -116,6 +116,9 @@ PHP_FUNCTION(xdebug_start_function_monitor)
 	XG_DEV(functions_to_monitor) = xdebug_hash_alloc(zend_hash_num_elements(functions_to_monitor) + 1, (xdebug_hash_dtor_t) xdebug_hash_function_monitor_dtor);
 	init_function_monitor_hash(XG_DEV(functions_to_monitor), functions_to_monitor);
 
+	/* Disable opcache's optimizer as it prevents some optimized internal functions from being monitored */
+	xdebug_disable_opcache_optimizer();
+
 	XG_DEV(do_monitor_functions) = 1;
 }
 

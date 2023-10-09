@@ -707,44 +707,20 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	return tmp;
 }
 
-static void xdebug_execute_ex(zend_execute_data *execute_data)
+/** Function interceptors and dispatchers to modules ***********************/
+
+static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 {
-	zend_op_array        *op_array = &(execute_data->func->op_array);
-	zend_execute_data    *edata = execute_data->prev_execute_data;
+	zend_op_array     *op_array = &(execute_data->func->op_array);
+	zend_execute_data *edata = execute_data->prev_execute_data;
+
 	function_stack_entry *fse;
-	int                   function_nr = 0;
-	char                 *code_coverage_function_name = NULL;
-	zend_string          *code_coverage_filename = NULL;
-	int                   code_coverage_init = 0;
 
 	/* For PHP 7, we need to reset the opline to the start, so that all opcode
 	 * handlers are being hit. But not for generators, as that would make an
 	 * endless loop. TODO: Fix RECV handling with generators. */
 	if (!(EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR)) {
 		EX(opline) = EX(func)->op_array.opcodes;
-	}
-
-	if (xdebug_debugger_bailout_if_no_exec_requested()) {
-		return;
-	}
-
-	/* If we're evaluating for the debugger's eval capability, just bail out */
-	if (op_array && op_array->filename && strcmp("xdebug://debug-eval", STR_NAME_VAL(op_array->filename)) == 0) {
-		xdebug_old_execute_ex(execute_data);
-		return;
-	}
-
-	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
-	   that it's just being called to check for breakpoints with conditions */
-	if (edata && edata->func && ZEND_USER_CODE(edata->func->type) && edata->opline && edata->opline->opcode == ZEND_EXT_STMT) {
-		xdebug_old_execute_ex(execute_data);
-		return;
-	}
-
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		xdebug_old_execute_ex(execute_data);
-		return;
 	}
 
 	if (XG_BASE(in_execution) && XDEBUG_VECTOR_COUNT(XG_BASE(stack)) == 0) {
@@ -778,13 +754,11 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 		(fse - 1)->user_defined = XDEBUG_USER_DEFINED;
 	}
 
-	function_nr = XG_BASE(function_count);
-
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_execute_ex(function_nr, fse);
+		xdebug_tracing_execute_ex(fse);
 	}
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
@@ -811,7 +785,7 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
-		code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &code_coverage_filename, &code_coverage_function_name);
+		fse->code_coverage_init = xdebug_coverage_execute_ex(fse, op_array, &fse->code_coverage_filename, &fse->code_coverage_function_name);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -827,29 +801,31 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex(fse, op_array);
 	}
+}
 
-	xdebug_old_execute_ex(execute_data);
+static void xdebug_execute_user_code_end(zend_execute_data *execute_data, zval *retval)
+{
+	zend_op_array        *op_array = &(execute_data->func->op_array);
+	function_stack_entry *fse;
 
-	/* Re-acquire the tail as nested calls through xdebug_old_execute_ex()
-	 * might have reallocated the vector */
 	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_ex_end(fse);
 	}
 
-	if (code_coverage_init) {
-		xdebug_coverage_execute_ex_end(fse, op_array, code_coverage_filename, code_coverage_function_name);
+	if (fse->code_coverage_init) {
+		xdebug_coverage_execute_ex_end(fse, op_array, fse->code_coverage_filename, fse->code_coverage_function_name);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_execute_ex_end(function_nr, fse, execute_data);
+		xdebug_tracing_execute_ex_end(fse, execute_data);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		zval *return_value = NULL;
 
-		if (!fse->is_trampoline && execute_data->return_value && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
+		if (!fse->is_trampoline && retval && !(op_array->fn_flags & ZEND_ACC_GENERATOR)) {
 			return_value = execute_data->return_value;
 		}
 
@@ -859,6 +835,66 @@ static void xdebug_execute_ex(zend_execute_data *execute_data)
 
 	if (XG_BASE(stack)) {
 		xdebug_vector_pop(XG_BASE(stack));
+	}
+}
+
+static bool should_run_user_handler(zend_execute_data *execute_data)
+{
+	zend_op_array     *op_array = &(execute_data->func->op_array);
+	zend_execute_data *prev_edata = execute_data->prev_execute_data;
+
+	if (xdebug_debugger_bailout_if_no_exec_requested()) {
+		return false;
+	}
+
+	if (!ZEND_USER_CODE(op_array->type)) {
+		return false;
+	}
+
+	/* If we're evaluating for the debugger's eval capability, just bail out */
+	if (op_array && ZEND_USER_CODE(op_array->type) && op_array->filename && op_array->filename && strcmp("xdebug://debug-eval", STR_NAME_VAL(op_array->filename)) == 0) {
+		return false;
+	}
+
+	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
+	   that it's just being called to check for breakpoints with conditions */
+	if (prev_edata && prev_edata->func && ZEND_USER_CODE(prev_edata->func->type) && prev_edata->opline && prev_edata->opline->opcode == ZEND_EXT_STMT) {
+		return false;
+	}
+
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return false;
+	}
+
+	return true;
+}
+
+/* This is confusing. On PHP 8.1 we flip the logic, as normal user functions
+ * are handled through the Observer API. Once PHP 8.0 support is dropped, the
+ * negation should be **added** to the usage below in xdebug_execute_ex. */
+static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
+{
+#if PHP_VERSION_ID >= 80100
+	return !should_run_user_handler(execute_data);
+#else
+	return should_run_user_handler(execute_data);
+#endif
+}
+
+/* We still need this to do "include", "require", and "eval" */
+static void xdebug_execute_ex(zend_execute_data *execute_data)
+{
+	bool run_user_handler = should_run_user_handler_wrapper(execute_data);
+
+	if (run_user_handler) {
+		xdebug_execute_user_code_begin(execute_data);
+	}
+
+	xdebug_old_execute_ex(execute_data);
+
+	if (run_user_handler) {
+		xdebug_execute_user_code_end(execute_data, execute_data->return_value);
 	}
 }
 
@@ -889,28 +925,25 @@ static int check_soap_call(function_stack_entry *fse, zend_execute_data *execute
 	return 0;
 }
 
-static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
+static bool should_run_internal_handler(zend_execute_data *execute_data)
+{
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return false;
+	}
+
+	if (!execute_data || !execute_data->func || ZEND_USER_CODE(execute_data->func->type)) {
+		return false;
+	}
+
+	return true;
+}
+
+
+static void xdebug_execute_internal_begin(zend_execute_data *current_execute_data)
 {
 	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
-	int                   function_nr = 0;
-	int                   function_call_traced = 0;
-	int                   restore_error_handler_situation = 0;
-#if PHP_VERSION_ID >= 80100
-	void                (*tmp_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
-#else
-	void                (*tmp_error_cb)(int type, const char *error_filename, const uint32_t error_lineno, zend_string *message) = NULL;
-#endif
-
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		if (xdebug_old_execute_internal) {
-			xdebug_old_execute_internal(current_execute_data, return_value);
-		} else {
-			execute_internal(current_execute_data, return_value);
-		}
-		return;
-	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
@@ -919,13 +952,11 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN);
 	fse->function.internal = 1;
 
-	function_nr = XG_BASE(function_count);
-
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		function_call_traced = xdebug_tracing_execute_internal(function_nr, fse);
+		fse->function_call_traced = xdebug_tracing_execute_internal(fse);
 	}
 
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
@@ -940,20 +971,18 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 
 	/* Check for SOAP */
 	if (check_soap_call(fse, current_execute_data)) {
-		restore_error_handler_situation = 1;
-		tmp_error_cb = zend_error_cb;
+		fse->soap_error_cb = zend_error_cb;
 		xdebug_base_use_original_error_cb();
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_execute_internal(fse);
 	}
+}
 
-	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, return_value);
-	} else {
-		execute_internal(current_execute_data, return_value);
-	}
+static void xdebug_execute_internal_end(zend_execute_data *current_execute_data, zval *return_value)
+{
+	function_stack_entry *fse;
 
 	/* Re-acquire the tail as nested calls through
 	 * xdebug_old_execute_internal() might have reallocated the vector */
@@ -964,15 +993,15 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 	}
 
 	/* Restore SOAP situation if needed */
-	if (restore_error_handler_situation) {
-		zend_error_cb = tmp_error_cb;
+	if (fse->soap_error_cb) {
+		zend_error_cb = fse->soap_error_cb;
 	}
 
 	/* We only call the function_exit handler and return value handler if the
 	 * function call was also traced. Otherwise we end up with return trace
 	 * lines without a corresponding function call line. */
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && function_call_traced) {
-		xdebug_tracing_execute_internal_end(function_nr, fse, return_value);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) && fse->function_call_traced) {
+		xdebug_tracing_execute_internal_end(fse, return_value);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -984,6 +1013,59 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		xdebug_vector_pop(XG_BASE(stack));
 	}
 }
+
+#if PHP_VERSION_ID < 80200
+static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
+{
+	bool run_internal_handler = should_run_internal_handler(current_execute_data);
+
+	if (run_internal_handler) {
+		xdebug_execute_internal_begin(current_execute_data);
+	}
+
+	if (xdebug_old_execute_internal) {
+		xdebug_old_execute_internal(current_execute_data, return_value);
+	} else {
+		execute_internal(current_execute_data, return_value);
+	}
+
+	if (run_internal_handler) {
+		xdebug_execute_internal_end(current_execute_data, return_value);
+	}
+}
+#endif
+
+#if PHP_VERSION_ID >= 80100
+static void xdebug_execute_begin(zend_execute_data *execute_data)
+{
+	if (should_run_user_handler(execute_data)) {
+		xdebug_execute_user_code_begin(execute_data);
+	}
+#if PHP_VERSION_ID >= 80200
+	if (should_run_internal_handler(execute_data)) {
+		xdebug_execute_internal_begin(execute_data);
+	}
+#endif
+}
+
+static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
+{
+	if (should_run_user_handler(execute_data)) {
+		xdebug_execute_user_code_end(execute_data, retval);
+	}
+#if PHP_VERSION_ID >= 80200
+	if (should_run_internal_handler(execute_data)) {
+		xdebug_execute_internal_end(execute_data, retval);
+	}
+#endif
+}
+
+static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *execute_data)
+{
+	return (zend_observer_fcall_handlers){xdebug_execute_begin, xdebug_execute_end};
+}
+#endif
+/***************************************************************************/
 
 static void xdebug_base_overloaded_functions_setup(void)
 {
@@ -1072,6 +1154,7 @@ static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **b
 }
 
 #if PHP_VERSION_ID >= 80100
+/** Handling fibers ********************************************************/
 static struct xdebug_fiber_entry* xdebug_fiber_entry_ctor(xdebug_vector *stack)
 {
 	struct xdebug_fiber_entry *tmp = xdmalloc(sizeof(struct xdebug_fiber_entry));
@@ -1175,6 +1258,7 @@ static void xdebug_fiber_switch_observer(zend_fiber_context *from, zend_fiber_co
 		add_fiber_main(to);
 	}
 }
+/***************************************************************************/
 #endif
 
 #ifdef __linux__
@@ -1252,11 +1336,20 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	xdebug_old_error_cb = zend_error_cb;
 	xdebug_new_error_cb = xdebug_error_cb;
 
+#if PHP_VERSION_ID >= 80100
+	/* User Code Functions */
+	zend_observer_fcall_register(xdebug_observer_init);
+#endif
+
+	/* Include, Require, Eval */
 	xdebug_old_execute_ex = zend_execute_ex;
 	zend_execute_ex = xdebug_execute_ex;
 
+#if PHP_VERSION_ID < 80200
+	/* Internal Functions, since 8.2 they're also observed */
 	xdebug_old_execute_internal = zend_execute_internal;
 	zend_execute_internal = xdebug_execute_internal;
+#endif
 
 	XG_BASE(error_reporting_override) = 0;
 	XG_BASE(error_reporting_overridden) = 0;

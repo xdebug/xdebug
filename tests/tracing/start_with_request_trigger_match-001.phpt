@@ -2,6 +2,7 @@
 Starting Tracing: trigger, trigger match [1]
 --INI--
 xdebug.mode=trace
+xdebug.trace_format=0
 xdebug.start_with_request=trigger
 xdebug.trigger_value=SOMETHING
 xdebug.collect_return=0

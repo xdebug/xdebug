@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #905: Tracing for generators
+Test for bug #905: Tracing for generators (>= PHP 8.1)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.1');
+?>
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=no
@@ -34,7 +39,6 @@ key => c
 11 => f
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> gen() %sbug00905.php:13
-%w%f %w%d     -> gen() %sbug00905.php:13
 %w%f %w%d      >=> (0 => 'a')
 %w%f %w%d     -> gen() %sbug00905.php:13
 %w%f %w%d      >=> (1 => 'b')
@@ -47,6 +51,7 @@ TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d     -> gen() %sbug00905.php:13
 %w%f %w%d      >=> (11 => 'f')
 %w%f %w%d     -> gen() %sbug00905.php:13
+%w%f %w%d      >=> (11 => 'f')
 %w%f %w%d     -> xdebug_stop_trace() %sbug00905.php:17
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

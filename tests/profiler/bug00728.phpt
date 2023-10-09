@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #728: Profiler reports __call() invocations confusingly/wrongly
+Test for bug #728: Profiler reports __call() invocations confusingly/wrongly (>= PHP 8.1)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.1');
+?>
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=default
@@ -65,22 +70,14 @@ calls=1 0 0
 8 %d %d
 
 fl=(3)
-fn=(6) bankaccount->bar
-6 %d %d
-cfl=(3)
-cfn=(5)
-calls=1 0 0
-13 %d %d
-
-fl=(3)
-fn=(7) {main}
+fn=(6) {main}
 1 %d %d
 cfl=(2)
 cfn=(3)
 calls=1 0 0
 2 %d %d
 cfl=(3)
-cfn=(6)
+cfn=(5)
 calls=1 0 0
 13 %d %d
 
