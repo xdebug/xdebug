@@ -179,7 +179,7 @@ char *xdebug_trace_flamegraph_get_filename(void *ctxt)
 	return context->trace_file->name;
 }
 
-void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fse, int function_nr)
+void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fse)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
 	function_stack_entry            *parent_fse;
@@ -215,7 +215,7 @@ void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fs
 	xdfree(tmp_name);
 }
 
-void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse, int function_nr)
+void xdebug_trace_flamegraph_function_exit(void *ctxt, function_stack_entry *fse)
 {
 	xdebug_trace_flamegraph_context *context = (xdebug_trace_flamegraph_context*) ctxt;
 	flamegraph_function             *function;
