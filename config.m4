@@ -13,9 +13,9 @@ m4_include([m4/pkg.m4])
 m4_include([m4/clocks.m4])
 
 if test "$PHP_XDEBUG" != "no"; then
-  AC_MSG_CHECKING([Check for supported PHP versions])
+  AC_MSG_CHECKING([for supported PHP version])
   PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
-  PHP_XDEBUG_FOUND_VERNUM=`echo "${PHP_XDEBUG_FOUND_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 100 + [$]2) * 100 + [$]3;}'`
+  PHP_XDEBUG_FOUND_VERNUM=`${PHP_CONFIG} --vernum`
   if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80000"; then
     AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.5.0 (found $PHP_XDEBUG_FOUND_VERSION)])
   else
