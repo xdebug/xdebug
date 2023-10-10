@@ -281,86 +281,88 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		}
 	}
 
-	if (xdebug_is_debug_connection_active()) {
-		XG_DBG(suppress_return_value_step) = 0;
+	if (!xdebug_is_debug_connection_active()) {
+		return;
+	}
 
-		if (XG_DBG(context).do_break) {
-			xdebug_brk_info *brk_info = XG_DBG(context).pending_breakpoint;
+	XG_DBG(suppress_return_value_step) = 0;
 
-			XG_DBG(context).do_break = 0;
-			XG_DBG(context).pending_breakpoint = NULL;
+	if (XG_DBG(context).do_break) {
+		xdebug_brk_info *brk_info = XG_DBG(context).pending_breakpoint;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, brk_info, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
+		XG_DBG(context).do_break = 0;
+		XG_DBG(context).pending_breakpoint = NULL;
+
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, brk_info, NULL)) {
+			xdebug_mark_debug_connection_not_active();
 			return;
 		}
+		return;
+	}
 
-		/* Check for "finish" */
-		if (finish_condition_met(0)) {
-			XG_DBG(context).do_finish = 0;
+	/* Check for "finish" */
+	if (finish_condition_met(0)) {
+		XG_DBG(context).do_finish = 0;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
+			xdebug_mark_debug_connection_not_active();
 			return;
 		}
+		return;
+	}
 
-		/* Check for "next" */
-		if (next_condition_met()) {
-			XG_DBG(context).do_next = 0;
+	/* Check for "next" */
+	if (next_condition_met()) {
+		XG_DBG(context).do_next = 0;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
+			xdebug_mark_debug_connection_not_active();
 			return;
 		}
+		return;
+	}
 
-		/* Check for "step" */
-		if (XG_DBG(context).do_step) {
-			XG_DBG(context).do_step = 0;
+	/* Check for "step" */
+	if (XG_DBG(context).do_step) {
+		XG_DBG(context).do_step = 0;
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
-				xdebug_mark_debug_connection_not_active();
-				return;
-			}
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
+			xdebug_mark_debug_connection_not_active();
 			return;
 		}
+		return;
+	}
 
-		if (XG_DBG(context).line_breakpoints) {
-			int   break_ok, res;
-			zval  retval;
+	if (XG_DBG(context).line_breakpoints) {
+		int   break_ok, res;
+		zval  retval;
 
-			for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
-				extra_brk_info = XDEBUG_LLIST_VALP(le);
+		for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+			extra_brk_info = XDEBUG_LLIST_VALP(le);
 
-				if (XG_DBG(context).handler->break_on_line(&(XG_DBG(context)), extra_brk_info, filename, lineno)) {
-					break_ok = 1; /* Breaking is allowed by default */
+			if (XG_DBG(context).handler->break_on_line(&(XG_DBG(context)), extra_brk_info, filename, lineno)) {
+				break_ok = 1; /* Breaking is allowed by default */
 
-					/* Check if we have a condition set for it */
-					if (extra_brk_info->condition) {
-						/* If there is a condition, we disable breaking by
-						 * default and only enabled it when the code evaluates
-						 * to TRUE */
-						break_ok = 0;
+				/* Check if we have a condition set for it */
+				if (extra_brk_info->condition) {
+					/* If there is a condition, we disable breaking by
+					 * default and only enabled it when the code evaluates
+					 * to TRUE */
+					break_ok = 0;
 
-						/* Remember error reporting level */
-						res = xdebug_do_eval(extra_brk_info->condition, &retval, NULL);
-						if (res) {
-							break_ok = Z_TYPE(retval) == IS_TRUE;
-							zval_dtor(&retval);
-						}
+					/* Remember error reporting level */
+					res = xdebug_do_eval(extra_brk_info->condition, &retval, NULL);
+					if (res) {
+						break_ok = Z_TYPE(retval) == IS_TRUE;
+						zval_dtor(&retval);
 					}
-					if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
-						if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, NULL)) {
-							xdebug_mark_debug_connection_not_active();
-							break;
-						}
-						return;
+				}
+				if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
+					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, NULL)) {
+						xdebug_mark_debug_connection_not_active();
+						break;
 					}
+					return;
 				}
 			}
 		}
