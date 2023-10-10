@@ -730,8 +730,13 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 
 	lineno = EG(current_execute_data)->opline->lineno;
 
-	xdebug_coverage_count_line_if_active(op_array, op_array->filename, lineno);
-	xdebug_debugger_statement_call(op_array->filename, lineno);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+		xdebug_coverage_count_line_if_active(op_array, op_array->filename, lineno);
+	}
+
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_debugger_statement_call(op_array->filename, lineno);
+	}
 }
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
