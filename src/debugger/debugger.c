@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -440,11 +440,16 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 	}
 }
 
-static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
+static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
 {
 	char            *tmp_name = NULL;
 	size_t           tmp_len = 0;
 	xdebug_brk_info *extra_brk_info = NULL;
+
+	/* Short circuit if there are no function breakpoints */
+	if (!XG_DBG(context).function_breakpoints || XG_DBG(context).function_breakpoints->size == 0) {
+		return true;
+	}
 
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
@@ -476,7 +481,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 	}
 	/* Unknown */
 	else {
-		return 1;
+		return true;
 	}
 
 	if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
@@ -487,7 +492,7 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 				if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN)) {
 					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
 						xdfree(tmp_name);
-						return 0;
+						return false;
 					}
 				} else {
 					XG_DBG(context).do_break = 1;
@@ -497,6 +502,16 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 		}
 	}
 	xdfree(tmp_name);
+
+	return true;
+}
+
+/* Returns false if something is wrong with the breakpoint */
+static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
+{
+	if (!handle_function_breakpoints(fse, breakpoint_type, return_value)) {
+		return false;
+	}
 
 	if (
 		(XG_DBG(context).breakpoint_include_return_value) &&
@@ -509,15 +524,15 @@ static int handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zv
 		} else if (XG_DBG(context).do_finish && finish_condition_met(fse, 1)) {
 			XG_DBG(context).do_finish = 0;
 		} else {
-			return 1;
+			return true;
 		}
 
-		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
-			return 0;
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, NULL, return_value)) {
+			return false;
 		}
 	}
 
-	return 1;
+	return true;
 }
 
 void xdebug_debugger_handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
