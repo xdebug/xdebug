@@ -126,7 +126,7 @@ typedef struct xdebug_var_name {
 typedef struct _xdebug_func {
 	zend_string *object_class;
 	zend_string *scope_class;
-	char *function;
+	zend_string *function;
 	int   type;
 	int   internal;
 } xdebug_func;
@@ -183,7 +183,7 @@ typedef struct _function_stack_entry {
 	struct {
 		int          lineno;
 		zend_string *filename;
-		char        *funcname;
+		zend_string *function;
 	} profiler;
 
 	/* misc properties */
@@ -332,8 +332,8 @@ int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER
 char *xdebug_lib_get_output_dir(void);
 
 void xdebug_llist_string_dtor(void *dummy, void *elem);
-char* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, char *fname);
-char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname);
+zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, zend_string *fname);
+zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname);
 
 void xdebug_lib_register_compiled_variables(function_stack_entry *fse);
 #endif

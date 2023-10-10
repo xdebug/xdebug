@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@ typedef struct _xdebug_call_entry {
 	int          type; /* 0 = function call, 1 = line */
 	int          user_defined;
 	zend_string *filename;
-	char        *function;
+	zend_string *function;
 	int          lineno;
 	uint64_t     nanotime_taken;
 	long         mem_used;

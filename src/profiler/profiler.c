@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -149,7 +149,7 @@ void xdebug_profile_call_entry_dtor(void *dummy, void *elem)
 	xdebug_call_entry *ce = elem;
 
 	if (ce->function) {
-		xdfree(ce->function);
+		zend_string_release(ce->function);
 	}
 	if (ce->filename) {
 		zend_string_release(ce->filename);
@@ -342,7 +342,7 @@ void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_o
 	} else {
 		fse->profiler.filename = zend_string_copy(fse->filename);
 	}
-	fse->profiler.funcname = xdstrdup(tmp_name);
+	fse->profiler.function = ZSTR_INIT_LITERAL(tmp_name, false);
 	xdfree(tmp_name);
 }
 
@@ -371,7 +371,7 @@ void xdebug_profiler_add_function_details_internal(function_stack_entry *fse)
 	}
 
 	fse->profiler.filename = zend_string_copy(fse->filename);
-	fse->profiler.funcname = xdstrdup(tmp_name);
+	fse->profiler.function = ZSTR_INIT_LITERAL(tmp_name, false);
 
 	xdfree(tmp_name);
 }
@@ -414,7 +414,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		xdebug_call_entry *ce = xdmalloc(sizeof(xdebug_call_entry));
 
 		ce->filename = zend_string_copy(fse->profiler.filename);
-		ce->function = xdstrdup(fse->profiler.funcname);
+		ce->function = zend_string_copy(fse->profiler.function);
 		ce->nanotime_taken = fse->profile.nanotime;
 		ce->lineno = fse->lineno;
 		ce->user_defined = fse->user_defined;
@@ -426,10 +426,10 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	/* use previously created filename and funcname (or a reference to them) to show
 	 * time spend */
 	if (fse->user_defined == XDEBUG_BUILT_IN) {
-		size_t tmp_key_funcname_len = strlen(fse->profiler.funcname);
+		size_t tmp_key_funcname_len = ZSTR_LEN(fse->profiler.function);
 
 		memcpy(tmp_key + TMP_KEY_PREFIX_LEN,
-			fse->profiler.funcname,
+			ZSTR_VAL(fse->profiler.function),
 			tmp_key_funcname_len > TMP_KEY_MAX_LEN ? TMP_KEY_MAX_LEN : tmp_key_funcname_len + 1
 		);
 		tmp_key[TMP_KEY_BUFFER_LEN - 1] = '\0';
@@ -449,7 +449,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		add_filename_ref(&file_buffer, ZSTR_VAL(fse->profiler.filename));
 
 		xdebug_str_add_literal(&file_buffer, "\nfn=");
-		add_functionname_ref(&file_buffer, fse->profiler.funcname);
+		add_functionname_ref(&file_buffer, ZSTR_VAL(fse->profiler.function));
 		xdebug_str_addc(&file_buffer, '\n');
 	}
 
@@ -476,10 +476,10 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 		xdebug_call_entry *call_entry = XDEBUG_LLIST_VALP(le);
 
 		if (call_entry->user_defined == XDEBUG_BUILT_IN) {
-			size_t tmp_key_funcname_len = strlen(call_entry->function);
+			size_t tmp_key_funcname_len = ZSTR_LEN(call_entry->function);
 
 			memcpy(tmp_key + TMP_KEY_PREFIX_LEN,
-				call_entry->function,
+				ZSTR_VAL(call_entry->function),
 				tmp_key_funcname_len > TMP_KEY_MAX_LEN ? TMP_KEY_MAX_LEN : tmp_key_funcname_len + 1
 			);
 			tmp_key[TMP_KEY_BUFFER_LEN - 1] = '\0';
@@ -499,7 +499,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 			add_filename_ref(&file_buffer, ZSTR_VAL(call_entry->filename));
 
 			xdebug_str_add_literal(&file_buffer, "\ncfn=");
-			add_functionname_ref(&file_buffer, call_entry->function);
+			add_functionname_ref(&file_buffer, ZSTR_VAL(call_entry->function));
 			xdebug_str_addc(&file_buffer, '\n');
 		}
 
@@ -521,9 +521,9 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 
 void xdebug_profiler_free_function_details(function_stack_entry *fse)
 {
-	if (fse->profiler.funcname) {
-		xdfree(fse->profiler.funcname);
-		fse->profiler.funcname = NULL;
+	if (fse->profiler.function) {
+		zend_string_release(fse->profiler.function);
+		fse->profiler.function = NULL;
 	}
 	if (fse->profiler.filename) {
 		zend_string_release(fse->profiler.filename);

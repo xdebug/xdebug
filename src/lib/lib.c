@@ -703,40 +703,41 @@ void xdebug_llist_string_dtor(void *dummy, void *elem)
 	}
 }
 
-char* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, char *fname)
+zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, zend_string *fname)
 {
-	return xdebug_sprintf(
+	return zend_strpprintf(
+		0,
 		"%s{%s:%s:%d-%d}",
-		fname,
+		ZSTR_VAL(fname),
 		prefix,
-		opa->filename->val,
+		ZSTR_VAL(opa->filename),
 		opa->line_start,
 		opa->line_end
 	);
 }
 
-char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname)
+zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname)
 {
-	xdebug_str tmp = XDEBUG_STR_INITIALIZER;
-	char *tmp_loc_info;
+	zend_string *tmp, *tmp_loc_info;
 
-	if (fname[strlen(fname) - 1] != '}') {
-		xdebug_str_add(&tmp, fname, 0);
-
-		return tmp.d;
+	if (ZSTR_VAL(fname)[ZSTR_LEN(fname) - 1] != '}') {
+		return zend_string_copy(fname);
 	}
 
-	xdebug_str_addl(&tmp, fname, strlen(fname) - 1, 0);
+	tmp = zend_string_init(ZSTR_VAL(fname), ZSTR_LEN(fname) - 1, false);
 
-	tmp_loc_info = xdebug_sprintf(
-		":%s:%d-%d}",
-		opa->filename->val,
+	tmp_loc_info = zend_strpprintf(
+		0,
+		"%s:%s:%d-%d}",
+		ZSTR_VAL(tmp),
+		ZSTR_VAL(opa->filename),
 		opa->line_start,
 		opa->line_end
 	);
-	xdebug_str_add(&tmp, tmp_loc_info, 1);
 
-	return tmp.d;
+	zend_string_release(tmp);
+
+	return tmp_loc_info;
 }
 
 static void xdebug_declared_var_dtor(void *dummy, void *elem)

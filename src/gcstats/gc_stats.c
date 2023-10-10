@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,7 @@ static int xdebug_gc_collect_cycles(void)
 
 	xdebug_build_fname(&tmp, execute_data);
 
-	run->function_name = tmp.function ? xdstrdup(tmp.function) : NULL;
+	run->function_name = tmp.function ? zend_string_copy(tmp.function) : NULL;
 	run->class_name = tmp.object_class ? zend_string_copy(tmp.object_class) : NULL;
 
 	xdebug_gc_stats_print_run(run);
@@ -88,7 +88,7 @@ static void xdebug_gc_stats_run_free(xdebug_gc_run *run)
 	}
 
 	if (run->function_name) {
-		xdfree(run->function_name);
+		zend_string_release(run->function_name);
 	}
 	if (run->class_name) {
 		zend_string_release(run->class_name);
@@ -203,7 +203,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->memory_before,
 			run->memory_after,
 			reduction,
-			run->function_name
+			ZSTR_VAL(run->function_name)
 		);
 	} else if (run->class_name && run->function_name) {
 		fprintf(XG_GCSTATS(file),
@@ -215,7 +215,7 @@ static void xdebug_gc_stats_print_run(xdebug_gc_run *run)
 			run->memory_after,
 			reduction,
 			ZSTR_VAL(run->class_name),
-			run->function_name
+			ZSTR_VAL(run->function_name)
 		);
 	}
 

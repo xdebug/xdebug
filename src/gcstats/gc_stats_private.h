@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@ typedef struct _xdebug_gc_run {
 	zend_long    duration;
 	zend_long    memory_before;
 	zend_long    memory_after;
-	char        *function_name;
+	zend_string *function_name;
 	zend_string *class_name;
 } xdebug_gc_run;
 

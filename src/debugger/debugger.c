@@ -453,7 +453,7 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 
 	/* Function breakpoints */
 	if (fse->function.type == XFUNC_NORMAL) {
-		tmp_len = 2 + strlen(fse->function.function) + 1;
+		tmp_len = 2 + ZSTR_LEN(fse->function.function) + 1;
 		tmp_name = xdmalloc(tmp_len);
 		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
 		 * codebases due to setlocale calls. We don't care about the locale here. */
@@ -461,14 +461,14 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 			tmp_name, tmp_len,
 			"%c/%s",
 			(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_CALL) ? 'C' : 'R',
-			fse->function.function
+			ZSTR_VAL(fse->function.function)
 		);
 	}
 	/* class->function breakpoints */
 	else if (fse->function.type == XFUNC_MEMBER || fse->function.type == XFUNC_STATIC_MEMBER) {
 		/* Using strlen(ZSTR_VAL(...)) here to cut of the string at the first \0, which is needed
 		 * for anonymous classes, in combination with the snprintf() below */
-		tmp_len = 2 + strlen(ZSTR_VAL(fse->function.object_class)) + 2 + strlen(fse->function.function) + 1;
+		tmp_len = 2 + ZSTR_LEN(fse->function.object_class) + 2 + ZSTR_LEN(fse->function.function) + 1;
 		tmp_name = xdmalloc(tmp_len);
 		/* We intentionally do not use xdebug_sprintf because it can create a bottleneck in large
 		 * codebases due to setlocale calls. We don't care about the locale here. */
@@ -476,7 +476,7 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 			tmp_name, tmp_len,
 			"%c/%s::%s",
 			(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_CALL) ? 'C' : 'R',
-			ZSTR_VAL(fse->function.object_class), fse->function.function
+			ZSTR_VAL(fse->function.object_class), ZSTR_VAL(fse->function.function)
 		);
 	}
 	/* Unknown */

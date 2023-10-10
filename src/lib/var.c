@@ -1096,16 +1096,16 @@ static char* xdebug_create_doc_link(xdebug_func f)
 
 	switch (f.type) {
 		case XFUNC_NORMAL: {
-			tmp_target = xdebug_sprintf("function.%s", f.function);
+			tmp_target = xdebug_sprintf("function.%s", ZSTR_VAL(f.function));
 			break;
 		}
 
 		case XFUNC_STATIC_MEMBER:
 		case XFUNC_MEMBER: {
-			if (strcmp(f.function, "__construct") == 0) {
+			if (zend_string_equals_literal(f.function, "__construct")) {
 				tmp_target = xdebug_sprintf("%s.construct", ZSTR_VAL(f.object_class));
 			} else {
-				tmp_target = xdebug_sprintf("%s.%s", ZSTR_VAL(f.object_class), f.function);
+				tmp_target = xdebug_sprintf("%s.%s", ZSTR_VAL(f.object_class), ZSTR_VAL(f.function));
 			}
 			break;
 		}
@@ -1117,7 +1117,7 @@ static char* xdebug_create_doc_link(xdebug_func f)
 
 	retval = xdebug_sprintf("<a href='%s%s%s' target='_new'>%s</a>",
 		(PG(docref_root) && PG(docref_root)[0]) ? PG(docref_root) : "http://www.php.net/",
-		tmp_target, PG(docref_ext), f.function);
+		tmp_target, PG(docref_ext), ZSTR_VAL(f.function));
 
 	xdfree(tmp_target);
 
@@ -1131,7 +1131,7 @@ char* xdebug_show_fname(xdebug_func f, int flags)
 			if (PG(html_errors) && (flags & XDEBUG_SHOW_FNAME_ALLOW_HTML) && f.internal) {
 				return xdebug_create_doc_link(f);
 			} else {
-				return xdstrdup(f.function);
+				return xdebug_sprintf("%s", ZSTR_VAL(f.function));
 			}
 			break;
 		}
@@ -1145,14 +1145,14 @@ char* xdebug_show_fname(xdebug_func f, int flags)
 					return xdebug_sprintf("%s%s%s",
 						ZSTR_VAL(f.scope_class),
 						f.type == XFUNC_STATIC_MEMBER ? "::" : "->",
-						f.function ? f.function : "?"
+						f.function ? ZSTR_VAL(f.function) : "?"
 					);
 				}
 
 				return xdebug_sprintf("%s%s%s",
 					f.object_class ? ZSTR_VAL(f.object_class) : "?",
 					f.type == XFUNC_STATIC_MEMBER ? "::" : "->",
-					f.function ? f.function : "?"
+					f.function ? ZSTR_VAL(f.function) : "?"
 				);
 			}
 			break;
@@ -1188,7 +1188,7 @@ char* xdebug_show_fname(xdebug_func f, int flags)
 
 #if PHP_VERSION_ID >= 80100
 		case XFUNC_FIBER:
-			return xdstrdup(f.function);
+			return xdebug_sprintf("%s", ZSTR_VAL(f.function));
 			break;
 #endif
 
