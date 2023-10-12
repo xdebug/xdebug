@@ -2913,9 +2913,8 @@ static void function_breakpoint_resolve_helper(void *rctxt, xdebug_brk_info *brk
 }
 */
 
-static void line_breakpoint_resolve_helper(xdebug_con *context, xdebug_lines_list *lines_list, xdebug_brk_info *brk_info)
+static xdebug_function_lines_map_item* find_smallest_range(xdebug_lines_list *lines_list, xdebug_brk_info *brk_info)
 {
-//	xdebug_func        func;
 	int                             i;
 	xdebug_function_lines_map_item *found_item = NULL;
 	int                             found_item_span = XDEBUG_RESOLVED_SPAN_MAX;
@@ -2935,6 +2934,16 @@ static void line_breakpoint_resolve_helper(xdebug_con *context, xdebug_lines_lis
 			found_item_span = item->line_span;
 		}
 	}
+
+	return found_item;
+}
+
+static void line_breakpoint_resolve_helper(xdebug_con *context, xdebug_lines_list *lines_list, xdebug_brk_info *brk_info)
+{
+	xdebug_function_lines_map_item *found_item = NULL;
+
+	/* Find smallest function span that fits the line nr in brk_info */
+	found_item = find_smallest_range(lines_list, brk_info);
 
 	if (!found_item) {
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "R: Could not find any file/line entry in lines list.");
