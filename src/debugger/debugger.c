@@ -205,6 +205,25 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval, zend_string **return_messa
 	return res;
 }
 
+bool xdebug_debugger_check_evaled_code(zend_string *filename_in, zend_string **filename_out)
+{
+	char *end_marker;
+	xdebug_eval_info *ei;
+
+	if (!filename_in) {
+		return false;
+	}
+
+	end_marker = ZSTR_VAL(filename_in) + ZSTR_LEN(filename_in) - strlen("eval()'d code");
+	if (end_marker >= ZSTR_VAL(filename_in) && strcmp("eval()'d code", end_marker) == 0) {
+		if (xdebug_hash_find(XG_DBG(context).eval_id_lookup, ZSTR_VAL(filename_in), ZSTR_LEN(filename_in), (void *) &ei)) {
+			*filename_out = zend_strpprintf(0, "dbgp://%u", ei->id);
+			return true;
+		}
+	}
+	return false;
+}
+
 int next_condition_met(function_stack_entry *fse)
 {
 	if (XG_DBG(context).next_stack != NULL) {
