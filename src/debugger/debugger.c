@@ -332,7 +332,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		return;
 	}
 
-	if (XG_DBG(context).line_breakpoints) {
+	if (fse->has_line_breakpoints && XG_DBG(context).line_breakpoints) {
 		int   break_ok, res;
 		zval  retval;
 
@@ -525,9 +525,72 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 	return true;
 }
 
+void xdebug_debugger_set_has_line_breakpoints(function_stack_entry *fse)
+{
+	if (fse->has_line_breakpoints) {
+		return;
+	}
+
+	fse->has_line_breakpoints = true;
+	xdebug_log_ex(
+		XLOG_CHAN_DEBUG, XLOG_DEBUG, "HLB",
+		"Setting 'has_line_breakpoints on %s (%s:%d)",
+		fse->function.function ? ZSTR_VAL(fse->function.function) : "{no func}",
+		ZSTR_VAL(fse->filename), fse->lineno
+	);
+}
+
+static void mark_fse_as_having_line_breakpoints(function_stack_entry *fse)
+{
+	xdebug_llist_element *le;
+
+	if (!XG_DBG(context).line_breakpoints || XG_DBG(context).line_breakpoints->size == 0) {
+		return;
+	}
+
+	/* loop over all line breakpoints until one hits, and if so, turn on 'has_line_breakpoints' */
+	for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
+		xdebug_brk_info *extra_brk_info = XDEBUG_LLIST_VALP(le);
+		zend_string     *executed_filename = zend_get_executed_filename_ex();
+
+		if (!executed_filename) {
+			continue;
+		}
+
+		if (fse->function.type == XFUNC_EVAL) {
+			zend_string *resolved_filename;
+
+			if (!xdebug_debugger_check_evaled_code(executed_filename, &resolved_filename)) {
+				continue;
+			}
+
+			if (!zend_string_equals(extra_brk_info->filename, resolved_filename)) {
+				zend_string_release(resolved_filename);
+				continue;
+			}
+
+			zend_string_release(resolved_filename);
+		} else if (!zend_string_equals(extra_brk_info->filename, executed_filename)) {
+			continue;
+		}
+
+		if (extra_brk_info->resolved_lineno >= fse->op_array->line_start && extra_brk_info->resolved_lineno <= fse->op_array->line_end) {
+			xdebug_debugger_set_has_line_breakpoints(fse);
+
+			return;
+		}
+	}
+}
+
 /* Returns false if something is wrong with the breakpoint */
 static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
 {
+	/* If 'has_line_breakpoints' hasn't been marked, either use the resolve
+	 * list if it exists, or otherwise mark it as 'true' */
+	if (!fse->has_line_breakpoints) {
+		mark_fse_as_having_line_breakpoints(fse);
+	}
+
 	if (!handle_function_breakpoints(fse, breakpoint_type, return_value)) {
 		return false;
 	}

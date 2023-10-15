@@ -157,6 +157,9 @@ typedef struct _function_stack_entry {
 	unsigned char      is_trampoline;
 	unsigned char      arg_done;
 
+	/* debugging properties */
+	bool has_line_breakpoints;
+
 	/* filter properties */
 	unsigned char filtered_code_coverage;
 	unsigned char filtered_stack;

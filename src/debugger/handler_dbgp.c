@@ -944,6 +944,7 @@ DBGP_FUNC(breakpoint_set)
 	if ((strcmp(CMD_OPTION_CHAR('t'), "line") == 0) || (strcmp(CMD_OPTION_CHAR('t'), "conditional") == 0)) {
 		size_t  new_length = 0;
 		char   *tmp_name;
+		function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 		if (!CMD_OPTION_SET('n')) {
 			RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
@@ -953,8 +954,6 @@ DBGP_FUNC(breakpoint_set)
 
 		/* If no filename is given, we use the current one */
 		if (!CMD_OPTION_SET('f')) {
-			function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-
 			if (!fse) {
 				RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_STACK_DEPTH_INVALID);
 			} else {
@@ -1007,6 +1006,16 @@ DBGP_FUNC(breakpoint_set)
 
 			if (xdebug_hash_find(XG_DBG(breakable_lines_map), ZSTR_VAL(brk_info->filename), ZSTR_LEN(brk_info->filename), (void *) &lines_list)) {
 				line_breakpoint_resolve_helper(context, lines_list, brk_info);
+			}
+		}
+
+		if (fse) {
+			function_stack_entry *loop_fse = fse;
+			int i;
+			size_t stack_size = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
+
+			for (i = 0; i < stack_size; i++, loop_fse--) {
+				xdebug_debugger_set_has_line_breakpoints(loop_fse);
 			}
 		}
 	} else

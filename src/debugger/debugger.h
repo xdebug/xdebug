@@ -75,6 +75,7 @@ void xdebug_debugger_restart_if_pid_changed(void);
 xdebug_set *xdebug_debugger_get_breakable_lines_from_oparray(zend_op_array *opa);
 int xdebug_do_eval(char *eval_string, zval *ret_zval, zend_string **return_message);
 bool xdebug_debugger_check_evaled_code(zend_string *filename_in, zend_string **filename_out);
+void xdebug_debugger_set_has_line_breakpoints(function_stack_entry *fse);
 
 void xdebug_debugger_statement_call(zend_string *filename, int lineno);
 void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message);
