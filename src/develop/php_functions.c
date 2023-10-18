@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -311,7 +311,7 @@ PHP_FUNCTION(xdebug_call_function)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(fse->function.function);
+	RETURN_STR_COPY(fse->function.function);
 }
 /* }}} */
 

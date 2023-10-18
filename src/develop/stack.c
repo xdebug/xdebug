@@ -452,7 +452,7 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 	add_assoc_double_ex(frame, "time", HASH_KEY_SIZEOF("time"), XDEBUG_SECONDS_SINCE_START(fse->nanotime));
 	add_assoc_long_ex(frame, "memory", HASH_KEY_SIZEOF("memory"), fse->memory);
 	if (fse->function.function) {
-		add_assoc_string_ex(frame, "function", HASH_KEY_SIZEOF("function"), fse->function.function);
+		add_assoc_str_ex(frame, "function", HASH_KEY_SIZEOF("function"), zend_string_copy(fse->function.function));
 	}
 	if (fse->function.object_class) {
 		add_assoc_string_ex(frame, "type",     HASH_KEY_SIZEOF("type"),     (char*) (fse->function.type == XFUNC_STATIC_MEMBER ? "static" : "dynamic"));
@@ -840,6 +840,9 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			fse = fse - 1;
 			scope_nr--;
 		}
+
+		xdebug_lib_register_compiled_variables(fse);
+
 		if (fse->declared_vars && fse->declared_vars->size) {
 			xdebug_hash *tmp_hash;
 

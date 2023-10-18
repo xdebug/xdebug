@@ -98,7 +98,7 @@ static zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int typ
 void xdebug_func_dtor_by_ref(xdebug_func *elem)
 {
 	if (elem->function) {
-		xdfree(elem->function);
+		zend_string_release(elem->function);
 	}
 	if (elem->object_class) {
 		zend_string_release(elem->object_class);
@@ -210,7 +210,7 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 
 	if (edata && edata->func && edata->func == (zend_function*) &zend_pass_function) {
 		tmp->type     = XFUNC_ZEND_PASS;
-		tmp->function = xdstrdup("{zend_pass}");
+		tmp->function = ZSTR_INIT_LITERAL("{zend_pass}", false);
 	} else if (edata && edata->func) {
 		tmp->type = XFUNC_NORMAL;
 		if ((Z_TYPE(edata->This)) == IS_OBJECT) {
@@ -238,8 +238,8 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 		}
 		if (edata->func->common.function_name) {
 			if (edata->func->common.fn_flags & ZEND_ACC_CLOSURE) {
-				tmp->function = xdebug_wrap_closure_location_around_function_name(&edata->func->op_array, STR_NAME_VAL(edata->func->common.function_name));
-			} else if (strncmp(edata->func->common.function_name->val, "call_user_func", 14) == 0) {
+				tmp->function = xdebug_wrap_closure_location_around_function_name(&edata->func->op_array, edata->func->common.function_name);
+			} else if (strncmp(ZSTR_VAL(edata->func->common.function_name), "call_user_func", 14) == 0) {
 				zend_string *fname = NULL;
 				int          lineno = 0;
 
@@ -262,15 +262,16 @@ void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata)
 
 				lineno = find_line_number_for_current_execute_point(edata);
 
-				tmp->function = xdebug_sprintf(
+				tmp->function = zend_strpprintf(
+					0,
 					"%s:{%s:%d}",
-					edata->func->common.function_name->val,
+					ZSTR_VAL(edata->func->common.function_name),
 					ZSTR_VAL(fname),
 					lineno
 				);
 			} else {
 normal_after_all:
-				tmp->function = xdstrdup(edata->func->common.function_name->val);
+				tmp->function = zend_string_copy(edata->func->common.function_name);
 			}
 		} else if (
 			edata &&
@@ -285,7 +286,7 @@ normal_after_all:
 			)
 		) {
 			tmp->type = XFUNC_NORMAL;
-			tmp->function = xdstrdup("{internal eval}");
+			tmp->function = ZSTR_INIT_LITERAL("{internal eval}", false);
 		} else if (
 			edata &&
 			edata->prev_execute_data &&
@@ -665,7 +666,7 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 
 	xdebug_build_fname(&(tmp->function), zdata);
 	if (!tmp->function.type) {
-		tmp->function.function     = xdstrdup("{main}");
+		tmp->function.function     = ZSTR_INIT_LITERAL("{main}", false);
 		tmp->function.object_class = NULL;
 		tmp->function.scope_class  = NULL;
 		tmp->function.type         = XFUNC_MAIN;
@@ -750,7 +751,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
-	if (fse && xdebug_vector_element_is_valid(XG_BASE(stack), fse - 1) && fse->function.function && (strcmp(fse->function.function, "__call") == 0)) {
+	if (fse && xdebug_vector_element_is_valid(XG_BASE(stack), fse - 1) && fse->function.function && zend_string_equals_literal(fse->function.function, "__call")) {
 		(fse - 1)->user_defined = XDEBUG_USER_DEFINED;
 	}
 
@@ -764,24 +765,6 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 	fse->execute_data = EG(current_execute_data)->prev_execute_data;
 	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
 		fse->symbol_table = EG(current_execute_data)->symbol_table;
-	}
-
-	if (XG_BASE(stack) && (XINI_DEV(show_local_vars) || xdebug_is_debug_connection_active())) {
-		/* Because include/require is treated as a stack level, we have to add used
-		 * variables in include/required files to all the stack levels above, until
-		 * we hit a function or the top level stack.  This is so that the variables
-		 * show up correctly where they should be.  We always call
-		 * xdebug_lib_register_compiled_variables on the current stack level,
-		 * otherwise vars in include files do not show up in the locals list. */
-		function_stack_entry *loop_fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
-		int                   i;
-
-		for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)); i++, loop_fse--) {
-			xdebug_lib_register_compiled_variables(loop_fse, op_array);
-			if (XDEBUG_IS_NORMAL_FUNCTION(&loop_fse->function)) {
-				break;
-			}
-		}
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
@@ -1170,18 +1153,13 @@ static void xdebug_fiber_entry_dtor(struct xdebug_fiber_entry *entry)
 	xdfree(entry);
 }
 
-static xdebug_str *create_key_for_fiber(zend_fiber_context *fiber)
+static zend_string *create_key_for_fiber(zend_fiber_context *fiber)
 {
-	xdebug_str *tmp = xdebug_str_new();
-
-	xdebug_str_add_fmt(tmp, "{fiber:%0" PRIXPTR "}", ((uintptr_t) fiber));
-
-	return tmp;
+	return zend_strpprintf(0, "{fiber:%0" PRIXPTR "}", ((uintptr_t) fiber));
 }
 
 static void add_fiber_main(zend_fiber_context *fiber)
 {
-	xdebug_str           *key = create_key_for_fiber(fiber);
 	function_stack_entry *tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
 
 	tmp->level        = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
@@ -1189,7 +1167,7 @@ static void add_fiber_main(zend_fiber_context *fiber)
 	tmp->function.type = XFUNC_FIBER;
 	tmp->function.object_class = NULL;
 	tmp->function.scope_class = NULL;
-	tmp->function.function = xdstrdup(key->d);
+	tmp->function.function = create_key_for_fiber(fiber);
 	tmp->filename = zend_string_copy(zend_get_executed_filename_ex());
 	tmp->lineno = zend_get_executed_lineno();
 
@@ -1198,40 +1176,38 @@ static void add_fiber_main(zend_fiber_context *fiber)
 	XG_BASE(prev_memory) = tmp->memory;
 
 	tmp->nanotime = xdebug_get_nanotime();
-
-	xdebug_str_free(key);
 }
 
 static xdebug_vector* create_stack_for_fiber(zend_fiber_context *fiber)
 {
 	xdebug_vector             *tmp_stack = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
-	xdebug_str                *key       = create_key_for_fiber(fiber);
+	zend_string               *key       = create_key_for_fiber(fiber);
 	struct xdebug_fiber_entry *entry     = xdebug_fiber_entry_ctor(tmp_stack);
 
-	xdebug_hash_add(XG_BASE(fiber_stacks), key->d, key->l, entry);
+	xdebug_hash_add(XG_BASE(fiber_stacks), ZSTR_VAL(key), ZSTR_LEN(key), entry);
 
-	xdebug_str_free(key);
+	zend_string_release(key);
 
 	return tmp_stack;
 }
 
 static void remove_stack_for_fiber(zend_fiber_context *fiber)
 {
-	xdebug_str *key = create_key_for_fiber(fiber);
+	zend_string *key = create_key_for_fiber(fiber);
 
-	xdebug_hash_delete(XG_BASE(fiber_stacks), key->d, key->l);
+	xdebug_hash_delete(XG_BASE(fiber_stacks), ZSTR_VAL(key), ZSTR_LEN(key));
 
-	xdebug_str_free(key);
+	zend_string_release(key);
 }
 
 static xdebug_vector *find_stack_for_fiber(zend_fiber_context *fiber)
 {
 	struct xdebug_fiber_entry *entry = NULL;
-	xdebug_str                *key = create_key_for_fiber(fiber);
+	zend_string               *key = create_key_for_fiber(fiber);
 
-	xdebug_hash_find(XG_BASE(fiber_stacks), key->d, key->l, (void*) &entry);
+	xdebug_hash_find(XG_BASE(fiber_stacks), ZSTR_VAL(key), ZSTR_LEN(key), (void*) &entry);
 
-	xdebug_str_free(key);
+	zend_string_release(key);
 
 	return entry->stack;
 }

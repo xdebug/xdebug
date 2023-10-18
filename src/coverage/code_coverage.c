@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -88,18 +88,18 @@ void xdebug_coverage_function_dtor(void *data)
 static void xdebug_func_format(char *buffer, size_t buffer_size, xdebug_func *func)
 {
 	if (func->type == XFUNC_NORMAL) {
-		int len = strlen(func->function);
+		int len = ZSTR_LEN(func->function);
 
 		if (len + 1 > buffer_size) {
 			goto error;
 		}
-		memcpy(buffer, func->function, len);
+		memcpy(buffer, ZSTR_VAL(func->function), len);
 		buffer[len] = '\0';
 		return;
 	}
 
 	if (func->type == XFUNC_MEMBER) {
-		int func_len = strlen(func->function);
+		int func_len = ZSTR_LEN(func->function);
 		int len = ZSTR_LEN(func->object_class) + 2 + func_len;
 
 		if (len + 1 > buffer_size) {
@@ -107,7 +107,7 @@ static void xdebug_func_format(char *buffer, size_t buffer_size, xdebug_func *fu
 		}
 		memcpy(buffer, ZSTR_VAL(func->object_class), ZSTR_LEN(func->object_class));
 		memcpy(buffer + ZSTR_LEN(func->object_class), "->", 2);
-		memcpy(buffer + ZSTR_LEN(func->object_class) + 2, func->function, func_len);
+		memcpy(buffer + ZSTR_LEN(func->object_class) + 2, ZSTR_VAL(func->function), func_len);
 		buffer[len] = '\0';
 		return;
 	}
@@ -125,19 +125,19 @@ static void xdebug_build_fname_from_oparray(xdebug_func *tmp, zend_op_array *opa
 
 	if (opa->function_name) {
 		if (opa->fn_flags & ZEND_ACC_CLOSURE) {
-			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, STR_NAME_VAL(opa->function_name));
+			tmp->function = xdebug_wrap_closure_location_around_function_name(opa, opa->function_name);
 			wrapped = 1;
 		} else if (
 			opa->fn_flags & ZEND_ACC_TRAIT_CLONE
 			|| (opa->scope && opa->scope->ce_flags & ZEND_ACC_TRAIT)
 		) {
-			tmp->function = xdebug_wrap_location_around_function_name("trait-method", opa, STR_NAME_VAL(opa->function_name));
+			tmp->function = xdebug_wrap_location_around_function_name("trait-method", opa, opa->function_name);
 			wrapped = 1;
 		} else {
-			tmp->function = xdstrdup(STR_NAME_VAL(opa->function_name));
+			tmp->function = zend_string_copy(opa->function_name);
 		}
 	} else {
-		tmp->function = xdstrdup("{main}");
+		tmp->function = ZSTR_INIT_LITERAL("{main}", false);
 		tmp->type = XFUNC_MAIN;
 	}
 
@@ -165,7 +165,7 @@ static void xdebug_print_opcode_info(zend_execute_data *execute_data, const zend
 		zend_string_release(func_info.scope_class);
 	}
 	if (func_info.function) {
-		xdfree(func_info.function);
+		zend_string_release(func_info.function);
 	}
 
 	xdebug_branch_info_mark_reached(op_array->filename, function_name, op_array, opnr);
@@ -551,7 +551,7 @@ static void prefill_from_oparray(zend_string *filename, zend_op_array *op_array)
 			zend_string_release(func_info.scope_class);
 		}
 		if (func_info.function) {
-			xdfree(func_info.function);
+			zend_string_release(func_info.function);
 		}
 
 		xdebug_branch_post_process(op_array, branch_info);
@@ -982,7 +982,7 @@ int xdebug_coverage_execute_ex(function_stack_entry *fse, zend_op_array *op_arra
 			zend_string_release(func_info.scope_class);
 		}
 		if (func_info.function) {
-			xdfree(func_info.function);
+			zend_string_release(func_info.function);
 		}
 		return 1;
 	}

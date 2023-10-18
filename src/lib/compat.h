@@ -42,6 +42,10 @@ zend_bool xdebug_zend_hash_is_recursive(HashTable* ht);
 zend_bool xdebug_zend_hash_apply_protection_begin(HashTable* ht);
 zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 
+#if PHP_VERSION_ID < 80100
+# define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init((s), strlen(s), (persistent)))
+#endif
+
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
 	zv = ecalloc(sizeof(zval), 1);
 

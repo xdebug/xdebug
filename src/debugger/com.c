@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -632,12 +632,6 @@ void xdebug_restart_debugger()
 {
 	xdebug_abort_debugger();
 	xdebug_init_debugger();
-}
-
-/* Remote connection activation and house keeping */
-int xdebug_is_debug_connection_active()
-{
-	return XG_DBG(remote_connection_enabled);
 }
 
 void xdebug_mark_debug_connection_active()

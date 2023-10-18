@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -703,40 +703,41 @@ void xdebug_llist_string_dtor(void *dummy, void *elem)
 	}
 }
 
-char* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, char *fname)
+zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, zend_string *fname)
 {
-	return xdebug_sprintf(
+	return zend_strpprintf(
+		0,
 		"%s{%s:%s:%d-%d}",
-		fname,
+		ZSTR_VAL(fname),
 		prefix,
-		opa->filename->val,
+		ZSTR_VAL(opa->filename),
 		opa->line_start,
 		opa->line_end
 	);
 }
 
-char* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, char *fname)
+zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname)
 {
-	xdebug_str tmp = XDEBUG_STR_INITIALIZER;
-	char *tmp_loc_info;
+	zend_string *tmp, *tmp_loc_info;
 
-	if (fname[strlen(fname) - 1] != '}') {
-		xdebug_str_add(&tmp, fname, 0);
-
-		return tmp.d;
+	if (ZSTR_VAL(fname)[ZSTR_LEN(fname) - 1] != '}') {
+		return zend_string_copy(fname);
 	}
 
-	xdebug_str_addl(&tmp, fname, strlen(fname) - 1, 0);
+	tmp = zend_string_init(ZSTR_VAL(fname), ZSTR_LEN(fname) - 1, false);
 
-	tmp_loc_info = xdebug_sprintf(
-		":%s:%d-%d}",
-		opa->filename->val,
+	tmp_loc_info = zend_strpprintf(
+		0,
+		"%s:%s:%d-%d}",
+		ZSTR_VAL(tmp),
+		ZSTR_VAL(opa->filename),
 		opa->line_start,
 		opa->line_end
 	);
-	xdebug_str_add(&tmp, tmp_loc_info, 1);
 
-	return tmp.d;
+	zend_string_release(tmp);
+
+	return tmp_loc_info;
 }
 
 static void xdebug_declared_var_dtor(void *dummy, void *elem)
@@ -746,21 +747,23 @@ static void xdebug_declared_var_dtor(void *dummy, void *elem)
 	xdebug_str_free(s);
 }
 
-void xdebug_lib_register_compiled_variables(function_stack_entry *fse, zend_op_array *op_array)
+void xdebug_lib_register_compiled_variables(function_stack_entry *fse)
 {
 	unsigned int i = 0;
 
-	if (!fse->declared_vars) {
-		fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
-	}
-
-	if (!op_array->vars) {
+	if (fse->declared_vars) {
 		return;
 	}
 
+	if (!fse->op_array->vars) {
+		return;
+	}
+
+	fse->declared_vars = xdebug_llist_alloc(xdebug_declared_var_dtor);
+
 	/* gather used variables from compiled vars information */
-	while (i < (unsigned int) op_array->last_var) {
-		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(op_array->vars[i]), STR_NAME_LEN(op_array->vars[i])));
+	while (i < (unsigned int) fse->op_array->last_var) {
+		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(fse->op_array->vars[i]), STR_NAME_LEN(fse->op_array->vars[i])));
 		i++;
 	}
 }
