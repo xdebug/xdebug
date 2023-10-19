@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2023-09-06</date>
- <time>12:53:26</time>
+ <date>2023-10-19</date>
+ <time>15:42:30</time>
  <version>
-  <release>3.3.0alpha2</release>
-  <api>3.3.0alpha2</api>
+  <release>3.3.0alpha3</release>
+  <api>3.3.0alpha3</api>
  </version>
  <stability>
   <release>beta</release>
@@ -52,11 +52,15 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Wed, Sep 06, 2023 - Xdebug 3.3.0alpha2
+Thu, Oct 19, 2023 - Xdebug 3.3.0alpha3
 
 = Fixed bugs:
 
-  - Fixed issue #2200: PECL package file has wrong max PHP version number, and peclweb refuses the package
+  - Fixed issue #1732: Add support for flame graph outputs
+  - Fixed issue #2000: Debugger evaluate expression: &quot;can&#039;t evaluate expression&quot;
+  - Fixed issue #2077: Bring back xdebug.collect_params
+  - Fixed issue #2203: Increase default max nesting time out from 256 to 512
+  - Fixed issue #2206: Optimise debugger breakpoints checking
 
  </notes>
 
@@ -207,6 +211,27 @@ Wed, Sep 06, 2023 - Xdebug 3.3.0alpha2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2023-09-06</date>
+   <time>12:53:26</time>
+   <version>
+    <release>3.3.0alpha2</release>
+    <api>3.3.0alpha2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Wed, Sep 06, 2023 - Xdebug 3.3.0alpha2
+
+= Fixed bugs:
+
+  - Fixed issue #2200: PECL package file has wrong max PHP version number, and peclweb refuses the package
+   </notes>
+  </release>
 
   <release>
    <date>2023-09-06</date>

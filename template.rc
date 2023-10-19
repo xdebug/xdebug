@@ -14,8 +14,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 # define THANKS_GUYS ""
 #endif
 
-#define VERSIONDESC 3,3,0,4
-#define VERSIONSTR  "3.3.0alpha3-dev"
+#define VERSIONDESC 3,3,0,5
+#define VERSIONSTR  "3.3.0alpha3"
 
 //Version
 VS_VERSION_INFO VERSIONINFO
