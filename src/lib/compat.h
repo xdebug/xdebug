@@ -42,7 +42,7 @@ zend_bool xdebug_zend_hash_is_recursive(HashTable* ht);
 zend_bool xdebug_zend_hash_apply_protection_begin(HashTable* ht);
 zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 
-#if PHP_VERSION_ID < 80100
+#ifndef ZSTR_INIT_LITERAL
 # define ZSTR_INIT_LITERAL(s, persistent) (zend_string_init((s), strlen(s), (persistent)))
 #endif
 
