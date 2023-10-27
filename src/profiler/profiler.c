@@ -319,7 +319,7 @@ void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_o
 		case XFUNC_INCLUDE_ONCE:
 		case XFUNC_REQUIRE:
 		case XFUNC_REQUIRE_ONCE:
-			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, ZSTR_VAL(fse->include_filename));
+			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, ZSTR_VAL(fse->function.include_filename));
 			xdfree(tmp_name);
 			tmp_name = tmp_fname;
 			fse->profiler.lineno = 1;
@@ -356,7 +356,7 @@ void xdebug_profiler_add_function_details_internal(function_stack_entry *fse)
 		case XFUNC_INCLUDE_ONCE:
 		case XFUNC_REQUIRE:
 		case XFUNC_REQUIRE_ONCE:
-			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, fse->include_filename);
+			tmp_fname = xdebug_sprintf("%s::%s", tmp_name, fse->function.include_filename);
 			xdfree(tmp_name);
 			tmp_name = tmp_fname;
 			fse->profiler.lineno = 1;

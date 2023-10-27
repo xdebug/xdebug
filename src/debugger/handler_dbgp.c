@@ -3155,7 +3155,7 @@ int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse)
 
 	ei = xdcalloc(sizeof(xdebug_eval_info), 1);
 	ei->id = context->eval_id_sequence;
-	ei->contents = zend_string_copy(fse->include_filename);
+	ei->contents = zend_string_copy(fse->function.include_filename);
 	ei->refcount = 2;
 
 	key = create_eval_key_file(fse->filename, fse->lineno);

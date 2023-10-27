@@ -188,7 +188,7 @@ void xdebug_trace_flamegraph_function_entry(void *ctxt, function_stack_entry *fs
 	xdebug_str                      *prefix = xdebug_str_new();
 	char                            *tmp_name;
 
-	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_DEFAULT);
+	tmp_name = xdebug_show_fname(fse->function, XDEBUG_SHOW_FNAME_ADD_FILE_NAME);
 	function = fg_function_ctor();
 
 	parent_fse = fg_parent_find();
