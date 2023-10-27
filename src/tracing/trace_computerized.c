@@ -152,18 +152,18 @@ void xdebug_trace_computerized_function_entry(void *ctxt, function_stack_entry *
 	}
 	xdfree(tmp_name);
 
-	if (fse->include_filename) {
+	if (fse->function.include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
 			zend_string *escaped;
 
-			escaped = php_addcslashes(fse->include_filename, (char*) "'\\\0..\37", 6);
+			escaped = php_addcslashes(fse->function.include_filename, (char*) "'\\\0..\37", 6);
 
 			xdebug_str_addc(&str, '\'');
 			xdebug_str_add_zstr(&str, escaped);
 			xdebug_str_addc(&str, '\'');
 			zend_string_release(escaped);
 		} else {
-			xdebug_str_add_zstr(&str, fse->include_filename);
+			xdebug_str_add_zstr(&str, fse->function.include_filename);
 		}
 	}
 

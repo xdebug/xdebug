@@ -467,8 +467,8 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 		zval_from_stack_add_frame_variables(frame, edata, fse->symbol_table, fse->op_array);
 	}
 
-	if (fse->include_filename) {
-		add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), zend_string_copy(fse->include_filename));
+	if (fse->function.include_filename) {
+		add_assoc_str_ex(frame, "include_filename", HASH_KEY_SIZEOF("include_filename"), zend_string_copy(fse->function.include_filename));
 	}
 
 	add_next_index_zval(output, frame);
@@ -786,14 +786,14 @@ void xdebug_append_printable_stack(xdebug_str *str, int html)
 			xdebug_str_add_literal(str, ")");
 		}
 
-		if (fse->include_filename) {
+		if (fse->function.include_filename) {
 			if (html) {
 				xdebug_str_add_literal(str, "<font color='#00bb00'>'");
-				xdebug_str_add_zstr(str, fse->include_filename);
+				xdebug_str_add_zstr(str, fse->function.include_filename);
 				xdebug_str_add_literal(str, "</font>");
 			} else {
 				xdebug_str_addc(str, '\'');
-				xdebug_str_add_zstr(str, fse->include_filename);
+				xdebug_str_add_zstr(str, fse->function.include_filename);
 				xdebug_str_addc(str, '\'');
 			}
 		}

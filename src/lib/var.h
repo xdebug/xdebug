@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,6 +84,7 @@ zval *xdebug_get_zval_with_opline(zend_execute_data *zdata, const zend_op *oplin
 #define XDEBUG_SHOW_FNAME_DEFAULT          0
 #define XDEBUG_SHOW_FNAME_ALLOW_HTML    1<<1
 #define XDEBUG_SHOW_FNAME_IGNORE_SCOPE  1<<2
+#define XDEBUG_SHOW_FNAME_ADD_FILE_NAME 1<<3
 char* xdebug_show_fname(xdebug_func t, int flags);
 
 #endif

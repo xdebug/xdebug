@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -116,7 +116,7 @@ void xdebug_filter_run_internal(function_stack_entry *fse, int group, unsigned c
 		case XDEBUG_PATH_INCLUDE:
 			*filtered_flag = 1;
 			if (group == XDEBUG_FILTER_CODE_COVERAGE && fse->function.type & XFUNC_INCLUDES) {
-				tmp_fse.filename = fse->include_filename;
+				tmp_fse.filename = fse->function.include_filename;
 				fse = &tmp_fse;
 			}
 
@@ -126,7 +126,7 @@ void xdebug_filter_run_internal(function_stack_entry *fse, int group, unsigned c
 		case XDEBUG_PATH_EXCLUDE:
 			*filtered_flag = 0;
 			if (group == XDEBUG_FILTER_CODE_COVERAGE && fse->function.type & XFUNC_INCLUDES) {
-				tmp_fse.filename = fse->include_filename;
+				tmp_fse.filename = fse->function.include_filename;
 				fse = &tmp_fse;
 			}
 

@@ -1163,23 +1163,23 @@ char* xdebug_show_fname(xdebug_func f, int flags)
 			break;
 
 		case XFUNC_INCLUDE:
-			return xdstrdup("include");
+			return (flags & XDEBUG_SHOW_FNAME_ADD_FILE_NAME) ? xdebug_sprintf("{include:%s}", ZSTR_VAL(f.include_filename)) : xdstrdup("include");
 			break;
 
 		case XFUNC_INCLUDE_ONCE:
-			return xdstrdup("include_once");
+			return (flags & XDEBUG_SHOW_FNAME_ADD_FILE_NAME) ? xdebug_sprintf("{include_once:%s}", ZSTR_VAL(f.include_filename)) : xdstrdup("include_once");
 			break;
 
 		case XFUNC_REQUIRE:
-			return xdstrdup("require");
+			return (flags & XDEBUG_SHOW_FNAME_ADD_FILE_NAME) ? xdebug_sprintf("{require:%s}", ZSTR_VAL(f.include_filename)) : xdstrdup("require");
 			break;
 
 		case XFUNC_REQUIRE_ONCE:
-			return xdstrdup("require_once");
+			return (flags & XDEBUG_SHOW_FNAME_ADD_FILE_NAME) ? xdebug_sprintf("{require_once:%s}", ZSTR_VAL(f.include_filename)) : xdstrdup("require_once");
 			break;
 
 		case XFUNC_MAIN:
-			return xdstrdup("{main}");
+			return (flags & XDEBUG_SHOW_FNAME_ADD_FILE_NAME) ? xdebug_sprintf("{main:%s}", ZSTR_VAL(f.include_filename)) : xdstrdup("{main}");
 			break;
 
 		case XFUNC_ZEND_PASS:
