@@ -106,6 +106,9 @@ void xdebug_func_dtor_by_ref(xdebug_func *elem)
 	if (elem->scope_class) {
 		zend_string_release(elem->scope_class);
 	}
+	if (elem->include_filename) {
+		zend_string_release(elem->include_filename);
+	}
 }
 
 void xdebug_func_dtor(xdebug_func *elem)
@@ -133,10 +136,6 @@ static void function_stack_entry_dtor(void *elem)
 			zval_ptr_dtor(&(e->var[i].data));
 		}
 		xdfree(e->var);
-	}
-
-	if (e->include_filename) {
-		zend_string_release(e->include_filename);
 	}
 
 	if (e->declared_vars) {
@@ -681,9 +680,9 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 		}
 
 		if (tmp->function.type == XFUNC_EVAL && XG_BASE(last_eval_statement)) {
-			tmp->include_filename = zend_string_copy(XG_BASE(last_eval_statement));
+			tmp->function.include_filename = zend_string_copy(XG_BASE(last_eval_statement));
 		} else {
-			tmp->include_filename = zend_string_copy(zend_get_executed_filename_ex());
+			tmp->function.include_filename = zend_string_copy(zend_get_executed_filename_ex());
 		}
 	} else {
 		tmp->lineno = find_line_number_for_current_execute_point(edata);

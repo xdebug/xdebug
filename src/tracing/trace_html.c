@@ -96,20 +96,20 @@ void xdebug_trace_html_function_entry(void *ctxt, function_stack_entry *fse)
 	xdebug_str_add_fmt(&str, "<td>%s(", tmp_name);
 	xdfree(tmp_name);
 
-	if (fse->include_filename) {
+	if (fse->function.include_filename) {
 		if (fse->function.type == XFUNC_EVAL) {
 			xdebug_str       *joined;
 			xdebug_arg       *parts;
 
 			parts = xdebug_arg_ctor();
-			xdebug_explode("\n", ZSTR_VAL(fse->include_filename), parts, 99999);
+			xdebug_explode("\n", ZSTR_VAL(fse->function.include_filename), parts, 99999);
 			joined = xdebug_join("<br />", parts, 0, 99999);
 			xdebug_arg_dtor(parts);
 
 			xdebug_str_add_fmt(&str, "'%s'", joined->d);
 			xdebug_str_free(joined);
 		} else {
-			xdebug_str_add_zstr(&str, fse->include_filename);
+			xdebug_str_add_zstr(&str, fse->function.include_filename);
 		}
 	}
 

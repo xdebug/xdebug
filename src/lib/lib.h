@@ -127,6 +127,7 @@ typedef struct _xdebug_func {
 	zend_string *object_class;
 	zend_string *scope_class;
 	zend_string *function;
+	zend_string *include_filename;
 	int   type;
 	int   internal;
 } xdebug_func;
@@ -173,7 +174,6 @@ typedef struct _function_stack_entry {
 	/* location properties */
 	int          lineno;
 	zend_string *filename;
-	zend_string *include_filename;
 
 	/* tracing properties */
 	signed long  memory;

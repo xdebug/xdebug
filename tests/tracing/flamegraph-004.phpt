@@ -51,20 +51,20 @@ xdebug_stop_trace();
 ?>
 --EXPECTF--
 dirname %d
-require;Fiber->__construct %d
-require;Fiber->__construct %d
+{require:%sfiber-001.inc};Fiber->__construct %d
+{require:%sfiber-001.inc};Fiber->__construct %d
 {closure:%sfiber-001.inc:27-29};A;AA %d
-require;Fiber->start %d
+{require:%sfiber-001.inc};Fiber->start %d
 {closure:%sfiber-001.inc:31-33};B;BA %d
-require;Fiber->start %d
+{require:%sfiber-001.inc};Fiber->start %d
 {closure:%sfiber-001.inc:27-29};A;Fiber::suspend %d
 {closure:%sfiber-001.inc:27-29};A;AB %d
 {closure:%sfiber-001.inc:27-29};A %d
 {closure:%sfiber-001.inc:27-29} %d
-require;Fiber->resume %d
+{require:%sfiber-001.inc};Fiber->resume %d
 {closure:%sfiber-001.inc:31-33};B;Fiber::suspend %d
 {closure:%sfiber-001.inc:31-33};B;BB %d
 {closure:%sfiber-001.inc:31-33};B %d
 {closure:%sfiber-001.inc:31-33} %d
-require;Fiber->resume %d
-require %d
+{require:%sfiber-001.inc};Fiber->resume %d
+{require:%sfiber-001.inc} %d
