@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include "handlers.h"
+#include "lib/cmd_parser.h"
 #include "lib/xml.h"
 
 #define DBGP_VERSION "1.0"
@@ -62,11 +63,6 @@ typedef struct xdebug_dbgp_result {
 	return; \
 }
 
-/* Argument structure */
-typedef struct xdebug_dbgp_arg {
-	xdebug_str *value[27]; /* one extra for - */
-} xdebug_dbgp_arg;
-
 #define DBGP_FUNC_PARAMETERS        xdebug_xml_node **retval, xdebug_con *context, xdebug_dbgp_arg *args
 #define DBGP_FUNC_PASS_PARAMETERS   retval, context, args
 #define DBGP_FUNC(name)             static void xdebug_dbgp_handle_##name(DBGP_FUNC_PARAMETERS)
@@ -89,11 +85,6 @@ typedef struct xdebug_dbgp_resolve_context {
 	zend_string          *filename;
 	xdebug_lines_list    *lines_list;
 } xdebug_dbgp_resolve_context;
-
-#define CMD_OPTION_SET(opt)        (!!(opt == '-' ? args->value[26] : args->value[(opt) - 'a']))
-#define CMD_OPTION_CHAR(opt)       (opt == '-' ? args->value[26]->d : args->value[(opt) - 'a']->d)
-#define CMD_OPTION_LEN(opt)        (opt == '-' ? args->value[26]->l : args->value[(opt) - 'a']->l)
-#define CMD_OPTION_XDEBUG_STR(opt) (opt == '-' ? args->value[26] : args->value[(opt) - 'a'])
 
 int xdebug_dbgp_init(xdebug_con *context, int mode);
 int xdebug_dbgp_deinit(xdebug_con *context);
