@@ -229,7 +229,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 						xdebug_str_add_fmt(str, "%*s", (level * 4) - 2, "");
 						xdebug_str_add_fmt(str, "<i><font color='%s'>empty</font></i>\n", COLOR_EMPTY);
 					}
-				} else {
+				} else if (myht->nNumOfElements > 0) {
 					xdebug_str_add_fmt(str, "%*s...\n", (level * 4) - 2, "");
 				}
 			} else {
@@ -292,7 +292,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 					} ZEND_HASH_FOREACH_END();
 
 					xdebug_zend_hash_apply_protection_end(myht);
-				} else {
+				} else if (myht->nNumOfElements > 0) {
 					xdebug_str_add_fmt(str, "%*s...\n", (level * 4) - 2, "");
 				}
 			} else {
