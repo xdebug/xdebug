@@ -36,6 +36,9 @@
 
 #include "base.h"
 #include "filter.h"
+#ifdef __linux__
+# include "ctrl_socket.h"
+#endif
 #include "develop/develop.h"
 #include "develop/stack.h"
 #include "gcstats/gc_stats.h"
@@ -754,6 +757,10 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		(fse - 1)->user_defined = XDEBUG_USER_DEFINED;
 	}
 
+#ifdef __linux__
+	xdebug_ctrl_socket_dispatch();
+#endif
+
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_monitor_handler(fse);
 	}
@@ -1387,14 +1394,15 @@ void xdebug_base_rinit()
 	XG_BASE(last_exception_trace) = NULL;
 
 	/* Initialize start time */
-	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING) || XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
-		XG_BASE(start_nanotime) = xdebug_get_nanotime();
-	} else {
-		XG_BASE(start_nanotime) = 0;
-	}
+	XG_BASE(start_nanotime) = xdebug_get_nanotime();
 
 	XG_BASE(in_var_serialisation) = 0;
 	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;
+
+#ifdef __linux__
+	/* Set-up Control Socket */
+	xdebug_ctrl_socket_setup();
+#endif
 
 	/* Signal that we're in a request now */
 	XG_BASE(in_execution) = 1;
@@ -1443,6 +1451,11 @@ void xdebug_base_post_deactivate()
 	XG_BASE(filters_code_coverage) = NULL;
 
 	xdebug_base_overloaded_functions_restore();
+
+#ifdef __linux__
+	/* Close Down Control Socket */
+	xdebug_ctrl_socket_teardown();
+#endif
 }
 
 void xdebug_base_rshutdown()
