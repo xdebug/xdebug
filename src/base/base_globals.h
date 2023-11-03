@@ -68,6 +68,12 @@ typedef struct _xdebug_base_globals_t {
 	/* Systemd Private Temp */
 	char         *private_tmp;
 
+#ifdef __linux__
+	/* Control Socket */
+	char *control_socket_path;
+	int   control_socket_fd;
+#endif
+
 	/* filters */
 	zend_long     filter_type_code_coverage;
 	zend_long     filter_type_stack;
