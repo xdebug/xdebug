@@ -842,6 +842,7 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 	xdebug_coverage_function *function = (xdebug_coverage_function*) e->ptr;
 	zval                     *retval = (zval*) ret;
 	zval                     *function_info;
+	zend_string              *trait_scope = NULL;
 
 	XDEBUG_MAKE_STD_ZVAL(function_info);
 	array_init(function_info);
@@ -851,7 +852,14 @@ static void add_cc_function(void *ret, xdebug_hash_element *e)
 		add_paths(function_info, function->branch_info);
 	}
 
-	add_assoc_zval_ex(retval, function->name, HASH_KEY_STRLEN(function->name), function_info);
+	if ((trait_scope = xdebug_get_trait_scope(function->name)) != NULL) {
+		char *with_scope = xdebug_sprintf("%s->%s", ZSTR_VAL(trait_scope), function->name);
+
+		add_assoc_zval_ex(retval, with_scope, strlen(with_scope), function_info);
+	} else {
+		add_assoc_zval_ex(retval, function->name, HASH_KEY_STRLEN(function->name), function_info);
+	}
+
 
 	efree(function_info);
 }

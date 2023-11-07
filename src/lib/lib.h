@@ -235,6 +235,10 @@ typedef struct _xdebug_library_globals_t {
 	char         *log_open_timestring;
 	xdebug_str   *diagnosis_buffer;
 
+	/* Trait location map */
+	xdebug_hash  *trait_location_map;
+
+	/* Opcode overrite handlers */
 	user_opcode_handler_t          original_opcode_handlers[256];
 	xdebug_multi_opcode_handler_t *opcode_multi_handlers[256];
 	xdebug_set                    *opcode_handlers_set;
@@ -335,6 +339,8 @@ int xdebug_call_original_opcode_handler_if_set(int opcode, XDEBUG_OPCODE_HANDLER
 char *xdebug_lib_get_output_dir(void);
 
 void xdebug_llist_string_dtor(void *dummy, void *elem);
+
+zend_string *xdebug_get_trait_scope(const char *function);
 zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, zend_string *fname);
 zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname);
 
