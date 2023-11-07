@@ -93,6 +93,8 @@ void xdebug_library_rinit(void)
 
 	XG_LIB(dumped) = 0;
 	XG_LIB(do_collect_errors) = 0;
+
+	XG_LIB(trait_location_map) = xdebug_hash_alloc(256, (xdebug_hash_dtor_t) zend_string_release);
 }
 
 void xdebug_library_post_deactivate(void)
@@ -101,6 +103,7 @@ void xdebug_library_post_deactivate(void)
 	xdebug_llist_destroy(XG_LIB(headers), NULL);
 	XG_LIB(headers) = NULL;
 
+	xdebug_hash_destroy(XG_LIB(trait_location_map));
 
 	xdebug_close_log();
 	xdebug_str_free(XG_LIB(diagnosis_buffer));
@@ -703,9 +706,26 @@ void xdebug_llist_string_dtor(void *dummy, void *elem)
 	}
 }
 
-zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, zend_string *fname)
+zend_string *xdebug_get_trait_scope(const char *function)
 {
-	return zend_strpprintf(
+	zend_string *trait_scope;
+
+	if (
+		function[0] != '{' &&
+		function[strlen(function)-1] == '}' &&
+		xdebug_hash_find(XG_LIB(trait_location_map), function, strlen(function), (void *) &trait_scope)
+	) {
+		return trait_scope;
+	}
+
+	return NULL;
+}
+
+zend_string *xdebug_wrap_location_around_function_name(const char *prefix, zend_op_array *opa, zend_string *fname)
+{
+	void *dummy;
+
+	zend_string *wrapped = zend_strpprintf(
 		0,
 		"%s{%s:%s:%d-%d}",
 		ZSTR_VAL(fname),
@@ -714,6 +734,12 @@ zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_
 		opa->line_start,
 		opa->line_end
 	);
+
+	if (!xdebug_hash_find(XG_LIB(trait_location_map), ZSTR_VAL(wrapped), ZSTR_LEN(wrapped), &dummy)) {
+		xdebug_hash_add(XG_LIB(trait_location_map), ZSTR_VAL(wrapped), ZSTR_LEN(wrapped), zend_string_copy(opa->scope->name));
+	}
+
+	return wrapped;
 }
 
 zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname)

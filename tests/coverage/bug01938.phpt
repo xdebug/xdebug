@@ -36,7 +36,7 @@ App\Bar->useTrait
 - paths
   - 0: HIT
 
-returnsTrue{trait-method:%sbug01938-FooTrait.inc:9-12}
+App\FooTrait->returnsTrue{trait-method:%sbug01938-FooTrait.inc:9-12}
 - branches
   - 00; OP: 00-%d; line: %d-%d HIT%S
 - paths
