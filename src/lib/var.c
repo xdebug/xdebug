@@ -1179,7 +1179,7 @@ char* xdebug_show_fname(xdebug_func f, int flags)
 			break;
 
 		case XFUNC_MAIN:
-			return (flags & XDEBUG_SHOW_FNAME_ADD_FILE_NAME) ? xdebug_sprintf("{main:%s}", ZSTR_VAL(f.include_filename)) : xdstrdup("{main}");
+			return xdstrdup("{main}");
 			break;
 
 		case XFUNC_ZEND_PASS:
