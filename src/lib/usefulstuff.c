@@ -316,6 +316,9 @@ char *xdebug_path_to_url(zend_string *fileurl)
 	if (strncmp(ZSTR_VAL(fileurl), "phar://", 7) == 0) {
 		/* ignore, phar is cool */
 		tmp = xdstrdup(ZSTR_VAL(fileurl));
+	} else if (strstr(ZSTR_VAL(fileurl), "://") != NULL) {
+		/* ignore, some form of stream wrapper scheme */
+		tmp = xdstrdup(ZSTR_VAL(fileurl));
 	} else if (ZSTR_VAL(fileurl)[0] != '/' && ZSTR_VAL(fileurl)[0] != '\\' && ZSTR_VAL(fileurl)[1] != ':') {
 		/* convert relative paths */
 		cwd_state new_state;
