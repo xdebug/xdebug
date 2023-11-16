@@ -774,6 +774,7 @@ static void print_step_debug_information(void)
 			xdebug_info_printf("Resolved Breakpoints => %s\n", XG_DBG(context).resolved_breakpoints ? "Yes" : "No");
 			xdebug_info_printf("Breakpoint: Details => %s\n", XG_DBG(context).breakpoint_details ? "Yes" : "No");
 			xdebug_info_printf("Breakpoint: Include Return Values => %s\n", XG_DBG(context).breakpoint_include_return_value ? "Yes" : "No");
+			xdebug_info_printf("Virtual __EXCEPTION value => %s\n", XG_DBG(context).virtual_exception_value ? "Yes" : "No");
 		}
 	}
 	php_info_print_table_end();

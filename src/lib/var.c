@@ -426,6 +426,16 @@ static void fetch_zval_from_symbol_table(
 				goto cleanup;
 			}
 
+			/* Return special exception value if set and enabled */
+			if (
+				XG_DBG(context).virtual_exception_value &&
+				EG(exception) &&
+				(strncmp(name, XDEBUG_EXCEPTION_VALUE_VAR_NAME, name_length) == 0)
+			) {
+				ZVAL_OBJ_COPY(&tmp_retval, EG(exception));
+				goto cleanup;
+			}
+
 			/* Check for compiled vars */
 			element = prepare_search_key(name, &element_length, "", 0);
 			if (xdebug_lib_has_active_data() && xdebug_lib_has_active_function()) {
