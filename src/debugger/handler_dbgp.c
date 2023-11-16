@@ -1961,6 +1961,20 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		return 0;
 	}
 
+	if (EG(exception) && depth == 0) {
+		xdebug_xml_node *tmp_node;
+		xdebug_str *name = xdebug_str_create_from_const_char("$"XDEBUG_EXCEPTION_VALUE_VAR_NAME);
+		zval val;
+
+		ZVAL_OBJ(&val, EG(exception));
+
+		tmp_node = xdebug_get_zval_value_xml_node(name, &val, options);
+		xdebug_xml_expand_attribute_value(tmp_node, "facet", "readonly virtual");
+
+		xdebug_xml_add_child(node, tmp_node);
+		xdebug_str_free(name);
+	}
+
 	/* Here the context_id is 0 */
 	if ((fse = xdebug_get_stack_frame(depth))) {
 		function_stack_entry *old_fse = xdebug_get_stack_frame(depth - 1);
