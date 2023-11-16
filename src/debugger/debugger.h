@@ -65,6 +65,7 @@ PHP_INI_MH(OnUpdateDebugMode);
 void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg);
 
 #define XDEBUG_RETURN_VALUE_VAR_NAME "__RETURN_VALUE"
+#define XDEBUG_EXCEPTION_VALUE_VAR_NAME "__EXCEPTION"
 
 void xdebug_debugger_reset_ide_key(char *envval);
 int xdebug_debugger_bailout_if_no_exec_requested(void);
