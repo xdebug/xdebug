@@ -313,10 +313,7 @@ char *xdebug_path_to_url(zend_string *fileurl)
 	/* encode the url */
 	encoded_fileurl = xdebug_raw_url_encode(ZSTR_VAL(fileurl), ZSTR_LEN(fileurl), &new_len, 1);
 
-	if (strncmp(ZSTR_VAL(fileurl), "phar://", 7) == 0) {
-		/* ignore, phar is cool */
-		tmp = xdstrdup(ZSTR_VAL(fileurl));
-	} else if (strstr(ZSTR_VAL(fileurl), "://") != NULL) {
+	if (strstr(ZSTR_VAL(fileurl), "://") != NULL && strstr(ZSTR_VAL(fileurl), "://") < strstr(ZSTR_VAL(fileurl), "/")) {
 		/* ignore, some form of stream wrapper scheme */
 		tmp = xdstrdup(ZSTR_VAL(fileurl));
 	} else if (ZSTR_VAL(fileurl)[0] != '/' && ZSTR_VAL(fileurl)[0] != '\\' && ZSTR_VAL(fileurl)[1] != ':') {
