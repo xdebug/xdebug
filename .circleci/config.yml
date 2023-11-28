@@ -157,6 +157,8 @@ workflows:
   version: 2
   testing:
     jobs:
+      - "PHP 8 3 without opcache":
+      - "PHP 8 3 with opcache":
       - "PHP 8 2 without opcache"
       - "PHP 8 2 with opcache"
       - "PHP 8 1 without opcache"
