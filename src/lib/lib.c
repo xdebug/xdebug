@@ -202,6 +202,21 @@ int xdebug_lib_set_mode(const char *mode)
 	return result;
 }
 
+#if __linux__
+int xdebug_lib_set_control_socket_granularity(char *value)
+{
+	if (strcmp(value, "no") == 0 || value[0] == '\0') {
+		XINI_BASE(control_socket_granularity) = XDEBUG_CONTROL_SOCKET_OFF;
+		return 1;
+	}
+
+	XINI_BASE(control_socket_granularity) = XDEBUG_CONTROL_SOCKET_TIME;
+	XINI_BASE(control_socket_threshold_ms) = 25;
+
+	return 0;
+}
+#endif
+
 int xdebug_lib_get_start_with_request(void)
 {
 	return XG_LIB(start_with_request);

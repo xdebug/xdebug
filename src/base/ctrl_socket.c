@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
  */
 
+#ifdef __linux__
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -45,6 +47,8 @@ static xdebug_error_entry xdebug_error_codes[24] = {
 	{   3, "invalid or missing options" },
 	{   4, "unimplemented command" },
 	{   5, "command is not available" },
+	{ 400, "step debugger is not enabled" },
+	{ 401, "step debugger did not activate" },
 	{  -1, NULL }
 };
 
@@ -80,9 +84,11 @@ typedef struct xdebug_ctrl_cmd {
 
 /* Command definition list */
 CTRL_FUNC(ps);
+CTRL_FUNC(pause);
 
 static xdebug_ctrl_cmd ctrl_commands[] = {
 	CTRL_FUNC_ENTRY(ps)
+	CTRL_FUNC_ENTRY(pause)
 	{ NULL, NULL }
 };
 
@@ -151,10 +157,11 @@ CTRL_FUNC(ps)
 {
 	xdebug_xml_node *response, *engine, *file, *pid, *time, *memory;
 	char *pid_str, *time_str, *memory_str;
-	function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+	function_stack_entry *fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
 	double time_elapsed = XDEBUG_SECONDS_SINCE_START(xdebug_get_nanotime());
 
 	response = xdebug_xml_node_init("ps");
+	xdebug_xml_add_attribute(response, "success", "1");
 
 	engine = xdebug_xml_node_init("engine");
 	xdebug_xml_add_attribute(engine, "version", XDEBUG_VERSION);
@@ -183,7 +190,47 @@ CTRL_FUNC(ps)
 	xdebug_xml_add_child(*retval, response);
 }
 
-void xdebug_ctrl_socket_dispatch(void)
+CTRL_FUNC(pause)
+{
+	xdebug_xml_node *response, *pid, *action;
+	char *pid_str;
+
+	response = xdebug_xml_node_init("pause");
+	xdebug_xml_add_attribute(response, "success", "1");
+
+	pid = xdebug_xml_node_init("pid");
+	pid_str = xdebug_sprintf("%lu", xdebug_get_pid());
+	xdebug_xml_add_text(pid, pid_str);
+	xdebug_xml_add_child(response, pid);
+
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		xdebug_xml_node *error;
+
+		error = xdebug_xml_node_init("error");
+		xdebug_xml_add_attribute_ex(error, "code", xdebug_sprintf("%lu", XDEBUG_ERROR_STEP_DEBUG_MODE_NOT_ENABLED), 0, 1);
+		ADD_REASON_MESSAGE(XDEBUG_ERROR_STEP_DEBUG_MODE_NOT_ENABLED);
+		xdebug_xml_add_child(*retval, error);
+
+		xdebug_xml_add_child(*retval, response);
+		return;
+	}
+
+	if (!xdebug_is_debug_connection_active()) {
+		action = xdebug_xml_node_init("action");
+		xdebug_xml_add_text(action, xdstrdup("IDE Connection Signalled"));
+
+		XG_DBG(context).do_connect_to_client = 1;
+	} else {
+		action = xdebug_xml_node_init("action");
+		xdebug_xml_add_text(action, xdstrdup("Breakpoint Signalled"));
+
+		XG_DBG(context).do_break = 1;
+	}
+	xdebug_xml_add_child(response, action);
+	xdebug_xml_add_child(*retval, response);
+}
+
+static void xdebug_control_socket_handle(void)
 {
 	char           buffer[256];
 	int            bytes_read;
@@ -191,6 +238,9 @@ void xdebug_ctrl_socket_dispatch(void)
 	int            new_sd;
 	struct timeval timeout;
 	fd_set         master_set, working_set;
+
+	/* Update last trigger */
+	XG_BASE(control_socket_last_trigger) = xdebug_get_nanotime();
 
 	/* Initialize the master fd_set */
 	FD_ZERO(&master_set);
@@ -233,13 +283,35 @@ void xdebug_ctrl_socket_dispatch(void)
 	close(new_sd);
 }
 
-void xdebug_ctrl_socket_setup(void)
+void xdebug_control_socket_dispatch(void)
+{
+	if (!XG_BASE(control_socket_path)) {
+		return;
+	}
+
+	switch (XINI_BASE(control_socket_granularity)) {
+		case XDEBUG_CONTROL_SOCKET_OFF:
+			return;
+
+		case XDEBUG_CONTROL_SOCKET_TIME:
+			if (xdebug_get_nanotime() < (XG_BASE(control_socket_last_trigger) + (XINI_BASE(control_socket_threshold_ms) * 1000000))) {
+				return;
+			}
+
+			break;
+	}
+
+	xdebug_control_socket_handle();
+}
+
+void xdebug_control_socket_setup(void)
 {
 	struct sockaddr_un *servaddr = NULL;
 
 	/* Initialise control socket globals */
 	XG_BASE(control_socket_fd) = -1;
 	XG_BASE(control_socket_path) = NULL;
+	XG_BASE(control_socket_last_trigger) = xdebug_get_nanotime();
 
 	/* Part 1 – create the socket */
 	if (0 > (XG_BASE(control_socket_fd) = socket(AF_UNIX, SOCK_STREAM, 0))) {
@@ -289,10 +361,12 @@ void xdebug_ctrl_socket_setup(void)
 	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up succesfully: '@%s'", XG_BASE(control_socket_path));
 }
 
-void xdebug_ctrl_socket_teardown(void)
+void xdebug_control_socket_teardown(void)
 {
 	if (XG_BASE(control_socket_path)) {
 		close(XG_BASE(control_socket_fd));
 		xdfree(XG_BASE(control_socket_path));
 	}
 }
+
+#endif

@@ -17,9 +17,9 @@
 #ifndef __XDEBUG_CTRL_SOCKET__
 #define __XDEBUG_CTRL_SOCKET__
 
-void xdebug_ctrl_socket_setup(void);
-void xdebug_ctrl_socket_teardown(void);
+void xdebug_control_socket_setup(void);
+void xdebug_control_socket_teardown(void);
 
-void xdebug_ctrl_socket_dispatch(void);
+void xdebug_control_socket_dispatch(void);
 
 #endif // __XDEBUG_CTRL_SOCKET__

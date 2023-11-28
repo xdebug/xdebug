@@ -40,5 +40,7 @@ int xdebug_cmd_parse(const char *line, char **cmd, xdebug_dbgp_arg **ret_args);
 #define XDEBUG_ERROR_UNIMPLEMENTED                   4
 #define XDEBUG_ERROR_COMMAND_UNAVAILABLE             5
 
+#define XDEBUG_ERROR_STEP_DEBUG_MODE_NOT_ENABLED   400
+#define XDEBUG_ERROR_STEP_DEBUG_NOT_STARTED        401
 
 #endif

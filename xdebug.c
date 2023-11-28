@@ -48,6 +48,9 @@
 #include "php_xdebug_arginfo.h"
 
 #include "base/base.h"
+#ifdef __linux__
+# include "base/ctrl_socket.h"
+#endif
 #include "base/filter.h"
 #include "coverage/code_coverage.h"
 #include "develop/monitor.h"
@@ -195,6 +198,20 @@ static PHP_INI_MH(OnUpdateChangedSetting)
 	return FAILURE;
 }
 
+#if __linux__
+static PHP_INI_MH(OnUpdateCtrlSocket)
+{
+	if (!new_value) {
+		return FAILURE;
+	}
+
+	if (!xdebug_lib_set_control_socket_granularity(ZSTR_VAL(new_value))) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+#endif
 
 #ifdef P_tmpdir
 # define XDEBUG_TEMP_DIR P_tmpdir
@@ -215,6 +232,21 @@ ZEND_INI_DISP(display_changed_setting)
 {
 	ZEND_PUTS("(setting renamed in Xdebug 3)");
 }
+
+#if __linux__
+ZEND_INI_DISP(display_control_socket)
+{
+	switch (XINI_BASE(control_socket_granularity))
+	{
+		case XDEBUG_CONTROL_SOCKET_OFF:
+			ZEND_PUTS("off");
+			break;
+		case XDEBUG_CONTROL_SOCKET_TIME:
+			php_printf("time: %ldms", XINI_BASE(control_socket_threshold_ms));
+			break;
+	}
+}
+#endif
 
 #define XDEBUG_REMOVED_INI_ENTRY(n) PHP_INI_ENTRY_EX(("" # n), "This setting has been removed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#removed-" # n, PHP_INI_ALL, OnUpdateRemovedSetting, display_removed_setting)
 #define XDEBUG_CHANGED_INI_ENTRY(n) PHP_INI_ENTRY_EX(("" # n), "This setting has been changed, see the upgrading guide at https://xdebug.org/docs/upgrade_guide#changed-" # n, PHP_INI_ALL, OnUpdateChangedSetting, display_changed_setting)
@@ -277,6 +309,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trigger_value",      "",                      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",   "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.file_link_format, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.filename_format",    "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.filename_format,  zend_xdebug_globals, xdebug_globals)
+#if __linux__
+	PHP_INI_ENTRY_EX("xdebug.control_socket",      "time",                  PHP_INI_ALL,                   OnUpdateCtrlSocket, display_control_socket)
+#endif
 
 	STD_PHP_INI_ENTRY("xdebug.log",       "",           PHP_INI_ALL, OnUpdateString, settings.library.log,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.log_level", XLOG_DEFAULT, PHP_INI_ALL, OnUpdateLong,   settings.library.log_level, zend_xdebug_globals, xdebug_globals)
@@ -737,6 +772,10 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_statement_call(op_array->filename, lineno);
 	}
+
+#ifdef __linux__
+	xdebug_control_socket_dispatch();
+#endif
 }
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)

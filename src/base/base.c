@@ -758,7 +758,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 	}
 
 #ifdef __linux__
-	xdebug_ctrl_socket_dispatch();
+	xdebug_control_socket_dispatch();
 #endif
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
@@ -1344,6 +1344,10 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(private_tmp) = NULL;
 #ifdef __linux__
 	read_systemd_private_tmp_directory(&XG_BASE(private_tmp));
+
+	XG_BASE(control_socket_path) = NULL;
+	XG_BASE(control_socket_fd) = 0;
+	XG_BASE(control_socket_last_trigger) = 0;
 #endif
 }
 
@@ -1401,7 +1405,9 @@ void xdebug_base_rinit()
 
 #ifdef __linux__
 	/* Set-up Control Socket */
-	xdebug_ctrl_socket_setup();
+	if (XINI_BASE(control_socket_granularity) != XDEBUG_CONTROL_SOCKET_OFF) {
+		xdebug_control_socket_setup();
+	}
 #endif
 
 	/* Signal that we're in a request now */
@@ -1454,7 +1460,7 @@ void xdebug_base_post_deactivate()
 
 #ifdef __linux__
 	/* Close Down Control Socket */
-	xdebug_ctrl_socket_teardown();
+	xdebug_control_socket_teardown();
 #endif
 }
 

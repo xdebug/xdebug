@@ -70,8 +70,9 @@ typedef struct _xdebug_base_globals_t {
 
 #ifdef __linux__
 	/* Control Socket */
-	char *control_socket_path;
-	int   control_socket_fd;
+	char      *control_socket_path;
+	int        control_socket_fd;
+	zend_long  control_socket_last_trigger;
 #endif
 
 	/* filters */
@@ -88,6 +89,10 @@ typedef struct _xdebug_base_globals_t {
 } xdebug_base_globals_t;
 
 typedef struct _xdebug_base_settings_t {
+#ifdef __linux__
+	int           control_socket_granularity;
+	zend_long     control_socket_threshold_ms;
+#endif
 	zend_long     max_nesting_level;
 } xdebug_base_settings_t;
 
