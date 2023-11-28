@@ -13,6 +13,7 @@ xdebug.log_level=20
 xdebug.discover_client_host=0
 xdebug.client_host=doesnotexist
 xdebug.client_port=9002
+xdebug.control_socket=off
 --FILE--
 <?php
 echo strlen("foo"), "\n";

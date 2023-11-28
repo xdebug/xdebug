@@ -12,6 +12,7 @@ xdebug.use_compression=1
 xdebug.profiler_append=1
 xdebug.profiler_output_name=cachegrind.out.%R.end
 xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}issue2069-001.txt
+xdebug.control_socket=off
 --FILE--
 <?php
 require_once 'capture-profile.inc';

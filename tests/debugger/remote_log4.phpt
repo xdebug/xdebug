@@ -15,6 +15,7 @@ xdebug.discover_client_host=1
 xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
 xdebug.client_discovery_header=I_LIKE_COOKIES
+xdebug.control_socket=off
 --FILE--
 <?php
 echo strlen("foo"), "\n";

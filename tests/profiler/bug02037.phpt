@@ -9,6 +9,7 @@ check_reqs('!win');
 xdebug.mode=profile
 xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}issue2037.txt
 xdebug.output_dir=/tmp/un-writable
+xdebug.control_socket=off
 --FILE--
 <?php
 echo "==DONE==\n";

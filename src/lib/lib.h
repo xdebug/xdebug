@@ -284,6 +284,12 @@ int xdebug_lib_set_start_upon_error(char *value);
 int xdebug_lib_start_upon_error(void);
 int xdebug_lib_get_start_upon_error(void);
 
+#if __linux__
+# define XDEBUG_CONTROL_SOCKET_OFF        1
+# define XDEBUG_CONTROL_SOCKET_TIME       4
+int xdebug_lib_set_control_socket_granularity(char *value);
+#endif
+
 const char *xdebug_lib_mode_from_value(int mode);
 
 void xdebug_lib_set_active_data(zend_execute_data *execute_data);

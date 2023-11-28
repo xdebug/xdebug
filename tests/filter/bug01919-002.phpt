@@ -8,6 +8,7 @@ check_reqs('!win');
 --INI--
 xdebug.mode=develop
 xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}issue1919-002.txt
+xdebug.control_socket=off
 --FILE--
 <?php
 xdebug_set_filter(XDEBUG_FILTER_TRACING, XDEBUG_PATH_INCLUDE, []);
