@@ -12,6 +12,7 @@ xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}remote-log2.txt
 xdebug.discover_client_host=1
 xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
+xdebug.control_socket=off
 --FILE--
 <?php
 echo strlen("foo"), "\n";

@@ -106,8 +106,8 @@ if test "$PHP_XDEBUG" != "no"; then
 
   PHP_XDEBUG_CFLAGS="$STD_CFLAGS $MAINTAINER_CFLAGS"
 
-  XDEBUG_BASE_SOURCES="src/base/base.c src/base/filter.c"
-  XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/compat.c src/lib/crc32.c src/lib/file.c src/lib/hash.c src/lib/headers.c src/lib/lib.c src/lib/llist.c src/lib/log.c src/lib/set.c src/lib/str.c src/lib/timing.c src/lib/var.c src/lib/var_export_html.c src/lib/var_export_line.c src/lib/var_export_text.c src/lib/var_export_xml.c src/lib/xml.c"
+  XDEBUG_BASE_SOURCES="src/base/base.c src/base/ctrl_socket.c src/base/filter.c"
+  XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/cmd_parser.c src/lib/compat.c src/lib/crc32.c src/lib/file.c src/lib/hash.c src/lib/headers.c src/lib/lib.c src/lib/llist.c src/lib/log.c src/lib/set.c src/lib/str.c src/lib/timing.c src/lib/var.c src/lib/var_export_html.c src/lib/var_export_line.c src/lib/var_export_text.c src/lib/var_export_xml.c src/lib/xml.c"
 
   XDEBUG_COVERAGE_SOURCES="src/coverage/branch_info.c src/coverage/code_coverage.c"
   XDEBUG_DEBUGGER_SOURCES="src/debugger/com.c src/debugger/debugger.c src/debugger/handler_dbgp.c src/debugger/handlers.c src/debugger/ip_info.c"

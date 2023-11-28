@@ -95,34 +95,6 @@ typedef struct xdebug_var_name {
 #define XDEBUG_CMDLOOP_NONBAIL                       0
 #define XDEBUG_CMDLOOP_BAIL                          1
 
-#define XDEBUG_ERROR_OK                              0
-#define XDEBUG_ERROR_PARSE                           1
-#define XDEBUG_ERROR_DUP_ARG                         2
-#define XDEBUG_ERROR_INVALID_ARGS                    3
-#define XDEBUG_ERROR_UNIMPLEMENTED                   4
-#define XDEBUG_ERROR_COMMAND_UNAVAILABLE             5
-
-#define XDEBUG_ERROR_CANT_OPEN_FILE                100
-#define XDEBUG_ERROR_STREAM_REDIRECT_FAILED        101 /* unused */
-
-#define XDEBUG_ERROR_BREAKPOINT_NOT_SET            200
-#define XDEBUG_ERROR_BREAKPOINT_TYPE_NOT_SUPPORTED 201
-#define XDEBUG_ERROR_BREAKPOINT_INVALID            202
-#define XDEBUG_ERROR_BREAKPOINT_NO_CODE            203
-#define XDEBUG_ERROR_BREAKPOINT_INVALID_STATE      204
-#define XDEBUG_ERROR_NO_SUCH_BREAKPOINT            205
-#define XDEBUG_ERROR_EVALUATING_CODE               206
-#define XDEBUG_ERROR_INVALID_EXPRESSION            207 /* unused */
-
-#define XDEBUG_ERROR_PROPERTY_NON_EXISTENT         300
-#define XDEBUG_ERROR_PROPERTY_NON_EXISTANT         300 /* compatibility typo */
-#define XDEBUG_ERROR_STACK_DEPTH_INVALID           301
-#define XDEBUG_ERROR_CONTEXT_INVALID               302 /* unused */
-
-#define XDEBUG_ERROR_PROFILING_NOT_STARTED         800
-
-#define XDEBUG_ERROR_ENCODING_NOT_SUPPORTED        900
-
 typedef struct _xdebug_func {
 	zend_string *object_class;
 	zend_string *scope_class;
@@ -311,6 +283,12 @@ int xdebug_lib_has_shared_secret(void);
 int xdebug_lib_set_start_upon_error(char *value);
 int xdebug_lib_start_upon_error(void);
 int xdebug_lib_get_start_upon_error(void);
+
+#if __linux__
+# define XDEBUG_CONTROL_SOCKET_OFF        1
+# define XDEBUG_CONTROL_SOCKET_TIME       4
+int xdebug_lib_set_control_socket_granularity(char *value);
+#endif
 
 const char *xdebug_lib_mode_from_value(int mode);
 

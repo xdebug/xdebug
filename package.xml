@@ -96,10 +96,14 @@ Thu, Oct 19, 2023 - Xdebug 3.3.0alpha3
      <file name="base_private.h" role="src" />
      <file name="filter.c" role="src" />
      <file name="filter.h" role="src" />
+     <file name="ctrl_socket.c" role="src" />
+     <file name="ctrl_socket.h" role="src" />
     </dir>
     <dir name="lib">
      <file name="usefulstuff.c" role="src" />
      <file name="usefulstuff.h" role="src" />
+     <file name="cmd_parser.c" role="src" />
+     <file name="cmd_parser.h" role="src" />
      <file name="compat.c" role="src" />
      <file name="compat.h" role="src" />
      <file name="crc32.c" role="src" />

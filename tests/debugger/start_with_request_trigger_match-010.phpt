@@ -20,7 +20,8 @@ dbgpRunFile(
 	[
 		'xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'trigger',
 		'xdebug.trigger_value' => 'value1,value2', 'variables_order' => 'PGCS',
-		'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 10
+		'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 10,
+		'xdebug.control_socket' => 'off',
 	],
 	['timeout' => 1]
 );

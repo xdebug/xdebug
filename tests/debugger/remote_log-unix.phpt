@@ -13,6 +13,7 @@ xdebug.start_with_request=yes
 xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}remote-log4.txt
 xdebug.client_host=unix:///tmp/xdbg.sock
 xdebug.client_port=0
+xdebug.control_socket=off
 --FILE--
 <?php
 echo strlen("foo"), "\n";
