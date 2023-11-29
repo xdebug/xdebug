@@ -150,7 +150,7 @@ jobs:
                     echo "Found PHP in: ${{ env.TEST_PHP_EXECUTABLE }}"
                     php run-xdebug-tests.php -j8 -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp
                 - name: Upload artifacts
-                  uses: actions/upload-artifact@v2
+                  uses: actions/upload-artifact@v3
                   with:
                       name: ${{env.ARTIFACT_NAME}}
                       path: ${{env.ARTIFACT}}
