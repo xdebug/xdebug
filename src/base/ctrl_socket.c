@@ -359,6 +359,7 @@ void xdebug_control_socket_setup(void)
 	}
 
 	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up succesfully: '@%s'", XG_BASE(control_socket_path));
+	xdfree(servaddr);
 }
 
 void xdebug_control_socket_teardown(void)
