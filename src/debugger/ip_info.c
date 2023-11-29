@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2023 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -187,50 +187,50 @@ char *xdebug_get_ip_for_interface(const char *iface)
 
 static int get_gateway_and_iface(in_addr_t *addr, char *interface)
 {
-    long  destination, gateway;
-    char  iface[IF_NAMESIZE];
-    char  buf[BUFFER_SIZE];
-    FILE *file;
+	long  destination, gateway;
+	char  iface[IF_NAMESIZE];
+	char  buf[BUFFER_SIZE];
+	FILE *file;
 
-    memset(iface, 0, sizeof(iface));
-    memset(buf, 0, sizeof(buf));
+	memset(iface, 0, sizeof(iface));
+	memset(buf, 0, sizeof(buf));
 
-    file = fopen("/proc/net/route", "r");
-    if (!file) {
-        return 0;
+	file = fopen("/proc/net/route", "r");
+	if (!file) {
+		return 0;
 	}
 
-    while (fgets(buf, sizeof(buf), file)) {
-        if (sscanf(buf, "%s %lx %lx", iface, &destination, &gateway) == 3) {
-            if (destination == 0) { /* default */
-                *addr = gateway;
-                strcpy(interface, iface);
-                fclose(file);
-                return 1;
-            }
-        }
-    }
-
-    /* default route not found */
-    if (file) {
-        fclose(file);
+	while (fgets(buf, sizeof(buf), file)) {
+		if (sscanf(buf, "%s %lx %lx", iface, &destination, &gateway) == 3) {
+			if (destination == 0) { /* default */
+				*addr = gateway;
+				strcpy(interface, iface);
+				fclose(file);
+				return 1;
+			}
+		}
 	}
-    return 0;
+
+	/* default route not found */
+	if (file) {
+		fclose(file);
+	}
+	return 0;
 }
 
 char *xdebug_get_gateway_ip(void)
 {
-    in_addr_t addr = 0;
-    char      iface[IF_NAMESIZE];
-    char      addrbuf[INET6_ADDRSTRLEN];
+	in_addr_t addr = 0;
+	char      iface[IF_NAMESIZE];
+	char      addrbuf[INET6_ADDRSTRLEN];
 
-    memset(iface, 0, sizeof(iface));
+	memset(iface, 0, sizeof(iface));
 
-    if (get_gateway_and_iface(&addr, iface)) {
+	if (get_gateway_and_iface(&addr, iface)) {
 		return xdstrdup(inet_ntop(AF_INET, &addr, addrbuf, sizeof(addrbuf)));
 	}
 
-    return NULL;
+	return NULL;
 }
 #endif /* XDEBUG_GATEWAY_SUPPORT */
 
