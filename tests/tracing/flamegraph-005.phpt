@@ -3,6 +3,7 @@ Tracing: Flamegraph with "start with request"
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=yes
+xdebug.trace_output_name=trace.%p.%r
 xdebug.trace_format=3
 --FILE--
 <?php
