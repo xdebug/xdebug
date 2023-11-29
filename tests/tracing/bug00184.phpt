@@ -3,8 +3,8 @@ Test for bug #184: problem with control chars in code traces
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=yes
+xdebug.trace_output_name=trace.%p.%r
 xdebug.trace_options=0
-xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.dump_globals=0

@@ -4,6 +4,7 @@ Starting Tracing: always, no trigger match
 xdebug.mode=trace
 xdebug.trace_format=0
 xdebug.start_with_request=yes
+xdebug.trace_output_name=trace.%p.%r
 xdebug.trigger_value=FOOBAR
 xdebug.collect_return=0
 xdebug.collect_assignments=0

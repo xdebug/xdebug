@@ -8,6 +8,7 @@ check_reqs('!ext-flag compression');
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=yes
+xdebug.trace_output_name=trace.%p.%r
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.use_compression=0

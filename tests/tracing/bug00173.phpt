@@ -8,8 +8,8 @@ check_reqs('ext SPL');
 --INI--
 xdebug.mode=trace,develop
 xdebug.start_with_request=yes
+xdebug.trace_output_name=trace.%p.%r
 xdebug.trace_options=0
-xdebug.trace_output_name=trace.%c
 xdebug.collect_return=1
 xdebug.collect_assignments=0
 xdebug.dump_globals=0
@@ -34,4 +34,4 @@ Call Stack:
 
 
 Variables in local scope (#1):
-  $trace_file = '%s.%d.xt%S'
+  $trace_file = '%s.%d.%s.xt%S'
