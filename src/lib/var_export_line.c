@@ -35,19 +35,15 @@ static int xdebug_array_element_export(zval *zv_nptr, zend_ulong index_key, zend
 		if (HASH_KEY_IS_NUMERIC(hash_key)) { /* numeric key */
 			xdebug_str_add_fmt(str, XDEBUG_INT_FMT " => ", index_key);
 		} else { /* string key */
-			zend_string *tmp, *tmp2;
+			zend_string *tmp_zstr;
 
-			tmp = php_str_to_str(ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), (char*) "'", 1, (char*) "\\'", 2);
-			tmp2 = php_str_to_str(ZSTR_VAL(tmp), ZSTR_LEN(tmp), (char*) "\0", 1, (char*) "\\0", 2);
-			if (tmp) {
-				zend_string_release(tmp);
-			}
+			tmp_zstr = php_addcslashes(hash_key, (char*) "'\\\0..\37", 7);
+
 			xdebug_str_addc(str, '\'');
-			if (tmp2) {
-				xdebug_str_add_zstr(str, tmp2);
-				zend_string_release(tmp2);
-			}
+			xdebug_str_add_zstr(str, tmp_zstr);
 			xdebug_str_add_literal(str, "' => ");
+
+			zend_string_release(tmp_zstr);
 		}
 		xdebug_var_export_line(zv, str, level + 2, debug_zval, options);
 		xdebug_str_add_literal(str, ", ");
