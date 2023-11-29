@@ -222,11 +222,12 @@ char *xdebug_get_gateway_ip(void)
 {
     in_addr_t addr = 0;
     char      iface[IF_NAMESIZE];
+    char      addrbuf[INET6_ADDRSTRLEN];
 
     memset(iface, 0, sizeof(iface));
 
     if (get_gateway_and_iface(&addr, iface)) {
-		return xdstrdup(inet_ntoa(*(struct in_addr *) &addr));
+		return xdstrdup(inet_ntop(AF_INET, &addr, addrbuf, sizeof(addrbuf)));
 	}
 
     return NULL;
