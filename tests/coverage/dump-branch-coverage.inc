@@ -3,7 +3,7 @@ require dirname(__FILE__) . '/../../contrib/branch-coverage-to-dot.php';
 
 function dump_branch_coverage($info)
 {
-	file_put_contents(sys_get_temp_dir() . "/paths.dot", branch_coverage_to_dot( $info ) );
+	file_put_contents(tempnam(sys_get_temp_dir(), "xdebug-paths-"), branch_coverage_to_dot( $info ) );
 	ksort($info);
 
 	foreach ( $info as $fname => $file )
