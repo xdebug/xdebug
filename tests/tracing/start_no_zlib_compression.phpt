@@ -8,11 +8,13 @@ check_reqs('!ext-flag compression');
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=yes
+xdebug.trace_format=0
 xdebug.trace_output_name=trace.%p.%r
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.use_compression=1
 xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}start_no_zlib_compression.txt
+xdebug.control_socket=off
 --FILE--
 <?php
 $tf = xdebug_get_tracefile_name();
