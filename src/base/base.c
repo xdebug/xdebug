@@ -851,11 +851,6 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 		return false;
 	}
 
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		return false;
-	}
-
 	return true;
 }
 
@@ -864,6 +859,11 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
  * negation should be **added** to the usage below in xdebug_execute_ex. */
 static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
 {
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return false;
+	}
+
 #if PHP_VERSION_ID >= 80100
 	return !should_run_user_handler(execute_data);
 #else
