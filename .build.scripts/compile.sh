@@ -1,5 +1,5 @@
 #!/bin/bash
 phpize
-./configure --enable-xdebug-dev
+./configure --enable-xdebug-dev $@
 make all
 
