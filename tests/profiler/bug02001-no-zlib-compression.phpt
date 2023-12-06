@@ -11,6 +11,7 @@ xdebug.start_with_request=default
 xdebug.use_compression=1
 xdebug.profiler_output_name=cachegrind.out
 xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}bug2001-no-zlib-compression.txt
+xdebug.control_socket=off
 --FILE--
 <?php
 require_once 'capture-profile.inc';
