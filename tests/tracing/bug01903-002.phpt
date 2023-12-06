@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1903: Tracing constants should not be defined with mode=off
+Test for bug #1903: Tracing constants should be defined with mode=off
 --INI--
 xdebug.mode=off
 --FILE--
@@ -11,6 +11,6 @@ var_dump(
 );
 ?>
 --EXPECT--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
