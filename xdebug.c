@@ -553,6 +553,10 @@ PHP_MINIT_FUNCTION(xdebug)
 	ZEND_INIT_MODULE_GLOBALS(xdebug, php_xdebug_init_globals, php_xdebug_shutdown_globals);
 	REGISTER_INI_ENTRIES();
 
+	xdebug_coverage_register_constants(INIT_FUNC_ARGS_PASSTHRU);
+	xdebug_filter_register_constants(INIT_FUNC_ARGS_PASSTHRU);
+	xdebug_tracing_register_constants(INIT_FUNC_ARGS_PASSTHRU);
+
 	/* Locking in mode as it currently is */
 	if (!xdebug_lib_set_mode(XG(settings.library.requested_mode))) {
 		xdebug_lib_set_mode("develop");
@@ -594,10 +598,6 @@ PHP_MINIT_FUNCTION(xdebug)
 	if (zend_xdebug_initialised == 0) {
 		zend_error(E_WARNING, "Xdebug MUST be loaded as a Zend extension");
 	}
-
-	xdebug_coverage_register_constants(INIT_FUNC_ARGS_PASSTHRU);
-	xdebug_filter_register_constants(INIT_FUNC_ARGS_PASSTHRU);
-	xdebug_tracing_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }

@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1903: XDEBUG_CC_DEAD_CODE and XDEBUG_CC_UNUSED should not be defined with mode=off
+Test for bug #1903: XDEBUG_CC_DEAD_CODE and XDEBUG_CC_UNUSED should be defined with mode=off
 --INI--
 xdebug.mode=off
 --FILE--
@@ -11,6 +11,6 @@ var_dump(
 );
 ?>
 --EXPECT--
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
