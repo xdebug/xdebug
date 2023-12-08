@@ -832,6 +832,11 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 	zend_op_array     *op_array = &(execute_data->func->op_array);
 	zend_execute_data *prev_edata = execute_data->prev_execute_data;
 
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return false;
+	}
+
 	if (xdebug_debugger_bailout_if_no_exec_requested()) {
 		return false;
 	}
@@ -859,11 +864,6 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
  * negation should be **added** to the usage below in xdebug_execute_ex. */
 static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
 {
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		return false;
-	}
-
 #if PHP_VERSION_ID >= 80100
 	return !should_run_user_handler(execute_data);
 #else
