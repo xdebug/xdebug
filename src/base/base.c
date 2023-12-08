@@ -719,6 +719,11 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 
 	function_stack_entry *fse;
 
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return;
+	}
+
 	/* For PHP 7, we need to reset the opline to the start, so that all opcode
 	 * handlers are being hit. But not for generators, as that would make an
 	 * endless loop. TODO: Fix RECV handling with generators. */
@@ -797,6 +802,11 @@ static void xdebug_execute_user_code_end(zend_execute_data *execute_data, zval *
 	zend_op_array        *op_array = &(execute_data->func->op_array);
 	function_stack_entry *fse;
 
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return;
+	}
+
 	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
@@ -831,11 +841,6 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 {
 	zend_op_array     *op_array = &(execute_data->func->op_array);
 	zend_execute_data *prev_edata = execute_data->prev_execute_data;
-
-	/* If the stack vector hasn't been initialised yet, we should abort immediately */
-	if (!XG_BASE(stack)) {
-		return false;
-	}
 
 	if (xdebug_debugger_bailout_if_no_exec_requested()) {
 		return false;
