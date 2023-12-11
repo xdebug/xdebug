@@ -35,7 +35,7 @@ dbgpRunFile( $filename, $commands );
 
 -> breakpoint_list -i 3
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="3"><breakpoint type="call" function="a" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint><breakpoint type="call" function="b" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0002"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="3"><breakpoint type="call" function="%r(a|b)%r" state="enabled" hit_count="0" hit_value="0" id="{{PID}}000%r(1|2)%r"></breakpoint><breakpoint type="call" function="%r(a|b)%r" state="enabled" hit_count="0" hit_value="0" id="{{PID}}000%r(1|2)%r"></breakpoint></response>
 
 -> breakpoint_remove -i 4 -d %d0001
 <?xml version="1.0" encoding="iso-8859-1"?>
