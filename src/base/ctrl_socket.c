@@ -235,7 +235,6 @@ static void xdebug_control_socket_handle(void)
 	char           buffer[256];
 	int            bytes_read;
 	int            rc;
-	int            new_sd;
 	struct timeval timeout;
 	fd_set         master_set, working_set;
 
@@ -263,7 +262,7 @@ static void xdebug_control_socket_handle(void)
 	}
 
 	if (FD_ISSET(XG_BASE(control_socket_fd), &working_set)) {
-		new_sd = accept(XG_BASE(control_socket_fd), NULL, NULL);
+		int new_sd = accept(XG_BASE(control_socket_fd), NULL, NULL);
 		if (new_sd < 0) {
 			if (errno != EWOULDBLOCK) {
 				fprintf(stdout, "  accept() failed: %d: %s", errno, strerror(errno));
@@ -279,8 +278,8 @@ static void xdebug_control_socket_handle(void)
 			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
 			handle_command(new_sd, buffer);
 		}
+		close(new_sd);
 	}
-	close(new_sd);
 }
 
 void xdebug_control_socket_dispatch(void)

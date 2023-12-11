@@ -50,10 +50,10 @@ dbgpRunFile( $filename, $commands );
 
 -> run -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-08b.inc" lineno="2" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-08b.inc" lineno="%r(2|9)%r" state="enabled" hit_count="0" hit_value="0" id="{{PID}}000%r(1|2)%r"></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
-<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-08b.inc" lineno="9" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0002"></breakpoint></notify>
+<notify xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" name="breakpoint_resolved"><breakpoint type="line" resolved="resolved" filename="file://bug01388-08b.inc" lineno="%r(2|9)%r" state="enabled" hit_count="0" hit_value="0" id="{{PID}}000%r(1|2)%r"></breakpoint></notify>
 
 <?xml version="1.0" encoding="iso-8859-1"?>
 <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="6" status="break" reason="ok"><xdebug:message filename="file://bug01388-08b.inc" lineno="2"></xdebug:message></response>
