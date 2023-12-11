@@ -9,6 +9,15 @@ commands:
           name: Setup env vars
           command: |
             echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
+  compile-no-zlib:
+    description: Compiles and sets-up common environment vars
+    steps:
+      - checkout
+      - run: ./.build.scripts/compile.sh --without-xdebug-compression
+      - run:
+          name: Setup env vars
+          command: |
+            echo 'export CWD=`eval echo "${CIRCLE_WORKING_DIRECTORY}"`' >> $BASH_ENV
   run-tests:
     description: Runs the tests
     steps:
@@ -59,7 +68,7 @@ jobs:
           password: $DOCKERHUB_PW
     steps:
       - checkout
-      - compile
+      - compile-no-zlib
       - run:
           name: Setup extra env vars
           command: |
