@@ -1307,9 +1307,11 @@ PHP_FUNCTION(xdebug_get_function_stack)
 
 		value = zend_hash_str_find(options, "from_exception", sizeof("from_exception") - 1);
 		if (value && Z_TYPE_P(value) == IS_OBJECT && instanceof_function(Z_OBJCE_P(value), zend_ce_throwable)) {
-			if (Z_OBJ_P(value) == XG_DEV(last_exception_trace).obj_ptr[0]) {
-				Z_TRY_ADDREF(XG_DEV(last_exception_trace).stack_trace[0]);
-				ZVAL_COPY_VALUE(return_value, &XG_DEV(last_exception_trace).stack_trace[0]);
+			zval *z_previous_exception = last_exception_find_trace(Z_OBJ_P(value));
+
+			if (z_previous_exception) {
+				Z_TRY_ADDREF(*z_previous_exception);
+				ZVAL_COPY_VALUE(return_value, z_previous_exception);
 			} else {
 				array_init(return_value);
 			}
