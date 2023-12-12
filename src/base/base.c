@@ -1027,6 +1027,11 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 #if PHP_VERSION_ID >= 80100
 static void xdebug_execute_begin(zend_execute_data *execute_data)
 {
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return;
+	}
+
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_begin(execute_data);
 	}
@@ -1039,6 +1044,11 @@ static void xdebug_execute_begin(zend_execute_data *execute_data)
 
 static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
 {
+	/* If the stack vector hasn't been initialised yet, we should abort immediately */
+	if (!XG_BASE(stack)) {
+		return;
+	}
+
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_end(execute_data, retval);
 	}
