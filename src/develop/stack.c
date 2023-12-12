@@ -475,7 +475,7 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 	efree(frame);
 }
 
-static void zval_from_stack(zval *output, bool add_local_vars, bool params_as_values)
+static bool zval_from_stack(zval *output, bool add_local_vars, bool params_as_values)
 {
 	function_stack_entry *fse, *next_fse;
 	unsigned int          i;
@@ -483,11 +483,19 @@ static void zval_from_stack(zval *output, bool add_local_vars, bool params_as_va
 	array_init(output);
 
 	fse = XDEBUG_VECTOR_HEAD(XG_BASE(stack));
+
+	/* In some situations, it is possible that there is no stack yet. This
+	 * happens in some cases when Datadog's trace is used. */
+	if (!fse) {
+		return false;
+	}
 	next_fse = fse + 1;
 
 	for (i = 0; i < XDEBUG_VECTOR_COUNT(XG_BASE(stack)) - 1; i++, fse++, next_fse++) {
 		zval_from_stack_add_frame(output, fse, next_fse->execute_data, add_local_vars, params_as_values);
 	}
+
+	return true;
 }
 
 /* Helpers for last_exception_trace slots */
@@ -1241,8 +1249,9 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	/* Remember last stack trace so it can be retrieved in an exception handler through
 	 * xdebug_get_function_stack(['from_exception' => $e]) */
 	z_last_exception_slot = last_exception_get_slot(exception);
-	zval_from_stack(z_last_exception_slot, true, true);
-	zval_from_stack_add_frame(z_last_exception_slot, XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
+	if (zval_from_stack(z_last_exception_slot, true, true)) {
+		zval_from_stack_add_frame(z_last_exception_slot, XDEBUG_VECTOR_TAIL(XG_BASE(stack)), EG(current_execute_data), true, true);
+	}
 
 	exception_trace = tmp_str.d;
 
