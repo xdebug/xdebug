@@ -54,7 +54,7 @@ xdebug_stop_trace();
 A;AA 0
 A;AB;ABA 0
 A;AB;ABB %d
-A;AB 0
+A;AB %d
 A;AA 0
 A;AB;ABA 0
 A;AB;ABB %d
