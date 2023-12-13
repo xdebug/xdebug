@@ -708,7 +708,7 @@ void xdebug_tracing_execute_ex(function_stack_entry *fse)
 	}
 }
 
-void xdebug_tracing_execute_ex_end(function_stack_entry *fse, zend_execute_data *execute_data)
+void xdebug_tracing_execute_ex_end(function_stack_entry *fse, zend_execute_data *execute_data, zval *return_value)
 {
 	zend_op_array *op_array;
 
@@ -737,7 +737,7 @@ void xdebug_tracing_execute_ex_end(function_stack_entry *fse, zend_execute_data 
 		}
 	} else {
 		if (XG_TRACE(trace_handler)->return_value) {
-			XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, execute_data->return_value);
+			XG_TRACE(trace_handler)->return_value(XG_TRACE(trace_context), fse, return_value);
 		}
 	}
 }
