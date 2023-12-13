@@ -60,7 +60,7 @@ void xdebug_tracing_register_constants(INIT_FUNC_ARGS);
 
 void xdebug_tracing_init_if_requested(zend_op_array *op_array);
 void xdebug_tracing_execute_ex(function_stack_entry *fse);
-void xdebug_tracing_execute_ex_end(function_stack_entry *fse, zend_execute_data *execute_data);
+void xdebug_tracing_execute_ex_end(function_stack_entry *fse, zend_execute_data *execute_data, zval *return_value);
 int xdebug_tracing_execute_internal(function_stack_entry *fse);
 void xdebug_tracing_execute_internal_end(function_stack_entry *fse, zval *return_value);
 

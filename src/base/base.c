@@ -808,7 +808,7 @@ static void xdebug_execute_user_code_end(zend_execute_data *execute_data, zval *
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
-		xdebug_tracing_execute_ex_end(fse, execute_data);
+		xdebug_tracing_execute_ex_end(fse, execute_data, retval);
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
