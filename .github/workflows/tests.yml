@@ -1,4 +1,4 @@
-name: Build
+name: Running Tests
 
 on:
     push:
@@ -154,3 +154,9 @@ jobs:
                   with:
                       name: ${{env.ARTIFACT_NAME}}
                       path: ${{env.ARTIFACT}}
+                - name: Publish Binaries to Release
+                  if: ${{ startsWith(github.ref, 'refs/tags') }}
+                  uses: svenstaro/upload-release-action@v2
+                  with:
+                      asset_name: ${{env.ARTIFACT_NAME}}
+                      file: ${{env.ARTIFACT}}
