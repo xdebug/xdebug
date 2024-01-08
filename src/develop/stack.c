@@ -463,7 +463,13 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 
 	zval_from_stack_add_frame_parameters(frame, fse, params_as_values);
 
-	if (add_local_vars && fse->op_array && fse->op_array->vars) {
+	php_printf("fse: %p\n", fse);
+	php_printf("fse->user_defined: %d\n", fse->user_defined);
+	php_printf("fse->op_array: %p\n", fse->op_array);
+	php_printf("ZEND_USER_CODE(fse->op_array->type): %d\n", ZEND_USER_CODE(fse->op_array->type));
+	php_printf("fse->op_array_vars: %p\n", fse->op_array->vars);
+
+	if (add_local_vars && fse->user_defined == XDEBUG_USER_DEFINED && fse->op_array && ZEND_USER_CODE(fse->op_array->type) && fse->op_array->vars) {
 		zval_from_stack_add_frame_variables(frame, edata, fse->symbol_table, fse->op_array);
 	}
 

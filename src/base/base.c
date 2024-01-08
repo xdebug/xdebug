@@ -848,7 +848,7 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 	/* if we're in a ZEND_EXT_STMT, we ignore this function call as it's likely
 	   that it's just being called to check for breakpoints with conditions */
 	if (prev_edata && prev_edata->func && ZEND_USER_CODE(prev_edata->func->type) && prev_edata->opline && prev_edata->opline->opcode == ZEND_EXT_STMT) {
-		return false;
+	//	return false;
 	}
 
 	return true;
@@ -1031,7 +1031,11 @@ static void xdebug_execute_begin(zend_execute_data *execute_data)
 	if (!XG_BASE(stack)) {
 		return;
 	}
-
+fprintf(stderr, "> %p %p (%s)\n",
+	execute_data->prev_execute_data,
+	XDEBUG_VECTOR_COUNT(XG_BASE(stack)) ? ((function_stack_entry*) XDEBUG_VECTOR_TAIL(XG_BASE(stack)))->execute_data : NULL,
+	execute_data->func->common.function_name ? ZSTR_VAL(execute_data->func->common.function_name) : ""
+);
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_begin(execute_data);
 	}
@@ -1049,6 +1053,16 @@ static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
 		return;
 	}
 
+	fprintf(stderr, "< %p %p (%s)\n",
+		execute_data->prev_execute_data,
+		XDEBUG_VECTOR_COUNT(XG_BASE(stack)) ? ((function_stack_entry*) XDEBUG_VECTOR_TAIL(XG_BASE(stack)))->execute_data : NULL,
+		execute_data->func->common.function_name ? ZSTR_VAL(execute_data->func->common.function_name) : ""
+	);
+if (((function_stack_entry*) XDEBUG_VECTOR_TAIL(XG_BASE(stack)))->execute_data != execute_data->prev_execute_data)
+{
+	fprintf(stderr, "PROBVLEM\n");
+}
+
 	if (should_run_user_handler(execute_data)) {
 		xdebug_execute_user_code_end(execute_data, retval);
 	}
@@ -1057,6 +1071,17 @@ static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
 		xdebug_execute_internal_end(execute_data, retval);
 	}
 #endif
+
+	fprintf(stderr, "< %p %p (%s)\n",
+		execute_data->prev_execute_data ? execute_data->prev_execute_data->prev_execute_data : NULL,
+		XDEBUG_VECTOR_COUNT(XG_BASE(stack)) ? ((function_stack_entry*) XDEBUG_VECTOR_TAIL(XG_BASE(stack)))->execute_data : NULL,
+		execute_data->func->common.function_name ? ZSTR_VAL(execute_data->func->common.function_name) : ""
+	);
+if (execute_data->prev_execute_data && ((function_stack_entry*) XDEBUG_VECTOR_TAIL(XG_BASE(stack)))->execute_data != execute_data->prev_execute_data->prev_execute_data)
+{
+	fprintf(stderr, "PROBRXVLEM\n");
+}
+
 }
 
 static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *execute_data)
