@@ -107,6 +107,7 @@ void xdebug_library_post_deactivate(void)
 
 	xdebug_close_log();
 	xdebug_str_free(XG_LIB(diagnosis_buffer));
+	XG_LIB(diagnosis_buffer) = NULL;
 }
 
 
