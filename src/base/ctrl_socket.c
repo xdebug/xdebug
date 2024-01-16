@@ -366,6 +366,7 @@ void xdebug_control_socket_teardown(void)
 	if (XG_BASE(control_socket_path)) {
 		close(XG_BASE(control_socket_fd));
 		xdfree(XG_BASE(control_socket_path));
+		XG_BASE(control_socket_path) = NULL;
 	}
 }
 
