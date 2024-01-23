@@ -48,4 +48,6 @@ struct _xdebug_lines_list {
 #define XG_DBG(v)      (XG(globals.debugger.v))
 #define XINI_DBG(v)    (XG(settings.debugger.v))
 
+bool xdebug_should_ignore(void);
+
 #endif
