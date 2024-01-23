@@ -656,6 +656,40 @@ void xdebug_mark_debug_connection_not_active()
 	XG_DBG(remote_connection_pid) = 0;
 }
 
+bool xdebug_should_ignore(void)
+{
+	const char *ignore_value;
+	const char *found_in_global;
+
+	ignore_value = xdebug_lib_find_in_globals("XDEBUG_IGNORE", &found_in_global);
+
+	if (!ignore_value) {
+		return false;
+	}
+
+	if ((strcmp(ignore_value, "no") == 0) || (strcmp(ignore_value, "0") == 0)) {
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_INFO, "IGN", "Not ignoring present 'XDEBUG_IGNORE' %s variable, because the value is '%s'.", found_in_global, ignore_value);
+		return false;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_DEBUG, "IGN", "Not activating because an 'XDEBUG_IGNORE' %s variable is present, with value '%s'.", found_in_global, ignore_value);
+	return true;
+}
+
+
+void xdebug_debug_init_if_requested_on_connect_to_client()
+{
+	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
+
+	if (xdebug_should_ignore()) {
+		return;
+	}
+
+	if (!xdebug_is_debug_connection_active()) {
+		xdebug_init_debugger();
+	}
+}
+
 void xdebug_debug_init_if_requested_on_error()
 {
 	RETURN_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
@@ -768,6 +802,10 @@ void xdebug_debug_init_if_requested_at_startup(void)
 	}
 
 	if (xdebug_is_debug_connection_active()) {
+		return;
+	}
+
+	if (xdebug_should_ignore()) {
 		return;
 	}
 

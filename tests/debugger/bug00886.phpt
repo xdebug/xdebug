@@ -10,7 +10,6 @@ check_reqs('ext phar; dbgp; slow; !osx');
 require 'dbgp/dbgpclient.php';
 
 $dir = dirname(__FILE__);
-putenv("XDEBUG_TEST_DIR=$dir");
 $pharFile = str_replace('\\', '/', "phar://{$dir}/bug00886.phar");
 $filename = dirname(__FILE__) . '/bug00886.inc';
 
@@ -27,7 +26,7 @@ $commands = array(
 	'detach',
 );
 
-dbgpRunFile( $filename, $commands );
+dbgpRunFile( $filename, $commands, [], ['env' => ['XDEBUG_TEST_DIR' => $dir]] );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>

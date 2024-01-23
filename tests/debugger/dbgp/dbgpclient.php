@@ -55,7 +55,7 @@ class DebugClient
 		return $socket;
 	}
 
-	private function launchPhp( &$pipes, $filename, array $ini_options = [] )
+	private function launchPhp( &$pipes, $filename, array $ini_options = [], array $extra_options = [] )
 	{
 		@unlink( $this->tmpDir . 'error-output.txt' );
 		@unlink( $this->tmpDir . 'remote_log.txt' );
@@ -73,11 +73,21 @@ class DebugClient
 			"xdebug.client_port" => $this->getPort(),
 		);
 
+		$env_vars = array_key_exists( 'env', $extra_options ) ? $extra_options['env'] : [];
+		$env_vars += $_ENV;
+
 		$options = (getenv('TEST_PHP_ARGS') ?: '');
 		$ini_options = array_merge( $default_options, $ini_options );
 		foreach ( $ini_options as $key => $value )
 		{
 			$options .= " -d{$key}=$value";
+		}
+
+		if ( array_key_exists( 'auto_prepend', $extra_options ) )
+		{
+			$prependFile = "{$this->tmpDir}auto-prepend.inc";
+			file_put_contents( $prependFile, $extra_options['auto_prepend'] );
+			$options .= " -dauto_prepend_file={$prependFile}";
 		}
 
 		$php = getenv( 'TEST_PHP_EXECUTABLE' );
@@ -87,7 +97,7 @@ class DebugClient
 		}
 		$cwd = dirname( __FILE__ );
 
-		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd );
+		$process = proc_open( $cmd, $descriptorspec, $pipes, $cwd, $env_vars );
 		return $process;
 	}
 
@@ -174,8 +184,8 @@ class DebugClient
 			echo "Address: {$this->getAddress()}\n";
 			return false;
 		}
-		$this->php = $this->launchPhp( $this->ppipes, $filename, $ini_options );
-		$conn = @stream_socket_accept( $this->socket, isset( $options['timeout'] ) ? $options['timeout'] : 20 );
+		$this->php = $this->launchPhp( $this->ppipes, $filename, $ini_options, $options );
+		$conn = @stream_socket_accept( $this->socket, isset( $options['timeout'] ) ? $options['timeout'] : 5 );
 
 		if ( $conn === false )
 		{
