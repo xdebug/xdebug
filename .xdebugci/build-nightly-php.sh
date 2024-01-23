@@ -13,4 +13,4 @@ cd ${DIR}/..
 
 PATH=/usr/local/php/7.3.6/bin:$PATH
 
-PHP_DIR=/tmp/php-build/workspace/install .xdebugci/test-all.sh '^master|^7\.[^01].*dev|^8.*dev'
+PHP_DIR=/tmp/php-build/workspace/install .xdebugci/test-all.sh '^master|^8.*dev'
