@@ -9,7 +9,7 @@ check_reqs('dbgp; !win');
 <?php
 require 'dbgp/dbgpclient.php';
 $dir = dirname(__FILE__);
-putenv("XDEBUG_TEST_DIR=$dir");
+
 $filename = $dir . '/bug00627.inc';
 
 $commands = array(
@@ -20,7 +20,7 @@ $commands = array(
 	'detach',
 );
 
-dbgpRunFile( $filename, $commands );
+dbgpRunFile( $filename, $commands, [], ['env' => ['XDEBUG_TEST_DIR' => $dir]] );
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="iso-8859-1"?>

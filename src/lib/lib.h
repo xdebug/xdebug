@@ -277,6 +277,8 @@ int xdebug_lib_never_start_with_request(void);
 int xdebug_lib_get_start_with_request(void);
 int xdebug_lib_has_shared_secret(void);
 
+const char *xdebug_lib_find_in_globals(const char *element, const char **found_in_global);
+
 #define XDEBUG_START_UPON_ERROR_DEFAULT     1
 #define XDEBUG_START_UPON_ERROR_YES         2
 #define XDEBUG_START_UPON_ERROR_NO          3

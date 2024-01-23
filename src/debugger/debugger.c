@@ -269,7 +269,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		XG_DBG(context).do_connect_to_client = 0;
 
 		if (!xdebug_is_debug_connection_active()) {
-			xdebug_debug_init_if_requested_on_xdebug_break();
+			xdebug_debug_init_if_requested_on_connect_to_client();
 		}
 	}
 

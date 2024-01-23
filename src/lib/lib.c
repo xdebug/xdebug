@@ -325,26 +325,61 @@ const char *xdebug_lib_mode_from_value(int mode)
 	}
 }
 
-static const char *find_in_globals(const char *element)
+const char *xdebug_lib_find_in_globals(const char *element, const char **found_in_global)
 {
 	zval *trigger_val = NULL;
 	const char *env_value = getenv(element);
+	zval *st;
 
+	/* Elements in Superglobal Symbols */
+	st = zend_hash_str_find(&EG(symbol_table), "_GET", strlen("_GET"));
+	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+		*found_in_global = "GET";
+		return Z_STRVAL_P(trigger_val);
+	}
+
+	st = zend_hash_str_find(&EG(symbol_table), "_POST", strlen("_POST"));
+	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+		*found_in_global = "POST";
+		return Z_STRVAL_P(trigger_val);
+	}
+
+	st = zend_hash_str_find(&EG(symbol_table), "_COOKIE", strlen("_COOKIE"));
+	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+		*found_in_global = "COOKIE";
+		return Z_STRVAL_P(trigger_val);
+	}
+
+	/* Actual Superglobals */
+	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), element, strlen(element))) != NULL) {
+		*found_in_global = "GET";
+		return Z_STRVAL_P(trigger_val);
+	}
+
+	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), element, strlen(element))) != NULL) {
+		*found_in_global = "POST";
+		return Z_STRVAL_P(trigger_val);
+	}
+
+	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), element, strlen(element))) != NULL) {
+		*found_in_global = "COOKIE";
+		return Z_STRVAL_P(trigger_val);
+	}
+
+	/* Environment. This goes last. */
 	if (env_value) {
+		*found_in_global = "ENV";
 		return env_value;
 	}
 
-	if (
-		(
-			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]), element, strlen(element))) != NULL
-		) || (
-			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), element, strlen(element))) != NULL
-		) || (
-			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), element, strlen(element))) != NULL
-		) || (
-			(trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), element, strlen(element))) != NULL
-		)
-	) {
+	st = zend_hash_str_find(&EG(symbol_table), "_ENV", strlen("_ENV"));
+	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+		*found_in_global = "ENV";
+		return Z_STRVAL_P(trigger_val);
+	}
+
+	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]), element, strlen(element))) != NULL) {
+		*found_in_global = "ENV";
 		return Z_STRVAL_P(trigger_val);
 	}
 
@@ -431,11 +466,12 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 {
 	const char *trigger_value = NULL;
 	const char *trigger_name = "XDEBUG_TRIGGER";
+	const char *found_in_global;
 
 	xdebug_log(XLOG_CHAN_CONFIG, XLOG_DEBUG, "Checking if trigger 'XDEBUG_TRIGGER' is enabled for mode '%s'", xdebug_lib_mode_from_value(for_mode));
 
 	/* First we check for the generic 'XDEBUG_TRIGGER' option */
-	trigger_value = find_in_globals(trigger_name);
+	trigger_value = xdebug_lib_find_in_globals(trigger_name, &found_in_global);
 
 	/* If not found, we fall back to the per-mode name for backwards compatibility reasons */
 	if (!trigger_value) {
@@ -449,7 +485,7 @@ static int trigger_enabled(int for_mode, char **found_trigger_value)
 
 		if (trigger_name) {
 			xdebug_log(XLOG_CHAN_CONFIG, XLOG_INFO, "Trigger value for 'XDEBUG_TRIGGER' not found, falling back to '%s'", trigger_name);
-			trigger_value = find_in_globals(trigger_name);
+			trigger_value = xdebug_lib_find_in_globals(trigger_name, &found_in_global);
 		}
 	}
 
