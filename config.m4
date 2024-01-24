@@ -19,8 +19,8 @@ if test "$PHP_XDEBUG" != "no"; then
   if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80000"; then
     AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.5.0 (found $PHP_XDEBUG_FOUND_VERSION)])
   else
-    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80500"; then
-      AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.5.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80400"; then
+      AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.4.0 (found $PHP_XDEBUG_FOUND_VERSION)])
     else
       AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
     fi
