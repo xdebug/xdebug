@@ -41,7 +41,11 @@
 #include "usefulstuff.h"
 #include "log.h"
 
-#include "ext/standard/php_lcg.h"
+#if PHP_VERSION_ID >= 80200
+# include "ext/random/php_random.h"
+#else
+# include "ext/standard/php_lcg.h"
+#endif
 #include "ext/standard/flock_compat.h"
 #include "main/php_ini.h"
 
