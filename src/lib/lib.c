@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -214,8 +214,17 @@ int xdebug_lib_set_control_socket_granularity(char *value)
 		return 1;
 	}
 
-	XINI_BASE(control_socket_granularity) = XDEBUG_CONTROL_SOCKET_TIME;
-	XINI_BASE(control_socket_threshold_ms) = 25;
+	if (strcmp(value, "default") == 0) {
+		XINI_BASE(control_socket_granularity) = XDEBUG_CONTROL_SOCKET_DEFAULT;
+		XINI_BASE(control_socket_threshold_ms) = 25;
+		return 1;
+	}
+
+	if (strcmp(value, "time") == 0) {
+		XINI_BASE(control_socket_granularity) = XDEBUG_CONTROL_SOCKET_TIME;
+		XINI_BASE(control_socket_threshold_ms) = 25;
+		return 1;
+	}
 
 	return 0;
 }

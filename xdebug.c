@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -241,6 +241,9 @@ ZEND_INI_DISP(display_control_socket)
 		case XDEBUG_CONTROL_SOCKET_OFF:
 			ZEND_PUTS("off");
 			break;
+		case XDEBUG_CONTROL_SOCKET_DEFAULT:
+			php_printf("time: %ldms", XINI_BASE(control_socket_threshold_ms));
+			break;
 		case XDEBUG_CONTROL_SOCKET_TIME:
 			php_printf("time: %ldms", XINI_BASE(control_socket_threshold_ms));
 			break;
@@ -310,7 +313,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",   "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.file_link_format, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.filename_format",    "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.filename_format,  zend_xdebug_globals, xdebug_globals)
 #if __linux__
-	PHP_INI_ENTRY_EX("xdebug.control_socket",      "time",                  PHP_INI_ALL,                   OnUpdateCtrlSocket, display_control_socket)
+	PHP_INI_ENTRY_EX("xdebug.control_socket",      "default",               PHP_INI_ALL,                   OnUpdateCtrlSocket, display_control_socket)
 #endif
 
 	STD_PHP_INI_ENTRY("xdebug.log",       "",           PHP_INI_ALL, OnUpdateString, settings.library.log,       zend_xdebug_globals, xdebug_globals)

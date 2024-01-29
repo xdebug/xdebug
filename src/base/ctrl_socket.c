@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -292,6 +292,7 @@ void xdebug_control_socket_dispatch(void)
 		case XDEBUG_CONTROL_SOCKET_OFF:
 			return;
 
+		case XDEBUG_CONTROL_SOCKET_DEFAULT:
 		case XDEBUG_CONTROL_SOCKET_TIME:
 			if (xdebug_get_nanotime() < (XG_BASE(control_socket_last_trigger) + (XINI_BASE(control_socket_threshold_ms) * 1000000))) {
 				return;

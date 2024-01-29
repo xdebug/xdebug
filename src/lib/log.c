@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -335,6 +335,7 @@ void xdebug_print_info(void)
 	php_info_print_table_row(2, "Clock Source", "clock_gettime_nsec_np");
 # elif HAVE_XDEBUG_CLOCK_GETTIME
 	php_info_print_table_row(2, "Clock Source", "clock_gettime");
+	php_info_print_table_row(2, "TSC Clock Source", XG_BASE(working_tsc_clock) ? "available" : "unavailable");
 # else
 	php_info_print_table_row(2, "Clock Source", "gettimeofday");
 # endif
