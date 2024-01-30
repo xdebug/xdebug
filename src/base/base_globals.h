@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,6 +48,7 @@ typedef struct _xdebug_base_globals_t {
 #endif
 	xdebug_nanotime_context nanotime_context;
 	uint64_t      start_nanotime;
+	unsigned int  working_tsc_clock; /* -1 = unknown, 0 = not available, 1 = available */
 	unsigned int  prev_memory;
 	zif_handler   orig_set_time_limit_func;
 	zif_handler   orig_error_reporting_func;

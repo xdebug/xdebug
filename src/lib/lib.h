@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -288,7 +288,8 @@ int xdebug_lib_get_start_upon_error(void);
 
 #if __linux__
 # define XDEBUG_CONTROL_SOCKET_OFF        1
-# define XDEBUG_CONTROL_SOCKET_TIME       4
+# define XDEBUG_CONTROL_SOCKET_DEFAULT    2
+# define XDEBUG_CONTROL_SOCKET_TIME       3
 int xdebug_lib_set_control_socket_granularity(char *value);
 #endif
 

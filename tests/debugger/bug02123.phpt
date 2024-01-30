@@ -42,6 +42,6 @@ echo file_get_contents( $xdebugLogFileName );
 
 %A[Step Debug] WARN: Breakpoint file name does not exist: /var/www/elephpants-are-cool/does-not-exist (No such file or directory).%A
 
-[%d] Log opened at %s
+[%d] Log opened at %s%A
 [%d] [Step Debug] WARN: Breakpoint file name does not exist: /var/www/elephpants-are-cool/does-not-exist (No such file or directory).
 [%d] Log closed at %s

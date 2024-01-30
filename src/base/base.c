@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1415,6 +1415,21 @@ void xdebug_base_rinit()
 
 #ifdef __linux__
 	/* Set-up Control Socket */
+
+# if HAVE_XDEBUG_CLOCK_GETTIME
+	/* Check whether we have a broken TSC clock, and adjust if needed */
+	if (!XG_BASE(working_tsc_clock)) {
+		if (XINI_BASE(control_socket_granularity) == XDEBUG_CONTROL_SOCKET_DEFAULT) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TSC-NO", "Not setting up control socket with default value due to unavailable 'tsc' clock");
+			XINI_BASE(control_socket_granularity) = XDEBUG_CONTROL_SOCKET_OFF;
+		}
+		if (XINI_BASE(control_socket_granularity) == XDEBUG_CONTROL_SOCKET_TIME) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "TSC-INFREQ", "Due to unavailable TSC clock, setting poll granularity to 100ms instead of 25ms");
+			XINI_BASE(control_socket_threshold_ms) = 100;
+		}
+	}
+# endif
+
 	if (XINI_BASE(control_socket_granularity) != XDEBUG_CONTROL_SOCKET_OFF) {
 		xdebug_control_socket_setup();
 	}

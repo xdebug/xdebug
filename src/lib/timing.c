@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -124,11 +124,42 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 
 	return 0;
 }
+
+# ifdef __linux__
+bool detect_linux_working_tsc_clock(void)
+{
+	FILE *current_clocksource;
+	char contents[64];
+
+	current_clocksource = fopen("/sys/devices/system/clocksource/clocksource0/current_clocksource", "r");
+	if (!current_clocksource) {
+		/* Inconclusive, assume working clock */
+		return true;
+	}
+
+	if (!fgets(contents, sizeof(contents), current_clocksource)) {
+		/* Can't read any clock source */
+		fclose(current_clocksource);
+		return false;
+	}
+
+	if (strcmp(contents, "tsc\n") != 0) {
+		/* Current clock is not 'tsc' (+ newline) */
+		fclose(current_clocksource);
+		return false;
+	}
+
+	fclose(current_clocksource);
+	return true;
+}
+# endif
 #endif
 
 void xdebug_nanotime_init(xdebug_base_globals_t *base)
 {
 	xdebug_nanotime_context context = {0};
+
+	base->working_tsc_clock = -1;
 
 #if PHP_WIN32
 	LARGE_INTEGER tcounter;
@@ -154,6 +185,13 @@ void xdebug_nanotime_init(xdebug_base_globals_t *base)
 #if PHP_WIN32 | HAVE_XDEBUG_CLOCK_GETTIME | HAVE_XDEBUG_CLOCK_GETTIME_NSEC_NP
 	context.start_rel = xdebug_get_nanotime_rel(&context);
 	context.last_rel = 0;
+#endif
+
+#ifdef __linux__
+# if HAVE_XDEBUG_CLOCK_GETTIME
+	/* Detect if we have a 'broken' tsc clock on Linux for clock_gettime */
+	base->working_tsc_clock = detect_linux_working_tsc_clock();
+# endif
 #endif
 
 	base->nanotime_context = context;
