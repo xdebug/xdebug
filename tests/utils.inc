@@ -205,4 +205,18 @@ function mustNotBeExecuted( array $coverageInfo, array $lines )
 		echo "line #{$line} is present and not covered\n";
 	}
 }
+
+function getTmpDir() : string
+{
+	$envTmpDir = getenv('TEST_TMP_DIR');
+	$tmpDir = $envTmpDir !== false ? $envTmpDir : sys_get_temp_dir();
+	$tmpDir .= '/';
+	$workerId = getenv( 'TEST_PHP_WORKER' );
+	if ( $workerId !== false )
+	{
+		$tmpDir .= "{$workerId}-";
+	}
+
+	return $tmpDir;
+}
 ?>

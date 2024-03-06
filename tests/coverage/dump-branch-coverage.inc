@@ -1,14 +1,19 @@
 <?php
-require dirname(__FILE__) . '/../../contrib/branch-coverage-to-dot.php';
+require_once __DIR__ . '/../../contrib/branch-coverage-to-dot.php';
+require_once __DIR__ . '/../utils.inc';
 
 function dump_branch_coverage($info)
 {
-	file_put_contents(sys_get_temp_dir() . "/paths.dot", branch_coverage_to_dot( $info ) );
+	file_put_contents( getTmpDir() . "xdebug-paths.dot", branch_coverage_to_dot( $info ) );
 	ksort($info);
 
 	foreach ( $info as $fname => $file )
 	{
 		if ( preg_match( '/dump-branch-coverage.inc$/', $fname ) )
+		{
+			continue;
+		}
+		if ( preg_match( '/utils.inc$/', $fname ) )
 		{
 			continue;
 		}
