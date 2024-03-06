@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../../utils.inc';
+
 class DebugClient
 {
 	// free port will be selected automatically by the operating system
@@ -33,14 +35,7 @@ class DebugClient
 
 	public function __construct()
 	{
-		$envTmpDir = getenv('TEST_TMP_DIR');
-		$this->tmpDir = $envTmpDir !== false ? $envTmpDir : sys_get_temp_dir();
-		$this->tmpDir .= '/';
-		$workerId = getenv( 'TEST_PHP_WORKER' );
-		if ( $workerId !== false )
-		{
-			$this->tmpDir .= "{$workerId}-";
-		}
+		$this->tmpDir = getTmpDir();
 	}
 
 	private function open( &$errno, &$errstr )
