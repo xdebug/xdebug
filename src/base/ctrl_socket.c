@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
  */
 
+#ifdef __linux__
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -23,6 +24,7 @@
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
+#endif
 
 #include "php_xdebug.h"
 
@@ -32,6 +34,10 @@
 #include "lib/cmd_parser.h"
 #include "lib/log.h"
 #include "lib/xml.h"
+
+#if WIN32
+#include <windows.h>
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
@@ -147,7 +153,17 @@ static void handle_command(int fd, const char *line)
 	}
 
 	message = make_message(retval);
+#if __linux__
 	write(fd, message->d, message->l);
+#elif WIN32
+	WriteFile(
+		XG_BASE(control_socket_h),
+		message->d,
+		message->l,
+		NULL,
+		NULL
+	);
+#endif
 
 	xdfree(cmd);
 	xdebug_cmd_arg_dtor(args);
@@ -232,6 +248,7 @@ CTRL_FUNC(pause)
 
 static void xdebug_control_socket_handle(void)
 {
+#if __linux__
 	char           buffer[256];
 	int            bytes_read;
 	int            rc;
@@ -280,13 +297,76 @@ static void xdebug_control_socket_handle(void)
 		}
 		close(new_sd);
 	}
+#elif WIN32
+	DWORD result;
+	char  buffer[256];
+	int   bytes_read;
+
+	if (XG_BASE(control_socket_h) <= 0) {
+		// no NP
+		return;
+	}
+
+	if (ConnectNamedPipe(XG_BASE(control_socket_h), NULL)) {
+		// previous disconnect
+		DisconnectNamedPipe(XG_BASE(control_socket_h));
+		return;
+	}
+
+	result = GetLastError();
+
+	if (result == ERROR_PIPE_LISTENING) {
+		// no clients
+		return;
+	}
+
+	if (result == ERROR_NO_DATA) {
+		DisconnectNamedPipe(XG_BASE(control_socket_h));
+		return;
+	}
+
+	if (result == ERROR_PIPE_CONNECTED) {
+		// got new client!
+		DWORD lpMode;
+		lpMode = PIPE_TYPE_BYTE | PIPE_REJECT_REMOTE_CLIENTS;
+		SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL);
+
+		memset(buffer, 0, sizeof(buffer));
+		bytes_read = 0;
+		if (!ReadFile(
+			XG_BASE(control_socket_h),
+			buffer,
+			sizeof(buffer),
+			&bytes_read,
+			NULL
+		)) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from NP: %x", GetLastError());
+		} else {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
+			handle_command(0, buffer);
+			FlushFileBuffers(XG_BASE(control_socket_h));
+		}
+
+		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS;
+		SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL);
+	}
+
+	// All other errors and completed reading should close the socket
+	DisconnectNamedPipe(XG_BASE(control_socket_h));
+#endif
 }
 
 void xdebug_control_socket_dispatch(void)
 {
+#if __linux__
 	if (!XG_BASE(control_socket_path)) {
 		return;
 	}
+#elif WIN32
+	if (XG_BASE(control_socket_h) <= 0) {
+		return;
+	}
+#endif
 
 	switch (XINI_BASE(control_socket_granularity)) {
 		case XDEBUG_CONTROL_SOCKET_OFF:
@@ -306,6 +386,7 @@ void xdebug_control_socket_dispatch(void)
 
 void xdebug_control_socket_setup(void)
 {
+#ifdef __linux__
 	struct sockaddr_un *servaddr = NULL;
 
 	/* Initialise control socket globals */
@@ -360,15 +441,55 @@ void xdebug_control_socket_setup(void)
 
 	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '@%s'", XG_BASE(control_socket_path));
 	xdfree(servaddr);
+#elif WIN32
+
+	XG_BASE(control_socket_last_trigger) = xdebug_get_nanotime();
+
+	XG_BASE(control_socket_path) = xdebug_sprintf("\\\\.\\pipe\\xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+
+	/* Part 1 – create Named Pipe */
+	XG_BASE(control_socket_h) = CreateNamedPipeA(
+		XG_BASE(control_socket_path),
+		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
+		PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS,
+		1,
+		1024,
+		1024,
+		0,
+		NULL
+	);
+
+	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE)
+	{
+		errno = WSAGetLastError();
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (%x)", errno);
+		xdfree(XG_BASE(control_socket_path));
+		XG_BASE(control_socket_path) = NULL;
+		return;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '%s'", XG_BASE(control_socket_path));
+#endif
 }
 
 void xdebug_control_socket_teardown(void)
 {
+#ifdef __linux__
 	if (XG_BASE(control_socket_path)) {
 		close(XG_BASE(control_socket_fd));
 		xdfree(XG_BASE(control_socket_path));
 		XG_BASE(control_socket_path) = NULL;
 	}
+#elif WIN32
+	if (XG_BASE(control_socket_path)) {
+		xdfree(XG_BASE(control_socket_path));
+		XG_BASE(control_socket_path) = NULL;
+	}
+	if (XG_BASE(control_socket_h)) {
+		DisconnectNamedPipe(XG_BASE(control_socket_h));
+		XG_BASE(control_socket_h) = 0;
+	}
+#endif
 }
 
 #endif
