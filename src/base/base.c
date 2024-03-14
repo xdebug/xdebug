@@ -36,7 +36,7 @@
 
 #include "base.h"
 #include "filter.h"
-#ifdef __linux__
+#if __linux__ || WIN32
 # include "ctrl_socket.h"
 #endif
 #include "develop/develop.h"
@@ -757,7 +757,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		(fse - 1)->user_defined = XDEBUG_USER_DEFINED;
 	}
 
-#ifdef __linux__
+#if __linux__ || WIN32
 	xdebug_control_socket_dispatch();
 #endif
 
@@ -1358,6 +1358,9 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(control_socket_path) = NULL;
 	XG_BASE(control_socket_fd) = 0;
 	XG_BASE(control_socket_last_trigger) = 0;
+#elif WIN32
+	XG_BASE(control_socket_h) = 0;
+	XG_BASE(control_socket_last_trigger) = 0;
 #endif
 }
 
@@ -1429,7 +1432,9 @@ void xdebug_base_rinit()
 		}
 	}
 # endif
+#endif
 
+#if __linux__ || WIN32
 	if (XINI_BASE(control_socket_granularity) != XDEBUG_CONTROL_SOCKET_OFF) {
 		xdebug_control_socket_setup();
 	}
