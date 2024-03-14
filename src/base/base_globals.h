@@ -21,7 +21,6 @@
 #include "lib/llist.h"
 #include "lib/vector.h"
 
-
 #if PHP_WIN32
 typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
 #endif
@@ -67,8 +66,12 @@ typedef struct _xdebug_base_globals_t {
 
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	/* Control Socket */
+# ifdef __linux__
 	char      *control_socket_path;
 	int        control_socket_fd;
+# elif WIN32
+	HANDLE     control_socket_h;
+# endif
 	zend_long  control_socket_last_trigger;
 #endif
 
