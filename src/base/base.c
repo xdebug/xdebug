@@ -1343,21 +1343,8 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	zend_execute_internal = xdebug_execute_internal;
 #endif
 
-	XG_BASE(error_reporting_override) = 0;
-	XG_BASE(error_reporting_overridden) = 0;
-	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
-
 #if PHP_VERSION_ID >= 80100
 	zend_observer_fiber_switch_register(xdebug_fiber_switch_observer);
-#endif
-
-	XG_BASE(private_tmp) = NULL;
-#ifdef __linux__
-	read_systemd_private_tmp_directory(&XG_BASE(private_tmp));
-
-	XG_BASE(control_socket_path) = NULL;
-	XG_BASE(control_socket_fd) = 0;
-	XG_BASE(control_socket_last_trigger) = 0;
 #endif
 }
 
@@ -1384,6 +1371,15 @@ void xdebug_base_post_startup()
 
 void xdebug_base_rinit()
 {
+	XG_BASE(error_reporting_override)= 0;
+	XG_BASE(error_reporting_overridden) = 0;
+	XG_BASE(output_is_tty) = OUTPUT_NOT_CHECKED;
+
+	XG_BASE(private_tmp) = NULL;
+#ifdef __linux__
+	read_systemd_private_tmp_directory(&XG_BASE(private_tmp));
+#endif
+
 	/* Hack: We check for a soap header here, if that's existing, we don't use
 	 * Xdebug's error handler to keep soap fault from fucking up. */
 	if (
@@ -1416,6 +1412,9 @@ void xdebug_base_rinit()
 #ifdef __linux__
 	/* Set-up Control Socket */
 
+	XG_BASE(control_socket_path) = NULL;
+	XG_BASE(control_socket_fd) = 0;
+	XG_BASE(control_socket_last_trigger) = 0;
 # if HAVE_XDEBUG_CLOCK_GETTIME
 	/* Check whether we have a broken TSC clock, and adjust if needed */
 	if (!XG_BASE(working_tsc_clock)) {
