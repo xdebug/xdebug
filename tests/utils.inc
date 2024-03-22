@@ -219,4 +219,10 @@ function getTmpDir() : string
 
 	return $tmpDir;
 }
+
+function x_sort(array $array)
+{
+	asort($array);
+	return $array;
+}
 ?>

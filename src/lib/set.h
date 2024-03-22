@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2021 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,16 +18,31 @@
 #define __XDEBUG_SET_H__
 
 typedef struct _xdebug_set {
-	unsigned int size;
+	unsigned int   size;
 	unsigned char *setinfo;
+	char           resizable;
 } xdebug_set;
 
+typedef struct _xdebug_mset {
+	unsigned int   size;
+	unsigned char *setinfo;
+	unsigned char  bits;
+} xdebug_mset;
+
 xdebug_set *xdebug_set_create(unsigned int size);
+xdebug_set *xdebug_set_create_resizable(void);
 void xdebug_set_add(xdebug_set *set, unsigned int position);
 void xdebug_set_remove(xdebug_set *set, unsigned int position);
-#define xdebug_set_in(x,y) xdebug_set_in_ex(x,y,1)
-int xdebug_set_in_ex(xdebug_set *set, unsigned int position, int noisy);
+int xdebug_set_in(xdebug_set *set, unsigned int position);
 void xdebug_set_dump(xdebug_set *set);
+void xdebug_set_clear(xdebug_set *set);
 void xdebug_set_free(xdebug_set *set);
+
+xdebug_mset *xdebug_mset_create(unsigned char bits);
+void xdebug_mset_add(xdebug_mset *set, unsigned int position, unsigned char bit);
+int xdebug_mset_in(xdebug_mset *set, unsigned int position, unsigned char bit);
+void xdebug_mset_dump(const char *text, xdebug_mset *set);
+void xdebug_mset_clear(xdebug_mset *set);
+void xdebug_mset_free(xdebug_mset *set);
 
 #endif
