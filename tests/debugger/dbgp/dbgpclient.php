@@ -106,7 +106,7 @@ class DebugClient
 		return " {$m[1]}=\"file://{$fm[1]}\"";
 	}
 
-	function doRead( $conn, string $transaction_id = null )
+	function doRead( $conn, ?string $transaction_id = null )
 	{
 		stream_set_timeout( $conn, 3 );
 		do {
