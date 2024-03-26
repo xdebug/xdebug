@@ -423,7 +423,9 @@ static void fetch_zval_from_symbol_table(
 				goto cleanup;
 			}
 
+			/* Return special exception value if set and enabled */
 			if (
+				XG_DBG(context).virtual_exception_value &&
 				EG(exception) &&
 				(strncmp(name, XDEBUG_EXCEPTION_VALUE_VAR_NAME, name_length) == 0)
 			) {
