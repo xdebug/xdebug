@@ -20,7 +20,7 @@ $commands = array(
 
 dbgpRunFile( $filename, $commands );
 ?>
---EXPECT--
+--EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
 <init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://dbgp-virtual-exception-value-001.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
@@ -38,7 +38,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$__EXCEPTION" fullname="$__EXCEPTION" type="object" classname="Exception" children="1" numchildren="7" page="0" pagesize="32" facet="readonly virtual"><property name="message" fullname="$__EXCEPTION-&gt;message" facet="protected" type="string" size="4" encoding="base64"><![CDATA[VEVTVA==]]></property><property name="string" fullname="$__EXCEPTION-&gt;string" facet="private" type="string" size="0" encoding="base64"><![CDATA[]]></property><property name="code" fullname="$__EXCEPTION-&gt;code" facet="protected" type="int"><![CDATA[0]]></property><property name="file" fullname="$__EXCEPTION-&gt;file" facet="protected" type="string" size="76" encoding="base64"><![CDATA[L3Jvb3Qvem9iby94ZGVidWcveGRlYnVnL3Rlc3RzL2RlYnVnZ2VyL2RiZ3AtdmlydHVhbC1leGNlcHRpb24tdmFsdWUtMDAxLmluYw==]]></property><property name="line" fullname="$__EXCEPTION-&gt;line" facet="protected" type="int"><![CDATA[2]]></property><property name="trace" fullname="$__EXCEPTION-&gt;trace" facet="private" type="array" children="0" numchildren="0"></property><property name="previous" fullname="$__EXCEPTION-&gt;previous" facet="private" type="object" classname="Exception" children="1" numchildren="7"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$__EXCEPTION" fullname="$__EXCEPTION" type="object" classname="Exception" children="1" numchildren="7" page="0" pagesize="32" facet="readonly virtual"><property name="message" fullname="$__EXCEPTION-&gt;message" facet="protected" type="string" size="4" encoding="base64"><![CDATA[VEVTVA==]]></property><property name="string" fullname="$__EXCEPTION-&gt;string" facet="private" type="string" size="0" encoding="base64"><![CDATA[]]></property><property name="code" fullname="$__EXCEPTION-&gt;code" facet="protected" type="int"><![CDATA[0]]></property><property name="file" fullname="$__EXCEPTION-&gt;file" facet="protected" type="string" size="%d" encoding="base64"><![CDATA[%s]]></property><property name="line" fullname="$__EXCEPTION-&gt;line" facet="protected" type="int"><![CDATA[2]]></property><property name="trace" fullname="$__EXCEPTION-&gt;trace" facet="private" type="array" children="0" numchildren="0"></property><property name="previous" fullname="$__EXCEPTION-&gt;previous" facet="private" type="object" classname="Exception" children="1" numchildren="7"></property></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
