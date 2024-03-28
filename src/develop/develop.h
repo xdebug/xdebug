@@ -41,9 +41,6 @@ typedef struct _xdebug_develop_globals_t {
 	/* scream */
 	zend_bool  in_at;
 
-	/* overloaded var_dump */
-	zif_handler   orig_var_dump_func;
-
 	/* last exception stack trace */
 	struct {
 		int          next_slot;
