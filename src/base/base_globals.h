@@ -50,10 +50,6 @@ typedef struct _xdebug_base_globals_t {
 	uint64_t      start_nanotime;
 	unsigned int  working_tsc_clock; /* -1 = unknown, 0 = not available, 1 = available */
 	unsigned int  prev_memory;
-	zif_handler   orig_set_time_limit_func;
-	zif_handler   orig_error_reporting_func;
-	zif_handler   orig_pcntl_exec_func;
-	zif_handler   orig_pcntl_fork_func;
 	int           output_is_tty;
 	zend_bool     in_debug_info;
 	zend_long     error_reporting_override;

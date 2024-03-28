@@ -50,6 +50,12 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
+/* True globals for overloaded functions */
+zif_handler orig_error_reporting_func = NULL;
+zif_handler orig_set_time_limit_func = NULL;
+zif_handler orig_pcntl_exec_func = NULL;
+zif_handler orig_pcntl_fork_func = NULL;
+
 #if PHP_VERSION_ID >= 80100
 void (*xdebug_old_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 void (*xdebug_new_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -1071,74 +1077,33 @@ static void xdebug_base_overloaded_functions_setup(void)
 	zend_function *orig;
 
 	/* Override set_time_limit with our own function to prevent timing out while debugging */
-	orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
+	orig = zend_hash_str_find_ptr(CG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
 	if (orig) {
-		XG_BASE(orig_set_time_limit_func) = orig->internal_function.handler;
+		orig_set_time_limit_func = orig->internal_function.handler;
 		orig->internal_function.handler = zif_xdebug_set_time_limit;
-	} else {
-		XG_BASE(orig_set_time_limit_func) = NULL;
 	}
 
 	/* Override error_reporting with our own function, to be able to give right answer during DBGp's
 	 * 'eval' commands */
-	orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
+	orig = zend_hash_str_find_ptr(CG(function_table), "error_reporting", sizeof("error_reporting") - 1);
 	if (orig) {
-		XG_BASE(orig_error_reporting_func) = orig->internal_function.handler;
+		orig_error_reporting_func = orig->internal_function.handler;
 		orig->internal_function.handler = zif_xdebug_error_reporting;
-	} else {
-		XG_BASE(orig_error_reporting_func) = NULL;
 	}
 
 	/* Override pcntl_exec with our own function to be able to write profiling summary */
-	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
+	orig = zend_hash_str_find_ptr(CG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
 	if (orig) {
-		XG_BASE(orig_pcntl_exec_func) = orig->internal_function.handler;
+		orig_pcntl_exec_func = orig->internal_function.handler;
 		orig->internal_function.handler = zif_xdebug_pcntl_exec;
-	} else {
-		XG_BASE(orig_pcntl_exec_func) = NULL;
 	}
 
 	/* Override pcntl_fork with our own function to be able
 	 * to start the debugger for the forked process */
-	orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_fork", sizeof("pcntl_fork") - 1);
+	orig = zend_hash_str_find_ptr(CG(function_table), "pcntl_fork", sizeof("pcntl_fork") - 1);
 	if (orig) {
-		XG_BASE(orig_pcntl_fork_func) = orig->internal_function.handler;
+		orig_pcntl_fork_func = orig->internal_function.handler;
 		orig->internal_function.handler = zif_xdebug_pcntl_fork;
-	} else {
-		XG_BASE(orig_pcntl_fork_func) = NULL;
-	}
-}
-
-static void xdebug_base_overloaded_functions_restore(void)
-{
-	zend_function *orig;
-
-	if (XG_BASE(orig_set_time_limit_func)) {
-		orig = zend_hash_str_find_ptr(EG(function_table), "set_time_limit", sizeof("set_time_limit") - 1);
-		if (orig) {
-			orig->internal_function.handler = XG_BASE(orig_set_time_limit_func);
-		}
-	}
-
-	if (XG_BASE(orig_error_reporting_func)) {
-		orig = zend_hash_str_find_ptr(EG(function_table), "error_reporting", sizeof("error_reporting") - 1);
-		if (orig) {
-			orig->internal_function.handler = XG_BASE(orig_error_reporting_func);
-		}
-	}
-
-	if (XG_BASE(orig_pcntl_exec_func)) {
-		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_exec", sizeof("pcntl_exec") - 1);
-		if (orig) {
-			orig->internal_function.handler = XG_BASE(orig_pcntl_exec_func);
-		}
-	}
-
-	if (XG_BASE(orig_pcntl_fork_func)) {
-		orig = zend_hash_str_find_ptr(EG(function_table), "pcntl_fork", sizeof("pcntl_fork") - 1);
-		if (orig) {
-			orig->internal_function.handler = XG_BASE(orig_pcntl_fork_func);
-		}
 	}
 }
 
@@ -1359,6 +1324,8 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(control_socket_fd) = 0;
 	XG_BASE(control_socket_last_trigger) = 0;
 #endif
+
+	xdebug_base_overloaded_functions_setup();
 }
 
 void xdebug_base_mshutdown()
@@ -1446,8 +1413,6 @@ void xdebug_base_rinit()
 	XG_BASE(filters_stack)             = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
-	xdebug_base_overloaded_functions_setup();
-
 	if (XG_BASE(private_tmp)) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "PRIVTMP", "Systemd Private Temp Directory is enabled (%s)", XG_BASE(private_tmp));
 	}
@@ -1480,8 +1445,6 @@ void xdebug_base_post_deactivate()
 	xdebug_llist_destroy(XG_BASE(filters_tracing), NULL);
 	XG_BASE(filters_tracing) = NULL;
 	XG_BASE(filters_code_coverage) = NULL;
-
-	xdebug_base_overloaded_functions_restore();
 
 #ifdef __linux__
 	/* Close Down Control Socket */
@@ -1614,7 +1577,7 @@ void xdebug_base_use_xdebug_throw_exception_hook(void)
 PHP_FUNCTION(xdebug_set_time_limit)
 {
 	if (!xdebug_is_debug_connection_active()) {
-		XG_BASE(orig_set_time_limit_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		orig_set_time_limit_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 
 	RETURN_FALSE;
@@ -1628,7 +1591,7 @@ PHP_FUNCTION(xdebug_error_reporting)
 	if (ZEND_NUM_ARGS() == 0 && XG_BASE(error_reporting_overridden) && xdebug_is_debug_connection_active()) {
 		RETURN_LONG(XG_BASE(error_reporting_override));
 	}
-	XG_BASE(orig_error_reporting_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	orig_error_reporting_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -1639,7 +1602,7 @@ PHP_FUNCTION(xdebug_pcntl_exec)
 	/* We need to stop the profiler and trace files here */
 	xdebug_profiler_pcntl_exec_handler();
 
-	XG_BASE(orig_pcntl_exec_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	orig_pcntl_exec_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -1647,7 +1610,7 @@ PHP_FUNCTION(xdebug_pcntl_exec)
    Dummy function to set a new connection when forking a process */
 PHP_FUNCTION(xdebug_pcntl_fork)
 {
-	XG_BASE(orig_pcntl_fork_func)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	orig_pcntl_fork_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	xdebug_debugger_restart_if_pid_changed();
 }
