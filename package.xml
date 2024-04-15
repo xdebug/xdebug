@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2023-12-14</date>
- <time>17:36:35</time>
+ <date>2024-04-15</date>
+ <time>12:51:20</time>
  <version>
-  <release>3.3.1</release>
-  <api>3.3.1</api>
+  <release>3.3.2</release>
+  <api>3.3.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,16 +52,13 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Thu, Dec 14, 2023 - Xdebug 3.3.1
+Mon, Apr 15, 2024 - Xdebug 3.3.2
 
 = Fixed bugs:
 
-  - Fixed issue #2220: Test failure
-  - Fixed issue #2221: Crash when other extensions run PHP code without the stack being initialised yet
-  - Fixed issue #2223: Xdebug&#039;s constants are not available with `xdebug.mode=off`
-  - Fixed issue #2226: xdebug_get_function_stack([&#039;from_exception&#039;]) does not always find stored trace
-  - Fixed issue #2227: Crash with return value and observers
-  - Fixed issue #2228: Return value can not be fetched with property_get if top frame is an internal function
+  - Fixed issue #2216: With PHP8.3 and Apache 2.4.58 error_reporting() causing Apache process to hang
+  - Fixed issue #2230: Crash when xdebug and blackfire extensions are active
+  - Fixed issue #2233: High and continuous Apache server CPU use
 
  </notes>
 
@@ -216,6 +213,32 @@ Thu, Dec 14, 2023 - Xdebug 3.3.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2023-12-14</date>
+   <time>17:36:35</time>
+   <version>
+    <release>3.3.1</release>
+    <api>3.3.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Thu, Dec 14, 2023 - Xdebug 3.3.1
+
+= Fixed bugs:
+
+  - Fixed issue #2220: Test failure
+  - Fixed issue #2221: Crash when other extensions run PHP code without the stack being initialised yet
+  - Fixed issue #2223: Xdebug&#039;s constants are not available with `xdebug.mode=off`
+  - Fixed issue #2226: xdebug_get_function_stack([&#039;from_exception&#039;]) does not always find stored trace
+  - Fixed issue #2227: Crash with return value and observers
+  - Fixed issue #2228: Return value can not be fetched with property_get if top frame is an internal function
+   </notes>
+  </release>
 
   <release>
    <date>2023-11-30</date>
