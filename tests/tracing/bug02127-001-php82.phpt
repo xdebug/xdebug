@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2127: Tracing does not handle NUL char in anonymous closure scope (>= PHP 8.2)
+Test for bug #2127: Tracing does not handle NUL char in anonymous closure scope (>= PHP 8.2, < PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2');
+check_reqs('PHP >= 8.2,< 8.4');
 ?>
 --INI--
 xdebug.mode=trace

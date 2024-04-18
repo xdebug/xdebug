@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2011: Protected closure facets (>= PHP 8.2, < PHP 8.4)
+Test for bug #2011: Protected closure facets (>= PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2,< 8.4; dbgp');
+check_reqs('PHP >= 8.4; dbgp');
 ?>
 --FILE--
 <?php
@@ -43,7 +43,7 @@ dbgpRunFile( $filename, $commands );
 
 -> property_get -i 5 -n $obj
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$obj" fullname="$obj" type="object" classname="WithProtectedClosure" children="1" numchildren="1" page="0" pagesize="32"><property name="c" fullname="$obj-&gt;c" facet="protected closure" type="object" classname="Closure" children="1" numchildren="1" page="0" pagesize="32"><property name="this" fullname="$obj-&gt;c-&gt;this" facet="public" type="object" classname="WithProtectedClosure" children="1" numchildren="1"></property></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="5"><property name="$obj" fullname="$obj" type="object" classname="WithProtectedClosure" children="1" numchildren="1" page="0" pagesize="32"><property name="c" fullname="$obj-&gt;c" facet="protected closure" type="object" classname="Closure" children="1" numchildren="4" page="0" pagesize="32"><property name="name" fullname="$obj-&gt;c-&gt;name" facet="public" type="string" size="%d" encoding="base64"><![CDATA[%s]]></property><property name="file" fullname="$obj-&gt;c-&gt;file" facet="public" type="string" size="%d" encoding="base64"><![CDATA[%s]]></property><property name="line" fullname="$obj-&gt;c-&gt;line" facet="public" type="int"><![CDATA[7]]></property><property name="this" fullname="$obj-&gt;c-&gt;this" facet="public" type="object" classname="WithProtectedClosure" children="1" numchildren="1"></property></property></property></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
