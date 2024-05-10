@@ -6,6 +6,8 @@ require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 if (false == setlocale(LC_ALL, "da_DK.utf8")) print "skip locale not found";
 ?>
+--INI--
+serialize_precision=-1
 --FILE--
 <?php
 setlocale(LC_ALL, "da_DK.utf8");
@@ -41,7 +43,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$a" fullname="$a" type="float"><![CDATA[3.1415926535898]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="$a" fullname="$a" type="float"><![CDATA[3.141592653589793]]></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

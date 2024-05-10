@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2021 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -187,7 +187,7 @@ void xdebug_var_export_html(zval **struc, xdebug_str *str, int level, int debug_
 			break;
 
 		case IS_DOUBLE:
-			xdebug_str_add_fmt(str, "<small>float</small> <font color='%s'>%.*H</font>", COLOR_DOUBLE, (int) EG(precision), Z_DVAL_P(*struc));
+			xdebug_str_add_fmt(str, "<small>float</small> <font color='%s'>%.*H</font>", COLOR_DOUBLE, (int) PG(serialize_precision), Z_DVAL_P(*struc));
 			break;
 
 		case IS_STRING:

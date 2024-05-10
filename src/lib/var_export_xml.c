@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -536,7 +536,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 		case IS_DOUBLE:
 			xdebug_xml_add_attribute(node, "type", "float");
-			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf("%.*H", (int) EG(precision), Z_DVAL_P(*struc)));
+			add_unencoded_text_value_attribute_or_element(options, node, xdebug_sprintf("%.*H", (int) PG(serialize_precision), Z_DVAL_P(*struc)));
 			break;
 
 		case IS_STRING:

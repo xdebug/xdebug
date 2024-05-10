@@ -13,6 +13,7 @@ xdebug.var_display_max_children=11
 xdebug.cli_color=0
 xdebug.file_link_format=
 xdebug.filename_format=
+serialize_precision=-1
 --FILE--
 <?php
 class foo {
@@ -34,7 +35,7 @@ var_dump(new class{public string $x;});
 %sxdebug_var_dump_typed_properties-text.php:14:
 class foo#%d (6) {
   public $v =>
-  double(3.1415926535898)
+  double(3.141592653589793)
   public $w =>
   NULL
   private string $x =>
