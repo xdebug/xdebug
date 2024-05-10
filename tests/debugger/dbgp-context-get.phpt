@@ -5,6 +5,8 @@ DBGP: context_get
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
+--INI--
+serialize_precision=-1
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
@@ -42,4 +44,4 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 5 -c 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="2"><property name="YES" fullname="YES" type="float" facet="constant"><![CDATA[3.1415926535898]]></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="5" context="2"><property name="YES" fullname="YES" type="float" facet="constant"><![CDATA[3.141592653589793]]></property></response>

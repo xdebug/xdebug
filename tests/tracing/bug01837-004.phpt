@@ -11,6 +11,7 @@ xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.trace_format=0
+serialize_precision=-1
 --FILE--
 <?php
 require_once 'capture-trace.inc';
@@ -28,15 +29,15 @@ xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> call_user_func:{%sbug01837-004.php:7}($callback = 'test', ...$args = variadic($one => 'test', $arg1 => 42, $arg2 => 3.1415926535898)) %sbug01837-004.php:7
-%w%f %w%d       -> test(...$all = variadic($one => 'test', $arg1 => 42, $arg2 => 3.1415926535898)) %sbug01837-004.php:7
-%w%f %w%d     -> call_user_func:{%sbug01837-004.php:8}($callback = 'test', ...$args = variadic($arg1 => 42, $one => 'test', $arg2 => 3.1415926535898)) %sbug01837-004.php:8
-%w%f %w%d       -> test(...$all = variadic($arg1 => 42, $one => 'test', $arg2 => 3.1415926535898)) %sbug01837-004.php:8
-%w%f %w%d     -> call_user_func:{%sbug01837-004.php:9}($callback = 'test', ...$args = variadic(0 => 'test', $arg1 => 42, $arg2 => 3.1415926535898)) %sbug01837-004.php:9
-%w%f %w%d       -> test(...$all = variadic(0 => 'test', $arg1 => 42, $arg2 => 3.1415926535898)) %sbug01837-004.php:9
-%w%f %w%d     -> test(...$all = variadic(0 => 'test', 1 => 42, 2 => 3.1415926535898)) %sbug01837-004.php:10
-%w%f %w%d     -> call_user_func:{%sbug01837-004.php:11}($callback = 'test', ...$args = variadic(0 => 'test', 1 => 42, $arg2 => 3.1415926535898)) %sbug01837-004.php:11
-%w%f %w%d       -> test(...$all = variadic(0 => 'test', 1 => 42, $arg2 => 3.1415926535898)) %sbug01837-004.php:11
+%w%f %w%d     -> call_user_func:{%sbug01837-004.php:7}($callback = 'test', ...$args = variadic($one => 'test', $arg1 => 42, $arg2 => 3.141592653589793)) %sbug01837-004.php:7
+%w%f %w%d       -> test(...$all = variadic($one => 'test', $arg1 => 42, $arg2 => 3.141592653589793)) %sbug01837-004.php:7
+%w%f %w%d     -> call_user_func:{%sbug01837-004.php:8}($callback = 'test', ...$args = variadic($arg1 => 42, $one => 'test', $arg2 => 3.141592653589793)) %sbug01837-004.php:8
+%w%f %w%d       -> test(...$all = variadic($arg1 => 42, $one => 'test', $arg2 => 3.141592653589793)) %sbug01837-004.php:8
+%w%f %w%d     -> call_user_func:{%sbug01837-004.php:9}($callback = 'test', ...$args = variadic(0 => 'test', $arg1 => 42, $arg2 => 3.141592653589793)) %sbug01837-004.php:9
+%w%f %w%d       -> test(...$all = variadic(0 => 'test', $arg1 => 42, $arg2 => 3.141592653589793)) %sbug01837-004.php:9
+%w%f %w%d     -> test(...$all = variadic(0 => 'test', 1 => 42, 2 => 3.141592653589793)) %sbug01837-004.php:10
+%w%f %w%d     -> call_user_func:{%sbug01837-004.php:11}($callback = 'test', ...$args = variadic(0 => 'test', 1 => 42, $arg2 => 3.141592653589793)) %sbug01837-004.php:11
+%w%f %w%d       -> test(...$all = variadic(0 => 'test', 1 => 42, $arg2 => 3.141592653589793)) %sbug01837-004.php:11
 %w%f %w%d     -> xdebug_stop_trace() %sbug01837-004.php:13
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
