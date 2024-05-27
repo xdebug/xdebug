@@ -1,0 +1,14 @@
+{
+    "name": "xdebug/xdebug",
+    "type": "php-ext-zend",
+    "license": "Xdebug-1.03",
+    "description": "Xdebug is a debugging and productivity extension for PHP",
+    "require": {
+        "php": ">=8.0,<8.4"
+    },
+    "php-ext": {
+        "extension-name": "ext-xdebug",
+        "priority": 90,
+        "configure-options": []
+    }
+}
