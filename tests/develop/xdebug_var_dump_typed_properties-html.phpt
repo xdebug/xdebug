@@ -12,6 +12,7 @@ html_errors=1
 xdebug.var_display_max_children=11
 xdebug.file_link_format=
 xdebug.filename_format=
+serialize_precision=-1
 --FILE--
 <?php
 class foo {
@@ -33,7 +34,7 @@ var_dump(new class{public string $x;});
 <pre class='xdebug-var-dump' dir='ltr'>
 <small>%sxdebug_var_dump_typed_properties-html.php:14:</small>
 <b>object</b>(<i>foo</i>)[<i>%d</i>]
-  <i>public</i> 'v' <font color='#888a85'>=&gt;</font> <small>float</small> <font color='#f57900'>3.1415926535898</font>
+  <i>public</i> 'v' <font color='#888a85'>=&gt;</font> <small>float</small> <font color='#f57900'>3.141592653589793</font>
   <i>public</i> 'w' <font color='#888a85'>=&gt;</font> <font color='#3465a4'>null</font>
   <i>private</i> <i>string</i> 'x' <font color='#888a85'>=&gt;</font> <font color='#3465a4'>*uninitialized*</font>
   <i>protected</i> <i>int</i> 'y' <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>42</font>
