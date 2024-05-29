@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2211: File wrapper gets wrong filename location in stack
+Test for bug #2211: File wrapper gets wrong filename location in stack (< PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 8.4; dbgp');
 ?>
 --FILE--
 <?php

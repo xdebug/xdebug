@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #2094: Public static property with closure data type have double facet XML attribute (>= PHP 8.2, < PHP 8.4)
+Test for bug #2094: Public static property with closure data type have double facet XML attribute (>= PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2,< 8.4; dbgp');
+check_reqs('PHP >= 8.4; dbgp');
 ?>
 --FILE--
 <?php
@@ -38,7 +38,7 @@ dbgpRunFile( $filename, $commands );
 
 -> context_get -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="::" fullname="::" type="object" classname="Test" children="1" numchildren="1"><property name="::bar" fullname="::bar" type="object" facet="closure static public" classname="Closure" children="0" numchildren="0" page="0" pagesize="32"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="4" context="0"><property name="::" fullname="::" type="object" classname="Test" children="1" numchildren="1"><property name="::bar" fullname="::bar" type="object" facet="closure static public" classname="Closure" children="1" numchildren="3" page="0" pagesize="32"><property name="name" fullname="::bar-&gt;name" facet="public" type="string" size="%d" encoding="base64"><![CDATA[%s]]></property><property name="file" fullname="::bar-&gt;file" facet="public" type="string" size="%d" encoding="base64"><![CDATA[%s]]></property><property name="line" fullname="::bar-&gt;line" facet="public" type="int"><![CDATA[15]]></property></property></property></response>
 
 -> detach -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>

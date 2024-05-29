@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #1571: Code Coverage doesn't show file/line for closures in namespaces
+Test for bug #1571: Code Coverage doesn't show file/line for closures in namespaces (< PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.4');
+?>
 --INI--
 xdebug.mode=coverage
 xdebug.auto_profile=0
@@ -23,5 +28,5 @@ print_r(array_keys($coverage[$pathname]['functions']));
 --EXPECTF--
 Array
 (
-    [0] => Testing\{closure:%sbug01571.php:7-10}
+    [0] => Testing\{closure:%sbug01571-php82.php:7-10}
 )

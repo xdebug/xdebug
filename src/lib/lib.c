@@ -803,6 +803,31 @@ zend_string *xdebug_wrap_location_around_function_name(const char *prefix, zend_
 	return wrapped;
 }
 
+#if PHP_VERSION_ID >= 80400
+zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname)
+{
+	zend_string *tmp, *tmp_loc_info;
+
+	if (ZSTR_VAL(fname)[ZSTR_LEN(fname) - 1] != '}') {
+		return zend_string_copy(fname);
+	}
+
+	tmp = zend_string_init(ZSTR_VAL(fname), strlen("{closure"), false);
+
+	tmp_loc_info = zend_strpprintf(
+		0,
+		"%s:%s:%d-%d}",
+		ZSTR_VAL(tmp),
+		ZSTR_VAL(opa->filename),
+		opa->line_start,
+		opa->line_end
+	);
+
+	zend_string_release(tmp);
+
+	return tmp_loc_info;
+}
+#else
 zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname)
 {
 	zend_string *tmp, *tmp_loc_info;
@@ -826,6 +851,7 @@ zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *op
 
 	return tmp_loc_info;
 }
+#endif
 
 static void xdebug_declared_var_dtor(void *dummy, void *elem)
 {
