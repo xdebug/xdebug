@@ -11,6 +11,7 @@ xdebug.start_with_request=no
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.trace_format=0
+serialize_precision=-1
 --FILE--
 <?php
 require_once 'capture-trace.inc';
@@ -29,11 +30,11 @@ xdebug_stop_trace();
 ?>
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic($arg1 => 42, $arg2 => 3.1415926535898)) %sbug01837-001.php:8
-%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic($arg1 => 42, $arg2 => 3.1415926535898)) %sbug01837-001.php:9
-%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic($arg1 => 42, $arg2 => 3.1415926535898)) %sbug01837-001.php:10
-%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic(0 => 42, 1 => 3.1415926535898)) %sbug01837-001.php:11
-%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic(0 => 42, $arg2 => 3.1415926535898)) %sbug01837-001.php:12
+%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic($arg1 => 42, $arg2 => 3.141592653589793)) %sbug01837-001.php:8
+%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic($arg1 => 42, $arg2 => 3.141592653589793)) %sbug01837-001.php:9
+%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic($arg1 => 42, $arg2 => 3.141592653589793)) %sbug01837-001.php:10
+%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic(0 => 42, 1 => 3.141592653589793)) %sbug01837-001.php:11
+%w%f %w%d     -> takeThemAll($one = 'test', ...$args = variadic(0 => 42, $arg2 => 3.141592653589793)) %sbug01837-001.php:12
 %w%f %w%d     -> xdebug_stop_trace() %sbug01837-001.php:14
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+
+#if PHP_VERSION_ID < 80200
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#  include "zend_smart_str.h"
+# pragma GCC diagnostic pop
+#endif
 
 #include "lib/php-header.h"
 #include "ext/standard/php_string.h"
@@ -101,6 +108,7 @@ void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num)
 	xdebug_str_internal_addl(xs, pos, &buffer[20] - pos, 0);
 }
 
+#if PHP_VERSION_ID >= 80200
 void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 {
 	int size;
@@ -132,6 +140,23 @@ void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 
 	assert(0);
 }
+#else
+void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
+{
+	smart_str buf = {0};
+
+	php_printf_to_smart_str(&buf, fmt, argv);
+
+	if (!buf.s) {
+		return;
+	}
+
+	xdebug_str_add_zstr(xs, buf.s);
+
+	smart_str_free(&buf);
+}
+#endif
+
 
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 {
@@ -209,31 +234,14 @@ void xdebug_str_free(xdebug_str *s)
 
 char *xdebug_sprintf(const char* fmt, ...)
 {
-	char   *new_str;
-	int     size = 32;
 	va_list args;
+	xdebug_str tmp_str = {0};
 
-	new_str = (char *) xdmalloc(size);
+	va_start(args, fmt);
+	xdebug_str_add_va_fmt(&tmp_str, fmt, args);
+	va_end(args);
 
-	for (;;) {
-		int n;
-
-		va_start(args, fmt);
-		n = vsnprintf(new_str, size, fmt, args);
-		va_end(args);
-
-		if (n > -1 && n < size) {
-			break;
-		}
-		if (n < 0) {
-			size *= 2;
-		} else {
-			size = n + 1;
-		}
-		new_str = (char *) xdrealloc(new_str, size);
-	}
-
-	return new_str;
+	return tmp_str.d;
 }
 
 /**

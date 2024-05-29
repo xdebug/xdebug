@@ -13,6 +13,7 @@ xdebug.var_display_max_children=11
 xdebug.cli_color=2
 xdebug.file_link_format=
 xdebug.filename_format=
+serialize_precision=-1
 --FILE--
 <?php
 class foo {
@@ -34,7 +35,7 @@ var_dump(new class{public string $x;});
 [1m%sxdebug_var_dump_typed_properties-ansi.php[22m:[1m14[22m:
 [1mclass[22m [31mfoo[0m#%d ([32m6[0m) {
   [32m[1mpublic[22m[0m $v [0m=>[0m
-  [1mdouble[22m([33m3.1415926535898[0m)
+  [1mdouble[22m([33m3.141592653589793[0m)
   [32m[1mpublic[22m[0m $w [0m=>[0m
   [1m[34mNULL[0m[22m
   [32m[1mprivate[22m string[0m $x [0m=>[0m

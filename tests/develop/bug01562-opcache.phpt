@@ -9,6 +9,7 @@ check_reqs('opcache');
 xdebug.mode=develop
 xdebug.auto_profile=0
 xdebug.var_display_max_depth=4
+serialize_precision=-1
 --FILE--
 <?php
 class Elephpant
@@ -135,7 +136,7 @@ array(4) {
         private string $title =>
         string(5) "Bluey"
         private float $PIE =>
-        double(3.1415926535898)
+        double(3.141592653589793)
       }
     }
   }
