@@ -217,7 +217,7 @@ function installPeclPackage( $release_version )
 
 function showGitCommands( $release_version )
 {
-	echo "git commit package.xml template.rc php_xdebug.h xdebug.ini RELEASE_PROCESS.rst -m \"Go with {$release_version}\"\n";
+	echo "git commit package.xml template.rc php_xdebug.h xdebug.ini composer.json RELEASE_PROCESS.rst -m \"Go with {$release_version}\"\n";
 	echo "~/bin/tag-sign.sh {$release_version}\n";
 	echo "git push origin {$release_version}\n";
 
