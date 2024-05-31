@@ -272,6 +272,7 @@ $xml = <<<ENDXML
         '8.1' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
         '8.2' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
         '8.3' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
+        '8.4' => [ 'src' => '{$release_version}',       'win' => '{$release_version}' ],
     ];
 
 ENDXML;
