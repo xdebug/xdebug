@@ -163,13 +163,12 @@ int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	const zend_op *opline = execute_data->opline;
 	zval *inc_filename;
 	zval tmp_inc_filename;
-	int  is_var;
 
 	if (opline->extended_value != ZEND_EVAL) {
 		return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 
-	inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1, &is_var);
+	inc_filename = xdebug_get_zval(execute_data, opline->op1_type, &opline->op1);
 
 	/* If there is no inc_filename, we're just bailing out instead */
 	if (!inc_filename) {
