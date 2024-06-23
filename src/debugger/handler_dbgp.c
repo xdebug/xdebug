@@ -2400,6 +2400,12 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 		xdebug_xml_add_attribute_ex(response, "idekey", xdstrdup(XG_DBG(ide_key)), 0, 1);
 	}
 
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
+	if (XG_BASE(control_socket_path)) {
+		xdebug_xml_add_attribute_ex(response, "xdebug:ctrl_socket", xdstrdup(XG_BASE(control_socket_path)), 0, 1);
+	}
+#endif
+
 	context->buffer = xdmalloc(sizeof(fd_buf));
 	context->buffer->buffer = NULL;
 	context->buffer->buffer_size = 0;
