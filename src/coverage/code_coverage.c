@@ -344,6 +344,14 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		*jump_count = 1;
 		return 1;
 
+#if PHP_VERSION_ID >= 80400
+	} else if (opcode.opcode == ZEND_JMP_FRAMELESS) {
+		jumps[0] = position + 1;
+		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		*jump_count = 2;
+		return 1;
+#endif
+
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
 		opcode.opcode == ZEND_EXIT ||
@@ -1122,6 +1130,13 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	xdebug_set_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
 	xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
+
+#if PHP_VERSION_ID >= 80400
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_0, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_1, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_2, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_3, xdebug_common_override_handler);
+#endif
 
 	/* Override all the other opcodes so that we can mark when we hit a branch
 	 * start one */

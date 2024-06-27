@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED
+Test for bug #697: Incorrect code coverage of function arguments when using XDEBUG_CC_UNUSED (>= PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.4');
+?>
 --INI--
 xdebug.mode=coverage
 xdebug.trace_options=0
@@ -15,17 +20,15 @@ xdebug.trace_format=0
 	include 'bug00697.inc';
 	$cc = xdebug_get_code_coverage();
 	ksort($cc);
-	var_dump(array_slice($cc, 0, 1));
+	var_dump(array_slice($cc, 1, 1));
 
 	xdebug_stop_code_coverage(false);
 ?>
 --EXPECTF--
 array(1) {
   ["%sbug00697.inc"]=>
-  array(5) {
+  array(4) {
     [4]=>
-    int(1)
-    [5]=>
     int(1)
     [7]=>
     int(1)
