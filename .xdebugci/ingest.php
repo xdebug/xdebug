@@ -30,6 +30,7 @@ foreach ( glob( '/tmp/ptester/junit/' . $pattern ) as $file )
 	$status = [
 		'run' => $runId,
 		'ts' => $timeStamp,
+		'ts_exp' => new \MongoDB\BSON\Timestamp(0, time()),
 		'ref' => trim( `git rev-parse --short --verify HEAD` ),
 		'abbrev' => $abbrev,
 		'cfg' => [
