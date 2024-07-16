@@ -1,5 +1,10 @@
 --TEST--
-Test for assertion callbacks
+Test for assertion callbacks (< PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.4');
+?>
 --INI--
 assert.exception=0
 error_reporting=E_ALL & ~E_DEPRECATED
@@ -35,15 +40,15 @@ xdebug_stop_trace();
 ?>
 --EXPECTF--
 Assertion Failed:
-        File '%sassert_test-001.php'
+        File '%sassert_test-001-php83.php'
         Line '20'
         Code 'assert(1 == 2)'
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> assert_options($option = 1, $value = 1) %sassert_test-001.php:5
-%w%f %w%d     -> assert_options($option = 4, $value = 0) %sassert_test-001.php:6
-%w%f %w%d     -> assert_options($option = 2, $value = 'my_assert_handler') %sassert_test-001.php:17
-%w%f %w%d     -> assert($assertion = FALSE, $description = 'assert(1 == 2)') %sassert_test-001.php:20
-%w%f %w%d       -> my_assert_handler($file = '%sassert_test-001.php', $line = 20, $dummy = NULL, $code = 'assert(1 == 2)') %sassert_test-001.php:20
+%w%f %w%d     -> assert_options($option = 1, $value = 1) %sassert_test-001-php83.php:5
+%w%f %w%d     -> assert_options($option = 4, $value = 0) %sassert_test-001-php83.php:6
+%w%f %w%d     -> assert_options($option = 2, $value = 'my_assert_handler') %sassert_test-001-php83.php:17
+%w%f %w%d     -> assert($assertion = FALSE, $description = 'assert(1 == 2)') %sassert_test-001-php83.php:20
+%w%f %w%d       -> my_assert_handler($file = '%sassert_test-001-php83.php', $line = 20, $dummy = NULL, $code = 'assert(1 == 2)') %sassert_test-001-php83.php:20
 %w%f %w%d     -> xdebug_stop_trace() %s:%d
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

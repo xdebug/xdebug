@@ -68,7 +68,7 @@ foreach ( glob( '/tmp/ptester/junit/' . $pattern ) as $file )
 			{
 				if ( isset ( $testcase->failure['type'] ) )
 				{
-					preg_match( "@PHP\.tests\.(.*)\.phpt@", (string) $testcase['classname'], $matches );
+					preg_match( "@tests.(.*)\.phpt@", (string) $testcase['name'], $matches );
 					$status['failures'][] = [
 						'file' => $matches[1],
 						'desc' => (string) $testcase['name'],

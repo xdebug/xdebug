@@ -264,6 +264,9 @@ static void prefill_from_opcode(zend_string *filename, zend_op opcode, int deadc
 		&& opcode.opcode != ZEND_TICKS
 		&& opcode.opcode != ZEND_FAST_CALL
 		&& opcode.opcode != ZEND_RECV_VARIADIC
+#if PHP_VERSION_ID >= 80400
+		&& opcode.opcode != ZEND_FREE
+#endif
 	) {
 		xdebug_count_line(filename, opcode.lineno, 1, deadcode);
 	}
@@ -1122,6 +1125,13 @@ void xdebug_coverage_minit(INIT_FUNC_ARGS)
 	xdebug_set_opcode_handler(ZEND_DECLARE_CLASS_DELAYED, xdebug_common_override_handler);
 	xdebug_set_opcode_handler(ZEND_SWITCH_STRING, xdebug_switch_handler);
 	xdebug_set_opcode_handler(ZEND_SWITCH_LONG, xdebug_switch_handler);
+
+#if PHP_VERSION_ID >= 80400
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_0, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_1, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_2, xdebug_common_override_handler);
+	xdebug_set_opcode_handler(ZEND_FRAMELESS_ICALL_3, xdebug_common_override_handler);
+#endif
 
 	/* Override all the other opcodes so that we can mark when we hit a branch
 	 * start one */
