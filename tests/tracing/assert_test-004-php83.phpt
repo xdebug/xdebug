@@ -1,5 +1,10 @@
 --TEST--
-Test for assertion callbacks and exception
+Test for assertion callbacks and exception (< PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.4');
+?>
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=no
@@ -43,19 +48,19 @@ xdebug_stop_trace();
 ?>
 --EXPECTF--
 Assertion Failed:
-        File '%sassert_test-004.php'
+        File '%sassert_test-004-php83.php'
         Line '23'
         Code ''
         Desc 'One is not two'
 One is not two
 
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-%w%f %w%d     -> assert_options($%s = 1, $value = 1) %sassert_test-004.php:5
-%w%f %w%d     -> assert_options($%s = 4, $value = 0) %sassert_test-004.php:6
-%w%f %w%d     -> assert_options($%s = 2, $value = 'my_assert_handler') %sassert_test-004.php:18
-%w%f %w%d     -> assert($assertion = FALSE, $description = 'One is not two') %sassert_test-004.php:23
-%w%f %w%d       -> my_assert_handler($file = '%sassert_test-004.php', $line = 23, $code = %r(''|NULL)%r, $desc = 'One is not two') %sassert_test-004.php:23
-%w%f %w%d     -> Error->getMessage() %sassert_test-004.php:26
+%w%f %w%d     -> assert_options($%s = 1, $value = 1) %sassert_test-004-php83.php:5
+%w%f %w%d     -> assert_options($%s = 4, $value = 0) %sassert_test-004-php83.php:6
+%w%f %w%d     -> assert_options($%s = 2, $value = 'my_assert_handler') %sassert_test-004-php83.php:18
+%w%f %w%d     -> assert($assertion = FALSE, $description = 'One is not two') %sassert_test-004-php83.php:23
+%w%f %w%d       -> my_assert_handler($file = '%sassert_test-004-php83.php', $line = 23, $code = %r(''|NULL)%r, $desc = 'One is not two') %sassert_test-004-php83.php:23
+%w%f %w%d     -> Error->getMessage() %sassert_test-004-php83.php:26
 %w%f %w%d     -> xdebug_stop_trace() %s:%d
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
