@@ -10,13 +10,12 @@ date.timezone=Europe/Oslo
 --FILE--
 <?php
 require_once 'capture-trace.inc';
-@strftime('%b %l %Y %H:%M:%S', 1061728888);
+@printf('%d %d %d %d:%d:%d', 1061728888, 1061728888, 1061728888, 1061728888, 1061728888, 1061728888);
 xdebug_stop_trace();
 ?>
 --EXPECTF--
-
-TRACE START [%d-%d-%d %d:%d:%d.%d]
-    %f%w%d     -> strftime($format = '%b %l %Y %H:%M:%S', $timestamp = 1061728888) %sbug00003.php:3
-    %f%w%d     -> xdebug_stop_trace() %sbug00003.php:4
-    %f%w%d
+%ATRACE START [%d-%d-%d %d:%d:%d.%d]
+%w%f%w%d     -> printf($format = '%s', ...$values = variadic(%s)) %sbug00003.php:3
+%w%f%w%d     -> xdebug_stop_trace() %sbug00003.php:4
+%w%f%w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
