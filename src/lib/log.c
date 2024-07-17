@@ -862,7 +862,14 @@ static void info_extension_flags_set(INTERNAL_FUNCTION_PARAMETERS)
 	array_init_size(return_value, 1);
 
 #if HAVE_XDEBUG_ZLIB
-	add_next_index_stringl(return_value, "compression", 11);
+	add_next_index_stringl(return_value, "compression", strlen("compression"));
+#endif
+
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
+	add_next_index_stringl(return_value, "control-socket", strlen("control-socket"));
+	if (XG_BASE(working_tsc_clock) == 1) {
+		add_next_index_stringl(return_value, "tsc", strlen("tsc"));
+	}
 #endif
 }
 

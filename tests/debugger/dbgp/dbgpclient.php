@@ -66,6 +66,7 @@ class DebugClient
 			"xdebug.start_with_request" => "'yes'",
 			"xdebug.client_host" => $this->getIPAddress(),
 			"xdebug.client_port" => $this->getPort(),
+			'xdebug.control_socket' => "'no'",
 		);
 
 		$env_vars = array_key_exists( 'env', $extra_options ) ? $extra_options['env'] : [];

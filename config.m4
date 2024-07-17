@@ -36,6 +36,7 @@ if test "$PHP_XDEBUG" != "no"; then
   AC_CHECK_HEADERS([netinet/in.h poll.h sys/poll.h])
   case $host_os in
   linux*)
+    AC_DEFINE(HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT,1,[ do have control socket support? ])
     AC_CHECK_HEADERS([linux/rtnetlink.h], [], [
       case $host_os in
         linux-musl*)
@@ -55,7 +56,7 @@ if test "$PHP_XDEBUG" != "no"; then
       PHP_EVAL_LIBLINE($ZLIB_LIBS, XDEBUG_SHARED_LIBADD)
       PHP_EVAL_INCLINE($ZLIB_CFLAGS)
 
-      AC_DEFINE(HAVE_XDEBUG_ZLIB,1,[ ])
+      AC_DEFINE(HAVE_XDEBUG_ZLIB,1,[ do we have zlib support compiled in? ])
     ],[ ])
   fi
 

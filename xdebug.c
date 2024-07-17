@@ -48,7 +48,7 @@
 #include "php_xdebug_arginfo.h"
 
 #include "base/base.h"
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 # include "base/ctrl_socket.h"
 #endif
 #include "base/filter.h"
@@ -198,7 +198,7 @@ static PHP_INI_MH(OnUpdateChangedSetting)
 	return FAILURE;
 }
 
-#if __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 static PHP_INI_MH(OnUpdateCtrlSocket)
 {
 	if (!new_value) {
@@ -233,7 +233,7 @@ ZEND_INI_DISP(display_changed_setting)
 	ZEND_PUTS("(setting renamed in Xdebug 3)");
 }
 
-#if __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 ZEND_INI_DISP(display_control_socket)
 {
 	switch (XINI_BASE(control_socket_granularity))
@@ -312,7 +312,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("xdebug.trigger_value",      "",                      PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdateString, settings.library.trigger_value,    zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.file_link_format",   "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.file_link_format, zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.filename_format",    "",                      PHP_INI_ALL,                   OnUpdateString, settings.library.filename_format,  zend_xdebug_globals, xdebug_globals)
-#if __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	PHP_INI_ENTRY_EX("xdebug.control_socket",      "default",               PHP_INI_ALL,                   OnUpdateCtrlSocket, display_control_socket)
 #endif
 
@@ -776,7 +776,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 		xdebug_debugger_statement_call(op_array->filename, lineno);
 	}
 
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	xdebug_control_socket_dispatch();
 #endif
 }

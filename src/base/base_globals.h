@@ -65,7 +65,7 @@ typedef struct _xdebug_base_globals_t {
 	/* Systemd Private Temp */
 	char         *private_tmp;
 
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	/* Control Socket */
 	char      *control_socket_path;
 	int        control_socket_fd;
@@ -86,7 +86,7 @@ typedef struct _xdebug_base_globals_t {
 } xdebug_base_globals_t;
 
 typedef struct _xdebug_base_settings_t {
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	int           control_socket_granularity;
 	zend_long     control_socket_threshold_ms;
 #endif
