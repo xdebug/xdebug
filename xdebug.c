@@ -506,7 +506,7 @@ static void xdebug_env_config(void)
 			name = "xdebug.cloud_id";
 		} else
 		if (strcasecmp(envvar, "idekey") == 0) {
-			xdebug_debugger_reset_ide_key(envval);
+			name = "xdebug.idekey";
 		} else
 		if (strcasecmp(envvar, "output_dir") == 0) {
 			name = "xdebug.output_dir";
@@ -652,6 +652,10 @@ PHP_RINIT_FUNCTION(xdebug)
 		return SUCCESS;
 	}
 
+	/* Get xdebug ini entries from the environment also,
+	   this can override the idekey if one is set */
+	xdebug_env_config();
+
 	xdebug_library_rinit();
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
@@ -672,10 +676,6 @@ PHP_RINIT_FUNCTION(xdebug)
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_TRACING)) {
 		xdebug_tracing_rinit();
 	}
-
-	/* Get xdebug ini entries from the environment also,
-	   this can override the idekey if one is set */
-	xdebug_env_config();
 
 	xdebug_init_auto_globals();
 
