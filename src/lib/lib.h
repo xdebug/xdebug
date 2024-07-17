@@ -286,7 +286,7 @@ int xdebug_lib_set_start_upon_error(char *value);
 int xdebug_lib_start_upon_error(void);
 int xdebug_lib_get_start_upon_error(void);
 
-#if __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 # define XDEBUG_CONTROL_SOCKET_OFF        1
 # define XDEBUG_CONTROL_SOCKET_DEFAULT    2
 # define XDEBUG_CONTROL_SOCKET_TIME       3

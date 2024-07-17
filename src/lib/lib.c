@@ -206,7 +206,7 @@ int xdebug_lib_set_mode(const char *mode)
 	return result;
 }
 
-#if __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 int xdebug_lib_set_control_socket_granularity(char *value)
 {
 	if (strcmp(value, "no") == 0 || value[0] == '\0') {

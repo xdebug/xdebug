@@ -14,8 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-#ifdef __linux__
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -27,6 +25,8 @@
 #include <errno.h>
 
 #include "php_xdebug.h"
+
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 
 #include "ctrl_socket.h"
 #include "lib/cmd_parser.h"

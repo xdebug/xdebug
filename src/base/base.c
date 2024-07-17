@@ -36,7 +36,7 @@
 
 #include "base.h"
 #include "filter.h"
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 # include "ctrl_socket.h"
 #endif
 #include "develop/develop.h"
@@ -762,7 +762,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		(fse - 1)->user_defined = XDEBUG_USER_DEFINED;
 	}
 
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	xdebug_control_socket_dispatch();
 #endif
 
@@ -1318,7 +1318,9 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 	XG_BASE(private_tmp) = NULL;
 #ifdef __linux__
 	read_systemd_private_tmp_directory(&XG_BASE(private_tmp));
+#endif
 
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	XG_BASE(control_socket_path) = NULL;
 	XG_BASE(control_socket_fd) = 0;
 	XG_BASE(control_socket_last_trigger) = 0;
@@ -1379,7 +1381,7 @@ void xdebug_base_rinit()
 	XG_BASE(in_var_serialisation) = 0;
 	zend_ce_closure->serialize = xdebug_closure_serialize_deny_wrapper;
 
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	/* Set-up Control Socket */
 
 # if HAVE_XDEBUG_CLOCK_GETTIME
@@ -1445,7 +1447,7 @@ void xdebug_base_post_deactivate()
 	XG_BASE(filters_tracing) = NULL;
 	XG_BASE(filters_code_coverage) = NULL;
 
-#ifdef __linux__
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	/* Close Down Control Socket */
 	xdebug_control_socket_teardown();
 #endif
