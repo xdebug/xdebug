@@ -2000,6 +2000,9 @@ TEST $file
 
     if ($test->sectionNotEmpty('ENV')) {
         $env_str = str_replace('{PWD}', dirname($file), $test->getSection('ENV'));
+        $env_str = str_replace('{RUNID}', getenv('UNIQ_RUN_ID'), $env_str);
+        $env_str = str_replace('{TEST_PHP_WORKER}', getenv('TEST_PHP_WORKER'), $env_str);
+        $env_str = str_replace('{TMP}', sys_get_temp_dir(), $env_str);
         foreach (explode("\n", $env_str) as $e) {
             $e = explode('=', trim($e), 2);
 
