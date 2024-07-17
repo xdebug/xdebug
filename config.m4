@@ -56,7 +56,7 @@ if test "$PHP_XDEBUG" != "no"; then
       PHP_EVAL_LIBLINE($ZLIB_LIBS, XDEBUG_SHARED_LIBADD)
       PHP_EVAL_INCLINE($ZLIB_CFLAGS)
 
-      AC_DEFINE(HAVE_XDEBUG_ZLIB,1,[ ])
+      AC_DEFINE(HAVE_XDEBUG_ZLIB,1,[ do we have zlib support compiled in? ])
     ],[ ])
   fi
 
