@@ -838,10 +838,6 @@ static bool should_run_user_handler(zend_execute_data *execute_data)
 	zend_op_array     *op_array = &(execute_data->func->op_array);
 	zend_execute_data *prev_edata = execute_data->prev_execute_data;
 
-	if (xdebug_debugger_bailout_if_no_exec_requested()) {
-		return false;
-	}
-
 	if (!ZEND_USER_CODE(op_array->type)) {
 		return false;
 	}
