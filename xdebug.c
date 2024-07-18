@@ -663,6 +663,10 @@ PHP_RINIT_FUNCTION(xdebug)
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_rinit();
+
+		if (xdebug_debugger_bailout_if_no_exec_requested()) {
+			zend_bailout();
+		}
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
 		xdebug_develop_rinit();
