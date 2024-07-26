@@ -55,6 +55,7 @@
 #include "ip_info.h"
 #include "lib/crc32.h"
 #include "lib/log.h"
+#include "lib/trim.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
