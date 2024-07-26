@@ -13,11 +13,32 @@
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
  */
+#include <stddef.h>
+#include <stdlib.h>
 
-#ifndef __XDEBUG_MAPS_MAPS_H__
-#define __XDEBUG_MAPS_MAPS_H__
+#include "maps_private.h"
+#include "../mm.h"
 
-xdebug_path_maps *xdebug_path_maps_ctor(void);
-void xdebug_path_maps_dtor(xdebug_path_maps *maps);
 
-#endif
+xdebug_path_maps *xdebug_path_maps_ctor(void)
+{
+	xdebug_path_maps *tmp = (xdebug_path_maps*) xdcalloc(1, sizeof(xdebug_path_maps));
+	tmp->remote_to_local_map = xdebug_hash_alloc(128, xdebug_path_mapping_free);
+
+	return tmp;
+}
+
+void xdebug_path_maps_dtor(xdebug_path_maps *maps)
+{
+	xdebug_hash_destroy(maps->remote_to_local_map);
+	xdfree(maps);
+}
+
+void xdebug_path_mapping_free(void *mapping)
+{
+	xdebug_path_mapping *tmp = (xdebug_path_mapping*) mapping;
+	xdfree(tmp->remote_path);
+	xdfree(tmp->local_path);
+	xdfree(tmp);
+}
+
