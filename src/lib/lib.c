@@ -20,6 +20,7 @@
 
 #include "lib_private.h"
 #include "log.h"
+#include "trim.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
