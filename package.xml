@@ -138,6 +138,8 @@ Thu, Nov 28, 2024 - Xdebug 3.4.0
      <file name="str.h" role="src" />
      <file name="timing.c" role="src" />
      <file name="timing.h" role="src" />
+     <file name="trim.c" role="src" />
+     <file name="trim.h" role="src" />
      <file name="var.c" role="src" />
      <file name="var.h" role="src" />
      <file name="var_export_html.c" role="src" />
