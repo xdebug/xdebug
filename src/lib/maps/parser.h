@@ -14,10 +14,17 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef __XDEBUG_MAPS_MAPS_H__
-#define __XDEBUG_MAPS_MAPS_H__
+#ifndef __XDEBUG_MAPS_PARSER_H__
+#define __XDEBUG_MAPS_PARSER_H__
 
-xdebug_path_maps *xdebug_path_maps_ctor(void);
-void xdebug_path_maps_dtor(xdebug_path_maps *maps);
+/* Parser error codes */
+#define PATH_MAPS_OK             0x0000
+#define PATH_MAPS_CANT_OPEN_FILE 0x0001
+#define PATH_MAPS_NO_RULES       0x0002
+#define PATH_MAPS_EMPTY_LINE     0x0003
+#define PATH_MAPS_NO_NEWLINE     0x0004
+#define PATH_MAPS_GARBAGE        0x0005
+
+bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, char **error_message);
 
 #endif
