@@ -17,12 +17,25 @@
 #ifndef __XDEBUG_MAPS_MAPS_PRIVATE_H__
 #define __XDEBUG_MAPS_MAPS_PRIVATE_H__
 
-#define PATH_MAPS_OK             0x0000
-#define PATH_MAPS_CANT_OPEN_FILE 0x0001
+#include "../hash.h"
+
+#define XDEBUG_PATH_MAP_TYPE_DIRECTORY 0x01
+
+typedef struct xdebug_path_mapping {
+	char *remote_path;
+	char *local_path;
+	char  type;
+} xdebug_path_mapping;
 
 typedef struct xdebug_path_maps {
+	xdebug_hash *remote_to_local_map;
 } xdebug_path_maps;
 
-bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, char **error_message);
+void xdebug_path_mapping_free(void *mapping);
+
+/* Functions for testing, and not exported into Xdebug */
+size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps);
+
+xdebug_path_mapping *remote_to_local(xdebug_path_maps *maps, const char *remote);
 
 #endif

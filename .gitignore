@@ -83,3 +83,4 @@ phpt.*
 !run-xdebug-tests.php
 !make-release.php
 tests/ctest/ctest
+tests/ctest/*.o
