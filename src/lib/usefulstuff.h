@@ -33,7 +33,6 @@ void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int li
 bool xdebug_is_printable(const char *str, size_t len);
 const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end);
 char* xdebug_strrstr(const char* haystack, const char* needle);
-char *xdebug_trim(const char *str);
 char *xdebug_path_to_url(zend_string *fileurl);
 char *xdebug_path_from_url(zend_string *fileurl);
 FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);

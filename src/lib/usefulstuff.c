@@ -31,7 +31,7 @@
 # include <process.h>
 #endif
 
-#include "php_xdebug.h"
+#include "compat.h"
 
 #include "mm.h"
 #include "crc32.h"
@@ -181,34 +181,6 @@ char* xdebug_strrstr(const char* haystack, const char* needle)
 	}
 
 	return loc;
-}
-
-char *xdebug_trim(const char *str)
-{
-	char *trimmed = NULL, *begin = (char *) str, *end = NULL;
-
-	/* trim leading space */
-	while (isspace((unsigned char) *begin)) {
-		++begin;
-	}
-
-	/* All spaces */
-	if (*begin == '\0') {
-		return xdstrdup("");
-	}
-
-	/* trim trailing space */
-	end = begin + strlen(begin) - 1;
-	while (end > begin && isspace((unsigned char) *end)) {
-		--end;
-	}
-	end++;
-
-	trimmed = xdmalloc(end - begin + 1);
-	memcpy(trimmed, begin, (end - begin));
-	trimmed[(end - begin)] = '\0';
-
-	return trimmed;
 }
 
 /* not all versions of php export this */
