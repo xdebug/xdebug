@@ -55,6 +55,10 @@ typedef struct _xdebug_hash_element {
 	xdebug_hash_key  key;
 } xdebug_hash_element;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Helper functions */
 char* xdebug_hash_key_to_str(xdebug_hash_key* key, int* new_len);
 
@@ -76,5 +80,9 @@ void xdebug_hash_destroy(xdebug_hash *h);
 #define xdebug_hash_index_delete(h, key) xdebug_hash_extended_delete(h, NULL, 0, key)
 #define xdebug_hash_index_add(h, key, p) xdebug_hash_add_or_update(h, NULL, 0, key, p)
 #define xdebug_hash_index_update xdebug_hash_index_add
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XDEBUG_HASH_H__ */

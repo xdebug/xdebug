@@ -1,0 +1,2 @@
+remote_prefix: /var/www/
+local_prefix: /home/derick/projects/example.com/

@@ -13,11 +13,27 @@
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
  */
+#include <stdlib.h>
+#include <string.h>
 
-#ifndef __XDEBUG_MAPS_MAPS_H__
-#define __XDEBUG_MAPS_MAPS_H__
+#include "maps_private.h"
+#include "../mm.h"
+#include "../xdebug_strndup.h"
 
-xdebug_path_maps *xdebug_path_maps_ctor(void);
-void xdebug_path_maps_dtor(xdebug_path_maps *maps);
+/** Private API, mainly used for testing */
 
-#endif
+size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps)
+{
+	return maps->remote_to_local_map->size;
+}
+
+xdebug_path_mapping *remote_to_local(xdebug_path_maps *maps, const char *remote)
+{
+	void *result;
+
+	if (xdebug_hash_find(maps->remote_to_local_map, remote, strlen(remote), &result)) {
+		return (xdebug_path_mapping*) result;
+	}
+
+	return NULL;
+}
