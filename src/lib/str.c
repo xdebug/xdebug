@@ -243,23 +243,3 @@ char *xdebug_sprintf(const char* fmt, ...)
 
 	return tmp_str.d;
 }
-
-/**
- * Duplicate zend_strndup in core to avoid mismatches
- * in C-runtime libraries when xdebug and core are built
- * with different run-time libraries.
- */
-char *xdebug_strndup(const char *s, int length)
-{
-	char *p;
-
-	p = (char *) xdmalloc(length + 1);
-	if (p == NULL) {
-		return p;
-	}
-	if (length) {
-		memcpy(p, s, length);
-	}
-	p[length] = 0;
-	return p;
-}

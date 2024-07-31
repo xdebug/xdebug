@@ -151,6 +151,8 @@ Thu, Nov 28, 2024 - Xdebug 3.4.0
      <file name="var_export_xml.c" role="src" />
      <file name="var_export_xml.h" role="src" />
      <file name="vector.h" role="src" />
+     <file name="xdebug_strndup.c" role="src" />
+     <file name="xdebug_strndup.h" role="src" />
      <file name="xml.c" role="src" />
      <file name="xml.h" role="src" />
     </dir>

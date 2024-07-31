@@ -46,6 +46,7 @@
 #include "lib/log.h"
 #include "lib/var_export_line.h"
 #include "lib/var.h"
+#include "lib/xdebug_strndup.h"
 #include "profiler/profiler.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
