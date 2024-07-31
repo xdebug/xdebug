@@ -47,6 +47,7 @@
 #include "lib/mm.h"
 #include "lib/var_export_xml.h"
 #include "lib/vector.h"
+#include "lib/xdebug_strndup.h"
 #include "lib/xml.h"
 
 #ifdef PHP_WIN32
