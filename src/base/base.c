@@ -1327,13 +1327,14 @@ void xdebug_base_minit(INIT_FUNC_ARGS)
 
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	XG_BASE(control_socket_path) = NULL;
+#ifdef __linux__
 	XG_BASE(control_socket_fd) = 0;
 	XG_BASE(control_socket_last_trigger) = 0;
 #elif WIN32
 	XG_BASE(control_socket_h) = 0;
 	XG_BASE(control_socket_last_trigger) = 0;
 #endif
-
+#endif
 	xdebug_base_overloaded_functions_setup();
 }
 
@@ -1407,7 +1408,7 @@ void xdebug_base_rinit()
 # endif
 #endif
 
-#if __linux__ || WIN32
+#if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	if (XINI_BASE(control_socket_granularity) != XDEBUG_CONTROL_SOCKET_OFF) {
 		xdebug_control_socket_setup();
 	}

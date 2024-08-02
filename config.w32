@@ -54,5 +54,7 @@ if (PHP_XDEBUG != 'no') {
 		}
 	}
 
+	AC_DEFINE("HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT", 1, "Xdebug control socket support");
+
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
 }
