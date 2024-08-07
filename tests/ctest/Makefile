@@ -10,14 +10,17 @@ all: ctest
 ctest: xdebuglib.a ${C_TESTS} ${SOURCE_FILES} ${HEADER_FILES} all_tests.cpp
 	g++ ${CPPFLAGS} all_tests.cpp ${C_TESTS} ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o ctest ${LDFLAGS}
 
-xdebuglib.a: hash.o llist.o trim.o xdebug_strndup.o
-	ar -rc xdebuglib.a hash.o llist.o trim.o xdebug_strndup.o
+xdebuglib.a: hash.o llist.o str.o trim.o xdebug_strndup.o
+	ar -rc xdebuglib.a hash.o llist.o str.o trim.o xdebug_strndup.o
 
 llist.o: ../../src/lib/llist.c
 	gcc -c ${CPPFLAGS} -o llist.o ../../src/lib/llist.c
 
 hash.o: ../../src/lib/hash.c
 	gcc -c ${CPPFLAGS} -o hash.o ../../src/lib/hash.c
+
+str.o: ../../src/lib/str.c
+	gcc -DXDEBUG_NO_PHP_FEATURES -c ${CPPFLAGS} -o str.o ../../src/lib/str.c
 
 trim.o: ../../src/lib/trim.c
 	gcc -c ${CPPFLAGS} -o trim.o ../../src/lib/trim.c
