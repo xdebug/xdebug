@@ -23,8 +23,11 @@
 #include "maps_private.h"
 #include "parser.h"
 
+#define XDEBUG_NO_PHP_FEATURES
+
 #include "../hash.h"
 #include "../mm.h"
+#include "../str.h"
 #include "../trim.h"
 #include "../xdebug_strndup.h"
 
@@ -120,12 +123,38 @@ static void state_set_local_prefix(path_maps_parser_state *state, const char *pr
 static bool state_add_rule(path_maps_parser_state *state, const char *buffer, const char *equals)
 {
 	xdebug_path_mapping* tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
+	xdebug_str remote_path = XDEBUG_STR_INITIALIZER;
+	xdebug_str local_path  = XDEBUG_STR_INITIALIZER;
 
-	tmp->remote_path = xdebug_strndup(buffer, equals - buffer - 1);
-	tmp->local_path = xdebug_trim(equals + 1);
+	if (state->current_remote_prefix) {
+		xdebug_str_add(&remote_path, state->current_remote_prefix, false);
+	}
+	{
+		char *remote_part = xdstrndup(buffer, equals - buffer - 1);
+		char *trimmed = xdebug_trim(remote_part);
+
+		xdebug_str_add(&remote_path, trimmed, false);
+
+		xdfree(trimmed);
+		xdfree(remote_part);
+	}
+
+	if (state->current_local_prefix) {
+		xdebug_str_add(&local_path, state->current_local_prefix, false);
+	}
+	{
+		char *trimmed = xdebug_trim(equals + 1);
+
+		xdebug_str_add(&local_path, trimmed, false);
+
+		xdfree(trimmed);
+	}
+
+	tmp->remote_path = remote_path.d;
+	tmp->local_path = local_path.d;
 	tmp->type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
 
-	xdebug_hash_add(state->file_rules, buffer, equals - buffer, tmp);
+	xdebug_hash_add(state->file_rules, remote_path.d, remote_path.l, tmp);
 	return true;
 }
 
@@ -190,7 +219,7 @@ static void copy_rule(void *ret, xdebug_hash_element *e)
 	tmp->remote_path = xdstrdup(new_rule->remote_path);
 	tmp->type = new_rule->type;
 
-	xdebug_hash_add((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len - 1, tmp);
+	xdebug_hash_add((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, tmp);
 }
 
 /* Parses a path mapping file.
