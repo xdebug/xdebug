@@ -20,17 +20,21 @@
 #include <string.h>
 #include <locale.h>
 
-#if !defined(_MSC_VER)
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-#endif
-#include "zend_smart_str.h"
-#if !defined(_MSC_VER)
-# pragma GCC diagnostic pop
+#ifndef XDEBUG_NO_PHP_FEATURES
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+# endif
+# include "zend_smart_str.h"
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic pop
+# endif
 #endif
 
-#include "lib/php-header.h"
-#include "ext/standard/php_string.h"
+#ifndef XDEBUG_NO_PHP_FEATURES
+# include "lib/php-header.h"
+# include "ext/standard/php_string.h"
+#endif
 
 #include "mm.h"
 #include "str.h"
@@ -74,10 +78,12 @@ void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str)
     xdebug_str_internal_addl(xs, str->d, str->l, 0);
 }
 
+#ifndef XDEBUG_NO_PHP_FEATURES
 void xdebug_str_add_zstr(xdebug_str *xs, const zend_string *str)
 {
     xdebug_str_internal_addl(xs, ZSTR_VAL(str), ZSTR_LEN(str), 0);
 }
+#endif
 
 void xdebug_str_addc(xdebug_str *xs, char letter)
 {
@@ -110,7 +116,8 @@ void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num)
 	xdebug_str_internal_addl(xs, pos, &buffer[20] - pos, 0);
 }
 
-#if PHP_VERSION_ID >= 80200
+#ifndef XDEBUG_NO_PHP_FEATURES
+# if PHP_VERSION_ID >= 80200
 void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 {
 	int size;
@@ -142,7 +149,7 @@ void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 
 	assert(0);
 }
-#else
+# else
 void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 {
 	smart_str buf = {0};
@@ -157,8 +164,7 @@ void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 
 	smart_str_free(&buf);
 }
-#endif
-
+# endif
 
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 {
@@ -168,6 +174,18 @@ void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 	xdebug_str_add_va_fmt(xs, fmt, args);
 	va_end(args);
 }
+char *xdebug_sprintf(const char* fmt, ...)
+{
+	va_list args;
+	xdebug_str tmp_str = {0};
+
+	va_start(args, fmt);
+	xdebug_str_add_va_fmt(&tmp_str, fmt, args);
+	va_end(args);
+
+	return tmp_str.d;
+}
+#endif
 
 void xdebug_str_chop(xdebug_str *xs, size_t c)
 {
@@ -257,16 +275,4 @@ void xdebug_str_free(xdebug_str *s)
 
 	xdebug_str_free_storage(s);
 	xdfree(s);
-}
-
-char *xdebug_sprintf(const char* fmt, ...)
-{
-	va_list args;
-	xdebug_str tmp_str = {0};
-
-	va_start(args, fmt);
-	xdebug_str_add_va_fmt(&tmp_str, fmt, args);
-	va_end(args);
-
-	return tmp_str.d;
 }

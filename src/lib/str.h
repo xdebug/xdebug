@@ -17,9 +17,16 @@
 #ifndef __HAVE_XDEBUG_STR_H__
 #define __HAVE_XDEBUG_STR_H__
 
-#include <stddef.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "lib/php-header.h"
+#include <stddef.h>
+#include <stdint.h>
+
+#ifndef XDEBUG_NO_PHP_FEATURES
+# include "lib/php-header.h"
+#endif
 
 #include "mm.h"
 
@@ -39,11 +46,13 @@ typedef struct xdebug_str {
 void xdebug_str_add(xdebug_str *xs, const char *str, int f);
 void xdebug_str_addl(xdebug_str *xs, const char *str, int le, int f);
 void xdebug_str_add_str(xdebug_str *xs, const xdebug_str *str);
+#ifndef XDEBUG_NO_PHP_FEATURES
 void xdebug_str_add_zstr(xdebug_str *xs, const zend_string *str);
-void xdebug_str_addc(xdebug_str *xs, char letter);
-void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num);
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...);
 void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv);
+#endif
+void xdebug_str_addc(xdebug_str *xs, char letter);
+void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num);
 #define xdebug_str_add_literal(s,l) xdebug_str_addl((s), (l), sizeof(l)-1, 0)
 #define xdebug_str_add_const(s,l) xdebug_str_addl((s), (l), strlen(l), 0)
 
@@ -59,5 +68,9 @@ void xdebug_str_destroy(xdebug_str *s);
 void xdebug_str_free(xdebug_str *s);
 
 char* xdebug_sprintf(const char* fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
