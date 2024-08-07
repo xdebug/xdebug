@@ -88,3 +88,19 @@ TEST(path_maps_file, check_rules)
 	STRCMP_EQUAL("/var/www/", mapping->remote_path);
 	STRCMP_EQUAL("/home/derick/projects/example.com/", mapping->local_path);
 };
+
+TEST(path_maps_file, check_rules_with_prefix_1)
+{
+	xdebug_path_mapping *mapping = NULL;
+	result = xdebug_path_maps_parse_file(test_map, "files/with-prefix.map", &error_code, &error_message);
+
+	LONGS_EQUAL(true, result);
+	LONGS_EQUAL(PATH_MAPS_OK, error_code);
+	LONGS_EQUAL(1, xdebug_path_maps_get_rule_count(test_map));
+
+	mapping = remote_to_local(test_map, "/var/www/");
+	CHECK(mapping);
+	LONGS_EQUAL(XDEBUG_PATH_MAP_TYPE_DIRECTORY, mapping->type);
+	STRCMP_EQUAL("/var/www/", mapping->remote_path);
+	STRCMP_EQUAL("/home/derick/projects/example.com/", mapping->local_path);
+};
