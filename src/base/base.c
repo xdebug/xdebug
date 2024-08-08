@@ -55,6 +55,7 @@ zif_handler orig_error_reporting_func = NULL;
 zif_handler orig_set_time_limit_func = NULL;
 zif_handler orig_pcntl_exec_func = NULL;
 zif_handler orig_pcntl_fork_func = NULL;
+zif_handler orig_exit_func = NULL;
 
 #if PHP_VERSION_ID >= 80100
 void (*xdebug_old_error_cb)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -81,6 +82,7 @@ PHP_FUNCTION(xdebug_set_time_limit);
 PHP_FUNCTION(xdebug_error_reporting);
 PHP_FUNCTION(xdebug_pcntl_exec);
 PHP_FUNCTION(xdebug_pcntl_fork);
+PHP_FUNCTION(xdebug_exit);
 
 
 /* {{{ zend_op_array xdebug_compile_file (file_handle, type)
@@ -1100,6 +1102,13 @@ static void xdebug_base_overloaded_functions_setup(void)
 		orig_pcntl_fork_func = orig->internal_function.handler;
 		orig->internal_function.handler = zif_xdebug_pcntl_fork;
 	}
+
+	/* Override exit with our own function to be able to write profiling summary */
+	orig = zend_hash_str_find_ptr(CG(function_table), "exit", sizeof("exit") - 1);
+	if (orig) {
+		orig_exit_func = orig->internal_function.handler;
+		orig->internal_function.handler = zif_xdebug_exit;
+	}
 }
 
 static int xdebug_closure_serialize_deny_wrapper(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
@@ -1600,6 +1609,17 @@ PHP_FUNCTION(xdebug_pcntl_exec)
 	xdebug_profiler_pcntl_exec_handler();
 
 	orig_pcntl_exec_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ proto void xdebug_exit(void)
+   Dummy function to stop profiling when we run exit */
+PHP_FUNCTION(xdebug_exit)
+{
+	orig_exit_func(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+
+	/* We need to stop the profiler and trace files here */
+	xdebug_profiler_exit_function_handler();
 }
 /* }}} */
 

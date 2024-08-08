@@ -22,6 +22,7 @@
 #include "TSRM.h"
 #include "php_globals.h"
 #include "Zend/zend_alloc.h"
+#include "Zend/zend_exceptions.h"
 
 #include "php_xdebug.h"
 #include "profiler.h"
@@ -44,8 +45,10 @@ void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg)
 
 void xdebug_profiler_minit(void)
 {
+#if PHP_VERSION_ID < 80400
 	/* Overload the "exit" opcode */
 	xdebug_set_opcode_handler(ZEND_EXIT, xdebug_profiler_exit_handler);
+#endif
 }
 
 void xdebug_profiler_mshutdown(void)
@@ -80,6 +83,15 @@ void xdebug_profiler_post_deactivate(void)
 void xdebug_profiler_pcntl_exec_handler(void)
 {
 	deinit_if_active();
+}
+
+void xdebug_profiler_exit_function_handler(void)
+{
+	function_stack_entry *fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
+
+	deinit_if_active();
+
+	xdebug_profiler_free_function_details(fse);
 }
 
 int xdebug_profiler_exit_handler(XDEBUG_OPCODE_HANDLER_ARGS)

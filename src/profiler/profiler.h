@@ -47,6 +47,7 @@ void xdebug_profiler_rinit(void);
 void xdebug_profiler_post_deactivate(void);
 
 void xdebug_profiler_pcntl_exec_handler(void);
+void xdebug_profiler_exit_function_handler(void);
 
 void xdebug_profiler_init_if_requested(zend_op_array *op_array);
 void xdebug_profiler_execute_ex(function_stack_entry *fse, zend_op_array *op_array);
