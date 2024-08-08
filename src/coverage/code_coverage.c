@@ -368,6 +368,46 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		*jump_count = 1;
 		return 1;
 	} else if (
+		opcode.opcode == ZEND_INIT_FCALL
+	) {
+		zval *func_name = RT_CONSTANT(&opa->opcodes[position], opcode.op2);
+		if (zend_string_equals_literal(Z_PTR_P(func_name), "exit")) {
+			int level = 0;
+			uint32_t start = position + 1;
+			
+			for (;;) {
+				switch (opa->opcodes[start].opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+					case ZEND_NEW:
+						level++;
+						break;
+					case ZEND_DO_FCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+						if (level == 0) {
+							goto done;
+						}
+						level--;
+						break;
+				}
+				start++;
+			}
+ done:
+			ZEND_ASSERT(opa->opcodes[start].opcode == ZEND_DO_ICALL);
+			jumps[0] = XDEBUG_JMP_EXIT;
+			*jump_count = 1;
+			return 1;
+		}
+
+	} else if (
 		opcode.opcode == ZEND_MATCH ||
 		opcode.opcode == ZEND_SWITCH_LONG ||
 		opcode.opcode == ZEND_SWITCH_STRING
