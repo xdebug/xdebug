@@ -11,6 +11,7 @@ TEST_GROUP(path_maps_file)
 	struct xdebug_path_maps *test_map;
 	bool result;
 	int   error_code;
+	int   error_line;
 	char *error_message;
 	size_t mapping_count;
 	FILE *filep;
@@ -22,6 +23,7 @@ TEST_GROUP(path_maps_file)
 		test_map = xdebug_path_maps_ctor();
 		result = false;
 		error_code = PATH_MAPS_OK;
+		error_line = -1;
 		error_message = NULL;
 		filename = NULL;
 		filep = NULL;
@@ -41,14 +43,16 @@ TEST_GROUP(path_maps_file)
 
 		filename = strdup(templ);
 
-		return xdebug_path_maps_parse_file(test_map, filename, &error_code, &error_message);
+		return xdebug_path_maps_parse_file(test_map, filename, &error_code, &error_line, &error_message);
 	}
 
-	void check_result(size_t expected_error_code, size_t result_count)
+	void check_result(size_t expected_error_code, int expected_error_line, const char *expected_error_message)
 	{
 		LONGS_EQUAL(expected_error_code == PATH_MAPS_OK ? true : false, result);
+
 		LONGS_EQUAL(expected_error_code, error_code);
-		LONGS_EQUAL(result_count, xdebug_path_maps_get_rule_count(test_map));
+		LONGS_EQUAL(expected_error_line, error_line);
+		STRCMP_EQUAL(expected_error_message, error_message);
 	}
 
 	void check_map(size_t type, const char *remote_path, const char *local_path)
@@ -80,7 +84,7 @@ TEST_GROUP(path_maps_file)
 
 TEST(path_maps_file, fopen_non_existing)
 {
-	result = xdebug_path_maps_parse_file(test_map, "file-does-not-exist.map", &error_code, &error_message);
+	result = xdebug_path_maps_parse_file(test_map, "file-does-not-exist.map", &error_code, &error_line, &error_message);
 
 	LONGS_EQUAL(false, result);
 	LONGS_EQUAL(PATH_MAPS_CANT_OPEN_FILE, error_code);
@@ -92,8 +96,7 @@ TEST(path_maps_file, no_trailing_newline)
 	const char *map = R""""(/var/www/ = /home/derick/projects/example.com/)"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_NEWLINE, 0);
-	STRCMP_EQUAL("Line XXX does not end in a new line", error_message);
+	check_result(PATH_MAPS_NO_NEWLINE, 1, "Line does not end in a new line");
 };
 
 TEST(path_maps_file, empty)
@@ -101,7 +104,7 @@ TEST(path_maps_file, empty)
 	const char *map = R""""()"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 0);
+	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
 };
 
 TEST(path_maps_file, no_rules)
@@ -112,8 +115,7 @@ local_prefix: /home/derick/projects/example.com/
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 0);
-	LONGS_EQUAL(false, result);
+	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
 	STRCMP_EQUAL("The map file did not provide any mappings", error_message);
 };
 
@@ -124,7 +126,7 @@ TEST(path_maps_file, full_path_map)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, 1);
+	check_result(PATH_MAPS_OK, -1, NULL);
 };
 
 TEST(path_maps_file, check_rules)
@@ -134,7 +136,7 @@ TEST(path_maps_file, check_rules)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(error_code, 1);
+	check_result(PATH_MAPS_OK, -1, NULL);
 
 	mapping = remote_to_local(test_map, "/var/www/");
 
@@ -150,7 +152,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(error_code, 1);
+	check_result(PATH_MAPS_OK, -1, NULL);
 
 	mapping = remote_to_local(test_map, "/var/www/");
 
