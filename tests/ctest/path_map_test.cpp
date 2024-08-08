@@ -177,6 +177,21 @@ TEST(path_maps_file, check_rule_with_comment)
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/var/www/", "/home/derick/projects/example.com/");
 };
 
+TEST(path_maps_file, check_rule_with_odd_spaces)
+{
+	const char *map = R""""(
+# We map our remote path to our local projects directory
+	/var/www/	=	/home/derick/projects/example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/var/www/");
+
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/var/www/", "/home/derick/projects/example.com/");
+};
+
 TEST(path_maps_file, check_rules_with_prefix_1)
 {
 	const char *map = R""""(
