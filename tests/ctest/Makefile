@@ -29,4 +29,4 @@ xdebug_strndup.o: ../../src/lib/xdebug_strndup.c
 	gcc -c ${CPPFLAGS} -o xdebug_strndup.o ../../src/lib/xdebug_strndup.c
 
 clean:
-	rm xdebuglib.a hash.o llist.o trim.o xdebug_strndup.o ctest
+	rm xdebuglib.a hash.o llist.o str.o trim.o xdebug_strndup.o ctest
