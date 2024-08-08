@@ -99,6 +99,25 @@ TEST(path_maps_file, no_trailing_newline)
 	check_result(PATH_MAPS_NO_NEWLINE, 1, "Line does not end in a new line");
 };
 
+TEST(path_maps_file, only_new_line)
+{
+	const char *map = R""""(
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
+};
+
+TEST(path_maps_file, comment_no_rules)
+{
+	const char *map = R""""(# This is the first line of a comment
+# This is the second line of a comment
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
+};
+
 TEST(path_maps_file, empty)
 {
 	const char *map = R""""()"""";
@@ -132,6 +151,21 @@ TEST(path_maps_file, full_path_map)
 TEST(path_maps_file, check_rules)
 {
 	const char *map = R""""(
+/var/www/ = /home/derick/projects/example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/var/www/");
+
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/var/www/", "/home/derick/projects/example.com/");
+};
+
+TEST(path_maps_file, check_rule_with_comment)
+{
+	const char *map = R""""(
+# We map our remote path to our local projects directory
 /var/www/ = /home/derick/projects/example.com/
 )"""";
 
