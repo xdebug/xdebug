@@ -87,6 +87,15 @@ TEST(path_maps_file, fopen_non_existing)
 	STRCMP_EQUAL("Can't open file", error_message);
 };
 
+TEST(path_maps_file, no_trailing_newline)
+{
+	const char *map = R""""(/var/www/ = /home/derick/projects/example.com/)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_NO_NEWLINE, 0);
+	STRCMP_EQUAL("Line XXX does not end in a new line", error_message);
+};
+
 TEST(path_maps_file, empty)
 {
 	const char *map = R""""()"""";
