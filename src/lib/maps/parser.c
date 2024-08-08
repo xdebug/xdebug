@@ -33,6 +33,7 @@
 
 typedef struct path_maps_parser_state {
 	int   error_code;
+	int   error_line;
 	char *error_message;
 
 	char *current_local_prefix;
@@ -78,9 +79,10 @@ static void path_maps_parser_state_dtor(struct path_maps_parser_state *state)
 	}
 }
 
-static void state_set_error(path_maps_parser_state *state, int error_code, const char *error_message)
+static void state_set_error(path_maps_parser_state *state, int error_code, int error_line, const char *error_message)
 {
 	state->error_code = error_code;
+	state->error_line = error_line;
 	if (state->error_message) {
 		xdfree(state->error_message);
 	}
@@ -90,6 +92,11 @@ static void state_set_error(path_maps_parser_state *state, int error_code, const
 static int state_get_error_code(path_maps_parser_state *state)
 {
 	return state->error_code;
+}
+
+static int state_get_error_line(path_maps_parser_state *state)
+{
+	return state->error_line;
 }
 
 static char *state_get_error_message(path_maps_parser_state *state)
@@ -102,7 +109,7 @@ static bool state_open_file(path_maps_parser_state *state, const char *filename)
 	FILE *tmp = fopen(filename, "r");
 
 	if (!tmp) {
-		state_set_error(state, PATH_MAPS_CANT_OPEN_FILE, "Can't open file");
+		state_set_error(state, PATH_MAPS_CANT_OPEN_FILE, 0, "Can't open file");
 		return false;
 	}
 
@@ -172,15 +179,15 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 		/* if last char is no \n, abort */
 		buffer_len = strlen(buffer);
 
-		/* no data at all */
+		/* no data at all, which shouldn't happend as fgets should have returned NULL */
 		if (buffer_len == 0) {
-			state_set_error(state, PATH_MAPS_EMPTY_LINE, "Line XXX is empty, that shouldn't be possible");
+			state_set_error(state, PATH_MAPS_EMPTY_LINE, current_line_no, "Empty line, which shouldn't be possible");
 			return false;
 		}
 
 		/* All lines must end in \n */
 		if (buffer[buffer_len - 1] != '\n') {
-			state_set_error(state, PATH_MAPS_NO_NEWLINE, "Line XXX does not end in a new line");
+			state_set_error(state, PATH_MAPS_NO_NEWLINE, current_line_no, "Line does not end in a new line");
 			return false;
 		}
 
@@ -207,7 +214,7 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 		/* assignments */
 		equals = strchr(buffer, '=');
 		if (!equals) {
-			state_set_error(state, PATH_MAPS_GARBAGE, "Line XXX is not empty and has no stanza, assignment, or starts with '#'");
+			state_set_error(state, PATH_MAPS_GARBAGE, current_line_no, "Line is not empty, and has no stanza, assignment, or starts with '#'");
 			return false;
 		}
 
@@ -234,7 +241,7 @@ static void copy_rule(void *ret, xdebug_hash_element *e)
  * Returns true on success, with the 'maps' updated.
  * Returns false on error, with an error set in 'error_message' and no modifications to 'maps'.
  */
-bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, char **error_message)
+bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, int *error_line, char **error_message)
 {
 	struct path_maps_parser_state state;
 
@@ -249,7 +256,7 @@ bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, i
 	}
 
 	if (state.file_rules->size == 0) {
-		state_set_error(&state, PATH_MAPS_NO_RULES, "The map file did not provide any mappings");
+		state_set_error(&state, PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
 		goto error;
 	}
 
@@ -261,6 +268,7 @@ bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, i
 
 error:
 	*error_code = state_get_error_code(&state);
+	*error_line = state_get_error_line(&state);
 	*error_message = state_get_error_message(&state);
 	path_maps_parser_state_dtor(&state);
 	return false;
