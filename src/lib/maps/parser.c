@@ -172,14 +172,21 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 		/* if last char is no \n, abort */
 		buffer_len = strlen(buffer);
 
-		/* empty line */
+		/* no data at all */
 		if (buffer_len == 0) {
 			state_set_error(state, PATH_MAPS_EMPTY_LINE, "Line XXX is empty, that shouldn't be possible");
 			return false;
 		}
+
+		/* All lines must end in \n */
 		if (buffer[buffer_len - 1] != '\n') {
 			state_set_error(state, PATH_MAPS_NO_NEWLINE, "Line XXX does not end in a new line");
 			return false;
+		}
+
+		/* empty line, ignore */
+		if (buffer_len == 1) {
+			continue;
 		}
 
 		/* stanzas */
