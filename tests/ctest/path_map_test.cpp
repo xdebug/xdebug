@@ -202,5 +202,72 @@ local_prefix: /home/derick/projects
 
 	mapping = remote_to_local(test_map, "/var/www/");
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/var/www/", "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
+};
+
+TEST(path_maps_file, empty_remote_prefix)
+{
+	const char *map = R""""(
+remote_prefix:
+local_prefix: /usr/local/www
+/www/ = /example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is empty");
+}
+
+TEST(path_maps_file, empty_local_prefix)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix:
+/www/ = /example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is empty");
+}
+
+TEST(path_maps_file, non_absolute_remote_prefix)
+{
+	const char *map = R""""(
+remote_prefix: var
+local_prefix: /usr/local/www
+/www/ = /example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is not an absolute path: 'var'");
+}
+
+TEST(path_maps_file, non_absolute_local_prefix)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix:home/derick/projects
+/www/ = /example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is not an absolute path: 'home/derick/projects'");
+}
+
+TEST(path_maps_file, check_multiple_rules_with_prefix_1)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.com/ = /example.com/
+/servers/example.net/ = /example.net/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/usr/local/www/servers/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
+
+	mapping = remote_to_local(test_map, "/usr/local/www/servers/example.net/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/");
 };

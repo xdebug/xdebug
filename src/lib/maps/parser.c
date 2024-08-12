@@ -117,14 +117,49 @@ static bool state_open_file(path_maps_parser_state *state, const char *filename)
 	return true;
 }
 
-static void state_set_remote_prefix(path_maps_parser_state *state, const char *prefix)
+static bool is_valid_prefix(path_maps_parser_state *state, const char *prefix)
 {
-	state->current_remote_prefix = xdebug_trim(prefix);
+	if (prefix[0] == '\0') {
+		state_set_error(state, PATH_MAPS_INVALID_PREFIX, "Prefix is empty");
+		return false;
+	}
+
+	if (prefix[0] != '/') {
+		char *message = xdebug_sprintf("Prefix is not an absolute path: '%s'", prefix);
+		state_set_error(state, PATH_MAPS_INVALID_PREFIX, message);
+		xdfree(message);
+		return false;
+	}
+
+	return true;
 }
 
-static void state_set_local_prefix(path_maps_parser_state *state, const char *prefix)
+static bool state_set_remote_prefix(path_maps_parser_state *state, const char *prefix)
 {
-	state->current_local_prefix = xdebug_trim(prefix);
+	char *trimmed_prefix = xdebug_trim(prefix);
+
+	if (!is_valid_prefix(state, trimmed_prefix)) {
+		xdfree(trimmed_prefix);
+		return false;
+	}
+
+	state->current_remote_prefix = trimmed_prefix;
+
+	return true;
+}
+
+static bool state_set_local_prefix(path_maps_parser_state *state, const char *prefix)
+{
+	char *trimmed_prefix = xdebug_trim(prefix);
+
+	if (!is_valid_prefix(state, trimmed_prefix)) {
+		xdfree(trimmed_prefix);
+		return false;
+	}
+
+	state->current_local_prefix = trimmed_prefix;
+
+	return true;
 }
 
 static bool state_add_rule(path_maps_parser_state *state, const char *buffer, const char *equals)
@@ -198,11 +233,15 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 
 		/* stanzas */
 		if (strncmp(buffer, "remote_prefix:", strlen("remote_prefix:")) == 0) {
-			state_set_remote_prefix(state, buffer + strlen("remote_prefix:"));
+			if (!state_set_remote_prefix(state, buffer + strlen("remote_prefix:"))) {
+				return false;
+			}
 			continue;
 		}
 		if (strncmp(buffer, "local_prefix:", strlen("local_prefix:")) == 0) {
-			state_set_local_prefix(state, buffer + strlen("local_prefix:"));
+			if (!state_set_local_prefix(state, buffer + strlen("local_prefix:"))) {
+				return false;
+			}
 			continue;
 		}
 
