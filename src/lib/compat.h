@@ -47,7 +47,7 @@ zend_bool xdebug_zend_hash_apply_protection_end(HashTable* ht);
 #endif
 
 # define XDEBUG_MAKE_STD_ZVAL(zv) \
-	zv = ecalloc(sizeof(zval), 1);
+	zv = ecalloc(1, sizeof(zval));
 
 # define HASH_KEY_SIZEOF(k) (sizeof(k) - 1)
 # define HASH_KEY_STRLEN(k) (strlen(k))
