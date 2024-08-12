@@ -24,6 +24,7 @@
 #define PATH_MAPS_EMPTY_LINE     0x0003
 #define PATH_MAPS_NO_NEWLINE     0x0004
 #define PATH_MAPS_GARBAGE        0x0005
+#define PATH_MAPS_INVALID_PREFIX 0x0006
 
 bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, int *error_line, char **error_message);
 
