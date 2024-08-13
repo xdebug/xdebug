@@ -374,7 +374,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		if (zend_string_equals_literal(Z_PTR_P(func_name), "exit")) {
 			int level = 0;
 			uint32_t start = position + 1;
-			
+
 			for (;;) {
 				switch (opa->opcodes[start].opcode) {
 					case ZEND_INIT_FCALL:
