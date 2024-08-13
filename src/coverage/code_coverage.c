@@ -274,6 +274,16 @@ static void prefill_from_opcode(zend_string *filename, zend_op opcode, int deadc
 
 #define XDEBUG_ZNODE_ELEM(node,var) node.var
 
+#if PHP_VERSION_ID < 80200
+static zend_always_inline bool xdebug_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
+{
+	return ZSTR_LEN(s1) == s2_length && !memcmp(ZSTR_VAL(s1), s2, s2_length);
+}
+# define xdebug_string_equals_literal(str, literal) xdebug_string_equals_cstr(str, "" literal, sizeof(literal) - 1)
+#else
+# define xdebug_string_equals_literal  zend_string_equals_literal
+#endif
+
 static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
 #if ZEND_USE_ABS_JMP_ADDR
@@ -371,7 +381,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		opcode.opcode == ZEND_INIT_FCALL
 	) {
 		zval *func_name = RT_CONSTANT(&opa->opcodes[position], opcode.op2);
-		if (zend_string_equals_literal(Z_PTR_P(func_name), "exit")) {
+		if (xdebug_string_equals_literal(Z_PTR_P(func_name), "exit")) {
 			int level = 0;
 			uint32_t start = position + 1;
 
