@@ -384,7 +384,9 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 					case ZEND_INIT_USER_CALL:
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_STATIC_METHOD_CALL:
+#if PHP_VERSION_ID >= 80400
 					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+#endif
 					case ZEND_NEW:
 						level++;
 						break;
