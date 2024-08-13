@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #785: Profiler does not handle call_user_func_array well
+Test for bug #785: Profiler does not handle call_user_func_array well (< PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.4');
+?>
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=default
@@ -14,7 +19,7 @@ exit();
 --EXPECTF--
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug00785-002.php
+cmd: %sbug00785-002-php83.php
 part: 1
 positions: line
 
@@ -244,7 +249,7 @@ cfn=(10)
 calls=1 0 0
 26 %d %d
 
-fl=(4) %sbug00785-002.php
+fl=(4) %sbug00785-002-php83.php
 fn=(12) {main}
 1 %d %d
 cfl=(2)

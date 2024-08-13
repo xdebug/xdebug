@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #728: Profiler reports __call() invocations confusingly/wrongly (>= PHP 8.1)
+Test for bug #360: Function line number in profile not correct (< PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1');
+check_reqs('PHP < 8.4');
 ?>
 --INI--
 xdebug.mode=profile
@@ -12,26 +12,18 @@ xdebug.start_with_request=default
 <?php
 require_once 'capture-profile.inc';
 
-class bankaccount
-{
-	function __call( $foo, $bar )
-	{
-		var_dump( $foo, $bar );
-	}
+function func(){
+	1+1;
 }
 
-$b = new bankaccount;
-$b->bar();
+func();
 
 exit();
 ?>
 --EXPECTF--
-string(3) "bar"
-array(0) {
-}
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug00728.php
+cmd: %sbug00360-php83.php
 part: 1
 positions: line
 
@@ -57,28 +49,20 @@ cfn=(2)
 calls=1 0 0
 16 %d %d
 
-fl=(1)
-fn=(4) php::var_dump
-8 %d %d
-
-fl=(3) %sbug00728.php
-fn=(5) bankaccount->__call
-6 %d %d
-cfl=(1)
-cfn=(4)
-calls=1 0 0
-8 %d %d
+fl=(3) %sbug00360-php83.php
+fn=(4) func
+4 %d %d
 
 fl=(3)
-fn=(6) {main}
+fn=(5) {main}
 1 %d %d
 cfl=(2)
 cfn=(3)
 calls=1 0 0
 2 %d %d
 cfl=(3)
-cfn=(5)
+cfn=(4)
 calls=1 0 0
-13 %d %d
+8 %d %d
 
 summary: %d %d

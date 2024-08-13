@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #639: Xdebug profiling: output not correct - missing 'cfl='
+Test for bug #639: Xdebug profiling: output not correct - missing 'cfl=' (>= PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.4');
+?>
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=default
@@ -24,7 +29,7 @@ exit();
 --EXPECTF--
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug00639.php
+cmd: %sbug00639-php84.php
 part: 1
 positions: line
 
@@ -78,7 +83,7 @@ cfn=(5)
 calls=1 0 0
 4 %d %d
 
-fl=(4) %sbug00639.php
+fl=(4) %sbug00639-php84.php
 fn=(7) func1
 5 %d %d
 cfl=(3)
@@ -126,8 +131,12 @@ cfn=(5)
 calls=1 0 0
 4 %d %d
 
+fl=(1)
+fn=(8) php::exit
+16 %d %d
+
 fl=(4)
-fn=(8) {main}
+fn=(9) {main}
 1 %d %d
 cfl=(2)
 cfn=(3)
@@ -153,5 +162,9 @@ cfl=(3)
 cfn=(6)
 calls=1 0 0
 14 %d %d
+cfl=(1)
+cfn=(8)
+calls=1 0 0
+16 %d %d
 
 summary: %d %d

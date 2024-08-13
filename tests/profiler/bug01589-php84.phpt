@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1589: function names used in auto_prepend_file missing (!opcache)
+Test for bug #1589: function names used in auto_prepend_file missing (>= PHP 8.4; !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!win; !opcache');
+check_reqs('PHP >= 8.4; !win; !opcache');
 ?>
 --INI--
 xdebug.mode=profile
@@ -62,7 +62,7 @@ fl=(1)
 fn=(1)
 7 %d %d
 
-fl=(3) %sbug01589.php
+fl=(3) %sbug01589-php84.php
 fn=(4)
 1 %d %d
 cfl=(1)
@@ -74,6 +74,10 @@ fl=(1)
 fn=(1)
 3 %d %d
 
+fl=(1)
+fn=(5) php::exit
+9 %d %d
+
 fl=(4) %sbug01589-append.inc
 fn=(4)
 1 %d %d
@@ -81,5 +85,9 @@ cfl=(1)
 cfn=(1)
 calls=1 0 0
 3 %d %d
+cfl=(1)
+cfn=(5)
+calls=1 0 0
+9 %d %d
 
 summary: %d %d
