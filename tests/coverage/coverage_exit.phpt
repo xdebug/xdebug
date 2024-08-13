@@ -1,9 +1,9 @@
 --TEST--
-Dummy
+Test for coverage with exit() (>= PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
+check_reqs('PHP >= 8.4; !opcache');
 ?>
 --INI--
 xdebug.mode=coverage
