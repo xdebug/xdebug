@@ -105,7 +105,7 @@ TEST(path_maps_file, only_new_line)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
+	check_result(PATH_MAPS_NO_RULES, 1, "The map file did not provide any mappings");
 };
 
 TEST(path_maps_file, comment_no_rules)
@@ -115,7 +115,7 @@ TEST(path_maps_file, comment_no_rules)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
+	check_result(PATH_MAPS_NO_RULES, 2, "The map file did not provide any mappings");
 };
 
 TEST(path_maps_file, empty)
@@ -134,7 +134,7 @@ local_prefix: /home/derick/projects/example.com/
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
+	check_result(PATH_MAPS_NO_RULES, 3, "The map file did not provide any mappings");
 	STRCMP_EQUAL("The map file did not provide any mappings", error_message);
 };
 
