@@ -167,37 +167,73 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 	xdebug_path_mapping* tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
 	xdebug_str remote_path = XDEBUG_STR_INITIALIZER;
 	xdebug_str local_path  = XDEBUG_STR_INITIALIZER;
+	char *trimmed = NULL, *remote_part = NULL;
 
+	/* remote part */
 	if (state->current_remote_prefix) {
 		xdebug_str_add(&remote_path, state->current_remote_prefix, false);
 	}
-	{
-		char *remote_part = xdstrndup(buffer, equals - buffer - 1);
-		char *trimmed = xdebug_trim(remote_part);
 
-		xdebug_str_add(&remote_path, trimmed, false);
+	remote_part = xdstrndup(buffer, equals - buffer - 1);
+	trimmed = xdebug_trim(remote_part);
 
-		xdfree(trimmed);
-		xdfree(remote_part);
+	if (trimmed[0] == '/' && state->current_remote_prefix && remote_path.l > 0 && remote_path.d[remote_path.l - 1] == '/') {
+		char *message = xdebug_sprintf("Remote prefix ends with separator ('%s') and mapping line begins with separator ('%s')",
+			remote_path.d, trimmed);
+		state_set_error(state, PATH_MAPS_DOUBLE_SEPARATOR, message);
+		xdfree(message);
+
+		goto failure;
 	}
 
+	xdebug_str_add(&remote_path, trimmed, false);
+
+	xdfree(trimmed);
+	trimmed = NULL;
+	xdfree(remote_part);
+	remote_part = NULL;
+
+
+	/* local part */
 	if (state->current_local_prefix) {
 		xdebug_str_add(&local_path, state->current_local_prefix, false);
 	}
-	{
-		char *trimmed = xdebug_trim(equals + 1);
 
-		xdebug_str_add(&local_path, trimmed, false);
+	trimmed = xdebug_trim(equals + 1);
 
-		xdfree(trimmed);
+	if (trimmed[0] == '/' && state->current_local_prefix && local_path.l > 0 && local_path.d[local_path.l - 1] == '/') {
+		char *message = xdebug_sprintf("Local prefix ends with separator ('%s') and mapping line begins with separator ('%s')",
+			local_path.d, trimmed);
+		state_set_error(state, PATH_MAPS_DOUBLE_SEPARATOR, message);
+		xdfree(message);
+
+		goto failure;
 	}
 
+	xdebug_str_add(&local_path, trimmed, false);
+	xdfree(trimmed);
+	trimmed = NULL;
+
+
+	/* assign */
 	tmp->remote_path = remote_path.d;
 	tmp->local_path = local_path.d;
 	tmp->type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
 
 	xdebug_hash_add(state->file_rules, remote_path.d, remote_path.l, tmp);
 	return true;
+
+failure:
+	if (trimmed) {
+		xdfree(trimmed);
+	}
+	if (remote_part) {
+		xdfree(remote_part);
+	}
+	xdebug_str_destroy(&remote_path);
+	xdebug_str_destroy(&local_path);
+	xdebug_path_mapping_free(tmp);
+	return false;
 }
 
 static bool state_file_read_lines(path_maps_parser_state *state)
@@ -257,7 +293,9 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 			return false;
 		}
 
-		state_add_rule(state, buffer, equals);
+		if (!state_add_rule(state, buffer, equals)) {
+			return false;
+		}
 	}
 
 	return true;
