@@ -48,11 +48,10 @@ TEST_GROUP(path_maps_file)
 
 	void check_result(size_t expected_error_code, int expected_error_line, const char *expected_error_message)
 	{
-		LONGS_EQUAL(expected_error_code == PATH_MAPS_OK ? true : false, result);
-
+		STRCMP_EQUAL(expected_error_message, error_message);
 		LONGS_EQUAL(expected_error_code, error_code);
 		LONGS_EQUAL(expected_error_line, error_line);
-		STRCMP_EQUAL(expected_error_message, error_message);
+		LONGS_EQUAL(expected_error_code == PATH_MAPS_OK ? true : false, result);
 	}
 
 	void check_map(size_t type, const char *local_path)
@@ -134,7 +133,6 @@ local_prefix: /home/derick/projects/example.com/
 
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_NO_RULES, 3, "The map file did not provide any mappings");
-	STRCMP_EQUAL("The map file did not provide any mappings", error_message);
 };
 
 TEST(path_maps_file, full_path_map)
