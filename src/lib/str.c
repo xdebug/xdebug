@@ -19,16 +19,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <assert.h>
 
-#ifndef XDEBUG_NO_PHP_FEATURES
-# if !defined(_MSC_VER)
-#   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-# endif
-# include "zend_smart_str.h"
-# if !defined(_MSC_VER)
-#   pragma GCC diagnostic pop
-# endif
+#if !defined(_MSC_VER)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#endif
+#include "zend_smart_str.h"
+#if !defined(_MSC_VER)
+#  pragma GCC diagnostic pop
 #endif
 
 #ifndef XDEBUG_NO_PHP_FEATURES
@@ -116,8 +115,7 @@ void xdebug_str_add_uint64(xdebug_str *xs, uint64_t num)
 	xdebug_str_internal_addl(xs, pos, &buffer[20] - pos, 0);
 }
 
-#ifndef XDEBUG_NO_PHP_FEATURES
-# if PHP_VERSION_ID >= 80200
+#if PHP_VERSION_ID >= 80200
 void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 {
 	int size;
@@ -149,7 +147,7 @@ void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 
 	assert(0);
 }
-# else
+#else
 void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 {
 	smart_str buf = {0};
@@ -164,7 +162,7 @@ void xdebug_str_add_va_fmt(xdebug_str *xs, const char *fmt, va_list argv)
 
 	smart_str_free(&buf);
 }
-# endif
+#endif
 
 void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 {
@@ -174,6 +172,7 @@ void xdebug_str_add_fmt(xdebug_str *xs, const char *fmt, ...)
 	xdebug_str_add_va_fmt(xs, fmt, args);
 	va_end(args);
 }
+
 char *xdebug_sprintf(const char* fmt, ...)
 {
 	va_list args;
@@ -185,7 +184,6 @@ char *xdebug_sprintf(const char* fmt, ...)
 
 	return tmp_str.d;
 }
-#endif
 
 void xdebug_str_chop(xdebug_str *xs, size_t c)
 {

@@ -23,8 +23,6 @@
 #include "maps_private.h"
 #include "parser.h"
 
-#define XDEBUG_NO_PHP_FEATURES
-
 #include "../hash.h"
 #include "../mm.h"
 #include "../str.h"
