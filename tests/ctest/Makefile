@@ -2,7 +2,7 @@ C_TESTS=path_map_test.cpp
 SOURCE_FILES=../../src/lib/maps/parser.c ../../src/lib/maps/maps.c ../../src/lib/maps/maps_private.c
 HEADER_FILES=../../src/lib/maps/maps_private.h ../../src/lib/maps/maps.h
 INCLUDE_PATH=../../src/lib/maps
-CPPFLAGS=-ggdb3 -fsanitize=address -fsanitize=undefined
+CPPFLAGS=-DPHP_VERSION_ID=80300 -DXDEBUG_NO_PHP_FEATURES -ggdb3 -fsanitize=address -fsanitize=undefined
 LDFLAGS=-lCppUTest -fsanitize=undefined -l:libubsan.so -lCppUTest
 
 all: ctest
@@ -23,7 +23,7 @@ hash.o: ../../src/lib/hash.c
 	gcc -c ${CPPFLAGS} -o hash.o ../../src/lib/hash.c
 
 str.o: ../../src/lib/str.c
-	gcc -DXDEBUG_NO_PHP_FEATURES -c ${CPPFLAGS} -o str.o ../../src/lib/str.c
+	gcc -c ${CPPFLAGS} -o str.o ../../src/lib/str.c
 
 trim.o: ../../src/lib/trim.c
 	gcc -c ${CPPFLAGS} -o trim.o ../../src/lib/trim.c
