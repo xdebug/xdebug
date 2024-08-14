@@ -19,7 +19,10 @@
 
 #include "../hash.h"
 
+#define XDEBUG_PATH_MAP_TYPE_UNKNOWN   0x00
 #define XDEBUG_PATH_MAP_TYPE_DIRECTORY 0x01
+#define XDEBUG_PATH_MAP_TYPE_FILE      0x02
+#define XDEBUG_PATH_MAP_TYPE_LINES     0x03
 
 typedef struct xdebug_path_mapping {
 	char *remote_path;

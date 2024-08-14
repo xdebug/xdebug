@@ -162,12 +162,35 @@ static bool state_set_local_prefix(path_maps_parser_state *state, const char *pr
 	return true;
 }
 
+const char *mapping_type_as_string[] = {
+	"unknown",
+	"directory",
+	"file",
+	"line-range"
+};
+
+static int get_mapping_type(xdebug_str *string)
+{
+	if (string->l > 0 && string->d[string->l - 1] == '/') {
+		return XDEBUG_PATH_MAP_TYPE_DIRECTORY;
+	}
+
+	if (string->l > 0 && string->d[string->l - 1] == '?') {
+		return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
+	}
+
+	return XDEBUG_PATH_MAP_TYPE_FILE;
+}
+
 static bool state_add_rule(path_maps_parser_state *state, const char *buffer, const char *equals)
 {
 	xdebug_path_mapping* tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
 	xdebug_str remote_path = XDEBUG_STR_INITIALIZER;
 	xdebug_str local_path  = XDEBUG_STR_INITIALIZER;
 	char *trimmed = NULL, *remote_part = NULL;
+	int remote_mapping_type;
+	int local_mapping_type;
+
 
 	/* remote part */
 	if (state->current_remote_prefix) {
@@ -215,10 +238,42 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 	trimmed = NULL;
 
 
+	/* Extra checks */
+	remote_mapping_type = get_mapping_type(&remote_path);
+	local_mapping_type = get_mapping_type(&local_path);
+
+	/* - if types can't be determined, abort */
+	if (remote_mapping_type == XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+		char *message = xdebug_sprintf("Can't determine type of remote mapping part ('%s')", remote_path.d);
+		state_set_error(state, PATH_MAPS_MISMATCHED_TYPES, message);
+		xdfree(message);
+
+		goto failure;
+	}
+
+	if (local_mapping_type == XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+		char *message = xdebug_sprintf("Can't determine type of local mapping part ('%s')", local_path.d);
+		state_set_error(state, PATH_MAPS_MISMATCHED_TYPES, message);
+		xdfree(message);
+
+		goto failure;
+	}
+
+	/* - if remote path is a directory type, then local needs to be one too */
+	if (remote_mapping_type != local_mapping_type) {
+		char *message = xdebug_sprintf("Remote mapping part ('%s') type (%s) must match local mapping part ('%s') type (%s)",
+			remote_path.d, mapping_type_as_string[remote_mapping_type],
+			local_path.d, mapping_type_as_string[local_mapping_type]);
+		state_set_error(state, PATH_MAPS_MISMATCHED_TYPES, message);
+		xdfree(message);
+
+		goto failure;
+	}
+
 	/* assign */
 	tmp->remote_path = remote_path.d;
 	tmp->local_path = local_path.d;
-	tmp->type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
+	tmp->type = remote_mapping_type;
 
 	xdebug_hash_add(state->file_rules, remote_path.d, remote_path.l, tmp);
 	return true;
