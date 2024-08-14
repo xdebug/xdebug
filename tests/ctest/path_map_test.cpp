@@ -295,3 +295,70 @@ local_prefix: /home/derick/projects/
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_DOUBLE_SEPARATOR, 4, "Local prefix ends with separator ('/home/derick/projects/') and mapping line begins with separator ('/example.com/')");
 };
+
+TEST(path_maps_file, check_local_matches_remote_mapping_type_dir_file)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.com/ = /example.com/
+/servers/example.net/ = /example.net
+/servers/example.org/ = /example.org/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 5, "Remote mapping part ('/usr/local/www/servers/example.net/') type (directory) must match local mapping part ('/home/derick/projects/example.net') type (file)");
+};
+
+TEST(path_maps_file, check_local_matches_remote_mapping_type_file_dir)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.com/ = /example.com/
+/servers/example.net = /example.net/
+/servers/example.org/ = /example.org/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 5, "Remote mapping part ('/usr/local/www/servers/example.net') type (file) must match local mapping part ('/home/derick/projects/example.net/') type (directory)");
+};
+
+TEST(path_maps_file, remote_part_unknown_type)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.org? = /example.org/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Can't determine type of remote mapping part ('/usr/local/www/servers/example.org?')");
+};
+
+TEST(path_maps_file, local_part_unknown_type)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.org/ = /example.org?
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Can't determine type of local mapping part ('/home/derick/projects/example.org?')");
+};
+
+TEST(path_maps_file, check_type_file)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "/home/derick/project/example.php");
+};
