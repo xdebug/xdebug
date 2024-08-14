@@ -55,11 +55,10 @@ TEST_GROUP(path_maps_file)
 		STRCMP_EQUAL(expected_error_message, error_message);
 	}
 
-	void check_map(size_t type, const char *remote_path, const char *local_path)
+	void check_map(size_t type, const char *local_path)
 	{
 		CHECK(mapping);
 		LONGS_EQUAL(type, mapping->type);
-		STRCMP_EQUAL(remote_path, mapping->remote_path);
 		STRCMP_EQUAL(local_path, mapping->local_path);
 	}
 
@@ -159,7 +158,7 @@ TEST(path_maps_file, check_rules)
 
 	mapping = remote_to_local(test_map, "/var/www/");
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/var/www/", "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 };
 
 TEST(path_maps_file, check_rule_with_comment)
@@ -174,7 +173,7 @@ TEST(path_maps_file, check_rule_with_comment)
 
 	mapping = remote_to_local(test_map, "/var/www/");
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/var/www/", "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 };
 
 TEST(path_maps_file, check_rule_with_odd_spaces)
@@ -189,7 +188,7 @@ TEST(path_maps_file, check_rule_with_odd_spaces)
 
 	mapping = remote_to_local(test_map, "/var/www/");
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/var/www/", "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 };
 
 TEST(path_maps_file, check_rules_with_prefix_1)
