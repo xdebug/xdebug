@@ -7,6 +7,9 @@ LDFLAGS=-lCppUTest -fsanitize=undefined -l:libubsan.so -lCppUTest
 
 all: ctest
 
+test: ctest
+	./ctest
+
 ctest: xdebuglib.a ${C_TESTS} ${SOURCE_FILES} ${HEADER_FILES} all_tests.cpp
 	g++ ${CPPFLAGS} all_tests.cpp ${C_TESTS} ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o ctest ${LDFLAGS}
 
