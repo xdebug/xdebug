@@ -271,3 +271,27 @@ local_prefix: /home/derick/projects
 	mapping = remote_to_local(test_map, "/usr/local/www/servers/example.net/");
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/");
 };
+
+TEST(path_maps_file, no_double_separator_remote_prefix)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www/
+local_prefix: /home/derick/projects
+/servers/example.com/ = /example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_DOUBLE_SEPARATOR, 4, "Remote prefix ends with separator ('/usr/local/www/') and mapping line begins with separator ('/servers/example.com/')");
+};
+
+TEST(path_maps_file, no_double_separator_local_prefix)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects/
+/servers/example.com/ = /example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_DOUBLE_SEPARATOR, 4, "Local prefix ends with separator ('/home/derick/projects/') and mapping line begins with separator ('/example.com/')");
+};
