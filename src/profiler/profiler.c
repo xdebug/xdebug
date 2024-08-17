@@ -45,7 +45,7 @@ void xdebug_init_profiler_globals(xdebug_profiler_globals_t *xg)
 void xdebug_profiler_minit(void)
 {
 	/* Overload the "exit" opcode */
-	xdebug_set_opcode_handler(ZEND_EXIT, xdebug_profiler_exit_handler);
+	xdebug_set_opcode_handler(ZEND_GENERATOR_RETURN, xdebug_profiler_exit_handler);
 }
 
 void xdebug_profiler_mshutdown(void)
