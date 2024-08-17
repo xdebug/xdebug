@@ -357,7 +357,6 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
-		opcode.opcode == ZEND_EXIT ||
 		opcode.opcode == ZEND_THROW ||
 		opcode.opcode == ZEND_MATCH_ERROR ||
 		opcode.opcode == ZEND_RETURN
@@ -449,7 +448,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 		}
 
 		/* See if we have an exit instruction */
-		if (opa->opcodes[position].opcode == ZEND_EXIT) {
+		if (opa->opcodes[position].opcode == ZEND_GENERATOR_RETURN) {
 			/* fprintf(stderr, "X* Return found\n"); */
 			if (branch_info) {
 				xdebug_set_add(branch_info->ends, position);
