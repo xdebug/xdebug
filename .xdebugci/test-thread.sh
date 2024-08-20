@@ -3,6 +3,12 @@
 TID="$1"
 shift
 
+PHP=`which php`
+if [[ "${PHP}" == "" ]]; then
+	echo "Can't find a PHP binary on the path"
+	exit
+fi
+
 PHP_DIR=${PHP_DIR:-/usr/local/php}
 USERID=`id -u`
 TMP_DIR=/tmp/ptester-${USERID}
@@ -38,5 +44,5 @@ for i in $@; do
 		TEST_TMP_DIR=${BASEDIR}/tmp UNIQ_RUN_ID="run-$i-id" SKIP_UNPARALLEL_TESTS=1 TEST_PHP_EXECUTABLE=`which php` TEST_PHP_JUNIT="${TMP_DIR}/junit/$i.xml" php run-xdebug-tests.php ${TMP_DIR}/thread/${TID}/${i}/tmp-xdebug/tests >${TMP_DIR}/logs/$i.log 2>&1
 	fi
 
-	/usr/local/php/8.3.7/bin/php -dextension=mongodb.so ${MYDIR}/ingest.php $i
+	php -dextension=mongodb.so ${MYDIR}/ingest.php $i
 done
