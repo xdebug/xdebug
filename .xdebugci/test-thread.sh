@@ -38,5 +38,5 @@ for i in $@; do
 		TEST_TMP_DIR=${BASEDIR}/tmp UNIQ_RUN_ID="run-$i-id" SKIP_UNPARALLEL_TESTS=1 TEST_PHP_EXECUTABLE=`which php` TEST_PHP_JUNIT="${TMP_DIR}/junit/$i.xml" php run-xdebug-tests.php ${TMP_DIR}/thread/${TID}/${i}/tmp-xdebug/tests >${TMP_DIR}/logs/$i.log 2>&1
 	fi
 
-	/usr/local/php/8.2.8/bin/php -dextension=mongodb.so ${MYDIR}/ingest.php $i
+	/usr/local/php/8.3.7/bin/php -dextension=mongodb.so ${MYDIR}/ingest.php $i
 done
