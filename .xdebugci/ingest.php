@@ -1,8 +1,10 @@
 <?php
 $m = new \MongoDB\Driver\Manager( "mongodb+srv://ci-writer:{$_ENV['CIWRITEPASSWORD']}@xdebugci-qftmo.mongodb.net/test?retryWrites=true" );
+$userid = posix_geteuid();
+$tmp_dir = "/tmp/ptester-{$userid}";
 
 /* Create RUN ID */
-$runId =     trim( file_get_contents( '/tmp/ptester/run-id.txt' ) );
+$runId =     trim( file_get_contents( "{$tmp_dir}/run-id.txt" ) );
 $timeStamp = time();
 $abbrev =    trim( `git describe --tags` );
 
@@ -16,7 +18,7 @@ else
 }
 
 /* Read all JUNIT logs */
-foreach ( glob( '/tmp/ptester/junit/' . $pattern ) as $file )
+foreach ( glob( "{$tmp_dir}/junit/{$pattern}" ) as $file )
 {
 	preg_match( '@junit/((.*?)(-32bit)?(-zts)?)\.xml@', $file, $matches );
 

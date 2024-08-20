@@ -14,16 +14,18 @@ NPROC=${NPROC:-$SYSTEM_CORES}
 MYFILE=`realpath $0`
 MYDIR=`dirname ${MYFILE}`
 PHPS=$(ls -v ${PHP_DIR} | egrep ${PATTERN})
+USERID=`id -u`
+TMP_DIR=/tmp/ptester-${USERID}
 
-mkdir -p /tmp/ptester
-rm -rf /tmp/ptester/group*.lst
-mkdir -p /tmp/ptester/logs
-rm -rf /tmp/ptester/logs/*
-mkdir -p /tmp/ptester/junit
-rm -rf /tmp/ptester/junit/*
+mkdir -p ${TMP_DIR}
+rm -rf ${TMP_DIR}/group*.lst
+mkdir -p ${TMP_DIR}/logs
+rm -rf ${TMP_DIR}/logs/*
+mkdir -p ${TMP_DIR}/junit
+rm -rf ${TMP_DIR}/junit/*
 
 # Storing Run ID
-date +'%Y-%m-%d-%H-%M-%S' > /tmp/ptester/run-id.txt
+date +'%Y-%m-%d-%H-%M-%S' > ${TMP_DIR}/run-id.txt
 
 c=0
 for i in $PHPS; do
@@ -31,7 +33,7 @@ for i in $PHPS; do
 
 	GroupName=`printf group%03d.lst $c`
 
-	echo -n "$v " >> /tmp/ptester/${GroupName}
+	echo -n "$v " >> ${TMP_DIR}/${GroupName}
 
 	c=`expr $c + 1`
 	if [[ $c -eq $NPROC ]]; then
@@ -43,8 +45,8 @@ MAX=`expr $NPROC - 1`
 for i in `seq 0 $MAX`; do
 	GroupName=`printf group%03d.lst $i`
 
-	if [ -s /tmp/ptester/$GroupName ]; then
-		PHP_DIR=${PHP_DIR} ${MYDIR}/test-thread.sh $i `cat /tmp/ptester/$GroupName` &
+	if [ -s ${TMP_DIR}/$GroupName ]; then
+		PHP_DIR=${PHP_DIR} ${MYDIR}/test-thread.sh $i `cat ${TMP_DIR}/$GroupName` &
 	fi
 done
 
