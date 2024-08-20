@@ -36,6 +36,9 @@ extern "C" {
 
 #define XDEBUG_STR_WRAP_CHAR(v) (&((xdebug_str){strlen(v), strlen(v)+1, ((char*)(v))}))
 
+#define XDEBUG_STR_VAL(str) (str->d)
+#define XDEBUG_STR_LEN(str) (str->l)
+
 typedef struct xdebug_str {
 	size_t l;
 	size_t a;
