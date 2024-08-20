@@ -1,5 +1,5 @@
 --TEST--
-Test for bug #1571: Profiler doesn't show file/line for closures in namespaces (>= PHP 8.4)
+Test for bug #728: Profiler reports __call() invocations confusingly/wrongly (>= PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
@@ -12,14 +12,26 @@ xdebug.start_with_request=default
 <?php
 require_once 'capture-profile.inc';
 
-require_once 'bug01571-002.inc';
+class bankaccount
+{
+	function __call( $foo, $bar )
+	{
+		var_dump( $foo, $bar );
+	}
+}
+
+$b = new bankaccount;
+$b->bar();
 
 exit();
 ?>
 --EXPECTF--
+string(3) "bar"
+array(0) {
+}
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug01571-002-php84.php
+cmd: %sbug00728-php84.php
 part: 1
 positions: line
 
@@ -46,43 +58,35 @@ calls=1 0 0
 16 %d %d
 
 fl=(1)
-fn=(4) php::usleep
-4 %d %d
+fn=(4) php::var_dump
+8 %d %d
 
-fl=(3) %sbug01571-002.inc
-fn=(5) {closure:%sbug01571-002.inc:4-4}
-4 %d %d
+fl=(3) %sbug00728-php84.php
+fn=(5) bankaccount->__call
+6 %d %d
 cfl=(1)
 cfn=(4)
 calls=1 0 0
-4 %d %d
-
-fl=(3)
-fn=(6) require_once::%sbug01571-002.inc
-1 %d %d
-cfl=(3)
-cfn=(5)
-calls=1 0 0
-5 %d %d
+8 %d %d
 
 fl=(1)
-fn=(7) php::exit
-6 %d %d
+fn=(6) php::exit
+15 %d %d
 
-fl=(4) %sbug01571-002-php84.php
-fn=(8) {main}
+fl=(3)
+fn=(7) {main}
 1 %d %d
 cfl=(2)
 cfn=(3)
 calls=1 0 0
 2 %d %d
 cfl=(3)
+cfn=(5)
+calls=1 0 0
+13 %d %d
+cfl=(1)
 cfn=(6)
 calls=1 0 0
-4 %d %d
-cfl=(1)
-cfn=(7)
-calls=1 0 0
-6 %d %d
+15 %d %d
 
 summary: %d %d

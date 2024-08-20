@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #631: Summary not written when script ended with "exit()"
+Test for bug #631: Summary not written when script ended with "exit()" (< PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.4');
+?>
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=default
@@ -15,7 +20,7 @@ exit();
 --EXPECTF--
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug00631.php
+cmd: %sbug00631-php83.php
 part: 1
 positions: line
 
@@ -45,7 +50,7 @@ fl=(1)
 fn=(4) php::strrev
 4 %d %d
 
-fl=(3) %sbug00631.php
+fl=(3) %sbug00631-php83.php
 fn=(5) {main}
 1 %d %d
 cfl=(2)

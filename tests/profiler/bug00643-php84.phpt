@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #643: Profiler gets line numbers wrong
+Test for bug #643: Profiler gets line numbers wrong (>= PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP >= 8.4');
+?>
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=default
@@ -18,7 +23,7 @@ exit();
 --EXPECTF--
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug00643.php
+cmd: %sbug00643-php84.php
 part: 1
 positions: line
 
@@ -92,8 +97,12 @@ cfn=(8)
 calls=1 0 0
 23 %d %d
 
-fl=(5) %sbug00643.php
-fn=(10) {main}
+fl=(1)
+fn=(10) php::exit
+10 %d %d
+
+fl=(5) %sbug00643-php84.php
+fn=(11) {main}
 1 %d %d
 cfl=(2)
 cfn=(3)
@@ -107,5 +116,9 @@ cfl=(4)
 cfn=(9)
 calls=1 0 0
 8 %d %d
+cfl=(1)
+cfn=(10)
+calls=1 0 0
+10 %d %d
 
 summary: %d %d

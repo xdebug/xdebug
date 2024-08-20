@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #714: Cachegrind files have huge (wrong) numbers in some lines
+Test for bug #714: Cachegrind files have huge (wrong) numbers in some lines (< PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('slow');
+check_reqs('PHP < 8.4; slow');
 ?>
 --INI--
 xdebug.mode=profile
@@ -34,7 +34,7 @@ DONE
 
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug00714.php
+cmd: %sbug00714-php83.php
 part: 1
 positions: line
 
@@ -64,7 +64,7 @@ fl=(1)
 fn=(4) php::sleep
 4 %r(1\d{8}|9\d{7})%r %d
 
-fl=(3) %sbug00714.php
+fl=(3) %sbug00714-php83.php
 fn=(5) sleep1
 4 %d %d
 cfl=(1)

@@ -1,5 +1,10 @@
 --TEST--
-Test for bug #785: Profiler does not handle closures well
+Test for bug #785: Profiler does not handle closures well (< PHP 8.4)
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('PHP < 8.4');
+?>
 --INI--
 xdebug.mode=profile
 xdebug.start_with_request=default
@@ -15,7 +20,7 @@ exit();
 int(21)
 version: 1
 creator: xdebug %d.%s (PHP %s)
-cmd: %sbug00785-001.php
+cmd: %sbug00785-001-php83.php
 part: 1
 positions: line
 
@@ -181,7 +186,7 @@ cfn=(8)
 calls=1 0 0
 12 %d %d
 
-fl=(4) %sbug00785-001.php
+fl=(4) %sbug00785-001-php83.php
 fn=(10) {main}
 1 %d %d
 cfl=(2)

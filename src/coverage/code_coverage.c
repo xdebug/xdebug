@@ -274,6 +274,16 @@ static void prefill_from_opcode(zend_string *filename, zend_op opcode, int deadc
 
 #define XDEBUG_ZNODE_ELEM(node,var) node.var
 
+#if PHP_VERSION_ID < 80200
+static zend_always_inline bool xdebug_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
+{
+	return ZSTR_LEN(s1) == s2_length && !memcmp(ZSTR_VAL(s1), s2, s2_length);
+}
+# define xdebug_string_equals_literal(str, literal) xdebug_string_equals_cstr(str, "" literal, sizeof(literal) - 1)
+#else
+# define xdebug_string_equals_literal  zend_string_equals_literal
+#endif
+
 static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
 {
 #if ZEND_USE_ABS_JMP_ADDR
@@ -357,7 +367,9 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 
 	} else if (
 		opcode.opcode == ZEND_GENERATOR_RETURN ||
+#if PHP_VERSION_ID < 80400
 		opcode.opcode == ZEND_EXIT ||
+#endif
 		opcode.opcode == ZEND_THROW ||
 		opcode.opcode == ZEND_MATCH_ERROR ||
 		opcode.opcode == ZEND_RETURN
@@ -365,6 +377,48 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 		jumps[0] = XDEBUG_JMP_EXIT;
 		*jump_count = 1;
 		return 1;
+	} else if (
+		opcode.opcode == ZEND_INIT_FCALL
+	) {
+		zval *func_name = RT_CONSTANT(&opa->opcodes[position], opcode.op2);
+		if (xdebug_string_equals_literal(Z_PTR_P(func_name), "exit")) {
+			int level = 0;
+			uint32_t start = position + 1;
+
+			for (;;) {
+				switch (opa->opcodes[start].opcode) {
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_DYNAMIC_CALL:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+#if PHP_VERSION_ID >= 80400
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
+#endif
+					case ZEND_NEW:
+						level++;
+						break;
+					case ZEND_DO_FCALL:
+					case ZEND_DO_FCALL_BY_NAME:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+						if (level == 0) {
+							goto done;
+						}
+						level--;
+						break;
+				}
+				start++;
+			}
+ done:
+			ZEND_ASSERT(opa->opcodes[start].opcode == ZEND_DO_ICALL);
+			jumps[0] = XDEBUG_JMP_EXIT;
+			*jump_count = 1;
+			return 1;
+		}
+
 	} else if (
 		opcode.opcode == ZEND_MATCH ||
 		opcode.opcode == ZEND_SWITCH_LONG ||
@@ -448,6 +502,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			break;
 		}
 
+#if PHP_VERSION_ID < 80400
 		/* See if we have an exit instruction */
 		if (opa->opcodes[position].opcode == ZEND_EXIT) {
 			/* fprintf(stderr, "X* Return found\n"); */
@@ -457,6 +512,7 @@ static void xdebug_analyse_branch(zend_op_array *opa, unsigned int position, xde
 			}
 			break;
 		}
+#endif
 		/* See if we have a return instruction */
 		if (
 			opa->opcodes[position].opcode == ZEND_RETURN
