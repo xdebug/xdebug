@@ -34,11 +34,16 @@ void xdebug_path_maps_dtor(xdebug_path_maps *maps)
 	xdfree(maps);
 }
 
+static void xdebug_path_map_element_destroy(xdebug_path_map_element *element)
+{
+	xdfree(element->path);
+}
+
 void xdebug_path_mapping_free(void *mapping)
 {
 	xdebug_path_mapping *tmp = (xdebug_path_mapping*) mapping;
-	xdfree(tmp->remote_path);
-	xdfree(tmp->local_path);
+	xdebug_path_map_element_destroy(&tmp->remote);
+	xdebug_path_map_element_destroy(&tmp->local);
 	xdfree(tmp);
 }
 
