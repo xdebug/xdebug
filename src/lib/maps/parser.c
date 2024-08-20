@@ -182,6 +182,31 @@ static int get_mapping_type(xdebug_str *string)
 	return XDEBUG_PATH_MAP_TYPE_FILE;
 }
 
+enum map_element {
+	REMOTE,
+	LOCAL
+};
+
+const char *element_name_as_string[] = {
+	"Remote",
+	"Local"
+};
+
+static bool has_double_separator(path_maps_parser_state *state, const char *prefix, const char *path, map_element element)
+{
+	size_t prefix_len = prefix ? strlen(prefix) : 0;
+
+	if (path[0] == '/' && prefix && prefix_len > 0 && prefix[prefix_len - 1] == '/') {
+		char *message = xdebug_sprintf("%s prefix ends with separator ('%s') and mapping line begins with separator ('%s')",
+			element_name_as_string[element], prefix, path);
+		state_set_error(state, PATH_MAPS_DOUBLE_SEPARATOR, message);
+		xdfree(message);
+		return true;
+	}
+
+	return false;
+}
+
 static bool state_add_rule(path_maps_parser_state *state, const char *buffer, const char *equals)
 {
 	xdebug_path_mapping* tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
@@ -200,12 +225,7 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 	remote_part = xdstrndup(buffer, equals - buffer - 1);
 	trimmed = xdebug_trim(remote_part);
 
-	if (trimmed[0] == '/' && state->current_remote_prefix && remote_path.l > 0 && remote_path.d[remote_path.l - 1] == '/') {
-		char *message = xdebug_sprintf("Remote prefix ends with separator ('%s') and mapping line begins with separator ('%s')",
-			remote_path.d, trimmed);
-		state_set_error(state, PATH_MAPS_DOUBLE_SEPARATOR, message);
-		xdfree(message);
-
+	if (has_double_separator(state, state->current_remote_prefix, trimmed, REMOTE)) {
 		goto failure;
 	}
 
@@ -224,12 +244,7 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 
 	trimmed = xdebug_trim(equals + 1);
 
-	if (trimmed[0] == '/' && state->current_local_prefix && local_path.l > 0 && local_path.d[local_path.l - 1] == '/') {
-		char *message = xdebug_sprintf("Local prefix ends with separator ('%s') and mapping line begins with separator ('%s')",
-			local_path.d, trimmed);
-		state_set_error(state, PATH_MAPS_DOUBLE_SEPARATOR, message);
-		xdfree(message);
-
+	if (has_double_separator(state, state->current_local_prefix, trimmed, LOCAL)) {
 		goto failure;
 	}
 
