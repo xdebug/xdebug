@@ -41,5 +41,9 @@ class Manager
 Manager::$stuff = new stdClass();
 Manager::$stuff->Logs = new Handler;
 ?>
+--AFTER--
+<?php
+unlink(sys_get_temp_dir() . '/asdf');
+?>
 --EXPECT--
 DONE
