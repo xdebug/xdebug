@@ -25,7 +25,7 @@ class Wrapper
 
     public function stream_open($path, $mode)
     {
-        $this->_fp = fopen(sys_get_temp_dir() . '/asdf', $mode);
+        $this->_fp = fopen(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'asdf', $mode);
 
         return true;
     }
@@ -43,7 +43,7 @@ Manager::$stuff->Logs = new Handler;
 ?>
 --AFTER--
 <?php
-unlink(sys_get_temp_dir() . '/asdf');
+unlink(sys_get_temp_dir() .'/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'asdf');
 ?>
 --EXPECT--
 DONE
