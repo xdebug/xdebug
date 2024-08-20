@@ -271,9 +271,10 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 	}
 
 	/* assign */
-	tmp->remote_path = remote_path.d;
-	tmp->local_path = local_path.d;
-	tmp->type = remote_mapping_type;
+	tmp->remote.path = remote_path.d;
+	tmp->local.path = local_path.d;
+	tmp->remote.type = remote_mapping_type;
+	tmp->local.type = local_mapping_type;
 
 	xdebug_hash_add(state->file_rules, remote_path.d, remote_path.l, tmp);
 	return true;
@@ -356,14 +357,21 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 	return true;
 }
 
+static void copy_element(xdebug_path_map_element *to, xdebug_path_map_element *from)
+{
+	to->type  = from->type;
+	to->path  = xdstrdup(from->path);
+	to->begin = from->begin;
+	to->end   = from->end;
+}
+
 static void copy_rule(void *ret, xdebug_hash_element *e)
 {
 	xdebug_path_mapping *new_rule = (xdebug_path_mapping*) e->ptr;
 	xdebug_path_mapping *tmp = (xdebug_path_mapping*) xdmalloc(sizeof(xdebug_path_mapping));
 
-	tmp->local_path = xdstrdup(new_rule->local_path);
-	tmp->remote_path = xdstrdup(new_rule->remote_path);
-	tmp->type = new_rule->type;
+	copy_element(&tmp->remote, &new_rule->remote);
+	copy_element(&tmp->local,  &new_rule->local);
 
 	xdebug_hash_add((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, tmp);
 }
