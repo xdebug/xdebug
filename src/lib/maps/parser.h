@@ -27,6 +27,7 @@
 #define PATH_MAPS_INVALID_PREFIX 0x0006
 #define PATH_MAPS_DOUBLE_SEPARATOR 0x0007
 #define PATH_MAPS_MISMATCHED_TYPES 0x0008
+#define PATH_MAPS_WRONG_RANGE    0x0009
 
 bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, int *error_line, char **error_message);
 

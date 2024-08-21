@@ -57,9 +57,18 @@ TEST_GROUP(path_maps_file)
 	void check_map(size_t type, const char *local_path)
 	{
 		CHECK(mapping);
-		LONGS_EQUAL(type, mapping->remote.type);
-		LONGS_EQUAL(type, mapping->local.type);
-		STRCMP_EQUAL(local_path, mapping->local.path);
+		LONGS_EQUAL(type, mapping->remote->type);
+		LONGS_EQUAL(type, mapping->local->type);
+		STRCMP_EQUAL(local_path, XDEBUG_STR_VAL(mapping->local->path));
+	}
+
+	void check_map_with_range(size_t type, const char *local_path, int remote_begin, int remote_end, int local_begin, int local_end)
+	{
+		check_map(type, local_path);
+		LONGS_EQUAL(remote_begin, mapping->remote->begin);
+		LONGS_EQUAL(remote_end, mapping->remote->end);
+		LONGS_EQUAL(local_begin, mapping->local->begin);
+		LONGS_EQUAL(local_end, mapping->local->end);
 	}
 
 	TEST_TEARDOWN()
@@ -334,7 +343,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Can't determine type of remote mapping part ('/usr/local/www/servers/example.org?')");
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Remote mapping part ('/usr/local/www/servers/example.org?') type (file) must match local mapping part ('/home/derick/projects/example.org/') type (directory)");
 };
 
 TEST(path_maps_file, local_part_unknown_type)
@@ -346,7 +355,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Can't determine type of local mapping part ('/home/derick/projects/example.org?')");
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Remote mapping part ('/usr/local/www/servers/example.org/') type (directory) must match local mapping part ('/home/derick/projects/example.org?') type (file)");
 };
 
 TEST(path_maps_file, check_type_file)
@@ -362,4 +371,83 @@ local_prefix: /home/derick/project
 
 	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
 	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "/home/derick/project/example.php");
+};
+
+TEST(path_maps_file, remote_path_wrong_start_range_number)
+{
+	const char *map = R""""(
+/example.php:53x = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Remote element: Non-number found as range: ':53x'");
+};
+
+TEST(path_maps_file, local_path_wrong_start_range_number)
+{
+	const char *map = R""""(
+/example.php = /example.php:72c
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Local element: Non-number found as range: ':72c'");
+};
+
+TEST(path_maps_file, remote_path_only_range_number)
+{
+	const char *map = R""""(
+:53x = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Remote element: Element only contains a range, but no path: ':53x'");
+};
+
+TEST(path_maps_file, local_path_only_range_number)
+{
+	const char *map = R""""(
+/example.php = :72c
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Local element: Element only contains a range, but no path: ':72c'");
+};
+
+TEST(path_maps_file, remote_path_with_directory)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/examples/:53x = /examples/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Ranges are not supported with directories: '/examples/:53x'");
+};
+
+TEST(path_maps_file, local_path_with_directory)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/examples/ = /examples/:72c
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Ranges are not supported with directories: '/examples/:72c'");
+};
+
+TEST(path_maps_file, remote_single_range_number)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:1 = /example.php:42
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 1, 1, 42, 42);
 };
