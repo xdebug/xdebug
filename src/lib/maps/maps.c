@@ -23,7 +23,7 @@
 xdebug_path_maps *xdebug_path_maps_ctor(void)
 {
 	xdebug_path_maps *tmp = (xdebug_path_maps*) xdcalloc(1, sizeof(xdebug_path_maps));
-	tmp->remote_to_local_map = xdebug_hash_alloc(128, xdebug_path_mapping_free);
+	tmp->remote_to_local_map = xdebug_hash_alloc(128, xdebug_path_mapping_dtor);
 
 	return tmp;
 }
@@ -34,16 +34,31 @@ void xdebug_path_maps_dtor(xdebug_path_maps *maps)
 	xdfree(maps);
 }
 
-static void xdebug_path_map_element_destroy(xdebug_path_map_element *element)
+xdebug_path_map_element* xdebug_path_map_element_ctor(void)
 {
-	xdfree(element->path);
+	xdebug_path_map_element *tmp = (xdebug_path_map_element*) xdcalloc(1, sizeof(xdebug_path_map_element));
+
+	return tmp;
 }
 
-void xdebug_path_mapping_free(void *mapping)
+void xdebug_path_map_element_dtor(xdebug_path_map_element *element)
+{
+	if (element->path) {
+		xdebug_str_free(element->path);
+	}
+	xdfree(element);
+}
+
+void xdebug_path_mapping_dtor(void *mapping)
 {
 	xdebug_path_mapping *tmp = (xdebug_path_mapping*) mapping;
-	xdebug_path_map_element_destroy(&tmp->remote);
-	xdebug_path_map_element_destroy(&tmp->local);
+
+	if (tmp->remote) {
+		xdebug_path_map_element_dtor(tmp->remote);
+	}
+	if (tmp->local) {
+		xdebug_path_map_element_dtor(tmp->local);
+	}
 	xdfree(tmp);
 }
 

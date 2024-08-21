@@ -18,6 +18,7 @@
 #define __XDEBUG_MAPS_MAPS_PRIVATE_H__
 
 #include "../hash.h"
+#include "../str.h"
 
 #define XDEBUG_PATH_MAP_TYPE_UNKNOWN   0x00
 #define XDEBUG_PATH_MAP_TYPE_DIRECTORY 0x01
@@ -25,26 +26,29 @@
 #define XDEBUG_PATH_MAP_TYPE_LINES     0x03
 
 typedef struct xdebug_path_map_element {
-	int   type;
-	char *path;
-	int   begin;
-	int   end;
+	int         type;
+	xdebug_str *path;
+	int         begin;
+	int         end;
 } xdebug_path_map_element;
 
 typedef struct xdebug_path_mapping {
-	xdebug_path_map_element remote;
-	xdebug_path_map_element local;
+	xdebug_path_map_element *remote;
+	xdebug_path_map_element *local;
 } xdebug_path_mapping;
 
 typedef struct xdebug_path_maps {
 	xdebug_hash *remote_to_local_map;
 } xdebug_path_maps;
 
-void xdebug_path_mapping_free(void *mapping);
-
 /* Functions for testing, and not exported into Xdebug */
 size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps);
 
 xdebug_path_mapping *remote_to_local(xdebug_path_maps *maps, const char *remote);
+
+xdebug_path_map_element* xdebug_path_map_element_ctor(void);
+void xdebug_path_map_element_dtor(xdebug_path_map_element *element);
+
+void xdebug_path_mapping_dtor(void *mapping);
 
 #endif
