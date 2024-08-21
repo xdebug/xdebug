@@ -277,6 +277,71 @@ static bool extract_line_range(path_maps_parser_state *state, const char *elemen
 		return true;
 	}
 
+	/* check whether the minus doesn't immediately follow the colon */
+	if (minus == colon + 1) {
+		char *message = xdebug_sprintf("%s element: The starting line number must be provided: '%s'",
+			element_name_as_string[element_type],
+			element
+		);
+
+		state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+
+		xdfree(message);
+		return false;
+	}
+
+	/* we should have the begin line number between colon+1 and minus-1, and the end line number beteen minus+1...\0 */
+	{
+		char *end_ptr;
+		int begin_lineno, end_lineno;
+
+		begin_lineno = strtol(colon + 1, &end_ptr, 10);
+
+		if (*end_ptr != '-') { /* something else followed the number, and not the expected - */
+			char *message = xdebug_sprintf("%s element: Non-number found as begin range: '%s'",
+				element_name_as_string[element_type],
+				colon
+			);
+
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+
+			xdfree(message);
+			return false;
+		}
+
+		end_lineno = strtol(minus + 1, &end_ptr, 10);
+		if (*end_ptr != '\0') { /* something else followed the number */
+			char *message = xdebug_sprintf("%s element: Non-number found as end range: '%s'",
+				element_name_as_string[element_type],
+				colon
+			);
+
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+
+			xdfree(message);
+			return false;
+		}
+
+		if (end_lineno < begin_lineno) {
+			char *message = xdebug_sprintf("%s element: End of range (%d) is before start of range (%d): '%s'",
+				element_name_as_string[element_type],
+				begin_lineno, end_lineno,
+				colon
+			);
+
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+
+			xdfree(message);
+			return false;
+		}
+
+		*element_length = colon - element;
+		*begin = begin_lineno;
+		*end = end_lineno;
+
+		return true;
+	}
+
 	state_set_error(state, PATH_MAPS_WRONG_RANGE, "Unknown error in extracting line range");
 	return false;
 }
@@ -393,12 +458,28 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 		goto failure;
 	}
 
-	/* - if remote path is a directory type, then local needs to be one too */
+	/* - the types of the remote and local types need to be the same */
 	if (remote_path->type != local_path->type) {
 		char *message = xdebug_sprintf("Remote mapping part ('%s') type (%s) must match local mapping part ('%s') type (%s)",
 			XDEBUG_STR_VAL(remote_path->path), mapping_type_as_string[remote_path->type],
 			XDEBUG_STR_VAL(local_path->path), mapping_type_as_string[local_path->type]);
 		state_set_error(state, PATH_MAPS_MISMATCHED_TYPES, message);
+		xdfree(message);
+
+		goto failure;
+	}
+
+	/* - if local range is multiple lines, then remote range needs to be to, and the same difference */
+	if (
+		(remote_path->type == XDEBUG_PATH_MAP_TYPE_LINES && local_path->begin != local_path->end) &&
+		((remote_path->end - remote_path->begin) != (local_path->end - local_path->begin))
+	) {
+		char *message = xdebug_sprintf("The remote range span (%d-%d) needs to have the same difference (%d) as the local range span (%d-%d) difference (%d)",
+			remote_path->begin, remote_path->end,
+			remote_path->end - remote_path->begin,
+			local_path->begin, local_path->end,
+			local_path->end - local_path->begin);
+		state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
 		xdfree(message);
 
 		goto failure;
