@@ -475,3 +475,156 @@ local_prefix: /home/derick/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Line number much be larger than 0: '/example.php:0'");
 };
+
+TEST(path_maps_file, remote_range_empty_start)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:-42 = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: The starting line number must be provided: '/example.php:-42'");
+};
+
+TEST(path_maps_file, local_range_empty_start)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:7 = /example.php:-8
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: The starting line number must be provided: '/example.php:-8'");
+};
+
+TEST(path_maps_file, remote_range_wrong_begin_lineno)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:6x-42 = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Non-number found as begin range: ':6x-42'");
+};
+
+TEST(path_maps_file, local_range_wrong_begin_lineno)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php = /example.php:7y-43
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Non-number found as begin range: ':7y-43'");
+};
+
+TEST(path_maps_file, remote_range_wrong_end_lineno)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:6-42x = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Non-number found as end range: ':6-42x'");
+};
+
+TEST(path_maps_file, local_range_wrong_end_lineno)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php = /example.php:7-43y
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Non-number found as end range: ':7-43y'");
+};
+
+TEST(path_maps_file, remote_range_wrong_range_order)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:42-5 = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: End of range (42) is before start of range (5): ':42-5'");
+};
+
+TEST(path_maps_file, local_range_wrong_range_order)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php = /example.php:75-8
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: End of range (75) is before start of range (8): ':75-8'");
+};
+
+TEST(path_maps_file, range_span_mismatch)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:2-5 = /example.php:2-8
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "The remote range span (2-5) needs to have the same difference (3) as the local range span (2-8) difference (6)");
+};
+
+TEST(path_maps_file, range_span_single)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:5 = /example.php:8
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 5, 5, 8, 8);
+};
+
+TEST(path_maps_file, range_span_n_to_1)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:5-17 = /example.php:8
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 5, 17, 8, 8);
+};
+
+TEST(path_maps_file, range_span_n_to_m)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:5-17 = /example.php:8-20
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 5, 17, 8, 20);
+};
