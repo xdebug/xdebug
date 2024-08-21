@@ -451,3 +451,27 @@ local_prefix: /home/derick/project
 	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 1, 1, 42, 42);
 };
+
+TEST(path_maps_file, remote_range_less_than_one)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:0 = /example.php
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Line number much be larger than 0: '/example.php:0'");
+};
+
+TEST(path_maps_file, local_range_less_than_one)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php = /example.php:0
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Line number much be larger than 0: '/example.php:0'");
+};
