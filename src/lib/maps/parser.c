@@ -257,6 +257,19 @@ static bool extract_line_range(path_maps_parser_state *state, const char *elemen
 			xdfree(message);
 			return false;
 		}
+
+		if (lineno < 1) {
+			char *message = xdebug_sprintf("%s element: Line number much be larger than 0: '%s'",
+				element_name_as_string[element_type],
+				element
+			);
+
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+
+			xdfree(message);
+			return false;
+		}
+
 		*element_length = colon - element;
 		*begin = lineno;
 		*end = lineno;
@@ -264,6 +277,7 @@ static bool extract_line_range(path_maps_parser_state *state, const char *elemen
 		return true;
 	}
 
+	state_set_error(state, PATH_MAPS_WRONG_RANGE, "Unknown error in extracting line range");
 	return false;
 }
 
