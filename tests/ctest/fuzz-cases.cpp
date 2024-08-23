@@ -113,3 +113,14 @@ local_prefix: /hom/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_GARBAGE, 4, "Local part is empty");
 };
+
+TEST(fuzz_cases, single_char_remote_part)
+{
+	const char *map = R""""(
+remote_prefix: /local/www
+l= /exp:20
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 3, "Remote mapping part ('/local/wwwl') type (file) must match local mapping part ('/exp') type (line-range)");
+};
