@@ -353,6 +353,11 @@ static xdebug_path_map_element* prepare_remote_element(path_maps_parser_state *s
 	char       *trimmed = xdebug_trim(remote_part);
 	int         trimmed_length = strlen(trimmed), begin = 0, end = 0;
 
+	if (trimmed_length < 1) {
+		state_set_error(state, PATH_MAPS_GARBAGE, "Remote part is empty");
+		goto failure;
+	}
+
 	if (has_double_separator(state, state->current_remote_prefix, trimmed, REMOTE)) {
 		goto failure;
 	}

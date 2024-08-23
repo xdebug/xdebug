@@ -124,3 +124,16 @@ l= /exp:20
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_MISMATCHED_TYPES, 3, "Remote mapping part ('/local/wwwl') type (file) must match local mapping part ('/exp') type (line-range)");
 };
+
+TEST(fuzz_cases, remote_part_is_emtpy_after_trim)
+{
+	const char *map = R""""(
+remote_prefix: /local/www
+local_prefix: /hom/project
+/projecle.php:5-17 = /example.php:8
+ = /example.php:8
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_GARBAGE, 5, "Remote part is empty");
+};
