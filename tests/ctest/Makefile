@@ -1,4 +1,4 @@
-C_TESTS=path_map_test.cpp
+C_TESTS=path_map_test.cpp fuzz-cases.cpp
 SOURCE_FILES=../../src/lib/maps/parser.c ../../src/lib/maps/maps.c ../../src/lib/maps/maps_private.c
 HEADER_FILES=../../src/lib/maps/maps_private.h ../../src/lib/maps/maps.h
 INCLUDE_PATH=../../src/lib/maps
