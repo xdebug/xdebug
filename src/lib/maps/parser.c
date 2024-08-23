@@ -349,7 +349,7 @@ static bool extract_line_range(path_maps_parser_state *state, const char *elemen
 static xdebug_path_map_element* prepare_remote_element(path_maps_parser_state *state, const char *buffer, const char *equals)
 {
 	xdebug_path_map_element *remote_element = xdebug_path_map_element_ctor();
-	char       *remote_part = xdstrndup(buffer, equals - buffer - 1);
+	char       *remote_part = xdstrndup(buffer, equals - buffer);
 	char       *trimmed = xdebug_trim(remote_part);
 	int         trimmed_length = strlen(trimmed), begin = 0, end = 0;
 
