@@ -560,6 +560,10 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 			state_set_error(state, PATH_MAPS_GARBAGE, "Line is not empty, and has no stanza, assignment, or starts with '#'");
 			return false;
 		}
+		if (equals == buffer) {
+			state_set_error(state, PATH_MAPS_GARBAGE, "Line starts with a '='");
+			return false;
+		}
 
 		if (!state_add_rule(state, buffer, equals)) {
 			return false;
