@@ -1,0 +1,6 @@
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/projects/example.php:5-17 = /example.php:8
+/example.php:5-17 = /example.php:8-20
+/example.php:17 = /example.php:20
+/projects/php-web/ = /php-web/
