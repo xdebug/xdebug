@@ -101,3 +101,15 @@ local_prefix: /home/derick/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_GARBAGE, 4, "Line starts with a '='");
 };
+
+TEST(fuzz_cases, local_part_is_emtpy)
+{
+	const char *map = R""""(
+remote_prefix: /local/www
+local_prefix: /hom/project
+/projecle.php:5-17 =
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_GARBAGE, 4, "Local part is empty");
+};
