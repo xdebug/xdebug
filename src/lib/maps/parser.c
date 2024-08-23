@@ -401,6 +401,11 @@ static xdebug_path_map_element* prepare_local_element(path_maps_parser_state *st
 	char       *trimmed = xdebug_trim(equals + 1);
 	int         trimmed_length = strlen(trimmed), begin = 0, end = 0;
 
+	if (trimmed_length < 1) {
+		state_set_error(state, PATH_MAPS_GARBAGE, "Local part is empty");
+		goto failure;
+	}
+
 	if (has_double_separator(state, state->current_local_prefix, trimmed, LOCAL)) {
 		goto failure;
 	}
