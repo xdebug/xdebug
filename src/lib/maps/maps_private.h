@@ -26,13 +26,13 @@
 #define XDEBUG_PATH_MAP_TYPE_LINES     0x03
 
 typedef struct xdebug_path_map_element {
-	int         type;
 	xdebug_str *path;
 	int         begin;
 	int         end;
 } xdebug_path_map_element;
 
 typedef struct xdebug_path_mapping {
+	int         type;
 	xdebug_path_map_element *remote;
 	xdebug_path_map_element *local;
 } xdebug_path_mapping;
