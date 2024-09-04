@@ -57,8 +57,7 @@ TEST_GROUP(fuzz_cases)
 	void check_map(size_t type, const char *local_path)
 	{
 		CHECK(mapping);
-		LONGS_EQUAL(type, mapping->remote->type);
-		LONGS_EQUAL(type, mapping->local->type);
+		LONGS_EQUAL(type, mapping->type);
 		STRCMP_EQUAL(local_path, XDEBUG_STR_VAL(mapping->local->path));
 	}
 

@@ -346,7 +346,7 @@ static bool extract_line_range(path_maps_parser_state *state, const char *elemen
 	return false;
 }
 
-static xdebug_path_map_element* prepare_remote_element(path_maps_parser_state *state, const char *buffer, const char *equals)
+static xdebug_path_map_element* prepare_remote_element(path_maps_parser_state *state, const char *buffer, const char *equals, int *type)
 {
 	xdebug_path_map_element *remote_element = xdebug_path_map_element_ctor();
 	char       *remote_part = xdstrndup(buffer, equals - buffer);
@@ -362,20 +362,20 @@ static xdebug_path_map_element* prepare_remote_element(path_maps_parser_state *s
 		goto failure;
 	}
 
-	remote_element->type = XDEBUG_PATH_MAP_TYPE_FILE;
+	*type = XDEBUG_PATH_MAP_TYPE_FILE;
 
 	if (!extract_line_range(state, trimmed, &trimmed_length, &begin, &end, REMOTE)) {
 		goto failure;
 	}
 
 	if (begin > 0) {
-		remote_element->type = XDEBUG_PATH_MAP_TYPE_LINES;
+		*type = XDEBUG_PATH_MAP_TYPE_LINES;
 		remote_element->begin = begin;
 		remote_element->end   = end;
 	}
 
 	if (trimmed[trimmed_length - 1] == '/') {
-		remote_element->type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
+		*type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
 	}
 
 	/* Assemble */
@@ -400,7 +400,7 @@ failure:
 	return NULL;
 }
 
-static xdebug_path_map_element* prepare_local_element(path_maps_parser_state *state, const char *equals)
+static xdebug_path_map_element* prepare_local_element(path_maps_parser_state *state, const char *equals, int *type)
 {
 	xdebug_path_map_element *local_element = xdebug_path_map_element_ctor();
 	char       *trimmed = xdebug_trim(equals + 1);
@@ -415,20 +415,20 @@ static xdebug_path_map_element* prepare_local_element(path_maps_parser_state *st
 		goto failure;
 	}
 
-	local_element->type = XDEBUG_PATH_MAP_TYPE_FILE;
+	*type = XDEBUG_PATH_MAP_TYPE_FILE;
 
 	if (!extract_line_range(state, trimmed, &trimmed_length, &begin, &end, LOCAL)) {
 		goto failure;
 	}
 
 	if (begin > 0) {
-		local_element->type = XDEBUG_PATH_MAP_TYPE_LINES;
+		*type = XDEBUG_PATH_MAP_TYPE_LINES;
 		local_element->begin = begin;
 		local_element->end   = end;
 	}
 
 	if (trimmed[trimmed_length - 1] == '/') {
-		local_element->type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
+		*type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
 	}
 
 	if (state->current_local_prefix) {
@@ -455,24 +455,26 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 	xdebug_path_mapping* tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
 	xdebug_path_map_element *remote_path = NULL;
 	xdebug_path_map_element *local_path  = NULL;
+	int remote_type = XDEBUG_PATH_MAP_TYPE_UNKNOWN;
+	int local_type  = XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 
 	/* remote part */
-	remote_path = prepare_remote_element(state, buffer, equals);
+	remote_path = prepare_remote_element(state, buffer, equals, &remote_type);
 	if (!remote_path) {
 		goto failure;
 	}
 
 	/* local part */
-	local_path = prepare_local_element(state, equals);
+	local_path = prepare_local_element(state, equals, &local_type);
 	if (!local_path) {
 		goto failure;
 	}
 
 	/* - the types of the remote and local types need to be the same */
-	if (remote_path->type != local_path->type) {
+	if (remote_type != local_type) {
 		char *message = xdebug_sprintf("Remote mapping part ('%s') type (%s) must match local mapping part ('%s') type (%s)",
-			XDEBUG_STR_VAL(remote_path->path), mapping_type_as_string[remote_path->type],
-			XDEBUG_STR_VAL(local_path->path), mapping_type_as_string[local_path->type]);
+			XDEBUG_STR_VAL(remote_path->path), mapping_type_as_string[remote_type],
+			XDEBUG_STR_VAL(local_path->path), mapping_type_as_string[local_type]);
 		state_set_error(state, PATH_MAPS_MISMATCHED_TYPES, message);
 		xdfree(message);
 
@@ -481,7 +483,7 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 
 	/* - if local range is multiple lines, then remote range needs to be to, and the same difference */
 	if (
-		(remote_path->type == XDEBUG_PATH_MAP_TYPE_LINES && local_path->begin != local_path->end) &&
+		(remote_type == XDEBUG_PATH_MAP_TYPE_LINES && local_path->begin != local_path->end) &&
 		((remote_path->end - remote_path->begin) != (local_path->end - local_path->begin))
 	) {
 		char *message = xdebug_sprintf("The remote range span (%d-%d) needs to have the same difference (%d) as the local range span (%d-%d) difference (%d)",
@@ -496,6 +498,7 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 	}
 
 	/* assign */
+	tmp->type = remote_type;
 	tmp->remote = remote_path;
 	tmp->local  = local_path;
 
@@ -587,7 +590,6 @@ static xdebug_path_map_element* copy_element(xdebug_path_map_element *from)
 {
 	xdebug_path_map_element *tmp = xdebug_path_map_element_ctor();
 
-	tmp->type  = from->type;
 	tmp->path  = xdebug_str_copy(from->path);
 	tmp->begin = from->begin;
 	tmp->end   = from->end;
@@ -600,6 +602,7 @@ static void copy_rule(void *ret, xdebug_hash_element *e)
 	xdebug_path_mapping *new_rule = (xdebug_path_mapping*) e->ptr;
 	xdebug_path_mapping *tmp = (xdebug_path_mapping*) xdmalloc(sizeof(xdebug_path_mapping));
 
+	tmp->type = new_rule->type;
 	tmp->remote = copy_element(new_rule->remote);
 	tmp->local =  copy_element(new_rule->local);
 
