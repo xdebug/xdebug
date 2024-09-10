@@ -58,16 +58,16 @@ TEST_GROUP(fuzz_cases)
 	{
 		CHECK(mapping);
 		LONGS_EQUAL(type, mapping->type);
-		STRCMP_EQUAL(local_path, XDEBUG_STR_VAL(mapping->local->path));
+		STRCMP_EQUAL(local_path, XDEBUG_STR_VAL(mapping->local_path));
 	}
 
 	void check_map_with_range(size_t type, const char *local_path, int remote_begin, int remote_end, int local_begin, int local_end)
 	{
 		check_map(type, local_path);
-		LONGS_EQUAL(remote_begin, mapping->remote->begin);
-		LONGS_EQUAL(remote_end, mapping->remote->end);
-		LONGS_EQUAL(local_begin, mapping->local->begin);
-		LONGS_EQUAL(local_end, mapping->local->end);
+		LONGS_EQUAL(remote_begin, mapping->head_range_ptr->remote_begin);
+		LONGS_EQUAL(remote_end, mapping->head_range_ptr->remote_end);
+		LONGS_EQUAL(local_begin, mapping->head_range_ptr->local_begin);
+		LONGS_EQUAL(local_end, mapping->head_range_ptr->local_end);
 	}
 
 	TEST_TEARDOWN()
