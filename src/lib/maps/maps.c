@@ -34,30 +34,59 @@ void xdebug_path_maps_dtor(xdebug_path_maps *maps)
 	xdfree(maps);
 }
 
-xdebug_path_map_element* xdebug_path_map_element_ctor(void)
+xdebug_path_map_range* xdebug_path_map_range_ctor(int remote_begin, int remote_end, int local_begin, int local_end)
 {
-	xdebug_path_map_element *tmp = (xdebug_path_map_element*) xdcalloc(1, sizeof(xdebug_path_map_element));
+	xdebug_path_map_range *tmp = (xdebug_path_map_range*) xdcalloc(1, sizeof(xdebug_path_map_range));
+
+	tmp->ref_count    = 1;
+	tmp->remote_begin = remote_begin;
+	tmp->remote_end   = remote_end;
+	tmp->local_begin  = local_begin;
+	tmp->local_end    = local_end;
 
 	return tmp;
 }
 
-void xdebug_path_map_element_dtor(xdebug_path_map_element *element)
+xdebug_path_map_range* xdebug_path_map_range_copy(xdebug_path_map_range *range)
 {
-	if (element->path) {
-		xdebug_str_free(element->path);
+	range->ref_count++;
+
+	return range;
+}
+
+void xdebug_path_map_range_dtor(xdebug_path_map_range *range)
+{
+	range->ref_count--;
+
+	if (range->ref_count) {
+		return;
 	}
-	xdfree(element);
+
+	if (range->next) {
+		xdebug_path_map_range_dtor(range->next);
+	}
+	xdfree(range);
+}
+
+xdebug_path_mapping *xdebug_path_mapping_ctor(void)
+{
+	xdebug_path_mapping *tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
+
+	return tmp;
 }
 
 void xdebug_path_mapping_dtor(void *mapping)
 {
 	xdebug_path_mapping *tmp = (xdebug_path_mapping*) mapping;
 
-	if (tmp->remote) {
-		xdebug_path_map_element_dtor(tmp->remote);
+	if (tmp->remote_path) {
+		xdebug_str_free(tmp->remote_path);
 	}
-	if (tmp->local) {
-		xdebug_path_map_element_dtor(tmp->local);
+	if (tmp->local_path) {
+		xdebug_str_free(tmp->local_path);
+	}
+	if (tmp->head_range_ptr) {
+		xdebug_path_map_range_dtor(tmp->head_range_ptr);
 	}
 	xdfree(tmp);
 }

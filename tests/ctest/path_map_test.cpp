@@ -58,16 +58,16 @@ TEST_GROUP(path_maps_file)
 	{
 		CHECK(mapping);
 		LONGS_EQUAL(type, mapping->type);
-		STRCMP_EQUAL(local_path, XDEBUG_STR_VAL(mapping->local->path));
+		STRCMP_EQUAL(local_path, XDEBUG_STR_VAL(mapping->local_path));
 	}
 
 	void check_map_with_range(size_t type, const char *local_path, int remote_begin, int remote_end, int local_begin, int local_end)
 	{
 		check_map(type, local_path);
-		LONGS_EQUAL(remote_begin, mapping->remote->begin);
-		LONGS_EQUAL(remote_end, mapping->remote->end);
-		LONGS_EQUAL(local_begin, mapping->local->begin);
-		LONGS_EQUAL(local_end, mapping->local->end);
+		LONGS_EQUAL(remote_begin, mapping->head_range_ptr->remote_begin);
+		LONGS_EQUAL(remote_end, mapping->head_range_ptr->remote_end);
+		LONGS_EQUAL(local_begin, mapping->head_range_ptr->local_begin);
+		LONGS_EQUAL(local_end, mapping->head_range_ptr->local_end);
 	}
 
 	TEST_TEARDOWN()
@@ -163,7 +163,7 @@ TEST(path_maps_file, check_rules)
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/var/www/");
+	mapping = remote_to_local(test_map, "/var/www/", 1);
 
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 };
@@ -178,7 +178,7 @@ TEST(path_maps_file, check_rule_with_comment)
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/var/www/");
+	mapping = remote_to_local(test_map, "/var/www/", 1);
 
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 };
@@ -193,7 +193,7 @@ TEST(path_maps_file, check_rule_with_odd_spaces)
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/var/www/");
+	mapping = remote_to_local(test_map, "/var/www/", 1);
 
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 };
@@ -209,7 +209,7 @@ local_prefix: /home/derick/projects
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/var/www/");
+	mapping = remote_to_local(test_map, "/var/www/", 1);
 
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 };
@@ -274,10 +274,10 @@ local_prefix: /home/derick/projects
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/usr/local/www/servers/example.com/");
+	mapping = remote_to_local(test_map, "/usr/local/www/servers/example.com/", 1);
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
 
-	mapping = remote_to_local(test_map, "/usr/local/www/servers/example.net/");
+	mapping = remote_to_local(test_map, "/usr/local/www/servers/example.net/", 1);
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/");
 };
 
@@ -368,7 +368,7 @@ local_prefix: /home/derick/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php", 1);
 	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "/home/derick/project/example.php");
 };
 
@@ -447,7 +447,7 @@ local_prefix: /home/derick/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php", 1);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 1, 1, 42, 42);
 };
 
@@ -594,7 +594,7 @@ local_prefix: /home/derick/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php", 5);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 5, 5, 8, 8);
 };
 
@@ -609,7 +609,7 @@ local_prefix: /home/derick/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php", 8);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 5, 17, 8, 8);
 };
 
@@ -624,6 +624,6 @@ local_prefix: /home/derick/project
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_OK, -1, NULL);
 
-	mapping = remote_to_local(test_map, "/usr/local/www/example.php");
+	mapping = remote_to_local(test_map, "/usr/local/www/example.php", 14);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 5, 17, 8, 20);
 };
