@@ -798,8 +798,8 @@ xdebug_xml_node* xdebug_get_zval_value_xml_node_ex(xdebug_str *name, zval *val, 
 				xdebug_str_add_literal(&tmp_formatted_name, "::");
 				xdebug_str_add_str(&tmp_formatted_name, name);
 
-				short_name = xdebug_str_copy(&tmp_formatted_name);
-				full_name =  xdebug_str_copy(&tmp_formatted_name);
+				short_name = xdebug_str_clone(&tmp_formatted_name);
+				full_name =  xdebug_str_clone(&tmp_formatted_name);
 
 				xdebug_str_destroy(&tmp_formatted_name);
 			} break;

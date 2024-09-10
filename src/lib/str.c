@@ -184,6 +184,8 @@ xdebug_str *xdebug_str_new(void)
 	tmp->l = 0;
 	tmp->a = 0;
 	tmp->d = NULL;
+	tmp->rc = 1;
+	tmp->is_static = false;
 
 	return tmp;
 }
@@ -206,9 +208,11 @@ xdebug_str *xdebug_str_create_from_char(char *c)
 	return xdebug_str_create(c, strlen(c));
 }
 
-xdebug_str *xdebug_str_copy(xdebug_str *orig)
+xdebug_str *xdebug_str_clone(xdebug_str *orig)
 {
-	xdebug_str *tmp = xdebug_str_new();
+	xdebug_str *tmp;
+
+	tmp = xdebug_str_new();
 
 	tmp->l = tmp->a = orig->l;
 	tmp->a++;
@@ -219,16 +223,37 @@ xdebug_str *xdebug_str_copy(xdebug_str *orig)
 	return tmp;
 }
 
-void xdebug_str_destroy(xdebug_str *s)
+xdebug_str *xdebug_str_copy(xdebug_str *orig)
+{
+	orig->rc++;
+
+	return orig;
+}
+
+static void xdebug_str_free_storage(xdebug_str *s)
 {
 	if (s->d) {
 		xdfree(s->d);
 	}
 }
 
+void xdebug_str_destroy(xdebug_str *s)
+{
+	assert(s->is_static);
+	xdebug_str_free_storage(s);
+}
+
 void xdebug_str_free(xdebug_str *s)
 {
-	xdebug_str_destroy(s);
+	assert(!s->is_static);
+
+	s->rc--;
+
+	if (s->rc > 0) {
+		return;
+	}
+
+	xdebug_str_free_storage(s);
 	xdfree(s);
 }
 
