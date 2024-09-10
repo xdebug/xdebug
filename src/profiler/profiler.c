@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -528,7 +528,7 @@ void xdebug_profiler_function_end(function_stack_entry *fse)
 	xdebug_str_addc(&file_buffer, '\n');
 
 	xdebug_file_write(file_buffer.d, sizeof(char), file_buffer.l, &XG_PROF(profile_file));
-	xdebug_str_dtor(file_buffer);
+	xdebug_str_destroy(&file_buffer);
 }
 
 void xdebug_profiler_free_function_details(function_stack_entry *fse)
