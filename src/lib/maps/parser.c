@@ -511,6 +511,8 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 		add_range(existing_path_mapping, new_range);
 
 		xdebug_path_map_range_dtor(new_range);
+		xdebug_str_free(remote_path);
+		xdebug_str_free(local_path);
 	} else {
 		xdebug_path_mapping* tmp = xdebug_path_mapping_ctor();
 		xdebug_path_map_range *new_range = xdebug_path_map_range_ctor(remote_begin, remote_end, local_begin, local_end);
