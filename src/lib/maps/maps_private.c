@@ -27,7 +27,7 @@ size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps)
 	return maps->remote_to_local_map->size;
 }
 
-xdebug_path_mapping *remote_to_local(xdebug_path_maps *maps, const char *remote)
+xdebug_path_mapping *remote_to_local(xdebug_path_maps *maps, const char *remote, size_t line)
 {
 	void *result;
 
