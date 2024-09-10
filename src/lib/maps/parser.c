@@ -162,9 +162,18 @@ static bool state_set_local_prefix(path_maps_parser_state *state, const char *pr
 	return true;
 }
 
-static void add_range(xdebug_path_mapping *new_rule, xdebug_path_map_range *head_range_ptr)
+static void add_range(xdebug_path_mapping *new_rule, xdebug_path_map_range *range_ptr)
 {
-	new_rule->head_range_ptr = xdebug_path_map_range_copy(head_range_ptr);
+	if (!new_rule->tail_range_ptr) {
+		/* First range */
+		new_rule->head_range_ptr = xdebug_path_map_range_copy(range_ptr);
+		new_rule->tail_range_ptr = new_rule->head_range_ptr;
+
+		return;
+	}
+
+	new_rule->tail_range_ptr->next = xdebug_path_map_range_copy(range_ptr);
+	new_rule->tail_range_ptr = new_rule->tail_range_ptr->next;
 }
 
 const char *mapping_type_as_string[] = {

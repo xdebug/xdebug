@@ -41,6 +41,7 @@ typedef struct xdebug_path_mapping {
 	xdebug_str              *remote_path;
 	xdebug_str              *local_path;
 	xdebug_path_map_range   *head_range_ptr;
+	xdebug_path_map_range   *tail_range_ptr;
 } xdebug_path_mapping;
 
 typedef struct xdebug_path_maps {
@@ -50,7 +51,7 @@ typedef struct xdebug_path_maps {
 /* Functions for testing, and not exported into Xdebug */
 size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps);
 
-xdebug_path_mapping *remote_to_local(xdebug_path_maps *maps, const char *remote, size_t line);
+int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remote_line, xdebug_str **local_path, size_t *local_line);
 
 xdebug_path_map_range* xdebug_path_map_range_ctor(int remote_begin, int remote_end, int local_begin, int local_end);
 xdebug_path_map_range* xdebug_path_map_range_copy(xdebug_path_map_range *range);
