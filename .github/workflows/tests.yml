@@ -85,12 +85,13 @@ jobs:
                     echo $xdebug_version >> $env:GITHUB_ENV
                 - name: Setup PHP
                   id: setup-php
-                  uses: php/setup-php-sdk@v0.8
+                  uses: php/setup-php-sdk@v0.10
                   with:
                       version: ${{matrix.php}}
                       arch: ${{matrix.arch}}
                       ts: ${{matrix.ts}}
                       deps: zlib
+                      cache: true
                 - name: Enable Developer Command Prompt
                   uses: ilammy/msvc-dev-cmd@v1
                   with:
