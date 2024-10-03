@@ -2,7 +2,7 @@ trigger:
   batch: true
   branches:
     include:
-      - xdebug_3_2
+      - xdebug_3_3
       - master
 
 jobs:
@@ -14,28 +14,38 @@ jobs:
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
+      configurationName: 'OSX_PHP_84'
+      phpVersion: '8.4.0RC1'
+      configurationParameters: '--enable-debug --disable-zts'
+  - template: .azure/macos/job.yml
+    parameters:
+      configurationName: 'OSX_PHP_84_ZTS'
+      phpVersion: '8.4.0RC1'
+      configurationParameters: '--enable-debug --enable-zts'
+  - template: .azure/macos/job.yml
+    parameters:
       configurationName: 'OSX_PHP_83'
-      phpVersion: '8.3.0'
+      phpVersion: '8.3.12'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_83_ZTS'
-      phpVersion: '8.3.0'
+      phpVersion: '8.3.12'
       configurationParameters: '--enable-debug --enable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_82'
-      phpVersion: '8.2.13'
+      phpVersion: '8.2.24'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_82_ZTS'
-      phpVersion: '8.2.13'
+      phpVersion: '8.2.24'
       configurationParameters: '--enable-debug --enable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_81'
-      phpVersion: '8.1.26'
+      phpVersion: '8.1.30'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
