@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1586: error_reporting evaluation
+Test for bug #1586: error_reporting evaluation (< PHP 8.4)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp');
+check_reqs('PHP < 8.4; dbgp');
 ?>
 --FILE--
 <?php
