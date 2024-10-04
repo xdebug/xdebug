@@ -332,11 +332,11 @@ This release also contains a contribution by: <i></i> — Thanks!
 -->
 ENDTXT;
 
-	file_put_contents( "{$xdebugOrgRepo}/data/news/{$date}.txt", $text );
+	file_put_contents( "{$xdebugOrgRepo}/data/news/{$date}.html", $text );
 
 	$cwd = getcwd();
 	chdir( $xdebugOrgRepo );
-	`git add data/news/{$date}.txt`;
+	`git add data/news/{$date}.html`;
 
 	chdir( $cwd );
 }
