@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2024-05-31</date>
- <time>09:21:23</time>
+ <date>2024-10-04</date>
+ <time>14:39:23</time>
  <version>
-  <release>3.4.0alpha1</release>
-  <api>3.4.0alpha1</api>
+  <release>3.4.0beta1</release>
+  <api>3.4.0beta1</api>
  </version>
  <stability>
   <release>beta</release>
@@ -52,12 +52,12 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Fri, May 31, 2024 - Xdebug 3.4.0alpha1
+Fri, Oct 04, 2024 - Xdebug 3.4.0beta1
 
 = Fixed bugs:
 
-  - Fixed issue #2239: Add &#039;XDEBUG_IGNORE&#039; GET/POST/COOKIE/ENV to make the step debugger ignore that specific request
-  - Fixed issue #2262: PHP 8.4: Closure names need different wrapping algorithm
+  - Fixed issue #2261: Send control socket location in init packet
+  - Fixed issue #2281: PHP 8.4 support
 
  </notes>
 
@@ -212,6 +212,29 @@ Fri, May 31, 2024 - Xdebug 3.4.0alpha1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2024-05-31</date>
+   <time>09:21:23</time>
+   <version>
+    <release>3.4.0alpha1</release>
+    <api>3.4.0alpha1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Fri, May 31, 2024 - Xdebug 3.4.0alpha1
+
+= Fixed bugs:
+
+  - Fixed issue #2239: Add &#039;XDEBUG_IGNORE&#039; GET/POST/COOKIE/ENV to make the step debugger ignore that specific request
+  - Fixed issue #2262: PHP 8.4: Closure names need different wrapping algorithm
+
+   </notes>
+  </release>
 
   <release>
    <date>2024-04-15</date>
