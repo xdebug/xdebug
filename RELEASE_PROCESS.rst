@@ -3,7 +3,8 @@
    to release: https://bugs.xdebug.org/manage_proj_edit_page.php?project_id=1
 #. Make sure both the master and release branch (i.e. xdebug_3_3) are fully
    synced and merged.
-#. Update composer.json to reflect supported range of PHP versions.
+#. Update composer.json, config.m4, and config.w32 to reflect supported range
+   of PHP versions.
 #. For first release in minor version (i.e. 3.3.x), merge package.xml from old
    bug fix branch into master and new branch and commit::
 
