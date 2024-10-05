@@ -17,7 +17,7 @@ if (PHP_XDEBUG != 'no') {
 	
 	var files = "xdebug.c";
 
-	var XDEBUG_PHP_VERSION = 10000 * PHP_VERSION + 100 * PHP_MINOR_VERSION + PHP_RELEASE_VERSION;
+	var XDEBUG_PHP_VERSION = 10000 * PHP_VERSION + 100 * PHP_MINOR_VERSION + 1 * PHP_RELEASE_VERSION;
 	if (XDEBUG_PHP_VERSION < 80000) {
 		ERROR("not supported. Need a PHP version >= 8.0.0 and < 8.5.0 (found " + XDEBUG_PHP_VERSION + ")");
 	} else if (XDEBUG_PHP_VERSION >= 80500) {
