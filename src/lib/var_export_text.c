@@ -343,7 +343,7 @@ static void xdebug_var_export_text_ansi(zval **struc, xdebug_str *str, int mode,
 					} ZEND_HASH_FOREACH_END();
 
 					xdebug_zend_hash_apply_protection_end(myht);
-				} else if (myht->nNumOfElements > 0) {
+				} else if (myht && myht->nNumOfElements > 0) {
 					xdebug_str_add_fmt(str, "%*s...\n", (level * 2), "");
 				}
 				xdebug_str_add_fmt(str, "%*s}", (level * 2) - 2, "");
