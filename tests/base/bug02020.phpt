@@ -1,5 +1,10 @@
 --TEST--
 Test for bug #2020: segfault if xdebug.dump.GET=* and integer key without value in URL
+--SKIPIF--
+<?php
+require __DIR__ . '/../utils.inc';
+check_reqs('!win');
+?>
 --INI--
 xdebug.dump.GET=*
 xdebug.mode=develop
