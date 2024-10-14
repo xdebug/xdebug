@@ -67,7 +67,13 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 			*local_line = remote_line;
 			break;
 		case XDEBUG_PATH_MAP_TYPE_LINES:
-			*local_line = find_line_number_from_ranges(remote_line, result->head_range_ptr);
+			size_t tmp_local_line = find_line_number_from_ranges(remote_line, result->head_range_ptr);
+
+			if (tmp_local_line == -1) {
+				return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
+			}
+
+			*local_line = tmp_local_line;
 			break;
 	}
 
