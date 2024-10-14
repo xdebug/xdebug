@@ -63,6 +63,7 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 
 	switch (result->type) {
 		case XDEBUG_PATH_MAP_TYPE_DIRECTORY:
+			/* FIXME: directory mapping */
 		case XDEBUG_PATH_MAP_TYPE_FILE:
 			*local_line = remote_line;
 			break;
