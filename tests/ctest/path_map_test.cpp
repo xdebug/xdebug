@@ -703,3 +703,20 @@ local_prefix: /home/derick/project
 	test_remote_to_local("/usr/local/www/example.php", 32);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 24);
 };
+
+TEST(path_maps_file, multiple_ranges_outside_ranges)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:5-17 = /example.php:8-20
+/example.php:18 = /example.php:21
+/example.php:19-33 = /example.php:24
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	test_remote_to_local("/usr/local/www/example.php", 42);
+	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
+};
