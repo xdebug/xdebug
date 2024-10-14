@@ -69,6 +69,7 @@ TEST_GROUP(path_maps_file)
 
 	void test_remote_to_local(const char *remote_path, size_t remote_line)
 	{
+		reset_result();
 		mapping_type = remote_to_local(test_map, remote_path, remote_line, &local_path, &local_line);
 	}
 
@@ -83,9 +84,7 @@ TEST_GROUP(path_maps_file)
 		if (error_message) {
 			free(error_message);
 		}
-		if (local_path) {
-			xdebug_str_free(local_path);
-		}
+		reset_result();
 
 		if (filename) {
 			unlink(filename);
@@ -97,6 +96,14 @@ TEST_GROUP(path_maps_file)
 		}
 
 		xdebug_path_maps_dtor(test_map);
+	}
+
+private:
+	void reset_result()
+	{
+		if (local_path) {
+			xdebug_str_free(local_path);
+		}
 	}
 };
 
@@ -701,6 +708,9 @@ local_prefix: /home/derick/project
 	check_result(PATH_MAPS_OK, -1, NULL);
 
 	test_remote_to_local("/usr/local/www/example.php", 32);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 24);
+
+	test_remote_to_local("/usr/local/www/example.php", 33);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 24);
 };
 
