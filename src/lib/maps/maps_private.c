@@ -18,6 +18,7 @@
 
 #include "maps_private.h"
 #include "../mm.h"
+#include "../vector.h"
 #include "../xdebug_strndup.h"
 
 /** Private API, mainly used for testing */
@@ -27,11 +28,12 @@ size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps)
 	return maps->remote_to_local_map->size;
 }
 
-static size_t find_line_number_from_ranges(size_t remote_line, xdebug_path_map_range *ranges)
+static size_t find_line_number_from_ranges(size_t remote_line, xdebug_vector *line_ranges)
 {
-	xdebug_path_map_range *ptr = ranges;
+	xdebug_path_map_range *ptr = (xdebug_path_map_range*) XDEBUG_VECTOR_HEAD(line_ranges);
+	int i;
 
-	do {
+	for (i = 0; i < XDEBUG_VECTOR_COUNT(line_ranges); i++, ptr++) {
 		/* 1:1 match */
 		if (ptr->remote_begin == ptr->remote_end && ptr->local_begin == ptr->local_end && remote_line == ptr->remote_begin) {
 			return ptr->local_begin;
@@ -44,8 +46,7 @@ static size_t find_line_number_from_ranges(size_t remote_line, xdebug_path_map_r
 		if ((remote_line >= ptr->remote_begin) && (remote_line <= ptr->remote_end)) {
 			return remote_line - ptr->remote_begin + ptr->local_begin;
 		}
-		ptr = ptr->next;
-	} while (ptr != NULL);
+	}
 
 	return -1;
 }
@@ -68,7 +69,7 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 			*local_line = remote_line;
 			break;
 		case XDEBUG_PATH_MAP_TYPE_LINES:
-			size_t tmp_local_line = find_line_number_from_ranges(remote_line, result->head_range_ptr);
+			size_t tmp_local_line = find_line_number_from_ranges(remote_line, result->line_ranges);
 
 			if (tmp_local_line == -1) {
 				return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
