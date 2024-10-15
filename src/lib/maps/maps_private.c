@@ -28,12 +28,12 @@ size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps)
 	return maps->remote_to_local_map->size;
 }
 
-static size_t find_line_number_from_ranges(size_t remote_line, xdebug_vector *line_ranges)
+static size_t do_binary_search(xdebug_vector *line_ranges, int low, int high, size_t remote_line)
 {
-	xdebug_path_map_range *ptr = (xdebug_path_map_range*) XDEBUG_VECTOR_HEAD(line_ranges);
-	int i;
+	while (low <= high) {
+		int                    mid = low + (high - low) / 2;
+		xdebug_path_map_range *ptr = (xdebug_path_map_range*) xdebug_vector_element_get(line_ranges, mid);
 
-	for (i = 0; i < XDEBUG_VECTOR_COUNT(line_ranges); i++, ptr++) {
 		/* 1:1 match */
 		if (ptr->remote_begin == ptr->remote_end && ptr->local_begin == ptr->local_end && remote_line == ptr->remote_begin) {
 			return ptr->local_begin;
@@ -46,9 +46,21 @@ static size_t find_line_number_from_ranges(size_t remote_line, xdebug_vector *li
 		if ((remote_line >= ptr->remote_begin) && (remote_line <= ptr->remote_end)) {
 			return remote_line - ptr->remote_begin + ptr->local_begin;
 		}
+
+		/* Not found, so choose between first or second half */
+		if (remote_line < ptr->remote_begin) {
+			high = mid - 1;
+		} else {
+			low = mid + 1;
+		}
 	}
 
 	return -1;
+}
+
+static size_t find_line_number_from_ranges(size_t remote_line, xdebug_vector *line_ranges)
+{
+	return do_binary_search(line_ranges, 0, XDEBUG_VECTOR_COUNT(line_ranges) - 1, remote_line);
 }
 
 /* Returns the remote type, and sets *local_path and *local_line if the type is not XDEBUG_PATH_MAP_TYPE_UNKNOWN */
