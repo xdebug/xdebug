@@ -19,6 +19,7 @@
 
 #include "../hash.h"
 #include "../str.h"
+#include "../vector.h"
 
 #define XDEBUG_PATH_MAP_TYPE_UNKNOWN   0x00
 #define XDEBUG_PATH_MAP_TYPE_DIRECTORY 0x01
@@ -28,20 +29,17 @@
 typedef struct xdebug_path_map_range xdebug_path_map_range;
 
 struct xdebug_path_map_range {
-	int ref_count;
 	int remote_begin;
 	int remote_end;
 	int local_begin;
 	int local_end;
-	xdebug_path_map_range *next;
 };
 
 typedef struct xdebug_path_mapping {
 	int                      type;
 	xdebug_str              *remote_path;
 	xdebug_str              *local_path;
-	xdebug_path_map_range   *head_range_ptr;
-	xdebug_path_map_range   *tail_range_ptr;
+	xdebug_vector           *line_ranges;
 } xdebug_path_mapping;
 
 typedef struct xdebug_path_maps {
@@ -53,11 +51,12 @@ size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps);
 
 int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remote_line, xdebug_str **local_path, size_t *local_line);
 
-xdebug_path_map_range* xdebug_path_map_range_ctor(int remote_begin, int remote_end, int local_begin, int local_end);
-xdebug_path_map_range* xdebug_path_map_range_copy(xdebug_path_map_range *range);
+void xdebug_path_map_range_set(xdebug_path_map_range *from, int remote_begin, int remote_end, int local_begin, int local_end);
+void xdebug_path_map_range_copy(xdebug_path_map_range *from, xdebug_path_map_range *to);
 void xdebug_path_map_range_dtor(xdebug_path_map_range *range);
 
 xdebug_path_mapping *xdebug_path_mapping_ctor(void);
 void xdebug_path_mapping_dtor(void *mapping);
+xdebug_path_mapping *xdebug_path_mapping_clone(xdebug_path_mapping *mapping);
 
 #endif

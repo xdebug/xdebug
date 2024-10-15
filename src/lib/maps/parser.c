@@ -162,20 +162,6 @@ static bool state_set_local_prefix(path_maps_parser_state *state, const char *pr
 	return true;
 }
 
-static void add_range(xdebug_path_mapping *new_rule, xdebug_path_map_range *range_ptr)
-{
-	if (!new_rule->tail_range_ptr) {
-		/* First range */
-		new_rule->head_range_ptr = xdebug_path_map_range_copy(range_ptr);
-		new_rule->tail_range_ptr = new_rule->head_range_ptr;
-
-		return;
-	}
-
-	new_rule->tail_range_ptr->next = xdebug_path_map_range_copy(range_ptr);
-	new_rule->tail_range_ptr = new_rule->tail_range_ptr->next;
-}
-
 const char *mapping_type_as_string[] = {
 	"unknown",
 	"directory",
@@ -515,25 +501,24 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 
 	/* assign */
 	if (xdebug_hash_find(state->file_rules, XDEBUG_STR_VAL(remote_path), XDEBUG_STR_LEN(remote_path), (void**) &existing_path_mapping)) {
-		xdebug_path_map_range *new_range = xdebug_path_map_range_ctor(remote_begin, remote_end, local_begin, local_end);
+		xdebug_path_map_range *new_range = (xdebug_path_map_range*) xdebug_vector_push(existing_path_mapping->line_ranges);
 
-		add_range(existing_path_mapping, new_range);
+		xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_begin, local_end);
 
-		xdebug_path_map_range_dtor(new_range);
 		xdebug_str_free(remote_path);
 		xdebug_str_free(local_path);
 	} else {
 		xdebug_path_mapping* tmp = xdebug_path_mapping_ctor();
-		xdebug_path_map_range *new_range = xdebug_path_map_range_ctor(remote_begin, remote_end, local_begin, local_end);
+		xdebug_path_map_range *new_range;
 
 		tmp->type = remote_type;
 		tmp->remote_path = remote_path;
 		tmp->local_path  = local_path;
-		add_range(tmp, new_range);
+
+		new_range = (xdebug_path_map_range*) xdebug_vector_push(tmp->line_ranges);
+		xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_begin, local_end);
 
 		xdebug_hash_add(state->file_rules, XDEBUG_STR_VAL(remote_path), XDEBUG_STR_LEN(remote_path), tmp);
-
-		xdebug_path_map_range_dtor(new_range);
 	}
 
 	return true;
@@ -623,15 +608,9 @@ static void copy_rule(void *ret, xdebug_hash_element *e)
 	xdebug_path_mapping *existing_path_mapping = NULL;
 
 	if (xdebug_hash_find((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, (void**) &existing_path_mapping)) {
-		add_range(existing_path_mapping, new_rule->head_range_ptr);
+		existing_path_mapping->line_ranges = xdebug_vector_clone(new_rule->line_ranges);
 	} else {
-		xdebug_path_mapping *tmp = xdebug_path_mapping_ctor();
-
-		tmp->type = new_rule->type;
-		tmp->remote_path = xdebug_str_copy(new_rule->remote_path);
-		tmp->local_path  = xdebug_str_copy(new_rule->local_path);
-
-		add_range(tmp, new_rule->head_range_ptr);
+		xdebug_path_mapping *tmp = xdebug_path_mapping_clone(new_rule);
 
 		xdebug_hash_add((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, tmp);
 	}
