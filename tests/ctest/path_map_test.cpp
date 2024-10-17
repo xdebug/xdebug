@@ -103,6 +103,7 @@ private:
 	{
 		if (local_path) {
 			xdebug_str_free(local_path);
+			local_path = NULL;
 		}
 	}
 };
