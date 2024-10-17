@@ -314,6 +314,50 @@ local_prefix: /home/derick/projects
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/");
 };
 
+TEST(path_maps_file, check_multiple_rules_with_prefix_and_file)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.com/ = /example.com/
+/servers/example.net/ = /example.net/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	test_remote_to_local("/usr/local/www/servers/example.net/my-script.php", 1);
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/my-script.php");
+};
+
+TEST(path_maps_file, check_multiple_rules_with_prefix_and_file_in_subdirectory)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.com/ = /example.com/
+/servers/example.net/ = /example.net/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	test_remote_to_local("/usr/local/www/servers/example.net/public/router.php", 1);
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/router.php");
+
+	test_remote_to_local("/usr/local/www/servers/example.net/public/index.php", 1);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/index.php", 1);
+
+	test_remote_to_local("/usr/local/www/servers/public/index.php", 1);
+	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
+
+	test_remote_to_local("/local/www/servers/public/index.php", 1);
+	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
+
+	test_remote_to_local("/usr/local/www/servers/example.net/public/index.php", 8051);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/index.php", 8051);
+};
+
 TEST(path_maps_file, no_double_separator_remote_prefix)
 {
 	const char *map = R""""(
