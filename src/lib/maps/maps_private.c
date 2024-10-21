@@ -70,11 +70,17 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 	xdebug_path_mapping *result;
 
 	if (!xdebug_hash_find(maps->remote_to_local_map, remote_path, strlen(remote_path), (void**) &result)) {
-		/* We can't find an exact file match, so no try to see if we have a directory match, starting with the full
+		/* We can't find an exact file match, so now try to see if we have a directory match, starting with the full
 		 * path and then removing the trailing directory path until there are none left */
-		char *end_slash = strrchr((char*) remote_path, '/');
-		char *directory = xdstrndup(remote_path, end_slash - remote_path + 1);
+		char *end_slash;
+		char *directory;
 
+		end_slash = strrchr((char*) remote_path, '/');
+		if (!end_slash) {
+			return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
+		}
+
+		directory = xdstrndup(remote_path, end_slash - remote_path + 1);
 		end_slash = strrchr((char*) directory, '/');
 
 		do {
