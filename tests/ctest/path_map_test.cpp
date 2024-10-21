@@ -1323,3 +1323,19 @@ local_prefix: /home/derick/projects
 	test_remote_to_local("", 8051);
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
 };
+
+TEST(path_maps_file, multiple_ranges_with_gap)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:1-10 = /example.php:7-16
+/example.php:22-32 = /example.php:44-54
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	test_remote_to_local("/usr/local/www/example.php", 13);
+	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
+};
