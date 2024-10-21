@@ -82,7 +82,7 @@ phpt.*
 !run-xdebug-tests.php
 !make-release.php
 tests/ctest/*.o
-tests/ctest/afl-test
+tests/ctest/afl-test-*
 tests/ctest/ctest
 tests/ctest/ftest
 tests/ctest/fuzz-output
