@@ -501,8 +501,20 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 
 	/* assign */
 	if (xdebug_hash_find(state->file_rules, XDEBUG_STR_VAL(remote_path), XDEBUG_STR_LEN(remote_path), (void**) &existing_path_mapping)) {
-		xdebug_path_map_range *new_range = (xdebug_path_map_range*) xdebug_vector_push(existing_path_mapping->line_ranges);
+		xdebug_path_map_range *tail_range, *new_range;
 
+		/* Check to make sure the order of lines is incrementing */
+		tail_range = (xdebug_path_map_range*) XDEBUG_VECTOR_TAIL(existing_path_mapping->line_ranges);
+		if (remote_begin <= tail_range->remote_end) {
+			char *message = xdebug_sprintf("The remote range begin line (%d) must be higher than the previous range end line (%d)",
+				remote_begin, tail_range->remote_end);
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+			xdfree(message);
+
+			goto failure;
+		}
+
+		new_range = (xdebug_path_map_range*) xdebug_vector_push(existing_path_mapping->line_ranges);
 		xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_begin, local_end);
 
 		xdebug_str_free(remote_path);
