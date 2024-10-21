@@ -1339,3 +1339,29 @@ local_prefix: /home/derick/project
 	test_remote_to_local("/usr/local/www/example.php", 13);
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
 };
+
+TEST(path_maps_file, wrong_order_of_lines_in_map_1)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:4 = /example.php:3
+/example.php:4 = /example.php:7
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 5, "The remote range begin line (4) must be higher than the previous range end line (4)");
+};
+
+TEST(path_maps_file, wrong_order_of_lines_in_map_2)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+/example.php:21-32 = /example.php:43-54
+/example.php:1-20 = /example.php:7-26
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 5, "The remote range begin line (1) must be higher than the previous range end line (32)");
+};
