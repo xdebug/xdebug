@@ -1307,3 +1307,19 @@ local_prefix: /home/derick/project
 		check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", j + 6);
 	}
 };
+
+TEST(path_maps_file, fuzz_test_01)
+{
+	const char *map = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/projects
+/servers/example.com/ = /example.com/
+/servers/example.net/ = /example.net/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	test_remote_to_local("", 8051);
+	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
+};
