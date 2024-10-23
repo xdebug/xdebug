@@ -6,6 +6,10 @@
 #include "maps.h"
 #include "parser.h"
 
+#define STRINGIZE_DETAIL(x) #x
+#define STRINGIZE(x) STRINGIZE_DETAIL(x)
+#define LOCATION __FILE__ ":" STRINGIZE(__LINE__)
+
 TEST_GROUP(path_maps_file)
 {
 	struct xdebug_path_maps *test_map;
@@ -59,12 +63,17 @@ TEST_GROUP(path_maps_file)
 		return retval;
 	}
 
+	void check_result(size_t expected_error_code, int expected_error_line, const char *expected_error_message, const char *location)
+	{
+		STRCMP_EQUAL_TEXT(expected_error_message, error_message, location);
+		LONGS_EQUAL_TEXT(expected_error_code, error_code, location);
+		LONGS_EQUAL_TEXT(expected_error_line, error_line, location);
+		LONGS_EQUAL_TEXT(expected_error_code == PATH_MAPS_OK ? true : false, result, location);
+	}
+
 	void check_result(size_t expected_error_code, int expected_error_line, const char *expected_error_message)
 	{
-		STRCMP_EQUAL(expected_error_message, error_message);
-		LONGS_EQUAL(expected_error_code, error_code);
-		LONGS_EQUAL(expected_error_line, error_line);
-		LONGS_EQUAL(expected_error_code == PATH_MAPS_OK ? true : false, result);
+		check_result(expected_error_code, expected_error_line, expected_error_message, "UNKNOWN");
 	}
 
 	void check_map(size_t expected_type, const char *expected_local_path)
@@ -1398,4 +1407,55 @@ local_prefix: /home/derick/project2
 
 	test_remote_to_local("/usr/local/www2/example.php", 2);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project2/example.php", 8);
+};
+
+TEST(path_maps_file, two_files_with_rules_for_the_same_files)
+{
+	const char *map1 = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project1
+/example.php:1-20 = /example.php:7-26
+/example.php:21-32 = /example.php:43-54
+/example2.php = /example2.php
+)"""";
+
+	const char *map2 = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project2
+/example.php:1-20 = /example.php:7-26
+/example2.php = /example2.php
+)"""";
+
+	result = test_map_from_file(map1);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	result = test_map_from_file(map2);
+	check_result(PATH_MAPS_DUPLICATE_RULES, 5, "Duplicate rules in multiple files for '/usr/local/www/example.php'", LOCATION);
+
+	test_remote_to_local("/usr/local/www/example.php", 2);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project1/example.php", 8);
+};
+
+TEST(path_maps_file, two_files_with_rules_for_the_same_directories)
+{
+	const char *map1 = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project1
+/ = /
+)"""";
+
+	const char *map2 = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project2
+/ = /
+)"""";
+
+	result = test_map_from_file(map1);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	result = test_map_from_file(map2);
+	check_result(PATH_MAPS_DUPLICATE_RULES, 4, "Duplicate rules in multiple files for '/usr/local/www/'", LOCATION);
+
+	test_remote_to_local("/usr/local/www/example.php", 2);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/project1/example.php", 2);
 };
