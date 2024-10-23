@@ -34,6 +34,8 @@ typedef struct path_maps_parser_state {
 	int   error_line;
 	char *error_message;
 
+	bool  copy_error;
+
 	char *current_local_prefix;
 	char *current_remote_prefix;
 
@@ -47,6 +49,8 @@ static void path_maps_parser_state_ctor(struct path_maps_parser_state *state)
 {
 	state->error_code = PATH_MAPS_OK;
 	state->error_message = NULL;
+
+	state->copy_error = false;
 
 	state->current_file = NULL;
 	state->current_line_no = 0;
@@ -614,13 +618,25 @@ static bool state_file_read_lines(path_maps_parser_state *state)
 	return true;
 }
 
-static void copy_rule(void *ret, xdebug_hash_element *e)
+static void copy_rule(void *ret, xdebug_hash_element *e, void *state_v)
 {
+	struct path_maps_parser_state *state = (struct path_maps_parser_state*) state_v;
 	xdebug_path_mapping *new_rule = (xdebug_path_mapping*) e->ptr;
 	xdebug_path_mapping *existing_path_mapping = NULL;
 
+	if (state->copy_error) {
+		return;
+	}
+
 	if (xdebug_hash_find((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, (void**) &existing_path_mapping)) {
-		existing_path_mapping->line_ranges = xdebug_vector_clone(new_rule->line_ranges);
+		xdebug_str *message = xdebug_str_create_from_const_char("Duplicate rules in multiple files for '");
+		xdebug_str_addl(message, e->key.value.str.val, e->key.value.str.len, 0);
+		xdebug_str_add_literal(message, "'");
+
+		state_set_error(state, PATH_MAPS_DUPLICATE_RULES, message->d);
+		state->copy_error = true;
+
+		xdebug_str_free(message);
 	} else {
 		xdebug_path_mapping *tmp = xdebug_path_mapping_clone(new_rule);
 
@@ -653,7 +669,11 @@ bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, i
 	}
 
 	/* No errors, so copy all rules to actual map */
-	xdebug_hash_apply(state.file_rules, (void*) maps->remote_to_local_map, copy_rule);
+	state.copy_error = false;
+	xdebug_hash_apply_with_argument(state.file_rules, (void*) maps->remote_to_local_map, copy_rule, (void*) &state);
+	if (state.copy_error) {
+		goto error;
+	}
 
 	path_maps_parser_state_dtor(&state);
 	return true;
