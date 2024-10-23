@@ -1454,3 +1454,30 @@ local_prefix: /home/derick/project2
 	test_remote_to_local("/usr/local/www/example.php", 2);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/project1/example.php", 2, LOCATION);
 };
+
+TEST(path_maps_file, two_files_with_rules_for_directory_and_file_in_directory)
+{
+	const char *map1 = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick
+/project1/ = /project/
+)"""";
+
+	const char *map2 = R""""(
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project2
+/project1/example.php:5-19 = /example-in-project.php:15-29
+)"""";
+
+	result = test_map_from_file(map1);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	result = test_map_from_file(map2);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/usr/local/www/project1/example.php", 9);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project2/example-in-project.php", 19, LOCATION);
+
+	test_remote_to_local("/usr/local/www/project1/example2.php", 9);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/project/example2.php", 9, LOCATION);
+};
