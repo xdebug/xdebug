@@ -71,16 +71,11 @@ TEST_GROUP(path_maps_file)
 		LONGS_EQUAL_TEXT(expected_error_code == PATH_MAPS_OK ? true : false, result, location);
 	}
 
-	void check_result(size_t expected_error_code, int expected_error_line, const char *expected_error_message)
+	void check_map(size_t expected_type, const char *expected_local_path, const char *location)
 	{
-		check_result(expected_error_code, expected_error_line, expected_error_message, "UNKNOWN");
-	}
-
-	void check_map(size_t expected_type, const char *expected_local_path)
-	{
-		CHECK(mapping_type != XDEBUG_PATH_MAP_TYPE_UNKNOWN);
-		LONGS_EQUAL(expected_type, mapping_type);
-		STRCMP_EQUAL(expected_local_path, XDEBUG_STR_VAL(local_path));
+		CHECK_TEXT(mapping_type != XDEBUG_PATH_MAP_TYPE_UNKNOWN, location);
+		LONGS_EQUAL_TEXT(expected_type, mapping_type, location);
+		STRCMP_EQUAL_TEXT(expected_local_path, XDEBUG_STR_VAL(local_path), location);
 	}
 
 	void test_remote_to_local(const char *remote_path, size_t remote_line)
@@ -89,10 +84,10 @@ TEST_GROUP(path_maps_file)
 		mapping_type = remote_to_local(test_map, remote_path, remote_line, &local_path, &local_line);
 	}
 
-	void check_map_with_range(size_t expected_type, const char *expected_local_path, size_t expected_local_line)
+	void check_map_with_range(size_t expected_type, const char *expected_local_path, size_t expected_local_line, const char *location)
 	{
-		check_map(expected_type, expected_local_path);
-		LONGS_EQUAL(expected_local_line, local_line);
+		check_map(expected_type, expected_local_path, location);
+		LONGS_EQUAL_TEXT(expected_local_line, local_line, location);
 	}
 
 	TEST_TEARDOWN()
@@ -138,7 +133,7 @@ TEST(path_maps_file, no_trailing_newline)
 	const char *map = R""""(/var/www/ = /home/derick/projects/example.com/)"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_NEWLINE, 1, "Line does not end in a new line");
+	check_result(PATH_MAPS_NO_NEWLINE, 1, "Line does not end in a new line", LOCATION);
 };
 
 TEST(path_maps_file, only_new_line)
@@ -147,7 +142,7 @@ TEST(path_maps_file, only_new_line)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 1, "The map file did not provide any mappings");
+	check_result(PATH_MAPS_NO_RULES, 1, "The map file did not provide any mappings", LOCATION);
 };
 
 TEST(path_maps_file, comment_no_rules)
@@ -157,7 +152,7 @@ TEST(path_maps_file, comment_no_rules)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 2, "The map file did not provide any mappings");
+	check_result(PATH_MAPS_NO_RULES, 2, "The map file did not provide any mappings", LOCATION);
 };
 
 TEST(path_maps_file, empty)
@@ -165,7 +160,7 @@ TEST(path_maps_file, empty)
 	const char *map = R""""()"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings");
+	check_result(PATH_MAPS_NO_RULES, 0, "The map file did not provide any mappings", LOCATION);
 };
 
 TEST(path_maps_file, no_rules)
@@ -176,7 +171,7 @@ local_prefix: /home/derick/projects/example.com/
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_NO_RULES, 3, "The map file did not provide any mappings");
+	check_result(PATH_MAPS_NO_RULES, 3, "The map file did not provide any mappings", LOCATION);
 };
 
 TEST(path_maps_file, full_path_map)
@@ -186,7 +181,7 @@ TEST(path_maps_file, full_path_map)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 };
 
 TEST(path_maps_file, check_rules)
@@ -196,11 +191,11 @@ TEST(path_maps_file, check_rules)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/var/www/", 1);
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/", LOCATION);
 };
 
 TEST(path_maps_file, check_rule_with_comment)
@@ -211,11 +206,11 @@ TEST(path_maps_file, check_rule_with_comment)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/var/www/", 1);
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/", LOCATION);
 };
 
 TEST(path_maps_file, check_rule_with_odd_spaces)
@@ -226,11 +221,11 @@ TEST(path_maps_file, check_rule_with_odd_spaces)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/var/www/", 1);
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/", LOCATION);
 };
 
 TEST(path_maps_file, check_rules_with_prefix_1)
@@ -242,11 +237,11 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/var/www/", 1);
 
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/", LOCATION);
 };
 
 TEST(path_maps_file, empty_remote_prefix)
@@ -258,7 +253,7 @@ local_prefix: /usr/local/www
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is empty");
+	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is empty", LOCATION);
 }
 
 TEST(path_maps_file, empty_local_prefix)
@@ -270,7 +265,7 @@ local_prefix:
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is empty");
+	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is empty", LOCATION);
 }
 
 TEST(path_maps_file, non_absolute_remote_prefix)
@@ -282,7 +277,7 @@ local_prefix: /usr/local/www
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is not an absolute path: 'var'");
+	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is not an absolute path: 'var'", LOCATION);
 }
 
 TEST(path_maps_file, non_absolute_local_prefix)
@@ -294,7 +289,7 @@ local_prefix:home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is not an absolute path: 'home/derick/projects'");
+	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is not an absolute path: 'home/derick/projects'", LOCATION);
 }
 
 TEST(path_maps_file, check_multiple_rules_with_prefix_1)
@@ -307,10 +302,10 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/servers/example.com/", 1);
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/", LOCATION);
 }
 
 TEST(path_maps_file, check_multiple_rules_with_prefix_2)
@@ -323,11 +318,11 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 
 	test_remote_to_local("/usr/local/www/servers/example.net/", 1);
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/", LOCATION);
 };
 
 TEST(path_maps_file, check_multiple_rules_with_prefix_and_file)
@@ -340,10 +335,10 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/servers/example.net/my-script.php", 1);
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/my-script.php");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/my-script.php", LOCATION);
 };
 
 TEST(path_maps_file, check_multiple_rules_with_prefix_and_file_in_subdirectory)
@@ -356,13 +351,13 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/servers/example.net/public/router.php", 1);
-	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/router.php");
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/router.php", LOCATION);
 
 	test_remote_to_local("/usr/local/www/servers/example.net/public/index.php", 1);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/index.php", 1);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/index.php", 1, LOCATION);
 
 	test_remote_to_local("/usr/local/www/servers/public/index.php", 1);
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
@@ -371,7 +366,7 @@ local_prefix: /home/derick/projects
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
 
 	test_remote_to_local("/usr/local/www/servers/example.net/public/index.php", 8051);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/index.php", 8051);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.net/public/index.php", 8051, LOCATION);
 };
 
 TEST(path_maps_file, no_double_separator_remote_prefix)
@@ -383,7 +378,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_DOUBLE_SEPARATOR, 4, "Remote prefix ends with separator ('/usr/local/www/') and mapping line begins with separator ('/servers/example.com/')");
+	check_result(PATH_MAPS_DOUBLE_SEPARATOR, 4, "Remote prefix ends with separator ('/usr/local/www/') and mapping line begins with separator ('/servers/example.com/')", LOCATION);
 };
 
 TEST(path_maps_file, no_double_separator_local_prefix)
@@ -395,7 +390,7 @@ local_prefix: /home/derick/projects/
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_DOUBLE_SEPARATOR, 4, "Local prefix ends with separator ('/home/derick/projects/') and mapping line begins with separator ('/example.com/')");
+	check_result(PATH_MAPS_DOUBLE_SEPARATOR, 4, "Local prefix ends with separator ('/home/derick/projects/') and mapping line begins with separator ('/example.com/')", LOCATION);
 };
 
 TEST(path_maps_file, check_local_matches_remote_mapping_type_dir_file)
@@ -409,7 +404,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_MISMATCHED_TYPES, 5, "Remote mapping part ('/usr/local/www/servers/example.net/') type (directory) must match local mapping part ('/home/derick/projects/example.net') type (file)");
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 5, "Remote mapping part ('/usr/local/www/servers/example.net/') type (directory) must match local mapping part ('/home/derick/projects/example.net') type (file)", LOCATION);
 };
 
 TEST(path_maps_file, check_local_matches_remote_mapping_type_file_dir)
@@ -423,7 +418,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_MISMATCHED_TYPES, 5, "Remote mapping part ('/usr/local/www/servers/example.net') type (file) must match local mapping part ('/home/derick/projects/example.net/') type (directory)");
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 5, "Remote mapping part ('/usr/local/www/servers/example.net') type (file) must match local mapping part ('/home/derick/projects/example.net/') type (directory)", LOCATION);
 };
 
 TEST(path_maps_file, remote_part_unknown_type)
@@ -435,7 +430,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Remote mapping part ('/usr/local/www/servers/example.org?') type (file) must match local mapping part ('/home/derick/projects/example.org/') type (directory)");
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Remote mapping part ('/usr/local/www/servers/example.org?') type (file) must match local mapping part ('/home/derick/projects/example.org/') type (directory)", LOCATION);
 };
 
 TEST(path_maps_file, local_part_unknown_type)
@@ -447,7 +442,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Remote mapping part ('/usr/local/www/servers/example.org/') type (directory) must match local mapping part ('/home/derick/projects/example.org?') type (file)");
+	check_result(PATH_MAPS_MISMATCHED_TYPES, 4, "Remote mapping part ('/usr/local/www/servers/example.org/') type (directory) must match local mapping part ('/home/derick/projects/example.org?') type (file)", LOCATION);
 };
 
 TEST(path_maps_file, check_type_file)
@@ -459,10 +454,10 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 1);
-	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "/home/derick/project/example.php");
+	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "/home/derick/project/example.php", LOCATION);
 };
 
 TEST(path_maps_file, remote_path_wrong_start_range_number)
@@ -472,7 +467,7 @@ TEST(path_maps_file, remote_path_wrong_start_range_number)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 2, "Remote element: Non-number found as range: ':53x'");
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Remote element: Non-number found as range: ':53x'", LOCATION);
 };
 
 TEST(path_maps_file, local_path_wrong_start_range_number)
@@ -482,7 +477,7 @@ TEST(path_maps_file, local_path_wrong_start_range_number)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 2, "Local element: Non-number found as range: ':72c'");
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Local element: Non-number found as range: ':72c'", LOCATION);
 };
 
 TEST(path_maps_file, remote_path_only_range_number)
@@ -492,7 +487,7 @@ TEST(path_maps_file, remote_path_only_range_number)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 2, "Remote element: Element only contains a range, but no path: ':53x'");
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Remote element: Element only contains a range, but no path: ':53x'", LOCATION);
 };
 
 TEST(path_maps_file, local_path_only_range_number)
@@ -502,7 +497,7 @@ TEST(path_maps_file, local_path_only_range_number)
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 2, "Local element: Element only contains a range, but no path: ':72c'");
+	check_result(PATH_MAPS_WRONG_RANGE, 2, "Local element: Element only contains a range, but no path: ':72c'", LOCATION);
 };
 
 TEST(path_maps_file, remote_path_with_directory)
@@ -514,7 +509,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Ranges are not supported with directories: '/examples/:53x'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Ranges are not supported with directories: '/examples/:53x'", LOCATION);
 };
 
 TEST(path_maps_file, local_path_with_directory)
@@ -526,7 +521,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Ranges are not supported with directories: '/examples/:72c'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Ranges are not supported with directories: '/examples/:72c'", LOCATION);
 };
 
 TEST(path_maps_file, remote_single_range_number)
@@ -538,10 +533,10 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 1);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 42);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 42, LOCATION);
 };
 
 TEST(path_maps_file, remote_range_less_than_one)
@@ -553,7 +548,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Line number much be larger than 0: '/example.php:0'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Line number much be larger than 0: '/example.php:0'", LOCATION);
 };
 
 TEST(path_maps_file, local_range_less_than_one)
@@ -565,7 +560,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Line number much be larger than 0: '/example.php:0'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Line number much be larger than 0: '/example.php:0'", LOCATION);
 };
 
 TEST(path_maps_file, remote_range_empty_start)
@@ -577,7 +572,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: The starting line number must be provided: '/example.php:-42'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: The starting line number must be provided: '/example.php:-42'", LOCATION);
 };
 
 TEST(path_maps_file, local_range_empty_start)
@@ -589,7 +584,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: The starting line number must be provided: '/example.php:-8'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: The starting line number must be provided: '/example.php:-8'", LOCATION);
 };
 
 TEST(path_maps_file, remote_range_wrong_begin_lineno)
@@ -601,7 +596,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Non-number found as begin range: ':6x-42'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Non-number found as begin range: ':6x-42'", LOCATION);
 };
 
 TEST(path_maps_file, local_range_wrong_begin_lineno)
@@ -613,7 +608,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Non-number found as begin range: ':7y-43'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Non-number found as begin range: ':7y-43'", LOCATION);
 };
 
 TEST(path_maps_file, remote_range_wrong_end_lineno)
@@ -625,7 +620,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Non-number found as end range: ':6-42x'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: Non-number found as end range: ':6-42x'", LOCATION);
 };
 
 TEST(path_maps_file, local_range_wrong_end_lineno)
@@ -637,7 +632,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Non-number found as end range: ':7-43y'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: Non-number found as end range: ':7-43y'", LOCATION);
 };
 
 TEST(path_maps_file, remote_range_wrong_range_order)
@@ -649,7 +644,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: End of range (42) is before start of range (5): ':42-5'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Remote element: End of range (42) is before start of range (5): ':42-5'", LOCATION);
 };
 
 TEST(path_maps_file, local_range_wrong_range_order)
@@ -661,7 +656,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: End of range (75) is before start of range (8): ':75-8'");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "Local element: End of range (75) is before start of range (8): ':75-8'", LOCATION);
 };
 
 TEST(path_maps_file, range_span_mismatch)
@@ -673,7 +668,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 4, "The remote range span (2-5) needs to have the same difference (3) as the local range span (2-8) difference (6)");
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "The remote range span (2-5) needs to have the same difference (3) as the local range span (2-8) difference (6)", LOCATION);
 };
 
 TEST(path_maps_file, range_span_single)
@@ -685,10 +680,10 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 5);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 8, LOCATION);
 };
 
 TEST(path_maps_file, range_span_n_to_1)
@@ -700,10 +695,10 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 8);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 8, LOCATION);
 };
 
 TEST(path_maps_file, range_span_n_to_m)
@@ -715,10 +710,10 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 14);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 17);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 17, LOCATION);
 };
 
 TEST(path_maps_file, multiple_ranges_one_file_1)
@@ -732,10 +727,10 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 6);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 9);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 9, LOCATION);
 };
 
 TEST(path_maps_file, multiple_ranges_one_file_2)
@@ -749,10 +744,10 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 18);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 21);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 21, LOCATION);
 };
 
 TEST(path_maps_file, multiple_ranges_one_file_3)
@@ -766,13 +761,13 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 32);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 24);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 24, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 33);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 24);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", 24, LOCATION);
 };
 
 TEST(path_maps_file, multiple_ranges_outside_ranges)
@@ -786,7 +781,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 42);
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
@@ -1312,7 +1307,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	srandom(time(NULL));
 
@@ -1320,7 +1315,7 @@ local_prefix: /home/derick/project
 		int j = 1 + (random() % 511);
 
 		test_remote_to_local("/usr/local/www/example.php", j);
-		check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", j + 6);
+		check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project/example.php", j + 6, LOCATION);
 	}
 };
 
@@ -1334,7 +1329,7 @@ local_prefix: /home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("", 8051);
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
@@ -1350,7 +1345,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 13);
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
@@ -1366,7 +1361,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 5, "The remote range begin line (4) must be higher than the previous range end line (4)");
+	check_result(PATH_MAPS_WRONG_RANGE, 5, "The remote range begin line (4) must be higher than the previous range end line (4)", LOCATION);
 };
 
 TEST(path_maps_file, wrong_order_of_lines_in_map_2)
@@ -1379,7 +1374,7 @@ local_prefix: /home/derick/project
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_WRONG_RANGE, 5, "The remote range begin line (1) must be higher than the previous range end line (32)");
+	check_result(PATH_MAPS_WRONG_RANGE, 5, "The remote range begin line (1) must be higher than the previous range end line (32)", LOCATION);
 };
 
 TEST(path_maps_file, two_files)
@@ -1400,13 +1395,13 @@ local_prefix: /home/derick/project2
 
 	result = test_map_from_file(map1);
 	result = test_map_from_file(map2);
-	check_result(PATH_MAPS_OK, -1, NULL);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
 
 	test_remote_to_local("/usr/local/www1/example.php", 2);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project1/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project1/example.php", 8, LOCATION);
 
 	test_remote_to_local("/usr/local/www2/example.php", 2);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project2/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project2/example.php", 8, LOCATION);
 };
 
 TEST(path_maps_file, two_files_with_rules_for_the_same_files)
@@ -1433,7 +1428,7 @@ local_prefix: /home/derick/project2
 	check_result(PATH_MAPS_DUPLICATE_RULES, 5, "Duplicate rules in multiple files for '/usr/local/www/example.php'", LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 2);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project1/example.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project1/example.php", 8, LOCATION);
 };
 
 TEST(path_maps_file, two_files_with_rules_for_the_same_directories)
@@ -1457,5 +1452,5 @@ local_prefix: /home/derick/project2
 	check_result(PATH_MAPS_DUPLICATE_RULES, 4, "Duplicate rules in multiple files for '/usr/local/www/'", LOCATION);
 
 	test_remote_to_local("/usr/local/www/example.php", 2);
-	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/project1/example.php", 2);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/project1/example.php", 2, LOCATION);
 };
