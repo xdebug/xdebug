@@ -38,6 +38,7 @@ TEST_GROUP(path_maps_file)
 
 	bool test_map_from_file(const char *data_string)
 	{
+		bool retval = false;
 		char templ[] = "/tmp/xdct.XXXXXX";
 
 		int fp = mkstemp(templ);
@@ -49,7 +50,13 @@ TEST_GROUP(path_maps_file)
 
 		filename = strdup(templ);
 
-		return xdebug_path_maps_parse_file(test_map, filename, &error_code, &error_line, &error_message);
+		retval = xdebug_path_maps_parse_file(test_map, filename, &error_code, &error_line, &error_message);
+
+		unlink(filename);
+		free(filename);
+		filename = NULL;
+
+		return retval;
 	}
 
 	void check_result(size_t expected_error_code, int expected_error_line, const char *expected_error_message)
@@ -1364,4 +1371,31 @@ local_prefix: /home/derick/project
 
 	result = test_map_from_file(map);
 	check_result(PATH_MAPS_WRONG_RANGE, 5, "The remote range begin line (1) must be higher than the previous range end line (32)");
+};
+
+TEST(path_maps_file, two_files)
+{
+	const char *map1 = R""""(
+remote_prefix: /usr/local/www1
+local_prefix: /home/derick/project1
+/example.php:1-20 = /example.php:7-26
+/example.php:21-32 = /example.php:43-54
+)"""";
+
+	const char *map2 = R""""(
+remote_prefix: /usr/local/www2
+local_prefix: /home/derick/project2
+/example.php:1-20 = /example.php:7-26
+/example.php:21-32 = /example.php:43-54
+)"""";
+
+	result = test_map_from_file(map1);
+	result = test_map_from_file(map2);
+	check_result(PATH_MAPS_OK, -1, NULL);
+
+	test_remote_to_local("/usr/local/www1/example.php", 2);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project1/example.php", 8);
+
+	test_remote_to_local("/usr/local/www2/example.php", 2);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/home/derick/project2/example.php", 8);
 };
