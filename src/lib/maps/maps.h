@@ -17,7 +17,6 @@
 #ifndef __XDEBUG_MAPS_MAPS_H__
 #define __XDEBUG_MAPS_MAPS_H__
 
-xdebug_path_maps *xdebug_path_maps_ctor(void);
-void xdebug_path_maps_dtor(xdebug_path_maps *maps);
+void xdebug_path_maps_scan(const char *script_source);
 
 #endif
