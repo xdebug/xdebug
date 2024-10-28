@@ -3,7 +3,6 @@
 #include <unistd.h>
 
 #include "maps_private.h"
-#include "maps.h"
 #include "parser.h"
 
 #define STRINGIZE_DETAIL(x) #x

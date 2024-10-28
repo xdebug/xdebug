@@ -24,6 +24,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "compat.h"
+#include "set.h"
 
 extern int xdebug_global_mode;
 

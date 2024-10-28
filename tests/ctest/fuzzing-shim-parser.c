@@ -4,7 +4,6 @@
 #include <unistd.h>
 
 #include "maps_private.h"
-#include "maps.h"
 #include "parser.h"
 
 int main(int argc, char *argv[])

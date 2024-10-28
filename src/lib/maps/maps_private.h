@@ -46,8 +46,8 @@ typedef struct xdebug_path_maps {
 	xdebug_hash *remote_to_local_map;
 } xdebug_path_maps;
 
-/* Functions for testing, and not exported into Xdebug */
-size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps);
+xdebug_path_maps *xdebug_path_maps_ctor(void);
+void xdebug_path_maps_dtor(xdebug_path_maps *maps);
 
 int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remote_line, xdebug_str **local_path, size_t *local_line);
 
