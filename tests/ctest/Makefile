@@ -1,5 +1,5 @@
 C_TESTS=path_map_test.cpp fuzz-cases.cpp
-SOURCE_FILES=../../src/lib/maps/parser.c ../../src/lib/maps/maps.c ../../src/lib/maps/maps_private.c
+SOURCE_FILES=../../src/lib/maps/parser.c ../../src/lib/maps/maps_private.c
 HEADER_FILES=../../src/lib/maps/maps_private.h ../../src/lib/maps/maps.h
 INCLUDE_PATH=../../src/lib/maps
 CPPFLAGS=-DPHP_VERSION_ID=80300 -DXDEBUG_NO_PHP_FEATURES -ggdb3 -fsanitize=address -fsanitize=undefined
