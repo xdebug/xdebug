@@ -20,6 +20,7 @@
 
 #include "lib_private.h"
 #include "log.h"
+#include "maps/maps.h"
 #include "trim.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
@@ -96,6 +97,10 @@ void xdebug_library_rinit(void)
 	XG_LIB(do_collect_errors) = 0;
 
 	XG_LIB(trait_location_map) = xdebug_hash_alloc(256, (xdebug_hash_dtor_t) zend_string_release);
+
+	if (XINI_LIB(path_mapping)) {
+		xdebug_path_maps_scan(SG(request_info).path_translated);
+	}
 }
 
 void xdebug_library_post_deactivate(void)
