@@ -22,13 +22,6 @@
 #include "../vector.h"
 #include "../xdebug_strndup.h"
 
-/** Private API, mainly used for testing */
-
-size_t xdebug_path_maps_get_rule_count(xdebug_path_maps *maps)
-{
-	return maps->remote_to_local_map->size;
-}
-
 static size_t do_binary_search(xdebug_vector *line_ranges, int low, int high, size_t remote_line)
 {
 	while (low <= high) {

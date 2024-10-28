@@ -183,7 +183,7 @@ const char *element_name_as_string[] = {
 	"Local"
 };
 
-static bool has_double_separator(path_maps_parser_state *state, const char *prefix, const char *path, map_element element)
+static bool has_double_separator(path_maps_parser_state *state, const char *prefix, const char *path, enum map_element element)
 {
 	size_t prefix_len = prefix ? strlen(prefix) : 0;
 
@@ -199,7 +199,7 @@ static bool has_double_separator(path_maps_parser_state *state, const char *pref
 }
 
 /* returns true if there is no range, or a valid range; false if something is wrong */
-static bool extract_line_range(path_maps_parser_state *state, const char *element, int *element_length, int *begin, int *end, map_element element_type)
+static bool extract_line_range(path_maps_parser_state *state, const char *element, int *element_length, int *begin, int *end, enum map_element element_type)
 {
 	/* range: :(\d+)(-\d+)?
 	   :4-20
