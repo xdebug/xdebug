@@ -226,6 +226,9 @@ typedef struct _xdebug_library_settings_t {
 	char         *file_link_format;
 	char         *filename_format;
 
+	/* Whether we should do native path mapping */
+	zend_bool     path_mapping;
+
 	/* Whether to use zlib compression for profiling and trace files, if ZLIB support
 	 * is enabled */
 	zend_bool     use_compression;
