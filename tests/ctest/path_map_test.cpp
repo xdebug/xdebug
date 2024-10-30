@@ -276,7 +276,7 @@ local_prefix: /usr/local/www
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is not an absolute path: 'var'", LOCATION);
+	check_result(PATH_MAPS_INVALID_PREFIX, 2, "Prefix is not an absolute or relative path: 'var'", LOCATION);
 }
 
 TEST(path_maps_file, non_absolute_local_prefix)
@@ -288,7 +288,58 @@ local_prefix:home/derick/projects
 )"""";
 
 	result = test_map_from_file(map);
-	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is not an absolute path: 'home/derick/projects'", LOCATION);
+	check_result(PATH_MAPS_INVALID_PREFIX, 3, "Prefix is not an absolute or relative path: 'home/derick/projects'", LOCATION);
+}
+
+TEST(path_maps_file, remote_file_without_separator)
+{
+	const char *map = R""""(
+remote_prefix: /var
+local_prefix: /usr/local/www
+www/ = /example.com/
+)"""";
+
+	result = test_map_from_file(map);
+
+	check_result(PATH_MAPS_NO_SEPARATOR, 4, "Remote prefix ('/var') does not end with a separator, and mapping line does not begin with a separator ('www/')", LOCATION);
+}
+
+TEST(path_maps_file, local_file_without_separator)
+{
+	const char *map = R""""(
+remote_prefix: /var
+local_prefix: /usr/local/www
+/www/ = example.com/
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_NO_SEPARATOR, 4, "Local prefix ('/usr/local/www') does not end with a separator, and mapping line does not begin with a separator ('example.com/')", LOCATION);
+}
+
+TEST(path_maps_file, relative_remote_file)
+{
+	const char *map = R""""(
+remote_prefix: ./
+remote_file.php = /example.com/local_file.php
+)"""";
+
+	result = test_map_from_file(map);
+
+	test_remote_to_local("RELATIVE/remote_file.php", 1);
+	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "/example.com/local_file.php", LOCATION);
+}
+
+TEST(path_maps_file, relative_local_file)
+{
+	const char *map = R""""(
+local_prefix: ./
+/remote_file.php:8 = example.com/local_file.php:81
+)"""";
+
+	result = test_map_from_file(map);
+
+	test_remote_to_local("/remote_file.php", 8);
+	check_map(XDEBUG_PATH_MAP_TYPE_LINES, "RELATIVE/example.com/local_file.php", LOCATION);
 }
 
 TEST(path_maps_file, check_multiple_rules_with_prefix_1)
