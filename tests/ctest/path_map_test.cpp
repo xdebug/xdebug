@@ -356,6 +356,9 @@ local_prefix: /home/derick/projects
 
 	test_remote_to_local("/usr/local/www/servers/example.com/", 1);
 	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/", LOCATION);
+
+	test_remote_to_local("/usr/local/www/servers/example.com/test.php", 1);
+	check_map(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/projects/example.com/test.php", LOCATION);
 }
 
 TEST(path_maps_file, check_multiple_rules_with_prefix_2)
