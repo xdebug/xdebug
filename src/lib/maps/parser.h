@@ -26,9 +26,11 @@
 #define PATH_MAPS_GARBAGE        0x0005
 #define PATH_MAPS_INVALID_PREFIX 0x0006
 #define PATH_MAPS_DOUBLE_SEPARATOR 0x0007
-#define PATH_MAPS_MISMATCHED_TYPES 0x0008
-#define PATH_MAPS_WRONG_RANGE      0x0009
-#define PATH_MAPS_DUPLICATE_RULES  0x0010
+#define PATH_MAPS_NO_SEPARATOR     0x0008
+#define PATH_MAPS_MISMATCHED_TYPES 0x0009
+#define PATH_MAPS_WRONG_RANGE      0x0010
+#define PATH_MAPS_DUPLICATE_RULES  0x0011
+#define PATH_MAPS_NOT_ABSOLUTE     0x0012
 
 bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, int *error_line, char **error_message);
 
