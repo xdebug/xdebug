@@ -128,8 +128,21 @@ static bool is_valid_prefix(path_maps_parser_state *state, const char *prefix)
 		return false;
 	}
 
+	/* Relative prefix */
+	if (prefix[0] == '.') {
+		/* Valid, starting with ./ */
+		if (prefix[1] == '/') {
+			return true;
+		}
+
+		char *message = xdebug_sprintf("Prefix is not a valid relative path: '%s'", prefix);
+		state_set_error(state, PATH_MAPS_INVALID_PREFIX, message);
+		xdfree(message);
+		return false;
+	}
+
 	if (prefix[0] != '/') {
-		char *message = xdebug_sprintf("Prefix is not an absolute path: '%s'", prefix);
+		char *message = xdebug_sprintf("Prefix is not an absolute or relative path: '%s'", prefix);
 		state_set_error(state, PATH_MAPS_INVALID_PREFIX, message);
 		xdfree(message);
 		return false;
@@ -182,6 +195,21 @@ const char *element_name_as_string[] = {
 	"Remote",
 	"Local"
 };
+
+static bool has_no_separator(path_maps_parser_state *state, const char *prefix, const char *path, enum map_element element)
+{
+	size_t prefix_len = prefix ? strlen(prefix) : 0;
+
+	if (path[0] != '/' && prefix && prefix_len > 0 && prefix[prefix_len - 1] != '/') {
+		char *message = xdebug_sprintf("%s prefix ('%s') does not end with a separator, and mapping line does not begin with a separator ('%s')",
+			element_name_as_string[element], prefix, path);
+		state_set_error(state, PATH_MAPS_NO_SEPARATOR, message);
+		xdfree(message);
+		return true;
+	}
+
+	return false;
+}
 
 static bool has_double_separator(path_maps_parser_state *state, const char *prefix, const char *path, enum map_element element)
 {
@@ -362,6 +390,9 @@ static xdebug_str* prepare_remote_element(path_maps_parser_state *state, const c
 		goto failure;
 	}
 
+	if (has_no_separator(state, state->current_remote_prefix, trimmed, REMOTE)) {
+		goto failure;
+	}
 	if (has_double_separator(state, state->current_remote_prefix, trimmed, REMOTE)) {
 		goto failure;
 	}
@@ -384,7 +415,12 @@ static xdebug_str* prepare_remote_element(path_maps_parser_state *state, const c
 
 	/* Assemble */
 	if (state->current_remote_prefix) {
-		remote_path = xdebug_str_create_from_char(state->current_remote_prefix);
+		if (state->current_remote_prefix[0] == '.') {
+			remote_path = xdebug_str_create_from_const_char("RELATIVE");
+			xdebug_str_add(remote_path, state->current_remote_prefix + 1, false);
+		} else {
+			remote_path = xdebug_str_create_from_char(state->current_remote_prefix);
+		}
 	} else {
 		remote_path = xdebug_str_new();
 	}
@@ -414,6 +450,9 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 		goto failure;
 	}
 
+	if (has_no_separator(state, state->current_local_prefix, trimmed, LOCAL)) {
+		goto failure;
+	}
 	if (has_double_separator(state, state->current_local_prefix, trimmed, LOCAL)) {
 		goto failure;
 	}
@@ -434,8 +473,14 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 		*type = XDEBUG_PATH_MAP_TYPE_DIRECTORY;
 	}
 
+	/* Assemble */
 	if (state->current_local_prefix) {
-		local_path = xdebug_str_create_from_char(state->current_local_prefix);
+		if (state->current_local_prefix[0] == '.') {
+			local_path = xdebug_str_create_from_const_char("RELATIVE");
+			xdebug_str_add(local_path, state->current_local_prefix + 1, false);
+		} else {
+			local_path = xdebug_str_create_from_char(state->current_local_prefix);
+		}
 	} else {
 		local_path = xdebug_str_new();
 	}
