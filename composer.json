@@ -7,7 +7,6 @@
         "php": ">=8.0,<8.5"
     },
     "php-ext": {
-        "extension-name": "xdebug",
         "priority": 90,
         "configure-options": []
     }
