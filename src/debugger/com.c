@@ -661,6 +661,11 @@ bool xdebug_should_ignore(void)
 	const char *ignore_value;
 	const char *found_in_global;
 
+	/* If we are in engine shutdown, don't try to read a global */
+	if (EG(flags) & EG_FLAGS_IN_SHUTDOWN) {
+		return true;
+	}
+
 	ignore_value = xdebug_lib_find_in_globals("XDEBUG_IGNORE", &found_in_global);
 
 	if (!ignore_value) {
