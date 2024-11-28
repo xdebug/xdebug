@@ -317,7 +317,9 @@ The full list of changes can be found on the
 <p>
 The source code can be found on the
 <a href="https://xdebug.org/download#releases">downloads</a> page, and as
-usual, Xdebug is installable through PECL.
+usual, Xdebug is installable through <a href="https://pecl.php.net/">PECL</a> and <a
+href="https://github.com/php/pie">PIE</a>, and is also available as package
+for most Linux distributions.
 </p>
 
 <p>
