@@ -2,28 +2,26 @@ trigger:
   batch: true
   branches:
     include:
-      - xdebug_3_3
+      - xdebug_3_4
       - master
 
 jobs:
-# Disable master until xdebug_3_4 branch has been created
-#  - template: .azure/macos/job.yml
-#    parameters:
-#      configurationName: 'OSX_PHP_MASTER'
-#      phpVersion: 'branch'
-#      phpBranch: 'master'
-#      configurationParameters: '--enable-debug --disable-zts'
+ Disable master until xdebug_3_4 branch has been created
+  - template: .azure/macos/job.yml
+    parameters:
+      configurationName: 'OSX_PHP_MASTER'
+      phpVersion: 'branch'
+      phpBranch: 'master'
+      configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_84'
-      phpVersion: 'branch'
-      phpBranch: 'PHP-8.4'
+      phpVersion: '8.4.1'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_84_ZTS'
-      phpVersion: 'branch'
-      phpBranch: 'PHP-8.4'
+      phpVersion: '8.4.1'
       configurationParameters: '--enable-debug --enable-zts'
   - template: .azure/macos/job.yml
     parameters:

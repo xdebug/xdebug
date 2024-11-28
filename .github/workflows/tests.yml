@@ -17,7 +17,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [8.0, 8.1, 8.2, 8.3, 8.4]
+                php: [8.0, 8.1, 8.2, 8.3, 8.4, 8.5]
                 use-opcache: [true, false]
                 experimental: [false]
         steps:
@@ -67,7 +67,7 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: ["8.0", "8.1", "8.2", "8.3", "8.4"]
+                php: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
                 arch: [x64]
                 ts: [nts, ts]
                 experimental: [false]
@@ -122,6 +122,7 @@ jobs:
                     if ('8.2' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
                     if ('8.3' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs16' }
                     if ('8.4' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs17' }
+                    if ('8.5' -eq '${{matrix.php}}') { $artifact_name = $artifact_name + '-vs17' }
 
                     if ('nts' -eq '${{matrix.ts}}') { $artifact_name = $artifact_name + '-nts' }
                     if ('x64' -eq '${{matrix.arch}}') { $artifact_name = $artifact_name + '-x86_64' }
