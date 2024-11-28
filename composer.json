@@ -4,7 +4,7 @@
     "license": "Xdebug-1.03",
     "description": "Xdebug is a debugging and productivity extension for PHP",
     "require": {
-        "php": ">=8.0,<8.5"
+        "php": ">=8.0,<8.6"
     },
     "php-ext": {
         "priority": 90,
