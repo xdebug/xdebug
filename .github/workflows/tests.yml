@@ -71,15 +71,6 @@ jobs:
                 arch: [x64]
                 ts: [nts, ts]
                 experimental: [false]
-                include:
-                  - php: "8.5"
-                    arch: x64
-                    ts: nts
-                    experimental: true
-                  - php: "8.5"
-                    arch: x64
-                    ts: ts
-                    experimental: true
         steps:
                 - name: Checkout Xdebug
                   uses: actions/checkout@v4
