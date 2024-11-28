@@ -40,24 +40,36 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2024-10-04</date>
- <time>14:39:23</time>
+ <date>2024-11-28</date>
+ <time>13:45:52</time>
  <version>
-  <release>3.4.0beta1</release>
-  <api>3.4.0beta1</api>
+  <release>3.4.0</release>
+  <api>3.4.0</api>
  </version>
  <stability>
-  <release>beta</release>
-  <api>beta</api>
+  <release>stable</release>
+  <api>stable</api>
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Fri, Oct 04, 2024 - Xdebug 3.4.0beta1
+Thu, Nov 28, 2024 - Xdebug 3.4.0
+
++ New features:
+
+  - Fixed issue #2239: Add &#039;XDEBUG_IGNORE&#039; GET/POST/COOKIE/ENV to make the step debugger ignore that specific request
+  - Fixed issue #2281: PHP 8.4 support
+
++ Improvements
+
+  - Fixed issue #2261: Send control socket location in init packet
 
 = Fixed bugs:
 
-  - Fixed issue #2261: Send control socket location in init packet
-  - Fixed issue #2281: PHP 8.4 support
+  - Fixed issue #2262: PHP 8.4: Closure names need different wrapping algorithm
+  - Fixed issue #2283: SoapClient usage causes segfault with codecoverage
+  - Fixed issue #2294: Nette Tester always crashes in all test jobs when running with XDebug 3.4.0beta1 active
+  - Fixed issue #2304: Seg fault on throw exception
+  - Fixed issue #2305: Segfault when checking whether to ignore creating a debug connection during shutdown functions
 
  </notes>
 
@@ -212,6 +224,28 @@ Fri, Oct 04, 2024 - Xdebug 3.4.0beta1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2024-10-04</date>
+   <time>14:39:23</time>
+   <version>
+    <release>3.4.0beta1</release>
+    <api>3.4.0beta1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Fri, Oct 04, 2024 - Xdebug 3.4.0beta1
+
+= Fixed bugs:
+
+  - Fixed issue #2261: Send control socket location in init packet
+  - Fixed issue #2281: PHP 8.4 support
+   </notes>
+  </release>
 
   <release>
    <date>2024-05-31</date>
