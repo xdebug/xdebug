@@ -76,7 +76,6 @@ jobs:
                     arch: x64
                     ts: nts
                     experimental: true
-                include:
                   - php: "8.5"
                     arch: x64
                     ts: ts
