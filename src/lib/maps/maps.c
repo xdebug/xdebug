@@ -89,7 +89,7 @@ static void scan_directory(const char *dir)
 
 		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "SCAN-READ", "Reading mapping file '%s'", globbuf.gl_pathv[i]);
 
-		if (!xdebug_path_maps_parse_file(XG_LIB(path_mapping_information), globbuf.gl_pathv[i], &error_code, &error_line, &error_message)) {
+		if (!xdebug_path_maps_parse_file(XG_LIB(path_mapping_information), dir, globbuf.gl_pathv[i], &error_code, &error_line, &error_message)) {
 			xdebug_log_ex(
 				XLOG_CHAN_PATHMAP, XLOG_WARN,
 				"ERR-FILE", "Parse error in path mapping file '%s' on line %d: %s",
