@@ -53,7 +53,7 @@ TEST_GROUP(path_maps_file)
 
 		filename = strdup(templ);
 
-		retval = xdebug_path_maps_parse_file(test_map, filename, &error_code, &error_line, &error_message);
+		retval = xdebug_path_maps_parse_file(test_map, "RELATIVE", filename, &error_code, &error_line, &error_message);
 
 		unlink(filename);
 		free(filename);
@@ -120,7 +120,7 @@ private:
 
 TEST(path_maps_file, fopen_non_existing)
 {
-	result = xdebug_path_maps_parse_file(test_map, "file-does-not-exist.map", &error_code, &error_line, &error_message);
+	result = xdebug_path_maps_parse_file(test_map, "RELATIVE", "file-does-not-exist.map", &error_code, &error_line, &error_message);
 
 	LONGS_EQUAL(false, result);
 	LONGS_EQUAL(PATH_MAPS_CANT_OPEN_FILE, error_code);
