@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	char *error_message = NULL;
 
 	test_map = xdebug_path_maps_ctor();
-	xdebug_path_maps_parse_file(test_map, argv[1], &error_code, &error_line, &error_message);
+	xdebug_path_maps_parse_file(test_map, "RELATIVE", argv[1], &error_code, &error_line, &error_message);
 
 	printf("Error code: %d\n", error_code);
 

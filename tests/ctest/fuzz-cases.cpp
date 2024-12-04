@@ -42,7 +42,7 @@ TEST_GROUP(fuzz_cases)
 
 		filename = strdup(templ);
 
-		return xdebug_path_maps_parse_file(test_map, filename, &error_code, &error_line, &error_message);
+		return xdebug_path_maps_parse_file(test_map, "RELATIVE", filename, &error_code, &error_line, &error_message);
 	}
 
 	void check_result(size_t expected_error_code, int expected_error_line, const char *expected_error_message)

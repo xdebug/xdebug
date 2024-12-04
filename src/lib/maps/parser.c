@@ -39,6 +39,7 @@ typedef struct path_maps_parser_state {
 	char *current_local_prefix;
 	char *current_remote_prefix;
 
+	char *current_working_directory;
 	FILE *current_file;
 	size_t current_line_no;
 
@@ -56,6 +57,7 @@ static void path_maps_parser_state_ctor(struct path_maps_parser_state *state)
 	state->current_line_no = 0;
 	state->current_local_prefix = NULL;
 	state->current_remote_prefix = NULL;
+	state->current_working_directory = NULL;
 
 	state->file_rules = xdebug_hash_alloc(256, xdebug_path_mapping_dtor);
 }
@@ -73,6 +75,10 @@ static void path_maps_parser_state_dtor(struct path_maps_parser_state *state)
 	if (state->current_remote_prefix) {
 		xdfree(state->current_remote_prefix);
 		state->current_remote_prefix = NULL;
+	}
+	if (state->current_working_directory) {
+		xdfree(state->current_working_directory);
+		state->current_working_directory = NULL;
 	}
 	if (state->current_file) {
 		fclose(state->current_file);
@@ -131,14 +137,14 @@ static bool is_valid_prefix(path_maps_parser_state *state, const char *prefix)
 	/* Relative prefix */
 	if (prefix[0] == '.') {
 		/* Valid, starting with ./ */
-		if (prefix[1] == '/') {
-			return true;
+		if (prefix[1] != '/') {
+			char *message = xdebug_sprintf("Prefix is not a valid relative path: '%s'", prefix);
+			state_set_error(state, PATH_MAPS_INVALID_PREFIX, message);
+			xdfree(message);
+			return false;
 		}
 
-		char *message = xdebug_sprintf("Prefix is not a valid relative path: '%s'", prefix);
-		state_set_error(state, PATH_MAPS_INVALID_PREFIX, message);
-		xdfree(message);
-		return false;
+		return true;
 	}
 
 	if (prefix[0] != '/') {
@@ -416,7 +422,7 @@ static xdebug_str* prepare_remote_element(path_maps_parser_state *state, const c
 	/* Assemble */
 	if (state->current_remote_prefix) {
 		if (state->current_remote_prefix[0] == '.') {
-			remote_path = xdebug_str_create_from_const_char("RELATIVE");
+			remote_path = xdebug_str_create_from_char(state->current_working_directory);
 			xdebug_str_add(remote_path, state->current_remote_prefix + 1, false);
 		} else {
 			remote_path = xdebug_str_create_from_char(state->current_remote_prefix);
@@ -476,7 +482,7 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 	/* Assemble */
 	if (state->current_local_prefix) {
 		if (state->current_local_prefix[0] == '.') {
-			local_path = xdebug_str_create_from_const_char("RELATIVE");
+			local_path = xdebug_str_create_from_char(state->current_working_directory);
 			xdebug_str_add(local_path, state->current_local_prefix + 1, false);
 		} else {
 			local_path = xdebug_str_create_from_char(state->current_local_prefix);
@@ -689,16 +695,49 @@ static void copy_rule(void *ret, xdebug_hash_element *e, void *state_v)
 	}
 }
 
+static void copy_rule_reverse(void *ret, xdebug_hash_element *e, void *state_v)
+{
+	struct path_maps_parser_state *state = (struct path_maps_parser_state*) state_v;
+	xdebug_path_mapping *new_rule = (xdebug_path_mapping*) e->ptr;
+	xdebug_path_mapping *existing_path_mapping = NULL;
+
+	if (state->copy_error) {
+		return;
+	}
+
+	if (xdebug_hash_find((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, (void**) &existing_path_mapping)) {
+		xdebug_str *message = xdebug_str_create_from_const_char("Duplicate rules in multiple files for '");
+		xdebug_str_addl(message, e->key.value.str.val, e->key.value.str.len, 0);
+		xdebug_str_add_literal(message, "'");
+
+		state_set_error(state, PATH_MAPS_DUPLICATE_RULES, message->d);
+		state->copy_error = true;
+
+		xdebug_str_free(message);
+	} else {
+		xdebug_path_mapping *tmp = xdebug_path_mapping_clone(new_rule);
+
+		xdebug_hash_add((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, tmp);
+	}
+}
+
 /* Parses a path mapping file.
  *
  * Returns true on success, with the 'maps' updated.
  * Returns false on error, with an error set in 'error_message' and no modifications to 'maps'.
  */
-bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *filename, int *error_code, int *error_line, char **error_message)
+bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *cwd, const char *filename, int *error_code, int *error_line, char **error_message)
 {
 	struct path_maps_parser_state state;
 
 	path_maps_parser_state_ctor(&state);
+
+	if (cwd) {
+		state.current_working_directory = strdup(cwd);
+	} else {
+		int *p = NULL;
+		*p = 0;
+	}
 
 	if (!state_open_file(&state, filename)) {
 		goto error;
