@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 	int         mapping_type;
 
 	test_map = xdebug_path_maps_ctor();
-	xdebug_path_maps_parse_file(test_map, "fuzz-seeds/directory.map", &error_code, &error_line, &error_message);
+	xdebug_path_maps_parse_file(test_map, "RELATIVE", "fuzz-seeds/directory.map", &error_code, &error_line, &error_message);
 	test_path_f = fopen(argv[1], "r");
 	fread(test_path, sizeof(test_path) - 1, 1, test_path_f);
 	fclose(test_path_f);
