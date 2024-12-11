@@ -44,12 +44,14 @@ typedef struct xdebug_path_mapping {
 
 typedef struct xdebug_path_maps {
 	xdebug_hash *remote_to_local_map;
+	xdebug_hash *local_to_remote_map;
 } xdebug_path_maps;
 
 xdebug_path_maps *xdebug_path_maps_ctor(void);
 void xdebug_path_maps_dtor(xdebug_path_maps *maps);
 
 int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remote_line, xdebug_str **local_path, size_t *local_line);
+int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local_line, xdebug_str **remote_path, size_t *remote_line);
 
 void xdebug_path_map_range_set(xdebug_path_map_range *from, int remote_begin, int remote_end, int local_begin, int local_end);
 void xdebug_path_map_range_copy(xdebug_path_map_range *from, xdebug_path_map_range *to);
