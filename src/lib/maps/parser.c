@@ -568,6 +568,14 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 
 			goto failure;
 		}
+		if (local_begin <= tail_range->local_end) {
+			char *message = xdebug_sprintf("The local range begin line (%d) must be higher than the previous range end line (%d)",
+				local_begin, tail_range->local_end);
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+			xdfree(message);
+
+			goto failure;
+		}
 
 		new_range = (xdebug_path_map_range*) xdebug_vector_push(existing_path_mapping->line_ranges);
 		xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_begin, local_end);
@@ -679,9 +687,9 @@ static void copy_rule(void *ret, xdebug_hash_element *e, void *state_v)
 		return;
 	}
 
-	if (xdebug_hash_find((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, (void**) &existing_path_mapping)) {
+	if (xdebug_hash_find((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->remote_path), XDEBUG_STR_LEN(new_rule->remote_path), (void**) &existing_path_mapping)) {
 		xdebug_str *message = xdebug_str_create_from_const_char("Duplicate rules in multiple files for '");
-		xdebug_str_addl(message, e->key.value.str.val, e->key.value.str.len, 0);
+		xdebug_str_addl(message, XDEBUG_STR_VAL(new_rule->remote_path), XDEBUG_STR_LEN(new_rule->remote_path), 0);
 		xdebug_str_add_literal(message, "'");
 
 		state_set_error(state, PATH_MAPS_DUPLICATE_RULES, message->d);
@@ -691,7 +699,7 @@ static void copy_rule(void *ret, xdebug_hash_element *e, void *state_v)
 	} else {
 		xdebug_path_mapping *tmp = xdebug_path_mapping_clone(new_rule);
 
-		xdebug_hash_add((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, tmp);
+		xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->remote_path), XDEBUG_STR_LEN(new_rule->remote_path), tmp);
 	}
 }
 
@@ -705,9 +713,9 @@ static void copy_rule_reverse(void *ret, xdebug_hash_element *e, void *state_v)
 		return;
 	}
 
-	if (xdebug_hash_find((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, (void**) &existing_path_mapping)) {
+	if (xdebug_hash_find((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->local_path), XDEBUG_STR_LEN(new_rule->local_path), (void**) &existing_path_mapping)) {
 		xdebug_str *message = xdebug_str_create_from_const_char("Duplicate rules in multiple files for '");
-		xdebug_str_addl(message, e->key.value.str.val, e->key.value.str.len, 0);
+		xdebug_str_addl(message, XDEBUG_STR_VAL(new_rule->local_path), XDEBUG_STR_LEN(new_rule->local_path), 0);
 		xdebug_str_add_literal(message, "'");
 
 		state_set_error(state, PATH_MAPS_DUPLICATE_RULES, message->d);
@@ -717,7 +725,7 @@ static void copy_rule_reverse(void *ret, xdebug_hash_element *e, void *state_v)
 	} else {
 		xdebug_path_mapping *tmp = xdebug_path_mapping_clone(new_rule);
 
-		xdebug_hash_add((xdebug_hash*) ret, e->key.value.str.val, e->key.value.str.len, tmp);
+		xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->local_path), XDEBUG_STR_LEN(new_rule->local_path), tmp);
 	}
 }
 
@@ -752,9 +760,16 @@ bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *cwd, const 
 		goto error;
 	}
 
-	/* No errors, so copy all rules to actual map */
+	/* No errors, so copy all rules to remote-to-local map */
 	state.copy_error = false;
 	xdebug_hash_apply_with_argument(state.file_rules, (void*) maps->remote_to_local_map, copy_rule, (void*) &state);
+	if (state.copy_error) {
+		goto error;
+	}
+
+	/* No errors, so copy all rules to local-to-remote map */
+	state.copy_error = false;
+	xdebug_hash_apply_with_argument(state.file_rules, (void*) maps->local_to_remote_map, copy_rule_reverse, (void*) &state);
 	if (state.copy_error) {
 		goto error;
 	}
