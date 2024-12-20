@@ -733,7 +733,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		EX(opline) = EX(func)->op_array.opcodes;
 	}
 
-	if (XG_BASE(in_execution) && XDEBUG_VECTOR_COUNT(XG_BASE(stack)) == 0 && !(EG(flags) & EG_FLAGS_IN_SHUTDOWN)) {
+	if (XG_BASE(in_execution) && XDEBUG_VECTOR_COUNT(XG_BASE(stack)) == 0) {
 		if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 			xdebug_debugger_set_program_name(op_array->filename);
 			xdebug_debug_init_if_requested_at_startup();

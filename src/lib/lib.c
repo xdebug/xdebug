@@ -341,36 +341,36 @@ const char *xdebug_lib_find_in_globals(const char *element, const char **found_i
 	zval *st;
 
 	/* Elements in Superglobal Symbols */
-	st = zend_hash_str_find(&EG(symbol_table), "_GET", strlen("_GET"));
-	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+	st = zend_hash_str_find_deref(&EG(symbol_table), "_GET", strlen("_GET"));
+	if (st && (trigger_val = zend_hash_str_find_deref(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
 		*found_in_global = "GET";
 		return Z_STRVAL_P(trigger_val);
 	}
 
-	st = zend_hash_str_find(&EG(symbol_table), "_POST", strlen("_POST"));
-	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+	st = zend_hash_str_find_deref(&EG(symbol_table), "_POST", strlen("_POST"));
+	if (st && (trigger_val = zend_hash_str_find_deref(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
 		*found_in_global = "POST";
 		return Z_STRVAL_P(trigger_val);
 	}
 
-	st = zend_hash_str_find(&EG(symbol_table), "_COOKIE", strlen("_COOKIE"));
-	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+	st = zend_hash_str_find_deref(&EG(symbol_table), "_COOKIE", strlen("_COOKIE"));
+	if (st && (trigger_val = zend_hash_str_find_deref(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
 		*found_in_global = "COOKIE";
 		return Z_STRVAL_P(trigger_val);
 	}
 
 	/* Actual Superglobals */
-	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), element, strlen(element))) != NULL) {
+	if ((trigger_val = zend_hash_str_find_deref(Z_ARR(PG(http_globals)[TRACK_VARS_GET]), element, strlen(element))) != NULL) {
 		*found_in_global = "GET";
 		return Z_STRVAL_P(trigger_val);
 	}
 
-	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), element, strlen(element))) != NULL) {
+	if ((trigger_val = zend_hash_str_find_deref(Z_ARR(PG(http_globals)[TRACK_VARS_POST]), element, strlen(element))) != NULL) {
 		*found_in_global = "POST";
 		return Z_STRVAL_P(trigger_val);
 	}
 
-	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), element, strlen(element))) != NULL) {
+	if ((trigger_val = zend_hash_str_find_deref(Z_ARR(PG(http_globals)[TRACK_VARS_COOKIE]), element, strlen(element))) != NULL) {
 		*found_in_global = "COOKIE";
 		return Z_STRVAL_P(trigger_val);
 	}
@@ -381,13 +381,13 @@ const char *xdebug_lib_find_in_globals(const char *element, const char **found_i
 		return env_value;
 	}
 
-	st = zend_hash_str_find(&EG(symbol_table), "_ENV", strlen("_ENV"));
-	if (st && (trigger_val = zend_hash_str_find(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
+	st = zend_hash_str_find_deref(&EG(symbol_table), "_ENV", strlen("_ENV"));
+	if (st && (trigger_val = zend_hash_str_find_deref(Z_ARRVAL_P(st), element, strlen(element))) != NULL) {
 		*found_in_global = "ENV";
 		return Z_STRVAL_P(trigger_val);
 	}
 
-	if ((trigger_val = zend_hash_str_find(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]), element, strlen(element))) != NULL) {
+	if ((trigger_val = zend_hash_str_find_deref(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]), element, strlen(element))) != NULL) {
 		*found_in_global = "ENV";
 		return Z_STRVAL_P(trigger_val);
 	}
