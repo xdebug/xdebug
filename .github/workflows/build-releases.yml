@@ -24,6 +24,7 @@ jobs:
               with:
                 php-version-list: '8.0, 8.1, 8.2, 8.3, 8.4'
                 arch-list: 'x64'
+
     build:
         needs: get-extension-matrix
         runs-on: ${{ matrix.os }}
