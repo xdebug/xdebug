@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2024-11-28</date>
- <time>13:45:52</time>
+ <date>2025-01-06</date>
+ <time>15:43:11</time>
  <version>
-  <release>3.4.0</release>
-  <api>3.4.0</api>
+  <release>3.4.1</release>
+  <api>3.4.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,24 +52,14 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Thu, Nov 28, 2024 - Xdebug 3.4.0
-
-+ New features:
-
-  - Fixed issue #2239: Add &#039;XDEBUG_IGNORE&#039; GET/POST/COOKIE/ENV to make the step debugger ignore that specific request
-  - Fixed issue #2281: PHP 8.4 support
-
-+ Improvements
-
-  - Fixed issue #2261: Send control socket location in init packet
+Mon, Jan 06, 2025 - Xdebug 3.4.1
 
 = Fixed bugs:
 
-  - Fixed issue #2262: PHP 8.4: Closure names need different wrapping algorithm
-  - Fixed issue #2283: SoapClient usage causes segfault with codecoverage
-  - Fixed issue #2294: Nette Tester always crashes in all test jobs when running with XDebug 3.4.0beta1 active
-  - Fixed issue #2304: Seg fault on throw exception
-  - Fixed issue #2305: Segfault when checking whether to ignore creating a debug connection during shutdown functions
+  - Fixed issue #2306: Segmentation fault on each HTTP request when not listening to debugging connections
+  - Fixed issue #2307: Segmentation fault due to a superglobal being a reference while checking for triggers
+  - Fixed issue #2309: Installation on Windows with PHP PIE failing
+  - Fixed issue #2310: xdebug 3.4.0 crashes php8.1-fpm after script execution
 
  </notes>
 
@@ -224,6 +214,41 @@ Thu, Nov 28, 2024 - Xdebug 3.4.0
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2024-11-28</date>
+   <time>13:45:52</time>
+   <version>
+    <release>3.4.0</release>
+    <api>3.4.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Thu, Nov 28, 2024 - Xdebug 3.4.0
+
++ New features:
+
+  - Fixed issue #2239: Add &#039;XDEBUG_IGNORE&#039; GET/POST/COOKIE/ENV to make the step debugger ignore that specific request
+  - Fixed issue #2281: PHP 8.4 support
+
++ Improvements
+
+  - Fixed issue #2261: Send control socket location in init packet
+
+= Fixed bugs:
+
+  - Fixed issue #2262: PHP 8.4: Closure names need different wrapping algorithm
+  - Fixed issue #2283: SoapClient usage causes segfault with codecoverage
+  - Fixed issue #2294: Nette Tester always crashes in all test jobs when running with XDebug 3.4.0beta1 active
+  - Fixed issue #2304: Seg fault on throw exception
+  - Fixed issue #2305: Segfault when checking whether to ignore creating a debug connection during shutdown functions
+
+   </notes>
+  </release>
 
   <release>
    <date>2024-10-04</date>
