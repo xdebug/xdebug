@@ -155,8 +155,8 @@ function updateGIT( bool $from_master )
 
 	if ( !$from_master )
 	{
-		`git checkout xdebug_3_3`;
-		`git pull origin xdebug_3_3`;
+		`git checkout xdebug_3_4`;
+		`git pull origin xdebug_3_4`;
 	}
 }
 
