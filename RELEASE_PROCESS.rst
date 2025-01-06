@@ -14,6 +14,7 @@
 #. Move existing release entry down in ``package.xml``
 #. Include new snippet in ``/tmp/package.xml``
 #. Run commands from output
+#. Create a release from the tag on GitHub
 #. Update www.xdebug.org ``views/home/updates.php`` with snippet
 #. Update www.xdebug.org ``src/XdebugVersion.php`` with snippet
 #. Update pre-generated www.xdebug.org ``data/news/...`` file
