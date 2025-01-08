@@ -261,6 +261,7 @@ xdebug_path_mapping *xdebug_path_mapping_ctor(void)
 {
 	xdebug_path_mapping *tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
 
+	tmp->ref_count = 1;
 	tmp->line_ranges = xdebug_vector_alloc(sizeof(xdebug_path_map_range), (xdebug_vector_dtor) xdebug_path_map_range_dtor);
 
 	return tmp;
@@ -269,6 +270,12 @@ xdebug_path_mapping *xdebug_path_mapping_ctor(void)
 void xdebug_path_mapping_dtor(void *mapping)
 {
 	xdebug_path_mapping *tmp = (xdebug_path_mapping*) mapping;
+
+	tmp->ref_count--;
+
+	if (tmp->ref_count > 0) {
+		return;
+	}
 
 	if (tmp->remote_path) {
 		xdebug_str_free(tmp->remote_path);
@@ -282,14 +289,11 @@ void xdebug_path_mapping_dtor(void *mapping)
 	xdfree(tmp);
 }
 
-xdebug_path_mapping *xdebug_path_mapping_clone(xdebug_path_mapping *mapping)
+xdebug_path_mapping *xdebug_path_mapping_copy(xdebug_path_mapping *mapping)
 {
-	xdebug_path_mapping *tmp = (xdebug_path_mapping*) xdcalloc(1, sizeof(xdebug_path_mapping));
+	xdebug_path_mapping *tmp = (xdebug_path_mapping*) mapping;
 
-	tmp->type        = mapping->type;
-	tmp->remote_path = xdebug_str_copy(mapping->remote_path);
-	tmp->local_path  = xdebug_str_copy(mapping->local_path);
-	tmp->line_ranges = xdebug_vector_clone(mapping->line_ranges);
+	tmp->ref_count++;
 
 	return tmp;
 }
