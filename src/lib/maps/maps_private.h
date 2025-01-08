@@ -37,6 +37,7 @@ struct xdebug_path_map_range {
 
 typedef struct xdebug_path_mapping {
 	int                      type;
+	int                      ref_count;
 	xdebug_str              *remote_path;
 	xdebug_str              *local_path;
 	xdebug_vector           *line_ranges;
@@ -59,6 +60,6 @@ void xdebug_path_map_range_dtor(xdebug_path_map_range *range);
 
 xdebug_path_mapping *xdebug_path_mapping_ctor(void);
 void xdebug_path_mapping_dtor(void *mapping);
-xdebug_path_mapping *xdebug_path_mapping_clone(xdebug_path_mapping *mapping);
+xdebug_path_mapping *xdebug_path_mapping_copy(xdebug_path_mapping *mapping);
 
 #endif
