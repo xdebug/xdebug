@@ -697,7 +697,7 @@ static void copy_rule(void *ret, xdebug_hash_element *e, void *state_v)
 
 		xdebug_str_free(message);
 	} else {
-		xdebug_path_mapping *tmp = xdebug_path_mapping_clone(new_rule);
+		xdebug_path_mapping *tmp = xdebug_path_mapping_copy(new_rule);
 
 		xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->remote_path), XDEBUG_STR_LEN(new_rule->remote_path), tmp);
 	}
@@ -723,7 +723,7 @@ static void copy_rule_reverse(void *ret, xdebug_hash_element *e, void *state_v)
 
 		xdebug_str_free(message);
 	} else {
-		xdebug_path_mapping *tmp = xdebug_path_mapping_clone(new_rule);
+		xdebug_path_mapping *tmp = xdebug_path_mapping_copy(new_rule);
 
 		xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->local_path), XDEBUG_STR_LEN(new_rule->local_path), tmp);
 	}
