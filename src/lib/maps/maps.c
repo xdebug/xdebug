@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -147,6 +147,6 @@ void xdebug_path_maps_scan(const char *script_source)
 	xdfree(slash);
 	xdebug_arg_dtor(parts);
 
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULES", "Found %zd path mapping rules", xdebug_globals.globals.library.path_mapping_information->remote_to_local_map->size);
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULES", "Found %zd path mapping rules", XG_LIB(path_mapping_information)->remote_to_local_map->size);
 }
 
