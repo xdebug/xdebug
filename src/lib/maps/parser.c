@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -431,7 +431,12 @@ static xdebug_str* prepare_remote_element(path_maps_parser_state *state, const c
 		remote_path = xdebug_str_new();
 	}
 
-	xdebug_str_addl(remote_path, trimmed, trimmed_length, false);
+	if (trimmed[0] == '.' && trimmed[1] == '/') {
+		xdebug_str_add(remote_path, state->current_working_directory, false);
+		xdebug_str_addl(remote_path, trimmed + 1, trimmed_length - 1, false);
+	} else {
+		xdebug_str_addl(remote_path, trimmed, trimmed_length, false);
+	}
 
 	/* clean up */
 	xdfree(trimmed);
@@ -491,7 +496,12 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 		local_path = xdebug_str_new();
 	}
 
-	xdebug_str_addl(local_path, trimmed, trimmed_length, false);
+	if (trimmed[0] == '.' && trimmed[1] == '/') {
+		xdebug_str_add(local_path, state->current_working_directory, false);
+		xdebug_str_addl(local_path, trimmed + 1, trimmed_length - 1, false);
+	} else {
+		xdebug_str_addl(local_path, trimmed, trimmed_length, false);
+	}
 
 	/* clean up */
 	xdfree(trimmed);

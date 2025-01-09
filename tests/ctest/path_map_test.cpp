@@ -325,7 +325,7 @@ local_prefix: /usr/local/www
 	check_result(PATH_MAPS_NO_SEPARATOR, 4, "Local prefix ('/usr/local/www') does not end with a separator, and mapping line does not begin with a separator ('example.com/')", LOCATION);
 }
 
-TEST(path_maps_file, relative_remote_file)
+TEST(path_maps_file, relative_remote_prefix)
 {
 	const char *map = R""""(
 remote_prefix: ./
@@ -341,11 +341,41 @@ remote_file.php = /example.com/local_file.php
 	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "RELATIVE/remote_file.php", LOCATION);
 }
 
-TEST(path_maps_file, relative_local_file)
+TEST(path_maps_file, relative_local_prefix)
 {
 	const char *map = R""""(
 local_prefix: ./
 /remote_file.php:8 = example.com/local_file.php:81
+)"""";
+
+	result = test_map_from_file(map);
+
+	test_remote_to_local("/remote_file.php", 8);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "RELATIVE/example.com/local_file.php", 81, LOCATION);
+
+	test_local_to_remote("RELATIVE/example.com/local_file.php", 81);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/remote_file.php", 8, LOCATION);
+}
+
+TEST(path_maps_file, relative_remote_file)
+{
+	const char *map = R""""(
+./remote_file.php = /example.com/local_file.php
+)"""";
+
+	result = test_map_from_file(map);
+
+	test_remote_to_local("RELATIVE/remote_file.php", 1);
+	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "/example.com/local_file.php", LOCATION);
+
+	test_local_to_remote("/example.com/local_file.php", 1);
+	check_map(XDEBUG_PATH_MAP_TYPE_FILE, "RELATIVE/remote_file.php", LOCATION);
+}
+
+TEST(path_maps_file, relative_local_file)
+{
+	const char *map = R""""(
+/remote_file.php:8 = ./example.com/local_file.php:81
 )"""";
 
 	result = test_map_from_file(map);
