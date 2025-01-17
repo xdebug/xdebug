@@ -892,3 +892,8 @@ void xdebug_lib_register_compiled_variables(function_stack_entry *fse)
 		i++;
 	}
 }
+
+bool xdebug_lib_path_mapping_enabled()
+{
+	return !!XINI_LIB(path_mapping);
+}

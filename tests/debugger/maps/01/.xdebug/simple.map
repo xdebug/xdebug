@@ -1,1 +1,1 @@
-/var/www/projects/xdebug-test/virtual_file.php = ./dbgp-breakpoint-line.inc
+./dbgp-breakpoint-line.inc = /var/www/projects/xdebug-test/fake-local-file.php

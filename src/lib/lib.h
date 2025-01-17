@@ -335,4 +335,6 @@ zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_
 zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname);
 
 void xdebug_lib_register_compiled_variables(function_stack_entry *fse);
+
+bool xdebug_lib_path_mapping_enabled();
 #endif
