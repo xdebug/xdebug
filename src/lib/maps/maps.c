@@ -150,3 +150,11 @@ void xdebug_path_maps_scan(const char *script_source)
 	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULES", "Found %zd path mapping rules", XG_LIB(path_mapping_information)->remote_to_local_map->size);
 }
 
+bool xdebug_path_maps_local_to_remote(const char *local_path, size_t local_line, xdebug_str **remote_path, size_t *remote_line)
+{
+	return local_to_remote(
+		XG_LIB(path_mapping_information),
+		local_path, local_line,
+		remote_path, remote_line
+	);
+}

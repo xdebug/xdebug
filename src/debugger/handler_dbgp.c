@@ -913,6 +913,43 @@ DBGP_FUNC(breakpoint_list)
 	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) *retval, breakpoint_list_helper, NULL);
 }
 
+static void map_location_to_remote(xdebug_brk_info *brk_info)
+{
+	xdebug_str *remote_path;
+	size_t remote_line;
+
+	if (!xdebug_lib_path_mapping_enabled()) {
+		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "DISABLED", "Not mapping location");
+		return;
+	}
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->original_lineno);
+
+	if (xdebug_path_maps_local_to_remote(
+		ZSTR_VAL(brk_info->filename), brk_info->original_lineno,
+		&remote_path, &remote_line
+	) != XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+		xdebug_log_ex(
+			XLOG_CHAN_PATHMAP, XLOG_INFO, "MAPPED",
+			"Mapped location %s:%d to %s:%zd",
+			ZSTR_VAL(brk_info->filename), brk_info->original_lineno,
+			XDEBUG_STR_VAL(remote_path), remote_line
+		);
+
+		zend_string_release(brk_info->filename);
+		brk_info->filename = zend_string_init(XDEBUG_STR_VAL(remote_path), XDEBUG_STR_LEN(remote_path), false);
+		brk_info->original_lineno = remote_line;
+		brk_info->resolved_lineno = remote_line;
+
+		return;
+	}
+
+	xdebug_log_ex(
+		XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-FAIL",
+		"Couldn't map location %s:%d",
+		ZSTR_VAL(brk_info->filename), brk_info->original_lineno
+	);
+}
+
 static void warn_if_breakpoint_file_does_not_exist(xdebug_brk_info *brk_info)
 {
 #ifndef WIN32
@@ -1006,6 +1043,7 @@ DBGP_FUNC(breakpoint_set)
 			xdfree(tmp_path);
 		}
 
+		map_location_to_remote(brk_info);
 		warn_if_breakpoint_file_does_not_exist(brk_info);
 
 		/* Perhaps we have a break condition */

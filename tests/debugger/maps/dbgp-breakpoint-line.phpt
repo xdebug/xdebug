@@ -16,7 +16,8 @@ $xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('
 $commands = array(
 	'feature_set -n breakpoint_details -v 1',
 	'step_into',
-	'breakpoint_set -t line -n 3',
+	"breakpoint_set -t line -f /var/www/projects/xdebug-test/fake-local-file.php -n 3",
+	'breakpoint_list',
 	'run',
 	'detach',
 );
@@ -42,4 +43,8 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger/maps/01/.xdebug/*.map'
 [%d] [Path Mapping] INFO: Reading mapping file '%sdebugger/maps/01/.xdebug/simple.map'
 [%d] [Path Mapping] DEBUG: Found 1 path mapping rules
+%A
+[%d] [Step Debug] <- breakpoint_set -i 3 -t line -f /var/www/projects/xdebug-test/fake-local-file.php -n 3
+[%d] [Path Mapping] INFO: Mapping location /var/www/projects/xdebug-test/fake-local-file.php:3
+[%d] [Path Mapping] INFO: Mapped location /var/www/projects/xdebug-test/fake-local-file.php:3 to %sdbgp-breakpoint-line.inc:3
 %A
