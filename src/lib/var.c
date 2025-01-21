@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -501,6 +501,12 @@ static void fetch_zval_from_symbol_table(
 					/* As a normal (public) property */
 					zval *tmp = zend_symtable_str_find(myht, name, name_length);
 					if (tmp != NULL) {
+#if PHP_VERSION_ID >= 80400
+						if (Z_TYPE_P(tmp) == IS_PTR) {
+							zend_release_properties(myht);
+							goto skip_for_property_hook;
+						}
+#endif
 						ZVAL_COPY(&tmp_retval, tmp);
 						zend_release_properties(myht);
 						goto cleanup;
@@ -522,6 +528,10 @@ static void fetch_zval_from_symbol_table(
 					zend_release_properties(myht);
 				}
 			}
+
+#if PHP_VERSION_ID >= 80400
+skip_for_property_hook:
+#endif
 			/* First we try an object handler */
 			if (cce) {
 				zval *tmp_val;
