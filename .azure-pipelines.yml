@@ -6,7 +6,6 @@ trigger:
       - master
 
 jobs:
- Disable master until xdebug_3_4 branch has been created
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_MASTER'
