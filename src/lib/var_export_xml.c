@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -141,6 +141,7 @@ typedef struct
 	int           name_len;
 	unsigned long index_key;
 	zval         *zv;
+	zend_object  *zobj;
 } xdebug_object_item;
 
 static void merged_hash_object_item_dtor(zval *data)
@@ -150,7 +151,7 @@ static void merged_hash_object_item_dtor(zval *data)
 	 xdfree(item);
 }
 
-static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, HashTable *merged, int object_type)
+static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index_key, zend_string *hash_key, HashTable *merged, int object_type, zend_object *zobj)
 {
 	zval **zv = &zv_nptr;
 	xdebug_object_item *item;
@@ -158,6 +159,7 @@ static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index_key, z
 	item = xdcalloc(1, sizeof(xdebug_object_item));
 	item->type = object_type;
 	item->zv   = *zv;
+	item->zobj = zobj;
 
 	if (hash_key) {
 		item->name = (char*) HASH_APPLY_KEY_VAL(hash_key);
@@ -173,7 +175,7 @@ static int object_item_add_to_merged_hash(zval *zv_nptr, zend_ulong index_key, z
 	return 0;
 }
 
-static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp, HashTable *merged, int object_type, zend_class_entry *ce)
+static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp, HashTable *merged, int object_type, zend_object *zobj, zend_class_entry *ce)
 {
 	xdebug_object_item *item;
 
@@ -184,6 +186,7 @@ static int object_item_add_zend_prop_to_merged_hash(zend_property_info *zpp, Has
 	item = xdmalloc(sizeof(xdebug_object_item));
 	item->type = object_type;
 	item->zv   = &CE_STATIC_MEMBERS(ce)[zpp->offset];
+	item->zobj = zobj;
 	item->name = (char*) STR_NAME_VAL(zpp->name);
 	item->name_len = STR_NAME_LEN(zpp->name);
 
@@ -406,7 +409,44 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 		}
 
 		xdebug_xml_add_child(parent, node);
+
+#if PHP_VERSION_ID >= 80400
+		{
+			zval tmp_for_is_ptr;
+			zval *tmp_value_for_ptr = NULL;
+
+			if (Z_TYPE_P((*item)->zv) == IS_PTR) {
+				// IS_PTR is for properties with hooks
+				zend_property_info *prop_info = Z_PTR_P((*item)->zv);
+				const char *unmangled_name_cstr;
+				zend_string *unmangled_name;
+
+				if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
+					return 0;
+				}
+
+				unmangled_name_cstr = zend_get_unmangled_property_name(prop_info->name);
+				unmangled_name = zend_string_init(unmangled_name_cstr, strlen(unmangled_name_cstr), false);
+
+				tmp_value_for_ptr = zend_read_property_ex(prop_info->ce, (*item)->zobj, unmangled_name, /* silent */ true, &tmp_for_is_ptr);
+
+				zend_string_release_ex(unmangled_name, false);
+				if (EG(exception)) {
+					return 0;
+				}
+
+				xdebug_var_export_xml_node(&tmp_value_for_ptr, tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
+
+				if (tmp_value_for_ptr == &tmp_for_is_ptr) {
+					zval_ptr_dtor(tmp_value_for_ptr);
+				}
+			} else {
+				xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
+			}
+		}
+#else
 		xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
+#endif
 
 		if (tmp_name) {
 			xdebug_str_free(tmp_name);
@@ -606,7 +646,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 #endif
 
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, zpi_val) {
-				object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, ce);
+				object_item_add_zend_prop_to_merged_hash(zpi_val, merged_hash, (int) XDEBUG_OBJECT_ITEM_TYPE_STATIC_PROPERTY, Z_OBJ_P(*struc), ce);
 			} ZEND_HASH_FOREACH_END();
 
 			xdebug_zend_hash_apply_protection_end(&ce->properties_info);
@@ -641,7 +681,7 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 						}
 					}
 #endif
-					object_item_add_to_merged_hash(tmp_val, num, key, merged_hash, flags);
+					object_item_add_to_merged_hash(tmp_val, num, key, merged_hash, flags, Z_OBJ_P(*struc));
 				} ZEND_HASH_FOREACH_END();
 
 				xdebug_zend_hash_apply_protection_end(myht);
