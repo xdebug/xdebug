@@ -198,7 +198,8 @@ PHP_FUNCTION(xdebug_dump_superglobals)
 
 	superglobal_info = xdebug_get_printable_superglobals(html);
 	if (superglobal_info) {
-		php_printf("%s", xdebug_get_printable_superglobals(html));
+		php_printf("%s", superglobal_info);
+		xdfree(superglobal_info);
 	} else {
 		php_printf("<tr><td><i>No information about superglobals is available or configured.</i></td></tr>\n");
 	}
