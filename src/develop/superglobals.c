@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -198,7 +198,8 @@ PHP_FUNCTION(xdebug_dump_superglobals)
 
 	superglobal_info = xdebug_get_printable_superglobals(html);
 	if (superglobal_info) {
-		php_printf("%s", xdebug_get_printable_superglobals(html));
+		php_printf("%s", superglobal_info);
+		xdfree(superglobal_info);
 	} else {
 		php_printf("<tr><td><i>No information about superglobals is available or configured.</i></td></tr>\n");
 	}
