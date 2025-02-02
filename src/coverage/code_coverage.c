@@ -722,19 +722,19 @@ void xdebug_code_coverage_end_of_function(zend_op_array *op_array, zend_string *
 	xdebug_str str = XDEBUG_STR_INITIALIZER;
 	xdebug_path *path = xdebug_path_info_get_path_for_level(XG_COV(paths_stack), XDEBUG_VECTOR_COUNT(XG_BASE(stack)));
 
-	if (!path || !path->elements) {
+	if (!path) {
 		return;
 	}
 
-	xdebug_create_key_for_path(path, &str);
+	if (path->elements) {
+		xdebug_create_key_for_path(path, &str);
 
-	xdebug_branch_info_mark_end_of_function_reached(filename, function_name, str.d, str.l);
+		xdebug_branch_info_mark_end_of_function_reached(filename, function_name, str.d, str.l);
 
-	xdfree(str.d);
-
-	if (path) {
-		xdebug_path_free(path);
+		xdfree(str.d);
 	}
+
+	xdebug_path_free(path);
 }
 
 PHP_FUNCTION(xdebug_start_code_coverage)
