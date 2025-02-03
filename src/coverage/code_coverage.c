@@ -321,7 +321,7 @@ static zend_always_inline bool xdebug_string_equals_cstr(const zend_string *s1, 
 # define xdebug_string_equals_literal  zend_string_equals_literal
 #endif
 
-static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps)
+static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *jump_count, int *jumps, bool *soft_fail_jumps)
 {
 #if ZEND_USE_ABS_JMP_ADDR
 	zend_op *base_address = &(opa->opcodes[0]);
@@ -361,6 +361,7 @@ static int xdebug_find_jumps(zend_op_array *opa, unsigned int position, size_t *
 	} else if (opcode.opcode == ZEND_FE_RESET_R || opcode.opcode == ZEND_FE_RESET_RW) {
 		jumps[0] = position + 1;
 		jumps[1] = XDEBUG_ZNODE_JMP_LINE(opcode.op2, position, base_address);
+		soft_fail_jumps[1] = true;
 		*jump_count = 2;
 		return 1;
 
@@ -512,10 +513,14 @@ static void xdebug_analysis_branch(zend_op_array *opa, unsigned int position, xd
 	while (position < opa->last) {
 		size_t jump_count = 0;
 		int    jumps[XDEBUG_BRANCH_MAX_OUTS];
+		bool   soft_fail_jumps[XDEBUG_BRANCH_MAX_OUTS];
 		size_t i;
 
+		/* Clean out soft_fail_jumps */
+		memset(soft_fail_jumps, 0, sizeof(soft_fail_jumps));
+
 		/* See if we have a jump instruction */
-		if (xdebug_find_jumps(opa, position, &jump_count, jumps)) {
+		if (xdebug_find_jumps(opa, position, &jump_count, jumps, soft_fail_jumps)) {
 			/* Record the highest jump if we have branch information*/
 			if (branch_info && jump_count > branch_info->highest_out) {
 				branch_info->highest_out = jump_count;
@@ -524,7 +529,7 @@ static void xdebug_analysis_branch(zend_op_array *opa, unsigned int position, xd
 			for (i = 0; i < jump_count; i++) {
 				if (jumps[i] == XDEBUG_JMP_EXIT || jumps[i] != XDEBUG_JMP_NOT_SET) {
 					if (branch_info) {
-						xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, i, jumps[i]);
+						xdebug_branch_info_update(branch_info, position, opa->opcodes[position].lineno, i, jumps[i], soft_fail_jumps[i]);
 					}
 					if (jumps[i] != XDEBUG_JMP_EXIT) {
 						xdebug_analysis_branch(opa, jumps[i], set, branch_info);

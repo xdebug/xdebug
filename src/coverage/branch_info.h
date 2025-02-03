@@ -41,6 +41,7 @@ typedef struct _xdebug_branch {
 	unsigned int  end_op;
 	unsigned int  outs_count;
 	int           outs[XDEBUG_BRANCH_MAX_OUTS];
+	bool          soft_fails[XDEBUG_BRANCH_MAX_OUTS];
 } xdebug_branch;
 
 typedef struct _xdebug_path {

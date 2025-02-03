@@ -64,7 +64,7 @@ typedef struct xdebug_coverage_file {
 
 xdebug_branch_info *xdebug_branch_info_create(unsigned int size);
 
-void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos);
+void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos, bool soft_fail);
 void xdebug_branch_post_process(zend_op_array *opa, xdebug_branch_info *branch_info);
 void xdebug_branch_find_paths(xdebug_branch_info *branch_info);
 
