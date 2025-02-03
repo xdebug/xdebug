@@ -55,7 +55,7 @@ void xdebug_branch_info_free(xdebug_branch_info *branch_info)
 	free(branch_info);
 }
 
-void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos)
+void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos, bool soft_fail)
 {
 	xdebug_set_add(branch_info->ends, pos);
 	if (outidx < XDEBUG_BRANCH_MAX_OUTS) {
@@ -65,6 +65,7 @@ void xdebug_branch_info_update(xdebug_branch_info *branch_info, unsigned int pos
 		}
 	}
 	branch_info->branches[pos].start_lineno = lineno;
+	branch_info->branches[pos].soft_fail = soft_fail;
 }
 
 static void only_leave_first_catch(zend_op_array *opa, xdebug_branch_info *branch_info, int position)

@@ -54,7 +54,6 @@ showLanguages
 - paths
   - 0 3 4 3 9: HIT
   - 0 3 9: HIT
-  - 0 9:  X
 
 showLanguages
 - branches
