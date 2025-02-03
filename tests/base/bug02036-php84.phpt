@@ -3,7 +3,7 @@ Test for bug #2036: Segfault on fiber switch in finally block in garbage collect
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.2; ext posix');
+check_reqs('PHP >= 8.2; ext posix; ext pcntl');
 ?>
 --INI--
 xdebug.mode=develop
