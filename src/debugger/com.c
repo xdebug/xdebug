@@ -49,6 +49,7 @@
 #include "Zend/zend_extensions.h"
 
 #include "com.h"
+#include "base/base.h"
 
 #include "debugger_private.h"
 #include "handler_dbgp.h"
@@ -603,7 +604,7 @@ static void xdebug_init_debugger()
 
 		if (!XG_DBG(context).handler->remote_init(&(XG_DBG(context)), XDEBUG_REQ)) {
 			/* The request could not be started, ignore it then */
-			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "SES-INIT", "The debug session could not be started. Tried: %s.", connection_attempts->d);
+			xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "SES-INIT", "The debug session could not be started. Tried: %s.", connection_attempts->d);
 		} else {
 			/* All is well, turn off script time outs */
 			zend_unset_timeout();
@@ -611,11 +612,11 @@ static void xdebug_init_debugger()
 			zend_set_timeout(EG(timeout_seconds), 0);
 		}
 	} else if (XG_DBG(context).socket == -1) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOCON", "Could not connect to debugging client. Tried: %s.", connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "NOCON", "Could not connect to debugging client. Tried: %s.", connection_attempts->d);
 	} else if (XG_DBG(context).socket == -2) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s.", XINI_DBG(connect_timeout_ms), connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "TIMEOUT", "Time-out connecting to debugging client, waited: " ZEND_LONG_FMT " ms. Tried: %s.", XINI_DBG(connect_timeout_ms), connection_attempts->d);
 	} else if (XG_DBG(context).socket == -3) {
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related.", connection_attempts->d);
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related.", connection_attempts->d);
 	}
 
 	xdebug_str_free(connection_attempts);
@@ -697,6 +698,8 @@ void xdebug_debug_init_if_requested_on_error()
 	if (!xdebug_lib_start_upon_error()) {
 		return;
 	}
+
+	xdebug_enable_debugger_and_rebuild_stack_if_disabled();
 
 	if (!xdebug_is_debug_connection_active()) {
 		xdebug_init_debugger();
@@ -818,6 +821,9 @@ void xdebug_debug_init_if_requested_at_startup(void)
 			xdebug_update_ide_key(found_trigger_value);
 		}
 		xdebug_init_debugger();
+	}
+	if (XDEBUG_MODE_IS_ONLY_DEBUG() && XG_DBG(remote_connection_enabled) == 0) {
+		xdebug_disable_debugger_if_enabled();
 	}
 
 	if (found_trigger_value) {

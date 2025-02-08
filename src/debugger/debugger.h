@@ -29,6 +29,7 @@ typedef struct _xdebug_debugger_globals_t {
 	zend_bool     remote_connection_enabled;
 	zend_ulong    remote_connection_pid;
 	zend_bool     breakpoints_allowed;
+	zend_bool     debugger_disabled;
 	zend_bool     suppress_return_value_step;
 	zend_bool     detached;
 	xdebug_con    context;

@@ -30,4 +30,4 @@ unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORK
 [%d] [Step Debug] WARN: Invalid remote address provided containing URI spec 'unix:///tmp/haxx0r.sock'.
 [%d] [Step Debug] WARN: Could not discover client host through HTTP headers, connecting to configured address/port: unix:///tmp/xdbg.sock:0.
 [%d] [Step Debug] WARN: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
-[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.client_host/xdebug.client_port).
+[%d] [Step Debug] WARN: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (fallback through xdebug.client_host/xdebug.client_port).

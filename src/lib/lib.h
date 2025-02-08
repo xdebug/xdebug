@@ -260,6 +260,7 @@ void xdebug_disable_opcache_optimizer(void);
 int xdebug_lib_set_mode(const char *mode);
 
 #define XDEBUG_MODE_IS_OFF() ((xdebug_global_mode == XDEBUG_MODE_OFF))
+#define XDEBUG_MODE_IS_ONLY_DEBUG() ((xdebug_global_mode == XDEBUG_MODE_STEP_DEBUG))
 #define XDEBUG_MODE_IS(v) ((xdebug_global_mode & (v)) ? 1 : 0)
 #define RETURN_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { return; }
 #define RETURN_FALSE_IF_MODE_IS_NOT(m) if (!XDEBUG_MODE_IS((m))) { RETURN_FALSE; }

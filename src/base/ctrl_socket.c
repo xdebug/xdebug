@@ -28,6 +28,7 @@
 
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 
+#include "base/base.h"
 #include "ctrl_socket.h"
 #include "lib/cmd_parser.h"
 #include "lib/log.h"
@@ -220,6 +221,8 @@ CTRL_FUNC(pause)
 		xdebug_xml_add_text(action, xdstrdup("IDE Connection Signalled"));
 
 		XG_DBG(context).do_connect_to_client = 1;
+
+		xdebug_enable_debugger_and_rebuild_stack_if_disabled();
 	} else {
 		action = xdebug_xml_node_init("action");
 		xdebug_xml_add_text(action, xdstrdup("Breakpoint Signalled"));

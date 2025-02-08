@@ -25,4 +25,4 @@ unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORK
 [%d] Log opened at %d-%d-%d %d:%d:%d.%d
 [%d] [Step Debug] INFO: Connecting to configured address/port: unix:///tmp/xdbg.sock:0.
 [%d] [Step Debug] WARN: Creating socket for 'unix:///tmp/xdbg.sock', connect: No such file or directory.
-[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (through xdebug.client_host/xdebug.client_port).
+[%d] [Step Debug] WARN: Could not connect to debugging client. Tried: unix:///tmp/xdbg.sock:0 (through xdebug.client_host/xdebug.client_port).
