@@ -31,4 +31,4 @@ unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORK
 [%d] [Step Debug] WARN: Creating socket for 'cookiehost:9003', getaddrinfo: %s.
 [%d] [Step Debug] WARN: Could not connect to client host discovered through HTTP headers, connecting to configured address/port: doesnotexist2:9003.
 [%d] [Step Debug] WARN: Creating socket for 'doesnotexist2:9003', getaddrinfo: %s.
-[%d] [Step Debug] ERR: Could not connect to debugging client. Tried: cookiehost:9003 (from I_LIKE_COOKIES HTTP header), doesnotexist2:9003 (fallback through xdebug.client_host/xdebug.client_port).
+[%d] [Step Debug] WARN: Could not connect to debugging client. Tried: cookiehost:9003 (from I_LIKE_COOKIES HTTP header), doesnotexist2:9003 (fallback through xdebug.client_host/xdebug.client_port).

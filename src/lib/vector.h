@@ -112,4 +112,11 @@ static inline void xdebug_vector_destroy(xdebug_vector *v)
 	xdfree(v);
 }
 
+static inline void xdebug_vector_empty(xdebug_vector *v)
+{
+	while (XDEBUG_VECTOR_COUNT(v)) {
+		xdebug_vector_pop(v);
+	}
+}
+
 #endif /* __XDEBUG_VECTOR_H__ */
