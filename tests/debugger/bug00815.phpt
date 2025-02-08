@@ -5,6 +5,9 @@ Test for bug #815: Xdebug crashes when 'exit' operator used in the script
 require __DIR__ . '/../utils.inc';
 check_reqs('dbgp');
 ?>
+--ENV--
+PHP_IDE_CONFIG=
+SERVER_NAME=
 --FILE--
 <?php
 require 'dbgp/dbgpclient.php';
