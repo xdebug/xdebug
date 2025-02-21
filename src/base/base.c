@@ -77,6 +77,9 @@ void xdebug_base_use_original_error_cb(void);
 void xdebug_base_use_xdebug_error_cb(void);
 void xdebug_base_use_xdebug_throw_exception_hook(void);
 
+static statement_handler_func_t existing_statement_handler;
+static zend_extension *xdebug_extension = NULL;
+
 /* Forward declarations for function overides */
 PHP_FUNCTION(xdebug_set_time_limit);
 PHP_FUNCTION(xdebug_error_reporting);
@@ -608,23 +611,30 @@ static void collect_params(function_stack_entry *fse, zend_execute_data *zdata, 
 #endif
 }
 
-function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type)
+function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_array *op_array, int type, int use_current_execute_data)
 {
 	zend_execute_data    *edata;
 	zend_op             **opline_ptr = NULL;
 	function_stack_entry *tmp;
 	zend_op              *cur_opcode;
 
+	if (use_current_execute_data) {
+		edata = EG(current_execute_data);
+	} else {
+		edata = zdata;
+	}
 	if (type == XDEBUG_USER_DEFINED) {
-		edata = EG(current_execute_data)->prev_execute_data;
+		edata = edata->prev_execute_data;
 		if (edata) {
 			opline_ptr = (zend_op**) &edata->opline;
 		}
 	} else {
-		edata = EG(current_execute_data);
-		opline_ptr = (zend_op**) &EG(current_execute_data)->opline;
+		opline_ptr = (zend_op**) &edata->opline;
 	}
-	zdata = EG(current_execute_data);
+
+	if (use_current_execute_data) {
+		zdata = EG(current_execute_data);
+	}
 
 	tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
 	tmp->level         = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
@@ -756,7 +766,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED);
+	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED, 1);
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
@@ -874,18 +884,36 @@ static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
 #endif
 }
 
+void xdebug_save_statement_handler(zend_extension *extension, statement_handler_func_t statement_handler)
+{
+	xdebug_extension = extension;
+	existing_statement_handler = statement_handler;
+}
+
+
+static void xdebug_disable_statement_extension_handler()
+{
+	existing_statement_handler = xdebug_extension->statement_handler;
+	xdebug_extension->statement_handler = NULL;
+}
+
+static void xdebug_enable_statement_extension_handler()
+{
+	xdebug_extension->statement_handler = existing_statement_handler;
+}
+
 /* We still need this to do "include", "require", and "eval" */
 static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
 	bool run_user_handler = should_run_user_handler_wrapper(execute_data);
 
-	if (run_user_handler) {
+	if (run_user_handler && (XG_DBG(debugger_disabled) == 0 || execute_data->func->type == ZEND_EVAL_CODE)) {
 		xdebug_execute_user_code_begin(execute_data);
 	}
 
 	xdebug_old_execute_ex(execute_data);
 
-	if (run_user_handler) {
+	if (run_user_handler && XG_DBG(debugger_disabled) == 0) {
 		xdebug_execute_user_code_end(execute_data, execute_data->return_value);
 	}
 }
@@ -941,7 +969,7 @@ static void xdebug_execute_internal_begin(zend_execute_data *current_execute_dat
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN);
+	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN, 1);
 	fse->function.internal = 1;
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
@@ -1011,7 +1039,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 {
 	bool run_internal_handler = should_run_internal_handler(current_execute_data);
 
-	if (run_internal_handler) {
+	if (run_internal_handler && XG_DBG(debugger_disabled) == 0) {
 		xdebug_execute_internal_begin(current_execute_data);
 	}
 
@@ -1021,7 +1049,7 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 		execute_internal(current_execute_data, return_value);
 	}
 
-	if (run_internal_handler) {
+	if (run_internal_handler && XG_DBG(debugger_disabled) == 0) {
 		xdebug_execute_internal_end(current_execute_data, return_value);
 	}
 }
@@ -1030,6 +1058,9 @@ static void xdebug_execute_internal(zend_execute_data *current_execute_data, zva
 #if PHP_VERSION_ID >= 80100
 static void xdebug_execute_begin(zend_execute_data *execute_data)
 {
+	if (XG_DBG(debugger_disabled) == 1 && execute_data->func->type != ZEND_EVAL_CODE) {
+		return;
+	}	
 	/* If the stack vector hasn't been initialised yet, we should abort immediately */
 	if (!XG_BASE(stack)) {
 		return;
@@ -1047,6 +1078,9 @@ static void xdebug_execute_begin(zend_execute_data *execute_data)
 
 static void xdebug_execute_end(zend_execute_data *execute_data, zval *retval)
 {
+	if (XG_DBG(debugger_disabled) == 1) {
+		return;
+	}	
 	/* If the stack vector hasn't been initialised yet, we should abort immediately */
 	if (!XG_BASE(stack)) {
 		return;
@@ -1067,6 +1101,83 @@ static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *exec
 	return (zend_observer_fcall_handlers){xdebug_execute_begin, xdebug_execute_end};
 }
 #endif
+
+static void xdebug_enable_debugger_handlers()
+{
+#if PHP_VERSION_ID >= 80100
+	zend_execute_ex = xdebug_execute_ex;
+#endif
+	
+	xdebug_enable_statement_extension_handler();
+}
+
+static void xdebug_disable_debugger_handlers()
+{
+#if PHP_VERSION_ID >= 80100
+	zend_execute_ex = xdebug_old_execute_ex;
+#endif
+	
+	xdebug_disable_statement_extension_handler();
+}
+
+static void add_stack_frame_recursively(zend_execute_data *execute_data)
+{
+	zend_op_array *op_array;
+	int type;
+	function_stack_entry *fse;
+
+	if (execute_data->prev_execute_data) {
+		add_stack_frame_recursively(execute_data->prev_execute_data);
+	}
+	if (execute_data->func) {
+		op_array = &(execute_data->func->op_array);
+		type = ZEND_USER_CODE(execute_data->func->type) ? XDEBUG_USER_DEFINED : XDEBUG_BUILT_IN;
+		fse = xdebug_add_stack_frame(execute_data, op_array, type, 0);
+		fse->execute_data = execute_data->prev_execute_data;
+		if (ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE) {
+			fse->symbol_table = execute_data->symbol_table;
+		}
+	}
+}
+
+static void xdebug_rebuild_stack()
+{
+	xdebug_vector_empty(XG_BASE(stack));
+
+	add_stack_frame_recursively(EG(current_execute_data));
+}
+
+void xdebug_enable_debugger_if_disabled()
+{
+	if (XG_DBG(debugger_disabled) == 1) {
+		XG_DBG(debugger_disabled) = 0;
+		xdebug_enable_debugger_handlers();
+	}	
+}
+
+void xdebug_disable_debugger_if_enabled()
+{
+	if (XG_DBG(debugger_disabled) == 0) {
+		XG_DBG(debugger_disabled) = 1;
+		xdebug_disable_debugger_handlers();
+	}
+}
+
+void xdebug_enable_debugger_and_rebuild_stack_if_disabled()
+{
+	if (XG_DBG(debugger_disabled) == 1) {
+		xdebug_enable_debugger_if_disabled();
+		xdebug_rebuild_stack();
+	}
+}
+
+void xdebug_rebuild_stack_if_disabled()
+{
+	if (XG_DBG(debugger_disabled) == 1) {
+		xdebug_rebuild_stack();
+	}
+}
+
 /***************************************************************************/
 
 static void xdebug_base_overloaded_functions_setup(void)

@@ -17,6 +17,8 @@
 #ifndef __XDEBUG_BASE_H__
 #define __XDEBUG_BASE_H__
 
+#include "zend_extensions.h"
+
 void xdebug_base_minit(INIT_FUNC_ARGS);
 void xdebug_base_mshutdown();
 
@@ -32,4 +34,11 @@ void xdebug_func_dtor(xdebug_func *elem);
 void xdebug_build_fname(xdebug_func *tmp, zend_execute_data *edata);
 
 void xdebug_print_info(void);
+
+void xdebug_enable_debugger_if_disabled();
+void xdebug_disable_debugger_if_enabled();
+void xdebug_enable_debugger_and_rebuild_stack_if_disabled();
+void xdebug_rebuild_stack_if_disabled();
+void xdebug_save_statement_handler(zend_extension *extension, statement_handler_func_t statement_handler);
+
 #endif // __XDEBUG_BASE_H__
