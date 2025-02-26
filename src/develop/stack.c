@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1273,7 +1273,7 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 			xdebug_append_error_footer(&displ_tmp_str, PG(html_errors));
 
 			php_printf("%s", displ_tmp_str.d);
-			xdebug_str_dtor(displ_tmp_str);
+			xdebug_str_destroy(&displ_tmp_str);
 		}
 	}
 }
