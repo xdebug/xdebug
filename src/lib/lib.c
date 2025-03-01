@@ -680,12 +680,15 @@ void xdebug_set_opcode_handler(int opcode, user_opcode_handler_t handler)
 static int xdebug_opcode_multi_handler(zend_execute_data *execute_data)
 {
 	const zend_op *cur_opcode = execute_data->opline;
+	xdebug_multi_opcode_handler_t *handler_ptr;
 
-	xdebug_multi_opcode_handler_t *handler_ptr = XG_LIB(opcode_multi_handlers[cur_opcode->opcode]);
+	if (XG_DBG(debugger_disabled) == 0) {
+		handler_ptr = XG_LIB(opcode_multi_handlers[cur_opcode->opcode]);
 
-	while (handler_ptr) {
-		handler_ptr->handler(execute_data);
-		handler_ptr = handler_ptr->next;
+		while (handler_ptr) {
+			handler_ptr->handler(execute_data);
+			handler_ptr = handler_ptr->next;
+		}
 	}
 
 	return xdebug_call_original_opcode_handler_if_set(cur_opcode->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
