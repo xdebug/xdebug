@@ -768,7 +768,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 	zend_op_array *op_array = &frame->func->op_array;
 	int                   lineno;
 
-	if (XDEBUG_MODE_IS_OFF()) {
+	if (XG_DBG(debugger_disabled) == 1 || XDEBUG_MODE_IS_OFF()) {
 		return;
 	}
 
@@ -793,7 +793,6 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 
 ZEND_DLEXPORT int xdebug_zend_startup(zend_extension *extension)
 {
-	xdebug_save_statement_handler(extension, xdebug_statement_call);
 	xdebug_library_zend_startup();
 	xdebug_debugger_zend_startup();
 

@@ -77,9 +77,6 @@ void xdebug_base_use_original_error_cb(void);
 void xdebug_base_use_xdebug_error_cb(void);
 void xdebug_base_use_xdebug_throw_exception_hook(void);
 
-static statement_handler_func_t existing_statement_handler;
-static zend_extension *xdebug_extension = NULL;
-
 /* Forward declarations for function overides */
 PHP_FUNCTION(xdebug_set_time_limit);
 PHP_FUNCTION(xdebug_error_reporting);
@@ -884,37 +881,29 @@ static bool should_run_user_handler_wrapper(zend_execute_data *execute_data)
 #endif
 }
 
-void xdebug_save_statement_handler(zend_extension *extension, statement_handler_func_t statement_handler)
-{
-	xdebug_extension = extension;
-	existing_statement_handler = statement_handler;
-}
-
-
-static void xdebug_disable_statement_extension_handler()
-{
-	existing_statement_handler = xdebug_extension->statement_handler;
-	xdebug_extension->statement_handler = NULL;
-}
-
-static void xdebug_enable_statement_extension_handler()
-{
-	xdebug_extension->statement_handler = existing_statement_handler;
-}
-
 /* We still need this to do "include", "require", and "eval" */
 static void xdebug_execute_ex(zend_execute_data *execute_data)
 {
-	bool run_user_handler = should_run_user_handler_wrapper(execute_data);
+	bool run_user_handler = false;
+	bool debugger_was_disabled = true;
 
-	if (run_user_handler && (XG_DBG(debugger_disabled) == 0 || execute_data->func->type == ZEND_EVAL_CODE)) {
-		xdebug_execute_user_code_begin(execute_data);
+	if ((XG_DBG(debugger_disabled) == 0 || execute_data->func->type == ZEND_EVAL_CODE)) {
+		debugger_was_disabled = false;
+		run_user_handler = should_run_user_handler_wrapper(execute_data);
+		if (run_user_handler) {
+			xdebug_execute_user_code_begin(execute_data);
+		}
 	}
 
 	xdebug_old_execute_ex(execute_data);
 
-	if (run_user_handler && XG_DBG(debugger_disabled) == 0) {
-		xdebug_execute_user_code_end(execute_data, execute_data->return_value);
+	if (XG_DBG(debugger_disabled) == 0) {
+		if (debugger_was_disabled) {
+			run_user_handler = should_run_user_handler_wrapper(execute_data);
+		}
+		if (run_user_handler) {
+			xdebug_execute_user_code_end(execute_data, execute_data->return_value);
+		}
 	}
 }
 
@@ -1102,24 +1091,6 @@ static zend_observer_fcall_handlers xdebug_observer_init(zend_execute_data *exec
 }
 #endif
 
-static void xdebug_enable_debugger_handlers()
-{
-#if PHP_VERSION_ID >= 80100
-	zend_execute_ex = xdebug_execute_ex;
-#endif
-	
-	xdebug_enable_statement_extension_handler();
-}
-
-static void xdebug_disable_debugger_handlers()
-{
-#if PHP_VERSION_ID >= 80100
-	zend_execute_ex = xdebug_old_execute_ex;
-#endif
-	
-	xdebug_disable_statement_extension_handler();
-}
-
 static void add_stack_frame_recursively(zend_execute_data *execute_data)
 {
 	zend_op_array *op_array;
@@ -1151,7 +1122,6 @@ void xdebug_enable_debugger_if_disabled()
 {
 	if (XG_DBG(debugger_disabled) == 1) {
 		XG_DBG(debugger_disabled) = 0;
-		xdebug_enable_debugger_handlers();
 	}	
 }
 
@@ -1159,7 +1129,6 @@ void xdebug_disable_debugger_if_enabled()
 {
 	if (XG_DBG(debugger_disabled) == 0) {
 		XG_DBG(debugger_disabled) = 1;
-		xdebug_disable_debugger_handlers();
 	}
 }
 

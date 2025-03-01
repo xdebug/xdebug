@@ -39,6 +39,5 @@ void xdebug_enable_debugger_if_disabled();
 void xdebug_disable_debugger_if_enabled();
 void xdebug_enable_debugger_and_rebuild_stack_if_disabled();
 void xdebug_rebuild_stack_if_disabled();
-void xdebug_save_statement_handler(zend_extension *extension, statement_handler_func_t statement_handler);
 
 #endif // __XDEBUG_BASE_H__
