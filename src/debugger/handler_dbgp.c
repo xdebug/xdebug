@@ -503,14 +503,14 @@ static xdebug_str* return_eval_source(char *id, int begin, int end)
 	return joined;
 }
 
-static int is_dbgp_url(zend_string *filename)
+static int is_dbgp_url(char *filename)
 {
-	return (strncmp(ZSTR_VAL(filename), "dbgp://", 7) == 0);
+	return (strncmp(filename, "dbgp://", 7) == 0);
 }
 
 static xdebug_str* return_source(zend_string *filename, int begin, int end)
 {
-	if (is_dbgp_url(filename)) {
+	if (is_dbgp_url(ZSTR_VAL(filename))) {
 		return return_eval_source(ZSTR_VAL(filename) + 7, begin, end);
 	} else {
 		return return_file_source(filename, begin, end);
@@ -626,20 +626,66 @@ static void breakpoint_brk_info_add_resolved(xdebug_xml_node *xml, xdebug_brk_in
 	}
 }
 
+static void map_remote_to_local(xdebug_brk_info *brk_info, xdebug_str **local_path, size_t *local_line, bool *must_free)
+{
+	if (!xdebug_lib_path_mapping_enabled()) {
+		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "DISABLED", "Not mapping location");
+		goto pass_through;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno);
+
+	if (xdebug_path_maps_remote_to_local(
+		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
+		local_path, local_line
+	) != XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+		xdebug_log_ex(
+			XLOG_CHAN_PATHMAP, XLOG_INFO, "MAPPED",
+			"Mapped location %s:%d to %s:%zd",
+			ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
+			XDEBUG_STR_VAL((*local_path)), *local_line
+		);
+		*must_free = false;
+		return;
+	}
+
+	xdebug_log_ex(
+		XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-FAIL",
+		"Couldn't map location %s:%d",
+		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno
+	);
+
+pass_through:
+	*local_path = xdebug_str_create(ZSTR_VAL(brk_info->filename), ZSTR_LEN(brk_info->filename));
+	*local_line = brk_info->resolved_lineno;
+	*must_free = true;
+}
+
+
 static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk_info)
 {
 	xdebug_xml_add_attribute_ex(xml, "type", xdstrdup(XDEBUG_BREAKPOINT_TYPE_NAME(brk_info->brk_type)), 0, 1);
 	breakpoint_brk_info_add_resolved(xml, brk_info);
-	if (brk_info->filename) {
-		if (is_dbgp_url(brk_info->filename)) {
-			xdebug_xml_add_attribute_ex(xml, "filename", ZSTR_VAL(brk_info->filename), 0, 0);
+
+	if (brk_info->filename && brk_info->resolved_lineno) {
+		xdebug_str *local_path;
+		size_t local_line;
+		bool must_free_path = false;
+
+		map_remote_to_local(brk_info, &local_path, &local_line, &must_free_path);
+
+		if (is_dbgp_url(XDEBUG_STR_VAL(local_path))) {
+			xdebug_xml_add_attribute_ex(xml, "filename", XDEBUG_STR_VAL(local_path), 0, 0);
 		} else {
-			xdebug_xml_add_attribute_ex(xml, "filename", xdebug_path_to_url(brk_info->filename), 0, 1);
+			xdebug_xml_add_attribute_ex(xml, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+		}
+		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", local_line), 0, 1);
+
+		if (must_free_path) {
+			xdebug_str_free(local_path);
 		}
 	}
-	if (brk_info->resolved_lineno) {
-		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", brk_info->resolved_lineno), 0, 1);
-	}
+
 	if (brk_info->functionname) {
 		xdebug_xml_add_attribute_ex(xml, "function", xdstrdup(brk_info->functionname), 0, 1);
 	}
@@ -913,7 +959,7 @@ DBGP_FUNC(breakpoint_list)
 	xdebug_hash_apply_with_argument(context->breakpoint_list, (void *) *retval, breakpoint_list_helper, NULL);
 }
 
-static void map_location_to_remote(xdebug_brk_info *brk_info)
+static void map_local_to_remote_replace(xdebug_brk_info *brk_info)
 {
 	xdebug_str *remote_path;
 	size_t remote_line;
@@ -1043,7 +1089,7 @@ DBGP_FUNC(breakpoint_set)
 			xdfree(tmp_path);
 		}
 
-		map_location_to_remote(brk_info);
+		map_local_to_remote_replace(brk_info);
 		warn_if_breakpoint_file_does_not_exist(brk_info);
 
 		/* Perhaps we have a break condition */
@@ -2683,7 +2729,7 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_st
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Current location: %s:%d.", ZSTR_VAL(orig_filename), lineno);
 
-	if (is_dbgp_url(brk->filename) && xdebug_debugger_check_evaled_code(orig_filename, &resolved_filename)) {
+	if (is_dbgp_url(ZSTR_VAL(brk->filename)) && xdebug_debugger_check_evaled_code(orig_filename, &resolved_filename)) {
 		free_eval_filename = true;
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Found eval code for '%s': %s.", ZSTR_VAL(orig_filename), ZSTR_VAL(resolved_filename));
 	}
