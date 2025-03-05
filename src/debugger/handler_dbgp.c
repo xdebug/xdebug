@@ -539,7 +539,7 @@ static xdebug_xml_node* return_stackframe(int nr)
 			zend_string_release(tmp_filename);
 		} else {
 			xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("file"), 0, 1);
-			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(fse_prev->filename), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_zstr_path_to_url(fse_prev->filename), 0, 1);
 		}
 		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno), 0, 1);
 	} else {
@@ -553,7 +553,7 @@ static xdebug_xml_node* return_stackframe(int nr)
 			zend_string_release(tmp_filename);
 		} else if (executed_filename) {
 			xdebug_xml_add_attribute_ex(tmp, "type", xdstrdup("file"), 0, 1);
-			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_path_to_url(executed_filename), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_zstr_path_to_url(executed_filename), 0, 1);
 		}
 		xdebug_xml_add_attribute_ex(tmp, "lineno", xdebug_sprintf("%lu", executed_lineno), 0, 1);
 	}
@@ -2483,7 +2483,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	if (zend_string_equals_literal(context->program_name, "-") || zend_string_equals_literal(context->program_name, "Command line code")) {
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdstrdup("dbgp://stdin"), 0, 1);
 	} else {
-		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_path_to_url(context->program_name), 0, 1);
+		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_zstr_path_to_url(context->program_name), 0, 1);
 	}
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
 	xdebug_xml_add_attribute_ex(response, "xdebug:language_version", XG_BASE(php_version_run_time), 0, 0);
@@ -2744,7 +2744,7 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_strin
 			xdebug_xml_add_attribute_ex(error_container, "filename", ZSTR_VAL(tmp_filename), 0, 0);
 			zend_string_release(tmp_filename);
 		} else {
-			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_path_to_url(filename), 0, 1);
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_zstr_path_to_url(filename), 0, 1);
 		}
 	}
 	if (lineno) {
@@ -3047,7 +3047,7 @@ int xdebug_dbgp_notification(xdebug_con *context, zend_string *filename, long li
 			xdebug_xml_add_attribute_ex(error_container, "filename", ZSTR_VAL(tmp_filename), 0, 0);
 			zend_string_release(tmp_filename);
 		} else {
-			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_path_to_url(filename), 0, 1);
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_zstr_path_to_url(filename), 0, 1);
 		}
 	}
 	if (lineno) {
@@ -3098,7 +3098,7 @@ int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lin
 			xdebug_xml_add_attribute_ex(location_node, "filename", ZSTR_VAL(tmp_filename), 0, 0);
 			zend_string_release(tmp_filename);
 		} else {
-			xdebug_xml_add_attribute_ex(location_node, "filename", xdebug_path_to_url(filename), 0, 1);
+			xdebug_xml_add_attribute_ex(location_node, "filename", xdebug_zstr_path_to_url(filename), 0, 1);
 		}
 	}
 	if (lineno) {
