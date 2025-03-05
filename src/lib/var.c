@@ -431,19 +431,21 @@ static void fetch_zval_from_symbol_table(
 				zend_op_array *opa = xdebug_lib_get_active_func_oparray();
 				zval **CV;
 
-				while (opa->vars && i < opa->last_var) {
-					if (ZSTR_H(opa->vars[i]) == hash_value &&
-						ZSTR_LEN(opa->vars[i]) == element_length &&
-						strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)
-					{
-						zval *CV_z = ZEND_CALL_VAR_NUM(xdebug_lib_get_active_data(), i);
-						CV = &CV_z;
-						if (CV) {
-							ZVAL_COPY(&tmp_retval, *CV);
-							goto cleanup;
+				if (ZEND_USER_CODE(opa->type)) {
+					while (opa->vars && i < opa->last_var) {
+						if (ZSTR_H(opa->vars[i]) == hash_value &&
+							ZSTR_LEN(opa->vars[i]) == element_length &&
+							strncmp(STR_NAME_VAL(opa->vars[i]), element, element_length) == 0)
+						{
+							zval *CV_z = ZEND_CALL_VAR_NUM(xdebug_lib_get_active_data(), i);
+							CV = &CV_z;
+							if (CV) {
+								ZVAL_COPY(&tmp_retval, *CV);
+								goto cleanup;
+							}
 						}
+						i++;
 					}
-					i++;
 				}
 			}
 			free(element);
