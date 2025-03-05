@@ -19,5 +19,6 @@
 
 void xdebug_path_maps_scan(const char *script_source);
 bool xdebug_path_maps_local_to_remote(const char *local_path, size_t local_line, xdebug_str **remote_path, size_t *remote_line);
+bool xdebug_path_maps_remote_to_local(const char *remote_path, size_t remote_line, xdebug_str **local_path, size_t *local_line);
 
 #endif
