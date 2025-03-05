@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2023 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2982,8 +2982,8 @@ int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lin
 	xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
 	xdebug_xml_add_attribute(response, "name", "user");
 
-	options = (xdebug_var_export_options*) context->options;
-	options->encode_as_extended_property = 0;
+	options = xdebug_var_export_options_from_ini();
+	options->extended_properties = 1;
 
 	location_node = xdebug_xml_node_init("xdebug:location");
 	if (filename) {
@@ -3007,6 +3007,8 @@ int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lin
 
 	send_message(context, response);
 	xdebug_xml_node_dtor(response);
+	xdfree(options->runtime);
+	xdfree(options);
 
 	return 1;
 }

@@ -971,7 +971,7 @@ xdebug_var_export_options* xdebug_var_export_options_from_ini(void)
 		options->max_depth = 0;
 	}
 
-	options->runtime = (xdebug_var_runtime_page*) xdmalloc((options->max_depth + 1) * sizeof(xdebug_var_runtime_page));
+	options->runtime = (xdebug_var_runtime_page*) xdcalloc((options->max_depth + 1), sizeof(xdebug_var_runtime_page));
 	options->no_decoration = 0;
 
 	return options;
