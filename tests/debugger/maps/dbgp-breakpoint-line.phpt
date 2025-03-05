@@ -48,3 +48,8 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] INFO: Mapping location /var/www/projects/xdebug-test/fake-local-file.php:3
 [%d] [Path Mapping] INFO: Mapped location /var/www/projects/xdebug-test/fake-local-file.php:3 to %sdbgp-breakpoint-line.inc:3
 %A
+[%d] [Step Debug] <- breakpoint_list -i 4
+[%d] [Path Mapping] INFO: Mapping location %s/maps/01/dbgp-breakpoint-line.inc:3
+[%d] [Path Mapping] INFO: Mapped location %s/maps/01/dbgp-breakpoint-line.inc:3 to /var/www/projects/xdebug-test/fake-local-file.php:3
+[%d] [Step Debug] -> <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="4"><breakpoint type="line" filename="file:///var/www/projects/xdebug-test/fake-local-file.php" lineno="3" state="enabled" hit_count="0" hit_value="0" id="%s0001"></breakpoint></response>
+%A
