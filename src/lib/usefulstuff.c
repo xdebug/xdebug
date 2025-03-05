@@ -280,19 +280,19 @@ char *xdebug_path_from_url(zend_string *fileurl)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_to_url(zend_string *fileurl)
+static char *xdebug_path_to_url(const char *fileurl, size_t fileurl_len)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
 	char *encoded_fileurl;
 
 	/* encode the url */
-	encoded_fileurl = xdebug_raw_url_encode(ZSTR_VAL(fileurl), ZSTR_LEN(fileurl), &new_len, 1);
+	encoded_fileurl = xdebug_raw_url_encode(fileurl, fileurl_len, &new_len, 1);
 
-	if (strstr(ZSTR_VAL(fileurl), "://") != NULL && strstr(ZSTR_VAL(fileurl), "://") < strstr(ZSTR_VAL(fileurl), "/")) {
+	if (strstr(fileurl, "://") != NULL && strstr(fileurl, "://") < strstr(fileurl, "/")) {
 		/* ignore, some form of stream wrapper scheme */
-		tmp = xdstrdup(ZSTR_VAL(fileurl));
-	} else if (ZSTR_VAL(fileurl)[0] != '/' && ZSTR_VAL(fileurl)[0] != '\\' && ZSTR_VAL(fileurl)[1] != ':') {
+		tmp = xdstrdup(fileurl);
+	} else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
 		/* convert relative paths */
 		cwd_state new_state;
 		char cwd[MAXPATHLEN];
@@ -306,21 +306,21 @@ char *xdebug_path_to_url(zend_string *fileurl)
 		new_state.cwd = estrdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 
-		if (!virtual_file_ex(&new_state, ZSTR_VAL(fileurl), NULL, 1)) {
+		if (!virtual_file_ex(&new_state, fileurl, NULL, 1)) {
 			char *s = estrndup(new_state.cwd, new_state.cwd_length);
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
 		}
 		efree(new_state.cwd);
 
-	} else if (ZSTR_VAL(fileurl)[1] == '/' || ZSTR_VAL(fileurl)[1] == '\\') {
+	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
 		/* See https://docs.microsoft.com/en-us/archive/blogs/ie/file-uris-in-windows */
 		tmp = xdebug_sprintf("file:%s", encoded_fileurl);
-	} else if (ZSTR_VAL(fileurl)[0] == '/' || ZSTR_VAL(fileurl)[0] == '\\') {
+	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
 		/* convert *nix paths (eg. /path) */
 		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
-	} else if (ZSTR_VAL(fileurl)[1] == ':') {
+	} else if (fileurl[1] == ':') {
 		/* convert windows drive paths (eg. c:\path) */
 		tmp = xdebug_sprintf("file:///%s", encoded_fileurl);
 	} else {
@@ -336,6 +336,16 @@ char *xdebug_path_to_url(zend_string *fileurl)
 	}
 	xdfree(encoded_fileurl);
 	return tmp;
+}
+
+char *xdebug_zstr_path_to_url(zend_string *string)
+{
+	return xdebug_path_to_url(ZSTR_VAL(string), ZSTR_LEN(string));
+}
+
+char *xdebug_xdebug_str_path_to_url(xdebug_str *string)
+{
+	return xdebug_path_to_url(XDEBUG_STR_VAL(string), XDEBUG_STR_LEN(string));
 }
 
 #ifndef PHP_WIN32

@@ -32,8 +32,11 @@ xdebug_str* xdebug_join(const char *delim, xdebug_arg *args, int begin, int end)
 void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int limit);
 const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end);
 char* xdebug_strrstr(const char* haystack, const char* needle);
-char *xdebug_path_to_url(zend_string *fileurl);
+
+char *xdebug_zstr_path_to_url(zend_string *string);
+char *xdebug_xdebug_str_path_to_url(xdebug_str *string);
 char *xdebug_path_from_url(zend_string *fileurl);
+
 FILE *xdebug_fopen(char *fname, const char *mode, const char *extension, char **new_fname);
 int xdebug_format_output_filename(char **filename, char *format, char *script_name);
 int xdebug_format_file_link(char **filename, const char *error_filename, int error_lineno);
