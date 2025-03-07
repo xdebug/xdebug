@@ -17,7 +17,7 @@ $commands = array(
 	'detach',
 );
 
-dbgpRunFile( $filename, $commands );
+dbgpRunFile( $filename, $commands, [ 'xdebug.var_display_max_children' => 32 ] );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
