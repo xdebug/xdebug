@@ -19,6 +19,7 @@
 #include "ext/standard/info.h"
 #include "zend_exceptions.h"
 
+#include "base/base.h"
 #include "debugger_private.h"
 #include "lib/log.h"
 #include "lib/var.h"
@@ -49,6 +50,7 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 	xg->remote_connection_enabled  = 0;
 	xg->remote_connection_pid      = 0;
 	xg->breakpoints_allowed        = 0;
+	xg->debugger_disabled          = 0;
 	xg->suppress_return_value_step = 0;
 
 	/* Capturing output */
@@ -406,6 +408,7 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 		}
 #endif
 		if (exception_breakpoint_found && xdebug_handle_hit_value(extra_brk_info)) {
+			xdebug_enable_debugger_and_rebuild_stack_if_disabled();
 			if (
 				!XG_DBG(context).handler->remote_breakpoint(
 					&(XG_DBG(context)), XG_BASE(stack),
@@ -427,6 +430,7 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int type, char *error_type_str, char *buffer)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
+	bool stack_rebuilt = false;
 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
@@ -437,6 +441,8 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 
 	/* Send notification with warning/notice/error information */
 	if (XG_DBG(context).send_notifications && !XG_DBG(context).inhibit_notifications) {
+		xdebug_rebuild_stack_if_disabled();
+		stack_rebuilt = true;
 		if (!XG_DBG(context).handler->remote_notification(&(XG_DBG(context)), error_filename, error_lineno, type, error_type_str, buffer)) {
 			xdebug_mark_debug_connection_not_active();
 		}
@@ -447,6 +453,11 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 		xdebug_hash_find(XG_DBG(context).exception_breakpoints, error_type_str, strlen(error_type_str), (void *) &extra_brk_info) ||
 		xdebug_hash_find(XG_DBG(context).exception_breakpoints, "*", 1, (void *) &extra_brk_info)
 	) {
+		if (stack_rebuilt) {
+			xdebug_enable_debugger_if_disabled();
+		} else {
+			xdebug_enable_debugger_and_rebuild_stack_if_disabled();
+		}
 		if (xdebug_handle_hit_value(extra_brk_info)) {
 			char *type_str = xdebug_sprintf("%ld", type);
 
@@ -988,11 +999,15 @@ PHP_FUNCTION(xdebug_break)
 {
 	RETURN_FALSE_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
 
+	xdebug_rebuild_stack_if_disabled();
+
 	xdebug_debug_init_if_requested_on_xdebug_break();
 
 	if (!xdebug_is_debug_connection_active()) {
 		RETURN_FALSE;
 	}
+
+	xdebug_enable_debugger_if_disabled();
 
 	XG_DBG(context).do_break = 1;
 	XG_DBG(context).pending_breakpoint = NULL;
@@ -1005,6 +1020,8 @@ PHP_FUNCTION(xdebug_connect_to_client)
 	RETURN_FALSE_IF_MODE_IS_NOT(XDEBUG_MODE_STEP_DEBUG);
 
 	XG_DBG(context).do_connect_to_client = 1;
+
+	xdebug_enable_debugger_and_rebuild_stack_if_disabled();
 
 	RETURN_TRUE;
 }
@@ -1028,6 +1045,8 @@ PHP_FUNCTION(xdebug_notify)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &data) == FAILURE) {
 		return;
 	}
+
+	xdebug_rebuild_stack_if_disabled();
 
 	fse = xdebug_get_stack_frame(0);
 
