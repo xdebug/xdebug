@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-01-06</date>
- <time>15:43:11</time>
+ <date>2025-03-09</date>
+ <time>16:10:30</time>
  <version>
-  <release>3.4.1</release>
-  <api>3.4.1</api>
+  <release>3.4.2</release>
+  <api>3.4.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,14 +52,17 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Mon, Jan 06, 2025 - Xdebug 3.4.1
+Sun, Mar 09, 2025 - Xdebug 3.4.2
 
 = Fixed bugs:
 
-  - Fixed issue #2306: Segmentation fault on each HTTP request when not listening to debugging connections
-  - Fixed issue #2307: Segmentation fault due to a superglobal being a reference while checking for triggers
-  - Fixed issue #2309: Installation on Windows with PHP PIE failing
-  - Fixed issue #2310: xdebug 3.4.0 crashes php8.1-fpm after script execution
+  - Fixed issue #2313: var_dump does not output some Russian characters
+  - Fixed issue #2314: Class properties with hooks are always shown as null
+  - Fixed issue #2315: xdebug_dump_superglobals() leaks memory
+  - Fixed issue #2317: Code coverage leaks memory
+  - Fixed issue #2321: Segfault when null is assigned to a superglobal
+  - Fixed issue #2323: xdebug_notify() does not respect xdebug.var_display_max_* Settings
+  - Fixed issue #2327: Segmentation Fault 139 if exception thrown in callback since PHP 8.4
 
  </notes>
 
@@ -214,6 +217,31 @@ Mon, Jan 06, 2025 - Xdebug 3.4.1
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-01-06</date>
+   <time>15:43:11</time>
+   <version>
+    <release>3.4.1</release>
+    <api>3.4.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+  Mon, Jan 06, 2025 - Xdebug 3.4.1
+
+  = Fixed bugs:
+
+    - Fixed issue #2306: Segmentation fault on each HTTP request when not listening to debugging connections
+    - Fixed issue #2307: Segmentation fault due to a superglobal being a reference while checking for triggers
+    - Fixed issue #2309: Installation on Windows with PHP PIE failing
+    - Fixed issue #2310: xdebug 3.4.0 crashes php8.1-fpm after script execution
+
+   </notes>
+  </release>
 
   <release>
    <date>2024-11-28</date>
