@@ -14,7 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#endif
 #include "php.h"
-#pragma GCC diagnostic pop
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic pop
+#endif
