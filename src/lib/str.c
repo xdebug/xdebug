@@ -20,10 +20,12 @@
 #include <string.h>
 #include <locale.h>
 
-#if PHP_VERSION_ID < 80200
+#if !defined(_MSC_VER)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-#  include "zend_smart_str.h"
+#endif
+#include "zend_smart_str.h"
+#if !defined(_MSC_VER)
 # pragma GCC diagnostic pop
 #endif
 
