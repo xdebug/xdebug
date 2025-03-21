@@ -320,6 +320,11 @@ static void xdebug_control_socket_handle(void)
 		return;
 	}
 
+	if (result == ERROR_NO_DATA) {
+		DisconnectNamedPipe(XG_BASE(control_socket_h));
+		return;
+	}
+
 	if (result == ERROR_PIPE_CONNECTED) {
 		// got new client!
 		DWORD lpMode;
@@ -344,9 +349,10 @@ static void xdebug_control_socket_handle(void)
 
 		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS;
 		SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL);
-
-		DisconnectNamedPipe(XG_BASE(control_socket_h));
 	}
+
+	// All other errors and completed reading should close the socket
+	DisconnectNamedPipe(XG_BASE(control_socket_h));
 #endif
 }
 
