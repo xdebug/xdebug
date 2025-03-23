@@ -2307,6 +2307,7 @@ static int xdebug_dbgp_cmdloop(xdebug_con *context, int bail)
 
 		option = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', &length);
 		if (!option) {
+			xdebug_mark_debug_connection_not_active();
 			return 0;
 		}
 
