@@ -3,7 +3,7 @@ Test for bug #2261: Control socket in init package (Control Socket without TSC)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('dbgp; ext-flag control-socket; !ext-flag tsc');
+check_reqs('dbgp; ext-flag control-socket; !ext-flag tsc; linux');
 ?>
 --FILE--
 <?php
