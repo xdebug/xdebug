@@ -64,6 +64,7 @@ jobs:
                     coverage: none
                     ini-values: "session.save_path=/tmp"
                     tools: pecl
+                    extensions: xmlreader
 
             -   name: Compile
                 run: ./.build.scripts/compile.sh

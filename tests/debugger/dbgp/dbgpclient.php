@@ -76,7 +76,17 @@ class DebugClient
 		$ini_options = array_merge( $default_options, $ini_options );
 		foreach ( $ini_options as $key => $value )
 		{
-			$options .= " -d{$key}=$value";
+			if ( is_array( $value ) )
+			{
+				foreach ( $value as $valueElement )
+				{
+					$options .= " -d{$key}=$valueElement";
+				}
+			}
+			else
+			{
+				$options .= " -d{$key}=$value";
+			}
 		}
 
 		if ( array_key_exists( 'auto_prepend', $extra_options ) )
