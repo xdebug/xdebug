@@ -106,6 +106,9 @@ HashTable *xdebug_objdebug_pp(zval **zval_pp, int flags)
 		EG(exception) = NULL;
 
 		tmp = zend_get_properties_for(&dzval, ZEND_PROP_PURPOSE_DEBUG);
+		if (EG(exception)) {
+			zend_clear_exception();
+		}
 
 		XG_BASE(in_debug_info) = 0;
 		xdebug_tracing_restore_trace_context(original_trace_context);
