@@ -462,7 +462,7 @@ static void fetch_zval_from_symbol_table(
 				if (xdebug_lib_has_active_object()) {
 					ZVAL_COPY(&tmp_retval, xdebug_lib_get_active_object());
 				} else {
-					ZVAL_NULL(&tmp_retval);
+					ZVAL_UNDEF(&tmp_retval);
 				}
 				goto cleanup;
 			}
@@ -495,40 +495,44 @@ static void fetch_zval_from_symbol_table(
 			XDEBUG_BREAK_INTENTIONALLY_MISSING
 
 		case XF_ST_OBJ_PROPERTY:
-			/* Let's see if there is a debug handler */
-			if (value_in && Z_TYPE_P(value_in) == IS_OBJECT) {
-				myht = xdebug_objdebug_pp(&value_in, XDEBUG_VAR_OBJDEBUG_DEFAULT);
+			/* If we don't have an object, bail out */
+			if (!value_in || Z_TYPE_P(value_in) != IS_OBJECT) {
+				ZVAL_UNDEF(&tmp_retval);
+				goto cleanup;
+			}
 
-				if (myht) {
-					/* As a normal (public) property */
-					zval *tmp = zend_symtable_str_find(myht, name, name_length);
-					if (tmp != NULL) {
+			/* Let's see if there is a debug handler */
+			myht = xdebug_objdebug_pp(&value_in, XDEBUG_VAR_OBJDEBUG_DEFAULT);
+
+			if (myht) {
+				/* As a normal (public) property */
+				zval *tmp = zend_symtable_str_find(myht, name, name_length);
+				if (tmp != NULL) {
 #if PHP_VERSION_ID >= 80400
-						if (Z_TYPE_P(tmp) == IS_PTR) {
-							zend_release_properties(myht);
-							goto skip_for_property_hook;
-						}
+					if (Z_TYPE_P(tmp) == IS_PTR) {
+						zend_release_properties(myht);
+						goto skip_for_property_hook;
+					}
 #endif
+					ZVAL_COPY(&tmp_retval, tmp);
+					zend_release_properties(myht);
+					goto cleanup;
+				}
+
+				/* As a private property */
+				{
+					char *unmangled = replace_star_by_null(name, name_length);
+					zval *tmp = zend_symtable_str_find(myht, unmangled, name_length);
+					if (tmp != NULL) {
 						ZVAL_COPY(&tmp_retval, tmp);
 						zend_release_properties(myht);
+						xdfree(unmangled);
 						goto cleanup;
 					}
-
-					/* As a private property */
-					{
-						char *unmangled = replace_star_by_null(name, name_length);
-						zval *tmp = zend_symtable_str_find(myht, unmangled, name_length);
-						if (tmp != NULL) {
-							ZVAL_COPY(&tmp_retval, tmp);
-							zend_release_properties(myht);
-							xdfree(unmangled);
-							goto cleanup;
-						}
-						xdfree(unmangled);
-					}
-
-					zend_release_properties(myht);
+					xdfree(unmangled);
 				}
+
+				zend_release_properties(myht);
 			}
 
 #if PHP_VERSION_ID >= 80400
