@@ -1430,6 +1430,11 @@ DBGP_FUNC(feature_get)
 			xdebug_xml_add_attribute(*retval, "supported", "1");
 		XDEBUG_STR_CASE_END
 
+		XDEBUG_STR_CASE("virtual_exception_value")
+			xdebug_xml_add_text(*retval, xdebug_sprintf("%ld", XG_DBG(context).virtual_exception_value));
+			xdebug_xml_add_attribute(*retval, "supported", "1");
+		XDEBUG_STR_CASE_END
+
 		XDEBUG_STR_CASE_DEFAULT
 			xdebug_xml_add_text(*retval, xdstrdup(lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0"));
 			xdebug_xml_add_attribute(*retval, "supported", lookup_cmd(CMD_OPTION_CHAR('n')) ? "1" : "0");
@@ -1503,6 +1508,10 @@ DBGP_FUNC(feature_set)
 
 		XDEBUG_STR_CASE("breakpoint_include_return_value")
 			XG_DBG(context).breakpoint_include_return_value = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
+		XDEBUG_STR_CASE_END
+
+		XDEBUG_STR_CASE("virtual_exception_value")
+			XG_DBG(context).virtual_exception_value = strtol(CMD_OPTION_CHAR('v'), NULL, 10);
 		XDEBUG_STR_CASE_END
 
 		XDEBUG_STR_CASE_DEFAULT
@@ -1959,6 +1968,21 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		xdebug_str_free(name);
 
 		return 0;
+	}
+
+	/* Add special exception value if enabled, if it exists in engine global and if depth = 0 */
+	if (XG_DBG(context).virtual_exception_value && EG(exception) && depth == 0) {
+		xdebug_xml_node *tmp_node;
+		xdebug_str *name = xdebug_str_create_from_const_char("$"XDEBUG_EXCEPTION_VALUE_VAR_NAME);
+		zval val;
+
+		ZVAL_OBJ(&val, EG(exception));
+
+		tmp_node = xdebug_get_zval_value_xml_node(name, &val, options);
+		xdebug_xml_expand_attribute_value(tmp_node, "facet", "readonly virtual");
+
+		xdebug_xml_add_child(node, tmp_node);
+		xdebug_str_free(name);
 	}
 
 	/* Here the context_id is 0 */
@@ -2439,6 +2463,7 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	context->resolved_breakpoints = 0;
 	context->breakpoint_details = 0;
 	context->breakpoint_include_return_value = 0;
+	context->virtual_exception_value = 0;
 
 	xdebug_mark_debug_connection_active();
 	xdebug_dbgp_cmdloop(context, XDEBUG_CMDLOOP_BAIL);
