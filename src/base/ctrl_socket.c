@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -127,8 +127,11 @@ static xdebug_str *make_message(xdebug_xml_node *message)
 	return ret;
 }
 
-
+#if __linux__
 static void handle_command(int fd, const char *line)
+#elif WIN32
+static void handle_command(HANDLE h, const char *line)
+#endif
 {
 	char *cmd = NULL;
 	xdebug_dbgp_arg *args;
@@ -157,7 +160,7 @@ static void handle_command(int fd, const char *line)
 	write(fd, message->d, message->l);
 #elif WIN32
 	WriteFile(
-		XG_BASE(control_socket_h),
+		h,
 		message->d,
 		message->l,
 		NULL,
@@ -246,9 +249,9 @@ CTRL_FUNC(pause)
 	xdebug_xml_add_child(*retval, response);
 }
 
+#if __linux__
 static void xdebug_control_socket_handle(void)
 {
-#if __linux__
 	char           buffer[256];
 	int            bytes_read;
 	int            rc;
@@ -297,7 +300,10 @@ static void xdebug_control_socket_handle(void)
 		}
 		close(new_sd);
 	}
+}
 #elif WIN32
+static void xdebug_control_socket_handle(void)
+{
 	DWORD result;
 	char  buffer[256];
 	int   bytes_read;
@@ -353,20 +359,32 @@ static void xdebug_control_socket_handle(void)
 
 	// All other errors and completed reading should close the socket
 	DisconnectNamedPipe(XG_BASE(control_socket_h));
-#endif
 }
+#endif
+
+#if __linux__
+static bool is_control_socket_active(void)
+{
+	if (!XG_BASE(control_socket_path)) {
+		return false;
+	}
+	return true;
+}
+#elif WIN32
+static bool is_control_socket_active(void)
+{
+	if (XG_BASE(control_socket_h) <= 0) {
+		return false;
+	}
+	return true;
+}
+#endif
 
 void xdebug_control_socket_dispatch(void)
 {
-#if __linux__
-	if (!XG_BASE(control_socket_path)) {
+	if (!is_control_socket_active()) {
 		return;
 	}
-#elif WIN32
-	if (XG_BASE(control_socket_h) <= 0) {
-		return;
-	}
-#endif
 
 	switch (XINI_BASE(control_socket_granularity)) {
 		case XDEBUG_CONTROL_SOCKET_OFF:
@@ -384,9 +402,9 @@ void xdebug_control_socket_dispatch(void)
 	xdebug_control_socket_handle();
 }
 
+#ifdef __linux__
 void xdebug_control_socket_setup(void)
 {
-#ifdef __linux__
 	struct sockaddr_un *servaddr = NULL;
 
 	/* Initialise control socket globals */
@@ -429,8 +447,7 @@ void xdebug_control_socket_setup(void)
 	}
 
 	/* Part 3 — Listen */
-	if (listen(XG_BASE(control_socket_fd), 32) < 0)
-	{
+	if (listen(XG_BASE(control_socket_fd), 32) < 0) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-LISTEN", "Listen failed: %s", strerror(errno));
 		xdfree(servaddr);
 		xdfree(XG_BASE(control_socket_path));
@@ -441,8 +458,19 @@ void xdebug_control_socket_setup(void)
 
 	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '@%s'", XG_BASE(control_socket_path));
 	xdfree(servaddr);
-#elif WIN32
+}
 
+void xdebug_control_socket_teardown(void)
+{
+	if (XG_BASE(control_socket_path)) {
+		close(XG_BASE(control_socket_fd));
+		xdfree(XG_BASE(control_socket_path));
+		XG_BASE(control_socket_path) = NULL;
+	}
+}
+#elif WIN32
+void xdebug_control_socket_setup(void)
+{
 	XG_BASE(control_socket_last_trigger) = xdebug_get_nanotime();
 
 	XG_BASE(control_socket_path) = xdebug_sprintf("\\\\.\\pipe\\xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
@@ -459,8 +487,7 @@ void xdebug_control_socket_setup(void)
 		NULL
 	);
 
-	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE)
-	{
+	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE) {
 		errno = WSAGetLastError();
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (%x)", errno);
 		xdfree(XG_BASE(control_socket_path));
@@ -469,18 +496,10 @@ void xdebug_control_socket_setup(void)
 	}
 
 	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '%s'", XG_BASE(control_socket_path));
-#endif
 }
 
 void xdebug_control_socket_teardown(void)
 {
-#ifdef __linux__
-	if (XG_BASE(control_socket_path)) {
-		close(XG_BASE(control_socket_fd));
-		xdfree(XG_BASE(control_socket_path));
-		XG_BASE(control_socket_path) = NULL;
-	}
-#elif WIN32
 	if (XG_BASE(control_socket_path)) {
 		xdfree(XG_BASE(control_socket_path));
 		XG_BASE(control_socket_path) = NULL;
@@ -489,7 +508,7 @@ void xdebug_control_socket_teardown(void)
 		DisconnectNamedPipe(XG_BASE(control_socket_h));
 		XG_BASE(control_socket_h) = 0;
 	}
-#endif
 }
+#endif
 
 #endif
