@@ -616,15 +616,13 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op              *cur_opcode;
 
 	if (type == XDEBUG_USER_DEFINED) {
-		edata = EG(current_execute_data)->prev_execute_data;
-		if (edata) {
-			opline_ptr = (zend_op**) &edata->opline;
-		}
+		edata = zdata->prev_execute_data;
 	} else {
-		edata = EG(current_execute_data);
-		opline_ptr = (zend_op**) &EG(current_execute_data)->opline;
+		edata = zdata;
 	}
-	zdata = EG(current_execute_data);
+	if (edata) {
+		opline_ptr = (zend_op**) &edata->opline;
+	}
 
 	tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
 	tmp->level         = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
@@ -722,7 +720,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 {
 	zend_op_array     *op_array = &(execute_data->func->op_array);
-	zend_execute_data *edata = execute_data->prev_execute_data;
 
 	function_stack_entry *fse;
 
@@ -756,7 +753,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED);
+	fse = xdebug_add_stack_frame(execute_data, op_array, XDEBUG_USER_DEFINED);
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
