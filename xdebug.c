@@ -827,7 +827,9 @@ ZEND_DLEXPORT void xdebug_init_oparray(zend_op_array *op_array)
 		return;
 	}
 
-	xdebug_coverage_init_oparray(op_array);
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+		xdebug_coverage_init_oparray(op_array);
+	}
 }
 
 #ifndef ZEND_EXT_API
