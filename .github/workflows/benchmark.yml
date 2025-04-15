@@ -1,0 +1,211 @@
+name: Benchmark Xdebug performance
+
+on:
+    pull_request:
+
+jobs:
+    linux:
+        runs-on: ubuntu-latest
+        name: "Linux"
+        strategy:
+            fail-fast: false
+            matrix:
+                php: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "${{ matrix.php }}"
+                    coverage: none
+                    ini-values: "session.save_path=/tmp"
+
+            -   name: Compile
+                run: ./.build.scripts/compile-for-benchmark.sh
+
+            -   name: install composer 
+                run: |
+                    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+                    php composer-setup.php
+                    php -r "unlink('composer-setup.php');"
+                    sudo mv composer.phar /usr/local/bin/composer
+                    composer --version
+
+            -   name: install Symfony
+                run: |
+                    git config --global user.email "runner@example.com"
+                    git config --global user.name "runner"
+                    curl -sS https://get.symfony.com/cli/installer | bash
+                    sudo mv ~/.symfony5/bin/symfony /usr/local/bin/symfony
+                    php_version="${{ matrix.php }}"
+                    case "$php_version" in
+                    8.0)
+                        mkdir xdebug_app
+                        cd xdebug_app
+                        composer create-project symfony/skeleton:"6.0.*" .
+                        composer require webapp phpstan/phpdoc-parser:^1.17
+                      ;;
+                    8.1)
+                        symfony new xdebug_app --webapp --version="6.4.*"
+                      ;;
+                    *)
+                        symfony new xdebug_app --webapp --version="7.2.*"
+                      ;;
+                    esac
+                    composer require rector/rector --dev
+
+            -   name: install Rector and PHPStan
+                run: |
+                    cd xdebug_app
+                    composer require rector/rector --dev
+
+            -   name: create summary file
+                run: |
+                    cd xdebug_app
+                    echo "### 🕒 Performance Results" > summary.md 
+                    echo "| Xdebug | Command | Duration | Slowdown |" >> summary.md       
+                    echo "|--------|---------|---------:|---------:|" >> summary.md       
+
+            -   name: Copy files
+                run: |
+                    sudo cp ./.github/benchmark-files/xdebug-benchmark.ini /etc/php/${{ matrix.php }}/cli/conf.d
+                    cp ./.github/benchmark-files/rector.php xdebug_app
+                    cp ./.github/benchmark-files/run-rector.sh xdebug_app
+                    cp ./.github/benchmark-files/phpstan.neon xdebug_app
+                    cp ./.github/benchmark-files/run-phpstan.sh xdebug_app
+                    cp ./.github/benchmark-files/run-server.sh xdebug_app
+                    echo "XDEBUG_MODE=off" >> $GITHUB_ENV
+    
+            -   name: Set off mode
+                run: echo "XDEBUG_MODE=off" >> $GITHUB_ENV
+    
+            -   name: benchmark rector with xdebug off
+                run:  |
+                    cd xdebug_app
+                    ./run-rector.sh
+
+            -   name: benchmark phpstan with xdebug off
+                run:  |
+                    cd xdebug_app
+                    ./run-phpstan.sh
+
+            -   name: benchmark app server with xdebug off
+                run:  |
+                    cd xdebug_app
+                    ./run-server.sh
+
+            -   name: Set coverage mode
+                run: echo "XDEBUG_MODE=coverage" >> $GITHUB_ENV
+
+            -   name: benchmark rector with xdebug in coverage mode
+                run:  |
+                    cd xdebug_app
+                    ./run-rector.sh
+
+            -   name: benchmark phpstan with xdebug in coverage mode
+                run:  |
+                    cd xdebug_app
+                    ./run-phpstan.sh
+        
+            -   name: benchmark app server with xdebug in coverage mode
+                run:  |
+                    cd xdebug_app
+                    ./run-server.sh
+    
+            -   name: Set debug mode
+                run: echo "XDEBUG_MODE=debug" >> $GITHUB_ENV
+
+            -   name: benchmark rector with xdebug in debug mode
+                run:  |
+                    cd xdebug_app
+                    ./run-rector.sh
+
+            -   name: benchmark phpstan with xdebug in debug mode
+                run:  |
+                    cd xdebug_app
+                    ./run-phpstan.sh
+        
+            -   name: benchmark app server with xdebug in debug mode
+                run:  |
+                    cd xdebug_app
+                    ./run-server.sh
+            
+            -   name: Set develop mode
+                run: echo "XDEBUG_MODE=develop" >> $GITHUB_ENV
+
+            -   name: benchmark rector with xdebug in develop mode
+                run:  |
+                    cd xdebug_app
+                    ./run-rector.sh
+
+            -   name: benchmark phpstan with xdebug in develop mode
+                run:  |
+                    cd xdebug_app
+                    ./run-phpstan.sh
+        
+            -   name: benchmark app server with xdebug in develop mode
+                run:  |
+                    cd xdebug_app
+                    ./run-server.sh
+        
+            -   name: Set gcstats mode
+                run: echo "XDEBUG_MODE=gcstats" >> $GITHUB_ENV
+
+            -   name: benchmark rector with xdebug in gcstats mode
+                run:  |
+                    cd xdebug_app
+                    ./run-rector.sh
+
+            -   name: benchmark phpstan with xdebug in gcstats mode
+                run:  |
+                    cd xdebug_app
+                    ./run-phpstan.sh
+        
+            -   name: benchmark app server with xdebug in gcstats mode
+                run:  |
+                    cd xdebug_app
+                    ./run-server.sh                       
+
+            -   name: Set profile mode
+                run: echo "XDEBUG_MODE=profile" >> $GITHUB_ENV
+
+            -   name: benchmark rector with xdebug in profile mode
+                run:  |
+                    cd xdebug_app
+                    ./run-rector.sh
+
+            -   name: benchmark phpstan with xdebug in profile mode
+                run:  |
+                    cd xdebug_app
+                    ./run-phpstan.sh
+        
+            -   name: benchmark app server with xdebug in profile mode
+                run:  |
+                    cd xdebug_app
+                    ./run-server.sh                       
+
+            -   name: Set trace mode
+                run: echo "XDEBUG_MODE=trace" >> $GITHUB_ENV
+
+            -   name: benchmark rector with xdebug in trace mode
+                run:  |
+                    cd xdebug_app
+                    ./run-rector.sh
+
+            -   name: benchmark phpstan with xdebug in trace mode
+                run:  |
+                    cd xdebug_app
+                    ./run-phpstan.sh
+        
+            -   name: benchmark app server with xdebug in trace mode
+                run:  |
+                    cd xdebug_app
+                    ./run-server.sh                       
+
+            -   name: print summary file
+                run: |
+                    cd xdebug_app
+                    cat summary.md >> $GITHUB_STEP_SUMMARY
+    
+                        
