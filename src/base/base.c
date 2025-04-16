@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,7 @@ static void xdebug_error_cb(int orig_type, const char *error_filename, const uin
 /* execution redirection functions */
 zend_op_array* (*old_compile_file)(zend_file_handle* file_handle, int type);
 static void (*xdebug_old_execute_ex)(zend_execute_data *execute_data);
-static void (*xdebug_old_execute_internal)(zend_execute_data *current_execute_data, zval *return_value);
+static void (*xdebug_old_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 
 /* error_cb and execption hook overrides */
 void xdebug_base_use_original_error_cb(void);
@@ -616,15 +616,13 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 	zend_op              *cur_opcode;
 
 	if (type == XDEBUG_USER_DEFINED) {
-		edata = EG(current_execute_data)->prev_execute_data;
-		if (edata) {
-			opline_ptr = (zend_op**) &edata->opline;
-		}
+		edata = zdata->prev_execute_data;
 	} else {
-		edata = EG(current_execute_data);
-		opline_ptr = (zend_op**) &EG(current_execute_data)->opline;
+		edata = zdata;
 	}
-	zdata = EG(current_execute_data);
+	if (edata) {
+		opline_ptr = (zend_op**) &edata->opline;
+	}
 
 	tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
 	tmp->level         = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
@@ -722,7 +720,6 @@ function_stack_entry *xdebug_add_stack_frame(zend_execute_data *zdata, zend_op_a
 static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 {
 	zend_op_array     *op_array = &(execute_data->func->op_array);
-	zend_execute_data *edata = execute_data->prev_execute_data;
 
 	function_stack_entry *fse;
 
@@ -756,7 +753,7 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, op_array, XDEBUG_USER_DEFINED);
+	fse = xdebug_add_stack_frame(execute_data, op_array, XDEBUG_USER_DEFINED);
 	fse->function.internal = 0;
 
 	/* A hack to make __call work with profiles. The function *is* user defined after all. */
@@ -775,9 +772,9 @@ static void xdebug_execute_user_code_begin(zend_execute_data *execute_data)
 		xdebug_tracing_execute_ex(fse);
 	}
 
-	fse->execute_data = EG(current_execute_data)->prev_execute_data;
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
-		fse->symbol_table = EG(current_execute_data)->symbol_table;
+	fse->execute_data = execute_data->prev_execute_data;
+	if (ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE) {
+		fse->symbol_table = execute_data->symbol_table;
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
@@ -932,16 +929,15 @@ static bool should_run_internal_handler(zend_execute_data *execute_data)
 }
 
 
-static void xdebug_execute_internal_begin(zend_execute_data *current_execute_data)
+static void xdebug_execute_internal_begin(zend_execute_data *execute_data)
 {
-	zend_execute_data    *edata = EG(current_execute_data);
 	function_stack_entry *fse;
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP) && (signed long) XDEBUG_VECTOR_COUNT(XG_BASE(stack)) >= XINI_BASE(max_nesting_level) && (XINI_BASE(max_nesting_level) != -1)) {
 		zend_throw_exception_ex(zend_ce_error, 0, "Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '" ZEND_LONG_FMT "' frames", XINI_BASE(max_nesting_level));
 	}
 
-	fse = xdebug_add_stack_frame(edata, &edata->func->op_array, XDEBUG_BUILT_IN);
+	fse = xdebug_add_stack_frame(execute_data, &execute_data->func->op_array, XDEBUG_BUILT_IN);
 	fse->function.internal = 1;
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_DEVELOP)) {
@@ -951,9 +947,9 @@ static void xdebug_execute_internal_begin(zend_execute_data *current_execute_dat
 		fse->function_call_traced = xdebug_tracing_execute_internal(fse);
 	}
 
-	fse->execute_data = EG(current_execute_data)->prev_execute_data;
-	if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_SYMBOL_TABLE) {
-		fse->symbol_table = EG(current_execute_data)->symbol_table;
+	fse->execute_data = execute_data->prev_execute_data;
+	if (ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE) {
+		fse->symbol_table = execute_data->symbol_table;
 	}
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
@@ -962,7 +958,7 @@ static void xdebug_execute_internal_begin(zend_execute_data *current_execute_dat
 	}
 
 	/* Check for SOAP */
-	if (check_soap_call(fse, current_execute_data)) {
+	if (check_soap_call(fse, execute_data)) {
 		fse->soap_error_cb = zend_error_cb;
 		xdebug_base_use_original_error_cb();
 	}
@@ -972,7 +968,7 @@ static void xdebug_execute_internal_begin(zend_execute_data *current_execute_dat
 	}
 }
 
-static void xdebug_execute_internal_end(zend_execute_data *current_execute_data, zval *return_value)
+static void xdebug_execute_internal_end(zend_execute_data *execute_data, zval *return_value)
 {
 	function_stack_entry *fse;
 
@@ -1007,22 +1003,22 @@ static void xdebug_execute_internal_end(zend_execute_data *current_execute_data,
 }
 
 #if PHP_VERSION_ID < 80200
-static void xdebug_execute_internal(zend_execute_data *current_execute_data, zval *return_value)
+static void xdebug_execute_internal(zend_execute_data *execute_data, zval *return_value)
 {
-	bool run_internal_handler = should_run_internal_handler(current_execute_data);
+	bool run_internal_handler = should_run_internal_handler(execute_data);
 
 	if (run_internal_handler) {
-		xdebug_execute_internal_begin(current_execute_data);
+		xdebug_execute_internal_begin(execute_data);
 	}
 
 	if (xdebug_old_execute_internal) {
-		xdebug_old_execute_internal(current_execute_data, return_value);
+		xdebug_old_execute_internal(execute_data, return_value);
 	} else {
-		execute_internal(current_execute_data, return_value);
+		execute_internal(execute_data, return_value);
 	}
 
 	if (run_internal_handler) {
-		xdebug_execute_internal_end(current_execute_data, return_value);
+		xdebug_execute_internal_end(execute_data, return_value);
 	}
 }
 #endif
