@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,7 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+#endif
 #include "php.h"
-#pragma GCC diagnostic pop
+#if !defined(_MSC_VER)
+# pragma GCC diagnostic pop
+#endif

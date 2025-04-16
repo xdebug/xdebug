@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,6 @@
 #include "lib/hash.h"
 #include "lib/llist.h"
 #include "lib/vector.h"
-
 
 #if PHP_WIN32
 typedef void (WINAPI *WIN_PRECISE_TIME_FUNC)(LPFILETIME);
@@ -68,8 +67,12 @@ typedef struct _xdebug_base_globals_t {
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	/* Control Socket */
 	char      *control_socket_path;
-	int        control_socket_fd;
 	zend_long  control_socket_last_trigger;
+# ifdef __linux__
+	int        control_socket_fd;
+# elif WIN32
+	HANDLE     control_socket_h;
+# endif
 #endif
 
 	/* filters */
