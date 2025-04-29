@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -135,6 +135,19 @@ void xdebug_explode(const char *delim, const char *str, xdebug_arg *args, int li
 			args->args[args->c - 1][endp - p1] = '\0';
 		}
 	}
+}
+
+bool xdebug_is_printable(const char *str, size_t len)
+{
+	size_t i;
+
+	for (i = 0; i < len; i++) {
+		if (!isprint(str[i])) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 const char* xdebug_memnstr(const char *haystack, const char *needle, int needle_len, const char *end)

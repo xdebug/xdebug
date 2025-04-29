@@ -1,4 +1,6 @@
 <?php
+require_once( __DIR__ . '../../utils.inc' );
+
 function show_trace_file() {
 	global $tf;
 
@@ -14,7 +16,7 @@ function show_trace_file() {
 register_shutdown_function('show_trace_file');
 
 if (xdebug_get_tracefile_name() === false) {
-	$tf = xdebug_start_trace(sys_get_temp_dir() . '/' . uniqid('xdt', TRUE));
+	$tf = xdebug_start_trace(getTmpFile(uniqid('xdt', TRUE)));
 } else {
 	$tf = xdebug_get_tracefile_name();
 }

@@ -6,8 +6,6 @@ class DebugClient
 	// free port will be selected automatically by the operating system
 	protected $port = 0;
 
-	private $tmpDir;
-
 	protected $socket;
 	protected $php;
 	protected $ppipes;
@@ -35,7 +33,6 @@ class DebugClient
 
 	public function __construct()
 	{
-		$this->tmpDir = getTmpDir();
 	}
 
 	private function open( &$errno, &$errstr )
@@ -52,13 +49,13 @@ class DebugClient
 
 	private function launchPhp( &$pipes, $filename, array $ini_options = [], array $extra_options = [] )
 	{
-		@unlink( $this->tmpDir . 'error-output.txt' );
-		@unlink( $this->tmpDir . 'remote_log.txt' );
+		@unlink( getTmpFile( 'error-output.txt' ) );
+		@unlink( getTmpFile( 'remote_log.txt' ) );
 
 		$descriptorspec = array(
 		   0 => array( 'pipe', 'r' ),
 		   1 => array( 'pipe', 'w' ),
-		   2 => array( 'file', $this->tmpDir . 'error-output.txt', 'a' )
+		   2 => array( 'file', getTmpFile( 'error-output.txt' ), 'a' )
 		);
 
 		$default_options = array(
@@ -91,13 +88,15 @@ class DebugClient
 
 		if ( array_key_exists( 'auto_prepend', $extra_options ) )
 		{
-			$prependFile = "{$this->tmpDir}auto-prepend.inc";
+			$prependFile = getTmpFile( 'auto-prepend.inc' );
 			file_put_contents( $prependFile, $extra_options['auto_prepend'] );
 			$options .= " -dauto_prepend_file={$prependFile}";
 		}
 
 		$php = getenv( 'TEST_PHP_EXECUTABLE' );
-		$cmd = "{$php} $options {$filename} >{$this->tmpDir}php-stdout.txt 2>{$this->tmpDir}php-stderr.txt";
+		$stdOut = getTmpFile( 'php-stdout.txt' );
+		$stdErr = getTmpFile( 'php-stderr.txt' );
+		$cmd = "{$php} $options {$filename} >{$stdOut} 2>{$stdErr}";
 		if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
 			$cmd = "exec {$cmd}";
 		}
@@ -195,10 +194,10 @@ class DebugClient
 
 		if ( $conn === false )
 		{
-			echo @file_get_contents( $this->tmpDir . 'php-stdout.txt' ), "\n";
-			echo @file_get_contents( $this->tmpDir . 'php-stderr.txt' ), "\n";
-			echo @file_get_contents( $this->tmpDir . 'error-output.txt' ), "\n";
-			echo @file_get_contents( $this->tmpDir . 'remote_log.txt' ), "\n";
+			echo @file_get_contents( getTmpFile( 'php-stdout.txt' ) ), "\n";
+			echo @file_get_contents( getTmpFile( 'php-stderr.txt' ) ), "\n";
+			echo @file_get_contents( getTmpFile( 'error-output.txt' ) ), "\n";
+			echo @file_get_contents( getTmpFile( 'remote_log.txt' ) ), "\n";
 			proc_close( $this->php );
 			return false;
 		}
@@ -215,10 +214,10 @@ class DebugClient
 
 		if ( array_key_exists( 'show-stdout', $options ) && $options['show-stdout'] )
 		{
-			echo @file_get_contents( $this->tmpDir . 'php-stdout.txt' ), "\n";
+			echo @file_get_contents( getTmpFile( 'php-stdout.txt' ) ), "\n";
 		}
-		// echo @file_get_contents( $this->tmpDir . 'php-stderr.txt' ), "\n";
-		// echo @file_get_contents( $this->tmpDir . 'error-output.txt' ), "\n";
+		// echo @file_get_contents( getTmpFile( 'php-stderr.txt' ) ), "\n";
+		// echo @file_get_contents( getTmpFile( 'error-output.txt' ) ), "\n";
 	}
 
 	function sendCommand( $conn, $command, $transaction_id )

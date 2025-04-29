@@ -13,10 +13,12 @@ xdebug.trace_output_name=trace.%p.%r
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.use_compression=1
-xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}start_no_zlib_compression.txt
+xdebug.log={TMPFILE:start_no_zlib_compression.txt}
 xdebug.control_socket=off
 --FILE--
 <?php
+require __DIR__ . '/../utils.inc';
+
 $tf = xdebug_get_tracefile_name();
 
 xdebug_stop_trace();
@@ -29,18 +31,21 @@ if (preg_match('@\.gz$@', $tf)) {
 	echo file_get_contents($tf);
 }
 
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_no_zlib_compression.txt' );
+echo file_get_contents(getTmpFile('start_no_zlib_compression.txt'));
 ?>
 --CLEAN--
 <?php
-unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_no_zlib_compression.txt' );
+require __DIR__ . '/../utils.inc';
+
+unlink(getTmpFile('start_no_zlib_compression.txt'));
 ?>
 --EXPECTF--
 %s.xt
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f %w%d   -> {main}() %s:0
-%w%f %w%d     -> xdebug_get_tracefile_name() %s:2
-%w%f %w%d     -> xdebug_stop_trace() %s:4
+%w%f %w%d     -> require(%s) %s:2
+%w%f %w%d     -> xdebug_get_tracefile_name() %s:4
+%w%f %w%d     -> xdebug_stop_trace() %s:6
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
 

@@ -7,14 +7,16 @@ check_reqs('!win');
 ?>
 --INI--
 xdebug.mode=profile
-xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}issue2037.txt
+xdebug.log={TMPFILE:issue2037.txt}
 xdebug.output_dir=/tmp/un-writable
 xdebug.control_socket=off
 --FILE--
 <?php
+require_once __DIR__ . '/../utils.inc';
+
 echo "==DONE==\n";
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'issue2037.txt' );
-@unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'issue2037.txt' );
+echo file_get_contents(getTmpFile('issue2037.txt'));
+@unlink(getTmpFile('issue2037.txt'));
 ?>
 --EXPECTF--
 ==DONE==
