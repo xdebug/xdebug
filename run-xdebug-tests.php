@@ -25,6 +25,8 @@
 
 /* $Id: ff8fc1a09b14846e2a5daa9b51cc2b6e97f3ac3c $ */
 
+require_once __DIR__ . '/tests/utils.inc';
+
 /* Temporary variables while this file is being refactored. */
 /** @var ?JUnit */
 $junit = null;
@@ -2000,9 +2002,7 @@ TEST $file
 
     if ($test->sectionNotEmpty('ENV')) {
         $env_str = str_replace('{PWD}', dirname($file), $test->getSection('ENV'));
-        $env_str = str_replace('{RUNID}', getenv('UNIQ_RUN_ID'), $env_str);
-        $env_str = str_replace('{TEST_PHP_WORKER}', getenv('TEST_PHP_WORKER'), $env_str);
-        $env_str = str_replace('{TMP}', sys_get_temp_dir(), $env_str);
+        $env_str = preg_replace_callback('/{TMPFILE:(\S+)}/', function($matches) { return getTmpFile($matches[1]); }, $env_str);
         foreach (explode("\n", $env_str) as $e) {
             $e = explode('=', trim($e), 2);
 
@@ -2091,9 +2091,7 @@ TEST $file
     // these may overwrite the test defaults...
     if ($test->hasSection('INI')) {
         $ini = str_replace('{PWD}', dirname($file), $test->getSection('INI'));
-        $ini = str_replace('{RUNID}', getenv('UNIQ_RUN_ID'), $ini);
-        $ini = str_replace('{TEST_PHP_WORKER}', getenv('TEST_PHP_WORKER'), $ini);
-        $ini = str_replace('{TMP}', sys_get_temp_dir(), $ini);
+        $ini = preg_replace_callback('/{TMPFILE:(\S+)}/', function($matches) { return getTmpFile($matches[1]); }, $ini);
         $replacement = IS_WINDOWS ? '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"' : 'tee $1 >/dev/null';
         $ini = preg_replace('/{MAIL:(\S+)}/', $replacement, $ini);
         settings2array(preg_split("/[\n\r]+/", $ini), $ini_settings);

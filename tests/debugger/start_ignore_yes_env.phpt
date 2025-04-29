@@ -6,7 +6,7 @@ XDEBUG_IGNORE=yes
 <?php
 require 'dbgp/dbgpclient.php';
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_ignore_yes_env.txt';
+$xdebugLogFileName = getTmpFile('start_ignore_yes_env.txt');
 @unlink( $xdebugLogFileName );
 
 dbgpRunFile(

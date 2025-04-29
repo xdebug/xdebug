@@ -20,7 +20,7 @@ $commands = array(
 	'detach',
 );
 
-$xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-log-1978.txt';
+$xdebugLogFileName = getTmpFile('remote-log-1978.txt');
 @unlink( $xdebugLogFileName );
 
 dbgpRunFile( $filename, $commands, [ 'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 7, 'xdebug.control_socket' => 'off' ] );

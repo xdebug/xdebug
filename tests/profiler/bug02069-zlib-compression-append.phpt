@@ -11,16 +11,18 @@ xdebug.start_with_request=default
 xdebug.use_compression=1
 xdebug.profiler_append=1
 xdebug.profiler_output_name=cachegrind.out.%R.end
-xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}issue2069-001.txt
+xdebug.log={TMPFILE:issue2069-001.txt}
 xdebug.control_socket=off
 --FILE--
 <?php
+require_once __DIR__ . '/../utils.inc';
 require_once 'capture-profile.inc';
+
 $file = xdebug_get_profiler_filename();
 var_dump( $file );
 
-echo "\n", file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'issue2069-001.txt' );
-@unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'issue2069-001.txt' );
+echo "\n", file_get_contents(getTmpFile('issue2069-001.txt'));
+@unlink(getTmpFile('issue2069-001.txt'));
 ?>
 --EXPECTF--
 string(%d) "%send"

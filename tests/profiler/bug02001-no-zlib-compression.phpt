@@ -10,14 +10,15 @@ xdebug.mode=profile
 xdebug.start_with_request=default
 xdebug.use_compression=1
 xdebug.profiler_output_name=cachegrind.out
-xdebug.log={TMP}/{RUNID}{TEST_PHP_WORKER}bug2001-no-zlib-compression.txt
+xdebug.log={TMPFILE:bug2001-no-zlib-compression.txt}
 xdebug.control_socket=off
 --FILE--
 <?php
+require __DIR__ . '/../utils.inc';
 require_once 'capture-profile.inc';
 
-echo file_get_contents(sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'bug2001-no-zlib-compression.txt' );
-unlink (sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'bug2001-no-zlib-compression.txt' );
+echo file_get_contents(getTmpFile('bug2001-no-zlib-compression.txt'));
+unlink(getTmpFile('bug2001-no-zlib-compression.txt'));
 ?>
 --EXPECTF--
 [%d] Log opened at %s
