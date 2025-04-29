@@ -1146,6 +1146,10 @@ DBGP_FUNC(eval)
 	/* base64 decode eval string */
 	eval_string = (char*) xdebug_base64_decode((unsigned char*) CMD_OPTION_CHAR('-'), CMD_OPTION_LEN('-'), &new_length);
 
+	if (!eval_string) {
+		RETURN_RESULT_WITH_MESSAGE(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_EVALUATING_CODE, xdebug_sprintf("%s: %s", error_message_from_code(XDEBUG_ERROR_EVALUATING_CODE), "invalid base64-encoded data value"));
+	}
+
 	res = xdebug_do_eval(eval_string, &ret_zval, &return_message);
 
 	xdfree(eval_string);
@@ -1273,9 +1277,25 @@ DBGP_FUNC(detach)
 	XG_DBG(stdout_mode) = 0;
 	XG_DBG(detached) = 1;
 
-	if (CMD_OPTION_SET('-')) {
-		XG_DBG(context).detached_message = xdstrdup(CMD_OPTION_CHAR('-'));
-		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "DETACH", "Debug client detached: %s.", XG_DBG(context).detached_message);
+	if (CMD_OPTION_SET('-') && CMD_OPTION_LEN('-') > 0) {
+		unsigned char *new_value;
+		size_t         new_length = 0;
+
+		/* It should be base64 */
+		new_value = xdebug_base64_decode((unsigned char*) CMD_OPTION_CHAR('-'), CMD_OPTION_LEN('-'), &new_length);
+
+		/* But if not, we fall back if all characters are also printable. */
+		if (new_value) {
+			if (xdebug_is_printable((char*) new_value, new_length)) {
+				XG_DBG(context).detached_message = (char*) new_value;
+			} else {
+				xdfree(new_value);
+				XG_DBG(context).detached_message = xdstrdup(CMD_OPTION_CHAR('-'));
+			}
+		} else {
+			XG_DBG(context).detached_message = xdstrdup(CMD_OPTION_CHAR('-'));
+		}
+		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_WARN, "DETACH", "Debug client detached: %s", XG_DBG(context).detached_message);
 	}
 }
 
@@ -1714,6 +1734,10 @@ DBGP_FUNC(property_set)
 	}
 
 	new_value = xdebug_base64_decode((unsigned char*) CMD_OPTION_CHAR('-'), CMD_OPTION_LEN('-'), &new_length);
+
+	if (!new_value) {
+		RETURN_RESULT_WITH_MESSAGE(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_EVALUATING_CODE, xdebug_sprintf("%s: %s", error_message_from_code(XDEBUG_ERROR_EVALUATING_CODE), "invalid base64-encoded data value"));
+	}
 
 	/* Set a cast, if requested through the 't' option */
 	cast_as = "";
