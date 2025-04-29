@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2022 Derick Rethans <derick@xdebug.org>           |
+   | Copyright (c) 2002-2025 Derick Rethans <derick@xdebug.org>           |
    |           (c) 1997-2004 Jim Winstead <jimw@trainedmonkey.com>        |
    |           (c) 1998-2004 Andi Gutmans <andi@zend.com> and             |
    |                         Zeev Suraski <zeev@zend.com>                 |
@@ -127,7 +127,7 @@ static unsigned char *xdebug_base64_encode_impl(const unsigned char *in, size_t 
 }
 /* }}} */
 
-static int xdebug_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict) /* {{{ */
+static bool xdebug_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict) /* {{{ */
 {
 	int ch;
 	size_t i = 0, padding = 0, j = *outl;
@@ -190,10 +190,10 @@ static int xdebug_base64_decode_impl(const unsigned char *in, size_t inl, unsign
 	*outl = j;
 	out[j] = '\0';
 
-	return 1;
+	return true;
 
 fail:
-	return 0;
+	return false;
 }
 /* }}} */
 
@@ -210,9 +210,15 @@ unsigned char *xdebug_base64_encode(unsigned char *data, size_t data_len, size_t
 
 unsigned char *xdebug_base64_decode(unsigned char *data, size_t data_len, size_t *new_len)
 {
+	bool           ok;
 	unsigned char *retval = xdmalloc(data_len + 1);
 
-	xdebug_base64_decode_impl(data, data_len, retval, new_len, 0);
+	ok = xdebug_base64_decode_impl(data, data_len, retval, new_len, true);
+
+	if (!ok) {
+		xdfree(retval);
+		return NULL;
+	}
 
 	return retval;
 }
