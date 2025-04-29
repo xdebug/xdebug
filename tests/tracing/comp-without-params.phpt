@@ -27,9 +27,9 @@ xdebug_stop_trace();
 Version: %s
 File format: %d
 TRACE START [%d-%d-%d %d:%d:%d.%d]
-2	1	1	%f	%d
-2	7	0	%f	%d	a	1		%scomp-without-params.php	11
-2	7	1	%f	%d
-2	8	0	%f	%d	xdebug_stop_trace	0		%scomp-without-params.php	13
+2	%d	1	%f	%d
+2	%d	0	%f	%d	a	1		%scomp-without-params.php	11
+2	%d	1	%f	%d
+2	%d	0	%f	%d	xdebug_stop_trace	0		%scomp-without-params.php	13
 			%f	%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

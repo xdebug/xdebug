@@ -206,17 +206,29 @@ function mustNotBeExecuted( array $coverageInfo, array $lines )
 	}
 }
 
-function getTmpDir() : string
+function getTmpFile(string $filename) : string
 {
+	/* Main tmp dir */
 	$envTmpDir = getenv('TEST_TMP_DIR');
-	$tmpDir = $envTmpDir !== false ? $envTmpDir : sys_get_temp_dir();
-	$tmpDir .= '/';
+	$tmpFile = $envTmpDir !== false ? $envTmpDir : sys_get_temp_dir();
+	$tmpFile .= '/';
+
+	/* Parallel run ID */
+	$runId = getenv( 'UNIQ_RUN_ID' );
+	if ( $runId !== false )
+	{
+		$tmpFile .= "{$runId}-";
+	}
+
+	/* Worker ID */
 	$workerId = getenv( 'TEST_PHP_WORKER' );
 	if ( $workerId !== false )
 	{
-		$tmpDir .= "{$workerId}-";
+		$tmpFile .= "{$workerId}-";
 	}
 
-	return $tmpDir;
+	$tmpFile .= $filename;
+
+	return $tmpFile;
 }
 ?>

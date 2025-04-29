@@ -35,13 +35,13 @@ Version: %d.%s
 File format: %d
 TRACE START [%s]
 2	1	1	%f	%d
-2	7	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'
-2	7	1	%f	%d
-2	8	0	%f	%d	foo	1		%sbug00355.php	18	0
-3	9	0	%f	%d	strrev	0		%sbug00355.php	7	1	'Hi'
-3	9	1	%f	%d
-2	8	1	%f	%d
-2	10	0	%f	%d	xdebug_stop_trace	0		%sbug00355.php	20	0
+2	%d	0	%f	%d	register_shutdown_function	0		%sbug00355.php	16	1	'bar'
+2	%d	1	%f	%d
+2	%d	0	%f	%d	foo	1		%sbug00355.php	18	0
+3	%d	0	%f	%d	strrev	0		%sbug00355.php	7	1	'Hi'
+3	%d	1	%f	%d
+2	%d	1	%f	%d
+2	%d	0	%f	%d	xdebug_stop_trace	0		%sbug00355.php	20	0
 			%f	%d
 TRACE END   [%s]
 
