@@ -676,8 +676,15 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 						zend_string_release(unmangled);
 
-						if (info && info != ZEND_WRONG_PROPERTY_INFO && info->flags & ZEND_ACC_READONLY) {
-							flags |= XDEBUG_OBJECT_ITEM_TYPE_READONLY;
+						if (info && info != ZEND_WRONG_PROPERTY_INFO) {
+							if (info->flags & ZEND_ACC_READONLY) {
+								flags |= XDEBUG_OBJECT_ITEM_TYPE_READONLY;
+							}
+#if PHP_VERSION_ID >= 80400
+							if (info->flags & ZEND_ACC_VIRTUAL) {
+								continue;
+							}
+#endif
 						}
 					}
 #endif
