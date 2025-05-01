@@ -862,6 +862,39 @@ static void resolve_breakpoints_for_function(xdebug_lines_list *lines_list, zend
 	add_function_to_lines_list(lines_list, opa);
 }
 
+#if PHP_VERSION_ID >= 80400
+static void resolve_breakpoints_for_property_hooks(xdebug_lines_list *file_function_lines_list, zend_class_entry *ce, zend_string *filename)
+{
+	int i;
+	zend_property_info *prop_info;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, prop_info) {
+		if (!prop_info->hooks) {
+			continue;
+		}
+
+		for (i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			if (!prop_info->hooks[i]) {
+				continue;
+			}
+
+			if (!ZEND_USER_CODE((&prop_info->hooks[i]->op_array)->type)) {
+				continue;
+			}
+			/* Only resolve if the file names are the same. This is needed in case
+			 * of inheritance or traits where op arrays from other files might get introduced */
+			if (ZSTR_LEN(filename) != ZSTR_LEN((&prop_info->hooks[i]->op_array)->filename)) {
+				continue;
+			}
+			if (strcmp(ZSTR_VAL(filename), ZSTR_VAL((&prop_info->hooks[i]->op_array)->filename)) != 0) {
+				continue;
+			}
+			resolve_breakpoints_for_function(file_function_lines_list, &prop_info->hooks[i]->op_array);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+#endif
+
 static void resolve_breakpoints_for_class(xdebug_lines_list *file_function_lines_list, zend_class_entry *ce, zend_string *filename)
 {
 	zend_op_array    *function_op_array;
@@ -880,6 +913,10 @@ static void resolve_breakpoints_for_class(xdebug_lines_list *file_function_lines
 		}
 		resolve_breakpoints_for_function(file_function_lines_list, function_op_array);
 	} ZEND_HASH_FOREACH_END();
+
+#if PHP_VERSION_ID >= 80400
+	resolve_breakpoints_for_property_hooks(file_function_lines_list, ce, filename);
+#endif
 }
 
 void xdebug_debugger_compile_file(zend_op_array *op_array)
