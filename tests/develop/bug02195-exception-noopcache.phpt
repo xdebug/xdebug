@@ -98,7 +98,7 @@ array(1) {
 %sbug02195-exception-noopcache.php:8:
 array(3) {
   [0] =>
-  array(7) {
+  array(6) {
     'time' =>
     double(%f)
     'memory' =>
@@ -111,11 +111,6 @@ array(3) {
     int(0)
     'params' =>
     array(0) {
-    }
-    'variables' =>
-    array(1) {
-      'e' =>
-      NULL
     }
   }
   [1] =>
