@@ -55,7 +55,7 @@ $e = new Error_Entry(1, 2);
 %sbug01562-opcache.php:17:
 array(4) {
   [0] =>
-  array(7) {
+  array(6) {
     'time' =>
     double(%f)
     'memory' =>
@@ -68,11 +68,6 @@ array(4) {
     int(0)
     'params' =>
     array(0) {
-    }
-    'variables' =>
-    array(1) {
-      'e' =>
-      NULL
     }
   }
   [1] =>
