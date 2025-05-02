@@ -2594,7 +2594,7 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_st
 		return 0;
 	}
 
-	if (zend_string_equals(brk->filename, resolved_filename)) {
+	if (zend_string_equals_ci(brk->filename, resolved_filename)) {
 		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "F: File names match (%s).", ZSTR_VAL(brk->filename));
 
 		if (free_eval_filename) {
