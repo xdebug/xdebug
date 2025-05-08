@@ -297,6 +297,78 @@ static xdebug_dbgp_cmd dbgp_commands[] = {
 };
 
 /*****************************************************************************
+** Path Mapping Helpers
+*/
+
+static void map_remote_to_local(zend_string *remote_filename, int remote_lineno, xdebug_str **local_path, size_t *local_line, bool *must_free)
+{
+	if (!xdebug_lib_path_mapping_enabled()) {
+		goto pass_through;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(remote_filename), remote_lineno);
+
+	if (xdebug_path_maps_remote_to_local(
+		ZSTR_VAL(remote_filename), remote_lineno,
+		local_path, local_line
+	) != XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+		xdebug_log_ex(
+			XLOG_CHAN_PATHMAP, XLOG_INFO, "MAPPED",
+			"Mapped location %s:%d to %s:%zd",
+			ZSTR_VAL(remote_filename), remote_lineno,
+			XDEBUG_STR_VAL((*local_path)), *local_line
+		);
+		*must_free = false;
+		return;
+	}
+
+	xdebug_log_ex(
+		XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-FAIL",
+		"Couldn't map location %s:%d",
+		ZSTR_VAL(remote_filename), remote_lineno
+	);
+
+pass_through:
+	*local_path = xdebug_str_create(ZSTR_VAL(remote_filename), ZSTR_LEN(remote_filename));
+	*local_line = remote_lineno;
+	*must_free = true;
+}
+
+static void map_remote_brkinfo_to_local(xdebug_brk_info *brk_info, xdebug_str **local_path, size_t *local_line, bool *must_free)
+{
+	if (!xdebug_lib_path_mapping_enabled()) {
+		goto pass_through;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno);
+
+	if (xdebug_path_maps_remote_to_local(
+		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
+		local_path, local_line
+	) != XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+		xdebug_log_ex(
+			XLOG_CHAN_PATHMAP, XLOG_INFO, "MAPPED",
+			"Mapped location %s:%d to %s:%zd",
+			ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
+			XDEBUG_STR_VAL((*local_path)), *local_line
+		);
+		*must_free = false;
+		return;
+	}
+
+	xdebug_log_ex(
+		XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-FAIL",
+		"Couldn't map location %s:%d",
+		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno
+	);
+
+pass_through:
+	*local_path = xdebug_str_create(ZSTR_VAL(brk_info->filename), ZSTR_LEN(brk_info->filename));
+	*local_line = brk_info->resolved_lineno;
+	*must_free = true;
+}
+
+/*****************************************************************************
 ** Utility functions
 */
 
@@ -536,12 +608,24 @@ static xdebug_xml_node* return_stackframe(int nr)
 		if (xdebug_debugger_check_evaled_code(fse_prev->filename, &tmp_filename)) {
 			xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("eval"), 0, 1);
 			xdebug_xml_add_attribute_ex(tmp, "filename", ZSTR_VAL(tmp_filename), 0, 0);
+			xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno), 0, 1);
+
 			zend_string_release(tmp_filename);
 		} else {
+			xdebug_str *local_path;
+			size_t local_line;
+			bool must_free_path = false;
+
+			map_remote_to_local(fse_prev->filename, fse_prev->lineno, &local_path, &local_line, &must_free_path);
+
 			xdebug_xml_add_attribute_ex(tmp, "type",     xdstrdup("file"), 0, 1);
-			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_zstr_path_to_url(fse_prev->filename), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", local_line), 0, 1);
+
+			if (must_free_path) {
+				xdebug_str_free(local_path);
+			}
 		}
-		xdebug_xml_add_attribute_ex(tmp, "lineno",   xdebug_sprintf("%lu", fse_prev->lineno), 0, 1);
 	} else {
 		zend_string *executed_filename = zend_get_executed_filename_ex();
 		int          executed_lineno   = zend_get_executed_lineno();
@@ -550,12 +634,24 @@ static xdebug_xml_node* return_stackframe(int nr)
 		if (xdebug_debugger_check_evaled_code(executed_filename, &tmp_filename)) {
 			xdebug_xml_add_attribute_ex(tmp, "type", xdstrdup("eval"), 0, 1);
 			xdebug_xml_add_attribute_ex(tmp, "filename", ZSTR_VAL(tmp_filename), 0, 0);
+			xdebug_xml_add_attribute_ex(tmp, "lineno", xdebug_sprintf("%lu", executed_lineno), 0, 1);
+
 			zend_string_release(tmp_filename);
 		} else if (executed_filename) {
+			xdebug_str *local_path;
+			size_t local_line;
+			bool must_free_path = false;
+
+			map_remote_to_local(executed_filename, executed_lineno, &local_path, &local_line, &must_free_path);
+
 			xdebug_xml_add_attribute_ex(tmp, "type", xdstrdup("file"), 0, 1);
-			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_zstr_path_to_url(executed_filename), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+			xdebug_xml_add_attribute_ex(tmp, "lineno", xdebug_sprintf("%lu", local_line), 0, 1);
+
+			if (must_free_path) {
+				xdebug_str_free(local_path);
+			}
 		}
-		xdebug_xml_add_attribute_ex(tmp, "lineno", xdebug_sprintf("%lu", executed_lineno), 0, 1);
 	}
 
 	xdfree(tmp_fname);
@@ -626,41 +722,6 @@ static void breakpoint_brk_info_add_resolved(xdebug_xml_node *xml, xdebug_brk_in
 	}
 }
 
-static void map_remote_to_local(xdebug_brk_info *brk_info, xdebug_str **local_path, size_t *local_line, bool *must_free)
-{
-	if (!xdebug_lib_path_mapping_enabled()) {
-		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "DISABLED", "Not mapping location");
-		goto pass_through;
-	}
-
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno);
-
-	if (xdebug_path_maps_remote_to_local(
-		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
-		local_path, local_line
-	) != XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
-		xdebug_log_ex(
-			XLOG_CHAN_PATHMAP, XLOG_INFO, "MAPPED",
-			"Mapped location %s:%d to %s:%zd",
-			ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
-			XDEBUG_STR_VAL((*local_path)), *local_line
-		);
-		*must_free = false;
-		return;
-	}
-
-	xdebug_log_ex(
-		XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-FAIL",
-		"Couldn't map location %s:%d",
-		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno
-	);
-
-pass_through:
-	*local_path = xdebug_str_create(ZSTR_VAL(brk_info->filename), ZSTR_LEN(brk_info->filename));
-	*local_line = brk_info->resolved_lineno;
-	*must_free = true;
-}
-
 
 static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk_info)
 {
@@ -668,21 +729,22 @@ static void breakpoint_brk_info_add(xdebug_xml_node *xml, xdebug_brk_info *brk_i
 	breakpoint_brk_info_add_resolved(xml, brk_info);
 
 	if (brk_info->filename && brk_info->resolved_lineno) {
-		xdebug_str *local_path;
-		size_t local_line;
-		bool must_free_path = false;
-
-		map_remote_to_local(brk_info, &local_path, &local_line, &must_free_path);
-
-		if (is_dbgp_url(XDEBUG_STR_VAL(local_path))) {
-			xdebug_xml_add_attribute_ex(xml, "filename", XDEBUG_STR_VAL(local_path), 0, 0);
+		if (is_dbgp_url(ZSTR_VAL(brk_info->filename))) {
+			xdebug_xml_add_attribute_ex(xml, "filename", ZSTR_VAL(brk_info->filename), 0, 0);
+			xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", brk_info->resolved_lineno), 0, 1);
 		} else {
-			xdebug_xml_add_attribute_ex(xml, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
-		}
-		xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", local_line), 0, 1);
+			xdebug_str *local_path;
+			size_t local_line;
+			bool must_free_path = false;
 
-		if (must_free_path) {
-			xdebug_str_free(local_path);
+			map_remote_brkinfo_to_local(brk_info, &local_path, &local_line, &must_free_path);
+
+			xdebug_xml_add_attribute_ex(xml, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+			xdebug_xml_add_attribute_ex(xml, "lineno", xdebug_sprintf("%lu", local_line), 0, 1);
+
+			if (must_free_path) {
+				xdebug_str_free(local_path);
+			}
 		}
 	}
 
@@ -965,7 +1027,6 @@ static void map_local_to_remote_replace(xdebug_brk_info *brk_info)
 	size_t remote_line;
 
 	if (!xdebug_lib_path_mapping_enabled()) {
-		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "DISABLED", "Not mapping location");
 		return;
 	}
 	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->original_lineno);
@@ -2788,13 +2849,23 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, zend_strin
 
 		if (xdebug_debugger_check_evaled_code(filename, &tmp_filename)) {
 			xdebug_xml_add_attribute_ex(error_container, "filename", ZSTR_VAL(tmp_filename), 0, 0);
+			xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
+
 			zend_string_release(tmp_filename);
 		} else {
-			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_zstr_path_to_url(filename), 0, 1);
+			xdebug_str *local_path;
+			size_t local_line;
+			bool must_free_path = false;
+
+			map_remote_to_local(filename, lineno, &local_path, &local_line, &must_free_path);
+
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+			xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", local_line), 0, 1);
+
+			if (must_free_path) {
+				xdebug_str_free(local_path);
+			}
 		}
-	}
-	if (lineno) {
-		xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
 	}
 	if (exception) {
 		xdebug_xml_add_attribute_ex(error_container, "exception", xdstrdup(exception), 0, 1);
@@ -3091,13 +3162,23 @@ int xdebug_dbgp_notification(xdebug_con *context, zend_string *filename, long li
 
 		if (xdebug_debugger_check_evaled_code(filename, &tmp_filename)) {
 			xdebug_xml_add_attribute_ex(error_container, "filename", ZSTR_VAL(tmp_filename), 0, 0);
+			xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
+
 			zend_string_release(tmp_filename);
 		} else {
-			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_zstr_path_to_url(filename), 0, 1);
+			xdebug_str *local_path;
+			size_t local_line;
+			bool must_free_path = false;
+
+			map_remote_to_local(filename, lineno, &local_path, &local_line, &must_free_path);
+
+			xdebug_xml_add_attribute_ex(error_container, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+			xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", local_line), 0, 1);
+
+			if (must_free_path) {
+				xdebug_str_free(local_path);
+			}
 		}
-	}
-	if (lineno) {
-		xdebug_xml_add_attribute_ex(error_container, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
 	}
 	if (type_string) {
 		xdebug_xml_add_attribute_ex(error_container, "type", xdstrdup(type_string), 0, 1);
@@ -3142,13 +3223,23 @@ int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lin
 
 		if (xdebug_debugger_check_evaled_code(filename, &tmp_filename)) {
 			xdebug_xml_add_attribute_ex(location_node, "filename", ZSTR_VAL(tmp_filename), 0, 0);
+			xdebug_xml_add_attribute_ex(location_node, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
+
 			zend_string_release(tmp_filename);
 		} else {
-			xdebug_xml_add_attribute_ex(location_node, "filename", xdebug_zstr_path_to_url(filename), 0, 1);
+			xdebug_str *local_path;
+			size_t local_line;
+			bool must_free_path = false;
+
+			map_remote_to_local(filename, lineno, &local_path, &local_line, &must_free_path);
+
+			xdebug_xml_add_attribute_ex(location_node, "filename", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+			xdebug_xml_add_attribute_ex(location_node, "lineno", xdebug_sprintf("%lu", local_line), 0, 1);
+
+			if (must_free_path) {
+				xdebug_str_free(local_path);
+			}
 		}
-	}
-	if (lineno) {
-		xdebug_xml_add_attribute_ex(location_node, "lineno", xdebug_sprintf("%lu", lineno), 0, 1);
 	}
 	xdebug_xml_add_child(response, location_node);
 

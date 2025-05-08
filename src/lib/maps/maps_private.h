@@ -25,22 +25,29 @@
 #define XDEBUG_PATH_MAP_TYPE_DIRECTORY 0x01
 #define XDEBUG_PATH_MAP_TYPE_FILE      0x02
 #define XDEBUG_PATH_MAP_TYPE_LINES     0x03
+#define XDEBUG_PATH_MAP_TYPE_MASK      0x0f
+#define XDEBUG_PATH_MAP_FLAGS_SKIP     0x10
+#define XDEBUG_PATH_MAP_FLAGS_MASK     0xf0
 
 typedef struct xdebug_path_map_range xdebug_path_map_range;
 
 struct xdebug_path_map_range {
-	int remote_begin;
-	int remote_end;
-	int local_begin;
-	int local_end;
+	int         remote_begin;
+	int         remote_end;
+	int         local_flags;
+	xdebug_str *local_path;
+	int         local_begin;
+	int         local_end;
 };
 
 typedef struct xdebug_path_mapping {
 	int                      type;
 	int                      ref_count;
 	xdebug_str              *remote_path;
-	xdebug_str              *local_path;
-	xdebug_vector           *line_ranges;
+	union {
+		xdebug_str              *local_path;  /* Only used for SKIP, DIRECTORY and FILE types */
+		xdebug_vector           *line_ranges; /* Only used for LINES type */
+	} m;
 } xdebug_path_mapping;
 
 typedef struct xdebug_path_maps {
@@ -54,11 +61,11 @@ void xdebug_path_maps_dtor(xdebug_path_maps *maps);
 int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remote_line, xdebug_str **local_path, size_t *local_line);
 int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local_line, xdebug_str **remote_path, size_t *remote_line);
 
-void xdebug_path_map_range_set(xdebug_path_map_range *from, int remote_begin, int remote_end, int local_begin, int local_end);
+void xdebug_path_map_range_set(xdebug_path_map_range *from, int remote_begin, int remote_end, int local_flags, xdebug_str *local_path, int local_begin, int local_end);
 void xdebug_path_map_range_copy(xdebug_path_map_range *from, xdebug_path_map_range *to);
 void xdebug_path_map_range_dtor(xdebug_path_map_range *range);
 
-xdebug_path_mapping *xdebug_path_mapping_ctor(void);
+xdebug_path_mapping *xdebug_path_mapping_ctor(int type);
 void xdebug_path_mapping_dtor(void *mapping);
 xdebug_path_mapping *xdebug_path_mapping_copy(xdebug_path_mapping *mapping);
 

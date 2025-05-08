@@ -69,7 +69,6 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Step Debug] -> <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="1" status="break" reason="ok"><xdebug:message filename="file://%sbug01949.inc" lineno="2"></xdebug:message></response>
 
 [%d] [Step Debug] <- breakpoint_set -i 2 -t line -n 6
-%A
 [%d] [Step Debug] -> <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_set" transaction_id="2" id="%s"></response>
 
 [%d] [Step Debug] <- run -i 3

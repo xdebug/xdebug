@@ -189,7 +189,8 @@ const char *mapping_type_as_string[] = {
 	"unknown",
 	"directory",
 	"file",
-	"line-range"
+	"line-range",
+	"skip"
 };
 
 enum map_element {
@@ -461,6 +462,15 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 		goto failure;
 	}
 
+	if (strcmp("SKIP", trimmed) == 0) {
+		*type = XDEBUG_PATH_MAP_FLAGS_SKIP;
+		*local_begin = -1;
+		*local_end = -1;
+		local_path = NULL;
+
+		goto cleanup;
+	}
+
 	if (has_no_separator(state, state->current_local_prefix, trimmed, LOCAL)) {
 		goto failure;
 	}
@@ -503,12 +513,14 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 		xdebug_str_addl(local_path, trimmed, trimmed_length, false);
 	}
 
+cleanup:
 	/* clean up */
 	xdfree(trimmed);
 
 	return local_path;
 
 failure:
+	*type = XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 	xdfree(trimmed);
 	return NULL;
 }
@@ -533,44 +545,71 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 
 	/* local part */
 	local_path = prepare_local_element(state, equals, &local_type, &local_begin, &local_end);
-	if (!local_path) {
+	if (local_type == XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
 		goto failure;
 	}
 
-	/* - the types of the remote and local types need to be the same */
-	if (remote_type != local_type) {
-		char *message = xdebug_sprintf("Remote mapping part ('%s') type (%s) must match local mapping part ('%s') type (%s)",
-			XDEBUG_STR_VAL(remote_path), mapping_type_as_string[remote_type],
-			XDEBUG_STR_VAL(local_path), mapping_type_as_string[local_type]);
-		state_set_error(state, PATH_MAPS_MISMATCHED_TYPES, message);
-		xdfree(message);
+	if (! (local_type & XDEBUG_PATH_MAP_FLAGS_SKIP)) {
+		/* - the types of the remote and local types need to be the same */
+		if (remote_type != local_type) {
+			char *message = xdebug_sprintf("Remote mapping part ('%s') type (%s) must match local mapping part ('%s') type (%s)",
+				XDEBUG_STR_VAL(remote_path), mapping_type_as_string[remote_type],
+				XDEBUG_STR_VAL(local_path), mapping_type_as_string[local_type]);
+			state_set_error(state, PATH_MAPS_MISMATCHED_TYPES, message);
+			xdfree(message);
 
-		goto failure;
-	}
+			goto failure;
+		}
 
-	/* - if local range is multiple lines, then remote range needs to be to, and the same difference */
-	if (
-		(remote_type == XDEBUG_PATH_MAP_TYPE_LINES && local_begin != local_end) &&
-		((remote_end - remote_begin) != (local_end - local_begin))
-	) {
-		char *message = xdebug_sprintf("The remote range span (%d-%d) needs to have the same difference (%d) as the local range span (%d-%d) difference (%d)",
-			remote_begin, remote_end,
-			remote_end - remote_begin,
-			local_begin, local_end,
-			local_end - local_begin);
-		state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
-		xdfree(message);
+		/* - if local range is multiple lines, then remote range needs to be to, and the same difference */
+		if (
+			(remote_type == XDEBUG_PATH_MAP_TYPE_LINES && local_begin != local_end) &&
+			((remote_end - remote_begin) != (local_end - local_begin))
+		) {
+			char *message = xdebug_sprintf("The remote range span (%d-%d) needs to have the same difference (%d) as the local range span (%d-%d) difference (%d)",
+				remote_begin, remote_end,
+				remote_end - remote_begin,
+				local_begin, local_end,
+				local_end - local_begin);
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+			xdfree(message);
 
-		goto failure;
+			goto failure;
+		}
 	}
 
 	/* assign */
 	if (xdebug_hash_find(state->file_rules, XDEBUG_STR_VAL(remote_path), XDEBUG_STR_LEN(remote_path), (void**) &existing_path_mapping)) {
 		xdebug_path_map_range *tail_range, *new_range;
 
-		/* Check to make sure the order of lines is incrementing */
-		tail_range = (xdebug_path_map_range*) XDEBUG_VECTOR_TAIL(existing_path_mapping->line_ranges);
-		if (remote_begin <= tail_range->remote_end) {
+		/* If there is an existing path mapping for this `remote_path`, but it is not TYPE_LINES, then we shouldn't see the same
+		 * DIRECTORY/FILE again, so this is an error */
+		if (existing_path_mapping->type != XDEBUG_PATH_MAP_TYPE_LINES) {
+			char *message = xdebug_sprintf("An entry for '%s' is already present, but it is not a line range entry. You can't mix them",
+				remote_path);
+			state_set_error(state, PATH_MAPS_MIXING_PATH_AND_LINES, message);
+			xdfree(message);
+
+			goto failure;
+		}
+
+		/* Check to make sure the local file paths are the same, and that the line numbers is incrementing */
+		tail_range = (xdebug_path_map_range*) XDEBUG_VECTOR_TAIL(existing_path_mapping->m.line_ranges);
+
+		if (
+			!(local_type & XDEBUG_PATH_MAP_FLAGS_SKIP) &&
+			!(tail_range->local_flags & XDEBUG_PATH_MAP_FLAGS_SKIP) &&
+			!xdebug_str_is_equal(tail_range->local_path, local_path)
+		) {
+			char *message = xdebug_sprintf("The local path (%s) must match earlier local paths (%s) for the same remote path (%s)",
+				XDEBUG_STR_VAL(local_path), XDEBUG_STR_VAL(tail_range->local_path), XDEBUG_STR_VAL(remote_path));
+			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
+			xdfree(message);
+
+			goto failure;
+		}
+
+		if (!(local_type & XDEBUG_PATH_MAP_FLAGS_SKIP) && remote_begin <= tail_range->remote_end) {
 			char *message = xdebug_sprintf("The remote range begin line (%d) must be higher than the previous range end line (%d)",
 				remote_begin, tail_range->remote_end);
 			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
@@ -578,7 +617,8 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 
 			goto failure;
 		}
-		if (local_begin <= tail_range->local_end) {
+
+		if (!(local_type & XDEBUG_PATH_MAP_FLAGS_SKIP) && local_begin <= tail_range->local_end) {
 			char *message = xdebug_sprintf("The local range begin line (%d) must be higher than the previous range end line (%d)",
 				local_begin, tail_range->local_end);
 			state_set_error(state, PATH_MAPS_WRONG_RANGE, message);
@@ -587,23 +627,32 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 			goto failure;
 		}
 
-		new_range = (xdebug_path_map_range*) xdebug_vector_push(existing_path_mapping->line_ranges);
-		xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_begin, local_end);
+		new_range = (xdebug_path_map_range*) xdebug_vector_push(existing_path_mapping->m.line_ranges);
+		xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_type & XDEBUG_PATH_MAP_FLAGS_MASK, local_path, local_begin, local_end);
 
 		xdebug_str_free(remote_path);
-		xdebug_str_free(local_path);
+		if (local_path) {
+			xdebug_str_free(local_path);
+		}
 	} else {
-		xdebug_path_mapping* tmp = xdebug_path_mapping_ctor();
+		xdebug_path_mapping* tmp = xdebug_path_mapping_ctor(remote_type | (local_type & XDEBUG_PATH_MAP_FLAGS_MASK));
 		xdebug_path_map_range *new_range;
 
 		tmp->type = remote_type;
 		tmp->remote_path = remote_path;
-		tmp->local_path  = local_path;
 
-		new_range = (xdebug_path_map_range*) xdebug_vector_push(tmp->line_ranges);
-		xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_begin, local_end);
+		if (remote_type == XDEBUG_PATH_MAP_TYPE_LINES) {
+			new_range = (xdebug_path_map_range*) xdebug_vector_push(tmp->m.line_ranges);
+			xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_type & XDEBUG_PATH_MAP_FLAGS_MASK, local_path, local_begin, local_end);
+		} else if (local_path) {
+			tmp->m.local_path = xdebug_str_copy(local_path);
+		}
 
 		xdebug_hash_add(state->file_rules, XDEBUG_STR_VAL(remote_path), XDEBUG_STR_LEN(remote_path), tmp);
+
+		if (local_path) {
+			xdebug_str_free(local_path);
+		}
 	}
 
 	return true;
@@ -723,19 +772,63 @@ static void copy_rule_reverse(void *ret, xdebug_hash_element *e, void *state_v)
 		return;
 	}
 
-	if (xdebug_hash_find((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->local_path), XDEBUG_STR_LEN(new_rule->local_path), (void**) &existing_path_mapping)) {
-		xdebug_str *message = xdebug_str_create_from_const_char("Duplicate rules in multiple files for '");
-		xdebug_str_addl(message, XDEBUG_STR_VAL(new_rule->local_path), XDEBUG_STR_LEN(new_rule->local_path), 0);
-		xdebug_str_add_literal(message, "'");
+	if (new_rule->type & XDEBUG_PATH_MAP_FLAGS_SKIP) {
+		return;
+	}
 
-		state_set_error(state, PATH_MAPS_DUPLICATE_RULES, message->d);
-		state->copy_error = true;
+	switch (new_rule->type & XDEBUG_PATH_MAP_TYPE_MASK) {
+		case XDEBUG_PATH_MAP_TYPE_FILE:
+		case XDEBUG_PATH_MAP_TYPE_DIRECTORY:
+			if (xdebug_hash_find((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->m.local_path), XDEBUG_STR_LEN(new_rule->m.local_path), (void**) &existing_path_mapping)) {
+				xdebug_str *message = xdebug_str_create_from_const_char("Duplicate rules in multiple files for '");
+				xdebug_str_addl(message, XDEBUG_STR_VAL(new_rule->m.local_path), XDEBUG_STR_LEN(new_rule->m.local_path), 0);
+				xdebug_str_add_literal(message, "'");
 
-		xdebug_str_free(message);
-	} else {
-		xdebug_path_mapping *tmp = xdebug_path_mapping_copy(new_rule);
+				state_set_error(state, PATH_MAPS_DUPLICATE_RULES, message->d);
+				state->copy_error = true;
 
-		xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->local_path), XDEBUG_STR_LEN(new_rule->local_path), tmp);
+				xdebug_str_free(message);
+			} else {
+				xdebug_path_mapping *tmp = xdebug_path_mapping_copy(new_rule);
+
+				xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(new_rule->m.local_path), XDEBUG_STR_LEN(new_rule->m.local_path), tmp);
+			}
+			break;
+
+		case XDEBUG_PATH_MAP_TYPE_LINES: {
+			size_t i;
+			xdebug_path_map_range *range_cursor;
+			xdebug_path_mapping *reverse_map;
+			xdebug_str *last_path;
+
+			if (!new_rule->m.line_ranges || XDEBUG_VECTOR_COUNT(new_rule->m.line_ranges) == 0) {
+				return;
+			}
+
+			/* Alloc new vector */
+			reverse_map = xdebug_path_mapping_ctor(XDEBUG_PATH_MAP_TYPE_LINES);
+
+			/* Loop over each range and build up vector */
+			range_cursor = (xdebug_path_map_range*) XDEBUG_VECTOR_HEAD(new_rule->m.line_ranges);
+
+			for (i = 0; i < XDEBUG_VECTOR_COUNT(new_rule->m.line_ranges); i++, range_cursor++) {
+				xdebug_path_map_range *reverse_range;
+
+				if (range_cursor->local_flags & XDEBUG_PATH_MAP_FLAGS_SKIP) {
+					continue;
+				}
+
+				reverse_range = (xdebug_path_map_range*) xdebug_vector_push(reverse_map->m.line_ranges);
+				xdebug_path_map_range_set(reverse_range, range_cursor->remote_begin, range_cursor->remote_end, range_cursor->local_flags & XDEBUG_PATH_MAP_FLAGS_MASK, xdebug_str_copy(new_rule->remote_path), range_cursor->local_begin, range_cursor->local_end);
+				last_path = range_cursor->local_path;
+			}
+
+			if (XDEBUG_VECTOR_COUNT(reverse_map->m.line_ranges) > 0) {
+				xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(last_path), XDEBUG_STR_LEN(last_path), reverse_map);
+			}
+
+			break;
+		}
 	}
 }
 

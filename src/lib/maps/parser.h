@@ -31,6 +31,7 @@
 #define PATH_MAPS_WRONG_RANGE      0x0010
 #define PATH_MAPS_DUPLICATE_RULES  0x0011
 #define PATH_MAPS_NOT_ABSOLUTE     0x0012
+#define PATH_MAPS_MIXING_PATH_AND_LINES 0x0013
 
 bool xdebug_path_maps_parse_file(xdebug_path_maps *maps, const char *cwd, const char *filename, int *error_code, int *error_line, char **error_message);
 

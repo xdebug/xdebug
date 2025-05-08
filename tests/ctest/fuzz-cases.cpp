@@ -52,14 +52,14 @@ TEST_GROUP(fuzz_cases)
 		LONGS_EQUAL(expected_error_line, error_line);
 		LONGS_EQUAL(expected_error_code == PATH_MAPS_OK ? true : false, result);
 	}
-
+#if 0
 	void check_map(size_t type, const char *local_path)
 	{
 		CHECK(mapping);
 		LONGS_EQUAL(type, mapping->type);
 		STRCMP_EQUAL(local_path, XDEBUG_STR_VAL(mapping->local_path));
 	}
-
+#endif
 	TEST_TEARDOWN()
 	{
 		if (error_message) {
