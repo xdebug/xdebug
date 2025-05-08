@@ -2,3 +2,5 @@ remote_prefix: /usr/local/www
 local_prefix: /home/derick/projects
 /servers/example.com/ = /example.com/
 /servers/example.net/ = /example.net/
+
+/servers/example.org/vendor = SKIP

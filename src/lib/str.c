@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,16 +21,15 @@
 #include <locale.h>
 #include <assert.h>
 
-#if !defined(_MSC_VER)
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
-#endif
-#include "zend_smart_str.h"
-#if !defined(_MSC_VER)
-#  pragma GCC diagnostic pop
-#endif
-
 #ifndef XDEBUG_NO_PHP_FEATURES
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+# endif
+# include "zend_smart_str.h"
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic pop
+# endif
 # include "lib/php-header.h"
 # include "ext/standard/php_string.h"
 #endif

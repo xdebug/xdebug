@@ -74,8 +74,12 @@ TEST_GROUP(path_maps_file)
 	{
 		CHECK_TEXT(mapping_type != XDEBUG_PATH_MAP_TYPE_UNKNOWN, location);
 		LONGS_EQUAL_TEXT(expected_type, mapping_type, location);
-		CHECK_TEXT(_expected_path, location);
-		STRCMP_EQUAL_TEXT(expected_path, XDEBUG_STR_VAL(_expected_path), location);
+		if (mapping_type & XDEBUG_PATH_MAP_FLAGS_SKIP) {
+			CHECK_TEXT(_expected_path == NULL, location);
+		} else {
+			CHECK_TEXT(_expected_path, location);
+			STRCMP_EQUAL_TEXT(expected_path, XDEBUG_STR_VAL(_expected_path), location);
+		}
 	}
 
 	void test_remote_to_local(const char *remote_path, size_t remote_line)
@@ -1692,4 +1696,114 @@ local_prefix: /home/derick
 
 	test_remote_to_local("/usr/local/www/project1/example2.php", 9);
 	check_map_with_range(XDEBUG_PATH_MAP_TYPE_DIRECTORY, "/home/derick/project/example2.php", 9, LOCATION);
+};
+
+TEST(path_maps_file, local_path_not_equal)
+{
+	const char *map = R""""(
+/project1/generated-file.php:5 = /actual-file.php:5
+/project1/generated-file.php:6 = /actual-file.php:6
+/project1/generated-file.php:7 = /another-file.php:7
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_WRONG_RANGE, 4, "The local path (/another-file.php) must match earlier local paths (/actual-file.php) for the same remote path (/project1/generated-file.php)", LOCATION);
+};
+
+TEST(path_maps_file, local_path_not_equal_with_SKIP_1)
+{
+	const char *map = R""""(
+/project1/generated-file.php:5 = SKIP
+/project1/generated-file.php:6 = /actual-file.php:5
+/project1/generated-file.php:7 = /actual-file.php:7
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 5);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 6);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/actual-file.php", 5, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 7);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/actual-file.php", 7, LOCATION);
+};
+
+TEST(path_maps_file, local_path_not_equal_with_SKIP_2)
+{
+	const char *map = R""""(
+/project1/generated-file.php:5 = /actual-file.php:15
+/project1/generated-file.php:6 = SKIP
+/project1/generated-file.php:7 = /actual-file.php:17
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 5);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/actual-file.php", 15, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 6);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 7);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/actual-file.php", 17, LOCATION);
+
+	test_local_to_remote("/actual-file.php", 17);
+	check_map_with_range(XDEBUG_PATH_MAP_TYPE_LINES, "/project1/generated-file.php", 7, LOCATION);
+};
+
+TEST(path_maps_file, local_path_not_equal_with_SKIP_all)
+{
+	const char *map = R""""(
+/project1/generated-file.php:5 = SKIP
+/project1/generated-file.php:6 = SKIP
+/project1/generated-file.php:7 = SKIP
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 5);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 6);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 7);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+};
+
+TEST(path_maps_file, skip_line)
+{
+	const char *map = R""""(
+/project1/generated-file.php:5 = SKIP
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 5);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 6);
+	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
+};
+
+TEST(path_maps_file, skip_lines)
+{
+	const char *map = R""""(
+/project1/generated-file.php:5-74 = SKIP
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 42);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+
+	test_remote_to_local("/project1/generated-file.php", 4);
+	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
 };
