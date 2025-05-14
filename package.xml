@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-03-09</date>
- <time>16:10:30</time>
+ <date>2025-05-14</date>
+ <time>09:37:56</time>
  <version>
-  <release>3.4.2</release>
-  <api>3.4.2</api>
+  <release>3.4.3</release>
+  <api>3.4.3</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,17 +52,18 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Sun, Mar 09, 2025 - Xdebug 3.4.2
+Wed, May 14, 2025 - Xdebug 3.4.3
 
 = Fixed bugs:
 
-  - Fixed issue #2313: var_dump does not output some Russian characters
-  - Fixed issue #2314: Class properties with hooks are always shown as null
-  - Fixed issue #2315: xdebug_dump_superglobals() leaks memory
-  - Fixed issue #2317: Code coverage leaks memory
-  - Fixed issue #2321: Segfault when null is assigned to a superglobal
-  - Fixed issue #2323: xdebug_notify() does not respect xdebug.var_display_max_* Settings
-  - Fixed issue #2327: Segmentation Fault 139 if exception thrown in callback since PHP 8.4
+  - Fixed issue #2322: Xdebug tries to open debugging connection in destructors during shutdown
+  - Fixed issue #2325: Referred chrome browser extension is no longer working
+  - Fixed issue #2326: Step debugger finishes if property debugging handler in PHP throws an exception
+  - Fixed issue #2331: Segmentation fault with &#039;invalid&#039; variable names
+  - Fixed issue #2339: Trying to throw an exception can cause a zend_mm_heap corrupted error under specific circumstances
+  - Fixed issue #2340: Xdebug case sensitivity issues on some files introduced since 3.3.0
+  - Fixed issue #2343: Fatal error on virtual property hook step debugging
+  - Fixed issue #2348: Xdebug does not resolve breakpoints in property hooks
 
  </notes>
 
@@ -217,6 +218,34 @@ Sun, Mar 09, 2025 - Xdebug 3.4.2
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-03-09</date>
+   <time>16:10:30</time>
+   <version>
+    <release>3.4.2</release>
+    <api>3.4.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Sun, Mar 09, 2025 - Xdebug 3.4.2
+
+= Fixed bugs:
+
+  - Fixed issue #2313: var_dump does not output some Russian characters
+  - Fixed issue #2314: Class properties with hooks are always shown as null
+  - Fixed issue #2315: xdebug_dump_superglobals() leaks memory
+  - Fixed issue #2317: Code coverage leaks memory
+  - Fixed issue #2321: Segfault when null is assigned to a superglobal
+  - Fixed issue #2323: xdebug_notify() does not respect xdebug.var_display_max_* Settings
+  - Fixed issue #2327: Segmentation Fault 139 if exception thrown in callback since PHP 8.4
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-01-06</date>
