@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,9 +23,8 @@
 
 #include "mm.h"
 
-#define XDEBUG_STR_INITIALIZER { 0, 0, NULL }
+#define XDEBUG_STR_INITIALIZER { 0, 0, NULL, 0, true }
 #define XDEBUG_STR_PREALLOC 1024
-#define xdebug_str_dtor(str)     xdfree(str.d)
 
 #define XDEBUG_STR_WRAP_CHAR(v) (&((xdebug_str){strlen(v), strlen(v)+1, ((char*)(v))}))
 
@@ -33,6 +32,8 @@ typedef struct xdebug_str {
 	size_t l;
 	size_t a;
 	char *d;
+	size_t rc; // refcount
+	bool   is_static; // not an allocated xdebug_str
 } xdebug_str;
 
 void xdebug_str_add(xdebug_str *xs, const char *str, int f);
@@ -52,7 +53,8 @@ xdebug_str *xdebug_str_new(void);
 xdebug_str *xdebug_str_create_from_char(char *c);
 #define xdebug_str_create_from_const_char(c) xdebug_str_create_from_char((char*) (c))
 xdebug_str *xdebug_str_create(const char *c, size_t len);
-xdebug_str *xdebug_str_copy(xdebug_str *orig);
+xdebug_str *xdebug_str_copy(xdebug_str *orig); // uses refcounting
+xdebug_str *xdebug_str_clone(xdebug_str *orig); // new allocation + copying data
 void xdebug_str_destroy(xdebug_str *s);
 void xdebug_str_free(xdebug_str *s);
 
