@@ -424,9 +424,9 @@ static void zval_from_stack_add_frame_variables(zval *frame, zend_execute_data *
 	xdebug_lib_set_active_data(edata);
 	xdebug_lib_set_active_symbol_table(symbols);
 
-	for (j = 0; j < (unsigned int) opa->last_var; j++) {
+	for (j = 0; j < ZEND_CALL_NUM_ARGS(edata); j++) {
 		xdebug_str *symbol_name;
-		zval       *symbol;
+		zval       *symbol = NULL;
 
 		symbol_name = xdebug_str_create_from_char(opa->vars[j]->val);
 		symbol = ZEND_CALL_VAR_NUM(xdebug_lib_get_active_data(), j);
