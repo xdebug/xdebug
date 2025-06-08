@@ -421,16 +421,10 @@ static void zval_from_stack_add_frame_variables(zval *frame, zend_execute_data *
 
 	add_assoc_zval_ex(frame, "variables", HASH_KEY_SIZEOF("variables"), &variables);
 
-	xdebug_lib_set_active_data(edata);
-	xdebug_lib_set_active_symbol_table(symbols);
-
 	for (j = 0; j < ZEND_CALL_NUM_ARGS(edata); j++) {
-		xdebug_str *symbol_name;
 		zval       *symbol = NULL;
 
-		symbol_name = xdebug_str_create_from_char(opa->vars[j]->val);
-		symbol = ZEND_CALL_VAR_NUM(xdebug_lib_get_active_data(), j);
-		xdebug_str_free(symbol_name);
+		symbol = ZEND_CALL_VAR_NUM(edata, j);
 
 		if (Z_TYPE_P(symbol) == IS_UNDEF) {
 			add_assoc_null_ex(&variables, opa->vars[j]->val, opa->vars[j]->len);
