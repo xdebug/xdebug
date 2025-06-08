@@ -94,13 +94,11 @@ array(4) {
       int(2)
     }
     'variables' =>
-    array(3) {
+    array(2) {
       'base' =>
       int(1)
       'errno' =>
       int(2)
-      'return' =>
-      NULL
     }
   }
   [2] =>
@@ -125,18 +123,9 @@ array(4) {
       bool(true)
     }
     'variables' =>
-    array(3) {
+    array(1) {
       'errno' =>
       bool(true)
-      'elephpant' =>
-      class Elephpant#2 (2) {
-        private string $title =>
-        string(5) "Bluey"
-        private float $PIE =>
-        double(3.141592653589793)
-      }
-      'randoVar' =>
-      int(42)
     }
   }
   [3] =>
@@ -166,7 +155,7 @@ array(4) {
       }
     }
     'variables' =>
-    array(2) {
+    array(1) {
       'what' =>
       class Elephpant#2 (2) {
         private string $title =>
@@ -174,8 +163,6 @@ array(4) {
         private float $PIE =>
         double(3.141592653589793)
       }
-      'tmp' =>
-      NULL
     }
   }
 }

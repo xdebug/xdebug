@@ -29,7 +29,7 @@ class Error_Class
 		$tmp = xdebug_get_function_stack( ['local_vars' => true ] );
 		var_dump($tmp);
 
-		echo $tmp[2]['variables']['elephpant'], "\n";
+		echo $tmp[2]['variables']['errno'], "\n";
 	}
 
 	public static function newError($errno = false)
@@ -123,16 +123,9 @@ array(4) {
       string(4) "TRUE"
     }
     'variables' =>
-    array(2) {
+    array(1) {
       'errno' =>
       bool(true)
-      'elephpant' =>
-      class Elephpant#2 (2) {
-        private string $title =>
-        string(5) "Bluey"
-        private float $PIE =>
-        double(3.141592653589793)
-      }
     }
   }
   [3] =>
@@ -155,10 +148,8 @@ array(4) {
     array(0) {
     }
     'variables' =>
-    array(1) {
-      'tmp' =>
-      NULL
+    array(0) {
     }
   }
 }
-Bluey loves 3.1415926535%s
+1
