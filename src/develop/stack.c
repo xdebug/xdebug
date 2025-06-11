@@ -463,7 +463,7 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 
 	zval_from_stack_add_frame_parameters(frame, fse, params_as_values);
 
-	if (add_local_vars && fse->op_array && fse->op_array->vars) {
+	if (add_local_vars && fse->op_array && fse->op_array->vars && !(fse->function.type & XFUNC_INCLUDES)) {
 		zval_from_stack_add_frame_variables(frame, edata, fse->symbol_table, fse->op_array);
 	}
 

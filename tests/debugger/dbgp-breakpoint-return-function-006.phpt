@@ -70,15 +70,15 @@ dbgpRunFile( $filename, $commands, [ 'xdebug.mode' => 'develop,debug' ] );
 
 -> step_into -i 9
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="9" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-006.inc" lineno="4"></xdebug:message><xdebug:return_value><property type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" type="array" children="1" numchildren="7"></property><property name="1" type="array" children="1" numchildren="6"></property></property></xdebug:return_value></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="9" status="break" reason="ok"><xdebug:message filename="file://dbgp-breakpoint-return-function-006.inc" lineno="4"></xdebug:message><xdebug:return_value><property type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" type="array" children="1" numchildren="6"></property><property name="1" type="array" children="1" numchildren="6"></property></property></xdebug:return_value></response>
 
 -> context_get -i 10
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="10" context="0"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="array" children="1" numchildren="2" page="0" pagesize="32" facet="readonly return_value virtual"><property name="0" fullname="$__RETURN_VALUE[0]" type="array" children="1" numchildren="7"></property><property name="1" fullname="$__RETURN_VALUE[1]" type="array" children="1" numchildren="6"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="context_get" transaction_id="10" context="0"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="array" children="1" numchildren="2" page="0" pagesize="32" facet="readonly return_value virtual"><property name="0" fullname="$__RETURN_VALUE[0]" type="array" children="1" numchildren="6"></property><property name="1" fullname="$__RETURN_VALUE[1]" type="array" children="1" numchildren="6"></property></property></response>
 
 -> property_get -i 11 -n $__RETURN_VALUE
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="11"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" fullname="$__RETURN_VALUE[0]" type="array" children="1" numchildren="7"></property><property name="1" fullname="$__RETURN_VALUE[1]" type="array" children="1" numchildren="6"></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="11"><property name="$__RETURN_VALUE" fullname="$__RETURN_VALUE" type="array" children="1" numchildren="2" page="0" pagesize="32"><property name="0" fullname="$__RETURN_VALUE[0]" type="array" children="1" numchildren="6"></property><property name="1" fullname="$__RETURN_VALUE[1]" type="array" children="1" numchildren="6"></property></property></response>
 
 -> property_get -i 12 -n $__RETURN_VALUE[1]
 <?xml version="1.0" encoding="iso-8859-1"?>
