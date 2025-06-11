@@ -426,17 +426,16 @@ static void zval_from_stack_add_frame_variables(zval *frame, zend_execute_data *
 
 	for (j = 0; j < (unsigned int) opa->last_var; j++) {
 		xdebug_str *symbol_name;
-		zval       *symbol;
+		zval        symbol;
 
 		symbol_name = xdebug_str_create_from_char(opa->vars[j]->val);
-		symbol = ZEND_CALL_VAR_NUM(xdebug_lib_get_active_data(), j);
+		xdebug_get_php_symbol(&symbol, symbol_name);
 		xdebug_str_free(symbol_name);
 
-		if (Z_TYPE_P(symbol) == IS_UNDEF) {
+		if (Z_TYPE(symbol) == IS_UNDEF) {
 			add_assoc_null_ex(&variables, opa->vars[j]->val, opa->vars[j]->len);
 		} else {
-			Z_TRY_ADDREF_P(symbol);
-			add_assoc_zval_ex(&variables, opa->vars[j]->val, opa->vars[j]->len, symbol);
+			add_assoc_zval_ex(&variables, opa->vars[j]->val, opa->vars[j]->len, &symbol);
 		}
 	}
 }
@@ -464,7 +463,7 @@ static void zval_from_stack_add_frame(zval *output, function_stack_entry *fse, z
 
 	zval_from_stack_add_frame_parameters(frame, fse, params_as_values);
 
-	if (add_local_vars && fse->op_array && fse->op_array->vars && (fse->function.type & XFUNC_INCLUDES) != XFUNC_INCLUDES) {
+	if (add_local_vars && fse->op_array && fse->op_array->vars && !(fse->function.type & XFUNC_INCLUDES)) {
 		zval_from_stack_add_frame_variables(frame, edata, fse->symbol_table, fse->op_array);
 	}
 
