@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-05-14</date>
- <time>09:37:56</time>
+ <date>2025-06-12</date>
+ <time>11:51:46</time>
  <version>
-  <release>3.4.3</release>
-  <api>3.4.3</api>
+  <release>3.4.4</release>
+  <api>3.4.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,18 +52,14 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Wed, May 14, 2025 - Xdebug 3.4.3
+Thu, Jun 12, 2025 - Xdebug 3.4.4
 
 = Fixed bugs:
 
-  - Fixed issue #2322: Xdebug tries to open debugging connection in destructors during shutdown
-  - Fixed issue #2325: Referred chrome browser extension is no longer working
-  - Fixed issue #2326: Step debugger finishes if property debugging handler in PHP throws an exception
-  - Fixed issue #2331: Segmentation fault with &#039;invalid&#039; variable names
-  - Fixed issue #2339: Trying to throw an exception can cause a zend_mm_heap corrupted error under specific circumstances
-  - Fixed issue #2340: Xdebug case sensitivity issues on some files introduced since 3.3.0
-  - Fixed issue #2343: Fatal error on virtual property hook step debugging
-  - Fixed issue #2348: Xdebug does not resolve breakpoints in property hooks
+  - Fixed issue #2349: Regression in Xdebug 3.4.3 breaks throwing exceptions in nested generators
+  - Fixed issue #2350: Crash when a certain page generates an exception since Xdebug 3.4.3
+  - Fixed issue #2352: Crash when using latest Xdebug version when throwing exceptions
+  - Fixed issue #2354: The __invoke frame in call stacks don&#039;t have the argument name in the trace
 
  </notes>
 
@@ -218,6 +214,35 @@ Wed, May 14, 2025 - Xdebug 3.4.3
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-05-14</date>
+   <time>09:37:56</time>
+   <version>
+    <release>3.4.3</release>
+    <api>3.4.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Wed, May 14, 2025 - Xdebug 3.4.3
+
+= Fixed bugs:
+
+  - Fixed issue #2322: Xdebug tries to open debugging connection in destructors during shutdown
+  - Fixed issue #2325: Referred chrome browser extension is no longer working
+  - Fixed issue #2326: Step debugger finishes if property debugging handler in PHP throws an exception
+  - Fixed issue #2331: Segmentation fault with &#039;invalid&#039; variable names
+  - Fixed issue #2339: Trying to throw an exception can cause a zend_mm_heap corrupted error under specific circumstances
+  - Fixed issue #2340: Xdebug case sensitivity issues on some files introduced since 3.3.0
+  - Fixed issue #2343: Fatal error on virtual property hook step debugging
+  - Fixed issue #2348: Xdebug does not resolve breakpoints in property hooks
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-03-09</date>
