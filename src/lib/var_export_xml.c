@@ -412,34 +412,14 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 
 #if PHP_VERSION_ID >= 80400
 		{
-			zval tmp_for_is_ptr;
-			zval *tmp_value_for_ptr = NULL;
+			zend_property_info *prop_info = Z_PTR_P((*item)->zv);
+			HashTable *props = zend_get_properties_no_lazy_init((*item)->zobj);
 
+			// IS_PTR is for properties with hooks
 			if (Z_TYPE_P((*item)->zv) == IS_PTR) {
-				// IS_PTR is for properties with hooks
-				zend_property_info *prop_info = Z_PTR_P((*item)->zv);
-				const char *unmangled_name_cstr;
-				zend_string *unmangled_name;
-
-				if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
-					return 0;
-				}
-
-				unmangled_name_cstr = zend_get_unmangled_property_name(prop_info->name);
-				unmangled_name = zend_string_init(unmangled_name_cstr, strlen(unmangled_name_cstr), false);
-
-				tmp_value_for_ptr = zend_read_property_ex(prop_info->ce, (*item)->zobj, unmangled_name, /* silent */ true, &tmp_for_is_ptr);
-
-				zend_string_release_ex(unmangled_name, false);
-				if (EG(exception)) {
-					return 0;
-				}
+				zval *tmp_value_for_ptr = zend_symtable_str_find(props, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name));
 
 				xdebug_var_export_xml_node(&tmp_value_for_ptr, tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
-
-				if (tmp_value_for_ptr == &tmp_for_is_ptr) {
-					zval_ptr_dtor(tmp_value_for_ptr);
-				}
 			} else {
 				xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
 			}
