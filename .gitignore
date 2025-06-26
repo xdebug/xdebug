@@ -82,3 +82,8 @@ phpt.*
 !php_xdebug.stub.php
 !run-xdebug-tests.php
 !make-release.php
+!rector.php
+!run-rector.sh
+!run-phpstan.sh
+!run-server.sh
+!compile-for-benchmark.sh
