@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,6 +42,9 @@ typedef struct _xdebug_coverage_globals_t {
 	zend_string          *previous_mark_filename;
 	xdebug_coverage_file *previous_mark_file;
 	xdebug_path_info     *paths_stack;
+#if PHP_VERSION_ID >= 80100
+	xdebug_hash          *fiber_path_info_stacks;
+#endif
 	xdebug_hash          *visited_branches;
 	struct {
 		unsigned int  size;

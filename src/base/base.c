@@ -1139,7 +1139,7 @@ static zend_string *create_key_for_fiber(zend_fiber_context *fiber)
 	return zend_strpprintf(0, "{fiber:%0" PRIXPTR "}", ((uintptr_t) fiber));
 }
 
-static void add_fiber_main(zend_fiber_context *fiber)
+static void add_fiber_main(zend_string *fiber_key, zend_fiber_context *fiber)
 {
 	function_stack_entry *tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
 
@@ -1148,7 +1148,7 @@ static void add_fiber_main(zend_fiber_context *fiber)
 	tmp->function.type = XFUNC_FIBER;
 	tmp->function.object_class = NULL;
 	tmp->function.scope_class = NULL;
-	tmp->function.function = create_key_for_fiber(fiber);
+	tmp->function.function = zend_string_copy(fiber_key);
 	tmp->filename = zend_string_copy(zend_get_executed_filename_ex());
 	tmp->lineno = zend_get_executed_lineno();
 
@@ -1159,36 +1159,26 @@ static void add_fiber_main(zend_fiber_context *fiber)
 	tmp->nanotime = xdebug_get_nanotime();
 }
 
-static xdebug_vector* create_stack_for_fiber(zend_fiber_context *fiber)
+static xdebug_vector* create_stack_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
 {
 	xdebug_vector             *tmp_stack = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
-	zend_string               *key       = create_key_for_fiber(fiber);
 	struct xdebug_fiber_entry *entry     = xdebug_fiber_entry_ctor(tmp_stack);
 
-	xdebug_hash_add(XG_BASE(fiber_stacks), ZSTR_VAL(key), ZSTR_LEN(key), entry);
-
-	zend_string_release(key);
+	xdebug_hash_add(XG_BASE(fiber_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key), entry);
 
 	return tmp_stack;
 }
 
-static void remove_stack_for_fiber(zend_fiber_context *fiber)
+static void remove_stack_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
 {
-	zend_string *key = create_key_for_fiber(fiber);
-
-	xdebug_hash_delete(XG_BASE(fiber_stacks), ZSTR_VAL(key), ZSTR_LEN(key));
-
-	zend_string_release(key);
+	xdebug_hash_delete(XG_BASE(fiber_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key));
 }
 
-static xdebug_vector *find_stack_for_fiber(zend_fiber_context *fiber)
+static xdebug_vector *find_stack_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
 {
 	struct xdebug_fiber_entry *entry = NULL;
-	zend_string               *key = create_key_for_fiber(fiber);
 
-	xdebug_hash_find(XG_BASE(fiber_stacks), ZSTR_VAL(key), ZSTR_LEN(key), (void*) &entry);
-
-	zend_string_release(key);
+	xdebug_hash_find(XG_BASE(fiber_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key), (void*) &entry);
 
 	return entry->stack;
 }
@@ -1196,24 +1186,31 @@ static xdebug_vector *find_stack_for_fiber(zend_fiber_context *fiber)
 static void xdebug_fiber_switch_observer(zend_fiber_context *from, zend_fiber_context *to)
 {
 	xdebug_vector *current_stack;
+	zend_string   *to_key = create_key_for_fiber(to);
 
 	if (from->status == ZEND_FIBER_STATUS_DEAD) {
-		if (XG_DBG(context).next_stack == find_stack_for_fiber(from)) {
+		zend_string *from_key = create_key_for_fiber(from);
+
+		if (XG_DBG(context).next_stack == find_stack_for_fiber(from_key, from)) {
 			XG_DBG(context).next_stack = NULL;
 		}
 
-		remove_stack_for_fiber(from);
+		remove_stack_for_fiber(from_key, from);
+
+		zend_string_release(from_key);
 	}
 	if (to->status == ZEND_FIBER_STATUS_INIT) {
-		current_stack = create_stack_for_fiber(to);
+		current_stack = create_stack_for_fiber(to_key, to);
 	} else {
-		current_stack = find_stack_for_fiber(to);
+		current_stack = find_stack_for_fiber(to_key, to);
 	}
 	XG_BASE(stack) = current_stack;
 
 	if (to->status == ZEND_FIBER_STATUS_INIT) {
-		add_fiber_main(to);
+		add_fiber_main(to_key, to);
 	}
+
+	zend_string_release(to_key);
 }
 /***************************************************************************/
 #endif
@@ -1369,8 +1366,14 @@ void xdebug_base_rinit()
 	}
 
 #if PHP_VERSION_ID >= 80100
-	XG_BASE(fiber_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
-	XG_BASE(stack) = create_stack_for_fiber(EG(main_fiber_context));
+	{
+		zend_string *fiber_key = create_key_for_fiber(EG(main_fiber_context));
+
+		XG_BASE(fiber_stacks) = xdebug_hash_alloc(64, (xdebug_hash_dtor_t) xdebug_fiber_entry_dtor);
+		XG_BASE(stack) = create_stack_for_fiber(fiber_key, EG(main_fiber_context));
+
+		zend_string_release(fiber_key);
+	}
 #else
 	XG_BASE(stack) = xdebug_vector_alloc(sizeof(function_stack_entry), function_stack_entry_dtor);
 #endif
