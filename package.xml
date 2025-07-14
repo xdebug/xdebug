@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-06-12</date>
- <time>11:51:46</time>
+ <date>2025-07-14</date>
+ <time>14:58:54</time>
  <version>
-  <release>3.4.4</release>
-  <api>3.4.4</api>
+  <release>3.4.5</release>
+  <api>3.4.5</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,14 +52,12 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Thu, Jun 12, 2025 - Xdebug 3.4.4
+Mon, Jul 14, 2025 - Xdebug 3.4.5
 
 = Fixed bugs:
 
-  - Fixed issue #2349: Regression in Xdebug 3.4.3 breaks throwing exceptions in nested generators
-  - Fixed issue #2350: Crash when a certain page generates an exception since Xdebug 3.4.3
-  - Fixed issue #2352: Crash when using latest Xdebug version when throwing exceptions
-  - Fixed issue #2354: The __invoke frame in call stacks don&#039;t have the argument name in the trace
+  - Fixed issue #2332: Segmentation fault for code coverage with nested fibers
+  - Fixed issue #2356: Reading properties with get hooks may modify property value
 
  </notes>
 
@@ -214,6 +212,31 @@ Thu, Jun 12, 2025 - Xdebug 3.4.4
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-06-12</date>
+   <time>11:51:46</time>
+   <version>
+    <release>3.4.4</release>
+    <api>3.4.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Thu, Jun 12, 2025 - Xdebug 3.4.4
+
+= Fixed bugs:
+
+  - Fixed issue #2349: Regression in Xdebug 3.4.3 breaks throwing exceptions in nested generators
+  - Fixed issue #2350: Crash when a certain page generates an exception since Xdebug 3.4.3
+  - Fixed issue #2352: Crash when using latest Xdebug version when throwing exceptions
+  - Fixed issue #2354: The __invoke frame in call stacks don&#039;t have the argument name in the trace
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-05-14</date>
