@@ -1,0 +1,7 @@
+parameters:
+    parallel:
+        maximumNumberOfProcesses: 1
+    level: max
+    paths:
+        - vendor/symfony/http-foundation
+        - vendor/symfony/http-kernel
