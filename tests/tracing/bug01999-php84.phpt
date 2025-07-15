@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1999: Show readonly properties (PHP >= 8.1)
+Test for bug #1999: Show readonly properties (PHP >= 8.1, < 8.5)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 8.1');
+check_reqs('PHP >= 8.1, < 8.5');
 ?>
 --INI--
 xdebug.mode=trace
@@ -34,10 +34,10 @@ xdebug_stop_trace();
 --EXPECTF--
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w               => $tf = '%s' %s
-%w%f %w%d     -> WithReadOnlyProps->__construct($static_string = 'two', $ro_string = 'New Value') %sbug01999.php:15
-%w               => $this->static_string = 'two' %sbug01999.php:9
-%w               => $this->ro_string = 'New Value' %sbug01999.php:9
-%w              => $obj = class WithReadOnlyProps { public string $static_string = 'two'; public readonly string $ro_string = 'New Value' } %sbug01999.php:15
-%w%f %w%d     -> xdebug_stop_trace() %sbug01999.php:18
+%w%f %w%d     -> WithReadOnlyProps->__construct($static_string = 'two', $ro_string = 'New Value') %sbug01999-php84.php:15
+%w               => $this->static_string = 'two' %sbug01999-php84.php:9
+%w               => $this->ro_string = 'New Value' %sbug01999-php84.php:9
+%w              => $obj = class WithReadOnlyProps { public string $static_string = 'two'; public readonly string $ro_string = 'New Value' } %sbug01999-php84.php:15
+%w%f %w%d     -> xdebug_stop_trace() %sbug01999-php84.php:18
 %w%f %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]
