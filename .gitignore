@@ -87,3 +87,4 @@ phpt.*
 !run-phpstan.sh
 !run-server.sh
 !compile-for-benchmark.sh
+!bench.php
