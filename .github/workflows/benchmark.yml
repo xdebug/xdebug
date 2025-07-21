@@ -48,7 +48,8 @@ jobs:
     
             -   name: benchmark with xdebug off
                 run:  |
-                      valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php-cgi  -T1 -d max_execution_time=0 -d opcache.enable=1 -d opcache.jit=disable -d opcache.jit_buffer_size=128M -d opcache.validate_timestamps=0 ./.github/benchmark-files/bench.php
+                      php -d max_execution_time=0 -d opcache.enable=1 -d opcache.jit=disable -d opcache.validate_timestamps=0 ./.github/benchmark-files/bench.php
+                      valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php -d max_execution_time=0 -d opcache.enable=1 -d opcache.jit=disable -d opcache.jit_buffer_size=128M -d opcache.validate_timestamps=0 ./.github/benchmark-files/bench.php
                       cat callgrind.out
 
             -   name: Set coverage mode
