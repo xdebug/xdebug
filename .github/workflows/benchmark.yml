@@ -41,8 +41,6 @@ jobs:
             -   name: Copy files
                 run: |
                     sudo cp ./.github/benchmark-files/xdebug-benchmark.ini /etc/php/${{ matrix.php }}/cli/conf.d
-                    cp ./.github/benchmark-files/rector.php xdebug_app
-                    cp ./.github/benchmark-files/run-rector.sh xdebug_app
                     php -v
     
             -   name: Set off mode
