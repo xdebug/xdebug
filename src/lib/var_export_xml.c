@@ -15,6 +15,7 @@
  */
 
 #include "var_export_xml.h"
+#include "xdebug_strndup.h"
 #include "Zend/zend_closures.h"
 
 static xdebug_str *prepare_variable_name(xdebug_str *name)

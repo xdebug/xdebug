@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2024 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,6 +18,7 @@
 #define __XDEBUG_VECTOR_H__
 
 #include <stddef.h>
+#include <string.h>
 #include "mm.h"
 
 typedef void (*xdebug_vector_dtor)(void *);
@@ -93,7 +94,7 @@ static inline xdebug_vector *xdebug_vector_alloc(size_t element_size, xdebug_vec
 {
 	xdebug_vector *tmp;
 
-	tmp = xdmalloc(sizeof(xdebug_vector));
+	tmp = (xdebug_vector*) xdmalloc(sizeof(xdebug_vector));
 	tmp->capacity = 0;
 	tmp->count = 0;
 	tmp->data = NULL;
@@ -110,6 +111,18 @@ static inline void xdebug_vector_destroy(xdebug_vector *v)
 	}
 	xdfree(v->data);
 	xdfree(v);
+}
+
+static inline xdebug_vector *xdebug_vector_clone(xdebug_vector *v)
+{
+	xdebug_vector *tmp = xdebug_vector_alloc(v->element_size, v->dtor);
+
+	tmp->count = v->count;
+
+	tmp->data = xdrealloc(tmp->data, v->capacity * v->element_size);
+	memcpy(tmp->data, v->data, v->capacity * v->element_size);
+
+	return tmp;
 }
 
 #endif /* __XDEBUG_VECTOR_H__ */

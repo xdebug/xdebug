@@ -24,6 +24,9 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "compat.h"
+#include "set.h"
+#include "maps/maps_private.h"
+#include "maps/maps.h"
 
 extern int xdebug_global_mode;
 
@@ -207,6 +210,9 @@ typedef struct _xdebug_library_globals_t {
 	char         *log_open_timestring;
 	xdebug_str   *diagnosis_buffer;
 
+	/* Information for native path mapping */
+	xdebug_path_maps *path_mapping_information;
+
 	/* Trait location map */
 	xdebug_hash  *trait_location_map;
 
@@ -224,6 +230,9 @@ typedef struct _xdebug_library_settings_t {
 
 	char         *file_link_format;
 	char         *filename_format;
+
+	/* Whether we should do native path mapping */
+	zend_bool         path_mapping;
 
 	/* Whether to use zlib compression for profiling and trace files, if ZLIB support
 	 * is enabled */
@@ -326,4 +335,6 @@ zend_string* xdebug_wrap_location_around_function_name(const char *prefix, zend_
 zend_string* xdebug_wrap_closure_location_around_function_name(zend_op_array *opa, zend_string *fname);
 
 void xdebug_lib_register_compiled_variables(function_stack_entry *fse);
+
+bool xdebug_lib_path_mapping_enabled();
 #endif
