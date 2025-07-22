@@ -311,6 +311,7 @@ function main(): void
         'zend.exception_string_param_max_len=15',
         'short_open_tag=0',
         'pcre.jit=0',
+        'variables_order=EGPCS',
     ];
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
