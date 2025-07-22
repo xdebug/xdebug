@@ -36,12 +36,12 @@ echo file_get_contents( $xdebugLogFileName );
 ?>
 --EXPECTF--
 %A
-[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger/.xdebug/*.map'
-[%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger/.xdebug/*.map'
-[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger/maps/.xdebug/*.map'
-[%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger/maps/.xdebug/*.map'
-[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger/maps/01/.xdebug/*.map'
-[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger/maps/01/.xdebug/simple.map'
+[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%e.xdebug%e*.map'
+[%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger%e.xdebug%e*.map'
+[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%e.xdebug%e*.map'
+[%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger%emaps%e.xdebug%e*.map'
+[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%e01%e.xdebug%e*.map'
+[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%e01%e.xdebug%esimple.map'
 [%d] [Path Mapping] DEBUG: Found 1 path mapping rules
 %A
 [%d] [Step Debug] <- breakpoint_set -i 3 -t line -f /var/www/projects/xdebug-test/fake-local-file.php -n 3
@@ -49,7 +49,7 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] INFO: Mapped location /var/www/projects/xdebug-test/fake-local-file.php:3 to %sdbgp-breakpoint-line.inc:3
 %A
 [%d] [Step Debug] <- breakpoint_list -i 4
-[%d] [Path Mapping] INFO: Mapping location %s/maps/01/dbgp-breakpoint-line.inc:3
-[%d] [Path Mapping] INFO: Mapped location %s/maps/01/dbgp-breakpoint-line.inc:3 to /var/www/projects/xdebug-test/fake-local-file.php:3
+[%d] [Path Mapping] INFO: Mapping location %sdbgp-breakpoint-line.inc:3
+[%d] [Path Mapping] INFO: Mapped location %sdbgp-breakpoint-line.inc:3 to /var/www/projects/xdebug-test/fake-local-file.php:3
 [%d] [Step Debug] -> <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="4"><breakpoint type="line" filename="file:///var/www/projects/xdebug-test/fake-local-file.php" lineno="3" state="enabled" hit_count="0" hit_value="0" id="%s0001"></breakpoint></response>
 %A
