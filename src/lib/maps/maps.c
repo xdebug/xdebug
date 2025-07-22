@@ -15,7 +15,23 @@
  */
 #include <stddef.h>
 #include <stdlib.h>
-#include <glob.h>
+
+#if PHP_VERSION_ID >= 80500
+# include "php_glob.h"
+# define xdebug_glob php_glob
+# define xdebug_glob_t php_glob_t
+# define xdebug_globfree php_globfree
+#else
+# ifndef PHP_WIN32
+#  include <glob.h>
+# else
+#  include "php.h"
+#  include "win32/glob.h"
+# endif
+# define xdebug_glob glob
+# define xdebug_glob_t glob_t
+# define xdebug_globfree globfree
+#endif
 
 #include "php_xdebug.h"
 
@@ -56,14 +72,14 @@ static bool scan_directory_exists(const char *dir)
 static void scan_directory(const char *dir)
 {
 	char *scan_dir = xdebug_sprintf("%s%c.xdebug%c*.map", dir, DEFAULT_SLASH, DEFAULT_SLASH);
-	glob_t globbuf;
+	xdebug_glob_t globbuf;
 	int glob_result = 0;
 	size_t i;
 
 	/* Read all files ending in .map */
 	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "SCAN", "Scanning for map files with pattern '%s'", scan_dir);
 
-	glob_result = glob(scan_dir, 0, NULL, &globbuf);
+	glob_result = xdebug_glob(scan_dir, 0, NULL, &globbuf);
 
 	switch (glob_result) {
 		case 0: /* No error */
@@ -98,7 +114,7 @@ static void scan_directory(const char *dir)
 		}
 	}
 
-	globfree(&globbuf);
+	xdebug_globfree(&globbuf);
 	xdfree(scan_dir);
 }
 
