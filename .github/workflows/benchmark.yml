@@ -1,0 +1,181 @@
+name: Benchmark Xdebug performance
+
+on:
+    schedule:
+        # Every Sunday at 03:00 UTC
+        - cron: '0 3 * * 0'
+    workflow_dispatch: 
+    pull_request:
+        types: [opened, edited, reopened, synchronize]
+
+jobs:
+    run-benchmark:
+        if: |
+            github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' ||
+            (
+                github.event_name == 'pull_request' &&
+                (
+                    startsWith(github.event.pull_request.title, 'perf:') ||
+                    startsWith(github.event.pull_request.title, 'Perf:') ||
+                    startsWith(github.event.pull_request.title, 'Performance:') ||
+                    startsWith(github.event.pull_request.title, 'performance:')
+                )
+            )
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                command: ["bench", "symfony", "rector"]
+                php: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+                xdebug_mode: ["no", "off", "develop", "coverage", "debug", "gcstats", "profile", "trace"]
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "${{ matrix.php }}"
+                    coverage: none
+                    tools: composer:v2.2.21
+
+            # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
+            # and other operations, so we disable it during benchmarking.
+            -   name: Disable ASLR
+                run: echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+
+            -   name: Install valgrind
+                run: sudo apt-get update && sudo apt-get install -y valgrind
+                    
+            -   name: Compile
+                run: |
+                    ./.build.scripts/compile.sh
+                    sudo make install
+
+            -   name: create results and opcache folder
+                run: |
+                    mkdir -p results
+                    mkdir -p /tmp/opcache
+
+            -   name: install Symfony demo
+                if: matrix.command == 'symfony'   
+                run: |
+                    if [ "${{ matrix.php }}" \< "8.4" ]; then
+                        version="v2.0.2"
+                    else
+                        version="v2.7.0"
+                    fi
+                    git clone -q --branch "$version" --depth 1 https://github.com/symfony/demo.git ./symfony-demo
+                    cd symfony-demo
+                    composer install 
+                    find . -type f -name "*.php" -exec sed -i.bak -E 's/error_reporting\(.*\);/error_reporting(0);/g' {} +
+
+            -   name: install Rector
+                if: matrix.command == 'rector'   
+                run: |
+                    composer require rector/rector:2.1.2 --dev
+                    cp .github/benchmark-files/rector.php .
+
+            -   name: Copy ini file
+                run: |
+                    sudo cp ./.github/benchmark-files/benchmark.ini /etc/php/${{ matrix.php }}/cli/conf.d
+                    sudo cp ./.github/benchmark-files/benchmark.ini /etc/php/${{ matrix.php }}/cgi/conf.d
+
+            -   name: Copy xdebug ini file
+                if: matrix.xdebug_mode != 'no'   
+                run: |
+                    sudo cp ./.github/benchmark-files/xdebug-benchmark.ini /etc/php/${{ matrix.php }}/cli/conf.d
+                    sudo cp ./.github/benchmark-files/xdebug-benchmark.ini /etc/php/${{ matrix.php }}/cgi/conf.d
+    
+            -   name: Set xdebug mode
+                run: echo "XDEBUG_MODE=${{ matrix.xdebug_mode }}" >> $GITHUB_ENV
+    
+            -   name: benchmark bench.php
+                if: matrix.command == 'bench'   
+                run: valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php ./.github/benchmark-files/bench.php
+
+            -   name: benchmark Symfony
+                if: matrix.command == 'symfony'   
+                run: |
+                    cd symfony-demo
+                    export SCRIPT_FILENAME="$(realpath public/index.php)"
+                    php-cgi public/index.php
+                    valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php-cgi public/index.php
+                    mv callgrind.out ..
+                    cd ..
+
+            -   name: benchmark rector.php
+                if: matrix.command == 'rector'   
+                run: valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php vendor/bin/rector --dry-run --xdebug --debug || true
+
+            -   name: save matrix values
+                run: |
+                    awk '/^summary:/ { print $2 }' callgrind.out > results/php-${{ matrix.php }}_cmd-${{ matrix.command }}_xdebug-${{ matrix.xdebug_mode }}.txt
+                    echo "${{ matrix.php }},${{ matrix.command }},${{ matrix.xdebug_mode }}" > results/matrix-values-${{ matrix.php }}-${{ matrix.command }}-${{ matrix.xdebug_mode }}.txt
+
+            -   name: Upload result and matrix info
+                uses: actions/upload-artifact@v4
+                with:
+                    name: results-${{ matrix.command }}-${{ matrix.php }}-${{ matrix.xdebug_mode }}
+                    path: results/
+
+    performance:
+        needs: run-benchmark
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Download all artifacts
+                uses: actions/download-artifact@v4
+                with:
+                    path: results
+
+            -   name: Merge matrix values
+                run: |
+                    mkdir merged
+                    find results -name '*.txt' -exec cp {} merged/ \;
+                    cat merged/matrix-values-*.txt | sort | uniq > unique-matrix-values.txt
+                    cat unique-matrix-values.txt
+
+            -   name: Generate summary table
+                run: |
+                    export LC_NUMERIC=en_US.UTF-8
+                    echo "# 🕒 Performance Results" > summary.md 
+
+                    commands=$(cut -d',' -f2 unique-matrix-values.txt | sort | uniq)
+                    php_versions=$(cut -d',' -f1 unique-matrix-values.txt | sort | uniq)
+                    xdebug_modes=$(cut -d',' -f3 unique-matrix-values.txt | sort | uniq)
+
+                    for command in $commands; do
+                        echo "" >> summary.md
+                        echo "## **Command:** \`$command\`" >> summary.md
+                        for php in $php_versions; do
+                            echo "" >> summary.md
+                            echo "### **PHP Version:** \`$php\`" >> summary.md
+                            echo "" >> summary.md
+                            echo "| Xdebug | Instructions | Slowdown |" >> summary.md
+                            echo "|--------|-------------:|---------:|" >> summary.md
+
+                            base_file="merged/php-${php}_cmd-${command}_xdebug-no.txt"
+                            base_value=$(cat "$base_file")
+                            for xdebug in $xdebug_modes; do
+                                file="merged/php-${php}_cmd-${command}_xdebug-${xdebug}.txt"
+                                if [[ -f "$file" ]]; then
+                                    value=$(cat "$file")
+                                    if [[ "$xdebug" == "no" ]]; then
+                                        slowdown="0%"
+                                    else
+                                        slowdown=$(awk -v v=$value -v b=$base_value 'BEGIN { printf "%.1f%%", ((v - b) * 100) / b }')
+                                    fi
+                                    formatted_value=$(printf "%'d" "$value")
+                                    echo "| $xdebug | $formatted_value | $slowdown |" >> summary.md
+                                fi
+                            done
+                        done
+                    done
+
+            -   name: print summary
+                run: cat summary.md >> $GITHUB_STEP_SUMMARY
+
+            -   name: delete intermediary artifacts
+                uses: geekyeggo/delete-artifact@v5
+                with:
+                    name: results-*                
+                    
