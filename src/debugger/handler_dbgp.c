@@ -1994,6 +1994,22 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 		return 0;
 	}
 
+	if (
+		EG(current_execute_data)->opline->opcode == ZEND_EXT_STMT &&
+		(
+			EG(current_execute_data)->opline->op1_type == IS_VAR || EG(current_execute_data)->opline->op1_type == IS_TMP_VAR
+		)
+	) {
+		xdebug_xml_node *tmp_node;
+		xdebug_str *name = xdebug_str_create_from_const_char("$"XDEBUG_INTERMEDIATE_VALUE_VAR_NAME);
+
+		tmp_node = xdebug_get_zval_value_xml_node(name, ZEND_CALL_VAR(EG(current_execute_data), EG(current_execute_data)->opline->op1.var), options);
+		xdebug_xml_expand_attribute_value(tmp_node, "facet", "readonly intermediate_value virtual");
+
+		xdebug_xml_add_child(node, tmp_node);
+		xdebug_str_free(name);
+	}
+
 	/* Add special exception value if enabled, if it exists in engine global and if depth = 0 */
 	if (XG_DBG(context).virtual_exception_value && EG(exception) && depth == 0) {
 		xdebug_xml_node *tmp_node;

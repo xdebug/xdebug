@@ -66,6 +66,7 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg);
 
 #define XDEBUG_RETURN_VALUE_VAR_NAME "__RETURN_VALUE"
 #define XDEBUG_EXCEPTION_VALUE_VAR_NAME "__EXCEPTION"
+#define XDEBUG_INTERMEDIATE_VALUE_VAR_NAME "__INTERMEDIATE_VALUE"
 
 void xdebug_debugger_reset_ide_key(char *envval);
 int xdebug_debugger_bailout_if_no_exec_requested(void);
