@@ -1,4 +1,11 @@
 <?php
+
+/**
+ * This file has been copied from the php-src project. It is just a php process that runs some fairly standard
+ * algorithms and which serves as an artificial benchmark. We removed a couple of functions which were taking
+ * long to run and which made these benchmarks too slow
+ */
+
 if (function_exists("date_default_timezone_set")) {
     date_default_timezone_set("UTC");
 }
