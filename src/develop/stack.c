@@ -18,9 +18,9 @@
 #include "main/php_ini.h"
 
 #include "ext/standard/html.h"
-#include "ext/standard/php_smart_string.h"
 #include "zend_exceptions.h"
 #include "zend_generators.h"
+#include "zend_smart_string.h"
 
 #include "monitor.h"
 #include "stack.h"
