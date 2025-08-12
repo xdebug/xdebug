@@ -411,18 +411,17 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 		xdebug_xml_add_child(parent, node);
 
 #if PHP_VERSION_ID >= 80400
-		{
+		if (
+			ZEND_USER_CODE((*item)->zobj->ce->type) &&
+			Z_TYPE_P((*item)->zv) == IS_PTR
+		) {
 			zend_property_info *prop_info = Z_PTR_P((*item)->zv);
 			HashTable *props = zend_get_properties_no_lazy_init((*item)->zobj);
+			zval *tmp_value_for_ptr = zend_symtable_str_find(props, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name));
 
-			// IS_PTR is for properties with hooks
-			if (Z_TYPE_P((*item)->zv) == IS_PTR) {
-				zval *tmp_value_for_ptr = zend_symtable_str_find(props, ZSTR_VAL(prop_info->name), ZSTR_LEN(prop_info->name));
-
-				xdebug_var_export_xml_node(&tmp_value_for_ptr, tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
-			} else {
-				xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
-			}
+			xdebug_var_export_xml_node(&tmp_value_for_ptr, tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
+		} else {
+			xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
 		}
 #else
 		xdebug_var_export_xml_node(&((*item)->zv), tmp_fullname ? tmp_fullname : NULL, node, options, level + 1);
