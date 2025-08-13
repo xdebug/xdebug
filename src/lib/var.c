@@ -20,7 +20,11 @@
 #include "zend.h"
 #include "zend_exceptions.h"
 #include "zend_extensions.h"
-#include "ext/standard/php_smart_string.h"
+#if PHP_VERSION_ID >= 80500
+	#include "Zend/zend_smart_string.h"
+#else			
+	#include "ext/standard/php_smart_string.h"
+#endif
 #include "zend_smart_str.h"
 #include "zend_closures.h"
 
