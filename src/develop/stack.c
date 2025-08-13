@@ -1172,7 +1172,7 @@ void xdebug_develop_error_cb(int orig_type, const char *error_filename, const un
 				    !SG(headers_sent) &&
 					SG(sapi_headers).http_response_code == 200
 				) {
-					sapi_header_line ctr = { 0, 0, 0 };
+					sapi_header_line ctr = { 0 };
 
 					ctr.line = (char*) "HTTP/1.0 500 Internal Server Error";
 					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
