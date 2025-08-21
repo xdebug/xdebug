@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #213: Dead code analysis doesn't take catches for throws into account (opcache)
+Test for bug #213: Dead code analysis doesn't take catches for throws into account (>= PHP 8.5)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('opcache');
+check_reqs('PHP >= 8.5');
 ?>
 --INI--
 xdebug.mode=coverage
@@ -23,9 +23,11 @@ xdebug.trace_format=0
 ?>
 --EXPECT--
 48
-array(4) {
+array(5) {
   [5]=>
   int(1)
+  [6]=>
+  int(-2)
   [8]=>
   int(1)
   [12]=>

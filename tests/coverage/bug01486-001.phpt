@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING (!opcache)
+Test for bug #1486: Crash on ZEND_SWITCH_LONG / ZEND_SWITCH_STRING
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
 ?>
 --INI--
 xdebug.mode=coverage

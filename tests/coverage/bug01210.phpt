@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #1210: Coverage of sending arguments to a method (!opcache)
+Test for bug #1210: Coverage of sending arguments to a method
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
 ?>
 --INI--
 xdebug.mode=coverage

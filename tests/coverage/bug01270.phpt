@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #1270: String parsing marked not covered (opcache)
+Test for bug #1270: String parsing marked not covered
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('opcache');
 ?>
 --INI--
 xdebug.mode=coverage
@@ -20,31 +19,45 @@ try { func3(); } catch (Exception $e) { }
 $cc = xdebug_get_code_coverage();
 
 ksort( $cc );
-var_dump( array_slice( $cc, 1, 1 ) );
+var_dump( array_slice( $cc, 0, 1 ) );
 ?>
 --EXPECTF--
 array(1) {
   ["%sbug01270.inc"]=>
-  array(10) {
+  array(17) {
     [4]=>
     int(1)
     [5]=>
     int(1)
+    [6]=>
+    int(1)
     [7]=>
     int(1)
+    [9]=>
+    int(-2)
     [13]=>
     int(1)
     [14]=>
     int(1)
+    [15]=>
+    int(1)
     [16]=>
     int(1)
+    [18]=>
+    int(-2)
     [22]=>
     int(1)
     [23]=>
     int(1)
+    [25]=>
+    int(1)
     [27]=>
     int(1)
+    [31]=>
+    int(-2)
     [33]=>
     int(1)
+    [35]=>
+    int(-2)
   }
 }
