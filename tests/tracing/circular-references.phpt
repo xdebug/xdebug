@@ -3,7 +3,6 @@ Test for circular references
 --INI--
 xdebug.mode=trace
 xdebug.start_with_request=no
-report_memleaks=0
 xdebug.collect_return=0
 xdebug.collect_assignments=0
 xdebug.trace_format=0
