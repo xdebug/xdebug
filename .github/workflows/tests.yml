@@ -31,6 +31,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         name: "Windows"
         strategy:
+            fail-fast: false
             matrix: ${{fromJson(needs.get-extension-matrix.outputs.matrix)}}
         steps:
             - name: Checkout
@@ -54,6 +55,9 @@ jobs:
                 php: [8.0, 8.1, 8.2, 8.3, 8.4, 8.5]
                 use-opcache: [true, false]
                 experimental: [false]
+                exclude:
+                    - php: 8.5
+                      use-opcache: true
         steps:
             -   uses: actions/checkout@v4
 
