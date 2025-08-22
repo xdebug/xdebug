@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #213: Dead code analysis doesn't take catches for throws into account (!opcache)
+Test for bug #213: Dead code analysis doesn't take catches for throws into account
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
 ?>
 --INI--
 xdebug.mode=coverage

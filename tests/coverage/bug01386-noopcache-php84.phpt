@@ -1,9 +1,9 @@
 --TEST--
-Test for bug #1386: Executable code not shown as executed/executable (opcache)
+Test for bug #1386: Executable code not shown as executed/executable (< PHP 8.5, !opcache)
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('opcache');
+check_reqs('PHP < 8.5; !opcache');
 ?>
 --INI--
 xdebug.mode=coverage
@@ -32,25 +32,27 @@ xdebug_stop_code_coverage(false);
 array(2) {
   ["%sbug01386-class1.inc"]=>
   array(5) {
-    [3]=>
-    int(1)
     [7]=>
     int(-1)
     [8]=>
     int(-1)
     [9]=>
     int(-1)
+    [10]=>
+    int(-2)
     [13]=>
     int(1)
   }
   ["%sbug01386-class2.inc"]=>
-  array(4) {
+  array(5) {
     [7]=>
     int(-1)
     [8]=>
     int(-1)
     [9]=>
     int(-1)
+    [10]=>
+    int(-2)
     [13]=>
     int(1)
   }

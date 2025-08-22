@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function (!opcache)
+Test for bug #757: XDEBUG_CC_UNUSED does not work with code outside a function
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('!opcache');
 ?>
 --INI--
 xdebug.mode=coverage

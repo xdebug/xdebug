@@ -22,5 +22,5 @@ class SoapAgent extends \SoapClient
 
 $client = new SoapAgent('test');
 ?>
---EXPECT--
-SOAP-ERROR: Parsing WSDL: Couldn't load from 'test' : failed to load external entity "test"
+--EXPECTF--
+SOAP-ERROR: Parsing WSDL: Couldn't load from 'test' : failed to load%s

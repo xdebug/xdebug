@@ -6,7 +6,7 @@ $tmp_dir = "/tmp/ptester-{$userid}";
 /* Create RUN ID */
 $runId =     trim( file_get_contents( "{$tmp_dir}/run-id.txt" ) );
 $timeStamp = time();
-$abbrev =    trim( `git describe --tags` );
+$abbrev =    trim( shell_exec( 'git describe --tags' ) );
 
 if ( $argc >= 2 )
 {
@@ -33,7 +33,7 @@ foreach ( glob( "{$tmp_dir}/junit/{$pattern}" ) as $file )
 		'run' => $runId,
 		'ts' => $timeStamp,
 		'ts_exp' => new \MongoDB\BSON\Timestamp(0, time()),
-		'ref' => trim( `git rev-parse --short --verify HEAD` ),
+		'ref' => trim( shell_exec( 'git rev-parse --short --verify HEAD' ) ),
 		'abbrev' => $abbrev,
 		'cfg' => [
 			'config' => $config,
@@ -59,7 +59,7 @@ foreach ( glob( "{$tmp_dir}/junit/{$pattern}" ) as $file )
 			'failures' => (int) $xml['failures'],
 			'errors' => (int) $xml['errors'],
 			'skip' => (int) $xml['skip'],
-			'time' => (double) $xml['time'],
+			'time' => (float) $xml['time'],
 		];
 	}
 

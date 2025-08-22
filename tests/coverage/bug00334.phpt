@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #334: Code Coverage Regressions (opcache)
+Test for bug #334: Code Coverage Regressions
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('opcache');
 ?>
 --INI--
 xdebug.mode=coverage
@@ -22,18 +21,20 @@ xdebug_stop_code_coverage();
 ?>
 --EXPECTF--
 array(2) {
-  ["%sbug00334-opcache.php"]=>
+  ["%sbug00334.inc"]=>
+  array(3) {
+    [5]=>
+    int(1)
+    [7]=>
+    int(-1)
+    [9]=>
+    int(1)
+  }
+  ["%sbug00334.php"]=>
   array(2) {
     [5]=>
     int(1)
     [6]=>
-    int(1)
-  }
-  ["%sbug00334.inc"]=>
-  array(2) {
-    [5]=>
-    int(1)
-    [9]=>
     int(1)
   }
 }

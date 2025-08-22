@@ -371,7 +371,11 @@ void xdebug_setcookie(const char *name, int name_len, char *value, int value_len
 	zend_string *domain_s = domain ? zend_string_init(domain, domain_len, 0) : NULL;
 	zend_string *samesite_s = zend_string_init("Lax", sizeof("Lax") - 1, 0);
 
+#if PHP_VERSION_ID >= 80500
+	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, httponly, samesite_s, false, url_encode);
+#else
 	php_setcookie(name_s, value_s, expires, path_s, domain_s, secure, httponly, samesite_s, url_encode);
+#endif
 
 	zend_string_release(samesite_s);
 	name ? zend_string_release(name_s) : 0;
