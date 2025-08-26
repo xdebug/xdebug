@@ -1,4 +1,8 @@
 <?php
+if (!class_exists(\MongoDB\Driver\Manager::class)) {
+	echo "MongoDB extension not loaded, not ingesting.\n";
+	exit(-3);
+}
 $m = new \MongoDB\Driver\Manager( "mongodb+srv://ci-writer:{$_ENV['CIWRITEPASSWORD']}@xdebugci-qftmo.mongodb.net/test?retryWrites=true" );
 $userid = posix_geteuid();
 $tmp_dir = "/tmp/ptester-{$userid}";
