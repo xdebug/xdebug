@@ -373,7 +373,7 @@ static void zval_from_stack_add_frame_parameters(zval *frame, function_stack_ent
 			if (fse->var[j].name && !variadic_opened) {
 				if (Z_TYPE(fse->var[j].data) == IS_UNDEF) {
 					add_assoc_null_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name));
-				} else {
+				} else if (Z_TYPE(fse->var[j].data) != IS_RESOURCE) {
 					Z_TRY_ADDREF(fse->var[j].data);
 					add_assoc_zval_ex(params, ZSTR_VAL(fse->var[j].name), ZSTR_LEN(fse->var[j].name), &fse->var[j].data);
 				}
@@ -383,11 +383,10 @@ static void zval_from_stack_add_frame_parameters(zval *frame, function_stack_ent
 			/* Unnamed or Variadic parameters */
 			if (Z_TYPE(fse->var[j].data) == IS_UNDEF) {
 				add_index_null(params, j - variadic_opened);
-			} else {
+			} else if (Z_TYPE(fse->var[j].data) != IS_RESOURCE) {
 				Z_TRY_ADDREF(fse->var[j].data);
 				add_index_zval(params, j - variadic_opened, &fse->var[j].data);
 			}
-
 			continue;
 		} else {
 			xdebug_str *argument = NULL;
