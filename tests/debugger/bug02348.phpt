@@ -54,6 +54,7 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Step Debug] -> <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="feature_set" transaction_id="1" feature="resolved_breakpoints" success="1"></response>
 
 [%d] [Step Debug] <- breakpoint_set -i 2 -t line -f %sbug02348.inc -n 7
+[%d] [Path Mapping] INFO: Not mapping location
 [%d] [Step Debug] DEBUG: R: Line number (7) out of range (3-3).
 [%d] [Step Debug] DEBUG: R: Line number (7) out of range (9-9).
 [%d] [Step Debug] DEBUG: R: Line number (7) in smallest range of range (6-8).

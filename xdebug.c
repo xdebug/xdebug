@@ -315,6 +315,7 @@ PHP_INI_BEGIN()
 #if HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT
 	PHP_INI_ENTRY_EX("xdebug.control_socket",      "default",               PHP_INI_ALL,                   OnUpdateCtrlSocket, display_control_socket)
 #endif
+	STD_PHP_INI_ENTRY("xdebug.path_mapping",       "0",                     PHP_INI_ALL,                   OnUpdateBool,   settings.library.path_mapping,     zend_xdebug_globals, xdebug_globals)
 
 	STD_PHP_INI_ENTRY("xdebug.log",       "",           PHP_INI_ALL, OnUpdateString, settings.library.log,       zend_xdebug_globals, xdebug_globals)
 	STD_PHP_INI_ENTRY("xdebug.log_level", XLOG_DEFAULT, PHP_INI_ALL, OnUpdateLong,   settings.library.log_level, zend_xdebug_globals, xdebug_globals)

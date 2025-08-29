@@ -20,6 +20,8 @@
 
 #include "lib_private.h"
 #include "log.h"
+#include "maps/maps.h"
+#include "trim.h"
 
 extern ZEND_DECLARE_MODULE_GLOBALS(xdebug);
 
@@ -95,6 +97,12 @@ void xdebug_library_rinit(void)
 	XG_LIB(do_collect_errors) = 0;
 
 	XG_LIB(trait_location_map) = xdebug_hash_alloc(256, (xdebug_hash_dtor_t) zend_string_release);
+
+	XG_LIB(path_mapping_information) = NULL;
+	if (XINI_LIB(path_mapping)) {
+		XG_LIB(path_mapping_information) = xdebug_path_maps_ctor();
+		xdebug_path_maps_scan(SG(request_info).path_translated);
+	}
 }
 
 void xdebug_library_post_deactivate(void)
@@ -108,6 +116,10 @@ void xdebug_library_post_deactivate(void)
 	xdebug_close_log();
 	xdebug_str_free(XG_LIB(diagnosis_buffer));
 	XG_LIB(diagnosis_buffer) = NULL;
+
+	if (XG_LIB(path_mapping_information)) {
+		xdebug_path_maps_dtor(XG_LIB(path_mapping_information));
+	}
 }
 
 
@@ -879,4 +891,9 @@ void xdebug_lib_register_compiled_variables(function_stack_entry *fse)
 		xdebug_llist_insert_next(fse->declared_vars, XDEBUG_LLIST_TAIL(fse->declared_vars), xdebug_str_create(STR_NAME_VAL(fse->op_array->vars[i]), STR_NAME_LEN(fse->op_array->vars[i])));
 		i++;
 	}
+}
+
+bool xdebug_lib_path_mapping_enabled()
+{
+	return !!XINI_LIB(path_mapping);
 }
