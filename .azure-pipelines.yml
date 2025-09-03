@@ -12,6 +12,7 @@ jobs:
       phpVersion: 'branch'
       phpBranch: 'master'
       configurationParameters: '--enable-debug --disable-zts'
+      loadOpCache: 'no'
   - template: .azure/macos/job.yml
     parameters:
       configurationName: 'OSX_PHP_84'
