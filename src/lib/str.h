@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,7 @@ extern "C" {
 #endif
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -70,6 +71,8 @@ xdebug_str *xdebug_str_copy(xdebug_str *orig); // uses refcounting
 xdebug_str *xdebug_str_clone(xdebug_str *orig); // new allocation + copying data
 void xdebug_str_destroy(xdebug_str *s);
 void xdebug_str_free(xdebug_str *s);
+
+bool xdebug_str_is_equal(xdebug_str *s1, xdebug_str *s2);
 
 char* xdebug_sprintf(const char* fmt, ...);
 

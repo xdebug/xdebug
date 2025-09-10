@@ -274,3 +274,16 @@ void xdebug_str_free(xdebug_str *s)
 	xdebug_str_free_storage(s);
 	xdfree(s);
 }
+
+bool xdebug_str_is_equal(xdebug_str *s1, xdebug_str *s2)
+{
+	if (s1->l != s2->l) {
+		return false;
+	}
+
+	if (memcmp(s1->d, s2->d, s1->l) != 0) {
+		return false;
+	}
+
+	return true;
+}
