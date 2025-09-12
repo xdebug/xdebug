@@ -1807,3 +1807,16 @@ TEST(path_maps_file, skip_lines)
 	test_remote_to_local("/project1/generated-file.php", 4);
 	CHECK_EQUAL(XDEBUG_PATH_MAP_TYPE_UNKNOWN, mapping_type);
 };
+
+TEST(path_maps_file, vendor_skip)
+{
+	const char *map = R""""(
+./src/vendor/ = SKIP
+)"""";
+
+	result = test_map_from_file(map);
+	check_result(PATH_MAPS_OK, -1, NULL, LOCATION);
+
+	test_remote_to_local("RELATIVE/src/vendor/autoload.php", 42);
+	check_map_with_range(XDEBUG_PATH_MAP_FLAGS_SKIP, NULL, -1, LOCATION);
+};

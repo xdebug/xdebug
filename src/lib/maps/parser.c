@@ -635,17 +635,19 @@ static bool state_add_rule(path_maps_parser_state *state, const char *buffer, co
 			xdebug_str_free(local_path);
 		}
 	} else {
-		xdebug_path_mapping* tmp = xdebug_path_mapping_ctor(remote_type | (local_type & XDEBUG_PATH_MAP_FLAGS_MASK));
+		xdebug_path_mapping* tmp = xdebug_path_mapping_ctor(remote_type);
 		xdebug_path_map_range *new_range;
 
-		tmp->type = remote_type;
 		tmp->remote_path = remote_path;
 
 		if (remote_type == XDEBUG_PATH_MAP_TYPE_LINES) {
 			new_range = (xdebug_path_map_range*) xdebug_vector_push(tmp->m.line_ranges);
 			xdebug_path_map_range_set(new_range, remote_begin, remote_end, local_type & XDEBUG_PATH_MAP_FLAGS_MASK, local_path, local_begin, local_end);
-		} else if (local_path) {
-			tmp->m.local_path = xdebug_str_copy(local_path);
+		} else {
+			tmp->type = tmp->type | (local_type & XDEBUG_PATH_MAP_FLAGS_MASK);
+			if (local_path) {
+				tmp->m.local_path = xdebug_str_copy(local_path);
+			}
 		}
 
 		xdebug_hash_add(state->file_rules, XDEBUG_STR_VAL(remote_path), XDEBUG_STR_LEN(remote_path), tmp);
@@ -819,12 +821,14 @@ static void copy_rule_reverse(void *ret, xdebug_hash_element *e, void *state_v)
 				}
 
 				reverse_range = (xdebug_path_map_range*) xdebug_vector_push(reverse_map->m.line_ranges);
-				xdebug_path_map_range_set(reverse_range, range_cursor->remote_begin, range_cursor->remote_end, range_cursor->local_flags & XDEBUG_PATH_MAP_FLAGS_MASK, xdebug_str_copy(new_rule->remote_path), range_cursor->local_begin, range_cursor->local_end);
+				xdebug_path_map_range_set(reverse_range, range_cursor->remote_begin, range_cursor->remote_end, range_cursor->local_flags & XDEBUG_PATH_MAP_FLAGS_MASK, new_rule->remote_path, range_cursor->local_begin, range_cursor->local_end);
 				last_path = range_cursor->local_path;
 			}
 
 			if (XDEBUG_VECTOR_COUNT(reverse_map->m.line_ranges) > 0) {
 				xdebug_hash_add((xdebug_hash*) ret, XDEBUG_STR_VAL(last_path), XDEBUG_STR_LEN(last_path), reverse_map);
+			} else {
+				xdebug_path_mapping_dtor(reverse_map);
 			}
 
 			break;

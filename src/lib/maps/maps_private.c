@@ -328,6 +328,8 @@ xdebug_path_mapping *xdebug_path_mapping_ctor(int type)
 	tmp->type = type;
 	tmp->ref_count = 1;
 
+	assert(!(type & XDEBUG_PATH_MAP_FLAGS_MASK));
+
 	if ((type & XDEBUG_PATH_MAP_TYPE_MASK) == XDEBUG_PATH_MAP_TYPE_LINES) {
 		tmp->m.line_ranges = xdebug_vector_alloc(sizeof(xdebug_path_map_range), (xdebug_vector_dtor) xdebug_path_map_range_dtor);
 	} else {
