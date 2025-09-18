@@ -9,6 +9,7 @@ check_reqs('!win');
 xdebug.mode=develop
 xdebug.log={TMPFILE:issue1919-002.txt}
 xdebug.control_socket=off
+xdebug.path_mapping=off
 --FILE--
 <?php
 require_once __DIR__ . '/../utils.inc';

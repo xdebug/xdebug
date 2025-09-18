@@ -14,6 +14,7 @@ xdebug.log={TMPFILE:remote-log4.txt}
 xdebug.client_host=unix:///tmp/xdbg.sock
 xdebug.client_port=0
 xdebug.control_socket=off
+xdebug.path_mapping=off
 --FILE--
 <?php
 require_once __DIR__ . '/../utils.inc';
