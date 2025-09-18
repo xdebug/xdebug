@@ -733,9 +733,10 @@ static void mark_fse_as_having_line_breakpoints(function_stack_entry *fse)
 /* Returns false if something is wrong with the breakpoint */
 static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
 {
-	xdebug_str *mapped_path;
-	size_t      mapped_lineno;
-	bool        must_free_mapped_path = false;
+	xdebug_str  *mapped_path;
+	size_t       mapped_lineno;
+	bool         must_free_mapped_path = false;
+	zend_string *executed_filename;
 
 	/* If 'has_line_breakpoints' hasn't been marked, either use the resolve
 	 * list if it exists, or otherwise mark it as 'true' */
@@ -748,7 +749,9 @@ static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, z
 	}
 
 	/* Map paths */
-	if (xdebug_debugger_map_remote_to_local(fse->filename, fse->lineno, &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
+	executed_filename = zend_get_executed_filename_ex();
+
+	if (executed_filename && xdebug_debugger_map_remote_to_local(executed_filename, zend_get_executed_lineno(), &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
 		return true;
 	}
 
