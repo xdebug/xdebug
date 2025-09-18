@@ -748,10 +748,18 @@ static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, z
 		return false;
 	}
 
-	/* Map paths */
+	/* Check whether we need to skip this break */
 	executed_filename = zend_get_executed_filename_ex();
 
 	if (executed_filename && xdebug_debugger_map_remote_to_local(executed_filename, zend_get_executed_lineno(), &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
+		return true;
+	}
+	if (must_free_mapped_path) {
+		xdebug_str_free(mapped_path);
+	}
+
+	/* Map paths for breakpoint location */
+	if (xdebug_debugger_map_remote_to_local(fse->filename, fse->lineno, &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
 		return true;
 	}
 
