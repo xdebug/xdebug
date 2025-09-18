@@ -380,7 +380,6 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
 	XG_DBG(suppress_return_value_step) = 0;
-	XG_DBG(context).breakpoint_skipped = 0;
 
 	if (XG_DBG(context).do_break) {
 		xdebug_brk_info *brk_info = XG_DBG(context).pending_breakpoint;
@@ -397,9 +396,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 
 	/* Check for "finish" (step_out) */
 	if (XG_DBG(context).do_finish && finish_condition_met(fse, 0)) {
-		if (!XG_DBG(context).breakpoint_skipped) {
-			XG_DBG(context).do_finish = 0;
-		}
+		XG_DBG(context).do_finish = 0;
 
 		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 			xdebug_mark_debug_connection_not_active();
@@ -411,9 +408,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 
 	/* Check for "next" (step_over) */
 	if (XG_DBG(context).do_next && next_condition_met(fse)) {
-		if (!XG_DBG(context).breakpoint_skipped) {
-			XG_DBG(context).do_next = 0;
-		}
+		XG_DBG(context).do_next = 0;
 
 		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 			xdebug_mark_debug_connection_not_active();
@@ -425,9 +420,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 
 	/* Check for "step" (step_into) */
 	if (XG_DBG(context).do_step) {
-		if (!XG_DBG(context).breakpoint_skipped) {
-			XG_DBG(context).do_step = 0;
-		}
+		XG_DBG(context).do_step = 0;
 
 		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 			xdebug_mark_debug_connection_not_active();
@@ -763,8 +756,7 @@ static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, z
 		(XG_DBG(context).breakpoint_include_return_value) &&
 		(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN) &&
 		!(XG_DBG(suppress_return_value_step)) &&
-		return_value &&
-		!(XG_DBG(context).breakpoint_skipped)
+		return_value
 	) {
 		if (XG_DBG(context).do_step) {
 			XG_DBG(context).do_step = 0;
