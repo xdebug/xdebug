@@ -87,7 +87,6 @@ struct _xdebug_con {
 	int                    do_connect_to_client;
 	int                    finish_level;
 	int                    finish_func_nr;
-	int	                   breakpoint_skipped;
 
 	int                    send_notifications;
 	int                    inhibit_notifications;

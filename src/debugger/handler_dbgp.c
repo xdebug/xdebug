@@ -2813,8 +2813,6 @@ int xdebug_dbgp_breakpoint(xdebug_con *context, xdebug_vector *stack, xdebug_str
 {
 	xdebug_xml_node *response, *message_container;
 
-	context->breakpoint_skipped = false;
-
 	message_container = xdebug_xml_node_init("xdebug:message");
 	if (filename) {
 		zend_string *tmp_filename = NULL;
