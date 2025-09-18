@@ -13,6 +13,7 @@ xdebug.profiler_append=1
 xdebug.profiler_output_name=cachegrind.out.%R.end
 xdebug.log={TMPFILE:issue2069-001.txt}
 xdebug.control_socket=off
+xdebug.path_mapping=off
 --FILE--
 <?php
 require_once __DIR__ . '/../utils.inc';
