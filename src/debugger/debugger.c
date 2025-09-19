@@ -744,8 +744,19 @@ static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, z
 		mark_fse_as_having_line_breakpoints(fse);
 	}
 
+	/* Handle function entry and exit breakpoints */
 	if (!handle_function_breakpoints(fse, breakpoint_type, return_value)) {
 		return false;
+	}
+
+	/* See if we need to do something with return value breakpoints */
+	if (
+		!(XG_DBG(context).breakpoint_include_return_value) ||
+		!(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN) ||
+		(XG_DBG(suppress_return_value_step)) ||
+		!return_value
+	) {
+		return true;
 	}
 
 	/* Check whether we need to skip this break */
@@ -763,26 +774,20 @@ static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, z
 		return true;
 	}
 
-	if (
-		(XG_DBG(context).breakpoint_include_return_value) &&
-		(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN) &&
-		!(XG_DBG(suppress_return_value_step)) &&
-		return_value
-	) {
-		if (XG_DBG(context).do_step) {
-			XG_DBG(context).do_step = 0;
-		} else if (XG_DBG(context).do_finish && finish_condition_met(fse, 1)) {
-			XG_DBG(context).do_finish = 0;
-		} else {
-			goto finish;
-		}
+	/* Do breaking logic */
+	if (XG_DBG(context).do_step) {
+		XG_DBG(context).do_step = 0;
+	} else if (XG_DBG(context).do_finish && finish_condition_met(fse, 1)) {
+		XG_DBG(context).do_finish = 0;
+	} else {
+		goto finish;
+	}
 
-		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_BREAK, NULL, 0, NULL, NULL, return_value)) {
-			if (must_free_mapped_path) {
-				xdebug_str_free(mapped_path);
-			}
-			return false;
+	if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_BREAK, NULL, 0, NULL, NULL, return_value)) {
+		if (must_free_mapped_path) {
+			xdebug_str_free(mapped_path);
 		}
+		return false;
 	}
 
 finish:
