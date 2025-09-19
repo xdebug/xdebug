@@ -2,13 +2,13 @@
 DBGP: line breakpoint with path map
 --SKIPIF--
 <?php
-require __DIR__ . '/../../utils.inc';
+require __DIR__ . '/../../../utils.inc';
 check_reqs('dbgp');
 ?>
 --FILE--
 <?php
-require __DIR__ . '/../dbgp/dbgpclient.php';
-$filename = dirname(__FILE__) . '/01/dbgp-breakpoint-line.inc';
+require __DIR__ . '/../../dbgp/dbgpclient.php';
+$filename = dirname(__FILE__) . '/dbgp-breakpoint-line.inc';
 
 $xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'start_ignore_yes_env.txt';
 @unlink( $xdebugLogFileName );
@@ -40,8 +40,8 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger%e.xdebug%e*.map'
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%e.xdebug%e*.map'
 [%d] [Path Mapping] DEBUG: No map files found with pattern '%sdebugger%emaps%e.xdebug%e*.map'
-[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%e01%e.xdebug%e*.map'
-[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%e01%e.xdebug%esimple.map'
+[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sdebugger%emaps%emap-single-line%e.xdebug%e*.map'
+[%d] [Path Mapping] INFO: Reading mapping file '%sdebugger%emaps%emap-single-line%e.xdebug%esimple.map'
 [%d] [Path Mapping] DEBUG: Found 1 path mapping rules
 %A
 [%d] [Step Debug] <- breakpoint_set -i 3 -t line -f /var/www/projects/xdebug-test/fake-local-file.php -n 3
