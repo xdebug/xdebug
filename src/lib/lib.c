@@ -101,7 +101,23 @@ void xdebug_library_rinit(void)
 	XG_LIB(path_mapping_information) = NULL;
 	if (XINI_LIB(path_mapping)) {
 		XG_LIB(path_mapping_information) = xdebug_path_maps_ctor();
-		xdebug_path_maps_scan(SG(request_info).path_translated);
+		if (SG(request_info).path_translated) {
+			xdebug_path_maps_scan(SG(request_info).path_translated);
+		} else {
+			char path[MAXPATHLEN];
+			char *ret = NULL;
+
+#ifdef HAVE_GETCWD
+			ret = VCWD_GETCWD(path, MAXPATHLEN);
+#elif defined(HAVE_GETWD)
+			ret = VCWD_GETWD(path);
+#endif
+
+			if (ret) {
+				xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "NO-PATH-TRANSLATED", "The SAPI request info 'path_translated' is empty, falling back to current working directory (%s)", path);
+				xdebug_path_maps_scan(path);
+			}
+		}
 	}
 }
 
