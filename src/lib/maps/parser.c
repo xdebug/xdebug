@@ -27,6 +27,7 @@
 #include "../mm.h"
 #include "../str.h"
 #include "../trim.h"
+#include "../usefulstuff.h"
 #include "../xdebug_strndup.h"
 
 typedef struct path_maps_parser_state {
@@ -439,6 +440,9 @@ static xdebug_str* prepare_remote_element(path_maps_parser_state *state, const c
 		xdebug_str_addl(remote_path, trimmed, trimmed_length, false);
 	}
 
+	/* Convert slashes to Unix style */
+	xdebug_normalize_path_xdebug_str_in_place(remote_path);
+
 	/* clean up */
 	xdfree(trimmed);
 	xdfree(remote_part);
@@ -512,6 +516,9 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 	} else {
 		xdebug_str_addl(local_path, trimmed, trimmed_length, false);
 	}
+
+	/* Convert slashes to Unix style */
+	xdebug_normalize_path_xdebug_str_in_place(local_path);
 
 cleanup:
 	/* clean up */
