@@ -17,7 +17,7 @@ $commands = array(
 $xdebugLogFileName = getTmpFile('remote-log-2261-001.txt');
 @unlink( $xdebugLogFileName );
 
-dbgpRunFile( $filename, $commands, [ 'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 7, 'xdebug.control_socket' => 'time' ] );
+dbgpRunFile( $filename, $commands, [ 'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 7, 'xdebug.control_socket' => 'time', 'xdebug.path_mapping' => 'off' ] );
 
 echo file_get_contents( $xdebugLogFileName );
 @unlink( $xdebugLogFileName );
