@@ -722,3 +722,37 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, zend_
 
 	return fname.l;
 }
+
+
+#ifdef PHP_WIN32
+char *xdebug_normalize_path_char(const char *path)
+{
+	char *new_path = xdstrdup(path);
+	char *ptr = new_path;
+
+	do {
+		if ((*ptr) == '\\') {
+			*ptr = '/';
+		}
+		ptr++;
+	} while (*ptr != '\0');
+
+	return new_path;
+}
+
+void xdebug_normalize_path_xdebug_str_in_place(xdebug_str *path)
+{
+	int i;
+
+	for (i = 0; i < XDEBUG_STR_LEN(path); i++) {
+		if (XDEBUG_STR_VAL(path)[i] == '\\') {
+			XDEBUG_STR_VAL(path)[i] = '/';
+		}
+	}
+}
+#else
+char *xdebug_normalize_path_char(const char *path)
+{
+	return xdstrdup(path);
+}
+#endif
