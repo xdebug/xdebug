@@ -1,7 +1,7 @@
 <?php
 namespace Xdebug;
 
-require 'vendor/autoload.php';
+require 'vendor/autoload.inc';
 
 $c = new Counter(42);
 foreach ($c->range() as $number)
