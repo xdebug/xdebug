@@ -1,4 +1,4 @@
-/*
+
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
@@ -12,7 +12,6 @@
    | to obtain it through the world-wide-web, please send a note to       |
    | derick@xdebug.org so we can mail you a copy immediately.             |
    +----------------------------------------------------------------------+
- */
 
 #ifndef __XDEBUG_PROFILER_H__
 #define __XDEBUG_PROFILER_H__
