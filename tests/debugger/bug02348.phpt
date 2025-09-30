@@ -20,7 +20,7 @@ $commands = array(
 $xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'remote-log-2343.txt';
 @unlink( $xdebugLogFileName );
 
-dbgpRunFile( $filename, $commands, [ 'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 10 ] );
+dbgpRunFile( $filename, $commands, [ 'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 10, 'xdebug.path_mapping' => 'off' ] );
 
 echo file_get_contents( $xdebugLogFileName );
 @unlink( $xdebugLogFileName );

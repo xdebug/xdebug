@@ -16,6 +16,7 @@ xdebug.client_host=doesnotexist2
 xdebug.client_port=9003
 xdebug.client_discovery_header=I_LIKE_COOKIES
 xdebug.control_socket=off
+xdebug.path_mapping=off
 --FILE--
 <?php
 require_once __DIR__ . '/../utils.inc';

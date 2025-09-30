@@ -31,7 +31,7 @@
 # include <process.h>
 #endif
 
-#include "php_xdebug.h"
+#include "compat.h"
 
 #include "mm.h"
 #include "crc32.h"
@@ -183,34 +183,6 @@ char* xdebug_strrstr(const char* haystack, const char* needle)
 	return loc;
 }
 
-char *xdebug_trim(const char *str)
-{
-	char *trimmed = NULL, *begin = (char *) str, *end = NULL;
-
-	/* trim leading space */
-	while (isspace((unsigned char) *begin)) {
-		++begin;
-	}
-
-	/* All spaces */
-	if (*begin == '\0') {
-		return xdstrdup("");
-	}
-
-	/* trim trailing space */
-	end = begin + strlen(begin) - 1;
-	while (end > begin && isspace((unsigned char) *end)) {
-		--end;
-	}
-	end++;
-
-	trimmed = xdmalloc(end - begin + 1);
-	memcpy(trimmed, begin, (end - begin));
-	trimmed[(end - begin)] = '\0';
-
-	return trimmed;
-}
-
 /* not all versions of php export this */
 static int xdebug_htoi(char *s)
 {
@@ -321,19 +293,19 @@ char *xdebug_path_from_url(zend_string *fileurl)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-char *xdebug_path_to_url(zend_string *fileurl)
+static char *xdebug_path_to_url(const char *fileurl, size_t fileurl_len)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
 	char *encoded_fileurl;
 
 	/* encode the url */
-	encoded_fileurl = xdebug_raw_url_encode(ZSTR_VAL(fileurl), ZSTR_LEN(fileurl), &new_len, 1);
+	encoded_fileurl = xdebug_raw_url_encode(fileurl, fileurl_len, &new_len, 1);
 
-	if (strstr(ZSTR_VAL(fileurl), "://") != NULL && strstr(ZSTR_VAL(fileurl), "://") < strstr(ZSTR_VAL(fileurl), "/")) {
+	if (strstr(fileurl, "://") != NULL && strstr(fileurl, "://") < strstr(fileurl, "/")) {
 		/* ignore, some form of stream wrapper scheme */
-		tmp = xdstrdup(ZSTR_VAL(fileurl));
-	} else if (ZSTR_VAL(fileurl)[0] != '/' && ZSTR_VAL(fileurl)[0] != '\\' && ZSTR_VAL(fileurl)[1] != ':') {
+		tmp = xdstrdup(fileurl);
+	} else if (fileurl[0] != '/' && fileurl[0] != '\\' && fileurl[1] != ':') {
 		/* convert relative paths */
 		cwd_state new_state;
 		char cwd[MAXPATHLEN];
@@ -347,21 +319,21 @@ char *xdebug_path_to_url(zend_string *fileurl)
 		new_state.cwd = estrdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 
-		if (!virtual_file_ex(&new_state, ZSTR_VAL(fileurl), NULL, 1)) {
+		if (!virtual_file_ex(&new_state, fileurl, NULL, 1)) {
 			char *s = estrndup(new_state.cwd, new_state.cwd_length);
 			tmp = xdebug_sprintf("file://%s",s);
 			efree(s);
 		}
 		efree(new_state.cwd);
 
-	} else if (ZSTR_VAL(fileurl)[1] == '/' || ZSTR_VAL(fileurl)[1] == '\\') {
+	} else if (fileurl[1] == '/' || fileurl[1] == '\\') {
 		/* convert UNC paths (eg. \\server\sharepath) */
 		/* See https://docs.microsoft.com/en-us/archive/blogs/ie/file-uris-in-windows */
 		tmp = xdebug_sprintf("file:%s", encoded_fileurl);
-	} else if (ZSTR_VAL(fileurl)[0] == '/' || ZSTR_VAL(fileurl)[0] == '\\') {
+	} else if (fileurl[0] == '/' || fileurl[0] == '\\') {
 		/* convert *nix paths (eg. /path) */
 		tmp = xdebug_sprintf("file://%s", encoded_fileurl);
-	} else if (ZSTR_VAL(fileurl)[1] == ':') {
+	} else if (fileurl[1] == ':') {
 		/* convert windows drive paths (eg. c:\path) */
 		tmp = xdebug_sprintf("file:///%s", encoded_fileurl);
 	} else {
@@ -377,6 +349,16 @@ char *xdebug_path_to_url(zend_string *fileurl)
 	}
 	xdfree(encoded_fileurl);
 	return tmp;
+}
+
+char *xdebug_zstr_path_to_url(zend_string *string)
+{
+	return xdebug_path_to_url(ZSTR_VAL(string), ZSTR_LEN(string));
+}
+
+char *xdebug_xdebug_str_path_to_url(xdebug_str *string)
+{
+	return xdebug_path_to_url(XDEBUG_STR_VAL(string), XDEBUG_STR_LEN(string));
 }
 
 #ifndef PHP_WIN32
@@ -740,3 +722,37 @@ int xdebug_format_filename(char **formatted_name, const char *default_fmt, zend_
 
 	return fname.l;
 }
+
+
+#ifdef PHP_WIN32
+char *xdebug_normalize_path_char(const char *path)
+{
+	char *new_path = xdstrdup(path);
+	char *ptr = new_path;
+
+	do {
+		if ((*ptr) == '\\') {
+			*ptr = '/';
+		}
+		ptr++;
+	} while (*ptr != '\0');
+
+	return new_path;
+}
+
+void xdebug_normalize_path_xdebug_str_in_place(xdebug_str *path)
+{
+	int i;
+
+	for (i = 0; i < XDEBUG_STR_LEN(path); i++) {
+		if (XDEBUG_STR_VAL(path)[i] == '\\') {
+			XDEBUG_STR_VAL(path)[i] = '/';
+		}
+	}
+}
+#else
+char *xdebug_normalize_path_char(const char *path)
+{
+	return xdstrdup(path);
+}
+#endif

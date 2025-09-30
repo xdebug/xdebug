@@ -205,7 +205,7 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval, zend_string **return_messa
 	return res;
 }
 
-bool xdebug_debugger_check_evaled_code(zend_string *filename_in, zend_string **filename_out)
+bool xdebug_debugger_check_evaled_code_zstr(zend_string *filename_in, zend_string **filename_out)
 {
 	char *end_marker;
 	xdebug_eval_info *ei;
@@ -217,6 +217,25 @@ bool xdebug_debugger_check_evaled_code(zend_string *filename_in, zend_string **f
 	end_marker = ZSTR_VAL(filename_in) + ZSTR_LEN(filename_in) - strlen("eval()'d code");
 	if (end_marker >= ZSTR_VAL(filename_in) && strcmp("eval()'d code", end_marker) == 0) {
 		if (xdebug_hash_find(XG_DBG(context).eval_id_lookup, ZSTR_VAL(filename_in), ZSTR_LEN(filename_in), (void *) &ei)) {
+			*filename_out = zend_strpprintf(0, "dbgp://%u", ei->id);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool xdebug_debugger_check_evaled_code_xdebug_str(xdebug_str *filename_in, zend_string **filename_out)
+{
+	char *end_marker;
+	xdebug_eval_info *ei;
+
+	if (!filename_in) {
+		return false;
+	}
+
+	end_marker = XDEBUG_STR_VAL(filename_in) + XDEBUG_STR_LEN(filename_in) - strlen("eval()'d code");
+	if (end_marker >= XDEBUG_STR_VAL(filename_in) && strcmp("eval()'d code", end_marker) == 0) {
+		if (xdebug_hash_find(XG_DBG(context).eval_id_lookup, XDEBUG_STR_VAL(filename_in), XDEBUG_STR_LEN(filename_in), (void *) &ei)) {
 			*filename_out = zend_strpprintf(0, "dbgp://%u", ei->id);
 			return true;
 		}
@@ -259,11 +278,82 @@ int finish_condition_met(function_stack_entry *fse, int break_at_return_scope)
 	return 0;
 }
 
+/*****************************************************************************
+** Path Mapping Helpers
+*/
+static void log_map_result(int result, const char* remote_filename, int remote_lineno, xdebug_str* local_path, size_t local_line)
+{
+	if (result == XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+		xdebug_log_ex(
+			XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-FAIL",
+			"Couldn't map location %s:%d", remote_filename, remote_lineno
+		);
+		return;
+	}
+
+	if (result & XDEBUG_PATH_MAP_FLAGS_SKIP) {
+		xdebug_log_ex(
+			XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-SKIP",
+			"Location %s:%d needs to be skipped", remote_filename, remote_lineno
+		);
+		return;
+	}
+
+	xdebug_log_ex(
+		XLOG_CHAN_PATHMAP, XLOG_INFO, "MAP-OK",
+		"Mapped location %s:%d to %s:%zd", remote_filename, remote_lineno, XDEBUG_STR_VAL(local_path), local_line
+	);
+	return;
+}
+
+int xdebug_debugger_map_remote_to_local(zend_string *remote_filename, int remote_lineno, xdebug_str **local_path, size_t *local_line, bool *must_free)
+{
+	int result;
+
+	if (!xdebug_lib_path_mapping_enabled()) {
+		goto pass_through;
+	}
+
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(remote_filename), remote_lineno);
+
+	result = xdebug_path_maps_remote_to_local(
+		ZSTR_VAL(remote_filename), remote_lineno,
+		local_path, local_line
+	);
+
+	log_map_result(result, ZSTR_VAL(remote_filename), remote_lineno, *local_path, *local_line);
+
+	if (result == XDEBUG_PATH_MAP_TYPE_UNKNOWN) {
+pass_through:
+		*local_path = xdebug_str_create(ZSTR_VAL(remote_filename), ZSTR_LEN(remote_filename));
+		*local_line = remote_lineno;
+		*must_free = true;
+
+		return XDEBUG_PATH_MAP_RESULT_UNKNOWN;
+	}
+
+	if (result & XDEBUG_PATH_MAP_FLAGS_SKIP) {
+		*local_path = xdebug_str_create(ZSTR_VAL(remote_filename), ZSTR_LEN(remote_filename));
+		*local_line = remote_lineno;
+		*must_free = true;
+
+		return XDEBUG_PATH_MAP_RESULT_SKIP;
+	}
+
+	/* local_path and local_file have been overwritten by xdebug_path_maps_remote_to_local() */
+	*must_free = false;
+	return XDEBUG_PATH_MAP_RESULT_OK;
+}
+
+
 void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 {
 	xdebug_llist_element *le;
 	xdebug_brk_info      *extra_brk_info;
 	function_stack_entry *fse;
+	xdebug_str           *mapped_path;
+	size_t                mapped_lineno;
+	bool                  must_free_mapped_path = false;
 
 	if (XG_DBG(context).do_connect_to_client) {
 		XG_DBG(context).do_connect_to_client = 0;
@@ -281,6 +371,11 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		return;
 	}
 
+	/* Map paths */
+	if (xdebug_debugger_map_remote_to_local(filename, lineno, &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
+		return;
+	}
+
 	/* Fetch top level fse */
 	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
@@ -292,44 +387,47 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		XG_DBG(context).do_break = 0;
 		XG_DBG(context).pending_breakpoint = NULL;
 
-		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, brk_info, NULL)) {
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_BREAK, NULL, 0, NULL, brk_info, NULL)) {
 			xdebug_mark_debug_connection_not_active();
-			return;
+			goto finish;
 		}
-		return;
+		goto finish;
 	}
 
-	/* Check for "finish" */
+	/* Check for "finish" (step_out) */
 	if (XG_DBG(context).do_finish && finish_condition_met(fse, 0)) {
 		XG_DBG(context).do_finish = 0;
 
-		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 			xdebug_mark_debug_connection_not_active();
-			return;
+			goto finish;
 		}
-		return;
+
+		goto finish;
 	}
 
-	/* Check for "next" */
+	/* Check for "next" (step_over) */
 	if (XG_DBG(context).do_next && next_condition_met(fse)) {
 		XG_DBG(context).do_next = 0;
 
-		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 			xdebug_mark_debug_connection_not_active();
-			return;
+			goto finish;
 		}
-		return;
+
+		goto finish;
 	}
 
-	/* Check for "step" */
+	/* Check for "step" (step_into) */
 	if (XG_DBG(context).do_step) {
 		XG_DBG(context).do_step = 0;
 
-		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
+		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_STEP, NULL, 0, NULL, NULL, NULL)) {
 			xdebug_mark_debug_connection_not_active();
-			return;
+			goto finish;
 		}
-		return;
+
+		goto finish;
 	}
 
 	if (fse->has_line_breakpoints && XG_DBG(context).line_breakpoints) {
@@ -339,7 +437,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			extra_brk_info = XDEBUG_LLIST_VALP(le);
 
-			if (XG_DBG(context).handler->break_on_line(&(XG_DBG(context)), extra_brk_info, filename, lineno)) {
+			if (XG_DBG(context).handler->break_on_line(&(XG_DBG(context)), extra_brk_info, mapped_path, mapped_lineno)) {
 				break_ok = 1; /* Breaking is allowed by default */
 
 				/* Check if we have a condition set for it */
@@ -357,26 +455,40 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 					}
 				}
 				if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {
-					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), filename, lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, NULL)) {
+					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, NULL)) {
 						xdebug_mark_debug_connection_not_active();
 						break;
 					}
-					return;
+					goto finish;
 				}
 			}
 		}
+	}
+
+finish:
+	/* Free mapped path */
+	if (must_free_mapped_path) {
+		xdebug_str_free(mapped_path);
 	}
 }
 
 void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zval *line, zval *code, char *code_str, zval *message)
 {
 	zend_class_entry *exception_ce = exception->ce;
-	xdebug_brk_info *extra_brk_info;
+	xdebug_brk_info  *extra_brk_info;
+	xdebug_str       *mapped_path;
+	size_t            mapped_lineno;
+	bool              must_free_mapped_path = false;
 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
 
 	if (!xdebug_is_debug_connection_active() || !XG_DBG(breakpoints_allowed)) {
+		return;
+	}
+
+	/* Map paths */
+	if (xdebug_debugger_map_remote_to_local(zend_get_executed_filename_ex(), zend_get_executed_lineno(), &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
 		return;
 	}
 
@@ -409,7 +521,7 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 			if (
 				!XG_DBG(context).handler->remote_breakpoint(
 					&(XG_DBG(context)), XG_BASE(stack),
-					zend_get_executed_filename_ex(), zend_get_executed_lineno(),
+					mapped_path, mapped_lineno,
 					XDEBUG_BREAK,
 					(char*) STR_NAME_VAL(exception_ce->name),
 					code_str ? code_str : ((code && Z_TYPE_P(code) == IS_STRING) ? Z_STRVAL_P(code) : NULL),
@@ -422,11 +534,19 @@ void xdebug_debugger_throw_exception_hook(zend_object *exception, zval *file, zv
 			}
 		}
 	}
+
+	/* Free mapped path */
+	if (must_free_mapped_path) {
+		xdebug_str_free(mapped_path);
+	}
 }
 
 void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int type, char *error_type_str, char *buffer)
 {
 	xdebug_brk_info *extra_brk_info = NULL;
+	xdebug_str      *mapped_path;
+	size_t           mapped_lineno;
+	bool             must_free_mapped_path = false;
 
 	/* Start JIT if requested and not yet enabled */
 	xdebug_debug_init_if_requested_on_error();
@@ -435,9 +555,14 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 		return;
 	}
 
+	/* Map paths */
+	if (xdebug_debugger_map_remote_to_local(error_filename, error_lineno, &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
+		return;
+	}
+
 	/* Send notification with warning/notice/error information */
 	if (XG_DBG(context).send_notifications && !XG_DBG(context).inhibit_notifications) {
-		if (!XG_DBG(context).handler->remote_notification(&(XG_DBG(context)), error_filename, error_lineno, type, error_type_str, buffer)) {
+		if (!XG_DBG(context).handler->remote_notification(&(XG_DBG(context)), mapped_path, mapped_lineno, type, error_type_str, buffer)) {
 			xdebug_mark_debug_connection_not_active();
 		}
 	}
@@ -450,12 +575,17 @@ void xdebug_debugger_error_cb(zend_string *error_filename, int error_lineno, int
 		if (xdebug_handle_hit_value(extra_brk_info)) {
 			char *type_str = xdebug_sprintf("%ld", type);
 
-			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), error_filename, error_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer, extra_brk_info, NULL)) {
+			if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_BREAK, error_type_str, type_str, buffer, extra_brk_info, NULL)) {
 				xdebug_mark_debug_connection_not_active();
 			}
 
 			xdfree(type_str);
 		}
+	}
+
+	/* Free mapped path */
+	if (must_free_mapped_path) {
+		xdebug_str_free(mapped_path);
 	}
 }
 
@@ -464,9 +594,17 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 	char            *tmp_name = NULL;
 	size_t           tmp_len = 0;
 	xdebug_brk_info *extra_brk_info = NULL;
+	xdebug_str      *mapped_path;
+	size_t           mapped_lineno;
+	bool             must_free_mapped_path = false;
 
 	/* Short circuit if there are no function breakpoints */
 	if (!XG_DBG(context).function_breakpoints || XG_DBG(context).function_breakpoints->size == 0) {
+		return true;
+	}
+
+	/* Map paths */
+	if (xdebug_debugger_map_remote_to_local(fse->filename, fse->lineno, &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
 		return true;
 	}
 
@@ -500,7 +638,7 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 	}
 	/* Unknown */
 	else {
-		return true;
+		goto finish;
 	}
 
 	if (xdebug_hash_find(XG_DBG(context).function_breakpoints, tmp_name, tmp_len - 1, (void *) &extra_brk_info)) {
@@ -509,8 +647,13 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 		if (!extra_brk_info->disabled && (extra_brk_info->function_break_type == (breakpoint_type & XDEBUG_BREAKPOINT_TYPES_MASK))) {
 			if (xdebug_handle_hit_value(extra_brk_info)) {
 				if (fse->user_defined == XDEBUG_BUILT_IN || (breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN)) {
-					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
+					if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_BREAK, NULL, 0, NULL, extra_brk_info, return_value)) {
 						xdfree(tmp_name);
+
+						if (must_free_mapped_path) {
+							xdebug_str_free(mapped_path);
+						}
+
 						return false;
 					}
 				} else {
@@ -522,6 +665,11 @@ static bool handle_function_breakpoints(function_stack_entry *fse, int breakpoin
 	}
 	xdfree(tmp_name);
 
+finish:
+	/* Free mapped path */
+	if (must_free_mapped_path) {
+		xdebug_str_free(mapped_path);
+	}
 	return true;
 }
 
@@ -560,7 +708,7 @@ static void mark_fse_as_having_line_breakpoints(function_stack_entry *fse)
 		if (fse->function.type == XFUNC_EVAL) {
 			zend_string *resolved_filename;
 
-			if (!xdebug_debugger_check_evaled_code(executed_filename, &resolved_filename)) {
+			if (!xdebug_debugger_check_evaled_code_zstr(executed_filename, &resolved_filename)) {
 				continue;
 			}
 
@@ -585,35 +733,68 @@ static void mark_fse_as_having_line_breakpoints(function_stack_entry *fse)
 /* Returns false if something is wrong with the breakpoint */
 static bool handle_breakpoints(function_stack_entry *fse, int breakpoint_type, zval *return_value)
 {
+	xdebug_str  *mapped_path;
+	size_t       mapped_lineno;
+	bool         must_free_mapped_path = false;
+	zend_string *executed_filename;
+
 	/* If 'has_line_breakpoints' hasn't been marked, either use the resolve
 	 * list if it exists, or otherwise mark it as 'true' */
 	if (!fse->has_line_breakpoints) {
 		mark_fse_as_having_line_breakpoints(fse);
 	}
 
+	/* Handle function entry and exit breakpoints */
 	if (!handle_function_breakpoints(fse, breakpoint_type, return_value)) {
 		return false;
 	}
 
+	/* See if we need to do something with return value breakpoints */
 	if (
-		(XG_DBG(context).breakpoint_include_return_value) &&
-		(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN) &&
-		!(XG_DBG(suppress_return_value_step)) &&
-		return_value
+		!(XG_DBG(context).breakpoint_include_return_value) ||
+		!(breakpoint_type & XDEBUG_BREAKPOINT_TYPE_RETURN) ||
+		(XG_DBG(suppress_return_value_step)) ||
+		!return_value
 	) {
-		if (XG_DBG(context).do_step) {
-			XG_DBG(context).do_step = 0;
-		} else if (XG_DBG(context).do_finish && finish_condition_met(fse, 1)) {
-			XG_DBG(context).do_finish = 0;
-		} else {
-			return true;
-		}
-
-		if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), fse->filename, fse->lineno, XDEBUG_BREAK, NULL, 0, NULL, NULL, return_value)) {
-			return false;
-		}
+		return true;
 	}
 
+	/* Check whether we need to skip this break */
+	executed_filename = zend_get_executed_filename_ex();
+
+	if (executed_filename && xdebug_debugger_map_remote_to_local(executed_filename, zend_get_executed_lineno(), &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
+		return true;
+	}
+	if (must_free_mapped_path) {
+		xdebug_str_free(mapped_path);
+	}
+
+	/* Map paths for breakpoint location */
+	if (xdebug_debugger_map_remote_to_local(fse->filename, fse->lineno, &mapped_path, &mapped_lineno, &must_free_mapped_path) == XDEBUG_PATH_MAP_RESULT_SKIP) {
+		return true;
+	}
+
+	/* Do breaking logic */
+	if (XG_DBG(context).do_step) {
+		XG_DBG(context).do_step = 0;
+	} else if (XG_DBG(context).do_finish && finish_condition_met(fse, 1)) {
+		XG_DBG(context).do_finish = 0;
+	} else {
+		goto finish;
+	}
+
+	if (!XG_DBG(context).handler->remote_breakpoint(&(XG_DBG(context)), XG_BASE(stack), mapped_path, mapped_lineno, XDEBUG_BREAK, NULL, 0, NULL, NULL, return_value)) {
+		if (must_free_mapped_path) {
+			xdebug_str_free(mapped_path);
+		}
+		return false;
+	}
+
+finish:
+	/* Free mapped path */
+	if (must_free_mapped_path) {
+		xdebug_str_free(mapped_path);
+	}
 	return true;
 }
 

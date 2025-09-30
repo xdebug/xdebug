@@ -10,6 +10,7 @@ xdebug.mode=profile
 xdebug.log={TMPFILE:issue2037.txt}
 xdebug.output_dir=/tmp/un-writable
 xdebug.control_socket=off
+xdebug.path_mapping=off
 --FILE--
 <?php
 require_once __DIR__ . '/../utils.inc';

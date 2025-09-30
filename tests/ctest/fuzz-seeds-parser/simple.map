@@ -1,0 +1,11 @@
+remote_prefix: /usr/local/www
+local_prefix: /home/derick/project
+
+/projects/example.php:5-17 = /example.php:8
+/example.php:5-17 = /example.php:8-20
+/example.php:17 = /example.php:20
+/projects/php-web/ = /php-web/
+
+/skipping-1.php = SKIP
+/skipping-2.php:5 = SKIP
+/skipping-3.php:7-19 = SKIP
