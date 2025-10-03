@@ -6,12 +6,26 @@ trigger:
       - master
 
 jobs:
+#  - template: .azure/macos/job.yml
+#    parameters:
+#      configurationName: 'OSX_PHP_MASTER'
+#      phpVersion: 'branch'
+#      phpBranch: 'master'
+#      configurationParameters: '--enable-debug --disable-zts'
+#      loadOpCache: 'no'
   - template: .azure/macos/job.yml
     parameters:
-      configurationName: 'OSX_PHP_MASTER'
+      configurationName: 'OSX_PHP_85'
       phpVersion: 'branch'
-      phpBranch: 'master'
+      phpBranch: 'PHP-8.5'
       configurationParameters: '--enable-debug --disable-zts'
+      loadOpCache: 'no'
+  - template: .azure/macos/job.yml
+    parameters:
+      configurationName: 'OSX_PHP_85_ZTS'
+      phpVersion: 'branch'
+      phpBranch: 'PHP-8.5'
+      configurationParameters: '--enable-debug --enable-zts'
       loadOpCache: 'no'
   - template: .azure/macos/job.yml
     parameters:
@@ -27,16 +41,6 @@ jobs:
     parameters:
       configurationName: 'OSX_PHP_83'
       phpVersion: '8.3.16'
-      configurationParameters: '--enable-debug --disable-zts'
-  - template: .azure/macos/job.yml
-    parameters:
-      configurationName: 'OSX_PHP_83_ZTS'
-      phpVersion: '8.3.16'
-      configurationParameters: '--enable-debug --enable-zts'
-  - template: .azure/macos/job.yml
-    parameters:
-      configurationName: 'OSX_PHP_82'
-      phpVersion: '8.2.27'
       configurationParameters: '--enable-debug --disable-zts'
   - template: .azure/macos/job.yml
     parameters:
