@@ -275,7 +275,7 @@ int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local
 			*remote_line = local_line;
 			break;
 
-		case XDEBUG_PATH_MAP_TYPE_LINES:
+		case XDEBUG_PATH_MAP_TYPE_LINES: {
 			xdebug_str *result_path;
 			size_t      result_line;
 
@@ -286,6 +286,7 @@ int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local
 			*remote_path = xdebug_str_copy(result_path);
 			*remote_line = result_line;
 			break;
+		}
 	}
 
 	xdfree(url_path);
