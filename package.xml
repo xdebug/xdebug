@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-07-14</date>
- <time>14:58:54</time>
+ <date>2025-10-06</date>
+ <time>09:45:27</time>
  <version>
-  <release>3.4.5</release>
-  <api>3.4.5</api>
+  <release>3.4.6</release>
+  <api>3.4.6</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,12 +52,12 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Mon, Jul 14, 2025 - Xdebug 3.4.5
+Mon, Oct 06, 2025 - Xdebug 3.4.6
 
 = Fixed bugs:
 
-  - Fixed issue #2332: Segmentation fault for code coverage with nested fibers
-  - Fixed issue #2356: Reading properties with get hooks may modify property value
+  - Fixed issue #2328: Stream resource references in stored stack traces don&#039;t hold, and can cause crashes
+  - Fixed issue #2360: Debugging DateInterval (and other internal objects) causes a crash
 
  </notes>
 
@@ -212,6 +212,29 @@ Mon, Jul 14, 2025 - Xdebug 3.4.5
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-07-14</date>
+   <time>14:58:54</time>
+   <version>
+    <release>3.4.5</release>
+    <api>3.4.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Mon, Jul 14, 2025 - Xdebug 3.4.5
+
+= Fixed bugs:
+
+  - Fixed issue #2332: Segmentation fault for code coverage with nested fibers
+  - Fixed issue #2356: Reading properties with get hooks may modify property value
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-06-12</date>
