@@ -379,6 +379,20 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 	/* Fetch top level fse */
 	fse = XDEBUG_VECTOR_TAIL(XG_BASE(stack));
 
+	/* If we're in a user-defined main function, with a valid function, with two or more opcodes,
+	 * with the current opcode to be the next-to-last one, and the last opcode being ZEND_RETURN,
+	 * and the value of ZEND_RETURN is a constant, and the value of ZEND_RETURN is the default, then bail out */
+	if (
+		fse->user_defined && (fse->function.type & XFUNC_INCLUDES) &&
+		/*EG(current_execute_data)->opline && */EG(current_execute_data)->func && /*EG(current_execute_data)->func->op_array && */
+		EG(current_execute_data)->func->op_array.last >= 2 &&
+		((EG(current_execute_data)->opline - EG(current_execute_data)->func->op_array.opcodes) == EG(current_execute_data)->func->op_array.last - 2) &&
+		EG(current_execute_data)->func->op_array.opcodes[EG(current_execute_data)->func->op_array.last - 1].opcode == ZEND_RETURN &&
+		EG(current_execute_data)->func->op_array.opcodes[EG(current_execute_data)->func->op_array.last - 1].op1_type == IS_CONST
+	) {
+		return;
+	}
+
 	XG_DBG(suppress_return_value_step) = 0;
 
 	if (XG_DBG(context).do_break) {
