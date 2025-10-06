@@ -41,23 +41,37 @@ Code Coverage Analysis
  </lead>
 
  <date>2025-10-06</date>
- <time>09:45:27</time>
+ <time>11:32:57</time>
  <version>
-  <release>3.4.6</release>
-  <api>3.4.6</api>
+  <release>3.5.0alpha1</release>
+  <api>3.5.0alpha1</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Mon, Oct 06, 2025 - Xdebug 3.4.6
+Mon, Oct 06, 2025 - Xdebug 3.5.0alpha1
+
++ New features:
+
+  - Fixed issue #2213: Expose __EXCEPTION virtual variable for current EG(exception)
+  - Fixed issue #2369: Implement &quot;Native Xdebug Path Mapping&quot; project
+  - Initial support for PHP 8.5
+
++ Improvements
+
+  - Fixed issue #2336: Optimise xdebug_init_oparray
+  - Fixed issue #2338: Add experimental support for Windows Named Pipes control socket
+  - Fixed issue #2363: Add better debugging support for PHP 8.5&#039;s pipes
+  - Fixed issue #2367: Debugger should not break on return out of include files when return value debugger is enabled
+  - Fixed issue #2337: Modify xdebug_add_stack_frame to always work on the passed execute_data
 
 = Fixed bugs:
 
-  - Fixed issue #2328: Stream resource references in stored stack traces don&#039;t hold, and can cause crashes
-  - Fixed issue #2360: Debugging DateInterval (and other internal objects) causes a crash
+  - Fixed issue #2335: Failed dbgp connection is not marked as not active
+  - Fixed issue #2345: DBGP&#039;s detach does not support base64 encoded strings
 
  </notes>
 
@@ -216,6 +230,29 @@ Mon, Oct 06, 2025 - Xdebug 3.4.6
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-10-06</date>
+   <time>09:45:27</time>
+   <version>
+    <release>3.4.6</release>
+    <api>3.4.6</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Mon, Oct 06, 2025 - Xdebug 3.4.6
+
+= Fixed bugs:
+
+  - Fixed issue #2328: Stream resource references in stored stack traces don&#039;t hold, and can cause crashes
+  - Fixed issue #2360: Debugging DateInterval (and other internal objects) causes a crash
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-07-14</date>
