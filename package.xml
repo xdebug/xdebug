@@ -138,6 +138,7 @@ Tue, Oct 07, 2025 - Xdebug 3.5.0alpha2
      <file name="set.h" role="src" />
      <file name="str.c" role="src" />
      <file name="str.h" role="src" />
+     <file name="strrnchr.h" role="src" />
      <file name="timing.c" role="src" />
      <file name="timing.h" role="src" />
      <file name="trim.c" role="src" />
@@ -157,6 +158,14 @@ Tue, Oct 07, 2025 - Xdebug 3.5.0alpha2
      <file name="xdebug_strndup.h" role="src" />
      <file name="xml.c" role="src" />
      <file name="xml.h" role="src" />
+     <dir name="maps">
+      <file name="maps.c" role="src" />
+      <file name="maps.h" role="src" />
+      <file name="maps_private.c" role="src" />
+      <file name="maps_private.h" role="src" />
+      <file name="parser.c" role="src" />
+      <file name="parser.h" role="src" />
+     </dir>
     </dir>
     <dir name="coverage">
      <file name="branch_info.c" role="src" />
