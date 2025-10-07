@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-10-06</date>
- <time>11:32:57</time>
+ <date>2025-10-07</date>
+ <time>11:57:01</time>
  <version>
-  <release>3.5.0alpha1</release>
-  <api>3.5.0alpha1</api>
+  <release>3.5.0alpha2</release>
+  <api>3.5.0alpha2</api>
  </version>
  <stability>
   <release>beta</release>
@@ -52,21 +52,21 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Mon, Oct 06, 2025 - Xdebug 3.5.0alpha1
+Tue, Oct 07, 2025 - Xdebug 3.5.0alpha2
 
 + New features:
 
   - Fixed issue #2213: Expose __EXCEPTION virtual variable for current EG(exception)
   - Fixed issue #2369: Implement &quot;Native Xdebug Path Mapping&quot; project
-  - Initial support for PHP 8.5
+  - Fixed issue #2370: PHP 8.5 support
 
 + Improvements
 
   - Fixed issue #2336: Optimise xdebug_init_oparray
+  - Fixed issue #2337: Modify xdebug_add_stack_frame to always work on the passed execute_data
   - Fixed issue #2338: Add experimental support for Windows Named Pipes control socket
   - Fixed issue #2363: Add better debugging support for PHP 8.5&#039;s pipes
   - Fixed issue #2367: Debugger should not break on return out of include files when return value debugger is enabled
-  - Fixed issue #2337: Modify xdebug_add_stack_frame to always work on the passed execute_data
 
 = Fixed bugs:
 
