@@ -131,6 +131,8 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 		case XDEBUG_PATH_MAP_TYPE_FILE:
 			*local_path = xdebug_str_copy(result->m.local_path);
 			*local_line = remote_line;
+
+			xdfree(url_path);
 			return result->type;
 
 		case XDEBUG_PATH_MAP_TYPE_LINES: {
@@ -280,6 +282,8 @@ int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local
 			size_t      result_line;
 
 			if (!find_remote_line_number_from_ranges(local_line, result->m.line_ranges, &result_path, &result_line)) {
+				xdfree(url_path);
+
 				return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 			}
 
