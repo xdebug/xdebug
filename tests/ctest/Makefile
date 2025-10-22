@@ -23,14 +23,17 @@ afl-test-parser: xdebuglib.a ${C_TESTS} ${SOURCE_FILES} ${HEADER_FILES} fuzzing-
 afl-test-mapper: xdebuglib.a ${C_TESTS} ${SOURCE_FILES} ${HEADER_FILES} fuzzing-shim-mapper.c
 	afl-g++ ${CPPFLAGS} fuzzing-shim-mapper.c ${SOURCE_FILES} xdebuglib.a -I ${INCLUDE_PATH} -o afl-test-mapper ${LDFLAGS}
 
-xdebuglib.a: hash.o llist.o str.o trim.o xdebug_strndup.o
-	ar -rc xdebuglib.a hash.o llist.o str.o trim.o xdebug_strndup.o
+xdebuglib.a: hash.o llist.o normalize_path.o str.o trim.o xdebug_strndup.o
+	ar -rc xdebuglib.a hash.o llist.o normalize_path.o str.o trim.o xdebug_strndup.o
+
+hash.o: ../../src/lib/hash.c
+	gcc -c ${CPPFLAGS} -o hash.o ../../src/lib/hash.c
 
 llist.o: ../../src/lib/llist.c
 	gcc -c ${CPPFLAGS} -o llist.o ../../src/lib/llist.c
 
-hash.o: ../../src/lib/hash.c
-	gcc -c ${CPPFLAGS} -o hash.o ../../src/lib/hash.c
+normalize_path.o: ../../src/lib/normalize_path.c
+	gcc -c ${CPPFLAGS} -o normalize_path.o ../../src/lib/normalize_path.c
 
 str.o: ../../src/lib/str.c
 	gcc -c ${CPPFLAGS} -o str.o ../../src/lib/str.c
@@ -42,4 +45,4 @@ xdebug_strndup.o: ../../src/lib/xdebug_strndup.c
 	gcc -c ${CPPFLAGS} -o xdebug_strndup.o ../../src/lib/xdebug_strndup.c
 
 clean:
-	rm xdebuglib.a hash.o llist.o str.o trim.o xdebug_strndup.o ctest afl-test-parser afl-test-mapper
+	rm xdebuglib.a hash.o llist.o normalize_path.o str.o trim.o xdebug_strndup.o ctest afl-test-parser afl-test-mapper

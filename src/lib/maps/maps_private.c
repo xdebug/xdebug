@@ -19,8 +19,8 @@
 
 #include "maps_private.h"
 #include "../mm.h"
+#include "../normalize_path.h"
 #include "../strrnchr.h"
-#include "../usefulstuff.h"
 #include "../vector.h"
 #include "../xdebug_strndup.h"
 
