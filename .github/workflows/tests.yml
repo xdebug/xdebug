@@ -23,7 +23,7 @@ jobs:
               id: extension-matrix
               uses: php/php-windows-builder/extension-matrix@v1
               with:
-                php-version-list: '8.0, 8.1, 8.2, 8.3, 8.4'
+                php-version-list: '8.0, 8.1, 8.2, 8.3, 8.4, 8.5'
                 arch-list: 'x64'
 
     windows:
