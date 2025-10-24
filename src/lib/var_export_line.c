@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -244,6 +244,23 @@ void xdebug_var_export_line(zval **struc, xdebug_str *str, int level, int debug_
 		case IS_OBJECT: {
 #if PHP_VERSION_ID >= 80100
 			zend_class_entry *ce = Z_OBJCE_P(*struc);
+#endif
+
+#if PHP_VERSION_ID >= 80400
+			if (
+				ce->type != ZEND_INTERNAL_CLASS &&
+				zend_object_is_lazy(Z_OBJ_P(*struc)) &&
+				!zend_lazy_object_initialized(Z_OBJ_P(*struc))
+			) {
+				xdebug_str_add_literal(str, "class ");
+				xdebug_str_add(str, ZSTR_VAL(Z_OBJCE_P(*struc)->name), 0);
+				xdebug_str_add_literal(str, " { *uninitialized ghost* }");
+
+				break; /* Jump out of the function */
+			}
+#endif
+
+#if PHP_VERSION_ID >= 80100
 			if (ce->ce_flags & ZEND_ACC_ENUM) {
 				zval *case_name_zval = zend_enum_fetch_case_name(Z_OBJ_P(*struc));
 				xdebug_str_add_fmt(str, "enum %s::%s", ZSTR_VAL(ce->name), Z_STRVAL_P(case_name_zval));
