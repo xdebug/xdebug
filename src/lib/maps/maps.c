@@ -16,6 +16,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#ifndef XDEBUG_NO_PHP_FEATURES
+# include "php_xdebug.h"
+#endif
+
 #if PHP_VERSION_ID >= 80500
 # include "php_glob.h"
 # define xdebug_glob php_glob
@@ -33,7 +37,9 @@
 # define xdebug_globfree globfree
 #endif
 
-#include "php_xdebug.h"
+#ifndef PHP_GLOB_NOMATCH
+# define PHP_GLOB_NOMATCH GLOB_NOMATCH
+#endif
 
 #include "maps_private.h"
 #include "parser.h"
@@ -85,7 +91,7 @@ static void scan_directory(const char *dir)
 		case 0: /* No error */
 			break;
 
-		case GLOB_NOMATCH:
+		case PHP_GLOB_NOMATCH:
 			xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "NOMATCH", "No map files found with pattern '%s'", scan_dir);
 			xdfree(scan_dir);
 
