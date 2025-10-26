@@ -6,8 +6,6 @@ on:
             - 'master'
             - 'xdebug_*'
     pull_request:
-    release:
-        types: [created]
     create:
 
 jobs:
@@ -101,7 +99,7 @@ jobs:
         runs-on: ubuntu-latest
         name: "PIE Release Artifacts"
         needs: windows
-        if: ${{ github.event_name == 'release' }}
+        if: ${{ github.ref_type == 'tag' }}
         steps:
             - name: Upload artifact to the release
               uses: php/php-windows-builder/release@v1
