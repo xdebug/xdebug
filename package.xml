@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-10-06</date>
- <time>09:45:27</time>
+ <date>2025-10-26</date>
+ <time>13:37:32</time>
  <version>
-  <release>3.4.6</release>
-  <api>3.4.6</api>
+  <release>3.4.7</release>
+  <api>3.4.7</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,12 +52,13 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Mon, Oct 06, 2025 - Xdebug 3.4.6
+Sun, Oct 26, 2025 - Xdebug 3.4.7
 
 = Fixed bugs:
 
-  - Fixed issue #2328: Stream resource references in stored stack traces don&#039;t hold, and can cause crashes
-  - Fixed issue #2360: Debugging DateInterval (and other internal objects) causes a crash
+  - Fixed issue #2359: PHP 8.4 Lazy Ghost Object inoperable/defunct when Xdebug is enabled
+  - Fixed issue #2371: Step debugging initialize lazy objects
+  - Fixed issue #2375: Xdebug&#039;s exception trace conversion initialises lazy objects
 
  </notes>
 
@@ -212,6 +213,29 @@ Mon, Oct 06, 2025 - Xdebug 3.4.6
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-10-06</date>
+   <time>09:45:27</time>
+   <version>
+    <release>3.4.6</release>
+    <api>3.4.6</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Mon, Oct 06, 2025 - Xdebug 3.4.6
+
+= Fixed bugs:
+
+  - Fixed issue #2328: Stream resource references in stored stack traces don&#039;t hold, and can cause crashes
+  - Fixed issue #2360: Debugging DateInterval (and other internal objects) causes a crash
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-07-14</date>
