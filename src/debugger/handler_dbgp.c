@@ -2770,6 +2770,9 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_string *orig_filename, int lineno)
 {
 	zend_string *resolved_filename = NULL;
+#if PHP_WIN32
+	char *normalized_filename = NULL;
+#endif
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "Checking whether to break on %s:%d.", ZSTR_VAL(brk->filename), brk->resolved_lineno);
 
@@ -2785,6 +2788,12 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_st
 	} else {
 		resolved_filename = zend_string_init(ZSTR_VAL(orig_filename), ZSTR_LEN(orig_filename), false);
 	}
+
+#if PHP_WIN32
+	normalized_filename = xdebug_normalize_path_char(ZSTR_VAL(brk->filename));
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "N: Normalized '%s' to '%s'", ZSTR_VAL(brk->filename), normalized_filename);
+	xdfree(normalized_filename);
+#endif
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Matching breakpoint '%s:%d' against location '%s:%d'.", ZSTR_VAL(brk->filename), brk->resolved_lineno, ZSTR_VAL(resolved_filename), lineno);
 
