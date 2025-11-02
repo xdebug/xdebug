@@ -58,6 +58,10 @@
 # endif
 #endif
 
+#ifdef PHP_WIN32
+#include <windows.h>
+#endif
+
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
 
 xdebug_arg *xdebug_arg_ctor(void)
@@ -293,7 +297,7 @@ char *xdebug_path_from_url(zend_string *fileurl)
 }
 
 /* fake URI's per IETF RFC 1738 and 2396 format */
-static char *xdebug_path_to_url(const char *fileurl, size_t fileurl_len)
+char *xdebug_path_to_url(const char *fileurl, size_t fileurl_len)
 {
 	int l, i, new_len;
 	char *tmp = NULL;
@@ -748,6 +752,173 @@ void xdebug_normalize_path_xdebug_str_in_place(xdebug_str *path)
 		if (XDEBUG_STR_VAL(path)[i] == '\\') {
 			XDEBUG_STR_VAL(path)[i] = '/';
 		}
+	}
+}
+
+typedef enum {
+	XDEBUG_ENCODING_TYPE_UTF8,
+	XDEBUG_ENCODING_TYPE_SJIS,
+	XDEBUG_ENCODING_TYPE_UNKNOWN
+} xdebug_encoding_type;
+// Check if string is valid UTF-8
+bool xdebug_is_valid_utf8(const char *str) {
+	const unsigned char *bytes = (const unsigned char *)str;
+	unsigned int cp;
+	size_t seqlen;
+
+	while (*bytes) {
+		unsigned char first_byte = *bytes;
+
+		if ((first_byte & 0x80) == 0x00) {			/* 1-byte */
+			seqlen = 1;
+			cp = first_byte & 0x7F;
+		} else if ((first_byte & 0xE0) == 0xC0) {	/* 2-byte */
+			if (first_byte == 0xC0 || first_byte == 0xC1) {
+				return false; // Overlong encoding
+			}
+			seqlen = 2;
+			cp = first_byte & 0x1F;
+		} else if ((first_byte & 0xF0) == 0xE0) {	/* 3-byte */
+			seqlen = 3;
+			cp = first_byte & 0x0F;
+		} else if ((first_byte & 0xF8) == 0xF0) {	/* 4-byte */
+			if (first_byte > 0xF4) {
+				return false; // Invalid first byte for 4-byte sequence
+			}
+			seqlen = 4;
+			cp = first_byte & 0x07;
+		} else {
+			return false; // Invalid first byte
+		}
+
+		const unsigned char *start_byte = bytes + 1;
+		for (size_t i = 1; i < seqlen; i++, start_byte++) {
+			if (*start_byte == '\0') {
+				return false; // Unexpected end of string
+			}
+			if ((*start_byte & 0xC0) != 0x80) {
+				return false; // Invalid continuation byte
+			}
+			cp = (cp << 6) | (*start_byte & 0x3F);
+		}
+		// Move to the next character
+		bytes += seqlen;
+
+		// overlong, surrogate, or out of range checks
+		if ((seqlen == 2 && cp < 0x80) ||
+			(seqlen == 3 && cp < 0x800) ||
+			(seqlen == 4 && cp < 0x10000) ||
+			(cp > 0x10FFFF) ||
+			(cp >= 0xD800 && cp <= 0xDFFF)) {
+			return false;
+		}
+	}
+	return true;
+}
+// Check if string is valid Shift_JIS
+bool xdebug_is_valid_shiftjis(const char *str) {
+	const unsigned char *bytes = (const unsigned char *)str;
+
+	while (*bytes) {
+		unsigned char first_byte = *bytes;
+
+		if ((first_byte >= 0x00 && first_byte <= 0x7F) || /* 1-byte (ASCII) */
+			(first_byte >= 0xA1 && first_byte <= 0xDF)) { /* 1-byte (Half-width Katakana) */
+			bytes += 1;
+		} else if ((first_byte >= 0x81 && first_byte <= 0x9F) || /* 2-byte */
+				   (first_byte >= 0xE0 && first_byte <= 0xEF)) {
+			const unsigned char *second_byte = bytes + 1;
+			if (*second_byte == '\0') {
+				return false; // Unexpected end of string
+			}
+			if (!((*second_byte >= 0x40 && *second_byte <= 0x7E) ||
+				  (*second_byte >= 0x80 && *second_byte <= 0xFC))) {
+				return false; // Invalid second byte
+			}
+			bytes += 2;
+		} else {
+			return false; // Invalid first byte
+		}
+	}
+	return true;
+}
+xdebug_encoding_type xdebug_is_valid_encoding(const char *str) {
+	/* Check for UTF-8 BOM */
+	if (strlen(str) >= 3
+			&& (unsigned char)str[0] == 0xEF
+			&& (unsigned char)str[1] == 0xBB
+			&& (unsigned char)str[2] == 0xBF) {
+		return XDEBUG_ENCODING_TYPE_UTF8;
+	}
+
+	/* Check if valid UTF-8 */
+	if (xdebug_is_valid_utf8(str)) {
+		return XDEBUG_ENCODING_TYPE_UTF8;
+	}
+
+	/* Check if valid Shift_JIS*/
+	if (xdebug_is_valid_shiftjis(str)) {
+		return XDEBUG_ENCODING_TYPE_SJIS;
+	}
+
+	/* Fallback to UNKNOWN */
+	return XDEBUG_ENCODING_TYPE_UNKNOWN;
+}
+// Convert Shift_JIS to UTF-8
+char *xdebug_shiftjis_to_utf8(const char *sjis_str) {
+	int wlen = MultiByteToWideChar(932 /* Shift-JIS */, MB_ERR_INVALID_CHARS, sjis_str, -1, NULL, 0);
+	if (wlen == 0) {
+		return NULL;
+	}
+
+	wchar_t *wbuf = (wchar_t *)malloc(wlen * sizeof(wchar_t));
+	if (MultiByteToWideChar(932, MB_ERR_INVALID_CHARS, sjis_str, -1, wbuf, wlen) == 0) {
+		free(wbuf);
+		return NULL;
+	}
+
+	int ulen = WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, NULL, 0, NULL, NULL);
+	if (ulen == 0) {
+		free(wbuf);
+		return NULL;
+	}
+	char *utf8_str = (char *)malloc(ulen);
+	if (WideCharToMultiByte(CP_UTF8, 0, wbuf, -1, utf8_str, ulen, NULL, NULL) == 0) {
+		free(wbuf);
+		free(utf8_str);
+		return NULL;
+	}
+
+	free(wbuf);
+	return utf8_str;
+}
+// Convert filename to UTF-8
+char *xdebug_prepare_filename(const char *filename) {
+	char *utf8_filename = NULL;
+	switch (xdebug_is_valid_encoding(filename)) {
+		case XDEBUG_ENCODING_TYPE_UTF8: {
+			utf8_filename = xdstrdup(filename);
+			break;
+		}
+		case XDEBUG_ENCODING_TYPE_SJIS: {
+			utf8_filename = xdebug_shiftjis_to_utf8(filename);
+			if (!utf8_filename) {
+				utf8_filename = xdstrdup(filename); // Fallback to original
+			}
+			break;
+		}
+		case XDEBUG_ENCODING_TYPE_UNKNOWN:
+		default: {
+			utf8_filename = xdstrdup(filename);
+			break;
+		}
+	}
+	return utf8_filename;
+}
+// Lowercase drive letter in file URI
+void xdebug_lowercase_drive_letter(char *fileuri) {
+	if (fileuri && strlen(fileuri) >= 2 && fileuri[1] == ':') {
+		fileuri[0] = (char)tolower((unsigned char)fileuri[0]);
 	}
 }
 #else

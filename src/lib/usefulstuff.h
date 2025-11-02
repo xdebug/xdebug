@@ -36,11 +36,14 @@ char* xdebug_strrstr(const char* haystack, const char* needle);
 
 char *xdebug_zstr_path_to_url(zend_string *string);
 char *xdebug_xdebug_str_path_to_url(xdebug_str *string);
+char *xdebug_path_to_url(const char *fileurl, size_t fileurl_len);
 char *xdebug_path_from_url(zend_string *fileurl);
 
 char *xdebug_normalize_path_char(const char *path);
 #ifdef PHP_WIN32
 void xdebug_normalize_path_xdebug_str_in_place(xdebug_str *path);
+char *xdebug_prepare_filename(const char *filename);
+void xdebug_lowercase_drive_letter(char *fileuri);
 #else
 # define xdebug_normalize_path_xdebug_str_in_place(path)
 #endif
