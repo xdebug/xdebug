@@ -70,22 +70,20 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 {
 	xdebug_path_mapping *result;
 	xdebug_hash *map = maps->remote_to_local_map;
-	char *url_path = xdebug_normalize_path_char(remote_path);
 
-	if (!xdebug_hash_find(map, url_path, strlen(url_path), (void**) &result)) {
+	if (!xdebug_hash_find(map, remote_path, strlen(remote_path), (void**) &result)) {
 		/* We can't find an exact file match, so now try to see if we have a directory match, starting with the full
 		 * path and then removing the trailing directory path until there are none left */
 		char *end_slash;
 		char *directory;
 
-		end_slash = strrchr((char*) url_path, '/');
+		end_slash = strrchr((char*) remote_path, DEFAULT_SLASH);
 		if (!end_slash) {
-			xdfree(url_path);
 			return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 		}
 
-		directory = xdstrndup(url_path, end_slash - url_path + 1);
-		end_slash = strrchr((char*) directory, '/');
+		directory = xdstrndup(remote_path, end_slash - remote_path + 1);
+		end_slash = strrchr((char*) directory, DEFAULT_SLASH);
 
 		do {
 			size_t n = end_slash - directory + 1;
@@ -100,19 +98,17 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 					*local_line = remote_line;
 
 					*local_path = xdebug_str_new();
-					xdebug_str_add_fmt(*local_path, "%s%s", result->m.local_path->d, url_path + n);
+					xdebug_str_add_fmt(*local_path, "%s%s", result->m.local_path->d, remote_path + n);
 
 					xdfree(directory);
-					xdfree(url_path);
 					return XDEBUG_PATH_MAP_TYPE_DIRECTORY;
 				}
 			}
 
-			end_slash = strrnchr(directory, '/', n - 1);
+			end_slash = strrnchr(directory, DEFAULT_SLASH, n - 1);
 		} while (end_slash);
 
 		xdfree(directory);
-		xdfree(url_path);
 		return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 	}
 
@@ -138,12 +134,10 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 			size_t      result_line;
 
 			if (!result->m.line_ranges) {
-				xdfree(url_path);
 				return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 			}
 
 			if (!find_local_line_number_from_ranges(remote_line, result->m.line_ranges, &result_path, &result_line)) {
-				xdfree(url_path);
 				return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 			}
 
@@ -154,7 +148,6 @@ int remote_to_local(xdebug_path_maps *maps, const char *remote_path, size_t remo
 			*local_path = xdebug_str_copy(result_path);
 			*local_line = result_line;
 
-			xdfree(url_path);
 			return result->type;
 		}
 
@@ -167,7 +160,6 @@ skipped_match:
 	*local_path = NULL;
 	*local_line = -1;
 
-	xdfree(url_path);
 	return XDEBUG_PATH_MAP_FLAGS_SKIP;
 }
 
@@ -217,22 +209,20 @@ int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local
 {
 	xdebug_path_mapping *result;
 	xdebug_hash *map = maps->local_to_remote_map;
-	char *url_path = xdebug_normalize_path_char(local_path);
 
-	if (!xdebug_hash_find(map, url_path, strlen(url_path), (void**) &result)) {
+	if (!xdebug_hash_find(map, local_path, strlen(local_path), (void**) &result)) {
 		/* We can't find an exact file match, so now try to see if we have a directory match, starting with the full
 		 * path and then removing the trailing directory path until there are none left */
 		char *end_slash;
 		char *directory;
 
-		end_slash = strrchr((char*) url_path, '/');
+		end_slash = strrchr((char*) local_path, DEFAULT_SLASH);
 		if (!end_slash) {
-			xdfree(url_path);
 			return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 		}
 
-		directory = xdstrndup(url_path, end_slash - url_path + 1);
-		end_slash = strrchr((char*) directory, '/');
+		directory = xdstrndup(local_path, end_slash - local_path + 1);
+		end_slash = strrchr((char*) directory, DEFAULT_SLASH);
 
 		do {
 			size_t n = end_slash - directory + 1;
@@ -242,19 +232,17 @@ int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local
 					*remote_line = local_line;
 
 					*remote_path = xdebug_str_new();
-					xdebug_str_add_fmt(*remote_path, "%s%s", result->remote_path->d, url_path + n);
+					xdebug_str_add_fmt(*remote_path, "%s%s", result->remote_path->d, local_path + n);
 
 					xdfree(directory);
-					xdfree(url_path);
 					return XDEBUG_PATH_MAP_TYPE_DIRECTORY;
 				}
 			}
 
-			end_slash = strrnchr(directory, '/', n - 1);
+			end_slash = strrnchr(directory, DEFAULT_SLASH, n - 1);
 		} while (end_slash);
 
 		xdfree(directory);
-		xdfree(url_path);
 		return XDEBUG_PATH_MAP_TYPE_UNKNOWN;
 	}
 
@@ -289,7 +277,6 @@ int local_to_remote(xdebug_path_maps *maps, const char *local_path, size_t local
 		}
 	}
 
-	xdfree(url_path);
 	return result->type;
 }
 

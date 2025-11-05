@@ -314,7 +314,7 @@ int xdebug_debugger_map_remote_to_local(zend_string *remote_filename, int remote
 		goto pass_through;
 	}
 
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(remote_filename), remote_lineno);
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping remote location %s:%d", ZSTR_VAL(remote_filename), remote_lineno);
 
 	result = xdebug_path_maps_remote_to_local(
 		ZSTR_VAL(remote_filename), remote_lineno,
@@ -451,7 +451,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 		for (le = XDEBUG_LLIST_HEAD(XG_DBG(context).line_breakpoints); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			extra_brk_info = XDEBUG_LLIST_VALP(le);
 
-			if (XG_DBG(context).handler->break_on_line(&(XG_DBG(context)), extra_brk_info, mapped_path, mapped_lineno)) {
+			if (XG_DBG(context).handler->break_on_line(&(XG_DBG(context)), extra_brk_info, filename, lineno)) {
 				break_ok = 1; /* Breaking is allowed by default */
 
 				/* Check if we have a condition set for it */

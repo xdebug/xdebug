@@ -68,20 +68,20 @@ echo file_get_contents( $xdebugLogFileName );
 [%d] [Path Mapping] DEBUG: Found 1 path mapping rules
 %A
 [%d] [Step Debug] <- step_into -i 4
-[%d] [Path Mapping] INFO: Mapping location %sautoload.inc:6
+[%d] [Path Mapping] INFO: Mapping remote location %sautoload.inc:6
 [%d] [Path Mapping] INFO: Location %sautoload.inc:6 needs to be skipped
-[%d] [Path Mapping] INFO: Mapping location %sautoload.inc:7
+[%d] [Path Mapping] INFO: Mapping remote location %sautoload.inc:7
 [%d] [Path Mapping] INFO: Location %sautoload.inc:7 needs to be skipped
-[%d] [Path Mapping] INFO: Mapping location %scounter.inc:15
+[%d] [Path Mapping] INFO: Mapping remote location %scounter.inc:15
 [%d] [Path Mapping] INFO: Couldn't map location %sxdebug%ecounter.inc:15
-[%d] [Path Mapping] INFO: Mapping location %sautoload.inc:8
+[%d] [Path Mapping] INFO: Mapping remote location %sautoload.inc:8
 [%d] [Path Mapping] INFO: Location %sautoload.inc:8 needs to be skipped
-[%d] [Path Mapping] INFO: Mapping location %scounter.inc:6
+[%d] [Path Mapping] INFO: Mapping remote location %scounter.inc:6
 [%d] [Path Mapping] INFO: Couldn't map location %scounter.inc:6
 [%d] [Step Debug] -> <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="4" status="break" reason="ok"><xdebug:message filename="file://%scounter.inc" lineno="6"></xdebug:message></response>
 %A
 [%d] [Step Debug] <- step_into -i 5
-[%d] [Path Mapping] INFO: Mapping location %sskip-vendor-directory.inc:7
+[%d] [Path Mapping] INFO: Mapping remote location %sskip-vendor-directory.inc:7
 [%d] [Path Mapping] INFO: Couldn't map location %sskip-vendor-directory.inc:7
 [%d] [Step Debug] -> <response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://%sskip-vendor-directory.inc" lineno="7"></xdebug:message></response>
 %A

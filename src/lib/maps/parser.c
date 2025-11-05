@@ -386,6 +386,21 @@ static bool extract_line_range(path_maps_parser_state *state, const char *elemen
 	return false;
 }
 
+#ifdef PHP_WIN32
+static void normalize_path_xdebug_str_in_place(xdebug_str *path)
+{
+	int i;
+
+	for (i = 0; i < XDEBUG_STR_LEN(path); i++) {
+		if (XDEBUG_STR_VAL(path)[i] == '/') {
+			XDEBUG_STR_VAL(path)[i] = '\\';
+		}
+	}
+}
+#else
+# define normalize_path_xdebug_str_in_place(path)
+#endif
+
 static xdebug_str* prepare_remote_element(path_maps_parser_state *state, const char *buffer, const char *equals, int *type, int *remote_begin, int *remote_end)
 {
 	xdebug_str *remote_path;
@@ -440,8 +455,8 @@ static xdebug_str* prepare_remote_element(path_maps_parser_state *state, const c
 		xdebug_str_addl(remote_path, trimmed, trimmed_length, false);
 	}
 
-	/* Convert slashes to Unix style */
-	xdebug_normalize_path_xdebug_str_in_place(remote_path);
+	/* Convert Unix-style slashes (/) to Windows-style slashes (\\) from mapping file if needed */
+	normalize_path_xdebug_str_in_place(remote_path);
 
 	/* clean up */
 	xdfree(trimmed);
@@ -516,9 +531,6 @@ static xdebug_str* prepare_local_element(path_maps_parser_state *state, const ch
 	} else {
 		xdebug_str_addl(local_path, trimmed, trimmed_length, false);
 	}
-
-	/* Convert slashes to Unix style */
-	xdebug_normalize_path_xdebug_str_in_place(local_path);
 
 cleanup:
 	/* clean up */
