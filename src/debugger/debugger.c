@@ -314,7 +314,7 @@ int xdebug_debugger_map_remote_to_local(zend_string *remote_filename, int remote
 		goto pass_through;
 	}
 
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(remote_filename), remote_lineno);
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping remote location %s:%d", ZSTR_VAL(remote_filename), remote_lineno);
 
 	result = xdebug_path_maps_remote_to_local(
 		ZSTR_VAL(remote_filename), remote_lineno,

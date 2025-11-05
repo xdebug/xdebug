@@ -322,7 +322,7 @@ static void map_local_to_remote_replace(xdebug_brk_info *brk_info)
 	if (!xdebug_lib_path_mapping_enabled()) {
 		return;
 	}
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->original_lineno);
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping (to replace) local location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->original_lineno);
 
 	if (xdebug_path_maps_local_to_remote(
 		ZSTR_VAL(brk_info->filename), brk_info->original_lineno,
@@ -356,7 +356,7 @@ static void map_remote_brkinfo_to_local(xdebug_brk_info *brk_info, xdebug_str **
 		goto pass_through;
 	}
 
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno);
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping brkinfo local location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno);
 
 	if (xdebug_path_maps_remote_to_local(
 		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
