@@ -868,14 +868,11 @@ void xdebug_append_error_footer(xdebug_str *str, int html)
 
 char *xdebug_get_printable_stack(int html, int error_type, const char *buffer, const char *error_filename, const int error_lineno, int include_decription)
 {
-	char *prepend_string;
-	char *append_string;
-	char *error_type_str = xdebug_error_type(error_type);
-	char *error_type_str_simple = xdebug_error_type_simple(error_type);
-	xdebug_str str = XDEBUG_STR_INITIALIZER;
-
-	prepend_string = INI_STR((char*) "error_prepend_string");
-	append_string = INI_STR((char*) "error_append_string");
+	char       *error_type_str = xdebug_error_type(error_type);
+	char       *error_type_str_simple = xdebug_error_type_simple(error_type);
+	xdebug_str  str = XDEBUG_STR_INITIALIZER;
+	char       *prepend_string = INI_STR((char*) "error_prepend_string");
+	char       *append_string = INI_STR((char*) "error_append_string");
 
 	if (prepend_string) {
 		xdebug_str_add(&str, prepend_string, 0);
@@ -941,9 +938,13 @@ static char *xdebug_handle_stack_trace(int type, char *error_type_str, const cha
 
 	/* We need to see if we have an uncaught exception fatal error now */
 	if (type == E_ERROR && ((tmp_buf = xdebug_strip_php_stack_trace(buffer)) != NULL)) {
-		xdebug_str str = XDEBUG_STR_INITIALIZER;
+		xdebug_str  str = XDEBUG_STR_INITIALIZER;
+		char       *prepend_string = INI_STR((char*) "error_prepend_string");
+		char       *append_string = INI_STR((char*) "error_append_string");
 
-		/* Append error */
+		if (prepend_string) {
+			xdebug_str_add(&str, prepend_string, 0);
+		}
 		xdebug_append_error_head(&str, PG(html_errors), "uncaught-exception");
 		xdebug_append_error_description(&str, PG(html_errors), error_type_str, tmp_buf, error_filename, error_lineno);
 		xdebug_append_printable_stack(&str, PG(html_errors));
@@ -951,6 +952,9 @@ static char *xdebug_handle_stack_trace(int type, char *error_type_str, const cha
 			xdebug_str_add(&str, XG_BASE(last_exception_trace), 0);
 		}
 		xdebug_append_error_footer(&str, PG(html_errors));
+		if (append_string) {
+			xdebug_str_add(&str, append_string, 0);
+		}
 
 		free(tmp_buf);
 		printable_stack = str.d;
@@ -1195,7 +1199,6 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 	zend_class_entry *exception_ce = exception->ce;
 	char *exception_trace;
 	xdebug_str tmp_str = XDEBUG_STR_INITIALIZER;
-
 	zval *z_previous_exception, *z_last_exception_slot, *z_previous_trace;
 	zend_object *previous_exception_obj = exception;
 	zval dummy;
@@ -1265,9 +1268,18 @@ void xdebug_develop_throw_exception_hook(zend_object *exception, zval *file, zva
 		}
 		if (PG(display_errors)) {
 			xdebug_str displ_tmp_str = XDEBUG_STR_INITIALIZER;
+			char *prepend_string = INI_STR((char*) "error_prepend_string");
+			char *append_string = INI_STR((char*) "error_append_string");
+
+			if (prepend_string) {
+				xdebug_str_add(&displ_tmp_str, prepend_string, 0);
+			}
 			xdebug_append_error_head(&displ_tmp_str, PG(html_errors), "exception");
 			xdebug_str_add(&displ_tmp_str, exception_trace, 0);
 			xdebug_append_error_footer(&displ_tmp_str, PG(html_errors));
+			if (append_string) {
+				xdebug_str_add(&displ_tmp_str, append_string, 0);
+			}
 
 			php_printf("%s", displ_tmp_str.d);
 			xdebug_str_dtor(displ_tmp_str);
