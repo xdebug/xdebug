@@ -118,6 +118,37 @@ static void scan_directory(const char *dir)
 	xdfree(scan_dir);
 }
 
+static void dump_rule_info(void *ret, xdebug_hash_element *e)
+{
+	xdebug_path_mapping *rule = (xdebug_path_mapping*) e->ptr;
+
+	if ((rule->type & XDEBUG_PATH_MAP_FLAGS_MASK) == XDEBUG_PATH_MAP_FLAGS_SKIP) {
+		switch (rule->type & XDEBUG_PATH_MAP_TYPE_MASK) {
+			case XDEBUG_PATH_MAP_TYPE_DIRECTORY:
+				xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULE", "Skip directory '%s'", XDEBUG_STR_VAL(rule->remote_path));
+				break;
+			case XDEBUG_PATH_MAP_TYPE_FILE:
+				xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULE", "Skip file '%s'", XDEBUG_STR_VAL(rule->remote_path));
+				break;
+		}
+	} else {
+		switch (rule->type & XDEBUG_PATH_MAP_TYPE_MASK) {
+			case XDEBUG_PATH_MAP_TYPE_DIRECTORY:
+				xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULE", "Map directory '%s' to '%s'", XDEBUG_STR_VAL(rule->remote_path), XDEBUG_STR_VAL(rule->m.local_path));
+				break;
+			case XDEBUG_PATH_MAP_TYPE_FILE:
+				xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULE", "Map file '%s' to '%s'", XDEBUG_STR_VAL(rule->remote_path), XDEBUG_STR_VAL(rule->m.local_path));
+				break;
+		}
+	}
+}
+
+static void dump_mapping_rules(xdebug_path_maps *map_info)
+{
+	xdebug_hash_apply(map_info->remote_to_local_map, NULL, dump_rule_info);
+	xdebug_hash_apply(map_info->local_to_remote_map, NULL, dump_rule_info);
+}
+
 void xdebug_path_maps_scan(const char *script_source)
 {
 	xdebug_arg *parts;
@@ -164,6 +195,7 @@ void xdebug_path_maps_scan(const char *script_source)
 	xdebug_arg_dtor(parts);
 
 	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_DEBUG, "RULES", "Found %zd path mapping rules", XG_LIB(path_mapping_information)->remote_to_local_map->size);
+	dump_mapping_rules(XG_LIB(path_mapping_information));
 }
 
 int xdebug_path_maps_local_to_remote(const char *local_path, size_t local_line, xdebug_str **remote_path, size_t *remote_line)
