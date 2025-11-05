@@ -102,6 +102,7 @@ static uint64_t xdebug_get_nanotime_rel(xdebug_nanotime_context *nanotime_contex
 		QueryPerformanceCounter(&tcounter);
 		return xdebug_counter_and_freq_to_nanotime((uint64_t)tcounter.QuadPart, nanotime_context->win_freq);
 	}
+	return 0;
 }
 
 // Mac

@@ -44,6 +44,7 @@
 #include "gcstats/gc_stats.h"
 #include "lib/lib_private.h"
 #include "lib/log.h"
+#include "lib/usefulstuff.h"
 #include "lib/var_export_line.h"
 #include "lib/var.h"
 #include "lib/xdebug_strndup.h"
@@ -97,6 +98,22 @@ static zend_op_array *xdebug_compile_file(zend_file_handle *file_handle, int typ
 	if (!op_array) {
 		return NULL;
 	}
+#if PHP_WIN32
+	if (op_array->filename) {
+		char *utf8_filename = xdebug_prepare_filename(ZSTR_VAL(op_array->filename));
+		if (utf8_filename) {
+			xdebug_lowercase_drive_letter(utf8_filename);
+
+			char *utf8_filename_url = xdebug_path_to_url(utf8_filename, strlen(utf8_filename));
+			if (utf8_filename_url) {
+				op_array->filename = zend_string_init(utf8_filename_url, strlen(utf8_filename_url), 0);
+				free(utf8_filename_url);
+			}
+
+			free(utf8_filename);
+		}
+	}
+#endif
 
 	xdebug_coverage_compile_file(op_array);
 	xdebug_debugger_compile_file(op_array);

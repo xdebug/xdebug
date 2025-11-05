@@ -1,6 +1,6 @@
 // vim:ft=javascript
 
-ARG_WITH("xdebug", "Xdebug support", "no");
+ARG_WITH("xdebug", "Xdebug support", "yes");
 
 ARG_WITH("xdebug-compression", "whether to compress profiler files (requires zlib)", "no");
 
@@ -27,11 +27,6 @@ if (PHP_XDEBUG != 'no') {
 		MESSAGE("supported (" + XDEBUG_PHP_VERSION + ")");
 	}
 
-	if (typeof(ZEND_EXTENSION) == 'undefined') {
-		EXTENSION('xdebug', files);
-	} else {
-		ZEND_EXTENSION('xdebug', files);
-	}
 	ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + " ");
 	ADD_FLAG("CFLAGS_XDEBUG", " /I " + configure_module_dirname + "/src ");
 	ADD_SOURCES(configure_module_dirname + "/src/base", XDEBUG_BASE_SOURCES, "xdebug");
@@ -59,4 +54,10 @@ if (PHP_XDEBUG != 'no') {
 	AC_DEFINE("HAVE_XDEBUG_CONTROL_SOCKET_SUPPORT", 1, "Xdebug control socket support");
 
 	AC_DEFINE("HAVE_XDEBUG", 1, "Xdebug support");
+
+	if (typeof(ZEND_EXTENSION) == 'undefined') {
+		EXTENSION('xdebug', files);
+	} else {
+		ZEND_EXTENSION('xdebug', files, true);
+	}
 }
