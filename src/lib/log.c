@@ -25,7 +25,7 @@
 #include "log.h"
 #include "var.h"
 
-#define DOCS_LINK_ICON "⊕"
+#define DOCS_LINK_ICON "\u2295"
 
 char* xdebug_lib_docs_base(void)
 {
