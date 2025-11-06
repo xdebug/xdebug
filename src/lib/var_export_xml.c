@@ -613,10 +613,10 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 
 #if PHP_VERSION_ID >= 80400
 			if (ce->type != ZEND_INTERNAL_CLASS && zend_object_is_lazy(Z_OBJ_P(*struc))) {
-				xdebug_xml_add_attribute(node, "type", "object");
 				if (zend_object_is_lazy_proxy(Z_OBJ_P(*struc))) {
 					xdebug_xml_expand_attribute_value(node, "facet", "lazy-proxy");
 				} else if (!zend_lazy_object_initialized(Z_OBJ_P(*struc))) {
+					xdebug_xml_add_attribute(node, "type", "object");
 					xdebug_xml_expand_attribute_value(node, "facet", "lazy-ghost");
 
 					break; /* Jump out of the function */
