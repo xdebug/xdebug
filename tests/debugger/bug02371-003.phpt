@@ -40,7 +40,7 @@ dbgpRunFile( $filename, $commands );
 
 -> property_get -i 4 -n $user
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$user" fullname="$user" type="object" facet="lazy-proxy" type="object" classname="User" children="1" numchildren="2" page="0" pagesize="32"><property name="id" fullname="$user-&gt;id" facet="public" type="int"><![CDATA[43]]></property><property name="name" fullname="$user-&gt;name" facet="public" type="string" size="5" encoding="base64"><![CDATA[Qmx1ZXk=]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="4"><property name="$user" fullname="$user" facet="lazy-proxy" type="object" classname="User" children="1" numchildren="2" page="0" pagesize="32"><property name="id" fullname="$user-&gt;id" facet="public" type="int"><![CDATA[43]]></property><property name="name" fullname="$user-&gt;name" facet="public" type="string" size="5" encoding="base64"><![CDATA[Qmx1ZXk=]]></property></property></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -48,7 +48,7 @@ dbgpRunFile( $filename, $commands );
 
 -> property_get -i 6 -n $user
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$user" fullname="$user" type="object" facet="lazy-proxy" type="object" classname="User" children="1" numchildren="2" page="0" pagesize="32"><property name="id" fullname="$user-&gt;id" facet="public" type="int"><![CDATA[43]]></property><property name="name" fullname="$user-&gt;name" facet="public" type="string" size="5" encoding="base64"><![CDATA[Qmx1ZXk=]]></property></property></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="property_get" transaction_id="6"><property name="$user" fullname="$user" facet="lazy-proxy" type="object" classname="User" children="1" numchildren="2" page="0" pagesize="32"><property name="id" fullname="$user-&gt;id" facet="public" type="int"><![CDATA[43]]></property><property name="name" fullname="$user-&gt;name" facet="public" type="string" size="5" encoding="base64"><![CDATA[Qmx1ZXk=]]></property></property></response>
 
 -> detach -i 7
 <?xml version="1.0" encoding="iso-8859-1"?>
