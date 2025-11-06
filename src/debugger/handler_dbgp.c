@@ -1266,7 +1266,7 @@ DBGP_FUNC(eval)
 	size_t           new_length = 0;
 	int              res;
 	xdebug_var_export_options *options;
-	zend_string     *return_message;
+	zend_string     *return_message = NULL;
 
 	if (!CMD_OPTION_SET('-')) {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
