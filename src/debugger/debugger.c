@@ -166,6 +166,8 @@ int xdebug_do_eval(char *eval_string, zval *ret_zval, zend_string **return_messa
 	/* Do evaluation */
 	zend_first_try {
 		res = (zend_eval_string(eval_string, ret_zval, (char*) "xdebug://debug-eval") == SUCCESS);
+	} zend_catch {
+		res = 0;
 	} zend_end_try();
 
 	if (EG(exception)) {
