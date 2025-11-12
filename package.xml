@@ -133,6 +133,8 @@ Tue, Oct 07, 2025 - Xdebug 3.5.0alpha2
      <file name="llist.c" role="src" />
      <file name="llist.h" role="src" />
      <file name="mm.h" role="src" />
+     <file name="normalize_path.c" role="src" />
+     <file name="normalize_path.h" role="src" />
      <file name="php-header.h" role="src" />
      <file name="set.c" role="src" />
      <file name="set.h" role="src" />
