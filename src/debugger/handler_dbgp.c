@@ -2132,6 +2132,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	}
 
 	if (
+		ZEND_USER_CODE(EG(current_execute_data)->func->type) &&
 		EG(current_execute_data)->opline->opcode == ZEND_EXT_STMT &&
 		(
 			EG(current_execute_data)->opline->op1_type == IS_VAR || EG(current_execute_data)->opline->op1_type == IS_TMP_VAR
