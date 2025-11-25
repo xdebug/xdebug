@@ -349,7 +349,7 @@ static void xdebug_control_socket_handle(void)
 			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from NP: %x", GetLastError());
 		} else {
 			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
-			handle_command(0, buffer);
+			handle_command(XG_BASE(control_socket_h), buffer);
 			FlushFileBuffers(XG_BASE(control_socket_h));
 		}
 
