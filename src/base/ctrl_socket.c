@@ -334,8 +334,10 @@ static void xdebug_control_socket_handle(void)
 	if (result == ERROR_PIPE_CONNECTED) {
 		// got new client!
 		DWORD lpMode;
-		lpMode = PIPE_TYPE_BYTE | PIPE_REJECT_REMOTE_CLIENTS;
-		SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL);
+		lpMode = PIPE_TYPE_BYTE | PIPE_WAIT;
+		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+		}
 
 		memset(buffer, 0, sizeof(buffer));
 		bytes_read = 0;
@@ -346,15 +348,17 @@ static void xdebug_control_socket_handle(void)
 			&bytes_read,
 			NULL
 		)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from NP: %x", GetLastError());
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from NP: 0x%x", GetLastError());
 		} else {
 			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
 			handle_command(XG_BASE(control_socket_h), buffer);
 			FlushFileBuffers(XG_BASE(control_socket_h));
 		}
 
-		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS;
-		SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL);
+		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT;
+		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't (post)set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+		}
 	}
 
 	// All other errors and completed reading should close the socket
@@ -489,7 +493,7 @@ void xdebug_control_socket_setup(void)
 
 	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE) {
 		errno = WSAGetLastError();
-		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (%x)", errno);
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (0x%x)", errno);
 		xdfree(XG_BASE(control_socket_path));
 		XG_BASE(control_socket_path) = NULL;
 		return;
