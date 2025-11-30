@@ -475,13 +475,16 @@ void xdebug_control_socket_teardown(void)
 #elif WIN32
 void xdebug_control_socket_setup(void)
 {
+	char *name = NULL;
+
 	XG_BASE(control_socket_last_trigger) = xdebug_get_nanotime();
 
-	XG_BASE(control_socket_path) = xdebug_sprintf("\\\\.\\pipe\\xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+	name = xdebug_sprintf("\\\\.\\pipe\\%s", XG_BASE(control_socket_path));
 
 	/* Part 1 – create Named Pipe */
 	XG_BASE(control_socket_h) = CreateNamedPipeA(
-		XG_BASE(control_socket_path),
+		name,
 		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
 		PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS,
 		1,
@@ -491,6 +494,8 @@ void xdebug_control_socket_setup(void)
 		NULL
 	);
 
+	xdfree(name);
+
 	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE) {
 		errno = WSAGetLastError();
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (0x%x)", errno);
@@ -499,7 +504,7 @@ void xdebug_control_socket_setup(void)
 		return;
 	}
 
-	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '%s'", XG_BASE(control_socket_path));
+	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '\\\\.\\pipe\\%s'", XG_BASE(control_socket_path));
 }
 
 void xdebug_control_socket_teardown(void)
