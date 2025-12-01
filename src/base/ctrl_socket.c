@@ -495,16 +495,17 @@ void xdebug_control_socket_setup(void)
 	);
 
 	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE) {
-		xdfree(name);
 		errno = WSAGetLastError();
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (0x%x)", errno);
 		xdfree(XG_BASE(control_socket_path));
 		XG_BASE(control_socket_path) = NULL;
+
+		xdfree(name);
 		return;
 	}
 
 	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '%s'", name);
-	xdfree(name);	
+	xdfree(name);
 }
 
 void xdebug_control_socket_teardown(void)
