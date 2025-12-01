@@ -410,6 +410,7 @@ void xdebug_control_socket_dispatch(void)
 void xdebug_control_socket_setup(void)
 {
 	struct sockaddr_un *servaddr = NULL;
+	socklen_t addr_len = 0;
 
 	/* Initialise control socket globals */
 	XG_BASE(control_socket_fd) = -1;
@@ -435,13 +436,12 @@ void xdebug_control_socket_setup(void)
 		return;
 	}
 
-	memset(servaddr, 'x', sizeof(struct sockaddr_un));
 	servaddr->sun_family = AF_UNIX;
 	snprintf(servaddr->sun_path + 1, strlen(XG_BASE(control_socket_path)) + 1, "%s", XG_BASE(control_socket_path));
+	addr_len = offsetof(struct sockaddr_un, sun_path) + strlen(XG_BASE(control_socket_path));
 	servaddr->sun_path[0] = '\0';
-	servaddr->sun_path[strlen(XG_BASE(control_socket_path)) + 1] = 'y';
 
-	if (0 != (bind(XG_BASE(control_socket_fd), (struct sockaddr *)servaddr, sizeof(struct sockaddr_un)))) {
+	if (0 != (bind(XG_BASE(control_socket_fd), (struct sockaddr *)servaddr, addr_len))) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-BIND", "Can't bind control socket");
 		xdfree(servaddr);
 		xdfree(XG_BASE(control_socket_path));
