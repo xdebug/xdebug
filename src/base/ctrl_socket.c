@@ -336,7 +336,7 @@ static void xdebug_control_socket_handle(void)
 		DWORD lpMode;
 		lpMode = PIPE_TYPE_BYTE | PIPE_WAIT;
 		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_ERR, "CTRL-RECV", "Can't set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
 		}
 
 		memset(buffer, 0, sizeof(buffer));
@@ -357,7 +357,7 @@ static void xdebug_control_socket_handle(void)
 
 		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT;
 		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't (post)set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_ERR, "CTRL-RECV", "Can't (post)set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
 		}
 	}
 
