@@ -309,12 +309,12 @@ static void xdebug_control_socket_handle(void)
 	int   bytes_read;
 
 	if (XG_BASE(control_socket_h) <= 0) {
-		// no NP
+		/* No Named Pipe */
 		return;
 	}
 
 	if (ConnectNamedPipe(XG_BASE(control_socket_h), NULL)) {
-		// previous disconnect
+		/* Previous disconnect */
 		DisconnectNamedPipe(XG_BASE(control_socket_h));
 		return;
 	}
@@ -322,7 +322,7 @@ static void xdebug_control_socket_handle(void)
 	result = GetLastError();
 
 	if (result == ERROR_PIPE_LISTENING) {
-		// no clients
+		/* No clients */
 		return;
 	}
 
@@ -332,7 +332,7 @@ static void xdebug_control_socket_handle(void)
 	}
 
 	if (result == ERROR_PIPE_CONNECTED) {
-		// got new client!
+		/* Got new client */
 		DWORD lpMode;
 		lpMode = PIPE_TYPE_BYTE | PIPE_WAIT;
 		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
@@ -361,7 +361,7 @@ static void xdebug_control_socket_handle(void)
 		}
 	}
 
-	// All other errors and completed reading should close the socket
+	/* All other errors and completed reading should close the socket */
 	DisconnectNamedPipe(XG_BASE(control_socket_h));
 }
 #endif
