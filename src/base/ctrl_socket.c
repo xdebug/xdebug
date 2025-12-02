@@ -438,7 +438,7 @@ void xdebug_control_socket_setup(void)
 
 	servaddr->sun_family = AF_UNIX;
 	snprintf(servaddr->sun_path + 1, strlen(XG_BASE(control_socket_path)) + 1, "%s", XG_BASE(control_socket_path));
-	addr_len = offsetof(struct sockaddr_un, sun_path) + strlen(XG_BASE(control_socket_path));
+	addr_len = offsetof(struct sockaddr_un, sun_path) + strlen(XG_BASE(control_socket_path)) + 1;
 	servaddr->sun_path[0] = '\0';
 
 	if (0 != (bind(XG_BASE(control_socket_fd), (struct sockaddr *)servaddr, addr_len))) {
