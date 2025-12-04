@@ -273,7 +273,7 @@ static void xdebug_control_socket_handle(void)
 	rc = select(XG_BASE(control_socket_fd) + 1, &working_set, NULL, NULL, &timeout);
 
 	if (rc < 0) {
-		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SELECT", "Select failed: %s", strerror(errno));
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Select failed: %s", strerror(errno));
 		return;
 	}
 
@@ -293,9 +293,9 @@ static void xdebug_control_socket_handle(void)
 		memset(buffer, 0, sizeof(buffer));
 		bytes_read = read(new_sd, buffer, sizeof(buffer));
 		if (bytes_read == -1) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from socket: %s", strerror(errno));
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from socket: %s", strerror(errno));
 		} else {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
 			handle_command(new_sd, buffer);
 		}
 		close(new_sd);
@@ -336,7 +336,7 @@ static void xdebug_control_socket_handle(void)
 		DWORD lpMode;
 		lpMode = PIPE_TYPE_BYTE | PIPE_WAIT;
 		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_ERR, "CTRL-RECV", "Can't set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
 		}
 
 		memset(buffer, 0, sizeof(buffer));
@@ -348,16 +348,16 @@ static void xdebug_control_socket_handle(void)
 			&bytes_read,
 			NULL
 		)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from NP: 0x%x", GetLastError());
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from NP: 0x%x", GetLastError());
 		} else {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
 			handle_command(XG_BASE(control_socket_h), buffer);
 			FlushFileBuffers(XG_BASE(control_socket_h));
 		}
 
 		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT;
 		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_ERR, "CTRL-RECV", "Can't (post)set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't (post)set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
 		}
 	}
 
