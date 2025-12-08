@@ -39,27 +39,19 @@ dump the full execution of your script to a file, and more.
 Requirements
 ------------
 
-Xdebug requires a `supported version <https://www.php.net/supported-versions.php>`_ of PHP. For
-installation it requires the `pecl` tool (available through the `php-pear`
-package), unless your Linux distribution has an Xdebug package (`php-xdebug`).
+Xdebug requires a `supported version <https://www.php.net/supported-versions.php>`_
+of PHP. For installation it requires the ``pie`` tool, unless your Linux
+distribution has an Xdebug package (most often: ``php-xdebug``).
 
 Installation
 ------------
 
-On most Linux distributions you can install Xdebug through its package
-manager. You can also compile from source with the `pecl` tool through `pecl
-install xdebug`. The latter also works for MacOS as long as PHP is installed
-with Homebrew.
+On most Linux distributions you can install Xdebug through `their package
+manager <https://xdebug.org/docs/install#linux>`_.
 
-On Windows, you need to `download <https://xdebug.org/download#releases>`_ a
-binary. Use the `Wizard <https://xdebug.org/wizard>`_.
-
-Unless you have installed Xdebug with a package manager on Linux, you also
-need to add the following line to your `php.ini` file, or create a new Xdebug
-specific ini file `xdebug.ini` in the `conf.d` directory. In either case, it
-needs the following line added::
-
-	zend_extension=xdebug
+You can also install Xdebug on Linux, macOS, and Windows, with the
+`PIE <https://github.com/php/pie?tab=readme-ov-file#using-pie---what-do-i-need-to-get-started>`_
+installer through ``pie install xdebug/xdebug``.
 
 For more extensive installation instructions, see the documentation at
 https://xdebug.org/docs/install
