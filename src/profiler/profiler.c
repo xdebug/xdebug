@@ -354,7 +354,7 @@ void xdebug_profiler_add_function_details_user(function_stack_entry *fse, zend_o
 	} else {
 		fse->profiler.filename = zend_string_copy(fse->filename);
 	}
-	fse->profiler.function = ZSTR_INIT_LITERAL(tmp_name, false);
+	fse->profiler.function = zend_string_init(tmp_name, strlen(tmp_name), false);
 	xdfree(tmp_name);
 }
 
@@ -383,7 +383,7 @@ void xdebug_profiler_add_function_details_internal(function_stack_entry *fse)
 	}
 
 	fse->profiler.filename = zend_string_copy(fse->filename);
-	fse->profiler.function = ZSTR_INIT_LITERAL(tmp_name, false);
+	fse->profiler.function = zend_string_init(tmp_name, strlen(tmp_name), false);
 
 	xdfree(tmp_name);
 }
