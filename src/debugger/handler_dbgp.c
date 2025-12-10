@@ -1937,7 +1937,7 @@ DBGP_FUNC(property_set)
 		/* don't send an error, send success = zero */
 		xdebug_xml_add_attribute(*retval, "success", "0");
 	} else {
-		zval_dtor(&ret_zval);
+		zval_ptr_dtor_nogc(&ret_zval);
 		xdebug_xml_add_attribute(*retval, "success", "1");
 	}
 }
