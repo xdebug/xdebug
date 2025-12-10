@@ -467,7 +467,7 @@ void xdebug_debugger_statement_call(zend_string *filename, int lineno)
 					res = xdebug_do_eval(extra_brk_info->condition, &retval, NULL);
 					if (res) {
 						break_ok = Z_TYPE(retval) == IS_TRUE;
-						zval_dtor(&retval);
+						zval_ptr_dtor_nogc(&retval);
 					}
 				}
 				if (break_ok && xdebug_handle_hit_value(extra_brk_info)) {

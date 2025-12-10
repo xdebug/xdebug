@@ -192,7 +192,7 @@ int xdebug_include_or_eval_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	XG_BASE(last_eval_statement) = zend_string_init(Z_STRVAL_P(inc_filename), Z_STRLEN_P(inc_filename), 0);
 
 	if (inc_filename == &tmp_inc_filename) {
-		zval_dtor(&tmp_inc_filename);
+		zval_ptr_dtor_nogc(&tmp_inc_filename);
 	}
 
 	return xdebug_call_original_opcode_handler_if_set(opline->opcode, XDEBUG_OPCODE_HANDLER_ARGS_PASSTHRU);
