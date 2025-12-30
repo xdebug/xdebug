@@ -1428,6 +1428,12 @@ void xdebug_base_rinit()
 	if (XG_BASE(private_tmp)) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "PRIVTMP", "Systemd Private Temp Directory is enabled (%s)", XG_BASE(private_tmp));
 	}
+
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE) || XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		XG_BASE(statement_handler_enabled) = 1;
+	} else {
+		XG_BASE(statement_handler_enabled) = 0;
+	}
 }
 
 void xdebug_base_post_deactivate()
