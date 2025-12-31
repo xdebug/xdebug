@@ -1425,6 +1425,7 @@ void xdebug_base_rinit()
 	XG_BASE(filters_stack)             = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
+	/* Warn about Private Temp Directory */
 	if (XG_BASE(private_tmp)) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "PRIVTMP", "Systemd Private Temp Directory is enabled (%s)", XG_BASE(private_tmp));
 	}
