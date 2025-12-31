@@ -1384,6 +1384,12 @@ void xdebug_base_rinit()
 	XG_BASE(last_eval_statement) = NULL;
 	XG_BASE(last_exception_trace) = NULL;
 
+	/* Enable statement handler only when needed */
+	XG_BASE(statement_handler_enabled) = false;
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE) || XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		XG_BASE(statement_handler_enabled) = true;
+	}
+
 	/* Initialize start time */
 	XG_BASE(start_nanotime) = xdebug_get_nanotime();
 
@@ -1425,6 +1431,7 @@ void xdebug_base_rinit()
 	XG_BASE(filters_stack)             = xdebug_llist_alloc(xdebug_llist_string_dtor);
 	XG_BASE(filters_tracing)           = xdebug_llist_alloc(xdebug_llist_string_dtor);
 
+	/* Warn about Private Temp Directory */
 	if (XG_BASE(private_tmp)) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "PRIVTMP", "Systemd Private Temp Directory is enabled (%s)", XG_BASE(private_tmp));
 	}
