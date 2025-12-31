@@ -417,6 +417,7 @@ static void xdebug_init_base_globals(xdebug_base_globals_t *xg)
 	xg->in_var_serialisation = 0;
 	xg->error_reporting_override   = 0;
 	xg->error_reporting_overridden = 0;
+	xg->statement_handler_enabled  = false;
 
 	xg->filter_type_code_coverage = XDEBUG_FILTER_NONE;
 	xg->filter_type_stack         = XDEBUG_FILTER_NONE;
@@ -760,10 +761,14 @@ PHP_MINFO_FUNCTION(xdebug)
 
 ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 {
-	zend_op_array *op_array = &frame->func->op_array;
-	int                   lineno;
+	zend_op_array *op_array;
+	int            lineno;
 
 	if (XDEBUG_MODE_IS_OFF()) {
+		return;
+	}
+
+	if (!XG_BASE(statement_handler_enabled)) {
 		return;
 	}
 
@@ -771,6 +776,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 		return;
 	}
 
+	op_array = &frame->func->op_array;
 	lineno = EG(current_execute_data)->opline->lineno;
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {

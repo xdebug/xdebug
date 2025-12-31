@@ -1384,6 +1384,12 @@ void xdebug_base_rinit()
 	XG_BASE(last_eval_statement) = NULL;
 	XG_BASE(last_exception_trace) = NULL;
 
+	/* Enable statement handler only when needed */
+	XG_BASE(statement_handler_enabled) = false;
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE) || XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
+		XG_BASE(statement_handler_enabled) = true;
+	}
+
 	/* Initialize start time */
 	XG_BASE(start_nanotime) = xdebug_get_nanotime();
 
