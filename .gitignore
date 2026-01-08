@@ -84,6 +84,7 @@ phpt.*
 !make-release.php
 !bench.php
 !rector.php
+!generate_summary.php
 tests/ctest/*.o
 tests/ctest/afl-test-*
 tests/ctest/ctest
