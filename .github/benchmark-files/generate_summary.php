@@ -139,8 +139,20 @@ foreach ($commands as $command) {
 file_put_contents('summary.md', $output);
 echo "Summary generated successfully in summary.md\n";
 
-// Write CSV file
+// Write CSV file with metadata header
 $csvFile = fopen('summary.csv', 'w');
+
+// Add metadata rows at the top
+fputcsv($csvFile, ['date', date('c')]); // ISO 8601 format
+
+// For pull requests, GITHUB_HEAD_REF contains the source branch name
+// For other events (workflow_dispatch, schedule), use GITHUB_REF_NAME which contains the current branch name
+$branch = getenv('GITHUB_HEAD_REF') ?: getenv('GITHUB_REF_NAME') ?: 'unknown';
+fputcsv($csvFile, ['branch', $branch]);
+
+fputcsv($csvFile, ['commit', getenv('GITHUB_SHA') ?: 'unknown']);
+
+// Add the benchmark data
 foreach ($csvData as $row) {
     fputcsv($csvFile, $row);
 }
