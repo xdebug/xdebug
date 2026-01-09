@@ -23,7 +23,7 @@ jobs:
             fail-fast: false
             matrix:
                 command: ["bench", "symfony", "rector"]
-                php: ["8.0", "8.1", "8.2", "8.3", "8.4", "8.5"]
+                php: ["8.1", "8.2", "8.3", "8.4", "8.5"]
                 xdebug_mode: ["no", "off", "develop", "coverage", "debug", "gcstats", "profile", "trace"]
         steps:
             -   uses: actions/checkout@v4
@@ -144,62 +144,21 @@ jobs:
         needs: run-benchmark
         runs-on: ubuntu-latest
         steps:
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "8.5"
+                    coverage: none
+
+            -   uses: actions/checkout@v4
+
             -   name: Download all artifacts
                 uses: actions/download-artifact@v4
                 with:
                     path: results
 
-            -   name: Merge matrix values
-                # We copy all the saved result files into a single folder and build a file with a list of all matrix
-                # variables used
-                run: |
-                    mkdir merged
-                    find results -name '*.txt' -exec cp {} merged/ \;
-                    cat merged/matrix-values-*.txt | sort | uniq > unique-matrix-values.txt
-                    cat unique-matrix-values.txt
-
-            -   name: Generate summary table
-                run: |
-                    # This is needed to be able to print the number of instructions using commas for separators
-                    export LC_NUMERIC=en_US.UTF-8
-                    echo "# 🕒 Performance Results" > summary.md 
-
-                    # We build lists of the different matrix options used in the previous jobs
-                    commands=$(cut -d',' -f2 unique-matrix-values.txt | sort | uniq)
-                    php_versions=$(cut -d',' -f1 unique-matrix-values.txt | sort | uniq)
-                    xdebug_modes=$(cut -d',' -f3 unique-matrix-values.txt | sort | uniq)
-
-                    # And we loop over all these versions building a summary with tables of all the values
-                    for command in $commands; do
-                        echo "" >> summary.md
-                        echo "## **Command:** \`$command\`" >> summary.md
-                        for php in $php_versions; do
-                            echo "" >> summary.md
-                            echo "### **PHP Version:** \`$php\`" >> summary.md
-                            echo "" >> summary.md
-                            echo "| Xdebug | Instructions | Slowdown |" >> summary.md
-                            echo "|--------|-------------:|---------:|" >> summary.md
-
-                            # To calculate the slowdown, we read a base value which is taken from the data
-                            # where Xdebug mode is "no" (it was not loaded)
-                            base_file="merged/php-${php}_cmd-${command}_xdebug-no.txt"
-                            base_value=$(cat "$base_file")
-                            for xdebug in $xdebug_modes; do
-                                file="merged/php-${php}_cmd-${command}_xdebug-${xdebug}.txt"
-                                if [[ -f "$file" ]]; then
-                                    value=$(cat "$file")
-                                    if [[ "$xdebug" == "no" ]]; then
-                                        slowdown="0%"
-                                    else
-                                        slowdown=$(awk -v v=$value -v b=$base_value 'BEGIN { printf "%.1f%%", ((v - b) * 100) / b }')
-                                    fi
-                                    # The number of instructions is formatted with thousands separators
-                                    formatted_value=$(printf "%'d" "$value")
-                                    echo "| $xdebug | $formatted_value | $slowdown |" >> summary.md
-                                fi
-                            done
-                        done
-                    done
+            -   name: Generate summary table as markdown
+                run: php .github/benchmark-files/generate_summary.php
 
             -   name: print summary
                 # This generated summary file is copied into a special file which GitHub has defined
@@ -212,3 +171,9 @@ jobs:
                 uses: geekyeggo/delete-artifact@v5
                 with:
                     name: results-*                
+
+            -   name: Upload summary.csv as artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: summary.csv
+                    path: summary.csv
