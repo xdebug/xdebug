@@ -273,7 +273,7 @@ static void xdebug_control_socket_handle(void)
 	rc = select(XG_BASE(control_socket_fd) + 1, &working_set, NULL, NULL, &timeout);
 
 	if (rc < 0) {
-		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SELECT", "Select failed: %s", strerror(errno));
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Select failed: %s", strerror(errno));
 		return;
 	}
 
@@ -293,9 +293,9 @@ static void xdebug_control_socket_handle(void)
 		memset(buffer, 0, sizeof(buffer));
 		bytes_read = read(new_sd, buffer, sizeof(buffer));
 		if (bytes_read == -1) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from socket: %s", strerror(errno));
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from socket: %s", strerror(errno));
 		} else {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
 			handle_command(new_sd, buffer);
 		}
 		close(new_sd);
@@ -309,12 +309,12 @@ static void xdebug_control_socket_handle(void)
 	int   bytes_read;
 
 	if (XG_BASE(control_socket_h) <= 0) {
-		// no NP
+		/* No Named Pipe */
 		return;
 	}
 
 	if (ConnectNamedPipe(XG_BASE(control_socket_h), NULL)) {
-		// previous disconnect
+		/* Previous disconnect */
 		DisconnectNamedPipe(XG_BASE(control_socket_h));
 		return;
 	}
@@ -322,7 +322,7 @@ static void xdebug_control_socket_handle(void)
 	result = GetLastError();
 
 	if (result == ERROR_PIPE_LISTENING) {
-		// no clients
+		/* No clients */
 		return;
 	}
 
@@ -332,10 +332,12 @@ static void xdebug_control_socket_handle(void)
 	}
 
 	if (result == ERROR_PIPE_CONNECTED) {
-		// got new client!
+		/* Got new client */
 		DWORD lpMode;
-		lpMode = PIPE_TYPE_BYTE | PIPE_REJECT_REMOTE_CLIENTS;
-		SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL);
+		lpMode = PIPE_TYPE_BYTE | PIPE_WAIT;
+		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+		}
 
 		memset(buffer, 0, sizeof(buffer));
 		bytes_read = 0;
@@ -346,18 +348,20 @@ static void xdebug_control_socket_handle(void)
 			&bytes_read,
 			NULL
 		)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-RECV", "Can't receive from NP: %x", GetLastError());
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from NP: 0x%x", GetLastError());
 		} else {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-RECV", "Received: '%s'", buffer);
-			handle_command(0, buffer);
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
+			handle_command(XG_BASE(control_socket_h), buffer);
 			FlushFileBuffers(XG_BASE(control_socket_h));
 		}
 
-		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS;
-		SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL);
+		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT;
+		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't (post)set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+		}
 	}
 
-	// All other errors and completed reading should close the socket
+	/* All other errors and completed reading should close the socket */
 	DisconnectNamedPipe(XG_BASE(control_socket_h));
 }
 #endif
@@ -406,6 +410,7 @@ void xdebug_control_socket_dispatch(void)
 void xdebug_control_socket_setup(void)
 {
 	struct sockaddr_un *servaddr = NULL;
+	socklen_t addr_len = 0;
 
 	/* Initialise control socket globals */
 	XG_BASE(control_socket_fd) = -1;
@@ -431,13 +436,12 @@ void xdebug_control_socket_setup(void)
 		return;
 	}
 
-	memset(servaddr, 'x', sizeof(struct sockaddr_un));
 	servaddr->sun_family = AF_UNIX;
 	snprintf(servaddr->sun_path + 1, strlen(XG_BASE(control_socket_path)) + 1, "%s", XG_BASE(control_socket_path));
+	addr_len = offsetof(struct sockaddr_un, sun_path) + strlen(XG_BASE(control_socket_path)) + 1;
 	servaddr->sun_path[0] = '\0';
-	servaddr->sun_path[strlen(XG_BASE(control_socket_path)) + 1] = 'y';
 
-	if (0 != (bind(XG_BASE(control_socket_fd), (struct sockaddr *)servaddr, sizeof(struct sockaddr_un)))) {
+	if (0 != (bind(XG_BASE(control_socket_fd), (struct sockaddr *)servaddr, addr_len))) {
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-BIND", "Can't bind control socket");
 		xdfree(servaddr);
 		xdfree(XG_BASE(control_socket_path));
@@ -471,13 +475,16 @@ void xdebug_control_socket_teardown(void)
 #elif WIN32
 void xdebug_control_socket_setup(void)
 {
+	char *name = NULL;
+
 	XG_BASE(control_socket_last_trigger) = xdebug_get_nanotime();
 
-	XG_BASE(control_socket_path) = xdebug_sprintf("\\\\.\\pipe\\xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
+	name = xdebug_sprintf("\\\\.\\pipe\\%s", XG_BASE(control_socket_path));
 
 	/* Part 1 – create Named Pipe */
 	XG_BASE(control_socket_h) = CreateNamedPipeA(
-		XG_BASE(control_socket_path),
+		name,
 		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
 		PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS,
 		1,
@@ -488,14 +495,17 @@ void xdebug_control_socket_setup(void)
 	);
 
 	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE) {
-		errno = WSAGetLastError();
-		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (%x)", errno);
+		errno = GetLastError();
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (0x%x)", errno);
 		xdfree(XG_BASE(control_socket_path));
 		XG_BASE(control_socket_path) = NULL;
+
+		xdfree(name);
 		return;
 	}
 
-	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '%s'", XG_BASE(control_socket_path));
+	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-OK", "Control socket set up successfully: '%s'", name);
+	xdfree(name);
 }
 
 void xdebug_control_socket_teardown(void)

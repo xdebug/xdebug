@@ -5,9 +5,9 @@ on:
         branches:
             - 'master'
             - 'xdebug_*'
+        tags:
+            - '*'
     pull_request:
-    release:
-        types: [created]
     create:
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
               id: extension-matrix
               uses: php/php-windows-builder/extension-matrix@v1
               with:
-                php-version-list: '8.0, 8.1, 8.2, 8.3, 8.4'
+                php-version-list: '8.0, 8.1, 8.2, 8.3, 8.4, 8.5'
                 arch-list: 'x64'
 
     windows:
@@ -101,10 +101,11 @@ jobs:
         runs-on: ubuntu-latest
         name: "PIE Release Artifacts"
         needs: windows
-        if: ${{ github.event_name == 'release' }}
+        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') }}
         steps:
             - name: Upload artifact to the release
               uses: php/php-windows-builder/release@v1
               with:
-                release: ${{ github.event.release.tag_name }}
+                release: ${{ github.ref }}
                 token: ${{ secrets.GITHUB_TOKEN }}
+                draft: 'true'

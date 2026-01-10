@@ -150,13 +150,13 @@ function createVersion( $project_id, $release_version )
 
 function updateGIT( bool $from_master )
 {
-	`git checkout master`;
-	`git pull origin master`;
+	shell_exec('git checkout master');
+	shell_exec('git pull origin master');
 
 	if ( !$from_master )
 	{
-		`git checkout xdebug_3_5`;
-		`git pull origin xdebug_3_5`;
+		shell_exec('git checkout xdebug_3_5');
+		shell_exec('git pull origin xdebug_3_5');
 	}
 }
 
@@ -183,7 +183,7 @@ function updatePhpXdebugH( $release_version )
 function rebuild()
 {
 	echo "Rebuilding Xdebug binary:\n";
-	`~/bin/rebuild.sh`;
+	shell_exec('~/bin/rebuild.sh');
 }
 
 function updateIniFileInDocs()
@@ -192,7 +192,7 @@ function updateIniFileInDocs()
 
 	$cwd = getcwd();
 	chdir( $xdebugOrgRepo );
-	`php html/docs/convert.php > {$xdebugRepo}/xdebug.ini`;
+	shell_exec("php html/docs/convert.php > {$xdebugRepo}/xdebug.ini");
 
 	chdir( $cwd );
 }
@@ -258,7 +258,7 @@ function createXdebugVersionPhp( $release_version )
 	global $xdebugOrgRepo;
 
 $xml = <<<ENDXML
-    public const NOT_SUPPORTED_BEFORE = '3.3';
+    public const NOT_SUPPORTED_BEFORE = '3.4';
     public const LATEST_VERSION = '{$release_version}';
     public const LATEST_WINDOWS_VERSION = '{$release_version}';
 
@@ -339,7 +339,7 @@ ENDTXT;
 
 	$cwd = getcwd();
 	chdir( $xdebugOrgRepo );
-	`git add data/news/{$date}.html`;
+	shell_exec("git add data/news/{$date}.html");
 
 	chdir( $cwd );
 }

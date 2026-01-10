@@ -322,7 +322,7 @@ static void map_local_to_remote_replace(xdebug_brk_info *brk_info)
 	if (!xdebug_lib_path_mapping_enabled()) {
 		return;
 	}
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->original_lineno);
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping (to replace) local location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->original_lineno);
 
 	if (xdebug_path_maps_local_to_remote(
 		ZSTR_VAL(brk_info->filename), brk_info->original_lineno,
@@ -356,7 +356,7 @@ static void map_remote_brkinfo_to_local(xdebug_brk_info *brk_info, xdebug_str **
 		goto pass_through;
 	}
 
-	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno);
+	xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_INFO, "ENABLED", "Mapping brkinfo local location %s:%d", ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno);
 
 	if (xdebug_path_maps_remote_to_local(
 		ZSTR_VAL(brk_info->filename), brk_info->resolved_lineno,
@@ -1266,7 +1266,7 @@ DBGP_FUNC(eval)
 	size_t           new_length = 0;
 	int              res;
 	xdebug_var_export_options *options;
-	zend_string     *return_message;
+	zend_string     *return_message = NULL;
 
 	if (!CMD_OPTION_SET('-')) {
 		RETURN_RESULT(XG_DBG(status), XG_DBG(reason), XDEBUG_ERROR_INVALID_ARGS);
@@ -1937,7 +1937,7 @@ DBGP_FUNC(property_set)
 		/* don't send an error, send success = zero */
 		xdebug_xml_add_attribute(*retval, "success", "0");
 	} else {
-		zval_dtor(&ret_zval);
+		zval_ptr_dtor_nogc(&ret_zval);
 		xdebug_xml_add_attribute(*retval, "success", "1");
 	}
 }
@@ -2132,6 +2132,7 @@ static int attach_context_vars(xdebug_xml_node *node, xdebug_var_export_options 
 	}
 
 	if (
+		ZEND_USER_CODE(EG(current_execute_data)->func->type) &&
 		EG(current_execute_data)->opline->opcode == ZEND_EXT_STMT &&
 		(
 			EG(current_execute_data)->opline->op1_type == IS_VAR || EG(current_execute_data)->opline->op1_type == IS_TMP_VAR
@@ -2767,7 +2768,7 @@ int xdebug_dbgp_error(xdebug_con *context, int type, char *exception_type, char 
 	return 1;
 }
 
-int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, xdebug_str *orig_filename, int lineno)
+int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, zend_string *orig_filename, int lineno)
 {
 	zend_string *resolved_filename = NULL;
 
@@ -2778,12 +2779,12 @@ int xdebug_dbgp_break_on_line(xdebug_con *context, xdebug_brk_info *brk, xdebug_
 		return 0;
 	}
 
-	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Current location: %s:%d.", XDEBUG_STR_VAL(orig_filename), lineno);
+	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Current location: %s:%d.", ZSTR_VAL(orig_filename), lineno);
 
-	if (is_dbgp_url(ZSTR_VAL(brk->filename)) && xdebug_debugger_check_evaled_code_xdebug_str(orig_filename, &resolved_filename)) {
-		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Found eval code for '%s': %s.", XDEBUG_STR_VAL(orig_filename), ZSTR_VAL(resolved_filename));
+	if (is_dbgp_url(ZSTR_VAL(brk->filename)) && xdebug_debugger_check_evaled_code_zstr(orig_filename, &resolved_filename)) {
+		xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Found eval code for '%s': %s.", ZSTR_VAL(orig_filename), ZSTR_VAL(resolved_filename));
 	} else {
-		resolved_filename = zend_string_init(XDEBUG_STR_VAL(orig_filename), XDEBUG_STR_LEN(orig_filename), false);
+		resolved_filename = zend_string_init(ZSTR_VAL(orig_filename), ZSTR_LEN(orig_filename), false);
 	}
 
 	xdebug_log(XLOG_CHAN_DEBUG, XLOG_DEBUG, "I: Matching breakpoint '%s:%d' against location '%s:%d'.", ZSTR_VAL(brk->filename), brk->resolved_lineno, ZSTR_VAL(resolved_filename), lineno);

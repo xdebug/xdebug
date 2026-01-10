@@ -10,19 +10,19 @@ xdebug.trace_format=0
 <?php
 require_once 'capture-trace.inc';
 
-$any = 'printf("foo\n");';
+$any = 'printf("foo: %x\n", 42);';
 eval('eval($any);');
 
 xdebug_stop_trace();
 ?>
 DONE
 --EXPECTF--
-foo
+foo: 2a
 DONE
 TRACE START [%d-%d-%d %d:%d:%d.%d]
 %w%f  %w%d     -> eval('eval($any);') %sbug00558-002.php:5
-%w%f  %w%d       -> eval('printf("foo\\n");') %sbug00558-002.php(5) : eval()'d code:1
-%w%f  %w%d         -> printf($format = 'foo\n') %sbug00558-002.php(5) : eval()'d code(1) : eval()'d code:1
+%w%f  %w%d       -> eval('printf("foo: %s\\n", 42);') %sbug00558-002.php(5) : eval()'d code:1
+%w%f  %w%d         -> printf($format = 'foo: %s\n', ...$values = variadic(0 => 42)) %sbug00558-002.php(5) : eval()'d code(1) : eval()'d code:1
 %w%f  %w%d     -> xdebug_stop_trace() %sbug00558-002.php:7
 %w%f  %w%d
 TRACE END   [%d-%d-%d %d:%d:%d.%d]

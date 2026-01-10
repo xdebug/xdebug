@@ -608,11 +608,24 @@ void xdebug_var_export_xml_node(zval **struc, xdebug_str *name, xdebug_xml_node 
 			int                 extra_children = 0;
 			zend_property_info *zpi_val;
 
-			ALLOC_HASHTABLE(merged_hash);
-			zend_hash_init(merged_hash, 128, NULL, merged_hash_object_item_dtor, 0);
-
 			class_name = Z_OBJCE_P(*struc)->name;
 			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_DEFAULT);
+
+#if PHP_VERSION_ID >= 80400
+			if (ce->type != ZEND_INTERNAL_CLASS && zend_object_is_lazy(Z_OBJ_P(*struc))) {
+				if (zend_object_is_lazy_proxy(Z_OBJ_P(*struc))) {
+					xdebug_xml_expand_attribute_value(node, "facet", "lazy-proxy");
+				} else if (!zend_lazy_object_initialized(Z_OBJ_P(*struc))) {
+					xdebug_xml_add_attribute(node, "type", "object");
+					xdebug_xml_expand_attribute_value(node, "facet", "lazy-ghost");
+
+					break; /* Jump out of the function */
+				}
+			}
+#endif
+
+			ALLOC_HASHTABLE(merged_hash);
+			zend_hash_init(merged_hash, 128, NULL, merged_hash_object_item_dtor, 0);
 
 			/* Adding static properties */
 			xdebug_zend_hash_apply_protection_begin(&ce->properties_info);

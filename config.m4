@@ -17,10 +17,10 @@ if test "$PHP_XDEBUG" != "no"; then
   PHP_XDEBUG_FOUND_VERSION=`${PHP_CONFIG} --version`
   PHP_XDEBUG_FOUND_VERNUM=`${PHP_CONFIG} --vernum`
   if test "$PHP_XDEBUG_FOUND_VERNUM" -lt "80000"; then
-    AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.6.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+    AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
   else
-    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80600"; then
-      AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.6.0 (found $PHP_XDEBUG_FOUND_VERSION)])
+    if test "$PHP_XDEBUG_FOUND_VERNUM" -ge "80700"; then
+      AC_MSG_ERROR([not supported. Need a PHP version >= 8.0.0 and < 8.7.0 (found $PHP_XDEBUG_FOUND_VERSION)])
     else
       AC_MSG_RESULT([supported ($PHP_XDEBUG_FOUND_VERSION)])
     fi
@@ -108,7 +108,7 @@ if test "$PHP_XDEBUG" != "no"; then
   PHP_XDEBUG_CFLAGS="$STD_CFLAGS $MAINTAINER_CFLAGS"
 
   XDEBUG_BASE_SOURCES="src/base/base.c src/base/ctrl_socket.c src/base/filter.c"
-  XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/cmd_parser.c src/lib/compat.c src/lib/crc32.c src/lib/file.c src/lib/hash.c src/lib/headers.c src/lib/lib.c src/lib/llist.c src/lib/log.c src/lib/set.c src/lib/str.c src/lib/timing.c src/lib/trim.c src/lib/var.c src/lib/var_export_html.c src/lib/var_export_line.c src/lib/var_export_text.c src/lib/var_export_xml.c src/lib/xdebug_strndup.c src/lib/xml.c"
+  XDEBUG_LIB_SOURCES="src/lib/usefulstuff.c src/lib/cmd_parser.c src/lib/compat.c src/lib/crc32.c src/lib/file.c src/lib/hash.c src/lib/headers.c src/lib/lib.c src/lib/llist.c src/lib/log.c src/lib/normalize_path.c src/lib/set.c src/lib/str.c src/lib/timing.c src/lib/trim.c src/lib/var.c src/lib/var_export_html.c src/lib/var_export_line.c src/lib/var_export_text.c src/lib/var_export_xml.c src/lib/xdebug_strndup.c src/lib/xml.c"
   XDEBUG_LIB_MAPS_SOURCES="src/lib/maps/maps.c src/lib/maps/maps_private.c src/lib/maps/parser.c"
 
   XDEBUG_COVERAGE_SOURCES="src/coverage/branch_info.c src/coverage/code_coverage.c"

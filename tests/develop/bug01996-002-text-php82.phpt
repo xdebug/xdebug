@@ -33,7 +33,7 @@ var_dump($closure);
 ?>
 --EXPECTF--
 %sbug01996-002-text-php82.php:3:
-class Closure#1 (2) {
+class Closure#%d (2) {
   public $function =>
   string(6) "substr"
   public $parameter =>
@@ -47,7 +47,7 @@ class Closure#1 (2) {
   }
 }
 %sbug01996-002-text-php82.php:11:
-class Closure#2 (2) {
+class Closure#%d (2) {
   public $function =>
   string(12) "user_defined"
   public $parameter =>
@@ -59,7 +59,7 @@ class Closure#2 (2) {
   }
 }
 %sbug01996-002-text-php82.php:15:
-class Closure#1 (2) {
+class Closure#%d (2) {
   public $function =>
   string(35) "DateTimeImmutable::createFromFormat"
   public $parameter =>
@@ -73,11 +73,11 @@ class Closure#1 (2) {
   }
 }
 %sbug01996-002-text-php82.php:20:
-class Closure#3 (3) {
+class Closure#%d (3) {
   public $function =>
   string(25) "DateTimeImmutable::format"
   public $this =>
-  class DateTimeImmutable#2 (3) {
+  class DateTimeImmutable#%d (3) {
     public $date =>
     string(26) "2021-07-22 00:00:00.000000"
     public $timezone_type =>

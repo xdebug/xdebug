@@ -1,0 +1,179 @@
+name: Benchmark Xdebug performance
+
+on:
+    # This workflow runs on three triggers: Weekly on schedule, manually, or when pull requests are labeled
+    schedule:
+        # Every Sunday at 03:00 UTC
+        - cron: '0 3 * * 0'
+    workflow_dispatch: 
+    pull_request:
+        types: [ labeled ]
+
+jobs:
+    run-benchmark:
+        # When triggered when a pull request is labeled we check the name of the label
+        if: |
+            github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' ||
+            (
+                github.event_name == 'pull_request' &&
+                github.event.label.name == 'performance-check'
+            )
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                command: ["bench", "symfony", "rector"]
+                php: ["8.1", "8.2", "8.3", "8.4", "8.5"]
+                xdebug_mode: ["no", "off", "develop", "coverage", "debug", "gcstats", "profile", "trace"]
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "${{ matrix.php }}"
+                    coverage: none
+                    # We need to use a specific version of Composer because we are using a specific version of the
+                    # Symfony Demo which is not compatible with the latest versions of Composer
+                    tools: composer:v2.2.21
+
+            -   name: Disable ASLR
+                # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
+                # and other operations, so we disable it during benchmarking.
+                run: echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+
+            -   name: Install valgrind
+                run: sudo apt-get update && sudo apt-get install -y valgrind
+                    
+            -   name: Compile
+                run: |
+                    ./.build.scripts/compile.sh
+                    sudo make install
+
+            -   name: create results and opcache folder
+                run: |
+                    mkdir -p results
+                    mkdir -p /tmp/opcache
+
+            -   name: install Symfony demo
+                if: matrix.command == 'symfony'   
+                # For versions of PHP greater than 8.4 we need to run a different version of the Symfony Demo.
+                # The older versions suffer from the nulllable parameter deprecation and this generated a lot of
+                # deprecations in the code and this skewed the tests results a lot. And we cannot use the newer version
+                # for older versions of PHP as it is not compatible.
+                run: |
+                    if [ "${{ matrix.php }}" \< "8.4" ]; then
+                        version="v2.0.2"
+                    else
+                        version="v2.7.0"
+                    fi
+                    git clone -q --branch "$version" --depth 1 https://github.com/symfony/demo.git ./symfony-demo
+                    cd symfony-demo
+                    composer install 
+                    # We do not want our tests to be skewed by any error, warning, notice or deprecation thrown by the
+                    # code, so we set the error level to 0 on purpose. Unfortunately, Symfony overrides this setup and
+                    # sets their own error reporting level. We fix this by changing all the places where Symfony is
+                    # setting the error reporting level so that it continues to be set to 0
+                    find . -type f -name "*.php" -exec sed -i.bak -E 's/error_reporting\(.*\);/error_reporting(0);/g' {} +
+
+            -   name: install Rector
+                if: matrix.command == 'rector'   
+                run: |
+                    composer require rector/rector:2.1.2 --dev
+                    cp .github/benchmark-files/rector.php .
+
+            -   name: Copy ini file
+                run: |
+                    sudo cp ./.github/benchmark-files/benchmark.ini /etc/php/${{ matrix.php }}/cli/conf.d
+                    sudo cp ./.github/benchmark-files/benchmark.ini /etc/php/${{ matrix.php }}/cgi/conf.d
+
+            -   name: Copy xdebug ini file
+                if: matrix.xdebug_mode != 'no'   
+                run: |
+                    sudo cp ./.github/benchmark-files/xdebug-benchmark.ini /etc/php/${{ matrix.php }}/cli/conf.d
+                    sudo cp ./.github/benchmark-files/xdebug-benchmark.ini /etc/php/${{ matrix.php }}/cgi/conf.d
+    
+            -   name: Set xdebug mode
+                run: echo "XDEBUG_MODE=${{ matrix.xdebug_mode }}" >> $GITHUB_ENV
+    
+            -   name: benchmark bench.php
+                if: matrix.command == 'bench'   
+                run: valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php ./.github/benchmark-files/bench.php
+
+            -   name: benchmark Symfony
+                if: matrix.command == 'symfony'   
+                run: |
+                    cd symfony-demo
+                    # The Symfony demo is run using php-cgi to simulate a web server. Symfony needs that this env
+                    # variable is set, it would usually be set by the web server, we need to set it manually instead
+                    export SCRIPT_FILENAME="$(realpath public/index.php)"
+                    # Symfony also needs this to be set to a non empty value
+                    export APP_SECRET=APP_SECRET
+                    # We run the web page twice so that the files have already been compiled into the opcache in order
+                    # to remove the compilation time from the equation. This also better reflects the normal situation
+                    # in a web server
+                    php-cgi public/index.php
+                    valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php-cgi public/index.php
+                    mv callgrind.out ..
+                    cd ..
+
+            -   name: benchmark rector.php
+                if: matrix.command == 'rector' 
+                # Rector needs to be run with the --xdebug flag so that it does not try to disable Xdebug and also with
+                # the --debug flag so that it does not try to run several threads in parallel
+                run: valgrind --tool=callgrind --dump-instr=yes --callgrind-out-file=callgrind.out -- php vendor/bin/rector --dry-run --xdebug --debug || true
+
+            -   name: save matrix values
+                run: |
+                    # We read the number of executed instructions from the callgrind.out file and save it in an artifact
+                    # to be processed later
+                    awk '/^summary:/ { print $2 }' callgrind.out > results/php-${{ matrix.php }}_cmd-${{ matrix.command }}_xdebug-${{ matrix.xdebug_mode }}.txt
+                    # We also save the matrix variables so that in a later step we can build a list of the executed
+                    # options
+                    echo "${{ matrix.php }},${{ matrix.command }},${{ matrix.xdebug_mode }}" > results/matrix-values-${{ matrix.php }}-${{ matrix.command }}-${{ matrix.xdebug_mode }}.txt
+
+            -   name: Upload result and matrix info
+                uses: actions/upload-artifact@v4
+                with:
+                    name: results-${{ matrix.command }}-${{ matrix.php }}-${{ matrix.xdebug_mode }}
+                    path: results/
+
+    performance:
+        # After running all benchmarks for all commands, PHP versions and Xdebug modes, we run a new job that builds a
+        # summary of all execution times
+        needs: run-benchmark
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "8.5"
+                    coverage: none
+
+            -   uses: actions/checkout@v4
+
+            -   name: Download all artifacts
+                uses: actions/download-artifact@v4
+                with:
+                    path: results
+
+            -   name: Generate summary table as markdown
+                run: php .github/benchmark-files/generate_summary.php
+
+            -   name: print summary
+                # This generated summary file is copied into a special file which GitHub has defined
+                # in this special env variable and it will use it to print a summary for the workflow
+                run: cat summary.md >> $GITHUB_STEP_SUMMARY
+
+            -   name: delete intermediary artifacts
+                # The intermediate files that we generated are not needed and can be deleted,
+                # helping us keep the summary page clean
+                uses: geekyeggo/delete-artifact@v5
+                with:
+                    name: results-*                
+
+            -   name: Upload summary.csv as artifact
+                uses: actions/upload-artifact@v4
+                with:
+                    name: summary.csv
+                    path: summary.csv

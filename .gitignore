@@ -82,9 +82,13 @@ phpt.*
 !php_xdebug.stub.php
 !run-xdebug-tests.php
 !make-release.php
+!bench.php
+!rector.php
+!generate_summary.php
 tests/ctest/*.o
 tests/ctest/afl-test-*
 tests/ctest/ctest
 tests/ctest/ftest
 tests/ctest/fuzz-output
 tests/ctest/xdebuglib.a
+
