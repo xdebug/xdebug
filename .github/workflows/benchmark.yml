@@ -158,6 +158,8 @@ jobs:
                     path: results
 
             -   name: Generate summary table as markdown
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 run: php .github/benchmark-files/generate_summary.php
 
             -   name: print summary
