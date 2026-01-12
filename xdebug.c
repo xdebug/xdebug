@@ -703,6 +703,7 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 {
 	zend_op_array *op_array;
 	int            lineno;
+	int i,j;
 
 	if (XDEBUG_MODE_IS_OFF()) {
 		return;
@@ -729,6 +730,14 @@ ZEND_DLEXPORT void xdebug_statement_call(zend_execute_data *frame)
 
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG)) {
 		xdebug_debugger_statement_call(op_array->filename, lineno);
+		/**
+		 * DO NOT MERGE THIS CHANGE!!!!!!!
+		 * Just added to be able to test recording performance changes
+		 */
+		j = 0;
+		for (i = 0; i < 10; i++) {
+			j += i;
+		}
 	}
 }
 
