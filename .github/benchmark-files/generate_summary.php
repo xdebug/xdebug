@@ -82,7 +82,12 @@ $phpVersions = array_keys($phpVersions);
 $xdebugModes = array_keys($xdebugModes);
 sort($commands);
 sort($phpVersions);
-sort($xdebugModes);
+
+// Sort xdebug modes according to the defined order, leaving only those which actually exist in the data
+$xdebugModeOrder = ["no", "off", "coverage", "debug", "develop", "gcstats", "profile", "trace"];
+$xdebugModes = array_values(array_filter($xdebugModeOrder, function($mode) use ($xdebugModes) {
+    return in_array($mode, $xdebugModes);
+}));
 
 // Start building the markdown summary and CSV data
 $output = "# 🕒 Performance Results\n";
@@ -96,8 +101,8 @@ foreach ($commands as $command) {
     // Loop through each PHP version
     foreach ($phpVersions as $php) {
         $output .= "\n### **PHP Version:** `$php`\n\n";
-        $output .= "| Xdebug | Instructions | Slowdown | Δ performance |\n";
-        $output .= "|--------|-------------:|---------:|--------------:|\n";
+        $output .= "| Xdebug | Instructions | Slowdown | Δ Instructions |\n";
+        $output .= "|--------|-------------:|---------:|---------------:|\n";
 
         // Get base value (when Xdebug mode is "no")
         $baseFile = "merged/php-{$php}_cmd-{$command}_xdebug-no.txt";
@@ -156,8 +161,8 @@ $output .= "\nThese tables show aggregated results across all PHP versions:\n";
 // Aggregate data across all PHP versions for each command and xdebug mode
 foreach ($commands as $command) {
     $output .= "\n## **Command:** `$command`\n\n";
-    $output .= "| Xdebug | Slowdown | Δ performance |\n";
-    $output .= "|--------|----------:|--------------:|\n";
+    $output .= "| Xdebug | Slowdown | Δ Instructions |\n";
+    $output .= "|--------|---------:|---------------:|\n";
 
     // Calculate aggregated values for each xdebug mode
     $aggregatedData = [];

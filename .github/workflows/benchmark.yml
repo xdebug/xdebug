@@ -24,7 +24,7 @@ jobs:
             matrix:
                 command: ["bench", "symfony", "rector"]
                 php: ["8.1", "8.2", "8.3", "8.4", "8.5"]
-                xdebug_mode: ["no", "off", "develop", "coverage", "debug", "gcstats", "profile", "trace"]
+                xdebug_mode: ["no", "off", "coverage", "debug", "develop", "gcstats", "profile", "trace"]
         steps:
             -   uses: actions/checkout@v4
 
