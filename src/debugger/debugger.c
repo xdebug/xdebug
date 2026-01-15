@@ -1240,6 +1240,8 @@ PHP_FUNCTION(xdebug_connect_to_client)
 
 	XG_DBG(context).do_connect_to_client = 1;
 
+    XG_BASE(statement_handler_enabled) = true;
+
 	RETURN_TRUE;
 }
 
