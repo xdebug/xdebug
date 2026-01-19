@@ -71,7 +71,7 @@ typedef struct _xdebug_base_globals_t {
 # ifdef __linux__
 	int        control_socket_fd;
 # elif WIN32
-	HANDLE     control_socket_h;
+	HANDLE      control_socket_h;
 	OVERLAPPED  control_socket_ov;
 # endif
 #endif
