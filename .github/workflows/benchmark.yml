@@ -79,7 +79,7 @@ jobs:
             -   name: install Rector
                 if: matrix.command == 'rector'   
                 run: |
-                    composer require rector/rector:2.1.2 --dev
+                    composer require rector/rector:2.1.2 phpstan/phpstan:2.1.33 --dev
                     cp .github/benchmark-files/rector.php .
 
             -   name: Copy ini file
