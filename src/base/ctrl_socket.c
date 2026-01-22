@@ -159,13 +159,9 @@ static void handle_command(HANDLE h, const char *line)
 #if __linux__
 	write(fd, message->d, message->l);
 #elif WIN32
-	WriteFile(
-		h,
-		message->d,
-		message->l,
-		NULL,
-		NULL
-	);
+	if (WriteFile(h, message->d, message->l, NULL, &XG_BASE(control_socket_ov))) {
+		SetEvent(XG_BASE(control_socket_ov).hEvent);
+	}
 #endif
 
 	xdfree(cmd);
@@ -302,6 +298,32 @@ static void xdebug_control_socket_handle(void)
 	}
 }
 #elif WIN32
+static bool named_pipe_listen()
+{
+	if (ConnectNamedPipe(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov))) {
+		errno = GetLastError();
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't create control Named Pipe Connect 1 (0x%x)", errno);
+		return false;
+	}
+
+	switch (GetLastError()) {
+		case ERROR_IO_PENDING:
+			break;
+		case ERROR_PIPE_CONNECTED:
+			if (!SetEvent(XG_BASE(control_socket_ov).hEvent)) {
+				errno = GetLastError();
+				xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't create control Named Pipe Connect SetEvent (0x%x)", errno);
+				return false;
+			}
+		default:
+			errno = GetLastError();
+			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't create control Named Pipe Connect 2 (0x%x)", errno);
+			return false;
+	}
+
+	return true;
+}
+
 static void xdebug_control_socket_handle(void)
 {
 	DWORD result;
@@ -313,56 +335,52 @@ static void xdebug_control_socket_handle(void)
 		return;
 	}
 
-	if (ConnectNamedPipe(XG_BASE(control_socket_h), NULL)) {
-		/* Previous disconnect */
-		DisconnectNamedPipe(XG_BASE(control_socket_h));
+	if (WaitForSingleObject(XG_BASE(control_socket_ov).hEvent, 0) != WAIT_OBJECT_0) {
+		/* No connection yet */
 		return;
 	}
 
-	result = GetLastError();
-
-	if (result == ERROR_PIPE_LISTENING) {
-		/* No clients */
+	if (!GetOverlappedResult(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov), &bytes_read, TRUE)) {
+		/* Error getting Overlapped result */
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from Named Pipe GetOverlappedResult 1 (0x%x)", GetLastError());
 		return;
 	}
 
-	if (result == ERROR_NO_DATA) {
-		DisconnectNamedPipe(XG_BASE(control_socket_h));
-		return;
-	}
-
-	if (result == ERROR_PIPE_CONNECTED) {
-		/* Got new client */
-		DWORD lpMode;
-		lpMode = PIPE_TYPE_BYTE | PIPE_WAIT;
-		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
-		}
-
-		memset(buffer, 0, sizeof(buffer));
-		bytes_read = 0;
-		if (!ReadFile(
-			XG_BASE(control_socket_h),
-			buffer,
-			sizeof(buffer),
-			&bytes_read,
-			NULL
-		)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from NP: 0x%x", GetLastError());
+	memset(buffer, 0, sizeof(buffer));
+	bytes_read = 0;
+	if (!ReadFile(
+		XG_BASE(control_socket_h),
+		buffer,
+		sizeof(buffer),
+		&bytes_read,
+		&XG_BASE(control_socket_ov)
+	)) {
+		errno = GetLastError();
+		if (errno == ERROR_IO_PENDING) {
+			WaitForSingleObject(XG_BASE(control_socket_ov).hEvent, INFINITY);
+			/* Error? */
+			if (!GetOverlappedResult(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov), &bytes_read, TRUE)) {
+				xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from Named Pipe GetOverlappedResult 2 (0x%x)", GetLastError());
+				goto finish;
+			}
 		} else {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
-			handle_command(XG_BASE(control_socket_h), buffer);
-			FlushFileBuffers(XG_BASE(control_socket_h));
-		}
-
-		lpMode = PIPE_TYPE_BYTE | PIPE_NOWAIT;
-		if (!SetNamedPipeHandleState(XG_BASE(control_socket_h), &lpMode, NULL, NULL)) {
-			xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't (post)set NP handle state to 0x%x: 0x%x", lpMode, GetLastError());
+				xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-HANDLE", "Can't receive from Named Pipe (0x%x)", GetLastError());
+				goto finish;
 		}
 	}
 
-	/* All other errors and completed reading should close the socket */
+	xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_INFO, "CTRL-HANDLE", "Received: '%s'", buffer);
+	handle_command(XG_BASE(control_socket_h), buffer);
+	WaitForSingleObject(XG_BASE(control_socket_ov).hEvent, INFINITY);
+	GetOverlappedResult(XG_BASE(control_socket_h), &XG_BASE(control_socket_ov), &bytes_read, FALSE);
+
+	FlushFileBuffers(XG_BASE(control_socket_h));
+
+finish:
 	DisconnectNamedPipe(XG_BASE(control_socket_h));
+	if (!named_pipe_listen()) {
+		xdebug_control_socket_teardown();
+	}
 }
 #endif
 
@@ -482,11 +500,10 @@ void xdebug_control_socket_setup(void)
 	XG_BASE(control_socket_path) = xdebug_sprintf("xdebug-ctrl." ZEND_ULONG_FMT, xdebug_get_pid());
 	name = xdebug_sprintf("\\\\.\\pipe\\%s", XG_BASE(control_socket_path));
 
-	/* Part 1 – create Named Pipe */
 	XG_BASE(control_socket_h) = CreateNamedPipeA(
 		name,
-		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE,
-		PIPE_TYPE_BYTE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS,
+		PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE | FILE_FLAG_OVERLAPPED,
+		PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
 		1,
 		1024,
 		1024,
@@ -495,11 +512,28 @@ void xdebug_control_socket_setup(void)
 	);
 
 	if (XG_BASE(control_socket_h) == INVALID_HANDLE_VALUE) {
+		XG_BASE(control_socket_h) = 0;
 		errno = GetLastError();
 		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe (0x%x)", errno);
-		xdfree(XG_BASE(control_socket_path));
-		XG_BASE(control_socket_path) = NULL;
+		xdebug_control_socket_teardown();
+		xdfree(name);
+		return;
+	}
 
+	XG_BASE(control_socket_ov).Offset = 0;
+	XG_BASE(control_socket_ov).OffsetHigh = 0;
+	XG_BASE(control_socket_ov).hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+	if (XG_BASE(control_socket_ov).hEvent == NULL) {
+		errno = GetLastError();
+		xdebug_log_ex(XLOG_CHAN_CONFIG, XLOG_WARN, "CTRL-SOCKET", "Can't create control Named Pipe Event (0x%x)", errno);
+		xdebug_control_socket_teardown();
+		xdfree(name);
+		return;
+	}
+
+	if (!named_pipe_listen()) {
+		xdebug_control_socket_teardown();
 		xdfree(name);
 		return;
 	}
@@ -516,7 +550,12 @@ void xdebug_control_socket_teardown(void)
 	}
 	if (XG_BASE(control_socket_h)) {
 		DisconnectNamedPipe(XG_BASE(control_socket_h));
+		CloseHandle(XG_BASE(control_socket_h));
 		XG_BASE(control_socket_h) = 0;
+	}
+	if (XG_BASE(control_socket_ov).hEvent) {
+		CloseHandle(XG_BASE(control_socket_ov).hEvent);
+		XG_BASE(control_socket_ov).hEvent = 0;
 	}
 }
 #endif
