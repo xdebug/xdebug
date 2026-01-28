@@ -646,6 +646,10 @@ static void xdebug_init_debugger()
 		xdebug_log_ex(XLOG_CHAN_DEBUG, XLOG_ERR, "NOPERM", "No permission connecting to debugging client (%s). This could be SELinux related.", connection_attempts->d);
 	}
 
+	if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+        XG_BASE(statement_handler_enabled) = XG_DBG(remote_connection_enabled);
+	}
+
 	xdebug_str_free(connection_attempts);
 }
 
@@ -846,6 +850,10 @@ void xdebug_debug_init_if_requested_at_startup(void)
 			xdebug_update_ide_key(found_trigger_value);
 		}
 		xdebug_init_debugger();
+	} else {
+        if (!XDEBUG_MODE_IS(XDEBUG_MODE_COVERAGE)) {
+            XG_BASE(statement_handler_enabled) = false;
+        }
 	}
 
 	if (found_trigger_value) {
