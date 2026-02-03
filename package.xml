@@ -40,11 +40,11 @@ Code Coverage Analysis
   <active>yes</active>
  </lead>
 
- <date>2025-12-04</date>
- <time>14:55:24</time>
+ <date>2026-02-03</date>
+ <time>15:38:25</time>
  <version>
-  <release>3.5.0</release>
-  <api>3.5.0</api>
+  <release>3.5.1</release>
+  <api>3.5.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -52,29 +52,13 @@ Code Coverage Analysis
  </stability>
  <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
  <notes>
-Thu, Dec 04, 2025 - Xdebug 3.5.0
-
-+ New features:
-
-  - Fixed issue #2338: Add experimental support for Windows Named Pipes control socket
-  - Fixed issue #2369: Implement &quot;Native Xdebug Path Mapping&quot; project
-  - Fixed issue #2370: PHP 8.5 support
-
-+ Improvements:
-
-  - Fixed issue #2213: Expose __EXCEPTION virtual variable for current EG(exception)
-  - Fixed issue #2363: Add better debugging support for PHP 8.5&#039;s pipes
-  - Fixed issue #2345: DBGP&#039;s detach does not support base64 encoded strings
+Tue, Feb 03, 2026 - Xdebug 3.5.1
 
 = Fixed bugs:
 
-  - Fixed issue #2335: Failed dbgp connection is not marked as not active
-  - Fixed issue #2336: Optimise xdebug_init_oparray
-  - Fixed issue #2337: Modify xdebug_add_stack_frame to always work on the passed execute_data
-  - Fixed issue #2367: Debugger should not break on return out of include files when return value debugger is enabled
-  - Fixed issue #2372: Build failed on MSVC
-  - Fixed issue #2374: Breakpoints in mapped paths don&#039;t trigger as they&#039;re mapped back before matching
-  - Fixed issue #2386: Crashes when running context_get in an exception thrown from an internal function
+  - Fixed issue #2391: Code Coverage times out on random tests
+  - Fixed issue #2395: Severe performance degredation on Windows
+  - Fixed issue #2397: Very slow with Xdebug 3.5.0
 
  </notes>
 
@@ -244,6 +228,46 @@ Thu, Dec 04, 2025 - Xdebug 3.5.0
  <providesextension>xdebug</providesextension>
  <zendextsrcrelease />
  <changelog>
+
+  <release>
+   <date>2025-12-04</date>
+   <time>14:55:24</time>
+   <version>
+    <release>3.5.0</release>
+    <api>3.5.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license uri="https://xdebug.org/license/1.03" filesource="LICENSE">Xdebug-1.03</license>
+   <notes>
+Thu, Dec 04, 2025 - Xdebug 3.5.0
+
++ New features:
+
+  - Fixed issue #2338: Add experimental support for Windows Named Pipes control socket
+  - Fixed issue #2369: Implement &quot;Native Xdebug Path Mapping&quot; project
+  - Fixed issue #2370: PHP 8.5 support
+
++ Improvements:
+
+  - Fixed issue #2213: Expose __EXCEPTION virtual variable for current EG(exception)
+  - Fixed issue #2363: Add better debugging support for PHP 8.5&#039;s pipes
+  - Fixed issue #2345: DBGP&#039;s detach does not support base64 encoded strings
+
+= Fixed bugs:
+
+  - Fixed issue #2335: Failed dbgp connection is not marked as not active
+  - Fixed issue #2336: Optimise xdebug_init_oparray
+  - Fixed issue #2337: Modify xdebug_add_stack_frame to always work on the passed execute_data
+  - Fixed issue #2367: Debugger should not break on return out of include files when return value debugger is enabled
+  - Fixed issue #2372: Build failed on MSVC
+  - Fixed issue #2374: Breakpoints in mapped paths don&#039;t trigger as they&#039;re mapped back before matching
+  - Fixed issue #2386: Crashes when running context_get in an exception thrown from an internal function
+
+   </notes>
+  </release>
 
   <release>
    <date>2025-11-12</date>
