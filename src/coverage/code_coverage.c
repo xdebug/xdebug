@@ -789,6 +789,81 @@ static void scrub_runtime(void *dummy, xdebug_hash_element *e)
 	xdebug_hash_empty(file->runtime.functions);
 }
 
+#if PHP_VERSION_ID >= 80100
+/** Handling fibers ********************************************************/
+struct xdebug_fiber_entry {
+	xdebug_path_info *path_info;
+};
+
+static struct xdebug_fiber_entry* xdebug_fiber_entry_ctor(xdebug_path_info *path_info)
+{
+	struct xdebug_fiber_entry *tmp = xdmalloc(sizeof(struct xdebug_fiber_entry));
+
+	tmp->path_info = path_info;
+
+	return tmp;
+}
+
+static void xdebug_fiber_entry_dtor(struct xdebug_fiber_entry *entry)
+{
+	xdebug_path_info_dtor(entry->path_info);
+	xdfree(entry);
+}
+
+static zend_string *create_key_for_fiber(zend_fiber_context *fiber)
+{
+	return zend_strpprintf(0, "{fiber-cc:%0" PRIXPTR "}", ((uintptr_t) fiber));
+}
+
+static xdebug_path_info* create_path_info_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
+{
+	xdebug_path_info          *tmp_path_info = xdebug_path_info_ctor();
+	struct xdebug_fiber_entry *entry         = xdebug_fiber_entry_ctor(tmp_path_info);
+
+	xdebug_hash_add(XG_COV(fiber_path_info_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key), entry);
+
+	return tmp_path_info;
+}
+
+static void remove_path_info_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
+{
+	xdebug_hash_delete(XG_COV(fiber_path_info_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key));
+}
+
+static xdebug_path_info *find_path_info_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
+{
+	struct xdebug_fiber_entry *entry = NULL;
+
+	xdebug_hash_find(XG_COV(fiber_path_info_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key), (void*) &entry);
+
+	return entry->path_info;
+}
+
+static void xdebug_fiber_switch_coverage_observer(zend_fiber_context *from, zend_fiber_context *to)
+{
+	xdebug_path_info *current_path_info;
+	zend_string      *to_key = create_key_for_fiber(to);
+
+	if (from->status == ZEND_FIBER_STATUS_DEAD) {
+		zend_string *from_key = create_key_for_fiber(from);
+
+		remove_path_info_for_fiber(from_key, from);
+
+		zend_string_release(from_key);
+	}
+	if (to->status == ZEND_FIBER_STATUS_INIT) {
+		current_path_info = create_path_info_for_fiber(to_key, to);
+	} else {
+		current_path_info = find_path_info_for_fiber(to_key, to);
+	}
+	XG_COV(paths_stack) = current_path_info;
+
+	zend_string_release(to_key);
+
+}
+#endif
+
+
 PHP_FUNCTION(xdebug_start_code_coverage)
 {
 	zend_long options = 0;
@@ -808,6 +883,14 @@ PHP_FUNCTION(xdebug_start_code_coverage)
 
 	XG_COV(code_coverage_active) = 1;
 	RETURN_TRUE;
+}
+
+static void recreate_path_stacks(void *dummy, xdebug_hash_element *e)
+{
+	struct xdebug_fiber_entry *tmp = (struct xdebug_fiber_entry*) e->ptr;
+
+	xdebug_path_info_dtor(tmp->path_info);
+	tmp->path_info = xdebug_path_info_ctor();
 }
 
 PHP_FUNCTION(xdebug_stop_code_coverage)
@@ -841,8 +924,12 @@ PHP_FUNCTION(xdebug_stop_code_coverage)
 
 		xdebug_hash_empty(XG_COV(visited_branches));
 
+#if PHP_VERSION_ID >= 80100
+		xdebug_hash_apply(XG_COV(fiber_path_info_stacks), NULL, recreate_path_stacks);
+#else
 		xdebug_path_info_dtor(XG_COV(paths_stack));
 		XG_COV(paths_stack) = xdebug_path_info_ctor();
+#endif
 	}
 
 	XG_COV(code_coverage_active) = 0;
@@ -1199,101 +1286,6 @@ static int xdebug_switch_handler(XDEBUG_OPCODE_HANDLER_ARGS)
 	execute_data->opline++;
 	return ZEND_USER_OPCODE_CONTINUE;
 }
-
-
-#if PHP_VERSION_ID >= 80100
-/** Handling fibers ********************************************************/
-struct xdebug_fiber_entry {
-	xdebug_path_info *path_info;
-};
-
-static struct xdebug_fiber_entry* xdebug_fiber_entry_ctor(xdebug_path_info *path_info)
-{
-	struct xdebug_fiber_entry *tmp = xdmalloc(sizeof(struct xdebug_fiber_entry));
-
-	tmp->path_info = path_info;
-
-	return tmp;
-}
-
-static void xdebug_fiber_entry_dtor(struct xdebug_fiber_entry *entry)
-{
-	xdebug_path_info_dtor(entry->path_info);
-	xdfree(entry);
-}
-
-static zend_string *create_key_for_fiber(zend_fiber_context *fiber)
-{
-	return zend_strpprintf(0, "{fiber-cc:%0" PRIXPTR "}", ((uintptr_t) fiber));
-}
-/*
-static void add_fiber_main(zend_string *fiber_key, zend_fiber_context *fiber)
-{
-	function_stack_entry *tmp = (function_stack_entry*) xdebug_vector_push(XG_BASE(stack));
-
-	tmp->level        = XDEBUG_VECTOR_COUNT(XG_BASE(stack));
-	tmp->user_defined = XDEBUG_BUILT_IN;
-	tmp->function.type = XFUNC_FIBER;
-	tmp->function.object_class = NULL;
-	tmp->function.scope_class = NULL;
-	tmp->function.function = zend_string_copy(fiber_key);
-	tmp->filename = zend_string_copy(zend_get_executed_filename_ex());
-	tmp->lineno = zend_get_executed_lineno();
-
-	tmp->prev_memory = XG_BASE(prev_memory);
-	tmp->memory = zend_memory_usage(0);
-	XG_BASE(prev_memory) = tmp->memory;
-
-	tmp->nanotime = xdebug_get_nanotime();
-}
-*/
-static xdebug_path_info* create_path_info_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
-{
-	xdebug_path_info          *tmp_path_info = xdebug_path_info_ctor();
-	struct xdebug_fiber_entry *entry         = xdebug_fiber_entry_ctor(tmp_path_info);
-
-	xdebug_hash_add(XG_COV(fiber_path_info_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key), entry);
-
-	return tmp_path_info;
-}
-
-static void remove_path_info_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
-{
-	xdebug_hash_delete(XG_COV(fiber_path_info_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key));
-}
-
-static xdebug_path_info *find_path_info_for_fiber(zend_string *fiber_key, zend_fiber_context *fiber)
-{
-	struct xdebug_fiber_entry *entry = NULL;
-
-	xdebug_hash_find(XG_COV(fiber_path_info_stacks), ZSTR_VAL(fiber_key), ZSTR_LEN(fiber_key), (void*) &entry);
-
-	return entry->path_info;
-}
-
-static void xdebug_fiber_switch_coverage_observer(zend_fiber_context *from, zend_fiber_context *to)
-{
-	xdebug_path_info *current_path_info;
-	zend_string      *to_key = create_key_for_fiber(to);
-
-	if (from->status == ZEND_FIBER_STATUS_DEAD) {
-		zend_string *from_key = create_key_for_fiber(from);
-
-		remove_path_info_for_fiber(from_key, from);
-
-		zend_string_release(from_key);
-	}
-	if (to->status == ZEND_FIBER_STATUS_INIT) {
-		current_path_info = create_path_info_for_fiber(to_key, to);
-	} else {
-		current_path_info = find_path_info_for_fiber(to_key, to);
-	}
-	XG_COV(paths_stack) = current_path_info;
-
-	zend_string_release(to_key);
-
-}
-#endif
 
 void xdebug_coverage_minit(INIT_FUNC_ARGS)
 {
