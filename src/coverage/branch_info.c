@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2020 Derick Rethans                               |
+   | Copyright (c) 1997-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to the 2-Clause BSD license which is     |
    | available through the LICENSE file, or online at                     |
@@ -33,6 +33,7 @@ xdebug_branch_info *xdebug_branch_info_create(unsigned int size)
 	tmp->path_info.paths_count = 0;
 	tmp->path_info.paths_size  = 0;
 	tmp->path_info.paths = NULL;
+	tmp->highest_out = 0;
 
 	return tmp;
 }
@@ -249,7 +250,7 @@ static void xdebug_branch_find_path(unsigned int nr, xdebug_branch_info *branch_
 	int found = 0;
 	size_t i = 0;
 
-	if (branch_info->path_info.paths_count > 4095) {
+	if (branch_info->path_info.paths_count >= XDEBUG_MAX_PATHS) {
 		return;
 	}
 
@@ -335,23 +336,36 @@ void xdebug_branch_find_paths(xdebug_branch_info *branch_info)
 	}
 }
 
+static int fetch_mark_file(zend_string *filename, xdebug_coverage_file **file)
+{
+	if (XG_COV(previous_mark_filename) && zend_string_equals(XG_COV(previous_mark_filename), filename)) {
+		*file = XG_COV(previous_mark_file);
+		return 1;
+	}
+
+	if (!xdebug_hash_find(XG_COV(info), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) file)) {
+		return 0;
+	}
+
+	if (XG_COV(previous_mark_filename)) {
+		zend_string_release(XG_COV(previous_mark_filename));
+	}
+	XG_COV(previous_mark_filename) = zend_string_copy((*file)->name);
+	XG_COV(previous_mark_file) = *file;
+
+	return 1;
+}
+
 void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name, zend_op_array *op_array, long opcode_nr)
 {
 	xdebug_coverage_file *file;
-	xdebug_coverage_function *function;
+	xdebug_coverage_analysis_function *analysis_function = NULL;
+	xdebug_coverage_runtime_function  *runtime_function;
 	xdebug_branch_info *branch_info;
 
-	if (XG_COV(previous_mark_filename) && zend_string_equals(XG_COV(previous_mark_filename), filename)) {
-		file = XG_COV(previous_mark_file);
-	} else {
-		if (!xdebug_hash_find(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &file)) {
-			return;
-		}
-		if (XG_COV(previous_mark_filename)) {
-			zend_string_release(XG_COV(previous_mark_filename));
-		}
-		XG_COV(previous_mark_filename) = zend_string_copy(file->name);
-		XG_COV(previous_mark_file) = file;
+	/* Find the information for the given filename */
+	if (!fetch_mark_file(filename, &file)) {
+		return;
 	}
 
 	/* If there is no branch info, we don't have to do more */
@@ -360,11 +374,17 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 	}
 
 	/* Check if the function already exists in the hash */
-	if (!xdebug_hash_find(file->functions, function_name, strlen(function_name), (void *) &function)) {
+	if (!xdebug_hash_find(file->analysis.functions, function_name, strlen(function_name), (void *) &analysis_function)) {
 		return;
 	}
 
-	branch_info = function->branch_info;
+	/* Find the runtime function, and if it does not exist, create it */
+	if (!xdebug_hash_find(file->runtime.functions, function_name, strlen(function_name), (void *) &runtime_function)) {
+		runtime_function = xdebug_coverage_runtime_function_ctor(function_name, analysis_function);
+		xdebug_hash_add(file->runtime.functions, function_name, strlen(function_name), runtime_function);
+	}
+
+	branch_info = analysis_function->branch_info;
 
 	if (opcode_nr != 0 && xdebug_set_in(branch_info->entry_points, opcode_nr)) {
 		xdebug_code_coverage_end_of_function(op_array, filename, function_name);
@@ -382,7 +402,8 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 
 			for (i = 0; i < branch_info->branches[XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))]].outs_count; i++) {
 				if (branch_info->branches[XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))]].outs[i] == opcode_nr) {
-					branch_info->branches[XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))]].outs_hit[i] = 1;
+//printf("\nOUT HIT: %p (%d) (*%ld) %ld\n", runtime_function->hit_branch, XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))], branch_info->highest_out, i + 1);
+					xdebug_set_add(runtime_function->hit_branch, (XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] * (1 + branch_info->highest_out)) + i + 1);
 				}
 			}
 		}
@@ -395,28 +416,24 @@ void xdebug_branch_info_mark_reached(zend_string *filename, char *function_name,
 		}
 		xdfree(key);
 
-		branch_info->branches[opcode_nr].hit = 1;
+//printf("\nIN  HIT: %p (%ld) (*%ld) %d\n", runtime_function->hit_branch, opcode_nr, branch_info->highest_out, 0);
+		xdebug_set_add(runtime_function->hit_branch, opcode_nr * (1 + branch_info->highest_out));
 
 		XG_COV(branches).last_branch_nr[XDEBUG_VECTOR_COUNT(XG_BASE(stack))] = opcode_nr;
 	}
 }
 
+/* TODO: Store paths hit differently */
 void xdebug_branch_info_mark_end_of_function_reached(zend_string *filename, char *function_name, char *key, int key_len)
 {
 	xdebug_coverage_file *file;
-	xdebug_coverage_function *function;
-	xdebug_branch_info *branch_info;
+	xdebug_coverage_analysis_function *analysis_function;
+	xdebug_coverage_runtime_function  *runtime_function;
 	xdebug_path *path;
 
-	if (XG_COV(previous_mark_filename) && zend_string_equals(XG_COV(previous_mark_filename), filename) == 0) {
-		file = XG_COV(previous_mark_file);
-	} else {
-		if (!xdebug_hash_find(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &file)) {
-			return;
-		}
-		zend_string_release(XG_COV(previous_mark_filename));
-		XG_COV(previous_mark_filename) = zend_string_copy(file->name);
-		XG_COV(previous_mark_file) = file;
+	/* Find the information for the given filename */
+	if (!fetch_mark_file(filename, &file)) {
+		return;
 	}
 
 	/* If there is no branch info, we don't have to do more */
@@ -424,49 +441,40 @@ void xdebug_branch_info_mark_end_of_function_reached(zend_string *filename, char
 		return;
 	}
 
-	/* Check if the function already exists in the hash */
-	if (!xdebug_hash_find(file->functions, function_name, strlen(function_name), (void *) &function)) {
+	/* Check if the function has been analysed, and hence exists in the hash */
+	if (!xdebug_hash_find(file->analysis.functions, function_name, strlen(function_name), (void *) &analysis_function)) {
 		return;
 	}
 
-	branch_info = function->branch_info;
-
-	if (!xdebug_hash_find(branch_info->path_info.path_hash, key, key_len, (void *) &path)) {
+	/* Check whether we know something about the current path */
+	if (!xdebug_hash_find(analysis_function->branch_info->path_info.path_hash, key, key_len, (void *) &path)) {
 		return;
 	}
-	path->hit = 1;
+
+	/* Find the runtime function, and if it does not exist, create it */
+	if (!xdebug_hash_find(file->runtime.functions, function_name, strlen(function_name), (void *) &runtime_function)) {
+		runtime_function = xdebug_coverage_runtime_function_ctor(function_name, analysis_function);
+		xdebug_hash_add(file->runtime.functions, function_name, strlen(function_name), runtime_function);
+	}
+
+	xdebug_hash_add(runtime_function->hit_paths, key, key_len, NULL);
 }
 
-void xdebug_branch_info_add_branches_and_paths(zend_string *filename, char *function_name, xdebug_branch_info *branch_info)
+void xdebug_branch_info_add_branches_and_paths(xdebug_coverage_file *file, char *function_name, xdebug_branch_info *branch_info)
 {
-	xdebug_coverage_file *file;
-	xdebug_coverage_function *function;
+	xdebug_coverage_analysis_function *analysis_function;
 
-	if (XG_COV(previous_filename) && zend_string_equals(XG_COV(previous_filename), filename) == 0) {
-		file = XG_COV(previous_file);
-	} else {
-		/* Check if the file already exists in the hash */
-		if (!xdebug_hash_find(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), (void *) &file)) {
-			/* The file does not exist, so we add it to the hash */
-			file = xdebug_coverage_file_ctor(filename);
-
-			xdebug_hash_add(XG_COV(code_coverage_info), ZSTR_VAL(filename), ZSTR_LEN(filename), file);
-		}
-		zend_string_release(XG_COV(previous_filename));
-		XG_COV(previous_filename) = zend_string_copy(file->name);
-		XG_COV(previous_file) = file;
-	}
-
+	/* TODO: Check if creating things here is actually useful */
 	/* Check if the function already exists in the hash */
-	if (!xdebug_hash_find(file->functions, function_name, strlen(function_name), (void *) &function)) {
-		/* The file does not exist, so we add it to the hash */
-		function = xdebug_coverage_function_ctor(function_name);
+	if (!xdebug_hash_find(file->analysis.functions, function_name, strlen(function_name), (void *) &analysis_function)) {
+		/* The function does not exist, so we add it to the hash */
+		analysis_function = xdebug_coverage_analysis_function_ctor(function_name);
 
-		xdebug_hash_add(file->functions, function_name, strlen(function_name), function);
+		xdebug_hash_add(file->analysis.functions, function_name, strlen(function_name), analysis_function);
 	}
 
 	if (branch_info) {
 		file->has_branch_info = 1;
 	}
-	function->branch_info = branch_info;
+	analysis_function->branch_info = branch_info;
 }

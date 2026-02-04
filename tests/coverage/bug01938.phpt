@@ -1,9 +1,8 @@
 --TEST--
-Test for bug #1938: Branches in traits aren’t marked as executed (>= PHP 7.4)
+Test for bug #1938: Branches in traits aren't marked as executed
 --SKIPIF--
 <?php
 require __DIR__ . '/../utils.inc';
-check_reqs('PHP >= 7.4');
 ?>
 --INI--
 xdebug.mode=coverage
