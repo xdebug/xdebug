@@ -158,6 +158,9 @@ struct _xdebug_remote_handler {
 
 	/* Eval ID registration and removal */
 	int (*register_eval_id)(xdebug_con *h, function_stack_entry *fse);
+
+	/* FrankenPHP worker mode: poll for pending commands without blocking */
+	int (*remote_poll_pending)(xdebug_con *h);
 };
 
 xdebug_brk_info *xdebug_brk_info_ctor(void);
