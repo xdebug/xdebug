@@ -1,0 +1,15 @@
+{
+	frankenphp {
+		num_threads 3
+		worker {
+			file /app/public/worker.php
+			num 1
+		}
+	}
+	auto_https off
+}
+
+http://:8080 {
+	root * /app/public
+	php_server
+}

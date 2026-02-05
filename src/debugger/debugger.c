@@ -20,6 +20,7 @@
 #include "zend_exceptions.h"
 
 #include "debugger_private.h"
+#include "frankenphp.h"
 #include "lib/log.h"
 #include "lib/var.h"
 
@@ -45,6 +46,7 @@ void xdebug_init_debugger_globals(xdebug_debugger_globals_t *xg)
 	xg->context.do_next      = 0;
 	xg->context.do_finish    = 0;
 	xg->context.do_connect_to_client = 0;
+	xg->context.do_request_reinit = 0;
 
 	xg->remote_connection_enabled  = 0;
 	xg->remote_connection_pid      = 0;
@@ -864,6 +866,11 @@ void xdebug_debugger_zend_shutdown(void)
 void xdebug_debugger_minit(void)
 {
 	XG_DBG(breakpoint_count) = 0;
+
+	/* Initialize FrankenPHP worker mode support */
+	if (xdebug_sapi_is_frankenphp()) {
+		xdebug_frankenphp_minit();
+	}
 }
 
 void xdebug_debugger_minfo(void)
@@ -877,6 +884,12 @@ void xdebug_debugger_minfo(void)
 void xdebug_debugger_rinit(void)
 {
 	char *idekey;
+
+	/* When RINIT runs, this is a regular request, and the normal activation
+	 * checks below apply. Only FrankenPHP *worker* requests skip RINIT, so
+	 * disarming the flag here makes it a reliable worker-request detector:
+	 * regular requests served by the FrankenPHP SAPI do no extra work. */
+	XG_DBG(context).do_request_reinit = 0;
 
 	xdebug_disable_opcache_optimizer();
 

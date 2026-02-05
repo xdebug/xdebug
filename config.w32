@@ -10,7 +10,7 @@ if (PHP_XDEBUG != 'no') {
 	var XDEBUG_LIB_MAPS_SOURCES="maps.c maps_private.c parser.c"
 
 	var XDEBUG_COVERAGE_SOURCES="branch_info.c code_coverage.c"
-	var XDEBUG_DEBUGGER_SOURCES="com.c debugger.c handler_dbgp.c handlers.c"
+	var XDEBUG_DEBUGGER_SOURCES="com.c debugger.c frankenphp.c handler_dbgp.c handlers.c"
 	var XDEBUG_DEVELOP_SOURCES="develop.c monitor.c php_functions.c stack.c superglobals.c"
 	var XDEBUG_GCSTATS_SOURCES="gc_stats.c"
 	var XDEBUG_PROFILER_SOURCES="profiler.c"

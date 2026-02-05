@@ -1,0 +1,42 @@
+# Keep host build artifacts (with absolute host paths baked in) out of the
+# Docker build context used by tests/frankenphp/Dockerfile. Without this, the
+# in-container build could inherit a broken Makefile from a prior host
+# `phpize`/`configure`.
+.git
+.github
+
+Makefile
+Makefile.*
+config.status
+config.cache
+config.log
+config.nice
+configure
+configure.ac
+configure.in
+acinclude.m4
+aclocal.m4
+autom4te.cache
+build
+libtool
+ltmain.sh
+install-sh
+missing
+mkinstalldirs
+run-tests.php
+
+*.lo
+*.la
+*.o
+*.dep
+*.so
+**/*.lo
+**/*.la
+**/*.o
+**/*.dep
+**/*.so
+**/.libs
+**/.deps
+.libs
+.deps
+modules

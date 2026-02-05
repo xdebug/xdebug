@@ -57,6 +57,7 @@
 #include "develop/stack.h"
 #include "develop/superglobals.h"
 #include "debugger/com.h"
+#include "debugger/frankenphp.h"
 #include "gcstats/gc_stats.h"
 #include "lib/usefulstuff.h"
 #include "lib/lib.h"
@@ -561,6 +562,9 @@ PHP_MSHUTDOWN_FUNCTION(xdebug)
 	}
 	if (XDEBUG_MODE_IS(XDEBUG_MODE_PROFILING)) {
 		xdebug_profiler_mshutdown();
+	}
+	if (XDEBUG_MODE_IS(XDEBUG_MODE_STEP_DEBUG) && xdebug_sapi_is_frankenphp()) {
+		xdebug_frankenphp_mshutdown();
 	}
 
 	xdebug_library_mshutdown();

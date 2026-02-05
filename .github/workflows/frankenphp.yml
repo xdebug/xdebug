@@ -1,0 +1,24 @@
+name: FrankenPHP worker mode tests
+
+on:
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+    frankenphp:
+        runs-on: ubuntu-latest
+        name: "FrankenPHP worker mode (PHP ${{ matrix.php-version }})"
+        strategy:
+            fail-fast: false
+            matrix:
+                # PHP 8.6: to be added once dunglas/frankenphp publishes
+                # 1-php8.6 images.
+                php-version: ["8.4", "8.5"]
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v6
+
+            - name: Run FrankenPHP worker mode integration tests
+              run: tests/frankenphp/run-tests.sh
+              env:
+                  PHP_VERSION: ${{ matrix.php-version }}
