@@ -9,7 +9,7 @@ if (PHP_XDEBUG != 'no') {
 	var XDEBUG_LIB_SOURCES="usefulstuff.c cmd_parser.c compat.c crc32.c file.c hash.c headers.c lib.c llist.c log.c set.c str.c timing.c var.c var_export_html.c var_export_line.c var_export_text.c var_export_xml.c xml.c"
 
 	var XDEBUG_COVERAGE_SOURCES="branch_info.c code_coverage.c"
-	var XDEBUG_DEBUGGER_SOURCES="com.c debugger.c handler_dbgp.c handlers.c"
+	var XDEBUG_DEBUGGER_SOURCES="com.c debugger.c frankenphp.c handler_dbgp.c handlers.c"
 	var XDEBUG_DEVELOP_SOURCES="develop.c monitor.c php_functions.c stack.c superglobals.c"
 	var XDEBUG_GCSTATS_SOURCES="gc_stats.c"
 	var XDEBUG_PROFILER_SOURCES="profiler.c"

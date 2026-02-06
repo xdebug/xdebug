@@ -68,6 +68,7 @@ xdebug_remote_handler xdebug_handler_dbgp = {
 	xdebug_dbgp_notification,
 	xdebug_dbgp_user_notify,
 	xdebug_dbgp_register_eval_id,
+	xdebug_dbgp_poll_pending,
 };
 
 static char *create_eval_key_id(int id);
@@ -3044,4 +3045,72 @@ int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse)
 	xdfree(key);
 
 	return ei->id;
+}
+
+/*
+ * Poll for pending DBGP commands without blocking.
+ *
+ * This function is used by FrankenPHP worker mode to process commands
+ * (like breakpoint_set/remove) that the IDE sent while the worker was
+ * handling previous requests.
+ *
+ * Uses select() with timeout=0 to check for data availability, then
+ * processes all pending non-continuation commands.
+ *
+ * Returns 1 on success, 0 on connection error.
+ */
+int xdebug_dbgp_poll_pending(xdebug_con *context)
+{
+	char *option;
+	int length;
+	int ret;
+	xdebug_xml_node *response;
+	fd_set read_set;
+	struct timeval timeout = {0, 0}; /* Non-blocking */
+
+	while (1) {
+		/* Check if data is available without blocking */
+		FD_ZERO(&read_set);
+		FD_SET(context->socket, &read_set);
+
+		if (select(context->socket + 1, &read_set, NULL, NULL, &timeout) <= 0) {
+			return 1; /* No more data available, success */
+		}
+
+		if (!FD_ISSET(context->socket, &read_set)) {
+			return 1;
+		}
+
+		length = 0;
+		option = xdebug_fd_read_line_delim(context->socket, context->buffer, FD_RL_SOCKET, '\0', &length);
+		if (!option) {
+			xdebug_mark_debug_connection_not_active();
+			return 0; /* Connection error */
+		}
+
+		response = xdebug_xml_node_init("response");
+		xdebug_xml_add_attribute(response, "xmlns", "urn:debugger_protocol_v1");
+		xdebug_xml_add_attribute(response, "xmlns:xdebug", "https://xdebug.org/dbgp/xdebug");
+
+		ret = xdebug_dbgp_parse_option(context, option, 0, response);
+
+		if (ret != 1) {
+			send_message(context, response);
+		}
+
+		xdebug_xml_node_dtor(response);
+		free(option);
+
+		/*
+		 * ret == 1 means continuation command (run, step_into, step_over, etc.)
+		 * We should NOT process these during polling - they should only be
+		 * handled when stopped at a breakpoint. Log and ignore.
+		 */
+		if (ret == 1) {
+			xdebug_log(XLOG_CHAN_DEBUG, XLOG_WARN,
+			           "FrankenPHP poll: ignoring continuation command received outside breakpoint");
+		}
+	}
+
+	return 1;
 }

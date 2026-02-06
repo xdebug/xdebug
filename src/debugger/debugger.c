@@ -20,6 +20,7 @@
 #include "zend_exceptions.h"
 
 #include "debugger_private.h"
+#include "frankenphp.h"
 #include "lib/log.h"
 #include "lib/var.h"
 
@@ -669,6 +670,9 @@ void xdebug_debugger_zend_shutdown(void)
 void xdebug_debugger_minit(void)
 {
 	XG_DBG(breakpoint_count) = 0;
+
+	/* Initialize FrankenPHP worker mode support */
+	xdebug_frankenphp_minit();
 }
 
 void xdebug_debugger_minfo(void)

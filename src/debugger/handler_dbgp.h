@@ -97,6 +97,7 @@ int xdebug_dbgp_notification(xdebug_con *context, zend_string *filename, long li
 int xdebug_dbgp_user_notify(xdebug_con *context, zend_string *filename, long lineno, zval *data);
 void XDEBUG_ATTRIBUTE_FORMAT(printf, 2, 3) xdebug_dbgp_log(int log_level, const char *fmt, ...);
 int xdebug_dbgp_register_eval_id(xdebug_con *context, function_stack_entry *fse);
+int xdebug_dbgp_poll_pending(xdebug_con *context);
 
 extern xdebug_remote_handler xdebug_handler_dbgp;
 
