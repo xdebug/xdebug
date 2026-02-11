@@ -179,9 +179,9 @@ void xdebug_path_maps_scan(const char *script_source)
 	parts = xdebug_arg_ctor();
 	xdebug_explode(slash, script_source, parts, -1);
 
-	current_dir = parts->c > 2 ? xdebug_join(slash, parts, 0, parts->c - 2) : NULL;
-	parent_dir = parts->c > 3 ? xdebug_join(slash, parts, 0, parts->c - 3) : NULL;
-	grand_dir = parts->c > 4 ? xdebug_join(slash, parts, 0, parts->c - 4) : NULL;
+	current_dir = parts->c >= 2 ? xdebug_join(slash, parts, 0, parts->c - 2) : NULL;
+	parent_dir = parts->c >= 3 ? xdebug_join(slash, parts, 0, parts->c - 3) : NULL;
+	grand_dir = parts->c >= 4 ? xdebug_join(slash, parts, 0, parts->c - 4) : NULL;
 
 	if (grand_dir) {
 		scan_directory(grand_dir->d);
