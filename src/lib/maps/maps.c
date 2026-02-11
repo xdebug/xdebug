@@ -65,7 +65,6 @@ static bool scan_directory_exists(const char *dir)
 		return false;
 	}
 
-	fprintf(stdout, "Map directory %s is a directory: %s\n", map_dir, S_ISDIR(dir_info.st_mode) ? "yes" : "no");
 	if (!S_ISDIR(dir_info.st_mode)) {
 		xdebug_log_ex(XLOG_CHAN_PATHMAP, XLOG_WARN, "NOTADIR", "The map directory '%s' is not a directory", map_dir);
 		return false;
