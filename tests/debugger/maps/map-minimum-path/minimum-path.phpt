@@ -8,7 +8,16 @@ check_reqs('dbgp');
 --FILE--
 <?php
 require __DIR__ . '/../../dbgp/dbgpclient.php';
-$filename = dirname(__FILE__) . '/foo/bar/file.inc';
+
+$tmpBase = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'minimum-path';
+
+@mkdir( $tmpBase . '/foo/bar', 0755, true );
+@mkdir( $tmpBase . '/.xdebug', 0755, true );
+
+copy( __DIR__ . '/foo/bar/file.inc', $tmpBase . '/foo/bar/file.inc' );
+copy( __DIR__ . '/.xdebug/minimum.map', $tmpBase . '/.xdebug/minimum.map' );
+
+$filename = $tmpBase . '/foo/bar/file.inc';
 
 $xdebugLogFileName = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'minimum-path.txt';
 @unlink( $xdebugLogFileName );
@@ -34,12 +43,23 @@ dbgpRunFile(
 echo file_get_contents( $xdebugLogFileName );
 @unlink( $xdebugLogFileName );
 ?>
+--CLEAN--
+<?php
+$tmpBase = sys_get_temp_dir() . '/' . getenv('UNIQ_RUN_ID') . getenv('TEST_PHP_WORKER') . 'minimum-path';
+
+@unlink( $tmpBase . '/foo/bar/file.inc' );
+@unlink( $tmpBase . '/.xdebug/minimum.map' );
+@rmdir( $tmpBase . '/foo/bar' );
+@rmdir( $tmpBase . '/foo' );
+@rmdir( $tmpBase . '/.xdebug' );
+@rmdir( $tmpBase );
+?>
 --EXPECTF--
 %A
-[%d] [Path Mapping] INFO: Scanning for map files with pattern '%smap-minimum-path%e.xdebug%e*.map'
-[%d] [Path Mapping] INFO: Reading mapping file '%smap-minimum-path%e.xdebug%eminimum.map'
-[%d] [Path Mapping] INFO: Scanning for map files with pattern '%smap-minimum-path%efoo%e.xdebug%e*.map'
-[%d] [Path Mapping] DEBUG: No map files found with pattern '%smap-minimum-path%efoo%e.xdebug%e*.map'
+[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sminimum-path%e.xdebug%e*.map'
+[%d] [Path Mapping] INFO: Reading mapping file '%sminimum-path%e.xdebug%eminimum.map'
+[%d] [Path Mapping] INFO: Scanning for map files with pattern '%sminimum-path%efoo%e.xdebug%e*.map'
+[%d] [Path Mapping] DEBUG: No map files found with pattern '%sminimum-path%efoo%e.xdebug%e*.map'
 [%d] [Path Mapping] INFO: Scanning for map files with pattern '%sfoo%ebar%e.xdebug%e*.map'
 [%d] [Path Mapping] DEBUG: No map files found with pattern '%sfoo%ebar%e.xdebug%e*.map'
 [%d] [Path Mapping] DEBUG: Found 1 path mapping rules
