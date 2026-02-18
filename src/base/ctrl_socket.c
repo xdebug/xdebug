@@ -235,6 +235,8 @@ CTRL_FUNC(pause)
 		xdebug_xml_add_text(action, xdstrdup("IDE Connection Signalled"));
 
 		XG_DBG(context).do_connect_to_client = 1;
+
+        XG_BASE(statement_handler_enabled) = true;
 	} else {
 		action = xdebug_xml_node_init("action");
 		xdebug_xml_add_text(action, xdstrdup("Breakpoint Signalled"));
