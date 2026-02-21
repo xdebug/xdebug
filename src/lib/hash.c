@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2020 Derick Rethans                               |
+   | Copyright (c) 2002-2025 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -272,6 +272,15 @@ void xdebug_hash_apply_with_argument(xdebug_hash *h, void *user, void (*cb)(void
 		for (le = XDEBUG_LLIST_HEAD(h->table[i]); le != NULL; le = XDEBUG_LLIST_NEXT(le)) {
 			cb(user, (xdebug_hash_element *) XDEBUG_LLIST_VALP(le), argument);
 		}
+	}
+}
+
+void xdebug_hash_empty(xdebug_hash *h)
+{
+	int i;
+
+    for (i = 0; i < h->slots; ++i) {
+		xdebug_llist_empty(h->table[i], (void *) h);
 	}
 }
 

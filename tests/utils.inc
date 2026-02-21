@@ -231,4 +231,10 @@ function getTmpFile(string $filename) : string
 
 	return $tmpFile;
 }
+
+function x_sort(array $array)
+{
+	asort($array);
+	return $array;
+}
 ?>
