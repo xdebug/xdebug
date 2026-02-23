@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2025 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -413,7 +413,7 @@ static int xdebug_object_element_export_xml_node(xdebug_object_item *item_nptr, 
 
 #if PHP_VERSION_ID >= 80400
 		if (
-			ZEND_USER_CODE((*item)->zobj->ce->type) &&
+			((*item)->zobj->ce->type == ZEND_USER_CLASS) &&
 			Z_TYPE_P((*item)->zv) == IS_PTR
 		) {
 			zend_property_info *prop_info = Z_PTR_P((*item)->zv);
