@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Xdebug                                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2002-2024 Derick Rethans                               |
+   | Copyright (c) 2002-2026 Derick Rethans                               |
    +----------------------------------------------------------------------+
    | This source file is subject to version 1.01 of the Xdebug license,   |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,14 @@
 #include "lib_private.h"
 #include "Zend/zend_closures.h"
 #if PHP_VERSION_ID >= 80100
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wdeclaration-after-statement"
+# endif
 # include "zend_enum.h"
+# if !defined(_MSC_VER)
+#   pragma GCC diagnostic pop
+# endif
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(xdebug)
