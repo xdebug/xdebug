@@ -26,7 +26,7 @@ jobs:
                 php: ["8.1", "8.2", "8.3", "8.4", "8.5"]
                 xdebug_mode: ["no", "off", "coverage", "debug", "develop", "gcstats", "profile", "trace"]
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v6
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
@@ -133,7 +133,7 @@ jobs:
                     echo "${{ matrix.php }},${{ matrix.command }},${{ matrix.xdebug_mode }}" > results/matrix-values-${{ matrix.php }}-${{ matrix.command }}-${{ matrix.xdebug_mode }}.txt
 
             -   name: Upload result and matrix info
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v6
                 with:
                     name: results-${{ matrix.command }}-${{ matrix.php }}-${{ matrix.xdebug_mode }}
                     path: results/
@@ -150,10 +150,10 @@ jobs:
                     php-version: "8.5"
                     coverage: none
 
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v6
 
             -   name: Download all artifacts
-                uses: actions/download-artifact@v4
+                uses: actions/download-artifact@v6
                 with:
                     path: results
 
@@ -175,7 +175,7 @@ jobs:
                     name: results-*                
 
             -   name: Upload summary.csv as artifact
-                uses: actions/upload-artifact@v4
+                uses: actions/upload-artifact@v6
                 with:
                     name: summary.csv
                     path: summary.csv
