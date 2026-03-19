@@ -18,7 +18,7 @@ jobs:
             matrix: ${{ steps.extension-matrix.outputs.matrix }}
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Get The Extension Matrix
               id: extension-matrix
               uses: php/php-windows-builder/extension-matrix@v1
@@ -35,7 +35,7 @@ jobs:
             matrix: ${{fromJson(needs.get-extension-matrix.outputs.matrix)}}
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
             - name: Build The Extension
               uses: php/php-windows-builder/extension@v1
               with:
@@ -59,7 +59,7 @@ jobs:
                     - php: 8.5
                       use-opcache: true
         steps:
-            -   uses: actions/checkout@v4
+            -   uses: actions/checkout@v6
 
             -   name: Setup PHP
                 uses: shivammathur/setup-php@v2
