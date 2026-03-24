@@ -28,7 +28,10 @@ dbgpRunFile(
 		'xdebug.mode' => 'debug', 'xdebug.start_with_request' => 'yes',
 		'xdebug.log' => $xdebugLogFileName, 'xdebug.log_level' => 10,
 		'xdebug.path_mapping' => 'yes',
-	]
+	],
+	[
+		'SanitizeFileUri' => false,
+	],
 );
 
 echo file_get_contents( $xdebugLogFileName );
@@ -36,7 +39,7 @@ echo file_get_contents( $xdebugLogFileName );
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="iso-8859-1"?>
-<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file://dbgp-breakpoint-line.inc" language="PHP" xdebug:language_version="" protocol_version="1.0" appid=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
+<init xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" fileuri="file:///var/www/projects/xdebug-test/fake-local-file.php" language="PHP" xdebug:language_version="" protocol_version="1.0" appid=""><engine version=""><![CDATA[Xdebug]]></engine><author><![CDATA[Derick Rethans]]></author><url><![CDATA[https://xdebug.org]]></url><copyright><![CDATA[Copyright (c) 2002-2099 by Derick Rethans]]></copyright></init>
 
 -> feature_set -i 1 -n breakpoint_details -v 1
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -44,7 +47,7 @@ echo file_get_contents( $xdebugLogFileName );
 
 -> step_into -i 2
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file://" lineno="2"></xdebug:message></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="step_into" transaction_id="2" status="break" reason="ok"><xdebug:message filename="file:///var/www/projects/xdebug-test/fake-local-file.php" lineno="2"></xdebug:message></response>
 
 -> breakpoint_set -i 3 -t line -f /var/www/projects/xdebug-test/fake-local-file.php -n 3
 <?xml version="1.0" encoding="iso-8859-1"?>
@@ -52,11 +55,11 @@ echo file_get_contents( $xdebugLogFileName );
 
 -> breakpoint_list -i 4
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="4"><breakpoint type="line" filename="file://" lineno="3" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="breakpoint_list" transaction_id="4"><breakpoint type="line" filename="file:///var/www/projects/xdebug-test/fake-local-file.php" lineno="3" state="enabled" hit_count="0" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> run -i 5
 <?xml version="1.0" encoding="iso-8859-1"?>
-<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file://" lineno="3"></xdebug:message><breakpoint type="line" filename="file://" lineno="3" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0001"></breakpoint></response>
+<response xmlns="urn:debugger_protocol_v1" xmlns:xdebug="https://xdebug.org/dbgp/xdebug" command="run" transaction_id="5" status="break" reason="ok"><xdebug:message filename="file:///var/www/projects/xdebug-test/fake-local-file.php" lineno="3"></xdebug:message><breakpoint type="line" filename="file:///var/www/projects/xdebug-test/fake-local-file.php" lineno="3" state="enabled" hit_count="1" hit_value="0" id="{{PID}}0001"></breakpoint></response>
 
 -> detach -i 6
 <?xml version="1.0" encoding="iso-8859-1"?>
