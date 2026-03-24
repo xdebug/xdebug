@@ -116,7 +116,17 @@ class DebugClient
 		return " {$m[1]}=\"file://{$fm[1]}\"";
 	}
 
-	function doRead( $conn, ?string $transaction_id = null )
+	private function shouldSanitizeFileUri( array $options ) : bool
+	{
+		if ( !array_key_exists( 'SanitizeFileUri', $options ) )
+		{
+			return true;
+		}
+
+		return !! $options['SanitizeFileUri'];
+	}
+
+	function doRead( $conn, ?string $transaction_id = null, ?array $options = [] )
 	{
 		stream_set_timeout( $conn, 3 );
 		do {
@@ -157,7 +167,11 @@ class DebugClient
 			$read = preg_replace( '@\s(xdebug:language_version)="[^"]+?"@', ' \\1=""', $read );
 			$read = preg_replace( '@(engine\sversion)="[^"]+?"@', '\\1=""', $read );
 			$read = preg_replace( '@(2002-20[0-9]{2})@', '2002-2099', $read );
-			$read = preg_replace_callback( '@\s(fileuri|filename)="file:///(.+?)"@', self::class . '::fixFilePath', $read );
+
+			if ( $this->shouldSanitizeFileUri( $options ) )
+			{
+				$read = preg_replace_callback( '@\s(fileuri|filename)="file:///(.+?)"@', self::class . '::fixFilePath', $read );
+			}
 
 			echo $read, "\n\n";
 
@@ -255,11 +269,11 @@ class DebugClient
 		$this->pid = $procInfo['pid'];
 
 		// read header
-		$this->doRead( $conn );
+		$this->doRead( $conn, NULL, $options );
 		foreach ( $commands as $command )
 		{
 			$this->sendCommand( $conn, $command, $i );
-			$this->doRead( $conn, (string)$i );
+			$this->doRead( $conn, (string)$i, $options );
 
 			$i++;
 		}

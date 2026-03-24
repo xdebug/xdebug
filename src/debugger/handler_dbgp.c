@@ -2582,7 +2582,16 @@ int xdebug_dbgp_init(xdebug_con *context, int mode)
 	if (zend_string_equals_literal(context->program_name, "-") || zend_string_equals_literal(context->program_name, "Command line code")) {
 		xdebug_xml_add_attribute_ex(response, "fileuri", xdstrdup("dbgp://stdin"), 0, 1);
 	} else {
-		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_zstr_path_to_url(context->program_name), 0, 1);
+		xdebug_str *local_path;
+		size_t      local_line;
+		bool        must_free_path = false;
+
+		xdebug_debugger_map_remote_to_local(context->program_name, 1, &local_path, &local_line, &must_free_path);
+		xdebug_xml_add_attribute_ex(response, "fileuri", xdebug_xdebug_str_path_to_url(local_path), 0, 1);
+
+		if (must_free_path) {
+			xdebug_str_free(local_path);
+		}
 	}
 	xdebug_xml_add_attribute_ex(response, "language", "PHP", 0, 0);
 	xdebug_xml_add_attribute_ex(response, "xdebug:language_version", XG_BASE(php_version_run_time), 0, 0);
